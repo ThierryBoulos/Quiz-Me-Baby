@@ -2948,16 +2948,16 @@ const ACT = {
     const none = () => toast('No other question left in ' + rd.theme + ' at this difficulty.', 4000);
     if(list.length < 2) return none();
 
+    /* One list for the whole round, not one per team: a question the host has
+       already skipped past on Team A should not come back on Team B either. */
     const cur = rd.q[seat];
-    rd.swapSeen = rd.swapSeen || [[], []];
-    const seen = rd.swapSeen[seat];
+    const seen = rd.swapSeen = rd.swapSeen || [];
     if(seen.indexOf(cur.id) < 0) seen.push(cur.id);
 
     let next = list.filter(q => seen.indexOf(q.id) < 0)[0];
     if(!next){                                    // whole theme exhausted — start again
       seen.length = 0; seen.push(cur.id);
       next = list.filter(q => q.id !== cur.id)[0];
-      if(next) toast('Back to the top of ' + rd.theme + '.', 2600);
     }
     if(!next) return none();
 
