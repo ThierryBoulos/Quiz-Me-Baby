@@ -528,6 +528,85 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .confetti i{position:absolute;top:-12vh;width:9px;height:16px;border-radius:2px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(115vh) rotate(720deg);opacity:.15}}
 
+/* the Call a Friend countdown — a class, not an inline style, so the phone
+   block below can give the Anton glyphs the room they need */
+.cd-num{font-family:var(--font-d);font-size:74px;line-height:1;color:var(--gold)}
+
+/* ============================================================
+   PHONE ONLY — everything below this line is inside this query
+   and cannot reach a laptop.
+
+   max-width:640px  — an iPhone 13 reports 390 CSS pixels wide,
+     the widest iPhone is 430, a laptop is 1280+. 640 sits safely
+     between them. This is the portrait case.
+   max-height:560px AND pointer:coarse — a phone turned sideways
+     is 844 wide, so the width test misses it. pointer:coarse
+     means the primary input is a finger; a laptop reports
+     pointer:fine even with a touchscreen, so this cannot fire
+     on one however small the window is dragged.
+   ============================================================ */
+@media(max-width:640px),(max-height:560px) and (pointer:coarse){
+
+  /* --- the tracker sat 29px left of centre: .hud-in reserved 58px on the
+         right for the Exit button, which offsets the whole grid including the
+         centred row underneath. Reserve that space on the Team B cell only,
+         and pin Exit into the true corner. --- */
+  .hud-in{padding-right:0}
+  .hud-team.b{padding-right:60px}
+  .hud-actions{top:8px;right:max(6px,env(safe-area-inset-right));transform:none}
+  .hud-actions .btn{min-height:34px;padding:0 12px;font-size:12px;border-radius:var(--r-s)}
+
+  /* --- the strobing header. A sticky bar with backdrop-filter sitting over a
+         permanently animating background makes iOS re-composite the frosted
+         layer every frame, and it flickers. Solid bar, and hold the backdrop
+         still — neither is noticeable at this size. --- */
+  #hud{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+  #stage::before{animation:none}
+  .pip.now{animation:none}
+
+  /* --- blurry answer notes. @keyframes reveal starts at filter:blur(6px);
+         iOS rasterises the element to apply it and can leave it soft forever.
+         Same entrance, no blur. --- */
+  @keyframes revealFlat{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .q-answer,.q-note{animation-name:revealFlat}
+
+  /* --- text spilling out of the Call a Friend boxes. Anton overflows a tight
+         line-height: the 74px counter needed 92px of room inside a 74px box. --- */
+  .cd-num{font-size:clamp(46px,15vw,64px);line-height:1.5}
+  .modal-box .display{line-height:1.3}
+  .modal-box{width:100%}
+
+  /* --- the two recap screens. On a laptop these lock to the window height and
+         let the table scroll inside itself. On a phone that left 9 rows sharing
+         an 85px window, 640px wide, inside a 356px screen. Unlock the height,
+         let the PAGE scroll, and redraw every row as a stacked card. --- */
+  .fits{height:auto;justify-content:flex-start}
+  .fits > .card.pad,.fits > .tbl-wrap{flex:none}
+  .fits .tbl-wrap{max-height:none;overflow:visible;border:0;background:none;border-radius:0}
+  .fits table{min-width:0;display:block;font-size:13px}
+  .fits thead{display:none}                       /* the labels move onto each cell */
+  .fits tbody,.fits tr,.fits td{display:block;width:100%}
+  .fits tr{border:1px solid var(--line);border-radius:var(--r);background:var(--glass);
+    padding:10px 14px;margin-bottom:8px}
+  .fits tr:hover td{background:none}
+  .fits td{border:0;padding:4px 0;color:var(--ink);
+    display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+  .fits td::before{content:attr(data-l);flex:none;font-size:10px;font-weight:800;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+  .fits td:empty{display:none}                    /* e.g. a round with no lifelines */
+  /* the first cell becomes the card's title bar */
+  .fits td.rowhead{display:block;font-family:var(--font-d);font-size:16px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--gold);padding:0 0 7px;margin-bottom:7px;
+    border-bottom:1px solid var(--line)}
+  .fits td.rowhead::before{content:attr(data-l) ' ';display:inline;font-size:inherit;
+    letter-spacing:inherit;color:inherit;font-weight:inherit}
+  /* the mini-game's points row heads on its label, not on a "—" */
+  .fits tr.sumrow td:first-child{display:none}
+  /* the leg question runs full width with its label above it */
+  .fits td.qcell{display:block;font-weight:600;line-height:1.4;padding:2px 0 8px}
+  .fits td.qcell::before{display:block;margin-bottom:4px}
+}
+
 /* ---------- MISC ---------- */
 .kbd{display:inline-block;min-width:22px;padding:2px 6px;border-radius:5px;border:1px solid var(--line-2);background:rgba(0,0,0,.4);font-size:11px;font-weight:700;text-align:center;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:120;padding:13px 22px;border-radius:999px;
@@ -1904,9 +1983,11 @@ SCREENS.roundIntro = function(){
         '<p class="help" style="margin-top:6px">Must be declared now, before the questions. If a team arms it they may use only <strong>one</strong> other lifeline this round. If they miss and the other team steals, the steal is worth 2 as well.</p></div>' +
       '<div class="grid2">' + cards + '</div>' +
     '</div>' +
-    '<div class="btn-row center">' +
-      '<button class="btn ghost" data-act="replayJingle">Replay jingle</button>' +
+    /* Start first and big; the jingle is a secondary control, so it sits under
+       it and smaller, on a phone and on a laptop alike. */
+    '<div class="stack" style="align-items:center;gap:10px">' +
       '<button class="btn gold lg" data-act="beginRound">Start — question for ' + esc(g.teams[first].name) + '</button>' +
+      '<button class="btn sm ghost" data-act="replayJingle">Replay jingle</button>' +
     '</div>' +
   '</div>';
 };
@@ -2200,11 +2281,15 @@ AFTER.miniEntry = function(){ const a = el('gA'); if(a) a.focus(); };
 
 SCREENS.miniSummary = function(){
   const g = G(), m = g.mini;
+  /* data-l / the cell classes are inert on a laptop — the phone stylesheet uses
+     them to re-draw each row as a stacked card instead of a table row. */
   const rows = m.subs.map((s, i) =>
-    '<tr><td>' + (i + 1) + '</td><td>' + esc(s.q.question) + '</td><td class="num">' + fmtAns(s.q) + '</td>' +
-    '<td class="num" style="color:var(--a)">' + (s.gA == null ? '—' : nf(s.gA)) + '</td>' +
-    '<td class="num" style="color:var(--b)">' + (s.gB == null ? '—' : nf(s.gB)) + '</td>' +
-    '<td>' + (s.winner === 'tie' ? '<span class="badge line">Tie</span>' : '<span class="badge ' + (s.winner === 0 ? 'a' : 'b') + '">' + esc(g.teams[s.winner].name) + '</span>') + '</td></tr>'
+    '<tr><td class="rowhead" data-l="Leg">' + (i + 1) + '</td>' +
+    '<td class="qcell" data-l="Question">' + esc(s.q.question) + '</td>' +
+    '<td class="num" data-l="Answer">' + fmtAns(s.q) + '</td>' +
+    '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + (s.gA == null ? '—' : nf(s.gA)) + '</td>' +
+    '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + (s.gB == null ? '—' : nf(s.gB)) + '</td>' +
+    '<td data-l="Winner">' + (s.winner === 'tie' ? '<span class="badge line">Tie</span>' : '<span class="badge ' + (s.winner === 0 ? 'a' : 'b') + '">' + esc(g.teams[s.winner].name) + '</span>') + '</td></tr>'
   ).join('');
 
   const verdict = m.verdict || {};
@@ -2273,11 +2358,14 @@ SCREENS.final = function(){
   const g = G();
   const w = g.winner;
   const tie = w == null;
+  /* data-l / the cell classes are inert on a laptop — the phone stylesheet uses
+     them to re-draw each row as a stacked card instead of a table row. */
   const rows = g.rounds.filter(r => r.done).map(r =>
-    '<tr><td>' + r.n + '</td><td>' + esc(r.theme) + '</td>' +
-    '<td class="num" style="color:var(--a)">' + r.pts[0] + '</td>' +
-    '<td class="num" style="color:var(--b)">' + r.pts[1] + '</td>' +
-    '<td>' + (r.dbl[0] ? '<span class="badge a">2× A</span> ' : '') + (r.dbl[1] ? '<span class="badge b">2× B</span>' : '') + '</td></tr>').join('');
+    '<tr><td class="rowhead" data-l="Round">' + r.n + '</td>' +
+    '<td data-l="Theme">' + esc(r.theme) + '</td>' +
+    '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + r.pts[0] + '</td>' +
+    '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + r.pts[1] + '</td>' +
+    '<td data-l="Lifelines">' + (r.dbl[0] ? '<span class="badge a">2× A</span> ' : '') + (r.dbl[1] ? '<span class="badge b">2× B</span>' : '') + '</td></tr>').join('');
 
   return '<div class="fits">' +
     '<div class="winner">' +
@@ -2291,7 +2379,9 @@ SCREENS.final = function(){
     '<div class="card pad stack">' +
       '<div class="eyebrow">Round by round</div>' +
       '<div class="tbl-wrap"><table><thead><tr><th>#</th><th>Theme</th><th>' + esc(g.teams[0].name) + '</th><th>' + esc(g.teams[1].name) + '</th><th>Lifelines</th></tr></thead><tbody>' + rows +
-      '<tr><td>—</td><td>Closest to wins</td><td class="num" style="color:var(--a)">' + (g.mini.award ? g.mini.award[0] : 0) + '</td><td class="num" style="color:var(--b)">' + (g.mini.award ? g.mini.award[1] : 0) + '</td><td></td></tr>' +
+      '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Closest to wins</td>' +
+      '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + (g.mini.award ? g.mini.award[0] : 0) + '</td>' +
+      '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + (g.mini.award ? g.mini.award[1] : 0) + '</td><td></td></tr>' +
       '</tbody></table></div>' +
     '</div>' +
     '<div class="btn-row center">' +
@@ -2831,24 +2921,51 @@ const ACT = {
   timerAdd(e){ Timer.add(+e.dataset.s); },
   timerSkip(){ Timer.stop(); go(S.screen === 'steal' ? 'stealReveal' : S.screen === 'miniQ' ? 'miniEntry' : 'reveal'); },
 
+  /* Walk the theme in bank order, one question per press, and do not offer the
+     same one twice until the whole theme has been through.
+
+     Two things used to break this. The pairing ticker was honoured, which left
+     a pool of one or two; and the pool was recomputed from the live rounds each
+     press, so the question you had just swapped AWAY from was instantly a
+     candidate again. Between them the button ping-ponged over the same pair
+     forever. The ticker is ignored here on purpose — it exists to match the two
+     teams' questions when the round is built, and once the host is overriding
+     by hand it is only getting in the way. */
   swapQ(){
-    const g = G(), rd = curRound(), seat = g.seat, cur = rd.q[seat];
-    const inGame = new Set();
-    g.rounds.forEach(r => r.q.forEach(q => inGame.add(q.id)));
-    g.mini.qs.forEach(q => inGame.add(q.id));
-    let pool = S.bank.filter(q => q.type === 'standard' && q.theme === rd.theme && !inGame.has(q.id) &&
-      matchDiff(q, g.cfg.difficulty) && (!rd.pairKey || q.use_with === rd.pairKey));
-    let loose = false;
-    if(!pool.length){
-      loose = true;
-      pool = S.bank.filter(q => q.type === 'standard' && q.theme === rd.theme && !inGame.has(q.id));
+    const g = G(), rd = curRound(), seat = g.seat;
+
+    /* committed elsewhere: the other team's question this round, every other
+       round, and the mini-game. The current slot is deliberately NOT excluded,
+       so it can come back round at the end of the cycle. */
+    const elsewhere = new Set();
+    g.rounds.forEach((r, ri) => r.q.forEach((q, si) => { if(ri !== g.r || si !== seat) elsewhere.add(q.id); }));
+    g.mini.qs.forEach(q => elsewhere.add(q.id));
+
+    const list = S.bank.filter(q =>
+      q.type === 'standard' && q.theme === rd.theme &&
+      matchDiff(q, g.cfg.difficulty) && !elsewhere.has(q.id));
+
+    const none = () => toast('No other question left in ' + rd.theme + ' at this difficulty.', 4000);
+    if(list.length < 2) return none();
+
+    const cur = rd.q[seat];
+    rd.swapSeen = rd.swapSeen || [[], []];
+    const seen = rd.swapSeen[seat];
+    if(seen.indexOf(cur.id) < 0) seen.push(cur.id);
+
+    let next = list.filter(q => seen.indexOf(q.id) < 0)[0];
+    if(!next){                                    // whole theme exhausted — start again
+      seen.length = 0; seen.push(cur.id);
+      next = list.filter(q => q.id !== cur.id)[0];
+      if(next) toast('Back to the top of ' + rd.theme + '.', 2600);
     }
-    if(!pool.length) return toast('No spare question left in ' + rd.theme + '.');
-    const q = shuffle(pool)[0];
-    rd.q[seat] = q; markUsed(q);
+    if(!next) return none();
+
+    seen.push(next.id);
+    rd.q[seat] = next; markUsed(next);
+    rd.strict = false;
     rd.picked = false;                 // no longer the pair the host chose by hand
-    if(loose){ rd.strict = false; toast('Swapped — no exact pair match left, so this one is loosely matched.', 4200); }
-    else toast('New question.');
+    toast('New question.');
     go('ask');
   },
 
@@ -2868,7 +2985,7 @@ const ACT = {
             '<div class="eyebrow gold">The question</div>' +
             '<p style="margin-top:8px;font-size:19px;font-weight:700;line-height:1.35">' + esc(rd.q[G().seat].question) + '</p>' +
           '</div>' +
-          '<div style="font-family:var(--font-d);font-size:74px;line-height:1;color:var(--gold)" id="cdNum">' + S.settings.tFriend + '</div>' +
+          '<div class="cd-num" id="cdNum">' + S.settings.tFriend + '</div>' +
           '<div class="eyebrow">seconds on the call</div>' +
           '<div class="btn-row center">' +
             '<button class="btn sm" data-act="cdToggle">Pause</button>' +
