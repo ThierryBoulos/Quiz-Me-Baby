@@ -605,6 +605,16 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
   /* the leg question runs full width with its label above it */
   .fits td.qcell{display:block;font-weight:600;line-height:1.4;padding:2px 0 8px}
   .fits td.qcell::before{display:block;margin-bottom:4px}
+
+  /* --- the hand-picker. Fourteen themes wrapped to ten rows of chips, eating
+         most of the modal before a single question was visible. One row that
+         swipes sideways instead, and no scroll boxes inside a scroll box —
+         nested scrollers are miserable to drive with a thumb, so the whole
+         modal becomes one surface. --- */
+  #modal .pickfilter{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
+    padding-bottom:8px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+  #modal .pickfilter .chip{flex:none;scroll-snap-align:start;min-height:40px;font-size:12.5px}
+  #modal .picklist{max-height:none;overflow:visible;padding-right:0}
 }
 
 /* ---------- MISC ---------- */
@@ -1857,7 +1867,11 @@ function pickerHTML(){
     '</div>' +
     '<p class="help">Two per theme — one for each team. Showing <strong>' + esc(c.difficulty) + '</strong> questions from tonight&rsquo;s themes only' +
       (S.settings.noRepeat ? ', minus anything already played' : '') + '. Themes you leave empty get a matched pair picked for them.</p>' +
-    '<div class="chips" style="position:sticky;top:0;z-index:2;padding:6px 0;background:linear-gradient(180deg,rgba(11,14,36,.98) 70%,transparent)">' + filterChips + '</div>' +
+    /* NOT sticky. Pinned to the top it was fine with four themes and a wall
+       with fourteen — ten wrapped rows of chips covering most of the modal and
+       sitting over the questions. It scrolls away with everything else now. */
+    '<div class="chips pickfilter">' + filterChips + '</div>' +
+    '<hr class="hair" style="margin:2px 0 0">' +
     blocks +
     '<hr class="hair">' +
     '<div class="btn-row end">' +
