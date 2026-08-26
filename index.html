@@ -676,7 +676,7 @@ const DIFFS  = ['easy','medium','hard'];
 
 const SEED = [
 /* ---- ACRONYMS ---- */
-['Acronyms','easy','common-acronym','What does "ATM" stand for?','Automated Teller Machine',''],
+['Acronyms','medium','common-acronym','What does "ATM" stand for?','Automated Teller Machine',''],
 ['Acronyms','easy','common-acronym','What does "PIN" stand for?','Personal Identification Number','Which makes "PIN number" redundant.'],
 ['Acronyms','easy','org-acronym','What does "NASA" stand for?','National Aeronautics and Space Administration',''],
 ['Acronyms','easy','org-acronym','What does "NATO" stand for?','North Atlantic Treaty Organization',''],
@@ -730,8 +730,6 @@ const SEED = [
 ['Food & Drink','hard','food-origin','Which country invented tempura?','Portugal','Portuguese missionaries brought the batter-frying technique to Japan in the 16th century.'],
 ['Food & Drink','easy','dish-from','Which country is the dish "pho" from?','Vietnam',''],
 ['Food & Drink','easy','dish-from','Which country is the dish "paella" from?','Spain','Valencia, specifically.'],
-['Food & Drink','easy','main-ingredient','Besides tahini, what is the main ingredient in traditional hummus?','Chickpeas','"Hummus" literally means chickpeas in Arabic.'],
-['Food & Drink','easy','main-ingredient','What is the main ingredient in guacamole?','Avocado',''],
 ['Food & Drink','medium','spirit-made-from','What is tequila made from?','Agave','By law, at least 51 per cent blue Weber agave.'],
 ['Food & Drink','medium','spirit-made-from','What is rum made from?','Sugarcane','Either molasses or fresh cane juice.'],
 ['Food & Drink','hard','cocktail-ingredients','Which spirit is the base of a Negroni, alongside gin and sweet vermouth?','Campari',''],
@@ -792,9 +790,10 @@ const SEED = [
 ['Geography','hard','most-of','Which country has the most time zones?','France','12 to 13, thanks to its overseas territories.'],
 ['Geography','hard','most-of','Which country has the most islands?','Sweden','Around 267,570 islands.'],
 ['Geography','hard','','Name one country that is doubly landlocked — landlocked and surrounded only by landlocked countries?','Liechtenstein or Uzbekistan','Either one counts.'],
-['Geography','hard','','What is the largest island in the world?','Greenland',''],
-['Geography','medium','','Which two countries share the world\'s longest border?','USA and Canada',''],
-['Geography','hard','mountain','What is the longest mountain range in the world above sea level?','The Andes',''],
+['Geography','medium','','What is the largest island in the world?','Greenland',''],
+['Geography','medium','borders','Which two countries share the world\'s longest border?','USA and Canada',''],
+['Geography','hard','','Which country has the longest border with France?','Brazil','French Guiana is an overseas department of France, and its border with Brazil runs about 730 km — longer than any of France\'s borders in Europe.'],
+['Geography','medium','mountain','What is the longest mountain range in the world above sea level?','The Andes',''],
 ['Geography','easy','','Which city sits on two continents?','Istanbul','Europe and Asia, split by the Bosphorus.'],
 ['Geography','hard','','Which country is entirely surrounded by South Africa?','Lesotho','Eswatini is bordered by South Africa and Mozambique, so it does not count.'],
 ['Geography','medium','mountain','What is the highest mountain in Africa?','Mount Kilimanjaro','5,895 m, Tanzania.'],
@@ -835,7 +834,7 @@ const SEED = [
 ['Internet & Memes','easy','','What breed of dog is the "Doge" meme?','A Shiba Inu','The dog real name was Kabosu.'],
 ['Internet & Memes','easy','challenge','Which charity challenge involved tipping freezing water over your head in 2014?','The Ice Bucket Challenge','It raised money for ALS research.'],
 ['Internet & Memes','easy','challenge','Which 2013 dance craze involved one person dancing, then a hard cut to a room going wild?','The Harlem Shake','To the Baauer track of the same name.'],
-['Internet & Memes','medium','most-viewed','Which video is the most-viewed on YouTube of all time?','Baby Shark Dance','By Pinkfong; overtook Despacito in 2020, now ~17 billion views. Despacito has since slipped to third.'],
+['Internet & Memes','easy','most-viewed','Which video is the most-viewed on YouTube of all time?','Baby Shark Dance','By Pinkfong; overtook Despacito in 2020, now ~17 billion views. Despacito has since slipped to third.'],
 ['Internet & Memes','hard','the-first','What was the first ever tweet, and who posted it?','"just setting up my twttr" — Jack Dorsey','21 March 2006.'],
 ['Internet & Memes','hard','the-first','What was the first video uploaded to YouTube?','Me at the Zoo','By co-founder Jawed Karim, April 2005.'],
 ['Internet & Memes','hard','optical-illusion','In 2015, the internet split in half over what colour a certain dress was — what were the two options?','Blue and black, or white and gold','It was actually blue and black.'],
@@ -967,7 +966,7 @@ const SEED = [
 ['Science','medium','','What is the closest star to Earth after the Sun?','Proxima Centauri','About 4.24 light years away.'],
 ['Science','hard','discovery','Who discovered penicillin?','Alexander Fleming','1928, by accident.'],
 ['Science','hard','discovery','Who discovered radioactivity, sharing the 1903 Nobel with the Curies?','Henri Becquerel',''],
-['Science','hard','','Number of known chemical elements','118','118 confirmed on the periodic table as of 2024.'],
+['Science','medium','','Number of known chemical elements','118','118 confirmed on the periodic table as of 2024.'],
 ['Science','easy','planet','Which planet is closest to the Sun?','Mercury',''],
 ['Science','easy','planet','Which planet is the largest in our solar system?','Jupiter',''],
 ['Science','easy','','Which gas makes up about 78 per cent of the Earth\'s atmosphere?','Nitrogen',''],
@@ -1031,7 +1030,7 @@ const SEED = [
 /* ---- POP CULTURE ---- */
 ['Pop Culture','hard','','What is Barbie\'s full name?','Barbara Millicent Roberts',''],
 /* ---- SCIENCE ---- */
-['Science','hard','','Who is the only person to have won Nobel Prizes in two different sciences?','Marie Curie','Physics in 1903 and Chemistry in 1911.'],
+['Science','medium','','Who is the only person to have won Nobel Prizes in two different sciences?','Marie Curie','Physics in 1903 and Chemistry in 1911.'],
 ['Science','hard','','Which particle is nicknamed the "God particle"?','The Higgs boson','Confirmed at CERN in 2012.'],
 ['Science','hard','','Which planet rotates in the opposite direction to most others in the solar system?','Venus','The Sun rises in the west there.'],
 /* ---- INTERNET & MEMES ---- */
@@ -1075,8 +1074,8 @@ const SEED = [
 /* ---- NATURE ---- */
 ['Nature','hard','','What is believed to be the loudest sound in recorded history?','The 1883 Krakatoa eruption','Heard nearly 4,800 km away; ruptured eardrums 60 km from the volcano.'],
 /* ---- GEOGRAPHY ---- */
-['Geography','easy','second-largest','After London, what is the largest city in the UK by population?','Birmingham','Around 1.1 million people in the city proper.'],
-['Geography','easy','second-largest','After Berlin, what is the largest city in Germany by population?','Hamburg','Roughly 1.9 million, and Germany\'s largest port.'],
+['Geography','hard','second-largest','After London, what is the largest city in the UK by population?','Birmingham','Around 1.1 million people in the city proper.'],
+['Geography','hard','second-largest','After Berlin, what is the largest city in Germany by population?','Hamburg','Roughly 1.9 million, and Germany\'s largest port.'],
 ['Geography','medium','borders','Which two countries are tied for sharing land borders with the most neighbouring countries?','China and Russia','Fourteen each.'],
 ['Geography','medium','most-of','Which country has the most active volcanoes?','Indonesia','Roughly 130, sitting on the Ring of Fire.'],
 ['Geography','hard','','Excluding Antarctic territory, what is the largest British Overseas Territory?','The Falkland Islands','About 12,000 square kilometres.'],
@@ -1127,10 +1126,10 @@ const SEED = [
 const SEED_CLOSEST = [
 /* ---- FOOD & DRINK ---- */
 ['Food & Drink','medium','Number of grapes it takes to make one bottle of wine',700,'Roughly 600 to 800 grapes, or about 1.2 kg of fruit.'],
-['Food & Drink','medium','Tabasco is around 3,000 Scoville Heat Units - How many does a Carolina Reaper average?',1641183,'Guinness-tested average from 2017; individual peppers exceed 2 million SHU.'],
-['Food & Drink','medium','A single espresso uses about 7g of coffee - Roughly how many coffee beans is that?',40,'Estimates range 40-70 depending on bean size — accept anything close.'],
+['Food & Drink','medium','Tabasco is around 3,000 Scoville Heat Units - How many does a Carolina Reaper average?',1600000,'About 1.6 million. The Guinness-tested average from 2017 was 1,641,183; individual peppers exceed 2 million SHU.'],
+['Food & Drink','medium','A single espresso uses about 7g of coffee - Roughly how many coffee beans is that?',60,'Average is 50 to 70 depending on bean size.'],
 ['Food & Drink','medium','Number of seeds on an average strawberry',200,'About 200. They are technically achenes, not seeds, and the strawberry is not technically a berry.'],
-['Food & Drink','medium','Bottles of champagne shipped from the Champagne region in a year',266000000,'266 million in 2025, per the Comite Champagne. Peaked at 326 million in 2022.'],
+['Food & Drink','medium','In millions, how many bottles of champagne are shipped from the Champagne region in a year?',266,'266 million in 2025, per the Comite Champagne. Peaked at 326 million in 2022.'],
 ['Food & Drink','medium','Number of coffee cups drunk worldwide every day, in billions',2.25,'About 2.25 billion cups a day — SCA Global Estimate, Q3 2025'],
 ['Food & Drink','medium','Number of McDonald\'s restaurants in the world',44000,'~44,000 in 2025; the company is expanding toward 50,000 by 2027.'],
 ['Food & Drink','medium','Number of litres of beer drunk at Oktoberfest in a typical year',6500000,'About 6 to 7 million litres over the festival — City of Munich figures.'],
@@ -1141,7 +1140,7 @@ const SEED_CLOSEST = [
 ['Geography','medium','Surface area of the Mediterranean Sea, in square kilometres',2500000,'About 2.5 million square kilometres.'],
 ['Geography','medium','Number of islands in Sweden',267570,'267,570 — Statistics Sweden. Only about 1,000 are inhabited.'],
 ['Geography','medium','Number of countries in Africa',54,'54 UN member states. 55 if you count Western Sahara as recognised by the African Union.'],
-['Geography','medium','Population of Brazil',212800000,'As per World Bank, 2025'],
+['Geography','medium','In millions, what is the population of Brazil?',212.8,'About 212.8 million. As per World Bank, 2025.'],
 ['Geography','medium','Number of steps to the top of the Eiffel Tower',1665,''],
 ['Geography','medium','Length of the Nile, in kilometres',6650,''],
 ['Geography','medium','Distance between Beirut and Paris in a straight line, in kilometres',3200,'About 3,200 km great-circle distance.'],
@@ -1182,14 +1181,14 @@ const SEED_CLOSEST = [
 /* ---- FOOD & DRINK ---- */
 ['Food & Drink','medium','How many calories are in a 360g airport-size Toblerone?',1890,'About 525 calories per 100g.'],
 /* ---- GEOGRAPHY ---- */
-['Geography','medium','What is the population of Colombia?',53000000,''],
-['Geography','medium','What is the population of Nigeria?',230000000,'Africa\'s most populous country.'],
+['Geography','medium','In millions, what is the population of Colombia?',53,'About 53 million.'],
+['Geography','medium','In millions, what is the population of Nigeria?',230,'About 230 million. Africa\'s most populous country.'],
 /* ---- LEBANON ---- */
 ['Lebanon','medium','How many km is it from Beirut to Arez by road?',116,''],
 /* ---- NATURE ---- */
 ['Nature','medium','How many active volcanoes are there worldwide?',1500,'Roughly 500 have erupted in recorded history.'],
 /* ---- FOOD & DRINK ---- */
-['Food & Drink','medium','Estimate the number of baguettes consumed in France every year',10000000000,'About 10 billion — roughly 320 every second.'],
+['Food & Drink','medium','In millions, how many baguettes are consumed in France every year?',10000,'10,000 million — 10 billion, roughly 320 every second.'],
 ['Food & Drink','medium','How many tonnes of bananas were consumed in the UAE in 2024?',192000,'About 17 kg per person across 11.3 million people.'],
 /* ---- MUSIC ---- */
 ['Music','medium','How many times is the word "hips" sung in My Humps by The Black Eyed Peas?',35,''],
@@ -1217,8 +1216,8 @@ const DB = {
   /* bank/seedv/killed are on .v3: the built-in bank was replaced wholesale
      again, so no earlier saved copy may survive into this version. History,
      played-question memory and settings keep their keys and carry over. */
-  k:{ bank:'qn.bank.v4', hist:'qn.history.v1', used:'qn.used.v1', set:'qn.settings.v1',
-      seedv:'qn.seedv.v4', killed:'qn.killed.v4' },
+  k:{ bank:'qn.bank.v5', hist:'qn.history.v1', used:'qn.used.v1', set:'qn.settings.v1',
+      seedv:'qn.seedv.v5', killed:'qn.killed.v5' },
   get(k, fb){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; }catch(e){ return fb; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ toast('Storage full — could not save.'); } }
 };
@@ -1377,14 +1376,15 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 6;   // bumped when the built-in bank changes
+const SEED_VERSION = 7;   // bumped when the built-in bank changes
 (function bootBank(){
   /* Earlier banks were retired wholesale, not merged. Clear them out so a
      browser that ran an older copy of this file cannot resurrect those
      questions — this bank is the one everybody gets. */
   try{ ['qn.bank.v1','qn.seedv.v1','qn.killed.v1',
         'qn.bank.v2','qn.seedv.v2','qn.killed.v2',
-        'qn.bank.v3','qn.seedv.v3','qn.killed.v3'].forEach(k => localStorage.removeItem(k)); }catch(e){}
+        'qn.bank.v3','qn.seedv.v3','qn.killed.v3',
+        'qn.bank.v4','qn.seedv.v4','qn.killed.v4'].forEach(k => localStorage.removeItem(k)); }catch(e){}
   const stored  = DB.get(DB.k.bank, null);
   const killed  = DB.get(DB.k.killed, []);          // seed questions the host deleted
   const seenVer = DB.get(DB.k.seedv, 0);
@@ -2793,7 +2793,7 @@ SCREENS.settings = function(){
     '<div class="card pad stack">' +
       '<div class="eyebrow">Default timers</div>' +
       '<div class="grid2">' +
-        timerField('tQuestion', 'Main question', [30,45,60,75,90]) +
+        timerField('tQuestion', 'Main question', [15,30,45,60,75,90]) +
         timerField('tSteal', 'Steal window', [15,20,30,45]) +
         timerField('tMini', 'Closest to wins', [60,75,90,120]) +
         timerField('tFriend', 'Call a friend', [30,45,60]) +
