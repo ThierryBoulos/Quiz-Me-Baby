@@ -233,6 +233,18 @@ h3.display{font-size:clamp(20px,3vw,30px)}
 .home-menu{display:grid;gap:var(--sp-2);width:min(420px,100%)}
 .home-stats{display:flex;gap:var(--sp-4);flex-wrap:wrap;justify-content:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 .home-stats b{color:var(--gold);font-weight:700}
+/* the colophon. Meant to be findable, not readable — it sits at the threshold
+   of noticing across the room, and comes up to legible when you go looking for
+   it — on hover with a mouse, on a tap with a thumb. */
+.colophon{
+  margin-top:6px;font-size:10px;letter-spacing:.1em;line-height:1.5;
+  color:var(--ink-3);opacity:.38;transition:opacity .35s var(--ease);cursor:default;
+}
+.colophon:hover,.colophon.lit{opacity:.92}
+.colophon .sep{opacity:.5;margin:0 2px}
+/* a phone has no hover, so it starts a shade up and reveals on tap instead */
+@media(hover:none){.colophon{opacity:.5}}
+@media(prefers-reduced-motion:reduce){.colophon{transition:none}}
 body.homemode main{padding-top:8px;padding-bottom:8px}
 .home{min-height:calc(100svh - 20px)}
 /* keep the home screen inside one browser window on short displays */
@@ -826,6 +838,21 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 const nf = (n) => Number(n).toLocaleString('en-US');
 function shuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+str.charCodeAt(i))|0; return 'q'+(h>>>0).toString(36); }
+
+/* ==========================================================================
+   0. BUILD STAMP
+   ==========================================================================
+   The footer on the home screen reads from here and nowhere else, so the
+   version and the date can never end up disagreeing with each other. There is
+   no build step in a single HTML file — nothing updates this on its own, so
+   BUMP BOTH FIELDS whenever you change the app. A date that has quietly gone
+   stale is worse than no date at all.
+
+   Deriving it from document.lastModified was the obvious alternative and is a
+   trap: copying the file to another laptop resets the timestamp, so a build
+   from months ago would announce itself as updated today.
+   ========================================================================== */
+const BUILD = { v:'1.1', date:'26 Aug 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    1. SEED QUESTION BANK
@@ -2062,6 +2089,10 @@ SCREENS.home = function(){
         '<span><b>' + S.used.size + '</b> questions burned</span>' +
       '</div>' +
       '<p class="dim" style="font-size:12px;max-width:52ch;line-height:1.6">Two teams. One captain each. Captains give the final answer — no phones.</p>' +
+      '<p class="colophon" data-act="colophon" title="Version ' + BUILD.v + ', built ' + BUILD.date + '">' +
+        'Built by ' + BUILD.author + ' <span class="sep">·</span> © ' + BUILD.year +
+        ' <span class="sep">·</span> v' + BUILD.v + ' <span class="sep">·</span> ' + BUILD.date +
+      '</p>' +
     '</div>' +
     '<img class="mascot" src="' + MASCOT + '" alt="Imad, your host" draggable="false">' +
   '</section>';
@@ -3854,6 +3885,11 @@ const ACT = {
     g.winner = w;
     finalize();
   },
+
+  /* the colophon reveals on tap. A phone has no hover, and iOS fires :active
+     too unreliably to hang it on, so it goes through the same click handler as
+     everything else in the app. */
+  colophon(t){ t.classList.toggle('lit'); },
 
   /* ---- misc ---- */
   quit(){
