@@ -4,7 +4,7 @@ One file: `index.html`. Double-click it. That's the whole install. (It is named 
 
 Your host stands on the left of the home screen. He's baked into the HTML as a data URI, so he travels with the file and there is no image folder to forget. (`host-imad.png` is the cut-out on its own, kept only in case you want to reuse it elsewhere — the app does not read it.) He's positioned out of the layout flow, so the logo and the menu stay dead centre on screen whether he's there or not, and he hides himself on windows narrower than 920px rather than squeeze them.
 
-No server, no internet (the Google Fonts link and `.xlsx` import are the only online bits — both degrade gracefully). Works in Chrome, Edge, Firefox, Safari, on a laptop, a tablet or a phone.
+No server, no internet (the Google Fonts link and `.xlsx` import are the only online bits — both degrade gracefully). Works in Chrome, Edge, Firefox, Safari, on a laptop, a tablet or a phone. 
 
 ## Phone vs laptop
 
