@@ -7,6 +7,33 @@
      to leave the host panning around a zoomed board looking for the buttons. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>QUIZ ME BABY — Host Control</title>
+
+<!-- HOME-SCREEN WEB CLIP ----------------------------------------------------
+     Without an apple-touch-icon iOS invents a tile from the first letter of
+     the title, which is why everyone who saved this got a grey "Q".
+     apple-mobile-web-app-title is what iOS pre-fills the name field with, so
+     the tile reads "Quiz Me Baby" instead of the title's "QUIZMEBABY...".
+     Icon path stays RELATIVE — this is a project page under /<repo>/, so a
+     leading slash would resolve to the wrong root and bring the Q back.
+     Status bar is "black", not "black-translucent": nothing in the layout
+     pads for env(safe-area-inset-top), so translucent would run the logo up
+     under the notch.
+     ------------------------------------------------------------------------->
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Quiz Me Baby">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#04050e">
+
+<!-- Tell Safari not to sit on a stale copy. Belt and braces next to the
+     version check further down, which is what actually forces the update. -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -220,7 +247,6 @@ h3.display{font-size:clamp(20px,3vw,30px)}
   animation:mascotIn .7s var(--ease) both;pointer-events:none;user-select:none;-webkit-user-drag:none}
 @keyframes mascotIn{from{opacity:0;transform:translate(0,calc(-50% + 20px)) scale(.95)}
   to{opacity:1;transform:translateY(-50%)}}
-@media(max-width:920px){.mascot{display:none}}
 .logo-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
 .logo{
   font-family:var(--font-d);font-size:clamp(44px,7vw + 2vh,116px);line-height:.86;text-transform:uppercase;
@@ -230,6 +256,26 @@ h3.display{font-size:clamp(20px,3vw,30px)}
   letter-spacing:.01em;
 }
 .logo-sub{font-size:12px;font-weight:700;letter-spacing:.42em;text-transform:uppercase;color:var(--ink-3);padding-left:.42em}
+/* Phones: there is no room for him to stand beside the menu, so he tucks in
+   next to the wordmark instead — small, on the left, directly above "Start a
+   new game". He used to be display:none here, so this only ever fires where
+   he was invisible; the desktop rule above is untouched.
+   The grid lets him sit left of BOTH logo lines without a wrapper element:
+   he takes column 1 spanning two rows, the logo and its sub-label stack in
+   column 2. He also drops out of absolute positioning, which means the
+   desktop mascotIn keyframes (built on translateY(-50%)) must not apply. */
+@media(max-width:920px){
+  .logo-wrap{display:grid;grid-template-columns:auto auto;justify-content:center;
+    align-items:center;column-gap:clamp(10px,3vw,18px);row-gap:0}
+  .mascot{position:static;transform:none;grid-column:1;grid-row:1 / span 2;
+    align-self:center;width:clamp(62px,19vw,104px);max-height:none;
+    animation:mascotInSm .6s var(--ease) both;
+    filter:drop-shadow(0 10px 18px rgba(0,0,0,.6)) drop-shadow(0 0 22px rgba(245,197,24,.15))}
+  .logo{grid-column:2;grid-row:1;text-align:left}
+  .logo-sub{grid-column:2;grid-row:2;text-align:left;padding-left:0}
+}
+@keyframes mascotInSm{from{opacity:0;transform:translateY(10px) scale(.94)}
+  to{opacity:1;transform:none}}
 .home-menu{display:grid;gap:var(--sp-2);width:min(420px,100%)}
 .home-stats{display:flex;gap:var(--sp-4);flex-wrap:wrap;justify-content:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 .home-stats b{color:var(--gold);font-weight:700}
@@ -852,7 +898,51 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'1.1', date:'26 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.2', date:'26 Aug 2026', author:'Thierry Boulos', year:2026 };
+
+/* ==========================================================================
+   0b. SELF-UPDATE
+   A home-screen web clip caches this file hard, and the people who already
+   saved it can't be asked to re-add it. So the app checks its own version
+   on every launch and resume.
+
+   version.json is the single source of truth. It is fetched with no-store
+   AND a cache-busting query — no-store only bypasses Safari's cache, the
+   ?t= is what stops GitHub's CDN handing back a stale copy of the check
+   itself. If it disagrees with the build baked into this copy, we bounce to
+   a URL the cache has never seen (?v=<new>), which is guaranteed to miss
+   every cache between here and the origin.
+
+   Two safeguards:
+   - it never fires off the home screen, so it cannot interrupt a live game
+     (state isn't restored across reloads — S.screen is always 'home' on boot)
+   - a sessionStorage guard means a failed bounce is tried once, not forever,
+     so a half-deployed build can't put the app in a reload loop.
+
+   To ship an update: bump BUILD.v here AND version.json to the same string.
+   ========================================================================== */
+(function(){
+  var GUARD = 'qmb.updating.v1';
+  function check(){
+    fetch('version.json?t=' + Date.now(), { cache:'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        if(!j || !j.v) return;
+        if(j.v === BUILD.v){ try{ sessionStorage.removeItem(GUARD); }catch(e){} return; }
+        if(typeof S !== 'undefined' && S.screen !== 'home') return;
+        try{
+          if(sessionStorage.getItem(GUARD) === j.v) return;
+          sessionStorage.setItem(GUARD, j.v);
+        }catch(e){}
+        location.replace(location.pathname + '?v=' + encodeURIComponent(j.v));
+      })
+      .catch(function(){});
+  }
+  if(document.readyState === 'complete') check(); else window.addEventListener('load', check);
+  /* A saved web clip gets resumed far more often than it gets cold-launched,
+     and a resume does not re-run page load. */
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) check(); });
+})();
 
 /* ==========================================================================
    1. SEED QUESTION BANK
@@ -2071,6 +2161,11 @@ SCREENS.home = function(){
   '<section class="home">' +
     '<div class="home-main">' +
       '<div class="logo-wrap">' +
+        /* He lives inside the logo block so phones can sit him beside the
+           wordmark. On desktop he is position:absolute against .home — and
+           neither .home-main nor .logo-wrap is a positioned ancestor — so
+           moving him here leaves the desktop layout byte-for-byte identical. */
+        '<img class="mascot" src="' + MASCOT + '" alt="Imad, your host" draggable="false">' +
         '<div class="logo">Quiz Me<br>Baby</div>' +
         '<div class="logo-sub">Host Control</div>' +
       '</div>' +
@@ -2094,7 +2189,6 @@ SCREENS.home = function(){
         ' <span class="sep">·</span> v' + BUILD.v + ' <span class="sep">·</span> ' + BUILD.date +
       '</p>' +
     '</div>' +
-    '<img class="mascot" src="' + MASCOT + '" alt="Imad, your host" draggable="false">' +
   '</section>';
 };
 
