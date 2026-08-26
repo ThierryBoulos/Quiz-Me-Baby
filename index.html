@@ -256,26 +256,32 @@ h3.display{font-size:clamp(20px,3vw,30px)}
   letter-spacing:.01em;
 }
 .logo-sub{font-size:12px;font-weight:700;letter-spacing:.42em;text-transform:uppercase;color:var(--ink-3);padding-left:.42em}
-/* Phones: there is no room for him to stand beside the menu, so he tucks in
-   next to the wordmark instead — small, on the left, directly above "Start a
-   new game". He used to be display:none here, so this only ever fires where
-   he was invisible; the desktop rule above is untouched.
-   The grid lets him sit left of BOTH logo lines without a wrapper element:
-   he takes column 1 spanning two rows, the logo and its sub-label stack in
-   column 2. He also drops out of absolute positioning, which means the
-   desktop mascotIn keyframes (built on translateY(-50%)) must not apply. */
+/* Phones: same idea as desktop, just tighter — the wordmark keeps its exact
+   centred position and he stands in the gutter beside it. He is NOT put into
+   the flow next to the logo; that would push the wordmark off centre.
+
+   The width trick: .logo-wrap is shrink-to-fit and centred in the viewport,
+   so the free space on each side of it is exactly (100vw - 100%)/2, where
+   100% is .logo-wrap's own width. That is the gutter, measured for us by the
+   layout engine at whatever size the logo happens to render. He fills it,
+   less a 10px breathing gap from the wordmark and 8px from the screen edge,
+   so he is as large as he can be without ever touching the logo.
+
+   The 200px ceiling only bites on wide tablets near the 920px breakpoint,
+   where the gutter grows faster than the wordmark and he would otherwise
+   tower over the menu. He stays absolute, so mascotInSm must preserve the
+   translateY(-50%) that centres him. */
 @media(max-width:920px){
-  .logo-wrap{display:grid;grid-template-columns:auto auto;justify-content:center;
-    align-items:center;column-gap:clamp(10px,3vw,18px);row-gap:0}
-  .mascot{position:static;transform:none;grid-column:1;grid-row:1 / span 2;
-    align-self:center;width:clamp(62px,19vw,104px);max-height:none;
+  .logo-wrap{position:relative}
+  .mascot{
+    position:absolute;right:calc(100% + 8px);top:50%;transform:translateY(-50%);
+    width:min(calc((100vw - 100%) / 2 - 14px), 150px);
+    max-height:none;
     animation:mascotInSm .6s var(--ease) both;
-    filter:drop-shadow(0 10px 18px rgba(0,0,0,.6)) drop-shadow(0 0 22px rgba(245,197,24,.15))}
-  .logo{grid-column:2;grid-row:1;text-align:left}
-  .logo-sub{grid-column:2;grid-row:2;text-align:left;padding-left:0}
+    filter:drop-shadow(0 12px 22px rgba(0,0,0,.62)) drop-shadow(0 0 26px rgba(245,197,24,.16))}
 }
-@keyframes mascotInSm{from{opacity:0;transform:translateY(10px) scale(.94)}
-  to{opacity:1;transform:none}}
+@keyframes mascotInSm{from{opacity:0;transform:translate(0,calc(-50% + 10px)) scale(.94)}
+  to{opacity:1;transform:translateY(-50%)}}
 .home-menu{display:grid;gap:var(--sp-2);width:min(420px,100%)}
 .home-stats{display:flex;gap:var(--sp-4);flex-wrap:wrap;justify-content:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 .home-stats b{color:var(--gold);font-weight:700}
@@ -898,7 +904,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'1.2', date:'26 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.3', date:'26 Aug 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
