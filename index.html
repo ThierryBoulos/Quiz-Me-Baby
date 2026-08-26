@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- maximum-scale + user-scalable: no accidental pinch-zoom mid-game. Nothing
+     here is small enough to need magnifying, and a stray two-finger drag used
+     to leave the host panning around a zoomed board looking for the buttons. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>QUIZ ME BABY — Host Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,7 +57,12 @@
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
+/* pan-x pan-y allows scrolling and nothing else — it rules out pinch-zoom and
+   double-tap-zoom, which is what the meta tag asks for and some browsers
+   ignore. A mouse never generates these gestures, so laptops are untouched. */
+html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{
+  touch-action:pan-x pan-y;
   font-family:var(--font);
   background:var(--bg);
   color:var(--ink);
@@ -343,6 +351,9 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .compact input[type=text]{padding:10px 12px;font-size:15px}
 .compact .calc-out{min-height:44px;padding:8px 10px;font-size:12px}
 .compact .hair{margin:10px 0}
+.compact .q-text{font-size:clamp(17px,3.1vh,26px);margin:clamp(6px,1.1vh,12px) auto}
+.compact .q-theme{font-size:clamp(10px,1.5vh,12px);padding:6px 14px}
+.compact .reader{font-size:clamp(12px,1.7vh,14px);margin-top:clamp(6px,1vh,12px)}
 .compact .btn.lg{min-height:52px;font-size:15px}
 
 /* ---- ONE-SCREEN PLAY MODE ----
@@ -366,6 +377,27 @@ body.playmode #hud{padding-top:6px;padding-bottom:8px}
   .play .timer{width:min(196px,27svh)}
   .play .spot{padding:8px var(--sp-2)}
   .play .reader{display:none}
+  /* The two intro screens carry a five-line rules list, which makes them the
+     tallest fixed blocks in the app. On a 720p laptop lid that was 23px more
+     than the window. Keyed on height, not on phone-vs-laptop, because a short
+     screen is a short screen — the phone tiers below tighten it further. */
+  .intro-screen{gap:14px}
+  .intro-head{gap:6px!important}
+  .intro-head .mini-band{margin:4px auto!important}
+  .intro-screen .card.pad{padding:16px}
+  .intro-rules{gap:9px!important;line-height:1.5!important}
+}
+/* Shorter again — a laptop window dragged small, or a netbook lid. Still no
+   width test: 1366x640 is as short as 375x640 and needs the same answer. The
+   display type stops scaling with the WIDTH here and starts scaling with the
+   height, which is what actually ran out. */
+@media(max-height:660px){
+  .intro-screen{gap:11px;padding-top:8px!important}
+  .intro-head h1.display{font-size:clamp(26px,7vh,44px)}
+  .intro-head .reader{font-size:12.5px;line-height:1.4}
+  .intro-screen .card.pad{padding:12px}
+  .intro-rules{gap:6px!important;font-size:12.5px!important;line-height:1.4!important}
+  .intro-screen .btn.lg{min-height:46px}
 }
 .q-answer{
   font-family:var(--font-d);font-size:clamp(30px,5.4vw,64px);line-height:1;text-transform:uppercase;
@@ -445,6 +477,28 @@ body.playmode #hud{padding-top:6px;padding-bottom:8px}
 .mini-dots{display:flex;gap:6px}
 .mini-dots i{width:24px;height:6px;border-radius:3px;background:rgba(255,255,255,.16)}
 .mini-dots i.a{background:var(--a)} .mini-dots i.b{background:var(--b)} .mini-dots i.t{background:var(--gold)}
+/* ---------- BATTLE OF THE CAPTAINS ----------
+   A slim always-on scoreline. Unlike .score-big it stays three-across on a
+   phone — the whole point is seeing both captains at a glance, and stacking
+   it would push the question off a 390px screen. */
+.bt-counter{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--sp-3);align-items:center}
+.bt-cell{text-align:center;padding:10px var(--sp-2);border-radius:var(--r-l);
+  border:1px solid var(--line);background:rgba(255,255,255,.02);transition:all .3s var(--ease)}
+.bt-cell.a{border-color:rgba(49,201,247,.24)} .bt-cell.b{border-color:rgba(255,77,130,.24)}
+/* the captain who is actually answering right now */
+.bt-cell.live.a{background:radial-gradient(70% 100% at 50% 0%,rgba(49,201,247,.18),transparent);
+  border-color:var(--a);box-shadow:0 0 0 1px rgba(49,201,247,.25)}
+.bt-cell.live.b{background:radial-gradient(70% 100% at 50% 0%,rgba(255,77,130,.18),transparent);
+  border-color:var(--b);box-shadow:0 0 0 1px rgba(255,77,130,.25)}
+.bt-cell .v{font-family:var(--font-d);font-size:clamp(30px,5.4vw,46px);line-height:.95}
+.bt-cell.a .v{color:var(--a)} .bt-cell.b .v{color:var(--b)}
+.bt-cell .n{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-top:5px}
+.bt-cell .t{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:2px}
+.bt-track{display:flex;gap:4px}
+.bt-track i{width:10px;height:6px;border-radius:3px;background:rgba(255,255,255,.16)}
+.bt-track i.y{background:var(--ok)} .bt-track i.n{background:rgba(255,255,255,.32)}
+.eyebrow.ta{color:var(--a)} .eyebrow.tb{color:var(--b)}
+
 .calc{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--sp-3);align-items:end}
 @media(max-width:640px){.calc{grid-template-columns:1fr}}
 .calc-out{text-align:center;padding:var(--sp-3);border-radius:var(--r);border:1px dashed var(--line-2);font-size:13px;color:var(--ink-2);min-height:56px;display:grid;place-items:center}
@@ -486,6 +540,9 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .fits .btn.lg{min-height:clamp(42px,5.6vh,60px);font-size:15px}
 .fits .help,.fits .muted{font-size:clamp(11px,1.5vh,13px)}
 .fits .mini-band{padding:8px 16px}
+.fits .bt-counter{gap:clamp(8px,1.8vh,22px)}
+.fits .bt-cell{padding:clamp(6px,1.2vh,14px) var(--sp-2)}
+.fits .bt-cell .v{font-size:clamp(26px,5.8vh,46px)}
 
 /* ---------- MODAL ---------- */
 #modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:var(--sp-3);
@@ -494,6 +551,7 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .modal-box{width:min(620px,100%);max-height:88svh;overflow:auto;animation:pop .3s var(--ease)}
 .modal-box.wide{width:min(860px,100%)}
+.modal-box.narrow{width:min(420px,100%)}
 
 /* ---------- QUESTION PICKER ---------- */
 .picklist{display:grid;gap:6px;max-height:42vh;overflow:auto;padding-right:4px}
@@ -606,6 +664,29 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
   .fits td.qcell{display:block;font-weight:600;line-height:1.4;padding:2px 0 8px}
   .fits td.qcell::before{display:block;margin-bottom:4px}
 
+  /* --- Battle of the Captains. The counter stays three-across on purpose —
+         both captains at a glance is the whole point of it — so everything in
+         it shrinks instead. The band above wraps rather than squeezing the
+         captain's name, and only the Battle's band does: the mini-game's is
+         two short chips and has never needed it. --- */
+  .bt-band{flex-wrap:wrap;gap:8px;padding:10px 14px}
+  /* sized in vh, not px: a phone is not one height. An SE is 667, a 17 Pro Max
+     is 956, and Safari's own toolbar takes ~90 off whatever the number is. */
+  .bt-counter{gap:8px}
+  .bt-cell{padding:clamp(5px,.95vh,9px) 6px;border-radius:var(--r)}
+  .bt-cell .v{font-size:clamp(20px,3.3vh,28px)}
+  .bt-cell .n{font-size:clamp(9px,1.35vh,11px);letter-spacing:.06em;margin-top:3px}
+  .bt-cell .t{font-size:clamp(8px,1.15vh,10px);letter-spacing:.08em}
+  .bt-track i{width:8px}
+  /* the tie-breaker verdict. Three buttons stacked is 180px of a 812px phone
+     and it was the one thing pushing a long question off the bottom. The two
+     captains go side by side; "neither" spans underneath them. */
+  .bt-verdict{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .bt-verdict > :nth-child(1){order:1}
+  .bt-verdict > :nth-child(3){order:2}
+  .bt-verdict > :nth-child(2){order:3;grid-column:1/-1}
+  .compact .q-text{font-size:clamp(16px,2.5vh,21px)}
+
   /* --- the hand-picker. Fourteen themes wrapped to ten rows of chips, eating
          most of the modal before a single question was visible. One row that
          swipes sideways instead, and no scroll boxes inside a scroll box —
@@ -615,6 +696,88 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
     padding-bottom:8px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
   #modal .pickfilter .chip{flex:none;scroll-snap-align:start;min-height:40px;font-size:12.5px}
   #modal .picklist{max-height:none;overflow:visible;padding-right:0}
+}
+
+/* ============================================================
+   SHORT VIEWPORT — a phone that is not tall enough for the
+   two intro screens, whose five-line rules list is the tallest
+   fixed block in the app.
+
+   This is NOT only the small phones. Safari draws its address
+   bar and toolbar over the viewport, so a 390x844 iPhone 13
+   reports about 750 with the chrome showing, and a 375x667 SE
+   reports about 570. Keying on height rather than on a device
+   catches both, and catches whatever Apple ships next.
+   ============================================================ */
+@media(max-width:640px) and (max-height:780px),(max-height:560px) and (pointer:coarse){
+  .intro-screen{gap:12px;padding-top:10px!important}
+  .intro-head{gap:6px!important}
+  .intro-head h1.display{font-size:clamp(28px,6.2vh,42px)}
+  .intro-head .reader{font-size:12.5px;line-height:1.4;margin:0 auto}
+  .intro-head .mini-band{margin:4px auto!important;padding:8px 14px}
+  .intro-screen .card.pad{padding:13px}
+  .intro-rules{gap:7px!important;font-size:12.3px!important;line-height:1.42!important}
+  .intro-screen .btn.lg{min-height:48px}
+
+  /* the tie-breaker and the mini-game entry screen, same treatment */
+  .compact{gap:8px}
+  .compact .spot{padding:10px var(--sp-3)}
+  .compact .card.pad{padding:11px}
+  .compact .q-answer{font-size:clamp(24px,4.6vh,34px)}
+  .compact .btn.lg{min-height:46px}
+  .compact .display{font-size:clamp(16px,2.9vh,22px)}
+  .bt-counter{gap:6px}
+
+  /* Change-question / Show-answer wrapped to two rows at 375px and cost
+     50px doing it. Let them share one row and shrink instead. */
+  .play .row.between{gap:6px}
+  .play .row.between .btn{min-height:44px;padding:0 12px;font-size:13px}
+  .compact .q-note{font-size:12px;margin-top:6px}
+  .compact .spot{gap:4px}
+}
+
+/* The tie-breaker carries the most in one screen — question, answer, note,
+   counter and three verdict buttons — so it runs out of room before anything
+   else does. It gets its own step between the two tiers. */
+@media(max-width:640px) and (max-height:760px),(max-height:560px) and (pointer:coarse){
+  .compact{gap:7px}
+  .compact .q-answer{font-size:clamp(22px,4.4vh,30px)}
+  .compact .q-note{font-size:11px;line-height:1.4;margin-top:4px}
+  .compact .card.pad{padding:10px}
+  .compact .btn.lg{min-height:44px}
+  .compact .q-text{font-size:clamp(15px,2.3vh,19px);line-height:1.2}
+    .compact .spot{padding:9px var(--sp-3)}
+  .bt-verdict .btn{min-height:44px;font-size:13.5px}
+}
+
+/* Tighter still: an SE with the Safari chrome showing is 375x570, and there
+   is a floor below which a question, its answer, a counter and three buttons
+   simply do not fit. Everything expendable goes — the flavour line under the
+   title, the team name under each captain's — before anything load-bearing. */
+@media(max-width:640px) and (max-height:640px),(max-height:560px) and (pointer:coarse){
+  .intro-head h1.display{font-size:clamp(24px,5.6vh,32px)}
+  .intro-head .reader{display:none}
+  .intro-rules{gap:5px!important;font-size:11.5px!important;line-height:1.34!important}
+  .intro-screen .card.pad{padding:10px}
+  .intro-screen .btn.lg{min-height:44px}
+  .bt-cell .t{display:none}
+  .compact .q-answer{font-size:clamp(20px,4.2vh,28px)}
+  .compact .q-note{font-size:11px;margin-top:4px}
+  .compact .card.pad{padding:9px}
+  .compact .btn.lg{min-height:42px}
+  .play .timer{width:min(150px,21svh)}
+  .play .timer .val{font-size:min(46px,8svh)}
+  .q-text{font-size:clamp(15px,2.5vh,19px)}
+  .q-answer{font-size:clamp(22px,4.4vh,30px)}
+  .compact .q-text{font-size:clamp(14px,2.3vh,17px)}
+  .compact .spot{padding:7px var(--sp-2)}
+  .compact{gap:6px}
+  .bt-cell .v{font-size:clamp(18px,3vh,23px)}
+  .bt-cell{padding:4px 5px}
+  .bt-verdict{gap:6px}
+  .bt-verdict .btn{min-height:40px;font-size:13px}
+  .intro-rules{font-size:11px!important;gap:4px!important}
+  .intro-head .mini-band{padding:6px 12px}
 }
 
 /* ---------- MISC ---------- */
@@ -752,7 +915,6 @@ const SEED = [
 ['Friends','medium','wedding-disaster','In which city did Chandler and Monica first sleep together?','London','Same trip, season 4 finale.'],
 ['Friends','hard','alias','What alias does Phoebe use when she needs a fake name?','Regina Phalange',''],
 ['Friends','hard','alias','What is the name of the Central Perk manager who is secretly in love with Rachel?','Gunther','Played by James Michael Tyler.'],
-['Friends','hard','','How many episodes of Friends are there in total?','236',''],
 ['Friends','hard','kids','What are the names of Monica and Chandler twins?','Jack and Erica',''],
 ['Friends','hard','kids','What is the name of Ross and Rachel daughter?','Emma',''],
 ['Friends','medium','job','What is Ross profession?','Palaeontologist','He later becomes a professor at NYU.'],
@@ -1003,7 +1165,7 @@ const SEED = [
 ['Sports','medium','','Which city is set to host the 2028 Summer Olympics?','Los Angeles',''],
 ['Sports','medium','grand-slam','Which tennis Grand Slam is played on clay?','The French Open','Roland Garros.'],
 ['Sports','medium','grand-slam','Which tennis Grand Slam is played on grass?','Wimbledon',''],
-['Sports','medium','','Which club has won the most UEFA Champions League titles?','Real Madrid','15+ titles — more than double the next club (AC Milan, 7).'],
+['Sports','easy','','Which club has won the most UEFA Champions League titles?','Real Madrid','15+ titles — more than double the next club (AC Milan, 7).'],
 ['Sports','hard','sport-origin','What is the most popular sport in Japan by television ratings and attendance?','Baseball',''],
 ['Sports','hard','sport-origin','Alongside ice hockey, which sport is one of Canada\'s two official national sports by law?','Lacrosse',''],
 ['Sports','hard','','Number of players on a rugby union team','15','Rugby league has 13.'],
@@ -1100,7 +1262,7 @@ const SEED = [
 ['Tech','hard','what-year','In what year did Tesla release its first car, the Roadster?','2008','Built on a Lotus Elise chassis.'],
 ['Tech','hard','what-year','In what year was MSN Messenger officially discontinued?','2013','Users were migrated to Skype.'],
 ['Tech','hard','what-year','In what year did BlackBerry shut down service for its legacy devices?','2022','Classic BlackBerry phones stopped working in January 2022.'],
-/* ---- TV ---- */
+/* ---- MOVIES ---- */
 ['Movies','hard','','After M*A*S*H and Cheers, which sitcom had the most-watched series finale?','Seinfeld','Around 76 million viewers in 1998.'],
 ['Movies','medium','','Which scripted series has won the most Emmy Awards?','Game of Thrones','59 wins across its run.'],
 ['Movies','medium','','What is the name of the town where The Simpsons live?','Springfield','Deliberately never assigned to a state.'],
@@ -1121,9 +1283,62 @@ const SEED = [
 ['Music','hard','','Which band is the most-streamed band on Spotify?','Coldplay','Top band, as distinct from solo artists.'],
 /* ---- FOOD & DRINK ---- */
 ['Food & Drink','hard','','Within what 10-year range did Michelin first award a star to a restaurant?','1926','The three-star system followed in 1931.'],
+/* ---- SPORTS ---- */
+['Sports','easy','','Which sport uses the terms "birdie" and "eagle"?','Golf','One and two strokes under par.'],
+['Sports','easy','','Which country won the first FIFA World Cup in 1930?','Uruguay','Also hosted it, and won again in 1950.'],
+['Sports','easy','','In which city were the first ancient Olympic Games held, back in 776 BC?','Olympia, Greece','The modern games revived the name.'],
+['Sports','easy','','Which dance sport made its Olympic debut at Paris 2024?','Breaking (breakdancing)','The only new sport in Paris; dropped again for LA 2028.'],
+['Sports','medium','','Name three of the four sports that made their Olympic debut at Tokyo 2020','Skateboarding, surfing, sport climbing, karate','Any three count. Baseball and softball also returned but were not new.'],
+/* ---- MOVIES ---- */
+['Movies','easy','','Who plays Iron Man in the Marvel movies?','Robert Downey Jr.',''],
+['Movies','easy','','Which film\'s famous line is "I\'ll be back"?','The Terminator',''],
+['Movies','easy','','Who plays Rose in Titanic?','Kate Winslet',''],
+['Movies','easy','','What is the name of the ring-obsessed creature in The Lord of the Rings?','Gollum','"My precious."'],
+/* ---- MUSIC ---- */
+['Music','easy','','Which pop star is nicknamed the "Queen of Pop"?','Madonna',''],
+['Music','easy','','Which artist is known as the "King of Pop"?','Michael Jackson',''],
+['Music','easy','','Which British singer released "Shape of You"?','Ed Sheeran',''],
+['Music','easy','','John, Paul, George and Ringo were members of which band?','The Beatles',''],
+/* ---- NATURE ---- */
+['Nature','medium','','What is the largest species of big cat?','The tiger',''],
+['Nature','medium','','Which animal\'s fingerprints are nearly indistinguishable from a human\'s?','The koala',''],
+['Nature','medium','','What is a group of flamingos called?','A flamboyance',''],
+['Nature','medium','','What colour is a polar bear\'s skin?','Black','The fur is translucent, not white.'],
+['Nature','medium','','Which African animal\'s name means "river horse" in Greek?','The hippopotamus',''],
+/* ---- TECH ---- */
+['Tech','medium','','Which web browser did Microsoft finally kill off in 2022?','Internet Explorer','After 27 years.'],
+['Tech','medium','','What was Twitter\'s original character limit per tweet?','140','Doubled to 280 in 2017.'],
+/* ---- RAVE CULTURE ---- */
+['Rave Culture','medium','','What kind of building does Berghain occupy?','A former power plant','A disused East German heating plant.'],
+['Rave Culture','medium','','Which French platform films DJ sets at spectacular locations like volcanoes and hot-air balloons?','Cercle',''],
+['Rave Culture','medium','','Which DJ was born Frederick Gibson?','Fred again..','Mentored by Brian Eno.'],
+['Rave Culture','medium','','Which label and party brand did Tale of Us create?','Afterlife',''],
+/* ---- KNOW THE HOST ---- */
+['Know the Host','medium','','Which football club does the host support?','Host knows this one',''],
+['Know the Host','medium','','What car does the host currently drive?','Host knows this one',''],
+['Know the Host','medium','','Which country did the host most recently travel to?','Host knows this one',''],
+/* ---- SCIENCE ---- */
+['Science','hard','','Which chemical element has the symbol W?','Tungsten','From its German name, Wolfram.'],
+['Science','medium','','Which planet has the most moons?','Saturn','274 confirmed — overtook Jupiter in 2023.'],
+['Science','hard','','What is the scientific study of fungi called?','Mycology',''],
+/* ---- GEEK & GAMER ---- */
+['Geek & Gamer','easy','','What colour is Sonic the Hedgehog?','Blue',''],
+['Geek & Gamer','easy','','What type of Pokémon is Pikachu?','Electric',''],
+['Geek & Gamer','easy','','Which puzzle game with falling blocks was invented in the Soviet Union?','Tetris','By Alexey Pajitnov in 1984.'],
+['Geek & Gamer','easy','','What does "GG" mean in gaming?','Good game',''],
+['Geek & Gamer','easy','','Which princess does Mario keep rescuing?','Princess Peach',''],
+/* ---- TECH ---- */
+['Tech','easy','','Which company makes the Galaxy range of phones?','Samsung',''],
+['Tech','easy','','Which app has a white ghost on a yellow background as its logo?','Snapchat',''],
+['Tech','easy','','Which website calls itself "the front page of the internet"?','Reddit',''],
+/* ---- INTERNET & MEMES ---- */
+['Internet & Memes','easy','','What is the term for using a fake online identity to lure someone into a relationship?','Catfishing','From the 2010 documentary.'],
+['Internet & Memes','easy','','In internet slang, what does "IYKYK" stand for?','If You Know You Know',''],
 ];
 
 const SEED_CLOSEST = [
+/* ---- FRIENDS ---- */
+['Friends','medium','How many episodes of Friends are there in total?',236,''],
 /* ---- FOOD & DRINK ---- */
 ['Food & Drink','medium','Number of grapes it takes to make one bottle of wine',700,'Roughly 600 to 800 grapes, or about 1.2 kg of fruit.'],
 ['Food & Drink','medium','Tabasco is around 3,000 Scoville Heat Units - How many does a Carolina Reaper average?',1600000,'About 1.6 million. The Guinness-tested average from 2017 was 1,641,183; individual peppers exceed 2 million SHU.'],
@@ -1174,7 +1389,7 @@ const SEED_CLOSEST = [
 ['Pop Culture','medium','Probability of being dealt a royal flush in a standard 5-card poker hand (1 in ?)',649740,''],
 /* ---- TECH ---- */
 ['Tech','medium','Number of hours of video uploaded to YouTube every minute',500,'YouTube\'s last officially confirmed figure.'],
-/* ---- TV ---- */
+/* ---- MOVIES ---- */
 ['Movies','medium','How many episodes of Game of Thrones were made?',73,'Eight seasons, 2011 to 2019.'],
 /* ---- SPORTS ---- */
 ['Sports','medium','How many medal events were there at the Paris 2024 Summer Olympics?',329,'Across 32 sports.'],
@@ -1216,8 +1431,8 @@ const DB = {
   /* bank/seedv/killed are on .v3: the built-in bank was replaced wholesale
      again, so no earlier saved copy may survive into this version. History,
      played-question memory and settings keep their keys and carry over. */
-  k:{ bank:'qn.bank.v5', hist:'qn.history.v1', used:'qn.used.v1', set:'qn.settings.v1',
-      seedv:'qn.seedv.v5', killed:'qn.killed.v5' },
+  k:{ bank:'qn.bank.v6', hist:'qn.history.v1', used:'qn.used.v1', set:'qn.settings.v1',
+      seedv:'qn.seedv.v6', killed:'qn.killed.v6' },
   get(k, fb){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; }catch(e){ return fb; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ toast('Storage full — could not save.'); } }
 };
@@ -1376,7 +1591,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 7;   // bumped when the built-in bank changes
+const SEED_VERSION = 8;   // bumped when the built-in bank changes
 (function bootBank(){
   /* Earlier banks were retired wholesale, not merged. Clear them out so a
      browser that ran an older copy of this file cannot resurrect those
@@ -1384,7 +1599,8 @@ const SEED_VERSION = 7;   // bumped when the built-in bank changes
   try{ ['qn.bank.v1','qn.seedv.v1','qn.killed.v1',
         'qn.bank.v2','qn.seedv.v2','qn.killed.v2',
         'qn.bank.v3','qn.seedv.v3','qn.killed.v3',
-        'qn.bank.v4','qn.seedv.v4','qn.killed.v4'].forEach(k => localStorage.removeItem(k)); }catch(e){}
+        'qn.bank.v4','qn.seedv.v4','qn.killed.v4',
+        'qn.bank.v5','qn.seedv.v5','qn.killed.v5'].forEach(k => localStorage.removeItem(k)); }catch(e){}
   const stored  = DB.get(DB.k.bank, null);
   const killed  = DB.get(DB.k.killed, []);          // seed questions the host deleted
   const seenVer = DB.get(DB.k.seedv, 0);
@@ -1512,6 +1728,130 @@ function capacity(themes, diff){
   return { rounds:loose, strict, closest:closestPool().length };
 }
 
+
+/* ==========================================================================
+   8b. BATTLE OF THE CAPTAINS — the optional end-of-night bonus
+   ==========================================================================
+   Ten questions each, seven seconds a shot, captains only. Two rules shape
+   the draw:
+     - Three themes are barred. "Know the Host" has no answers in the bank,
+       and Sexy Time and Lebanon are rooms-specific — under a seven-second
+       clock a captain deserves something anyone at the table could know.
+     - Both captains get the SAME difficulty shape, five easy and five
+       medium in an identical order, but never the same question. Different
+       sets, same shape, so nobody can claim they drew the harder ten.       */
+const BATTLE_SKIP_THEMES = ['Know the Host','Sexy Time','Lebanon'];
+const BATTLE_N    = 10;   // questions per captain
+const BATTLE_PTS  = 2;    // what the winning captain is worth
+const BATTLE_SECS = 7;    // per question
+
+/* Everything already used tonight is off the table — the rounds, both teams'
+   questions, the mini-game including its unplayed spares, and sudden death. */
+function battleSpent(){
+  const g = G(), spent = new Set();
+  g.rounds.forEach(r => r.q.forEach(q => spent.add(q.id)));
+  (g.mini.qs || []).forEach(q => spent.add(q.id));
+  (g.mini.spare || []).forEach(q => spent.add(q.id));
+  (g.sdUsed || []).forEach(id => spent.add(id));
+  const b = g.battle;
+  if(b){
+    b.qs.forEach(set => set.forEach(q => spent.add(q.id)));
+    (b.tbUsed || []).forEach(id => spent.add(id));
+    (b.dropped || []).forEach(id => spent.add(id));
+  }
+  return spent;
+}
+function battlePool(diff){
+  const spent = battleSpent();
+  const ok = (q) => q.type === 'standard' && !spent.has(q.id) &&
+    BATTLE_SKIP_THEMES.indexOf(q.theme) < 0 &&
+    (diff ? q.difficulty === diff : q.difficulty === 'easy' || q.difficulty === 'medium');
+  const fresh = S.bank.filter(q => ok(q) && isFresh(q));
+  /* "never reuse a question" is a nicety. Being able to run the Battle at all
+     matters more, so fall back to the played ones rather than a short set. */
+  return fresh.length >= BATTLE_N * 2 ? fresh : S.bank.filter(ok);
+}
+/* Don't offer the Battle at all if the bank can't fill both captains. */
+function battleReady(){
+  const p = battlePool();
+  return p.filter(q => q.difficulty === 'easy').length >= 2 && p.length >= 8;
+}
+
+function buildBattle(){
+  const pool = shuffle(battlePool());
+  const by = { easy:pool.filter(q => q.difficulty === 'easy'),
+               medium:pool.filter(q => q.difficulty === 'medium') };
+  /* one shape, drawn once, used for both captains */
+  const shape = shuffle(['easy','easy','easy','easy','easy','medium','medium','medium','medium','medium']);
+  const taken = new Set();
+  const draw = (want) => {
+    /* the wanted difficulty first; the other one only to avoid a short set */
+    for(const d of (want === 'easy' ? ['easy','medium'] : ['medium','easy'])){
+      const q = by[d].find(x => !taken.has(x.id));
+      if(q){ taken.add(q.id); return q; }
+    }
+    return null;
+  };
+  const sets = [[], []];
+  for(let i = 0; i < BATTLE_N; i++){
+    const a = draw(shape[i]), b = draw(shape[i]);
+    if(!a || !b) break;                 // both captains or neither — always equal length
+    sets[0].push(a); sets[1].push(b);
+  }
+  if(sets[0].length < 2) return null;
+  return {
+    n:sets[0].length, qs:sets, shape:shape.slice(0, sets[0].length),
+    cap:0, i:0, shown:false, score:[0, 0],
+    log:[[], []],                        // per captain: {q, got}
+    stage:'run',                         // run → (tie) → done
+    tb:null, tbUsed:[], tbRounds:0, dropped:[],
+    winner:null, awarded:false, award:[0, 0], done:false
+  };
+}
+
+const curBattleQ = () => { const b = G().battle; return b.stage === 'tie' ? b.tb.q : b.qs[b.cap][b.i]; };
+const battleCapName = (c) => {
+  const t = G().teams[c];
+  return t.captain ? t.captain : t.name + "'s captain";
+};
+
+function battleFinish(){
+  const g = G(), b = g.battle;
+  if(b.score[0] === b.score[1]){ battleTieBreak(); return; }
+  b.winner = b.score[0] > b.score[1] ? 0 : 1;
+  battleAward();
+}
+/* Tie → a medium question, no clock, first captain in takes it. Still level
+   (nobody got it) → another one, and another, until someone does. */
+/* bump === false means "swap this tie-breaker for another", not "next one" */
+function battleTieBreak(bump){
+  const g = G(), b = g.battle;
+  let pool = battlePool('medium');
+  if(!pool.length) pool = battlePool();
+  if(!pool.length){
+    b.stage = 'done'; b.done = true; b.winner = null;
+    b.note = 'Dead level, and the bank is out of questions. Your call, host.';
+    go('battleSummary'); return;
+  }
+  const q = shuffle(pool)[0];
+  b.tbUsed.push(q.id);
+  if(bump !== false) b.tbRounds++;
+  b.stage = 'tie';
+  b.tb = { q, n:b.tbRounds, shown:false };
+  markUsed(q);
+  go('battleTie');
+}
+function battleAward(){
+  const g = G(), b = g.battle;
+  b.stage = 'done'; b.done = true;
+  if(b.winner != null && !b.awarded){
+    b.awarded = true;
+    g.teams[b.winner].score += BATTLE_PTS;
+    b.award = [b.winner === 0 ? BATTLE_PTS : 0, b.winner === 1 ? BATTLE_PTS : 0];
+    Snd.point();
+  }
+  go('battleSummary');
+}
 /* ==========================================================================
    9. GAME ENGINE
    ========================================================================== */
@@ -1566,6 +1906,7 @@ function buildGame(cfg){
     miniPts: N >= 8 ? 3 : 2,
     mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
     r:0, seat:0, sub:'intro', miniPlayed:false,
+    battle:null, battleOffered:false,
     sd:null, screen:'roundIntro'
   };
 }
@@ -1589,7 +1930,10 @@ function award(teamIdx, pts, why){
   toast(g.teams[teamIdx].name + ' +' + pts + ' ' + (pts === 1 ? 'point' : 'points') + (why ? ' — ' + why : ''));
 }
 
-/* schedule: pips for the HUD. standard rounds + one mini bar. */
+/* schedule: pips for the HUD. standard rounds + one mini bar, and a second
+   bar on the end once the Battle has actually been activated — it is a
+   surprise, so it must not appear on the schedule before it is accepted. */
+const BATTLE_SCREENS = ['battleIntro','battleQ','battleHandoff','battleTie','battleSummary'];
 function schedule(){
   const g = G(); const out = [];
   for(let i = 0; i < g.rounds.length; i++){
@@ -1597,20 +1941,26 @@ function schedule(){
     if(i + 1 === g.miniAfter) out.push({ kind:'mini' });
   }
   if(g.miniAfter >= g.rounds.length && !out.some(x => x.kind === 'mini')) out.push({ kind:'mini' });
+  if(g.battle) out.push({ kind:'battle' });
   return out;
 }
 function pipState(){
   const g = G(); const sch = schedule();
   const inMini = ['miniIntro','miniQ','miniEntry','miniSummary'].indexOf(S.screen) > -1;
+  const inBattle = BATTLE_SCREENS.indexOf(S.screen) > -1;
   return sch.map(s => {
     if(s.kind === 'mini'){
       if(inMini) return 'now';
       return g.miniPlayed ? 'done' : 'todo';
     }
+    if(s.kind === 'battle'){
+      if(inBattle) return 'now';
+      return g.battle && g.battle.done ? 'done' : 'todo';
+    }
     /* Use the round's own done flag, not g.r — g.r stays parked on the
        last-played round for the whole of the mini-game, which would show a
        finished round as still to come. */
-    if(s.i === g.r && !inMini) return 'now';
+    if(s.i === g.r && !inMini && !inBattle) return 'now';
     return (g.rounds[s.i] && g.rounds[s.i].done) ? 'done' : 'todo';
   });
 }
@@ -1624,8 +1974,8 @@ function render(){
   const app = el('app');
   const y = window.scrollY;
   const fn = SCREENS[S.screen] || SCREENS.home;
-  document.body.classList.toggle('playmode', ['ask','steal','miniQ'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff'].indexOf(S.screen) > -1);
   document.body.classList.toggle('homemode', S.screen === 'home');
   app.innerHTML = fn();
   renderHUD();
@@ -1638,18 +1988,28 @@ function nav(screen){ S.tmp.toTop = true; S.screen = screen; render(); }
 function renderHUD(){
   const h = el('hud');
   const g = G();
-  const inGame = g && ['roundIntro','ask','reveal','steal','stealReveal','answer','roundScore','miniIntro','miniQ','miniEntry','miniSummary','sudden','final'].indexOf(S.screen) > -1;
+  const inGame = g && (['roundIntro','ask','reveal','steal','stealReveal','answer','roundScore','miniIntro','miniQ','miniEntry','miniSummary','sudden','final'].indexOf(S.screen) > -1
+    || BATTLE_SCREENS.indexOf(S.screen) > -1);
   if(!inGame){ h.hidden = true; h.innerHTML = ''; return; }
   h.hidden = false;
 
   const pips = pipState().map((st, i) => {
     const sch = schedule()[i];
-    return '<span class="pip ' + (sch.kind === 'mini' ? 'mini ' : '') + (st === 'now' ? 'now' : st === 'done' ? 'done' : '') + '" title="' + (sch.kind === 'mini' ? 'Closest To Wins' : 'Round ' + (sch.i + 1)) + '"></span>';
+    const title = sch.kind === 'mini' ? 'Closest To Wins'
+                : sch.kind === 'battle' ? 'Battle of the Captains'
+                : 'Round ' + (sch.i + 1);
+    /* the .mini class is the wide bar — the Battle earns one too */
+    return '<span class="pip ' + (sch.kind === 'std' ? '' : 'mini ') + (st === 'now' ? 'now' : st === 'done' ? 'done' : '') + '" title="' + title + '"></span>';
   }).join('');
 
   let label;
   if(['miniIntro','miniQ','miniEntry','miniSummary'].indexOf(S.screen) > -1){
     label = '<b>CLOSEST TO WINS</b> &nbsp;·&nbsp; ' + legLabel();
+  } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
+    const b = g.battle;
+    label = '<b>BATTLE OF THE CAPTAINS</b>' +
+      (S.screen === 'battleQ' ? ' &nbsp;·&nbsp; ' + esc(battleCapName(b.cap)) + ' ' + (b.i + 1) + '/' + b.n
+       : S.screen === 'battleTie' ? ' &nbsp;·&nbsp; Tie breaker ' + b.tb.n : '');
   } else if(S.screen === 'sudden'){
     label = '<b>SUDDEN DEATH</b>';
   } else if(S.screen === 'final'){
@@ -2279,7 +2639,9 @@ SCREENS.roundScore = function(){
   const g = G(), rd = curRound();
   const nextIsMini = (g.r + 1 === g.miniAfter) && !g.miniPlayed;
   const last = g.r + 1 >= g.rounds.length;
-  const heading = last && g.teams[0].score === g.teams[1].score;
+  /* don't promise a tie breaker if the Battle is about to be offered — it may
+     well settle the thing, and the button must give nothing away either way */
+  const heading = last && g.teams[0].score === g.teams[1].score && (g.battleOffered || !battleReady());
   const lines = [0, 1].map(seat => {
     const ti = seatTeam(rd, seat), r = rd.res[seat];
     if(!r) return '';
@@ -2322,14 +2684,14 @@ function scoreBig(delta){
    ========================================================================== */
 SCREENS.miniIntro = function(){
   const g = G(), n = g.mini.qs.length;
-  return '<div class="stack lg" style="padding-top:18px">' +
-    '<div class="center stack" style="gap:10px">' +
+  return '<div class="stack lg intro-screen" style="padding-top:18px">' +
+    '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Halfway — the mini-game</div>' +
       '<h1 class="display">Closest<br>To Wins</h1>' +
       '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
-      '<ul style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
+      '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> Both teams get the same number question at the same time.</li>' +
         '<li><strong style="color:var(--gold)">2.</strong> ' + S.settings.tMini + ' seconds to write one number down. Captains hand it to you.</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> Closest number wins the leg. Tie = one point each.</li>' +
@@ -2457,6 +2819,172 @@ SCREENS.miniSummary = function(){
 };
 
 /* ==========================================================================
+   17b. BATTLE OF THE CAPTAINS — screens
+   ========================================================================== */
+/* the live counter, on every Battle screen so nobody has to ask the score */
+function battleCounter(){
+  const g = G(), b = g.battle;
+  const cell = (c) => '<div class="bt-cell ' + (c === 0 ? 'a' : 'b') + (b.stage === 'run' && b.cap === c ? ' live' : '') + '">' +
+    '<div class="v num">' + b.score[c] + '</div>' +
+    '<div class="n">' + esc(battleCapName(c)) + '</div>' +
+    '<div class="t">' + esc(g.teams[c].name) + '</div>' +
+  '</div>';
+  return '<div class="bt-counter">' + cell(0) + '<div class="vs">VS</div>' + cell(1) + '</div>';
+}
+/* one tick per question — filled for a hit, hollow for a miss */
+function battleTrack(c){
+  const b = G().battle;
+  let out = '<span class="bt-track">';
+  for(let i = 0; i < b.n; i++){
+    const r = b.log[c][i];
+    out += '<i class="' + (!r ? '' : r.got ? 'y' : 'n') + '"></i>';
+  }
+  return out + '</span>';
+}
+
+SCREENS.battleIntro = function(){
+  const g = G(), b = g.battle;
+  return '<div class="stack lg intro-screen" style="padding-top:18px">' +
+    '<div class="center stack intro-head" style="gap:10px">' +
+      '<div class="eyebrow gold">The last word</div>' +
+      '<h1 class="display">Battle of<br>the Captains</h1>' +
+      '<p class="reader" style="max-width:42ch;margin:0 auto">You handed one person the keys to your whole night. Time to find out whether that was judgement or optimism.</p>' +
+    '</div>' +
+    '<div class="card pad lit stack">' +
+      '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
+        '<li><strong style="color:var(--gold)">1.</strong> Captains only. The room says nothing — and I mean nothing.</li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> ' + b.n + ' questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot. ' + esc(battleCapName(0)) + ' goes first.</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> Same spread for both — five easy, five medium, in the same order. Different questions.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> <span style="color:var(--warn)">No lifelines, no conferring, no second guesses.</span></li>' +
+        '<li><strong style="color:var(--gold)">5.</strong> Best score takes <strong>' + BATTLE_PTS + ' points</strong>. Tie? One more question, first captain in wins it.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="battleStart">Start — ' + esc(battleCapName(0)) + '</button></div>' +
+  '</div>';
+};
+AFTER.battleIntro = function(){ jingleOnce('battle'); };
+
+SCREENS.battleQ = function(){
+  const g = G(), b = g.battle, q = curBattleQ();
+  const note = q.notes ? '<p class="q-note">' + esc(q.notes) + '</p>' : '';
+  return '<div class="play">' +
+    '<div class="center"><div class="mini-band bt-band">' +
+      '<span class="eyebrow ' + (b.cap === 0 ? 'ta' : 'tb') + '">' + esc(battleCapName(b.cap)) + '</span>' +
+      '<span class="dim">·</span><span class="eyebrow gold">' + (b.i + 1) + ' of ' + b.n + '</span>' +
+      battleTrack(b.cap) +
+    '</div></div>' +
+    battleCounter() +
+    '<div class="spot" style="background:radial-gradient(80% 120% at 50% -20%,rgba(245,197,24,.16),transparent 65%)">' +
+      '<div class="q-theme">' + esc(q.theme) + ' &nbsp;·&nbsp; ' + esc(q.difficulty) + '</div>' +
+      (b.shown ? '' : timerRing('seconds')) +
+      '<h2 class="q-text">' + esc(q.question) + '</h2>' +
+      (b.shown ? '<div><div class="eyebrow gold">The answer</div><div class="q-answer">' + esc(q.answer) + '</div>' + note + '</div>' : '') +
+    '</div>' +
+    (b.shown
+      ? '<div class="card pad lit center stack" style="gap:10px">' +
+          '<h3 class="display" style="font-size:clamp(18px,2.6vw,26px)">Did ' + esc(battleCapName(b.cap)) + ' get it?</h3>' +
+          '<div class="btn-row center">' +
+            '<button class="btn gold lg" data-act="battleMark" data-v="1">Yes</button>' +
+            '<button class="btn ghost lg" data-act="battleMark" data-v="0">No</button>' +
+          '</div>' +
+        '</div>'
+      : '<div class="row between" style="gap:10px">' +
+          '<button class="btn sm ghost" data-act="battleSwap">Change this question</button>' +
+          '<button class="btn gold" data-act="battleShow">Show the answer</button>' +
+        '</div>') +
+  '</div>';
+};
+/* The clock runs itself out into the answer, so the host never has to catch
+   it. Keyed on captain + slot + question id: a plain re-render must not
+   restart it, but a swapped-in question must. */
+AFTER.battleQ = function(){
+  const b = G().battle;
+  if(b.shown){ Timer.stop(); return; }
+  armTimer('bt' + b.cap + '-' + b.i + '-' + b.qs[b.cap][b.i].id, BATTLE_SECS, () => {
+    if(S.screen === 'battleQ' && S.game && S.game.battle){ S.game.battle.shown = true; render(); }
+  });
+};
+
+SCREENS.battleHandoff = function(){
+  const g = G(), b = g.battle;
+  return '<div class="fits">' +
+    '<div class="center stack" style="gap:8px">' +
+      '<div class="eyebrow gold">Halfway</div>' +
+      '<h2 class="display">' + esc(battleCapName(0)) + ' scored ' + b.score[0] + ' of ' + b.n + '</h2>' +
+      '<p class="reader" style="max-width:44ch;margin:0 auto">Same spread, different questions. ' +
+        esc(battleCapName(1)) + ', the room is yours — and everyone else keeps their mouth shut.</p>' +
+    '</div>' +
+    battleCounter() +
+    '<div class="btn-row center">' +
+      '<button class="btn gold lg" data-act="battleStart">Start — ' + esc(battleCapName(1)) + '</button>' +
+    '</div>' +
+  '</div>';
+};
+
+/* Tie-breaker: no clock. Whoever gets in first and gets it right takes it. */
+SCREENS.battleTie = function(){
+  const g = G(), b = g.battle, q = b.tb.q;
+  const note = q.notes ? '<p class="q-note">' + esc(q.notes) + '</p>' : '';
+  /* .compact, not .stack — the answer, the counter and the three verdict
+     buttons all have to sit on one screen with no scrolling */
+  return '<div class="compact" style="padding-top:10px">' +
+    '<div class="center stack" style="gap:6px">' +
+      '<div class="eyebrow gold">Level at ' + b.score[0] + ' — tie breaker ' + b.tb.n + '</div>' +
+      '<h2 class="display" style="font-size:clamp(20px,3.6vh,34px)">First captain in takes it.</h2>' +
+    '</div>' +
+    battleCounter() +
+    '<div class="spot" style="background:radial-gradient(80% 120% at 50% -20%,rgba(245,197,24,.2),transparent 65%)">' +
+      '<div class="q-theme">' + esc(q.theme) + ' &nbsp;·&nbsp; ' + esc(q.difficulty) + '</div>' +
+      /* the instruction is spent once the answer is up, and its two lines are
+         exactly what pushes this screen off the bottom of a phone */
+      (b.tb.shown ? '' : '<p class="reader" style="margin-top:14px">No clock. Both captains, hands up, first in answers.</p>') +
+      '<h2 class="q-text">' + esc(q.question) + '</h2>' +
+      (b.tb.shown
+        ? '<div><div class="eyebrow gold">The answer</div><div class="q-answer">' + esc(q.answer) + '</div>' + note + '</div>'
+        : '<div class="btn-row center">' +
+            '<button class="btn ghost sm" data-act="battleTbSwap">Change question</button>' +
+            '<button class="btn gold lg" data-act="battleTbShow">Show the answer</button></div>') +
+    '</div>' +
+    (b.tb.shown ? '<div class="card pad lit center stack">' +
+      '<h3 class="display">Who got it first?</h3>' +
+      '<div class="btn-row center bt-verdict">' +
+        '<button class="btn teamA lg" data-act="battleTbWin" data-w="0">' + esc(battleCapName(0)) + '</button>' +
+        '<button class="btn ghost" data-act="battleTbWin" data-w="none">Neither — next question</button>' +
+        '<button class="btn teamB lg" data-act="battleTbWin" data-w="1">' + esc(battleCapName(1)) + '</button>' +
+      '</div></div>' : '') +
+  '</div>';
+};
+
+SCREENS.battleSummary = function(){
+  const g = G(), b = g.battle;
+  const tick = (r) => !r ? '' : r.got ? '<span class="badge ok">Got it</span>' : '<span class="badge no">Missed</span>';
+  const rows = [];
+  for(let i = 0; i < b.n; i++){
+    const ra = b.log[0][i], rb = b.log[1][i];
+    rows.push('<tr><td class="rowhead" data-l="Q">' + (i + 1) + ' &middot; ' + esc(b.shape[i] || '') + '</td>' +
+      '<td class="qcell" data-l="' + esc(battleCapName(0)) + '">' + (ra ? esc(ra.q.question) : '—') + '</td>' +
+      '<td data-l="Result">' + tick(ra) + '</td>' +
+      '<td class="qcell" data-l="' + esc(battleCapName(1)) + '">' + (rb ? esc(rb.q.question) : '—') + '</td>' +
+      '<td data-l="Result">' + tick(rb) + '</td></tr>');
+  }
+  const headline = b.winner == null ? 'Dead level' : esc(battleCapName(b.winner)) + ' takes it';
+  return '<div class="fits">' +
+    '<div class="center stack" style="gap:6px">' +
+      '<div class="eyebrow gold">Battle of the Captains — final</div>' +
+      '<h2 class="display">' + headline + '</h2>' +
+      (b.tbRounds ? '<p class="help">Settled on tie breaker ' + b.tbRounds + '.</p>' : '') +
+      (b.note ? '<p class="help" style="max-width:52ch;margin:0 auto">' + esc(b.note) + '</p>' : '') +
+      (b.awarded ? '<p class="help">' + esc(g.teams[b.winner].name) + ' <strong style="color:var(--gold)">+' + BATTLE_PTS + ' points</strong>.</p>' : '') +
+    '</div>' +
+    battleCounter() +
+    '<div class="tbl-wrap"><table><thead><tr><th>Q</th><th>' + esc(battleCapName(0)) + '</th><th>Result</th><th>' + esc(battleCapName(1)) + '</th><th>Result</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' +
+    '<div class="btn-row center">' +
+      '<button class="btn gold lg" data-act="battleDone">See the results</button>' +
+    '</div>' +
+  '</div>';
+};
+
+/* ==========================================================================
    18. SUDDEN DEATH
    ========================================================================== */
 SCREENS.sudden = function(){
@@ -2516,6 +3044,12 @@ SCREENS.final = function(){
       '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Closest to wins</td>' +
       '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + (g.mini.award ? g.mini.award[0] : 0) + '</td>' +
       '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + (g.mini.award ? g.mini.award[1] : 0) + '</td><td></td></tr>' +
+      (g.battle && g.battle.done
+        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Battle of the captains</td>' +
+          '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.battle.award[0] + '</td>' +
+          '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.battle.award[1] + '</td>' +
+          '<td data-l="Captains">' + g.battle.score[0] + '–' + g.battle.score[1] + '</td></tr>'
+        : '') +
       '</tbody></table></div>' +
     '</div>' +
     '<div class="btn-row center">' +
@@ -2884,9 +3418,25 @@ function nextRound(){
 }
 function advanceRound(){
   const g = G();
-  g.r++;
-  if(g.r < g.rounds.length){ g.seat = 0; go('roundIntro'); }
-  else endGame();
+  /* clamped: the Battle pop-up can be dismissed with Esc and the host can then
+     press the button again — that must not walk g.r off the end of the list */
+  g.r = Math.min(g.r + 1, g.rounds.length);
+  if(g.r < g.rounds.length){ g.seat = 0; go('roundIntro'); return; }
+  if(!g.battleOffered && battleReady()){ offerBattle(); return; }
+  endGame();
+}
+/* The pop-up over the last round's scoreboard. Deliberately flat — no pitch,
+   no "would you like to", nothing that hints the host is fishing for a way to
+   rescue the losing team. It reads as a fixture that was always on the card. */
+function offerBattle(){
+  openModal(
+    '<div class="center stack" style="gap:14px">' +
+      '<h3 class="display" style="line-height:1.12;font-size:clamp(22px,4.4vw,34px)">Activate Battle<br>of the Captains</h3>' +
+      '<div class="btn-row center" style="gap:12px">' +
+        '<button class="btn gold lg" data-act="battleYes" style="min-width:100px">Yes</button>' +
+        '<button class="btn ghost lg" data-act="battleNo" style="min-width:100px">No</button>' +
+      '</div>' +
+    '</div>', 'narrow');
 }
 
 /* ---------- mini ---------- */
@@ -2980,6 +3530,7 @@ function finalize(){
     teams:g.teams.map(t => ({ name:t.name, captain:t.captain, players:t.players, score:t.score })),
     winner:g.winner,
     mini:{ wins:g.mini.wins, award:g.mini.award || [0, 0] },
+    battle:g.battle && g.battle.done ? { score:g.battle.score, award:g.battle.award, tb:g.battle.tbRounds } : null,
     sudden:g.sdRounds || 0
   };
   if(!S.history.some(h => h.id === rec.id)){ S.history.push(rec); saveHistory(); }
@@ -3242,6 +3793,56 @@ const ACT = {
     advanceRound();
   },
 
+  /* ---- battle of the captains ---- */
+  battleYes(){
+    closeModal();
+    const g = G();
+    g.battleOffered = true;
+    g.battle = buildBattle();
+    if(!g.battle){ toast('Not enough spare questions left for the Battle.'); endGame(); return; }
+    go('battleIntro');
+  },
+  battleNo(){ closeModal(); G().battleOffered = true; endGame(); },
+  /* used by both the intro and the handoff — cap and i are already set */
+  battleStart(){ const b = G().battle; b.shown = false; go('battleQ'); },
+  battleShow(){ Timer.stop(); G().battle.shown = true; render(); },
+  /* Same escape hatch as a standard round: if the question doesn't suit the
+     room, pull another at the same difficulty so the shape survives. The one
+     dropped is remembered, so pressing it twice can't hand back the first. */
+  battleSwap(){
+    const b = G().battle, cur = b.qs[b.cap][b.i];
+    let pool = battlePool(cur.difficulty);
+    if(!pool.length) pool = battlePool();
+    if(!pool.length) return toast('No spare question left in the bank.');
+    b.dropped.push(cur.id);
+    b.qs[b.cap][b.i] = shuffle(pool)[0];
+    toast('New question.');
+    go('battleQ');
+  },
+  battleMark(e){
+    const b = G().battle, q = b.qs[b.cap][b.i], got = e.dataset.v === '1';
+    b.log[b.cap][b.i] = { q, got };
+    if(got){ b.score[b.cap]++; Snd.correct(); } else Snd.wrong();
+    markUsed(q);
+    b.shown = false;
+    b.i++;
+    if(b.i < b.n){ go('battleQ'); return; }
+    if(b.cap === 0){ b.cap = 1; b.i = 0; go('battleHandoff'); return; }
+    battleFinish();
+  },
+  battleTbShow(){ G().battle.tb.shown = true; render(); },
+  battleTbSwap(){ battleTieBreak(false); },
+  battleTbWin(e){
+    const b = G().battle;
+    if(e.dataset.w === 'none'){ battleTieBreak(); return; }
+    b.winner = +e.dataset.w;
+    battleAward();
+  },
+  /* the Battle's 2 points can create a tie as easily as break one — 10-8 with
+     the trailing captain winning is 10-10 — so hand back to the normal ending,
+     which sends a level game to sudden death exactly as it always did */
+  battleDone(){ endGame(); },
+
   /* ---- sudden death ---- */
   sdShow(){ G().sd.shown = true; render(); },
   sdSwap(){ startSudden(false); },
@@ -3398,7 +3999,12 @@ document.addEventListener('keydown', e => {
     if(k === 'y'){ e.preventDefault(); ACT.judgeSteal({ dataset:{ v:'1' } }); }
     if(k === 'n'){ e.preventDefault(); ACT.judgeSteal({ dataset:{ v:'0' } }); }
   }
-  if(k === ' ' && (S.screen === 'ask' || S.screen === 'steal' || S.screen === 'miniQ')){ e.preventDefault(); Timer.toggle(); }
+  /* seven seconds is no time to be hunting for a button — Y/N works here too */
+  if(S.screen === 'battleQ' && S.game && S.game.battle.shown){
+    if(k === 'y'){ e.preventDefault(); ACT.battleMark({ dataset:{ v:'1' } }); }
+    if(k === 'n'){ e.preventDefault(); ACT.battleMark({ dataset:{ v:'0' } }); }
+  }
+  if(k === ' ' && (S.screen === 'ask' || S.screen === 'steal' || S.screen === 'miniQ' || S.screen === 'battleQ')){ e.preventDefault(); Timer.toggle(); }
   if(k === 'enter'){
     const main = $('.btn.gold.lg') || $('.btn.gold');
     if(main){ e.preventDefault(); main.click(); }
@@ -3408,6 +4014,13 @@ document.addEventListener('keydown', e => {
 window.addEventListener('beforeunload', e => {
   if(S.game && S.screen !== 'final'){ e.preventDefault(); e.returnValue = ''; }
 });
+
+/* iOS Safari ignores user-scalable=no and honours touch-action only patchily,
+   but it does fire these three and it does respect preventDefault on them.
+   This is the belt to the stylesheet's braces. No other browser fires them,
+   and a mouse never can, so a laptop is unaffected. */
+['gesturestart','gesturechange','gestureend'].forEach(t =>
+  document.addEventListener(t, e => e.preventDefault(), { passive:false }));
 
 /* ==========================================================================
    26. BOOT
