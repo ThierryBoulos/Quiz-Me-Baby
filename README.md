@@ -1,10 +1,10 @@
 # QUIZ ME BABY — Host Control
 
-One file: `index.html`. Double-click it. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.) .
+One file: `index.html`. Double-click it. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.)
 
 Your host stands on the left of the home screen. He's baked into the HTML as a data URI, so he travels with the file and there is no image folder to forget. (`host-imad.png` is the cut-out on its own, kept only in case you want to reuse it elsewhere — the app does not read it.) He's positioned out of the layout flow, so the logo and the menu stay dead centre on screen whether he's there or not, and he hides himself on windows narrower than 920px rather than squeeze them.
 
-No server, no internet (the Google Fonts link and `.xlsx` import are the only online bits — both degrade gracefully). Works in Chrome, Edge, Firefox, Safari, on a laptop, a tablet or a phone. 
+No server, no internet (the Google Fonts link and `.xlsx` import are the only online bits — both degrade gracefully). Works in Chrome, Edge, Firefox, Safari, on a laptop, a tablet or a phone.
 
 ## Phone vs laptop
 
@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v1.1 · 26 Aug 2026
+> Built by Thierry Boulos · © 2026 · v1.5 · 27 Aug 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'1.1', date:'26 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.5', date:'27 Aug 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -71,7 +71,19 @@ There's a full **Rules** screen on the home page — read it out to the room bef
 
 **Setup** — you pick the number of rounds and then exactly that many themes. One theme per round, so 4 rounds = 4 themes, 9 rounds = 9 themes. The setup screen counts them for you and won't let you start until they match. Changing the round count adds or trims themes automatically. Timers are **not** on this screen — they live in Settings and hold for every game.
 
-**Hand-picking questions** — optional, section 04 on the setup screen. *Choose questions* opens a picker over the top of it listing only tonight's themes at tonight's difficulty (minus anything already played, if "never reuse" is on), with a theme filter across the top. That filter scrolls away with the rest of the list rather than staying pinned — pinned, a fourteen-theme game wrapped it to ten rows of chips covering most of the dialog. On a phone it is a single row you swipe sideways, and the per-theme lists run at full height so the whole dialog is one scroll surface instead of scroll boxes inside a scroll box. Tick **exactly two** in a theme — one for each team — and that round is locked to the pair you chose. Two is the cap; the rest of the theme greys out once you've got them. Leave a theme alone and the app matches a pair for it as usual, so you can hand-pick one round and let it fill in the other eight. A theme with only one question ticked is ignored, and the setup screen tells you so. Picks are dropped automatically if you drop the theme, change difficulty, or the question stops qualifying.
+The theme chips **don't carry a question count** any more. On a phone that badge was the difference between two chips per row and three or four, and it answered a question you weren't asking — the capacity warning underneath already stops you starting a game the bank can't fill. A theme too thin to field a round at the difficulty it's on is **dimmed** instead, which reads at a glance and costs no width.
+
+**Advanced Game Configuration** — one button near the bottom of the setup screen, collapsed by default, holding the three things you won't touch on a normal Tuesday: hand-picked questions, a difficulty per theme, and tonight's rules. The line under the button says what's configured in there, so nothing you've set can hide behind a closed drawer.
+
+**Difficulty per theme** — inside that drawer. The difficulty you pick in section 02 is the house setting for the night; any theme can override it. Each theme gets a row of three pills — **Easy / Medium / Hard**. The one that's **outlined** is the house setting it inherited; the one that's **filled gold** is a choice you made. Tap whichever is lit to hand that theme back. A row outlined in amber can't field a round at the difficulty it's on; the capacity warning at the foot of the screen says so in words.
+
+**There is no per-theme Mixed, deliberately.** Mixed describes a *spread across rounds* — some easy, some hard, over the course of a night. A theme is one round, and one round is one difficulty, so "mixed" has nothing to describe at that level. Mixed can still be the house setting, and a theme nobody has touched inherits it — that's the case where none of the three pills is lit.
+
+**On Mixed generally:** it never means the two teams in a round get different questions. Pairs only ever form *within* a single difficulty, so both teams always face the same difficulty as each other; Mixed just lets round 3 be hard while round 4 is easy. Verified across 320 generated rounds — zero mismatches.
+
+Everything downstream obeys the per-theme setting: the capacity count, the question picker, the round build, and *Swap this question* mid-game.
+
+**Hand-picking questions** — optional, inside the same drawer. *Choose questions* opens a picker over the top of it listing only tonight's themes, each at **its own** difficulty (minus anything already played, if "never reuse" is on), with a theme filter across the top. Every theme heading carries the difficulty its list is running at, so an overridden theme is obvious while you're picking. That filter scrolls away with the rest of the list rather than staying pinned — pinned, a fourteen-theme game wrapped it to ten rows of chips covering most of the dialog. On a phone it is a single row you swipe sideways, and the per-theme lists run at full height so the whole dialog is one scroll surface instead of scroll boxes inside a scroll box. Tick **exactly two** in a theme — one for each team — and that round is locked to the pair you chose. Two is the cap; the rest of the theme greys out once you've got them. Leave a theme alone and the app matches a pair for it as usual, so you can hand-pick one round and let it fill in the other eight. A theme with only one question ticked is ignored, and the setup screen tells you so. Picks are dropped automatically if you drop the theme, change difficulty, or the question stops qualifying.
 
 **Standard round** — one theme, one question per team.
 1. Team A gets their question. 60s (adjustable).
@@ -131,7 +143,7 @@ Because the Battle is worth 2 points it can *create* a tie as easily as break on
 - **Round scoreboard** after each round with a *Next round* button, so you can break whenever. On the last round it reads *Scores tied — tie breaker* if you're heading for sudden death.
 - **Keyboard**: `Y` / `N` to judge — including the Battle, where seven seconds is no time to be hunting for a button — `Space` to pause the timer, `Enter` for the main gold button, `Esc` to close a dialog.
 - **Sound**: on by default at **75%**. The theme plays **once when you open the app** — not every time you come back to the home screen — then a calm 5-second sting at the top of each round, three soft descending bells when a timer ends, and a quiet tick over the last 10 seconds. All synthesised in the browser, no files. Volume and on/off in Settings.
-  - Browsers won't let a page make noise before you've touched it, so if the opening theme doesn't fire the instant the file loads it plays on your first click or key press instead. Nothing to press, and no button for it — that's deliberate.
+  - Browsers won't let a page make noise before you've touched it, so the theme can't always fire the instant the file loads. When it can't, it waits — but only for an *idle* gesture: a tap on dead space, a scroll, a key. A tap that lands on a **control** unlocks the audio and cancels the theme instead of triggering it, because a five-second sting starting on top of *Start a new game* is a startup sound arriving at the worst possible moment. It also gives up after 12 seconds: a theme that begins a minute into setup doesn't read as the app opening, it reads as a fault. Nothing to press, and no button for it — that's deliberate.
 
 ---
 
@@ -159,13 +171,20 @@ Import merges — a question with identical text updates the existing row instea
 
 ## What's in the box
 
-**488 questions** — 438 standard and 50 Closest To Wins, across 19 themes:
+**491 questions** — 441 standard and 50 Closest To Wins, across 19 themes:
 
 Acronyms · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech
 
 This is the bank from `quiz-me-baby-bank-v5.csv`, baked in as the official set for everyone. It replaced the previous bank outright — if you open this file in a browser that ran an earlier version, the old questions are cleared out rather than merged, every time the bank is replaced. Your game history and played-question memory carry over.
 
 Closest To Wins questions carry their caveats in the notes — which year the figure is from, whether the number is disputed.
+
+**How changes to the built-in bank reach a browser that already has one.** Your saved bank lives in local storage, so a new copy of the file does not overwrite it — otherwise every update would wipe questions you had imported. `SEED_VERSION` near the top of the file is what unlocks a merge: **bump it whenever you touch the built-in bank**, or nothing you changed will ever appear on a browser that has run the app before. On the next open, that browser then does two things:
+
+- **Adds** built-in questions it has never seen. Ones you deleted stay deleted.
+- **Refreshes** built-in questions it already has, where the built-in copy has changed — a corrected answer, a question moved to a different theme. This matters because the question id is a hash of the *question text*, so a fix to any other field arrives under an id the browser already holds; add-only would drop it silently and you would keep reading the old answer off your own screen.
+
+Only rows marked `src: 'seed'` are refreshed. Anything you **imported or typed yourself is never touched**, even where it sits on top of a built-in id. The startup toast reports both numbers — *"1 new built-in question added, 3 corrected in your bank."*
 
 **Two themes work differently:**
 

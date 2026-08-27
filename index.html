@@ -344,6 +344,10 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .chip:hover{border-color:rgba(255,255,255,.32)}
 .chip[aria-pressed="true"]{background:linear-gradient(180deg,var(--gold-2),var(--gold));color:#1A1400;border-color:transparent;font-weight:800;box-shadow:0 8px 24px -10px rgba(245,197,24,.6)}
 .chip .ct{font-size:11px;opacity:.7;font-variant-numeric:tabular-nums}
+/* a theme that cannot field a round at the difficulty it is on. Still
+   pressable — the host may be about to change the difficulty. */
+.chip.thin{opacity:.42}
+.chip.thin[aria-pressed="true"]{opacity:1;box-shadow:0 0 0 1px var(--warn) inset,0 8px 24px -10px rgba(245,197,24,.6)}
 
 /* segmented */
 .seg{display:inline-flex;background:rgba(0,0,0,.4);border:1px solid var(--line-2);border-radius:var(--r);padding:4px;gap:4px;flex-wrap:wrap}
@@ -358,6 +362,31 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .tgl .sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .22s var(--ease)}
 .tgl[aria-pressed="true"] .sw{background:var(--gold)}
 .tgl[aria-pressed="true"] .sw::after{transform:translateX(22px)}
+
+/* advanced game configuration — one button, three sections behind it */
+.advbtn{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:52px;padding:8px 4px;cursor:pointer;text-align:left;width:100%}
+.advbtn .tl{font-size:14px;font-weight:600}
+.advbtn .help{margin:0}
+.advbtn .chev{flex:none;width:28px;height:28px;border-radius:50%;background:var(--glass);border:1px solid var(--line-2);position:relative;transition:transform .22s var(--ease),border-color .16s var(--ease)}
+.advbtn .chev::after{content:'';position:absolute;top:9px;left:9px;width:8px;height:8px;border-right:2px solid var(--ink-2);border-bottom:2px solid var(--ink-2);transform:rotate(45deg)}
+.advbtn[aria-pressed="true"] .chev{transform:rotate(180deg);border-color:var(--gold)}
+.advbtn[aria-pressed="true"] .chev::after{border-color:var(--gold)}
+
+/* difficulty, one row per theme. Name on the left, three pills on the right,
+   and nothing else — the row is a control, not a paragraph. */
+.tdlist{display:flex;flex-direction:column;gap:4px}
+.tdrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:4px 8px;border-radius:var(--r-s);border:1px solid transparent}
+.tdrow.set{border-color:rgba(245,197,24,.28);background:rgba(245,197,24,.05)}
+/* nothing can be drawn for this theme at the difficulty it is on. The capacity
+   warning at the foot of the screen says so in words; this just points at it. */
+.tdrow.dead{border-color:rgba(255,162,58,.45)}
+.tdname{font-size:13.5px;font-weight:600;min-width:0}
+.seg.tiny{padding:3px;gap:3px}
+.seg.tiny button{min-height:29px;padding:0 10px;font-size:12px;border-radius:8px}
+/* the difficulty this theme has because nobody changed it — lit, but hollow,
+   so a glance separates "I chose this" from "this is just the house setting" */
+.seg button[aria-pressed="true"].inherit{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--gold)}
 
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:rgba(255,255,255,.14);padding:0}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:linear-gradient(180deg,var(--gold-2),var(--gold));cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.5)}
@@ -760,6 +789,25 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
     padding-bottom:8px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
   #modal .pickfilter .chip{flex:none;scroll-snap-align:start;min-height:40px;font-size:12.5px}
   #modal .picklist{max-height:none;overflow:visible;padding-right:0}
+
+  /* --- the theme wall. Nineteen chips at 44px tall with a count badge on each
+         ran two per row and pushed the Start button a long way down. The count
+         is gone from the markup; these numbers are what turns the leftover
+         width into three per row. A 390px iPhone leaves about 326px inside the
+         card, so three chips plus two 6px gaps have to live inside 314 — a
+         104px budget each, which covers everything up to "Pop Culture". The
+         long names ("Internet & Memes") still take a row of their own, and
+         that is fine: they wrap, they do not clip. --- */
+  .chips.theme-chips{gap:6px}
+  .theme-chips .chip{min-height:36px;padding:0 11px;font-size:12px;letter-spacing:0;gap:6px}
+
+  /* --- difficulty per theme. Three pills and a theme name DO share 326px —
+         it was the fourth pill (Mixed) that forced the name onto its own line
+         and doubled the height of every row. One line each now. --- */
+  .tdrow{gap:8px;padding:3px 6px;flex-wrap:nowrap}
+  .tdrow .tdname{font-size:12.5px;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tdrow .seg.tiny{flex:none;flex-wrap:nowrap}
+  .tdrow .seg.tiny button{padding:0 7px;font-size:11px;min-height:28px}
 }
 
 /* ============================================================
@@ -887,6 +935,10 @@ const el = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const uid = () => Math.random().toString(36).slice(2, 10);
+/* The bank stores type and difficulty lower-case because that is what the
+   matching logic compares against. Nothing the host READS should be
+   lower-case, so every label goes through here on the way to the screen. */
+const Cap = (s) => { s = String(s ?? ''); return s ? s[0].toUpperCase() + s.slice(1) : s; };
 const nf = (n) => Number(n).toLocaleString('en-US');
 function shuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+str.charCodeAt(i))|0; return 'q'+(h>>>0).toString(36); }
@@ -904,7 +956,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'1.3', date:'26 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.5', date:'27 Aug 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1153,7 +1205,7 @@ const SEED = [
 ['Lebanon','hard','lb-taif','Which year was the Taif Agreement signed?','1989','32803.0'],
 ['Lebanon','hard','lb-taif','Who was Speaker of Parliament that negotiated the Taif Agreement?','Hussein El-Husseini',''],
 ['Lebanon','hard','','Number of UNESCO World Heritage sites in Lebanon','6','Anjar, Baalbek, Byblos, Tyre, Qadisha Valley and the Rachid Karami Fair in Tripoli.'],
-['Lebanon','easy','','Which Lebanese-American writer wrote The Prophet?','Kahlil Gibran','Published 1923, born in Bsharri.'],
+['Lebanon','easy','','Which Lebanese-American writer wrote The Prophet?','Khalil Gibran','Published 1923, born in Bsharri.'],
 ['Lebanon','easy','','Which Lebanese singer is known as the "Jewel of Lebanon" and one of the Arab world most famous voices?','Fairuz','Born Nouhad Haddad.'],
 /* ---- MOVIES ---- */
 ['Movies','easy','best-picture','Which film won the Best Picture Oscar for 2019 — the first non-English-language film ever to win it?','Parasite','South Korean, directed by Bong Joon-ho. It also won Best Director and Best International Feature the same night.'],
@@ -1193,6 +1245,9 @@ const SEED = [
 ['Music','medium','one-hit','Which Swedish group won Eurovision in 1974 with Waterloo?','ABBA',''],
 ['Music','medium','one-hit','Which Irish band is fronted by Bono?','U2',''],
 /* ---- NATURE ---- */
+['Nature','easy','national-animal','What is the national animal of Spain?','The bull','The Spanish fighting bull, the toro bravo. Not fixed by statute — it is the traditional national symbol, and the Osborne bull silhouette on the roadsides is the same animal.'],
+['Nature','medium','national-animal','What is the national animal of France?','The Gallic rooster','The coq gaulois. It comes from a Latin pun: gallus means both "rooster" and "an inhabitant of Gaul". An emblem by tradition rather than by law — France\'s official state symbol is Marianne.'],
+['Nature','hard','national-animal','What is the national animal of Scotland?','The unicorn','Genuinely official, and on the Royal Coat of Arms since the 1300s. The unicorn is chained because a free one was believed too dangerous to hold.'],
 ['Nature','easy','superlative-animal','What is the fastest land animal?','The cheetah','Roughly 100 km/h in short bursts.'],
 ['Nature','easy','superlative-animal','What is the largest animal on Earth?','The blue whale',''],
 ['Nature','hard','baby-animal','What is a baby kangaroo called?','A joey',''],
@@ -1714,7 +1769,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 8;   // bumped when the built-in bank changes
+const SEED_VERSION = 9;   // bumped when the built-in bank changes
 (function bootBank(){
   /* Earlier banks were retired wholesale, not merged. Clear them out so a
      browser that ran an older copy of this file cannot resurrect those
@@ -1735,8 +1790,32 @@ const SEED_VERSION = 8;   // bumped when the built-in bank changes
     stored.forEach(q => have[q.id] = 1);
     killed.forEach(id => have[id] = 1);
     const fresh = seed.filter(q => !have[q.id]);
+
+    /* Adding what is new is only half of it. A built-in question can also be
+       CORRECTED — a misspelt answer, a question filed under the wrong theme —
+       and the id is a hash of the question text, so a correction to any other
+       field arrives under an id this browser already has. Adding-only silently
+       dropped every one of those fixes, and the host kept reading the old
+       answer off their own screen with no way to know.
+
+       So a seed question is refreshed from the seed. Only a seed question:
+       `src` marks where a row came from, and anything the host imported or
+       typed themselves is left exactly as it is, even where it happens to sit
+       on top of a built-in id. Deleted ones stay deleted — `killed` is checked
+       before anything is written back. */
+    const byId = {};
+    seed.forEach(q => byId[q.id] = q);
+    let fixed = 0;
+    stored.forEach(q => {
+      const s = byId[q.id];
+      if(!s || q.src !== 'seed') return;
+      const moved = ['question','answer','notes','theme','type','difficulty','use_with']
+        .some(k => q[k] !== s[k]);
+      if(moved){ Object.assign(q, s); fixed++; }
+    });
+
     S.bank = stored.concat(fresh);
-    if(fresh.length) S.tmp.seedNews = fresh.length;
+    if(fresh.length || fixed) S.tmp.seedNews = { added:fresh.length, fixed };
   } else {
     S.bank = stored;
   }
@@ -1845,9 +1924,12 @@ function closestPool(){
   return out;
 }
 
+/* `diff` is either one difficulty for the lot, or a resolver (theme) =>
+   difficulty — which is how a per-theme override reaches the count. */
 function capacity(themes, diff){
+  const at = typeof diff === 'function' ? diff : () => diff;
   let loose = 0, strict = 0;
-  themes.forEach(t => { const p = pairsFor(t, diff); loose += p.length; strict += p.filter(x => x.strict).length; });
+  themes.forEach(t => { const p = pairsFor(t, at(t)); loose += p.length; strict += p.filter(x => x.strict).length; });
   return { rounds:loose, strict, closest:closestPool().length };
 }
 
@@ -1999,7 +2081,7 @@ function buildGame(cfg){
       /* a hand-picked pair wins outright — the host chose those two on purpose */
       const hand = pickedPair(t, cfg.picks);
       if(hand && !taken.has(hand.a.id) && !taken.has(hand.b.id)){ pair = hand; theme = t; break; }
-      const p = pairsFor(t, cfg.difficulty, taken);
+      const p = pairsFor(t, diffOf(cfg, t), taken);
       if(p.length){ pair = p[0]; theme = t; break; }
     }
     if(!pair) break;
@@ -2096,11 +2178,37 @@ function pipState(){
 function render(){
   const app = el('app');
   const y = window.scrollY;
+
+  /* Typing in a filter box re-renders the screen underneath the cursor, and
+     replacing innerHTML throws the focused input away mid-word — which is why
+     the bank search took one letter per click. Note who had focus and where
+     the caret sat, then put both back on the rebuilt element. The data-act /
+     data-k / data-side triple is what identifies an input across a rebuild;
+     there are no ids on these fields. */
+  const live = document.activeElement;
+  const keep = live && live.dataset && app.contains(live) &&
+               (live.tagName === 'INPUT' || live.tagName === 'TEXTAREA')
+    ? { act:live.dataset.act, k:live.dataset.k, side:live.dataset.side,
+        start:live.selectionStart, end:live.selectionEnd }
+    : null;
+
   const fn = SCREENS[S.screen] || SCREENS.home;
   document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ'].indexOf(S.screen) > -1);
   document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff'].indexOf(S.screen) > -1);
   document.body.classList.toggle('homemode', S.screen === 'home');
   app.innerHTML = fn();
+  if(keep && keep.act){
+    const sel = '[data-act="' + keep.act + '"]' +
+      (keep.k    ? '[data-k="'    + keep.k    + '"]' : '') +
+      (keep.side ? '[data-side="' + keep.side + '"]' : '');
+    const back = app.querySelector(sel);
+    if(back){
+      back.focus({ preventScroll:true });
+      /* setSelectionRange throws on number/email inputs, where it also has
+         nothing useful to do — the focus alone is the point there. */
+      try{ back.setSelectionRange(keep.start, keep.end); }catch(e){}
+    }
+  }
   renderHUD();
   if(AFTER[S.screen]) AFTER[S.screen]();
   if(S.tmp.toTop){ S.tmp.toTop = false; window.scrollTo(0, 0); }
@@ -2275,8 +2383,28 @@ function defaultSetup(){
     rounds,
     themes:shuffle(usableThemes('mixed')).slice(0, rounds),
     difficulty:'mixed',
+    themeDiff:{},       // theme -> difficulty, overriding the house setting
     picks:{}            // theme -> [questionId, questionId] chosen by hand
   };
+}
+
+/* --------------------------------------------------------------------------
+   DIFFICULTY, PER THEME
+   `difficulty` is the house setting for the night. A theme may override it —
+   hard Friends for the table who have seen it fifty times, easy Geography for
+   everyone else — and that override is what every pool, count and warning in
+   the app reads from. A theme with no entry simply inherits.
+   -------------------------------------------------------------------------- */
+function diffOf(cfg, theme){
+  const d = cfg && cfg.themeDiff && cfg.themeDiff[theme];
+  return d || (cfg ? cfg.difficulty : 'mixed');
+}
+function diffFor(theme){ return diffOf(S.setup, theme); }
+/* themes actually running on something other than the house setting */
+function overrideThemes(){
+  const c = S.setup;
+  if(!c || !c.themeDiff) return [];
+  return c.themes.filter(t => c.themeDiff[t] && c.themeDiff[t] !== c.difficulty);
 }
 /* keep the theme count matched to the round count when the round count moves */
 function syncThemes(){
@@ -2291,17 +2419,24 @@ function syncThemes(){
    The host may nominate exactly two questions per theme — one for each team.
    Anything they do not touch is still matched automatically at build time.
    -------------------------------------------------------------------------- */
+/* The theme's own difficulty is the default — pass one explicitly only to ask
+   a what-if question, which nothing currently does. */
 function pickPool(theme, diff){
-  return S.bank.filter(q => q.type === 'standard' && q.theme === theme && matchDiff(q, diff) && isFresh(q));
+  const d = diff || diffFor(theme);
+  return S.bank.filter(q => q.type === 'standard' && q.theme === theme && matchDiff(q, d) && isFresh(q));
 }
 function picksFor(theme){ return ((S.setup && S.setup.picks) || {})[theme] || []; }
 /* a pick stops being valid the moment its theme, difficulty or freshness moves */
 function prunePicks(){
   const c = S.setup; if(!c) return;
+  /* A difficulty override for a theme that is no longer in play is dead weight,
+     and worse, it would come back silently if the host re-added the theme. */
+  const td = c.themeDiff = c.themeDiff || {};
+  Object.keys(td).forEach(t => { if(c.themes.indexOf(t) < 0) delete td[t]; });
   const p = c.picks = c.picks || {};
   Object.keys(p).forEach(t => {
     if(c.themes.indexOf(t) < 0){ delete p[t]; return; }
-    const ok = {}; pickPool(t, c.difficulty).forEach(q => ok[q.id] = 1);
+    const ok = {}; pickPool(t).forEach(q => ok[q.id] = 1);
     p[t] = p[t].filter(id => ok[id]);
     if(!p[t].length) delete p[t];
   });
@@ -2320,7 +2455,7 @@ SCREENS.setup = function(){
   prunePicks();
   const setThemes  = c.themes.filter(t => picksFor(t).length === 2);
   const halfThemes = c.themes.filter(t => picksFor(t).length === 1);
-  const cap = capacity(c.themes, c.difficulty);
+  const cap = capacity(c.themes, diffFor);   // resolver, so overrides count
   const enough = cap.rounds >= c.rounds;
   const enoughMini = cap.closest >= 7;
   const miniAfter = Math.ceil(c.rounds / 2);
@@ -2329,18 +2464,103 @@ SCREENS.setup = function(){
   const themesOK = themeGap === 0;
   const canStart = enough && themesOK;
 
+  /* The count came off the face of the chip. On a phone it was the difference
+     between two themes per row and three, and it was answering a question the
+     host does not have — the capacity warning underneath already catches a
+     theme that cannot field a round. A theme that is genuinely too thin is
+     dimmed instead, which reads at a glance and costs no width. */
   const themeChips = THEMES.map(t => {
-    const n = S.bank.filter(q => q.theme === t && q.type === 'standard' && matchDiff(q, c.difficulty) && isFresh(q)).length;
+    const d = diffFor(t);
+    const n = S.bank.filter(q => q.theme === t && q.type === 'standard' && matchDiff(q, d) && isFresh(q)).length;
     const on = c.themes.indexOf(t) > -1;
-    return '<button class="chip" role="button" aria-pressed="' + on + '" data-act="theme" data-t="' + esc(t) + '"' + (n < 2 ? ' title="Not enough questions in this theme"' : '') + '>' +
-      esc(t) + '<span class="ct">' + n + '</span></button>';
+    return '<button class="chip' + (n < 2 ? ' thin' : '') + '" role="button" aria-pressed="' + on + '" data-act="theme" data-t="' + esc(t) + '"' +
+      (n < 2 ? ' title="Not enough questions in ' + esc(t) + ' at ' + esc(Cap(d)) + ' difficulty"' : '') + '>' +
+      esc(t) + '</button>';
   }).join('');
 
   const roundBtns = [];
   for(let i = 4; i <= 14; i++) roundBtns.push('<button data-act="rounds" data-n="' + i + '" aria-pressed="' + (c.rounds === i) + '" class="' + (c.rounds === i ? 'gold' : '') + '">' + i + '</button>');
 
   const diffBtns = ['easy','medium','hard','mixed'].map(d =>
-    '<button data-act="diff" data-d="' + d + '" aria-pressed="' + (c.difficulty === d) + '" class="' + (c.difficulty === d ? 'gold' : '') + '">' + d[0].toUpperCase() + d.slice(1) + '</button>').join('');
+    '<button data-act="diff" data-d="' + d + '" aria-pressed="' + (c.difficulty === d) + '" class="' + (c.difficulty === d ? 'gold' : '') + '">' + Cap(d) + '</button>').join('');
+
+  /* ---- the advanced drawer ------------------------------------------------
+     Three things the host almost never touches on a normal Tuesday, folded
+     away behind one button so the setup screen stays a phone screen: the
+     hand-picked questions, a difficulty per theme, and tonight's rules.
+     Collapsed by default. The summary line under the button says what is
+     configured in there, so nothing set can hide behind a closed drawer. */
+  const adv  = !!S.tmp.advOpen;
+  const ovr  = overrideThemes();
+  const bits = [];
+  if(setThemes.length)  bits.push(setThemes.length + ' theme' + (setThemes.length > 1 ? 's' : '') + ' hand-picked');
+  if(halfThemes.length) bits.push(halfThemes.length + ' half-picked');
+  if(ovr.length)        bits.push(ovr.length === 1 ? '1 theme on its own difficulty' : ovr.length + ' themes on their own difficulty');
+  if(S.settings.noRepeat)       bits.push('no repeats');
+  if(S.settings.alternateFirst) bits.push('alternating first answer');
+  const advSummary = bits.length
+    ? bits.join(' <span class="sep">·</span> ')
+    : 'Hand-pick the questions, set a difficulty per theme, change tonight&rsquo;s rules.';
+
+  function advBody(){
+    /* A. hand-picked questions */
+    const pickBlock = '<div class="stack">' +
+      '<div class="sec-head"><div class="eyebrow gold">Hand-picked questions</div>' +
+        '<span class="badge ' + (setThemes.length ? 'gold' : 'line') + '">' + setThemes.length + ' of ' + c.themes.length + ' themes set</span></div>' +
+      '<p class="help">Optional. Tick exactly <strong>two</strong> questions in a theme — one for each team — and that round is locked to the pair you chose. Leave a theme alone and the app matches a pair itself, as always.</p>' +
+      (halfThemes.length
+        ? '<div class="warnbox"><strong>' + esc(halfThemes.join(', ')) + '</strong> ' + (halfThemes.length > 1 ? 'have' : 'has') + ' only one question ticked. A round needs two — tick a second one or clear it, otherwise that theme falls back to a random pair.</div>'
+        : '') +
+      '<div class="btn-row">' +
+        '<button class="btn gold" data-act="pickOpen"' + (c.themes.length ? '' : ' disabled') + '>Choose questions</button>' +
+        (setThemes.length || halfThemes.length ? '<button class="btn ghost" data-act="pickClear">Clear all picks</button>' : '') +
+      '</div>' +
+      (setThemes.length
+        ? '<div class="chips">' + setThemes.map(t => '<span class="chip" aria-pressed="true" style="pointer-events:none">' + esc(t) + '<span class="ct">2</span></span>').join('') + '</div>'
+        : '') +
+    '</div>';
+
+    /* B. a difficulty per theme.
+       No Mixed here. Mixed is a statement about a SPREAD of rounds — some easy,
+       some hard — which is a thing a whole game can be and a single theme
+       cannot. A theme is one round, and one round is one difficulty.
+       Mixed can still be the HOUSE setting, and a theme nobody has touched
+       inherits it; that is the case where no pill is lit. */
+    const rows = c.themes.length
+      ? c.themes.map(t => {
+          const own = (c.themeDiff || {})[t] || '';
+          const eff = own || c.difficulty;
+          const dead = !pairsFor(t, eff).length;
+          return '<div class="tdrow' + (own ? ' set' : '') + (dead ? ' dead' : '') + '"' +
+            (dead ? ' title="No pair left in ' + esc(t) + ' at ' + esc(Cap(eff)) + '"' : '') + '>' +
+            '<div class="tdname">' + esc(t) + '</div>' +
+            '<div class="seg tiny">' + DIFFS.map(d =>
+              '<button data-act="themeDiff" data-t="' + esc(t) + '" data-d="' + d + '" aria-pressed="' + (eff === d) + '"' +
+                ' class="' + (eff === d ? (own ? 'gold' : 'inherit') : '') + '">' + Cap(d) + '</button>').join('') +
+            '</div>' +
+          '</div>';
+        }).join('')
+      : '<div class="empty">Pick tonight&rsquo;s themes first.</div>';
+
+    const diffBlock = '<div class="stack">' +
+      '<div class="sec-head"><div class="eyebrow gold">Difficulty per theme</div>' +
+        '<span class="badge ' + (ovr.length ? 'gold' : 'line') + '">' +
+          (ovr.length ? ovr.length + ' overridden' : 'all on ' + Cap(c.difficulty)) + '</span>' +
+        (ovr.length ? '<button class="btn sm ghost" data-act="themeDiffReset">Reset all</button>' : '') +
+      '</div>' +
+      '<div class="tdlist">' + rows + '</div>' +
+    '</div>';
+
+    /* C. tonight's rules */
+    const rulesBlock = '<div class="stack">' +
+      '<div class="sec-head"><div class="eyebrow gold">Rules for tonight</div></div>' +
+      toggleRow('noRepeat', 'Never reuse a question I&rsquo;ve already played', 'Same group can play again next week with zero repeats.') +
+      toggleRow('alternateFirst', 'Alternate which team answers first each round', 'Off = Team A always goes first, as in the classic format.') +
+      '<p class="help">Timers live in <strong>Settings</strong> — change them there and they hold for every game.</p>' +
+    '</div>';
+
+    return '<div class="stack lg">' + pickBlock + '<hr class="hair">' + diffBlock + '<hr class="hair">' + rulesBlock + '</div>';
+  }
 
   return '' +
   '<div class="stack lg" style="padding-top:12px">' +
@@ -2369,8 +2589,8 @@ SCREENS.setup = function(){
       '<div class="sec-head"><div class="eyebrow gold">03</div><h3 class="display">Themes in play</h3>' +
         '<span class="badge ' + (themesOK ? 'ok' : 'no') + '">' + c.themes.length + ' of ' + c.rounds + ' picked</span>' +
         '<button class="btn sm ghost" data-act="themeNone">Clear</button></div>' +
-      '<div class="chips">' + themeChips + '</div>' +
-      '<p class="help">One theme per round — pick exactly <strong>' + c.rounds + '</strong>. The number on each chip is how many usable standard questions that theme still has at this difficulty' + (S.settings.noRepeat ? ' (already-played questions excluded)' : '') + '.</p>' +
+      '<div class="chips theme-chips">' + themeChips + '</div>' +
+      '<p class="help">One theme per round — pick exactly <strong>' + c.rounds + '</strong>. Dimmed themes are too thin at this difficulty.</p>' +
       (themesOK ? '' : '<div class="warnbox"><strong>' +
         (themeGap > 0
           ? themeGap + ' theme' + (themeGap > 1 ? 's' : '') + ' too many.</strong> You have ' + c.rounds + ' rounds and ' + c.themes.length + ' themes — drop ' + themeGap + '.'
@@ -2378,27 +2598,13 @@ SCREENS.setup = function(){
         '</div>') +
     '</div>' +
 
-    '<div class="card pad lit stack">' +
-      '<div class="sec-head"><div class="eyebrow gold">04</div><h3 class="display">Hand-pick the questions</h3>' +
-        '<span class="badge ' + (setThemes.length ? 'gold' : 'line') + '">' + setThemes.length + ' of ' + c.themes.length + ' themes set</span></div>' +
-      '<p class="help">Optional. Tick exactly <strong>two</strong> questions in a theme — one for each team — and that round is locked to the pair you chose. Leave a theme alone and the app matches a pair itself, as always.</p>' +
-      (halfThemes.length
-        ? '<div class="warnbox"><strong>' + esc(halfThemes.join(', ')) + '</strong> ' + (halfThemes.length > 1 ? 'have' : 'has') + ' only one question ticked. A round needs two — tick a second one or clear it, otherwise that theme falls back to a random pair.</div>'
-        : '') +
-      '<div class="btn-row">' +
-        '<button class="btn gold" data-act="pickOpen"' + (c.themes.length ? '' : ' disabled') + '>Choose questions</button>' +
-        (setThemes.length || halfThemes.length ? '<button class="btn ghost" data-act="pickClear">Clear all picks</button>' : '') +
-      '</div>' +
-      (setThemes.length
-        ? '<div class="chips">' + setThemes.map(t => '<span class="chip" aria-pressed="true" style="pointer-events:none">' + esc(t) + '<span class="ct">2</span></span>').join('') + '</div>'
-        : '') +
-    '</div>' +
-
     '<div class="card pad stack">' +
-      '<div class="sec-head"><div class="eyebrow">Rules for tonight</div></div>' +
-      toggleRow('noRepeat', 'Never reuse a question I&rsquo;ve already played', 'Same group can play again next week with zero repeats.') +
-      toggleRow('alternateFirst', 'Alternate which team answers first each round', 'Off = Team A always goes first, as in the classic format.') +
-      '<p class="help">Timers live in <strong>Settings</strong> — change them there and they hold for every game.</p>' +
+      '<button class="advbtn" data-act="advToggle" aria-pressed="' + adv + '" aria-expanded="' + adv + '">' +
+        '<span><span class="tl">Advanced Game Configuration</span><br>' +
+          '<span class="help">' + advSummary + '</span></span>' +
+        '<span class="chev" aria-hidden="true"></span>' +
+      '</button>' +
+      (adv ? '<hr class="hair">' + advBody() : '') +
     '</div>' +
 
     (enough ? ''
@@ -2447,19 +2653,19 @@ function pickerHTML(){
       esc(t) + '<span class="ct">' + picksFor(t).length + '/2</span></button>').join('');
 
   const blocks = shown.map(t => {
-    const sel = picksFor(t), pool = pickPool(t, c.difficulty), full = sel.length >= 2;
+    const sel = picksFor(t), pool = pickPool(t), full = sel.length >= 2, td = diffFor(t);
     const rows = pool.map(q => {
       const on = sel.indexOf(q.id) > -1;
       return '<button class="pickrow" role="button" aria-pressed="' + on + '"' + (!on && full ? ' disabled' : '') +
         ' data-act="pickToggle" data-t="' + esc(t) + '" data-id="' + q.id + '">' +
         '<span class="tick" aria-hidden="true"></span>' +
         '<span class="pq"><span class="qq">' + esc(q.question) + '</span>' +
-        '<span class="qa">' + esc(q.answer) + ' <span class="dim">· ' + esc(q.difficulty) +
+        '<span class="qa">' + esc(q.answer) + ' <span class="dim">· ' + esc(Cap(q.difficulty)) +
           (q.use_with ? ' · pairs with “' + esc(q.use_with) + '”' : '') + '</span></span></span></button>';
     }).join('');
     return '<div class="stack" style="gap:8px">' +
       '<div class="row between">' +
-        '<div class="eyebrow gold">' + esc(t) + '</div>' +
+        '<div class="eyebrow gold">' + esc(t) + ' <span class="dim">· ' + esc(Cap(td)) + '</span></div>' +
         '<div class="row" style="gap:8px">' +
           '<span class="badge ' + (full ? 'ok' : sel.length ? 'no' : 'line') + '">' + sel.length + ' of 2 ticked</span>' +
           (sel.length ? '<button class="btn sm ghost" data-act="pickThemeClear" data-t="' + esc(t) + '">Clear</button>' : '') +
@@ -2467,7 +2673,7 @@ function pickerHTML(){
       '</div>' +
       (pool.length
         ? '<div class="picklist">' + rows + '</div>'
-        : '<div class="empty">Nothing in this theme at ' + esc(c.difficulty) + ' difficulty' + (S.settings.noRepeat ? ' that has not been played' : '') + '.</div>') +
+        : '<div class="empty">Nothing in this theme at ' + esc(Cap(td)) + ' difficulty' + (S.settings.noRepeat ? ' that has not been played' : '') + '.</div>') +
     '</div>';
   }).join('<hr class="hair">');
 
@@ -2476,7 +2682,10 @@ function pickerHTML(){
       '<div><div class="eyebrow gold">Optional</div><h3 class="display">Pick tonight&rsquo;s questions</h3></div>' +
       '<span class="badge ' + (done ? 'gold' : 'line') + '">' + done + ' of ' + c.themes.length + ' themes set</span>' +
     '</div>' +
-    '<p class="help">Two per theme — one for each team. Showing <strong>' + esc(c.difficulty) + '</strong> questions from tonight&rsquo;s themes only' +
+    /* No single difficulty to quote any more — a theme can be running on its
+       own, so each theme heading carries its own and the list under it obeys
+       that one. */
+    '<p class="help">Two per theme — one for each team. Each theme shows only questions at <strong>its own difficulty</strong>' +
       (S.settings.noRepeat ? ', minus anything already played' : '') + '. Themes you leave empty get a matched pair picked for them.</p>' +
     /* NOT sticky. Pinned to the top it was fine with four themes and a wall
        with fourteen — ten wrapped rows of chips covering most of the modal and
@@ -3006,7 +3215,7 @@ SCREENS.battleQ = function(){
     '</div></div>' +
     battleCounter() +
     '<div class="spot" style="background:radial-gradient(80% 120% at 50% -20%,rgba(245,197,24,.16),transparent 65%)">' +
-      '<div class="q-theme">' + esc(q.theme) + ' &nbsp;·&nbsp; ' + esc(q.difficulty) + '</div>' +
+      '<div class="q-theme">' + esc(q.theme) + ' &nbsp;·&nbsp; ' + esc(Cap(q.difficulty)) + '</div>' +
       (b.shown ? '' : timerRing('seconds')) +
       '<h2 class="q-text">' + esc(q.question) + '</h2>' +
       (b.shown ? '<div><div class="eyebrow gold">The answer</div><div class="q-answer">' + esc(q.answer) + '</div>' + note + '</div>' : '') +
@@ -3065,7 +3274,7 @@ SCREENS.battleTie = function(){
     '</div>' +
     battleCounter() +
     '<div class="spot" style="background:radial-gradient(80% 120% at 50% -20%,rgba(245,197,24,.2),transparent 65%)">' +
-      '<div class="q-theme">' + esc(q.theme) + ' &nbsp;·&nbsp; ' + esc(q.difficulty) + '</div>' +
+      '<div class="q-theme">' + esc(q.theme) + ' &nbsp;·&nbsp; ' + esc(Cap(q.difficulty)) + '</div>' +
       /* the instruction is spent once the answer is up, and its two lines are
          exactly what pushes this screen off the bottom of a phone */
       (b.tb.shown ? '' : '<p class="reader" style="margin-top:14px">No clock. Both captains, hands up, first in answers.</p>') +
@@ -3240,12 +3449,14 @@ SCREENS.bank = function(){
     '<td style="color:var(--gold);font-weight:600">' + esc(q.answer) + '</td>' +
     '<td>' + esc(q.theme) + '</td>' +
     '<td>' + (q.type === 'closest' ? '<span class="badge gold">Closest</span>' : '<span class="badge line">Standard</span>') + '</td>' +
-    '<td>' + esc(q.difficulty) + '</td>' +
+    '<td>' + esc(Cap(q.difficulty)) + '</td>' +
     '<td>' + (q.use_with ? '<code style="font-size:11px;color:var(--a)">' + esc(q.use_with) + '</code>' : '<span class="dim">—</span>') + '</td>' +
     '<td>' + (S.used.has(q.id) ? '<span class="badge no">played</span>' : '') + '</td>' +
     '<td><button class="btn sm ghost danger" data-act="qDel" data-id="' + q.id + '">Del</button></td></tr>').join('');
 
-  const opt = (v, cur) => '<option value="' + esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + esc(v || 'All') + '</option>';
+  /* The VALUE stays lower-case — it is matched against q.type / q.difficulty.
+     Only the label the host reads is capitalised. */
+  const opt = (v, cur) => '<option value="' + esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + esc(v ? Cap(v) : 'All') + '</option>';
 
   return '<div class="stack lg" style="padding-top:12px">' +
     '<div class="row between">' +
@@ -3415,7 +3626,7 @@ SCREENS.history = function(){
           '<span class="dim"> — </span>' +
           '<span style="color:var(--b)">' + h.teams[1].score + ' ' + esc(h.teams[1].name) + '</span>' +
         '</div>' +
-        '<div class="help">' + h.rounds + ' rounds · ' + esc(h.difficulty) + ' · ' + esc(h.themes.join(', ')) + '</div>' +
+        '<div class="help">' + h.rounds + ' rounds · ' + esc(Cap(h.difficulty)) + ' · ' + esc(h.themes.join(', ')) + '</div>' +
         '<div class="help">Captains: ' + esc(h.teams[0].captain || '—') + ' vs ' + esc(h.teams[1].captain || '—') +
           (h.teams[0].players || h.teams[1].players ? ' &nbsp;|&nbsp; Players: ' + esc(h.teams[0].players || '—') + ' vs ' + esc(h.teams[1].players || '—') : '') + '</div>' +
       '</div>' +
@@ -3690,7 +3901,23 @@ const ACT = {
     }
     render();
   },
-  themeNone(){ S.setup.themes = []; S.setup.picks = {}; render(); },
+  themeNone(){ S.setup.themes = []; S.setup.picks = {}; S.setup.themeDiff = {}; render(); },
+
+  /* ---- advanced game configuration ---- */
+  advToggle(){ S.tmp.advOpen = !S.tmp.advOpen; Snd.soft(); render(); },
+  themeDiff(e){
+    const c = S.setup, t = e.dataset.t, d = e.dataset.d;
+    const td = c.themeDiff = c.themeDiff || {};
+    /* Pressing whatever is already lit hands the theme back to the house
+       setting, so there is always a way out of an override — including out of
+       one that happens to match the house setting. */
+    if((td[t] || c.difficulty) === d) delete td[t];
+    else td[t] = d;
+    prunePicks();            // the pool just moved; hand-picks may not survive
+    Snd.soft();
+    render();
+  },
+  themeDiffReset(){ S.setup.themeDiff = {}; prunePicks(); Snd.soft(); render(); },
 
   /* ---- hand-picked questions ---- */
   pickOpen(){ prunePicks(); S.tmp.pickFilter = ''; openPicker(); },
@@ -3771,7 +3998,7 @@ const ACT = {
 
     const list = S.bank.filter(q =>
       q.type === 'standard' && q.theme === rd.theme &&
-      matchDiff(q, g.cfg.difficulty) && !elsewhere.has(q.id));
+      matchDiff(q, diffOf(g.cfg, rd.theme)) && !elsewhere.has(q.id));
 
     const none = () => toast('No other question left in ' + rd.theme + ' at this difficulty.', 4000);
     if(list.length < 2) return none();
@@ -4034,7 +4261,7 @@ const ACT = {
       '<label class="fld">Notes (shown with the answer)<input type="text" id="nn"></label>' +
       '<div class="grid2">' +
         '<label class="fld">Theme<select id="nt">' + THEMES.map(t => '<option>' + esc(t) + '</option>').join('') + '</select></label>' +
-        '<label class="fld">Difficulty<select id="nd">' + DIFFS.map(d => '<option' + (d === 'medium' ? ' selected' : '') + '>' + d + '</option>').join('') + '</select></label>' +
+        '<label class="fld">Difficulty<select id="nd">' + DIFFS.map(d => '<option value="' + d + '"' + (d === 'medium' ? ' selected' : '') + '>' + Cap(d) + '</option>').join('') + '</select></label>' +
         '<label class="fld">Type<select id="ny"><option value="standard">Standard</option><option value="closest">Closest to wins</option></select></label>' +
         '<label class="fld">Pair ticker<input type="text" id="nu" placeholder="e.g. capital-of"></label>' +
       '</div>' +
@@ -4172,27 +4399,52 @@ if(!DB.get('qn.audiodefaults.v2', false)){
 }
 
 render();
-if(S.tmp.seedNews) setTimeout(() => toast(S.tmp.seedNews + ' new built-in questions added to your bank.', 5000), 900);
+if(S.tmp.seedNews) setTimeout(() => {
+  const n = S.tmp.seedNews, bits = [];
+  if(n.added) bits.push(n.added + ' new built-in question' + (n.added === 1 ? '' : 's') + ' added');
+  if(n.fixed) bits.push(n.fixed + ' corrected');
+  toast(bits.join(', ') + ' in your bank.', 5000);
+}, 900);
 
 /* The theme plays ONCE, when the app is opened — not every time you land back
    on the home screen from Settings or from a finished game. No button, by
    design: it is the sound of the app starting up.
-   Browsers refuse to make noise before the visitor has interacted with the
-   page, so if the audio context is still suspended we wait for the first click
-   or key press and play it then. */
+
+   Browsers refuse to make noise before the visitor has touched the page, so
+   when the audio context comes up suspended the theme has to wait for a
+   gesture. The trap is that on the home screen the host's first gesture is
+   almost always "Start a new game" — which is how a startup sound ended up
+   firing five seconds into the setup screen instead.
+
+   So a gesture that lands on a CONTROL is treated as the host getting on with
+   the night: it unlocks audio for the timers and the round jingles, and it
+   cancels the opening theme outright rather than triggering it. Only an idle
+   gesture — a tap on dead space, a scroll, a key — plays it, and only inside
+   a short window after launch. Late is worse than never: a theme that starts
+   ninety seconds in does not read as the app opening, it reads as a bug. */
 (function openingTheme(){
-  let played = false;
-  const play = () => { if(played) return; played = true; Snd.jingle(); };
-  Snd.init();
-  if(Snd.ctx && Snd.ctx.state === 'running'){ play(); return; }
-  const arm = () => {
+  const GRACE = 12000;                 // after this, the moment has passed
+  let armed = true;
+  const disarm = () => {
+    armed = false;
     window.removeEventListener('pointerdown', arm, true);
     window.removeEventListener('keydown', arm, true);
-    Snd.resume();
-    setTimeout(play, 0);      // let the click that unlocked audio finish first
   };
+  function arm(e){
+    if(!armed) return;
+    const t = e.target;
+    const onControl = t && t.closest &&
+      t.closest('button,a,input,select,textarea,label,[data-act]');
+    disarm();                          // either way, this was the one chance
+    Snd.resume();                      // and either way, audio is unlocked now
+    if(onControl) return;              // deliberate press — unlock, stay quiet
+    setTimeout(() => Snd.jingle(), 0); // let the gesture finish, then play
+  }
+  Snd.init();
+  if(Snd.ctx && Snd.ctx.state === 'running'){ Snd.jingle(); return; }
   window.addEventListener('pointerdown', arm, true);
   window.addEventListener('keydown', arm, true);
+  setTimeout(disarm, GRACE);
 })();
 </script>
 </body>
