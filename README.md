@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v1.5 · 27 Aug 2026
+> Built by Thierry Boulos · © 2026 · v1.71 · 27 Aug 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'1.5', date:'27 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.71', date:'27 Aug 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -58,6 +58,72 @@ On copyright — it attaches automatically the moment the thing is written; ther
 The file itself is portable — copy it anywhere. But each browser keeps its own **question bank, game history and played-question memory** (they live in that browser's local storage).
 
 To carry your data across: **Settings → Export everything (JSON)**, then **Import a backup** on the other machine.
+
+---
+
+## Mini-games
+
+Three of them, **all optional, all chosen up front** in Setup — card 04, after rounds, difficulty and themes, since those three decide each other and the mini-games sit on top. There is no longer an end-of-night pop-up asking whether you want the Battle; if it is on the card it is on the schedule, visible in the round tracker from the first pip.
+
+Each row carries its own value and slot — *"2 pts · after R3"* — and the card header carries the total. There is no paragraph spelling the arithmetic out: it cost most of a phone screen to say what the badges already say.
+
+| | What it is | Where it lands |
+|---|---|---|
+| **Closest To Wins** | Seven number questions, nearest guess takes the leg | Spread through the rounds |
+| **The Auction** | Bid on how many you can name, then deliver it in 30s | Spread through the rounds |
+| **Battle of the Captains** | Ten questions each, captains only, 7s a shot | **Always after the last round** |
+
+**Where they land.** Even spread rather than fixed gaps: mini *k* of *M* goes after round `round((k+1) × N ÷ (M+1))`. On a normal card that gives the two-round gap — 8 rounds with 2 mini-games puts them after rounds 3 and 5. When the card is too tight it compresses to one round, then to two mini-games back to back, rather than refusing. It can never open the night: at least one standard round is always played first.
+
+**What they are worth.** `clamp(2, 4, round(0.35 × N ÷ M))`, the same value for each.
+
+A mini-game should be worth roughly the gap two decent teams open over two to four rounds — enough that a comeback is always live, never so much that the standard rounds stop mattering. The `0.35` keeps the pool near a third of the round score; dividing by `M` stops three mini-games tripling it; the floor of 2 keeps any single one worth playing; the ceiling of 4 stops one deciding the night alone.
+
+| Rounds | 1 mini | 2 minis | 3 minis |
+|---|---|---|---|
+| 4 | 2 (50%) | 4 | 6 |
+| 8 | 3 (38%) | 4 (50%) | 6 (75%) |
+| 12 | 4 (33%) | 4 (33%) | 6 (50%) |
+| 14 | 4 (29%) | 4 (29%) | 6 (43%) |
+
+Setup shows the live split and **says what the card actually is** — at 75%+ it tells you the mini-games *are* the night rather than reassuring you they aren't. The floor of 2 means a short card with three mini-games really is mini-led, and a comforting line under a 100% split would be a lie.
+
+## The Auction
+
+Host reads a category — *"How many countries can you name?"* — and the teams bid on how many they can deliver.
+
+1. **Team A opens** with a number. Opening is the marginally worse seat (you commit with no information) and Team A won the toss, so that is the fair place to put it.
+2. The other team either **bids higher** or **lets them take it**. Bids must beat the standing bid; the opener cannot fold against nothing.
+3. Whoever is left holding the bid gets **30 seconds** to actually name that many.
+4. Make it and they take the points. Fall short and **the other team takes them** for calling it.
+
+While they name, you get a **tap counter** — one big tap target, a running `12 / 25` that turns gold on the target, and an undo. It settles itself the moment they hit the number, so you are never counting in your head against a clock.
+
+**22 auction categories** ship in the bank: countries · capital cities · car brands · football clubs · movies · animals · alcoholic brands · fruits · world leaders · body parts · cocktails · musical instruments · languages · jobs · pizza toppings · bands · rappers · US states · currencies · sports · board games · vegetables.
+
+They carry `type: auction`, **no theme, no difficulty, no pairing ticker** — an auction category is not easy or hard, it is wide or narrow, and the bidding sets the difficulty. Each carries a ruling note (*"Marques only. Toyota counts, Corolla does not."*) because every one of these gets argued: it says what counts, you rule once, the table moves on. Filter the bank by **Type** to find them; the theme is the literal string `Auction` and is deliberately not in `THEMES`, so it can never appear in the party game's theme picker or in solo.
+
+---
+
+## Play solo
+
+Second button on the home screen. Practice mode, not a party mode — you pick a **difficulty**, any number of **themes**, and **10 / 20 / 30 / 40 / 50 questions**. Ten seconds each. Standard questions only: no Closest To Wins, no lifelines, no double points, no steals, no Battle.
+
+**The bar across the top** is the same on the question and on the answer, so neither the way out nor the score ever has to be hunted for: **End game** on the left, the tally in the middle, the question counter on the right.
+
+The tally is **correct over answered**, not correct over total — 7/12, then 7/13 if you miss the next one, then 8/14 if you get it. It tells you how you are doing *now*, which correct-over-total cannot: 7/50 four questions in reads as a disaster rather than as 7 from 12.
+
+**End game** goes straight to the result, no confirmation. Ending isn't destructive — the next screen shows exactly the score you earned, with *Play again* on it — and a confirm would put a tap between you and the exit. The result is scored against what you **answered**, not what you set out to answer, with an "Ended early — 6 of 50 asked" line underneath. Ending before answering anything just returns you to the setup screen rather than showing a 0/0.
+
+**"Know the Host" is never offered in solo**, and is rejected by the pool even if it somehow reaches the theme list. Every answer in that theme is the literal string *"Host knows this one"* — the answer is in the host's head, not in the file. Fine with a host in the room, useless without one; solo would reveal "Host knows this one" and ask you to mark yourself against it. The Battle bars it for the same reason. It remains fully available in the party game.
+
+Three more things about it are deliberate:
+
+- **You mark yourself.** Question → ten seconds → answer → *Got it / Missed it*. There is no host to judge, and multiple choice was rejected on purpose: the bank holds no wrong options, and inventing them from other answers in the theme produces "Canberra / a pride / Khalil Gibran". A giveaway is worse than an honest system.
+- **Solo never burns a question.** It does not read the played-question memory and it does not write to it. Practising on a Tuesday must not empty the good material out of Friday's game, which is exactly what a shared memory would do.
+- **Nothing is recorded.** Game history is a two-team shape — names, scores, a winner. A solo run has none of those, so it stays out rather than arriving malformed. The result lives on the last screen.
+
+**On the question counts:** no single theme can fill the longer rounds, and the setup screen tells you so rather than failing at the start. The whole bank is 441 standard questions, but the largest single theme is Geography at 32, and the largest theme-plus-difficulty is Tech on Hard at 16. So 50 questions means several themes, or all of them at one difficulty (Easy 136 · Medium 153 · Hard 152). Counts you can't fill are greyed out with the available number shown beside them, and narrowing the themes pulls your chosen count down to something the bank can actually deal.
 
 ---
 
@@ -171,7 +237,7 @@ Import merges — a question with identical text updates the existing row instea
 
 ## What's in the box
 
-**491 questions** — 441 standard and 50 Closest To Wins, across 19 themes:
+**513 questions** — 441 standard, 50 Closest To Wins and 22 Auction categories, across 19 themes:
 
 Acronyms · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech
 
