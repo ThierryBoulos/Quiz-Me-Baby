@@ -373,6 +373,12 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .tgl[aria-pressed="true"] .sw{background:var(--gold)}
 .tgl[aria-pressed="true"] .sw::after{transform:translateX(22px)}
 
+/* the small round close on a modal header */
+.xbtn{flex:none;width:34px;height:34px;border-radius:50%;font-size:22px;line-height:1;
+  color:var(--ink-2);background:var(--glass);border:1px solid var(--line-2);
+  display:grid;place-items:center;transition:all .16s var(--ease)}
+.xbtn:hover{color:var(--ink);border-color:rgba(255,255,255,.32)}
+
 /* the auction — the host's tally while a team is naming against the clock */
 .auc-count{display:flex;align-items:baseline;justify-content:center;gap:10px;
   margin:clamp(4px,1.4vh,14px) 0;line-height:1}
@@ -609,6 +615,11 @@ body.playmode #hud{padding-top:6px;padding-bottom:8px}
   background:linear-gradient(90deg,rgba(245,197,24,.12),rgba(245,197,24,.24),rgba(245,197,24,.12));
   border:1px solid rgba(245,197,24,.35);
 }
+/* the auction runs one of these on every screen, so it gets a slimmer build */
+.mini-band.tight{gap:8px;padding:7px 14px;margin:4px auto;flex-wrap:wrap}
+.mini-band.tight .eyebrow{font-size:11px;letter-spacing:.14em}
+/* team colours on an eyebrow — .tn.a/.tn.b already do this for inline names */
+.eyebrow.a{color:var(--a)} .eyebrow.b{color:var(--b)}
 .mini-dots{display:flex;gap:6px}
 .mini-dots i{width:24px;height:6px;border-radius:3px;background:rgba(255,255,255,.16)}
 .mini-dots i.a{background:var(--a)} .mini-dots i.b{background:var(--b)} .mini-dots i.t{background:var(--gold)}
@@ -675,6 +686,34 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .fits .btn.lg{min-height:clamp(42px,5.6vh,60px);font-size:15px}
 .fits .help,.fits .muted{font-size:clamp(11px,1.5vh,13px)}
 .fits .mini-band{padding:8px 16px}
+
+/* ---- auction overrides. These MUST sit after the .fits block above: they are
+   the same specificity as `.fits .winner .name`, so ordering is the only thing
+   deciding them, and up with the other winner styles they simply lost. ---- */
+
+/* The winner name is a gradient clipped to the text. Swap the FILL only —
+   `background:` shorthand resets background-clip to border-box, which paints
+   the gradient across the whole element and gives you a solid colour bar
+   instead of coloured letters. background-image leaves the clip alone. */
+.winner .name.tint-a{background-image:linear-gradient(180deg,#D8F5FF 4%,var(--a) 46%,#0C6E90 100%);
+  filter:drop-shadow(0 10px 26px rgba(49,201,247,.32))}
+.winner .name.tint-b{background-image:linear-gradient(180deg,#FFDCE7 4%,var(--b) 46%,#9C0E45 100%);
+  filter:drop-shadow(0 10px 26px rgba(255,77,130,.32))}
+
+/* a between-legs winner block: same shape as the end-of-game one, a third the
+   height, because it is a beat between categories and not a results page */
+.winner.tight{padding:clamp(4px,1vh,12px) var(--sp-3)}
+.fits .winner.tight .name{font-size:clamp(26px,5.6vh,54px);margin:2px 0;line-height:1}
+.fits .winner.tight .crown{font-size:clamp(24px,3.4vh,40px)}
+.winner.tight .muted{font-size:13px;margin-top:2px}
+.auction-leg{gap:clamp(6px,1.4vh,14px)}
+
+/* The bidding and naming screens are .play, which has no height ceiling — on a
+   laptop the category, the tally, the standing bid and the card ran past the
+   fold. Cap them the way .fits caps the result screens. */
+.play.auction-bid,.play.auction-run{max-height:calc(100svh - 96px);justify-content:center}
+.auction-bid .q-text,.auction-run .q-theme{margin-top:0}
+.auction-bid .spot,.auction-run .spot{padding-top:0}
 .fits .bt-counter{gap:clamp(8px,1.8vh,22px)}
 .fits .bt-cell{padding:clamp(6px,1.2vh,14px) var(--sp-2)}
 .fits .bt-cell .v{font-size:clamp(26px,5.8vh,46px)}
@@ -998,7 +1037,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'1.71', date:'27 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.82', date:'28 Aug 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1677,7 +1716,7 @@ function buildSeedBank(){
     type:'closest', difficulty:r[1], use_with:'', src:'seed'
   }); });
   SEED_AUCTION.forEach(function(r){ out.push({
-    id:hash(r[0]), question:r[0], answer:'Host counts', notes:r[1]||'', theme:'Auction',
+    id:hash(r[0]), question:r[0], answer:'Host counts', notes:r[1]||'', theme:'',
     type:'auction', difficulty:'', use_with:'', src:'seed'
   }); });
   return out;
@@ -1851,7 +1890,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 10;   // bumped when the built-in bank changes
+const SEED_VERSION = 11;   // bumped when the built-in bank changes
 (function bootBank(){
   /* Earlier banks were retired wholesale, not merged. Clear them out so a
      browser that ran an older copy of this file cannot resurrect those
@@ -2151,21 +2190,44 @@ function battleAward(){
    night, so it is the fair place to put it.
    ========================================================================== */
 const AUCTION_SECS = 30;
+const AUCTION_LEGS = 3;   // odd, so the legs can never finish level
+const CLOSEST_LEGS = 7;   // legs in Closest To Wins
 
 function auctionPool(){
   return S.bank.filter(q => q.type === 'auction' && isFresh(q));
 }
+/* The host's hand-picked categories first, in the order they ticked them, then
+   whatever else the bank has to make the numbers up. */
+function auctionDeck(cfg){
+  const picked = ((cfg && cfg.pickAuction) || [])
+    .map(id => S.bank.find(q => q.id === id)).filter(Boolean);
+  const ids = new Set(picked.map(q => q.id));
+  return picked.concat(shuffle(auctionPool().filter(q => !ids.has(q.id))));
+}
 function buildAuction(){
   const g = G();
-  const pool = shuffle(auctionPool());
-  const q = pool[0];
-  if(!q){ g.done.auction = true; toast('No auction categories left in the bank.'); return null; }
-  markUsed(q);
+  const deck = auctionDeck(g.cfg);
+  if(!deck.length){ g.done.auction = true; toast('No auction categories left in the bank.'); return null; }
   g.auction = {
-    q, bid:0, by:null, turn:0,       // turn = team index to act; A opens
-    count:0, winner:null, awarded:false, done:false, ran:false
+    deck,                            // everything still available, in draw order
+    leg:0, n:Math.min(AUCTION_LEGS, deck.length),
+    wins:[0, 0], legs:[],            // one record per finished leg
+    q:null, bid:0, by:null, turn:0, count:0,
+    winner:null, awarded:false, done:false
   };
+  auctionDraw();
   return g.auction;
+}
+/* Take the next category off the deck and reset the leg around it. Also the
+   Change-the-category button — the skipped one goes to the back, not the bin,
+   so a long night cannot run the deck dry by skipping. */
+function auctionDraw(skip){
+  const a = G().auction;
+  if(skip && a.q) a.deck.push(a.q);
+  a.q = a.deck.shift() || a.q;
+  if(a.q) markUsed(a.q);
+  a.bid = 0; a.by = null; a.count = 0;
+  a.turn = a.leg % 2;                // the open alternates leg by leg
 }
 const LL = {
   friend:{ key:'friend', name:'Call a Friend', icon:ICON.phone },
@@ -2253,9 +2315,15 @@ function buildGame(cfg){
     });
   }
 
-  const cpAll = closestPool();
-  const cp = cpAll.slice(0, 7);
-  const spare = cpAll.slice(7, 13);   // held back for tie-breaker legs
+  /* Hand-picked legs lead, in the order the host ticked them; the round-robin
+     draw makes up whatever is short, skipping anything already picked. */
+  const handClosest = (cfg.pickClosest || [])
+    .map(id => S.bank.find(q => q.id === id))
+    .filter(q => q && q.type === 'closest');
+  const handIds = new Set(handClosest.map(q => q.id));
+  const cpAll = handClosest.concat(closestPool().filter(q => !handIds.has(q.id)));
+  const cp = cpAll.slice(0, CLOSEST_LEGS);
+  const spare = cpAll.slice(CLOSEST_LEGS, CLOSEST_LEGS + 6);   // held back for tie-breaker legs
 
   const mk = (t, color) => ({
     name:t.name, captain:t.captain, players:t.players,
@@ -2328,7 +2396,7 @@ function schedule(){
   if(g.hasBattle) out.push({ kind:'mini', key:'battle' });
   return out;
 }
-const AUCTION_SCREENS = ['auctionIntro','auctionBid','auctionRun','auctionResult'];
+const AUCTION_SCREENS = ['auctionIntro','auctionBid','auctionRun','auctionLeg','auctionResult'];
 const CLOSEST_SCREENS = ['miniIntro','miniQ','miniEntry','miniSummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
@@ -2376,8 +2444,12 @@ function render(){
     : null;
 
   const fn = SCREENS[S.screen] || SCREENS.home;
-  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff'].indexOf(S.screen) > -1);
+  /* These two strip the page's 24/64px padding so a full-height screen really
+     does fit the window. Any screen using .play or .fits MUST be in one of
+     them — left out, it renders 88px of padding inside a box already sized to
+     the viewport and the page scrolls by exactly that much. */
+  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult'].indexOf(S.screen) > -1);
   document.body.classList.toggle('homemode', S.screen === 'home');
   app.innerHTML = fn();
   if(keep && keep.act){
@@ -2423,6 +2495,7 @@ function renderHUD(){
   } else if(AUCTION_SCREENS.indexOf(S.screen) > -1){
     const a = g.auction;
     label = '<b>THE AUCTION</b>' +
+      (a && S.screen !== 'auctionResult' ? ' &nbsp;·&nbsp; Leg ' + Math.min(a.leg + 1, a.n) + '/' + a.n : '') +
       (S.screen === 'auctionRun' && a ? ' &nbsp;·&nbsp; ' + a.count + '/' + a.bid : '');
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
     const b = g.battle;
@@ -2527,12 +2600,12 @@ SCREENS.rules = function(){
       '<button class="btn ghost sm" data-act="go" data-to="home">Back</button>' +
     '</div>' +
 
-    ruleBlock('01', 'The setup', ul([
-      li('<strong>Two teams</strong>, as many players each as you like.'),
-      li('Each team picks a <strong>captain</strong>. The captain gives the final answer. Nobody else. If the captain has not said it, it has not been said.'),
-      li('<strong>Settle who goes first by chance, not by argument.</strong> Coin toss, rock paper scissors, highest card, closest guess to a number in the host head — anything, as long as it is luck. Winner becomes <span class="tn a">Team A</span> and answers first every round. Loser is <span class="tn b">Team B</span> and gets the first steal.'),
-      li('<strong>No phones.</strong> Not on the table, not in a lap.'),
-      li('Between 4 and 14 standard rounds, plus one mini-game. One theme per round.')
+    ruleBlock('01', 'The setup', ol([
+      '<strong>Two teams</strong>, as many players each as you like.',
+      'Each team picks a <strong>captain</strong>. The captain gives the final answer. Nobody else. If the captain has not said it, it has not been said.',
+      '<strong>Settle who goes first by chance, not by argument.</strong> Coin toss, rock paper scissors, highest card, closest guess to a number in the host&rsquo;s head — anything, as long as it is luck. <strong>The winner then chooses</strong> whether to be <span class="tn a">Team A</span>, who answers first every round, or <span class="tn b">Team B</span>, who gets the first steal.',
+      '<strong>No phones.</strong> Not on the table, not in a lap.',
+      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or all three.'
     ])) +
 
     ruleBlock('02', 'A standard round', ol([
@@ -2550,19 +2623,41 @@ SCREENS.rules = function(){
       li(ICON.x2 + ' <strong>Double Points</strong> — must be <strong>declared before the round starts</strong>. Once the question is read, it is too late.'),
       li('<span style="color:var(--warn)">If you arm Double Points you may use only <strong>one</strong> of the other two lifelines that round.</span>'),
       li('<span style="color:var(--warn)">If you arm Double Points and miss, the other team can steal it — and if they get it right it is worth <strong>2 points</strong> to them, even though they spent nothing.</span>'),
-      li('No lifelines on a steal. No lifelines at all in Closest To Wins.')
+      li('No lifelines on a steal. <strong>No lifelines at all in the mini-games.</strong>')
     ])) +
 
-    ruleBlock('04', 'Closest To Wins', ul([
-      li('Drops in at the <strong>halfway point</strong>, rounded up. Seven legs.'),
-      li('<strong>Tonight&rsquo;s themes do not apply here.</strong> The seven legs are dealt across the whole bank, one theme at a time — a Geography number, a Food number, a Music number — so you never get the same theme twice in a row.'),
+    ruleBlock('04', 'The mini-games', ul([
+      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or all three</strong>. They are announced at the start, not sprung on you.'),
+      li('They drop in <strong>between the standard rounds</strong>, spaced out across the night. Where exactly depends on how many rounds you are playing.'),
+      li('Each one is worth <strong>between 2 and 4 points</strong> to whoever wins it. The host can tell you which before you start.'),
+      li('<span style="color:var(--warn)">No lifelines in any of them.</span>')
+    ])) +
+
+    ruleBlock('05', 'Closest To Wins', ul([
+      li('<strong>Tonight&rsquo;s themes do not apply here.</strong> The legs are dealt across the whole bank, one theme at a time — a Geography number, a Food number, a Music number — so you never get the same theme twice in a row.'),
       li('Both teams get the same number question at the same time. <strong>' + S.settings.tMini + ' seconds</strong> to write one number down.'),
       li('Closest number takes the leg. Tie on a leg = <strong>a point each</strong>.'),
-      li('Winner takes <strong>2 points</strong>, or <strong>3</strong> if the game runs 8 rounds or more.'),
-      li('Tie after seven legs? An <strong>extra tie-breaker question</strong> is pulled straight away, and again if needed.')
+      li('Most legs takes the mini-game. Still level at the end? An <strong>extra tie-breaker question</strong> is pulled straight away, and again if needed.')
     ])) +
 
-    ruleBlock('05', 'Winning', ul([
+    ruleBlock('06', 'The Auction', ul([
+      li('<strong>' + AUCTION_LEGS + ' categories.</strong> &ldquo;How many countries can you name?&rdquo; &ldquo;How many cocktails?&rdquo;'),
+      li('One team opens with a number — how many they reckon they can name. The other team either <strong>bids higher</strong> or <strong>lets them take it</strong>. Back and forth until somebody folds. <strong>The open alternates</strong> each category, so nobody bids blind twice.'),
+      li('Whoever is left holding the bid gets <strong>' + AUCTION_SECS + ' seconds</strong> to actually name that many. The host counts.'),
+      li('Make it and you take the category. Fall short and <strong>the other team takes it</strong> for calling your bluff.'),
+      li('Most categories out of ' + AUCTION_LEGS + ' wins the mini-game. Bid what you can deliver, not what sounds brave.')
+    ])) +
+
+    ruleBlock('07', 'Battle of the Captains', ul([
+      li('<strong>Captains only.</strong> The room says nothing — and that means nothing.'),
+      li('Ten questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot, one captain at a time.'),
+      li('Both captains get the <strong>same shape</strong> — five easy, five medium, in the same order — but never the same questions. Different sets, same difficulty, so nobody can claim they drew the harder ten.'),
+      li('<span style="color:var(--warn)">No lifelines, no conferring, no second guesses.</span>'),
+      li('Best score wins it. Level after twenty questions? One more question, <strong>no clock</strong>, first captain in takes it.'),
+      li('It always runs <strong>last</strong>, after the final standard round.')
+    ])) +
+
+    ruleBlock('08', 'Winning', ul([
       li('Highest score after the last round takes the night.'),
       li('Tie? <strong>Sudden death</strong> — one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
     ])) +
@@ -2588,6 +2683,7 @@ function defaultSetup(){
     difficulty:'mixed',
     themeDiff:{},       // theme -> difficulty, overriding the house setting
     minis:['closest'],  // which mini-games are on tonight's card
+    pickClosest:[], pickAuction:[],   // hand-picked mini-game questions
     picks:{}            // theme -> [questionId, questionId] chosen by hand
   };
 }
@@ -2643,6 +2739,14 @@ function prunePicks(){
     const ok = {}; pickPool(t).forEach(q => ok[q.id] = 1);
     p[t] = p[t].filter(id => ok[id]);
     if(!p[t].length) delete p[t];
+  });
+  /* Turn a mini-game off and its hand-picked questions go with it — leaving
+     them would silently reapply if the host switched it back on later. */
+  Object.keys(MINI_PICKS).forEach(k => {
+    const m = MINI_PICKS[k];
+    if((c.minis || []).indexOf(k) < 0){ c[m.store] = []; return; }
+    const ok = {}; S.bank.forEach(q => { if(q.type === m.type && isFresh(q)) ok[q.id] = 1; });
+    c[m.store] = (c[m.store] || []).filter(id => ok[id]);
   });
 }
 function pickedPair(theme, picks){
@@ -2914,7 +3018,12 @@ function pickerHTML(){
   return '<div class="stack">' +
     '<div class="row between">' +
       '<div><div class="eyebrow gold">Optional</div><h3 class="display">Pick tonight&rsquo;s questions</h3></div>' +
-      '<span class="badge ' + (done ? 'gold' : 'line') + '">' + done + ' of ' + c.themes.length + ' themes set</span>' +
+      '<div class="row" style="gap:10px">' +
+        '<span class="badge ' + (done ? 'gold' : 'line') + '">' + done + ' of ' + c.themes.length + ' themes set</span>' +
+        /* Done is at the foot of a long modal — after fifty questions that is a
+           long way to scroll to get out. Same action, reachable from the top. */
+        '<button class="xbtn" data-act="pickDone" aria-label="Close">&times;</button>' +
+      '</div>' +
     '</div>' +
     /* No single difficulty to quote any more — a theme can be running on its
        own, so each theme heading carries its own and the list under it obeys
@@ -2927,6 +3036,7 @@ function pickerHTML(){
     '<div class="chips pickfilter">' + filterChips + '</div>' +
     '<hr class="hair" style="margin:2px 0 0">' +
     blocks +
+    miniPickBlocks() +
     '<hr class="hair">' +
     '<div class="btn-row end">' +
       '<button class="btn ghost" data-act="pickClearAll">Clear everything</button>' +
@@ -2934,6 +3044,56 @@ function pickerHTML(){
     '</div>' +
   '</div>';
 }
+/* --------------------------------------------------------------------------
+   HAND-PICKING THE MINI-GAMES
+   Same idea as the themes, and same rule: only what is actually on tonight's
+   card is offered. Picking questions for a mini-game the host has not selected
+   would be work thrown away, so those blocks simply are not drawn.
+   Under-filling is fine — pick two auction categories out of three and the
+   third is drawn for you. Picks lead, the bank makes the numbers up.
+   -------------------------------------------------------------------------- */
+const MINI_PICKS = {
+  closest:{ store:'pickClosest', type:'closest', cap:CLOSEST_LEGS, label:'Closest To Wins',
+            help:'Number questions, in the order you tick them. Anything short is dealt from the bank as usual.' },
+  auction:{ store:'pickAuction', type:'auction', cap:AUCTION_LEGS, label:'The Auction',
+            help:'Categories, in the order you tick them. Anything short is drawn from the bank.' }
+};
+function miniPicksFor(key){ return (S.setup && S.setup[MINI_PICKS[key].store]) || []; }
+function miniPickBlocks(){
+  const c = S.setup;
+  return Object.keys(MINI_PICKS).filter(k => (c.minis || []).indexOf(k) > -1).map(k => {
+    const m = MINI_PICKS[k];
+    const sel = miniPicksFor(k), full = sel.length >= m.cap;
+    const pool = S.bank.filter(q => q.type === m.type && isFresh(q));
+    const rows = pool.map(q => {
+      const on = sel.indexOf(q.id) > -1;
+      return '<button class="pickrow" role="button" aria-pressed="' + on + '"' + (!on && full ? ' disabled' : '') +
+        ' data-act="miniPickToggle" data-k="' + k + '" data-id="' + q.id + '">' +
+        '<span class="tick" aria-hidden="true"></span>' +
+        '<span class="pq"><span class="qq">' + esc(q.question) + '</span>' +
+        /* Closest To Wins is a number — the answer IS the useful line, and its
+           note is a source citation nobody picks a question on. The auction has
+           no answer worth printing ("Host counts"), so it shows its ruling. */
+        (m.type === 'closest' ? '<span class="qa">' + esc(q.answer) + '</span>'
+         : q.notes ? '<span class="qa dim">' + esc(q.notes) + '</span>' : '') +
+        '</span></button>';
+    }).join('');
+    return '<hr class="hair">' +
+      '<div class="stack" style="gap:8px">' +
+        '<div class="row between">' +
+          '<div class="eyebrow gold">' + m.label + '</div>' +
+          '<div class="row" style="gap:8px">' +
+            '<span class="badge ' + (full ? 'ok' : sel.length ? 'gold' : 'line') + '">' + sel.length + ' of ' + m.cap + ' ticked</span>' +
+            (sel.length ? '<button class="btn sm ghost" data-act="miniPickClear" data-k="' + k + '">Clear</button>' : '') +
+          '</div>' +
+        '</div>' +
+        '<p class="help">' + m.help + '</p>' +
+        (pool.length ? '<div class="picklist">' + rows + '</div>'
+                     : '<div class="empty">Nothing left in the bank for this one.</div>') +
+      '</div>';
+  }).join('');
+}
+
 function openPicker(){ S.tmp.pickerOpen = true; openModal(pickerHTML(), 'wide'); }
 /* Redraw in place and put every scroll position back — ticking a question
    40 rows down must not fling the host back to the top of the list. */
@@ -3564,13 +3724,6 @@ SCREENS.battleSummary = function(){
 /* ==========================================================================
    17c. THE AUCTION — screens
    ========================================================================== */
-function auctionBand(){
-  const g = G(), a = g.auction;
-  return '<div class="mini-band" style="margin:8px auto">' +
-    '<span class="eyebrow gold">The Auction</span><span class="dim">·</span>' +
-    '<span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>';
-}
-
 /* Same shell as the other two intros — .intro-screen / .intro-head / h1.display
    / .intro-rules — so the title lands at the size the Battle and Closest To
    Wins titles do, and the short-viewport rules that shrink those shrink this. */
@@ -3580,45 +3733,62 @@ SCREENS.auctionIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">The<br>Auction</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Winner takes ' + g.miniPts + ' points</span></div>' +
-      '<p class="reader" style="max-width:42ch;margin:0 auto">Everyone thinks they can name twenty. Almost nobody can.</p>' +
+      /* A band OR a flavour line, not both — Closest To Wins carries a band,
+         the Battle carries a line, and carrying both put this intro 81px past
+         the bottom of a phone. */
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + a.n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
-        '<li><strong style="color:var(--gold)">1.</strong> Read the category out. <strong>' + esc(g.teams[0].name) + '</strong> opens with a number — how many they reckon they can name.</li>' +
-        '<li><strong style="color:var(--gold)">2.</strong> The other team either <strong>bids higher</strong> or <strong>lets them take it</strong>.</li>' +
-        '<li><strong style="color:var(--gold)">3.</strong> Whoever is left holding the bid has <strong>' + AUCTION_SECS + ' seconds</strong> to actually name that many.</li>' +
-        '<li><strong style="color:var(--gold)">4.</strong> <span style="color:var(--warn)">No lifelines, no help from the room.</span></li>' +
-        '<li><strong style="color:var(--gold)">5.</strong> They make it, they take <strong>' + g.miniPts + ' points</strong>. They fall short and the other team takes the ' + g.miniPts + ' for calling it.</li>' +
+        '<li><strong style="color:var(--gold)">1.</strong> <strong>' + a.n + ' categories.</strong> The open alternates, so nobody bids blind twice.</li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> One team says a number — how many they can name. The other <strong>bids higher</strong> or <strong>lets them take it</strong>.</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> Whoever holds the bid gets <strong>' + AUCTION_SECS + ' seconds</strong> to name that many.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Make it, they take the leg. Fall short and <strong>the other team takes it</strong>.</li>' +
+        '<li><strong style="color:var(--gold)">5.</strong> <span style="color:var(--warn)">No lifelines, no help from the room.</span> Most legs takes <strong>' + g.miniPts + ' points</strong>.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="auctionBegin">Read the category</button></div>' +
   '</div>';
 };
 
+/* the leg counter, on every auction screen so nobody has to ask the score */
+function auctionTally(){
+  const g = G(), a = g.auction;
+  return '<div class="mini-band tight">' +
+    '<span class="eyebrow">Leg ' + Math.min(a.leg + 1, a.n) + ' of ' + a.n + '</span><span class="dim">·</span>' +
+    '<span class="eyebrow a">' + esc(g.teams[0].name) + ' ' + a.wins[0] + '</span><span class="dim">–</span>' +
+    '<span class="eyebrow b">' + a.wins[1] + ' ' + esc(g.teams[1].name) + '</span></div>';
+}
+
 SCREENS.auctionBid = function(){
   const g = G(), a = g.auction;
   const t = g.teams[a.turn], opened = a.bid > 0;
-  return '<div class="play">' +
+  /* Once a bid lands, the standing-bid line appears and the whole thing grew
+     past the screen. So the category note is dropped the moment bidding is
+     live — it has been read out by then — and the standing bid takes its place
+     rather than stacking on top of it. */
+  return '<div class="play auction-bid">' +
     '<div class="spot">' +
-      '<div class="q-theme">The Auction</div>' +
+      auctionTally() +
       '<h2 class="q-text">' + esc(a.q.question) + '</h2>' +
-      (a.q.notes ? '<p class="q-note" style="animation:none">' + esc(a.q.notes) + '</p>' : '') +
       (opened
         ? '<p class="whofor ' + (a.by === 0 ? 'a' : 'b') + '">' + esc(g.teams[a.by].name.toUpperCase()) + ' bid <b>' + a.bid + '</b></p>'
-        : '<p class="reader">No bid yet</p>') +
+        : (a.q.notes ? '<p class="q-note" style="animation:none">' + esc(a.q.notes) + '</p>' : '')) +
     '</div>' +
     '<div class="card pad lit stack">' +
-      '<div class="sec-head"><div class="eyebrow ' + (a.turn === 0 ? 'a' : 'b') + '">' + esc(t.name) + ' to act</div></div>' +
-      '<label class="fld">Their number' +
+      '<label class="fld"><span class="tn ' + (a.turn === 0 ? 'a' : 'b') + '">' + esc(t.name) + '</span> to act — their number' +
         '<input type="number" id="auctionN" min="' + (a.bid + 1) + '" step="1" value="' + (a.bid + 1) + '" inputmode="numeric"></label>' +
       '<div class="btn-row">' +
         '<button class="btn gold lg" data-act="auctionRaise">Bid it</button>' +
         '<button class="btn ghost lg" data-act="auctionPass"' + (opened ? '' : ' disabled') + '>Let them take it</button>' +
       '</div>' +
-      '<p class="help">' + (opened
-        ? 'Higher than ' + a.bid + ', or fold and make them prove it.'
-        : esc(g.teams[0].name) + ' opens — there is nothing to fold against yet.') + '</p>' +
+      /* Only before a bid is on the table. Swapping the category once someone
+         has committed a number to it would be changing the deal mid-hand. */
+      (opened ? ''
+        : '<div class="row between" style="gap:10px">' +
+            '<p class="help" style="margin:0">' + esc(t.name) + ' opens — nothing to fold against yet.</p>' +
+            '<button class="btn sm ghost" data-act="auctionSkip">Change category</button>' +
+          '</div>') +
     '</div>' +
   '</div>';
 };
@@ -3627,9 +3797,10 @@ SCREENS.auctionRun = function(){
   const g = G(), a = g.auction;
   const t = g.teams[a.by];
   const hit = a.count >= a.bid;
-  return '<div class="play">' +
+  return '<div class="play auction-run">' +
     '<div class="spot">' +
       '<div class="q-theme">' + esc(a.q.question) + '</div>' +
+      auctionTally() +
       '<p class="whofor ' + (a.by === 0 ? 'a' : 'b') + '">' + esc(t.name.toUpperCase()) + ' must name <b>' + a.bid + '</b></p>' +
       '<div class="auc-count ' + (hit ? 'hit' : '') + '">' +
         '<span class="n num">' + a.count + '</span><span class="of num">/ ' + a.bid + '</span>' +
@@ -3637,13 +3808,10 @@ SCREENS.auctionRun = function(){
       timerRing('seconds left') +
       timerControls() +
     '</div>' +
-    '<div class="card pad stack" style="gap:10px">' +
+    '<div class="card pad stack" style="gap:8px">' +
       '<button class="btn gold lg block auc-tap" data-act="auctionTick">Count one &nbsp;+1</button>' +
-      '<div class="row between" style="gap:10px">' +
-        '<button class="btn sm ghost" data-act="auctionUntick"' + (a.count ? '' : ' disabled') + '>Undo one</button>' +
-        '<button class="btn sm" data-act="auctionStop">They are done</button>' +
-      '</div>' +
-      '<p class="help">' + esc(a.q.notes || 'Tap once for every one they get. It settles itself the moment they hit ' + a.bid + '.') + '</p>' +
+      '<button class="btn sm ghost block" data-act="auctionUntick"' + (a.count ? '' : ' disabled') + '>Undo one</button>' +
+      '<p class="help">' + esc(a.q.notes || 'Tap once for every one they get.') + '</p>' +
     '</div>' +
   '</div>';
 };
@@ -3651,12 +3819,24 @@ AFTER.auctionRun = function(){
   armTimer('auction', AUCTION_SECS, () => { if(S.screen === 'auctionRun') auctionResolve(); });
 };
 
+/* End of ONE leg. The bidder either delivered or they did not; the other team
+   takes it if they did not. A leg always has exactly one winner, and with an
+   odd number of legs the auction can never finish level. */
 function auctionResolve(){
   const g = G(), a = g.auction;
   Timer.stop();
-  a.made = a.count >= a.bid;
-  a.winner = a.made ? a.by : otherTeam(a.by);
+  const made = a.count >= a.bid;
+  const won  = made ? a.by : otherTeam(a.by);
+  a.wins[won]++;
+  a.legs.push({ q:a.q, bid:a.bid, by:a.by, count:a.count, made, won });
+  Snd[made ? 'correct' : 'wrong']();
+  go('auctionLeg');
+}
+/* All legs played — the auction itself is what pays, not the individual legs */
+function auctionFinish(){
+  const g = G(), a = g.auction;
   a.done = true;
+  a.winner = a.wins[0] > a.wins[1] ? 0 : 1;
   if(!a.awarded){
     a.awarded = true;
     a.award = [a.winner === 0 ? g.miniPts : 0, a.winner === 1 ? g.miniPts : 0];
@@ -3666,19 +3846,51 @@ function auctionResolve(){
   go('auctionResult');
 }
 
+/* one leg down — who took it, and what is still to play */
+SCREENS.auctionLeg = function(){
+  const g = G(), a = g.auction;
+  const L = a.legs[a.legs.length - 1];
+  const bidder = g.teams[L.by], win = g.teams[L.won];
+  const more = a.leg + 1 < a.n;
+  /* A between-legs card, not a results page — it is on screen for four seconds
+     before the next category. Compact winner block, no crown, no scoreboard. */
+  return '<div class="fits auction-leg">' +
+    '<div class="winner tight">' +
+      '<div class="eyebrow gold">' + (L.made ? 'Delivered' : 'Called') + '</div>' +
+      '<div class="name ' + (L.won === 0 ? 'tint-a' : 'tint-b') + '">' + esc(win.name) + '</div>' +
+      '<p class="muted">' + esc(bidder.name) + ' bid <strong>' + L.bid + '</strong>, named <strong>' + L.count + '</strong>.</p>' +
+    '</div>' +
+    auctionTally() +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="auctionNextLeg">' +
+      (more ? 'Next category' : 'See who took the auction') + '</button></div>' +
+  '</div>';
+};
+
 SCREENS.auctionResult = function(){
   const g = G(), a = g.auction;
-  const bidder = g.teams[a.by], win = g.teams[a.winner];
-  return '<div class="fits">' +
-    '<div class="winner">' +
-      '<div class="crown">' + ICON.trophy + '</div>' +
-      '<div class="eyebrow gold">' + (a.made ? 'Delivered' : 'Called') + '</div>' +
-      '<div class="name">' + esc(win.name) + '</div>' +
-      '<p class="muted">' + esc(bidder.name) + ' bid <strong>' + a.bid + '</strong> and named <strong>' + a.count + '</strong>' +
-        (a.made ? '.' : ' — ' + esc(win.name) + ' called it.') + '</p>' +
-      '<p class="help"><strong style="color:var(--gold)">+' + g.miniPts + ' points</strong> to ' + esc(win.name) + '.</p>' +
+  const win = g.teams[a.winner];
+  /* A list, not a table. On a phone the stylesheet expands every table into one
+     stacked card per row with the column headings repeated onto each cell —
+     right for a fourteen-round recap, and 644px for three short lines here. */
+  const rows = a.legs.map((L, i) =>
+    '<div class="list-row" style="padding:9px 12px">' +
+      '<div><div class="eyebrow">' + (i + 1) + ' &nbsp;·&nbsp; ' +
+        esc(L.q.question.replace(/^How many /, '').replace(/ can you name\?$/, '')) + '</div>' +
+        '<div class="help" style="margin-top:3px">' + esc(g.teams[L.by].name) +
+          ' bid ' + L.bid + ' &nbsp;·&nbsp; named ' + L.count + '</div></div>' +
+      '<span class="badge ' + (L.won === 0 ? 'a' : 'b') + '">' + esc(g.teams[L.won].name) + '</span>' +
+    '</div>').join('');
+  return '<div class="fits auction-leg">' +
+    '<div class="winner tight">' +
+      '<div class="eyebrow gold">The Auction &nbsp;·&nbsp; ' + a.wins[0] + '&ndash;' + a.wins[1] + ' on legs</div>' +
+      '<div class="name ' + (a.winner === 0 ? 'tint-a' : 'tint-b') + '">' + esc(win.name) + '</div>' +
+      '<p class="muted"><strong style="color:var(--gold)">+' + g.miniPts + ' points</strong></p>' +
     '</div>' +
-    scoreBig() +
+    '<div class="card pad stack" style="gap:8px">' +
+      '<div class="eyebrow">Leg by leg</div>' + rows +
+    '</div>' +
+    /* No scoreboard here — the running score is in the tracker at the top of
+       the screen throughout, and repeating it cost 282px of a phone. */
     '<div class="btn-row center"><button class="btn gold lg" data-act="afterAuction">Back to the rounds</button></div>' +
   '</div>';
 };
@@ -3744,7 +3956,7 @@ SCREENS.final = function(){
         ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">The auction</td>' +
           '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.auction.award[0] + '</td>' +
           '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.auction.award[1] + '</td>' +
-          '<td data-l="Bid">' + esc(g.teams[g.auction.by].name) + ' bid ' + g.auction.bid + ', named ' + g.auction.count + '</td></tr>'
+          '<td data-l="Legs">' + g.auction.wins[0] + '–' + g.auction.wins[1] + '</td></tr>'
         : '') +
       '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Closest to wins</td>' +
       '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + (g.mini.award ? g.mini.award[0] : 0) + '</td>' +
@@ -4013,7 +4225,9 @@ SCREENS.bank = function(){
       (q.notes ? '<div class="help" style="margin-top:4px">' + esc(q.notes) + '</div>' : '') + '</td>' +
     '<td style="color:var(--gold);font-weight:600">' + esc(q.answer) + '</td>' +
     '<td>' + esc(q.theme) + '</td>' +
-    '<td>' + (q.type === 'closest' ? '<span class="badge gold">Closest</span>' : '<span class="badge line">Standard</span>') + '</td>' +
+    '<td>' + (q.type === 'closest' ? '<span class="badge gold">Closest</span>'
+            : q.type === 'auction' ? '<span class="badge a">Auction</span>'
+            : '<span class="badge line">Standard</span>') + '</td>' +
     '<td>' + esc(Cap(q.difficulty)) + '</td>' +
     '<td>' + (q.use_with ? '<code style="font-size:11px;color:var(--a)">' + esc(q.use_with) + '</code>' : '<span class="dim">—</span>') + '</td>' +
     '<td>' + (S.used.has(q.id) ? '<span class="badge no">played</span>' : '') + '</td>' +
@@ -4045,7 +4259,7 @@ SCREENS.bank = function(){
       '<div class="row">' +
         '<label class="fld" style="flex:2;min-width:200px">Search<input type="text" data-act="bf" data-k="q" value="' + esc(f.q) + '" placeholder="question or answer"></label>' +
         '<label class="fld" style="flex:1;min-width:140px">Theme<select data-act="bf" data-k="theme">' + [''].concat(THEMES).map(t => opt(t, f.theme)).join('') + '</select></label>' +
-        '<label class="fld" style="flex:1;min-width:120px">Type<select data-act="bf" data-k="type">' + ['','standard','closest'].map(t => opt(t, f.type)).join('') + '</select></label>' +
+        '<label class="fld" style="flex:1;min-width:120px">Type<select data-act="bf" data-k="type">' + ['','standard','closest','auction'].map(t => opt(t, f.type)).join('') + '</select></label>' +
         '<label class="fld" style="flex:1;min-width:120px">Difficulty<select data-act="bf" data-k="diff">' + [''].concat(DIFFS).map(t => opt(t, f.diff)).join('') + '</select></label>' +
       '</div>' +
       '<div class="row between"><span class="help">Showing ' + Math.min(rows.length, BANK_ROW_CAP) + ' of ' + rows.length + '</span>' +
@@ -4102,14 +4316,20 @@ function rowsToQuestions(rows){
     const answer = String(row[iA] || '').trim();
     if(!question || !answer) continue;
     const rawType = norm(iY > -1 ? row[iY] : '');
-    const type = /clos|estim|numb|guess|mini/.test(rawType) ? 'closest' : 'standard';
+    const type = /auct|bid|nameas?many/.test(rawType) ? 'auction'
+               : /clos|estim|numb|guess|mini/.test(rawType) ? 'closest'
+               : 'standard';
     let d = norm(iD > -1 ? row[iD] : '');
     if(/^(1|e|easy|low)/.test(d)) d = 'easy';
     else if(/^(3|h|hard|difficult|high)/.test(d)) d = 'hard';
     else d = 'medium';
-    let theme = String(iT > -1 ? row[iT] : '').trim() || 'General';
-    const known = THEMES.find(t => norm(t) === norm(theme));
-    if(known) theme = known; else if(THEMES.indexOf(theme) < 0) THEMES.push(theme);
+    /* An auction category has no theme by design, so an empty cell stays empty
+       rather than being filed under "General" and pushed into THEMES. */
+    let theme = String(iT > -1 ? row[iT] : '').trim() || (type === 'auction' ? '' : 'General');
+    if(theme){
+      const known = THEMES.find(t => norm(t) === norm(theme));
+      if(known) theme = known; else if(THEMES.indexOf(theme) < 0) THEMES.push(theme);
+    }
     out.push({
       id:hash(question), question, answer,
       notes:String(iN > -1 ? row[iN] : '').trim(),
@@ -4560,9 +4780,20 @@ const ACT = {
     Snd.soft();
     repaintPicker();
   },
+  miniPickToggle(e){
+    const c = S.setup, k = e.dataset.k, m = MINI_PICKS[k], id = e.dataset.id;
+    const arr = c[m.store] = c[m.store] || [];
+    const i = arr.indexOf(id);
+    if(i > -1) arr.splice(i, 1);
+    else if(arr.length >= m.cap) return toast(m.cap + ' is the whole ' + m.label + ' — untick one first.', 3200);
+    else arr.push(id);
+    Snd.soft();
+    repaintPicker();
+  },
+  miniPickClear(e){ S.setup[MINI_PICKS[e.dataset.k].store] = []; repaintPicker(); },
   pickThemeClear(e){ delete (S.setup.picks || {})[e.dataset.t]; repaintPicker(); },
-  pickClearAll(){ S.setup.picks = {}; repaintPicker(); },
-  pickClear(){ S.setup.picks = {}; render(); },
+  pickClearAll(){ S.setup.picks = {}; S.setup.pickClosest = []; S.setup.pickAuction = []; repaintPicker(); },
+  pickClear(){ S.setup.picks = {}; S.setup.pickClosest = []; S.setup.pickAuction = []; render(); },
   pickDone(){ closeModal(); },
   setNum(e){ S.settings[e.dataset.k] = +e.value; saveSettings(); },
   toggle(e){ const k = e.dataset.k; S.settings[k] = !S.settings[k]; saveSettings(); render(); },
@@ -4602,6 +4833,9 @@ const ACT = {
   timerAdd(e){ Timer.add(+e.dataset.s); },
   timerSkip(){
     Timer.stop();
+    /* On the auction this is the ONLY manual way to close a leg early now that
+       "They are done" is gone, so it has to resolve rather than navigate. */
+    if(S.screen === 'auctionRun') return auctionResolve();
     go(S.screen === 'steal'  ? 'stealReveal'
      : S.screen === 'miniQ'  ? 'miniEntry'
      : S.screen === 'soloQ'  ? 'soloA'      // solo has no steal and no host
@@ -4811,7 +5045,14 @@ const ACT = {
     render();
   },
   auctionUntick(){ const a = G().auction; if(a.count) a.count--; render(); },
-  auctionStop(){ auctionResolve(); },
+  auctionSkip(){ auctionDraw(true); Snd.soft(); render(); },
+  auctionNextLeg(){
+    const a = G().auction;
+    a.leg++;
+    if(a.leg >= a.n) return auctionFinish();
+    auctionDraw();
+    go('auctionBid');
+  },
   afterAuction(){
     const g = G();
     g.done.auction = true;
