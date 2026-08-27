@@ -330,6 +330,16 @@ input[type=text],input[type=number],select,textarea{
 }
 input:focus,select:focus,textarea:focus{border-color:var(--gold);background:rgba(0,0,0,.5);outline:none}
 input::placeholder{color:var(--ink-3)}
+/* The two hint placeholders in the team cards. The rule above only reaches
+   <input>, so "Comma separated" in the Players <textarea> was falling back to
+   whatever grey the browser fancied and never matched "Captain name" beside
+   it. Both are set here, and set quieter than a real value — smaller and
+   italic, so an empty field reads as a prompt rather than as something
+   already filled in. */
+[data-act="tf"][data-k="captain"]::placeholder,
+[data-act="tf"][data-k="players"]::placeholder{
+  color:var(--ink-3);font-size:13px;font-style:italic;font-weight:400;
+}
 select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-2) 50%),linear-gradient(135deg,var(--ink-2) 50%,transparent 50%);
   background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:38px}
 .help{font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-3);line-height:1.5}
@@ -956,7 +966,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'1.5', date:'27 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.51', date:'27 Aug 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
