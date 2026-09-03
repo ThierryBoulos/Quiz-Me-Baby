@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v2.0 · 03 Sep 2026
+> Built by Thierry Boulos · © 2026 · v2.01 · 03 Sep 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'2.0', date:'03 Sep 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.01', date:'03 Sep 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -286,7 +286,7 @@ Import merges — a question with identical text updates the existing row instea
 
 ## What's in the box
 
-**553 questions** — 441 standard, 50 Closest To Wins, 22 Auction categories and 40 Don't Say the Same as Me prompts, across 19 themes:
+**550 questions** — 441 standard, 50 Closest To Wins, 22 Auction categories and 37 Don't Say the Same as Me prompts, across 19 themes:
 
 Acronyms · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech
 
@@ -298,8 +298,9 @@ Closest To Wins questions carry their caveats in the notes — which year the fi
 
 - **Adds** built-in questions it has never seen. Ones you deleted stay deleted.
 - **Refreshes** built-in questions it already has, where the built-in copy has changed — a corrected answer, a question moved to a different theme. This matters because the question id is a hash of the *question text*, so a fix to any other field arrives under an id the browser already holds; add-only would drop it silently and you would keep reading the old answer off your own screen.
+- **Retires** built-in questions that have been removed from the source outright, not corrected — a category dropped from Don't Say the Same as Me, say. Add and Refresh only know how to react to a *seed* row that still exists; they have nothing to say about one that has vanished, so a plain merge would leave it sitting in every existing browser's bank forever. `RETIRED_SEED` (next to `SEED_VERSION`) names anything that needs to disappear on the next bump.
 
-Only rows marked `src: 'seed'` are refreshed. Anything you **imported or typed yourself is never touched**, even where it sits on top of a built-in id. The startup toast reports both numbers — *"1 new built-in question added, 3 corrected in your bank."*
+Only rows marked `src: 'seed'` are touched by any of the three. Anything you **imported or typed yourself is never touched**, even where it sits on top of a built-in id. The startup toast reports all three — *"1 new built-in question added, 3 corrected, 2 retired in your bank."*
 
 **Two themes work differently:**
 

@@ -1054,7 +1054,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.0', date:'03 Sep 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.01', date:'03 Sep 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1790,7 +1790,6 @@ const SEED_SAYSAME = [
   ['Cats or dogs?', ['Cats','Dogs']],
   ['Name a chess piece', ['King','Queen','Rook','Bishop','Knight','Pawn']],
   ['Name an ocean', ['Pacific','Atlantic','Indian','Southern','Arctic']],
-  ['Name a Great Lake', ['Superior','Michigan','Huron','Erie','Ontario']],
   ['Rock, paper or scissors — pick one', ['Rock','Paper','Scissors']],
   ['Name a primary colour', ['Red','Yellow','Blue']],
   ['Name a traffic light colour', ['Red','Amber','Green']],
@@ -1799,7 +1798,7 @@ const SEED_SAYSAME = [
   ['Name a Beatle', ['John','Paul','George','Ringo']],
   ['Name a compass direction', ['North','South','East','West']],
   ['Name a vowel', ['A','E','I','O','U']],
-  ['Name a James Bond actor', ['Sean Connery','George Lazenby','Roger Moore','Timothy Dalton','Pierce Brosnan','Daniel Craig']],
+  ['Name a James Bond actor', ['Sean Connery','Pierce Brosnan','Daniel Craig']],
   ['Name a Friends character', ['Ross','Rachel','Monica','Chandler','Joey','Phoebe']],
   ['Name a colour of the rainbow', ['Red','Orange','Yellow','Green','Blue','Indigo','Violet']],
   ['Name a day of the week', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']],
@@ -1808,21 +1807,19 @@ const SEED_SAYSAME = [
   ['Name a planet in the solar system', ['Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune']],
   ['Name a month with 31 days', ['January','March','May','July','August','October','December']],
   ['Name a Snow White dwarf', ['Doc','Grumpy','Happy','Sleepy','Bashful','Sneezy','Dopey']],
-  ['Name a US state on the Pacific coast', ['California','Oregon','Washington','Alaska','Hawaii']],
   ['Name a zodiac sign', ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces']],
   ['Name a country in South America', ['Brazil','Argentina','Chile','Peru','Colombia','Venezuela','Ecuador','Bolivia','Paraguay','Uruguay']],
   ['Name a Disney princess', ['Snow White','Cinderella','Aurora','Ariel','Belle','Jasmine','Pocahontas','Mulan','Tiana','Rapunzel','Merida','Moana']],
-  ['Name a Formula 1 team', ['Red Bull','Ferrari','Mercedes','McLaren','Aston Martin','Alpine','Williams','RB','Sauber','Haas']],
-  ['Name an Avenger', ['Iron Man','Captain America','Thor','Hulk','Black Widow','Hawkeye','Spider-Man','Black Panther','Scarlet Witch','Ant-Man','Doctor Strange','Captain Marvel']],
-  ['Name a Star Wars character', ['Luke Skywalker','Leia Organa','Han Solo','Darth Vader','Yoda','Obi-Wan Kenobi','Chewbacca','R2-D2','C-3PO','Rey','Kylo Ren']],
+  ['Name a Formula 1 team', ['Red Bull','Ferrari','Mercedes','McLaren','Aston Martin','Alpine','Williams','Sauber','Haas']],
+  ['Name an Avenger', ['Iron Man','Captain America','Thor','Hulk','Spider-Man','Black Panther','Scarlet Witch','Ant-Man','Doctor Strange']],
   ['Name a dog breed', ['Labrador','Poodle','Bulldog','Beagle','Chihuahua','Husky','Golden Retriever','German Shepherd','Rottweiler','Dachshund','Pug','Boxer']],
   ['Name a type of pasta', ['Spaghetti','Penne','Fusilli','Linguine','Macaroni','Ravioli','Lasagne','Tagliatelle','Rigatoni','Farfalle']],
   ['Name a fruit', ['Apple','Banana','Orange','Grape','Mango','Pineapple','Strawberry','Kiwi','Watermelon','Pear','Peach','Cherry']],
   ['Name a country in Africa', ['Egypt','Nigeria','Kenya','Morocco','Ghana','Ethiopia','South Africa','Tanzania','Algeria','Senegal','Uganda','Zimbabwe']],
-  ['Name a pizza topping', ['Pepperoni','Mushroom','Olives','Ham','Pineapple','Onion','Sausage','Bacon','Chicken','Jalapeño','Anchovies','Extra cheese']],
+  ['Name a pizza topping', ['Pepperoni','Mushroom','Olives','Ham','Pineapple','Onion','Chicken','Jalapeño','Cheese']],
   ['Name a musical instrument', ['Guitar','Piano','Violin','Drums','Flute','Trumpet','Saxophone','Cello','Clarinet','Harp','Trombone','Bass']],
   ['Name a cheese', ['Feta','Cheddar','Brie','Mozzarella','Gouda','Parmesan','Camembert','Halloumi','Gruyère','Blue cheese','Ricotta','Manchego']],
-  ['Name a flower', ['Rose','Tulip','Daisy','Sunflower','Lily','Orchid','Daffodil','Carnation','Iris','Peony','Jasmine','Poppy']],
+  ['Name a flower', ['Rose','Tulip','Daisy','Sunflower','Lily','Orchid','Jasmine']],
   ['Name a fast food chain', ['McDonald’s','Burger King','KFC','Subway','Wendy’s','Taco Bell','Domino’s','Pizza Hut','Popeyes','Five Guys','Chick-fil-A','Shake Shack']]
 ];
 
@@ -2015,7 +2012,22 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 12;   // bumped when the built-in bank changes
+const SEED_VERSION = 14;   // bumped when the built-in bank changes
+/* Seed prompts that shipped once and have since been retired outright — not
+   corrected, removed. This is different from `killed`: `killed` is the HOST
+   deleting a question, and the app must never bring it back. This is the
+   CONTENT changing out from under a browser that never touched it — the seed
+   list simply no longer has this prompt — and without an explicit retire
+   list the row would sit there forever, since the merge below only adds and
+   corrects, it never deletes what it does not recognise. Matched on the
+   question text (equivalent to its id, easier to read here) and gated on
+   `src:'seed'`, so anything the host built or imported on top of the same
+   text is left alone. */
+const RETIRED_SEED = [
+  'Name a Great Lake',
+  'Name a Star Wars character',
+  'Name a US state on the Pacific coast'
+];
 (function bootBank(){
   /* Earlier banks were retired wholesale, not merged. Clear them out so a
      browser that ran an older copy of this file cannot resurrect those
@@ -2025,13 +2037,17 @@ const SEED_VERSION = 12;   // bumped when the built-in bank changes
         'qn.bank.v3','qn.seedv.v3','qn.killed.v3',
         'qn.bank.v4','qn.seedv.v4','qn.killed.v4',
         'qn.bank.v5','qn.seedv.v5','qn.killed.v5'].forEach(k => localStorage.removeItem(k)); }catch(e){}
-  const stored  = DB.get(DB.k.bank, null);
+  let stored  = DB.get(DB.k.bank, null);
   const killed  = DB.get(DB.k.killed, []);          // seed questions the host deleted
   const seenVer = DB.get(DB.k.seedv, 0);
   const seed    = buildSeedBank();
 
   if(!stored){ S.bank = seed; }
   else if(seenVer < SEED_VERSION){
+    const beforeRetire = stored.length;
+    stored = stored.filter(q => !(q.src === 'seed' && RETIRED_SEED.indexOf(q.question) > -1));
+    const retired = beforeRetire - stored.length;
+
     const have = {};
     stored.forEach(q => have[q.id] = 1);
     killed.forEach(id => have[id] = 1);
@@ -2065,7 +2081,7 @@ const SEED_VERSION = 12;   // bumped when the built-in bank changes
     });
 
     S.bank = stored.concat(fresh);
-    if(fresh.length || fixed) S.tmp.seedNews = { added:fresh.length, fixed };
+    if(fresh.length || fixed || retired) S.tmp.seedNews = { added:fresh.length, fixed, retired };
   } else {
     S.bank = stored;
   }
@@ -4140,7 +4156,7 @@ SCREENS.sayIntro = function(){
   return '<div class="stack lg intro-screen" style="padding-top:18px">' +
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
-      '<h1 class="display" style="font-size:clamp(24px,5.4vh,44px)">Don&rsquo;t Say the<br>Same as Me</h1>' +
+      '<h1 class="display">Don&rsquo;t Say the<br>Same as Me</h1>' +
       '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
@@ -5853,6 +5869,7 @@ if(S.tmp.seedNews) setTimeout(() => {
   const n = S.tmp.seedNews, bits = [];
   if(n.added) bits.push(n.added + ' new built-in question' + (n.added === 1 ? '' : 's') + ' added');
   if(n.fixed) bits.push(n.fixed + ' corrected');
+  if(n.retired) bits.push(n.retired + ' retired');
   toast(bits.join(', ') + ' in your bank.', 5000);
 }, 900);
 
