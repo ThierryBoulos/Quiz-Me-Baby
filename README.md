@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v1.9 · 28 Aug 2026
+> Built by Thierry Boulos · © 2026 · v2.0 · 03 Sep 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'1.9', date:'28 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.0', date:'03 Sep 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -63,7 +63,7 @@ To carry your data across: **Settings → Export everything (JSON)**, then **Imp
 
 ## Mini-games
 
-Three of them, **all optional, all chosen up front** in Setup — card 04, after rounds, difficulty and themes, since those three decide each other and the mini-games sit on top. There is no longer an end-of-night pop-up asking whether you want the Battle; if it is on the card it is on the schedule, visible in the round tracker from the first pip.
+Four of them, **all optional, all chosen up front** in Setup — card 04, after rounds, difficulty and themes, since those three decide each other and the mini-games sit on top. There is no end-of-night pop-up asking whether you want the Battle; if it is on the card it is on the schedule, visible in the round tracker from the first pip.
 
 Each row carries its own value and slot — *"2 pts · after R3"* — and the card header carries the total. There is no paragraph spelling the arithmetic out: it cost most of a phone screen to say what the badges already say.
 
@@ -71,9 +71,10 @@ Each row carries its own value and slot — *"2 pts · after R3"* — and the ca
 |---|---|---|
 | **Closest To Wins** | Seven number questions, nearest guess takes the leg | Spread through the rounds |
 | **The Auction** | Three categories. Bid how many you can name, then deliver in 30s | Spread through the rounds |
+| **Don't Say the Same as Me** | Nine prompts. Answer without matching the host's word | Spread through the rounds |
 | **Battle of the Captains** | Ten questions each, captains only, 7s a shot | **Always after the last round** |
 
-**Where they land.** Even spread rather than fixed gaps: mini *k* of *M* goes after round `round((k+1) × N ÷ (M+1))`. On a normal card that gives the two-round gap — 8 rounds with 2 mini-games puts them after rounds 3 and 5. When the card is too tight it compresses to one round, then to two mini-games back to back, rather than refusing. It can never open the night: at least one standard round is always played first.
+**Where they land.** Even spread rather than fixed gaps: mini *k* of *M* goes after round `round((k+1) × N ÷ (M+1))`. On a normal card that gives the two-round gap — 8 rounds with 2 mini-games puts them after rounds 3 and 5. When the card is too tight it compresses to one round, then to mini-games back to back, rather than refusing. It can never open the night: at least one standard round is always played first.
 
 **What they are worth.** `clamp(2, 4, round(0.35 × N ÷ M))`, the same value for each.
 
@@ -106,6 +107,20 @@ While they name, you get a **tap counter** — one big tap target, a running `12
 
 They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker** — an auction category is not easy or hard, it is wide or narrow, and the bidding sets the difficulty. Each carries a ruling note (*"Marques only. Toyota counts, Corolla does not."*) because every one of these gets argued: it says what counts, you rule once, the table moves on. Filter the bank by **Type → Auction** to find them; they show an `Auction` badge in the Type column.
 
+## Don't Say the Same as Me
+
+**Nine prompts.** Host reads one — *"Name a cheese"* — and starts a clock. Both teams call out an answer before it runs out. Saying the same thing as each other costs nothing; the only thing that costs a team is matching the word the host already has loaded, which stays hidden until time is up.
+
+1. **10 seconds** to answer, out loud, no phones. A **Peek at the answer — host only** toggle sits under the timer so you know what to listen for without giving it away.
+2. Time&rsquo;s up — **Time is up** or the clock itself moves you on to the reveal.
+3. The host&rsquo;s word appears. You rule on who said it, from what you heard.
+4. **Dodged it while the other team did not?** You take the leg. Both dodged it, or both said it — **tie, a point each**, the same rule every mini-game here uses.
+5. **Most legs out of nine** takes the mini-game points. Level after nine? Straight into a tie-breaker prompt, same as Closest To Wins.
+
+**The order tightens on purpose.** Legs are sorted by how wide the prompt is — how many different answers its pool holds — from vast down to tight. Round one might be *"name a fast food chain"*, where the host's word is one of a dozen and dodging it is easy money. Round nine might be a coin flip. **Change this prompt** is on the thinking screen, same shape as Auction's category swap — available only before the clock runs out, so the prompt can't be swapped away from once the room has heard it.
+
+**40 prompts** ship in the bank, spanning true binaries (*heads or tails, odds or evens*) up through wide-open categories (cheeses, fast food chains, dog breeds, countries). Each carries `type: saysame`, a **blank theme, no difficulty** — same reasoning as the Auction — and a **pool of candidate answers** instead of one fixed answer: one is drawn at random each time the prompt is played, so replaying "Name a cheese" does not always land on Feta. The pool's length **is** the prompt's scope, and that number is exactly what drives the vast-to-tight ordering above.
+
 ## Adding your own questions
 
 **Add a question** in the bank screen writes all three types, and the form changes shape to match:
@@ -115,6 +130,7 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 | **Standard** | question · answer · notes · theme · difficulty · pair ticker |
 | **Closest To Wins** | question · **answer must be a number** · notes · theme · difficulty |
 | **The Auction** | question · ruling note. No answer, no theme, no difficulty — the bidding sets the difficulty and you count the answers yourself. |
+| **Don't Say the Same as Me** | prompt · **possible answers, one per line, at least two**. No theme, no difficulty — the width of the list is the difficulty, and one line is drawn at random each time it plays. |
 
 Every field lives in the form once and the type picker decides which are shown, so switching type mid-way doesn't rebuild the dialog or lose what you have already typed.
 
@@ -270,7 +286,7 @@ Import merges — a question with identical text updates the existing row instea
 
 ## What's in the box
 
-**513 questions** — 441 standard, 50 Closest To Wins and 22 Auction categories, across 19 themes:
+**553 questions** — 441 standard, 50 Closest To Wins, 22 Auction categories and 40 Don't Say the Same as Me prompts, across 19 themes:
 
 Acronyms · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech
 

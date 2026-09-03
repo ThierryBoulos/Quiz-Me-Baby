@@ -379,10 +379,12 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .qadd .q-only,.qadd .q-newtheme{display:none}
 .qadd[data-type="standard"] .q-std,
 .qadd[data-type="closest"]  .q-clo,
-.qadd[data-type="auction"]  .q-auc{display:flex}
+.qadd[data-type="auction"]  .q-auc,
+.qadd[data-type="saysame"]  .q-say{display:flex}
 .qadd[data-type="standard"] p.q-std,
 .qadd[data-type="closest"]  p.q-clo,
-.qadd[data-type="auction"]  p.q-auc{display:block}
+.qadd[data-type="auction"]  p.q-auc,
+.qadd[data-type="saysame"]  p.q-say{display:block}
 .qadd[data-newtheme="1"] .q-newtheme{display:flex}
 .qadd[data-newtheme="1"] p.q-newtheme{display:block}
 /* the theme fields live in a grid; a hidden one must not hold its column open */
@@ -1052,7 +1054,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'1.9', date:'28 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.0', date:'03 Sep 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1759,6 +1761,71 @@ const SEED_AUCTION = [
   ['How many vegetables can you name?','Same supermarket rule as the fruit. No botany arguments.']
 ];
 
+/* ---- DON'T SAY THE SAME AS ME --------------------------------------------
+   [prompt, [candidate answer, candidate answer, ...]]
+   No theme, no difficulty, no pairing ticker — same reasoning as the auction:
+   a prompt like "Name a cheese" is not easy or hard, it is just wide or
+   narrow, and that width IS the difficulty here.
+
+   The candidate list does two jobs at once. One entry is drawn at random
+   as THIS game's secret word, so replaying "Name a cheese" does not always
+   land on Feta — that is the "answers should always change" part. And the
+   list's LENGTH is the prompt's real-world scope: 2 for a true binary like
+   Heads or Tails, up to a dozen or so for something wide open like fast food
+   chains. That number is what orders a night's nine prompts from vast (safe,
+   many ways to dodge the host) down to tight (a coin flip by the end) — see
+   buildGame(), which sorts the picked legs by pool length, descending.
+
+   On "up to 40-50": that ceiling describes how many valid answers actually
+   exist out in the world for a wide category, not how many get typed into
+   this file. Only one is ever drawn per game, so the payoff of hand-typing
+   forty near-duplicate cheeses is nearly zero and the cost — to file size,
+   to reading this list, to editing it later — is not. A dozen genuinely
+   different, well-known answers gives all the unpredictability replay needs.
+   -------------------------------------------------------------------------- */
+const SEED_SAYSAME = [
+  ['Heads or tails?', ['Heads','Tails']],
+  ['Odds or evens?', ['Odds','Evens']],
+  ['Left or right?', ['Left','Right']],
+  ['Cats or dogs?', ['Cats','Dogs']],
+  ['Name a chess piece', ['King','Queen','Rook','Bishop','Knight','Pawn']],
+  ['Name an ocean', ['Pacific','Atlantic','Indian','Southern','Arctic']],
+  ['Name a Great Lake', ['Superior','Michigan','Huron','Erie','Ontario']],
+  ['Rock, paper or scissors — pick one', ['Rock','Paper','Scissors']],
+  ['Name a primary colour', ['Red','Yellow','Blue']],
+  ['Name a traffic light colour', ['Red','Amber','Green']],
+  ['Name a suit in a deck of cards', ['Hearts','Diamonds','Clubs','Spades']],
+  ['Name a season', ['Spring','Summer','Autumn','Winter']],
+  ['Name a Beatle', ['John','Paul','George','Ringo']],
+  ['Name a compass direction', ['North','South','East','West']],
+  ['Name a vowel', ['A','E','I','O','U']],
+  ['Name a James Bond actor', ['Sean Connery','George Lazenby','Roger Moore','Timothy Dalton','Pierce Brosnan','Daniel Craig']],
+  ['Name a Friends character', ['Ross','Rachel','Monica','Chandler','Joey','Phoebe']],
+  ['Name a colour of the rainbow', ['Red','Orange','Yellow','Green','Blue','Indigo','Violet']],
+  ['Name a day of the week', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']],
+  ['Name a continent', ['Africa','Antarctica','Asia','Europe','North America','Australia','South America']],
+  ['Name a country that borders France', ['Belgium','Luxembourg','Germany','Switzerland','Italy','Monaco','Spain','Andorra']],
+  ['Name a planet in the solar system', ['Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune']],
+  ['Name a month with 31 days', ['January','March','May','July','August','October','December']],
+  ['Name a Snow White dwarf', ['Doc','Grumpy','Happy','Sleepy','Bashful','Sneezy','Dopey']],
+  ['Name a US state on the Pacific coast', ['California','Oregon','Washington','Alaska','Hawaii']],
+  ['Name a zodiac sign', ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces']],
+  ['Name a country in South America', ['Brazil','Argentina','Chile','Peru','Colombia','Venezuela','Ecuador','Bolivia','Paraguay','Uruguay']],
+  ['Name a Disney princess', ['Snow White','Cinderella','Aurora','Ariel','Belle','Jasmine','Pocahontas','Mulan','Tiana','Rapunzel','Merida','Moana']],
+  ['Name a Formula 1 team', ['Red Bull','Ferrari','Mercedes','McLaren','Aston Martin','Alpine','Williams','RB','Sauber','Haas']],
+  ['Name an Avenger', ['Iron Man','Captain America','Thor','Hulk','Black Widow','Hawkeye','Spider-Man','Black Panther','Scarlet Witch','Ant-Man','Doctor Strange','Captain Marvel']],
+  ['Name a Star Wars character', ['Luke Skywalker','Leia Organa','Han Solo','Darth Vader','Yoda','Obi-Wan Kenobi','Chewbacca','R2-D2','C-3PO','Rey','Kylo Ren']],
+  ['Name a dog breed', ['Labrador','Poodle','Bulldog','Beagle','Chihuahua','Husky','Golden Retriever','German Shepherd','Rottweiler','Dachshund','Pug','Boxer']],
+  ['Name a type of pasta', ['Spaghetti','Penne','Fusilli','Linguine','Macaroni','Ravioli','Lasagne','Tagliatelle','Rigatoni','Farfalle']],
+  ['Name a fruit', ['Apple','Banana','Orange','Grape','Mango','Pineapple','Strawberry','Kiwi','Watermelon','Pear','Peach','Cherry']],
+  ['Name a country in Africa', ['Egypt','Nigeria','Kenya','Morocco','Ghana','Ethiopia','South Africa','Tanzania','Algeria','Senegal','Uganda','Zimbabwe']],
+  ['Name a pizza topping', ['Pepperoni','Mushroom','Olives','Ham','Pineapple','Onion','Sausage','Bacon','Chicken','Jalapeño','Anchovies','Extra cheese']],
+  ['Name a musical instrument', ['Guitar','Piano','Violin','Drums','Flute','Trumpet','Saxophone','Cello','Clarinet','Harp','Trombone','Bass']],
+  ['Name a cheese', ['Feta','Cheddar','Brie','Mozzarella','Gouda','Parmesan','Camembert','Halloumi','Gruyère','Blue cheese','Ricotta','Manchego']],
+  ['Name a flower', ['Rose','Tulip','Daisy','Sunflower','Lily','Orchid','Daffodil','Carnation','Iris','Peony','Jasmine','Poppy']],
+  ['Name a fast food chain', ['McDonald’s','Burger King','KFC','Subway','Wendy’s','Taco Bell','Domino’s','Pizza Hut','Popeyes','Five Guys','Chick-fil-A','Shake Shack']]
+];
+
 function buildSeedBank(){
   const out = [];
   SEED.forEach(function(r){ out.push({
@@ -1772,6 +1839,10 @@ function buildSeedBank(){
   SEED_AUCTION.forEach(function(r){ out.push({
     id:hash(r[0]), question:r[0], answer:'Host counts', notes:r[1]||'', theme:'',
     type:'auction', difficulty:'', use_with:'', src:'seed'
+  }); });
+  SEED_SAYSAME.forEach(function(r){ out.push({
+    id:hash(r[0]), question:r[0], answer:'', notes:'', theme:'',
+    type:'saysame', difficulty:'', use_with:'', pool:r[1].slice(), src:'seed'
   }); });
   return out;
 }
@@ -1944,7 +2015,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 11;   // bumped when the built-in bank changes
+const SEED_VERSION = 12;   // bumped when the built-in bank changes
 (function bootBank(){
   /* Earlier banks were retired wholesale, not merged. Clear them out so a
      browser that ran an older copy of this file cannot resurrect those
@@ -1984,8 +2055,12 @@ const SEED_VERSION = 11;   // bumped when the built-in bank changes
     stored.forEach(q => {
       const s = byId[q.id];
       if(!s || q.src !== 'seed') return;
+      /* pool is an array — a straight !== is always true between two distinct
+         array references even when the contents match, which would report a
+         false "correction" on every single load. Compare it by content. */
       const moved = ['question','answer','notes','theme','type','difficulty','use_with']
-        .some(k => q[k] !== s[k]);
+        .some(k => q[k] !== s[k])
+        || JSON.stringify(q.pool || null) !== JSON.stringify(s.pool || null);
       if(moved){ Object.assign(q, s); fixed++; }
     });
 
@@ -2286,6 +2361,65 @@ function auctionDraw(skip){
   a.bid = 0; a.by = null; a.count = 0;
   a.turn = a.leg % 2;                // the open alternates leg by leg
 }
+/* ==========================================================================
+   8d. DON'T SAY THE SAME AS ME
+   ==========================================================================
+   Host reads a prompt — "Name a cheese" — and starts a clock. Both teams call
+   out an answer before it runs out. They can say the same as EACH OTHER, that
+   costs nothing; the only thing that costs them is matching the host's own
+   pre-loaded word, revealed only once the clock stops.
+
+   Nine legs. Whoever avoided the host's word while the other team did not
+   takes the leg; if both dodged it or both said it, that leg is a wash and
+   splits like any other tie here. Most legs after nine wins the mini-game,
+   with the same straight-into-a-tie-breaker rule Closest To Wins uses if the
+   legs themselves end up level.
+
+   The order is deliberate: legs are sorted by how WIDE the prompt is — how
+   many different answers the pool holds — from vast down to tight. Round one
+   might be "name a fast food chain", where the host's word is one of a dozen
+   and dodging it is easy. Round nine might be a coin flip. The night is
+   supposed to tighten.
+   ========================================================================== */
+const SAYSAME_SECS = 10;
+const SAYSAME_LEGS = 9;
+
+function saySamePool(){
+  return S.bank.filter(q => q.type === 'saysame' && isFresh(q) && (q.pool || []).length >= 2);
+}
+/* One prompt from the bank -> one leg. `answer` is resolved HERE, freshly, so
+   the same prompt reveals a different word most times it is played — the
+   whole reason the bank stores a pool instead of a single fixed answer. */
+function drawSaySame(q){
+  const pool = q.pool || [];
+  return Object.assign({}, q, { answer: pool[Math.floor(Math.random() * pool.length)] });
+}
+/* Hand-picks lead (which prompts play), then the vast-to-tight sort decides
+   WHEN each one lands — a hand-pick does not skip the front of the queue by
+   virtue of being chosen on purpose; it only guarantees it plays at all.
+
+   That guarantee needs the primary set to be picked BEFORE it is sorted, not
+   after. Sorting the whole candidate pile — hand-picks and filler together —
+   and then slicing off the top SAYSAME_LEGS would let a host's own tight,
+   small-pool pick (a coin flip, say) get outsorted into the spare-only tail
+   by nothing more than other prompts happening to have bigger pools, which
+   breaks the promise a hand-pick makes everywhere else in this app: chosen on
+   purpose means it plays. */
+function saySameDeck(cfg){
+  const picked = ((cfg && cfg.pickSaySame) || [])
+    .map(id => S.bank.find(q => q.id === id))
+    .filter(q => q && (q.pool || []).length >= 2)
+    .slice(0, SAYSAME_LEGS);
+  const ids = new Set(picked.map(q => q.id));
+  const rest = shuffle(saySamePool().filter(q => !ids.has(q.id)));
+
+  const fillNeeded = Math.max(0, SAYSAME_LEGS - picked.length);
+  const primary = picked.concat(rest.slice(0, fillNeeded))
+    .sort((a, b) => b.pool.length - a.pool.length);   // vast-to-tight, within the chosen nine
+  const spare = rest.slice(fillNeeded, fillNeeded + 6);   // held back for tie-breaker legs
+  return primary.concat(spare);
+}
+
 const LL = {
   friend:{ key:'friend', name:'Call a Friend', icon:ICON.phone },
   dip:   { key:'dip',    name:'Double Dip',    icon:ICON.dip   },
@@ -2315,12 +2449,13 @@ const LL = {
    one from deciding the night on its own.
    ========================================================================== */
 const MINI_GAMES = {
-  closest:{ key:'closest', name:'Closest To Wins',        blurb:'Seven numbers. Closest guess wins the leg.' },
-  auction:{ key:'auction', name:'The Auction',            blurb:'Bid how many you can name, then deliver it.' },
-  battle: { key:'battle',  name:'Battle of the Captains', blurb:'Ten each, captains only, 7s a shot.' }
+  closest:{ key:'closest', name:'Closest To Wins',            blurb:'Seven numbers. Closest guess wins the leg.' },
+  auction:{ key:'auction', name:'The Auction',                blurb:'Bid how many you can name, then deliver it.' },
+  saysame:{ key:'saysame', name:"Don't Say the Same as Me",   blurb:'Ten seconds to answer without matching the host.' },
+  battle: { key:'battle',  name:'Battle of the Captains',     blurb:'Ten each, captains only, 7s a shot.' }
 };
-/* the two that get spread through the rounds — the Battle is the finale */
-const INTERLEAVED = ['closest', 'auction'];
+/* the three that get spread through the rounds — the Battle is the finale */
+const INTERLEAVED = ['closest', 'auction', 'saysame'];
 
 function miniPointValue(N, M){
   if(!M) return 0;
@@ -2382,6 +2517,14 @@ function buildGame(cfg){
   const cp = cpAll.slice(0, CLOSEST_LEGS);
   const spare = cpAll.slice(CLOSEST_LEGS, CLOSEST_LEGS + 6);   // held back for tie-breaker legs
 
+  /* Say-Same's legs are already sorted vast-to-tight by saySameDeck(); the
+     first SAYSAME_LEGS play, the rest sit in reserve for a tie-break. Each
+     leg's secret word is resolved now, once, via drawSaySame — not at render
+     time, or a re-render mid-leg would change the answer under the host. */
+  const ssDeck = saySameDeck(cfg);
+  const ssLegs = ssDeck.slice(0, SAYSAME_LEGS).map(drawSaySame);
+  const ssSpare = ssDeck.slice(SAYSAME_LEGS);   // resolved lazily, if a tie-break needs one
+
   const mk = (t, color) => ({
     name:t.name, captain:t.captain, players:t.players,
     score:0, ll:{ friend:true, dip:true, dbl:true }, color
@@ -2392,7 +2535,8 @@ function buildGame(cfg){
   const wanted = (cfg.minis || []).slice();
   const inter  = INTERLEAVED.filter(k => wanted.indexOf(k) > -1)
                             .filter(k => k !== 'closest' || cp.length)
-                            .filter(k => k !== 'auction' || auctionPool().length);
+                            .filter(k => k !== 'auction' || auctionPool().length)
+                            .filter(k => k !== 'saysame' || ssLegs.length);
   const hasBattle = wanted.indexOf('battle') > -1;
   const plan = planMinis(rounds.length, inter);
   const M = inter.length + (hasBattle ? 1 : 0);
@@ -2406,6 +2550,7 @@ function buildGame(cfg){
     miniPts: miniPointValue(rounds.length, M),
     done:{},                   // key -> true once that mini-game has finished
     mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
+    saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     auction:null,
     r:0, seat:0, sub:'intro', miniPlayed:false,
     battle:null,
@@ -2455,10 +2600,12 @@ function schedule(){
 }
 const AUCTION_SCREENS = ['auctionIntro','auctionBid','auctionRun','auctionLeg','auctionResult'];
 const CLOSEST_SCREENS = ['miniIntro','miniQ','miniEntry','miniSummary'];
+const SAYSAME_SCREENS = ['sayIntro','sayQ','sayJudge','saySummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
   if(CLOSEST_SCREENS.indexOf(S.screen) > -1) return 'closest';
   if(AUCTION_SCREENS.indexOf(S.screen) > -1) return 'auction';
+  if(SAYSAME_SCREENS.indexOf(S.screen) > -1) return 'saysame';
   if(BATTLE_SCREENS.indexOf(S.screen) > -1) return 'battle';
   return null;
 }
@@ -2505,8 +2652,8 @@ function render(){
      does fit the window. Any screen using .play or .fits MUST be in one of
      them — left out, it renders 88px of padding inside a box already sized to
      the viewport and the page scrolls by exactly that much. */
-  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary'].indexOf(S.screen) > -1);
   document.body.classList.toggle('homemode', S.screen === 'home');
   app.innerHTML = fn();
   if(keep && keep.act){
@@ -2534,6 +2681,7 @@ function renderHUD(){
   const inGame = g && (['roundIntro','ask','reveal','steal','stealReveal','answer','roundScore','sudden','final'].indexOf(S.screen) > -1
     || CLOSEST_SCREENS.indexOf(S.screen) > -1
     || AUCTION_SCREENS.indexOf(S.screen) > -1
+    || SAYSAME_SCREENS.indexOf(S.screen) > -1
     || BATTLE_SCREENS.indexOf(S.screen) > -1);
   if(!inGame){ h.hidden = true; h.innerHTML = ''; return; }
   h.hidden = false;
@@ -2554,6 +2702,8 @@ function renderHUD(){
     label = '<b>THE AUCTION</b>' +
       (a && S.screen !== 'auctionResult' ? ' &nbsp;·&nbsp; Leg ' + Math.min(a.leg + 1, a.n) + '/' + a.n : '') +
       (S.screen === 'auctionRun' && a ? ' &nbsp;·&nbsp; ' + a.count + '/' + a.bid : '');
+  } else if(SAYSAME_SCREENS.indexOf(S.screen) > -1){
+    label = '<b>DON&rsquo;T SAY THE SAME AS ME</b> &nbsp;·&nbsp; ' + sayLegLabel();
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
     const b = g.battle;
     label = '<b>BATTLE OF THE CAPTAINS</b>' +
@@ -2662,7 +2812,7 @@ SCREENS.rules = function(){
       'Each team picks a <strong>captain</strong>. The captain gives the final answer. Nobody else. If the captain has not said it, it has not been said.',
       '<strong>Settle who goes first by chance, not by argument.</strong> Coin toss, rock paper scissors, highest card, closest guess to a number in the host&rsquo;s head — anything, as long as it is luck. <strong>The winner then chooses</strong> whether to be <span class="tn a">Team A</span>, who answers first every round, or <span class="tn b">Team B</span>, who gets the first steal.',
       '<strong>No phones.</strong> Not on the table, not in a lap.',
-      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or all three.'
+      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or any of the four.'
     ])) +
 
     ruleBlock('02', 'A standard round', ol([
@@ -2684,7 +2834,7 @@ SCREENS.rules = function(){
     ])) +
 
     ruleBlock('04', 'The mini-games', ul([
-      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or all three</strong>. They are announced at the start, not sprung on you.'),
+      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or any of the four</strong>. They are announced at the start, not sprung on you.'),
       li('They drop in <strong>between the standard rounds</strong>, spaced out across the night. Where exactly depends on how many rounds you are playing.'),
       li('Each one is worth <strong>between 2 and 4 points</strong> to whoever wins it. The host can tell you which before you start.'),
       li('<span style="color:var(--warn)">No lifelines in any of them.</span>')
@@ -2705,7 +2855,15 @@ SCREENS.rules = function(){
       li('Most categories out of ' + AUCTION_LEGS + ' wins the mini-game. Bid what you can deliver, not what sounds brave.')
     ])) +
 
-    ruleBlock('07', 'Battle of the Captains', ul([
+    ruleBlock('07', "Don't Say the Same as Me", ul([
+      li('Host reads a prompt — &ldquo;Name a cheese.&rdquo; <strong>' + SAYSAME_SECS + ' seconds</strong> for both teams to call out an answer.'),
+      li('The host already has a word loaded. <strong>Saying the same as each other is fine</strong> — the only thing that costs you is matching the host.'),
+      li('Time&rsquo;s up, the host reveals the word and rules on who said it. Dodged it while the other team did not? You take the leg.'),
+      li('Both dodged it, or both said it? <strong>Tie — a point each.</strong>'),
+      li('Most legs out of ' + SAYSAME_LEGS + ' wins the mini-game. The prompts get narrower as the night goes — the last one might be a coin flip.')
+    ])) +
+
+    ruleBlock('08', 'Battle of the Captains', ul([
       li('<strong>Captains only.</strong> The room says nothing — and that means nothing.'),
       li('Ten questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot, one captain at a time.'),
       li('Both captains get the <strong>same shape</strong> — five easy, five medium, in the same order — but never the same questions. Different sets, same difficulty, so nobody can claim they drew the harder ten.'),
@@ -2714,7 +2872,7 @@ SCREENS.rules = function(){
       li('It always runs <strong>last</strong>, after the final standard round.')
     ])) +
 
-    ruleBlock('08', 'Winning', ul([
+    ruleBlock('09', 'Winning', ul([
       li('Highest score after the last round takes the night.'),
       li('Tie? <strong>Sudden death</strong> — one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
     ])) +
@@ -2740,7 +2898,7 @@ function defaultSetup(){
     difficulty:'mixed',
     themeDiff:{},       // theme -> difficulty, overriding the house setting
     minis:['closest'],  // which mini-games are on tonight's card
-    pickClosest:[], pickAuction:[],   // hand-picked mini-game questions
+    pickClosest:[], pickAuction:[], pickSaySame:[],   // hand-picked mini-game questions
     picks:{}            // theme -> [questionId, questionId] chosen by hand
   };
 }
@@ -3113,7 +3271,9 @@ const MINI_PICKS = {
   closest:{ store:'pickClosest', type:'closest', cap:CLOSEST_LEGS, label:'Closest To Wins',
             help:'Number questions, in the order you tick them. Anything short is dealt from the bank as usual.' },
   auction:{ store:'pickAuction', type:'auction', cap:AUCTION_LEGS, label:'The Auction',
-            help:'Categories, in the order you tick them. Anything short is drawn from the bank.' }
+            help:'Categories, in the order you tick them. Anything short is drawn from the bank.' },
+  saysame:{ store:'pickSaySame', type:'saysame', cap:SAYSAME_LEGS, label:"Don't Say the Same as Me",
+            help:'Prompts, in the order you tick them. Anything short is dealt from the bank as usual — vast prompts play first, tight ones last.' }
 };
 function miniPicksFor(key){ return (S.setup && S.setup[MINI_PICKS[key].store]) || []; }
 function miniPickBlocks(){
@@ -3121,7 +3281,8 @@ function miniPickBlocks(){
   return Object.keys(MINI_PICKS).filter(k => (c.minis || []).indexOf(k) > -1).map(k => {
     const m = MINI_PICKS[k];
     const sel = miniPicksFor(k), full = sel.length >= m.cap;
-    const pool = S.bank.filter(q => q.type === m.type && isFresh(q));
+    const pool = S.bank.filter(q => q.type === m.type && isFresh(q) &&
+      (m.type !== 'saysame' || (q.pool || []).length >= 2));
     const rows = pool.map(q => {
       const on = sel.indexOf(q.id) > -1;
       return '<button class="pickrow" role="button" aria-pressed="' + on + '"' + (!on && full ? ' disabled' : '') +
@@ -3130,8 +3291,12 @@ function miniPickBlocks(){
         '<span class="pq"><span class="qq">' + esc(q.question) + '</span>' +
         /* Closest To Wins is a number — the answer IS the useful line, and its
            note is a source citation nobody picks a question on. The auction has
-           no answer worth printing ("Host counts"), so it shows its ruling. */
+           no answer worth printing ("Host counts"), so it shows its ruling. A
+           Say-Same prompt has no FIXED answer to show — one is drawn fresh
+           each time it is played — so it shows the pool instead, which is the
+           thing the host is actually choosing between prompts on. */
         (m.type === 'closest' ? '<span class="qa">' + esc(q.answer) + '</span>'
+         : m.type === 'saysame' ? '<span class="qa dim">' + esc(q.pool.join(' · ')) + '</span>'
          : q.notes ? '<span class="qa dim">' + esc(q.notes) + '</span>' : '') +
         '</span></button>';
     }).join('');
@@ -3953,6 +4118,126 @@ SCREENS.auctionResult = function(){
 };
 
 /* ==========================================================================
+   17d. DON'T SAY THE SAME AS ME — screens
+   ========================================================================== */
+function sayLegLabel(){
+  const s = G().saySame;
+  const i = Math.min(s.i, s.qs.length - 1);
+  return i >= s.base ? 'Tie-breaker leg ' + (i - s.base + 1) : 'Leg ' + (i + 1) + ' of ' + s.base;
+}
+function sayDots(){
+  const s = G().saySame;
+  let out = '<span class="mini-dots">';
+  for(let i = 0; i < s.qs.length; i++){
+    const r = s.subs[i];
+    out += '<i class="' + (!r ? '' : r.winner === 'tie' ? 't' : r.winner === 0 ? 'a' : 'b') + '"></i>';
+  }
+  return out + '</span>';
+}
+
+SCREENS.sayIntro = function(){
+  const g = G(), s = g.saySame, n = s.qs.length;
+  return '<div class="stack lg intro-screen" style="padding-top:18px">' +
+    '<div class="center stack intro-head" style="gap:10px">' +
+      '<div class="eyebrow gold">Mini-game</div>' +
+      '<h1 class="display" style="font-size:clamp(24px,5.4vh,44px)">Don&rsquo;t Say the<br>Same as Me</h1>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+    '</div>' +
+    '<div class="card pad lit stack">' +
+      '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
+        '<li><strong style="color:var(--gold)">1.</strong> A prompt, <strong>' + SAYSAME_SECS + ' seconds</strong>, both teams answer. The host has a word loaded — <strong>matching each other is fine</strong>, only matching the host costs you.</li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> Time&rsquo;s up — the word is revealed and the host rules who said it.</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> Dodged it alone? You take the leg. Both dodged or both said it? <strong>Tie — a point each.</strong></li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Most legs after ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level? Straight into a tie-breaker.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="sayStart">Start leg 1</button></div>' +
+  '</div>';
+};
+AFTER.sayIntro = function(){ jingleOnce('saysame'); };
+
+SCREENS.sayQ = function(){
+  const g = G(), s = g.saySame, q = s.qs[s.i];
+  return '<div class="play">' +
+    '<div class="center"><div class="mini-band"><span class="eyebrow gold">' + sayLegLabel() + '</span>' + sayDots() + '</div></div>' +
+    '<div class="spot" style="background:radial-gradient(80% 120% at 50% -20%,rgba(245,197,24,.16),transparent 65%)">' +
+      '<div class="q-theme">Don&rsquo;t say the same as me</div>' +
+      '<h2 class="q-text">' + esc(q.question) + '</h2>' +
+      timerRing('seconds left') +
+      timerControls() +
+      peek(q) +
+    '</div>' +
+    '<div class="row between" style="gap:10px">' +
+      '<button class="btn sm ghost" data-act="saySwap">Change this prompt</button>' +
+      '<button class="btn gold" data-act="toSayJudge">Time&rsquo;s up — reveal</button>' +
+    '</div>' +
+  '</div>';
+};
+AFTER.sayQ = function(){
+  armTimer('say' + G().saySame.i, SAYSAME_SECS, () => { if(S.screen === 'sayQ') go('sayJudge'); });
+};
+
+SCREENS.sayJudge = function(){
+  const g = G(), s = g.saySame, q = s.qs[s.i];
+  return '<div class="compact">' +
+    '<div class="center"><div class="mini-band"><span class="eyebrow gold">' + sayLegLabel() + '</span>' + sayDots() + '</div></div>' +
+    '<div class="spot" style="background:radial-gradient(80% 120% at 50% -20%,rgba(245,197,24,.16),transparent 65%)">' +
+      '<p class="q-text" style="font-size:clamp(15px,1.8vw,20px);font-weight:500;color:var(--ink-2);max-width:46ch;margin:0 auto 8px">' + esc(q.question) + '</p>' +
+      '<div class="eyebrow gold">The host&rsquo;s word</div>' +
+      '<div class="q-answer">' + esc(q.answer) + '</div>' +
+    '</div>' +
+    '<div class="card pad lit stack" style="gap:10px">' +
+      '<h3 class="display" style="font-size:clamp(16px,2.2vw,22px);text-align:center">Who avoided it?</h3>' +
+      '<div class="btn-row center" style="gap:10px">' +
+        '<button class="btn teamA lg" data-act="sayVerdict" data-w="0">' + esc(g.teams[0].name) + '</button>' +
+        '<button class="btn ghost" data-act="sayVerdict" data-w="tie">Tie — 1 each</button>' +
+        '<button class="btn teamB lg" data-act="sayVerdict" data-w="1">' + esc(g.teams[1].name) + '</button>' +
+      '</div>' +
+      '<p class="help" style="text-align:center">Tie covers both — both dodged it, or both said it. Either way, a point each.</p>' +
+    '</div>' +
+  '</div>';
+};
+
+SCREENS.saySummary = function(){
+  const g = G(), s = g.saySame;
+  const rows = s.subs.map((r, i) =>
+    '<tr><td class="rowhead" data-l="Leg">' + (i + 1) + '</td>' +
+    '<td class="qcell" data-l="Prompt">' + esc(r.q.question) + '</td>' +
+    '<td data-l="Word">' + esc(r.q.answer) + '</td>' +
+    '<td data-l="Winner">' + (r.winner === 'tie' ? '<span class="badge line">Tie</span>' : '<span class="badge ' + (r.winner === 0 ? 'a' : 'b') + '">' + esc(g.teams[r.winner].name) + '</span>') + '</td></tr>'
+  ).join('');
+
+  const verdict = s.verdict || {};
+  return '<div class="fits">' +
+    '<div class="center stack" style="gap:6px">' +
+      '<div class="eyebrow gold">Don&rsquo;t Say the Same as Me — final</div>' +
+      '<h2 class="display">' + (verdict.winner == null ? 'Tie' : esc(g.teams[verdict.winner].name) + ' takes it') + '</h2>' +
+      '<div class="row center" style="justify-content:center;gap:20px">' +
+        '<span class="badge a">' + esc(g.teams[0].name) + ' — ' + s.wins[0] + '</span>' +
+        '<span class="badge b">' + esc(g.teams[1].name) + ' — ' + s.wins[1] + '</span>' +
+      '</div>' +
+      (verdict.note ? '<p class="help" style="max-width:52ch;margin:0 auto">' + verdict.note + '</p>' : '') +
+      (s.awarded && s.award ? '<p class="help">Points awarded: <strong style="color:var(--a)">' + s.award[0] + '</strong> / <strong style="color:var(--b)">' + s.award[1] + '</strong></p>' : '') +
+    '</div>' +
+    (verdict.needsHost
+      ? '<div class="card pad lit center stack"><h3 class="display">Your call, host</h3>' +
+        '<p class="help">Legs are tied and there is nothing to separate them. Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<div class="btn-row center">' +
+          '<button class="btn teamA lg" data-act="sayAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
+          '<button class="btn ghost" data-act="sayAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
+          '<button class="btn teamB lg" data-act="sayAward" data-w="1">' + esc(g.teams[1].name) + ' takes it</button>' +
+        '</div></div>'
+      : '') +
+    scoreBig() +
+    '<div class="tbl-wrap"><table><thead><tr><th>Leg</th><th>Prompt</th><th>Word</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="btn-row center">' +
+      '<button class="btn ghost" data-act="quit">End game</button>' +
+      '<button class="btn gold lg" data-act="afterSaySame">Back to the standard rounds</button>' +
+    '</div>' +
+  '</div>';
+};
+
+/* ==========================================================================
    18. SUDDEN DEATH
    ========================================================================== */
 SCREENS.sudden = function(){
@@ -4018,6 +4303,12 @@ SCREENS.final = function(){
       '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Closest to wins</td>' +
       '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + (g.mini.award ? g.mini.award[0] : 0) + '</td>' +
       '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + (g.mini.award ? g.mini.award[1] : 0) + '</td><td></td></tr>' +
+      (g.saySame && g.saySame.awarded
+        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Don&rsquo;t say the same as me</td>' +
+          '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.saySame.award[0] + '</td>' +
+          '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.saySame.award[1] + '</td>' +
+          '<td data-l="Legs">' + g.saySame.wins[0] + '–' + g.saySame.wins[1] + '</td></tr>'
+        : '') +
       (g.battle && g.battle.done
         ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Battle of the captains</td>' +
           '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.battle.award[0] + '</td>' +
@@ -4280,10 +4571,14 @@ SCREENS.bank = function(){
   const body = rows.slice(0, BANK_ROW_CAP).map(q =>
     '<tr><td style="max-width:380px"><div style="color:var(--ink);font-weight:600">' + esc(q.question) + '</div>' +
       (q.notes ? '<div class="help" style="margin-top:4px">' + esc(q.notes) + '</div>' : '') + '</td>' +
-    '<td style="color:var(--gold);font-weight:600">' + esc(q.answer) + '</td>' +
+    /* A Say-Same row has no fixed answer — one is drawn fresh each time it is
+       played — so the pool it draws from goes here instead of a blank cell. */
+    '<td style="color:var(--gold);font-weight:600">' +
+      (q.type === 'saysame' ? esc((q.pool || []).join(' · ')) : esc(q.answer)) + '</td>' +
     '<td>' + esc(q.theme) + '</td>' +
     '<td>' + (q.type === 'closest' ? '<span class="badge gold">Closest</span>'
             : q.type === 'auction' ? '<span class="badge a">Auction</span>'
+            : q.type === 'saysame' ? '<span class="badge b">Say-Same</span>'
             : '<span class="badge line">Standard</span>') + '</td>' +
     '<td>' + esc(Cap(q.difficulty)) + '</td>' +
     '<td>' + (q.use_with ? '<code style="font-size:11px;color:var(--a)">' + esc(q.use_with) + '</code>' : '<span class="dim">—</span>') + '</td>' +
@@ -4316,7 +4611,12 @@ SCREENS.bank = function(){
       '<div class="row">' +
         '<label class="fld" style="flex:2;min-width:200px">Search<input type="text" data-act="bf" data-k="q" value="' + esc(f.q) + '" placeholder="question or answer"></label>' +
         '<label class="fld" style="flex:1;min-width:140px">Theme<select data-act="bf" data-k="theme">' + [''].concat(THEMES).map(t => opt(t, f.theme)).join('') + '</select></label>' +
-        '<label class="fld" style="flex:1;min-width:120px">Type<select data-act="bf" data-k="type">' + ['','standard','closest','auction'].map(t => opt(t, f.type)).join('') + '</select></label>' +
+        /* Cap() alone turns 'saysame' into "Saysame" — a real label, not a
+           capitalised value, for the one type whose name is not one word. */
+        '<label class="fld" style="flex:1;min-width:120px">Type<select data-act="bf" data-k="type">' +
+          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same']]
+            .map(([v, label]) => '<option value="' + esc(v) + '"' + (f.type === v ? ' selected' : '') + '>' + esc(label) + '</option>').join('') +
+        '</select></label>' +
         '<label class="fld" style="flex:1;min-width:120px">Difficulty<select data-act="bf" data-k="diff">' + [''].concat(DIFFS).map(t => opt(t, f.diff)).join('') + '</select></label>' +
       '</div>' +
       '<div class="row between"><span class="help">Showing ' + Math.min(rows.length, BANK_ROW_CAP) + ' of ' + rows.length + '</span>' +
@@ -4365,35 +4665,51 @@ function rowsToQuestions(rows){
   const iY = find('type','typeofgame','gametype','typeofquestion');
   const iD = find('difficulty','diff','level');
   const iU = find('usequestionwith','usewith','pair','ticker','pairing','group');
+  const iP = find('pool','answers','options','possibleanswers','wordlist');
 
   const out = [];
   for(let r = 1; r < rows.length; r++){
     const row = rows[r];
     const question = String(row[iQ] || '').trim();
-    const answer = String(row[iA] || '').trim();
-    if(!question || !answer) continue;
     const rawType = norm(iY > -1 ? row[iY] : '');
-    const type = /auct|bid|nameas?many/.test(rawType) ? 'auction'
+    const type = /saysame|dontsay|donotsay|matchhost|notsame/.test(rawType) ? 'saysame'
+               : /auct|bid|nameas?many/.test(rawType) ? 'auction'
                : /clos|estim|numb|guess|mini/.test(rawType) ? 'closest'
                : 'standard';
+
+    /* Say-Same has no single answer — it has a pool, split on newlines,
+       semicolons or pipes inside that one cell — so it is gated on the pool
+       instead of the answer column, which stays required for the other three. */
+    let pool;
+    if(type === 'saysame'){
+      pool = String(iP > -1 ? row[iP] : '').split(/[\n;|]/).map(s => s.trim()).filter(Boolean);
+      pool = [...new Set(pool)];
+      if(!question || pool.length < 2) continue;
+    } else {
+      if(!question || !String(row[iA] || '').trim()) continue;
+    }
+    const answer = type === 'saysame' ? '' : String(row[iA] || '').trim();
+
     let d = norm(iD > -1 ? row[iD] : '');
     if(/^(1|e|easy|low)/.test(d)) d = 'easy';
     else if(/^(3|h|hard|difficult|high)/.test(d)) d = 'hard';
     else d = 'medium';
-    /* An auction category has no theme by design, so an empty cell stays empty
-       rather than being filed under "General" and pushed into THEMES. */
-    let theme = String(iT > -1 ? row[iT] : '').trim() || (type === 'auction' ? '' : 'General');
+    /* Auction and Say-Same have no theme by design, so an empty cell stays
+       empty rather than being filed under "General" and pushed into THEMES. */
+    let theme = String(iT > -1 ? row[iT] : '').trim() || (type === 'auction' || type === 'saysame' ? '' : 'General');
     if(theme){
       const known = THEMES.find(t => norm(t) === norm(theme));
       if(known) theme = known; else if(THEMES.indexOf(theme) < 0) THEMES.push(theme);
     }
-    out.push({
+    const rec = {
       id:hash(question), question, answer,
       notes:String(iN > -1 ? row[iN] : '').trim(),
       theme, type, difficulty:d,
       use_with:String(iU > -1 ? row[iU] : '').trim(),
       src:'import'
-    });
+    };
+    if(pool) rec.pool = pool;
+    out.push(rec);
   }
   if(!out.length) throw new Error('No usable rows found.');
   return out;
@@ -4444,9 +4760,10 @@ function download(name, text, mime){
 }
 const csvCell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
 function bankToCSV(list){
-  const head = ['question','answer','notes','theme','type','difficulty','use_question_with'];
+  const head = ['question','answer','notes','theme','type','difficulty','use_question_with','pool'];
   return head.join(',') + '\n' + list.map(q =>
-    [q.question, q.answer, q.notes, q.theme, q.type, q.difficulty, q.use_with].map(csvCell).join(',')).join('\n');
+    [q.question, q.answer, q.notes, q.theme, q.type, q.difficulty, q.use_with, (q.pool || []).join(' | ')]
+      .map(csvCell).join(',')).join('\n');
 }
 
 /* ==========================================================================
@@ -4609,6 +4926,7 @@ function startMini(key){
   const g = G();
   if(key === 'closest'){ go('miniIntro'); return; }
   if(key === 'auction'){ buildAuction(); go('auctionIntro'); return; }
+  if(key === 'saysame'){ go('sayIntro'); return; }
   if(key === 'battle'){
     g.battle = buildBattle();
     if(!g.battle){ g.done.battle = true; toast('Not enough spare questions left for the Battle.'); endGame(); return; }
@@ -4672,6 +4990,53 @@ function awardMini(w){
     m.verdict.winner = w;
   }
   m.verdict.needsHost = false;
+  Snd.point();
+}
+
+/* Same shape as miniFinish/awardMini above, one leg-selection difference: a
+   spare here is a raw bank prompt with a `pool`, not yet an `answer` — it has
+   to go through drawSaySame() at the moment it is actually pulled in, so a
+   tie-breaker prompt's secret word is drawn exactly once, same as the rest. */
+function saySameFinish(){
+  const g = G(), s = g.saySame;
+  if(s.wins[0] === s.wins[1]){
+    if(s.spare && s.spare.length){
+      const q = drawSaySame(s.spare.shift());
+      s.qs.push(q); markUsed(q);
+      s.tieLegs++;
+      toast('Tied after ' + (s.qs.length - 1) + ' legs — tie-breaker prompt.', 3600);
+      go('sayQ');
+      return;
+    }
+    s.done = true;
+    s.verdict = { winner:null, needsHost:true,
+      note:'Tied on legs, and there are no spare prompts left for another tie-breaker. Your call.' };
+    go('saySummary');
+    return;
+  }
+  const winner = s.wins[0] > s.wins[1] ? 0 : 1;
+  s.done = true;
+  s.verdict = { winner, needsHost:false,
+    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker leg' : s.tieLegs + ' tie-breaker legs') + '.' : '' };
+  awardSaySame(winner);
+  go('saySummary');
+}
+function awardSaySame(w){
+  const g = G(), s = g.saySame;
+  if(s.awarded) return;
+  s.awarded = true;
+  if(w === 'split'){
+    const half = Math.floor(g.miniPts / 2);
+    g.teams[0].score += half; g.teams[1].score += half;
+    s.award = [half, half];
+    s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
+    s.verdict.winner = null;
+  } else {
+    g.teams[w].score += g.miniPts;
+    s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
+    s.verdict.winner = w;
+  }
+  s.verdict.needsHost = false;
   Snd.point();
 }
 
@@ -4869,6 +5234,7 @@ const ACT = {
     S.game = g;
     g.rounds.forEach(r => r.q.forEach(markUsed));
     g.mini.qs.forEach(markUsed);
+    g.saySame.qs.forEach(markUsed);
     Snd.resume();
     go('roundIntro');
   },
@@ -4895,6 +5261,7 @@ const ACT = {
     if(S.screen === 'auctionRun') return auctionResolve();
     go(S.screen === 'steal'  ? 'stealReveal'
      : S.screen === 'miniQ'  ? 'miniEntry'
+     : S.screen === 'sayQ'   ? 'sayJudge'
      : S.screen === 'soloQ'  ? 'soloA'      // solo has no steal and no host
      : 'reveal');
   },
@@ -5078,6 +5445,43 @@ const ACT = {
     advanceRound();
   },
 
+  /* ---- don't say the same as me ---- */
+  sayStart(){ G().saySame.i = 0; go('sayQ'); },
+  /* Same escape hatch as Closest's "Change this question" — pull another
+     prompt not already in play if this one does not suit the room. */
+  saySwap(){
+    const g = G(), s = g.saySame;
+    const inPlay = new Set();
+    s.qs.forEach(q => inPlay.add(q.id));
+    (s.spare || []).forEach(q => inPlay.add(q.id));
+
+    let pool = saySamePool().filter(q => !inPlay.has(q.id));
+    if(!pool.length) return toast('No spare prompt left in the bank.');
+
+    const q = drawSaySame(shuffle(pool)[0]);
+    s.qs[s.i] = q;
+    toast('New prompt.');
+    go('sayQ');
+  },
+  toSayJudge(){ Timer.stop(); go('sayJudge'); },
+  sayVerdict(e){
+    const g = G(), s = g.saySame, q = s.qs[s.i];
+    const w = e.dataset.w === 'tie' ? 'tie' : +e.dataset.w;
+    s.subs.push({ q, winner:w });
+    if(w === 'tie'){ s.wins[0]++; s.wins[1]++; toast('Tie — a point each.'); }
+    else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes leg ' + (s.i + 1) + '.'); }
+    s.i++;
+    if(s.i < s.qs.length) go('sayQ'); else saySameFinish();
+  },
+  sayAward(e){ awardSaySame(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
+  afterSaySame(){
+    const g = G();
+    if(g.saySame.verdict && g.saySame.verdict.needsHost) return toast('Award the mini-game points first.');
+    g.done.saysame = true;
+    if(runNextMini()) return;
+    advanceRound();
+  },
+
   /* ---- the auction ---- */
   auctionBegin(){ Snd.soft(); go('auctionBid'); },
   auctionRaise(){
@@ -5227,6 +5631,7 @@ const ACT = {
         '<option value="standard">Standard</option>' +
         '<option value="closest">Closest To Wins</option>' +
         '<option value="auction">Auction</option>' +
+        '<option value="saysame">Don&rsquo;t Say the Same as Me</option>' +
       '</select></label>' +
       '<label class="fld">Question<textarea id="nq" rows="2"></textarea></label>' +
 
@@ -5237,6 +5642,8 @@ const ACT = {
       '<label class="fld q-only q-std q-clo">Notes (shown with the answer)<input type="text" id="nn"></label>' +
       '<label class="fld q-only q-auc">Ruling note — what counts' +
         '<input type="text" id="nnAuc" placeholder="e.g. Marques only. Toyota counts, Corolla does not."></label>' +
+      '<label class="fld q-only q-say">Possible answers — one per line, at least two' +
+        '<textarea id="nsayPool" rows="5" placeholder="Feta&#10;Cheddar&#10;Brie&#10;Mozzarella&#10;Gouda"></textarea></label>' +
 
       '<div class="grid2">' +
         '<label class="fld q-only q-std q-clo">Theme<select id="nt" data-act="qThemeSel">' +
@@ -5256,6 +5663,7 @@ const ACT = {
       (custom.length ? '<p class="help q-only q-std q-clo">Yours: <strong>' + esc(custom.join(', ')) + '</strong></p>' : '') +
 
       '<p class="help q-only q-auc">An auction category has no theme, no difficulty and no answer — the bidding sets the difficulty and you count the answers yourself.</p>' +
+      '<p class="help q-only q-say">No theme, no difficulty here either — how wide the answers are IS the difficulty. One line is drawn at random each time this plays, so a wider list means more variety across replays.</p>' +
 
       '<div class="btn-row end"><button class="btn ghost" data-act="closeModal">Cancel</button>' +
       '<button class="btn gold" data-act="qSave">Add it</button></div></div>');
@@ -5270,11 +5678,15 @@ const ACT = {
     const question = el('nq').value.trim();
     if(!question) return toast('The question is required.');
 
-    let answer = '', notes = '', theme = '', difficulty = '', use_with = '';
+    let answer = '', notes = '', theme = '', difficulty = '', use_with = '', pool;
 
     if(type === 'auction'){
       answer = 'Host counts';
       notes  = el('nnAuc').value.trim();
+    } else if(type === 'saysame'){
+      const lines = el('nsayPool').value.split('\n').map(s => s.trim()).filter(Boolean);
+      pool = [...new Set(lines)];                     // dedupe — a repeated line buys no real variety
+      if(pool.length < 2) return toast('At least two possible answers — one per line.', 3600);
     } else {
       notes = el('nn').value.trim();
       difficulty = el('nd').value;
@@ -5307,9 +5719,11 @@ const ACT = {
     if(S.bank.some(x => x.id === hash(question)))
       return toast('That question is already in the bank.', 3600);
 
-    S.bank.push({ id:hash(question), question, answer, notes, theme, type, difficulty, use_with, src:'manual' });
+    const rec = { id:hash(question), question, answer, notes, theme, type, difficulty, use_with, src:'manual' };
+    if(pool) rec.pool = pool;
+    S.bank.push(rec);
     saveBank(); closeModal();
-    toast('Added' + (theme && BUILT_IN_THEMES.indexOf(theme) < 0 ? ' under ' + theme : '') + '.');
+    toast('Added' + (pool ? ' — ' + pool.length + ' possible answers' : theme && BUILT_IN_THEMES.indexOf(theme) < 0 ? ' under ' + theme : '') + '.');
     render();
   },
   bankTemplate(){
