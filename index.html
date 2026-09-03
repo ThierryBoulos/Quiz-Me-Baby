@@ -373,6 +373,21 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .tgl[aria-pressed="true"] .sw{background:var(--gold)}
 .tgl[aria-pressed="true"] .sw::after{transform:translateX(22px)}
 
+/* Add-a-question: one form, three shapes. Every field is in the markup once
+   and the container's data-type picks which are relevant, so switching type
+   does not rebuild the dialog or lose what is already typed. */
+.qadd .q-only,.qadd .q-newtheme{display:none}
+.qadd[data-type="standard"] .q-std,
+.qadd[data-type="closest"]  .q-clo,
+.qadd[data-type="auction"]  .q-auc{display:flex}
+.qadd[data-type="standard"] p.q-std,
+.qadd[data-type="closest"]  p.q-clo,
+.qadd[data-type="auction"]  p.q-auc{display:block}
+.qadd[data-newtheme="1"] .q-newtheme{display:flex}
+.qadd[data-newtheme="1"] p.q-newtheme{display:block}
+/* the theme fields live in a grid; a hidden one must not hold its column open */
+.qadd .grid2 .q-only{margin:0}
+
 /* the small round close on a modal header */
 .xbtn{flex:none;width:34px;height:34px;border-radius:50%;font-size:22px;line-height:1;
   color:var(--ink-2);background:var(--glass);border:1px solid var(--line-2);
@@ -1037,7 +1052,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'1.82', date:'28 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.9', date:'28 Aug 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1092,6 +1107,45 @@ const BUILD = { v:'1.82', date:'28 Aug 2026', author:'Thierry Boulos', year:2026
    ========================================================================== */
 const THEMES = ['Acronyms','Disney & Pixar','Food & Drink','Friends','Geek & Gamer','Geography','History','Internet & Memes','Know the Host','Lebanon','Movies','Music','Nature','Pop Culture','Rave Culture','Science','Sexy Time','Sports','Tech'];
 const DIFFS  = ['easy','medium','hard'];
+
+/* --------------------------------------------------------------------------
+   CUSTOM THEMES
+   The nineteen above are the house set. The host may add up to four of their
+   own — "Work", "The Cousins", whatever the room is — and they are DERIVED
+   FROM THE BANK rather than stored in a list of their own: a custom theme
+   exists exactly as long as a question is filed under it, and the last
+   question leaving takes the theme with it. That is what "only if someone
+   creates them" means, and it needs no separate bookkeeping to go stale.
+
+   THEMES itself is mutated on boot to include them, so every picker, filter
+   and chip wall in the app sees them without knowing they are special. That
+   also fixes a quieter bug: a theme arriving via CSV import was pushed into
+   THEMES at import time and then forgotten on the next reload, so imported
+   questions became unreachable from the setup screen.
+   -------------------------------------------------------------------------- */
+const BUILT_IN_THEMES   = THEMES.slice();
+const MAX_CUSTOM_THEMES = 4;
+function customThemes(){
+  const seen = {}, out = [];
+  S.bank.forEach(q => {
+    const t = (q.theme || '').trim();
+    if(!t || BUILT_IN_THEMES.indexOf(t) > -1 || seen[t]) return;
+    seen[t] = 1; out.push(t);
+  });
+  return out.sort();
+}
+/* Make THEMES match the bank exactly, both directions: adopt anything new the
+   bank has, and drop any custom theme whose last question has been deleted —
+   otherwise a freed slot leaves a ghost chip on the setup screen until reload.
+   The house nineteen are never removed, empty or not. */
+function reconcileThemes(){
+  const live = customThemes();
+  live.forEach(t => { if(THEMES.indexOf(t) < 0) THEMES.push(t); });
+  for(let i = THEMES.length - 1; i >= 0; i--){
+    const t = THEMES[i];
+    if(BUILT_IN_THEMES.indexOf(t) < 0 && live.indexOf(t) < 0) THEMES.splice(i, 1);
+  }
+}
 
 const SEED = [
 /* ---- ACRONYMS ---- */
@@ -1942,10 +1996,13 @@ const SEED_VERSION = 11;   // bumped when the built-in bank changes
   }
   DB.set(DB.k.bank, S.bank);
   DB.set(DB.k.seedv, SEED_VERSION);
+  reconcileThemes();   // custom and imported themes rejoin the pickers
 })();
 
 const saveSettings = () => DB.set(DB.k.set, S.settings);
-const saveBank     = () => DB.set(DB.k.bank, S.bank);
+/* every bank write is also the moment THEMES could have gained or lost a
+   custom theme, so the reconcile lives here rather than at each call site */
+const saveBank     = () => { reconcileThemes(); DB.set(DB.k.bank, S.bank); };
 const saveUsed     = () => DB.set(DB.k.used, [...S.used]);
 const saveHistory  = () => DB.set(DB.k.hist, S.history);
 
@@ -5156,27 +5213,104 @@ const ACT = {
     S.bank = S.bank.filter(x => x.id !== id);
     saveBank(); render();
   },
+  /* The three question types want three different forms — an auction category
+     has no answer, no theme and no difficulty; a Closest To Wins answer must
+     be a number; only a standard question has a pairing ticker. Rather than
+     rebuild the dialog on every change and lose whatever is half-typed, every
+     field is present once and the container's data-type decides what shows. */
   qAdd(){
-    openModal('<div class="stack"><h3 class="display">Add a question</h3>' +
+    const custom = customThemes();
+    const slots  = MAX_CUSTOM_THEMES - custom.length;
+    openModal('<div class="stack qadd" data-type="standard" data-newtheme="0">' +
+      '<h3 class="display">Add a question</h3>' +
+      '<label class="fld">Type<select id="ny" data-act="qType">' +
+        '<option value="standard">Standard</option>' +
+        '<option value="closest">Closest To Wins</option>' +
+        '<option value="auction">Auction</option>' +
+      '</select></label>' +
       '<label class="fld">Question<textarea id="nq" rows="2"></textarea></label>' +
-      '<label class="fld">Answer<input type="text" id="na"></label>' +
-      '<label class="fld">Notes (shown with the answer)<input type="text" id="nn"></label>' +
+
+      '<label class="fld q-only q-std">Answer<input type="text" id="na"></label>' +
+      '<label class="fld q-only q-clo">Answer — a number' +
+        '<input type="text" id="naNum" inputmode="numeric" placeholder="e.g. 236"></label>' +
+
+      '<label class="fld q-only q-std q-clo">Notes (shown with the answer)<input type="text" id="nn"></label>' +
+      '<label class="fld q-only q-auc">Ruling note — what counts' +
+        '<input type="text" id="nnAuc" placeholder="e.g. Marques only. Toyota counts, Corolla does not."></label>' +
+
       '<div class="grid2">' +
-        '<label class="fld">Theme<select id="nt">' + THEMES.map(t => '<option>' + esc(t) + '</option>').join('') + '</select></label>' +
-        '<label class="fld">Difficulty<select id="nd">' + DIFFS.map(d => '<option value="' + d + '"' + (d === 'medium' ? ' selected' : '') + '>' + Cap(d) + '</option>').join('') + '</select></label>' +
-        '<label class="fld">Type<select id="ny"><option value="standard">Standard</option><option value="closest">Closest to wins</option></select></label>' +
-        '<label class="fld">Pair ticker<input type="text" id="nu" placeholder="e.g. capital-of"></label>' +
+        '<label class="fld q-only q-std q-clo">Theme<select id="nt" data-act="qThemeSel">' +
+          THEMES.map(t => '<option value="' + esc(t) + '">' + esc(t) + '</option>').join('') +
+          (slots > 0 ? '<option value="__new__">+ New custom theme…</option>' : '') +
+        '</select></label>' +
+        '<label class="fld q-only q-std q-clo">Difficulty<select id="nd">' +
+          DIFFS.map(d => '<option value="' + d + '"' + (d === 'medium' ? ' selected' : '') + '>' + Cap(d) + '</option>').join('') +
+        '</select></label>' +
+        '<label class="fld q-only q-std">Pair ticker<input type="text" id="nu" placeholder="e.g. capital-of"></label>' +
       '</div>' +
+
+      '<label class="fld q-newtheme">Custom theme name' +
+        '<input type="text" id="ntNew" maxlength="24" placeholder="Custom Theme ' + (custom.length + 1) + '"></label>' +
+      '<p class="help q-newtheme">' + slots + ' of ' + MAX_CUSTOM_THEMES + ' custom theme slots left. ' +
+        'A custom theme lives as long as it has questions — delete them all and the slot frees up.</p>' +
+      (custom.length ? '<p class="help q-only q-std q-clo">Yours: <strong>' + esc(custom.join(', ')) + '</strong></p>' : '') +
+
+      '<p class="help q-only q-auc">An auction category has no theme, no difficulty and no answer — the bidding sets the difficulty and you count the answers yourself.</p>' +
+
       '<div class="btn-row end"><button class="btn ghost" data-act="closeModal">Cancel</button>' +
       '<button class="btn gold" data-act="qSave">Add it</button></div></div>');
   },
+  /* both of these only flip an attribute — nothing re-renders, so anything
+     already typed into the other fields survives the switch */
+  qType(e){ const b = $('.qadd'); if(b) b.dataset.type = e.value; },
+  qThemeSel(e){ const b = $('.qadd'); if(b) b.dataset.newtheme = e.value === '__new__' ? '1' : '0'; },
+
   qSave(){
-    const q = el('nq').value.trim(), a = el('na').value.trim();
-    if(!q || !a) return toast('Question and answer are both required.');
-    S.bank.push({ id:hash(q), question:q, answer:a, notes:el('nn').value.trim(),
-      theme:el('nt').value, difficulty:el('nd').value, type:el('ny').value,
-      use_with:el('nu').value.trim(), src:'manual' });
-    saveBank(); closeModal(); toast('Added.'); render();
+    const type = el('ny').value;
+    const question = el('nq').value.trim();
+    if(!question) return toast('The question is required.');
+
+    let answer = '', notes = '', theme = '', difficulty = '', use_with = '';
+
+    if(type === 'auction'){
+      answer = 'Host counts';
+      notes  = el('nnAuc').value.trim();
+    } else {
+      notes = el('nn').value.trim();
+      difficulty = el('nd').value;
+      if(type === 'closest'){
+        const raw = el('naNum').value.trim();
+        const n = Number(raw.replace(/[,\s]/g, ''));
+        if(!raw || !isFinite(n)) return toast('Closest To Wins needs a number as the answer.', 3600);
+        answer = String(n);
+      } else {
+        answer = el('na').value.trim();
+        if(!answer) return toast('The answer is required.');
+        use_with = el('nu').value.trim();
+      }
+      /* theme, including a brand new custom one */
+      if(el('nt').value === '__new__'){
+        const name = (el('ntNew').value || '').trim();
+        if(!name) return toast('Name the custom theme, or pick an existing one.', 3600);
+        const match = THEMES.find(t => t.toLowerCase() === name.toLowerCase());
+        if(match) theme = match;                       // typed an existing one — reuse it
+        else if(customThemes().length >= MAX_CUSTOM_THEMES)
+          return toast(MAX_CUSTOM_THEMES + ' custom themes is the limit. Clear one out to free a slot.', 4200);
+        else { THEMES.push(name); theme = name; }
+      } else theme = el('nt').value;
+      /* A standard or Closest question with no theme is unreachable — no chip
+         exists for it, so no round can ever draw it. Refuse rather than file
+         an orphan in the bank. (Only auction questions are themeless.) */
+      if(!theme || THEMES.indexOf(theme) < 0) return toast('Pick a theme for this question.');
+    }
+
+    if(S.bank.some(x => x.id === hash(question)))
+      return toast('That question is already in the bank.', 3600);
+
+    S.bank.push({ id:hash(question), question, answer, notes, theme, type, difficulty, use_with, src:'manual' });
+    saveBank(); closeModal();
+    toast('Added' + (theme && BUILT_IN_THEMES.indexOf(theme) < 0 ? ' under ' + theme : '') + '.');
+    render();
   },
   bankTemplate(){
     const sample = [
@@ -5239,12 +5373,12 @@ document.addEventListener('input', e => {
   const t = e.target.closest('[data-act]');
   if(!t) return;
   const fn = ACT[t.dataset.act];
-  if(fn && ['tf','setNum','vol','bf','calc'].indexOf(t.dataset.act) > -1) fn(t);
+  if(fn && ['tf','setNum','vol','bf','calc','qType','qThemeSel'].indexOf(t.dataset.act) > -1) fn(t);
 });
 document.addEventListener('change', e => {
   const t = e.target.closest('[data-act]');
   if(!t) return;
-  if(['setNum','bf'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
+  if(['setNum','bf','qType','qThemeSel'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
 });
 el('modal').addEventListener('click', e => {
   if(e.target.id !== 'modal') return;

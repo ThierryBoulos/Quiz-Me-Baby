@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v1.71 · 27 Aug 2026
+> Built by Thierry Boulos · © 2026 · v1.9 · 28 Aug 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'1.71', date:'27 Aug 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'1.9', date:'28 Aug 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -70,7 +70,7 @@ Each row carries its own value and slot — *"2 pts · after R3"* — and the ca
 | | What it is | Where it lands |
 |---|---|---|
 | **Closest To Wins** | Seven number questions, nearest guess takes the leg | Spread through the rounds |
-| **The Auction** | Bid on how many you can name, then deliver it in 30s | Spread through the rounds |
+| **The Auction** | Three categories. Bid how many you can name, then deliver in 30s | Spread through the rounds |
 | **Battle of the Captains** | Ten questions each, captains only, 7s a shot | **Always after the last round** |
 
 **Where they land.** Even spread rather than fixed gaps: mini *k* of *M* goes after round `round((k+1) × N ÷ (M+1))`. On a normal card that gives the two-round gap — 8 rounds with 2 mini-games puts them after rounds 3 and 5. When the card is too tight it compresses to one round, then to two mini-games back to back, rather than refusing. It can never open the night: at least one standard round is always played first.
@@ -90,18 +90,51 @@ Setup shows the live split and **says what the card actually is** — at 75%+ it
 
 ## The Auction
 
-Host reads a category — *"How many countries can you name?"* — and the teams bid on how many they can deliver.
+**Three categories, best of three.** Host reads one — *"How many countries can you name?"* — and the teams bid on how many they can deliver.
 
-1. **Team A opens** with a number. Opening is the marginally worse seat (you commit with no information) and Team A won the toss, so that is the fair place to put it.
+1. One team **opens** with a number. **The open alternates** each category, so nobody bids blind twice.
 2. The other team either **bids higher** or **lets them take it**. Bids must beat the standing bid; the opener cannot fold against nothing.
 3. Whoever is left holding the bid gets **30 seconds** to actually name that many.
-4. Make it and they take the points. Fall short and **the other team takes them** for calling it.
+4. Make it and they take the leg. Fall short and **the other team takes it** for calling the bluff.
+5. **Most legs out of three** takes the mini-game points. Three is odd on purpose — the legs can never finish level, so there is no tie-break to run.
+
+**Change category** sits on the bidding screen, but only *before a bid is on the table* — swapping it once someone has committed a number would be changing the deal mid-hand. A skipped category goes to the back of the deck rather than the bin, so a long night cannot run it dry.
 
 While they name, you get a **tap counter** — one big tap target, a running `12 / 25` that turns gold on the target, and an undo. It settles itself the moment they hit the number, so you are never counting in your head against a clock.
 
 **22 auction categories** ship in the bank: countries · capital cities · car brands · football clubs · movies · animals · alcoholic brands · fruits · world leaders · body parts · cocktails · musical instruments · languages · jobs · pizza toppings · bands · rappers · US states · currencies · sports · board games · vegetables.
 
-They carry `type: auction`, **no theme, no difficulty, no pairing ticker** — an auction category is not easy or hard, it is wide or narrow, and the bidding sets the difficulty. Each carries a ruling note (*"Marques only. Toyota counts, Corolla does not."*) because every one of these gets argued: it says what counts, you rule once, the table moves on. Filter the bank by **Type** to find them; the theme is the literal string `Auction` and is deliberately not in `THEMES`, so it can never appear in the party game's theme picker or in solo.
+They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker** — an auction category is not easy or hard, it is wide or narrow, and the bidding sets the difficulty. Each carries a ruling note (*"Marques only. Toyota counts, Corolla does not."*) because every one of these gets argued: it says what counts, you rule once, the table moves on. Filter the bank by **Type → Auction** to find them; they show an `Auction` badge in the Type column.
+
+## Adding your own questions
+
+**Add a question** in the bank screen writes all three types, and the form changes shape to match:
+
+| Type | Fields |
+|---|---|
+| **Standard** | question · answer · notes · theme · difficulty · pair ticker |
+| **Closest To Wins** | question · **answer must be a number** · notes · theme · difficulty |
+| **The Auction** | question · ruling note. No answer, no theme, no difficulty — the bidding sets the difficulty and you count the answers yourself. |
+
+Every field lives in the form once and the type picker decides which are shown, so switching type mid-way doesn't rebuild the dialog or lose what you have already typed.
+
+A standard or Closest question **must** have a theme. Without one there is no chip to select it, so no round could ever draw it — the dialog refuses rather than filing an orphan in the bank.
+
+## Custom themes
+
+Up to **four** of your own, alongside the house nineteen. Pick **+ New custom theme…** in the theme dropdown and name it — "Work Crew", "The Cousins", whatever the room is. Once it has questions it appears everywhere a theme can: the setup chip wall, solo, the bank filter.
+
+They are **derived from the bank**, not kept in a list of their own: a custom theme exists exactly as long as a question is filed under it, and deleting the last one takes the theme with it and frees the slot. Nothing to tidy up, and nothing that can go stale. The dialog shows how many slots are left and stops offering the option at four.
+
+Remember a theme needs **two questions at the same difficulty** to field a round — one for each team — so a custom theme with a single question will show up dimmed in the setup wall until you add its partner.
+
+This also fixed a quieter bug: a theme arriving via **CSV import** used to be registered only for that session and forgotten on the next reload, leaving the imported questions unreachable from the setup screen. Themes now reconcile against the bank on every load and every bank write.
+
+## Hand-picking the mini-games
+
+The question picker (Advanced Game Configuration → *Choose questions*) also lists **Closest To Wins** and **The Auction** — but only the ones actually on tonight's card. Picking questions for a mini-game you have not selected would be work thrown away, so those blocks simply are not drawn, and turning a mini-game off drops its picks rather than leaving them to reapply silently later.
+
+Tick up to seven number questions or three auction categories. They lead, **in the order you tick them**, and anything short is dealt from the bank as usual — so you can hand-pick one killer category and let the other two be a surprise.
 
 ---
 
