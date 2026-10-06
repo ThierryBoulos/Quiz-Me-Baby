@@ -1,7 +1,7 @@
 {
   "name": "Quiz Me Baby",
   "short_name": "Quiz Me Baby",
-  "description": "Host control for Quiz Me Baby.",
+  "description": "The party quiz you host.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

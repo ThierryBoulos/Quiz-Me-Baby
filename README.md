@@ -1,4 +1,4 @@
-# QUIZ ME BABY — Host Control
+# QUIZ ME BABY
 
 Two files: `index.html` and `maps-geo.js`, side by side. Double-click `index.html`. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.) `maps-geo.js` is the real-world borders that **Guess the Map** draws from; the app only reads it when a game actually has maps on the card, so if it is missing, everything else still works.
 
@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v2.1 · 06 Oct 2026
+> Built by Thierry Boulos · © 2026 · v2.2 · 06 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'2.1', date:'06 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.2', date:'06 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -133,34 +133,40 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 
 **Change this map** swaps in one not already in play. **Enlarge** (or tap the map) fills the screen; tap a spot to zoom in there, drag to look around, tap again to zoom out — pinch-zoom is off app-wide, so this is how you read fifty year labels on a phone. The countdown keeps running in the corner.
 
-**The 20 built-in maps** are drawn by the app, not pasted in as pictures, so all twenty share one look — same sea, same land, same palette, same legend — and every border and city dot sits where it really is: country borders from Natural Earth 1:10m, US states from the Census Bureau, cities by their exact coordinates.
+**The 22 built-in maps** are drawn by the app, not pasted in as pictures, so all of them share one look — same sea, same land, same palette, same legend — and every border and city dot sits where it really is: country borders from Natural Earth 1:10m, US states from the Census Bureau, cities by their exact coordinates.
 
 | Map | Base |
 |---|---|
 | Countries that drive on the left | World |
-| Half the world's population lives in these seven countries | World |
 | Corruption Perceptions Index 2025, in four bands | World |
-| The year women won the vote on equal terms with men — year printed on every country | Europe |
-| The 10 most and 10 least educated US states (ACS 2024) | US |
+| The year women won the vote on equal terms with men — year on every country | Europe |
+| The 10 most and 10 least educated US states — % on every state | US |
 | Everywhere the Vikings reached — 22 places, Newfoundland to Baghdad | North Atlantic |
 | Every country that still has a monarch — own monarch vs. King Charles III | World |
 | Every landlocked country | World |
-| The countries the Equator runs through | World |
-| Every Summer Olympics host | World |
+| Every Summer Olympics host — ×times on each | World |
+| Every World Cup winner — ×titles on each, Spain's 2026 win included | World |
+| Every country that borders only one other — plus Canada and Denmark, until Hans Island in 2022 | World |
+| The countries with the most time zones — count on each (France 12) | World |
+| The 10 countries with the most Summer Olympic medals — total on each | World |
+| The 10 countries where the most languages are spoken — count on each | World |
 | Every country with nuclear weapons | World |
 | The G7 and the rest of the G20 | World |
-| The only countries not officially metric | World |
 | Every country that uses the euro | Europe |
+| The 10 biggest beer drinkers per person — rank during play, litres at the reveal | Europe |
+| The countries that stayed neutral in World War II | Europe |
 | The Schengen Area | Europe |
-| The Thirteen Colonies | US |
-| US states with no sales tax | US |
 | The New Seven Wonders | World |
 | The Seven Summits | World, with Antarctica |
 | The 16 host cities of the 2026 World Cup | North America |
 
-Every fact on them carries its source in the reveal note (Transparency International, the UN, the US Census Bureau, SIPRI, the CIA World Factbook, Wikipedia). During play the legend may say what the colours *are* — "70–100", "50%", "1906–1918" — but never what they *mean*; at the reveal it says everything.
+**Numbers go on the map, during play.** Any map built on numbers — years, counts, percentages, titles — prints them on the countries from the first second, not just at the reveal. The numbers are the clue; without them a map like *most time zones* is a coin toss. Where a country is too small or too crowded for its number, the label sits in open water with a hairline back to it, placed by testing every label against the real borders.
 
-**Built-in maps never run out.** Twenty maps and *never repeat a question* would empty a weekly table in a few months and quietly drop the mini-game off the card, so fresh maps always come first and played ones queue up behind them instead of vanishing. The hand-pick list shows them all, played ones tagged *played before*.
+Every fact on them carries its source in the reveal note (Transparency International, the US Census Bureau, SIPRI, FIFA, Kirin Holdings, Ethnologue, Wikipedia). During play the legend may say what the colours *are* — "70–100", "1906–1918" — but never what they *mean*; at the reveal it says everything.
+
+**Retired after the first nights:** the Thirteen Colonies, the countries not officially metric, the US states with no sales tax, the Equator, and half the world's population. They are removed from every existing bank automatically on the next open.
+
+**Built-in maps never run out.** Twenty-odd maps and *never repeat a question* would empty a weekly table in a few months and quietly drop the mini-game off the card, so fresh maps always come first and played ones queue up behind them instead of vanishing. The hand-pick list shows them all, played ones tagged *played before*.
 
 **Your own maps** are pictures: **Add a question → Guess the Map**, choose an image (no title on it — the title is the answer), and type what it shows. Any photo is shrunk to 1400px and re-encoded before it is stored, so a 4 MB screenshot lands at a few hundred KB at most; if the browser's storage is full, it says so rather than losing the map on the next reload. Pictures travel in the **JSON backup**, not the CSV — a spreadsheet cannot carry an image, so map rows are left out of CSV export and skipped on CSV import.
 
@@ -224,7 +230,7 @@ Three more things about it are deliberate:
 
 ## The rules the app enforces
 
-There's a full **Rules** screen on the home page — read it out to the room before you start. Short version:
+There's a full **How to Play** screen — the underlined link under the home menu. Read it out to the room before you start. Short version:
 
 **Format** — 2 teams, one captain each. Only the captain's answer counts. No phones.
 
@@ -332,7 +338,7 @@ Import merges — a question with identical text updates the existing row instea
 
 ## What's in the box
 
-**570 questions** — 441 standard, 50 Closest To Wins, 22 Auction categories, 37 Don't Say the Same as Me prompts and 20 Guess the Map maps, across 19 themes:
+**572 questions** — 441 standard, 50 Closest To Wins, 22 Auction categories, 37 Don't Say the Same as Me prompts and 22 Guess the Map maps, across 19 themes:
 
 Acronyms · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech
 
