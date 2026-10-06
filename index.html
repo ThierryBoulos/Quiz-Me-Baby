@@ -380,11 +380,19 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .qadd[data-type="standard"] .q-std,
 .qadd[data-type="closest"]  .q-clo,
 .qadd[data-type="auction"]  .q-auc,
-.qadd[data-type="saysame"]  .q-say{display:flex}
+.qadd[data-type="saysame"]  .q-say,
+.qadd[data-type="map"]      .q-map{display:flex}
 .qadd[data-type="standard"] p.q-std,
 .qadd[data-type="closest"]  p.q-clo,
 .qadd[data-type="auction"]  p.q-auc,
-.qadd[data-type="saysame"]  p.q-say{display:block}
+.qadd[data-type="saysame"]  p.q-say,
+.qadd[data-type="map"]      p.q-map{display:block}
+.qadd .q-lab-map,.qadd[data-type="map"] .q-lab-std{display:none}
+.qadd[data-type="map"] .q-lab-map{display:inline}
+.qadd .map-prev{flex-direction:column;align-items:center;gap:6px}
+.qadd .map-prev:empty{display:none}
+.qadd .map-prev img{max-width:100%;max-height:180px;border-radius:var(--r-s);border:1px solid var(--line)}
+.qadd input[type=file]{font-size:13px;color:var(--ink-2)}
 .qadd[data-newtheme="1"] .q-newtheme{display:flex}
 .qadd[data-newtheme="1"] p.q-newtheme{display:block}
 /* the theme fields live in a grid; a hidden one must not hold its column open */
@@ -735,6 +743,83 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .fits .bt-cell{padding:clamp(6px,1.2vh,14px) var(--sp-2)}
 .fits .bt-cell .v{font-size:clamp(26px,5.8vh,46px)}
 
+/* ---------- GUESS THE MAP ----------
+   The map is the show, so it takes every pixel the screen can spare: beside
+   the clock on a laptop, above it on a phone. The question screen is .play and
+   capped at the window like the auction's, so nothing runs past the fold. */
+.mini-dots i.n{background:rgba(255,255,255,.42)}
+.play.map-play{max-height:calc(100svh - 96px)}
+.map-stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(230px,24vw,300px);gap:clamp(10px,1.6vw,22px);align-items:center}
+/* the frame hugs the drawing, so the Enlarge chip sits on the map's corner */
+.map-frame{position:relative;min-height:0;align-self:center;display:flex;align-items:center;justify-content:center;cursor:zoom-in;border-radius:var(--r)}
+.map-svg,.map-img{display:block;width:100%;height:auto;max-height:calc(100svh - 230px);border-radius:var(--r);
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,.45))}
+.map-svg{width:min(100%,calc((100svh - 230px) * var(--ar,2)))}
+.map-frame:has(> .map-img){justify-self:center}
+.map-img{object-fit:contain;width:auto;max-width:100%}
+.map-svg .msea{fill:#0B1030}
+.map-svg .mland path{stroke:#0B1030;stroke-width:.6px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.map-svg .mdots circle{stroke:#0B1030;stroke-width:1px;vector-effect:non-scaling-stroke}
+/* gold, not pink — pink is Team B's colour everywhere else on screen */
+.map-svg .mpts circle{fill:var(--gold);stroke:#fff;stroke-width:1.6px;vector-effect:non-scaling-stroke}
+.map-svg .mlead line{stroke:rgba(255,255,255,.75);stroke-width:.8px;vector-effect:non-scaling-stroke}
+.map-svg .mline{fill:none;stroke:#fff;stroke-width:1.4px;stroke-dasharray:6 5;vector-effect:non-scaling-stroke}
+.map-svg text{fill:#fff;stroke:#0B1030;paint-order:stroke;stroke-linejoin:round;font-family:var(--font);font-weight:800;letter-spacing:.01em}
+.map-zoomhint{position:absolute;right:8px;bottom:8px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);
+  border:1px solid var(--line-2);font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);pointer-events:none}
+.map-wait{padding:40px 16px;text-align:center;color:var(--ink-3);font-size:14px}
+.map-side{display:flex;flex-direction:column;align-items:center;gap:clamp(6px,1.1vh,12px);min-width:0;text-align:center}
+.map-side .peek{margin:0;width:100%}
+.map-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 12px;font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.map-legend span{display:inline-flex;align-items:center;gap:6px}
+.map-legend i{width:14px;height:14px;border-radius:4px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.map-legend i.pt{border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px #fff inset}
+.map-title{font-family:var(--font-d);font-size:clamp(22px,3.4vh,34px);line-height:1.08;text-transform:uppercase;letter-spacing:.01em;
+  background:linear-gradient(180deg,#FFF7DA,var(--gold) 70%,#C79306);-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:reveal .5s var(--ease) both;text-wrap:balance}
+.map-judge .map-stage{grid-template-columns:minmax(0,1.8fr) minmax(240px,1fr)}
+.map-judge .map-svg,.map-judge .map-img{max-height:calc(100svh - 330px)}
+.map-judge .map-svg{width:min(100%,calc((100svh - 330px) * var(--ar,2)))}
+.map-judge .q-note{font-size:13px;line-height:1.5;margin-top:2px;text-align:left}
+.map-judge .map-side{align-items:stretch;text-align:left}
+.map-judge .map-legend{justify-content:flex-start}
+.bank-thumb{display:block;max-width:120px;max-height:60px;border-radius:6px;border:1px solid var(--line)}
+@media(max-width:760px){
+  .map-stage,.map-judge .map-stage{grid-template-columns:1fr;grid-template-rows:auto auto;align-items:start;align-content:center}
+  .map-play .map-side .q-theme{font-size:10px;letter-spacing:.12em;padding:6px 12px;white-space:nowrap}
+  .map-svg,.map-img{max-height:none}
+  .map-judge .map-svg,.map-judge .map-img{max-height:none}
+  .map-svg,.map-judge .map-svg{width:100%}
+  /* the reveal carries a map, a title and a fact to read out — on a phone that
+     runs past the fold, so the verdict buttons ride along at the bottom
+     instead of making the host scroll for them */
+  .map-judge > .card{position:sticky;bottom:6px;z-index:5;background:rgba(12,14,32,.97);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+  .map-judge > .card h3,.map-judge > .card .help{display:none}
+  .map-judge > .card .btn-row{gap:8px!important}
+  .map-judge > .card .btn{min-height:44px;padding-inline:14px}
+  /* phone: the clock goes small and sits beside the legend under the map */
+  .map-play .map-side{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"t q" "t l" "c c" "p p";
+    column-gap:12px;row-gap:6px;align-items:center;text-align:left}
+  .map-play .map-side .q-theme{grid-area:q;justify-self:start}
+  .map-play .map-side .map-legend{grid-area:l;justify-content:flex-start}
+  .map-play .map-side .timer{grid-area:t;width:92px}
+  .map-play .map-side .timer .val{font-size:34px}
+  .map-play .map-side .timer .cap{display:none}
+  .map-play .map-side .btn-row{grid-area:c}
+  .map-play .map-side .peek{grid-area:p}
+}
+
+/* the enlarged map — over everything, timer still running underneath */
+#mapzoom{position:fixed;inset:0;z-index:120;background:rgba(5,7,20,.96);display:flex;flex-direction:column;
+  padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));gap:8px;animation:fade .2s var(--ease)}
+#mapzoom .mz-top{display:flex;align-items:center;gap:12px}
+#mapzoom .mz-top .eyebrow{flex:1;min-width:0}
+#mapzoom .mz-t{font-family:var(--font-d);font-size:24px;color:var(--gold)}
+#mapzoom .mz-stage{flex:1;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none;border-radius:var(--r)}
+#mapzoom .mz-stage svg,#mapzoom .mz-stage img{width:100%;height:100%;max-height:100%;object-fit:contain;transition:transform .25s var(--ease);cursor:zoom-in}
+#mapzoom .mz-help{text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
 /* ---------- MODAL ---------- */
 #modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:var(--sp-3);
   background:rgba(2,3,10,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
@@ -1054,7 +1139,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.01', date:'03 Sep 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.1', date:'06 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1823,6 +1908,234 @@ const SEED_SAYSAME = [
   ['Name a fast food chain', ['McDonald’s','Burger King','KFC','Subway','Wendy’s','Taco Bell','Domino’s','Pizza Hut','Popeyes','Five Guys','Chick-fil-A','Shake Shack']]
 ];
 
+/* --------------------------------------------------------------------------
+   GUESS THE MAP — the twenty built-in maps
+   Every one is drawn by the app itself from real borders (maps-geo.js: Natural
+   Earth 1:10m countries, US Census states), so all twenty share one look —
+   same sea, same land, same palette, same legend — and every border, coast and
+   city dot sits where it really is. Nothing is a traced or approximated image.
+
+   A map is pure data:
+     view   which base map — world · europe · northatl · namerica · us
+     ata    world only: keep Antarctica (cropped off otherwise)
+     cls    shaded groups: { c:colour, codes:'ISO3 …', label:at reveal, hint:during play }
+     rest   optional fill for every country NOT in a group (the "other half")
+     labels text printed on a country throughout (the years on the vote map)
+     rlabels text printed on a country only at the reveal
+     pts    [lat, lon, name, [dx, dy, anchor]] — exact coordinates, name shown at reveal
+     lines  parallels drawn at the reveal (the Equator)
+   The title is the answer, so it never appears until the reveal. A `hint` is
+   allowed to tell the room what the colours are without saying what they mean
+   — "70–100" on the corruption map is fair; "least corrupt" is not.
+   Facts are sourced in each `notes`, and that note is what the host reads out.
+   -------------------------------------------------------------------------- */
+const MC = { gold:'#F5C518', vio:'#9B7BFF', org:'#FF9F43', coral:'#FF5566', mint:'#3DDC97', lime:'#C8E05A', sky:'#5AB0FF' };
+const SEED_MAPS = [
+  { key:'lht', view:'world',
+    title:'Countries that drive on the left',
+    answer:'Which side of the road they drive on — gold drives on the left',
+    notes:'About 75 countries and territories drive on the left — roughly a third of the world’s people. Mostly the old British Empire, plus Japan, Thailand, Indonesia and Mozambique. Source: Wikipedia, Left- and right-hand traffic.',
+    cls:[{ c:MC.gold, label:'Drive on the left',
+      codes:'ATG AUS BGD BHS BMU BRB BRN BTN BWA CYM CYP DMA FJI FLK GBR GGY GRD GUY HKG IDN IMN IND IRL JAM JEY JPN KEN KIR KNA LCA LKA LSO MAC MDV MLT MOZ MUS MWI MYS NAM NPL NRU NZL PAK PCN PNG SGP SGS SLB SUR SWZ SYC TCA THA TLS TON TTO TUV TZA UGA VCT VGB VIR WSM ZAF ZMB ZWE' }],
+    rest:{ c:'#3a4370', label:'Drive on the right' } },
+
+  { key:'half', view:'world',
+    title:'Half the world’s population lives in these seven countries',
+    answer:'The world’s population split in two — the seven gold countries hold over half of humanity',
+    notes:'India, China, the USA, Indonesia, Pakistan, Nigeria and Brazil: 51.6% of everyone alive. The other ~190 countries share the rest. The top six alone fall just short, at about 49%. Source: UN World Population Prospects, 2023 estimates.',
+    cls:[{ c:MC.gold, label:'7 countries — 50%', hint:'50%', codes:'IND CHN USA IDN PAK NGA BRA' }],
+    rest:{ c:MC.vio, label:'Everyone else — 50%', hint:'50%' } },
+
+  { key:'cpi', view:'world',
+    title:'How corrupt every country is — Corruption Perceptions Index 2025',
+    answer:'Corruption — Transparency International’s Corruption Perceptions Index',
+    notes:'Transparency International, CPI 2025 (published February 2026): 182 countries scored from 0 (highly corrupt) to 100 (very clean). Cleanest: Denmark, 89. Bottom: Somalia and South Sudan, 9. Grey = not scored.',
+    cls:[
+      { c:MC.mint,  hint:'70–100', label:'Very clean (70–100)',
+        codes:'AUS BTN CAN CHE DEU DNK EST FIN GBR HKG IRL ISL JPN LUX NLD NOR NZL SGP SWE URY' },
+      { c:MC.lime,  hint:'50–69',  label:'Fairly clean (50–69)',
+        codes:'ARE AUT BEL BHR BHS BRB BRN BWA CHL CPV CRI CYP CZE DMA ESP FJI FRA GEO GRC GRD ISR ITA JOR KOR LCA LTU LVA MYS OMN POL PRT QAT RWA SAU SVN SYC TWN USA VCT' },
+      { c:MC.org,   hint:'30–49',  label:'Corrupt (30–49)',
+        codes:'AGO ALB ARG ARM AZE BEN BFA BGR BIH BLR BLZ BRA CHN CIV COL CUB DJI DOM DZA ECU EGY ETH GHA GMB GUY HRV HUN IDN IND JAM KAZ KEN KWT LAO LKA LSO MAR MDA MDV MKD MLT MNE MNG MRT MUS MWI NAM NER NPL PAN PER PHL ROU SEN SLB SLE SLV SRB STP SUR SVK TGO THA TLS TTO TUN TUR TZA UKR UZB VNM VUT XKX ZAF ZMB' },
+      { c:MC.coral, hint:'0–29',   label:'Highly corrupt (0–29)',
+        codes:'AFG BDI BGD BOL CAF CMR COD COG COM ERI GAB GIN GNB GNQ GTM HND HTI IRN IRQ KGZ KHM LBN LBR LBY MDG MEX MLI MMR MOZ NGA NIC PAK PNG PRK PRY RUS SDN SOM SOML SSD SWZ SYR TCD TJK TKM UGA VEN YEM ZWE' }
+    ] },
+
+  { key:'vote', view:'europe',
+    title:'The year women won the vote, on equal terms with men',
+    answer:'When women got the vote — the year each country gave women the same voting rights as men',
+    notes:'Equal terms with men. Several let some women vote earlier: the UK in 1918 (over-30s only), Norway in 1907 (with a property limit), Portugal in 1931 (educated women only). Switzerland waited until 1971 — and its last canton, Appenzell Innerrhoden, until 1990. The Vatican holds no elections for anyone. Source: Wikipedia, Women’s suffrage.',
+    cls:[
+      { c:MC.gold,  hint:'1906–1918', label:'1906–1918', codes:'FIN NOR DNK RUS EST LVA UKR ARM LTU POL DEU AUT GEO AZE' },
+      { c:MC.org,   hint:'1919–1939', label:'1919–1939', codes:'BLR NLD LUX SWE ISL CZE SVK IRL GBR ESP TUR' },
+      { c:MC.vio,   hint:'1940–1959', label:'1940–1959', codes:'MDA FRA BGR ITA HUN ALB HRV SVN BIH SRB MNE MKD XKX ROU MLT BEL GRC SMR' },
+      { c:MC.coral, hint:'1960–1984', label:'1960–1984', codes:'CYP MCO AND CHE PRT LIE' }
+    ],
+    labels:{ FIN:'1906', NOR:'1913', DNK:'1915', RUS:'1917', EST:'1917', LVA:'1917', UKR:'1917', ARM:'1917',
+      LTU:'1918', POL:'1918', DEU:'1918', AUT:'1918', GEO:'1918', AZE:'1918',
+      BLR:'1919', NLD:'1919', LUX:'1919', SWE:'1919', ISL:'1920', CZE:'1920', SVK:'1920', IRL:'1922', GBR:'1928', ESP:'1931', TUR:'1934',
+      MDA:'1940', FRA:'1944', BGR:'1944', ITA:'1945', HUN:'1945', ALB:'1945', HRV:'1945', SVN:'1945', BIH:'1945', SRB:'1945', MNE:'1945', MKD:'1945', XKX:'1945',
+      ROU:'1946', MLT:'1947', BEL:'1948', GRC:'1952', SMR:'1959', CYP:'1960', MCO:'1962', AND:'1970', CHE:'1971', PRT:'1976', LIE:'1984' } },
+
+  { key:'edu', view:'us',
+    title:'The 10 most and 10 least educated US states',
+    answer:'Education — the share of adults with a university degree: 10 highest in gold, 10 lowest in red',
+    notes:'Adults 25+ with a bachelor’s degree or higher. Top: Massachusetts 48.3%, Colorado 47.8%, Vermont 45.1%. Bottom: West Virginia 24.4%, Mississippi 27.0%, Arkansas 27.1%. Source: US Census Bureau, American Community Survey 2024 (1-year), table S1501.',
+    cls:[
+      { c:MC.gold,  hint:'Top 10',    label:'10 most educated',  codes:'MA CO VT MD NJ VA CT NH NY WA' },
+      { c:MC.coral, hint:'Bottom 10', label:'10 least educated', codes:'WV MS AR LA KY NV OK AL IN NM' }
+    ],
+    rlabels:{ MA:'48.3%', CO:'47.8%', VT:'45.1%', MD:'44.7%', NJ:'44.5%', VA:'43.3%', CT:'42.6%', NH:'41.5%', NY:'41.2%', WA:'41.0%',
+      WV:'24.4%', MS:'27.0%', AR:'27.1%', LA:'27.8%', KY:'27.9%', NV:'28.5%', OK:'29.3%', AL:'29.9%', IN:'30.7%', NM:'31.8%' } },
+
+  { key:'vikings', view:'northatl',
+    title:'Everywhere the Vikings reached',
+    answer:'The Vikings — how far they sailed, raided and traded from Scandinavia',
+    notes:'c. 793–1110. West to Newfoundland (L’Anse aux Meadows — tree rings date the wood cutting to exactly 1021), east down the Russian rivers to Constantinople, Baghdad and the Caspian. Lindisfarne 793, Seville 844, Paris 845. Jerusalem: King Sigurd the Crusader, 1110.',
+    cls:[{ c:MC.vio, label:'Viking homelands', codes:'NOR SWE DNK' }],
+    ptLabel:'Reached by Vikings',
+    pts:[
+      [51.5964,-55.5333,'L’Anse aux Meadows',[0,-14,'middle']], [61.1522,-45.515,'Greenland',[0,-14,'middle']],
+      [64.1458,-21.9425,'Iceland',[0,-14,'middle']], [62.0117,-6.7675,'Faroes',[-10,4,'end']],
+      [58.981,-2.96,'Orkney',[-10,4,'end']], [55.68,-1.8025,'Lindisfarne',[10,4,'start']],
+      [53.96,-1.08,'York',[10,8,'start']], [54.235,-4.525,'Isle of Man',[-10,4,'end']],
+      [53.35,-6.2603,'Dublin',[-10,8,'end']], [48.8547,2.3475,'Paris',[10,4,'start']],
+      [49.4428,1.0886,'Rouen',[-10,-4,'end']], [37.3886,-5.995,'Seville',[10,4,'start']],
+      [38.7253,-9.15,'Lisbon',[-10,4,'end']], [44.0848,10.042,'Luni',[-10,4,'end']],
+      [41.0083,28.98,'Constantinople',[0,16,'middle']], [50.45,30.5233,'Kyiv',[10,4,'start']],
+      [58.55,31.2667,'Novgorod',[10,10,'start']], [59.9972,32.2981,'Staraya Ladoga',[10,-4,'start']],
+      [33.3153,44.3661,'Baghdad',[0,16,'middle']], [40.3744,47.1267,'Barda (Caspian)',[10,4,'start']],
+      [54.9789,49.0564,'Bolghar',[0,-12,'middle']], [31.7789,35.2256,'Jerusalem',[-10,4,'end']]
+    ] },
+
+  { key:'monarch', view:'world',
+    title:'Every country that still has a king, queen or emperor',
+    answer:'Monarchies — gold have their own monarch, purple share King Charles III',
+    notes:'43 monarchies. 28 have their own (Japan’s emperor, Saudi Arabia, Spain, Thailand, Morocco…), and 15 Commonwealth realms share King Charles III — the UK, Canada, Australia, New Zealand, Jamaica and more. The Vatican counts: the Pope is an elected absolute monarch. Source: Wikipedia, List of current monarchies.',
+    cls:[
+      { c:MC.gold, label:'Their own monarch',  codes:'AND ARE BEL BHR BRN BTN DNK ESP JOR JPN KHM KWT LIE LSO LUX MAR MCO MYS NLD NOR OMN QAT SAU SWE SWZ THA TON VAT' },
+      { c:MC.vio,  label:'King Charles III',   codes:'ATG AUS BHS BLZ CAN GRD JAM NZL PNG KNA LCA VCT SLB TUV GBR' }
+    ] },
+
+  { key:'landlocked', view:'world',
+    title:'Every landlocked country',
+    answer:'Landlocked countries — no coastline at all',
+    notes:'44 UN countries plus Kosovo have no sea coast. Only two are doubly landlocked — surrounded entirely by other landlocked countries: Liechtenstein and Uzbekistan. Kazakhstan is the biggest; the Caspian is a lake. Bolivia lost its coast to Chile in the War of the Pacific (1879–84) and still has a navy.',
+    cls:[{ c:MC.gold, label:'Landlocked',
+      codes:'AFG AND ARM AUT AZE BDI BFA BLR BOL BTN BWA CAF CHE CZE ETH HUN KAZ KGZ LAO LIE LSO LUX MDA MKD MLI MNG MWI NER NPL PRY RWA SMR SRB SSD SVK SWZ TCD TJK TKM UGA UZB VAT XKX ZMB ZWE' }] },
+
+  { key:'equator', view:'world',
+    title:'The countries the Equator runs through',
+    answer:'The Equator — every country it crosses on land',
+    notes:'Thirteen countries: on land through São Tomé and Príncipe, Gabon, Congo, DR Congo, Uganda, Kenya, Somalia, Indonesia, Ecuador (named after it), Colombia and Brazil — and through the waters of the Maldives and Kiribati.',
+    cls:[
+      { c:MC.gold, label:'Crossed on land',   codes:'STP GAB COG COD UGA KEN SOM IDN ECU COL BRA' },
+      { c:MC.org,  label:'Crossed at sea',    codes:'MDV KIR' }
+    ],
+    lines:[{ lat:0, label:'Equator' }] },
+
+  { key:'olympics', view:'world',
+    title:'Every country that has hosted the Summer Olympics',
+    answer:'Summer Olympics hosts',
+    notes:'19 countries, Athens 1896 to Paris 2024. The USA leads with four (St Louis 1904, LA 1932 and 1984, Atlanta 1996) — LA 2028 makes five. Britain and France have three each. Russia is shaded for Moscow 1980 (USSR). Africa has never hosted.',
+    cls:[{ c:MC.gold, label:'Hosted', codes:'GRC FRA USA GBR SWE BEL NLD DEU FIN AUS ITA JPN MEX CAN RUS KOR ESP CHN BRA' }],
+    rlabels:{ USA:'×4', GBR:'×3', FRA:'×3', GRC:'×2', DEU:'×2', AUS:'×2', JPN:'×2' } },
+
+  { key:'nukes', view:'world',
+    title:'Every country with nuclear weapons',
+    answer:'Nuclear-armed countries',
+    notes:'Nine: the USA, Russia, the UK, France, China, India, Pakistan, North Korea — and Israel, which has never confirmed it. Russia and the USA hold around 90% of all warheads. South Africa built six bombs and dismantled them. Source: SIPRI Yearbook 2025.',
+    cls:[
+      { c:MC.gold, label:'Declared',     codes:'USA RUS GBR FRA CHN IND PAK PRK' },
+      { c:MC.org,  label:'Undeclared',   codes:'ISR' }
+    ] },
+
+  { key:'g20', view:'world',
+    title:'The G7 and the rest of the G20',
+    answer:'The G20 — gold is the G7, purple the rest of the G20',
+    notes:'The G20 is 19 countries plus the European Union and, since 2023, the African Union. The G7 inner circle: the US, Canada, the UK, France, Germany, Italy and Japan. Russia was in the G8 until it was suspended in 2014.',
+    cls:[
+      { c:MC.gold, label:'G7',                 codes:'USA CAN GBR FRA DEU ITA JPN' },
+      { c:MC.vio,  label:'Rest of the G20',    codes:'ARG AUS BRA CHN IND IDN MEX RUS SAU ZAF KOR TUR' }
+    ] },
+
+  { key:'metric', view:'world',
+    title:'The only countries that haven’t officially gone metric',
+    answer:'The metric system — the three countries that never officially adopted it',
+    notes:'The USA, Liberia and Myanmar, per the CIA World Factbook. The UK is officially metric — pints and miles are legal exceptions. NASA lost the $125m Mars Climate Orbiter in 1999 to a pounds-versus-newtons mix-up.',
+    cls:[{ c:MC.gold, label:'Not officially metric', codes:'USA LBR MMR' }] },
+
+  { key:'euro', view:'europe',
+    title:'Every country that uses the euro',
+    answer:'The euro — gold are euro-area EU members, purple use it from outside the EU',
+    notes:'21 EU members use the euro — Bulgaria joined on 1 January 2026. Six more use it without being in the EU: Andorra, Monaco, San Marino and the Vatican by agreement, Montenegro and Kosovo on their own. Denmark has a legal opt-out.',
+    cls:[
+      { c:MC.gold, label:'EU, uses the euro',     codes:'AUT BEL BGR HRV CYP EST FIN FRA DEU GRC IRL ITA LVA LTU LUX MLT NLD PRT SVK SVN ESP' },
+      { c:MC.vio,  label:'Outside the EU, uses it', codes:'AND MCO SMR VAT MNE XKX' }
+    ] },
+
+  { key:'schengen', view:'europe',
+    title:'The Schengen Area — Europe without border checks',
+    answer:'The Schengen Area — passport-free travel',
+    notes:'29 members: 25 EU countries plus Iceland, Norway, Switzerland and Liechtenstein. Romania and Bulgaria became full members on 1 January 2025. Ireland opted out and Cyprus hasn’t joined. Monaco, San Marino and the Vatican are open de facto. Named after a village in Luxembourg.',
+    cls:[
+      { c:MC.gold, label:'Schengen members', codes:'AUT BEL BGR HRV CZE DNK EST FIN FRA DEU GRC HUN ISL ITA LVA LIE LTU LUX MLT NLD NOR POL PRT ROU SVK SVN ESP SWE CHE' },
+      { c:MC.vio,  label:'Open, not members', codes:'AND MCO SMR VAT' }
+    ] },
+
+  { key:'colonies', view:'us',
+    title:'The Thirteen Colonies',
+    answer:'The original Thirteen Colonies that declared independence in 1776',
+    notes:'New Hampshire, Massachusetts, Rhode Island, Connecticut, New York, New Jersey, Pennsylvania, Delaware, Maryland, Virginia, North Carolina, South Carolina, Georgia. Today’s borders, so roughly: Maine was then part of Massachusetts, and West Virginia split from Virginia in 1863.',
+    cls:[{ c:MC.gold, label:'The Thirteen Colonies', codes:'NH MA RI CT NY NJ PA DE MD VA NC SC GA' }] },
+
+  { key:'salestax', view:'us',
+    title:'The US states with no sales tax',
+    answer:'No statewide sales tax',
+    notes:'The “NOMAD” five: New Hampshire, Oregon, Montana, Alaska, Delaware. Alaska still lets towns add their own local sales tax. Source: Tax Foundation.',
+    cls:[{ c:MC.gold, label:'No statewide sales tax', codes:'AK DE MT NH OR' }] },
+
+  { key:'wonders', view:'world',
+    title:'The New Seven Wonders of the World',
+    answer:'The New Seven Wonders of the World',
+    notes:'Picked in a 2007 worldwide public vote run by the New7Wonders Foundation. The Great Pyramid of Giza, the last survivor of the ancient seven, was given honorary status rather than a place on the list.',
+    ptLabel:'A wonder',
+    pts:[
+      [40.3542,116.0069,'Great Wall of China',[0,-14,'middle']], [30.3221,35.4515,'Petra',[-10,4,'end']],
+      [-22.9519,-43.2106,'Christ the Redeemer',[10,4,'start']], [-13.1633,-72.5456,'Machu Picchu',[-10,4,'end']],
+      [20.6831,-88.5686,'Chichén Itzá',[-10,4,'end']], [41.8903,12.4922,'Colosseum',[0,-14,'middle']],
+      [27.175,78.0419,'Taj Mahal',[0,16,'middle']]
+    ] },
+
+  { key:'summits', view:'world', ata:true,
+    title:'The Seven Summits — the highest mountain on each continent',
+    answer:'The Seven Summits — the highest peak on every continent',
+    notes:'Everest 8,849 m · Aconcagua 6,961 m · Denali 6,190 m · Kilimanjaro 5,895 m · Elbrus 5,642 m · Vinson 4,892 m · Puncak Jaya 4,884 m. Some lists use Australia’s Kosciuszko (2,228 m) instead of Puncak Jaya.',
+    ptLabel:'A summit',
+    pts:[
+      [27.9883,86.9253,'Everest',[0,-14,'middle']], [-32.6531,-70.0117,'Aconcagua',[10,4,'start']],
+      [63.0692,-151.0064,'Denali',[0,-14,'middle']], [-3.0758,37.3533,'Kilimanjaro',[10,4,'start']],
+      [43.355,42.4392,'Elbrus',[0,-14,'middle']], [-78.5256,-85.6172,'Vinson',[10,4,'start']],
+      [-4.0789,137.1583,'Puncak Jaya',[0,16,'middle']]
+    ] },
+
+  { key:'wc2026', view:'namerica',
+    title:'The 16 host cities of the 2026 World Cup',
+    answer:'The 2026 FIFA World Cup host cities',
+    notes:'11 in the USA, 3 in Mexico, 2 in Canada — 48 teams and 104 matches, 11 June to 19 July 2026. The opener was at Mexico City’s Estadio Azteca, the first stadium to host games at three World Cups; the final at MetLife Stadium, New York New Jersey.',
+    ptLabel:'A host city',
+    pts:[
+      [19.303,-99.1505,'Mexico City',[10,8,'start']], [20.6817,-103.4628,'Guadalajara',[-10,4,'end']],
+      [25.6692,-100.2444,'Monterrey',[10,4,'start']], [43.6333,-79.4186,'Toronto',[-10,-4,'end']],
+      [49.2767,-123.1119,'Vancouver',[10,-2,'start']], [33.7556,-84.4,'Atlanta',[-10,4,'end']],
+      [42.091,-71.264,'Boston',[10,-2,'start']], [32.7478,-97.0928,'Dallas',[10,4,'start']],
+      [29.6847,-95.4108,'Houston',[10,8,'start']], [39.0489,-94.4839,'Kansas City',[10,4,'start']],
+      [33.953,-118.339,'Los Angeles',[-10,8,'end']], [25.9581,-80.2389,'Miami',[-10,4,'end']],
+      [40.8136,-74.0744,'New York New Jersey',[10,6,'start']], [39.9008,-75.1675,'Philadelphia',[-10,8,'end']],
+      [37.403,-121.97,'San Francisco Bay Area',[-10,4,'end']], [47.5952,-122.3316,'Seattle',[10,4,'start']]
+    ] }
+];
+
 function buildSeedBank(){
   const out = [];
   SEED.forEach(function(r){ out.push({
@@ -1840,6 +2153,13 @@ function buildSeedBank(){
   SEED_SAYSAME.forEach(function(r){ out.push({
     id:hash(r[0]), question:r[0], answer:'', notes:'', theme:'',
     type:'saysame', difficulty:'', use_with:'', pool:r[1].slice(), src:'seed'
+  }); });
+  /* The bank row carries the words; the drawing itself is looked up from
+     SEED_MAPS by `map` at render time, so a corrected border or colour never
+     needs a bank migration — only the words do. */
+  SEED_MAPS.forEach(function(m){ out.push({
+    id:hash('map:' + m.key), question:m.title, answer:m.answer, notes:m.notes, theme:'',
+    type:'map', difficulty:'', use_with:'', map:m.key, src:'seed'
   }); });
   return out;
 }
@@ -2012,7 +2332,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 14;   // bumped when the built-in bank changes
+const SEED_VERSION = 15;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -2074,7 +2394,7 @@ const RETIRED_SEED = [
       /* pool is an array — a straight !== is always true between two distinct
          array references even when the contents match, which would report a
          false "correction" on every single load. Compare it by content. */
-      const moved = ['question','answer','notes','theme','type','difficulty','use_with']
+      const moved = ['question','answer','notes','theme','type','difficulty','use_with','map']
         .some(k => q[k] !== s[k])
         || JSON.stringify(q.pool || null) !== JSON.stringify(s.pool || null);
       if(moved){ Object.assign(q, s); fixed++; }
@@ -2436,6 +2756,203 @@ function saySameDeck(cfg){
   return primary.concat(spare);
 }
 
+/* ==========================================================================
+   9a3. GUESS THE MAP — the engine
+   ==========================================================================
+   A map goes up, sixty seconds, both teams write down what they think it
+   shows. The host reveals the title and rules: Team A, Team B, both (a point
+   each) or neither. Best of three — and "neither" is the reason the tie-break
+   has no ceiling: if nobody gets one, another map comes out, and another,
+   until somebody does.
+
+   The built-in maps are drawn here, from maps-geo.js, not shipped as pictures.
+   That file is half a megabyte of real borders, so it is loaded only when a
+   night actually has maps on the card (prefetched the moment the game starts)
+   rather than on every open of the app. A host's own map is a picture they
+   uploaded, stored in the bank as a compressed data URL.
+   ========================================================================== */
+const MAP_SECS = 60;
+const MAP_LEGS = 3;
+
+function mapSpec(q){ return q && q.map ? SEED_MAPS.find(m => m.key === q.map) || null : null; }
+function mapOK(q){ return !!q && q.type === 'map' && (!!mapSpec(q) || !!q.img); }
+/* Twenty maps and a never-repeat rule would run a weekly table dry in a few
+   months, and then the mini-game would silently drop off the card. So the
+   fresh ones always go first, and the played ones queue up behind them
+   instead of vanishing. */
+function mapPool(skip){
+  const all = S.bank.filter(q => mapOK(q) && !(skip && skip.has(q.id)));
+  return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
+}
+/* Hand-picks first, in the order ticked; the bank fills the rest. Everything
+   after the first MAP_LEGS is tie-break reserve — the whole remaining bank,
+   because a tie-break here is "until somebody gets one". */
+function mapDeck(cfg){
+  const picked = ((cfg && cfg.pickMap) || [])
+    .map(id => S.bank.find(q => q.id === id))
+    .filter(mapOK)
+    .slice(0, MAP_LEGS);
+  return picked.concat(mapPool(new Set(picked.map(q => q.id))));
+}
+
+/* ---- loading the geometry ---- */
+let mapGeoP = null;
+function loadMapGeo(){
+  if(window.MAPGEO) return Promise.resolve(window.MAPGEO);
+  if(mapGeoP) return mapGeoP;
+  mapGeoP = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'maps-geo.js?v=' + BUILD.v;   // a new release must not read last version's cached file
+    s.async = true;
+    s.onload = () => window.MAPGEO ? res(window.MAPGEO) : rej(new Error('empty'));
+    s.onerror = () => { mapGeoP = null; s.remove(); rej(new Error('load')); };
+    document.head.appendChild(s);
+  });
+  return mapGeoP;
+}
+const needsGeo = (q) => !!mapSpec(q) && !window.MAPGEO;
+
+/* ---- drawing ---- */
+const MAP_SEA = '#0B1030', MAP_LAND = '#2B3152';
+/* the world map stops just below Cape Horn unless a map needs Antarctica */
+const MAP_CROP = { world:450 };
+/* label sizes per base map, in the geometry's own units (1000 = full width) */
+const MAP_FS = { world:12, europe:10.5, northatl:11, namerica:12, us:13 };
+const MAP_VIEW_NAME = { world:'World', europe:'Europe', northatl:'North Atlantic', namerica:'North America', us:'US' };
+/* Countries too small, or too crowded, to hold their own label. The label is
+   moved by [dx, dy] to the nearest spot where it covers nothing but sea or its
+   own country and no other label, and a hairline leads back to it. Found by
+   collision-testing every label against the real borders at these sizes, not
+   by eye — rerun that if a label is added or MAP_FS changes. */
+const MAP_CALLOUT = {
+  europe:{ GRC:[8,0], PRT:[-5,6], LVA:[-7,4], HRV:[-23,13], SVK:[7,-4], CHE:[8,0], NLD:[-6,5], MDA:[41,34], BEL:[-8,-43],
+           ARM:[-59,0], ALB:[-7,4], MKD:[-37,7], SVN:[19,53], MNE:[-11,13], XKX:[-20,55], CYP:[8,1], LUX:[13,-73],
+           AND:[16,28], LIE:[-11,61], SMR:[-22,38], MCO:[-3,20] },
+  us:{ WV:[10,-17], MD:[36,20], VT:[-11,-13], NH:[17,0], MA:[30,36], NJ:[14,0], CT:[20,3] },
+  world:{ DEU:[-6,34], GBR:[-1,-8], GRC:[4,7] },
+  northatl:{}, namerica:{}
+};
+
+const MAP_R = Math.PI / 180;
+/* the exact same projection maps-geo.js was cut with (d3's naturalEarth1 and
+   azimuthalEqualArea), so a city dot lands on the very pixel of its border */
+function mapRotate(lam, phi, dl, dp){
+  lam += dl; if(lam > Math.PI) lam -= 2 * Math.PI; else if(lam < -Math.PI) lam += 2 * Math.PI;
+  if(!dp) return [lam, phi];
+  const cp = Math.cos(dp), sp = Math.sin(dp), cphi = Math.cos(phi);
+  const x = Math.cos(lam) * cphi, y = Math.sin(lam) * cphi, z = Math.sin(phi), k = z * cp + x * sp;
+  return [Math.atan2(y, x * cp - z * sp), Math.asin(Math.max(-1, Math.min(1, k)))];
+}
+function mapNE1(l, p){
+  const p2 = p * p, p4 = p2 * p2;
+  return [ l * (0.8707 - 0.131979 * p2 + p4 * (-0.013791 + p4 * (0.003971 * p2 - 0.001529 * p4))),
+           p * (1.007226 + p2 * (0.015085 + p4 * (-0.044475 + 0.028874 * p2 - 0.005916 * p4))) ];
+}
+function mapLAEA(l, p){ const cl = Math.cos(l), cp = Math.cos(p), k = Math.sqrt(2 / (1 + cl * cp)); return [k * cp * Math.sin(l), k * Math.sin(p)]; }
+function mapProject(view, lat, lon){
+  const pr = view.proj;
+  const [l, p] = mapRotate(lon * MAP_R, lat * MAP_R, pr.r[0] * MAP_R, pr.r[1] * MAP_R);
+  const [x, y] = (pr.t === 'ne1' ? mapNE1 : mapLAEA)(l, p);
+  return [pr.tx + pr.k * x, pr.ty - pr.k * y];
+}
+
+const mapMemo = {};
+function mapSVG(q, reveal){
+  const spec = mapSpec(q);
+  if(!spec){
+    return q.img ? '<img class="map-img" src="' + esc(q.img) + '" alt="The map">'
+                 : '<div class="map-wait">This map has no picture.</div>';
+  }
+  const GEO = window.MAPGEO;
+  if(!GEO) return '<div class="map-wait" data-geo="wait">Loading the map&hellip;</div>';
+  const memoKey = spec.key + (reveal ? ':r' : ':q');
+  if(mapMemo[memoKey]) return mapMemo[memoKey];
+
+  const v = GEO.views[spec.view];
+  const H = (spec.view === 'world' && !spec.ata ? MAP_CROP.world : v.h);
+  const fs = MAP_FS[spec.view] * 10;
+  const fill = {};
+  (spec.cls || []).forEach(c => c.codes.split(' ').forEach(k => { fill[k] = c.c; }));
+
+  let land = '';
+  Object.keys(v.shapes).forEach(k => {
+    if(k === 'ATA' && !spec.ata) return;
+    const f = fill[k] || (spec.rest && k !== 'ATA' ? spec.rest.c : MAP_LAND);
+    land += '<path d="' + v.shapes[k].d + '" fill="' + f + '"/>';
+  });
+  /* microstates and islands too small to see get a dot — only when they are
+     in a group, or the map would be freckled with every atoll on Earth */
+  let dots = '';
+  const dotR = spec.view === 'world' ? 34 : 42;
+  Object.keys(fill).forEach(k => {
+    const p = v.tiny[k] || (v.shapes[k] && v.shapes[k].a < 12 ? v.shapes[k].l : null);   // Malta-sized and under
+    if(p) dots += '<circle cx="' + Math.round(p[0] * 10) + '" cy="' + Math.round(p[1] * 10) + '" r="' + dotR + '" fill="' + fill[k] + '"/>';
+  });
+
+  const where = (k) => v.shapes[k] ? v.shapes[k].l : v.tiny[k];
+  const call = MAP_CALLOUT[spec.view] || {};
+  const lab = Object.assign({}, spec.labels || {}, reveal ? (spec.rlabels || {}) : {});
+  let labels = '', leaders = '';
+  Object.keys(lab).forEach(k => {
+    const at = where(k); if(!at) return;
+    const off = call[k];
+    const x = Math.round((at[0] + (off ? off[0] : 0)) * 10), y = Math.round((at[1] + (off ? off[1] : 0)) * 10);
+    if(off && Math.hypot(off[0], off[1]) > 12) leaders += '<line x1="' + Math.round(at[0] * 10) + '" y1="' + Math.round(at[1] * 10) + '" x2="' + x + '" y2="' + y + '"/>';
+    labels += '<text x="' + x + '" y="' + y + '" dy=".35em" text-anchor="middle" font-size="' + fs + '" stroke-width="' + Math.round(fs * .22) + '">' + esc(lab[k]) + '</text>';
+  });
+
+  let lines = '';
+  if(reveal && spec.lines && v.proj){
+    spec.lines.forEach(ln => {
+      let d = '';
+      for(let lon = -180; lon <= 180; lon += 2){
+        const p = mapProject(v, ln.lat, lon);
+        d += (d ? 'L' : 'M') + Math.round(p[0] * 10) + ' ' + Math.round(p[1] * 10);
+      }
+      const p0 = mapProject(v, ln.lat, -150);
+      lines += '<path class="mline" d="' + d + '"/>' +
+        '<text x="' + Math.round(p0[0] * 10) + '" y="' + Math.round(p0[1] * 10 - fs * .6) + '" font-size="' + Math.round(fs * .9) + '" stroke-width="' + Math.round(fs * .2) + '">' + esc(ln.label) + '</text>';
+    });
+  }
+
+  let pts = '', ptl = '';
+  (spec.pts || []).forEach(pt => {
+    const p = mapProject(v, pt[0], pt[1]);
+    const x = Math.round(p[0] * 10), y = Math.round(p[1] * 10);
+    pts += '<circle class="mpt" cx="' + x + '" cy="' + y + '" r="' + (spec.pts.length > 10 ? 52 : 64) + '"/>';
+    if(reveal){
+      const o = pt[3] || [10, 4, 'start'];
+      ptl += '<text x="' + (x + o[0] * 10) + '" y="' + (y + o[1] * 10) + '" text-anchor="' + o[2] + '" font-size="' + Math.round(fs * .9) + '" stroke-width="' + Math.round(fs * .2) + '">' + esc(pt[2]) + '</text>';
+    }
+  });
+
+  /* --ar lets the CSS size the drawing by whichever runs out first, width or
+     height, so the frame (and its Enlarge chip) hugs the map itself */
+  const out = '<svg class="map-svg" viewBox="0 0 10000 ' + (H * 10) + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map" style="--ar:' + (1000 / H).toFixed(4) + '">' +
+    (v.sphere ? '<path class="msea" d="' + v.sphere + '"/>' : '<rect class="msea" width="10000" height="' + (H * 10) + '"/>') +
+    '<g class="mland">' + land + '</g>' +
+    '<g class="mdots">' + dots + '</g>' +
+    lines +
+    '<g class="mlead">' + leaders + '</g>' +
+    '<g class="mpts">' + pts + '</g>' +
+    '<g class="mlab">' + labels + ptl + '</g>' +
+  '</svg>';
+  mapMemo[memoKey] = out;
+  return out;
+}
+/* During play the legend may say what the colours ARE ("70–100", "50%") but
+   never what they MEAN; at the reveal it says everything. A map with no hint
+   at all simply has no legend until the reveal. */
+function mapLegend(q, reveal){
+  const spec = mapSpec(q);
+  if(!spec) return '';
+  const items = [];
+  (spec.cls || []).forEach(c => { const t = reveal ? c.label : c.hint; if(t) items.push('<span><i style="background:' + c.c + '"></i>' + esc(t) + '</span>'); });
+  if(spec.rest){ const t = reveal ? spec.rest.label : spec.rest.hint; if(t) items.push('<span><i style="background:' + spec.rest.c + '"></i>' + esc(t) + '</span>'); }
+  if(spec.pts) items.push('<span><i class="pt"></i>' + (reveal ? esc(spec.ptLabel) : spec.pts.length + ' places') + '</span>');
+  return items.length ? '<div class="map-legend">' + items.join('') + '</div>' : '';
+}
+
 const LL = {
   friend:{ key:'friend', name:'Call a Friend', icon:ICON.phone },
   dip:   { key:'dip',    name:'Double Dip',    icon:ICON.dip   },
@@ -2445,7 +2962,7 @@ const LL = {
 /* ==========================================================================
    9b. MINI-GAMES — which ones, where they land, what they are worth
    ==========================================================================
-   Three of them, all optional, all chosen up front in Setup. Two get spread
+   Five of them, all optional, all chosen up front in Setup. Four get spread
    through the standard rounds; the Battle is always the closer.
 
    WHERE THEY LAND. Even spread, not fixed gaps: mini k of M goes after round
@@ -2468,10 +2985,11 @@ const MINI_GAMES = {
   closest:{ key:'closest', name:'Closest To Wins',            blurb:'Seven numbers. Closest guess wins the leg.' },
   auction:{ key:'auction', name:'The Auction',                blurb:'Bid how many you can name, then deliver it.' },
   saysame:{ key:'saysame', name:"Don't Say the Same as Me",   blurb:'Ten seconds to answer without matching the host.' },
+  map:    { key:'map',     name:'Guess the Map',              blurb:'A map, sixty seconds — what does it show?' },
   battle: { key:'battle',  name:'Battle of the Captains',     blurb:'Ten each, captains only, 7s a shot.' }
 };
-/* the three that get spread through the rounds — the Battle is the finale */
-const INTERLEAVED = ['closest', 'auction', 'saysame'];
+/* the four that get spread through the rounds — the Battle is the finale */
+const INTERLEAVED = ['closest', 'auction', 'saysame', 'map'];
 
 function miniPointValue(N, M){
   if(!M) return 0;
@@ -2541,6 +3059,10 @@ function buildGame(cfg){
   const ssLegs = ssDeck.slice(0, SAYSAME_LEGS).map(drawSaySame);
   const ssSpare = ssDeck.slice(SAYSAME_LEGS);   // resolved lazily, if a tie-break needs one
 
+  const mpDeck = mapDeck(cfg);
+  const mpLegs = mpDeck.slice(0, MAP_LEGS);
+  const mpSpare = mpDeck.slice(MAP_LEGS);
+
   const mk = (t, color) => ({
     name:t.name, captain:t.captain, players:t.players,
     score:0, ll:{ friend:true, dip:true, dbl:true }, color
@@ -2552,7 +3074,8 @@ function buildGame(cfg){
   const inter  = INTERLEAVED.filter(k => wanted.indexOf(k) > -1)
                             .filter(k => k !== 'closest' || cp.length)
                             .filter(k => k !== 'auction' || auctionPool().length)
-                            .filter(k => k !== 'saysame' || ssLegs.length);
+                            .filter(k => k !== 'saysame' || ssLegs.length)
+                            .filter(k => k !== 'map' || mpLegs.length);
   const hasBattle = wanted.indexOf('battle') > -1;
   const plan = planMinis(rounds.length, inter);
   const M = inter.length + (hasBattle ? 1 : 0);
@@ -2567,6 +3090,7 @@ function buildGame(cfg){
     done:{},                   // key -> true once that mini-game has finished
     mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
     saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+    mapGame:{ qs:mpLegs, spare:mpSpare, base:mpLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     auction:null,
     r:0, seat:0, sub:'intro', miniPlayed:false,
     battle:null,
@@ -2617,11 +3141,13 @@ function schedule(){
 const AUCTION_SCREENS = ['auctionIntro','auctionBid','auctionRun','auctionLeg','auctionResult'];
 const CLOSEST_SCREENS = ['miniIntro','miniQ','miniEntry','miniSummary'];
 const SAYSAME_SCREENS = ['sayIntro','sayQ','sayJudge','saySummary'];
+const MAP_SCREENS = ['mapIntro','mapQ','mapJudge','mapSummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
   if(CLOSEST_SCREENS.indexOf(S.screen) > -1) return 'closest';
   if(AUCTION_SCREENS.indexOf(S.screen) > -1) return 'auction';
   if(SAYSAME_SCREENS.indexOf(S.screen) > -1) return 'saysame';
+  if(MAP_SCREENS.indexOf(S.screen) > -1) return 'map';
   if(BATTLE_SCREENS.indexOf(S.screen) > -1) return 'battle';
   return null;
 }
@@ -2668,8 +3194,10 @@ function render(){
      does fit the window. Any screen using .play or .fits MUST be in one of
      them — left out, it renders 88px of padding inside a box already sized to
      the viewport and the page scrolls by exactly that much. */
-  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapSummary'].indexOf(S.screen) > -1);
+  /* the enlarged map belongs to the screen that opened it */
+  if(S.tmp.mzFor && S.tmp.mzFor !== S.screen) closeMapZoom();
   document.body.classList.toggle('homemode', S.screen === 'home');
   app.innerHTML = fn();
   if(keep && keep.act){
@@ -2698,6 +3226,7 @@ function renderHUD(){
     || CLOSEST_SCREENS.indexOf(S.screen) > -1
     || AUCTION_SCREENS.indexOf(S.screen) > -1
     || SAYSAME_SCREENS.indexOf(S.screen) > -1
+    || MAP_SCREENS.indexOf(S.screen) > -1
     || BATTLE_SCREENS.indexOf(S.screen) > -1);
   if(!inGame){ h.hidden = true; h.innerHTML = ''; return; }
   h.hidden = false;
@@ -2720,6 +3249,8 @@ function renderHUD(){
       (S.screen === 'auctionRun' && a ? ' &nbsp;·&nbsp; ' + a.count + '/' + a.bid : '');
   } else if(SAYSAME_SCREENS.indexOf(S.screen) > -1){
     label = '<b>DON&rsquo;T SAY THE SAME AS ME</b> &nbsp;·&nbsp; ' + sayLegLabel();
+  } else if(MAP_SCREENS.indexOf(S.screen) > -1){
+    label = '<b>GUESS THE MAP</b> &nbsp;·&nbsp; ' + (S.screen === 'mapSummary' ? 'Final' : mapLegLabel());
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
     const b = g.battle;
     label = '<b>BATTLE OF THE CAPTAINS</b>' +
@@ -2828,7 +3359,7 @@ SCREENS.rules = function(){
       'Each team picks a <strong>captain</strong>. The captain gives the final answer. Nobody else. If the captain has not said it, it has not been said.',
       '<strong>Settle who goes first by chance, not by argument.</strong> Coin toss, rock paper scissors, highest card, closest guess to a number in the host&rsquo;s head — anything, as long as it is luck. <strong>The winner then chooses</strong> whether to be <span class="tn a">Team A</span>, who answers first every round, or <span class="tn b">Team B</span>, who gets the first steal.',
       '<strong>No phones.</strong> Not on the table, not in a lap.',
-      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or any of the four.'
+      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or any of the five.'
     ])) +
 
     ruleBlock('02', 'A standard round', ol([
@@ -2850,7 +3381,7 @@ SCREENS.rules = function(){
     ])) +
 
     ruleBlock('04', 'The mini-games', ul([
-      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or any of the four</strong>. They are announced at the start, not sprung on you.'),
+      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or any of the five</strong>. They are announced at the start, not sprung on you.'),
       li('They drop in <strong>between the standard rounds</strong>, spaced out across the night. Where exactly depends on how many rounds you are playing.'),
       li('Each one is worth <strong>between 2 and 4 points</strong> to whoever wins it. The host can tell you which before you start.'),
       li('<span style="color:var(--warn)">No lifelines in any of them.</span>')
@@ -2879,7 +3410,15 @@ SCREENS.rules = function(){
       li('Most legs out of ' + SAYSAME_LEGS + ' wins the mini-game. The prompts get narrower as the night goes — the last one might be a coin flip.')
     ])) +
 
-    ruleBlock('08', 'Battle of the Captains', ul([
+    ruleBlock('08', 'Guess the Map', ul([
+      li('A map goes up — <strong>no title</strong>, just the colours, the dots and whatever numbers are printed on it. <strong>' + MAP_SECS + ' seconds.</strong>'),
+      li('Both teams write down <strong>what the map shows</strong>, at the same time — &ldquo;countries that drive on the left&rdquo;, &ldquo;where the Vikings got to&rdquo;.'),
+      li('The host reveals it and rules. The idea counts, not the exact wording. <strong>Both right — a point each.</strong> Nobody right — nobody scores.'),
+      li('Best of ' + MAP_LEGS + '. Once a team cannot be caught, the rest are not played.'),
+      li('Level after ' + MAP_LEGS + ' — even at nothing each? <strong>Another map comes out, and another, until somebody gets one.</strong>')
+    ])) +
+
+    ruleBlock('09', 'Battle of the Captains', ul([
       li('<strong>Captains only.</strong> The room says nothing — and that means nothing.'),
       li('Ten questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot, one captain at a time.'),
       li('Both captains get the <strong>same shape</strong> — five easy, five medium, in the same order — but never the same questions. Different sets, same difficulty, so nobody can claim they drew the harder ten.'),
@@ -2888,7 +3427,7 @@ SCREENS.rules = function(){
       li('It always runs <strong>last</strong>, after the final standard round.')
     ])) +
 
-    ruleBlock('09', 'Winning', ul([
+    ruleBlock('10', 'Winning', ul([
       li('Highest score after the last round takes the night.'),
       li('Tie? <strong>Sudden death</strong> — one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
     ])) +
@@ -2914,7 +3453,7 @@ function defaultSetup(){
     difficulty:'mixed',
     themeDiff:{},       // theme -> difficulty, overriding the house setting
     minis:['closest'],  // which mini-games are on tonight's card
-    pickClosest:[], pickAuction:[], pickSaySame:[],   // hand-picked mini-game questions
+    pickClosest:[], pickAuction:[], pickSaySame:[], pickMap:[],   // hand-picked mini-game questions
     picks:{}            // theme -> [questionId, questionId] chosen by hand
   };
 }
@@ -2976,7 +3515,7 @@ function prunePicks(){
   Object.keys(MINI_PICKS).forEach(k => {
     const m = MINI_PICKS[k];
     if((c.minis || []).indexOf(k) < 0){ c[m.store] = []; return; }
-    const ok = {}; S.bank.forEach(q => { if(q.type === m.type && isFresh(q)) ok[q.id] = 1; });
+    const ok = {}; S.bank.forEach(q => { if(q.type === m.type && (isFresh(q) || m.type === 'map')) ok[q.id] = 1; });
     c[m.store] = (c[m.store] || []).filter(id => ok[id]);
   });
 }
@@ -3289,7 +3828,9 @@ const MINI_PICKS = {
   auction:{ store:'pickAuction', type:'auction', cap:AUCTION_LEGS, label:'The Auction',
             help:'Categories, in the order you tick them. Anything short is drawn from the bank.' },
   saysame:{ store:'pickSaySame', type:'saysame', cap:SAYSAME_LEGS, label:"Don't Say the Same as Me",
-            help:'Prompts, in the order you tick them. Anything short is dealt from the bank as usual — vast prompts play first, tight ones last.' }
+            help:'Prompts, in the order you tick them. Anything short is dealt from the bank as usual — vast prompts play first, tight ones last.' },
+  map:    { store:'pickMap', type:'map', cap:MAP_LEGS, label:'Guess the Map',
+            help:'Maps, in the order you tick them. Anything short is drawn from the bank, and the rest wait as tie-breakers.' }
 };
 function miniPicksFor(key){ return (S.setup && S.setup[MINI_PICKS[key].store]) || []; }
 function miniPickBlocks(){
@@ -3297,8 +3838,13 @@ function miniPickBlocks(){
   return Object.keys(MINI_PICKS).filter(k => (c.minis || []).indexOf(k) > -1).map(k => {
     const m = MINI_PICKS[k];
     const sel = miniPicksFor(k), full = sel.length >= m.cap;
-    const pool = S.bank.filter(q => q.type === m.type && isFresh(q) &&
-      (m.type !== 'saysame' || (q.pool || []).length >= 2));
+    /* Maps come back once they have all been played (see mapPool), so the
+       picker offers every one — fresh first, played ones after and tagged —
+       rather than an empty list on a table that has been through all twenty. */
+    const pool = m.type === 'map'
+      ? S.bank.filter(mapOK).sort((a, b) => isFresh(b) - isFresh(a))
+      : S.bank.filter(q => q.type === m.type && isFresh(q) &&
+          (m.type !== 'saysame' || (q.pool || []).length >= 2));
     const rows = pool.map(q => {
       const on = sel.indexOf(q.id) > -1;
       return '<button class="pickrow" role="button" aria-pressed="' + on + '"' + (!on && full ? ' disabled' : '') +
@@ -3313,6 +3859,9 @@ function miniPickBlocks(){
            thing the host is actually choosing between prompts on. */
         (m.type === 'closest' ? '<span class="qa">' + esc(q.answer) + '</span>'
          : m.type === 'saysame' ? '<span class="qa dim">' + esc(q.pool.join(' · ')) + '</span>'
+         /* a map's title IS its answer; the line under it says what kind of map */
+         : m.type === 'map' ? '<span class="qa dim">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' : 'Your own map') +
+             (isFresh(q) ? '' : ' · played before') + '</span>'
          : q.notes ? '<span class="qa dim">' + esc(q.notes) + '</span>' : '') +
         '</span></button>';
     }).join('');
@@ -4254,6 +4803,221 @@ SCREENS.saySummary = function(){
 };
 
 /* ==========================================================================
+   17e. GUESS THE MAP — screens
+   ========================================================================== */
+function mapLegLabel(){
+  const s = G().mapGame;
+  const i = Math.min(s.i, s.qs.length - 1);
+  return i >= s.base ? 'Tie-breaker map ' + (i - s.base + 1) : 'Map ' + (i + 1) + ' of ' + s.base;
+}
+function mapDots(){
+  const s = G().mapGame;
+  let out = '<span class="mini-dots">';
+  for(let i = 0; i < s.qs.length; i++){
+    const r = s.subs[i];
+    out += '<i class="' + (!r ? '' : r.winner === 'tie' ? 't' : r.winner === 'none' ? 'n' : r.winner === 0 ? 'a' : 'b') + '"></i>';
+  }
+  return out + '</span>';
+}
+const mapBand = () => '<div class="center"><div class="mini-band tight"><span class="eyebrow gold">' + mapLegLabel() + '</span>' + mapDots() + '</div></div>';
+/* the host's peek: the title is the answer here, the answer line is the gloss */
+function mapPeek(q){ return peek({ answer:q.question, notes:q.answer && q.answer !== q.question ? q.answer : '' }); }
+
+SCREENS.mapIntro = function(){
+  const g = G(), s = g.mapGame, n = s.qs.length;
+  return '<div class="stack lg intro-screen" style="padding-top:18px">' +
+    '<div class="center stack intro-head" style="gap:10px">' +
+      '<div class="eyebrow gold">Mini-game</div>' +
+      '<h1 class="display">Guess<br>the Map</h1>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+    '</div>' +
+    '<div class="card pad lit stack">' +
+      '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
+        '<li><strong style="color:var(--gold)">1.</strong> A map goes up — no title, just the colours. <strong>' + MAP_SECS + ' seconds.</strong></li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>what the map shows</strong>, at the same time. Captains hand it to the host.</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> The host reveals it and rules. Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level — even at nothing each — and another map comes out, <strong>until somebody gets one</strong>.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="mapStart">Show map 1</button></div>' +
+  '</div>';
+};
+AFTER.mapIntro = function(){ jingleOnce('map'); loadMapGeo().catch(() => {}); };
+
+SCREENS.mapQ = function(){
+  const g = G(), s = g.mapGame, q = s.qs[s.i];
+  return '<div class="play map-play">' +
+    mapBand() +
+    '<div class="map-stage">' +
+      '<div class="map-frame" data-act="mapZoom" title="Enlarge">' + mapSVG(q, false) +
+        '<span class="map-zoomhint" aria-hidden="true">&#x2922; Enlarge</span></div>' +
+      '<div class="map-side">' +
+        '<div class="q-theme">What does this map show?</div>' +
+        mapLegend(q, false) +
+        timerRing('seconds left') +
+        timerControls() +
+        mapPeek(q) +
+      '</div>' +
+    '</div>' +
+    '<div class="row between" style="gap:10px">' +
+      '<button class="btn sm ghost" data-act="mapSwap">Change this map</button>' +
+      '<button class="btn gold" data-act="toMapJudge">Pens down — reveal</button>' +
+    '</div>' +
+  '</div>';
+};
+/* The clock does not start on a map nobody can see yet: if the geometry is
+   still on its way, wait for it, redraw, and arm the timer then. */
+AFTER.mapQ = function(){
+  const q = G().mapGame.qs[G().mapGame.i];
+  if(needsGeo(q)){ mapWaitGeo(); return; }
+  /* marked as played the moment it is actually on screen — not when the game
+     is built — so a map the night never reached stays fresh */
+  if(!S.used.has(q.id)) markUsed(q);
+  armTimer('map' + G().mapGame.i, MAP_SECS, () => { if(S.screen === 'mapQ') go('mapJudge'); });
+};
+function mapWaitGeo(){
+  const here = S.screen;
+  loadMapGeo().then(() => { if(S.screen === here) render(); }).catch(() => {
+    const w = $('[data-geo="wait"]');
+    if(w) w.innerHTML = 'Could not load the map — check the connection. <button class="btn sm ghost" data-act="mapRetry">Try again</button>';
+  });
+}
+
+SCREENS.mapJudge = function(){
+  const g = G(), s = g.mapGame, q = s.qs[s.i];
+  return '<div class="compact map-judge">' +
+    mapBand() +
+    '<div class="map-stage reveal">' +
+      '<div class="map-frame" data-act="mapZoom" title="Enlarge">' + mapSVG(q, true) +
+        '<span class="map-zoomhint" aria-hidden="true">&#x2922; Enlarge</span></div>' +
+      '<div class="map-side">' +
+        '<div class="eyebrow gold">The map shows</div>' +
+        '<div class="map-title">' + esc(q.question) + '</div>' +
+        mapLegend(q, true) +
+        (q.notes ? '<p class="q-note">' + esc(q.notes) + '</p>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="card pad lit stack" style="gap:10px">' +
+      '<h3 class="display" style="font-size:clamp(16px,2.2vw,22px);text-align:center">Who got it?</h3>' +
+      '<div class="btn-row center" style="gap:10px">' +
+        '<button class="btn teamA lg" data-act="mapVerdict" data-w="0">' + esc(g.teams[0].name) + '</button>' +
+        '<button class="btn ghost" data-act="mapVerdict" data-w="tie">Both — 1 each</button>' +
+        '<button class="btn ghost" data-act="mapVerdict" data-w="none">Nobody</button>' +
+        '<button class="btn teamB lg" data-act="mapVerdict" data-w="1">' + esc(g.teams[1].name) + '</button>' +
+      '</div>' +
+      '<p class="help" style="text-align:center">Close enough is your call — the idea counts, not the exact wording.</p>' +
+    '</div>' +
+  '</div>';
+};
+AFTER.mapJudge = function(){
+  if(needsGeo(G().mapGame.qs[G().mapGame.i])) mapWaitGeo();
+};
+
+SCREENS.mapSummary = function(){
+  const g = G(), s = g.mapGame;
+  const rows = s.subs.map((r, i) =>
+    '<tr><td class="rowhead" data-l="Map">' + (i + 1) + '</td>' +
+    '<td class="qcell" data-l="It showed">' + esc(r.q.question) + '</td>' +
+    '<td data-l="Winner">' + (r.winner === 'tie' ? '<span class="badge line">Both</span>'
+      : r.winner === 'none' ? '<span class="badge line">Nobody</span>'
+      : '<span class="badge ' + (r.winner === 0 ? 'a' : 'b') + '">' + esc(g.teams[r.winner].name) + '</span>') + '</td></tr>'
+  ).join('');
+
+  const verdict = s.verdict || {};
+  return '<div class="fits">' +
+    '<div class="center stack" style="gap:6px">' +
+      '<div class="eyebrow gold">Guess the Map — final</div>' +
+      '<h2 class="display">' + (verdict.winner == null ? 'Tie' : esc(g.teams[verdict.winner].name) + ' takes it') + '</h2>' +
+      '<div class="row center" style="justify-content:center;gap:20px">' +
+        '<span class="badge a">' + esc(g.teams[0].name) + ' — ' + s.wins[0] + '</span>' +
+        '<span class="badge b">' + esc(g.teams[1].name) + ' — ' + s.wins[1] + '</span>' +
+      '</div>' +
+      (verdict.note ? '<p class="help" style="max-width:52ch;margin:0 auto">' + verdict.note + '</p>' : '') +
+      (s.awarded && s.award ? '<p class="help">Points awarded: <strong style="color:var(--a)">' + s.award[0] + '</strong> / <strong style="color:var(--b)">' + s.award[1] + '</strong></p>' : '') +
+    '</div>' +
+    (verdict.needsHost
+      ? '<div class="card pad lit center stack"><h3 class="display">Your call, host</h3>' +
+        '<p class="help">Still level and the bank is out of maps. Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<div class="btn-row center">' +
+          '<button class="btn teamA lg" data-act="mapAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
+          '<button class="btn ghost" data-act="mapAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
+          '<button class="btn teamB lg" data-act="mapAward" data-w="1">' + esc(g.teams[1].name) + ' takes it</button>' +
+        '</div></div>'
+      : '') +
+    scoreBig() +
+    '<div class="tbl-wrap"><table><thead><tr><th>Map</th><th>It showed</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="btn-row center">' +
+      '<button class="btn ghost" data-act="quit">End game</button>' +
+      '<button class="btn gold lg" data-act="afterMap">Back to the standard rounds</button>' +
+    '</div>' +
+  '</div>';
+};
+
+/* ---- the enlarged map ----
+   Pinch-zoom is switched off app-wide (it wrecked the buttons on a phone), so
+   a map with fifty year labels on it needs its own way to get close. Tap the
+   map: it fills the screen. Tap a spot: it zooms in there. Drag to look
+   around, tap again to zoom back out. It lives outside #app, so the timer
+   underneath keeps running and a re-render never wipes it. */
+function openMapZoom(){
+  const g = G(); if(!g) return;
+  const s = g.mapGame, q = s.qs[s.i], reveal = S.screen === 'mapJudge';
+  closeMapZoom();
+  const box = document.createElement('div');
+  box.id = 'mapzoom';
+  box.innerHTML =
+    '<div class="mz-top"><span class="eyebrow gold">' + (reveal ? esc(q.question) : 'What does this map show?') + '</span>' +
+      (reveal ? '' : '<span class="mz-t num" id="mzT"></span>') +
+      '<button class="xbtn" id="mzClose" aria-label="Close">&times;</button></div>' +
+    '<div class="mz-stage" id="mzStage">' + mapSVG(q, reveal) + '</div>' +
+    mapLegend(q, reveal) +
+    '<p class="mz-help">Tap to zoom in &middot; drag to look around &middot; tap again to zoom out</p>';
+  document.body.appendChild(box);
+  S.tmp.mzFor = S.screen;
+
+  const stage = box.querySelector('#mzStage');
+  const svg = stage.querySelector('svg'), img = stage.querySelector('img');
+  box.querySelector('#mzClose').addEventListener('click', e => { e.stopPropagation(); closeMapZoom(); });
+  if(!reveal){
+    const t = box.querySelector('#mzT');
+    const tick = () => { if(t) t.textContent = Math.ceil(Timer.left) + 's'; };
+    tick(); S.tmp.mzTick = setInterval(tick, 250);
+  }
+
+  /* one zoom level, 2.6x, panned by dragging — enough to read Luxembourg */
+  const Z = 2.6;
+  let zoomed = false, tx = 0, ty = 0, drag = null;
+  const target = svg || img;
+  if(!target) return;
+  target.style.transformOrigin = '0 0';
+  const apply = () => { target.style.transform = zoomed ? 'translate(' + tx + 'px,' + ty + 'px) scale(' + Z + ')' : ''; };
+  const clamp = () => {
+    const w = target.clientWidth, h = target.clientHeight;
+    tx = Math.min(0, Math.max(w - w * Z, tx));
+    ty = Math.min(0, Math.max(h - h * Z, ty));
+  };
+  stage.addEventListener('pointerdown', e => { drag = { x:e.clientX, y:e.clientY, tx, ty, moved:false }; stage.setPointerCapture(e.pointerId); });
+  stage.addEventListener('pointermove', e => {
+    if(!drag || !zoomed) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if(Math.abs(dx) + Math.abs(dy) > 6) drag.moved = true;
+    tx = drag.tx + dx; ty = drag.ty + dy; clamp(); apply();
+  });
+  stage.addEventListener('pointerup', e => {
+    const d = drag; drag = null;
+    if(d && d.moved) return;
+    if(zoomed){ zoomed = false; tx = ty = 0; apply(); return; }
+    const r = target.getBoundingClientRect();
+    const px = e.clientX - r.left, py = e.clientY - r.top;
+    zoomed = true; tx = px - px * Z; ty = py - py * Z; clamp(); apply();
+  });
+}
+function closeMapZoom(){
+  const b = el('mapzoom'); if(b) b.remove();
+  clearInterval(S.tmp.mzTick); S.tmp.mzTick = null; S.tmp.mzFor = null;
+}
+
+/* ==========================================================================
    18. SUDDEN DEATH
    ========================================================================== */
 SCREENS.sudden = function(){
@@ -4324,6 +5088,12 @@ SCREENS.final = function(){
           '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.saySame.award[0] + '</td>' +
           '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.saySame.award[1] + '</td>' +
           '<td data-l="Legs">' + g.saySame.wins[0] + '–' + g.saySame.wins[1] + '</td></tr>'
+        : '') +
+      (g.mapGame && g.mapGame.awarded
+        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Guess the map</td>' +
+          '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.mapGame.award[0] + '</td>' +
+          '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.mapGame.award[1] + '</td>' +
+          '<td data-l="Maps">' + g.mapGame.wins[0] + '–' + g.mapGame.wins[1] + '</td></tr>'
         : '') +
       (g.battle && g.battle.done
         ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Battle of the captains</td>' +
@@ -4590,11 +5360,16 @@ SCREENS.bank = function(){
     /* A Say-Same row has no fixed answer — one is drawn fresh each time it is
        played — so the pool it draws from goes here instead of a blank cell. */
     '<td style="color:var(--gold);font-weight:600">' +
-      (q.type === 'saysame' ? esc((q.pool || []).join(' · ')) : esc(q.answer)) + '</td>' +
+      (q.type === 'saysame' ? esc((q.pool || []).join(' · '))
+       /* a host's own map shows its picture; a built-in one says which map */
+       : q.type === 'map' ? (q.img ? '<img class="bank-thumb" src="' + esc(q.img) + '" alt="">'
+                                   : '<span class="dim" style="font-weight:500">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' : '') + '</span>')
+       : esc(q.answer)) + '</td>' +
     '<td>' + esc(q.theme) + '</td>' +
     '<td>' + (q.type === 'closest' ? '<span class="badge gold">Closest</span>'
             : q.type === 'auction' ? '<span class="badge a">Auction</span>'
             : q.type === 'saysame' ? '<span class="badge b">Say-Same</span>'
+            : q.type === 'map'     ? '<span class="badge ok">Map</span>'
             : '<span class="badge line">Standard</span>') + '</td>' +
     '<td>' + esc(Cap(q.difficulty)) + '</td>' +
     '<td>' + (q.use_with ? '<code style="font-size:11px;color:var(--a)">' + esc(q.use_with) + '</code>' : '<span class="dim">—</span>') + '</td>' +
@@ -4630,7 +5405,7 @@ SCREENS.bank = function(){
         /* Cap() alone turns 'saysame' into "Saysame" — a real label, not a
            capitalised value, for the one type whose name is not one word. */
         '<label class="fld" style="flex:1;min-width:120px">Type<select data-act="bf" data-k="type">' +
-          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same']]
+          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same'],['map','Map']]
             .map(([v, label]) => '<option value="' + esc(v) + '"' + (f.type === v ? ' selected' : '') + '>' + esc(label) + '</option>').join('') +
         '</select></label>' +
         '<label class="fld" style="flex:1;min-width:120px">Difficulty<select data-act="bf" data-k="diff">' + [''].concat(DIFFS).map(t => opt(t, f.diff)).join('') + '</select></label>' +
@@ -4688,6 +5463,10 @@ function rowsToQuestions(rows){
     const row = rows[r];
     const question = String(row[iQ] || '').trim();
     const rawType = norm(iY > -1 ? row[iY] : '');
+    /* A map is a picture, and a spreadsheet cannot carry one — maps travel in
+       the JSON backup. Skip the row rather than let "guessthemap" fall
+       through to the "guess" test below and arrive as a Closest question. */
+    if(/map/.test(rawType)) continue;
     const type = /saysame|dontsay|donotsay|matchhost|notsame/.test(rawType) ? 'saysame'
                : /auct|bid|nameas?many/.test(rawType) ? 'auction'
                : /clos|estim|numb|guess|mini/.test(rawType) ? 'closest'
@@ -4777,7 +5556,8 @@ function download(name, text, mime){
 const csvCell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
 function bankToCSV(list){
   const head = ['question','answer','notes','theme','type','difficulty','use_question_with','pool'];
-  return head.join(',') + '\n' + list.map(q =>
+  /* maps are pictures — they go in the JSON backup, not a spreadsheet */
+  return head.join(',') + '\n' + list.filter(q => q.type !== 'map').map(q =>
     [q.question, q.answer, q.notes, q.theme, q.type, q.difficulty, q.use_with, (q.pool || []).join(' | ')]
       .map(csvCell).join(',')).join('\n');
 }
@@ -4887,7 +5667,15 @@ AFTER.settings = function(){
     fr.onload = () => {
       try{
         const d = JSON.parse(fr.result);
-        if(d.bank) { S.bank = d.bank; saveBank(); }
+        if(d.bank){
+          S.bank = d.bank;
+          /* a backup taken before Guess the Map existed would otherwise take
+             the built-in maps away for good — this browser has already seen
+             this seed version, so the boot merge would never put them back */
+          const have = new Set(S.bank.map(q => q.id)), killed = DB.get(DB.k.killed, []);
+          buildSeedBank().forEach(q => { if(q.type === 'map' && !have.has(q.id) && killed.indexOf(q.id) < 0) S.bank.push(q); });
+          saveBank();
+        }
         if(d.history) { S.history = d.history; saveHistory(); }
         if(d.used) { S.used = new Set(d.used); saveUsed(); }
         if(d.settings) { S.settings = Object.assign({}, DEFAULT_SETTINGS, d.settings); saveSettings(); }
@@ -4943,6 +5731,7 @@ function startMini(key){
   if(key === 'closest'){ go('miniIntro'); return; }
   if(key === 'auction'){ buildAuction(); go('auctionIntro'); return; }
   if(key === 'saysame'){ go('sayIntro'); return; }
+  if(key === 'map'){ go('mapIntro'); return; }
   if(key === 'battle'){
     g.battle = buildBattle();
     if(!g.battle){ g.done.battle = true; toast('Not enough spare questions left for the Battle.'); endGame(); return; }
@@ -5039,6 +5828,55 @@ function saySameFinish(){
 }
 function awardSaySame(w){
   const g = G(), s = g.saySame;
+  if(s.awarded) return;
+  s.awarded = true;
+  if(w === 'split'){
+    const half = Math.floor(g.miniPts / 2);
+    g.teams[0].score += half; g.teams[1].score += half;
+    s.award = [half, half];
+    s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
+    s.verdict.winner = null;
+  } else {
+    g.teams[w].score += g.miniPts;
+    s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
+    s.verdict.winner = w;
+  }
+  s.verdict.needsHost = false;
+  Snd.point();
+}
+
+/* Guess the Map is a true best-of: once a lead cannot be caught in the maps
+   that are left, the rest are not played. After the base maps it is
+   sudden death — the first map that separates the teams ends it, and a map
+   nobody gets (or both get) simply brings out the next one. */
+function mapAfterLeg(){
+  const g = G(), s = g.mapGame;
+  const lead = Math.abs(s.wins[0] - s.wins[1]);
+  const left = Math.max(0, s.base - s.i);    // base maps not yet played
+  if(s.i < s.base && lead <= left){ go('mapQ'); return; }
+  if(lead === 0){
+    if(s.spare && s.spare.length){
+      s.qs.push(s.spare.shift());
+      s.tieLegs++;
+      toast(s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next map decides it.' : 'Nobody on the board yet — next map.', 3600);
+      go('mapQ');            // s.i already points at the new map
+      return;
+    }
+    s.done = true;
+    s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no maps left in the bank. Your call.' };
+    go('mapSummary');
+    return;
+  }
+  const winner = s.wins[0] > s.wins[1] ? 0 : 1;
+  s.done = true;
+  s.verdict = { winner, needsHost:false,
+    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker map' : s.tieLegs + ' tie-breaker maps') + '.'
+       : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' map' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
+  awardMap(winner);
+  go('mapSummary');
+}
+function awardMap(w){
+  const g = G(), s = g.mapGame;
   if(s.awarded) return;
   s.awarded = true;
   if(w === 'split'){
@@ -5230,8 +6068,8 @@ const ACT = {
   },
   miniPickClear(e){ S.setup[MINI_PICKS[e.dataset.k].store] = []; repaintPicker(); },
   pickThemeClear(e){ delete (S.setup.picks || {})[e.dataset.t]; repaintPicker(); },
-  pickClearAll(){ S.setup.picks = {}; S.setup.pickClosest = []; S.setup.pickAuction = []; repaintPicker(); },
-  pickClear(){ S.setup.picks = {}; S.setup.pickClosest = []; S.setup.pickAuction = []; render(); },
+  pickClearAll(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); repaintPicker(); },
+  pickClear(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); render(); },
   pickDone(){ closeModal(); },
   setNum(e){ S.settings[e.dataset.k] = +e.value; saveSettings(); },
   toggle(e){ const k = e.dataset.k; S.settings[k] = !S.settings[k]; saveSettings(); render(); },
@@ -5249,8 +6087,17 @@ const ACT = {
     if(!g.rounds.length) return toast('No usable questions. Widen the themes or difficulty.');
     S.game = g;
     g.rounds.forEach(r => r.q.forEach(markUsed));
-    g.mini.qs.forEach(markUsed);
-    g.saySame.qs.forEach(markUsed);
+    /* Only burn a mini-game's questions when that mini-game is actually on
+       tonight's card. Both decks are dealt for every game regardless, and
+       marking them unconditionally quietly used up seven Closest To Wins
+       questions a night on tables that never played it. */
+    const onCard = (k) => (g.plan || []).some(p => p.key === k);
+    if(onCard('closest')) g.mini.qs.forEach(markUsed);
+    if(onCard('saysame')) g.saySame.qs.forEach(markUsed);
+    /* maps are only marked once actually shown — see AFTER.mapQ — so a
+       night that ends early does not burn three of only twenty. The geometry
+       starts downloading now, rounds before it is needed. */
+    if((g.plan || []).some(p => p.key === 'map')) loadMapGeo().catch(() => {});
     Snd.resume();
     go('roundIntro');
   },
@@ -5278,6 +6125,7 @@ const ACT = {
     go(S.screen === 'steal'  ? 'stealReveal'
      : S.screen === 'miniQ'  ? 'miniEntry'
      : S.screen === 'sayQ'   ? 'sayJudge'
+     : S.screen === 'mapQ'   ? 'mapJudge'
      : S.screen === 'soloQ'  ? 'soloA'      // solo has no steal and no host
      : 'reveal');
   },
@@ -5498,6 +6346,43 @@ const ACT = {
     advanceRound();
   },
 
+  /* ---- guess the map ---- */
+  mapStart(){ G().mapGame.i = 0; go('mapQ'); },
+  /* Same escape hatch as the others — a map the room has seen before, or one
+     that is just not landing tonight, gets swapped for one not in play. */
+  mapSwap(){
+    const g = G(), s = g.mapGame;
+    const inPlay = new Set(s.qs.map(q => q.id));
+    const pool = mapPool(inPlay);
+    if(!pool.length) return toast('No other map left in the bank.');
+    const q = pool[0];
+    s.spare = (s.spare || []).filter(x => x.id !== q.id);
+    s.qs[s.i] = q;
+    toast('New map.');
+    go('mapQ');
+  },
+  mapZoom(){ openMapZoom(); },
+  mapRetry(){ render(); },
+  toMapJudge(){ Timer.stop(); go('mapJudge'); },
+  mapVerdict(e){
+    const g = G(), s = g.mapGame, q = s.qs[s.i];
+    const w = e.dataset.w === 'tie' || e.dataset.w === 'none' ? e.dataset.w : +e.dataset.w;
+    s.subs.push({ q, winner:w });
+    if(w === 'tie'){ s.wins[0]++; s.wins[1]++; toast('Both got it — a point each.'); }
+    else if(w === 'none'){ toast('Nobody got it.'); }
+    else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes map ' + (s.i + 1) + '.'); }
+    s.i++;
+    mapAfterLeg();
+  },
+  mapAward(e){ awardMap(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
+  afterMap(){
+    const g = G();
+    if(g.mapGame.verdict && g.mapGame.verdict.needsHost) return toast('Award the mini-game points first.');
+    g.done.map = true;
+    if(runNextMini()) return;
+    advanceRound();
+  },
+
   /* ---- the auction ---- */
   auctionBegin(){ Snd.soft(); go('auctionBid'); },
   auctionRaise(){
@@ -5639,6 +6524,7 @@ const ACT = {
      rebuild the dialog on every change and lose whatever is half-typed, every
      field is present once and the container's data-type decides what shows. */
   qAdd(){
+    S.tmp.newMapImg = null;
     const custom = customThemes();
     const slots  = MAX_CUSTOM_THEMES - custom.length;
     openModal('<div class="stack qadd" data-type="standard" data-newtheme="0">' +
@@ -5648,14 +6534,19 @@ const ACT = {
         '<option value="closest">Closest To Wins</option>' +
         '<option value="auction">Auction</option>' +
         '<option value="saysame">Don&rsquo;t Say the Same as Me</option>' +
+        '<option value="map">Guess the Map</option>' +
       '</select></label>' +
-      '<label class="fld">Question<textarea id="nq" rows="2"></textarea></label>' +
+      '<label class="fld q-only q-map">Map picture' +
+        '<input type="file" id="nmapImg" accept="image/*" data-act="qMapImg"></label>' +
+      '<div class="q-only q-map map-prev" id="nmapPrev"></div>' +
+      '<label class="fld"><span class="q-lab-std">Question</span><span class="q-lab-map">What the map shows — this is the answer</span>' +
+        '<textarea id="nq" rows="2"></textarea></label>' +
 
       '<label class="fld q-only q-std">Answer<input type="text" id="na"></label>' +
       '<label class="fld q-only q-clo">Answer — a number' +
         '<input type="text" id="naNum" inputmode="numeric" placeholder="e.g. 236"></label>' +
 
-      '<label class="fld q-only q-std q-clo">Notes (shown with the answer)<input type="text" id="nn"></label>' +
+      '<label class="fld q-only q-std q-clo q-map">Notes (shown with the answer)<input type="text" id="nn"></label>' +
       '<label class="fld q-only q-auc">Ruling note — what counts' +
         '<input type="text" id="nnAuc" placeholder="e.g. Marques only. Toyota counts, Corolla does not."></label>' +
       '<label class="fld q-only q-say">Possible answers — one per line, at least two' +
@@ -5680,6 +6571,7 @@ const ACT = {
 
       '<p class="help q-only q-auc">An auction category has no theme, no difficulty and no answer — the bidding sets the difficulty and you count the answers yourself.</p>' +
       '<p class="help q-only q-say">No theme, no difficulty here either — how wide the answers are IS the difficulty. One line is drawn at random each time this plays, so a wider list means more variety across replays.</p>' +
+      '<p class="help q-only q-map">No theme, no difficulty. Use a picture with <strong>no title on it</strong> — the title is the answer, revealed by the host. It is shrunk and kept on this device (a few hundred KB at most), and it travels in the JSON backup, not the CSV.</p>' +
 
       '<div class="btn-row end"><button class="btn ghost" data-act="closeModal">Cancel</button>' +
       '<button class="btn gold" data-act="qSave">Add it</button></div></div>');
@@ -5688,15 +6580,48 @@ const ACT = {
      already typed into the other fields survives the switch */
   qType(e){ const b = $('.qadd'); if(b) b.dataset.type = e.value; },
   qThemeSel(e){ const b = $('.qadd'); if(b) b.dataset.newtheme = e.value === '__new__' ? '1' : '0'; },
+  /* A phone photo is 3–12 MB and the whole bank lives in ~5 MB of browser
+     storage, so the picture is redrawn at most 1400px on its long side and
+     re-encoded (WebP where the browser can write it, JPEG where it cannot)
+     before it goes anywhere near the bank. */
+  qMapImg(e){
+    const f = e.files && e.files[0];
+    const prev = el('nmapPrev');
+    S.tmp.newMapImg = null;
+    if(!f) { if(prev) prev.innerHTML = ''; return; }
+    if(!/^image\//.test(f.type)) return toast('That is not a picture.');
+    const fr = new FileReader();
+    fr.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const MAX = 1400, k = Math.min(1, MAX / Math.max(im.width, im.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        let url = c.toDataURL('image/webp', 0.82);
+        if(url.indexOf('data:image/webp') !== 0) url = c.toDataURL('image/jpeg', 0.84);
+        S.tmp.newMapImg = url;
+        const kb = Math.round(url.length * 0.75 / 1024);
+        if(prev) prev.innerHTML = '<img src="' + url + '" alt=""><span class="help">' + c.width + '×' + c.height + ' · ' + kb + ' KB</span>';
+      };
+      im.onerror = () => toast('Could not read that picture.');
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(f);
+  },
 
   qSave(){
     const type = el('ny').value;
     const question = el('nq').value.trim();
     if(!question) return toast('The question is required.');
 
-    let answer = '', notes = '', theme = '', difficulty = '', use_with = '', pool;
+    let answer = '', notes = '', theme = '', difficulty = '', use_with = '', pool, img;
 
-    if(type === 'auction'){
+    if(type === 'map'){
+      img = S.tmp.newMapImg;
+      if(!img) return toast('Add the map picture first.');
+      notes = el('nn').value.trim();
+    } else if(type === 'auction'){
       answer = 'Host counts';
       notes  = el('nnAuc').value.trim();
     } else if(type === 'saysame'){
@@ -5737,9 +6662,17 @@ const ACT = {
 
     const rec = { id:hash(question), question, answer, notes, theme, type, difficulty, use_with, src:'manual' };
     if(pool) rec.pool = pool;
+    if(img){
+      rec.img = img;
+      /* Storage that silently refuses the write would leave the map on screen
+         and gone on the next open. Try it first; if it does not fit, say so. */
+      try{ localStorage.setItem(DB.k.bank, JSON.stringify(S.bank.concat([rec]))); }
+      catch(err){ return toast('Not enough room on this device for another picture — delete a map or two first.', 5200); }
+    }
     S.bank.push(rec);
     saveBank(); closeModal();
-    toast('Added' + (pool ? ' — ' + pool.length + ' possible answers' : theme && BUILT_IN_THEMES.indexOf(theme) < 0 ? ' under ' + theme : '') + '.');
+    S.tmp.newMapImg = null;
+    toast('Added' + (pool ? ' — ' + pool.length + ' possible answers' : img ? ' — your map is in the bank' : theme && BUILT_IN_THEMES.indexOf(theme) < 0 ? ' under ' + theme : '') + '.');
     render();
   },
   bankTemplate(){
@@ -5808,7 +6741,7 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   const t = e.target.closest('[data-act]');
   if(!t) return;
-  if(['setNum','bf','qType','qThemeSel'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
+  if(['setNum','bf','qType','qThemeSel','qMapImg'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
 });
 el('modal').addEventListener('click', e => {
   if(e.target.id !== 'modal') return;
@@ -5819,7 +6752,7 @@ el('modal').addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if(['INPUT','TEXTAREA','SELECT'].indexOf(document.activeElement.tagName) > -1) return;
   const k = e.key.toLowerCase();
-  if(k === 'escape'){ if(S.tmp.llModal) ACT.closeLL(); else closeModal(); return; }
+  if(k === 'escape'){ if(el('mapzoom')) closeMapZoom(); else if(S.tmp.llModal) ACT.closeLL(); else closeModal(); return; }
   if(S.screen === 'reveal'){
     if(k === 'y'){ e.preventDefault(); ACT.judge({ dataset:{ v:'1' } }); }
     if(k === 'n'){ e.preventDefault(); ACT.judge({ dataset:{ v:'0' } }); }

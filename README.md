@@ -1,6 +1,6 @@
 # QUIZ ME BABY — Host Control
 
-One file: `index.html`. Double-click it. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.)
+Two files: `index.html` and `maps-geo.js`, side by side. Double-click `index.html`. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.) `maps-geo.js` is the real-world borders that **Guess the Map** draws from; the app only reads it when a game actually has maps on the card, so if it is missing, everything else still works.
 
 Your host stands on the left of the home screen. He's baked into the HTML as a data URI, so he travels with the file and there is no image folder to forget. (`host-imad.png` is the cut-out on its own, kept only in case you want to reuse it elsewhere — the app does not read it.) He's positioned out of the layout flow, so the logo and the menu stay dead centre on screen whether he's there or not, and he hides himself on windows narrower than 920px rather than squeeze them.
 
@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v2.01 · 03 Sep 2026
+> Built by Thierry Boulos · © 2026 · v2.1 · 06 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'2.01', date:'03 Sep 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.1', date:'06 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -63,7 +63,7 @@ To carry your data across: **Settings → Export everything (JSON)**, then **Imp
 
 ## Mini-games
 
-Four of them, **all optional, all chosen up front** in Setup — card 04, after rounds, difficulty and themes, since those three decide each other and the mini-games sit on top. There is no end-of-night pop-up asking whether you want the Battle; if it is on the card it is on the schedule, visible in the round tracker from the first pip.
+Five of them, **all optional, all chosen up front** in Setup — card 04, after rounds, difficulty and themes, since those three decide each other and the mini-games sit on top. There is no end-of-night pop-up asking whether you want the Battle; if it is on the card it is on the schedule, visible in the round tracker from the first pip.
 
 Each row carries its own value and slot — *"2 pts · after R3"* — and the card header carries the total. There is no paragraph spelling the arithmetic out: it cost most of a phone screen to say what the badges already say.
 
@@ -72,6 +72,7 @@ Each row carries its own value and slot — *"2 pts · after R3"* — and the ca
 | **Closest To Wins** | Seven number questions, nearest guess takes the leg | Spread through the rounds |
 | **The Auction** | Three categories. Bid how many you can name, then deliver in 30s | Spread through the rounds |
 | **Don't Say the Same as Me** | Nine prompts. Answer without matching the host's word | Spread through the rounds |
+| **Guess the Map** | Best of three maps. Sixty seconds to say what the map shows | Spread through the rounds |
 | **Battle of the Captains** | Ten questions each, captains only, 7s a shot | **Always after the last round** |
 
 **Where they land.** Even spread rather than fixed gaps: mini *k* of *M* goes after round `round((k+1) × N ÷ (M+1))`. On a normal card that gives the two-round gap — 8 rounds with 2 mini-games puts them after rounds 3 and 5. When the card is too tight it compresses to one round, then to mini-games back to back, rather than refusing. It can never open the night: at least one standard round is always played first.
@@ -121,9 +122,53 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 
 **40 prompts** ship in the bank, spanning true binaries (*heads or tails, odds or evens*) up through wide-open categories (cheeses, fast food chains, dog breeds, countries). Each carries `type: saysame`, a **blank theme, no difficulty** — same reasoning as the Auction — and a **pool of candidate answers** instead of one fixed answer: one is drawn at random each time the prompt is played, so replaying "Name a cheese" does not always land on Feta. The pool's length **is** the prompt's scope, and that number is exactly what drives the vast-to-tight ordering above.
 
+## Guess the Map
+
+**Best of three maps.** A map goes up with no title — just the colours, the dots, and any numbers printed on it. **60 seconds**, with the same Pause / +10s / Time is up controls as everything else. Both teams write down what they think it shows, at the same time, and hand it to the host.
+
+1. **Pens down — reveal** (or the clock) shows the title, the full legend and a fact sheet to read out.
+2. You rule: **Team A**, **Team B**, **Both — a point each**, or **Nobody**. The idea counts, not the exact wording.
+3. It is a real best-of: once a team cannot be caught, the remaining maps are skipped.
+4. **Level after three — even at nothing each — another map comes out, and another, until somebody gets one.** The whole rest of the bank is the tie-break reserve. Only if it truly runs out does it fall back to *Your call, host*.
+
+**Change this map** swaps in one not already in play. **Enlarge** (or tap the map) fills the screen; tap a spot to zoom in there, drag to look around, tap again to zoom out — pinch-zoom is off app-wide, so this is how you read fifty year labels on a phone. The countdown keeps running in the corner.
+
+**The 20 built-in maps** are drawn by the app, not pasted in as pictures, so all twenty share one look — same sea, same land, same palette, same legend — and every border and city dot sits where it really is: country borders from Natural Earth 1:10m, US states from the Census Bureau, cities by their exact coordinates.
+
+| Map | Base |
+|---|---|
+| Countries that drive on the left | World |
+| Half the world's population lives in these seven countries | World |
+| Corruption Perceptions Index 2025, in four bands | World |
+| The year women won the vote on equal terms with men — year printed on every country | Europe |
+| The 10 most and 10 least educated US states (ACS 2024) | US |
+| Everywhere the Vikings reached — 22 places, Newfoundland to Baghdad | North Atlantic |
+| Every country that still has a monarch — own monarch vs. King Charles III | World |
+| Every landlocked country | World |
+| The countries the Equator runs through | World |
+| Every Summer Olympics host | World |
+| Every country with nuclear weapons | World |
+| The G7 and the rest of the G20 | World |
+| The only countries not officially metric | World |
+| Every country that uses the euro | Europe |
+| The Schengen Area | Europe |
+| The Thirteen Colonies | US |
+| US states with no sales tax | US |
+| The New Seven Wonders | World |
+| The Seven Summits | World, with Antarctica |
+| The 16 host cities of the 2026 World Cup | North America |
+
+Every fact on them carries its source in the reveal note (Transparency International, the UN, the US Census Bureau, SIPRI, the CIA World Factbook, Wikipedia). During play the legend may say what the colours *are* — "70–100", "50%", "1906–1918" — but never what they *mean*; at the reveal it says everything.
+
+**Built-in maps never run out.** Twenty maps and *never repeat a question* would empty a weekly table in a few months and quietly drop the mini-game off the card, so fresh maps always come first and played ones queue up behind them instead of vanishing. The hand-pick list shows them all, played ones tagged *played before*.
+
+**Your own maps** are pictures: **Add a question → Guess the Map**, choose an image (no title on it — the title is the answer), and type what it shows. Any photo is shrunk to 1400px and re-encoded before it is stored, so a 4 MB screenshot lands at a few hundred KB at most; if the browser's storage is full, it says so rather than losing the map on the next reload. Pictures travel in the **JSON backup**, not the CSV — a spreadsheet cannot carry an image, so map rows are left out of CSV export and skipped on CSV import.
+
+`maps-geo.js` is loaded only when a game has maps on the card, and starts downloading the moment that game begins, rounds before it is needed. The clock never starts on a map that has not finished drawing.
+
 ## Adding your own questions
 
-**Add a question** in the bank screen writes all three types, and the form changes shape to match:
+**Add a question** in the bank screen writes every type, and the form changes shape to match:
 
 | Type | Fields |
 |---|---|
@@ -131,6 +176,7 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 | **Closest To Wins** | question · **answer must be a number** · notes · theme · difficulty |
 | **The Auction** | question · ruling note. No answer, no theme, no difficulty — the bidding sets the difficulty and you count the answers yourself. |
 | **Don't Say the Same as Me** | prompt · **possible answers, one per line, at least two**. No theme, no difficulty — the width of the list is the difficulty, and one line is drawn at random each time it plays. |
+| **Guess the Map** | **map picture** · what the map shows (that is the answer) · notes. No theme, no difficulty. |
 
 Every field lives in the form once and the type picker decides which are shown, so switching type mid-way doesn't rebuild the dialog or lose what you have already typed.
 
@@ -148,9 +194,9 @@ This also fixed a quieter bug: a theme arriving via **CSV import** used to be re
 
 ## Hand-picking the mini-games
 
-The question picker (Advanced Game Configuration → *Choose questions*) also lists **Closest To Wins** and **The Auction** — but only the ones actually on tonight's card. Picking questions for a mini-game you have not selected would be work thrown away, so those blocks simply are not drawn, and turning a mini-game off drops its picks rather than leaving them to reapply silently later.
+The question picker (Advanced Game Configuration → *Choose questions*) also lists **Closest To Wins**, **The Auction**, **Don't Say the Same as Me** and **Guess the Map** — but only the ones actually on tonight's card. Picking questions for a mini-game you have not selected would be work thrown away, so those blocks simply are not drawn, and turning a mini-game off drops its picks rather than leaving them to reapply silently later.
 
-Tick up to seven number questions or three auction categories. They lead, **in the order you tick them**, and anything short is dealt from the bank as usual — so you can hand-pick one killer category and let the other two be a surprise.
+Tick up to seven number questions, three auction categories, nine prompts or three maps. They lead, **in the order you tick them**, and anything short is dealt from the bank as usual — so you can hand-pick one killer category and let the other two be a surprise.
 
 ---
 
@@ -286,7 +332,7 @@ Import merges — a question with identical text updates the existing row instea
 
 ## What's in the box
 
-**550 questions** — 441 standard, 50 Closest To Wins, 22 Auction categories and 37 Don't Say the Same as Me prompts, across 19 themes:
+**570 questions** — 441 standard, 50 Closest To Wins, 22 Auction categories, 37 Don't Say the Same as Me prompts and 20 Guess the Map maps, across 19 themes:
 
 Acronyms · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech
 
