@@ -1980,12 +1980,22 @@ const SEED_MAPS = [
       ROU:'1946', MLT:'1947', BEL:'1948', GRC:'1952', SMR:'1959', CYP:'1960', MCO:'1962', AND:'1970', CHE:'1971', PRT:'1976', LIE:'1984' } },
 
   { key:'edu', view:'us',
-    title:'The 10 most and 10 least educated US states',
-    answer:'Education — the share of adults with a university degree: 10 highest in gold, 10 lowest in red',
+    title:'How educated every US state is',
+    answer:'Education — the share of adults with a university degree, every state shaded; the 10 highest and 10 lowest carry their numbers',
     notes:'Adults 25+ with a bachelor’s degree or higher. Top: Massachusetts 48.3%, Colorado 47.8%, Vermont 45.1%. Bottom: West Virginia 24.4%, Mississippi 27.0%, Arkansas 27.1%. Source: US Census Bureau, American Community Survey 2024 (1-year), table S1501.',
-    cls:[
-      { c:MC.gold,  hint:'Top 10',    label:'10 most educated',  codes:'MA CO VT MD NJ VA CT NH NY WA' },
-      { c:MC.coral, hint:'Bottom 10', label:'10 least educated', codes:'WV MS AR LA KY NV OK AL IN NM' }
+    /* every state is shaded, so the room isn't hunting for just twenty;
+       the top band is exactly the 10 highest, the bottom band the 10 lowest */
+    vals:{ MA:48.3, CO:47.8, VT:45.1, MD:44.7, NJ:44.5, VA:43.3, CT:42.6, NH:41.5, NY:41.2, WA:41,
+      MN:40, IL:39.2, UT:39.1, RI:39, CA:38.1, HI:37.8, OR:37.8, ME:37.1, NC:37.1, PA:36.4,
+      GA:36.3, MT:36.3, DE:36, KS:36, FL:35.8, NE:35.4, TX:35.2, AZ:34.7, WI:34.6, SD:34.2,
+      ND:34, MO:33.5, MI:33.3, SC:33.3, ID:33, AK:32.8, OH:32.4, TN:32.4, WY:32.3, IA:32.1,
+      NM:31.8, IN:30.7, AL:29.9, OK:29.3, NV:28.5, KY:27.9, LA:27.8, AR:27.1, MS:27, WV:24.4 },
+    bands:[
+      { min:41,  c:MC.gold,   hint:'41%+',       label:'41% or more (the top 10)' },
+      { min:37,  c:'#F07F3C', hint:'37–40.9%',   label:'37–40.9%' },
+      { min:34,  c:'#C2416B', hint:'34–36.9%',   label:'34–36.9%' },
+      { min:32,  c:'#6E3B8C', hint:'32–33.9%',   label:'32–33.9%' },
+      { min:0,   c:'#4058B8', hint:'Under 32%',  label:'Under 32% (the bottom 10)' }
     ],
     labels:{ MA:'48.3%', CO:'47.8%', VT:'45.1%', MD:'44.7%', NJ:'44.5%', VA:'43.3%', CT:'42.6%', NH:'41.5%', NY:'41.2%', WA:'41.0%',
       WV:'24.4%', MS:'27.0%', AR:'27.1%', LA:'27.8%', KY:'27.9%', NV:'28.5%', OK:'29.3%', AL:'29.9%', IN:'30.7%', NM:'31.8%' } },
@@ -2051,11 +2061,32 @@ const SEED_MAPS = [
     ] },
 
   { key:'timezones', view:'world',
-    title:'The countries with the most time zones',
-    answer:'Time zones — how many each country spans, overseas territories included',
+    title:'How many time zones every country spans',
+    answer:'Time zones — how many each country spans, overseas territories included (shaded with their country)',
     notes:'France has the most: 12, thanks to its overseas territories from Polynesia to the Indian Ocean (13 counting its Antarctic claim). Then Russia and the USA 11, Australia and the UK 9, Canada and New Zealand 5, Brazil, Denmark (with Greenland) and Mexico 4. China, nearly as wide as the USA, uses just one. Source: Wikipedia, List of time zones by country.',
-    cls:[{ c:MC.gold, label:'Four or more time zones (territories shaded too)',
-      codes:'FRA PYF NCL WLF SPM BLM MAF ATF RUS USA ASM GUM MNP PRI VIR UMI AUS HMD NFK GBR PCN CYM TCA AIA BMU VGB MSR FLK SGS SHN GGY IMN JEY GIB IOT IOT2 CAN NZL NIU COK BRA DNK GRL FRO MEX' }],
+    /* every country is shaded; overseas territories take their country's
+       count, since that is where its extra zones come from */
+    vals:{ ATF:12, BLM:12, FRA:12, MAF:12, NCL:12, PYF:12, SPM:12, WLF:12, ASM:11, GUM:11, MNP:11, PRI:11, RUS:11, UMI:11, USA:11, VIR:11,
+      AIA:9, AUS:9, BMU:9, CYM:9, FLK:9, GBR:9, GGY:9, GIB:9, HMD:9, IMN:9, IOT:9, IOT2:9, JEY:9, MSR:9, NFK:9, PCN:9,
+      SGS:9, SHN:9, TCA:9, VGB:9, CAN:5, COK:5, NIU:5, NZL:5, BRA:4, DNK:4, FRO:4, GRL:4, MEX:4, CHL:3, IDN:3, KIR:3,
+      ABW:2, COD:2, CUW:2, ECU:2, ESP:2, FSM:2, MNG:2, NLD:2, PNG:2, PRT:2, SXM:2, ZAF:2, AFG:1, AGO:1, ALB:1, AND:1,
+      ARE:1, ARG:1, ARM:1, ATG:1, AUT:1, AZE:1, BDI:1, BEL:1, BEN:1, BFA:1, BGD:1, BGR:1, BHR:1, BHS:1, BIH:1, BLR:1,
+      BLZ:1, BOL:1, BRB:1, BRN:1, BTN:1, BWA:1, CAF:1, CHE:1, CHN:1, CIV:1, CMR:1, COG:1, COL:1, COM:1, CPV:1, CRI:1,
+      CUB:1, CYP:1, CZE:1, DEU:1, DJI:1, DMA:1, DOM:1, DZA:1, EGY:1, ERI:1, EST:1, ETH:1, FIN:1, FJI:1, GAB:1, GEO:1,
+      GHA:1, GIN:1, GMB:1, GNB:1, GNQ:1, GRC:1, GRD:1, GTM:1, GUY:1, HKG:1, HND:1, HRV:1, HTI:1, HUN:1, IND:1, IRL:1,
+      IRN:1, IRQ:1, ISL:1, ISR:1, ITA:1, JAM:1, JOR:1, JPN:1, KAZ:1, KEN:1, KGZ:1, KHM:1, KNA:1, KWT:1, LAO:1, LBN:1,
+      LBR:1, LBY:1, LCA:1, LIE:1, LKA:1, LSO:1, LTU:1, LUX:1, LVA:1, MAC:1, MAR:1, MCO:1, MDA:1, MDG:1, MDV:1, MHL:1,
+      MKD:1, MLI:1, MLT:1, MMR:1, MNE:1, MOZ:1, MRT:1, MUS:1, MWI:1, MYS:1, NAM:1, NER:1, NGA:1, NIC:1, NOR:1, NPL:1,
+      NRU:1, OMN:1, PAK:1, PAN:1, PER:1, PHL:1, PLW:1, POL:1, PRY:1, PSE:1, QAT:1, ROU:1, RWA:1, SAU:1, SDN:1, SEN:1,
+      SGP:1, SLB:1, SLE:1, SLV:1, SMR:1, SOM:1, SRB:1, SSD:1, STP:1, SUR:1, SVK:1, SVN:1, SWE:1, SWZ:1, SYC:1, SYR:1,
+      TCD:1, TGO:1, THA:1, TJK:1, TKM:1, TLS:1, TON:1, TTO:1, TUN:1, TUR:1, TUV:1, TWN:1, TZA:1, UGA:1, UKR:1, URY:1,
+      UZB:1, VAT:1, VCT:1, VEN:1, VNM:1, VUT:1, WSM:1, YEM:1, ZMB:1, ZWE:1 },
+    bands:[
+      { min:9, c:MC.gold, hint:'9–12', label:'9–12 time zones' },
+      { min:4, c:'#F07F3C', hint:'4–5',  label:'4–5 time zones' },
+      { min:2, c:'#C2416B', hint:'2–3',  label:'2–3 time zones' },
+      { min:1, c:'#6E3B8C', hint:'1',    label:'1 time zone' }
+    ],
     labels:{ FRA:'12', RUS:'11', USA:'11', AUS:'9', GBR:'9', CAN:'5', NZL:'5', BRA:'4', DNK:'4', MEX:'4' },
     callout:{ DNK:[-8,0] } },
 
@@ -2090,10 +2121,38 @@ const SEED_MAPS = [
     callout:{ FRA:[-6,5], ITA:[5,13], GBR:[-3,-2] } },
 
   { key:'languages', view:'world',
-    title:'The 10 countries where the most languages are spoken',
-    answer:'Languages — the 10 countries with the most living languages',
-    notes:'Papua New Guinea alone has 841 — about one in eight of all the world’s languages, for some 10 million people. Then Indonesia 721, Nigeria 538, India 459, the USA 335, Australia 319, China 305, Mexico 292, Cameroon 275 and Brazil 228. The US and Australian totals include immigrant languages; count only the established ones and both drop to about 220. Source: Ethnologue, 22nd edition (2019), via Wikipedia.',
-    cls:[{ c:MC.gold, label:'Top 10 for living languages', codes:'PNG IDN NGA IND USA AUS CHN MEX CMR BRA' }],
+    title:'How many languages are spoken in every country',
+    answer:'Languages — how many living languages each country has; numbers on the top 10',
+    notes:'Papua New Guinea alone has 841 — about one in eight of all the world’s languages, for some 10 million people. Then Indonesia 721, Nigeria 538, India 459, the USA 335, Australia 319, China 305, Mexico 292, Cameroon 275 and Brazil 228. The US and Australian totals include immigrant languages; count only the established ones and both drop to about 220. Grey = not counted. Source: Ethnologue, 22nd edition (2019), via Wikipedia, List of countries by number of languages.',
+    /* every country is shaded, so the room isn't hunting for just ten;
+       the top band is exactly the top 10, and only they carry numbers */
+    vals:{ PNG:841, IDN:721, NGA:538, IND:459, USA:335, AUS:319, CHN:305, MEX:292, CMR:275, BRA:228, COD:214, CAN:195,
+      PHL:191, RUS:159, NPL:149, MYS:144, TCD:131, MMR:126, TZA:126, VUT:116, VNM:112, CIV:101, DEU:95, FRA:95,
+      PER:94, LAO:92, ETH:91, COL:89, THA:88, GHA:87, GBR:85, PAK:85, IRN:84, CAF:83, SDN:76, KEN:72,
+      SLB:72, BFA:71, MLI:71, SSD:69, NZL:65, COG:64, BEN:56, ZMB:55, TUR:54, ISR:53, NLD:50, KAZ:48,
+      UKR:48, VEN:48, AGO:47, ITA:47, MOZ:47, NOR:47, SEN:46, TGO:46, BGD:45, BOL:45, UGA:45, GAB:44,
+      AFG:42, ZAF:42, ARG:40, GIN:40, NCL:40, DNK:39, AZE:38, BWA:38, FIN:38, SWE:37, UZB:37, AUT:36,
+      BEL:36, TWN:35, ESP:34, GRC:34, LBR:34, CHE:33, KGZ:33, NAM:33, TJK:33, BTN:31, OMN:31, SGP:31,
+      TKM:31, GNB:30, KHM:29, LBY:29, ROU:29, ARE:27, GEO:27, GTM:27, HRV:27, IRQ:27, POL:27, PRY:27,
+      SUR:27, CZE:26, SLE:26, BGR:25, SAU:25, ECU:24, GMB:24, MWI:24, SRB:24, SYR:24, ZWE:24, EGY:23,
+      NER:23, PRT:23, DZA:22, FJI:21, HUN:21, TLS:21, EST:20, MDG:20, FSM:19, JPN:19, GUY:18, PAN:18,
+      QAT:18, BRN:17, CHL:17, ERI:17, YEM:17, CYP:16, GNQ:16, GUF:16, LBN:16, LUX:16, LVA:16, LTU:15,
+      MAR:15, MKD:15, SVK:15, SVN:15, TUN:15, ARM:14, BHR:14, JOR:14, MDA:14, MNG:14, MUS:14, SOM:14,
+      URY:14, IRL:13, MNE:13, ALB:12, BIH:12, BLZ:12, CRI:12, HND:12, LKA:12, PRI:12, BLR:11, HKG:11,
+      NIC:11, DJI:10, PSE:10, PYF:10, DOM:9, GUM:9, NRU:9, SXM:9, TTO:9, JAM:8, MLT:8, MRT:8,
+      REU:8, STP:8, ASM:7, KWT:7, MAC:7, MNP:7, SWZ:7, ABW:6, COM:6, CUW:6, PLW:6, VIR:6,
+      AND:5, BHS:5, COK:5, CUB:5, DMA:5, KOR:5, LIE:5, LSO:5, MAF:5, MCO:5, MYT:5, RWA:5,
+      SLV:5, TKL:5, ATG:4, BDI:4, CYM:4, ESH:4, GGY:4, GLP:4, GRD:4, HTI:4, JEY:4, LCA:4,
+      MTQ:4, TCA:4, TON:4, ALA:3, BLM:3, BMU:3, BRB:3, CPV:3, GIB:3, GRL:3, KIR:3, KNA:3,
+      NIU:3, SYC:3, TUV:3, VCT:3, WLF:3, WSM:3, AIA:2, CCK:2, CXR:2, FLK:2, FRO:2, IMN:2,
+      ISL:2, MDV:2, MHL:2, MSR:2, NFK:2, PCN:2, SMR:2, VAT:2, VGB:2, IOT:1, PRK:1, SHN:1,
+      SPM:1 },
+    bands:[
+      { min:220, c:MC.gold, hint:'220+',   label:'220 or more (the top 10)' },
+      { min:100, c:'#F07F3C', hint:'100–219', label:'100–219 languages' },
+      { min:40,  c:'#C2416B', hint:'40–99',   label:'40–99 languages' },
+      { min:1,   c:'#6E3B8C', hint:'Under 40', label:'Under 40 languages' }
+    ],
     labels:{ PNG:'841', IDN:'721', NGA:'538', IND:'459', USA:'335', AUS:'319', CHN:'305', MEX:'292', CMR:'275', BRA:'228' },
     callout:{ MEX:[8,3], NGA:[-9,24], CMR:[-21,25], PNG:[8,0] } },
 
@@ -2125,10 +2184,19 @@ const SEED_MAPS = [
     ] },
 
   { key:'beer', view:'europe',
-    title:'The 10 countries that drink the most beer per person',
-    answer:'Beer — the world’s top 10 beer drinkers per person (all ten are in Europe)',
-    notes:'Litres per person in 2024: Czechia 148.8 — No. 1 every single year since 1993 — then Lithuania 110.6, Austria 104.6, Ireland 99.0, Croatia 95.1, Estonia 93.2, Spain 91.8, Slovenia 88.4, Romania 87.4 and Germany 86.9. The UK is 24th, the USA 29th, Japan 56th. Source: Kirin Holdings, Global Beer Consumption by Country in 2024 (December 2025).',
-    cls:[{ c:MC.gold, hint:'Ranked 1–10', label:'Top 10 per person', codes:'CZE LTU AUT IRL HRV EST ESP SVN ROU DEU' }],
+    title:'Where Europe ranks in the world for beer drunk per person',
+    answer:'Beer — each country’s world ranking for beer per person; the world’s top 10 are all in Europe',
+    notes:'Litres per person in 2024: Czechia 148.8 — No. 1 every single year since 1993 — then Lithuania 110.6, Austria 104.6, Ireland 99.0, Croatia 95.1, Estonia 93.2, Spain 91.8, Slovenia 88.4, Romania 87.4 and Germany 86.9. The UK is 24th, the USA 29th, Japan 56th. Kirin only ranks the world’s top 35; everywhere else is below 55.2 L. Source: Kirin Holdings, Global Beer Consumption by Country in 2024 (December 2025).',
+    /* every country is shaded by its world rank, so the room isn't hunting
+       for just ten; Kirin publishes the top 35, so that is where the bands stop */
+    vals:{ CZE:1, LTU:2, AUT:3, IRL:4, HRV:5, EST:6, ESP:7, SVN:8, ROU:9, DEU:10, POL:13, BGR:14, SVK:15,
+      LVA:17, HUN:19, BIH:20, FIN:22, PRT:23, GBR:24, NLD:25, RUS:27, SRB:28, DNK:32, BEL:33, NOR:34 },
+    bands:[
+      { max:10, c:MC.gold, hint:'Ranked 1–10',  label:'World top 10' },
+      { max:20, c:'#F07F3C', hint:'Ranked 11–20', label:'World 11th–20th' },
+      { max:35, c:'#C2416B', hint:'Ranked 21–35', label:'World 21st–35th' }
+    ],
+    rest:{ c:'#2B3152', hint:'Below 35th', label:'Outside the world top 35' },
     labels:{ CZE:'1', LTU:'2', AUT:'3', IRL:'4', HRV:'5', EST:'6', ESP:'7', SVN:'8', ROU:'9', DEU:'10' },
     rlabels:{ CZE:'148.8 L', LTU:'110.6 L', AUT:'104.6 L', IRL:'99.0 L', HRV:'95.1 L', EST:'93.2 L', ESP:'91.8 L', SVN:'88.4 L', ROU:'87.4 L', DEU:'86.9 L' },
     callout:{ AUT:[-5,6], CZE:[8,0], LTU:[-8,1], HRV:[-9,49], EST:[-6,5], SVN:[-31,86] } },
@@ -2192,14 +2260,18 @@ const SEED_MAPS = [
     ] }
 ];
 /* A graded map lists each place's number once (`vals`) and its colour bands
-   from the top down (`bands`, by minimum); the shaded groups are worked out
+   from the best down (`bands`); the shaded groups are worked out
    here, so a corrected figure can never leave a country in the wrong band. */
 SEED_MAPS.forEach(function(m){
   if(!m.vals || !m.bands) return;
+  /* `min` when bigger is better, `max` when it is a ranking (1st is best) */
   m.cls = m.bands.map(function(b, i){
-    const top = i ? m.bands[i - 1].min : Infinity;
+    const prev = i ? m.bands[i - 1] : null;
+    const inBand = b.max != null
+      ? v => v <= b.max && v > (prev ? prev.max : -Infinity)
+      : v => v >= b.min && v < (prev ? prev.min : Infinity);
     return { c:b.c, hint:b.hint, label:b.label,
-      codes:Object.keys(m.vals).filter(k => m.vals[k] >= b.min && m.vals[k] < top).join(' ') };
+      codes:Object.keys(m.vals).filter(k => inBand(m.vals[k])).join(' ') };
   });
 });
 

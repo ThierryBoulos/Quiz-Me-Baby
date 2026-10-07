@@ -140,25 +140,27 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 | Countries that drive on the left | World |
 | Corruption Perceptions Index 2025, in four bands | World |
 | The year women won the vote on equal terms with men — year on every country | Europe |
-| The 10 most and 10 least educated US states — % on every state | US |
+| How educated every US state is — every state shaded, % on the top and bottom 10 | US |
 | Everywhere the Vikings reached — 22 places, Newfoundland to Baghdad | North Atlantic |
 | Every country that still has a monarch — own monarch vs. King Charles III | World |
 | Every landlocked country | World |
 | Every Summer Olympics host — ×times on each | World |
 | Every World Cup winner — ×titles on each, Spain's 2026 win included | World |
 | Every country that borders only one other — plus Canada and Denmark, until Hans Island in 2022 | World |
-| The countries with the most time zones — count on each (France 12) | World |
+| How many time zones every country spans — every country shaded, count on the 4+ (France 12) | World |
 | Every country's all-time Summer Olympic medal count — shaded by total, numbers on the 11 with 500+ | World |
-| The 10 countries where the most languages are spoken — count on each | World |
+| How many languages every country speaks — every country shaded, count on the top 10 | World |
 | Every country with nuclear weapons | World |
 | The G7 and the rest of the G20 | World |
 | Every country that uses the euro | Europe |
-| The 10 biggest beer drinkers per person — rank during play, litres at the reveal | Europe |
+| Europe's world ranking for beer per person — shaded by rank, top 10 show rank during play, litres at the reveal | Europe |
 | The countries that stayed neutral in World War II | Europe |
 | The Schengen Area | Europe |
 | The New Seven Wonders | World |
 | The Seven Summits | World, with Antarctica |
 | The 16 host cities of the 2026 World Cup | North America |
+
+**Ranking maps shade every country.** A map about a ranking (medals, languages, time zones, beer, education) colours every country by band, with the ranges in the legend during play, so the room isn't hunting for just ten; only the top ones carry their numbers.
 
 **Numbers go on the map, during play.** Any map built on numbers — years, counts, percentages, titles — prints them on the countries from the first second, not just at the reveal. The numbers are the clue; without them a map like *most time zones* is a coin toss. Where a country is too small or too crowded for its number, the label sits in open water with a hairline back to it, placed by testing every label against the real borders.
 
