@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v2.3 · 07 Oct 2026
+> Built by Thierry Boulos · © 2026 · v2.4 · 07 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'2.3', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.4', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -133,14 +133,13 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 
 **Change this map** swaps in one not already in play. **Enlarge** (or tap the map) fills the screen; tap a spot to zoom in there, drag to look around, tap again to zoom out — pinch-zoom is off app-wide, so this is how you read fifty year labels on a phone. The countdown keeps running in the corner.
 
-**The 22 built-in maps** are drawn by the app, not pasted in as pictures, so all of them share one look — same sea, same land, same palette, same legend — and every border and city dot sits where it really is: country borders from Natural Earth 1:10m, US states from the Census Bureau, cities by their exact coordinates.
+**The 20 built-in maps** are drawn by the app, not pasted in as pictures, so all of them share one look — same sea, same land, same palette, same legend — and every border and city dot sits where it really is: country borders from Natural Earth 1:10m, cities by their exact coordinates.
 
 | Map | Base |
 |---|---|
 | Countries that drive on the left | World |
 | Corruption Perceptions Index 2025, in four bands | World |
 | The year women won the vote on equal terms with men — year on every country | Europe |
-| How educated every US state is — every state shaded, % on the top and bottom 10 | US |
 | Everywhere the Vikings reached — 22 places, Newfoundland to Baghdad | North Atlantic |
 | Every country that still has a monarch — own monarch vs. King Charles III | World |
 | Every landlocked country | World |
@@ -149,18 +148,17 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 | Every country that borders only one other — plus Canada and Denmark, until Hans Island in 2022 | World |
 | How many time zones every country spans — every country shaded, count on the 4+ (France 12) | World |
 | Every country's all-time Summer Olympic medal count — shaded by total, numbers on the 11 with 500+ | World |
-| How many languages every country speaks — every country shaded, count on the top 10 | World |
+| How many official languages each country has — the 21 with three or more shaded, counts on the 4+ | World |
 | Every country with nuclear weapons | World |
 | The G7 and the rest of the G20 | World |
 | Every country that uses the euro | Europe |
-| Europe's world ranking for beer per person — shaded by rank, top 10 show rank during play, litres at the reveal | Europe |
 | The countries that stayed neutral in World War II | Europe |
 | The Schengen Area | Europe |
 | The New Seven Wonders | World |
 | The Seven Summits | World, with Antarctica |
 | The 16 host cities of the 2026 World Cup | North America |
 
-**Ranking maps shade every country.** A map about a ranking (medals, languages, time zones, beer, education) colours every country by band, with the ranges in the legend during play, so the room isn't hunting for just ten; only the top ones carry their numbers.
+**Ranking maps shade every country.** A map about a ranking (medals, official languages, time zones) colours every country by band, with the ranges in the legend during play, so the room isn't hunting for just ten; only the top ones carry their numbers.
 
 **Numbers go on the map, during play.** Any map built on numbers — years, counts, percentages, titles — prints them on the countries from the first second, not just at the reveal. The numbers are the clue; without them a map like *most time zones* is a coin toss. Where a country is too small or too crowded for its number, the label sits in open water with a hairline back to it, placed by testing every label against the real borders.
 

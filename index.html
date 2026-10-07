@@ -1146,7 +1146,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.3', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.4', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1916,7 +1916,7 @@ const SEED_SAYSAME = [
 ];
 
 /* --------------------------------------------------------------------------
-   GUESS THE MAP — the twenty built-in maps
+   GUESS THE MAP — the built-in maps
    Every one is drawn by the app itself from real borders (maps-geo.js: Natural
    Earth 1:10m countries, US Census states), so all twenty share one look —
    same sea, same land, same palette, same legend — and every border, coast and
@@ -1978,27 +1978,6 @@ const SEED_MAPS = [
       BLR:'1919', NLD:'1919', LUX:'1919', SWE:'1919', ISL:'1920', CZE:'1920', SVK:'1920', IRL:'1922', GBR:'1928', ESP:'1931', TUR:'1934',
       MDA:'1940', FRA:'1944', BGR:'1944', ITA:'1945', HUN:'1945', ALB:'1945', HRV:'1945', SVN:'1945', BIH:'1945', SRB:'1945', MNE:'1945', MKD:'1945', XKX:'1945',
       ROU:'1946', MLT:'1947', BEL:'1948', GRC:'1952', SMR:'1959', CYP:'1960', MCO:'1962', AND:'1970', CHE:'1971', PRT:'1976', LIE:'1984' } },
-
-  { key:'edu', view:'us',
-    title:'How educated every US state is',
-    answer:'Education — the share of adults with a university degree, every state shaded; the 10 highest and 10 lowest carry their numbers',
-    notes:'Adults 25+ with a bachelor’s degree or higher. Top: Massachusetts 48.3%, Colorado 47.8%, Vermont 45.1%. Bottom: West Virginia 24.4%, Mississippi 27.0%, Arkansas 27.1%. Source: US Census Bureau, American Community Survey 2024 (1-year), table S1501.',
-    /* every state is shaded, so the room isn't hunting for just twenty;
-       the top band is exactly the 10 highest, the bottom band the 10 lowest */
-    vals:{ MA:48.3, CO:47.8, VT:45.1, MD:44.7, NJ:44.5, VA:43.3, CT:42.6, NH:41.5, NY:41.2, WA:41,
-      MN:40, IL:39.2, UT:39.1, RI:39, CA:38.1, HI:37.8, OR:37.8, ME:37.1, NC:37.1, PA:36.4,
-      GA:36.3, MT:36.3, DE:36, KS:36, FL:35.8, NE:35.4, TX:35.2, AZ:34.7, WI:34.6, SD:34.2,
-      ND:34, MO:33.5, MI:33.3, SC:33.3, ID:33, AK:32.8, OH:32.4, TN:32.4, WY:32.3, IA:32.1,
-      NM:31.8, IN:30.7, AL:29.9, OK:29.3, NV:28.5, KY:27.9, LA:27.8, AR:27.1, MS:27, WV:24.4 },
-    bands:[
-      { min:41,  c:MC.gold,   hint:'41%+',       label:'41% or more (the top 10)' },
-      { min:37,  c:'#F07F3C', hint:'37–40.9%',   label:'37–40.9%' },
-      { min:34,  c:'#C2416B', hint:'34–36.9%',   label:'34–36.9%' },
-      { min:32,  c:'#6E3B8C', hint:'32–33.9%',   label:'32–33.9%' },
-      { min:0,   c:'#4058B8', hint:'Under 32%',  label:'Under 32% (the bottom 10)' }
-    ],
-    labels:{ MA:'48.3%', CO:'47.8%', VT:'45.1%', MD:'44.7%', NJ:'44.5%', VA:'43.3%', CT:'42.6%', NH:'41.5%', NY:'41.2%', WA:'41.0%',
-      WV:'24.4%', MS:'27.0%', AR:'27.1%', LA:'27.8%', KY:'27.9%', NV:'28.5%', OK:'29.3%', AL:'29.9%', IN:'30.7%', NM:'31.8%' } },
 
   { key:'vikings', view:'northatl',
     title:'Everywhere the Vikings reached',
@@ -2121,40 +2100,20 @@ const SEED_MAPS = [
     callout:{ FRA:[-6,5], ITA:[5,13], GBR:[-3,-2] } },
 
   { key:'languages', view:'world',
-    title:'How many languages are spoken in every country',
-    answer:'Languages — how many living languages each country has; numbers on the top 10',
-    notes:'Papua New Guinea alone has 841 — about one in eight of all the world’s languages, for some 10 million people. Then Indonesia 721, Nigeria 538, India 459, the USA 335, Australia 319, China 305, Mexico 292, Cameroon 275 and Brazil 228. The US and Australian totals include immigrant languages; count only the established ones and both drop to about 220. Grey = not counted. Source: Ethnologue, 22nd edition (2019), via Wikipedia, List of countries by number of languages.',
-    /* every country is shaded, so the room isn't hunting for just ten;
-       the top band is exactly the top 10, and only they carry numbers */
-    vals:{ PNG:841, IDN:721, NGA:538, IND:459, USA:335, AUS:319, CHN:305, MEX:292, CMR:275, BRA:228, COD:214, CAN:195,
-      PHL:191, RUS:159, NPL:149, MYS:144, TCD:131, MMR:126, TZA:126, VUT:116, VNM:112, CIV:101, DEU:95, FRA:95,
-      PER:94, LAO:92, ETH:91, COL:89, THA:88, GHA:87, GBR:85, PAK:85, IRN:84, CAF:83, SDN:76, KEN:72,
-      SLB:72, BFA:71, MLI:71, SSD:69, NZL:65, COG:64, BEN:56, ZMB:55, TUR:54, ISR:53, NLD:50, KAZ:48,
-      UKR:48, VEN:48, AGO:47, ITA:47, MOZ:47, NOR:47, SEN:46, TGO:46, BGD:45, BOL:45, UGA:45, GAB:44,
-      AFG:42, ZAF:42, ARG:40, GIN:40, NCL:40, DNK:39, AZE:38, BWA:38, FIN:38, SWE:37, UZB:37, AUT:36,
-      BEL:36, TWN:35, ESP:34, GRC:34, LBR:34, CHE:33, KGZ:33, NAM:33, TJK:33, BTN:31, OMN:31, SGP:31,
-      TKM:31, GNB:30, KHM:29, LBY:29, ROU:29, ARE:27, GEO:27, GTM:27, HRV:27, IRQ:27, POL:27, PRY:27,
-      SUR:27, CZE:26, SLE:26, BGR:25, SAU:25, ECU:24, GMB:24, MWI:24, SRB:24, SYR:24, ZWE:24, EGY:23,
-      NER:23, PRT:23, DZA:22, FJI:21, HUN:21, TLS:21, EST:20, MDG:20, FSM:19, JPN:19, GUY:18, PAN:18,
-      QAT:18, BRN:17, CHL:17, ERI:17, YEM:17, CYP:16, GNQ:16, GUF:16, LBN:16, LUX:16, LVA:16, LTU:15,
-      MAR:15, MKD:15, SVK:15, SVN:15, TUN:15, ARM:14, BHR:14, JOR:14, MDA:14, MNG:14, MUS:14, SOM:14,
-      URY:14, IRL:13, MNE:13, ALB:12, BIH:12, BLZ:12, CRI:12, HND:12, LKA:12, PRI:12, BLR:11, HKG:11,
-      NIC:11, DJI:10, PSE:10, PYF:10, DOM:9, GUM:9, NRU:9, SXM:9, TTO:9, JAM:8, MLT:8, MRT:8,
-      REU:8, STP:8, ASM:7, KWT:7, MAC:7, MNP:7, SWZ:7, ABW:6, COM:6, CUW:6, PLW:6, VIR:6,
-      AND:5, BHS:5, COK:5, CUB:5, DMA:5, KOR:5, LIE:5, LSO:5, MAF:5, MCO:5, MYT:5, RWA:5,
-      SLV:5, TKL:5, ATG:4, BDI:4, CYM:4, ESH:4, GGY:4, GLP:4, GRD:4, HTI:4, JEY:4, LCA:4,
-      MTQ:4, TCA:4, TON:4, ALA:3, BLM:3, BMU:3, BRB:3, CPV:3, GIB:3, GRL:3, KIR:3, KNA:3,
-      NIU:3, SYC:3, TUV:3, VCT:3, WLF:3, WSM:3, AIA:2, CCK:2, CXR:2, FLK:2, FRO:2, IMN:2,
-      ISL:2, MDV:2, MHL:2, MSR:2, NFK:2, PCN:2, SMR:2, VAT:2, VGB:2, IOT:1, PRK:1, SHN:1,
-      SPM:1 },
+    title:'How many official languages each country has',
+    answer:'Official languages — the countries with three or more, nationally or locally, with the count on each',
+    notes:'Bolivia 37 · India 22 · Zimbabwe 16 · Mali 13 · South Africa 12 · Spain 5 · Papua New Guinea, Rwanda, Switzerland, Singapore and Burkina Faso 4 · Belgium, Bosnia and Herzegovina, Burundi, Comoros, Equatorial Guinea, Fiji, Luxembourg, New Zealand, Seychelles and Vanuatu 3. Counted nationally or locally, so Spain’s regional co-official languages count. Every other country has one or two, or none at all. Source: Wikipedia, List of countries by number of languages — Number of official languages.',
+    /* the source lists every country with three or more; everywhere else is
+       "fewer than three", which is all it can honestly say */
+    vals:{ BOL:37, IND:22, ZWE:16, MLI:13, ZAF:12, ESP:5, PNG:4, RWA:4, CHE:4, SGP:4, BFA:4,
+      BEL:3, BIH:3, BDI:3, COM:3, GNQ:3, FJI:3, LUX:3, NZL:3, SYC:3, VUT:3 },
     bands:[
-      { min:220, c:MC.gold, hint:'220+',   label:'220 or more (the top 10)' },
-      { min:100, c:'#F07F3C', hint:'100–219', label:'100–219 languages' },
-      { min:40,  c:'#C2416B', hint:'40–99',   label:'40–99 languages' },
-      { min:1,   c:'#6E3B8C', hint:'Under 40', label:'Under 40 languages' }
+      { min:10, c:MC.gold,   hint:'10+', label:'10 or more official languages' },
+      { min:4,  c:'#F07F3C', hint:'4–5', label:'4–5 official languages' },
+      { min:3,  c:'#C2416B', hint:'3',   label:'3 official languages' }
     ],
-    labels:{ PNG:'841', IDN:'721', NGA:'538', IND:'459', USA:'335', AUS:'319', CHN:'305', MEX:'292', CMR:'275', BRA:'228' },
-    callout:{ MEX:[8,3], NGA:[-9,24], CMR:[-21,25], PNG:[8,0] } },
+    rest:{ c:'#2B3152', hint:'Fewer than 3', label:'Fewer than 3' },
+    labels:{ BOL:'37', IND:'22', ZWE:'16', MLI:'13', ZAF:'12', ESP:'5', PNG:'4', CHE:'4', BFA:'4' } },
 
   { key:'nukes', view:'world',
     title:'Every country with nuclear weapons',
@@ -2176,30 +2135,10 @@ const SEED_MAPS = [
 
   { key:'euro', view:'europe',
     title:'Every country that uses the euro',
-    answer:'The euro — gold are euro-area EU members, purple use it from outside the EU',
+    answer:'The euro — every country that uses it, in the EU or not',
     notes:'21 EU members use the euro — Bulgaria joined on 1 January 2026. Six more use it without being in the EU: Andorra, Monaco, San Marino and the Vatican by agreement, Montenegro and Kosovo on their own. Denmark has a legal opt-out.',
-    cls:[
-      { c:MC.gold, label:'EU, uses the euro',     codes:'AUT BEL BGR HRV CYP EST FIN FRA DEU GRC IRL ITA LVA LTU LUX MLT NLD PRT SVK SVN ESP' },
-      { c:MC.vio,  label:'Outside the EU, uses it', codes:'AND MCO SMR VAT MNE XKX' }
-    ] },
-
-  { key:'beer', view:'europe',
-    title:'Where Europe ranks in the world for beer drunk per person',
-    answer:'Beer — each country’s world ranking for beer per person; the world’s top 10 are all in Europe',
-    notes:'Litres per person in 2024: Czechia 148.8 — No. 1 every single year since 1993 — then Lithuania 110.6, Austria 104.6, Ireland 99.0, Croatia 95.1, Estonia 93.2, Spain 91.8, Slovenia 88.4, Romania 87.4 and Germany 86.9. The UK is 24th, the USA 29th, Japan 56th. Kirin only ranks the world’s top 35; everywhere else is below 55.2 L. Source: Kirin Holdings, Global Beer Consumption by Country in 2024 (December 2025).',
-    /* every country is shaded by its world rank, so the room isn't hunting
-       for just ten; Kirin publishes the top 35, so that is where the bands stop */
-    vals:{ CZE:1, LTU:2, AUT:3, IRL:4, HRV:5, EST:6, ESP:7, SVN:8, ROU:9, DEU:10, POL:13, BGR:14, SVK:15,
-      LVA:17, HUN:19, BIH:20, FIN:22, PRT:23, GBR:24, NLD:25, RUS:27, SRB:28, DNK:32, BEL:33, NOR:34 },
-    bands:[
-      { max:10, c:MC.gold, hint:'Ranked 1–10',  label:'World top 10' },
-      { max:20, c:'#F07F3C', hint:'Ranked 11–20', label:'World 11th–20th' },
-      { max:35, c:'#C2416B', hint:'Ranked 21–35', label:'World 21st–35th' }
-    ],
-    rest:{ c:'#2B3152', hint:'Below 35th', label:'Outside the world top 35' },
-    labels:{ CZE:'1', LTU:'2', AUT:'3', IRL:'4', HRV:'5', EST:'6', ESP:'7', SVN:'8', ROU:'9', DEU:'10' },
-    rlabels:{ CZE:'148.8 L', LTU:'110.6 L', AUT:'104.6 L', IRL:'99.0 L', HRV:'95.1 L', EST:'93.2 L', ESP:'91.8 L', SVN:'88.4 L', ROU:'87.4 L', DEU:'86.9 L' },
-    callout:{ AUT:[-5,6], CZE:[8,0], LTU:[-8,1], HRV:[-9,49], EST:[-6,5], SVN:[-31,86] } },
+    cls:[{ c:MC.gold, label:'Uses the euro',
+      codes:'AUT BEL BGR HRV CYP EST FIN FRA DEU GRC IRL ITA LVA LTU LUX MLT NLD PRT SVK SVN ESP AND MCO SMR VAT MNE XKX' }] },
 
   { key:'ww2neutral', view:'europe',
     title:'The countries that stayed neutral in World War II',
@@ -2471,7 +2410,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 17;   // bumped when the built-in bank changes
+const SEED_VERSION = 18;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -2491,7 +2430,11 @@ const RETIRED_SEED = [
   'The only countries that haven’t officially gone metric',
   'The US states with no sales tax',
   'The countries the Equator runs through',
-  'Half the world’s population lives in these seven countries'
+  'Half the world’s population lives in these seven countries',
+  'The 10 most and 10 least educated US states',
+  'How educated every US state is',
+  'The 10 countries that drink the most beer per person',
+  'Where Europe ranks in the world for beer drunk per person'
 ];
 (function bootBank(){
   /* Earlier banks were retired wholesale, not merged. Clear them out so a
