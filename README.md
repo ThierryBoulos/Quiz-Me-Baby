@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v2.5 · 07 Oct 2026
+> Built by Thierry Boulos · © 2026 · v2.6 · 07 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'2.5', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.6', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -131,7 +131,7 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 3. It is a real best-of: once a team cannot be caught, the remaining maps are skipped.
 4. **Level after three — even at nothing each — another map comes out, and another, until somebody gets one.** The whole rest of the bank is the tie-break reserve. Only if it truly runs out does it fall back to *Your call, host*.
 
-**Change this map** swaps in one not already in play. **Enlarge** (or tap the map) fills the screen; tap a spot to zoom in there, drag to look around, tap again to zoom out — pinch-zoom is off app-wide, so this is how you read fifty year labels on a phone. The countdown keeps running in the corner.
+**Show a hint** — one per map, for whoever holds the phone — puts the map's subject on screen (History, Sport, Geography, Politics…) without naming it; the clock keeps running. **Change this map** swaps in one not already in play. **Enlarge** (or tap the map) fills the screen; tap a spot to zoom in there, drag to look around, tap again to zoom out — pinch-zoom is off app-wide, so this is how you read fifty year labels on a phone. The countdown keeps running in the corner.
 
 **The 19 built-in maps** are drawn by the app, not pasted in as pictures, so all of them share one look — same sea, same land, same palette, same legend — and every border and city dot sits where it really is: country borders from Natural Earth 1:10m, cities by their exact coordinates.
 

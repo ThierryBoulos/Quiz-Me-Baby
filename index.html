@@ -780,6 +780,9 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .map-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 12px;font-size:12.5px;font-weight:700;color:var(--ink-2)}
 .map-legend span{display:inline-flex;align-items:center;gap:6px}
 .map-legend i{width:14px;height:14px;border-radius:4px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.map-hint{font-size:14px;color:var(--ink-2);text-align:center}
+.map-hint strong{color:var(--gold);letter-spacing:.04em}
+.map-hint-btn{align-self:center}
 .map-legend i.pt{border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px #fff inset}
 .map-title{font-family:var(--font-d);font-size:clamp(22px,3.4vh,34px);line-height:1.08;text-transform:uppercase;letter-spacing:.01em;
   background:linear-gradient(180deg,#FFF7DA,var(--gold) 70%,#C79306);-webkit-background-clip:text;background-clip:text;color:transparent;
@@ -1146,7 +1149,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.5', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.6', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1933,6 +1936,8 @@ const SEED_SAYSAME = [
      rlabels text printed on a country only at the reveal
      pts    [lat, lon, name, [dx, dy, anchor]] — exact coordinates, name shown at reveal
      lines  parallels drawn at the reveal (the Equator)
+     topic  the one hint, a subject area ("History", "Sport") shown only when
+            the phone holder presses Hint — it narrows the field, never names it
    The title is the answer, so it never appears until the reveal. A `hint` is
    allowed to tell the room what the colours are without saying what they mean
    — "70–100" on the corruption map is fair; "least corrupt" is not.
@@ -1941,6 +1946,7 @@ const SEED_SAYSAME = [
 const MC = { gold:'#F5C518', vio:'#9B7BFF', org:'#FF9F43', coral:'#FF5566', mint:'#3DDC97', lime:'#C8E05A', sky:'#5AB0FF' };
 const SEED_MAPS = [
   { key:'lht', view:'world',
+    topic:'Transport',
     title:'Countries that drive on the left',
     answer:'Which side of the road they drive on — gold drives on the left',
     notes:'About 75 countries and territories drive on the left — roughly a third of the world’s people. Mostly the old British Empire, plus Japan, Thailand, Indonesia and Mozambique. Source: Wikipedia, Left- and right-hand traffic.',
@@ -1949,6 +1955,7 @@ const SEED_MAPS = [
     rest:{ c:'#3a4370', label:'Drive on the right' } },
 
   { key:'cpi', view:'world',
+    topic:'Politics',
     title:'How corrupt every country is — Corruption Perceptions Index 2025',
     answer:'Corruption — Transparency International’s Corruption Perceptions Index',
     notes:'Transparency International, CPI 2025 (published February 2026): 182 countries scored from 0 (highly corrupt) to 100 (very clean). Cleanest: Denmark, 89. Bottom: Somalia and South Sudan, 9. Grey = not scored.',
@@ -1964,6 +1971,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'vote', view:'europe',
+    topic:'History',
     title:'The year women won the vote, on equal terms with men',
     answer:'When women got the vote — the year each country gave women the same voting rights as men',
     notes:'Equal terms with men. Several let some women vote earlier: the UK in 1918 (over-30s only), Norway in 1907 (with a property limit), Portugal in 1931 (educated women only). Switzerland waited until 1971 — and its last canton, Appenzell Innerrhoden, until 1990. The Vatican holds no elections for anyone. Source: Wikipedia, Women’s suffrage.',
@@ -1980,6 +1988,7 @@ const SEED_MAPS = [
       ROU:'1946', MLT:'1947', BEL:'1948', GRC:'1952', SMR:'1959', CYP:'1960', MCO:'1962', AND:'1970', CHE:'1971', PRT:'1976', LIE:'1984' } },
 
   { key:'vikings', view:'northatl',
+    topic:'History',
     title:'Everywhere the Vikings reached',
     answer:'The Vikings — how far they sailed, raided and traded from Scandinavia',
     notes:'c. 793–1110. West to Newfoundland (L’Anse aux Meadows — tree rings date the wood cutting to exactly 1021), east down the Russian rivers to Constantinople, Baghdad and the Caspian. Lindisfarne 793, Seville 844, Paris 845. Jerusalem: King Sigurd the Crusader, 1110.',
@@ -2000,6 +2009,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'monarch', view:'world',
+    topic:'Politics',
     title:'Every country that still has a king, queen or emperor',
     answer:'Monarchies — gold have their own monarch, purple share King Charles III',
     notes:'43 monarchies. 28 have their own (Japan’s emperor, Saudi Arabia, Spain, Thailand, Morocco…), and 15 Commonwealth realms share King Charles III — the UK, Canada, Australia, New Zealand, Jamaica and more. The Vatican counts: the Pope is an elected absolute monarch. Source: Wikipedia, List of current monarchies.',
@@ -2009,6 +2019,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'landlocked', view:'world',
+    topic:'Geography',
     title:'Every landlocked country',
     answer:'Landlocked countries — no coastline at all',
     notes:'44 UN countries plus Kosovo have no sea coast. Only two are doubly landlocked — surrounded entirely by other landlocked countries: Liechtenstein and Uzbekistan. Kazakhstan is the biggest; the Caspian is a lake. Bolivia lost its coast to Chile in the War of the Pacific (1879–84) and still has a navy.',
@@ -2016,6 +2027,7 @@ const SEED_MAPS = [
       codes:'AFG AND ARM AUT AZE BDI BFA BLR BOL BTN BWA CAF CHE CZE ETH HUN KAZ KGZ LAO LIE LSO LUX MDA MKD MLI MNG MWI NER NPL PRY RWA SMR SRB SSD SVK SWZ TCD TJK TKM UGA UZB VAT XKX ZMB ZWE' }] },
 
   { key:'olympics', view:'world',
+    topic:'Sport',
     title:'Every country that has hosted the Summer Olympics',
     answer:'Summer Olympics hosts',
     notes:'19 countries, Athens 1896 to Paris 2024. The USA leads with four (St Louis 1904, LA 1932 and 1984, Atlanta 1996) — LA 2028 makes five. Britain and France have three each. Russia is shaded for Moscow 1980 (USSR). Africa has never hosted.',
@@ -2023,6 +2035,7 @@ const SEED_MAPS = [
     labels:{ USA:'×4', GBR:'×3', FRA:'×3', GRC:'×2', DEU:'×2', AUS:'×2', JPN:'×2' } },
 
   { key:'wcwinners', view:'world',
+    topic:'Sport',
     title:'Every country that has won the World Cup',
     answer:'FIFA World Cup winners — with how many times each has won it',
     notes:'Only eight nations have ever won it. Brazil 5 (1958, 62, 70, 94, 2002) · Germany 4 (1954, 74 and 90 as West Germany, 2014) · Italy 4 (1934, 38, 82, 2006) · Argentina 3 (1978, 86, 2022) · France 2 (1998, 2018) · Uruguay 2 (1930, 50) · Spain 2 (2010, and 2026 — 1–0 over Argentina after extra time) · England 1 (1966, shaded here on the whole UK). Source: FIFA.',
@@ -2031,6 +2044,7 @@ const SEED_MAPS = [
     callout:{ ESP:[8,0], DEU:[0,2], ITA:[4,11], GBR:[-1,-8], URY:[10,6] } },
 
   { key:'oneneighbour', view:'world',
+    topic:'Geography',
     title:'Every country that borders only one other country',
     answer:'Countries with exactly one neighbour by land',
     notes:'Portugal (Spain), Ireland and the UK (each other), South Korea (North Korea), Haiti and the Dominican Republic (each other), Qatar (Saudi Arabia), Brunei (Malaysia), Timor-Leste and Papua New Guinea (Indonesia), Gambia (Senegal), Lesotho (South Africa), Monaco (France), San Marino and the Vatican (Italy) — and Bahrain, whose only border is a checkpoint on an artificial island in the middle of the King Fahd Causeway. Canada and Denmark were on this list until June 2022, when they split Hans Island in the Arctic down the middle and gained a 1.3 km land border with each other. Source: Wikipedia, List of countries and territories by number of land borders.',
@@ -2040,6 +2054,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'timezones', view:'world',
+    topic:'Geography',
     title:'How many time zones every country spans',
     answer:'Time zones — how many each country spans, overseas territories included (shaded with their country)',
     notes:'France has the most: 12, thanks to its overseas territories from Polynesia to the Indian Ocean (13 counting its Antarctic claim). Then Russia and the USA 11, Australia and the UK 9, Canada and New Zealand 5, Brazil, Denmark (with Greenland) and Mexico 4. China, nearly as wide as the USA, uses just one. Source: Wikipedia, List of time zones by country.',
@@ -2070,6 +2085,7 @@ const SEED_MAPS = [
     callout:{ DNK:[-8,0] } },
 
   { key:'medals', view:'world',
+    topic:'Sport',
     title:'Every country’s all-time Summer Olympic medal count',
     answer:'All-time Summer Olympic medals — every country shaded by its total, numbers on the 11 with 500 or more',
     notes:'Through Paris 2024: USA 2,774 · Russia 1,623 · Germany 1,418 · Great Britain 986 · France 824 · China 727 · Italy 658 · Australia 594 · Japan 542 · Hungary 530 · Sweden 514. Russia includes the Soviet Union, the Russian Empire, the 1992 Unified Team and the ROC; Germany includes East and West Germany. Other defunct teams — Czechoslovakia, Yugoslavia and the like — are not credited to today’s countries. 140 countries on the map have won at least one. Source: Wikipedia, All-time Olympic Games medal table.',
@@ -2100,6 +2116,7 @@ const SEED_MAPS = [
     callout:{ FRA:[-6,5], ITA:[5,13], GBR:[-3,-2] } },
 
   { key:'nukes', view:'world',
+    topic:'Military',
     title:'Every country with nuclear weapons',
     answer:'Nuclear-armed countries',
     notes:'Nine: the USA, Russia, the UK, France, China, India, Pakistan, North Korea — and Israel, which has never confirmed it. Russia and the USA hold around 90% of all warheads. South Africa built six bombs and dismantled them. Source: SIPRI Yearbook 2025.',
@@ -2109,6 +2126,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'g20', view:'world',
+    topic:'Economics',
     title:'The G7 and the rest of the G20',
     answer:'The G20 — gold is the G7, purple the rest of the G20',
     notes:'The G20 is 19 countries plus the European Union and, since 2023, the African Union. The G7 inner circle: the US, Canada, the UK, France, Germany, Italy and Japan. Russia was in the G8 until it was suspended in 2014.',
@@ -2118,6 +2136,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'euro', view:'europe',
+    topic:'Money',
     title:'Every country that uses the euro',
     answer:'The euro — every country that uses it, in the EU or not',
     notes:'21 EU members use the euro — Bulgaria joined on 1 January 2026. Six more use it without being in the EU: Andorra, Monaco, San Marino and the Vatican by agreement, Montenegro and Kosovo on their own. Denmark has a legal opt-out.',
@@ -2125,6 +2144,7 @@ const SEED_MAPS = [
       codes:'AUT BEL BGR HRV CYP EST FIN FRA DEU GRC IRL ITA LVA LTU LUX MLT NLD PRT SVK SVN ESP AND MCO SMR VAT MNE XKX' }] },
 
   { key:'ww2neutral', view:'europe',
+    topic:'History',
     title:'The countries that stayed neutral in World War II',
     answer:'WWII neutrals — gold stayed out the whole war, orange only joined the Allies at the very end',
     notes:'Ireland (which called the war “The Emergency”), Portugal, Spain, Switzerland and Sweden, plus Andorra, Liechtenstein and the Vatican, stayed out. Neutral Spain still sent the “Blue Division” of volunteers to fight for Germany on the Eastern Front. San Marino was bombed by the RAF in June 1944 and declared war on Germany that September; Turkey declared war in February 1945 — the price of a seat at the founding of the UN. Denmark, Norway, the Netherlands, Belgium, Luxembourg and Iceland were neutral too, until they were invaded. Source: Wikipedia, Neutral powers during World War II.',
@@ -2134,6 +2154,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'schengen', view:'europe',
+    topic:'Travel',
     title:'The Schengen Area — Europe without border checks',
     answer:'The Schengen Area — passport-free travel',
     notes:'29 members: 25 EU countries plus Iceland, Norway, Switzerland and Liechtenstein. Romania and Bulgaria became full members on 1 January 2025. Ireland opted out and Cyprus hasn’t joined. Monaco, San Marino and the Vatican are open de facto. Named after a village in Luxembourg.',
@@ -2143,6 +2164,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'wonders', view:'world',
+    topic:'Landmarks',
     title:'The New Seven Wonders of the World',
     answer:'The New Seven Wonders of the World',
     notes:'Picked in a 2007 worldwide public vote run by the New7Wonders Foundation. The Great Pyramid of Giza, the last survivor of the ancient seven, was given honorary status rather than a place on the list.',
@@ -2155,6 +2177,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'summits', view:'world', ata:true,
+    topic:'Nature',
     title:'The Seven Summits — the highest mountain on each continent',
     answer:'The Seven Summits — the highest peak on every continent',
     notes:'Everest 8,849 m · Aconcagua 6,961 m · Denali 6,190 m · Kilimanjaro 5,895 m · Elbrus 5,642 m · Vinson 4,892 m · Puncak Jaya 4,884 m. Some lists use Australia’s Kosciuszko (2,228 m) instead of Puncak Jaya.',
@@ -2167,6 +2190,7 @@ const SEED_MAPS = [
     ] },
 
   { key:'wc2026', view:'namerica',
+    topic:'Sport',
     title:'The 16 host cities of the 2026 World Cup',
     answer:'The 2026 FIFA World Cup host cities',
     notes:'11 in the USA, 3 in Mexico, 2 in Canada — 48 teams and 104 matches, 11 June to 19 July 2026. The opener was at Mexico City’s Estadio Azteca, the first stadium to host games at three World Cups; the final at MetLife Stadium, New York New Jersey, where Spain beat Argentina 1–0 after extra time.',
@@ -3482,6 +3506,7 @@ SCREENS.rules = function(){
       li('A map goes up — <strong>no title</strong>, just the colours, the dots and whatever numbers are printed on it. <strong>' + MAP_SECS + ' seconds.</strong>'),
       li('Both teams write down <strong>what the map shows</strong>, at the same time — &ldquo;countries that drive on the left&rdquo;, &ldquo;where the Vikings got to&rdquo;.'),
       li('The host reveals it and rules. The idea counts, not the exact wording. <strong>Both right — a point each.</strong> Nobody right — nobody scores.'),
+      li('<strong>One hint per map</strong> — press it and the map&rsquo;s subject comes up: History, Sport, Geography&hellip; Same hint for both teams.'),
       li('Best of ' + MAP_LEGS + '. Once a team cannot be caught, the rest are not played.'),
       li('Level after ' + MAP_LEGS + ' — even at nothing each? <strong>Another map comes out, and another, until somebody gets one.</strong>')
     ])) +
@@ -4913,6 +4938,16 @@ const mapBand = () => '<div class="center"><div class="mini-band tight"><span cl
 /* the host's peek: the title is the answer here, the answer line is the gloss */
 function mapPeek(q){ return peek({ answer:q.question, notes:q.answer && q.answer !== q.question ? q.answer : '' }); }
 
+/* One hint per map: its subject area. Remembered per map, not per leg, so a
+   swapped-in map starts without one. A host's own picture has no topic. */
+function mapHint(q){
+  const sp = mapSpec(q), s = G().mapGame;
+  if(!sp || !sp.topic) return '';
+  return (s.hints || {})[q.id]
+    ? '<div class="map-hint">Hint: <strong>' + esc(sp.topic) + '</strong></div>'
+    : '<button class="btn sm ghost map-hint-btn" data-act="mapHint">Show a hint</button>';
+}
+
 SCREENS.mapIntro = function(){
   const g = G(), s = g.mapGame, n = s.qs.length;
   return '<div class="stack lg intro-screen" style="padding-top:18px">' +
@@ -4944,6 +4979,7 @@ SCREENS.mapQ = function(){
       '<div class="map-side">' +
         '<div class="q-theme">What does this map show?</div>' +
         mapLegend(q, false) +
+        mapHint(q) +
         timerRing('seconds left') +
         timerControls() +
         mapPeek(q) +
@@ -6464,6 +6500,12 @@ const ACT = {
   mapStart(){ G().mapGame.i = 0; go('mapQ'); },
   /* Same escape hatch as the others — a map the room has seen before, or one
      that is just not landing tonight, gets swapped for one not in play. */
+  mapHint(){
+    const s = G().mapGame, q = s.qs[s.i];
+    (s.hints = s.hints || {})[q.id] = true;
+    Snd.soft();
+    render();
+  },
   mapSwap(){
     const g = G(), s = g.mapGame;
     const inPlay = new Set(s.qs.map(q => q.id));
