@@ -1984,7 +1984,7 @@ const SEED_MAPS = [
     answer:'The Vikings — how far they sailed, raided and traded from Scandinavia',
     notes:'c. 793–1110. West to Newfoundland (L’Anse aux Meadows — tree rings date the wood cutting to exactly 1021), east down the Russian rivers to Constantinople, Baghdad and the Caspian. Lindisfarne 793, Seville 844, Paris 845. Jerusalem: King Sigurd the Crusader, 1110.',
     cls:[{ c:MC.vio, label:'Viking homelands', codes:'NOR SWE DNK' }],
-    ptLabel:'Reached by Vikings',
+    ptLabel:'Reached by Vikings', ptColor:MC.vio,      // gold dots read as a second, different thing
     pts:[
       [51.5964,-55.5333,'L’Anse aux Meadows',[0,-14,'middle']], [61.1522,-45.515,'Greenland',[0,-14,'middle']],
       [64.1458,-21.9425,'Iceland',[0,-14,'middle']], [62.0117,-6.7675,'Faroes',[-10,4,'end']],
@@ -2098,22 +2098,6 @@ const SEED_MAPS = [
     /* Germany and Hungary keep their numbers on themselves, spilling a little
        onto neighbours — a long leader line across Europe read worse */
     callout:{ FRA:[-6,5], ITA:[5,13], GBR:[-3,-2] } },
-
-  { key:'languages', view:'world',
-    title:'How many official languages each country has',
-    answer:'Official languages — the countries with three or more, nationally or locally, with the count on each',
-    notes:'Bolivia 37 · India 22 · Zimbabwe 16 · Mali 13 · South Africa 12 · Spain 5 · Papua New Guinea, Rwanda, Switzerland, Singapore and Burkina Faso 4 · Belgium, Bosnia and Herzegovina, Burundi, Comoros, Equatorial Guinea, Fiji, Luxembourg, New Zealand, Seychelles and Vanuatu 3. Counted nationally or locally, so Spain’s regional co-official languages count. Every other country has one or two, or none at all. Source: Wikipedia, List of countries by number of languages — Number of official languages.',
-    /* the source lists every country with three or more; everywhere else is
-       "fewer than three", which is all it can honestly say */
-    vals:{ BOL:37, IND:22, ZWE:16, MLI:13, ZAF:12, ESP:5, PNG:4, RWA:4, CHE:4, SGP:4, BFA:4,
-      BEL:3, BIH:3, BDI:3, COM:3, GNQ:3, FJI:3, LUX:3, NZL:3, SYC:3, VUT:3 },
-    bands:[
-      { min:10, c:MC.gold,   hint:'10+', label:'10 or more official languages' },
-      { min:4,  c:'#F07F3C', hint:'4–5', label:'4–5 official languages' },
-      { min:3,  c:'#C2416B', hint:'3',   label:'3 official languages' }
-    ],
-    rest:{ c:'#2B3152', hint:'Fewer than 3', label:'Fewer than 3' },
-    labels:{ BOL:'37', IND:'22', ZWE:'16', MLI:'13', ZAF:'12', ESP:'5', PNG:'4', CHE:'4', BFA:'4' } },
 
   { key:'nukes', view:'world',
     title:'Every country with nuclear weapons',
@@ -2410,7 +2394,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 18;   // bumped when the built-in bank changes
+const SEED_VERSION = 19;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -2434,7 +2418,10 @@ const RETIRED_SEED = [
   'The 10 most and 10 least educated US states',
   'How educated every US state is',
   'The 10 countries that drink the most beer per person',
-  'Where Europe ranks in the world for beer drunk per person'
+  'Where Europe ranks in the world for beer drunk per person',
+  'The 10 countries where the most languages are spoken',
+  'How many languages are spoken in every country',
+  'How many official languages each country has'
 ];
 (function bootBank(){
   /* Earlier banks were retired wholesale, not merged. Clear them out so a
@@ -3009,7 +2996,7 @@ function mapSVG(q, reveal){
   (spec.pts || []).forEach(pt => {
     const p = mapProject(v, pt[0], pt[1]);
     const x = Math.round(p[0] * 10), y = Math.round(p[1] * 10);
-    pts += '<circle class="mpt" cx="' + x + '" cy="' + y + '" r="' + (spec.pts.length > 10 ? 52 : 64) + '"/>';
+    pts += '<circle class="mpt" cx="' + x + '" cy="' + y + '" r="' + (spec.pts.length > 10 ? 52 : 64) + '"' + (spec.ptColor ? ' style="fill:' + spec.ptColor + '"' : '') + '/>';
     if(reveal){
       const o = pt[3] || [10, 4, 'start'];
       ptl += '<text x="' + (x + o[0] * 10) + '" y="' + (y + o[1] * 10) + '" text-anchor="' + o[2] + '" font-size="' + Math.round(fs * .9) + '" stroke-width="' + Math.round(fs * .2) + '">' + esc(pt[2]) + '</text>';
@@ -3039,7 +3026,7 @@ function mapLegend(q, reveal){
   const items = [];
   (spec.cls || []).forEach(c => { const t = reveal ? c.label : c.hint; if(t) items.push('<span><i style="background:' + c.c + '"></i>' + esc(t) + '</span>'); });
   if(spec.rest){ const t = reveal ? spec.rest.label : spec.rest.hint; if(t) items.push('<span><i style="background:' + spec.rest.c + '"></i>' + esc(t) + '</span>'); }
-  if(spec.pts) items.push('<span><i class="pt"></i>' + (reveal ? esc(spec.ptLabel) : spec.pts.length + ' places') + '</span>');
+  if(spec.pts) items.push('<span><i class="pt"' + (spec.ptColor ? ' style="background:' + spec.ptColor + '"' : '') + '></i>' + (reveal ? esc(spec.ptLabel) : spec.pts.length + ' places') + '</span>');
   return items.length ? '<div class="map-legend">' + items.join('') + '</div>' : '';
 }
 

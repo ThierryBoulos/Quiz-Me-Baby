@@ -133,7 +133,7 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 
 **Change this map** swaps in one not already in play. **Enlarge** (or tap the map) fills the screen; tap a spot to zoom in there, drag to look around, tap again to zoom out — pinch-zoom is off app-wide, so this is how you read fifty year labels on a phone. The countdown keeps running in the corner.
 
-**The 20 built-in maps** are drawn by the app, not pasted in as pictures, so all of them share one look — same sea, same land, same palette, same legend — and every border and city dot sits where it really is: country borders from Natural Earth 1:10m, cities by their exact coordinates.
+**The 19 built-in maps** are drawn by the app, not pasted in as pictures, so all of them share one look — same sea, same land, same palette, same legend — and every border and city dot sits where it really is: country borders from Natural Earth 1:10m, cities by their exact coordinates.
 
 | Map | Base |
 |---|---|
@@ -148,7 +148,6 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 | Every country that borders only one other — plus Canada and Denmark, until Hans Island in 2022 | World |
 | How many time zones every country spans — every country shaded, count on the 4+ (France 12) | World |
 | Every country's all-time Summer Olympic medal count — shaded by total, numbers on the 11 with 500+ | World |
-| How many official languages each country has — the 21 with three or more shaded, counts on the 4+ | World |
 | Every country with nuclear weapons | World |
 | The G7 and the rest of the G20 | World |
 | Every country that uses the euro | Europe |
@@ -158,7 +157,7 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 | The Seven Summits | World, with Antarctica |
 | The 16 host cities of the 2026 World Cup | North America |
 
-**Ranking maps shade every country.** A map about a ranking (medals, official languages, time zones) colours every country by band, with the ranges in the legend during play, so the room isn't hunting for just ten; only the top ones carry their numbers.
+**Ranking maps shade every country.** A map about a ranking (medals, time zones) colours every country by band, with the ranges in the legend during play, so the room isn't hunting for just ten; only the top ones carry their numbers.
 
 **Numbers go on the map, during play.** Any map built on numbers — years, counts, percentages, titles — prints them on the countries from the first second, not just at the reveal. The numbers are the clue; without them a map like *most time zones* is a coin toss. Where a country is too small or too crowded for its number, the label sits in open water with a hairline back to it, placed by testing every label against the real borders.
 
