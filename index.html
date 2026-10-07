@@ -1146,7 +1146,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.2', date:'06 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.3', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2060,13 +2060,33 @@ const SEED_MAPS = [
     callout:{ DNK:[-8,0] } },
 
   { key:'medals', view:'world',
-    title:'The 10 countries with the most Summer Olympic medals',
-    answer:'All-time Summer Olympic medals — the top 10',
-    notes:'Through Paris 2024: USA 2,774 · Russia 1,623 · Germany 1,418 · Great Britain 986 · France 824 · China 727 · Italy 651 · Australia 594 · Japan 542 · Hungary 530. Russia includes the Soviet Union and the Russian Empire; Germany includes East and West Germany. Hungary is the only one of the ten with fewer than 10 million people. Source: Wikipedia, All-time Olympic Games medal table.',
-    cls:[{ c:MC.gold, label:'Top 10, all-time Summer medals', codes:'USA RUS DEU GBR FRA CHN ITA AUS JPN HUN' }],
-    labels:{ USA:'2,774', RUS:'1,623', DEU:'1,418', GBR:'986', FRA:'824', CHN:'727', ITA:'651', AUS:'594', JPN:'542', HUN:'530' },
+    title:'Every country’s all-time Summer Olympic medal count',
+    answer:'All-time Summer Olympic medals — every country shaded by its total, numbers on the 11 with 500 or more',
+    notes:'Through Paris 2024: USA 2,774 · Russia 1,623 · Germany 1,418 · Great Britain 986 · France 824 · China 727 · Italy 658 · Australia 594 · Japan 542 · Hungary 530 · Sweden 514. Russia includes the Soviet Union, the Russian Empire, the 1992 Unified Team and the ROC; Germany includes East and West Germany. Other defunct teams — Czechoslovakia, Yugoslavia and the like — are not credited to today’s countries. 140 countries on the map have won at least one. Source: Wikipedia, All-time Olympic Games medal table.',
+    /* every country is shaded by its total, so the room isn't hunting for
+       just ten; only the 500+ band carries numbers */
+    vals:{ USA:2774, RUS:1623, DEU:1418, GBR:986, FRA:824, CHN:727, ITA:658, AUS:594, JPN:542, HUN:530, SWE:514, NLD:357,
+      CAN:351, KOR:320, ROU:317, POL:308, FIN:305, CUB:244, BGR:231, DNK:214, CHE:212, ESP:187, BRA:170, NOR:169,
+      BEL:168, NZL:157, UKR:151, GRC:129, KEN:124, TUR:111, AUT:98, ZAF:95, JAM:94, IRN:88, BLR:85, ARG:80,
+      KAZ:78, MEX:77, CZE:72, ETH:62, PRK:61, AZE:56, HRV:49, UZB:49, GEO:47, TWN:43, IRL:42, EGY:41,
+      IND:41, THA:41, IDN:40, COL:38, EST:36, SVK:33, PRT:32, MNG:31, SVN:31, LTU:30, SRB:28, NGA:27,
+      MAR:26, ARM:22, LVA:21, DZA:20, ISR:20, TTO:19, VEN:19, PHL:18, TUN:18, BHS:16, CHL:15, DOM:15,
+      MYS:15, HKG:13, KGZ:13, UGA:13, PRI:12, PAK:11, ECU:10, MDA:10, URY:10, QAT:9, BRN:8, ZWE:8,
+      TJK:7, CMR:6, SGP:6, GHA:5, GRD:5, CIV:5, XKX:5, NAM:5, PER:5, VNM:5, BWA:4, CRI:4,
+      FJI:4, ISL:4, JOR:4, LBN:4, PAN:4, SAU:4, SYR:4, GTM:3, KWT:3, SMR:3, ZMB:3, AFG:2,
+      ALB:2, BMU:2, BDI:2, CYP:2, HTI:2, LUX:2, MOZ:2, NER:2, LCA:2, LKA:2, SUR:2, TZA:2,
+      ARE:2, BRB:1, BFA:1, CPV:1, DJI:1, DMA:1, ERI:1, GAB:1, GUY:1, IRQ:1, MUS:1, MNE:1,
+      PRY:1, WSM:1, SEN:1, SDN:1, TGO:1, TON:1, TKM:1, VIR:1 },
+    bands:[
+      { min:500, c:MC.gold,   hint:'500+',    label:'500+ medals' },
+      { min:100, c:'#F07F3C', hint:'100–499', label:'100–499 medals' },
+      { min:20,  c:'#C2416B', hint:'20–99',   label:'20–99 medals' },
+      { min:1,   c:'#6E3B8C', hint:'1–19',    label:'1–19 medals' }
+    ],
+    rest:{ c:'#2B3152', hint:'None', label:'No medals' },
+    labels:{ USA:'2,774', RUS:'1,623', DEU:'1,418', GBR:'986', FRA:'824', CHN:'727', ITA:'658', AUS:'594', JPN:'542', HUN:'530', SWE:'514' },
     /* Germany and Hungary keep their numbers on themselves, spilling a little
-       onto grey neighbours — a long leader line across Europe read worse */
+       onto neighbours — a long leader line across Europe read worse */
     callout:{ FRA:[-6,5], ITA:[5,13], GBR:[-3,-2] } },
 
   { key:'languages', view:'world',
@@ -2171,6 +2191,17 @@ const SEED_MAPS = [
       [37.403,-121.97,'San Francisco Bay Area',[-10,4,'end']], [47.5952,-122.3316,'Seattle',[10,4,'start']]
     ] }
 ];
+/* A graded map lists each place's number once (`vals`) and its colour bands
+   from the top down (`bands`, by minimum); the shaded groups are worked out
+   here, so a corrected figure can never leave a country in the wrong band. */
+SEED_MAPS.forEach(function(m){
+  if(!m.vals || !m.bands) return;
+  m.cls = m.bands.map(function(b, i){
+    const top = i ? m.bands[i - 1].min : Infinity;
+    return { c:b.c, hint:b.hint, label:b.label,
+      codes:Object.keys(m.vals).filter(k => m.vals[k] >= b.min && m.vals[k] < top).join(' ') };
+  });
+});
 
 function buildSeedBank(){
   const out = [];
@@ -2368,7 +2399,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 16;   // bumped when the built-in bank changes
+const SEED_VERSION = 17;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the

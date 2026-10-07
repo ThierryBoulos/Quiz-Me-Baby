@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v2.2 · 06 Oct 2026
+> Built by Thierry Boulos · © 2026 · v2.3 · 07 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'2.2', date:'06 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.3', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -148,7 +148,7 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 | Every World Cup winner — ×titles on each, Spain's 2026 win included | World |
 | Every country that borders only one other — plus Canada and Denmark, until Hans Island in 2022 | World |
 | The countries with the most time zones — count on each (France 12) | World |
-| The 10 countries with the most Summer Olympic medals — total on each | World |
+| Every country's all-time Summer Olympic medal count — shaded by total, numbers on the 11 with 500+ | World |
 | The 10 countries where the most languages are spoken — count on each | World |
 | Every country with nuclear weapons | World |
 | The G7 and the rest of the G20 | World |
