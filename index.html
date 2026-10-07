@@ -1146,7 +1146,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.4', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.5', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2711,7 +2711,7 @@ function battleTieBreak(bump){
   if(!pool.length) pool = battlePool();
   if(!pool.length){
     b.stage = 'done'; b.done = true; b.winner = null;
-    b.note = 'Dead level, and the bank is out of questions. Your call, host.';
+    b.note = 'Dead level, and the bank is out of questions. Your call.';
     go('battleSummary'); return;
   }
   const q = shuffle(pool)[0];
@@ -3403,8 +3403,9 @@ SCREENS.home = function(){
       /* Three buttons and a quiet link. The stats line and the tagline were
          reading material nobody stopped for; history lives in Settings now. */
       '<div class="home-menu">' +
-        '<button class="btn gold lg block" data-act="go" data-to="setup">Start a new game</button>' +
-        '<button class="btn block" data-act="go" data-to="soloSetup">Play solo game</button>' +
+        '<button class="btn gold lg block" data-act="playMode" data-h="0">Play with host</button>' +
+        '<button class="btn block" data-act="playMode" data-h="1">Play without host</button>' +
+        '<button class="btn block" data-act="go" data-to="soloSetup">Play solo</button>' +
         '<button class="btn ghost block" data-act="go" data-to="settings">Settings</button>' +
         '<button class="howto" data-act="go" data-to="rules">How to Play</button>' +
       '</div>' +
@@ -3510,6 +3511,15 @@ SCREENS.rules = function(){
     ruleBlock('10', 'Winning', ul([
       li('Highest score after the last round takes the night.'),
       li('Tie? <strong>Sudden death</strong> — one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
+    ])) +
+
+    ruleBlock('11', 'Playing without a host', ul([
+      li('Same game, same rounds, same mini-games — <strong>the TV does the hosting</strong>. Everyone reads the question off the screen.'),
+      li('The captain answers out loud, then <strong>Lock it in</strong>: the answer comes straight up for everyone. Whoever is holding the phone taps <strong>Yes</strong> or <strong>No</strong>.'),
+      li('<strong>No steals.</strong> Wrong or out of time, and it is the next question.'),
+      li(ICON.dip + ' <strong>Double Dip</strong> — say both answers out loud <strong>before</strong> you lock it in. Either one right counts.'),
+      li('<strong>The Auction</strong> — the other team does the counting. <strong>The Battle</strong> — show the answer after each one and mark it honestly.'),
+      li('<strong>Guess the Map</strong> — keep your answers face down until the reveal, then rule together.')
     ])) +
 
     '<div class="btn-row center"><button class="btn gold lg" data-act="go" data-to="setup">Right — start a game</button></div>' +
@@ -3730,7 +3740,7 @@ SCREENS.setup = function(){
   return '' +
   '<div class="stack lg" style="padding-top:12px">' +
     '<div class="row between">' +
-      '<div><div class="eyebrow gold">Setup</div><h2 class="display">Build tonight&rsquo;s game</h2></div>' +
+      '<div><div class="eyebrow gold">Setup &nbsp;·&nbsp; ' + (c.hostless ? 'no host' : 'with host') + '</div><h2 class="display">Build tonight&rsquo;s game</h2></div>' +
       '<button class="btn ghost sm" data-act="go" data-to="home">Back</button>' +
     '</div>' +
 
@@ -3742,7 +3752,7 @@ SCREENS.setup = function(){
     '<div class="card pad lit stack">' +
       '<div class="sec-head"><div class="eyebrow gold">01</div><h3 class="display">How many standard rounds?</h3></div>' +
       '<div class="seg" style="flex-wrap:wrap">' + roundBtns.join('') + '</div>' +
-      '<p class="help">Each round = one theme, one question per team, plus steal chances.</p>' +
+      '<p class="help">Each round = one theme, one question per team' + (c.hostless ? '. No host, so no steals.' : ', plus steal chances.') + '</p>' +
     '</div>' +
 
     '<div class="card pad lit stack">' +
@@ -4075,7 +4085,7 @@ SCREENS.roundIntro = function(){
     '</div>' +
     '<div class="card pad lit stack">' +
       '<div class="center"><div class="eyebrow">Captains — double points, yes or no?</div>' +
-        '<p class="help" style="margin-top:6px">Must be declared now, before the questions. If a team arms it they may use only <strong>one</strong> other lifeline this round. If they miss and the other team steals, the steal is worth 2 as well.</p></div>' +
+        '<p class="help" style="margin-top:6px">Must be declared now, before the questions. If a team arms it they may use only <strong>one</strong> other lifeline this round.' + (NOHOST() ? '' : ' If they miss and the other team steals, the steal is worth 2 as well.') + '</p></div>' +
       '<div class="grid2">' + cards + '</div>' +
     '</div>' +
     /* Start first and big; the jingle is a secondary control, so it sits under
@@ -4135,11 +4145,17 @@ AFTER.ask = function(){
    screen would simply read it off. The host judges from the peek, or from
    knowing it. The full reveal comes later, on SCREENS.answer. */
 function peek(q){
+  if(NOHOST()) return '';             // nobody to hide it from, nobody to show it to
   return '<details class="peek"><summary>Peek at the answer — host only</summary>' +
     '<div class="peek-body"><strong>' + esc(q.answer) + '</strong>' +
     (q.notes ? '<p class="help" style="margin-top:6px">' + esc(q.notes) + '</p>' : '') +
     '</div></details>';
 }
+/* No host: the TV is the host. Questions are read off the screen, the answer
+   comes up for everyone the moment the team locks in, whoever holds the phone
+   taps right or wrong, and there is no steal. Set in Setup, carried on the game. */
+const NOHOST = () => !!(S.game && S.game.hostless);
+
 function teamName(i){ return '<span class="tn ' + (i === 0 ? 'a' : 'b') + '">' + esc(G().teams[i].name) + '</span>'; }
 
 SCREENS.reveal = function(){
@@ -4149,7 +4165,11 @@ SCREENS.reveal = function(){
     '<div class="spot ' + (ti === 0 ? 'a' : 'b') + '">' +
       '<div class="q-theme">' + esc(rd.theme) + '</div>' +
       '<p class="q-text" style="font-size:clamp(18px,2.2vw,26px);font-weight:600;color:var(--ink-2);max-width:40ch;margin:16px auto 4px">' + esc(q.question) + '</p>' +
-      peek(q) +
+      (NOHOST()
+      ? '<div class="eyebrow gold" style="margin-top:14px">The answer</div>' +
+        '<div class="q-answer" style="font-size:clamp(26px,4.4vw,50px)">' + esc(q.answer) + '</div>' +
+        (q.notes ? '<p class="q-note">' + esc(q.notes) + '</p>' : '')
+      : peek(q)) +
     '</div>' +
     '<div class="card pad lit center stack">' +
       '<h3 class="display">Did ' + teamName(ti) + ' get it right?</h3>' +
@@ -4405,7 +4425,7 @@ SCREENS.miniSummary = function(){
       (m.awarded && m.award ? '<p class="help">Points awarded: <strong style="color:var(--a)">' + m.award[0] + '</strong> / <strong style="color:var(--b)">' + m.award[1] + '</strong></p>' : '') +
     '</div>' +
     (verdict.needsHost
-      ? '<div class="card pad lit center stack"><h3 class="display">Your call, host</h3>' +
+      ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
         '<p class="help">Legs are tied and there is nothing to separate them. Award the ' + g.miniPts + ' points however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="miniAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
@@ -4678,7 +4698,7 @@ SCREENS.auctionRun = function(){
     '<div class="card pad stack" style="gap:8px">' +
       '<button class="btn gold lg block auc-tap" data-act="auctionTick">Count one &nbsp;+1</button>' +
       '<button class="btn sm ghost block" data-act="auctionUntick"' + (a.count ? '' : ' disabled') + '>Undo one</button>' +
-      '<p class="help">' + esc(a.q.notes || 'Tap once for every one they get.') + '</p>' +
+      '<p class="help">' + (NOHOST() ? '<strong>' + esc(g.teams[otherTeam(a.by)].name) + ' counts</strong> — one tap for every one they get. ' : '') + esc(a.q.notes || (NOHOST() ? '' : 'Tap once for every one they get.')) + '</p>' +
     '</div>' +
   '</div>';
 };
@@ -4790,8 +4810,11 @@ SCREENS.sayIntro = function(){
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
-        '<li><strong style="color:var(--gold)">1.</strong> A prompt, <strong>' + SAYSAME_SECS + ' seconds</strong>, both teams answer. The host has a word loaded — <strong>matching each other is fine</strong>, only matching the host costs you.</li>' +
-        '<li><strong style="color:var(--gold)">2.</strong> Time&rsquo;s up — the word is revealed and the host rules who said it.</li>' +
+        (NOHOST()
+          ? '<li><strong style="color:var(--gold)">1.</strong> A prompt, <strong>' + SAYSAME_SECS + ' seconds</strong>, both teams answer. The app has a word hidden — <strong>matching each other is fine</strong>, only matching the app costs you.</li>' +
+            '<li><strong style="color:var(--gold)">2.</strong> Time&rsquo;s up — the word comes up and you rule together on who said it.</li>'
+          : '<li><strong style="color:var(--gold)">1.</strong> A prompt, <strong>' + SAYSAME_SECS + ' seconds</strong>, both teams answer. The host has a word loaded — <strong>matching each other is fine</strong>, only matching the host costs you.</li>' +
+            '<li><strong style="color:var(--gold)">2.</strong> Time&rsquo;s up — the word is revealed and the host rules who said it.</li>') +
         '<li><strong style="color:var(--gold)">3.</strong> Dodged it alone? You take the leg. Both dodged or both said it? <strong>Tie — a point each.</strong></li>' +
         '<li><strong style="color:var(--gold)">4.</strong> Most legs after ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level? Straight into a tie-breaker.</li>' +
       '</ul>' +
@@ -4828,7 +4851,7 @@ SCREENS.sayJudge = function(){
     '<div class="center"><div class="mini-band"><span class="eyebrow gold">' + sayLegLabel() + '</span>' + sayDots() + '</div></div>' +
     '<div class="spot" style="background:radial-gradient(80% 120% at 50% -20%,rgba(245,197,24,.16),transparent 65%)">' +
       '<p class="q-text" style="font-size:clamp(15px,1.8vw,20px);font-weight:500;color:var(--ink-2);max-width:46ch;margin:0 auto 8px">' + esc(q.question) + '</p>' +
-      '<div class="eyebrow gold">The host&rsquo;s word</div>' +
+      '<div class="eyebrow gold">' + (NOHOST() ? 'The word' : 'The host&rsquo;s word') + '</div>' +
       '<div class="q-answer">' + esc(q.answer) + '</div>' +
     '</div>' +
     '<div class="card pad lit stack" style="gap:10px">' +
@@ -4865,7 +4888,7 @@ SCREENS.saySummary = function(){
       (s.awarded && s.award ? '<p class="help">Points awarded: <strong style="color:var(--a)">' + s.award[0] + '</strong> / <strong style="color:var(--b)">' + s.award[1] + '</strong></p>' : '') +
     '</div>' +
     (verdict.needsHost
-      ? '<div class="card pad lit center stack"><h3 class="display">Your call, host</h3>' +
+      ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
         '<p class="help">Legs are tied and there is nothing to separate them. Award the ' + g.miniPts + ' points however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="sayAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
@@ -4914,8 +4937,8 @@ SCREENS.mapIntro = function(){
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> A map goes up — no title, just the colours. <strong>' + MAP_SECS + ' seconds.</strong></li>' +
-        '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>what the map shows</strong>, at the same time. Captains hand it to the host.</li>' +
-        '<li><strong style="color:var(--gold)">3.</strong> The host reveals it and rules. Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>what the map shows</strong>, at the same time.' + (NOHOST() ? ' Keep it face down.' : ' Captains hand it to the host.') + '</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> ' + (NOHOST() ? 'Reveal it, turn the answers over, and rule together.' : 'The host reveals it and rules.') + ' Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
         '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level — even at nothing each — and another map comes out, <strong>until somebody gets one</strong>.</li>' +
       '</ul>' +
     '</div>' +
@@ -5016,7 +5039,7 @@ SCREENS.mapSummary = function(){
       (s.awarded && s.award ? '<p class="help">Points awarded: <strong style="color:var(--a)">' + s.award[0] + '</strong> / <strong style="color:var(--b)">' + s.award[1] + '</strong></p>' : '') +
     '</div>' +
     (verdict.needsHost
-      ? '<div class="card pad lit center stack"><h3 class="display">Your call, host</h3>' +
+      ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
         '<p class="help">Award the ' + g.miniPts + ' points however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="mapAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
@@ -6045,6 +6068,13 @@ function finalize(){
    24. ACTIONS
    ========================================================================== */
 const ACT = {
+  /* Home's two party buttons: same setup screen, one switch different */
+  playMode(e){
+    Snd.soft();
+    if(!S.setup) S.setup = defaultSetup();
+    S.setup.hostless = e.dataset.h === '1';
+    nav('setup');
+  },
   go(e){ Snd.soft(); if(e.dataset.to === 'setup' && !S.setup) S.setup = defaultSetup(); nav(e.dataset.to); },
 
   /* ---- setup ---- */
@@ -6180,6 +6210,7 @@ const ACT = {
     if(g.rounds.length < c.rounds) toast('Only enough questions for ' + g.rounds.length + ' rounds — shortened.', 4500);
     if(!g.rounds.length) return toast('No usable questions. Widen the themes or difficulty.');
     S.game = g;
+    g.hostless = !!c.hostless;
     g.rounds.forEach(r => r.q.forEach(markUsed));
     /* Only burn a mini-game's questions when that mini-game is actually on
        tonight's card. Both decks are dealt for every game regardless, and
@@ -6282,7 +6313,7 @@ const ACT = {
       openModal(
         '<div class="center stack">' +
           '<div class="eyebrow gold">Lifeline</div><h3 class="display">Call a Friend</h3>' +
-          '<div class="warnbox" style="text-align:left">Before the captain says a word, <strong>you</strong> speak to the friend:<br>' +
+          '<div class="warnbox" style="text-align:left">Before the captain says a word, ' + (NOHOST() ? '<strong>whoever is holding the phone</strong> reads this to the friend' : '<strong>you</strong> speak to the friend') + ':<br>' +
           '&ldquo;Hi — quick quiz question. No ChatGPT, no Google, no asking anyone else. Straight off the top of your head. Ready?&rdquo;</div>' +
           '<div class="card tight" style="text-align:left">' +
             '<div class="eyebrow gold">The question</div>' +
@@ -6302,7 +6333,9 @@ const ACT = {
       openModal(
         '<div class="center stack">' +
           '<div class="eyebrow gold">Lifeline</div><h3 class="display">Double Dip</h3>' +
-          '<p class="muted" style="max-width:44ch;margin:0 auto">The captain gets <strong>two</strong> goes at this one. First answer right? Still counts — and the lifeline is gone either way.</p>' +
+          (NOHOST()
+            ? '<p class="muted" style="max-width:44ch;margin:0 auto">The captain says <strong>two</strong> answers out loud <strong>before</strong> you lock it in. Either one right counts — and the lifeline is gone either way.</p>'
+            : '<p class="muted" style="max-width:44ch;margin:0 auto">The captain gets <strong>two</strong> goes at this one. First answer right? Still counts — and the lifeline is gone either way.</p>') +
           '<div class="btn-row center"><button class="btn gold" data-act="closeLL">Back to the question</button></div>' +
         '</div>');
     }
@@ -6322,7 +6355,7 @@ const ACT = {
       const p = pointValue(rd, ti);
       rd.pts[ti] += p; award(ti, p);
       go('answer');
-    } else { Snd.wrong(); go('steal'); }
+    } else { Snd.wrong(); go(NOHOST() ? 'answer' : 'steal'); }
   },
   afterAnswer(){ afterSeat(); },
   toStealReveal(){ Timer.stop(); go('stealReveal'); },

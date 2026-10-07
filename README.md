@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v2.4 · 07 Oct 2026
+> Built by Thierry Boulos · © 2026 · v2.5 · 07 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'2.4', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.5', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -205,6 +205,16 @@ The question picker (Advanced Game Configuration → *Choose questions*) also li
 Tick up to seven number questions, three auction categories, nine prompts or three maps. They lead, **in the order you tick them**, and anything short is dealt from the bank as usual — so you can hand-pick one killer category and let the other two be a surprise.
 
 ---
+
+## Play without a host
+
+Home has three ways in: **Play with host**, **Play without host** and **Play solo**. Without a host it is the same Setup screen and the same game — same rounds, lifelines and all five mini-games — with the TV doing the hosting:
+
+- Everyone reads the question off the screen. The captain answers out loud, then **Lock it in** puts the answer and the fact straight up for everyone, and whoever is holding the phone taps **Yes** or **No**.
+- **No steals.** Wrong or out of time, it goes to the answer and on to the next question.
+- **No answer peeks** anywhere — the peek boxes simply are not drawn.
+- **Double Dip**: both answers said out loud before locking in; either one right counts. **Call a Friend**: whoever holds the phone reads the warning to the friend.
+- **The Auction**: the other team does the counting. **Don't Say the Same as Me**: the app's hidden word comes up at the reveal. **Guess the Map**: answers face down until the reveal, then you rule together.
 
 ## Play solo
 
