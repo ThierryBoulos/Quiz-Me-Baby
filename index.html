@@ -433,6 +433,9 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .tgl.mini-row{min-height:0;padding:7px 4px;gap:12px;align-items:center}
 .tgl.mini-row .tl{font-size:13.5px;line-height:1.25}
 .tgl.mini-row .help{display:block;font-size:11.5px;line-height:1.35;margin-top:2px}
+.flag-lvl{display:flex;flex-wrap:wrap;gap:4px;margin:-2px 0 6px 4px}
+.flag-lvl button{min-height:26px;padding:0 10px;border-radius:999px;font-size:11.5px;font-weight:600;color:var(--ink-3);border:1px solid var(--line)}
+.flag-lvl button[aria-pressed="true"]{color:#1A1400;background:var(--gold);border-color:var(--gold)}
 .tgl.mini-row .sw{width:44px;height:26px}
 .tgl.mini-row .sw::after{width:20px;height:20px}
 .tgl.mini-row[aria-pressed="true"] .sw::after{transform:translateX(18px)}
@@ -1160,7 +1163,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.7', date:'08 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.8', date:'08 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2922,13 +2925,6 @@ function mapDeck(cfg){
 const FLAG_LEGS = 5;
 const FLAG_SECS = 20;
 const FLAG_LEVELS = { veasy:'Very easy', easy:'Easy', medium:'Medium', hard:'Hard', expert:'Expert' };
-const FLAG_LEVEL_HELP = {
-  veasy:'30 of the best-known flags in the world — the USA, Japan, Brazil, the Vatican.',
-  easy:'51 well-travelled ones — Belgium, Kenya, Jamaica, Scotland, the Soviet Union.',
-  medium:'60 that need some thought — the Baltics, the Caucasus, Central America, East Africa.',
-  hard:'The rest of the UN, plus Taiwan, Greenland and Hong Kong — Pacific islands, the Caribbean, Chad versus Romania.',
-  expert:'Off the beaten track: Kosovo, Somaliland, Catalonia, Cornwall, Texas, Zaire, East Germany, NATO…'
-};
 const FLAGS = [["us", "United States", "veasy", ""],
   ["gb", "United Kingdom", "veasy", ""],
   ["fr", "France", "veasy", ""],
@@ -4109,15 +4105,13 @@ SCREENS.setup = function(){
           '<span class="help">' + m.blurb +
             (on ? ' <strong style="color:var(--gold)">' + miniEach + ' pts' + (slot ? ' · ' + slot : '') + '</strong>' : '') +
           '</span></span>' +
-          '<span class="sw"></span></button>';
+          '<span class="sw"></span></button>' +
+          (k === 'flag' && on
+            ? '<div class="flag-lvl" role="group" aria-label="Guess the Flag level">' + Object.keys(FLAG_LEVELS).map(l =>
+                '<button data-act="flagLevel" data-v="' + l + '" aria-pressed="' + ((c.flagLevel || 'medium') === l) + '">' + FLAG_LEVELS[l] + '</button>').join('') + '</div>'
+            : '');
       }).join('') +
       '</div>' +
-      (c.minis.indexOf('flag') > -1
-        ? '<div class="stack" style="gap:8px"><div class="eyebrow">Guess the Flag — level</div>' +
-          '<div class="seg" style="flex-wrap:wrap">' + Object.keys(FLAG_LEVELS).map(k =>
-            '<button data-act="flagLevel" data-v="' + k + '" aria-pressed="' + ((c.flagLevel || 'medium') === k) + '">' + FLAG_LEVELS[k] + '</button>').join('') + '</div>' +
-          '<p class="help">' + FLAG_LEVEL_HELP[c.flagLevel || 'medium'] + '</p></div>'
-        : '') +
       /* No paragraph under here. The badge at the top of the card already
          carries the total, each row carries its own value and slot, and the
          maths does not need spelling out at the cost of a screen of scroll. */
