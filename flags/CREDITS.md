@@ -2,7 +2,7 @@
 
 Every flag in this folder is the Wikimedia Commons file named below, at its official proportions, run through SVGO (lossless-in-appearance optimisation: rounding to 2 decimals, whitespace and metadata removed). Nothing else was changed.
 
-Licences: 232 are public domain. The others are credited here as their licences require; the optimised copies keep those same licences.
+Licences: most are public domain. The others are credited here as their licences require; the optimised copies keep those same licences.
 
 | File | Flag | Level | Commons source | Licence |
 |---|---|---|---|---|
@@ -33,7 +33,7 @@ Licences: 232 are public domain. The others are credited here as their licences 
 | `sa.svg` | Saudi Arabia | Very easy | [Flag of Saudi Arabia.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Saudi_Arabia.svg) | Public domain |
 | `za.svg` | South Africa | Very easy | [Flag of South Africa.svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Africa.svg) | Public domain |
 | `eg.svg` | Egypt | Very easy | [Flag of Egypt.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Egypt.svg) | Public domain |
-| `jm.svg` | Jamaica | Very easy | [Flag of Jamaica.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Jamaica.svg) | Public domain |
+| `jm.svg` | Jamaica | Easy | [Flag of Jamaica.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Jamaica.svg) | Public domain |
 | `dk.svg` | Denmark | Very easy | [Flag of Denmark.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Denmark.svg) | Public domain |
 | `no.svg` | Norway | Very easy | [Flag of Norway.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Norway.svg) | Public domain |
 | `be.svg` | Belgium | Easy | [Flag of Belgium.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Belgium.svg) | Public domain |
@@ -198,29 +198,28 @@ Licences: 232 are public domain. The others are credited here as their licences 
 | `vc.svg` | Saint Vincent and the Grenadines | Hard | [Flag of Saint Vincent and the Grenadines.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Saint_Vincent_and_the_Grenadines.svg) | Public domain |
 | `vu.svg` | Vanuatu | Hard | [Flag of Vanuatu (official).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Vanuatu_(official).svg) | Public domain |
 | `ws.svg` | Samoa | Hard | [Flag of Samoa.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Samoa.svg) | Public domain |
-| `va.svg` | Vatican City | Expert | [Flag of Vatican City (2023–present).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Vatican_City_(2023%E2%80%93present).svg) | Public domain |
-| `ps.svg` | Palestine | Expert | [Flag of Palestine.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Palestine.svg) | Public domain |
+| `va.svg` | Vatican City | Very easy | [Flag of Vatican City (2023–present).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Vatican_City_(2023%E2%80%93present).svg) | Public domain |
+| `ps.svg` | Palestine | Easy | [Flag of Palestine.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Palestine.svg) | Public domain |
 | `xk.svg` | Kosovo | Expert | [Flag of Kosovo.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Kosovo.svg) | Public domain |
-| `tw.svg` | Taiwan | Expert | [Flag of the Republic of China.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Republic_of_China.svg) | Public domain |
+| `tw.svg` | Taiwan | Hard | [Flag of the Republic of China.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Republic_of_China.svg) | Public domain |
 | `ncy.svg` | Northern Cyprus | Expert | [Flag of the Turkish Republic of Northern Cyprus.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Turkish_Republic_of_Northern_Cyprus.svg) | Public domain |
 | `sml.svg` | Somaliland | Expert | [Flag of Somaliland.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Somaliland.svg) | Public domain |
 | `eh.svg` | Western Sahara (Sahrawi Republic) | Expert | [Flag of the Sahrawi Arab Democratic Republic.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Sahrawi_Arab_Democratic_Republic.svg) | Public domain |
 | `abk.svg` | Abkhazia | Expert | [Flag of the Republic of Abkhazia.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Republic_of_Abkhazia.svg) | Public domain |
 | `sos.svg` | South Ossetia | Expert | [Flag of South Ossetia.svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Ossetia.svg) | Public domain |
 | `pmr.svg` | Transnistria | Expert | [Flag of Transnistria (state).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Transnistria_(state).svg) | Public domain |
-| `eng.svg` | England | Expert | [Flag of England.svg](https://commons.wikimedia.org/wiki/File:Flag_of_England.svg) | Public domain |
-| `sct.svg` | Scotland | Expert | [Flag of Scotland.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Scotland.svg) | Public domain |
-| `wls.svg` | Wales | Expert | [Flag of Wales.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Wales.svg) | Public domain |
-| `gl.svg` | Greenland | Expert | [Flag of Greenland.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Greenland.svg) | Public domain |
+| `eng.svg` | England | Easy | [Flag of England.svg](https://commons.wikimedia.org/wiki/File:Flag_of_England.svg) | Public domain |
+| `sct.svg` | Scotland | Easy | [Flag of Scotland.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Scotland.svg) | Public domain |
+| `wls.svg` | Wales | Easy | [Flag of Wales.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Wales.svg) | Public domain |
+| `gl.svg` | Greenland | Hard | [Flag of Greenland.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Greenland.svg) | Public domain |
 | `fo.svg` | Faroe Islands | Expert | [Flag of the Faroe Islands.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Faroe_Islands.svg) | Public domain |
 | `pr.svg` | Puerto Rico | Expert | [Flag of Puerto Rico.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Puerto_Rico.svg) | Public domain |
-| `hk.svg` | Hong Kong | Expert | [Flag of Hong Kong.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Hong_Kong.svg) | Public domain |
+| `hk.svg` | Hong Kong | Hard | [Flag of Hong Kong.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Hong_Kong.svg) | Public domain |
 | `mo.svg` | Macau | Expert | [Flag of Macau.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Macau.svg) | Public domain |
 | `cat.svg` | Catalonia | Expert | [Flag of Catalonia.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Catalonia.svg) | Public domain |
 | `eus.svg` | Basque Country | Expert | [Flag of the Basque Country.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Basque_Country.svg) | CC BY-SA 2.5 — by Daniele Schirmo aka Frankie688 |
 | `qc.svg` | Quebec | Expert | [Flag of Quebec.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Quebec.svg) | Public domain |
 | `tx.svg` | Texas | Expert | [Flag of Texas.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Texas.svg) | Public domain |
-| `ca-us.svg` | California | Expert | [Flag of California.svg](https://commons.wikimedia.org/wiki/File:Flag_of_California.svg) | Public domain |
 | `hi.svg` | Hawaii | Expert | [Flag of Hawaii.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Hawaii.svg) | Public domain |
 | `by-de.svg` | Bavaria | Expert | [Flag of Bavaria (lozengy).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Bavaria_(lozengy).svg) | Public domain |
 | `sic.svg` | Sicily | Expert | [Flag of Sicily.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Sicily.svg) | Public domain |
@@ -231,17 +230,18 @@ Licences: 232 are public domain. The others are credited here as their licences 
 | `bm.svg` | Bermuda | Expert | [Flag of Bermuda.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Bermuda.svg) | Public domain |
 | `gi.svg` | Gibraltar | Expert | [Flag of Gibraltar.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Gibraltar.svg) | Public domain |
 | `im.svg` | Isle of Man | Expert | [Flag of the Isle of Man.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Isle_of_Man.svg) | CC0 — by Edited by Reisio, Alkari, e.a. |
-| `su.svg` | Soviet Union | Expert | [Flag of the Soviet Union.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Soviet_Union.svg) | Public domain |
+| `su.svg` | Soviet Union | Easy | [Flag of the Soviet Union.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Soviet_Union.svg) | Public domain |
 | `yu.svg` | Yugoslavia | Expert | [Flag of Yugoslavia (1946-1992).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Yugoslavia_(1946-1992).svg) | Public domain |
 | `dd.svg` | East Germany | Expert | [Flag of East Germany.svg](https://commons.wikimedia.org/wiki/File:Flag_of_East_Germany.svg) | Public domain |
-| `ott.svg` | Ottoman Empire | Expert | [Flag of the Ottoman Empire (1844–1922).svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Ottoman_Empire_(1844%E2%80%931922).svg) | Public domain |
 | `zr.svg` | Zaire | Expert | [Flag of Zaire.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Zaire_(1971%E2%80%931997).svg) | Public domain |
 | `ly77.svg` | Libya (1977–2011) | Expert | [Flag of Libya (1977–2011).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Libya_(1977%E2%80%932011).svg) | Public domain |
 | `mm74.svg` | Burma (1974–2010) | Expert | [Flag of Myanmar (1974–2010).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Myanmar_(1974%E2%80%932010).svg) | Public domain |
 | `ir64.svg` | Iran (before 1979) | Expert | [State flag of Iran (1964–1980).svg](https://commons.wikimedia.org/wiki/File:State_flag_of_Iran_(1964%E2%80%931980).svg) | Public domain |
 | `pru.svg` | Prussia | Expert | [Flag of Prussia (1892-1918).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Prussia_(1892-1918).svg) | Attribution — by David Liuzzo |
-| `eu.svg` | European Union | Expert | [Flag of Europe.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Europe.svg) | Public domain |
-| `un.svg` | United Nations | Expert | [Flag of the United Nations.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_United_Nations.svg) | Public domain |
 | `au-org.svg` | African Union | Expert | [Flag of the African Union.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_African_Union.svg) | Public domain |
 | `arab.svg` | Arab League | Expert | [Flag of the Arab League.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Arab_League.svg) | Public domain |
 | `nato.svg` | NATO | Expert | [Flag of NATO.svg](https://commons.wikimedia.org/wiki/File:Flag_of_NATO.svg) | Public domain |
+| `srd.svg` | Sardinia | Expert | [Flag of Sardinia, Italy.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Sardinia,_Italy.svg) | CC BY-SA 3.0 — by Angelus |
+| `vlg.svg` | Flanders | Expert | [Flag of Flanders.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Flanders.svg) | CC0 — by Tom Lemmens |
+| `ak.svg` | Alaska | Expert | [Flag of Alaska.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Alaska.svg) | Public domain |
+| `kw-uk.svg` | Cornwall | Expert | [Flag of Cornwall.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Cornwall.svg) | Public domain |

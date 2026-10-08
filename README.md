@@ -213,11 +213,11 @@ Pick the level in Setup when the mini-game is switched on:
 
 | Level | What's in it |
 |---|---|
-| Very easy | 30 of the best-known flags — the USA, Japan, Brazil, Canada |
-| Easy | 45 well-travelled ones — Belgium, Kenya, Chile, Vietnam, Qatar |
+| Very easy | 30 of the best-known flags — the USA, Japan, Brazil, Canada, the Vatican |
+| Easy | 51 — Belgium, Kenya, Chile, Jamaica, Palestine, England, Scotland, Wales, the Soviet Union |
 | Medium | 60 — the Baltics, the Caucasus, Central America, East Africa |
-| Hard | the other 57 UN members — Pacific islands, the Caribbean, West Africa |
-| Expert | 47 flags outside the 193 — Vatican, Palestine, Kosovo, Taiwan, Somaliland, England, Scotland, Catalonia, Quebec, Texas, Greenland, Hong Kong, the Soviet Union, East Germany, Yugoslavia, the Ottoman Empire, Zaire, the EU, the UN, NATO… |
+| Hard | 60 — the other 57 UN members (Pacific islands, the Caribbean, West Africa), plus Taiwan, Greenland and Hong Kong |
+| Expert | 38 off the beaten track — Kosovo, Somaliland, Northern Cyprus, Catalonia, Sardinia, Flanders, Cornwall, Quebec, Texas, Alaska, East Germany, Yugoslavia, Zaire, the African Union, NATO… |
 
 Afghanistan is left out on purpose: its flag has been in dispute since 2021.
 
