@@ -780,6 +780,17 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .map-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 12px;font-size:12.5px;font-weight:700;color:var(--ink-2)}
 .map-legend span{display:inline-flex;align-items:center;gap:6px}
 .map-legend i{width:14px;height:14px;border-radius:4px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+/* A flag is a picture with its own proportions (Qatar is 11:28, Switzerland
+   square), so it gets a fixed-height box and object-fit, never a stretch. The
+   drop-shadows follow the flag's own edge — a white flag (Japan) still reads. */
+.flag-frame{cursor:default;width:100%;justify-self:stretch}
+.flag-frame .flag-img{width:100%;height:clamp(120px,46svh,480px);max-height:none;object-fit:contain;border-radius:0;
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.55)) drop-shadow(0 10px 26px rgba(0,0,0,.5))}
+.flag-judge .flag-frame .flag-img{height:clamp(110px,40svh,420px)}
+@media (max-width:760px){
+  .flag-frame .flag-img{height:clamp(110px,30svh,300px)}
+  .flag-judge .flag-frame .flag-img{height:clamp(100px,26svh,260px)}
+}
 .map-hint{font-size:14px;color:var(--ink-2);text-align:center}
 .map-hint strong{color:var(--gold);letter-spacing:.04em}
 .map-hint-btn{align-self:center}
@@ -1149,7 +1160,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.6', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.7', date:'08 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2894,6 +2905,284 @@ function mapDeck(cfg){
   return picked.concat(mapPool(new Set(picked.map(q => q.id))));
 }
 
+/* ==========================================================================
+   GUESS THE FLAG — the catalogue
+   Every flag is a Wikimedia Commons file at its official proportions, kept in
+   flags/<key>.svg (see flags/CREDITS.md for each source and licence). The files
+   are NOT bundled: the browser fetches only the handful a game deals, and only
+   when Guess the Flag is on the card — nothing is downloaded otherwise.
+
+   [key, name, level, what it is]. Levels:
+     veasy/easy/medium/hard  the UN member states, by how well-known the flag is
+                             (Afghanistan is left out — its flag is in dispute)
+     expert                  everything outside the 193: observer and partly
+                             recognised states, nations and regions, former
+                             countries and flags, international organisations
+   ========================================================================== */
+const FLAG_LEGS = 5;
+const FLAG_SECS = 20;
+const FLAG_LEVELS = { veasy:'Very easy', easy:'Easy', medium:'Medium', hard:'Hard', expert:'Expert' };
+const FLAG_LEVEL_HELP = {
+  veasy:'30 of the best-known flags in the world — the USA, Japan, Brazil, Canada.',
+  easy:'45 well-travelled ones — Belgium, Kenya, Chile, Vietnam, Qatar.',
+  medium:'60 that need some thought — the Baltics, the Caucasus, Central America, East Africa.',
+  hard:'The rest of the UN — Pacific islands, the Caribbean, West Africa, Chad versus Romania.',
+  expert:'Outside the 193: Kosovo, Somaliland, Scotland, Catalonia, Texas, the Soviet Union, the EU, NATO…'
+};
+const FLAGS = [["us", "United States", "veasy", ""],
+  ["gb", "United Kingdom", "veasy", ""],
+  ["fr", "France", "veasy", ""],
+  ["de", "Germany", "veasy", ""],
+  ["it", "Italy", "veasy", ""],
+  ["es", "Spain", "veasy", ""],
+  ["jp", "Japan", "veasy", ""],
+  ["cn", "China", "veasy", ""],
+  ["ca", "Canada", "veasy", ""],
+  ["br", "Brazil", "veasy", ""],
+  ["mx", "Mexico", "veasy", ""],
+  ["au", "Australia", "veasy", ""],
+  ["in", "India", "veasy", ""],
+  ["ru", "Russia", "veasy", ""],
+  ["kr", "South Korea", "veasy", ""],
+  ["ar", "Argentina", "veasy", ""],
+  ["ch", "Switzerland", "veasy", ""],
+  ["se", "Sweden", "veasy", ""],
+  ["ie", "Ireland", "veasy", ""],
+  ["pt", "Portugal", "veasy", ""],
+  ["nl", "Netherlands", "veasy", ""],
+  ["gr", "Greece", "veasy", ""],
+  ["tr", "Turkey", "veasy", ""],
+  ["il", "Israel", "veasy", ""],
+  ["sa", "Saudi Arabia", "veasy", ""],
+  ["za", "South Africa", "veasy", ""],
+  ["eg", "Egypt", "veasy", ""],
+  ["jm", "Jamaica", "veasy", ""],
+  ["dk", "Denmark", "veasy", ""],
+  ["no", "Norway", "veasy", ""],
+  ["be", "Belgium", "easy", ""],
+  ["at", "Austria", "easy", ""],
+  ["pl", "Poland", "easy", ""],
+  ["fi", "Finland", "easy", ""],
+  ["ua", "Ukraine", "easy", ""],
+  ["cz", "Czechia", "easy", ""],
+  ["hr", "Croatia", "easy", ""],
+  ["lb", "Lebanon", "easy", ""],
+  ["ma", "Morocco", "easy", ""],
+  ["tn", "Tunisia", "easy", ""],
+  ["dz", "Algeria", "easy", ""],
+  ["ng", "Nigeria", "easy", ""],
+  ["ke", "Kenya", "easy", ""],
+  ["gh", "Ghana", "easy", ""],
+  ["cm", "Cameroon", "easy", ""],
+  ["sn", "Senegal", "easy", ""],
+  ["co", "Colombia", "easy", ""],
+  ["cl", "Chile", "easy", ""],
+  ["pe", "Peru", "easy", ""],
+  ["uy", "Uruguay", "easy", ""],
+  ["ve", "Venezuela", "easy", ""],
+  ["cu", "Cuba", "easy", ""],
+  ["pk", "Pakistan", "easy", ""],
+  ["bd", "Bangladesh", "easy", ""],
+  ["th", "Thailand", "easy", ""],
+  ["vn", "Vietnam", "easy", ""],
+  ["id", "Indonesia", "easy", ""],
+  ["ph", "Philippines", "easy", ""],
+  ["my", "Malaysia", "easy", ""],
+  ["sg", "Singapore", "easy", ""],
+  ["nz", "New Zealand", "easy", ""],
+  ["ir", "Iran", "easy", ""],
+  ["iq", "Iraq", "easy", ""],
+  ["sy", "Syria", "easy", ""],
+  ["jo", "Jordan", "easy", ""],
+  ["ae", "United Arab Emirates", "easy", ""],
+  ["qa", "Qatar", "easy", ""],
+  ["kw", "Kuwait", "easy", ""],
+  ["hu", "Hungary", "easy", ""],
+  ["ro", "Romania", "easy", ""],
+  ["bg", "Bulgaria", "easy", ""],
+  ["rs", "Serbia", "easy", ""],
+  ["is", "Iceland", "easy", ""],
+  ["lu", "Luxembourg", "easy", ""],
+  ["kp", "North Korea", "easy", ""],
+  ["sk", "Slovakia", "medium", ""],
+  ["si", "Slovenia", "medium", ""],
+  ["ee", "Estonia", "medium", ""],
+  ["lv", "Latvia", "medium", ""],
+  ["lt", "Lithuania", "medium", ""],
+  ["by", "Belarus", "medium", ""],
+  ["md", "Moldova", "medium", ""],
+  ["ge", "Georgia", "medium", ""],
+  ["am", "Armenia", "medium", ""],
+  ["az", "Azerbaijan", "medium", ""],
+  ["kz", "Kazakhstan", "medium", ""],
+  ["uz", "Uzbekistan", "medium", ""],
+  ["al", "Albania", "medium", ""],
+  ["mk", "North Macedonia", "medium", ""],
+  ["ba", "Bosnia and Herzegovina", "medium", ""],
+  ["me", "Montenegro", "medium", ""],
+  ["cy", "Cyprus", "medium", ""],
+  ["mt", "Malta", "medium", ""],
+  ["mc", "Monaco", "medium", ""],
+  ["li", "Liechtenstein", "medium", ""],
+  ["ad", "Andorra", "medium", ""],
+  ["sm", "San Marino", "medium", ""],
+  ["ec", "Ecuador", "medium", ""],
+  ["bo", "Bolivia", "medium", ""],
+  ["py", "Paraguay", "medium", ""],
+  ["cr", "Costa Rica", "medium", ""],
+  ["pa", "Panama", "medium", ""],
+  ["do", "Dominican Republic", "medium", ""],
+  ["hn", "Honduras", "medium", ""],
+  ["gt", "Guatemala", "medium", ""],
+  ["sv", "El Salvador", "medium", ""],
+  ["ni", "Nicaragua", "medium", ""],
+  ["ht", "Haiti", "medium", ""],
+  ["tt", "Trinidad and Tobago", "medium", ""],
+  ["bs", "The Bahamas", "medium", ""],
+  ["bb", "Barbados", "medium", ""],
+  ["np", "Nepal", "medium", ""],
+  ["lk", "Sri Lanka", "medium", ""],
+  ["mm", "Myanmar", "medium", ""],
+  ["kh", "Cambodia", "medium", ""],
+  ["la", "Laos", "medium", ""],
+  ["mn", "Mongolia", "medium", ""],
+  ["bt", "Bhutan", "medium", ""],
+  ["om", "Oman", "medium", ""],
+  ["ye", "Yemen", "medium", ""],
+  ["bh", "Bahrain", "medium", ""],
+  ["ly", "Libya", "medium", ""],
+  ["sd", "Sudan", "medium", ""],
+  ["et", "Ethiopia", "medium", ""],
+  ["tz", "Tanzania", "medium", ""],
+  ["ug", "Uganda", "medium", ""],
+  ["rw", "Rwanda", "medium", ""],
+  ["cd", "DR Congo", "medium", ""],
+  ["ao", "Angola", "medium", ""],
+  ["mz", "Mozambique", "medium", ""],
+  ["zw", "Zimbabwe", "medium", ""],
+  ["zm", "Zambia", "medium", ""],
+  ["na", "Namibia", "medium", ""],
+  ["bw", "Botswana", "medium", ""],
+  ["mg", "Madagascar", "medium", ""],
+  ["ag", "Antigua and Barbuda", "hard", ""],
+  ["bf", "Burkina Faso", "hard", ""],
+  ["bi", "Burundi", "hard", ""],
+  ["bj", "Benin", "hard", ""],
+  ["bn", "Brunei", "hard", ""],
+  ["bz", "Belize", "hard", ""],
+  ["cf", "Central African Republic", "hard", ""],
+  ["cg", "Republic of the Congo", "hard", ""],
+  ["ci", "Ivory Coast", "hard", ""],
+  ["cv", "Cape Verde", "hard", ""],
+  ["dj", "Djibouti", "hard", ""],
+  ["dm", "Dominica", "hard", ""],
+  ["er", "Eritrea", "hard", ""],
+  ["fj", "Fiji", "hard", ""],
+  ["fm", "Micronesia", "hard", ""],
+  ["ga", "Gabon", "hard", ""],
+  ["gd", "Grenada", "hard", ""],
+  ["gm", "The Gambia", "hard", ""],
+  ["gn", "Guinea", "hard", ""],
+  ["gq", "Equatorial Guinea", "hard", ""],
+  ["gw", "Guinea-Bissau", "hard", ""],
+  ["gy", "Guyana", "hard", ""],
+  ["kg", "Kyrgyzstan", "hard", ""],
+  ["ki", "Kiribati", "hard", ""],
+  ["km", "Comoros", "hard", ""],
+  ["kn", "Saint Kitts and Nevis", "hard", ""],
+  ["lc", "Saint Lucia", "hard", ""],
+  ["lr", "Liberia", "hard", ""],
+  ["ls", "Lesotho", "hard", ""],
+  ["mh", "Marshall Islands", "hard", ""],
+  ["ml", "Mali", "hard", ""],
+  ["mr", "Mauritania", "hard", ""],
+  ["mu", "Mauritius", "hard", ""],
+  ["mv", "Maldives", "hard", ""],
+  ["mw", "Malawi", "hard", ""],
+  ["ne", "Niger", "hard", ""],
+  ["nr", "Nauru", "hard", ""],
+  ["pg", "Papua New Guinea", "hard", ""],
+  ["pw", "Palau", "hard", ""],
+  ["sb", "Solomon Islands", "hard", ""],
+  ["sc", "Seychelles", "hard", ""],
+  ["sl", "Sierra Leone", "hard", ""],
+  ["so", "Somalia", "hard", ""],
+  ["sr", "Suriname", "hard", ""],
+  ["ss", "South Sudan", "hard", ""],
+  ["st", "São Tomé and Príncipe", "hard", ""],
+  ["sz", "Eswatini", "hard", ""],
+  ["td", "Chad", "hard", ""],
+  ["tg", "Togo", "hard", ""],
+  ["tj", "Tajikistan", "hard", ""],
+  ["tl", "Timor-Leste", "hard", ""],
+  ["tm", "Turkmenistan", "hard", ""],
+  ["to", "Tonga", "hard", ""],
+  ["tv", "Tuvalu", "hard", ""],
+  ["vc", "Saint Vincent and the Grenadines", "hard", ""],
+  ["vu", "Vanuatu", "hard", ""],
+  ["ws", "Samoa", "hard", ""],
+  ["va", "Vatican City", "expert", "Not a UN member — observer state"],
+  ["ps", "Palestine", "expert", "Not a UN member — observer state"],
+  ["xk", "Kosovo", "expert", "Partly recognised state"],
+  ["tw", "Taiwan", "expert", "Partly recognised state"],
+  ["ncy", "Northern Cyprus", "expert", "Recognised only by Turkey"],
+  ["sml", "Somaliland", "expert", "Unrecognised state"],
+  ["eh", "Western Sahara (Sahrawi Republic)", "expert", "Partly recognised state"],
+  ["abk", "Abkhazia", "expert", "Breakaway region"],
+  ["sos", "South Ossetia", "expert", "Breakaway region"],
+  ["pmr", "Transnistria", "expert", "Breakaway region"],
+  ["eng", "England", "expert", "Nation of the United Kingdom"],
+  ["sct", "Scotland", "expert", "Nation of the United Kingdom"],
+  ["wls", "Wales", "expert", "Nation of the United Kingdom"],
+  ["gl", "Greenland", "expert", "Part of the Kingdom of Denmark"],
+  ["fo", "Faroe Islands", "expert", "Part of the Kingdom of Denmark"],
+  ["pr", "Puerto Rico", "expert", "US territory"],
+  ["hk", "Hong Kong", "expert", "Special administrative region of China"],
+  ["mo", "Macau", "expert", "Special administrative region of China"],
+  ["cat", "Catalonia", "expert", "Region of Spain"],
+  ["eus", "Basque Country", "expert", "Region of Spain"],
+  ["qc", "Quebec", "expert", "Province of Canada"],
+  ["tx", "Texas", "expert", "US state"],
+  ["ca-us", "California", "expert", "US state"],
+  ["hi", "Hawaii", "expert", "US state"],
+  ["by-de", "Bavaria", "expert", "State of Germany"],
+  ["sic", "Sicily", "expert", "Region of Italy"],
+  ["cor", "Corsica", "expert", "Region of France"],
+  ["bzh", "Brittany", "expert", "Region of France"],
+  ["krd", "Kurdistan Region", "expert", "Autonomous region of Iraq"],
+  ["ax", "Åland", "expert", "Autonomous region of Finland"],
+  ["bm", "Bermuda", "expert", "British Overseas Territory"],
+  ["gi", "Gibraltar", "expert", "British Overseas Territory"],
+  ["im", "Isle of Man", "expert", "Crown Dependency"],
+  ["su", "Soviet Union", "expert", "Former country"],
+  ["yu", "Yugoslavia", "expert", "Former country"],
+  ["dd", "East Germany", "expert", "Former country"],
+  ["ott", "Ottoman Empire", "expert", "Former country"],
+  ["zr", "Zaire", "expert", "Former name of DR Congo"],
+  ["ly77", "Libya (1977–2011)", "expert", "Former flag"],
+  ["mm74", "Burma (1974–2010)", "expert", "Former flag"],
+  ["ir64", "Iran (before 1979)", "expert", "Former flag"],
+  ["pru", "Prussia", "expert", "Former kingdom"],
+  ["eu", "European Union", "expert", "International organisation"],
+  ["un", "United Nations", "expert", "International organisation"],
+  ["au-org", "African Union", "expert", "International organisation"],
+  ["arab", "Arab League", "expert", "International organisation"],
+  ["nato", "NATO", "expert", "International organisation"]];
+const flagObj = (f) => ({ id:'flag:' + f[0], key:f[0], name:f[1], level:f[2], kind:f[3] });
+const flagSrc = (q) => 'flags/' + q.key + '.svg';
+/* fresh flags first, played ones queued behind them — same as the maps */
+function flagPool(level, skip){
+  const all = FLAGS.filter(f => f[2] === level).map(flagObj).filter(q => !(skip && skip.has(q.id)));
+  return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
+}
+/* Ask for the dealt flags now, so they are in the browser's cache long before
+   the mini-game comes round — and only those, never the whole set. */
+function preloadFlags(list){ (list || []).forEach(q => { const i = new Image(); i.src = flagSrc(q); }); }
+function flagImg(q){
+  return '<img class="map-img flag-img" src="' + flagSrc(q) + '" alt="A flag" draggable="false" ' +
+    'onerror="this.outerHTML=\'<div class=&quot;map-wait&quot;>Could not load the flag — check the connection.</div>\'">';
+}
+
 /* ---- loading the geometry ---- */
 let mapGeoP = null;
 function loadMapGeo(){
@@ -3063,7 +3352,7 @@ const LL = {
 /* ==========================================================================
    9b. MINI-GAMES — which ones, where they land, what they are worth
    ==========================================================================
-   Five of them, all optional, all chosen up front in Setup. Four get spread
+   Six of them, all optional, all chosen up front in Setup. Five get spread
    through the standard rounds; the Battle is always the closer.
 
    WHERE THEY LAND. Even spread, not fixed gaps: mini k of M goes after round
@@ -3087,10 +3376,11 @@ const MINI_GAMES = {
   auction:{ key:'auction', name:'The Auction',                blurb:'Bid how many you can name, then deliver it.' },
   saysame:{ key:'saysame', name:"Don't Say the Same as Me",   blurb:'Ten seconds to answer without matching the host.' },
   map:    { key:'map',     name:'Guess the Map',              blurb:'A map, sixty seconds — what does it show?' },
+  flag:   { key:'flag',    name:'Guess the Flag',             blurb:'Five flags, twenty seconds each — whose is it?' },
   battle: { key:'battle',  name:'Battle of the Captains',     blurb:'Ten each, captains only, 7s a shot.' }
 };
 /* the four that get spread through the rounds — the Battle is the finale */
-const INTERLEAVED = ['closest', 'auction', 'saysame', 'map'];
+const INTERLEAVED = ['closest', 'auction', 'saysame', 'map', 'flag'];
 
 function miniPointValue(N, M){
   if(!M) return 0;
@@ -3164,6 +3454,11 @@ function buildGame(cfg){
   const mpLegs = mpDeck.slice(0, MAP_LEGS);
   const mpSpare = mpDeck.slice(MAP_LEGS);
 
+  const fgLevel = FLAG_LEVELS[cfg.flagLevel] ? cfg.flagLevel : 'medium';
+  const fgDeck = flagPool(fgLevel);
+  const fgLegs = fgDeck.slice(0, FLAG_LEGS);
+  const fgSpare = fgDeck.slice(FLAG_LEGS, FLAG_LEGS + 15);   // tie-breakers and swaps
+
   const mk = (t, color) => ({
     name:t.name, captain:t.captain, players:t.players,
     score:0, ll:{ friend:true, dip:true, dbl:true }, color
@@ -3176,7 +3471,8 @@ function buildGame(cfg){
                             .filter(k => k !== 'closest' || cp.length)
                             .filter(k => k !== 'auction' || auctionPool().length)
                             .filter(k => k !== 'saysame' || ssLegs.length)
-                            .filter(k => k !== 'map' || mpLegs.length);
+                            .filter(k => k !== 'map' || mpLegs.length)
+                            .filter(k => k !== 'flag' || fgLegs.length);
   const hasBattle = wanted.indexOf('battle') > -1;
   const plan = planMinis(rounds.length, inter);
   const M = inter.length + (hasBattle ? 1 : 0);
@@ -3192,6 +3488,7 @@ function buildGame(cfg){
     mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
     saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     mapGame:{ qs:mpLegs, spare:mpSpare, base:mpLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+    flagGame:{ level:fgLevel, qs:fgLegs, spare:fgSpare, base:fgLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     auction:null,
     r:0, seat:0, sub:'intro', miniPlayed:false,
     battle:null,
@@ -3243,12 +3540,14 @@ const AUCTION_SCREENS = ['auctionIntro','auctionBid','auctionRun','auctionLeg','
 const CLOSEST_SCREENS = ['miniIntro','miniQ','miniEntry','miniSummary'];
 const SAYSAME_SCREENS = ['sayIntro','sayQ','sayJudge','saySummary'];
 const MAP_SCREENS = ['mapIntro','mapQ','mapJudge','mapSummary'];
+const FLAG_SCREENS = ['flagIntro','flagQ','flagJudge','flagSummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
   if(CLOSEST_SCREENS.indexOf(S.screen) > -1) return 'closest';
   if(AUCTION_SCREENS.indexOf(S.screen) > -1) return 'auction';
   if(SAYSAME_SCREENS.indexOf(S.screen) > -1) return 'saysame';
   if(MAP_SCREENS.indexOf(S.screen) > -1) return 'map';
+  if(FLAG_SCREENS.indexOf(S.screen) > -1) return 'flag';
   if(BATTLE_SCREENS.indexOf(S.screen) > -1) return 'battle';
   return null;
 }
@@ -3295,8 +3594,8 @@ function render(){
      does fit the window. Any screen using .play or .fits MUST be in one of
      them — left out, it renders 88px of padding inside a box already sized to
      the viewport and the page scrolls by exactly that much. */
-  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapSummary'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ','flagQ'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapSummary','flagSummary'].indexOf(S.screen) > -1);
   /* the enlarged map belongs to the screen that opened it */
   if(S.tmp.mzFor && S.tmp.mzFor !== S.screen) closeMapZoom();
   document.body.classList.toggle('homemode', S.screen === 'home');
@@ -3328,6 +3627,7 @@ function renderHUD(){
     || AUCTION_SCREENS.indexOf(S.screen) > -1
     || SAYSAME_SCREENS.indexOf(S.screen) > -1
     || MAP_SCREENS.indexOf(S.screen) > -1
+    || FLAG_SCREENS.indexOf(S.screen) > -1
     || BATTLE_SCREENS.indexOf(S.screen) > -1);
   if(!inGame){ h.hidden = true; h.innerHTML = ''; return; }
   h.hidden = false;
@@ -3352,6 +3652,8 @@ function renderHUD(){
     label = '<b>DON&rsquo;T SAY THE SAME AS ME</b> &nbsp;·&nbsp; ' + sayLegLabel();
   } else if(MAP_SCREENS.indexOf(S.screen) > -1){
     label = '<b>GUESS THE MAP</b> &nbsp;·&nbsp; ' + (S.screen === 'mapSummary' ? 'Final' : mapLegLabel());
+  } else if(FLAG_SCREENS.indexOf(S.screen) > -1){
+    label = '<b>GUESS THE FLAG</b> &nbsp;·&nbsp; ' + (S.screen === 'flagSummary' ? 'Final' : flagLegLabel());
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
     const b = g.battle;
     label = '<b>BATTLE OF THE CAPTAINS</b>' +
@@ -3451,7 +3753,7 @@ SCREENS.rules = function(){
       'Each team picks a <strong>captain</strong>. The captain gives the final answer. Nobody else. If the captain has not said it, it has not been said.',
       '<strong>Settle who goes first by chance, not by argument.</strong> Coin toss, rock paper scissors, highest card, closest guess to a number in the host&rsquo;s head — anything, as long as it is luck. <strong>The winner then chooses</strong> whether to be <span class="tn a">Team A</span>, who answers first every round, or <span class="tn b">Team B</span>, who gets the first steal.',
       '<strong>No phones.</strong> Not on the table, not in a lap.',
-      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or any of the five.'
+      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or any of the six.'
     ])) +
 
     ruleBlock('02', 'A standard round', ol([
@@ -3473,7 +3775,7 @@ SCREENS.rules = function(){
     ])) +
 
     ruleBlock('04', 'The mini-games', ul([
-      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or any of the five</strong>. They are announced at the start, not sprung on you.'),
+      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or any of the six</strong>. They are announced at the start, not sprung on you.'),
       li('They drop in <strong>between the standard rounds</strong>, spaced out across the night. Where exactly depends on how many rounds you are playing.'),
       li('Each one is worth <strong>between 2 and 4 points</strong> to whoever wins it. The host can tell you which before you start.'),
       li('<span style="color:var(--warn)">No lifelines in any of them.</span>')
@@ -3511,7 +3813,13 @@ SCREENS.rules = function(){
       li('Level after ' + MAP_LEGS + ' — even at nothing each? <strong>Another map comes out, and another, until somebody gets one.</strong>')
     ])) +
 
-    ruleBlock('09', 'Battle of the Captains', ul([
+    ruleBlock('09', 'Guess the Flag', ul([
+      li('A flag goes up. <strong>' + FLAG_SECS + ' seconds.</strong> Both teams write down whose it is, at the same time.'),
+      li('Five levels, chosen in Setup: <strong>very easy, easy, medium, hard</strong> (all UN members) and <strong>expert</strong> — flags outside the 193: unrecognised states, nations and regions, former countries, unions and organisations.'),
+      li('Both right — <strong>a point each</strong>. Best of ' + FLAG_LEGS + '; level at the end, and another flag comes out until somebody gets one.')
+    ])) +
+
+    ruleBlock('10', 'Battle of the Captains', ul([
       li('<strong>Captains only.</strong> The room says nothing — and that means nothing.'),
       li('Ten questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot, one captain at a time.'),
       li('Both captains get the <strong>same shape</strong> — five easy, five medium, in the same order — but never the same questions. Different sets, same difficulty, so nobody can claim they drew the harder ten.'),
@@ -3520,18 +3828,18 @@ SCREENS.rules = function(){
       li('It always runs <strong>last</strong>, after the final standard round.')
     ])) +
 
-    ruleBlock('10', 'Winning', ul([
+    ruleBlock('11', 'Winning', ul([
       li('Highest score after the last round takes the night.'),
       li('Tie? <strong>Sudden death</strong> — one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
     ])) +
 
-    ruleBlock('11', 'Playing without a host', ul([
+    ruleBlock('12', 'Playing without a host', ul([
       li('Same game, same rounds, same mini-games — <strong>the TV does the hosting</strong>. Everyone reads the question off the screen.'),
       li('The captain answers out loud, then <strong>Lock it in</strong>: the answer comes straight up for everyone. Whoever is holding the phone taps <strong>Yes</strong> or <strong>No</strong>.'),
       li('<strong>No steals.</strong> Wrong or out of time, and it is the next question.'),
       li(ICON.dip + ' <strong>Double Dip</strong> — say both answers out loud <strong>before</strong> you lock it in. Either one right counts.'),
       li('<strong>The Auction</strong> — the other team does the counting. <strong>The Battle</strong> — show the answer after each one and mark it honestly.'),
-      li('<strong>Guess the Map</strong> — keep your answers face down until the reveal, then rule together.')
+      li('<strong>Guess the Map</strong> and <strong>Guess the Flag</strong> — keep your answers face down until the reveal, then rule together.')
     ])) +
 
     '<div class="btn-row center"><button class="btn gold lg" data-act="go" data-to="setup">Right — start a game</button></div>' +
@@ -3804,6 +4112,12 @@ SCREENS.setup = function(){
           '<span class="sw"></span></button>';
       }).join('') +
       '</div>' +
+      (c.minis.indexOf('flag') > -1
+        ? '<div class="stack" style="gap:8px"><div class="eyebrow">Guess the Flag — level</div>' +
+          '<div class="seg" style="flex-wrap:wrap">' + Object.keys(FLAG_LEVELS).map(k =>
+            '<button data-act="flagLevel" data-v="' + k + '" aria-pressed="' + ((c.flagLevel || 'medium') === k) + '">' + FLAG_LEVELS[k] + '</button>').join('') + '</div>' +
+          '<p class="help">' + FLAG_LEVEL_HELP[c.flagLevel || 'medium'] + '</p></div>'
+        : '') +
       /* No paragraph under here. The badge at the top of the card already
          carries the total, each row carries its own value and slot, and the
          maths does not need spelling out at the cost of a screen of scroll. */
@@ -5079,6 +5393,138 @@ SCREENS.mapSummary = function(){
   '</div>';
 };
 
+/* ==========================================================================
+   17f. GUESS THE FLAG — screens
+   Built on Guess the Map: same layout, same best-of with a tie-break that
+   runs until somebody gets one, same verdict buttons.
+   ========================================================================== */
+function flagLegLabel(){
+  const s = G().flagGame;
+  const i = Math.min(s.i, s.qs.length - 1);
+  return i >= s.base ? 'Tie-breaker flag ' + (i - s.base + 1) : 'Flag ' + (i + 1) + ' of ' + s.base;
+}
+function flagDots(){
+  const s = G().flagGame;
+  let out = '<span class="mini-dots">';
+  for(let i = 0; i < s.qs.length; i++){
+    const r = s.subs[i];
+    out += '<i class="' + (!r ? '' : r.winner === 'tie' ? 't' : r.winner === 'none' ? 'n' : r.winner === 0 ? 'a' : 'b') + '"></i>';
+  }
+  return out + '</span>';
+}
+const flagBand = () => '<div class="center"><div class="mini-band tight"><span class="eyebrow gold">' + flagLegLabel() + '</span>' + flagDots() + '</div></div>';
+
+SCREENS.flagIntro = function(){
+  const g = G(), s = g.flagGame, n = s.base;
+  return '<div class="stack lg intro-screen" style="padding-top:18px">' +
+    '<div class="center stack intro-head" style="gap:10px">' +
+      '<div class="eyebrow gold">Mini-game</div>' +
+      '<h1 class="display">Guess<br>the Flag</h1>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + FLAG_LEVELS[s.level] + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+    '</div>' +
+    '<div class="card pad lit stack">' +
+      '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
+        '<li><strong style="color:var(--gold)">1.</strong> A flag goes up. <strong>' + FLAG_SECS + ' seconds.</strong></li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>whose flag it is</strong>, at the same time.' + (NOHOST() ? ' Keep it face down.' : ' Captains hand it to the host.') + '</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> ' + (NOHOST() ? 'Reveal it, turn the answers over, and rule together.' : 'The host reveals it and rules.') + ' Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level — even at nothing each — and another flag comes out, <strong>until somebody gets one</strong>.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="flagStart">Show flag 1</button></div>' +
+  '</div>';
+};
+AFTER.flagIntro = function(){ jingleOnce('flag'); preloadFlags(G().flagGame.qs); };
+
+SCREENS.flagQ = function(){
+  const g = G(), s = g.flagGame, q = s.qs[s.i];
+  return '<div class="play map-play flag-play">' +
+    flagBand() +
+    '<div class="map-stage">' +
+      '<div class="map-frame flag-frame">' + flagImg(q) + '</div>' +
+      '<div class="map-side">' +
+        '<div class="q-theme">Whose flag is this?</div>' +
+        timerRing('seconds left') +
+        timerControls() +
+        peek({ answer:q.name, notes:q.kind }) +
+      '</div>' +
+    '</div>' +
+    '<div class="row between" style="gap:10px">' +
+      '<button class="btn sm ghost" data-act="flagSwap">Change this flag</button>' +
+      '<button class="btn gold" data-act="toFlagJudge">Pens down — reveal</button>' +
+    '</div>' +
+  '</div>';
+};
+AFTER.flagQ = function(){
+  const s = G().flagGame, q = s.qs[s.i];
+  if(!S.used.has(q.id)) markUsed(q);        // played the moment it is on screen
+  preloadFlags(s.spare.slice(0, 2));         // the next swap or tie-breaker, ready
+  armTimer('flag' + s.i + '-' + q.id, FLAG_SECS, () => { if(S.screen === 'flagQ') go('flagJudge'); });
+};
+
+SCREENS.flagJudge = function(){
+  const g = G(), s = g.flagGame, q = s.qs[s.i];
+  return '<div class="compact map-judge flag-judge">' +
+    flagBand() +
+    '<div class="map-stage reveal">' +
+      '<div class="map-frame flag-frame">' + flagImg(q) + '</div>' +
+      '<div class="map-side">' +
+        '<div class="eyebrow gold">The flag of</div>' +
+        '<div class="map-title">' + esc(q.name) + '</div>' +
+        (q.kind ? '<p class="q-note">' + esc(q.kind) + '</p>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="card pad lit stack" style="gap:10px">' +
+      '<h3 class="display" style="font-size:clamp(16px,2.2vw,22px);text-align:center">Who got it?</h3>' +
+      '<div class="btn-row center" style="gap:10px">' +
+        '<button class="btn teamA lg" data-act="flagVerdict" data-w="0">' + esc(g.teams[0].name) + '</button>' +
+        '<button class="btn ghost" data-act="flagVerdict" data-w="tie">Both — 1 each</button>' +
+        '<button class="btn ghost" data-act="flagVerdict" data-w="none">Nobody</button>' +
+        '<button class="btn teamB lg" data-act="flagVerdict" data-w="1">' + esc(g.teams[1].name) + '</button>' +
+      '</div>' +
+      '<p class="help" style="text-align:center">Spelling does not matter — the right place does.</p>' +
+    '</div>' +
+  '</div>';
+};
+
+SCREENS.flagSummary = function(){
+  const g = G(), s = g.flagGame;
+  const rows = s.subs.map((r, i) =>
+    '<tr><td class="rowhead" data-l="Flag">' + (i + 1) + '</td>' +
+    '<td class="qcell" data-l="It was">' + esc(r.q.name) + '</td>' +
+    '<td data-l="Winner">' + (r.winner === 'tie' ? '<span class="badge line">Both</span>'
+      : r.winner === 'none' ? '<span class="badge line">Nobody</span>'
+      : '<span class="badge ' + (r.winner === 0 ? 'a' : 'b') + '">' + esc(g.teams[r.winner].name) + '</span>') + '</td></tr>'
+  ).join('');
+  const verdict = s.verdict || {};
+  return '<div class="fits">' +
+    '<div class="center stack" style="gap:6px">' +
+      '<div class="eyebrow gold">Guess the Flag — final</div>' +
+      '<h2 class="display">' + (verdict.winner == null ? 'Tie' : esc(g.teams[verdict.winner].name) + ' takes it') + '</h2>' +
+      '<div class="row center" style="justify-content:center;gap:20px">' +
+        '<span class="badge a">' + esc(g.teams[0].name) + ' — ' + s.wins[0] + '</span>' +
+        '<span class="badge b">' + esc(g.teams[1].name) + ' — ' + s.wins[1] + '</span>' +
+      '</div>' +
+      (verdict.note ? '<p class="help" style="max-width:52ch;margin:0 auto">' + verdict.note + '</p>' : '') +
+      (s.awarded && s.award ? '<p class="help">Points awarded: <strong style="color:var(--a)">' + s.award[0] + '</strong> / <strong style="color:var(--b)">' + s.award[1] + '</strong></p>' : '') +
+    '</div>' +
+    (verdict.needsHost
+      ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
+        '<p class="help">Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<div class="btn-row center">' +
+          '<button class="btn teamA lg" data-act="flagAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
+          '<button class="btn ghost" data-act="flagAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
+          '<button class="btn teamB lg" data-act="flagAward" data-w="1">' + esc(g.teams[1].name) + ' takes it</button>' +
+        '</div></div>'
+      : '') +
+    scoreBig() +
+    '<div class="tbl-wrap"><table><thead><tr><th>Flag</th><th>It was</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="btn-row center">' +
+      '<button class="btn ghost" data-act="quit">End game</button>' +
+      '<button class="btn gold lg" data-act="afterFlag">Back to the standard rounds</button>' +
+    '</div>' +
+  '</div>';
+};
+
 /* ---- the enlarged map ----
    Pinch-zoom is switched off app-wide (it wrecked the buttons on a phone), so
    a map with fifty year labels on it needs its own way to get close. Tap the
@@ -5220,6 +5666,12 @@ SCREENS.final = function(){
           '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.mapGame.award[0] + '</td>' +
           '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.mapGame.award[1] + '</td>' +
           '<td data-l="Maps">' + g.mapGame.wins[0] + '–' + g.mapGame.wins[1] + '</td></tr>'
+        : '') +
+      (g.flagGame && g.flagGame.awarded
+        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Guess the flag</td>' +
+          '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.flagGame.award[0] + '</td>' +
+          '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.flagGame.award[1] + '</td>' +
+          '<td data-l="Flags">' + g.flagGame.wins[0] + '–' + g.flagGame.wins[1] + '</td></tr>'
         : '') +
       (g.battle && g.battle.done
         ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Battle of the captains</td>' +
@@ -5872,6 +6324,7 @@ function startMini(key){
   if(key === 'auction'){ buildAuction(); go('auctionIntro'); return; }
   if(key === 'saysame'){ go('sayIntro'); return; }
   if(key === 'map'){ go('mapIntro'); return; }
+  if(key === 'flag'){ go('flagIntro'); return; }
   if(key === 'battle'){
     g.battle = buildBattle();
     if(!g.battle){ g.done.battle = true; toast('Not enough spare questions left for the Battle.'); endGame(); return; }
@@ -6017,6 +6470,52 @@ function mapAfterLeg(){
 }
 function awardMap(w){
   const g = G(), s = g.mapGame;
+  if(s.awarded) return;
+  s.awarded = true;
+  if(w === 'split'){
+    const half = Math.floor(g.miniPts / 2);
+    g.teams[0].score += half; g.teams[1].score += half;
+    s.award = [half, half];
+    s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
+    s.verdict.winner = null;
+  } else {
+    g.teams[w].score += g.miniPts;
+    s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
+    s.verdict.winner = w;
+  }
+  s.verdict.needsHost = false;
+  Snd.point();
+}
+
+/* ---------- flags ---------- */
+function flagAfterLeg(){
+  const g = G(), s = g.flagGame;
+  const lead = Math.abs(s.wins[0] - s.wins[1]);
+  const left = Math.max(0, s.base - s.i);
+  if(s.i < s.base && lead <= left){ go('flagQ'); return; }
+  if(lead === 0){
+    if(s.spare && s.spare.length){
+      s.qs.push(s.spare.shift());
+      s.tieLegs++;
+      toast(s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next flag decides it.' : 'Nobody on the board yet — next flag.', 3600);
+      go('flagQ');
+      return;
+    }
+    s.done = true;
+    s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no flags left at this level. Your call.' };
+    go('flagSummary');
+    return;
+  }
+  const winner = s.wins[0] > s.wins[1] ? 0 : 1;
+  s.done = true;
+  s.verdict = { winner, needsHost:false,
+    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker flag' : s.tieLegs + ' tie-breaker flags') + '.'
+       : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' flag' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
+  awardFlag(winner);
+  go('flagSummary');
+}
+function awardFlag(w){
+  const g = G(), s = g.flagGame;
   if(s.awarded) return;
   s.awarded = true;
   if(w === 'split'){
@@ -6218,6 +6717,7 @@ const ACT = {
   pickClearAll(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); repaintPicker(); },
   pickClear(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); render(); },
   pickDone(){ closeModal(); },
+  flagLevel(e){ S.setup.flagLevel = e.dataset.v; Snd.soft(); render(); },
   setNum(e){ S.settings[e.dataset.k] = +e.value; saveSettings(); },
   toggle(e){ const k = e.dataset.k; S.settings[k] = !S.settings[k]; saveSettings(); render(); },
   vol(e){ S.settings.volume = (+e.value) / 100; saveSettings(); Snd.resume(); Snd.vol(S.settings.volume); Snd.soft(); },
@@ -6246,6 +6746,7 @@ const ACT = {
        night that ends early does not burn three of only twenty. The geometry
        starts downloading now, rounds before it is needed. */
     if((g.plan || []).some(p => p.key === 'map')) loadMapGeo().catch(() => {});
+    if((g.plan || []).some(p => p.key === 'flag')) preloadFlags(g.flagGame.qs.concat(g.flagGame.spare.slice(0, 3)));
     Snd.resume();
     go('roundIntro');
   },
@@ -6274,6 +6775,7 @@ const ACT = {
      : S.screen === 'miniQ'  ? 'miniEntry'
      : S.screen === 'sayQ'   ? 'sayJudge'
      : S.screen === 'mapQ'   ? 'mapJudge'
+     : S.screen === 'flagQ'  ? 'flagJudge'
      : S.screen === 'soloQ'  ? 'soloA'      // solo has no steal and no host
      : 'reveal');
   },
@@ -6535,6 +7037,35 @@ const ACT = {
     const g = G();
     if(g.mapGame.verdict && g.mapGame.verdict.needsHost) return toast('Award the mini-game points first.');
     g.done.map = true;
+    if(runNextMini()) return;
+    advanceRound();
+  },
+
+  /* ---- guess the flag ---- */
+  flagStart(){ G().flagGame.i = 0; go('flagQ'); },
+  flagSwap(){
+    const s = G().flagGame;
+    if(!s.spare.length) return toast('No other flag left at this level.');
+    s.qs[s.i] = s.spare.shift();
+    toast('New flag.');
+    go('flagQ');
+  },
+  toFlagJudge(){ Timer.stop(); go('flagJudge'); },
+  flagVerdict(e){
+    const g = G(), s = g.flagGame, q = s.qs[s.i];
+    const w = e.dataset.w === 'tie' || e.dataset.w === 'none' ? e.dataset.w : +e.dataset.w;
+    s.subs.push({ q, winner:w });
+    if(w === 'tie'){ s.wins[0]++; s.wins[1]++; toast('Both got it — a point each.'); }
+    else if(w === 'none'){ toast('Nobody got it.'); }
+    else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes flag ' + (s.i + 1) + '.'); }
+    s.i++;
+    flagAfterLeg();
+  },
+  flagAward(e){ awardFlag(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
+  afterFlag(){
+    const g = G();
+    if(g.flagGame.verdict && g.flagGame.verdict.needsHost) return toast('Award the mini-game points first.');
+    g.done.flag = true;
     if(runNextMini()) return;
     advanceRound();
   },

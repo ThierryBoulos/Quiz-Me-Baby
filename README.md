@@ -1,6 +1,6 @@
 # QUIZ ME BABY
 
-Two files: `index.html` and `maps-geo.js`, side by side. Double-click `index.html`. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.) `maps-geo.js` is the real-world borders that **Guess the Map** draws from; the app only reads it when a game actually has maps on the card, so if it is missing, everything else still works.
+Two files and a folder: `index.html`, `maps-geo.js` and `flags/`, side by side. Double-click `index.html`. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.) `maps-geo.js` is the real-world borders that **Guess the Map** draws from; the app only reads it when a game actually has maps on the card, so if it is missing, everything else still works.
 
 Your host stands on the left of the home screen. He's baked into the HTML as a data URI, so he travels with the file and there is no image folder to forget. (`host-imad.png` is the cut-out on its own, kept only in case you want to reuse it elsewhere — the app does not read it.) He's positioned out of the layout flow, so the logo and the menu stay dead centre on screen whether he's there or not, and he hides himself on windows narrower than 920px rather than squeeze them.
 
@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v2.6 · 07 Oct 2026
+> Built by Thierry Boulos · © 2026 · v2.7 · 08 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'2.6', date:'07 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'2.7', date:'08 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -63,7 +63,7 @@ To carry your data across: **Settings → Export everything (JSON)**, then **Imp
 
 ## Mini-games
 
-Five of them, **all optional, all chosen up front** in Setup — card 04, after rounds, difficulty and themes, since those three decide each other and the mini-games sit on top. There is no end-of-night pop-up asking whether you want the Battle; if it is on the card it is on the schedule, visible in the round tracker from the first pip.
+Six of them, **all optional, all chosen up front** in Setup — card 04, after rounds, difficulty and themes, since those three decide each other and the mini-games sit on top. There is no end-of-night pop-up asking whether you want the Battle; if it is on the card it is on the schedule, visible in the round tracker from the first pip.
 
 Each row carries its own value and slot — *"2 pts · after R3"* — and the card header carries the total. There is no paragraph spelling the arithmetic out: it cost most of a phone screen to say what the badges already say.
 
@@ -205,9 +205,27 @@ Tick up to seven number questions, three auction categories, nine prompts or thr
 
 ---
 
+## Guess the Flag
+
+A flag goes up, **20 seconds**, both teams write down whose it is; the host (or the phone) reveals it and rules — **both right, a point each**. Best of 5; level at the end and another flag comes out until somebody gets one. **Change this flag** swaps it for another at the same level.
+
+Pick the level in Setup when the mini-game is switched on:
+
+| Level | What's in it |
+|---|---|
+| Very easy | 30 of the best-known flags — the USA, Japan, Brazil, Canada |
+| Easy | 45 well-travelled ones — Belgium, Kenya, Chile, Vietnam, Qatar |
+| Medium | 60 — the Baltics, the Caucasus, Central America, East Africa |
+| Hard | the other 57 UN members — Pacific islands, the Caribbean, West Africa |
+| Expert | 47 flags outside the 193 — Vatican, Palestine, Kosovo, Taiwan, Somaliland, England, Scotland, Catalonia, Quebec, Texas, Greenland, Hong Kong, the Soviet Union, East Germany, Yugoslavia, the Ottoman Empire, Zaire, the EU, the UN, NATO… |
+
+Afghanistan is left out on purpose: its flag has been in dispute since 2021.
+
+**The flags are only downloaded when Guess the Flag is on the card.** They live as separate files in `flags/` (one SVG each, true proportions, from Wikimedia Commons — sources and licences in `flags/CREDITS.md`), and a game asks the browser for just the handful it deals, the moment it starts. A night without the flag game downloads none of them. Like the maps, a flag counts as played once it has been on screen, and fresh ones are dealt first.
+
 ## Play without a host
 
-Home has three ways in: **Play with host**, **Play without host** and **Play solo**. Without a host it is the same Setup screen and the same game — same rounds, lifelines and all five mini-games — with the TV doing the hosting:
+Home has three ways in: **Play with host**, **Play without host** and **Play solo**. Without a host it is the same Setup screen and the same game — same rounds, lifelines and all six mini-games — with the TV doing the hosting:
 
 - Everyone reads the question off the screen. The captain answers out loud, then **Lock it in** puts the answer and the fact straight up for everyone, and whoever is holding the phone taps **Yes** or **No**.
 - **No steals.** Wrong or out of time, it goes to the answer and on to the next question.
