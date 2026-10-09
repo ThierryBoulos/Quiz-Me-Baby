@@ -261,7 +261,6 @@ Licences: most are public domain. The others are credited here as their licences
 | `can.svg` | Canary Islands | Expert | [Flag of the Canary Islands.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Canary_Islands.svg) | Public domain |
 | `mq.svg` | Martinique | Expert | [Flag-of-Martinique.svg](https://commons.wikimedia.org/wiki/File:Flag-of-Martinique.svg) | Public domain |
 | `gp.svg` | Guadeloupe | Expert | [Unofficial flag of Guadeloupe (local).svg](https://commons.wikimedia.org/wiki/File:Unofficial_flag_of_Guadeloupe_(local).svg) | Public domain |
-| `cs.svg` | Czechoslovakia | Expert | [Flag of the Czech Republic.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Czech_Republic.svg) | Public domain |
 | `ah.svg` | Austria-Hungary | Expert | [Ensign of Austro-Hungarian civil fleet (1869-1918).svg](https://commons.wikimedia.org/wiki/File:Ensign_of_Austro-Hungarian_civil_fleet_(1869-1918).svg) | Public domain |
 | `svn.svg` | South Vietnam | Expert | [Flag of South Vietnam.svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Vietnam.svg) | Public domain |
 | `za28.svg` | South Africa (1928–1994) | Expert | [Flag of South Africa (1928–1994, dark colors).svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Africa_(1928%E2%80%931994,_dark_colors).svg) | Public domain |

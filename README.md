@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.0 · 09 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.1 · 09 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.0', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.1', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -217,7 +217,7 @@ Pick the level in Setup — a small row of level buttons appears right under Gue
 | Easy | 51 — Belgium, Kenya, Chile, Jamaica, Palestine, England, Scotland, Wales, the Soviet Union |
 | Medium | 60 — the Baltics, the Caucasus, Central America, East Africa |
 | Hard | 60 — the other 57 UN members (Pacific islands, the Caribbean, West Africa), plus Taiwan, Greenland and Hong Kong |
-| Expert | 58 off the beaten track — Kosovo, Somaliland, Catalonia, Cornwall, Texas, Alaska; the Caymans, Falklands, Jersey, Aruba, Easter Island, the Azores, Madeira, the Canaries, Martinique; Czechoslovakia, Austria-Hungary, South Vietnam, East Germany, Yugoslavia, Zaire; the African Union, NATO… |
+| Expert | 57 off the beaten track — Kosovo, Somaliland, Catalonia, Cornwall, Texas, Alaska; the Caymans, Falklands, Jersey, Aruba, Easter Island, the Azores, Madeira, the Canaries, Martinique; Austria-Hungary, South Vietnam, East Germany, Yugoslavia, Zaire; the African Union, NATO… |
 
 Afghanistan is left out on purpose: its flag has been in dispute since 2021.
 
