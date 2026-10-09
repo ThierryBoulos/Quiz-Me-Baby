@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.3 · 09 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.4 · 09 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.3', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.4', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -215,7 +215,7 @@ The filter chips at the top of the picker cover the mini-games too: tap **Guess 
 
 A flag goes up, **15 seconds**, both teams write down whose it is; the host (or the phone) reveals it and rules — **both right, a point each**. Best of 10; level at the end and another flag comes out until somebody gets one. **Change this flag** swaps it for another at the same level.
 
-Pick the level in Setup — a small row of level buttons appears right under Guess the Flag once it is switched on:
+Pick the level in Setup — a small row of level buttons appears right under Guess the Flag once it is switched on. Tick **one or several**: with several, the flags are shared out evenly between them (ten flags over two levels is five and five), in mixed order:
 
 | Level | What's in it |
 |---|---|

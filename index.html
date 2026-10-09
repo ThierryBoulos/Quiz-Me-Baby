@@ -1167,7 +1167,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.3', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.4', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2524,17 +2524,33 @@ const flagOK = (q) => !!q && q.type === 'flag' && FLAG_KEYS.has(q.flag);
 /* Every flag at the level, fresh first and played ones queued behind them —
    the whole level, so "Change this flag" and the tie-breakers can reach every
    one of them (it used to hold back only fifteen). */
-function flagPool(level, skip){
-  const all = S.bank.filter(q => flagOK(q) && q.level === level && !(skip && skip.has(q.id)));
-  return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
+/* One or more levels can be on. Older setups stored a single `flagLevel`. */
+function flagLevelsOf(c){
+  const want = (c && c.flagLevels) || (c && c.flagLevel ? [c.flagLevel] : ['medium']);
+  const ok = Object.keys(FLAG_LEVELS).filter(k => want.indexOf(k) > -1);
+  return ok.length ? ok : ['medium'];
 }
-/* Hand-picks first, in the order ticked; the level's pool fills the rest. */
-function flagDeck(cfg, level){
+/* Several levels share the flags EVENLY: each level is its own queue (fresh
+   first), and the deck takes one from every level in turn — shuffled within
+   each turn, so the easy one is not always first. Ten flags over two levels
+   is five and five; over three, 4-3-3. */
+function flagPool(levels, skip){
+  const queues = levels.map(l => {
+    const all = S.bank.filter(q => flagOK(q) && q.level === l && !(skip && skip.has(q.id)));
+    return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
+  });
+  const out = [];
+  for(let i = 0; queues.some(q => i < q.length); i++)
+    out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
+  return out;
+}
+/* Hand-picks first, in the order ticked; the chosen levels fill the rest. */
+function flagDeck(cfg, levels){
   const picked = ((cfg && cfg.pickFlag) || [])
     .map(id => S.bank.find(q => q.id === id))
-    .filter(q => flagOK(q) && q.level === level)
+    .filter(q => flagOK(q) && levels.indexOf(q.level) > -1)
     .slice(0, FLAG_LEGS);
-  return picked.concat(flagPool(level, new Set(picked.map(q => q.id))));
+  return picked.concat(flagPool(levels, new Set(picked.map(q => q.id))));
 }
 /* Ask for the dealt flags now, so they are in the browser's cache long before
    the mini-game comes round — and only those, never the whole set. */
@@ -3491,8 +3507,8 @@ function buildGame(cfg){
   const mpLegs = mpDeck.slice(0, MAP_LEGS);
   const mpSpare = mpDeck.slice(MAP_LEGS);
 
-  const fgLevel = FLAG_LEVELS[cfg.flagLevel] ? cfg.flagLevel : 'medium';
-  const fgDeck = flagDeck(cfg, fgLevel);
+  const fgLevels = flagLevelsOf(cfg);
+  const fgDeck = flagDeck(cfg, fgLevels);
   const fgLegs = fgDeck.slice(0, FLAG_LEGS);
   const fgSpare = fgDeck.slice(FLAG_LEGS);   // every other flag at the level: swaps and tie-breakers
 
@@ -3526,7 +3542,7 @@ function buildGame(cfg){
     mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
     saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     mapGame:{ qs:mpLegs, spare:mpSpare, base:mpLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
-    flagGame:{ level:fgLevel, qs:fgLegs, spare:fgSpare, base:fgLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+    flagGame:{ levels:fgLevels, qs:fgLegs, spare:fgSpare, base:fgLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     auction:null,
     r:0, seat:0, sub:'intro', miniPlayed:false,
     battle:null,
@@ -3854,7 +3870,7 @@ SCREENS.rules = function(){
 
     ruleBlock('09', 'Guess the Flag', ul([
       li('A flag goes up. <strong>' + FLAG_SECS + ' seconds.</strong> Both teams write down whose it is, at the same time.'),
-      li('Five levels, chosen in Setup: <strong>very easy, easy, medium, hard</strong> (all UN members) and <strong>expert</strong> — flags outside the 193: unrecognised states, nations and regions, former countries, unions and organisations.'),
+      li('Five levels, chosen in Setup — <strong>one or several</strong>, shared out evenly: <strong>very easy, easy, medium, hard</strong> (all UN members) and <strong>expert</strong> — flags outside the 193: unrecognised states, nations and regions, former countries, unions and organisations.'),
       li('Both right — <strong>a point each</strong>. Best of ' + FLAG_LEGS + '; level at the end, and another flag comes out until somebody gets one.')
     ])) +
 
@@ -4163,7 +4179,7 @@ SCREENS.setup = function(){
           '<span class="sw"></span></button>' +
           (k === 'flag' && on
             ? '<div class="flag-lvl" role="group" aria-label="Guess the Flag level">' + Object.keys(FLAG_LEVELS).map(l =>
-                '<button data-act="flagLevel" data-v="' + l + '" aria-pressed="' + ((c.flagLevel || 'medium') === l) + '">' + FLAG_LEVELS[l] + '</button>').join('') + '</div>'
+                '<button data-act="flagLevel" data-v="' + l + '" aria-pressed="' + (flagLevelsOf(c).indexOf(l) > -1) + '">' + FLAG_LEVELS[l] + '</button>').join('') + '</div>'
             : '');
       }).join('') +
       '</div>' +
@@ -4305,7 +4321,7 @@ const MINI_PICKS = {
   map:    { store:'pickMap', type:'map', cap:MAP_LEGS, label:'Guess the Map',
             help:'Maps, in the order you tick them. Anything short is drawn from the bank, and the rest wait as tie-breakers.' },
   flag:   { store:'pickFlag', type:'flag', cap:FLAG_LEGS, label:'Guess the Flag',
-            help:'Flags at tonight&rsquo;s level, in the order you tick them. Anything short is dealt from the level, and the rest wait as swaps and tie-breakers.' }
+            help:'Flags at tonight&rsquo;s level(s), in the order you tick them. Anything short is dealt from the level, and the rest wait as swaps and tie-breakers.' }
 };
 function miniPicksFor(key){ return (S.setup && S.setup[MINI_PICKS[key].store]) || []; }
 function miniPickBlocks(only){
@@ -4319,7 +4335,7 @@ function miniPickBlocks(only){
     const pool = m.type === 'map'
       ? S.bank.filter(mapOK).sort((a, b) => isFresh(b) - isFresh(a))
       : m.type === 'flag'
-      ? S.bank.filter(q => flagOK(q) && q.level === (c.flagLevel || 'medium'))
+      ? S.bank.filter(q => flagOK(q) && flagLevelsOf(c).indexOf(q.level) > -1)
           .sort((a, b) => (isFresh(b) - isFresh(a)) || a.question.localeCompare(b.question))
       : S.bank.filter(q => q.type === m.type && isFresh(q) &&
           (m.type !== 'saysame' || (q.pool || []).length >= 2));
@@ -5484,7 +5500,7 @@ SCREENS.flagIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">Guess<br>the Flag</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + FLAG_LEVELS[s.level] + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + s.levels.map(l => FLAG_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
@@ -6785,9 +6801,14 @@ const ACT = {
   pickClear(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); render(); },
   pickDone(){ closeModal(); },
   stdToggle(){ S.setup.standard = S.setup.standard === false; Snd.soft(); render(); },
+  /* levels toggle on and off — any mix, but never none */
   flagLevel(e){
-    S.setup.flagLevel = e.dataset.v;
-    S.setup.pickFlag = (S.setup.pickFlag || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && q.level === e.dataset.v; });
+    const v = e.dataset.v, cur = flagLevelsOf(S.setup);
+    const next = cur.indexOf(v) > -1 ? cur.filter(x => x !== v) : cur.concat([v]);
+    if(!next.length) return toast('Keep at least one level.');
+    S.setup.flagLevels = Object.keys(FLAG_LEVELS).filter(k => next.indexOf(k) > -1);
+    delete S.setup.flagLevel;
+    S.setup.pickFlag = (S.setup.pickFlag || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && next.indexOf(q.level) > -1; });
     Snd.soft(); render();
   },
   setNum(e){ S.settings[e.dataset.k] = +e.value; saveSettings(); },
