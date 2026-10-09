@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.1 · 09 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.2 · 09 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.1', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.2', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -199,9 +199,11 @@ This also fixed a quieter bug: a theme arriving via **CSV import** used to be re
 
 ## Hand-picking the mini-games
 
-The question picker (Advanced Game Configuration → *Choose questions*) also lists **Closest To Wins**, **The Auction**, **Don't Say the Same as Me** and **Guess the Map** — but only the ones actually on tonight's card. Picking questions for a mini-game you have not selected would be work thrown away, so those blocks simply are not drawn, and turning a mini-game off drops its picks rather than leaving them to reapply silently later.
+The question picker (Advanced Game Configuration → *Choose questions*) also lists **Closest To Wins**, **The Auction**, **Don't Say the Same as Me**, **Guess the Map** and **Guess the Flag** — but only the ones actually on tonight's card. Picking questions for a mini-game you have not selected would be work thrown away, so those blocks simply are not drawn, and turning a mini-game off drops its picks rather than leaving them to reapply silently later.
 
-Tick up to seven number questions, three auction categories, nine prompts or three maps. They lead, **in the order you tick them**, and anything short is dealt from the bank as usual — so you can hand-pick one killer category and let the other two be a surprise.
+Tick up to seven number questions, three auction categories, nine prompts, three maps or ten flags (at tonight's flag level). They lead, **in the order you tick them**, and anything short is dealt from the bank as usual — so you can hand-pick one killer category and let the other two be a surprise.
+
+The filter chips at the top of the picker cover the mini-games too: tap **Guess the Flag** (or any mini-game on the card) to see only that list, or a theme to see only that theme; **Everything** shows the lot.
 
 ---
 
@@ -220,6 +222,8 @@ Pick the level in Setup — a small row of level buttons appears right under Gue
 | Expert | 57 off the beaten track — Kosovo, Somaliland, Catalonia, Cornwall, Texas, Alaska; the Caymans, Falklands, Jersey, Aruba, Easter Island, the Azores, Madeira, the Canaries, Martinique; Austria-Hungary, South Vietnam, East Germany, Yugoslavia, Zaire; the African Union, NATO… |
 
 Afghanistan is left out on purpose: its flag has been in dispute since 2021.
+
+Every flag is also a row in the **question bank** (type *Flag*, with its picture, level and what it is), so you can see them all — and delete any you never want dealt. In **Advanced → Pick tonight's questions** you can hand-pick up to 10 flags at tonight's level, in the order you want them; the rest of the level fills in behind. A game can reach **every** flag at its level through *Change this flag* and the tie-breakers.
 
 **The flags are only downloaded when Guess the Flag is on the card.** They live as separate files in `flags/` (one SVG each, true proportions, from Wikimedia Commons — sources and licences in `flags/CREDITS.md`), and a game asks the browser for just the handful it deals, the moment it starts. A night without the flag game downloads none of them. Like the maps, a flag counts as played once it has been on screen, and fresh ones are dealt first.
 

@@ -787,6 +787,8 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
    square), so it gets a fixed-height box and object-fit, never a stretch. The
    drop-shadows follow the flag's own edge — a white flag (Japan) still reads. */
 .flag-frame{cursor:default;width:100%;justify-self:stretch}
+.pick-flag{width:44px;height:30px;object-fit:contain;flex:none;align-self:center;filter:drop-shadow(0 0 1px rgba(255,255,255,.4))}
+.bank-flag{width:60px;height:40px;object-fit:contain;background:none;filter:drop-shadow(0 0 1px rgba(255,255,255,.4))}
 .flag-frame .flag-img{width:100%;height:clamp(120px,46svh,480px);max-height:none;object-fit:contain;border-radius:0;
   filter:drop-shadow(0 0 1px rgba(255,255,255,.55)) drop-shadow(0 10px 26px rgba(0,0,0,.5))}
 .flag-judge .flag-frame .flag-img{height:clamp(110px,40svh,420px)}
@@ -1163,7 +1165,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.1', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.2', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2236,6 +2238,310 @@ SEED_MAPS.forEach(function(m){
   });
 });
 
+/* ==========================================================================
+   GUESS THE FLAG — the catalogue
+   Every flag is a Wikimedia Commons file at its official proportions, kept in
+   flags/<key>.svg (see flags/CREDITS.md for each source and licence). The files
+   are NOT bundled: the browser fetches only the handful a game deals, and only
+   when Guess the Flag is on the card — nothing is downloaded otherwise.
+
+   [key, name, level, what it is]. Levels:
+     veasy/easy/medium/hard  the UN member states, by how well-known the flag is
+                             (Afghanistan is left out — its flag is in dispute)
+     expert                  everything outside the 193: observer and partly
+                             recognised states, nations and regions, former
+                             countries and flags, international organisations
+   ========================================================================== */
+const FLAG_LEGS = 10;
+const FLAG_SECS = 15;
+const FLAG_LEVELS = { veasy:'Very easy', easy:'Easy', medium:'Medium', hard:'Hard', expert:'Expert' };
+const FLAGS = [["us", "United States", "veasy", ""],
+  ["gb", "United Kingdom", "veasy", ""],
+  ["fr", "France", "veasy", ""],
+  ["de", "Germany", "veasy", ""],
+  ["it", "Italy", "veasy", ""],
+  ["es", "Spain", "veasy", ""],
+  ["jp", "Japan", "veasy", ""],
+  ["cn", "China", "veasy", ""],
+  ["ca", "Canada", "veasy", ""],
+  ["br", "Brazil", "veasy", ""],
+  ["mx", "Mexico", "veasy", ""],
+  ["au", "Australia", "veasy", ""],
+  ["in", "India", "veasy", ""],
+  ["ru", "Russia", "veasy", ""],
+  ["kr", "South Korea", "veasy", ""],
+  ["ar", "Argentina", "veasy", ""],
+  ["ch", "Switzerland", "veasy", ""],
+  ["se", "Sweden", "veasy", ""],
+  ["ie", "Ireland", "veasy", ""],
+  ["pt", "Portugal", "veasy", ""],
+  ["nl", "Netherlands", "veasy", ""],
+  ["gr", "Greece", "veasy", ""],
+  ["tr", "Turkey", "veasy", ""],
+  ["il", "Israel", "veasy", ""],
+  ["sa", "Saudi Arabia", "veasy", ""],
+  ["za", "South Africa", "veasy", ""],
+  ["eg", "Egypt", "veasy", ""],
+  ["dk", "Denmark", "veasy", ""],
+  ["no", "Norway", "veasy", ""],
+  ["va", "Vatican City", "veasy", "Not a UN member — observer state"],
+  ["jm", "Jamaica", "easy", ""],
+  ["be", "Belgium", "easy", ""],
+  ["at", "Austria", "easy", ""],
+  ["pl", "Poland", "easy", ""],
+  ["fi", "Finland", "easy", ""],
+  ["ua", "Ukraine", "easy", ""],
+  ["cz", "Czechia", "easy", ""],
+  ["hr", "Croatia", "easy", ""],
+  ["lb", "Lebanon", "easy", ""],
+  ["ma", "Morocco", "easy", ""],
+  ["tn", "Tunisia", "easy", ""],
+  ["dz", "Algeria", "easy", ""],
+  ["ng", "Nigeria", "easy", ""],
+  ["ke", "Kenya", "easy", ""],
+  ["gh", "Ghana", "easy", ""],
+  ["cm", "Cameroon", "easy", ""],
+  ["sn", "Senegal", "easy", ""],
+  ["co", "Colombia", "easy", ""],
+  ["cl", "Chile", "easy", ""],
+  ["pe", "Peru", "easy", ""],
+  ["uy", "Uruguay", "easy", ""],
+  ["ve", "Venezuela", "easy", ""],
+  ["cu", "Cuba", "easy", ""],
+  ["pk", "Pakistan", "easy", ""],
+  ["bd", "Bangladesh", "easy", ""],
+  ["th", "Thailand", "easy", ""],
+  ["vn", "Vietnam", "easy", ""],
+  ["id", "Indonesia", "easy", ""],
+  ["ph", "Philippines", "easy", ""],
+  ["my", "Malaysia", "easy", ""],
+  ["sg", "Singapore", "easy", ""],
+  ["nz", "New Zealand", "easy", ""],
+  ["ir", "Iran", "easy", ""],
+  ["iq", "Iraq", "easy", ""],
+  ["sy", "Syria", "easy", ""],
+  ["jo", "Jordan", "easy", ""],
+  ["ae", "United Arab Emirates", "easy", ""],
+  ["qa", "Qatar", "easy", ""],
+  ["kw", "Kuwait", "easy", ""],
+  ["hu", "Hungary", "easy", ""],
+  ["ro", "Romania", "easy", ""],
+  ["bg", "Bulgaria", "easy", ""],
+  ["rs", "Serbia", "easy", ""],
+  ["is", "Iceland", "easy", ""],
+  ["lu", "Luxembourg", "easy", ""],
+  ["kp", "North Korea", "easy", ""],
+  ["ps", "Palestine", "easy", "Not a UN member — observer state"],
+  ["eng", "England", "easy", "Nation of the United Kingdom"],
+  ["sct", "Scotland", "easy", "Nation of the United Kingdom"],
+  ["wls", "Wales", "easy", "Nation of the United Kingdom"],
+  ["su", "Soviet Union", "easy", "Former country"],
+  ["sk", "Slovakia", "medium", ""],
+  ["si", "Slovenia", "medium", ""],
+  ["ee", "Estonia", "medium", ""],
+  ["lv", "Latvia", "medium", ""],
+  ["lt", "Lithuania", "medium", ""],
+  ["by", "Belarus", "medium", ""],
+  ["md", "Moldova", "medium", ""],
+  ["ge", "Georgia", "medium", ""],
+  ["am", "Armenia", "medium", ""],
+  ["az", "Azerbaijan", "medium", ""],
+  ["kz", "Kazakhstan", "medium", ""],
+  ["uz", "Uzbekistan", "medium", ""],
+  ["al", "Albania", "medium", ""],
+  ["mk", "North Macedonia", "medium", ""],
+  ["ba", "Bosnia and Herzegovina", "medium", ""],
+  ["me", "Montenegro", "medium", ""],
+  ["cy", "Cyprus", "medium", ""],
+  ["mt", "Malta", "medium", ""],
+  ["mc", "Monaco", "medium", ""],
+  ["li", "Liechtenstein", "medium", ""],
+  ["ad", "Andorra", "medium", ""],
+  ["sm", "San Marino", "medium", ""],
+  ["ec", "Ecuador", "medium", ""],
+  ["bo", "Bolivia", "medium", ""],
+  ["py", "Paraguay", "medium", ""],
+  ["cr", "Costa Rica", "medium", ""],
+  ["pa", "Panama", "medium", ""],
+  ["do", "Dominican Republic", "medium", ""],
+  ["hn", "Honduras", "medium", ""],
+  ["gt", "Guatemala", "medium", ""],
+  ["sv", "El Salvador", "medium", ""],
+  ["ni", "Nicaragua", "medium", ""],
+  ["ht", "Haiti", "medium", ""],
+  ["tt", "Trinidad and Tobago", "medium", ""],
+  ["bs", "The Bahamas", "medium", ""],
+  ["bb", "Barbados", "medium", ""],
+  ["np", "Nepal", "medium", ""],
+  ["lk", "Sri Lanka", "medium", ""],
+  ["mm", "Myanmar", "medium", ""],
+  ["kh", "Cambodia", "medium", ""],
+  ["la", "Laos", "medium", ""],
+  ["mn", "Mongolia", "medium", ""],
+  ["bt", "Bhutan", "medium", ""],
+  ["om", "Oman", "medium", ""],
+  ["ye", "Yemen", "medium", ""],
+  ["bh", "Bahrain", "medium", ""],
+  ["ly", "Libya", "medium", ""],
+  ["sd", "Sudan", "medium", ""],
+  ["et", "Ethiopia", "medium", ""],
+  ["tz", "Tanzania", "medium", ""],
+  ["ug", "Uganda", "medium", ""],
+  ["rw", "Rwanda", "medium", ""],
+  ["cd", "DR Congo", "medium", ""],
+  ["ao", "Angola", "medium", ""],
+  ["mz", "Mozambique", "medium", ""],
+  ["zw", "Zimbabwe", "medium", ""],
+  ["zm", "Zambia", "medium", ""],
+  ["na", "Namibia", "medium", ""],
+  ["bw", "Botswana", "medium", ""],
+  ["mg", "Madagascar", "medium", ""],
+  ["ag", "Antigua and Barbuda", "hard", ""],
+  ["bf", "Burkina Faso", "hard", ""],
+  ["bi", "Burundi", "hard", ""],
+  ["bj", "Benin", "hard", ""],
+  ["bn", "Brunei", "hard", ""],
+  ["bz", "Belize", "hard", ""],
+  ["cf", "Central African Republic", "hard", ""],
+  ["cg", "Republic of the Congo", "hard", ""],
+  ["ci", "Ivory Coast", "hard", ""],
+  ["cv", "Cape Verde", "hard", ""],
+  ["dj", "Djibouti", "hard", ""],
+  ["dm", "Dominica", "hard", ""],
+  ["er", "Eritrea", "hard", ""],
+  ["fj", "Fiji", "hard", ""],
+  ["fm", "Micronesia", "hard", ""],
+  ["ga", "Gabon", "hard", ""],
+  ["gd", "Grenada", "hard", ""],
+  ["gm", "The Gambia", "hard", ""],
+  ["gn", "Guinea", "hard", ""],
+  ["gq", "Equatorial Guinea", "hard", ""],
+  ["gw", "Guinea-Bissau", "hard", ""],
+  ["gy", "Guyana", "hard", ""],
+  ["kg", "Kyrgyzstan", "hard", ""],
+  ["ki", "Kiribati", "hard", ""],
+  ["km", "Comoros", "hard", ""],
+  ["kn", "Saint Kitts and Nevis", "hard", ""],
+  ["lc", "Saint Lucia", "hard", ""],
+  ["lr", "Liberia", "hard", ""],
+  ["ls", "Lesotho", "hard", ""],
+  ["mh", "Marshall Islands", "hard", ""],
+  ["ml", "Mali", "hard", ""],
+  ["mr", "Mauritania", "hard", ""],
+  ["mu", "Mauritius", "hard", ""],
+  ["mv", "Maldives", "hard", ""],
+  ["mw", "Malawi", "hard", ""],
+  ["ne", "Niger", "hard", ""],
+  ["nr", "Nauru", "hard", ""],
+  ["pg", "Papua New Guinea", "hard", ""],
+  ["pw", "Palau", "hard", ""],
+  ["sb", "Solomon Islands", "hard", ""],
+  ["sc", "Seychelles", "hard", ""],
+  ["sl", "Sierra Leone", "hard", ""],
+  ["so", "Somalia", "hard", ""],
+  ["sr", "Suriname", "hard", ""],
+  ["ss", "South Sudan", "hard", ""],
+  ["st", "São Tomé and Príncipe", "hard", ""],
+  ["sz", "Eswatini", "hard", ""],
+  ["td", "Chad", "hard", ""],
+  ["tg", "Togo", "hard", ""],
+  ["tj", "Tajikistan", "hard", ""],
+  ["tl", "Timor-Leste", "hard", ""],
+  ["tm", "Turkmenistan", "hard", ""],
+  ["to", "Tonga", "hard", ""],
+  ["tv", "Tuvalu", "hard", ""],
+  ["vc", "Saint Vincent and the Grenadines", "hard", ""],
+  ["vu", "Vanuatu", "hard", ""],
+  ["ws", "Samoa", "hard", ""],
+  ["tw", "Taiwan", "hard", "Partly recognised state"],
+  ["gl", "Greenland", "hard", "Part of the Kingdom of Denmark"],
+  ["hk", "Hong Kong", "hard", "Special administrative region of China"],
+  ["xk", "Kosovo", "expert", "Partly recognised state"],
+  ["ncy", "Northern Cyprus", "expert", "Recognised only by Turkey"],
+  ["sml", "Somaliland", "expert", "Unrecognised state"],
+  ["eh", "Western Sahara (Sahrawi Republic)", "expert", "Partly recognised state"],
+  ["abk", "Abkhazia", "expert", "Breakaway region"],
+  ["sos", "South Ossetia", "expert", "Breakaway region"],
+  ["pmr", "Transnistria", "expert", "Breakaway region"],
+  ["fo", "Faroe Islands", "expert", "Part of the Kingdom of Denmark"],
+  ["pr", "Puerto Rico", "expert", "US territory"],
+  ["mo", "Macau", "expert", "Special administrative region of China"],
+  ["cat", "Catalonia", "expert", "Region of Spain"],
+  ["eus", "Basque Country", "expert", "Region of Spain"],
+  ["qc", "Quebec", "expert", "Province of Canada"],
+  ["tx", "Texas", "expert", "US state"],
+  ["hi", "Hawaii", "expert", "US state"],
+  ["by-de", "Bavaria", "expert", "State of Germany"],
+  ["sic", "Sicily", "expert", "Region of Italy"],
+  ["cor", "Corsica", "expert", "Region of France"],
+  ["bzh", "Brittany", "expert", "Region of France"],
+  ["krd", "Kurdistan Region", "expert", "Autonomous region of Iraq"],
+  ["ax", "Åland", "expert", "Autonomous region of Finland"],
+  ["bm", "Bermuda", "expert", "British Overseas Territory"],
+  ["gi", "Gibraltar", "expert", "British Overseas Territory"],
+  ["im", "Isle of Man", "expert", "Crown Dependency"],
+  ["yu", "Yugoslavia", "expert", "Former country"],
+  ["dd", "East Germany", "expert", "Former country"],
+  ["zr", "Zaire", "expert", "Former name of DR Congo"],
+  ["ly77", "Libya (1977–2011)", "expert", "Former flag"],
+  ["mm74", "Burma (1974–2010)", "expert", "Former flag"],
+  ["ir64", "Iran (before 1979)", "expert", "Former flag"],
+  ["pru", "Prussia", "expert", "Former kingdom"],
+  ["au-org", "African Union", "expert", "International organisation"],
+  ["arab", "Arab League", "expert", "International organisation"],
+  ["nato", "NATO", "expert", "International organisation"],
+  ["srd", "Sardinia", "expert", "Region of Italy"],
+  ["vlg", "Flanders", "expert", "Region of Belgium"],
+  ["ak", "Alaska", "expert", "US state"],
+  ["kw-uk", "Cornwall", "expert", "County of England"],
+  ["ky", "Cayman Islands", "expert", "British Overseas Territory"],
+  ["fk", "Falkland Islands", "expert", "British Overseas Territory"],
+  ["tc", "Turks and Caicos Islands", "expert", "British Overseas Territory"],
+  ["vg", "British Virgin Islands", "expert", "British Overseas Territory"],
+  ["je", "Jersey", "expert", "Crown Dependency"],
+  ["gg", "Guernsey", "expert", "Crown Dependency"],
+  ["nc", "New Caledonia", "expert", "French territory — one of its two official flags"],
+  ["pf", "French Polynesia", "expert", "French overseas collectivity"],
+  ["aw", "Aruba", "expert", "Part of the Kingdom of the Netherlands"],
+  ["cw", "Curaçao", "expert", "Part of the Kingdom of the Netherlands"],
+  ["rapa", "Easter Island", "expert", "Special territory of Chile"],
+  ["azo", "Azores", "expert", "Autonomous region of Portugal"],
+  ["mad", "Madeira", "expert", "Autonomous region of Portugal"],
+  ["can", "Canary Islands", "expert", "Autonomous community of Spain"],
+  ["mq", "Martinique", "expert", "French overseas region — flag adopted 2023"],
+  ["gp", "Guadeloupe", "expert", "French overseas region — unofficial local flag"],
+  ["ah", "Austria-Hungary", "expert", "Former country — civil ensign, 1869–1918"],
+  ["svn", "South Vietnam", "expert", "Former country, 1955–1975"],
+  ["za28", "South Africa (1928–1994)", "expert", "Former flag"]];
+/* Each flag is a bank row (type 'flag', built in buildSeedBank) so it shows in
+   the bank, can be deleted there, and can be hand-picked in Setup. The bank row
+   carries the words; the picture is found from `flag`, its file key. */
+const FLAG_KEYS = new Set(FLAGS.map(f => f[0]));
+const flagSrc = (q) => 'flags/' + q.flag + '.svg';
+const flagOK = (q) => !!q && q.type === 'flag' && FLAG_KEYS.has(q.flag);
+/* Every flag at the level, fresh first and played ones queued behind them —
+   the whole level, so "Change this flag" and the tie-breakers can reach every
+   one of them (it used to hold back only fifteen). */
+function flagPool(level, skip){
+  const all = S.bank.filter(q => flagOK(q) && q.level === level && !(skip && skip.has(q.id)));
+  return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
+}
+/* Hand-picks first, in the order ticked; the level's pool fills the rest. */
+function flagDeck(cfg, level){
+  const picked = ((cfg && cfg.pickFlag) || [])
+    .map(id => S.bank.find(q => q.id === id))
+    .filter(q => flagOK(q) && q.level === level)
+    .slice(0, FLAG_LEGS);
+  return picked.concat(flagPool(level, new Set(picked.map(q => q.id))));
+}
+/* Ask for the dealt flags now, so they are in the browser's cache long before
+   the mini-game comes round — and only those, never the whole set. */
+function preloadFlags(list){ (list || []).forEach(q => { const i = new Image(); i.src = flagSrc(q); }); }
+function flagImg(q){
+  return '<img class="map-img flag-img" src="' + flagSrc(q) + '" alt="A flag" draggable="false" ' +
+    'onerror="this.outerHTML=\'<div class=&quot;map-wait&quot;>Could not load the flag — check the connection.</div>\'">';
+}
+
 function buildSeedBank(){
   const out = [];
   SEED.forEach(function(r){ out.push({
@@ -2257,6 +2563,10 @@ function buildSeedBank(){
   /* The bank row carries the words; the drawing itself is looked up from
      SEED_MAPS by `map` at render time, so a corrected border or colour never
      needs a bank migration — only the words do. */
+  FLAGS.forEach(function(f){ out.push({
+    id:'flag:' + f[0], question:f[1], answer:f[1], notes:f[3] || '', theme:'',
+    type:'flag', difficulty:'', use_with:'', flag:f[0], level:f[2], src:'seed'
+  }); });
   SEED_MAPS.forEach(function(m){ out.push({
     id:hash('map:' + m.key), question:m.title, answer:m.answer, notes:m.notes, theme:'',
     type:'map', difficulty:'', use_with:'', map:m.key, src:'seed'
@@ -2432,7 +2742,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 19;   // bumped when the built-in bank changes
+const SEED_VERSION = 20;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -2507,7 +2817,7 @@ const RETIRED_SEED = [
       /* pool is an array — a straight !== is always true between two distinct
          array references even when the contents match, which would report a
          false "correction" on every single load. Compare it by content. */
-      const moved = ['question','answer','notes','theme','type','difficulty','use_with','map']
+      const moved = ['question','answer','notes','theme','type','difficulty','use_with','map','flag','level']
         .some(k => q[k] !== s[k])
         || JSON.stringify(q.pool || null) !== JSON.stringify(s.pool || null);
       if(moved){ Object.assign(q, s); fixed++; }
@@ -2908,296 +3218,6 @@ function mapDeck(cfg){
   return picked.concat(mapPool(new Set(picked.map(q => q.id))));
 }
 
-/* ==========================================================================
-   GUESS THE FLAG — the catalogue
-   Every flag is a Wikimedia Commons file at its official proportions, kept in
-   flags/<key>.svg (see flags/CREDITS.md for each source and licence). The files
-   are NOT bundled: the browser fetches only the handful a game deals, and only
-   when Guess the Flag is on the card — nothing is downloaded otherwise.
-
-   [key, name, level, what it is]. Levels:
-     veasy/easy/medium/hard  the UN member states, by how well-known the flag is
-                             (Afghanistan is left out — its flag is in dispute)
-     expert                  everything outside the 193: observer and partly
-                             recognised states, nations and regions, former
-                             countries and flags, international organisations
-   ========================================================================== */
-const FLAG_LEGS = 10;
-const FLAG_SECS = 15;
-const FLAG_LEVELS = { veasy:'Very easy', easy:'Easy', medium:'Medium', hard:'Hard', expert:'Expert' };
-const FLAGS = [["us", "United States", "veasy", ""],
-  ["gb", "United Kingdom", "veasy", ""],
-  ["fr", "France", "veasy", ""],
-  ["de", "Germany", "veasy", ""],
-  ["it", "Italy", "veasy", ""],
-  ["es", "Spain", "veasy", ""],
-  ["jp", "Japan", "veasy", ""],
-  ["cn", "China", "veasy", ""],
-  ["ca", "Canada", "veasy", ""],
-  ["br", "Brazil", "veasy", ""],
-  ["mx", "Mexico", "veasy", ""],
-  ["au", "Australia", "veasy", ""],
-  ["in", "India", "veasy", ""],
-  ["ru", "Russia", "veasy", ""],
-  ["kr", "South Korea", "veasy", ""],
-  ["ar", "Argentina", "veasy", ""],
-  ["ch", "Switzerland", "veasy", ""],
-  ["se", "Sweden", "veasy", ""],
-  ["ie", "Ireland", "veasy", ""],
-  ["pt", "Portugal", "veasy", ""],
-  ["nl", "Netherlands", "veasy", ""],
-  ["gr", "Greece", "veasy", ""],
-  ["tr", "Turkey", "veasy", ""],
-  ["il", "Israel", "veasy", ""],
-  ["sa", "Saudi Arabia", "veasy", ""],
-  ["za", "South Africa", "veasy", ""],
-  ["eg", "Egypt", "veasy", ""],
-  ["dk", "Denmark", "veasy", ""],
-  ["no", "Norway", "veasy", ""],
-  ["va", "Vatican City", "veasy", "Not a UN member — observer state"],
-  ["jm", "Jamaica", "easy", ""],
-  ["be", "Belgium", "easy", ""],
-  ["at", "Austria", "easy", ""],
-  ["pl", "Poland", "easy", ""],
-  ["fi", "Finland", "easy", ""],
-  ["ua", "Ukraine", "easy", ""],
-  ["cz", "Czechia", "easy", ""],
-  ["hr", "Croatia", "easy", ""],
-  ["lb", "Lebanon", "easy", ""],
-  ["ma", "Morocco", "easy", ""],
-  ["tn", "Tunisia", "easy", ""],
-  ["dz", "Algeria", "easy", ""],
-  ["ng", "Nigeria", "easy", ""],
-  ["ke", "Kenya", "easy", ""],
-  ["gh", "Ghana", "easy", ""],
-  ["cm", "Cameroon", "easy", ""],
-  ["sn", "Senegal", "easy", ""],
-  ["co", "Colombia", "easy", ""],
-  ["cl", "Chile", "easy", ""],
-  ["pe", "Peru", "easy", ""],
-  ["uy", "Uruguay", "easy", ""],
-  ["ve", "Venezuela", "easy", ""],
-  ["cu", "Cuba", "easy", ""],
-  ["pk", "Pakistan", "easy", ""],
-  ["bd", "Bangladesh", "easy", ""],
-  ["th", "Thailand", "easy", ""],
-  ["vn", "Vietnam", "easy", ""],
-  ["id", "Indonesia", "easy", ""],
-  ["ph", "Philippines", "easy", ""],
-  ["my", "Malaysia", "easy", ""],
-  ["sg", "Singapore", "easy", ""],
-  ["nz", "New Zealand", "easy", ""],
-  ["ir", "Iran", "easy", ""],
-  ["iq", "Iraq", "easy", ""],
-  ["sy", "Syria", "easy", ""],
-  ["jo", "Jordan", "easy", ""],
-  ["ae", "United Arab Emirates", "easy", ""],
-  ["qa", "Qatar", "easy", ""],
-  ["kw", "Kuwait", "easy", ""],
-  ["hu", "Hungary", "easy", ""],
-  ["ro", "Romania", "easy", ""],
-  ["bg", "Bulgaria", "easy", ""],
-  ["rs", "Serbia", "easy", ""],
-  ["is", "Iceland", "easy", ""],
-  ["lu", "Luxembourg", "easy", ""],
-  ["kp", "North Korea", "easy", ""],
-  ["ps", "Palestine", "easy", "Not a UN member — observer state"],
-  ["eng", "England", "easy", "Nation of the United Kingdom"],
-  ["sct", "Scotland", "easy", "Nation of the United Kingdom"],
-  ["wls", "Wales", "easy", "Nation of the United Kingdom"],
-  ["su", "Soviet Union", "easy", "Former country"],
-  ["sk", "Slovakia", "medium", ""],
-  ["si", "Slovenia", "medium", ""],
-  ["ee", "Estonia", "medium", ""],
-  ["lv", "Latvia", "medium", ""],
-  ["lt", "Lithuania", "medium", ""],
-  ["by", "Belarus", "medium", ""],
-  ["md", "Moldova", "medium", ""],
-  ["ge", "Georgia", "medium", ""],
-  ["am", "Armenia", "medium", ""],
-  ["az", "Azerbaijan", "medium", ""],
-  ["kz", "Kazakhstan", "medium", ""],
-  ["uz", "Uzbekistan", "medium", ""],
-  ["al", "Albania", "medium", ""],
-  ["mk", "North Macedonia", "medium", ""],
-  ["ba", "Bosnia and Herzegovina", "medium", ""],
-  ["me", "Montenegro", "medium", ""],
-  ["cy", "Cyprus", "medium", ""],
-  ["mt", "Malta", "medium", ""],
-  ["mc", "Monaco", "medium", ""],
-  ["li", "Liechtenstein", "medium", ""],
-  ["ad", "Andorra", "medium", ""],
-  ["sm", "San Marino", "medium", ""],
-  ["ec", "Ecuador", "medium", ""],
-  ["bo", "Bolivia", "medium", ""],
-  ["py", "Paraguay", "medium", ""],
-  ["cr", "Costa Rica", "medium", ""],
-  ["pa", "Panama", "medium", ""],
-  ["do", "Dominican Republic", "medium", ""],
-  ["hn", "Honduras", "medium", ""],
-  ["gt", "Guatemala", "medium", ""],
-  ["sv", "El Salvador", "medium", ""],
-  ["ni", "Nicaragua", "medium", ""],
-  ["ht", "Haiti", "medium", ""],
-  ["tt", "Trinidad and Tobago", "medium", ""],
-  ["bs", "The Bahamas", "medium", ""],
-  ["bb", "Barbados", "medium", ""],
-  ["np", "Nepal", "medium", ""],
-  ["lk", "Sri Lanka", "medium", ""],
-  ["mm", "Myanmar", "medium", ""],
-  ["kh", "Cambodia", "medium", ""],
-  ["la", "Laos", "medium", ""],
-  ["mn", "Mongolia", "medium", ""],
-  ["bt", "Bhutan", "medium", ""],
-  ["om", "Oman", "medium", ""],
-  ["ye", "Yemen", "medium", ""],
-  ["bh", "Bahrain", "medium", ""],
-  ["ly", "Libya", "medium", ""],
-  ["sd", "Sudan", "medium", ""],
-  ["et", "Ethiopia", "medium", ""],
-  ["tz", "Tanzania", "medium", ""],
-  ["ug", "Uganda", "medium", ""],
-  ["rw", "Rwanda", "medium", ""],
-  ["cd", "DR Congo", "medium", ""],
-  ["ao", "Angola", "medium", ""],
-  ["mz", "Mozambique", "medium", ""],
-  ["zw", "Zimbabwe", "medium", ""],
-  ["zm", "Zambia", "medium", ""],
-  ["na", "Namibia", "medium", ""],
-  ["bw", "Botswana", "medium", ""],
-  ["mg", "Madagascar", "medium", ""],
-  ["ag", "Antigua and Barbuda", "hard", ""],
-  ["bf", "Burkina Faso", "hard", ""],
-  ["bi", "Burundi", "hard", ""],
-  ["bj", "Benin", "hard", ""],
-  ["bn", "Brunei", "hard", ""],
-  ["bz", "Belize", "hard", ""],
-  ["cf", "Central African Republic", "hard", ""],
-  ["cg", "Republic of the Congo", "hard", ""],
-  ["ci", "Ivory Coast", "hard", ""],
-  ["cv", "Cape Verde", "hard", ""],
-  ["dj", "Djibouti", "hard", ""],
-  ["dm", "Dominica", "hard", ""],
-  ["er", "Eritrea", "hard", ""],
-  ["fj", "Fiji", "hard", ""],
-  ["fm", "Micronesia", "hard", ""],
-  ["ga", "Gabon", "hard", ""],
-  ["gd", "Grenada", "hard", ""],
-  ["gm", "The Gambia", "hard", ""],
-  ["gn", "Guinea", "hard", ""],
-  ["gq", "Equatorial Guinea", "hard", ""],
-  ["gw", "Guinea-Bissau", "hard", ""],
-  ["gy", "Guyana", "hard", ""],
-  ["kg", "Kyrgyzstan", "hard", ""],
-  ["ki", "Kiribati", "hard", ""],
-  ["km", "Comoros", "hard", ""],
-  ["kn", "Saint Kitts and Nevis", "hard", ""],
-  ["lc", "Saint Lucia", "hard", ""],
-  ["lr", "Liberia", "hard", ""],
-  ["ls", "Lesotho", "hard", ""],
-  ["mh", "Marshall Islands", "hard", ""],
-  ["ml", "Mali", "hard", ""],
-  ["mr", "Mauritania", "hard", ""],
-  ["mu", "Mauritius", "hard", ""],
-  ["mv", "Maldives", "hard", ""],
-  ["mw", "Malawi", "hard", ""],
-  ["ne", "Niger", "hard", ""],
-  ["nr", "Nauru", "hard", ""],
-  ["pg", "Papua New Guinea", "hard", ""],
-  ["pw", "Palau", "hard", ""],
-  ["sb", "Solomon Islands", "hard", ""],
-  ["sc", "Seychelles", "hard", ""],
-  ["sl", "Sierra Leone", "hard", ""],
-  ["so", "Somalia", "hard", ""],
-  ["sr", "Suriname", "hard", ""],
-  ["ss", "South Sudan", "hard", ""],
-  ["st", "São Tomé and Príncipe", "hard", ""],
-  ["sz", "Eswatini", "hard", ""],
-  ["td", "Chad", "hard", ""],
-  ["tg", "Togo", "hard", ""],
-  ["tj", "Tajikistan", "hard", ""],
-  ["tl", "Timor-Leste", "hard", ""],
-  ["tm", "Turkmenistan", "hard", ""],
-  ["to", "Tonga", "hard", ""],
-  ["tv", "Tuvalu", "hard", ""],
-  ["vc", "Saint Vincent and the Grenadines", "hard", ""],
-  ["vu", "Vanuatu", "hard", ""],
-  ["ws", "Samoa", "hard", ""],
-  ["tw", "Taiwan", "hard", "Partly recognised state"],
-  ["gl", "Greenland", "hard", "Part of the Kingdom of Denmark"],
-  ["hk", "Hong Kong", "hard", "Special administrative region of China"],
-  ["xk", "Kosovo", "expert", "Partly recognised state"],
-  ["ncy", "Northern Cyprus", "expert", "Recognised only by Turkey"],
-  ["sml", "Somaliland", "expert", "Unrecognised state"],
-  ["eh", "Western Sahara (Sahrawi Republic)", "expert", "Partly recognised state"],
-  ["abk", "Abkhazia", "expert", "Breakaway region"],
-  ["sos", "South Ossetia", "expert", "Breakaway region"],
-  ["pmr", "Transnistria", "expert", "Breakaway region"],
-  ["fo", "Faroe Islands", "expert", "Part of the Kingdom of Denmark"],
-  ["pr", "Puerto Rico", "expert", "US territory"],
-  ["mo", "Macau", "expert", "Special administrative region of China"],
-  ["cat", "Catalonia", "expert", "Region of Spain"],
-  ["eus", "Basque Country", "expert", "Region of Spain"],
-  ["qc", "Quebec", "expert", "Province of Canada"],
-  ["tx", "Texas", "expert", "US state"],
-  ["hi", "Hawaii", "expert", "US state"],
-  ["by-de", "Bavaria", "expert", "State of Germany"],
-  ["sic", "Sicily", "expert", "Region of Italy"],
-  ["cor", "Corsica", "expert", "Region of France"],
-  ["bzh", "Brittany", "expert", "Region of France"],
-  ["krd", "Kurdistan Region", "expert", "Autonomous region of Iraq"],
-  ["ax", "Åland", "expert", "Autonomous region of Finland"],
-  ["bm", "Bermuda", "expert", "British Overseas Territory"],
-  ["gi", "Gibraltar", "expert", "British Overseas Territory"],
-  ["im", "Isle of Man", "expert", "Crown Dependency"],
-  ["yu", "Yugoslavia", "expert", "Former country"],
-  ["dd", "East Germany", "expert", "Former country"],
-  ["zr", "Zaire", "expert", "Former name of DR Congo"],
-  ["ly77", "Libya (1977–2011)", "expert", "Former flag"],
-  ["mm74", "Burma (1974–2010)", "expert", "Former flag"],
-  ["ir64", "Iran (before 1979)", "expert", "Former flag"],
-  ["pru", "Prussia", "expert", "Former kingdom"],
-  ["au-org", "African Union", "expert", "International organisation"],
-  ["arab", "Arab League", "expert", "International organisation"],
-  ["nato", "NATO", "expert", "International organisation"],
-  ["srd", "Sardinia", "expert", "Region of Italy"],
-  ["vlg", "Flanders", "expert", "Region of Belgium"],
-  ["ak", "Alaska", "expert", "US state"],
-  ["kw-uk", "Cornwall", "expert", "County of England"],
-  ["ky", "Cayman Islands", "expert", "British Overseas Territory"],
-  ["fk", "Falkland Islands", "expert", "British Overseas Territory"],
-  ["tc", "Turks and Caicos Islands", "expert", "British Overseas Territory"],
-  ["vg", "British Virgin Islands", "expert", "British Overseas Territory"],
-  ["je", "Jersey", "expert", "Crown Dependency"],
-  ["gg", "Guernsey", "expert", "Crown Dependency"],
-  ["nc", "New Caledonia", "expert", "French territory — one of its two official flags"],
-  ["pf", "French Polynesia", "expert", "French overseas collectivity"],
-  ["aw", "Aruba", "expert", "Part of the Kingdom of the Netherlands"],
-  ["cw", "Curaçao", "expert", "Part of the Kingdom of the Netherlands"],
-  ["rapa", "Easter Island", "expert", "Special territory of Chile"],
-  ["azo", "Azores", "expert", "Autonomous region of Portugal"],
-  ["mad", "Madeira", "expert", "Autonomous region of Portugal"],
-  ["can", "Canary Islands", "expert", "Autonomous community of Spain"],
-  ["mq", "Martinique", "expert", "French overseas region — flag adopted 2023"],
-  ["gp", "Guadeloupe", "expert", "French overseas region — unofficial local flag"],
-  ["ah", "Austria-Hungary", "expert", "Former country — civil ensign, 1869–1918"],
-  ["svn", "South Vietnam", "expert", "Former country, 1955–1975"],
-  ["za28", "South Africa (1928–1994)", "expert", "Former flag"]];
-const flagObj = (f) => ({ id:'flag:' + f[0], key:f[0], name:f[1], level:f[2], kind:f[3] });
-const flagSrc = (q) => 'flags/' + q.key + '.svg';
-/* fresh flags first, played ones queued behind them — same as the maps */
-function flagPool(level, skip){
-  const all = FLAGS.filter(f => f[2] === level).map(flagObj).filter(q => !(skip && skip.has(q.id)));
-  return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
-}
-/* Ask for the dealt flags now, so they are in the browser's cache long before
-   the mini-game comes round — and only those, never the whole set. */
-function preloadFlags(list){ (list || []).forEach(q => { const i = new Image(); i.src = flagSrc(q); }); }
-function flagImg(q){
-  return '<img class="map-img flag-img" src="' + flagSrc(q) + '" alt="A flag" draggable="false" ' +
-    'onerror="this.outerHTML=\'<div class=&quot;map-wait&quot;>Could not load the flag — check the connection.</div>\'">';
-}
-
 /* ---- loading the geometry ---- */
 let mapGeoP = null;
 function loadMapGeo(){
@@ -3470,9 +3490,9 @@ function buildGame(cfg){
   const mpSpare = mpDeck.slice(MAP_LEGS);
 
   const fgLevel = FLAG_LEVELS[cfg.flagLevel] ? cfg.flagLevel : 'medium';
-  const fgDeck = flagPool(fgLevel);
+  const fgDeck = flagDeck(cfg, fgLevel);
   const fgLegs = fgDeck.slice(0, FLAG_LEGS);
-  const fgSpare = fgDeck.slice(FLAG_LEGS, FLAG_LEGS + 15);   // tie-breakers and swaps
+  const fgSpare = fgDeck.slice(FLAG_LEGS);   // every other flag at the level: swaps and tie-breakers
 
   const mk = (t, color) => ({
     name:t.name, captain:t.captain, players:t.players,
@@ -4180,14 +4200,20 @@ function toggleRow(key, label, help){
 /* ---------- the question picker (lives in a modal over the setup screen) ---------- */
 function pickerHTML(){
   const c = S.setup;
-  const filter = c.themes.indexOf(S.tmp.pickFilter) > -1 ? S.tmp.pickFilter : '';
-  const shown = filter ? [filter] : c.themes;
+  /* The filter is a theme, or 'mini:<key>' for one of tonight's mini-games */
+  const minisOn = Object.keys(MINI_PICKS).filter(k => (c.minis || []).indexOf(k) > -1);
+  const pf = S.tmp.pickFilter || '';
+  const miniF = pf.indexOf('mini:') === 0 && minisOn.indexOf(pf.slice(5)) > -1 ? pf.slice(5) : '';
+  const filter = c.themes.indexOf(pf) > -1 ? pf : '';
+  const shown = miniF ? [] : filter ? [filter] : c.themes;
   const done = c.themes.filter(t => picksFor(t).length === 2).length;
 
   const filterChips =
-    '<button class="chip" role="button" aria-pressed="' + (!filter) + '" data-act="pickFilter" data-t="">All themes<span class="ct">' + c.themes.length + '</span></button>' +
+    '<button class="chip" role="button" aria-pressed="' + (!filter && !miniF) + '" data-act="pickFilter" data-t="">Everything<span class="ct">' + c.themes.length + '</span></button>' +
     c.themes.map(t => '<button class="chip" role="button" aria-pressed="' + (filter === t) + '" data-act="pickFilter" data-t="' + esc(t) + '">' +
-      esc(t) + '<span class="ct">' + picksFor(t).length + '/2</span></button>').join('');
+      esc(t) + '<span class="ct">' + picksFor(t).length + '/2</span></button>').join('') +
+    minisOn.map(k => '<button class="chip mini-chip" role="button" aria-pressed="' + (miniF === k) + '" data-act="pickFilter" data-t="mini:' + k + '">' +
+      MINI_PICKS[k].label + '<span class="ct">' + miniPicksFor(k).length + '/' + MINI_PICKS[k].cap + '</span></button>').join('');
 
   const blocks = shown.map(t => {
     const sel = picksFor(t), pool = pickPool(t), full = sel.length >= 2, td = diffFor(t);
@@ -4235,7 +4261,7 @@ function pickerHTML(){
     '<div class="chips pickfilter">' + filterChips + '</div>' +
     '<hr class="hair" style="margin:2px 0 0">' +
     blocks +
-    miniPickBlocks() +
+    (filter ? '' : miniPickBlocks(miniF)) +
     '<hr class="hair">' +
     '<div class="btn-row end">' +
       '<button class="btn ghost" data-act="pickClearAll">Clear everything</button>' +
@@ -4259,12 +4285,14 @@ const MINI_PICKS = {
   saysame:{ store:'pickSaySame', type:'saysame', cap:SAYSAME_LEGS, label:"Don't Say the Same as Me",
             help:'Prompts, in the order you tick them. Anything short is dealt from the bank as usual — vast prompts play first, tight ones last.' },
   map:    { store:'pickMap', type:'map', cap:MAP_LEGS, label:'Guess the Map',
-            help:'Maps, in the order you tick them. Anything short is drawn from the bank, and the rest wait as tie-breakers.' }
+            help:'Maps, in the order you tick them. Anything short is drawn from the bank, and the rest wait as tie-breakers.' },
+  flag:   { store:'pickFlag', type:'flag', cap:FLAG_LEGS, label:'Guess the Flag',
+            help:'Flags at tonight&rsquo;s level, in the order you tick them. Anything short is dealt from the level, and the rest wait as swaps and tie-breakers.' }
 };
 function miniPicksFor(key){ return (S.setup && S.setup[MINI_PICKS[key].store]) || []; }
-function miniPickBlocks(){
+function miniPickBlocks(only){
   const c = S.setup;
-  return Object.keys(MINI_PICKS).filter(k => (c.minis || []).indexOf(k) > -1).map(k => {
+  return Object.keys(MINI_PICKS).filter(k => (c.minis || []).indexOf(k) > -1 && (!only || k === only)).map((k, i) => {
     const m = MINI_PICKS[k];
     const sel = miniPicksFor(k), full = sel.length >= m.cap;
     /* Maps come back once they have all been played (see mapPool), so the
@@ -4272,6 +4300,9 @@ function miniPickBlocks(){
        rather than an empty list on a table that has been through all twenty. */
     const pool = m.type === 'map'
       ? S.bank.filter(mapOK).sort((a, b) => isFresh(b) - isFresh(a))
+      : m.type === 'flag'
+      ? S.bank.filter(q => flagOK(q) && q.level === (c.flagLevel || 'medium'))
+          .sort((a, b) => (isFresh(b) - isFresh(a)) || a.question.localeCompare(b.question))
       : S.bank.filter(q => q.type === m.type && isFresh(q) &&
           (m.type !== 'saysame' || (q.pool || []).length >= 2));
     const rows = pool.map(q => {
@@ -4279,6 +4310,7 @@ function miniPickBlocks(){
       return '<button class="pickrow" role="button" aria-pressed="' + on + '"' + (!on && full ? ' disabled' : '') +
         ' data-act="miniPickToggle" data-k="' + k + '" data-id="' + q.id + '">' +
         '<span class="tick" aria-hidden="true"></span>' +
+        (m.type === 'flag' ? '<img class="pick-flag" src="' + flagSrc(q) + '" alt="" loading="lazy">' : '') +
         '<span class="pq"><span class="qq">' + esc(q.question) + '</span>' +
         /* Closest To Wins is a number — the answer IS the useful line, and its
            note is a source citation nobody picks a question on. The auction has
@@ -4291,10 +4323,11 @@ function miniPickBlocks(){
          /* a map's title IS its answer; the line under it says what kind of map */
          : m.type === 'map' ? '<span class="qa dim">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' : 'Your own map') +
              (isFresh(q) ? '' : ' · played before') + '</span>'
+         : m.type === 'flag' ? '<span class="qa dim">' + esc(q.notes || FLAG_LEVELS[q.level]) + (isFresh(q) ? '' : ' · played before') + '</span>'
          : q.notes ? '<span class="qa dim">' + esc(q.notes) + '</span>' : '') +
         '</span></button>';
     }).join('');
-    return '<hr class="hair">' +
+    return (only && !i ? '' : '<hr class="hair">') +
       '<div class="stack" style="gap:8px">' +
         '<div class="row between">' +
           '<div class="eyebrow gold">' + m.label + '</div>' +
@@ -5458,7 +5491,7 @@ SCREENS.flagQ = function(){
         '<div class="q-theme">Whose flag is this?</div>' +
         timerRing('seconds left') +
         timerControls() +
-        peek({ answer:q.name, notes:q.kind }) +
+        peek({ answer:q.question, notes:q.notes }) +
       '</div>' +
     '</div>' +
     '<div class="row between" style="gap:10px">' +
@@ -5482,8 +5515,8 @@ SCREENS.flagJudge = function(){
       '<div class="map-frame flag-frame">' + flagImg(q) + '</div>' +
       '<div class="map-side">' +
         '<div class="eyebrow gold">The flag of</div>' +
-        '<div class="map-title">' + esc(q.name) + '</div>' +
-        (q.kind ? '<p class="q-note">' + esc(q.kind) + '</p>' : '') +
+        '<div class="map-title">' + esc(q.question) + '</div>' +
+        (q.notes ? '<p class="q-note">' + esc(q.notes) + '</p>' : '') +
       '</div>' +
     '</div>' +
     '<div class="card pad lit stack" style="gap:10px">' +
@@ -5502,7 +5535,7 @@ SCREENS.flagSummary = function(){
   const g = G(), s = g.flagGame;
   const rows = s.subs.map((r, i) =>
     '<tr><td class="rowhead" data-l="Flag">' + (i + 1) + '</td>' +
-    '<td class="qcell" data-l="It was">' + esc(r.q.name) + '</td>' +
+    '<td class="qcell" data-l="It was">' + esc(r.q.question) + '</td>' +
     '<td data-l="Winner">' + (r.winner === 'tie' ? '<span class="badge line">Both</span>'
       : r.winner === 'none' ? '<span class="badge line">Nobody</span>'
       : '<span class="badge ' + (r.winner === 0 ? 'a' : 'b') + '">' + esc(g.teams[r.winner].name) + '</span>') + '</td></tr>'
@@ -5940,7 +5973,9 @@ SCREENS.bank = function(){
      easy/hard/medium), then the question A-Z. */
   const dRank = (q) => { const i = DIFFS.indexOf(q.difficulty); return i < 0 ? DIFFS.length : i; };
   const coll = new Intl.Collator(undefined, { sensitivity:'base', numeric:true });
+  /* flags last — 250-odd of them would otherwise fill the first screen */
   rows.sort((a, b) =>
+    ((a.type === 'flag') - (b.type === 'flag')) ||
     coll.compare(a.theme, b.theme) ||
     dRank(a) - dRank(b) ||
     coll.compare(a.question, b.question));
@@ -5954,14 +5989,16 @@ SCREENS.bank = function(){
        /* a host's own map shows its picture; a built-in one says which map */
        : q.type === 'map' ? (q.img ? '<img class="bank-thumb" src="' + esc(q.img) + '" alt="">'
                                    : '<span class="dim" style="font-weight:500">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' : '') + '</span>')
+       : q.type === 'flag' ? (FLAG_KEYS.has(q.flag) ? '<img class="bank-thumb bank-flag" src="' + flagSrc(q) + '" alt="" loading="lazy">' : '')
        : esc(q.answer)) + '</td>' +
     '<td>' + esc(q.theme) + '</td>' +
     '<td>' + (q.type === 'closest' ? '<span class="badge gold">Closest</span>'
             : q.type === 'auction' ? '<span class="badge a">Auction</span>'
             : q.type === 'saysame' ? '<span class="badge b">Say-Same</span>'
             : q.type === 'map'     ? '<span class="badge ok">Map</span>'
+            : q.type === 'flag'    ? '<span class="badge ok">Flag</span>'
             : '<span class="badge line">Standard</span>') + '</td>' +
-    '<td>' + esc(Cap(q.difficulty)) + '</td>' +
+    '<td>' + (q.type === 'flag' ? esc(FLAG_LEVELS[q.level] || '') : esc(Cap(q.difficulty))) + '</td>' +
     '<td>' + (q.use_with ? '<code style="font-size:11px;color:var(--a)">' + esc(q.use_with) + '</code>' : '<span class="dim">—</span>') + '</td>' +
     '<td>' + (S.used.has(q.id) ? '<span class="badge no">played</span>' : '') + '</td>' +
     '<td><button class="btn sm ghost danger" data-act="qDel" data-id="' + q.id + '">Del</button></td></tr>').join('');
@@ -5995,7 +6032,7 @@ SCREENS.bank = function(){
         /* Cap() alone turns 'saysame' into "Saysame" — a real label, not a
            capitalised value, for the one type whose name is not one word. */
         '<label class="fld" style="flex:1;min-width:120px">Type<select data-act="bf" data-k="type">' +
-          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same'],['map','Map']]
+          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same'],['map','Map'],['flag','Flag']]
             .map(([v, label]) => '<option value="' + esc(v) + '"' + (f.type === v ? ' selected' : '') + '>' + esc(label) + '</option>').join('') +
         '</select></label>' +
         '<label class="fld" style="flex:1;min-width:120px">Difficulty<select data-act="bf" data-k="diff">' + [''].concat(DIFFS).map(t => opt(t, f.diff)).join('') + '</select></label>' +
@@ -6147,7 +6184,7 @@ const csvCell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"
 function bankToCSV(list){
   const head = ['question','answer','notes','theme','type','difficulty','use_question_with','pool'];
   /* maps are pictures — they go in the JSON backup, not a spreadsheet */
-  return head.join(',') + '\n' + list.filter(q => q.type !== 'map').map(q =>
+  return head.join(',') + '\n' + list.filter(q => q.type !== 'map' && q.type !== 'flag').map(q =>
     [q.question, q.answer, q.notes, q.theme, q.type, q.difficulty, q.use_with, (q.pool || []).join(' | ')]
       .map(csvCell).join(',')).join('\n');
 }
@@ -6729,7 +6766,11 @@ const ACT = {
   pickClearAll(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); repaintPicker(); },
   pickClear(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); render(); },
   pickDone(){ closeModal(); },
-  flagLevel(e){ S.setup.flagLevel = e.dataset.v; Snd.soft(); render(); },
+  flagLevel(e){
+    S.setup.flagLevel = e.dataset.v;
+    S.setup.pickFlag = (S.setup.pickFlag || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && q.level === e.dataset.v; });
+    Snd.soft(); render();
+  },
   setNum(e){ S.settings[e.dataset.k] = +e.value; saveSettings(); },
   toggle(e){ const k = e.dataset.k; S.settings[k] = !S.settings[k]; saveSettings(); render(); },
   vol(e){ S.settings.volume = (+e.value) / 100; saveSettings(); Snd.resume(); Snd.vol(S.settings.volume); Snd.soft(); },
