@@ -433,6 +433,8 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .tgl.mini-row{min-height:0;padding:7px 4px;gap:12px;align-items:center}
 .tgl.mini-row .tl{font-size:13.5px;line-height:1.25}
 .tgl.mini-row .help{display:block;font-size:11.5px;line-height:1.35;margin-top:2px}
+.std-tgl{border:0;padding:2px 2px 6px}
+.std-tgl .tl{font-family:var(--font-d);font-weight:400;font-size:clamp(20px,2.6vw,28px);letter-spacing:.01em;line-height:1;text-transform:uppercase}
 .flag-lvl{display:flex;flex-wrap:wrap;gap:4px;margin:-2px 0 6px 4px}
 .flag-lvl button{min-height:26px;padding:0 10px;border-radius:999px;font-size:11.5px;font-weight:600;color:var(--ink-3);border:1px solid var(--line)}
 .flag-lvl button[aria-pressed="true"]{color:#1A1400;background:var(--gold);border-color:var(--gold)}
@@ -1165,7 +1167,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.2', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.3', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3440,7 +3442,7 @@ function planMinis(N, keys){
 }
 
 function buildGame(cfg){
-  const N = cfg.rounds;
+  const N = cfg.standard === false ? 0 : cfg.rounds;   // 0 = mini-games only
   const themes = shuffle(cfg.themes.slice());
   const taken = new Set();
   const rounds = [];
@@ -3509,7 +3511,8 @@ function buildGame(cfg){
                             .filter(k => k !== 'map' || mpLegs.length)
                             .filter(k => k !== 'flag' || fgLegs.length);
   const hasBattle = wanted.indexOf('battle') > -1;
-  const plan = planMinis(rounds.length, inter);
+  /* no standard rounds: the mini-games simply run back to back, from the start */
+  const plan = rounds.length ? planMinis(rounds.length, inter) : inter.map(k => ({ key:k, after:0 }));
   const M = inter.length + (hasBattle ? 1 : 0);
 
   return {
@@ -3566,6 +3569,7 @@ function schedule(){
     out.push({ kind:'std', i });
     (g.plan || []).forEach(p => { if(p.after === i) out.push({ kind:'mini', key:p.key }); });
   }
+  if(!g.rounds.length) (g.plan || []).forEach(p => out.push({ kind:'mini', key:p.key }));
   /* The Battle is on the card from Setup, so it is on the schedule from the
      first pip — it is no longer a surprise the host springs at the end. */
   if(g.hasBattle) out.push({ kind:'mini', key:'battle' });
@@ -3788,7 +3792,7 @@ SCREENS.rules = function(){
       'Each team picks a <strong>captain</strong>. The captain gives the final answer. Nobody else. If the captain has not said it, it has not been said.',
       '<strong>Settle who goes first by chance, not by argument.</strong> Coin toss, rock paper scissors, highest card, closest guess to a number in the host&rsquo;s head — anything, as long as it is luck. <strong>The winner then chooses</strong> whether to be <span class="tn a">Team A</span>, who answers first every round, or <span class="tn b">Team B</span>, who gets the first steal.',
       '<strong>No phones.</strong> Not on the table, not in a lap.',
-      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or any of the six.'
+      'Between 4 and 14 standard rounds, one theme each, plus <strong>however many mini-games the host puts on the card</strong> — none, one, or any of the six. Or switch the standard rounds off in Setup for a night of <strong>nothing but mini-games</strong>, played back to back.'
     ])) +
 
     ruleBlock('02', 'A standard round', ol([
@@ -3897,6 +3901,7 @@ function defaultSetup(){
     themes:shuffle(usableThemes('mixed')).slice(0, rounds),
     difficulty:'mixed',
     themeDiff:{},       // theme -> difficulty, overriding the house setting
+    standard:true,      // false = a mini-games-only night, no standard rounds
     minis:['closest'],  // which mini-games are on tonight's card
     pickClosest:[], pickAuction:[], pickSaySame:[], pickMap:[],   // hand-picked mini-game questions
     picks:{}            // theme -> [questionId, questionId] chosen by hand
@@ -3985,14 +3990,15 @@ SCREENS.setup = function(){
   c.minis = c.minis || [];
   const miniKeys   = Object.keys(MINI_GAMES).filter(k => c.minis.indexOf(k) > -1);
   const miniInter  = INTERLEAVED.filter(k => miniKeys.indexOf(k) > -1);
-  const miniPlan   = planMinis(c.rounds, miniInter);
-  const miniEach   = miniPointValue(c.rounds, miniKeys.length);
+  const stdOn      = c.standard !== false;
+  const miniPlan   = stdOn ? planMinis(c.rounds, miniInter) : miniInter.map(k => ({ key:k, after:-1 }));
+  const miniEach   = miniPointValue(stdOn ? c.rounds : 0, miniKeys.length);
   const miniTotal  = miniEach * miniKeys.length;
 
   /* one theme per round — the counts have to match exactly */
   const themeGap = c.themes.length - c.rounds;
   const themesOK = themeGap === 0;
-  const canStart = enough && themesOK;
+  const canStart = stdOn ? enough && themesOK : miniKeys.length > 0;
 
   /* The count came off the face of the chip. On a phone it was the difference
      between two themes per row and three, and it was answering a question the
@@ -4042,7 +4048,7 @@ SCREENS.setup = function(){
         ? '<div class="warnbox"><strong>' + esc(halfThemes.join(', ')) + '</strong> ' + (halfThemes.length > 1 ? 'have' : 'has') + ' only one question ticked. A round needs two — tick a second one or clear it, otherwise that theme falls back to a random pair.</div>'
         : '') +
       '<div class="btn-row">' +
-        '<button class="btn gold" data-act="pickOpen"' + (c.themes.length ? '' : ' disabled') + '>Choose questions</button>' +
+        '<button class="btn gold" data-act="pickOpen"' + ((stdOn && c.themes.length) || miniKeys.some(k => MINI_PICKS[k]) ? '' : ' disabled') + '>Choose questions</button>' +
         (setThemes.length || halfThemes.length ? '<button class="btn ghost" data-act="pickClear">Clear all picks</button>' : '') +
       '</div>' +
       (setThemes.length
@@ -4089,7 +4095,7 @@ SCREENS.setup = function(){
       '<p class="help">Timers live in <strong>Settings</strong> — change them there and they hold for every game.</p>' +
     '</div>';
 
-    return '<div class="stack lg">' + pickBlock + '<hr class="hair">' + diffBlock + '<hr class="hair">' + rulesBlock + '</div>';
+    return '<div class="stack lg">' + pickBlock + '<hr class="hair">' + (stdOn ? diffBlock + '<hr class="hair">' : '') + rulesBlock + '</div>';
   }
 
   return '' +
@@ -4104,6 +4110,14 @@ SCREENS.setup = function(){
       teamSetupCard('b', c.teamB) +
     '</div>' +
 
+    /* Two main boxes. The first is the standard rounds — and it can be
+       switched off entirely for a night of nothing but mini-games. */
+    '<div class="card pad stack std-box">' +
+      '<button class="tgl std-tgl" data-act="stdToggle" aria-pressed="' + stdOn + '">' +
+        '<span><span class="tl">Standard rounds</span><br><span class="help">' +
+          (stdOn ? 'Question rounds, one theme each, with steals and lifelines.' : 'Off — tonight is mini-games only.') +
+        '</span></span><span class="sw"></span></button>' +
+      (stdOn ? (
     '<div class="card pad lit stack">' +
       '<div class="sec-head"><div class="eyebrow gold">01</div><h3 class="display">How many standard rounds?</h3></div>' +
       '<div class="seg" style="flex-wrap:wrap">' + roundBtns.join('') + '</div>' +
@@ -4126,6 +4140,8 @@ SCREENS.setup = function(){
           ? themeGap + ' theme' + (themeGap > 1 ? 's' : '') + ' too many.</strong> You have ' + c.rounds + ' rounds and ' + c.themes.length + ' themes — drop ' + themeGap + '.'
           : (-themeGap) + ' more theme' + (themeGap < -1 ? 's' : '') + ' needed.</strong> You have ' + c.rounds + ' rounds and only ' + c.themes.length + ' theme' + (c.themes.length === 1 ? '' : 's') + ' — add ' + (-themeGap) + ', or drop the round count to ' + c.themes.length + '.') +
         '</div>') +
+    '</div>'
+      ) : '') +
     '</div>' +
 
     '<div class="card pad stack">' +
@@ -4138,7 +4154,7 @@ SCREENS.setup = function(){
         const m = MINI_GAMES[k], on = c.minis.indexOf(k) > -1;
         const slot = k === 'battle' ? 'last'
           : (() => { const p = miniPlan.find(x => x.key === k);
-                     return p ? 'after R' + (p.after + 1) : ''; })();
+                     return !p ? '' : stdOn ? 'after R' + (p.after + 1) : ['1st','2nd','3rd','4th','5th'][miniPlan.indexOf(p)] || ''; })();
         return '<button class="tgl mini-row" data-act="miniToggle" data-k="' + k + '" aria-pressed="' + on + '">' +
           '<span><span class="tl">' + m.name + '</span>' +
           '<span class="help">' + m.blurb +
@@ -4164,9 +4180,10 @@ SCREENS.setup = function(){
       (adv ? '<hr class="hair">' + advBody() : '') +
     '</div>' +
 
-    (enough ? ''
+    (!stdOn ? (miniKeys.length ? '' : '<div class="warnbox"><strong>Nothing to play.</strong> Standard rounds are off — switch on at least one mini-game.</div>')
+     : enough ? ''
       : '<div class="warnbox"><strong>Not enough questions.</strong> Only ' + cap.rounds + ' matched pair(s) available for ' + c.rounds + ' rounds. Add themes, change difficulty, lower the round count, or turn off &ldquo;never reuse&rdquo; in Settings.</div>') +
-    (enoughMini ? '' : '<div class="warnbox">Only ' + cap.closest + ' of 7 Closest To Wins questions available — that leg will be shortened to ' + cap.closest + ' leg(s).</div>') +
+    (enoughMini || miniKeys.indexOf('closest') < 0 ? '' : '<div class="warnbox">Only ' + cap.closest + ' of 7 Closest To Wins questions available — that leg will be shortened to ' + cap.closest + ' leg(s).</div>') +
 
     '<div class="btn-row end">' +
       '<button class="btn ghost" data-act="go" data-to="home">Cancel</button>' +
@@ -4204,13 +4221,14 @@ function pickerHTML(){
   const minisOn = Object.keys(MINI_PICKS).filter(k => (c.minis || []).indexOf(k) > -1);
   const pf = S.tmp.pickFilter || '';
   const miniF = pf.indexOf('mini:') === 0 && minisOn.indexOf(pf.slice(5)) > -1 ? pf.slice(5) : '';
-  const filter = c.themes.indexOf(pf) > -1 ? pf : '';
-  const shown = miniF ? [] : filter ? [filter] : c.themes;
+  const themesP = c.standard === false ? [] : c.themes;
+  const filter = themesP.indexOf(pf) > -1 ? pf : '';
+  const shown = miniF ? [] : filter ? [filter] : themesP;
   const done = c.themes.filter(t => picksFor(t).length === 2).length;
 
   const filterChips =
-    '<button class="chip" role="button" aria-pressed="' + (!filter && !miniF) + '" data-act="pickFilter" data-t="">Everything<span class="ct">' + c.themes.length + '</span></button>' +
-    c.themes.map(t => '<button class="chip" role="button" aria-pressed="' + (filter === t) + '" data-act="pickFilter" data-t="' + esc(t) + '">' +
+    '<button class="chip" role="button" aria-pressed="' + (!filter && !miniF) + '" data-act="pickFilter" data-t="">Everything<span class="ct">' + themesP.length + '</span></button>' +
+    themesP.map(t => '<button class="chip" role="button" aria-pressed="' + (filter === t) + '" data-act="pickFilter" data-t="' + esc(t) + '">' +
       esc(t) + '<span class="ct">' + picksFor(t).length + '/2</span></button>').join('') +
     minisOn.map(k => '<button class="chip mini-chip" role="button" aria-pressed="' + (miniF === k) + '" data-act="pickFilter" data-t="mini:' + k + '">' +
       MINI_PICKS[k].label + '<span class="ct">' + miniPicksFor(k).length + '/' + MINI_PICKS[k].cap + '</span></button>').join('');
@@ -6766,6 +6784,7 @@ const ACT = {
   pickClearAll(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); repaintPicker(); },
   pickClear(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); render(); },
   pickDone(){ closeModal(); },
+  stdToggle(){ S.setup.standard = S.setup.standard === false; Snd.soft(); render(); },
   flagLevel(e){
     S.setup.flagLevel = e.dataset.v;
     S.setup.pickFlag = (S.setup.pickFlag || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && q.level === e.dataset.v; });
@@ -6779,12 +6798,15 @@ const ACT = {
 
   startGame(){
     const c = S.setup;
-    if(!c.themes.length) return toast('Pick at least one theme.');
+    const std = c.standard !== false;
+    if(std && !c.themes.length) return toast('Pick at least one theme.');
+    if(!std && !(c.minis || []).length) return toast('Standard rounds are off — switch on at least one mini-game.');
     c.teamA.name = (c.teamA.name || '').trim() || 'Team A';
     c.teamB.name = (c.teamB.name || '').trim() || 'Team B';
     const g = buildGame(c);
-    if(g.rounds.length < c.rounds) toast('Only enough questions for ' + g.rounds.length + ' rounds — shortened.', 4500);
-    if(!g.rounds.length) return toast('No usable questions. Widen the themes or difficulty.');
+    if(std && g.rounds.length < c.rounds) toast('Only enough questions for ' + g.rounds.length + ' rounds — shortened.', 4500);
+    if(std && !g.rounds.length) return toast('No usable questions. Widen the themes or difficulty.');
+    if(!std && !g.plan.length && !g.hasBattle) return toast('None of those mini-games can run on this bank.');
     S.game = g;
     g.hostless = !!c.hostless;
     g.rounds.forEach(r => r.q.forEach(markUsed));
@@ -6801,7 +6823,8 @@ const ACT = {
     if((g.plan || []).some(p => p.key === 'map')) loadMapGeo().catch(() => {});
     if((g.plan || []).some(p => p.key === 'flag')) preloadFlags(g.flagGame.qs.concat(g.flagGame.spare.slice(0, 3)));
     Snd.resume();
-    go('roundIntro');
+    if(g.rounds.length) go('roundIntro');
+    else if(!runNextMini()) advanceRound();     // mini-games only: straight in (or straight to the Battle)
   },
 
   /* ---- round ---- */

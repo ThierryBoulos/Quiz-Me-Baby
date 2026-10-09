@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.2 · 09 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.3 · 09 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.2', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.3', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -196,6 +196,10 @@ They are **derived from the bank**, not kept in a list of their own: a custom th
 Remember a theme needs **two questions at the same difficulty** to field a round — one for each team — so a custom theme with a single question will show up dimmed in the setup wall until you add its partner.
 
 This also fixed a quieter bug: a theme arriving via **CSV import** used to be registered only for that session and forgotten on the next reload, leaving the imported questions unreachable from the setup screen. Themes now reconcile against the bank on every load and every bank write.
+
+## Mini-games only
+
+Setup has two main boxes: **Standard rounds** (rounds, difficulty, themes) and **Mini-games**. The Standard rounds box has a switch — turn it off and tonight is mini-games only: they run back to back from the first screen, in the order listed, with the Battle (if it is on) as the closer and sudden death if it ends level. You need at least one mini-game switched on to start.
 
 ## Hand-picking the mini-games
 
