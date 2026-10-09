@@ -245,3 +245,23 @@ Licences: most are public domain. The others are credited here as their licences
 | `vlg.svg` | Flanders | Expert | [Flag of Flanders.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Flanders.svg) | CC0 — by Tom Lemmens |
 | `ak.svg` | Alaska | Expert | [Flag of Alaska.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Alaska.svg) | Public domain |
 | `kw-uk.svg` | Cornwall | Expert | [Flag of Cornwall.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Cornwall.svg) | Public domain |
+| `ky.svg` | Cayman Islands | Expert | [Flag of the Cayman Islands.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Cayman_Islands.svg) | Public domain |
+| `fk.svg` | Falkland Islands | Expert | [Flag of the Falkland Islands.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Falkland_Islands.svg) | Public domain |
+| `tc.svg` | Turks and Caicos Islands | Expert | [Flag of the Turks and Caicos Islands.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Turks_and_Caicos_Islands.svg) | Public domain |
+| `vg.svg` | British Virgin Islands | Expert | [Flag of the British Virgin Islands.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_British_Virgin_Islands.svg) | Public domain |
+| `je.svg` | Jersey | Expert | [Flag of Jersey.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Jersey.svg) | Public domain |
+| `gg.svg` | Guernsey | Expert | [Flag of Guernsey.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Guernsey.svg) | CC0 |
+| `nc.svg` | New Caledonia | Expert | [Flag of FLNKS.svg](https://commons.wikimedia.org/wiki/File:Flag_of_FLNKS.svg) | Public domain |
+| `pf.svg` | French Polynesia | Expert | [Flag of French Polynesia.svg](https://commons.wikimedia.org/wiki/File:Flag_of_French_Polynesia.svg) | CC0 |
+| `aw.svg` | Aruba | Expert | [Flag of Aruba.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Aruba.svg) | Public domain |
+| `cw.svg` | Curaçao | Expert | [Flag of Curaçao.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Cura%C3%A7ao.svg) | Public domain |
+| `rapa.svg` | Easter Island | Expert | [Flag of Rapa Nui, Chile.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Rapa_Nui,_Chile.svg) | Public domain |
+| `azo.svg` | Azores | Expert | [Flag of the Azores.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Azores.svg) | Public domain |
+| `mad.svg` | Madeira | Expert | [Flag of Madeira.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Madeira.svg) | CC BY-SA 1.0 — by Original: Brian Boru Vector: Nuno Tavares |
+| `can.svg` | Canary Islands | Expert | [Flag of the Canary Islands.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Canary_Islands.svg) | Public domain |
+| `mq.svg` | Martinique | Expert | [Flag-of-Martinique.svg](https://commons.wikimedia.org/wiki/File:Flag-of-Martinique.svg) | Public domain |
+| `gp.svg` | Guadeloupe | Expert | [Unofficial flag of Guadeloupe (local).svg](https://commons.wikimedia.org/wiki/File:Unofficial_flag_of_Guadeloupe_(local).svg) | Public domain |
+| `cs.svg` | Czechoslovakia | Expert | [Flag of the Czech Republic.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Czech_Republic.svg) | Public domain |
+| `ah.svg` | Austria-Hungary | Expert | [Ensign of Austro-Hungarian civil fleet (1869-1918).svg](https://commons.wikimedia.org/wiki/File:Ensign_of_Austro-Hungarian_civil_fleet_(1869-1918).svg) | Public domain |
+| `svn.svg` | South Vietnam | Expert | [Flag of South Vietnam.svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Vietnam.svg) | Public domain |
+| `za28.svg` | South Africa (1928–1994) | Expert | [Flag of South Africa (1928–1994, dark colors).svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Africa_(1928%E2%80%931994,_dark_colors).svg) | Public domain |

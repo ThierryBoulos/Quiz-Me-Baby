@@ -1163,7 +1163,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'2.9', date:'08 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.0', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3163,7 +3163,27 @@ const FLAGS = [["us", "United States", "veasy", ""],
   ["srd", "Sardinia", "expert", "Region of Italy"],
   ["vlg", "Flanders", "expert", "Region of Belgium"],
   ["ak", "Alaska", "expert", "US state"],
-  ["kw-uk", "Cornwall", "expert", "County of England"]];
+  ["kw-uk", "Cornwall", "expert", "County of England"],
+  ["ky", "Cayman Islands", "expert", "British Overseas Territory"],
+  ["fk", "Falkland Islands", "expert", "British Overseas Territory"],
+  ["tc", "Turks and Caicos Islands", "expert", "British Overseas Territory"],
+  ["vg", "British Virgin Islands", "expert", "British Overseas Territory"],
+  ["je", "Jersey", "expert", "Crown Dependency"],
+  ["gg", "Guernsey", "expert", "Crown Dependency"],
+  ["nc", "New Caledonia", "expert", "French territory — one of its two official flags"],
+  ["pf", "French Polynesia", "expert", "French overseas collectivity"],
+  ["aw", "Aruba", "expert", "Part of the Kingdom of the Netherlands"],
+  ["cw", "Curaçao", "expert", "Part of the Kingdom of the Netherlands"],
+  ["rapa", "Easter Island", "expert", "Special territory of Chile"],
+  ["azo", "Azores", "expert", "Autonomous region of Portugal"],
+  ["mad", "Madeira", "expert", "Autonomous region of Portugal"],
+  ["can", "Canary Islands", "expert", "Autonomous community of Spain"],
+  ["mq", "Martinique", "expert", "French overseas region — flag adopted 2023"],
+  ["gp", "Guadeloupe", "expert", "French overseas region — unofficial local flag"],
+  ["cs", "Czechoslovakia", "expert", "Former country — the same flag Czechia flies today"],
+  ["ah", "Austria-Hungary", "expert", "Former country — civil ensign, 1869–1918"],
+  ["svn", "South Vietnam", "expert", "Former country, 1955–1975"],
+  ["za28", "South Africa (1928–1994)", "expert", "Former flag"]];
 const flagObj = (f) => ({ id:'flag:' + f[0], key:f[0], name:f[1], level:f[2], kind:f[3] });
 const flagSrc = (q) => 'flags/' + q.key + '.svg';
 /* fresh flags first, played ones queued behind them — same as the maps */
