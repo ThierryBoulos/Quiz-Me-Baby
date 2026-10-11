@@ -840,7 +840,6 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .dish-buzz .btn.out{opacity:.35;text-decoration:line-through}
 .flag-lvl .lvl-tag{align-self:center;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);flex:none;width:84px}
 .dish-judge .q-note{text-align:left;margin:0;max-width:none;font-size:15px}
-.dish-judge .help a{color:var(--gold)}
 @media(max-width:760px){
   .ing{padding-inline:12px}
   .ing-q{white-space:normal;max-width:45%}
@@ -1244,7 +1243,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.9', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.10', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2819,7 +2818,7 @@ const DEFAULT_SETTINGS = {
   tQuestion:60, tSteal:30, tFriend:30, tMini:90,
   sound:true, volume:0.75, tick:true,
   noRepeat:true, alternateFirst:false,
-  hostOn:true, hostVoice:true, hostVoiceName:'', hostRate:1.05
+  hostOn:true
 };
 
 /* ==========================================================================
@@ -6054,17 +6053,13 @@ AFTER.dishQ = function(){
 
 SCREENS.dishReveal = function(){
   const g = G(), s = g.dishGame, r = s.subs[s.subs.length - 1], q = r.q;
-  let host = '';
-  try { host = new URL(q.source).hostname.replace(/^www\./, ''); } catch(e){}
   return '<div class="compact map-judge dish-judge">' +
     dishBand() +
     '<div class="map-stage reveal">' +
       '<div class="dish-frame">' + dishList(q, q.ings.length) + '</div>' +
       '<div class="map-side">' +
-        '<div class="eyebrow gold">It was ' + (dishKind(q) === 'Cocktail' ? 'a cocktail' : 'a dish') + '</div>' +
         '<div class="map-title">' + esc(q.question) + '</div>' +
         '<p class="q-note">' + (r.winner === 'none' ? 'Nobody got it.' : teamName(r.winner) + ' got it.') + '</p>' +
-        (host ? '<p class="help">Recipe: <a href="' + esc(q.source) + '" target="_blank" rel="noopener">' + esc(host) + '</a></p>' : '') +
       '</div>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="dishNext">Next</button></div>' +
@@ -6832,20 +6827,7 @@ SCREENS.settings = function(){
 
     '<div class="card pad stack">' +
       '<div class="eyebrow">Your host — Imad</div>' +
-      toggleRow('hostOn', 'Imad talks', 'He comments on the game in a speech bubble — round intros, right and wrong answers, steals, lead changes, the final.') +
-      (S.settings.hostOn ? toggleRow('hostVoice', 'Out loud', 'Read with this device&rsquo;s own voice. Phones and Macs sound best; play from the one with the nicest voice.') : '') +
-      (S.settings.hostOn && S.settings.hostVoice && Host.ok()
-        ? '<div class="grid2">' +
-            '<label class="fld">Voice<select data-act="hostVoicePick">' +
-              '<option value="">Best available</option>' +
-              Host.voices.map(v => '<option value="' + esc(v.name) + '"' + (S.settings.hostVoiceName === v.name ? ' selected' : '') + '>' + esc(v.name) + ' (' + esc(v.lang) + ')</option>').join('') +
-            '</select></label>' +
-            '<label class="fld">Speed<select data-act="setNum" data-k="hostRate">' +
-              [[0.9, 'Relaxed'], [1, 'Normal'], [1.05, 'Lively'], [1.15, 'Fast'], [1.25, 'Very fast']].map(o =>
-                '<option value="' + o[0] + '"' + (S.settings.hostRate === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') +
-            '</select></label>' +
-          '</div>'
-        : S.settings.hostOn && S.settings.hostVoice ? '<p class="help">This browser has no built-in voice — Imad will stick to the speech bubble.</p>' : '') +
+      toggleRow('hostOn', 'Imad comments', 'He comments on the game in a speech bubble — round intros, right and wrong answers, steals, lead changes, the final.') +
       (S.settings.hostOn ? '<div class="btn-row"><button class="btn sm" data-act="hostTest">Test Imad</button></div>' : '') +
     '</div>' +
 
@@ -7142,8 +7124,7 @@ function dishAfterLeg(){
   const winner = s.wins[0] > s.wins[1] ? 0 : 1;
   s.done = true;
   s.verdict = { winner, needsHost:false,
-    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker' : s.tieLegs + ' tie-breakers') + '.'
-       : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' to spare.' : '' };
+    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker' : s.tieLegs + ' tie-breakers') + '.' : '' };
   awardDish(winner);
   go('dishSummary');
 }
@@ -7270,7 +7251,7 @@ function finalize(){
    ==========================================================================
    He picks one line per moment, never the same one twice in a night (until a
    moment's lines run out), fills in the real names and numbers, shows it in a
-   speech bubble and reads it with the device's own voice. Lines said in the
+   speech bubble — text only; the device voices were too robotic. Lines said in the
    same instant — "Correct!" and then "LEAD CHANGE!" — are joined into one, so
    the second never cuts the first off.
 
@@ -7413,23 +7394,7 @@ const HOST_LINES = {
 };
 
 const Host = {
-  voices:[], q:[], t:null, flushT:null,
-  ok(){ return 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined'; },
-  loadVoices(){
-    if(!this.ok()) return;
-    const all = speechSynthesis.getVoices() || [];
-    this.voices = all.filter(v => /^en/i.test(v.lang));
-  },
-  /* the saved choice, else the warmest English voice the device is known to carry */
-  voice(){
-    const vs = this.voices;
-    if(!vs.length) return null;
-    const mine = vs.find(v => v.name === S.settings.hostVoiceName);
-    if(mine) return mine;
-    const pref = [/^Daniel/, /Google UK English Male/, /^Arthur/, /^Oliver/, /^Aaron/, /^Alex$/, /^Samantha/, /Google US English/, /Microsoft (Guy|Ryan|Andrew)/];
-    for(const re of pref){ const v = vs.find(x => re.test(x.name)); if(v) return v; }
-    return vs.find(v => /en-GB/i.test(v.lang)) || vs[0];
-  },
+  q:[], t:null, flushT:null,
   vars(extra){
     const g = G(), o = Object.assign({}, extra || {});
     if(!g) return o;
@@ -7470,7 +7435,6 @@ const Host = {
     const text = this.q.join(' '); this.q = [];
     if(!text) return;
     this.bubble(text);
-    this.speak(text);
   },
   bubble(text){
     let b = el('hostBubble');
@@ -7484,26 +7448,8 @@ const Host = {
     clearTimeout(this.t);
     this.t = setTimeout(() => b.classList.remove('on'), 2800 + text.length * 60);
   },
-  speak(text){
-    if(!S.settings.hostVoice || !this.ok()) return;
-    if(!this.voices.length) this.loadVoices();
-    /* Shouty capitals get spelled out letter by letter by some voices
-       ("Q-U-I-Z"), so the spoken copy is lower-cased; the bubble keeps them. */
-    const said = text.replace(/\b[A-Z]{2,}[A-Z']*\b/g, w => w.toLowerCase()).replace(/…/g, ', ');
-    try{
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(said);
-      const v = this.voice();
-      if(v){ u.voice = v; u.lang = v.lang; }
-      u.rate = S.settings.hostRate || 1.05;
-      u.pitch = 1.05;
-      u.volume = Math.min(1, (S.settings.volume || 0.75) + 0.25);
-      speechSynthesis.speak(u);
-    }catch(e){}
-  },
   hush(){
     this.q = []; clearTimeout(this.flushT);
-    try{ if(this.ok()) speechSynthesis.cancel(); }catch(e){}
     const b = el('hostBubble'); if(b) b.classList.remove('on');
   },
   test(){
@@ -7514,8 +7460,6 @@ const Host = {
     this.q.push(l); this.flush();
   }
 };
-Host.loadVoices();
-if(Host.ok()) speechSynthesis.onvoiceschanged = () => { Host.loadVoices(); if(S.screen === 'settings') render(); };
 
 /* the scores count up, and a change of leader gets a banner and a line */
 function hudFx(){
@@ -7770,7 +7714,6 @@ const ACT = {
     Snd.soft(); render();
   },
   setNum(e){ S.settings[e.dataset.k] = +e.value; saveSettings(); },
-  hostVoicePick(e){ S.settings.hostVoiceName = e.value; saveSettings(); Host.test(); },
   hostTest(){ Host.test(); },
   toggle(e){ const k = e.dataset.k; S.settings[k] = !S.settings[k]; saveSettings(); render(); },
   vol(e){ S.settings.volume = (+e.value) / 100; saveSettings(); Snd.resume(); Snd.vol(S.settings.volume); Snd.soft(); },
@@ -8561,7 +8504,7 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   const t = e.target.closest('[data-act]');
   if(!t) return;
-  if(['setNum','bf','qType','qThemeSel','qMapImg','hostVoicePick'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
+  if(['setNum','bf','qType','qThemeSel','qMapImg'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
 });
 el('modal').addEventListener('click', e => {
   if(e.target.id !== 'modal') return;

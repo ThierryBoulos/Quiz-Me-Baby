@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.9 · 11 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.10 · 11 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.9', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.10', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -241,7 +241,7 @@ Every flag is also a row in the **question bank** (type *Flag*, with its picture
 
 ## Imad, your host
 
-Imad talks now. At every big moment he pops up in a speech bubble and **says it out loud** with the device's own voice:
+Imad comments on the game now. At every big moment he pops up in a speech bubble — text only (a spoken voice was tried and dropped: the device voices sound too robotic):
 
 - **The night:** the welcome ("Are you ready to QUIZ ME BABYYYY?!"), each round's theme, and the final.
 - **Answers:** right and wrong ones, time running out, steals and missed steals, and lifelines.
@@ -258,7 +258,7 @@ The show around him:
 - The screen shakes on a stolen point.
 - Confetti falls when a mini-game is won.
 
-**Settings → Your host — Imad**: switch him off, keep him to the bubble only, or pick the voice and speed. The voice is whatever the device carries — iPhones and Macs sound best, so play from the one with the nicest voice. Anyone sensitive to motion gets the animations switched off by their device's reduce-motion setting.
+**Settings → Your host — Imad**: switch him off, or press *Test Imad* to see him. Anyone sensitive to motion gets the animations switched off by their device's reduce-motion setting.
 
 ## Guess the Cocktail or Dish
 
@@ -274,7 +274,7 @@ Six levels in Setup, as two rows of buttons under the mini-game — **Cocktails*
 | Medium | Negroni, Old Fashioned, Espresso Martini, Moscow Mule, Whiskey Sour, Caipirinha, White Russian, Cuba Libre, Bellini, Irish Coffee | Paella, Pad Thai, Shakshuka, Butter chicken, Moussaka, Fattoush, Chili con carne, Risotto, Ratatouille, Baba ghanoush |
 | Hard | Pornstar Martini, Hugo Spritz, Pisco Sour, Mint Julep, Paloma, Manhattan, Mai Tai, Amaretto Sour, Black Russian, Sangria | Bouillabaisse, Beef Wellington, Coq au vin, Pho, Mouloukhieh, Mansaf, Beef bourguignon, Goulash, Ceviche, Cheese fondue |
 
-Every recipe is a real, published one, and its page is linked on the reveal and kept in the bank. The cocktails are the **IBA's official specs** wherever the IBA has one; White Russian, Hugo Spritz and Amaretto Sour are Difford's Guide's. The dishes are mostly BBC Good Food; the Levantine ones come from Lebanese and Arab cooks (Mama's Lebanese Kitchen, Alphafoodie, Palestine in a Dish), and the goulash from RecipeTin Eats. Lists are trimmed of salt, pepper and frying oil to keep them to ten lines.
+Every recipe is a real, published one; its page is kept with it in the app's code (not shown during the game). The cocktails are the **IBA's official specs** wherever the IBA has one; White Russian, Hugo Spritz and Amaretto Sour are Difford's Guide's. The dishes are mostly BBC Good Food; the Levantine ones come from Lebanese and Arab cooks (Mama's Lebanese Kitchen, Alphafoodie, Palestine in a Dish), and the goulash from RecipeTin Eats. Lists are trimmed of salt, pepper and frying oil to keep them to ten lines.
 
 Without a host: the captain taps their team, says it, and **Show the answer** puts it up — wrong, and the other team takes that one.
 
