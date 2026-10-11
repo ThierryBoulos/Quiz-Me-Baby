@@ -1245,7 +1245,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.10', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.11', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2357,7 +2357,7 @@ const FLAG_SECS = 15;
 const FLAG_LEVELS = { veasy:'Very easy', easy:'Easy', medium:'Medium', hard:'Hard', expert:'Expert' };
 /* Guess the Cocktail or Dish: the ingredients come up one at a time, the
    giveaway last. Six levels — cocktails and dishes, each easy/medium/hard. */
-const DISH_LEGS = 10;
+const DISH_LEGS = 7;
 const DISH_STEP = 3;    // seconds between ingredients
 const DISH_LAST = 8;    // seconds still to answer once the whole list is up
 const DISH_LEVELS = { 'c-easy':'Easy', 'c-medium':'Medium', 'c-hard':'Hard', 'd-easy':'Easy', 'd-medium':'Medium', 'd-hard':'Hard' };

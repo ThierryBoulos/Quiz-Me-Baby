@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.10 · 11 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.11 · 11 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.10', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.11', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -264,7 +264,7 @@ The show around him:
 
 The ingredients come up **one at a time, with their amounts** (ml and oz for drinks, grams and ounces for food) — a new one every **3 seconds**, the least telling first and the giveaway last: the cinnamon comes last on a cinnamon roll, the espresso last on an Espresso Martini. Once the whole list is up there are **8 more seconds**, then it is revealed (35 seconds at most, for a 10-ingredient list).
 
-**First captain to call it answers.** The host taps who called it, and the list and the clock stop while they answer. **One go per team**: get it wrong and you are out of that one — the list keeps coming for the other team. Both out, or time up, and nobody scores it. Best of 10; level at the end and another one comes out until somebody gets one. **Change this one** swaps it before anybody has had a go.
+**First captain to call it answers.** The host taps who called it, and the list and the clock stop while they answer. **One go per team**: get it wrong and you are out of that one — the list keeps coming for the other team. Both out, or time up, and nobody scores it. Best of 7; level at the end and another one comes out until somebody gets one. **Change this one** swaps it before anybody has had a go.
 
 Six levels in Setup, as two rows of buttons under the mini-game — **Cocktails** easy / medium / hard and **Dishes** easy / medium / hard. Tick any mix; they are shared out evenly.
 
