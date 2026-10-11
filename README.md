@@ -276,7 +276,7 @@ Six levels in Setup, as two rows of buttons under the mini-game — **Cocktails*
 
 Every recipe is a real, published one; its page is kept with it in the app's code (not shown during the game). The cocktails are the **IBA's official specs** wherever the IBA has one; White Russian, Hugo Spritz and Amaretto Sour are Difford's Guide's. The dishes are mostly BBC Good Food; the Levantine ones come from Lebanese and Arab cooks (Mama's Lebanese Kitchen, Alphafoodie, Palestine in a Dish), and the goulash from RecipeTin Eats. Lists are trimmed of salt, pepper and frying oil to keep them to ten lines.
 
-Without a host: the captain taps their team, says it, and **Show the answer** puts it up — wrong, and the other team takes that one.
+Without a host, nobody can judge a shouted answer without seeing it, so answers are **written down** instead: tap your team when you know it and write it face down. The list keeps coming for the other team, who can tap in and write theirs. Once both are in (or time runs out, or you press **Turn the answers over**), the answer comes up and the written answers are checked in the order they were called — **the first one right wins it**.
 
 ## Play without a host
 
@@ -286,7 +286,7 @@ Home has three ways in: **Play with host**, **Play without host** and **Play sol
 - **No steals.** Wrong or out of time, it goes to the answer and on to the next question.
 - **No answer peeks** anywhere — the peek boxes simply are not drawn.
 - **Double Dip**: both answers said out loud before locking in; either one right counts. **Call a Friend**: whoever holds the phone reads the warning to the friend.
-- **The Auction**: the other team does the counting. **Don't Say the Same as Me**: the app's hidden word comes up at the reveal. **Guess the Map**: answers face down until the reveal, then you rule together. **Guess the Cocktail or Dish**: call it, show the answer — wrong, and the other team takes it.
+- **The Auction**: the other team does the counting. **Don't Say the Same as Me**: the app's hidden word comes up at the reveal. **Guess the Map**: answers face down until the reveal, then you rule together. **Guess the Cocktail or Dish**: tap your team and write the answer down, face down; the list keeps coming for the other team, and at the end the answers are turned over in the order they were called — first one right wins.
 
 ## Play solo
 

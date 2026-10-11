@@ -838,6 +838,8 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .dish-buzz{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .dish-buzz .btn{min-height:clamp(52px,8vh,72px);font-size:clamp(14px,2.2vh,18px)}
 .dish-buzz .btn.out{opacity:.35;text-decoration:line-through}
+.dish-buzz .btn.done{opacity:.6}
+.map-judge.dish-judge > .card h3{display:block}
 .flag-lvl .lvl-tag{align-self:center;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);flex:none;width:84px}
 .dish-judge .q-note{text-align:left;margin:0;max-width:none;font-size:15px}
 @media(max-width:760px){
@@ -3877,7 +3879,7 @@ const CLOSEST_SCREENS = ['miniIntro','miniQ','miniEntry','miniSummary'];
 const SAYSAME_SCREENS = ['sayIntro','sayQ','sayJudge','saySummary'];
 const MAP_SCREENS = ['mapIntro','mapQ','mapJudge','mapTie','mapSummary'];
 const FLAG_SCREENS = ['flagIntro','flagQ','flagJudge','flagSummary'];
-const DISH_SCREENS = ['dishIntro','dishQ','dishReveal','dishSummary'];
+const DISH_SCREENS = ['dishIntro','dishQ','dishCheck','dishReveal','dishSummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
   if(CLOSEST_SCREENS.indexOf(S.screen) > -1) return 'closest';
@@ -4190,7 +4192,7 @@ SCREENS.rules = function(){
       li(ICON.dip + ' <strong>Double Dip</strong> — say both answers out loud <strong>before</strong> you lock it in. Either one right counts.'),
       li('<strong>The Auction</strong> — the other team does the counting. <strong>The Battle</strong> — show the answer after each one and mark it honestly.'),
       li('<strong>Guess the Map</strong> and <strong>Guess the Flag</strong> — keep your answers face down until the reveal, then rule together.'),
-      li('<strong>Guess the Cocktail or Dish</strong> — call it, then show the answer. Wrong, and the other team takes that one.')
+      li('<strong>Guess the Cocktail or Dish</strong> — know it? Tap your team and <strong>write the answer down</strong>, face down. The list keeps coming for the other team. At the end the answers are turned over in the order they were called: <strong>the first team right wins it</strong>.')
     ])) +
 
     '<div class="btn-row center"><button class="btn gold lg" data-act="go" data-to="setup">Right — start a game</button></div>' +
@@ -5983,8 +5985,8 @@ SCREENS.dishIntro = function(){
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> The ingredients come up <strong>one at a time</strong>, a new one every <strong>' + DISH_STEP + ' seconds</strong>. The giveaway comes last.</li>' +
-        '<li><strong style="color:var(--gold)">2.</strong> Know it? <strong>Captain, call it out</strong> — first voice answers.' + (NOHOST() ? ' Tap your team, say it, then show the answer.' : ' The host taps who called it.') + '</li>' +
-        '<li><strong style="color:var(--gold)">3.</strong> <strong>One go per team.</strong> ' + (NOHOST() ? 'Wrong, and the other team takes it.' : 'Wrong, and you are out of that one — the list keeps coming for the other team.') + '</li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> Know it? <strong>Captain, call it out</strong> — first voice answers.' + (NOHOST() ? ' Tap your team and <strong>write it down</strong>, face down — the app keeps the order.' : ' The host taps who called it.') + '</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> <strong>One go per team.</strong> ' + (NOHOST() ? 'The list keeps coming for the other team. At the end the answers are turned over in the order they were called — <strong>the first one right wins it</strong>.' : 'Wrong, and you are out of that one — the list keeps coming for the other team.') + '</li>' +
         '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level at the end, and another one comes out, <strong>until somebody gets one</strong>.</li>' +
       '</ul>' +
     '</div>' +
@@ -6000,20 +6002,29 @@ SCREENS.dishQ = function(){
     ? '<button class="btn lg ' + (t === 0 ? 'teamA' : 'teamB') + ' out" disabled>' + esc(g.teams[t].name) + ' — out</button>'
     : '<button class="btn lg ' + (t === 0 ? 'teamA' : 'teamB') + '" data-act="dishBuzz" data-w="' + t + '">' + esc(g.teams[t].name) + ' called it</button>';
   let foot;
-  if(L.buzz == null){
+  if(NOHOST()){
+    /* No host: a call is written down, face down, and the list keeps going.
+       The app only keeps the order the teams called in. */
+    const calls = L.calls || [];
+    const wBtn = (t) => calls.indexOf(t) > -1
+      ? '<button class="btn lg ' + (t === 0 ? 'teamA' : 'teamB') + ' done" disabled>' + esc(g.teams[t].name) + ' — written (' + (calls.indexOf(t) ? '2nd' : '1st') + ')</button>'
+      : '<button class="btn lg ' + (t === 0 ? 'teamA' : 'teamB') + '" data-act="dishWrite" data-w="' + t + '">' + esc(g.teams[t].name) + ' — write it down</button>';
+    foot = '<div class="dish-buzz">' + wBtn(0) + wBtn(1) + '</div>' +
+      '<div class="row center" style="gap:10px">' +
+        (calls.length ? '<button class="btn gold" data-act="dishTurnOver">Turn the answers over</button>'
+                      : '<button class="btn sm ghost" data-act="dishSwap">Change this one</button>') +
+      '</div>';
+  } else if(L.buzz == null){
     foot = '<div class="dish-buzz">' + buzzBtn(0) + buzzBtn(1) + '</div>' +
       (L.out[0] || L.out[1] ? '' : '<div class="row center"><button class="btn sm ghost" data-act="dishSwap">Change this one</button></div>');
   } else {
     const t = L.buzz;
     foot = '<div class="card pad lit stack dish-call" style="gap:10px">' +
       '<h3 class="display" style="font-size:clamp(16px,2.2vw,22px);text-align:center">' + teamName(t) + ' — say it</h3>' +
-      (NOHOST() && !L.checked
-        ? '<div class="btn-row center"><button class="btn gold lg" data-act="dishCheck">Show the answer</button></div>'
-        : (NOHOST() ? '<div class="map-title" style="text-align:center">' + esc(q.question) + '</div>' : '') +
-          '<div class="btn-row center" style="gap:10px">' +
-            '<button class="btn ok lg" data-act="dishRight">Right</button>' +
-            '<button class="btn ghost lg" data-act="dishWrong">Wrong</button>' +
-          '</div>') +
+      '<div class="btn-row center" style="gap:10px">' +
+        '<button class="btn ok lg" data-act="dishRight">Right</button>' +
+        '<button class="btn ghost lg" data-act="dishWrong">Wrong</button>' +
+      '</div>' +
     '</div>';
   }
   return '<div class="play map-play dish-play">' +
@@ -6050,6 +6061,31 @@ AFTER.dishQ = function(){
   clearInterval(S.tmp.dishIv);
   S.tmp.dishIv = setInterval(dishWatch, 150);
 };
+
+/* No host: the answer comes up and the written answers are checked in the
+   order the teams called — the first one right takes it. */
+SCREENS.dishCheck = function(){
+  const g = G(), s = g.dishGame, q = s.qs[s.i], L = s.leg;
+  const t = L.calls[L.k || 0];
+  return '<div class="compact map-judge dish-judge">' +
+    dishBand() +
+    '<div class="map-stage reveal">' +
+      '<div class="dish-frame">' + dishList(q, q.ings.length) + '</div>' +
+      '<div class="map-side">' +
+        '<div class="map-title">' + esc(q.question) + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="card pad lit stack" style="gap:10px">' +
+      '<h3 class="display" style="font-size:clamp(16px,2.2vw,22px);text-align:center">' + teamName(t) +
+        ' called it ' + ((L.k || 0) ? 'second' : 'first') + ' — turn it over. Right?</h3>' +
+      '<div class="btn-row center" style="gap:10px">' +
+        '<button class="btn ok lg" data-act="dishCheckYes">Right</button>' +
+        '<button class="btn ghost lg" data-act="dishCheckNo">Wrong</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+};
+AFTER.dishCheck = function(){ drumOnce('dc' + G().dishGame.i); };
 
 SCREENS.dishReveal = function(){
   const g = G(), s = g.dishGame, r = s.subs[s.subs.length - 1], q = r.q;
@@ -7090,7 +7126,16 @@ function awardMap(w){
 }
 
 /* ---------- cocktail or dish ---------- */
-function dishLeg(){ return { shown:1, out:[false, false], buzz:null, checked:false }; }
+function dishLeg(){ return { shown:1, out:[false, false], buzz:null, calls:[], k:0 }; }
+/* no host: once the calls are in (or time runs out), check them in order */
+function dishTurnOver(){
+  const L = G().dishGame.leg;
+  if(!L.calls.length) return dishEndLeg('none');
+  Timer.stop();
+  clearInterval(S.tmp.dishIv);
+  L.k = 0;
+  go('dishCheck');
+}
 function dishEndLeg(w){
   const g = G(), s = g.dishGame, q = s.qs[s.i];
   Timer.stop();
@@ -7101,7 +7146,7 @@ function dishEndLeg(w){
   else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes ' + (s.i < s.base ? 'number ' + (s.i + 1) : 'the tie-breaker') + '.'); }
   go('dishReveal');
 }
-function dishTimeUp(){ if(S.screen === 'dishQ') dishEndLeg('none'); }
+function dishTimeUp(){ if(S.screen === 'dishQ') NOHOST() ? dishTurnOver() : dishEndLeg('none'); }
 function dishAfterLeg(){
   const g = G(), s = g.dishGame;
   s.leg = dishLeg();
@@ -8102,7 +8147,7 @@ const ACT = {
   dishStart(){ const s = G().dishGame; s.i = 0; s.leg = dishLeg(); go('dishQ'); },
   dishSwap(){
     const s = G().dishGame, L = s.leg;
-    if(L.buzz != null || L.out[0] || L.out[1]) return toast('Somebody has already had a go at this one.');
+    if(L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length) return toast('Somebody has already had a go at this one.');
     if(!s.spare.length) return toast('Nothing else left at these levels.');
     s.qs[s.i] = s.spare.shift();
     s.leg = dishLeg();
@@ -8117,7 +8162,24 @@ const ACT = {
     L.buzz = w; L.checked = false;
     Snd.soft(); render();
   },
-  dishCheck(){ G().dishGame.leg.checked = true; render(); },
+  dishWrite(e){
+    const g = G(), L = g.dishGame.leg, w = +e.dataset.w;
+    if(L.calls.indexOf(w) > -1) return;
+    L.calls.push(w);
+    Snd.soft();
+    if(L.calls.length === 2) return dishTurnOver();   // both written — nothing left to wait for
+    toast(g.teams[w].name + ' wrote it down — ' + g.teams[otherTeam(w)].name + ', still time.', 3200);
+    render();
+  },
+  dishTurnOver(){ dishTurnOver(); },
+  dishCheckYes(){ const L = G().dishGame.leg; dishEndLeg(L.calls[L.k]); },
+  dishCheckNo(){
+    const L = G().dishGame.leg;
+    Snd.wrong();
+    L.k++;
+    if(L.k >= L.calls.length) return dishEndLeg('none');
+    render();
+  },
   dishRight(){
     const g = G(), L = g.dishGame.leg;
     if(L.buzz == null) return;
@@ -8129,8 +8191,6 @@ const ACT = {
     const w = L.buzz, o = otherTeam(w);
     L.out[w] = true; L.buzz = null;
     Snd.wrong && Snd.wrong();
-    /* no host: the answer is already on the screen, so the other team takes it */
-    if(NOHOST()) return dishEndLeg(L.out[o] ? 'none' : o);
     if(L.out[o]) return dishEndLeg('none');
     toast(g.teams[w].name + ' is out of this one — ' + g.teams[o].name + ', it is yours to get.', 3600);
     Timer.resumeT();
