@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.8 · 11 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.9 · 11 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.8', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.9', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -238,6 +238,27 @@ Afghanistan is left out on purpose: its flag has been in dispute since 2021.
 Every flag is also a row in the **question bank** (type *Flag*, with its picture, level and what it is), so you can see them all — and delete any you never want dealt. In **Advanced → Pick tonight's questions** you can hand-pick up to 10 flags at tonight's level, in the order you want them; the rest of the level fills in behind. A game can reach **every** flag at its level through *Change this flag* and the tie-breakers.
 
 **The flags are only downloaded when Guess the Flag is on the card.** They live as separate files in `flags/` (one SVG each, true proportions, from Wikimedia Commons — sources and licences in `flags/CREDITS.md`), and a game asks the browser for just the handful it deals, the moment it starts. A night without the flag game downloads none of them. Like the maps, a flag counts as played once it has been on screen, and fresh ones are dealt first.
+
+## Imad, your host
+
+Imad talks now. At every big moment he pops up in a speech bubble and **says it out loud** with the device's own voice:
+
+- **The night:** the welcome ("Are you ready to QUIZ ME BABYYYY?!"), each round's theme, and the final.
+- **Answers:** right and wrong ones, time running out, steals and missed steals, and lifelines.
+- **The scoreboard:** lead changes, runaway leads, neck-and-neck finishes.
+- **Mini-games:** each one's intro, its winner, and sudden death.
+
+About 150 lines, picked at random and never the same one twice in a night, with the real team names, captains, themes and points gap filled in.
+
+The show around him:
+- Titles slam in with a whoosh.
+- Scores count up in the bar at the top.
+- A **LEAD CHANGE** banner sweeps across in the new leader's colour.
+- A drumroll plays as an answer comes up.
+- The screen shakes on a stolen point.
+- Confetti falls when a mini-game is won.
+
+**Settings → Your host — Imad**: switch him off, keep him to the bubble only, or pick the voice and speed. The voice is whatever the device carries — iPhones and Macs sound best, so play from the one with the nicest voice. Anyone sensitive to motion gets the animations switched off by their device's reduce-motion setting.
 
 ## Guess the Cocktail or Dish
 

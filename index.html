@@ -934,6 +934,35 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
   filter:drop-shadow(0 14px 40px rgba(245,197,24,.35));
   animation:reveal .7s var(--ease) both;
 }
+/* ---- Imad's speech bubble: up top, over the content, never in the way of a tap ---- */
+#hostBubble{position:fixed;z-index:90;top:62px;right:16px;max-width:min(440px,calc(100vw - 32px));display:flex;align-items:flex-end;gap:10px;
+  pointer-events:none;opacity:0;transform:translateY(-12px) scale(.96);transition:opacity .25s,transform .25s var(--ease)}
+#hostBubble.on{opacity:1;transform:none}
+#hostBubble img{width:76px;height:76px;object-fit:contain;flex:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));order:2}
+#hostBubble .hb-text{position:relative;padding:12px 16px;border-radius:18px 18px 4px 18px;background:#FFF7DA;color:#1A1400;
+  font-weight:700;font-size:15px;line-height:1.35;box-shadow:0 14px 34px rgba(0,0,0,.55)}
+#hostBubble.on .hb-text{animation:hbPop .45s var(--ease) both}
+@keyframes hbPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:none}}
+@media(max-width:760px){
+  #hostBubble{top:96px;right:12px;left:12px;max-width:none}
+  #hostBubble img{width:46px;height:46px}
+  #hostBubble .hb-text{font-size:14px;padding:10px 14px}
+}
+/* ---- the show ---- */
+h1.display.slam{animation:slam .7s cubic-bezier(.2,.9,.25,1.2) both}
+@keyframes slam{0%{opacity:0;transform:scale(2.4);filter:blur(12px)}55%{opacity:1;transform:scale(.93);filter:none}75%{transform:scale(1.04)}100%{transform:none}}
+#hud .sc.pop{animation:scPop .7s var(--ease)}
+@keyframes scPop{0%{transform:scale(1)}30%{transform:scale(1.55);text-shadow:0 0 24px currentColor}100%{transform:scale(1)}}
+.lead-banner{position:fixed;z-index:95;left:0;right:0;top:38%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 16px;
+  pointer-events:none;text-transform:uppercase;font-family:var(--font-d);animation:leadIn 2.3s var(--ease) both}
+.lead-banner.a{background:linear-gradient(90deg,transparent,rgba(49,201,247,.92) 20%,rgba(49,201,247,.92) 80%,transparent)}
+.lead-banner.b{background:linear-gradient(90deg,transparent,rgba(255,77,130,.92) 20%,rgba(255,77,130,.92) 80%,transparent)}
+.lead-banner span{font-size:clamp(14px,2.4vw,20px);letter-spacing:.3em;color:#0B1030}
+.lead-banner b{font-weight:400;font-size:clamp(34px,7vw,72px);line-height:1;color:#fff;text-shadow:0 4px 18px rgba(0,0,0,.35)}
+@keyframes leadIn{0%{opacity:0;transform:translateX(-60%) skewX(-12deg)}15%{opacity:1;transform:none}82%{opacity:1;transform:none}100%{opacity:0;transform:translateX(60%) skewX(-12deg)}}
+#app.shake{animation:shake .6s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-9px)}40%,60%{transform:translateX(9px)}}
+@media (prefers-reduced-motion:reduce){h1.display.slam,#hud .sc.pop,#app.shake,.lead-banner{animation:none}}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
 .confetti i{position:absolute;top:-12vh;width:9px;height:16px;border-radius:2px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(115vh) rotate(720deg);opacity:.15}}
@@ -1215,7 +1244,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.8', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.9', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2789,7 +2818,8 @@ const DB = {
 const DEFAULT_SETTINGS = {
   tQuestion:60, tSteal:30, tFriend:30, tMini:90,
   sound:true, volume:0.75, tick:true,
-  noRepeat:true, alternateFirst:false
+  noRepeat:true, alternateFirst:false,
+  hostOn:true, hostVoice:true, hostVoiceName:'', hostRate:1.05
 };
 
 /* ==========================================================================
@@ -2850,6 +2880,32 @@ const Snd = {
       self.note(f*2, i*0.26, 0.7, {type:'sine', gain:0.04});
     });
   },
+  /* filtered white noise — the whoosh under a title card, the drumroll */
+  noise(at, dur, opt){
+    if(!this.ctx || !S.settings.sound) return;
+    opt = opt || {};
+    const ctx = this.ctx, n = Math.max(1, Math.ceil(ctx.sampleRate * dur));
+    const buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+    for(let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const f = ctx.createBiquadFilter(); f.type = opt.type || 'bandpass'; f.Q.value = opt.q || 1;
+    const t = ctx.currentTime + at;
+    f.frequency.setValueAtTime(opt.f0 || 800, t);
+    if(opt.f1) f.frequency.exponentialRampToValueAtTime(opt.f1, t + dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(opt.gain || 0.2, t + (opt.att || dur * 0.6));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(this.master);
+    src.start(t); src.stop(t + dur + 0.05);
+  },
+  whoosh(){ this.resume(); this.noise(0, 0.6, { f0:260, f1:3600, q:0.7, gain:0.2, att:0.42 }); this.note(98, 0.42, 0.6, { type:'sine', gain:0.22 }); },
+  drumroll(){
+    this.resume(); if(!this.ctx || !S.settings.sound) return;
+    for(let i = 0; i < 16; i++) this.noise(i * 0.05, 0.06, { type:'lowpass', f0:700, gain:0.05 + i * 0.01, att:0.008 });
+    this.note(82, 0.82, 0.7, { type:'sine', gain:0.3 });
+    this.noise(0.82, 1.1, { type:'highpass', f0:3000, gain:0.09, att:0.01 });
+  },
   tick(){ this.note(1320, 0, 0.07, {type:'sine', gain:0.095}); this.note(2640, 0, 0.04, {type:'sine', gain:0.03}); },
   correct(){ this.resume(); this.note(659.25,0,0.42,{type:'triangle',gain:0.14}); this.note(987.77,0.09,0.6,{type:'triangle',gain:0.11}); },
   wrong(){ this.resume(); this.note(311.13,0,0.4,{type:'sine',gain:0.12}); this.note(233.08,0.11,0.6,{type:'sine',gain:0.10}); },
@@ -2892,6 +2948,7 @@ const Timer = {
     clearInterval(this.id); this.id = null; this.running = false; this.left = 0;
     this.paint(true);
     Snd.alarm();
+    if(S.game && (S.screen === 'ask' || S.screen === 'steal')) Host.say('timeup', { t:curTeam() });
     const f = this.onEnd; this.onEnd = null;
     if(f) f();
   },
@@ -3895,6 +3952,7 @@ function render(){
     }
   }
   renderHUD();
+  hudFx();
   if(AFTER[S.screen]) AFTER[S.screen]();
   if(S.tmp.toTop){ S.tmp.toTop = false; window.scrollTo(0, 0); }
   else window.scrollTo(0, y);
@@ -4761,7 +4819,14 @@ SCREENS.roundIntro = function(){
 };
 AFTER.roundIntro = function(){ jingleOnce('r' + G().r); };
 /* one sting per round — not on every re-render */
-function jingleOnce(key){ if(S.tmp.jKey === key) return; S.tmp.jKey = key; Snd.jingle(); }
+function jingleOnce(key){ if(S.tmp.jKey === key) return; S.tmp.jKey = key; Snd.jingle(); slamTitle(); }
+/* the screen's big title drops in with a whoosh — once per visit, not on every re-render */
+function slamTitle(){
+  const h = $('#app h1.display');
+  if(!h) return;
+  h.classList.remove('slam'); void h.offsetWidth; h.classList.add('slam');
+  Snd.whoosh();
+}
 
 /* ==========================================================================
    15. ASK / REVEAL / STEAL
@@ -6766,6 +6831,25 @@ SCREENS.settings = function(){
     '</div>' +
 
     '<div class="card pad stack">' +
+      '<div class="eyebrow">Your host — Imad</div>' +
+      toggleRow('hostOn', 'Imad talks', 'He comments on the game in a speech bubble — round intros, right and wrong answers, steals, lead changes, the final.') +
+      (S.settings.hostOn ? toggleRow('hostVoice', 'Out loud', 'Read with this device&rsquo;s own voice. Phones and Macs sound best; play from the one with the nicest voice.') : '') +
+      (S.settings.hostOn && S.settings.hostVoice && Host.ok()
+        ? '<div class="grid2">' +
+            '<label class="fld">Voice<select data-act="hostVoicePick">' +
+              '<option value="">Best available</option>' +
+              Host.voices.map(v => '<option value="' + esc(v.name) + '"' + (S.settings.hostVoiceName === v.name ? ' selected' : '') + '>' + esc(v.name) + ' (' + esc(v.lang) + ')</option>').join('') +
+            '</select></label>' +
+            '<label class="fld">Speed<select data-act="setNum" data-k="hostRate">' +
+              [[0.9, 'Relaxed'], [1, 'Normal'], [1.05, 'Lively'], [1.15, 'Fast'], [1.25, 'Very fast']].map(o =>
+                '<option value="' + o[0] + '"' + (S.settings.hostRate === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') +
+            '</select></label>' +
+          '</div>'
+        : S.settings.hostOn && S.settings.hostVoice ? '<p class="help">This browser has no built-in voice — Imad will stick to the speech bubble.</p>' : '') +
+      (S.settings.hostOn ? '<div class="btn-row"><button class="btn sm" data-act="hostTest">Test Imad</button></div>' : '') +
+    '</div>' +
+
+    '<div class="card pad stack">' +
       '<div class="eyebrow">Gameplay</div>' +
       toggleRow('noRepeat', 'Never reuse a question I&rsquo;ve already played', 'Every question you use is remembered. The same group can play week after week with zero repeats.') +
       toggleRow('alternateFirst', 'Alternate which team answers first each round', 'Off = Team A always goes first.') +
@@ -7182,6 +7266,352 @@ function finalize(){
 }
 
 /* ==========================================================================
+   23b. IMAD, THE HOST — lines, voice, and the show around them
+   ==========================================================================
+   He picks one line per moment, never the same one twice in a night (until a
+   moment's lines run out), fills in the real names and numbers, shows it in a
+   speech bubble and reads it with the device's own voice. Lines said in the
+   same instant — "Correct!" and then "LEAD CHANGE!" — are joined into one, so
+   the second never cuts the first off.
+
+   Placeholders: {team} {other} {captain} {othercap} — the team the moment is
+   about, the other one, and their captains; {leader} {trailer} {gap} — the
+   scoreboard; {theme} {n} {N} — the round; {pts} — a mini-game's prize.
+   ========================================================================== */
+const HOST_LINES = {
+  start:[
+    'Are you ready to QUIZ ME BABYYYY?!',
+    'Welcome, welcome, welcome! Phones down, brains on, egos at the door.',
+    'Tonight: {team} versus {other}. Only one leaves with dignity.',
+    'Ladies and gentlemen… and whoever brought the hummus… let\'s QUIZ!',
+    'Captains, you speak for your team. Everyone else, you speak for nobody.',
+    'I\'ve seen the questions. Some of you are not ready.',
+    'Yalla! Let\'s see who actually paid attention at school.',
+    'Friendships may end tonight. That\'s fine. That\'s the game.'],
+  round:[
+    'Round {n}! Theme: {theme}. Who\'s feeling confident? Wrong answer, nobody should be.',
+    'Round {n}. {theme}. Somebody in this room is about to pretend they knew that.',
+    'Next up: {theme}. {captain}, I believe in you. Slightly.',
+    '{theme}! I can already hear the arguing.',
+    'Round {n}. Deep breaths. Shallow knowledge.',
+    'Here comes {theme}. Captains, the floor is yours. The floor is also sticky.',
+    'Round {n} of {N}. Still anybody\'s game. Mostly.',
+    '{theme}. Let\'s go. No pressure. A little pressure.'],
+  correct:[
+    'YES! {team}, take a bow!',
+    'Correct! Somebody\'s been reading.',
+    'That\'s right! {captain}, you absolute genius.',
+    'Nailed it. Frame that answer.',
+    'Correct! {other}, are you taking notes?',
+    'Ding ding ding! Point to {team}!',
+    'Look at {team}, flexing on everyone.',
+    'Correct. I\'m honestly a bit emotional.',
+    'That\'s the one! Smooth. Very smooth.',
+    'Correct! Mama would be proud.',
+    'Yes! And with that, {team} becomes slightly more unbearable.',
+    'Right answer. {captain}, take the rest of the night off. Actually don\'t.'],
+  wrong:[
+    'Ohhhh no. No no no.',
+    'Wrong! But said with such confidence.',
+    'That\'s… a choice.',
+    'Incorrect. I\'ll allow you a moment of silence.',
+    'Nope! Bold of you, though.',
+    'Wrong. {other} are smiling. I\'d be worried.',
+    'So close! Actually, not close at all.',
+    'Wrong. Let\'s never speak of this again.',
+    'Incorrect. Somebody\'s teacher is crying somewhere.',
+    'Hmm. No. Hard no.',
+    'Wrong! {captain}, who told you that?',
+    'Not quite. Not even the same continent.'],
+  timeup:[
+    'Time! The clock waits for no one. Especially not you.',
+    'Too slow! The answer left without you.',
+    'And… time. Thinking is great. Answering is better.',
+    'Out of time! That silence was beautiful though.',
+    'Buzzer! You had the whole time and used it all to panic.',
+    'Time\'s up. Somewhere, a snail is laughing.'],
+  steal:[
+    '{other}, it\'s yours to steal!',
+    'Steal time! {other}, eat their lunch.',
+    'The door is open, {other}. Walk right in.',
+    '{other}, here\'s your chance to be terrible to your friends.',
+    'Steal! {othercap}, look them in the eye and take it.',
+    'Up for grabs! {other}, don\'t make me regret this.'],
+  stolen:[
+    'STOLEN! Daylight robbery!',
+    '{team} just walked out with your point and didn\'t even say thank you.',
+    'Stolen! That\'s going to sting for a while.',
+    'Thief! Brilliant, brilliant thief.',
+    'Stolen! {other}, I\'d lock up your valuables.',
+    'And they take it! Ruthless. I love it.'],
+  nosteal:[
+    'Nobody gets it! Everybody loses! Wonderful!',
+    'Missed the steal. The point floats away into the night.',
+    'No steal. Both teams, equally lost.',
+    'Wrong again! It\'s a festival of wrong.',
+    'Nobody. Not a single soul. Beautiful.'],
+  ll_dbl:[
+    'Double points! Big risk, big swagger.',
+    'Doubling up? Brave. Or foolish. We\'ll see.',
+    '{team} going double. I respect the chaos.'],
+  ll_dip:[
+    'Double Dip! Two shots at glory.',
+    'Two answers? Greedy. I like it.',
+    'Dipping twice. Make them both count.'],
+  ll_friend:[
+    'Calling a friend! Hope they pick up.',
+    'Phone a friend! The friend has no idea what\'s coming.',
+    'Let\'s hope your friend is smarter than you.'],
+  lead:[
+    'LEAD CHANGE! {leader} take over!',
+    'And just like that, {leader} are on top!',
+    'Oh, the tables have turned! {leader} in front!',
+    'New leaders! {trailer}, how does it feel?',
+    '{leader} go ahead! This is getting spicy.',
+    'Plot twist! {leader} now lead!'],
+  big:[
+    '{leader} are running away with this. {trailer}, wake up!',
+    '{gap} points in it. {trailer}, now would be a great time to be smart.',
+    '{leader} cruising. {trailer}, still time… technically.',
+    'That\'s a {gap} point lead. {trailer}, I\'m starting a support group.',
+    '{trailer}, don\'t panic. Okay, panic a little.'],
+  close:[
+    'It\'s tight! Nobody breathe.',
+    'Neck and neck! My heart can\'t take this.',
+    'One point in it. Every answer counts now.',
+    'All square! Who wants it more?',
+    'This is closer than my last haircut.'],
+  mini_closest:['Closest To Wins! Numbers time. Guess big, guess wisely.', 'Closest To Wins. Nobody needs to be right, just less wrong.'],
+  mini_auction:['The Auction! How many can you REALLY name?', 'The Auction. Bid high, deliver, or be humiliated. Simple.'],
+  mini_saysame:['Don\'t Say the Same as Me! Think different. Think weird.', 'Great minds think alike. Don\'t be a great mind.'],
+  mini_map:['Guess the Map! Your geography teacher is watching.', 'Colours, dots, mystery. What on earth is this map?'],
+  mini_flag:['Guess the Flag! Rectangles of national pride.', 'Flags! Is it Chad? It\'s always Chad. Or Romania.'],
+  mini_dish:['Guess the Cocktail or Dish! I hope you ate before this.', 'Ingredients incoming. First captain to shout it wins. No pressure, chef.'],
+  mini_battle:['Battle of the Captains! Everyone else, zip it.', 'Captains only. Teams, sit on your hands.'],
+  miniwin:[
+    '{team} take the mini-game! {pts} sweet points!',
+    'Mini-game to {team}! Did that hurt, {other}?',
+    'And {team} win it! Grab those {pts} points.',
+    '{team} walk away with it. Classy.',
+    'That\'s {pts} points to {team}. The scoreboard shakes.'],
+  sudden:[
+    'SUDDEN DEATH! One question. One winner. One very sad team.',
+    'It\'s a tie! We go to sudden death. I love this part.',
+    'Sudden death! Captains, step forward. Hands steady.',
+    'Tied! First right answer wins it all. No pressure. All the pressure.'],
+  final:[
+    'And the winner is… {leader}! Quiz me, baby!',
+    '{leader} WIN! Champions! Unbearable! Champions!',
+    'It\'s over! {leader} take the night! {trailer}, there\'s always next time.',
+    'Congratulations {leader}! You may now be smug for one week.',
+    '{leader} win! {trailer}, you were great. Not good enough, but great.',
+    'Victory to {leader}! Somebody tell the neighbours.'],
+  finaltie:[
+    'A draw! Everybody wins! Nobody wins! Philosophy!',
+    'Tied at the end. Fine. Rematch. Now.',
+    'Dead level! You\'re all equally brilliant. Or equally lost.']
+};
+
+const Host = {
+  voices:[], q:[], t:null, flushT:null,
+  ok(){ return 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined'; },
+  loadVoices(){
+    if(!this.ok()) return;
+    const all = speechSynthesis.getVoices() || [];
+    this.voices = all.filter(v => /^en/i.test(v.lang));
+  },
+  /* the saved choice, else the warmest English voice the device is known to carry */
+  voice(){
+    const vs = this.voices;
+    if(!vs.length) return null;
+    const mine = vs.find(v => v.name === S.settings.hostVoiceName);
+    if(mine) return mine;
+    const pref = [/^Daniel/, /Google UK English Male/, /^Arthur/, /^Oliver/, /^Aaron/, /^Alex$/, /^Samantha/, /Google US English/, /Microsoft (Guy|Ryan|Andrew)/];
+    for(const re of pref){ const v = vs.find(x => re.test(x.name)); if(v) return v; }
+    return vs.find(v => /en-GB/i.test(v.lang)) || vs[0];
+  },
+  vars(extra){
+    const g = G(), o = Object.assign({}, extra || {});
+    if(!g) return o;
+    const T = g.teams, cap = (i) => (T[i].captain || '').trim() || T[i].name;
+    if(o.t != null){ o.team = T[o.t].name; o.other = T[1 - o.t].name; o.captain = cap(o.t); o.othercap = cap(1 - o.t); }
+    else { o.team = o.team || T[0].name; o.other = o.other || T[1].name; o.captain = o.captain || cap(0); o.othercap = o.othercap || cap(1); }
+    const d = T[0].score - T[1].score;
+    o.leader = T[d >= 0 ? 0 : 1].name; o.trailer = T[d >= 0 ? 1 : 0].name; o.gap = Math.abs(d);
+    return o;
+  },
+  line(moment, v){
+    const pool = HOST_LINES[moment]; if(!pool || !pool.length) return '';
+    const g = G(), used = g ? (g.hostUsed = g.hostUsed || {}) : (S.tmp.hostUsed = S.tmp.hostUsed || {});
+    const seen = used[moment] = used[moment] || [];
+    let free = pool.map((_, i) => i).filter(i => seen.indexOf(i) < 0);
+    if(!free.length){ seen.length = 0; free = pool.map((_, i) => i); }
+    const i = free[Math.floor(Math.random() * free.length)];
+    seen.push(i);
+    return pool[i].replace(/\{(\w+)\}/g, (m, k) => v[k] != null ? String(v[k]) : '');
+  },
+  say(moments, extra){
+    if(!S.settings.hostOn) return;
+    const v = this.vars(extra);
+    [].concat(moments).forEach(m => { const l = this.line(m, v); if(l) this.q.push(l); });
+    clearTimeout(this.flushT);
+    this.flushT = setTimeout(() => this.flush(), 30);
+  },
+  /* say it once per game — keyed, so a re-render of the same screen stays quiet */
+  once(key, moments, extra){
+    const g = G(); if(!g) return false;
+    g.hostOnce = g.hostOnce || {};
+    if(g.hostOnce[key]) return false;
+    g.hostOnce[key] = true;
+    this.say(moments, extra);
+    return true;
+  },
+  flush(){
+    const text = this.q.join(' '); this.q = [];
+    if(!text) return;
+    this.bubble(text);
+    this.speak(text);
+  },
+  bubble(text){
+    let b = el('hostBubble');
+    if(!b){
+      b = document.createElement('div'); b.id = 'hostBubble'; b.setAttribute('role', 'status');
+      b.innerHTML = '<img alt="" src="' + MASCOT + '"><div class="hb-text"></div>';
+      document.body.appendChild(b);
+    }
+    b.querySelector('.hb-text').textContent = text;
+    b.classList.remove('on'); void b.offsetWidth; b.classList.add('on');
+    clearTimeout(this.t);
+    this.t = setTimeout(() => b.classList.remove('on'), 2800 + text.length * 60);
+  },
+  speak(text){
+    if(!S.settings.hostVoice || !this.ok()) return;
+    if(!this.voices.length) this.loadVoices();
+    /* Shouty capitals get spelled out letter by letter by some voices
+       ("Q-U-I-Z"), so the spoken copy is lower-cased; the bubble keeps them. */
+    const said = text.replace(/\b[A-Z]{2,}[A-Z']*\b/g, w => w.toLowerCase()).replace(/…/g, ', ');
+    try{
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(said);
+      const v = this.voice();
+      if(v){ u.voice = v; u.lang = v.lang; }
+      u.rate = S.settings.hostRate || 1.05;
+      u.pitch = 1.05;
+      u.volume = Math.min(1, (S.settings.volume || 0.75) + 0.25);
+      speechSynthesis.speak(u);
+    }catch(e){}
+  },
+  hush(){
+    this.q = []; clearTimeout(this.flushT);
+    try{ if(this.ok()) speechSynthesis.cancel(); }catch(e){}
+    const b = el('hostBubble'); if(b) b.classList.remove('on');
+  },
+  test(){
+    if(!S.settings.hostOn) return;
+    S.tmp.hostUsed = {};
+    const v = { team:'Team A', other:'Team B', captain:'Captain' };
+    const l = this.line('start', v);
+    this.q.push(l); this.flush();
+  }
+};
+Host.loadVoices();
+if(Host.ok()) speechSynthesis.onvoiceschanged = () => { Host.loadVoices(); if(S.screen === 'settings') render(); };
+
+/* the scores count up, and a change of leader gets a banner and a line */
+function hudFx(){
+  const g = G();
+  if(!g || el('hud').hidden){ return; }
+  if(S.tmp.hudFor !== g.id){ S.tmp.hudFor = g.id; S.tmp.hudSc = g.teams.map(t => t.score); }
+  const was = S.tmp.hudSc || [0, 0];
+  g.teams.forEach((t, i) => {
+    const box = $('#hud .hud-team.' + (i ? 'b' : 'a') + ' .sc');
+    if(!box || t.score === was[i]) return;
+    countUp(box, was[i], t.score);
+  });
+  S.tmp.hudSc = g.teams.map(t => t.score);
+  const d = g.teams[0].score - g.teams[1].score;
+  const lead = d > 0 ? 0 : d < 0 ? 1 : null;
+  if(lead != null){
+    if(g.hostLeader != null && g.hostLeader !== lead){ leadBanner(lead); Host.say('lead'); }
+    g.hostLeader = lead;
+  }
+}
+function countUp(node, from, to){
+  const t0 = performance.now(), dur = 650;
+  node.classList.remove('pop'); void node.offsetWidth; node.classList.add('pop');
+  node.textContent = from;
+  (function step(now){
+    const k = Math.min(1, (now - t0) / dur);
+    node.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+    if(k < 1 && node.isConnected) requestAnimationFrame(step);
+  })(t0);
+}
+function leadBanner(i){
+  const g = G();
+  const b = document.createElement('div');
+  b.className = 'lead-banner ' + (i ? 'b' : 'a');
+  b.innerHTML = '<span>Lead change</span><b>' + esc(g.teams[i].name) + '</b>';
+  document.body.appendChild(b);
+  Snd.whoosh();
+  setTimeout(() => b.remove(), 2300);
+}
+function shake(){
+  const a = el('app');
+  a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake');
+  setTimeout(() => a.classList.remove('shake'), 700);
+}
+function drumOnce(key){
+  if(S.tmp.drumKey === key) return;
+  S.tmp.drumKey = key;
+  Snd.drumroll();
+}
+
+/* ---- where he speaks — added on top of each screen's own AFTER ---- */
+function afterAlso(screen, fn){
+  const prev = AFTER[screen];
+  AFTER[screen] = function(){ if(prev) prev(); fn(); };
+}
+/* the very first thing on the night gets the welcome in front of it */
+function opener(){ const g = G(); if(g.hostHello) return []; g.hostHello = true; return ['start']; }
+
+afterAlso('roundIntro', () => {
+  const g = G(), rd = curRound(), first = seatTeam(rd, 0);
+  if(g.hostOnce && g.hostOnce['r' + g.r]) return;
+  Host.once('r' + g.r, opener().concat(['round']), { t:first, theme:rd.theme, n:rd.n, N:g.rounds.length });
+});
+[['miniIntro', 'closest'], ['auctionIntro', 'auction'], ['sayIntro', 'saysame'], ['mapIntro', 'map'],
+ ['flagIntro', 'flag'], ['dishIntro', 'dish'], ['battleIntro', 'battle']].forEach(([scr, key]) =>
+  afterAlso(scr, () => { const g = G(); if(!(g.hostOnce && g.hostOnce['mi:' + key])) Host.once('mi:' + key, opener().concat(['mini_' + key])); }));
+
+/* a mini-game's result, once the points are actually on the board */
+[['miniSummary', g => g.mini], ['auctionResult', g => g.auction], ['saySummary', g => g.saySame],
+ ['mapSummary', g => g.mapGame], ['flagSummary', g => g.flagGame], ['dishSummary', g => g.dishGame],
+ ['battleSummary', g => g.battle]].forEach(([scr, get]) =>
+  afterAlso(scr, () => {
+    const g = G(), m = get(g);
+    if(!m || !m.award) return;
+    const w = m.award[0] > m.award[1] ? 0 : m.award[1] > m.award[0] ? 1 : null;
+    if(w == null) return;
+    if(Host.once('mw:' + scr, 'miniwin', { t:w, pts:Math.max(m.award[0], m.award[1]) })) confetti();
+  }));
+
+afterAlso('roundScore', () => {
+  const g = G(), d = Math.abs(g.teams[0].score - g.teams[1].score);
+  const k = 'rs' + g.r;
+  if(g.hostOnce && g.hostOnce[k]) return;
+  if(d >= 5) Host.once(k, 'big');
+  else if(d <= 1) Host.once(k, 'close');
+});
+afterAlso('sudden', () => { const g = G(); Host.once('sd' + (g.sdRounds || 1), 'sudden'); });
+afterAlso('final', () => { const g = G(); Host.once('final', g.winner == null ? 'finaltie' : 'final'); });
+
+/* a drumroll as the answer comes up for the room */
+afterAlso('answer', () => { const g = G(); if(!NOHOST()) drumOnce('a' + g.r + '-' + g.seat); });
+afterAlso('reveal', () => { const g = G(); if(NOHOST()) drumOnce('v' + g.r + '-' + g.seat); });
+afterAlso('mapJudge', () => { const s = G().mapGame; drumOnce('m' + s.i); });
+afterAlso('flagJudge', () => { const s = G().flagGame; drumOnce('f' + s.i); });
+
+/* ==========================================================================
    24. ACTIONS
    ========================================================================== */
 const ACT = {
@@ -7340,6 +7770,8 @@ const ACT = {
     Snd.soft(); render();
   },
   setNum(e){ S.settings[e.dataset.k] = +e.value; saveSettings(); },
+  hostVoicePick(e){ S.settings.hostVoiceName = e.value; saveSettings(); Host.test(); },
+  hostTest(){ Host.test(); },
   toggle(e){ const k = e.dataset.k; S.settings[k] = !S.settings[k]; saveSettings(); render(); },
   vol(e){ S.settings.volume = (+e.value) / 100; saveSettings(); Snd.resume(); Snd.vol(S.settings.volume); Snd.soft(); },
   testAlarm(){ Snd.resume(); Snd.alarm(); },
@@ -7381,6 +7813,7 @@ const ACT = {
     const i = +e.dataset.i, g = G(), rd = curRound();
     if(!g.teams[i].ll.dbl) return;
     rd.dbl[i] = !rd.dbl[i];
+    if(rd.dbl[i]) Host.say('ll_dbl', { t:i });
     Snd.soft();
     render();
   },
@@ -7492,6 +7925,7 @@ const ACT = {
     }
     t.ll[key] = false;
     rd.llUsed[i].push(key);
+    Host.say('ll_' + key, { t:i });
     toast(t.name + ' used ' + LL[key].name + '.');
   },
   cdToggle(){ CD.toggle(); },
@@ -7504,17 +7938,18 @@ const ACT = {
     rd.res[g.seat] = { correct:v, stolen:false };
     if(v){
       const p = pointValue(rd, ti);
+      Host.say('correct', { t:ti });
       rd.pts[ti] += p; award(ti, p);
       go('answer');
-    } else { Snd.wrong(); go(NOHOST() ? 'answer' : 'steal'); }
+    } else { Snd.wrong(); Host.say(NOHOST() ? 'wrong' : ['wrong', 'steal'], { t:ti }); go(NOHOST() ? 'answer' : 'steal'); }
   },
   afterAnswer(){ afterSeat(); },
   toStealReveal(){ Timer.stop(); go('stealReveal'); },
   judgeSteal(e){
     const v = e.dataset.v === '1', g = G(), rd = curRound(), owner = curTeam(), th = otherTeam(owner);
     rd.res[g.seat].stolen = v;
-    if(v){ const p = pointValue(rd, owner); rd.pts[th] += p; award(th, p, 'steal'); }
-    else Snd.wrong();
+    if(v){ const p = pointValue(rd, owner); Host.say('stolen', { t:th }); shake(); rd.pts[th] += p; award(th, p, 'steal'); }
+    else { Snd.wrong(); Host.say('nosteal', { t:th }); }
     go('answer');
   },
   nextRound(){ nextRound(); },
@@ -7874,7 +8309,7 @@ const ACT = {
       '<div class="btn-row center"><button class="btn ghost" data-act="closeModal">Keep playing</button>' +
       '<button class="btn danger" data-act="quitYes">Leave</button></div></div>');
   },
-  quitYes(){ closeModal(); Timer.stop(); S.game = null; S.screen = 'home'; render(); },
+  quitYes(){ closeModal(); Timer.stop(); Host.hush(); S.game = null; S.screen = 'home'; render(); },
   closeModal(){ closeModal(); },
   newGame(){ S.game = null; S.setup = defaultSetup(); S.screen = 'setup'; render(); },
   exportResult(){
@@ -8126,7 +8561,7 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   const t = e.target.closest('[data-act]');
   if(!t) return;
-  if(['setNum','bf','qType','qThemeSel','qMapImg'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
+  if(['setNum','bf','qType','qThemeSel','qMapImg','hostVoicePick'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
 });
 el('modal').addEventListener('click', e => {
   if(e.target.id !== 'modal') return;
