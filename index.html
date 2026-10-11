@@ -1167,7 +1167,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.4', date:'09 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.5', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2514,7 +2514,9 @@ const FLAGS = [["us", "United States", "veasy", ""],
   ["gp", "Guadeloupe", "expert", "French overseas region — unofficial local flag"],
   ["ah", "Austria-Hungary", "expert", "Former country — civil ensign, 1869–1918"],
   ["svn", "South Vietnam", "expert", "Former country, 1955–1975"],
-  ["za28", "South Africa (1928–1994)", "expert", "Former flag"]];
+  ["za28", "South Africa (1928–1994)", "expert", "Former flag"],
+  ["chr", "Christiania", "expert", "Self-governing commune in Copenhagen, Denmark"],
+  ["epo", "Esperanto", "expert", "Flag of the Esperanto language and movement"]];
 /* Each flag is a bank row (type 'flag', built in buildSeedBank) so it shows in
    the bank, can be deleted there, and can be hand-picked in Setup. The bank row
    carries the words; the picture is found from `flag`, its file key. */

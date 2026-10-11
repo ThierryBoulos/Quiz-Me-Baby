@@ -264,3 +264,5 @@ Licences: most are public domain. The others are credited here as their licences
 | `ah.svg` | Austria-Hungary | Expert | [Ensign of Austro-Hungarian civil fleet (1869-1918).svg](https://commons.wikimedia.org/wiki/File:Ensign_of_Austro-Hungarian_civil_fleet_(1869-1918).svg) | Public domain |
 | `svn.svg` | South Vietnam | Expert | [Flag of South Vietnam.svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Vietnam.svg) | Public domain |
 | `za28.svg` | South Africa (1928–1994) | Expert | [Flag of South Africa (1928–1994, dark colors).svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Africa_(1928%E2%80%931994,_dark_colors).svg) | Public domain |
+| `chr.svg` | Christiania | Expert | [Flag of Christiania.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Christiania.svg) | Public domain |
+| `epo.svg` | Esperanto | Expert | [Flag of Esperanto.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Esperanto.svg) | Public domain |
