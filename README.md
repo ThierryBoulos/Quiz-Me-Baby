@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.5 · 11 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.6 · 11 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.5', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.6', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -129,7 +129,15 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 1. **Pens down — reveal** (or the clock) shows the title, the full legend and a fact sheet to read out.
 2. You rule: **Team A**, **Team B**, **Both — a point each**, or **Nobody**. The idea counts, not the exact wording.
 3. It is a real best-of: once a team cannot be caught, the remaining maps are skipped.
-4. **Level after three — even at nothing each — another map comes out, and another, until somebody gets one.** The whole rest of the bank is the tie-break reserve. Only if it truly runs out does it fall back to *Your call, host*.
+4. **Level after three — even at nothing each — the host decides:** *Another map*, or *Stop here — 1 point each*. Read the room. The same choice comes back after every tie-breaker that is still level.
+
+**Levels.** Every built-in map is **Easy**, **Medium** or **Hard**, and Setup shows the three as small buttons under Guess the Map — tick one or several, and the three maps are shared out evenly between them. When the ticked levels run out (swaps and tie-breakers), the next-nearest level steps in: the next **easier** one, or the next harder one from Easy. Maps you upload yourself play at every level.
+
+| Level | Maps |
+|---|---|
+| Easy | New Seven Wonders · Seven Summits · 2026 World Cup cities · World Cup winners · Nuclear weapons · The euro |
+| Medium | Olympic medals · Olympic hosts · Time zones · Drive on the left · Monarchies · G7/G20 · Schengen |
+| Hard | Corruption index · Women's vote · Vikings · Landlocked · One neighbour · WWII neutrals |
 
 **Show a hint** — one per map, for whoever holds the phone — puts the map's subject on screen (History, Sport, Geography, Politics…) without naming it; the clock keeps running. **Change this map** swaps in one not already in play. **Enlarge** (or tap the map) fills the screen; tap a spot to zoom in there, drag to look around, tap again to zoom out — pinch-zoom is off app-wide, so this is how you read fifty year labels on a phone. The countdown keeps running in the corner.
 

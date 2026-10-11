@@ -1167,7 +1167,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.5', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.6', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1954,6 +1954,7 @@ const SEED_SAYSAME = [
      rlabels text printed on a country only at the reveal
      pts    [lat, lon, name, [dx, dy, anchor]] — exact coordinates, name shown at reveal
      lines  parallels drawn at the reveal (the Equator)
+     level  easy / medium / hard — Setup can play one or several
      topic  the one hint, a subject area ("History", "Sport") shown only when
             the phone holder presses Hint — it narrows the field, never names it
    The title is the answer, so it never appears until the reveal. A `hint` is
@@ -1965,6 +1966,7 @@ const MC = { gold:'#F5C518', vio:'#9B7BFF', org:'#FF9F43', coral:'#FF5566', mint
 const SEED_MAPS = [
   { key:'lht', view:'world',
     topic:'Law',
+    level:'medium',
     title:'Countries that drive on the left',
     answer:'Which side of the road they drive on — gold drives on the left',
     notes:'About 75 countries and territories drive on the left — roughly a third of the world’s people. Mostly the old British Empire, plus Japan, Thailand, Indonesia and Mozambique. Source: Wikipedia, Left- and right-hand traffic.',
@@ -1974,6 +1976,7 @@ const SEED_MAPS = [
 
   { key:'cpi', view:'world',
     topic:'Politics',
+    level:'hard',
     title:'How corrupt every country is — Corruption Perceptions Index 2025',
     answer:'Corruption — Transparency International’s Corruption Perceptions Index',
     notes:'Transparency International, CPI 2025 (published February 2026): 182 countries scored from 0 (highly corrupt) to 100 (very clean). Cleanest: Denmark, 89. Bottom: Somalia and South Sudan, 9. Grey = not scored.',
@@ -1990,6 +1993,7 @@ const SEED_MAPS = [
 
   { key:'vote', view:'europe',
     topic:'Politics',
+    level:'hard',
     title:'The year women won the vote, on equal terms with men',
     answer:'When women got the vote — the year each country gave women the same voting rights as men',
     notes:'Equal terms with men. Several let some women vote earlier: the UK in 1918 (over-30s only), Norway in 1907 (with a property limit), Portugal in 1931 (educated women only). Switzerland waited until 1971 — and its last canton, Appenzell Innerrhoden, until 1990. The Vatican holds no elections for anyone. Source: Wikipedia, Women’s suffrage.',
@@ -2007,6 +2011,7 @@ const SEED_MAPS = [
 
   { key:'vikings', view:'northatl',
     topic:'History',
+    level:'hard',
     title:'Everywhere the Vikings reached',
     answer:'The Vikings — how far they sailed, raided and traded from Scandinavia',
     notes:'c. 793–1110. West to Newfoundland (L’Anse aux Meadows — tree rings date the wood cutting to exactly 1021), east down the Russian rivers to Constantinople, Baghdad and the Caspian. Lindisfarne 793, Seville 844, Paris 845. Jerusalem: King Sigurd the Crusader, 1110.',
@@ -2028,6 +2033,7 @@ const SEED_MAPS = [
 
   { key:'monarch', view:'world',
     topic:'Politics',
+    level:'medium',
     title:'Every country that still has a king, queen or emperor',
     answer:'Monarchies — gold have their own monarch, purple share King Charles III',
     notes:'43 monarchies. 28 have their own (Japan’s emperor, Saudi Arabia, Spain, Thailand, Morocco…), and 15 Commonwealth realms share King Charles III — the UK, Canada, Australia, New Zealand, Jamaica and more. The Vatican counts: the Pope is an elected absolute monarch. Source: Wikipedia, List of current monarchies.',
@@ -2038,6 +2044,7 @@ const SEED_MAPS = [
 
   { key:'landlocked', view:'world',
     topic:'Geography',
+    level:'hard',
     title:'Every landlocked country',
     answer:'Landlocked countries — no coastline at all',
     notes:'44 UN countries plus Kosovo have no sea coast. Only two are doubly landlocked — surrounded entirely by other landlocked countries: Liechtenstein and Uzbekistan. Kazakhstan is the biggest; the Caspian is a lake. Bolivia lost its coast to Chile in the War of the Pacific (1879–84) and still has a navy.',
@@ -2046,6 +2053,7 @@ const SEED_MAPS = [
 
   { key:'olympics', view:'world',
     topic:'Sport',
+    level:'medium',
     title:'Every country that has hosted the Summer Olympics',
     answer:'Summer Olympics hosts',
     notes:'19 countries, Athens 1896 to Paris 2024. The USA leads with four (St Louis 1904, LA 1932 and 1984, Atlanta 1996) — LA 2028 makes five. Britain and France have three each. Russia is shaded for Moscow 1980 (USSR). Africa has never hosted.',
@@ -2054,6 +2062,7 @@ const SEED_MAPS = [
 
   { key:'wcwinners', view:'world',
     topic:'Sport',
+    level:'easy',
     title:'Every country that has won the World Cup',
     answer:'FIFA World Cup winners — with how many times each has won it',
     notes:'Only eight nations have ever won it. Brazil 5 (1958, 62, 70, 94, 2002) · Germany 4 (1954, 74 and 90 as West Germany, 2014) · Italy 4 (1934, 38, 82, 2006) · Argentina 3 (1978, 86, 2022) · France 2 (1998, 2018) · Uruguay 2 (1930, 50) · Spain 2 (2010, and 2026 — 1–0 over Argentina after extra time) · England 1 (1966, shaded here on the whole UK). Source: FIFA.',
@@ -2063,6 +2072,7 @@ const SEED_MAPS = [
 
   { key:'oneneighbour', view:'world',
     topic:'Geography',
+    level:'hard',
     title:'Every country that borders only one other country',
     answer:'Countries with exactly one neighbour by land',
     notes:'Portugal (Spain), Ireland and the UK (each other), South Korea (North Korea), Haiti and the Dominican Republic (each other), Qatar (Saudi Arabia), Brunei (Malaysia), Timor-Leste and Papua New Guinea (Indonesia), Gambia (Senegal), Lesotho (South Africa), Monaco (France), San Marino and the Vatican (Italy) — and Bahrain, whose only border is a checkpoint on an artificial island in the middle of the King Fahd Causeway. Canada and Denmark were on this list until June 2022, when they split Hans Island in the Arctic down the middle and gained a 1.3 km land border with each other. Source: Wikipedia, List of countries and territories by number of land borders.',
@@ -2073,6 +2083,7 @@ const SEED_MAPS = [
 
   { key:'timezones', view:'world',
     topic:'Geography',
+    level:'medium',
     title:'How many time zones every country spans',
     answer:'Time zones — how many each country spans, overseas territories included (shaded with their country)',
     notes:'France has the most: 12, thanks to its overseas territories from Polynesia to the Indian Ocean (13 counting its Antarctic claim). Then Russia and the USA 11, Australia and the UK 9, Canada and New Zealand 5, Brazil, Denmark (with Greenland) and Mexico 4. China, nearly as wide as the USA, uses just one. Source: Wikipedia, List of time zones by country.',
@@ -2104,6 +2115,7 @@ const SEED_MAPS = [
 
   { key:'medals', view:'world',
     topic:'Sport',
+    level:'medium',
     title:'Every country’s all-time Summer Olympic medal count',
     answer:'All-time Summer Olympic medals — every country shaded by its total, numbers on the 11 with 500 or more',
     notes:'Through Paris 2024: USA 2,774 · Russia 1,623 · Germany 1,418 · Great Britain 986 · France 824 · China 727 · Italy 658 · Australia 594 · Japan 542 · Hungary 530 · Sweden 514. Russia includes the Soviet Union, the Russian Empire, the 1992 Unified Team and the ROC; Germany includes East and West Germany. Other defunct teams — Czechoslovakia, Yugoslavia and the like — are not credited to today’s countries. 140 countries on the map have won at least one. Source: Wikipedia, All-time Olympic Games medal table.',
@@ -2135,6 +2147,7 @@ const SEED_MAPS = [
 
   { key:'nukes', view:'world',
     topic:'Politics',
+    level:'easy',
     title:'Every country with nuclear weapons',
     answer:'Nuclear-armed countries',
     notes:'Nine: the USA, Russia, the UK, France, China, India, Pakistan, North Korea — and Israel, which has never confirmed it. Russia and the USA hold around 90% of all warheads. South Africa built six bombs and dismantled them. Source: SIPRI Yearbook 2025.',
@@ -2145,6 +2158,7 @@ const SEED_MAPS = [
 
   { key:'g20', view:'world',
     topic:'Economics',
+    level:'medium',
     title:'The G7 and the rest of the G20',
     answer:'The G20 — gold is the G7, purple the rest of the G20',
     notes:'The G20 is 19 countries plus the European Union and, since 2023, the African Union. The G7 inner circle: the US, Canada, the UK, France, Germany, Italy and Japan. Russia was in the G8 until it was suspended in 2014.',
@@ -2155,6 +2169,7 @@ const SEED_MAPS = [
 
   { key:'euro', view:'europe',
     topic:'Politics',
+    level:'easy',
     title:'Every country that uses the euro',
     answer:'The euro — every country that uses it, in the EU or not',
     notes:'21 EU members use the euro — Bulgaria joined on 1 January 2026. Six more use it without being in the EU: Andorra, Monaco, San Marino and the Vatican by agreement, Montenegro and Kosovo on their own. Denmark has a legal opt-out.',
@@ -2163,6 +2178,7 @@ const SEED_MAPS = [
 
   { key:'ww2neutral', view:'europe',
     topic:'History',
+    level:'hard',
     title:'The countries that stayed neutral in World War II',
     answer:'WWII neutrals — gold stayed out the whole war, orange only joined the Allies at the very end',
     notes:'Ireland (which called the war “The Emergency”), Portugal, Spain, Switzerland and Sweden, plus Andorra, Liechtenstein and the Vatican, stayed out. Neutral Spain still sent the “Blue Division” of volunteers to fight for Germany on the Eastern Front. San Marino was bombed by the RAF in June 1944 and declared war on Germany that September; Turkey declared war in February 1945 — the price of a seat at the founding of the UN. Denmark, Norway, the Netherlands, Belgium, Luxembourg and Iceland were neutral too, until they were invaded. Source: Wikipedia, Neutral powers during World War II.',
@@ -2173,6 +2189,7 @@ const SEED_MAPS = [
 
   { key:'schengen', view:'europe',
     topic:'Politics',
+    level:'medium',
     title:'The Schengen Area — Europe without border checks',
     answer:'The Schengen Area — passport-free travel',
     notes:'29 members: 25 EU countries plus Iceland, Norway, Switzerland and Liechtenstein. Romania and Bulgaria became full members on 1 January 2025. Ireland opted out and Cyprus hasn’t joined. Monaco, San Marino and the Vatican are open de facto. Named after a village in Luxembourg.',
@@ -2183,6 +2200,7 @@ const SEED_MAPS = [
 
   { key:'wonders', view:'world',
     topic:'Landmarks',
+    level:'easy',
     title:'The New Seven Wonders of the World',
     answer:'The New Seven Wonders of the World',
     notes:'Picked in a 2007 worldwide public vote run by the New7Wonders Foundation. The Great Pyramid of Giza, the last survivor of the ancient seven, was given honorary status rather than a place on the list.',
@@ -2196,6 +2214,7 @@ const SEED_MAPS = [
 
   { key:'summits', view:'world', ata:true,
     topic:'Nature',
+    level:'easy',
     title:'The Seven Summits — the highest mountain on each continent',
     answer:'The Seven Summits — the highest peak on every continent',
     notes:'Everest 8,849 m · Aconcagua 6,961 m · Denali 6,190 m · Kilimanjaro 5,895 m · Elbrus 5,642 m · Vinson 4,892 m · Puncak Jaya 4,884 m. Some lists use Australia’s Kosciuszko (2,228 m) instead of Puncak Jaya.',
@@ -2209,6 +2228,7 @@ const SEED_MAPS = [
 
   { key:'wc2026', view:'namerica',
     topic:'Sport',
+    level:'easy',
     title:'The 16 host cities of the 2026 World Cup',
     answer:'The 2026 FIFA World Cup host cities',
     notes:'11 in the USA, 3 in Mexico, 2 in Canada — 48 teams and 104 matches, 11 June to 19 July 2026. The opener was at Mexico City’s Estadio Azteca, the first stadium to host games at three World Cups; the final at MetLife Stadium, New York New Jersey, where Spain beat Argentina 1–0 after extra time.',
@@ -2589,7 +2609,7 @@ function buildSeedBank(){
   }); });
   SEED_MAPS.forEach(function(m){ out.push({
     id:hash('map:' + m.key), question:m.title, answer:m.answer, notes:m.notes, theme:'',
-    type:'map', difficulty:'', use_with:'', map:m.key, src:'seed'
+    type:'map', difficulty:'', use_with:'', map:m.key, level:m.level, src:'seed'
   }); });
   return out;
 }
@@ -2762,7 +2782,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 20;   // bumped when the built-in bank changes
+const SEED_VERSION = 21;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -3223,19 +3243,44 @@ function mapOK(q){ return !!q && q.type === 'map' && (!!mapSpec(q) || !!q.img); 
    months, and then the mini-game would silently drop off the card. So the
    fresh ones always go first, and the played ones queue up behind them
    instead of vanishing. */
-function mapPool(skip){
-  const all = S.bank.filter(q => mapOK(q) && !(skip && skip.has(q.id)));
+const MAP_LEVELS = { easy:'Easy', medium:'Medium', hard:'Hard' };
+const MAP_ORDER = ['easy', 'medium', 'hard'];
+function mapLevelsOf(c){
+  const want = (c && c.mapLevels) || MAP_ORDER;
+  const ok = MAP_ORDER.filter(k => want.indexOf(k) > -1);
+  return ok.length ? ok : MAP_ORDER.slice();
+}
+/* A host's own map has no level, so it plays at every level. */
+const mapAt = (q, levels) => !q.level || levels.indexOf(q.level) > -1;
+function mapQueue(test, skip){
+  const all = S.bank.filter(q => mapOK(q) && test(q) && !(skip && skip.has(q.id)));
   return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
 }
-/* Hand-picks first, in the order ticked; the bank fills the rest. Everything
-   after the first MAP_LEGS is tie-break reserve — the whole remaining bank,
-   because a tie-break here is "until somebody gets one". */
+/* The ticked levels share the maps EVENLY — one from each level in turn,
+   shuffled within each turn — with the host's own maps as one more queue.
+   When they run dry, the next-nearest level steps in: the next EASIER one
+   first (or the next harder, from Easy), then the rest. */
+function mapPool(levels, skip){
+  const queues = levels.map(l => mapQueue(q => q.level === l, skip))
+    .concat([mapQueue(q => !q.level, skip)]);
+  const out = [];
+  for(let i = 0; queues.some(q => i < q.length); i++)
+    out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
+  const lo = MAP_ORDER.indexOf(levels[0]), hi = MAP_ORDER.indexOf(levels[levels.length - 1]);
+  const rank = (l) => { const i = MAP_ORDER.indexOf(l); return i < lo ? lo - i : i > hi ? 10 + i - hi : 20; };
+  MAP_ORDER.filter(l => levels.indexOf(l) < 0).sort((a, b) => rank(a) - rank(b))
+    .forEach(l => out.push.apply(out, mapQueue(q => q.level === l, skip)));
+  return out;
+}
+/* Hand-picks first, in the order ticked; the levels fill the rest. Everything
+   after the first MAP_LEGS is swap and tie-break reserve. */
 function mapDeck(cfg){
+  const levels = mapLevelsOf(cfg);
   const picked = ((cfg && cfg.pickMap) || [])
     .map(id => S.bank.find(q => q.id === id))
-    .filter(mapOK)
+    .filter(q => mapOK(q) && mapAt(q, levels))
     .slice(0, MAP_LEGS);
-  return picked.concat(mapPool(new Set(picked.map(q => q.id))));
+  return picked.concat(mapPool(levels, new Set(picked.map(q => q.id))));
 }
 
 /* ---- loading the geometry ---- */
@@ -3543,7 +3588,7 @@ function buildGame(cfg){
     done:{},                   // key -> true once that mini-game has finished
     mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
     saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
-    mapGame:{ qs:mpLegs, spare:mpSpare, base:mpLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+    mapGame:{ levels:mapLevelsOf(cfg), qs:mpLegs, spare:mpSpare, base:mpLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     flagGame:{ levels:fgLevels, qs:fgLegs, spare:fgSpare, base:fgLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     auction:null,
     r:0, seat:0, sub:'intro', miniPlayed:false,
@@ -3596,7 +3641,7 @@ function schedule(){
 const AUCTION_SCREENS = ['auctionIntro','auctionBid','auctionRun','auctionLeg','auctionResult'];
 const CLOSEST_SCREENS = ['miniIntro','miniQ','miniEntry','miniSummary'];
 const SAYSAME_SCREENS = ['sayIntro','sayQ','sayJudge','saySummary'];
-const MAP_SCREENS = ['mapIntro','mapQ','mapJudge','mapSummary'];
+const MAP_SCREENS = ['mapIntro','mapQ','mapJudge','mapTie','mapSummary'];
 const FLAG_SCREENS = ['flagIntro','flagQ','flagJudge','flagSummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
@@ -3652,7 +3697,7 @@ function render(){
      them — left out, it renders 88px of padding inside a box already sized to
      the viewport and the page scrolls by exactly that much. */
   document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ','flagQ'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapSummary','flagSummary'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapTie','mapSummary','flagSummary'].indexOf(S.screen) > -1);
   /* the enlarged map belongs to the screen that opened it */
   if(S.tmp.mzFor && S.tmp.mzFor !== S.screen) closeMapZoom();
   document.body.classList.toggle('homemode', S.screen === 'home');
@@ -3708,7 +3753,7 @@ function renderHUD(){
   } else if(SAYSAME_SCREENS.indexOf(S.screen) > -1){
     label = '<b>DON&rsquo;T SAY THE SAME AS ME</b> &nbsp;·&nbsp; ' + sayLegLabel();
   } else if(MAP_SCREENS.indexOf(S.screen) > -1){
-    label = '<b>GUESS THE MAP</b> &nbsp;·&nbsp; ' + (S.screen === 'mapSummary' ? 'Final' : mapLegLabel());
+    label = '<b>GUESS THE MAP</b> &nbsp;·&nbsp; ' + (S.screen === 'mapSummary' ? 'Final' : S.screen === 'mapTie' ? 'Level' : mapLegLabel());
   } else if(FLAG_SCREENS.indexOf(S.screen) > -1){
     label = '<b>GUESS THE FLAG</b> &nbsp;·&nbsp; ' + (S.screen === 'flagSummary' ? 'Final' : flagLegLabel());
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
@@ -3867,7 +3912,8 @@ SCREENS.rules = function(){
       li('The host reveals it and rules. The idea counts, not the exact wording. <strong>Both right — a point each.</strong> Nobody right — nobody scores.'),
       li('<strong>One hint per map</strong> — press it and the map&rsquo;s subject comes up: History, Sport, Geography&hellip; Same hint for both teams.'),
       li('Best of ' + MAP_LEGS + '. Once a team cannot be caught, the rest are not played.'),
-      li('Level after ' + MAP_LEGS + ' — even at nothing each? <strong>Another map comes out, and another, until somebody gets one.</strong>')
+      li('Three levels — <strong>easy, medium, hard</strong> — chosen in Setup, one or several, shared out evenly.'),
+      li('Level after ' + MAP_LEGS + ' — even at nothing each? <strong>The host decides: another map, or stop there with a point each</strong> — and decides again after every tied tie-breaker.')
     ])) +
 
     ruleBlock('09', 'Guess the Flag', ul([
@@ -4179,6 +4225,10 @@ SCREENS.setup = function(){
             (on ? ' <strong style="color:var(--gold)">' + miniEach + ' pts' + (slot ? ' · ' + slot : '') + '</strong>' : '') +
           '</span></span>' +
           '<span class="sw"></span></button>' +
+          (k === 'map' && on
+            ? '<div class="flag-lvl" role="group" aria-label="Guess the Map level">' + MAP_ORDER.map(l =>
+                '<button data-act="mapLevel" data-v="' + l + '" aria-pressed="' + (mapLevelsOf(c).indexOf(l) > -1) + '">' + MAP_LEVELS[l] + '</button>').join('') + '</div>'
+            : '') +
           (k === 'flag' && on
             ? '<div class="flag-lvl" role="group" aria-label="Guess the Flag level">' + Object.keys(FLAG_LEVELS).map(l =>
                 '<button data-act="flagLevel" data-v="' + l + '" aria-pressed="' + (flagLevelsOf(c).indexOf(l) > -1) + '">' + FLAG_LEVELS[l] + '</button>').join('') + '</div>'
@@ -4321,7 +4371,7 @@ const MINI_PICKS = {
   saysame:{ store:'pickSaySame', type:'saysame', cap:SAYSAME_LEGS, label:"Don't Say the Same as Me",
             help:'Prompts, in the order you tick them. Anything short is dealt from the bank as usual — vast prompts play first, tight ones last.' },
   map:    { store:'pickMap', type:'map', cap:MAP_LEGS, label:'Guess the Map',
-            help:'Maps, in the order you tick them. Anything short is drawn from the bank, and the rest wait as tie-breakers.' },
+            help:'Maps at tonight&rsquo;s level(s), in the order you tick them. Anything short is drawn from those levels, and the rest wait as tie-breakers.' },
   flag:   { store:'pickFlag', type:'flag', cap:FLAG_LEGS, label:'Guess the Flag',
             help:'Flags at tonight&rsquo;s level(s), in the order you tick them. Anything short is dealt from the level, and the rest wait as swaps and tie-breakers.' }
 };
@@ -4335,7 +4385,7 @@ function miniPickBlocks(only){
        picker offers every one — fresh first, played ones after and tagged —
        rather than an empty list on a table that has been through all twenty. */
     const pool = m.type === 'map'
-      ? S.bank.filter(mapOK).sort((a, b) => isFresh(b) - isFresh(a))
+      ? S.bank.filter(q => mapOK(q) && mapAt(q, mapLevelsOf(c))).sort((a, b) => isFresh(b) - isFresh(a))
       : m.type === 'flag'
       ? S.bank.filter(q => flagOK(q) && flagLevelsOf(c).indexOf(q.level) > -1)
           .sort((a, b) => (isFresh(b) - isFresh(a)) || a.question.localeCompare(b.question))
@@ -4357,7 +4407,7 @@ function miniPickBlocks(only){
         (m.type === 'closest' ? '<span class="qa">' + esc(q.answer) + '</span>'
          : m.type === 'saysame' ? '<span class="qa dim">' + esc(q.pool.join(' · ')) + '</span>'
          /* a map's title IS its answer; the line under it says what kind of map */
-         : m.type === 'map' ? '<span class="qa dim">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' : 'Your own map') +
+         : m.type === 'map' ? '<span class="qa dim">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' + (q.level ? ' · ' + MAP_LEVELS[q.level] : '') : 'Your own map') +
              (isFresh(q) ? '' : ' · played before') + '</span>'
          : m.type === 'flag' ? '<span class="qa dim">' + esc(q.notes || FLAG_LEVELS[q.level]) + (isFresh(q) ? '' : ' · played before') + '</span>'
          : q.notes ? '<span class="qa dim">' + esc(q.notes) + '</span>' : '') +
@@ -5350,14 +5400,14 @@ SCREENS.mapIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">Guess<br>the Map</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + (s.levels || MAP_ORDER).map(l => MAP_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> A map goes up — no title, just the colours. <strong>' + MAP_SECS + ' seconds.</strong></li>' +
         '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>what the map shows</strong>, at the same time.' + (NOHOST() ? ' Keep it face down.' : ' Captains hand it to the host.') + '</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> ' + (NOHOST() ? 'Reveal it, turn the answers over, and rule together.' : 'The host reveals it and rules.') + ' Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
-        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level — even at nothing each — and another map comes out, <strong>until somebody gets one</strong>.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level at the end? The host decides: <strong>another map</strong>, or <strong>stop with a point each</strong>.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="mapStart">Show map 1</button></div>' +
@@ -5433,6 +5483,23 @@ SCREENS.mapJudge = function(){
 };
 AFTER.mapJudge = function(){
   if(needsGeo(G().mapGame.qs[G().mapGame.i])) mapWaitGeo();
+};
+
+SCREENS.mapTie = function(){
+  const g = G(), s = g.mapGame, more = !!(s.spare && s.spare.length);
+  return '<div class="fits">' +
+    mapBand() +
+    '<div class="center stack" style="gap:8px">' +
+      '<div class="eyebrow gold">' + (s.tieLegs ? 'Still level' : 'Level after ' + s.base + ' maps') + '</div>' +
+      '<h2 class="display">' + (s.wins[0] ? s.wins[0] + ' map' + (s.wins[0] > 1 ? 's' : '') + ' each' : 'No maps each') + '</h2>' +
+      '<p class="reader" style="max-width:44ch;margin:0 auto">Your call: one more map to settle it, or stop here and give both teams a point.</p>' +
+    '</div>' +
+    scoreBig() +
+    '<div class="btn-row center">' +
+      '<button class="btn ghost lg" data-act="mapStop">Stop here — 1 point each</button>' +
+      '<button class="btn gold lg" data-act="mapMore"' + (more ? '' : ' disabled') + '>' + (more ? 'Another map' : 'No maps left') + '</button>' +
+    '</div>' +
+  '</div>';
 };
 
 SCREENS.mapSummary = function(){
@@ -6034,7 +6101,7 @@ SCREENS.bank = function(){
             : q.type === 'map'     ? '<span class="badge ok">Map</span>'
             : q.type === 'flag'    ? '<span class="badge ok">Flag</span>'
             : '<span class="badge line">Standard</span>') + '</td>' +
-    '<td>' + (q.type === 'flag' ? esc(FLAG_LEVELS[q.level] || '') : esc(Cap(q.difficulty))) + '</td>' +
+    '<td>' + (q.type === 'flag' ? esc(FLAG_LEVELS[q.level] || '') : q.type === 'map' ? esc(MAP_LEVELS[q.level] || '') : esc(Cap(q.difficulty))) + '</td>' +
     '<td>' + (q.use_with ? '<code style="font-size:11px;color:var(--a)">' + esc(q.use_with) + '</code>' : '<span class="dim">—</span>') + '</td>' +
     '<td>' + (S.used.has(q.id) ? '<span class="badge no">played</span>' : '') + '</td>' +
     '<td><button class="btn sm ghost danger" data-act="qDel" data-id="' + q.id + '">Del</button></td></tr>').join('');
@@ -6533,16 +6600,9 @@ function mapAfterLeg(){
   const left = Math.max(0, s.base - s.i);    // base maps not yet played
   if(s.i < s.base && lead <= left){ go('mapQ'); return; }
   if(lead === 0){
-    if(s.spare && s.spare.length){
-      s.qs.push(s.spare.shift());
-      s.tieLegs++;
-      toast(s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next map decides it.' : 'Nobody on the board yet — next map.', 3600);
-      go('mapQ');            // s.i already points at the new map
-      return;
-    }
-    s.done = true;
-    s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no maps left in the bank. Your call.' };
-    go('mapSummary');
+    /* Level after the three (or after a tie-breaker): the host reads the room —
+       another map, or stop here with a point each. */
+    go('mapTie');
     return;
   }
   const winner = s.wins[0] > s.wins[1] ? 0 : 1;
@@ -6802,6 +6862,14 @@ const ACT = {
   pickClearAll(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); repaintPicker(); },
   pickClear(){ S.setup.picks = {}; Object.keys(MINI_PICKS).forEach(k => { S.setup[MINI_PICKS[k].store] = []; }); render(); },
   pickDone(){ closeModal(); },
+  mapLevel(e){
+    const v = e.dataset.v, cur = mapLevelsOf(S.setup);
+    const next = cur.indexOf(v) > -1 ? cur.filter(x => x !== v) : cur.concat([v]);
+    if(!next.length) return toast('Keep at least one level.');
+    S.setup.mapLevels = MAP_ORDER.filter(k => next.indexOf(k) > -1);
+    S.setup.pickMap = (S.setup.pickMap || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && mapAt(q, next); });
+    Snd.soft(); render();
+  },
   stdToggle(){ S.setup.standard = S.setup.standard === false; Snd.soft(); render(); },
   /* levels toggle on and off — any mix, but never none */
   flagLevel(e){
@@ -7110,7 +7178,7 @@ const ACT = {
   mapSwap(){
     const g = G(), s = g.mapGame;
     const inPlay = new Set(s.qs.map(q => q.id));
-    const pool = mapPool(inPlay);
+    const pool = mapPool(s.levels || MAP_ORDER, inPlay);
     if(!pool.length) return toast('No other map left in the bank.');
     const q = pool[0];
     s.spare = (s.spare || []).filter(x => x.id !== q.id);
@@ -7130,6 +7198,24 @@ const ACT = {
     else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes map ' + (s.i + 1) + '.'); }
     s.i++;
     mapAfterLeg();
+  },
+  mapMore(){
+    const s = G().mapGame;
+    if(!s.spare || !s.spare.length) return toast('No maps left.');
+    s.qs.push(s.spare.shift());
+    s.tieLegs++;
+    go('mapQ');                // s.i already points at the new map
+  },
+  mapStop(){
+    const g = G(), s = g.mapGame;
+    if(s.awarded) return;
+    s.done = true; s.awarded = true;
+    s.award = [1, 1];
+    g.teams[0].score += 1; g.teams[1].score += 1;
+    s.verdict = { winner:null, needsHost:false,
+      note:'Level after ' + s.i + ' map' + (s.i > 1 ? 's' : '') + ' — called there, a point each.' };
+    Snd.point();
+    go('mapSummary');
   },
   mapAward(e){ awardMap(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
   afterMap(){
