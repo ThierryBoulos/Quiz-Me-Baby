@@ -241,7 +241,7 @@ Every flag is also a row in the **question bank** (type *Flag*, with its picture
 
 ## Guess the Cocktail or Dish
 
-The ingredients come up **one at a time, with their amounts** (ml and oz for drinks, grams and ounces for food) — a new one every **5 seconds**, the least telling first and the giveaway last: the cinnamon comes last on a cinnamon roll, the espresso last on an Espresso Martini. Once the whole list is up there are **10 more seconds**, then it is revealed.
+The ingredients come up **one at a time, with their amounts** (ml and oz for drinks, grams and ounces for food) — a new one every **3 seconds**, the least telling first and the giveaway last: the cinnamon comes last on a cinnamon roll, the espresso last on an Espresso Martini. Once the whole list is up there are **8 more seconds**, then it is revealed (35 seconds at most, for a 10-ingredient list).
 
 **First captain to call it answers.** The host taps who called it, and the list and the clock stop while they answer. **One go per team**: get it wrong and you are out of that one — the list keeps coming for the other team. Both out, or time up, and nobody scores it. Best of 10; level at the end and another one comes out until somebody gets one. **Change this one** swaps it before anybody has had a go.
 

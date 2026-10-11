@@ -2328,8 +2328,8 @@ const FLAG_LEVELS = { veasy:'Very easy', easy:'Easy', medium:'Medium', hard:'Har
 /* Guess the Cocktail or Dish: the ingredients come up one at a time, the
    giveaway last. Six levels — cocktails and dishes, each easy/medium/hard. */
 const DISH_LEGS = 10;
-const DISH_STEP = 5;    // seconds between ingredients
-const DISH_LAST = 10;   // seconds still to answer once the whole list is up
+const DISH_STEP = 3;    // seconds between ingredients
+const DISH_LAST = 8;    // seconds still to answer once the whole list is up
 const DISH_LEVELS = { 'c-easy':'Easy', 'c-medium':'Medium', 'c-hard':'Hard', 'd-easy':'Easy', 'd-medium':'Medium', 'd-hard':'Hard' };
 const dishKind = (q) => (q && q.level || '')[0] === 'c' ? 'Cocktail' : 'Dish';
 const dishLevelName = (l) => (l[0] === 'c' ? 'Cocktails' : 'Dishes') + ' · ' + (DISH_LEVELS[l] || '');
