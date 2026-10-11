@@ -532,6 +532,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
    The ask / steal / mini question screens must fit a laptop without scrolling. */
 body.playmode main{padding-top:4px;padding-bottom:6px}
 .play{min-height:calc(100svh - 96px);display:flex;flex-direction:column;gap:clamp(6px,1.1vh,14px)}
+.play .spot{justify-content:safe center}
 .play .spot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:clamp(12px,2vh,28px) var(--sp-3);gap:clamp(6px,1vh,12px)}
 .play .q-theme{font-size:clamp(10px,1.5vh,12px);padding:6px 14px}
@@ -651,7 +652,10 @@ body.playmode #hud{padding-top:6px;padding-bottom:8px}
 .mini-band.tight .eyebrow{font-size:11px;letter-spacing:.14em}
 /* team colours on an eyebrow — .tn.a/.tn.b already do this for inline names */
 .eyebrow.a{color:var(--a)} .eyebrow.b{color:var(--b)}
-.mini-dots{display:flex;gap:6px}
+.mini-band{flex-wrap:wrap;max-width:100%;row-gap:6px}
+.mini-band .eyebrow{white-space:nowrap}
+.mini-dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-width:0}
+@media(max-width:520px){ .mini-dots{gap:4px} .mini-dots i{width:16px} .mini-band{padding:10px 14px} }
 .mini-dots i{width:24px;height:6px;border-radius:3px;background:rgba(255,255,255,.16)}
 .mini-dots i.a{background:var(--a)} .mini-dots i.b{background:var(--b)} .mini-dots i.t{background:var(--gold)}
 /* ---------- BATTLE OF THE CAPTAINS ----------
@@ -748,7 +752,24 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 /* The bidding and naming screens are .play, which has no height ceiling — on a
    laptop the category, the tally, the standing bid and the card ran past the
    fold. Cap them the way .fits caps the result screens. */
-.play.auction-bid,.play.auction-run{max-height:calc(100svh - 96px);justify-content:center}
+.play.auction-bid,.play.auction-run{justify-content:safe center}
+/* Short phones (and an installed app under the notch, where the score bar is
+   taller): the count, the clock and the tap button all shrink rather than
+   pushing the category off the top. Centring is "safe", so if it still does
+   not fit it scrolls instead of clipping. */
+@media(max-height:900px){
+  .auction-run .auc-count .n{font-size:clamp(40px,8vh,70px)}
+  .auction-run .timer{width:min(160px,20svh)}
+  .auction-run .timer .val{font-size:min(52px,8svh)}
+  .auction-run .timer .cap{display:none}
+  .auction-run .auc-tap{min-height:52px}
+  .auction-run .card.pad{padding:10px}
+}
+@media(max-height:620px){
+  .auction-run .timer{width:min(120px,17svh)}
+  .auction-run .auc-count .n{font-size:40px}
+  .auction-run .help{display:none}
+}
 .auction-bid .q-text,.auction-run .q-theme{margin-top:0}
 .auction-bid .spot,.auction-run .spot{padding-top:0}
 .fits .bt-counter{gap:clamp(8px,1.8vh,22px)}
@@ -1167,7 +1188,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.6', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.7', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3177,7 +3198,7 @@ function auctionDraw(skip){
    The order is deliberate: legs are sorted by how WIDE the prompt is — how
    many different answers the pool holds — from vast down to tight. Round one
    might be "name a fast food chain", where the host's word is one of a dozen
-   and dodging it is easy. Round nine might be a coin flip. The night is
+   and dodging it is easy. Round nine is a coin flip. The night is
    supposed to tighten.
    ========================================================================== */
 const SAYSAME_SECS = 10;
@@ -3205,18 +3226,28 @@ function drawSaySame(q){
    breaks the promise a hand-pick makes everywhere else in this app: chosen on
    purpose means it plays. */
 function saySameDeck(cfg){
+  /* Legs 1 to 8 are prompts with plenty of answers (four or more), widest
+     first; leg 9 — the last — is a two-way coin flip (heads or tails, cats or
+     dogs). Tie-breakers go back to the wide prompts. Fresh prompts first;
+     played ones only if the fresh ones run short. */
+  const has = (q) => q && (q.pool || []).length >= 2;
+  const two = (q) => q.pool.length === 2;
   const picked = ((cfg && cfg.pickSaySame) || [])
-    .map(id => S.bank.find(q => q.id === id))
-    .filter(q => q && (q.pool || []).length >= 2)
-    .slice(0, SAYSAME_LEGS);
+    .map(id => S.bank.find(q => q.id === id)).filter(has).slice(0, SAYSAME_LEGS);
   const ids = new Set(picked.map(q => q.id));
-  const rest = shuffle(saySamePool().filter(q => !ids.has(q.id)));
+  const all = S.bank.filter(q => q.type === 'saysame' && has(q) && !ids.has(q.id));
+  const freshFirst = (list) => shuffle(list.filter(isFresh)).concat(shuffle(list.filter(q => !isFresh(q))));
+  const wide  = freshFirst(all.filter(q => q.pool.length >= 4));
+  const three = freshFirst(all.filter(q => q.pool.length === 3));
+  const coins = freshFirst(all.filter(two));
 
-  const fillNeeded = Math.max(0, SAYSAME_LEGS - picked.length);
-  const primary = picked.concat(rest.slice(0, fillNeeded))
-    .sort((a, b) => b.pool.length - a.pool.length);   // vast-to-tight, within the chosen nine
-  const spare = rest.slice(fillNeeded, fillNeeded + 6);   // held back for tie-breaker legs
-  return primary.concat(spare);
+  const last = picked.filter(two)[0] || coins[0] || null;
+  const body = picked.filter(q => q !== last);
+  const fill = wide.concat(three).filter(q => q !== last);
+  while(body.length < SAYSAME_LEGS - (last ? 1 : 0) && fill.length) body.push(fill.shift());
+  body.sort((x, y) => y.pool.length - x.pool.length);       // widest first
+  const primary = body.concat(last ? [last] : []);
+  return primary.concat(fill.slice(0, 6));                  // tie-breakers: more wide prompts
 }
 
 /* ==========================================================================
@@ -4895,7 +4926,7 @@ SCREENS.miniSummary = function(){
     '<div class="tbl-wrap"><table><thead><tr><th>Leg</th><th>Question</th><th>Answer</th><th>' + esc(g.teams[0].name) + '</th><th>' + esc(g.teams[1].name) + '</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<div class="btn-row center">' +
       '<button class="btn ghost" data-act="quit">End game</button>' +
-      '<button class="btn gold lg" data-act="afterMini">Back to the standard rounds</button>' +
+      '<button class="btn gold lg" data-act="afterMini">' + afterMiniLabel('closest') + '</button>' +
     '</div>' +
   '</div>';
 };
@@ -5236,7 +5267,7 @@ SCREENS.auctionResult = function(){
     '</div>' +
     /* No scoreboard here — the running score is in the tracker at the top of
        the screen throughout, and repeating it cost 282px of a phone. */
-    '<div class="btn-row center"><button class="btn gold lg" data-act="afterAuction">Back to the rounds</button></div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="afterAuction">' + afterMiniLabel('auction') + '</button></div>' +
   '</div>';
 };
 
@@ -5358,7 +5389,7 @@ SCREENS.saySummary = function(){
     '<div class="tbl-wrap"><table><thead><tr><th>Leg</th><th>Prompt</th><th>Word</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<div class="btn-row center">' +
       '<button class="btn ghost" data-act="quit">End game</button>' +
-      '<button class="btn gold lg" data-act="afterSaySame">Back to the standard rounds</button>' +
+      '<button class="btn gold lg" data-act="afterSaySame">' + afterMiniLabel('saysame') + '</button>' +
     '</div>' +
   '</div>';
 };
@@ -5537,7 +5568,7 @@ SCREENS.mapSummary = function(){
     '<div class="tbl-wrap"><table><thead><tr><th>Map</th><th>It showed</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<div class="btn-row center">' +
       '<button class="btn ghost" data-act="quit">End game</button>' +
-      '<button class="btn gold lg" data-act="afterMap">Back to the standard rounds</button>' +
+      '<button class="btn gold lg" data-act="afterMap">' + afterMiniLabel('map') + '</button>' +
     '</div>' +
   '</div>';
 };
@@ -5668,7 +5699,7 @@ SCREENS.flagSummary = function(){
     '<div class="tbl-wrap"><table><thead><tr><th>Flag</th><th>It was</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<div class="btn-row center">' +
       '<button class="btn ghost" data-act="quit">End game</button>' +
-      '<button class="btn gold lg" data-act="afterFlag">Back to the standard rounds</button>' +
+      '<button class="btn gold lg" data-act="afterFlag">' + afterMiniLabel('flag') + '</button>' +
     '</div>' +
   '</div>';
 };
@@ -6463,6 +6494,16 @@ function afterSeat(){
 /* The single gate every mini-game goes through. Called when a round has just
    finished and when a mini-game has just finished, so two scheduled against
    the same round run one after the other before the next round starts. */
+/* What the button at the end of a mini-game will actually do next — the
+   next mini-game owed, the next standard round, the Battle, or the end. */
+function afterMiniLabel(cur){
+  const g = G();
+  const owed = (g.plan || []).filter(p => p.after === g.r && !g.done[p.key] && p.key !== cur);
+  if(owed.length) return 'Next — ' + MINI_GAMES[owed[0].key].name;
+  if(g.r + 1 < g.rounds.length) return 'Back to the standard rounds';
+  if(g.hasBattle && !g.done.battle && cur !== 'battle') return 'Next — ' + MINI_GAMES.battle.name;
+  return 'See the final scores';
+}
 function runNextMini(){
   const g = G();
   const owed = minisAfter(g.r);
@@ -7138,7 +7179,13 @@ const ACT = {
     s.qs.forEach(q => inPlay.add(q.id));
     (s.spare || []).forEach(q => inPlay.add(q.id));
 
-    let pool = saySamePool().filter(q => !inPlay.has(q.id));
+    /* keep the shape: the last leg swaps for another coin flip, every other
+       leg for another prompt with plenty of answers */
+    const lastLeg = s.i === s.base - 1, cur = s.qs[s.i];
+    const fits = (q) => lastLeg && cur.pool.length === 2 ? q.pool.length === 2 : q.pool.length >= 4;
+    const avail = saySamePool().filter(q => !inPlay.has(q.id));
+    let pool = avail.filter(fits);
+    if(!pool.length) pool = avail;
     if(!pool.length) return toast('No spare prompt left in the bank.');
 
     const q = drawSaySame(shuffle(pool)[0]);

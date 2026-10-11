@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.6 · 11 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.7 · 11 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.6', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.7', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -118,7 +118,7 @@ They carry `type: auction` and a **blank theme, no difficulty, no pairing ticker
 4. **Dodged it while the other team did not?** You take the leg. Both dodged it, or both said it — **tie, a point each**, the same rule every mini-game here uses.
 5. **Most legs out of nine** takes the mini-game points. Level after nine? Straight into a tie-breaker prompt, same as Closest To Wins.
 
-**The order tightens on purpose.** Legs are sorted by how wide the prompt is — how many different answers its pool holds — from vast down to tight. Round one might be *"name a fast food chain"*, where the host's word is one of a dozen and dodging it is easy money. Round nine might be a coin flip. **Change this prompt** is on the thinking screen, same shape as Auction's category swap — available only before the clock runs out, so the prompt can't be swapped away from once the room has heard it.
+**The order tightens on purpose.** Legs are sorted by how wide the prompt is — how many different answers its pool holds — from vast down to tight. Round one might be *"name a fast food chain"*, where the host's word is one of a dozen and dodging it is easy money. Legs one to eight are always prompts with **four or more** possible answers; **leg nine is the one coin flip** (heads or tails, cats or dogs), and tie-breakers go back to wide prompts. **Change this prompt** keeps that shape — another coin flip on the last leg, another wide prompt anywhere else — and is on the thinking screen, same shape as Auction's category swap — available only before the clock runs out, so the prompt can't be swapped away from once the room has heard it.
 
 **40 prompts** ship in the bank, spanning true binaries (*heads or tails, odds or evens*) up through wide-open categories (cheeses, fast food chains, dog breeds, countries). Each carries `type: saysame`, a **blank theme, no difficulty** — same reasoning as the Auction — and a **pool of candidate answers** instead of one fixed answer: one is drawn at random each time the prompt is played, so replaying "Name a cheese" does not always land on Feta. The pool's length **is** the prompt's scope, and that number is exactly what drives the vast-to-tight ordering above.
 
