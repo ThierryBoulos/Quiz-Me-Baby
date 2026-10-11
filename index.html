@@ -819,6 +819,33 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
   .flag-frame .flag-img{height:clamp(110px,30svh,300px)}
   .flag-judge .flag-frame .flag-img{height:clamp(100px,26svh,260px)}
 }
+/* Guess the Cocktail or Dish: every row is drawn from the start and lit as it
+   comes due, so the list never jumps; an unlit row is an empty slot */
+.play.map-play.dish-play{max-height:none}
+.dish-frame{min-width:0;align-self:center;width:100%}
+.ings{list-style:none;display:grid;gap:clamp(4px,.8vh,8px);width:100%;max-width:760px;margin:0 auto;padding:0}
+.ing{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:clamp(6px,1.1vh,11px) 16px;border-radius:12px;
+  border:1px dashed var(--line);background:rgba(255,255,255,.02);min-height:clamp(32px,5.4vh,50px)}
+.ing > *{visibility:hidden}
+.ing.on{border-style:solid;border-color:var(--line-2);background:rgba(255,255,255,.06);animation:reveal .5s var(--ease) both}
+.ing.on > *{visibility:visible}
+.ing-n{font-weight:700;font-size:clamp(15px,2.5vh,23px);color:var(--ink);line-height:1.2}
+.ing-q{flex:none;color:var(--gold);font-weight:700;font-size:clamp(12px,1.9vh,16px);text-align:right;white-space:nowrap}
+.ings.long .ing{min-height:clamp(28px,4.4vh,44px);padding-block:clamp(4px,.8vh,9px)}
+.ings.long .ing-n{font-size:clamp(14px,2.2vh,21px)}
+.dish-count{font-size:13px;color:var(--ink-2);font-weight:600}
+.dish-count b{color:var(--gold);font-size:16px}
+.dish-buzz{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dish-buzz .btn{min-height:clamp(52px,8vh,72px);font-size:clamp(14px,2.2vh,18px)}
+.dish-buzz .btn.out{opacity:.35;text-decoration:line-through}
+.flag-lvl .lvl-tag{align-self:center;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);flex:none;width:84px}
+.dish-judge .q-note{text-align:left;margin:0;max-width:none;font-size:15px}
+.dish-judge .help a{color:var(--gold)}
+@media(max-width:760px){
+  .ing{padding-inline:12px}
+  .ing-q{white-space:normal;max-width:45%}
+  .dish-play .map-side .dish-count{grid-area:l;justify-self:start}
+}
 .map-hint{font-size:14px;color:var(--ink-2);text-align:center}
 .map-hint strong{color:var(--gold);letter-spacing:.04em}
 .map-hint-btn{align-self:center}
@@ -1188,7 +1215,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.7', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.8', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2298,6 +2325,14 @@ SEED_MAPS.forEach(function(m){
 const FLAG_LEGS = 10;
 const FLAG_SECS = 15;
 const FLAG_LEVELS = { veasy:'Very easy', easy:'Easy', medium:'Medium', hard:'Hard', expert:'Expert' };
+/* Guess the Cocktail or Dish: the ingredients come up one at a time, the
+   giveaway last. Six levels — cocktails and dishes, each easy/medium/hard. */
+const DISH_LEGS = 10;
+const DISH_STEP = 5;    // seconds between ingredients
+const DISH_LAST = 10;   // seconds still to answer once the whole list is up
+const DISH_LEVELS = { 'c-easy':'Easy', 'c-medium':'Medium', 'c-hard':'Hard', 'd-easy':'Easy', 'd-medium':'Medium', 'd-hard':'Hard' };
+const dishKind = (q) => (q && q.level || '')[0] === 'c' ? 'Cocktail' : 'Dish';
+const dishLevelName = (l) => (l[0] === 'c' ? 'Cocktails' : 'Dishes') + ' · ' + (DISH_LEVELS[l] || '');
 const FLAGS = [["us", "United States", "veasy", ""],
   ["gb", "United Kingdom", "veasy", ""],
   ["fr", "France", "veasy", ""],
@@ -2603,6 +2638,105 @@ function flagImg(q){
     'onerror="this.outerHTML=\'<div class=&quot;map-wait&quot;>Could not load the flag — check the connection.</div>\'">';
 }
 
+/* --------------------------------------------------------------------------
+   GUESS THE COCKTAIL OR DISH — the catalogue
+   [key, name, level, source, ingredients]. Each ingredient is "amount — what",
+   in the order they are shown: the least telling first, the giveaway last.
+   Cocktails are the IBA's official specs where the IBA has one; every recipe's
+   page is in `source` and in the bank.
+   -------------------------------------------------------------------------- */
+const DISHES = /*DISHES-DATA*/[
+  ["mojito", "Mojito", "c-easy", "https://iba-world.com/iba-cocktail/mojito/", ["To top — Soda water", "2 tsp — White cane sugar", "20 ml (¾ oz) — Fresh lime juice", "45 ml (1½ oz) — White Cuban rum", "Garnish — Sprigs of mint and slice of lime", "6 — Mint sprigs"]],
+  ["margarita", "Margarita", "c-easy", "https://iba-world.com/iba-cocktail/margarita/", ["15 ml (½ oz) — Freshly squeezed lime juice", "20 ml (¾ oz) — Triple sec", "Garnish — Half salt rim (optional)", "50 ml (1¾ oz) — Tequila 100% agave"]],
+  ["pina-colada", "Piña Colada", "c-easy", "https://iba-world.com/iba-cocktail/pina-colada/", ["50 ml (1¾ oz) — White rum", "50 ml (1¾ oz) — Fresh pineapple juice", "Garnish — Slice of pineapple with a cocktail cherry", "30 ml (1 oz) — Coconut cream"]],
+  ["cosmopolitan", "Cosmopolitan", "c-easy", "https://iba-world.com/iba-cocktail/cosmopolitan/", ["Garnish — Lemon twist", "15 ml (½ oz) — Fresh lime juice", "15 ml (½ oz) — Cointreau", "40 ml (1¼ oz) — Vodka citron", "30 ml (1 oz) — Cranberry juice"]],
+  ["aperol-spritz", "Aperol Spritz", "c-easy", "https://iba-world.com/iba-cocktail/spritz/", ["Splash — Soda water", "Garnish — Slice of orange", "90 ml (3 oz) — Prosecco", "60 ml (2 oz) — Aperol"]],
+  ["bloody-mary", "Bloody Mary", "c-easy", "https://iba-world.com/iba-cocktail/bloody-mary/", ["To taste — Pepper", "To taste — Celery salt", "2 dashes — Worcestershire sauce", "To taste — Tabasco", "15 ml (½ oz) — Fresh lemon juice", "Garnish — Celery, lemon wedge (optional)", "45 ml (1½ oz) — Vodka", "90 ml (3 oz) — Tomato juice"]],
+  ["daiquiri", "Daiquiri", "c-easy", "https://iba-world.com/iba-cocktail/daiquiri/", ["2 bar spoons — Superfine sugar", "20 ml (¾ oz) — Fresh lime juice", "60 ml (2 oz) — White Cuban rum"]],
+  ["long-island-iced-tea", "Long Island Iced Tea", "c-easy", "https://iba-world.com/iba-cocktail/long-island-iced-tea/", ["30 ml (1 oz) — Simple syrup", "25 ml (¾ oz) — Lemon juice", "Garnish — Lemon slice (optional)", "15 ml (½ oz) — Cointreau", "15 ml (½ oz) — Gin", "15 ml (½ oz) — Vodka", "15 ml (½ oz) — White rum", "15 ml (½ oz) — Tequila", "To top — Cola"]],
+  ["sex-on-the-beach", "Sex on the Beach", "c-easy", "https://iba-world.com/iba-cocktail/sex-on-the-beach/", ["Garnish — Half orange slice", "40 ml (1¼ oz) — Fresh orange juice", "40 ml (1¼ oz) — Vodka", "40 ml (1¼ oz) — Cranberry juice", "20 ml (¾ oz) — Peach schnapps"]],
+  ["tequila-sunrise", "Tequila Sunrise", "c-easy", "https://iba-world.com/iba-cocktail/tequila-sunrise/", ["Garnish — Half orange slice or an orange zest", "90 ml (3 oz) — Fresh orange juice", "15 ml (½ oz) — Grenadine syrup", "45 ml (1½ oz) — Tequila"]],
+  ["negroni", "Negroni", "c-medium", "https://iba-world.com/iba-cocktail/negroni/", ["Garnish — Half orange slice", "30 ml (1 oz) — Sweet red vermouth", "30 ml (1 oz) — Gin", "30 ml (1 oz) — Bitter Campari"]],
+  ["old-fashioned", "Old Fashioned", "c-medium", "https://iba-world.com/iba-cocktail/old-fashioned/", ["Few dashes — Plain water", "Garnish — Orange slice or zest, and a cocktail cherry", "45 ml (1½ oz) — Bourbon or rye whiskey", "Few dashes — Angostura bitters", "1 — Sugar cube"]],
+  ["espresso-martini", "Espresso Martini", "c-medium", "https://iba-world.com/iba-cocktail/espresso-martini/", ["10 ml (¼ oz) — Sugar syrup", "50 ml (1¾ oz) — Vodka", "30 ml (1 oz) — Kahlúa", "Garnish — 3 coffee beans", "1 — Strong espresso"]],
+  ["moscow-mule", "Moscow Mule", "c-medium", "https://iba-world.com/iba-cocktail/moscow-mule/", ["Garnish — Lime slice", "10 ml (¼ oz) — Fresh lime juice", "45 ml (1½ oz) — Smirnoff vodka", "120 ml (4 oz) — Ginger beer"]],
+  ["whiskey-sour", "Whiskey Sour", "c-medium", "https://iba-world.com/iba-cocktail/whiskey-sour/", ["Garnish — Half orange slice and maraschino cherry (optionally orange zest)", "Few drops — Egg white (optional)", "20 ml (¾ oz) — Sugar syrup", "25 ml (¾ oz) — Fresh lemon juice", "45 ml (1½ oz) — Bourbon whiskey"]],
+  ["caipirinha", "Caipirinha", "c-medium", "https://iba-world.com/iba-cocktail/caipirinha/", ["4 teaspoons — White cane sugar", "1 — Lime, cut into small wedges", "60 ml (2 oz) — Cachaça"]],
+  ["white-russian", "White Russian", "c-medium", "https://www.diffordsguide.com/cocktails/recipe/2093/white-russian-cocktail", ["Garnish — Freshly grated nutmeg", "60 ml (2 oz) — Vodka", "30 ml (1 oz) — Whipping cream", "30 ml (1 oz) — Coffee liqueur"]],
+  ["cuba-libre", "Cuba Libre", "c-medium", "https://iba-world.com/iba-cocktail/cuba-libre/", ["Garnish — Lime wedge", "10 ml (¼ oz) — Fresh lime juice", "50 ml (1¾ oz) — White rum", "120 ml (4 oz) — Cola"]],
+  ["bellini", "Bellini", "c-medium", "https://iba-world.com/iba-cocktail/bellini/", ["100 ml (3¼ oz) — Prosecco", "50 ml (1¾ oz) — White peach purée"]],
+  ["irish-coffee", "Irish Coffee", "c-medium", "https://iba-world.com/iba-cocktail/irish-coffee/", ["50 ml (1¾ oz) — Fresh cream (chilled)", "1 teaspoon — Sugar", "50 ml (1¾ oz) — Irish whiskey", "120 ml (4 oz) — Hot coffee"]],
+  ["pornstar-martini", "Pornstar Martini", "c-hard", "https://iba-world.com/iba-cocktail/porn-star-martini/", ["2 bar spoons — Vanilla sugar", "50 ml (1¾ oz) — Vanilla vodka", "20 ml (¾ oz) — Passion fruit liqueur", "50 ml (1¾ oz) — Passion fruit purée", "Garnish — Passion fruit cup and sugar", "50 ml (1¾ oz) — Champagne (served on the side)"]],
+  ["hugo-spritz", "Hugo Spritz", "c-hard", "https://www.diffordsguide.com/cocktails/recipe/5039/hugo-spritz", ["60 ml (2 oz) — Soda water", "Garnish — Lime wedge and mint sprigs bouquet", "8 — Fresh mint leaves", "60 ml (2 oz) — Prosecco", "40 ml (1¼ oz) — Elderflower liqueur"]],
+  ["pisco-sour", "Pisco Sour", "c-hard", "https://iba-world.com/iba-cocktail/pisco-sour/", ["20 ml (¾ oz) — Simple syrup", "30 ml (1 oz) — Fresh lemon juice", "1 — Raw whole egg white", "Garnish — Few dashes of Amargo bitters on top", "60 ml (2 oz) — Pisco"]],
+  ["mint-julep", "Mint Julep", "c-hard", "https://iba-world.com/iba-cocktail/mint-julep/", ["2 tsp — Water", "1 tsp — Powdered sugar", "60 ml (2 oz) — Bourbon whiskey", "Garnish — Mint sprig", "4 — Fresh mint sprigs"]],
+  ["paloma", "Paloma", "c-hard", "https://iba-world.com/iba-cocktail/paloma/", ["Garnish — Slice of lime", "A pinch — Salt", "5 ml (¼ oz) — Fresh lime", "50 ml (1¾ oz) — 100% agave tequila", "100 ml (3¼ oz) — Pink grapefruit soda"]],
+  ["manhattan", "Manhattan", "c-hard", "https://iba-world.com/iba-cocktail/manhattan/", ["Garnish — Cocktail cherry", "1 dash — Angostura bitters", "20 ml (¾ oz) — Sweet red vermouth", "50 ml (1¾ oz) — Rye whiskey"]],
+  ["mai-tai", "Mai Tai", "c-hard", "https://iba-world.com/iba-cocktail/mai-tai/", ["7.5 ml (¼ oz) — Simple syrup", "30 ml (1 oz) — Fresh squeezed lime juice", "Garnish — Pineapple spear, mint leaves and lime peel", "15 ml (½ oz) — Orange curaçao", "30 ml (1 oz) — Martinique molasses rhum", "30 ml (1 oz) — Amber Jamaican rum", "15 ml (½ oz) — Orgeat syrup (almond)"]],
+  ["amaretto-sour", "Amaretto Sour", "c-hard", "https://www.diffordsguide.com/cocktails/recipe/53/amaretto-sour", ["Garnish — Aromatic bitters (atomised), lemon wheel and maraschino cherry sail", "1 dash — Aromatic bitters", "15 ml (½ oz) — Egg white (pasteurised)", "30 ml (1 oz) — Lemon juice", "60 ml (2 oz) — Amaretto liqueur"]],
+  ["black-russian", "Black Russian", "c-hard", "https://iba-world.com/iba-cocktail/black-russian/", ["50 ml (1¾ oz) — Vodka", "20 ml (¾ oz) — Coffee liqueur"]],
+  ["sangria", "Sangria", "c-hard", "https://www.bbcgoodfood.com/recipes/sangria", ["To fill the jug — Ice", "300 ml (10 oz) — Sparkling water", "3 tbsp — Caster sugar", "1 tsp — Cinnamon", "2 — Pears, chopped", "2 — Lemons (1 chopped, 1 juiced)", "2 — Oranges, chopped", "200 g (7 oz) — Red berries, chopped (strawberries and cherries)", "100 ml (3¼ oz) — Spanish brandy", "750 ml (25 oz) — Light red wine"]],
+  ["hummus", "Hummus", "d-easy", "https://www.bbcgoodfood.com/recipes/hummus", ["1 small — Garlic clove, crushed", "1 — Lemon, juiced, then ½ zested", "60 ml (2 fl oz) — Oil (plus 30 ml / 1 fl oz for a looser consistency)", "1 tbsp — Olive oil, to garnish", "3 tbsp (45 ml) — Tahini", "1 can — Chickpeas, drained"]],
+  ["tabbouleh", "Tabbouleh", "d-easy", "https://www.bbcgoodfood.com/recipes/tabbouleh", ["Juice of 1 — Lemon", "3 tbsp — Olive oil", "200 g (7 oz) — Ripe tomatoes, deseeded and diced", "3 — Spring onions, finely sliced", "50 g (1¾ oz) — Mint, chopped", "50 g (1¾ oz) — Flat-leaf parsley, chopped", "50 g (1¾ oz) — Bulgur wheat"]],
+  ["guacamole", "Guacamole", "d-easy", "https://www.bbcgoodfood.com/recipes/classic-guacamole", ["¼ — Red onion", "2 — Ripe tomatoes", "A few sprigs — Coriander", "2 — Green jalapeños", "1 — Lime, juiced", "To serve — Tortilla chips", "2 — Ripe avocados, halved"]],
+  ["cinnamon-roll", "Cinnamon roll", "d-easy", "https://www.bbcgoodfood.com/recipes/next-level-cinnamon-rolls", ["500 g (1 lb 2 oz) — Strong white bread flour", "200 ml (7 fl oz) — Warm milk", "7 g (¼ oz) sachet — Fast-action dried yeast", "2 — Eggs", "50 g (1¾ oz) — Golden caster sugar", "100 g (3½ oz) + 125 g (4½ oz) — Butter (dough + filling)", "2 tbsp — Golden syrup", "150 g (5¼ oz) — Light brown soft sugar", "50 g (1¾ oz) each — Soft cheese & icing sugar (frosting)", "1 tsp + 2 tbsp — Ground cinnamon"]],
+  ["spaghetti-carbonara", "Spaghetti carbonara", "d-easy", "https://www.bbcgoodfood.com/recipes/ultimate-spaghetti-carbonara-recipe", ["To taste — Sea salt & freshly ground black pepper", "2 plump — Garlic cloves, peeled and left whole", "50 g (1¾ oz) — Unsalted butter", "100 g (3½ oz) — Pancetta", "3 large — Eggs", "50 g (1¾ oz) — Parmesan", "50 g (1¾ oz) — Pecorino cheese", "350 g (12 oz) — Spaghetti"]],
+  ["caesar-salad", "Caesar salad", "d-easy", "https://www.bbcgoodfood.com/recipes/perfect-caesar-salad", ["240 ml (8 fl oz) — Vegetable oil", "60 ml (2 fl oz) — Red wine vinegar", "2 — Garlic cloves", "1 large — Egg", "3 tbsp — Dijon mustard", "4 — Little Gem lettuces, leaves separated and chilled", "225 g (8 oz) — Day-old rustic Italian bread, torn (croutons)", "30 g (1 oz) — Parmigiano-Reggiano, grated (plus shavings)", "10 — Anchovy fillets"]],
+  ["greek-salad", "Greek salad", "d-easy", "https://www.bbcgoodfood.com/recipes/greek-salad", ["1 — Cucumber, peeled, deseeded and chopped", "4 large — Vine tomatoes, cut into wedges", "½ — Red onion, thinly sliced", "1 tsp — Dried oregano", "4 tbsp — Greek extra virgin olive oil", "16 — Kalamata olives", "85 g (3 oz) — Feta cheese, in chunks"]],
+  ["lasagne", "Lasagne", "d-easy", "https://www.bbcgoodfood.com/recipes/classic-lasagne-0", ["Grating — Nutmeg", "200 ml (7 fl oz) — Hot beef stock", "800 g (1 lb 12 oz) — Passata", "90 g (3¼ oz) pack — Prosciutto", "750 g (1 lb 10 oz) — Lean beef mince", "1 batch — White sauce", "125 g (4½ oz) ball — Mozzarella, torn into strips", "300 g (10½ oz) — Fresh lasagne sheets"]],
+  ["pesto", "Pesto", "d-easy", "https://www.bbcgoodfood.com/recipes/classic-pesto", ["2 — Garlic cloves", "150 ml (5 fl oz) — Olive oil", "50 g (1¾ oz) — Parmesan", "50 g (1¾ oz) — Pine nuts", "80 g (2¾ oz) — Basil"]],
+  ["tiramisu", "Tiramisu", "d-easy", "https://www.bbcgoodfood.com/recipes/best-ever-tiramisu", ["400 ml (13½ fl oz) — Double cream", "5 tbsp — Golden caster sugar", "25 g (1 oz) — Dark chocolate", "2 tsp — Cocoa powder", "75 ml (2½ fl oz) — Marsala", "300 ml (10 fl oz) — Coffee (2 tbsp granules + boiling water)", "250 g (9 oz) — Mascarpone", "175 g (6 oz) — Sponge fingers"]],
+  ["paella", "Paella", "d-medium", "https://www.bbcgoodfood.com/recipes/next-level-paella", ["1 — Onion, finely chopped", "2 — Ripe tomatoes, roughly chopped", "100 ml (3½ fl oz) — Dry sherry or white wine", "100 g (3½ oz) — Frozen broad beans or peas", "150 g (5¼ oz) — Cooking chorizo, in chunks", "1 medium (about 300 g / 10½ oz) — Squid, cut into rings", "500 g (1 lb 2 oz) — Mussels", "10 large — Raw tiger prawns, in shells", "Large pinch — Saffron strands", "250 g (9 oz) — Paella rice"]],
+  ["pad-thai", "Pad Thai", "d-medium", "https://www.bbcgoodfood.com/recipes/easy-pad-thai", ["2 tsp — Light muscovado sugar", "½ tsp — Cayenne pepper", "3 tbsp — Lime juice (about 2 limes)", "4 — Spring onions, sliced", "200 g (7 oz) — Cooked peeled tiger prawns", "2 tbsp — Fish sauce (nam pla)", "140 g (5 oz) — Beansprouts", "25 g (1 oz) — Salted peanuts, finely chopped", "125 g (4½ oz) — Rice noodles"]],
+  ["shakshuka", "Shakshuka", "d-medium", "https://www.bbcgoodfood.com/recipes/shakshuka", ["1 tbsp — Olive oil", "1 tsp — Caster sugar", "1 — Garlic clove, sliced", "2 — Red onions, chopped", "1 — Red chilli, deseeded and finely chopped", "Small bunch — Coriander", "2 cans — Cherry tomatoes", "4 — Eggs"]],
+  ["butter-chicken", "Butter chicken", "d-medium", "https://www.bbcgoodfood.com/recipes/butter-chicken", ["1 — Onion, halved and finely sliced", "3 — Garlic cloves, crushed", "1 tbsp — Ginger, finely grated", "Handful — Coriander, chopped", "500 g (1 lb 2 oz) — Passata", "2 tbsp — Cashew nut butter", "2 tbsp — Garam masala", "50 ml (1¾ fl oz) — Double cream", "4 — Skinless chicken breasts, in chunks", "25 g (1 oz) — Butter"]],
+  ["moussaka", "Moussaka", "d-medium", "https://www.bbcgoodfood.com/recipes/moussaka", ["2 — Bay leaves", "200 ml (7 fl oz) — Red wine", "400 g (14 oz) can — Chopped tomatoes", "3 heaped tsp — Dried oregano", "2 tsp — Ground cinnamon", "40 g (1½ oz) each — Unsalted butter & plain flour (béchamel)", "450 ml (15 fl oz) — Whole milk", "550 g (1 lb 3 oz) — Maris Piper potatoes, sliced", "800 g (1 lb 12 oz) — Lamb mince", "3 medium — Aubergines, cut into rounds"]],
+  ["fattoush", "Fattoush", "d-medium", "https://mamaslebanesekitchen.com/salads/fattoush-salad-recipe/", ["3 cloves — Garlic, crushed", "1/2 cup (≈ 120 ml) — Lemon juice, freshly squeezed", "2 lbs (≈ 900 g) — Tomatoes, chopped", "1 lb (≈ 450 g) — Cucumbers (Persian preferred)", "1 bunch each — Mint and Italian parsley", "1/2 bunch — Red radishes", "1/3 cup (≈ 80 ml) — Pomegranate molasses", "2 tbsp — Sumac", "5 loaves — Pita bread (toasted/fried)"]],
+  ["chili-con-carne", "Chili con carne", "d-medium", "https://www.bbcgoodfood.com/recipes/chilli-con-carne-recipe", ["1 large — Onion", "2 — Garlic cloves", "1 — Red pepper", "1 tsp — Ground cumin", "1 tsp — Paprika", "400 g (14 oz) can — Chopped tomatoes", "500 g (1 lb 2 oz) — Lean minced beef", "1 heaped tsp — Hot chilli powder", "410 g (14½ oz) can — Red kidney beans"]],
+  ["risotto", "Risotto", "d-medium", "https://www.bbcgoodfood.com/recipes/saffron-risotto", ["1 — Onion, very finely chopped", "2 tbsp — Butter", "1.2 litres / 2 pints (≈ 5 US cups) — Chicken stock", "125 ml (4¼ fl oz) — Fino sherry or dry white wine", "1 — Egg yolk", "50 g (1¾ oz) — Parmesan, grated", "½ tsp — Saffron", "350 g (12½ oz) — Arborio risotto rice"]],
+  ["ratatouille", "Ratatouille", "d-medium", "https://www.bbcgoodfood.com/recipes/ratatouille", ["1 tbsp — Red wine vinegar", "3 — Garlic cloves, crushed", "1 medium — Onion, thinly sliced", "5 tbsp — Olive oil", "Small bunch — Basil", "4 large ripe — Tomatoes", "2 — Red or yellow peppers", "4 small — Courgettes", "2 large — Aubergines"]],
+  ["baba-ghanoush", "Baba ghanoush", "d-medium", "https://mamaslebanesekitchen.com/dips/baba-ghanouj-recipe/", ["1 tsp — Salt", "1 tbsp — White vinegar", "3 cloves — Garlic, crushed", "1/2 cup (≈ 120 ml) — Fresh lemon juice", "5 tbsp — Tahini paste", "4 medium — Eggplants (aubergines), roasted"]],
+  ["bouillabaisse", "Bouillabaisse", "d-hard", "https://www.bbcgoodfood.com/recipes/bouillabaisse", ["2 strips — Orange peel", "1 — Star anise", "2 tbsp — Pernod", "1 — Fennel bulb", "4 large ripe — Tomatoes", "Large pinch (⅓ tsp) — Saffron strands", "1½ l (≈ 6⅓ US cups) — Fish stock", "300 g (10½ oz) — Mussels", "1 kg (2 lb 3 oz) — Mixed Mediterranean fish fillets (red & grey mullet, monkfish, John Dory, gurnard)"]],
+  ["beef-wellington", "Beef Wellington", "d-hard", "https://www.bbcgoodfood.com/recipes/beef-wellington", ["1 large sprig — Fresh thyme", "100 ml (3½ fl oz) — Dry white wine", "50 g (2 oz) — Butter", "2 — Egg yolks", "250 g (9 oz) — Chestnut mushrooms", "12 slices — Prosciutto", "500 g (1 lb 2 oz) — Puff pastry", "About 1 kg (2 lb 4 oz) — Beef fillet"]],
+  ["coq-au-vin", "Coq au vin", "d-hard", "https://www.bbcgoodfood.com/recipes/coq-au-vin", ["3 thyme sprigs, 2 rosemary sprigs, 2 bay leaves — Bouquet garni", "3 — Garlic cloves", "12 small — Shallots", "250 g (9 oz) — Chestnut mushrooms", "3 tbsp — Brandy or Cognac", "3 rashers, 100 g (3½ oz) — Smoked back bacon", "2 legs (460 g / 1 lb), 4 thighs (650 g / 1 lb 7 oz), 2 breasts (280 g / 10 oz) — Free-range chicken", "600 ml (20 fl oz / ≈ 2½ US cups) — Red wine"]],
+  ["pho", "Pho", "d-hard", "https://www.bbcgoodfood.com/recipes/beef-pho", ["1 — Cinnamon stick", "2 — Star anise", "½ tsp — Cloves", "Large thumb-sized piece — Ginger", "1 — Lime, in wedges", "Handful each — Thai basil and coriander", "1 tbsp — Fish sauce", "1 l (34 fl oz / ≈ 4¼ US cups) — Low-salt beef stock", "230 g (8 oz) — Sirloin steak", "200 g (7 oz) — Flat rice noodles"]],
+  ["mouloukhieh", "Mouloukhieh", "d-hard", "https://www.alphafoodie.com/lebanese-molokhia-with-chicken/", ["2 — Lemons, juiced", "½ cup (≈ 120 ml) — Olive oil", "1 tbsp — Crushed coriander seeds", "2 heads (about 1 cup peeled cloves) — Garlic", "2 cups (≈ 480 ml) — Fresh cilantro (coriander) leaves", "3 lb (≈ 1.4 kg) — Whole chicken", "To serve — Lebanese vermicelli rice", "6 oz (≈ 170 g) — Dried molokhia (jute leaves)"]],
+  ["mansaf", "Mansaf", "d-hard", "https://palestineinadish.com/recipes/main-dishes/mansaf-recipe/", ["3-4 — Cardamom pods", "3 — Bay leaves", "1 — Cinnamon stick", "1/4 tsp — Turmeric", "1 cup (≈ 240 ml) — Roasted almonds (or half pine nuts)", "1 large shrak or 2 medium — Flatbread", "2 cups (≈ 480 ml) — Short-grain rice", "4-5 pieces, about 3 lb (≈ 1.4 kg) — Lamb", "2 cups (≈ 480 ml) — Liquid jameed"]],
+  ["beef-bourguignon", "Beef bourguignon", "d-hard", "https://www.bbcgoodfood.com/recipes/beef-bourguignon", ["3 — Bay leaves", "Small bunch — Thyme", "1 tbsp — Tomato purée", "3 large or 6 normal — Carrots", "400 g (14 oz) — Mushrooms", "500 g (1 lb 2 oz) — Pearl onions or small shallots", "300 g (10½ oz) — Bacon lardons", "1.6 kg (3 lb 8 oz) — Braising steak", "2 bottles — Red wine"]],
+  ["goulash", "Goulash", "d-hard", "https://www.recipetineats.com/hungarian-goulash-recipe/", ["1 — Bay leaf", "1 tsp — Caraway seeds", "5 — Garlic cloves", "2 — Tomatoes", "2 (1 red + 1 yellow) — Bell peppers", "2 — Carrots", "2 — Potatoes", "1 litre / 4 cups — Beef stock", "1 kg (2 lb) — Beef chuck", "1/4 cup (≈ 60 ml) — Hungarian-style paprika"]],
+  ["ceviche", "Ceviche", "d-hard", "https://www.bbcgoodfood.com/recipes/ceviche", ["Good pinch — Caster sugar", "2 tbsp — Extra-virgin olive oil", "Handful — Pitted green olives", "2-3 — Tomatoes", "1 — Red onion", "2-3 — Green chillies", "Bunch — Coriander", "Juice of 8, 250 ml (9 fl oz) — Limes", "500 g (1 lb 2 oz) — Raw firm white fish fillets (haddock, halibut or pollack)"]],
+  ["cheese-fondue", "Cheese fondue", "d-hard", "https://www.bbcgoodfood.com/recipes/classic-cheese-fondue", ["1 clove, halved — Garlic", "1 tbsp (15 ml) — Lemon juice", "2 tsp — Cornflour", "1 tbsp (15 ml) — Kirsch or schnapps", "200 ml (7 fl oz) — Dry white wine", "To serve — Crusty bread, boiled new potatoes, cornichons", "200 g (7 oz) — Emmental, grated", "200 g (7 oz) — Comté or Gruyère, grated"]]];
+const DISH_KEYS = new Set(DISHES.map(d => d[0]));
+const dishOK = (q) => !!q && q.type === 'dish' && DISH_KEYS.has(q.dish) && (q.ings || []).length > 0;
+function dishLevelsOf(c){
+  const want = (c && c.dishLevels) || ['c-medium', 'd-medium'];
+  const ok = Object.keys(DISH_LEVELS).filter(k => want.indexOf(k) > -1);
+  return ok.length ? ok : ['c-medium', 'd-medium'];
+}
+/* shared out evenly over the levels that are on, exactly as the flags are */
+function dishPool(levels, skip){
+  const queues = levels.map(l => {
+    const all = S.bank.filter(q => dishOK(q) && q.level === l && !(skip && skip.has(q.id)));
+    return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
+  });
+  const out = [];
+  for(let i = 0; queues.some(q => i < q.length); i++)
+    out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
+  return out;
+}
+function dishDeck(cfg, levels){
+  const picked = ((cfg && cfg.pickDish) || [])
+    .map(id => S.bank.find(q => q.id === id))
+    .filter(q => dishOK(q) && levels.indexOf(q.level) > -1)
+    .slice(0, DISH_LEGS);
+  return picked.concat(dishPool(levels, new Set(picked.map(q => q.id))));
+}
+/* "45 ml (1½ oz) — White rum" -> ['45 ml (1½ oz)', 'White rum'] */
+function splitIng(t){
+  const i = String(t).indexOf(' — ');
+  return i < 0 ? ['', String(t)] : [t.slice(0, i), t.slice(i + 3)];
+}
+
 function buildSeedBank(){
   const out = [];
   SEED.forEach(function(r){ out.push({
@@ -2627,6 +2761,10 @@ function buildSeedBank(){
   FLAGS.forEach(function(f){ out.push({
     id:'flag:' + f[0], question:f[1], answer:f[1], notes:f[3] || '', theme:'',
     type:'flag', difficulty:'', use_with:'', flag:f[0], level:f[2], src:'seed'
+  }); });
+  DISHES.forEach(function(d){ out.push({
+    id:'dish:' + d[0], question:d[1], answer:d[1], notes:'', theme:'',
+    type:'dish', difficulty:'', use_with:'', dish:d[0], level:d[2], source:d[3], ings:d[4].slice(), src:'seed'
   }); });
   SEED_MAPS.forEach(function(m){ out.push({
     id:hash('map:' + m.key), question:m.title, answer:m.answer, notes:m.notes, theme:'',
@@ -2803,7 +2941,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 21;   // bumped when the built-in bank changes
+const SEED_VERSION = 22;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -2878,9 +3016,10 @@ const RETIRED_SEED = [
       /* pool is an array — a straight !== is always true between two distinct
          array references even when the contents match, which would report a
          false "correction" on every single load. Compare it by content. */
-      const moved = ['question','answer','notes','theme','type','difficulty','use_with','map','flag','level']
+      const moved = ['question','answer','notes','theme','type','difficulty','use_with','map','flag','dish','source','level']
         .some(k => q[k] !== s[k])
-        || JSON.stringify(q.pool || null) !== JSON.stringify(s.pool || null);
+        || JSON.stringify(q.pool || null) !== JSON.stringify(s.pool || null)
+        || JSON.stringify(q.ings || null) !== JSON.stringify(s.ings || null);
       if(moved){ Object.assign(q, s); fixed++; }
     });
 
@@ -3508,10 +3647,11 @@ const MINI_GAMES = {
   saysame:{ key:'saysame', name:"Don't Say the Same as Me",   blurb:'Ten seconds to answer without matching the host.' },
   map:    { key:'map',     name:'Guess the Map',              blurb:'A map, sixty seconds — what does it show?' },
   flag:   { key:'flag',    name:'Guess the Flag',             blurb:'Ten flags, fifteen seconds each — whose is it?' },
+  dish:   { key:'dish',    name:'Guess the Cocktail or Dish', blurb:'The ingredients, one at a time — first captain to call it wins.' },
   battle: { key:'battle',  name:'Battle of the Captains',     blurb:'Ten each, captains only, 7s a shot.' }
 };
 /* the four that get spread through the rounds — the Battle is the finale */
-const INTERLEAVED = ['closest', 'auction', 'saysame', 'map', 'flag'];
+const INTERLEAVED = ['closest', 'auction', 'saysame', 'map', 'flag', 'dish'];
 
 function miniPointValue(N, M){
   if(!M) return 0;
@@ -3590,6 +3730,11 @@ function buildGame(cfg){
   const fgLegs = fgDeck.slice(0, FLAG_LEGS);
   const fgSpare = fgDeck.slice(FLAG_LEGS);   // every other flag at the level: swaps and tie-breakers
 
+  const dsLevels = dishLevelsOf(cfg);
+  const dsDeck = dishDeck(cfg, dsLevels);
+  const dsLegs = dsDeck.slice(0, DISH_LEGS);
+  const dsSpare = dsDeck.slice(DISH_LEGS);
+
   const mk = (t, color) => ({
     name:t.name, captain:t.captain, players:t.players,
     score:0, ll:{ friend:true, dip:true, dbl:true }, color
@@ -3603,7 +3748,8 @@ function buildGame(cfg){
                             .filter(k => k !== 'auction' || auctionPool().length)
                             .filter(k => k !== 'saysame' || ssLegs.length)
                             .filter(k => k !== 'map' || mpLegs.length)
-                            .filter(k => k !== 'flag' || fgLegs.length);
+                            .filter(k => k !== 'flag' || fgLegs.length)
+                            .filter(k => k !== 'dish' || dsLegs.length);
   const hasBattle = wanted.indexOf('battle') > -1;
   /* no standard rounds: the mini-games simply run back to back, from the start */
   const plan = rounds.length ? planMinis(rounds.length, inter) : inter.map(k => ({ key:k, after:0 }));
@@ -3621,6 +3767,7 @@ function buildGame(cfg){
     saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     mapGame:{ levels:mapLevelsOf(cfg), qs:mpLegs, spare:mpSpare, base:mpLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
     flagGame:{ levels:fgLevels, qs:fgLegs, spare:fgSpare, base:fgLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+    dishGame:{ levels:dsLevels, qs:dsLegs, spare:dsSpare, base:dsLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0, leg:dishLeg() },
     auction:null,
     r:0, seat:0, sub:'intro', miniPlayed:false,
     battle:null,
@@ -3674,6 +3821,7 @@ const CLOSEST_SCREENS = ['miniIntro','miniQ','miniEntry','miniSummary'];
 const SAYSAME_SCREENS = ['sayIntro','sayQ','sayJudge','saySummary'];
 const MAP_SCREENS = ['mapIntro','mapQ','mapJudge','mapTie','mapSummary'];
 const FLAG_SCREENS = ['flagIntro','flagQ','flagJudge','flagSummary'];
+const DISH_SCREENS = ['dishIntro','dishQ','dishReveal','dishSummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
   if(CLOSEST_SCREENS.indexOf(S.screen) > -1) return 'closest';
@@ -3681,6 +3829,7 @@ function liveMini(){
   if(SAYSAME_SCREENS.indexOf(S.screen) > -1) return 'saysame';
   if(MAP_SCREENS.indexOf(S.screen) > -1) return 'map';
   if(FLAG_SCREENS.indexOf(S.screen) > -1) return 'flag';
+  if(DISH_SCREENS.indexOf(S.screen) > -1) return 'dish';
   if(BATTLE_SCREENS.indexOf(S.screen) > -1) return 'battle';
   return null;
 }
@@ -3727,8 +3876,8 @@ function render(){
      does fit the window. Any screen using .play or .fits MUST be in one of
      them — left out, it renders 88px of padding inside a box already sized to
      the viewport and the page scrolls by exactly that much. */
-  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ','flagQ'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapTie','mapSummary','flagSummary'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ','flagQ','dishQ'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapTie','mapSummary','flagSummary','dishSummary'].indexOf(S.screen) > -1);
   /* the enlarged map belongs to the screen that opened it */
   if(S.tmp.mzFor && S.tmp.mzFor !== S.screen) closeMapZoom();
   document.body.classList.toggle('homemode', S.screen === 'home');
@@ -3761,6 +3910,7 @@ function renderHUD(){
     || SAYSAME_SCREENS.indexOf(S.screen) > -1
     || MAP_SCREENS.indexOf(S.screen) > -1
     || FLAG_SCREENS.indexOf(S.screen) > -1
+    || DISH_SCREENS.indexOf(S.screen) > -1
     || BATTLE_SCREENS.indexOf(S.screen) > -1);
   if(!inGame){ h.hidden = true; h.innerHTML = ''; return; }
   h.hidden = false;
@@ -3787,6 +3937,8 @@ function renderHUD(){
     label = '<b>GUESS THE MAP</b> &nbsp;·&nbsp; ' + (S.screen === 'mapSummary' ? 'Final' : S.screen === 'mapTie' ? 'Level' : mapLegLabel());
   } else if(FLAG_SCREENS.indexOf(S.screen) > -1){
     label = '<b>GUESS THE FLAG</b> &nbsp;·&nbsp; ' + (S.screen === 'flagSummary' ? 'Final' : flagLegLabel());
+  } else if(DISH_SCREENS.indexOf(S.screen) > -1){
+    label = '<b>COCKTAIL OR DISH</b> &nbsp;·&nbsp; ' + (S.screen === 'dishSummary' ? 'Final' : dishLegLabel());
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
     const b = g.battle;
     label = '<b>BATTLE OF THE CAPTAINS</b>' +
@@ -3953,7 +4105,14 @@ SCREENS.rules = function(){
       li('Both right — <strong>a point each</strong>. Best of ' + FLAG_LEGS + '; level at the end, and another flag comes out until somebody gets one.')
     ])) +
 
-    ruleBlock('10', 'Battle of the Captains', ul([
+    ruleBlock('10', 'Guess the Cocktail or Dish', ul([
+      li('The ingredients come up <strong>one at a time</strong>, with their amounts — a new one every <strong>' + DISH_STEP + ' seconds</strong>, the giveaway last.'),
+      li('Know it? <strong>Captain, call it out.</strong> The first voice gets to answer. <strong>One go per team</strong> — get it wrong and you are out of that one, and the list keeps coming for the other team.'),
+      li('Six levels, chosen in Setup — <strong>cocktails</strong> and <strong>dishes</strong>, each easy, medium or hard. Pick any mix; they are shared out evenly.'),
+      li('Best of ' + DISH_LEGS + '; level at the end, and another one comes out until somebody gets one.')
+    ])) +
+
+    ruleBlock('11', 'Battle of the Captains', ul([
       li('<strong>Captains only.</strong> The room says nothing — and that means nothing.'),
       li('Ten questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot, one captain at a time.'),
       li('Both captains get the <strong>same shape</strong> — five easy, five medium, in the same order — but never the same questions. Different sets, same difficulty, so nobody can claim they drew the harder ten.'),
@@ -3962,18 +4121,19 @@ SCREENS.rules = function(){
       li('It always runs <strong>last</strong>, after the final standard round.')
     ])) +
 
-    ruleBlock('11', 'Winning', ul([
+    ruleBlock('12', 'Winning', ul([
       li('Highest score after the last round takes the night.'),
       li('Tie? <strong>Sudden death</strong> — one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
     ])) +
 
-    ruleBlock('12', 'Playing without a host', ul([
+    ruleBlock('13', 'Playing without a host', ul([
       li('Same game, same rounds, same mini-games — <strong>the TV does the hosting</strong>. Everyone reads the question off the screen.'),
       li('The captain answers out loud, then <strong>Lock it in</strong>: the answer comes straight up for everyone. Whoever is holding the phone taps <strong>Yes</strong> or <strong>No</strong>.'),
       li('<strong>No steals.</strong> Wrong or out of time, and it is the next question.'),
       li(ICON.dip + ' <strong>Double Dip</strong> — say both answers out loud <strong>before</strong> you lock it in. Either one right counts.'),
       li('<strong>The Auction</strong> — the other team does the counting. <strong>The Battle</strong> — show the answer after each one and mark it honestly.'),
-      li('<strong>Guess the Map</strong> and <strong>Guess the Flag</strong> — keep your answers face down until the reveal, then rule together.')
+      li('<strong>Guess the Map</strong> and <strong>Guess the Flag</strong> — keep your answers face down until the reveal, then rule together.'),
+      li('<strong>Guess the Cocktail or Dish</strong> — call it, then show the answer. Wrong, and the other team takes that one.')
     ])) +
 
     '<div class="btn-row center"><button class="btn gold lg" data-act="go" data-to="setup">Right — start a game</button></div>' +
@@ -4249,7 +4409,7 @@ SCREENS.setup = function(){
         const m = MINI_GAMES[k], on = c.minis.indexOf(k) > -1;
         const slot = k === 'battle' ? 'last'
           : (() => { const p = miniPlan.find(x => x.key === k);
-                     return !p ? '' : stdOn ? 'after R' + (p.after + 1) : ['1st','2nd','3rd','4th','5th'][miniPlan.indexOf(p)] || ''; })();
+                     return !p ? '' : stdOn ? 'after R' + (p.after + 1) : ['1st','2nd','3rd','4th','5th','6th'][miniPlan.indexOf(p)] || ''; })();
         return '<button class="tgl mini-row" data-act="miniToggle" data-k="' + k + '" aria-pressed="' + on + '">' +
           '<span><span class="tl">' + m.name + '</span>' +
           '<span class="help">' + m.blurb +
@@ -4263,6 +4423,14 @@ SCREENS.setup = function(){
           (k === 'flag' && on
             ? '<div class="flag-lvl" role="group" aria-label="Guess the Flag level">' + Object.keys(FLAG_LEVELS).map(l =>
                 '<button data-act="flagLevel" data-v="' + l + '" aria-pressed="' + (flagLevelsOf(c).indexOf(l) > -1) + '">' + FLAG_LEVELS[l] + '</button>').join('') + '</div>'
+            : '') +
+          (k === 'dish' && on
+            ? ['c', 'd'].map(kind =>
+                '<div class="flag-lvl" role="group" aria-label="' + (kind === 'c' ? 'Cocktail' : 'Dish') + ' levels">' +
+                  '<span class="lvl-tag">' + (kind === 'c' ? 'Cocktails' : 'Dishes') + '</span>' +
+                  Object.keys(DISH_LEVELS).filter(l => l[0] === kind).map(l =>
+                    '<button data-act="dishLevel" data-v="' + l + '" aria-pressed="' + (dishLevelsOf(c).indexOf(l) > -1) + '">' + DISH_LEVELS[l] + '</button>').join('') +
+                '</div>').join('')
             : '');
       }).join('') +
       '</div>' +
@@ -4404,7 +4572,9 @@ const MINI_PICKS = {
   map:    { store:'pickMap', type:'map', cap:MAP_LEGS, label:'Guess the Map',
             help:'Maps at tonight&rsquo;s level(s), in the order you tick them. Anything short is drawn from those levels, and the rest wait as tie-breakers.' },
   flag:   { store:'pickFlag', type:'flag', cap:FLAG_LEGS, label:'Guess the Flag',
-            help:'Flags at tonight&rsquo;s level(s), in the order you tick them. Anything short is dealt from the level, and the rest wait as swaps and tie-breakers.' }
+            help:'Flags at tonight&rsquo;s level(s), in the order you tick them. Anything short is dealt from the level, and the rest wait as swaps and tie-breakers.' },
+  dish:   { store:'pickDish', type:'dish', cap:DISH_LEGS, label:'Guess the Cocktail or Dish',
+            help:'Cocktails and dishes at tonight&rsquo;s levels, in the order you tick them. Anything short is dealt from those levels, and the rest wait as swaps and tie-breakers.' }
 };
 function miniPicksFor(key){ return (S.setup && S.setup[MINI_PICKS[key].store]) || []; }
 function miniPickBlocks(only){
@@ -4420,6 +4590,9 @@ function miniPickBlocks(only){
       : m.type === 'flag'
       ? S.bank.filter(q => flagOK(q) && flagLevelsOf(c).indexOf(q.level) > -1)
           .sort((a, b) => (isFresh(b) - isFresh(a)) || a.question.localeCompare(b.question))
+      : m.type === 'dish'
+      ? S.bank.filter(q => dishOK(q) && dishLevelsOf(c).indexOf(q.level) > -1)
+          .sort((a, b) => (isFresh(b) - isFresh(a)) || a.level.localeCompare(b.level) || a.question.localeCompare(b.question))
       : S.bank.filter(q => q.type === m.type && isFresh(q) &&
           (m.type !== 'saysame' || (q.pool || []).length >= 2));
     const rows = pool.map(q => {
@@ -4441,6 +4614,7 @@ function miniPickBlocks(only){
          : m.type === 'map' ? '<span class="qa dim">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' + (q.level ? ' · ' + MAP_LEVELS[q.level] : '') : 'Your own map') +
              (isFresh(q) ? '' : ' · played before') + '</span>'
          : m.type === 'flag' ? '<span class="qa dim">' + esc(q.notes || FLAG_LEVELS[q.level]) + (isFresh(q) ? '' : ' · played before') + '</span>'
+         : m.type === 'dish' ? '<span class="qa dim">' + esc(dishLevelName(q.level)) + ' · ' + q.ings.length + ' ingredients' + (isFresh(q) ? '' : ' · played before') + '</span>'
          : q.notes ? '<span class="qa dim">' + esc(q.notes) + '</span>' : '') +
         '</span></button>';
     }).join('');
@@ -5704,6 +5878,172 @@ SCREENS.flagSummary = function(){
   '</div>';
 };
 
+/* ==========================================================================
+   17g. GUESS THE COCKTAIL OR DISH — screens
+   The list is drawn whole and the rows light up one by one, so nothing jumps
+   as they arrive. One clock runs the leg: ingredient k shows at (k-1)·STEP
+   seconds, and LAST more seconds follow the final one. A call pauses it.
+   ========================================================================== */
+function dishLegLabel(){
+  const s = G().dishGame;
+  const i = Math.min(s.i, s.qs.length - 1);
+  return i >= s.base ? 'Tie-breaker ' + (i - s.base + 1) : 'Number ' + (i + 1) + ' of ' + s.base;
+}
+function dishDots(){
+  const s = G().dishGame;
+  let out = '<span class="mini-dots">';
+  for(let i = 0; i < s.qs.length; i++){
+    const r = s.subs[i];
+    out += '<i class="' + (!r ? '' : r.winner === 'none' ? 'n' : r.winner === 0 ? 'a' : 'b') + '"></i>';
+  }
+  return out + '</span>';
+}
+const dishBand = () => '<div class="center"><div class="mini-band tight"><span class="eyebrow gold">' + dishLegLabel() + '</span>' + dishDots() + '</div></div>';
+function dishList(q, shown){
+  return '<ol class="ings' + (q.ings.length > 8 ? ' long' : '') + '">' + q.ings.map((t, i) => {
+    const p = splitIng(t);
+    return '<li class="ing' + (i < shown ? ' on' : '') + '" data-i="' + i + '">' +
+      '<span class="ing-n">' + esc(p[1]) + '</span>' + (p[0] ? '<span class="ing-q">' + esc(p[0]) + '</span>' : '') + '</li>';
+  }).join('') + '</ol>';
+}
+const dishTotal = (q) => (q.ings.length - 1) * DISH_STEP + DISH_LAST;
+
+SCREENS.dishIntro = function(){
+  const g = G(), s = g.dishGame, n = s.base;
+  return '<div class="stack lg intro-screen" style="padding-top:18px">' +
+    '<div class="center stack intro-head" style="gap:10px">' +
+      '<div class="eyebrow gold">Mini-game</div>' +
+      '<h1 class="display">Guess the<br>Cocktail or Dish</h1>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + s.levels.map(dishLevelName).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+    '</div>' +
+    '<div class="card pad lit stack">' +
+      '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
+        '<li><strong style="color:var(--gold)">1.</strong> The ingredients come up <strong>one at a time</strong>, a new one every <strong>' + DISH_STEP + ' seconds</strong>. The giveaway comes last.</li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> Know it? <strong>Captain, call it out</strong> — first voice answers.' + (NOHOST() ? ' Tap your team, say it, then show the answer.' : ' The host taps who called it.') + '</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> <strong>One go per team.</strong> ' + (NOHOST() ? 'Wrong, and the other team takes it.' : 'Wrong, and you are out of that one — the list keeps coming for the other team.') + '</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level at the end, and another one comes out, <strong>until somebody gets one</strong>.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="dishStart">Show number 1</button></div>' +
+  '</div>';
+};
+AFTER.dishIntro = function(){ jingleOnce('dish'); };
+
+SCREENS.dishQ = function(){
+  const g = G(), s = g.dishGame, q = s.qs[s.i], L = s.leg;
+  const n = q.ings.length;
+  const buzzBtn = (t) => L.out[t]
+    ? '<button class="btn lg ' + (t === 0 ? 'teamA' : 'teamB') + ' out" disabled>' + esc(g.teams[t].name) + ' — out</button>'
+    : '<button class="btn lg ' + (t === 0 ? 'teamA' : 'teamB') + '" data-act="dishBuzz" data-w="' + t + '">' + esc(g.teams[t].name) + ' called it</button>';
+  let foot;
+  if(L.buzz == null){
+    foot = '<div class="dish-buzz">' + buzzBtn(0) + buzzBtn(1) + '</div>' +
+      (L.out[0] || L.out[1] ? '' : '<div class="row center"><button class="btn sm ghost" data-act="dishSwap">Change this one</button></div>');
+  } else {
+    const t = L.buzz;
+    foot = '<div class="card pad lit stack dish-call" style="gap:10px">' +
+      '<h3 class="display" style="font-size:clamp(16px,2.2vw,22px);text-align:center">' + teamName(t) + ' — say it</h3>' +
+      (NOHOST() && !L.checked
+        ? '<div class="btn-row center"><button class="btn gold lg" data-act="dishCheck">Show the answer</button></div>'
+        : (NOHOST() ? '<div class="map-title" style="text-align:center">' + esc(q.question) + '</div>' : '') +
+          '<div class="btn-row center" style="gap:10px">' +
+            '<button class="btn ok lg" data-act="dishRight">Right</button>' +
+            '<button class="btn ghost lg" data-act="dishWrong">Wrong</button>' +
+          '</div>') +
+    '</div>';
+  }
+  return '<div class="play map-play dish-play">' +
+    dishBand() +
+    '<div class="map-stage">' +
+      '<div class="dish-frame">' + dishList(q, L.shown) + '</div>' +
+      '<div class="map-side">' +
+        '<div class="q-theme">' + (dishKind(q) === 'Cocktail' ? 'Which cocktail?' : 'Which dish?') + '</div>' +
+        '<div class="dish-count"><b>' + L.shown + '</b> of ' + n + ' ingredients</div>' +
+        timerRing('seconds left') +
+        (L.buzz == null ? timerControls() : '') +
+        peek({ answer:q.question, notes:'' }) +
+      '</div>' +
+    '</div>' +
+    foot +
+  '</div>';
+};
+/* one clock for the whole leg; the watcher lights the next row as it comes due */
+function dishWatch(){
+  if(S.screen !== 'dishQ' || !S.game){ clearInterval(S.tmp.dishIv); return; }
+  const s = G().dishGame, q = s.qs[s.i], L = s.leg;
+  const want = Math.min(q.ings.length, 1 + Math.floor((Timer.total - Timer.left) / DISH_STEP + 1e-6));
+  if(want <= L.shown) return;
+  L.shown = want;
+  $$('.ings .ing').forEach(li => { if(+li.dataset.i < want) li.classList.add('on'); });
+  const c = $('.dish-count b'); if(c) c.textContent = want;
+  Snd.soft();
+}
+AFTER.dishQ = function(){
+  const s = G().dishGame, q = s.qs[s.i];
+  if(!S.used.has(q.id)) markUsed(q);
+  armTimer('dish' + s.i + '-' + q.id, dishTotal(q), dishTimeUp);
+  if(s.leg.buzz != null) Timer.pause();
+  clearInterval(S.tmp.dishIv);
+  S.tmp.dishIv = setInterval(dishWatch, 150);
+};
+
+SCREENS.dishReveal = function(){
+  const g = G(), s = g.dishGame, r = s.subs[s.subs.length - 1], q = r.q;
+  let host = '';
+  try { host = new URL(q.source).hostname.replace(/^www\./, ''); } catch(e){}
+  return '<div class="compact map-judge dish-judge">' +
+    dishBand() +
+    '<div class="map-stage reveal">' +
+      '<div class="dish-frame">' + dishList(q, q.ings.length) + '</div>' +
+      '<div class="map-side">' +
+        '<div class="eyebrow gold">It was ' + (dishKind(q) === 'Cocktail' ? 'a cocktail' : 'a dish') + '</div>' +
+        '<div class="map-title">' + esc(q.question) + '</div>' +
+        '<p class="q-note">' + (r.winner === 'none' ? 'Nobody got it.' : teamName(r.winner) + ' got it.') + '</p>' +
+        (host ? '<p class="help">Recipe: <a href="' + esc(q.source) + '" target="_blank" rel="noopener">' + esc(host) + '</a></p>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="dishNext">Next</button></div>' +
+  '</div>';
+};
+
+SCREENS.dishSummary = function(){
+  const g = G(), s = g.dishGame;
+  const rows = s.subs.map((r, i) =>
+    '<tr><td class="rowhead" data-l="#">' + (i + 1) + '</td>' +
+    '<td class="qcell" data-l="It was">' + esc(r.q.question) + ' <span class="dim">· ' + dishKind(r.q) + '</span></td>' +
+    '<td data-l="Winner">' + (r.winner === 'none' ? '<span class="badge line">Nobody</span>'
+      : '<span class="badge ' + (r.winner === 0 ? 'a' : 'b') + '">' + esc(g.teams[r.winner].name) + '</span>') + '</td></tr>'
+  ).join('');
+  const verdict = s.verdict || {};
+  return '<div class="fits">' +
+    '<div class="center stack" style="gap:6px">' +
+      '<div class="eyebrow gold">Guess the Cocktail or Dish — final</div>' +
+      '<h2 class="display">' + (verdict.winner == null ? 'Tie' : esc(g.teams[verdict.winner].name) + ' takes it') + '</h2>' +
+      '<div class="row center" style="justify-content:center;gap:20px">' +
+        '<span class="badge a">' + esc(g.teams[0].name) + ' — ' + s.wins[0] + '</span>' +
+        '<span class="badge b">' + esc(g.teams[1].name) + ' — ' + s.wins[1] + '</span>' +
+      '</div>' +
+      (verdict.note ? '<p class="help" style="max-width:52ch;margin:0 auto">' + verdict.note + '</p>' : '') +
+      (s.awarded && s.award ? '<p class="help">Points awarded: <strong style="color:var(--a)">' + s.award[0] + '</strong> / <strong style="color:var(--b)">' + s.award[1] + '</strong></p>' : '') +
+    '</div>' +
+    (verdict.needsHost
+      ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
+        '<p class="help">Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<div class="btn-row center">' +
+          '<button class="btn teamA lg" data-act="dishAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
+          '<button class="btn ghost" data-act="dishAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
+          '<button class="btn teamB lg" data-act="dishAward" data-w="1">' + esc(g.teams[1].name) + ' takes it</button>' +
+        '</div></div>'
+      : '') +
+    scoreBig() +
+    '<div class="tbl-wrap"><table><thead><tr><th>#</th><th>It was</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="btn-row center">' +
+      '<button class="btn ghost" data-act="quit">End game</button>' +
+      '<button class="btn gold lg" data-act="afterDish">' + afterMiniLabel('dish') + '</button>' +
+    '</div>' +
+  '</div>';
+};
+
 /* ---- the enlarged map ----
    Pinch-zoom is switched off app-wide (it wrecked the buttons on a phone), so
    a map with fifty year labels on it needs its own way to get close. Tap the
@@ -5851,6 +6191,12 @@ SCREENS.final = function(){
           '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.flagGame.award[0] + '</td>' +
           '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.flagGame.award[1] + '</td>' +
           '<td data-l="Flags">' + g.flagGame.wins[0] + '–' + g.flagGame.wins[1] + '</td></tr>'
+        : '') +
+      (g.dishGame && g.dishGame.awarded
+        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Cocktail or dish</td>' +
+          '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.dishGame.award[0] + '</td>' +
+          '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.dishGame.award[1] + '</td>' +
+          '<td data-l="Legs">' + g.dishGame.wins[0] + '–' + g.dishGame.wins[1] + '</td></tr>'
         : '') +
       (g.battle && g.battle.done
         ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Battle of the captains</td>' +
@@ -6110,6 +6456,7 @@ SCREENS.bank = function(){
   /* flags last — 250-odd of them would otherwise fill the first screen */
   rows.sort((a, b) =>
     ((a.type === 'flag') - (b.type === 'flag')) ||
+    ((a.type === 'dish') - (b.type === 'dish')) ||
     coll.compare(a.theme, b.theme) ||
     dRank(a) - dRank(b) ||
     coll.compare(a.question, b.question));
@@ -6124,6 +6471,7 @@ SCREENS.bank = function(){
        : q.type === 'map' ? (q.img ? '<img class="bank-thumb" src="' + esc(q.img) + '" alt="">'
                                    : '<span class="dim" style="font-weight:500">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' : '') + '</span>')
        : q.type === 'flag' ? (FLAG_KEYS.has(q.flag) ? '<img class="bank-thumb bank-flag" src="' + flagSrc(q) + '" alt="" loading="lazy">' : '')
+       : q.type === 'dish' ? '<span class="dim" style="font-weight:500">' + esc((q.ings || []).map(t => splitIng(t)[1]).join(' · ')) + '</span>'
        : esc(q.answer)) + '</td>' +
     '<td>' + esc(q.theme) + '</td>' +
     '<td>' + (q.type === 'closest' ? '<span class="badge gold">Closest</span>'
@@ -6131,8 +6479,9 @@ SCREENS.bank = function(){
             : q.type === 'saysame' ? '<span class="badge b">Say-Same</span>'
             : q.type === 'map'     ? '<span class="badge ok">Map</span>'
             : q.type === 'flag'    ? '<span class="badge ok">Flag</span>'
+            : q.type === 'dish'    ? '<span class="badge ok">' + dishKind(q) + '</span>'
             : '<span class="badge line">Standard</span>') + '</td>' +
-    '<td>' + (q.type === 'flag' ? esc(FLAG_LEVELS[q.level] || '') : q.type === 'map' ? esc(MAP_LEVELS[q.level] || '') : esc(Cap(q.difficulty))) + '</td>' +
+    '<td>' + (q.type === 'dish' ? esc(DISH_LEVELS[q.level] || '') : q.type === 'flag' ? esc(FLAG_LEVELS[q.level] || '') : q.type === 'map' ? esc(MAP_LEVELS[q.level] || '') : esc(Cap(q.difficulty))) + '</td>' +
     '<td>' + (q.use_with ? '<code style="font-size:11px;color:var(--a)">' + esc(q.use_with) + '</code>' : '<span class="dim">—</span>') + '</td>' +
     '<td>' + (S.used.has(q.id) ? '<span class="badge no">played</span>' : '') + '</td>' +
     '<td><button class="btn sm ghost danger" data-act="qDel" data-id="' + q.id + '">Del</button></td></tr>').join('');
@@ -6166,7 +6515,7 @@ SCREENS.bank = function(){
         /* Cap() alone turns 'saysame' into "Saysame" — a real label, not a
            capitalised value, for the one type whose name is not one word. */
         '<label class="fld" style="flex:1;min-width:120px">Type<select data-act="bf" data-k="type">' +
-          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same'],['map','Map'],['flag','Flag']]
+          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same'],['map','Map'],['flag','Flag'],['dish','Cocktail / dish']]
             .map(([v, label]) => '<option value="' + esc(v) + '"' + (f.type === v ? ' selected' : '') + '>' + esc(label) + '</option>').join('') +
         '</select></label>' +
         '<label class="fld" style="flex:1;min-width:120px">Difficulty<select data-act="bf" data-k="diff">' + [''].concat(DIFFS).map(t => opt(t, f.diff)).join('') + '</select></label>' +
@@ -6318,7 +6667,7 @@ const csvCell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"
 function bankToCSV(list){
   const head = ['question','answer','notes','theme','type','difficulty','use_question_with','pool'];
   /* maps are pictures — they go in the JSON backup, not a spreadsheet */
-  return head.join(',') + '\n' + list.filter(q => q.type !== 'map' && q.type !== 'flag').map(q =>
+  return head.join(',') + '\n' + list.filter(q => q.type !== 'map' && q.type !== 'flag' && q.type !== 'dish').map(q =>
     [q.question, q.answer, q.notes, q.theme, q.type, q.difficulty, q.use_with, (q.pool || []).join(' | ')]
       .map(csvCell).join(',')).join('\n');
 }
@@ -6518,6 +6867,7 @@ function startMini(key){
   if(key === 'saysame'){ go('sayIntro'); return; }
   if(key === 'map'){ go('mapIntro'); return; }
   if(key === 'flag'){ go('flagIntro'); return; }
+  if(key === 'dish'){ go('dishIntro'); return; }
   if(key === 'battle'){
     g.battle = buildBattle();
     if(!g.battle){ g.done.battle = true; toast('Not enough spare questions left for the Battle.'); endGame(); return; }
@@ -6656,6 +7006,65 @@ function mapAfterLeg(){
 }
 function awardMap(w){
   const g = G(), s = g.mapGame;
+  if(s.awarded) return;
+  s.awarded = true;
+  if(w === 'split'){
+    const half = Math.floor(g.miniPts / 2);
+    g.teams[0].score += half; g.teams[1].score += half;
+    s.award = [half, half];
+    s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
+    s.verdict.winner = null;
+  } else {
+    g.teams[w].score += g.miniPts;
+    s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
+    s.verdict.winner = w;
+  }
+  s.verdict.needsHost = false;
+  Snd.point();
+}
+
+/* ---------- cocktail or dish ---------- */
+function dishLeg(){ return { shown:1, out:[false, false], buzz:null, checked:false }; }
+function dishEndLeg(w){
+  const g = G(), s = g.dishGame, q = s.qs[s.i];
+  Timer.stop();
+  clearInterval(S.tmp.dishIv);
+  s.subs.push({ q, winner:w });
+  s.leg.shown = q.ings.length;
+  if(w === 'none') toast('Nobody got it.');
+  else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes ' + (s.i < s.base ? 'number ' + (s.i + 1) : 'the tie-breaker') + '.'); }
+  go('dishReveal');
+}
+function dishTimeUp(){ if(S.screen === 'dishQ') dishEndLeg('none'); }
+function dishAfterLeg(){
+  const g = G(), s = g.dishGame;
+  s.leg = dishLeg();
+  const lead = Math.abs(s.wins[0] - s.wins[1]);
+  const left = Math.max(0, s.base - s.i);
+  if(s.i < s.base && lead <= left){ go('dishQ'); return; }
+  if(lead === 0){
+    if(s.spare && s.spare.length){
+      s.qs.push(s.spare.shift());
+      s.tieLegs++;
+      toast(s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next one decides it.' : 'Nobody on the board yet — next one.', 3600);
+      go('dishQ');
+      return;
+    }
+    s.done = true;
+    s.verdict = { winner:null, needsHost:true, note:'Still level, and there is nothing left at these levels. Your call.' };
+    go('dishSummary');
+    return;
+  }
+  const winner = s.wins[0] > s.wins[1] ? 0 : 1;
+  s.done = true;
+  s.verdict = { winner, needsHost:false,
+    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker' : s.tieLegs + ' tie-breakers') + '.'
+       : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' to spare.' : '' };
+  awardDish(winner);
+  go('dishSummary');
+}
+function awardDish(w){
+  const g = G(), s = g.dishGame;
   if(s.awarded) return;
   s.awarded = true;
   if(w === 'split'){
@@ -6922,6 +7331,14 @@ const ACT = {
     S.setup.pickFlag = (S.setup.pickFlag || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && next.indexOf(q.level) > -1; });
     Snd.soft(); render();
   },
+  dishLevel(e){
+    const v = e.dataset.v, cur = dishLevelsOf(S.setup);
+    const next = cur.indexOf(v) > -1 ? cur.filter(x => x !== v) : cur.concat([v]);
+    if(!next.length) return toast('Keep at least one level.');
+    S.setup.dishLevels = Object.keys(DISH_LEVELS).filter(k => next.indexOf(k) > -1);
+    S.setup.pickDish = (S.setup.pickDish || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && next.indexOf(q.level) > -1; });
+    Snd.soft(); render();
+  },
   setNum(e){ S.settings[e.dataset.k] = +e.value; saveSettings(); },
   toggle(e){ const k = e.dataset.k; S.settings[k] = !S.settings[k]; saveSettings(); render(); },
   vol(e){ S.settings.volume = (+e.value) / 100; saveSettings(); Snd.resume(); Snd.vol(S.settings.volume); Snd.soft(); },
@@ -6979,6 +7396,7 @@ const ACT = {
     /* On the auction this is the ONLY manual way to close a leg early now that
        "They are done" is gone, so it has to resolve rather than navigate. */
     if(S.screen === 'auctionRun') return auctionResolve();
+    if(S.screen === 'dishQ') return dishTimeUp();
     go(S.screen === 'steal'  ? 'stealReveal'
      : S.screen === 'miniQ'  ? 'miniEntry'
      : S.screen === 'sayQ'   ? 'sayJudge'
@@ -7298,6 +7716,54 @@ const ACT = {
     const g = G();
     if(g.flagGame.verdict && g.flagGame.verdict.needsHost) return toast('Award the mini-game points first.');
     g.done.flag = true;
+    if(runNextMini()) return;
+    advanceRound();
+  },
+
+  /* ---- guess the cocktail or dish ---- */
+  dishStart(){ const s = G().dishGame; s.i = 0; s.leg = dishLeg(); go('dishQ'); },
+  dishSwap(){
+    const s = G().dishGame, L = s.leg;
+    if(L.buzz != null || L.out[0] || L.out[1]) return toast('Somebody has already had a go at this one.');
+    if(!s.spare.length) return toast('Nothing else left at these levels.');
+    s.qs[s.i] = s.spare.shift();
+    s.leg = dishLeg();
+    toast('New one.');
+    go('dishQ');
+  },
+  /* the first captain to call it — the clock and the list stop while they answer */
+  dishBuzz(e){
+    const L = G().dishGame.leg, w = +e.dataset.w;
+    if(L.buzz != null || L.out[w]) return;
+    Timer.pause();
+    L.buzz = w; L.checked = false;
+    Snd.soft(); render();
+  },
+  dishCheck(){ G().dishGame.leg.checked = true; render(); },
+  dishRight(){
+    const g = G(), L = g.dishGame.leg;
+    if(L.buzz == null) return;
+    dishEndLeg(L.buzz);
+  },
+  dishWrong(){
+    const g = G(), s = g.dishGame, L = s.leg;
+    if(L.buzz == null) return;
+    const w = L.buzz, o = otherTeam(w);
+    L.out[w] = true; L.buzz = null;
+    Snd.wrong && Snd.wrong();
+    /* no host: the answer is already on the screen, so the other team takes it */
+    if(NOHOST()) return dishEndLeg(L.out[o] ? 'none' : o);
+    if(L.out[o]) return dishEndLeg('none');
+    toast(g.teams[w].name + ' is out of this one — ' + g.teams[o].name + ', it is yours to get.', 3600);
+    Timer.resumeT();
+    render();
+  },
+  dishNext(){ const s = G().dishGame; s.i++; dishAfterLeg(); },
+  dishAward(e){ awardDish(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
+  afterDish(){
+    const g = G();
+    if(g.dishGame.verdict && g.dishGame.verdict.needsHost) return toast('Award the mini-game points first.');
+    g.done.dish = true;
     if(runNextMini()) return;
     advanceRound();
   },
