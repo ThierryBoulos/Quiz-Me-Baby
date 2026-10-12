@@ -1,6 +1,6 @@
 # Quiz Me Baby v4: Party mode (phones as controllers)
 
-Status: **plan, not built**. Nothing here changes v3 until we agree on it.
+Status: **plan agreed, not built**. Decisions from 12 Oct 2026 are folded in (section 8).
 
 ---
 
@@ -17,32 +17,38 @@ The current single-screen game stays as **Classic**, so nothing is lost.
 
 ---
 
-## 2. Picking a version (the first screen)
+## 2. One button: the mode picks itself
 
-On the home screen, three big choices:
+The home screen has **one big button: PLAY**. Nobody chooses "Classic", "with host" or "no host"; the app works it out from who joins.
 
-| Choice | What it is | Who needs a phone |
-|---|---|---|
-| **Classic** | Today's game. One screen, someone taps. | Nobody |
-| **Party — with host** | TV + host phone + captain phones (+ any players) | Host, 2 captains |
-| **Party — no host** | TV + captain phones (+ any players) | 2 captains |
+1. Tap **PLAY** on the device facing the room (laptop, smart TV, tablet). It becomes **the TV** and shows a room code + QR.
+2. Then one of three things happens:
 
-"With host" and "no host" are the same Party mode with one switch. There are no separate builds and no separate code paths per game.
+| What happens | The game becomes |
+|---|---|
+| Nobody joins. Somebody taps the small **"Just play on this screen"** link under the QR. | **Classic**: today's game, one screen |
+| Phones join, and one of them taps **"I'm the host"** | **Party with host** |
+| Phones join, but nobody takes the host role | **Party, no host**: the app checks the answers |
+
+3. Whoever sets the game up (the host, or Team A's captain with no host) taps **Start** on their phone. The mode is fixed at that moment and shown once on the TV: "Hosted by Thierry" or "No host tonight — the app is checking answers".
+
+A phone that opens the site without scanning sees PLAY plus a **"Got a code? Type it here"** box, so nobody ends up making a second room by mistake.
+
+"With host" and "no host" are still the same Party mode with one switch. There are no separate builds and no separate code paths per game.
 
 ---
 
 ## 3. Joining (as few taps as possible)
 
-1. **On the TV** (laptop or smart-TV browser): tap **Party → New room**. The TV shows a big **4-letter room code** and a **QR code**.
-2. **On each phone**: scan the QR (or open the site and type the code). Then:
-   - type your **name**;
-   - tap a **team**: big Team A / Team B buttons;
-   - the **first person on each team becomes captain**, and anyone can tap "Make me captain" later.
-3. **The host** (if there is one) taps **"I'm the host"** instead of a team. To stop a player opening the answers, the host role is locked with a **PIN that only the TV operator sees** when the room is made: a tap-to-reveal, then it hides.
-4. **Setup** (themes, rounds, mini-games) happens **on the host's phone**, or on Team A's captain's phone with no host. It's today's Setup screen, unchanged. The TV shows "Waiting for the host to set up…" with the joined players listed under each team.
-5. **Start** on the host's (or captain's) phone, and the TV takes over.
+1. **On each phone**: scan the QR on the TV (or type the code), type your **name**, then tap **Team A**, **Team B** or **I'm the host**.
+2. **Captain:** every player sees a **"Make me captain"** button. **One captain per team:** once somebody takes it, the button greys out for their teammates and says **"Rami is your captain"**. A captain can hand it back ("Step down").
+3. **The captain names the team:** a "Team name" box on the captain's phone. The new name shows instantly on the TV and on every phone.
+4. **One host only.** Once taken, "I'm the host" greys out and the TV shows "Host: Thierry", so everyone can see who it is. (A PIN wouldn't help: anything the TV shows, the whole room can see.)
+5. **The host's phone shows the lobby:** both teams, every player's name and who the captains are. The host can move a player to the other team or make someone captain.
+6. **Setup** (themes, rounds, mini-games) happens on the host's phone, or on Team A's captain's phone with no host. It's today's Setup screen. The TV shows the two teams filling up while it happens.
+7. **Start** on that phone, and the TV takes over.
 
-Phones that lock or drop come back on their own: the room and role are remembered on the phone, so reopening the page puts you straight back in.
+Phones that lock or drop come back on their own: the room, team and role are remembered on the phone, so reopening the page puts you straight back in.
 
 ---
 
@@ -51,7 +57,8 @@ Phones that lock or drop come back on their own: the room and role are remembere
 - **TV:** no buttons, ever. Big, readable from the sofa. It never shows an answer before the reveal. Imad's bubbles, sounds and animations play here only.
 - **Host phone:** the answer is always visible, top of screen. **One main button** at the bottom that does the obvious next thing (Start, Reveal, Next…), plus judging buttons only when there's something to judge.
 - **Captain phone:** shows **what you can do right now**, and nothing when it's not your turn. Typing box + Send, the buzzer, lifelines. Your team's colour fills the screen so you can't confuse teams.
-- **Player phone:** the question (or map, flag or ingredient list) and your team's score. **No buttons.** Between questions it shows the scoreboard.
+- **Player phone:** the question (or map, flag or ingredient list), your team's score, and a **"Suggest to the captain"** box: type an answer, tap **Send**. Between questions it shows the scoreboard.
+- **Suggestions on the captain's phone:** a list under the answer box, each with the player's name ("Maya: *Paris*"). **Tap one to put it in the answer box**, edit it if needed, then **Send**. The captain always sends; players never answer directly.
 - **No host:** the jobs the host's buttons did are done by the app (timers and auto-checking) or by the captains, one tap each.
 
 ---
@@ -175,9 +182,12 @@ Today the game logic and the screen drawing are mixed together in `index.html`. 
 - Still no framework: plain JavaScript and the same styles, so today's screens are reused, not rewritten.
 - The questions bank, flags and maps come along unchanged.
 
-### 6.5 Answer checking (for no host and for typed answers)
-- **The app's check:** lower-case, strip "the" / punctuation / accents, then allow small typos (1 letter in short words, 2 in long ones).
-- **Accepted spellings per question:** the bank gets a new field. For flags and cocktails/dishes these are easy to generate. For the 491 standard questions we'd add them over time, while the overrule button covers the gaps.
+### 6.5 Answer checking (kept deliberately simple)
+- **Several accepted answers per question.** The bank gets a list: "UK / United Kingdom / Britain / Great Britain"; "The Beatles / Beatles".
+- **Tidy before comparing:** lower-case, drop accents, punctuation and a leading "the".
+- **Typos allowed:** 1 wrong letter in short words, 2 in long ones. "yelephant" still counts as *elephant*, but "elegant" doesn't.
+- **Numbers** (Closest To Wins) are compared as numbers, never as text.
+- **Flags and cocktails/dishes** get their accepted lists generated once (they're fixed names). The **491 standard questions** start with just their main answer plus the typo allowance; extra accepted answers get added over time. The **overrule** button (host, or with no host the other captain) covers anything the app misses.
 
 ---
 
@@ -203,12 +213,13 @@ Each step is playable on its own, and Classic is never broken along the way.
 
 ---
 
-## 8. Decisions needed from you
+## 8. Decisions (12 Oct 2026)
 
-1. **TV shows the question text?** Recommended: **yes**. Everyone looks at the TV; the phones just repeat it close-up for players. Otherwise the TV shows only the theme, the timer and the reveal.
-2. **App checking + overrule with no host?** Recommended: **yes**. The alternative is captains judging every answer by hand.
-3. **Players' phones: nothing to tap at all**, or a small "suggest to my captain" box (shows on the captain's phone)? Recommended: **nothing at first**; add the suggest box later if the teams want it.
-4. **Accounts:** none (room code only)? Recommended: **none**.
-5. **Domain:** keep the GitHub Pages address for Classic and give Party a Vercel address, or move everything to Vercel? Recommended: **move everything** once step 2 works.
+1. **TV shows the question text:** yes.
+2. **No host = the app checks answers**, with a typo allowance and several accepted answers per question. Simple, with an overrule for anything it gets wrong.
+3. **Players suggest to their captain:** yes. The captain sees each player's suggestion with their name and can pick one.
+4. **No accounts:** just the room code.
+5. **Move everything to Vercel.**
+6. **One PLAY button:** the mode (Classic / with host / no host) picks itself from who joins (section 2).
 
-To start step 2 I'll need you to create a free Supabase project and give me its URL and its public (publishable) key. I'll set up the tables, security rules and functions. The Vercel connection to the GitHub repo is a one-click import on your side.
+**Next:** step 1 (the engine refactor) needs nothing external and can start now. Step 2 needs the Supabase project: Thierry is creating a new organisation on Supabase. Once it exists, this session can create the project, tables, security rules and functions through the Supabase connection.
