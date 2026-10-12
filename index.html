@@ -1188,7 +1188,7 @@ h1.display.slam{animation:slam .7s cubic-bezier(.2,.9,.25,1.2) both}
 
 /* ---------- MISC ---------- */
 .kbd{display:inline-block;min-width:22px;padding:2px 6px;border-radius:5px;border:1px solid var(--line-2);background:rgba(0,0,0,.4);font-size:11px;font-weight:700;text-align:center;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:120;padding:13px 22px;border-radius:999px;
+.toast{pointer-events:none;position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:120;padding:13px 22px;border-radius:999px;
   background:rgba(10,12,28,.96);border:1px solid var(--line-2);box-shadow:var(--shadow);font-size:14px;font-weight:600;
   animation:toastIn .3s var(--ease);max-width:min(560px,92vw);text-align:center}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -1214,6 +1214,8 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
   <main id="app"></main>
 </div>
 <div id="modal" role="dialog" aria-modal="true"></div>
+<!-- the shared engine (v4 step 1): the rules with no screen in them -->
+<script src="engine/core.js?v=3.14"></script>
 <script>
 /* ==========================================================================
    QUIZ ME BABY
@@ -1250,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.13', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.14', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3721,27 +3723,9 @@ const MINI_GAMES = {
 /* the four that get spread through the rounds — the Battle is the finale */
 const INTERLEAVED = ['closest', 'auction', 'saysame', 'map', 'flag', 'dish'];
 
-function miniPointValue(N, M){
-  if(!M) return 0;
-  return Math.max(2, Math.min(4, Math.round(0.35 * N / M)));
-}
-/* -> [{key, after}] where `after` is the 0-based index of the round it follows.
-   Equal `after` values mean two mini-games run back to back, which is what
-   happens when there are more mini-games than the round count can space. */
-function planMinis(N, keys){
-  const M = keys.length;
-  if(!M || !N) return [];
-  const out = [];
-  let last = -1;
-  keys.forEach((k, i) => {
-    let at = Math.round((i + 1) * N / (M + 1)) - 1;
-    at = Math.max(0, Math.min(N - 1, at));   // never before round 1, never past the end
-    if(at < last) at = last;                 // keep the chosen order; equal = back to back
-    out.push({ key:k, after:at });
-    last = at;
-  });
-  return out;
-}
+/* both live in the shared engine now (engine/core.js) */
+const miniPointValue = QMB.miniPointValue;
+const planMinis = QMB.planMinis;
 
 function buildGame(cfg){
   const N = cfg.standard === false ? 0 : cfg.rounds;   // 0 = mini-games only
@@ -7136,10 +7120,9 @@ function awardSaySame(w){
    nobody gets (or both get) simply brings out the next one. */
 function mapAfterLeg(){
   const g = G(), s = g.mapGame;
-  const lead = Math.abs(s.wins[0] - s.wins[1]);
-  const left = Math.max(0, s.base - s.i);    // base maps not yet played
-  if(s.i < s.base && lead <= left){ go('mapQ'); return; }
-  if(lead === 0){
+  const out = QMB.bestOf(s);
+  if(out === 'next'){ go('mapQ'); return; }
+  if(out === 'level'){
     /* Level after the three (or after a tie-breaker): the host reads the room —
        another map, or stop here with a point each. */
     go('mapTie');
@@ -7197,10 +7180,9 @@ function dishTimeUp(){ if(S.screen === 'dishQ') NOHOST() ? dishTurnOver() : dish
 function dishAfterLeg(){
   const g = G(), s = g.dishGame;
   s.leg = dishLeg();
-  const lead = Math.abs(s.wins[0] - s.wins[1]);
-  const left = Math.max(0, s.base - s.i);
-  if(s.i < s.base && lead <= left){ go('dishQ'); return; }
-  if(lead === 0){
+  const out = QMB.bestOf(s);
+  if(out === 'next'){ go('dishQ'); return; }
+  if(out === 'level'){
     /* level: the table decides — one more to settle it, or a point each */
     go('dishTie');
     return;
@@ -7234,10 +7216,9 @@ function awardDish(w){
 /* ---------- flags ---------- */
 function flagAfterLeg(){
   const g = G(), s = g.flagGame;
-  const lead = Math.abs(s.wins[0] - s.wins[1]);
-  const left = Math.max(0, s.base - s.i);
-  if(s.i < s.base && lead <= left){ go('flagQ'); return; }
-  if(lead === 0){
+  const out = QMB.bestOf(s);
+  if(out === 'next'){ go('flagQ'); return; }
+  if(out === 'level'){
     if(s.spare && s.spare.length){
       s.qs.push(s.spare.shift());
       s.tieLegs++;
