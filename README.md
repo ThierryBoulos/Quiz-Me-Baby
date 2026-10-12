@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.14 · 12 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.15 · 12 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.14', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.15', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -450,12 +450,13 @@ The rules of the game are moving out of `index.html` into **`engine/core.js`**, 
 The engine has no screen in it: no page, no sounds, no storage. `index.html` loads it with a plain `<script>`, and it runs under Node for its tests:
 
 ```
-node --test engine/core.test.js
+node --test engine/core.test.js engine/deal.test.js
 ```
 
 So far it holds:
 - **answer checking** for typed answers: tidying, several accepted answers, and a small typo allowance — *yelephant* counts as elephant, *elegant* doesn't;
 - **mini-game points and their slots** between rounds;
-- **the best-of rule** shared by Guess the Map, Guess the Flag and Cocktail or Dish.
+- **the best-of rule** shared by Guess the Map, Guess the Flag and Cocktail or Dish;
+- **dealing**: every deck (standard pairs, Closest To Wins, Auction, Don't Say the Same, maps, flags, cocktails and dishes, the Battle) and the whole game built from them. It was moved over unchanged: the old and new code deal identical games from the same random seed.
 
 The script tag carries a version (`engine/core.js?v=…`): **bump it with `BUILD`** so a browser never runs a new page against an old engine.

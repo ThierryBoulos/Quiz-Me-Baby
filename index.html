@@ -1215,7 +1215,7 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
 </div>
 <div id="modal" role="dialog" aria-modal="true"></div>
 <!-- the shared engine (v4 step 1): the rules with no screen in them -->
-<script src="engine/core.js?v=3.14"></script>
+<script src="engine/core.js?v=3.15"></script>
 <script>
 /* ==========================================================================
    QUIZ ME BABY
@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.14', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.15', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2359,12 +2359,12 @@ SEED_MAPS.forEach(function(m){
                              recognised states, nations and regions, former
                              countries and flags, international organisations
    ========================================================================== */
-const FLAG_LEGS = 10;
+const FLAG_LEGS = QMB.LEGS.flag;     // 10
 const FLAG_SECS = 15;
 const FLAG_LEVELS = { veasy:'Very easy', easy:'Easy', medium:'Medium', hard:'Hard', expert:'Expert' };
 /* Guess the Cocktail or Dish: the ingredients come up one at a time, the
    giveaway last. Six levels — cocktails and dishes, each easy/medium/hard. */
-const DISH_LEGS = 7;
+const DISH_LEGS = QMB.LEGS.dish;     // 7
 const DISH_STEP = 3;    // seconds between ingredients
 const DISH_LAST = 8;    // seconds still to answer once the whole list is up
 const DISH_LEVELS = { 'c-easy':'Easy', 'c-medium':'Medium', 'c-hard':'Hard', 'd-easy':'Easy', 'd-medium':'Medium', 'd-hard':'Hard' };
@@ -2645,33 +2645,14 @@ const flagOK = (q) => !!q && q.type === 'flag' && FLAG_KEYS.has(q.flag);
    the whole level, so "Change this flag" and the tie-breakers can reach every
    one of them (it used to hold back only fifteen). */
 /* One or more levels can be on. Older setups stored a single `flagLevel`. */
-function flagLevelsOf(c){
-  const want = (c && c.flagLevels) || (c && c.flagLevel ? [c.flagLevel] : ['medium']);
-  const ok = Object.keys(FLAG_LEVELS).filter(k => want.indexOf(k) > -1);
-  return ok.length ? ok : ['medium'];
-}
+
 /* Several levels share the flags EVENLY: each level is its own queue (fresh
    first), and the deck takes one from every level in turn — shuffled within
    each turn, so the easy one is not always first. Ten flags over two levels
    is five and five; over three, 4-3-3. */
-function flagPool(levels, skip){
-  const queues = levels.map(l => {
-    const all = S.bank.filter(q => flagOK(q) && q.level === l && !(skip && skip.has(q.id)));
-    return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
-  });
-  const out = [];
-  for(let i = 0; queues.some(q => i < q.length); i++)
-    out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
-  return out;
-}
+
 /* Hand-picks first, in the order ticked; the chosen levels fill the rest. */
-function flagDeck(cfg, levels){
-  const picked = ((cfg && cfg.pickFlag) || [])
-    .map(id => S.bank.find(q => q.id === id))
-    .filter(q => flagOK(q) && levels.indexOf(q.level) > -1)
-    .slice(0, FLAG_LEGS);
-  return picked.concat(flagPool(levels, new Set(picked.map(q => q.id))));
-}
+
 /* Ask for the dealt flags now, so they are in the browser's cache long before
    the mini-game comes round — and only those, never the whole set. */
 function preloadFlags(list){ (list || []).forEach(q => { const i = new Image(); i.src = flagSrc(q); }); }
@@ -2750,29 +2731,10 @@ const DISHES = /*DISHES-DATA*/[
   ["cheese-fondue", "Cheese fondue", "d-hard", "https://www.bbcgoodfood.com/recipes/classic-cheese-fondue", ["1 clove, halved — Garlic", "1 tbsp (15 ml) — Lemon juice", "2 tsp — Cornflour", "1 tbsp (15 ml) — Kirsch or schnapps", "200 ml (7 fl oz) — Dry white wine", "To serve — Crusty bread, boiled new potatoes, cornichons", "200 g (7 oz) — Emmental, grated", "200 g (7 oz) — Comté or Gruyère, grated"]]];
 const DISH_KEYS = new Set(DISHES.map(d => d[0]));
 const dishOK = (q) => !!q && q.type === 'dish' && DISH_KEYS.has(q.dish) && (q.ings || []).length > 0;
-function dishLevelsOf(c){
-  const want = (c && c.dishLevels) || ['c-medium', 'd-medium'];
-  const ok = Object.keys(DISH_LEVELS).filter(k => want.indexOf(k) > -1);
-  return ok.length ? ok : ['c-medium', 'd-medium'];
-}
+
 /* shared out evenly over the levels that are on, exactly as the flags are */
-function dishPool(levels, skip){
-  const queues = levels.map(l => {
-    const all = S.bank.filter(q => dishOK(q) && q.level === l && !(skip && skip.has(q.id)));
-    return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
-  });
-  const out = [];
-  for(let i = 0; queues.some(q => i < q.length); i++)
-    out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
-  return out;
-}
-function dishDeck(cfg, levels){
-  const picked = ((cfg && cfg.pickDish) || [])
-    .map(id => S.bank.find(q => q.id === id))
-    .filter(q => dishOK(q) && levels.indexOf(q.level) > -1)
-    .slice(0, DISH_LEGS);
-  return picked.concat(dishPool(levels, new Set(picked.map(q => q.id))));
-}
+
+
 /* "45 ml (1½ oz) — White rum" -> ['45 ml (1½ oz)', 'White rum'] */
 function splitIng(t){
   const i = String(t).indexOf(' — ');
@@ -3149,36 +3111,26 @@ const ICON = {
    8. QUESTION SELECTION
    ========================================================================== */
 const isFresh   = (q) => !S.settings.noRepeat || !S.used.has(q.id);
-const matchDiff = (q, d) => d === 'mixed' || q.difficulty === d;
+/* Dealing lives in the shared engine (engine/core.js) — the same code Party
+   mode deals with. It is handed the bank, the played list and the "never
+   reuse" setting, plus how to tell a map, flag or recipe row is usable. */
+const DEAL = QMB.createDealer({
+  bank: () => S.bank,
+  used: () => S.used,
+  noRepeat: () => S.settings.noRepeat,
+  ok: { map: (q) => mapOK(q), flag: (q) => flagOK(q), dish: (q) => dishOK(q) }
+});
+const { matchDiff, pairsFor, closestPool, capacity, auctionPool, auctionDeck, saySamePool, drawSaySame,
+        saySameDeck, mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
+        dishLevelsOf, dishPool, dishDeck, diffOf, dishLeg, buildGame } = DEAL;
+/* the Battle's pool leaves out everything already used tonight */
+const battlePool  = (diff) => DEAL.battlePool(battleSpent(), diff);
+const battleReady = () => DEAL.battleReady(battleSpent());
+const buildBattle = () => DEAL.buildBattle(battleSpent());
+const pickedPair  = (theme, picks) => DEAL.pickedPair(theme, picks || (S.setup && S.setup.picks));
 
 /* All valid PAIRS for a theme: two standard questions sharing a use_with key. */
-function pairsFor(theme, diff, exclude){
-  exclude = exclude || new Set();
-  const pool = S.bank.filter(q =>
-    q.type === 'standard' && q.theme === theme && matchDiff(q, diff) &&
-    !exclude.has(q.id) && isFresh(q));
-  /* Group by ticker AND difficulty — on "mixed" one team must never get an
-     easy question while the other gets a hard one. */
-  const groups = {};
-  pool.forEach(q => {
-    const k = ((q.use_with || '').trim() || '__solo__') + '||' + q.difficulty;
-    (groups[k] = groups[k] || []).push(q);
-  });
-  const pairs = [], odd = {};
-  Object.keys(groups).forEach(k => {
-    const diff = k.split('||')[1];
-    if(k.indexOf('__solo__||') === 0){ (odd[diff] = odd[diff] || []).push(...groups[k]); return; }
-    const sh = shuffle(groups[k]);
-    for(let i = 0; i + 1 < sh.length; i += 2) pairs.push({ key:k.split('||')[0], a:sh[i], b:sh[i+1], strict:true });
-    if(sh.length % 2) (odd[diff] = odd[diff] || []).push(sh[sh.length-1]);
-  });
-  /* leftovers pair loosely, but still only within the same difficulty */
-  Object.keys(odd).forEach(diff => {
-    const lo = shuffle(odd[diff]);
-    for(let i = 0; i + 1 < lo.length; i += 2) pairs.push({ key:'', a:lo[i], b:lo[i+1], strict:false });
-  });
-  return shuffle(pairs);
-}
+
 
 /* Closest To Wins draws from the WHOLE bank — it ignores difficulty (a number
    is a number) and it ignores tonight's themes too. Instead it deals the
@@ -3187,33 +3139,11 @@ function pairsFor(theme, diff, exclude){
    themes, never seven Geography questions in a row. The theme order is
    re-shuffled on every pass, so a second lap through does not repeat the
    first lap's running order. */
-function closestPool(){
-  const byTheme = {};
-  S.bank.forEach(q => {
-    if(q.type !== 'closest' || !isFresh(q)) return;
-    (byTheme[q.theme] = byTheme[q.theme] || []).push(q);
-  });
-  let decks = shuffle(Object.keys(byTheme)).map(t => shuffle(byTheme[t]));
-  const out = [];
-  while(decks.length){
-    decks.forEach(d => out.push(d.shift()));
-    decks = shuffle(decks.filter(d => d.length));
-    /* a fresh lap must not open on the theme the last lap closed with */
-    if(decks.length > 1 && out.length && decks[0][0].theme === out[out.length - 1].theme){
-      const swap = decks[0]; decks[0] = decks[1]; decks[1] = swap;
-    }
-  }
-  return out;
-}
+
 
 /* `diff` is either one difficulty for the lot, or a resolver (theme) =>
    difficulty — which is how a per-theme override reaches the count. */
-function capacity(themes, diff){
-  const at = typeof diff === 'function' ? diff : () => diff;
-  let loose = 0, strict = 0;
-  themes.forEach(t => { const p = pairsFor(t, at(t)); loose += p.length; strict += p.filter(x => x.strict).length; });
-  return { rounds:loose, strict, closest:closestPool().length };
-}
+
 
 
 /* ==========================================================================
@@ -3227,8 +3157,8 @@ function capacity(themes, diff){
      - Both captains get the SAME difficulty shape, five easy and five
        medium in an identical order, but never the same question. Different
        sets, same shape, so nobody can claim they drew the harder ten.       */
-const BATTLE_SKIP_THEMES = ['Know the Host','Sexy Time','Lebanon'];
-const BATTLE_N    = 10;   // questions per captain
+const BATTLE_SKIP_THEMES = QMB.BATTLE_SKIP_THEMES;
+const BATTLE_N    = QMB.LEGS.battle;   // questions per captain (10)
 const BATTLE_SECS = 7;    // per question
 
 /* Everything already used tonight is off the table — the rounds, both teams'
@@ -3247,53 +3177,11 @@ function battleSpent(){
   }
   return spent;
 }
-function battlePool(diff){
-  const spent = battleSpent();
-  const ok = (q) => q.type === 'standard' && !spent.has(q.id) &&
-    BATTLE_SKIP_THEMES.indexOf(q.theme) < 0 &&
-    (diff ? q.difficulty === diff : q.difficulty === 'easy' || q.difficulty === 'medium');
-  const fresh = S.bank.filter(q => ok(q) && isFresh(q));
-  /* "never reuse a question" is a nicety. Being able to run the Battle at all
-     matters more, so fall back to the played ones rather than a short set. */
-  return fresh.length >= BATTLE_N * 2 ? fresh : S.bank.filter(ok);
-}
-/* Don't offer the Battle at all if the bank can't fill both captains. */
-function battleReady(){
-  const p = battlePool();
-  return p.filter(q => q.difficulty === 'easy').length >= 2 && p.length >= 8;
-}
 
-function buildBattle(){
-  const pool = shuffle(battlePool());
-  const by = { easy:pool.filter(q => q.difficulty === 'easy'),
-               medium:pool.filter(q => q.difficulty === 'medium') };
-  /* one shape, drawn once, used for both captains */
-  const shape = shuffle(['easy','easy','easy','easy','easy','medium','medium','medium','medium','medium']);
-  const taken = new Set();
-  const draw = (want) => {
-    /* the wanted difficulty first; the other one only to avoid a short set */
-    for(const d of (want === 'easy' ? ['easy','medium'] : ['medium','easy'])){
-      const q = by[d].find(x => !taken.has(x.id));
-      if(q){ taken.add(q.id); return q; }
-    }
-    return null;
-  };
-  const sets = [[], []];
-  for(let i = 0; i < BATTLE_N; i++){
-    const a = draw(shape[i]), b = draw(shape[i]);
-    if(!a || !b) break;                 // both captains or neither — always equal length
-    sets[0].push(a); sets[1].push(b);
-  }
-  if(sets[0].length < 2) return null;
-  return {
-    n:sets[0].length, qs:sets, shape:shape.slice(0, sets[0].length),
-    cap:0, i:0, shown:false, score:[0, 0],
-    log:[[], []],                        // per captain: {q, got}
-    stage:'run',                         // run → (tie) → done
-    tb:null, tbUsed:[], tbRounds:0, dropped:[],
-    winner:null, awarded:false, award:[0, 0], done:false
-  };
-}
+/* Don't offer the Battle at all if the bank can't fill both captains. */
+
+
+
 
 const curBattleQ = () => { const b = G().battle; return b.stage === 'tie' ? b.tb.q : b.qs[b.cap][b.i]; };
 const battleCapName = (c) => {
@@ -3351,20 +3239,13 @@ function battleAward(){
    night, so it is the fair place to put it.
    ========================================================================== */
 const AUCTION_SECS = 30;
-const AUCTION_LEGS = 3;   // odd, so the legs can never finish level
-const CLOSEST_LEGS = 7;   // legs in Closest To Wins
+const AUCTION_LEGS = QMB.LEGS.auction;   // 3 — odd, so the legs can never finish level
+const CLOSEST_LEGS = QMB.LEGS.closest;   // 7 legs in Closest To Wins
 
-function auctionPool(){
-  return S.bank.filter(q => q.type === 'auction' && isFresh(q));
-}
+
 /* The host's hand-picked categories first, in the order they ticked them, then
    whatever else the bank has to make the numbers up. */
-function auctionDeck(cfg){
-  const picked = ((cfg && cfg.pickAuction) || [])
-    .map(id => S.bank.find(q => q.id === id)).filter(Boolean);
-  const ids = new Set(picked.map(q => q.id));
-  return picked.concat(shuffle(auctionPool().filter(q => !ids.has(q.id))));
-}
+
 function buildAuction(){
   const g = G();
   const deck = auctionDeck(g.cfg);
@@ -3411,18 +3292,13 @@ function auctionDraw(skip){
    supposed to tighten.
    ========================================================================== */
 const SAYSAME_SECS = 10;
-const SAYSAME_LEGS = 9;
+const SAYSAME_LEGS = QMB.LEGS.saysame;   // 9
 
-function saySamePool(){
-  return S.bank.filter(q => q.type === 'saysame' && isFresh(q) && (q.pool || []).length >= 2);
-}
+
 /* One prompt from the bank -> one leg. `answer` is resolved HERE, freshly, so
    the same prompt reveals a different word most times it is played — the
    whole reason the bank stores a pool instead of a single fixed answer. */
-function drawSaySame(q){
-  const pool = q.pool || [];
-  return Object.assign({}, q, { answer: pool[Math.floor(Math.random() * pool.length)] });
-}
+
 /* Hand-picks lead (which prompts play), then the vast-to-tight sort decides
    WHEN each one lands — a hand-pick does not skip the front of the queue by
    virtue of being chosen on purpose; it only guarantees it plays at all.
@@ -3434,30 +3310,7 @@ function drawSaySame(q){
    by nothing more than other prompts happening to have bigger pools, which
    breaks the promise a hand-pick makes everywhere else in this app: chosen on
    purpose means it plays. */
-function saySameDeck(cfg){
-  /* Legs 1 to 8 are prompts with plenty of answers (four or more), widest
-     first; leg 9 — the last — is a two-way coin flip (heads or tails, cats or
-     dogs). Tie-breakers go back to the wide prompts. Fresh prompts first;
-     played ones only if the fresh ones run short. */
-  const has = (q) => q && (q.pool || []).length >= 2;
-  const two = (q) => q.pool.length === 2;
-  const picked = ((cfg && cfg.pickSaySame) || [])
-    .map(id => S.bank.find(q => q.id === id)).filter(has).slice(0, SAYSAME_LEGS);
-  const ids = new Set(picked.map(q => q.id));
-  const all = S.bank.filter(q => q.type === 'saysame' && has(q) && !ids.has(q.id));
-  const freshFirst = (list) => shuffle(list.filter(isFresh)).concat(shuffle(list.filter(q => !isFresh(q))));
-  const wide  = freshFirst(all.filter(q => q.pool.length >= 4));
-  const three = freshFirst(all.filter(q => q.pool.length === 3));
-  const coins = freshFirst(all.filter(two));
 
-  const last = picked.filter(two)[0] || coins[0] || null;
-  const body = picked.filter(q => q !== last);
-  const fill = wide.concat(three).filter(q => q !== last);
-  while(body.length < SAYSAME_LEGS - (last ? 1 : 0) && fill.length) body.push(fill.shift());
-  body.sort((x, y) => y.pool.length - x.pool.length);       // widest first
-  const primary = body.concat(last ? [last] : []);
-  return primary.concat(fill.slice(0, 6));                  // tie-breakers: more wide prompts
-}
 
 /* ==========================================================================
    9a3. GUESS THE MAP — the engine
@@ -3475,7 +3328,7 @@ function saySameDeck(cfg){
    uploaded, stored in the bank as a compressed data URL.
    ========================================================================== */
 const MAP_SECS = 60;
-const MAP_LEGS = 3;
+const MAP_LEGS = QMB.LEGS.map;   // 3
 
 function mapSpec(q){ return q && q.map ? SEED_MAPS.find(m => m.key === q.map) || null : null; }
 function mapOK(q){ return !!q && q.type === 'map' && (!!mapSpec(q) || !!q.img); }
@@ -3484,44 +3337,18 @@ function mapOK(q){ return !!q && q.type === 'map' && (!!mapSpec(q) || !!q.img); 
    fresh ones always go first, and the played ones queue up behind them
    instead of vanishing. */
 const MAP_LEVELS = { easy:'Easy', medium:'Medium', hard:'Hard' };
-const MAP_ORDER = ['easy', 'medium', 'hard'];
-function mapLevelsOf(c){
-  const want = (c && c.mapLevels) || MAP_ORDER;
-  const ok = MAP_ORDER.filter(k => want.indexOf(k) > -1);
-  return ok.length ? ok : MAP_ORDER.slice();
-}
+const MAP_ORDER = QMB.MAP_ORDER;
+
 /* A host's own map has no level, so it plays at every level. */
-const mapAt = (q, levels) => !q.level || levels.indexOf(q.level) > -1;
-function mapQueue(test, skip){
-  const all = S.bank.filter(q => mapOK(q) && test(q) && !(skip && skip.has(q.id)));
-  return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
-}
+
 /* The ticked levels share the maps EVENLY — one from each level in turn,
    shuffled within each turn — with the host's own maps as one more queue.
    When they run dry, the next-nearest level steps in: the next EASIER one
    first (or the next harder, from Easy), then the rest. */
-function mapPool(levels, skip){
-  const queues = levels.map(l => mapQueue(q => q.level === l, skip))
-    .concat([mapQueue(q => !q.level, skip)]);
-  const out = [];
-  for(let i = 0; queues.some(q => i < q.length); i++)
-    out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
-  const lo = MAP_ORDER.indexOf(levels[0]), hi = MAP_ORDER.indexOf(levels[levels.length - 1]);
-  const rank = (l) => { const i = MAP_ORDER.indexOf(l); return i < lo ? lo - i : i > hi ? 10 + i - hi : 20; };
-  MAP_ORDER.filter(l => levels.indexOf(l) < 0).sort((a, b) => rank(a) - rank(b))
-    .forEach(l => out.push.apply(out, mapQueue(q => q.level === l, skip)));
-  return out;
-}
+
 /* Hand-picks first, in the order ticked; the levels fill the rest. Everything
    after the first MAP_LEGS is swap and tie-break reserve. */
-function mapDeck(cfg){
-  const levels = mapLevelsOf(cfg);
-  const picked = ((cfg && cfg.pickMap) || [])
-    .map(id => S.bank.find(q => q.id === id))
-    .filter(q => mapOK(q) && mapAt(q, levels))
-    .slice(0, MAP_LEGS);
-  return picked.concat(mapPool(levels, new Set(picked.map(q => q.id))));
-}
+
 
 /* ---- loading the geometry ---- */
 let mapGeoP = null;
@@ -3721,111 +3548,13 @@ const MINI_GAMES = {
   battle: { key:'battle',  name:'Battle of the Captains',     blurb:'Ten each, captains only, 7s a shot.' }
 };
 /* the four that get spread through the rounds — the Battle is the finale */
-const INTERLEAVED = ['closest', 'auction', 'saysame', 'map', 'flag', 'dish'];
+const INTERLEAVED = QMB.INTERLEAVED;
 
 /* both live in the shared engine now (engine/core.js) */
 const miniPointValue = QMB.miniPointValue;
 const planMinis = QMB.planMinis;
 
-function buildGame(cfg){
-  const N = cfg.standard === false ? 0 : cfg.rounds;   // 0 = mini-games only
-  const themes = shuffle(cfg.themes.slice());
-  const taken = new Set();
-  const rounds = [];
 
-  for(let i = 0; i < N; i++){
-    let pair = null, theme = null;
-    // try each theme in rotation until one still has a usable pair
-    const order = themes.slice(i % themes.length).concat(themes.slice(0, i % themes.length));
-    for(const t of order){
-      /* a hand-picked pair wins outright — the host chose those two on purpose */
-      const hand = pickedPair(t, cfg.picks);
-      if(hand && !taken.has(hand.a.id) && !taken.has(hand.b.id)){ pair = hand; theme = t; break; }
-      const p = pairsFor(t, diffOf(cfg, t), taken);
-      if(p.length){ pair = p[0]; theme = t; break; }
-    }
-    if(!pair) break;
-    taken.add(pair.a.id); taken.add(pair.b.id);
-    rounds.push({
-      n:i + 1, theme, strict:pair.strict, picked:!!pair.picked, pairKey:pair.key,
-      q:[pair.a, pair.b],                 // q[0] -> team that goes first slot 0
-      dbl:[false, false], llUsed:[[], []],
-      res:[null, null],                   // per seat: {correct, stolen}
-      pts:[0, 0], done:false
-    });
-  }
-
-  /* Hand-picked legs lead, in the order the host ticked them; the round-robin
-     draw makes up whatever is short, skipping anything already picked. */
-  const handClosest = (cfg.pickClosest || [])
-    .map(id => S.bank.find(q => q.id === id))
-    .filter(q => q && q.type === 'closest');
-  const handIds = new Set(handClosest.map(q => q.id));
-  const cpAll = handClosest.concat(closestPool().filter(q => !handIds.has(q.id)));
-  const cp = cpAll.slice(0, CLOSEST_LEGS);
-  const spare = cpAll.slice(CLOSEST_LEGS, CLOSEST_LEGS + 6);   // held back for tie-breaker legs
-
-  /* Say-Same's legs are already sorted vast-to-tight by saySameDeck(); the
-     first SAYSAME_LEGS play, the rest sit in reserve for a tie-break. Each
-     leg's secret word is resolved now, once, via drawSaySame — not at render
-     time, or a re-render mid-leg would change the answer under the host. */
-  const ssDeck = saySameDeck(cfg);
-  const ssLegs = ssDeck.slice(0, SAYSAME_LEGS).map(drawSaySame);
-  const ssSpare = ssDeck.slice(SAYSAME_LEGS);   // resolved lazily, if a tie-break needs one
-
-  const mpDeck = mapDeck(cfg);
-  const mpLegs = mpDeck.slice(0, MAP_LEGS);
-  const mpSpare = mpDeck.slice(MAP_LEGS);
-
-  const fgLevels = flagLevelsOf(cfg);
-  const fgDeck = flagDeck(cfg, fgLevels);
-  const fgLegs = fgDeck.slice(0, FLAG_LEGS);
-  const fgSpare = fgDeck.slice(FLAG_LEGS);   // every other flag at the level: swaps and tie-breakers
-
-  const dsLevels = dishLevelsOf(cfg);
-  const dsDeck = dishDeck(cfg, dsLevels);
-  const dsLegs = dsDeck.slice(0, DISH_LEGS);
-  const dsSpare = dsDeck.slice(DISH_LEGS);
-
-  const mk = (t, color) => ({
-    name:t.name, captain:t.captain, players:t.players,
-    score:0, ll:{ friend:true, dip:true, dbl:true }, color
-  });
-
-  /* Which mini-games the host actually asked for, in a fixed order so the
-     plan is stable, minus any that cannot run on this bank. */
-  const wanted = (cfg.minis || []).slice();
-  const inter  = INTERLEAVED.filter(k => wanted.indexOf(k) > -1)
-                            .filter(k => k !== 'closest' || cp.length)
-                            .filter(k => k !== 'auction' || auctionPool().length)
-                            .filter(k => k !== 'saysame' || ssLegs.length)
-                            .filter(k => k !== 'map' || mpLegs.length)
-                            .filter(k => k !== 'flag' || fgLegs.length)
-                            .filter(k => k !== 'dish' || dsLegs.length);
-  const hasBattle = wanted.indexOf('battle') > -1;
-  /* no standard rounds: the mini-games simply run back to back, from the start */
-  const plan = rounds.length ? planMinis(rounds.length, inter) : inter.map(k => ({ key:k, after:0 }));
-  const M = inter.length + (hasBattle ? 1 : 0);
-
-  return {
-    id:uid(), startedAt:new Date().toISOString(), cfg,
-    teams:[mk(cfg.teamA, 'a'), mk(cfg.teamB, 'b')],
-    rounds,
-    plan,                      // [{key, after}] for the interleaved ones
-    hasBattle,
-    miniPts: miniPointValue(rounds.length, M),
-    done:{},                   // key -> true once that mini-game has finished
-    mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
-    saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
-    mapGame:{ levels:mapLevelsOf(cfg), qs:mpLegs, spare:mpSpare, base:mpLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
-    flagGame:{ levels:fgLevels, qs:fgLegs, spare:fgSpare, base:fgLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
-    dishGame:{ levels:dsLevels, qs:dsLegs, spare:dsSpare, base:dsLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0, leg:dishLeg() },
-    auction:null,
-    r:0, seat:0, sub:'intro', miniPlayed:false,
-    battle:null,
-    sd:null, screen:'roundIntro'
-  };
-}
 
 /* every mini-game still owed after the round at index r finishes */
 function minisAfter(r){
@@ -4223,10 +3952,7 @@ function defaultSetup(){
    everyone else — and that override is what every pool, count and warning in
    the app reads from. A theme with no entry simply inherits.
    -------------------------------------------------------------------------- */
-function diffOf(cfg, theme){
-  const d = cfg && cfg.themeDiff && cfg.themeDiff[theme];
-  return d || (cfg ? cfg.difficulty : 'mixed');
-}
+
 function diffFor(theme){ return diffOf(S.setup, theme); }
 /* themes actually running on something other than the house setting */
 function overrideThemes(){
@@ -4277,14 +4003,7 @@ function prunePicks(){
     c[m.store] = (c[m.store] || []).filter(id => ok[id]);
   });
 }
-function pickedPair(theme, picks){
-  const ids = (picks || (S.setup && S.setup.picks) || {})[theme] || [];
-  if(ids.length !== 2) return null;
-  const a = S.bank.find(q => q.id === ids[0]), b = S.bank.find(q => q.id === ids[1]);
-  if(!a || !b) return null;
-  const key = (a.use_with || '').trim();
-  return { key, a, b, strict:!!key && key === (b.use_with || '').trim(), picked:true };
-}
+
 
 SCREENS.setup = function(){
   const c = S.setup = S.setup || defaultSetup();
@@ -7156,7 +6875,6 @@ function awardMap(w){
 }
 
 /* ---------- cocktail or dish ---------- */
-function dishLeg(){ return { shown:1, out:[false, false], buzz:null, calls:[], k:0 }; }
 /* no host: once the calls are in (or time runs out), check them in order */
 function dishTurnOver(){
   const L = G().dishGame.leg;
