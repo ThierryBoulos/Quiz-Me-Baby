@@ -3,11 +3,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, loadBank, type Bank } from "./engine";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
+import { getSettings, USED_KEY } from "./settings";
 import { readyToStart, starter, type Member, type Room } from "./room";
-import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_AUTO, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_FLAG, T_MAP, T_MAP_RULE, T_OVERRULE, T_SAY, T_SUDDEN_BUZZ,
+import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_AUTO, T_BATTLE_HOST, T_BATTLE_TYPED, T_FLAG, T_MAP, T_MAP_RULE, T_OVERRULE, T_SAY, T_SUDDEN_BUZZ,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
-const T_QUESTION = 60, T_STEAL = 30, T_FRIEND = 30;
+/* the house timers come from Settings on this TV */
+const T = () => getSettings();
 type Action = { id: number; room: string; user_id: string; kind: string; payload: Record<string, unknown>; at: string };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type G = any;
@@ -124,14 +126,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const [pub, setPub] = useState<Pub | null>(null);
   const isTvRef = useRef(isTv);
   isTvRef.current = isTv;
-  const saveKey = "qmb.tv." + code + ".game", usedKey = "qmb.party.used";
+  const saveKey = "qmb.tv." + code + ".game", usedKey = USED_KEY;
+  /* who answers first: fixed for the whole game when it starts (Settings → alternate) */
+  const seat = () => ({ alternateFirst: !!st.current.g?.alternateFirst });
 
   const used = useCallback((): Set<string> => { try { return new Set(JSON.parse(localStorage.getItem(usedKey) || "[]")); } catch { return new Set(); } }, []);
   const env = useCallback(() => {
     const bank = st.current.bank!;
-    const deal = QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => true,
+    const deal = QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => getSettings().noRepeat,
       ok: { map: (q: G) => q.type === "map", flag: (q: G) => q.type === "flag", dish: (q: G) => q.type === "dish" } });
-    return { deal, settings: { alternateFirst: false } };
+    return { deal, settings: seat() };
   }, [used]);
 
   /* the question in play right now, whatever the game */
@@ -158,7 +162,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (s.screen === "auctionBid" || s.screen === "auctionRun") return g.auction.turn;
     if (s.screen === "battleQ") return g.battle.cap;
     if (!rd) return 0;
-    const owner = QMB.seatTeam(g, rd, g.seat, {});
+    const owner = QMB.seatTeam(g, rd, g.seat, seat());
     return s.screen === "steal" ? other(owner) : owner;
   };
 
@@ -180,7 +184,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const s = st.current, g = s.g;
     if (!g) return null;
     const rd = g.rounds[g.r];
-    const owner = rd ? QMB.seatTeam(g, rd, g.seat, {}) : 0;
+    const owner = rd ? QMB.seatTeam(g, rd, g.seat, seat()) : 0;
     const q = current();
     const p: Pub = {
       screen: s.screen, step: s.step, r: g.r, N: g.rounds.length, theme: rd?.theme, mode: s.nohost ? "nohost" : "host",
@@ -193,7 +197,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const secret: Secret = { step: s.step, typed: s.typed, match: [match(s.typed[0], q), match(s.typed[1], q)], guesses: s.guesses };
     if (q) { p.qid = q.id; secret.qid = q.id; secret.answer = q.answer; secret.notes = q.notes; }
     if (rd) {
-      p.first = QMB.seatTeam(g, rd, 0, {});
+      p.first = QMB.seatTeam(g, rd, 0, seat());
       p.dbl = [...rd.dbl] as Two<boolean>;
       p.llUsed = [[...rd.llUsed[0]], [...rd.llUsed[1]]];
       if (["ask", "steal", "answer"].includes(s.screen)) {
@@ -296,7 +300,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (f.used) { const u = used(); u.add(f.used.id); localStorage.setItem(usedKey, JSON.stringify([...u])); }
       if (f.lifeline) {
         const rd = s.g.rounds[s.g.r];
-        s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, {}), deadline: f.lifeline === "friend" ? now + T_FRIEND * 1000 : null };
+        s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, seat()), deadline: f.lifeline === "friend" ? now + T().tFriend * 1000 : null };
       }
       if (f.toast) s.toast = { id: ++s.toastN, text: f.toast };
       if (f.sound && isTvRef.current) playSound(f.sound as SoundName);
@@ -310,7 +314,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; }
         if (f.go === "sudden" || f.go === "battleTie") { s.sdBuzz = null; s.sdOut = [false, false]; }
         const g = s.g;
-        const secs = f.go === "ask" ? T_QUESTION : f.go === "steal" ? T_STEAL : f.go === "miniQ" ? T_CLOSEST : f.go === "flagQ" ? T_FLAG
+        const secs = f.go === "ask" ? T().tQuestion : f.go === "steal" ? T().tSteal : f.go === "miniQ" ? T().tMini : f.go === "flagQ" ? T_FLAG
           : f.go === "mapQ" ? T_MAP : f.go === "auctionRun" ? T_AUCTION
           : f.go === "dishQ" ? dishTotal(g.dishGame.qs[g.dishGame.i])
           : f.go === "sayQ" ? T_SAY : f.go === "battleQ" ? (s.nohost ? T_BATTLE_TYPED : T_BATTLE_HOST)
@@ -526,12 +530,22 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const standard = cfgIn.standard !== false;
       if (!standard && !minis.length) return;
       const rounds = Math.max(4, Math.min(12, Math.floor(Number(cfgIn.rounds) || 8)));
+      /* the host's hand-picked questions and per-theme difficulty (only a host can send them: the picker shows answers) */
+      const byHost = members.find((m) => m.user_id === a.user_id)?.role === "host";
+      const ids = (x: unknown) => (Array.isArray(x) ? x.filter((v) => typeof v === "string").slice(0, 20) : []) as string[];
+      const pickIn = (byHost && cfgIn.picks && typeof cfgIn.picks === "object" ? cfgIn.picks : {}) as Record<string, unknown>;
+      const picks = Object.fromEntries(Object.entries(pickIn).map(([t, v]) => [t, ids(v).slice(0, 2)]).filter(([, v]) => v.length === 2));
+      const themeDiff = byHost && cfgIn.themeDiff && typeof cfgIn.themeDiff === "object"
+        ? Object.fromEntries(Object.entries(cfgIn.themeDiff as Record<string, string>).filter(([, d]) => ["easy", "medium", "hard", "mixed"].includes(d))) : {};
+      const hand = (k: string) => (byHost ? ids(cfgIn[k]) : []);
       const cfg = { rounds, themes: cfgIn.themes || [], difficulty: diff, standard,
-        minis, flagLevels: LEVELS[miniDiff].flag, dishLevels: LEVELS[miniDiff].dish, teamA: team(0), teamB: team(1), picks: {} };
+        minis, flagLevels: LEVELS[miniDiff].flag, dishLevels: LEVELS[miniDiff].dish, teamA: team(0), teamB: team(1), picks, themeDiff,
+        pickClosest: hand("pickClosest"), pickAuction: hand("pickAuction"), pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish") };
       const g = env().deal.buildGame(cfg);
       /* The engine always plays "hosted" here: with no host the TV is the host
          (it checks the answers), so steals and buzzers work as with one. */
       g.hostless = false;
+      g.alternateFirst = getSettings().alternateFirst;
       s.nohost = !members.some((m) => m.role === "host");
       s.g = g; s.screen = ""; s.lifeline = null; s.pending = null; s.autoAt = null; s.step = 1;
       g.rounds.forEach((r: G) => r.q.forEach((q: G) => applyFx([{ used: q }])));

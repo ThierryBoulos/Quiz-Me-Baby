@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { loadBank, themeCounts, type Bank } from "@/lib/engine";
+import { NO_PICKS, Picker, pickSummary, type Picks } from "./Picker";
 
-export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; miniLevel: string };
+export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; miniLevel: string } & Partial<Picks>;
 const MINIS = [["closest", "Closest To Wins"], ["auction", "The Auction"], ["saysame", "Don't Say the Same"], ["map", "Guess the Map"],
   ["flag", "Guess the Flag"], ["dish", "Cocktail or Dish"], ["battle", "Battle of the Captains"]] as const;
 const LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["mixed", "Mixed"]] as const;
@@ -14,7 +15,7 @@ const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1
    rounds can be switched off (a mini-games-only night); one theme per round,
    so the number of themes always matches the number of rounds; mini-games
    are their own section. Sensible defaults, so Start works straight away. */
-export function Setup({ onStart, busy, ready, why }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string }) {
+export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean }) {
   const [bank, setBank] = useState<Bank | null>(null);
   const [standard, setStandard] = useState(true);
   const [rounds, setRounds] = useState(8);
@@ -24,6 +25,9 @@ export function Setup({ onStart, busy, ready, why }: { onStart: (c: Cfg) => void
   const [miniLevel, setMiniLevel] = useState("mixed");
   const [note, setNote] = useState<string | null>(null);
   const [open, setOpen] = useState<"themes" | "minis" | null>(null);
+  /* the host's advanced options: hand-picked questions, a difficulty per theme */
+  const [picks, setPicks] = useState<Picks>(NO_PICKS);
+  const [picking, setPicking] = useState(false);
   useEffect(() => { void loadBank().then(setBank); }, []);
 
   /* themes that can field a question for each team at this difficulty */
@@ -48,6 +52,7 @@ export function Setup({ onStart, busy, ready, why }: { onStart: (c: Cfg) => void
     setThemes([...picked, t]);
   };
   const flagsOrDishes = minis.includes("flag") || minis.includes("dish");
+  const half = picked.filter((t) => (picks.picks[t] || []).length === 1);
 
   /* what stops the start, in plain words */
   const blocker = !ready ? why
@@ -124,9 +129,25 @@ export function Setup({ onStart, busy, ready, why }: { onStart: (c: Cfg) => void
         {flagsOrDishes && <Levels value={miniLevel} set={setMiniLevel} label="Flags & dishes level" />}
       </div>
 
+      {/* ---- ADVANCED: the host only (it shows the answers) ---- */}
+      {isHost && bank && (
+        <div className="card flex flex-col gap-3">
+          <div>
+            <div className="display text-[24px]">Advanced</div>
+            <div className="text-[13px] text-[var(--color-ink-2)]">Host only. {pickSummary(picks, standard ? picked : [], minis)}</div>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <button type="button" className="btn btn-sm" onClick={() => setPicking(true)}>Choose questions</button>
+            {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
+          </div>
+        </div>)}
+      {picking && bank && <Picker bank={bank} themes={standard ? picked : []} minis={minis} difficulty={difficulty} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
+
       <button className="btn btn-gold btn-lg btn-block" disabled={!!blocker || busy}
-        onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, miniLevel })}>Start the game</button>
+        onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, miniLevel,
+          ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
       {blocker && <p className="text-center text-[13px] text-[var(--color-ink-2)]" role="status">{blocker}</p>}
+      {isHost && half.length > 0 && <p className="text-center text-[13px] text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
     </section>
   );
 }

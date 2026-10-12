@@ -6,9 +6,13 @@
 type Opt = { type?: OscillatorType; gain?: number };
 type NOpt = { type?: BiquadFilterType; f0?: number; f1?: number; q?: number; gain?: number; att?: number };
 
+import { getSettings, saveSettings } from "./settings";
+
 let ctx: AudioContext | null = null, master: GainNode | null = null;
-let on = true;
-try { on = localStorage.getItem("qmb.tv.sound") !== "off"; } catch { /* private mode */ }
+/* sound, tick and volume come from Settings */
+const cfg = () => (typeof window === "undefined" ? { sound: true, tick: true, volume: 0.75 } : getSettings());
+let on = cfg().sound;
+if (typeof window !== "undefined") window.addEventListener("qmb:settings", () => { const c = cfg(); on = c.sound; if (master && ctx) master.gain.setTargetAtTime(c.volume, ctx.currentTime, 0.05); });
 
 function init() {
   if (ctx || typeof window === "undefined") return;
@@ -16,7 +20,7 @@ function init() {
   if (!AC) return;
   ctx = new AC();
   master = ctx.createGain();
-  master.gain.value = 0.8;
+  master.gain.value = cfg().volume;
   const lp = ctx.createBiquadFilter();
   lp.type = "lowpass"; lp.frequency.value = 5200; lp.Q.value = 0.6;   // nothing harsh, ever
   master.connect(lp); lp.connect(ctx.destination);
@@ -57,7 +61,7 @@ export const Snd = {
   resume() { init(); if (ctx && ctx.state === "suspended") void ctx.resume(); },
   blocked() { init(); return !!ctx && ctx.state !== "running"; },
   get on() { return on; },
-  set(v: boolean) { on = v; try { localStorage.setItem("qmb.tv.sound", v ? "on" : "off"); } catch { /* ignore */ } },
+  set(v: boolean) { on = v; saveSettings({ sound: v }); },
   jingle() {
     this.resume();
     const N = { C3: 130.81, F3: 174.61, G3: 196.0, A3: 220.0, C4: 261.63, E4: 329.63, G4: 392.0, A4: 440.0, B4: 493.88, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99 };
@@ -79,7 +83,7 @@ export const Snd = {
     note(82, 0.82, 0.7, { type: "sine", gain: 0.3 });
     noise(0.82, 1.1, { type: "highpass", f0: 3000, gain: 0.09, att: 0.01 });
   },
-  tick() { note(1320, 0, 0.07, { type: "sine", gain: 0.095 }); note(2640, 0, 0.04, { type: "sine", gain: 0.03 }); },
+  tick() { if (!cfg().tick) return; note(1320, 0, 0.07, { type: "sine", gain: 0.095 }); note(2640, 0, 0.04, { type: "sine", gain: 0.03 }); },
   correct() { this.resume(); note(659.25, 0, 0.42, { type: "triangle", gain: 0.14 }); note(987.77, 0.09, 0.6, { type: "triangle", gain: 0.11 }); },
   wrong() { this.resume(); note(311.13, 0, 0.4, { type: "sine", gain: 0.12 }); note(233.08, 0.11, 0.6, { type: "sine", gain: 0.1 }); },
   point() { this.resume(); [523.25, 659.25, 783.99].forEach((f, i) => note(f, i * 0.07, 0.5, { type: "triangle", gain: 0.1 })); },

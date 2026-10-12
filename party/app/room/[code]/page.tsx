@@ -170,7 +170,7 @@ export default function PhoneRoom() {
       {room.status === "lobby" && (
         <footer className="mt-auto flex flex-col gap-2">
           {canStart ? (
-            <Setup ready={ready} why={notReadyWhy(members)} busy={busy} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <Setup ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-[14px] text-[var(--color-ink-2)]">
               You&rsquo;re in. {who ? <><b>{who.name}</b> starts the game.</> : "The host — or Team A's captain — starts the game."}
