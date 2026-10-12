@@ -223,3 +223,51 @@ Each step is playable on its own, and Classic is never broken along the way.
 6. **One PLAY button:** the mode (Classic / with host / no host) picks itself from who joins (section 2).
 
 **Next:** step 1 (the engine refactor) needs nothing external and can start now. Step 2 needs the Supabase project: Thierry is creating a new organisation on Supabase. Once it exists, this session can create the project, tables, security rules and functions through the Supabase connection.
+
+---
+
+## 9. Look and feel: copy SNAKED (12 Oct 2026)
+
+Joining, the lobby, the TV code screen and the phone controllers **follow SNAKED**. Yelephant already uses the same lobby layout in its paper style. SNAKED is the reference (`/home/user/snaked`).
+
+**Join (one screen):** `/join?code=ABCD`
+- Room code box: big display font, letter-spaced, upper-cased as you type, 4 characters. Placeholder "Enter 4-letter code".
+- **Name** (max 12).
+- **Pick a face**: emoji grid, with faces already taken greyed out.
+- Then **team** (A / B) and **"Make me captain"** / **"I'm the host"**.
+- One big pill button: "Take my seat".
+- Errors in SNAKED's tone: "Room not found"; a taken name offers "Rami is already at this table — Rami 2?".
+
+**Codes:** 4 characters from `23456789ABCDEFGHJKMNPQRSTUVWXYZ` (no 0/O/1/I/L), the same alphabet as SNAKED. Already applied in Supabase.
+
+**Phone lobby:**
+- "Your room" eyebrow + the code in the display font with a hard offset shadow.
+- QR tile + "Send the link" (share sheet).
+- Connection dot: "{here} of {n} here".
+- Players as chips (face + name) under each team, the captain marked.
+- **One loud button** for whoever starts. Everyone else sees "You're in. {host} starts the game."
+
+**TV:**
+- A fixed 1280×720 stage scaled to fit the screen.
+- Huge code + 220px QR, player cards. No buttons.
+- **Unlike SNAKED, the PLAY screen links to it directly.** In SNAKED the TV address is only in the README.
+
+**Phone controller:**
+- Full-width stacked answer buttons (≥60px, 18px radius).
+- "Locked" state after sending.
+- **Haptic buzz** on your turn and when buzzing in.
+- The whole screen glows in the phase / team colour, instead of popping up dialogs.
+- A door button to leave, and a "Connection lost — your seat is being held" screen that recovers on its own.
+
+**Rejoin:** your identity is the anonymous Supabase session. Coming back with the same phone gives you the same seat.
+
+**Kicking:** a visible "Remove" on the host's player list. SNAKED's long-press is hidden; Quiz Me Baby makes it visible.
+
+**Tech, same stack as SNAKED:**
+- Next.js + Tailwind v4 + `@supabase/ssr` + `qrcode.react`, hosted on Vercel.
+- Realtime by `postgres_changes` on a `room:{code}` channel, with a short polling safety net and a heartbeat.
+- Countdowns on the server clock.
+
+This replaces "plain JS + Vite" in 6.4. The game engine (step 1) is still written framework-free, so Classic and Party share it.
+
+**Open question:** keep **Quiz Me Baby's own colours** (navy, gold, cyan Team A, pink Team B) with SNAKED's layouts and components, or take SNAKED's palette as well? Recommended: **QMB's colours, SNAKED's layouts.** The team colours carry meaning in a two-team game.
