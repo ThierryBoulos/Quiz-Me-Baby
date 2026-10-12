@@ -841,10 +841,15 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 .dish-buzz .btn.done{opacity:.6}
 .map-judge.dish-judge > .card h3{display:block}
 .flag-lvl .lvl-tag{align-self:center;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);flex:none;width:84px}
+.flag-lvl.dish-lvl{margin-top:4px}
+.flag-lvl.dish-lvl .lvl-tag{flex-basis:100%;width:auto;margin:0 0 2px 2px}
 .dish-judge .q-note{text-align:left;margin:0;max-width:none;font-size:15px}
 @media(max-width:760px){
-  .ing{padding-inline:12px}
-  .ing-q{white-space:normal;max-width:45%}
+  .ing{padding:6px 12px;min-height:0;gap:10px;border-radius:10px}
+  .ing-n{font-size:15px}
+  .ings.long .ing-n{font-size:14px}
+  .ing-q{font-size:12.5px;white-space:normal;max-width:45%}
+  .ings{gap:5px}
   .dish-play .map-side .dish-count{grid-area:l;justify-self:start}
 }
 .map-hint{font-size:14px;color:var(--ink-2);text-align:center}
@@ -1245,7 +1250,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.11', date:'11 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.12', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2362,6 +2367,11 @@ const DISH_STEP = 3;    // seconds between ingredients
 const DISH_LAST = 8;    // seconds still to answer once the whole list is up
 const DISH_LEVELS = { 'c-easy':'Easy', 'c-medium':'Medium', 'c-hard':'Hard', 'd-easy':'Easy', 'd-medium':'Medium', 'd-hard':'Hard' };
 const dishKind = (q) => (q && q.level || '')[0] === 'c' ? 'Cocktail' : 'Dish';
+/* "Cocktails", "Dishes" or "Cocktails + dishes" — the levels stay off screen */
+const dishKinds = (levels) => {
+  const c = levels.some(l => l[0] === 'c'), d = levels.some(l => l[0] === 'd');
+  return c && d ? 'Cocktails + dishes' : c ? 'Cocktails' : 'Dishes';
+};
 const dishLevelName = (l) => (l[0] === 'c' ? 'Cocktails' : 'Dishes') + ' · ' + (DISH_LEVELS[l] || '');
 const FLAGS = [["us", "United States", "veasy", ""],
   ["gb", "United Kingdom", "veasy", ""],
@@ -3879,7 +3889,7 @@ const CLOSEST_SCREENS = ['miniIntro','miniQ','miniEntry','miniSummary'];
 const SAYSAME_SCREENS = ['sayIntro','sayQ','sayJudge','saySummary'];
 const MAP_SCREENS = ['mapIntro','mapQ','mapJudge','mapTie','mapSummary'];
 const FLAG_SCREENS = ['flagIntro','flagQ','flagJudge','flagSummary'];
-const DISH_SCREENS = ['dishIntro','dishQ','dishCheck','dishReveal','dishSummary'];
+const DISH_SCREENS = ['dishIntro','dishQ','dishCheck','dishReveal','dishTie','dishSummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
   if(CLOSEST_SCREENS.indexOf(S.screen) > -1) return 'closest';
@@ -3935,7 +3945,7 @@ function render(){
      them — left out, it renders 88px of padding inside a box already sized to
      the viewport and the page scrolls by exactly that much. */
   document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ','flagQ','dishQ'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapTie','mapSummary','flagSummary','dishSummary'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapTie','mapSummary','flagSummary','dishTie','dishSummary'].indexOf(S.screen) > -1);
   /* the enlarged map belongs to the screen that opened it */
   if(S.tmp.mzFor && S.tmp.mzFor !== S.screen) closeMapZoom();
   document.body.classList.toggle('homemode', S.screen === 'home');
@@ -3997,7 +4007,7 @@ function renderHUD(){
   } else if(FLAG_SCREENS.indexOf(S.screen) > -1){
     label = '<b>GUESS THE FLAG</b> &nbsp;·&nbsp; ' + (S.screen === 'flagSummary' ? 'Final' : flagLegLabel());
   } else if(DISH_SCREENS.indexOf(S.screen) > -1){
-    label = '<b>COCKTAIL OR DISH</b> &nbsp;·&nbsp; ' + (S.screen === 'dishSummary' ? 'Final' : dishLegLabel());
+    label = '<b>COCKTAIL OR DISH</b> &nbsp;·&nbsp; ' + (S.screen === 'dishSummary' ? 'Final' : S.screen === 'dishTie' ? 'Level' : dishLegLabel());
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
     const b = g.battle;
     label = '<b>BATTLE OF THE CAPTAINS</b>' +
@@ -4168,7 +4178,7 @@ SCREENS.rules = function(){
       li('The ingredients come up <strong>one at a time</strong>, with their amounts — a new one every <strong>' + DISH_STEP + ' seconds</strong>, the giveaway last.'),
       li('Know it? <strong>Captain, call it out.</strong> The first voice gets to answer. <strong>One go per team</strong> — get it wrong and you are out of that one, and the list keeps coming for the other team.'),
       li('Six levels, chosen in Setup — <strong>cocktails</strong> and <strong>dishes</strong>, each easy, medium or hard. Pick any mix; they are shared out evenly.'),
-      li('Best of ' + DISH_LEGS + '; level at the end, and another one comes out until somebody gets one.')
+      li('Best of ' + DISH_LEGS + '. Level at the end? <strong>One more as a tie-breaker, or stop there with a point each</strong> — your choice, again after every tied tie-breaker.')
     ])) +
 
     ruleBlock('11', 'Battle of the Captains', ul([
@@ -4485,7 +4495,7 @@ SCREENS.setup = function(){
             : '') +
           (k === 'dish' && on
             ? ['c', 'd'].map(kind =>
-                '<div class="flag-lvl" role="group" aria-label="' + (kind === 'c' ? 'Cocktail' : 'Dish') + ' levels">' +
+                '<div class="flag-lvl dish-lvl" role="group" aria-label="' + (kind === 'c' ? 'Cocktail' : 'Dish') + ' levels">' +
                   '<span class="lvl-tag">' + (kind === 'c' ? 'Cocktails' : 'Dishes') + '</span>' +
                   Object.keys(DISH_LEVELS).filter(l => l[0] === kind).map(l =>
                     '<button data-act="dishLevel" data-v="' + l + '" aria-pressed="' + (dishLevelsOf(c).indexOf(l) > -1) + '">' + DISH_LEVELS[l] + '</button>').join('') +
@@ -5980,14 +5990,14 @@ SCREENS.dishIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">Guess the<br>Cocktail or Dish</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + s.levels.map(dishLevelName).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + dishKinds(s.levels) + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> The ingredients come up <strong>one at a time</strong>, a new one every <strong>' + DISH_STEP + ' seconds</strong>. The giveaway comes last.</li>' +
         '<li><strong style="color:var(--gold)">2.</strong> Know it? <strong>Captain, call it out</strong> — first voice answers.' + (NOHOST() ? ' Tap your team and <strong>write it down</strong>, face down — the app keeps the order.' : ' The host taps who called it.') + '</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> <strong>One go per team.</strong> ' + (NOHOST() ? 'The list keeps coming for the other team. At the end the answers are turned over in the order they were called — <strong>the first one right wins it</strong>.' : 'Wrong, and you are out of that one — the list keeps coming for the other team.') + '</li>' +
-        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level at the end, and another one comes out, <strong>until somebody gets one</strong>.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level at the end? <strong>One more to settle it, or a point each</strong> — your choice.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="dishStart">Show number 1</button></div>' +
@@ -6099,6 +6109,23 @@ SCREENS.dishReveal = function(){
       '</div>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="dishNext">Next</button></div>' +
+  '</div>';
+};
+
+SCREENS.dishTie = function(){
+  const g = G(), s = g.dishGame, more = !!(s.spare && s.spare.length);
+  return '<div class="fits">' +
+    dishBand() +
+    '<div class="center stack" style="gap:8px">' +
+      '<div class="eyebrow gold">' + (s.tieLegs ? 'Still level' : 'Level after ' + s.base) + '</div>' +
+      '<h2 class="display">' + (s.wins[0] ? s.wins[0] + ' each' : 'Nothing each') + '</h2>' +
+      '<p class="reader" style="max-width:44ch;margin:0 auto">' + (NOHOST() ? 'Decide together' : 'Your call') + ': one more to settle it, or stop here and give both teams a point.</p>' +
+    '</div>' +
+    scoreBig() +
+    '<div class="btn-row center">' +
+      '<button class="btn ghost lg" data-act="dishStop">Stop here — 1 point each</button>' +
+      '<button class="btn gold lg" data-act="dishMore"' + (more ? '' : ' disabled') + '>' + (more ? 'One more — tie-breaker' : 'Nothing left') + '</button>' +
+    '</div>' +
   '</div>';
 };
 
@@ -7154,16 +7181,8 @@ function dishAfterLeg(){
   const left = Math.max(0, s.base - s.i);
   if(s.i < s.base && lead <= left){ go('dishQ'); return; }
   if(lead === 0){
-    if(s.spare && s.spare.length){
-      s.qs.push(s.spare.shift());
-      s.tieLegs++;
-      toast(s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next one decides it.' : 'Nobody on the board yet — next one.', 3600);
-      go('dishQ');
-      return;
-    }
-    s.done = true;
-    s.verdict = { winner:null, needsHost:true, note:'Still level, and there is nothing left at these levels. Your call.' };
-    go('dishSummary');
+    /* level: the table decides — one more to settle it, or a point each */
+    go('dishTie');
     return;
   }
   const winner = s.wins[0] > s.wins[1] ? 0 : 1;
@@ -8197,6 +8216,24 @@ const ACT = {
     render();
   },
   dishNext(){ const s = G().dishGame; s.i++; dishAfterLeg(); },
+  dishMore(){
+    const s = G().dishGame;
+    if(!s.spare || !s.spare.length) return toast('Nothing left at these levels.');
+    s.qs.push(s.spare.shift());
+    s.tieLegs++;
+    s.leg = dishLeg();
+    go('dishQ');
+  },
+  dishStop(){
+    const g = G(), s = g.dishGame;
+    if(s.awarded) return;
+    s.done = true; s.awarded = true;
+    s.award = [1, 1];
+    g.teams[0].score += 1; g.teams[1].score += 1;
+    s.verdict = { winner:null, needsHost:false, note:'Level — called there, a point each.' };
+    Snd.point();
+    go('dishSummary');
+  },
   dishAward(e){ awardDish(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
   afterDish(){
     const g = G();
