@@ -1,0 +1,133 @@
+"use client";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { Lineup } from "@/components/Lineup";
+import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
+import { readyToStart, starter, teamName, useRoom, type Member } from "@/lib/room";
+
+/* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
+   name the team, or be the host. The colour of your team fills the screen. */
+export default function PhoneRoom() {
+  const { code } = useParams<{ code: string }>();
+  const router = useRouter();
+  const { room, members, missing, refresh } = useRoom(code);
+  const [me, setMe] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  useEffect(() => { void ensureSession().then(setMe); }, []);
+  const mine = useMemo(() => members.find((m) => m.user_id === me) || null, [members, me]);
+
+  /* not in this room (yet): to the join screen with the code filled in */
+  useEffect(() => {
+    if (missing) router.replace("/join?code=" + code);
+    else if (room && me && members.length && !mine) router.replace("/join?code=" + code);
+  }, [missing, room, me, members.length, mine, code, router]);
+
+  const host = members.find((m) => m.role === "host") || null;
+  const side = mine?.team === 0 ? "a" : mine?.team === 1 ? "b" : null;
+  useEffect(() => { document.documentElement.style.setProperty("--tint", side ? `var(--color-${side})` : "var(--color-gold)"); }, [side]);
+
+  async function act(fn: () => Promise<unknown>) {
+    setBusy(true); setMsg(null);
+    try { const r = await fn(); if (typeof r === "string" && r !== "ok") setMsg(r); await refresh(); }
+    catch (e) { setMsg(e instanceof Error ? e.message : String(e)); }
+    setBusy(false);
+  }
+  const pickTeam = (t: 0 | 1 | null) => act(() => rpc<string>("qmb_update_me", { r: code, nm: mine?.name ?? "", tm: t }));
+  const claim = (want: "captain" | "host" | "player") => act(() => rpc<string>("qmb_claim", { r: code, want }));
+  const move = (m: Member, to: 0 | 1) => act(async () => {
+    const { error } = await sb().from("members").update({ team: to, role: "player" }).eq("room", code).eq("user_id", m.user_id);
+    if (error) throw new Error(error.message);
+  });
+  const leave = () => act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
+
+  if (!room || !mine) return <main className="screen justify-center text-center"><div className="eyebrow">Finding your seat…</div></main>;
+
+  const myCaptain = mine.team != null ? members.find((m) => m.team === mine.team && m.role === "captain") : null;
+  const who = starter(members);
+  const canStart = who?.user_id === me;
+  const ready = readyToStart(members);
+
+  return (
+    <main className="screen">
+      <header className="flex items-center justify-between">
+        <span className="chip"><span className="face">{mine.avatar || "🙂"}</span>{mine.name}</span>
+        <span className="eyebrow">Room {code}</span>
+        <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>
+      </header>
+
+      {room.status !== "lobby" ? (
+        <section className="card text-center enter flex-1 grid place-items-center">
+          <div>
+            <div className="eyebrow">Game on</div>
+            <h1 className="display text-[44px] mt-2">Eyes on the TV</h1>
+            <p className="text-[var(--color-ink-2)] mt-2">Your controls will show up here.</p>
+          </div>
+        </section>
+      ) : mine.role === "host" ? (
+        <>
+          <section className="card enter text-center">
+            <div className="eyebrow">You&rsquo;re the host</div>
+            <h1 className="display text-[40px] mt-1" style={{ color: "var(--color-gold)" }}>Run the night</h1>
+            <p className="text-[14px] text-[var(--color-ink-2)] mt-1">You&rsquo;ll see every answer. Tap an arrow to move a player across.</p>
+          </section>
+          <Lineup room={room} members={members} onMove={move} />
+          <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => claim("player")}>Stop hosting</button>
+        </>
+      ) : mine.team == null ? (
+        <section className="flex flex-col gap-3 enter">
+          <h1 className="display text-[44px] text-center">Pick your side</h1>
+          <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
+          <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
+          <div className="h-2" />
+          {host
+            ? <button className="btn btn-block" disabled>{host.name} is the host</button>
+            : <button className="btn btn-block" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>}
+        </section>
+      ) : (
+        <section className="flex flex-col gap-3 enter">
+          <div className="card text-center" style={{ borderColor: `var(--color-${side})` }}>
+            <div className="eyebrow">You&rsquo;re on</div>
+            <div className="display text-[48px] mt-1" style={{ color: `var(--color-${side})` }}>{teamName(room, mine.team)}</div>
+          </div>
+          {mine.role === "captain" ? (
+            <div className="card flex flex-col gap-3">
+              <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
+              <label className="field-label !mb-0" htmlFor="tname">Name your team</label>
+              <div className="flex gap-2">
+                <input id="tname" className="input" maxLength={18} value={draft} placeholder={teamName(room, mine.team)} onChange={(e) => setDraft(e.target.value)} />
+                <button className="btn" disabled={!draft.trim() || busy} onClick={() => act(async () => { await sendAction(code, "team_name", { team: mine.team, name: draft.trim() }); setDraft(""); })}>Save</button>
+              </div>
+              <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
+            </div>
+          ) : myCaptain ? (
+            <button className="btn btn-block" disabled>{myCaptain.name} is your captain</button>
+          ) : (
+            <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>
+          )}
+          <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => pickTeam(mine.team === 0 ? 1 : 0)}>Switch to {teamName(room, mine.team === 0 ? 1 : 0)}</button>
+        </section>
+      )}
+
+      {msg && <p className="field-error text-center">{msg}</p>}
+
+      {room.status === "lobby" && (
+        <footer className="mt-auto flex flex-col gap-2">
+          {canStart ? (
+            <>
+              <button className="btn btn-gold btn-lg btn-block" disabled={!ready || busy}
+                onClick={() => act(() => sendAction(code, "setup", { start: true }))}>Start the game</button>
+              {!ready && <p className="text-center text-[13px] text-[var(--color-ink-3)]">Each team needs a captain first.</p>}
+            </>
+          ) : (
+            <p className="text-center text-[14px] text-[var(--color-ink-2)]">
+              You&rsquo;re in. {who ? <><b>{who.name}</b> starts the game.</> : "The host — or Team A's captain — starts the game."}
+            </p>
+          )}
+        </footer>
+      )}
+    </main>
+  );
+}

@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Quiz Me Baby — Party. SNAKED's layouts and behaviour, Quiz Me Baby's own
+   colours: night-navy ground, gold for the show, cyan for Team A, pink for
+   Team B. A team's colour fills the phone of everyone on that team, so you
+   always know whose side you're on.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-bg: #04050e;
+  --color-bg-2: #0b0e24;
+  --color-stage: #12163a;
+  --color-ink: #f4f6ff;
+  --color-ink-2: #b9c0de;
+  --color-ink-3: #7a83aa;
+  --color-gold: #f5c518;
+  --color-gold-2: #ffe58a;
+  --color-a: #31c9f7;
+  --color-b: #ff4d82;
+  --color-ok: #3ddc97;
+  --color-no: #ff5566;
+  --font-display: var(--font-anton), "Arial Black", Impact, sans-serif;
+  --font-body: var(--font-sora), system-ui, sans-serif;
+}
+:root {
+  --glass: rgba(255, 255, 255, 0.045);
+  --glass-2: rgba(255, 255, 255, 0.075);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-2: rgba(255, 255, 255, 0.18);
+  --shadow: 0 30px 70px -24px rgba(0, 0, 0, 0.95);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --tint: var(--color-gold);           /* the screen's colour: gold, or a team's */
+}
+html { background: var(--color-bg); color: var(--color-ink); font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
+body { min-height: 100svh; background:
+  radial-gradient(120% 70% at 50% -10%, color-mix(in srgb, var(--tint) 16%, transparent), transparent 60%),
+  radial-gradient(90% 60% at 50% 110%, rgba(18, 22, 58, 0.9), transparent 70%), var(--color-bg); }
+
+.screen { min-height: 100svh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding: 28px 20px 24px; }
+.display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; line-height: 0.95; }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-ink-3); }
+.card { background: linear-gradient(180deg, var(--glass-2), var(--glass)); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 18px; }
+
+/* every button is a pill */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 999px;
+  font-weight: 800; font-size: 16px; border: 2px solid var(--line-2); color: var(--color-ink); background: var(--glass);
+  transition: transform 0.12s var(--ease), opacity 0.2s; }
+.btn:active { transform: scale(0.985); }
+.btn:disabled { opacity: 0.38; }
+.btn-gold { background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); color: #1a1400; border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.22), 0 18px 40px -18px rgba(245, 197, 24, 0.75); }
+.btn-a { background: color-mix(in srgb, var(--color-a) 18%, transparent); border-color: var(--color-a); color: var(--color-ink); }
+.btn-b { background: color-mix(in srgb, var(--color-b) 18%, transparent); border-color: var(--color-b); color: var(--color-ink); }
+.btn-lg { min-height: 64px; font-size: 19px; }
+.btn-block { width: 100%; }
+.btn-ghost { background: transparent; }
+.btn-sm { min-height: 40px; font-size: 14px; padding: 0 16px; }
+
+.field-label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-ink-2); margin-bottom: 8px; }
+.field-error { font-size: 13px; font-style: italic; color: var(--color-no); }
+.input { width: 100%; min-height: 56px; border-radius: 18px; padding: 0 18px; font-size: 18px; font-weight: 700; color: var(--color-ink);
+  background: var(--glass-2); border: 2px solid var(--line-2); outline: none; }
+.input:focus { border-color: var(--color-gold); }
+.input-code { font-family: var(--font-display); font-size: 40px; letter-spacing: 0.22em; text-align: center; text-transform: uppercase;
+  border-color: color-mix(in srgb, var(--color-gold) 60%, transparent); background: color-mix(in srgb, var(--color-gold) 7%, transparent); }
+
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; font-weight: 700; font-size: 14px;
+  background: var(--glass-2); border: 1px solid var(--line); }
+.chip .face { width: 30px; height: 30px; display: grid; place-items: center; font-size: 18px; border-radius: 999px; background: rgba(0, 0, 0, 0.3); }
+.chip.a { background: color-mix(in srgb, var(--color-a) 12%, transparent); border-color: color-mix(in srgb, var(--color-a) 40%, transparent); }
+.chip.b { background: color-mix(in srgb, var(--color-b) 12%, transparent); border-color: color-mix(in srgb, var(--color-b) 40%, transparent); }
+.cap { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-gold); }
+
+.enter { animation: enter 0.22s var(--ease) both; }
+@keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* the TV: a fixed 1280×720 stage scaled to whatever screen it's on */
+.tv-wrap { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden; }
+.tv-stage { width: 1280px; height: 720px; transform-origin: center; position: relative; padding: 44px 56px; display: flex; flex-direction: column; }
