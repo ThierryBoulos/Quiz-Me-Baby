@@ -28,7 +28,7 @@ Import the GitHub repo and set **Root Directory: `party`**. Nothing else is need
 - **Start the game**: the host's phone, or with no host Team A's captain, once each team has a captain. The TV decides the mode from who joined: hosted, or no host.
 - Your phone remembers you: reopen the page and you're back in your seat.
 
-Done: the hosted game on the TV (step 2b); captains type, buzz and lock in numbers, players suggest, and Closest To Wins, Guess the Flag and Cocktail or Dish run in Party (step 3). Next: Party with no host (step 4).
+Done: the hosted game on the TV (step 2b); captains type, buzz and lock in numbers, players suggest, and Closest To Wins, Guess the Flag and Cocktail or Dish run in Party (step 3); Party with no host, where the app checks and the other captain can overrule, plus Guess the Map and The Auction in both modes (step 4). Not in Party yet: Don't Say the Same as Me and Battle of the Captains.
 
 ## Deploying
 

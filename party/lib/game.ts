@@ -3,7 +3,7 @@
    row only the host can read (Supabase row-level security). */
 export type Team = { name: string; score: number; ll: { friend: boolean; dip: boolean; dbl: boolean } };
 export type Two<T> = [T, T];
-export type MiniKey = "closest" | "flag" | "dish";
+export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction";
 export type Pub = {
   step: number;                   // bumps on every host move and screen change; host taps carry it so stale ones are refused
   screen: string;                 // roundIntro | ask | steal | answer | roundScore | sudden | final | miniIntro | miniQ | closestReveal | miniSummary | flag… | dish…
@@ -32,10 +32,17 @@ export type Pub = {
   summary?: { wins: Two<number>; winner: 0 | 1 | null; needsHost: boolean; note: string; award?: Two<number> };
   winner?: 0 | 1 | null;
   toast?: { id: number; text: string } | null;
+  /* no host: what a captain sent, the app's verdict, and how long the other captain has to overrule it */
+  pending?: { team: 0 | 1; text: string; v: boolean; until: number } | null;
+  map?: { id: string; reveal: boolean; hint?: string; title?: string; notes?: string; ruled?: Two<boolean | null> };
+  auction?: { cat: string; notes?: string; bid: number; by: 0 | 1 | null; turn: 0 | 1; count: number; leg: number; n: number; wins: Two<number>;
+    last?: { bid: number; by: 0 | 1; count: number; made: boolean; won: 0 | 1 }; winner?: 0 | 1 | null; award?: Two<number> };
+  autoAt?: number | null;         // no host: when this screen moves on by itself
   mode: "host" | "nohost";
 };
 /* host only: the answer, and what the captains typed with the app's opinion */
 export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null> };
 
-export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Cocktail or Dish" };
-export const T_CLOSEST = 90, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8;
+export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Cocktail or Dish", map: "Guess the Map", auction: "The Auction" };
+export const T_CLOSEST = 90, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30;
+export const T_OVERRULE = 5, T_AUTO = 8, T_SUDDEN_BUZZ = 30, T_MAP_RULE = 30;

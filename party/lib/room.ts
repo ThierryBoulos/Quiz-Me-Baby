@@ -49,13 +49,12 @@ export function useRoom(code: string) {
 export function starter(members: Member[]): Member | null {
   return members.find((m) => m.role === "host") || members.find((m) => m.role === "captain" && m.team === 0) || null;
 }
-/* the game can start once both teams have a captain — and, until no-host
-   Party mode is built (step 3), a host */
+/* the game can start once both teams have a captain; with no host the app
+   checks the answers */
 export function readyToStart(members: Member[]) {
-  return members.some((m) => m.role === "host") && [0, 1].every((t) => members.some((m) => m.team === t && m.role === "captain"));
+  return [0, 1].every((t) => members.some((m) => m.team === t && m.role === "captain"));
 }
 export function notReadyWhy(members: Member[]) {
   if (![0, 1].every((t) => members.some((m) => m.team === t && m.role === "captain"))) return "Each team needs a captain first.";
-  if (!members.some((m) => m.role === "host")) return "Party needs a host for now — playing without one comes next.";
   return "";
 }

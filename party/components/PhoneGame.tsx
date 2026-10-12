@@ -4,11 +4,12 @@ import type { Pub, Secret } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { loadBank } from "@/lib/engine";
 import { sb, sendAction } from "@/lib/supabase";
-import { Clock } from "./Clock";
+import { Clock, useSecondsLeft } from "./Clock";
+import { MapView } from "./MapView";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
-const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "dishQ", "sudden"];
+const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sudden"];
 
 /* The answer for the current question. Only the host's phone can read it —
    the database refuses everyone else, so a player can't peek even with the
@@ -201,12 +202,12 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
         <div className="display text-[32px]">{T[0].score} – {T[1].score}</div></div></div>);
 
     /* ---- the mini-games ---- */
-    case "miniIntro": case "flagIntro": case "dishIntro": return (
+    case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": return (
       <div className="flex flex-col gap-4 flex-1">
         <div className="card text-center"><div className="eyebrow">Mini-game</div>
           <div className="display text-[38px]" style={{ color: "var(--color-gold)" }}>{pub.mini?.title}</div>
           <div className="text-[14px] text-[var(--color-ink-2)]">Best of {pub.mini?.of} · winner takes {pub.mini?.pts} points. The rules are on the TV.</div></div>
-        <Main label="Start" move={{ type: mk + "/start" }} />
+        <Main label="Start" move={{ type: mk === "auction" ? "auction/begin" : mk + "/start" }} />
       </div>);
     case "miniQ": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -276,7 +277,7 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => send({ type: "dish/more" })}>One more</button>
         </div>
       </div>);
-    case "miniSummary": case "flagSummary": case "dishSummary": return (
+    case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": return (
       <div className="flex flex-col gap-4 flex-1">
         <div className="card text-center"><div className="eyebrow">{pub.mini?.title}</div>
           <div className="display text-[44px]">{S?.wins[0]} – {S?.wins[1]}</div>
@@ -290,6 +291,63 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
           </div>
         </>) : <Main label="Next" move={{ type: mk + "/done" }} />}
       </div>);
+    case "mapQ": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="flex items-center justify-between"><div className="eyebrow">Map {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
+        {pub.map && <MapView id={pub.map.id} reveal={false} hint={!!pub.map.hint} maxH={200} legend={false} />}
+        <AnswerCard />
+        <Typed t={0} /><Typed t={1} />
+        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause />{!pub.map?.hint && <Small label="Show a hint" move={{ type: "map/hint" }} />}<Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change map" move={{ type: "map/swap" }} /></div>
+      </div>);
+    case "mapReveal": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="card text-center"><div className="eyebrow">The map shows</div><div className="display text-[28px]" style={{ color: "var(--color-gold)" }}>{pub.map?.title}</div></div>
+        <div className="eyebrow">Who got it? The idea counts, not the exact words.</div>
+        {[0, 1].map((t) => { const ok = pub.reveal?.ok?.[t]; return (
+          <button key={t} className="btn btn-block" style={ok ? btnGreen : { borderColor: tc(t as 0 | 1) }} disabled={busy} onClick={() => send({ type: "ui/mapOk", t })}>
+            {T[t].name}: {pub.reveal?.typed?.[t]?.[0] ?? "no answer"} · {ok ? "right" : "wrong"}</button>); })}
+        <Main label="Next" move={{ type: "ui/next" }} />
+      </div>);
+    case "mapTie": return (
+      <div className="flex flex-col gap-4 flex-1">
+        <div className="card text-center"><div className="display text-[34px]" style={{ color: "var(--color-gold)" }}>Level at {pub.mini?.wins[0]} each</div>
+          <p className="text-[14px] text-[var(--color-ink-2)]">Another map, or a point each?</p></div>
+        <div className="grid grid-cols-2 gap-3 mt-auto">
+          <button className="btn btn-lg" disabled={busy} onClick={() => send({ type: "map/stop" })}>A point each</button>
+          <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => send({ type: "map/more" })}>One more</button>
+        </div>
+      </div>);
+    case "auctionBid": { const A = pub.auction!; return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="card text-center"><div className="eyebrow">Auction · leg {A.leg + 1} of {A.n}</div>
+          <div className="display text-[30px]" style={{ color: "var(--color-gold)" }}>{A.cat}</div>
+          {A.notes && <div className="text-[13px] text-[var(--color-ink-2)] mt-1">{A.notes}</div>}</div>
+        <div className="card text-center text-[16px]">{A.bid ? <>Bid: <b>{A.bid}</b> by <b style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}</b></> : "No bid yet"}<br />
+          <span className="text-[var(--color-ink-2)]">The captains bid on their phones. <b style={{ color: tc(A.turn) }}>{T[A.turn].name}</b> to go.</span></div>
+        <div className="flex justify-center mt-auto">{!A.bid && <Small ghost label="Change the category" move={{ type: "auction/skip" }} />}</div>
+      </div>); }
+    case "auctionRun": { const A = pub.auction!; return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="flex items-center justify-between"><div className="display text-[22px]" style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}: name {A.bid}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
+        <div className="text-[15px] text-[var(--color-ink-2)]">{A.cat}{A.notes ? `. ${A.notes}` : ""}</div>
+        <div className="display text-center" style={{ fontSize: 90 }}>{A.count}<span className="text-[var(--color-ink-3)] text-[40px]"> / {A.bid}</span></div>
+        <button className="btn btn-gold btn-block display" style={{ minHeight: 130, fontSize: 54 }} disabled={busy} onClick={() => send({ type: "auction/tick" })}>+1</button>
+        <div className="flex gap-2 justify-center"><Small label="Undo" move={{ type: "auction/untick" }} /><Pause /><Small ghost label="Time's up" move={{ type: "auction/resolve" }} /></div>
+      </div>); }
+    case "auctionLeg": { const L = pub.auction?.last; return (
+      <div className="flex flex-col gap-4 flex-1">
+        <div className="card text-center">{L && (<>
+          <div className="display text-[36px]" style={{ color: L.made ? "var(--color-ok)" : "var(--color-no)" }}>{L.made ? "Delivered" : "Short"}</div>
+          <div className="text-[15px]">{T[L.by].name} bid {L.bid}, named {L.count}.</div>
+          <div className="display text-[22px] mt-1" style={{ color: tc(L.won) }}>{T[L.won].name} take the leg</div></>)}</div>
+        <Main label="Next" move={{ type: "auction/nextLeg" }} />
+      </div>); }
+    case "auctionResult": return (
+      <div className="flex flex-col gap-4 flex-1">
+        <div className="card text-center"><div className="eyebrow">The Auction</div>
+          <div className="display text-[44px]">{pub.auction?.wins[0]} – {pub.auction?.wins[1]}</div></div>
+        <Main label="Next" move={{ type: "auction/done" }} />
+      </div>);
     default: return <div className="eyebrow text-center">Eyes on the TV</div>;
   }
 }
@@ -299,10 +357,14 @@ function OnScreen({ pub }: { pub: Pub }) {
   return (<>
     {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal"].includes(pub.screen) && <p className="font-bold text-[19px] leading-snug text-center">{pub.question}</p>}
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <Flag name={pub.flag} h={150} />}
+    {pub.map && <MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={260} />}
+    {pub.map?.reveal && <div className="display text-[26px] text-center" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>}
+    {pub.auction && /^auction(Bid|Run|Leg)$/.test(pub.screen) && <div className="card text-center"><div className="eyebrow">Category</div><div className="display text-[26px]" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>
+      {pub.screen === "auctionRun" && <div className="display text-[44px]">{pub.auction.count} / {pub.auction.bid}</div>}</div>}
     {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
-    {pub.reveal && /Reveal$/.test(pub.screen) && <div className="display text-[30px] text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
+    {pub.reveal && /Reveal$/.test(pub.screen) && pub.screen !== "mapReveal" && <div className="display text-[30px] text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.screen === "answer" && pub.result && <div className="display text-[32px] text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {["ask", "steal", "miniQ", "flagQ", "dishQ"].includes(pub.screen) && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" ? 70 : 90} /></div>}
+    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun"].includes(pub.screen) && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" ? 70 : 90} /></div>}
   </>);
 }
 
@@ -320,6 +382,10 @@ function status(pub: Pub, me: Member) {
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country? One go." : "Guess the Flag: help your captain";
     case "dishQ": return pub.buzz === mine ? (cap ? "You buzzed! Type it." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? "You're out of this one" : cap ? "Know it? BUZZ!" : "Cocktail or Dish: help your captain";
+    case "mapQ": return cap ? "What does the map show? One go." : "Guess the Map: help your captain";
+    case "mapReveal": return "The answer's on the TV";
+    case "auctionBid": return pub.auction?.turn === mine ? (cap ? "Your bid: raise, or pass" : "Your captain is bidding") : `${T[pub.auction?.turn ?? 0].name} is bidding`;
+    case "auctionRun": return pub.auction?.by === mine ? (cap ? `Name ${pub.auction?.bid}! Out loud!` : `Name ${pub.auction?.bid}! Out loud!`) : `${T[pub.auction?.by ?? 0].name} has to name ${pub.auction?.bid}`;
     default: return pub.mini ? pub.mini.title : "Eyes on the TV";
   }
 }
@@ -355,23 +421,45 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
    lifelines; the number pad; the buzzer; your players' suggestions. */
+/* the "next thing" button a captain gets when there's no host, and its countdown */
+const NEXT_LABEL: Record<string, [string, string]> = {
+  roundIntro: ["Start the question", "round/begin"], miniIntro: ["Start", "closest/start"], flagIntro: ["Start", "flag/start"], dishIntro: ["Start", "dish/start"],
+  mapIntro: ["Start", "map/start"], auctionIntro: ["Start", "auction/begin"],
+  answer: ["Next", "round/afterAnswer"], roundScore: ["Next", "round/next"], closestReveal: ["Next", "ui/next"], flagReveal: ["Next", "ui/next"],
+  dishReveal: ["Next", "dish/next"], auctionLeg: ["Next", "auction/nextLeg"], auctionResult: ["Next", "auction/done"],
+  miniSummary: ["Next", "closest/done"], flagSummary: ["Next", "flag/done"], dishSummary: ["Next", "dish/done"], mapSummary: ["Next", "map/done"],
+};
+function Countdown({ at }: { at: number }) { const s = useSecondsLeft(at); return <>{s}</>; }
+
+/* A CAPTAIN's phone: only what you can do right now. Type and send; the
+   lifelines; the number pad; the buzzer; the bidding; your players'
+   suggestions. With no host, also the referee's buttons and Next. */
 export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; members: Member[]; code: string }) {
-  const mine = me.team as 0 | 1, T = pub.teams, sc = pub.screen;
+  const mine = me.team as 0 | 1, T = pub.teams, sc = pub.screen, nohost = pub.mode === "nohost";
+  const theirs = (mine === 0 ? 1 : 0) as 0 | 1;
   const [a, setA] = useState(""), [b, setB] = useState(""), [busy, setBusy] = useState(false), [sentTxt, setSentTxt] = useState<string | null>(null);
+  const [bid, setBid] = useState("");
   useEffect(() => { setA(""); setB(""); setSentTxt(null); }, [pub.qid, sc]);
+  useEffect(() => { setBid(""); }, [pub.auction?.bid, sc]);
   const names = useNames();
   const act = async (kind: string, payload: Record<string, unknown>) => { setBusy(true); try { await sendAction(code, kind, payload); } finally { setBusy(false); } };
+  const nxt = (move: Record<string, unknown>) => act("next", { move, step: pub.step });
 
   const myTurn = (sc === "ask" || sc === "steal") && pub.turn === mine && !pub.lifeline;
   const dip = sc === "ask" && (pub.llUsed?.[mine] || []).includes("dip");
-  const canType = myTurn || (sc === "miniQ" && !pub.sent?.[mine]) || (sc === "flagQ" && !pub.sent?.[mine])
-    || (sc === "dishQ" && pub.buzz === mine) || (sc === "sudden" && pub.buzz === mine);
+  /* with no host, the first answer sent is the one the app checks */
+  const locked = nohost && (!!pub.pending || !!pub.sent?.[mine]);
+  const canType = (myTurn && !locked) || (sc === "miniQ" && !pub.sent?.[mine]) || ((sc === "flagQ" || sc === "mapQ") && !pub.sent?.[mine])
+    || (sc === "dishQ" && pub.buzz === mine && !pub.pending) || (sc === "sudden" && pub.buzz === mine && !pub.pending);
   const canBuzz = (sc === "dishQ" && pub.buzz == null && !pub.out?.[mine]) || (sc === "sudden" && !!pub.sudden?.ready && pub.buzz == null && !pub.out?.[mine]);
   const sugs = useSuggestions(code, pub.qid, members, mine, ANSWERING.includes(sc));
   const list = sc === "flagQ" ? names.flag : sc === "dishQ" ? names.dish : [];
   const used = useMemo(() => pub.llUsed?.[mine] || [], [pub.llUsed, mine]);
   const armed = !!pub.dbl?.[mine];
-  const llOk = (k: "friend" | "dip") => sc === "ask" && myTurn && T[mine].ll[k] && !(armed && used.length >= 1);
+  const llOk = (k: "friend" | "dip") => sc === "ask" && myTurn && !locked && T[mine].ll[k] && !(armed && used.length >= 1);
+  const A = pub.auction;
+  const next = nohost && !pub.pending ? NEXT_LABEL[sc] : undefined;
+  const showNext = next && !(sc === "sudden") && !(sc === "miniSummary" || sc === "flagSummary" || sc === "dishSummary" || sc === "mapSummary" ? pub.summary?.needsHost : false);
 
   const send = async () => {
     if (sc === "miniQ") { await act("answer", { n: a }); setSentTxt(a); return; }
@@ -386,13 +474,34 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
         <div className="font-bold text-[17px]">{status(pub, me)}</div>
       </div>
 
+      {/* no host: the other captain's answer, the app's verdict, and my chance to overrule */}
+      {pub.pending && (pub.pending.team === mine ? (
+        <div className="card text-center"><div className="eyebrow">You sent</div><div className="display text-[28px]">{pub.pending.text}</div>
+          <div className="font-bold" style={{ color: pub.pending.v ? "var(--color-ok)" : "var(--color-no)" }}>The app says {pub.pending.v ? "right" : "wrong"}</div>
+          <div className="text-[13px] text-[var(--color-ink-2)]">{T[theirs].name} can overrule · <Countdown at={pub.pending.until} /></div></div>
+      ) : (
+        <div className="card flex flex-col gap-2" style={{ borderColor: tc(theirs) }}>
+          <div className="eyebrow" style={{ color: tc(theirs) }}>{T[theirs].name} said</div>
+          <div className="display text-[30px]">{pub.pending.text}</div>
+          <div className="font-bold" style={{ color: pub.pending.v ? "var(--color-ok)" : "var(--color-no)" }}>The app says {pub.pending.v ? "right" : "wrong"}</div>
+          <div className="text-[13px] text-[var(--color-ink-3)]">You decide: is the app right? <Countdown at={pub.pending.until} /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "ui/overrule" })}>Overrule</button>
+            <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "ui/agree" })}>Agree</button>
+          </div>
+        </div>))}
+
       {sc === "roundIntro" && (
         T[mine].ll.dbl || armed ? (
           <button className={"btn btn-lg btn-block " + (armed ? (mine === 0 ? "btn-a" : "btn-b") : "")} disabled={busy} onClick={() => void act("lifeline", { key: "dbl" })}>
             {armed ? "Double points armed. Tap to undo." : "Double points this round?"}</button>
         ) : <div className="text-center text-[14px] text-[var(--color-ink-3)]">Double points already used.</div>)}
 
-      <OnScreen pub={pub} />
+      {!pub.pending && <OnScreen pub={pub} />}
+
+      {/* no host, Call a Friend: the calling captain closes the card */}
+      {nohost && pub.lifeline?.key === "friend" && pub.lifeline.team === mine && (
+        <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "ui/closeLifeline" })}>Back to the question</button>)}
 
       {canBuzz && <button className="btn btn-lg btn-block display" style={{ minHeight: 150, fontSize: 56, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy} onClick={() => void act("buzz", {})}>BUZZ</button>}
 
@@ -404,15 +513,56 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
           {dip && <input className="input" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {list.length > 0 && <datalist id="names">{list.map((n) => <option key={n} value={n} />)}</datalist>}
           <button className="btn btn-gold btn-lg" disabled={busy || !a.trim()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
-          {sentTxt && (sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-2)]">Sent: <b>{sentTxt}</b>. You can change it until the host decides.</div>}
+          {sentTxt && !nohost && (sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-2)]">Sent: <b>{sentTxt}</b>. You can change it until the host decides.</div>}
+          {nohost && (sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-3)]">One go: the app checks the first answer you send.</div>}
         </div>)}
-      {!canType && pub.sent?.[mine] && ["miniQ", "flagQ"].includes(sc) && <div className="card text-center font-bold">Locked in{sentTxt ? `: ${sentTxt}` : ""}</div>}
+      {!canType && pub.sent?.[mine] && ["miniQ", "flagQ", "mapQ"].includes(sc) && <div className="card text-center font-bold">Locked in{sentTxt ? `: ${sentTxt}` : ""}</div>}
 
       {(llOk("friend") || llOk("dip")) && (
         <div className="flex gap-2 justify-center">
           {llOk("friend") && <button className="btn btn-sm" disabled={busy} onClick={() => void act("lifeline", { key: "friend" })}>Call a Friend</button>}
           {llOk("dip") && <button className="btn btn-sm" disabled={busy} onClick={() => void act("lifeline", { key: "dip" })}>Double Dip</button>}
         </div>)}
+
+      {/* the Auction: bidding is always the captains' */}
+      {sc === "auctionBid" && A && A.turn === mine && (
+        <div className="card flex flex-col gap-2" style={{ borderColor: tc(mine) }}>
+          <div className="eyebrow">{A.bid ? `Beat ${A.bid}, or pass` : "Open the bidding"}</div>
+          <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>
+          <div className="flex gap-2">
+            <input className="input" inputMode="numeric" value={bid} placeholder={`More than ${A.bid}`} onChange={(e) => setBid(e.target.value.replace(/\D/g, ""))} />
+            <button className="btn" disabled={busy || !(Number(bid) > A.bid)} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>Bid</button>
+          </div>
+          {A.bid > 0 && <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/pass" })}>Pass: {T[A.by ?? theirs].name} must name {A.bid}</button>}
+        </div>)}
+      {/* no host: the other captain counts the names */}
+      {nohost && sc === "auctionRun" && A && A.by === theirs && (
+        <div className="card flex flex-col gap-2">
+          <div className="eyebrow">You&rsquo;re counting. Only fair ones count.</div>
+          <button className="btn btn-gold btn-block display" style={{ minHeight: 120, fontSize: 50 }} disabled={busy} onClick={() => void nxt({ type: "auction/tick" })}>+1</button>
+          <button className="btn btn-sm self-center" disabled={busy} onClick={() => void nxt({ type: "auction/untick" })}>Undo</button>
+        </div>)}
+
+      {/* no host: each captain referees the other team's flag and map */}
+      {nohost && sc === "flagReveal" && pub.reveal && (
+        <button className="btn btn-block" disabled={busy} onClick={() => void nxt({ type: "ui/flagOk", t: theirs })}>
+          {T[theirs].name}: {pub.reveal.typed?.[theirs]?.[0] ?? "no answer"} · {pub.reveal.ok?.[theirs] ? "right" : "wrong"} (tap to overrule)</button>)}
+      {nohost && sc === "mapReveal" && pub.map && (pub.map.ruled?.[theirs] == null ? (
+        <div className="card flex flex-col gap-2" style={{ borderColor: tc(theirs) }}>
+          <div className="eyebrow">You rule on {T[theirs].name}&rsquo;s answer</div>
+          <div className="display text-[26px]">{pub.reveal?.typed?.[theirs]?.[0]}</div>
+          <div className="text-[13px] text-[var(--color-ink-2)]">The map shows: <b>{pub.map.title}</b>. The idea counts, not the exact words.</div>
+          <div className="grid grid-cols-2 gap-3">
+            <button className="btn btn-lg" style={btnRed} disabled={busy} onClick={() => void nxt({ type: "ui/mapRule", v: false })}>Wrong</button>
+            <button className="btn btn-lg" style={btnGreen} disabled={busy} onClick={() => void nxt({ type: "ui/mapRule", v: true })}>Right</button>
+          </div>
+        </div>) : <div className="card text-center text-[14px]">You ruled {T[theirs].name} {pub.map.ruled?.[theirs] ? "right" : "wrong"}.</div>)}
+
+      {/* no host: start, go and next — either captain */}
+      {showNext && next && (
+        <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: next[1] })}>
+          {next[0]}{pub.autoAt ? <> · <Countdown at={pub.autoAt} /></> : null}</button>)}
+      {nohost && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
 
       {sugs.length > 0 && (canType || ANSWERING.includes(sc)) && (
         <div className="card">

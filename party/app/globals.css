@@ -79,3 +79,18 @@ body { min-height: 100svh; background:
 .tv-stage { width: 1280px; height: 720px; transform-origin: center; position: relative; padding: 44px 56px; display: flex; flex-direction: column; }
 button.chip { padding: 8px 14px; cursor: pointer; }
 .chip.chip-on { background: color-mix(in srgb, var(--color-gold) 18%, transparent); border-color: var(--color-gold); color: var(--color-gold); }
+
+/* Guess the Map — the drawing rules copied from Classic */
+.map-box { display: flex; justify-content: center; }
+.map-box .map-svg { width: 100%; height: auto; max-height: inherit; border-radius: 12px; }
+.map-svg .msea { fill: #0B1030; }
+.map-svg .mland path { stroke: #0B1030; stroke-width: .6px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.map-svg .mdots circle { stroke: #0B1030; stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.map-svg .mpts circle { fill: var(--color-gold); stroke: #fff; stroke-width: 1.6px; vector-effect: non-scaling-stroke; }
+.map-svg .mlead line { stroke: rgba(255,255,255,.75); stroke-width: .8px; vector-effect: non-scaling-stroke; }
+.map-svg .mline { fill: none; stroke: #fff; stroke-width: 1.4px; stroke-dasharray: 6 5; vector-effect: non-scaling-stroke; }
+.map-svg text { fill: #fff; stroke: #0B1030; paint-order: stroke; stroke-linejoin: round; font-weight: 800; letter-spacing: .01em; }
+.map-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 12px; font-size: 0.85em; font-weight: 700; color: var(--color-ink-2); }
+.map-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.map-legend i { width: 14px; height: 14px; border-radius: 4px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.35); }
+.map-legend i.pt { border-radius: 50%; background: var(--color-gold); box-shadow: 0 0 0 2px #fff inset; }
