@@ -10,7 +10,7 @@
    This file grows step by step as logic moves out of index.html:
      1a  answer checking, mini-game points and schedule, best-of legs
      1b  dealing — the decks and the game built from a bank
-     1c  the game as actions in, new state out               (after)
+     1c  the game's moves — Flag and Cocktail or Dish so far
    ========================================================================== */
 (function(root, factory){
   const QMB = factory();
@@ -513,6 +513,216 @@
              dishLevelsOf, dishPool, dishDeck, diffOf, pickedPair, dishLeg, buildGame };
   }
 
+
+  /* ================================================================== moves
+     Step 1c: the game's moves. play(g, action) changes the game `g` in place
+     and returns what the screen should do about it, in order:
+       { go:'screen' }            show that screen
+       { render:true }            redraw the current one
+       { toast:'text', ms }       the pop-up message
+       { sound:'correct'|'wrong'|'soft'|'point' }
+       { timer:'stop'|'pause'|'resume' }
+       { next:true }              this mini-game is finished — on to whatever comes next
+     Classic carries these out on one screen; Party will carry them out on
+     the TV and the phones. A move that isn't allowed right now returns []
+     or just a toast saying why.
+     Moved over game by game: Guess the Flag and Cocktail or Dish first.   */
+
+  /* the mini-game's points to one team, or split — once */
+  function awardMini(g, s, w, fx){
+    if(s.awarded) return;
+    s.awarded = true;
+    if(w === 'split'){
+      const half = Math.floor(g.miniPts / 2);
+      g.teams[0].score += half; g.teams[1].score += half;
+      s.award = [half, half];
+      s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
+      s.verdict.winner = null;
+    } else {
+      g.teams[w].score += g.miniPts;
+      s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
+      s.verdict.winner = w;
+    }
+    s.verdict.needsHost = false;
+    fx.push({ sound:'point' });
+  }
+  /* a mini-game's last button: refused while the points still need awarding */
+  function finishMini(g, key, s){
+    if(s.verdict && s.verdict.needsHost) return [{ toast:'Award the mini-game points first.' }];
+    g.done[key] = true;
+    return [{ next:true }];
+  }
+  const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
+  const other = (t) => t === 0 ? 1 : 0;
+
+  /* ---- Guess the Flag ---- */
+  function flagAfterLeg(g, fx){
+    const s = g.flagGame;
+    const out = bestOf(s);
+    if(out === 'next'){ fx.push({ go:'flagQ' }); return fx; }
+    if(out === 'level'){
+      if(s.spare && s.spare.length){
+        s.qs.push(s.spare.shift());
+        s.tieLegs++;
+        fx.push({ toast:s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next flag decides it.' : 'Nobody on the board yet — next flag.', ms:3600 });
+        fx.push({ go:'flagQ' });
+        return fx;
+      }
+      s.done = true;
+      s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no flags left at this level. Your call.' };
+      fx.push({ go:'flagSummary' });
+      return fx;
+    }
+    const winner = out.winner;
+    s.done = true;
+    s.verdict = { winner, needsHost:false,
+      note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker flag' : s.tieLegs + ' tie-breaker flags') + '.'
+         : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' flag' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
+    awardMini(g, s, winner, fx);
+    fx.push({ go:'flagSummary' });
+    return fx;
+  }
+
+  /* ---- Guess the Cocktail or Dish ---- */
+  function dishEndLeg(g, w, fx){
+    const s = g.dishGame, q = s.qs[s.i];
+    fx.push({ timer:'stop' });
+    s.subs.push({ q, winner:w });
+    s.leg.shown = q.ings.length;
+    if(w === 'none') fx.push({ toast:'Nobody got it.' });
+    else {
+      s.wins[w]++;
+      fx.push({ sound:'correct' });
+      fx.push({ toast:g.teams[w].name + ' takes ' + (s.i < s.base ? 'number ' + (s.i + 1) : 'the tie-breaker') + '.' });
+    }
+    fx.push({ go:'dishReveal' });
+    return fx;
+  }
+  /* no host: once the calls are in (or time runs out), check them in order */
+  function dishTurnOver(g, fx){
+    const L = g.dishGame.leg;
+    if(!L.calls.length) return dishEndLeg(g, 'none', fx);
+    fx.push({ timer:'stop' });
+    L.k = 0;
+    fx.push({ go:'dishCheck' });
+    return fx;
+  }
+  function dishAfterLeg(g, fx){
+    const s = g.dishGame;
+    s.leg = freshLeg();
+    const out = bestOf(s);
+    if(out === 'next'){ fx.push({ go:'dishQ' }); return fx; }
+    /* level: the table decides — one more to settle it, or a point each */
+    if(out === 'level'){ fx.push({ go:'dishTie' }); return fx; }
+    s.done = true;
+    s.verdict = { winner:out.winner, needsHost:false,
+      note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker' : s.tieLegs + ' tie-breakers') + '.' : '' };
+    awardMini(g, s, out.winner, fx);
+    fx.push({ go:'dishSummary' });
+    return fx;
+  }
+
+  const MOVES = {
+    'flag/start'(g){ g.flagGame.i = 0; return [{ go:'flagQ' }]; },
+    'flag/swap'(g){
+      const s = g.flagGame;
+      if(!s.spare.length) return [{ toast:'No other flag left at this level.' }];
+      s.qs[s.i] = s.spare.shift();
+      return [{ toast:'New flag.' }, { go:'flagQ' }];
+    },
+    /* w: 0 | 1 | 'tie' (both right) | 'none' */
+    'flag/verdict'(g, a){
+      const s = g.flagGame, q = s.qs[s.i], w = a.w, fx = [];
+      s.subs.push({ q, winner:w });
+      if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Both got it — a point each.' }); }
+      else if(w === 'none'){ fx.push({ toast:'Nobody got it.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes flag ' + (s.i + 1) + '.' }); }
+      s.i++;
+      return flagAfterLeg(g, fx);
+    },
+    'flag/award'(g, a){ const fx = []; awardMini(g, g.flagGame, a.w, fx); fx.push({ render:true }); return fx; },
+    'flag/done'(g){ return finishMini(g, 'flag', g.flagGame); },
+
+    'dish/start'(g){ const s = g.dishGame; s.i = 0; s.leg = freshLeg(); return [{ go:'dishQ' }]; },
+    'dish/swap'(g){
+      const s = g.dishGame, L = s.leg;
+      if(L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length) return [{ toast:'Somebody has already had a go at this one.' }];
+      if(!s.spare.length) return [{ toast:'Nothing else left at these levels.' }];
+      s.qs[s.i] = s.spare.shift();
+      s.leg = freshLeg();
+      return [{ toast:'New one.' }, { go:'dishQ' }];
+    },
+    /* with a host: the first captain to call it — the clock and the list stop while they answer */
+    'dish/buzz'(g, a){
+      const L = g.dishGame.leg, w = a.w;
+      if(L.buzz != null || L.out[w]) return [];
+      L.buzz = w; L.checked = false;
+      return [{ timer:'pause' }, { sound:'soft' }, { render:true }];
+    },
+    'dish/right'(g){
+      const L = g.dishGame.leg;
+      if(L.buzz == null) return [];
+      return dishEndLeg(g, L.buzz, []);
+    },
+    'dish/wrong'(g){
+      const L = g.dishGame.leg;
+      if(L.buzz == null) return [];
+      const w = L.buzz, o = other(w), fx = [];
+      L.out[w] = true; L.buzz = null;
+      fx.push({ sound:'wrong' });
+      if(L.out[o]) return dishEndLeg(g, 'none', fx);
+      fx.push({ toast:g.teams[w].name + ' is out of this one — ' + g.teams[o].name + ', it is yours to get.', ms:3600 });
+      fx.push({ timer:'resume' }, { render:true });
+      return fx;
+    },
+    /* no host: a team has written its answer down, face down */
+    'dish/write'(g, a){
+      const L = g.dishGame.leg, w = a.w, fx = [];
+      if(L.calls.indexOf(w) > -1) return [];
+      L.calls.push(w);
+      fx.push({ sound:'soft' });
+      if(L.calls.length === 2) return dishTurnOver(g, fx);   // both written — nothing left to wait for
+      fx.push({ toast:g.teams[w].name + ' wrote it down — ' + g.teams[other(w)].name + ', still time.', ms:3200 }, { render:true });
+      return fx;
+    },
+    'dish/turnOver'(g){ return dishTurnOver(g, []); },
+    'dish/checkYes'(g){ const L = g.dishGame.leg; return dishEndLeg(g, L.calls[L.k], []); },
+    'dish/checkNo'(g){
+      const L = g.dishGame.leg, fx = [{ sound:'wrong' }];
+      L.k++;
+      if(L.k >= L.calls.length) return dishEndLeg(g, 'none', fx);
+      fx.push({ render:true });
+      return fx;
+    },
+    /* out of time: with a host nobody scores it; without, the written answers are checked */
+    'dish/timeUp'(g){ return g.hostless ? dishTurnOver(g, []) : dishEndLeg(g, 'none', []); },
+    'dish/next'(g){ g.dishGame.i++; return dishAfterLeg(g, []); },
+    'dish/more'(g){
+      const s = g.dishGame;
+      if(!s.spare || !s.spare.length) return [{ toast:'Nothing left at these levels.' }];
+      s.qs.push(s.spare.shift());
+      s.tieLegs++;
+      s.leg = freshLeg();
+      return [{ go:'dishQ' }];
+    },
+    'dish/stop'(g){
+      const s = g.dishGame;
+      if(s.awarded) return [];
+      s.done = true; s.awarded = true;
+      s.award = [1, 1];
+      g.teams[0].score += 1; g.teams[1].score += 1;
+      s.verdict = { winner:null, needsHost:false, note:'Level — called there, a point each.' };
+      return [{ sound:'point' }, { go:'dishSummary' }];
+    },
+    'dish/award'(g, a){ const fx = []; awardMini(g, g.dishGame, a.w, fx); fx.push({ render:true }); return fx; },
+    'dish/done'(g){ return finishMini(g, 'dish', g.dishGame); }
+  };
+  function play(g, action){
+    const move = MOVES[action && action.type];
+    if(!move) throw new Error('Unknown move: ' + (action && action.type));
+    return move(g, action) || [];
+  }
+
   /* -------------------------------------------------------------- utilities */
   /* Fisher–Yates on a copy; `rng` defaults to Math.random (tests pass their own) */
   function shuffleWith(a, rng){
@@ -522,5 +732,5 @@
   }
 
   return { tidy, asNumber, distance, isMatch, miniPointValue, planMinis, bestOf, shuffle:shuffleWith,
-           createDealer, LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
+           createDealer, play, MOVES:Object.keys(MOVES), LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
 });

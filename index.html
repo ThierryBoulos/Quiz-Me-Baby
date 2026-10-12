@@ -1215,7 +1215,7 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
 </div>
 <div id="modal" role="dialog" aria-modal="true"></div>
 <!-- the shared engine (v4 step 1): the rules with no screen in them -->
-<script src="engine/core.js?v=3.15"></script>
+<script src="engine/core.js?v=3.16"></script>
 <script>
 /* ==========================================================================
    QUIZ ME BABY
@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.15', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.16', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -6874,107 +6874,24 @@ function awardMap(w){
   Snd.point();
 }
 
-/* ---------- cocktail or dish ---------- */
-/* no host: once the calls are in (or time runs out), check them in order */
-function dishTurnOver(){
-  const L = G().dishGame.leg;
-  if(!L.calls.length) return dishEndLeg('none');
-  Timer.stop();
-  clearInterval(S.tmp.dishIv);
-  L.k = 0;
-  go('dishCheck');
+/* ---------- moves that live in the engine ----------
+   Guess the Flag and Cocktail or Dish play through QMB.play (engine/core.js):
+   it changes the game and says what the screen should do. This carries
+   that out — the same list Party mode will carry out on the TV. */
+function run(action){ applyFx(QMB.play(G(), action)); }
+function applyFx(fx){
+  (fx || []).forEach(f => {
+    if(f.timer === 'stop'){ Timer.stop(); clearInterval(S.tmp.dishIv); }
+    else if(f.timer === 'pause') Timer.pause();
+    else if(f.timer === 'resume') Timer.resumeT();
+    if(f.sound && Snd[f.sound]) Snd[f.sound]();
+    if(f.toast) toast(f.toast, f.ms);
+    if(f.go) go(f.go);
+    if(f.render) render();
+    if(f.next && !runNextMini()) advanceRound();
+  });
 }
-function dishEndLeg(w){
-  const g = G(), s = g.dishGame, q = s.qs[s.i];
-  Timer.stop();
-  clearInterval(S.tmp.dishIv);
-  s.subs.push({ q, winner:w });
-  s.leg.shown = q.ings.length;
-  if(w === 'none') toast('Nobody got it.');
-  else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes ' + (s.i < s.base ? 'number ' + (s.i + 1) : 'the tie-breaker') + '.'); }
-  go('dishReveal');
-}
-function dishTimeUp(){ if(S.screen === 'dishQ') NOHOST() ? dishTurnOver() : dishEndLeg('none'); }
-function dishAfterLeg(){
-  const g = G(), s = g.dishGame;
-  s.leg = dishLeg();
-  const out = QMB.bestOf(s);
-  if(out === 'next'){ go('dishQ'); return; }
-  if(out === 'level'){
-    /* level: the table decides — one more to settle it, or a point each */
-    go('dishTie');
-    return;
-  }
-  const winner = s.wins[0] > s.wins[1] ? 0 : 1;
-  s.done = true;
-  s.verdict = { winner, needsHost:false,
-    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker' : s.tieLegs + ' tie-breakers') + '.' : '' };
-  awardDish(winner);
-  go('dishSummary');
-}
-function awardDish(w){
-  const g = G(), s = g.dishGame;
-  if(s.awarded) return;
-  s.awarded = true;
-  if(w === 'split'){
-    const half = Math.floor(g.miniPts / 2);
-    g.teams[0].score += half; g.teams[1].score += half;
-    s.award = [half, half];
-    s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
-    s.verdict.winner = null;
-  } else {
-    g.teams[w].score += g.miniPts;
-    s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
-    s.verdict.winner = w;
-  }
-  s.verdict.needsHost = false;
-  Snd.point();
-}
-
-/* ---------- flags ---------- */
-function flagAfterLeg(){
-  const g = G(), s = g.flagGame;
-  const out = QMB.bestOf(s);
-  if(out === 'next'){ go('flagQ'); return; }
-  if(out === 'level'){
-    if(s.spare && s.spare.length){
-      s.qs.push(s.spare.shift());
-      s.tieLegs++;
-      toast(s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next flag decides it.' : 'Nobody on the board yet — next flag.', 3600);
-      go('flagQ');
-      return;
-    }
-    s.done = true;
-    s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no flags left at this level. Your call.' };
-    go('flagSummary');
-    return;
-  }
-  const winner = s.wins[0] > s.wins[1] ? 0 : 1;
-  s.done = true;
-  s.verdict = { winner, needsHost:false,
-    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker flag' : s.tieLegs + ' tie-breaker flags') + '.'
-       : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' flag' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
-  awardFlag(winner);
-  go('flagSummary');
-}
-function awardFlag(w){
-  const g = G(), s = g.flagGame;
-  if(s.awarded) return;
-  s.awarded = true;
-  if(w === 'split'){
-    const half = Math.floor(g.miniPts / 2);
-    g.teams[0].score += half; g.teams[1].score += half;
-    s.award = [half, half];
-    s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
-    s.verdict.winner = null;
-  } else {
-    g.teams[w].score += g.miniPts;
-    s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
-    s.verdict.winner = w;
-  }
-  s.verdict.needsHost = false;
-  Snd.point();
-}
+function dishTimeUp(){ if(S.screen === 'dishQ') run({ type:'dish/timeUp' }); }
 
 /* ---------- end of game ---------- */
 function endGame(){
@@ -7852,115 +7769,29 @@ const ACT = {
     advanceRound();
   },
 
-  /* ---- guess the flag ---- */
-  flagStart(){ G().flagGame.i = 0; go('flagQ'); },
-  flagSwap(){
-    const s = G().flagGame;
-    if(!s.spare.length) return toast('No other flag left at this level.');
-    s.qs[s.i] = s.spare.shift();
-    toast('New flag.');
-    go('flagQ');
-  },
+  /* ---- guess the flag (moves in the engine) ---- */
+  flagStart(){ run({ type:'flag/start' }); },
+  flagSwap(){ run({ type:'flag/swap' }); },
   toFlagJudge(){ Timer.stop(); go('flagJudge'); },
-  flagVerdict(e){
-    const g = G(), s = g.flagGame, q = s.qs[s.i];
-    const w = e.dataset.w === 'tie' || e.dataset.w === 'none' ? e.dataset.w : +e.dataset.w;
-    s.subs.push({ q, winner:w });
-    if(w === 'tie'){ s.wins[0]++; s.wins[1]++; toast('Both got it — a point each.'); }
-    else if(w === 'none'){ toast('Nobody got it.'); }
-    else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes flag ' + (s.i + 1) + '.'); }
-    s.i++;
-    flagAfterLeg();
-  },
-  flagAward(e){ awardFlag(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
-  afterFlag(){
-    const g = G();
-    if(g.flagGame.verdict && g.flagGame.verdict.needsHost) return toast('Award the mini-game points first.');
-    g.done.flag = true;
-    if(runNextMini()) return;
-    advanceRound();
-  },
+  flagVerdict(e){ run({ type:'flag/verdict', w:e.dataset.w === 'tie' || e.dataset.w === 'none' ? e.dataset.w : +e.dataset.w }); },
+  flagAward(e){ run({ type:'flag/award', w:e.dataset.w === 'split' ? 'split' : +e.dataset.w }); },
+  afterFlag(){ run({ type:'flag/done' }); },
 
-  /* ---- guess the cocktail or dish ---- */
-  dishStart(){ const s = G().dishGame; s.i = 0; s.leg = dishLeg(); go('dishQ'); },
-  dishSwap(){
-    const s = G().dishGame, L = s.leg;
-    if(L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length) return toast('Somebody has already had a go at this one.');
-    if(!s.spare.length) return toast('Nothing else left at these levels.');
-    s.qs[s.i] = s.spare.shift();
-    s.leg = dishLeg();
-    toast('New one.');
-    go('dishQ');
-  },
-  /* the first captain to call it — the clock and the list stop while they answer */
-  dishBuzz(e){
-    const L = G().dishGame.leg, w = +e.dataset.w;
-    if(L.buzz != null || L.out[w]) return;
-    Timer.pause();
-    L.buzz = w; L.checked = false;
-    Snd.soft(); render();
-  },
-  dishWrite(e){
-    const g = G(), L = g.dishGame.leg, w = +e.dataset.w;
-    if(L.calls.indexOf(w) > -1) return;
-    L.calls.push(w);
-    Snd.soft();
-    if(L.calls.length === 2) return dishTurnOver();   // both written — nothing left to wait for
-    toast(g.teams[w].name + ' wrote it down — ' + g.teams[otherTeam(w)].name + ', still time.', 3200);
-    render();
-  },
-  dishTurnOver(){ dishTurnOver(); },
-  dishCheckYes(){ const L = G().dishGame.leg; dishEndLeg(L.calls[L.k]); },
-  dishCheckNo(){
-    const L = G().dishGame.leg;
-    Snd.wrong();
-    L.k++;
-    if(L.k >= L.calls.length) return dishEndLeg('none');
-    render();
-  },
-  dishRight(){
-    const g = G(), L = g.dishGame.leg;
-    if(L.buzz == null) return;
-    dishEndLeg(L.buzz);
-  },
-  dishWrong(){
-    const g = G(), s = g.dishGame, L = s.leg;
-    if(L.buzz == null) return;
-    const w = L.buzz, o = otherTeam(w);
-    L.out[w] = true; L.buzz = null;
-    Snd.wrong && Snd.wrong();
-    if(L.out[o]) return dishEndLeg('none');
-    toast(g.teams[w].name + ' is out of this one — ' + g.teams[o].name + ', it is yours to get.', 3600);
-    Timer.resumeT();
-    render();
-  },
-  dishNext(){ const s = G().dishGame; s.i++; dishAfterLeg(); },
-  dishMore(){
-    const s = G().dishGame;
-    if(!s.spare || !s.spare.length) return toast('Nothing left at these levels.');
-    s.qs.push(s.spare.shift());
-    s.tieLegs++;
-    s.leg = dishLeg();
-    go('dishQ');
-  },
-  dishStop(){
-    const g = G(), s = g.dishGame;
-    if(s.awarded) return;
-    s.done = true; s.awarded = true;
-    s.award = [1, 1];
-    g.teams[0].score += 1; g.teams[1].score += 1;
-    s.verdict = { winner:null, needsHost:false, note:'Level — called there, a point each.' };
-    Snd.point();
-    go('dishSummary');
-  },
-  dishAward(e){ awardDish(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
-  afterDish(){
-    const g = G();
-    if(g.dishGame.verdict && g.dishGame.verdict.needsHost) return toast('Award the mini-game points first.');
-    g.done.dish = true;
-    if(runNextMini()) return;
-    advanceRound();
-  },
+  /* ---- guess the cocktail or dish (moves in the engine) ---- */
+  dishStart(){ run({ type:'dish/start' }); },
+  dishSwap(){ run({ type:'dish/swap' }); },
+  dishBuzz(e){ run({ type:'dish/buzz', w:+e.dataset.w }); },
+  dishWrite(e){ run({ type:'dish/write', w:+e.dataset.w }); },
+  dishTurnOver(){ run({ type:'dish/turnOver' }); },
+  dishCheckYes(){ run({ type:'dish/checkYes' }); },
+  dishCheckNo(){ run({ type:'dish/checkNo' }); },
+  dishRight(){ run({ type:'dish/right' }); },
+  dishWrong(){ run({ type:'dish/wrong' }); },
+  dishNext(){ run({ type:'dish/next' }); },
+  dishMore(){ run({ type:'dish/more' }); },
+  dishStop(){ run({ type:'dish/stop' }); },
+  dishAward(e){ run({ type:'dish/award', w:e.dataset.w === 'split' ? 'split' : +e.dataset.w }); },
+  afterDish(){ run({ type:'dish/done' }); },
 
   /* ---- the auction ---- */
   auctionBegin(){ Snd.soft(); go('auctionBid'); },
