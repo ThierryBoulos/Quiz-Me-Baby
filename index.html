@@ -1250,7 +1250,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.12', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.13', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -4192,7 +4192,7 @@ SCREENS.rules = function(){
 
     ruleBlock('12', 'Winning', ul([
       li('Highest score after the last round takes the night.'),
-      li('Tie? <strong>Sudden death</strong> — one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
+      li('Tie? <strong>Sudden death</strong> — a quick rules screen, then one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
     ])) +
 
     ruleBlock('13', 'Playing without a host', ul([
@@ -6033,7 +6033,7 @@ SCREENS.dishQ = function(){
       '<h3 class="display" style="font-size:clamp(16px,2.2vw,22px);text-align:center">' + teamName(t) + ' — say it</h3>' +
       '<div class="btn-row center" style="gap:10px">' +
         '<button class="btn ok lg" data-act="dishRight">Right</button>' +
-        '<button class="btn ghost lg" data-act="dishWrong">Wrong</button>' +
+        '<button class="btn no lg" data-act="dishWrong">Wrong</button>' +
       '</div>' +
     '</div>';
   }
@@ -6090,7 +6090,7 @@ SCREENS.dishCheck = function(){
         ' called it ' + ((L.k || 0) ? 'second' : 'first') + ' — turn it over. Right?</h3>' +
       '<div class="btn-row center" style="gap:10px">' +
         '<button class="btn ok lg" data-act="dishCheckYes">Right</button>' +
-        '<button class="btn ghost lg" data-act="dishCheckNo">Wrong</button>' +
+        '<button class="btn no lg" data-act="dishCheckNo">Wrong</button>' +
       '</div>' +
     '</div>' +
   '</div>';
@@ -6236,6 +6236,22 @@ function closeMapZoom(){
    ========================================================================== */
 SCREENS.sudden = function(){
   const g = G(), q = g.sd.q;
+  /* the first time in, the rules — and nothing of the question — until Go */
+  if(!g.sdReady) return '<div class="stack lg intro-screen" style="padding-top:18px">' +
+    '<div class="center stack intro-head" style="gap:10px">' +
+      '<div class="eyebrow gold">Scores tied — ' + g.teams[0].score + ' each</div>' +
+      '<h1 class="display">Sudden<br>Death</h1>' +
+    '</div>' +
+    '<div class="card pad lit stack">' +
+      '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
+        '<li><strong style="color:var(--gold)">1.</strong> <strong>One question</strong> decides the night.</li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> <strong>Captains only.</strong> No conferring, no lifelines.</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> Know it? <strong>Hand up</strong> — the first hand answers. Wrong, and the other captain can have a go.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> <strong>First right answer wins.</strong> Neither? Another question, until somebody gets one.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="sdGo">Go</button></div>' +
+  '</div>';
   return '<div class="stack lg" style="padding-top:14px">' +
     '<div class="center stack" style="gap:6px">' +
       '<div class="eyebrow gold">Scores tied — sudden death ' + (g.sd.n) + '</div>' +
@@ -7610,7 +7626,7 @@ afterAlso('roundScore', () => {
   if(d >= 5) Host.once(k, 'big');
   else if(d <= 1) Host.once(k, 'close');
 });
-afterAlso('sudden', () => { const g = G(); Host.once('sd' + (g.sdRounds || 1), 'sudden'); });
+afterAlso('sudden', () => { const g = G(); if(!g.sdReady) jingleOnce('sudden'); Host.once('sd' + (g.sdRounds || 1), 'sudden'); });
 afterAlso('final', () => { const g = G(); Host.once('final', g.winner == null ? 'finaltie' : 'final'); });
 
 /* a drumroll as the answer comes up for the room */
@@ -8327,6 +8343,7 @@ const ACT = {
 
   /* ---- sudden death ---- */
   sdShow(){ G().sd.shown = true; render(); },
+  sdGo(){ G().sdReady = true; Snd.soft(); go('sudden'); },
   sdSwap(){ startSudden(false); },
   sdWin(e){
     const g = G();
