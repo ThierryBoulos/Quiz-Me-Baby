@@ -95,8 +95,11 @@ body { min-height: 100svh; background:
 }
 
 /* the TV: a fixed 1280×720 stage scaled to whatever screen it's on */
-.tv-wrap { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden; }
-.tv-stage { width: 1280px; height: 720px; transform-origin: center; position: relative; padding: 44px 56px; display: flex; flex-direction: column; }
+.tv-wrap { position: fixed; inset: 0; overflow: hidden; }
+/* pinned to the centre of the screen, then scaled: works on a TV, a laptop and a phone alike
+   (a grid-centred 1280px box slid off-screen on anything narrower than 1280px) */
+.tv-stage { width: 1280px; height: 720px; position: absolute; left: 50%; top: 50%; transform-origin: center;
+  padding: 44px 56px; display: flex; flex-direction: column; }
 button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .chip.chip-on { background: color-mix(in srgb, var(--color-gold) 18%, transparent); border-color: var(--color-gold); color: var(--color-gold); }
 

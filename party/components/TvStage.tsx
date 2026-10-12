@@ -13,7 +13,7 @@ export function TvStage({ children }: { children: React.ReactNode }) {
   }, []);
   return (
     <div className="tv-wrap">
-      <div ref={ref} className="tv-stage" style={{ transform: `scale(${k})` }}>{children}</div>
+      <div ref={ref} className="tv-stage" style={{ transform: `translate(-50%, -50%) scale(${k})` }}>{children}</div>
     </div>
   );
 }
