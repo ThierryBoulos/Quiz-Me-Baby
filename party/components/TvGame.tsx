@@ -127,6 +127,8 @@ function TvMini({ pub }: { pub: Pub }) {
     <div className="text-[26px] max-w-[1000px]">{m.key === "closest" ? "Both captains get the same number question. Type a number on your phone — nearest wins the leg."
       : m.key === "flag" ? `A flag, ${15} seconds. Captains type the country — each team that gets it scores the leg.`
       : m.key === "map" ? "A map goes up with no title. 60 seconds. Captains type what it shows: the idea counts, not the exact words."
+      : m.key === "saysame" ? "A prompt. Both captains type an answer, hidden from each other. The app has a word in mind: say it and you lose the leg. Matching each other is fine."
+      : m.key === "battle" ? (pub.mode === "nohost" ? "Captains only. Ten quick questions each, typed on the phone: 15 seconds a question. Teams, not a word." : "Captains only. Ten quick questions each, 7 seconds a question, answered out loud. Teams, not a word.")
       : m.key === "auction" ? "A category. Captains take turns raising the bid on their phones, or pass. Whoever holds the bid has 30 seconds to name that many, out loud."
       : "The ingredients come up one at a time, the giveaway last. Captains: first to BUZZ answers. Wrong, and you're out of that one."}</div>
     {pub.mode === "nohost" && <div className="text-[20px] text-[var(--color-ink-3)]">No host tonight: either captain taps Start.</div>}
@@ -231,6 +233,44 @@ function TvMini({ pub }: { pub: Pub }) {
       {A.winner != null && <div className="display text-[54px]" style={{ color: tc(A.winner) }}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</div>}
     </>);
   }
+  if (sc === "sayQ") return (<>
+    <div className="eyebrow text-[20px]">Don&rsquo;t say the same as me</div>
+    <div className="font-bold max-w-[1000px]" style={{ fontSize: 56, lineHeight: 1.1 }}>{pub.question}</div>
+    <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
+    <Sent pub={pub} />
+  </>);
+  if (sc === "sayReveal" && pub.reveal) return (<>
+    <div className="text-[26px] text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
+    <div className="eyebrow text-[18px]">The app&rsquo;s word</div>
+    <div className="display" style={{ fontSize: 100, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
+    <div className="flex gap-16">{[0, 1].map((t) => (
+      <div key={t}><div className="display text-[28px]" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
+        <div className="text-[30px] font-bold">{pub.reveal?.typed?.[t]?.[0] ?? "nothing"} <span style={{ color: pub.reveal?.ok?.[t] ? "var(--color-ok)" : "var(--color-no)" }}>{pub.reveal?.ok?.[t] ? "dodged it" : "said it"}</span></div></div>))}</div>
+    <div className="display text-[40px]" style={{ color: tc(pub.reveal.w === 0 || pub.reveal.w === 1 ? pub.reveal.w : null) }}>{pub.reveal.w === "tie" ? "A point each" : pub.reveal.w === 0 || pub.reveal.w === 1 ? `${T[pub.reveal.w].name} take the leg` : ""}</div>
+  </>);
+  if (pub.battle && sc === "battleQ") { const B = pub.battle; return (<>
+    <div className="display text-[40px]" style={{ color: tc(B.cap) }}>{T[B.cap].name}&rsquo;s captain</div>
+    <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 100 ? 42 : 54, lineHeight: 1.12 }}>{pub.question}</div>
+    <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
+    <div className="display text-[34px]"><span style={{ color: tc(0) }}>{B.score[0]}</span> – <span style={{ color: tc(1) }}>{B.score[1]}</span></div>
+    {B.last && <div className="text-[20px] text-[var(--color-ink-2)]">Last one: <b>{B.last.answer}</b> <span style={{ color: B.last.got ? "var(--color-ok)" : "var(--color-no)" }}>{B.last.got ? "right" : "wrong"}</span></div>}
+  </>); }
+  if (pub.battle && sc === "battleHandoff") return (<>
+    <div className="eyebrow text-[20px]">Halfway</div>
+    <div className="display" style={{ fontSize: 100, color: tc(1) }}>{T[1].name}&rsquo;s captain, you&rsquo;re up</div>
+    <div className="text-[30px]">{T[0].name} scored <b>{pub.battle.score[0]}</b> out of {pub.battle.n}. Beat it.</div>
+  </>);
+  if (pub.battle && sc === "battleTie") return (<>
+    <div className="eyebrow text-[20px]">Level at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: first captain to buzz</div>
+    <div className="font-bold max-w-[1000px]" style={{ fontSize: 52, lineHeight: 1.12 }}>{pub.question}</div>
+    {pub.deadline && <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />}
+    <Buzzed pub={pub} />
+  </>);
+  if (pub.battle && sc === "battleSummary") { const B = pub.battle; return (<>
+    <div className="eyebrow text-[20px]">Battle of the Captains</div>
+    <div className="display" style={{ fontSize: 120 }}>{B.score[0]} – {B.score[1]}</div>
+    <div className="display text-[54px]" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Level") : `${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</div>
+  </>); }
   if (sc === "dishTie") return (<>
     <div className="display" style={{ fontSize: 100, color: "var(--color-gold)" }}>Level at {m.wins[0]} each</div>
     <div className="text-[28px] text-[var(--color-ink-2)]">One more to settle it, or a point each — the host decides.</div>

@@ -18,6 +18,7 @@ export default function PhoneRoom() {
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState("");
+  const [panel, setPanel] = useState(false);          // mid-game: the line-up, and changing captain
 
   useEffect(() => { void ensureSession().then(setMe); }, []);
   const mine = useMemo(() => members.find((m) => m.user_id === me) || null, [members, me]);
@@ -44,7 +45,7 @@ export default function PhoneRoom() {
     const { error } = await sb().from("members").update({ team: to, role: "player" }).eq("room", code).eq("user_id", m.user_id);
     if (error) throw new Error(error.message);
   });
-  const leave = () => act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
+  const leave = () => (room?.status === "lobby" || window.confirm("Leave the game? You can come back with the same name.")) && act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
 
   const playing = room?.status === "playing" || room?.status === "done";
   const pub = (room?.state?.pub || null) as Pub | null;
@@ -62,18 +63,48 @@ export default function PhoneRoom() {
     <main className="screen">
       <header className="flex items-center justify-between">
         <span className="chip"><span className="face">{mine.avatar || "🙂"}</span>{mine.name}</span>
-        <span className="eyebrow">Room {code}</span>
-        <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>
+        <span className="eyebrow whitespace-nowrap">{room.status === "lobby" ? `Room ${code}` : code}</span>
+        <div className="flex gap-2">
+          {room.status !== "lobby" && <button className="btn btn-sm btn-ghost" onClick={() => setPanel(!panel)}>{panel ? "Back" : mine.role === "host" ? "Players" : "Team"}</button>}
+          <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>
+        </div>
       </header>
 
       {room.status !== "lobby" ? (
-        !pub ? (
+        /* joined after the start: pick a side first */
+        mine.team == null && mine.role !== "host" ? (
+          <section className="flex flex-col gap-3 enter">
+            <h1 className="display text-[40px] text-center">Pick your side</h1>
+            <p className="text-center text-[14px] text-[var(--color-ink-2)]">The game&rsquo;s on. Join a team and help your captain.</p>
+            <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
+            <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
+          </section>
+        ) : panel ? (
+          /* mid-game: who's where, and a new captain when one is needed */
+          <section className="flex flex-col gap-3 enter">
+            {mine.role === "captain" && (
+              <div className="card flex flex-col gap-2">
+                <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
+                <p className="text-[14px] text-[var(--color-ink-2)]">Hand over to a teammate: step down, and they tap &ldquo;Make me captain&rdquo; on their phone.</p>
+                <button className="btn" disabled={busy} onClick={() => claim("player")}>Step down as captain</button>
+              </div>)}
+            {mine.role === "player" && !myCaptain && (
+              <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>)}
+            {mine.role === "player" && myCaptain && <div className="card text-center text-[14px]">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
+            {mine.role === "host" && <p className="text-[14px] text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
+            <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} />
+            <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
+          </section>
+        ) : !pub ? (
           <section className="card text-center enter flex-1 grid place-items-center">
             <div><div className="eyebrow">Game on</div><h1 className="display text-[44px] mt-2">Eyes on the TV</h1></div>
           </section>
         ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} busy={busy} />
           : mine.role === "captain" ? <CaptainGame pub={pub} me={mine} members={members} code={code} />
-          : <PlayerGame pub={pub} me={mine} members={members} code={code} />
+          : <>
+              {!myCaptain && <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Your team has no captain. Make me captain</button>}
+              <PlayerGame pub={pub} me={mine} members={members} code={code} />
+            </>
       ) : mine.role === "host" ? (
         <>
           <section className="card enter text-center">

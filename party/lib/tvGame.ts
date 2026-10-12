@@ -2,8 +2,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, loadBank, type Bank } from "./engine";
 import { sb } from "./supabase";
+import { playSound, type SoundName } from "./sound";
 import { readyToStart, starter, type Member, type Room } from "./room";
-import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_AUTO, T_CLOSEST, T_FLAG, T_MAP, T_MAP_RULE, T_OVERRULE, T_SUDDEN_BUZZ,
+import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_AUTO, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_FLAG, T_MAP, T_MAP_RULE, T_OVERRULE, T_SAY, T_SUDDEN_BUZZ,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
 const T_QUESTION = 60, T_STEAL = 30, T_FRIEND = 30;
@@ -11,6 +12,7 @@ type Action = { id: number; room: string; user_id: string; kind: string; payload
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type G = any;
 type W = 0 | 1 | "tie" | "none";
+type PKind = "ask" | "steal" | "dish" | "sudden" | "battle" | "battleTie";
 type Where = string | string[];
 const inScreen = (where: Where, sc: string) => where === "*" || (Array.isArray(where) ? where : [where]).includes(sc);
 
@@ -28,9 +30,12 @@ const HOST_MOVES: Record<string, Where> = {
   "map/start": "mapIntro", "map/hint": "mapQ", "map/swap": "mapQ", "map/more": "mapTie", "map/stop": "mapTie", "map/award": "mapSummary", "map/done": "mapSummary",
   "auction/begin": "auctionIntro", "auction/skip": "auctionBid", "auction/tick": "auctionRun", "auction/untick": "auctionRun",
   "auction/resolve": "auctionRun", "auction/nextLeg": "auctionLeg", "auction/done": "auctionResult",
-  "ui/closeLifeline": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun"],
-  "ui/reveal": ["miniQ", "flagQ", "mapQ"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/next": ["closestReveal", "flagReveal", "mapReveal"],
-  "ui/sdRight": "sudden", "ui/sdWrong": "sudden",
+  "say/start": "sayIntro", "say/swap": "sayQ", "say/award": "saySummary", "say/done": "saySummary",
+  "battle/start": ["battleIntro", "battleHandoff"], "battle/mark": "battleQ", "battle/swap": "battleQ", "battle/tbSwap": "battleTie", "battle/tbWin": "battleTie", "battle/done": "battleSummary",
+  "ui/sayOk": "sayReveal",
+  "ui/closeLifeline": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"],
+  "ui/reveal": ["miniQ", "flagQ", "mapQ", "sayQ"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal"],
+  "ui/sdRight": ["sudden", "battleTie"], "ui/sdWrong": ["sudden", "battleTie"],
 };
 /* What a CAPTAIN may tap, and who: "any" captain, the team whose "turn" it
    is, or the "other" one (the referee). The Auction's bidding is always the
@@ -46,9 +51,14 @@ const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?: boole
   "map/start": { where: "mapIntro", who: "any", nohostOnly: true },
   "auction/begin": { where: "auctionIntro", who: "any", nohostOnly: true },
   "sudden/go": { where: "sudden", who: "any", nohostOnly: true },
+  "say/start": { where: "sayIntro", who: "any", nohostOnly: true },
+  "battle/start": { where: ["battleIntro", "battleHandoff"], who: "any", nohostOnly: true },
+  "say/done": { where: "saySummary", who: "any", nohostOnly: true },
+  "battle/done": { where: "battleSummary", who: "any", nohostOnly: true },
+  "ui/sayOk": { where: "sayReveal", who: "other", nohostOnly: true },
   "round/afterAnswer": { where: "answer", who: "any", nohostOnly: true },
   "round/next": { where: "roundScore", who: "any", nohostOnly: true },
-  "ui/next": { where: ["closestReveal", "flagReveal"], who: "any", nohostOnly: true },
+  "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal"], who: "any", nohostOnly: true },
   "dish/next": { where: "dishReveal", who: "any", nohostOnly: true },
   "auction/nextLeg": { where: "auctionLeg", who: "any", nohostOnly: true },
   "auction/done": { where: "auctionResult", who: "any", nohostOnly: true },
@@ -57,8 +67,8 @@ const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?: boole
   "dish/done": { where: "dishSummary", who: "any", nohostOnly: true },
   "map/done": { where: "mapSummary", who: "any", nohostOnly: true },
   "ui/closeLifeline": { where: "*", who: "turn", nohostOnly: true },
-  "ui/agree": { where: ["ask", "steal", "dishQ", "sudden"], who: "other", nohostOnly: true },
-  "ui/overrule": { where: ["ask", "steal", "dishQ", "sudden"], who: "other", nohostOnly: true },
+  "ui/agree": { where: ["ask", "steal", "dishQ", "sudden", "battleQ", "battleTie"], who: "other", nohostOnly: true },
+  "ui/overrule": { where: ["ask", "steal", "dishQ", "sudden", "battleQ", "battleTie"], who: "other", nohostOnly: true },
   "ui/flagOk": { where: "flagReveal", who: "other", nohostOnly: true },
   "ui/mapRule": { where: "mapReveal", who: "other", nohostOnly: true },
   "auction/tick": { where: "auctionRun", who: "other", nohostOnly: true },
@@ -68,12 +78,13 @@ const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?: boole
    right or wrong, pausing. They skip the stale-tap check (and don't bump the
    step): a host tapping +1 five times fast must get five, and a tap on
    "Next" straight after marking a team must not be refused as stale. */
-const SAME_SCREEN = new Set(["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/mapRule", "ui/pause"]);
+const SAME_SCREEN = new Set(["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/mapRule", "ui/sayOk", "ui/pause"]);
 /* no host: the screens that move on by themselves, and how */
 const AUTO_NEXT: Record<string, G> = {
   answer: { type: "round/afterAnswer" }, roundScore: { type: "round/next" }, closestReveal: { type: "ui/next" }, flagReveal: { type: "ui/next" },
   dishReveal: { type: "dish/next" }, auctionLeg: { type: "auction/nextLeg" }, auctionResult: { type: "auction/done" },
   miniSummary: { type: "closest/done" }, flagSummary: { type: "flag/done" }, dishSummary: { type: "dish/done" }, mapSummary: { type: "map/done" },
+  sayReveal: { type: "ui/next" }, saySummary: { type: "say/done" }, battleHandoff: { type: "battle/start" }, battleSummary: { type: "battle/done" },
 };
 const other = (t: 0 | 1) => (t === 0 ? 1 : 0) as 0 | 1;
 const LEVELS: Record<string, { flag: string[]; dish: string[] }> = {
@@ -82,11 +93,14 @@ const LEVELS: Record<string, { flag: string[]; dish: string[] }> = {
   hard: { flag: ["hard", "expert"], dish: ["c-hard", "d-hard"] },
   mixed: { flag: ["easy", "medium", "hard"], dish: ["c-easy", "c-medium", "d-easy", "d-medium"] },
 };
-const PARTY_MINIS = ["closest", "auction", "map", "flag", "dish"];
+const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dish", "battle"];
 const dishKind = (q: G) => ((q?.level || "")[0] === "c" ? "Cocktail" : "Dish");
 const dishTotal = (q: G) => (q.ings.length - 1) * DISH_STEP + DISH_LAST;
 const miniOf = (sc: string): MiniKey | null => /^(mini|closest)/.test(sc) ? "closest" : /^flag/.test(sc) ? "flag" : /^dish/.test(sc) ? "dish"
-  : /^map/.test(sc) ? "map" : /^auction/.test(sc) ? "auction" : null;
+  : /^map/.test(sc) ? "map" : /^auction/.test(sc) ? "auction" : /^say/.test(sc) ? "saysame" : /^battle/.test(sc) ? "battle" : null;
+/* the engine's move prefix for each mini-game */
+const PREFIX: Record<MiniKey, string> = { closest: "closest", flag: "flag", dish: "dish", map: "map", auction: "auction", saysame: "say", battle: "battle" };
+const miniState = (g: G, k: MiniKey | null) => k === "closest" ? g.mini : k === "flag" ? g.flagGame : k === "map" ? g.mapGame : k === "dish" ? g.dishGame : k === "saysame" ? g.saySame : null;
 
 /* THE TV RUNS THE NIGHT. It holds the game, plays every move through the
    shared engine (exactly as Classic does), carries out what the engine says
@@ -104,10 +118,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     guesses: [null, null] as Two<number | null>,       // Closest To Wins
     ok: [null, null] as Two<boolean | null>,           // Flag / Map verdicts
     sdBuzz: null as 0 | 1 | null, sdOut: [false, false] as Two<boolean>,
-    pending: null as null | { kind: "ask" | "steal" | "dish" | "sudden"; team: 0 | 1; text: string; v: boolean; until: number },
+    pending: null as null | { kind: PKind; team: 0 | 1; text: string; v: boolean; until: number },
     autoAt: null as number | null,                     // no host: when this screen moves on by itself
   });
   const [pub, setPub] = useState<Pub | null>(null);
+  const isTvRef = useRef(isTv);
+  isTvRef.current = isTv;
   const saveKey = "qmb.tv." + code + ".game", usedKey = "qmb.party.used";
 
   const used = useCallback((): Set<string> => { try { return new Set(JSON.parse(localStorage.getItem(usedKey) || "[]")); } catch { return new Set(); } }, []);
@@ -131,12 +147,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (["dishQ", "dishCheck"].includes(sc)) return g.dishGame.qs[g.dishGame.i];
     if (sc === "dishReveal") { const subs = g.dishGame.subs; return subs[subs.length - 1]?.q; }
     if (/^auction(Bid|Run)$/.test(sc)) return g.auction?.q;
+    if (sc === "sayQ" || sc === "sayReveal") return g.saySame.qs[g.saySame.i];
+    if (sc === "battleQ") return g.battle?.qs[g.battle.cap][g.battle.i];
+    if (sc === "battleTie") return g.battle?.tb?.q;
     return null;
   }, []);
   const match = (texts: string[] | null, q: G) => (texts && q ? texts.some((t) => QMB.isMatch(t, q.answer)) : null);
   const turnTeam = (): 0 | 1 => {
     const s = st.current, g = s.g, rd = g.rounds[g.r];
     if (s.screen === "auctionBid" || s.screen === "auctionRun") return g.auction.turn;
+    if (s.screen === "battleQ") return g.battle.cap;
     if (!rd) return 0;
     const owner = QMB.seatTeam(g, rd, g.seat, {});
     return s.screen === "steal" ? other(owner) : owner;
@@ -151,6 +171,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const ans = Number(q.answer), da = Math.abs(a - ans), db = Math.abs(b - ans);
     return da === db ? "tie" : da < db ? 0 : 1;
   };
+  /* Say Same: ok = dodged the word. One team dodging alone takes it; otherwise a point each */
+  const sayW = (): W => { const [a, b] = st.current.ok; return a && !b ? 0 : b && !a ? 1 : "tie"; };
   const okW = (): W => { const [a, b] = st.current.ok; return a && b ? "tie" : a ? 0 : b ? 1 : "none"; };
 
   /* ---- what the phones see ---- */
@@ -203,13 +225,21 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         winner: a.done ? a.winner : null, award: a.award };
       p.turn = a.turn;
       secret.answer = a.q?.notes || ""; secret.notes = "";
+    } else if (key === "battle" && g.battle) {
+      const b = g.battle, lastLog = s.screen === "battleQ" && b.i > 0 ? b.log[b.cap][b.i - 1] : null;
+      p.mini = { key, title: MINI_TITLES[key], leg: Math.min(b.i + 1, b.n), of: b.n, wins: [...b.score] as Two<number>, pts: g.miniPts };
+      p.battle = { cap: b.cap, i: b.i, n: b.n, score: [...b.score] as Two<number>, last: lastLog ? { answer: lastLog.q.answer, got: lastLog.got } : null,
+        tb: b.tb?.n, winner: b.done ? b.winner : null, note: b.note, award: b.award };
+      if (s.screen === "battleQ" || s.screen === "battleTie") { p.question = q?.question; p.turn = s.screen === "battleQ" ? b.cap : undefined; }
+      if (s.screen === "battleTie") { p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>; }
     } else if (key) {
-      const m = key === "closest" ? g.mini : key === "flag" ? g.flagGame : key === "map" ? g.mapGame : g.dishGame;
+      const m = miniState(g, key);
       p.mini = { key, title: MINI_TITLES[key], leg: Math.min(m.i + 1, m.qs.length), of: m.base, wins: [...m.wins] as Two<number>, pts: g.miniPts, tie: m.i >= m.base };
       if (key === "dish") p.mini.kinds = m.levels.some((l: string) => l[0] === "c") && m.levels.some((l: string) => l[0] === "d") ? "Cocktails + dishes" : m.levels[0][0] === "c" ? "Cocktails" : "Dishes";
       if (/Summary$/.test(s.screen) && m.verdict) p.summary = { wins: [...m.wins] as Two<number>, winner: m.verdict.winner, needsHost: m.verdict.needsHost, note: m.verdict.note || "", award: m.award };
     }
-    if (s.screen === "miniQ") p.question = q?.question;
+    if (s.screen === "miniQ" || s.screen === "sayQ") p.question = q?.question;
+    if (s.screen === "sayReveal" && q) { p.question = q.question; p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, w: sayW() }; }
     if (s.screen === "closestReveal" && q) {
       p.question = q.question;
       p.reveal = { answer: q.answer, guesses: s.guesses, w: closestWinner() };
@@ -269,24 +299,31 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, {}), deadline: f.lifeline === "friend" ? now + T_FRIEND * 1000 : null };
       }
       if (f.toast) s.toast = { id: ++s.toastN, text: f.toast };
+      if (f.sound && isTvRef.current) playSound(f.sound as SoundName);
+      if (f.go && isTvRef.current) {
+        if (f.go === "roundIntro" || /Intro$/.test(f.go) || (f.go === "sudden" && !s.g.sdReady)) { playSound("whoosh"); playSound("jingle"); }
+        else if (f.go === "answer" || f.go === "dishReveal" || f.go === "auctionLeg") playSound("drumroll");
+      }
       if (f.go) {
         s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
-        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; }
-        if (f.go === "sudden") { s.sdBuzz = null; s.sdOut = [false, false]; }
+        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; }
+        if (f.go === "sudden" || f.go === "battleTie") { s.sdBuzz = null; s.sdOut = [false, false]; }
         const g = s.g;
         const secs = f.go === "ask" ? T_QUESTION : f.go === "steal" ? T_STEAL : f.go === "miniQ" ? T_CLOSEST : f.go === "flagQ" ? T_FLAG
           : f.go === "mapQ" ? T_MAP : f.go === "auctionRun" ? T_AUCTION
           : f.go === "dishQ" ? dishTotal(g.dishGame.qs[g.dishGame.i])
-          : f.go === "sudden" && s.nohost && g.sdReady ? T_SUDDEN_BUZZ : 0;
+          : f.go === "sayQ" ? T_SAY : f.go === "battleQ" ? (s.nohost ? T_BATTLE_TYPED : T_BATTLE_HOST)
+          : ((f.go === "sudden" && g.sdReady) || f.go === "battleTie") && s.nohost ? T_SUDDEN_BUZZ : 0;
         if (secs) { s.deadline = now + secs * 1000; s.total = secs; }
         if (f.go === "flagQ") applyFx([{ used: g.flagGame.qs[g.flagGame.i] }]);
         if (f.go === "dishQ") applyFx([{ used: g.dishGame.qs[g.dishGame.i] }]);
         if (f.go === "miniQ") applyFx([{ used: g.mini.qs[g.mini.i] }]);
         if (f.go === "mapQ") applyFx([{ used: g.mapGame.qs[g.mapGame.i] }]);
+        if (f.go === "sayQ") applyFx([{ used: g.saySame.qs[g.saySame.i] }]);
         if (s.nohost && AUTO_NEXT[f.go]) s.autoAt = now + T_AUTO * 1000;
       }
-      if (f.finalize) { s.screen = "final"; s.deadline = null; s.autoAt = null; s.pending = null; }
+      if (f.finalize) { s.screen = "final"; s.deadline = null; s.autoAt = null; s.pending = null; if (isTvRef.current) playSound("win"); }
     }
   }, [used]);
 
@@ -298,8 +335,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const g = s.g;
     if (!s.nohost) return;
     if (/Summary$/.test(s.screen)) {
-      const k = miniOf(s.screen), m = k === "closest" ? g.mini : k === "flag" ? g.flagGame : k === "map" ? g.mapGame : k === "dish" ? g.dishGame : null;
-      if (m?.verdict?.needsHost) { play({ type: k + "/award", w: "split" }); s.autoAt = Date.now() + T_AUTO * 1000; }
+      const k = miniOf(s.screen), m = miniState(g, k);
+      if (k && m?.verdict?.needsHost) { play({ type: PREFIX[k] + "/award", w: "split" }); s.autoAt = Date.now() + T_AUTO * 1000; }
     }
     if (s.screen === "dishTie") play({ type: g.dishGame.spare?.length ? "dish/more" : "dish/stop" });
     if (s.screen === "mapTie") play({ type: g.mapGame.spare?.length ? "map/more" : "map/stop" });
@@ -313,12 +350,18 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const q = g.flagGame.qs[g.flagGame.i];
       s.ok = [0, 1].map((t) => !!match(s.typed[t], q)) as Two<boolean>;
       s.screen = "flagReveal";
+    } else if (s.screen === "sayQ") {
+      /* dodged = wrote something, and it isn't the app's word; nothing written can't win */
+      const q = g.saySame.qs[g.saySame.i];
+      s.ok = [0, 1].map((t) => !!s.typed[t] && !match(s.typed[t], q)) as Two<boolean>;
+      s.screen = "sayReveal";
     } else if (s.screen === "mapQ") {
       /* no host: each captain rules on the other's answer; nothing written is simply wrong */
       s.ok = s.nohost ? [s.typed[0] ? null : false, s.typed[1] ? null : false] : [false, false];
       s.screen = "mapReveal";
     } else return;
     s.deadline = null; s.left = 0;
+    playSound("drumroll");
     s.autoAt = s.nohost ? Date.now() + (s.screen === "mapReveal" ? T_MAP_RULE : T_AUTO) * 1000 : null;
     if (s.screen === "mapReveal" && s.ok[0] != null && s.ok[1] != null && s.autoAt) s.autoAt = Date.now() + T_AUTO * 1000;
   }, []);
@@ -333,11 +376,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (P.kind === "ask") play({ type: "round/judge", v });
     else if (P.kind === "steal") play({ type: "round/judgeSteal", v });
     else if (P.kind === "dish") { play({ type: v ? "dish/right" : "dish/wrong" }); if (!v) s.typed[P.team] = null; }
-    else if (P.kind === "sudden") {
-      if (v) play({ type: "sudden/win", w: P.team });
+    else if (P.kind === "battle") play({ type: "battle/mark", got: v });
+    else if (P.kind === "sudden" || P.kind === "battleTie") {
+      const tb = P.kind === "battleTie";
+      if (v) play(tb ? { type: "battle/tbWin", w: P.team } : { type: "sudden/win", w: P.team });
       else {
         s.sdOut[P.team] = true; s.typed[P.team] = null; s.sdBuzz = null;
-        if (s.sdOut[0] && s.sdOut[1]) play({ type: "sudden/win", w: "none" });
+        if (s.sdOut[0] && s.sdOut[1]) play(tb ? { type: "battle/tbWin", w: "none" } : { type: "sudden/win", w: "none" });
         else { s.toast = { id: ++s.toastN, text: "Wrong. The other captain can buzz." }; s.deadline = Date.now() + T_SUDDEN_BUZZ * 1000; }
       }
     }
@@ -351,16 +396,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "ui/timeUp") { s.deadline = null; s.left = 0; s.timeUp = true; }
     else if (t === "ui/pause") applyFx([{ timer: s.deadline ? "pause" : "resume" }]);
     else if (t === "ui/reveal") reveal();
-    else if (t === "ui/flagOk" || t === "ui/mapOk") { const i = move.t === 1 ? 1 : 0; s.ok[i] = !s.ok[i]; }
+    else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk") { const i = move.t === 1 ? 1 : 0; s.ok[i] = !s.ok[i]; }
     else if (t === "ui/next") {
       if (s.screen === "closestReveal") play({ type: "closest/win", w: closestWinner(), gA: s.guesses[0], gB: s.guesses[1] });
       else if (s.screen === "flagReveal") play({ type: "flag/verdict", w: okW() });
       else if (s.screen === "mapReveal") play({ type: "map/verdict", w: okW() });
+      else if (s.screen === "sayReveal") play({ type: "say/verdict", w: sayW() });
     }
-    else if (t === "ui/sdRight" && s.sdBuzz != null) play({ type: "sudden/win", w: s.sdBuzz });
+    else if (t === "ui/sdRight" && s.sdBuzz != null) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: s.sdBuzz } : { type: "sudden/win", w: s.sdBuzz });
     else if (t === "ui/sdWrong" && s.sdBuzz != null) {
       s.sdOut[s.sdBuzz] = true; s.typed[s.sdBuzz] = null; s.sdBuzz = null;
-      if (s.sdOut[0] && s.sdOut[1]) play({ type: "sudden/win", w: "none" });
+      if (s.sdOut[0] && s.sdOut[1]) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: "none" } : { type: "sudden/win", w: "none" });
       else s.toast = { id: ++s.toastN, text: "Wrong. The other captain can have a go." };
     }
     else if (t === "dish/wrong") { const b = g.dishGame.leg.buzz; play(move); if (b != null) s.typed[b] = null; }
@@ -387,13 +433,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (kind === "buzz") {
       if (sc === "dishQ") { const L = g.dishGame.leg; if (L.buzz != null || L.out[team]) return false; play({ type: "dish/buzz", w: team }); return true; }
-      if (sc === "sudden" && g.sdReady && s.sdBuzz == null && !s.sdOut[team]) { s.sdBuzz = team; s.deadline = null; return true; }
+      if (((sc === "sudden" && g.sdReady) || sc === "battleTie") && s.sdBuzz == null && !s.sdOut[team]) { s.sdBuzz = team; s.deadline = null; playSound("soft"); return true; }
       return false;
     }
     if (kind !== "answer") return false;
     const texts = (Array.isArray(p.texts) ? p.texts : [p.text]).map((x: unknown) => String(x ?? "").trim().slice(0, 80)).filter(Boolean);
     /* no host: the first answer sent is the one checked — and the other captain gets a few seconds to overrule */
-    const check = (kindP: "ask" | "steal" | "dish" | "sudden", q: G) => {
+    const check = (kindP: PKind, q: G) => {
       if (!s.nohost) return;
       const v = !!match(s.typed[team], q);
       applyFx([{ timer: "pause" }]);
@@ -413,14 +459,20 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.guesses[0] != null && s.guesses[1] != null) reveal();
       return true;
     }
-    if (sc === "flagQ" || sc === "mapQ") {
+    if (sc === "battleQ") {
+      if (team !== g.battle.cap || !texts.length || s.pending) return false;
+      s.typed[team] = texts.slice(0, 1);
+      check("battle", current());
+      return true;
+    }
+    if (sc === "flagQ" || sc === "mapQ" || sc === "sayQ") {
       if (!texts.length || s.typed[team]) return false;
       s.typed[team] = texts.slice(0, 1);
       if (s.typed[0] && s.typed[1]) reveal();
       return true;
     }
     if (sc === "dishQ" && g.dishGame.leg.buzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check("dish", current()); return true; }
-    if (sc === "sudden" && s.sdBuzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check("sudden", current()); return true; }
+    if ((sc === "sudden" || sc === "battleTie") && s.sdBuzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check(sc === "sudden" ? "sudden" : "battleTie", current()); return true; }
     return false;
   }, [applyFx, current, play, reveal]);
 
@@ -433,7 +485,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (t === "ui/closeLifeline") { if (!s.lifeline || s.lifeline.team !== team) return false; }
     else if (t === "ui/agree" || t === "ui/overrule") { if (!s.pending || s.pending.team === team) return false; }
     else if (t === "sudden/go") { if (g.sdReady) return false; }
-    else if (t === "ui/flagOk") { if (move.t !== other(team)) return false; }
+    else if (t === "ui/flagOk" || t === "ui/sayOk") { if (move.t !== other(team)) return false; }
     else if (t === "ui/mapRule") { if (s.ok[other(team)] != null) return false; }
     else if (rule.who === "turn" && turnTeam() !== team) return false;
     else if (rule.who === "other" && turnTeam() === team) return false;
@@ -536,6 +588,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     return () => { clearInterval(poll); void sb().removeChannel(ch); };
   }, [code, isTv, handle]);
 
+  const lastWhole = useRef<number | null>(null);
   /* The clocks. A standard question running out is only "time's up" when
      there's a host to judge; with no host it's a wrong answer. Closest, Flag
      and Map reveal; a dish leg ends; the Auction settles. The dish ingredients
@@ -547,6 +600,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const s = st.current, now = Date.now(), g = s.g;
       if (!g) return;
       let changed = false;
+      /* the last ten seconds tick; the bells ring at zero */
+      const whole = s.deadline ? Math.ceil((s.deadline - now) / 1000) : null;
+      if (whole !== lastWhole.current) { if (whole != null && whole <= 10 && whole > 0) playSound("tick"); lastWhole.current = whole; }
+      if (s.deadline && now >= s.deadline) playSound("alarm");
       if (s.screen === "dishQ" && s.deadline) {
         const q = g.dishGame.qs[g.dishGame.i], L = g.dishGame.leg;
         const want = Math.min(q.ings.length, 1 + Math.floor((s.total - (s.deadline - now) / 1000) / DISH_STEP + 1e-6));
@@ -555,7 +612,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.pending && now >= s.pending.until) { s.step++; settle(false); changed = true; }
       if (s.deadline && now >= s.deadline) {
         s.deadline = null; s.step++; changed = true;
-        if (["miniQ", "flagQ", "mapQ"].includes(s.screen)) reveal();
+        if (["miniQ", "flagQ", "mapQ", "sayQ"].includes(s.screen)) reveal();
+        else if (s.screen === "battleQ" && s.nohost) { s.toast = { id: ++s.toastN, text: "Time's up." }; play({ type: "battle/mark", got: false }); }
+        else if (s.screen === "battleTie" && s.nohost) play({ type: "battle/tbWin", w: "none" });
         else if (s.screen === "dishQ") play({ type: "dish/timeUp" });
         else if (s.screen === "auctionRun") play({ type: "auction/resolve" });
         else if (s.screen === "sudden" && s.nohost) play({ type: "sudden/win", w: "none" });

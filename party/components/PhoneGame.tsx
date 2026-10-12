@@ -9,7 +9,9 @@ import { MapView } from "./MapView";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
-const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sudden"];
+const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sayQ", "sudden", "battleQ", "battleTie"];
+/* captains only: the players keep quiet */
+const CAPTAINS_ONLY = ["sudden", "battleQ", "battleTie"];
 
 /* The answer for the current question. Only the host's phone can read it —
    the database refuses everyone else, so a player can't peek even with the
@@ -135,7 +137,7 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
       <Main label="Back to the question" move={{ type: "ui/closeLifeline" }} />
     </div>);
 
-  const mk = pub.mini?.key, S = pub.summary;
+  const mk = pub.mini?.key ? ({ saysame: "say" } as Record<string, string>)[pub.mini.key] || pub.mini.key : undefined, S = pub.summary;
   switch (pub.screen) {
     case "roundIntro": return (
       <div className="flex flex-col gap-4 flex-1">
@@ -202,7 +204,7 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
         <div className="display text-[32px]">{T[0].score} – {T[1].score}</div></div></div>);
 
     /* ---- the mini-games ---- */
-    case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": return (
+    case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "battleIntro": return (
       <div className="flex flex-col gap-4 flex-1">
         <div className="card text-center"><div className="eyebrow">Mini-game</div>
           <div className="display text-[38px]" style={{ color: "var(--color-gold)" }}>{pub.mini?.title}</div>
@@ -277,7 +279,7 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => send({ type: "dish/more" })}>One more</button>
         </div>
       </div>);
-    case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": return (
+    case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": case "saySummary": return (
       <div className="flex flex-col gap-4 flex-1">
         <div className="card text-center"><div className="eyebrow">{pub.mini?.title}</div>
           <div className="display text-[44px]">{S?.wins[0]} – {S?.wins[1]}</div>
@@ -348,6 +350,63 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
           <div className="display text-[44px]">{pub.auction?.wins[0]} – {pub.auction?.wins[1]}</div></div>
         <Main label="Next" move={{ type: "auction/done" }} />
       </div>);
+    case "sayQ": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="flex items-center justify-between"><div className="eyebrow">Don&rsquo;t say the same · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
+        <p className="font-bold text-[18px]">{pub.question}</p>
+        <AnswerCard />
+        {[0, 1].map((t) => <div key={t} className="card !p-3 text-[15px]" style={{ borderColor: tc(t as 0 | 1) }}><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {secret.typed?.[t]?.[0] ?? "thinking…"}{secret.typed?.[t] ? (secret.match?.[t] ? " · said the word" : " · dodged it") : ""}</div>)}
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change prompt" move={{ type: "say/swap" }} /></div>
+      </div>);
+    case "sayReveal": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="card text-center"><div className="eyebrow">The word</div><div className="display text-[34px]" style={{ color: "var(--color-gold)" }}>{pub.reveal?.answer}</div></div>
+        <div className="eyebrow">The app checked them. Tap to overrule.</div>
+        {[0, 1].map((t) => { const ok = pub.reveal?.ok?.[t]; return (
+          <button key={t} className="btn btn-block" style={ok ? btnGreen : { borderColor: tc(t as 0 | 1) }} disabled={busy} onClick={() => send({ type: "ui/sayOk", t })}>
+            {T[t].name}: {pub.reveal?.typed?.[t]?.[0] ?? "nothing"} · {ok ? "dodged it" : "said it"}</button>); })}
+        <Main label="Next" move={{ type: "ui/next" }} />
+      </div>);
+    case "battleQ": { const B = pub.battle!; return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="flex items-center justify-between"><div className="display text-[22px]" style={{ color: tc(B.cap) }}>{T[B.cap].name} · {B.i + 1}/{B.n}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
+        <p className="font-bold text-[18px]">{pub.question}</p>
+        <AnswerCard />
+        {secret.typed?.[B.cap] && <Typed t={B.cap} />}
+        <Judge right={{ type: "battle/mark", got: true }} wrong={{ type: "battle/mark", got: false }} />
+        <div className="flex gap-2 justify-center"><Pause /><Small ghost label="Change question" move={{ type: "battle/swap" }} /></div>
+      </div>); }
+    case "battleHandoff": return (
+      <div className="flex flex-col gap-4 flex-1">
+        <div className="card text-center"><div className="eyebrow">Halfway</div>
+          <div className="display text-[30px]">{T[0].name} scored {pub.battle?.score[0]}</div>
+          <div className="text-[14px] text-[var(--color-ink-2)]">Now {T[1].name}&rsquo;s captain.</div></div>
+        <Main label={`Start ${T[1].name}'s questions`} move={{ type: "battle/start" }} />
+      </div>);
+    case "battleTie": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="eyebrow">Battle tie-breaker: first captain to buzz</div>
+        <p className="font-bold text-[18px]">{pub.question}</p>
+        <AnswerCard />
+        {pub.buzz != null ? (<>
+          <div className="display text-[26px] text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed</div>
+          <Typed t={pub.buzz} />
+          <Judge right={{ type: "ui/sdRight" }} wrong={{ type: "ui/sdWrong" }} />
+        </>) : (<>
+          <div className="card text-center text-[15px] text-[var(--color-ink-2)] mt-auto">Waiting for a buzz…</div>
+          <div className="flex gap-2 justify-center">
+            <Small label="Neither, another one" move={{ type: "battle/tbWin", w: "none" }} />
+            <Small ghost label="Change question" move={{ type: "battle/tbSwap" }} />
+          </div>
+        </>)}
+      </div>);
+    case "battleSummary": return (
+      <div className="flex flex-col gap-4 flex-1">
+        <div className="card text-center"><div className="eyebrow">Battle of the Captains</div>
+          <div className="display text-[44px]">{pub.battle?.score[0]} – {pub.battle?.score[1]}</div>
+          {pub.battle?.note && <div className="text-[13px] text-[var(--color-ink-2)]">{pub.battle.note}</div>}</div>
+        <Main label="Next" move={{ type: "battle/done" }} />
+      </div>);
     default: return <div className="eyebrow text-center">Eyes on the TV</div>;
   }
 }
@@ -355,16 +414,16 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
 /* what's on screen, close up: the question, the flag or the ingredients */
 function OnScreen({ pub }: { pub: Pub }) {
   return (<>
-    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal"].includes(pub.screen) && <p className="font-bold text-[19px] leading-snug text-center">{pub.question}</p>}
+    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className="font-bold text-[19px] leading-snug text-center">{pub.question}</p>}
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <Flag name={pub.flag} h={150} />}
     {pub.map && <MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={260} />}
     {pub.map?.reveal && <div className="display text-[26px] text-center" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>}
     {pub.auction && /^auction(Bid|Run|Leg)$/.test(pub.screen) && <div className="card text-center"><div className="eyebrow">Category</div><div className="display text-[26px]" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>
       {pub.screen === "auctionRun" && <div className="display text-[44px]">{pub.auction.count} / {pub.auction.bid}</div>}</div>}
     {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
-    {pub.reveal && /Reveal$/.test(pub.screen) && pub.screen !== "mapReveal" && <div className="display text-[30px] text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
+    {pub.reveal && /Reveal$/.test(pub.screen) && pub.screen !== "mapReveal" && pub.screen !== "sayReveal" && <div className="display text-[30px] text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.screen === "answer" && pub.result && <div className="display text-[32px] text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun"].includes(pub.screen) && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" ? 70 : 90} /></div>}
+    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"].includes(pub.screen) && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" ? 70 : 90} /></div>}
   </>);
 }
 
@@ -382,6 +441,11 @@ function status(pub: Pub, me: Member) {
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country? One go." : "Guess the Flag: help your captain";
     case "dishQ": return pub.buzz === mine ? (cap ? "You buzzed! Type it." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? "You're out of this one" : cap ? "Know it? BUZZ!" : "Cocktail or Dish: help your captain";
+    case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same: help your captain";
+    case "sayReveal": return pub.reveal?.ok?.[mine] ? "You dodged the app's word" : "You said the app's word";
+    case "battleQ": return pub.battle?.cap === mine ? (cap ? (pub.mode === "nohost" ? "Your question. Type it fast!" : "Your question. Say it out loud!") : "Your captain's battle. Not a word!") : cap ? "Your turn is next. Stay quiet." : "Captains only. Not a word!";
+    case "battleHandoff": return `${T[1].name}'s captain is next`;
+    case "battleTie": return cap ? "Tie-breaker: buzz to answer" : "Captains only. Not a word!";
     case "mapQ": return cap ? "What does the map show? One go." : "Guess the Map: help your captain";
     case "mapReveal": return "The answer's on the TV";
     case "auctionBid": return pub.auction?.turn === mine ? (cap ? "Your bid: raise, or pass" : "Your captain is bidding") : `${T[pub.auction?.turn ?? 0].name} is bidding`;
@@ -397,7 +461,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   const [text, setText] = useState(""), [sent, setSent] = useState<string | null>(null);
   useEffect(() => { setSent(null); setText(""); }, [pub.qid]);
   const cap = members.find((m) => m.team === mine && m.role === "captain");
-  const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !(pub.screen === "sudden");
+  const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !CAPTAINS_ONLY.includes(pub.screen);
   const suggest = async () => { const t = text.trim(); if (!t) return; await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); };
   return (
     <div className="flex flex-col gap-4 flex-1">
@@ -424,7 +488,8 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
 /* the "next thing" button a captain gets when there's no host, and its countdown */
 const NEXT_LABEL: Record<string, [string, string]> = {
   roundIntro: ["Start the question", "round/begin"], miniIntro: ["Start", "closest/start"], flagIntro: ["Start", "flag/start"], dishIntro: ["Start", "dish/start"],
-  mapIntro: ["Start", "map/start"], auctionIntro: ["Start", "auction/begin"],
+  mapIntro: ["Start", "map/start"], auctionIntro: ["Start", "auction/begin"], sayIntro: ["Start", "say/start"], battleIntro: ["Start", "battle/start"],
+  battleHandoff: ["Start the second half", "battle/start"], sayReveal: ["Next", "ui/next"], saySummary: ["Next", "say/done"], battleSummary: ["Next", "battle/done"],
   answer: ["Next", "round/afterAnswer"], roundScore: ["Next", "round/next"], closestReveal: ["Next", "ui/next"], flagReveal: ["Next", "ui/next"],
   dishReveal: ["Next", "dish/next"], auctionLeg: ["Next", "auction/nextLeg"], auctionResult: ["Next", "auction/done"],
   miniSummary: ["Next", "closest/done"], flagSummary: ["Next", "flag/done"], dishSummary: ["Next", "dish/done"], mapSummary: ["Next", "map/done"],
@@ -449,9 +514,12 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
   const dip = sc === "ask" && (pub.llUsed?.[mine] || []).includes("dip");
   /* with no host, the first answer sent is the one the app checks */
   const locked = nohost && (!!pub.pending || !!pub.sent?.[mine]);
-  const canType = (myTurn && !locked) || (sc === "miniQ" && !pub.sent?.[mine]) || ((sc === "flagQ" || sc === "mapQ") && !pub.sent?.[mine])
-    || (sc === "dishQ" && pub.buzz === mine && !pub.pending) || (sc === "sudden" && pub.buzz === mine && !pub.pending);
-  const canBuzz = (sc === "dishQ" && pub.buzz == null && !pub.out?.[mine]) || (sc === "sudden" && !!pub.sudden?.ready && pub.buzz == null && !pub.out?.[mine]);
+  const canType = (myTurn && !locked) || (sc === "miniQ" && !pub.sent?.[mine]) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ") && !pub.sent?.[mine])
+    || (sc === "dishQ" && pub.buzz === mine && !pub.pending) || ((sc === "sudden" || sc === "battleTie") && pub.buzz === mine && !pub.pending)
+    /* the Battle: typed with no host; with a host it's said out loud */
+    || (sc === "battleQ" && nohost && pub.battle?.cap === mine && !locked);
+  const canBuzz = (sc === "dishQ" && pub.buzz == null && !pub.out?.[mine]) || (sc === "sudden" && !!pub.sudden?.ready && pub.buzz == null && !pub.out?.[mine])
+    || (sc === "battleTie" && pub.buzz == null && !pub.out?.[mine]);
   const sugs = useSuggestions(code, pub.qid, members, mine, ANSWERING.includes(sc));
   const list = sc === "flagQ" ? names.flag : sc === "dishQ" ? names.dish : [];
   const used = useMemo(() => pub.llUsed?.[mine] || [], [pub.llUsed, mine]);
@@ -459,7 +527,7 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
   const llOk = (k: "friend" | "dip") => sc === "ask" && myTurn && !locked && T[mine].ll[k] && !(armed && used.length >= 1);
   const A = pub.auction;
   const next = nohost && !pub.pending ? NEXT_LABEL[sc] : undefined;
-  const showNext = next && !(sc === "sudden") && !(sc === "miniSummary" || sc === "flagSummary" || sc === "dishSummary" || sc === "mapSummary" ? pub.summary?.needsHost : false);
+  const showNext = next && !(sc === "sudden") && !(/Summary$/.test(sc) && sc !== "battleSummary" ? pub.summary?.needsHost : false);
 
   const send = async () => {
     if (sc === "miniQ") { await act("answer", { n: a }); setSentTxt(a); return; }
@@ -516,7 +584,7 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
           {sentTxt && !nohost && (sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-2)]">Sent: <b>{sentTxt}</b>. You can change it until the host decides.</div>}
           {nohost && (sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-3)]">One go: the app checks the first answer you send.</div>}
         </div>)}
-      {!canType && pub.sent?.[mine] && ["miniQ", "flagQ", "mapQ"].includes(sc) && <div className="card text-center font-bold">Locked in{sentTxt ? `: ${sentTxt}` : ""}</div>}
+      {!canType && pub.sent?.[mine] && ["miniQ", "flagQ", "mapQ", "sayQ"].includes(sc) && <div className="card text-center font-bold">Locked in{sentTxt ? `: ${sentTxt}` : ""}</div>}
 
       {(llOk("friend") || llOk("dip")) && (
         <div className="flex gap-2 justify-center">
@@ -547,6 +615,9 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
       {nohost && sc === "flagReveal" && pub.reveal && (
         <button className="btn btn-block" disabled={busy} onClick={() => void nxt({ type: "ui/flagOk", t: theirs })}>
           {T[theirs].name}: {pub.reveal.typed?.[theirs]?.[0] ?? "no answer"} · {pub.reveal.ok?.[theirs] ? "right" : "wrong"} (tap to overrule)</button>)}
+      {nohost && sc === "sayReveal" && pub.reveal && (
+        <button className="btn btn-block" disabled={busy} onClick={() => void nxt({ type: "ui/sayOk", t: theirs })}>
+          {T[theirs].name}: {pub.reveal.typed?.[theirs]?.[0] ?? "nothing"} · {pub.reveal.ok?.[theirs] ? "dodged it" : "said it"} (tap to overrule)</button>)}
       {nohost && sc === "mapReveal" && pub.map && (pub.map.ruled?.[theirs] == null ? (
         <div className="card flex flex-col gap-2" style={{ borderColor: tc(theirs) }}>
           <div className="eyebrow">You rule on {T[theirs].name}&rsquo;s answer</div>

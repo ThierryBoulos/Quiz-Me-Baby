@@ -18,6 +18,7 @@ function JoinForm() {
   const [codeErr, setCodeErr] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [suggest, setSuggest] = useState<string | null>(null);
+  const [canRejoin, setCanRejoin] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const loadTaken = useCallback(async () => {
@@ -32,11 +33,21 @@ function JoinForm() {
     setBusy(true); setErr(null); setCodeErr(null);
     try {
       await ensureSession();
-      const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string }>("qmb_join", { r: code, nm: useName.trim(), face });
+      const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean }>("qmb_join", { r: code, nm: useName.trim(), face });
       if (res.error === "no_room") { setCodeErr("Room not found"); setBusy(false); return; }
-      if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setBusy(false); return; }
+      if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(!!res.playing); setBusy(false); return; }
       if (res.error === "face_taken") { setErr("Someone already took that face — pick another."); void loadTaken(); setBusy(false); return; }
       if (res.error) { setErr("Couldn't join: " + res.error); setBusy(false); return; }
+      router.push("/room/" + code);
+    } catch (e) { setErr(e instanceof Error ? e.message : String(e)); setBusy(false); }
+  }
+  /* mid-game, a taken name may be you on a new phone: take the seat back (team, captaincy and all) */
+  async function rejoin() {
+    setBusy(true); setErr(null);
+    try {
+      await ensureSession();
+      const res = await rpc<{ ok?: boolean; error?: string }>("qmb_rejoin", { r: code, nm: name.trim() });
+      if (res.error) { setErr("Couldn't take that seat: " + res.error.replace(/_/g, " ")); setBusy(false); return; }
       router.push("/room/" + code);
     } catch (e) { setErr(e instanceof Error ? e.message : String(e)); setBusy(false); }
   }
@@ -62,7 +73,7 @@ function JoinForm() {
       <div>
         <label className="field-label" htmlFor="name">Name</label>
         <input id="name" className="input" value={name} maxLength={12} placeholder="Enter your name" autoComplete="off"
-          autoFocus={code.length === 4} onChange={(e) => { setName(e.target.value); setSuggest(null); }} />
+          autoFocus={code.length === 4} onChange={(e) => { setName(e.target.value); setSuggest(null); setCanRejoin(false); }} />
       </div>
       <div>
         <div className="field-label">Pick a face</div>
@@ -78,6 +89,9 @@ function JoinForm() {
             <span style={{ color: "var(--color-gold)" }}>{suggest}?</span>
           </span>
         </button>
+      )}
+      {suggest && canRejoin && (
+        <button disabled={busy} onClick={() => void rejoin()} className="btn btn-block">I&rsquo;m {name.trim()}: take my seat back</button>
       )}
       {err && <p className="field-error not-italic">{err}</p>}
       <button className="btn btn-gold btn-lg btn-block" disabled={!ready || busy} onClick={() => join(name)}>

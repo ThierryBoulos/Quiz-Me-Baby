@@ -9,6 +9,7 @@ import { useTvGame } from "@/lib/tvGame";
 import { ensureSession } from "@/lib/supabase";
 import { notReadyWhy, readyToStart, starter, useRoom } from "@/lib/room";
 import type { Pub } from "@/lib/game";
+import { Snd } from "@/lib/sound";
 
 const CLASSIC = "https://thierryboulos.github.io/Quiz-Me-Baby/";
 
@@ -28,6 +29,18 @@ export default function TvRoom() {
   /* for the end-to-end tests: what the TV is showing */
   useEffect(() => { (window as unknown as { __qmb?: Pub | null }).__qmb = pub; }, [pub]);
 
+  /* sound needs one tap on this screen after a refresh; any tap does it */
+  const [blocked, setBlocked] = useState(false), [soundOn, setSoundOn] = useState(true);
+  useEffect(() => {
+    setSoundOn(Snd.on);
+    const t = setInterval(() => setBlocked(Snd.on && Snd.blocked()), 1000);
+    const wake = () => { Snd.resume(); setBlocked(false); };
+    window.addEventListener("pointerdown", wake);
+    window.addEventListener("keydown", wake);
+    return () => { clearInterval(t); window.removeEventListener("pointerdown", wake); window.removeEventListener("keydown", wake); };
+  }, []);
+  const SoundNote = () => blocked ? <div className="fixed left-6 bottom-6 chip" style={{ fontSize: 15, padding: "8px 16px", zIndex: 30 }}>Tap the screen to turn the sound on</div> : null;
+
   const joinUrl = origin + "/join?code=" + code;
   const host = members.find((m) => m.role === "host");
   const who = starter(members);
@@ -36,6 +49,10 @@ export default function TvRoom() {
 
   return (
     <TvStage>
+      <SoundNote />
+      {room.status !== "lobby" && [0, 1].filter((t) => !members.some((m) => m.team === t && m.role === "captain")).map((t) => (
+        <div key={t} className="fixed left-1/2 top-4 -translate-x-1/2 chip" style={{ fontSize: 18, padding: "10px 20px", zIndex: 30, borderColor: `var(--color-${t === 0 ? "a" : "b"})` }}>
+          {(room.state.teamNames || ["Team A", "Team B"])[t]} needs a captain: tap &ldquo;Make me captain&rdquo; on a phone</div>))}
       {room.status === "lobby" ? (
         <>
           <div className="flex items-start justify-between gap-10">
@@ -55,7 +72,10 @@ export default function TvRoom() {
               <br />
               {readyToStart(members) ? <>Ready. <b>{who?.name}</b> starts the game.</> : notReadyWhy(members)}
             </div>
-            {members.length === 0 && <a href={CLASSIC} className="btn btn-sm">Just play on this screen</a>}
+            <div className="flex gap-3">
+              <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>
+              {members.length === 0 && <a href={CLASSIC} className="btn btn-sm">Just play on this screen</a>}
+            </div>
           </div>
         </>
       ) : pub ? <TvGame pub={pub} /> : (

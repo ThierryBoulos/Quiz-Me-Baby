@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { loadBank, themeCounts, type Bank } from "@/lib/engine";
 
 export type Cfg = { rounds: number; themes: string[]; difficulty: string; minis: string[] };
-const MINIS = [["closest", "Closest To Wins"], ["auction", "The Auction"], ["map", "Guess the Map"], ["flag", "Guess the Flag"], ["dish", "Cocktail or Dish"]] as const;
+const MINIS = [["closest", "Closest To Wins"], ["auction", "The Auction"], ["saysame", "Don't Say the Same"], ["map", "Guess the Map"], ["flag", "Guess the Flag"], ["dish", "Cocktail or Dish"], ["battle", "Battle of the Captains"]] as const;
 const LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["mixed", "Mixed"]] as const;
 const OFF_BY_DEFAULT = ["Know the Host", "Sexy Time"];
 
@@ -14,7 +14,7 @@ export function Setup({ onStart, busy, ready, why }: { onStart: (c: Cfg) => void
   const [rounds, setRounds] = useState(6);
   const [difficulty, setDiff] = useState("mixed");
   const [themes, setThemes] = useState<string[] | null>(null);
-  const [minis, setMinis] = useState<string[]>(["closest", "auction", "map", "flag", "dish"]);
+  const [minis, setMinis] = useState<string[]>(["closest", "auction", "saysame", "map", "flag", "dish", "battle"]);
   useEffect(() => { void loadBank().then(setBank); }, []);
   const counts = useMemo(() => (bank ? themeCounts(bank, difficulty) : {}), [bank, difficulty]);
   const avail = useMemo(() => Object.keys(counts).filter((t) => counts[t] >= 2).sort(), [counts]);
