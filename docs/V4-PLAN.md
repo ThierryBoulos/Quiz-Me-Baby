@@ -270,4 +270,68 @@ Joining, the lobby, the TV code screen and the phone controllers **follow SNAKED
 
 This replaces "plain JS + Vite" in 6.4. The game engine (step 1) is still written framework-free, so Classic and Party share it.
 
-**Open question:** keep **Quiz Me Baby's own colours** (navy, gold, cyan Team A, pink Team B) with SNAKED's layouts and components, or take SNAKED's palette as well? Recommended: **QMB's colours, SNAKED's layouts.** The team colours carry meaning in a two-team game.
+**Colours (decided):** Quiz Me Baby's own: navy, gold, cyan Team A, pink Team B. SNAKED supplies the layouts and components, not the palette.
+
+---
+
+## 10. Mechanics checklist: every v3 feature has a home in Party
+
+Checked against every screen and every button handler in v3.13 (12 Oct 2026). Nothing in v3 is dropped. "Host" means the host's phone; "no host" means what replaces it.
+
+### Before the game
+| v3 mechanic | Party |
+|---|---|
+| Rounds count, themes, difficulty per theme ("diff", "themeDiff") | Setup on the host's phone (no host: Team A captain's) |
+| Standard rounds on/off: mini-games-only nights | Setup, same switch |
+| Mini-games on/off + levels: map 3 levels, flags 5, cocktail/dish 6 | Setup, same buttons |
+| Hand-picking questions ("Pick tonight's questions", per theme and per mini-game) | Setup → Advanced, same picker |
+| Team names, captains, players | **Lobby** (captain names the team; players join themselves) instead of typed lists |
+| Settings: timers (question, steal, Closest, call-a-friend), sound, tick, volume, "never reuse", alternate who goes first | Host's phone → Settings. Sound and volume play on the **TV** |
+| Question bank: add, delete, import/export CSV, template, reset | **Classic only**, on the TV device. The TV's bank is the bank Party deals from |
+| Game history, export result, "reset played" | Classic only (history is saved on the TV device) |
+| Solo practice | Classic only |
+| Rules screen | On every phone ("How it works", SNAKED-style) and the TV home |
+| Self-updater (version.json) | All devices; a phone that updates mid-game rejoins its seat |
+
+### Standard rounds
+| v3 mechanic | Party |
+|---|---|
+| Double points armed at round intro, then max one other lifeline | Captain phone at round intro; same rule enforced |
+| Call a Friend (warning card, its own countdown, pause/+time) | Captain's phone shows the card and the friend timer; TV shows "Calling a friend…" |
+| Double Dip (two answers) | Captain gets two answer boxes |
+| Change this question ("swapQ") | Host. No host: the answering captain, once per question, before sending |
+| Timer pause / +10s / "Time is up" | Host. No host: either captain can pause; +10s and "time up" are host-only |
+| Steal (other team, own timer) | Other captain's phone opens when the first answer is wrong. No host: **no steal**, same as v3 |
+| Right / wrong judging, peek at answer | Host (answer always visible). No host: app check + the other captain's overrule |
+| Alternate who goes first | Engine, unchanged |
+| Imad's bubbles, title slam, count-up, lead banner, drumroll, shake, confetti | **TV only** |
+
+### Mini-games
+| v3 mechanic | Party |
+|---|---|
+| Points per mini-game (0.35·N/M, 2–4 points); order and slot between rounds | Engine, unchanged |
+| **Closest To Wins:** 7 numbers, closest wins, change question, tie → tie-breaker legs, host's call if they run out | Captains type numbers; app decides; host Change/Next. No host: Team A captain taps Next |
+| **Auction:** bid / pass, leg count, +1 / undo counter, skip, legs and result | Captains bid; host counts (no host: the other captain counts) |
+| **Don't Say the Same:** 10s, hidden word drawn at deal time, vast→tight order, change prompt, tie-breakers | Captains type; app compares; overrule as above |
+| **Guess the Map:** 60s, **one hint per map**, **enlarge/zoom**, change map, retry loading, levels, "another map or 1 point each" on a tie | Hint: host or no host either captain (one per map, both see it). Zoom: pinch on every phone. Tie choice: host / both captains agree |
+| **Guess the Flag:** 15s, change flag, both-right = point each, tie-breakers until somebody gets one, best of 10 | Captains type with suggestions; app check |
+| **Cocktail or Dish:** 3s per ingredient, +8s, buzz → one go each, change, best of 7, tie → one more or 1 point each | Real buzzer, server clock decides; app check |
+| **Battle of the Captains:** 10 each, 7s, same shape for both, change question, tie-breaker, "done" | Answering captain's phone; host judges / no host: app + other captain |
+| Mini-game result screens, host's split/award when level and nothing left | TV shows; host taps (no host: both captains tap the same choice) |
+
+### End of the night
+| v3 mechanic | Party |
+|---|---|
+| Final scores, round-by-round table (only mini-games played) | TV; phones show the summary |
+| Sudden death: rules screen + Go, captains only, change question, first right wins, "neither → next question" | Rules on TV, **Go** on host (no host: both captains tap Ready). Buzzers on captains' phones |
+| End game / quit confirmation | Host (no host: TV's small exit, with confirm) |
+
+### New in Party (not in v3)
+- Buzzers with server time
+- Player suggestions to the captain
+- App answer checking with typo allowance and several accepted answers
+- Lobby with faces
+- Rejoin
+- Kicking (visible "Remove" on the host's list)
+- Captain hand-over
+
