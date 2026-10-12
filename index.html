@@ -6310,9 +6310,13 @@ SCREENS.final = function(){
           '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.auction.award[1] + '</td>' +
           '<td data-l="Legs">' + g.auction.wins[0] + '–' + g.auction.wins[1] + '</td></tr>'
         : '') +
-      '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Closest to wins</td>' +
-      '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + (g.mini.award ? g.mini.award[0] : 0) + '</td>' +
-      '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + (g.mini.award ? g.mini.award[1] : 0) + '</td><td></td></tr>' +
+      /* only when it was actually played — it used to show 0–0 on nights without it */
+      (g.mini && g.mini.awarded
+        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Closest to wins</td>' +
+          '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.mini.award[0] + '</td>' +
+          '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.mini.award[1] + '</td>' +
+          '<td data-l="Legs">' + g.mini.wins[0] + '–' + g.mini.wins[1] + '</td></tr>'
+        : '') +
       (g.saySame && g.saySame.awarded
         ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Don&rsquo;t say the same as me</td>' +
           '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.saySame.award[0] + '</td>' +
@@ -8378,7 +8382,7 @@ const ACT = {
       lines.push('Round ' + r.n + ' — ' + r.theme + '  (' + r.pts[0] + ' / ' + r.pts[1] + ')');
       r.q.forEach((q, i) => lines.push('   Q' + (i + 1) + ': ' + q.question + '  →  ' + q.answer));
     });
-    lines.push('', 'Closest to wins: ' + g.mini.wins[0] + ' — ' + g.mini.wins[1] + '  (points ' + (g.mini.award || [0, 0]).join(' / ') + ')');
+    if(g.mini.awarded) lines.push('', 'Closest to wins: ' + g.mini.wins[0] + ' — ' + g.mini.wins[1] + '  (points ' + (g.mini.award || [0, 0]).join(' / ') + ')');
     download('quiz-me-baby-' + new Date(g.startedAt).toISOString().slice(0, 10) + '.txt', lines.join('\n'));
   },
 
