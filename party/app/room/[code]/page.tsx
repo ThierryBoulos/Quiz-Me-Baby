@@ -2,8 +2,11 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Lineup } from "@/components/Lineup";
+import { HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
+import { Setup } from "@/components/Setup";
+import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
-import { readyToStart, starter, teamName, useRoom, type Member } from "@/lib/room";
+import { notReadyWhy, readyToStart, starter, teamName, useRoom, type Member } from "@/lib/room";
 
 /* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
    name the team, or be the host. The colour of your team fills the screen. */
@@ -43,6 +46,11 @@ export default function PhoneRoom() {
   });
   const leave = () => act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
 
+  const playing = room?.status === "playing" || room?.status === "done";
+  const pub = (room?.state?.pub || null) as Pub | null;
+  const secret = useSecret(code, !!mine && mine.role === "host" && playing);
+  const sendMove = (move: Record<string, unknown>) => act(() => sendAction(code, "judge", { move, step: pub?.step }));
+
   if (!room || !mine) return <main className="screen justify-center text-center"><div className="eyebrow">Finding your seat…</div></main>;
 
   const myCaptain = mine.team != null ? members.find((m) => m.team === mine.team && m.role === "captain") : null;
@@ -59,13 +67,12 @@ export default function PhoneRoom() {
       </header>
 
       {room.status !== "lobby" ? (
-        <section className="card text-center enter flex-1 grid place-items-center">
-          <div>
-            <div className="eyebrow">Game on</div>
-            <h1 className="display text-[44px] mt-2">Eyes on the TV</h1>
-            <p className="text-[var(--color-ink-2)] mt-2">Your controls will show up here.</p>
-          </div>
-        </section>
+        !pub ? (
+          <section className="card text-center enter flex-1 grid place-items-center">
+            <div><div className="eyebrow">Game on</div><h1 className="display text-[44px] mt-2">Eyes on the TV</h1></div>
+          </section>
+        ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} busy={busy} />
+          : <PlayerGame pub={pub} me={mine} />
       ) : mine.role === "host" ? (
         <>
           <section className="card enter text-center">
@@ -116,11 +123,7 @@ export default function PhoneRoom() {
       {room.status === "lobby" && (
         <footer className="mt-auto flex flex-col gap-2">
           {canStart ? (
-            <>
-              <button className="btn btn-gold btn-lg btn-block" disabled={!ready || busy}
-                onClick={() => act(() => sendAction(code, "setup", { start: true }))}>Start the game</button>
-              {!ready && <p className="text-center text-[13px] text-[var(--color-ink-3)]">Each team needs a captain first.</p>}
-            </>
+            <Setup ready={ready} why={notReadyWhy(members)} busy={busy} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-[14px] text-[var(--color-ink-2)]">
               You&rsquo;re in. {who ? <><b>{who.name}</b> starts the game.</> : "The host — or Team A's captain — starts the game."}

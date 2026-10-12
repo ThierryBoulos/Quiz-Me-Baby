@@ -1,11 +1,14 @@
 "use client";
 import { useParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Lineup } from "@/components/Lineup";
+import { TvGame } from "@/components/TvGame";
 import { TvStage } from "@/components/TvStage";
-import { ensureSession, sb } from "@/lib/supabase";
-import { readyToStart, starter, useRoom, type Member, type Room } from "@/lib/room";
+import { useTvGame } from "@/lib/tvGame";
+import { ensureSession } from "@/lib/supabase";
+import { notReadyWhy, readyToStart, starter, useRoom } from "@/lib/room";
+import type { Pub } from "@/lib/game";
 
 const CLASSIC = "https://thierryboulos.github.io/Quiz-Me-Baby/";
 
@@ -20,7 +23,8 @@ export default function TvRoom() {
   useEffect(() => { void ensureSession().then(setMe); setOrigin(window.location.origin); }, []);
   const isTv = !!room && room.tv_id === me;
 
-  useActions(code, isTv, room, members);
+  const { pub: own } = useTvGame(code, isTv, room, members);
+  const pub = own || ((room?.state?.pub || null) as Pub | null);
 
   const joinUrl = origin + "/join?code=" + code;
   const host = members.find((m) => m.role === "host");
@@ -47,59 +51,16 @@ export default function TvRoom() {
             <div>
               {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b></> : "No host yet — the app will check answers."}
               <br />
-              {readyToStart(members) ? <>Ready. <b>{who?.name}</b> starts the game.</> : "Each team needs a captain."}
+              {readyToStart(members) ? <>Ready. <b>{who?.name}</b> starts the game.</> : notReadyWhy(members)}
             </div>
             {members.length === 0 && <a href={CLASSIC} className="btn btn-sm">Just play on this screen</a>}
           </div>
         </>
-      ) : (
+      ) : pub ? <TvGame pub={pub} /> : (
         <div className="m-auto text-center enter">
-          <div className="eyebrow text-[18px]">{room.mode === "host" ? "Hosted by " + (host?.name || "the host") : "No host tonight — the app is checking answers"}</div>
-          <div className="display mt-4" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
-          <p className="text-[22px] text-[var(--color-ink-2)] mt-4">The game itself arrives in the next build.</p>
+          <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
         </div>
       )}
     </TvStage>
   );
-}
-
-type Action = { id: number; room: string; user_id: string; kind: string; payload: Record<string, unknown>; at: string };
-
-/* The TV's inbox. Every action is handled once (the last one seen is kept on
-   this device), whether it arrives live or is picked up after a refresh. */
-function useActions(code: string, isTv: boolean, room: Room | null, members: Member[]) {
-  const ctx = useRef({ room, members });
-  ctx.current = { room, members };
-  useEffect(() => {
-    if (!isTv) return;
-    const key = "qmb.tv." + code + ".last";
-    let last = Number(localStorage.getItem(key) || 0);
-    let busy = false;
-    const handle = async (a: Action) => {
-      const { room, members } = ctx.current;
-      if (!room) return;
-      const from = members.find((m) => m.user_id === a.user_id);
-      if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team) {
-        const names = [...(room.state.teamNames || ["Team A", "Team B"])] as [string, string];
-        names[from.team as 0 | 1] = String(a.payload.name || "").slice(0, 18) || names[from.team as 0 | 1];
-        await sb().from("rooms").update({ state: { ...room.state, teamNames: names } }).eq("code", code);
-      }
-      if (a.kind === "setup" && a.payload.start && room.status === "lobby" && starter(members)?.user_id === a.user_id && readyToStart(members)) {
-        await sb().from("rooms").update({ status: "playing", mode: members.some((m) => m.role === "host") ? "host" : "nohost" }).eq("code", code);
-      }
-    };
-    const drain = async () => {
-      if (busy) return; busy = true;
-      try {
-        const { data } = await sb().from("actions").select("*").eq("room", code).gt("id", last).order("id");
-        for (const a of (data || []) as Action[]) { await handle(a); last = a.id; localStorage.setItem(key, String(last)); }
-      } finally { busy = false; }
-    };
-    void drain();
-    const ch = sb().channel("actions:" + code)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code }, () => void drain())
-      .subscribe();
-    const poll = setInterval(() => void drain(), 2000);
-    return () => { clearInterval(poll); void sb().removeChannel(ch); };
-  }, [code, isTv]);
 }

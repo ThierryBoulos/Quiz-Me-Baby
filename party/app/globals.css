@@ -77,3 +77,5 @@ body { min-height: 100svh; background:
 /* the TV: a fixed 1280×720 stage scaled to whatever screen it's on */
 .tv-wrap { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden; }
 .tv-stage { width: 1280px; height: 720px; transform-origin: center; position: relative; padding: 44px 56px; display: flex; flex-direction: column; }
+button.chip { padding: 8px 14px; cursor: pointer; }
+.chip.chip-on { background: color-mix(in srgb, var(--color-gold) 18%, transparent); border-color: var(--color-gold); color: var(--color-gold); }
