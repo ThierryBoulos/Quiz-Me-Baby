@@ -528,8 +528,11 @@
      or just a toast saying why.
        { used:q }                 mark that question as played
        { finalize:true }          the night is over — save it and show the final
-     Every game's moves are here: the five best-of mini-games, the Auction,
-     the Battle, sudden death; the standard rounds follow.                  */
+       { host:[moments], vars }   Imad says something (one of his lines)
+       { shake:true }             the screen shakes (a stolen point)
+       { lifeline:'friend'|'dip' } open that lifeline's card
+     Every move of the night is here: the standard rounds, every mini-game,
+     the Battle, sudden death, and the running order between them.          */
 
   /* the mini-game's points to one team, or split — once */
   function awardMini(g, s, w, fx){
@@ -802,7 +805,138 @@
     return fx;
   }
 
+  /* ---- the running order ---- */
+  /* which TEAM sits in slot `seat` of a round (who answers first) */
+  function seatTeam(g, round, seat, settings){
+    const flip = settings && settings.alternateFirst && (round.n % 2 === 0);
+    return flip ? (seat === 0 ? 1 : 0) : seat;
+  }
+  const pointValue = (round, owner) => round.dbl[owner] ? 2 : 1;
+  /* every mini-game still owed after round r */
+  const minisAfter = (g, r) => (g.plan || []).filter(p => p.after === r && !g.done[p.key]);
+  function startMini(g, env, key, fx){
+    if(key === 'closest'){ fx.push({ go:'miniIntro' }); return fx; }
+    if(key === 'auction'){ MOVES['auction/build'](g, {}, env).forEach(f => fx.push(f)); fx.push({ go:'auctionIntro' }); return fx; }
+    if(key === 'saysame'){ fx.push({ go:'sayIntro' }); return fx; }
+    if(key === 'map'){ fx.push({ go:'mapIntro' }); return fx; }
+    if(key === 'flag'){ fx.push({ go:'flagIntro' }); return fx; }
+    if(key === 'dish'){ fx.push({ go:'dishIntro' }); return fx; }
+    if(key === 'battle'){ MOVES['battle/build'](g, {}, env).forEach(f => fx.push(f)); return fx; }
+    return fx;
+  }
+  /* after a round or a mini-game: the next mini-game owed against this
+     round, else the next round, else the Battle (chosen in Setup), else the end */
+  function nextStep(g, env, fx){
+    const owed = minisAfter(g, g.r);
+    if(owed.length) return startMini(g, env, owed[0].key, fx);
+    g.r = Math.min(g.r + 1, g.rounds.length);
+    if(g.r < g.rounds.length){ g.seat = 0; fx.push({ go:'roundIntro' }); return fx; }
+    if(g.hasBattle && !g.done.battle) return startMini(g, env, 'battle', fx);
+    return endGame(g, env, fx);
+  }
+  /* points to a team, with the pop-up that says so */
+  function award(g, team, pts, why, fx){
+    g.teams[team].score += pts;
+    fx.push({ sound:'point' });
+    fx.push({ toast:g.teams[team].name + ' +' + pts + ' ' + (pts === 1 ? 'point' : 'points') + (why ? ' — ' + why : '') });
+  }
+
   const MOVES = {
+    /* the game has just been dealt: the first round, or straight into the mini-games */
+    'game/start'(g, a, env){ return g.rounds.length ? [{ go:'roundIntro' }] : nextStep(g, env, []); },
+
+    /* ---- the standard rounds ---- */
+    /* double points is armed (or un-armed) at the round intro, before the questions */
+    'round/armDbl'(g, a){
+      const i = a.i, rd = g.rounds[g.r], fx = [];
+      if(!g.teams[i].ll.dbl) return fx;
+      rd.dbl[i] = !rd.dbl[i];
+      if(rd.dbl[i]) fx.push({ host:['ll_dbl'], vars:{ t:i } });
+      fx.push({ sound:'soft' }, { render:true });
+      return fx;
+    },
+    /* Start: an armed double is spent from that moment */
+    'round/begin'(g){
+      const rd = g.rounds[g.r];
+      [0, 1].forEach(i => { if(rd.dbl[i]) g.teams[i].ll.dbl = false; });
+      g.seat = 0;
+      return [{ go:'ask' }];
+    },
+    /* "Change this question": the next one in the theme at this difficulty.
+       One list for the whole round, so a question skipped on Team A doesn't
+       come back on Team B; the current one can return at the end of a lap. */
+    'round/swap'(g, a, env){
+      const D = env.deal, rd = g.rounds[g.r], seat = g.seat;
+      const elsewhere = new Set();
+      g.rounds.forEach((r, ri) => r.q.forEach((q, si) => { if(ri !== g.r || si !== seat) elsewhere.add(q.id); }));
+      g.mini.qs.forEach(q => elsewhere.add(q.id));
+      const list = D.bank().filter(q =>
+        q.type === 'standard' && q.theme === rd.theme &&
+        D.matchDiff(q, D.diffOf(g.cfg, rd.theme)) && !elsewhere.has(q.id));
+      const none = [{ toast:'No other question left in ' + rd.theme + ' at this difficulty.', ms:4000 }];
+      if(list.length < 2) return none;
+      const cur = rd.q[seat];
+      const seen = rd.swapSeen = rd.swapSeen || [];
+      if(seen.indexOf(cur.id) < 0) seen.push(cur.id);
+      let next = list.filter(q => seen.indexOf(q.id) < 0)[0];
+      if(!next){                                    // whole theme exhausted — start again
+        seen.length = 0; seen.push(cur.id);
+        next = list.filter(q => q.id !== cur.id)[0];
+      }
+      if(!next) return none;
+      seen.push(next.id);
+      rd.q[seat] = next;
+      rd.strict = false;
+      rd.picked = false;                 // no longer the pair the host chose by hand
+      return [{ used:next }, { toast:'New question.' }, { go:'ask' }];
+    },
+    /* a lifeline: key 'friend' | 'dip', i the team. With double armed, one extra only. */
+    'round/lifeline'(g, a){
+      const key = a.key, i = a.i, rd = g.rounds[g.r], t = g.teams[i];
+      if(!t.ll[key]) return [];
+      if(rd.dbl[i] && rd.llUsed[i].length >= 1) return [{ toast:'Double points is armed — one extra lifeline only.' }];
+      t.ll[key] = false;
+      rd.llUsed[i].push(key);
+      return [{ timer:'pause' }, { lifeline:key }, { host:['ll_' + key], vars:{ t:i } },
+              { toast:t.name + ' used ' + (key === 'friend' ? 'Call a Friend' : key === 'dip' ? 'Double Dip' : 'Double Points') + '.' }];
+    },
+    /* right: v true | false */
+    'round/judge'(g, a, env){
+      const rd = g.rounds[g.r], ti = seatTeam(g, rd, g.seat, env.settings), fx = [];
+      rd.res[g.seat] = { correct:a.v, stolen:false };
+      if(a.v){
+        const p = pointValue(rd, ti);
+        fx.push({ host:['correct'], vars:{ t:ti } });
+        rd.pts[ti] += p; award(g, ti, p, '', fx);
+        fx.push({ go:'answer' });
+        return fx;
+      }
+      /* wrong: the other team gets a steal — except with no host, where it's straight to the answer */
+      fx.push({ sound:'wrong' }, { host:g.hostless ? ['wrong'] : ['wrong', 'steal'], vars:{ t:ti } }, { go:g.hostless ? 'answer' : 'steal' });
+      return fx;
+    },
+    'round/judgeSteal'(g, a, env){
+      const rd = g.rounds[g.r], owner = seatTeam(g, rd, g.seat, env.settings), th = other(owner), fx = [];
+      rd.res[g.seat].stolen = a.v;
+      if(a.v){
+        const p = pointValue(rd, owner);
+        fx.push({ host:['stolen'], vars:{ t:th } }, { shake:true });
+        rd.pts[th] += p; award(g, th, p, 'steal', fx);
+      } else fx.push({ sound:'wrong' }, { host:['nosteal'], vars:{ t:th } });
+      fx.push({ go:'answer' });
+      return fx;
+    },
+    /* after the answer card: the second team's question, or the round's score */
+    'round/afterAnswer'(g){
+      const rd = g.rounds[g.r];
+      if(g.seat === 0){ g.seat = 1; return [{ go:'ask' }]; }
+      rd.done = true;
+      return [{ go:'roundScore' }];
+    },
+    /* from the round's score: whatever comes next in the running order */
+    'round/next'(g, a, env){ return nextStep(g, env, []); },
+
+
     /* deal the auction's deck when it comes round */
     'auction/build'(g, a, env){
       const deck = env.deal.auctionDeck(g.cfg), fx = [];
@@ -1133,7 +1267,12 @@
   function play(g, action, env){
     const move = MOVES[action && action.type];
     if(!move) throw new Error('Unknown move: ' + (action && action.type));
-    return move(g, action, env || {}) || [];
+    env = env || {};
+    const fx = move(g, action, env) || [];
+    /* a finished mini-game says {next:true}; that becomes the next step here */
+    const i = fx.findIndex(f => f.next);
+    if(i < 0) return fx;
+    return fx.slice(0, i).concat(nextStep(g, env, []), fx.slice(i + 1));
   }
 
   /* -------------------------------------------------------------- utilities */
@@ -1145,5 +1284,5 @@
   }
 
   return { tidy, asNumber, distance, isMatch, miniPointValue, planMinis, bestOf, shuffle:shuffleWith,
-           createDealer, play, MOVES:Object.keys(MOVES), battleSpent, LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
+           createDealer, play, MOVES:Object.keys(MOVES), battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
 });

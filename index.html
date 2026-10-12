@@ -1215,7 +1215,7 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
 </div>
 <div id="modal" role="dialog" aria-modal="true"></div>
 <!-- the shared engine (v4 step 1): the rules with no screen in them -->
-<script src="engine/core.js?v=3.18"></script>
+<script src="engine/core.js?v=3.19"></script>
 <script>
 /* ==========================================================================
    QUIZ ME BABY
@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.18', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.19', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3488,29 +3488,18 @@ const planMinis = QMB.planMinis;
 
 
 /* every mini-game still owed after the round at index r finishes */
-function minisAfter(r){
-  const g = G();
-  return (g.plan || []).filter(p => p.after === r && !g.done[p.key]);
-}
+/* the running order lives in the engine; these read it for the screens */
+const minisAfter = (r) => QMB.minisAfter(G(), r);
 
 const G = () => S.game;
 const curRound = () => { const g = G(); return g.rounds[g.r]; };
 /* which TEAM index sits in slot `seat` of this round */
-function seatTeam(round, seat){
-  const flip = S.settings.alternateFirst && (round.n % 2 === 0);
-  return flip ? (seat === 0 ? 1 : 0) : seat;
-}
+const seatTeam = (round, seat) => QMB.seatTeam(G(), round, seat, S.settings);
 const curTeam  = () => seatTeam(curRound(), G().seat);
 const otherTeam = (t) => t === 0 ? 1 : 0;
 
-function pointValue(round, ownerTeam){ return round.dbl[ownerTeam] ? 2 : 1; }
+const pointValue = QMB.pointValue;
 
-function award(teamIdx, pts, why){
-  const g = G();
-  g.teams[teamIdx].score += pts;
-  Snd.point();
-  toast(g.teams[teamIdx].name + ' +' + pts + ' ' + (pts === 1 ? 'point' : 'points') + (why ? ' — ' + why : ''));
-}
 
 /* schedule: pips for the HUD. standard rounds + one mini bar, and a second
    bar on the end once the Battle has actually been activated — it is a
@@ -6591,16 +6580,6 @@ function armTimer(key, secs, onEnd){
 }
 function markUsed(q){ if(q){ S.used.add(q.id); saveUsed(); } }
 
-function beginRound(){
-  const g = G();
-  g.seat = 0;
-  go('ask');
-}
-function afterSeat(){
-  const g = G(), rd = curRound();
-  if(g.seat === 0){ g.seat = 1; go('ask'); }
-  else { rd.done = true; go('roundScore'); }
-}
 /* The single gate every mini-game goes through. Called when a round has just
    finished and when a mini-game has just finished, so two scheduled against
    the same round run one after the other before the next round starts. */
@@ -6614,58 +6593,64 @@ function afterMiniLabel(cur){
   if(g.hasBattle && !g.done.battle && cur !== 'battle') return 'Next — ' + MINI_GAMES.battle.name;
   return 'See the final scores';
 }
-function runNextMini(){
-  const g = G();
-  const owed = minisAfter(g.r);
-  if(!owed.length) return false;
-  startMini(owed[0].key);
-  return true;
-}
-function startMini(key){
-  const g = G();
-  if(key === 'closest'){ go('miniIntro'); return; }
-  if(key === 'auction'){ run({ type:'auction/build' }); go('auctionIntro'); return; }
-  if(key === 'saysame'){ go('sayIntro'); return; }
-  if(key === 'map'){ go('mapIntro'); return; }
-  if(key === 'flag'){ go('flagIntro'); return; }
-  if(key === 'dish'){ go('dishIntro'); return; }
-  if(key === 'battle'){ run({ type:'battle/build' }); return; }
-}
-function nextRound(){
-  const g = G();
-  if(runNextMini()) return;
-  advanceRound();
-}
-function advanceRound(){
-  const g = G();
-  g.r = Math.min(g.r + 1, g.rounds.length);
-  if(g.r < g.rounds.length){ g.seat = 0; go('roundIntro'); return; }
-  /* The rounds are done. The Battle is the closer, and it was chosen in Setup
-     rather than offered here — no pop-up, no asking. */
-  if(g.hasBattle && !g.done.battle){ startMini('battle'); return; }
-  endGame();
-}
 
 /* ---------- mini ---------- */
 /* ---------- moves that live in the engine ----------
-   Every mini-game, the Battle and sudden death play through QMB.play
-   (engine/core.js):
+   The whole night plays through QMB.play (engine/core.js) — the standard
+   rounds, every mini-game, the Battle, sudden death and the order between them:
    it changes the game and says what the screen should do. This carries
    that out — the same list Party mode will carry out on the TV. */
-function run(action){ applyFx(QMB.play(G(), action, { deal:DEAL })); }
+function run(action){ applyFx(QMB.play(G(), action, { deal:DEAL, settings:S.settings })); }
 function applyFx(fx){
   (fx || []).forEach(f => {
     if(f.timer === 'stop'){ Timer.stop(); clearInterval(S.tmp.dishIv); }
     else if(f.timer === 'pause') Timer.pause();
     else if(f.timer === 'resume') Timer.resumeT();
     if(f.used) markUsed(f.used);
+    if(f.lifeline) openLifeline(f.lifeline);
+    if(f.host) Host.say(f.host, f.vars);
+    if(f.shake) shake();
     if(f.sound && Snd[f.sound]) Snd[f.sound]();
     if(f.toast) toast(f.toast, f.ms);
     if(f.go) go(f.go);
     if(f.render) render();
-    if(f.next && !runNextMini()) advanceRound();
     if(f.finalize) finalize();
   });
+}
+/* a lifeline's card: Call a Friend (with its own countdown) or Double Dip.
+   The engine has already spent the lifeline and paused the clock. */
+function openLifeline(key){
+  const g = G(), rd = curRound();
+  S.tmp.llModal = true;
+  if(key === 'friend'){
+    openModal(
+      '<div class="center stack">' +
+        '<div class="eyebrow gold">Lifeline</div><h3 class="display">Call a Friend</h3>' +
+        '<div class="warnbox" style="text-align:left">Before the captain says a word, ' + (NOHOST() ? '<strong>whoever is holding the phone</strong> reads this to the friend' : '<strong>you</strong> speak to the friend') + ':<br>' +
+        '&ldquo;Hi — quick quiz question. No ChatGPT, no Google, no asking anyone else. Straight off the top of your head. Ready?&rdquo;</div>' +
+        '<div class="card tight" style="text-align:left">' +
+          '<div class="eyebrow gold">The question</div>' +
+          '<p style="margin-top:8px;font-size:19px;font-weight:700;line-height:1.35">' + esc(rd.q[G().seat].question) + '</p>' +
+        '</div>' +
+        '<div class="cd-num" id="cdNum">' + S.settings.tFriend + '</div>' +
+        '<div class="eyebrow">seconds on the call</div>' +
+        '<div class="btn-row center">' +
+          '<button class="btn sm" data-act="cdToggle">Pause</button>' +
+          '<button class="btn sm ghost" data-act="cdAdd" data-s="10">+10s</button>' +
+        '</div>' +
+        '<div class="btn-row center"><button class="btn gold" data-act="closeLL">Done — back to the question</button></div>' +
+      '</div>');
+    CD.start(S.settings.tFriend, 'cdNum');
+  } else {
+    openModal(
+      '<div class="center stack">' +
+        '<div class="eyebrow gold">Lifeline</div><h3 class="display">Double Dip</h3>' +
+        (NOHOST()
+          ? '<p class="muted" style="max-width:44ch;margin:0 auto">The captain says <strong>two</strong> answers out loud <strong>before</strong> you lock it in. Either one right counts — and the lifeline is gone either way.</p>'
+          : '<p class="muted" style="max-width:44ch;margin:0 auto">The captain gets <strong>two</strong> goes at this one. First answer right? Still counts — and the lifeline is gone either way.</p>') +
+        '<div class="btn-row center"><button class="btn gold" data-act="closeLL">Back to the question</button></div>' +
+      '</div>');
+  }
 }
 function dishTimeUp(){ if(S.screen === 'dishQ') run({ type:'dish/timeUp' }); }
 /* the Auction's clock running out, and "Time is up" */
@@ -6674,7 +6659,6 @@ function auctionResolve(){ run({ type:'auction/resolve' }); }
 function endGame(){ run({ type:'game/end' }); }
 
 /* ---------- end of game ---------- */
-/* Prefer the themes chosen for tonight; widen only when they run dry. */
 function finalize(){
   const g = G();
   const rec = {
@@ -7191,24 +7175,12 @@ const ACT = {
     if((g.plan || []).some(p => p.key === 'map')) loadMapGeo().catch(() => {});
     if((g.plan || []).some(p => p.key === 'flag')) preloadFlags(g.flagGame.qs.concat(g.flagGame.spare.slice(0, 3)));
     Snd.resume();
-    if(g.rounds.length) go('roundIntro');
-    else if(!runNextMini()) advanceRound();     // mini-games only: straight in (or straight to the Battle)
+    run({ type:'game/start' });     // the first round — or, mini-games only, straight in
   },
 
   /* ---- round ---- */
-  armDbl(e){
-    const i = +e.dataset.i, g = G(), rd = curRound();
-    if(!g.teams[i].ll.dbl) return;
-    rd.dbl[i] = !rd.dbl[i];
-    if(rd.dbl[i]) Host.say('ll_dbl', { t:i });
-    Snd.soft();
-    render();
-  },
-  beginRound(){
-    const g = G(), rd = curRound();
-    [0, 1].forEach(i => { if(rd.dbl[i]) g.teams[i].ll.dbl = false; });
-    beginRound();
-  },
+  armDbl(e){ run({ type:'round/armDbl', i:+e.dataset.i }); },
+  beginRound(){ run({ type:'round/begin' }); },
   timerToggle(){ Timer.toggle(); },
   timerAdd(e){ Timer.add(+e.dataset.s); },
   timerSkip(){
@@ -7236,110 +7208,19 @@ const ACT = {
      forever. The ticker is ignored here on purpose — it exists to match the two
      teams' questions when the round is built, and once the host is overriding
      by hand it is only getting in the way. */
-  swapQ(){
-    const g = G(), rd = curRound(), seat = g.seat;
+  swapQ(){ run({ type:'round/swap' }); },
 
-    /* committed elsewhere: the other team's question this round, every other
-       round, and the mini-game. The current slot is deliberately NOT excluded,
-       so it can come back round at the end of the cycle. */
-    const elsewhere = new Set();
-    g.rounds.forEach((r, ri) => r.q.forEach((q, si) => { if(ri !== g.r || si !== seat) elsewhere.add(q.id); }));
-    g.mini.qs.forEach(q => elsewhere.add(q.id));
-
-    const list = S.bank.filter(q =>
-      q.type === 'standard' && q.theme === rd.theme &&
-      matchDiff(q, diffOf(g.cfg, rd.theme)) && !elsewhere.has(q.id));
-
-    const none = () => toast('No other question left in ' + rd.theme + ' at this difficulty.', 4000);
-    if(list.length < 2) return none();
-
-    /* One list for the whole round, not one per team: a question the host has
-       already skipped past on Team A should not come back on Team B either. */
-    const cur = rd.q[seat];
-    const seen = rd.swapSeen = rd.swapSeen || [];
-    if(seen.indexOf(cur.id) < 0) seen.push(cur.id);
-
-    let next = list.filter(q => seen.indexOf(q.id) < 0)[0];
-    if(!next){                                    // whole theme exhausted — start again
-      seen.length = 0; seen.push(cur.id);
-      next = list.filter(q => q.id !== cur.id)[0];
-    }
-    if(!next) return none();
-
-    seen.push(next.id);
-    rd.q[seat] = next; markUsed(next);
-    rd.strict = false;
-    rd.picked = false;                 // no longer the pair the host chose by hand
-    toast('New question.');
-    go('ask');
-  },
-
-  useLL(e){
-    const key = e.dataset.k, i = +e.dataset.i, g = G(), rd = curRound(), t = g.teams[i];
-    if(!t.ll[key]) return;
-    if(rd.dbl[i] && rd.llUsed[i].length >= 1) return toast('Double points is armed — one extra lifeline only.');
-    S.tmp.llModal = true;
-    if(key === 'friend'){
-      Timer.pause();
-      openModal(
-        '<div class="center stack">' +
-          '<div class="eyebrow gold">Lifeline</div><h3 class="display">Call a Friend</h3>' +
-          '<div class="warnbox" style="text-align:left">Before the captain says a word, ' + (NOHOST() ? '<strong>whoever is holding the phone</strong> reads this to the friend' : '<strong>you</strong> speak to the friend') + ':<br>' +
-          '&ldquo;Hi — quick quiz question. No ChatGPT, no Google, no asking anyone else. Straight off the top of your head. Ready?&rdquo;</div>' +
-          '<div class="card tight" style="text-align:left">' +
-            '<div class="eyebrow gold">The question</div>' +
-            '<p style="margin-top:8px;font-size:19px;font-weight:700;line-height:1.35">' + esc(rd.q[G().seat].question) + '</p>' +
-          '</div>' +
-          '<div class="cd-num" id="cdNum">' + S.settings.tFriend + '</div>' +
-          '<div class="eyebrow">seconds on the call</div>' +
-          '<div class="btn-row center">' +
-            '<button class="btn sm" data-act="cdToggle">Pause</button>' +
-            '<button class="btn sm ghost" data-act="cdAdd" data-s="10">+10s</button>' +
-          '</div>' +
-          '<div class="btn-row center"><button class="btn gold" data-act="closeLL">Done — back to the question</button></div>' +
-        '</div>');
-      CD.start(S.settings.tFriend, 'cdNum');
-    } else {
-      Timer.pause();
-      openModal(
-        '<div class="center stack">' +
-          '<div class="eyebrow gold">Lifeline</div><h3 class="display">Double Dip</h3>' +
-          (NOHOST()
-            ? '<p class="muted" style="max-width:44ch;margin:0 auto">The captain says <strong>two</strong> answers out loud <strong>before</strong> you lock it in. Either one right counts — and the lifeline is gone either way.</p>'
-            : '<p class="muted" style="max-width:44ch;margin:0 auto">The captain gets <strong>two</strong> goes at this one. First answer right? Still counts — and the lifeline is gone either way.</p>') +
-          '<div class="btn-row center"><button class="btn gold" data-act="closeLL">Back to the question</button></div>' +
-        '</div>');
-    }
-    t.ll[key] = false;
-    rd.llUsed[i].push(key);
-    Host.say('ll_' + key, { t:i });
-    toast(t.name + ' used ' + LL[key].name + '.');
-  },
+  useLL(e){ run({ type:'round/lifeline', key:e.dataset.k, i:+e.dataset.i }); },
   cdToggle(){ CD.toggle(); },
   cdAdd(e){ CD.add(+e.dataset.s); },
   closeLL(){ CD.stop(); S.tmp.llModal = false; closeModal(); render(); Timer.resumeT(); },
 
   toReveal(){ Timer.stop(); go('reveal'); },
-  judge(e){
-    const v = e.dataset.v === '1', g = G(), rd = curRound(), ti = curTeam();
-    rd.res[g.seat] = { correct:v, stolen:false };
-    if(v){
-      const p = pointValue(rd, ti);
-      Host.say('correct', { t:ti });
-      rd.pts[ti] += p; award(ti, p);
-      go('answer');
-    } else { Snd.wrong(); Host.say(NOHOST() ? 'wrong' : ['wrong', 'steal'], { t:ti }); go(NOHOST() ? 'answer' : 'steal'); }
-  },
-  afterAnswer(){ afterSeat(); },
+  judge(e){ run({ type:'round/judge', v:e.dataset.v === '1' }); },
+  afterAnswer(){ run({ type:'round/afterAnswer' }); },
   toStealReveal(){ Timer.stop(); go('stealReveal'); },
-  judgeSteal(e){
-    const v = e.dataset.v === '1', g = G(), rd = curRound(), owner = curTeam(), th = otherTeam(owner);
-    rd.res[g.seat].stolen = v;
-    if(v){ const p = pointValue(rd, owner); Host.say('stolen', { t:th }); shake(); rd.pts[th] += p; award(th, p, 'steal'); }
-    else { Snd.wrong(); Host.say('nosteal', { t:th }); }
-    go('answer');
-  },
-  nextRound(){ nextRound(); },
+  judgeSteal(e){ run({ type:'round/judgeSteal', v:e.dataset.v === '1' }); },
+  nextRound(){ run({ type:'round/next' }); },
 
   /* ---- mini ---- */
   miniStart(){ run({ type:'closest/start' }); },
@@ -7425,7 +7306,7 @@ const ACT = {
 
   /* ---- battle of the captains ----
      battleYes / battleNo are gone with the end-of-night pop-up. The Battle is
-     chosen in Setup now and started by startMini('battle'). */
+     chosen in Setup now and started by the running order in the engine. */
   /* used by both the intro and the handoff — cap and i are already set */
   battleStart(){ run({ type:'battle/start' }); },
   battleShow(){ run({ type:'battle/show' }); },

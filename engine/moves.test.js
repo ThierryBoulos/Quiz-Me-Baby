@@ -26,7 +26,7 @@ test('flag: a 6–0 run ends early and pays the mini-game points', () => {
   assert.equal(g.flagGame.verdict.note, 'Decided with 4 flags to spare.');
   assert.equal(g.teams[0].score, g.miniPts);
   assert.ok(types(fx).includes('go:flagSummary'));
-  assert.deepEqual(Q.play(g, { type:'flag/done' }), [{ next:true }]);
+  assert.deepEqual(Q.play(g, { type:'flag/done' }), [{ go:'dishIntro' }]);   // next in the running order
   assert.equal(g.done.flag, true);
 });
 
@@ -142,7 +142,7 @@ test('closest: guesses add up the gap; level after seven brings a tie-breaker le
   assert.equal(g2.mini.verdict.winner, 1);
   assert.equal(g2.mini.verdict.note, 'Settled by a tie-breaker leg.');
   assert.ok(types(fx).includes('go:miniSummary'));
-  assert.deepEqual(Q.play(g2, { type:'closest/done' }, e2), [{ next:true }]);
+  assert.deepEqual(Q.play(g2, { type:'closest/done' }, e2), [{ go:'sayIntro' }]);
   assert.equal(g2.miniPlayed, true);
 });
 
@@ -218,4 +218,59 @@ test('end of the night: a clear winner finalizes straight away', () => {
   g.teams[1].score = 3;
   assert.deepEqual(Q.play(g, { type:'game/end' }, env), [{ finalize:true }]);
   assert.equal(g.winner, 1);
+});
+
+/* ---- the standard rounds and the running order ---- */
+function game4(over){
+  const bank = [];
+  ['easy', 'medium', 'hard'].forEach(d => { for(let i = 0; i < 8; i++) bank.push({ id:`m-${d}${i}`, type:'standard', theme:'Music', difficulty:d, use_with:'m' + d + (i >> 1), question:'Q' + i, answer:'A' }); });
+  for(let i = 0; i < 9; i++) bank.push({ id:'c' + i, type:'closest', theme:'Music', answer:'10' });
+  const deal = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => true });
+  const g = deal.buildGame(Object.assign({ rounds:2, themes:['Music'], difficulty:'medium', minis:['closest'],
+    teamA:{ name:'A' }, teamB:{ name:'B' } }, over));
+  return { g, env:{ deal, settings:{ alternateFirst:false } } };
+}
+
+test('round: right scores, wrong goes to a steal, a steal scores the other team', () => {
+  const { g, env } = game4();
+  assert.deepEqual(Q.play(g, { type:'game/start' }, env), [{ go:'roundIntro' }]);
+  Q.play(g, { type:'round/armDbl', i:0 }, env);
+  Q.play(g, { type:'round/begin' }, env);
+  assert.equal(g.teams[0].ll.dbl, false);                               // spent at Start
+  Q.play(g, { type:'round/judge', v:true }, env);
+  assert.equal(g.teams[0].score, 2);                                    // doubled
+  Q.play(g, { type:'round/afterAnswer' }, env);
+  assert.equal(g.seat, 1);
+  const fx = Q.play(g, { type:'round/judge', v:false }, env);
+  assert.ok(types(fx).includes('go:steal'));
+  Q.play(g, { type:'round/judgeSteal', v:true }, env);
+  assert.deepEqual(g.teams.map(t => t.score), [3, 0]);
+  assert.deepEqual(types(Q.play(g, { type:'round/afterAnswer' }, env)), ['go:roundScore']);
+});
+
+test('round: no host means no steal', () => {
+  const { g, env } = game4(); g.hostless = true;
+  Q.play(g, { type:'round/begin' }, env);
+  assert.ok(types(Q.play(g, { type:'round/judge', v:false }, env)).includes('go:answer'));
+});
+
+test('round: a lifeline is spent once; with double armed, only one extra', () => {
+  const { g, env } = game4();
+  Q.play(g, { type:'round/armDbl', i:0 }, env);
+  Q.play(g, { type:'round/begin' }, env);
+  assert.ok(types(Q.play(g, { type:'round/lifeline', key:'dip', i:0 }, env)).includes('lifeline:dip'));
+  assert.deepEqual(Q.play(g, { type:'round/lifeline', key:'friend', i:0 }, env), [{ toast:'Double points is armed — one extra lifeline only.' }]);
+  assert.deepEqual(Q.play(g, { type:'round/lifeline', key:'dip', i:0 }, env), []);   // already gone
+});
+
+test('running order: round 1, its mini-game, round 2, the end', () => {
+  const { g, env } = game4();
+  assert.deepEqual(g.plan, [{ key:'closest', after:0 }]);
+  Q.play(g, { type:'round/begin' }, env);
+  assert.deepEqual(Q.play(g, { type:'round/next' }, env), [{ go:'miniIntro' }]);  // owed after round 1
+  g.mini.verdict = { needsHost:false };
+  assert.deepEqual(Q.play(g, { type:'closest/done' }, env), [{ go:'roundIntro' }]);
+  assert.equal(g.r, 1);
+  g.teams[0].score = 1;
+  assert.deepEqual(Q.play(g, { type:'round/next' }, env), [{ finalize:true }]);
 });
