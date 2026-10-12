@@ -507,7 +507,7 @@
       };
     }
 
-    return { isFresh, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
+    return { bank, shuffle, isFresh, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
              dishLevelsOf, dishPool, dishDeck, diffOf, pickedPair, dishLeg, buildGame };
@@ -526,7 +526,9 @@
      Classic carries these out on one screen; Party will carry them out on
      the TV and the phones. A move that isn't allowed right now returns []
      or just a toast saying why.
-     Moved over game by game: Guess the Flag and Cocktail or Dish first.   */
+       { used:q }                 mark that question as played
+     Moved over game by game: Flag, Cocktail or Dish, Map, Closest To Wins,
+     Don't Say the Same as Me so far.                                       */
 
   /* the mini-game's points to one team, or split — once */
   function awardMini(g, s, w, fx){
@@ -622,7 +624,175 @@
     return fx;
   }
 
+  /* ---- Guess the Map ---- */
+  function mapAfterLeg(g, fx){
+    const s = g.mapGame;
+    const out = bestOf(s);
+    if(out === 'next'){ fx.push({ go:'mapQ' }); return fx; }
+    /* level after the three (or after a tie-breaker): the host reads the room —
+       another map, or stop here with a point each */
+    if(out === 'level'){ fx.push({ go:'mapTie' }); return fx; }
+    s.done = true;
+    s.verdict = { winner:out.winner, needsHost:false,
+      note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker map' : s.tieLegs + ' tie-breaker maps') + '.'
+         : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' map' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
+    awardMini(g, s, out.winner, fx);
+    fx.push({ go:'mapSummary' });
+    return fx;
+  }
+
+  /* ---- Closest To Wins and Don't Say the Same as Me ----
+     Both play every leg; level at the end means a tie-breaker leg from the
+     spares while they last, then the host's call. */
+  function legsFinish(g, s, o, fx){
+    if(s.wins[0] === s.wins[1]){
+      if(s.spare && s.spare.length){
+        const q = o.draw(s.spare.shift());
+        s.qs.push(q);
+        fx.push({ used:q });
+        s.tieLegs++;
+        fx.push({ toast:'Tied after ' + (s.qs.length - 1) + ' legs — tie-breaker ' + o.what + '.', ms:3600 });
+        fx.push({ go:o.again });            // s.i already points at the new one
+        return fx;
+      }
+      s.done = true;
+      s.verdict = { winner:null, needsHost:true, note:o.dry };
+      fx.push({ go:o.summary });
+      return fx;
+    }
+    const winner = s.wins[0] > s.wins[1] ? 0 : 1;
+    s.done = true;
+    s.verdict = { winner, needsHost:false,
+      note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker leg' : s.tieLegs + ' tie-breaker legs') + '.' : '' };
+    awardMini(g, s, winner, fx);
+    fx.push({ go:o.summary });
+    return fx;
+  }
+  const CLOSEST_END = { what:'question', again:'miniQ', summary:'miniSummary', draw:(q) => q,
+    dry:'Tied on legs, and there are no spare Closest To questions left for another tie-breaker. Your call.' };
+
   const MOVES = {
+    'closest/start'(g){ g.mini.i = 0; return [{ go:'miniQ' }]; },
+    /* a number that doesn't suit the room: another, preferably from a theme
+       this mini-game hasn't used yet (one theme per leg) */
+    'closest/swap'(g, a, env){
+      const m = g.mini, D = env.deal;
+      const inPlay = new Set();
+      g.rounds.forEach(r => r.q.forEach(q => inPlay.add(q.id)));
+      m.qs.forEach(q => inPlay.add(q.id));
+      (m.spare || []).forEach(q => inPlay.add(q.id));
+      let pool = D.bank().filter(q => q.type === 'closest' && !inPlay.has(q.id) && D.isFresh(q));
+      if(!pool.length) pool = D.bank().filter(q => q.type === 'closest' && !inPlay.has(q.id));
+      if(!pool.length) return [{ toast:'No spare Closest To Wins question left in the bank.' }];
+      const spent = new Set(m.qs.filter((q, i) => i !== m.i).map(q => q.theme));
+      const offTheme = pool.filter(q => !spent.has(q.theme));
+      const q = D.shuffle(offTheme.length ? offTheme : pool)[0];
+      m.qs[m.i] = q;
+      return [{ used:q }, { toast:'New number question — ' + q.theme + '.' }, { go:'miniQ' }];
+    },
+    /* w: 0 | 1 | 'tie'; gA, gB: the two guesses when they were typed in */
+    'closest/win'(g, a){
+      const m = g.mini, q = m.qs[m.i], w = a.w, fx = [];
+      const ga = a.gA == null ? null : a.gA, gb = a.gB == null ? null : a.gB;
+      if(ga != null && gb != null){
+        const ans = Number(q.answer);
+        m.delta[0] += Math.abs(ga - ans); m.delta[1] += Math.abs(gb - ans);
+        m.counted = true;
+      }
+      m.subs.push({ q, gA:ga, gB:gb, winner:w });
+      if(w === 'tie'){ m.wins[0]++; m.wins[1]++; fx.push({ toast:'Tie — a point each.' }); }
+      else { m.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes leg ' + (m.i + 1) + '.' }); }
+      m.i++;
+      if(m.i < m.qs.length){ fx.push({ go:'miniQ' }); return fx; }
+      return legsFinish(g, m, CLOSEST_END, fx);
+    },
+    'closest/award'(g, a){ const fx = []; awardMini(g, g.mini, a.w, fx); fx.push({ render:true }); return fx; },
+    'closest/done'(g){
+      if(g.mini.verdict && g.mini.verdict.needsHost) return [{ toast:'Award the mini-game points first.' }];
+      g.miniPlayed = true;
+      g.done.closest = true;
+      return [{ next:true }];
+    },
+
+    'say/start'(g){ g.saySame.i = 0; return [{ go:'sayQ' }]; },
+    /* keep the shape: the last leg swaps for another coin flip, every other
+       leg for another prompt with plenty of answers */
+    'say/swap'(g, a, env){
+      const s = g.saySame, D = env.deal;
+      const inPlay = new Set();
+      s.qs.forEach(q => inPlay.add(q.id));
+      (s.spare || []).forEach(q => inPlay.add(q.id));
+      const lastLeg = s.i === s.base - 1, cur = s.qs[s.i];
+      const fits = (q) => lastLeg && cur.pool.length === 2 ? q.pool.length === 2 : q.pool.length >= 4;
+      const avail = D.saySamePool().filter(q => !inPlay.has(q.id));
+      let pool = avail.filter(fits);
+      if(!pool.length) pool = avail;
+      if(!pool.length) return [{ toast:'No spare prompt left in the bank.' }];
+      s.qs[s.i] = D.drawSaySame(D.shuffle(pool)[0]);
+      return [{ toast:'New prompt.' }, { go:'sayQ' }];
+    },
+    /* w: 0 | 1 | 'tie' */
+    'say/verdict'(g, a, env){
+      const s = g.saySame, q = s.qs[s.i], w = a.w, fx = [];
+      s.subs.push({ q, winner:w });
+      if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Tie — a point each.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes leg ' + (s.i + 1) + '.' }); }
+      s.i++;
+      if(s.i < s.qs.length){ fx.push({ go:'sayQ' }); return fx; }
+      /* a spare is a raw prompt — its secret word is drawn as it comes in */
+      return legsFinish(g, s, { what:'prompt', again:'sayQ', summary:'saySummary', draw:(p) => env.deal.drawSaySame(p),
+        dry:'Tied on legs, and there are no spare prompts left for another tie-breaker. Your call.' }, fx);
+    },
+    'say/award'(g, a){ const fx = []; awardMini(g, g.saySame, a.w, fx); fx.push({ render:true }); return fx; },
+    'say/done'(g){ return finishMini(g, 'saysame', g.saySame); },
+
+    'map/start'(g){ g.mapGame.i = 0; return [{ go:'mapQ' }]; },
+    /* one hint per map: its subject comes up for both teams */
+    'map/hint'(g){
+      const s = g.mapGame, q = s.qs[s.i];
+      (s.hints = s.hints || {})[q.id] = true;
+      return [{ sound:'soft' }, { render:true }];
+    },
+    /* a map not landing tonight is swapped for one not in play */
+    'map/swap'(g, a, env){
+      const s = g.mapGame;
+      const inPlay = new Set(s.qs.map(q => q.id));
+      const pool = env.deal.mapPool(s.levels || MAP_ORDER, inPlay);
+      if(!pool.length) return [{ toast:'No other map left in the bank.' }];
+      const q = pool[0];
+      s.spare = (s.spare || []).filter(x => x.id !== q.id);
+      s.qs[s.i] = q;
+      return [{ toast:'New map.' }, { go:'mapQ' }];
+    },
+    'map/verdict'(g, a){
+      const s = g.mapGame, q = s.qs[s.i], w = a.w, fx = [];
+      s.subs.push({ q, winner:w });
+      if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Both got it — a point each.' }); }
+      else if(w === 'none'){ fx.push({ toast:'Nobody got it.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes map ' + (s.i + 1) + '.' }); }
+      s.i++;
+      return mapAfterLeg(g, fx);
+    },
+    'map/more'(g){
+      const s = g.mapGame;
+      if(!s.spare || !s.spare.length) return [{ toast:'No maps left.' }];
+      s.qs.push(s.spare.shift());
+      s.tieLegs++;
+      return [{ go:'mapQ' }];                // s.i already points at the new map
+    },
+    'map/stop'(g){
+      const s = g.mapGame;
+      if(s.awarded) return [];
+      s.done = true; s.awarded = true;
+      s.award = [1, 1];
+      g.teams[0].score += 1; g.teams[1].score += 1;
+      s.verdict = { winner:null, needsHost:false,
+        note:'Level after ' + s.i + ' map' + (s.i > 1 ? 's' : '') + ' — called there, a point each.' };
+      return [{ sound:'point' }, { go:'mapSummary' }];
+    },
+    'map/award'(g, a){ const fx = []; awardMini(g, g.mapGame, a.w, fx); fx.push({ render:true }); return fx; },
+    'map/done'(g){ return finishMini(g, 'map', g.mapGame); },
+
     'flag/start'(g){ g.flagGame.i = 0; return [{ go:'flagQ' }]; },
     'flag/swap'(g){
       const s = g.flagGame;
@@ -717,10 +887,11 @@
     'dish/award'(g, a){ const fx = []; awardMini(g, g.dishGame, a.w, fx); fx.push({ render:true }); return fx; },
     'dish/done'(g){ return finishMini(g, 'dish', g.dishGame); }
   };
-  function play(g, action){
+  /* env.deal: the dealer (createDealer), for moves that draw a replacement */
+  function play(g, action, env){
     const move = MOVES[action && action.type];
     if(!move) throw new Error('Unknown move: ' + (action && action.type));
-    return move(g, action) || [];
+    return move(g, action, env || {}) || [];
   }
 
   /* -------------------------------------------------------------- utilities */

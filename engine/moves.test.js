@@ -90,3 +90,67 @@ test('dish: level after seven — one more, or a point each', () => {
 test('unknown moves are refused loudly', () => {
   assert.throws(() => Q.play(game(), { type:'nope' }), /Unknown move/);
 });
+
+/* ---- Map, Closest To Wins, Don't Say the Same ---- */
+function game2(){
+  const bank = [];
+  ['easy', 'medium', 'hard'].forEach(l => { for(let i = 0; i < 4; i++) bank.push({ id:`map:${l}${i}`, type:'map', level:l, question:'M' }); });
+  ['Music', 'Movies', 'Sports', 'Food'].forEach(t => { for(let i = 0; i < 4; i++) bank.push({ id:`c:${t}${i}`, type:'closest', theme:t, answer:String(100 * (i + 1)) }); });
+  for(let i = 0; i < 14; i++) bank.push({ id:'s' + i, type:'saysame', question:'P' + i, pool:i < 2 ? ['x', 'y'] : ['a', 'b', 'c', 'd'] });
+  const used = new Set();
+  const deal = Q.createDealer({ bank:() => bank, used:() => used, noRepeat:() => true,
+    ok:{ map:q => q.type === 'map', flag:() => false, dish:() => false } });
+  const g = deal.buildGame({ standard:false, rounds:0, themes:[], minis:['closest', 'saysame', 'map'],
+    teamA:{ name:'A' }, teamB:{ name:'B' } });
+  return { g, env:{ deal } };
+}
+
+test('map: level after three goes to the table, "stop" pays a point each', () => {
+  const { g, env } = game2();
+  Q.play(g, { type:'map/start' }, env);
+  Q.play(g, { type:'map/hint' }, env);
+  assert.equal(Object.keys(g.mapGame.hints).length, 1);
+  Q.play(g, { type:'map/verdict', w:0 }, env);
+  Q.play(g, { type:'map/verdict', w:1 }, env);
+  const fx = Q.play(g, { type:'map/verdict', w:'none' }, env);
+  assert.ok(types(fx).includes('go:mapTie'));
+  Q.play(g, { type:'map/stop' }, env);
+  assert.deepEqual(g.teams.map(t => t.score), [1, 1]);
+});
+
+test('map: a swap draws a map that is not already in play', () => {
+  const { g, env } = game2();
+  Q.play(g, { type:'map/start' }, env);
+  const before = g.mapGame.qs.map(q => q.id);
+  Q.play(g, { type:'map/swap' }, env);
+  assert.ok(!before.includes(g.mapGame.qs[0].id));
+});
+
+test('closest: guesses add up the gap; level after seven brings a tie-breaker leg', () => {
+  const { g, env } = game2();
+  Q.play(g, { type:'closest/start' }, env);
+  const ans = Number(g.mini.qs[0].answer);
+  Q.play(g, { type:'closest/win', w:0, gA:ans - 3, gB:ans + 10 }, env);
+  assert.deepEqual(g.mini.delta, [3, 10]);
+  for(let i = 1; i < 7; i++) Q.play(g, { type:'closest/win', w:i % 2 ? 1 : 0 }, env);   // 4–3 to A... make it level:
+  assert.ok(g.mini.done);
+  const { g:g2, env:e2 } = game2();
+  Q.play(g2, { type:'closest/start' }, e2);
+  for(let i = 0; i < 7; i++) Q.play(g2, { type:'closest/win', w:i === 6 ? 'tie' : i % 2 }, e2);
+  assert.equal(g2.mini.tieLegs, 1);
+  const fx = Q.play(g2, { type:'closest/win', w:1 }, e2);
+  assert.equal(g2.mini.verdict.winner, 1);
+  assert.equal(g2.mini.verdict.note, 'Settled by a tie-breaker leg.');
+  assert.ok(types(fx).includes('go:miniSummary'));
+  assert.deepEqual(Q.play(g2, { type:'closest/done' }, e2), [{ next:true }]);
+  assert.equal(g2.miniPlayed, true);
+});
+
+test('say-same: a tie-breaker prompt gets its secret word as it comes in', () => {
+  const { g, env } = game2();
+  Q.play(g, { type:'say/start' }, env);
+  for(let i = 0; i < 9; i++) Q.play(g, { type:'say/verdict', w:'tie' }, env);
+  assert.equal(g.saySame.tieLegs, 1);
+  const tb = g.saySame.qs[9];
+  assert.ok(tb.pool.includes(tb.answer));
+});

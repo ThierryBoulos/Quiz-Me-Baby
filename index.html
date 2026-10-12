@@ -1215,7 +1215,7 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
 </div>
 <div id="modal" role="dialog" aria-modal="true"></div>
 <!-- the shared engine (v4 step 1): the rules with no screen in them -->
-<script src="engine/core.js?v=3.16"></script>
+<script src="engine/core.js?v=3.17"></script>
 <script>
 /* ==========================================================================
    QUIZ ME BABY
@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.16', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.17', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -6742,148 +6742,18 @@ function advanceRound(){
 }
 
 /* ---------- mini ---------- */
-function miniFinish(){
-  const g = G(), m = g.mini;
-  /* Tied on legs → straight into an extra tie-breaker question. */
-  if(m.wins[0] === m.wins[1]){
-    if(m.spare && m.spare.length){
-      const q = m.spare.shift();
-      m.qs.push(q); markUsed(q);
-      m.tieLegs++;
-      toast('Tied after ' + (m.qs.length - 1) + ' legs — tie-breaker question.', 3600);
-      go('miniQ');            // m.i already points at the new question
-      return;
-    }
-    m.done = true;
-    m.verdict = { winner:null, needsHost:true,
-      note:'Tied on legs, and there are no spare Closest To questions left for another tie-breaker. Your call.' };
-    go('miniSummary');
-    return;
-  }
-  const winner = m.wins[0] > m.wins[1] ? 0 : 1;
-  m.done = true;
-  m.verdict = { winner, needsHost:false,
-    note:m.tieLegs ? 'Settled by ' + (m.tieLegs === 1 ? 'a tie-breaker leg' : m.tieLegs + ' tie-breaker legs') + '.' : '' };
-  awardMini(winner);
-  go('miniSummary');
-}
-function awardMini(w){
-  const g = G(), m = g.mini;
-  if(m.awarded) return;
-  m.awarded = true;
-  if(w === 'split'){
-    const half = Math.floor(g.miniPts / 2);
-    g.teams[0].score += half; g.teams[1].score += half;
-    m.award = [half, half];
-    m.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
-    m.verdict.winner = null;
-  } else {
-    g.teams[w].score += g.miniPts;
-    m.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
-    m.verdict.winner = w;
-  }
-  m.verdict.needsHost = false;
-  Snd.point();
-}
-
-/* Same shape as miniFinish/awardMini above, one leg-selection difference: a
-   spare here is a raw bank prompt with a `pool`, not yet an `answer` — it has
-   to go through drawSaySame() at the moment it is actually pulled in, so a
-   tie-breaker prompt's secret word is drawn exactly once, same as the rest. */
-function saySameFinish(){
-  const g = G(), s = g.saySame;
-  if(s.wins[0] === s.wins[1]){
-    if(s.spare && s.spare.length){
-      const q = drawSaySame(s.spare.shift());
-      s.qs.push(q); markUsed(q);
-      s.tieLegs++;
-      toast('Tied after ' + (s.qs.length - 1) + ' legs — tie-breaker prompt.', 3600);
-      go('sayQ');
-      return;
-    }
-    s.done = true;
-    s.verdict = { winner:null, needsHost:true,
-      note:'Tied on legs, and there are no spare prompts left for another tie-breaker. Your call.' };
-    go('saySummary');
-    return;
-  }
-  const winner = s.wins[0] > s.wins[1] ? 0 : 1;
-  s.done = true;
-  s.verdict = { winner, needsHost:false,
-    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker leg' : s.tieLegs + ' tie-breaker legs') + '.' : '' };
-  awardSaySame(winner);
-  go('saySummary');
-}
-function awardSaySame(w){
-  const g = G(), s = g.saySame;
-  if(s.awarded) return;
-  s.awarded = true;
-  if(w === 'split'){
-    const half = Math.floor(g.miniPts / 2);
-    g.teams[0].score += half; g.teams[1].score += half;
-    s.award = [half, half];
-    s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
-    s.verdict.winner = null;
-  } else {
-    g.teams[w].score += g.miniPts;
-    s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
-    s.verdict.winner = w;
-  }
-  s.verdict.needsHost = false;
-  Snd.point();
-}
-
-/* Guess the Map is a true best-of: once a lead cannot be caught in the maps
-   that are left, the rest are not played. After the base maps it is
-   sudden death — the first map that separates the teams ends it, and a map
-   nobody gets (or both get) simply brings out the next one. */
-function mapAfterLeg(){
-  const g = G(), s = g.mapGame;
-  const out = QMB.bestOf(s);
-  if(out === 'next'){ go('mapQ'); return; }
-  if(out === 'level'){
-    /* Level after the three (or after a tie-breaker): the host reads the room —
-       another map, or stop here with a point each. */
-    go('mapTie');
-    return;
-  }
-  const winner = s.wins[0] > s.wins[1] ? 0 : 1;
-  s.done = true;
-  s.verdict = { winner, needsHost:false,
-    note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker map' : s.tieLegs + ' tie-breaker maps') + '.'
-       : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' map' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
-  awardMap(winner);
-  go('mapSummary');
-}
-function awardMap(w){
-  const g = G(), s = g.mapGame;
-  if(s.awarded) return;
-  s.awarded = true;
-  if(w === 'split'){
-    const half = Math.floor(g.miniPts / 2);
-    g.teams[0].score += half; g.teams[1].score += half;
-    s.award = [half, half];
-    s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
-    s.verdict.winner = null;
-  } else {
-    g.teams[w].score += g.miniPts;
-    s.award = [w === 0 ? g.miniPts : 0, w === 1 ? g.miniPts : 0];
-    s.verdict.winner = w;
-  }
-  s.verdict.needsHost = false;
-  Snd.point();
-}
-
 /* ---------- moves that live in the engine ----------
-   Guess the Flag and Cocktail or Dish play through QMB.play (engine/core.js):
+   Closest To Wins, Don't Say the Same, Map, Flag and Cocktail or Dish play
+   through QMB.play (engine/core.js):
    it changes the game and says what the screen should do. This carries
    that out — the same list Party mode will carry out on the TV. */
-function run(action){ applyFx(QMB.play(G(), action)); }
+function run(action){ applyFx(QMB.play(G(), action, { deal:DEAL })); }
 function applyFx(fx){
   (fx || []).forEach(f => {
     if(f.timer === 'stop'){ Timer.stop(); clearInterval(S.tmp.dishIv); }
     else if(f.timer === 'pause') Timer.pause();
     else if(f.timer === 'resume') Timer.resumeT();
+    if(f.used) markUsed(f.used);
     if(f.sound && Snd[f.sound]) Snd[f.sound]();
     if(f.toast) toast(f.toast, f.ms);
     if(f.go) go(f.go);
@@ -7598,29 +7468,8 @@ const ACT = {
   nextRound(){ nextRound(); },
 
   /* ---- mini ---- */
-  miniStart(){ G().mini.i = 0; go('miniQ'); },
-  /* Same escape hatch as "Swap this question" in a standard round: if the
-     number doesn't suit the room, pull another. Prefers a theme this
-     mini-game has not already used, to protect the one-per-theme spread. */
-  miniSwap(){
-    const g = G(), m = g.mini;
-    const inPlay = new Set();
-    g.rounds.forEach(r => r.q.forEach(q => inPlay.add(q.id)));
-    m.qs.forEach(q => inPlay.add(q.id));
-    (m.spare || []).forEach(q => inPlay.add(q.id));
-
-    let pool = S.bank.filter(q => q.type === 'closest' && !inPlay.has(q.id) && isFresh(q));
-    if(!pool.length) pool = S.bank.filter(q => q.type === 'closest' && !inPlay.has(q.id));
-    if(!pool.length) return toast('No spare Closest To Wins question left in the bank.');
-
-    const spent = new Set(m.qs.filter((q, i) => i !== m.i).map(q => q.theme));
-    const offTheme = pool.filter(q => !spent.has(q.theme));
-    const q = shuffle(offTheme.length ? offTheme : pool)[0];
-
-    m.qs[m.i] = q; markUsed(q);
-    toast('New number question — ' + q.theme + '.');
-    go('miniQ');
-  },
+  miniStart(){ run({ type:'closest/start' }); },
+  miniSwap(){ run({ type:'closest/swap' }); },
   toMiniEntry(){ Timer.stop(); go('miniEntry'); },
   calc(){
     const g = G(), m = g.mini, q = m.qs[m.i];
@@ -7638,136 +7487,33 @@ const ACT = {
         '<span class="badge ' + (w === 0 ? 'a' : 'b') + '">' + esc(g.teams[w].name) + ' is closer</span>') + '</div></div>';
   },
   miniWin(e){
-    const g = G(), m = g.mini, q = m.qs[m.i];
-    const w = e.dataset.w === 'tie' ? 'tie' : +e.dataset.w;
     const a = el('gA') ? numFrom(el('gA').value) : null;
     const b = el('gB') ? numFrom(el('gB').value) : null;
-    if(a != null && b != null){
-      const ans = Number(q.answer);
-      m.delta[0] += Math.abs(a - ans); m.delta[1] += Math.abs(b - ans);
-      m.counted = true;
-    }
-    m.subs.push({ q, gA:a, gB:b, winner:w });
-    if(w === 'tie'){ m.wins[0]++; m.wins[1]++; toast('Tie — a point each.'); }
-    else { m.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes leg ' + (m.i + 1) + '.'); }
-    m.i++;
-    if(m.i < m.qs.length) go('miniQ'); else miniFinish();
+    run({ type:'closest/win', w:e.dataset.w === 'tie' ? 'tie' : +e.dataset.w, gA:a, gB:b });
   },
-  miniAward(e){ awardMini(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
-  afterMini(){
-    const g = G();
-    if(g.mini.verdict && g.mini.verdict.needsHost) return toast('Award the mini-game points first.');
-    g.miniPlayed = true;
-    g.done.closest = true;
-    /* another mini-game may be scheduled against this same round — run it
-       before going back to the standard rounds */
-    if(runNextMini()) return;
-    advanceRound();
-  },
+  miniAward(e){ run({ type:'closest/award', w:e.dataset.w === 'split' ? 'split' : +e.dataset.w }); },
+  afterMini(){ run({ type:'closest/done' }); },
 
-  /* ---- don't say the same as me ---- */
-  sayStart(){ G().saySame.i = 0; go('sayQ'); },
-  /* Same escape hatch as Closest's "Change this question" — pull another
-     prompt not already in play if this one does not suit the room. */
-  saySwap(){
-    const g = G(), s = g.saySame;
-    const inPlay = new Set();
-    s.qs.forEach(q => inPlay.add(q.id));
-    (s.spare || []).forEach(q => inPlay.add(q.id));
-
-    /* keep the shape: the last leg swaps for another coin flip, every other
-       leg for another prompt with plenty of answers */
-    const lastLeg = s.i === s.base - 1, cur = s.qs[s.i];
-    const fits = (q) => lastLeg && cur.pool.length === 2 ? q.pool.length === 2 : q.pool.length >= 4;
-    const avail = saySamePool().filter(q => !inPlay.has(q.id));
-    let pool = avail.filter(fits);
-    if(!pool.length) pool = avail;
-    if(!pool.length) return toast('No spare prompt left in the bank.');
-
-    const q = drawSaySame(shuffle(pool)[0]);
-    s.qs[s.i] = q;
-    toast('New prompt.');
-    go('sayQ');
-  },
+  /* ---- don't say the same as me (moves in the engine) ---- */
+  sayStart(){ run({ type:'say/start' }); },
+  saySwap(){ run({ type:'say/swap' }); },
   toSayJudge(){ Timer.stop(); go('sayJudge'); },
-  sayVerdict(e){
-    const g = G(), s = g.saySame, q = s.qs[s.i];
-    const w = e.dataset.w === 'tie' ? 'tie' : +e.dataset.w;
-    s.subs.push({ q, winner:w });
-    if(w === 'tie'){ s.wins[0]++; s.wins[1]++; toast('Tie — a point each.'); }
-    else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes leg ' + (s.i + 1) + '.'); }
-    s.i++;
-    if(s.i < s.qs.length) go('sayQ'); else saySameFinish();
-  },
-  sayAward(e){ awardSaySame(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
-  afterSaySame(){
-    const g = G();
-    if(g.saySame.verdict && g.saySame.verdict.needsHost) return toast('Award the mini-game points first.');
-    g.done.saysame = true;
-    if(runNextMini()) return;
-    advanceRound();
-  },
+  sayVerdict(e){ run({ type:'say/verdict', w:e.dataset.w === 'tie' ? 'tie' : +e.dataset.w }); },
+  sayAward(e){ run({ type:'say/award', w:e.dataset.w === 'split' ? 'split' : +e.dataset.w }); },
+  afterSaySame(){ run({ type:'say/done' }); },
 
-  /* ---- guess the map ---- */
-  mapStart(){ G().mapGame.i = 0; go('mapQ'); },
-  /* Same escape hatch as the others — a map the room has seen before, or one
-     that is just not landing tonight, gets swapped for one not in play. */
-  mapHint(){
-    const s = G().mapGame, q = s.qs[s.i];
-    (s.hints = s.hints || {})[q.id] = true;
-    Snd.soft();
-    render();
-  },
-  mapSwap(){
-    const g = G(), s = g.mapGame;
-    const inPlay = new Set(s.qs.map(q => q.id));
-    const pool = mapPool(s.levels || MAP_ORDER, inPlay);
-    if(!pool.length) return toast('No other map left in the bank.');
-    const q = pool[0];
-    s.spare = (s.spare || []).filter(x => x.id !== q.id);
-    s.qs[s.i] = q;
-    toast('New map.');
-    go('mapQ');
-  },
+  /* ---- guess the map (moves in the engine) ---- */
+  mapStart(){ run({ type:'map/start' }); },
+  mapHint(){ run({ type:'map/hint' }); },
+  mapSwap(){ run({ type:'map/swap' }); },
   mapZoom(){ openMapZoom(); },
   mapRetry(){ render(); },
   toMapJudge(){ Timer.stop(); go('mapJudge'); },
-  mapVerdict(e){
-    const g = G(), s = g.mapGame, q = s.qs[s.i];
-    const w = e.dataset.w === 'tie' || e.dataset.w === 'none' ? e.dataset.w : +e.dataset.w;
-    s.subs.push({ q, winner:w });
-    if(w === 'tie'){ s.wins[0]++; s.wins[1]++; toast('Both got it — a point each.'); }
-    else if(w === 'none'){ toast('Nobody got it.'); }
-    else { s.wins[w]++; Snd.correct(); toast(g.teams[w].name + ' takes map ' + (s.i + 1) + '.'); }
-    s.i++;
-    mapAfterLeg();
-  },
-  mapMore(){
-    const s = G().mapGame;
-    if(!s.spare || !s.spare.length) return toast('No maps left.');
-    s.qs.push(s.spare.shift());
-    s.tieLegs++;
-    go('mapQ');                // s.i already points at the new map
-  },
-  mapStop(){
-    const g = G(), s = g.mapGame;
-    if(s.awarded) return;
-    s.done = true; s.awarded = true;
-    s.award = [1, 1];
-    g.teams[0].score += 1; g.teams[1].score += 1;
-    s.verdict = { winner:null, needsHost:false,
-      note:'Level after ' + s.i + ' map' + (s.i > 1 ? 's' : '') + ' — called there, a point each.' };
-    Snd.point();
-    go('mapSummary');
-  },
-  mapAward(e){ awardMap(e.dataset.w === 'split' ? 'split' : +e.dataset.w); render(); },
-  afterMap(){
-    const g = G();
-    if(g.mapGame.verdict && g.mapGame.verdict.needsHost) return toast('Award the mini-game points first.');
-    g.done.map = true;
-    if(runNextMini()) return;
-    advanceRound();
-  },
+  mapVerdict(e){ run({ type:'map/verdict', w:e.dataset.w === 'tie' || e.dataset.w === 'none' ? e.dataset.w : +e.dataset.w }); },
+  mapMore(){ run({ type:'map/more' }); },
+  mapStop(){ run({ type:'map/stop' }); },
+  mapAward(e){ run({ type:'map/award', w:e.dataset.w === 'split' ? 'split' : +e.dataset.w }); },
+  afterMap(){ run({ type:'map/done' }); },
 
   /* ---- guess the flag (moves in the engine) ---- */
   flagStart(){ run({ type:'flag/start' }); },
