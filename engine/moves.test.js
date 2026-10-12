@@ -154,3 +154,68 @@ test('say-same: a tie-breaker prompt gets its secret word as it comes in', () =>
   const tb = g.saySame.qs[9];
   assert.ok(tb.pool.includes(tb.answer));
 });
+
+/* ---- the Auction, the Battle, sudden death ---- */
+function game3(over){
+  const bank = [];
+  for(let i = 0; i < 5; i++) bank.push({ id:'a' + i, type:'auction', question:'Cat ' + i });
+  ['easy', 'medium'].forEach(d => { for(let i = 0; i < 16; i++) bank.push({ id:`q-${d}${i}`, type:'standard', theme:'Music', difficulty:d, question:'Q', answer:'A' }); });
+  const deal = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => true });
+  const g = deal.buildGame(Object.assign({ standard:false, rounds:0, themes:['Music'], minis:['auction', 'battle'],
+    teamA:{ name:'A' }, teamB:{ name:'B' } }, over));
+  return { g, env:{ deal } };
+}
+
+test('auction: bid up, deliver, and the bidder takes the leg; best of three pays once', () => {
+  const { g, env } = game3();
+  Q.play(g, { type:'auction/build' }, env);
+  assert.equal(g.auction.n, 3);
+  assert.deepEqual(Q.play(g, { type:'auction/pass' }, env), [{ toast:'Somebody has to open first.' }]);
+  Q.play(g, { type:'auction/raise', n:3 }, env);                       // A opens with 3
+  assert.deepEqual(Q.play(g, { type:'auction/raise', n:3 }, env), [{ toast:'Has to beat 3.' }]);
+  Q.play(g, { type:'auction/raise', n:4 }, env);                       // B raises to 4
+  Q.play(g, { type:'auction/pass' }, env);                             // A folds — B must deliver 4
+  for(let i = 0; i < 4; i++) Q.play(g, { type:'auction/tick' }, env);  // the 4th settles it
+  assert.deepEqual(g.auction.wins, [0, 1]);
+  Q.play(g, { type:'auction/nextLeg' }, env);
+  Q.play(g, { type:'auction/raise', n:2 }, env);                       // B opens leg 2 (alternates)
+  Q.play(g, { type:'auction/pass' }, env);
+  Q.play(g, { type:'auction/resolve' }, env);                          // out of time, 0 of 2
+  assert.deepEqual(g.auction.wins, [1, 1]);
+  Q.play(g, { type:'auction/nextLeg' }, env);
+  Q.play(g, { type:'auction/raise', n:1 }, env);
+  Q.play(g, { type:'auction/pass' }, env);
+  Q.play(g, { type:'auction/tick' }, env);
+  const fx = Q.play(g, { type:'auction/nextLeg' }, env);
+  assert.ok(types(fx).includes('go:auctionResult'));
+  assert.equal(g.auction.winner, 0);
+  assert.equal(g.teams[0].score, g.miniPts);
+});
+
+test('battle: level after both captains goes to a tie-breaker; "done" sends a level night to sudden death', () => {
+  const { g, env } = game3({ minis:['battle'] });
+  Q.play(g, { type:'battle/build' }, env);
+  for(let cap = 0; cap < 2; cap++){
+    Q.play(g, { type:'battle/start' }, env);
+    for(let i = 0; i < g.battle.n; i++) Q.play(g, { type:'battle/mark', got:i < 5 }, env);
+  }
+  assert.equal(g.battle.stage, 'tie');
+  Q.play(g, { type:'battle/tbWin', w:'none' }, env);
+  assert.equal(g.battle.tbRounds, 2);
+  Q.play(g, { type:'battle/tbWin', w:1 }, env);
+  assert.equal(g.teams[1].score, g.miniPts);
+  g.teams[0].score = g.teams[1].score;                                 // make the night level
+  const fx = Q.play(g, { type:'battle/done' }, env);
+  assert.ok(types(fx).includes('go:sudden'));
+  assert.equal(g.sdRounds, 1);
+  const win = Q.play(g, { type:'sudden/win', w:0 }, env);
+  assert.deepEqual(win, [{ finalize:true }]);
+  assert.equal(g.winner, 0);
+});
+
+test('end of the night: a clear winner finalizes straight away', () => {
+  const { g, env } = game3();
+  g.teams[1].score = 3;
+  assert.deepEqual(Q.play(g, { type:'game/end' }, env), [{ finalize:true }]);
+  assert.equal(g.winner, 1);
+});

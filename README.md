@@ -37,14 +37,14 @@ Everything above is invisible on a laptop, which renders exactly as it always di
 
 Bottom of the home screen, deliberately faint:
 
-> Built by Thierry Boulos · © 2026 · v3.17 · 12 Oct 2026
+> Built by Thierry Boulos · © 2026 · v3.18 · 12 Oct 2026
 
 Hover it on a laptop or tap it on a phone and it comes up to legible, so you can check which build you are on without it shouting at the room the rest of the time.
 
 Both the version and the date come from **one constant** at the very top of the file:
 
 ```js
-const BUILD = { v:'3.17', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.18', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 ```
 
 **Bump both fields whenever the app changes.** There is no build step in a single HTML file, so nothing updates that date on its own, and a date that has quietly gone stale is worse than no date at all. Deriving it from `document.lastModified` was the obvious alternative and is a trap: copying the file to another laptop resets the timestamp, so a build from months ago would announce itself as updated today.
@@ -458,6 +458,6 @@ So far it holds:
 - **mini-game points and their slots** between rounds;
 - **the best-of rule** shared by Guess the Map, Guess the Flag and Cocktail or Dish;
 - **dealing**: every deck (standard pairs, Closest To Wins, Auction, Don't Say the Same, maps, flags, cocktails and dishes, the Battle) and the whole game built from them. It was moved over unchanged: the old and new code deal identical games from the same random seed;
-- **the game's moves** for Closest To Wins, Don't Say the Same as Me, Guess the Map, Guess the Flag and Cocktail or Dish: `QMB.play(game, move)` changes the game and returns what the screen should do (show this screen, this pop-up, this sound). Classic carries it out on one screen; Party will carry it out on the TV and phones. Scripted games played on the old and new code match event for event. The other games follow one by one.
+- **the game's moves** for every mini-game (Closest To Wins, the Auction, Don't Say the Same as Me, Guess the Map, Guess the Flag, Cocktail or Dish), the Battle of the Captains, sudden death and the end of the night: `QMB.play(game, move)` changes the game and returns what the screen should do (show this screen, this pop-up, this sound). Classic carries it out on one screen; Party will carry it out on the TV and phones. Scripted games played on the old and new code match event for event. The standard rounds are next.
 
 The script tag carries a version (`engine/core.js?v=…`): **bump it with `BUILD`** so a browser never runs a new page against an old engine.

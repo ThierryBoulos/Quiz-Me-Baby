@@ -1215,7 +1215,7 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
 </div>
 <div id="modal" role="dialog" aria-modal="true"></div>
 <!-- the shared engine (v4 step 1): the rules with no screen in them -->
-<script src="engine/core.js?v=3.17"></script>
+<script src="engine/core.js?v=3.18"></script>
 <script>
 /* ==========================================================================
    QUIZ ME BABY
@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.17', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.18', date:'12 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3124,6 +3124,7 @@ const { matchDiff, pairsFor, closestPool, capacity, auctionPool, auctionDeck, sa
         saySameDeck, mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
         dishLevelsOf, dishPool, dishDeck, diffOf, dishLeg, buildGame } = DEAL;
 /* the Battle's pool leaves out everything already used tonight */
+const battleSpent = () => QMB.battleSpent(G());
 const battlePool  = (diff) => DEAL.battlePool(battleSpent(), diff);
 const battleReady = () => DEAL.battleReady(battleSpent());
 const buildBattle = () => DEAL.buildBattle(battleSpent());
@@ -3163,20 +3164,6 @@ const BATTLE_SECS = 7;    // per question
 
 /* Everything already used tonight is off the table — the rounds, both teams'
    questions, the mini-game including its unplayed spares, and sudden death. */
-function battleSpent(){
-  const g = G(), spent = new Set();
-  g.rounds.forEach(r => r.q.forEach(q => spent.add(q.id)));
-  (g.mini.qs || []).forEach(q => spent.add(q.id));
-  (g.mini.spare || []).forEach(q => spent.add(q.id));
-  (g.sdUsed || []).forEach(id => spent.add(id));
-  const b = g.battle;
-  if(b){
-    b.qs.forEach(set => set.forEach(q => spent.add(q.id)));
-    (b.tbUsed || []).forEach(id => spent.add(id));
-    (b.dropped || []).forEach(id => spent.add(id));
-  }
-  return spent;
-}
 
 /* Don't offer the Battle at all if the bank can't fill both captains. */
 
@@ -3189,43 +3176,9 @@ const battleCapName = (c) => {
   return t.captain ? t.captain : t.name + "'s captain";
 };
 
-function battleFinish(){
-  const g = G(), b = g.battle;
-  if(b.score[0] === b.score[1]){ battleTieBreak(); return; }
-  b.winner = b.score[0] > b.score[1] ? 0 : 1;
-  battleAward();
-}
 /* Tie → a medium question, no clock, first captain in takes it. Still level
    (nobody got it) → another one, and another, until someone does. */
 /* bump === false means "swap this tie-breaker for another", not "next one" */
-function battleTieBreak(bump){
-  const g = G(), b = g.battle;
-  let pool = battlePool('medium');
-  if(!pool.length) pool = battlePool();
-  if(!pool.length){
-    b.stage = 'done'; b.done = true; b.winner = null;
-    b.note = 'Dead level, and the bank is out of questions. Your call.';
-    go('battleSummary'); return;
-  }
-  const q = shuffle(pool)[0];
-  b.tbUsed.push(q.id);
-  if(bump !== false) b.tbRounds++;
-  b.stage = 'tie';
-  b.tb = { q, n:b.tbRounds, shown:false };
-  markUsed(q);
-  go('battleTie');
-}
-function battleAward(){
-  const g = G(), b = g.battle;
-  b.stage = 'done'; b.done = true;
-  if(b.winner != null && !b.awarded){
-    b.awarded = true;
-    g.teams[b.winner].score += g.miniPts;
-    b.award = [b.winner === 0 ? g.miniPts : 0, b.winner === 1 ? g.miniPts : 0];
-    Snd.point();
-  }
-  go('battleSummary');
-}
 /* ==========================================================================
    8c. THE AUCTION — bid on how many you can name, then deliver it
    ==========================================================================
@@ -3246,31 +3199,9 @@ const CLOSEST_LEGS = QMB.LEGS.closest;   // 7 legs in Closest To Wins
 /* The host's hand-picked categories first, in the order they ticked them, then
    whatever else the bank has to make the numbers up. */
 
-function buildAuction(){
-  const g = G();
-  const deck = auctionDeck(g.cfg);
-  if(!deck.length){ g.done.auction = true; toast('No auction categories left in the bank.'); return null; }
-  g.auction = {
-    deck,                            // everything still available, in draw order
-    leg:0, n:Math.min(AUCTION_LEGS, deck.length),
-    wins:[0, 0], legs:[],            // one record per finished leg
-    q:null, bid:0, by:null, turn:0, count:0,
-    winner:null, awarded:false, done:false
-  };
-  auctionDraw();
-  return g.auction;
-}
 /* Take the next category off the deck and reset the leg around it. Also the
    Change-the-category button — the skipped one goes to the back, not the bin,
    so a long night cannot run the deck dry by skipping. */
-function auctionDraw(skip){
-  const a = G().auction;
-  if(skip && a.q) a.deck.push(a.q);
-  a.q = a.deck.shift() || a.q;
-  if(a.q) markUsed(a.q);
-  a.bid = 0; a.by = null; a.count = 0;
-  a.turn = a.leg % 2;                // the open alternates leg by leg
-}
 /* ==========================================================================
    8d. DON'T SAY THE SAME AS ME
    ==========================================================================
@@ -5151,29 +5082,7 @@ AFTER.auctionRun = function(){
 /* End of ONE leg. The bidder either delivered or they did not; the other team
    takes it if they did not. A leg always has exactly one winner, and with an
    odd number of legs the auction can never finish level. */
-function auctionResolve(){
-  const g = G(), a = g.auction;
-  Timer.stop();
-  const made = a.count >= a.bid;
-  const won  = made ? a.by : otherTeam(a.by);
-  a.wins[won]++;
-  a.legs.push({ q:a.q, bid:a.bid, by:a.by, count:a.count, made, won });
-  Snd[made ? 'correct' : 'wrong']();
-  go('auctionLeg');
-}
 /* All legs played — the auction itself is what pays, not the individual legs */
-function auctionFinish(){
-  const g = G(), a = g.auction;
-  a.done = true;
-  a.winner = a.wins[0] > a.wins[1] ? 0 : 1;
-  if(!a.awarded){
-    a.awarded = true;
-    a.award = [a.winner === 0 ? g.miniPts : 0, a.winner === 1 ? g.miniPts : 0];
-    g.teams[a.winner].score += g.miniPts;
-    Snd.point();
-  }
-  go('auctionResult');
-}
 
 /* one leg down — who took it, and what is still to play */
 SCREENS.auctionLeg = function(){
@@ -6715,16 +6624,12 @@ function runNextMini(){
 function startMini(key){
   const g = G();
   if(key === 'closest'){ go('miniIntro'); return; }
-  if(key === 'auction'){ buildAuction(); go('auctionIntro'); return; }
+  if(key === 'auction'){ run({ type:'auction/build' }); go('auctionIntro'); return; }
   if(key === 'saysame'){ go('sayIntro'); return; }
   if(key === 'map'){ go('mapIntro'); return; }
   if(key === 'flag'){ go('flagIntro'); return; }
   if(key === 'dish'){ go('dishIntro'); return; }
-  if(key === 'battle'){
-    g.battle = buildBattle();
-    if(!g.battle){ g.done.battle = true; toast('Not enough spare questions left for the Battle.'); endGame(); return; }
-    go('battleIntro'); return;
-  }
+  if(key === 'battle'){ run({ type:'battle/build' }); return; }
 }
 function nextRound(){
   const g = G();
@@ -6743,8 +6648,8 @@ function advanceRound(){
 
 /* ---------- mini ---------- */
 /* ---------- moves that live in the engine ----------
-   Closest To Wins, Don't Say the Same, Map, Flag and Cocktail or Dish play
-   through QMB.play (engine/core.js):
+   Every mini-game, the Battle and sudden death play through QMB.play
+   (engine/core.js):
    it changes the game and says what the screen should do. This carries
    that out — the same list Party mode will carry out on the TV. */
 function run(action){ applyFx(QMB.play(G(), action, { deal:DEAL })); }
@@ -6759,48 +6664,17 @@ function applyFx(fx){
     if(f.go) go(f.go);
     if(f.render) render();
     if(f.next && !runNextMini()) advanceRound();
+    if(f.finalize) finalize();
   });
 }
 function dishTimeUp(){ if(S.screen === 'dishQ') run({ type:'dish/timeUp' }); }
+/* the Auction's clock running out, and "Time is up" */
+function auctionResolve(){ run({ type:'auction/resolve' }); }
+/* after the last round or mini-game: a winner, or sudden death on a tie */
+function endGame(){ run({ type:'game/end' }); }
 
 /* ---------- end of game ---------- */
-function endGame(){
-  const g = G();
-  if(g.teams[0].score === g.teams[1].score){ startSudden(); return; }
-  g.winner = g.teams[0].score > g.teams[1].score ? 0 : 1;
-  finalize();
-}
 /* Prefer the themes chosen for tonight; widen only when they run dry. */
-function suddenPool(){
-  const g = G();
-  const inGame = new Set();
-  g.rounds.forEach(r => r.q.forEach(q => inGame.add(q.id)));
-  g.mini.qs.forEach(q => inGame.add(q.id));
-  (g.sdUsed || []).forEach(id => inGame.add(id));
-  const themes = g.cfg.themes || [];
-  const free = (q) => q.type === 'standard' && !inGame.has(q.id);
-  let pool = S.bank.filter(q => free(q) && themes.indexOf(q.theme) > -1 && isFresh(q));
-  if(!pool.length) pool = S.bank.filter(q => free(q) && themes.indexOf(q.theme) > -1);
-  if(!pool.length) pool = S.bank.filter(q => free(q) && isFresh(q));
-  if(!pool.length) pool = S.bank.filter(free);
-  return pool;
-}
-function startSudden(newLeg){
-  const g = G();
-  const pool = suddenPool();
-  if(!pool.length){
-    if(newLeg === false) return toast('No spare questions left to swap in.');
-    g.winner = null; finalize(); return;
-  }
-  const q = shuffle(pool)[0];
-  g.sdUsed = (g.sdUsed || []).concat([q.id]);
-  if(newLeg !== false) g.sdRounds = (g.sdRounds || 0) + 1;
-  const offTheme = (g.cfg.themes || []).indexOf(q.theme) < 0;
-  g.sd = { q, n:g.sdRounds, shown:false, offTheme };
-  markUsed(q);
-  if(offTheme) toast('Tonight themes are out of spare questions — pulling from ' + q.theme + '.', 4200);
-  go('sudden');
-}
 function finalize(){
   const g = G();
   const rec = {
@@ -7539,100 +7413,34 @@ const ACT = {
   dishAward(e){ run({ type:'dish/award', w:e.dataset.w === 'split' ? 'split' : +e.dataset.w }); },
   afterDish(){ run({ type:'dish/done' }); },
 
-  /* ---- the auction ---- */
-  auctionBegin(){ Snd.soft(); go('auctionBid'); },
-  auctionRaise(){
-    const a = G().auction;
-    const n = Math.floor(+(el('auctionN') || {}).value);
-    if(!(n > a.bid)) return toast('Has to beat ' + a.bid + '.');
-    a.bid = n; a.by = a.turn; a.turn = otherTeam(a.turn);
-    Snd.soft(); render();
-  },
-  auctionPass(){
-    const a = G().auction;
-    if(!a.bid) return toast('Somebody has to open first.');
-    a.turn = a.by;                 // the standing bidder is the one on the hook
-    a.ran = true;
-    Snd.soft(); go('auctionRun');
-  },
-  auctionTick(){
-    const a = G().auction;
-    a.count++;
-    Snd.correct();
-    if(a.count >= a.bid) return auctionResolve();   // settles itself on the target
-    render();
-  },
-  auctionUntick(){ const a = G().auction; if(a.count) a.count--; render(); },
-  auctionSkip(){ auctionDraw(true); Snd.soft(); render(); },
-  auctionNextLeg(){
-    const a = G().auction;
-    a.leg++;
-    if(a.leg >= a.n) return auctionFinish();
-    auctionDraw();
-    go('auctionBid');
-  },
-  afterAuction(){
-    const g = G();
-    g.done.auction = true;
-    if(runNextMini()) return;
-    advanceRound();
-  },
+  /* ---- the auction (moves in the engine) ---- */
+  auctionBegin(){ run({ type:'auction/begin' }); },
+  auctionRaise(){ run({ type:'auction/raise', n:Math.floor(+(el('auctionN') || {}).value) }); },
+  auctionPass(){ run({ type:'auction/pass' }); },
+  auctionTick(){ run({ type:'auction/tick' }); },
+  auctionUntick(){ run({ type:'auction/untick' }); },
+  auctionSkip(){ run({ type:'auction/skip' }); },
+  auctionNextLeg(){ run({ type:'auction/nextLeg' }); },
+  afterAuction(){ run({ type:'auction/done' }); },
 
   /* ---- battle of the captains ----
      battleYes / battleNo are gone with the end-of-night pop-up. The Battle is
      chosen in Setup now and started by startMini('battle'). */
   /* used by both the intro and the handoff — cap and i are already set */
-  battleStart(){ const b = G().battle; b.shown = false; go('battleQ'); },
-  battleShow(){ Timer.stop(); G().battle.shown = true; render(); },
-  /* Same escape hatch as a standard round: if the question doesn't suit the
-     room, pull another at the same difficulty so the shape survives. The one
-     dropped is remembered, so pressing it twice can't hand back the first. */
-  battleSwap(){
-    const b = G().battle, cur = b.qs[b.cap][b.i];
-    let pool = battlePool(cur.difficulty);
-    if(!pool.length) pool = battlePool();
-    if(!pool.length) return toast('No spare question left in the bank.');
-    b.dropped.push(cur.id);
-    b.qs[b.cap][b.i] = shuffle(pool)[0];
-    toast('New question.');
-    go('battleQ');
-  },
-  battleMark(e){
-    const b = G().battle, q = b.qs[b.cap][b.i], got = e.dataset.v === '1';
-    b.log[b.cap][b.i] = { q, got };
-    if(got){ b.score[b.cap]++; Snd.correct(); } else Snd.wrong();
-    markUsed(q);
-    b.shown = false;
-    b.i++;
-    if(b.i < b.n){ go('battleQ'); return; }
-    if(b.cap === 0){ b.cap = 1; b.i = 0; go('battleHandoff'); return; }
-    battleFinish();
-  },
-  battleTbShow(){ G().battle.tb.shown = true; render(); },
-  battleTbSwap(){ battleTieBreak(false); },
-  battleTbWin(e){
-    const b = G().battle;
-    if(e.dataset.w === 'none'){ battleTieBreak(); return; }
-    b.winner = +e.dataset.w;
-    battleAward();
-  },
-  /* the Battle's 2 points can create a tie as easily as break one — 10-8 with
-     the trailing captain winning is 10-10 — so hand back to the normal ending,
-     which sends a level game to sudden death exactly as it always did */
-  battleDone(){ G().done.battle = true; endGame(); },
+  battleStart(){ run({ type:'battle/start' }); },
+  battleShow(){ run({ type:'battle/show' }); },
+  battleSwap(){ run({ type:'battle/swap' }); },
+  battleMark(e){ run({ type:'battle/mark', got:e.dataset.v === '1' }); },
+  battleTbShow(){ run({ type:'battle/tbShow' }); },
+  battleTbSwap(){ run({ type:'battle/tbSwap' }); },
+  battleTbWin(e){ run({ type:'battle/tbWin', w:e.dataset.w === 'none' ? 'none' : +e.dataset.w }); },
+  battleDone(){ run({ type:'battle/done' }); },
 
-  /* ---- sudden death ---- */
-  sdShow(){ G().sd.shown = true; render(); },
-  sdGo(){ G().sdReady = true; Snd.soft(); go('sudden'); },
-  sdSwap(){ startSudden(false); },
-  sdWin(e){
-    const g = G();
-    if(e.dataset.w === 'none'){ startSudden(); return; }
-    const w = +e.dataset.w;
-    g.teams[w].score += 1;
-    g.winner = w;
-    finalize();
-  },
+  /* ---- sudden death (moves in the engine) ---- */
+  sdShow(){ run({ type:'sudden/show' }); },
+  sdGo(){ run({ type:'sudden/go' }); },
+  sdSwap(){ run({ type:'sudden/swap' }); },
+  sdWin(e){ run({ type:'sudden/win', w:e.dataset.w === 'none' ? 'none' : +e.dataset.w }); },
 
   /* the colophon reveals on tap. A phone has no hover, and iOS fires :active
      too unreliably to hang it on, so it goes through the same click handler as

@@ -527,8 +527,9 @@
      the TV and the phones. A move that isn't allowed right now returns []
      or just a toast saying why.
        { used:q }                 mark that question as played
-     Moved over game by game: Flag, Cocktail or Dish, Map, Closest To Wins,
-     Don't Say the Same as Me so far.                                       */
+       { finalize:true }          the night is over — save it and show the final
+     Every game's moves are here: the five best-of mini-games, the Auction,
+     the Battle, sudden death; the standard rounds follow.                  */
 
   /* the mini-game's points to one team, or split — once */
   function awardMini(g, s, w, fx){
@@ -671,7 +672,248 @@
   const CLOSEST_END = { what:'question', again:'miniQ', summary:'miniSummary', draw:(q) => q,
     dry:'Tied on legs, and there are no spare Closest To questions left for another tie-breaker. Your call.' };
 
+  /* ---- The Auction ---- */
+  /* the next category off the deck; also "Change the category" — the
+     skipped one goes to the back, not the bin */
+  function auctionDraw(a, skip, fx){
+    if(skip && a.q) a.deck.push(a.q);
+    a.q = a.deck.shift() || a.q;
+    if(a.q) fx.push({ used:a.q });
+    a.bid = 0; a.by = null; a.count = 0;
+    a.turn = a.leg % 2;                // the open alternates leg by leg
+  }
+  /* end of one leg: the bidder delivered or didn't; exactly one winner */
+  function auctionResolve(g, fx){
+    const a = g.auction;
+    fx.push({ timer:'stop' });
+    const made = a.count >= a.bid;
+    const won  = made ? a.by : other(a.by);
+    a.wins[won]++;
+    a.legs.push({ q:a.q, bid:a.bid, by:a.by, count:a.count, made, won });
+    fx.push({ sound:made ? 'correct' : 'wrong' }, { go:'auctionLeg' });
+    return fx;
+  }
+  /* all legs played — the auction itself pays, not the legs */
+  function auctionFinish(g, fx){
+    const a = g.auction;
+    a.done = true;
+    a.winner = a.wins[0] > a.wins[1] ? 0 : 1;
+    if(!a.awarded){
+      a.awarded = true;
+      a.award = [a.winner === 0 ? g.miniPts : 0, a.winner === 1 ? g.miniPts : 0];
+      g.teams[a.winner].score += g.miniPts;
+      fx.push({ sound:'point' });
+    }
+    fx.push({ go:'auctionResult' });
+    return fx;
+  }
+
+  /* ---- Battle of the Captains ---- */
+  /* everything already used tonight is off the table for the Battle */
+  function battleSpent(g){
+    const spent = new Set();
+    g.rounds.forEach(r => r.q.forEach(q => spent.add(q.id)));
+    (g.mini.qs || []).forEach(q => spent.add(q.id));
+    (g.mini.spare || []).forEach(q => spent.add(q.id));
+    (g.sdUsed || []).forEach(id => spent.add(id));
+    const b = g.battle;
+    if(b){
+      b.qs.forEach(set => set.forEach(q => spent.add(q.id)));
+      (b.tbUsed || []).forEach(id => spent.add(id));
+      (b.dropped || []).forEach(id => spent.add(id));
+    }
+    return spent;
+  }
+  function battleAward(g, fx){
+    const b = g.battle;
+    b.stage = 'done'; b.done = true;
+    if(b.winner != null && !b.awarded){
+      b.awarded = true;
+      g.teams[b.winner].score += g.miniPts;
+      b.award = [b.winner === 0 ? g.miniPts : 0, b.winner === 1 ? g.miniPts : 0];
+      fx.push({ sound:'point' });
+    }
+    fx.push({ go:'battleSummary' });
+    return fx;
+  }
+  /* level → a medium question, no clock, first captain in takes it; still
+     level → another. bump === false swaps this tie-breaker instead. */
+  function battleTieBreak(g, env, bump, fx){
+    const b = g.battle, D = env.deal;
+    let pool = D.battlePool(battleSpent(g), 'medium');
+    if(!pool.length) pool = D.battlePool(battleSpent(g));
+    if(!pool.length){
+      b.stage = 'done'; b.done = true; b.winner = null;
+      b.note = 'Dead level, and the bank is out of questions. Your call.';
+      fx.push({ go:'battleSummary' }); return fx;
+    }
+    const q = D.shuffle(pool)[0];
+    b.tbUsed.push(q.id);
+    if(bump !== false) b.tbRounds++;
+    b.stage = 'tie';
+    b.tb = { q, n:b.tbRounds, shown:false };
+    fx.push({ used:q }, { go:'battleTie' });
+    return fx;
+  }
+  function battleFinish(g, env, fx){
+    const b = g.battle;
+    if(b.score[0] === b.score[1]) return battleTieBreak(g, env, undefined, fx);
+    b.winner = b.score[0] > b.score[1] ? 0 : 1;
+    return battleAward(g, fx);
+  }
+
+  /* ---- the end of the night, and sudden death ---- */
+  /* tonight's themes first; wider only when they run dry */
+  function suddenPool(g, D){
+    const inGame = new Set();
+    g.rounds.forEach(r => r.q.forEach(q => inGame.add(q.id)));
+    g.mini.qs.forEach(q => inGame.add(q.id));
+    (g.sdUsed || []).forEach(id => inGame.add(id));
+    const themes = g.cfg.themes || [];
+    const free = (q) => q.type === 'standard' && !inGame.has(q.id);
+    let pool = D.bank().filter(q => free(q) && themes.indexOf(q.theme) > -1 && D.isFresh(q));
+    if(!pool.length) pool = D.bank().filter(q => free(q) && themes.indexOf(q.theme) > -1);
+    if(!pool.length) pool = D.bank().filter(q => free(q) && D.isFresh(q));
+    if(!pool.length) pool = D.bank().filter(free);
+    return pool;
+  }
+  /* newLeg === false: "Change question", not another sudden-death question */
+  function startSudden(g, env, newLeg, fx){
+    const D = env.deal;
+    const pool = suddenPool(g, D);
+    if(!pool.length){
+      if(newLeg === false){ fx.push({ toast:'No spare questions left to swap in.' }); return fx; }
+      g.winner = null; fx.push({ finalize:true }); return fx;
+    }
+    const q = D.shuffle(pool)[0];
+    g.sdUsed = (g.sdUsed || []).concat([q.id]);
+    if(newLeg !== false) g.sdRounds = (g.sdRounds || 0) + 1;
+    const offTheme = (g.cfg.themes || []).indexOf(q.theme) < 0;
+    g.sd = { q, n:g.sdRounds, shown:false, offTheme };
+    fx.push({ used:q });
+    if(offTheme) fx.push({ toast:'Tonight themes are out of spare questions — pulling from ' + q.theme + '.', ms:4200 });
+    fx.push({ go:'sudden' });
+    return fx;
+  }
+  function endGame(g, env, fx){
+    if(g.teams[0].score === g.teams[1].score) return startSudden(g, env, undefined, fx);
+    g.winner = g.teams[0].score > g.teams[1].score ? 0 : 1;
+    fx.push({ finalize:true });
+    return fx;
+  }
+
   const MOVES = {
+    /* deal the auction's deck when it comes round */
+    'auction/build'(g, a, env){
+      const deck = env.deal.auctionDeck(g.cfg), fx = [];
+      if(!deck.length){ g.done.auction = true; fx.push({ toast:'No auction categories left in the bank.' }); return fx; }
+      g.auction = {
+        deck,                            // everything still available, in draw order
+        leg:0, n:Math.min(LEGS.auction, deck.length),
+        wins:[0, 0], legs:[],            // one record per finished leg
+        q:null, bid:0, by:null, turn:0, count:0,
+        winner:null, awarded:false, done:false
+      };
+      auctionDraw(g.auction, false, fx);
+      return fx;
+    },
+    'auction/begin'(){ return [{ sound:'soft' }, { go:'auctionBid' }]; },
+    /* n: the new bid */
+    'auction/raise'(g, act){
+      const a = g.auction, n = act.n;
+      if(!(n > a.bid)) return [{ toast:'Has to beat ' + a.bid + '.' }];
+      a.bid = n; a.by = a.turn; a.turn = other(a.turn);
+      return [{ sound:'soft' }, { render:true }];
+    },
+    'auction/pass'(g){
+      const a = g.auction;
+      if(!a.bid) return [{ toast:'Somebody has to open first.' }];
+      a.turn = a.by;                 // the standing bidder is the one on the hook
+      a.ran = true;
+      return [{ sound:'soft' }, { go:'auctionRun' }];
+    },
+    'auction/tick'(g){
+      const a = g.auction, fx = [];
+      a.count++;
+      fx.push({ sound:'correct' });
+      if(a.count >= a.bid) return auctionResolve(g, fx);   // settles itself on the target
+      fx.push({ render:true });
+      return fx;
+    },
+    'auction/untick'(g){ const a = g.auction; if(a.count) a.count--; return [{ render:true }]; },
+    'auction/skip'(g){ const fx = []; auctionDraw(g.auction, true, fx); fx.push({ sound:'soft' }, { render:true }); return fx; },
+    /* out of time, or "time is up" pressed */
+    'auction/resolve'(g){ return auctionResolve(g, []); },
+    'auction/nextLeg'(g){
+      const a = g.auction, fx = [];
+      a.leg++;
+      if(a.leg >= a.n) return auctionFinish(g, fx);
+      auctionDraw(a, false, fx);
+      fx.push({ go:'auctionBid' });
+      return fx;
+    },
+    'auction/done'(g){ g.done.auction = true; return [{ next:true }]; },
+
+    /* deal the Battle when it comes round; not enough questions → skip to the end */
+    'battle/build'(g, a, env){
+      g.battle = env.deal.buildBattle(battleSpent(g));
+      if(!g.battle){
+        g.done.battle = true;
+        return endGame(g, env, [{ toast:'Not enough spare questions left for the Battle.' }]);
+      }
+      return [{ go:'battleIntro' }];
+    },
+    /* the intro and the handoff both start here — cap and i are already set */
+    'battle/start'(g){ g.battle.shown = false; return [{ go:'battleQ' }]; },
+    'battle/show'(g){ g.battle.shown = true; return [{ timer:'stop' }, { render:true }]; },
+    /* a question that doesn't suit the room: another at the same difficulty;
+       the dropped one is remembered so it can't come straight back */
+    'battle/swap'(g, a, env){
+      const b = g.battle, D = env.deal, cur = b.qs[b.cap][b.i];
+      let pool = D.battlePool(battleSpent(g), cur.difficulty);
+      if(!pool.length) pool = D.battlePool(battleSpent(g));
+      if(!pool.length) return [{ toast:'No spare question left in the bank.' }];
+      b.dropped.push(cur.id);
+      b.qs[b.cap][b.i] = D.shuffle(pool)[0];
+      return [{ toast:'New question.' }, { go:'battleQ' }];
+    },
+    /* got: true | false */
+    'battle/mark'(g, a, env){
+      const b = g.battle, q = b.qs[b.cap][b.i], fx = [];
+      b.log[b.cap][b.i] = { q, got:a.got };
+      if(a.got){ b.score[b.cap]++; fx.push({ sound:'correct' }); } else fx.push({ sound:'wrong' });
+      fx.push({ used:q });
+      b.shown = false;
+      b.i++;
+      if(b.i < b.n){ fx.push({ go:'battleQ' }); return fx; }
+      if(b.cap === 0){ b.cap = 1; b.i = 0; fx.push({ go:'battleHandoff' }); return fx; }
+      return battleFinish(g, env, fx);
+    },
+    'battle/tbShow'(g){ g.battle.tb.shown = true; return [{ render:true }]; },
+    'battle/tbSwap'(g, a, env){ return battleTieBreak(g, env, false, []); },
+    /* w: 0 | 1 | 'none' (nobody got it → another) */
+    'battle/tbWin'(g, a, env){
+      if(a.w === 'none') return battleTieBreak(g, env, undefined, []);
+      g.battle.winner = a.w;
+      return battleAward(g, []);
+    },
+    /* the Battle's points can make a tie as easily as break one, so this hands
+       back to the normal ending — which sends a level game to sudden death */
+    'battle/done'(g, a, env){ g.done.battle = true; return endGame(g, env, []); },
+
+    /* the last round (or mini-game) is over */
+    'game/end'(g, a, env){ return endGame(g, env, []); },
+    'sudden/go'(g){ g.sdReady = true; return [{ sound:'soft' }, { go:'sudden' }]; },
+    'sudden/show'(g){ g.sd.shown = true; return [{ render:true }]; },
+    'sudden/swap'(g, a, env){ return startSudden(g, env, false, []); },
+    /* w: 0 | 1 | 'none' (neither → the next question) */
+    'sudden/win'(g, a, env){
+      if(a.w === 'none') return startSudden(g, env, undefined, []);
+      g.teams[a.w].score += 1;
+      g.winner = a.w;
+      return [{ finalize:true }];
+    },
+
     'closest/start'(g){ g.mini.i = 0; return [{ go:'miniQ' }]; },
     /* a number that doesn't suit the room: another, preferably from a theme
        this mini-game hasn't used yet (one theme per leg) */
@@ -903,5 +1145,5 @@
   }
 
   return { tidy, asNumber, distance, isMatch, miniPointValue, planMinis, bestOf, shuffle:shuffleWith,
-           createDealer, play, MOVES:Object.keys(MOVES), LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
+           createDealer, play, MOVES:Object.keys(MOVES), battleSpent, LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
 });
