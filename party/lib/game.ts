@@ -2,25 +2,40 @@
    phones only ever get this view of it — and the answer goes in a separate
    row only the host can read (Supabase row-level security). */
 export type Team = { name: string; score: number; ll: { friend: boolean; dip: boolean; dbl: boolean } };
+export type Two<T> = [T, T];
+export type MiniKey = "closest" | "flag" | "dish";
 export type Pub = {
-  step: number;                   // bumps on every move; host taps carry it so stale ones are refused
-  screen: string;                 // roundIntro | ask | steal | answer | roundScore | sudden | final | lifeline…
+  step: number;                   // bumps on every host move and screen change; host taps carry it so stale ones are refused
+  screen: string;                 // roundIntro | ask | steal | answer | roundScore | sudden | final | miniIntro | miniQ | closestReveal | miniSummary | flag… | dish…
+  qid?: string;                   // the question on screen now — suggestions are filed under it
   r: number; N: number; theme?: string;
   turn?: 0 | 1;                   // the team answering (or stealing) now
   first?: 0 | 1;                  // who answers first this round
-  question?: string;
+  question?: string;              // never set for flags or dishes: there the question IS the answer
   deadline?: number | null;       // ms since epoch when the clock runs out; null = paused/none
   left?: number;                  // seconds left when paused
   timeUp?: boolean;
-  dbl?: [boolean, boolean];
-  llUsed?: [string[], string[]];
-  teams: [Team, Team];
-  result?: { answer: string; notes?: string; correct: boolean; stolen: boolean; by: 0 | 1 | null; pts: number };
-  roundPts?: [number, number];
+  dbl?: Two<boolean>;
+  llUsed?: Two<string[]>;
+  teams: Two<Team>;
+  sent?: Two<boolean>;            // which captains have sent an answer for this question
+  buzz?: 0 | 1 | null;            // who buzzed (dish, sudden death)
+  out?: Two<boolean>;             // who is out of this one (dish, sudden death)
+  result?: { answer: string; notes?: string; correct: boolean; stolen: boolean; by: 0 | 1 | null; pts: number; typed?: Two<string[] | null> };
+  roundPts?: Two<number>;
   lifeline?: { key: string; team: 0 | 1; deadline: number | null } | null;
   sudden?: { ready: boolean; shown: boolean; n: number; answer?: string } | null;
+  mini?: { key: MiniKey; title: string; leg: number; of: number; wins: Two<number>; pts: number; kinds?: string; tie?: boolean };
+  flag?: string;                  // the flag's file name (flags/<flag>.svg)
+  dish?: { kind: string; ings: string[]; n: number };
+  reveal?: { answer: string; typed?: Two<string[] | null>; guesses?: Two<number | null>; ok?: Two<boolean | null>; w: 0 | 1 | "tie" | "none" | null };
+  summary?: { wins: Two<number>; winner: 0 | 1 | null; needsHost: boolean; note: string; award?: Two<number> };
   winner?: 0 | 1 | null;
   toast?: { id: number; text: string } | null;
   mode: "host" | "nohost";
 };
-export type Secret = { answer?: string; notes?: string };
+/* host only: the answer, and what the captains typed with the app's opinion */
+export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null> };
+
+export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Cocktail or Dish" };
+export const T_CLOSEST = 90, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8;

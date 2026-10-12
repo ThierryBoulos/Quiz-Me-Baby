@@ -25,6 +25,8 @@ export default function TvRoom() {
 
   const { pub: own } = useTvGame(code, isTv, room, members);
   const pub = own || ((room?.state?.pub || null) as Pub | null);
+  /* for the end-to-end tests: what the TV is showing */
+  useEffect(() => { (window as unknown as { __qmb?: Pub | null }).__qmb = pub; }, [pub]);
 
   const joinUrl = origin + "/join?code=" + code;
   const host = members.find((m) => m.role === "host");

@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Lineup } from "@/components/Lineup";
-import { HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
+import { CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
 import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
@@ -72,7 +72,8 @@ export default function PhoneRoom() {
             <div><div className="eyebrow">Game on</div><h1 className="display text-[44px] mt-2">Eyes on the TV</h1></div>
           </section>
         ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} busy={busy} />
-          : <PlayerGame pub={pub} me={mine} />
+          : mine.role === "captain" ? <CaptainGame pub={pub} me={mine} members={members} code={code} />
+          : <PlayerGame pub={pub} me={mine} members={members} code={code} />
       ) : mine.role === "host" ? (
         <>
           <section className="card enter text-center">

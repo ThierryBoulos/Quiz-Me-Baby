@@ -28,10 +28,11 @@ Import the GitHub repo and set **Root Directory: `party`**. Nothing else is need
 - **Start the game**: the host's phone, or with no host Team A's captain, once each team has a captain. The TV decides the mode from who joined: hosted, or no host.
 - Your phone remembers you: reopen the page and you're back in your seat.
 
-Next: the game itself on the TV, driven by the engine, with the host's phone judging (step 2b), then captains' answers and the buzzer (step 3).
+Done: the hosted game on the TV (step 2b); captains type, buzz and lock in numbers, players suggest, and Closest To Wins, Guess the Flag and Cocktail or Dish run in Party (step 3). Next: Party with no host (step 4).
 
 ## Deploying
 
-Vercel deploys every push to `main` (Root Directory `party`). The Hobby team
-only builds commits whose author is on the team, so commits here are authored
-as the repo owner.
+Vercel builds this folder (Root Directory `party`). Pushes to `main` are
+meant to deploy automatically through Vercel's GitHub app; if a push doesn't
+show up, redeploy from the Vercel dashboard (Deployments → Redeploy) or
+use a Deploy Hook.
