@@ -519,9 +519,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const team = (t: 0 | 1) => ({ name: names[t], captain: members.find((m) => m.team === t && m.role === "captain")?.name || "",
         players: members.filter((m) => m.team === t).map((m) => m.name).join(", ") });
       const diff = LEVELS[cfgIn.difficulty] ? cfgIn.difficulty : "mixed";
+      /* flags and dishes have their own level, set in the mini-games section */
+      const miniDiff = LEVELS[cfgIn.miniLevel] ? cfgIn.miniLevel : diff;
       const minis = (Array.isArray(cfgIn.minis) ? cfgIn.minis : []).filter((k: string) => PARTY_MINIS.includes(k));
-      const cfg = { rounds: cfgIn.rounds || 6, themes: cfgIn.themes || [], difficulty: diff, standard: true,
-        minis, flagLevels: LEVELS[diff].flag, dishLevels: LEVELS[diff].dish, teamA: team(0), teamB: team(1), picks: {} };
+      /* standard rounds can be off (a mini-games-only night), as in Classic */
+      const standard = cfgIn.standard !== false;
+      if (!standard && !minis.length) return;
+      const rounds = Math.max(4, Math.min(12, Math.floor(Number(cfgIn.rounds) || 8)));
+      const cfg = { rounds, themes: cfgIn.themes || [], difficulty: diff, standard,
+        minis, flagLevels: LEVELS[miniDiff].flag, dishLevels: LEVELS[miniDiff].dish, teamA: team(0), teamB: team(1), picks: {} };
       const g = env().deal.buildGame(cfg);
       /* The engine always plays "hosted" here: with no host the TV is the host
          (it checks the answers), so steals and buzzers work as with one. */
