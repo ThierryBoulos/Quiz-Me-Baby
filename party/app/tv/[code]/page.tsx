@@ -46,7 +46,7 @@ export default function TvRoom() {
   const host = members.find((m) => m.role === "host");
   const who = starter(members);
 
-  if (!room) return <TvStage><div className="m-auto eyebrow text-[20px]">Opening the room…</div></TvStage>;
+  if (!room) return <TvStage><div className="m-auto flex flex-col items-center gap-4"><div className="spinner" style={{ width: 48, height: 48, borderWidth: 5 }} /><div className="eyebrow text-[20px]">Opening the room…</div></div></TvStage>;
 
   return (
     <TvStage>

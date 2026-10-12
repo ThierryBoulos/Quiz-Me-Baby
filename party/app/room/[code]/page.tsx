@@ -19,6 +19,15 @@ export default function PhoneRoom() {
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState("");
   const [panel, setPanel] = useState(false);          // mid-game: the line-up, and changing captain
+  /* Between a tap and the TV's reply (a second or two): a bar along the top,
+     and the buttons stay off, so nobody taps twice wondering if it worked. */
+  const [waiting, setWaiting] = useState(false);
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const on = () => { setWaiting(true); clearTimeout(t); t = setTimeout(() => setWaiting(false), 4000); };
+    window.addEventListener("qmb:sent", on);
+    return () => { window.removeEventListener("qmb:sent", on); clearTimeout(t); };
+  }, []);
 
   useEffect(() => { void ensureSession().then(setMe); }, []);
   const mine = useMemo(() => members.find((m) => m.user_id === me) || null, [members, me]);
@@ -47,12 +56,14 @@ export default function PhoneRoom() {
   });
   const leave = () => (room?.status === "lobby" || window.confirm("Leave the game? You can come back with the same name.")) && act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
 
+  /* the TV's reply has landed: whatever changed in the room */
+  useEffect(() => { setWaiting(false); }, [room]);
   const playing = room?.status === "playing" || room?.status === "done";
   const pub = (room?.state?.pub || null) as Pub | null;
   const secret = useSecret(code, !!mine && mine.role === "host" && playing);
   const sendMove = (move: Record<string, unknown>) => act(() => sendAction(code, "judge", { move, step: pub?.step }));
 
-  if (!room || !mine) return <main className="screen justify-center text-center"><div className="eyebrow">Finding your seat…</div></main>;
+  if (!room || !mine) return <main className="screen justify-center items-center gap-4" aria-busy="true"><div className="spinner" /><div className="eyebrow">Finding your seat…</div></main>;
 
   const myCaptain = mine.team != null ? members.find((m) => m.team === mine.team && m.role === "captain") : null;
   const who = starter(members);
@@ -61,12 +72,14 @@ export default function PhoneRoom() {
 
   return (
     <main className="screen">
+      {waiting && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
       <header className="flex items-center justify-between">
         <span className="chip"><span className="face">{mine.avatar || "🙂"}</span>{mine.name}</span>
         <span className="eyebrow whitespace-nowrap">{room.status === "lobby" ? `Room ${code}` : code}</span>
         <div className="flex gap-2">
-          {room.status !== "lobby" && <button className="btn btn-sm btn-ghost" onClick={() => setPanel(!panel)}>{panel ? "Back" : mine.role === "host" ? "Players" : "Team"}</button>}
-          <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>
+          {room.status !== "lobby"
+            ? <button className="btn btn-sm btn-ghost" aria-expanded={panel} onClick={() => setPanel(!panel)}>{panel ? "Back" : mine.role === "host" ? "Players" : "Team"}</button>
+            : <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}
         </div>
       </header>
 
@@ -94,13 +107,15 @@ export default function PhoneRoom() {
             {mine.role === "host" && <p className="text-[14px] text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
             <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} />
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
+            {/* leaving is kept away from everyday buttons, and asks first */}
+            <button className="btn btn-sm btn-ghost self-center mt-6" style={{ color: "var(--color-no)", borderColor: "color-mix(in srgb, var(--color-no) 45%, transparent)" }} onClick={leave}>Leave the game</button>
           </section>
         ) : !pub ? (
           <section className="card text-center enter flex-1 grid place-items-center">
             <div><div className="eyebrow">Game on</div><h1 className="display text-[44px] mt-2">Eyes on the TV</h1></div>
           </section>
-        ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} busy={busy} />
-          : mine.role === "captain" ? <CaptainGame pub={pub} me={mine} members={members} code={code} />
+        ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} busy={busy || waiting} />
+          : mine.role === "captain" ? <CaptainGame pub={pub} me={mine} members={members} code={code} hold={waiting} />
           : <>
               {!myCaptain && <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Your team has no captain. Make me captain</button>}
               <PlayerGame pub={pub} me={mine} members={members} code={code} />

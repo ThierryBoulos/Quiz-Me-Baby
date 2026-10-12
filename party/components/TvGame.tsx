@@ -24,7 +24,7 @@ export function TvGame({ pub }: { pub: Pub }) {
           </div>
         ))}
       </div>
-      <div className="eyebrow text-center text-[16px] -mt-6">{pub.screen === "final" ? "Final" : pub.screen === "sudden" ? "Sudden death" : pub.mini ? `${pub.mini.title}${/Intro|Summary|Tie/.test(pub.screen) ? "" : pub.mini.tie ? " · tie-breaker" : ` · ${pub.mini.leg} of ${pub.mini.of}`}` : `Round ${Math.min(pub.r + 1, pub.N)} of ${pub.N}`}</div>
+      <div className="eyebrow text-center text-[18px] -mt-6" style={{ color: "var(--color-ink-2)" }}>{pub.screen === "final" ? "Final" : pub.screen === "sudden" ? "Sudden death" : pub.mini ? `${pub.mini.title}${/Intro|Summary|Tie/.test(pub.screen) ? "" : pub.mini.tie ? " · tie-breaker" : ` · ${pub.mini.leg} of ${pub.mini.of}`}` : `Round ${Math.min(pub.r + 1, pub.N)} of ${pub.N}`}</div>
 
       <div className="flex-1 flex flex-col items-center justify-center text-center gap-6 enter" key={pub.screen + pub.r + (pub.turn ?? "")}>
         {pub.screen === "roundIntro" && (<>
@@ -92,7 +92,7 @@ export function TvGame({ pub }: { pub: Pub }) {
       )}
       {pub.pending && <Pending pub={pub} />}
       {pub.autoAt && !pub.pending && <AutoNext at={pub.autoAt} />}
-      {pub.toast && shown === pub.toast.id && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" style={{ fontSize: 22, padding: "12px 26px" }}>{pub.toast.text}</div>}
+      {pub.toast && shown === pub.toast.id && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" role="status" aria-live="polite" style={{ fontSize: 24, padding: "12px 28px" }}>{pub.toast.text}</div>}
     </div>
   );
 }
@@ -304,5 +304,5 @@ function Pending({ pub }: { pub: Pub }) {
 }
 function AutoNext({ at }: { at: number }) {
   const left = useSecondsLeft(at);
-  return <div className="absolute right-8 bottom-8 text-[16px] text-[var(--color-ink-3)]">Moving on in {left}</div>;
+  return <div className="absolute right-8 bottom-8 text-[18px] text-[var(--color-ink-2)]">Moving on in {left}</div>;
 }

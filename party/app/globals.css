@@ -32,21 +32,27 @@
   --tint: var(--color-gold);           /* the screen's colour: gold, or a team's */
 }
 html { background: var(--color-bg); color: var(--color-ink); font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
+/* no 300ms tap delay on phones */
+button, a, input, [role="button"] { touch-action: manipulation; }
 body { min-height: 100svh; background:
   radial-gradient(120% 70% at 50% -10%, color-mix(in srgb, var(--tint) 16%, transparent), transparent 60%),
   radial-gradient(90% 60% at 50% 110%, rgba(18, 22, 58, 0.9), transparent 70%), var(--color-bg); }
 
-.screen { min-height: 100svh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding: 28px 20px 24px; }
-.display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; line-height: 0.95; }
-.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-ink-3); }
+/* clear of the notch, the Dynamic Island and the home bar */
+.screen { min-height: 100svh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px;
+  padding: calc(28px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left)); }
+.display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; line-height: 0.95; font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-ink-3); }
 .card { background: linear-gradient(180deg, var(--glass-2), var(--glass)); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 18px; }
 
 /* every button is a pill */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 999px;
   font-weight: 800; font-size: 16px; border: 2px solid var(--line-2); color: var(--color-ink); background: var(--glass);
-  transition: transform 0.12s var(--ease), opacity 0.2s; }
-.btn:active { transform: scale(0.985); }
-.btn:disabled { opacity: 0.38; }
+  cursor: pointer; transition: transform 0.15s var(--ease), filter 0.15s, opacity 0.2s; }
+.btn:active:not(:disabled) { transform: scale(0.97); filter: brightness(1.15); }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; }
+/* keyboard focus is always visible */
+.btn:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--color-gold-2); outline-offset: 3px; }
 .btn-gold { background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); color: #1a1400; border-color: transparent;
   box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.22), 0 18px 40px -18px rgba(245, 197, 24, 0.75); }
 .btn-a { background: color-mix(in srgb, var(--color-a) 18%, transparent); border-color: var(--color-a); color: var(--color-ink); }
@@ -54,7 +60,7 @@ body { min-height: 100svh; background:
 .btn-lg { min-height: 64px; font-size: 19px; }
 .btn-block { width: 100%; }
 .btn-ghost { background: transparent; }
-.btn-sm { min-height: 40px; font-size: 14px; padding: 0 16px; }
+.btn-sm { min-height: 44px; font-size: 14px; padding: 0 16px; }
 
 .field-label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-ink-2); margin-bottom: 8px; }
 .field-error { font-size: 13px; font-style: italic; color: var(--color-no); }
@@ -74,10 +80,24 @@ body { min-height: 100svh; background:
 .enter { animation: enter 0.22s var(--ease) both; }
 @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
+/* waiting for the TV: a thin bar along the top of the phone */
+.sending { position: fixed; left: 0; right: 0; top: 0; height: 3px; z-index: 50; overflow: hidden; background: color-mix(in srgb, var(--tint) 20%, transparent); }
+.sending::after { content: ""; position: absolute; inset: 0; width: 40%; background: var(--tint); animation: sending 0.9s var(--ease) infinite; }
+@keyframes sending { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+/* a small spinner for loading screens */
+.spinner { width: 28px; height: 28px; border-radius: 999px; border: 3px solid var(--line-2); border-top-color: var(--color-gold); animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* the phone's "reduce motion" setting is respected */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .sending::after { animation: none; width: 100%; opacity: 0.6; }
+}
+
 /* the TV: a fixed 1280×720 stage scaled to whatever screen it's on */
 .tv-wrap { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden; }
 .tv-stage { width: 1280px; height: 720px; transform-origin: center; position: relative; padding: 44px 56px; display: flex; flex-direction: column; }
-button.chip { padding: 8px 14px; cursor: pointer; }
+button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .chip.chip-on { background: color-mix(in srgb, var(--color-gold) 18%, transparent); border-color: var(--color-gold); color: var(--color-gold); }
 
 /* Guess the Map — the drawing rules copied from Classic */

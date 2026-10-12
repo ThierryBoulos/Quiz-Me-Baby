@@ -23,7 +23,10 @@ export function Lineup({ room, members, onMove, big }: { room: Room | null; memb
                   <span className="face" style={big ? { width: 44, height: 44, fontSize: 28 } : undefined}>{m.avatar || "🙂"}</span>
                   {m.name}
                   {m.role === "captain" && <span className="cap">Captain</span>}
-                  {onMove && <button className="ml-1 text-[var(--color-ink-3)]" aria-label={"Move " + m.name} onClick={() => onMove(m, t === 0 ? 1 : 0)}>{t === 0 ? "→" : "←"}</button>}
+                  {onMove && (
+                    <button className="ml-1 -mr-1 w-11 h-11 -my-2 grid place-items-center rounded-full text-[var(--color-ink-2)] active:bg-white/10" aria-label={`Move ${m.name} to ${teamName(room, t === 0 ? 1 : 0)}`} onClick={() => onMove(m, t === 0 ? 1 : 0)}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ transform: t === 0 ? undefined : "scaleX(-1)" }}><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </button>)}
                 </span>
               ))}
             </div>

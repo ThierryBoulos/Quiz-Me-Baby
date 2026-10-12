@@ -34,4 +34,9 @@ export async function rpc<T = unknown>(fn: string, args: Record<string, unknown>
 export async function sendAction(room: string, kind: string, payload: Record<string, unknown> = {}) {
   const { error } = await sb().from("actions").insert({ room, kind, payload });
   if (error) throw new Error(error.message);
+  /* sent — the phone now waits for the TV's answer (see useWaiting) */
+  /* except quick same-screen taps (+1, undo, marking right/wrong, pause): counting names fast must stay fast */
+  const move = (payload.move as { type?: string } | undefined)?.type || "";
+  const quick = ["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/pause"].includes(move);
+  if (typeof window !== "undefined" && kind !== "suggest" && !quick) window.dispatchEvent(new Event("qmb:sent"));
 }

@@ -11,7 +11,7 @@ const load = (id: string) => (cache[id] ||= fetch(`/maps/${id}.json`).then((r) =
 export function MapView({ id, reveal, hint, maxH = 420, legend = true }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean }) {
   const [m, setM] = useState<MapFile | null>(null);
   useEffect(() => { setM(null); void load(id).then(setM); }, [id]);
-  if (!m) return <div className="text-center text-[var(--color-ink-3)] py-10">Loading the map…</div>;
+  if (!m) return <div className="flex flex-col items-center gap-3 py-10 text-[var(--color-ink-3)]" aria-busy="true"><div className="spinner" />Loading the map…</div>;
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: reveal ? m.r : m.q }} />

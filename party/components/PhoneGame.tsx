@@ -81,6 +81,8 @@ function Scores({ pub }: { pub: Pub }) {
 }
 
 type Send = (move: Record<string, unknown>) => void;
+/* a light vibration where the phone supports it (Android); silently nothing elsewhere */
+const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 const btnRed = { background: "rgba(255,85,102,.9)", color: "#2b0206", borderColor: "transparent" };
 const btnGreen = { background: "var(--color-ok)", color: "#04210f", borderColor: "transparent" };
 
@@ -465,7 +467,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   const suggest = async () => { const t = text.trim(); if (!t) return; await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); };
   return (
     <div className="flex flex-col gap-4 flex-1">
-      <div className="card text-center" style={{ borderColor: tc(pub.turn === mine && ["ask", "steal"].includes(pub.screen) ? mine : null) }}>
+      <div className="card text-center" style={{ borderColor: tc(pub.turn === mine && ["ask", "steal"].includes(pub.screen) ? mine : null) }} role="status" aria-live="polite">
         <div className="font-bold text-[17px]">{status(pub, me)}</div>
       </div>
       <OnScreen pub={pub} />
@@ -499,11 +501,12 @@ function Countdown({ at }: { at: number }) { const s = useSecondsLeft(at); retur
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
    lifelines; the number pad; the buzzer; the bidding; your players'
    suggestions. With no host, also the referee's buttons and Next. */
-export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; members: Member[]; code: string }) {
+export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub; me: Member; members: Member[]; code: string; hold?: boolean }) {
   const mine = me.team as 0 | 1, T = pub.teams, sc = pub.screen, nohost = pub.mode === "nohost";
   const theirs = (mine === 0 ? 1 : 0) as 0 | 1;
-  const [a, setA] = useState(""), [b, setB] = useState(""), [busy, setBusy] = useState(false), [sentTxt, setSentTxt] = useState<string | null>(null);
+  const [a, setA] = useState(""), [b, setB] = useState(""), [sending, setBusy] = useState(false), [sentTxt, setSentTxt] = useState<string | null>(null);
   const [bid, setBid] = useState("");
+  const busy = sending || hold;                     // sending, or waiting for the TV to reply
   useEffect(() => { setA(""); setB(""); setSentTxt(null); }, [pub.qid, sc]);
   useEffect(() => { setBid(""); }, [pub.auction?.bid, sc]);
   const names = useNames();
@@ -526,6 +529,9 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
   const armed = !!pub.dbl?.[mine];
   const llOk = (k: "friend" | "dip") => sc === "ask" && myTurn && !locked && T[mine].ll[k] && !(armed && used.length >= 1);
   const A = pub.auction;
+  /* a short buzz in the hand when it becomes your go (phones that can) */
+  const yourGo = (myTurn && !locked) || (sc === "auctionBid" && A?.turn === mine) || canBuzz;
+  useEffect(() => { if (yourGo) buzzHand([60, 40, 60]); }, [yourGo, pub.qid, sc]);
   const next = nohost && !pub.pending ? NEXT_LABEL[sc] : undefined;
   const showNext = next && !(sc === "sudden") && !(/Summary$/.test(sc) && sc !== "battleSummary" ? pub.summary?.needsHost : false);
 
@@ -538,7 +544,7 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
 
   return (
     <div className="flex flex-col gap-3 flex-1">
-      <div className="card text-center" style={{ borderColor: tc(mine) }}>
+      <div className="card text-center" style={{ borderColor: tc(mine) }} role="status" aria-live="polite">
         <div className="font-bold text-[17px]">{status(pub, me)}</div>
       </div>
 
@@ -571,14 +577,14 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
       {nohost && pub.lifeline?.key === "friend" && pub.lifeline.team === mine && (
         <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "ui/closeLifeline" })}>Back to the question</button>)}
 
-      {canBuzz && <button className="btn btn-lg btn-block display" style={{ minHeight: 150, fontSize: 56, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy} onClick={() => void act("buzz", {})}>BUZZ</button>}
+      {canBuzz && <button className="btn btn-lg btn-block display" style={{ minHeight: 150, fontSize: 56, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy} onClick={() => { buzzHand(40); void act("buzz", {}); }}>BUZZ</button>}
 
       {canType && (
         <div className="card flex flex-col gap-2" style={{ borderColor: tc(mine) }}>
           <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
           <input id="ans" className="input" value={a} maxLength={80} list={list.length ? "names" : undefined} autoComplete="off"
             inputMode={sc === "miniQ" ? "decimal" : "text"} placeholder={sc === "miniQ" ? "e.g. 236" : "Type it"} onChange={(e) => setA(e.target.value)} />
-          {dip && <input className="input" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
+          {dip && <input className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {list.length > 0 && <datalist id="names">{list.map((n) => <option key={n} value={n} />)}</datalist>}
           <button className="btn btn-gold btn-lg" disabled={busy || !a.trim()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
           {sentTxt && !nohost && (sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-2)]">Sent: <b>{sentTxt}</b>. You can change it until the host decides.</div>}
@@ -598,7 +604,7 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
           <div className="eyebrow">{A.bid ? `Beat ${A.bid}, or pass` : "Open the bidding"}</div>
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>
           <div className="flex gap-2">
-            <input className="input" inputMode="numeric" value={bid} placeholder={`More than ${A.bid}`} onChange={(e) => setBid(e.target.value.replace(/\D/g, ""))} />
+            <input className="input" aria-label="Your bid" inputMode="numeric" value={bid} placeholder={`More than ${A.bid}`} onChange={(e) => setBid(e.target.value.replace(/\D/g, ""))} />
             <button className="btn" disabled={busy || !(Number(bid) > A.bid)} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>Bid</button>
           </div>
           {A.bid > 0 && <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/pass" })}>Pass: {T[A.by ?? theirs].name} must name {A.bid}</button>}
@@ -640,7 +646,7 @@ export function CaptainGame({ pub, me, members, code }: { pub: Pub; me: Member; 
           <div className="eyebrow mb-2">Your team suggests{canType ? ". Tap one to use it." : ""}</div>
           <div className="flex flex-col gap-1">
             {sugs.map((s) => (
-              <button key={s.id} className="text-left text-[15px] py-1" disabled={!canType} onClick={() => setA(s.text)}>
+              <button key={s.id} className="text-left text-[15px] min-h-[44px] px-2 -mx-2 rounded-[12px] active:bg-white/10" disabled={!canType} onClick={() => setA(s.text)}>
                 <b style={{ color: tc(mine) }}>{members.find((m) => m.user_id === s.user_id)?.name}:</b> {s.text}</button>))}
           </div>
         </div>)}
