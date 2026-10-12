@@ -29,3 +29,9 @@ Import the GitHub repo and set **Root Directory: `party`**. Nothing else is need
 - Your phone remembers you: reopen the page and you're back in your seat.
 
 Next: the game itself on the TV, driven by the engine, with the host's phone judging (step 2b), then captains' answers and the buzzer (step 3).
+
+## Deploying
+
+Vercel deploys every push to `main` (Root Directory `party`). The Hobby team
+only builds commits whose author is on the team, so commits here are authored
+as the repo owner.
