@@ -11,7 +11,8 @@ import { notReadyWhy, readyToStart, starter, useRoom } from "@/lib/room";
 import type { Pub } from "@/lib/game";
 import { Snd } from "@/lib/sound";
 
-const CLASSIC = "https://thierryboulos.github.io/Quiz-Me-Baby/";
+/* Classic lives on this same site, at /classic (copied in at build time) */
+const CLASSIC = "/classic";
 
 /* THE TV. No buttons: it shows the room and runs the night. Phones send it
    actions (a team name, "start", later buzzes and answers); the TV checks the

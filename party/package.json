@@ -4,7 +4,9 @@
   "private": true,
   "description": "Quiz Me Baby, Party mode: the TV is the show, phones are the controllers.",
   "scripts": {
+    "predev": "node scripts/copy-classic.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/copy-classic.mjs",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit"

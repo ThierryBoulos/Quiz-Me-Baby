@@ -1,5 +1,7 @@
 # QUIZ ME BABY
 
+**Where it lives.** Everything is on one site now: <https://quiz-me-baby-eta.vercel.app/> is Party (phones as controllers, see `party/`), and Classic, this one-screen app, is at <https://quiz-me-baby-eta.vercel.app/classic>. Vercel copies Classic in from the repo root on every deploy (`party/scripts/copy-classic.mjs`), so `index.html` here is still the only copy. GitHub Pages keeps serving it too, at <https://thierryboulos.github.io/Quiz-Me-Baby/>. A browser keeps Classic's saved bank, history and settings per site, so the two addresses don't share them.
+
 Two files and a folder: `index.html`, `maps-geo.js` and `flags/`, side by side. Double-click `index.html`. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.) `maps-geo.js` is the real-world borders that **Guess the Map** draws from; the app only reads it when a game actually has maps on the card, so if it is missing, everything else still works.
 
 Your host stands on the left of the home screen. He's baked into the HTML as a data URI, so he travels with the file and there is no image folder to forget. (`host-imad.png` is the cut-out on its own, kept only in case you want to reuse it elsewhere — the app does not read it.) He's positioned out of the layout flow, so the logo and the menu stay dead centre on screen whether he's there or not, and he hides himself on windows narrower than 920px rather than squeeze them.
