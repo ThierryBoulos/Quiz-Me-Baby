@@ -495,14 +495,16 @@ function Result({ pub, mine }: { pub: Pub; mine?: 0 | 1 }) {
       {rows((t) => `${pub.reveal?.typed?.[t]?.[0] ?? (say ? "nothing" : "no answer")} · ${verdict(t)}`)}</>);
   }
   if (sc === "dishReveal" && pub.reveal) return head(legW(pub.reveal.w), legW(pub.reveal.w) != null ? `${T[pub.reveal.w as 0 | 1].name} got it` : "Nobody got it");
-  if (sc === "auctionLeg" && pub.auction?.last) { const L = pub.auction.last; return (
-    <div className="card text-center flex flex-col gap-1" role="status" aria-live="polite">
-      <div className="display text-[30px]" style={{ color: L.made ? "var(--color-ok)" : "var(--color-no)" }}>{L.made ? "Delivered!" : "Short!"}</div>
-      <div className="text-[15px]">{name(L.by)} bid {L.bid}, named {L.count}.</div>
-      <div className="display text-[24px] mt-1" style={{ color: tc(L.won) }}>{T[L.won].name} take the leg</div>
+  if (sc === "auctionLeg" && pub.auction?.last) { const L = pub.auction.last; return (<>
+    {/* one headline (who takes the leg); the how, small; the legs, as a board */}
+    <div className="card text-center flex flex-col items-center gap-2" role="status" aria-live="polite">
+      <span className="rounded-full px-3 py-1 text-[11px] font-extrabold tracking-[.16em] uppercase"
+        style={L.made ? { background: "rgba(46,204,113,.14)", color: "var(--color-ok)" } : { background: "rgba(255,85,102,.14)", color: "var(--color-no)" }}>{L.made ? "Delivered" : "Short"}</span>
+      <div className="display text-[32px] leading-none" style={{ color: tc(L.won) }}>{T[L.won].name} take the leg</div>
+      <div className="text-[14px] text-[var(--color-ink-2)]">{name(L.by)} bid {L.bid}, named {L.count}.</div>
       {mine != null && <div className="text-[13px] font-bold" style={{ color: L.won === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{L.won === mine ? "That's your team!" : "Not this time."}</div>}
-      <div className="text-[13px] text-[var(--color-ink-2)]">Legs so far: {T[0].name} {pub.auction.wins[0]} · {T[1].name} {pub.auction.wins[1]}</div>
-    </div>); }
+    </div>
+    {board(pub.auction.wins, "Legs so far", null)}</>); }
   if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null; return (<>
     {head(w, w == null ? "Level" : `${T[w].name} win the Auction`, w != null ? `+${A.award?.[w] ?? m?.pts} points` : "")}
     {board(A.wins, "Legs won", w)}</>); }
@@ -527,7 +529,8 @@ function OnScreen({ pub }: { pub: Pub }) {
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <Flag name={pub.flag} h={150} />}
     {pub.map && <MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={260} />}
     {pub.map?.reveal && <div className="display text-[26px] text-center" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>}
-    {pub.auction && /^auction(Bid|Run|Leg)$/.test(pub.screen) && <div className="card text-center"><div className="eyebrow">Category</div><div className="display text-[26px]" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>
+    {pub.auction && pub.screen === "auctionLeg" && <p className="text-center text-[14px] text-[var(--color-ink-2)]"><span className="eyebrow mr-2">Leg {pub.auction.wins[0] + pub.auction.wins[1]}</span>{pub.auction.cat}</p>}
+    {pub.auction && /^auction(Bid|Run)$/.test(pub.screen) && <div className="card text-center"><div className="eyebrow">Category</div><div className="display text-[26px]" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>
       {pub.screen === "auctionBid" && <BidBoard pub={pub} />}
       {pub.screen === "auctionRun" && <div className="display text-[44px]">{pub.auction.count} / {pub.auction.bid}</div>}</div>}
     {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
