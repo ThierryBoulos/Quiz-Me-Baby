@@ -591,7 +591,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const from = members.find((m) => m.user_id === a.user_id);
     /* anything a phone sends (its 15-second "I'm here" included) proves it's here */
     if (Date.now() - new Date(a.at).getTime() < 30000) here.current.at[a.user_id] = Date.now();
-    if (a.kind === "count") { if (isTv) onNote(a.user_id, a.payload as Parameters<typeof onNote>[1]); return; }
+    if (a.kind === "count") { if (isTvRef.current) onNote(a.user_id, a.payload as Parameters<typeof onNote>[1]); return; }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
       const names = [...(room.state.teamNames || ["Team A", "Team B"])] as [string, string];
       names[from.team as 0 | 1] = String(a.payload.name || "").slice(0, 18) || names[from.team as 0 | 1];
