@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Pub } from "@/lib/game";
 import { Clock, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
+import { AskHead, Hud, LifelineStrip, MiniIntro, RoundIntro } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
@@ -15,30 +16,20 @@ export function TvGame({ pub }: { pub: Pub }) {
   useEffect(() => { if (tid == null) return; setShown(tid); const t = setTimeout(() => setShown(null), 3000); return () => clearTimeout(t); }, [tid]);
   return (
     <div className="flex flex-col h-full">
-      {/* the scores, always */}
-      <div className="flex items-center justify-between">
-        {[0, 1].map((t) => (
-          <div key={t} className={"flex items-center gap-4 " + (t === 1 ? "flex-row-reverse" : "")}>
-            <div className="display text-[34px]" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
-            <div className="display text-[64px]">{T[t].score}</div>
-          </div>
-        ))}
-      </div>
-      <div className="eyebrow text-center text-[18px] -mt-6" style={{ color: "var(--color-ink-2)" }}>{pub.screen === "final" ? "Final" : pub.screen === "sudden" ? "Sudden death" : pub.mini ? `${pub.mini.title}${/Intro|Summary|Tie/.test(pub.screen) ? "" : pub.mini.tie ? " · tie-breaker" : ` · ${pub.mini.leg} of ${pub.mini.of}`}` : `Round ${Math.min(pub.r + 1, pub.N)} of ${pub.N}`}</div>
+      {/* the tracker, always: Classic's HUD */}
+      <Hud pub={pub} size="tv" />
 
-      <div className="flex-1 flex flex-col items-center justify-center text-center gap-6 enter" key={pub.screen + pub.r + (pub.turn ?? "")}>
-        {pub.screen === "roundIntro" && (<>
-          <div className="eyebrow text-[20px]">Theme</div>
-          <div className="display" style={{ fontSize: 130, color: "var(--color-gold)" }}>{pub.theme}</div>
-          <div className="text-[28px] text-[var(--color-ink-2)]"><b style={{ color: tc(pub.first) }}>{T[pub.first ?? 0].name}</b> answers first</div>
-          <div className="flex gap-4">{[0, 1].map((t) => pub.dbl?.[t] ? <span key={t} className="chip" style={{ fontSize: 20, color: tc(t as 0 | 1) }}>{T[t].name}: double points</span> : null)}</div>
-        </>)}
+      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] " + (pub.turn === 1 ? "b" : "a") : "gap-6")} key={pub.screen + pub.r + (pub.turn ?? "")}>
+        {pub.screen === "roundIntro" && <div className="w-full max-w-[1080px]"><RoundIntro pub={pub} size="tv" /></div>}
 
         {(pub.screen === "ask" || pub.screen === "steal") && (<>
-          <div className="display" style={{ fontSize: 40, color: tc(pub.turn) }}>{pub.screen === "steal" ? "Steal! " : ""}{T[pub.turn ?? 0].name}{pub.screen === "ask" ? " answers" : ""}</div>
-          <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 110 ? 40 : 52, lineHeight: 1.15 }}>{pub.question}</div>
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={150} />
-          <div className="h-8 text-[24px] font-bold" style={{ color: tc(pub.turn) }}>{pub.sent?.[pub.turn ?? 0] ? `${T[pub.turn ?? 0].name} has answered…` : ""}</div>
+          <AskHead pub={pub} size="tv" />
+          <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 110 ? 36 : 46, lineHeight: 1.15 }}>{pub.question}</div>
+          <div className="flex items-center gap-8">
+            <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
+            {pub.screen === "ask" && <div className="w-[560px]"><LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="tv" /></div>}
+          </div>
+          <div className="h-7 text-[22px] font-bold" style={{ color: tc(pub.turn) }}>{pub.sent?.[pub.turn ?? 0] ? `${T[pub.turn ?? 0].name} has answered…` : ""}</div>
         </>)}
 
         {pub.screen === "answer" && pub.result && (<>
@@ -121,17 +112,8 @@ function TvMini({ pub }: { pub: Pub }) {
   const T = pub.teams, m = pub.mini, sc = pub.screen;
   if (!m) return null;
   if (/Intro$/.test(sc)) return (<>
-    <div className="eyebrow text-[22px]">Mini-game</div>
-    <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>{m.title}</div>
-    <div className="text-[26px] text-[var(--color-ink-2)]">Best of {m.of}{m.kinds ? ` · ${m.kinds}` : ""} · winner takes {m.pts} points</div>
-    <div className="text-[26px] max-w-[1000px]">{m.key === "closest" ? "Both captains get the same number question. Type a number on your phone — nearest wins the leg."
-      : m.key === "flag" ? `A flag, ${15} seconds. Captains type the country — each team that gets it scores the leg.`
-      : m.key === "map" ? "A map goes up with no title. 60 seconds. Captains type what it shows: the idea counts, not the exact words."
-      : m.key === "saysame" ? "A prompt. Both captains type an answer, hidden from each other. The app has a word in mind: say it and you lose the leg. Matching each other is fine."
-      : m.key === "battle" ? (pub.mode === "nohost" ? "Captains only. Ten quick questions each, typed on the phone: 15 seconds a question. Teams, not a word." : "Captains only. Ten quick questions each, 7 seconds a question, answered out loud. Teams, not a word.")
-      : m.key === "auction" ? "A category. Captains take turns raising the bid on their phones, or pass. Whoever holds the bid has 30 seconds to name that many, out loud."
-      : "The ingredients come up one at a time, the giveaway last. Captains: first to BUZZ answers. Wrong, and you're out of that one."}</div>
-    {pub.mode === "nohost" && <div className="text-[20px] text-[var(--color-ink-3)]">No host tonight: either captain taps Start.</div>}
+    <div className="w-full max-w-[1080px]"><MiniIntro pub={pub} size="tv" /></div>
+    <div className="text-[18px] text-[var(--color-ink-3)]">{pub.mode === "nohost" ? "Either captain taps Start on their phone." : "The host starts it."}</div>
   </>);
   if (sc === "miniQ") return (<>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 50, lineHeight: 1.15 }}>{pub.question}</div>

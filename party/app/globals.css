@@ -149,3 +149,97 @@ button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .colophon { margin-top: 6px; font-size: 10px; letter-spacing: .1em; line-height: 1.5; color: var(--color-ink-3); opacity: .5; }
 .colophon .sep { opacity: .5; margin: 0 2px; }
 @media (max-height: 820px) { .home { padding-top: 10px; padding-bottom: 10px; } .home-main { gap: clamp(12px, 2vh, 20px); } .home-menu { gap: 9px; } }
+
+/* ---------- IN-GAME: Classic's HUD, team cards, lifelines, question head, mini-game intro ---------- */
+/* the tracker: on the TV and every phone */
+.hud { border-bottom: 1px solid var(--line); padding: 10px 0 12px; }
+.hud-in { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.hud-team { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.hud-team.b { justify-content: flex-end; }
+.hud-team .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.hud-team .nm { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--color-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.hud-team .sc { font-family: var(--font-display); font-size: 30px; line-height: 1; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.hud-team.a .sc { color: var(--color-a); } .hud-team.a .dot { background: var(--color-a); box-shadow: 0 0 12px var(--color-a); }
+.hud-team.b .sc { color: var(--color-b); } .hud-team.b .dot { background: var(--color-b); box-shadow: 0 0 12px var(--color-b); }
+.hud-mid { min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.hud-label { font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--color-ink-3); text-align: center; }
+.hud-label b { color: var(--color-gold); font-weight: 700; }
+.pips { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center; }
+.pip { height: 8px; width: 8px; border-radius: 50%; background: rgba(255,255,255,.16); transition: all .3s var(--ease); }
+.pip.mini { width: 26px; border-radius: 5px; }
+.pip.done { background: var(--color-ink-2); }
+.pip.now { background: var(--color-gold); box-shadow: 0 0 0 4px rgba(245,197,24,.18), 0 0 14px var(--color-gold); animation: pulse 1.8s ease-in-out infinite; }
+.pip.now.mini { width: 30px; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+/* phones: the scores on one line, the label and pips under them (Classic's narrow layout) */
+.hud.phone .hud-in { grid-template-columns: 1fr 1fr; row-gap: 8px; }
+.hud.phone .hud-mid { grid-column: 1 / -1; grid-row: 2; }
+.hud.phone .hud-team .nm { max-width: 110px; }
+/* the TV, read from the sofa */
+.hud.tv { padding: 0 0 14px; }
+.hud.tv .hud-team .nm { font-size: 18px; max-width: 300px; }
+.hud.tv .hud-team .sc { font-size: 48px; }
+.hud.tv .hud-team .dot { width: 14px; height: 14px; }
+.hud.tv .hud-label { font-size: 15px; }
+.hud.tv .pip { height: 11px; width: 11px; } .hud.tv .pip.mini { width: 34px; } .hud.tv .pip.now.mini { width: 40px; }
+
+.team-card { border-radius: 22px; padding: 18px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
+.team-card.a { background: linear-gradient(180deg, rgba(49,201,247,.10), rgba(255,255,255,.02)); border-color: rgba(49,201,247,.3); }
+.team-card.b { background: linear-gradient(180deg, rgba(255,77,130,.10), rgba(255,255,255,.02)); border-color: rgba(255,77,130,.3); }
+.team-tag { font-family: var(--font-display); font-size: 14px; letter-spacing: .2em; text-transform: uppercase; }
+.team-card.a .team-tag { color: var(--color-a); } .team-card.b .team-tag { color: var(--color-b); }
+
+.ll { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 10px; border-radius: 18px; border: 1px solid var(--line-2);
+  background: var(--glass); text-align: center; min-height: 92px; justify-content: center; transition: all .18s var(--ease); position: relative; overflow: hidden; width: 100%; }
+button.ll:not([disabled]) { cursor: pointer; }
+button.ll:not([disabled]):active { transform: scale(.97); }
+.ll .ic { width: 28px; height: 28px; stroke: var(--color-gold); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; transition: fill .25s var(--ease), transform .25s var(--ease); }
+.ll .nm { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.ll.off { opacity: .35; }
+.ll.spent { opacity: .3; }
+.ll.spent::after { content: "USED"; position: absolute; inset: auto 0 6px; font-size: 10px; letter-spacing: .24em; color: var(--color-no); font-weight: 800; }
+.ll.usedup { border-color: rgba(255,85,102,.35); background: rgba(255,85,102,.07); }
+.ll.usedup .ic { stroke: rgba(255,85,102,.5); }
+.ll.usedup .nm { color: var(--color-no); text-decoration: line-through; text-decoration-thickness: 2px; }
+.ll.armed, .ll.inuse { border-color: var(--color-gold); background: linear-gradient(180deg, rgba(245,197,24,.25), rgba(245,197,24,.08)); box-shadow: 0 0 0 3px rgba(245,197,24,.14), 0 18px 40px -18px rgba(245,197,24,.7); }
+.ll.armed .ic { fill: var(--color-gold); filter: drop-shadow(0 0 12px rgba(245,197,24,.8)); transform: scale(1.14); }
+.ll-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.ll-inv { display: grid; gap: 8px; }
+/* the phone's strip: same tiles, smaller, so the answer box stays in view */
+/* the round intro on a phone: both teams fit above the Start button */
+.ri-sm .team-card { padding: 12px; gap: 10px; border-radius: 18px; }
+.ri-sm .ll { flex-direction: row; min-height: 52px; gap: 10px; padding: 10px 14px; border-radius: 14px; }
+.ri-sm .ll .ic { width: 22px; height: 22px; }
+.ri-sm .badge { min-height: 30px; padding: 4px 8px; font-size: 10px; letter-spacing: .08em; }
+.ll-grid.sm { gap: 8px; }
+.mini-band.sm { padding: 9px 16px; column-gap: 14px; }
+.mini-band.sm .sep { display: none; }
+.ll-grid.sm .ll { gap: 5px; padding: 9px 6px 8px; border-radius: 14px; min-height: 58px; }
+.ll-grid.sm .ll .ic { width: 20px; height: 20px; }
+.ll-grid.sm .ll .nm { font-size: 10.5px; letter-spacing: .06em; line-height: 1.15; }
+.ll-grid.sm .ll.spent::after { inset: 5px 7px auto auto; font-size: 8px; letter-spacing: .14em; }
+.you-line { font-size: 14px; font-weight: 600; color: var(--color-ink-2); background: rgba(255,255,255,.05); border-radius: 999px; padding: 7px 14px; line-height: 1.3; }
+.you-line.go { color: var(--color-gold); background: rgba(245,197,24,.1); }
+.badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; min-height: 34px; }
+.badge.line { color: var(--color-ink-3); border: 1px solid var(--line-2); }
+.badge.no { background: rgba(255,85,102,.16); color: var(--color-no); border: 1px solid rgba(255,85,102,.4); text-decoration: line-through; opacity: .6; }
+.badge.gold { background: var(--color-gold); color: #1a1400; }
+
+/* who the question belongs to: unmissable at a glance */
+.q-theme { display: inline-flex; align-items: center; gap: 10px; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(0,0,0,.4);
+  font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+.whofor { font-family: var(--font-display); font-size: 20px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-3); }
+.whofor b { font-weight: 400; letter-spacing: .1em; font-size: 1.35em; }
+.whofor.a b { color: var(--color-a); text-shadow: 0 0 26px rgba(49,201,247,.55); }
+.whofor.b b { color: var(--color-b); text-shadow: 0 0 26px rgba(255,77,130,.55); }
+.reader { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-3); }
+.spot.a { background: radial-gradient(80% 120% at 50% -20%, rgba(49,201,247,.18), transparent 65%); }
+.spot.b { background: radial-gradient(80% 120% at 50% -20%, rgba(255,77,130,.18), transparent 65%); }
+
+/* mini-game intro */
+.mini-band { display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 22px; border-radius: 999px; flex-wrap: wrap; row-gap: 4px;
+  background: linear-gradient(90deg, rgba(245,197,24,.12), rgba(245,197,24,.24), rgba(245,197,24,.12)); border: 1px solid rgba(245,197,24,.35); }
+.rules { list-style: none; display: grid; gap: 12px; font-size: 15px; line-height: 1.55; text-align: left; counter-reset: r; }
+.rules li { counter-increment: r; }
+.rules li::before { content: counter(r) ". "; color: var(--color-gold); font-weight: 800; }
+.rules li.warn { color: #ffb347; }

@@ -3,6 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Lineup } from "@/components/Lineup";
 import { CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
+import { Hud } from "@/components/GameParts";
 import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
@@ -78,10 +79,13 @@ export default function PhoneRoom() {
         <span className="eyebrow whitespace-nowrap">{room.status === "lobby" ? `Room ${code}` : code}</span>
         <div className="flex gap-2">
           {room.status !== "lobby"
-            ? <button className="btn btn-sm btn-ghost" aria-expanded={panel} onClick={() => setPanel(!panel)}>{panel ? "Back" : mine.role === "host" ? "Players" : "Team"}</button>
+            ? <button className="btn btn-sm btn-ghost" aria-expanded={panel} onClick={() => setPanel(!panel)}>{panel ? "Back" : mine.role === "host" ? "Players" : "Team Members"}</button>
             : <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}
         </div>
       </header>
+
+      {/* the tracker, as on the TV: scores, where we are, the night's progress */}
+      {room.status !== "lobby" && pub && !panel && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
 
       {room.status !== "lobby" ? (
         /* joined after the start: pick a side first */

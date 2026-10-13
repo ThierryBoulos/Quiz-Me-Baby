@@ -194,6 +194,18 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
       autoAt: s.autoAt,
     };
+    /* the tracker: every round and mini-game of the night, in order (Classic's schedule/pipState) */
+    const live = miniOf(s.screen);
+    const sched: { kind: "std" | "mini"; i?: number; key?: string }[] = [];
+    g.rounds.forEach((_: G, i: number) => { sched.push({ kind: "std", i }); (g.plan || []).forEach((pl: G) => { if (pl.after === i) sched.push({ kind: "mini", key: pl.key }); }); });
+    if (!g.rounds.length) (g.plan || []).forEach((pl: G) => sched.push({ kind: "mini", key: pl.key }));
+    if (g.hasBattle) sched.push({ kind: "mini", key: "battle" });
+    p.pips = sched.map((x) => ({ kind: x.kind, state: x.kind === "mini"
+      ? (live === x.key ? "now" : g.done[x.key!] ? "done" : "todo")
+      : (x.i === g.r && !live && s.screen !== "final" && s.screen !== "sudden" ? "now" : g.rounds[x.i!]?.done ? "done" : "todo") }));
+    const mem = ctx.current.members;
+    p.captains = [0, 1].map((t) => mem.find((m) => m.team === t && m.role === "captain")?.name || null) as [string | null, string | null];
+    p.tMini = getSettings().tMini;
     const secret: Secret = { step: s.step, typed: s.typed, match: [match(s.typed[0], q), match(s.typed[1], q)], guesses: s.guesses };
     if (q) { p.qid = q.id; secret.qid = q.id; secret.answer = q.answer; secret.notes = q.notes; }
     if (rd) {
