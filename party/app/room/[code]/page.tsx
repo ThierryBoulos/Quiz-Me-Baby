@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
 import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
 import { Hud } from "@/components/GameParts";
+import { noteTvTime } from "@/components/Clock";
 import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
@@ -97,6 +98,7 @@ export default function PhoneRoom() {
   useEffect(() => { setWaiting(false); }, [room]);
   const playing = room?.status === "playing" || room?.status === "done";
   const pub = (room?.state?.pub || null) as Pub | null;
+  useEffect(() => { noteTvTime(pub?.at); }, [pub?.at]);
   const secret = useSecret(code, !!mine && mine.role === "host" && playing);
   /* a question is live on this phone: leaving the screen now gets flagged on the TV */
   const live = !!pub && !!mine && mine.role !== "host" && ANSWERING.includes(pub.screen) && !pub.paused

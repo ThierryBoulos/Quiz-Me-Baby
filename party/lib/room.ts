@@ -60,7 +60,10 @@ export function usePresence(code: string, me: string | null) {
     ch.subscribe((status) => { if (status === "SUBSCRIBED") track(); });
     const vis = () => { if (document.visibilityState === "visible") track(); };
     document.addEventListener("visibilitychange", vis);
-    return () => { document.removeEventListener("visibilitychange", vis); ref.current.ch = null; void sb().removeChannel(ch); };
+    /* say it again every 15 s: after a dropped connection the phone rejoins
+       the channel but its presence isn't restored, and the TV would think it gone */
+    const beat = setInterval(() => { if (document.visibilityState === "visible") track(); }, 15000);
+    return () => { clearInterval(beat); document.removeEventListener("visibilitychange", vis); ref.current.ch = null; void sb().removeChannel(ch); };
   }, [code, me]);
   /* tell the TV something about this phone, straight away (it may be about to sleep) */
   return useCallback((meta: AwayMeta) => { ref.current.meta = meta; void ref.current.ch?.track({ ...meta, at: Date.now() }); }, []);

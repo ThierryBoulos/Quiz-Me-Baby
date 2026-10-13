@@ -1,10 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
 
+/* Every deadline is the TV's time. A phone whose own clock is set wrong (by
+   more than a few seconds) would count down wrong, so phones learn how far
+   off they are from each update the TV sends (the smallest gap seen is the
+   closest to the truth) and correct for it. */
+let skew = 0, best: number | null = null;
+export function noteTvTime(tvAt?: number) {
+  if (!tvAt) return;
+  const gap = Date.now() - tvAt;
+  if (best == null || gap < best) best = gap;
+  skew = Math.abs(best) > 3000 ? best : 0;
+}
+const tvNow = () => Date.now() - skew;
+
 /* Seconds left, from the TV's deadline. Paused shows the frozen number. */
 export function useSecondsLeft(deadline?: number | null, left?: number) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(t); }, []);
+  const [now, setNow] = useState(tvNow());
+  useEffect(() => { const t = setInterval(() => setNow(tvNow()), 250); return () => clearInterval(t); }, []);
   if (deadline) return Math.max(0, Math.ceil((deadline - now) / 1000));
   return left ? Math.ceil(left) : 0;
 }
@@ -13,7 +26,7 @@ export function useAfter(at?: number | null) {
   const [on, setOn] = useState(false);
   useEffect(() => {
     if (!at) { setOn(false); return; }
-    const d = at - Date.now();
+    const d = at - tvNow();
     if (d <= 0) { setOn(true); return; }
     setOn(false);
     const t = setTimeout(() => setOn(true), d);

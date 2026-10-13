@@ -33,6 +33,9 @@
 }
 /* no double-tap zoom, and iOS never resizes the text on its own */
 html { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* a long name with no spaces wraps instead of pushing the screen sideways */
+body { overflow-wrap: break-word; }
+.display { overflow-wrap: break-word; }
 html { background: var(--color-bg); color: var(--color-ink); font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
 /* no 300ms tap delay on phones */
 button, a, input, [role="button"] { touch-action: manipulation; }

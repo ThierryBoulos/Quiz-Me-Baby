@@ -303,10 +303,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     c.p = c.p.then(async () => {
       c.queued = false;
       const v = view(); if (!v) return;
+      v[0].at = Date.now();
       setPub(v[0]);
       const s = st.current;
       try { localStorage.setItem(saveKey, JSON.stringify({ g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN })); } catch { /* full */ }
+        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused })); } catch { /* full */ }
       const room = ctx.current.room;
       /* the answer first, so the host's phone never shows a new question with the old answer */
       await sb().from("secrets").update({ data: v[1] }).eq("room", code);
@@ -588,6 +589,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const { room, members } = ctx.current, s = st.current;
     if (!room) return;
     const from = members.find((m) => m.user_id === a.user_id);
+    /* anything a phone sends proves it's here (presence alone can lag on a bad connection) */
+    if (Date.now() - new Date(a.at).getTime() < 30000) here.current.at[a.user_id] = Date.now();
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
       const names = [...(room.state.teamNames || ["Team A", "Team B"])] as [string, string];
       names[from.team as 0 | 1] = String(a.payload.name || "").slice(0, 18) || names[from.team as 0 | 1];
@@ -661,9 +664,32 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     try {
       const saved = JSON.parse(localStorage.getItem(saveKey) || "null");
-      if (saved?.g) { Object.assign(st.current, saved); void loadBank().then((b) => { st.current.bank = withCustom(b, st.current.custom || []); setPub(view()?.[0] || null); }); }
+      if (saved?.g) {
+        Object.assign(st.current, saved);
+        /* A reload (or a sleep) hides the page first, which pauses everyone; the
+           new page must take that pause back, or the game stays frozen. */
+        const s = st.current;
+        if (s.tvAway) {
+          const d = Date.now() - s.tvAway;
+          if (s.pending) s.pending = { ...s.pending, until: s.pending.until + d };
+          if (s.lifeline?.deadline) s.lifeline = { ...s.lifeline, deadline: s.lifeline.deadline + d };
+          if (s.autoAt) s.autoAt += d;
+          if (s.waitSince) s.waitSince += d;
+          if (s.awayPaused && s.left) { s.deadline = Date.now() + s.left * 1000; s.left = 0; s.paused = false; }
+          s.tvAway = 0; s.awayPaused = false;
+        }
+        /* the bank, then the view, to this TV and to every phone (they may still show "paused") */
+        void loadBank().then(async (b) => {
+          st.current.bank = withCustom(b, st.current.custom || []);
+          setPub(view()?.[0] || null);
+          /* publish once the room is loaded: its state carries the team names too */
+          for (let i = 0; i < 40 && !ctx.current.room; i++) await new Promise((r) => setTimeout(r, 250));
+          if (ctx.current.room) void publish();
+        });
+      }
     } catch { /* nothing saved */ }
-  }, [isTv, saveKey, view]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTv, saveKey]);
 
   /* the inbox: everything since the last action handled on this TV, in the
      order the server received it — that order decides who buzzed first */
@@ -715,6 +741,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     for (const [k, metas] of Object.entries(state)) {
       const m = metas[metas.length - 1] || {};
       if (m.away && !H.away[k]) H.away[k] = { at: now, qid: m.away.qid };
+      /* back without a report (the phone reloaded the page): they're here again */
+      else if (!m.away && H.away[k] && !(m.last && m.last.at !== H.back[k])) {
+        const a = H.away[k]; delete H.away[k];
+        if (a.flag && a.flag > 0) { s.flags = s.flags.map((f) => (f.id === a.flag ? { ...f, ms: now - a.at } : f)); changed = true; }
+      }
       if (m.last && m.last.at !== H.back[k]) {
         H.back[k] = m.last.at;
         const a = H.away[k]; delete H.away[k];
@@ -742,6 +773,29 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const H = here.current, s = st.current, { room, members } = ctx.current, now = Date.now();
     if (H.busy || !s.g || room?.status !== "playing") return;
     H.online.forEach((k) => { H.at[k] = now; });
+    /* The host's phone gone a minute (or the host left): the app checks the
+       answers, as in a game with no host, until the host is back. */
+    const hostM = members.find((m) => m.role === "host");
+    const hostHere = !!hostM && now - (H.at[hostM.user_id] ?? H.since) < T_AWAY * 1000;
+    if (s.nohost === hostHere && !s.pending) {
+      s.nohost = !hostHere;
+      s.toast = { id: ++s.toastN, text: s.nohost ? "The host is away, so the app checks the answers for now." : "The host is back." };
+      if (s.nohost) {
+        /* an answer already typed for the host to judge: the app checks it now */
+        const sc = s.screen, g = s.g, q = current();
+        const who: 0 | 1 | null = sc === "ask" || sc === "steal" || sc === "battleQ" ? turnTeam() : sc === "dishQ" ? g.dishGame.leg.buzz : sc === "sudden" || sc === "battleTie" ? s.sdBuzz : null;
+        const kind = ({ ask: "ask", steal: "steal", battleQ: "battle", dishQ: "dish", sudden: "sudden", battleTie: "battleTie" } as Record<string, PKind>)[sc];
+        if (kind && who != null && s.typed[who] && q) {
+          applyFx([{ timer: "pause" }]);
+          s.pending = { kind, team: who, text: (s.typed[who] || []).join(" / "), v: !!match(s.typed[who], q), until: now + (kind === "battle" ? T_OVERRULE_BATTLE : T_OVERRULE) * 1000 };
+        } else if (s.timeUp && (sc === "ask" || sc === "steal")) {
+          /* the clock had run out, waiting for the host: with no host that's a wrong answer */
+          s.timeUp = false; s.step++;
+          play({ type: sc === "ask" ? "round/judge" : "round/judgeSteal", v: false });
+        }
+      }
+      void publish();
+    }
     for (const t of [0, 1] as const) {
       const cap = members.find((m) => m.team === t && m.role === "captain");
       if (!cap || now - (H.at[cap.user_id] ?? H.since) < T_AWAY * 1000) continue;
@@ -760,7 +814,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       } finally { H.busy = false; }
       return;
     }
-  }, [code, publish]);
+  }, [code, publish, current, play, applyFx]);
   /* the line-up changed (a new captain, a move): the phones' view changes with it */
   const lineup = ctx.current.members.map((m) => `${m.user_id}:${m.team}:${m.role}:${m.name}`).join("|");
   const lastLineup = useRef(lineup);
