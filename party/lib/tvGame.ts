@@ -717,7 +717,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (m.last && m.last.at !== H.back[k]) {
         H.back[k] = m.last.at;
         const a = H.away[k]; delete H.away[k];
-        if (a?.flag) { s.flags = s.flags.map((f) => (f.id === a.flag ? { ...f, ms: m.last!.ms } : f)); changed = true; }
+        /* the phone's own clock decides: a glance under two seconds that was flagged while its "back" was in the post is taken back */
+        if (a?.flag && m.last.ms < 2000) { s.flags = s.flags.filter((f) => f.id !== a.flag); changed = true; }
+        else if (a?.flag) { s.flags = s.flags.map((f) => (f.id === a.flag ? { ...f, ms: m.last!.ms } : f)); changed = true; }
         else if (m.last.ms >= 2000 && H.back[k] && flag(k, m.last.qid, m.last.ms)) changed = true;
       }
     }
@@ -816,7 +818,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (now - here.current.checked > 2000) { here.current.checked = now; void handOver(); }
       /* away for two seconds during a question: flag it now (how long comes when they're back) */
       for (const [k, a] of Object.entries(here.current.away)) {
-        if (!a.flag && now - a.at >= 2000) { a.flag = flag(k, a.qid, null) ?? -1; if (a.flag > 0) changed = true; }
+        if (!a.flag && now - a.at >= 3000) { a.flag = flag(k, a.qid, null) ?? -1; if (a.flag > 0) changed = true; }
       }
       if (changed) void publish();
     }, 250);
