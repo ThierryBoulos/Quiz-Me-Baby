@@ -7,6 +7,7 @@ import { Hud } from "@/components/GameParts";
 import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
+import { friendly } from "@/lib/errors";
 import { useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
 /* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
@@ -18,7 +19,8 @@ export default function PhoneRoom() {
   const [me, setMe] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState<string | null>(null);        // the team name being typed (null: not touched)
+  const [nameState, setNameState] = useState<null | "saving" | "saved" | "late">(null);
   const [panel, setPanel] = useState(false);          // mid-game: the line-up, and changing captain
   /* Between a tap and the TV's reply (a second or two): a bar along the top,
      and the buttons stay off, so nobody taps twice wondering if it worked. */
@@ -46,8 +48,8 @@ export default function PhoneRoom() {
 
   async function act(fn: () => Promise<unknown>) {
     setBusy(true); setMsg(null);
-    try { const r = await fn(); if (typeof r === "string" && r !== "ok") setMsg(r); await refresh(); }
-    catch (e) { setMsg(e instanceof Error ? e.message : String(e)); }
+    try { const r = await fn(); if (typeof r === "string" && r !== "ok") setMsg(friendly(r)); await refresh(); }
+    catch (e) { setMsg(friendly(e)); }
     setBusy(false);
   }
   const pickTeam = (t: 0 | 1 | null) => act(() => rpc<string>("qmb_update_me", { r: code, nm: mine?.name ?? "", tm: t }));
@@ -73,6 +75,23 @@ export default function PhoneRoom() {
     was.current = { role: mine.role, team: mine.team };
   }, [mine, members, room?.status]);
   useEffect(() => { if (!note) return; const t = setTimeout(() => setNote(null), 9000); return () => clearTimeout(t); }, [note]);
+
+  /* a captain names the team: the TV writes it; we wait to see it land */
+  const saveTeamName = () => {
+    const name = (draft ?? "").trim();
+    if (!mine || mine.team == null || !name) return;
+    setNameState("saving"); setMsg(null);
+    void sendAction(code, "team_name", { team: mine.team, name }).catch((e) => { setNameState(null); setMsg(friendly(e)); });
+    (document.activeElement as HTMLElement | null)?.blur?.();
+  };
+  const shownName = mine?.team != null ? teamName(room, mine.team) : "";
+  useEffect(() => {
+    if (nameState !== "saving") return;
+    if (draft != null && shownName === draft.trim()) { setNameState("saved"); setDraft(null); return; }
+    const t = setTimeout(() => setNameState("late"), 8000);
+    return () => clearTimeout(t);
+  }, [nameState, shownName, draft]);
+  useEffect(() => { if (nameState !== "saved") return; const t = setTimeout(() => setNameState(null), 4000); return () => clearTimeout(t); }, [nameState]);
 
   /* the TV's reply has landed: whatever changed in the room */
   useEffect(() => { setWaiting(false); }, [room]);
@@ -182,10 +201,15 @@ export default function PhoneRoom() {
             <div className="card flex flex-col gap-3">
               <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
               <label className="field-label !mb-0" htmlFor="tname">Name your team</label>
-              <div className="flex gap-2">
-                <input id="tname" className="input" maxLength={18} value={draft} placeholder={teamName(room, mine.team)} onChange={(e) => setDraft(e.target.value)} />
-                <button className="btn" disabled={!draft.trim() || busy} onClick={() => act(async () => { await sendAction(code, "team_name", { team: mine.team, name: draft.trim() }); setDraft(""); })}>Save</button>
-              </div>
+              {/* a form, so the keyboard's Done/Go saves it too; Save keeps the keyboard's focus so the tap never misses */}
+              <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); saveTeamName(); }}>
+                <input id="tname" className="input" maxLength={18} enterKeyHint="done" autoComplete="off" value={draft ?? teamName(room, mine.team)}
+                  onChange={(e) => { setDraft(e.target.value); setNameState(null); }} onFocus={(e) => e.currentTarget.select()} />
+                <button type="submit" className="btn shrink-0" onPointerDown={(e) => e.preventDefault()}
+                  disabled={busy || nameState === "saving" || !(draft ?? "").trim() || (draft ?? "").trim() === teamName(room, mine.team)}>{nameState === "saving" ? "Saving…" : "Save"}</button>
+              </form>
+              {nameState === "saved" && <p className="text-[13px] font-bold" role="status" style={{ color: "var(--color-ok)" }}>Saved. It&rsquo;s on the TV.</p>}
+              {nameState === "late" && <p className="field-error" role="alert">The TV didn&rsquo;t pick it up. Is the TV screen still open? Try again.</p>}
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
             </div>
           ) : myCaptain ? (

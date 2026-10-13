@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ensureSession, rpc } from "@/lib/supabase";
 import { BUILD } from "@/lib/build";
+import { friendly } from "@/lib/errors";
 
 /* HOME — Classic's home screen (index.html, SCREENS.home): Imad beside the
    wordmark, a short menu, How to Play as a quiet link, the colophon.
@@ -21,7 +22,7 @@ export default function Home() {
       const c = await rpc<string>("qmb_create_room");
       router.push("/tv/" + c);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
+      setErr(friendly(e));
       setBusy(false);
     }
   }
@@ -38,7 +39,7 @@ export default function Home() {
           <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={play}>{busy ? "Opening the room…" : "Create game"}</button>
           <Link className="btn btn-block" href="/join">Join a game</Link>
           <Link className="btn btn-ghost btn-block" href="/settings">Settings</Link>
-          {err && <p className="field-error" role="alert">Couldn&rsquo;t open a room: {err}</p>}
+          {err && <p className="field-error" role="alert">Couldn&rsquo;t open a room. {err}</p>}
           <Link className="howto" href="/how-to-play">How to Play</Link>
         </div>
         <p className="colophon">

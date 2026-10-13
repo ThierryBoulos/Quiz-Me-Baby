@@ -5,6 +5,7 @@ import { FacePicker } from "@/components/Face";
 import { FACES } from "@/lib/faces";
 import { cleanCode } from "@/lib/room";
 import { ensureSession, rpc } from "@/lib/supabase";
+import { friendly } from "@/lib/errors";
 
 /* JOIN — SNAKED's one screen: room code, name, a face, "Take my seat".
    Errors sit beside the thing that's wrong; a taken name offers a fix. */
@@ -30,16 +31,18 @@ function JoinForm() {
   useEffect(() => { if (taken.includes(face)) setFace(FACES.find((f) => !taken.includes(f)) || face); }, [taken, face]);
 
   async function join(useName: string) {
-    setBusy(true); setErr(null); setCodeErr(null);
+    setErr(null); setCodeErr(null);
+    if (useName.trim().length > 12) { setErr("Names can be 1 to 12 characters."); return; }
+    setBusy(true);
     try {
       await ensureSession();
       const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean }>("qmb_join", { r: code, nm: useName.trim(), face });
-      if (res.error === "no_room") { setCodeErr("Room not found"); setBusy(false); return; }
+      if (res.error === "no_room") { setCodeErr(friendly("no_room")); setBusy(false); return; }
       if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(!!res.playing); setBusy(false); return; }
-      if (res.error === "face_taken") { setErr("Someone already took that face — pick another."); void loadTaken(); setBusy(false); return; }
-      if (res.error) { setErr("Couldn't join: " + res.error); setBusy(false); return; }
+      if (res.error === "face_taken") { setErr(friendly("face_taken")); void loadTaken(); setBusy(false); return; }
+      if (res.error) { setErr(friendly(res.error)); setBusy(false); return; }
       router.push("/room/" + code);
-    } catch (e) { setErr(e instanceof Error ? e.message : String(e)); setBusy(false); }
+    } catch (e) { setErr(friendly(e)); setBusy(false); }
   }
   /* mid-game, a taken name may be you on a new phone: take the seat back (team, captaincy and all) */
   async function rejoin() {
@@ -47,9 +50,9 @@ function JoinForm() {
     try {
       await ensureSession();
       const res = await rpc<{ ok?: boolean; error?: string }>("qmb_rejoin", { r: code, nm: name.trim() });
-      if (res.error) { setErr("Couldn't take that seat: " + res.error.replace(/_/g, " ")); setBusy(false); return; }
+      if (res.error) { setErr(friendly(res.error)); setBusy(false); return; }
       router.push("/room/" + code);
-    } catch (e) { setErr(e instanceof Error ? e.message : String(e)); setBusy(false); }
+    } catch (e) { setErr(friendly(e)); setBusy(false); }
   }
   const ready = code.length === 4 && name.trim().length > 0;
 
