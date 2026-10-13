@@ -10,9 +10,19 @@ export type Q = { id: string; type: string; theme?: string; difficulty?: string;
 export type Bank = { version: string; themes: string[]; bank: Q[] };
 
 let bankP: Promise<Bank> | null = null;
+/* Other answers that count, for questions with more than one fair way to say
+   it (public/accept.json): by question id, and by answer for flags, dishes,
+   maps and Say-the-Same words ("United States" also takes "USA"). */
+type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]> };
+let accept: Accept = { byId: {}, byAnswer: {} };
+export const acceptFor = (q: { id?: string; answer?: string; accept?: string[] } | null | undefined) =>
+  !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(accept.byAnswer[q.answer || ""] || [])];
 /* the house bank, as shipped */
 export function loadBaseBank(): Promise<Bank> {
-  if (!bankP) bankP = fetch("/bank.json").then((r) => r.json());
+  if (!bankP) bankP = Promise.all([
+    fetch("/bank.json").then((r) => r.json()),
+    fetch("/accept.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+  ]).then(([b, a]) => { if (a) accept = a; return b; });
   return bankP;
 }
 /* the house bank plus questions of your own (custom themes join the theme list) */

@@ -51,11 +51,11 @@ export type Pub = {
   at?: number;               // the TV's clock when this was published (phones correct their own clock with it)
   tvAway?: boolean;          // the TV's screen is asleep or hidden: everything is paused until it's back
   /* phones that left the game screen during a question (another app or tab): name, team, how long (null: still away) */
-  flags?: { id: number; name: string; team: 0 | 1 | null; label: string; qid?: string; ms: number | null }[];                 // Closest To Wins clock, for its rules
+  flags?: { id: number; name: string; team: 0 | 1 | null; label: string; qid?: string; ms: number | null; kind?: "away" | "paste" }[];                 // Closest To Wins clock, for its rules
   mode: "host" | "nohost";
 };
 /* host only: the answer, and what the captains typed with the app's opinion */
-export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null> };
+export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null> };
 
 export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me", battle: "Battle of the Captains" };
 export const T_CLOSEST = 90, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30;

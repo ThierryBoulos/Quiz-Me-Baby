@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, loadBank, withCustom, type Bank, type Q } from "./engine";
+import { QMB, acceptFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { cleanList } from "./custom";
 import { HOST_LINES } from "./imadLines";
 import { sb } from "./supabase";
@@ -161,7 +161,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (sc === "battleTie") return g.battle?.tb?.q;
     return null;
   }, []);
-  const match = (texts: string[] | null, q: G) => (texts && q ? texts.some((t) => QMB.isMatch(t, q.answer)) : null);
+  /* right if it matches the answer or any other answer that counts (see acceptFor) */
+  const match = (texts: string[] | null, q: G) => (texts && q ? texts.some((t) => QMB.isMatch(t, q.answer, acceptFor(q))) : null);
   /* the captain who moves the night on with no host: Team A's, or B's if A has none */
   const leadTeam = (): 0 | 1 => (ctx.current.members.some((m) => m.team === 0 && m.role === "captain") ? 0 : 1);
   const turnTeam = (): 0 | 1 => {
@@ -220,7 +221,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       p.nextOpenAt = s.waitSince + T_NEXT_FALLBACK * 1000; p.nextOther = p.captains[other(leadTeam())];
     }
     const secret: Secret = { step: s.step, typed: s.typed, match: [match(s.typed[0], q), match(s.typed[1], q)], guesses: s.guesses };
-    if (q) { p.qid = q.id; secret.qid = q.id; secret.answer = q.answer; secret.notes = q.notes; }
+    if (q) { p.qid = q.id; secret.qid = q.id; secret.answer = q.answer; secret.notes = q.notes; secret.accept = acceptFor(q).slice(0, 8); }
     if (rd) {
       p.first = QMB.seatTeam(g, rd, 0, seat());
       p.dbl = [...rd.dbl] as Two<boolean>;
@@ -724,24 +725,26 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* Left the game screen during a question: flagged once they've been gone two
      seconds (a glance at a notification doesn't count), with how long when
      they come back. The TV says it; the host's phone keeps the list. */
-  const flag = (k: string, qid: string | undefined, ms: number | null) => {
+  const flag = (k: string, qid: string | undefined, ms: number | null, kind: "away" | "paste" = "away") => {
     const s = st.current, g = s.g, m = ctx.current.members.find((x) => x.user_id === k);
     if (!g || !m || m.role === "host" || !getSettings().flagAway) return undefined;
     const mk = miniOf(s.screen), rd = g.rounds[g.r];
     const label = s.screen === "sudden" ? "Sudden death" : mk ? MINI_TITLES[mk] : rd ? `Round ${g.r + 1} · ${rd.theme}` : "A question";
-    const f = { id: ++s.flagN, name: m.name, team: m.team, label, qid, ms };
+    const f = { id: ++s.flagN, name: m.name, team: m.team, label, qid, ms, kind };
     s.flags = [...s.flags, f].slice(-60);
-    s.toast = { id: ++s.toastN, text: `${m.name} left the game screen during the question.` };
+    s.toast = { id: ++s.toastN, text: kind === "paste" ? `${m.name} tried to paste an answer.` : `${m.name} left the game screen during the question.` };
     playSound("wrong");
     return f.id;
   };
   /* a phone's note: "I left the screen", "I'm back" (and for how long, by
      its own clock), or "hello" from a fresh page (a reload: back too) */
-  const onNote = (k: string, n: { away?: { qid?: string }; back?: { qid?: string; ms: number }; hello?: number }) => {
+  const onNote = (k: string, n: { away?: { qid?: string }; back?: { qid?: string; ms: number }; hello?: number; paste?: { qid?: string } }) => {
     const H = here.current, s = st.current, now = Date.now();
     let changed = false;
     const setMs = (id: number, ms: number) => { s.flags = s.flags.map((f) => (f.id === id ? { ...f, ms } : f)); changed = true; };
     if (n.away && !H.away[k]) H.away[k] = { at: now, qid: n.away.qid };
+    /* a paste into an answer box: flagged once per question */
+    if (n.paste && !s.flags.some((f) => f.kind === "paste" && f.qid === n.paste!.qid && f.name === ctx.current.members.find((m) => m.user_id === k)?.name) && flag(k, n.paste.qid, null, "paste")) changed = true;
     if (n.hello && H.away[k]) { const a = H.away[k]; delete H.away[k]; if (a.flag && a.flag > 0) setMs(a.flag, now - a.at); }
     if (n.back) {
       const a = H.away[k]; delete H.away[k];

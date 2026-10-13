@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Pub } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
+import { flagText } from "./PhoneGame";
 import { AskHead, Hud, LifelineStrip, MiniIntro, RoundIntro } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
@@ -302,7 +303,7 @@ function AwayFlags({ pub }: { pub: Pub }) {
     <div className="absolute left-8 bottom-8 flex items-center gap-3 rounded-full px-5 py-2.5 text-[18px] font-bold" role="status"
       style={{ background: "rgba(255,85,102,.16)", border: "1px solid rgba(255,85,102,.55)", color: "var(--color-no)", zIndex: 25 }}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 22V4" /><path d="M4 4h13l-2 4 2 4H4" /></svg>
-      Left the game screen: {now.map((f) => `${f.name}${f.ms != null ? ` (${Math.round(f.ms / 1000)}s)` : " (still away)"}`).join(", ")}
+      Flagged: {now.map(flagText).join(", ")}
     </div>);
 }
 /* the night's tally: who left the game screen, and how often */

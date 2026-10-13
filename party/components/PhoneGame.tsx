@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { Pub, Secret } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { loadBank } from "@/lib/engine";
-import { sb, sendAction } from "@/lib/supabase";
+import { note, sb, sendAction } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { AskHead, LifelineStrip, MiniIntro, RoundIntro } from "./GameParts";
@@ -70,6 +70,20 @@ function Ings({ ings, small }: { ings: string[]; small?: boolean }) {
       {ings.map((t, i) => { const [q, n] = splitIng(t); return <li key={i} className="flex gap-2 items-baseline"><b>{n}</b><span className="text-[var(--color-ink-3)] text-[0.85em]">{q}</span></li>; })}
     </ol>);
 }
+/* No pasting into an answer: typed by hand or not at all. A paste (or a
+   dropped text) is refused, and the TV flags it, like leaving the screen. */
+function useNoPaste(code: string, qid?: string) {
+  const [said, setSaid] = useState(false);
+  useEffect(() => { if (!said) return; const t = setTimeout(() => setSaid(false), 3500); return () => clearTimeout(t); }, [said]);
+  const block = (e: { preventDefault: () => void }) => { e.preventDefault(); setSaid(true); note(code, { paste: { qid } }); };
+  const props = {
+    onPaste: block, onDrop: block,
+    onBeforeInput: (e: React.FormEvent<HTMLInputElement>) => { const t = (e.nativeEvent as InputEvent).inputType || ""; if (/^insertFrom(Paste|Drop)/.test(t)) block(e); },
+  };
+  const hint = said ? <p className="text-[13px] font-bold text-[var(--color-no)]" role="alert">No pasting: type it yourself. The TV has been told.</p> : null;
+  return { props, hint };
+}
+
 type Send = (move: Record<string, unknown>) => void;
 /* a light vibration where the phone supports it (Android); silently nothing elsewhere */
 const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
@@ -92,6 +106,7 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answer, only you can see this</div>
       <div className="display text-[32px] mt-1" style={{ color: "var(--color-gold)" }}>{secret.answer}</div>
       {secret.notes && <div className="text-[13px] text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
+      {(secret.accept?.length ?? 0) > 0 && <div className="text-[13px] text-[var(--color-ink-2)] mt-1"><b className="text-[var(--color-ink)]">Also accepted:</b> {secret.accept!.join(", ")}</div>}
     </div>) : null;
   /* what a captain typed, with the app's opinion — the host still decides */
   const Typed = ({ t }: { t: 0 | 1 }) => {
@@ -401,13 +416,14 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
   }
 }
 
+export const flagText = (f: NonNullable<Pub["flags"]>[number]) => `${f.name} ${f.kind === "paste" ? "(tried to paste)" : f.ms != null ? `(left the screen ${Math.round(f.ms / 1000)}s)` : "(left the screen, still away)"}`;
 /* the host's warning: who left the game screen during this question (another app, a search) */
 function AwayCard({ pub }: { pub: Pub }) {
   const now = (pub.flags || []).filter((f) => f.qid && f.qid === pub.qid);
   if (!now.length) return null;
   return (
     <div className="card !p-3 text-[14px] font-bold" role="alert" style={{ background: "rgba(255,85,102,.12)", borderColor: "rgba(255,85,102,.5)", color: "var(--color-no)" }}>
-      Left the game screen during this question: {now.map((f) => `${f.name}${f.ms != null ? ` (${Math.round(f.ms / 1000)}s)` : " (still away)"}`).join(", ")}
+      Flagged during this question: {now.map(flagText).join(", ")}
     </div>);
 }
 /* the host's full list, in the Players panel */
@@ -415,9 +431,9 @@ export function AwayLog({ pub }: { pub: Pub | null }) {
   const all = pub?.flags || [];
   return (
     <div className="card flex flex-col gap-2">
-      <div className="eyebrow" style={{ color: "var(--color-no)" }}>Left the game screen</div>
+      <div className="eyebrow" style={{ color: "var(--color-no)" }}>Flagged: left the screen or pasted</div>
       {all.length ? [...all].reverse().map((f) => (
-        <div key={f.id} className="text-[14px]"><b style={{ color: tc(f.team) }}>{f.name}</b> · {f.label}{f.ms != null ? ` · ${Math.round(f.ms / 1000)}s` : " · still away"}</div>))
+        <div key={f.id} className="text-[14px]"><b style={{ color: tc(f.team) }}>{f.name}</b> · {f.label} · {f.kind === "paste" ? "tried to paste an answer" : f.ms != null ? `left the screen ${Math.round(f.ms / 1000)}s` : "left the screen, still away"}</div>))
         : <p className="text-[14px] text-[var(--color-ink-2)]">Nobody so far. A phone that switches app or tab during a question shows up here and on the TV.</p>}
     </div>);
 }
@@ -544,6 +560,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   useEffect(() => { setSent(null); setText(""); }, [pub.qid]);
   const cap = members.find((m) => m.team === mine && m.role === "captain");
   const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !CAPTAINS_ONLY.includes(pub.screen);
+  const np = useNoPaste(code, pub.qid);
   const suggest = async () => { const t = text.trim(); if (!t) return; await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); };
   return (
     <div className="flex flex-col gap-4 flex-1">
@@ -554,9 +571,10 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
           <div className="flex gap-2">
-            <input id="sug" className="input" value={text} maxLength={80} inputMode={pub.screen === "miniQ" ? "decimal" : "text"} placeholder={pub.screen === "miniQ" ? "A number" : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
+            <input id="sug" {...np.props} className="input" value={text} maxLength={80} inputMode={pub.screen === "miniQ" ? "decimal" : "text"} placeholder={pub.screen === "miniQ" ? "A number" : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
             <button className="btn" disabled={!text.trim()} onClick={() => void suggest()}>Send</button>
           </div>
+          {np.hint}
           {sent && <div className="text-[13px] text-[var(--color-ink-2)]">Sent: <b>{sent}</b></div>}
         </div>)}
       {pub.screen === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />}
@@ -599,6 +617,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   useEffect(() => { setA(""); setB(""); setSentTxt(null); }, [pub.qid, sc]);
   useEffect(() => { setBid(""); }, [pub.auction?.bid, sc]);
   const names = useNames();
+  const np = useNoPaste(code, pub.qid);
   const act = async (kind: string, payload: Record<string, unknown>) => { setBusy(true); try { await sendAction(code, kind, payload); } finally { setBusy(false); } };
   const nxt = (move: Record<string, unknown>) => act("next", { move, step: pub.step });
 
@@ -667,9 +686,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {canType && (
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
-          <input id="ans" className="input" value={a} maxLength={80} list={list.length ? "names" : undefined} autoComplete="off"
+          <input id="ans" {...np.props} className="input" value={a} maxLength={80} list={list.length ? "names" : undefined} autoComplete="off"
             inputMode={sc === "miniQ" ? "decimal" : "text"} placeholder={sc === "miniQ" ? "e.g. 236" : "Type it"} onChange={(e) => setA(e.target.value)} />
-          {dip && <input className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
+          {dip && <input {...np.props} className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
+          {np.hint}
           {list.length > 0 && <datalist id="names">{list.map((n) => <option key={n} value={n} />)}</datalist>}
           <button className="btn btn-gold btn-lg" disabled={busy || !a.trim()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
           {sentTxt && !nohost && (sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-2)]">Sent: <b>{sentTxt}</b>. You can change it until the host decides.</div>}
@@ -687,7 +707,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <div className="eyebrow">{A.bid ? `Beat ${A.bid}, or pass` : "Open the bidding"}</div>
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>
           <div className="flex gap-2">
-            <input className="input" aria-label="Custom bid" inputMode="numeric" value={bid} placeholder="Custom bid" onChange={(e) => setBid(e.target.value.replace(/\D/g, "").slice(0, 3))} />
+            <input {...np.props} className="input" aria-label="Custom bid" inputMode="numeric" value={bid} placeholder="Custom bid" onChange={(e) => setBid(e.target.value.replace(/\D/g, "").slice(0, 3))} />
             <button className="btn" disabled={busy || !(Number(bid) > A.bid)} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>Bid</button>
           </div>
           {bid !== "" && !(Number(bid) > A.bid) && <p className="text-[13px] text-[var(--color-no)]" role="alert">A bid has to beat {A.bid}.</p>}
