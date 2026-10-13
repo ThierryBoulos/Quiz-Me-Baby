@@ -589,8 +589,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const { room, members } = ctx.current, s = st.current;
     if (!room) return;
     const from = members.find((m) => m.user_id === a.user_id);
-    /* anything a phone sends proves it's here (presence alone can lag on a bad connection) */
+    /* anything a phone sends (its 15-second "I'm here" included) proves it's here */
     if (Date.now() - new Date(a.at).getTime() < 30000) here.current.at[a.user_id] = Date.now();
+    if (a.kind === "count") { if (isTv) onNote(a.user_id, a.payload as Parameters<typeof onNote>[1]); return; }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
       const names = [...(room.state.teamNames || ["Team A", "Team B"])] as [string, string];
       names[from.team as 0 | 1] = String(a.payload.name || "").slice(0, 18) || names[from.team as 0 | 1];
@@ -715,11 +716,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     return () => { clearInterval(poll); void sb().removeChannel(ch); };
   }, [code, isTv, handle]);
 
-  /* Who's here: every phone keeps a presence in the room (see usePresence). A
+  /* Who's here: every phone says so every 15 s, through the action log (see usePresence). A
      captain gone for T_AWAY hands over to the first teammate still here, so a
      phone left in a pocket never stalls the night. Nobody is removed. */
-  const here = useRef({ at: {} as Record<string, number>, online: new Set<string>(), since: Date.now(), busy: false, checked: 0,
-    away: {} as Record<string, { at: number; qid?: string; flag?: number }>, back: {} as Record<string, number>, beat: {} as Record<string, number> });
+  const here = useRef({ at: {} as Record<string, number>, since: Date.now(), busy: false, checked: 0,
+    away: {} as Record<string, { at: number; qid?: string; flag?: number }> });
   /* Left the game screen during a question: flagged once they've been gone two
      seconds (a glance at a notification doesn't count), with how long when
      they come back. The TV says it; the host's phone keeps the list. */
@@ -734,52 +735,28 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     playSound("wrong");
     return f.id;
   };
-  const onPresence = useRef<(st: Record<string, { away?: { qid?: string } | null; last?: { qid?: string; ms: number; at: number } | null }[]>) => void>(() => {});
-  onPresence.current = (state) => {
+  /* a phone's note: "I left the screen", "I'm back" (and for how long, by
+     its own clock), or "hello" from a fresh page (a reload: back too) */
+  const onNote = (k: string, n: { away?: { qid?: string }; back?: { qid?: string; ms: number }; hello?: number }) => {
     const H = here.current, s = st.current, now = Date.now();
     let changed = false;
-    for (const [k, metas] of Object.entries(state)) {
-      /* a phone can show twice for a moment (its old and new presence): the newest one counts */
-      const m = metas.reduce<(typeof metas)[number] | undefined>((x, y) => (!x || ((y as { at?: number }).at ?? 0) >= ((x as { at?: number }).at ?? 0) ? y : x), undefined) || {};
-      if (m.away && !H.away[k]) H.away[k] = { at: now, qid: m.away.qid };
-      /* back without a report (the phone reloaded the page): they're here again */
-      else if (!m.away && H.away[k] && !(m.last && m.last.at !== H.back[k])) {
-        const a = H.away[k]; delete H.away[k];
-        if (a.flag && a.flag > 0) { s.flags = s.flags.map((f) => (f.id === a.flag ? { ...f, ms: now - a.at } : f)); changed = true; }
-      }
-      if (m.last && m.last.at !== H.back[k]) {
-        H.back[k] = m.last.at;
-        const a = H.away[k]; delete H.away[k];
-        /* the phone's own clock decides: a glance under two seconds that was flagged while its "back" was in the post is taken back */
-        if (a?.flag && m.last.ms < 2000) { s.flags = s.flags.filter((f) => f.id !== a.flag); changed = true; }
-        else if (a?.flag) { s.flags = s.flags.map((f) => (f.id === a.flag ? { ...f, ms: m.last!.ms } : f)); changed = true; }
-        else if (m.last.ms >= 2000 && H.back[k] && flag(k, m.last.qid, m.last.ms)) changed = true;
-      }
+    const setMs = (id: number, ms: number) => { s.flags = s.flags.map((f) => (f.id === id ? { ...f, ms } : f)); changed = true; };
+    if (n.away && !H.away[k]) H.away[k] = { at: now, qid: n.away.qid };
+    if (n.hello && H.away[k]) { const a = H.away[k]; delete H.away[k]; if (a.flag && a.flag > 0) setMs(a.flag, now - a.at); }
+    if (n.back) {
+      const a = H.away[k]; delete H.away[k];
+      const ms = Math.max(0, Number(n.back.ms) || 0);
+      /* the phone's own clock decides: a glance under two seconds flagged while its "back" was on the way is taken back */
+      if (a?.flag && a.flag > 0 && ms < 2000) { s.flags = s.flags.filter((f) => f.id !== a.flag); changed = true; }
+      else if (a?.flag && a.flag > 0) setMs(a.flag, ms);
+      else if (!a?.flag && ms >= 2000 && flag(k, n.back.qid, ms)) changed = true;
     }
     if (changed) void publish();
   };
-  useEffect(() => {
-    if (!isTv) return;
-    const ch = sb().channel("presence:" + code);
-    const sync = () => {
-      const state = ch.presenceState() as Parameters<typeof onPresence.current>[0];
-      const on = new Set(Object.keys(state)), now = Date.now();
-      /* a phone counts as here when its heartbeat (every 15 s) is fresh, not just
-         because it's still listed: a dead phone can stay listed for a minute */
-      here.current.online = on;
-      for (const k of on) {
-        const at = Math.max(0, ...(state[k] || []).map((x) => (x as { at?: number }).at ?? 0));
-        if (here.current.beat[k] !== at) { here.current.beat[k] = at; here.current.at[k] = now; }
-      }
-      onPresence.current(state);
-    };
-    ch.on("presence", { event: "sync" }, sync).on("presence", { event: "join" }, sync).on("presence", { event: "leave" }, sync).subscribe();
-    return () => { void sb().removeChannel(ch); };
-  }, [code, isTv]);
   const handOver = useCallback(async () => {
     const H = here.current, s = st.current, { room, members } = ctx.current, now = Date.now();
     if (H.busy || !s.g || room?.status !== "playing") return;
-    const fresh = (k: string) => H.online.has(k) && now - (H.at[k] ?? 0) < 40000;
+    const fresh = (k: string) => now - (H.at[k] ?? 0) < 40000;
     /* The host's phone gone a minute (or the host left): the app checks the
        answers, as in a game with no host, until the host is back. */
     const hostM = members.find((m) => m.role === "host");

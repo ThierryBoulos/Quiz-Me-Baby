@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { sb } from "./supabase";
+import { note, sb } from "./supabase";
 
 export type Role = "player" | "captain" | "host";
 export type Member = { room: string; user_id: string; name: string; team: 0 | 1 | null; role: Role; avatar: string | null; joined_at: string };
@@ -45,28 +45,22 @@ export function useRoom(code: string) {
   return { room, members, missing, refresh: pull };
 }
 
-/* "I'm here": each phone keeps a presence in the room while its page is open,
-   so the TV can tell a captain who has gone (phone off, page closed) from one
-   who is just slow. Nobody is ever removed for it; a captain who's been gone
-   a minute hands the armband to a teammate who's still here. */
-export type AwayMeta = { away?: { qid?: string } | null; last?: { qid?: string; ms: number; at: number } | null };
+/* "I'm here": while its page is open and on screen, each phone tells the TV
+   every 15 seconds, so the TV can tell a captain who has gone (phone off,
+   page closed) from one who is just slow. Nobody is ever removed for it; a
+   captain who's been gone a minute hands the armband to a teammate who's
+   still here. A fresh page says "hello" (a reload: they're back). */
+export type AwayMeta = { away?: { qid?: string } | null; back?: { qid?: string; ms: number } | null };
 export function usePresence(code: string, me: string | null) {
-  const ref = useRef<{ ch: ReturnType<ReturnType<typeof sb>["channel"]> | null; meta: AwayMeta }>({ ch: null, meta: {} });
   useEffect(() => {
     if (!me) return;
-    const ch = sb().channel("presence:" + code, { config: { presence: { key: me } } });
-    ref.current.ch = ch;
-    const track = () => void ch.track({ ...ref.current.meta, at: Date.now() });
-    ch.subscribe((status) => { if (status === "SUBSCRIBED") track(); });
-    const vis = () => { if (document.visibilityState === "visible") track(); };
-    document.addEventListener("visibilitychange", vis);
-    /* say it again every 15 s: after a dropped connection the phone rejoins
-       the channel but its presence isn't restored, and the TV would think it gone */
-    const beat = setInterval(() => { if (document.visibilityState === "visible") track(); }, 15000);
-    return () => { clearInterval(beat); document.removeEventListener("visibilitychange", vis); ref.current.ch = null; void sb().removeChannel(ch); };
+    note(code, { hello: 1 });
+    const beat = () => { if (document.visibilityState === "visible") note(code, { here: 1 }); };
+    const t = setInterval(beat, 15000);
+    document.addEventListener("visibilitychange", beat);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", beat); };
   }, [code, me]);
-  /* tell the TV something about this phone, straight away (it may be about to sleep) */
-  return useCallback((meta: AwayMeta) => { ref.current.meta = meta; void ref.current.ch?.track({ ...meta, at: Date.now() }); }, []);
+  return useCallback((m: AwayMeta) => note(code, m as Record<string, unknown>), [code]);
 }
 
 /* Leaving the game screen during a question (another app, another tab, a
@@ -81,7 +75,7 @@ export function useAwayWatch(report: (m: AwayMeta) => void, live: boolean, qid?:
       if (document.visibilityState === "hidden") {
         if (now.current.live && !since) { since = Date.now(); q = now.current.qid; report({ away: { qid: q } }); }
       } else if (since) {
-        report({ away: null, last: { qid: q, ms: Date.now() - since, at: Date.now() } }); since = 0;
+        report({ back: { qid: q, ms: Date.now() - since } }); since = 0;
       }
     };
     document.addEventListener("visibilitychange", vis);

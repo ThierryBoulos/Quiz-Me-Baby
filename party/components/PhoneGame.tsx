@@ -43,7 +43,8 @@ function useSuggestions(code: string, qid: string | undefined, members: Member[]
       setList(((data || []) as { id: number; user_id: string; payload: { text?: string } }[]).map((a) => ({ id: a.id, user_id: a.user_id, text: String(a.payload.text || "") })));
     };
     void pull();
-    const ch = sb().channel("sug:" + code + ":" + qid).on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code }, () => void pull()).subscribe();
+    const ch = sb().channel("sug:" + code + ":" + qid).on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
+      (e) => { if ((e.new as { kind?: string })?.kind === "suggest") void pull(); }).subscribe();
     const t = setInterval(() => void pull(), 2500);
     return () => { clearInterval(t); void sb().removeChannel(ch); };
   }, [code, qid, on]);

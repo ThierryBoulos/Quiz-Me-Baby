@@ -40,3 +40,17 @@ export async function sendAction(room: string, kind: string, payload: Record<str
   const quick = ["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/pause"].includes(move);
   if (typeof window !== "undefined" && kind !== "suggest" && !quick) window.dispatchEvent(new Event("qmb:sent"));
 }
+
+/* "I'm here" / "I left the screen" / "I'm back": small notes from a phone to
+   the TV, sent through the same log as every other action (the TV reads it
+   every 1.5 s, so none get lost), quietly (no waiting bar), and with
+   keepalive so the note still goes out when the phone is about to sleep. */
+let token: string | null = null;
+async function freshToken() { try { const { data } = await sb().auth.getSession(); token = data.session?.access_token ?? token; } catch { /* offline */ } }
+export function note(room: string, payload: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  const send = () => { if (!token) return; void fetch(URL + "/rest/v1/actions", { method: "POST", keepalive: true,
+    headers: { apikey: KEY, Authorization: "Bearer " + token, "Content-Type": "application/json", Prefer: "return=minimal" },
+    body: JSON.stringify({ room, kind: "count", payload }) }).catch(() => {}); };
+  if (token) { send(); void freshToken(); } else void freshToken().then(send);
+}
