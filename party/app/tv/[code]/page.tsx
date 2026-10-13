@@ -10,6 +10,7 @@ import { ensureSession } from "@/lib/supabase";
 import { notReadyWhy, readyToStart, starter, useRoom } from "@/lib/room";
 import type { Pub } from "@/lib/game";
 import { Snd } from "@/lib/sound";
+import { useWakeLock } from "@/lib/wakeLock";
 
 /* Classic lives on this same site, at /classic (copied in at build time) */
 const CLASSIC = "/classic";
@@ -26,6 +27,8 @@ export default function TvRoom() {
   const isTv = !!room && room.tv_id === me;
 
   const { pub: own } = useTvGame(code, isTv, room, members);
+  /* the laptop must not doze off mid-game */
+  const awake = useWakeLock(isTv);
   const pub = own || ((room?.state?.pub || null) as Pub | null);
   /* for the end-to-end tests: what the TV is showing */
   useEffect(() => { (window as unknown as { __qmb?: Pub | null }).__qmb = pub; }, [pub]);
@@ -77,6 +80,7 @@ export default function TvRoom() {
               {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b></> : "No host yet — the app will check answers."}
               <br />
               {readyToStart(members) ? <>Ready. <b>{who?.name}</b> starts the game.</> : notReadyWhy(members)}
+              {awake === false && <><br /><span className="text-[16px] text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
             </div>
             <div className="flex gap-3">
               <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>

@@ -48,6 +48,7 @@ export type Pub = {
   nextOpenAt?: number;       // ...and from when the other captain may tap it too
   nextOther?: string | null; // that other captain
   imad?: { id: number; text: string };   // Imad's latest line (text only)
+  tvAway?: boolean;          // the TV's screen is asleep or hidden: everything is paused until it's back
   /* phones that left the game screen during a question (another app or tab): name, team, how long (null: still away) */
   flags?: { id: number; name: string; team: 0 | 1 | null; label: string; qid?: string; ms: number | null }[];                 // Closest To Wins clock, for its rules
   mode: "host" | "nohost";

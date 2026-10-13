@@ -124,6 +124,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     paused: false,                                     // the clock stopped by a Pause (the question hides meanwhile)
     waitSince: 0,                                      // no host: when this screen started waiting for a Start or Next
     flags: [] as NonNullable<Pub["flags"]>, flagN: 0,  // phones that left the game screen during a question
+    tvAway: 0, awayPaused: false,                      // when the TV's screen went to sleep (0: it's on), and whether that paused the clock
     imad: null as Pub["imad"] | null, imadN: 0, imadQ: [] as string[],   // Imad's latest line, and the ones waiting to go up together
     custom: [] as Q[],                                 // questions of their own, sent by the phone that started
   });
@@ -198,7 +199,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       deadline: s.deadline, left: s.left, timeUp: s.timeUp, lifeline: s.lifeline, toast: s.toast, winner: g.winner ?? null,
       sent: [!!s.typed[0] || s.guesses[0] != null, !!s.typed[1] || s.guesses[1] != null],
       pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
-      autoAt: s.autoAt, paused: s.paused, lead: leadTeam(), imad: s.imad || undefined, flags: s.flags.slice(-30),
+      autoAt: s.autoAt, paused: s.paused, lead: leadTeam(), imad: s.imad || undefined, flags: s.flags.slice(-30), tvAway: !!s.tvAway,
     };
     /* the tracker: every round and mini-game of the night, in order (Classic's schedule/pipState) */
     const live = miniOf(s.screen);
@@ -305,7 +306,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       setPub(v[0]);
       const s = st.current;
       try { localStorage.setItem(saveKey, JSON.stringify({ g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN })); } catch { /* full */ }
+        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN })); } catch { /* full */ }
       const room = ctx.current.room;
       /* the answer first, so the host's phone never shows a new question with the old answer */
       await sb().from("secrets").update({ data: v[1] }).eq("room", code);
@@ -495,7 +496,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      a captain typing doesn't change what the host is deciding) ---- */
   const captainInput = useCallback((kind: string, team: 0 | 1, p: G) => {
     const s = st.current, g = s.g, sc = s.screen;
-    if (s.paused) return false;                        // nothing goes in while the clock is stopped
+    if (s.paused || s.tvAway) return false;            // nothing goes in while the clock is stopped or the TV is asleep
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
@@ -768,6 +769,34 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     lastLineup.current = lineup; void publish();
   }, [isTv, lineup, publish]);
 
+  /* The TV's screen goes to sleep or out of sight (the laptop dozes, someone
+     switches tab): everyone pauses, the question hides, and nothing times out.
+     When it's back, every clock picks up exactly where it was. */
+  useEffect(() => {
+    if (!isTv) return;
+    const vis = () => {
+      const s = st.current, now = Date.now();
+      if (!s.g) return;
+      if (document.visibilityState === "hidden" && !s.tvAway) {
+        s.tvAway = now;
+        s.awayPaused = !!s.deadline && !s.paused && !s.lifeline;
+        if (s.awayPaused) { applyFx([{ timer: "pause" }]); s.paused = true; }
+        void publish();
+      } else if (document.visibilityState === "visible" && s.tvAway) {
+        const d = now - s.tvAway;
+        s.tvAway = 0;
+        if (s.pending) s.pending = { ...s.pending, until: s.pending.until + d };
+        if (s.lifeline?.deadline) s.lifeline = { ...s.lifeline, deadline: s.lifeline.deadline + d };
+        if (s.autoAt) s.autoAt += d;
+        if (s.waitSince) s.waitSince += d;
+        if (s.awayPaused) { s.paused = false; s.awayPaused = false; applyFx([{ timer: "resume" }]); }
+        void publish();
+      }
+    };
+    document.addEventListener("visibilitychange", vis);
+    return () => document.removeEventListener("visibilitychange", vis);
+  }, [isTv, applyFx, publish]);
+
   const lastWhole = useRef<number | null>(null);
   /* The clocks. A standard question running out is only "time's up" when
      there's a host to judge; with no host it's a wrong answer. Closest, Flag
@@ -778,7 +807,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     const t = setInterval(() => {
       const s = st.current, now = Date.now(), g = s.g;
-      if (!g) return;
+      if (!g || s.tvAway) return;                     // the TV is asleep: nothing moves
       let changed = false;
       /* the last ten seconds tick; the bells ring at zero */
       const whole = s.deadline ? Math.ceil((s.deadline - now) / 1000) : null;

@@ -107,6 +107,10 @@ export default function PhoneRoom() {
 
       {note && <div className="card text-center text-[14px] font-bold enter" role="status" style={{ background: "rgba(245,197,24,.1)", borderColor: "rgba(245,197,24,.45)", color: "var(--color-gold)" }}>{note}</div>}
 
+      {pub?.tvAway && room.status !== "lobby" && (
+        <div className="card text-center text-[14px] font-bold enter" role="status" style={{ background: "rgba(245,197,24,.1)", borderColor: "rgba(245,197,24,.45)", color: "var(--color-gold)" }}>
+          The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</div>)}
+
       {/* the tracker, as on the TV: scores, where we are, the night's progress */}
       {room.status !== "lobby" && pub && !panel && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
 
