@@ -8,6 +8,19 @@ export function useSecondsLeft(deadline?: number | null, left?: number) {
   if (deadline) return Math.max(0, Math.ceil((deadline - now) / 1000));
   return left ? Math.ceil(left) : 0;
 }
+/* true once the TV's time `at` has passed (re-renders right then) */
+export function useAfter(at?: number | null) {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    if (!at) { setOn(false); return; }
+    const d = at - Date.now();
+    if (d <= 0) { setOn(true); return; }
+    setOn(false);
+    const t = setTimeout(() => setOn(true), d);
+    return () => clearTimeout(t);
+  }, [at]);
+  return on;
+}
 export function Clock({ deadline, left, timeUp, size = 120 }: { deadline?: number | null; left?: number; timeUp?: boolean; size?: number }) {
   const s = useSecondsLeft(deadline, left);
   const paused = !deadline && !!left;

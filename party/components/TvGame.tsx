@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { Pub } from "@/lib/game";
-import { Clock, useSecondsLeft } from "./Clock";
+import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { AskHead, Hud, LifelineStrip, MiniIntro, RoundIntro } from "./GameParts";
 
@@ -90,7 +90,7 @@ export function TvGame({ pub }: { pub: Pub }) {
           </div>
         </div>)}
       {pub.pending && <Pending pub={pub} />}
-      {pub.nextBy && !pub.pending && <div className="absolute right-8 bottom-8 text-[18px] text-[var(--color-ink-2)]">Waiting for <b>{pub.nextBy}</b> to tap {/Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" ? "Start" : pub.screen === "sudden" ? "Go" : "Next"}</div>}
+      {pub.nextBy && !pub.pending && <NextHint pub={pub} />}
       <ImadBubble imad={pub.imad} />
       {pub.toast && shown === pub.toast.id && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" role="status" aria-live="polite" style={{ fontSize: 24, padding: "12px 28px" }}>{pub.toast.text}</div>}
     </div>
@@ -292,6 +292,13 @@ function Pending({ pub }: { pub: Pub }) {
       </div>
     </div>);
 }
+/* no host: whose tap the room is waiting for (after a while, either captain's) */
+function NextHint({ pub }: { pub: Pub }) {
+  const open = useAfter(pub.nextOpenAt);
+  const label = /Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" ? "Start" : pub.screen === "sudden" ? "Go" : "Next";
+  return <div className="absolute right-8 bottom-8 text-[18px] text-[var(--color-ink-2)]">Waiting for <b>{pub.nextBy}</b>{open && pub.nextOther ? <> or <b>{pub.nextOther}</b></> : null} to tap {label}</div>;
+}
+
 /* Imad's line: his face and a speech bubble, up top, for as long as it takes to read (Classic's #hostBubble) */
 function ImadBubble({ imad }: { imad?: Pub["imad"] }) {
   const [on, setOn] = useState<number | null>(null);

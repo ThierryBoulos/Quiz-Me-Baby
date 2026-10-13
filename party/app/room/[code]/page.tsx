@@ -1,13 +1,13 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
 import { CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
 import { Hud } from "@/components/GameParts";
 import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
-import { notReadyWhy, readyToStart, starter, teamName, useRoom, type Member } from "@/lib/room";
+import { notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
 /* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
    name the team, or be the host. The colour of your team fills the screen. */
@@ -31,6 +31,7 @@ export default function PhoneRoom() {
   }, []);
 
   useEffect(() => { void ensureSession().then(setMe); }, []);
+  usePresence(code, me);
   const mine = useMemo(() => members.find((m) => m.user_id === me) || null, [members, me]);
 
   /* not in this room (yet): to the join screen with the code filled in */
@@ -50,12 +51,28 @@ export default function PhoneRoom() {
     setBusy(false);
   }
   const pickTeam = (t: 0 | 1 | null) => act(() => rpc<string>("qmb_update_me", { r: code, nm: mine?.name ?? "", tm: t }));
-  const claim = (want: "captain" | "host" | "player") => act(() => rpc<string>("qmb_claim", { r: code, want }));
+  const self = useRef(0);                              // when I last changed my own role
+  const claim = (want: "captain" | "host" | "player") => { self.current = Date.now(); return act(() => rpc<string>("qmb_claim", { r: code, want })); };
   const move = (m: Member, to: 0 | 1) => act(async () => {
     const { error } = await sb().from("members").update({ team: to, role: "player" }).eq("room", code).eq("user_id", m.user_id);
     if (error) throw new Error(error.message);
   });
   const leave = () => (room?.status === "lobby" || window.confirm("Leave the game? You can come back with the same name.")) && act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
+
+  /* the armband moved without me asking (a captain's phone was away): say so, once */
+  const [note, setNote] = useState<string | null>(null);
+  const was = useRef<{ role?: string; team?: number | null }>({});
+  useEffect(() => {
+    if (!mine) return;
+    const w = was.current, mid = room?.status === "playing", mineSelf = Date.now() - self.current < 8000;
+    if (mid && w.role && w.team === mine.team && w.role !== mine.role && !mineSelf) {
+      const cap = members.find((m) => m.team === mine.team && m.role === "captain");
+      if (mine.role === "captain") setNote("You're your team's captain now: their phone was away. You type the answers.");
+      else if (w.role === "captain" && cap) setNote(`Your phone was away, so ${cap.name} took over as captain. They can step down to hand it back.`);
+    }
+    was.current = { role: mine.role, team: mine.team };
+  }, [mine, members, room?.status]);
+  useEffect(() => { if (!note) return; const t = setTimeout(() => setNote(null), 9000); return () => clearTimeout(t); }, [note]);
 
   /* the TV's reply has landed: whatever changed in the room */
   useEffect(() => { setWaiting(false); }, [room]);
@@ -83,6 +100,8 @@ export default function PhoneRoom() {
             : <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}
         </div>
       </header>
+
+      {note && <div className="card text-center text-[14px] font-bold enter" role="status" style={{ background: "rgba(245,197,24,.1)", borderColor: "rgba(245,197,24,.45)", color: "var(--color-gold)" }}>{note}</div>}
 
       {/* the tracker, as on the TV: scores, where we are, the night's progress */}
       {room.status !== "lobby" && pub && !panel && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}

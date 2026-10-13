@@ -7,7 +7,7 @@ import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
 import { getSettings, USED_KEY } from "./settings";
 import { readyToStart, starter, type Member, type Room } from "./room";
-import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_FLAG, T_MAP, T_MAP_RULE, T_OVERRULE, T_OVERRULE_BATTLE, T_SAY, T_SUDDEN_BUZZ,
+import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_FLAG, T_AWAY, T_MAP, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE, T_OVERRULE_BATTLE, T_SAY, T_SUDDEN_BUZZ,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
 /* the house timers come from Settings on this TV */
@@ -122,6 +122,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     pending: null as null | { kind: PKind; team: 0 | 1; text: string; v: boolean; until: number },
     autoAt: null as number | null,                     // no host: when an unruled map answer stands as right
     paused: false,                                     // the clock stopped by a Pause (the question hides meanwhile)
+    waitSince: 0,                                      // no host: when this screen started waiting for a Start or Next
     imad: null as Pub["imad"] | null, imadN: 0, imadQ: [] as string[],   // Imad's latest line, and the ones waiting to go up together
     custom: [] as Q[],                                 // questions of their own, sent by the phone that started
   });
@@ -212,7 +213,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     p.tMini = getSettings().tMini;
     /* no host: whose Start or Next the room is waiting for */
     if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
-      && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) p.nextBy = p.captains[leadTeam()] || "The captain";
+      && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {
+      p.nextBy = p.captains[leadTeam()] || "The captain";
+      p.nextOpenAt = s.waitSince + T_NEXT_FALLBACK * 1000; p.nextOther = p.captains[other(leadTeam())];
+    }
     const secret: Secret = { step: s.step, typed: s.typed, match: [match(s.typed[0], q), match(s.typed[1], q)], guesses: s.guesses };
     if (q) { p.qid = q.id; secret.qid = q.id; secret.answer = q.answer; secret.notes = q.notes; }
     if (rd) {
@@ -300,7 +304,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       setPub(v[0]);
       const s = st.current;
       try { localStorage.setItem(saveKey, JSON.stringify({ g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, custom: s.custom })); } catch { /* full */ }
+        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, custom: s.custom, waitSince: s.waitSince })); } catch { /* full */ }
       const room = ctx.current.room;
       /* the answer first, so the host's phone never shows a new question with the old answer */
       await sb().from("secrets").update({ data: v[1] }).eq("room", code);
@@ -377,7 +381,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else if (f.go === "answer" || f.go === "dishReveal" || f.go === "auctionLeg") playSound("drumroll");
       }
       if (f.go) {
-        s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false;
+        s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
         if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; }
         if (f.go === "sudden" || f.go === "battleTie") { s.sdBuzz = null; s.sdOut = [false, false]; }
@@ -555,7 +559,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const rule = CAPTAIN_MOVES[move.type];
     if (!rule || (rule.nohostOnly && !s.nohost) || !inScreen(rule.where, sc)) return false;
     const t = move.type as string;
-    if (rule.who === "lead" && leadTeam() !== team) return false;
+    /* the lead captain moves the night on; if they haven't after a while, the other captain may */
+    if (rule.who === "lead" && leadTeam() !== team && Date.now() - s.waitSince < T_NEXT_FALLBACK * 1000) return false;
     if (t === "ui/closeLifeline") { if (!s.lifeline || s.lifeline.team !== team) return false; }
     else if (t === "ui/agree" || t === "ui/overrule") { if (!s.pending || s.pending.team === team) return false; }
     else if (t === "sudden/go") { if (g.sdReady) return false; }
@@ -569,7 +574,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "ui/overrule") settle(true);
     else if (t === "ui/mapRule") {
       s.ok[other(team)] = !!move.v;
-      if (s.ok[0] != null && s.ok[1] != null) s.autoAt = null;
+      if (s.ok[0] != null && s.ok[1] != null) { s.autoAt = null; s.waitSince = Date.now(); }
     }
     else if (t === "auction/raise") { const n = Math.floor(Number(move.n)); if (!(n > g.auction.bid) || n > 999) return false; play({ type: t, n }); }
     else hostMove(move);
@@ -682,6 +687,51 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     return () => { clearInterval(poll); void sb().removeChannel(ch); };
   }, [code, isTv, handle]);
 
+  /* Who's here: every phone keeps a presence in the room (see usePresence). A
+     captain gone for T_AWAY hands over to the first teammate still here, so a
+     phone left in a pocket never stalls the night. Nobody is removed. */
+  const here = useRef({ at: {} as Record<string, number>, online: new Set<string>(), since: Date.now(), busy: false, checked: 0 });
+  useEffect(() => {
+    if (!isTv) return;
+    const ch = sb().channel("presence:" + code);
+    const sync = () => {
+      const on = new Set(Object.keys(ch.presenceState())), now = Date.now();
+      here.current.online = on; on.forEach((k) => { here.current.at[k] = now; });
+    };
+    ch.on("presence", { event: "sync" }, sync).on("presence", { event: "join" }, sync).on("presence", { event: "leave" }, sync).subscribe();
+    return () => { void sb().removeChannel(ch); };
+  }, [code, isTv]);
+  const handOver = useCallback(async () => {
+    const H = here.current, s = st.current, { room, members } = ctx.current, now = Date.now();
+    if (H.busy || !s.g || room?.status !== "playing") return;
+    H.online.forEach((k) => { H.at[k] = now; });
+    for (const t of [0, 1] as const) {
+      const cap = members.find((m) => m.team === t && m.role === "captain");
+      if (!cap || now - (H.at[cap.user_id] ?? H.since) < T_AWAY * 1000) continue;
+      const next = members.find((m) => m.team === t && m.role === "player" && H.online.has(m.user_id));   // first to join, still here
+      if (!next) continue;
+      H.busy = true;
+      try {
+        const a = await sb().from("members").update({ role: "player" }).eq("room", code).eq("user_id", cap.user_id);
+        if (a.error) continue;
+        const b = await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", next.user_id);
+        if (b.error) { await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", cap.user_id); continue; }
+        H.at[next.user_id] = now;
+        s.g.teams[t].captain = next.name;
+        s.toast = { id: ++s.toastN, text: `${cap.name} seems to be away. ${next.name} is ${s.g.teams[t].name}'s captain now.` };
+        void publish();
+      } finally { H.busy = false; }
+      return;
+    }
+  }, [code, publish]);
+  /* the line-up changed (a new captain, a move): the phones' view changes with it */
+  const lineup = ctx.current.members.map((m) => `${m.user_id}:${m.team}:${m.role}:${m.name}`).join("|");
+  const lastLineup = useRef(lineup);
+  useEffect(() => {
+    if (!isTv || !st.current.g || lastLineup.current === lineup) return;
+    lastLineup.current = lineup; void publish();
+  }, [isTv, lineup, publish]);
+
   const lastWhole = useRef<number | null>(null);
   /* The clocks. A standard question running out is only "time's up" when
      there's a host to judge; with no host it's a wrong answer. Closest, Flag
@@ -727,13 +777,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* no host: a map answer the other captain never ruled on stands as right; then the lead captain taps Next */
       if (s.nohost && s.autoAt && now >= s.autoAt) {
         s.autoAt = null; changed = true;
-        if (s.screen === "mapReveal") s.ok = [s.ok[0] ?? true, s.ok[1] ?? true];
+        if (s.screen === "mapReveal") { s.ok = [s.ok[0] ?? true, s.ok[1] ?? true]; s.waitSince = now; }
       }
+      if (now - here.current.checked > 2000) { here.current.checked = now; void handOver(); }
       if (changed) void publish();
     }, 250);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTv, publish, play, reveal, settle, hostMove, applyFx]);
+  }, [isTv, publish, play, reveal, settle, hostMove, applyFx, handOver]);
 
   return { pub, game: st.current.g as G };
 }

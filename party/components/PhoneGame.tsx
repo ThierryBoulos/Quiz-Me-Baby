@@ -4,7 +4,7 @@ import type { Pub, Secret } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { loadBank } from "@/lib/engine";
 import { sb, sendAction } from "@/lib/supabase";
-import { Clock, useSecondsLeft } from "./Clock";
+import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { AskHead, LifelineStrip, MiniIntro, RoundIntro } from "./GameParts";
 
@@ -554,7 +554,9 @@ function Countdown({ at }: { at: number }) { const s = useSecondsLeft(at); retur
 /* no host: whose tap the room is waiting for */
 function WaitingFor({ pub }: { pub: Pub }) {
   const label = pub.screen === "sudden" ? "Go" : NEXT_LABEL[pub.screen]?.[0] || "Next";
-  return <p className="text-center text-[13px] text-[var(--color-ink-3)]" role="status">Waiting for {pub.nextBy} to tap {/^Start/.test(label) ? "Start" : label}.</p>;
+  const open = useAfter(pub.nextOpenAt);
+  const who = open && pub.nextOther ? `${pub.nextBy} or ${pub.nextOther}` : pub.nextBy;
+  return <p className="text-center text-[13px] text-[var(--color-ink-3)]" role="status">Waiting for {who} to tap {/^Start/.test(label) ? "Start" : label}.</p>;
 }
 /* the screens a clock runs on, and so the ones a Pause makes sense on */
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"];
@@ -592,7 +594,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   useEffect(() => { if (yourGo) buzzHand([60, 40, 60]); }, [yourGo, pub.qid, sc]);
   /* no host: Team A's captain (B's if A has none) starts and moves the night on */
   const lead = pub.lead === mine;
-  const next = nohost && lead && pub.nextBy ? NEXT_LABEL[sc] : undefined;
+  /* ...and if they haven't after a while (phone in a pocket), the other captain can */
+  const open = useAfter(pub.nextOpenAt);
+  const mayNext = lead || open;
+  const next = nohost && mayNext && pub.nextBy ? NEXT_LABEL[sc] : undefined;
   const showNext = !!next && sc !== "sudden";
 
   const send = async () => {
@@ -695,8 +700,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {/* no host: start, go and next — the lead captain (Team A's) */}
       {showNext && next && (
         <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: next[1] })}>{next[0]}</button>)}
-      {nohost && lead && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
-      {pub.nextBy && !lead && <WaitingFor pub={pub} />}
+      {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
+      {pub.nextBy && !lead && open && <p className="text-center text-[13px] text-[var(--color-ink-3)]">{pub.nextBy} hasn&rsquo;t tapped it, so you can.</p>}
+      {pub.nextBy && !lead && !open && <WaitingFor pub={pub} />}
       {/* no host: either captain can stop the clock (the question hides until it restarts) */}
       {nohost && PAUSABLE.includes(sc) && !pub.lifeline && !pub.pending && (pub.deadline || pub.paused) && (
         <button className="btn btn-sm self-center" disabled={busy} onClick={() => void nxt({ type: "ui/pause" })}>{pub.paused ? "Resume" : "Pause"}</button>)}

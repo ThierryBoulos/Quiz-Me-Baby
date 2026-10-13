@@ -45,6 +45,8 @@ export type Pub = {
   paused?: boolean;          // the clock was paused: the question is hidden until it restarts
   lead?: 0 | 1;              // no host: the captain who starts and moves the night on (Team A's, or B's)
   nextBy?: string;           // no host: whose Start or Next the room is waiting for
+  nextOpenAt?: number;       // ...and from when the other captain may tap it too
+  nextOther?: string | null; // that other captain
   imad?: { id: number; text: string };   // Imad's latest line (text only)                 // Closest To Wins clock, for its rules
   mode: "host" | "nohost";
 };
@@ -58,3 +60,7 @@ export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
 export const T_OVERRULE = 15, T_SUDDEN_BUZZ = 30, T_MAP_RULE = 30;
 /* the Battle is rapid fire: a shorter window there (the other captain can still Agree at once) */
 export const T_OVERRULE_BATTLE = 8;
+/* no host: if the lead captain hasn't tapped Next after this long, the other captain can */
+export const T_NEXT_FALLBACK = 20;
+/* a captain whose phone has been gone this long hands over to a teammate who's still here */
+export const T_AWAY = 60;

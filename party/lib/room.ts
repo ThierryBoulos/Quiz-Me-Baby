@@ -45,6 +45,22 @@ export function useRoom(code: string) {
   return { room, members, missing, refresh: pull };
 }
 
+/* "I'm here": each phone keeps a presence in the room while its page is open,
+   so the TV can tell a captain who has gone (phone off, page closed) from one
+   who is just slow. Nobody is ever removed for it; a captain who's been gone
+   a minute hands the armband to a teammate who's still here. */
+export function usePresence(code: string, me: string | null) {
+  useEffect(() => {
+    if (!me) return;
+    const ch = sb().channel("presence:" + code, { config: { presence: { key: me } } });
+    const track = () => void ch.track({ at: Date.now() });
+    ch.subscribe((status) => { if (status === "SUBSCRIBED") track(); });
+    const vis = () => { if (document.visibilityState === "visible") track(); };
+    document.addEventListener("visibilitychange", vis);
+    return () => { document.removeEventListener("visibilitychange", vis); void sb().removeChannel(ch); };
+  }, [code, me]);
+}
+
 /* who starts the game: the host, or with no host Team A's captain */
 export function starter(members: Member[]): Member | null {
   return members.find((m) => m.role === "host") || members.find((m) => m.role === "captain" && m.team === 0) || null;
