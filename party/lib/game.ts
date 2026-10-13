@@ -35,7 +35,7 @@ export type Pub = {
   /* no host: what a captain sent, the app's verdict, and how long the other captain has to overrule it */
   pending?: { team: 0 | 1; text: string; v: boolean; until: number } | null;
   map?: { id: string; reveal: boolean; hint?: string; title?: string; notes?: string; ruled?: Two<boolean | null> };
-  auction?: { cat: string; notes?: string; bid: number; by: 0 | 1 | null; turn: 0 | 1; count: number; leg: number; n: number; wins: Two<number>;
+  auction?: { cat: string; notes?: string; bid: number; by: 0 | 1 | null; turn: 0 | 1; count: number; leg: number; n: number; wins: Two<number>; bids?: Two<number | null>;
     last?: { bid: number; by: 0 | 1; count: number; made: boolean; won: 0 | 1 }; winner?: 0 | 1 | null; award?: Two<number> };
   battle?: { cap: 0 | 1; i: number; n: number; score: Two<number>; last?: { answer: string; got: boolean } | null; tb?: number; winner?: 0 | 1 | null; note?: string; award?: Two<number> };
   autoAt?: number | null;         // no host: when this screen moves on by itself

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import type { Pub, Secret } from "@/lib/game";
+import type { Pub, Secret, Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { loadBank } from "@/lib/engine";
 import { note, sb, sendAction } from "@/lib/supabase";
@@ -173,7 +173,7 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
       <div className="flex flex-col gap-4 flex-1">
         <div className="card text-center"><div className="eyebrow">The answer</div>
           <div className="display text-[36px]" style={{ color: "var(--color-gold)" }}>{pub.result?.answer}</div>
-          <div className="display text-[24px] mt-2" style={{ color: tc(pub.result?.by) }}>{pub.result?.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}`}</div></div>
+          <div className="display text-[24px] mt-2" style={{ color: pub.result?.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>{pub.result?.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}`}</div></div>
         <Main label="Next" move={{ type: "round/afterAnswer" }} />
       </div>);
     case "roundScore": return (
@@ -438,17 +438,44 @@ export function AwayLog({ pub }: { pub: Pub | null }) {
     </div>);
 }
 
+/* the Auction while it's bid: each captain's latest bid, the one to beat lit up */
+function BidBoard({ pub }: { pub: Pub }) {
+  const A = pub.auction!, T = pub.teams;
+  return (
+    <div className="grid grid-cols-2 gap-2 mt-3">
+      {([0, 1] as const).map((t) => { const b = A.bids?.[t], top = A.by === t && A.bid > 0; return (
+        <div key={t} className="rounded-[14px] py-2.5 px-2 flex flex-col items-center" style={{ background: top ? "rgba(245,197,24,.12)" : "rgba(255,255,255,.04)", border: `1px solid ${top ? "rgba(245,197,24,.55)" : "transparent"}` }}>
+          <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
+          <div className="display text-[38px] leading-none mt-1">{b ?? "–"}</div>
+          <div className="text-[11px] font-bold mt-1" style={{ color: top ? "var(--color-gold)" : "var(--color-ink-3)" }}>{top ? "Highest bid" : A.turn === t ? "To bid" : b == null ? "No bid yet" : "Outbid"}</div>
+        </div>); })}
+    </div>);
+}
+
 /* who won what, on every phone (the TV isn't the only one that gets to know) */
 function Result({ pub, mine }: { pub: Pub; mine?: 0 | 1 }) {
   const T = pub.teams, sc = pub.screen, m = pub.mini;
   const name = (t: 0 | 1) => <b style={{ color: tc(t) }}>{T[t].name}</b>;
   const head = (t: 0 | 1 | null | undefined, text: string, sub?: string) => (
     <div className="card text-center flex flex-col gap-1" role="status" aria-live="polite">
-      <div className="display text-[28px] leading-tight" style={{ color: tc(t ?? null) }}>{text}</div>
+      <div className="display text-[28px] leading-tight" style={{ color: t == null ? "var(--color-ink-2)" : tc(t) }}>{text}</div>
       {t != null && mine != null && <div className="text-[13px] font-bold" style={{ color: t === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{t === mine ? "That's your team!" : "Not this time."}</div>}
       {sub && <div className="text-[13px] text-[var(--color-ink-2)]">{sub}</div>}
     </div>);
   const legW = (w: unknown) => (w === 0 || w === 1 ? w : null) as 0 | 1 | null;
+  /* the mini-game's own score, big: TEAM A 3 – 4 TEAM B */
+  const board = (w: Two<number>, label: string, win: 0 | 1 | null) => (
+    <div className="card !py-4" aria-label={`${label}: ${T[0].name} ${w[0]}, ${T[1].name} ${w[1]}`}>
+      <div className="eyebrow text-center mb-2">{label}</div>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        {([0, 1] as const).map((t) => (
+          <div key={t} className={"flex flex-col items-center gap-1 " + (t === 1 ? "order-3" : "")} style={{ opacity: win == null || win === t ? 1 : 0.55 }}>
+            <div className="display text-[60px] leading-none" style={{ color: tc(t) }}>{w[t]}</div>
+            <div className="text-[12px] font-bold tracking-[.1em] uppercase text-[var(--color-ink-2)] text-center leading-tight">{T[t].name}</div>
+          </div>))}
+        <div className="display text-[36px] text-[var(--color-ink-3)] order-2">–</div>
+      </div>
+    </div>);
   const rows = (ok: (t: 0 | 1) => string) => (
     <div className="grid grid-cols-2 gap-2">{([0, 1] as const).map((t) => (
       <div key={t} className="card !p-3 text-center"><div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div><div className="text-[15px] font-bold mt-1">{ok(t)}</div></div>))}</div>);
@@ -476,10 +503,16 @@ function Result({ pub, mine }: { pub: Pub; mine?: 0 | 1 }) {
       {mine != null && <div className="text-[13px] font-bold" style={{ color: L.won === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{L.won === mine ? "That's your team!" : "Not this time."}</div>}
       <div className="text-[13px] text-[var(--color-ink-2)]">Legs so far: {T[0].name} {pub.auction.wins[0]} · {T[1].name} {pub.auction.wins[1]}</div>
     </div>); }
-  if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null; return head(w, w == null ? `Level, ${A.wins[0]}–${A.wins[1]}` : `${T[w].name} win the Auction`, `${A.wins[0]}–${A.wins[1]} on legs${w != null ? ` · +${A.award?.[w] ?? m?.pts} points` : ""}`); }
-  if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary; return head(S.winner, S.needsHost ? "Still level" : S.winner == null ? "A split" : `${T[S.winner].name} win ${m?.title ?? "it"}`,
-    `${S.wins[0]}–${S.wins[1]} on legs${S.needsHost ? " · the host decides" : S.winner == null ? ` · ${S.award?.[0] ?? 0} points each` : ` · +${S.award?.[S.winner] ?? m?.pts} points`}`); }
-  if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null; return head(w, w == null ? (B.note || "Level") : `${T[w].name} win the Battle`, `${B.score[0]}–${B.score[1]}${w != null ? ` · +${B.award?.[w] ?? m?.pts} points` : ""}`); }
+  if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null; return (<>
+    {head(w, w == null ? "Level" : `${T[w].name} win the Auction`, w != null ? `+${A.award?.[w] ?? m?.pts} points` : "")}
+    {board(A.wins, "Legs won", w)}</>); }
+  if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary; return (<>
+    {head(S.winner, S.needsHost ? "Still level" : S.winner == null ? "A split" : `${T[S.winner].name} win ${m?.title ?? "it"}`,
+      S.needsHost ? "The host decides" : S.winner == null ? `${S.award?.[0] ?? 0} points each` : `+${S.award?.[S.winner] ?? m?.pts} points`)}
+    {board(S.wins, "Legs won", S.winner)}</>); }
+  if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null; return (<>
+    {head(w, w == null ? (B.note || "Level") : `${T[w].name} win the Battle`, w != null ? `+${B.award?.[w] ?? m?.pts} points` : "")}
+    {board(B.score, "Right answers", w)}</>); }
   return null;
 }
 
@@ -495,6 +528,7 @@ function OnScreen({ pub }: { pub: Pub }) {
     {pub.map && <MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={260} />}
     {pub.map?.reveal && <div className="display text-[26px] text-center" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>}
     {pub.auction && /^auction(Bid|Run|Leg)$/.test(pub.screen) && <div className="card text-center"><div className="eyebrow">Category</div><div className="display text-[26px]" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>
+      {pub.screen === "auctionBid" && <BidBoard pub={pub} />}
       {pub.screen === "auctionRun" && <div className="display text-[44px]">{pub.auction.count} / {pub.auction.bid}</div>}</div>}
     {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
     {pub.reveal && /Reveal$/.test(pub.screen) && pub.screen !== "mapReveal" && pub.screen !== "sayReveal" && <div className="display text-[30px] text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}

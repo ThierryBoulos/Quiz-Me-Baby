@@ -122,6 +122,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     pending: null as null | { kind: PKind; team: 0 | 1; text: string; v: boolean; until: number },
     autoAt: null as number | null,                     // no host: when an unruled map answer stands as right
     paused: false,                                     // the clock stopped by a Pause (the question hides meanwhile)
+    bids: { leg: -1, by: [null, null] as Two<number | null> },   // the Auction: each captain's latest bid this leg
     waitSince: 0,                                      // no host: when this screen started waiting for a Start or Next
     flags: [] as NonNullable<Pub["flags"]>, flagN: 0,  // phones that left the game screen during a question
     tvAway: 0, awayPaused: false,                      // when the TV's screen went to sleep (0: it's on), and whether that paused the clock
@@ -251,6 +252,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       p.mini = { key, title: MINI_TITLES[key], leg: Math.min(a.leg + 1, a.n), of: a.n, wins: [...a.wins] as Two<number>, pts: g.miniPts };
       const last = a.legs[a.legs.length - 1];
       p.auction = { cat: a.q?.question || "", notes: a.q?.notes, bid: a.bid, by: a.by, turn: a.turn, count: a.count, leg: a.leg, n: a.n, wins: [...a.wins] as Two<number>,
+        bids: s.bids.leg === a.leg ? [...s.bids.by] as Two<number | null> : [null, null],
         last: s.screen === "auctionLeg" && last ? { bid: last.bid, by: last.by, count: last.count, made: last.made, won: last.won } : undefined,
         winner: a.done ? a.winner : null, award: a.award };
       p.turn = a.turn;
@@ -580,7 +582,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.ok[other(team)] = !!move.v;
       if (s.ok[0] != null && s.ok[1] != null) { s.autoAt = null; s.waitSince = Date.now(); }
     }
-    else if (t === "auction/raise") { const n = Math.floor(Number(move.n)); if (!(n > g.auction.bid) || n > 999) return false; play({ type: t, n }); }
+    else if (t === "auction/raise") {
+      const n = Math.floor(Number(move.n)); if (!(n > g.auction.bid) || n > 999) return false;
+      if (s.bids.leg !== g.auction.leg) s.bids = { leg: g.auction.leg, by: [null, null] };
+      s.bids.by[team] = n;
+      play({ type: t, n });
+    }
     else hostMove(move);
     return true;
   }, [hostMove, play, settle]);
