@@ -719,7 +719,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      captain gone for T_AWAY hands over to the first teammate still here, so a
      phone left in a pocket never stalls the night. Nobody is removed. */
   const here = useRef({ at: {} as Record<string, number>, online: new Set<string>(), since: Date.now(), busy: false, checked: 0,
-    away: {} as Record<string, { at: number; qid?: string; flag?: number }>, back: {} as Record<string, number> });
+    away: {} as Record<string, { at: number; qid?: string; flag?: number }>, back: {} as Record<string, number>, beat: {} as Record<string, number> });
   /* Left the game screen during a question: flagged once they've been gone two
      seconds (a glance at a notification doesn't count), with how long when
      they come back. The TV says it; the host's phone keeps the list. */
@@ -739,7 +739,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const H = here.current, s = st.current, now = Date.now();
     let changed = false;
     for (const [k, metas] of Object.entries(state)) {
-      const m = metas[metas.length - 1] || {};
+      /* a phone can show twice for a moment (its old and new presence): the newest one counts */
+      const m = metas.reduce<(typeof metas)[number] | undefined>((x, y) => (!x || ((y as { at?: number }).at ?? 0) >= ((x as { at?: number }).at ?? 0) ? y : x), undefined) || {};
       if (m.away && !H.away[k]) H.away[k] = { at: now, qid: m.away.qid };
       /* back without a report (the phone reloaded the page): they're here again */
       else if (!m.away && H.away[k] && !(m.last && m.last.at !== H.back[k])) {
@@ -763,7 +764,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const sync = () => {
       const state = ch.presenceState() as Parameters<typeof onPresence.current>[0];
       const on = new Set(Object.keys(state)), now = Date.now();
-      here.current.online = on; on.forEach((k) => { here.current.at[k] = now; });
+      /* a phone counts as here when its heartbeat (every 15 s) is fresh, not just
+         because it's still listed: a dead phone can stay listed for a minute */
+      here.current.online = on;
+      for (const k of on) {
+        const at = Math.max(0, ...(state[k] || []).map((x) => (x as { at?: number }).at ?? 0));
+        if (here.current.beat[k] !== at) { here.current.beat[k] = at; here.current.at[k] = now; }
+      }
       onPresence.current(state);
     };
     ch.on("presence", { event: "sync" }, sync).on("presence", { event: "join" }, sync).on("presence", { event: "leave" }, sync).subscribe();
@@ -772,7 +779,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const handOver = useCallback(async () => {
     const H = here.current, s = st.current, { room, members } = ctx.current, now = Date.now();
     if (H.busy || !s.g || room?.status !== "playing") return;
-    H.online.forEach((k) => { H.at[k] = now; });
+    const fresh = (k: string) => H.online.has(k) && now - (H.at[k] ?? 0) < 40000;
     /* The host's phone gone a minute (or the host left): the app checks the
        answers, as in a game with no host, until the host is back. */
     const hostM = members.find((m) => m.role === "host");
@@ -799,7 +806,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     for (const t of [0, 1] as const) {
       const cap = members.find((m) => m.team === t && m.role === "captain");
       if (!cap || now - (H.at[cap.user_id] ?? H.since) < T_AWAY * 1000) continue;
-      const next = members.find((m) => m.team === t && m.role === "player" && H.online.has(m.user_id));   // first to join, still here
+      const next = members.find((m) => m.team === t && m.role === "player" && fresh(m.user_id));   // first to join, still here
       if (!next) continue;
       H.busy = true;
       try {
