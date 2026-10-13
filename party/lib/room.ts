@@ -9,7 +9,9 @@ export type Room = { code: string; tv_id: string; status: "lobby" | "playing" | 
 
 export const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 export const cleanCode = (s: string) => s.toUpperCase().split("").filter((c) => CODE_ALPHABET.includes(c)).join("").slice(0, 4);
-export const teamName = (room: Room | null, t: 0 | 1) => room?.state?.teamNames?.[t] || (t === 0 ? "Team A" : "Team B");
+/* names always start with a capital ("sanofi" shows as "Sanofi") */
+export const cap1 = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+export const teamName = (room: Room | null, t: 0 | 1) => cap1(room?.state?.teamNames?.[t] || (t === 0 ? "Team A" : "Team B"));
 
 /* The room and its line-up, kept live: Supabase pushes every change, and a
    slow poll sits underneath as a safety net (SNAKED does the same) so a
@@ -27,7 +29,7 @@ export function useRoom(code: string) {
     ]);
     if (!alive.current) return;
     if (!r.error) { setRoom(r.data as Room | null); setMissing(!r.data); }
-    if (!m.error) setMembers((m.data || []) as Member[]);
+    if (!m.error) setMembers(((m.data || []) as Member[]).map((x) => ({ ...x, name: cap1(x.name) })));
   }, [code]);
 
   useEffect(() => {

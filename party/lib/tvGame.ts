@@ -6,7 +6,7 @@ import { HOST_LINES } from "./imadLines";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
 import { getSettings, USED_KEY } from "./settings";
-import { readyToStart, starter, type Member, type Room } from "./room";
+import { cap1, readyToStart, starter, type Member, type Room } from "./room";
 import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_FLAG, T_AWAY, T_MAP, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE, T_OVERRULE_BATTLE, T_SAY, T_SUDDEN_BUZZ,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
@@ -252,7 +252,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       p.mini = { key, title: MINI_TITLES[key], leg: Math.min(a.leg + 1, a.n), of: a.n, wins: [...a.wins] as Two<number>, pts: g.miniPts };
       const last = a.legs[a.legs.length - 1];
       p.auction = { cat: a.q?.question || "", notes: a.q?.notes, bid: a.bid, by: a.by, turn: a.turn, count: a.count, leg: a.leg, n: a.n, wins: [...a.wins] as Two<number>,
-        bids: s.bids.leg === a.leg ? [...s.bids.by] as Two<number | null> : [null, null],
+        bids: (() => { const b = (s.bids.leg === a.leg ? [...s.bids.by] : [null, null]) as Two<number | null>; if (a.by != null && a.bid > 0) b[a.by as 0 | 1] = a.bid; return b; })(),
         last: s.screen === "auctionLeg" && last ? { bid: last.bid, by: last.by, count: last.count, made: last.made, won: last.won } : undefined,
         winner: a.done ? a.winner : null, award: a.award };
       p.turn = a.turn;
@@ -310,7 +310,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       setPub(v[0]);
       const s = st.current;
       try { localStorage.setItem(saveKey, JSON.stringify({ g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused })); } catch { /* full */ }
+        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids })); } catch { /* full */ }
       const room = ctx.current.room;
       /* the answer first, so the host's phone never shows a new question with the old answer */
       await sb().from("secrets").update({ data: v[1] }).eq("room", code);
@@ -602,7 +602,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "count") { if (isTvRef.current) onNote(a.user_id, a.payload as Parameters<typeof onNote>[1]); return; }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
       const names = [...(room.state.teamNames || ["Team A", "Team B"])] as [string, string];
-      names[from.team as 0 | 1] = String(a.payload.name || "").slice(0, 18) || names[from.team as 0 | 1];
+      names[from.team as 0 | 1] = cap1(String(a.payload.name || "").trim().slice(0, 18)) || names[from.team as 0 | 1];
       await sb().from("rooms").update({ state: { ...room.state, teamNames: names } }).eq("code", code);
       return;
     }
@@ -613,7 +613,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.custom = cleanList(cfgIn.custom, base.themes);
       s.bank = withCustom(base, s.custom);
       const names = room.state.teamNames || ["Team A", "Team B"];
-      const team = (t: 0 | 1) => ({ name: names[t], captain: members.find((m) => m.team === t && m.role === "captain")?.name || "",
+      const team = (t: 0 | 1) => ({ name: cap1(names[t]), captain: cap1(members.find((m) => m.team === t && m.role === "captain")?.name || ""),
         players: members.filter((m) => m.team === t).map((m) => m.name).join(", ") });
       const diff = DIFFS.includes(cfgIn.difficulty) ? cfgIn.difficulty : "mixed";
       const minis = (Array.isArray(cfgIn.minis) ? cfgIn.minis : []).filter((k: string) => PARTY_MINIS.includes(k));

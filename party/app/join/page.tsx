@@ -3,7 +3,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { FacePicker } from "@/components/Face";
 import { FACES } from "@/lib/faces";
-import { cleanCode } from "@/lib/room";
+import { cap1, cleanCode } from "@/lib/room";
 import { ensureSession, rpc } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 
@@ -36,7 +36,7 @@ function JoinForm() {
     setBusy(true);
     try {
       await ensureSession();
-      const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean }>("qmb_join", { r: code, nm: useName.trim(), face });
+      const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean }>("qmb_join", { r: code, nm: cap1(useName.trim()), face });
       if (res.error === "no_room") { setCodeErr(friendly("no_room")); setBusy(false); return; }
       if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(!!res.playing); setBusy(false); return; }
       if (res.error === "face_taken") { setErr(friendly("face_taken")); void loadTaken(); setBusy(false); return; }

@@ -9,7 +9,7 @@ import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
-import { useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
+import { cap1, useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
 /* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
    name the team, or be the host. The colour of your team fills the screen. */
@@ -79,7 +79,7 @@ export default function PhoneRoom() {
 
   /* a captain names the team: the TV writes it; we wait to see it land */
   const saveTeamName = () => {
-    const name = (draft ?? "").trim();
+    const name = cap1((draft ?? "").trim());
     if (!mine || mine.team == null || !name) return;
     setNameState("saving"); setMsg(null);
     void sendAction(code, "team_name", { team: mine.team, name }).catch((e) => { setNameState(null); setMsg(friendly(e)); });
@@ -88,7 +88,7 @@ export default function PhoneRoom() {
   const shownName = mine?.team != null ? teamName(room, mine.team) : "";
   useEffect(() => {
     if (nameState !== "saving") return;
-    if (draft != null && shownName === draft.trim()) { setNameState("saved"); setDraft(null); return; }
+    if (draft != null && shownName === cap1(draft.trim())) { setNameState("saved"); setDraft(null); return; }
     const t = setTimeout(() => setNameState("late"), 8000);
     return () => clearTimeout(t);
   }, [nameState, shownName, draft]);
