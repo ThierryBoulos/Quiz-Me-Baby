@@ -53,7 +53,8 @@ export default function TvRoom() {
 
   return (
     <TvStage>
-      <SoundNote />
+      {/* not in the lobby: the first tap there (anywhere) turns the sound on anyway */}
+      {room.status !== "lobby" && <SoundNote />}
       {room.status !== "lobby" && [0, 1].filter((t) => !members.some((m) => m.team === t && m.role === "captain")).map((t) => (
         <div key={t} className="fixed left-1/2 top-4 -translate-x-1/2 chip" style={{ fontSize: 18, padding: "10px 20px", zIndex: 30, borderColor: `var(--color-${t === 0 ? "a" : "b"})` }}>
           {(room.state.teamNames || ["Team A", "Team B"])[t]} needs a captain: tap &ldquo;Make me captain&rdquo; on a phone</div>))}
