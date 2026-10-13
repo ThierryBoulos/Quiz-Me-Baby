@@ -2,12 +2,12 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
-import { CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
+import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
 import { Hud } from "@/components/GameParts";
 import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
-import { notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
+import { useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
 /* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
    name the team, or be the host. The colour of your team fills the screen. */
@@ -31,7 +31,7 @@ export default function PhoneRoom() {
   }, []);
 
   useEffect(() => { void ensureSession().then(setMe); }, []);
-  usePresence(code, me);
+  const report = usePresence(code, me);
   const mine = useMemo(() => members.find((m) => m.user_id === me) || null, [members, me]);
 
   /* not in this room (yet): to the join screen with the code filled in */
@@ -79,6 +79,10 @@ export default function PhoneRoom() {
   const playing = room?.status === "playing" || room?.status === "done";
   const pub = (room?.state?.pub || null) as Pub | null;
   const secret = useSecret(code, !!mine && mine.role === "host" && playing);
+  /* a question is live on this phone: leaving the screen now gets flagged on the TV */
+  const live = !!pub && !!mine && mine.role !== "host" && ANSWERING.includes(pub.screen) && !pub.paused
+    && !(pub.lifeline?.key === "friend" && pub.lifeline.team === mine.team);
+  useAwayWatch(report, live, pub?.qid);
   const sendMove = (move: Record<string, unknown>) => act(() => sendAction(code, "judge", { move, step: pub?.step }));
 
   if (!room || !mine) return <main className="screen justify-center items-center gap-4" aria-busy="true"><div className="spinner" /><div className="eyebrow">Finding your seat…</div></main>;
@@ -129,6 +133,7 @@ export default function PhoneRoom() {
             {mine.role === "player" && myCaptain && <div className="card text-center text-[14px]">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
             {mine.role === "host" && <p className="text-[14px] text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
             <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} />
+            {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {/* leaving is kept away from everyday buttons, and asks first */}
             <button className="btn btn-sm btn-ghost self-center mt-6" style={{ color: "var(--color-no)", borderColor: "color-mix(in srgb, var(--color-no) 45%, transparent)" }} onClick={leave}>Leave the game</button>
@@ -197,6 +202,7 @@ export default function PhoneRoom() {
           ) : (
             <p className="text-center text-[14px] text-[var(--color-ink-2)]">
               You&rsquo;re in. {who ? <><b>{who.name}</b> starts the game.</> : "The host — or Team A's captain — starts the game."}
+              <br /><span className="text-[12px] text-[var(--color-ink-3)]">Heads up: leaving this screen during a question (another app, a search) is flagged on the TV.</span>
             </p>
           )}
         </footer>

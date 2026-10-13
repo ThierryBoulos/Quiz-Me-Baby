@@ -47,7 +47,9 @@ export type Pub = {
   nextBy?: string;           // no host: whose Start or Next the room is waiting for
   nextOpenAt?: number;       // ...and from when the other captain may tap it too
   nextOther?: string | null; // that other captain
-  imad?: { id: number; text: string };   // Imad's latest line (text only)                 // Closest To Wins clock, for its rules
+  imad?: { id: number; text: string };   // Imad's latest line (text only)
+  /* phones that left the game screen during a question (another app or tab): name, team, how long (null: still away) */
+  flags?: { id: number; name: string; team: 0 | 1 | null; label: string; qid?: string; ms: number | null }[];                 // Closest To Wins clock, for its rules
   mode: "host" | "nohost";
 };
 /* host only: the answer, and what the captains typed with the app's opinion */

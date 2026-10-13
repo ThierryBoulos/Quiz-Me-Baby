@@ -172,6 +172,7 @@ export default function SettingsPage() {
       <Section title="Gameplay">
         <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="Never reuse a question I've already played" help="Every question this TV plays is remembered. The same group can play week after week with no repeats." />
         <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="Alternate which team answers first each round" help="Off = Team A always goes first." />
+        <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help="Someone switches app or tab while a question is up (a search, a chatbot)? The TV says so, and the host's phone keeps the list. Call a Friend is allowed." />
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <span className="text-[14px] text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played.</span>
           <button type="button" className="btn btn-sm" disabled={!played}

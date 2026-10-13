@@ -132,6 +132,7 @@ export default function HowToPlay() {
           <><B>The captain&rsquo;s phone</B> sends the answers, the bids, the buzzes and the lifelines.</>,
           <><B>Everyone else</B> sees the question and can send the captain a suggestion.</>,
           <><B>No host?</B> The app checks every answer, and the other captain has 15 seconds to agree or overrule. Team A&rsquo;s captain taps Start and Next to move the night on.</>,
+          <><B>No peeking.</B> A phone that leaves the game screen during a question (another app, a search) is flagged on the TV, and the host sees the list.</>,
           <>Phone died? Join again with the same name and tap &ldquo;take my seat back&rdquo;.</>,
         ]} />
       </Rule>

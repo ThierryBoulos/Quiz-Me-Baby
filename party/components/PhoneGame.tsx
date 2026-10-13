@@ -10,7 +10,7 @@ import { AskHead, LifelineStrip, MiniIntro, RoundIntro } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
-const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sayQ", "sudden", "battleQ", "battleTie"];
+export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sayQ", "sudden", "battleQ", "battleTie"];
 /* captains only: the players keep quiet */
 const CAPTAINS_ONLY = ["sudden", "battleQ", "battleTie"];
 
@@ -129,6 +129,9 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
     </div>);
 
   const mk = pub.mini?.key ? ({ saysame: "say" } as Record<string, string>)[pub.mini.key] || pub.mini.key : undefined, S = pub.summary;
+  const screen = HostScreen();
+  return <>{<AwayCard pub={pub} />}{screen}</>;
+  function HostScreen() {
   switch (pub.screen) {
     case "roundIntro": return (
       <div className="flex flex-col gap-4 flex-1">
@@ -394,6 +397,28 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
       </div>);
     default: return <div className="eyebrow text-center">Eyes on the TV</div>;
   }
+  }
+}
+
+/* the host's warning: who left the game screen during this question (another app, a search) */
+function AwayCard({ pub }: { pub: Pub }) {
+  const now = (pub.flags || []).filter((f) => f.qid && f.qid === pub.qid);
+  if (!now.length) return null;
+  return (
+    <div className="card !p-3 text-[14px] font-bold" role="alert" style={{ background: "rgba(255,85,102,.12)", borderColor: "rgba(255,85,102,.5)", color: "var(--color-no)" }}>
+      Left the game screen during this question: {now.map((f) => `${f.name}${f.ms != null ? ` (${Math.round(f.ms / 1000)}s)` : " (still away)"}`).join(", ")}
+    </div>);
+}
+/* the host's full list, in the Players panel */
+export function AwayLog({ pub }: { pub: Pub | null }) {
+  const all = pub?.flags || [];
+  return (
+    <div className="card flex flex-col gap-2">
+      <div className="eyebrow" style={{ color: "var(--color-no)" }}>Left the game screen</div>
+      {all.length ? [...all].reverse().map((f) => (
+        <div key={f.id} className="text-[14px]"><b style={{ color: tc(f.team) }}>{f.name}</b> · {f.label}{f.ms != null ? ` · ${Math.round(f.ms / 1000)}s` : " · still away"}</div>))
+        : <p className="text-[14px] text-[var(--color-ink-2)]">Nobody so far. A phone that switches app or tab during a question shows up here and on the TV.</p>}
+    </div>);
 }
 
 /* who won what, on every phone (the TV isn't the only one that gets to know) */

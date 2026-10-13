@@ -123,6 +123,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     autoAt: null as number | null,                     // no host: when an unruled map answer stands as right
     paused: false,                                     // the clock stopped by a Pause (the question hides meanwhile)
     waitSince: 0,                                      // no host: when this screen started waiting for a Start or Next
+    flags: [] as NonNullable<Pub["flags"]>, flagN: 0,  // phones that left the game screen during a question
     imad: null as Pub["imad"] | null, imadN: 0, imadQ: [] as string[],   // Imad's latest line, and the ones waiting to go up together
     custom: [] as Q[],                                 // questions of their own, sent by the phone that started
   });
@@ -197,7 +198,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       deadline: s.deadline, left: s.left, timeUp: s.timeUp, lifeline: s.lifeline, toast: s.toast, winner: g.winner ?? null,
       sent: [!!s.typed[0] || s.guesses[0] != null, !!s.typed[1] || s.guesses[1] != null],
       pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
-      autoAt: s.autoAt, paused: s.paused, lead: leadTeam(), imad: s.imad || undefined,
+      autoAt: s.autoAt, paused: s.paused, lead: leadTeam(), imad: s.imad || undefined, flags: s.flags.slice(-30),
     };
     /* the tracker: every round and mini-game of the night, in order (Classic's schedule/pipState) */
     const live = miniOf(s.screen);
@@ -304,7 +305,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       setPub(v[0]);
       const s = st.current;
       try { localStorage.setItem(saveKey, JSON.stringify({ g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, custom: s.custom, waitSince: s.waitSince })); } catch { /* full */ }
+        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN })); } catch { /* full */ }
       const room = ctx.current.room;
       /* the answer first, so the host's phone never shows a new question with the old answer */
       await sb().from("secrets").update({ data: v[1] }).eq("room", code);
@@ -690,13 +691,46 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* Who's here: every phone keeps a presence in the room (see usePresence). A
      captain gone for T_AWAY hands over to the first teammate still here, so a
      phone left in a pocket never stalls the night. Nobody is removed. */
-  const here = useRef({ at: {} as Record<string, number>, online: new Set<string>(), since: Date.now(), busy: false, checked: 0 });
+  const here = useRef({ at: {} as Record<string, number>, online: new Set<string>(), since: Date.now(), busy: false, checked: 0,
+    away: {} as Record<string, { at: number; qid?: string; flag?: number }>, back: {} as Record<string, number> });
+  /* Left the game screen during a question: flagged once they've been gone two
+     seconds (a glance at a notification doesn't count), with how long when
+     they come back. The TV says it; the host's phone keeps the list. */
+  const flag = (k: string, qid: string | undefined, ms: number | null) => {
+    const s = st.current, g = s.g, m = ctx.current.members.find((x) => x.user_id === k);
+    if (!g || !m || m.role === "host" || !getSettings().flagAway) return undefined;
+    const mk = miniOf(s.screen), rd = g.rounds[g.r];
+    const label = s.screen === "sudden" ? "Sudden death" : mk ? MINI_TITLES[mk] : rd ? `Round ${g.r + 1} · ${rd.theme}` : "A question";
+    const f = { id: ++s.flagN, name: m.name, team: m.team, label, qid, ms };
+    s.flags = [...s.flags, f].slice(-60);
+    s.toast = { id: ++s.toastN, text: `${m.name} left the game screen during the question.` };
+    playSound("wrong");
+    return f.id;
+  };
+  const onPresence = useRef<(st: Record<string, { away?: { qid?: string } | null; last?: { qid?: string; ms: number; at: number } | null }[]>) => void>(() => {});
+  onPresence.current = (state) => {
+    const H = here.current, s = st.current, now = Date.now();
+    let changed = false;
+    for (const [k, metas] of Object.entries(state)) {
+      const m = metas[metas.length - 1] || {};
+      if (m.away && !H.away[k]) H.away[k] = { at: now, qid: m.away.qid };
+      if (m.last && m.last.at !== H.back[k]) {
+        H.back[k] = m.last.at;
+        const a = H.away[k]; delete H.away[k];
+        if (a?.flag) { s.flags = s.flags.map((f) => (f.id === a.flag ? { ...f, ms: m.last!.ms } : f)); changed = true; }
+        else if (m.last.ms >= 2000 && H.back[k] && flag(k, m.last.qid, m.last.ms)) changed = true;
+      }
+    }
+    if (changed) void publish();
+  };
   useEffect(() => {
     if (!isTv) return;
     const ch = sb().channel("presence:" + code);
     const sync = () => {
-      const on = new Set(Object.keys(ch.presenceState())), now = Date.now();
+      const state = ch.presenceState() as Parameters<typeof onPresence.current>[0];
+      const on = new Set(Object.keys(state)), now = Date.now();
       here.current.online = on; on.forEach((k) => { here.current.at[k] = now; });
+      onPresence.current(state);
     };
     ch.on("presence", { event: "sync" }, sync).on("presence", { event: "join" }, sync).on("presence", { event: "leave" }, sync).subscribe();
     return () => { void sb().removeChannel(ch); };
@@ -780,6 +814,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.screen === "mapReveal") { s.ok = [s.ok[0] ?? true, s.ok[1] ?? true]; s.waitSince = now; }
       }
       if (now - here.current.checked > 2000) { here.current.checked = now; void handOver(); }
+      /* away for two seconds during a question: flag it now (how long comes when they're back) */
+      for (const [k, a] of Object.entries(here.current.away)) {
+        if (!a.flag && now - a.at >= 2000) { a.flag = flag(k, a.qid, null) ?? -1; if (a.flag > 0) changed = true; }
+      }
       if (changed) void publish();
     }, 250);
     return () => clearInterval(t);

@@ -7,8 +7,9 @@ export type Settings = {
   noRepeat: boolean;          // never reuse a question this TV has already played
   alternateFirst: boolean;    // alternate which team answers first each round
   imad: boolean;              // Imad comments on the game in a bubble on the TV (text only)
+  flagAway: boolean;          // flag a phone that leaves the game screen during a question
 };
-export const DEFAULTS: Settings = { tQuestion: 60, tSteal: 30, tMini: 90, tFriend: 30, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: true };
+export const DEFAULTS: Settings = { tQuestion: 60, tSteal: 30, tMini: 90, tFriend: 30, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: true, flagAway: true };
 const KEY = "qmb.party.settings";
 export function getSettings(): Settings {
   try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch { return { ...DEFAULTS }; }

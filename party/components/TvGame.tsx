@@ -69,6 +69,7 @@ export function TvGame({ pub }: { pub: Pub }) {
           <div className="eyebrow text-[22px]">The winner</div>
           <div className="display" style={{ fontSize: 150, color: tc(pub.winner) }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
           <div className="display text-[60px]">{T[0].score} – {T[1].score}</div>
+          {(pub.flags?.length ?? 0) > 0 && <div className="text-[20px] text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}
         </>)}
       </div>
 
@@ -91,6 +92,7 @@ export function TvGame({ pub }: { pub: Pub }) {
         </div>)}
       {pub.pending && <Pending pub={pub} />}
       {pub.nextBy && !pub.pending && <NextHint pub={pub} />}
+      <AwayFlags pub={pub} />
       <ImadBubble imad={pub.imad} />
       {pub.toast && shown === pub.toast.id && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" role="status" aria-live="polite" style={{ fontSize: 24, padding: "12px 28px" }}>{pub.toast.text}</div>}
     </div>
@@ -292,6 +294,24 @@ function Pending({ pub }: { pub: Pub }) {
       </div>
     </div>);
 }
+/* who left the game screen during this question, in red, bottom left, until the question changes */
+function AwayFlags({ pub }: { pub: Pub }) {
+  const now = (pub.flags || []).filter((f) => f.qid && f.qid === pub.qid);
+  if (!now.length || pub.screen === "final") return null;
+  return (
+    <div className="absolute left-8 bottom-8 flex items-center gap-3 rounded-full px-5 py-2.5 text-[18px] font-bold" role="status"
+      style={{ background: "rgba(255,85,102,.16)", border: "1px solid rgba(255,85,102,.55)", color: "var(--color-no)", zIndex: 25 }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 22V4" /><path d="M4 4h13l-2 4 2 4H4" /></svg>
+      Left the game screen: {now.map((f) => `${f.name}${f.ms != null ? ` (${Math.round(f.ms / 1000)}s)` : " (still away)"}`).join(", ")}
+    </div>);
+}
+/* the night's tally: who left the game screen, and how often */
+function awayTotals(pub: Pub) {
+  const by: Record<string, number> = {};
+  (pub.flags || []).forEach((f) => { by[f.name] = (by[f.name] || 0) + 1; });
+  return Object.entries(by).map(([n, c]) => `${n} ${c === 1 ? "once" : c + " times"}`).join(", ");
+}
+
 /* no host: whose tap the room is waiting for (after a while, either captain's) */
 function NextHint({ pub }: { pub: Pub }) {
   const open = useAfter(pub.nextOpenAt);

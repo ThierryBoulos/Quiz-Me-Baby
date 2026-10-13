@@ -49,16 +49,41 @@ export function useRoom(code: string) {
    so the TV can tell a captain who has gone (phone off, page closed) from one
    who is just slow. Nobody is ever removed for it; a captain who's been gone
    a minute hands the armband to a teammate who's still here. */
+export type AwayMeta = { away?: { qid?: string } | null; last?: { qid?: string; ms: number; at: number } | null };
 export function usePresence(code: string, me: string | null) {
+  const ref = useRef<{ ch: ReturnType<ReturnType<typeof sb>["channel"]> | null; meta: AwayMeta }>({ ch: null, meta: {} });
   useEffect(() => {
     if (!me) return;
     const ch = sb().channel("presence:" + code, { config: { presence: { key: me } } });
-    const track = () => void ch.track({ at: Date.now() });
+    ref.current.ch = ch;
+    const track = () => void ch.track({ ...ref.current.meta, at: Date.now() });
     ch.subscribe((status) => { if (status === "SUBSCRIBED") track(); });
     const vis = () => { if (document.visibilityState === "visible") track(); };
     document.addEventListener("visibilitychange", vis);
-    return () => { document.removeEventListener("visibilitychange", vis); void sb().removeChannel(ch); };
+    return () => { document.removeEventListener("visibilitychange", vis); ref.current.ch = null; void sb().removeChannel(ch); };
   }, [code, me]);
+  /* tell the TV something about this phone, straight away (it may be about to sleep) */
+  return useCallback((meta: AwayMeta) => { ref.current.meta = meta; void ref.current.ch?.track({ ...meta, at: Date.now() }); }, []);
+}
+
+/* Leaving the game screen during a question (another app, another tab, a
+   search) is reported to the TV, which flags it for the room and the host.
+   Not during Call a Friend for your own team: that one is allowed. */
+export function useAwayWatch(report: (m: AwayMeta) => void, live: boolean, qid?: string) {
+  const now = useRef({ live, qid });
+  now.current = { live, qid };
+  useEffect(() => {
+    let since = 0, q: string | undefined;
+    const vis = () => {
+      if (document.visibilityState === "hidden") {
+        if (now.current.live && !since) { since = Date.now(); q = now.current.qid; report({ away: { qid: q } }); }
+      } else if (since) {
+        report({ away: null, last: { qid: q, ms: Date.now() - since, at: Date.now() } }); since = 0;
+      }
+    };
+    document.addEventListener("visibilitychange", vis);
+    return () => document.removeEventListener("visibilitychange", vis);
+  }, [report]);
 }
 
 /* who starts the game: the host, or with no host Team A's captain */
