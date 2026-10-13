@@ -31,6 +31,8 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --tint: var(--color-gold);           /* the screen's colour: gold, or a team's */
 }
+/* no double-tap zoom, and iOS never resizes the text on its own */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 html { background: var(--color-bg); color: var(--color-ink); font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
 /* no 300ms tap delay on phones */
 button, a, input, [role="button"] { touch-action: manipulation; }

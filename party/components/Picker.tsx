@@ -110,7 +110,7 @@ export function Picker({ bank, themes, minis, difficulty, value, onChange, onClo
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <label className="text-[13px] text-[var(--color-ink-2)]" htmlFor={"d-" + t}>Difficulty</label>
-                <select id={"d-" + t} className="input !min-h-[44px] !text-[15px] !py-0 flex-1 min-w-0" value={value.themeDiff[t] || ""} onChange={(e) => setThemeDiff(t, e.target.value)}>
+                <select id={"d-" + t} className="input !min-h-[44px] !text-[16px] !py-0 flex-1 min-w-0" value={value.themeDiff[t] || ""} onChange={(e) => setThemeDiff(t, e.target.value)}>
                   {DIFFS.map(([k, l]) => <option key={k} value={k}>{k ? l : `${l} (${cap(difficulty)})`}</option>)}
                 </select>
                 {sel.length > 0 && <button type="button" className="btn btn-sm btn-ghost shrink-0" onClick={() => { const picks = { ...value.picks }; delete picks[t]; onChange({ ...value, picks }); }}>Clear</button>}
