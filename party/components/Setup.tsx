@@ -1,11 +1,24 @@
 "use client";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { loadBank, themeCounts, type Bank } from "@/lib/engine";
+import { QMB, loadBank, themeCounts, type Bank, type Q } from "@/lib/engine";
 import { NO_PICKS, Picker, pickSummary, type Picks } from "./Picker";
+import { getCustom } from "@/lib/custom";
 
-export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; miniLevel: string } & Partial<Picks>;
-const MINIS = [["closest", "Closest To Wins"], ["auction", "The Auction"], ["saysame", "Don't Say the Same"], ["map", "Guess the Map"],
-  ["flag", "Guess the Flag"], ["dish", "Cocktail or Dish"], ["battle", "Battle of the Captains"]] as const;
+export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
+  mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; custom?: Q[] } & Partial<Picks>;
+/* Classic's MINI_GAMES (index.html), name and one line each */
+const MINIS = [
+  ["closest", "Closest To Wins", "Seven numbers. Closest guess wins the leg."],
+  ["auction", "The Auction", "Bid how many you can name, then deliver it."],
+  ["saysame", "Don't Say the Same", "Answer without matching the app's hidden word."],
+  ["map", "Guess the Map", "A map, sixty seconds: what does it show?"],
+  ["flag", "Guess the Flag", "Ten flags, fifteen seconds each: whose is it?"],
+  ["dish", "Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
+  ["battle", "Battle of the Captains", "Ten each, captains only. Closes the night."]] as const;
+/* each picture game has its own levels, as in Classic; more than one can be on */
+const MAP_LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
+const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
+const DISH_LEVELS = { c: [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]], d: [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] } as const;
 const LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["mixed", "Mixed"]] as const;
 const ROUND_CHOICES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
 const OFF_BY_DEFAULT = ["Know the Host", "Sexy Time"];
@@ -22,9 +35,11 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
   const [difficulty, setDiff] = useState("mixed");
   const [themes, setThemes] = useState<string[] | null>(null);
   const [minis, setMinis] = useState<string[]>(["closest", "auction", "saysame", "map", "flag", "dish", "battle"]);
-  const [miniLevel, setMiniLevel] = useState("mixed");
+  const [mapLevels, setMapLevels] = useState<string[]>(["easy", "medium", "hard"]);
+  const [flagLevels, setFlagLevels] = useState<string[]>(["medium"]);
+  const [dishLevels, setDishLevels] = useState<string[]>(["c-medium", "d-medium"]);
   const [note, setNote] = useState<string | null>(null);
-  const [open, setOpen] = useState<"themes" | "minis" | null>(null);
+  const [open, setOpen] = useState<"themes" | null>(null);
   /* the host's advanced options: hand-picked questions, a difficulty per theme */
   const [picks, setPicks] = useState<Picks>(NO_PICKS);
   const [picking, setPicking] = useState(false);
@@ -51,7 +66,20 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
     if (picked.length >= rounds) { setNote(`That's ${rounds} themes already, one per round. Drop one first, or add a round.`); return; }
     setThemes([...picked, t]);
   };
-  const flagsOrDishes = minis.includes("flag") || minis.includes("dish");
+  /* what each mini-game is worth, and where it falls in the night (Classic's setup) */
+  const miniKeys = MINIS.map(([k]) => k as string).filter((k) => minis.includes(k));
+  const each = QMB.miniPointValue(standard ? rounds : 0, miniKeys.length) || 2;
+  const plan: { key: string; after: number }[] = QMB.planMinis(standard ? rounds : 0, (QMB.INTERLEAVED as string[]).filter((k) => miniKeys.includes(k)));
+  const slot = (k: string) => k === "battle" ? "last" : standard ? (plan.find((p) => p.key === k) ? `after R${plan.find((p) => p.key === k)!.after + 1}` : "")
+    : ["1st", "2nd", "3rd", "4th", "5th", "6th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";
+  /* a level row: tap to add or drop a level; the last one can't be dropped */
+  const LevelRow = ({ label, opts, value, set, tag }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string }) => (
+    <div className="flex flex-wrap items-center gap-2 pl-1 pb-2" role="group" aria-label={label}>
+      {tag && <span className="eyebrow !text-[11px] basis-full">{tag}</span>}
+      {opts.map(([k, l]) => { const on = value.includes(k); return (
+        <button key={k} type="button" className={"chip !min-h-[44px] !px-3 !text-[13px] " + (on ? "chip-on" : "")} aria-pressed={on}
+          onClick={() => { const next = on ? value.filter((x) => x !== k) : [...value, k]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{l}</button>); })}
+    </div>);
   const half = picked.filter((t) => (picks.picks[t] || []).length === 1);
 
   /* what stops the start, in plain words */
@@ -60,7 +88,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
     : !standard && !minis.length ? "With no standard rounds, switch on at least one mini-game."
     : "";
 
-  const Fold = ({ id, label, summary, children }: { id: "themes" | "minis"; label: string; summary: string; children: ReactNode }) => (
+  const Fold = ({ id, label, summary, children }: { id: "themes"; label: string; summary: string; children: ReactNode }) => (
     <div className="flex flex-col gap-2">
       <button type="button" className="flex items-center justify-between gap-3 min-h-[44px] -mx-1 px-1 rounded-[12px] text-left" aria-expanded={open === id}
         onClick={() => setOpen(open === id ? null : id)}>
@@ -115,18 +143,34 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
         </>) : <p className="text-[14px] text-[var(--color-ink-2)]">Off: tonight is mini-games only, back to back.</p>}
       </div>
 
-      {/* ---- MINI-GAMES ---- */}
-      <div className="card flex flex-col gap-4" style={{ borderColor: "color-mix(in srgb, var(--color-a) 35%, transparent)" }}>
-        <div>
-          <div className="display text-[24px]">Mini-games</div>
+      {/* ---- MINI-GAMES: Classic's list, every game on show with its own levels ---- */}
+      <div className="card flex flex-col gap-2" style={{ borderColor: "color-mix(in srgb, var(--color-a) 35%, transparent)" }}>
+        <div className="mb-1">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="display text-[24px]">Mini-games</div>
+            <span className={"badge shrink-0 " + (miniKeys.length ? "gold" : "line")}>{miniKeys.length ? `${each * miniKeys.length} pts on the table` : "None"}</span>
+          </div>
           <div className="text-[13px] text-[var(--color-ink-2)]">{standard ? "Spread between the rounds; the Battle closes the night." : "Played one after another."}</div>
         </div>
-        <Fold id="minis" label="Which ones" summary={minis.length ? `${minis.length} of ${MINIS.length} on` : "None"}>
-          {MINIS.map(([k, l]) => (
-            <button key={k} type="button" className={"chip " + (minis.includes(k) ? "chip-on" : "")} aria-pressed={minis.includes(k)}
-              onClick={() => setMinis(minis.includes(k) ? minis.filter((x) => x !== k) : [...minis, k])}>{l}</button>))}
-        </Fold>
-        {flagsOrDishes && <Levels value={miniLevel} set={setMiniLevel} label="Flags & dishes level" />}
+        {MINIS.map(([k, name, blurb]) => { const on = minis.includes(k); return (
+          <div key={k}>
+            <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
+              onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
+              <span className="min-w-0"><span className="block font-bold text-[15px] leading-tight">{name}</span>
+                <span className="block text-[12.5px] text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{on && <b style={{ color: "var(--color-gold)" }}> {each} pts{slot(k) ? ` · ${slot(k)}` : ""}</b>}</span></span>
+              <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
+                <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
+              </span>
+            </button>
+            {on && k === "map" && <LevelRow label="Guess the Map level" opts={MAP_LEVELS} value={mapLevels} set={setMapLevels} />}
+            {on && k === "flag" && <LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} />}
+            {on && k === "dish" && (<>
+              <LevelRow label="Cocktail levels" tag="Cocktails" opts={DISH_LEVELS.c} value={dishLevels.filter((l) => l[0] === "c")}
+                set={(v) => setDishLevels([...v, ...dishLevels.filter((l) => l[0] === "d")])} />
+              <LevelRow label="Dish levels" tag="Dishes" opts={DISH_LEVELS.d} value={dishLevels.filter((l) => l[0] === "d")}
+                set={(v) => setDishLevels([...dishLevels.filter((l) => l[0] === "c"), ...v])} />
+            </>)}
+          </div>); })}
       </div>
 
       {/* ---- ADVANCED: the host only (it shows the answers) ---- */}
@@ -144,7 +188,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
       {picking && bank && <Picker bank={bank} themes={standard ? picked : []} minis={minis} difficulty={difficulty} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
 
       <button className="btn btn-gold btn-lg btn-block" disabled={!!blocker || busy}
-        onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, miniLevel,
+        onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, custom: getCustom(),
           ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
       {blocker && <p className="text-center text-[13px] text-[var(--color-ink-2)]" role="status">{blocker}</p>}
       {isHost && half.length > 0 && <p className="text-center text-[13px] text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}

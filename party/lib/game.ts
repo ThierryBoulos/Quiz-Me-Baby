@@ -41,7 +41,11 @@ export type Pub = {
   autoAt?: number | null;         // no host: when this screen moves on by itself
   pips?: { kind: "std" | "mini"; state: "now" | "done" | "todo" }[];   // the night's progress, for the tracker
   captains?: [string | null, string | null];
-  tMini?: number;                 // Closest To Wins clock, for its rules
+  tMini?: number;
+  paused?: boolean;          // the clock was paused: the question is hidden until it restarts
+  lead?: 0 | 1;              // no host: the captain who starts and moves the night on (Team A's, or B's)
+  nextBy?: string;           // no host: whose Start or Next the room is waiting for
+  imad?: { id: number; text: string };   // Imad's latest line (text only)                 // Closest To Wins clock, for its rules
   mode: "host" | "nohost";
 };
 /* host only: the answer, and what the captains typed with the app's opinion */
@@ -50,4 +54,7 @@ export type Secret = { qid?: string; step?: number; answer?: string; notes?: str
 export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me", battle: "Battle of the Captains" };
 export const T_CLOSEST = 90, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30;
 export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
-export const T_OVERRULE = 5, T_AUTO = 8, T_SUDDEN_BUZZ = 30, T_MAP_RULE = 30;
+/* no host: the other captain has this long to agree or overrule the app before it stands */
+export const T_OVERRULE = 15, T_SUDDEN_BUZZ = 30, T_MAP_RULE = 30;
+/* the Battle is rapid fire: a shorter window there (the other captain can still Agree at once) */
+export const T_OVERRULE_BATTLE = 8;

@@ -58,7 +58,11 @@ export default function TvRoom() {
         <>
           <div className="flex items-start justify-between gap-10">
             <div>
-              <div className="eyebrow text-[16px]">Join on your phone · scan or type</div>
+              <div className="flex items-center gap-5">
+                <a href="/" className="btn btn-sm btn-ghost" aria-label="Back to the home screen">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</a>
+                <div className="eyebrow text-[16px]">Join on your phone · scan or type</div>
+              </div>
               <div className="display mt-2" style={{ fontSize: 150, color: "var(--color-gold)", textShadow: "6px 6px 0 rgba(49,201,247,.55)", letterSpacing: "0.08em" }}>{code}</div>
               <div className="text-[22px] text-[var(--color-ink-2)] mt-1">{origin.replace(/^https?:\/\//, "")}/join</div>
             </div>

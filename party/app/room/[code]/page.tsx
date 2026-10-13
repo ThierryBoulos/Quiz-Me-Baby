@@ -91,7 +91,7 @@ export default function PhoneRoom() {
         /* joined after the start: pick a side first */
         mine.team == null && mine.role !== "host" ? (
           <section className="flex flex-col gap-3 enter">
-            <h1 className="display text-[40px] text-center">Pick your side</h1>
+            <h1 className="display text-[40px] text-center">Pick a side</h1>
             <p className="text-center text-[14px] text-[var(--color-ink-2)]">The game&rsquo;s on. Join a team and help your captain.</p>
             <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
             <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
@@ -136,7 +136,7 @@ export default function PhoneRoom() {
         </>
       ) : mine.team == null ? (
         <section className="flex flex-col gap-3 enter">
-          <h1 className="display text-[44px] text-center">Pick your side</h1>
+          <h1 className="display text-[44px] text-center">Pick a side</h1>
           <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
           <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
           <div className="h-2" />

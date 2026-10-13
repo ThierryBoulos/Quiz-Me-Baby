@@ -396,9 +396,58 @@ export function HostGame({ pub, secret: raw, send, busy }: { pub: Pub; secret: S
   }
 }
 
-/* what's on screen, close up: the question, the flag or the ingredients */
+/* who won what, on every phone (the TV isn't the only one that gets to know) */
+function Result({ pub, mine }: { pub: Pub; mine?: 0 | 1 }) {
+  const T = pub.teams, sc = pub.screen, m = pub.mini;
+  const name = (t: 0 | 1) => <b style={{ color: tc(t) }}>{T[t].name}</b>;
+  const head = (t: 0 | 1 | null | undefined, text: string, sub?: string) => (
+    <div className="card text-center flex flex-col gap-1" role="status" aria-live="polite">
+      <div className="display text-[28px] leading-tight" style={{ color: tc(t ?? null) }}>{text}</div>
+      {t != null && mine != null && <div className="text-[13px] font-bold" style={{ color: t === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{t === mine ? "That's your team!" : "Not this time."}</div>}
+      {sub && <div className="text-[13px] text-[var(--color-ink-2)]">{sub}</div>}
+    </div>);
+  const legW = (w: unknown) => (w === 0 || w === 1 ? w : null) as 0 | 1 | null;
+  const rows = (ok: (t: 0 | 1) => string) => (
+    <div className="grid grid-cols-2 gap-2">{([0, 1] as const).map((t) => (
+      <div key={t} className="card !p-3 text-center"><div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div><div className="text-[15px] font-bold mt-1">{ok(t)}</div></div>))}</div>);
+  if (sc === "answer" && pub.result) return head(pub.result.by, pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? ", stolen!" : ""}`);
+  if (sc === "roundScore") return (<>
+    {head(null, `End of round ${pub.r + 1}`)}
+    {rows((t) => `${T[t].score} pts (+${pub.roundPts?.[t] ?? 0})`)}</>);
+  if (sc === "closestReveal" && pub.reveal) { const w = pub.reveal.w, ans = Number(pub.reveal.answer); return (<>
+    {head(legW(w), w === "tie" ? "A point each" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
+    {rows((t) => { const g = pub.reveal?.guesses?.[t]; return g == null ? "No answer" : `${g} (off by ${Math.abs(g - ans)})`; })}</>); }
+  if ((sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal") && pub.reveal) {
+    const say = sc === "sayReveal", w = pub.reveal.w;
+    const ok = (t: 0 | 1) => sc === "mapReveal" ? pub.map?.ruled?.[t] : pub.reveal?.ok?.[t];
+    const verdict = (t: 0 | 1) => { const v = ok(t); return v == null ? "waiting for a ruling" : say ? (v ? "dodged it" : "said it") : v ? "right" : "wrong"; };
+    return (<>
+      {(sc !== "mapReveal" || (ok(0) != null && ok(1) != null)) && head(legW(w), w === "tie" ? "A point each" : w === "none" ? "Nobody gets it" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
+      {rows((t) => `${pub.reveal?.typed?.[t]?.[0] ?? (say ? "nothing" : "no answer")} · ${verdict(t)}`)}</>);
+  }
+  if (sc === "dishReveal" && pub.reveal) return head(legW(pub.reveal.w), legW(pub.reveal.w) != null ? `${T[pub.reveal.w as 0 | 1].name} got it` : "Nobody got it");
+  if (sc === "auctionLeg" && pub.auction?.last) { const L = pub.auction.last; return (
+    <div className="card text-center flex flex-col gap-1" role="status" aria-live="polite">
+      <div className="display text-[30px]" style={{ color: L.made ? "var(--color-ok)" : "var(--color-no)" }}>{L.made ? "Delivered!" : "Short!"}</div>
+      <div className="text-[15px]">{name(L.by)} bid {L.bid}, named {L.count}.</div>
+      <div className="display text-[24px] mt-1" style={{ color: tc(L.won) }}>{T[L.won].name} take the leg</div>
+      {mine != null && <div className="text-[13px] font-bold" style={{ color: L.won === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{L.won === mine ? "That's your team!" : "Not this time."}</div>}
+      <div className="text-[13px] text-[var(--color-ink-2)]">Legs so far: {T[0].name} {pub.auction.wins[0]} · {T[1].name} {pub.auction.wins[1]}</div>
+    </div>); }
+  if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null; return head(w, w == null ? `Level, ${A.wins[0]}–${A.wins[1]}` : `${T[w].name} win the Auction`, `${A.wins[0]}–${A.wins[1]} on legs${w != null ? ` · +${A.award?.[w] ?? m?.pts} points` : ""}`); }
+  if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary; return head(S.winner, S.needsHost ? "Still level" : S.winner == null ? "A split" : `${T[S.winner].name} win ${m?.title ?? "it"}`,
+    `${S.wins[0]}–${S.wins[1]} on legs${S.needsHost ? " · the host decides" : S.winner == null ? ` · ${S.award?.[0] ?? 0} points each` : ` · +${S.award?.[S.winner] ?? m?.pts} points`}`); }
+  if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null; return head(w, w == null ? (B.note || "Level") : `${T[w].name} win the Battle`, `${B.score[0]}–${B.score[1]}${w != null ? ` · +${B.award?.[w] ?? m?.pts} points` : ""}`); }
+  return null;
+}
+
+/* what's on screen, close up: the question, the flag or the ingredients.
+   It can't be selected or copied (no pasting it into a chatbot), and while
+   the clock is paused it's hidden. */
+const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onContextMenu: (e: React.MouseEvent) => e.preventDefault() };
 function OnScreen({ pub }: { pub: Pub }) {
-  return (<>
+  if (pub.paused) return <div className="card text-center py-8"><div className="display text-[34px]" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-[14px] text-[var(--color-ink-2)] mt-1">The question comes back when the clock restarts.</p></div>;
+  return (<div className="noselect contents" {...noCopy}>
     {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className="font-bold text-[19px] leading-snug text-center">{pub.question}</p>}
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <Flag name={pub.flag} h={150} />}
     {pub.map && <MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={260} />}
@@ -409,8 +458,11 @@ function OnScreen({ pub }: { pub: Pub }) {
     {pub.reveal && /Reveal$/.test(pub.screen) && pub.screen !== "mapReveal" && pub.screen !== "sayReveal" && <div className="display text-[30px] text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.screen === "answer" && pub.result && <div className="display text-[32px] text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
     {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"].includes(pub.screen) && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" ? 70 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div>}
-  </>);
+  </div>);
 }
+
+/* the screens that show who won what (see Result) */
+const RESULT = /^(answer|roundScore|closestReveal|flagReveal|sayReveal|mapReveal|dishReveal|auctionLeg|auctionResult|\w+Summary)$/;
 
 /* what this question means for YOU, under the "Question for TEAM" head */
 function youLine(pub: Pub, me: Member, capName?: string) {
@@ -427,6 +479,7 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   if (pub.screen === "roundIntro") return <RoundIntro pub={pub} size="phone" canArm={canArm} onArm={onArm} busy={busy} />;
   if (pub.screen === "ask" || pub.screen === "steal") return <AskHead pub={pub} size="phone" you={youLine(pub, me, capName)} go={pub.turn === me.team && !pub.lifeline && !pub.pending} />;
   if (/Intro$/.test(pub.screen) && pub.mini) return <MiniIntro pub={pub} size="phone" />;
+  if (RESULT.test(pub.screen)) return null;            // the result card says it
   return <p className="text-center font-bold text-[17px] leading-snug" role="status" aria-live="polite">{status(pub, me)}</p>;
 }
 
@@ -470,6 +523,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
     <div className="flex flex-col gap-4 flex-1">
       <Head pub={pub} me={me} capName={cap?.name} />
       <OnScreen pub={pub} />
+      <Result pub={pub} mine={mine} />
       {canSuggest && (
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
@@ -480,6 +534,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
           {sent && <div className="text-[13px] text-[var(--color-ink-2)]">Sent: <b>{sent}</b></div>}
         </div>)}
       {pub.screen === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />}
+      {pub.nextBy && <WaitingFor pub={pub} />}
     </div>
   );
 }
@@ -490,12 +545,19 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
 const NEXT_LABEL: Record<string, [string, string]> = {
   roundIntro: ["Start the question", "round/begin"], miniIntro: ["Start", "closest/start"], flagIntro: ["Start", "flag/start"], dishIntro: ["Start", "dish/start"],
   mapIntro: ["Start", "map/start"], auctionIntro: ["Start", "auction/begin"], sayIntro: ["Start", "say/start"], battleIntro: ["Start", "battle/start"],
-  battleHandoff: ["Start the second half", "battle/start"], sayReveal: ["Next", "ui/next"], saySummary: ["Next", "say/done"], battleSummary: ["Next", "battle/done"],
+  battleHandoff: ["Start the second half", "battle/start"], sayReveal: ["Next", "ui/next"], mapReveal: ["Next", "ui/next"], saySummary: ["Next", "say/done"], battleSummary: ["Next", "battle/done"],
   answer: ["Next", "round/afterAnswer"], roundScore: ["Next", "round/next"], closestReveal: ["Next", "ui/next"], flagReveal: ["Next", "ui/next"],
   dishReveal: ["Next", "dish/next"], auctionLeg: ["Next", "auction/nextLeg"], auctionResult: ["Next", "auction/done"],
   miniSummary: ["Next", "closest/done"], flagSummary: ["Next", "flag/done"], dishSummary: ["Next", "dish/done"], mapSummary: ["Next", "map/done"],
 };
 function Countdown({ at }: { at: number }) { const s = useSecondsLeft(at); return <>{s}</>; }
+/* no host: whose tap the room is waiting for */
+function WaitingFor({ pub }: { pub: Pub }) {
+  const label = pub.screen === "sudden" ? "Go" : NEXT_LABEL[pub.screen]?.[0] || "Next";
+  return <p className="text-center text-[13px] text-[var(--color-ink-3)]" role="status">Waiting for {pub.nextBy} to tap {/^Start/.test(label) ? "Start" : label}.</p>;
+}
+/* the screens a clock runs on, and so the ones a Pause makes sense on */
+const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"];
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
    lifelines; the number pad; the buzzer; the bidding; your players'
@@ -516,10 +578,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const dip = sc === "ask" && (pub.llUsed?.[mine] || []).includes("dip");
   /* with no host, the first answer sent is the one the app checks */
   const locked = nohost && (!!pub.pending || !!pub.sent?.[mine]);
-  const canType = (myTurn && !locked) || (sc === "miniQ" && !pub.sent?.[mine]) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ") && !pub.sent?.[mine])
+  const canType = !pub.paused && ((myTurn && !locked) || (sc === "miniQ" && !pub.sent?.[mine]) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ") && !pub.sent?.[mine])
     || (sc === "dishQ" && pub.buzz === mine && !pub.pending) || ((sc === "sudden" || sc === "battleTie") && pub.buzz === mine && !pub.pending)
     /* the Battle: typed with no host; with a host it's said out loud */
-    || (sc === "battleQ" && nohost && pub.battle?.cap === mine && !locked);
+    || (sc === "battleQ" && nohost && pub.battle?.cap === mine && !locked));
   const canBuzz = (sc === "dishQ" && pub.buzz == null && !pub.out?.[mine]) || (sc === "sudden" && !!pub.sudden?.ready && pub.buzz == null && !pub.out?.[mine])
     || (sc === "battleTie" && pub.buzz == null && !pub.out?.[mine]);
   const sugs = useSuggestions(code, pub.qid, members, mine, ANSWERING.includes(sc));
@@ -528,8 +590,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   /* a short buzz in the hand when it becomes your go (phones that can) */
   const yourGo = (myTurn && !locked) || (sc === "auctionBid" && A?.turn === mine) || canBuzz;
   useEffect(() => { if (yourGo) buzzHand([60, 40, 60]); }, [yourGo, pub.qid, sc]);
-  const next = nohost && !pub.pending ? NEXT_LABEL[sc] : undefined;
-  const showNext = next && !(sc === "sudden") && !(/Summary$/.test(sc) && sc !== "battleSummary" ? pub.summary?.needsHost : false);
+  /* no host: Team A's captain (B's if A has none) starts and moves the night on */
+  const lead = pub.lead === mine;
+  const next = nohost && lead && pub.nextBy ? NEXT_LABEL[sc] : undefined;
+  const showNext = !!next && sc !== "sudden";
 
   const send = async () => {
     if (sc === "miniQ") { await act("answer", { n: a }); setSentTxt(a); return; }
@@ -560,6 +624,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         </div>))}
 
       {!pub.pending && <OnScreen pub={pub} />}
+      {!pub.pending && <Result pub={pub} mine={mine} />}
 
 
       {/* no host, Call a Friend: the calling captain closes the card */}
@@ -591,10 +656,15 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <div className="eyebrow">{A.bid ? `Beat ${A.bid}, or pass` : "Open the bidding"}</div>
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>
           <div className="flex gap-2">
-            <input className="input" aria-label="Your bid" inputMode="numeric" value={bid} placeholder={`More than ${A.bid}`} onChange={(e) => setBid(e.target.value.replace(/\D/g, ""))} />
+            <input className="input" aria-label="Custom bid" inputMode="numeric" value={bid} placeholder="Custom bid" onChange={(e) => setBid(e.target.value.replace(/\D/g, "").slice(0, 3))} />
             <button className="btn" disabled={busy || !(Number(bid) > A.bid)} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>Bid</button>
           </div>
-          {A.bid > 0 && <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/pass" })}>Pass: {T[A.by ?? theirs].name} must name {A.bid}</button>}
+          {bid !== "" && !(Number(bid) > A.bid) && <p className="text-[13px] text-[var(--color-no)]" role="alert">A bid has to beat {A.bid}.</p>}
+          {A.bid > 0 && (
+            <button className="btn btn-lg btn-block pass-btn" disabled={busy} onClick={() => void nxt({ type: "auction/pass" })}>
+              <span className="text-[17px]">Pass</span>
+              <span className="text-[13px] font-semibold text-[var(--color-ink-2)]"><b style={{ color: tc(A.by ?? theirs) }}>{T[A.by ?? theirs].name}</b> must name {A.bid}</span>
+            </button>)}
         </div>)}
       {/* no host: the other captain counts the names */}
       {nohost && sc === "auctionRun" && A && A.by === theirs && (
@@ -622,11 +692,14 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           </div>
         </div>) : <div className="card text-center text-[14px]">You ruled {T[theirs].name} {pub.map.ruled?.[theirs] ? "right" : "wrong"}.</div>)}
 
-      {/* no host: start, go and next — either captain */}
+      {/* no host: start, go and next — the lead captain (Team A's) */}
       {showNext && next && (
-        <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: next[1] })}>
-          {next[0]}{pub.autoAt ? <> · <Countdown at={pub.autoAt} /></> : null}</button>)}
-      {nohost && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
+        <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: next[1] })}>{next[0]}</button>)}
+      {nohost && lead && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
+      {pub.nextBy && !lead && <WaitingFor pub={pub} />}
+      {/* no host: either captain can stop the clock (the question hides until it restarts) */}
+      {nohost && PAUSABLE.includes(sc) && !pub.lifeline && !pub.pending && (pub.deadline || pub.paused) && (
+        <button className="btn btn-sm self-center" disabled={busy} onClick={() => void nxt({ type: "ui/pause" })}>{pub.paused ? "Resume" : "Pause"}</button>)}
 
       {sugs.length > 0 && (canType || ANSWERING.includes(sc)) && (
         <div className="card">

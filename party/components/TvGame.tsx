@@ -15,7 +15,8 @@ export function TvGame({ pub }: { pub: Pub }) {
   const tid = pub.toast?.id ?? null;
   useEffect(() => { if (tid == null) return; setShown(tid); const t = setTimeout(() => setShown(null), 3000); return () => clearTimeout(t); }, [tid]);
   return (
-    <div className="flex flex-col h-full">
+    /* nothing on the TV can be selected or copied */
+    <div className="flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       {/* the tracker, always: Classic's HUD */}
       <Hud pub={pub} size="tv" />
 
@@ -81,8 +82,16 @@ export function TvGame({ pub }: { pub: Pub }) {
           </div>
         </div>
       )}
+      {pub.paused && !pub.lifeline && (
+        <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", backdropFilter: "blur(12px)", zIndex: 20 }}>
+          <div className="text-center">
+            <div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
+            <div className="text-[26px] text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div>
+          </div>
+        </div>)}
       {pub.pending && <Pending pub={pub} />}
-      {pub.autoAt && !pub.pending && <AutoNext at={pub.autoAt} />}
+      {pub.nextBy && !pub.pending && <div className="absolute right-8 bottom-8 text-[18px] text-[var(--color-ink-2)]">Waiting for <b>{pub.nextBy}</b> to tap {/Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" ? "Start" : pub.screen === "sudden" ? "Go" : "Next"}</div>}
+      <ImadBubble imad={pub.imad} />
       {pub.toast && shown === pub.toast.id && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" role="status" aria-live="polite" style={{ fontSize: 24, padding: "12px 28px" }}>{pub.toast.text}</div>}
     </div>
   );
@@ -113,7 +122,6 @@ function TvMini({ pub }: { pub: Pub }) {
   if (!m) return null;
   if (/Intro$/.test(sc)) return (<>
     <div className="w-full max-w-[1080px]"><MiniIntro pub={pub} size="tv" /></div>
-    <div className="text-[18px] text-[var(--color-ink-3)]">{pub.mode === "nohost" ? "Either captain taps Start on their phone." : "The host starts it."}</div>
   </>);
   if (sc === "miniQ") return (<>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 50, lineHeight: 1.15 }}>{pub.question}</div>
@@ -284,7 +292,16 @@ function Pending({ pub }: { pub: Pub }) {
       </div>
     </div>);
 }
-function AutoNext({ at }: { at: number }) {
-  const left = useSecondsLeft(at);
-  return <div className="absolute right-8 bottom-8 text-[18px] text-[var(--color-ink-2)]">Moving on in {left}</div>;
+/* Imad's line: his face and a speech bubble, up top, for as long as it takes to read (Classic's #hostBubble) */
+function ImadBubble({ imad }: { imad?: Pub["imad"] }) {
+  const [on, setOn] = useState<number | null>(null);
+  const id = imad?.id ?? null, len = imad?.text.length ?? 0;
+  useEffect(() => { if (id == null) return; setOn(id); const t = setTimeout(() => setOn(null), 2800 + len * 60); return () => clearTimeout(t); }, [id, len]);
+  if (!imad || on !== imad.id) return null;
+  return (
+    <div className="imad-bubble" role="status" aria-live="polite" key={imad.id}>
+      <div className="hb-text">{imad.text}</div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/imad.webp" alt="" />
+    </div>);
 }

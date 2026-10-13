@@ -67,6 +67,14 @@ body { min-height: 100svh; background:
 .input { width: 100%; min-height: 56px; border-radius: 18px; padding: 0 18px; font-size: 18px; font-weight: 700; color: var(--color-ink);
   background: var(--glass-2); border: 2px solid var(--line-2); outline: none; }
 .input:focus { border-color: var(--color-gold); }
+/* questions can't be selected, copied or long-pressed (no pasting them into a chatbot) */
+/* an empty code box: the hint at body size, centred like the code will be */
+.input-code:placeholder-shown { font-family: var(--font-body); font-size: 16px; letter-spacing: normal; }
+.noselect, .noselect * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+/* the Auction's Pass: clearly a button, with who it hands the bid to */
+.btn.pass-btn { flex-direction: column; gap: 2px; min-height: 66px; border: 2px solid rgba(255,255,255,.45); background: rgba(255,255,255,.08); }
+/* hints in empty boxes: small, light, italic, so they never read as typed text */
+.input::placeholder { font-family: var(--font-body, inherit); font-size: 15px; font-weight: 400; font-style: italic; letter-spacing: normal; text-transform: none; color: var(--color-ink-3); opacity: .75; }
 .input-code { font-family: var(--font-display); font-size: 40px; letter-spacing: 0.22em; text-align: center; text-transform: uppercase;
   border-color: color-mix(in srgb, var(--color-gold) 60%, transparent); background: color-mix(in srgb, var(--color-gold) 7%, transparent); }
 
@@ -243,3 +251,13 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .rules li { counter-increment: r; }
 .rules li::before { content: counter(r) ". "; color: var(--color-gold); font-weight: 800; }
 .rules li.warn { color: #ffb347; }
+
+/* ---- Imad's speech bubble on the TV: up top, over the content (Classic's #hostBubble) ---- */
+.imad-bubble { position: absolute; z-index: 40; top: 116px; right: 20px; max-width: 360px; display: flex; align-items: flex-end; gap: 12px; pointer-events: none;
+  animation: hbIn .3s var(--ease) both; }
+.imad-bubble img { width: 76px; height: 76px; object-fit: contain; flex: none; filter: drop-shadow(0 6px 14px rgba(0,0,0,.5)); }
+.imad-bubble .hb-text { padding: 14px 18px; border-radius: 20px 20px 4px 20px; background: #FFF7DA; color: #1A1400; font-weight: 700; font-size: 17px; line-height: 1.35;
+  box-shadow: 0 14px 34px rgba(0,0,0,.55); animation: hbPop .45s var(--ease) both; }
+@keyframes hbIn { from { opacity: 0; transform: translateY(-12px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes hbPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .imad-bubble, .imad-bubble .hb-text { animation: none; } }

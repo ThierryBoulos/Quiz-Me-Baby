@@ -1,11 +1,13 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, loadBank, type Bank } from "./engine";
+import { QMB, loadBank, withCustom, type Bank, type Q } from "./engine";
+import { cleanList } from "./custom";
+import { HOST_LINES } from "./imadLines";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
 import { getSettings, USED_KEY } from "./settings";
 import { readyToStart, starter, type Member, type Room } from "./room";
-import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_AUTO, T_BATTLE_HOST, T_BATTLE_TYPED, T_FLAG, T_MAP, T_MAP_RULE, T_OVERRULE, T_SAY, T_SUDDEN_BUZZ,
+import { DISH_LAST, DISH_STEP, MINI_TITLES, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_FLAG, T_MAP, T_MAP_RULE, T_OVERRULE, T_OVERRULE_BATTLE, T_SAY, T_SUDDEN_BUZZ,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
 /* the house timers come from Settings on this TV */
@@ -40,34 +42,37 @@ const HOST_MOVES: Record<string, Where> = {
   "ui/sdRight": ["sudden", "battleTie"], "ui/sdWrong": ["sudden", "battleTie"],
 };
 /* What a CAPTAIN may tap, and who: "any" captain, the team whose "turn" it
-   is, or the "other" one (the referee). The Auction's bidding is always the
-   captains'; everything else here only exists when there's no host. */
-type Who = "any" | "turn" | "other";
+   is, the "other" one (the referee), or the "lead": Team A's captain (Team
+   B's if A has none), who starts and moves the night on, like a host would.
+   The Auction's bidding is always the captains'; everything else here only
+   exists when there's no host. */
+type Who = "any" | "turn" | "other" | "lead";
 const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?: boolean }> = {
   "auction/raise": { where: "auctionBid", who: "turn" },
   "auction/pass": { where: "auctionBid", who: "turn" },
-  "round/begin": { where: "roundIntro", who: "any", nohostOnly: true },
-  "closest/start": { where: "miniIntro", who: "any", nohostOnly: true },
-  "flag/start": { where: "flagIntro", who: "any", nohostOnly: true },
-  "dish/start": { where: "dishIntro", who: "any", nohostOnly: true },
-  "map/start": { where: "mapIntro", who: "any", nohostOnly: true },
-  "auction/begin": { where: "auctionIntro", who: "any", nohostOnly: true },
-  "sudden/go": { where: "sudden", who: "any", nohostOnly: true },
-  "say/start": { where: "sayIntro", who: "any", nohostOnly: true },
-  "battle/start": { where: ["battleIntro", "battleHandoff"], who: "any", nohostOnly: true },
-  "say/done": { where: "saySummary", who: "any", nohostOnly: true },
-  "battle/done": { where: "battleSummary", who: "any", nohostOnly: true },
+  "round/begin": { where: "roundIntro", who: "lead", nohostOnly: true },
+  "closest/start": { where: "miniIntro", who: "lead", nohostOnly: true },
+  "flag/start": { where: "flagIntro", who: "lead", nohostOnly: true },
+  "dish/start": { where: "dishIntro", who: "lead", nohostOnly: true },
+  "map/start": { where: "mapIntro", who: "lead", nohostOnly: true },
+  "auction/begin": { where: "auctionIntro", who: "lead", nohostOnly: true },
+  "sudden/go": { where: "sudden", who: "lead", nohostOnly: true },
+  "say/start": { where: "sayIntro", who: "lead", nohostOnly: true },
+  "battle/start": { where: ["battleIntro", "battleHandoff"], who: "lead", nohostOnly: true },
+  "say/done": { where: "saySummary", who: "lead", nohostOnly: true },
+  "battle/done": { where: "battleSummary", who: "lead", nohostOnly: true },
   "ui/sayOk": { where: "sayReveal", who: "other", nohostOnly: true },
-  "round/afterAnswer": { where: "answer", who: "any", nohostOnly: true },
-  "round/next": { where: "roundScore", who: "any", nohostOnly: true },
-  "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal"], who: "any", nohostOnly: true },
-  "dish/next": { where: "dishReveal", who: "any", nohostOnly: true },
-  "auction/nextLeg": { where: "auctionLeg", who: "any", nohostOnly: true },
-  "auction/done": { where: "auctionResult", who: "any", nohostOnly: true },
-  "closest/done": { where: "miniSummary", who: "any", nohostOnly: true },
-  "flag/done": { where: "flagSummary", who: "any", nohostOnly: true },
-  "dish/done": { where: "dishSummary", who: "any", nohostOnly: true },
-  "map/done": { where: "mapSummary", who: "any", nohostOnly: true },
+  "round/afterAnswer": { where: "answer", who: "lead", nohostOnly: true },
+  "round/next": { where: "roundScore", who: "lead", nohostOnly: true },
+  "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal", "mapReveal"], who: "lead", nohostOnly: true },
+  "dish/next": { where: "dishReveal", who: "lead", nohostOnly: true },
+  "auction/nextLeg": { where: "auctionLeg", who: "lead", nohostOnly: true },
+  "auction/done": { where: "auctionResult", who: "lead", nohostOnly: true },
+  "closest/done": { where: "miniSummary", who: "lead", nohostOnly: true },
+  "flag/done": { where: "flagSummary", who: "lead", nohostOnly: true },
+  "dish/done": { where: "dishSummary", who: "lead", nohostOnly: true },
+  "map/done": { where: "mapSummary", who: "lead", nohostOnly: true },
+  "ui/pause": { where: ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"], who: "any", nohostOnly: true },
   "ui/closeLifeline": { where: "*", who: "turn", nohostOnly: true },
   "ui/agree": { where: ["ask", "steal", "dishQ", "sudden", "battleQ", "battleTie"], who: "other", nohostOnly: true },
   "ui/overrule": { where: ["ask", "steal", "dishQ", "sudden", "battleQ", "battleTie"], who: "other", nohostOnly: true },
@@ -81,20 +86,14 @@ const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?: boole
    step): a host tapping +1 five times fast must get five, and a tap on
    "Next" straight after marking a team must not be refused as stale. */
 const SAME_SCREEN = new Set(["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/mapRule", "ui/sayOk", "ui/pause"]);
-/* no host: the screens that move on by themselves, and how */
-const AUTO_NEXT: Record<string, G> = {
-  answer: { type: "round/afterAnswer" }, roundScore: { type: "round/next" }, closestReveal: { type: "ui/next" }, flagReveal: { type: "ui/next" },
-  dishReveal: { type: "dish/next" }, auctionLeg: { type: "auction/nextLeg" }, auctionResult: { type: "auction/done" },
-  miniSummary: { type: "closest/done" }, flagSummary: { type: "flag/done" }, dishSummary: { type: "dish/done" }, mapSummary: { type: "map/done" },
-  sayReveal: { type: "ui/next" }, saySummary: { type: "say/done" }, battleHandoff: { type: "battle/start" }, battleSummary: { type: "battle/done" },
-};
+/* no host: the screens that wait for the lead captain's Start or Next (nothing moves on by itself) */
+const WAITS_FOR_NEXT = new Set(["roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "battleIntro", "battleHandoff",
+  "answer", "roundScore", "closestReveal", "flagReveal", "mapReveal", "sayReveal", "dishReveal", "auctionLeg", "auctionResult",
+  "miniSummary", "flagSummary", "dishSummary", "mapSummary", "saySummary", "battleSummary", "sudden"]);
 const other = (t: 0 | 1) => (t === 0 ? 1 : 0) as 0 | 1;
-const LEVELS: Record<string, { flag: string[]; dish: string[] }> = {
-  easy: { flag: ["veasy", "easy"], dish: ["c-easy", "d-easy"] },
-  medium: { flag: ["medium"], dish: ["c-medium", "d-medium"] },
-  hard: { flag: ["hard", "expert"], dish: ["c-hard", "d-hard"] },
-  mixed: { flag: ["easy", "medium", "hard"], dish: ["c-easy", "c-medium", "d-easy", "d-medium"] },
-};
+const DIFFS = ["easy", "medium", "hard", "mixed"];
+/* a picture game's levels from the phone: known ones only, or the default */
+const levels = (x: unknown, keys: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((k) => keys.includes(k)); return v.length ? v : dflt; };
 const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dish", "battle"];
 const dishKind = (q: G) => ((q?.level || "")[0] === "c" ? "Cocktail" : "Dish");
 const dishTotal = (q: G) => (q.ings.length - 1) * DISH_STEP + DISH_LAST;
@@ -121,7 +120,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     ok: [null, null] as Two<boolean | null>,           // Flag / Map verdicts
     sdBuzz: null as 0 | 1 | null, sdOut: [false, false] as Two<boolean>,
     pending: null as null | { kind: PKind; team: 0 | 1; text: string; v: boolean; until: number },
-    autoAt: null as number | null,                     // no host: when this screen moves on by itself
+    autoAt: null as number | null,                     // no host: when an unruled map answer stands as right
+    paused: false,                                     // the clock stopped by a Pause (the question hides meanwhile)
+    imad: null as Pub["imad"] | null, imadN: 0, imadQ: [] as string[],   // Imad's latest line, and the ones waiting to go up together
+    custom: [] as Q[],                                 // questions of their own, sent by the phone that started
   });
   const [pub, setPub] = useState<Pub | null>(null);
   const isTvRef = useRef(isTv);
@@ -157,6 +159,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     return null;
   }, []);
   const match = (texts: string[] | null, q: G) => (texts && q ? texts.some((t) => QMB.isMatch(t, q.answer)) : null);
+  /* the captain who moves the night on with no host: Team A's, or B's if A has none */
+  const leadTeam = (): 0 | 1 => (ctx.current.members.some((m) => m.team === 0 && m.role === "captain") ? 0 : 1);
   const turnTeam = (): 0 | 1 => {
     const s = st.current, g = s.g, rd = g.rounds[g.r];
     if (s.screen === "auctionBid" || s.screen === "auctionRun") return g.auction.turn;
@@ -192,7 +196,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       deadline: s.deadline, left: s.left, timeUp: s.timeUp, lifeline: s.lifeline, toast: s.toast, winner: g.winner ?? null,
       sent: [!!s.typed[0] || s.guesses[0] != null, !!s.typed[1] || s.guesses[1] != null],
       pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
-      autoAt: s.autoAt,
+      autoAt: s.autoAt, paused: s.paused, lead: leadTeam(), imad: s.imad || undefined,
     };
     /* the tracker: every round and mini-game of the night, in order (Classic's schedule/pipState) */
     const live = miniOf(s.screen);
@@ -206,6 +210,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const mem = ctx.current.members;
     p.captains = [0, 1].map((t) => mem.find((m) => m.team === t && m.role === "captain")?.name || null) as [string | null, string | null];
     p.tMini = getSettings().tMini;
+    /* no host: whose Start or Next the room is waiting for */
+    if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
+      && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) p.nextBy = p.captains[leadTeam()] || "The captain";
     const secret: Secret = { step: s.step, typed: s.typed, match: [match(s.typed[0], q), match(s.typed[1], q)], guesses: s.guesses };
     if (q) { p.qid = q.id; secret.qid = q.id; secret.answer = q.answer; secret.notes = q.notes; }
     if (rd) {
@@ -293,7 +300,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       setPub(v[0]);
       const s = st.current;
       try { localStorage.setItem(saveKey, JSON.stringify({ g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt })); } catch { /* full */ }
+        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, custom: s.custom })); } catch { /* full */ }
       const room = ctx.current.room;
       /* the answer first, so the host's phone never shows a new question with the old answer */
       await sb().from("secrets").update({ data: v[1] }).eq("room", code);
@@ -301,6 +308,54 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }).catch((e) => console.error("publish failed", e));
     return c.p;
   }, [code, saveKey, view]);
+
+  /* ---- Imad: one line per moment, never the same twice in a night (until a
+     moment's lines run out), real names and numbers filled in. Lines from the
+     same instant ("Correct!" then "LEAD CHANGE!") go up as one. (Classic's Host) ---- */
+  const say = (moments: string[] | string, extra?: G) => {
+    const s = st.current, g = s.g;
+    if (!g || !getSettings().imad) return;
+    const T = g.teams, cap = (i: 0 | 1) => (T[i].captain || "").trim() || T[i].name, v: G = { ...(extra || {}) };
+    if (v.t === 0 || v.t === 1) { v.team = T[v.t].name; v.other = T[1 - v.t].name; v.captain = cap(v.t); v.othercap = cap(other(v.t)); }
+    else { v.team = v.team || T[0].name; v.other = v.other || T[1].name; v.captain = v.captain || cap(0); v.othercap = v.othercap || cap(1); }
+    const d = T[0].score - T[1].score;
+    v.leader = T[d >= 0 ? 0 : 1].name; v.trailer = T[d >= 0 ? 1 : 0].name; v.gap = Math.abs(d);
+    for (const m of ([] as string[]).concat(moments)) {
+      const pool = HOST_LINES[m]; if (!pool?.length) continue;
+      const seen: number[] = ((g.hostUsed = g.hostUsed || {})[m] = g.hostUsed[m] || []);
+      let free = pool.map((_, i) => i).filter((i) => !seen.includes(i));
+      if (!free.length) { seen.length = 0; free = pool.map((_, i) => i); }
+      const i = free[Math.floor(Math.random() * free.length)];
+      seen.push(i);
+      s.imadQ.push(pool[i].replace(/\{(\w+)\}/g, (_x, k) => (v[k] != null ? String(v[k]) : "")));
+    }
+  };
+  /* once per game, keyed: a screen shown again stays quiet */
+  const once = (key: string, moments: string[] | string, extra?: G) => {
+    const g = st.current.g; g.hostOnce = g.hostOnce || {};
+    if (g.hostOnce[key]) return false;
+    g.hostOnce[key] = true; say(moments, extra); return true;
+  };
+  /* after every move: the screen's own moment, a change of leader, then up it goes */
+  const narrate = () => {
+    const s = st.current, g = s.g;
+    if (!g) return;
+    const sc = s.screen, rd = g.rounds[g.r];
+    const opener = () => (g.hostHello ? [] : ((g.hostHello = true), ["start"]));
+    if (sc === "roundIntro" && rd && !g.hostOnce?.["r" + g.r]) once("r" + g.r, [...opener(), "round"], { t: QMB.seatTeam(g, rd, 0, seat()), theme: rd.theme, n: g.r + 1, N: g.rounds.length });
+    const intro = ({ miniIntro: "closest", auctionIntro: "auction", sayIntro: "saysame", mapIntro: "map", flagIntro: "flag", dishIntro: "dish", battleIntro: "battle" } as Record<string, string>)[sc];
+    if (intro && !g.hostOnce?.["mi:" + intro]) once("mi:" + intro, [...opener(), "mini_" + intro]);
+    if (/Summary$|^auctionResult$/.test(sc)) {
+      const m = sc === "auctionResult" ? g.auction : sc === "battleSummary" ? g.battle : miniState(g, miniOf(sc));
+      if (m?.award) { const w = m.award[0] > m.award[1] ? 0 : m.award[1] > m.award[0] ? 1 : null; if (w != null) once("mw:" + sc, "miniwin", { t: w, pts: Math.max(m.award[0], m.award[1]) }); }
+    }
+    if (sc === "roundScore") { const d = Math.abs(g.teams[0].score - g.teams[1].score); if (d >= 5) once("rs" + g.r, "big"); else if (d <= 1) once("rs" + g.r, "close"); }
+    if (sc === "sudden") once("sd" + (g.sdRounds || 1), "sudden");
+    if (sc === "final") once("final", g.winner == null ? "finaltie" : "final");
+    const d = g.teams[0].score - g.teams[1].score, lead = d > 0 ? 0 : d < 0 ? 1 : null;
+    if (lead != null) { if (g.hostLeader != null && g.hostLeader !== lead) say("lead"); g.hostLeader = lead; }
+    if (s.imadQ.length) { s.imad = { id: ++s.imadN, text: s.imadQ.join(" ") }; s.imadQ = []; }
+  };
 
   /* ---- carrying out what the engine says ---- */
   const applyFx = useCallback((fx: G[]) => {
@@ -315,13 +370,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, seat()), deadline: f.lifeline === "friend" ? now + T().tFriend * 1000 : null };
       }
       if (f.toast) s.toast = { id: ++s.toastN, text: f.toast };
+      if (f.host) say(f.host, f.vars);
       if (f.sound && isTvRef.current) playSound(f.sound as SoundName);
       if (f.go && isTvRef.current) {
         if (f.go === "roundIntro" || /Intro$/.test(f.go) || (f.go === "sudden" && !s.g.sdReady)) { playSound("whoosh"); playSound("jingle"); }
         else if (f.go === "answer" || f.go === "dishReveal" || f.go === "auctionLeg") playSound("drumroll");
       }
       if (f.go) {
-        s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null;
+        s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
         if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; }
         if (f.go === "sudden" || f.go === "battleTie") { s.sdBuzz = null; s.sdOut = [false, false]; }
@@ -337,7 +393,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (f.go === "miniQ") applyFx([{ used: g.mini.qs[g.mini.i] }]);
         if (f.go === "mapQ") applyFx([{ used: g.mapGame.qs[g.mapGame.i] }]);
         if (f.go === "sayQ") applyFx([{ used: g.saySame.qs[g.saySame.i] }]);
-        if (s.nohost && AUTO_NEXT[f.go]) s.autoAt = now + T_AUTO * 1000;
       }
       if (f.finalize) { s.screen = "final"; s.deadline = null; s.autoAt = null; s.pending = null; if (isTvRef.current) playSound("win"); }
     }
@@ -347,12 +402,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const s = st.current;
     if (!s.g || !s.bank) return;
     applyFx(QMB.play(s.g, move, env()));
+    narrate();
     /* no host: the table's calls that a host would make, made at once */
     const g = s.g;
     if (!s.nohost) return;
     if (/Summary$/.test(s.screen)) {
       const k = miniOf(s.screen), m = miniState(g, k);
-      if (k && m?.verdict?.needsHost) { play({ type: PREFIX[k] + "/award", w: "split" }); s.autoAt = Date.now() + T_AUTO * 1000; }
+      if (k && m?.verdict?.needsHost) play({ type: PREFIX[k] + "/award", w: "split" });
     }
     if (s.screen === "dishTie") play({ type: g.dishGame.spare?.length ? "dish/more" : "dish/stop" });
     if (s.screen === "mapTie") play({ type: g.mapGame.spare?.length ? "map/more" : "map/stop" });
@@ -376,10 +432,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.ok = s.nohost ? [s.typed[0] ? null : false, s.typed[1] ? null : false] : [false, false];
       s.screen = "mapReveal";
     } else return;
-    s.deadline = null; s.left = 0;
+    s.deadline = null; s.left = 0; s.paused = false;
     playSound("drumroll");
-    s.autoAt = s.nohost ? Date.now() + (s.screen === "mapReveal" ? T_MAP_RULE : T_AUTO) * 1000 : null;
-    if (s.screen === "mapReveal" && s.ok[0] != null && s.ok[1] != null && s.autoAt) s.autoAt = Date.now() + T_AUTO * 1000;
+    /* no host: each captain rules on the other's map answer; one left unruled stands as right after a while */
+    s.autoAt = s.nohost && s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null) ? Date.now() + T_MAP_RULE * 1000 : null;
   }, []);
 
   /* no host: the app's verdict on what a captain sent; the other captain may overrule */
@@ -408,9 +464,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const hostMove = useCallback((move: G) => {
     const s = st.current, g = s.g;
     const t = move.type as string;
-    if (t === "ui/closeLifeline") { s.lifeline = null; applyFx([{ timer: "resume" }]); }
+    if (t === "ui/closeLifeline") { s.lifeline = null; s.paused = false; applyFx([{ timer: "resume" }]); }
     else if (t === "ui/timeUp") { s.deadline = null; s.left = 0; s.timeUp = true; }
-    else if (t === "ui/pause") applyFx([{ timer: s.deadline ? "pause" : "resume" }]);
+    else if (t === "ui/pause") { if (s.lifeline || (!s.deadline && !s.paused)) return; applyFx([{ timer: s.deadline ? "pause" : "resume" }]); s.paused = !s.deadline && s.left > 0; }
     else if (t === "ui/reveal") reveal();
     else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk") { const i = move.t === 1 ? 1 : 0; s.ok[i] = !s.ok[i]; }
     else if (t === "ui/next") {
@@ -434,6 +490,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      a captain typing doesn't change what the host is deciding) ---- */
   const captainInput = useCallback((kind: string, team: 0 | 1, p: G) => {
     const s = st.current, g = s.g, sc = s.screen;
+    if (s.paused) return false;                        // nothing goes in while the clock is stopped
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
@@ -459,7 +516,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!s.nohost) return;
       const v = !!match(s.typed[team], q);
       applyFx([{ timer: "pause" }]);
-      s.pending = { kind: kindP, team, text: (s.typed[team] || []).join(" / "), v, until: Date.now() + T_OVERRULE * 1000 };
+      s.pending = { kind: kindP, team, text: (s.typed[team] || []).join(" / "), v, until: Date.now() + (kindP === "battle" ? T_OVERRULE_BATTLE : T_OVERRULE) * 1000 };
     };
     if (sc === "ask" || sc === "steal") {
       if (team !== turnTeam() || !texts.length || s.pending || s.lifeline) return false;
@@ -498,11 +555,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const rule = CAPTAIN_MOVES[move.type];
     if (!rule || (rule.nohostOnly && !s.nohost) || !inScreen(rule.where, sc)) return false;
     const t = move.type as string;
+    if (rule.who === "lead" && leadTeam() !== team) return false;
     if (t === "ui/closeLifeline") { if (!s.lifeline || s.lifeline.team !== team) return false; }
     else if (t === "ui/agree" || t === "ui/overrule") { if (!s.pending || s.pending.team === team) return false; }
     else if (t === "sudden/go") { if (g.sdReady) return false; }
     else if (t === "ui/flagOk" || t === "ui/sayOk") { if (move.t !== other(team)) return false; }
     else if (t === "ui/mapRule") { if (s.ok[other(team)] != null) return false; }
+    else if (t === "ui/next" && sc === "mapReveal") { if (s.ok[0] == null || s.ok[1] == null) return false; }
     else if (rule.who === "turn" && turnTeam() !== team) return false;
     else if (rule.who === "other" && turnTeam() === team) return false;
 
@@ -510,7 +569,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "ui/overrule") settle(true);
     else if (t === "ui/mapRule") {
       s.ok[other(team)] = !!move.v;
-      if (s.ok[0] != null && s.ok[1] != null) s.autoAt = Date.now() + 2500;
+      if (s.ok[0] != null && s.ok[1] != null) s.autoAt = null;
     }
     else if (t === "auction/raise") { const n = Math.floor(Number(move.n)); if (!(n > g.auction.bid) || n > 999) return false; play({ type: t, n }); }
     else hostMove(move);
@@ -529,14 +588,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return;
     }
     if (a.kind === "setup" && a.payload.start && room.status === "lobby" && starter(members)?.user_id === a.user_id && readyToStart(members)) {
-      s.bank = s.bank || await loadBank();
       const cfgIn = (a.payload.cfg || {}) as G;
+      /* the house bank, this TV's own questions, and the starter's (cleaned: never trust a phone) */
+      const base = await loadBank();
+      s.custom = cleanList(cfgIn.custom, base.themes);
+      s.bank = withCustom(base, s.custom);
       const names = room.state.teamNames || ["Team A", "Team B"];
       const team = (t: 0 | 1) => ({ name: names[t], captain: members.find((m) => m.team === t && m.role === "captain")?.name || "",
         players: members.filter((m) => m.team === t).map((m) => m.name).join(", ") });
-      const diff = LEVELS[cfgIn.difficulty] ? cfgIn.difficulty : "mixed";
-      /* flags and dishes have their own level, set in the mini-games section */
-      const miniDiff = LEVELS[cfgIn.miniLevel] ? cfgIn.miniLevel : diff;
+      const diff = DIFFS.includes(cfgIn.difficulty) ? cfgIn.difficulty : "mixed";
       const minis = (Array.isArray(cfgIn.minis) ? cfgIn.minis : []).filter((k: string) => PARTY_MINIS.includes(k));
       /* standard rounds can be off (a mini-games-only night), as in Classic */
       const standard = cfgIn.standard !== false;
@@ -551,7 +611,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         ? Object.fromEntries(Object.entries(cfgIn.themeDiff as Record<string, string>).filter(([, d]) => ["easy", "medium", "hard", "mixed"].includes(d))) : {};
       const hand = (k: string) => (byHost ? ids(cfgIn[k]) : []);
       const cfg = { rounds, themes: cfgIn.themes || [], difficulty: diff, standard,
-        minis, flagLevels: LEVELS[miniDiff].flag, dishLevels: LEVELS[miniDiff].dish, teamA: team(0), teamB: team(1), picks, themeDiff,
+        /* maps, flags and dishes each have their own levels, set with the mini-games (as in Classic) */
+        minis, mapLevels: levels(cfgIn.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), flagLevels: levels(cfgIn.flagLevels, QMB.FLAG_LEVEL_KEYS, ["medium"]),
+        dishLevels: levels(cfgIn.dishLevels, QMB.DISH_LEVEL_KEYS, ["c-medium", "d-medium"]), teamA: team(0), teamB: team(1), picks, themeDiff,
         pickClosest: hand("pickClosest"), pickAuction: hand("pickAuction"), pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish") };
       const g = env().deal.buildGame(cfg);
       /* The engine always plays "hosted" here: with no host the TV is the host
@@ -592,7 +654,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     try {
       const saved = JSON.parse(localStorage.getItem(saveKey) || "null");
-      if (saved?.g) { Object.assign(st.current, saved); void loadBank().then((b) => { st.current.bank = b; setPub(view()?.[0] || null); }); }
+      if (saved?.g) { Object.assign(st.current, saved); void loadBank().then((b) => { st.current.bank = withCustom(b, st.current.custom || []); setPub(view()?.[0] || null); }); }
     } catch { /* nothing saved */ }
   }, [isTv, saveKey, view]);
 
@@ -644,6 +706,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.pending && now >= s.pending.until) { s.step++; settle(false); changed = true; }
       if (s.deadline && now >= s.deadline) {
         s.deadline = null; s.step++; changed = true;
+        if (s.screen === "ask" || s.screen === "steal") { say("timeup", { t: turnTeam() }); if (!s.nohost) narrate(); }
         if (["miniQ", "flagQ", "mapQ", "sayQ"].includes(s.screen)) reveal();
         else if (s.screen === "battleQ" && s.nohost) { s.toast = { id: ++s.toastN, text: "Time's up." }; play({ type: "battle/mark", got: false }); }
         else if (s.screen === "battleTie" && s.nohost) play({ type: "battle/tbWin", w: "none" });
@@ -661,10 +724,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else s.lifeline = { ...s.lifeline, deadline: null };
         changed = true;
       }
+      /* no host: a map answer the other captain never ruled on stands as right; then the lead captain taps Next */
       if (s.nohost && s.autoAt && now >= s.autoAt) {
-        s.autoAt = null; s.step++; changed = true;
-        if (s.screen === "mapReveal") { s.ok = [s.ok[0] ?? true, s.ok[1] ?? true]; play({ type: "map/verdict", w: okW() }); }
-        else if (AUTO_NEXT[s.screen]) hostMove(AUTO_NEXT[s.screen]);
+        s.autoAt = null; changed = true;
+        if (s.screen === "mapReveal") s.ok = [s.ok[0] ?? true, s.ok[1] ?? true];
       }
       if (changed) void publish();
     }, 250);
