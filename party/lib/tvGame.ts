@@ -323,7 +323,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      the phones a step behind the TV — and a host tap from a stale step is
      refused, which would freeze the game. */
   const chain = useRef<{ p: Promise<void>; queued: boolean }>({ p: Promise.resolve(), queued: false });
+  const lastSecret = useRef("");
   const publish = useCallback(() => {
+    /* this TV shows the change at once; the phones get it with the next write */
+    const now = view(); if (now) { now[0].at = Date.now(); setPub(now[0]); }
     const c = chain.current;
     if (c.queued) return c.p;              // a write that hasn't started yet will pick up this change too
     c.queued = true;
@@ -337,8 +340,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
         app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns })); } catch { /* full */ }
       const room = ctx.current.room;
-      /* the answer first, so the host's phone never shows a new question with the old answer */
-      await sb().from("secrets").update({ data: v[1] }).eq("room", code);
+      /* the answer first, so the host's phone never shows a new question with the old answer
+         (and only when it changed: a +1, a pause, a ruling leave it as it was — one write, not two) */
+      const sec = JSON.stringify(v[1]);
+      if (sec !== lastSecret.current) { await sb().from("secrets").update({ data: v[1] }).eq("room", code); lastSecret.current = sec; }
       await sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0] } }).eq("code", code);
     }).catch((e) => console.error("publish failed", e));
     return c.p;
@@ -755,17 +760,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* a tap made on an earlier screen (a double tap, a slow phone) is ignored */
       if (!SAME_SCREEN.has(move.type)) { if (a.payload.step !== s.step) return; s.step++; }
       hostMove(move);
-      await publish();
+      void publish();
       return;
     }
     if (from.role !== "captain" || (from.team !== 0 && from.team !== 1)) return;
     if (a.kind === "next") {
       const move = (a.payload.move || {}) as G, free = SAME_SCREEN.has(move.type);
       if (!free && a.payload.step !== s.step) return;
-      if (captainMove(from.team, move)) { if (!free) s.step++; await publish(); }
+      if (captainMove(from.team, move)) { if (!free) s.step++; void publish(); }
       return;
     }
-    if (["answer", "buzz", "lifeline"].includes(a.kind) && captainInput(a.kind, from.team, a.payload as G)) await publish();
+    if (["answer", "buzz", "lifeline"].includes(a.kind) && captainInput(a.kind, from.team, a.payload as G)) void publish();
   }, [applyFx, captainInput, captainMove, code, env, hostMove, play, publish]);
 
   /* restore a game in progress after a refresh of the TV */
@@ -806,15 +811,20 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   useEffect(() => {
     if (!isTv) return;
     const key = "qmb.tv." + code + ".last";
-    let last = Number(localStorage.getItem(key) || 0), busy = false;
+    let last = Number(localStorage.getItem(key) || 0), busy = false, again = false;
+    /* an action that lands while the last batch is still being read is picked up straight after, not at the next poll */
     const drain = async () => {
-      if (busy) return; busy = true;
+      if (busy) { again = true; return; }
+      busy = true;
       try {
-        const { data } = await sb().from("actions").select("*").eq("room", code).neq("kind", "suggest").gt("id", last).order("id");
-        for (const a of (data || []) as Action[]) {
-          try { await handle(a); } catch (e) { console.error("action refused", a, e); }
-          last = a.id; localStorage.setItem(key, String(last));
-        }
+        do {
+          again = false;
+          const { data } = await sb().from("actions").select("*").eq("room", code).neq("kind", "suggest").gt("id", last).order("id");
+          for (const a of (data || []) as Action[]) {
+            try { await handle(a); } catch (e) { console.error("action refused", a, e); }
+            last = a.id; localStorage.setItem(key, String(last));
+          }
+        } while (again);
       } finally { busy = false; }
     };
     void drain();

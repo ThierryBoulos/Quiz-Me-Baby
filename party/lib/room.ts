@@ -22,23 +22,31 @@ export function useRoom(code: string) {
   const [missing, setMissing] = useState(false);
   const alive = useRef(true);
 
-  const pull = useCallback(async () => {
-    const [r, m] = await Promise.all([
-      sb().from("rooms").select("*").eq("code", code).maybeSingle(),
-      sb().from("members").select("*").eq("room", code).order("joined_at"),
-    ]);
-    if (!alive.current) return;
-    if (!r.error) { setRoom(r.data as Room | null); setMissing(!r.data); }
-    if (!m.error) setMembers(((m.data || []) as Member[]).map((x) => ({ ...x, name: cap1(x.name) })));
+  /* The TV stamps every view it publishes (pub.at); a slower poll answer that
+     arrives after a newer push never rolls the screen back. */
+  const stamp = (r: Room | null) => ((r?.state as { pub?: { at?: number } } | undefined)?.pub?.at) ?? 0;
+  const takeRoom = useCallback((r: Room | null) => setRoom((cur) => (r && cur && stamp(r) < stamp(cur) ? cur : r)), []);
+  const pullMembers = useCallback(async () => {
+    const m = await sb().from("members").select("*").eq("room", code).order("joined_at");
+    if (alive.current && !m.error) setMembers(((m.data || []) as Member[]).map((x) => ({ ...x, name: cap1(x.name) })));
   }, [code]);
+  const pull = useCallback(async () => {
+    const [r] = await Promise.all([sb().from("rooms").select("*").eq("code", code).maybeSingle(), pullMembers()]);
+    if (!alive.current) return;
+    if (!r.error) { takeRoom(r.data as Room | null); setMissing(!r.data); }
+  }, [code, pullMembers, takeRoom]);
 
   useEffect(() => {
     alive.current = true;
     void pull();
     const ch = sb()
       .channel("room:" + code)
-      .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: "code=eq." + code }, () => void pull())
-      .on("postgres_changes", { event: "*", schema: "public", table: "members", filter: "room=eq." + code }, () => void pull())
+      /* the push carries the new row: use it straight away (no second trip to the server) */
+      .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: "code=eq." + code }, (e) => {
+        const n = e.new as Room | undefined;
+        if (n && n.code === code && n.state) { takeRoom(n); setMissing(false); } else void pull();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "members", filter: "room=eq." + code }, () => void pullMembers())
       .subscribe();
     const poll = setInterval(() => void pull(), 3000);
     return () => { alive.current = false; clearInterval(poll); void sb().removeChannel(ch); };

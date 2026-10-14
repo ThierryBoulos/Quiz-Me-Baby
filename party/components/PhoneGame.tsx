@@ -82,8 +82,9 @@ const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } cat
 function Counter({ A, fire, h, fs, children }: { A: NonNullable<Pub["auction"]>; fire: Send; h: number; fs: number; children?: React.ReactNode }) {
   const leg = `${A.leg}:${A.cat}`;
   const [opt, setOpt] = useState<{ leg: string; n: number } | null>(null);
-  /* no tap for a few seconds: the TV's count is the count */
-  useEffect(() => { if (!opt) return; const t = setTimeout(() => setOpt(null), 4000); return () => clearTimeout(t); }, [opt]);
+  /* the TV has caught up: its count is the count again (and if a tap never arrives, after a while the TV's count wins) */
+  useEffect(() => { if (opt && opt.leg === leg && A.count === opt.n) setOpt(null); }, [A.count, opt, leg]);
+  useEffect(() => { if (!opt) return; const t = setTimeout(() => setOpt(null), 6000); return () => clearTimeout(t); }, [opt]);
   const shown = opt && opt.leg === leg ? opt.n : A.count;
   const tap = (d: 1 | -1) => { setOpt({ leg, n: Math.max(0, shown + d) }); fire({ type: d > 0 ? "auction/tick" : "auction/untick" }); buzzHand(15); };
   return (<>
