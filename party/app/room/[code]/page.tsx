@@ -5,6 +5,7 @@ import { Lineup } from "@/components/Lineup";
 import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
 import { Confetti, Hud } from "@/components/GameParts";
 import { noteTvTime } from "@/components/Clock";
+import { Rules } from "@/components/Rules";
 import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
@@ -24,6 +25,7 @@ export default function PhoneRoom() {
   const [draft, setDraft] = useState<string | null>(null);        // the team name being typed (null: not touched)
   const [nameState, setNameState] = useState<null | "saving" | "saved" | "late">(null);
   const [panel, setPanel] = useState(false);          // mid-game: the line-up, and changing captain
+  const [rules, setRules] = useState(false);          // the lobby: How to Play over the room, so nobody leaves it
   /* Between a tap and the TV's reply (a second or two): a bar along the top,
      and the buttons stay off, so nobody taps twice wondering if it worked. */
   const [waiting, setWaiting] = useState(false);
@@ -233,8 +235,22 @@ export default function PhoneRoom() {
 
       {msg && <p className="field-error text-center">{msg}</p>}
 
+      {rules && room.status === "lobby" && (
+        <div className="fixed inset-0 z-40 overflow-y-auto" style={{ background: "var(--color-bg)" }} role="dialog" aria-modal="true" aria-label="How to play">
+          <div className="screen !max-w-[720px]">
+            <header className="flex items-end justify-between gap-3">
+              <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>How to Play</div><h1 className="display text-[40px]">How the night works</h1></div>
+              <button className="btn btn-sm btn-ghost" onClick={() => setRules(false)}>Back</button>
+            </header>
+            <p className="text-[13px] text-[var(--color-ink-2)] -mt-2">Times below are the defaults; the TV&rsquo;s Settings can change them.</p>
+            <Rules />
+            <button className="btn btn-gold btn-lg btn-block" onClick={() => setRules(false)}>Back to the lobby</button>
+          </div>
+        </div>)}
+
       {room.status === "lobby" && (
         <footer className="mt-auto flex flex-col gap-2">
+          <button type="button" className="self-center text-[14px] font-bold underline underline-offset-4 text-[var(--color-ink-2)] py-1" onClick={() => setRules(true)}>How to play</button>
           {canStart ? (
             <Setup ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
