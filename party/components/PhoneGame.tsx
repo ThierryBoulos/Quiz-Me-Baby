@@ -5,7 +5,7 @@ import type { Member } from "@/lib/room";
 import { note, sb, sendAction } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
-import { AskHead, FlagImg, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, Verdict } from "./GameParts";
+import { AskHead, FlagImg, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
@@ -129,7 +129,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const Typed = ({ t }: { t: 0 | 1 }) => {
     if (loading) return null;
     const x = secret.typed?.[t];
-    return <Said t={t} text={x?.join("  /  ")} label={x ? `${T[t].name} typed` : T[t].name} empty={`Waiting for ${T[t].name}’s captain to type…`} />;
+    return <Said t={t} text={x?.join("  /  ")} label={x ? `${T[t].name} typed` : T[t].name} empty={pub.timeUp ? "No answer" : `Waiting for ${T[t].name}’s captain to type…`} />;
   };
   /* RIGHT / WRONG under the answer, once there IS an answer (or the clock ran out with none: then the
      app suggests WRONG). The app's call is pre-selected; either button rules. `aloud`: the Battle with a
@@ -244,7 +244,6 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <div key={t} className="text-center">
             <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
             <div className="display text-[28px]">{secret.guesses?.[t] ?? "…"}</div></div>))}</div>
-        <Line className="!text-[13px] !text-[var(--color-ink-3)]">The app works out who&rsquo;s closer once both are in.</Line>
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change question" move={{ type: "closest/swap" }} /></div>
       </div>);
     case "closestReveal": return <Results><Main label="Next" move={{ type: "ui/next" }} /></Results>;
@@ -282,7 +281,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     /* level at the end of a mini-game: one more, or a point each */
     case "miniTie": case "sayTie": case "flagTie": case "dishTie": case "mapTie": case "battleLevel": return (
       <div className="flex flex-col gap-4 flex-1">
-        <Big eyebrow={pub.mini?.title} size={34} text={`Level at ${pub.mini?.wins[0]} each`} sub="One more to settle it, or a point each?" />
+        <Big eyebrow={pub.mini?.title} size={34} text={tieHead(pub)} sub={tieCall(pub)} />
         <div className="flex flex-col gap-3 mt-auto">
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => send({ type: "tie/more" })}>One more</button>
           <button className="btn btn-lg" disabled={busy} onClick={() => send({ type: "tie/stop" })}>A point each</button>
@@ -440,7 +439,10 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
   const rows = (ok: (t: 0 | 1) => React.ReactNode) => (
     <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
       <div key={t} className="text-center"><div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div><div className="text-[15px] font-bold mt-1">{ok(t)}</div></div>))}</div>);
-  if (sc === "answer" && pub.result) return head(pub.result.by, pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? ", stolen!" : ""}`);
+  if (sc === "answer" && pub.result) {
+    const quiet = ([0, 1] as const).filter((t) => silent(pub, t)).map((t) => `${T[t].name}: ${silent(pub, t)}`).join(" · ");
+    return head(pub.result.by, pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? ", stolen!" : ""}`, quiet || undefined);
+  }
   if (sc === "roundScore") return (<>
     {head(null, `End of round ${pub.r + 1}`)}
     {board([T[0].score, T[1].score], "The score", null)}
@@ -476,14 +478,14 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
     </div>
     {board(pub.auction.wins, "Legs so far", null)}</>); }
   if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null; return (<>
-    {head(w, w == null ? "Level" : `${T[w].name} win the Auction`, w != null ? `+${A.award?.[w] ?? m?.pts} points` : "")}
+    {head(w, w == null ? "Tie" : `${T[w].name} win the Auction`, w != null ? `+${A.award?.[w] ?? m?.pts} points` : "")}
     {board(A.wins, "Legs won", w)}</>); }
   if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary; return (<>
     {head(S.winner, S.needsHost ? "Still level" : S.winner == null ? "A split" : `${T[S.winner].name} win ${m?.title ?? "it"}`,
       S.needsHost ? "The host decides" : S.winner == null ? `${S.award?.[0] ?? 0} point${S.award?.[0] === 1 ? "" : "s"} each` : `+${S.award?.[S.winner] ?? m?.pts} points`)}
     {board(S.wins, "Legs won", S.winner)}</>); }
   if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null; return (<>
-    {head(w, w == null ? (B.note || "Level") : `${T[w].name} win the Battle`, w != null ? `+${B.award?.[w] ?? m?.pts} points` : "")}
+    {head(w, w == null ? (B.note || "Tie") : `${T[w].name} win the Battle`, w != null ? `+${B.award?.[w] ?? m?.pts} points` : "")}
     {board(B.score, "Right answers", w)}</>); }
   if (sc === "final") { const w = pub.winner ?? null; return (
     <div className="text-center flex flex-col gap-2 py-4" role="status" aria-live="polite">
@@ -557,7 +559,7 @@ const QUIET = ["miniQ", "flagQ", "mapQ", "sayQ"];
 function status(pub: Pub, me: Member) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend" : "Double Dip: two answers") : `${T[pub.lifeline.team].name} used a lifeline`;
-  if (TIE_SCREENS.includes(pub.screen)) return `Level at ${pub.mini?.wins[0] ?? 0} each. ${pub.mode === "host" ? "The host picks" : "The captain picks"}: one more, or a point each.`;
+  if (TIE_SCREENS.includes(pub.screen)) return `${tieHead(pub)}. ${tieCall(pub)}`;
   switch (pub.screen) {
     case "ask": return pub.turn === mine ? (cap ? "Your question. Type your answer." : "Your team's question. Help your captain!") : `${T[pub.turn ?? 0].name} is answering. Get ready to steal.`;
     case "steal": return pub.turn === mine ? (cap ? "Steal! Type your answer." : "Steal! Help your captain.") : `${T[pub.turn ?? 0].name} can steal it`;

@@ -54,7 +54,7 @@ export function Rules() {
         <L items={[
           <>Chosen in Setup and announced at the start, not sprung on you. They drop in between the standard rounds; the Battle always closes the night.</>,
           <>Each is worth 2 to 4 points to whoever wins it. No lifelines in any of them. A small &ldquo;This game&rdquo; score sits under the night&rsquo;s score while one is on.</>,
-          <>Level at the end of any of them? <B>One more to settle it, or a point each</B>: the host decides, or Team A&rsquo;s captain with no host.</>,
+          <>Tied at the end of any of them? <B>One more to settle it, or a point each</B>: the host decides, or Team A&rsquo;s captain with no host.</>,
         ]} />
       </Rule>
 

@@ -4,7 +4,7 @@ import type { Pub } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { BattleAnswer, flagText } from "./PhoneGame";
-import { AskHead, Confetti, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
+import { AskHead, Confetti, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
 import { TIE_SCREENS } from "@/lib/game";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
@@ -39,7 +39,8 @@ export function TvGame({ pub, onExit }: { pub: Pub; onExit?: () => void }) {
           <div className="text-[28px] text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
           <div className="eyebrow text-[18px]">The answer</div>
           <div className="display" style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
-          {[0, 1].map((t) => pub.result?.typed?.[t] ? <div key={t} className="text-[24px]"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name} said:</b> {pub.result.typed[t]!.join(" / ")}</div> : null)}
+          {[0, 1].map((t) => pub.result?.typed?.[t] ? <div key={t} className="text-[24px]"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name} said:</b> {pub.result.typed[t]!.join(" / ")}</div>
+            : silent(pub, t as 0 | 1) ? <div key={t} className="text-[24px] text-[var(--color-ink-2)]"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {silent(pub, t as 0 | 1)}</div> : null)}
           {pub.result.notes && <div className="text-[22px] text-[var(--color-ink-2)] max-w-[900px]">{pub.result.notes}</div>}
           <div className="display text-[44px]" style={{ color: pub.result.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>
             {pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? " — stolen!" : ""}`}
@@ -145,7 +146,7 @@ function TvMini({ pub }: { pub: Pub }) {
         <div key={t} style={{ opacity: w === t || w === "tie" ? 1 : 0.55 }}>
           <div className="display text-[30px]" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
           <div className="display text-[70px]">{gss ?? "—"}</div>
-          <div className="text-[20px] text-[var(--color-ink-2)]">{gss == null ? "no answer" : `off by ${Math.abs(gss - ans)}`}</div>
+          <div className="text-[20px] text-[var(--color-ink-2)]">{gss == null ? "No answer" : `Off by ${Math.abs(gss - ans)}`}</div>
         </div>); })}</div>
       <div className="display text-[44px]" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : ""}</div>
     </>);
@@ -197,8 +198,8 @@ function TvMini({ pub }: { pub: Pub }) {
     </div>);
   if (TIE_SCREENS.includes(sc)) return (<>
     <div className="eyebrow text-[20px]">{m.title}</div>
-    <div className="display" style={{ fontSize: 100, color: "var(--color-gold)" }}>Level at {m.wins[0]} each</div>
-    <div className="text-[28px] text-[var(--color-ink-2)]">One more to settle it, or a point each: {pub.mode === "host" ? "the host decides" : `${pub.captains?.[pub.lead ?? 0] || "the captain"} decides`}.</div>
+    <div className="display" style={{ fontSize: 100, color: "var(--color-gold)" }}>{tieHead(pub)}</div>
+    <div className="text-[28px] text-[var(--color-ink-2)]">{tieCall(pub)}</div>
   </>);
   if (pub.auction && /^auction(Bid|Run|Leg|Result)$/.test(sc)) {
     const A = pub.auction;
@@ -253,7 +254,7 @@ function TvMini({ pub }: { pub: Pub }) {
     {pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} />}
   </>);
   if (pub.battle && sc === "battleTie") return (<>
-    <div className="eyebrow text-[20px]">Level at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: first captain to buzz</div>
+    <div className="eyebrow text-[20px]">Tie at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: first captain to buzz</div>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 52, lineHeight: 1.12 }}>{pub.question}</div>
     {pub.deadline && <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />}
     <Buzzed pub={pub} />
@@ -263,7 +264,7 @@ function TvMini({ pub }: { pub: Pub }) {
     {B.last && <BattleAnswer last={B.last} size={24} />}
     <div className="eyebrow text-[20px]">Battle of the Captains</div>
     <ScoreBoard pub={pub} w={B.score} win={B.winner} size="tv" />
-    <div className="display text-[54px]" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Level") : `${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</div>
+    <div className="display text-[54px]" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Tie") : `${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</div>
   </>); }
 
   if (/Summary$/.test(sc) && pub.summary) {
@@ -287,7 +288,7 @@ function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: 
       <div key={t} className="flex flex-col items-center gap-1 min-w-0">
         <div className="flex items-baseline gap-3 whitespace-nowrap" style={{ fontSize: small ? 22 : 30 }}>
           <span className="display" style={{ color: tc(t) }}>{T[t].name}</span>
-          {ok == null ? <span className="text-[var(--color-ink-3)] font-bold" style={{ fontSize: "0.7em" }}>{pub.mode === "nohost" ? `${T[t === 0 ? 1 : 0].name} rules` : "the host rules"}</span> : <Verdict v={ok} say={say} />}
+          {ok == null ? <span className="text-[var(--color-ink-3)] font-bold" style={{ fontSize: "0.7em" }}>{pub.mode === "nohost" ? `${T[t === 0 ? 1 : 0].name} rules` : "The host rules"}</span> : <Verdict v={ok} say={say} />}
         </div>
         <div className="font-bold" style={{ fontSize: small ? 20 : 28, color: x ? undefined : "var(--color-ink-3)" }}>{x ?? empty}</div>
       </div>); })}

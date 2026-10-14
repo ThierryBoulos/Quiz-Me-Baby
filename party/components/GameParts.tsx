@@ -20,8 +20,8 @@ function hudLabel(pub: Pub): ReactNode {
   if (sc === "final") return <b>Final result</b>;
   if (sc === "sudden") return <b>Sudden death</b>;
   if (m) {
-    const tail = /Summary$|Result$/.test(sc) ? "Final" : /Tie$/.test(sc) && m.key !== "battle" ? "Level"
-      : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Level" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
+    const tail = /Summary$|Result$/.test(sc) ? "Final" : /Tie$/.test(sc) && m.key !== "battle" ? "Tie"
+      : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Tie" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
       : m.tie ? "Tie-breaker" : `Leg ${m.leg} of ${m.of}`;
     return <><b>{m.title}</b> &nbsp;·&nbsp; {tail}</>;
   }
@@ -169,9 +169,9 @@ export function AskHead({ pub, you, go, size }: { pub: Pub; you?: string; go?: b
         {steal ? "Steal" : pub.theme}{armed && <> &nbsp;·&nbsp; <span style={{ color: "var(--color-gold)" }}>Double points</span></>}
       </div>
       <p className={"whofor " + side(t)} style={{ fontSize: tv ? 30 : 18 }}>{steal ? "Steal for" : "Question for"} <b>{T[t].name}</b></p>
-      <p className="reader" style={{ fontSize: tv ? 15 : 11 }}>
+      {(steal || !tv) && <p className="reader" style={{ fontSize: tv ? 15 : 11 }}>
         {steal ? "No lifelines on a steal" : pub.captains?.[t] ? `Answer from ${pub.captains[t]} only` : "Only the captain's answer counts"}
-      </p>
+      </p>}
       {you && <p className={"you-line mt-1 " + (go ? "go" : "")}>{you}</p>}
     </div>);
 }
@@ -209,7 +209,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
   const t = pub.timers, sec = (v: number | undefined, d: number) => `${v ?? d} seconds`;
   /* level at the end: the same choice in every mini-game */
   const call = host ? "the host's call" : `${pub.captains?.[pub.lead ?? 0] || "Team A's captain"}'s call`;
-  const level = `Level at the end? One more to settle it, or a point each: ${call}.`;
+  const level = `Tied at the end? One more to settle it, or a point each: ${call}.`;
   switch (m.key) {
     case "closest": return [
       { text: "Both teams get the same number question at the same time." },
@@ -248,7 +248,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `${n} questions each, ${host ? `${sec(t?.battleHost, T_BATTLE_HOST)} a shot, out loud` : `${sec(t?.battleTyped, T_BATTLE_TYPED)} a shot, typed on the phone`}. ${pub.teams[0].name}'s captain goes first.` },
       { text: "Same spread for both: five easy, five medium, in the same order. Different questions." },
       { text: "No lifelines, no conferring, no second guesses." },
-      { text: `Best score takes ${pts} points. Level? One buzzer question to settle it (first captain in takes it), or a point each: ${call}.` }];
+      { text: `Best score takes ${pts} points. Tied? One buzzer question to settle it (first captain in takes it), or a point each: ${call}.` }];
   }
 }
 export function MiniIntro({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
@@ -272,3 +272,16 @@ export function MiniIntro({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
       </div>
     </div>);
 }
+
+/* a standard question's result: a team that had its go (its own question, or the steal) and sent nothing */
+export const silent = (pub: Pub, t: 0 | 1) => {
+  const r = pub.result;
+  if (!r || r.owner == null || r.typed?.[t]) return null;
+  if (r.by === t) return null;                     // the host ruled it right, typed or not
+  return t === r.owner ? "No answer" : !r.correct ? "No answer on the steal" : null;
+};
+
+/* a tie at the end of a mini-game, in the same words on the TV and every phone */
+export const tieHead = (pub: Pub) => `Tie at ${pub.mini?.wins[0] ?? 0} each`;
+export const tieCall = (pub: Pub) =>
+  `One more to settle it, or a point each: ${pub.mode === "host" ? "the host" : pub.captains?.[pub.lead ?? 0] || "the captain"} decides.`;

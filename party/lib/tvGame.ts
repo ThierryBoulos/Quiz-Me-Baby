@@ -259,7 +259,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.screen === "answer") {
         const res = rd.res[g.seat] || { correct: false, stolen: false };
         p.result = { answer: q.answer, notes: q.notes, correct: res.correct, stolen: res.stolen, typed: s.typed,
-          by: res.correct ? owner : res.stolen ? other(owner) : null, pts: QMB.pointValue(rd, owner) };
+          by: res.correct ? owner : res.stolen ? other(owner) : null, pts: QMB.pointValue(rd, owner), owner };
       }
       if (s.screen === "roundScore") p.roundPts = [...rd.pts] as Two<number>;
       if (s.screen === "roundIntro") p.turn = p.first;
@@ -345,11 +345,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
         app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns })); } catch { /* full */ }
       const room = ctx.current.room;
-      /* the answer first, so the host's phone never shows a new question with the old answer
-         (and only when it changed: a +1, a pause, a ruling leave it as it was — one write, not two) */
+      /* the answer and the screen go out together (the host's phone shows "Getting the answer…" until
+         an answer for this very step lands), and the answer only when it changed: a +1, a pause,
+         a ruling leave it as it was — one write, not two */
       const sec = JSON.stringify(v[1]);
-      if (sec !== lastSecret.current) { await sb().from("secrets").update({ data: v[1] }).eq("room", code); lastSecret.current = sec; }
-      await sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0] } }).eq("code", code);
+      await Promise.all([
+        sec !== lastSecret.current ? sb().from("secrets").update({ data: v[1] }).eq("room", code).then(() => { lastSecret.current = sec; }) : null,
+        sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0] } }).eq("code", code),
+      ]);
     }).catch((e) => console.error("publish failed", e));
     return c.p;
   }, [code, saveKey, view]);
@@ -555,7 +558,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           const b = g.battle, half = Math.floor(g.miniPts / 2);
           b.stage = "done"; b.done = true; b.winner = null; b.awarded = true; b.award = [half, half];
           g.teams[0].score += half; g.teams[1].score += half;
-          b.note = `Level: called there, ${half} point${half === 1 ? "" : "s"} each.`;
+          b.note = `Tie: called there, ${half} point${half === 1 ? "" : "s"} each.`;
           applyFx([{ sound: "point" }, { go: "battleSummary" }]);
         }
       } else if (TIES[sc]) {
@@ -817,24 +820,42 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     const key = "qmb.tv." + code + ".last";
     let last = Number(localStorage.getItem(key) || 0), busy = false, again = false;
+    /* Two taps sent at once (a fast +1, two buzzes) can be numbered in one order and land in the
+       other, so reading only "after the last id" would skip the slower one for good. So each read
+       also looks back 10 seconds (by the server's clock) for late arrivals, and remembers what it
+       has handled, so nothing is lost and nothing is done twice. */
+    const before = last, seen = new Set<number>();
+    let newest = 0;                                   // the server time of the newest action handled (ms)
+    /* the server's timestamps, in either spelling ("…T12:00:00.123456+00:00" or "… 12:00:00.123456+00"), as ms */
+    const ms = (x: string) => Date.parse(String(x || "").replace(" ", "T").replace(/(\.\d{3})\d+/, "$1").replace(/([+-]\d\d)$/, "$1:00"));
     /* an action that lands while the last batch is still being read is picked up straight after, not at the next poll */
+    const fresh: Action[] = [];                        // straight from the realtime message: handled before the read
+    const take = async (a: Action) => {
+      if (a.id <= before || seen.has(a.id) || a.kind === "suggest") return;
+      seen.add(a.id);
+      try { await handle(a); } catch (e) { console.error("action refused", a, e); }
+      if (a.id > last) { last = a.id; localStorage.setItem(key, String(last)); }
+      const t = ms(a.at); if (t > newest) newest = t;
+    };
     const drain = async () => {
       if (busy) { again = true; return; }
       busy = true;
       try {
         do {
           again = false;
-          const { data } = await sb().from("actions").select("*").eq("room", code).neq("kind", "suggest").gt("id", last).order("id");
-          for (const a of (data || []) as Action[]) {
-            try { await handle(a); } catch (e) { console.error("action refused", a, e); }
-            last = a.id; localStorage.setItem(key, String(last));
-          }
+          while (fresh.length) await take(fresh.shift()!);
+          let q = sb().from("actions").select("*").eq("room", code).neq("kind", "suggest");
+          q = newest ? q.or(`id.gt.${last},at.gt.${new Date(newest - 10000).toISOString()}`) : q.gt("id", last);
+          const { data } = await q.order("id");
+          for (const a of (data || []) as Action[]) await take(a);
+          if (seen.size > 2000) { const keep = [...seen].slice(-500); seen.clear(); keep.forEach((x) => seen.add(x)); }
         } while (again);
       } finally { busy = false; }
     };
     void drain();
     const ch = sb().channel("actions:" + code)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code }, () => void drain())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
+        (m: { new?: Partial<Action> }) => { if (m.new?.id && m.new.kind) fresh.push(m.new as Action); void drain(); })
       .subscribe();
     const poll = setInterval(() => void drain(), 1500);
     return () => { clearInterval(poll); void sb().removeChannel(ch); };
@@ -855,8 +876,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const label = s.screen === "sudden" ? "Sudden death" : mk ? MINI_TITLES[mk] : rd ? `Round ${g.r + 1} · ${rd.theme}` : "A question";
     const f = { id: ++s.flagN, name: m.name, team: m.team, label, qid, ms, kind };
     s.flags = [...s.flags, f].slice(-60);
-    s.toast = { id: ++s.toastN, text: kind === "paste" ? `${m.name} tried to paste an answer.` : `${m.name} left the game screen during the question.` };
-    playSound("wrong");
+    playSound("wrong");                              // the red flag, bottom left, says who
     return f.id;
   };
   /* a phone's note: "I left the screen", "I'm back" (and for how long, by
