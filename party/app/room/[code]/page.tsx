@@ -3,7 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
 import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
-import { Hud } from "@/components/GameParts";
+import { Confetti, Hud } from "@/components/GameParts";
 import { noteTvTime } from "@/components/Clock";
 import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
@@ -99,6 +99,8 @@ export default function PhoneRoom() {
   const playing = room?.status === "playing" || room?.status === "done";
   const pub = (room?.state?.pub || null) as Pub | null;
   useEffect(() => { noteTvTime(pub?.at); }, [pub?.at]);
+  /* the night is over and somebody tapped Exit: everyone back to the home screen */
+  useEffect(() => { if (pub?.exit) router.replace("/"); }, [pub?.exit, router]);
   const secret = useSecret(code, !!mine && mine.role === "host" && playing);
   /* a question is live on this phone: leaving the screen now gets flagged on the TV */
   const live = !!pub && !!mine && mine.role !== "host" && ANSWERING.includes(pub.screen) && !pub.paused
@@ -116,6 +118,7 @@ export default function PhoneRoom() {
   return (
     <main className="screen">
       {waiting && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
+      {pub?.screen === "final" && !panel && <Confetti n={60} />}
       <header className="flex items-center justify-between">
         <span className="chip"><span className="face">{mine.avatar || "🙂"}</span>{mine.name}</span>
         <span className="eyebrow whitespace-nowrap">{room.status === "lobby" ? `Room ${code}` : code}</span>
@@ -126,11 +129,11 @@ export default function PhoneRoom() {
         </div>
       </header>
 
-      {note && <div className="card text-center text-[14px] font-bold enter" role="status" style={{ background: "rgba(245,197,24,.1)", borderColor: "rgba(245,197,24,.45)", color: "var(--color-gold)" }}>{note}</div>}
+      {note && <p className="text-center text-[14px] font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>{note}</p>}
 
       {pub?.tvAway && room.status !== "lobby" && (
-        <div className="card text-center text-[14px] font-bold enter" role="status" style={{ background: "rgba(245,197,24,.1)", borderColor: "rgba(245,197,24,.45)", color: "var(--color-gold)" }}>
-          The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</div>)}
+        <p className="text-center text-[14px] font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>
+          The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</p>)}
 
       {/* the tracker, as on the TV: scores, where we are, the night's progress */}
       {room.status !== "lobby" && pub && !panel && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}

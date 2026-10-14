@@ -231,8 +231,9 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .ll-grid.sm .ll .ic { width: 20px; height: 20px; }
 .ll-grid.sm .ll .nm { font-size: 10.5px; letter-spacing: .06em; line-height: 1.15; }
 .ll-grid.sm .ll.spent::after { inset: 5px 7px auto auto; font-size: 8px; letter-spacing: .14em; }
-.you-line { font-size: 14px; font-weight: 600; color: var(--color-ink-2); background: rgba(255,255,255,.05); border-radius: 999px; padding: 7px 14px; line-height: 1.3; }
-.you-line.go { color: var(--color-gold); background: rgba(245,197,24,.1); }
+/* what this question means for you: plain text (pills are for things you can tap) */
+.you-line { font-size: 14px; font-weight: 600; color: var(--color-ink-2); line-height: 1.3; }
+.you-line.go { color: var(--color-gold); font-weight: 700; }
 .badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; min-height: 34px; }
 .badge.line { color: var(--color-ink-3); border: 1px solid var(--line-2); }
 .badge.no { background: rgba(255,85,102,.16); color: var(--color-no); border: 1px solid rgba(255,85,102,.4); text-decoration: line-through; opacity: .6; }
@@ -266,3 +267,54 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 @keyframes hbIn { from { opacity: 0; transform: translateY(-12px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes hbPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .imad-bubble, .imad-bubble .hb-text { animation: none; } }
+
+/* ---- the mini-game's own score, under the night's (TV and phones) ---- */
+.hud-mini { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; min-width: 0;
+  font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-3); }
+.hud-mini .nm { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud-mini b { font-family: var(--font-display); font-weight: 400; font-size: 17px; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.hud-mini .a { color: var(--color-a); } .hud-mini .b { color: var(--color-b); }
+.hud.tv .hud-mini { font-size: 14px; gap: 12px; margin-top: 8px; } .hud.tv .hud-mini b { font-size: 26px; } .hud.tv .hud-mini .nm { max-width: 260px; }
+
+/* ---- a ruling in words: RIGHT / WRONG, DODGED IT / SAID IT ---- */
+.verdict { font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.verdict.pos { color: var(--color-ok); } .verdict.neg { color: var(--color-no); }
+/* the ruling buttons: the call that stands is filled; the other is an outline in its colour */
+.rule-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn.rule-btn { flex-direction: column; gap: 0; padding: 6px 10px; min-height: 64px; letter-spacing: .08em; text-transform: uppercase; background: transparent; line-height: 1.1; }
+.btn.rule-btn.pos { border-color: color-mix(in srgb, var(--color-ok) 55%, transparent); color: var(--color-ok); }
+.btn.rule-btn.neg { border-color: color-mix(in srgb, var(--color-no) 55%, transparent); color: var(--color-no); }
+.btn.rule-btn.pos.on { background: var(--color-ok); border-color: var(--color-ok); color: #04210f; }
+.btn.rule-btn.neg.on { background: var(--color-no); border-color: var(--color-no); color: #2b0206; }
+.rule-tag { font-size: 9.5px; font-weight: 800; letter-spacing: .14em; opacity: .85; }
+.rule-btn:not(.on) .rule-tag { color: var(--color-ink-2); }
+
+/* the TV's mini-game score: the team names small, beside the big numbers */
+.tv-score-nm { min-width: 0; font-size: 22px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* a flag's thin light edge, so a black stripe never melts into the dark */
+.flag-img { display: block; margin: 0 auto; width: auto; object-fit: contain; border-radius: 4px;
+  filter: drop-shadow(0 0 1px rgba(244,246,255,.95)) drop-shadow(0 0 1px rgba(244,246,255,.6)) drop-shadow(0 10px 24px rgba(0,0,0,.45)); }
+
+/* ---- the end of the night ---- */
+.confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 60; }
+.confetti i { position: absolute; top: -24px; display: block; opacity: .95; animation-name: confettiFall; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes confettiFall {
+  0% { transform: translate3d(0, -5vh, 0) rotate(var(--rot)); }
+  50% { transform: translate3d(calc(var(--sway) * .6), 50vh, 0) rotate(calc(var(--rot) + 360deg)); }
+  100% { transform: translate3d(var(--sway), 110vh, 0) rotate(calc(var(--rot) + 720deg)); }
+}
+@media (prefers-reduced-motion: reduce) { .confetti { display: none; } }
+
+/* ---- the enlarged map (Classic's #mapzoom): fills the screen; tap or pinch to zoom, drag to look around ---- */
+.map-frame { position: relative; cursor: zoom-in; display: flex; justify-content: center; width: 100%; background: none; border: 0; padding: 0; color: inherit; font: inherit; }
+.map-enlarge { position: absolute; right: 8px; bottom: 8px; padding: 4px 10px; border-radius: 999px; background: rgba(0,0,0,.6);
+  border: 1px solid var(--line-2); font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--color-ink-2); pointer-events: none; }
+.mapzoom { position: fixed; inset: 0; z-index: 120; background: #05071a; display: flex; flex-direction: column; gap: 8px;
+  padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)); }
+.mapzoom .mz-top { display: flex; align-items: center; gap: 12px; }
+.mapzoom .mz-top .eyebrow { flex: 1; min-width: 0; color: var(--color-gold); }
+.mapzoom .mz-stage { flex: 1; min-height: 0; overflow: hidden; touch-action: none; border-radius: 12px; position: relative; cursor: zoom-in; }
+.mapzoom .mz-inner { position: absolute; inset: 0; transform-origin: 0 0; display: flex; align-items: center; justify-content: center; }
+.mapzoom .mz-inner .map-svg { width: 100%; height: 100%; max-height: 100%; border-radius: 12px; }
+.mapzoom .mz-help { text-align: center; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--color-ink-3); }

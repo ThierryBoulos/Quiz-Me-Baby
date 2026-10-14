@@ -4,7 +4,7 @@
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
 import type { ReactNode } from "react";
-import type { Pub } from "@/lib/game";
+import { T_DISH_TYPE, type Pub, type Two } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -28,7 +28,7 @@ function hudLabel(pub: Pub): ReactNode {
   return <>Round <b>{Math.min(pub.r + 1, pub.N)}</b> of {pub.N} &nbsp;·&nbsp; <b>{pub.theme}</b></>;
 }
 export function Hud({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
-  const T = pub.teams;
+  const T = pub.teams, w = pub.mini?.wins;
   return (
     <div className={"hud " + size} role="group" aria-label="Scores">
       <div className="hud-in">
@@ -39,6 +39,67 @@ export function Hud({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
         </div>
         <div className="hud-team b"><div className="sc">{T[1].score}</div><div className="nm">{T[1].name}</div><span className="dot" /></div>
       </div>
+      {/* the mini-game's own score, small, under the night's: "This game: A 1 – 2 B" */}
+      {w && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}, ${T[1].name} ${w[1]}`}>
+        <span>This game:</span><span className="nm a">{T[0].name}</span><b className="a">{w[0]}</b><span aria-hidden>–</span><b className="b">{w[1]}</b><span className="nm b">{T[1].name}</span>
+      </div>}
+    </div>);
+}
+
+/* ---- a ruling, in words: RIGHT / WRONG, or DODGED IT / SAID IT. Capitals,
+   green for the good one and red for the bad, on the TV and every phone ---- */
+export const verdictWord = (v: boolean, say?: boolean) => (say ? (v ? "Dodged it" : "Said it") : v ? "Right" : "Wrong");
+export function Verdict({ v, say, size }: { v: boolean | null | undefined; say?: boolean; size?: number }) {
+  if (v == null) return null;
+  return <span className={"verdict " + (v ? "pos" : "neg")} style={size ? { fontSize: size } : undefined}>{verdictWord(v, say)}</span>;
+}
+
+/* ---- the ruling buttons under a team's answer: [RIGHT] [WRONG] (or
+   [DODGED IT] [SAID IT]). The call that stands is filled in; the app's own
+   call carries an "App suggests" tag; the other button flips it. Wherever
+   the app judges, the host (or, with no host, the other captain) can. ---- */
+export function RulingPicker({ value, app, say, onPick, busy, label }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string }) {
+  const opt = (v: boolean) => {
+    const on = value === v;
+    return (
+      <button type="button" className={"btn btn-lg rule-btn " + (v ? "pos" : "neg") + (on ? " on" : "")} aria-pressed={on} disabled={busy} onClick={() => onPick(v)}>
+        {app === v && <span className="rule-tag">App suggests</span>}
+        <span>{verdictWord(v, say)}</span>
+      </button>);
+  };
+  return <div className="rule-pick" role="group" aria-label={label || "Your call"}>{opt(true)}{opt(false)}</div>;
+}
+
+/* ---- a mini-game's final score on the TV: TEAM A 1 – 2 TEAM B, in team colours ---- */
+export function TvScore({ pub, w, size = 120 }: { pub: Pub; w: Two<number>; size?: number }) {
+  const T = pub.teams;
+  return (
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-8 w-full max-w-[1100px]" aria-label={`${T[0].name} ${w[0]}, ${T[1].name} ${w[1]}`}>
+      <span className="tv-score-nm text-right" style={{ color: "var(--color-a)" }}>{T[0].name}</span>
+      <span className="display whitespace-nowrap" style={{ fontSize: size }}><span style={{ color: "var(--color-a)" }}>{w[0]}</span> <span className="text-[var(--color-ink-3)]">–</span> <span style={{ color: "var(--color-b)" }}>{w[1]}</span></span>
+      <span className="tv-score-nm text-left" style={{ color: "var(--color-b)" }}>{T[1].name}</span>
+    </div>);
+}
+
+/* ---- a flag, with a thin light edge: a black stripe (Yemen, Germany) must not melt into the night sky ---- */
+export function FlagImg({ name, h, maxW }: { name?: string; h: number; maxW?: number }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return name ? <img src={`/flags/${name}.svg`} alt="The flag" className="flag-img" style={{ height: h, maxWidth: maxW ?? "100%" }} /> : null;
+}
+
+/* ---- the end of the night: confetti, on the TV and every phone ---- */
+const CONFETTI = ["var(--color-gold)", "var(--color-gold-2)", "var(--color-a)", "var(--color-b)", "#ffffff", "var(--color-ok)"];
+export function Confetti({ n = 90 }: { n?: number }) {
+  /* fixed positions per piece (no Math.random in render: the TV and a phone's re-render must not reshuffle) */
+  const bits = Array.from({ length: n }, (_, i) => {
+    const r = (k: number) => ((Math.sin(i * 12.9898 + k * 78.233) * 43758.5453) % 1 + 1) % 1;
+    return { left: r(1) * 100, delay: -r(2) * 6, dur: 3.2 + r(3) * 3, w: 6 + r(4) * 8, h: 8 + r(5) * 10, rot: r(6) * 360, sway: (r(7) - 0.5) * 160,
+      c: CONFETTI[i % CONFETTI.length], round: r(8) > 0.75 };
+  });
+  return (
+    <div className="confetti" aria-hidden>
+      {bits.map((b, i) => <i key={i} style={{ left: b.left + "%", width: b.w, height: b.round ? b.w : b.h, background: b.c, borderRadius: b.round ? "50%" : 2,
+        animationDelay: b.delay + "s", animationDuration: b.dur + "s", ["--rot" as string]: b.rot + "deg", ["--sway" as string]: b.sway + "px" }} />)}
     </div>);
 }
 
@@ -150,7 +211,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `No lifelines, no help from the room. Most legs takes ${pts} points.`, warn: true }];
     case "saysame": return [
       { text: "A prompt, 20 seconds. Both captains type an answer, hidden from each other. The app has a word hidden: matching each other is fine, only matching the app costs you." },
-      { text: `Time's up: the word comes up. ${host ? "The host can overrule the app." : "Each captain can overrule the app on the other team."}` },
+      { text: `Time's up: the word comes up. ${host ? "The host can change the app's call." : "Each captain can change the app's call on the other team."}` },
       { text: "Dodged it alone? You take the leg. Both dodged or both said it? Tie, a point each." },
       { text: `Most legs after ${n} takes ${pts} points. Level? Straight into a tie-breaker.` }];
     case "map": return [
@@ -160,12 +221,12 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Best of ${n} takes ${pts} points. Level at the end? ${host ? "The host decides: another map, or a point each." : "Another map if there's one left, otherwise a point each."}` }];
     case "flag": return [
       { text: "A flag goes up. 15 seconds." },
-      { text: "Both captains type whose flag it is, at the same time. Country names come up as you type." },
-      { text: `The app checks them${host ? ", and the host can overrule" : ", and each captain can overrule it on the other team"}. Both right? A point each. Nobody? Nobody.` },
+      { text: "Both captains type whose flag it is, at the same time." },
+      { text: `The app checks them${host ? ", and the host can change the call" : ", and each captain can change the call on the other team"}. Both right? A point each. Nobody? Nobody.` },
       { text: `Best of ${n} takes ${pts} points. Level, even at nothing each, and another flag comes out until somebody gets one.` }];
     case "dish": return [
       { text: "The ingredients come up one at a time, a new one every 3 seconds. The giveaway comes last." },
-      { text: "Know it? Captain, hit BUZZ: the first buzz answers." },
+      { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${T_DISH_TYPE} seconds to type it.` },
       { text: "One go per team. Wrong, and you're out of that one: the list keeps coming for the other team." },
       { text: `Best of ${n} takes ${pts} points. Level at the end? ${host ? "One more to settle it, or a point each: the host's call." : "One more to settle it if there's one left, otherwise a point each."}` }];
     case "battle": return [

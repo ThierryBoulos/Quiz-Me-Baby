@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import type { Pub } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
-import { flagText } from "./PhoneGame";
-import { AskHead, Hud, LifelineStrip, MiniIntro, RoundIntro } from "./GameParts";
+import { BattleAnswer, flagText } from "./PhoneGame";
+import { AskHead, Confetti, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, TvScore, Verdict } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
-/* The TV during the game: no buttons, no answers before the reveal. */
-export function TvGame({ pub }: { pub: Pub }) {
+/* The TV during the game: no buttons (but Exit at the very end), no answers before the reveal. */
+export function TvGame({ pub, onExit }: { pub: Pub; onExit?: () => void }) {
   const T = pub.teams;
   /* a pop-up shows for three seconds, then goes */
   const [shown, setShown] = useState<number | null>(null);
@@ -67,10 +67,12 @@ export function TvGame({ pub }: { pub: Pub }) {
         <TvMini pub={pub} />
 
         {pub.screen === "final" && (<>
-          <div className="eyebrow text-[22px]">The winner</div>
+          <Confetti n={140} />
+          <div className="eyebrow text-[22px]">{pub.winner == null ? "The night ends" : "The winner"}</div>
           <div className="display" style={{ fontSize: 150, color: tc(pub.winner) }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
-          <div className="display text-[60px]">{T[0].score} – {T[1].score}</div>
+          <TvScore pub={pub} w={[T[0].score, T[1].score]} size={70} />
           {(pub.flags?.length ?? 0) > 0 && <div className="text-[20px] text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}
+          {onExit && <button className="btn btn-sm btn-ghost" style={{ position: "relative", zIndex: 70 }} onClick={onExit}>Exit: everyone back to the home screen</button>}
         </>)}
       </div>
 
@@ -113,8 +115,8 @@ function Buzzed({ pub }: { pub: Pub }) {
 function Sent({ pub }: { pub: Pub }) {
   const T = pub.teams;
   return (
-    <div className="flex gap-6">{[0, 1].map((t) => (
-      <span key={t} className="chip" style={{ fontSize: 22, padding: "10px 22px", color: pub.sent?.[t] ? tc(t as 0 | 1) : "var(--color-ink-3)" }}>
+    <div className="flex gap-10" role="status">{[0, 1].map((t) => (
+      <span key={t} className="font-bold" style={{ fontSize: 22, color: pub.sent?.[t] ? tc(t as 0 | 1) : "var(--color-ink-3)" }}>
         {T[t].name}: {pub.sent?.[t] ? "locked in" : "thinking…"}</span>))}
     </div>);
 }
@@ -147,13 +149,12 @@ function TvMini({ pub }: { pub: Pub }) {
     </>);
   }
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (<>
-    {/* eslint-disable-next-line @next/next/no-img-element */}
-    <img src={`/flags/${pub.flag}.svg`} alt="The flag" className="rounded-[12px] shadow-2xl" style={{ height: sc === "flagQ" ? 300 : 220, maxWidth: 520, objectFit: "contain", background: "rgba(255,255,255,.04)" }} />
+    <FlagImg name={pub.flag} h={sc === "flagQ" ? 300 : 220} maxW={520} />
     {sc === "flagQ" ? (<><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} /><Sent pub={pub} /></>) : (<>
       <div className="display" style={{ fontSize: 90, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
       <div className="flex gap-16">{[0, 1].map((t) => (
         <div key={t}><div className="display text-[28px]" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
-          <div className="text-[30px] font-bold">{pub.reveal?.typed?.[t]?.[0] ?? "—"} <span style={{ color: pub.reveal?.ok?.[t] ? "var(--color-ok)" : "var(--color-no)" }}>{pub.reveal?.ok?.[t] ? "right" : "wrong"}</span></div></div>))}</div>
+          <div className="text-[30px] font-bold">{pub.reveal?.typed?.[t]?.[0] ?? "—"} <Verdict v={!!pub.reveal?.ok?.[t]} /></div></div>))}</div>
     </>)}
   </>);
   if ((sc === "dishQ" || sc === "dishReveal") && pub.dish) {
@@ -181,7 +182,7 @@ function TvMini({ pub }: { pub: Pub }) {
   }
   if ((sc === "mapQ" || sc === "mapReveal") && pub.map) return (
     <div className="flex gap-10 items-center w-full" style={{ fontSize: 22 }}>
-      <div className="flex-1 min-w-0"><MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} /></div>
+      <div className="flex-1 min-w-0"><MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} title={pub.map.title} /></div>
       <div className="w-[340px] flex flex-col items-center gap-4">
         {sc === "mapQ" ? (<>
           <div className="display text-[40px]" style={{ color: "var(--color-gold)" }}>What does this map show?</div>
@@ -192,7 +193,7 @@ function TvMini({ pub }: { pub: Pub }) {
           <div className="display text-[38px]" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>
           {[0, 1].map((t) => { const ok = pub.map?.ruled?.[t]; return (
             <div key={t} className="text-[20px]"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {pub.reveal?.typed?.[t]?.[0] ?? "nothing"}{" "}
-              <span style={{ color: ok == null ? "var(--color-ink-3)" : ok ? "var(--color-ok)" : "var(--color-no)" }}>{ok == null ? (pub.mode === "nohost" ? `· ${T[t === 0 ? 1 : 0].name} rules` : "") : ok ? "· right" : "· wrong"}</span></div>); })}
+              {ok == null ? <span className="text-[var(--color-ink-3)]">{pub.mode === "nohost" ? `· ${T[t === 0 ? 1 : 0].name} rules` : "· the host rules"}</span> : <>· <Verdict v={ok} /></>}</div>); })}
         </>)}
       </div>
     </div>);
@@ -222,7 +223,7 @@ function TvMini({ pub }: { pub: Pub }) {
     </>);
     if (sc === "auctionResult") return (<>
       <div className="eyebrow text-[20px]">The Auction</div>
-      <div className="display" style={{ fontSize: 120 }}>{A.wins[0]} – {A.wins[1]}</div>
+      <TvScore pub={pub} w={A.wins} />
       {A.winner != null && <div className="display text-[54px]" style={{ color: tc(A.winner) }}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</div>}
     </>);
   }
@@ -238,7 +239,7 @@ function TvMini({ pub }: { pub: Pub }) {
     <div className="display" style={{ fontSize: 100, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
     <div className="flex gap-16">{[0, 1].map((t) => (
       <div key={t}><div className="display text-[28px]" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
-        <div className="text-[30px] font-bold">{pub.reveal?.typed?.[t]?.[0] ?? "nothing"} <span style={{ color: pub.reveal?.ok?.[t] ? "var(--color-ok)" : "var(--color-no)" }}>{pub.reveal?.ok?.[t] ? "dodged it" : "said it"}</span></div></div>))}</div>
+        <div className="text-[30px] font-bold">{pub.reveal?.typed?.[t]?.[0] ?? "nothing"} <Verdict v={!!pub.reveal?.ok?.[t]} say /></div></div>))}</div>
     <div className="display text-[40px]" style={{ color: tc(pub.reveal.w === 0 || pub.reveal.w === 1 ? pub.reveal.w : null) }}>{pub.reveal.w === "tie" ? "A point each" : pub.reveal.w === 0 || pub.reveal.w === 1 ? `${T[pub.reveal.w].name} take the leg` : ""}</div>
   </>);
   if (pub.battle && sc === "battleQ") { const B = pub.battle; return (<>
@@ -246,22 +247,25 @@ function TvMini({ pub }: { pub: Pub }) {
     <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 100 ? 42 : 54, lineHeight: 1.12 }}>{pub.question}</div>
     <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
     <div className="display text-[34px]"><span style={{ color: tc(0) }}>{B.score[0]}</span> – <span style={{ color: tc(1) }}>{B.score[1]}</span></div>
-    {B.last && <div className="text-[20px] text-[var(--color-ink-2)]">Last one: <b>{B.last.answer}</b> <span style={{ color: B.last.got ? "var(--color-ok)" : "var(--color-no)" }}>{B.last.got ? "right" : "wrong"}</span></div>}
+    {B.last && <BattleAnswer last={B.last} size={24} prev />}
   </>); }
   if (pub.battle && sc === "battleHandoff") return (<>
     <div className="eyebrow text-[20px]">Halfway</div>
     <div className="display" style={{ fontSize: 100, color: tc(1) }}>{T[1].name}&rsquo;s captain, you&rsquo;re up</div>
     <div className="text-[30px]">{T[0].name} scored <b>{pub.battle.score[0]}</b> out of {pub.battle.n}. Beat it.</div>
+    {pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} />}
   </>);
   if (pub.battle && sc === "battleTie") return (<>
     <div className="eyebrow text-[20px]">Level at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: first captain to buzz</div>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 52, lineHeight: 1.12 }}>{pub.question}</div>
     {pub.deadline && <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />}
     <Buzzed pub={pub} />
+    {pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} prev />}
   </>);
   if (pub.battle && sc === "battleSummary") { const B = pub.battle; return (<>
+    {B.last && <BattleAnswer last={B.last} size={24} />}
     <div className="eyebrow text-[20px]">Battle of the Captains</div>
-    <div className="display" style={{ fontSize: 120 }}>{B.score[0]} – {B.score[1]}</div>
+    <TvScore pub={pub} w={B.score} />
     <div className="display text-[54px]" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Level") : `${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</div>
   </>); }
   if (sc === "dishTie") return (<>
@@ -272,7 +276,7 @@ function TvMini({ pub }: { pub: Pub }) {
     const S = pub.summary;
     return (<>
       <div className="eyebrow text-[20px]">{m.title}</div>
-      <div className="display" style={{ fontSize: 120 }}>{S.wins[0]} – {S.wins[1]}</div>
+      <TvScore pub={pub} w={S.wins} />
       <div className="display text-[54px]" style={{ color: tc(S.winner) }}>
         {S.needsHost ? "Still level — the host decides" : S.winner == null ? `Split — ${S.award?.[0] ?? 0} each` : `${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</div>
       {S.note && <div className="text-[22px] text-[var(--color-ink-2)]">{S.note}</div>}
@@ -281,7 +285,7 @@ function TvMini({ pub }: { pub: Pub }) {
   return null;
 }
 
-/* no host: what the captain sent, the app's verdict, and the other captain's window to overrule */
+/* no host: what the captain sent, the app's verdict, and the other captain's window to change the call */
 function Pending({ pub }: { pub: Pub }) {
   const T = pub.teams, P = pub.pending!, o = P.team === 0 ? 1 : 0;
   const left = useSecondsLeft(P.until);
@@ -290,8 +294,8 @@ function Pending({ pub }: { pub: Pub }) {
       <div className="text-center enter flex flex-col items-center gap-4">
         <div className="eyebrow text-[20px]">{T[P.team].name} said</div>
         <div className="display" style={{ fontSize: 96, color: tc(P.team) }}>{P.text}</div>
-        <div className="display text-[54px]" style={{ color: P.v ? "var(--color-ok)" : "var(--color-no)" }}>The app says {P.v ? "right" : "wrong"}</div>
-        <div className="text-[24px] text-[var(--color-ink-2)]">{T[o].name}&rsquo;s captain can overrule · {left}</div>
+        <div className="display text-[54px]">The app says <Verdict v={P.v} /></div>
+        <div className="text-[24px] text-[var(--color-ink-2)]">{T[o].name}&rsquo;s captain can change the call · {left}</div>
       </div>
     </div>);
 }

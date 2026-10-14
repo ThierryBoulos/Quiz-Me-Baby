@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { QMB, type Bank, type Q } from "@/lib/engine";
+import { PARTY_LEGS } from "@/lib/game";
 
 /* HAND-PICKED QUESTIONS — Classic's picker (index.html, pickerHTML), for the
    host's phone only: it shows the answers. Two per theme, one for each team;
@@ -16,10 +17,10 @@ type MiniStore = "pickClosest" | "pickAuction" | "pickSaySame" | "pickMap" | "pi
 const MINI: Record<string, { store: MiniStore; type: string; cap: number; label: string }> = {
   closest: { store: "pickClosest", type: "closest", cap: QMB.LEGS.closest, label: "Closest To Wins" },
   auction: { store: "pickAuction", type: "auction", cap: QMB.LEGS.auction, label: "The Auction" },
-  saysame: { store: "pickSaySame", type: "saysame", cap: QMB.LEGS.saysame, label: "Don't Say the Same" },
+  saysame: { store: "pickSaySame", type: "saysame", cap: PARTY_LEGS.saysame ?? QMB.LEGS.saysame, label: "Don't Say the Same" },
   map: { store: "pickMap", type: "map", cap: QMB.LEGS.map, label: "Guess the Map" },
   flag: { store: "pickFlag", type: "flag", cap: QMB.LEGS.flag, label: "Guess the Flag" },
-  dish: { store: "pickDish", type: "dish", cap: QMB.LEGS.dish, label: "Cocktail or Dish" },
+  dish: { store: "pickDish", type: "dish", cap: PARTY_LEGS.dish ?? QMB.LEGS.dish, label: "Cocktail or Dish" },
 };
 const DIFFS = [["", "Tonight's"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["mixed", "Mixed"]] as const;
 const cap = (s?: string) => (s ? s[0].toUpperCase() + s.slice(1) : "");

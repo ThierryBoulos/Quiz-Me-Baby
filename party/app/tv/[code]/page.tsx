@@ -1,5 +1,5 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { Lineup } from "@/components/Lineup";
@@ -21,15 +21,18 @@ const CLASSIC = "/classic";
 export default function TvRoom() {
   const { code } = useParams<{ code: string }>();
   const { room, members } = useRoom(code);
+  const router = useRouter();
   const [me, setMe] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
   useEffect(() => { void ensureSession().then(setMe); setOrigin(window.location.origin); }, []);
   const isTv = !!room && room.tv_id === me;
 
-  const { pub: own } = useTvGame(code, isTv, room, members);
+  const { pub: own, exit } = useTvGame(code, isTv, room, members);
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
   const pub = own || ((room?.state?.pub || null) as Pub | null);
+  /* the night is over and somebody tapped Exit: home (a moment later, so every phone hears it first) */
+  useEffect(() => { if (!pub?.exit) return; const t = setTimeout(() => router.replace("/"), 1500); return () => clearTimeout(t); }, [pub?.exit, router]);
   /* for the end-to-end tests: what the TV is showing */
   useEffect(() => { (window as unknown as { __qmb?: Pub | null }).__qmb = pub; }, [pub]);
 
@@ -89,7 +92,7 @@ export default function TvRoom() {
             </div>
           </div>
         </>
-      ) : pub ? <TvGame pub={pub} /> : (
+      ) : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} /> : (
         <div className="m-auto text-center enter">
           <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
         </div>

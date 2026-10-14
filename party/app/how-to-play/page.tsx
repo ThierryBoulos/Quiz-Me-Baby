@@ -83,7 +83,7 @@ export default function HowToPlay() {
         <L items={[
           <>A prompt: &ldquo;Name a cheese.&rdquo; <B>20 seconds</B> for both captains to type an answer, hidden from each other.</>,
           <>The app already has a word in mind. Matching each other is fine; only matching the app costs you.</>,
-          <>Dodged it while the other team didn&rsquo;t? You take the leg. Both dodged, or both said it? A point each. Most of 9 legs wins.</>,
+          <>Dodged it while the other team didn&rsquo;t? You take the leg. Both dodged, or both said it? A point each. Best of 7.</>,
         ]} />
       </Rule>
 
@@ -97,16 +97,16 @@ export default function HowToPlay() {
 
       <Rule n="09" title="Guess the Flag">
         <L items={[
-          <>A flag goes up. <B>15 seconds.</B> Both captains type the country; names come up as you type.</>,
-          <>The app checks them, and the host (or the other captain) can overrule. Both right is a point each. Best of 10.</>,
+          <>A flag goes up. <B>15 seconds.</B> Both captains type the country.</>,
+          <>The app checks them, and the host (or the other captain) can change the call. Both right is a point each. Best of 10.</>,
         ]} />
       </Rule>
 
       <Rule n="10" title="Guess the Cocktail or Dish">
         <L items={[
           <>The ingredients come up one at a time, a new one every 3 seconds, the giveaway last.</>,
-          <>Know it? Captain, hit <B>BUZZ</B>. The first buzz answers. Wrong, and you&rsquo;re out of that one; the list keeps coming for the other team.</>,
-          <>Best of 7. Level at the end? One more, or a point each.</>,
+          <>Know it? Captain, hit <B>BUZZ</B>. The first buzz answers, within 10 seconds. Wrong, and you&rsquo;re out of that one; the list keeps coming for the other team.</>,
+          <>Best of 5. Level at the end? One more, or a point each.</>,
         ]} />
       </Rule>
 
@@ -131,7 +131,7 @@ export default function HowToPlay() {
           <><B>The host&rsquo;s phone</B> shows the answer and what the captain typed, with the app&rsquo;s opinion, then Right or Wrong.</>,
           <><B>The captain&rsquo;s phone</B> sends the answers, the bids, the buzzes and the lifelines.</>,
           <><B>Everyone else</B> sees the question and can send the captain a suggestion.</>,
-          <><B>No host?</B> The app checks every answer, and the other captain has 15 seconds to agree or overrule. Team A&rsquo;s captain taps Start and Next to move the night on.</>,
+          <><B>No host?</B> The app checks every answer, and the other captain has 15 seconds to confirm it or change the call (RIGHT or WRONG). Team A&rsquo;s captain taps Start and Next to move the night on.</>,
           <><B>No peeking.</B> A phone that leaves the game screen during a question (another app, a search) is flagged on the TV, and the host sees the list.</>,
           <>Phone died? Join again with the same name and tap &ldquo;take my seat back&rdquo;.</>,
         ]} />
