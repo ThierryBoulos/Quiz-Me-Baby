@@ -37,8 +37,17 @@ export function pickSummary(p: Picks, themes: string[], minis: string[]) {
   return bits.length ? bits.join(" · ") : "Pick tonight's questions yourself, or set a difficulty per theme.";
 }
 
-export function Picker({ bank, themes, minis, difficulty, value, onChange, onClose }: {
-  bank: Bank; themes: string[]; minis: string[]; difficulty: string; value: Picks; onChange: (p: Picks) => void; onClose: () => void;
+/* the picture games only offer the levels switched on in Setup (a question with no level, one of yours, always shows) */
+export type PickLevels = Partial<Record<"map" | "flag" | "dish", string[]>>;
+export const inLevels = (q: Q, levels: PickLevels) => {
+  const on = levels[q.type as keyof PickLevels];
+  return !on || !q.level || on.includes(String(q.level));
+};
+const LEVEL_NAMES: Record<string, string> = { veasy: "Very easy", easy: "Easy", medium: "Medium", hard: "Hard", expert: "Expert" };
+const levelName = (l: string) => (/^c-/.test(l) ? "Cocktail " : /^d-/.test(l) ? "Dish " : "") + (LEVEL_NAMES[l.replace(/^[cd]-/, "")] || l).toLowerCase();
+
+export function Picker({ bank, themes, minis, difficulty, levels = {}, value, onChange, onClose }: {
+  bank: Bank; themes: string[]; minis: string[]; difficulty: string; levels?: PickLevels; value: Picks; onChange: (p: Picks) => void; onClose: () => void;
 }) {
   const [filter, setFilter] = useState<string>("");
   const [note, setNote] = useState<string | null>(null);
@@ -125,14 +134,15 @@ export function Picker({ bank, themes, minis, difficulty, value, onChange, onClo
 
         {shownMinis.map((k) => {
           const m = MINI[k], sel = value[m.store];
-          const list = bank.bank.filter((q) => q.type === m.type);
+          const list = bank.bank.filter((q) => q.type === m.type && inLevels(q, levels));
+          const lv = levels[m.type as keyof PickLevels];
           return (
             <section key={k} className="card flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="display text-[22px]" style={{ color: "var(--color-a)" }}>{m.label}</div>
                 <span className="text-[13px] font-bold text-[var(--color-ink-2)]">{sel.length} of {m.cap}</span>
               </div>
-              <p className="text-[13px] text-[var(--color-ink-2)]">In the order you tick them. Anything short is dealt as usual.</p>
+              <p className="text-[13px] text-[var(--color-ink-2)]">In the order you tick them. Anything short is dealt as usual.{lv?.length ? ` Showing ${lv.map(levelName).join(", ").replace(/^./, (c) => c.toUpperCase())} only, the levels picked in Setup.` : ""}</p>
               {list.map((q) => {
                 const i = sel.indexOf(q.id);
                 return <Row key={q.id} on={i > -1} disabled={i < 0 && sel.length >= m.cap} onTap={() => tickMini(k, q.id)}

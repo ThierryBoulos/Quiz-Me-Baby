@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { QMB, loadBank, themeCounts, type Bank, type Q } from "@/lib/engine";
-import { NO_PICKS, Picker, pickSummary, type Picks } from "./Picker";
+import { NO_PICKS, Picker, inLevels, pickSummary, type Picks } from "./Picker";
 import { getCustom } from "@/lib/custom";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
@@ -44,6 +44,16 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
   const [picks, setPicks] = useState<Picks>(NO_PICKS);
   const [picking, setPicking] = useState(false);
   useEffect(() => { void loadBank().then(setBank); }, []);
+  /* a level switched off in Setup takes its hand-picked flags, maps and dishes with it */
+  useEffect(() => {
+    if (!bank) return;
+    const lv = { map: mapLevels, flag: flagLevels, dish: dishLevels }, byId = new Map(bank.bank.map((q) => [q.id, q]));
+    const keep = (ids: string[]) => ids.filter((id) => { const q = byId.get(id); return !q || inLevels(q, lv); });
+    setPicks((p) => {
+      const n = { ...p, pickMap: keep(p.pickMap), pickFlag: keep(p.pickFlag), pickDish: keep(p.pickDish) };
+      return n.pickMap.length === p.pickMap.length && n.pickFlag.length === p.pickFlag.length && n.pickDish.length === p.pickDish.length ? p : n;
+    });
+  }, [bank, mapLevels, flagLevels, dishLevels]);
 
   /* themes that can field a question for each team at this difficulty */
   const counts = useMemo(() => (bank ? themeCounts(bank, difficulty) : {}), [bank, difficulty]);
@@ -185,7 +195,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
             {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
           </div>
         </div>)}
-      {picking && bank && <Picker bank={bank} themes={standard ? picked : []} minis={minis} difficulty={difficulty} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
+      {picking && bank && <Picker bank={bank} themes={standard ? picked : []} minis={minis} difficulty={difficulty} levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels }} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
 
       <button className="btn btn-gold btn-lg btn-block" disabled={!!blocker || busy}
         onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, custom: getCustom(),

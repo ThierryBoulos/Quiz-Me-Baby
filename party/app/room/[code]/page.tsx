@@ -199,9 +199,7 @@ export default function PhoneRoom() {
           <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
           <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
           <div className="h-2" />
-          {host
-            ? <button className="btn btn-block" disabled><span style={{ color: "var(--color-gold)" }}>{host.name}</span>&nbsp;is the host</button>
-            : <button className="btn btn-block" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>}
+          {!host && <button className="btn btn-block" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>}
         </section>
       ) : (
         <section className="flex flex-col gap-3 enter">
@@ -255,7 +253,9 @@ export default function PhoneRoom() {
             <Setup ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-[14px] text-[var(--color-ink-2)]">
-              You&rsquo;re in. {host && <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b>. </>}{who ? <><b style={{ color: "var(--color-gold)" }}>{who.name}</b> starts the game.</> : "The host, or Team A's captain, starts the game."}
+              You&rsquo;re in.{" "}
+              {host && who?.user_id === host.user_id ? <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b>, who starts the game.</>
+                : <>{host && <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b>. </>}{who ? <><b style={{ color: "var(--color-gold)" }}>{who.name}</b> starts the game.</> : "The host, or Team A's captain, starts the game."}</>}
               <br /><span className="text-[12px] text-[var(--color-ink-3)]">Heads up: leaving this screen during a question (another app, a search) is flagged on the TV.</span>
             </p>
           )}
