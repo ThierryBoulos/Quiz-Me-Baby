@@ -289,8 +289,6 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .rule-tag { font-size: 9.5px; font-weight: 800; letter-spacing: .14em; opacity: .85; }
 .rule-btn:not(.on) .rule-tag { color: var(--color-ink-2); }
 
-/* the TV's mini-game score: the team names small, beside the big numbers */
-.tv-score-nm { min-width: 0; font-size: 22px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* a flag's thin light edge, so a black stripe never melts into the dark */
 .flag-img { display: block; margin: 0 auto; width: auto; object-fit: contain; border-radius: 4px;

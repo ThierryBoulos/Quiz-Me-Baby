@@ -11,6 +11,8 @@ import { notReadyWhy, readyToStart, starter, useRoom } from "@/lib/room";
 import type { Pub } from "@/lib/game";
 import { Snd } from "@/lib/sound";
 import { useWakeLock } from "@/lib/wakeLock";
+import { useFreshBuild } from "@/lib/fresh";
+import { ANSWERING } from "@/components/PhoneGame";
 
 /* Classic lives on this same site, at /classic (copied in at build time) */
 const CLASSIC = "/classic";
@@ -31,6 +33,8 @@ export default function TvRoom() {
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
   const pub = own || ((room?.state?.pub || null) as Pub | null);
+  /* an old copy of the app (left open across a deploy) reloads between questions */
+  useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline));
   /* the night is over and somebody tapped Exit: home (a moment later, so every phone hears it first) */
   useEffect(() => { if (!pub?.exit) return; const t = setTimeout(() => router.replace("/"), 1500); return () => clearTimeout(t); }, [pub?.exit, router]);
   /* for the end-to-end tests: what the TV is showing */

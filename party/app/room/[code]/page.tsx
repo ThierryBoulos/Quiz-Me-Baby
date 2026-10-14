@@ -9,6 +9,7 @@ import { Setup } from "@/components/Setup";
 import type { Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
+import { useFreshBuild } from "@/lib/fresh";
 import { cap1, useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
 /* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
@@ -99,6 +100,8 @@ export default function PhoneRoom() {
   const playing = room?.status === "playing" || room?.status === "done";
   const pub = (room?.state?.pub || null) as Pub | null;
   useEffect(() => { noteTvTime(pub?.at); }, [pub?.at]);
+  /* an old copy of the app (left open across a deploy) reloads when nothing is being answered */
+  useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline));
   /* the night is over and somebody tapped Exit: everyone back to the home screen */
   useEffect(() => { if (pub?.exit) router.replace("/"); }, [pub?.exit, router]);
   const secret = useSecret(code, !!mine && mine.role === "host" && playing);
@@ -107,6 +110,8 @@ export default function PhoneRoom() {
     && !(pub.lifeline?.key === "friend" && pub.lifeline.team === mine.team);
   useAwayWatch(report, live, pub?.qid);
   const sendMove = (move: Record<string, unknown>) => act(() => sendAction(code, "judge", { move, step: pub?.step }));
+  /* quick taps (+1, Undo, pausing a call): straight out, the buttons never wait for them */
+  const fireMove = (move: Record<string, unknown>) => { void sendAction(code, "judge", { move, step: pub?.step }).catch((e) => setMsg(friendly(e))); };
 
   if (!room || !mine) return <main className="screen justify-center items-center gap-4" aria-busy="true"><div className="spinner" /><div className="eyebrow">Finding your seat…</div></main>;
 
@@ -170,7 +175,7 @@ export default function PhoneRoom() {
           <section className="card text-center enter flex-1 grid place-items-center">
             <div><div className="eyebrow">Game on</div><h1 className="display text-[44px] mt-2">Eyes on the TV</h1></div>
           </section>
-        ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} busy={busy || waiting} />
+        ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} fire={fireMove} busy={busy || waiting} />
           : mine.role === "captain" ? <CaptainGame pub={pub} me={mine} members={members} code={code} hold={waiting} />
           : <>
               {!myCaptain && <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Your team has no captain. Make me captain</button>}
@@ -193,7 +198,7 @@ export default function PhoneRoom() {
           <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
           <div className="h-2" />
           {host
-            ? <button className="btn btn-block" disabled>{host.name} is the host</button>
+            ? <button className="btn btn-block" disabled><span style={{ color: "var(--color-gold)" }}>{host.name}</span>&nbsp;is the host</button>
             : <button className="btn btn-block" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>}
         </section>
       ) : (
@@ -234,7 +239,7 @@ export default function PhoneRoom() {
             <Setup ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-[14px] text-[var(--color-ink-2)]">
-              You&rsquo;re in. {who ? <><b>{who.name}</b> starts the game.</> : "The host — or Team A's captain — starts the game."}
+              You&rsquo;re in. {host && <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b>. </>}{who ? <><b style={{ color: "var(--color-gold)" }}>{who.name}</b> starts the game.</> : "The host, or Team A's captain, starts the game."}
               <br /><span className="text-[12px] text-[var(--color-ink-3)]">Heads up: leaving this screen during a question (another app, a search) is flagged on the TV.</span>
             </p>
           )}

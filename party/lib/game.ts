@@ -23,7 +23,7 @@ export type Pub = {
   out?: Two<boolean>;             // who is out of this one (dish, sudden death)
   result?: { answer: string; notes?: string; correct: boolean; stolen: boolean; by: 0 | 1 | null; pts: number; typed?: Two<string[] | null> };
   roundPts?: Two<number>;
-  lifeline?: { key: string; team: 0 | 1; deadline: number | null } | null;
+  lifeline?: { key: string; team: 0 | 1; deadline: number | null; left?: number } | null;   // left: Call a Friend paused with this many seconds to go
   sudden?: { ready: boolean; shown: boolean; n: number; answer?: string } | null;
   mini?: { key: MiniKey; title: string; leg: number; of: number; wins: Two<number>; pts: number; kinds?: string; tie?: boolean };
   flag?: string;                  // the flag's file name (flags/<flag>.svg)
@@ -59,6 +59,8 @@ export type Pub = {
 /* host only: the answer, and what the captains typed with the app's opinion */
 export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null> };
 
+/* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
+export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "battleLevel"];
 export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me", battle: "Battle of the Captains" };
 export const T_CLOSEST = 90, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30;
 export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;

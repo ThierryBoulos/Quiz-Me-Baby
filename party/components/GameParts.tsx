@@ -21,7 +21,7 @@ function hudLabel(pub: Pub): ReactNode {
   if (sc === "sudden") return <b>Sudden death</b>;
   if (m) {
     const tail = /Summary$|Result$/.test(sc) ? "Final" : /Tie$/.test(sc) && m.key !== "battle" ? "Level"
-      : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
+      : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Level" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
       : m.tie ? "Tie-breaker" : `Leg ${m.leg} of ${m.of}`;
     return <><b>{m.title}</b> &nbsp;·&nbsp; {tail}</>;
   }
@@ -58,11 +58,12 @@ export function Verdict({ v, say, size }: { v: boolean | null | undefined; say?:
    [DODGED IT] [SAID IT]). The call that stands is filled in; the app's own
    call carries an "App suggests" tag; the other button flips it. Wherever
    the app judges, the host (or, with no host, the other captain) can. ---- */
-export function RulingPicker({ value, app, say, onPick, busy, label }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string }) {
+/* sticky: the call already stands (a reveal), so tapping the lit button again changes nothing */
+export function RulingPicker({ value, app, say, onPick, busy, label, sticky }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string; sticky?: boolean }) {
   const opt = (v: boolean) => {
     const on = value === v;
     return (
-      <button type="button" className={"btn btn-lg rule-btn " + (v ? "pos" : "neg") + (on ? " on" : "")} aria-pressed={on} disabled={busy} onClick={() => onPick(v)}>
+      <button type="button" className={"btn btn-lg rule-btn " + (v ? "pos" : "neg") + (on ? " on" : "")} aria-pressed={on} disabled={busy} onClick={() => { if (!(sticky && on)) onPick(v); }}>
         {app === v && <span className="rule-tag">App suggests</span>}
         <span>{verdictWord(v, say)}</span>
       </button>);
@@ -70,14 +71,22 @@ export function RulingPicker({ value, app, say, onPick, busy, label }: { value: 
   return <div className="rule-pick" role="group" aria-label={label || "Your call"}>{opt(true)}{opt(false)}</div>;
 }
 
-/* ---- a mini-game's final score on the TV: TEAM A 1 – 2 TEAM B, in team colours ---- */
-export function TvScore({ pub, w, size = 120 }: { pub: Pub; w: Two<number>; size?: number }) {
-  const T = pub.teams;
+/* ---- a mini-game's score, the same on the TV and every phone: each team's
+   number big in its colour, the team's name under it, the loser dimmed ---- */
+export function ScoreBoard({ pub, w, win, label, size }: { pub: Pub; w: Two<number>; win?: 0 | 1 | null; label?: string; size: "tv" | "phone" }) {
+  const T = pub.teams, tv = size === "tv";
+  const col = (t: 0 | 1) => (
+    <div key={t} className={"flex flex-col items-center gap-1 min-w-0 " + (t === 1 ? "order-3" : "")} style={{ opacity: win == null || win === t ? 1 : 0.55 }}>
+      <div className="display leading-none" style={{ fontSize: tv ? 130 : 60, color: t === 0 ? "var(--color-a)" : "var(--color-b)" }}>{w[t]}</div>
+      <div className="font-bold uppercase text-center leading-tight text-[var(--color-ink-2)] max-w-full truncate" style={{ fontSize: tv ? 22 : 12, letterSpacing: ".1em" }}>{T[t].name}</div>
+    </div>);
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-8 w-full max-w-[1100px]" aria-label={`${T[0].name} ${w[0]}, ${T[1].name} ${w[1]}`}>
-      <span className="tv-score-nm text-right" style={{ color: "var(--color-a)" }}>{T[0].name}</span>
-      <span className="display whitespace-nowrap" style={{ fontSize: size }}><span style={{ color: "var(--color-a)" }}>{w[0]}</span> <span className="text-[var(--color-ink-3)]">–</span> <span style={{ color: "var(--color-b)" }}>{w[1]}</span></span>
-      <span className="tv-score-nm text-left" style={{ color: "var(--color-b)" }}>{T[1].name}</span>
+    <div className={tv ? "w-full max-w-[900px]" : "py-1"} aria-label={`${label ? label + ": " : ""}${T[0].name} ${w[0]}, ${T[1].name} ${w[1]}`}>
+      {label && <div className="eyebrow text-center mb-2" style={tv ? { fontSize: 18 } : undefined}>{label}</div>}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        {col(0)}{col(1)}
+        <div className="display text-[var(--color-ink-3)] order-2" style={{ fontSize: tv ? 70 : 36 }}>–</div>
+      </div>
     </div>);
 }
 
