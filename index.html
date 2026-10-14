@@ -2375,6 +2375,8 @@ const dishKinds = (levels) => {
   return c && d ? 'Cocktails + dishes' : c ? 'Cocktails' : 'Dishes';
 };
 const dishLevelName = (l) => (l[0] === 'c' ? 'Cocktails' : 'Dishes') + ' · ' + (DISH_LEVELS[l] || '');
+/* Left out on purpose: flags with the answer written on them (Paraguay,
+   Nicaragua, El Salvador, Dominican Republic, Brunei, the Arab League). */
 const FLAGS = [["us", "United States", "veasy", ""],
   ["gb", "United Kingdom", "veasy", ""],
   ["fr", "France", "veasy", ""],
@@ -2480,14 +2482,10 @@ const FLAGS = [["us", "United States", "veasy", ""],
   ["sm", "San Marino", "medium", ""],
   ["ec", "Ecuador", "medium", ""],
   ["bo", "Bolivia", "medium", ""],
-  ["py", "Paraguay", "medium", ""],
   ["cr", "Costa Rica", "medium", ""],
   ["pa", "Panama", "medium", ""],
-  ["do", "Dominican Republic", "medium", ""],
   ["hn", "Honduras", "medium", ""],
   ["gt", "Guatemala", "medium", ""],
-  ["sv", "El Salvador", "medium", ""],
-  ["ni", "Nicaragua", "medium", ""],
   ["ht", "Haiti", "medium", ""],
   ["tt", "Trinidad and Tobago", "medium", ""],
   ["bs", "The Bahamas", "medium", ""],
@@ -2520,7 +2518,6 @@ const FLAGS = [["us", "United States", "veasy", ""],
   ["bf", "Burkina Faso", "hard", ""],
   ["bi", "Burundi", "hard", ""],
   ["bj", "Benin", "hard", ""],
-  ["bn", "Brunei", "hard", ""],
   ["bz", "Belize", "hard", ""],
   ["cf", "Central African Republic", "hard", ""],
   ["cg", "Republic of the Congo", "hard", ""],
@@ -2608,7 +2605,6 @@ const FLAGS = [["us", "United States", "veasy", ""],
   ["ir64", "Iran (before 1979)", "expert", "Former flag"],
   ["pru", "Prussia", "expert", "Former kingdom"],
   ["au-org", "African Union", "expert", "International organisation"],
-  ["arab", "Arab League", "expert", "International organisation"],
   ["nato", "NATO", "expert", "International organisation"],
   ["srd", "Sardinia", "expert", "Region of Italy"],
   ["vlg", "Flanders", "expert", "Region of Belgium"],
@@ -2973,7 +2969,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 22;   // bumped when the built-in bank changes
+const SEED_VERSION = 23;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
