@@ -9,12 +9,27 @@ import { Snd } from "@/lib/sound";
 /* SETTINGS — Classic's house rules (index.html, SCREENS.settings): the
    questions, the default timers, sound, gameplay. Saved on this device: open
    Settings on the screen that will be the TV. */
-const TIMERS: [keyof Settings, string, number[]][] = [
-  ["tQuestion", "Main question", [15, 30, 45, 60, 75, 90]],
-  ["tSteal", "Steal window", [15, 20, 30, 45]],
-  ["tMini", "Closest To Wins", [60, 75, 90, 120]],
-  ["tFriend", "Call a Friend", [30, 45, 60]],
+/* every clock in the game, on its own tab: the standard rounds, then the mini-games */
+type Timer = [keyof Settings, string, number[], string?];
+const STANDARD_TIMERS: Timer[] = [
+  ["tQuestion", "Main question", [15, 30, 45, 60, 75, 90, 120]],
+  ["tSteal", "Steal", [10, 15, 20, 30, 45, 60]],
+  ["tFriend", "Call a Friend", [20, 30, 45, 60, 90]],
+  ["tContest", "Captain's call on an answer", [5, 10, 15, 20, 30], "No host: how long the other captain has to change the app's RIGHT or WRONG."],
+  ["tSudden", "Sudden death: time to buzz", [15, 20, 30, 45, 60], "No host: also the Battle's tie-breaker question."],
 ];
+const MINI_TIMERS: Timer[] = [
+  ["tMini", "Closest To Wins", [30, 45, 60, 75, 90, 120]],
+  ["tAuction", "The Auction: naming time", [20, 30, 45, 60, 90]],
+  ["tSay", "Don't Say the Same", [10, 15, 20, 30, 45]],
+  ["tMap", "Guess the Map", [30, 45, 60, 90, 120]],
+  ["tFlag", "Guess the Flag", [10, 15, 20, 30]],
+  ["tDishStep", "Cocktail or Dish: a new ingredient every", [2, 3, 4, 5]],
+  ["tDishType", "Cocktail or Dish: time to type after a buzz", [5, 10, 15, 20]],
+  ["tBattleHost", "Battle, with a host: per question (out loud)", [5, 7, 10, 15]],
+  ["tBattleTyped", "Battle, no host: per question (typed)", [10, 15, 20, 30]],
+];
+const TIMER_KEYS = [...STANDARD_TIMERS, ...MINI_TIMERS].map(([k]) => k);
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return <section className="card flex flex-col gap-4"><h2 className="eyebrow" style={{ color: "var(--color-gold)" }}>{title}</h2>{children}</section>;
@@ -27,6 +42,22 @@ function Toggle({ on, set, title, help }: { on: boolean; set: (v: boolean) => vo
         <span className="absolute top-[3px] w-[28px] h-[28px] rounded-full bg-white transition-all" style={{ left: on ? 29 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
       </span>
     </button>);
+}
+
+function Timers({ list, s, set }: { list: Timer[]; s: Settings; set: (p: Partial<Settings>) => void }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-4">
+      {list.map(([k, label, opts, help]) => {
+        const v = Number(s[k]), all = opts.includes(v) ? opts : [...opts, v].sort((x, y) => x - y);
+        return (
+          <div key={k} className="flex flex-col gap-2 min-w-0">
+            <label className="field-label !mb-0 leading-snug" htmlFor={"t-" + k}>{label}</label>
+            <select id={"t-" + k} className="input !text-[16px] cursor-pointer" value={v} onChange={(e) => set({ [k]: Number(e.target.value) } as Partial<Settings>)}>
+              {all.map((n) => <option key={n} value={n}>{n} sec{n === DEFAULTS[k] ? " (default)" : ""}</option>)}
+            </select>
+            {help && <span className="text-[12px] text-[var(--color-ink-3)] leading-snug">{help}</span>}
+          </div>); })}
+    </div>);
 }
 
 /* a labelled field (kept outside the form, so typing never loses focus) */
@@ -63,7 +94,7 @@ function AddQuestion() {
   };
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-[14px] text-[var(--color-ink-2)]">Kept on this device. They join the game when this phone starts it, and the host can hand-pick them under Advanced.</p>
+      <p className="text-[14px] text-[var(--color-ink-2)]">Kept in this browser on this device, through every app update. They join the game when this device starts it (or is the TV), and the host can hand-pick them under Advanced. Clearing this browser&rsquo;s data, or a private window, loses them.</p>
       <Field id="ny" label="Type">
         <select id="ny" className="input !text-[16px] cursor-pointer" value={f.type} onChange={(e) => set({ type: e.target.value })}>
           {CUSTOM_TYPES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
@@ -125,8 +156,12 @@ function AddQuestion() {
 export default function SettingsPage() {
   const [s, setS] = useState<Settings>(DEFAULTS);
   const [played, setPlayed] = useState(0);
-  useEffect(() => { setS(getSettings()); setPlayed(usedCount()); }, []);
+  /* two tabs, so the timers don't crowd the rest; #timers opens that one */
+  const [tab, setTab] = useState<"general" | "timers">("general");
+  useEffect(() => { setS(getSettings()); setPlayed(usedCount()); if (location.hash === "#timers") setTab("timers"); }, []);
   const set = (p: Partial<Settings>) => setS(saveSettings(p));
+  const pick = (t: "general" | "timers") => { setTab(t); try { history.replaceState(null, "", t === "timers" ? "#timers" : location.pathname); } catch { /* fine */ } };
+  const changed = TIMER_KEYS.some((k) => s[k] !== DEFAULTS[k]);
 
   return (
     <main className="screen !max-w-[720px]">
@@ -136,22 +171,24 @@ export default function SettingsPage() {
       </header>
       <p className="text-[13px] text-[var(--color-ink-2)] -mt-2">Saved on this device. Change them on the screen that will be the TV.</p>
 
+      <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Settings">
+        {([["general", "General"], ["timers", "Timers"]] as const).map(([k, label]) => (
+          <button key={k} type="button" role="tab" aria-selected={tab === k} className={"btn " + (tab === k ? "btn-gold" : "btn-ghost")} onClick={() => pick(k)}>{label}</button>))}
+      </div>
+
+      {tab === "timers" ? (<>
+        <Section title="Standard trivia">
+          <Timers list={STANDARD_TIMERS} s={s} set={set} />
+        </Section>
+        <Section title="Mini-games">
+          <Timers list={MINI_TIMERS} s={s} set={set} />
+        </Section>
+        <button type="button" className="btn btn-sm btn-ghost self-center" disabled={!changed}
+          onClick={() => set(Object.fromEntries(TIMER_KEYS.map((k) => [k, DEFAULTS[k]])) as Partial<Settings>)}>Back to the default timers</button>
+      </>) : (<>
       <Section title="Add a question">
         <AddQuestion />
       </Section>
-
-      <Section title="Default timers">
-        <div className="grid grid-cols-2 gap-3">
-          {TIMERS.map(([k, label, opts]) => (
-            <div key={k} className="flex flex-col gap-2 min-w-0">
-              <label className="field-label !mb-0" htmlFor={"t-" + k}>{label}</label>
-              <select id={"t-" + k} className="input !text-[16px] cursor-pointer" value={Number(s[k])} onChange={(e) => set({ [k]: Number(e.target.value) } as Partial<Settings>)}>
-                {opts.map((n) => <option key={n} value={n}>{n} sec</option>)}
-              </select>
-            </div>))}
-        </div>
-      </Section>
-
       <Section title="Sound">
         <Toggle on={s.sound} set={(v) => set({ sound: v })} title="Jingles and chimes" help="A calm 5-second sting at the top of every round, soft bells when a timer runs out. Played on the TV only." />
         <Toggle on={s.tick} set={(v) => set({ tick: v })} title="Quiet tick in the last 10 seconds" help="Barely there. Turn it off if the room is small." />
@@ -179,6 +216,7 @@ export default function SettingsPage() {
             onClick={() => { if (window.confirm("Forget every played question on this device?")) { forgetUsed(); setPlayed(0); } }}>Forget played questions</button>
         </div>
       </Section>
+      </>)}
     </main>
   );
 }

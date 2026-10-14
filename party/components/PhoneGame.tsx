@@ -271,7 +271,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <div className="display text-[26px] text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed</div>
           <Typed t={pub.buzz} />
           <Judge t={pub.buzz} right={{ type: "dish/right" }} wrong={{ type: "dish/wrong" }} />
-          {!secret.typed?.[pub.buzz] && <Line className="!text-[13px] !text-[var(--color-ink-3)]">They have 10 seconds to type it.</Line>}
+          {!secret.typed?.[pub.buzz] && <Line className="!text-[13px] !text-[var(--color-ink-3)]">They have {pub.timers?.dishType ?? 10} seconds to type it.</Line>}
         </div>) : (<>
           {pub.dish && <div className="card"><Ings ings={pub.dish.ings} small /></div>}
           <Waiting>{pub.dish?.late != null ? `Time's up for ${T[pub.dish.late].name}. ` : ""}Waiting for a buzz…{[0, 1].filter((t) => pub.out?.[t]).map((t) => ` ${T[t].name} is out.`).join("")}</Waiting>

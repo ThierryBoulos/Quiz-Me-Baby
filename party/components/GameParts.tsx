@@ -4,7 +4,7 @@
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
 import type { ReactNode } from "react";
-import { T_DISH_TYPE, type Pub, type Two } from "@/lib/game";
+import { DISH_STEP, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_SAY, type Pub, type Two } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -205,45 +205,50 @@ export function LifelineStrip({ pub, t, onUse, busy, size }: { pub: Pub; t: 0 | 
 /* ---- the mini-game intro: title, the gold band, the numbered rules ---- */
 function rules(pub: Pub): { text: string; warn?: boolean }[] {
   const m = pub.mini!, n = m.of, pts = m.pts, host = pub.mode === "host";
+  /* the house timers, as set in Settings on the TV */
+  const t = pub.timers, sec = (v: number | undefined, d: number) => `${v ?? d} seconds`;
+  /* level at the end: the same choice in every mini-game */
+  const call = host ? "the host's call" : `${pub.captains?.[pub.lead ?? 0] || "Team A's captain"}'s call`;
+  const level = `Level at the end? One more to settle it, or a point each: ${call}.`;
   switch (m.key) {
     case "closest": return [
       { text: "Both teams get the same number question at the same time." },
-      { text: `${pub.tMini ?? 90} seconds for each captain to lock in one number on their phone.` },
+      { text: `${sec(t?.mini ?? pub.tMini, T_CLOSEST)} for each captain to lock in one number on their phone.` },
       { text: "Closest number wins the leg. Tie = one point each." },
       { text: "No lifelines in this leg.", warn: true },
-      { text: `After ${n} legs, whoever leads takes ${pts} points. Tied on legs? An extra tie-breaker question is pulled straight away.` }];
+      { text: `After ${n} legs, whoever leads takes ${pts} points. ${level}` }];
     case "auction": return [
       { text: `${n} categories. The open alternates, so nobody bids blind twice.` },
       { text: "One captain bids on their phone: how many they can name. The other raises, or passes." },
-      { text: "Whoever holds the bid gets 30 seconds to name that many, out loud." },
+      { text: `Whoever holds the bid gets ${sec(t?.auction, T_AUCTION)} to name that many, out loud.` },
       { text: `${host ? "The host counts" : "The other captain counts"}. Make it, you take the leg. Fall short and the other team takes it.` },
       { text: `No lifelines, no help from the room. Most legs takes ${pts} points.`, warn: true }];
     case "saysame": return [
-      { text: "A prompt, 20 seconds. Both captains type an answer, hidden from each other. The app has a word hidden: matching each other is fine, only matching the app costs you." },
+      { text: `A prompt, ${sec(t?.say, T_SAY)}. Both captains type an answer, hidden from each other. The app has a word hidden: matching each other is fine, only matching the app costs you.` },
       { text: `Time's up: the word comes up. ${host ? "The host can change the app's call." : "Each captain can change the app's call on the other team."}` },
       { text: "Dodged it alone? You take the leg. Both dodged or both said it? Tie, a point each." },
-      { text: `Most legs after ${n} takes ${pts} points. Level? Straight into a tie-breaker.` }];
+      { text: `Best of ${n} takes ${pts} points. ${level}` }];
     case "map": return [
-      { text: "A map goes up: no title, just the colours. 60 seconds." },
+      { text: `A map goes up: no title, just the colours. ${sec(t?.map, T_MAP)}.` },
       { text: "Both captains type what the map shows, at the same time." },
       { text: `${host ? "The host reveals it and rules." : "It's revealed, and each captain rules on the other team's answer."} The idea counts, not the exact words. Both right? A point each. Nobody? Nobody.` },
-      { text: `Best of ${n} takes ${pts} points. Level at the end? ${host ? "The host decides: another map, or a point each." : "Another map if there's one left, otherwise a point each."}` }];
+      { text: `Best of ${n} takes ${pts} points. ${level}` }];
     case "flag": return [
-      { text: "A flag goes up. 15 seconds." },
+      { text: `A flag goes up. ${sec(t?.flag, T_FLAG)}.` },
       { text: "Both captains type whose flag it is, at the same time." },
       { text: `The app checks them${host ? ", and the host can change the call" : ", and each captain can change the call on the other team"}. Both right? A point each. Nobody? Nobody.` },
-      { text: `Best of ${n} takes ${pts} points. Level, even at nothing each, and another flag comes out until somebody gets one.` }];
+      { text: `Best of ${n} takes ${pts} points. ${level}` }];
     case "dish": return [
-      { text: "The ingredients come up one at a time, a new one every 3 seconds. The giveaway comes last." },
-      { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${T_DISH_TYPE} seconds to type it.` },
+      { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
+      { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },
       { text: "One go per team. Wrong, and you're out of that one: the list keeps coming for the other team." },
-      { text: `Best of ${n} takes ${pts} points. Level at the end? ${host ? "One more to settle it, or a point each: the host's call." : "One more to settle it if there's one left, otherwise a point each."}` }];
+      { text: `Best of ${n} takes ${pts} points. ${level}` }];
     case "battle": return [
       { text: "Captains only. The room says nothing, and that means nothing.", warn: true },
-      { text: `${n} questions each, ${host ? "7 seconds a shot, out loud" : "15 seconds a shot, typed on the phone"}. ${pub.teams[0].name}'s captain goes first.` },
+      { text: `${n} questions each, ${host ? `${sec(t?.battleHost, T_BATTLE_HOST)} a shot, out loud` : `${sec(t?.battleTyped, T_BATTLE_TYPED)} a shot, typed on the phone`}. ${pub.teams[0].name}'s captain goes first.` },
       { text: "Same spread for both: five easy, five medium, in the same order. Different questions." },
       { text: "No lifelines, no conferring, no second guesses." },
-      { text: `Best score takes ${pts} points. Tie? One more question, first captain to buzz wins it.` }];
+      { text: `Best score takes ${pts} points. Level? One buzzer question to settle it (first captain in takes it), or a point each: ${call}.` }];
   }
 }
 export function MiniIntro({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {

@@ -7,7 +7,7 @@ import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
 import { getSettings, USED_KEY } from "./settings";
 import { cap1, readyToStart, starter, type Member, type Room } from "./room";
-import { DISH_LAST, DISH_STEP, MINI_TITLES, PARTY_LEGS, TIE_SCREENS, T_AUCTION, T_DISH_TYPE, T_BATTLE_HOST, T_BATTLE_TYPED, T_FLAG, T_AWAY, T_MAP, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE, T_OVERRULE_BATTLE, T_SAY, T_SUDDEN_BUZZ,
+import { DISH_LAST, MINI_TITLES, PARTY_LEGS, TIE_SCREENS, T_AWAY, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE_BATTLE,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
 /* the house timers come from Settings on this TV */
@@ -105,7 +105,9 @@ const DIFFS = ["easy", "medium", "hard", "mixed"];
 const levels = (x: unknown, keys: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((k) => keys.includes(k)); return v.length ? v : dflt; };
 const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dish", "battle"];
 const dishKind = (q: G) => ((q?.level || "")[0] === "c" ? "Cocktail" : "Dish");
-const dishTotal = (q: G) => (q.ings.length - 1) * DISH_STEP + DISH_LAST;
+const dishTotal = (q: G) => (q.ings.length - 1) * T().tDishStep + DISH_LAST;
+/* how long the other captain has to change the app's call: the Battle is rapid fire, so never more than 8 s there */
+const contestSecs = (battle: boolean) => (battle ? Math.min(T().tContest, T_OVERRULE_BATTLE) : T().tContest);
 const miniOf = (sc: string): MiniKey | null => /^(mini|closest)/.test(sc) ? "closest" : /^flag/.test(sc) ? "flag" : /^dish/.test(sc) ? "dish"
   : /^map/.test(sc) ? "map" : /^auction/.test(sc) ? "auction" : /^say/.test(sc) ? "saysame" : /^battle/.test(sc) ? "battle" : null;
 /* the engine's move prefix for each mini-game */
@@ -234,7 +236,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       : (x.i === g.r && !live && s.screen !== "final" && s.screen !== "sudden" ? "now" : g.rounds[x.i!]?.done ? "done" : "todo") }));
     const mem = ctx.current.members;
     p.captains = [0, 1].map((t) => mem.find((m) => m.team === t && m.role === "captain")?.name || null) as [string | null, string | null];
-    p.tMini = getSettings().tMini;
+    { const t = getSettings();
+      p.tMini = t.tMini;
+      p.timers = { question: t.tQuestion, steal: t.tSteal, friend: t.tFriend, contest: t.tContest, sudden: t.tSudden, mini: t.tMini, flag: t.tFlag, map: t.tMap, say: t.tSay,
+        auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped }; }
     /* no host: whose Start or Next the room is waiting for */
     if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
       && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {
@@ -422,11 +427,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; }
         if (f.go === "sudden" || f.go === "battleTie") { s.sdBuzz = null; s.sdOut = [false, false]; }
         const g = s.g;
-        const secs = f.go === "ask" ? T().tQuestion : f.go === "steal" ? T().tSteal : f.go === "miniQ" ? T().tMini : f.go === "flagQ" ? T_FLAG
-          : f.go === "mapQ" ? T_MAP : f.go === "auctionRun" ? T_AUCTION
+        const secs = f.go === "ask" ? T().tQuestion : f.go === "steal" ? T().tSteal : f.go === "miniQ" ? T().tMini : f.go === "flagQ" ? T().tFlag
+          : f.go === "mapQ" ? T().tMap : f.go === "auctionRun" ? T().tAuction
           : f.go === "dishQ" ? dishTotal(g.dishGame.qs[g.dishGame.i])
-          : f.go === "sayQ" ? T_SAY : f.go === "battleQ" ? (s.nohost ? T_BATTLE_TYPED : T_BATTLE_HOST)
-          : ((f.go === "sudden" && g.sdReady) || f.go === "battleTie") && s.nohost ? T_SUDDEN_BUZZ : 0;
+          : f.go === "sayQ" ? T().tSay : f.go === "battleQ" ? (s.nohost ? T().tBattleTyped : T().tBattleHost)
+          : ((f.go === "sudden" && g.sdReady) || f.go === "battleTie") && s.nohost ? T().tSudden : 0;
         if (secs) { s.deadline = now + secs * 1000; s.total = secs; }
         if (f.go === "flagQ") applyFx([{ used: g.flagGame.qs[g.flagGame.i] }]);
         if (f.go === "dishQ") applyFx([{ used: g.dishGame.qs[g.dishGame.i] }]);
@@ -509,7 +514,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else {
         s.sdOut[P.team] = true; s.typed[P.team] = null; s.sdBuzz = null;
         if (s.sdOut[0] && s.sdOut[1]) play(tb ? { type: "battle/tbWin", w: "none" } : { type: "sudden/win", w: "none" });
-        else { s.toast = { id: ++s.toastN, text: "Wrong. The other captain can buzz." }; s.deadline = Date.now() + T_SUDDEN_BUZZ * 1000; }
+        else { s.toast = { id: ++s.toastN, text: "Wrong. The other captain can buzz." }; s.deadline = Date.now() + T().tSudden * 1000; }
       }
     }
   }, [play]);
@@ -615,7 +620,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!s.nohost) return;
       const v = !!match(s.typed[team], q);
       applyFx([{ timer: "pause" }]);
-      s.pending = { kind: kindP, team, text: (s.typed[team] || []).join(" / "), v, until: Date.now() + (kindP === "battle" ? T_OVERRULE_BATTLE : T_OVERRULE) * 1000 };
+      s.pending = { kind: kindP, team, text: (s.typed[team] || []).join(" / "), v, until: Date.now() + contestSecs(kindP === "battle") * 1000 };
     };
     if (sc === "ask" || sc === "steal") {
       /* one answer: once it's sent it's locked, host or no host */
@@ -892,7 +897,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const kind = ({ ask: "ask", steal: "steal", battleQ: "battle", dishQ: "dish", sudden: "sudden", battleTie: "battleTie" } as Record<string, PKind>)[sc];
         if (kind && who != null && s.typed[who] && q) {
           applyFx([{ timer: "pause" }]);
-          s.pending = { kind, team: who, text: (s.typed[who] || []).join(" / "), v: !!match(s.typed[who], q), until: now + (kind === "battle" ? T_OVERRULE_BATTLE : T_OVERRULE) * 1000 };
+          s.pending = { kind, team: who, text: (s.typed[who] || []).join(" / "), v: !!match(s.typed[who], q), until: now + contestSecs(kind === "battle") * 1000 };
         } else if (s.timeUp && (sc === "ask" || sc === "steal")) {
           /* the clock had run out, waiting for the host: with no host that's a wrong answer */
           s.timeUp = false; s.step++;
@@ -975,7 +980,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.deadline && now >= s.deadline) playSound("alarm");
       if (s.screen === "dishQ" && s.deadline) {
         const q = g.dishGame.qs[g.dishGame.i], L = g.dishGame.leg;
-        const want = Math.min(q.ings.length, 1 + Math.floor((s.total - (s.deadline - now) / 1000) / DISH_STEP + 1e-6));
+        const want = Math.min(q.ings.length, 1 + Math.floor((s.total - (s.deadline - now) / 1000) / T().tDishStep + 1e-6));
         if (want > L.shown) { L.shown = want; changed = true; }
       }
       if (s.pending && now >= s.pending.until) { s.step++; settle(false); changed = true; }
@@ -983,7 +988,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.screen === "dishQ" && s.buzzAt && !s.pending) {
         const b = g.dishGame.leg.buzz;
         if (b == null || s.typed[b]) s.buzzAt = 0;
-        else if (now - s.buzzAt >= T_DISH_TYPE * 1000) {
+        else if (now - s.buzzAt >= T().tDishType * 1000) {
           s.buzzAt = 0; s.step++; changed = true;
           hostMove({ type: "dish/wrong" });
           s.late = b;
