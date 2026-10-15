@@ -78,6 +78,7 @@ export default function TvRoom() {
               <div className="display mt-2 pointer-events-none select-none" style={{ fontSize: 150, lineHeight: 0.85, color: "var(--color-gold)", textShadow: "6px 6px 0 rgba(49,201,247,.55)", letterSpacing: "0.08em" }}>{code}</div>
               <div className="text-[22px] text-[var(--color-ink-2)] mt-1">{origin.replace(/^https?:\/\//, "")}/join</div>
             </div>
+            <div className="logo self-center text-center pointer-events-none select-none" style={{ fontSize: 92 }} aria-hidden>Quiz Me<br />Baby</div>
             <div className="rounded-[22px] p-4 bg-[#f4f6ff] shrink-0">
               <QRCodeSVG value={joinUrl} size={200} bgColor="#f4f6ff" fgColor="#04050e" />
             </div>

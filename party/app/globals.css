@@ -143,9 +143,9 @@ button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
   animation: mascotIn .7s var(--ease) both; pointer-events: none; user-select: none; -webkit-user-drag: none; }
 @keyframes mascotIn { from { opacity: 0; transform: translate(0, calc(-50% + 20px)) scale(.95); } to { opacity: 1; transform: translateY(-50%); } }
 .logo-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.logo { font-family: var(--font-display); font-size: clamp(44px, 7vw + 2vh, 116px); line-height: .86; text-transform: uppercase;
-  background: linear-gradient(180deg, #FFF7DA 6%, var(--color-gold-2) 34%, var(--color-gold) 62%, #B98A05 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 10px 30px rgba(245,197,24,.28)); letter-spacing: .01em; }
+/* the logo wears the room code's look: solid gold, a hard Team A blue shadow, wide letters */
+.logo { font-family: var(--font-display); font-size: clamp(44px, 7vw + 2vh, 116px); line-height: .95; text-transform: uppercase;
+  color: var(--color-gold); text-shadow: .04em .04em 0 rgba(49,201,247,.55); letter-spacing: .06em; }
 @media (max-width: 920px) {
   .logo-wrap { position: relative; }
   .mascot { position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%);
