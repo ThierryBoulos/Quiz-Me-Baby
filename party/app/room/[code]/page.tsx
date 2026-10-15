@@ -136,6 +136,9 @@ export default function PhoneRoom() {
         </div>
       </header>
 
+      {/* the lobby: the logo, small, while everyone waits */}
+      {room.status === "lobby" && <div className="logo text-center pointer-events-none select-none -mt-1" style={{ fontSize: 34 }} aria-hidden>Quiz Me Baby</div>}
+
       {note && <p className="text-center text-[14px] font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>{note}</p>}
 
       {pub?.tvAway && room.status !== "lobby" && (
