@@ -278,7 +278,7 @@ export const silent = (pub: Pub, t: 0 | 1) => {
   const r = pub.result;
   if (!r || r.owner == null || r.typed?.[t]) return null;
   if (r.by === t) return null;                     // the host ruled it right, typed or not
-  return t === r.owner ? "No answer" : !r.correct ? "No answer on the steal" : null;
+  return t === r.owner ? "No answer" : !r.correct ? "No answer" : null;
 };
 
 /* a tie at the end of a mini-game, in the same words on the TV and every phone */
