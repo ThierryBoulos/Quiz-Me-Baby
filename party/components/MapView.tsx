@@ -8,6 +8,8 @@ import { createPortal } from "react-dom";
 type MapFile = { q: string; r: string; lq: string; lr: string; topic: string };
 const cache: Record<string, Promise<MapFile>> = {};
 const load = (id: string) => (cache[id] ||= fetch(`/maps/${id}.json`).then((r) => r.json()));
+/* fetched ahead (usePreload), so the map is there the moment it's asked */
+export const preloadMap = (id: string) => { void load(id).catch(() => { delete cache[id]; }); };
 
 export function MapView({ id, reveal, hint, maxH = 420, legend = true, title }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string }) {
   const [m, setM] = useState<MapFile | null>(null);

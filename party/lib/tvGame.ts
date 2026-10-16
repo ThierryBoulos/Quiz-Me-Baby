@@ -277,6 +277,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     };
     /* with a host: the typed answer rides with the screen (the host's phone shows it at once; the app's opinion follows with the secret) */
     if (!s.nohost && ["ask", "steal", "dishQ", "battleQ", "sudden", "battleTie"].includes(s.screen)) p.said = [s.typed[0], s.typed[1]];
+    /* the next pictures, fetched ahead on every screen (the TV takes the whole deck at the intro) */
+    { const fg = g.flagGame, mg = g.mapGame, sc = s.screen, all = /Intro$/.test(sc);
+      if (fg && /^flag/.test(sc)) p.preload = { flags: fg.qs.slice(fg.i, all ? undefined : fg.i + 3).map((x: G) => x.flag).filter(Boolean) };
+      if (mg && /^map/.test(sc)) p.preload = { maps: mg.qs.slice(mg.i, all ? undefined : mg.i + 2).map((x: G) => x.id) }; }
     /* every change of score, for the recap's lead changes */
     { const L = s.scoreLog, now: Two<number> = [g.teams[0].score, g.teams[1].score], last = L[L.length - 1];
       if (!last || last[0] !== now[0] || last[1] !== now[1]) L.push(now); }

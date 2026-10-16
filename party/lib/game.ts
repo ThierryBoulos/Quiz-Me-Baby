@@ -32,6 +32,8 @@ export type Pub = {
   appealable?: 0 | 1; appeal?: { team: 0 | 1; text: string } | null;
   /* with a host: what the captain typed (never the answer), so the host's phone shows it the moment it lands */
   said?: Two<string[] | null>;
+  /* pictures coming up next (flags under their public/fx names, map ids), fetched ahead so they show at once */
+  preload?: { flags?: string[]; maps?: string[] };
   /* the end of the night: a short story of it, shown after the confetti */
   recap?: { margin: number; sudden: boolean; leadChanges: number; steals: Two<number>; minis: Two<number>; best?: { title: string; team: 0 | 1; legs: Two<number> } };
   flag?: string;                  // the flag's file name (flags/<flag>.svg)

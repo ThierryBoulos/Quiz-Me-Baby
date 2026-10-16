@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
 import { ShareButton } from "@/components/Share";
 import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
-import { Confetti, Hud } from "@/components/GameParts";
+import { Confetti, Hud, usePreload } from "@/components/GameParts";
 import { noteTvTime } from "@/components/Clock";
 import { Rules } from "@/components/Rules";
 import { Setup } from "@/components/Setup";
@@ -138,6 +138,7 @@ export default function PhoneRoom() {
 
   const playing = room?.status === "playing" || room?.status === "done";
   const pub = (room?.state?.pub || null) as Pub | null;
+  usePreload(pub);
   /* the TV's reply has landed: the game moved on (a new update from the TV, or the game started) */
   viewKey.current = `${room?.status}|${pub?.at ?? ""}`;
   useEffect(() => {

@@ -12,5 +12,12 @@ const nextConfig = {
   env: { NEXT_PUBLIC_BUILD: BUILD, NEXT_PUBLIC_BUILD_DATE: new Date().toISOString() },
   /* Classic, copied into public/classic by scripts/copy-classic.mjs before each build */
   async rewrites() { return [{ source: "/classic", destination: "/classic/index.html" }]; },
+  /* flags (their names change only with the key) and maps keep in the phone's cache: no second download */
+  async headers() {
+    return [
+      { source: "/fx/:f*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      { source: "/maps/:f*", headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }] },
+    ];
+  },
 };
 export default nextConfig;

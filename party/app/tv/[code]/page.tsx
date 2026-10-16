@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { Lineup } from "@/components/Lineup";
+import { usePreload } from "@/components/GameParts";
 import { ShareButton } from "@/components/Share";
 import { TvGame } from "@/components/TvGame";
 import { TvStage } from "@/components/TvStage";
@@ -40,6 +41,7 @@ export default function TvRoom() {
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
   const pub = own || ((room?.state?.pub || null) as Pub | null);
+  usePreload(pub);
   /* an old copy of the app (left open across a deploy) reloads between questions */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline));
   /* the night is over and somebody tapped Exit: home (a moment later, so every phone hears it first) */

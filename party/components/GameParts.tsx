@@ -3,7 +3,8 @@
    from Classic (index.html): the HUD tracker, the round intro with each
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { preloadMap } from "./MapView";
 import { DISH_STEP, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_SAY, type Pub, type Two } from "@/lib/game";
 
 const ICON = {
@@ -295,6 +296,16 @@ export const silent = (pub: Pub, t: 0 | 1) => {
 export const tieHead = (pub: Pub) => `Tie at ${pub.mini?.wins[0] ?? 0} each`;
 export const tieCall = (pub: Pub) =>
   `One more to settle it, or a point each: ${pub.mode === "host" ? "the host" : pub.captains?.[pub.lead ?? 0] || "the captain"} decides.`;
+/* the pictures coming up, fetched ahead (flags into the browser's cache, maps into MapView's) */
+export function usePreload(pub: Pub | null) {
+  const key = JSON.stringify(pub?.preload || null);
+  useEffect(() => {
+    const P = pub?.preload;
+    P?.flags?.forEach((f) => { const i = new Image(); i.src = `/fx/${f}.svg`; });
+    P?.maps?.forEach((m) => preloadMap(m));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+}
 /* the end of the night: the recap, the same lines on the TV and every phone */
 export const recapLines = (pub: Pub): string[] => {
   const R = pub.recap, T = pub.teams;
