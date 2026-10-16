@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FacePicker } from "@/components/Face";
 import { FACES } from "@/lib/faces";
 import { cap1, cleanCode } from "@/lib/room";
@@ -14,6 +14,15 @@ export function JoinForm({ initial }: { initial: string }) {
   const router = useRouter();
   const [code, setCode] = useState(cleanCode(initial));
   const [name, setName] = useState("");
+  /* The page arrives before the app does (it's drawn on the server), so the two boxes are left to the
+     browser: whatever someone typed before the app loaded stays put, and is picked up here. */
+  const codeRef = useRef<HTMLInputElement>(null), nameRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (codeRef.current && codeRef.current.value !== code) setCode(cleanCode(codeRef.current.value));
+    if (nameRef.current?.value) setName(nameRef.current.value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const putName = (v: string) => { setName(v); if (nameRef.current) nameRef.current.value = v; };
   const [face, setFace] = useState(FACES[0]);
   /* each phone starts on its own random face, so a room scanning the QR together doesn't all reach for the first one */
   useEffect(() => { setFace(FACES[Math.floor(Math.random() * FACES.length)]); }, []);
@@ -79,14 +88,14 @@ export function JoinForm({ initial }: { initial: string }) {
           {codeErr && <span className="field-error">{codeErr}</span>}
         </div>
         <div className="h-2" />
-        <input id="room-code" className="input input-code" value={code} placeholder="Enter 4-letter code" autoComplete="off"
+        <input id="room-code" ref={codeRef} className="input input-code" defaultValue={code} placeholder="Enter 4-letter code" autoComplete="off"
           autoCapitalize="characters" autoFocus={code.length === 0}
-          onChange={(e) => { setCode(cleanCode(e.target.value)); setCodeErr(null); }} />
+          onChange={(e) => { const v = cleanCode(e.target.value); e.target.value = v; setCode(v); setCodeErr(null); }} />
       </div>
       <div>
         <div className="flex items-baseline justify-between"><label className="field-label" htmlFor="name">Name</label>
           <span className="text-[12px] text-[var(--color-ink-3)] tabular-nums" aria-live="polite">{name.length}/12</span></div>
-        <input id="name" className="input" value={name} maxLength={12} placeholder="Enter your name" autoComplete="off"
+        <input id="name" ref={nameRef} className="input" defaultValue="" maxLength={12} placeholder="Enter your name" autoComplete="off"
           autoFocus={code.length === 4} onChange={(e) => { setName(e.target.value); setSuggest(null); setCanRejoin(false); }} />
       </div>
       <div>
@@ -94,7 +103,7 @@ export function JoinForm({ initial }: { initial: string }) {
         <FacePicker value={face} taken={taken} onPick={setFace} />
       </div>
       {suggest && (
-        <button disabled={busy} onClick={() => { setName(suggest); void join(suggest); }}
+        <button disabled={busy} onClick={() => { putName(suggest); void join(suggest); }}
           className="flex items-center gap-3 w-full text-left rounded-[18px] px-4 py-3.5"
           style={{ background: "rgba(245,197,24,.09)", border: "1px solid rgba(245,197,24,.4)" }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>
