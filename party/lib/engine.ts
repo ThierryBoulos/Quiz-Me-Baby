@@ -11,20 +11,35 @@ export type Bank = { version: string; themes: string[]; bank: Q[] };
 
 let bankP: Promise<Bank> | null = null;
 /* Other answers that count, for questions with more than one fair way to say
-   it (public/accept.json): by question id, and by answer for flags, dishes,
-   maps and Say-the-Same words ("United States" also takes "USA"). */
+   it (data/accept.json, served with the full bank): by question id, and by
+   answer for flags, dishes, maps and Say-the-Same words ("United States"
+   also takes "USA"). */
 type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]> };
 let accept: Accept = { byId: {}, byAnswer: {} };
 export const acceptFor = (q: { id?: string; answer?: string; accept?: string[] } | null | undefined) =>
   !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(accept.byAnswer[q.answer || ""] || [])];
-/* the house bank, as shipped */
+/* The house bank any phone may have (public/bank.json): ids, types, themes and
+   levels, enough for Setup and Settings. No questions, no answers (D5). */
 export function loadBaseBank(): Promise<Bank> {
-  if (!bankP) bankP = Promise.all([
-    fetch("/bank.json").then((r) => r.json()),
-    fetch("/accept.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
-  ]).then(([b, a]) => { if (a) accept = a; return b; })
+  if (!bankP) bankP = fetch("/bank.json").then((r) => r.json())
     .catch((e) => { bankP = null; throw e; });      // a failed fetch (Wi-Fi blip) is tried again next time
   return bankP;
+}
+/* The bank with the answers, for this room's TV or its host only: the server
+   checks who's asking (app/api/bank). */
+const fullP: Record<string, Promise<Bank>> = {};
+export function loadFullBank(room: string): Promise<Bank> {
+  if (!fullP[room]) fullP[room] = (async () => {
+    const { sb } = await import("./supabase");
+    const { data } = await sb().auth.getSession();
+    const r = await fetch("/api/bank", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + (data.session?.access_token || "") },
+      body: JSON.stringify({ room }) });
+    if (!r.ok) throw new Error(r.status === 403 ? "not allowed" : "Could not load the questions (" + r.status + ")");
+    const j = (await r.json()) as { bank: Bank; accept: Accept };
+    accept = j.accept;
+    return j.bank;
+  })().catch((e) => { delete fullP[room]; throw e; });
+  return fullP[room];
 }
 /* the house bank plus questions of your own (custom themes join the theme list) */
 export function withCustom(base: Bank, list: Q[]): Bank {
@@ -34,9 +49,10 @@ export function withCustom(base: Bank, list: Q[]): Bank {
   list.forEach((q) => { if (q.theme && !themes.includes(q.theme)) themes.push(q.theme); });
   return { ...base, themes, bank: [...base.bank.filter((q) => !ids.has(q.id)), ...list] };
 }
-/* the bank on this device: the house bank and whatever was added here */
-export async function loadBank(): Promise<Bank> {
-  const base = await loadBaseBank();
+/* the bank on this device: the house bank and whatever was added here; with a
+   room, the full one (the TV, the host) */
+export async function loadBank(room?: string): Promise<Bank> {
+  const base = room ? await loadFullBank(room) : await loadBaseBank();
   if (typeof window === "undefined") return base;
   const { getCustom } = await import("./custom");
   return withCustom(base, getCustom());

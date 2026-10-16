@@ -296,7 +296,7 @@ export default function PhoneRoom() {
         <footer className="mt-auto flex flex-col gap-2">
           <button type="button" className="self-center text-[14px] font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" onClick={() => setRules(true)}>How to play</button>
           {canStart ? (
-            <Setup ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-[14px] text-[var(--color-ink-2)]">
               You&rsquo;re in.{" "}

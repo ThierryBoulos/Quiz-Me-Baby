@@ -93,7 +93,8 @@ export function ScoreBoard({ pub, w, win, label, size }: { pub: Pub; w: Two<numb
 /* ---- a flag, with a thin light edge: a black stripe (Yemen, Germany) must not melt into the night sky ---- */
 export function FlagImg({ name, h, maxW }: { name?: string; h: number; maxW?: number }) {
   // eslint-disable-next-line @next/next/no-img-element
-  return name ? <img src={`/flags/${name}.svg`} alt="The flag" className="flag-img" style={{ height: h, maxWidth: maxW ?? "100%" }} /> : null;
+  /* name: the flag's public/fx name (scripts/hash-flags.mjs), which doesn't give the country away */
+  return name ? <img src={`/fx/${name}.svg`} alt="The flag" className="flag-img" style={{ height: h, maxWidth: maxW ?? "100%" }} /> : null;
 }
 
 /* ---- the end of the night: confetti, on the TV and every phone ---- */

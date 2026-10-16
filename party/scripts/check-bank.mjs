@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* check-bank.mjs — lint the question bank (party/public/bank.json, exported from Classic) before a push.
+/* check-bank.mjs — lint the question bank (party/data/bank.json, exported from Classic; the full one, answers included) before a push.
    Usage: node scripts/check-bank.mjs [--warnings]       (run by `npm test`)
    Exit code 1 on any ERROR; warnings are counted, and listed with --warnings.
    Checks: schema, difficulty/level values, use_with pair parity per difficulty, ≥2 per theme per
@@ -18,8 +18,8 @@ const showWarnings = process.argv.includes("--warnings");
 /* the questions only a host can judge are dealt only with a host (lib/engine.ts): not errors here */
 const HOST_ONLY = new Set([...readFileSync(join(root, "party/lib/engine.ts"), "utf8").match(/HOST_ONLY_IDS = new Set\(\[([^\]]*)\]/)[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]));
 const QMB = require(join(root, "engine/core.js"));
-const bank = JSON.parse(readFileSync(join(root, "party/public/bank.json"), "utf8"));
-const accept = existsSync(join(root, "party/public/accept.json")) ? JSON.parse(readFileSync(join(root, "party/public/accept.json"), "utf8")) : { byId: {}, byAnswer: {} };
+const bank = JSON.parse(readFileSync(join(root, "party/data/bank.json"), "utf8"));
+const accept = existsSync(join(root, "party/data/accept.json")) ? JSON.parse(readFileSync(join(root, "party/data/accept.json"), "utf8")) : { byId: {}, byAnswer: {} };
 const flagsDir = join(root, "party/public/flags"), mapsDir = join(root, "party/public/maps");
 
 const errors = [], warns = [];

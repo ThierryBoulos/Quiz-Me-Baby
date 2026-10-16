@@ -1,6 +1,10 @@
-/* Writes party/public/bank.json — the built-in bank exactly as Classic builds
-   it (buildSeedBank), so Party deals from the same questions. Run it after
-   any change to the built-in bank:
+/* Writes Party's two banks from the built-in bank exactly as Classic builds it
+   (buildSeedBank), so Party deals from the same questions:
+     party/data/bank.json    — everything, answers included. Server only: the
+                               TV and the host get it through /api/bank.
+     party/public/bank.json  — what any phone may see: ids, types, themes,
+                               levels. No questions, no answers (D5).
+   Run it after any change to the built-in bank:
      node scripts/export-bank.js
    Needs Playwright's Chromium (it reads the bank out of index.html itself). */
 const { chromium } = require('playwright');
@@ -20,9 +24,12 @@ const root = path.join(__dirname, '..');
     bank: buildSeedBank().map(q => { const o = {}; Object.keys(q).forEach(k => { if(q[k] !== '' && q[k] != null && k !== 'src') o[k] = q[k]; }); return o; })
   }));
   await b.close(); srv.close();
-  const file = path.join(root, 'party/public/bank.json');
+  const file = path.join(root, 'party/data/bank.json');
   fs.mkdirSync(path.dirname(file), { recursive:true });
   fs.writeFileSync(file, JSON.stringify(out));
+  const LITE = ['id', 'type', 'theme', 'difficulty', 'level', 'use_with'];
+  const lite = Object.assign({}, out, { bank:out.bank.map(q => { const o = {}; LITE.forEach(k => { if(q[k] != null) o[k] = q[k]; }); return o; }) });
+  fs.writeFileSync(path.join(root, 'party/public/bank.json'), JSON.stringify(lite));
   const by = {}; out.bank.forEach(q => by[q.type] = (by[q.type] || 0) + 1);
   console.log('bank.json:', out.bank.length, 'rows', JSON.stringify(by), (fs.statSync(file).size / 1024).toFixed(0) + ' KB, from v' + out.version);
 })();

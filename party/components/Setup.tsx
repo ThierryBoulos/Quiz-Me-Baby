@@ -28,8 +28,10 @@ const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1
    rounds can be switched off (a mini-games-only night); one theme per round,
    so the number of themes always matches the number of rounds; mini-games
    are their own section. Sensible defaults, so Start works straight away. */
-export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean }) {
+export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean; code: string }) {
   const [bank, setBank] = useState<Bank | null>(null);
+  /* the host's question picker shows the answers: the full bank, which only the host's phone gets */
+  const [full, setFull] = useState<Bank | null>(null);
   const [standard, setStandard] = useState(true);
   const [rounds, setRounds] = useState(6);
   const [difficulty, setDiff] = useState("mixed");
@@ -43,6 +45,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
   /* the host's advanced options: hand-picked questions, a difficulty per theme */
   const [picks, setPicks] = useState<Picks>(NO_PICKS);
   const [picking, setPicking] = useState(false);
+  useEffect(() => { if (isHost && picking && !full) void loadBank(code).then(setFull).catch(() => setNote("Couldn't load the questions. Try again.")); }, [isHost, picking, full, code]);
   useEffect(() => { void loadBank().then(setBank); }, []);
   /* a level switched off in Setup takes its hand-picked flags, maps and dishes with it */
   useEffect(() => {
@@ -198,7 +201,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
             {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
           </div>
         </div>)}
-      {picking && bank && <Picker bank={bank} themes={standard ? picked : []} minis={minis} difficulty={difficulty} levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels }} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
+      {picking && full && <Picker bank={full} themes={standard ? picked : []} minis={minis} difficulty={difficulty} levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels }} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
 
       <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy}
         onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, custom: getCustom(),

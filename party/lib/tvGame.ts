@@ -150,6 +150,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     decided: null as null | { key: MiniKey; winner: 0 | 1; spare: number },   // the "decided" screen: which mini-game
     appeal: null as null | { team: 0 | 1; text: string },                      // no host: an appeal waiting for the other captain
     offList: [false, false] as Two<boolean>,                                   // Say the Same: not a real answer to the prompt
+    qkeys: {} as Record<string, number>,                                        // real question id → the number the phones see
     typed: [null, null] as Two<string[] | null>,       // what each captain sent for the question on screen
     guesses: [null, null] as Two<number | null>,       // Closest To Wins
     ok: [null, null] as Two<boolean | null>,           // Flag / Map / Say verdicts, as they stand
@@ -233,6 +234,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const okW = (): W => { const [a, b] = st.current.ok; return a && b ? "tie" : a ? 0 : b ? 1 : "none"; };
 
   /* ---- what the phones see ---- */
+  /* The question in play goes out under a number that means nothing outside this game (D5): its
+     real id would find the answer in a bank file. The phones use it only to tell questions apart. */
+  const qk = (id: string) => { const s = st.current; return "k" + (s.qkeys[id] ??= Object.keys(s.qkeys).length + 1); };
   const view = useCallback((): [Pub, Secret] | null => {
     const s = st.current, g = s.g;
     if (!g) return null;
@@ -276,7 +280,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       p.nextOpenAt = s.waitSince + T_NEXT_FALLBACK * 1000; p.nextOther = p.captains[other(leadTeam())];
     }
     const secret: Secret = { step: s.step, typed: s.typed, match: [match(s.typed[0], q), match(s.typed[1], q)], guesses: s.guesses };
-    if (q) { p.qid = q.id; secret.qid = q.id; secret.answer = q.answer; secret.notes = q.notes; secret.accept = acceptFor(q).slice(0, 8); }
+    if (q) { p.qid = secret.qid = qk(q.id); secret.answer = q.answer; secret.notes = q.notes; secret.accept = acceptFor(q).slice(0, 8); }
     if (rd) {
       p.first = QMB.seatTeam(g, rd, 0, seat());
       p.dbl = [...rd.dbl] as Two<boolean>;
@@ -297,7 +301,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       p.question = g.sdReady ? g.sd.q.question : undefined;
       p.sudden = { ready: !!g.sdReady, shown: !!g.sd.shown, n: g.sd.n, answer: g.sd.shown ? g.sd.q.answer : undefined };
       p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>;
-      secret.qid = p.qid = g.sd.q.id; secret.answer = g.sd.q.answer; secret.notes = g.sd.q.notes;
+      secret.qid = p.qid = qk(g.sd.q.id); secret.answer = g.sd.q.answer; secret.notes = g.sd.q.notes;
     }
     /* the mini-games */
     const key = s.screen === DECIDED ? s.decided?.key ?? null : miniOf(s.screen);
@@ -387,7 +391,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, appeal: s.appeal, offList: s.offList });
+            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, appeal: s.appeal, offList: s.offList, qkeys: s.qkeys });
           if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
         }
       } catch { setBanner("cantSave"); }
@@ -849,7 +853,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "setup" && a.payload.start && room.status === "lobby" && starter(members)?.user_id === a.user_id && readyToStart(members)) {
       const cfgIn = (a.payload.cfg || {}) as G;
       /* the house bank, this TV's own questions, and the starter's (cleaned: never trust a phone) */
-      const base = await loadBank();
+      const base = await loadBank(code);
       s.custom = cleanList(cfgIn.custom, base.themes);
       s.bank = withCustom(members.some((m) => m.role === "host") ? base : withoutHostOnly(base), s.custom);
       const names = room.state.teamNames || ["Team A", "Team B"];
@@ -930,7 +934,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   }, [applyFx, captainInput, captainMove, code, env, hostMove, play, publish, refuse]);
 
   /* fetch the questions while everyone's still joining, not when Start is tapped */
-  useEffect(() => { if (isTv) void loadBank().catch(() => { /* tried again at Start */ }); }, [isTv]);
+  useEffect(() => { if (isTv) void loadBank(code).catch(() => { /* tried again at Start */ }); }, [isTv, code]);
 
   /* restore a game in progress after a refresh of the TV */
   useEffect(() => {
@@ -956,7 +960,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           s.tvAway = 0; s.awayPaused = false;
         }
         /* the bank, then the view, to this TV and to every phone (they may still show "paused") */
-        void loadBank().then(async (b) => {
+        void loadBank(code).then(async (b) => {
           /* filtered as at Start: with no host, no question only a person can judge */
           st.current.bank = withCustom(st.current.nohost ? withoutHostOnly(b) : b, st.current.custom || []);
           /* a game saved by an older version of the app that this one can't read: say so, don't crash */
