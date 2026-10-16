@@ -9,7 +9,7 @@ const nextConfig = {
   /* the shared engine lives one level up (../engine) — Classic and Party play by one rulebook */
   experimental: { externalDir: true },
   /* which deploy this page came from: a TV or phone left open across a deploy reloads itself (lib/fresh.ts) */
-  env: { NEXT_PUBLIC_BUILD: BUILD },
+  env: { NEXT_PUBLIC_BUILD: BUILD, NEXT_PUBLIC_BUILD_DATE: new Date().toISOString() },
   /* Classic, copied into public/classic by scripts/copy-classic.mjs before each build */
   async rewrites() { return [{ source: "/classic", destination: "/classic/index.html" }]; },
 };
