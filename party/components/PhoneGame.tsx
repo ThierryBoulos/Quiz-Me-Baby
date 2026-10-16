@@ -22,10 +22,10 @@ export function useSecret(code: string, on: boolean) {
     if (!on) return;
     const pull = async () => { const { data } = await sb().from("secrets").select("data").eq("room", code).maybeSingle(); if (data) setS((data.data || {}) as Secret); };
     void pull();
-    /* the push carries the answer: use it (no second trip); a 10 s read underneath as a safety net */
+    /* the push carries the answer: use it (no second trip); a 25 s read underneath as a safety net */
     const ch = sb().channel("secret:" + code).on("postgres_changes", { event: "*", schema: "public", table: "secrets", filter: "room=eq." + code },
       (e) => { const d = (e.new as { data?: Secret } | undefined)?.data; if (d) setS(d); else void pull(); }).subscribe();
-    const t = setInterval(() => { if (document.visibilityState === "visible") void pull(); }, 10000);
+    const t = setInterval(() => { if (document.visibilityState === "visible") void pull(); }, 25000);
     return () => { clearInterval(t); void sb().removeChannel(ch); };
   }, [code, on]);
   return s;
@@ -44,14 +44,14 @@ function useSuggestions(code: string, qid: string | undefined, members: Member[]
       setList(((data || []) as { id: number; user_id: string; payload: { text?: string } }[]).map((a) => ({ id: a.id, user_id: a.user_id, text: String(a.payload.text || "") })));
     };
     void pull();
-    /* a new suggestion arrives with the push: add it straight in; a 10 s read underneath as a safety net */
+    /* a new suggestion arrives with the push: add it straight in; a 25 s read underneath as a safety net */
     const ch = sb().channel("sug:" + code + ":" + qid).on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
       (e) => {
         const a = e.new as { id?: number; user_id?: string; kind?: string; payload?: { qid?: string; text?: string } };
         if (a?.kind !== "suggest" || a.payload?.qid !== qid || a.id == null || !a.user_id) return;
         setList((cur) => (cur.some((x) => x.id === a.id) ? cur : [{ id: a.id!, user_id: a.user_id!, text: String(a.payload?.text || "") }, ...cur].slice(0, 30)));
       }).subscribe();
-    const t = setInterval(() => { if (document.visibilityState === "visible") void pull(); }, 10000);
+    const t = setInterval(() => { if (document.visibilityState === "visible") void pull(); }, 25000);
     return () => { clearInterval(t); void sb().removeChannel(ch); };
   }, [code, qid, on]);
   return list.filter((s) => members.find((m) => m.user_id === s.user_id)?.team === team);

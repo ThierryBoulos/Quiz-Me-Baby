@@ -950,12 +950,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       } finally { busy = false; }
     };
     void drain();
+    let live = false, read = Date.now();
     const ch = sb().channel("actions:" + code)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
         (m: { new?: Partial<Action> }) => { if (m.new?.id && m.new.kind) fresh.push(m.new as Action); void drain(); })
-      .subscribe();
-    /* every tap arrives with the push and is handled at once; this read is the safety net */
-    const poll = setInterval(() => void drain(), 3000);
+      .subscribe((status) => { const was = live; live = status === "SUBSCRIBED"; if (live && !was) void drain(); });
+    /* every tap arrives with the push and is handled at once; this read is the safety net:
+       every 20 s while the live connection is up (a tap it missed is picked up by the next push
+       anyway), every 3 s while it's down */
+    const poll = setInterval(() => { if (Date.now() - read >= (live ? 20000 : 3000)) { read = Date.now(); void drain(); } }, 1000);
     return () => { clearInterval(poll); void sb().removeChannel(ch); };
   }, [code, isTv, handle]);
 

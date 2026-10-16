@@ -15,9 +15,9 @@ export const teamName = (room: Room | null, t: 0 | 1) => cap1(room?.state?.teamN
 
 /* The room and its line-up, kept live: Supabase pushes every change and the
    phone uses what the push carries. A poll sits underneath as a safety net:
-   every 10 s while the live connection is up, every 3 s while it's down, and
+   every 25 s while the live connection is up, every 3 s while it's down, and
    not at all while the screen is off (it catches up the moment it's back). */
-const POLL_LIVE = 10000, POLL_DOWN = 3000;
+const POLL_LIVE = 25000, POLL_DOWN = 3000;
 export function useRoom(code: string) {
   const [room, setRoom] = useState<Room | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
