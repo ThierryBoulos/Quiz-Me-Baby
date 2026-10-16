@@ -75,3 +75,8 @@ Classic needs nothing: it runs on its own.
   A paused Free project: Supabase dashboard → the project → **Resume**.
 - **Database change:** add a new file in `supabase/migrations/` (never edit an old one)
   and run it in the SQL editor.
+- **Change how the TV plays (`party/lib/tvGame.ts`, `party/lib/tv/`):** `cd party && npm run sim`
+  plays twelve whole nights in a second and compares each with its saved trace in
+  `party/sim/golden`. A night that differs when it shouldn't is a bug; when the change is
+  meant to alter play, look at the difference (`node sim/run.mjs <n>` prints a night) and
+  save the new traces with `node sim/run.mjs --update`. Commit them with the change.
