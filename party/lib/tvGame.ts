@@ -688,7 +688,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return true;
     }
     if (sc === "miniQ") {
-      const n = Number(String(p.n ?? "").replace(/[\s,]/g, ""));
+      const n = QMB.parseNumber(String(p.n ?? ""), current()?.question);   // "1.5 million", "2k", "€25"...
       if (s.guesses[team] != null) return `${nm(team)}'s guess is already in.`;
       if (!Number.isFinite(n)) return "That isn't a number.";
       s.guesses[team] = n;

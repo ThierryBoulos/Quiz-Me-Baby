@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { iso, TIE_SCREENS, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
+import { QMB } from "@/lib/engine";
 import { note, sb, sendAction } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
@@ -611,7 +612,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
           <div className="flex gap-2">
-            <input id="sug" {...np.props} className="input" value={text} maxLength={80} inputMode={pub.screen === "miniQ" ? "decimal" : "text"} placeholder={pub.screen === "miniQ" ? "A number" : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
+            <input id="sug" {...np.props} className="input" value={text} maxLength={80} inputMode="text" placeholder={pub.screen === "miniQ" ? "A number" : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
             <button className="btn" disabled={!text.trim()} onClick={() => void suggest()}>Send</button>
           </div>
           {np.hint}
@@ -685,8 +686,11 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const next = nohost && mayNext && pub.nextBy ? NEXT_LABEL[sc] : undefined;
   const showNext = !!next && sc !== "sudden";
 
+  /* Closest To Wins: "1.5 million", "2k", "€25" all count; what the TV will read is shown back */
+  const guess: number = sc === "miniQ" && a.trim() ? QMB.parseNumber(a, pub.question) : NaN;
+  const per = /\bin (thousand|million|billion)s\b/i.exec(pub.question || "")?.[1].toLowerCase();
   const send = async () => {
-    if (sc === "miniQ") { if (await act("answer", { n: a })) setSentTxt(a); return; }
+    if (sc === "miniQ") { if (Number.isFinite(guess) && await act("answer", { n: a })) setSentTxt(a); return; }
     const texts = [a, b].map((x) => x.trim()).filter(Boolean);
     if (!texts.length) return;
     if (await act("answer", { texts })) setSentTxt(texts.join(" / "));
@@ -728,10 +732,13 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
           <input id="ans" {...np.props} className="input" value={a} maxLength={80} autoComplete="off" autoCorrect="off" spellCheck={false}
-            inputMode={sc === "miniQ" ? "decimal" : "text"} placeholder={sc === "miniQ" ? "e.g. 236" : "Type it"} onChange={(e) => setA(e.target.value)} />
+            inputMode="text" placeholder={sc === "miniQ" ? "e.g. 236 or 1.5 million" : "Type it"} onChange={(e) => setA(e.target.value)} />
+          {sc === "miniQ" && a.trim() && (Number.isFinite(guess)
+            ? ![String(guess), guess.toLocaleString("en-GB")].includes(a.trim()) && <div className="text-[13px] text-[var(--color-ink-2)]">Counts as <b>{guess.toLocaleString("en-GB")}{per ? ` ${per}` : ""}</b></div>
+            : <p className="text-[13px] text-[var(--color-no)]" role="alert">That isn&rsquo;t a number.</p>)}
           {dip && <input {...np.props} className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {np.hint}
-          <button className="btn btn-gold btn-lg" disabled={busy || !a.trim()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
+          <button className="btn btn-gold btn-lg" disabled={busy || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
           {(sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-3)]">One go: once you send it, it&rsquo;s locked{nohost ? " and the app checks it" : " until the host decides"}.</div>}
         </div>)}
       {!canType && pub.sent?.[mine] && (["miniQ", "flagQ", "mapQ", "sayQ"].includes(sc) || (myTurn && !pub.pending)) && (

@@ -87,3 +87,124 @@ test('answers: numbers as digits or words, both ways', () => {
   assert.ok(Q.isMatch('Everyone', 'Everyone'));
   assert.ok(Q.isMatch('Sevn', 'Seven'));                      // a typo in a number word still passes
 });
+
+test('answers: 12 = Twelve, and every number to twenty both ways', () => {
+  assert.ok(Q.isMatch('12', 'Twelve'));
+  const w = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+    'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+  w.forEach((x, i) => {
+    assert.ok(Q.isMatch(x, String(i + 1)), `${x} = ${i + 1}`);
+    assert.ok(Q.isMatch(String(i + 1), x[0].toUpperCase() + x.slice(1)), `${i + 1} = ${x}`);
+  });
+  assert.ok(!Q.isMatch('13', 'Thirty'));
+  assert.ok(!Q.isMatch('fourteen', '40'));
+});
+
+/* every pair of countries the typo allowance used to let through, and the near misses */
+const LOOKALIKES = [
+  ['Austria', 'Australia'], ['North Korea', 'South Korea'], ['Ireland', 'Iceland'], ['Zambia', 'Gambia'],
+  ['Zambia', 'The Gambia'], ['Russia', 'Prussia'], ['North America', 'South America'],
+  ['Niger', 'Nigeria'], ['Guinea', 'Guyana'], ['Guinea', 'Guinea-Bissau'], ['Guinea', 'Equatorial Guinea'],
+  ['Mali', 'Malawi'], ['Mali', 'Malta'], ['Iran', 'Iraq'], ['Iran', 'Oman'], ['Slovenia', 'Slovakia'],
+  ['Sweden', 'Swaziland'], ['Algeria', 'Nigeria'], ['Liberia', 'Nigeria'], ['Brunei', 'Burundi'],
+  ['Canada', 'Panama'], ['Chile', 'China'], ['China', 'Ghana'], ['Ghana', 'Guyana'], ['Gambia', 'Namibia'],
+  ['Namibia', 'Zambia'], ['Holland', 'Poland'], ['Romania', 'Somalia'], ['Rwanda', 'Uganda'],
+  ['Serbia', 'Syria'], ['Persia', 'Serbia'], ['Togo', 'Tonga'], ['Eire', 'Zaire'], ['USA', 'USSR'],
+  ['Dominica', 'Dominican Republic'], ['Nigeria', 'Niger River'],
+];
+test('answers: one country is never a typo of another', () => {
+  for(const [x, y] of LOOKALIKES){
+    assert.ok(!Q.isMatch(x, y), `${x} is not ${y}`);
+    assert.ok(!Q.isMatch(y, x), `${y} is not ${x}`);
+  }
+  /* and none at all: every listed name against every other country's */
+  const names = Q.COUNTRIES.flatMap((g, i) => g.map(n => [n, i]));
+  for(const [x, i] of names) for(const [y, j] of names) if(i !== j) assert.ok(!Q.isMatch(x, y), `${x} is not ${y}`);
+});
+
+test('answers: countries still take typos and their accepted names', () => {
+  assert.ok(Q.isMatch('Phillipines', 'Philippines'));
+  assert.ok(Q.isMatch('Columbia', 'Colombia'));              // not a country of its own
+  assert.ok(Q.isMatch('Austrailia', 'Australia'));
+  assert.ok(Q.isMatch('Australa', 'Australia'));
+  assert.ok(Q.isMatch('South Korae', 'South Korea'));
+  assert.ok(Q.isMatch('Rumania', 'Romania'));                // another name, and a typo of it
+  assert.ok(Q.isMatch('the gambia', 'The Gambia'));
+  assert.ok(Q.isMatch('Gambia', 'The Gambia'));
+  assert.ok(Q.isMatch('USA', 'United States', ['USA', 'US', 'America']));
+  assert.ok(Q.isMatch('U.S.A.', 'United States', ['USA']));
+  assert.ok(Q.isMatch('Holland', 'Netherlands', ['Holland']));
+  assert.ok(!Q.isMatch('Iran', 'Persia'));                   // other names count only through accept
+});
+
+test('answers: Mount, Mt, River and Lake are optional at either end', () => {
+  assert.ok(Q.isMatch('Everest', 'Mount Everest'));
+  assert.ok(Q.isMatch('Mt Everest', 'Mount Everest'));
+  assert.ok(Q.isMatch('Mt. Everest', 'Mount Everest'));
+  assert.ok(Q.isMatch('Mount Everest', 'Everest'));
+  assert.ok(Q.isMatch('Everest', 'Mount Everest (8,849 m)'));
+  assert.ok(Q.isMatch('Kilimanjaro', 'Mount Kilimanjaro'));
+  assert.ok(Q.isMatch('Kilimanjoro', 'Mount Kilimanjaro'));  // a typo in what is left still passes
+  assert.ok(Q.isMatch('Amazon', 'Amazon River'));
+  assert.ok(Q.isMatch('River Amazon', 'Amazon River'));
+  assert.ok(Q.isMatch('the Nile', 'River Nile'));
+  assert.ok(Q.isMatch('Victoria', 'Lake Victoria'));
+  assert.ok(Q.isMatch('Lake Victoria', 'Victoria'));
+  assert.ok(!Q.isMatch('Mount', 'Mount Everest'));
+  assert.ok(!Q.isMatch('River', 'Amazon River'));
+  assert.ok(!Q.isMatch('Lake', 'Lake Victoria'));
+  assert.ok(!Q.isMatch('Red', 'Red River'));                 // too short to stand alone
+  assert.ok(!Q.isMatch('Po', 'River Po'));
+  assert.ok(!Q.isMatch('Victoria', 'Victoria Falls'));       // only those four words
+  assert.ok(!Q.isMatch('Everest', 'Mount Elbrus'));
+  assert.ok(!Q.isMatch('Mount Elbrus', 'Mount Everest'));
+});
+
+test('parseNumber: guesses as people type them', () => {
+  const P = Q.parseNumber;
+  assert.equal(P('236'), 236);
+  assert.equal(P(' 1,000,000 '), 1000000);
+  assert.equal(P('1 000 000'), 1000000);
+  assert.equal(P('1.000.000'), 1000000);
+  assert.equal(P('1,5'), 1.5);                               // a decimal comma
+  assert.equal(P('1.5 million'), 1500000);
+  assert.equal(P('1.5m'), 1500000);
+  assert.equal(P('1.5M'), 1500000);
+  assert.equal(P('3.2 billion'), 3200000000);
+  assert.equal(P('3.2bn'), 3200000000);
+  assert.equal(P('2k'), 2000);
+  assert.equal(P('2 K'), 2000);
+  assert.equal(P('12 thousand'), 12000);
+  assert.equal(P('twelve thousand'), 12000);
+  assert.equal(P('two million'), 2000000);
+  assert.equal(P('5 hundred'), 500);
+  assert.equal(P('8,849 m'), 8849);                          // 1,000 or more: metres, not millions
+  assert.equal(P('8849m'), 8849);
+  assert.equal(P('€25'), 25);
+  assert.equal(P('$ 1.99'), 1.99);
+  assert.equal(P('25€'), 25);
+  assert.equal(P('45%'), 45);
+  assert.equal(P('-40'), -40);
+  assert.equal(P('about 300'), 300);
+  assert.equal(P('~44,000'), 44000);
+  assert.equal(P('3,200 km'), 3200);
+  assert.equal(P('263 km/h'), 263);
+  assert.equal(P('1.5 million people'), 1500000);
+  assert.equal(P('476 AD'), 476);
+  for(const bad of ['', '   ', 'abc', 'lots', 'two or three', '12-15', '1 in 649,740', '1.2.3', '1,00,000', '5 or 6', null, undefined])
+    assert.ok(Number.isNaN(P(bad)), `${bad} is not a number`);
+});
+
+test('parseNumber: in the question\'s own units', () => {
+  const P = Q.parseNumber, brazil = 'In millions, what is the population of Brazil?';
+  assert.equal(P('212.8', brazil), 212.8);
+  assert.equal(P('212.8 million', brazil), 212.8);
+  assert.equal(P('212.8m', brazil), 212.8);
+  assert.equal(P('0.2 billion', brazil), 200);
+  assert.equal(P('500k', brazil), 0.5);
+  assert.equal(P('two hundred', brazil), 200);
+  assert.equal(P('ten billion', 'In millions, how many baguettes?'), 10000);
+  assert.equal(P('2.25 billion', 'Number of coffee cups drunk every day, in billions'), 2.25);
+  assert.equal(P('300m', 'Height of the Eiffel Tower, in metres'), 300);    // metres, said so
+  assert.equal(P('300m', 'How many people?'), 300000000);
+});

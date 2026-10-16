@@ -28,7 +28,10 @@
          note is optional ("Everest (8,849 m)" also accepts "Everest")
        - small typos pass: none in words of 4 letters or fewer, one up to 8,
          two beyond. "yelephant" is elephant; "elegant" is not.
-       - numbers are compared as numbers: "1,000" = "1000" = "1000.0"     */
+       - but one country is never a typo of another: "Austria" is not Australia
+       - "Mount", "Mt", "River" and "Lake" are optional: "Everest" = "Mount Everest"
+       - numbers are compared as numbers: "1,000" = "1000" = "1000.0", "twelve" = "12"
+     Closest To Wins guesses are read by parseNumber ("1.5 million", "2k").  */
   function tidy(s){
     return String(s == null ? '' : s)
       .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -97,6 +100,51 @@
     });
     return out;
   }
+  /* Countries (UN members, plus a few places asked as if they were), each with the other names
+     people use for it. Typing one country exactly is never a typo of another: "Austria" is
+     not Australia, "Zambia" is not Gambia, though each is an edit away. A country's other
+     names only stop it being taken for a different one ("Rumania" is still a typo of Romania);
+     they aren't accepted for it here, or "Iran" would pass for "What was Iran called before
+     1935?" (Persia). accept.json says which other names count. */
+  const COUNTRIES = ('Afghanistan;Albania;Algeria;Andorra;Angola;Antigua and Barbuda|Antigua;Argentina;Armenia;' +
+    'Australia;Austria;Azerbaijan;Bahamas;Bahrain;Bangladesh;Barbados;Belarus|Byelorussia|Belorussia;Belgium;' +
+    'Belize;Benin|Dahomey;Bhutan;Bolivia;Bosnia and Herzegovina|Bosnia|Bosnia-Herzegovina|BiH;Botswana;Brazil|Brasil;' +
+    'Brunei|Brunei Darussalam;Bulgaria;Burkina Faso|Burkina|Upper Volta;Burundi;Cape Verde|Cabo Verde;' +
+    'Cambodia|Kampuchea;Cameroon;Canada;Central African Republic|CAR;Chad;Chile;China|PRC|People’s Republic of China;' +
+    'Colombia;Comoros;Republic of the Congo|Congo-Brazzaville|Republic of Congo|Congo Republic;Costa Rica;' +
+    'Ivory Coast|Côte d’Ivoire;Croatia|Hrvatska;Cuba;Cyprus;Czechia|Czech Republic|Czech;' +
+    'DR Congo|Democratic Republic of the Congo|Democratic Republic of Congo|DRC|Congo-Kinshasa|Zaire;Denmark;' +
+    'Djibouti;Dominica;Dominican Republic;Ecuador;Egypt;El Salvador;Equatorial Guinea;Eritrea;Estonia;' +
+    'Eswatini|Swaziland;Ethiopia;Fiji;Finland;France;Gabon;Gambia;Georgia;Germany|Deutschland;Ghana;Greece;' +
+    'Grenada;Guatemala;Guinea;Guinea-Bissau;Guyana;Haiti;Honduras;Hungary;Iceland;India|Bharat;Indonesia;' +
+    'Iran|Persia;Iraq;Ireland|Eire|Republic of Ireland;Israel;Italy|Italia;Jamaica;Japan|Nippon;Jordan;Kazakhstan;' +
+    'Kenya;Kiribati;Kuwait;Kyrgyzstan|Kyrgyz Republic|Kirghizia;Laos|Lao PDR;Latvia;Lebanon;Lesotho;Liberia;' +
+    'Libya;Liechtenstein;Lithuania;Luxembourg;Madagascar;Malawi;Malaysia;Maldives;Mali;Malta;Marshall Islands;' +
+    'Mauritania;Mauritius;Mexico;Micronesia;Moldova;Monaco;Mongolia;Montenegro;Morocco;Mozambique;' +
+    'Myanmar|Burma;Namibia;Nauru;Nepal;Netherlands|Holland;New Zealand|NZ|Aotearoa;Nicaragua;Niger;Nigeria;' +
+    'North Korea|DPRK;North Macedonia|Macedonia;Norway;Oman;Pakistan;Palau;Panama;Papua New Guinea|PNG;Paraguay;' +
+    'Peru;Philippines;Poland;Portugal;Qatar;Romania|Rumania;Russia|Russian Federation;Rwanda;' +
+    'Saint Kitts and Nevis|St Kitts and Nevis|St Kitts|Saint Kitts;Saint Lucia|St Lucia;' +
+    'Saint Vincent and the Grenadines|St Vincent and the Grenadines|St Vincent|Saint Vincent;Samoa;San Marino;' +
+    'São Tomé and Príncipe|São Tomé;Saudi Arabia|Saudi|KSA;Senegal;Serbia;Seychelles;Sierra Leone;Singapore;' +
+    'Slovakia|Slovak Republic;Slovenia;Solomon Islands;Somalia;South Africa|RSA;South Korea|Republic of Korea|ROK;' +
+    'South Sudan;Spain|España;Sri Lanka|Ceylon;Sudan;Suriname|Surinam;Sweden;Switzerland;Syria;Tajikistan;' +
+    'Tanzania;Thailand|Siam;Timor-Leste|East Timor;Togo;Tonga;Trinidad and Tobago|Trinidad;Tunisia;Turkey|Türkiye;' +
+    'Turkmenistan;Tuvalu;Uganda;Ukraine;United Arab Emirates|UAE|Emirates;' +
+    'United Kingdom|UK|Britain|Great Britain|GB;United States|USA|US|America|United States of America;Uruguay;' +
+    'Uzbekistan;Vanuatu;Venezuela;Vietnam|Viet Nam;Yemen;Zambia;Zimbabwe;' +
+    'Vatican City|Vatican|Holy See;Palestine;Taiwan;Kosovo;England;Scotland;Wales;Northern Ireland;Greenland;' +
+    'Western Sahara;Soviet Union|USSR;Prussia;North America;South America').split(';').map(g => g.split('|'));
+  const COUNTRY = new Map();
+  COUNTRIES.forEach((g, i) => g.forEach(n => COUNTRY.set(tidy(n).replace(/ /g, ''), i)));
+  const countryOf = (t) => COUNTRY.get(t.replace(/ /g, '')) ?? -1;
+  /* "Mount", "Mt", "River" and "Lake" are optional at either end ("Everest" = "Mount Everest",
+     "Amazon" = "Amazon River"), but only when a name of 4 letters or more is left: "Red" alone
+     is not the Red River. */
+  function bareGeo(t){
+    const r = t.replace(/^(mount|mt|river|lake) /, '').replace(/ (mount|mt|river|lake)$/, '');
+    return r.replace(/ /g, '').length >= 4 ? r : t;
+  }
   /* -> true when `typed` counts as `answer` (or any of `accept`) */
   function isMatch(typed, answer, accept){
     const tn = asNumber(typed) ?? asNumber(numWords(tidy(typed)));
@@ -104,15 +152,49 @@
     for(const w of wanted){
       const wn = asNumber(w) ?? asNumber(numWords(tidy(w)));
       if(tn != null && wn != null){ if(tn === wn) return true; continue; }
-      /* as written, and with number words as digits (so a typo in "Sevn" still meets "Seven") */
+      /* as written, with number words as digits (so a typo in "Sevn" still meets "Seven"),
+         and without a leading "Mount" or trailing "River" */
       const ta = tidy(typed), tb = tidy(w);
-      for(const [a, b] of [[ta, tb], [numWords(ta), numWords(tb)]]){
+      for(const [a, b] of [[ta, tb], [numWords(ta), numWords(tb)], [bareGeo(ta), bareGeo(tb)]]){
         if(!a || !b) continue;
         if(a === b || a.replace(/ /g, '') === b.replace(/ /g, '')) return true;
+        const ca = countryOf(a), cb = countryOf(b);
+        if(ca >= 0 && cb >= 0 && ca !== cb) continue;                  // one country typed for another
         if(distance(a, b) <= allowance(b.length)) return true;
       }
     }
     return false;
+  }
+
+  /* Closest To Wins guesses, as people type them: "1.5 million", "8,849 m", "2k", "€25",
+     "45%", "1 000 000", "twelve thousand". -> a number, or NaN for anything else.
+     `question` (optional) is the question's text: when it asks "in millions" (or thousands,
+     billions), a guess given with its own scale is put in those units, so "212.8 million"
+     and "212.8" both answer "In millions, the population of Brazil?". A lone "m" is a
+     million, unless the question is in metres or the number is already 1,000 or more. */
+  const SCALE_EXP = { hundred:2, hundreds:2, k:3, thousand:3, thousands:3, m:6, mn:6, mil:6, million:6, millions:6,
+    b:9, bn:9, billion:9, billions:9, tn:12, trillion:12, trillions:12 };
+  function parseNumber(s, question){
+    const q = String(question || '').toLowerCase();
+    const per = /\bin (thousands|millions|billions)\b/.exec(q), perExp = per ? SCALE_EXP[per[1]] : 0;
+    let t = String(s == null ? '' : s).toLowerCase().replace(/ /g, ' ').trim()
+      .replace(/^(about|around|roughly|approx(imately)?|circa|~|≈)\s*/, '')
+      .replace(/^[€$£¥₹]\s*/, '');
+    if(!/\d/.test(t)){                            // number words: "twelve thousand"
+      const w = numWords(tidy(t));
+      if(asNumber(w) == null) return NaN;
+      return /thousand|million|billion/.test(t) && perExp ? asNumber(w) / 10 ** perExp : asNumber(w);
+    }
+    const m = /^(-?)(\d[\d,. ]*?)\s*([a-z]+)?\s*([a-z%°²³/.€$£¥₹ ]*)$/.exec(t);
+    if(!m) return NaN;
+    let num = m[2].trim();
+    if(/^\d{1,3}([, ]\d{3})+(\.\d+)?$/.test(num)) num = num.replace(/[, ]/g, '');          // 1,000,000 / 1 000 000
+    else if(/^\d{1,3}(\.\d{3}){2,}(,\d+)?$/.test(num)) num = num.replace(/\./g, '').replace(',', '.');   // 1.000.000
+    else if(/^\d+,\d{1,2}$/.test(num)) num = num.replace(',', '.');                         // 1,5 (a decimal comma)
+    else if(!/^\d+(\.\d+)?$/.test(num)) return NaN;
+    let exp = SCALE_EXP[m[3]] || 0;
+    if(m[3] === 'm' && (/\bmet(re|er)s?\b/.test(q) || Number(num) >= 1000)) exp = 0;      // "8,849 m": metres
+    return Number(m[1] + num + 'e' + (exp ? exp - perExp : 0));
   }
 
   /* -------------------------------------------------------- mini-game points
@@ -1313,6 +1395,6 @@
     return b;
   }
 
-  return { tidy, asNumber, numWords, distance, isMatch, miniPointValue, planMinis, bestOf, shuffle:shuffleWith,
+  return { tidy, asNumber, numWords, distance, isMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
 });
