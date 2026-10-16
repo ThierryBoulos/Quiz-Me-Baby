@@ -66,3 +66,24 @@ test('shuffle: same items, own rng respected', () => {
   assert.deepEqual([...s].sort(), a);
   assert.deepEqual(a, [1, 2, 3, 4, 5]);                    // input untouched
 });
+
+test('answers: numbers as digits or words, both ways', () => {
+  assert.ok(Q.isMatch('5', 'Five'));
+  assert.ok(Q.isMatch('five', '5'));
+  assert.ok(Q.isMatch('Seven', '7'));
+  assert.ok(Q.isMatch('twelve', '12'));
+  assert.ok(Q.isMatch('21', 'Twenty-one'));
+  assert.ok(Q.isMatch('twenty one', '21'));
+  assert.ok(Q.isMatch('one hundred and five', '105'));
+  assert.ok(Q.isMatch('3000', 'Three thousand'));
+  assert.ok(Q.isMatch('two million', '2,000,000'));
+  assert.ok(Q.isMatch('7 wonders', 'Seven Wonders'));
+  assert.ok(Q.isMatch('Seven wonders', '7 Wonders'));
+  assert.ok(Q.isMatch('One Direction', 'One Direction'));   // a name with a number in it still matches itself
+  assert.ok(Q.isMatch('1 Direction', 'One Direction'));
+  assert.ok(!Q.isMatch('6', 'Five'));
+  assert.ok(!Q.isMatch('fifteen', '50'));
+  assert.ok(!Q.isMatch('Someone', 'One'));                    // only whole words are numbers
+  assert.ok(Q.isMatch('Everyone', 'Everyone'));
+  assert.ok(Q.isMatch('Sevn', 'Seven'));                      // a typo in a number word still passes
+});

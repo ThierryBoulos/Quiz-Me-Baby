@@ -43,6 +43,31 @@
     const t = String(s == null ? '' : s).replace(/[,\s]/g, '');
     return /^-?\d+(\.\d+)?$/.test(t) ? Number(t) : null;
   }
+  /* numbers written as words count as the number: "five" = "5", "twenty one" = "21",
+     "one hundred and five" = "105", "three thousand" = "3000". Runs on tidied text, word
+     by word, so "seven wonders" and "7 wonders" meet in the middle as "7 wonders". */
+  const UNITS = { zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10,
+    eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19 };
+  const TENS = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
+  const SCALES = { hundred:100, thousand:1000, million:1e6, billion:1e9 };
+  function numWords(t){
+    const words = t.split(' '), out = [];
+    let total = 0, cur = 0, inNum = false;
+    const flush = () => { if(inNum){ out.push(String(total + cur)); total = 0; cur = 0; inNum = false; } };
+    for(let i = 0; i < words.length; i++){
+      const w = words[i];
+      if(w in UNITS){ cur += UNITS[w]; inNum = true; }
+      else if(w in TENS){ cur += TENS[w]; inNum = true; }
+      else if(w in SCALES && inNum){
+        if(SCALES[w] === 100) cur *= 100; else { total += cur * SCALES[w]; cur = 0; }
+      }
+      /* "one hundred and five": the "and" belongs to the number when one follows */
+      else if(w === 'and' && inNum && (words[i + 1] in UNITS || words[i + 1] in TENS)) continue;
+      else { flush(); out.push(w); }
+    }
+    flush();
+    return out.join(' ');
+  }
   /* edits between two strings, a swapped neighbour pair counting as one */
   function distance(a, b){
     const n = a.length, m = b.length;
@@ -74,15 +99,18 @@
   }
   /* -> true when `typed` counts as `answer` (or any of `accept`) */
   function isMatch(typed, answer, accept){
-    const tn = asNumber(typed);
+    const tn = asNumber(typed) ?? asNumber(numWords(tidy(typed)));
     const wanted = variants(answer).concat(accept || []);
     for(const w of wanted){
-      const wn = asNumber(w);
+      const wn = asNumber(w) ?? asNumber(numWords(tidy(w)));
       if(tn != null && wn != null){ if(tn === wn) return true; continue; }
-      const a = tidy(typed), b = tidy(w);
-      if(!a || !b) continue;
-      if(a === b || a.replace(/ /g, '') === b.replace(/ /g, '')) return true;
-      if(distance(a, b) <= allowance(b.length)) return true;
+      /* as written, and with number words as digits (so a typo in "Sevn" still meets "Seven") */
+      const ta = tidy(typed), tb = tidy(w);
+      for(const [a, b] of [[ta, tb], [numWords(ta), numWords(tb)]]){
+        if(!a || !b) continue;
+        if(a === b || a.replace(/ /g, '') === b.replace(/ /g, '')) return true;
+        if(distance(a, b) <= allowance(b.length)) return true;
+      }
     }
     return false;
   }
@@ -1283,6 +1311,6 @@
     return b;
   }
 
-  return { tidy, asNumber, distance, isMatch, miniPointValue, planMinis, bestOf, shuffle:shuffleWith,
+  return { tidy, asNumber, numWords, distance, isMatch, miniPointValue, planMinis, bestOf, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
 });
