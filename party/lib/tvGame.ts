@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, acceptFor, hostOnly, loadBank, withCustom, withoutHostOnly, type Bank, type Q } from "./engine";
+import { QMB, acceptFor, hostOnly, loadBank, withCustom, withoutHostOnly, type Q } from "./engine";
 import { cleanList } from "./custom";
 import { HOST_LINES } from "./imadLines";
 import { sb } from "./supabase";
@@ -16,6 +16,8 @@ import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_LOBBY_AWAY, T
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 import { CAPTAIN_MOVES, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, contestSecs, dishKind, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, type Action, type G, type PKind, type W } from "./tv/rules";
+import { newState, type TvState } from "./tv/state";
+import { recap } from "./tv/recap";
 
 /* THE TV RUNS THE NIGHT. It holds the game, plays every move through the
    shared engine (exactly as Classic does), carries out what the engine says
@@ -26,32 +28,7 @@ import { CAPTAIN_MOVES, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, 
 export function useTvGame(code: string, isTv: boolean, room: Room | null, members: Member[]) {
   const ctx = useRef({ room, members });
   ctx.current = { room, members };
-  const st = useRef({
-    g: null as G, nohost: false, screen: "", step: 0, deadline: null as number | null, left: 0, timeUp: false, total: 0,
-    lifeline: null as Pub["lifeline"], toast: null as Pub["toast"], toastN: 0, bank: null as Bank | null,
-    decided: null as null | { key: MiniKey; winner: 0 | 1; spare: number },   // the "decided" screen: which mini-game
-    appeal: null as null | { team: 0 | 1; text: string },                      // no host: an appeal waiting for the other captain
-    offList: [false, false] as Two<boolean>,                                   // Say the Same: not a real answer to the prompt
-    qkeys: {} as Record<string, number>,                                        // real question id → the number the phones see
-    scoreLog: [] as Two<number>[],                                              // the score after every change (lead changes, for the recap)
-    typed: [null, null] as Two<string[] | null>,       // what each captain sent for the question on screen
-    guesses: [null, null] as Two<number | null>,       // Closest To Wins
-    ok: [null, null] as Two<boolean | null>,           // Flag / Map / Say verdicts, as they stand
-    app: [null, null] as Two<boolean | null>,          // ...and what the app said first (the "App suggests" tag)
-    sdBuzz: null as 0 | 1 | null, sdOut: [false, false] as Two<boolean>,
-    pending: null as null | { kind: PKind; team: 0 | 1; text: string; v: boolean; until: number },
-    autoAt: null as number | null,                     // no host: when an unruled map answer stands as right
-    paused: false,                                     // the clock stopped by a Pause (the question hides meanwhile)
-    bids: { leg: -1, by: [null, null] as Two<number | null> },   // the Auction: each captain's latest bid this leg
-    waitSince: 0,                                      // no host: when this screen started waiting for a Start or Next
-    flags: [] as NonNullable<Pub["flags"]>, flagN: 0,  // phones that left the game screen during a question
-    tvAway: 0, awayPaused: false,                      // when the TV's screen went to sleep (0: it's on), and whether that paused the clock
-    imad: null as Pub["imad"] | null, imadN: 0, imadQ: [] as string[],   // Imad's latest line, and the ones waiting to go up together
-    custom: [] as Q[],                                 // questions of their own, sent by the phone that started
-    buzzAt: 0, late: null as 0 | 1 | null,             // Guess the Cocktail or Dish: when the buzz came (10 s to type), and who ran out
-    lastAns: null as null | { answer: string; got: boolean | null },   // the Battle: the last question's answer, shown once it's settled
-    exit: false,                                       // the night is over and Exit was tapped: every screen goes home
-  });
+  const st = useRef<TvState>(newState());
   const [pub, setPub] = useState<Pub | null>(null);
   const isTvRef = useRef(isTv);
   isTvRef.current = isTv;
@@ -117,27 +94,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const okW = (): W => { const [a, b] = st.current.ok; return a && b ? "tie" : a ? 0 : b ? 1 : "none"; };
 
   /* ---- what the phones see ---- */
-  /* the night in a few lines: how close it was, lead changes, steals, mini-games won, the most one-sided mini-game */
-  const recap = (): NonNullable<Pub["recap"]> => {
-    const s = st.current, g = s.g, steals: Two<number> = [0, 0], minis: Two<number> = [0, 0], seatOpts = seat;
-    g.rounds.forEach((rd: G) => (rd.res || []).forEach((r: G, seat: number) => { if (r?.stolen) steals[other(QMB.seatTeam(g, rd, seat, seatOpts()))]++; }));
-    let best: NonNullable<Pub["recap"]>["best"];
-    const won = (title: string, award: G, legs?: Two<number>) => {
-      if (!award) return;
-      const w = award[0] > award[1] ? 0 : award[1] > award[0] ? 1 : null;
-      if (w == null) return;
-      minis[w]++;
-      /* "most one-sided" only for a clear win (2+ legs apart): a 3-2 is a close one */
-      if (legs && Math.abs(legs[0] - legs[1]) >= 2 && (!best || Math.abs(legs[0] - legs[1]) > Math.abs(best.legs[0] - best.legs[1]))) best = { title, team: w, legs };
-    };
-    ([["closest", g.mini], ["saysame", g.saySame], ["flag", g.flagGame], ["map", g.mapGame], ["dish", g.dishGame]] as [MiniKey, G][])
-      .forEach(([k, m]) => won(MINI_TITLES[k], m?.award, m ? [m.wins[0], m.wins[1]] : undefined));
-    if (g.auction) won(MINI_TITLES.auction, g.auction.award, [g.auction.wins[0], g.auction.wins[1]]);
-    if (g.battle) won(MINI_TITLES.battle, g.battle.award);
-    let changes = 0, lead = 0;
-    s.scoreLog.forEach(([a, b]) => { const now = Math.sign(a - b); if (now && lead && now !== lead) changes++; if (now) lead = now; });
-    return { margin: Math.abs(g.teams[0].score - g.teams[1].score), sudden: !!g.sdRounds, leadChanges: changes, steals, minis, best };
-  };
   /* The question in play goes out under a number that means nothing outside this game (D5): its
      real id would find the answer in a bank file. The phones use it only to tell questions apart. */
   const qk = (id: string) => { const s = st.current; return "k" + (s.qkeys[id] ??= Object.keys(s.qkeys).length + 1); };
@@ -165,7 +121,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* every change of score, for the recap's lead changes */
     { const L = s.scoreLog, now: Two<number> = [g.teams[0].score, g.teams[1].score], last = L[L.length - 1];
       if (!last || last[0] !== now[0] || last[1] !== now[1]) L.push(now); }
-    if (s.screen === "final") p.recap = recap();
+    if (s.screen === "final") p.recap = recap(s);
     /* no host, the answer card: the first team can appeal once if its answer went down as wrong */
     if (s.nohost && s.screen === "answer" && rd) {
       const res = rd.res?.[g.seat];
@@ -273,7 +229,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (s.exit) p.exit = true;
     return [p, secret];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current]);
 
   /* One write at a time, each built from the latest state when its turn
