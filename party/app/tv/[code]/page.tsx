@@ -65,7 +65,7 @@ export default function TvRoom() {
   const host = members.find((m) => m.role === "host");
   const who = starter(members);
 
-  if (!room) return <TvStage><div className="m-auto flex flex-col items-center gap-4"><div className="spinner" style={{ width: 48, height: 48, borderWidth: 5 }} /><div className="eyebrow text-[20px]">Opening the room…</div></div></TvStage>;
+  if (!room) return <TvStage><div className="m-auto flex flex-col items-center gap-4"><div className="spinner" style={{ width: 48, height: 48, borderWidth: 5 }} /><div className="eyebrow text-20">Opening the room…</div></div></TvStage>;
 
   return (
     <TvStage>
@@ -83,7 +83,7 @@ export default function TvRoom() {
         <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", zIndex: 40 }}>
           <div className="text-center flex flex-col items-center gap-5">
             <div className="display" style={{ fontSize: 64, color: "var(--color-gold)" }}>Open in another tab</div>
-            <div className="text-[24px] text-[var(--color-ink-2)] max-w-[760px]">This game is already running in another tab of this browser. One TV at a time keeps the night in step.</div>
+            <div className="text-24 text-[var(--color-ink-2)] max-w-[760px]">This game is already running in another tab of this browser. One TV at a time keeps the night in step.</div>
             <button className="btn btn-gold" style={{ fontSize: 22, padding: "14px 30px" }} onClick={lock.takeOver}>Use this tab instead</button>
           </div>
         </div>)}
@@ -91,7 +91,7 @@ export default function TvRoom() {
         <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", zIndex: 40 }}>
           <div className="text-center flex flex-col items-center gap-5">
             <div className="display" style={{ fontSize: 64, color: "var(--color-gold)" }}>The app was updated</div>
-            <div className="text-[24px] text-[var(--color-ink-2)] max-w-[760px]">This game was saved by an older version and can&rsquo;t carry on. Sorry! Exit, then start a new game from the home screen.</div>
+            <div className="text-24 text-[var(--color-ink-2)] max-w-[760px]">This game was saved by an older version and can&rsquo;t carry on. Sorry! Exit, then start a new game from the home screen.</div>
             <button className="btn btn-gold" style={{ fontSize: 22, padding: "14px 30px" }}
               onClick={() => { void sb().from("rooms").update({ status: "done" }).eq("code", code).then(() => router.replace("/")); }}>Exit this game</button>
           </div>
@@ -104,11 +104,11 @@ export default function TvRoom() {
               <div className="relative z-10 flex items-center gap-5">
                 <Link href="/" className="btn btn-sm btn-ghost" aria-label="Back to the home screen">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
-                <div className="eyebrow text-[16px]">Join on your phone · scan or type</div>
+                <div className="eyebrow text-16">Join on your phone · scan or type</div>
                 <ShareButton code={code} big />
               </div>
               <div className="display mt-2 pointer-events-none select-none" style={{ fontSize: 150, lineHeight: 0.85, color: "var(--color-gold)", textShadow: "6px 6px 0 rgba(49,201,247,.55)", letterSpacing: "0.08em" }}>{code}</div>
-              <div className="text-[22px] text-[var(--color-ink-2)] mt-1">{origin.replace(/^https?:\/\//, "")}/join</div>
+              <div className="text-22 text-[var(--color-ink-2)] mt-1">{origin.replace(/^https?:\/\//, "")}/join</div>
             </div>
             <div className="logo self-center text-center pointer-events-none select-none" style={{ fontSize: 92 }} aria-hidden>Quiz Me<br />Baby</div>
             <div className="rounded-[22px] p-4 bg-[#f4f6ff] shrink-0">
@@ -116,13 +116,13 @@ export default function TvRoom() {
             </div>
           </div>
           <div className="mt-8"><Lineup room={room} members={members} big /></div>
-          <div className="mt-auto flex items-end justify-between text-[20px] text-[var(--color-ink-2)]">
+          <div className="mt-auto flex items-end justify-between text-20 text-[var(--color-ink-2)]">
             <div>
               {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b></> : "No host yet — the app will check answers."}
               <br />
               {readyToStart(members) ? <>Ready. <b><bdi>{who?.name}</bdi></b> starts the game.</> : notReadyWhy(members)}
-              {lobbyNote && <><br /><span className="text-[18px] font-bold" style={{ color: "var(--color-no)" }} role="status">Start didn&rsquo;t go through: {lobbyNote}</span></>}
-              {awake === false && <><br /><span className="text-[16px] text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
+              {lobbyNote && <><br /><span className="text-18 font-bold" style={{ color: "var(--color-no)" }} role="status">Start didn&rsquo;t go through: {lobbyNote}</span></>}
+              {awake === false && <><br /><span className="text-16 text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
             </div>
             <div className="flex gap-3">
               <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>

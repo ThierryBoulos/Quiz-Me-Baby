@@ -9,7 +9,7 @@ export function FacePicker({ value, taken, onPick }: { value: string; taken: str
         const off = taken.includes(f) && f !== value;
         return (
           <button key={f} type="button" disabled={off} onClick={() => onPick(f)} aria-pressed={f === value}
-            className="aspect-square rounded-[14px] text-[24px] grid place-items-center transition"
+            className="aspect-square rounded-[14px] text-24 grid place-items-center transition"
             style={{ background: f === value ? "rgba(245,197,24,.18)" : "rgba(255,255,255,.05)",
                      border: "2px solid " + (f === value ? "var(--color-gold)" : "transparent"), opacity: off ? 0.25 : 1 }}>
             {f}

@@ -186,10 +186,10 @@ export default function PhoneRoom() {
       {/* the lobby: the logo, small, while everyone waits */}
       {room.status === "lobby" && <div className="logo text-center pointer-events-none select-none -mt-1" style={{ fontSize: 34 }} aria-hidden>Quiz Me Baby</div>}
 
-      {note && <p className="text-center text-[14px] font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>{note}</p>}
+      {note && <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>{note}</p>}
 
       {pub?.tvAway && room.status !== "lobby" && (
-        <p className="text-center text-[14px] font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>
+        <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>
           The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</p>)}
 
       {/* the tracker, as on the TV: scores, where we are, the night's progress */}
@@ -199,8 +199,8 @@ export default function PhoneRoom() {
         /* joined after the start: pick a side first */
         mine.team == null && mine.role !== "host" ? (
           <section className="flex flex-col gap-3 enter">
-            <h1 className="display text-[40px] text-center">Pick a side</h1>
-            <p className="text-center text-[14px] text-[var(--color-ink-2)]">The game&rsquo;s on. Join a team and help your captain.</p>
+            <h1 className="display text-40 text-center">Pick a side</h1>
+            <p className="text-center text-14 text-[var(--color-ink-2)]">The game&rsquo;s on. Join a team and help your captain.</p>
             <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
             <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
           </section>
@@ -210,13 +210,13 @@ export default function PhoneRoom() {
             {mine.role === "captain" && (
               <div className="card flex flex-col gap-2">
                 <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
-                <p className="text-[14px] text-[var(--color-ink-2)]">Hand over to a teammate: step down, and they tap &ldquo;Make me captain&rdquo; on their phone.</p>
+                <p className="text-14 text-[var(--color-ink-2)]">Hand over to a teammate: step down, and they tap &ldquo;Make me captain&rdquo; on their phone.</p>
                 <button className="btn" disabled={busy} onClick={() => claim("player")}>Step down as captain</button>
               </div>)}
             {mine.role === "player" && !myCaptain && (
               <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>)}
-            {mine.role === "player" && myCaptain && <div className="card text-center text-[14px]">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
-            {mine.role === "host" && <p className="text-[14px] text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
+            {mine.role === "player" && myCaptain && <div className="card text-center text-14">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
+            {mine.role === "host" && <p className="text-14 text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
             <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
@@ -225,7 +225,7 @@ export default function PhoneRoom() {
           </section>
         ) : !pub ? (
           <section className="card text-center enter flex-1 grid place-items-center">
-            <div><div className="eyebrow">Game on</div><h1 className="display text-[44px] mt-2">Eyes on the TV</h1></div>
+            <div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">Eyes on the TV</h1></div>
           </section>
         ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} fire={fireMove} busy={busy || waiting} />
           : mine.role === "captain" ? <CaptainGame pub={pub} me={mine} members={members} code={code} hold={waiting} />
@@ -237,15 +237,15 @@ export default function PhoneRoom() {
         <>
           <section className="card enter text-center">
             <div className="eyebrow">You&rsquo;re the host</div>
-            <h1 className="display text-[40px] mt-1" style={{ color: "var(--color-gold)" }}>Run the night</h1>
-            <p className="text-[14px] text-[var(--color-ink-2)] mt-1">You&rsquo;ll see every answer. Tap an arrow to move a player across.</p>
+            <h1 className="display text-40 mt-1" style={{ color: "var(--color-gold)" }}>Run the night</h1>
+            <p className="text-14 text-[var(--color-ink-2)] mt-1">You&rsquo;ll see every answer. Tap an arrow to move a player across.</p>
           </section>
           <Lineup room={room} members={members} onMove={move} onRemove={remove} />
           <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => claim("player")}>Stop hosting</button>
         </>
       ) : mine.team == null ? (
         <section className="flex flex-col gap-3 enter">
-          <h1 className="display text-[44px] text-center">Pick a side</h1>
+          <h1 className="display text-44 text-center">Pick a side</h1>
           <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
           <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
           <div className="h-2" />
@@ -255,13 +255,13 @@ export default function PhoneRoom() {
         <section className="flex flex-col gap-3 enter">
           <div className="card text-center" style={{ borderColor: `var(--color-${side})` }}>
             <div className="eyebrow">You&rsquo;re on</div>
-            <div className="display text-[48px] mt-1" style={{ color: `var(--color-${side})` }}>{teamName(room, mine.team)}</div>
+            <div className="display text-48 mt-1" style={{ color: `var(--color-${side})` }}>{teamName(room, mine.team)}</div>
           </div>
           {mine.role === "captain" ? (
             <div className="card flex flex-col gap-3">
               <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
               <div className="flex items-baseline justify-between"><label className="field-label !mb-0" htmlFor="tname">Name your team</label>
-                <span className="text-[12px] tabular-nums" aria-live="polite" style={{ color: tooLong ? "var(--color-no)" : "var(--color-ink-3)", fontWeight: tooLong ? 700 : 400 }}>
+                <span className="text-12 tabular-nums" aria-live="polite" style={{ color: tooLong ? "var(--color-no)" : "var(--color-ink-3)", fontWeight: tooLong ? 700 : 400 }}>
                   {(draft ?? teamName(room, mine.team)).trim().length}/{TEAM_MAX}</span></div>
               {/* a form, so the keyboard's Done/Go saves it too; Save keeps the keyboard's focus so the tap never misses */}
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); saveTeamName(); }}>
@@ -271,7 +271,7 @@ export default function PhoneRoom() {
                   disabled={busy || nameState === "saving" || tooLong || !(draft ?? "").trim() || (draft ?? "").trim() === teamName(room, mine.team)}>{nameState === "saving" ? "Saving…" : "Save"}</button>
               </form>
               {tooLong && <p className="field-error" role="alert">Team names can be up to {TEAM_MAX} characters. Try a shorter one.</p>}
-              {nameState === "saved" && <p className="text-[13px] font-bold" role="status" style={{ color: "var(--color-ok)" }}>Saved. It&rsquo;s on the TV.</p>}
+              {nameState === "saved" && <p className="text-13 font-bold" role="status" style={{ color: "var(--color-ok)" }}>Saved. It&rsquo;s on the TV.</p>}
               {nameState === "late" && <p className="field-error" role="alert">The TV didn&rsquo;t pick it up. Is the TV screen still open? Try again.</p>}
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
             </div>
@@ -279,7 +279,7 @@ export default function PhoneRoom() {
             ((room.state.away as string[] | undefined) || []).includes(myCaptain.user_id) ? (
               <button className="btn btn-gold btn-block" disabled={busy} onClick={() => act(() => sendAction(code, "setup", { takeCaptain: true }))}>
                 <bdi>{myCaptain.name}</bdi> seems away. Make me captain</button>
-            ) : <p className="text-center text-[16px] text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}><bdi>{myCaptain.name}</bdi></b> is your captain</p>
+            ) : <p className="text-center text-16 text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}><bdi>{myCaptain.name}</bdi></b> is your captain</p>
           ) : (
             <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>
           )}
@@ -293,10 +293,10 @@ export default function PhoneRoom() {
         <div className="fixed inset-0 z-40 overflow-y-auto" style={{ background: "var(--color-bg)" }} role="dialog" aria-modal="true" aria-label="How to play">
           <div className="screen !max-w-[720px]">
             <header className="flex items-end justify-between gap-3">
-              <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>How to Play</div><h1 className="display text-[40px]">How the night works</h1></div>
+              <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>How to Play</div><h1 className="display text-40">How the night works</h1></div>
               <button className="btn btn-sm btn-ghost" onClick={() => setRules(false)}>Back</button>
             </header>
-            <p className="text-[13px] text-[var(--color-ink-2)] -mt-2">Times below are the defaults; the TV&rsquo;s Settings can change them.</p>
+            <p className="text-13 text-[var(--color-ink-2)] -mt-2">Times below are the defaults; the TV&rsquo;s Settings can change them.</p>
             <Rules />
             <button className="btn btn-gold btn-lg btn-block" onClick={() => setRules(false)}>Back to the lobby</button>
           </div>
@@ -305,17 +305,17 @@ export default function PhoneRoom() {
       {room.status === "lobby" && (
         <footer className="mt-auto flex flex-col gap-2">
           <div className="flex items-center justify-center gap-2">
-            <button type="button" className="text-[14px] font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" onClick={() => setRules(true)}>How to play</button>
+            <button type="button" className="text-14 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" onClick={() => setRules(true)}>How to play</button>
             <ShareButton code={code} />
           </div>
           {canStart ? (
             <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
-            <p className="text-center text-[14px] text-[var(--color-ink-2)]">
+            <p className="text-center text-14 text-[var(--color-ink-2)]">
               You&rsquo;re in.{" "}
               {host && who?.user_id === host.user_id ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>, who starts the game.</>
                 : <>{host && <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>. </>}{who ? <><b style={{ color: "var(--color-gold)" }}><bdi>{who.name}</bdi></b> starts the game.</> : "The host, or Team A's captain, starts the game."}</>}
-              <br /><span className="text-[12px] text-[var(--color-ink-3)]">Heads up: leaving this screen during a question (another app, a search) is flagged on the TV.</span>
+              <br /><span className="text-12 text-[var(--color-ink-3)]">Heads up: leaving this screen during a question (another app, a search) is flagged on the TV.</span>
             </p>
           )}
         </footer>

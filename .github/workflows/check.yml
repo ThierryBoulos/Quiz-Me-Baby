@@ -1,4 +1,4 @@
-# On every push: the types, the lint rules, the engine's tests and the question-bank checker.
+# On every push: the types, the lint rules, the engine's tests, the question-bank checker and the type scale.
 name: Check
 on:
   push:

@@ -5,12 +5,12 @@ import type { ReactNode } from "react";
 function Rule({ n, title, children }: { n: string; title: string; children: ReactNode }) {
   return (
     <section className="card flex flex-col gap-3">
-      <div className="flex items-baseline gap-3"><span className="eyebrow" style={{ color: "var(--color-gold)" }}>{n}</span><h2 className="display text-[26px]">{title}</h2></div>
+      <div className="flex items-baseline gap-3"><span className="eyebrow" style={{ color: "var(--color-gold)" }}>{n}</span><h2 className="display text-26">{title}</h2></div>
       {children}
     </section>);
 }
 const L = ({ items }: { items: ReactNode[] }) => (
-  <ol className="flex flex-col gap-2.5 text-[15px] leading-relaxed text-[var(--color-ink-2)] list-decimal pl-5 marker:text-[var(--color-gold)] marker:font-bold">
+  <ol className="flex flex-col gap-2.5 text-15 leading-relaxed text-[var(--color-ink-2)] list-decimal pl-5 marker:text-[var(--color-gold)] marker:font-bold">
     {items.map((x, i) => <li key={i}>{x}</li>)}
   </ol>);
 const B = ({ children }: { children: ReactNode }) => <strong className="text-[var(--color-ink)]">{children}</strong>;
@@ -25,15 +25,15 @@ function First30() {
   ];
   return (
     <section className="card flex flex-col gap-3" style={{ borderColor: "rgba(245,197,24,.5)" }}>
-      <h2 className="display text-[26px]" style={{ color: "var(--color-gold)" }}>Your first 30 seconds</h2>
+      <h2 className="display text-26" style={{ color: "var(--color-gold)" }}>Your first 30 seconds</h2>
       <ol className="flex flex-col gap-2.5">
         {steps.map(([t, x], i) => (
           <li key={t} className="flex gap-3 items-baseline">
-            <span className="display text-[22px] shrink-0 w-6 text-center" style={{ color: "var(--color-gold)" }}>{i + 1}</span>
-            <span className="text-[15px] leading-relaxed text-[var(--color-ink-2)]"><B>{t}.</B> {x}</span>
+            <span className="display text-22 shrink-0 w-6 text-center" style={{ color: "var(--color-gold)" }}>{i + 1}</span>
+            <span className="text-15 leading-relaxed text-[var(--color-ink-2)]"><B>{t}.</B> {x}</span>
           </li>))}
       </ol>
-      <p className="text-[13px] text-[var(--color-ink-3)]">That&rsquo;s all you need. The full rules are below.</p>
+      <p className="text-13 text-[var(--color-ink-3)]">That&rsquo;s all you need. The full rules are below.</p>
     </section>);
 }
 

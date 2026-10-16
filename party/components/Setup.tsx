@@ -91,9 +91,9 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
   /* a level row: tap to add or drop a level; the last one can't be dropped */
   const LevelRow = ({ label, opts, value, set, tag }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string }) => (
     <div className="flex flex-wrap items-center gap-2 pl-1 pb-2" role="group" aria-label={label}>
-      {tag && <span className="eyebrow !text-[11px] basis-full">{tag}</span>}
+      {tag && <span className="eyebrow !text-11 basis-full">{tag}</span>}
       {opts.map(([k, l]) => { const on = value.includes(k); return (
-        <button key={k} type="button" className={"chip !min-h-[44px] !px-3 !text-[13px] " + (on ? "chip-on" : "")} aria-pressed={on}
+        <button key={k} type="button" className={"chip !min-h-[44px] !px-3 !text-13 " + (on ? "chip-on" : "")} aria-pressed={on}
           onClick={() => { const next = on ? value.filter((x) => x !== k) : [...value, k]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{l}</button>); })}
     </div>);
   const half = picked.filter((t) => (picks.picks[t] || []).length === 1);
@@ -108,8 +108,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
     <div className="flex flex-col gap-2">
       <button type="button" className="flex items-center justify-between gap-3 min-h-[44px] -mx-1 px-1 rounded-[12px] text-left" aria-expanded={open === id}
         onClick={() => setOpen(open === id ? null : id)}>
-        <span><span className="field-label !mb-0">{label}</span><span className="block text-[14px] text-[var(--color-ink-2)] mt-0.5">{summary}</span></span>
-        <span className="text-[13px] font-bold shrink-0" style={{ color: "var(--color-gold)" }}>{open === id ? "Done" : "Change"}</span>
+        <span><span className="field-label !mb-0">{label}</span><span className="block text-14 text-[var(--color-ink-2)] mt-0.5">{summary}</span></span>
+        <span className="text-13 font-bold shrink-0" style={{ color: "var(--color-gold)" }}>{open === id ? "Done" : "Change"}</span>
       </button>
       {open === id && <div className="flex flex-wrap gap-2 enter">{children}</div>}
     </div>);
@@ -129,8 +129,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
       <div className="card flex flex-col gap-4" style={{ borderColor: standard ? "color-mix(in srgb, var(--color-gold) 40%, transparent)" : undefined }}>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="display text-[24px]">Standard rounds</div>
-            <div className="text-[13px] text-[var(--color-ink-2)]">Trivia by theme, a question per team, with steals and lifelines.</div>
+            <div className="display text-24">Standard rounds</div>
+            <div className="text-13 text-[var(--color-ink-2)]">Trivia by theme, a question per team, with steals and lifelines.</div>
           </div>
           {/* the switch is 60×34 to look at, with a 64×48 area to tap */}
           <button type="button" role="switch" aria-checked={standard} aria-label="Standard rounds"
@@ -155,25 +155,25 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
             {avail.map((t) => (
               <button key={t} type="button" className={"chip " + (picked.includes(t) ? "chip-on" : "")} aria-pressed={picked.includes(t)} onClick={() => toggleTheme(t)}>{t}</button>))}
           </Fold>
-          {note && <p className="text-[13px] text-[var(--color-no)]" role="alert">{note}</p>}
-        </>) : <p className="text-[14px] text-[var(--color-ink-2)]">Off: tonight is mini-games only, back to back.</p>}
+          {note && <p className="text-13 text-[var(--color-no)]" role="alert">{note}</p>}
+        </>) : <p className="text-14 text-[var(--color-ink-2)]">Off: tonight is mini-games only, back to back.</p>}
       </div>
 
       {/* ---- MINI-GAMES: Classic's list, every game on show with its own levels ---- */}
       <div className="card flex flex-col gap-2" style={{ borderColor: "color-mix(in srgb, var(--color-a) 35%, transparent)" }}>
         <div className="mb-1">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="display text-[24px]">Mini-games</div>
+            <div className="display text-24">Mini-games</div>
             <span className={"badge shrink-0 " + (miniKeys.length ? "gold" : "line")}>{miniKeys.length ? `${miniKeys.reduce((n, k) => n + worth(k), 0)} pts on the table` : "None"}</span>
           </div>
-          <div className="text-[13px] text-[var(--color-ink-2)]">{standard ? "Spread between the rounds; the Battle closes the night." : "Played one after another."}</div>
+          <div className="text-13 text-[var(--color-ink-2)]">{standard ? "Spread between the rounds; the Battle closes the night." : "Played one after another."}</div>
         </div>
         {MINIS.map(([k, name, blurb]) => { const on = minis.includes(k); return (
           <div key={k}>
             <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
-              <span className="min-w-0"><span className="block font-bold text-[15px] leading-tight">{name}</span>
-                <span className="block text-[12.5px] text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k)} pts{slot(k) ? ` · ${slot(k)}` : ""}</b>}</span></span>
+              <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{name}</span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k)} pts{slot(k) ? ` · ${slot(k)}` : ""}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>
@@ -193,8 +193,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
       {isHost && bank && (
         <div className="card flex flex-col gap-3">
           <div>
-            <div className="display text-[24px]">Advanced</div>
-            <div className="text-[13px] text-[var(--color-ink-2)]">Host only. {pickSummary(picks, standard ? picked : [], minis)}</div>
+            <div className="display text-24">Advanced</div>
+            <div className="text-13 text-[var(--color-ink-2)]">Host only. {pickSummary(picks, standard ? picked : [], minis)}</div>
           </div>
           <div className="flex gap-2 flex-wrap">
             <button type="button" className="btn btn-sm" onClick={() => setPicking(true)}>Choose questions</button>
@@ -206,8 +206,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
       <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy}
         onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, custom: getCustom(),
           ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
-      {blocker && <p className="text-center text-[13px] text-[var(--color-ink-2)]" role="status">{blocker}</p>}
-      {isHost && half.length > 0 && <p className="text-center text-[13px] text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
+      {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
+      {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
     </section>
   );
 }

@@ -90,19 +90,19 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
       <span className="mt-0.5 grid place-items-center shrink-0 w-[22px] h-[22px] rounded-[7px]" style={{ background: on ? "var(--color-gold)" : "transparent", border: on ? "none" : "2px solid var(--line-2)" }} aria-hidden>
         {on && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1400" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5 9-10" /></svg>}
       </span>
-      <span className="flex-1 min-w-0"><span className="block text-[15px] font-semibold leading-snug">{q}</span><span className="block text-[13px] text-[var(--color-ink-2)] mt-0.5">{sub}</span></span>
+      <span className="flex-1 min-w-0"><span className="block text-15 font-semibold leading-snug">{q}</span><span className="block text-13 text-[var(--color-ink-2)] mt-0.5">{sub}</span></span>
     </button>);
 
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto" style={{ background: "var(--color-bg)" }} role="dialog" aria-modal="true" aria-label="Pick tonight's questions">
       <div className="screen !gap-4">
         <header className="flex items-start justify-between gap-3 sticky top-0 z-10 -mx-5 px-5 pt-1 pb-3" style={{ background: "var(--color-bg)" }}>
-          <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>Host only · optional</div><h2 className="display text-[30px]">Pick tonight&rsquo;s questions</h2>
-            <div className="text-[13px] text-[var(--color-ink-2)] mt-1">{done} of {themes.length} themes set</div></div>
+          <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>Host only · optional</div><h2 className="display text-30">Pick tonight&rsquo;s questions</h2>
+            <div className="text-13 text-[var(--color-ink-2)] mt-1">{done} of {themes.length} themes set</div></div>
           <button type="button" className="btn btn-gold btn-sm shrink-0" onClick={onClose}>Done</button>
         </header>
-        <p className="text-[14px] text-[var(--color-ink-2)] -mt-2">Two per theme, one for each team. Themes you leave alone get a matched pair. The answers show here, so keep this phone to yourself.</p>
-        {note && <p className="text-[13px] text-[var(--color-no)]" role="alert">{note}</p>}
+        <p className="text-14 text-[var(--color-ink-2)] -mt-2">Two per theme, one for each team. Themes you leave alone get a matched pair. The answers show here, so keep this phone to yourself.</p>
+        {note && <p className="text-13 text-[var(--color-no)]" role="alert">{note}</p>}
 
         <div className="flex flex-wrap gap-2">
           <button type="button" className={"chip " + (!filter ? "chip-on" : "")} aria-pressed={!filter} onClick={() => setFilter("")}>Everything</button>
@@ -115,12 +115,12 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
           return (
             <section key={t} className="card flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="display text-[22px]" style={{ color: "var(--color-gold)" }}>{t}</div>
-                <span className="text-[13px] font-bold" style={{ color: full ? "var(--color-ok)" : sel.length ? "var(--color-no)" : "var(--color-ink-2)" }}>{sel.length} of 2 ticked</span>
+                <div className="display text-22" style={{ color: "var(--color-gold)" }}>{t}</div>
+                <span className="text-13 font-bold" style={{ color: full ? "var(--color-ok)" : sel.length ? "var(--color-no)" : "var(--color-ink-2)" }}>{sel.length} of 2 ticked</span>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <label className="text-[13px] text-[var(--color-ink-2)]" htmlFor={"d-" + t}>Difficulty</label>
-                <select id={"d-" + t} className="input !min-h-[44px] !text-[16px] !py-0 flex-1 min-w-0" value={value.themeDiff[t] || ""} onChange={(e) => setThemeDiff(t, e.target.value)}>
+                <label className="text-13 text-[var(--color-ink-2)]" htmlFor={"d-" + t}>Difficulty</label>
+                <select id={"d-" + t} className="input !min-h-[44px] !text-16 !py-0 flex-1 min-w-0" value={value.themeDiff[t] || ""} onChange={(e) => setThemeDiff(t, e.target.value)}>
                   {DIFFS.map(([k, l]) => <option key={k} value={k}>{k ? l : `${l} (${cap(difficulty)})`}</option>)}
                 </select>
                 {sel.length > 0 && <button type="button" className="btn btn-sm btn-ghost shrink-0" onClick={() => { const picks = { ...value.picks }; delete picks[t]; onChange({ ...value, picks }); }}>Clear</button>}
@@ -128,7 +128,7 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
               {list.length ? list.map((q) => (
                 <Row key={q.id} on={sel.includes(q.id)} disabled={!sel.includes(q.id) && full} onTap={() => tick(t, q.id)}
                   q={q.question} sub={`${q.answer} · ${cap(q.difficulty)}${q.use_with ? ` · pairs with "${q.use_with}"` : ""}${q.src === "manual" ? " · Yours" : ""}`} />))
-                : <p className="text-[14px] text-[var(--color-ink-2)]">Nothing in this theme at {cap(diffFor(t))} difficulty.</p>}
+                : <p className="text-14 text-[var(--color-ink-2)]">Nothing in this theme at {cap(diffFor(t))} difficulty.</p>}
             </section>);
         })}
 
@@ -139,10 +139,10 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
           return (
             <section key={k} className="card flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
-                <div className="display text-[22px]" style={{ color: "var(--color-a)" }}>{m.label}</div>
-                <span className="text-[13px] font-bold text-[var(--color-ink-2)]">{sel.length} of {m.cap}</span>
+                <div className="display text-22" style={{ color: "var(--color-a)" }}>{m.label}</div>
+                <span className="text-13 font-bold text-[var(--color-ink-2)]">{sel.length} of {m.cap}</span>
               </div>
-              <p className="text-[13px] text-[var(--color-ink-2)]">In the order you tick them. Anything short is dealt as usual.{lv?.length ? ` Showing ${lv.map(levelName).join(", ").replace(/^./, (c) => c.toUpperCase())} only, the levels picked in Setup.` : ""}</p>
+              <p className="text-13 text-[var(--color-ink-2)]">In the order you tick them. Anything short is dealt as usual.{lv?.length ? ` Showing ${lv.map(levelName).join(", ").replace(/^./, (c) => c.toUpperCase())} only, the levels picked in Setup.` : ""}</p>
               {list.map((q) => {
                 const i = sel.indexOf(q.id);
                 return <Row key={q.id} on={i > -1} disabled={i < 0 && sel.length >= m.cap} onTap={() => tickMini(k, q.id)}

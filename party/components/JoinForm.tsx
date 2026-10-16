@@ -77,7 +77,7 @@ export function JoinForm({ initial }: { initial: string }) {
   return (
     <main className="screen justify-between" onKeyDown={(e) => { if (e.key === "Enter" && ready && !busy) void join(name); }}>
       <div className="flex items-center justify-between">
-        <Link href="/" className="inline-flex items-center gap-1 min-h-[44px] pr-3 text-[var(--color-ink-2)] text-[14px] font-bold">
+        <Link href="/" className="inline-flex items-center gap-1 min-h-[44px] pr-3 text-[var(--color-ink-2)] text-14 font-bold">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
         <div className="eyebrow">Join a game</div>
         <span className="w-10" />
@@ -94,7 +94,7 @@ export function JoinForm({ initial }: { initial: string }) {
       </div>
       <div>
         <div className="flex items-baseline justify-between"><label className="field-label" htmlFor="name">Name</label>
-          <span className="text-[12px] text-[var(--color-ink-3)] tabular-nums" aria-live="polite">{name.length}/12</span></div>
+          <span className="text-12 text-[var(--color-ink-3)] tabular-nums" aria-live="polite">{name.length}/12</span></div>
         <input id="name" ref={nameRef} className="input" defaultValue="" maxLength={12} placeholder="Enter your name" autoComplete="off"
           autoFocus={code.length === 4} onChange={(e) => { setName(e.target.value); setSuggest(null); setCanRejoin(false); }} />
       </div>
@@ -107,7 +107,7 @@ export function JoinForm({ initial }: { initial: string }) {
           className="flex items-center gap-3 w-full text-left rounded-[18px] px-4 py-3.5"
           style={{ background: "rgba(245,197,24,.09)", border: "1px solid rgba(245,197,24,.4)" }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>
-          <span className="flex-1 text-[14.5px] font-bold">
+          <span className="flex-1 text-14 font-bold">
             <span className="text-[var(--color-ink-3)]">{name} is already at this table — </span>
             <span style={{ color: "var(--color-gold)" }}>{suggest}?</span>
           </span>

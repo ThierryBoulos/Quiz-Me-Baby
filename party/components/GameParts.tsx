@@ -208,7 +208,7 @@ export function LifelineStrip({ pub, t, onUse, busy, size }: { pub: Pub; t: 0 | 
         {tile("friend")}{tile("dip")}
         <div className={"ll " + (armed ? "armed" : "off")}>{ICON.dbl}<span className="nm">{armed ? "Double armed" : "Round start only"}</span></div>
       </div>
-      {onUse && blocked && <p className="text-[12px] text-[var(--color-ink-3)]">Double points armed: no more lifelines this round.</p>}
+      {onUse && blocked && <p className="text-12 text-[var(--color-ink-3)]">Double points armed: no more lifelines this round.</p>}
     </div>);
 }
 

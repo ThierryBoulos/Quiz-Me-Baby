@@ -37,7 +37,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function Toggle({ on, set, title, help }: { on: boolean; set: (v: boolean) => void; title: string; help?: string }) {
   return (
     <button type="button" role="switch" aria-checked={on} onClick={() => set(!on)} className="flex items-center justify-between gap-4 text-left min-h-[48px]">
-      <span><span className="block font-bold text-[16px]">{title}</span>{help && <span className="block text-[13px] text-[var(--color-ink-2)] mt-0.5">{help}</span>}</span>
+      <span><span className="block font-bold text-16">{title}</span>{help && <span className="block text-13 text-[var(--color-ink-2)] mt-0.5">{help}</span>}</span>
       <span className="relative shrink-0 block w-[60px] h-[34px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
         <span className="absolute top-[3px] w-[28px] h-[28px] rounded-full bg-white transition-all" style={{ left: on ? 29 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
       </span>
@@ -52,10 +52,10 @@ function Timers({ list, s, set }: { list: Timer[]; s: Settings; set: (p: Partial
         return (
           <div key={k} className="flex flex-col gap-2 min-w-0">
             <label className="field-label !mb-0 leading-snug" htmlFor={"t-" + k}>{label}</label>
-            <select id={"t-" + k} className="input !text-[16px] cursor-pointer" value={v} onChange={(e) => set({ [k]: Number(e.target.value) } as Partial<Settings>)}>
+            <select id={"t-" + k} className="input !text-16 cursor-pointer" value={v} onChange={(e) => set({ [k]: Number(e.target.value) } as Partial<Settings>)}>
               {all.map((n) => <option key={n} value={n}>{n} sec{n === DEFAULTS[k] ? " (default)" : ""}</option>)}
             </select>
-            {help && <span className="text-[12px] text-[var(--color-ink-3)] leading-snug">{help}</span>}
+            {help && <span className="text-12 text-[var(--color-ink-3)] leading-snug">{help}</span>}
           </div>); })}
     </div>);
 }
@@ -78,7 +78,7 @@ function AddQuestion() {
     window.addEventListener("qmb:custom", pull);
     return () => window.removeEventListener("qmb:custom", pull);
   }, []);
-  if (!base) return <p className="text-[14px] text-[var(--color-ink-2)]">Loading…</p>;
+  if (!base) return <p className="text-14 text-[var(--color-ink-2)]">Loading…</p>;
   const builtIn = base.themes, custom = customThemes(builtIn, mine), slots = MAX_CUSTOM_THEMES - custom.length;
   const themes = [...builtIn, ...custom];
   const set = (p: Partial<typeof BLANK>) => { setF({ ...f, ...p }); setMsg(null); };
@@ -94,49 +94,49 @@ function AddQuestion() {
   };
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-[14px] text-[var(--color-ink-2)]">Kept in this browser on this device, through every app update. They join the game when this device starts it (or is the TV), and the host can hand-pick them under Advanced. Clearing this browser&rsquo;s data, or a private window, loses them.</p>
+      <p className="text-14 text-[var(--color-ink-2)]">Kept in this browser on this device, through every app update. They join the game when this device starts it (or is the TV), and the host can hand-pick them under Advanced. Clearing this browser&rsquo;s data, or a private window, loses them.</p>
       <Field id="ny" label="Type">
-        <select id="ny" className="input !text-[16px] cursor-pointer" value={f.type} onChange={(e) => set({ type: e.target.value })}>
+        <select id="ny" className="input !text-16 cursor-pointer" value={f.type} onChange={(e) => set({ type: e.target.value })}>
           {CUSTOM_TYPES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
         </select>
       </Field>
       <Field id="nq" label={f.type === "auction" ? "Category" : f.type === "saysame" ? "Prompt" : "Question"}>
-        <textarea id="nq" rows={2} className="input !py-3 !text-[16px] !font-semibold" value={f.question}
+        <textarea id="nq" rows={2} className="input !py-3 !text-16 !font-semibold" value={f.question}
           placeholder={f.type === "auction" ? "How many countries can you name?" : f.type === "saysame" ? "Name a cheese" : "Type the question"} onChange={(e) => set({ question: e.target.value })} />
       </Field>
-      {f.type === "standard" && <Field id="na" label="Answer"><input id="na" className="input !text-[16px]" value={f.answer} placeholder="The answer" onChange={(e) => set({ answer: e.target.value })} /></Field>}
-      {f.type === "closest" && <Field id="naNum" label="Answer, a number"><input id="naNum" className="input !text-[16px]" inputMode="decimal" value={f.answer} placeholder="e.g. 236" onChange={(e) => set({ answer: e.target.value })} /></Field>}
+      {f.type === "standard" && <Field id="na" label="Answer"><input id="na" className="input !text-16" value={f.answer} placeholder="The answer" onChange={(e) => set({ answer: e.target.value })} /></Field>}
+      {f.type === "closest" && <Field id="naNum" label="Answer, a number"><input id="naNum" className="input !text-16" inputMode="decimal" value={f.answer} placeholder="e.g. 236" onChange={(e) => set({ answer: e.target.value })} /></Field>}
       {f.type === "saysame" && <Field id="npool" label="Possible answers, one per line (at least two)">
-        <textarea id="npool" rows={5} className="input !py-3 !text-[16px] !font-semibold" value={f.pool} placeholder={"Feta\nCheddar\nBrie\nMozzarella"} onChange={(e) => set({ pool: e.target.value })} /></Field>}
+        <textarea id="npool" rows={5} className="input !py-3 !text-16 !font-semibold" value={f.pool} placeholder={"Feta\nCheddar\nBrie\nMozzarella"} onChange={(e) => set({ pool: e.target.value })} /></Field>}
       {f.type !== "saysame" && <Field id="nn" label={f.type === "auction" ? "Ruling note: what counts" : "Notes (shown with the answer)"}>
-        <input id="nn" className="input !text-[16px]" value={f.notes} placeholder={f.type === "auction" ? "e.g. Marques only. Toyota counts, Corolla does not." : "Optional"} onChange={(e) => set({ notes: e.target.value })} /></Field>}
+        <input id="nn" className="input !text-16" value={f.notes} placeholder={f.type === "auction" ? "e.g. Marques only. Toyota counts, Corolla does not." : "Optional"} onChange={(e) => set({ notes: e.target.value })} /></Field>}
       {themed && (
         <div className="grid grid-cols-2 gap-3">
           <Field id="nt" label="Theme">
-            <select id="nt" className="input !text-[16px] cursor-pointer" value={f.theme || themes[0]} onChange={(e) => set({ theme: e.target.value })}>
+            <select id="nt" className="input !text-16 cursor-pointer" value={f.theme || themes[0]} onChange={(e) => set({ theme: e.target.value })}>
               {themes.map((t) => <option key={t} value={t}>{t}</option>)}
               {slots > 0 && <option value="__new__">+ New custom theme…</option>}
             </select>
           </Field>
           <Field id="nd" label="Difficulty">
-            <select id="nd" className="input !text-[16px] cursor-pointer" value={f.difficulty} onChange={(e) => set({ difficulty: e.target.value })}>
+            <select id="nd" className="input !text-16 cursor-pointer" value={f.difficulty} onChange={(e) => set({ difficulty: e.target.value })}>
               {["easy", "medium", "hard"].map((d) => <option key={d} value={d}>{d[0].toUpperCase() + d.slice(1)}</option>)}
             </select>
           </Field>
         </div>)}
       {themed && f.theme === "__new__" && (
         <Field id="ntNew" label="Custom theme name">
-          <input id="ntNew" className="input !text-[16px]" maxLength={24} value={f.newTheme} placeholder={`Custom Theme ${custom.length + 1}`} onChange={(e) => set({ newTheme: e.target.value })} />
-          <span className="text-[13px] text-[var(--color-ink-3)]">{slots} of {MAX_CUSTOM_THEMES} custom theme slots left. A custom theme lives as long as it has questions.</span>
+          <input id="ntNew" className="input !text-16" maxLength={24} value={f.newTheme} placeholder={`Custom Theme ${custom.length + 1}`} onChange={(e) => set({ newTheme: e.target.value })} />
+          <span className="text-13 text-[var(--color-ink-3)]">{slots} of {MAX_CUSTOM_THEMES} custom theme slots left. A custom theme lives as long as it has questions.</span>
         </Field>)}
       {f.type === "standard" && f.theme !== "__new__" && (
         <Field id="nu" label="Pair ticker (optional)">
-          <input id="nu" className="input !text-[16px]" value={f.use_with} placeholder="e.g. capital-of" onChange={(e) => set({ use_with: e.target.value })} />
-          <span className="text-[13px] text-[var(--color-ink-3)]">Two questions in a theme with the same ticker are asked together, one to each team.</span>
+          <input id="nu" className="input !text-16" value={f.use_with} placeholder="e.g. capital-of" onChange={(e) => set({ use_with: e.target.value })} />
+          <span className="text-13 text-[var(--color-ink-3)]">Two questions in a theme with the same ticker are asked together, one to each team.</span>
         </Field>)}
-      {f.type === "auction" && <p className="text-[13px] text-[var(--color-ink-3)]">A category has no theme, no difficulty and no answer: the bidding sets the difficulty, and the answers are counted out loud.</p>}
-      {f.type === "saysame" && <p className="text-[13px] text-[var(--color-ink-3)]">No theme, no difficulty: how wide the answers are is the difficulty. One line is drawn at random each time it plays.</p>}
-      {msg && <p className="text-[14px] font-bold" role={msg.ok ? "status" : "alert"} style={{ color: msg.ok ? "var(--color-ok)" : "var(--color-no)" }}>{msg.text}</p>}
+      {f.type === "auction" && <p className="text-13 text-[var(--color-ink-3)]">A category has no theme, no difficulty and no answer: the bidding sets the difficulty, and the answers are counted out loud.</p>}
+      {f.type === "saysame" && <p className="text-13 text-[var(--color-ink-3)]">No theme, no difficulty: how wide the answers are is the difficulty. One line is drawn at random each time it plays.</p>}
+      {msg && <p className="text-14 font-bold" role={msg.ok ? "status" : "alert"} style={{ color: msg.ok ? "var(--color-ok)" : "var(--color-no)" }}>{msg.text}</p>}
       <div className="flex flex-wrap gap-2 items-center justify-between">
         <button type="button" className="btn btn-gold" onClick={save}>Add it</button>
         {mine.length > 0 && <button type="button" className="btn btn-sm btn-ghost" aria-expanded={showList} onClick={() => setShowList(!showList)}>{showList ? "Hide" : "Show"} mine ({mine.length})</button>}
@@ -145,8 +145,8 @@ function AddQuestion() {
         <ul className="flex flex-col gap-2">
           {mine.map((q) => (
             <li key={q.id} className="flex items-start gap-3 rounded-[14px] px-3 py-2.5" style={{ background: "rgba(255,255,255,.04)" }}>
-              <span className="flex-1 min-w-0"><span className="block text-[15px] font-semibold leading-snug">{q.question}</span>
-                <span className="block text-[13px] text-[var(--color-ink-2)] mt-0.5">{CUSTOM_TYPES.find(([k]) => k === q.type)?.[1]}{q.theme ? ` · ${q.theme}` : ""}{q.difficulty ? ` · ${q.difficulty}` : ""}</span></span>
+              <span className="flex-1 min-w-0"><span className="block text-15 font-semibold leading-snug">{q.question}</span>
+                <span className="block text-13 text-[var(--color-ink-2)] mt-0.5">{CUSTOM_TYPES.find(([k]) => k === q.type)?.[1]}{q.theme ? ` · ${q.theme}` : ""}{q.difficulty ? ` · ${q.difficulty}` : ""}</span></span>
               <button type="button" className="btn btn-sm btn-ghost shrink-0" onClick={() => removeCustom(q.id)}>Delete</button>
             </li>))}
         </ul>)}
@@ -166,10 +166,10 @@ export default function SettingsPage() {
   return (
     <main className="screen !max-w-[720px]">
       <header className="flex items-end justify-between gap-3">
-        <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>Settings</div><h1 className="display text-[40px]">House rules</h1></div>
+        <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>Settings</div><h1 className="display text-40">House rules</h1></div>
         <Link className="btn btn-sm btn-ghost" href="/">Back</Link>
       </header>
-      <p className="text-[13px] text-[var(--color-ink-2)] -mt-2">Saved on this device. Change them on the screen that will be the TV.</p>
+      <p className="text-13 text-[var(--color-ink-2)] -mt-2">Saved on this device. Change them on the screen that will be the TV.</p>
 
       <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Settings">
         {([["general", "General"], ["timers", "Timers"]] as const).map(([k, label]) => (
@@ -211,7 +211,7 @@ export default function SettingsPage() {
         <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="Alternate which team answers first each round" help="Off = Team A always goes first." />
         <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help="Someone switches app or tab while a question is up (a search, a chatbot)? The TV says so, and the host's phone keeps the list. Call a Friend is allowed." />
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <span className="text-[14px] text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played.</span>
+          <span className="text-14 text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played.</span>
           <button type="button" className="btn btn-sm" disabled={!played}
             onClick={() => { if (window.confirm("Forget every played question on this device?")) { forgetUsed(); setPlayed(0); } }}>Forget played questions</button>
         </div>
