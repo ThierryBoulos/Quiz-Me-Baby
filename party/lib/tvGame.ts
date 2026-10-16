@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, acceptFor, loadBank, withCustom, withoutHostOnly, type Bank, type Q } from "./engine";
+import { QMB, acceptFor, hostOnly, loadBank, withCustom, withoutHostOnly, type Bank, type Q } from "./engine";
 import { cleanList } from "./custom";
 import { HOST_LINES } from "./imadLines";
 import { sb } from "./supabase";
@@ -172,7 +172,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   }, []);
   const env = useCallback(() => {
     const bank = st.current.bank!;
-    const deal = QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => getSettings().noRepeat,
+    /* sudden death is typed and checked fast: never a question only a person can judge, host or not */
+    const deal = QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => getSettings().noRepeat, suddenOk: (q: Q) => !hostOnly(q),
       ok: { map: (q: G) => q.type === "map", flag: (q: G) => q.type === "flag", dish: (q: G) => q.type === "dish" } });
     return { deal, settings: seat() };
   }, [used]);
@@ -895,7 +896,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         }
         /* the bank, then the view, to this TV and to every phone (they may still show "paused") */
         void loadBank().then(async (b) => {
-          st.current.bank = withCustom(b, st.current.custom || []);
+          /* filtered as at Start: with no host, no question only a person can judge */
+          st.current.bank = withCustom(st.current.nohost ? withoutHostOnly(b) : b, st.current.custom || []);
           /* a game saved by an older version of the app that this one can't read: say so, don't crash */
           try { setPub(view()?.[0] || null); }
           catch (e) { console.error("saved game unreadable", e); Object.assign(st.current, before); try { localStorage.removeItem(saveKey); } catch { /* */ } setBanner("oldSave"); return; }

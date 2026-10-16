@@ -73,3 +73,16 @@ test('battle: same difficulty shape for both captains, never the same question',
   const all = b.qs[0].concat(b.qs[1]).map(q => q.id);
   assert.equal(new Set(all).size, all.length);
 });
+
+test('sudden death never deals a question the dealer marks as not for sudden death', () => {
+  const D2 = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => false, rng,
+    suddenOk:q => !q.id.startsWith('Music'),
+    ok:{ map:q => q.type === 'map', flag:q => q.type === 'flag', dish:q => q.type === 'dish' } });
+  const g = D2.buildGame(cfg({ rounds:4 }));
+  g.teams[0].score = g.teams[1].score;
+  for(let i = 0; i < 12; i++){
+    Q.play(g, { type:'sudden/win', w:'none' }, { deal:D2, settings:{} });
+    assert.ok(g.sd && g.sd.q, 'a sudden-death question was dealt');
+    assert.ok(!g.sd.q.id.startsWith('Music'), g.sd.q.id);
+  }
+});

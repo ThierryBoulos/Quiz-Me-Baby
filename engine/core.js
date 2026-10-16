@@ -535,7 +535,9 @@
       };
     }
 
-    return { bank, shuffle, isFresh, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
+    /* ctx.suddenOk: questions that can't be played in sudden death (Party: the ones a person must judge) */
+    const suddenOk = ctx.suddenOk || (() => true);
+    return { bank, shuffle, isFresh, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
              dishLevelsOf, dishPool, dishDeck, diffOf, pickedPair, dishLeg, buildGame };
@@ -801,7 +803,7 @@
     g.mini.qs.forEach(q => inGame.add(q.id));
     (g.sdUsed || []).forEach(id => inGame.add(id));
     const themes = g.cfg.themes || [];
-    const free = (q) => q.type === 'standard' && !inGame.has(q.id);
+    const free = (q) => q.type === 'standard' && !inGame.has(q.id) && (!D.suddenOk || D.suddenOk(q));
     let pool = D.bank().filter(q => free(q) && themes.indexOf(q.theme) > -1 && D.isFresh(q));
     if(!pool.length) pool = D.bank().filter(q => free(q) && themes.indexOf(q.theme) > -1);
     if(!pool.length) pool = D.bank().filter(q => free(q) && D.isFresh(q));
