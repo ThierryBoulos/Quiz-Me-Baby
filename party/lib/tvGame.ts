@@ -7,6 +7,10 @@ import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
 import { getSettings, USED_KEY } from "./settings";
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
+/* The shape of the saved game. Bump it whenever a change means a game saved before it can't be
+   carried on (new required state, renamed screens, a changed engine game object): a TV reloaded
+   onto the new version then says so and offers Exit, instead of playing on with a broken game. */
+const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
 import { DISH_LAST, iso, MINI_TITLES, PARTY_LEGS, TIE_SCREENS, T_AWAY, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE_BATTLE,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
@@ -357,7 +361,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       try {
         if (s.exit) { localStorage.removeItem(saveKey); lastSave.current = ""; }
         else {
-          const save = JSON.stringify({ build: BUILD_ID, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
+          const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns });
           if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
@@ -870,9 +874,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     try {
       const saved = JSON.parse(localStorage.getItem(saveKey) || "null");
-      if (saved?.g) {
+      if (saved?.g && (saved.shape ?? 1) !== SAVE_SHAPE) { try { localStorage.removeItem(saveKey); } catch { /* */ } setBanner("oldSave"); }
+      else if (saved?.g) {
         const before = { ...st.current };
-        delete saved.build;
+        delete saved.build; delete saved.shape;
         Object.assign(st.current, saved);
         /* A reload (or a sleep) hides the page first, which pauses everyone; the
            new page must take that pause back, or the game stays frozen. */

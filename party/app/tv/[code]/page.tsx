@@ -88,9 +88,9 @@ export default function TvRoom() {
         <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", zIndex: 40 }}>
           <div className="text-center flex flex-col items-center gap-5">
             <div className="display" style={{ fontSize: 64, color: "var(--color-gold)" }}>The app was updated</div>
-            <div className="text-[24px] text-[var(--color-ink-2)] max-w-[760px]">This game was saved by an older version and can&rsquo;t carry on. Sorry! Start a new game from the home screen.</div>
+            <div className="text-[24px] text-[var(--color-ink-2)] max-w-[760px]">This game was saved by an older version and can&rsquo;t carry on. Sorry! Exit, then start a new game from the home screen.</div>
             <button className="btn btn-gold" style={{ fontSize: 22, padding: "14px 30px" }}
-              onClick={() => { void sb().from("rooms").update({ status: "done" }).eq("code", code).then(() => router.replace("/")); }}>Back to the home screen</button>
+              onClick={() => { void sb().from("rooms").update({ status: "done" }).eq("code", code).then(() => router.replace("/")); }}>Exit this game</button>
           </div>
         </div>)}
       {room.status === "lobby" ? (
