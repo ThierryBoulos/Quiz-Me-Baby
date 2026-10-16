@@ -2,6 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
+import { ShareButton } from "@/components/Share";
 import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
 import { Confetti, Hud } from "@/components/GameParts";
 import { noteTvTime } from "@/components/Clock";
@@ -302,7 +303,10 @@ export default function PhoneRoom() {
 
       {room.status === "lobby" && (
         <footer className="mt-auto flex flex-col gap-2">
-          <button type="button" className="self-center text-[14px] font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" onClick={() => setRules(true)}>How to play</button>
+          <div className="flex items-center justify-center gap-2">
+            <button type="button" className="text-[14px] font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" onClick={() => setRules(true)}>How to play</button>
+            <ShareButton code={code} />
+          </div>
           {canStart ? (
             <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
