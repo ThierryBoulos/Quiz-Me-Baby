@@ -16,7 +16,11 @@ await build({
   entryPoints: [join(here, "night.jsx")], outfile: out, bundle: true, platform: "node", format: "esm", jsx: "automatic",
   packages: "external", logLevel: "error", define: { "process.env.NEXT_PUBLIC_BUILD": '"sim"' },
   /* the app's Supabase client becomes the fake one */
-  plugins: [{ name: "fake-supabase", setup(b) { b.onResolve({ filter: /^\.\/supabase$/ }, () => ({ path: join(here, "fakeSupabase.js") })); } }],
+  plugins: [{ name: "fake-supabase", setup(b) {
+    b.onResolve({ filter: /^(\.{1,2}\/)+(lib\/)?supabase$|^@\/lib\/supabase$/ }, () => ({ path: join(here, "fakeSupabase.js") }));
+    /* never the real one, whatever the path */
+    b.onResolve({ filter: /^@supabase\// }, (a) => ({ errors: [{ text: `the simulator must not load ${a.path} (from ${a.importer})` }] }));
+  } }],
 });
 /* each night gets fresh modules (the engine and the bank keep things between games, as on a real TV) */
 const load = async (n) => (await import(pathToFileURL(out).href + "?night=" + n)).night;

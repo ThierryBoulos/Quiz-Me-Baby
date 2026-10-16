@@ -1,0 +1,125 @@
+/* The rules the TV checks every tap against: which moves a host or a captain may
+   send, and on which screen; and the small pure helpers the TV's hook uses. */
+import { getSettings } from "../settings";
+import { DECIDED, DISH_LAST, TIE_SCREENS, T_OVERRULE_BATTLE, type MiniKey } from "../game";
+
+/* the house timers come from Settings on this TV */
+export const T = () => getSettings();
+export type Action = { id: number; room: string; user_id: string; kind: string; payload: Record<string, unknown>; at: string };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type G = any;
+export type W = 0 | 1 | "tie" | "none";
+export type PKind = "ask" | "steal" | "dish" | "sudden" | "battle" | "battleTie";
+export type Where = string | string[];
+export const inScreen = (where: Where, sc: string) => where === "*" || (Array.isArray(where) ? where : [where]).includes(sc);
+
+/* Moves the host's phone may send, and the screen each one belongs to.
+   "ui/…" moves are the TV's own (clocks, reveals, overrules); the rest go
+   straight to the shared engine. Anything else is refused. */
+export const HOST_MOVES: Record<string, Where> = {
+  "round/armDbl": "roundIntro", "round/begin": "roundIntro", "round/swap": "ask", "round/lifeline": "ask",
+  "round/judge": "ask", "round/judgeSteal": "steal", "round/afterAnswer": "answer", "round/next": "roundScore",
+  "sudden/go": "sudden", "sudden/show": "sudden", "sudden/swap": "sudden", "sudden/win": "sudden",
+  "closest/start": "miniIntro", "closest/swap": "miniQ", "closest/award": "miniSummary", "closest/done": "miniSummary",
+  "flag/start": "flagIntro", "flag/swap": "flagQ", "flag/award": "flagSummary", "flag/done": "flagSummary",
+  "dish/start": "dishIntro", "dish/swap": "dishQ", "dish/right": "dishQ", "dish/wrong": "dishQ", "dish/next": "dishReveal",
+  "dish/more": "dishTie", "dish/stop": "dishTie", "dish/award": "dishSummary", "dish/done": "dishSummary",
+  "map/start": "mapIntro", "map/hint": "mapQ", "map/swap": "mapQ", "map/more": "mapTie", "map/stop": "mapTie", "map/award": "mapSummary", "map/done": "mapSummary",
+  "auction/begin": "auctionIntro", "auction/skip": "auctionBid", "auction/tick": "auctionRun", "auction/untick": "auctionRun",
+  "auction/resolve": "auctionRun", "auction/nextLeg": "auctionLeg", "auction/done": "auctionResult",
+  "say/start": "sayIntro", "say/swap": "sayQ", "say/award": "saySummary", "say/done": "saySummary",
+  "battle/start": ["battleIntro", "battleHandoff"], "battle/mark": "battleQ", "battle/swap": "battleQ", "battle/tbSwap": "battleTie", "battle/tbWin": "battleTie", "battle/done": "battleSummary",
+  "ui/sayOk": "sayReveal",
+  "ui/closeLifeline": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"],
+  "ui/reveal": ["miniQ", "flagQ", "mapQ", "sayQ"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal"],
+  "ui/sdRight": ["sudden", "battleTie"], "ui/sdWrong": ["sudden", "battleTie"],
+  "ui/exit": "final", "ui/again": "final",
+  /* level at the end of a mini-game: one more, or a point each */
+  "tie/more": TIE_SCREENS, "tie/stop": TIE_SCREENS,
+  /* won with legs to spare: keep playing for fun, or stop here */
+  "decided/more": DECIDED, "decided/stop": DECIDED,
+  /* Call a Friend's clock */
+  "ui/pauseFriend": "ask",
+};
+/* What a CAPTAIN may tap, and who: "any" captain, the team whose "turn" it
+   is, the "other" one (the referee), or the "lead": Team A's captain (Team
+   B's if A has none), who starts and moves the night on, like a host would.
+   The Auction's bidding is always the captains'; everything else here only
+   exists when there's no host. */
+export type Who = "any" | "turn" | "other" | "lead";
+export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?: boolean }> = {
+  "auction/raise": { where: "auctionBid", who: "turn" },
+  "auction/pass": { where: "auctionBid", who: "turn" },
+  "round/begin": { where: "roundIntro", who: "lead", nohostOnly: true },
+  "closest/start": { where: "miniIntro", who: "lead", nohostOnly: true },
+  "flag/start": { where: "flagIntro", who: "lead", nohostOnly: true },
+  "dish/start": { where: "dishIntro", who: "lead", nohostOnly: true },
+  "map/start": { where: "mapIntro", who: "lead", nohostOnly: true },
+  "auction/begin": { where: "auctionIntro", who: "lead", nohostOnly: true },
+  "sudden/go": { where: "sudden", who: "lead", nohostOnly: true },
+  "say/start": { where: "sayIntro", who: "lead", nohostOnly: true },
+  "battle/start": { where: ["battleIntro", "battleHandoff"], who: "lead", nohostOnly: true },
+  "say/done": { where: "saySummary", who: "lead", nohostOnly: true },
+  "battle/done": { where: "battleSummary", who: "lead", nohostOnly: true },
+  "ui/sayOk": { where: "sayReveal", who: "other", nohostOnly: true },
+  "round/afterAnswer": { where: "answer", who: "lead", nohostOnly: true },
+  "round/next": { where: "roundScore", who: "lead", nohostOnly: true },
+  "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal", "mapReveal"], who: "lead", nohostOnly: true },
+  "dish/next": { where: "dishReveal", who: "lead", nohostOnly: true },
+  "auction/nextLeg": { where: "auctionLeg", who: "lead", nohostOnly: true },
+  "auction/done": { where: "auctionResult", who: "lead", nohostOnly: true },
+  "closest/done": { where: "miniSummary", who: "lead", nohostOnly: true },
+  "flag/done": { where: "flagSummary", who: "lead", nohostOnly: true },
+  "dish/done": { where: "dishSummary", who: "lead", nohostOnly: true },
+  "map/done": { where: "mapSummary", who: "lead", nohostOnly: true },
+  "ui/pause": { where: ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"], who: "any", nohostOnly: true },
+  "ui/closeLifeline": { where: "*", who: "turn", nohostOnly: true },
+  /* the other captain's call on what was sent: v is RIGHT (true) or WRONG; the app's own call is pre-selected */
+  "ui/rule": { where: ["ask", "steal", "dishQ", "sudden", "battleQ", "battleTie"], who: "other", nohostOnly: true },
+  /* after the steal: the first team says it was right, once; the other captain agrees or not */
+  "ui/appeal": { where: "answer", who: "any", nohostOnly: true },
+  "ui/appealOk": { where: "answer", who: "any", nohostOnly: true },
+  "ui/flagOk": { where: "flagReveal", who: "other", nohostOnly: true },
+  "ui/mapRule": { where: "mapReveal", who: "other", nohostOnly: true },
+  "auction/tick": { where: "auctionRun", who: "other", nohostOnly: true },
+  "auction/untick": { where: "auctionRun", who: "other", nohostOnly: true },
+  "ui/exit": { where: "final", who: "any", nohostOnly: true },
+  "ui/again": { where: "final", who: "any", nohostOnly: true },
+  "tie/more": { where: TIE_SCREENS, who: "lead", nohostOnly: true },
+  "tie/stop": { where: TIE_SCREENS, who: "lead", nohostOnly: true },
+  "decided/more": { where: DECIDED, who: "lead", nohostOnly: true },
+  "decided/stop": { where: DECIDED, who: "lead", nohostOnly: true },
+  "ui/pauseFriend": { where: "ask", who: "lead", nohostOnly: true },
+};
+/* Taps that adjust the screen they're on — counting names, marking a team
+   right or wrong, pausing. They skip the stale-tap check (and don't bump the
+   step): a host tapping +1 five times fast must get five, and a tap on
+   "Next" straight after marking a team must not be refused as stale. */
+export const SAME_SCREEN = new Set(["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/mapRule", "ui/sayOk", "ui/pause", "ui/pauseFriend", "ui/appeal", "ui/appealOk"]);
+/* no host: the screens that wait for the lead captain's Start or Next (nothing moves on by itself) */
+export const WAITS_FOR_NEXT = new Set(["roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "battleIntro", "battleHandoff",
+  "answer", "roundScore", "closestReveal", "flagReveal", "mapReveal", "sayReveal", "dishReveal", "auctionLeg", "auctionResult",
+  "miniSummary", "flagSummary", "dishSummary", "mapSummary", "saySummary", "battleSummary", "sudden", DECIDED, ...TIE_SCREENS]);
+export const other = (t: 0 | 1) => (t === 0 ? 1 : 0) as 0 | 1;
+export const DIFFS = ["easy", "medium", "hard", "mixed"];
+/* a picture game's levels from the phone: known ones only, or the default */
+export const levels = (x: unknown, keys: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((k) => keys.includes(k)); return v.length ? v : dflt; };
+export const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dish", "battle"];
+/* the server's timestamps, in either spelling ("…T12:00:00.123456+00:00" from a read, "… 12:00:00.123456+00" from a push), as ms */
+export const serverMs = (x: string) => Date.parse(String(x || "").replace(" ", "T").replace(/(\.\d{3})\d+/, "$1").replace(/([+-]\d\d)$/, "$1:00"));
+export const dishKind = (q: G) => ((q?.level || "")[0] === "c" ? "Cocktail" : "Dish");
+export const dishTotal = (q: G) => (q.ings.length - 1) * T().tDishStep + DISH_LAST;
+/* how long the other captain has to change the app's call: the Battle is rapid fire, so never more than 8 s there */
+export const contestSecs = (battle: boolean) => (battle ? Math.min(T().tContest, T_OVERRULE_BATTLE) : T().tContest);
+export const miniOf = (sc: string): MiniKey | null => /^(mini|closest)/.test(sc) ? "closest" : /^flag/.test(sc) ? "flag" : /^dish/.test(sc) ? "dish"
+  : /^map/.test(sc) ? "map" : /^auction/.test(sc) ? "auction" : /^say/.test(sc) ? "saysame" : /^battle/.test(sc) ? "battle" : null;
+/* the engine's move prefix for each mini-game */
+export const PREFIX: Record<MiniKey, string> = { closest: "closest", flag: "flag", dish: "dish", map: "map", auction: "auction", saysame: "say", battle: "battle" };
+/* Closest, Say the Same and Flag: the engine goes straight into a tie-breaker leg when level at the end;
+   Party stops there first and asks (One more / A point each), as Dish and Map already do */
+export const TIES: Record<string, { key: MiniKey; q: string; summary: string; award: string }> = {
+  miniTie: { key: "closest", q: "miniQ", summary: "miniSummary", award: "closest/award" },
+  sayTie: { key: "saysame", q: "sayQ", summary: "saySummary", award: "say/award" },
+  flagTie: { key: "flag", q: "flagQ", summary: "flagSummary", award: "flag/award" },
+};
+export const miniState = (g: G, k: MiniKey | null) => k === "closest" ? g.mini : k === "flag" ? g.flagGame : k === "map" ? g.mapGame : k === "dish" ? g.dishGame : k === "saysame" ? g.saySame : null;
