@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.20', date:'14 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.21', date:'16 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1379,12 +1379,12 @@ const SEED = [
 ['Disney & Pixar','easy','sidekick','What is the name of the crab in The Little Mermaid?','Sebastian',''],
 ['Disney & Pixar','easy','sidekick','What is the name of the snowman in Frozen?','Olaf',''],
 ['Disney & Pixar','hard','original-name','What was Mickey Mouse\'s original name, before Walt Disney\'s wife talked him out of it?','Mortimer',''],
-['Disney & Pixar','hard','original-name','In which 1928 short did Mickey Mouse first appear in cinemas?','Steamboat Willie','18 November 1928, still Mickey official birthday.'],
+['Disney & Pixar','hard','original-name','In which 1928 short did Mickey Mouse first appear in cinemas?','Steamboat Willie','18 November 1928, still Mickey\'s official birthday.'],
 ['Disney & Pixar','hard','address','In Finding Nemo, what is the dentist\'s address that Dory remembers?','42 Wallaby Way, Sydney','P. Sherman, 42 Wallaby Way, Sydney.'],
 ['Disney & Pixar','hard','address','In Up, where is Carl trying to take his house?','Paradise Falls','In South America.'],
 ['Disney & Pixar','hard','first-princess','Who is the first Black Disney princess?','Tiana','The Princess and the Frog, 2009.'],
 ['Disney & Pixar','hard','first-princess','What name did Mulan choose for herself when she pretended to be a man?','Ping or Hua Jun',''],
-['Disney & Pixar','medium','villain','Who is the villain in The Lion King?','Scar','Simba uncle.'],
+['Disney & Pixar','medium','villain','Who is the villain in The Lion King?','Scar','Simba\'s uncle.'],
 ['Disney & Pixar','medium','villain','Who is the sea witch villain in The Little Mermaid?','Ursula',''],
 ['Disney & Pixar','medium','voice-of','Which actor voiced the Genie in the 1992 Aladdin?','Robin Williams',''],
 ['Disney & Pixar','medium','voice-of','Which actor voices Woody in Toy Story?','Tom Hanks',''],
@@ -1425,15 +1425,15 @@ const SEED = [
 ['Friends','medium','wedding-disaster','In which city did Chandler and Monica first sleep together?','London','Same trip, season 4 finale.'],
 ['Friends','hard','alias','What alias does Phoebe use when she needs a fake name?','Regina Phalange',''],
 ['Friends','hard','alias','What is the name of the Central Perk manager who is secretly in love with Rachel?','Gunther','Played by James Michael Tyler.'],
-['Friends','hard','kids','What are the names of Monica and Chandler twins?','Jack and Erica',''],
-['Friends','hard','kids','What is the name of Ross and Rachel daughter?','Emma',''],
-['Friends','medium','job','What is Ross profession?','Palaeontologist','He later becomes a professor at NYU.'],
-['Friends','medium','job','What is Monica profession?','A chef',''],
-['Friends','medium','sibling','What is the name of Phoebe twin sister?','Ursula','Also played by Lisa Kudrow.'],
+['Friends','hard','kids','What are the names of Monica and Chandler\'s twins?','Jack and Erica',''],
+['Friends','hard','kids','What is the name of Ross and Rachel\'s daughter?','Emma',''],
+['Friends','medium','job','What is Ross\'s profession?','Palaeontologist','He later becomes a professor at NYU.'],
+['Friends','medium','job','What is Monica\'s profession?','A chef',''],
+['Friends','medium','sibling','What is the name of Phoebe\'s twin sister?','Ursula','Also played by Lisa Kudrow.'],
 ['Friends','medium','sibling','Ross and Monica are siblings — what are their parents called?','Jack and Judy Geller',''],
-['Friends','easy','pet','What kind of animal was Ross pet Marcel?','A monkey','A capuchin.'],
+['Friends','easy','pet','What kind of animal was Ross\'s pet Marcel?','A monkey','A capuchin.'],
 ['Friends','easy','pet','What two pets did Joey and Chandler keep in their apartment?','A duck and a chick','The Duck and the Chick.'],
-['Friends','easy','','What is the name of Phoebe most famous song?','Smelly Cat',''],
+['Friends','easy','','What is the name of Phoebe\'s most famous song?','Smelly Cat',''],
 ['Friends','medium','soap-opera','Which soap opera does Joey act in?','Days of Our Lives',''],
 ['Friends','medium','soap-opera','What is the name of Joey\'s character on that soap?','Dr Drake Ramoray','A neurosurgeon who later falls down an elevator shaft.'],
 /* ---- GEEK & GAMER ---- */
@@ -1482,7 +1482,7 @@ const SEED = [
 ['History','easy','famous-leader','Who was the first President of the United States?','George Washington','1789-1797.'],
 ['History','easy','famous-leader','Who was the first President of post-apartheid South Africa?','Nelson Mandela','1994-1999.'],
 ['History','medium','','In which year did the Titanic sink?','1912','15 April 1912.'],
-['History','hard','empire','Which empire was ruled from Constantinople for roughly 600 years until 1922?','The Ottoman Empire',''],
+['History','hard','empire','Which empire was ruled from Constantinople from 1453 until 1922?','The Ottoman Empire',''],
 ['History','hard','empire','Which ancient empire was ruled by Cyrus the Great?','The Persian Empire','Also accept "Achaemenid Empire".'],
 ['History','hard','explorer','Which explorer led the first expedition to circumnavigate the globe, though he died en route?','Ferdinand Magellan','Elcano completed the voyage in 1522.'],
 ['History','hard','explorer','Which explorer reached the South Pole first, in 1911?','Roald Amundsen','Beat Scott by about five weeks.'],
@@ -1502,8 +1502,8 @@ const SEED = [
 ['History','medium','treaty','Which 1215 English document limited the power of the king?','Magna Carta',''],
 /* ---- INTERNET & MEMES ---- */
 ['Internet & Memes','easy','','Which song plays when you get Rickrolled?','Never Gonna Give You Up','Rick Astley, 1987.'],
-['Internet & Memes','easy','','Which K-pop track was the first YouTube video to reach one billion views?','Gangnam Style','PSY, 2012. It also broke YouTube view counter.'],
-['Internet & Memes','easy','','What breed of dog is the "Doge" meme?','A Shiba Inu','The dog real name was Kabosu.'],
+['Internet & Memes','easy','','Which K-pop track was the first YouTube video to reach one billion views?','Gangnam Style','PSY, 2012. It also broke YouTube\'s view counter.'],
+['Internet & Memes','easy','','What breed of dog is the "Doge" meme?','A Shiba Inu','The dog\'s real name was Kabosu.'],
 ['Internet & Memes','easy','challenge','Which charity challenge involved tipping freezing water over your head in 2014?','The Ice Bucket Challenge','It raised money for ALS research.'],
 ['Internet & Memes','easy','challenge','Which 2013 dance craze involved one person dancing, then a hard cut to a room going wild?','The Harlem Shake','To the Baauer track of the same name.'],
 ['Internet & Memes','easy','most-viewed','Which video is the most-viewed on YouTube of all time?','Baby Shark Dance','By Pinkfong; overtook Despacito in 2020, now ~17 billion views. Despacito has since slipped to third.'],
@@ -1531,17 +1531,17 @@ const SEED = [
 ['Lebanon','medium','lb-national','What is the national dish of Lebanon?','Kibbeh',''],
 ['Lebanon','medium','lb-national','What is the national animal of Lebanon?','Striped Hyena',''],
 ['Lebanon','easy','lb-city','Which Lebanese city holds one of the largest Roman temple complexes in the world?','Baalbek','Known in antiquity as Heliopolis.'],
-['Lebanon','medium','','Which Lebanese city was the ancient Phoenician city famous for purple dye?','Tyre/ Sour','Sour in Arabic. UNESCO World Heritage site.'],
+['Lebanon','medium','','Which Lebanese city was the ancient Phoenician city famous for purple dye?','Tyre / Sour','Sour in Arabic. UNESCO World Heritage site.'],
 ['Lebanon','medium','lb-history','In which year did Lebanon gain independence from France?','1943','22 November 1943.'],
 ['Lebanon','medium','lb-history','In which years did the Lebanese Civil War run?','1975 to 1990',''],
 ['Lebanon','easy','lb-site','Which Lebanese cave system is the most famous tourist site north of Beirut?','Jeita Grotto','Two interconnected limestone caves.'],
 ['Lebanon','easy','lb-site','Which UNESCO-listed Lebanese valley contains ancient monasteries and the cedar forest?','The Qadisha Valley','Wadi Qadisha, near Bsharri.'],
 ['Lebanon','easy','','Which sport is Lebanon\'s national team historically strongest at?','Basketball','Lebanon reached the FIBA World Cup in 2002, 2006 and 2010.'],
-['Lebanon','hard','lb-taif','Which year was the Taif Agreement signed?','1989','32803.0'],
+['Lebanon','hard','lb-taif','Which year was the Taif Agreement signed?','1989','Signed on 22 October 1989, ending the civil war.'],
 ['Lebanon','hard','lb-taif','Who was Speaker of Parliament that negotiated the Taif Agreement?','Hussein El-Husseini',''],
 ['Lebanon','hard','','Number of UNESCO World Heritage sites in Lebanon','6','Anjar, Baalbek, Byblos, Tyre, Qadisha Valley and the Rachid Karami Fair in Tripoli.'],
 ['Lebanon','easy','','Which Lebanese-American writer wrote The Prophet?','Khalil Gibran','Published 1923, born in Bsharri.'],
-['Lebanon','easy','','Which Lebanese singer is known as the "Jewel of Lebanon" and one of the Arab world most famous voices?','Fairuz','Born Nouhad Haddad.'],
+['Lebanon','easy','','Which Lebanese singer is known as the "Jewel of Lebanon" and one of the Arab world\'s most famous voices?','Fairuz','Born Nouhad Haddad.'],
 /* ---- MOVIES ---- */
 ['Movies','easy','best-picture','Which film won the Best Picture Oscar for 2019 — the first non-English-language film ever to win it?','Parasite','South Korean, directed by Bong Joon-ho. It also won Best Director and Best International Feature the same night.'],
 ['Movies','medium','','Who played the title role in Gladiator?','Russell Crowe',''],
@@ -1601,8 +1601,8 @@ const SEED = [
 /* ---- POP CULTURE ---- */
 ['Pop Culture','easy','tv-setting','In which city is the sitcom Friends set?','New York City','Accept "New York".'],
 ['Pop Culture','easy','tv-setting','In which fictional town is Stranger Things set?','Hawkins, Indiana','Accept "Hawkins".'],
-['Pop Culture','easy','superhero-alter-ego','What is Spider-Man real name?','Peter Parker',''],
-['Pop Culture','easy','superhero-alter-ego','What is Batman real name?','Bruce Wayne',''],
+['Pop Culture','easy','superhero-alter-ego','What is Spider-Man\'s real name?','Peter Parker',''],
+['Pop Culture','easy','superhero-alter-ego','What is Batman\'s real name?','Bruce Wayne',''],
 ['Pop Culture','medium','','Which cooking show is fronted by Gordon Ramsay and features a red and blue kitchen brigade?','Hell\'s Kitchen',''],
 ['Pop Culture','medium','character','What is Batman\'s butler called?','Alfred','Alfred Pennyworth.'],
 ['Pop Culture','medium','character','What is Sherlock Holmes\'s loyal companion called?','Dr. John Watson','Accept "Watson".'],
@@ -2665,9 +2665,9 @@ function flagImg(q){
    page is in `source` and in the bank.
    -------------------------------------------------------------------------- */
 const DISHES = /*DISHES-DATA*/[
-  ["mojito", "Mojito", "c-easy", "https://iba-world.com/iba-cocktail/mojito/", ["To top — Soda water", "2 tsp — White cane sugar", "20 ml (¾ oz) — Fresh lime juice", "45 ml (1½ oz) — White Cuban rum", "Garnish — Sprigs of mint and slice of lime", "6 — Mint sprigs"]],
-  ["margarita", "Margarita", "c-easy", "https://iba-world.com/iba-cocktail/margarita/", ["15 ml (½ oz) — Freshly squeezed lime juice", "20 ml (¾ oz) — Triple sec", "Garnish — Half salt rim (optional)", "50 ml (1¾ oz) — Tequila 100% agave"]],
-  ["pina-colada", "Piña Colada", "c-easy", "https://iba-world.com/iba-cocktail/pina-colada/", ["50 ml (1¾ oz) — White rum", "50 ml (1¾ oz) — Fresh pineapple juice", "Garnish — Slice of pineapple with a cocktail cherry", "30 ml (1 oz) — Coconut cream"]],
+  ["mojito", "Mojito", "c-easy", "https://iba-world.com/iba-cocktail/mojito/", ["To top — Soda water", "2 tsp — White cane sugar", "20 ml (¾ oz) — Fresh lime juice", "45 ml (1½ oz) — White Cuban rum", "6 — Mint sprigs (and one to garnish, with a slice of lime)"]],
+  ["margarita", "Margarita", "c-easy", "https://iba-world.com/iba-cocktail/margarita/", ["20 ml (¾ oz) — Triple sec", "15 ml (½ oz) — Freshly squeezed lime juice", "50 ml (1¾ oz) — Tequila 100% agave", "Garnish — Half salt rim (optional)"]],
+  ["pina-colada", "Piña Colada", "c-easy", "https://iba-world.com/iba-cocktail/pina-colada/", ["50 ml (1¾ oz) — White rum", "30 ml (1 oz) — Coconut cream", "50 ml (1¾ oz) — Fresh pineapple juice", "Garnish — Slice of pineapple with a cocktail cherry"]],
   ["cosmopolitan", "Cosmopolitan", "c-easy", "https://iba-world.com/iba-cocktail/cosmopolitan/", ["Garnish — Lemon twist", "15 ml (½ oz) — Fresh lime juice", "15 ml (½ oz) — Cointreau", "40 ml (1¼ oz) — Vodka citron", "30 ml (1 oz) — Cranberry juice"]],
   ["aperol-spritz", "Aperol Spritz", "c-easy", "https://iba-world.com/iba-cocktail/spritz/", ["Splash — Soda water", "Garnish — Slice of orange", "90 ml (3 oz) — Prosecco", "60 ml (2 oz) — Aperol"]],
   ["bloody-mary", "Bloody Mary", "c-easy", "https://iba-world.com/iba-cocktail/bloody-mary/", ["To taste — Pepper", "To taste — Celery salt", "2 dashes — Worcestershire sauce", "To taste — Tabasco", "15 ml (½ oz) — Fresh lemon juice", "Garnish — Celery, lemon wedge (optional)", "45 ml (1½ oz) — Vodka", "90 ml (3 oz) — Tomato juice"]],
@@ -2683,17 +2683,17 @@ const DISHES = /*DISHES-DATA*/[
   ["caipirinha", "Caipirinha", "c-medium", "https://iba-world.com/iba-cocktail/caipirinha/", ["4 teaspoons — White cane sugar", "1 — Lime, cut into small wedges", "60 ml (2 oz) — Cachaça"]],
   ["white-russian", "White Russian", "c-medium", "https://www.diffordsguide.com/cocktails/recipe/2093/white-russian-cocktail", ["Garnish — Freshly grated nutmeg", "60 ml (2 oz) — Vodka", "30 ml (1 oz) — Whipping cream", "30 ml (1 oz) — Coffee liqueur"]],
   ["cuba-libre", "Cuba Libre", "c-medium", "https://iba-world.com/iba-cocktail/cuba-libre/", ["Garnish — Lime wedge", "10 ml (¼ oz) — Fresh lime juice", "50 ml (1¾ oz) — White rum", "120 ml (4 oz) — Cola"]],
-  ["bellini", "Bellini", "c-medium", "https://iba-world.com/iba-cocktail/bellini/", ["100 ml (3¼ oz) — Prosecco", "50 ml (1¾ oz) — White peach purée"]],
+  ["bellini", "Bellini", "c-medium", "https://iba-world.com/iba-cocktail/bellini/", ["Glass — A chilled flute", "100 ml (3¼ oz) — Prosecco", "50 ml (1¾ oz) — White peach purée"]],
   ["irish-coffee", "Irish Coffee", "c-medium", "https://iba-world.com/iba-cocktail/irish-coffee/", ["50 ml (1¾ oz) — Fresh cream (chilled)", "1 teaspoon — Sugar", "50 ml (1¾ oz) — Irish whiskey", "120 ml (4 oz) — Hot coffee"]],
-  ["pornstar-martini", "Pornstar Martini", "c-hard", "https://iba-world.com/iba-cocktail/porn-star-martini/", ["2 bar spoons — Vanilla sugar", "50 ml (1¾ oz) — Vanilla vodka", "20 ml (¾ oz) — Passion fruit liqueur", "50 ml (1¾ oz) — Passion fruit purée", "Garnish — Passion fruit cup and sugar", "50 ml (1¾ oz) — Champagne (served on the side)"]],
+  ["pornstar-martini", "Pornstar Martini", "c-hard", "https://iba-world.com/iba-cocktail/porn-star-martini/", ["50 ml (1¾ oz) — Vanilla vodka", "2 bar spoons — Vanilla sugar", "50 ml (1¾ oz) — Champagne (served on the side)", "20 ml (¾ oz) — Passion fruit liqueur", "50 ml (1¾ oz) — Passion fruit purée", "Garnish — Half a passion fruit"]],
   ["hugo-spritz", "Hugo Spritz", "c-hard", "https://www.diffordsguide.com/cocktails/recipe/5039/hugo-spritz", ["60 ml (2 oz) — Soda water", "Garnish — Lime wedge and mint sprigs bouquet", "8 — Fresh mint leaves", "60 ml (2 oz) — Prosecco", "40 ml (1¼ oz) — Elderflower liqueur"]],
   ["pisco-sour", "Pisco Sour", "c-hard", "https://iba-world.com/iba-cocktail/pisco-sour/", ["20 ml (¾ oz) — Simple syrup", "30 ml (1 oz) — Fresh lemon juice", "1 — Raw whole egg white", "Garnish — Few dashes of Amargo bitters on top", "60 ml (2 oz) — Pisco"]],
-  ["mint-julep", "Mint Julep", "c-hard", "https://iba-world.com/iba-cocktail/mint-julep/", ["2 tsp — Water", "1 tsp — Powdered sugar", "60 ml (2 oz) — Bourbon whiskey", "Garnish — Mint sprig", "4 — Fresh mint sprigs"]],
+  ["mint-julep", "Mint Julep", "c-hard", "https://iba-world.com/iba-cocktail/mint-julep/", ["2 tsp — Water", "1 tsp — Powdered sugar", "60 ml (2 oz) — Bourbon whiskey", "4 — Fresh mint sprigs (and one to garnish)"]],
   ["paloma", "Paloma", "c-hard", "https://iba-world.com/iba-cocktail/paloma/", ["Garnish — Slice of lime", "A pinch — Salt", "5 ml (¼ oz) — Fresh lime", "50 ml (1¾ oz) — 100% agave tequila", "100 ml (3¼ oz) — Pink grapefruit soda"]],
   ["manhattan", "Manhattan", "c-hard", "https://iba-world.com/iba-cocktail/manhattan/", ["Garnish — Cocktail cherry", "1 dash — Angostura bitters", "20 ml (¾ oz) — Sweet red vermouth", "50 ml (1¾ oz) — Rye whiskey"]],
   ["mai-tai", "Mai Tai", "c-hard", "https://iba-world.com/iba-cocktail/mai-tai/", ["7.5 ml (¼ oz) — Simple syrup", "30 ml (1 oz) — Fresh squeezed lime juice", "Garnish — Pineapple spear, mint leaves and lime peel", "15 ml (½ oz) — Orange curaçao", "30 ml (1 oz) — Martinique molasses rhum", "30 ml (1 oz) — Amber Jamaican rum", "15 ml (½ oz) — Orgeat syrup (almond)"]],
   ["amaretto-sour", "Amaretto Sour", "c-hard", "https://www.diffordsguide.com/cocktails/recipe/53/amaretto-sour", ["Garnish — Aromatic bitters (atomised), lemon wheel and maraschino cherry sail", "1 dash — Aromatic bitters", "15 ml (½ oz) — Egg white (pasteurised)", "30 ml (1 oz) — Lemon juice", "60 ml (2 oz) — Amaretto liqueur"]],
-  ["black-russian", "Black Russian", "c-hard", "https://iba-world.com/iba-cocktail/black-russian/", ["50 ml (1¾ oz) — Vodka", "20 ml (¾ oz) — Coffee liqueur"]],
+  ["black-russian", "Black Russian", "c-hard", "https://iba-world.com/iba-cocktail/black-russian/", ["Glass — Old fashioned, over ice", "50 ml (1¾ oz) — Vodka", "20 ml (¾ oz) — Coffee liqueur"]],
   ["sangria", "Sangria", "c-hard", "https://www.bbcgoodfood.com/recipes/sangria", ["To fill the jug — Ice", "300 ml (10 oz) — Sparkling water", "3 tbsp — Caster sugar", "1 tsp — Cinnamon", "2 — Pears, chopped", "2 — Lemons (1 chopped, 1 juiced)", "2 — Oranges, chopped", "200 g (7 oz) — Red berries, chopped (strawberries and cherries)", "100 ml (3¼ oz) — Spanish brandy", "750 ml (25 oz) — Light red wine"]],
   ["hummus", "Hummus", "d-easy", "https://www.bbcgoodfood.com/recipes/hummus", ["1 small — Garlic clove, crushed", "1 — Lemon, juiced, then ½ zested", "60 ml (2 fl oz) — Oil (plus 30 ml / 1 fl oz for a looser consistency)", "1 tbsp — Olive oil, to garnish", "3 tbsp (45 ml) — Tahini", "1 can — Chickpeas, drained"]],
   ["tabbouleh", "Tabbouleh", "d-easy", "https://www.bbcgoodfood.com/recipes/tabbouleh", ["Juice of 1 — Lemon", "3 tbsp — Olive oil", "200 g (7 oz) — Ripe tomatoes, deseeded and diced", "3 — Spring onions, finely sliced", "50 g (1¾ oz) — Mint, chopped", "50 g (1¾ oz) — Flat-leaf parsley, chopped", "50 g (1¾ oz) — Bulgur wheat"]],
@@ -2969,7 +2969,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 23;   // bumped when the built-in bank changes
+const SEED_VERSION = 24;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -2981,6 +2981,18 @@ const SEED_VERSION = 23;   // bumped when the built-in bank changes
    `src:'seed'`, so anything the host built or imported on top of the same
    text is left alone. */
 const RETIRED_SEED = [
+  /* copy fixes in seed 24 (possessive apostrophes, the Ottoman wording): the corrected rows replace these */
+  'What are the names of Monica and Chandler twins?',
+  'What is the name of Ross and Rachel daughter?',
+  'What is Ross profession?',
+  'What is Monica profession?',
+  'What is the name of Phoebe twin sister?',
+  'What kind of animal was Ross pet Marcel?',
+  'What is the name of Phoebe most famous song?',
+  'Which empire was ruled from Constantinople for roughly 600 years until 1922?',
+  'Which Lebanese singer is known as the "Jewel of Lebanon" and one of the Arab world most famous voices?',
+  'What is Spider-Man real name?',
+  'What is Batman real name?',
   'Name a Great Lake',
   'Name a Star Wars character',
   'Name a US state on the Pacific coast',
