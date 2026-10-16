@@ -803,7 +803,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (rule.who === "other" && turnTeam() === team) return false;
 
     if (t === "ui/rule") settle(move.v !== s.pending!.v);
-    else if (t === "ui/appeal") { s.appeal = { team, text: (s.typed[team] || []).join(" / ") }; s.toast = { id: ++s.toastN, text: `${iso(g.teams[team].name)} appeal: they say they were right.` }; }
+    else if (t === "ui/appeal") { s.appeal = { team, text: (s.typed[team] || []).join(" / ") }; s.toast = null; }   // the answer card says so
     else if (t === "ui/appealOk") { s.appeal = null; play({ type: "round/appeal", ok: !!move.v }); }
     else if (t === "ui/mapRule") {
       s.ok[other(team)] = !!move.v;
