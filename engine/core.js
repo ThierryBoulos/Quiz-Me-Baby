@@ -198,12 +198,15 @@
   }
 
   /* -------------------------------------------------------- mini-game points
-     What each mini-game is worth, from the standard rounds N and mini-games M.
-     0.35 keeps the pool near a third of the round score; dividing by M stops
-     three mini-games tripling it; never under 2, never over 4.            */
-  function miniPointValue(N, M){
+     What each mini-game is worth, from the standard rounds N (2 points a
+     round, one question each) and the mini-games M, the Battle among them.
+     The Battle counts double (battle: is it on?), and all of them together
+     come to about three quarters of the rounds, so the trivia still decides
+     most of the night. Never under 1; with no standard rounds, 2 each.     */
+  function miniPointValue(N, M, battle){
     if(!M) return 0;
-    return Math.max(2, Math.min(4, Math.round(0.35 * N / M)));
+    if(!N) return 2;
+    return Math.max(1, Math.round(0.75 * 2 * N / (M + (battle ? 1 : 0))));
   }
   /* -> [{key, after}]: `after` is the 0-based round each mini-game follows.
      Equal `after` values run back to back. */
@@ -254,7 +257,8 @@
   const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, battle:10 };
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
         FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, BATTLE_N = LEGS.battle;
-  const INTERLEAVED = ['closest', 'auction', 'saysame', 'map', 'flag', 'dish'];
+  /* Flag first: fast and loud, it opens the night */
+  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'dish'];
   const MAP_ORDER = ['easy', 'medium', 'hard'];
   const FLAG_LEVEL_KEYS = ['veasy', 'easy', 'medium', 'hard', 'expert'];
   const DISH_LEVEL_KEYS = ['c-easy', 'c-medium', 'c-hard', 'd-easy', 'd-medium', 'd-hard'];
@@ -386,9 +390,17 @@
       return bank().filter(q => q.type === 'saysame' && isFresh(q) && (q.pool || []).length >= 2);
     }
 
+    /* The hidden word leans towards what people actually say: the lists run from
+       the most common answer down, and the k-th word is drawn with weight 1/k, so
+       "Sean Connery" comes up far more often than "George Lazenby". Short closed
+       sets (heads or tails, the four suits) stay an even draw. */
     function drawSaySame(q){
       const pool = q.pool || [];
-      return Object.assign({}, q, { answer: pool[Math.floor(rand() * pool.length)] });
+      if(pool.length <= 4) return Object.assign({}, q, { answer: pool[Math.floor(rand() * pool.length)] });
+      const w = pool.map((_, k) => 1 / (k + 1)), total = w.reduce((a, b) => a + b, 0);
+      let r = rand() * total, i = 0;
+      while(i < pool.length - 1 && r >= w[i]){ r -= w[i]; i++; }
+      return Object.assign({}, q, { answer: pool[i] });
     }
 
     function saySameDeck(cfg){
@@ -603,7 +615,8 @@
         rounds,
         plan,                      // [{key, after}] for the interleaved ones
         hasBattle,
-        miniPts: miniPointValue(rounds.length, M),
+        miniPts: miniPointValue(rounds.length, M, hasBattle),
+        battlePts: 2 * miniPointValue(rounds.length, M, hasBattle),
         done:{},                   // key -> true once that mini-game has finished
         mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
         saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
@@ -671,11 +684,51 @@
     return [{ next:true }];
   }
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
+
+  /* ---- decided early: keep playing for fun, or stop there ----
+     Party asks once a mini-game can't be lost any more (the lead is bigger
+     than the legs left). Either way the winner is paid there and then; legs
+     played "for fun" still count on the mini-game's own scoreboard, never on
+     the night's score. s.fun: the rest is for fun; s.asked: already asked.  */
+  const LEGGED = {
+    closest:{ s:(g) => g.mini, q:'miniQ', summary:'miniSummary', left:(s) => s.base - s.i },
+    saysame:{ s:(g) => g.saySame, q:'sayQ', summary:'saySummary', left:(s) => s.base - s.i },
+    flag:{ s:(g) => g.flagGame, q:'flagQ', summary:'flagSummary', left:(s) => s.base - s.i },
+    map:{ s:(g) => g.mapGame, q:'mapQ', summary:'mapSummary', left:(s) => s.base - s.i },
+    dish:{ s:(g) => g.dishGame, q:'dishQ', summary:'dishSummary', left:(s) => s.base - s.i },
+    auction:{ s:(g) => g.auction, q:'auctionBid', summary:'auctionResult', left:(s) => s.n - s.leg - 1 }
+  };
+  /* -> { winner, spare } when this mini-game is settled with legs still to play, else null */
+  function decidedEarly(g, key){
+    const L = LEGGED[key], s = L && L.s(g);
+    if(!s || s.fun || s.asked) return null;
+    const left = L.left(s), lead = Math.abs(s.wins[0] - s.wins[1]);
+    if(left <= 0 || lead <= left) return null;
+    return { winner:s.wins[0] > s.wins[1] ? 0 : 1, spare:left };
+  }
+  /* pay the winner of a mini-game decided early (once) */
+  function payEarly(g, key, s, d, fx){
+    const note = 'Decided with ' + d.spare + ' to spare.';
+    if(key === 'auction'){
+      if(!s.awarded){ s.awarded = true; s.winner = d.winner; s.award = [d.winner === 0 ? g.miniPts : 0, d.winner === 1 ? g.miniPts : 0]; g.teams[d.winner].score += g.miniPts; fx.push({ sound:'point' }); }
+      return;
+    }
+    if(!s.awarded){ s.verdict = { winner:d.winner, needsHost:false, note }; awardMini(g, s, d.winner, fx); }
+  }
+  /* a leg played for fun: the next one, or the summary (the points were paid when it was decided) */
+  function funLeg(s, q, summary, fx){
+    if(s.i < s.base){ fx.push({ go:q }); return fx; }
+    s.done = true;
+    if(s.verdict) s.verdict.note = (s.verdict.note ? s.verdict.note + ' ' : '') + 'The rest was played for fun.';
+    fx.push({ go:summary });
+    return fx;
+  }
   const other = (t) => t === 0 ? 1 : 0;
 
   /* ---- Guess the Flag ---- */
   function flagAfterLeg(g, fx){
     const s = g.flagGame;
+    if(s.fun) return funLeg(s, 'flagQ', 'flagSummary', fx);
     const out = bestOf(s);
     if(out === 'next'){ fx.push({ go:'flagQ' }); return fx; }
     if(out === 'level'){
@@ -728,6 +781,7 @@
   function dishAfterLeg(g, fx){
     const s = g.dishGame;
     s.leg = freshLeg();
+    if(s.fun) return funLeg(s, 'dishQ', 'dishSummary', fx);
     const out = bestOf(s);
     if(out === 'next'){ fx.push({ go:'dishQ' }); return fx; }
     /* level: the table decides — one more to settle it, or a point each */
@@ -743,6 +797,7 @@
   /* ---- Guess the Map ---- */
   function mapAfterLeg(g, fx){
     const s = g.mapGame;
+    if(s.fun) return funLeg(s, 'mapQ', 'mapSummary', fx);
     const out = bestOf(s);
     if(out === 'next'){ fx.push({ go:'mapQ' }); return fx; }
     /* level after the three (or after a tie-breaker): the host reads the room —
@@ -839,13 +894,16 @@
     }
     return spent;
   }
+  /* the Battle is worth double (games saved before that was so: the old value) */
+  const battlePoints = (g) => g.battlePts || g.miniPts;
   function battleAward(g, fx){
     const b = g.battle;
     b.stage = 'done'; b.done = true;
     if(b.winner != null && !b.awarded){
       b.awarded = true;
-      g.teams[b.winner].score += g.miniPts;
-      b.award = [b.winner === 0 ? g.miniPts : 0, b.winner === 1 ? g.miniPts : 0];
+      const pts = battlePoints(g);
+      g.teams[b.winner].score += pts;
+      b.award = [b.winner === 0 ? pts : 0, b.winner === 1 ? pts : 0];
       fx.push({ sound:'point' });
     }
     fx.push({ go:'battleSummary' });
@@ -1029,6 +1087,14 @@
     },
     'round/judgeSteal'(g, a, env){
       const rd = g.rounds[g.r], owner = seatTeam(g, rd, g.seat, env.settings), th = other(owner), fx = [];
+      /* back: the steal was the very answer the first team gave, so the point is theirs (Party, no host) */
+      if(a.v && a.back){
+        const p = pointValue(rd, owner);
+        rd.res[g.seat] = { correct:true, stolen:false, same:true };
+        rd.pts[owner] += p; award(g, owner, p, 'same answer as theirs', fx);
+        fx.push({ go:'answer' });
+        return fx;
+      }
       rd.res[g.seat].stolen = a.v;
       if(a.v){
         const p = pointValue(rd, owner);
@@ -1036,6 +1102,21 @@
         rd.pts[th] += p; award(g, th, p, 'steal', fx);
       } else fx.push({ sound:'wrong' }, { host:['nosteal'], vars:{ t:th } });
       fx.push({ go:'answer' });
+      return fx;
+    },
+    /* an appeal after the steal (Party, no host): the first team says it was right, the
+       other captain agrees (ok) or not; once per question. Agreed: the point is theirs,
+       and a steal that scored gives it back. */
+    'round/appeal'(g, a, env){
+      const rd = g.rounds[g.r], res = rd.res[g.seat], owner = seatTeam(g, rd, g.seat, env.settings), th = other(owner), fx = [];
+      if(!res || res.correct || res.appealed) return fx;
+      res.appealed = true;
+      if(!a.ok){ fx.push({ toast:'Appeal turned down.' }, { render:true }); return fx; }
+      const p = pointValue(rd, owner);
+      if(res.stolen){ rd.pts[th] -= p; g.teams[th].score -= p; res.stolen = false; }
+      res.correct = true;
+      rd.pts[owner] += p; award(g, owner, p, 'appeal agreed', fx);
+      fx.push({ render:true });
       return fx;
     },
     /* after the answer card: the second team's question, or the round's score */
@@ -1093,6 +1174,7 @@
     'auction/nextLeg'(g){
       const a = g.auction, fx = [];
       a.leg++;
+      if(a.fun && a.leg >= a.n){ a.done = true; fx.push({ go:'auctionResult' }); return fx; }
       if(a.leg >= a.n) return auctionFinish(g, fx);
       auctionDraw(a, false, fx);
       fx.push({ go:'auctionBid' });
@@ -1147,6 +1229,27 @@
        back to the normal ending — which sends a level game to sudden death */
     'battle/done'(g, a, env){ g.done.battle = true; return endGame(g, env, []); },
 
+    /* a mini-game decided early (see decidedEarly): play the rest for fun, or stop there */
+    'mini/fun'(g, a){
+      const L = LEGGED[a.key], s = L && L.s(g), d = decidedEarly(g, a.key) || (s && s.awarded && { winner:null, spare:0 }), fx = [];
+      if(!s || !d) return [];
+      if(d.winner != null) payEarly(g, a.key, s, d, fx);
+      s.fun = true; s.asked = true; s.done = false;
+      if(a.key === 'auction'){ s.leg++; auctionDraw(s, false, fx); }
+      if(a.key === 'dish') s.leg = freshLeg();
+      fx.push({ go:L.q });
+      return fx;
+    },
+    'mini/stop'(g, a){
+      const L = LEGGED[a.key], s = L && L.s(g), d = decidedEarly(g, a.key), fx = [];
+      if(!s) return [];
+      if(d) payEarly(g, a.key, s, d, fx);
+      s.asked = true; s.done = true;
+      if(a.key === 'auction'){ s.done = true; s.winner = s.wins[0] > s.wins[1] ? 0 : 1; }
+      fx.push({ go:L.summary });
+      return fx;
+    },
+
     /* the last round (or mini-game) is over */
     'game/end'(g, a, env){ return endGame(g, env, []); },
     'sudden/go'(g){ g.sdReady = true; return [{ sound:'soft' }, { go:'sudden' }]; },
@@ -1189,8 +1292,10 @@
       }
       m.subs.push({ q, gA:ga, gB:gb, winner:w });
       if(w === 'tie'){ m.wins[0]++; m.wins[1]++; fx.push({ toast:'Tie — a point each.' }); }
+      else if(w === 'none'){ fx.push({ toast:'Nobody answered — no point.' }); }
       else { m.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes leg ' + (m.i + 1) + '.' }); }
       m.i++;
+      if(m.fun) return funLeg(m, 'miniQ', 'miniSummary', fx);
       if(m.i < m.qs.length){ fx.push({ go:'miniQ' }); return fx; }
       return legsFinish(g, m, CLOSEST_END, fx);
     },
@@ -1226,6 +1331,7 @@
       if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Tie — a point each.' }); }
       else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes leg ' + (s.i + 1) + '.' }); }
       s.i++;
+      if(s.fun) return funLeg(s, 'sayQ', 'saySummary', fx);
       if(s.i < s.qs.length){ fx.push({ go:'sayQ' }); return fx; }
       /* a spare is a raw prompt — its secret word is drawn as it comes in */
       return legsFinish(g, s, { what:'prompt', again:'sayQ', summary:'saySummary', draw:(p) => env.deal.drawSaySame(p),
@@ -1395,6 +1501,6 @@
     return b;
   }
 
-  return { tidy, asNumber, numWords, distance, isMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, shuffle:shuffleWith,
+  return { tidy, asNumber, numWords, distance, isMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
 });

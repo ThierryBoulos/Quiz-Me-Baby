@@ -3949,8 +3949,9 @@ SCREENS.setup = function(){
   const miniInter  = INTERLEAVED.filter(k => miniKeys.indexOf(k) > -1);
   const stdOn      = c.standard !== false;
   const miniPlan   = stdOn ? planMinis(c.rounds, miniInter) : miniInter.map(k => ({ key:k, after:-1 }));
-  const miniEach   = miniPointValue(stdOn ? c.rounds : 0, miniKeys.length);
-  const miniTotal  = miniEach * miniKeys.length;
+  const miniBattle = miniKeys.indexOf('battle') > -1;
+  const miniEach   = miniPointValue(stdOn ? c.rounds : 0, miniKeys.length, miniBattle);
+  const miniTotal  = miniEach * (miniKeys.length + (miniBattle ? 1 : 0));   // the Battle pays double
 
   /* one theme per round — the counts have to match exactly */
   const themeGap = c.themes.length - c.rounds;
@@ -4115,7 +4116,7 @@ SCREENS.setup = function(){
         return '<button class="tgl mini-row" data-act="miniToggle" data-k="' + k + '" aria-pressed="' + on + '">' +
           '<span><span class="tl">' + m.name + '</span>' +
           '<span class="help">' + m.blurb +
-            (on ? ' <strong style="color:var(--gold)">' + miniEach + ' pts' + (slot ? ' · ' + slot : '') + '</strong>' : '') +
+            (on ? ' <strong style="color:var(--gold)">' + (k === 'battle' ? 2 * miniEach : miniEach) + ' pts' + (slot ? ' · ' + slot : '') + '</strong>' : '') +
           '</span></span>' +
           '<span class="sw"></span></button>' +
           (k === 'map' && on
@@ -4852,7 +4853,7 @@ SCREENS.battleIntro = function(){
         '<li><strong style="color:var(--gold)">2.</strong> ' + b.n + ' questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot. ' + esc(battleCapName(0)) + ' goes first.</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> Same spread for both — five easy, five medium, in the same order. Different questions.</li>' +
         '<li><strong style="color:var(--gold)">4.</strong> <span style="color:var(--warn)">No lifelines, no conferring, no second guesses.</span></li>' +
-        '<li><strong style="color:var(--gold)">5.</strong> Best score takes <strong>' + g.miniPts + ' points</strong>. Tie? One more question, first captain in wins it.</li>' +
+        '<li><strong style="color:var(--gold)">5.</strong> Best score takes <strong>' + (g.battlePts || g.miniPts) + ' points</strong>. Tie? One more question, first captain in wins it.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="battleStart">Start — ' + esc(battleCapName(0)) + '</button></div>' +
@@ -4970,7 +4971,7 @@ SCREENS.battleSummary = function(){
       '<h2 class="display">' + headline + '</h2>' +
       (b.tbRounds ? '<p class="help">Settled on tie breaker ' + b.tbRounds + '.</p>' : '') +
       (b.note ? '<p class="help" style="max-width:52ch;margin:0 auto">' + esc(b.note) + '</p>' : '') +
-      (b.awarded ? '<p class="help">' + esc(g.teams[b.winner].name) + ' <strong style="color:var(--gold)">+' + g.miniPts + ' points</strong>.</p>' : '') +
+      (b.awarded ? '<p class="help">' + esc(g.teams[b.winner].name) + ' <strong style="color:var(--gold)">+' + (g.battlePts || g.miniPts) + ' points</strong>.</p>' : '') +
     '</div>' +
     battleCounter() +
     '<div class="tbl-wrap"><table><thead><tr><th>Q</th><th>' + esc(battleCapName(0)) + '</th><th>Result</th><th>' + esc(battleCapName(1)) + '</th><th>Result</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' +

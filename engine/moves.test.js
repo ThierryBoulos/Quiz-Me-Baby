@@ -203,7 +203,7 @@ test('battle: level after both captains goes to a tie-breaker; "done" sends a le
   Q.play(g, { type:'battle/tbWin', w:'none' }, env);
   assert.equal(g.battle.tbRounds, 2);
   Q.play(g, { type:'battle/tbWin', w:1 }, env);
-  assert.equal(g.teams[1].score, g.miniPts);
+  assert.equal(g.teams[1].score, g.battlePts);                         // the Battle pays double
   g.teams[0].score = g.teams[1].score;                                 // make the night level
   const fx = Q.play(g, { type:'battle/done' }, env);
   assert.ok(types(fx).includes('go:sudden'));
@@ -273,4 +273,95 @@ test('running order: round 1, its mini-game, round 2, the end', () => {
   assert.equal(g.r, 1);
   g.teams[0].score = 1;
   assert.deepEqual(Q.play(g, { type:'round/next' }, env), [{ finalize:true }]);
+});
+
+/* ---- decided early: keep playing for fun, or stop there ---- */
+test('closest: nobody answering scores nobody', () => {
+  const { g, env } = game2();
+  Q.play(g, { type:'closest/start' }, env);
+  const fx = Q.play(g, { type:'closest/win', w:'none' }, env);
+  assert.deepEqual(g.mini.wins, [0, 0]);
+  assert.ok(types(fx).includes('toast:Nobody answered — no point.'));
+});
+
+test('closest decided early: "for fun" pays now, plays on, and the extra legs never change the score', () => {
+  const { g, env } = game2();
+  Q.play(g, { type:'closest/start' }, env);
+  const base = g.mini.base;
+  let i = 0;
+  while(!Q.decidedEarly(g, 'closest')) { Q.play(g, { type:'closest/win', w:0 }, env); i++; }
+  assert.ok(i < base);
+  const d = Q.decidedEarly(g, 'closest');
+  assert.equal(d.winner, 0);
+  assert.equal(d.spare, base - i);
+  const fx = Q.play(g, { type:'mini/fun', key:'closest' }, env);
+  assert.ok(types(fx).includes('go:miniQ'));
+  assert.equal(g.teams[0].score, g.miniPts);                       // paid at once
+  assert.equal(Q.decidedEarly(g, 'closest'), null);                // asked once
+  let last;
+  while(g.mini.i < base) last = Q.play(g, { type:'closest/win', w:1 }, env);
+  assert.ok(types(last).includes('go:miniSummary'));
+  assert.equal(g.mini.wins[1], base - i);                          // the fun legs count on the mini-game's board…
+  assert.equal(g.teams[0].score, g.miniPts);                       // …never on the night's score
+  assert.equal(g.teams[1].score, 0);
+  assert.equal(g.mini.verdict.winner, 0);
+});
+
+test('flag decided early: "stop here" goes to the summary, paid once', () => {
+  const g = game();
+  Q.play(g, { type:'flag/start' });
+  for(let i = 0; i < 6; i++) Q.play(g, { type:'flag/verdict', w:0 });
+  assert.ok(Q.decidedEarly(g, 'flag'));
+  const fx = Q.play(g, { type:'mini/stop', key:'flag' });
+  assert.ok(types(fx).includes('go:flagSummary'));
+  assert.equal(g.teams[0].score, g.miniPts);
+});
+
+test('flag decided early: "for fun" plays the remaining flags, then the summary', () => {
+  const g = game();
+  Q.play(g, { type:'flag/start' });
+  for(let i = 0; i < 6; i++) Q.play(g, { type:'flag/verdict', w:0 });
+  Q.play(g, { type:'mini/fun', key:'flag' });
+  let fx;
+  for(let i = 0; i < 4; i++) fx = Q.play(g, { type:'flag/verdict', w:1 });
+  assert.ok(types(fx).includes('go:flagSummary'));
+  assert.deepEqual(g.flagGame.wins, [6, 4]);
+  assert.equal(g.teams[0].score, g.miniPts);
+  assert.equal(g.teams[1].score, 0);
+});
+
+/* ---- no host: the same answer stolen goes back; an appeal ---- */
+function roundGame(){
+  const bank = [];
+  ['Music', 'Movies'].forEach(t => { for(let i = 0; i < 8; i++) bank.push({ id:`${t}${i}`, type:'standard', theme:t, difficulty:'medium', use_with:`${t}${i >> 1}`, question:'Q', answer:'A' }); });
+  const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => false, ok:{ map:() => false, flag:() => false, dish:() => false } });
+  const g = D.buildGame({ rounds:2, themes:['Music', 'Movies'], difficulty:'medium', minis:[], teamA:{ name:'A' }, teamB:{ name:'B' } });
+  const env = { deal:D, settings:{} };
+  Q.play(g, { type:'game/start' }, env); Q.play(g, { type:'round/begin' }, env);
+  return { g, env };
+}
+test('steal with the first team\'s own answer: the point goes back to them', () => {
+  const { g, env } = roundGame();
+  Q.play(g, { type:'round/judge', v:false }, env);
+  Q.play(g, { type:'round/judgeSteal', v:true, back:true }, env);
+  assert.equal(g.teams[0].score, 1);
+  assert.equal(g.teams[1].score, 0);
+});
+test('appeal agreed after a steal: the point moves to the first team; once only', () => {
+  const { g, env } = roundGame();
+  Q.play(g, { type:'round/judge', v:false }, env);
+  Q.play(g, { type:'round/judgeSteal', v:true }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [0, 1]);
+  Q.play(g, { type:'round/appeal', ok:true }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [1, 0]);
+  Q.play(g, { type:'round/appeal', ok:true }, env);                 // no second go
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [1, 0]);
+});
+test('appeal turned down: nothing changes', () => {
+  const { g, env } = roundGame();
+  Q.play(g, { type:'round/judge', v:false }, env);
+  Q.play(g, { type:'round/judgeSteal', v:false }, env);
+  Q.play(g, { type:'round/appeal', ok:false }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [0, 0]);
+  assert.equal(g.rounds[0].res[0].appealed, true);
 });

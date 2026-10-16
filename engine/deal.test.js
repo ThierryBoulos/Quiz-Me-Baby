@@ -58,12 +58,13 @@ test('say-same: wide prompts first, a coin flip last', () => {
 
 test('mini-game plan and points', () => {
   const g = D.buildGame(cfg({ rounds:4, minis:['closest', 'flag', 'battle'] }));
-  assert.deepEqual(g.plan.map(p => p.key), ['closest', 'flag']);
+  assert.deepEqual(g.plan.map(p => p.key), ['flag', 'closest']);       // Flag opens the night
   assert.equal(g.hasBattle, true);
-  assert.equal(g.miniPts, Q.miniPointValue(4, 3));
+  assert.equal(g.miniPts, Q.miniPointValue(4, 3, true));
+  assert.equal(g.battlePts, 2 * g.miniPts);
   const only = D.buildGame(cfg({ standard:false, minis:['map', 'flag'] }));
   assert.equal(only.rounds.length, 0);
-  assert.deepEqual(only.plan, [{ key:'map', after:0 }, { key:'flag', after:0 }]);
+  assert.deepEqual(only.plan, [{ key:'flag', after:0 }, { key:'map', after:0 }]);
 });
 
 test('battle: same difficulty shape for both captains, never the same question', () => {
@@ -85,4 +86,16 @@ test('sudden death never deals a question the dealer marks as not for sudden dea
     assert.ok(g.sd && g.sd.q, 'a sudden-death question was dealt');
     assert.ok(!g.sd.q.id.startsWith('Music'), g.sd.q.id);
   }
+});
+
+test('Say the Same: the hidden word leans to the top of the list; short sets stay even', () => {
+  let s = 3; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const D3 = Q.createDealer({ bank:() => [], used:() => new Set(), noRepeat:() => false, rng:r, ok:{ map:() => false, flag:() => false, dish:() => false } });
+  const wide = { pool:['a', 'b', 'c', 'd', 'e', 'f'] }, n = {};
+  for(let i = 0; i < 3000; i++){ const w = D3.drawSaySame(wide).answer; n[w] = (n[w] || 0) + 1; }
+  assert.ok(n.a > n.c && n.c > n.f, JSON.stringify(n));
+  assert.ok(n.a / 3000 > 0.33 && n.a / 3000 < 0.49, JSON.stringify(n));        // 1 / 2.45
+  const coin = { pool:['Heads', 'Tails'] }, c = {};
+  for(let i = 0; i < 2000; i++){ const w = D3.drawSaySame(coin).answer; c[w] = (c[w] || 0) + 1; }
+  assert.ok(Math.abs(c.Heads - c.Tails) < 200, JSON.stringify(c));
 });
