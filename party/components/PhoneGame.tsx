@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import { iso, TIE_SCREENS, type Pub, type Secret, type Two } from "@/lib/game";
+import { DECIDED, iso, MAX_BID, TIE_SCREENS, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
 import { note, sb, sendAction } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
-import { AskHead, FlagImg, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, decidedCall, decidedHead, decidedSub, FlagImg, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
@@ -286,6 +286,15 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         </>)}
       </div>);
     case "dishReveal": return <Results><Main label="Next" move={{ type: "dish/next" }} /></Results>;
+    /* won with legs to spare: keep playing for fun, or stop here */
+    case DECIDED: return (
+      <div className="flex flex-col gap-4 flex-1">
+        <Big eyebrow={pub.mini?.title} size={34} text={decidedHead(pub)} sub={decidedSub(pub)} />
+        <div className="flex flex-col gap-3 mt-auto">
+          <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => send({ type: "decided/stop" })}>Stop here</button>
+          <button className="btn btn-lg" disabled={busy} onClick={() => send({ type: "decided/more" })}>Keep playing for fun</button>
+        </div>
+      </div>);
     /* level at the end of a mini-game: one more, or a point each */
     case "miniTie": case "sayTie": case "flagTie": case "dishTie": case "mapTie": case "battleLevel": return (
       <div className="flex flex-col gap-4 flex-1">
@@ -367,7 +376,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>); }
     case "battleHandoff": return (
       <div className="flex flex-col gap-4 flex-1">
-        <Big eyebrow="Halfway" size={30} color="var(--color-ink)" text={`${T[0].name} scored ${pub.battle?.score[0]}`} sub={`Now ${T[1].name}’s captain.`} />
+        <Big eyebrow="Halfway" size={30} color="var(--color-ink)" text={`${T[0].name} scored ${pub.battle?.score[0]}`} sub={`Now ${T[1].name}’s captain. ${battleNeeds(pub)}`} />
         <Main label={`Start ${T[1].name}'s questions`} move={{ type: "battle/start" }} />
       </div>);
     case "battleTie": return (
@@ -473,6 +482,7 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
             {v == null ? <span className="text-[12px] text-[var(--color-ink-3)]">waiting for a ruling</span> : <Verdict v={v} say={say} size={14} />}
           </div>
           <div className="text-[16px] font-bold mt-1" style={{ color: x ? undefined : "var(--color-ink-3)" }}>{x ?? (say ? "Nothing" : "No answer")}</div>
+          {say && pub.reveal?.offList?.[t] && !v && <div className="text-[12px] text-[var(--color-ink-2)]">Not on the list, so it counts as said</div>}
         </div>); })}</div></>);
   }
   if (sc === "dishReveal" && pub.reveal) return head(legW(pub.reveal.w), legW(pub.reveal.w) != null ? `${T[pub.reveal.w as 0 | 1].name} got it` : "Nobody got it");
@@ -520,7 +530,8 @@ function OnScreen({ pub, counting }: { pub: Pub; counting?: boolean }) {
     {pub.auction && pub.screen === "auctionLeg" && <p className="text-center text-[14px] text-[var(--color-ink-2)]"><span className="eyebrow mr-2">Leg {pub.auction.wins[0] + pub.auction.wins[1]}</span>{pub.auction.cat}</p>}
     {pub.auction && /^auction(Bid|Run)$/.test(pub.screen) && <div className="text-center"><div className="eyebrow">Category</div><div className="display text-[28px]" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>
       {pub.screen === "auctionBid" && <BidBoard pub={pub} />}
-      {pub.screen === "auctionRun" && !counting && <div className="display text-[44px] mt-1">{pub.auction.count} / {pub.auction.bid}</div>}</div>}
+      {pub.screen === "auctionRun" && !counting && <div className="display text-[44px] mt-1">{pub.auction.count} / {pub.auction.bid}</div>}
+      {pub.screen === "auctionRun" && pub.auction.countedBy && <div className="text-[13px] text-[var(--color-ink-2)] mt-1">Counted by <b>{pub.auction.countedBy}</b></div>}</div>}
     {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
     {pub.reveal && /Reveal$/.test(pub.screen) && pub.screen !== "mapReveal" && pub.screen !== "sayReveal" && <div className="display text-[30px] text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-[30px]" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
@@ -570,6 +581,7 @@ function status(pub: Pub, me: Member) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend" : "Double Dip: two answers") : `${T[pub.lifeline.team].name} used a lifeline`;
   if (TIE_SCREENS.includes(pub.screen)) return `${tieHead(pub)}. ${tieCall(pub)}`;
+  if (pub.screen === DECIDED) return `${decidedHead(pub)} ${decidedCall(pub)}`;
   switch (pub.screen) {
     case "ask": return pub.turn === mine ? (cap ? "Your question. Type your answer." : "Your team's question. Help your captain!") : `${T[pub.turn ?? 0].name} is answering. Get ready to steal.`;
     case "steal": return pub.turn === mine ? (cap ? "Steal! Type your answer." : "Steal! Help your captain.") : `${T[pub.turn ?? 0].name} can steal it`;
@@ -641,7 +653,7 @@ function WaitingFor({ pub }: { pub: Pub }) {
   const label = pub.screen === "sudden" ? "Go" : NEXT_LABEL[pub.screen]?.[0] || "Next";
   const open = useAfter(pub.nextOpenAt);
   const who = open && pub.nextOther ? `${pub.nextBy} or ${pub.nextOther}` : pub.nextBy;
-  return <p className="text-center text-[13px] text-[var(--color-ink-3)]" role="status">Waiting for {who} to {TIE_SCREENS.includes(pub.screen) ? "choose: one more, or a point each" : `tap ${/^Start/.test(label) ? "Start" : label}`}.</p>;
+  return <p className="text-center text-[13px] text-[var(--color-ink-3)]" role="status">Waiting for {who} to {TIE_SCREENS.includes(pub.screen) ? "choose: one more, or a point each" : pub.screen === DECIDED ? "choose: keep playing for fun, or stop here" : `tap ${/^Start/.test(label) ? "Start" : label}`}.</p>;
 }
 /* the screens a clock runs on, and so the ones a Pause makes sense on */
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"];
@@ -704,7 +716,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {pub.pending && (pub.pending.team === mine ? (
         <div className="text-center flex flex-col gap-1" role="status"><div className="eyebrow">You sent</div><div className="display text-[30px]">{pub.pending.text}</div>
           <div className="font-bold text-[15px]">The app says <Verdict v={pub.pending.v} /></div>
-          <div className="text-[13px] text-[var(--color-ink-2)]">{T[theirs].name} can change the call · <Countdown at={pub.pending.until} /></div></div>
+          <div className="text-[13px] text-[var(--color-ink-2)]">{T[theirs].name} can still give it to you · <Countdown at={pub.pending.until} /></div></div>
       ) : (
         <div className="flex flex-col gap-2">
           <div className="text-center">
@@ -712,7 +724,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
             <div className="display text-[30px]">{pub.pending.text}</div>
           </div>
           <RulingPicker value={pub.pending.v} app={pub.pending.v} busy={busy} label={`Rule on ${T[theirs].name}’s answer`} onPick={(v) => void nxt({ type: "ui/rule", v })} />
-          <p className="text-center text-[13px] text-[var(--color-ink-3)]">Your call. Tap nothing and the app&rsquo;s call stands in <Countdown at={pub.pending.until} />s.</p>
+          <p className="text-center text-[13px] text-[var(--color-ink-3)]">The app says WRONG. If it&rsquo;s actually right, tap RIGHT to give it to them. Tap nothing and it stays wrong in <Countdown at={pub.pending.until} />s.</p>
         </div>))}
 
       {!pub.pending && <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} />}
@@ -752,12 +764,13 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {sc === "auctionBid" && A && A.turn === mine && (
         <div className="card flex flex-col gap-2">
           <div className="eyebrow">{A.bid ? `Beat ${A.bid}, or pass` : "Open the bidding"}</div>
-          <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>
+          {A.bid < MAX_BID && <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>}
           <div className="flex gap-2">
             <input {...np.props} className="input" aria-label="Custom bid" inputMode="numeric" value={bid} placeholder="Custom bid" onChange={(e) => setBid(e.target.value.replace(/\D/g, "").slice(0, 3))} />
-            <button className="btn" disabled={busy || !(Number(bid) > A.bid)} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>Bid</button>
+            <button className="btn" disabled={busy || !(Number(bid) > A.bid) || Number(bid) > MAX_BID} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>Bid</button>
           </div>
           {bid !== "" && !(Number(bid) > A.bid) && <p className="text-[13px] text-[var(--color-no)]" role="alert">A bid has to beat {A.bid}.</p>}
+          {Number(bid) > MAX_BID && <p className="text-[13px] text-[var(--color-no)]" role="alert">Bids go up to {MAX_BID}.</p>}
           {A.bid > 0 && (
             <button className="btn btn-lg btn-block pass-btn" disabled={busy} onClick={() => void nxt({ type: "auction/pass" })}>
               <span className="text-[17px]">Pass</span>
@@ -775,14 +788,36 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {nohost && (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal") && pub.reveal && (
         <div className="flex flex-col gap-2">
           <div className="eyebrow text-center" style={{ color: tc(theirs) }}>Your call on {T[theirs].name}&rsquo;s answer{sc === "mapReveal" ? ": the idea counts, not the exact words" : ""}</div>
-          <RulingPicker say={sc === "sayReveal"} value={pub.reveal.ok?.[theirs]} app={pub.reveal.app?.[theirs]} busy={busy} label={`Rule on ${T[theirs].name}’s answer`}
-            onPick={(v) => void nxt(sc === "mapReveal" ? { type: "ui/mapRule", v } : { type: sc === "flagReveal" ? "ui/flagOk" : "ui/sayOk", t: theirs, v })} />
+          {/* the app's RIGHT (DODGED IT) stands; only its WRONG can be given */}
+          {sc !== "mapReveal" && pub.reveal.app?.[theirs] !== false
+            ? <p className="text-center text-[14px] text-[var(--color-ink-2)]">The app says <Verdict v={pub.reveal.app?.[theirs]} say={sc === "sayReveal"} />. That stands.</p>
+            : <RulingPicker say={sc === "sayReveal"} value={pub.reveal.ok?.[theirs]} app={pub.reveal.app?.[theirs]} busy={busy} label={`Rule on ${T[theirs].name}’s answer`}
+              onPick={(v) => void nxt(sc === "mapReveal" ? { type: "ui/mapRule", v } : { type: sc === "flagReveal" ? "ui/flagOk" : "ui/sayOk", t: theirs, v })} />}
         </div>)}
+      {/* no host, after the steal: a small appeal for the first team, and the other captain's answer to it */}
+      {nohost && sc === "answer" && pub.appealable === mine && (
+        <button className="self-center text-[13px] font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" disabled={busy}
+          onClick={() => void nxt({ type: "ui/appeal" })}>We were right: appeal</button>)}
+      {nohost && sc === "answer" && pub.appeal && pub.appeal.team !== mine && (
+        <div className="card flex flex-col gap-2 text-center" role="alert">
+          <div className="text-[14px]"><b style={{ color: tc(pub.appeal.team) }}>{T[pub.appeal.team].name}</b> say &ldquo;{pub.appeal.text}&rdquo; was right. Agree?</div>
+          <div className="flex gap-2 justify-center">
+            <button className="btn btn-sm" disabled={busy} onClick={() => void nxt({ type: "ui/appealOk", v: true })}>Agree, give it</button>
+            <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => void nxt({ type: "ui/appealOk", v: false })}>No</button>
+          </div>
+        </div>)}
+      {nohost && sc === "answer" && pub.appeal && pub.appeal.team === mine && <p className="text-center text-[13px] text-[var(--color-ink-3)]">Appeal sent. Waiting for {T[theirs].name}&rsquo;s captain.</p>}
       {/* the end of the night, no host: either captain sends everyone home */}
       {nohost && sc === "final" && (<>
         <p className="text-center text-[13px] text-[var(--color-ink-3)] mt-auto">Exit takes every phone and the TV back to the home screen.</p>
         <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => { void nxt({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
       </>)}
+      {/* no host, won with legs to spare: the lead captain picks */}
+      {nohost && sc === DECIDED && mayNext && pub.nextBy && (
+        <div className="flex flex-col gap-3 mt-auto dock">
+          <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "decided/stop" })}>Stop here</button>
+          <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "decided/more" })}>Keep playing for fun</button>
+        </div>)}
       {/* no host, level at the end of a mini-game: the lead captain picks */}
       {nohost && TIE_SCREENS.includes(sc) && mayNext && pub.nextBy && (
         <div className="flex flex-col gap-3 mt-auto dock">

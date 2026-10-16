@@ -31,10 +31,10 @@ const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1
 export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean }) {
   const [bank, setBank] = useState<Bank | null>(null);
   const [standard, setStandard] = useState(true);
-  const [rounds, setRounds] = useState(8);
+  const [rounds, setRounds] = useState(6);
   const [difficulty, setDiff] = useState("mixed");
   const [themes, setThemes] = useState<string[] | null>(null);
-  const [minis, setMinis] = useState<string[]>(["closest", "auction", "saysame", "map", "flag", "dish", "battle"]);
+  const [minis, setMinis] = useState<string[]>(["flag", "closest", "auction", "battle"]);
   const [mapLevels, setMapLevels] = useState<string[]>(["easy", "medium", "hard"]);
   const [flagLevels, setFlagLevels] = useState<string[]>(["easy", "medium"]);
   const [dishLevels, setDishLevels] = useState<string[]>(["c-medium", "d-medium"]);
@@ -79,7 +79,9 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
   };
   /* what each mini-game is worth, and where it falls in the night (Classic's setup) */
   const miniKeys = MINIS.map(([k]) => k as string).filter((k) => minis.includes(k));
-  const each = QMB.miniPointValue(standard ? rounds : 0, miniKeys.length) || 2;
+  const battle = miniKeys.includes("battle");
+  const each = QMB.miniPointValue(standard ? rounds : 0, miniKeys.length, battle) || 2;
+  const worth = (k: string) => (k === "battle" ? 2 * each : each);   // the Battle pays double
   const plan: { key: string; after: number }[] = QMB.planMinis(standard ? rounds : 0, (QMB.INTERLEAVED as string[]).filter((k) => miniKeys.includes(k)));
   const slot = (k: string) => k === "battle" ? "last" : standard ? (plan.find((p) => p.key === k) ? `after R${plan.find((p) => p.key === k)!.after + 1}` : "")
     : ["1st", "2nd", "3rd", "4th", "5th", "6th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";
@@ -159,7 +161,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
         <div className="mb-1">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="display text-[24px]">Mini-games</div>
-            <span className={"badge shrink-0 " + (miniKeys.length ? "gold" : "line")}>{miniKeys.length ? `${each * miniKeys.length} pts on the table` : "None"}</span>
+            <span className={"badge shrink-0 " + (miniKeys.length ? "gold" : "line")}>{miniKeys.length ? `${miniKeys.reduce((n, k) => n + worth(k), 0)} pts on the table` : "None"}</span>
           </div>
           <div className="text-[13px] text-[var(--color-ink-2)]">{standard ? "Spread between the rounds; the Battle closes the night." : "Played one after another."}</div>
         </div>
@@ -168,7 +170,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
             <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
               <span className="min-w-0"><span className="block font-bold text-[15px] leading-tight">{name}</span>
-                <span className="block text-[12.5px] text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{on && <b style={{ color: "var(--color-gold)" }}> {each} pts{slot(k) ? ` · ${slot(k)}` : ""}</b>}</span></span>
+                <span className="block text-[12.5px] text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k)} pts{slot(k) ? ` · ${slot(k)}` : ""}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

@@ -22,7 +22,7 @@ function hudLabel(pub: Pub): ReactNode {
   if (m) {
     const tail = /Summary$|Result$/.test(sc) ? "Final" : /Tie$/.test(sc) && m.key !== "battle" ? "Tie"
       : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Tie" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
-      : m.tie ? "Tie-breaker" : `Leg ${m.leg} of ${m.of}`;
+      : sc === "decided" ? "Won" : m.tie ? "Tie-breaker" : `Leg ${m.leg} of ${m.of}${m.fun ? " · for fun" : ""}`;
     return <><b>{m.title}</b> &nbsp;·&nbsp; {tail}</>;
   }
   return <>Round <b>{Math.min(pub.r + 1, pub.N)}</b> of {pub.N} &nbsp;·&nbsp; <b>{pub.theme}</b></>;
@@ -209,23 +209,24 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
   const t = pub.timers, sec = (v: number | undefined, d: number) => `${v ?? d} seconds`;
   /* level at the end: the same choice in every mini-game */
   const call = host ? "the host's call" : `${pub.captains?.[pub.lead ?? 0] || "Team A's captain"}'s call`;
-  const level = `Tied at the end? One more to settle it, or a point each: ${call}.`;
+  const level = `Won with legs to spare? Keep playing for fun, or stop. Tied at the end? One more, or a point each. Both ${call}.`;
   switch (m.key) {
     case "closest": return [
       { text: "Both teams get the same number question at the same time." },
       { text: `${sec(t?.mini ?? pub.tMini, T_CLOSEST)} for each captain to lock in one number on their phone.` },
-      { text: "Closest number wins the leg. Tie = one point each." },
+      { text: "Closest number wins the leg. Tie = one point each. Nobody answers = nobody scores." },
       { text: "No lifelines in this leg.", warn: true },
       { text: `After ${n} legs, whoever leads takes ${pts} points. ${level}` }];
     case "auction": return [
       { text: `${n} categories. The open alternates, so nobody bids blind twice.` },
       { text: "One captain bids on their phone: how many they can name. The other raises, or passes." },
       { text: `Whoever holds the bid gets ${sec(t?.auction, T_AUCTION)} to name that many, out loud.` },
-      { text: `${host ? "The host counts" : "The other captain counts"}. Make it, you take the leg. Fall short and the other team takes it.` },
+      { text: `Bids go up to 100. ${host ? "The host counts" : "The other captain counts"}. Make it, you take the leg. Fall short and the other team takes it.` },
       { text: `No lifelines, no help from the room. Most legs takes ${pts} points.`, warn: true }];
     case "saysame": return [
       { text: `A prompt, ${sec(t?.say, T_SAY)}. Both captains type an answer, hidden from each other. The app has a word hidden: matching each other is fine, only matching the app costs you.` },
-      { text: `Time's up: the word comes up. ${host ? "The host can change the app's call." : "Each captain can change the app's call on the other team."}` },
+      { text: "Your answer must be a real one, on the app's list for the prompt (typos are fine). Anything else counts as SAID IT." },
+      { text: `Time's up: the word comes up. ${host ? "The host can change the app's call." : "The other captain can give you a fair answer the list missed."}` },
       { text: "Dodged it alone? You take the leg. Both dodged or both said it? Tie, a point each." },
       { text: `Best of ${n} takes ${pts} points. ${level}` }];
     case "map": return [
@@ -236,7 +237,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
     case "flag": return [
       { text: `A flag goes up. ${sec(t?.flag, T_FLAG)}.` },
       { text: "Both captains type whose flag it is, at the same time." },
-      { text: `The app checks them${host ? ", and the host can change the call" : ", and each captain can change the call on the other team"}. Both right? A point each. Nobody? Nobody.` },
+      { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
       { text: `Best of ${n} takes ${pts} points. ${level}` }];
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
@@ -285,3 +286,20 @@ export const silent = (pub: Pub, t: 0 | 1) => {
 export const tieHead = (pub: Pub) => `Tie at ${pub.mini?.wins[0] ?? 0} each`;
 export const tieCall = (pub: Pub) =>
   `One more to settle it, or a point each: ${pub.mode === "host" ? "the host" : pub.captains?.[pub.lead ?? 0] || "the captain"} decides.`;
+/* won with legs to spare: the same words on the TV and every phone */
+export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
+export const decidedSub = (pub: Pub) => {
+  const d = pub.decided, w = pub.mini?.wins;
+  if (!d) return "";
+  return `${w ? `${w[0]}–${w[1]} with ${d.spare} to spare, ` : ""}+${d.pts} point${d.pts === 1 ? "" : "s"}. The rest can be played for fun (it won't change the score).`;
+};
+export const decidedCall = (pub: Pub) =>
+  `Keep playing for fun, or stop here: ${pub.mode === "host" ? "the host" : pub.captains?.[pub.lead ?? 0] || "the captain"} decides.`;
+/* the Battle at halftime: what the second captain needs (the Battle pays mini.pts) */
+export const battleNeeds = (pub: Pub) => {
+  const B = pub.battle, T = pub.teams;
+  if (!B) return "";
+  const s = B.score[0], pts = pub.mini?.pts;
+  if (s >= B.n) return `${T[1].name} need all ${B.n} to tie it.`;
+  return `${T[1].name} need ${s + 1} to win the Battle${pts ? ` (+${pts})` : ""}, ${s} to tie.`;
+};

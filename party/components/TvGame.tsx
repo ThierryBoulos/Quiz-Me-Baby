@@ -4,8 +4,8 @@ import type { Pub } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { BattleAnswer, flagText } from "./PhoneGame";
-import { AskHead, Confetti, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
-import { TIE_SCREENS } from "@/lib/game";
+import { AskHead, battleNeeds, Confetti, decidedCall, decidedHead, decidedSub, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
+import { DECIDED, TIE_SCREENS } from "@/lib/game";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
@@ -45,6 +45,8 @@ export function TvGame({ pub, onExit }: { pub: Pub; onExit?: () => void }) {
           <div className="display text-[44px]" style={{ color: pub.result.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>
             {pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? " — stolen!" : ""}`}
           </div>
+          {pub.appeal && <div className="chip enter" style={{ fontSize: 24, padding: "12px 26px" }} role="status">
+            <b style={{ color: tc(pub.appeal.team) }}>{T[pub.appeal.team].name}</b>&nbsp;appeal: &ldquo;{pub.appeal.text}&rdquo; was right. {pub.captains?.[pub.appeal.team === 0 ? 1 : 0] || "The other captain"} decides.</div>}
         </>)}
 
         {pub.screen === "roundScore" && (<>
@@ -196,6 +198,12 @@ function TvMini({ pub }: { pub: Pub }) {
         </>)}
       </div>
     </div>);
+  if (sc === DECIDED && pub.decided) return (<>
+    <div className="eyebrow text-[20px]">{m.title}</div>
+    <div className="display" style={{ fontSize: 100, color: tc(pub.decided.winner) }}>{decidedHead(pub)}</div>
+    <div className="text-[30px]">{decidedSub(pub)}</div>
+    <div className="text-[26px] text-[var(--color-ink-2)]">{decidedCall(pub)}</div>
+  </>);
   if (TIE_SCREENS.includes(sc)) return (<>
     <div className="eyebrow text-[20px]">{m.title}</div>
     <div className="display" style={{ fontSize: 100, color: "var(--color-gold)" }}>{tieHead(pub)}</div>
@@ -214,6 +222,7 @@ function TvMini({ pub }: { pub: Pub }) {
       <div className="display text-[44px]" style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}: name {A.bid}!</div>
       <div className="display" style={{ fontSize: 170, lineHeight: 1 }}>{A.count}<span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span></div>
       <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
+      {A.countedBy && <div className="text-[22px] text-[var(--color-ink-2)]">Counted by <b>{A.countedBy}</b></div>}
     </>);
     if (sc === "auctionLeg" && A.last) return (<>
       <div className="text-[28px] text-[var(--color-ink-2)] max-w-[1000px]">{A.cat}</div>
@@ -250,7 +259,7 @@ function TvMini({ pub }: { pub: Pub }) {
   if (pub.battle && sc === "battleHandoff") return (<>
     <div className="eyebrow text-[20px]">Halfway</div>
     <div className="display" style={{ fontSize: 100, color: tc(1) }}>{T[1].name}&rsquo;s captain, you&rsquo;re up</div>
-    <div className="text-[30px]">{T[0].name} scored <b>{pub.battle.score[0]}</b> out of {pub.battle.n}. Beat it.</div>
+    <div className="text-[30px]">{T[0].name} scored <b>{pub.battle.score[0]}</b> out of {pub.battle.n}. {battleNeeds(pub)}</div>
     {pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} />}
   </>);
   if (pub.battle && sc === "battleTie") return (<>
@@ -291,6 +300,7 @@ function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: 
           {ok == null ? <span className="text-[var(--color-ink-3)] font-bold" style={{ fontSize: "0.7em" }}>{pub.mode === "nohost" ? `${T[t === 0 ? 1 : 0].name} rules` : "The host rules"}</span> : <Verdict v={ok} say={say} />}
         </div>
         <div className="font-bold" style={{ fontSize: small ? 20 : 28, color: x ? undefined : "var(--color-ink-3)" }}>{x ?? empty}</div>
+        {say && pub.reveal?.offList?.[t] && !ok && <div className="text-[var(--color-ink-2)]" style={{ fontSize: small ? 16 : 20 }}>Not on the list</div>}
       </div>); })}
     </div>);
 }
@@ -305,7 +315,7 @@ function Pending({ pub }: { pub: Pub }) {
         <div className="eyebrow text-[20px]">{T[P.team].name} said</div>
         <div className="display" style={{ fontSize: 96, color: tc(P.team) }}>{P.text}</div>
         <div className="display text-[54px]">The app says <Verdict v={P.v} /></div>
-        <div className="text-[24px] text-[var(--color-ink-2)]"><bdi>{T[o].name}</bdi>&rsquo;s captain can change the call · {left}</div>
+        <div className="text-[24px] text-[var(--color-ink-2)]"><bdi>{T[o].name}</bdi>&rsquo;s captain can give it to them · {left}</div>
       </div>
     </div>);
 }
@@ -331,7 +341,7 @@ function awayTotals(pub: Pub) {
 function NextHint({ pub }: { pub: Pub }) {
   const open = useAfter(pub.nextOpenAt);
   const label = /Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" ? "Start" : pub.screen === "sudden" ? "Go" : "Next";
-  return <div className="absolute right-8 bottom-8 text-[18px] text-[var(--color-ink-2)]">Waiting for <b>{pub.nextBy}</b>{open && pub.nextOther ? <> or <b>{pub.nextOther}</b></> : null} to {TIE_SCREENS.includes(pub.screen) ? "choose" : `tap ${label}`}</div>;
+  return <div className="absolute right-8 bottom-8 text-[18px] text-[var(--color-ink-2)]">Waiting for <b>{pub.nextBy}</b>{open && pub.nextOther ? <> or <b>{pub.nextOther}</b></> : null} to {TIE_SCREENS.includes(pub.screen) || pub.screen === DECIDED ? "choose" : `tap ${label}`}</div>;
 }
 
 /* Imad's line: his face and a speech bubble, up top, for as long as it takes to read (Classic's #hostBubble) */
