@@ -30,6 +30,8 @@ export type Pub = {
   decided?: { key: MiniKey; title: string; winner: 0 | 1; spare: number; pts: number };
   /* no host, after the steal: the team that may still appeal ("we were right"), and an appeal waiting on the other captain */
   appealable?: 0 | 1; appeal?: { team: 0 | 1; text: string } | null;
+  /* with a host: what the captain typed (never the answer), so the host's phone shows it the moment it lands */
+  said?: Two<string[] | null>;
   flag?: string;                  // the flag's file name (flags/<flag>.svg)
   dish?: { kind: string; ings: string[]; n: number; late?: 0 | 1 | null };   // late: the team whose 10 s to type ran out
   /* ok: the verdict that stands now; app: what the app said first (the "App suggests" tag) */
@@ -83,7 +85,9 @@ export const T_OVERRULE_BATTLE = 8;
 export const T_NEXT_FALLBACK = 20;
 /* a captain whose phone has been gone this long hands over to a teammate who's still here */
 export const T_AWAY = 60;
-/* Cocktail or Dish: after a buzz, this long to type it (no clock shown); then it's wrong */
+/* in the lobby: a captain silent this long shows as away on the TV, and a teammate can take the armband */
+export const T_LOBBY_AWAY = 30;
+/* Guess the Cocktail or Dish: after a buzz, this long to type it (no clock shown); then it's wrong */
 export const T_DISH_TYPE = 10;
 /* the Auction: nobody names more than this in the time (and a typo can't bid 999) */
 export const MAX_BID = 100;

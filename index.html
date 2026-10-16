@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.23', date:'16 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.24', date:'16 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3650,7 +3650,7 @@ function renderHUD(){
   } else if(FLAG_SCREENS.indexOf(S.screen) > -1){
     label = '<b>GUESS THE FLAG</b> &nbsp;·&nbsp; ' + (S.screen === 'flagSummary' ? 'Final' : flagLegLabel());
   } else if(DISH_SCREENS.indexOf(S.screen) > -1){
-    label = '<b>COCKTAIL OR DISH</b> &nbsp;·&nbsp; ' + (S.screen === 'dishSummary' ? 'Final' : S.screen === 'dishTie' ? 'Level' : dishLegLabel());
+    label = '<b>GUESS THE COCKTAIL OR DISH</b> &nbsp;·&nbsp; ' + (S.screen === 'dishSummary' ? 'Final' : S.screen === 'dishTie' ? 'Level' : dishLegLabel());
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
     const b = g.battle;
     label = '<b>BATTLE OF THE CAPTAINS</b>' +
@@ -3707,7 +3707,7 @@ SCREENS.home = function(){
            wordmark. On desktop he is position:absolute against .home — and
            neither .home-main nor .logo-wrap is a positioned ancestor — so
            moving him here leaves the desktop layout byte-for-byte identical. */
-        '<img class="mascot" src="' + MASCOT + '" alt="Imad, your host" draggable="false">' +
+        '<img class="mascot" src="' + MASCOT + '" alt="Imad, your MC" draggable="false">' +
         '<div class="logo">Quiz Me<br>Baby</div>' +
       '</div>' +
       /* Three buttons and a quiet link. The stats line and the tagline were
@@ -5180,7 +5180,7 @@ SCREENS.sayQ = function(){
   return '<div class="play">' +
     '<div class="center"><div class="mini-band"><span class="eyebrow gold">' + sayLegLabel() + '</span>' + sayDots() + '</div></div>' +
     '<div class="spot" style="background:radial-gradient(80% 120% at 50% -20%,rgba(245,197,24,.16),transparent 65%)">' +
-      '<div class="q-theme">Don&rsquo;t say the same as me</div>' +
+      '<div class="q-theme">Don&rsquo;t Say the Same as Me</div>' +
       '<h2 class="q-text">' + esc(q.question) + '</h2>' +
       timerRing('seconds left') +
       timerControls() +
@@ -5930,7 +5930,7 @@ SCREENS.final = function(){
           '<td data-l="Legs">' + g.mini.wins[0] + '–' + g.mini.wins[1] + '</td></tr>'
         : '') +
       (g.saySame && g.saySame.awarded
-        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Don&rsquo;t say the same as me</td>' +
+        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Don&rsquo;t Say the Same as Me</td>' +
           '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.saySame.award[0] + '</td>' +
           '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.saySame.award[1] + '</td>' +
           '<td data-l="Legs">' + g.saySame.wins[0] + '–' + g.saySame.wins[1] + '</td></tr>'
@@ -5948,7 +5948,7 @@ SCREENS.final = function(){
           '<td data-l="Flags">' + g.flagGame.wins[0] + '–' + g.flagGame.wins[1] + '</td></tr>'
         : '') +
       (g.dishGame && g.dishGame.awarded
-        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Cocktail or dish</td>' +
+        ? '<tr class="sumrow"><td data-l="Round">—</td><td class="rowhead" data-l="">Guess the Cocktail or Dish</td>' +
           '<td class="num" data-l="' + esc(g.teams[0].name) + '" style="color:var(--a)">' + g.dishGame.award[0] + '</td>' +
           '<td class="num" data-l="' + esc(g.teams[1].name) + '" style="color:var(--b)">' + g.dishGame.award[1] + '</td>' +
           '<td data-l="Legs">' + g.dishGame.wins[0] + '–' + g.dishGame.wins[1] + '</td></tr>'
@@ -6521,7 +6521,7 @@ SCREENS.settings = function(){
     '</div>' +
 
     '<div class="card pad stack">' +
-      '<div class="eyebrow">Your host — Imad</div>' +
+      '<div class="eyebrow">Your MC — Imad</div>' +
       toggleRow('hostOn', 'Imad comments', 'He comments on the game in a speech bubble — round intros, right and wrong answers, steals, lead changes, the final.') +
       (S.settings.hostOn ? '<div class="btn-row"><button class="btn sm" data-act="hostTest">Test Imad</button></div>' : '') +
     '</div>' +

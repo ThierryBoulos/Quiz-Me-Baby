@@ -127,6 +127,8 @@ function Inventory({ pub, t }: { pub: Pub; t: 0 | 1 }) {
    else sees the same tile, lit or not, so the room knows what was armed. */
 export function RoundIntro({ pub, canArm, onArm, size, busy }: { pub: Pub; canArm?: (t: 0 | 1) => boolean; onArm?: (t: 0 | 1) => void; size: "tv" | "phone"; busy?: boolean }) {
   const T = pub.teams, tv = size === "tv";
+  /* only a captain's phone gets the yes/no card (for its own team) */
+  const captain = !!canArm && (canArm(0) || canArm(1));
   const card = (t: 0 | 1) => {
     const armed = !!pub.dbl?.[t], can = T[t].ll.dbl, mine = !!canArm?.(t);
     const cls = "ll " + (armed ? "armed" : can ? "" : "usedup");
@@ -150,13 +152,19 @@ export function RoundIntro({ pub, canArm, onArm, size, busy }: { pub: Pub; canAr
         <h1 className="display" style={{ fontSize: tv ? 104 : 46 }}>{pub.theme}</h1>
         <p className="text-[var(--color-ink-2)]" style={{ fontSize: tv ? 22 : 13 }}>{T[pub.first ?? 0].name} answers first</p>
       </div>
-      <div className={"card flex flex-col gap-3 w-full " + (tv ? "" : "ri-sm !p-3")}>
+      {/* the TV, the host and the players: no explaining, just a badge once a team has armed it */}
+      {!captain && (pub.dbl?.[0] || pub.dbl?.[1]) && (
+        <div className="flex flex-wrap justify-center gap-3" role="status">
+          {([0, 1] as const).filter((t) => pub.dbl?.[t]).map((t) => (
+            <span key={t} className={"ll armed " + side(t)} style={tv ? { fontSize: 24, padding: "12px 22px" } : undefined}>{ICON.dbl}<span className="nm">{T[t].name} · Double points</span></span>))}
+        </div>)}
+      {captain && <div className={"card flex flex-col gap-3 w-full " + (tv ? "" : "ri-sm !p-3")}>
         <div>
           <div className="eyebrow" style={{ fontSize: tv ? 15 : undefined }}>{tv ? "Captains: double points, yes or no?" : "Double points, yes or no?"}</div>
           <p className="text-[var(--color-ink-3)] mt-1.5" style={{ fontSize: tv ? 16 : 12 }}>{tv ? "Armed now, before the questions. A team that arms it may use only one other lifeline this round." : "Captains arm it now. Armed, a team gets one other lifeline this round."}</p>
         </div>
         <div className={tv ? "grid grid-cols-2 gap-4" : "grid grid-cols-1 gap-3"}>{card(0)}{card(1)}</div>
-      </div>
+      </div>}
     </div>);
 }
 

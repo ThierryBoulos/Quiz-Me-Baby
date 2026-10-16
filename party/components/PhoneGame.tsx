@@ -135,8 +135,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       {text ? <div className="font-bold text-[22px] leading-snug">{text}</div> : <div className="text-[14px] text-[var(--color-ink-3)] mt-0.5">{empty}</div>}
     </div>);
   const Typed = ({ t }: { t: 0 | 1 }) => {
-    if (loading) return null;
-    const x = secret.typed?.[t];
+    /* what they typed comes with the screen itself, so it shows before the secret (the answer, the app's call) lands */
+    const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
     return <Said t={t} text={x?.join("  /  ")} label={x ? `${T[t].name} typed` : T[t].name} empty={pub.timeUp ? "No answer" : `Waiting for ${T[t].name}’s captain to type…`} />;
   };
   /* RIGHT / WRONG under the answer, once there IS an answer (or the clock ran out with none: then the
@@ -668,6 +668,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const [bid, setBid] = useState("");
   const busy = sending || hold;                     // sending, or waiting for the TV to reply
   useEffect(() => { setA(""); setB(""); setSentTxt(null); }, [pub.qid, sc]);
+  /* a BUZZ shows at once on this phone (the TV confirms it a moment later, or says who was first) */
+  const [buzzed, setBuzzed] = useState(false);
+  useEffect(() => { setBuzzed(false); }, [pub.qid, sc, pub.buzz, pub.out?.[0], pub.out?.[1]]);
   useEffect(() => { setBid(""); }, [pub.auction?.bid, sc]);
   const np = useNoPaste(code, pub.qid);
   const act = async (kind: string, payload: Record<string, unknown>) => { setBusy(true); try { await sendAction(code, kind, payload); return true; } catch { return false; /* the phone already says so */ } finally { setBusy(false); } };
@@ -678,8 +681,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const myTurn = (sc === "ask" || sc === "steal") && pub.turn === mine && !pub.lifeline;
   const dip = sc === "ask" && (pub.llUsed?.[mine] || []).includes("dip");
   /* one answer per question: once it's sent it's locked (the app checks it, or the host decides) */
-  const locked = !!pub.pending || !!pub.sent?.[mine];
-  const canType = !pub.paused && ((myTurn && !locked) || (sc === "miniQ" && !pub.sent?.[mine]) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ") && !pub.sent?.[mine])
+  /* sentTxt: what this phone has just sent, locked at once (before the TV's update comes back) */
+  const sentHere = !!pub.sent?.[mine] || !!sentTxt;
+  const locked = !!pub.pending || sentHere;
+  const canType = !pub.paused && ((myTurn && !locked) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ") && !sentHere)
     || (sc === "dishQ" && pub.buzz === mine && !pub.pending) || ((sc === "sudden" || sc === "battleTie") && pub.buzz === mine && !pub.pending)
     /* the Battle: typed with no host; with a host it's said out loud */
     || (sc === "battleQ" && nohost && pub.battle?.cap === mine && !locked));
@@ -702,10 +707,12 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const guess: number = sc === "miniQ" && a.trim() ? QMB.parseNumber(a, pub.question) : NaN;
   const per = /\bin (thousand|million|billion)s\b/i.exec(pub.question || "")?.[1].toLowerCase();
   const send = async () => {
-    if (sc === "miniQ") { if (Number.isFinite(guess) && await act("answer", { n: a })) setSentTxt(a); return; }
+    /* locked in on this phone straight away; put back if it couldn't go */
+    if (sc === "miniQ") { if (!Number.isFinite(guess)) return; setSentTxt(a); if (!(await act("answer", { n: a }))) setSentTxt(null); return; }
     const texts = [a, b].map((x) => x.trim()).filter(Boolean);
     if (!texts.length) return;
-    if (await act("answer", { texts })) setSentTxt(texts.join(" / "));
+    setSentTxt(texts.join(" / "));
+    if (!(await act("answer", { texts }))) setSentTxt(null);
   };
 
   return (
@@ -738,7 +745,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {nohost && lead && pub.lifeline?.key === "friend" && (pub.lifeline.deadline || pub.lifeline.left) && (
         <button className="btn btn-sm self-center" onClick={() => fire({ type: "ui/pauseFriend" })}>{pub.lifeline.deadline ? "Pause the call" : "Resume the call"}</button>)}
 
-      {canBuzz && <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy} onClick={() => { buzzHand(40); void act("buzz", {}); }}>BUZZ</button>}
+      {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy}
+        onClick={() => { buzzHand(40); setBuzzed(true); void act("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>}
+      {canBuzz && buzzed && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
 
       {canType && (
         <div className="card flex flex-col gap-2">
@@ -753,7 +762,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <button className="btn btn-gold btn-lg" disabled={busy || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
           {(sc === "ask" || sc === "steal") && <div className="text-[13px] text-[var(--color-ink-3)]">One go: once you send it, it&rsquo;s locked{nohost ? " and the app checks it" : " until the host decides"}.</div>}
         </div>)}
-      {!canType && pub.sent?.[mine] && (["miniQ", "flagQ", "mapQ", "sayQ"].includes(sc) || (myTurn && !pub.pending)) && (
+      {!canType && sentHere && (["miniQ", "flagQ", "mapQ", "sayQ"].includes(sc) || (myTurn && !pub.pending)) && (
         <p className="text-center font-bold text-[16px]" role="status">Locked in{sentTxt ? `: ${sentTxt}` : ""}.</p>)}
 
       {/* the lifelines: everyone sees them; the captain whose question it is taps */}

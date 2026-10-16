@@ -15,10 +15,33 @@ const L = ({ items }: { items: ReactNode[] }) => (
   </ol>);
 const B = ({ children }: { children: ReactNode }) => <strong className="text-[var(--color-ink)]">{children}</strong>;
 
+/* the one screen to read before the first question; the full rules fold below it */
+function First30() {
+  const steps: [string, ReactNode][] = [
+    ["Pick a side", <>Tap Team A or Team B on your phone. One of you taps <B>Make me captain</B>.</>],
+    ["The captain types", <>Only the captain&rsquo;s answer counts. It goes in once, from the captain&rsquo;s phone.</>],
+    ["Everyone else suggests", <>Type your idea on your phone: it lands on your captain&rsquo;s screen. Shout too, why not.</>],
+    ["Watch the TV", <>Questions, clocks, scores and reveals are on the TV. Your phone shows what you can do right now.</>],
+  ];
+  return (
+    <section className="card flex flex-col gap-3" style={{ borderColor: "rgba(245,197,24,.5)" }}>
+      <h2 className="display text-[26px]" style={{ color: "var(--color-gold)" }}>Your first 30 seconds</h2>
+      <ol className="flex flex-col gap-2.5">
+        {steps.map(([t, x], i) => (
+          <li key={t} className="flex gap-3 items-baseline">
+            <span className="display text-[22px] shrink-0 w-6 text-center" style={{ color: "var(--color-gold)" }}>{i + 1}</span>
+            <span className="text-[15px] leading-relaxed text-[var(--color-ink-2)]"><B>{t}.</B> {x}</span>
+          </li>))}
+      </ol>
+      <p className="text-[13px] text-[var(--color-ink-3)]">That&rsquo;s all you need. The full rules are below.</p>
+    </section>);
+}
+
 /* the rules themselves: on How to Play, and in the lobby while people wait */
 export function Rules() {
   return (
     <>
+      <First30 />
       <Rule n="01" title="The setup">
         <L items={[
           <><B>Two teams</B>, as many players each as you like. One screen everyone can see is the TV: tap <B>Create game</B> on it. Everyone else joins on their phone with the code or the QR.</>,
@@ -131,7 +154,7 @@ export function Rules() {
           <><B>Everyone else</B> sees the question and can send the captain a suggestion.</>,
           <><B>No host?</B> The app checks every answer, and its <B>RIGHT stands</B>: nobody can take it away. When it says WRONG, the other captain has <B>8 seconds</B> to give it to you anyway (a typo the app missed). Steal with the very answer the first team gave, and the point goes back to them. Think the app got yours wrong after the steal? Tap the small <B>appeal</B> once; the point is yours if the other captain agrees. Team A&rsquo;s captain taps Start and Next to move the night on (the other captain can, after a while).</>,
           <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question (another app, a search), or tries to paste an answer, is flagged on the TV, and the host sees the list.</>,
-          <>Phone died during the game? Join again with the same name and tap &ldquo;take my seat back&rdquo;. A screen left open through an update refreshes itself between questions, and the night carries on.</>,
+          <>Phone died, in the lobby or during the game? Join again with the same name and tap &ldquo;take my seat back&rdquo;. A screen left open through an update refreshes itself between questions, and the night carries on.</>,
         ]} />
       </Rule>
     </>);

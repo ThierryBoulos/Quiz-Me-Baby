@@ -96,6 +96,11 @@ export default function PhoneRoom() {
     const { error } = await sb().from("members").update({ team: to, role: "player" }).eq("room", code).eq("user_id", m.user_id);
     if (error) throw new Error(error.message);
   });
+  /* the host: a ghost or a prankster off the line-up (they can join again with the code) */
+  const remove = (m: Member) => window.confirm(`Remove ${m.name} from the game?`) && act(async () => {
+    const { error } = await sb().from("members").delete().eq("room", code).eq("user_id", m.user_id);
+    if (error) throw new Error(error.message);
+  });
   const leave = () => (room?.status === "lobby" || window.confirm("Leave the game? You can come back with the same name.")) && act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
 
   /* the armband moved without me asking (a captain's phone was away): say so, once */
@@ -210,7 +215,7 @@ export default function PhoneRoom() {
               <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>)}
             {mine.role === "player" && myCaptain && <div className="card text-center text-[14px]">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
             {mine.role === "host" && <p className="text-[14px] text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
-            <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} />
+            <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {/* leaving is kept away from everyday buttons, and asks first */}
@@ -233,7 +238,7 @@ export default function PhoneRoom() {
             <h1 className="display text-[40px] mt-1" style={{ color: "var(--color-gold)" }}>Run the night</h1>
             <p className="text-[14px] text-[var(--color-ink-2)] mt-1">You&rsquo;ll see every answer. Tap an arrow to move a player across.</p>
           </section>
-          <Lineup room={room} members={members} onMove={move} />
+          <Lineup room={room} members={members} onMove={move} onRemove={remove} />
           <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => claim("player")}>Stop hosting</button>
         </>
       ) : mine.team == null ? (
@@ -269,7 +274,10 @@ export default function PhoneRoom() {
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
             </div>
           ) : myCaptain ? (
-            <p className="text-center text-[16px] text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}><bdi>{myCaptain.name}</bdi></b> is your captain</p>
+            ((room.state.away as string[] | undefined) || []).includes(myCaptain.user_id) ? (
+              <button className="btn btn-gold btn-block" disabled={busy} onClick={() => act(() => sendAction(code, "setup", { takeCaptain: true }))}>
+                <bdi>{myCaptain.name}</bdi> seems away. Make me captain</button>
+            ) : <p className="text-center text-[16px] text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}><bdi>{myCaptain.name}</bdi></b> is your captain</p>
           ) : (
             <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>
           )}

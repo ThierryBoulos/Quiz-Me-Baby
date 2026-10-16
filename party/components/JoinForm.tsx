@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { FacePicker } from "@/components/Face";
 import { FACES } from "@/lib/faces";
 import { cap1, cleanCode } from "@/lib/room";
@@ -10,10 +10,9 @@ import { friendly } from "@/lib/errors";
 
 /* JOIN — SNAKED's one screen: room code, name, a face, "Take my seat".
    Errors sit beside the thing that's wrong; a taken name offers a fix. */
-function JoinForm() {
+export function JoinForm({ initial }: { initial: string }) {
   const router = useRouter();
-  const params = useSearchParams();
-  const [code, setCode] = useState(cleanCode(params.get("code") ?? ""));
+  const [code, setCode] = useState(cleanCode(initial));
   const [name, setName] = useState("");
   const [face, setFace] = useState(FACES[0]);
   /* each phone starts on its own random face, so a room scanning the QR together doesn't all reach for the first one */
@@ -47,7 +46,7 @@ function JoinForm() {
       /* the server seats one phone at a time and hands out the next free face if this one just went */
       const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean; face?: string }>("qmb_join", { r: code, nm: cap1(useName.trim()), face });
       if (res.error === "no_room" || res.error === "game_over") { setCodeErr(friendly(res.error)); setBusy(false); return; }
-      if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(!!res.playing); setBusy(false); return; }
+      if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(true);   /* the lobby too: a phone that died can take its seat back */ setBusy(false); return; }
       if (res.error === "face_taken") { setErr(friendly("face_taken")); void loadTaken(); setBusy(false); return; }
       if (res.error) { setErr(friendly(res.error)); setBusy(false); return; }
       if (res.face) setFace(res.face);
@@ -115,4 +114,3 @@ function JoinForm() {
     </main>
   );
 }
-export default function JoinPage() { return <Suspense><JoinForm /></Suspense>; }

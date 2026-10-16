@@ -12,7 +12,7 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
    onto the new version then says so and offers Exit, instead of playing on with a broken game. */
 const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
-import { DECIDED, DISH_LAST, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, TIE_SCREENS, T_AWAY, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE_BATTLE,
+import { DECIDED, DISH_LAST, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, TIE_SCREENS, T_AWAY, T_LOBBY_AWAY, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE_BATTLE,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
 /* the house timers come from Settings on this TV */
@@ -165,7 +165,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     tvAway: 0, awayPaused: false,                      // when the TV's screen went to sleep (0: it's on), and whether that paused the clock
     imad: null as Pub["imad"] | null, imadN: 0, imadQ: [] as string[],   // Imad's latest line, and the ones waiting to go up together
     custom: [] as Q[],                                 // questions of their own, sent by the phone that started
-    buzzAt: 0, late: null as 0 | 1 | null,             // Cocktail or Dish: when the buzz came (10 s to type), and who ran out
+    buzzAt: 0, late: null as 0 | 1 | null,             // Guess the Cocktail or Dish: when the buzz came (10 s to type), and who ran out
     lastAns: null as null | { answer: string; got: boolean | null },   // the Battle: the last question's answer, shown once it's settled
     exit: false,                                       // the night is over and Exit was tapped: every screen goes home
   });
@@ -252,6 +252,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
       autoAt: s.autoAt, paused: s.paused, lead: leadTeam(), imad: s.imad || undefined, flags: s.flags.slice(-30), tvAway: !!s.tvAway,
     };
+    /* with a host: the typed answer rides with the screen (the host's phone shows it at once; the app's opinion follows with the secret) */
+    if (!s.nohost && ["ask", "steal", "dishQ", "battleQ", "sudden", "battleTie"].includes(s.screen)) p.said = [s.typed[0], s.typed[1]];
     /* no host, the answer card: the first team can appeal once if its answer went down as wrong */
     if (s.nohost && s.screen === "answer" && rd) {
       const res = rd.res?.[g.seat];
@@ -847,6 +849,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       await sb().from("rooms").update({ state: { ...room.state, teamNames: names } }).eq("code", code);
       return;
     }
+    /* the lobby: my captain is away, so I take the armband */
+    if (a.kind === "setup" && a.payload.takeCaptain && room.status === "lobby" && from && from.team != null && from.role === "player") {
+      const cap = members.find((m) => m.team === from!.team && m.role === "captain");
+      if (!cap) return;
+      if (!((room.state.away as string[] | undefined) || []).includes(cap.user_id)) { setLobbyNote(`${cap.name} is still here.`); return; }
+      const x = await sb().from("members").update({ role: "player" }).eq("room", code).eq("user_id", cap.user_id);
+      if (!x.error) await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", a.user_id);
+      return;
+    }
     if (a.kind === "setup" && a.payload.start && room.status === "lobby" && starter(members)?.user_id === a.user_id && !readyToStart(members)) {
       setLobbyNote(notReadyWhy(members) || "Not ready yet.");
       return;
@@ -880,8 +891,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         dishLevels: levels(cfgIn.dishLevels, QMB.DISH_LEVEL_KEYS, ["c-medium", "d-medium"]), teamA: team(0), teamB: team(1), picks, themeDiff,
         pickClosest: hand("pickClosest"), pickAuction: hand("pickAuction"), pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish") };
       const g = env().deal.buildGame(cfg);
-      /* Party plays Don't Say the Same best of 7 (the coin-flip prompt stays last) and
-         Cocktail or Dish best of 5. The engine deals Classic's lengths; the legs left
+      /* Party plays Don't Say the Same as Me best of 7 (the coin-flip prompt stays last) and
+         Guess the Cocktail or Dish best of 5. The engine deals Classic's lengths; the legs left
          over are dropped (Say) or kept back for swaps and tie-breakers (Dish). The
          host's own picks are the last to go. */
       const trim = (m: G, n: number | undefined, mine: string[], keepLast: boolean) => {
@@ -1099,6 +1110,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (kind && who != null && s.typed[who] && q) {
           applyFx([{ timer: "pause" }]);
           s.pending = { kind, team: who, text: (s.typed[who] || []).join(" / "), v: !!match(s.typed[who], q), until: now + contestSecs(kind === "battle") * 1000 };
+          if (s.pending.v) settle(false);             // the app's RIGHT stands at once
         } else if (s.timeUp && (sc === "ask" || sc === "steal")) {
           /* the clock had run out, waiting for the host: with no host that's a wrong answer */
           s.timeUp = false; s.step++;
@@ -1127,7 +1139,20 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       } finally { H.busy = false; }
       return;
     }
-  }, [code, publish, current, play, applyFx]);
+  }, [code, publish, current, play, applyFx, settle]);
+  /* The lobby: a captain silent for T_LOBBY_AWAY (phone asleep, gone) shows as away on the TV, and any
+     teammate can take the armband (the "setup" takeCaptain action). Kept in the room's state for the phones. */
+  useEffect(() => {
+    if (!isTv) return;
+    const t = setInterval(() => {
+      const { room, members } = ctx.current, H = here.current, now = Date.now();
+      if (!room || room.status !== "lobby") return;
+      const away = members.filter((m) => m.role === "captain" && now - (H.at[m.user_id] ?? H.since) >= T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
+      const was = ((room.state.away as string[] | undefined) || []).join(",");
+      if (away.join(",") !== was) void sb().from("rooms").update({ state: { ...room.state, away } }).eq("code", code).then(() => {});
+    }, 3000);
+    return () => clearInterval(t);
+  }, [isTv, code]);
   /* the line-up changed (a new captain, a move): the phones' view changes with it */
   const lineup = ctx.current.members.map((m) => `${m.user_id}:${m.team}:${m.role}:${m.name}`).join("|");
   const lastLineup = useRef(lineup);
@@ -1187,7 +1212,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (want > L.shown) { L.shown = want; changed = true; }
       }
       if (s.pending && now >= s.pending.until) { s.step++; settle(false); changed = true; }
-      /* Cocktail or Dish: a buzz gets 10 seconds to type it (no clock on screen); then it's wrong */
+      /* Guess the Cocktail or Dish: a buzz gets 10 seconds to type it (no clock on screen); then it's wrong */
       if (s.screen === "dishQ" && s.buzzAt && !s.pending) {
         const b = g.dishGame.leg.buzz;
         if (b == null || s.typed[b]) s.buzzAt = 0;
