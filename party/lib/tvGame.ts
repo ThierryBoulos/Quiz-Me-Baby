@@ -11,13 +11,15 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
    carried on (new required state, renamed screens, a changed engine game object): a TV reloaded
    onto the new version then says so and offers Exit, instead of playing on with a broken game. */
 const SAVE_SHAPE = 1;
-import { cap1, notReadyWhy, presenceChannel, readyToStart, starter, type Member, type Room } from "./room";
+import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
 import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_LOBBY_AWAY, T_MAP_RULE, T_NEXT_FALLBACK,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 import { CAPTAIN_MOVES, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, contestSecs, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, type Action, type G, type PKind, type W } from "./tv/rules";
 import { closestW, currentQ, leadOf, matchQ, okWin, sayWin, turnOf } from "./tv/reads";
 import { buildView } from "./tv/view";
+import { useInbox } from "./tv/useInbox";
+import { usePresent } from "./tv/usePresent";
 import { newState, type TvState } from "./tv/state";
 
 /* THE TV RUNS THE NIGHT. It holds the game, plays every move through the
@@ -699,57 +701,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTv, saveKey]);
 
-  /* the inbox: everything since the last action handled on this TV, in the
-     order the server received it — that order decides who buzzed first */
-  useEffect(() => {
-    if (!isTv) return;
-    const key = "qmb.tv." + code + ".last";
-    let last = 0, busy = false, again = false;
-    try { last = Number(localStorage.getItem(key) || 0); } catch { /* no storage: start from the top */ }
-    /* Two taps sent at once (a fast +1, two buzzes) can be numbered in one order and land in the
-       other, so reading only "after the last id" would skip the slower one for good. So each read
-       also looks back 10 seconds (by the server's clock) for late arrivals, and remembers what it
-       has handled, so nothing is lost and nothing is done twice. */
-    const before = last, seen = new Set<number>();
-    let newest = 0;                                   // the server time of the newest action handled (ms)
-    /* the server's timestamps, in either spelling ("…T12:00:00.123456+00:00" or "… 12:00:00.123456+00"), as ms */
-    const ms = serverMs;
-    /* an action that lands while the last batch is still being read is picked up straight after, not at the next poll */
-    const fresh: Action[] = [];                        // straight from the realtime message: handled before the read
-    const take = async (a: Action) => {
-      if (a.id <= before || seen.has(a.id) || a.kind === "suggest") return;
-      seen.add(a.id);
-      try { await handle(a); } catch (e) { console.error("action refused", a, e); }
-      if (a.id > last) { last = a.id; try { localStorage.setItem(key, String(last)); } catch { /* in memory only */ } }
-      const t = ms(a.at); if (t > newest) newest = t;
-    };
-    const drain = async () => {
-      if (busy) { again = true; return; }
-      busy = true;
-      try {
-        do {
-          again = false;
-          while (fresh.length) await take(fresh.shift()!);
-          let q = sb().from("actions").select("*").eq("room", code).neq("kind", "suggest");
-          q = newest ? q.or(`id.gt.${last},at.gt.${new Date(newest - 10000).toISOString()}`) : q.gt("id", last);
-          const { data } = await q.order("id");
-          for (const a of (data || []) as Action[]) await take(a);
-          if (seen.size > 2000) { const keep = [...seen].slice(-500); seen.clear(); keep.forEach((x) => seen.add(x)); }
-        } while (again);
-      } finally { busy = false; }
-    };
-    void drain();
-    let live = false, read = Date.now();
-    const ch = sb().channel("actions:" + code)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
-        (m: { new?: Partial<Action> }) => { if (m.new?.id && m.new.kind) fresh.push(m.new as Action); void drain(); })
-      .subscribe((status) => { const was = live; live = status === "SUBSCRIBED"; if (live && !was) void drain(); });
-    /* every tap arrives with the push and is handled at once; this read is the safety net:
-       every 20 s while the live connection is up (a tap it missed is picked up by the next push
-       anyway), every 3 s while it's down */
-    const poll = setInterval(() => { if (Date.now() - read >= (live ? 20000 : 3000)) { read = Date.now(); void drain(); } }, 1000);
-    return () => { clearInterval(poll); void sb().removeChannel(ch); };
-  }, [code, isTv, handle]);
+  /* the inbox: every tap from the phones, in the order the server received it (lib/tv/useInbox.ts) */
+  useInbox(code, isTv, handle);
 
   /* Who's here: every phone on screen is present on the room's realtime channel (see
      usePresence), and anything it sends counts too. A captain gone for T_AWAY hands over
@@ -757,21 +710,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      night. Nobody is removed. */
   const here = useRef({ at: {} as Record<string, number>, since: Date.now(), busy: false, checked: 0, lags: [] as number[],
     away: {} as Record<string, { at: number; qid?: string; flag?: number }> });
-  useEffect(() => {
-    if (!isTv) return;
-    let live = false, down = Date.now();
-    /* a presence listener is what makes the channel keep the list (without one, the joins are dropped) */
-    const ch = sb().channel(presenceChannel(code)).on("presence", { event: "sync" }, () => {});
-    ch.subscribe((status) => { live = status === "SUBSCRIBED"; if (!live) down = Date.now(); });
-    const t = setInterval(() => {
-      const H = here.current, now = Date.now();
-      if (live) { for (const k of Object.keys(ch.presenceState())) H.at[k] = now; return; }
-      /* the TV can't see who's present (its realtime link is down): nobody is taken for away
-         meanwhile, since the phones that are present aren't writing to the log */
-      if (now - down > 5000) for (const m of ctx.current.members) H.at[m.user_id] = now;
-    }, 1000);
-    return () => { clearInterval(t); void sb().removeChannel(ch); };
-  }, [isTv, code]);
+  usePresent(code, isTv, here, members);
   /* Left the game screen during a question: flagged once they've been gone two
      seconds (a glance at a notification doesn't count), with how long when
      they come back. The TV says it; the host's phone keeps the list. */
