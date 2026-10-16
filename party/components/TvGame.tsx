@@ -305,7 +305,7 @@ function Pending({ pub }: { pub: Pub }) {
         <div className="eyebrow text-[20px]">{T[P.team].name} said</div>
         <div className="display" style={{ fontSize: 96, color: tc(P.team) }}>{P.text}</div>
         <div className="display text-[54px]">The app says <Verdict v={P.v} /></div>
-        <div className="text-[24px] text-[var(--color-ink-2)]">{T[o].name}&rsquo;s captain can change the call · {left}</div>
+        <div className="text-[24px] text-[var(--color-ink-2)]"><bdi>{T[o].name}</bdi>&rsquo;s captain can change the call · {left}</div>
       </div>
     </div>);
 }
@@ -342,8 +342,8 @@ function ImadBubble({ imad }: { imad?: Pub["imad"] }) {
   if (!imad || on !== imad.id) return null;
   return (
     <div className="imad-bubble" role="status" aria-live="polite" key={imad.id}>
-      <div className="hb-text">{imad.text}</div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/imad.webp" alt="" />
+      <div className="hb-text">{imad.text}</div>
     </div>);
 }

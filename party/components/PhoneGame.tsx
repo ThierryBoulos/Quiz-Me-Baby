@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { TIE_SCREENS, type Pub, type Secret, type Two } from "@/lib/game";
+import { iso, TIE_SCREENS, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { note, sb, sendAction } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
@@ -22,8 +22,10 @@ export function useSecret(code: string, on: boolean) {
     if (!on) return;
     const pull = async () => { const { data } = await sb().from("secrets").select("data").eq("room", code).maybeSingle(); if (data) setS((data.data || {}) as Secret); };
     void pull();
-    const ch = sb().channel("secret:" + code).on("postgres_changes", { event: "*", schema: "public", table: "secrets", filter: "room=eq." + code }, () => void pull()).subscribe();
-    const t = setInterval(() => void pull(), 2500);
+    /* the push carries the answer: use it (no second trip); a 10 s read underneath as a safety net */
+    const ch = sb().channel("secret:" + code).on("postgres_changes", { event: "*", schema: "public", table: "secrets", filter: "room=eq." + code },
+      (e) => { const d = (e.new as { data?: Secret } | undefined)?.data; if (d) setS(d); else void pull(); }).subscribe();
+    const t = setInterval(() => { if (document.visibilityState === "visible") void pull(); }, 10000);
     return () => { clearInterval(t); void sb().removeChannel(ch); };
   }, [code, on]);
   return s;
@@ -42,9 +44,14 @@ function useSuggestions(code: string, qid: string | undefined, members: Member[]
       setList(((data || []) as { id: number; user_id: string; payload: { text?: string } }[]).map((a) => ({ id: a.id, user_id: a.user_id, text: String(a.payload.text || "") })));
     };
     void pull();
+    /* a new suggestion arrives with the push: add it straight in; a 10 s read underneath as a safety net */
     const ch = sb().channel("sug:" + code + ":" + qid).on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
-      (e) => { if ((e.new as { kind?: string })?.kind === "suggest") void pull(); }).subscribe();
-    const t = setInterval(() => void pull(), 2500);
+      (e) => {
+        const a = e.new as { id?: number; user_id?: string; kind?: string; payload?: { qid?: string; text?: string } };
+        if (a?.kind !== "suggest" || a.payload?.qid !== qid || a.id == null || !a.user_id) return;
+        setList((cur) => (cur.some((x) => x.id === a.id) ? cur : [{ id: a.id!, user_id: a.user_id!, text: String(a.payload?.text || "") }, ...cur].slice(0, 30)));
+      }).subscribe();
+    const t = setInterval(() => { if (document.visibilityState === "visible") void pull(); }, 10000);
     return () => { clearInterval(t); void sb().removeChannel(ch); };
   }, [code, qid, on]);
   return list.filter((s) => members.find((m) => m.user_id === s.user_id)?.team === team);
@@ -104,7 +111,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const secret: Secret = fresh ? raw : {};
   const loading = !!pub.qid && !fresh;
   const Main = ({ label, move, off }: { label: string; move: Record<string, unknown>; off?: boolean }) =>
-    <button className="btn btn-gold btn-lg btn-block mt-auto" disabled={busy || off} onClick={() => send(move)}>{label}</button>;
+    <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || off} onClick={() => send(move)}>{label}</button>;
   /* the host's private answer: the one box on this phone that isn't a button, so it can't be missed */
   const AnswerCard = () => loading ? <Line>Getting the answer…</Line> : secret.answer ? (
     <div className="card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
@@ -385,7 +392,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   }
 }
 
-export const flagText = (f: NonNullable<Pub["flags"]>[number]) => `${f.name} ${f.kind === "paste" ? "(tried to paste)" : f.ms != null ? `(left the screen ${Math.round(f.ms / 1000)}s)` : "(left the screen, still away)"}`;
+export const flagText = (f: NonNullable<Pub["flags"]>[number]) => `${iso(f.name)} ${f.kind === "paste" ? "(tried to paste)" : f.ms != null ? `(left the screen ${Math.round(f.ms / 1000)}s)` : "(left the screen, still away)"}`;
 /* the host's warning: who left the game screen during this question (another app, a search) */
 function AwayCard({ pub }: { pub: Pub }) {
   const now = (pub.flags || []).filter((f) => f.qid && f.qid === pub.qid);
@@ -537,7 +544,8 @@ function youLine(pub: Pub, me: Member, capName?: string) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain", ours = pub.turn === mine, them = T[pub.turn ?? 0].name;
   const to = capName ? `send ideas to ${capName}` : "send ideas to your captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend." : "Double Dip: two answers on this one.") : `${T[pub.lifeline.team].name} are using a lifeline.`;
-  if (pub.pending) return pub.pending.team === mine ? "Answer sent. The other captain can change the call." : `${them} answered. Your call below.`;
+  if (pub.pending) return pub.pending.team === mine ? "Answer sent. The other captain can change the call."
+    : cap ? `${them} answered. Your call below.` : `${them} answered. ${capName || "Your captain"} rules on it.`;
   /* sent, with a host: locked in until the host rules */
   if (ours && pub.sent?.[mine] && pub.mode === "host") return cap ? "Sent. Waiting for the host." : "Your captain has answered. The host decides.";
   if (pub.screen === "steal") return ours ? (cap ? "They missed. Your steal, captain: type it below." : `They missed. Your steal: ${to}.`) : `You missed. ${them} can steal it now.`;
@@ -592,7 +600,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   const cap = members.find((m) => m.team === mine && m.role === "captain");
   const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !CAPTAINS_ONLY.includes(pub.screen);
   const np = useNoPaste(code, pub.qid);
-  const suggest = async () => { const t = text.trim(); if (!t) return; await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); };
+  const suggest = async () => { const t = text.trim(); if (!t) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); } catch { /* the phone already says so; the text stays */ } };
   return (
     <div className="flex flex-col gap-4 flex-1">
       <Head pub={pub} me={me} capName={cap?.name} />
@@ -648,7 +656,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   useEffect(() => { setA(""); setB(""); setSentTxt(null); }, [pub.qid, sc]);
   useEffect(() => { setBid(""); }, [pub.auction?.bid, sc]);
   const np = useNoPaste(code, pub.qid);
-  const act = async (kind: string, payload: Record<string, unknown>) => { setBusy(true); try { await sendAction(code, kind, payload); } finally { setBusy(false); } };
+  const act = async (kind: string, payload: Record<string, unknown>) => { setBusy(true); try { await sendAction(code, kind, payload); return true; } catch { return false; /* the phone already says so */ } finally { setBusy(false); } };
   const nxt = (move: Record<string, unknown>) => act("next", { move, step: pub.step });
   /* quick taps (+1, pausing a call): straight out, nothing waits for them */
   const fire = (move: Record<string, unknown>) => { void sendAction(code, "next", { move, step: pub.step }).catch(() => {}); };
@@ -677,10 +685,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const showNext = !!next && sc !== "sudden";
 
   const send = async () => {
-    if (sc === "miniQ") { await act("answer", { n: a }); setSentTxt(a); return; }
+    if (sc === "miniQ") { if (await act("answer", { n: a })) setSentTxt(a); return; }
     const texts = [a, b].map((x) => x.trim()).filter(Boolean);
     if (!texts.length) return;
-    await act("answer", { texts }); setSentTxt(texts.join(" / "));
+    if (await act("answer", { texts })) setSentTxt(texts.join(" / "));
   };
 
   return (
@@ -769,15 +777,15 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       </>)}
       {/* no host, level at the end of a mini-game: the lead captain picks */}
       {nohost && TIE_SCREENS.includes(sc) && mayNext && pub.nextBy && (
-        <div className="flex flex-col gap-3 mt-auto">
+        <div className="flex flex-col gap-3 mt-auto dock">
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/more" })}>One more</button>
           <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/stop" })}>A point each</button>
         </div>)}
 
       {/* no host: start, go and next — the lead captain (Team A's) */}
       {showNext && next && (
-        <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: next[1] })}>{next[0]}</button>)}
-      {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
+        <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: next[1] })}>{next[0]}</button>)}
+      {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
       {pub.nextBy && !lead && open && <p className="text-center text-[13px] text-[var(--color-ink-3)]">{pub.nextBy} hasn&rsquo;t tapped it, so you can.</p>}
       {pub.nextBy && !lead && !open && <WaitingFor pub={pub} />}
       {/* no host: either captain can stop the clock (the question hides until it restarts) */}

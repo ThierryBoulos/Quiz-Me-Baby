@@ -28,13 +28,24 @@ export default function PhoneRoom() {
   const [rules, setRules] = useState(false);          // the lobby: How to Play over the room, so nobody leaves it
   /* Between a tap and the TV's reply (a second or two): a bar along the top,
      and the buttons stay off, so nobody taps twice wondering if it worked. */
+  /* It lasts until the TV has actually answered (its next update), not until this phone's own refresh;
+     if nothing comes back in 4 s the phone says so, and a tap that couldn't even leave says so at once. */
   const [waiting, setWaiting] = useState(false);
+  const [tapErr, setTapErr] = useState<string | null>(null);
+  const waitRef = useRef({ on: false, key: "" }), viewKey = useRef("");
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
-    const on = () => { setWaiting(true); clearTimeout(t); t = setTimeout(() => setWaiting(false), 4000); };
+    const stop = () => { clearTimeout(t); waitRef.current.on = false; setWaiting(false); };
+    const on = () => {
+      waitRef.current = { on: true, key: viewKey.current }; setWaiting(true); setTapErr(null); clearTimeout(t);
+      t = setTimeout(() => { if (waitRef.current.on) { stop(); setTapErr("The TV didn't get that. Tap again."); } }, 4000);
+    };
+    const failed = (e: Event) => { stop(); setTapErr((e as CustomEvent<string>).detail || "No connection. Tap again."); };
     window.addEventListener("qmb:sent", on);
-    return () => { window.removeEventListener("qmb:sent", on); clearTimeout(t); };
+    window.addEventListener("qmb:failed", failed);
+    return () => { window.removeEventListener("qmb:sent", on); window.removeEventListener("qmb:failed", failed); clearTimeout(t); };
   }, []);
+  useEffect(() => { if (!tapErr) return; const t = setTimeout(() => setTapErr(null), 6000); return () => clearTimeout(t); }, [tapErr]);
 
   useEffect(() => { void ensureSession().then(setMe); }, []);
   const report = usePresence(code, me);
@@ -53,7 +64,7 @@ export default function PhoneRoom() {
   async function act(fn: () => Promise<unknown>) {
     setBusy(true); setMsg(null);
     try { const r = await fn(); if (typeof r === "string" && r !== "ok") setMsg(friendly(r)); await refresh(); }
-    catch (e) { setMsg(friendly(e)); }
+    catch (e) { if (!(e as { announced?: boolean }).announced) setMsg(friendly(e)); }
     setBusy(false);
   }
   const pickTeam = (t: 0 | 1 | null) => act(() => rpc<string>("qmb_update_me", { r: code, nm: mine?.name ?? "", tm: t }));
@@ -85,7 +96,7 @@ export default function PhoneRoom() {
     const name = cap1((draft ?? "").trim());
     if (!mine || mine.team == null || !name) return;
     setNameState("saving"); setMsg(null);
-    void sendAction(code, "team_name", { team: mine.team, name }).catch((e) => { setNameState(null); setMsg(friendly(e)); });
+    void sendAction(code, "team_name", { team: mine.team, name }).catch(() => { setNameState(null); /* the phone already says so */ });
     (document.activeElement as HTMLElement | null)?.blur?.();
   };
   const shownName = mine?.team != null ? teamName(room, mine.team) : "";
@@ -97,10 +108,13 @@ export default function PhoneRoom() {
   }, [nameState, shownName, draft]);
   useEffect(() => { if (nameState !== "saved") return; const t = setTimeout(() => setNameState(null), 4000); return () => clearTimeout(t); }, [nameState]);
 
-  /* the TV's reply has landed: whatever changed in the room */
-  useEffect(() => { setWaiting(false); }, [room]);
   const playing = room?.status === "playing" || room?.status === "done";
   const pub = (room?.state?.pub || null) as Pub | null;
+  /* the TV's reply has landed: the game moved on (a new update from the TV, or the game started) */
+  viewKey.current = `${room?.status}|${pub?.at ?? ""}`;
+  useEffect(() => {
+    if (waitRef.current.on && viewKey.current !== waitRef.current.key) { waitRef.current.on = false; setWaiting(false); setTapErr(null); }
+  }, [room?.status, pub?.at]);
   useEffect(() => { noteTvTime(pub?.at); }, [pub?.at]);
   /* an old copy of the app (left open across a deploy) reloads when nothing is being answered */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline));
@@ -113,7 +127,7 @@ export default function PhoneRoom() {
   useAwayWatch(report, live, pub?.qid);
   const sendMove = (move: Record<string, unknown>) => act(() => sendAction(code, "judge", { move, step: pub?.step }));
   /* quick taps (+1, Undo, pausing a call): straight out, the buttons never wait for them */
-  const fireMove = (move: Record<string, unknown>) => { void sendAction(code, "judge", { move, step: pub?.step }).catch((e) => setMsg(friendly(e))); };
+  const fireMove = (move: Record<string, unknown>) => { void sendAction(code, "judge", { move, step: pub?.step }).catch(() => { /* the phone already says so */ }); };
 
   if (!room || !mine) return <main className="screen justify-center items-center gap-4" aria-busy="true"><div className="spinner" /><div className="eyebrow">Finding your seat…</div></main>;
 
@@ -125,6 +139,9 @@ export default function PhoneRoom() {
   return (
     <main className="screen">
       {waiting && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
+      {tapErr && <div className="fixed left-4 right-4 enter text-center font-bold rounded-[16px]" role="alert" data-taperr
+        style={{ zIndex: 50, top: "calc(12px + env(safe-area-inset-top))", fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
+          boxShadow: "0 12px 30px rgba(0,0,0,.6)" }}>{tapErr}</div>}
       {pub?.screen === "final" && !panel && <Confetti n={60} />}
       <header className="flex items-center justify-between">
         <span className="chip"><span className="face">{mine.avatar || "🙂"}</span>{mine.name}</span>
@@ -213,7 +230,8 @@ export default function PhoneRoom() {
           {mine.role === "captain" ? (
             <div className="card flex flex-col gap-3">
               <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
-              <label className="field-label !mb-0" htmlFor="tname">Name your team</label>
+              <div className="flex items-baseline justify-between"><label className="field-label !mb-0" htmlFor="tname">Name your team</label>
+                <span className="text-[12px] text-[var(--color-ink-3)] tabular-nums" aria-live="polite">{(draft ?? teamName(room, mine.team)).length}/18</span></div>
               {/* a form, so the keyboard's Done/Go saves it too; Save keeps the keyboard's focus so the tap never misses */}
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); saveTeamName(); }}>
                 <input id="tname" className="input" maxLength={18} enterKeyHint="done" autoComplete="off" value={draft ?? teamName(room, mine.team)}
@@ -226,7 +244,7 @@ export default function PhoneRoom() {
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
             </div>
           ) : myCaptain ? (
-            <button className="btn btn-block" disabled>{myCaptain.name} is your captain</button>
+            <p className="text-center text-[16px] text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}>{myCaptain.name}</b> is your captain</p>
           ) : (
             <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>
           )}
@@ -251,7 +269,7 @@ export default function PhoneRoom() {
 
       {room.status === "lobby" && (
         <footer className="mt-auto flex flex-col gap-2">
-          <button type="button" className="self-center text-[14px] font-bold underline underline-offset-4 text-[var(--color-ink-2)] py-1" onClick={() => setRules(true)}>How to play</button>
+          <button type="button" className="self-center text-[14px] font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" onClick={() => setRules(true)}>How to play</button>
           {canStart ? (
             <Setup ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (

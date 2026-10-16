@@ -1,5 +1,6 @@
 "use client";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { friendly } from "./errors";
 
 /* The project's public address and publishable key. Both are meant to be in
    the page — row-level security in the database is what protects the
@@ -32,8 +33,14 @@ export async function rpc<T = unknown>(fn: string, args: Record<string, unknown>
 
 /* a phone telling the TV something: a buzz, an answer, a team name, "start" */
 export async function sendAction(room: string, kind: string, payload: Record<string, unknown> = {}) {
-  const { error } = await sb().from("actions").insert({ room, kind, payload });
-  if (error) throw new Error(error.message);
+  let error: { message: string } | null = null;
+  try { ({ error } = await sb().from("actions").insert({ room, kind, payload })); }
+  catch (e) { error = { message: e instanceof Error ? e.message : String(e) }; }
+  if (error) {
+    /* never silent: the phone says the tap didn't go (see the room page) */
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("qmb:failed", { detail: friendly(error.message) }));
+    throw Object.assign(new Error(error.message), { announced: true });
+  }
   /* sent — the phone now waits for the TV's answer (see useWaiting) */
   /* except quick same-screen taps (+1, undo, marking right/wrong, pause): counting names fast must stay fast */
   const move = (payload.move as { type?: string } | undefined)?.type || "";

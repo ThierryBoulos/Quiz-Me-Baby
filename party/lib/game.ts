@@ -79,3 +79,7 @@ export const T_AWAY = 60;
 export const T_DISH_TYPE = 10;
 /* Party plays some mini-games shorter than Classic (the shared engine keeps Classic's lengths) */
 export const PARTY_LEGS: Partial<Record<MiniKey, number>> = { saysame: 7, dish: 5 };
+
+/* A name inside a sentence, isolated, so a right-to-left name (Arabic) doesn't drag the
+   punctuation around it out of order: "(Abdulrahman) left the screen" stays in order. */
+export const iso = (name: string) => "\u2068" + name + "\u2069";

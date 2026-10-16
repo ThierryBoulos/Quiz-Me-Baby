@@ -13,9 +13,11 @@ export const cleanCode = (s: string) => s.toUpperCase().split("").filter((c) => 
 export const cap1 = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 export const teamName = (room: Room | null, t: 0 | 1) => cap1(room?.state?.teamNames?.[t] || (t === 0 ? "Team A" : "Team B"));
 
-/* The room and its line-up, kept live: Supabase pushes every change, and a
-   slow poll sits underneath as a safety net (SNAKED does the same) so a
-   dropped socket on a phone never leaves the screen frozen. */
+/* The room and its line-up, kept live: Supabase pushes every change and the
+   phone uses what the push carries. A poll sits underneath as a safety net:
+   every 10 s while the live connection is up, every 3 s while it's down, and
+   not at all while the screen is off (it catches up the moment it's back). */
+const POLL_LIVE = 10000, POLL_DOWN = 3000;
 export function useRoom(code: string) {
   const [room, setRoom] = useState<Room | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
@@ -39,6 +41,7 @@ export function useRoom(code: string) {
   useEffect(() => {
     alive.current = true;
     void pull();
+    let live = false, last = Date.now();
     const ch = sb()
       .channel("room:" + code)
       /* the push carries the new row: use it straight away (no second trip to the server) */
@@ -46,11 +49,30 @@ export function useRoom(code: string) {
         const n = e.new as Room | undefined;
         if (n && n.code === code && n.state) { takeRoom(n); setMissing(false); } else void pull();
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "members", filter: "room=eq." + code }, () => void pullMembers())
-      .subscribe();
-    const poll = setInterval(() => void pull(), 3000);
-    return () => { alive.current = false; clearInterval(poll); void sb().removeChannel(ch); };
-  }, [code, pull]);
+      /* someone joined, moved, became captain or left: apply that one row, not the whole list again */
+      .on("postgres_changes", { event: "*", schema: "public", table: "members", filter: "room=eq." + code }, (e) => {
+        const n = e.new as Member | undefined, o = e.old as Partial<Member> | undefined;
+        if (e.eventType === "DELETE" && o?.user_id) setMembers((cur) => cur.filter((m) => m.user_id !== o.user_id));
+        else if (n?.user_id) setMembers((cur) => {
+          const row = { ...n, name: cap1(n.name) }, i = cur.findIndex((m) => m.user_id === n.user_id);
+          const next = i < 0 ? [...cur, row] : cur.map((m, k) => (k === i ? row : m));
+          return next.sort((a, b) => (a.joined_at < b.joined_at ? -1 : a.joined_at > b.joined_at ? 1 : 0));
+        });
+        else void pullMembers();
+      })
+      .subscribe((status) => {
+        const was = live;
+        live = status === "SUBSCRIBED";
+        if (live && !was) void pull();                  // (re)connected: catch up on anything missed meanwhile
+      });
+    const tick = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - last >= (live ? POLL_LIVE : POLL_DOWN)) { last = Date.now(); void pull(); }
+    }, 1000);
+    const wake = () => { if (document.visibilityState === "visible") { last = Date.now(); void pull(); } };
+    document.addEventListener("visibilitychange", wake);
+    return () => { alive.current = false; clearInterval(tick); document.removeEventListener("visibilitychange", wake); void sb().removeChannel(ch); };
+  }, [code, pull, pullMembers, takeRoom]);
 
   return { room, members, missing, refresh: pull };
 }

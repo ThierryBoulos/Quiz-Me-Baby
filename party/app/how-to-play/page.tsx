@@ -9,7 +9,7 @@ export default function HowToPlay() {
         <Link className="btn btn-sm btn-ghost" href="/">Back</Link>
       </header>
 
-      <p className="text-[13px] text-[var(--color-ink-2)] -mt-2">Times below are the defaults. Change any of them in <Link href="/settings#timers" className="underline underline-offset-4">Settings &rarr; Timers</Link> on the screen that will be the TV.</p>
+      <p className="text-[13px] text-[var(--color-ink-2)] -mt-2">Times below are the defaults. Change any of them in <Link href="/settings#timers" className="underline underline-offset-4 inline-block py-3 -my-3">Settings &rarr; Timers</Link> on the screen that will be the TV.</p>
 
       <Rules />
 

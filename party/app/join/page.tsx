@@ -1,10 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { FacePicker } from "@/components/Face";
 import { FACES } from "@/lib/faces";
 import { cap1, cleanCode } from "@/lib/room";
-import { ensureSession, rpc } from "@/lib/supabase";
+import { ensureSession, rpc, sb } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 
 /* JOIN — SNAKED's one screen: room code, name, a face, "Take my seat".
@@ -15,6 +16,8 @@ function JoinForm() {
   const [code, setCode] = useState(cleanCode(params.get("code") ?? ""));
   const [name, setName] = useState("");
   const [face, setFace] = useState(FACES[0]);
+  /* each phone starts on its own random face, so a room scanning the QR together doesn't all reach for the first one */
+  useEffect(() => { setFace(FACES[Math.floor(Math.random() * FACES.length)]); }, []);
   const [taken, setTaken] = useState<string[]>([]);
   const [codeErr, setCodeErr] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -23,12 +26,13 @@ function JoinForm() {
   const [busy, setBusy] = useState(false);
 
   const loadTaken = useCallback(async () => {
-    if (code.length !== 4) { setTaken([]); return; }
-    try { await ensureSession(); setTaken(await rpc<string[]>("qmb_taken_faces", { r: code })); } catch { setTaken([]); }
+    if (code.length !== 4) { setTaken([]); return []; }
+    try { await ensureSession(); const t = await rpc<string[]>("qmb_taken_faces", { r: code }); setTaken(t); return t; } catch { setTaken([]); return []; }
   }, [code]);
   useEffect(() => { void loadTaken(); }, [loadTaken]);
   /* don't sit on a face somebody already has */
-  useEffect(() => { if (taken.includes(face)) setFace(FACES.find((f) => !taken.includes(f)) || face); }, [taken, face]);
+  const freeFace = (t: string[]) => { const free = FACES.filter((f) => !t.includes(f)); return free.length ? free[Math.floor(Math.random() * free.length)] : null; };
+  useEffect(() => { if (taken.includes(face)) setFace(freeFace(taken) || face); }, [taken, face]);
 
   async function join(useName: string) {
     setErr(null); setCodeErr(null);
@@ -36,12 +40,25 @@ function JoinForm() {
     setBusy(true);
     try {
       await ensureSession();
-      const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean }>("qmb_join", { r: code, nm: cap1(useName.trim()), face });
-      if (res.error === "no_room") { setCodeErr(friendly("no_room")); setBusy(false); return; }
-      if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(!!res.playing); setBusy(false); return; }
-      if (res.error === "face_taken") { setErr(friendly("face_taken")); void loadTaken(); setBusy(false); return; }
-      if (res.error) { setErr(friendly(res.error)); setBusy(false); return; }
-      router.push("/room/" + code);
+      /* is the game already over? (an old QR on the fridge) */
+      const { data: room } = await sb().from("rooms").select("status").eq("code", code).maybeSingle();
+      if (room?.status === "done") { setCodeErr(friendly("game_over")); setBusy(false); return; }
+      /* someone grabbed the same face a moment earlier: quietly take another free one and try again */
+      let pick = face;
+      for (let tries = 0; tries < 4; tries++) {
+        const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean }>("qmb_join", { r: code, nm: cap1(useName.trim()), face: pick });
+        if (res.error === "face_taken") {
+          const next = freeFace(await loadTaken());
+          if (!next) { setErr(friendly("room_full")); setBusy(false); return; }
+          pick = next; setFace(next); continue;
+        }
+        if (res.error === "no_room") { setCodeErr(friendly("no_room")); setBusy(false); return; }
+        if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(!!res.playing); setBusy(false); return; }
+        if (res.error) { setErr(friendly(res.error)); setBusy(false); return; }
+        router.push("/room/" + code);
+        return;
+      }
+      setErr(friendly("face_taken")); setBusy(false);
     } catch (e) { setErr(friendly(e)); setBusy(false); }
   }
   /* mid-game, a taken name may be you on a new phone: take the seat back (team, captaincy and all) */
@@ -59,8 +76,8 @@ function JoinForm() {
   return (
     <main className="screen justify-between" onKeyDown={(e) => { if (e.key === "Enter" && ready && !busy) void join(name); }}>
       <div className="flex items-center justify-between">
-        <a href="/" className="inline-flex items-center gap-1 min-h-[44px] pr-3 text-[var(--color-ink-2)] text-[14px] font-bold">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</a>
+        <Link href="/" className="inline-flex items-center gap-1 min-h-[44px] pr-3 text-[var(--color-ink-2)] text-[14px] font-bold">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
         <div className="eyebrow">Join a game</div>
         <span className="w-10" />
       </div>
@@ -75,7 +92,8 @@ function JoinForm() {
           onChange={(e) => { setCode(cleanCode(e.target.value)); setCodeErr(null); }} />
       </div>
       <div>
-        <label className="field-label" htmlFor="name">Name</label>
+        <div className="flex items-baseline justify-between"><label className="field-label" htmlFor="name">Name</label>
+          <span className="text-[12px] text-[var(--color-ink-3)] tabular-nums" aria-live="polite">{name.length}/12</span></div>
         <input id="name" className="input" value={name} maxLength={12} placeholder="Enter your name" autoComplete="off"
           autoFocus={code.length === 4} onChange={(e) => { setName(e.target.value); setSuggest(null); setCanRejoin(false); }} />
       </div>

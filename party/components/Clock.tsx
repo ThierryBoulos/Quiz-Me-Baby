@@ -42,7 +42,7 @@ export function Clock({ deadline, left, timeUp, size = 120 }: { deadline?: numbe
     <div className="grid place-items-center rounded-full" style={{ width: size, height: size, border: `${Math.max(4, size / 22)}px solid ${col}`, boxShadow: `0 0 30px -6px ${col}` }}>
       <div className="text-center leading-none">
         <div className="display" style={{ fontSize: size * 0.42, color: col }}>{timeUp ? "0" : s}</div>
-        {size >= 90 && <div className="eyebrow" style={{ fontSize: Math.max(9, size / 12) }}>{timeUp ? "time up" : paused ? "paused" : "seconds"}</div>}
+        {size >= 90 && <div className="eyebrow" style={{ fontSize: Math.max(9, size / 9) }}>{timeUp ? "time up" : paused ? "paused" : "seconds"}</div>}
       </div>
     </div>
   );

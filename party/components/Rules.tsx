@@ -24,7 +24,7 @@ export function Rules() {
           <><B>Two teams</B>, as many players each as you like. One screen everyone can see is the TV: tap <B>Create game</B> on it. Everyone else joins on their phone with the code or the QR.</>,
           <>Each team picks a <B>captain</B> on their phone. The captain gives the final answer. Nobody else. If the captain hasn&rsquo;t sent it, it hasn&rsquo;t been said.</>,
           <>Want a host? One person taps <B>I&rsquo;m the host</B>. They see every answer and rule on it. No host? The app checks the answers and the captains referee each other.</>,
-          <>Settle who goes first by chance, not by argument. Coin toss, rock paper scissors, anything, as long as it&rsquo;s luck. The winner chooses Team A, who answers first every round, or Team B, who gets the first steal.</>,
+          <>Settle who goes first by chance, not by argument. Coin toss, rock paper scissors, anything, as long as it&rsquo;s luck. The winner chooses Team A, who answers first, or Team B, who gets the first steal. (Settings can make the teams take turns going first.)</>,
           <>Phones are for the game only. No searching, no asking anyone outside the room.</>,
           <>Between <B>4 and 12</B> standard rounds, one theme each, plus however many mini-games are on the card. Or switch the standard rounds off in Setup for a night of nothing but mini-games, back to back.</>,
         ]} />
@@ -127,9 +127,9 @@ export function Rules() {
           <><B>The host&rsquo;s phone</B> shows the answer and what the captain typed. Once the team has answered, two buttons, <B>RIGHT</B> and <B>WRONG</B>: the app&rsquo;s call is already picked (&ldquo;App suggests&rdquo;), and the other button changes it.</>,
           <><B>The captain&rsquo;s phone</B> sends the answers, the bids, the buzzes and the lifelines.</>,
           <><B>Everyone else</B> sees the question and can send the captain a suggestion.</>,
-          <><B>No host?</B> The app checks every answer, and the other captain has <B>15 seconds</B> to tap RIGHT or WRONG to change the call. Team A&rsquo;s captain taps Start and Next to move the night on (the other captain can, after a while).</>,
+          <><B>No host?</B> The app checks every answer, and the other captain has <B>15 seconds</B> (8 in the Battle) to tap RIGHT or WRONG to change the call. Team A&rsquo;s captain taps Start and Next to move the night on (the other captain can, after a while).</>,
           <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question (another app, a search), or tries to paste an answer, is flagged on the TV, and the host sees the list.</>,
-          <>Phone died? Join again with the same name and tap &ldquo;take my seat back&rdquo;. A screen left open through an update refreshes itself between questions, and the night carries on.</>,
+          <>Phone died during the game? Join again with the same name and tap &ldquo;take my seat back&rdquo;. A screen left open through an update refreshes itself between questions, and the night carries on.</>,
         ]} />
       </Rule>
     </>);

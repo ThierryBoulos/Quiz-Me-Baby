@@ -4,7 +4,7 @@ import { FACES } from "@/lib/faces";
 /* SNAKED's face grid: taken faces greyed out and untappable */
 export function FacePicker({ value, taken, onPick }: { value: string; taken: string[]; onPick: (f: string) => void }) {
   return (
-    <div className="grid grid-cols-6 gap-2">
+    <div className="grid grid-cols-6 gap-1.5">
       {FACES.map((f) => {
         const off = taken.includes(f) && f !== value;
         return (

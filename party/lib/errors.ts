@@ -12,6 +12,8 @@ const CODES: Record<string, string> = {
   "not in this room": "You're not in this room any more. Join again with the code on the TV.",
   "pick a team first": "Pick a team first.",
   "unknown role": "That didn't work. Try again.",
+  game_over: "That game is over. Ask for the new code on the TV.",
+  room_full: "This room is full: all 16 faces are taken.",
 };
 const DB: [RegExp, string][] = [
   [/members_name_check|name.*too long|value too long/i, "Names can be 1 to 12 characters."],
@@ -19,6 +21,8 @@ const DB: [RegExp, string][] = [
   [/members_avatar_unique/i, "Someone already took that face. Pick another."],
   [/members_one_captain/i, "Your team already has a captain."],
   [/members_one_host/i, "There's already a host."],
+  [/rate limit|too many requests|over_request_rate_limit|\b429\b/i, "Too many phones joined at once. Wait a minute and try again."],
+  [/project.*(paused|inactive)/i, "The game server is asleep. Try again in a minute."],
   [/failed to fetch|networkerror|network request failed|load failed|timeout/i, "No connection. Check your internet and try again."],
   [/jwt|session|not signed in|anonymous/i, "Your session ran out. Refresh the page and try again."],
   [/row-level security|permission denied|not allowed/i, "You can't do that from this phone."],

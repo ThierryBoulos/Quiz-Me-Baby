@@ -117,8 +117,13 @@ export const HOST_LINES: Record<string, string[]> = {
     "It's tight! Nobody breathe.",
     "Neck and neck! My heart can't take this.",
     "One point in it. Every answer counts now.",
-    "All square! Who wants it more?",
     "This is closer than my last haircut."
+  ],
+  "level": [
+    "All square! Who wants it more?",
+    "Dead level. My heart can't take this.",
+    "Tied up. Every answer counts now.",
+    "Nothing in it. Nobody breathe."
   ],
   "mini_closest": [
     "Closest To Wins! Numbers time. Guess big, guess wisely.",
@@ -133,7 +138,7 @@ export const HOST_LINES: Record<string, string[]> = {
     "Great minds think alike. Don't be a great mind."
   ],
   "mini_map": [
-    "Guess the Map! Your geography teacher is watching.",
+    "Guess the Map! Time to find out who paid attention in geography.",
     "Colours, dots, mystery. What on earth is this map?"
   ],
   "mini_flag": [
@@ -142,7 +147,7 @@ export const HOST_LINES: Record<string, string[]> = {
   ],
   "mini_dish": [
     "Guess the Cocktail or Dish! I hope you ate before this.",
-    "Ingredients incoming. First captain to shout it wins. No pressure, chef."
+    "Ingredients incoming. First captain to buzz and name it wins. Easy, chef."
   ],
   "mini_battle": [
     "Battle of the Captains! Everyone else, zip it.",

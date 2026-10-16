@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
@@ -11,6 +12,8 @@ import { notReadyWhy, readyToStart, starter, useRoom } from "@/lib/room";
 import type { Pub } from "@/lib/game";
 import { Snd } from "@/lib/sound";
 import { useWakeLock } from "@/lib/wakeLock";
+import { useTabLock } from "@/lib/tabLock";
+import { sb } from "@/lib/supabase";
 import { useFreshBuild } from "@/lib/fresh";
 import { ANSWERING } from "@/components/PhoneGame";
 
@@ -27,9 +30,12 @@ export default function TvRoom() {
   const [me, setMe] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
   useEffect(() => { void ensureSession().then(setMe); setOrigin(window.location.origin); }, []);
-  const isTv = !!room && room.tv_id === me;
+  const owner = !!room && room.tv_id === me;
+  /* this browser's TV, but only in one tab at a time */
+  const lock = useTabLock(code, owner);
+  const isTv = owner && lock.state === "mine";
 
-  const { pub: own, exit } = useTvGame(code, isTv, room, members);
+  const { pub: own, exit, banner, lobbyNote } = useTvGame(code, isTv, room, members);
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
   const pub = own || ((room?.state?.pub || null) as Pub | null);
@@ -50,7 +56,7 @@ export default function TvRoom() {
     window.addEventListener("keydown", wake);
     return () => { clearInterval(t); window.removeEventListener("pointerdown", wake); window.removeEventListener("keydown", wake); };
   }, []);
-  const SoundNote = () => blocked ? <div className="fixed left-6 bottom-6 chip" style={{ fontSize: 15, padding: "8px 16px", zIndex: 30 }}>Tap the screen to turn the sound on</div> : null;
+  const SoundNote = () => blocked ? <div className="absolute left-6 bottom-6 chip" style={{ fontSize: 18, padding: "10px 20px", zIndex: 30 }}>Tap the screen to turn the sound on</div> : null;
 
   const joinUrl = origin + "/join?code=" + code;
   const host = members.find((m) => m.role === "host");
@@ -62,17 +68,39 @@ export default function TvRoom() {
     <TvStage>
       {/* not in the lobby: the first tap there (anywhere) turns the sound on anyway */}
       {room.status !== "lobby" && <SoundNote />}
-      {room.status !== "lobby" && [0, 1].filter((t) => !members.some((m) => m.team === t && m.role === "captain")).map((t) => (
-        <div key={t} className="fixed left-1/2 top-4 -translate-x-1/2 chip" style={{ fontSize: 18, padding: "10px 20px", zIndex: 30, borderColor: `var(--color-${t === 0 ? "a" : "b"})` }}>
-          {(room.state.teamNames || ["Team A", "Team B"])[t]} needs a captain: tap &ldquo;Make me captain&rdquo; on a phone</div>))}
+      {/* notices for the room, stacked under the scores so they never sit on each other */}
+      <div className="absolute left-1/2 top-[104px] -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none" style={{ zIndex: 30 }}>
+        {banner === "offline" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">Reconnecting… the phones are a step behind</div>}
+        {banner === "cantSave" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">This browser can&rsquo;t save the game, so don&rsquo;t refresh this page</div>}
+        {room.status !== "lobby" && isTv && [0, 1].filter((t) => !members.some((m) => m.team === t && m.role === "captain")).map((t) => (
+          <div key={t} className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: `var(--color-${t === 0 ? "a" : "b"})` }}>
+            {(room.state.teamNames || ["Team A", "Team B"])[t]} needs a captain: tap &ldquo;Make me captain&rdquo; on a phone</div>))}
+      </div>
+      {owner && lock.state === "other" && (
+        <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", zIndex: 40 }}>
+          <div className="text-center flex flex-col items-center gap-5">
+            <div className="display" style={{ fontSize: 64, color: "var(--color-gold)" }}>Open in another tab</div>
+            <div className="text-[24px] text-[var(--color-ink-2)] max-w-[760px]">This game is already running in another tab of this browser. One TV at a time keeps the night in step.</div>
+            <button className="btn btn-gold" style={{ fontSize: 22, padding: "14px 30px" }} onClick={lock.takeOver}>Use this tab instead</button>
+          </div>
+        </div>)}
+      {banner === "oldSave" && (
+        <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", zIndex: 40 }}>
+          <div className="text-center flex flex-col items-center gap-5">
+            <div className="display" style={{ fontSize: 64, color: "var(--color-gold)" }}>The app was updated</div>
+            <div className="text-[24px] text-[var(--color-ink-2)] max-w-[760px]">This game was saved by an older version and can&rsquo;t carry on. Sorry! Start a new game from the home screen.</div>
+            <button className="btn btn-gold" style={{ fontSize: 22, padding: "14px 30px" }}
+              onClick={() => { void sb().from("rooms").update({ status: "done" }).eq("code", code).then(() => router.replace("/")); }}>Back to the home screen</button>
+          </div>
+        </div>)}
       {room.status === "lobby" ? (
         <>
           <div className="flex items-start justify-between gap-10">
             <div>
               {/* the Back row sits above the code: the code's tall letters overhang their box and used to swallow the tap */}
               <div className="relative z-10 flex items-center gap-5">
-                <a href="/" className="btn btn-sm btn-ghost" aria-label="Back to the home screen">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</a>
+                <Link href="/" className="btn btn-sm btn-ghost" aria-label="Back to the home screen">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
                 <div className="eyebrow text-[16px]">Join on your phone · scan or type</div>
               </div>
               <div className="display mt-2 pointer-events-none select-none" style={{ fontSize: 150, lineHeight: 0.85, color: "var(--color-gold)", textShadow: "6px 6px 0 rgba(49,201,247,.55)", letterSpacing: "0.08em" }}>{code}</div>
@@ -80,7 +108,7 @@ export default function TvRoom() {
             </div>
             <div className="logo self-center text-center pointer-events-none select-none" style={{ fontSize: 92 }} aria-hidden>Quiz Me<br />Baby</div>
             <div className="rounded-[22px] p-4 bg-[#f4f6ff] shrink-0">
-              <QRCodeSVG value={joinUrl} size={200} bgColor="#f4f6ff" fgColor="#04050e" />
+              <QRCodeSVG value={joinUrl} size={200} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" />
             </div>
           </div>
           <div className="mt-8"><Lineup room={room} members={members} big /></div>
@@ -89,6 +117,7 @@ export default function TvRoom() {
               {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b></> : "No host yet — the app will check answers."}
               <br />
               {readyToStart(members) ? <>Ready. <b>{who?.name}</b> starts the game.</> : notReadyWhy(members)}
+              {lobbyNote && <><br /><span className="text-[18px] font-bold" style={{ color: "var(--color-no)" }} role="status">Start didn&rsquo;t go through: {lobbyNote}</span></>}
               {awake === false && <><br /><span className="text-[16px] text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
             </div>
             <div className="flex gap-3">

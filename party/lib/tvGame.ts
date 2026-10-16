@@ -1,13 +1,14 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, acceptFor, loadBank, withCustom, type Bank, type Q } from "./engine";
+import { QMB, acceptFor, loadBank, withCustom, withoutHostOnly, type Bank, type Q } from "./engine";
 import { cleanList } from "./custom";
 import { HOST_LINES } from "./imadLines";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
 import { getSettings, USED_KEY } from "./settings";
-import { cap1, readyToStart, starter, type Member, type Room } from "./room";
-import { DISH_LAST, MINI_TITLES, PARTY_LEGS, TIE_SCREENS, T_AWAY, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE_BATTLE,
+const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
+import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
+import { DISH_LAST, iso, MINI_TITLES, PARTY_LEGS, TIE_SCREENS, T_AWAY, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE_BATTLE,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
 /* the house timers come from Settings on this TV */
@@ -104,6 +105,8 @@ const DIFFS = ["easy", "medium", "hard", "mixed"];
 /* a picture game's levels from the phone: known ones only, or the default */
 const levels = (x: unknown, keys: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((k) => keys.includes(k)); return v.length ? v : dflt; };
 const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dish", "battle"];
+/* the server's timestamps, in either spelling ("…T12:00:00.123456+00:00" from a read, "… 12:00:00.123456+00" from a push), as ms */
+const serverMs = (x: string) => Date.parse(String(x || "").replace(" ", "T").replace(/(\.\d{3})\d+/, "$1").replace(/([+-]\d\d)$/, "$1:00"));
 const dishKind = (q: G) => ((q?.level || "")[0] === "c" ? "Cocktail" : "Dish");
 const dishTotal = (q: G) => (q.ings.length - 1) * T().tDishStep + DISH_LAST;
 /* how long the other captain has to change the app's call: the Battle is rapid fire, so never more than 8 s there */
@@ -158,7 +161,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* who answers first: fixed for the whole game when it starts (Settings → alternate) */
   const seat = () => ({ alternateFirst: !!st.current.g?.alternateFirst });
 
-  const used = useCallback((): Set<string> => { try { return new Set(JSON.parse(localStorage.getItem(usedKey) || "[]")); } catch { return new Set(); } }, []);
+  /* questions already played on this TV (kept in memory too, for a browser that won't store anything) */
+  const usedMem = useRef(new Set<string>());
+  const used = useCallback((): Set<string> => {
+    try { return new Set([...JSON.parse(localStorage.getItem(usedKey) || "[]"), ...usedMem.current]); } catch { return new Set(usedMem.current); }
+  }, []);
   const env = useCallback(() => {
     const bank = st.current.bank!;
     const deal = QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => getSettings().noRepeat,
@@ -320,7 +327,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (s.exit) p.exit = true;
     return [p, secret];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current]);
 
   /* One write at a time, each built from the latest state when its turn
@@ -328,7 +334,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      the phones a step behind the TV — and a host tap from a stale step is
      refused, which would freeze the game. */
   const chain = useRef<{ p: Promise<void>; queued: boolean }>({ p: Promise.resolve(), queued: false });
-  const lastSecret = useRef("");
+  const lastSecret = useRef(""), lastSave = useRef(""), offline = useRef(false);
+  /* a line across the TV when something's wrong that the room should know about */
+  const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave">(null);
+  /* the lobby: why a Start didn't start (a captain left a second ago) */
+  const [lobbyNote, setLobbyNote] = useState<string | null>(null);
+  useEffect(() => { if (!lobbyNote) return; const t = setTimeout(() => setLobbyNote(null), 6000); return () => clearTimeout(t); }, [lobbyNote]);
   const publish = useCallback(() => {
     /* this TV shows the change at once; the phones get it with the next write */
     const now = view(); if (now) { now[0].at = Date.now(); setPub(now[0]); }
@@ -341,21 +352,40 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       v[0].at = Date.now();
       setPub(v[0]);
       const s = st.current;
-      try { if (s.exit) localStorage.removeItem(saveKey); else localStorage.setItem(saveKey, JSON.stringify({ g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-        total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-        app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns })); } catch { /* full */ }
+      /* the game, kept on this laptop so a refresh picks it up (only written when it changed);
+         stamped with the app's version, so an update mid-night can't load a game it doesn't understand */
+      try {
+        if (s.exit) { localStorage.removeItem(saveKey); lastSave.current = ""; }
+        else {
+          const save = JSON.stringify({ build: BUILD_ID, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
+            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
+            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns });
+          if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
+        }
+      } catch { setBanner("cantSave"); }
       const room = ctx.current.room;
       /* the answer and the screen go out together (the host's phone shows "Getting the answer…" until
          an answer for this very step lands), and the answer only when it changed: a +1, a pause,
          a ruling leave it as it was — one write, not two */
       const sec = JSON.stringify(v[1]);
-      await Promise.all([
-        sec !== lastSecret.current ? sb().from("secrets").update({ data: v[1] }).eq("room", code).then(() => { lastSecret.current = sec; }) : null,
-        sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0] } }).eq("code", code),
-      ]);
-    }).catch((e) => console.error("publish failed", e));
+      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0] } }).eq("code", code)];
+      if (sec !== lastSecret.current) writes.push(sb().from("secrets").update({ data: v[1] }).eq("room", code));
+      const res = await Promise.all(writes);
+      const bad = res.find((r) => r.error);
+      if (bad) throw bad.error;
+      lastSecret.current = sec;
+      if (offline.current) { offline.current = false; setBanner((b) => (b === "offline" ? null : b)); }
+    }).catch((e) => {
+      /* The phones didn't get it (Wi-Fi dropped, the server hiccupped): say so on the TV and keep
+         trying, so a reveal or a final screen with nothing after it still reaches everyone. */
+      console.error("publish failed", e);
+      offline.current = true; setBanner((b) => b ?? "offline");
+      setTimeout(() => void publishRef.current(), 2000);
+    });
     return c.p;
   }, [code, saveKey, view]);
+  const publishRef = useRef(publish);
+  publishRef.current = publish;
 
   /* ---- Imad: one line per moment, never the same twice in a night (until a
      moment's lines run out), real names and numbers filled in. Lines from the
@@ -363,7 +393,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const say = (moments: string[] | string, extra?: G) => {
     const s = st.current, g = s.g;
     if (!g || !getSettings().imad) return;
-    const T = g.teams, cap = (i: 0 | 1) => (T[i].captain || "").trim() || T[i].name, v: G = { ...(extra || {}) };
+    const T = g.teams.map((t: G) => ({ ...t, name: iso(t.name), captain: t.captain ? iso(t.captain) : t.captain })),
+      cap = (i: 0 | 1) => (T[i].captain || "").trim() || T[i].name, v: G = { ...(extra || {}) };
     if (v.t === 0 || v.t === 1) { v.team = T[v.t].name; v.other = T[1 - v.t].name; v.captain = cap(v.t); v.othercap = cap(other(v.t)); }
     else { v.team = v.team || T[0].name; v.other = v.other || T[1].name; v.captain = v.captain || cap(0); v.othercap = v.othercap || cap(1); }
     const d = T[0].score - T[1].score;
@@ -397,7 +428,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const m = sc === "auctionResult" ? g.auction : sc === "battleSummary" ? g.battle : miniState(g, miniOf(sc));
       if (m?.award) { const w = m.award[0] > m.award[1] ? 0 : m.award[1] > m.award[0] ? 1 : null; if (w != null) once("mw:" + sc, "miniwin", { t: w, pts: Math.max(m.award[0], m.award[1]) }); }
     }
-    if (sc === "roundScore") { const d = Math.abs(g.teams[0].score - g.teams[1].score); if (d >= 5) once("rs" + g.r, "big"); else if (d <= 1) once("rs" + g.r, "close"); }
+    if (sc === "roundScore") { const d = Math.abs(g.teams[0].score - g.teams[1].score); if (d >= 5) once("rs" + g.r, "big"); else if (d === 1) once("rs" + g.r, "close"); else if (d === 0) once("rs" + g.r, "level"); }
     if (sc === "sudden") once("sd" + (g.sdRounds || 1), "sudden");
     if (sc === "final") once("final", g.winner == null ? "finaltie" : "final");
     const d = g.teams[0].score - g.teams[1].score, lead = d > 0 ? 0 : d < 0 ? 1 : null;
@@ -412,7 +443,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (f.timer === "stop") { s.deadline = null; s.left = 0; }
       else if (f.timer === "pause" && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; }
       else if (f.timer === "resume" && s.left) { s.deadline = now + s.left * 1000; s.left = 0; }
-      if (f.used) { const u = used(); u.add(f.used.id); localStorage.setItem(usedKey, JSON.stringify([...u])); }
+      if (f.used) { usedMem.current.add(f.used.id); try { const u = used(); localStorage.setItem(usedKey, JSON.stringify([...u])); } catch { /* kept in memory */ } }
       if (f.lifeline) {
         const rd = s.g.rounds[s.g.r];
         s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, seat()), deadline: f.lifeline === "friend" ? now + T().tFriend * 1000 : null };
@@ -506,7 +537,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!P) return;
     s.pending = null;
     const v = flip ? !P.v : P.v;
-    if (flip) s.toast = { id: ++s.toastN, text: `${s.g.teams[other(P.team)].name} changed the call: ${v ? "RIGHT" : "WRONG"}.` };
+    if (flip) s.toast = { id: ++s.toastN, text: `${iso(s.g.teams[other(P.team)].name)} changed the call: ${v ? "RIGHT" : "WRONG"}.` };
     if (P.kind === "ask") play({ type: "round/judge", v });
     else if (P.kind === "steal") play({ type: "round/judgeSteal", v });
     else if (P.kind === "dish") { play({ type: v ? "dish/right" : "dish/wrong" }); if (!v) s.typed[P.team] = null; }
@@ -693,11 +724,22 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
 
   /* ---- the inbox ---- */
   const handle = useCallback(async (a: Action) => {
-    const { room, members } = ctx.current, s = st.current;
+    const { room } = ctx.current, s = st.current;
+    let { members } = ctx.current;
     if (!room) return;
-    const from = members.find((m) => m.user_id === a.user_id);
+    let from = members.find((m) => m.user_id === a.user_id);
+    /* the line-up here can be a beat behind the phones (a captain who claimed a second ago, a
+       player who just joined): before refusing or ignoring a tap for that, read it fresh */
+    if ((!from && a.kind !== "count") || (a.kind === "setup" && !readyToStart(members))) {
+      const { data } = await sb().from("members").select("*").eq("room", code);
+      if (data) { members = data as Member[]; ctx.current.members = members; from = members.find((m) => m.user_id === a.user_id); }
+    }
     /* anything a phone sends (its 15-second "I'm here" included) proves it's here */
-    if (Date.now() - new Date(a.at).getTime() < 30000) here.current.at[a.user_id] = Date.now();
+    /* Fresh by the server's clock, not this laptop's: a TV clock running fast must not decide that
+       everyone is away. The gap between "now here" and "sent there" is the clock skew plus the delay;
+       the smallest gap seen lately is the skew, so an action is fresh when it's within 30 s of that. */
+    { const H = here.current, sent = serverMs(a.at);
+      if (sent) { const lag = Date.now() - sent; H.lags = [...H.lags.slice(-29), lag]; if (lag - Math.min(...H.lags) < 30000) H.at[a.user_id] = Date.now(); } }
     if (a.kind === "count") { if (isTvRef.current) onNote(a.user_id, a.payload as Parameters<typeof onNote>[1]); return; }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
       const names = [...(room.state.teamNames || ["Team A", "Team B"])] as [string, string];
@@ -705,12 +747,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       await sb().from("rooms").update({ state: { ...room.state, teamNames: names } }).eq("code", code);
       return;
     }
+    if (a.kind === "setup" && a.payload.start && room.status === "lobby" && starter(members)?.user_id === a.user_id && !readyToStart(members)) {
+      setLobbyNote(notReadyWhy(members) || "Not ready yet.");
+      return;
+    }
     if (a.kind === "setup" && a.payload.start && room.status === "lobby" && starter(members)?.user_id === a.user_id && readyToStart(members)) {
       const cfgIn = (a.payload.cfg || {}) as G;
       /* the house bank, this TV's own questions, and the starter's (cleaned: never trust a phone) */
       const base = await loadBank();
       s.custom = cleanList(cfgIn.custom, base.themes);
-      s.bank = withCustom(base, s.custom);
+      s.bank = withCustom(members.some((m) => m.role === "host") ? base : withoutHostOnly(base), s.custom);
       const names = room.state.teamNames || ["Team A", "Team B"];
       const team = (t: 0 | 1) => ({ name: cap1(names[t]), captain: cap1(members.find((m) => m.team === t && m.role === "captain")?.name || ""),
         players: members.filter((m) => m.team === t).map((m) => m.name).join(", ") });
@@ -730,7 +776,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const hand = (k: string) => (byHost ? ids(cfgIn[k]) : []);
       const cfg = { rounds, themes: cfgIn.themes || [], difficulty: diff, standard,
         /* maps, flags and dishes each have their own levels, set with the mini-games (as in Classic) */
-        minis, mapLevels: levels(cfgIn.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), flagLevels: levels(cfgIn.flagLevels, QMB.FLAG_LEVEL_KEYS, ["medium"]),
+        minis, mapLevels: levels(cfgIn.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), flagLevels: levels(cfgIn.flagLevels, QMB.FLAG_LEVEL_KEYS, ["easy", "medium"]),
         dishLevels: levels(cfgIn.dishLevels, QMB.DISH_LEVEL_KEYS, ["c-medium", "d-medium"]), teamA: team(0), teamB: team(1), picks, themeDiff,
         pickClosest: hand("pickClosest"), pickAuction: hand("pickAuction"), pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish") };
       const g = env().deal.buildGame(cfg);
@@ -781,12 +827,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (["answer", "buzz", "lifeline"].includes(a.kind) && captainInput(a.kind, from.team, a.payload as G)) void publish();
   }, [applyFx, captainInput, captainMove, code, env, hostMove, play, publish]);
 
+  /* fetch the questions while everyone's still joining, not when Start is tapped */
+  useEffect(() => { if (isTv) void loadBank().catch(() => { /* tried again at Start */ }); }, [isTv]);
+
   /* restore a game in progress after a refresh of the TV */
   useEffect(() => {
     if (!isTv) return;
     try {
       const saved = JSON.parse(localStorage.getItem(saveKey) || "null");
       if (saved?.g) {
+        const before = { ...st.current };
+        delete saved.build;
         Object.assign(st.current, saved);
         /* A reload (or a sleep) hides the page first, which pauses everyone; the
            new page must take that pause back, or the game stays frozen. */
@@ -804,7 +855,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         /* the bank, then the view, to this TV and to every phone (they may still show "paused") */
         void loadBank().then(async (b) => {
           st.current.bank = withCustom(b, st.current.custom || []);
-          setPub(view()?.[0] || null);
+          /* a game saved by an older version of the app that this one can't read: say so, don't crash */
+          try { setPub(view()?.[0] || null); }
+          catch (e) { console.error("saved game unreadable", e); Object.assign(st.current, before); try { localStorage.removeItem(saveKey); } catch { /* */ } setBanner("oldSave"); return; }
           /* publish once the room is loaded: its state carries the team names too */
           for (let i = 0; i < 40 && !ctx.current.room; i++) await new Promise((r) => setTimeout(r, 250));
           if (ctx.current.room) void publish();
@@ -819,7 +872,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   useEffect(() => {
     if (!isTv) return;
     const key = "qmb.tv." + code + ".last";
-    let last = Number(localStorage.getItem(key) || 0), busy = false, again = false;
+    let last = 0, busy = false, again = false;
+    try { last = Number(localStorage.getItem(key) || 0); } catch { /* no storage: start from the top */ }
     /* Two taps sent at once (a fast +1, two buzzes) can be numbered in one order and land in the
        other, so reading only "after the last id" would skip the slower one for good. So each read
        also looks back 10 seconds (by the server's clock) for late arrivals, and remembers what it
@@ -827,14 +881,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const before = last, seen = new Set<number>();
     let newest = 0;                                   // the server time of the newest action handled (ms)
     /* the server's timestamps, in either spelling ("…T12:00:00.123456+00:00" or "… 12:00:00.123456+00"), as ms */
-    const ms = (x: string) => Date.parse(String(x || "").replace(" ", "T").replace(/(\.\d{3})\d+/, "$1").replace(/([+-]\d\d)$/, "$1:00"));
+    const ms = serverMs;
     /* an action that lands while the last batch is still being read is picked up straight after, not at the next poll */
     const fresh: Action[] = [];                        // straight from the realtime message: handled before the read
     const take = async (a: Action) => {
       if (a.id <= before || seen.has(a.id) || a.kind === "suggest") return;
       seen.add(a.id);
       try { await handle(a); } catch (e) { console.error("action refused", a, e); }
-      if (a.id > last) { last = a.id; localStorage.setItem(key, String(last)); }
+      if (a.id > last) { last = a.id; try { localStorage.setItem(key, String(last)); } catch { /* in memory only */ } }
       const t = ms(a.at); if (t > newest) newest = t;
     };
     const drain = async () => {
@@ -857,14 +911,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
         (m: { new?: Partial<Action> }) => { if (m.new?.id && m.new.kind) fresh.push(m.new as Action); void drain(); })
       .subscribe();
-    const poll = setInterval(() => void drain(), 1500);
+    /* every tap arrives with the push and is handled at once; this read is the safety net */
+    const poll = setInterval(() => void drain(), 3000);
     return () => { clearInterval(poll); void sb().removeChannel(ch); };
   }, [code, isTv, handle]);
 
   /* Who's here: every phone says so every 15 s, through the action log (see usePresence). A
      captain gone for T_AWAY hands over to the first teammate still here, so a
      phone left in a pocket never stalls the night. Nobody is removed. */
-  const here = useRef({ at: {} as Record<string, number>, since: Date.now(), busy: false, checked: 0,
+  const here = useRef({ at: {} as Record<string, number>, since: Date.now(), busy: false, checked: 0, lags: [] as number[],
     away: {} as Record<string, { at: number; qid?: string; flag?: number }> });
   /* Left the game screen during a question: flagged once they've been gone two
      seconds (a glance at a notification doesn't count), with how long when
@@ -899,6 +954,20 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (changed) void publish();
   };
+  /* is the night waiting on this team's captain right now? (their question, their buzz, their ruling, their Next) */
+  const waitsOn = (t: 0 | 1) => {
+    const s = st.current, g = s.g, sc = s.screen;
+    if (!g) return false;
+    if (s.pending) return s.pending.team !== t;                                   // the other captain rules
+    if (sc === "ask" || sc === "steal") return turnTeam() === t;
+    if (["miniQ", "flagQ", "mapQ", "sayQ", "dishQ", "sudden", "battleTie"].includes(sc)) return true;
+    if (sc === "battleQ") return g.battle?.cap === t;
+    if (sc === "auctionBid") return g.auction?.turn === t;
+    if (sc === "auctionRun") return s.nohost && g.auction?.by != null && g.auction.by !== t;   // the counter
+    if (s.nohost && WAITS_FOR_NEXT.has(sc)) return leadTeam() === t;
+    if (s.nohost && sc === "mapReveal") return s.ok[other(t)] == null;
+    return false;
+  };
   const handOver = useCallback(async () => {
     const H = here.current, s = st.current, { room, members } = ctx.current, now = Date.now();
     if (H.busy || !s.g || room?.status !== "playing") return;
@@ -929,6 +998,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     for (const t of [0, 1] as const) {
       const cap = members.find((m) => m.team === t && m.role === "captain");
       if (!cap || now - (H.at[cap.user_id] ?? H.since) < T_AWAY * 1000) continue;
+      /* only when the game is waiting on this captain: a phone asleep in a pocket between rounds keeps its armband */
+      if (!waitsOn(t)) continue;
       const next = members.find((m) => m.team === t && m.role === "player" && fresh(m.user_id));   // first to join, still here
       if (!next) continue;
       H.busy = true;
@@ -939,7 +1010,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (b.error) { await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", cap.user_id); continue; }
         H.at[next.user_id] = now;
         s.g.teams[t].captain = next.name;
-        s.toast = { id: ++s.toastN, text: `${cap.name} seems to be away. ${next.name} is ${s.g.teams[t].name}'s captain now.` };
+        s.toast = { id: ++s.toastN, text: `${iso(cap.name)} seems to be away. ${iso(next.name)} is ${iso(s.g.teams[t].name)}'s captain now.` };
         void publish();
       } finally { H.busy = false; }
       return;
@@ -1012,7 +1083,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           s.buzzAt = 0; s.step++; changed = true;
           hostMove({ type: "dish/wrong" });
           s.late = b;
-          s.toast = { id: ++s.toastN, text: `Time's up. ${g.teams[b].name} is out of this one.` };
+          s.toast = { id: ++s.toastN, text: `Time's up. ${iso(g.teams[b].name)} is out of this one.` };
         }
       }
       if (s.deadline && now >= s.deadline) {
@@ -1053,5 +1124,5 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
 
   /* Exit on the TV itself (it has a mouse): the same as the host's Exit */
   const exit = useCallback(() => { if (st.current.screen !== "final") return; exitGame(); void publish(); }, [publish]);  // eslint-disable-line react-hooks/exhaustive-deps
-  return { pub, game: st.current.g as G, exit };
+  return { pub, game: st.current.g as G, exit, banner, lobbyNote };
 }

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { QMB, loadBank, themeCounts, type Bank, type Q } from "@/lib/engine";
+import { QMB, loadBank, themeCounts, withoutHostOnly, type Bank, type Q } from "@/lib/engine";
 import { NO_PICKS, Picker, inLevels, pickSummary, type Picks } from "./Picker";
 import { getCustom } from "@/lib/custom";
 
@@ -36,7 +36,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
   const [themes, setThemes] = useState<string[] | null>(null);
   const [minis, setMinis] = useState<string[]>(["closest", "auction", "saysame", "map", "flag", "dish", "battle"]);
   const [mapLevels, setMapLevels] = useState<string[]>(["easy", "medium", "hard"]);
-  const [flagLevels, setFlagLevels] = useState<string[]>(["medium"]);
+  const [flagLevels, setFlagLevels] = useState<string[]>(["easy", "medium"]);
   const [dishLevels, setDishLevels] = useState<string[]>(["c-medium", "d-medium"]);
   const [note, setNote] = useState<string | null>(null);
   const [open, setOpen] = useState<"themes" | null>(null);
@@ -56,7 +56,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
   }, [bank, mapLevels, flagLevels, dishLevels]);
 
   /* themes that can field a question for each team at this difficulty */
-  const counts = useMemo(() => (bank ? themeCounts(bank, difficulty) : {}), [bank, difficulty]);
+  /* with no host, the questions only a person can judge (and "Know the Host") are left out */
+  const counts = useMemo(() => (bank ? themeCounts(isHost ? bank : withoutHostOnly(bank), difficulty) : {}), [bank, difficulty, isHost]);
   const avail = useMemo(() => Object.keys(counts).filter((t) => counts[t] >= 2).sort(), [counts]);
   /* keep exactly one theme per round: trim when rounds go down, add random ones when they go up */
   useEffect(() => {
