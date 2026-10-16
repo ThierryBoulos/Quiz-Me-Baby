@@ -1,0 +1,174 @@
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+8.25 ask | 2 | 0-0 |  |  | 
+11.00 ask | 2 | 0-0 |  |  | pending
+19.00 steal | 3 | 0-0 |  |  | 
+27.25 answer | 3 | 0-1 |  | Owls +1 point — steal | 
+32.75 answer | 3 | 0-1 |  |  | 
+61.50 answer | 3 | 1-0 |  | Lions +1 point — appeal agreed | 
+85.75 ask | 4 | 1-0 |  | Lions +1 point — appeal agreed | 
+130.75 steal | 5 | 1-0 |  | Time's up. | 
+133.50 steal | 5 | 1-0 |  | Time's up. | pending
+141.50 answer | 6 | 1-0 |  | Time's up. | 
+151.50 roundScore | 7 | 1-0 |  | Time's up. | 
+165.00 flagIntro | 8 | 1-0 | 0-0 | Time's up. | 
+276.50 flagQ | 9 | 1-0 | 0-0 | Time's up. | 
+291.50 flagReveal | 10 | 1-0 | 0-0 | Time's up. | 
+309.00 flagQ | 11 | 1-0 | 0-0 | Nobody got it. | 
+324.00 flagReveal | 12 | 1-0 | 0-0 | Nobody got it. | 
+327.75 flagQ | 13 | 1-0 | 0-0 | Nobody got it. | 
+342.75 flagReveal | 14 | 1-0 | 0-0 | Nobody got it. | 
+355.75 flagQ | 15 | 1-0 | 0-0 | Nobody got it. | 
+370.75 flagReveal | 16 | 1-0 | 0-0 | Nobody got it. | 
+382.75 flagQ | 17 | 1-0 | 0-0 | Nobody got it. | 
+397.75 flagReveal | 18 | 1-0 | 0-0 | Nobody got it. | 
+398.00 flagQ | 19 | 1-0 | 0-0 | Nobody got it. | 
+413.00 flagReveal | 20 | 1-0 | 0-0 | Nobody got it. | 
+441.25 flagQ | 21 | 1-0 | 0-0 | Nobody got it. | 
+456.25 flagReveal | 22 | 1-0 | 0-0 | Nobody got it. | 
+517.75 flagQ | 23 | 1-0 | 0-0 | Nobody got it. | 
+532.75 flagReveal | 24 | 1-0 | 0-0 | Nobody got it. | 
+551.00 flagQ | 25 | 1-0 | 0-0 | Nobody got it. | 
+566.00 flagReveal | 26 | 1-0 | 0-0 | Nobody got it. | 
+628.50 flagQ | 27 | 1-0 | 0-0 | Nobody got it. | 
+643.50 flagReveal | 28 | 1-0 | 0-0 | Nobody got it. | 
+697.75 flagTie | 29 | 1-0 | 0-0 |  | 
+785.00 flagSummary | 30 | 1-0 | 0-0 |  | 
+898.50 roundIntro | 31 | 1-0 |  |  | 
+909.25 ask | 32 | 1-0 |  |  | 
+922.75 answer | 32 | 2-0 |  | Lions +1 point | 
+973.25 ask | 33 | 2-0 |  | Lions +1 point | 
+995.75 ask | 33 | 2-0 |  | Lions +1 point | pending
+1003.75 steal | 34 | 2-0 |  | Lions +1 point | 
+1006.50 steal | 34 | 2-0 |  | Lions +1 point | pending
+1014.50 answer | 35 | 2-0 |  | Lions +1 point | 
+1027.25 roundScore | 36 | 2-0 |  | Lions +1 point | 
+1115.25 miniIntro | 37 | 2-0 | 0-0 | Lions +1 point | 
+1156.75 miniQ | 38 | 2-0 | 0-0 | Lions +1 point | 
+1163.00 closestReveal | 38 | 2-0 | 1-0 | Lions +1 point | 
+1164.00 miniQ | 39 | 2-0 | 1-0 | Lions takes leg 1. | 
+1224.00 closestReveal | 40 | 2-0 | 1-0 | Lions takes leg 1. | 
+1327.75 miniQ | 41 | 2-0 | 1-0 | Nobody answered — no point. | 
+1339.50 closestReveal | 41 | 2-0 | 2-0 | Nobody answered — no point. | 
+1341.25 miniQ | 42 | 2-0 | 2-0 | Lions takes leg 3. | 
+1357.50 closestReveal | 42 | 2-0 | 3-0 | Lions takes leg 3. | 
+1388.00 decided | 43 | 2-0 | 3-0 |  | 
+1403.25 miniQ | 44 | 3-0 | 3-0 |  | 
+1427.75 closestReveal | 44 | 3-0 | 4-1 |  | 
+1430.25 miniSummary | 45 | 3-0 | 4-1 | Tie — a point each. | 
+1455.50 roundIntro | 46 | 3-0 |  | Tie — a point each. | 
+1480.75 ask | 47 | 3-0 |  | Tie — a point each. | 
+1489.75 ask | 47 | 3-0 |  | Lions used Double Dip. | 
+1507.75 answer | 47 | 4-0 |  | Lions +1 point | 
+1510.50 ask | 48 | 4-0 |  | Lions +1 point | 
+1512.25 answer | 48 | 4-1 |  | Owls +1 point | 
+1555.50 roundScore | 49 | 4-1 |  | Owls +1 point | 
+1558.25 auctionIntro | 50 | 4-1 | 0-0 | Owls +1 point | 
+1563.50 auctionBid | 51 | 4-1 | 0-0 | Owls +1 point | 
+1586.00 auctionBid | 52 | 4-1 | 0-0 | Owls +1 point | 
+1606.75 auctionRun | 53 | 4-1 | 0-0 | Owls +1 point | 
+1617.50 auctionLeg | 53 | 4-1 | 1-0 | Owls +1 point | 
+1629.25 auctionBid | 54 | 4-1 | 1-0 | Owls +1 point | 
+1634.75 auctionBid | 55 | 4-1 | 1-0 | Owls +1 point | 
+1670.75 auctionRun | 56 | 4-1 | 1-0 | Owls +1 point | 
+1700.75 auctionLeg | 57 | 4-1 | 2-0 | Owls +1 point | 
+1714.75 decided | 58 | 4-1 | 2-0 |  | 
+1736.25 auctionResult | 59 | 5-1 | 2-0 |  | 
+1751.75 sayIntro | 60 | 5-1 | 0-0 |  | 
+1774.25 sayQ | 61 | 5-1 | 0-0 |  | 
+1794.25 sayReveal | 62 | 5-1 | 1-1 |  | 
+1921.75 sayQ | 63 | 5-1 | 1-1 | Tie — a point each. | 
+1929.00 sayReveal | 63 | 5-1 | 2-2 | Tie — a point each. | 
+1974.75 sayQ | 64 | 5-1 | 2-2 | Tie — a point each. | 
+1975.75 sayReveal | 64 | 5-1 | 3-3 | Tie — a point each. | 
+2044.25 sayQ | 65 | 5-1 | 3-3 | Tie — a point each. | 
+2064.25 sayReveal | 66 | 5-1 | 4-4 | Tie — a point each. | 
+2094.50 sayQ | 67 | 5-1 | 4-4 | Tie — a point each. | 
+2112.50 sayReveal | 67 | 5-1 | 5-5 | Tie — a point each. | 
+2142.25 sayQ | 68 | 5-1 | 5-5 | Tie — a point each. | 
+2143.25 sayReveal | 68 | 5-1 | 6-6 | Tie — a point each. | 
+2160.25 sayQ | 69 | 5-1 | 6-6 | Tie — a point each. | 
+2180.25 sayReveal | 70 | 5-1 | 7-7 | Tie — a point each. | 
+2222.25 sayTie | 71 | 5-1 | 7-7 |  | 
+2259.25 saySummary | 72 | 5-1 | 7-7 |  | 
+2287.25 roundIntro | 73 | 5-1 |  |  | 
+2356.50 ask | 74 | 5-1 |  |  | 
+2366.25 ask | 74 | 5-1 |  |  | pending
+2374.25 steal | 75 | 5-1 |  |  | 
+2394.25 answer | 76 | 5-1 |  | Time's up. | 
+2420.25 ask | 77 | 5-1 |  | Time's up. | 
+2429.25 ask | 77 | 5-1 |  | Time's up. | pending
+2437.25 steal | 78 | 5-1 |  | Time's up. | 
+2457.25 answer | 79 | 5-1 |  | Time's up. | 
+2478.75 roundScore | 80 | 5-1 |  | Time's up. | 
+2479.75 mapIntro | 81 | 5-1 | 0-0 | Time's up. | 
+2509.50 mapQ | 82 | 5-1 | 0-0 | Time's up. | 
+2569.50 mapReveal | 83 | 5-1 | 0-0 | Time's up. | 
+2599.50 mapQ | 84 | 5-1 | 0-0 | Nobody got it. | 
+2659.50 mapReveal | 85 | 5-1 | 0-0 | Nobody got it. | 
+2683.25 mapQ | 86 | 5-1 | 0-0 | Nobody got it. | 
+2685.75 mapReveal | 86 | 5-1 | 0-0 | Nobody got it. | 
+2715.75 mapReveal | 86 | 5-1 | 1-1 | Nobody got it. | 
+2727.25 mapTie | 87 | 5-1 | 1-1 | Both got it — a point each. | 
+2756.00 mapSummary | 88 | 6-2 | 1-1 | Both got it — a point each. | 
+2777.75 roundIntro | 89 | 6-2 |  | Both got it — a point each. | 
+2895.50 ask | 90 | 6-2 |  | Both got it — a point each. | 
+2940.50 steal | 91 | 6-2 |  | Time's up. | 
+2941.50 steal | 91 | 6-2 |  | Time's up. | pending
+2948.75 answer | 92 | 6-2 |  | Time's up. | 
+3069.25 ask | 93 | 6-2 |  | Time's up. | 
+3090.75 answer | 93 | 6-4 |  | Owls +2 points | 
+3144.00 roundScore | 94 | 6-4 |  | Owls +2 points | 
+3217.75 dishIntro | 95 | 6-4 | 0-0 | Owls +2 points | 
+3227.75 dishQ | 96 | 6-4 | 0-0 | Owls +2 points | 
+3241.75 dishReveal | 97 | 6-4 | 0-0 | Nobody got it. | 
+3340.25 dishQ | 98 | 6-4 | 0-0 | Nobody got it. | 
+3379.00 dishQ | 99 | 6-4 | 0-0 | Time's up. ⁨Lions⁩ is out of this one. | 
+3382.25 dishReveal | 100 | 6-4 | 0-0 | Nobody got it. | 
+3435.50 dishQ | 101 | 6-4 | 0-0 | Nobody got it. | 
+3465.25 dishQ | 102 | 6-4 | 0-0 | Time's up. ⁨Lions⁩ is out of this one. | 
+3474.50 dishReveal | 103 | 6-4 | 0-0 | Nobody got it. | 
+3478.75 dishQ | 104 | 6-4 | 0-0 | Nobody got it. | 
+3495.75 dishReveal | 105 | 6-4 | 0-0 | Nobody got it. | 
+3498.50 dishQ | 106 | 6-4 | 0-0 | Nobody got it. | 
+3523.75 dishQ | 107 | 6-4 | 0-0 | Time's up. ⁨Lions⁩ is out of this one. | 
+3540.50 dishReveal | 108 | 6-4 | 0-0 | Nobody got it. | 
+3587.75 dishTie | 109 | 6-4 | 0-0 | Nobody got it. | 
+3619.25 dishSummary | 110 | 7-5 | 0-0 | Nobody got it. | 
+3632.75 roundIntro | 111 | 7-5 |  | Nobody got it. | 
+3655.25 ask | 112 | 7-5 |  | Nobody got it. | 
+3700.25 steal | 113 | 7-5 |  | Time's up. | 
+3720.25 answer | 114 | 7-5 |  | Time's up. | 
+3764.00 ask | 115 | 7-5 |  | Time's up. | 
+3770.25 ask | 115 | 7-5 |  | Time's up. | pending
+3778.25 steal | 116 | 7-5 |  | Time's up. | 
+3783.00 answer | 116 | 8-5 |  | Lions +1 point — steal | 
+3785.75 answer | 116 | 8-5 |  |  | 
+3860.25 answer | 116 | 8-5 |  | Appeal turned down. | 
+3872.00 roundScore | 117 | 8-5 |  | Appeal turned down. | 
+3927.00 battleIntro | 118 | 8-5 | 0-0 | Appeal turned down. | 
+3986.25 battleQ | 119 | 8-5 | 0-0 | Appeal turned down. | 
+4001.25 battleQ | 120 | 8-5 | 0-0 | Time's up. | 
+4016.25 battleQ | 121 | 8-5 | 0-0 | Time's up. | 
+4031.25 battleQ | 122 | 8-5 | 0-0 | Time's up. | 
+4032.25 battleQ | 122 | 8-5 | 1-0 | Time's up. | 
+4047.25 battleQ | 123 | 8-5 | 1-0 | Time's up. | 
+4047.50 battleQ | 123 | 8-5 | 1-0 | Time's up. | pending
+4055.50 battleQ | 124 | 8-5 | 1-0 | Time's up. | 
+4064.75 battleQ | 124 | 8-5 | 2-0 | Time's up. | 
+4069.25 battleQ | 124 | 8-5 | 3-0 | Time's up. | 
+4084.25 battleQ | 125 | 8-5 | 3-0 | Time's up. | 
+4099.25 battleHandoff | 126 | 8-5 | 3-0 | Time's up. | 
+4139.25 battleQ | 127 | 8-5 | 3-0 | Time's up. | 
+4154.25 battleQ | 128 | 8-5 | 3-0 | Time's up. | 
+4169.25 battleQ | 129 | 8-5 | 3-0 | Time's up. | 
+4170.00 battleQ | 129 | 8-5 | 3-1 | Time's up. | 
+4185.00 battleQ | 130 | 8-5 | 3-1 | Time's up. | 
+4200.00 battleQ | 131 | 8-5 | 3-1 | Time's up. | 
+4215.00 battleQ | 132 | 8-5 | 3-1 | Time's up. | 
+4230.00 battleQ | 133 | 8-5 | 3-1 | Time's up. | 
+4241.00 battleQ | 133 | 8-5 | 3-2 | Time's up. | 
+4256.00 battleQ | 134 | 8-5 | 3-2 | Time's up. | 
+4271.00 battleSummary | 135 | 10-5 | 3-2 | Time's up. | 
+4359.00 final | 136 | 10-5 |  | Time's up. | 
+recap: {"margin":5,"sudden":false,"leadChanges":1,"steals":[1,0],"minis":[3,0],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]}}
