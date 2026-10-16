@@ -43,7 +43,7 @@ export default function Home() {
           <Link className="howto" href="/how-to-play">How to Play</Link>
         </div>
         <p className="colophon">
-          Built by {BUILD.author} <span className="sep">·</span> © {BUILD.year} <span className="sep">·</span> v{BUILD.v} <span className="sep">·</span> {BUILD.date}
+          Built by {BUILD.author} <span className="sep">·</span> © {BUILD.year} <span className="sep">·</span> {BUILD.date} <span className="sep">·</span> {BUILD.code}
         </p>
       </div>
     </main>
