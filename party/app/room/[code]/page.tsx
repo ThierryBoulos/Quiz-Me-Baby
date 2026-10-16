@@ -13,6 +13,8 @@ import { friendly } from "@/lib/errors";
 import { useFreshBuild } from "@/lib/fresh";
 import { cap1, useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
+const TEAM_MAX = 18;                                  // as the TV keeps them (lib/tvGame.ts)
+
 /* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
    name the team, or be the host. The colour of your team fills the screen. */
 export default function PhoneRoom() {
@@ -114,7 +116,7 @@ export default function PhoneRoom() {
   /* a captain names the team: the TV writes it; we wait to see it land */
   const saveTeamName = () => {
     const name = cap1((draft ?? "").trim());
-    if (!mine || mine.team == null || !name) return;
+    if (!mine || mine.team == null || !name || name.length > TEAM_MAX) return;
     setNameState("saving"); setMsg(null);
     void sendAction(code, "team_name", { team: mine.team, name }).catch(() => { setNameState(null); /* the phone already says so */ });
     (document.activeElement as HTMLElement | null)?.blur?.();
@@ -155,6 +157,7 @@ export default function PhoneRoom() {
   const who = starter(members);
   const canStart = who?.user_id === me;
   const ready = readyToStart(members);
+  const tooLong = (draft ?? "").trim().length > TEAM_MAX;
 
   return (
     <main className="screen">
@@ -251,14 +254,16 @@ export default function PhoneRoom() {
             <div className="card flex flex-col gap-3">
               <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
               <div className="flex items-baseline justify-between"><label className="field-label !mb-0" htmlFor="tname">Name your team</label>
-                <span className="text-[12px] text-[var(--color-ink-3)] tabular-nums" aria-live="polite">{(draft ?? teamName(room, mine.team)).length}/18</span></div>
+                <span className="text-[12px] tabular-nums" aria-live="polite" style={{ color: tooLong ? "var(--color-no)" : "var(--color-ink-3)", fontWeight: tooLong ? 700 : 400 }}>
+                  {(draft ?? teamName(room, mine.team)).trim().length}/{TEAM_MAX}</span></div>
               {/* a form, so the keyboard's Done/Go saves it too; Save keeps the keyboard's focus so the tap never misses */}
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); saveTeamName(); }}>
-                <input id="tname" className="input" maxLength={18} enterKeyHint="done" autoComplete="off" value={draft ?? teamName(room, mine.team)}
+                <input id="tname" className="input" maxLength={40} enterKeyHint="done" aria-invalid={tooLong} autoComplete="off" value={draft ?? teamName(room, mine.team)}
                   onChange={(e) => { setDraft(e.target.value); setNameState(null); }} onFocus={(e) => e.currentTarget.select()} />
                 <button type="submit" className="btn shrink-0" onPointerDown={(e) => e.preventDefault()}
-                  disabled={busy || nameState === "saving" || !(draft ?? "").trim() || (draft ?? "").trim() === teamName(room, mine.team)}>{nameState === "saving" ? "Saving…" : "Save"}</button>
+                  disabled={busy || nameState === "saving" || tooLong || !(draft ?? "").trim() || (draft ?? "").trim() === teamName(room, mine.team)}>{nameState === "saving" ? "Saving…" : "Save"}</button>
               </form>
+              {tooLong && <p className="field-error" role="alert">Team names can be up to {TEAM_MAX} characters. Try a shorter one.</p>}
               {nameState === "saved" && <p className="text-[13px] font-bold" role="status" style={{ color: "var(--color-ok)" }}>Saved. It&rsquo;s on the TV.</p>}
               {nameState === "late" && <p className="field-error" role="alert">The TV didn&rsquo;t pick it up. Is the TV screen still open? Try again.</p>}
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>

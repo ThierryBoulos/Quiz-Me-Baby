@@ -198,7 +198,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false }: { onStart: 
         </div>)}
       {picking && bank && <Picker bank={bank} themes={standard ? picked : []} minis={minis} difficulty={difficulty} levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels }} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
 
-      <button className="btn btn-gold btn-lg btn-block" disabled={!!blocker || busy}
+      <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy}
         onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, custom: getCustom(),
           ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
       {blocker && <p className="text-center text-[13px] text-[var(--color-ink-2)]" role="status">{blocker}</p>}

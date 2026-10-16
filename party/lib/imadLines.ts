@@ -121,9 +121,9 @@ export const HOST_LINES: Record<string, string[]> = {
   ],
   "level": [
     "All square! Who wants it more?",
-    "Dead level. My heart can't take this.",
-    "Tied up. Every answer counts now.",
-    "Nothing in it. Nobody breathe."
+    "Dead level. Back to square one, everybody.",
+    "Tied up. It's anybody's night.",
+    "Nothing in it. Somebody break the deadlock, please."
   ],
   "mini_closest": [
     "Closest To Wins! Numbers time. Guess big, guess wisely.",
