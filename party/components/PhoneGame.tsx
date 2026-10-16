@@ -542,6 +542,7 @@ const RESULT = /^(answer|roundScore|closestReveal|flagReveal|sayReveal|mapReveal
 /* what this question means for YOU, under the "Question for TEAM" head */
 function youLine(pub: Pub, me: Member, capName?: string) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain", ours = pub.turn === mine, them = T[pub.turn ?? 0].name;
+  if (capName) capName = iso(capName);
   const to = capName ? `send ideas to ${capName}` : "send ideas to your captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend." : "Double Dip: two answers on this one.") : `${T[pub.lifeline.team].name} are using a lifeline.`;
   if (pub.pending) return pub.pending.team === mine ? "Answer sent. The other captain can change the call."
@@ -798,7 +799,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <div className="flex flex-col gap-1">
             {sugs.map((s) => (
               <button key={s.id} className="text-left text-[15px] min-h-[44px] px-2 -mx-2 rounded-[12px] active:bg-white/10" disabled={!canType} onClick={() => setA(s.text)}>
-                <b style={{ color: tc(mine) }}>{members.find((m) => m.user_id === s.user_id)?.name}:</b> {s.text}</button>))}
+                <b style={{ color: tc(mine) }}><bdi>{members.find((m) => m.user_id === s.user_id)?.name}</bdi>:</b> {s.text}</button>))}
           </div>
         </div>)}
 

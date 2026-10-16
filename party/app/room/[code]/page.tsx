@@ -7,7 +7,7 @@ import { Confetti, Hud } from "@/components/GameParts";
 import { noteTvTime } from "@/components/Clock";
 import { Rules } from "@/components/Rules";
 import { Setup } from "@/components/Setup";
-import type { Pub } from "@/lib/game";
+import { iso, type Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 import { useFreshBuild } from "@/lib/fresh";
@@ -105,7 +105,7 @@ export default function PhoneRoom() {
     if (mid && w.role && w.team === mine.team && w.role !== mine.role && !mineSelf) {
       const cap = members.find((m) => m.team === mine.team && m.role === "captain");
       if (mine.role === "captain") setNote("You're your team's captain now: their phone was away. You type the answers.");
-      else if (w.role === "captain" && cap) setNote(`Your phone was away, so ${cap.name} took over as captain. They can step down to hand it back.`);
+      else if (w.role === "captain" && cap) setNote(`Your phone was away, so ${iso(cap.name)} took over as captain. They can step down to hand it back.`);
     }
     was.current = { role: mine.role, team: mine.team };
   }, [mine, members, room?.status]);
@@ -264,7 +264,7 @@ export default function PhoneRoom() {
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
             </div>
           ) : myCaptain ? (
-            <p className="text-center text-[16px] text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}>{myCaptain.name}</b> is your captain</p>
+            <p className="text-center text-[16px] text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}><bdi>{myCaptain.name}</bdi></b> is your captain</p>
           ) : (
             <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>
           )}
@@ -295,8 +295,8 @@ export default function PhoneRoom() {
           ) : (
             <p className="text-center text-[14px] text-[var(--color-ink-2)]">
               You&rsquo;re in.{" "}
-              {host && who?.user_id === host.user_id ? <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b>, who starts the game.</>
-                : <>{host && <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b>. </>}{who ? <><b style={{ color: "var(--color-gold)" }}>{who.name}</b> starts the game.</> : "The host, or Team A's captain, starts the game."}</>}
+              {host && who?.user_id === host.user_id ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>, who starts the game.</>
+                : <>{host && <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>. </>}{who ? <><b style={{ color: "var(--color-gold)" }}><bdi>{who.name}</bdi></b> starts the game.</> : "The host, or Team A's captain, starts the game."}</>}
               <br /><span className="text-[12px] text-[var(--color-ink-3)]">Heads up: leaving this screen during a question (another app, a search) is flagged on the TV.</span>
             </p>
           )}

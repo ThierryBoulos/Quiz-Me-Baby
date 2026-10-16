@@ -114,9 +114,9 @@ export default function TvRoom() {
           <div className="mt-8"><Lineup room={room} members={members} big /></div>
           <div className="mt-auto flex items-end justify-between text-[20px] text-[var(--color-ink-2)]">
             <div>
-              {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}>{host.name}</b></> : "No host yet — the app will check answers."}
+              {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b></> : "No host yet — the app will check answers."}
               <br />
-              {readyToStart(members) ? <>Ready. <b>{who?.name}</b> starts the game.</> : notReadyWhy(members)}
+              {readyToStart(members) ? <>Ready. <b><bdi>{who?.name}</bdi></b> starts the game.</> : notReadyWhy(members)}
               {lobbyNote && <><br /><span className="text-[18px] font-bold" style={{ color: "var(--color-no)" }} role="status">Start didn&rsquo;t go through: {lobbyNote}</span></>}
               {awake === false && <><br /><span className="text-[16px] text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
             </div>

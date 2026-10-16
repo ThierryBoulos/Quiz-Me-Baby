@@ -230,7 +230,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const q = current();
     const p: Pub = {
       screen: s.screen, step: s.step, r: g.r, N: g.rounds.length, theme: rd?.theme, mode: s.nohost ? "nohost" : "host",
-      teams: g.teams.map((t: G) => ({ name: t.name, score: t.score, ll: { ...t.ll } })),
+      /* names go out isolated, so a right-to-left (Arabic) name can't scramble the sentence it lands in */
+      teams: g.teams.map((t: G) => ({ name: iso(t.name), score: t.score, ll: { ...t.ll } })),
       deadline: s.deadline, left: s.left, timeUp: s.timeUp, lifeline: s.lifeline, toast: s.toast, winner: g.winner ?? null,
       sent: [!!s.typed[0] || s.guesses[0] != null, !!s.typed[1] || s.guesses[1] != null],
       pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
@@ -246,7 +247,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       ? (live === x.key ? "now" : g.done[x.key!] ? "done" : "todo")
       : (x.i === g.r && !live && s.screen !== "final" && s.screen !== "sudden" ? "now" : g.rounds[x.i!]?.done ? "done" : "todo") }));
     const mem = ctx.current.members;
-    p.captains = [0, 1].map((t) => mem.find((m) => m.team === t && m.role === "captain")?.name || null) as [string | null, string | null];
+    p.captains = [0, 1].map((t) => { const n = mem.find((m) => m.team === t && m.role === "captain")?.name; return n ? iso(n) : null; }) as [string | null, string | null];
     { const t = getSettings();
       p.tMini = t.tMini;
       p.timers = { question: t.tQuestion, steal: t.tSteal, friend: t.tFriend, contest: t.tContest, sudden: t.tSudden, mini: t.tMini, flag: t.tFlag, map: t.tMap, say: t.tSay,
