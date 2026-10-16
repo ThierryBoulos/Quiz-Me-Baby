@@ -625,9 +625,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
 
   /* ---- a captain's own moves: answers, buzzes, lifelines (no step bump:
      a captain typing doesn't change what the host is deciding) ---- */
-  const captainInput = useCallback((kind: string, team: 0 | 1, p: G) => {
+  /* Returns true when taken, false to drop it quietly (a stale or doubled tap), or a short
+     reason the TV puts up as a toast, so a refused tap is never a mystery. */
+  const captainInput = useCallback((kind: string, team: 0 | 1, p: G): boolean | string => {
     const s = st.current, g = s.g, sc = s.screen;
-    if (s.paused || s.tvAway) return false;            // nothing goes in while the clock is stopped or the TV is asleep
+    const nm = (t: 0 | 1) => iso(g.teams[t].name);
+    if (s.tvAway) return false;                        // the TV is asleep: it catches up when it wakes
+    if (s.paused) return "The game is paused.";        // nothing goes in while the clock is stopped
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
@@ -643,8 +647,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return false;
     }
     if (kind === "buzz") {
-      if (sc === "dishQ") { const L = g.dishGame.leg; if (L.buzz != null || L.out[team]) return false; play({ type: "dish/buzz", w: team }); s.buzzAt = Date.now(); return true; }
-      if (((sc === "sudden" && g.sdReady) || sc === "battleTie") && s.sdBuzz == null && !s.sdOut[team]) { s.sdBuzz = team; s.deadline = null; playSound("soft"); return true; }
+      if (sc === "dishQ") {
+        const L = g.dishGame.leg;
+        if (L.out[team]) return `${nm(team)} is out of this one.`;
+        if (L.buzz != null) return L.buzz === team ? false : `${nm(L.buzz)} buzzed first.`;
+        play({ type: "dish/buzz", w: team }); s.buzzAt = Date.now(); return true;
+      }
+      if ((sc === "sudden" && g.sdReady) || sc === "battleTie") {
+        if (s.sdOut[team]) return `${nm(team)} is out of this one.`;
+        if (s.sdBuzz != null) return s.sdBuzz === team ? false : `${nm(s.sdBuzz)} buzzed first.`;
+        s.sdBuzz = team; s.deadline = null; playSound("soft"); return true;
+      }
       return false;
     }
     if (kind !== "answer") return false;
@@ -658,7 +671,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     };
     if (sc === "ask" || sc === "steal") {
       /* one answer: once it's sent it's locked, host or no host */
-      if (team !== turnTeam() || !texts.length || s.pending || s.lifeline || s.typed[team]) return false;
+      if (!texts.length) return false;
+      if (team !== turnTeam()) return `It's ${nm(turnTeam())}'s turn to answer.`;
+      if (s.typed[team]) return `${nm(team)}'s answer is already in.`;
+      if (s.pending) return "Wait for the call on the last answer.";
+      if (s.lifeline) return "Wait for the lifeline to finish.";
       const dip = sc === "ask" && (rd.llUsed[team] || []).includes("dip");
       s.typed[team] = texts.slice(0, dip ? 2 : 1);
       check(sc, current());
@@ -666,19 +683,23 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (sc === "miniQ") {
       const n = Number(String(p.n ?? "").replace(/[\s,]/g, ""));
-      if (!Number.isFinite(n) || s.guesses[team] != null) return false;
+      if (s.guesses[team] != null) return `${nm(team)}'s guess is already in.`;
+      if (!Number.isFinite(n)) return "That isn't a number.";
       s.guesses[team] = n;
       if (s.guesses[0] != null && s.guesses[1] != null) reveal();
       return true;
     }
     if (sc === "battleQ") {
-      if (team !== g.battle.cap || !texts.length || s.pending) return false;
+      if (!texts.length) return false;
+      if (team !== g.battle.cap) return `It's ${nm(g.battle.cap)}'s turn in the Battle.`;
+      if (s.pending) return "Wait for the call on the last answer.";
       s.typed[team] = texts.slice(0, 1);
       check("battle", current());
       return true;
     }
     if (sc === "flagQ" || sc === "mapQ" || sc === "sayQ") {
-      if (!texts.length || s.typed[team]) return false;
+      if (!texts.length) return false;
+      if (s.typed[team]) return `${nm(team)}'s answer is already in.`;
       s.typed[team] = texts.slice(0, 1);
       if (s.typed[0] && s.typed[1]) reveal();
       return true;
@@ -689,13 +710,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   }, [applyFx, current, play, reveal]);
 
   /* a captain's tap on a host-style button: who may, where, and when */
-  const captainMove = useCallback((team: 0 | 1, move: G) => {
+  const captainMove = useCallback((team: 0 | 1, move: G): boolean | string => {
     const s = st.current, g = s.g, sc = s.screen;
     const rule = CAPTAIN_MOVES[move.type];
     if (!rule || (rule.nohostOnly && !s.nohost) || !inScreen(rule.where, sc)) return false;
     const t = move.type as string;
     /* the lead captain moves the night on; if they haven't after a while, the other captain may */
-    if (rule.who === "lead" && leadTeam() !== team && Date.now() - s.waitSince < T_NEXT_FALLBACK * 1000) return false;
+    if (rule.who === "lead" && leadTeam() !== team && Date.now() - s.waitSince < T_NEXT_FALLBACK * 1000) {
+      const lead = g.teams[leadTeam()];
+      return `${iso(lead.captain || lead.name)} moves the game on. You can in ${Math.max(1, Math.ceil(T_NEXT_FALLBACK - (Date.now() - s.waitSince) / 1000))} s.`;
+    }
     if (t === "ui/closeLifeline") { if (!s.lifeline || s.lifeline.team !== team) return false; }
     else if (t === "ui/rule") { if (!s.pending || s.pending.team === team || typeof move.v !== "boolean") return false; }
     else if (t === "sudden/go") { if (g.sdReady) return false; }
@@ -703,7 +727,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "ui/mapRule") { /* each captain rules on the other team's map answer, and can change it until Next */ }
     else if (t === "ui/pauseFriend") { if (!s.lifeline || s.lifeline.key !== "friend" || leadTeam() !== team) return false; }
     else if (t === "ui/exit") { /* either captain, with no host */ }
-    else if (t === "ui/next" && sc === "mapReveal") { if (s.ok[0] == null || s.ok[1] == null) return false; }
+    else if (t === "ui/next" && sc === "mapReveal") { if (s.ok[0] == null || s.ok[1] == null) return "Rule on both map answers first."; }
     else if (rule.who === "turn" && turnTeam() !== team) return false;
     else if (rule.who === "other" && turnTeam() === team) return false;
 
@@ -713,7 +737,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.ok[0] != null && s.ok[1] != null) { s.autoAt = null; s.waitSince = Date.now(); }
     }
     else if (t === "auction/raise") {
-      const n = Math.floor(Number(move.n)); if (!(n > g.auction.bid) || n > 999) return false;
+      const n = Math.floor(Number(move.n));
+      if (!(n > g.auction.bid)) return `Bid more than ${g.auction.bid}.`;
+      if (n > 999) return "Bids go up to 999.";
       if (s.bids.leg !== g.auction.leg) s.bids = { leg: g.auction.leg, by: [null, null] };
       s.bids.by[team] = n;
       play({ type: t, n });
@@ -721,6 +747,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else hostMove(move);
     return true;
   }, [hostMove, play, settle]);
+
+  /* a tap the TV won't take: say why on the TV (and the update ends the phone's "Sending…") */
+  const refuse = useCallback((why: string) => { const s = st.current; s.toast = { id: ++s.toastN, text: why }; void publish(); }, [publish]);
 
   /* ---- the inbox ---- */
   const handle = useCallback(async (a: Action) => {
@@ -821,11 +850,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "next") {
       const move = (a.payload.move || {}) as G, free = SAME_SCREEN.has(move.type);
       if (!free && a.payload.step !== s.step) return;
-      if (captainMove(from.team, move)) { if (!free) s.step++; void publish(); }
+      const ok = captainMove(from.team, move);
+      if (ok === true) { if (!free) s.step++; void publish(); }
+      else if (ok) refuse(ok);
       return;
     }
-    if (["answer", "buzz", "lifeline"].includes(a.kind) && captainInput(a.kind, from.team, a.payload as G)) void publish();
-  }, [applyFx, captainInput, captainMove, code, env, hostMove, play, publish]);
+    if (["answer", "buzz", "lifeline"].includes(a.kind)) {
+      const ok = captainInput(a.kind, from.team, a.payload as G);
+      if (ok === true) void publish();
+      else if (ok) refuse(ok);
+    }
+  }, [applyFx, captainInput, captainMove, code, env, hostMove, play, publish, refuse]);
 
   /* fetch the questions while everyone's still joining, not when Start is tapped */
   useEffect(() => { if (isTv) void loadBank().catch(() => { /* tried again at Start */ }); }, [isTv]);
