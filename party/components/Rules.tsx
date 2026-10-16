@@ -84,7 +84,7 @@ export function Rules() {
 
       <Rule n="05" title="Closest To Wins">
         <L items={[
-          <>Both captains get the same number question: <B>60 seconds</B> to lock in one number on the phone (&ldquo;1.5 million&rdquo;, &ldquo;2k&rdquo; and &ldquo;8,849 m&rdquo; all work).</>,
+          <>Both captains get the same number question: <B>60 seconds</B> to lock in one number on the phone&rsquo;s number pad.</>,
           <>The real answer comes up with both guesses and how far off each one was. Closest takes the leg; level is a point each; nobody answering scores nobody.</>,
           <>Most legs after 5 wins.</>,
         ]} />
