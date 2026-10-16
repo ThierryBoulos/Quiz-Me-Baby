@@ -6,7 +6,7 @@ import { QMB } from "@/lib/engine";
 import { note, sb, sendAction } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
-import { AskHead, battleNeeds, decidedCall, decidedHead, decidedSub, FlagImg, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, decidedCall, decidedHead, decidedSub, FlagImg, recapLines, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
@@ -164,9 +164,10 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     </div>);
   const Exit = () => (
     <div className="mt-auto flex flex-col gap-2">
+      <button className="btn btn-gold btn-lg btn-block" onClick={() => send({ type: "ui/again" })}>Play again: same teams</button>
       <p className="text-center text-[13px] text-[var(--color-ink-3)]">Exit takes every phone and the TV back to the home screen.</p>
       {/* home on this phone too, even if the TV is slow to answer */}
-      <button className="btn btn-gold btn-lg btn-block" onClick={() => { send({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+      <button className="btn btn-lg btn-block" onClick={() => { send({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
     </div>);
   const Small = ({ label, move, ghost }: { label: string; move: Record<string, unknown>; ghost?: boolean }) =>
     <button className={"btn btn-sm " + (ghost ? "btn-ghost" : "")} disabled={busy} onClick={() => send(move)}>{label}</button>;
@@ -511,6 +512,7 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
       <div className="display text-[52px] leading-none" style={{ color: tc(w) }}>{w == null ? "A draw" : T[w].name}</div>
       {w != null && mine != null && <div className="text-[15px] font-bold" style={{ color: w === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{w === mine ? "You won the night!" : "Not tonight."}</div>}
       <div className="mt-2">{board([T[0].score, T[1].score], "Final score", w)}</div>
+      {recapLines(pub).length > 0 && <ul className="mt-3 flex flex-col gap-1 text-[14px] text-[var(--color-ink-2)]">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>}
     </div>); }
   return null;
 }
@@ -670,7 +672,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   useEffect(() => { setA(""); setB(""); setSentTxt(null); }, [pub.qid, sc]);
   /* a BUZZ shows at once on this phone (the TV confirms it a moment later, or says who was first) */
   const [buzzed, setBuzzed] = useState(false);
-  useEffect(() => { setBuzzed(false); }, [pub.qid, sc, pub.buzz, pub.out?.[0], pub.out?.[1]]);
+  const outKey = `${pub.out?.[0]}|${pub.out?.[1]}`;
+  useEffect(() => { setBuzzed(false); }, [pub.qid, sc, pub.buzz, outKey]);
   useEffect(() => { setBid(""); }, [pub.auction?.bid, sc]);
   const np = useNoPaste(code, pub.qid);
   const act = async (kind: string, payload: Record<string, unknown>) => { setBusy(true); try { await sendAction(code, kind, payload); return true; } catch { return false; /* the phone already says so */ } finally { setBusy(false); } };
@@ -819,8 +822,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {nohost && sc === "answer" && pub.appeal && pub.appeal.team === mine && <p className="text-center text-[13px] text-[var(--color-ink-3)]">Appeal sent. Waiting for {T[theirs].name}&rsquo;s captain.</p>}
       {/* the end of the night, no host: either captain sends everyone home */}
       {nohost && sc === "final" && (<>
-        <p className="text-center text-[13px] text-[var(--color-ink-3)] mt-auto">Exit takes every phone and the TV back to the home screen.</p>
-        <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => { void nxt({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+        <button className="btn btn-gold btn-lg btn-block mt-auto" disabled={busy} onClick={() => void nxt({ type: "ui/again" })}>Play again: same teams</button>
+        <p className="text-center text-[13px] text-[var(--color-ink-3)]">Exit takes every phone and the TV back to the home screen.</p>
+        <button className="btn btn-lg btn-block" disabled={busy} onClick={() => { void nxt({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
       </>)}
       {/* no host, won with legs to spare: the lead captain picks */}
       {nohost && sc === DECIDED && mayNext && pub.nextBy && (

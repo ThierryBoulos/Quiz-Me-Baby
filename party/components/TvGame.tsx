@@ -4,14 +4,17 @@ import type { Pub } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { BattleAnswer, flagText } from "./PhoneGame";
-import { AskHead, battleNeeds, Confetti, decidedCall, decidedHead, decidedSub, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, Confetti, decidedCall, decidedHead, decidedSub, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
 import { DECIDED, TIE_SCREENS } from "@/lib/game";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
 /* The TV during the game: no buttons (but Exit at the very end), no answers before the reveal. */
-export function TvGame({ pub, onExit }: { pub: Pub; onExit?: () => void }) {
+export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void; onAgain?: () => void }) {
   const T = pub.teams;
+  /* the end: celebrate the winner first, then the recap comes up under it */
+  const [recap, setRecap] = useState(false);
+  useEffect(() => { if (pub.screen !== "final") { setRecap(false); return; } const t = setTimeout(() => setRecap(true), 7000); return () => clearTimeout(t); }, [pub.screen]);
   /* a pop-up shows for three seconds, then goes */
   const [shown, setShown] = useState<number | null>(null);
   const tid = pub.toast?.id ?? null;
@@ -73,10 +76,23 @@ export function TvGame({ pub, onExit }: { pub: Pub; onExit?: () => void }) {
         {pub.screen === "final" && (<>
           <Confetti n={140} />
           <div className="eyebrow text-[22px]">{pub.winner == null ? "The night ends" : "The winner"}</div>
-          <div className="display" style={{ fontSize: 150, color: tc(pub.winner) }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
-          <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />
+          <div className="display" style={{ fontSize: recap ? 100 : 150, color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
+          {/* once the recap is up, the big score board gives way to one line (the scores stay in the top bar too) */}
+          {recap ? (
+            <div className="display leading-none" style={{ fontSize: 72 }} aria-label={`${T[0].name} ${T[0].score}, ${T[1].name} ${T[1].score}`}>
+              <span style={{ color: "var(--color-a)" }}>{T[0].score}</span><span className="text-[var(--color-ink-3)]"> – </span><span style={{ color: "var(--color-b)" }}>{T[1].score}</span>
+            </div>
+          ) : <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
+          {recap && recapLines(pub).length > 0 && (
+            <div className="card enter text-left max-w-[1000px]" style={{ position: "relative", zIndex: 60 }}>
+              <div className="eyebrow text-[18px] mb-2" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
+              <ul className="flex flex-col gap-1.5 text-[26px]">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>
+            </div>)}
           {(pub.flags?.length ?? 0) > 0 && <div className="text-[20px] text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}
-          {onExit && <button className="btn btn-sm btn-ghost" style={{ position: "relative", zIndex: 70 }} onClick={onExit}>Exit: everyone back to the home screen</button>}
+          <div className="flex gap-3" style={{ position: "relative", zIndex: 70 }}>
+            {onAgain && <button className="btn btn-sm" onClick={onAgain}>Play again: same teams</button>}
+            {onExit && <button className="btn btn-sm btn-ghost" onClick={onExit}>Exit: everyone back to the home screen</button>}
+          </div>
         </>)}
       </div>
 

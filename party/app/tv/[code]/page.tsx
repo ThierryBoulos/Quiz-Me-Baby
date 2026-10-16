@@ -36,7 +36,7 @@ export default function TvRoom() {
   const lock = useTabLock(code, owner);
   const isTv = owner && lock.state === "mine";
 
-  const { pub: own, exit, banner, lobbyNote } = useTvGame(code, isTv, room, members);
+  const { pub: own, exit, again, banner, lobbyNote } = useTvGame(code, isTv, room, members);
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
   const pub = own || ((room?.state?.pub || null) as Pub | null);
@@ -128,7 +128,7 @@ export default function TvRoom() {
             </div>
           </div>
         </>
-      ) : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} /> : (
+      ) : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} /> : (
         <div className="m-auto text-center enter">
           <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
         </div>
