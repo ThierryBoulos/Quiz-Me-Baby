@@ -13,7 +13,6 @@ const CODES: Record<string, string> = {
   "pick a team first": "Pick a team first.",
   "unknown role": "That didn't work. Try again.",
   game_over: "That game is over. Ask for the new code on the TV.",
-  room_full: "This room is full: all 16 faces are taken.",
 };
 const DB: [RegExp, string][] = [
   [/members_name_check|name.*too long|value too long/i, "Names can be 1 to 12 characters."],

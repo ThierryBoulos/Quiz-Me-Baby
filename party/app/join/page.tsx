@@ -5,7 +5,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { FacePicker } from "@/components/Face";
 import { FACES } from "@/lib/faces";
 import { cap1, cleanCode } from "@/lib/room";
-import { ensureSession, rpc, sb } from "@/lib/supabase";
+import { ensureSession, rpc } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 
 /* JOIN — SNAKED's one screen: room code, name, a face, "Take my seat".
@@ -40,25 +40,18 @@ function JoinForm() {
     setBusy(true);
     try {
       await ensureSession();
-      /* is the game already over? (an old QR on the fridge) */
-      const { data: room } = await sb().from("rooms").select("status").eq("code", code).maybeSingle();
-      if (room?.status === "done") { setCodeErr(friendly("game_over")); setBusy(false); return; }
-      /* someone grabbed the same face a moment earlier: quietly take another free one and try again */
-      let pick = face;
-      for (let tries = 0; tries < 4; tries++) {
-        const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean }>("qmb_join", { r: code, nm: cap1(useName.trim()), face: pick });
-        if (res.error === "face_taken") {
-          const next = freeFace(await loadTaken());
-          if (!next) { setErr(friendly("room_full")); setBusy(false); return; }
-          pick = next; setFace(next); continue;
-        }
-        if (res.error === "no_room") { setCodeErr(friendly("no_room")); setBusy(false); return; }
-        if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(!!res.playing); setBusy(false); return; }
-        if (res.error) { setErr(friendly(res.error)); setBusy(false); return; }
-        router.push("/room/" + code);
-        return;
-      }
-      setErr(friendly("face_taken")); setBusy(false);
+      /* is this a game you can join? (an old QR on the fridge, a mistyped code) */
+      const state = await rpc<string>("qmb_room_state", { r: code });
+      if (state === "done") { setCodeErr(friendly("game_over")); setBusy(false); return; }
+      if (state === "gone") { setCodeErr(friendly("no_room")); setBusy(false); return; }
+      /* the server seats one phone at a time and hands out the next free face if this one just went */
+      const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean; face?: string }>("qmb_join", { r: code, nm: cap1(useName.trim()), face });
+      if (res.error === "no_room" || res.error === "game_over") { setCodeErr(friendly(res.error)); setBusy(false); return; }
+      if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(!!res.playing); setBusy(false); return; }
+      if (res.error === "face_taken") { setErr(friendly("face_taken")); void loadTaken(); setBusy(false); return; }
+      if (res.error) { setErr(friendly(res.error)); setBusy(false); return; }
+      if (res.face) setFace(res.face);
+      router.push("/room/" + code);
     } catch (e) { setErr(friendly(e)); setBusy(false); }
   }
   /* mid-game, a taken name may be you on a new phone: take the seat back (team, captaincy and all) */
