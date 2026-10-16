@@ -10,10 +10,10 @@ export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficu
 const MINIS = [
   ["closest", "Closest To Wins", "Seven numbers. Closest guess wins the leg."],
   ["auction", "The Auction", "Bid how many you can name, then deliver it."],
-  ["saysame", "Don't Say the Same", "Answer without matching the app's hidden word."],
+  ["saysame", "Don't Say the Same as Me", "Answer without matching the app's hidden word."],
   ["map", "Guess the Map", "A map, sixty seconds: what does it show?"],
   ["flag", "Guess the Flag", "Ten flags, fifteen seconds each: whose is it?"],
-  ["dish", "Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
+  ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
   ["battle", "Battle of the Captains", "Ten each, captains only. Closes the night."]] as const;
 /* each picture game has its own levels, as in Classic; more than one can be on */
 const MAP_LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;

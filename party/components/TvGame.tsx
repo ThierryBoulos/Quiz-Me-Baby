@@ -109,7 +109,7 @@ export function TvGame({ pub, onExit }: { pub: Pub; onExit?: () => void }) {
 const pointsEach = (n: number) => `${n} point${n === 1 ? "" : "s"} each`;
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
 
-/* who buzzed, and who is out (Cocktail or Dish, sudden death) */
+/* who buzzed, and who is out (Guess the Cocktail or Dish, sudden death) */
 function Buzzed({ pub }: { pub: Pub }) {
   const T = pub.teams;
   if (pub.buzz != null) return <div className="display text-[56px] enter" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed!</div>;
@@ -237,7 +237,7 @@ function TvMini({ pub }: { pub: Pub }) {
     </>);
   }
   if (sc === "sayQ") return (<>
-    <div className="eyebrow text-[20px]">Don&rsquo;t say the same as me</div>
+    <div className="eyebrow text-[20px]">Don&rsquo;t Say the Same as Me</div>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 56, lineHeight: 1.1 }}>{pub.question}</div>
     <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
     <Sent pub={pub} />

@@ -9,7 +9,7 @@ export type Settings = {
   tSudden: number;            // no host: sudden death and the Battle's tie-breaker, time to buzz
   /* the mini-games: */
   tMini: number; tFlag: number; tMap: number; tSay: number; tAuction: number;
-  tDishStep: number;          // Cocktail or Dish: a new ingredient every…
+  tDishStep: number;          // Guess the Cocktail or Dish: a new ingredient every…
   tDishType: number;          // …and after a buzz, this long to type it
   tBattleHost: number; tBattleTyped: number;   // the Battle, per question: out loud with a host, typed with none
   sound: boolean; tick: boolean; volume: number;                       // 0..1

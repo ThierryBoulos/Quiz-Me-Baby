@@ -72,7 +72,7 @@ export type Secret = { qid?: string; step?: number; answer?: string; notes?: str
 export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "battleLevel"];
 /* a mini-game can't be lost any more, with legs still to play: the same people choose — keep playing for fun, or stop here */
 export const DECIDED = "decided";
-export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me", battle: "Battle of the Captains" };
+export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Guess the Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me", battle: "Battle of the Captains" };
 export const T_CLOSEST = 60, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30;
 export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
 /* no host: the other captain has this long to give a point the app called WRONG (a RIGHT always stands) */

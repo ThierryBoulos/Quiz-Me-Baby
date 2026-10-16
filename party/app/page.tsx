@@ -32,7 +32,7 @@ export default function Home() {
       <div className="home-main">
         <div className="logo-wrap">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="mascot" src="/imad.webp" alt="Imad, your host" draggable={false} />
+          <img className="mascot" src="/imad.webp" alt="Imad, your MC" draggable={false} />
           <h1 className="logo">Quiz Me<br />Baby</h1>
         </div>
         <div className="home-menu">

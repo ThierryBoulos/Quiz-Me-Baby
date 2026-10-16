@@ -21,11 +21,11 @@ const STANDARD_TIMERS: Timer[] = [
 const MINI_TIMERS: Timer[] = [
   ["tMini", "Closest To Wins", [30, 45, 60, 75, 90, 120]],
   ["tAuction", "The Auction: naming time", [20, 30, 45, 60, 90]],
-  ["tSay", "Don't Say the Same", [10, 15, 20, 30, 45]],
+  ["tSay", "Don't Say the Same as Me", [10, 15, 20, 30, 45]],
   ["tMap", "Guess the Map", [30, 45, 60, 90, 120]],
   ["tFlag", "Guess the Flag", [10, 15, 20, 30]],
-  ["tDishStep", "Cocktail or Dish: a new ingredient every", [2, 3, 4, 5]],
-  ["tDishType", "Cocktail or Dish: time to type after a buzz", [5, 10, 15, 20]],
+  ["tDishStep", "Guess the Cocktail or Dish: a new ingredient every", [2, 3, 4, 5]],
+  ["tDishType", "Guess the Cocktail or Dish: time to type after a buzz", [5, 10, 15, 20]],
   ["tBattleHost", "Battle, with a host: per question (out loud)", [5, 7, 10, 15]],
   ["tBattleTyped", "Battle, no host: per question (typed)", [10, 15, 20, 30]],
 ];
@@ -202,7 +202,7 @@ export default function SettingsPage() {
         </div>
       </Section>
 
-      <Section title="Your host: Imad">
+      <Section title="Your MC: Imad">
         <Toggle on={s.imad} set={(v) => set({ imad: v })} title="Imad comments" help="He comments on the game in a speech bubble on the TV: round intros, right and wrong answers, steals, lead changes, the final. Text only, no voice." />
       </Section>
 

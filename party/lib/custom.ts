@@ -10,7 +10,7 @@ import type { Q } from "./engine";
 export const CUSTOM_KEY = "qmb.party.custom";
 export const MAX_CUSTOM_THEMES = 4;
 export const MAX_CUSTOM = 300;
-export const CUSTOM_TYPES = [["standard", "Standard"], ["closest", "Closest To Wins"], ["auction", "Auction"], ["saysame", "Don't Say the Same"]] as const;
+export const CUSTOM_TYPES = [["standard", "Standard"], ["closest", "Closest To Wins"], ["auction", "Auction"], ["saysame", "Don't Say the Same as Me"]] as const;
 const TYPES: string[] = CUSTOM_TYPES.map(([k]) => k);
 const DIFFS = ["easy", "medium", "hard"];
 

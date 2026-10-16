@@ -4,7 +4,7 @@
 
 Two files and a folder: `index.html`, `maps-geo.js` and `flags/`, side by side. Double-click `index.html`. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.) `maps-geo.js` is the real-world borders that **Guess the Map** draws from; the app only reads it when a game actually has maps on the card, so if it is missing, everything else still works.
 
-Your host stands on the left of the home screen. He's baked into the HTML as a data URI, so he travels with the file and there is no image folder to forget. (`host-imad.png` is the cut-out on its own, kept only in case you want to reuse it elsewhere — the app does not read it.) He's positioned out of the layout flow, so the logo and the menu stay dead centre on screen whether he's there or not, and he hides himself on windows narrower than 920px rather than squeeze them.
+Imad, your MC, stands on the left of the home screen. He's baked into the HTML as a data URI, so he travels with the file and there is no image folder to forget. (`host-imad.png` is the cut-out on its own, kept only in case you want to reuse it elsewhere — the app does not read it.) He's positioned out of the layout flow, so the logo and the menu stay dead centre on screen whether he's there or not, and he hides himself on windows narrower than 920px rather than squeeze them.
 
 No server, no internet (the Google Fonts link and `.xlsx` import are the only online bits — both degrade gracefully). Works in Chrome, Edge, Firefox, Safari, on a laptop, a tablet or a phone.
 
@@ -241,7 +241,7 @@ Every flag is also a row in the **question bank** (type *Flag*, with its picture
 
 **The flags are only downloaded when Guess the Flag is on the card.** They live as separate files in `flags/` (one SVG each, true proportions, from Wikimedia Commons — sources and licences in `flags/CREDITS.md`), and a game asks the browser for just the handful it deals, the moment it starts. A night without the flag game downloads none of them. Like the maps, a flag counts as played once it has been on screen, and fresh ones are dealt first.
 
-## Imad, your host
+## Imad, your MC
 
 Imad comments on the game now. At every big moment he pops up in a speech bubble — text only (a spoken voice was tried and dropped: the device voices sound too robotic):
 
@@ -260,7 +260,7 @@ The show around him:
 - The screen shakes on a stolen point.
 - Confetti falls when a mini-game is won.
 
-**Settings → Your host — Imad**: switch him off, or press *Test Imad* to see him. Anyone sensitive to motion gets the animations switched off by their device's reduce-motion setting.
+**Settings → Your MC — Imad**: switch him off, or press *Test Imad* to see him. Anyone sensitive to motion gets the animations switched off by their device's reduce-motion setting.
 
 ## Guess the Cocktail or Dish
 
@@ -458,8 +458,8 @@ node --test engine/core.test.js engine/deal.test.js engine/moves.test.js
 So far it holds:
 - **answer checking** for typed answers: tidying, several accepted answers, and a small typo allowance — *yelephant* counts as elephant, *elegant* doesn't;
 - **mini-game points and their slots** between rounds;
-- **the best-of rule** shared by Guess the Map, Guess the Flag and Cocktail or Dish;
-- **dealing**: every deck (standard pairs, Closest To Wins, Auction, Don't Say the Same, maps, flags, cocktails and dishes, the Battle) and the whole game built from them. It was moved over unchanged: the old and new code deal identical games from the same random seed;
+- **the best-of rule** shared by Guess the Map, Guess the Flag and Guess the Cocktail or Dish;
+- **dealing**: every deck (standard pairs, Closest To Wins, Auction, Don't Say the Same as Me, maps, flags, cocktails and dishes, the Battle) and the whole game built from them. It was moved over unchanged: the old and new code deal identical games from the same random seed;
 - **every move of the night**: the standard rounds (double points, lifelines, swaps, steals), every mini-game, the Battle of the Captains, sudden death, and the running order between them: `QMB.play(game, move)` changes the game and returns what the screen should do (show this screen, this pop-up, this sound). Classic carries it out on one screen; Party will carry it out on the TV and phones. Scripted games played on the old and new code match event for event. Step 1 of the plan is complete.
 
 The script tag carries a version (`engine/core.js?v=…`): **bump it with `BUILD`** so a browser never runs a new page against an old engine.

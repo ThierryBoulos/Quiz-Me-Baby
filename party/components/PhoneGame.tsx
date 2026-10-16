@@ -350,7 +350,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "auctionResult": return <Results><Main label="Next" move={{ type: "auction/done" }} /></Results>;
     case "sayQ": return (
       <div className="flex flex-col gap-3 flex-1">
-        <div className="flex items-center justify-between"><div className="eyebrow">Don&rsquo;t say the same · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
+        <div className="flex items-center justify-between"><div className="eyebrow">Don&rsquo;t Say the Same as Me · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
         <p className="font-bold text-[18px]">{pub.question}</p>
         <AnswerCard />
         {([0, 1] as const).map((t) => <p key={t} className="text-[15px]"><b style={{ color: tc(t) }}>{T[t].name}:</b> {secret.typed?.[t]?.[0] ?? "thinking…"}{secret.typed?.[t] ? <> · <Verdict v={!secret.match?.[t]} say /></> : ""}</p>)}
@@ -591,8 +591,8 @@ function status(pub: Pub, me: Member) {
     case "sudden": return cap ? "Sudden death: captains only. Buzz to answer." : "Sudden death: captains only. Not a word!";
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country? One go." : "Guess the Flag: help your captain";
-    case "dishQ": return pub.buzz === mine ? (cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Cocktail or Dish: help your captain";
-    case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same: help your captain";
+    case "dishQ": return pub.buzz === mine ? (cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
+    case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same as Me: help your captain";
     case "sayReveal": return pub.reveal?.ok?.[mine] ? "You dodged the app's word" : "You said the app's word";
     case "battleQ": return pub.battle?.cap === mine ? (cap ? (pub.mode === "nohost" ? "Your question. Type it fast!" : "Your question. Say it out loud!") : "Your captain's battle. Not a word!") : cap ? "Your turn is next. Stay quiet." : "Captains only. Not a word!";
     case "battleHandoff": return `${T[1].name}'s captain is next`;
