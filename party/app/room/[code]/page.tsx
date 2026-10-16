@@ -32,18 +32,38 @@ export default function PhoneRoom() {
      if nothing comes back in 4 s the phone says so, and a tap that couldn't even leave says so at once. */
   const [waiting, setWaiting] = useState(false);
   const [tapErr, setTapErr] = useState<string | null>(null);
+  /* where the failed tap was: the message sits just under that button (above it when the button is docked at the bottom) */
+  const [tapAt, setTapAt] = useState<{ top?: number; bottom?: number } | null>(null);
+  const lastBtn = useRef<Element | null>(null);
   const waitRef = useRef({ on: false, key: "" }), viewKey = useRef("");
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
     const stop = () => { clearTimeout(t); waitRef.current.on = false; setWaiting(false); };
     const on = () => {
       waitRef.current = { on: true, key: viewKey.current }; setWaiting(true); setTapErr(null); clearTimeout(t);
-      t = setTimeout(() => { if (waitRef.current.on) { stop(); setTapErr("The TV didn't get that. Tap again."); } }, 4000);
+      t = setTimeout(() => { if (waitRef.current.on) { stop(); window.dispatchEvent(new Event("qmb:late")); setTapErr("The TV didn't get that. Tap again."); } }, 4000);
     };
-    const failed = (e: Event) => { stop(); setTapErr((e as CustomEvent<string>).detail || "No connection. Tap again."); };
+    const place = () => {
+      const r = lastBtn.current?.isConnected ? lastBtn.current.getBoundingClientRect() : null;
+      if (!r) return setTapAt(null);
+      setTapAt(window.innerHeight - r.bottom > 90 ? { top: r.bottom + 8 } : { bottom: window.innerHeight - r.top + 8 });
+    };
+    const failed = (e: Event) => {
+      stop(); place();
+      const said = (e as CustomEvent<string>).detail;
+      setTapErr(!said || /^No connection/.test(said) ? "No connection. Tap again." : said);
+    };
+    const tapped = (e: Event) => { const b = (e.target as Element | null)?.closest?.("button"); if (b) lastBtn.current = b; };
+    const late = () => { place(); };
+    document.addEventListener("pointerdown", tapped, true);
+    document.addEventListener("keydown", tapped, true);
+    window.addEventListener("qmb:late", late);
     window.addEventListener("qmb:sent", on);
     window.addEventListener("qmb:failed", failed);
-    return () => { window.removeEventListener("qmb:sent", on); window.removeEventListener("qmb:failed", failed); clearTimeout(t); };
+    return () => {
+      window.removeEventListener("qmb:sent", on); window.removeEventListener("qmb:failed", failed); window.removeEventListener("qmb:late", late);
+      document.removeEventListener("pointerdown", tapped, true); document.removeEventListener("keydown", tapped, true); clearTimeout(t);
+    };
   }, []);
   useEffect(() => { if (!tapErr) return; const t = setTimeout(() => setTapErr(null), 6000); return () => clearTimeout(t); }, [tapErr]);
 
@@ -140,7 +160,7 @@ export default function PhoneRoom() {
     <main className="screen">
       {waiting && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
       {tapErr && <div className="fixed left-4 right-4 enter text-center font-bold rounded-[16px]" role="alert" data-taperr
-        style={{ zIndex: 50, top: "calc(12px + env(safe-area-inset-top))", fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
+        style={{ zIndex: 50, ...(tapAt ?? { top: "calc(12px + env(safe-area-inset-top))" }), fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
           boxShadow: "0 12px 30px rgba(0,0,0,.6)" }}>{tapErr}</div>}
       {pub?.screen === "final" && !panel && <Confetti n={60} />}
       <header className="flex items-center justify-between">
