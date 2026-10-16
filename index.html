@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.22', date:'16 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.23', date:'16 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1965,60 +1965,62 @@ const SEED_AUCTION = [
    a prompt like "Name a cheese" is not easy or hard, it is just wide or
    narrow, and that width IS the difficulty here.
 
-   The candidate list does two jobs at once. One entry is drawn at random
-   as THIS game's secret word, so replaying "Name a cheese" does not always
-   land on Feta — that is the "answers should always change" part. And the
-   list's LENGTH is the prompt's real-world scope: 2 for a true binary like
-   Heads or Tails, up to a dozen or so for something wide open like fast food
-   chains. That number is what orders a night's nine prompts from vast (safe,
-   many ways to dodge the host) down to tight (a coin flip by the end) — see
-   buildGame(), which sorts the picked legs by pool length, descending.
-
-   On "up to 40-50": that ceiling describes how many valid answers actually
-   exist out in the world for a wide category, not how many get typed into
-   this file. Only one is ever drawn per game, so the payoff of hand-typing
-   forty near-duplicate cheeses is nearly zero and the cost — to file size,
-   to reading this list, to editing it later — is not. A dozen genuinely
-   different, well-known answers gives all the unpredictability replay needs.
+   The list does three jobs at once:
+   - It is the set of REAL answers. A captain's answer has to be on it (typos
+     allowed), or it counts as saying it. So it must be complete: a closed set
+     (planets, the countries of Africa, Bond actors) lists every member, and an
+     open one (a fruit, a cheese) lists everything people would actually say.
+     Obscure but correct answers stay, at the end; wrong ones never go on.
+   - It is ORDERED, most commonly given answer first. The secret word is drawn
+     leaning towards the top, the way the person next to you would answer —
+     so put Connery before Lazenby, Apple before Quince.
+   - Its LENGTH is the prompt's real-world scope: 2 for a true binary like
+     Heads or Tails, dozens for something wide open like fast food chains.
+     That number orders a night's nine prompts from vast (safe, many ways to
+     dodge) down to tight (a coin flip by the end) — see buildGame(), which
+     sorts the picked legs by pool length, descending.
+   Other ways of writing a word (Connery for Sean Connery, Yellow for Amber)
+   live with Party's also-accepted answers (party/public/accept.json byAnswer),
+   keyed by the word itself.
    -------------------------------------------------------------------------- */
 const SEED_SAYSAME = [
   ['Heads or tails?', ['Heads','Tails']],
   ['Odds or evens?', ['Odds','Evens']],
   ['Left or right?', ['Left','Right']],
   ['Cats or dogs?', ['Cats','Dogs']],
-  ['Name a chess piece', ['King','Queen','Rook','Bishop','Knight','Pawn']],
-  ['Name an ocean', ['Pacific','Atlantic','Indian','Southern','Arctic']],
+  ['Name a chess piece', ['King','Queen','Pawn','Knight','Bishop','Rook']],
+  ['Name an ocean', ['Pacific','Atlantic','Indian','Arctic','Southern']],
   ['Rock, paper or scissors — pick one', ['Rock','Paper','Scissors']],
-  ['Name a primary colour', ['Red','Yellow','Blue']],
-  ['Name a traffic light colour', ['Red','Amber','Green']],
-  ['Name a suit in a deck of cards', ['Hearts','Diamonds','Clubs','Spades']],
-  ['Name a season', ['Spring','Summer','Autumn','Winter']],
-  ['Name a Beatle', ['John','Paul','George','Ringo']],
+  ['Name a primary colour', ['Red','Blue','Yellow']],
+  ['Name a traffic light colour', ['Red','Green','Amber']],
+  ['Name a suit in a deck of cards', ['Hearts','Spades','Diamonds','Clubs']],
+  ['Name a season', ['Summer','Winter','Spring','Autumn']],
+  ['Name a Beatle', ['John','Paul','Ringo','George','Pete Best','Stuart Sutcliffe']],
   ['Name a compass direction', ['North','South','East','West']],
-  ['Name a vowel', ['A','E','I','O','U']],
-  ['Name a James Bond actor', ['Sean Connery','Pierce Brosnan','Daniel Craig']],
-  ['Name a Friends character', ['Ross','Rachel','Monica','Chandler','Joey','Phoebe']],
-  ['Name a colour of the rainbow', ['Red','Orange','Yellow','Green','Blue','Indigo','Violet']],
-  ['Name a day of the week', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']],
-  ['Name a continent', ['Africa','Antarctica','Asia','Europe','North America','Australia','South America']],
-  ['Name a country that borders France', ['Belgium','Luxembourg','Germany','Switzerland','Italy','Monaco','Spain','Andorra']],
-  ['Name a planet in the solar system', ['Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune']],
-  ['Name a month with 31 days', ['January','March','May','July','August','October','December']],
-  ['Name a Snow White dwarf', ['Doc','Grumpy','Happy','Sleepy','Bashful','Sneezy','Dopey']],
-  ['Name a zodiac sign', ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces']],
-  ['Name a country in South America', ['Brazil','Argentina','Chile','Peru','Colombia','Venezuela','Ecuador','Bolivia','Paraguay','Uruguay']],
-  ['Name a Disney princess', ['Snow White','Cinderella','Aurora','Ariel','Belle','Jasmine','Pocahontas','Mulan','Tiana','Rapunzel','Merida','Moana']],
-  ['Name a Formula 1 team', ['Red Bull','Ferrari','Mercedes','McLaren','Aston Martin','Alpine','Williams','Sauber','Haas']],
-  ['Name an Avenger', ['Iron Man','Captain America','Thor','Hulk','Spider-Man','Black Panther','Scarlet Witch','Ant-Man','Doctor Strange']],
-  ['Name a dog breed', ['Labrador','Poodle','Bulldog','Beagle','Chihuahua','Husky','Golden Retriever','German Shepherd','Rottweiler','Dachshund','Pug','Boxer']],
-  ['Name a type of pasta', ['Spaghetti','Penne','Fusilli','Linguine','Macaroni','Ravioli','Lasagne','Tagliatelle','Rigatoni','Farfalle']],
-  ['Name a fruit', ['Apple','Banana','Orange','Grape','Mango','Pineapple','Strawberry','Kiwi','Watermelon','Pear','Peach','Cherry']],
-  ['Name a country in Africa', ['Egypt','Nigeria','Kenya','Morocco','Ghana','Ethiopia','South Africa','Tanzania','Algeria','Senegal','Uganda','Zimbabwe']],
-  ['Name a pizza topping', ['Pepperoni','Mushroom','Olives','Ham','Pineapple','Onion','Chicken','Jalapeño','Cheese']],
-  ['Name a musical instrument', ['Guitar','Piano','Violin','Drums','Flute','Trumpet','Saxophone','Cello','Clarinet','Harp','Trombone','Bass']],
-  ['Name a cheese', ['Feta','Cheddar','Brie','Mozzarella','Gouda','Parmesan','Camembert','Halloumi','Gruyère','Blue cheese','Ricotta','Manchego']],
-  ['Name a flower', ['Rose','Tulip','Daisy','Sunflower','Lily','Orchid','Jasmine']],
-  ['Name a fast food chain', ['McDonald’s','Burger King','KFC','Subway','Wendy’s','Taco Bell','Domino’s','Pizza Hut','Popeyes','Five Guys','Chick-fil-A','Shake Shack']]
+  ['Name a vowel', ['A','E','I','O','U','Y']],
+  ['Name a James Bond actor', ['Sean Connery','Daniel Craig','Roger Moore','Pierce Brosnan','Timothy Dalton','George Lazenby']],
+  ['Name a Friends character', ['Rachel','Ross','Joey','Chandler','Monica','Phoebe','Gunther','Janice','Mike','Ursula','Richard','Carol','Susan','Emily','Ben','Emma','Marcel','Jack','Judy','Estelle','Frank Jr.','Paolo','Tag','Mr Heckles','Amy','Jill','Charlie','Kathy','Julie','Pete','David']],
+  ['Name a colour of the rainbow', ['Red','Blue','Green','Yellow','Orange','Violet','Indigo']],
+  ['Name a day of the week', ['Monday','Friday','Sunday','Saturday','Wednesday','Tuesday','Thursday']],
+  ['Name a continent', ['Africa','Asia','Europe','Australia','North America','South America','Antarctica','Oceania']],
+  ['Name a country that borders France', ['Spain','Germany','Italy','Belgium','Switzerland','Luxembourg','Monaco','Andorra','Brazil','Suriname','Netherlands']],
+  ['Name a planet in the solar system', ['Mars','Earth','Jupiter','Saturn','Venus','Mercury','Neptune','Uranus']],
+  ['Name a month with 31 days', ['January','December','July','March','August','October','May']],
+  ['Name a Snow White dwarf', ['Grumpy','Dopey','Happy','Sleepy','Doc','Sneezy','Bashful']],
+  ['Name a zodiac sign', ['Leo','Scorpio','Gemini','Aries','Virgo','Cancer','Pisces','Libra','Taurus','Capricorn','Aquarius','Sagittarius']],
+  ['Name a country in South America', ['Brazil','Argentina','Colombia','Chile','Peru','Venezuela','Ecuador','Bolivia','Uruguay','Paraguay','Guyana','Suriname']],
+  ['Name a Disney princess', ['Cinderella','Snow White','Ariel','Belle','Jasmine','Aurora','Rapunzel','Mulan','Pocahontas','Moana','Tiana','Merida','Raya','Elsa','Anna']],
+  ['Name a Formula 1 team', ['Ferrari','Red Bull','Mercedes','McLaren','Williams','Aston Martin','Alpine','Haas','Racing Bulls','Audi','Cadillac','Renault','Lotus','Sauber','Toro Rosso','AlphaTauri','Alfa Romeo','Jordan','Benetton','Brawn GP','Force India','Racing Point','Toyota','Jaguar','Minardi','Brabham','Tyrrell']],
+  ['Name an Avenger', ['Iron Man','Captain America','Thor','Hulk','Black Widow','Spider-Man','Hawkeye','Black Panther','Doctor Strange','Captain Marvel','Scarlet Witch','Ant-Man','Vision','Falcon','War Machine','Winter Soldier','Wasp','Quicksilver']],
+  ['Name a dog breed', ['Labrador','Golden Retriever','German Shepherd','Poodle','Chihuahua','Bulldog','Husky','Beagle','Pug','Dachshund','Rottweiler','French Bulldog','Dalmatian','Border Collie','Boxer','Great Dane','Doberman','Yorkshire Terrier','Shih Tzu','Pit Bull','Cocker Spaniel','Pomeranian','Jack Russell','Corgi','Greyhound','Saint Bernard','Staffordshire Bull Terrier','Labradoodle','Cockapoo','Maltese','Schnauzer','Cavalier King Charles Spaniel','Shiba Inu','Basset Hound','Bichon Frise','Whippet','Akita','Samoyed','Bloodhound','Mastiff','Newfoundland','Bernese Mountain Dog','Weimaraner','Afghan Hound']],
+  ['Name a type of pasta', ['Spaghetti','Penne','Lasagne','Macaroni','Fusilli','Ravioli','Tagliatelle','Linguine','Fettuccine','Tortellini','Farfalle','Rigatoni','Gnocchi','Cannelloni','Pappardelle','Orzo','Conchiglie','Orecchiette','Vermicelli','Angel hair','Bucatini','Ziti','Tortiglioni','Rotini','Cavatappi','Paccheri','Gemelli','Ditalini','Trofie','Casarecce','Manicotti','Agnolotti']],
+  ['Name a fruit', ['Apple','Banana','Orange','Strawberry','Grape','Mango','Pineapple','Watermelon','Pear','Peach','Cherry','Kiwi','Lemon','Blueberry','Raspberry','Plum','Melon','Lime','Grapefruit','Pomegranate','Coconut','Apricot','Papaya','Blackberry','Fig','Passion fruit','Lychee','Nectarine','Avocado','Dragon fruit','Clementine','Tangerine','Mandarin','Date','Guava','Cantaloupe','Honeydew','Cranberry','Tomato','Persimmon','Starfruit','Jackfruit','Durian','Gooseberry','Kumquat','Quince']],
+  ['Name a country in Africa', ['Egypt','Nigeria','South Africa','Kenya','Morocco','Ghana','Ethiopia','Algeria','Tunisia','Libya','Senegal','Cameroon','Uganda','Tanzania','Zimbabwe','Sudan','Somalia','Rwanda','DR Congo','Ivory Coast','Madagascar','Angola','Zambia','Mali','Mozambique','Namibia','Botswana','Republic of the Congo','Niger','Chad','Mauritius','Sierra Leone','Liberia','South Sudan','Eritrea','Malawi','Burkina Faso','The Gambia','Guinea','Togo','Benin','Gabon','Mauritania','Seychelles','Lesotho','Eswatini','Burundi','Djibouti','Central African Republic','Cape Verde','Equatorial Guinea','Guinea-Bissau','Comoros','São Tomé and Príncipe']],
+  ['Name a pizza topping', ['Pepperoni','Cheese','Mushroom','Ham','Pineapple','Olives','Onion','Sausage','Chicken','Peppers','Bacon','Jalapeño','Tomato','Spinach','Beef','Anchovies','Sweetcorn','Salami','Chorizo','Garlic','Basil','Tuna','Prawns','Meatballs','Mozzarella','Rocket','Artichoke','Egg','Prosciutto']],
+  ['Name a musical instrument', ['Guitar','Piano','Drums','Violin','Flute','Trumpet','Saxophone','Cello','Bass','Keyboard','Clarinet','Harp','Ukulele','Trombone','Harmonica','Tuba','Recorder','Triangle','Accordion','Xylophone','Banjo','Tambourine','Oud','Bagpipes','Organ','Oboe','Double bass','Viola','French horn','Darbuka','Synthesizer','Mandolin','Bongos','Bassoon','Sitar','Maracas','Cymbals','Piccolo','Kazoo','Glockenspiel','Didgeridoo','Castanets','Steel drum','Marimba','Timpani','Euphonium','Cornet']],
+  ['Name a cheese', ['Cheddar','Mozzarella','Brie','Parmesan','Feta','Gouda','Camembert','Halloumi','Blue cheese','Stilton','Edam','Gruyère','Ricotta','Emmental','Cream cheese','Goat cheese','Mascarpone','Gorgonzola','Roquefort','Cottage cheese','Akkawi','Manchego','Pecorino','Provolone','Burrata','Paneer','Monterey Jack','Red Leicester','Wensleydale','American','Comté','Kashkaval','Colby','Raclette','Taleggio','Havarti','Jarlsberg','Labneh','Shanklish']],
+  ['Name a flower', ['Rose','Tulip','Daisy','Sunflower','Lily','Orchid','Daffodil','Lavender','Jasmine','Carnation','Poppy','Lotus','Dandelion','Hibiscus','Peony','Iris','Marigold','Violet','Lilac','Chrysanthemum','Hydrangea','Magnolia','Bluebell','Buttercup','Cherry blossom','Gardenia','Geranium','Pansy','Petunia','Forget-me-not','Snowdrop','Dahlia','Begonia','Freesia','Gerbera','Azalea','Camellia','Crocus','Foxglove','Gladiolus','Honeysuckle','Primrose','Sweet pea','Water lily','Bougainvillea','Zinnia','Edelweiss','Anemone']],
+  ['Name a fast food chain', ['McDonald’s','Burger King','KFC','Subway','Pizza Hut','Domino’s','Taco Bell','Wendy’s','Five Guys','Popeyes','Starbucks','Chick-fil-A','Papa John’s','Hardee’s','Shake Shack','Nando’s','Dunkin’','Chipotle','In-N-Out','Little Caesars','Arby’s','Dairy Queen','Sonic','Jack in the Box','Carl’s Jr.','Panda Express','Tim Hortons','Greggs','White Castle','Krispy Kreme','Al Baik','Zaatar w Zeit','Jollibee','Wingstop','Whataburger','Raising Cane’s']]
 ];
 
 /* --------------------------------------------------------------------------
@@ -2969,7 +2971,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 25;   // bumped when the built-in bank changes
+const SEED_VERSION = 26;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
