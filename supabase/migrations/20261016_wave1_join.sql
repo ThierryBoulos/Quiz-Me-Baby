@@ -1,17 +1,18 @@
--- Wave 1: nothing breaks on the night (the database half).
+-- Wave 1: nothing breaks on the night (the database half, part 1 of 2).
+-- Applied 2026-10-16. Part 2 (20261016b) lifts the 16-player cap and moves
+-- the clean-up to a nightly job.
 --
 -- 1. Everyone can join at once (1A). Joins into one room queue up behind a
 --    per-room lock, so twelve phones tapping "Take my seat" in the same
 --    second all get in. A face somebody already has is no longer an error:
 --    the phone quietly gets the next free one, and qmb_join says which face
---    it ended up with. Once all 16 faces are used, faces repeat, so a 17th
---    player can join (the one-face-per-player index goes).
+--    it ended up with. (Once all 16 faces are used it hands out the asked-for
+--    face again; part 2 drops the index that still refuses that.)
 -- 2. Old QR codes (1C). A new phone scanning a finished game is told so
 --    ('game_over') instead of landing in a dead room. qmb_room_state lets the
 --    join page check a code before anyone types a name.
--- 3. Ops basics (1D). qmb_health is the database half of /api/health. The
---    clean-up of day-old rooms moves out of "Create game" into a nightly job,
---    which also deletes anonymous logins nobody has used for a month.
+-- 3. Names lose invisible characters (zero-width spaces, direction marks), so
+--    "Rami" and "Rami\u200b" can't both sit in one room.
 
 -- the 16 faces, in the order of party/lib/faces.ts
 create or replace function private.qmb_faces() returns text[]
@@ -34,12 +35,10 @@ begin
 end
 $$;
 
-drop index if exists public.members_avatar_unique;
-
 create or replace function public.qmb_join(r text, nm text, face text) returns jsonb
   language plpgsql security definer set search_path = '' as
 $$
-declare me uuid := (select auth.uid()); clean text := trim(nm); n int := 2; alt text; st text; got text;
+declare me uuid := (select auth.uid()); clean text := trim(regexp_replace(coalesce(nm, ''), '[\u00AD\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF]', '', 'g')); n int := 2; alt text; st text; got text;
 begin
   if me is null then return jsonb_build_object('error', 'not_signed_in'); end if;
   /* one join at a time per room: the face and name checks below can't race */
@@ -51,10 +50,10 @@ begin
     begin
       update public.members set name = coalesce(nullif(clean, ''), name),
              avatar = case when face is null then avatar else private.qmb_pick_face(r, face, me) end
-       where room = r and user_id = me
-      returning avatar into got;
+       where room = r and user_id = me;
     exception when unique_violation then null;   -- keep the old name rather than fail a rejoin
     end;
+    select avatar into got from public.members where room = r and user_id = me;
     return jsonb_build_object('ok', true, 'rejoined', true, 'face', got);
   end if;
   if st = 'done' then return jsonb_build_object('error', 'game_over'); end if;
@@ -79,55 +78,8 @@ create or replace function public.qmb_room_state(r text) returns text
   language sql stable security definer set search_path = '' as
 $$ select coalesce((select status from public.rooms where code = upper(trim(r))), 'gone') $$;
 
-/* /api/health: the database is awake and answering. */
-create or replace function public.qmb_health() returns jsonb
-  language sql stable security definer set search_path = '' as
-$$ select jsonb_build_object('ok', true, 'now', now(), 'rooms', (select count(*) from public.rooms)) $$;
-
 revoke execute on function public.qmb_join(text, text, text) from anon, public;
 grant  execute on function public.qmb_join(text, text, text) to authenticated;
-revoke execute on function public.qmb_room_state(text), public.qmb_health() from public;
-grant  execute on function public.qmb_room_state(text), public.qmb_health() to anon, authenticated;
+revoke execute on function public.qmb_room_state(text) from public;
+grant  execute on function public.qmb_room_state(text) to anon, authenticated;
 revoke execute on function private.qmb_faces(), private.qmb_pick_face(text, text, uuid) from public, anon, authenticated;
-
--- "Create game" no longer pays for deleting yesterday's rooms.
-create or replace function public.qmb_create_room() returns text
-  language plpgsql security definer set search_path = '' as
-$$
-declare c text; letters text := '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
-begin
-  if (select auth.uid()) is null then raise exception 'not signed in'; end if;
-  loop
-    c := '';
-    for i in 1..4 loop c := c || substr(letters, 1 + floor(random() * length(letters))::int, 1); end loop;
-    exit when not exists (select 1 from public.rooms where code = c);
-  end loop;
-  insert into public.rooms (code, tv_id) values (c, (select auth.uid()));
-  insert into public.secrets (room) values (c);
-  return c;
-end
-$$;
-
-/* The nightly tidy-up: rooms over a day old (their members, answers and
-   actions go with them), and anonymous logins unused for 30 days that
-   aren't sitting in a room. */
-create or replace function private.qmb_cleanup() returns jsonb
-  language plpgsql security definer set search_path = '' as
-$$
-declare rooms int; users int;
-begin
-  delete from public.rooms where created_at < now() - interval '1 day';
-  get diagnostics rooms = row_count;
-  delete from auth.users u
-   where u.is_anonymous and coalesce(u.last_sign_in_at, u.created_at) < now() - interval '30 days'
-     and not exists (select 1 from public.members m where m.user_id = u.id)
-     and not exists (select 1 from public.rooms ro where ro.tv_id = u.id);
-  get diagnostics users = row_count;
-  return jsonb_build_object('rooms', rooms, 'users', users);
-end
-$$;
-revoke execute on function private.qmb_cleanup() from public, anon, authenticated;
-
-create extension if not exists pg_cron;
-select cron.unschedule(jobid) from cron.job where jobname = 'qmb-nightly-cleanup';
-select cron.schedule('qmb-nightly-cleanup', '17 4 * * *', 'select private.qmb_cleanup()');
