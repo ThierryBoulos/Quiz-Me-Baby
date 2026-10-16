@@ -613,7 +613,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const exitGame = () => {
     const s = st.current;
     s.exit = true; s.deadline = null; s.pending = null; s.autoAt = null;
-    void sb().from("rooms").update({ status: "done" }).eq("code", code);
+    /* (a query only goes out once something waits on it) */
+    void sb().from("rooms").update({ status: "done" }).eq("code", code).then(() => {});
   };
 
   /* the moves a host makes — from the host's phone, or a captain's with no host */
