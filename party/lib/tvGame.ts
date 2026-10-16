@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, acceptFor, hostOnly, loadBank, withCustom, withoutHostOnly, type Q } from "./engine";
 import { cleanList } from "./custom";
-import { HOST_LINES } from "./imadLines";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
 import { getSettings, USED_KEY } from "./settings";
@@ -20,6 +19,7 @@ import { closestW, currentQ, leadOf, matchQ, okWin, sayWin, turnOf } from "./tv/
 import { buildView } from "./tv/view";
 import { useInbox } from "./tv/useInbox";
 import { usePresent } from "./tv/usePresent";
+import { imadNarrate, imadSay } from "./tv/imad";
 import { newState, type TvState } from "./tv/state";
 
 /* THE TV RUNS THE NIGHT. It holds the game, plays every move through the
@@ -121,54 +121,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const publishRef = useRef(publish);
   publishRef.current = publish;
 
-  /* ---- Imad: one line per moment, never the same twice in a night (until a
-     moment's lines run out), real names and numbers filled in. Lines from the
-     same instant ("Correct!" then "LEAD CHANGE!") go up as one. (Classic's Host) ---- */
-  const say = (moments: string[] | string, extra?: G) => {
-    const s = st.current, g = s.g;
-    if (!g || !getSettings().imad) return;
-    const T = g.teams.map((t: G) => ({ ...t, name: iso(t.name), captain: t.captain ? iso(t.captain) : t.captain })),
-      cap = (i: 0 | 1) => (T[i].captain || "").trim() || T[i].name, v: G = { ...(extra || {}) };
-    if (v.t === 0 || v.t === 1) { v.team = T[v.t].name; v.other = T[1 - v.t].name; v.captain = cap(v.t); v.othercap = cap(other(v.t)); }
-    else { v.team = v.team || T[0].name; v.other = v.other || T[1].name; v.captain = v.captain || cap(0); v.othercap = v.othercap || cap(1); }
-    const d = T[0].score - T[1].score;
-    v.leader = T[d >= 0 ? 0 : 1].name; v.trailer = T[d >= 0 ? 1 : 0].name; v.gap = Math.abs(d);
-    for (const m of ([] as string[]).concat(moments)) {
-      const pool = HOST_LINES[m]; if (!pool?.length) continue;
-      const seen: number[] = ((g.hostUsed = g.hostUsed || {})[m] = g.hostUsed[m] || []);
-      let free = pool.map((_, i) => i).filter((i) => !seen.includes(i));
-      if (!free.length) { seen.length = 0; free = pool.map((_, i) => i); }
-      const i = free[Math.floor(Math.random() * free.length)];
-      seen.push(i);
-      s.imadQ.push(pool[i].replace(/\{(\w+)\}/g, (_x, k) => (v[k] != null ? String(v[k]) : "")));
-    }
-  };
-  /* once per game, keyed: a screen shown again stays quiet */
-  const once = (key: string, moments: string[] | string, extra?: G) => {
-    const g = st.current.g; g.hostOnce = g.hostOnce || {};
-    if (g.hostOnce[key]) return false;
-    g.hostOnce[key] = true; say(moments, extra); return true;
-  };
-  /* after every move: the screen's own moment, a change of leader, then up it goes */
-  const narrate = () => {
-    const s = st.current, g = s.g;
-    if (!g) return;
-    const sc = s.screen, rd = g.rounds[g.r];
-    const opener = () => (g.hostHello ? [] : ((g.hostHello = true), ["start"]));
-    if (sc === "roundIntro" && rd && !g.hostOnce?.["r" + g.r]) once("r" + g.r, [...opener(), "round"], { t: QMB.seatTeam(g, rd, 0, seat()), theme: rd.theme, n: g.r + 1, N: g.rounds.length });
-    const intro = ({ miniIntro: "closest", auctionIntro: "auction", sayIntro: "saysame", mapIntro: "map", flagIntro: "flag", dishIntro: "dish", battleIntro: "battle" } as Record<string, string>)[sc];
-    if (intro && !g.hostOnce?.["mi:" + intro]) once("mi:" + intro, [...opener(), "mini_" + intro]);
-    if (/Summary$|^auctionResult$/.test(sc)) {
-      const m = sc === "auctionResult" ? g.auction : sc === "battleSummary" ? g.battle : miniState(g, miniOf(sc));
-      if (m?.award) { const w = m.award[0] > m.award[1] ? 0 : m.award[1] > m.award[0] ? 1 : null; if (w != null) once("mw:" + sc, "miniwin", { t: w, pts: Math.max(m.award[0], m.award[1]) }); }
-    }
-    if (sc === "roundScore") { const d = Math.abs(g.teams[0].score - g.teams[1].score); if (d >= 5) once("rs" + g.r, "big"); else if (d === 1) once("rs" + g.r, "close"); else if (d === 0) once("rs" + g.r, "level"); }
-    if (sc === "sudden") once("sd" + (g.sdRounds || 1), "sudden");
-    if (sc === "final") once("final", g.winner == null ? "finaltie" : "final");
-    const d = g.teams[0].score - g.teams[1].score, lead = d > 0 ? 0 : d < 0 ? 1 : null;
-    if (lead != null) { if (g.hostLeader != null && g.hostLeader !== lead) say("lead"); g.hostLeader = lead; }
-    if (s.imadQ.length) { s.imad = { id: ++s.imadN, text: s.imadQ.join(" ") }; s.imadQ = []; }
-  };
+  /* ---- Imad, the MC (lib/tv/imad.ts) ---- */
+  const say = (moments: string[] | string, extra?: G) => imadSay(st.current, moments, extra);
+  const narrate = () => imadNarrate(st.current);
 
   /* ---- carrying out what the engine says ---- */
   const applyFx = useCallback((fx: G[]) => {
@@ -923,7 +878,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (changed) void publish();
     }, 250);
     return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTv, publish, play, reveal, settle, hostMove, applyFx, handOver]);
 
   /* Exit on the TV itself (it has a mouse): the same as the host's Exit */
