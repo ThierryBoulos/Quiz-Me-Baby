@@ -11,7 +11,7 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
    carried on (new required state, renamed screens, a changed engine game object): a TV reloaded
    onto the new version then says so and offers Exit, instead of playing on with a broken game. */
 const SAVE_SHAPE = 1;
-import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
+import { cap1, notReadyWhy, presenceChannel, readyToStart, starter, type Member, type Room } from "./room";
 import { DECIDED, DISH_LAST, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, TIE_SCREENS, T_AWAY, T_LOBBY_AWAY, T_MAP_RULE, T_NEXT_FALLBACK, T_OVERRULE_BATTLE,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 
@@ -882,7 +882,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const { data } = await sb().from("members").select("*").eq("room", code);
       if (data) { members = data as Member[]; ctx.current.members = members; from = members.find((m) => m.user_id === a.user_id); }
     }
-    /* anything a phone sends (its 15-second "I'm here" included) proves it's here */
+    /* anything a phone sends (its 15-second "I'm here" too, when its realtime link is down) proves it's here */
     /* Fresh by the server's clock, not this laptop's: a TV clock running fast must not decide that
        everyone is away. The gap between "now here" and "sent there" is the clock skew plus the delay;
        the smallest gap seen lately is the skew, so an action is fresh when it's within 30 s of that. */
@@ -1085,11 +1085,27 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     return () => { clearInterval(poll); void sb().removeChannel(ch); };
   }, [code, isTv, handle]);
 
-  /* Who's here: every phone says so every 15 s, through the action log (see usePresence). A
-     captain gone for T_AWAY hands over to the first teammate still here, so a
-     phone left in a pocket never stalls the night. Nobody is removed. */
+  /* Who's here: every phone on screen is present on the room's realtime channel (see
+     usePresence), and anything it sends counts too. A captain gone for T_AWAY hands over
+     to the first teammate still here, so a phone left in a pocket never stalls the
+     night. Nobody is removed. */
   const here = useRef({ at: {} as Record<string, number>, since: Date.now(), busy: false, checked: 0, lags: [] as number[],
     away: {} as Record<string, { at: number; qid?: string; flag?: number }> });
+  useEffect(() => {
+    if (!isTv) return;
+    let live = false, down = Date.now();
+    /* a presence listener is what makes the channel keep the list (without one, the joins are dropped) */
+    const ch = sb().channel(presenceChannel(code)).on("presence", { event: "sync" }, () => {});
+    ch.subscribe((status) => { live = status === "SUBSCRIBED"; if (!live) down = Date.now(); });
+    const t = setInterval(() => {
+      const H = here.current, now = Date.now();
+      if (live) { for (const k of Object.keys(ch.presenceState())) H.at[k] = now; return; }
+      /* the TV can't see who's present (its realtime link is down): nobody is taken for away
+         meanwhile, since the phones that are present aren't writing to the log */
+      if (now - down > 5000) for (const m of ctx.current.members) H.at[m.user_id] = now;
+    }, 1000);
+    return () => { clearInterval(t); void sb().removeChannel(ch); };
+  }, [isTv, code]);
   /* Left the game screen during a question: flagged once they've been gone two
      seconds (a glance at a notification doesn't count), with how long when
      they come back. The TV says it; the host's phone keeps the list. */

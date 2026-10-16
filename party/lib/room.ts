@@ -77,20 +77,32 @@ export function useRoom(code: string) {
   return { room, members, missing, refresh: pull };
 }
 
-/* "I'm here": while its page is open and on screen, each phone tells the TV
-   every 15 seconds, so the TV can tell a captain who has gone (phone off,
-   page closed) from one who is just slow. Nobody is ever removed for it; a
-   captain who's been gone a minute hands the armband to a teammate who's
-   still here. A fresh page says "hello" (a reload: they're back). */
+/* "I'm here": while its page is open and on screen, each phone is present on the
+   room's realtime channel (Supabase presence, nothing written anywhere), so the TV
+   can tell a captain who has gone (phone off, page closed) from one who is just
+   slow. Out of sight, it steps off; back on screen, it steps on again. Only when
+   that channel is down does the phone fall back to the old way: a note in the
+   action log every 15 seconds. Nobody is ever removed for it; a captain who's been
+   gone a minute hands the armband to a teammate who's still here. A fresh page
+   says "hello" in the log (a reload: they're back). */
 export type AwayMeta = { away?: { qid?: string } | null; back?: { qid?: string; ms: number } | null };
+export const presenceChannel = (code: string) => "here:" + code;
 export function usePresence(code: string, me: string | null) {
   useEffect(() => {
     if (!me) return;
     note(code, { hello: 1 });
-    const beat = () => { if (document.visibilityState === "visible") note(code, { here: 1 }); };
+    let live = false;
+    const ch = sb().channel(presenceChannel(code), { config: { presence: { key: me } } });
+    const show = () => {
+      if (!live) return;
+      if (document.visibilityState === "visible") void ch.track({ on: 1 }).catch(() => {});
+      else void ch.untrack().catch(() => {});
+    };
+    ch.subscribe((status) => { live = status === "SUBSCRIBED"; show(); });
+    const beat = () => { if (document.visibilityState === "visible" && !live) note(code, { here: 1 }); };
     const t = setInterval(beat, 15000);
-    document.addEventListener("visibilitychange", beat);
-    return () => { clearInterval(t); document.removeEventListener("visibilitychange", beat); };
+    document.addEventListener("visibilitychange", show);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", show); void sb().removeChannel(ch); };
   }, [code, me]);
   return useCallback((m: AwayMeta) => note(code, m as Record<string, unknown>), [code]);
 }
