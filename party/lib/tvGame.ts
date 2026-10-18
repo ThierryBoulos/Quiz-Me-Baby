@@ -74,7 +74,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* the lobby: why a Start didn't start (a captain left a second ago) */
   const [lobbyNote, setLobbyNote] = useState<string | null>(null);
   useEffect(() => { if (!lobbyNote) return; const t = setTimeout(() => setLobbyNote(null), 6000); return () => clearTimeout(t); }, [lobbyNote]);
+  const pubN = useRef(0);                             // publishes so far (a tap with none after it still gets a reply)
   const publish = useCallback(() => {
+    pubN.current++;
     /* this TV shows the change at once; the phones get it with the next write */
     const now = view(); if (now) { now[0].at = Date.now(); setPub(now[0]); }
     const c = chain.current;
@@ -669,7 +671,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   }, [isTv, saveKey]);
 
   /* the inbox: every tap from the phones, in the order the server received it (lib/tv/useInbox.ts) */
-  useInbox(code, isTv, handle);
+  /* every tap gets a reply: one the TV ignored (a double tap, the second captain's Next) still sends the
+     view again, so that phone stops waiting instead of saying "The TV didn't get that" */
+  const handleAndReply = useCallback(async (a: Action) => {
+    const n = pubN.current;
+    await handle(a);
+    if (a.kind !== "count" && a.kind !== "suggest" && st.current.g && pubN.current === n) void publish();
+  }, [handle, publish]);
+  useInbox(code, isTv, handleAndReply);
 
   /* Who's here: every phone on screen is present on the room's realtime channel (see
      usePresence), and anything it sends counts too. A captain gone for T_AWAY hands over

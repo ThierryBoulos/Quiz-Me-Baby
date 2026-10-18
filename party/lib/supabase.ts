@@ -34,6 +34,8 @@ export async function rpc<T = unknown>(fn: string, args: Record<string, unknown>
 /* a phone telling the TV something: a buzz, an answer, a team name, "start" */
 export async function sendAction(room: string, kind: string, payload: Record<string, unknown> = {}) {
   let error: { message: string } | null = null;
+  /* about to go: the room page notes the TV's latest update now, as the TV's reply can land before the send returns */
+  if (typeof window !== "undefined" && kind !== "suggest") window.dispatchEvent(new Event("qmb:sending"));
   try { ({ error } = await sb().from("actions").insert({ room, kind, payload })); }
   catch (e) { error = { message: e instanceof Error ? e.message : String(e) }; }
   if (error) {

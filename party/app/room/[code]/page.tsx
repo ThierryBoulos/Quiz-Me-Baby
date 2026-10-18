@@ -38,12 +38,16 @@ export default function PhoneRoom() {
   /* where the failed tap was: the message sits just under that button (above it when the button is docked at the bottom) */
   const [tapAt, setTapAt] = useState<{ top?: number; bottom?: number } | null>(null);
   const lastBtn = useRef<Element | null>(null);
-  const waitRef = useRef({ on: false, key: "" }), viewKey = useRef("");
+  const waitRef = useRef({ on: false, key: "" }), viewKey = useRef(""), sendKey = useRef("");
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
     const stop = () => { clearTimeout(t); waitRef.current.on = false; setWaiting(false); };
+    /* the TV's latest update just before the tap went: any newer one is its reply, even one that beat the send back */
+    const sending = () => { sendKey.current = viewKey.current; };
     const on = () => {
-      waitRef.current = { on: true, key: viewKey.current }; setWaiting(true); setTapErr(null); clearTimeout(t);
+      clearTimeout(t); setTapErr(null);
+      if (viewKey.current !== sendKey.current) { stop(); return; }   // the reply is already here
+      waitRef.current = { on: true, key: sendKey.current }; setWaiting(true);
       t = setTimeout(() => { if (waitRef.current.on) { stop(); window.dispatchEvent(new Event("qmb:late")); setTapErr("The TV didn't get that. Tap again."); } }, 4000);
     };
     const place = () => {
@@ -61,10 +65,11 @@ export default function PhoneRoom() {
     document.addEventListener("pointerdown", tapped, true);
     document.addEventListener("keydown", tapped, true);
     window.addEventListener("qmb:late", late);
+    window.addEventListener("qmb:sending", sending);
     window.addEventListener("qmb:sent", on);
     window.addEventListener("qmb:failed", failed);
     return () => {
-      window.removeEventListener("qmb:sent", on); window.removeEventListener("qmb:failed", failed); window.removeEventListener("qmb:late", late);
+      window.removeEventListener("qmb:sending", sending); window.removeEventListener("qmb:sent", on); window.removeEventListener("qmb:failed", failed); window.removeEventListener("qmb:late", late);
       document.removeEventListener("pointerdown", tapped, true); document.removeEventListener("keydown", tapped, true); clearTimeout(t);
     };
   }, []);
@@ -140,10 +145,12 @@ export default function PhoneRoom() {
   const pub = (room?.state?.pub || null) as Pub | null;
   usePreload(pub);
   /* the TV's reply has landed: the game moved on (a new update from the TV, or the game started) */
-  viewKey.current = `${room?.status}|${pub?.at ?? ""}`;
+  /* in the lobby the TV answers by changing the room itself (a team name, who's away), not a game view */
+  const lobbyKey = room?.status === "lobby" ? JSON.stringify([room.state?.teamNames, room.state?.away]) : "";
+  viewKey.current = `${room?.status}|${pub?.at ?? ""}|${lobbyKey}`;
   useEffect(() => {
     if (waitRef.current.on && viewKey.current !== waitRef.current.key) { waitRef.current.on = false; setWaiting(false); setTapErr(null); }
-  }, [room?.status, pub?.at]);
+  }, [room?.status, pub?.at, lobbyKey]);
   useEffect(() => { noteTvTime(pub?.at); }, [pub?.at]);
   /* an old copy of the app (left open across a deploy) reloads when nothing is being answered */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline));
