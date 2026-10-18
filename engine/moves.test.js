@@ -458,3 +458,37 @@ test('contest: the Battle stops for a review before it is settled; a changed cal
   assert.equal(g.battle.winner, 0);
   assert.deepEqual(Q.play(g, { type:'battle/rule', cap:1, i:0, got:false }, env), []);   // only at the review
 });
+test('contest: a sudden-death call changed on the final screen moves the win, or plays another question', () => {
+  const { g, env } = game3();
+  Q.play(g, { type:'game/end' }, env);
+  assert.deepEqual(Q.play(g, { type:'sudden/rule', w:1 }, env), [{ finalize:true }]);  // B's WRONG was right: they win
+  assert.equal(g.winner, 1);
+  assert.deepEqual(g.teams.map(t => t.score), [0, 1]);
+  assert.deepEqual(Q.play(g, { type:'sudden/rule', w:1 }, env), []);                  // no change twice
+  Q.play(g, { type:'sudden/rule', w:0 }, env);                                         // it was A, first
+  assert.deepEqual(g.teams.map(t => t.score), [1, 0]);
+  const q = g.sd.q.id;
+  const fx = Q.play(g, { type:'sudden/rule', w:'none' }, env);                         // A's RIGHT was wrong
+  assert.ok(types(fx).includes('go:sudden'));
+  assert.deepEqual(g.teams.map(t => t.score), [0, 0]);
+  assert.equal(g.winner, null);
+  assert.notEqual(g.sd.q.id, q);
+  assert.equal(g.sdRounds, 2);
+});
+test('contest: a tie-breaker call changed on the Battle summary moves its points, or plays another', () => {
+  const { g, env } = game3({ minis:['battle'] });
+  Q.play(g, { type:'battle/build' }, env);
+  for(let cap = 0; cap < 2; cap++){
+    Q.play(g, { type:'battle/start' }, env);
+    for(let i = 0; i < g.battle.n; i++) Q.play(g, { type:'battle/mark', got:i < 5 }, env);
+  }
+  assert.deepEqual(Q.play(g, { type:'battle/tbRule', w:1 }, env).length > 0, true);   // during the tie-breaker: B was right
+  assert.equal(g.teams[1].score, g.battlePts);
+  Q.play(g, { type:'battle/tbRule', w:0 }, env);
+  assert.deepEqual(g.teams.map(t => t.score), [g.battlePts, 0]);
+  const fx = Q.play(g, { type:'battle/tbRule', w:'none' }, env);
+  assert.ok(types(fx).includes('go:battleTie'));
+  assert.deepEqual(g.teams.map(t => t.score), [0, 0]);
+  assert.equal(g.battle.stage, 'tie');
+  assert.equal(g.battle.tbRounds, 2);
+});

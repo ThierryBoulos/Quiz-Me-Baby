@@ -1280,6 +1280,18 @@
       g.battle.winner = a.w;
       return battleAward(g, []);
     },
+    /* a contested tie-breaker call, on the Battle's summary (or during the next tie-breaker): the
+       Battle's points move to w, or (w 'none': nobody was right after all) another tie-breaker */
+    'battle/tbRule'(g, a, env){
+      const b = g.battle;
+      if(!b || !b.tbRounds || (b.stage !== 'done' && b.stage !== 'tie')) return [];
+      if(b.stage === 'done' && b.winner === a.w) return [];
+      if(b.awarded && b.award){ g.teams[0].score -= b.award[0]; g.teams[1].score -= b.award[1]; }
+      b.awarded = false; b.award = null; b.winner = null; b.done = false;
+      if(a.w !== 0 && a.w !== 1) return battleTieBreak(g, env, undefined, []);
+      b.winner = a.w;
+      return battleAward(g, []);
+    },
     /* the Battle's points can make a tie as easily as break one, so this hands
        back to the normal ending — which sends a level game to sudden death */
     'battle/done'(g, a, env){ g.done.battle = true; return endGame(g, env, []); },
@@ -1313,6 +1325,17 @@
     /* w: 0 | 1 | 'none' (neither → the next question) */
     'sudden/win'(g, a, env){
       if(a.w === 'none') return startSudden(g, env, undefined, []);
+      g.teams[a.w].score += 1;
+      g.winner = a.w;
+      return [{ finalize:true }];
+    },
+
+    /* a contested sudden-death call, on the final screen (or during the next question): the
+       night's point moves to w, or (w 'none': nobody was right after all) another question */
+    'sudden/rule'(g, a, env){
+      if(!g.sdRounds || g.winner === a.w) return [];
+      if(g.winner === 0 || g.winner === 1){ g.teams[g.winner].score -= 1; g.winner = null; }
+      if(a.w !== 0 && a.w !== 1) return startSudden(g, env, undefined, []);
       g.teams[a.w].score += 1;
       g.winner = a.w;
       return [{ finalize:true }];
