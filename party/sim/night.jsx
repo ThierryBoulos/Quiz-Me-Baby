@@ -54,11 +54,24 @@ function answerNow(g, pub) {
   return null;
 }
 
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0 }) {
+/* Weird nights (sim/weird.mjs): events at set times (seconds into the night):
+     { at, type: "tvOff", for }       the TV's screen off for a while (phones carry on)
+     { at, type: "reload" }           the TV's page reloads
+     { at, type: "offReload", for }   the TV goes off, and comes back as a fresh page
+     { at, type: "capGone", team }    that team's captain's phone is gone for good
+     { at, type: "hostGone", for }    the host's phone is gone for a while
+     { at, type: "writesFail", for }  the TV's writes fail (no internet) for a while
+   net: { dup, delay }  pushes sent twice / up to delay ms late (out of order)
+   simul: both captains tap Next, buzz, rule at the very same moment
+   edge: answers land at the exact moment the clock runs out */
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed);
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
-  const caps = ["capA", "capB"];
+  const caps = ["capA", "capB"], gone = new Set();
+  if (net) Object.assign(fake.net, net, { rnd: rng(seed * 31 + 7) });
+  /* the captain now (the armband can move to a teammate when a captain's phone is gone) */
+  const capOf = (t) => fake.db.members.find((m) => m.team === t && m.role === "captain" && !gone.has(m.user_id))?.user_id;
   fake.db.rooms.push({ code: CODE, status: "lobby", mode: null, state: { teamNames: ["Lions", "Owls"] } });
   fake.db.secrets.push({ room: CODE, data: null });
   fake.db.members.push({ room: CODE, user_id: "capA", name: "Rami", team: 0, role: "captain", face: null },
@@ -86,7 +99,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   };
   const checkAcks = () => {
     const p0 = fake.db.rooms[0].state?.pub; if (!p0?.ack) return;
-    for (const t of taps) if (!t.done) { const a = p0.ack[t.who]; if (a && a.tap === t.tap) { t.done = clock(); t.no = a.no; t.sent = !!p0.sent?.[t.who === "capA" ? 0 : 1]; t.pend = p0.pending?.team === (t.who === "capA" ? 0 : 1); t.buzz = p0.buzz; t.after = p0.screen; t.moved = `${p0.qid}|${p0.screen}` !== t.q;
+    for (const t of taps) if (!t.done) { const a = p0.ack[t.who]; if (a && a[t.tap] !== undefined) { t.done = clock(); t.no = a[t.tap] || undefined; const tm = fake.db.members.find((m) => m.user_id === t.who)?.team ?? 0; t.sent = !!p0.sent?.[tm]; t.pend = p0.pending?.team === tm; t.buzz = p0.buzz; t.after = p0.screen; t.moved = `${p0.qid}|${p0.screen}` !== t.q;
       /* a phone only waits on its latest tap: older ones from it are settled too */
       for (const o of taps) if (!o.done && o.who === t.who && Number(o.tap.slice(1)) < Number(t.tap.slice(1))) { o.done = clock(); o.superseded = true; } } }
   };
@@ -95,7 +108,17 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: THEMES.slice(0, rounds), minis } });
 
   let reloaded = false;
-  const appealed = new Set(), armed = new Set(), asked = new Set();
+  const appealed = new Set(), armed = new Set(), asked = new Set(), edged = new Set();
+  /* while the TV is off, the phones still tap: a captain answers or buzzes what they see */
+  const playOnce = (p) => {
+    const t = p.turn ?? 0, who = capOf(t);
+    if (!who) return;
+    if ((p.screen === "ask" || p.screen === "steal") && !p.sent?.[t]) send(who, "answer", { texts: ["Paris"] });
+    else if (["dishQ", "sudden", "battleTie"].includes(p.screen) && p.buzz == null) send(capOf(0) || who, "buzz", {});
+    else if (["flagQ", "mapQ", "sayQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
+    else if (p.screen === "miniQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { n: "50" }); }
+    else if (p.pending && capOf(1 - p.pending.team)) send(capOf(1 - p.pending.team), "next", { move: { type: "ui/rule", v: true }, step: p.step });
+  };
   let asks = 0, lastAsk = -1;
   /* each new question counts once */
   const sc0 = (p) => (p.screen === "ask" && p.step !== lastAsk ? ((lastAsk = p.step), "ask") : "");
@@ -109,12 +132,34 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       await act(async () => { tree = TestRenderer.create(<Tv />); await flush(); });
       await tick(2000);
     }
+    /* the weird things, when their time comes */
+    for (const e of events) {
+      if (e.done || clock() - t0 < e.at * 1000) continue;
+      e.done = true; trace.push(`(${e.type}${e.for ? " " + e.for + " s" : ""}${e.team != null ? " team " + e.team : ""})`);
+      if (e.type === "tvOff" || e.type === "offReload") {
+        await act(async () => { setVisible(false); await flush(); });
+        /* the phones carry on meanwhile */
+        const until = clock() + e.for * 1000;
+        while (clock() < until) { await tick(900); const p1 = fake.db.rooms[0].state?.pub; if (p1 && bot() < 0.5) playOnce(p1); }
+        if (e.type === "offReload") { await act(async () => { tree.unmount(); await flush(); }); await act(async () => { setVisible(true); tree = TestRenderer.create(<Tv />); await flush(); }); }
+        else await act(async () => { setVisible(true); await flush(); });
+        await tick(1500);
+      }
+      if (e.type === "reload") { await act(async () => { tree.unmount(); await flush(); }); await act(async () => { tree = TestRenderer.create(<Tv />); await flush(); }); await tick(1500); }
+      if (e.type === "capGone") { const id = capOf(e.team); if (id) { gone.add(id); fake.setPresence(fake.presence.filter((x) => x !== id)); } }
+      if (e.type === "hostGone") {
+        fake.setPresence(fake.presence.filter((x) => x !== "host")); gone.add("host");
+        setTimeout(() => { gone.delete("host"); fake.setPresence([...fake.presence, "host"]); trace.push("(the host is back)"); }, e.for * 1000);
+      }
+      if (e.type === "writesFail") { fake.net.failWrites = true; setTimeout(() => { fake.net.failWrites = false; }, e.for * 1000); }
+    }
     const pub = fake.db.rooms[0].state?.pub, g = api.current?.game;
     if (chaos) checkAcks();
+    if (check && pub) { const bad = check(pub, clock(), document.visibilityState); if (bad) { outcome = "broken"; stuckOn = bad; break; } }
     if (!pub || !g) continue;
     /* chaos: now and then a captain taps something at the wrong moment */
     if (chaos && bot() < chaos) {
-      const who = bot() < 0.5 ? "capA" : "capB", r = bot();
+      const who = capOf(bot() < 0.5 ? 0 : 1) || capOf(0) || capOf(1), r = bot();
       const MOVES = ["round/begin", "round/afterAnswer", "round/next", "ui/next", "ui/rule", "ui/appeal", "decided/stop", "tie/stop", "auction/pass", "auction/raise", "ui/pause", "flag/done", "closest/done", "battle/start", "sudden/go"];
       /* only what a phone can send on this screen: a number on Closest, words elsewhere; BUZZ where there's a buzzer */
       if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : { texts: ["Paris"] });
@@ -141,9 +186,17 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     if (slow && bot() < slow) continue;
     const sc = pub.screen, step = pub.step, lead = pub.lead ?? 0, other = (t) => 1 - t;
     const key = JSON.stringify([sc, step, pub.pending, pub.sent, pub.buzz, pub.auction?.count, pub.auction?.bid, pub.map?.ruled, pub.ok]);
-    if (key === prevKey) { if (++same > 120) { outcome = "stuck"; stuckOn = sc; break; } } else { same = 0; prevKey = key; }
-    const C = (t) => caps[t];
-    const next = (t, type, extra = {}) => send(host && !["auction/raise", "auction/pass"].includes(type) ? "host" : C(t), host ? "judge" : "next", { move: { type, ...extra }, step });
+    if (key === prevKey) { if (++same > 120) { outcome = "stuck"; stuckOn = `${sc}${pub.paused ? ", paused" : ""}${pub.pending ? ", call pending" : ""}${pub.lifeline ? ", lifeline " + pub.lifeline.key + (pub.lifeline.deadline ? " running" : " stopped") : ""}${pub.deadline ? ", clock " + Math.round((pub.deadline - clock()) / 1000) + " s" : ", no clock"}${pub.nextBy ? ", waiting for " + pub.nextBy : ""}`; break; } } else { same = 0; prevKey = key; }
+    const C = (t) => capOf(t);
+    /* the lead captain gone: the other one moves the night on (the TV lets them after a while) */
+    const by = (t, type) => (host && !gone.has("host") && !["auction/raise", "auction/pass"].includes(type) ? "host" : C(t) || C(1 - t));
+    const next = (t, type, extra = {}) => {
+      const who = by(t, type), kind = who === "host" ? "judge" : "next";
+      if (!who) return;
+      send(who, kind, { move: { type, ...extra }, step });
+      /* the same tap from the other captain, at the very same moment */
+      if (simul && kind === "next" && C(1 - t) && C(1 - t) !== who) send(C(1 - t), "next", { move: { type, ...extra }, step });
+    };
     const guess = (right) => (bot() < 0.45 && right ? right : bot() < 0.5 ? "xyz" : "Paris");
     if (sc === "final") {
       recap = pub.recap || null; score = pub.teams.map((x) => x.score).join("-");
@@ -156,6 +209,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     if (sc === "sudden" && (pub.sudden?.n || 0) > 6) { outcome = "sudden-cap"; break; }
     const right = answerNow(g, pub);
+    /* whoever paused resumes (a real person does) */
+    if (pub.paused && !pub.tvAway && bot() < 0.3) { const w = host && !gone.has("host") ? "host" : C(0) || C(1); if (w) send(w, w === "host" ? "judge" : "next", { move: { type: "ui/pause", on: "resume" }, step }); continue; }
     if (pub.pending && !host) next(other(pub.pending.team), "ui/rule", { v: pub.pending.v || bot() < 0.25 });
     /* a lifeline card up (Call a Friend): the team closes it, or its clock does */
     else if (pub.lifeline) { if (bot() < 0.4) next(pub.turn ?? 0, "ui/closeLifeline"); }
@@ -170,7 +225,9 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     else if (/Tie$|Level$/.test(sc) && sc !== "battleTie") next(lead, "tie/stop");
     else if (sc === "ask" || sc === "steal") {
       if (!pub.sent?.[pub.turn] && sc === "ask" && !asked.has(step) && bot() < 0.15) { asked.add(step); send(C(pub.turn), "lifeline", { key: bot() < 0.5 ? "dip" : "friend" }); }
-      else if (!pub.sent?.[pub.turn]) send(C(pub.turn), "answer", { texts: [guess(right), guess(right)] });
+      /* edge: the answer lands at the very moment the clock runs out */
+      else if (!pub.sent?.[pub.turn] && edge && pub.deadline && !edged.has(step)) { edged.add(step); const who = C(pub.turn), txt = guess(right); setTimeout(() => send(who, "answer", { texts: [txt] }), Math.max(0, pub.deadline - clock())); }
+      else if (!pub.sent?.[pub.turn] && !edge) send(C(pub.turn), "answer", { texts: [guess(right), guess(right)] });
       else if (host) next(0, sc === "ask" ? "round/judge" : "round/judgeSteal", { v: bot() < 0.5 });
     }
     else if (sc === "miniQ") { for (const t of [0, 1]) if (!pub.sent?.[t]) send(C(t), "answer", { n: String(Math.round((Number(right) || 100) * (0.6 + bot() * 0.8))) }); }
@@ -179,7 +236,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       if (host && pub.sent?.[0] && pub.sent?.[1]) next(0, "ui/reveal");
     }
     else if (sc === "dishQ") {
-      if (pub.buzz == null) { const t = pub.out?.[0] ? 1 : 0; if (!pub.out?.[t]) send(C(t), "buzz", {}); }
+      if (pub.buzz == null) { const t = pub.out?.[0] ? 1 : 0; if (!pub.out?.[t]) send(C(t), "buzz", {}); if (simul && !pub.out?.[1 - t]) send(C(1 - t), "buzz", {}); }
       else if (!pub.sent?.[pub.buzz]) send(C(pub.buzz), "answer", { text: guess(right) });
       else if (host) next(0, bot() < 0.5 ? "dish/right" : "dish/wrong");
     }
@@ -188,13 +245,13 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     else if (sc === "battleQ") { if (host) next(0, "battle/mark", { got: bot() < 0.5 }); else send(C(pub.battle.cap), "answer", { text: guess(right) }); }
     else if (sc === "sudden" || sc === "battleTie") {
       if (sc === "sudden" && !pub.sudden?.ready) next(lead, "sudden/go");
-      else if (pub.buzz == null) { const t = pub.out?.[0] ? 1 : 0; send(C(t), "buzz", {}); }
+      else if (pub.buzz == null) { const t = pub.out?.[0] ? 1 : 0; send(C(t), "buzz", {}); if (simul && !pub.out?.[1 - t]) send(C(1 - t), "buzz", {}); }
       else if (host) next(0, bot() < 0.5 ? "ui/sdRight" : "ui/sdWrong");
       else send(C(pub.buzz), "answer", { text: guess(right) });
     }
   }
+  await tick(5000); checkAcks();                       // the last taps' late pushes land
   await act(async () => { tree.unmount(); await flush(); });
   resetClock();
-  checkAcks();
   return { taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length };
 }

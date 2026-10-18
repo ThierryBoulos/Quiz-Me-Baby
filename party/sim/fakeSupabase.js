@@ -1,6 +1,8 @@
 /* The simulator's Supabase: the four tables in memory, the realtime feed of new
    actions, and presence. Only what lib/tvGame.ts (and what it imports) uses. */
 export const db = { rooms: [], members: [], secrets: [], actions: [], nextId: 1, writes: 0 };
+/* a messy network: pushes sent twice, or late (so out of order), and a TV whose writes fail for a while */
+export const net = { dup: 0, delay: 0, rnd: Math.random, failWrites: false };
 const listeners = new Set();              // the harness re-renders when rooms or members change
 export const onChange = (f) => { listeners.add(f); return () => listeners.delete(f); };
 const changed = (table) => listeners.forEach((f) => f(table));
@@ -8,6 +10,7 @@ const channels = new Set();
 
 export function reset() {
   db.rooms = []; db.members = []; db.secrets = []; db.actions = []; db.nextId = 1; db.writes = 0;
+  net.dup = 0; net.delay = 0; net.failWrites = false;
   channels.clear(); listeners.clear();
 }
 
@@ -36,6 +39,7 @@ function query(table) {
     if (op.kind === "insert") { insert(table, op.v); return { data: null, error: null }; }
     const hit = rows.filter((r) => f.every((x) => x(r)));
     if (op.kind === "update") {
+      if (net.failWrites && (table === "rooms" || table === "secrets")) return { data: null, error: { message: "Failed to fetch" } };
       db.writes++;
       hit.forEach((r) => Object.assign(r, structuredClone(op.v)));
       if (hit.length) changed(table);
@@ -54,7 +58,12 @@ export function insert(table, v) {
     row.id = db.nextId++; row.at = new Date(Date.now()).toISOString();
     db.actions.push(row);
     /* the realtime push, a moment later (as from the server) */
-    for (const ch of channels) for (const l of ch.pg) if (l.filter === "room=eq." + row.room) Promise.resolve().then(() => l.cb({ new: structuredClone(row) }));
+    for (const ch of channels) for (const l of ch.pg) if (l.filter === "room=eq." + row.room) {
+      const push = () => l.cb({ new: structuredClone(row) });
+      const later = (f) => (net.delay ? setTimeout(f, Math.floor(net.rnd() * net.delay)) : Promise.resolve().then(f));
+      later(push);
+      if (net.dup && net.rnd() < net.dup) later(push);           // the same push twice
+    }
   } else { db[table].push(row); changed(table); }
   return row;
 }
