@@ -36,7 +36,7 @@ function read() {
 const NEXT = { roundIntro: "round/begin", miniIntro: "closest/start", flagIntro: "flag/start", dishIntro: "dish/start", mapIntro: "map/start", auctionIntro: "auction/begin",
   sayIntro: "say/start", battleIntro: "battle/start", battleHandoff: "battle/start", sayReveal: "ui/next", mapReveal: "ui/next", saySummary: "say/done", battleSummary: "battle/done",
   answer: "round/afterAnswer", roundScore: "round/next", closestReveal: "ui/next", flagReveal: "ui/next", dishReveal: "dish/next", auctionLeg: "auction/nextLeg",
-  auctionResult: "auction/done", miniSummary: "closest/done", flagSummary: "flag/done", dishSummary: "dish/done", mapSummary: "map/done" };
+  auctionResult: "auction/done", miniSummary: "closest/done", flagSummary: "flag/done", dishSummary: "dish/done", mapSummary: "map/done", battleReview: "battle/reviewDone" };
 
 /* the answer to what's on screen, from the TV's own game (bots peek, so some answers are right) */
 function answerNow(g, pub) {
@@ -99,7 +99,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   };
   const checkAcks = () => {
     const p0 = fake.db.rooms[0].state?.pub; if (!p0?.ack) return;
-    for (const t of taps) if (!t.done) { const a = p0.ack[t.who]; if (a && a[t.tap] !== undefined) { t.done = clock(); t.no = a[t.tap] || undefined; const tm = fake.db.members.find((m) => m.user_id === t.who)?.team ?? 0; t.sent = !!p0.sent?.[tm]; t.pend = p0.pending?.team === tm; t.buzz = p0.buzz; t.after = p0.screen; t.moved = `${p0.qid}|${p0.screen}` !== t.q;
+    for (const t of taps) if (!t.done) { const a = p0.ack[t.who]; if (a && a[t.tap] !== undefined) { t.done = clock(); t.took = a[t.tap] === "+"; t.no = ["+", "-"].includes(a[t.tap]) ? undefined : a[t.tap]; const tm = fake.db.members.find((m) => m.user_id === t.who)?.team ?? 0; t.sent = !!p0.sent?.[tm]; t.pend = p0.pending?.team === tm; t.buzz = p0.buzz; t.after = p0.screen; t.moved = `${p0.qid}|${p0.screen}` !== t.q;
       /* a phone only waits on its latest tap: older ones from it are settled too */
       for (const o of taps) if (!o.done && o.who === t.who && Number(o.tap.slice(1)) < Number(t.tap.slice(1))) { o.done = clock(); o.superseded = true; } } }
   };
@@ -108,7 +108,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: THEMES.slice(0, rounds), minis } });
 
   let reloaded = false;
-  const appealed = new Set(), armed = new Set(), asked = new Set(), edged = new Set();
+  const armed = new Set(), asked = new Set(), edged = new Set(), contested = new Set(), contestSeen = new Set();
+  let contestSilent = false;
   /* while the TV is off, the phones still tap: a captain answers or buzzes what they see */
   const playOnce = (p) => {
     const t = p.turn ?? 0, who = capOf(t);
@@ -160,12 +161,12 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* chaos: now and then a captain taps something at the wrong moment */
     if (chaos && bot() < chaos) {
       const who = capOf(bot() < 0.5 ? 0 : 1) || capOf(0) || capOf(1), r = bot();
-      const MOVES = ["round/begin", "round/afterAnswer", "round/next", "ui/next", "ui/rule", "ui/appeal", "decided/stop", "tie/stop", "auction/pass", "auction/raise", "ui/pause", "flag/done", "closest/done", "battle/start", "sudden/go"];
+      const MOVES = ["round/begin", "round/afterAnswer", "round/next", "ui/next", "ui/contest", "ui/contestOk", "battle/reviewDone", "decided/stop", "tie/stop", "auction/pass", "auction/raise", "ui/pause", "flag/done", "closest/done", "battle/start", "sudden/go"];
       /* only what a phone can send on this screen: a number on Closest, words elsewhere; BUZZ where there's a buzzer */
       if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : { texts: ["Paris"] });
       else if (r < 0.45) { if (["dishQ", "sudden", "battleTie"].includes(pub.screen)) send(who, "buzz", {}); }
       else if (r < 0.6) send(who, "lifeline", { key: ["dbl", "friend", "dip"][Math.floor(bot() * 3)] });
-      else send(who, "next", { move: { type: MOVES[Math.floor(bot() * MOVES.length)], v: bot() < 0.5, n: 3 }, step: pub.step - (bot() < 0.3 ? 1 : 0) });
+      else send(who, "next", { move: { type: MOVES[Math.floor(bot() * MOVES.length)], v: bot() < 0.5, n: 3, id: ["first", "steal", "t0", "t1", "d0", "b0-3"][Math.floor(bot() * 6)] }, step: pub.step - (bot() < 0.3 ? 1 : 0) });
     }
     /* the TV's screen goes to sleep during the sleep-th question; the captain answers meanwhile and
        the other captain taps Resume (the phones show the game as paused); then the TV wakes (18 Oct) */
@@ -211,16 +212,30 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     const right = answerNow(g, pub);
     /* whoever paused resumes (a real person does) */
     if (pub.paused && !pub.tvAway && bot() < 0.3) { const w = host && !gone.has("host") ? "host" : C(0) || C(1); if (w) send(w, w === "host" ? "judge" : "next", { move: { type: "ui/pause", on: "resume" }, step }); continue; }
-    if (pub.pending && !host) next(other(pub.pending.team), "ui/rule", { v: pub.pending.v || bot() < 0.25 });
+    /* a contest open: the other captain (or the host) agrees, says no, or (now and then) doesn't answer at all */
+    if (pub.contest) {
+      const K = pub.contest;
+      if (!contestSeen.has(K.id + step)) { contestSeen.add(K.id + step); contestSilent = bot() < 0.2; }
+      /* a host who lets it go simply moves on: Next closes the contest */
+      if (contestSilent && host && !gone.has("host") && NEXT[sc] && bot() < 0.3) { send("host", "judge", { move: { type: NEXT[sc] }, step }); continue; }
+      if (!contestSilent && bot() < 0.6) {
+        const v = bot() < 0.5;
+        if (host && !gone.has("host")) send("host", "judge", { move: { type: "ui/contestOk", v }, step });
+        else if (C(1 - K.by)) send(C(1 - K.by), "next", { move: { type: "ui/contestOk", v }, step });
+      }
+      continue;
+    }
     /* a lifeline card up (Call a Friend): the team closes it, or its clock does */
     else if (pub.lifeline) { if (bot() < 0.4) next(pub.turn ?? 0, "ui/closeLifeline"); }
-    /* after the steal: the first team sometimes appeals, the other captain agrees or not */
-    else if (sc === "answer" && !host && pub.appeal) next(other(pub.appeal.team), "ui/appealOk", { v: bot() < 0.5 });
-    else if (sc === "answer" && !host && pub.appealable != null && !appealed.has(step) && bot() < 0.5) { appealed.add(step); next(pub.appealable, "ui/appeal"); }
+    /* where the app's calls are shown: now and then a captain contests one (once per screen) */
+    else if ((pub.calls || []).some((c) => !c.done) && !contested.has(sc + step) && bot() < 0.35) {
+      contested.add(sc + step);
+      const open = pub.calls.filter((c) => !c.done), c = open[Math.floor(bot() * open.length)], by = bot() < 0.5 ? 0 : 1;
+      if (C(by)) send(C(by), "next", { move: { type: "ui/contest", id: c.id }, step });
+    }
     /* Double Points: armed now and then before a round */
     else if (sc === "roundIntro" && !armed.has(step) && bot() < 0.3) { armed.add(step); send(C(bot() < 0.5 ? 0 : 1), "lifeline", { key: "dbl" }); }
     else if (sc === "decided") next(lead, bot() < 0.5 ? "decided/more" : "decided/stop");
-    else if (sc === "mapReveal" && !host && (pub.map?.ruled || [null, null]).some((x) => x == null)) { for (const t of [0, 1]) next(t, "ui/mapRule", { v: bot() < 0.6 }); }
     else if (NEXT[sc]) next(lead, NEXT[sc]);
     else if (/Tie$|Level$/.test(sc) && sc !== "battleTie") next(lead, "tie/stop");
     else if (sc === "ask" || sc === "steal") {

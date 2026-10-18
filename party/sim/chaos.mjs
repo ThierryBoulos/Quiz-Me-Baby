@@ -20,7 +20,7 @@ for (let seed = 100; seed < 100 + N; seed++) {
   for (const t of r.taps) if (t.no) reasons[t.no.replace(/⁨|⁩/g, "").replace(/(Lions|Owls|Rami|Lea)/g, "X")] = (reasons[t.no.replace(/⁨|⁩/g, "").replace(/(Lions|Owls|Rami|Lea)/g, "X")] || 0) + 1;
   /* answers / buzzes not taken, with no reason given: where? */
   const TYPE = ["ask", "steal", "miniQ", "flagQ", "mapQ", "sayQ", "dishQ", "battleQ", "sudden", "battleTie"];
-  for (const t of r.taps) if (t.done && !t.superseded && !t.no && !t.moved && TYPE.includes(t.screen)
+  for (const t of r.taps) if (t.done && !t.superseded && !t.no && !t.took && !t.moved && TYPE.includes(t.screen)
     && ((t.kind === "answer" && !t.sent && !t.pend) || (t.kind === "buzz" && t.buzz !== (t.who === "capA" ? 0 : 1)))) silent[`${t.kind} on ${t.screen}`] = (silent[`${t.kind} on ${t.screen}`] || 0) + 1;
   const ends = r.outcome === "final" || r.outcome === "sudden-cap";
   if (!ends || missing.length) bad++;
