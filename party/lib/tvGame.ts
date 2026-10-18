@@ -453,6 +453,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (sc === "dishQ" && g.dishGame.leg.buzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check("dish", current()); return true; }
     if ((sc === "sudden" || sc === "battleTie") && s.sdBuzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check(sc === "sudden" ? "sudden" : "battleTie", current()); return true; }
+    /* an answer that can't go in here still says why (a phone a beat behind) */
+    if (texts.length && ["dishQ", "sudden", "battleTie"].includes(sc)) return s.pending ? "Wait for the call on the last answer." : "Buzz first, then type it.";
     return false;
   }, [applyFx, current, play, reveal, settle]);
 
@@ -504,7 +506,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   }, [hostMove, play, settle]);
 
   /* a tap the TV won't take: say why on the TV (and the update ends the phone's "Sending…") */
-  const refuse = useCallback((why: string) => { const s = st.current; s.toast = { id: ++s.toastN, text: why }; void publish(); }, [publish]);
+  const refused = useRef<string | null>(null);        // why the tap being handled was turned down (for its receipt)
+  const refuse = useCallback((why: string) => { const s = st.current; refused.current = why; s.toast = { id: ++s.toastN, text: why }; void publish(); }, [publish]);
 
   /* ---- the inbox ---- */
   const handle = useCallback(async (a: Action) => {
@@ -675,8 +678,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      view again, so that phone stops waiting instead of saying the TV hasn't answered */
   const handleAndReply = useCallback(async (a: Action) => {
     const n = pubN.current;
+    refused.current = null;
     await handle(a);
-    if (a.kind !== "count" && a.kind !== "suggest" && st.current.g && pubN.current === n) void publish();
+    const s = st.current, tap = typeof a.payload?.tap === "string" ? (a.payload.tap as string).slice(0, 12) : null;
+    /* the receipt: this phone's tap is dealt with; if it wasn't taken the phone shows why and lets go of it */
+    if (tap && s.g) {
+      const no = refused.current || undefined;
+      s.ack = { ...s.ack, [a.user_id]: no ? { tap, no } : { tap } };
+      void publish();
+    } else if (a.kind !== "count" && a.kind !== "suggest" && s.g && pubN.current === n) void publish();
   }, [handle, publish]);
   useInbox(code, isTv, handleAndReply);
 

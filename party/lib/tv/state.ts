@@ -6,6 +6,7 @@ import type { MiniKey, Pub, Two } from "../game";
 import type { G, PKind } from "./rules";
 
 export const newState = () => ({
+  ack: {} as Record<string, { tap: string; no?: string }>,   // per phone: the last tap dealt with (see Pub.ack)
   g: null as G, nohost: false, screen: "", step: 0, deadline: null as number | null, left: 0, timeUp: false, total: 0,
   lifeline: null as Pub["lifeline"], toast: null as Pub["toast"], toastN: 0, bank: null as Bank | null,
   decided: null as null | { key: MiniKey; winner: 0 | 1; spare: number },   // the "decided" screen: which mini-game

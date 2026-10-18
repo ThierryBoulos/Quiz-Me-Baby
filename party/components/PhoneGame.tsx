@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, TIE_SCREENS, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
-import { note, sb, sendAction } from "@/lib/supabase";
+import { newTap, note, sb, sendAction } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { AskHead, battleNeeds, decidedCall, decidedHead, decidedSub, FlagImg, recapLines, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict } from "./GameParts";
@@ -676,7 +676,26 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   useEffect(() => { setBuzzed(false); }, [pub.qid, sc, pub.buzz, outKey]);
   useEffect(() => { setBid(""); }, [pub.auction?.bid, sc]);
   const np = useNoPaste(code, pub.qid);
-  const act = async (kind: string, payload: Record<string, unknown>) => { setBusy(true); try { await sendAction(code, kind, payload); return true; } catch { return false; /* the phone already says so */ } finally { setBusy(false); } };
+  /* Every tap carries a tag; the TV hands it back once it has dealt with the tap (pub.ack). A tap
+     it turned down says why here, and an answer or a buzz it didn't take is let go, to try again. */
+  const lastTap = useRef<{ tap: string; kind: string; q: string } | null>(null);
+  const [no, setNo] = useState<string | null>(null);
+  const act = async (kind: string, payload: Record<string, unknown>) => {
+    const tap = newTap(); lastTap.current = { tap, kind, q: `${pub.qid}|${sc}` };
+    setBusy(true); try { await sendAction(code, kind, { ...payload, tap }); return true; } catch { lastTap.current = null; return false; /* the phone already says so */ } finally { setBusy(false); }
+  };
+  const ack = pub.ack?.[me.user_id];
+  useEffect(() => {
+    const L = lastTap.current;
+    if (!ack || !L || ack.tap !== L.tap) return;
+    lastTap.current = null;                          // each receipt once
+    /* taken: it shows as sent, it's waiting for its call, or the question has already moved on (a right answer) */
+    const mineIn = !!pub.sent?.[mine] || pub.pending?.team === mine || `${pub.qid}|${sc}` !== L.q;
+    if (L.kind === "answer" && !mineIn) { setSentTxt(null); setNo(ack.no || "The TV didn't take that answer. Send it again."); }
+    else if (L.kind === "buzz" && pub.buzz !== mine && `${pub.qid}|${sc}` === L.q) { setBuzzed(false); setNo(ack.no || "The TV didn't take the buzz. Tap again."); }
+    else if (ack.no) setNo(ack.no);
+  }, [ack?.tap]);   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!no) return; const t = setTimeout(() => setNo(null), 6000); return () => clearTimeout(t); }, [no]);
   const nxt = (move: Record<string, unknown>) => act("next", { move, step: pub.step });
   /* quick taps (+1, pausing a call): straight out, nothing waits for them */
   const fire = (move: Record<string, unknown>) => { void sendAction(code, "next", { move, step: pub.step }).catch(() => {}); };
@@ -720,6 +739,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
 
   return (
     <div className="flex flex-col gap-3 flex-1">
+      {no && <p className="text-center text-14 font-bold enter" role="alert" style={{ color: "var(--color-gold)" }}>{no}</p>}
       <Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} />
 
       {/* no host: what was sent, the app's call, and (the other captain) RIGHT or WRONG */}

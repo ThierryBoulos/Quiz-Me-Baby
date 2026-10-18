@@ -142,5 +142,6 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (s.screen === "dishReveal") { const sub = g.dishGame.subs[g.dishGame.subs.length - 1]; p.reveal = { answer: q.answer, typed: s.typed, w: sub?.winner ?? "none" }; }
   }
   if (s.exit) p.exit = true;
+  if (Object.keys(s.ack).length) p.ack = s.ack;
   return [p, secret];
 }

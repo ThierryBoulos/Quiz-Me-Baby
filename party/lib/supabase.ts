@@ -31,9 +31,13 @@ export async function rpc<T = unknown>(fn: string, args: Record<string, unknown>
   return data as T;
 }
 
+export const newTap = () => Math.random().toString(36).slice(2, 10);
 /* a phone telling the TV something: a buzz, an answer, a team name, "start" */
-export async function sendAction(room: string, kind: string, payload: Record<string, unknown> = {}) {
+export async function sendAction(room: string, kind: string, payload: Record<string, unknown> = {}): Promise<string> {
   let error: { message: string } | null = null;
+  /* a tag the TV hands back once it has dealt with this tap (pub.ack), taken or not */
+  const tap = typeof payload.tap === "string" ? payload.tap : newTap();
+  payload = { ...payload, tap };
   /* about to go: the room page notes the TV's latest update now, as the TV's reply can land before the send returns */
   if (typeof window !== "undefined" && kind !== "suggest") window.dispatchEvent(new Event("qmb:sending"));
   try { ({ error } = await sb().from("actions").insert({ room, kind, payload })); }
@@ -48,6 +52,7 @@ export async function sendAction(room: string, kind: string, payload: Record<str
   const move = (payload.move as { type?: string } | undefined)?.type || "";
   const quick = ["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/pause"].includes(move);
   if (typeof window !== "undefined" && kind !== "suggest" && !quick) window.dispatchEvent(new Event("qmb:sent"));
+  return tap;
 }
 
 /* "I'm here" / "I left the screen" / "I'm back": small notes from a phone to
