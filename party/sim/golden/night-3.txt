@@ -56,12 +56,12 @@
 79.50 mapReveal | 25 | 3-2 | 0-0 |  | 
 94.50 mapReveal | 25 | 3-2 | 0-0 | No answer in time: the call stands. | 
 94.75 mapQ | 26 | 3-2 | 0-0 | Nobody got it. | 
-95.75 mapReveal | 26 | 3-2 | 0-0 | Nobody got it. | 
-96.50 mapTie | 27 | 3-2 | 0-0 | Nobody got it. | 
-97.50 mapSummary | 28 | 4-3 | 0-0 | Nobody got it. | 
-98.25 roundIntro | 29 | 4-3 |  | Nobody got it. | 
-99.25 ask | 30 | 4-3 |  | Nobody got it. | 
-100.25 steal | 30 | 4-3 |  | Nobody got it. | 
+95.75 mapReveal | 26 | 3-2 | 1-1 | Nobody got it. | 
+96.50 mapTie | 27 | 3-2 | 1-1 | Both got it — a point each. | 
+97.50 mapSummary | 28 | 4-3 | 1-1 | Both got it — a point each. | 
+98.25 roundIntro | 29 | 4-3 |  | Both got it — a point each. | 
+99.25 ask | 30 | 4-3 |  | Both got it — a point each. | 
+100.25 steal | 30 | 4-3 |  | Both got it — a point each. | 
 101.00 answer | 30 | 4-4 |  | Owls +1 point — steal | 
 102.00 ask | 31 | 4-4 |  | Owls +1 point — steal | 
 102.75 ask | 31 | 4-4 |  | Owls used Call a Friend. | 

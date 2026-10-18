@@ -95,81 +95,82 @@
 2370.00 saySummary | 74 | 3-4 | 7-7 |  | 
 2427.50 roundIntro | 75 | 3-4 |  |  | 
 2437.50 ask | 76 | 3-4 |  |  | 
-2482.50 steal | 77 | 3-4 |  | Time's up. | 
-2490.50 answer | 77 | 3-4 |  | Time's up. | 
-2519.25 ask | 78 | 3-4 |  | Time's up. | 
-2564.25 steal | 79 | 3-4 |  | Time's up. | 
-2584.25 answer | 80 | 3-4 |  | Time's up. | 
-2608.50 roundScore | 81 | 3-4 |  | Time's up. | 
-2692.25 mapIntro | 82 | 3-4 | 0-0 | Time's up. | 
-2694.75 mapQ | 83 | 3-4 | 0-0 | Time's up. | 
-2739.00 mapReveal | 83 | 3-4 | 0-1 | Time's up. | 
-2765.00 mapQ | 84 | 3-4 | 0-1 | Owls takes map 1. | 
-2785.75 mapReveal | 84 | 3-4 | 1-1 | Owls takes map 1. | 
-2874.75 mapReveal | 84 | 3-4 | 1-1 |  | 
-2889.75 mapReveal | 84 | 3-4 | 1-1 | No answer in time: the call stands. | 
-2900.00 mapQ | 85 | 3-4 | 1-1 | Lions takes map 2. | 
-2946.00 mapReveal | 85 | 3-4 | 1-1 | Lions takes map 2. | 
-2953.25 mapTie | 86 | 3-4 | 1-1 | Nobody got it. | 
-3073.75 mapSummary | 87 | 4-5 | 1-1 | Nobody got it. | 
-3095.25 roundIntro | 88 | 4-5 |  | Nobody got it. | 
-3151.25 ask | 89 | 4-5 |  | Nobody got it. | 
-3196.25 steal | 90 | 4-5 |  | Time's up. | 
-3216.25 answer | 91 | 4-5 |  | Time's up. | 
-3224.00 ask | 92 | 4-5 |  | Time's up. | 
-3234.00 answer | 92 | 4-6 |  | Owls +1 point | 
-3343.75 roundScore | 93 | 4-6 |  | Owls +1 point | 
-3371.75 dishIntro | 94 | 4-6 | 0-0 | Owls +1 point | 
-3438.25 dishQ | 95 | 4-6 | 0-0 | Owls +1 point | 
-3452.25 dishReveal | 96 | 4-6 | 0-0 | Nobody got it. | 
-3458.00 dishQ | 97 | 4-6 | 0-0 | Nobody got it. | 
-3491.50 dishQ | 98 | 4-6 | 0-0 | Time's up. ⁨Lions⁩ is out of this one. | 
-3500.00 dishReveal | 99 | 4-6 | 0-0 | Nobody got it. | 
-3501.25 dishQ | 100 | 4-6 | 0-0 | Nobody got it. | 
-3526.50 dishQ | 101 | 4-6 | 0-0 | Time's up. ⁨Lions⁩ is out of this one. | 
-3540.25 dishReveal | 102 | 4-6 | 0-0 | Nobody got it. | 
-3590.25 dishQ | 103 | 4-6 | 0-0 | Nobody got it. | 
-3607.25 dishReveal | 104 | 4-6 | 0-0 | Nobody got it. | 
-3621.75 dishQ | 105 | 4-6 | 0-0 | Nobody got it. | 
-3645.25 dishQ | 106 | 4-6 | 0-0 | Time's up. ⁨Lions⁩ is out of this one. | 
-3667.75 dishReveal | 107 | 4-6 | 0-0 | Time's up. ⁨Owls⁩ is out of this one. | 
-3767.75 dishTie | 108 | 4-6 | 0-0 | Time's up. ⁨Owls⁩ is out of this one. | 
-3774.00 dishSummary | 109 | 5-7 | 0-0 | Time's up. ⁨Owls⁩ is out of this one. | 
-3791.00 roundIntro | 110 | 5-7 |  | Time's up. ⁨Owls⁩ is out of this one. | 
-3795.50 ask | 111 | 5-7 |  | Time's up. ⁨Owls⁩ is out of this one. | 
-3840.50 steal | 112 | 5-7 |  | Time's up. | 
-3860.50 answer | 113 | 5-7 |  | Time's up. | 
-3870.25 ask | 114 | 5-7 |  | Time's up. | 
-3882.75 ask | 114 | 5-7 |  | Owls used Double Dip. | 
-3915.25 steal | 115 | 5-7 |  | Time's up. | 
-3935.25 answer | 116 | 5-7 |  | Time's up. | 
-3936.00 roundScore | 117 | 5-7 |  | Time's up. | 
-3995.25 battleIntro | 118 | 5-7 | 0-0 | Time's up. | 
-4041.25 battleQ | 119 | 5-7 | 0-0 | Time's up. | 
-4056.25 battleQ | 120 | 5-7 | 0-0 | Time's up. | 
-4072.50 battleQ | 121 | 5-7 | 0-0 | Time's up. | 
-4074.50 battleQ | 121 | 5-7 | 1-0 | Time's up. | 
-4079.00 battleQ | 121 | 5-7 | 2-0 | Time's up. | 
-4094.00 battleQ | 122 | 5-7 | 2-0 | Time's up. | 
-4109.00 battleQ | 123 | 5-7 | 2-0 | Time's up. | 
-4124.00 battleQ | 124 | 5-7 | 2-0 | Time's up. | 
-4139.00 battleQ | 125 | 5-7 | 2-0 | Time's up. | 
-4149.25 battleHandoff | 125 | 5-7 | 2-0 | Time's up. | 
-4178.00 battleQ | 126 | 5-7 | 2-0 | Time's up. | 
-4193.00 battleQ | 127 | 5-7 | 2-0 | Time's up. | 
-4208.00 battleQ | 128 | 5-7 | 2-0 | Time's up. | 
-4223.00 battleQ | 129 | 5-7 | 2-0 | Time's up. | 
-4238.00 battleQ | 130 | 5-7 | 2-0 | Time's up. | 
-4250.00 battleQ | 130 | 5-7 | 2-1 | Time's up. | 
-4265.00 battleQ | 131 | 5-7 | 2-1 | Time's up. | 
-4280.00 battleQ | 132 | 5-7 | 2-1 | Time's up. | 
-4295.00 battleQ | 133 | 5-7 | 2-1 | Time's up. | 
-4310.00 battleQ | 134 | 5-7 | 2-1 | Time's up. | 
-4325.00 battleSummary | 135 | 7-7 | 2-1 | Time's up. | 
-4368.00 sudden | 136 | 7-7 |  | Time's up. | 
-4395.00 sudden | 137 | 7-7 |  | Time's up. | 
-4425.00 sudden | 138 | 7-7 |  | Time's up. | 
-4503.00 sudden | 138 | 7-7 |  | Wrong. The other captain can buzz. | 
-4548.75 sudden | 138 | 7-7 |  |  | 
-4560.50 final | 139 | 7-8 |  | Call changed: ⁨Owls⁩ win the night. | 
-recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[0,1],"minis":[2,1],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]}}
+2490.50 steal | 76 | 3-4 |  |  | 
+2518.50 answer | 76 | 3-4 |  |  | 
+2620.75 answer | 76 | 3-4 |  | No answer in time: the call stands. | 
+2686.75 ask | 77 | 3-4 |  | No answer in time: the call stands. | 
+2689.50 steal | 77 | 3-4 |  | No answer in time: the call stands. | 
+2719.50 answer | 78 | 3-4 |  | Time's up. | 
+2730.00 roundScore | 79 | 3-4 |  | Time's up. | 
+2757.75 mapIntro | 80 | 3-4 | 0-0 | Time's up. | 
+2779.50 mapQ | 81 | 3-4 | 0-0 | Time's up. | 
+2839.50 mapReveal | 82 | 3-4 | 0-0 | Time's up. | 
+2871.25 mapQ | 83 | 3-4 | 0-0 | Nobody got it. | 
+2899.25 mapReveal | 83 | 3-4 | 1-0 | Nobody got it. | 
+2942.25 mapQ | 84 | 3-4 | 1-0 | Lions takes map 2. | 
+2952.25 mapReveal | 84 | 3-4 | 1-0 | Lions takes map 2. | 
+3070.25 mapReveal | 84 | 3-4 | 1-0 |  | 
+3085.25 mapReveal | 84 | 3-4 | 1-0 | No answer in time: the call stands. | 
+3089.00 mapSummary | 85 | 4-4 | 1-0 | Nobody got it. | 
+3144.75 roundIntro | 86 | 4-4 |  | Nobody got it. | 
+3226.75 ask | 87 | 4-4 |  | Nobody got it. | 
+3286.75 steal | 88 | 4-4 |  | Time's up. | 
+3316.75 answer | 89 | 4-4 |  | Time's up. | 
+3339.25 ask | 90 | 4-4 |  | Time's up. | 
+3368.00 steal | 90 | 4-4 |  | Time's up. | 
+3398.00 answer | 91 | 4-4 |  | Time's up. | 
+3430.25 roundScore | 92 | 4-4 |  | Time's up. | 
+3449.00 dishIntro | 93 | 4-4 | 0-0 | Time's up. | 
+3472.50 dishQ | 94 | 4-4 | 0-0 | Time's up. | 
+3486.50 dishReveal | 95 | 4-4 | 0-0 | Nobody got it. | 
+3492.25 dishQ | 96 | 4-4 | 0-0 | Nobody got it. | 
+3517.50 dishQ | 97 | 4-4 | 0-0 | Time's up. ⁨Lions⁩ is out of this one. | 
+3534.25 dishReveal | 98 | 4-4 | 0-0 | Nobody got it. | 
+3581.25 dishQ | 99 | 4-4 | 0-0 | Nobody got it. | 
+3610.25 dishReveal | 100 | 4-4 | 0-0 | Nobody got it. | 
+3612.75 dishQ | 101 | 4-4 | 0-0 | Nobody got it. | 
+3636.25 dishQ | 102 | 4-4 | 0-0 | Time's up. ⁨Lions⁩ is out of this one. | 
+3639.75 dishReveal | 103 | 4-4 | 0-0 | Nobody got it. | 
+3648.75 dishQ | 104 | 4-4 | 0-0 | Nobody got it. | 
+3680.75 dishReveal | 105 | 4-4 | 0-0 | Nobody got it. | 
+3758.75 dishTie | 106 | 4-4 | 0-0 | Nobody got it. | 
+3765.00 dishSummary | 107 | 5-5 | 0-0 | Nobody got it. | 
+3782.00 roundIntro | 108 | 5-5 |  | Nobody got it. | 
+3786.50 ask | 109 | 5-5 |  | Nobody got it. | 
+3846.50 steal | 110 | 5-5 |  | Time's up. | 
+3861.25 answer | 110 | 5-5 |  | Time's up. | 
+3871.25 answer | 110 | 5-5 |  |  | 
+3886.25 answer | 110 | 5-5 |  | No answer in time: the call stands. | 
+3923.25 ask | 111 | 5-5 |  | No answer in time: the call stands. | 
+3982.75 steal | 111 | 5-5 |  | No answer in time: the call stands. | 
+4012.75 answer | 112 | 5-5 |  | Time's up. | 
+4025.00 answer | 112 | 5-5 |  |  | 
+4038.50 answer | 112 | 5-6 |  | Call changed: Owls +1 point. | 
+4054.75 roundScore | 113 | 5-6 |  | Call changed: Owls +1 point. | 
+4060.25 battleIntro | 114 | 5-6 | 0-0 | Call changed: Owls +1 point. | 
+4131.25 battleQ | 115 | 5-6 | 0-0 | Call changed: Owls +1 point. | 
+4146.25 battleQ | 116 | 5-6 | 0-0 | Time's up. | 
+4161.25 battleQ | 117 | 5-6 | 0-0 | Time's up. | 
+4161.75 battleQ | 117 | 5-6 | 1-0 | Time's up. | 
+4176.75 battleQ | 118 | 5-6 | 1-0 | Time's up. | 
+4191.75 battleQ | 119 | 5-6 | 1-0 | Time's up. | 
+4206.75 battleQ | 120 | 5-6 | 1-0 | Time's up. | 
+4221.75 battleQ | 121 | 5-6 | 1-0 | Time's up. | 
+4233.00 battleQ | 121 | 5-6 | 2-0 | Time's up. | 
+4248.00 battleQ | 122 | 5-6 | 2-0 | Time's up. | 
+4263.00 battleHandoff | 123 | 5-6 | 2-0 | Time's up. | 
+4350.75 battleQ | 124 | 5-6 | 2-0 | Time's up. | 
+4365.75 battleQ | 125 | 5-6 | 2-0 | Time's up. | 
+4377.75 battleQ | 125 | 5-6 | 2-1 | Time's up. | 
+4392.75 battleQ | 126 | 5-6 | 2-1 | Time's up. | 
+4407.75 battleQ | 127 | 5-6 | 2-1 | Time's up. | 
+4422.75 battleQ | 128 | 5-6 | 2-1 | Time's up. | 
+4450.50 battleQ | 129 | 5-6 | 2-1 | Time's up. | 
+4465.50 battleQ | 130 | 5-6 | 2-1 | Time's up. | 
+4480.50 battleQ | 131 | 5-6 | 2-1 | Time's up. | 
+4483.25 battleReview | 131 | 5-6 | 2-1 | Time's up. | 
+4501.25 battleReview | 131 | 5-6 | 2-1 |  | 
+4506.50 battleReview | 131 | 5-6 | 2-1 | ⁨Rami⁩ doesn't agree: the call stands. | 
+4525.50 battleSummary | 132 | 7-6 | 2-1 | ⁨Rami⁩ doesn't agree: the call stands. | 
+4539.75 final | 133 | 7-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+recap: {"margin":1,"sudden":false,"leadChanges":3,"steals":[0,1],"minis":[3,1],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]}}

@@ -3,9 +3,9 @@
 2.00 ask | 2 | 0-0 |  |  | 
 3.00 answer | 2 | 1-0 |  | Lions +1 point | 
 3.75 ask | 3 | 1-0 |  | Lions +1 point | 
-(the TV sleeps, 44 s left)
+(the TV sleeps, 59 s left)
 6.25 steal | 3 | 1-0 |  | Lions +1 point | 
-(the TV wakes: steal, answer in: true, clock 19 s)
+(the TV wakes: steal, answer in: true, clock 29 s)
 70.25 answer | 3 | 2-0 |  | Lions +1 point — steal | 
 71.00 answer | 3 | 2-0 |  |  | 
 72.00 answer | 3 | 1-0 |  | Call changed: nobody scores this one. | 

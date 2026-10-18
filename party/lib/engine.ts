@@ -14,10 +14,28 @@ let bankP: Promise<Bank> | null = null;
    it (data/accept.json, served with the full bank): by question id, and by
    answer for flags, dishes, maps and Say-the-Same words ("United States"
    also takes "USA"). */
-type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]> };
+type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; mapKeys?: Record<string, string[][]> };
 let accept: Accept = { byId: {}, byAnswer: {} };
 export const acceptFor = (q: { id?: string; answer?: string; accept?: string[] } | null | undefined) =>
   !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(accept.byAnswer[q.answer || ""] || [])];
+/* Guess the Map: the idea counts, not the wording. Each map has a few key ideas (data/accept.json,
+   mapKeys), each a handful of word stems; an answer has the idea when every stem of one of them is
+   among its words, in any order: "they drive on the left" has [driv], "kings and queens" has [king].
+   A stem matches the start of a word, with one slip allowed from five letters ("vikinks"); one marked
+   "=" must be the whole word ("no" isn't "north"); one marked "!" must not be there at all
+   ("nuclear", but not "nuclear energy"). */
+export function mapHit(text: string, keys: string[][] | undefined) {
+  if (!keys?.length) return false;
+  const words = String(QMB.tidy(text)).split(" ").filter(Boolean);
+  const has = (stem: string): boolean => {
+    if (stem.startsWith("!")) return !has(stem.slice(1));
+    const exact = stem.startsWith("="), s = stem.replace(/^=/, "");
+    return words.some((w) => exact ? w === s || w === s + "s"
+      : w.startsWith(s) || (s.length >= 5 && w.length >= s.length - 1 && QMB.distance(w.slice(0, s.length), s) <= 1));
+  };
+  return keys.some((k) => k.every(has));
+}
+export const mapKeysFor = (q: { answer?: string } | null | undefined) => (q ? accept.mapKeys?.[q.answer || ""] : undefined);
 /* The house bank any phone may have (public/bank.json): ids, types, themes and
    levels, enough for Setup and Settings. No questions, no answers (D5). */
 export function loadBaseBank(): Promise<Bank> {

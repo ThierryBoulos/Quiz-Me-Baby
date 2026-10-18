@@ -111,7 +111,7 @@ export function Rules() {
       <Rule n="08" title="Guess the Map">
         <L items={[
           <>A map goes up, no title, on the TV and every phone: <B>60 seconds</B>. Tap <B>Enlarge</B> to see it full screen, then tap, pinch or drag to zoom in. Both captains type what it shows.</>,
-          <>The idea counts, not the exact wording: the app accepts the map&rsquo;s title and its short forms (&ldquo;Landlocked&rdquo;, &ldquo;Vikings&rdquo;). One it missed? Contest it on the reveal.</>,
+          <>The idea counts, not the exact wording: the app knows each map&rsquo;s key ideas, so &ldquo;they drive on the left&rdquo;, &ldquo;kings and queens&rdquo; or &ldquo;no sea&rdquo; all count, in any words, typos and all. One it missed? Contest it on the reveal.</>,
           <>With a host, one hint per map (the host&rsquo;s button): the map&rsquo;s subject. Best of 3.</>,
         ]} />
       </Rule>

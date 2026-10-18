@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, acceptFor, hostOnly, loadBank, withCustom, withoutHostOnly, type Q } from "./engine";
+import { QMB, acceptFor, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, withoutHostOnly, type Q } from "./engine";
 import { cleanList } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
@@ -249,7 +249,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the idea counts, not the exact words: the map's title and its short forms ("Landlocked",
          "Vikings") are accepted; what the app misses, the captains (or the host) can contest */
       const q = g.mapGame.qs[g.mapGame.i];
-      const ok = (x: string[] | null) => !!x && x.some((t) => QMB.isMatch(t, q.answer, [...acceptFor(q), q.question]));
+      const ok = (x: string[] | null) => !!x && x.some((t) => QMB.isMatch(t, q.answer, [...acceptFor(q), q.question]) || mapHit(t, mapKeysFor(q)));
       s.ok = [ok(s.typed[0]), ok(s.typed[1])];
       s.app = [...s.ok] as Two<boolean>;
       s.screen = "mapReveal";
