@@ -170,5 +170,6 @@
 4395.00 sudden | 137 | 7-7 |  | Time's up. | 
 4425.00 sudden | 138 | 7-7 |  | Time's up. | 
 4503.00 sudden | 138 | 7-7 |  | Wrong. The other captain can buzz. | 
-4596.50 final | 138 | 7-8 |  | Wrong. The other captain can buzz. | 
+4548.75 sudden | 138 | 7-7 |  |  | 
+4560.50 final | 139 | 7-8 |  | Call changed: ⁨Owls⁩ win the night. | 
 recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[0,1],"minis":[2,1],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]}}

@@ -166,7 +166,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : { texts: ["Paris"] });
       else if (r < 0.45) { if (["dishQ", "sudden", "battleTie"].includes(pub.screen)) send(who, "buzz", {}); }
       else if (r < 0.6) send(who, "lifeline", { key: ["dbl", "friend", "dip"][Math.floor(bot() * 3)] });
-      else send(who, "next", { move: { type: MOVES[Math.floor(bot() * MOVES.length)], v: bot() < 0.5, n: 3, id: ["first", "steal", "t0", "t1", "d0", "b0-3"][Math.floor(bot() * 6)] }, step: pub.step - (bot() < 0.3 ? 1 : 0) });
+      else send(who, "next", { move: { type: MOVES[Math.floor(bot() * MOVES.length)], v: bot() < 0.5, n: 3, id: ["first", "steal", "t0", "t1", "d0", "b0-3", "s0", "s1"][Math.floor(bot() * 8)] }, step: pub.step - (bot() < 0.3 ? 1 : 0) });
     }
     /* the TV's screen goes to sleep during the sleep-th question; the captain answers meanwhile and
        the other captain taps Resume (the phones show the game as paused); then the TV wakes (18 Oct) */

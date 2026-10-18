@@ -136,7 +136,7 @@ export function Rules() {
         <L items={[
           <>Captains only. The room says nothing, and that means nothing.</>,
           <>Ten questions each, one captain at a time: <B>7 seconds</B> a shot out loud with a host, or <B>15 seconds</B> typed with no host. The TV shows each answer once it&rsquo;s settled.</>,
-          <>With no host the app checks each answer at once; at the end, the <B>review</B> lists every call, and either captain can contest before the Battle is settled.</>,
+          <>With no host the app checks each answer at once; at the end, the <B>review</B> lists every call, and either captain can contest before the Battle is settled. Still level? A tie-breaker, first buzz answers, contested like sudden death (on the Battle&rsquo;s result).</>,
           <>Best score wins, and it&rsquo;s worth double. At halftime the TV says what the second captain needs. It always runs last.</>,
         ]} />
       </Rule>
@@ -144,7 +144,7 @@ export function Rules() {
       <Rule n="12" title="Winning">
         <L items={[
           <>Highest score after the last round takes the night: confetti on every screen, then <B>Exit</B> sends everyone back to the home screen.</>,
-          <>Tie? <B>Sudden death</B>: one question, both captains, first to buzz answers (<B>30 seconds</B> to buzz with no host). Wrong, and the other captain can buzz. Repeats until somebody gets one.</>,
+          <>Tie? <B>Sudden death</B>: one question, both captains, first to buzz answers (<B>30 seconds</B> to buzz with no host). Wrong, and the other captain can buzz. Repeats until somebody gets one. The app checks each answer at once, and nothing waits for a contest: a captain can still contest a call on the final screen (or, when both were wrong, during the next question, whose clock waits for it). The first right answer, in the order they came, wins; nobody right after all, another question.</>,
         ]} />
       </Rule>
 

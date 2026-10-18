@@ -68,10 +68,10 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
           <div className="font-bold text-52 max-w-[1000px] leading-tight">{pub.question}</div>
           <Buzzed pub={pub} />
           {pub.sudden.shown && <div className="display text-80" style={{ color: "var(--color-gold)" }}>{pub.sudden.answer}</div>}
+          <SdCalls pub={pub} />
         </>))}
 
         <TvMini pub={pub} />
-        {pub.contest && <ContestBanner pub={pub} />}
 
         {pub.screen === "final" && (<>
           <Confetti n={140} />
@@ -83,6 +83,7 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
               <span style={{ color: "var(--color-a)" }}>{T[0].score}</span><span className="text-[var(--color-ink-3)]"> – </span><span style={{ color: "var(--color-b)" }}>{T[1].score}</span>
             </div>
           ) : <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
+          {(!recap || pub.contest) && <SdCalls pub={pub} />}
           {recap && recapLines(pub).length > 0 && (
             <div className="card enter text-left max-w-[1000px]" style={{ position: "relative", zIndex: 60 }}>
               <div className="eyebrow text-18 mb-2" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
@@ -94,6 +95,7 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
             {onExit && <button className="btn btn-sm btn-ghost" onClick={onExit}>Exit: everyone back to the home screen</button>}
           </div>
         </>)}
+        {pub.contest && <ContestBanner pub={pub} />}
       </div>
 
       {pub.lifeline && (
@@ -280,9 +282,10 @@ function TvMini({ pub }: { pub: Pub }) {
   if (pub.battle && sc === "battleTie") return (<>
     <div className="eyebrow text-20">Tie at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: first captain to buzz</div>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 52, lineHeight: 1.12 }}>{pub.question}</div>
-    {pub.deadline && <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />}
+    {(pub.deadline || (pub.left ?? 0) > 0) && <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />}
     <Buzzed pub={pub} />
     {pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} prev />}
+    <SdCalls pub={pub} />
   </>);
   if (pub.battle && sc === "battleReview") { const B = pub.battle, calls = pub.calls || []; return (<>
     <div className="eyebrow text-20">Battle of the Captains · captains, contest any call on your phone, then settle it</div>
@@ -298,6 +301,7 @@ function TvMini({ pub }: { pub: Pub }) {
     <div className="eyebrow text-20">Battle of the Captains</div>
     <ScoreBoard pub={pub} w={B.score} win={B.winner} size="tv" />
     <div className="display text-52" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Tie") : `${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</div>
+    <SdCalls pub={pub} />
   </>); }
 
   if (/Summary$/.test(sc) && pub.summary) {
@@ -330,6 +334,18 @@ function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: 
 }
 
 /* a call being contested: who says what, and who decides (with no host, the time left before the app's call stands) */
+/* sudden death / the tie-breaker: the question just decided, each answer and the app's call on it
+   (a captain can contest one on their phone) */
+function SdCalls({ pub }: { pub: Pub }) {
+  const C = pub.calls || [], T = pub.teams;
+  if (!C.length || !["final", "sudden", "battleTie", "battleSummary"].includes(pub.screen)) return null;
+  return (
+    <div className="text-22 flex flex-wrap gap-x-8 gap-y-1 justify-center items-baseline max-w-[1300px]">
+      <span className="eyebrow text-16">{C[0].note === "last question" ? "Last question" : "How it was won"}</span>
+      {C.map((c) => <span key={c.id} className="flex items-baseline gap-2"><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={16} /></span>)}
+    </div>);
+}
+
 function ContestBanner({ pub }: { pub: Pub }) {
   const T = pub.teams, K = pub.contest!, left = useSecondsLeft(K.until), nohost = pub.mode === "nohost";
   const say = pub.screen === "sayReveal", word = (ok: boolean) => (say ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");

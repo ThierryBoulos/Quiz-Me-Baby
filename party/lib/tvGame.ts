@@ -13,7 +13,7 @@ const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
 import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_LOBBY_AWAY, T_NEXT_FALLBACK,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
-import { CAPTAIN_MOVES, NEXT_MOVES, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, dishTotal, inScreen, levels, miniOf, miniState,
+import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, type Action, type G, type PKind, type W } from "./tv/rules";
 import { callsOf, closestW, currentQ, leadOf, matchQ, okWin, sayWin, turnOf } from "./tv/reads";
 import { buildView } from "./tv/view";
@@ -21,6 +21,14 @@ import { useInbox } from "./tv/useInbox";
 import { usePresent } from "./tv/usePresent";
 import { imadNarrate, imadSay } from "./tv/imad";
 import { newState, type TvState } from "./tv/state";
+
+/* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
+   right one, or both out) it's the one whose calls can be contested on the next screen. (true: go on) */
+function sdRecord(s: TvState, team: 0 | 1, ok: boolean) {
+  s.sdCur = [...s.sdCur, { team, text: (s.typed[team] || []).join(" / "), ok }];
+  if (ok || s.sdOut[other(team)]) { s.sdLog = { kind: s.screen === "battleTie" ? "battleTie" : "sudden", calls: s.sdCur }; s.contested = []; s.contest = null; }
+  return true;
+}
 
 /* THE TV RUNS THE NIGHT. It holds the game, plays every move through the
    shared engine (exactly as Classic does), carries out what the engine says
@@ -95,7 +103,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
+            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
           if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
         }
       } catch { setBanner("cantSave"); }
@@ -147,11 +155,19 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else if (f.go === "answer" || f.go === "dishReveal" || f.go === "auctionLeg") playSound("drumroll");
       }
       if (f.go) {
+        const was = s.screen;
         s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now; s.contest = null; s.contested = [];
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
         if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; }
         if (f.go === "dishQ") s.legLog = [];
-        if (f.go === "sudden" || f.go === "battleTie") { s.sdBuzz = null; s.sdOut = [false, false]; }
+        if (f.go === "sudden" || f.go === "battleTie") {
+          const n = (f.go === "sudden" ? s.g.sd?.n : s.g.battle?.tb?.n) || 0;
+          /* sudden death starting, or the first tie-breaker: no question decided yet; the next question
+             (not the same one swapped): the last one's calls, however it ended (time up with none is none) */
+          if ((f.go === "sudden" && !s.g.sdReady) || (f.go === "battleTie" && was !== "battleTie")) s.sdLog = null;
+          else if (was === f.go && n !== s.sdQ) s.sdLog = { kind: f.go, calls: s.sdCur };
+          s.sdBuzz = null; s.sdOut = [false, false]; s.sdCur = []; s.sdQ = n;
+        }
         const g = s.g;
         const secs = f.go === "ask" ? T().tQuestion : f.go === "steal" ? T().tSteal : f.go === "miniQ" ? T().tMini : f.go === "flagQ" ? T().tFlag
           : f.go === "mapQ" ? T().tMap : f.go === "auctionRun" ? T().tAuction
@@ -165,7 +181,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (f.go === "mapQ") applyFx([{ used: g.mapGame.qs[g.mapGame.i] }]);
         if (f.go === "sayQ") applyFx([{ used: g.saySame.qs[g.saySame.i] }]);
       }
-      if (f.finalize) { s.screen = "final"; s.deadline = null; s.autoAt = null; s.pending = null; if (isTvRef.current) playSound("win"); }
+      if (f.finalize) { s.contest = null; s.screen = "final"; s.deadline = null; s.autoAt = null; s.pending = null; if (isTvRef.current) playSound("win"); }
     }
     /* the TV is asleep: a clock that started meanwhile (the steal, after an answer) waits with the rest */
     if (s.tvAway && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; s.paused = true; s.awayPaused = true; }
@@ -263,6 +279,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (P.kind === "battle") play({ type: "battle/mark", got: v, said: P.text, review: s.nohost });
     else if (P.kind === "sudden" || P.kind === "battleTie") {
       const tb = P.kind === "battleTie";
+      sdRecord(s, P.team, v);
       if (v) play(tb ? { type: "battle/tbWin", w: P.team } : { type: "sudden/win", w: P.team });
       else {
         s.sdOut[P.team] = true; s.typed[P.team] = null; s.sdBuzz = null;
@@ -274,6 +291,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
 
   /* ---- contests: the app's call on an answer, looked at again ---- */
   const capName = (t: 0 | 1) => ctx.current.members.find((m) => m.team === t && m.role === "captain")?.name || st.current.g?.teams[t]?.name || "";
+  /* a tap held while a contest is open: who's deciding it (and, with no host, for how long yet) */
+  const contestWait = useCallback(() => {
+    const s = st.current, K = s.contest!, by = iso(s.g.teams[K.by].name);
+    const cap = ctx.current.members.find((m) => m.team === other(K.by) && m.role === "captain")?.name || s.g.teams[other(K.by)].name;
+    return s.nohost ? `Wait: ${iso(cap)} is deciding ${by}'s contest (${Math.max(1, Math.ceil((K.until - Date.now()) / 1000))} s).` : `Wait: the host is deciding ${by}'s contest.`;
+  }, []);
   const verdictWord = (sc: string, ok: boolean) => (sc === "sayReveal" ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
   /* a call changed: the score moves with it (or, a RIGHT turned down with no steal played, a steal on a new question) */
   const applyCall = useCallback((id: string, v: boolean) => {
@@ -300,6 +323,19 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const [cap, i] = id.slice(1).split("-").map(Number);
       play({ type: "battle/rule", cap, i, got: v });
       s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[cap].name)}'s answer ${i + 1} is ${v ? "RIGHT" : "WRONG"}.` };
+    } else if (/^s\d+$/.test(id) && s.sdLog?.calls[Number(id.slice(1))]) {
+      /* sudden death / the tie-breaker: the first right answer (in the order they came) takes it; nobody right
+         after all, another question */
+      const i = Number(id.slice(1)), L = s.sdLog, tb = L.kind === "battleTie";
+      const calls = L.calls.map((e, k) => (k === i ? { ...e, ok: v } : e)), right = calls.find((e) => e.ok), w = right ? right.team : "none";
+      const was = tb ? (g.battle?.stage === "done" ? g.battle.winner : null) : g.winner;
+      s.sdLog = w === "none" ? null : { ...L, calls };
+      if (w === "none") s.sdCur = [];
+      s.step++;
+      play(tb ? { type: "battle/tbRule", w } : { type: "sudden/rule", w });
+      s.toast = { id: ++s.toastN, text: !right ? "Call changed: nobody was right. Another question."
+        : right.team === was ? `Call changed, but ${iso(g.teams[was].name)} were right first: it stands.`
+        : `Call changed: ${iso(g.teams[right.team].name)} ${tb ? "take the tie-breaker" : "win the night"}.` };
     }
   }, [play]);
 
@@ -308,6 +344,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const s = st.current, C = s.contest;
     if (!C || !s.g) return;
     s.contest = null; s.contested = [...s.contested, C.id];
+    if (C.hold != null) { s.deadline = Date.now() + C.hold; s.left = 0; }
     if (agree) applyCall(C.id, !C.ok);
     else s.toast = { id: ++s.toastN, text: late ? "No answer in time: the call stands." : byHost ? "The host keeps the call." : `${iso(capName(other(C.by)))} doesn't agree: the call stands.` };
   }, [applyCall]);
@@ -316,6 +353,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const s = st.current, c = callsOf(s).find((x) => x.id === id);
     if (!c) return;
     s.contest = { id, by, team: c.team, text: c.text, ok: c.ok, until: Date.now() + T().tContest * 1000 };
+    /* sudden death / the tie-breaker going on meanwhile: its clock waits for the contest */
+    if (SD_CONTEST.includes(s.screen) && s.deadline) { s.contest.hold = Math.max(0, s.deadline - Date.now()); s.left = s.contest.hold / 1000; s.deadline = null; }
     /* no pop-up over it: the TV and the phones show the contest itself until it's decided */
     s.toast = null;
   }, []);
@@ -334,7 +373,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const againGame = () => {
     const s = st.current, room = ctx.current.room;
     Object.assign(s, { g: null, screen: "", step: 1, pending: null, lifeline: null, autoAt: null, deadline: null, left: 0, timeUp: false, paused: false,
-      typed: [null, null], guesses: [null, null], ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], flags: [], toast: null, scoreLog: [] });
+      typed: [null, null], guesses: [null, null], ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
     try { localStorage.removeItem(saveKey); } catch { /* */ }
     lastSave.current = "";
     setPub(null);
@@ -414,8 +453,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else if (s.screen === "mapReveal") play({ type: "map/verdict", w: okW() });
       else if (s.screen === "sayReveal") play({ type: "say/verdict", w: sayW() });
     }
-    else if (t === "ui/sdRight" && s.sdBuzz != null) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: s.sdBuzz } : { type: "sudden/win", w: s.sdBuzz });
-    else if (t === "ui/sdWrong" && s.sdBuzz != null) {
+    else if (t === "ui/sdRight" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, true)) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: s.sdBuzz } : { type: "sudden/win", w: s.sdBuzz });
+    else if (t === "ui/sdWrong" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, false)) {
       s.sdOut[s.sdBuzz] = true; s.typed[s.sdBuzz] = null; s.sdBuzz = null;
       if (s.sdOut[0] && s.sdOut[1]) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: "none" } : { type: "sudden/win", w: "none" });
       else s.toast = { id: ++s.toastN, text: "Wrong. The other captain can have a go." };
@@ -461,6 +500,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         play({ type: "dish/buzz", w: team }); s.buzzAt = Date.now(); return true;
       }
       if ((sc === "sudden" && g.sdReady) || sc === "battleTie") {
+        if (s.contest) return contestWait();
         if (s.sdOut[team]) return `${nm(team)} is out of this one.`;
         if (s.sdBuzz != null) return s.sdBuzz === team ? true : `${nm(s.sdBuzz)} buzzed first.`;
         s.sdBuzz = team; s.deadline = null; playSound("soft"); return true;
@@ -514,11 +554,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return true;
     }
     if (sc === "dishQ" && g.dishGame.leg.buzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check("dish", current()); return true; }
+    if ((sc === "sudden" || sc === "battleTie") && s.contest && texts.length) return contestWait();
     if ((sc === "sudden" || sc === "battleTie") && s.sdBuzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check(sc === "sudden" ? "sudden" : "battleTie", current()); return true; }
     /* an answer that can't go in here still says why (a phone a beat behind) */
     if (texts.length && ["dishQ", "sudden", "battleTie"].includes(sc)) return s.pending ? "Wait for the call on the last answer." : "Buzz first, then type it.";
     return false;
-  }, [applyFx, current, play, reveal, settle]);
+  }, [applyFx, current, play, reveal, settle, contestWait]);
 
   /* a captain's tap on a host-style button: who may, where, and when */
   const captainMove = useCallback((team: 0 | 1, move: G): boolean | string => {
@@ -532,7 +573,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return `${iso(lead.captain || lead.name)} moves the game on. You can in ${Math.max(1, Math.ceil(T_NEXT_FALLBACK - (Date.now() - s.waitSince) / 1000))} s.`;
     }
     /* the night doesn't move on past a contest: the other captain answers it first (or its time runs out) */
-    if (s.contest && NEXT_MOVES.has(t)) return `Wait: ${iso(capName(other(s.contest.by)))} is deciding ${iso(g.teams[s.contest.by].name)}'s contest (${Math.max(1, Math.ceil((s.contest.until - Date.now()) / 1000))} s).`;
+    if (s.contest && NEXT_MOVES.has(t)) return contestWait();
     if (t === "ui/closeLifeline") { if (!s.lifeline || s.lifeline.team !== team) return false; }
     else if (t === "sudden/go") { if (g.sdReady) return false; }
     /* a contest: one at a time, each call once, and only a call something was typed for */
@@ -561,7 +602,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     else hostMove(move);
     return true;
-  }, [hostMove, play, openContest, closeContest]);
+  }, [hostMove, play, openContest, closeContest, contestWait]);
 
   /* a tap the TV won't take: say why on the TV (and the update ends the phone's "Sending…") */
   const refused = useRef<string | null>(null);        // why the tap being handled was turned down (for its receipt)

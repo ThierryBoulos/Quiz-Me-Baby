@@ -12,9 +12,13 @@ export const newState = () => ({
   lifeline: null as Pub["lifeline"], toast: null as Pub["toast"], toastN: 0, bank: null as Bank | null,
   decided: null as null | { key: MiniKey; winner: 0 | 1; spare: number },   // the "decided" screen: which mini-game
   /* a call being contested (an answer card, a reveal, the Battle review): the other captain (or the host) decides */
-  contest: null as null | { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number },
+  contest: null as null | { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number; hold?: number },   // hold: a clock stopped meanwhile (ms left)
   contested: [] as string[],                       // calls on this screen already looked at (once each)
   legLog: [] as { team: 0 | 1; text: string; ok: boolean }[],   // Guess the Cocktail or Dish: this leg's answers, in order, with their calls
+  /* sudden death / the Battle tie-breaker: this question's answers so far, and the last question decided
+     (its calls can be contested on the next screen: the final, the Battle's summary, or the next question) */
+  sdCur: [] as { team: 0 | 1; text: string; ok: boolean }[], sdQ: 0,         // (sdQ: which question sdCur is for)
+  sdLog: null as null | { kind: "sudden" | "battleTie"; calls: { team: 0 | 1; text: string; ok: boolean }[] },
   offList: [false, false] as Two<boolean>,                                   // Say the Same: not a real answer to the prompt
   qkeys: {} as Record<string, number>,                                        // real question id → the number the phones see
   scoreLog: [] as Two<number>[],                                              // the score after every change (lead changes, for the recap)

@@ -12,9 +12,13 @@ export type W = 0 | 1 | "tie" | "none";
 export type PKind = "ask" | "steal" | "dish" | "sudden" | "battle" | "battleTie";
 export type Where = string | string[];
 /* the screens where the app's calls are shown, and can be contested */
-export const CONTEST_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "dishReveal", "battleReview"];
+export const CONTEST_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "dishReveal", "battleReview",
+  /* sudden death and the tie-breaker: the question just decided, on the screen after it */
+  "final", "battleSummary", "sudden", "battleTie"];
+/* ...where the night goes on meanwhile: no buzz until the contest is decided (its clock waits too) */
+export const SD_CONTEST = ["sudden", "battleTie"];
 /* the taps that move the night on from those screens (held while a contest is open) */
-export const NEXT_MOVES = new Set(["round/afterAnswer", "ui/next", "dish/next", "battle/reviewDone"]);
+export const NEXT_MOVES = new Set(["round/afterAnswer", "ui/next", "dish/next", "battle/reviewDone", "battle/done"]);
 export const inScreen = (where: Where, sc: string) => where === "*" || (Array.isArray(where) ? where : [where]).includes(sc);
 
 /* Moves the host's phone may send, and the screen each one belongs to.

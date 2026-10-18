@@ -224,6 +224,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="flex flex-col gap-3 flex-1">
         <p className="font-bold text-18">{pub.question}</p>
         <AnswerCard />
+        <Calls pub={pub} host busy={busy} act={send} />
         {pub.buzz != null ? (<div className="flex flex-col gap-2 mt-auto">
           <div className="display text-26 text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed</div>
           <Typed t={pub.buzz} />
@@ -236,7 +237,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           </div>
         </>)}
       </div>);
-    case "final": return <Results><Exit /></Results>;
+    case "final": return <Results><Calls pub={pub} host busy={busy} act={send} /><Exit /></Results>;
 
     /* ---- the mini-games ---- */
     case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "battleIntro": return (
@@ -395,6 +396,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <div className="eyebrow">Battle tie-breaker: first captain to buzz</div>
         <p className="font-bold text-18">{pub.question}</p>
         <AnswerCard />
+        <Calls pub={pub} host busy={busy} act={send} />
         {pub.buzz != null ? (<div className="flex flex-col gap-2 mt-auto">
           <div className="display text-26 text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed</div>
           <Typed t={pub.buzz} />
@@ -407,7 +409,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           </div>
         </>)}
       </div>);
-    case "battleSummary": return <Results><Main label="Next" move={{ type: "battle/done" }} /></Results>;
+    case "battleSummary": return <Results><Calls pub={pub} host busy={busy} act={send} /><Main label="Next" move={{ type: "battle/done" }} /></Results>;
     default: return <div className="eyebrow text-center">Eyes on the TV</div>;
   }
   }
@@ -459,13 +461,16 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
   if (!C.length) return null;
   const word = (ok: boolean) => (say ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
   const nohost = pub.mode === "nohost";
+  /* sudden death's "last question" said once, above it */
+  const lastQ = C.every((c) => c.note === "last question");
   const decider = K ? (nohost ? pub.captains?.[K.by === 0 ? 1 : 0] || "The other captain" : "The host") : "";
   return (
     <div className="flex flex-col gap-2">
       {!cardOnly && <div className={"flex flex-col gap-1.5" + (C.length > 6 ? " max-h-[260px] overflow-y-auto pr-1" : "")}>
+        {lastQ && <div className="eyebrow text-center">The last question</div>}
         {C.map((c) => (
           <div key={c.id} className="flex items-center gap-2 text-14" style={{ opacity: K && K.id !== c.id ? 0.6 : 1 }}>
-            <span className="font-bold shrink-0" style={{ color: tc(c.team) }}>{T[c.team].name}{c.note ? <span className="font-normal text-12 text-[var(--color-ink-3)]"> · {c.note}</span> : null}</span>
+            <span className="font-bold shrink-0" style={{ color: tc(c.team) }}>{T[c.team].name}{c.note && !lastQ ? <span className="font-normal text-12 text-[var(--color-ink-3)]"> · {c.note}</span> : null}</span>
             <span className="flex-1 min-w-0 truncate text-[var(--color-ink-2)]">{c.text || "No answer"}</span>
             <Verdict v={c.ok} say={say} size={13} />
             {host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
@@ -705,6 +710,8 @@ function WaitingFor({ pub }: { pub: Pub }) {
 /* the screens a clock runs on, and so the ones a Pause makes sense on */
 /* where the app's calls are listed, and can be contested */
 const CALL_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "dishReveal", "battleReview"];
+/* ...and sudden death / the tie-breaker: the question just decided, on the screen after it */
+const SD_CALL_SCREENS = ["final", "battleSummary", "sudden", "battleTie"];
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"];
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
@@ -795,7 +802,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
             <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} />
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} />
       {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
-      {CALL_SCREENS.includes(sc) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
+      {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc)) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
 
 
       {/* no host, Call a Friend: the calling captain closes the card */}
