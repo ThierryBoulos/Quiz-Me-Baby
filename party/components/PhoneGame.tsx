@@ -171,7 +171,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     </div>);
   const Small = ({ label, move, ghost }: { label: string; move: Record<string, unknown>; ghost?: boolean }) =>
     <button className={"btn btn-sm " + (ghost ? "btn-ghost" : "")} disabled={busy} onClick={() => send(move)}>{label}</button>;
-  const Pause = () => (pub.deadline || pub.left ? <Small label={pub.deadline ? "Pause" : "Resume"} move={{ type: "ui/pause" }} /> : null);
+  const Pause = () => (!pub.tvAway && (pub.deadline || pub.left) ? <Small label={pub.deadline ? "Pause" : "Resume"} move={{ type: "ui/pause", on: pub.deadline ? "pause" : "resume" }} /> : null);
   const Waiting = ({ children }: { children: React.ReactNode }) => <Line className="mt-auto">{children}</Line>;
 
   if (pub.lifeline) return (
@@ -846,8 +846,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {pub.nextBy && !lead && open && <p className="text-center text-13 text-[var(--color-ink-3)]">{pub.nextBy} hasn&rsquo;t tapped it, so you can.</p>}
       {pub.nextBy && !lead && !open && <WaitingFor pub={pub} />}
       {/* no host: either captain can stop the clock (the question hides until it restarts) */}
-      {nohost && PAUSABLE.includes(sc) && !pub.lifeline && !pub.pending && (pub.deadline || pub.paused) && (
-        <button className="btn btn-sm self-center" disabled={busy} onClick={() => void nxt({ type: "ui/pause" })}>{pub.paused ? "Resume" : "Pause"}</button>)}
+      {nohost && PAUSABLE.includes(sc) && !pub.lifeline && !pub.pending && !pub.tvAway && (pub.deadline || pub.paused) && (
+        <button className="btn btn-sm self-center" disabled={busy} onClick={() => void nxt({ type: "ui/pause", on: pub.paused ? "resume" : "pause" })}>{pub.paused ? "Resume" : "Pause"}</button>)}
 
       {sugs.length > 0 && (canType || ANSWERING.includes(sc)) && (
         <div className="card">

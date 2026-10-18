@@ -164,6 +164,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
       if (f.finalize) { s.screen = "final"; s.deadline = null; s.autoAt = null; s.pending = null; if (isTvRef.current) playSound("win"); }
     }
+    /* the TV is asleep: a clock that started meanwhile (the steal, after an answer) waits with the rest */
+    if (s.tvAway && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; s.paused = true; s.awayPaused = true; }
   }, [used]);
 
   const play = useCallback((move: G) => {
@@ -293,7 +295,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const t = move.type as string;
     if (t === "ui/closeLifeline") { s.lifeline = null; s.paused = false; applyFx([{ timer: "resume" }]); }
     else if (t === "ui/timeUp") { s.deadline = null; s.left = 0; s.timeUp = true; }
-    else if (t === "ui/pause") { if (s.lifeline || (!s.deadline && !s.paused)) return; applyFx([{ timer: s.deadline ? "pause" : "resume" }]); s.paused = !s.deadline && s.left > 0; }
+    else if (t === "ui/pause") {
+      /* while the TV is asleep its own pause holds the clock; a Pause or Resume tapped meanwhile waits for it */
+      if (s.tvAway || s.lifeline || (!s.deadline && !s.paused)) return;
+      /* the phone says which it meant (its button read Pause or Resume): a tap on a screen a beat behind can't do the opposite */
+      if ((move.on === "pause" && !s.deadline) || (move.on === "resume" && s.deadline)) return;
+      applyFx([{ timer: s.deadline ? "pause" : "resume" }]); s.paused = !s.deadline && s.left > 0;
+    }
     else if (t === "ui/reveal") reveal();
     /* a ruling: v sets it (RIGHT/WRONG, DODGED IT/SAID IT); without v it flips */
     else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk") { const i = move.t === 1 ? 1 : 0; s.ok[i] = typeof move.v === "boolean" ? move.v : !s.ok[i]; }
@@ -362,8 +370,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const captainInput = useCallback((kind: string, team: 0 | 1, p: G): boolean | string => {
     const s = st.current, g = s.g, sc = s.screen;
     const nm = (t: 0 | 1) => iso(g.teams[t].name);
-    if (s.tvAway) return false;                        // the TV is asleep: it catches up when it wakes
-    if (s.paused) return "The game is paused.";        // nothing goes in while the clock is stopped
+    /* An answer is never thrown away: one sent while the TV is asleep or the game is paused (typed
+       before the pause landed) is taken and checked as usual; the clock stays stopped meanwhile.
+       Anything else waits for the TV, and says so. */
+    if (kind !== "answer" && s.tvAway) return "The TV's screen was asleep. Tap again.";
+    if (kind !== "answer" && s.paused) return "The game is paused.";
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
@@ -637,7 +648,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           if (s.autoAt) s.autoAt += d;
           if (s.waitSince) s.waitSince += d;
           if (s.buzzAt) s.buzzAt += d;
-          if (s.awayPaused && s.left) { s.deadline = Date.now() + s.left * 1000; s.left = 0; s.paused = false; }
+          if (s.awayPaused && s.left && !s.pending) { s.deadline = Date.now() + s.left * 1000; s.left = 0; }
+          if (s.awayPaused) s.paused = false;
           s.tvAway = 0; s.awayPaused = false;
         }
         /* the bank, then the view, to this TV and to every phone (they may still show "paused") */
@@ -804,7 +816,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.autoAt) s.autoAt += d;
         if (s.waitSince) s.waitSince += d;
         if (s.buzzAt) s.buzzAt += d;
-        if (s.awayPaused) { s.paused = false; s.awayPaused = false; applyFx([{ timer: "resume" }]); }
+        /* the clock picks up where it was, unless an answer that came in meanwhile is waiting for its call */
+        if (s.awayPaused) { s.paused = false; s.awayPaused = false; if (!s.pending) applyFx([{ timer: "resume" }]); }
         void publish();
       }
     };

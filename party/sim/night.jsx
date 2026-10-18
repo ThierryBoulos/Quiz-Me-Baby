@@ -4,7 +4,7 @@
    trace (every screen the phones were shown, with the score); with the same
    seed the trace must not change unless the game is meant to.
    Run it with: npm run sim (node sim/run.mjs) */
-import { advance, clock, flush, resetClock, rng, seedRandom } from "./env.js";
+import { advance, clock, flush, resetClock, rng, seedRandom, setVisible } from "./env.js";
 import { act, useEffect, useState } from "react";
 import TestRenderer from "react-test-renderer";
 import * as fake from "./fakeSupabase.js";
@@ -54,7 +54,7 @@ function answerNow(g, pub) {
   return null;
 }
 
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0 }) {
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0 }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed);
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -85,6 +85,9 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
 
   let reloaded = false;
   const appealed = new Set(), armed = new Set(), asked = new Set();
+  let asks = 0, lastAsk = -1;
+  /* each new question counts once */
+  const sc0 = (p) => (p.screen === "ask" && p.step !== lastAsk ? ((lastAsk = p.step), "ask") : "");
   let outcome = "timeout", recap = null, score = "", stuckOn = "", same = 0, prevKey = "", playedAgain = false;
   while (clock() - t0 < 90 * 60000) {
     await tick(900);
@@ -97,6 +100,21 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     const pub = fake.db.rooms[0].state?.pub, g = api.current?.game;
     if (!pub || !g) continue;
+    /* the TV's screen goes to sleep during the sleep-th question; the captain answers meanwhile and
+       the other captain taps Resume (the phones show the game as paused); then the TV wakes (18 Oct) */
+    if (sleep && !host && sc0(pub) === "ask" && ++asks === sleep && !pub.sent?.[pub.turn]) {
+      const t = pub.turn, left = Math.round((pub.deadline - clock()) / 1000);
+      await act(async () => { setVisible(false); await flush(); }); await tick(1500);
+      trace.push(`(the TV sleeps, ${left} s left)`);
+      send(caps[t], "answer", { texts: ["Dane"] }); await tick(1500);
+      send(caps[1 - t], "next", { move: { type: "ui/pause", on: "resume" }, step: fake.db.rooms[0].state.pub.step });
+      send(caps[1 - t], "next", { move: { type: "ui/pause" }, step: fake.db.rooms[0].state.pub.step });   // an older phone: no "on"
+      await tick(60000);
+      await act(async () => { setVisible(true); await flush(); }); await tick(1500);
+      const p2 = fake.db.rooms[0].state.pub;
+      trace.push(`(the TV wakes: ${p2.screen}, answer in: ${!!(p2.sent?.[t] || p2.pending || p2.screen !== "ask")}, clock ${p2.deadline ? Math.round((p2.deadline - clock()) / 1000) + " s" : "stopped"})`);
+      continue;
+    }
     /* slow captains: this beat, nobody taps (so the clocks run out now and then) */
     if (slow && bot() < slow) continue;
     const sc = pub.screen, step = pub.step, lead = pub.lead ?? 0, other = (t) => 1 - t;

@@ -48,6 +48,13 @@ globalThis.localStorage = {
   removeItem: (k) => store.delete(k), clear: () => store.clear(), key: (i) => [...store.keys()][i] ?? null, get length() { return store.size; },
 };
 globalThis.window = globalThis;
-globalThis.document = { visibilityState: "visible", addEventListener() {}, removeEventListener() {}, hidden: false };
+const docListeners = new Set();
+globalThis.document = { visibilityState: "visible", hidden: false,
+  addEventListener(t, f) { if (t === "visibilitychange") docListeners.add(f); }, removeEventListener(t, f) { docListeners.delete(f); } };
+/* the TV's screen goes to sleep, or comes back */
+export function setVisible(on) {
+  document.visibilityState = on ? "visible" : "hidden"; document.hidden = !on;
+  docListeners.forEach((f) => f());
+}
 globalThis.addEventListener = () => {}; globalThis.removeEventListener = () => {}; globalThis.dispatchEvent = () => true;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;

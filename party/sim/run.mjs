@@ -41,6 +41,8 @@ const NIGHTS = [
   /* the TV reloads mid-game, twice over */
   { seed: 11, minis: DEFAULT, reload: 40 },
   { seed: 12, minis: ["dish", "saysame", "map"], host: true, reload: 25 },
+  /* the TV's screen sleeps during a question: the answer sent meanwhile counts, a Resume can't start the clock */
+  { seed: 13, minis: DEFAULT, sleep: 2 },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
