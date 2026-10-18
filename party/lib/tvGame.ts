@@ -456,12 +456,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (sc === "dishQ") {
         const L = g.dishGame.leg;
         if (L.out[team]) return `${nm(team)} is out of this one.`;
-        if (L.buzz != null) return L.buzz === team ? false : `${nm(L.buzz)} buzzed first.`;
+        /* (a second tap on Buzz: theirs is already in) */
+        if (L.buzz != null) return L.buzz === team ? true : `${nm(L.buzz)} buzzed first.`;
         play({ type: "dish/buzz", w: team }); s.buzzAt = Date.now(); return true;
       }
       if ((sc === "sudden" && g.sdReady) || sc === "battleTie") {
         if (s.sdOut[team]) return `${nm(team)} is out of this one.`;
-        if (s.sdBuzz != null) return s.sdBuzz === team ? false : `${nm(s.sdBuzz)} buzzed first.`;
+        if (s.sdBuzz != null) return s.sdBuzz === team ? true : `${nm(s.sdBuzz)} buzzed first.`;
         s.sdBuzz = team; s.deadline = null; playSound("soft"); return true;
       }
       return false;
