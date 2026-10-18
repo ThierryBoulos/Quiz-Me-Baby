@@ -684,17 +684,19 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
     const tap = newTap(); lastTap.current = { tap, kind, q: `${pub.qid}|${sc}` };
     setBusy(true); try { await sendAction(code, kind, { ...payload, tap }); return true; } catch { lastTap.current = null; return false; /* the phone already says so */ } finally { setBusy(false); }
   };
-  const ack = pub.ack?.[me.user_id];
+  const acks = pub.ack?.[me.user_id];
+  const got = lastTap.current && acks ? acks[lastTap.current.tap] : undefined;   // undefined: not dealt with yet
   useEffect(() => {
     const L = lastTap.current;
-    if (!ack || !L || ack.tap !== L.tap) return;
+    if (!L || got === undefined) return;
+    const ack = { no: got || undefined };
     lastTap.current = null;                          // each receipt once
     /* taken: it shows as sent, it's waiting for its call, or the question has already moved on (a right answer) */
     const mineIn = !!pub.sent?.[mine] || pub.pending?.team === mine || `${pub.qid}|${sc}` !== L.q;
     if (L.kind === "answer" && !mineIn) { setSentTxt(null); setNo(ack.no || "The TV didn't take that answer. Send it again."); }
     else if (L.kind === "buzz" && pub.buzz !== mine && `${pub.qid}|${sc}` === L.q) { setBuzzed(false); setNo(ack.no || "The TV didn't take the buzz. Tap again."); }
     else if (ack.no) setNo(ack.no);
-  }, [ack?.tap]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [got, acks]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!no) return; const t = setTimeout(() => setNo(null), 6000); return () => clearTimeout(t); }, [no]);
   const nxt = (move: Record<string, unknown>) => act("next", { move, step: pub.step });
   /* quick taps (+1, pausing a call): straight out, nothing waits for them */

@@ -65,8 +65,9 @@ export type Pub = {
   nextOther?: string | null; // that other captain
   imad?: { id: number; text: string };   // Imad's latest line (text only)
   at?: number;               // the TV's clock when this was published (phones correct their own clock with it)
-  /* each phone's last tap the TV has dealt with (its tag), and, if it wasn't taken, why */
-  ack?: Record<string, { tap: string; no?: string }>;
+  /* per phone, its last few taps the TV has dealt with (tag → why it wasn't taken, "" if it was):
+     a few, not one, as two quick taps can reach the TV the other way round */
+  ack?: Record<string, Record<string, string>>;
   tvAway?: boolean;          // the TV's screen is asleep or hidden: everything is paused until it's back
   /* phones that left the game screen during a question (another app or tab): name, team, how long (null: still away) */
   flags?: { id: number; name: string; team: 0 | 1 | null; label: string; qid?: string; ms: number | null; kind?: "away" | "paste" }[];                 // Closest To Wins clock, for its rules
