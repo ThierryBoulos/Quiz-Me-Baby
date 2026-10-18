@@ -11,11 +11,11 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
    onto the new version then says so and offers Exit, instead of playing on with a broken game. */
 const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
-import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_LOBBY_AWAY, T_MAP_RULE, T_NEXT_FALLBACK,
+import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_LOBBY_AWAY, T_NEXT_FALLBACK,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
-import { CAPTAIN_MOVES, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, contestSecs, dishTotal, inScreen, levels, miniOf, miniState,
+import { CAPTAIN_MOVES, NEXT_MOVES, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, type Action, type G, type PKind, type W } from "./tv/rules";
-import { closestW, currentQ, leadOf, matchQ, okWin, sayWin, turnOf } from "./tv/reads";
+import { callsOf, closestW, currentQ, leadOf, matchQ, okWin, sayWin, turnOf } from "./tv/reads";
 import { buildView } from "./tv/view";
 import { useInbox } from "./tv/useInbox";
 import { usePresent } from "./tv/usePresent";
@@ -95,7 +95,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, appeal: s.appeal, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
+            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
           if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
         }
       } catch { setBanner("cantSave"); }
@@ -147,9 +147,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else if (f.go === "answer" || f.go === "dishReveal" || f.go === "auctionLeg") playSound("drumroll");
       }
       if (f.go) {
-        s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now; s.appeal = null;
+        s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now; s.contest = null; s.contested = [];
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
         if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; }
+        if (f.go === "dishQ") s.legLog = [];
         if (f.go === "sudden" || f.go === "battleTie") { s.sdBuzz = null; s.sdOut = [false, false]; }
         const g = s.g;
         const secs = f.go === "ask" ? T().tQuestion : f.go === "steal" ? T().tSteal : f.go === "miniQ" ? T().tMini : f.go === "flagQ" ? T().tFlag
@@ -229,35 +230,37 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.app = [...s.ok] as Two<boolean>;
       s.screen = "sayReveal";
     } else if (s.screen === "mapQ") {
-      /* the app doesn't judge a map: the host rules (with no host, each captain on the other's
-         answer); nothing written is simply wrong */
-      s.ok = [s.typed[0] ? null : false, s.typed[1] ? null : false];
-      s.app = [null, null];
+      /* the idea counts, not the exact words: the map's title and its short forms ("Landlocked",
+         "Vikings") are accepted; what the app misses, the captains (or the host) can contest */
+      const q = g.mapGame.qs[g.mapGame.i];
+      const ok = (x: string[] | null) => !!x && x.some((t) => QMB.isMatch(t, q.answer, [...acceptFor(q), q.question]));
+      s.ok = [ok(s.typed[0]), ok(s.typed[1])];
+      s.app = [...s.ok] as Two<boolean>;
       s.screen = "mapReveal";
     } else return;
     s.deadline = null; s.left = 0; s.paused = false;
     playSound("drumroll");
-    /* no host: each captain rules on the other's map answer; one left unruled stands as right after a while */
-    s.autoAt = s.nohost && s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null) ? Date.now() + T_MAP_RULE * 1000 : null;
+    s.autoAt = null;
   }, []);
 
-  /* no host: the app's verdict on what a captain sent; the other captain may overrule */
+  /* No host: the app's call on what a captain sent, at once. It can be contested afterwards, where
+     the calls are shown (the answer card after the steal, the reveals, the Battle review). */
   const settle = useCallback((flip: boolean) => {
     const s = st.current, P = s.pending;
     if (!P) return;
     s.pending = null;
-    /* only ever a WRONG turned RIGHT: the other captain giving the point */
     const v = P.v || flip;
-    if (flip && !P.v) s.toast = { id: ++s.toastN, text: `${iso(s.g.teams[other(P.team)].name)} gave it to ${iso(s.g.teams[P.team].name)}.` };
     if (P.kind === "ask") play({ type: "round/judge", v });
     else if (P.kind === "steal") {
-      /* a steal with the very answer the first team gave (a typo apart): the point is theirs */
-      const first = s.typed[other(P.team)], same = v && !!first && (s.typed[P.team] || []).some((t) => first.some((f) => QMB.isMatch(t, f)));
+      /* a steal with the very answer the first team gave (a typo apart): the point is theirs
+         (not on a new question: then the first team's answer was to another one) */
+      const res = s.g.rounds[s.g.r]?.res?.[s.g.seat];
+      const first = s.typed[other(P.team)], same = v && !res?.fresh && !!first && (s.typed[P.team] || []).some((t) => first.some((f) => QMB.isMatch(t, f)));
       if (same) s.toast = { id: ++s.toastN, text: `Same answer as ${iso(s.g.teams[other(P.team)].name)}: the point is theirs.` };
       play({ type: "round/judgeSteal", v, back: same });
     }
-    else if (P.kind === "dish") { play({ type: v ? "dish/right" : "dish/wrong" }); if (!v) s.typed[P.team] = null; }
-    else if (P.kind === "battle") play({ type: "battle/mark", got: v });
+    else if (P.kind === "dish") { s.legLog = [...s.legLog, { team: P.team, text: P.text, ok: v }]; play({ type: v ? "dish/right" : "dish/wrong" }); if (!v) s.typed[P.team] = null; }
+    else if (P.kind === "battle") play({ type: "battle/mark", got: v, said: P.text, review: s.nohost });
     else if (P.kind === "sudden" || P.kind === "battleTie") {
       const tb = P.kind === "battleTie";
       if (v) play(tb ? { type: "battle/tbWin", w: P.team } : { type: "sudden/win", w: P.team });
@@ -268,6 +271,54 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
     }
   }, [play]);
+
+  /* ---- contests: the app's call on an answer, looked at again ---- */
+  const capName = (t: 0 | 1) => ctx.current.members.find((m) => m.team === t && m.role === "captain")?.name || st.current.g?.teams[t]?.name || "";
+  const verdictWord = (sc: string, ok: boolean) => (sc === "sayReveal" ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
+  /* a call changed: the score moves with it (or, a RIGHT turned down with no steal played, a steal on a new question) */
+  const applyCall = useCallback((id: string, v: boolean) => {
+    const s = st.current, g = s.g, sc = s.screen;
+    if (sc === "answer" && (id === "first" || id === "steal")) {
+      const res = g.rounds[g.r]?.res?.[g.seat];
+      if (!res) return;
+      play({ type: "round/rule", line: id, v });
+      if (id === "first" && !v && !res.steal && !res.fresh) { s.step++; play({ type: "round/freshSteal" }); }
+    } else if ((sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal") && /^t[01]$/.test(id)) {
+      const t = Number(id[1]) as 0 | 1;
+      s.ok[t] = v;
+      s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[t].name)} ${verdictWord(sc, v)}.` };
+    } else if (sc === "dishReveal" && /^d\d+$/.test(id)) {
+      const i = Number(id.slice(1)), L = s.legLog;
+      if (!L[i]) return;
+      s.legLog = L.map((e, k) => (k === i ? { ...e, ok: v } : e));
+      const right = s.legLog.find((e) => e.ok), w = right ? right.team : "none";
+      const was = g.dishGame.subs[g.dishGame.subs.length - 1]?.winner;
+      /* the winning call turned down, and the other team never had its go: a new one for both */
+      if (w === "none" && (was === 0 || was === 1) && !s.legLog.some((e) => e.team === other(was))) { s.step++; play({ type: "dish/replay" }); }
+      else play({ type: "dish/rule", w });
+    } else if (sc === "battleReview" && /^b[01]-\d+$/.test(id)) {
+      const [cap, i] = id.slice(1).split("-").map(Number);
+      play({ type: "battle/rule", cap, i, got: v });
+      s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[cap].name)}'s answer ${i + 1} is ${v ? "RIGHT" : "WRONG"}.` };
+    }
+  }, [play]);
+
+  /* agree: the call changes; not agreed (or no answer in time): the app's call stands */
+  const closeContest = useCallback((agree: boolean, byHost: boolean, late = false) => {
+    const s = st.current, C = s.contest;
+    if (!C || !s.g) return;
+    s.contest = null; s.contested = [...s.contested, C.id];
+    if (agree) applyCall(C.id, !C.ok);
+    else s.toast = { id: ++s.toastN, text: late ? "No answer in time: the call stands." : byHost ? "The host keeps the call." : `${iso(capName(other(C.by)))} doesn't agree: the call stands.` };
+  }, [applyCall]);
+
+  const openContest = useCallback((id: string, by: 0 | 1) => {
+    const s = st.current, c = callsOf(s).find((x) => x.id === id);
+    if (!c) return;
+    s.contest = { id, by, team: c.team, text: c.text, ok: c.ok, until: Date.now() + T().tContest * 1000 };
+    /* no pop-up over it: the TV and the phones show the contest itself until it's decided */
+    s.toast = null;
+  }, []);
 
   /* the night is over and somebody tapped Exit: every screen goes home, and
      this TV forgets the game (a reload must not bring it back) */
@@ -283,7 +334,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const againGame = () => {
     const s = st.current, room = ctx.current.room;
     Object.assign(s, { g: null, screen: "", step: 1, pending: null, lifeline: null, autoAt: null, deadline: null, left: 0, timeUp: false, paused: false,
-      typed: [null, null], guesses: [null, null], ok: [null, null], app: [null, null], decided: null, appeal: null, flags: [], toast: null, scoreLog: [] });
+      typed: [null, null], guesses: [null, null], ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], flags: [], toast: null, scoreLog: [] });
     try { localStorage.removeItem(saveKey); } catch { /* */ }
     lastSave.current = "";
     setPub(null);
@@ -295,7 +346,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const hostMove = useCallback((move: G) => {
     const s = st.current, g = s.g;
     const t = move.type as string;
-    if (t === "ui/closeLifeline") { s.lifeline = null; s.paused = false; applyFx([{ timer: "resume" }]); }
+    /* the host moving on past an open contest: that's the host's call */
+    if (s.contest && NEXT_MOVES.has(t) && !s.nohost) s.contest = null;
+    if (t === "ui/contestOk") closeContest(!!move.v, true);
+    else if (t === "ui/flip") { const c = callsOf(s).find((x) => x.id === move.id); if (c) applyCall(c.id, !c.ok); }
+    else if ((t === "dish/right" || t === "dish/wrong") && g.dishGame.leg.buzz != null && !s.nohost) {
+      const b = g.dishGame.leg.buzz as 0 | 1;
+      s.legLog = [...s.legLog, { team: b, text: (s.typed[b] || []).join(" / "), ok: t === "dish/right" }];
+      play(move);
+      if (t === "dish/wrong") { s.typed[b] = null; s.buzzAt = 0; }
+    }
+    else if (t === "ui/closeLifeline") { s.lifeline = null; s.paused = false; applyFx([{ timer: "resume" }]); }
     else if (t === "ui/timeUp") { s.deadline = null; s.left = 0; s.timeUp = true; }
     else if (t === "ui/pause") {
       /* while the TV is asleep its own pause holds the clock; a Pause or Resume tapped meanwhile waits for it */
@@ -363,7 +424,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "battle/tbWin") play({ ...move, byHost: true });
     else play(move);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applyFx, play, reveal]);
+  }, [applyFx, play, reveal, closeContest, applyCall]);
 
   /* ---- a captain's own moves: answers, buzzes, lifelines (no step bump:
      a captain typing doesn't change what the host is deciding) ---- */
@@ -413,8 +474,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!s.nohost) return;
       const v = !!matchQ(s.typed[team], q);
       applyFx([{ timer: "pause" }]);
-      s.pending = { kind: kindP, team, text: (s.typed[team] || []).join(" / "), v, until: Date.now() + contestSecs(kindP === "battle") * 1000 };
-      if (v) settle(false);
+      s.pending = { kind: kindP, team, text: (s.typed[team] || []).join(" / "), v, until: Date.now() };
+      settle(false);
     };
     if (sc === "ask" || sc === "steal") {
       /* one answer: once it's sent it's locked, host or no host */
@@ -469,30 +530,26 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const lead = g.teams[leadTeam()];
       return `${iso(lead.captain || lead.name)} moves the game on. You can in ${Math.max(1, Math.ceil(T_NEXT_FALLBACK - (Date.now() - s.waitSince) / 1000))} s.`;
     }
+    /* the night doesn't move on past a contest: the other captain answers it first (or its time runs out) */
+    if (s.contest && NEXT_MOVES.has(t)) return `Wait: ${iso(capName(other(s.contest.by)))} is deciding ${iso(g.teams[s.contest.by].name)}'s contest (${Math.max(1, Math.ceil((s.contest.until - Date.now()) / 1000))} s).`;
     if (t === "ui/closeLifeline") { if (!s.lifeline || s.lifeline.team !== team) return false; }
-    else if (t === "ui/rule") { if (!s.pending || s.pending.v || s.pending.team === team || typeof move.v !== "boolean") return false; }
     else if (t === "sudden/go") { if (g.sdReady) return false; }
-    /* the app's RIGHT (or DODGED IT) stands; a WRONG can be given (and taken back) by the other captain */
-    else if (t === "ui/flagOk" || t === "ui/sayOk") { if (move.t !== other(team)) return false; if (s.app[move.t] !== false) return "The app's call stands: it can only be changed to give a point."; }
-    else if (t === "ui/appeal") {
-      const rd = g.rounds[g.r], res = rd?.res?.[g.seat];
-      if (s.appeal || !res || res.correct || res.appealed || turnTeam() !== team || !s.typed[team]) return false;
+    /* a contest: one at a time, each call once, and only a call something was typed for */
+    else if (t === "ui/contest") {
+      if (s.contest) return `One at a time: ${iso(g.teams[s.contest.by].name)}'s contest is open.`;
+      const c = callsOf(s).find((x) => x.id === move.id);
+      if (!c) return false;
+      if (c.done) return c.text ? "That call has already been looked at." : "Nothing was typed there.";
     }
-    else if (t === "ui/appealOk") { if (!s.appeal || s.appeal.team === team || typeof move.v !== "boolean") return false; }
-    else if (t === "ui/mapRule") { /* each captain rules on the other team's map answer, and can change it until Next */ }
+    /* with no host, the other captain answers it (not the one who contested) */
+    else if (t === "ui/contestOk") { if (!s.contest || team !== other(s.contest.by) || typeof move.v !== "boolean") return false; }
     else if (t === "ui/pauseFriend") { if (!s.lifeline || s.lifeline.key !== "friend" || leadTeam() !== team) return false; }
     else if (t === "ui/exit") { /* either captain, with no host */ }
-    else if (t === "ui/next" && sc === "mapReveal") { if (s.ok[0] == null || s.ok[1] == null) return "Rule on both map answers first."; }
     else if (rule.who === "turn" && turnTeam() !== team) return false;
     else if (rule.who === "other" && turnTeam() === team) return false;
 
-    if (t === "ui/rule") settle(move.v !== s.pending!.v);
-    else if (t === "ui/appeal") { s.appeal = { team, text: (s.typed[team] || []).join(" / ") }; s.toast = null; }   // the answer card says so
-    else if (t === "ui/appealOk") { s.appeal = null; play({ type: "round/appeal", ok: !!move.v }); }
-    else if (t === "ui/mapRule") {
-      s.ok[other(team)] = !!move.v;
-      if (s.ok[0] != null && s.ok[1] != null) { s.autoAt = null; s.waitSince = Date.now(); }
-    }
+    if (t === "ui/contest") openContest(move.id, team);
+    else if (t === "ui/contestOk") closeContest(!!move.v, false);
     else if (t === "auction/raise") {
       const n = Math.floor(Number(move.n));
       if (!(n > g.auction.bid)) return `Bid more than ${g.auction.bid}.`;
@@ -503,10 +560,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     else hostMove(move);
     return true;
-  }, [hostMove, play, settle]);
+  }, [hostMove, play, openContest, closeContest]);
 
   /* a tap the TV won't take: say why on the TV (and the update ends the phone's "Sending…") */
   const refused = useRef<string | null>(null);        // why the tap being handled was turned down (for its receipt)
+  const took = useRef(false);                          // ...or that it was taken
   const refuse = useCallback((why: string) => { const s = st.current; refused.current = why; s.toast = { id: ++s.toastN, text: why }; void publish(); }, [publish]);
 
   /* ---- the inbox ---- */
@@ -610,7 +668,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!where || !inScreen(where, s.screen)) return;
       /* a tap made on an earlier screen (a double tap, a slow phone) is ignored */
       if (!SAME_SCREEN.has(move.type)) { if (a.payload.step !== s.step) return; s.step++; }
-      hostMove(move);
+      hostMove(move); took.current = true;
       void publish();
       return;
     }
@@ -619,13 +677,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const move = (a.payload.move || {}) as G, free = SAME_SCREEN.has(move.type);
       if (!free && a.payload.step !== s.step) return;
       const ok = captainMove(from.team, move);
-      if (ok === true) { if (!free) s.step++; void publish(); }
+      if (ok === true) { took.current = true; if (!free) s.step++; void publish(); }
       else if (ok) refuse(ok);
       return;
     }
     if (["answer", "buzz", "lifeline"].includes(a.kind)) {
       const ok = captainInput(a.kind, from.team, a.payload as G);
-      if (ok === true) void publish();
+      if (ok === true) { took.current = true; void publish(); }
       else if (ok) refuse(ok);
     }
   }, [applyFx, captainInput, captainMove, code, env, hostMove, play, publish, refuse]);
@@ -678,14 +736,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      view again, so that phone stops waiting instead of saying the TV hasn't answered */
   const handleAndReply = useCallback(async (a: Action) => {
     const n = pubN.current;
-    refused.current = null;
+    refused.current = null; took.current = false;
     await handle(a);
     const s = st.current, tap = typeof a.payload?.tap === "string" ? (a.payload.tap as string).slice(0, 12) : null;
     /* the receipt: this phone's tap is dealt with; if it wasn't taken the phone shows why and lets go of it */
     if (tap && s.g) {
-      const no = refused.current || undefined;
+      /* "+" taken, else why not ("-" when there's nothing to say: a double tap, a step behind) */
+      const r = took.current ? "+" : refused.current || "-";
       const mine = Object.entries(s.ack[a.user_id] || {}).filter(([k]) => k !== tap).slice(-4);
-      s.ack = { ...s.ack, [a.user_id]: Object.fromEntries([...mine, [tap, no || ""]]) };
+      s.ack = { ...s.ack, [a.user_id]: Object.fromEntries([...mine, [tap, r]]) };
       void publish();
     } else if (a.kind !== "count" && a.kind !== "suggest" && s.g && pubN.current === n) void publish();
   }, [handle, publish]);
@@ -736,6 +795,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const s = st.current, g = s.g, sc = s.screen;
     if (!g) return false;
     if (s.pending) return s.pending.team !== t;                                   // the other captain rules
+    if (s.contest && s.nohost) return other(s.contest.by) === t;                  // the other captain decides a contest
     if (sc === "ask" || sc === "steal") return turnTeam() === t;
     if (["miniQ", "flagQ", "mapQ", "sayQ", "dishQ", "sudden", "battleTie"].includes(sc)) return true;
     if (sc === "battleQ") return g.battle?.cap === t;
@@ -763,8 +823,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const kind = ({ ask: "ask", steal: "steal", battleQ: "battle", dishQ: "dish", sudden: "sudden", battleTie: "battleTie" } as Record<string, PKind>)[sc];
         if (kind && who != null && s.typed[who] && q) {
           applyFx([{ timer: "pause" }]);
-          s.pending = { kind, team: who, text: (s.typed[who] || []).join(" / "), v: !!matchQ(s.typed[who], q), until: now + contestSecs(kind === "battle") * 1000 };
-          if (s.pending.v) settle(false);             // the app's RIGHT stands at once
+          s.pending = { kind, team: who, text: (s.typed[who] || []).join(" / "), v: !!matchQ(s.typed[who], q), until: now };
+          settle(false);                                 // the app's call, at once (it can be contested where the calls are shown)
         } else if (s.timeUp && (sc === "ask" || sc === "steal")) {
           /* the clock had run out, waiting for the host: with no host that's a wrong answer */
           s.timeUp = false; s.step++;
@@ -867,6 +927,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (want > L.shown) { L.shown = want; changed = true; }
       }
       if (s.pending && now >= s.pending.until) { s.step++; settle(false); changed = true; }
+      /* no host: a contest nobody answers doesn't hold the night up; the app's call stands */
+      if (s.contest && s.nohost && now >= s.contest.until) { closeContest(false, false, true); changed = true; }
       /* Guess the Cocktail or Dish: a buzz gets 10 seconds to type it (no clock on screen); then it's wrong */
       if (s.screen === "dishQ" && s.buzzAt && !s.pending) {
         const b = g.dishGame.leg.buzz;
@@ -926,7 +988,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (changed) void publish();
     }, 250);
     return () => clearInterval(t);
-  }, [isTv, publish, play, reveal, settle, hostMove, applyFx, handOver]);
+  }, [isTv, publish, play, reveal, settle, hostMove, applyFx, handOver, closeContest]);
 
   /* Exit on the TV itself (it has a mouse): the same as the host's Exit */
   const exit = useCallback(() => { if (st.current.screen !== "final") return; exitGame(); void publish(); }, [publish]);  // eslint-disable-line react-hooks/exhaustive-deps

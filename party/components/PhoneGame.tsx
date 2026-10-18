@@ -214,7 +214,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           {pub.screen === "ask" && <Small ghost label="Change question" move={{ type: "round/swap" }} />}
         </div>
       </div>);
-    case "answer": return <Results><Main label="Next" move={{ type: "round/afterAnswer" }} /></Results>;
+    case "answer": return <Results><Calls pub={pub} host busy={busy} act={send} /><Main label="Next" move={{ type: "round/afterAnswer" }} /></Results>;
     case "roundScore": return <Results><Main label="Next" move={{ type: "round/next" }} /></Results>;
     case "sudden": return !pub.sudden?.ready ? (
       <div className="flex flex-col gap-4 flex-1">
@@ -269,6 +269,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <OnScreen pub={pub} />
         <Result pub={pub} headOnly />
         <Rulings type="ui/flagOk" empty="No answer" />
+        <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
       </div>);
     case "dishQ": return (
@@ -286,7 +287,14 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <div className="flex gap-2 justify-center"><Pause />{!pub.out?.some(Boolean) && <Small ghost label="Change this one" move={{ type: "dish/swap" }} />}</div>
         </>)}
       </div>);
-    case "dishReveal": return <Results><Main label="Next" move={{ type: "dish/next" }} /></Results>;
+    case "dishReveal": return <Results><Calls pub={pub} host busy={busy} act={send} /><Main label="Next" move={{ type: "dish/next" }} /></Results>;
+    /* the Battle's review (if the host came back during it): every call, then settle it */
+    case "battleReview": return (
+      <div className="flex flex-col gap-4 flex-1">
+        <Big eyebrow="Battle of the Captains" size={30} text="Review the calls" sub="Change any call that's wrong, then settle the Battle." />
+        <Calls pub={pub} host busy={busy} act={send} />
+        <Main label="Settle the Battle" move={{ type: "battle/reviewDone" }} />
+      </div>);
     /* won with legs to spare: keep playing for fun, or stop here */
     case DECIDED: return (
       <div className="flex flex-col gap-4 flex-1">
@@ -332,6 +340,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <Result pub={pub} headOnly />
         <Line className="!text-13">Who got it? The idea counts, not the exact words.</Line>
         <Rulings type="ui/mapOk" empty="No answer" />
+        <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label={unruled ? "Rule on both answers first" : "Next"} move={{ type: "ui/next" }} off={unruled} />
       </div>); }
     case "auctionBid": { const A = pub.auction!; return (
@@ -362,6 +371,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <OnScreen pub={pub} />
         <Result pub={pub} headOnly />
         <Rulings type="ui/sayOk" say empty="Nothing" />
+        <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
       </div>);
     case "battleQ": { const B = pub.battle!; return (
@@ -441,6 +451,43 @@ function BidBoard({ pub }: { pub: Pub }) {
 
 /* who won what, on every phone (the TV isn't the only one that gets to know) */
 /* headOnly: just the headline (the host's reveal screens show the rulings themselves) */
+/* The app's calls on this screen (the answer card, a reveal, the Battle review), each with a small
+   Contest for a captain. With no host the other captain agrees or not (after a while the app's call
+   stands); with a host, the host decides, and can change any call. */
+function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 1; host?: boolean; busy?: boolean; act: (move: Record<string, unknown>) => void; cardOnly?: boolean }) {
+  const C = pub.calls || [], K = pub.contest, T = pub.teams, say = pub.screen === "sayReveal", left = useSecondsLeft(K?.until);
+  if (!C.length) return null;
+  const word = (ok: boolean) => (say ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
+  const nohost = pub.mode === "nohost";
+  const decider = K ? (nohost ? pub.captains?.[K.by === 0 ? 1 : 0] || "The other captain" : "The host") : "";
+  return (
+    <div className="flex flex-col gap-2">
+      {!cardOnly && <div className={"flex flex-col gap-1.5" + (C.length > 6 ? " max-h-[260px] overflow-y-auto pr-1" : "")}>
+        {C.map((c) => (
+          <div key={c.id} className="flex items-center gap-2 text-14" style={{ opacity: K && K.id !== c.id ? 0.6 : 1 }}>
+            <span className="font-bold shrink-0" style={{ color: tc(c.team) }}>{T[c.team].name}{c.note ? <span className="font-normal text-12 text-[var(--color-ink-3)]"> · {c.note}</span> : null}</span>
+            <span className="flex-1 min-w-0 truncate text-[var(--color-ink-2)]">{c.text || "No answer"}</span>
+            <Verdict v={c.ok} say={say} size={13} />
+            {host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
+              : !c.done && !K && mine != null ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[36px] px-1" disabled={busy}
+                onClick={() => act({ type: "ui/contest", id: c.id })}>Contest</button> : <span className="w-[52px]" />}
+          </div>))}
+      </div>}
+      {K && (host || (nohost && mine != null && mine !== K.by) ? (
+        <div className="card flex flex-col gap-2 text-center" role="alert">
+          <div className="text-14"><b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>&rsquo;s </> : null}&ldquo;{K.text}&rdquo; was <b>{word(!K.ok)}</b>.{host ? " Your call." : " Agree?"}</div>
+          <div className="flex gap-2 justify-center">
+            <button className="btn btn-sm" disabled={busy} onClick={() => act({ type: "ui/contestOk", v: true })}>{host ? `Make it ${word(!K.ok)}` : "Agree"}</button>
+            <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => act({ type: "ui/contestOk", v: false })}>{host ? `Keep ${word(K.ok)}` : "No"}</button>
+          </div>
+          {nohost && <div className="text-12 text-[var(--color-ink-3)]">No answer in {left} s and the app&rsquo;s call stands.</div>}
+        </div>
+      ) : (
+        <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">
+          <b style={{ color: tc(K.by) }}>{T[K.by].name}</b> contest &ldquo;{K.text}&rdquo;. {decider} decides{nohost ? ` (${left} s)` : ""}.</p>))}
+    </div>);
+}
+
 function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean }) {
   const T = pub.teams, sc = pub.screen, m = pub.mini;
   const name = (t: 0 | 1) => <b style={{ color: tc(t) }}>{T[t].name}</b>;
@@ -559,8 +606,7 @@ function youLine(pub: Pub, me: Member, capName?: string) {
   if (capName) capName = iso(capName);
   const to = capName ? `send ideas to ${capName}` : "send ideas to your captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend." : "Double Dip: two answers on this one.") : `${T[pub.lifeline.team].name} are using a lifeline.`;
-  if (pub.pending) return pub.pending.team === mine ? "Answer sent. The other captain can change the call."
-    : cap ? `${them} answered. Your call below.` : `${them} answered. ${capName || "Your captain"} rules on it.`;
+  if (pub.pending) return pub.pending.team === mine ? "Answer sent. The app is checking it." : `${them} answered. The app is checking it.`;
   /* sent, with a host: locked in until the host rules */
   if (ours && pub.sent?.[mine] && pub.mode === "host") return cap ? "Sent. Waiting for the host." : "Your captain has answered. The host decides.";
   if (pub.screen === "steal") return ours ? (cap ? "They missed. Your steal, captain: type it below." : `They missed. Your steal: ${to}.`) : `You missed. ${them} can steal it now.`;
@@ -646,10 +692,9 @@ const NEXT_LABEL: Record<string, [string, string]> = {
   mapIntro: ["Start", "map/start"], auctionIntro: ["Start", "auction/begin"], sayIntro: ["Start", "say/start"], battleIntro: ["Start", "battle/start"],
   battleHandoff: ["Start the second half", "battle/start"], sayReveal: ["Next", "ui/next"], mapReveal: ["Next", "ui/next"], saySummary: ["Next", "say/done"], battleSummary: ["Next", "battle/done"],
   answer: ["Next", "round/afterAnswer"], roundScore: ["Next", "round/next"], closestReveal: ["Next", "ui/next"], flagReveal: ["Next", "ui/next"],
-  dishReveal: ["Next", "dish/next"], auctionLeg: ["Next", "auction/nextLeg"], auctionResult: ["Next", "auction/done"],
+  dishReveal: ["Next", "dish/next"], auctionLeg: ["Next", "auction/nextLeg"], auctionResult: ["Next", "auction/done"], battleReview: ["Settle the Battle", "battle/reviewDone"],
   miniSummary: ["Next", "closest/done"], flagSummary: ["Next", "flag/done"], dishSummary: ["Next", "dish/done"], mapSummary: ["Next", "map/done"],
 };
-function Countdown({ at }: { at: number }) { const s = useSecondsLeft(at); return <>{s}</>; }
 /* no host: whose tap the room is waiting for */
 function WaitingFor({ pub }: { pub: Pub }) {
   const label = pub.screen === "sudden" ? "Go" : NEXT_LABEL[pub.screen]?.[0] || "Next";
@@ -658,6 +703,8 @@ function WaitingFor({ pub }: { pub: Pub }) {
   return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Waiting for {who} to {TIE_SCREENS.includes(pub.screen) ? "choose: one more, or a point each" : pub.screen === DECIDED ? "choose: keep playing for fun, or stop here" : `tap ${/^Start/.test(label) ? "Start" : label}`}.</p>;
 }
 /* the screens a clock runs on, and so the ones a Pause makes sense on */
+/* where the app's calls are listed, and can be contested */
+const CALL_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "dishReveal", "battleReview"];
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"];
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
@@ -689,8 +736,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   useEffect(() => {
     const L = lastTap.current;
     if (!L || got === undefined) return;
-    const ack = { no: got || undefined };
     lastTap.current = null;                          // each receipt once
+    if (got === "+") return;                         // taken: the TV's view shows what came of it
+    const ack = { no: got === "-" ? undefined : got };
     /* taken: it shows as sent, it's waiting for its call, or the question has already moved on (a right answer) */
     const mineIn = !!pub.sent?.[mine] || pub.pending?.team === mine || `${pub.qid}|${sc}` !== L.q;
     if (L.kind === "answer" && !mineIn) { setSentTxt(null); setNo(ack.no || "The TV didn't take that answer. Send it again."); }
@@ -744,23 +792,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {no && <p className="text-center text-14 font-bold enter" role="alert" style={{ color: "var(--color-gold)" }}>{no}</p>}
       <Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} />
 
-      {/* no host: what was sent, the app's call, and (the other captain) RIGHT or WRONG */}
-      {pub.pending && (pub.pending.team === mine ? (
-        <div className="text-center flex flex-col gap-1" role="status"><div className="eyebrow">You sent</div><div className="display text-30">{pub.pending.text}</div>
-          <div className="font-bold text-15">The app says <Verdict v={pub.pending.v} /></div>
-          <div className="text-13 text-[var(--color-ink-2)]">{T[theirs].name} can still give it to you · <Countdown at={pub.pending.until} /></div></div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <div className="text-center">
-            <div className="eyebrow" style={{ color: tc(theirs) }}>{T[theirs].name} said</div>
-            <div className="display text-30">{pub.pending.text}</div>
-          </div>
-          <RulingPicker value={pub.pending.v} app={pub.pending.v} busy={busy} label={`Rule on ${T[theirs].name}’s answer`} onPick={(v) => void nxt({ type: "ui/rule", v })} />
-          <p className="text-center text-13 text-[var(--color-ink-3)]">The app says WRONG. If it&rsquo;s actually right, tap RIGHT to give it to them. Tap nothing and it stays wrong in <Countdown at={pub.pending.until} />s.</p>
-        </div>))}
-
-      {!pub.pending && <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} />}
-      {!pub.pending && <Result pub={pub} mine={mine} />}
+            <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} />
+      <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} />
+      {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
+      {CALL_SCREENS.includes(sc) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
 
 
       {/* no host, Call a Friend: the calling captain closes the card */}
@@ -819,29 +854,6 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <Counter A={A} fire={fire} h={92} fs={44} />
         </div>)}
 
-      {/* no host: each captain referees the other team's flag, word and map, and can change the call until Next */}
-      {nohost && (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal") && pub.reveal && (
-        <div className="flex flex-col gap-2">
-          <div className="eyebrow text-center" style={{ color: tc(theirs) }}>Your call on {T[theirs].name}&rsquo;s answer{sc === "mapReveal" ? ": the idea counts, not the exact words" : ""}</div>
-          {/* the app's RIGHT (DODGED IT) stands; only its WRONG can be given */}
-          {sc !== "mapReveal" && pub.reveal.app?.[theirs] !== false
-            ? <p className="text-center text-14 text-[var(--color-ink-2)]">The app says <Verdict v={pub.reveal.app?.[theirs]} say={sc === "sayReveal"} />. That stands.</p>
-            : <RulingPicker say={sc === "sayReveal"} value={pub.reveal.ok?.[theirs]} app={pub.reveal.app?.[theirs]} busy={busy} label={`Rule on ${T[theirs].name}’s answer`}
-              onPick={(v) => void nxt(sc === "mapReveal" ? { type: "ui/mapRule", v } : { type: sc === "flagReveal" ? "ui/flagOk" : "ui/sayOk", t: theirs, v })} />}
-        </div>)}
-      {/* no host, after the steal: a small appeal for the first team, and the other captain's answer to it */}
-      {nohost && sc === "answer" && pub.appealable === mine && (
-        <button className="self-center text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" disabled={busy}
-          onClick={() => void nxt({ type: "ui/appeal" })}>We were right: appeal</button>)}
-      {nohost && sc === "answer" && pub.appeal && pub.appeal.team !== mine && (
-        <div className="card flex flex-col gap-2 text-center" role="alert">
-          <div className="text-14"><b style={{ color: tc(pub.appeal.team) }}>{T[pub.appeal.team].name}</b> say &ldquo;{pub.appeal.text}&rdquo; was right. Agree?</div>
-          <div className="flex gap-2 justify-center">
-            <button className="btn btn-sm" disabled={busy} onClick={() => void nxt({ type: "ui/appealOk", v: true })}>Agree, give it</button>
-            <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => void nxt({ type: "ui/appealOk", v: false })}>No</button>
-          </div>
-        </div>)}
-      {nohost && sc === "answer" && pub.appeal && pub.appeal.team === mine && <p className="text-center text-13 text-[var(--color-ink-3)]">Appeal sent. Waiting for {T[theirs].name}&rsquo;s captain.</p>}
       {/* the end of the night, no host: either captain sends everyone home */}
       {nohost && sc === "final" && (<>
         <button className="btn btn-gold btn-lg btn-block mt-auto" disabled={busy} onClick={() => void nxt({ type: "ui/again" })}>Play again: same teams</button>

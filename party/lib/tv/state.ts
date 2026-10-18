@@ -11,7 +11,10 @@ export const newState = () => ({
   g: null as G, nohost: false, screen: "", step: 0, deadline: null as number | null, left: 0, timeUp: false, total: 0,
   lifeline: null as Pub["lifeline"], toast: null as Pub["toast"], toastN: 0, bank: null as Bank | null,
   decided: null as null | { key: MiniKey; winner: 0 | 1; spare: number },   // the "decided" screen: which mini-game
-  appeal: null as null | { team: 0 | 1; text: string },                      // no host: an appeal waiting for the other captain
+  /* a call being contested (an answer card, a reveal, the Battle review): the other captain (or the host) decides */
+  contest: null as null | { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number },
+  contested: [] as string[],                       // calls on this screen already looked at (once each)
+  legLog: [] as { team: 0 | 1; text: string; ok: boolean }[],   // Guess the Cocktail or Dish: this leg's answers, in order, with their calls
   offList: [false, false] as Two<boolean>,                                   // Say the Same: not a real answer to the prompt
   qkeys: {} as Record<string, number>,                                        // real question id → the number the phones see
   scoreLog: [] as Two<number>[],                                              // the score after every change (lead changes, for the recap)
@@ -21,7 +24,7 @@ export const newState = () => ({
   app: [null, null] as Two<boolean | null>,          // ...and what the app said first (the "App suggests" tag)
   sdBuzz: null as 0 | 1 | null, sdOut: [false, false] as Two<boolean>,
   pending: null as null | { kind: PKind; team: 0 | 1; text: string; v: boolean; until: number },
-  autoAt: null as number | null,                     // no host: when an unruled map answer stands as right
+  autoAt: null as number | null,                     // (games saved before contests: when an unruled map answer stood as right)
   paused: false,                                     // the clock stopped by a Pause (the question hides meanwhile)
   bids: { leg: -1, by: [null, null] as Two<number | null> },   // the Auction: each captain's latest bid this leg
   waitSince: 0,                                      // no host: when this screen started waiting for a Start or Next

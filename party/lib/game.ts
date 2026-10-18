@@ -28,8 +28,10 @@ export type Pub = {
   mini?: { key: MiniKey; title: string; leg: number; of: number; wins: Two<number>; pts: number; kinds?: string; tie?: boolean; fun?: boolean };
   /* a mini-game won with legs to spare: keep playing for fun, or stop here (screen "decided") */
   decided?: { key: MiniKey; title: string; winner: 0 | 1; spare: number; pts: number };
-  /* no host, after the steal: the team that may still appeal ("we were right"), and an appeal waiting on the other captain */
-  appealable?: 0 | 1; appeal?: { team: 0 | 1; text: string } | null;
+  /* the app's calls on this screen (answer card, reveals, Battle review), and one being contested:
+     with no host the other captain agrees or not before `until` (then the call stands); with a host, the host decides */
+  calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string }[];
+  contest?: { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number } | null;
   /* with a host: what the captain typed (never the answer), so the host's phone shows it the moment it lands */
   said?: Two<string[] | null>;
   /* pictures coming up next (flags under their public/fx names, map ids), fetched ahead so they show at once */
@@ -65,7 +67,7 @@ export type Pub = {
   nextOther?: string | null; // that other captain
   imad?: { id: number; text: string };   // Imad's latest line (text only)
   at?: number;               // the TV's clock when this was published (phones correct their own clock with it)
-  /* per phone, its last few taps the TV has dealt with (tag → why it wasn't taken, "" if it was):
+  /* per phone, its last few taps the TV has dealt with (tag → "+" taken, else why not, "-" if nothing to say):
      a few, not one, as two quick taps can reach the TV the other way round */
   ack?: Record<string, Record<string, string>>;
   tvAway?: boolean;          // the TV's screen is asleep or hidden: everything is paused until it's back
@@ -85,7 +87,8 @@ export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins"
 export const T_CLOSEST = 60, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30;
 export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
 /* no host: the other captain has this long to give a point the app called WRONG (a RIGHT always stands) */
-export const T_OVERRULE = 8, T_SUDDEN_BUZZ = 30, T_MAP_RULE = 30;
+/* T_OVERRULE: no host, how long a captain has to answer the other captain's contest before the app's call stands */
+export const T_OVERRULE = 15, T_SUDDEN_BUZZ = 30, T_MAP_RULE = 30;
 /* the Battle is rapid fire: a shorter window there (the other captain can still confirm at once) */
 export const T_OVERRULE_BATTLE = 8;
 /* no host: if the lead captain hasn't tapped Next after this long, the other captain can */

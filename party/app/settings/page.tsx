@@ -15,7 +15,7 @@ const STANDARD_TIMERS: Timer[] = [
   ["tQuestion", "Main question", [15, 30, 45, 60, 75, 90, 120]],
   ["tSteal", "Steal", [10, 15, 20, 30, 45, 60]],
   ["tFriend", "Call a Friend", [20, 30, 45, 60, 90]],
-  ["tContest", "Captain's call on an answer", [5, 10, 15, 20, 30], "No host: how long the other captain has to change the app's RIGHT or WRONG."],
+  ["tContest", "Answering a contest", [10, 15, 20, 30], "No host: how long a captain has to answer the other captain's contest before the app's call stands."],
   ["tSudden", "Sudden death: time to buzz", [15, 20, 30, 45, 60], "No host: also the Battle's tie-breaker question."],
 ];
 const MINI_TIMERS: Timer[] = [

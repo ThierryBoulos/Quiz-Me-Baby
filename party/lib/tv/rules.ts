@@ -1,7 +1,7 @@
 /* The rules the TV checks every tap against: which moves a host or a captain may
    send, and on which screen; and the small pure helpers the TV's hook uses. */
 import { getSettings } from "../settings";
-import { DECIDED, DISH_LAST, TIE_SCREENS, T_OVERRULE_BATTLE, type MiniKey } from "../game";
+import { DECIDED, DISH_LAST, TIE_SCREENS, type MiniKey } from "../game";
 
 /* the house timers come from Settings on this TV */
 export const T = () => getSettings();
@@ -11,6 +11,10 @@ export type G = any;
 export type W = 0 | 1 | "tie" | "none";
 export type PKind = "ask" | "steal" | "dish" | "sudden" | "battle" | "battleTie";
 export type Where = string | string[];
+/* the screens where the app's calls are shown, and can be contested */
+export const CONTEST_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "dishReveal", "battleReview"];
+/* the taps that move the night on from those screens (held while a contest is open) */
+export const NEXT_MOVES = new Set(["round/afterAnswer", "ui/next", "dish/next", "battle/reviewDone"]);
 export const inScreen = (where: Where, sc: string) => where === "*" || (Array.isArray(where) ? where : [where]).includes(sc);
 
 /* Moves the host's phone may send, and the screen each one belongs to.
@@ -30,6 +34,8 @@ export const HOST_MOVES: Record<string, Where> = {
   "say/start": "sayIntro", "say/swap": "sayQ", "say/award": "saySummary", "say/done": "saySummary",
   "battle/start": ["battleIntro", "battleHandoff"], "battle/mark": "battleQ", "battle/swap": "battleQ", "battle/tbSwap": "battleTie", "battle/tbWin": "battleTie", "battle/done": "battleSummary",
   "ui/sayOk": "sayReveal",
+  /* the host decides a captain's contest (v: change the call), and can change any call on these screens */
+  "ui/contestOk": CONTEST_SCREENS, "ui/flip": CONTEST_SCREENS, "battle/reviewDone": "battleReview",
   "ui/closeLifeline": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"],
   "ui/reveal": ["miniQ", "flagQ", "mapQ", "sayQ"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal"],
   "ui/sdRight": ["sudden", "battleTie"], "ui/sdWrong": ["sudden", "battleTie"],
@@ -61,7 +67,6 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   "battle/start": { where: ["battleIntro", "battleHandoff"], who: "lead", nohostOnly: true },
   "say/done": { where: "saySummary", who: "lead", nohostOnly: true },
   "battle/done": { where: "battleSummary", who: "lead", nohostOnly: true },
-  "ui/sayOk": { where: "sayReveal", who: "other", nohostOnly: true },
   "round/afterAnswer": { where: "answer", who: "lead", nohostOnly: true },
   "round/next": { where: "roundScore", who: "lead", nohostOnly: true },
   "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal", "mapReveal"], who: "lead", nohostOnly: true },
@@ -74,13 +79,11 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   "map/done": { where: "mapSummary", who: "lead", nohostOnly: true },
   "ui/pause": { where: ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"], who: "any", nohostOnly: true },
   "ui/closeLifeline": { where: "*", who: "turn", nohostOnly: true },
-  /* the other captain's call on what was sent: v is RIGHT (true) or WRONG; the app's own call is pre-selected */
-  "ui/rule": { where: ["ask", "steal", "dishQ", "sudden", "battleQ", "battleTie"], who: "other", nohostOnly: true },
-  /* after the steal: the first team says it was right, once; the other captain agrees or not */
-  "ui/appeal": { where: "answer", who: "any", nohostOnly: true },
-  "ui/appealOk": { where: "answer", who: "any", nohostOnly: true },
-  "ui/flagOk": { where: "flagReveal", who: "other", nohostOnly: true },
-  "ui/mapRule": { where: "mapReveal", who: "other", nohostOnly: true },
+  /* The app's calls stand unless contested: either captain contests one (host or not); with no host
+     the other captain agrees or not (the app's call stands after a while); with a host, the host decides */
+  "ui/contest": { where: CONTEST_SCREENS, who: "any" },
+  "ui/contestOk": { where: CONTEST_SCREENS, who: "any", nohostOnly: true },
+  "battle/reviewDone": { where: "battleReview", who: "lead", nohostOnly: true },
   "auction/tick": { where: "auctionRun", who: "other", nohostOnly: true },
   "auction/untick": { where: "auctionRun", who: "other", nohostOnly: true },
   "ui/exit": { where: "final", who: "any", nohostOnly: true },
@@ -95,9 +98,9 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
    right or wrong, pausing. They skip the stale-tap check (and don't bump the
    step): a host tapping +1 five times fast must get five, and a tap on
    "Next" straight after marking a team must not be refused as stale. */
-export const SAME_SCREEN = new Set(["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/mapRule", "ui/sayOk", "ui/pause", "ui/pauseFriend", "ui/appeal", "ui/appealOk"]);
+export const SAME_SCREEN = new Set(["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/pause", "ui/pauseFriend", "ui/contest", "ui/contestOk", "ui/flip"]);
 /* no host: the screens that wait for the lead captain's Start or Next (nothing moves on by itself) */
-export const WAITS_FOR_NEXT = new Set(["roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "battleIntro", "battleHandoff",
+export const WAITS_FOR_NEXT = new Set(["battleReview", "roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "battleIntro", "battleHandoff",
   "answer", "roundScore", "closestReveal", "flagReveal", "mapReveal", "sayReveal", "dishReveal", "auctionLeg", "auctionResult",
   "miniSummary", "flagSummary", "dishSummary", "mapSummary", "saySummary", "battleSummary", "sudden", DECIDED, ...TIE_SCREENS]);
 export const other = (t: 0 | 1) => (t === 0 ? 1 : 0) as 0 | 1;
@@ -109,8 +112,6 @@ export const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dis
 export const serverMs = (x: string) => Date.parse(String(x || "").replace(" ", "T").replace(/(\.\d{3})\d+/, "$1").replace(/([+-]\d\d)$/, "$1:00"));
 export const dishKind = (q: G) => ((q?.level || "")[0] === "c" ? "Cocktail" : "Dish");
 export const dishTotal = (q: G) => (q.ings.length - 1) * T().tDishStep + DISH_LAST;
-/* how long the other captain has to change the app's call: the Battle is rapid fire, so never more than 8 s there */
-export const contestSecs = (battle: boolean) => (battle ? Math.min(T().tContest, T_OVERRULE_BATTLE) : T().tContest);
 export const miniOf = (sc: string): MiniKey | null => /^(mini|closest)/.test(sc) ? "closest" : /^flag/.test(sc) ? "flag" : /^dish/.test(sc) ? "dish"
   : /^map/.test(sc) ? "map" : /^auction/.test(sc) ? "auction" : /^say/.test(sc) ? "saysame" : /^battle/.test(sc) ? "battle" : null;
 /* the engine's move prefix for each mini-game */

@@ -46,7 +46,7 @@ export function Rules() {
         <L items={[
           <><B>Two teams</B>, as many players each as you like. One screen everyone can see is the TV: tap <B>Create game</B> on it. Everyone else joins on their phone with the code or the QR.</>,
           <>Each team picks a <B>captain</B> on their phone. The captain gives the final answer. Nobody else. If the captain hasn&rsquo;t sent it, it hasn&rsquo;t been said.</>,
-          <>Want a host? One person taps <B>I&rsquo;m the host</B>. They see every answer and rule on it. No host? The app checks the answers and the captains referee each other.</>,
+          <>Want a host? One person taps <B>I&rsquo;m the host</B>. They see every answer and rule on it. No host? The app checks the answers, and the captains can contest its calls.</>,
           <>Settle who goes first by chance, not by argument. Coin toss, rock paper scissors, anything, as long as it&rsquo;s luck. The winner chooses Team A, who answers first, or Team B, who gets the first steal. (Settings can make the teams take turns going first.)</>,
           <>Phones are for the game only. No searching, no asking anyone outside the room.</>,
           <>Between <B>4 and 12</B> standard rounds, one theme each, plus however many mini-games are on the card. Or switch the standard rounds off in Setup for a night of nothing but mini-games, back to back.</>,
@@ -56,8 +56,8 @@ export function Rules() {
       <Rule n="02" title="A standard round">
         <L items={[
           <>One theme per round. One question for each team, always the same kind of question at the same difficulty.</>,
-          <>Team A gets their question: <B>60 seconds</B>. The team sends suggestions to the captain; the captain types the answer and sends it. <B>One go:</B> once it&rsquo;s sent it&rsquo;s locked, no changing it and no lifeline after it.</>,
-          <>Wrong or out of time? Team B can steal it: <B>30 seconds</B>, no lifelines on a steal.</>,
+          <>Team A gets their question: <B>45 seconds</B>. The team sends suggestions to the captain; the captain types the answer and sends it. <B>One go:</B> once it&rsquo;s sent it&rsquo;s locked, no changing it and no lifeline after it.</>,
+          <>Wrong or out of time? Team B can steal it: <B>20 seconds</B>, no lifelines on a steal. With no host the app checks at once, no waiting; after the steal the answer card shows both calls, and either captain can <B>contest</B> one (see The phones).</>,
           <>The answer stays hidden until the question is finished, so a stealing team can never read it off a screen.</>,
           <>Then Team B gets their own question, with Team A stealing. One point per correct answer, whoever gets it.</>,
         ]} />
@@ -104,14 +104,14 @@ export function Rules() {
           <>A prompt: &ldquo;Name a cheese.&rdquo; <B>20 seconds</B> for both captains to type an answer, hidden from each other.</>,
           <>The app already has a word in mind, usually one people say a lot. Matching each other is fine; only matching the app costs you.</>,
           <>Your answer has to be a real one: something on the app&rsquo;s list for that prompt (typos are fine). Anything else (&ldquo;zzzz&rdquo;) counts as SAID IT.</>,
-          <>Dodged it while the other team didn&rsquo;t? You take the leg. Both dodged, or both said it? A point each. The host rules; with no host, the other captain can give you a fair answer the list missed. Best of 7.</>,
+          <>Dodged it while the other team didn&rsquo;t? You take the leg. Both dodged, or both said it? A point each. The app checks; a call it got wrong (a fair answer the list missed) can be contested on the reveal. Best of 7.</>,
         ]} />
       </Rule>
 
       <Rule n="08" title="Guess the Map">
         <L items={[
           <>A map goes up, no title, on the TV and every phone: <B>60 seconds</B>. Tap <B>Enlarge</B> to see it full screen, then tap, pinch or drag to zoom in. Both captains type what it shows.</>,
-          <>The idea counts, not the exact wording. The host rules RIGHT or WRONG; with no host, each captain rules on the other team&rsquo;s answer.</>,
+          <>The idea counts, not the exact wording: the app accepts the map&rsquo;s title and its short forms (&ldquo;Landlocked&rdquo;, &ldquo;Vikings&rdquo;). One it missed? Contest it on the reveal.</>,
           <>With a host, one hint per map (the host&rsquo;s button): the map&rsquo;s subject. Best of 3.</>,
         ]} />
       </Rule>
@@ -119,7 +119,7 @@ export function Rules() {
       <Rule n="09" title="Guess the Flag">
         <L items={[
           <>A flag goes up: <B>15 seconds</B>. Both captains type the country, no list of names to pick from.</>,
-          <>The app checks them. The host can change the call; with no host, the app&rsquo;s RIGHT stands and the other captain can only give one it called WRONG. Both right is a point each. Best of 10.</>,
+          <>The app checks them; a call it got wrong can be contested on the reveal. Both right is a point each. Best of 10.</>,
         ]} />
       </Rule>
 
@@ -127,6 +127,7 @@ export function Rules() {
         <L items={[
           <>The ingredients come up one at a time, a new one every <B>3 seconds</B>, the giveaway last.</>,
           <>Know it? Captain, hit <B>BUZZ</B>. The first buzz answers, and has <B>10 seconds</B> to type it. Wrong or out of time, and you&rsquo;re out of that one; the list keeps coming for the other team.</>,
+          <>The app checks at once; the reveal lists every answer, and a call can be contested there. A winning answer turned WRONG when the other team never had its go: a new one, for both.</>,
           <>Best of 5.</>,
         ]} />
       </Rule>
@@ -135,6 +136,7 @@ export function Rules() {
         <L items={[
           <>Captains only. The room says nothing, and that means nothing.</>,
           <>Ten questions each, one captain at a time: <B>7 seconds</B> a shot out loud with a host, or <B>15 seconds</B> typed with no host. The TV shows each answer once it&rsquo;s settled.</>,
+          <>With no host the app checks each answer at once; at the end, the <B>review</B> lists every call, and either captain can contest before the Battle is settled.</>,
           <>Best score wins, and it&rsquo;s worth double. At halftime the TV says what the second captain needs. It always runs last.</>,
         ]} />
       </Rule>
@@ -149,10 +151,10 @@ export function Rules() {
       <Rule n="13" title="The phones">
         <L items={[
           <><B>The TV</B> is the show: questions, clocks, scores, reveals. It never shows an answer early.</>,
-          <><B>The host&rsquo;s phone</B> shows the answer and what the captain typed. Once the team has answered, two buttons, <B>RIGHT</B> and <B>WRONG</B>: the app&rsquo;s call is already picked (&ldquo;App suggests&rdquo;), and the other button changes it.</>,
+          <><B>The host&rsquo;s phone</B> shows the answer and what the captain typed. Once the team has answered, two buttons, <B>RIGHT</B> and <B>WRONG</B>: the app&rsquo;s call is already picked (&ldquo;App suggests&rdquo;), and the other button changes it. When a captain contests a call, <B>the host decides</B>, and can change any call until Next.</>,
           <><B>The captain&rsquo;s phone</B> sends the answers, the bids, the buzzes and the lifelines.</>,
           <><B>Everyone else</B> sees the question and can send the captain a suggestion.</>,
-          <><B>No host?</B> The app checks every answer, and its <B>RIGHT stands</B>: nobody can take it away. When it says WRONG, the other captain has <B>8 seconds</B> to give it to you anyway (a typo the app missed). Steal with the very answer the first team gave, and the point goes back to them. Think the app got yours wrong after the steal? Tap the small <B>appeal</B> once; the point is yours if the other captain agrees. Team A&rsquo;s captain taps Start and Next to move the night on (the other captain can, after a while).</>,
+          <><B>No host?</B> The app checks every answer at once. Where its calls are shown (the answer card after the steal, the reveals, the Battle review), either captain can tap <B>Contest</B> on one; the other captain agrees or not, and with no answer in <B>15 seconds</B> the app&rsquo;s call stands. One at a time, each call once, and Next waits for it. A RIGHT turned WRONG with no steal played gives the other team a steal on a new question. Steal with the very answer the first team gave, and the point goes back to them. Team A&rsquo;s captain taps Start and Next to move the night on (the other captain can, after a while).</>,
           <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question (another app, a search), or tries to paste an answer, is flagged on the TV, and the host sees the list.</>,
           <>Phone died, in the lobby or during the game? Join again with the same name and tap &ldquo;take my seat back&rdquo;. A screen left open through an update refreshes itself between questions, and the night carries on.</>,
         ]} />

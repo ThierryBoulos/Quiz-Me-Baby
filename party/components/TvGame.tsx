@@ -42,14 +42,13 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
           <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
           <div className="eyebrow text-18">The answer</div>
           <div className="display" style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
-          {[0, 1].map((t) => pub.result?.typed?.[t] ? <div key={t} className="text-24"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name} said:</b> {pub.result.typed[t]!.join(" / ")}</div>
-            : silent(pub, t as 0 | 1) ? <div key={t} className="text-24 text-[var(--color-ink-2)]"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {silent(pub, t as 0 | 1)}</div> : null)}
+          {/* what each team said, and the app's call on it (contestable until Next) */}
+          {(pub.calls || []).map((c) => <div key={c.id} className="text-24 flex items-baseline gap-3 justify-center"><b style={{ color: tc(c.team) }}>{T[c.team].name}{c.note === "steal" ? " (steal)" : c.note ? ` (${c.note})` : ""}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={20} /></div>)}
+          {[0, 1].map((t) => !(pub.calls || []).some((c) => c.team === t) && silent(pub, t as 0 | 1) ? <div key={t} className="text-24 text-[var(--color-ink-2)]"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {silent(pub, t as 0 | 1)}</div> : null)}
           {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px]">{pub.result.notes}</div>}
           <div className="display text-44" style={{ color: pub.result.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>
             {pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? " — stolen!" : ""}`}
           </div>
-          {pub.appeal && <div className="chip enter" style={{ fontSize: 24, padding: "12px 26px" }} role="status">
-            <b style={{ color: tc(pub.appeal.team) }}>{T[pub.appeal.team].name}</b>&nbsp;appeal: &ldquo;{pub.appeal.text}&rdquo; was right. {pub.captains?.[pub.appeal.team === 0 ? 1 : 0] || "The other captain"} decides.</div>}
         </>)}
 
         {pub.screen === "roundScore" && (<>
@@ -72,6 +71,7 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
         </>))}
 
         <TvMini pub={pub} />
+        {pub.contest && <ContestBanner pub={pub} />}
 
         {pub.screen === "final" && (<>
           <Confetti n={140} />
@@ -113,8 +113,7 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
             <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div>
           </div>
         </div>)}
-      {pub.pending && <Pending pub={pub} />}
-      {pub.nextBy && !pub.pending && <NextHint pub={pub} />}
+      {pub.nextBy && !pub.contest && <NextHint pub={pub} />}
       <AwayFlags pub={pub} />
       <ImadBubble imad={pub.imad} />
       {pub.toast && shown === pub.toast.id && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" role="status" aria-live="polite" style={{ fontSize: 24, padding: "12px 28px" }}>{pub.toast.text}</div>}
@@ -192,7 +191,7 @@ function TvMini({ pub }: { pub: Pub }) {
             <Buzzed pub={pub} />
           </>) : (<>
             <div className="display" style={{ fontSize: 76, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
-            {[0, 1].map((t) => pub.reveal?.typed?.[t] ? <div key={t} className="text-22"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {pub.reveal.typed[t]![0]}</div> : null)}
+            {(pub.calls || []).map((c) => <div key={c.id} className="text-22 flex items-baseline gap-2"><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={18} /></div>)}
             <div className="display text-36" style={{ color: tc(pub.reveal?.w === 0 || pub.reveal?.w === 1 ? pub.reveal.w : null) }}>
               {pub.reveal?.w === 0 || pub.reveal?.w === 1 ? `${T[pub.reveal.w].name} got it` : "Nobody got it"}</div>
           </>)}
@@ -285,6 +284,15 @@ function TvMini({ pub }: { pub: Pub }) {
     <Buzzed pub={pub} />
     {pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} prev />}
   </>);
+  if (pub.battle && sc === "battleReview") { const B = pub.battle, calls = pub.calls || []; return (<>
+    <div className="eyebrow text-20">Battle of the Captains · captains, contest any call on your phone, then settle it</div>
+    <div className="display text-52"><span style={{ color: tc(0) }}>{B.score[0]}</span> – <span style={{ color: tc(1) }}>{B.score[1]}</span></div>
+    <div className="flex gap-16 text-left">{([0, 1] as const).map((t) => (
+      <div key={t} className="flex flex-col gap-1 min-w-[420px]">
+        <div className="display text-28" style={{ color: tc(t) }}>{T[t].name}</div>
+        {calls.filter((c) => c.team === t).map((c) => <div key={c.id} className="text-20 flex items-baseline gap-3"><span className="text-[var(--color-ink-3)] w-6">{c.note}</span><span className="flex-1 truncate">{c.text || "no answer"}</span><Verdict v={c.ok} size={16} /></div>)}
+      </div>))}</div>
+  </>); }
   if (pub.battle && sc === "battleSummary") { const B = pub.battle; return (<>
     {B.last && <BattleAnswer last={B.last} size={24} />}
     <div className="eyebrow text-20">Battle of the Captains</div>
@@ -313,7 +321,7 @@ function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: 
       <div key={t} className="flex flex-col items-center gap-1 min-w-0">
         <div className="flex items-baseline gap-3 whitespace-nowrap" style={{ fontSize: small ? 22 : 30 }}>
           <span className="display" style={{ color: tc(t) }}>{T[t].name}</span>
-          {ok == null ? <span className="text-[var(--color-ink-3)] font-bold" style={{ fontSize: "0.7em" }}>{pub.mode === "nohost" ? `${T[t === 0 ? 1 : 0].name} rules` : "The host rules"}</span> : <Verdict v={ok} say={say} />}
+          {ok == null ? null : <Verdict v={ok} say={say} />}
         </div>
         <div className="font-bold" style={{ fontSize: small ? 20 : 28, color: x ? undefined : "var(--color-ink-3)" }}>{x ?? empty}</div>
         {say && pub.reveal?.offList?.[t] && !ok && <div className="text-[var(--color-ink-2)]" style={{ fontSize: small ? 16 : 20 }}>Not on the list</div>}
@@ -321,18 +329,15 @@ function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: 
     </div>);
 }
 
-/* no host: what the captain sent, the app's verdict, and the other captain's window to change the call */
-function Pending({ pub }: { pub: Pub }) {
-  const T = pub.teams, P = pub.pending!, o = P.team === 0 ? 1 : 0;
-  const left = useSecondsLeft(P.until);
+/* a call being contested: who says what, and who decides (with no host, the time left before the app's call stands) */
+function ContestBanner({ pub }: { pub: Pub }) {
+  const T = pub.teams, K = pub.contest!, left = useSecondsLeft(K.until), nohost = pub.mode === "nohost";
+  const say = pub.screen === "sayReveal", word = (ok: boolean) => (say ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
+  const decider = nohost ? pub.captains?.[K.by === 0 ? 1 : 0] || "The other captain" : "The host";
   return (
-    <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.93)", zIndex: 15 }}>
-      <div className="text-center enter flex flex-col items-center gap-4">
-        <div className="eyebrow text-20">{T[P.team].name} said</div>
-        <div className="display" style={{ fontSize: 96, color: tc(P.team) }}>{P.text}</div>
-        <div className="display text-52">The app says <Verdict v={P.v} /></div>
-        <div className="text-24 text-[var(--color-ink-2)]"><bdi>{T[o].name}</bdi>&rsquo;s captain can give it to them · {left}</div>
-      </div>
+    <div className="card enter text-24 max-w-[1300px]" style={{ borderColor: "var(--color-gold)", position: "relative", zIndex: 26 }} role="status">
+      <div className="eyebrow text-16 mb-1" style={{ color: "var(--color-gold)" }}>Contested</div>
+      <b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>&rsquo;s </> : null}&ldquo;{K.text}&rdquo; was <b>{word(!K.ok)}</b>. <b>{decider}</b> decides{nohost ? <span className="text-[var(--color-ink-2)]"> · {left} s</span> : null}.
     </div>);
 }
 /* who left the game screen during this question, in red, bottom left, until the question changes */

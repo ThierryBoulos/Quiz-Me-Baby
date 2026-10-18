@@ -4,8 +4,8 @@ import { QMB, acceptFor } from "../engine";
 import { getSettings } from "../settings";
 import type { Member } from "../room";
 import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two } from "../game";
-import { WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
-import { closestW, currentQ, leadOf, matchQ, okWin, sayWin, seatOf } from "./reads";
+import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
+import { callsOf, closestW, currentQ, leadOf, matchQ, okWin, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
 import type { TvState } from "./state";
 
@@ -37,12 +37,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   { const L = s.scoreLog, now: Two<number> = [g.teams[0].score, g.teams[1].score], last = L[L.length - 1];
     if (!last || last[0] !== now[0] || last[1] !== now[1]) L.push(now); }
   if (s.screen === "final") p.recap = recap(s);
-  /* no host, the answer card: the first team can appeal once if its answer went down as wrong */
-  if (s.nohost && s.screen === "answer" && rd) {
-    const res = rd.res?.[g.seat];
-    p.appeal = s.appeal;
-    if (!s.appeal && res && !res.correct && !res.appealed && s.typed[owner]) p.appealable = owner;
-  }
+  /* the app's calls on this screen, and one being contested */
+  if (CONTEST_SCREENS.includes(s.screen)) { p.calls = callsOf(s); p.contest = s.contest; }
   /* the tracker: every round and mini-game of the night, in order (Classic's schedule/pipState) */
   const live = s.screen === DECIDED ? s.decided?.key ?? null : miniOf(s.screen);
   const sched: { kind: "std" | "mini"; i?: number; key?: string }[] = [];
