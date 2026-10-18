@@ -54,7 +54,7 @@ function answerNow(g, pub) {
   return null;
 }
 
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0 }) {
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0 }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed);
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -78,7 +78,18 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
 
   let tree;
   await act(async () => { tree = TestRenderer.create(<Tv />); await flush(); });
-  const send = (who, kind, payload) => fake.insert("actions", { room: CODE, user_id: who, kind, payload });
+  /* chaos: every tap carries a tag, as phones' do, and each must come back in the TV's receipts (pub.ack) */
+  const taps = [], tapN = { n: 0 };
+  const send = (who, kind, payload) => {
+    if (chaos) { const tap = "t" + (++tapN.n); const p0 = fake.db.rooms[0].state?.pub; taps.push({ tap, who, kind, payload, screen: p0?.screen, q: `${p0?.qid}|${p0?.screen}`, at: clock() }); payload = { ...payload, tap }; }
+    return fake.insert("actions", { room: CODE, user_id: who, kind, payload });
+  };
+  const checkAcks = () => {
+    const p0 = fake.db.rooms[0].state?.pub; if (!p0?.ack) return;
+    for (const t of taps) if (!t.done) { const a = p0.ack[t.who]; if (a && a.tap === t.tap) { t.done = clock(); t.no = a.no; t.sent = !!p0.sent?.[t.who === "capA" ? 0 : 1]; t.pend = p0.pending?.team === (t.who === "capA" ? 0 : 1); t.buzz = p0.buzz; t.after = p0.screen; t.moved = `${p0.qid}|${p0.screen}` !== t.q;
+      /* a phone only waits on its latest tap: older ones from it are settled too */
+      for (const o of taps) if (!o.done && o.who === t.who && Number(o.tap.slice(1)) < Number(t.tap.slice(1))) { o.done = clock(); o.superseded = true; } } }
+  };
   const tick = (ms) => act(async () => { await advance(ms); });
   await tick(1000);
   send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: THEMES.slice(0, rounds), minis } });
@@ -99,7 +110,18 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       await tick(2000);
     }
     const pub = fake.db.rooms[0].state?.pub, g = api.current?.game;
+    if (chaos) checkAcks();
     if (!pub || !g) continue;
+    /* chaos: now and then a captain taps something at the wrong moment */
+    if (chaos && bot() < chaos) {
+      const who = bot() < 0.5 ? "capA" : "capB", r = bot();
+      const MOVES = ["round/begin", "round/afterAnswer", "round/next", "ui/next", "ui/rule", "ui/appeal", "decided/stop", "tie/stop", "auction/pass", "auction/raise", "ui/pause", "flag/done", "closest/done", "battle/start", "sudden/go"];
+      /* only what a phone can send on this screen: a number on Closest, words elsewhere; BUZZ where there's a buzzer */
+      if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : { texts: ["Paris"] });
+      else if (r < 0.45) { if (["dishQ", "sudden", "battleTie"].includes(pub.screen)) send(who, "buzz", {}); }
+      else if (r < 0.6) send(who, "lifeline", { key: ["dbl", "friend", "dip"][Math.floor(bot() * 3)] });
+      else send(who, "next", { move: { type: MOVES[Math.floor(bot() * MOVES.length)], v: bot() < 0.5, n: 3 }, step: pub.step - (bot() < 0.3 ? 1 : 0) });
+    }
     /* the TV's screen goes to sleep during the sleep-th question; the captain answers meanwhile and
        the other captain taps Resume (the phones show the game as paused); then the TV wakes (18 Oct) */
     if (sleep && !host && sc0(pub) === "ask" && ++asks === sleep && !pub.sent?.[pub.turn]) {
@@ -173,5 +195,6 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   }
   await act(async () => { tree.unmount(); await flush(); });
   resetClock();
-  return { outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length };
+  checkAcks();
+  return { taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length };
 }
