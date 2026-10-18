@@ -684,7 +684,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* the receipt: this phone's tap is dealt with; if it wasn't taken the phone shows why and lets go of it */
     if (tap && s.g) {
       const no = refused.current || undefined;
-      s.ack = { ...s.ack, [a.user_id]: no ? { tap, no } : { tap } };
+      const mine = Object.entries(s.ack[a.user_id] || {}).filter(([k]) => k !== tap).slice(-4);
+      s.ack = { ...s.ack, [a.user_id]: Object.fromEntries([...mine, [tap, no || ""]]) };
       void publish();
     } else if (a.kind !== "count" && a.kind !== "suggest" && s.g && pubN.current === n) void publish();
   }, [handle, publish]);
@@ -903,6 +904,21 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.screen === "mapReveal") { s.ok = [s.ok[0] ?? true, s.ok[1] ?? true]; s.waitSince = now; }
       }
       if (now - here.current.checked > 2000) { here.current.checked = now; void handOver(); }
+      /* The Auction waits on a captain with no clock: one whose phone has been gone 20 s (and no
+         teammate to take the armband) passes after 30 s, or, with nothing bid yet, the other team opens */
+      if (s.screen === "auctionBid" && g.auction) {
+        const A = g.auction, key = `${A.leg}|${A.turn}|${A.bid}`;
+        if (s.bidTurn.key !== key) s.bidTurn = { key, at: now };
+        else if (now - s.bidTurn.at > 30000) {
+          const cap = ctx.current.members.find((m) => m.team === A.turn && m.role === "captain");
+          if (!cap || now - (here.current.at[cap.user_id] ?? here.current.since) > 20000) {
+            const t = A.turn as 0 | 1, name = iso(g.teams[t].name);
+            s.step++; changed = true;
+            if (A.bid > 0) { play({ type: "auction/pass" }); s.toast = { id: ++s.toastN, text: `${name}'s captain seems to be away, so ${name} pass.` }; }
+            else { A.turn = other(t); s.bidTurn = { key: "", at: now }; s.toast = { id: ++s.toastN, text: `${name}'s captain seems to be away, so ${iso(g.teams[other(t)].name)} open the bidding.` }; }
+          }
+        }
+      }
       /* away for two seconds during a question: flag it now (how long comes when they're back) */
       for (const [k, a] of Object.entries(here.current.away)) {
         if (!a.flag && now - a.at >= 3000) { a.flag = flag(k, a.qid, null) ?? -1; if (a.flag > 0) changed = true; }
