@@ -1090,12 +1090,13 @@
       /* back: the steal was the very answer the first team gave, so the point is theirs (Party, no host) */
       if(a.v && a.back){
         const p = pointValue(rd, owner);
-        rd.res[g.seat] = { correct:true, stolen:false, same:true };
+        rd.res[g.seat] = { correct:true, stolen:false, same:true, steal:true };
         rd.pts[owner] += p; award(g, owner, p, 'same answer as theirs', fx);
         fx.push({ go:'answer' });
         return fx;
       }
       rd.res[g.seat].stolen = a.v;
+      rd.res[g.seat].steal = true;
       if(a.v){
         const p = pointValue(rd, owner);
         fx.push({ host:['stolen'], vars:{ t:th } }, { shake:true });
@@ -1118,6 +1119,45 @@
       rd.pts[owner] += p; award(g, owner, p, 'appeal agreed', fx);
       fx.push({ render:true });
       return fx;
+    },
+    /* A call changed on the answer card (Party: both captains agreed, or the host decided).
+       line 'first' (the first team's answer) or 'steal'; v the new verdict. The score moves by
+       the difference only: what this question gave before, against what it gives now. */
+    'round/rule'(g, a, env){
+      const rd = g.rounds[g.r], res = rd.res[g.seat], fx = [];
+      if(!res) return fx;
+      const owner = seatTeam(g, rd, g.seat, env.settings), th = other(owner), p = pointValue(rd, owner);
+      const gives = (r) => { const out = [0, 0]; if(r.correct) out[owner] = p; else if(r.stolen) out[th] = p; return out; };
+      const before = gives(res);
+      if(a.line === 'first'){ res.correct = !!a.v; if(res.correct) res.stolen = false; }
+      else if(a.line === 'steal'){ if(!res.steal || res.correct) return fx; res.stolen = !!a.v; }
+      else return fx;
+      res.ruled = true;
+      const after = gives(res);
+      [0, 1].forEach(t => { const d = after[t] - before[t]; if(d){ rd.pts[t] += d; g.teams[t].score += d; } });
+      const won = after[0] ? 0 : after[1] ? 1 : null;
+      fx.push({ sound:won == null ? 'wrong' : 'point' });
+      fx.push({ toast:'Call changed: ' + (won == null ? 'nobody scores this one.' : g.teams[won].name + ' +' + p + (p === 1 ? ' point.' : ' points.')) });
+      fx.push({ render:true });
+      return fx;
+    },
+    /* The first team's RIGHT was turned into WRONG after all, with no steal played: the answer is
+       already on the screen, so the other team steals a new question from the same theme. */
+    'round/freshSteal'(g, a, env){
+      const D = env.deal, rd = g.rounds[g.r], seat = g.seat, res = rd.res[seat];
+      if(!res || res.correct || res.steal || res.fresh) return [];
+      const inUse = new Set();
+      g.rounds.forEach(r => r.q.forEach(q => inUse.add(q.id)));
+      g.mini.qs.forEach(q => inUse.add(q.id));
+      (rd.swapSeen || []).forEach(id => inUse.add(id));
+      const theme = (q) => q.type === 'standard' && q.theme === rd.theme && !inUse.has(q.id);
+      let list = D.bank().filter(q => theme(q) && D.matchDiff(q, D.diffOf(g.cfg, rd.theme)));
+      if(!list.length) list = D.bank().filter(theme);
+      if(!list.length) return [{ toast:'No other question left in ' + rd.theme + ', so nobody scores this one.' }, { render:true }];
+      const owner = seatTeam(g, rd, seat, env.settings), next = D.shuffle(list)[0];
+      res.fresh = { q:rd.q[seat] };
+      rd.q[seat] = next;
+      return [{ used:next }, { toast:g.teams[other(owner)].name + ' steal a new question.' }, { go:'steal' }];
     },
     /* after the answer card: the second team's question, or the round's score */
     'round/afterAnswer'(g){
@@ -1208,14 +1248,29 @@
     /* got: true | false */
     'battle/mark'(g, a, env){
       const b = g.battle, q = b.qs[b.cap][b.i], fx = [];
-      b.log[b.cap][b.i] = { q, got:a.got };
+      b.log[b.cap][b.i] = { q, got:a.got, said:a.said };
       if(a.got){ b.score[b.cap]++; fx.push({ sound:'correct' }); } else fx.push({ sound:'wrong' });
       fx.push({ used:q });
       b.shown = false;
       b.i++;
       if(b.i < b.n){ fx.push({ go:'battleQ' }); return fx; }
       if(b.cap === 0){ b.cap = 1; b.i = 0; fx.push({ go:'battleHandoff' }); return fx; }
+      /* Party, typed answers: every call can be looked at once more before the Battle is settled */
+      if(a.review){ b.stage = 'review'; fx.push({ go:'battleReview' }); return fx; }
       return battleFinish(g, env, fx);
+    },
+    /* a Battle call changed at the review: cap's i-th answer */
+    'battle/rule'(g, a){
+      const b = g.battle, e = b && b.log[a.cap] && b.log[a.cap][a.i];
+      if(!e || b.stage !== 'review' || e.got === !!a.got) return [];
+      e.got = !!a.got; b.score[a.cap] += e.got ? 1 : -1;
+      return [{ sound:e.got ? 'point' : 'wrong' }, { render:true }];
+    },
+    'battle/reviewDone'(g, a, env){
+      const b = g.battle;
+      if(!b || b.stage !== 'review') return [];
+      b.stage = 'play';
+      return battleFinish(g, env, []);
     },
     'battle/tbShow'(g){ g.battle.tb.shown = true; return [{ render:true }]; },
     'battle/tbSwap'(g, a, env){ return battleTieBreak(g, env, false, []); },
@@ -1461,6 +1516,26 @@
     /* out of time: with a host nobody scores it; without, the written answers are checked */
     'dish/timeUp'(g){ return g.hostless ? dishTurnOver(g, []) : dishEndLeg(g, 'none', []); },
     'dish/next'(g){ g.dishGame.i++; return dishAfterLeg(g, []); },
+    /* a call changed at the reveal (Party): w the leg's winner now, 0 | 1 | 'none' */
+    'dish/rule'(g, a){
+      const s = g.dishGame, sub = s.subs[s.subs.length - 1];
+      if(!sub || sub.winner === a.w) return [];
+      if(sub.winner === 0 || sub.winner === 1) s.wins[sub.winner]--;
+      sub.winner = a.w;
+      if(a.w === 0 || a.w === 1) s.wins[a.w]++;
+      return [{ toast:a.w === 0 || a.w === 1 ? 'Call changed: ' + g.teams[a.w].name + ' take it.' : 'Call changed: nobody takes it.' }, { render:true }];
+    },
+    /* the winning call was turned down and the other team never had its go: a new one, for both */
+    'dish/replay'(g){
+      const s = g.dishGame, sub = s.subs[s.subs.length - 1];
+      if(!sub) return [];
+      if(!s.spare.length) return MOVES['dish/rule'](g, { w:'none' });
+      s.subs.pop();
+      if(sub.winner === 0 || sub.winner === 1) s.wins[sub.winner]--;
+      s.qs[s.i] = s.spare.shift();
+      s.leg = freshLeg();
+      return [{ toast:'Call changed. A new one, for both teams.' }, { go:'dishQ' }];
+    },
     'dish/more'(g){
       const s = g.dishGame;
       if(!s.spare || !s.spare.length) return [{ toast:'Nothing left at these levels.' }];

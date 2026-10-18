@@ -365,3 +365,96 @@ test('appeal turned down: nothing changes', () => {
   assert.deepEqual([g.teams[0].score, g.teams[1].score], [0, 0]);
   assert.equal(g.rounds[0].res[0].appealed, true);
 });
+
+/* ---- contests (Party): a call changed on the answer card, the score moves by the difference ---- */
+test('contest: the first team\'s WRONG turned RIGHT after a steal scored: the point moves over', () => {
+  const { g, env } = roundGame();
+  Q.play(g, { type:'round/judge', v:false }, env);
+  Q.play(g, { type:'round/judgeSteal', v:true }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [0, 1]);
+  Q.play(g, { type:'round/rule', line:'first', v:true }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [1, 0]);
+  assert.deepEqual(g.rounds[0].pts, [1, 0]);
+  assert.equal(g.rounds[0].res[0].stolen, false);
+});
+test('contest: a steal turned RIGHT, then a steal turned WRONG', () => {
+  const { g, env } = roundGame();
+  Q.play(g, { type:'round/judge', v:false }, env);
+  Q.play(g, { type:'round/judgeSteal', v:false }, env);
+  Q.play(g, { type:'round/rule', line:'steal', v:true }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [0, 1]);
+  Q.play(g, { type:'round/rule', line:'steal', v:false }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [0, 0]);
+});
+test('contest: the first team\'s RIGHT turned WRONG with no steal played: a steal on a new question', () => {
+  const { g, env } = roundGame();
+  const first = g.rounds[0].q[0];
+  Q.play(g, { type:'round/judge', v:true }, env);
+  assert.equal(g.teams[0].score, 1);
+  Q.play(g, { type:'round/rule', line:'first', v:false }, env);
+  assert.equal(g.teams[0].score, 0);
+  const fx = Q.play(g, { type:'round/freshSteal' }, env);
+  assert.ok(types(fx).includes('go:steal'));
+  const q = g.rounds[0].q[0];
+  assert.notEqual(q.id, first.id);
+  assert.equal(q.theme, first.theme);
+  assert.ok(!g.rounds.some((r) => r.q.some((x, i) => x.id === q.id && !(r === g.rounds[0] && i === 0))), 'not a question already in the game');
+  Q.play(g, { type:'round/judgeSteal', v:true }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [0, 1]);
+  assert.deepEqual(Q.play(g, { type:'round/freshSteal' }, env), []);       // once per question
+});
+test('contest: no fresh steal once the steal has been played', () => {
+  const { g, env } = roundGame();
+  Q.play(g, { type:'round/judge', v:false }, env);
+  Q.play(g, { type:'round/judgeSteal', v:true, back:true }, env);     // same answer as theirs: the point went back
+  Q.play(g, { type:'round/rule', line:'first', v:false }, env);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [0, 0]);
+  assert.deepEqual(Q.play(g, { type:'round/freshSteal' }, env), []);
+});
+test('contest: double points moves as double', () => {
+  const bank = [];
+  ['Music', 'Movies'].forEach(t => { for(let i = 0; i < 8; i++) bank.push({ id:`${t}${i}`, type:'standard', theme:t, difficulty:'medium', use_with:`${t}${i >> 1}`, question:'Q', answer:'A' }); });
+  const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => false, ok:{ map:() => false, flag:() => false, dish:() => false } });
+  const g = D.buildGame({ rounds:2, themes:['Music', 'Movies'], difficulty:'medium', minis:[], teamA:{ name:'A' }, teamB:{ name:'B' } });
+  const env = { deal:D, settings:{} };
+  Q.play(g, { type:'game/start' }, env); Q.play(g, { type:'round/armDbl', i:0 }, env); Q.play(g, { type:'round/begin' }, env);
+  Q.play(g, { type:'round/judge', v:false }, env);
+  Q.play(g, { type:'round/judgeSteal', v:false }, env);
+  Q.play(g, { type:'round/rule', line:'first', v:true }, env);
+  assert.equal(g.teams[0].score, 2);
+});
+test('contest: dish leg winner changed, and a leg played again with a new dish', () => {
+  const g = game();
+  Q.play(g, { type:'dish/start' });
+  Q.play(g, { type:'dish/buzz', w:0 }); Q.play(g, { type:'dish/right' });
+  assert.deepEqual(g.dishGame.wins, [1, 0]);
+  Q.play(g, { type:'dish/rule', w:'none' });
+  assert.deepEqual(g.dishGame.wins, [0, 0]);
+  Q.play(g, { type:'dish/rule', w:1 });
+  assert.deepEqual(g.dishGame.wins, [0, 1]);
+  const before = g.dishGame.qs[g.dishGame.i].id, subs = g.dishGame.subs.length;
+  const fx = Q.play(g, { type:'dish/replay' });
+  assert.ok(types(fx).includes('go:dishQ'));
+  assert.deepEqual(g.dishGame.wins, [0, 0]);
+  assert.equal(g.dishGame.subs.length, subs - 1);
+  assert.notEqual(g.dishGame.qs[g.dishGame.i].id, before);
+});
+test('contest: the Battle stops for a review before it is settled; a changed call moves the score', () => {
+  const { g, env } = game3({ minis:['battle'] });
+  Q.play(g, { type:'battle/build' }, env);
+  let fx;
+  for(let cap = 0; cap < 2; cap++){
+    Q.play(g, { type:'battle/start' }, env);
+    for(let i = 0; i < g.battle.n; i++) fx = Q.play(g, { type:'battle/mark', got:i < 5, said:'x' + i, review:true }, env);
+  }
+  assert.ok(types(fx).includes('go:battleReview'));
+  assert.equal(g.battle.log[1][0].said, 'x0');
+  Q.play(g, { type:'battle/rule', cap:0, i:9, got:true }, env);       // A's last answer was right after all
+  assert.deepEqual(g.battle.score, [6, 5]);
+  Q.play(g, { type:'battle/rule', cap:0, i:9, got:true }, env);       // no change twice
+  assert.deepEqual(g.battle.score, [6, 5]);
+  fx = Q.play(g, { type:'battle/reviewDone' }, env);
+  assert.ok(types(fx).includes('go:battleSummary'));
+  assert.equal(g.battle.winner, 0);
+  assert.deepEqual(Q.play(g, { type:'battle/rule', cap:1, i:0, got:false }, env), []);   // only at the review
+});
