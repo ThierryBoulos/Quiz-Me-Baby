@@ -18,7 +18,7 @@ export type Settings = {
   imad: boolean;              // Imad comments on the game in a bubble on the TV (text only)
   flagAway: boolean;          // flag a phone that leaves the game screen during a question
 };
-export const DEFAULTS: Settings = { tQuestion: 45, tSteal: 20, tFriend: 30, tContest: T_OVERRULE, tSudden: T_SUDDEN_BUZZ,
+export const DEFAULTS: Settings = { tQuestion: 60, tSteal: 30, tFriend: 30, tContest: T_OVERRULE, tSudden: T_SUDDEN_BUZZ,
   tMini: T_CLOSEST, tFlag: T_FLAG, tMap: T_MAP, tSay: T_SAY, tAuction: T_AUCTION, tDishStep: DISH_STEP, tDishType: T_DISH_TYPE,
   tBattleHost: T_BATTLE_HOST, tBattleTyped: T_BATTLE_TYPED, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: true, flagAway: true };
 const KEY = "qmb.party.settings";
@@ -26,12 +26,15 @@ const KEY = "qmb.party.settings";
    A TV that saved its settings before keeps any timer it actually changed; one still on an old
    default moves to the new one, once. */
 const OLD_DEFAULTS: Partial<Settings> = { tQuestion: 60, tSteal: 30, tContest: 15, tMini: 90 };
-const VERSION = 2;
+/* ...and the question and the steal went back to 60 and 30 (18 Oct): a TV still on 45 / 20 moves back */
+const WAVE2_DEFAULTS: Partial<Settings> = { tQuestion: 45, tSteal: 20 };
+const VERSION = 3;
 export function getSettings(): Settings {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
     if (saved && (saved.v ?? 1) < VERSION) {
-      for (const [k, v] of Object.entries(OLD_DEFAULTS)) if (saved[k] === v) delete saved[k];
+      if ((saved.v ?? 1) < 2) for (const [k, v] of Object.entries(OLD_DEFAULTS)) if (saved[k] === v) delete saved[k];
+      for (const [k, v] of Object.entries(WAVE2_DEFAULTS)) if (saved[k] === v) delete saved[k];
       saved.v = VERSION;
       try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch { /* private mode */ }
     }
