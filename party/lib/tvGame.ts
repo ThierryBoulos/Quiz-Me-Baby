@@ -672,7 +672,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
 
   /* the inbox: every tap from the phones, in the order the server received it (lib/tv/useInbox.ts) */
   /* every tap gets a reply: one the TV ignored (a double tap, the second captain's Next) still sends the
-     view again, so that phone stops waiting instead of saying "The TV didn't get that" */
+     view again, so that phone stops waiting instead of saying the TV hasn't answered */
   const handleAndReply = useCallback(async (a: Action) => {
     const n = pubN.current;
     await handle(a);

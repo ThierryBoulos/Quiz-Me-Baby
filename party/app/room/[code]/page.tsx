@@ -32,23 +32,24 @@ export default function PhoneRoom() {
   /* Between a tap and the TV's reply (a second or two): a bar along the top,
      and the buttons stay off, so nobody taps twice wondering if it worked. */
   /* It lasts until the TV has actually answered (its next update), not until this phone's own refresh;
-     if nothing comes back in 4 s the phone says so, and a tap that couldn't even leave says so at once. */
+     if nothing comes back in 8 s the phone says so (and takes it back if the reply comes after all), and a tap that couldn't even leave says so at once. */
   const [waiting, setWaiting] = useState(false);
   const [tapErr, setTapErr] = useState<string | null>(null);
   /* where the failed tap was: the message sits just under that button (above it when the button is docked at the bottom) */
   const [tapAt, setTapAt] = useState<{ top?: number; bottom?: number } | null>(null);
   const lastBtn = useRef<Element | null>(null);
-  const waitRef = useRef({ on: false, key: "" }), viewKey = useRef(""), sendKey = useRef("");
+  const waitRef = useRef({ on: false, key: "" }), viewKey = useRef(""), sendKey = useRef(""), lateKey = useRef<string | null>(null);
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
     const stop = () => { clearTimeout(t); waitRef.current.on = false; setWaiting(false); };
     /* the TV's latest update just before the tap went: any newer one is its reply, even one that beat the send back */
     const sending = () => { sendKey.current = viewKey.current; };
     const on = () => {
-      clearTimeout(t); setTapErr(null);
+      clearTimeout(t); setTapErr(null); lateKey.current = null;
       if (viewKey.current !== sendKey.current) { stop(); return; }   // the reply is already here
       waitRef.current = { on: true, key: sendKey.current }; setWaiting(true);
-      t = setTimeout(() => { if (waitRef.current.on) { stop(); window.dispatchEvent(new Event("qmb:late")); setTapErr("The TV didn't get that. Tap again."); } }, 4000);
+      /* 8 s with no reply (slow Wi-Fi at a party): say so; a reply that comes after all takes the message away */
+      t = setTimeout(() => { if (waitRef.current.on) { const key = waitRef.current.key; stop(); lateKey.current = key; window.dispatchEvent(new Event("qmb:late")); setTapErr("The TV hasn't answered. If nothing changes, tap again."); } }, 8000);
     };
     const place = () => {
       const r = lastBtn.current?.isConnected ? lastBtn.current.getBoundingClientRect() : null;
@@ -150,6 +151,7 @@ export default function PhoneRoom() {
   viewKey.current = `${room?.status}|${pub?.at ?? ""}|${lobbyKey}`;
   useEffect(() => {
     if (waitRef.current.on && viewKey.current !== waitRef.current.key) { waitRef.current.on = false; setWaiting(false); setTapErr(null); }
+    if (lateKey.current != null && viewKey.current !== lateKey.current) { lateKey.current = null; setTapErr(null); }
   }, [room?.status, pub?.at, lobbyKey]);
   useEffect(() => { noteTvTime(pub?.at); }, [pub?.at]);
   /* an old copy of the app (left open across a deploy) reloads when nothing is being answered */
