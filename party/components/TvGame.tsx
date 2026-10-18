@@ -42,10 +42,11 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
           <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
           <div className="eyebrow text-18">The answer</div>
           <div className="display" style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
+          {/* the fun fact goes with the answer */}
+          {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2">{pub.result.notes}</div>}
           {/* what each team said, and the app's call on it (contestable until Next) */}
           {(pub.calls || []).map((c) => <div key={c.id} className="text-24 flex items-baseline gap-3 justify-center"><b style={{ color: tc(c.team) }}>{T[c.team].name}{c.note === "steal" ? " (steal)" : c.note ? ` (${c.note})` : ""}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={20} /></div>)}
           {[0, 1].map((t) => !(pub.calls || []).some((c) => c.team === t) && silent(pub, t as 0 | 1) ? <div key={t} className="text-24 text-[var(--color-ink-2)]"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {silent(pub, t as 0 | 1)}</div> : null)}
-          {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px]">{pub.result.notes}</div>}
           <div className="display text-44" style={{ color: pub.result.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>
             {pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? " — stolen!" : ""}`}
           </div>
