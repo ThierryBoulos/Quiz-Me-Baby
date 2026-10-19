@@ -52,7 +52,9 @@ let bad = 0;
 for (const n of NIGHTS) {
   if (only.length && !only.includes(n.seed)) continue;
   const t = performance.now();
-  const r = await (await load(n.seed))(n);
+  /* a clock never sits past zero with nothing happening (while the TV is on) */
+  const check = (p, now, vis) => (vis === "visible" && p.deadline && !p.paused && !p.pending && now - p.deadline > 6000 ? `${p.screen}: the clock is ${Math.round((now - p.deadline) / 1000)} s past zero and nothing happened` : null);
+  const r = await (await load(n.seed))({ ...n, check });
   const file = join(gold, `night-${n.seed}.txt`), text = r.trace.join("\n") + "\n";
   const label = `night ${n.seed} (${n.host ? "host" : "no host"}, ${n.rounds || 6} rounds, ${n.minis.join(" ") || "no mini-games"})`;
   const ends = r.outcome === "final" || r.outcome === "sudden-cap";

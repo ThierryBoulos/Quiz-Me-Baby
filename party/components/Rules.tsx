@@ -56,7 +56,7 @@ export function Rules() {
       <Rule n="02" title="A standard round">
         <L items={[
           <>One theme per round. One question for each team, always the same kind of question at the same difficulty.</>,
-          <>Team A gets their question: <B>60 seconds</B>. The team sends suggestions to the captain; the captain types the answer and sends it. <B>One go:</B> once it&rsquo;s sent it&rsquo;s locked, no changing it and no lifeline after it.</>,
+          <>Team A gets their question: <B>60 seconds</B>. The team sends suggestions to the captain; the captain types the answer and sends it. <B>One go:</B> once it&rsquo;s sent it&rsquo;s locked, no changing it and no lifeline after it. Typed but not sent when the clock runs out? What&rsquo;s in the box counts as sent (on every clock, mini-games too).</>,
           <>Wrong or out of time? Team B can steal it: <B>30 seconds</B>, no lifelines on a steal. With no host the app checks at once, no waiting; after the steal the answer card shows both calls, and either captain can <B>contest</B> one (see The phones).</>,
           <>The answer stays hidden until the question is finished, so a stealing team can never read it off a screen.</>,
           <>Then Team B gets their own question, with Team A stealing. One point per correct answer, whoever gets it.</>,

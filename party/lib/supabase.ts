@@ -70,6 +70,13 @@ export async function sendAction(room: string, kind: string, payload: Record<str
   return tap;
 }
 
+/* What a captain has typed so far, sent quietly (no waiting bar, no receipt): if the clock runs out
+   before they press Send, the TV takes the last of these as their answer. */
+export function sendDraft(room: string, payload: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  void sb().from("actions").insert({ room, kind: "draft", payload }).then(() => {}, () => {});
+}
+
 /* "I'm here" / "I left the screen" / "I'm back": small notes from a phone to
    the TV, sent through the same log as every other action (the TV reads it
    every 1.5 s, so none get lost), quietly (no waiting bar), and with

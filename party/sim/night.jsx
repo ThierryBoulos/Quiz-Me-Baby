@@ -183,8 +183,16 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       trace.push(`(the TV wakes: ${p2.screen}, answer in: ${!!(p2.sent?.[t] || p2.pending || p2.screen !== "ask")}, clock ${p2.deadline ? Math.round((p2.deadline - clock()) / 1000) + " s" : "stopped"})`);
       continue;
     }
-    /* slow captains: this beat, nobody taps (so the clocks run out now and then) */
-    if (slow && bot() < slow) continue;
+    /* slow captains: this beat, nobody taps (so the clocks run out now and then)... but now and then
+       one has typed an answer and never presses Send: the TV takes it at time-up */
+    if (slow && bot() < slow) {
+      const sc = pub.screen;
+      if (["ask", "steal", "miniQ", "flagQ", "mapQ", "sayQ", "battleQ", "dishQ"].includes(sc) && bot() < 0.08) {
+        const t = sc === "battleQ" ? pub.battle?.cap : sc === "dishQ" ? pub.buzz : sc === "ask" || sc === "steal" ? pub.turn : bot() < 0.5 ? 0 : 1;
+        if (t != null && !pub.sent?.[t] && capOf(t)) fake.insert("actions", { room: CODE, user_id: capOf(t), kind: "draft", payload: { k: `${pub.qid}|${sc}`, ...(sc === "miniQ" ? { n: "12" } : { texts: [bot() < 0.5 ? answerNow(g, pub) || "Paris" : "xyz"] }) } });
+      }
+      continue;
+    }
     const sc = pub.screen, step = pub.step, lead = pub.lead ?? 0, other = (t) => 1 - t;
     const key = JSON.stringify([sc, step, pub.pending, pub.sent, pub.buzz, pub.auction?.count, pub.auction?.bid, pub.map?.ruled, pub.ok]);
     if (key === prevKey) { if (++same > 120) { outcome = "stuck"; stuckOn = `${sc}${pub.paused ? ", paused" : ""}${pub.pending ? ", call pending" : ""}${pub.lifeline ? ", lifeline " + pub.lifeline.key + (pub.lifeline.deadline ? " running" : " stopped") : ""}${pub.deadline ? ", clock " + Math.round((pub.deadline - clock()) / 1000) + " s" : ", no clock"}${pub.nextBy ? ", waiting for " + pub.nextBy : ""}`; break; } } else { same = 0; prevKey = key; }

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, TIE_SCREENS, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
-import { joinLive, newTap, note, sb, sendAction } from "@/lib/supabase";
+import { joinLive, newTap, note, sb, sendAction, sendDraft } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { AskHead, battleNeeds, decidedCall, decidedHead, decidedSub, FlagImg, recapLines, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict } from "./GameParts";
@@ -785,6 +785,17 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   /* Closest To Wins: "1.5 million", "2k", "€25" all count; what the TV will read is shown back */
   const guess: number = sc === "miniQ" && a.trim() ? QMB.parseNumber(a, pub.question) : NaN;
   const per = /\bin (thousand|million|billion)s\b/i.exec(pub.question || "")?.[1].toLowerCase();
+  /* what's in the box goes to the TV a moment after each pause in typing: if the clock runs out before
+     Send, the TV takes it (typed "elephan", never sent: "elephan" is the answer) */
+  const draftKey = `${pub.qid}|${sc}`, drafted = useRef("");
+  useEffect(() => {
+    if (!canType) return;
+    const body = sc === "miniQ" ? { n: a.trim() } : { texts: [a, b].map((x) => x.trim()).filter(Boolean) };
+    const sig = draftKey + JSON.stringify(body);
+    if (sig === drafted.current || (!a.trim() && !b.trim() && !drafted.current.startsWith(draftKey))) return;
+    const t = setTimeout(() => { drafted.current = sig; sendDraft(code, { k: draftKey, ...body }); }, 300);
+    return () => clearTimeout(t);
+  }, [a, b, canType, draftKey, sc, code]);
   const send = async () => {
     /* locked in on this phone straight away; put back if it couldn't go */
     if (sc === "miniQ") { if (!Number.isFinite(guess)) return; setSentTxt(a); if (!(await act("answer", { n: a }))) setSentTxt(null); return; }

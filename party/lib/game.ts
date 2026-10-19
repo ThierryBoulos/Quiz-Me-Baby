@@ -99,6 +99,9 @@ export const T_AWAY = 60;
 export const T_LOBBY_AWAY = 30;
 /* Guess the Cocktail or Dish: after a buzz, this long to type it (no clock shown); then it's wrong */
 export const T_DISH_TYPE = 10;
+/* A clock closes this long after it shows 0, unseen: an answer sent at "1 s left" is still on its way
+   when the TV's clock hits zero (phone to server to TV), and it counts. */
+export const T_GRACE_MS = 1000;
 /* the Auction: nobody names more than this in the time (and a typo can't bid 999) */
 export const MAX_BID = 100;
 /* Party plays some mini-games shorter than Classic (the shared engine keeps Classic's lengths) */

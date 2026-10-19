@@ -11,7 +11,7 @@ import type { TvState } from "./state";
 
 /* The question in play goes out under a number that means nothing outside this game (D5): its
    real id would find the answer in a bank file. The phones use it only to tell questions apart. */
-const qk = (s: TvState, id: string) => "k" + (s.qkeys[id] ??= Object.keys(s.qkeys).length + 1);
+export const qk = (s: TvState, id: string) => "k" + (s.qkeys[id] ??= Object.keys(s.qkeys).length + 1);
 export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   const g = s.g;
   if (!g) return null;

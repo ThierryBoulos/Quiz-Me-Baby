@@ -23,6 +23,7 @@ export const newState = () => ({
   qkeys: {} as Record<string, number>,                                        // real question id → the number the phones see
   scoreLog: [] as Two<number>[],                                              // the score after every change (lead changes, for the recap)
   typed: [null, null] as Two<string[] | null>,       // what each captain sent for the question on screen
+  drafts: [null, null] as Two<null | { k: string; texts: string[]; n: string }>,   // ...and what each has typed but not sent (taken at time-up)
   guesses: [null, null] as Two<number | null>,       // Closest To Wins
   ok: [null, null] as Two<boolean | null>,           // Flag / Map / Say verdicts, as they stand
   app: [null, null] as Two<boolean | null>,          // ...and what the app said first (the "App suggests" tag)
