@@ -61,7 +61,7 @@ function answerNow(g, pub) {
      { at, type: "capGone", team }    that team's captain's phone is gone for good
      { at, type: "hostGone", for }    the host's phone is gone for a while
      { at, type: "writesFail", for }  the TV's writes fail (no internet) for a while
-   net: { dup, delay }  pushes sent twice / up to delay ms late (out of order)
+   net: { dup, delay, stall }  pushes sent twice / up to delay ms late (out of order) / that share of reads held 5-28 s
    simul: both captains tap Next, buzz, rule at the very same moment
    edge: answers land at the exact moment the clock runs out */
 export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null }) {
@@ -277,5 +277,5 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   await tick(5000); checkAcks();                       // the last taps' late pushes land
   await act(async () => { tree.unmount(); await flush(); });
   resetClock();
-  return { taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length };
+  return { taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls };
 }

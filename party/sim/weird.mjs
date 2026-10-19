@@ -34,6 +34,8 @@ const W = [
   { name: "answers land the very moment the clock runs out", minis: DEF, edge: true },
   { name: "everything at once (no host)", minis: ALL, simul: true, net: { delay: 2000, dup: 0.3 }, events: [...offs(5, [25, 60]), { at: 50, type: "reload" }, { at: 140, type: "offReload", for: 20 }, { at: 70, type: "writesFail", for: 20 }] },
   { name: "everything at once (with a host)", minis: ALL, host: true, simul: true, net: { delay: 2000, dup: 0.3 }, events: [...offs(5, [25, 60]), { at: 50, type: "reload" }, { at: 100, type: "hostGone", for: 60 }, { at: 70, type: "writesFail", for: 20 }] },
+  { name: "the server sits on the TV's reads for 5 to 28 s, now and then", minis: ALL, net: { stall: 0.2 } },
+  { name: "the same, with a host", minis: ALL, host: true, net: { stall: 0.2 } },
 ];
 
 const only = process.argv.slice(2).filter((a) => /^\d+(:\d+)?$/.test(a)).map((a) => Number(a.split(":")[0]));
@@ -64,6 +66,13 @@ for (let i = 0; i < W.length; i++) {
     const ok = (r.outcome === "final" || r.outcome === "sudden-cap") && !errors.length && !lost;
     if (!ok) bad++;
     console.log(`${ok ? "ok  " : "FAIL"} ${i + 1}. ${w.name} [seed ${seed}]: ${r.outcome}${r.stuckOn ? " (" + r.stuckOn + ")" : ""}, ${r.score}, ${r.minutes.toFixed(1)} min, ${r.taps.length} taps${lost ? ", " + lost + " without a receipt" : ""}${errors.length ? ", errors: " + [...new Set(errors)].slice(0, 3).join(" | ") : ""}`);
+    /* a held read must not hold the taps back: each one's receipt comes as fast as on a good night */
+    if (w.net?.stall) {
+      const waits = r.taps.filter((t) => t.done && !t.superseded).map((t) => t.done - t.at).sort((a, b) => a - b);
+      const slow = waits.at(-1) ?? 0;
+      console.log(`     ${r.stalls} reads held; receipts: median ${(waits[waits.length >> 1] / 1000).toFixed(1)} s, slowest ${(slow / 1000).toFixed(1)} s`);
+      if (slow > 3000) { bad++; console.log("FAIL a tap waited behind a held read"); }
+    }
     if (lost) console.log("     taps without a receipt:", JSON.stringify(r.taps.filter((t) => !t.done).slice(0, 3).map((t) => ({ kind: t.kind, screen: t.screen, move: t.payload?.move?.type, at: Math.round(t.at / 1000) % 100000 }))));
     if (only.length) console.log(r.trace.slice(-25).join("\n"));
   }
