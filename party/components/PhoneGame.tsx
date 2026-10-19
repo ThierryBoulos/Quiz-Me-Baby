@@ -95,10 +95,17 @@ function Counter({ A, fire, h, fs, children }: { A: NonNullable<Pub["auction"]>;
   useEffect(() => { if (!opt) return; const t = setTimeout(() => setOpt(null), 6000); return () => clearTimeout(t); }, [opt]);
   const shown = opt && opt.leg === leg ? opt.n : A.count;
   const tap = (d: 1 | -1) => { setOpt({ leg, n: Math.max(0, shown + d) }); fire({ type: d > 0 ? "auction/tick" : "auction/untick" }); buzzHand(15); };
+  /* Every touch counts, however fast. An iPhone can take two quick taps on the same spot for one double
+     tap and never send the second "click" (GRF2: the host had to tap +1 twice, again and again), so this
+     counts when the finger lifts, which comes for every touch; a click counts only from the keyboard. */
+  const press = (d: 1 | -1) => ({
+    onPointerUp: (e: React.PointerEvent) => { if (e.pointerType === "mouse" && e.button !== 0) return; tap(d); },
+    onClick: (e: React.MouseEvent) => { if (e.detail === 0) tap(d); },
+  });
   return (<>
     <div className="display text-center" style={{ fontSize: 84 }} aria-live="polite">{shown}<span className="text-[var(--color-ink-3)] text-40"> / {A.bid}</span></div>
-    <button className="btn btn-gold btn-block display select-none" style={{ minHeight: h, fontSize: fs, touchAction: "manipulation" }} onClick={() => tap(1)}>+1</button>
-    <div className="flex gap-2 justify-center"><button className="btn btn-sm" onClick={() => tap(-1)}>Undo</button>{children}</div>
+    <button className="btn btn-gold btn-block display select-none" style={{ minHeight: h, fontSize: fs, touchAction: "manipulation" }} {...press(1)}>+1</button>
+    <div className="flex gap-2 justify-center"><button className="btn btn-sm" {...press(-1)}>Undo</button>{children}</div>
   </>);
 }
 
