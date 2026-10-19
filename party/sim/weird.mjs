@@ -5,7 +5,7 @@
    clock runs out. On top of each, chaos taps. Every night must end, with no error on the TV,
    no clock running away, and a receipt for every tap.
      node sim/weird.mjs          all of them
-     node sim/weird.mjs 7        one, with its trace
+     node sim/weird.mjs 7        one, with its trace (7:2 for its seed 2)
      node sim/weird.mjs --quick  one seed each (npm test) */
 import { build } from "esbuild";
 import { dirname, join } from "node:path";
@@ -36,11 +36,12 @@ const W = [
   { name: "everything at once (with a host)", minis: ALL, host: true, simul: true, net: { delay: 2000, dup: 0.3 }, events: [...offs(5, [25, 60]), { at: 50, type: "reload" }, { at: 100, type: "hostGone", for: 60 }, { at: 70, type: "writesFail", for: 20 }] },
 ];
 
-const only = process.argv.slice(2).filter((a) => /^\d+$/.test(a)).map(Number);
+const only = process.argv.slice(2).filter((a) => /^\d+(:\d+)?$/.test(a)).map((a) => Number(a.split(":")[0]));
+const seedArg = process.argv.slice(2).map((a) => /^\d+:(\d+)$/.exec(a)?.[1]).find(Boolean);
 let bad = 0;
 for (let i = 0; i < W.length; i++) {
   if (only.length && !only.includes(i + 1)) continue;
-  for (const seed of only.length || process.argv.includes("--quick") ? [1] : [1, 2, 3]) {
+  for (const seed of seedArg ? [Number(seedArg)] : only.length || process.argv.includes("--quick") ? [1] : [1, 2, 3]) {
     const w = W[i], errors = [];
     const err = console.error;
     console.error = (...a) => { const t = a.map(String).join(" "); if (/react-test-renderer is deprecated/.test(t)) return; if (!/publish failed/.test(t) || !w.events?.some((e) => e.type === "writesFail")) errors.push(t.slice(0, 160)); };

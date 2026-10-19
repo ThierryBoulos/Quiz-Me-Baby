@@ -140,7 +140,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const s = st.current, now = Date.now();
     for (const f of fx || []) {
       if (f.timer === "stop") { s.deadline = null; s.left = 0; }
-      else if (f.timer === "pause" && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; }
+      /* (a clock paused in its unseen second after 0 keeps a sliver, so Resume brings it back and it closes:
+         with nothing left it would be neither running nor paused, and the question would never end) */
+      else if (f.timer === "pause" && s.deadline) { s.left = Math.max(0.05, (s.deadline - now) / 1000); s.deadline = null; }
       else if (f.timer === "resume" && s.left) { s.deadline = now + s.left * 1000; s.left = 0; }
       if (f.used) { usedMem.current.add(f.used.id); try { const u = used(); localStorage.setItem(usedKey, JSON.stringify([...u])); } catch { /* kept in memory */ } }
       if (f.lifeline) {
@@ -489,7 +491,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
-      /* lifelines before the answer goes in, not after */
+      /* lifelines before the answer goes in, not after (nor once the clock has run out) */
+      if ((p.key === "friend" || p.key === "dip") && sc === "ask" && s.deadline && Date.now() >= s.deadline) return "Time's up.";
       if ((p.key === "friend" || p.key === "dip") && sc === "ask" && !s.lifeline && !s.pending && turnTeam() === team && !s.typed[team]) {
         const usedLl = rd.llUsed[team] || [];
         if (!g.teams[team].ll[p.key] || (rd.dbl[team] && usedLl.length >= 1)) return false;
