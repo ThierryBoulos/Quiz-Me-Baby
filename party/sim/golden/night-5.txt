@@ -9,54 +9,49 @@
 7.50 steal | 4 | 0-0 |  | Lions steal a new question. | 
 8.25 answer | 4 | 0-0 |  | Lions steal a new question. | 
 9.25 answer | 4 | 0-0 |  |  | 
-12.00 answer | 4 | 1-0 |  | Call changed: Lions +1 point. | 
-12.75 roundScore | 5 | 1-0 |  | Call changed: Lions +1 point. | 
-13.75 roundIntro | 6 | 1-0 |  | Call changed: Lions +1 point. | 
-14.75 ask | 7 | 1-0 |  | Call changed: Lions +1 point. | 
-15.50 answer | 7 | 2-0 |  | Lions +1 point | 
-16.50 ask | 8 | 2-0 |  | Lions +1 point | 
-17.25 answer | 8 | 2-1 |  | Owls +1 point | 
-18.25 answer | 8 | 2-1 |  |  | 
-19.25 steal | 9 | 2-0 |  | Lions steal a new question. | 
-20.00 answer | 9 | 3-0 |  | Lions +1 point — steal | 
-21.00 roundScore | 10 | 3-0 |  | Lions +1 point — steal | 
-21.75 roundIntro | 11 | 3-0 |  | Lions +1 point — steal | 
-22.75 ask | 12 | 3-0 |  | Lions +1 point — steal | 
-23.75 steal | 12 | 3-0 |  | Lions +1 point — steal | 
-24.50 answer | 12 | 3-1 |  | Owls +1 point — steal | 
-25.50 ask | 13 | 3-1 |  | Owls +1 point — steal | 
-26.25 answer | 13 | 3-2 |  | Owls +1 point | 
-27.25 answer | 13 | 3-2 |  |  | 
-42.25 answer | 13 | 3-2 |  | No answer in time: the call stands. | 
-42.50 roundScore | 14 | 3-2 |  | No answer in time: the call stands. | 
-43.50 roundIntro | 15 | 3-2 |  | No answer in time: the call stands. | 
-44.25 ask | 16 | 3-2 |  | No answer in time: the call stands. | 
-45.25 steal | 16 | 3-2 |  | No answer in time: the call stands. | 
-46.25 answer | 16 | 3-3 |  | Owls +1 point — steal | 
-47.00 answer | 16 | 3-3 |  |  | 
-48.00 answer | 16 | 3-3 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-48.75 ask | 17 | 3-3 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-49.75 answer | 17 | 3-4 |  | Owls +1 point | 
-50.75 roundScore | 18 | 3-4 |  | Owls +1 point | 
-51.50 roundIntro | 19 | 3-4 |  | Owls +1 point | 
-52.50 ask | 20 | 3-4 |  | Owls +1 point | 
-53.25 ask | 20 | 3-4 |  | Lions used Double Dip. | 
-54.25 steal | 20 | 3-4 |  | Lions used Double Dip. | 
-55.25 answer | 20 | 3-4 |  | Lions used Double Dip. | 
-56.00 ask | 21 | 3-4 |  | Lions used Double Dip. | 
-57.00 steal | 21 | 3-4 |  | Lions used Double Dip. | 
-57.75 answer | 21 | 4-4 |  | Lions +1 point — steal | 
-58.75 roundScore | 22 | 4-4 |  | Lions +1 point — steal | 
-59.75 roundIntro | 23 | 4-4 |  | Lions +1 point — steal | 
-60.50 ask | 24 | 4-4 |  | Lions +1 point — steal | 
-61.50 ask | 24 | 4-4 |  | Lions used Call a Friend. | 
-62.25 ask | 25 | 4-4 |  | Lions used Call a Friend. | 
-63.25 steal | 25 | 4-4 |  | Lions used Call a Friend. | 
-64.25 answer | 25 | 4-5 |  | Owls +1 point — steal | 
-65.00 answer | 25 | 4-5 |  |  | 
-66.00 answer | 25 | 4-5 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-66.75 ask | 26 | 4-5 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-67.75 answer | 26 | 4-6 |  | Owls +1 point | 
-68.75 roundScore | 27 | 4-6 |  | Owls +1 point | 
-69.50 final | 28 | 4-6 |  | Owls +1 point | 
-recap: {"margin":2,"sudden":false,"leadChanges":2,"steals":[3,3],"minis":[0,0]}
+24.25 answer | 4 | 0-0 |  | No answer in time: the call stands. | 
+24.50 roundScore | 5 | 0-0 |  | No answer in time: the call stands. | 
+25.50 roundIntro | 6 | 0-0 |  | No answer in time: the call stands. | 
+27.25 ask | 7 | 0-0 |  | No answer in time: the call stands. | 
+28.25 answer | 7 | 1-0 |  | Lions +1 point | 
+29.00 ask | 8 | 1-0 |  | Lions +1 point | 
+30.00 answer | 8 | 1-2 |  | Owls +2 points | 
+30.75 roundScore | 9 | 1-2 |  | Owls +2 points | 
+31.75 roundIntro | 10 | 1-2 |  | Owls +2 points | 
+32.75 ask | 11 | 1-2 |  | Owls +2 points | 
+33.50 steal | 11 | 1-2 |  | Owls +2 points | 
+34.50 answer | 11 | 1-3 |  | Owls +1 point — steal | 
+35.25 answer | 11 | 1-3 |  |  | 
+50.25 answer | 11 | 1-3 |  | No answer in time: the call stands. | 
+50.75 ask | 12 | 1-3 |  | No answer in time: the call stands. | 
+51.50 answer | 12 | 1-4 |  | Owls +1 point | 
+52.50 roundScore | 13 | 1-4 |  | Owls +1 point | 
+53.25 roundIntro | 14 | 1-4 |  | Owls +1 point | 
+54.25 ask | 15 | 1-4 |  | Owls +1 point | 
+55.25 steal | 15 | 1-4 |  | Owls +1 point | 
+56.00 answer | 15 | 1-5 |  | Owls +1 point — steal | 
+57.00 answer | 15 | 1-5 |  |  | 
+72.00 answer | 15 | 1-5 |  | No answer in time: the call stands. | 
+72.25 ask | 16 | 1-5 |  | No answer in time: the call stands. | 
+73.25 answer | 16 | 1-6 |  | Owls +1 point | 
+74.00 roundScore | 17 | 1-6 |  | Owls +1 point | 
+75.00 roundIntro | 18 | 1-6 |  | Owls +1 point | 
+75.75 ask | 19 | 1-6 |  | Owls +1 point | 
+76.75 steal | 19 | 1-6 |  | Owls +1 point | 
+77.75 answer | 19 | 1-7 |  | Owls +1 point — steal | 
+78.50 answer | 19 | 1-7 |  |  | 
+79.50 answer | 19 | 1-7 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+80.25 ask | 20 | 1-7 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+81.25 answer | 20 | 1-8 |  | Owls +1 point | 
+82.25 roundScore | 21 | 1-8 |  | Owls +1 point | 
+83.00 roundIntro | 22 | 1-8 |  | Owls +1 point | 
+84.00 ask | 23 | 1-8 |  | Owls +1 point | 
+84.75 ask | 23 | 1-8 |  | Lions used Double Dip. | 
+85.75 steal | 23 | 1-8 |  | Lions used Double Dip. | 
+86.75 answer | 23 | 1-8 |  | Lions used Double Dip. | 
+87.50 ask | 24 | 1-8 |  | Lions used Double Dip. | 
+88.50 steal | 24 | 1-8 |  | Lions used Double Dip. | 
+89.25 answer | 24 | 2-8 |  | Lions +1 point — steal | 
+90.25 roundScore | 25 | 2-8 |  | Lions +1 point — steal | 
+91.25 final | 26 | 2-8 |  | Lions +1 point — steal | 
+recap: {"margin":6,"sudden":false,"leadChanges":2,"steals":[1,3],"minis":[0,0]}

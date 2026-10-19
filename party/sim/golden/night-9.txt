@@ -5,185 +5,184 @@
 41.25 answer | 3 | 0-0 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
 54.25 answer | 3 | 0-0 |  |  | 
 69.25 answer | 3 | 0-0 |  | No answer in time: the call stands. | 
-99.25 ask | 4 | 0-0 |  | No answer in time: the call stands. | 
-117.25 answer | 4 | 0-1 |  | Owls +1 point | 
-226.25 answer | 4 | 0-1 |  |  | 
-241.25 answer | 4 | 0-1 |  | No answer in time: the call stands. | 
-255.75 roundScore | 5 | 0-1 |  | No answer in time: the call stands. | 
-274.75 flagIntro | 6 | 0-1 | 0-0 | No answer in time: the call stands. | 
-302.75 flagQ | 7 | 0-1 | 0-0 | No answer in time: the call stands. | 
-318.75 flagReveal | 9 | 0-1 | 1-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-323.25 flagReveal | 9 | 0-1 | 1-1 |  | 
-338.25 flagReveal | 9 | 0-1 | 1-1 | No answer in time: the call stands. | 
-363.75 flagQ | 10 | 0-1 | 1-1 | Both got it — a point each. | 
-379.75 flagReveal | 12 | 0-1 | 1-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-421.50 flagQ | 13 | 0-1 | 1-2 | Owls takes flag 2. | 
-437.50 flagReveal | 15 | 0-1 | 1-2 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-510.50 flagQ | 16 | 0-1 | 1-2 | Nobody got it. | 
-526.50 flagReveal | 18 | 0-1 | 1-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-561.75 flagReveal | 18 | 0-1 | 1-2 |  | 
-576.75 flagReveal | 18 | 0-1 | 1-2 | No answer in time: the call stands. | 
-646.50 flagQ | 19 | 0-1 | 1-2 | Nobody got it. | 
-662.50 flagReveal | 21 | 0-1 | 1-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-739.25 flagReveal | 21 | 0-1 | 1-3 |  | 
-747.25 flagReveal | 21 | 0-1 | 1-2 | Call changed: ⁨Owls⁩ WRONG. | 
-759.00 flagQ | 22 | 0-1 | 1-2 | Nobody got it. | 
-775.00 flagReveal | 24 | 0-1 | 1-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-795.75 flagQ | 25 | 0-1 | 1-3 | Owls takes flag 6. | 
-811.75 flagReveal | 27 | 0-1 | 2-3 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-814.75 flagQ | 28 | 0-1 | 2-3 | Lions takes flag 7. | 
-825.50 flagReveal | 28 | 0-1 | 2-3 | Lions takes flag 7. | 
-910.25 flagQ | 29 | 0-1 | 2-3 | Nobody got it. | 
-926.25 flagReveal | 31 | 0-1 | 2-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-930.75 flagQ | 32 | 0-1 | 2-3 | Nobody got it. | 
-935.25 flagReveal | 32 | 0-1 | 3-3 | Nobody got it. | 
-1096.50 flagReveal | 32 | 0-1 | 3-3 |  | 
-1111.50 flagReveal | 32 | 0-1 | 3-3 | No answer in time: the call stands. | 
-1122.50 flagTie | 33 | 0-1 | 3-3 |  | 
-1155.00 flagSummary | 34 | 0-1 | 3-3 |  | 
-1170.25 roundIntro | 35 | 0-1 |  |  | 
-1195.50 ask | 36 | 0-1 |  |  | 
-1227.00 ask | 36 | 0-1 |  | Lions used Double Dip. | 
-1256.50 steal | 37 | 0-1 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1262.00 answer | 37 | 0-1 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1266.50 answer | 37 | 0-1 |  |  | 
-1281.50 answer | 37 | 0-1 |  | No answer in time: the call stands. | 
-1286.25 ask | 38 | 0-1 |  | No answer in time: the call stands. | 
-1299.00 steal | 38 | 0-1 |  | No answer in time: the call stands. | 
-1305.25 answer | 38 | 0-1 |  | No answer in time: the call stands. | 
-1308.00 roundScore | 39 | 0-1 |  | No answer in time: the call stands. | 
-1344.00 miniIntro | 40 | 0-1 | 0-0 | No answer in time: the call stands. | 
-1388.00 miniQ | 41 | 0-1 | 0-0 | No answer in time: the call stands. | 
-1398.75 closestReveal | 41 | 0-1 | 1-0 | No answer in time: the call stands. | 
-1413.25 miniQ | 42 | 0-1 | 1-0 | Lions takes leg 1. | 
-1474.25 closestReveal | 44 | 0-1 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1517.75 miniQ | 45 | 0-1 | 2-0 | Lions takes leg 2. | 
-1545.50 closestReveal | 45 | 0-1 | 2-1 | Lions takes leg 2. | 
-1616.75 miniQ | 46 | 0-1 | 2-1 | Owls takes leg 3. | 
-1641.00 closestReveal | 46 | 0-1 | 3-1 | Owls takes leg 3. | 
-1657.25 decided | 47 | 0-1 | 3-1 |  | 
-1690.50 miniSummary | 48 | 1-1 | 3-1 |  | 
-1711.25 roundIntro | 49 | 1-1 |  |  | 
-1773.25 ask | 50 | 1-1 |  |  | 
-1791.25 steal | 50 | 1-1 |  |  | 
-1822.25 answer | 51 | 1-2 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1852.50 ask | 52 | 1-2 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1885.75 answer | 52 | 1-3 |  | Owls +1 point | 
-1893.00 roundScore | 53 | 1-3 |  | Owls +1 point | 
-1946.00 auctionIntro | 54 | 1-3 | 0-0 | Owls +1 point | 
-1947.75 auctionBid | 55 | 1-3 | 0-0 | Owls +1 point | 
-1977.50 auctionBid | 56 | 1-3 | 0-0 | Owls +1 point | 
-2066.75 auctionRun | 57 | 1-3 | 0-0 | Owls +1 point | 
-2097.75 auctionLeg | 58 | 1-3 | 0-1 | Owls +1 point | 
-2150.25 auctionBid | 59 | 1-3 | 0-1 | Owls +1 point | 
-2153.00 auctionBid | 60 | 1-3 | 0-1 | Owls +1 point | 
-2196.25 auctionRun | 61 | 1-3 | 0-1 | Owls +1 point | 
-2227.25 auctionLeg | 62 | 1-3 | 1-1 | Owls +1 point | 
-2246.75 auctionBid | 63 | 1-3 | 1-1 | Owls +1 point | 
-2338.50 auctionBid | 64 | 1-3 | 1-1 | Owls +1 point | 
-2365.50 auctionRun | 65 | 1-3 | 1-1 | Owls +1 point | 
-2396.50 auctionLeg | 66 | 1-3 | 1-2 | Owls +1 point | 
-2411.25 auctionResult | 67 | 1-4 | 1-2 | Owls +1 point | 
-2422.25 sayIntro | 68 | 1-4 | 0-0 | Owls +1 point | 
-2543.75 sayQ | 69 | 1-4 | 0-0 | Owls +1 point | 
-2564.75 sayReveal | 71 | 1-4 | 1-1 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-2598.50 sayQ | 72 | 1-4 | 1-1 | Tie — a point each. | 
-2619.50 sayReveal | 74 | 1-4 | 2-2 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-2649.00 sayReveal | 74 | 1-4 | 2-2 |  | 
-2656.25 sayReveal | 74 | 1-4 | 2-1 | Call changed: ⁨Lions⁩ DODGED IT. | 
-2766.00 sayQ | 75 | 1-4 | 2-1 | Lions takes leg 2. | 
-2787.00 sayReveal | 77 | 1-4 | 3-2 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-2838.75 sayQ | 78 | 1-4 | 3-2 | Tie — a point each. | 
-2848.75 sayReveal | 78 | 1-4 | 4-3 | Tie — a point each. | 
-2868.50 sayReveal | 78 | 1-4 | 4-3 |  | 
-2883.50 sayReveal | 78 | 1-4 | 4-3 | No answer in time: the call stands. | 
-2885.75 sayQ | 79 | 1-4 | 4-3 | Tie — a point each. | 
-2893.75 sayReveal | 79 | 1-4 | 5-4 | Tie — a point each. | 
-2964.00 sayReveal | 79 | 1-4 | 5-4 |  | 
-2979.00 sayReveal | 79 | 1-4 | 5-4 | No answer in time: the call stands. | 
-2992.75 sayQ | 80 | 1-4 | 5-4 | Tie — a point each. | 
-2999.00 sayReveal | 80 | 1-4 | 6-5 | Tie — a point each. | 
-3018.00 sayQ | 81 | 1-4 | 6-5 | Tie — a point each. | 
-3039.00 sayReveal | 82 | 1-4 | 7-6 | Tie — a point each. | 
-3106.25 saySummary | 83 | 2-4 | 7-6 | Tie — a point each. | 
-3112.50 roundIntro | 84 | 2-4 |  | Tie — a point each. | 
-3129.50 ask | 85 | 2-4 |  | Tie — a point each. | 
-3168.25 answer | 85 | 3-4 |  | Lions +1 point | 
-3178.25 answer | 85 | 3-4 |  |  | 
-3193.25 answer | 85 | 3-4 |  | No answer in time: the call stands. | 
-3230.25 ask | 86 | 3-4 |  | No answer in time: the call stands. | 
-3260.00 steal | 86 | 3-4 |  | No answer in time: the call stands. | 
-3280.75 answer | 86 | 4-4 |  | Lions +1 point — steal | 
-3295.25 roundScore | 87 | 4-4 |  | Lions +1 point — steal | 
-3313.25 mapIntro | 88 | 4-4 | 0-0 | Lions +1 point — steal | 
-3318.50 mapQ | 89 | 4-4 | 0-0 | Lions +1 point — steal | 
-3350.00 mapReveal | 89 | 4-4 | 0-0 | Lions +1 point — steal | 
-3377.00 mapReveal | 89 | 4-4 | 0-0 |  | 
-3392.00 mapReveal | 89 | 4-4 | 0-0 | No answer in time: the call stands. | 
-3446.25 mapQ | 90 | 4-4 | 0-0 | Nobody got it. | 
-3507.25 mapReveal | 92 | 4-4 | 1-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-3517.50 mapReveal | 92 | 4-4 | 1-0 |  | 
-3532.50 mapReveal | 92 | 4-4 | 1-0 | No answer in time: the call stands. | 
-3573.25 mapQ | 93 | 4-4 | 1-0 | Lions takes map 2. | 
-3594.75 mapReveal | 93 | 4-4 | 1-1 | Lions takes map 2. | 
-3612.00 mapReveal | 93 | 4-4 | 1-1 |  | 
-3617.25 mapReveal | 93 | 4-4 | 1-1 | ⁨Rami⁩ doesn't agree: the call stands. | 
-3636.25 mapTie | 94 | 4-4 | 1-1 | Owls takes map 3. | 
-3650.75 mapSummary | 95 | 5-5 | 1-1 | Owls takes map 3. | 
-3660.50 roundIntro | 96 | 5-5 |  | Owls takes map 3. | 
-3693.00 ask | 97 | 5-5 |  | Owls takes map 3. | 
-3754.00 steal | 98 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3765.75 answer | 98 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3771.25 ask | 99 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3777.50 steal | 99 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3805.50 answer | 99 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3828.00 roundScore | 100 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3875.75 dishIntro | 101 | 5-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3882.75 dishQ | 102 | 5-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3897.75 dishReveal | 103 | 5-5 | 0-0 | Nobody got it. | 
-3910.75 dishQ | 104 | 5-5 | 0-0 | Nobody got it. | 
-3926.00 dishQ | 104 | 5-5 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
-3952.75 dishReveal | 105 | 5-5 | 0-0 | Nobody got it. | 
-4007.00 dishQ | 106 | 5-5 | 0-0 | Nobody got it. | 
-4033.25 dishReveal | 107 | 5-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4079.00 dishQ | 108 | 5-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4097.00 dishReveal | 109 | 5-5 | 1-0 | Nobody got it. | 
-4099.75 dishQ | 110 | 5-5 | 1-0 | Nobody got it. | 
-4132.75 dishReveal | 111 | 5-5 | 1-0 | Nobody got it. | 
-4188.75 dishSummary | 112 | 6-5 | 1-0 | Nobody got it. | 
-4227.50 roundIntro | 113 | 6-5 |  | Nobody got it. | 
-4230.25 ask | 114 | 6-5 |  | Nobody got it. | 
-4286.00 ask | 114 | 6-5 |  | Lions used Call a Friend. | 
-4301.25 ask | 115 | 6-5 |  | Lions used Call a Friend. | 
-4306.50 steal | 116 | 6-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4337.50 answer | 117 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4421.00 ask | 118 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4433.75 steal | 118 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4448.00 answer | 118 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4485.00 roundScore | 119 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4512.75 battleIntro | 120 | 6-5 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4539.75 battleQ | 121 | 6-5 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4555.75 battleQ | 122 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4571.75 battleQ | 123 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4587.75 battleQ | 124 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4603.75 battleQ | 125 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4619.75 battleQ | 126 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4635.75 battleQ | 127 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4655.75 battleQ | 128 | 6-5 | 2-0 | Time's up. | 
-4671.75 battleQ | 129 | 6-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4687.75 battleHandoff | 130 | 6-5 | 3-0 | Time's up. | 
-4713.50 battleQ | 131 | 6-5 | 3-0 | Time's up. | 
-4729.50 battleQ | 132 | 6-5 | 3-0 | Time's up. | 
-4745.50 battleQ | 133 | 6-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4761.50 battleQ | 134 | 6-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4777.50 battleQ | 135 | 6-5 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4793.50 battleQ | 136 | 6-5 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4809.50 battleQ | 137 | 6-5 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4812.50 battleQ | 137 | 6-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4833.00 battleQ | 138 | 6-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4833.25 battleReview | 138 | 6-5 | 3-5 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4865.75 battleReview | 138 | 6-5 | 3-5 |  | 
-4872.75 battleReview | 138 | 6-5 | 4-5 | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
-4910.75 battleSummary | 139 | 6-7 | 4-5 | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
-4951.25 final | 140 | 6-7 |  | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
+100.25 ask | 4 | 0-0 |  | No answer in time: the call stands. | 
+118.25 answer | 4 | 0-1 |  | Owls +1 point | 
+227.00 answer | 4 | 0-1 |  |  | 
+242.00 answer | 4 | 0-1 |  | No answer in time: the call stands. | 
+256.75 roundScore | 5 | 0-1 |  | No answer in time: the call stands. | 
+275.75 flagIntro | 6 | 0-1 | 0-0 | No answer in time: the call stands. | 
+303.50 flagQ | 7 | 0-1 | 0-0 | No answer in time: the call stands. | 
+319.50 flagReveal | 9 | 0-1 | 1-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+325.25 flagReveal | 9 | 0-1 | 1-1 |  | 
+340.25 flagReveal | 9 | 0-1 | 1-1 | No answer in time: the call stands. | 
+365.75 flagQ | 10 | 0-1 | 1-1 | Both got it — a point each. | 
+381.75 flagReveal | 12 | 0-1 | 1-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+422.25 flagQ | 13 | 0-1 | 1-2 | Owls takes flag 2. | 
+438.25 flagReveal | 15 | 0-1 | 1-2 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+511.50 flagQ | 16 | 0-1 | 1-2 | Nobody got it. | 
+527.50 flagReveal | 18 | 0-1 | 1-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+562.75 flagReveal | 18 | 0-1 | 1-2 |  | 
+577.75 flagReveal | 18 | 0-1 | 1-2 | No answer in time: the call stands. | 
+648.25 flagQ | 19 | 0-1 | 1-2 | Nobody got it. | 
+664.25 flagReveal | 21 | 0-1 | 1-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+741.00 flagReveal | 21 | 0-1 | 1-3 |  | 
+749.00 flagReveal | 21 | 0-1 | 1-2 | Call changed: ⁨Owls⁩ WRONG. | 
+760.75 flagQ | 22 | 0-1 | 1-2 | Nobody got it. | 
+776.75 flagReveal | 24 | 0-1 | 1-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+797.75 flagQ | 25 | 0-1 | 1-3 | Owls takes flag 6. | 
+813.75 flagReveal | 27 | 0-1 | 2-3 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+815.75 flagQ | 28 | 0-1 | 2-3 | Lions takes flag 7. | 
+826.50 flagReveal | 28 | 0-1 | 2-3 | Lions takes flag 7. | 
+911.00 flagQ | 29 | 0-1 | 2-3 | Nobody got it. | 
+927.00 flagReveal | 31 | 0-1 | 2-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+932.75 flagQ | 32 | 0-1 | 2-3 | Nobody got it. | 
+937.25 flagReveal | 32 | 0-1 | 3-3 | Nobody got it. | 
+1098.25 flagReveal | 32 | 0-1 | 3-3 |  | 
+1113.25 flagReveal | 32 | 0-1 | 3-3 | No answer in time: the call stands. | 
+1124.25 flagTie | 33 | 0-1 | 3-3 |  | 
+1156.75 flagSummary | 34 | 0-1 | 3-3 |  | 
+1172.00 roundIntro | 35 | 0-1 |  |  | 
+1197.25 ask | 36 | 0-1 |  |  | 
+1228.75 ask | 36 | 0-1 |  | Lions used Double Dip. | 
+1258.25 steal | 37 | 0-1 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1263.75 answer | 37 | 0-1 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1268.25 answer | 37 | 0-1 |  |  | 
+1283.25 answer | 37 | 0-1 |  | No answer in time: the call stands. | 
+1289.00 ask | 38 | 0-1 |  | No answer in time: the call stands. | 
+1301.75 steal | 38 | 0-1 |  | No answer in time: the call stands. | 
+1308.00 answer | 38 | 0-1 |  | No answer in time: the call stands. | 
+1310.75 roundScore | 39 | 0-1 |  | No answer in time: the call stands. | 
+1346.75 miniIntro | 40 | 0-1 | 0-0 | No answer in time: the call stands. | 
+1390.75 miniQ | 41 | 0-1 | 0-0 | No answer in time: the call stands. | 
+1401.50 closestReveal | 41 | 0-1 | 1-0 | No answer in time: the call stands. | 
+1416.00 miniQ | 42 | 0-1 | 1-0 | Lions takes leg 1. | 
+1477.00 closestReveal | 44 | 0-1 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1520.25 miniQ | 45 | 0-1 | 2-0 | Lions takes leg 2. | 
+1548.25 closestReveal | 45 | 0-1 | 2-1 | Lions takes leg 2. | 
+1619.25 miniQ | 46 | 0-1 | 2-1 | Owls takes leg 3. | 
+1643.75 closestReveal | 46 | 0-1 | 3-1 | Owls takes leg 3. | 
+1659.75 decided | 47 | 0-1 | 3-1 |  | 
+1693.25 miniSummary | 48 | 1-1 | 3-1 |  | 
+1713.75 roundIntro | 49 | 1-1 |  |  | 
+1776.00 ask | 50 | 1-1 |  |  | 
+1794.00 steal | 50 | 1-1 |  |  | 
+1825.00 answer | 51 | 1-2 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1855.25 ask | 52 | 1-2 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1888.50 answer | 52 | 1-3 |  | Owls +1 point | 
+1895.75 roundScore | 53 | 1-3 |  | Owls +1 point | 
+1948.75 auctionIntro | 54 | 1-3 | 0-0 | Owls +1 point | 
+1950.50 auctionBid | 55 | 1-3 | 0-0 | Owls +1 point | 
+1980.25 auctionBid | 56 | 1-3 | 0-0 | Owls +1 point | 
+2069.25 auctionRun | 57 | 1-3 | 0-0 | Owls +1 point | 
+2100.25 auctionLeg | 58 | 1-3 | 0-1 | Owls +1 point | 
+2153.00 auctionBid | 59 | 1-3 | 0-1 | Owls +1 point | 
+2155.75 auctionBid | 60 | 1-3 | 0-1 | Owls +1 point | 
+2199.00 auctionRun | 61 | 1-3 | 0-1 | Owls +1 point | 
+2230.00 auctionLeg | 62 | 1-3 | 1-1 | Owls +1 point | 
+2249.25 auctionBid | 63 | 1-3 | 1-1 | Owls +1 point | 
+2341.25 auctionBid | 64 | 1-3 | 1-1 | Owls +1 point | 
+2368.25 auctionRun | 65 | 1-3 | 1-1 | Owls +1 point | 
+2399.25 auctionLeg | 66 | 1-3 | 1-2 | Owls +1 point | 
+2414.00 auctionResult | 67 | 1-4 | 1-2 | Owls +1 point | 
+2424.75 sayIntro | 68 | 1-4 | 0-0 | Owls +1 point | 
+2546.25 sayQ | 69 | 1-4 | 0-0 | Owls +1 point | 
+2567.25 sayReveal | 71 | 1-4 | 1-1 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+2601.25 sayQ | 72 | 1-4 | 1-1 | Tie — a point each. | 
+2622.25 sayReveal | 74 | 1-4 | 2-2 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+2651.75 sayReveal | 74 | 1-4 | 2-2 |  | 
+2659.75 sayReveal | 74 | 1-4 | 2-1 | Call changed: ⁨Lions⁩ DODGED IT. | 
+2769.50 sayQ | 75 | 1-4 | 2-1 | Lions takes leg 2. | 
+2790.50 sayReveal | 77 | 1-4 | 3-2 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+2842.50 sayQ | 78 | 1-4 | 3-2 | Tie — a point each. | 
+2852.25 sayReveal | 78 | 1-4 | 4-3 | Tie — a point each. | 
+2872.25 sayReveal | 78 | 1-4 | 4-3 |  | 
+2887.25 sayReveal | 78 | 1-4 | 4-3 | No answer in time: the call stands. | 
+2890.25 sayQ | 79 | 1-4 | 4-3 | Tie — a point each. | 
+2898.25 sayReveal | 79 | 1-4 | 5-4 | Tie — a point each. | 
+2968.50 sayReveal | 79 | 1-4 | 5-4 |  | 
+2983.50 sayReveal | 79 | 1-4 | 5-4 | No answer in time: the call stands. | 
+2998.25 sayQ | 80 | 1-4 | 5-4 | Tie — a point each. | 
+3004.50 sayReveal | 80 | 1-4 | 6-5 | Tie — a point each. | 
+3023.25 sayQ | 81 | 1-4 | 6-5 | Tie — a point each. | 
+3044.25 sayReveal | 82 | 1-4 | 7-6 | Tie — a point each. | 
+3111.50 saySummary | 83 | 2-4 | 7-6 | Tie — a point each. | 
+3117.75 roundIntro | 84 | 2-4 |  | Tie — a point each. | 
+3135.00 ask | 85 | 2-4 |  | Tie — a point each. | 
+3173.75 answer | 85 | 3-4 |  | Lions +1 point | 
+3183.50 answer | 85 | 3-4 |  |  | 
+3198.50 answer | 85 | 3-4 |  | No answer in time: the call stands. | 
+3235.75 ask | 86 | 3-4 |  | No answer in time: the call stands. | 
+3265.50 steal | 86 | 3-4 |  | No answer in time: the call stands. | 
+3286.25 answer | 86 | 4-4 |  | Lions +1 point — steal | 
+3300.50 roundScore | 87 | 4-4 |  | Lions +1 point — steal | 
+3318.50 mapIntro | 88 | 4-4 | 0-0 | Lions +1 point — steal | 
+3324.00 mapQ | 89 | 4-4 | 0-0 | Lions +1 point — steal | 
+3355.50 mapReveal | 89 | 4-4 | 0-0 | Lions +1 point — steal | 
+3382.50 mapReveal | 89 | 4-4 | 0-0 |  | 
+3397.50 mapReveal | 89 | 4-4 | 0-0 | No answer in time: the call stands. | 
+3452.75 mapQ | 90 | 4-4 | 0-0 | Nobody got it. | 
+3513.75 mapReveal | 92 | 4-4 | 1-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+3522.75 mapReveal | 92 | 4-4 | 1-0 |  | 
+3537.75 mapReveal | 92 | 4-4 | 1-0 | No answer in time: the call stands. | 
+3578.75 mapQ | 93 | 4-4 | 1-0 | Lions takes map 2. | 
+3600.25 mapReveal | 93 | 4-4 | 1-1 | Lions takes map 2. | 
+3617.25 mapReveal | 93 | 4-4 | 1-1 |  | 
+3623.75 mapReveal | 93 | 4-4 | 1-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+3642.50 mapTie | 94 | 4-4 | 1-1 | Owls takes map 3. | 
+3657.00 mapSummary | 95 | 5-5 | 1-1 | Owls takes map 3. | 
+3666.75 roundIntro | 96 | 5-5 |  | Owls takes map 3. | 
+3699.25 ask | 97 | 5-5 |  | Owls takes map 3. | 
+3760.25 steal | 98 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+3772.25 answer | 98 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+3777.50 ask | 99 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+3783.75 steal | 99 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+3811.75 answer | 99 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+3834.25 roundScore | 100 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+3882.00 dishIntro | 101 | 5-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+3889.25 dishQ | 102 | 5-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+3904.25 dishReveal | 103 | 5-5 | 0-0 | Nobody got it. | 
+3917.00 dishQ | 104 | 5-5 | 0-0 | Nobody got it. | 
+3932.25 dishQ | 104 | 5-5 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
+3959.00 dishReveal | 105 | 5-5 | 0-0 | Nobody got it. | 
+4013.25 dishQ | 106 | 5-5 | 0-0 | Nobody got it. | 
+4039.75 dishReveal | 107 | 5-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4085.25 dishQ | 108 | 5-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4103.25 dishReveal | 109 | 5-5 | 1-0 | Nobody got it. | 
+4106.00 dishQ | 110 | 5-5 | 1-0 | Nobody got it. | 
+4139.00 dishReveal | 111 | 5-5 | 1-0 | Nobody got it. | 
+4195.25 dishSummary | 112 | 6-5 | 1-0 | Nobody got it. | 
+4233.75 roundIntro | 113 | 6-5 |  | Nobody got it. | 
+4236.50 ask | 114 | 6-5 |  | Nobody got it. | 
+4292.25 ask | 114 | 6-5 |  | Lions used Call a Friend. | 
+4307.75 ask | 115 | 6-5 |  | Lions used Call a Friend. | 
+4313.00 answer | 116 | 7-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4359.75 ask | 117 | 7-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4408.50 answer | 117 | 7-6 |  | Owls +1 point | 
+4431.00 roundScore | 118 | 7-6 |  | Owls +1 point | 
+4463.25 battleIntro | 119 | 7-6 | 0-0 | Owls +1 point | 
+4503.00 battleQ | 120 | 7-6 | 0-0 | Owls +1 point | 
+4517.25 battleQ | 120 | 7-6 | 1-0 | Owls +1 point | 
+4533.25 battleQ | 121 | 7-6 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4549.25 battleQ | 122 | 7-6 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4565.25 battleQ | 123 | 7-6 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4581.25 battleQ | 124 | 7-6 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4597.25 battleQ | 125 | 7-6 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4613.25 battleQ | 126 | 7-6 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4629.25 battleQ | 127 | 7-6 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4645.75 battleHandoff | 128 | 7-6 | 3-0 | Time's up. | 
+4676.75 battleQ | 129 | 7-6 | 3-0 | Time's up. | 
+4692.75 battleQ | 130 | 7-6 | 3-0 | Time's up. | 
+4708.75 battleQ | 131 | 7-6 | 3-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4724.75 battleQ | 132 | 7-6 | 3-0 | Time's up. | 
+4740.75 battleQ | 133 | 7-6 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4756.75 battleQ | 134 | 7-6 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4772.75 battleQ | 135 | 7-6 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4788.75 battleQ | 136 | 7-6 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4804.75 battleQ | 137 | 7-6 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4805.25 battleQ | 137 | 7-6 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4809.75 battleReview | 137 | 7-6 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4843.25 battleReview | 137 | 7-6 | 3-4 |  | 
+4858.25 battleReview | 137 | 7-6 | 3-4 | No answer in time: the call stands. | 
+4874.75 battleSummary | 138 | 7-8 | 3-4 | No answer in time: the call stands. | 
+4884.50 final | 139 | 7-8 |  | No answer in time: the call stands. | 
 recap: {"margin":1,"sudden":false,"leadChanges":2,"steals":[1,1],"minis":[3,2],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]}}

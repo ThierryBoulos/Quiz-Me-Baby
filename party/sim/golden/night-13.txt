@@ -56,74 +56,74 @@
 132.25 ask | 24 | 2-2 |  |  | 
 133.25 steal | 24 | 2-2 |  |  | 
 134.00 answer | 24 | 2-2 |  |  | 
-150.00 answer | 24 | 2-2 |  | No answer in time: the call stands. | 
-150.25 ask | 25 | 2-2 |  | No answer in time: the call stands. | 
-151.25 ask | 25 | 2-2 |  | Owls used Double Dip. | 
-152.00 answer | 25 | 2-3 |  | Owls +1 point | 
-153.00 roundScore | 26 | 2-3 |  | Owls +1 point | 
-153.75 miniIntro | 27 | 2-3 | 0-0 | Owls +1 point | 
-154.75 miniQ | 28 | 2-3 | 0-0 | Owls +1 point | 
-155.75 closestReveal | 28 | 2-3 | 1-0 | Owls +1 point | 
-156.50 miniQ | 29 | 2-3 | 1-0 | Lions takes leg 1. | 
-157.50 closestReveal | 29 | 2-3 | 2-0 | Lions takes leg 1. | 
-158.25 miniQ | 30 | 2-3 | 2-0 | Lions takes leg 2. | 
-159.25 closestReveal | 30 | 2-3 | 3-0 | Lions takes leg 2. | 
-160.25 decided | 31 | 2-3 | 3-0 |  | 
-161.00 miniQ | 32 | 4-3 | 3-0 |  | 
-162.00 closestReveal | 32 | 4-3 | 4-0 |  | 
-162.75 miniQ | 33 | 4-3 | 4-0 | Lions takes leg 4. | 
-163.75 closestReveal | 33 | 4-3 | 4-1 | Lions takes leg 4. | 
-164.75 miniSummary | 34 | 4-3 | 4-1 | Owls takes leg 5. | 
-165.50 roundIntro | 35 | 4-3 |  | Owls takes leg 5. | 
-167.25 ask | 36 | 4-3 |  | Owls takes leg 5. | 
-168.25 steal | 36 | 4-3 |  | Owls takes leg 5. | 
-169.25 answer | 36 | 4-3 |  | Owls takes leg 5. | 
-170.00 ask | 37 | 4-3 |  | Owls takes leg 5. | 
-171.75 steal | 37 | 4-3 |  | Owls takes leg 5. | 
-172.75 answer | 37 | 4-3 |  | Owls takes leg 5. | 
-173.75 answer | 37 | 4-3 |  |  | 
-174.50 answer | 37 | 4-5 |  | Call changed: Owls +2 points. | 
-175.50 roundScore | 38 | 4-5 |  | Call changed: Owls +2 points. | 
-176.25 roundIntro | 39 | 4-5 |  | Call changed: Owls +2 points. | 
-177.25 ask | 40 | 4-5 |  | Call changed: Owls +2 points. | 
-178.25 steal | 40 | 4-5 |  | Call changed: Owls +2 points. | 
-179.00 answer | 40 | 4-6 |  | Owls +1 point — steal | 
-180.00 ask | 41 | 4-6 |  | Owls +1 point — steal | 
-180.75 answer | 41 | 4-7 |  | Owls +1 point | 
-181.75 roundScore | 42 | 4-7 |  | Owls +1 point | 
-182.75 auctionIntro | 43 | 4-7 | 0-0 | Owls +1 point | 
-183.50 auctionBid | 44 | 4-7 | 0-0 | Owls +1 point | 
-184.50 auctionBid | 45 | 4-7 | 0-0 | Owls +1 point | 
-185.25 auctionRun | 46 | 4-7 | 0-0 | Owls +1 point | 
-189.00 auctionLeg | 46 | 4-7 | 1-0 | Owls +1 point | 
-189.75 auctionBid | 47 | 4-7 | 1-0 | Owls +1 point | 
-190.75 auctionBid | 48 | 4-7 | 1-0 | Owls +1 point | 
-191.75 auctionRun | 49 | 4-7 | 1-0 | Owls +1 point | 
-193.50 auctionLeg | 49 | 4-7 | 1-1 | Owls +1 point | 
-194.25 auctionBid | 50 | 4-7 | 1-1 | Owls +1 point | 
-195.25 auctionBid | 51 | 4-7 | 1-1 | Owls +1 point | 
-196.25 auctionRun | 52 | 4-7 | 1-1 | Owls +1 point | 
-198.75 auctionLeg | 52 | 4-7 | 2-1 | Owls +1 point | 
-199.75 auctionResult | 53 | 6-7 | 2-1 | Owls +1 point | 
-200.75 roundIntro | 54 | 6-7 |  | Owls +1 point | 
-201.50 ask | 55 | 6-7 |  | Owls +1 point | 
-202.50 answer | 55 | 7-7 |  | Lions +1 point | 
-203.25 ask | 56 | 7-7 |  | Lions +1 point | 
-204.25 answer | 56 | 7-8 |  | Owls +1 point | 
-205.25 answer | 56 | 7-8 |  |  | 
-210.50 answer | 56 | 7-8 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-211.50 roundScore | 57 | 7-8 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-212.25 battleIntro | 58 | 7-8 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
-213.25 battleQ | 59 | 7-8 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
-214.25 battleQ | 59 | 7-8 | 1-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
-219.50 battleQ | 59 | 7-8 | 2-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
-220.50 battleQ | 59 | 7-8 | 3-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
-222.25 battleHandoff | 59 | 7-8 | 3-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
-223.25 battleQ | 60 | 7-8 | 3-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
-225.00 battleQ | 60 | 7-8 | 3-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
-225.75 battleQ | 60 | 7-8 | 3-2 | ⁨Lea⁩ doesn't agree: the call stands. | 
-229.50 battleQ | 60 | 7-8 | 3-3 | ⁨Lea⁩ doesn't agree: the call stands. | 
-232.25 battleReview | 60 | 7-8 | 3-4 | ⁨Lea⁩ doesn't agree: the call stands. | 
-233.00 battleSummary | 61 | 7-12 | 3-4 | ⁨Lea⁩ doesn't agree: the call stands. | 
-234.00 final | 62 | 7-12 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-recap: {"margin":5,"sudden":false,"leadChanges":3,"steals":[0,1],"minis":[2,1],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]}}
+135.75 answer | 24 | 4-2 |  | Call changed: Lions +2 points. | 
+136.75 ask | 25 | 4-2 |  | Call changed: Lions +2 points. | 
+137.75 answer | 25 | 4-3 |  | Owls +1 point | 
+138.50 roundScore | 26 | 4-3 |  | Owls +1 point | 
+139.50 miniIntro | 27 | 4-3 | 0-0 | Owls +1 point | 
+140.25 miniQ | 28 | 4-3 | 0-0 | Owls +1 point | 
+141.25 closestReveal | 28 | 4-3 | 1-0 | Owls +1 point | 
+142.25 miniQ | 29 | 4-3 | 1-0 | Lions takes leg 1. | 
+143.00 closestReveal | 29 | 4-3 | 2-0 | Lions takes leg 1. | 
+144.00 miniQ | 30 | 4-3 | 2-0 | Lions takes leg 2. | 
+144.75 closestReveal | 30 | 4-3 | 3-0 | Lions takes leg 2. | 
+145.75 decided | 31 | 4-3 | 3-0 |  | 
+146.75 miniQ | 32 | 6-3 | 3-0 |  | 
+147.50 closestReveal | 32 | 6-3 | 4-0 |  | 
+148.50 miniQ | 33 | 6-3 | 4-0 | Lions takes leg 4. | 
+149.25 closestReveal | 33 | 6-3 | 4-1 | Lions takes leg 4. | 
+150.25 miniSummary | 34 | 6-3 | 4-1 | Owls takes leg 5. | 
+151.25 roundIntro | 35 | 6-3 |  | Owls takes leg 5. | 
+153.00 ask | 36 | 6-3 |  | Owls takes leg 5. | 
+153.75 steal | 36 | 6-3 |  | Owls takes leg 5. | 
+154.75 answer | 36 | 6-3 |  | Owls takes leg 5. | 
+155.75 ask | 37 | 6-3 |  | Owls takes leg 5. | 
+156.50 ask | 37 | 6-3 |  | Owls used Double Dip. | 
+157.50 steal | 37 | 6-3 |  | Owls used Double Dip. | 
+158.25 answer | 37 | 6-3 |  | Owls used Double Dip. | 
+159.25 answer | 37 | 6-3 |  |  | 
+161.00 answer | 37 | 6-5 |  | Call changed: Owls +2 points. | 
+162.00 roundScore | 38 | 6-5 |  | Call changed: Owls +2 points. | 
+162.75 roundIntro | 39 | 6-5 |  | Call changed: Owls +2 points. | 
+163.75 ask | 40 | 6-5 |  | Call changed: Owls +2 points. | 
+164.75 steal | 40 | 6-5 |  | Call changed: Owls +2 points. | 
+165.50 answer | 40 | 6-6 |  | Owls +1 point — steal | 
+166.50 ask | 41 | 6-6 |  | Owls +1 point — steal | 
+167.25 answer | 41 | 6-7 |  | Owls +1 point | 
+168.25 roundScore | 42 | 6-7 |  | Owls +1 point | 
+169.25 auctionIntro | 43 | 6-7 | 0-0 | Owls +1 point | 
+170.00 auctionBid | 44 | 6-7 | 0-0 | Owls +1 point | 
+171.00 auctionBid | 45 | 6-7 | 0-0 | Owls +1 point | 
+171.75 auctionRun | 46 | 6-7 | 0-0 | Owls +1 point | 
+175.50 auctionLeg | 46 | 6-7 | 1-0 | Owls +1 point | 
+176.25 auctionBid | 47 | 6-7 | 1-0 | Owls +1 point | 
+177.25 auctionBid | 48 | 6-7 | 1-0 | Owls +1 point | 
+178.25 auctionRun | 49 | 6-7 | 1-0 | Owls +1 point | 
+180.00 auctionLeg | 49 | 6-7 | 1-1 | Owls +1 point | 
+180.75 auctionBid | 50 | 6-7 | 1-1 | Owls +1 point | 
+181.75 auctionBid | 51 | 6-7 | 1-1 | Owls +1 point | 
+182.75 auctionRun | 52 | 6-7 | 1-1 | Owls +1 point | 
+185.25 auctionLeg | 52 | 6-7 | 2-1 | Owls +1 point | 
+186.25 auctionResult | 53 | 8-7 | 2-1 | Owls +1 point | 
+187.25 roundIntro | 54 | 8-7 |  | Owls +1 point | 
+188.00 ask | 55 | 8-7 |  | Owls +1 point | 
+189.00 answer | 55 | 9-7 |  | Lions +1 point | 
+189.75 ask | 56 | 9-7 |  | Lions +1 point | 
+190.75 answer | 56 | 9-8 |  | Owls +1 point | 
+191.75 answer | 56 | 9-8 |  |  | 
+197.00 answer | 56 | 9-8 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+198.00 roundScore | 57 | 9-8 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+198.75 battleIntro | 58 | 9-8 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+199.75 battleQ | 59 | 9-8 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+200.75 battleQ | 59 | 9-8 | 1-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+206.00 battleQ | 59 | 9-8 | 2-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+207.00 battleQ | 59 | 9-8 | 3-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+208.75 battleHandoff | 59 | 9-8 | 3-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+209.75 battleQ | 60 | 9-8 | 3-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+211.50 battleQ | 60 | 9-8 | 3-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+212.25 battleQ | 60 | 9-8 | 3-2 | ⁨Lea⁩ doesn't agree: the call stands. | 
+216.00 battleQ | 60 | 9-8 | 3-3 | ⁨Lea⁩ doesn't agree: the call stands. | 
+218.75 battleReview | 60 | 9-8 | 3-4 | ⁨Lea⁩ doesn't agree: the call stands. | 
+219.50 battleSummary | 61 | 9-12 | 3-4 | ⁨Lea⁩ doesn't agree: the call stands. | 
+220.50 final | 62 | 9-12 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+recap: {"margin":3,"sudden":false,"leadChanges":3,"steals":[0,1],"minis":[2,1],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]}}

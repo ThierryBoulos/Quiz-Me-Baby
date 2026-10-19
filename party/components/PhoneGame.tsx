@@ -505,7 +505,7 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
             <span className="flex-1 min-w-0 truncate text-[var(--color-ink-2)]">{c.text || "No answer"}</span>
             <Verdict v={c.ok} say={say} size={13} />
             {host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
-              : !c.done && !K && mine != null ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[36px] px-1" disabled={busy}
+              : !c.done && !K && mine != null && (c.team === mine || c.ok) ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[36px] px-1" disabled={busy}
                 onClick={() => act({ type: "ui/contest", id: c.id })}>Contest</button> : <span className="w-[52px]" />}
           </div>))}
       </div>}
