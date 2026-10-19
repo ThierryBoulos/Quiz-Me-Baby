@@ -36,6 +36,9 @@ const W = [
   { name: "everything at once (with a host)", minis: ALL, host: true, simul: true, net: { delay: 2000, dup: 0.3 }, events: [...offs(5, [25, 60]), { at: 50, type: "reload" }, { at: 100, type: "hostGone", for: 60 }, { at: 70, type: "writesFail", for: 20 }] },
   { name: "the server sits on the TV's reads for 5 to 28 s, now and then", minis: ALL, net: { stall: 0.2 } },
   { name: "the same, with a host", minis: ALL, host: true, net: { stall: 0.2 } },
+  /* the night must be exactly the night with one copy of each */
+  { name: "every tap lands twice, up to 6 s apart (a phone's resend)", minis: ALL, net: { twice: 6000 }, twin: true },
+  { name: "the same, with a host", minis: ALL, host: true, net: { twice: 6000 }, twin: true },
 ];
 
 const only = process.argv.slice(2).filter((a) => /^\d+(:\d+)?$/.test(a)).map((a) => Number(a.split(":")[0]));
@@ -61,6 +64,14 @@ for (let i = 0; i < W.length; i++) {
     const fails = (w.events || []).filter((e) => e.type === "writesFail");
     const offline = (now) => { t0 ??= now; return fails.some((e) => now - t0 >= e.at * 1000 - 2000 && now - t0 <= (e.at + e.for) * 1000 + 8000); };
     const r = await night({ seed: 500 + i * 10 + seed, minis: w.minis, rounds: 4, host: !!w.host, events: structuredClone(w.events || []), net: w.net, simul: w.simul, edge: w.edge, chaos: 0.15, check });
+    if (w.twin) {
+      const { night: once } = await import(pathToFileURL(out).href + `?w=${i}-${seed}-once`);
+      const one = await once({ seed: 500 + i * 10 + seed, minis: w.minis, rounds: 4, host: !!w.host, chaos: 0.15 });
+      /* (what was shown, in order: the times can move by a fraction of a second, as the copies wake the simulator's clock) */
+      const shown = (t) => t.map((l) => l.replace(/^[\d.]+ /, ""));
+      const a = shown(r.trace), b = shown(one.trace), k = b.findIndex((l, n) => l !== a[n]);
+      if (k >= 0 || a.length !== b.length) errors.push(`not the same night as with one copy, from: ${a[k] ?? "(the end)"} vs ${b[k] ?? "(the end)"}`);
+    }
     console.error = err;
     const lost = r.taps.filter((t) => !t.done).length;
     const ok = (r.outcome === "final" || r.outcome === "sudden-cap") && !errors.length && !lost;

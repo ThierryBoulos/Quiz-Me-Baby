@@ -11,7 +11,7 @@ const READ_STUCK_MS = 4000, READS_AT_ONCE = 3;
 export function useInbox(code: string, isTv: boolean, handle: (a: Action) => Promise<void>) {
   useEffect(() => {
     if (!isTv) return;
-    const key = "qmb.tv." + code + ".last";
+    const key = "qmb.tv." + code + ".last", tapsKey = "qmb.tv." + code + ".taps";
     let last = 0;
     try { last = Number(localStorage.getItem(key) || 0); } catch { /* no storage: start from the top */ }
     /* Two taps sent at once (a fast +1, two buzzes) can be numbered in one order and land in the
@@ -22,8 +22,24 @@ export function useInbox(code: string, isTv: boolean, handle: (a: Action) => Pro
     let newest = 0;                                   // the server time of the newest action handled (ms)
     /* the server's timestamps, in either spelling ("…T12:00:00.123456+00:00" or "… 12:00:00.123456+00"), as ms */
     const ms = serverMs;
+    /* A phone whose send got stuck sends the same tap again, with the same tag (lib/supabase.ts):
+       whichever copy lands first is the tap, the others are nothing. The tags handled lately are
+       kept on this laptop with the last id, so a TV reloaded meanwhile doesn't take a late copy either. */
+    let tags: string[] = [];
+    try { tags = JSON.parse(localStorage.getItem(tapsKey) || "[]"); } catch { /* none kept */ }
+    const done = new Set(tags);
+    const firstCopy = (a: Action) => {
+      const tap = a.payload?.tap;
+      if (typeof tap !== "string" || !a.user_id) return true;
+      const tag = a.user_id + "|" + tap;
+      if (done.has(tag)) return false;
+      done.add(tag); tags.push(tag);
+      if (tags.length > 400) { tags = tags.slice(-300); done.clear(); tags.forEach((x) => done.add(x)); }
+      try { localStorage.setItem(tapsKey, JSON.stringify(tags)); } catch { /* in memory only */ }
+      return true;
+    };
     const take = async (a: Action) => {
-      try { await handle(a); } catch (e) { console.error("action refused", a, e); }
+      if (firstCopy(a)) { try { await handle(a); } catch (e) { console.error("action refused", a, e); } }
       if (a.id > last) { last = a.id; try { localStorage.setItem(key, String(last)); } catch { /* in memory only */ } }
       const t = ms(a.at); if (t > newest) newest = t;
     };

@@ -47,16 +47,36 @@ export async function rpc<T = unknown>(fn: string, args: Record<string, unknown>
 }
 
 export const newTap = () => Math.random().toString(36).slice(2, 10);
+
+/* Supabase's free servers sometimes sit on a request for 5 to 28 s (GRF2, 18 Oct: an answer took
+   17 s to be saved). So a tap the server hasn't answered in 4 s goes again, and again after 6 more,
+   then the last copy is waited for, as before. Every copy carries the tap's tag, and the TV takes
+   whichever lands first and only that one (lib/tv/useInbox.ts). A send that fails outright (no
+   connection) isn't repeated: the phone says so at once. */
+const RESEND_AFTER = [4000, 6000];
+async function insistInsert(row: Record<string, unknown>): Promise<{ message: string } | null> {
+  for (let i = 0; ; i++) {
+    const wait = RESEND_AFTER[i], ac = new AbortController();
+    const t = wait ? setTimeout(() => ac.abort(), wait) : undefined;
+    let error: { message: string } | null = null;
+    try { ({ error } = await sb().from("actions").insert(row).abortSignal(ac.signal)); }
+    catch (e) { error = { message: e instanceof Error ? e.message : String(e) }; }
+    finally { clearTimeout(t); }
+    if (!error || !ac.signal.aborted) return error;
+  }
+}
+
 /* a phone telling the TV something: a buzz, an answer, a team name, "start" */
 export async function sendAction(room: string, kind: string, payload: Record<string, unknown> = {}): Promise<string> {
-  let error: { message: string } | null = null;
   /* a tag the TV hands back once it has dealt with this tap (pub.ack), taken or not */
   const tap = typeof payload.tap === "string" ? payload.tap : newTap();
   payload = { ...payload, tap };
   /* about to go: the room page notes the TV's latest update now, as the TV's reply can land before the send returns */
   if (typeof window !== "undefined" && kind !== "suggest") window.dispatchEvent(new Event("qmb:sending"));
-  try { ({ error } = await sb().from("actions").insert({ room, kind, payload })); }
-  catch (e) { error = { message: e instanceof Error ? e.message : String(e) }; }
+  /* (a suggestion isn't sent twice: the captain's list would show it twice, and it's never in a hurry) */
+  const error = kind === "suggest"
+    ? await sb().from("actions").insert({ room, kind, payload }).then((r) => r.error, (e) => ({ message: e instanceof Error ? e.message : String(e) }))
+    : await insistInsert({ room, kind, payload });
   if (error) {
     /* never silent: the phone says the tap didn't go (see the room page) */
     if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("qmb:failed", { detail: friendly(error.message) }));
@@ -71,10 +91,13 @@ export async function sendAction(room: string, kind: string, payload: Record<str
 }
 
 /* What a captain has typed so far, sent quietly (no waiting bar, no receipt): if the clock runs out
-   before they press Send, the TV takes the last of these as their answer. */
+   before they press Send, the TV takes the last of these as their answer. Numbered, so one the
+   server held back that lands after a newer one doesn't replace it. */
+let draftN = 0;
 export function sendDraft(room: string, payload: Record<string, unknown>) {
   if (typeof window === "undefined") return;
-  void sb().from("actions").insert({ room, kind: "draft", payload }).then(() => {}, () => {});
+  draftN = Math.max(draftN + 1, Date.now());
+  void insistInsert({ room, kind: "draft", payload: { ...payload, seq: draftN } }).catch(() => {});
 }
 
 /* "I'm here" / "I left the screen" / "I'm back": small notes from a phone to

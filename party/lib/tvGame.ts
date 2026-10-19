@@ -659,8 +659,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "draft") {
       const t = from?.team;
       if (s.g && from?.role === "captain" && (t === 0 || t === 1) && a.payload.k === draftKey()) {
+        /* (one the server held back, landing after a newer one from the same phone, is old news) */
+        const seq = Number(a.payload.seq) || 0, cur = s.drafts[t];
+        if (cur && cur.by === a.user_id && cur.k === a.payload.k && (cur.seq || 0) > seq) return;
         const texts = (Array.isArray(a.payload.texts) ? a.payload.texts : []).map((x: unknown) => String(x ?? "").trim().slice(0, 80)).filter(Boolean);
-        s.drafts[t] = { k: String(a.payload.k), texts: texts.slice(0, 2), n: String(a.payload.n ?? "").trim().slice(0, 40) };
+        s.drafts[t] = { k: String(a.payload.k), texts: texts.slice(0, 2), n: String(a.payload.n ?? "").trim().slice(0, 40), by: a.user_id, seq };
       }
       return;
     }
