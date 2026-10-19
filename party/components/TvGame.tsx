@@ -192,6 +192,8 @@ function TvMini({ pub }: { pub: Pub }) {
             <div className="text-22 text-[var(--color-ink-2)]"><b>{pub.dish.ings.length}</b> of {pub.dish.n} ingredients</div>
             <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
             <Buzzed pub={pub} />
+            {/* the buzzer's own clock to type it */}
+            {pub.dish.typeBy && pub.buzz != null && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.dish.typeBy} size={80} /><span>to type it</span></div>}
           </>) : (<>
             <div className="display" style={{ fontSize: 76, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
             {(pub.calls || []).map((c) => <div key={c.id} className="text-22 flex items-baseline gap-2"><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={18} /></div>)}

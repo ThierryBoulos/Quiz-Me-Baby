@@ -281,7 +281,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <div className="display text-26 text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed</div>
           <Typed t={pub.buzz} />
           <Judge t={pub.buzz} right={{ type: "dish/right" }} wrong={{ type: "dish/wrong" }} />
-          {!secret.typed?.[pub.buzz] && <Line className="!text-13 !text-[var(--color-ink-3)]">They have {pub.timers?.dishType ?? 10} seconds to type it.</Line>}
+          {!secret.typed?.[pub.buzz] && pub.dish?.typeBy && <div className="flex items-center justify-center gap-3 text-14 text-[var(--color-ink-2)]"><Clock deadline={pub.dish.typeBy} size={48} />to type it</div>}
         </div>) : (<>
           {pub.dish && <div className="card"><Ings ings={pub.dish.ings} small /></div>}
           <Waiting>{pub.dish?.late != null ? `Time's up for ${T[pub.dish.late].name}. ` : ""}Waiting for a buzz…{[0, 1].filter((t) => pub.out?.[t]).map((t) => ` ${T[t].name} is out.`).join("")}</Waiting>
@@ -829,7 +829,11 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
 
       {canType && (
         <div className="card flex flex-col gap-2">
-          <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
+          <div className="flex items-center justify-between gap-3">
+            <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
+            {/* the cocktail or dish: you buzzed, now type it before your own clock runs out */}
+            {sc === "dishQ" && pub.dish?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.dish.typeBy} size={52} />to type it</div>}
+          </div>
           <input id="ans" {...np.props} className="input" value={a} maxLength={80} autoComplete="off" autoCorrect="off" spellCheck={false}
             /* Closest: the number pad, fastest (the reader still takes "1.5 million" if a keyboard sends it) */
             inputMode={sc === "miniQ" ? "decimal" : "text"} placeholder={sc === "miniQ" ? "e.g. 236" : "Type it"} onChange={(e) => setA(e.target.value)} />

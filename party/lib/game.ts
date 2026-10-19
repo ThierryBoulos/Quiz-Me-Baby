@@ -39,7 +39,8 @@ export type Pub = {
   /* the end of the night: a short story of it, shown after the confetti */
   recap?: { margin: number; sudden: boolean; leadChanges: number; steals: Two<number>; minis: Two<number>; best?: { title: string; team: 0 | 1; legs: Two<number> } };
   flag?: string;                  // the flag's file name (flags/<flag>.svg)
-  dish?: { kind: string; ings: string[]; n: number; late?: 0 | 1 | null };   // late: the team whose 10 s to type ran out
+  dish?: { kind: string; ings: string[]; n: number; late?: 0 | 1 | null;   // late: the team whose 10 s to type ran out
+    typeBy?: number | null };   // the buzzer's own clock to type it (the TV's time), while they haven't
   /* ok: the verdict that stands now; app: what the app said first (the "App suggests" tag) */
   reveal?: { answer: string; typed?: Two<string[] | null>; guesses?: Two<number | null>; ok?: Two<boolean | null>; app?: Two<boolean | null>; w: 0 | 1 | "tie" | "none" | null;
     offList?: Two<boolean> };   // Say the Same: an answer that isn't a real answer to the prompt (it counts as SAID IT)

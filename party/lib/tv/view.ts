@@ -133,7 +133,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   }
   if ((s.screen === "dishQ" || s.screen === "dishReveal" || s.screen === "dishCheck") && q) {
     const L = g.dishGame.leg, shown = s.screen === "dishQ" ? L.shown : q.ings.length;
-    p.dish = { kind: dishKind(q), ings: q.ings.slice(0, shown), n: q.ings.length, late: s.late };
+    p.dish = { kind: dishKind(q), ings: q.ings.slice(0, shown), n: q.ings.length, late: s.late,
+      typeBy: s.screen === "dishQ" && L.buzz != null && s.buzzAt && !s.typed[L.buzz as 0 | 1] && !s.pending ? s.buzzAt + getSettings().tDishType * 1000 : null };
     p.buzz = L.buzz; p.out = [...L.out] as Two<boolean>;
     if (s.screen === "dishReveal") { const sub = g.dishGame.subs[g.dishGame.subs.length - 1]; p.reveal = { answer: q.answer, typed: s.typed, w: sub?.winner ?? "none" }; }
   }
