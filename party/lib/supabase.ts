@@ -1,5 +1,5 @@
 "use client";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type RealtimeChannel, type SupabaseClient } from "@supabase/supabase-js";
 import { friendly } from "./errors";
 
 /* The project's public address and publishable key. Both are meant to be in
@@ -12,6 +12,21 @@ let cached: SupabaseClient | null = null;
 export function sb(): SupabaseClient {
   if (!cached) cached = createClient(URL, KEY, { auth: { persistSession: true, storageKey: "qmb.party.auth" } });
   return cached;
+}
+
+/* A live channel has to join with this device's sign-in: the database's rules hide every change
+   from an anonymous one, and nothing says so (it looks joined). On a page load the session comes
+   out of storage a beat after the page starts, and a join sent meanwhile goes out without it, for
+   good (the library only updates channels already joined): GRF2, 18 Oct, the host's phone got no
+   live update for 24 minutes after a reload. So: the session first, then the join. Returns the cleanup. */
+export function joinLive(make: () => RealtimeChannel): () => void {
+  let ch: RealtimeChannel | null = null, off = false;
+  void (async () => {
+    try { const { data } = await sb().auth.getSession(); if (data.session) await sb().realtime.setAuth(data.session.access_token); }
+    catch { /* offline: the reads underneath carry on */ }
+    if (!off) ch = make();
+  })();
+  return () => { off = true; if (ch) void sb().removeChannel(ch); };
 }
 
 /* Nobody signs up. An anonymous session gives each device its own id — the

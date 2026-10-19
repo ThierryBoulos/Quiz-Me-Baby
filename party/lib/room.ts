@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { note, sb } from "./supabase";
+import { joinLive, note, sb } from "./supabase";
 
 export type Role = "player" | "captain" | "host";
 export type Member = { room: string; user_id: string; name: string; team: 0 | 1 | null; role: Role; avatar: string | null; joined_at: string };
@@ -16,7 +16,9 @@ export const teamName = (room: Room | null, t: 0 | 1) => cap1(room?.state?.teamN
 /* The room and its line-up, kept live: Supabase pushes every change and the
    phone uses what the push carries. A poll sits underneath as a safety net:
    every 25 s while the live connection is up, every 3 s while it's down, and
-   not at all while the screen is off (it catches up the moment it's back). */
+   not at all while the screen is off (it catches up the moment it's back).
+   A feed that looks up but brings nothing (a read finds a newer view than any
+   push did, and none follows) is joined again, with the 3 s poll meanwhile. */
 const POLL_LIVE = 25000, POLL_DOWN = 3000;
 export function useRoom(code: string) {
   const [room, setRoom] = useState<Room | null>(null);
@@ -28,6 +30,8 @@ export function useRoom(code: string) {
      arrives after a newer push never rolls the screen back. */
   const stamp = (r: Room | null) => ((r?.state as { pub?: { at?: number } } | undefined)?.pub?.at) ?? 0;
   const takeRoom = useCallback((r: Room | null) => setRoom((cur) => (r && cur && stamp(r) < stamp(cur) ? cur : r)), []);
+  const pushed = useRef(0);                            // the newest view a push brought
+  const onRead = useRef<(r: Room | null) => void>(() => {});
   const pullMembers = useCallback(async () => {
     const m = await sb().from("members").select("*").eq("room", code).order("joined_at");
     if (alive.current && !m.error) setMembers(((m.data || []) as Member[]).map((x) => ({ ...x, name: cap1(x.name) })));
@@ -35,19 +39,19 @@ export function useRoom(code: string) {
   const pull = useCallback(async () => {
     const [r] = await Promise.all([sb().from("rooms").select("*").eq("code", code).maybeSingle(), pullMembers()]);
     if (!alive.current) return;
-    if (!r.error) { takeRoom(r.data as Room | null); setMissing(!r.data); }
+    if (!r.error) { takeRoom(r.data as Room | null); setMissing(!r.data); onRead.current(r.data as Room | null); }
   }, [code, pullMembers, takeRoom]);
 
   useEffect(() => {
     alive.current = true;
     void pull();
-    let live = false, last = Date.now();
-    const ch = sb()
+    let live = false, last = Date.now(), quietUntil = 0;
+    const open = () => joinLive(() => sb()
       .channel("room:" + code)
       /* the push carries the new row: use it straight away (no second trip to the server) */
       .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: "code=eq." + code }, (e) => {
         const n = e.new as Room | undefined;
-        if (n && n.code === code && n.state) { takeRoom(n); setMissing(false); } else void pull();
+        if (n && n.code === code && n.state) { pushed.current = Math.max(pushed.current, stamp(n)); takeRoom(n); setMissing(false); } else void pull();
       })
       /* someone joined, moved, became captain or left: apply that one row, not the whole list again */
       .on("postgres_changes", { event: "*", schema: "public", table: "members", filter: "room=eq." + code }, (e) => {
@@ -64,14 +68,21 @@ export function useRoom(code: string) {
         const was = live;
         live = status === "SUBSCRIBED";
         if (live && !was) void pull();                  // (re)connected: catch up on anything missed meanwhile
-      });
+      }));
+    let close = open();
+    /* a read that found a newer view than any push: if no push brings it in the next moment, the feed is quiet */
+    onRead.current = (r) => {
+      const s = stamp(r);
+      if (!live || !s || s <= pushed.current) return;
+      setTimeout(() => { if (alive.current && pushed.current < s && Date.now() > quietUntil) { quietUntil = Date.now() + 60000; live = false; close(); close = open(); } }, 2500);
+    };
     const tick = setInterval(() => {
       if (document.visibilityState !== "visible") return;
-      if (Date.now() - last >= (live ? POLL_LIVE : POLL_DOWN)) { last = Date.now(); void pull(); }
+      if (Date.now() - last >= (live && Date.now() > quietUntil ? POLL_LIVE : POLL_DOWN)) { last = Date.now(); void pull(); }
     }, 1000);
     const wake = () => { if (document.visibilityState === "visible") { last = Date.now(); void pull(); } };
     document.addEventListener("visibilitychange", wake);
-    return () => { alive.current = false; clearInterval(tick); document.removeEventListener("visibilitychange", wake); void sb().removeChannel(ch); };
+    return () => { alive.current = false; onRead.current = () => {}; clearInterval(tick); document.removeEventListener("visibilitychange", wake); close(); };
   }, [code, pull, pullMembers, takeRoom]);
 
   return { room, members, missing, refresh: pull };

@@ -94,3 +94,5 @@ export const note = () => {};
 export const ensureSession = () => Promise.resolve("tv");
 export const rpc = () => Promise.resolve(null);
 export const sendAction = () => Promise.resolve();
+/* (the app waits for the session before joining; here it's there from the start) */
+export const joinLive = (make) => { const ch = make(); return () => { client.removeChannel(ch); }; };

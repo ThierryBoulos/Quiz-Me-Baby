@@ -2,7 +2,7 @@
    this TV, in the order the server received it (that order decides who buzzed
    first). Each one goes to handle(), once. */
 import { useEffect } from "react";
-import { sb } from "../supabase";
+import { joinLive, sb } from "../supabase";
 import { serverMs, type Action } from "./rules";
 
 export function useInbox(code: string, isTv: boolean, handle: (a: Action) => Promise<void>) {
@@ -28,7 +28,14 @@ export function useInbox(code: string, isTv: boolean, handle: (a: Action) => Pro
       if (a.id > last) { last = a.id; try { localStorage.setItem(key, String(last)); } catch { /* in memory only */ } }
       const t = ms(a.at); if (t > newest) newest = t;
     };
-    const drain = async () => {
+    /* a live feed gone quiet (it looks joined and brings nothing): a safety-net read finds taps no push
+       brought, even a moment later. Then it joins again, and reads every 3 s for a minute meanwhile. */
+    const pushed = new Set<number>();
+    let quietUntil = 0;
+    const quiet = (ids: number[]) => setTimeout(() => {
+      if (!ids.some((id) => pushed.has(id)) && Date.now() > quietUntil) { quietUntil = Date.now() + 60000; close(); live = false; close = open(); }
+    }, 2500);
+    const drain = async (byPoll = false) => {
       if (busy) { again = true; return; }
       busy = true;
       try {
@@ -38,21 +45,25 @@ export function useInbox(code: string, isTv: boolean, handle: (a: Action) => Pro
           let q = sb().from("actions").select("*").eq("room", code).neq("kind", "suggest");
           q = newest ? q.or(`id.gt.${last},at.gt.${new Date(newest - 10000).toISOString()}`) : q.gt("id", last);
           const { data } = await q.order("id");
-          for (const a of (data || []) as Action[]) await take(a);
+          const found: number[] = [];
+          for (const a of (data || []) as Action[]) { if (!seen.has(a.id) && a.id > before && a.kind !== "suggest") found.push(a.id); await take(a); }
+          if (byPoll && live && found.length) quiet(found);
           if (seen.size > 2000) { const keep = [...seen].slice(-500); seen.clear(); keep.forEach((x) => seen.add(x)); }
+          if (pushed.size > 2000) pushed.clear();
         } while (again);
       } finally { busy = false; }
     };
     void drain();
     let live = false, read = Date.now();
-    const ch = sb().channel("actions:" + code)
+    const open = () => joinLive(() => sb().channel("actions:" + code)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
-        (m: { new?: Partial<Action> }) => { if (m.new?.id && m.new.kind) fresh.push(m.new as Action); void drain(); })
-      .subscribe((status) => { const was = live; live = status === "SUBSCRIBED"; if (live && !was) void drain(); });
+        (m: { new?: Partial<Action> }) => { if (m.new?.id && m.new.kind) { pushed.add(m.new.id); fresh.push(m.new as Action); } void drain(); })
+      .subscribe((status) => { const was = live; live = status === "SUBSCRIBED"; if (live && !was) void drain(); }));
+    let close = open();
     /* every tap arrives with the push and is handled at once; this read is the safety net:
        every 20 s while the live connection is up (a tap it missed is picked up by the next push
        anyway), every 3 s while it's down */
-    const poll = setInterval(() => { if (Date.now() - read >= (live ? 20000 : 3000)) { read = Date.now(); void drain(); } }, 1000);
-    return () => { clearInterval(poll); void sb().removeChannel(ch); };
+    const poll = setInterval(() => { if (Date.now() - read >= (live && Date.now() > quietUntil ? 20000 : 3000)) { read = Date.now(); void drain(true); } }, 1000);
+    return () => { clearInterval(poll); close(); };
   }, [code, isTv, handle]);
 }

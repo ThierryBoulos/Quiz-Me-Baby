@@ -39,15 +39,21 @@ export default function PhoneRoom() {
   const [tapAt, setTapAt] = useState<{ top?: number; bottom?: number } | null>(null);
   const lastBtn = useRef<Element | null>(null);
   const waitRef = useRef({ on: false, key: "" }), viewKey = useRef(""), sendKey = useRef(""), lateKey = useRef<string | null>(null);
+  const refreshRef = useRef(refresh);
+  refreshRef.current = refresh;
   useEffect(() => {
-    let t: ReturnType<typeof setTimeout> | undefined;
-    const stop = () => { clearTimeout(t); waitRef.current.on = false; setWaiting(false); };
+    let t: ReturnType<typeof setTimeout> | undefined, again: ReturnType<typeof setTimeout>[] = [];
+    const stop = () => { clearTimeout(t); again.forEach(clearTimeout); again = []; waitRef.current.on = false; setWaiting(false); };
     /* the TV's latest update just before the tap went: any newer one is its reply, even one that beat the send back */
     const sending = () => { sendKey.current = viewKey.current; };
     const on = () => {
       clearTimeout(t); setTapErr(null); lateKey.current = null;
       if (viewKey.current !== sendKey.current) { stop(); return; }   // the reply is already here
       waitRef.current = { on: true, key: sendKey.current }; setWaiting(true);
+      /* the TV usually answers within half a second, by push; if that push is slow (or the feed is
+         down), read the room again rather than wait for the next poll */
+      again.forEach(clearTimeout);
+      again = [1200, 3000, 5500].map((ms) => setTimeout(() => { if (waitRef.current.on) void refreshRef.current(); }, ms));
       /* 8 s with no reply (slow Wi-Fi at a party): say so; a reply that comes after all takes the message away */
       t = setTimeout(() => { if (waitRef.current.on) { const key = waitRef.current.key; stop(); lateKey.current = key; window.dispatchEvent(new Event("qmb:late")); setTapErr("The TV hasn't answered. If nothing changes, tap again."); } }, 8000);
     };
@@ -71,7 +77,7 @@ export default function PhoneRoom() {
     window.addEventListener("qmb:failed", failed);
     return () => {
       window.removeEventListener("qmb:sending", sending); window.removeEventListener("qmb:sent", on); window.removeEventListener("qmb:failed", failed); window.removeEventListener("qmb:late", late);
-      document.removeEventListener("pointerdown", tapped, true); document.removeEventListener("keydown", tapped, true); clearTimeout(t);
+      document.removeEventListener("pointerdown", tapped, true); document.removeEventListener("keydown", tapped, true); clearTimeout(t); again.forEach(clearTimeout);
     };
   }, []);
   useEffect(() => { if (!tapErr) return; const t = setTimeout(() => setTapErr(null), 6000); return () => clearTimeout(t); }, [tapErr]);
