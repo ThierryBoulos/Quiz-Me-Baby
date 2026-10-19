@@ -705,7 +705,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const hand = (k: string) => (byHost ? ids(cfgIn[k]) : []);
       const cfg = { rounds, themes: cfgIn.themes || [], difficulty: diff, standard,
         /* maps, flags and dishes each have their own levels, set with the mini-games (as in Classic) */
-        minis, mapLevels: levels(cfgIn.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), flagLevels: levels(cfgIn.flagLevels, QMB.FLAG_LEVEL_KEYS, ["easy", "medium"]),
+        minis, mapLevels: levels(cfgIn.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), flagLevels: levels(cfgIn.flagLevels, QMB.FLAG_LEVEL_KEYS, ["veasy", "easy", "medium"]),
         dishLevels: levels(cfgIn.dishLevels, QMB.DISH_LEVEL_KEYS, ["c-medium", "d-medium"]), teamA: team(0), teamB: team(1), picks, themeDiff,
         pickClosest: hand("pickClosest"), pickAuction: hand("pickAuction"), pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish") };
       const g = env().deal.buildGame(cfg);
