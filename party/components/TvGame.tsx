@@ -236,6 +236,7 @@ function TvMini({ pub }: { pub: Pub }) {
       <div className="display max-w-[1100px]" style={{ fontSize: 76, color: "var(--color-gold)", lineHeight: 1.05 }}>{A.cat}</div>
       <div className="display text-60">{A.bid ? <>Bid: {A.bid} <span style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}</span></> : "No bid yet"}</div>
       <div className="text-28" style={{ color: tc(A.turn) }}><b>{T[A.turn].name}</b>: raise{A.bid ? " or pass" : ""}</div>
+      <div className="text-24 text-[var(--color-ink-2)]">Whoever wins the bid has <b>{pub.timers?.auction ?? 30} seconds</b> to name them.</div>
     </>);
     if (sc === "auctionRun") return (<>
       <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{A.cat}</div>

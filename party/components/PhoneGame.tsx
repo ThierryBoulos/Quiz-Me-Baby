@@ -348,7 +348,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="flex flex-col gap-4 flex-1">
         <Big eyebrow={`Auction · leg ${A.leg + 1} of ${A.n}`} size={30} text={A.cat} sub={A.notes} />
         <Line className="!text-16 !text-[var(--color-ink)]">{A.bid ? <>Bid: <b>{A.bid}</b> by <b style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}</b></> : "No bid yet"}<br />
-          <span className="text-[var(--color-ink-2)]">The captains bid on their phones. <b style={{ color: tc(A.turn) }}>{T[A.turn].name}</b> to bid.</span></Line>
+          <span className="text-[var(--color-ink-2)]">The captains bid on their phones. <b style={{ color: tc(A.turn) }}>{T[A.turn].name}</b> to bid. Whoever wins it has {pub.timers?.auction ?? 30} seconds to name them.</span></Line>
         <div className="flex justify-center mt-auto">{!A.bid && <Small ghost label="Change the category" move={{ type: "auction/skip" }} />}</div>
       </div>); }
     case "auctionRun": { const A = pub.auction!; return (
@@ -887,10 +887,12 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {sc === "auctionBid" && A && A.turn === mine && (
         <div className="card flex flex-col gap-2">
           <div className="eyebrow">{A.bid ? `Beat ${A.bid}, or pass` : "Open the bidding"}</div>
-          {A.bid < MAX_BID && <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>}
+          <p className="text-13 text-[var(--color-ink-2)]">Whoever wins the bid has <b>{pub.timers?.auction ?? 30} seconds</b> to name them, out loud.</p>
+          {/* a number typed in the box: its Bid is the big button, and +1 steps back (people typed 15, then tapped "Raise to 2") */}
+          {A.bid < MAX_BID && <button className={"btn " + (bid ? "btn-sm self-start" : "btn-gold btn-lg")} disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>}
           <div className="flex gap-2">
-            <input {...np.props} className="input" aria-label="Custom bid" inputMode="numeric" value={bid} placeholder="Custom bid" onChange={(e) => setBid(e.target.value.replace(/\D/g, "").slice(0, 3))} />
-            <button className="btn" disabled={busy || !(Number(bid) > A.bid) || Number(bid) > MAX_BID} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>Bid</button>
+            <input {...np.props} className="input" aria-label="Custom bid" inputMode="numeric" value={bid} placeholder="Or type your bid" onChange={(e) => setBid(e.target.value.replace(/\D/g, "").slice(0, 3))} />
+            <button className={"btn shrink-0 " + (bid ? "btn-gold btn-lg" : "")} disabled={busy || !(Number(bid) > A.bid) || Number(bid) > MAX_BID} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>{bid && Number(bid) > A.bid ? `Bid ${Number(bid)}` : "Bid"}</button>
           </div>
           {bid !== "" && !(Number(bid) > A.bid) && <p className="text-13 text-[var(--color-no)]" role="alert">A bid has to beat {A.bid}.</p>}
           {Number(bid) > MAX_BID && <p className="text-13 text-[var(--color-no)]" role="alert">Bids go up to {MAX_BID}.</p>}
