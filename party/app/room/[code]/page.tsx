@@ -3,7 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
 import { ShareButton } from "@/components/Share";
-import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, useSecret } from "@/components/PhoneGame";
+import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, ScoreFix, useSecret } from "@/components/PhoneGame";
 import { Confetti, Hud, usePreload } from "@/components/GameParts";
 import { noteTvTime } from "@/components/Clock";
 import { Rules } from "@/components/Rules";
@@ -235,6 +235,7 @@ export default function PhoneRoom() {
             <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
+            {mine.role === "host" && pub && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
             {/* leaving is kept away from everyday buttons, and asks first */}
             <button className="btn btn-sm btn-ghost self-center mt-6" style={{ color: "var(--color-no)", borderColor: "color-mix(in srgb, var(--color-no) 45%, transparent)" }} onClick={leave}>Leave the game</button>
           </section>

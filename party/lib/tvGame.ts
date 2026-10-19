@@ -398,6 +398,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (t === "dish/wrong") { s.typed[b] = null; s.buzzAt = 0; }
     }
     else if (t === "ui/closeLifeline") { s.lifeline = null; s.paused = false; applyFx([{ timer: "resume" }]); }
+    /* the host sets the total scores by hand (something went wrong); everyone sees it said */
+    else if (t === "ui/setScore") {
+      const n = (x: unknown) => Math.max(0, Math.min(999, Math.floor(Number(x))));
+      if (!Number.isFinite(Number(move.a)) || !Number.isFinite(Number(move.b))) return;
+      g.teams[0].score = n(move.a); g.teams[1].score = n(move.b);
+      s.toast = { id: ++s.toastN, text: `The host set the scores: ${iso(g.teams[0].name)} ${g.teams[0].score}, ${iso(g.teams[1].name)} ${g.teams[1].score}.` };
+    }
     else if (t === "ui/timeUp") { s.deadline = null; s.left = 0; s.timeUp = true; }
     else if (t === "ui/pause") {
       /* while the TV is asleep its own pause holds the clock; a Pause or Resume tapped meanwhile waits for it */
