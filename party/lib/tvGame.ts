@@ -87,6 +87,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const [lobbyNote, setLobbyNote] = useState<string | null>(null);
   useEffect(() => { if (!lobbyNote) return; const t = setTimeout(() => setLobbyNote(null), 6000); return () => clearTimeout(t); }, [lobbyNote]);
   const pubN = useRef(0);                             // publishes so far (a tap with none after it still gets a reply)
+  /* The lobby's team names and who's away, as this TV last wrote them. Two writes a beat apart (both
+     captains naming their teams in the same second) must each build on the other, not on a room the
+     push hasn't brought back yet: on 20 Oct the second name overwrote the first. */
+  const lobbyMine = useRef<{ teamNames?: [string, string]; away?: string[] }>({});
+  const lobbyState = (room: Room) => ({ ...room.state, ...lobbyMine.current });
   const publish = useCallback(() => {
     pubN.current++;
     /* this TV shows the change at once; the phones get it with the next write */
@@ -404,7 +409,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     setPub(null);
     const rest = { ...(room?.state || {}) }; delete rest.pub;
     /* (stamped, so a game update still on its way can't bring the old game back) */
-    void sb().from("rooms").update({ status: "lobby", mode: null, state: { ...rest, away: [], pubAt: stamp() } }).eq("code", code).then(() => {});
+    lobbyMine.current.away = [];
+    void sb().from("rooms").update({ status: "lobby", mode: null, state: { ...rest, ...lobbyMine.current, pubAt: stamp() } }).eq("code", code).then(() => {});
   };
 
   /* the moves a host makes — from the host's phone, or a captain's with no host */
@@ -692,9 +698,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return;
     }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
-      const names = [...(room.state.teamNames || ["Team A", "Team B"])] as [string, string];
+      const base = lobbyState(room), names = [...(base.teamNames || ["Team A", "Team B"])] as [string, string];
       names[from.team as 0 | 1] = cap1(String(a.payload.name || "").trim().slice(0, 18)) || names[from.team as 0 | 1];
-      await sb().from("rooms").update({ state: { ...room.state, teamNames: names } }).eq("code", code);
+      lobbyMine.current.teamNames = names;
+      await sb().from("rooms").update({ state: { ...base, teamNames: names } }).eq("code", code);
       return;
     }
     /* the lobby: my captain is away, so I take the armband */
@@ -716,7 +723,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const base = await loadBank(code);
       s.custom = cleanList(cfgIn.custom, base.themes);
       s.bank = withCustom(members.some((m) => m.role === "host") ? base : withoutHostOnly(base), s.custom);
-      const names = room.state.teamNames || ["Team A", "Team B"];
+      const names = lobbyState(room).teamNames || ["Team A", "Team B"];
       const team = (t: 0 | 1) => ({ name: cap1(names[t]), captain: cap1(members.find((m) => m.team === t && m.role === "captain")?.name || ""),
         players: members.filter((m) => m.team === t).map((m) => m.name).join(", ") });
       const diff = DIFFS.includes(cfgIn.difficulty) ? cfgIn.difficulty : "mixed";
@@ -967,8 +974,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const { room, members } = ctx.current, H = here.current, now = Date.now();
       if (!room || room.status !== "lobby") return;
       const away = members.filter((m) => m.role === "captain" && now - (H.at[m.user_id] ?? H.since) >= T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
-      const was = ((room.state.away as string[] | undefined) || []).join(",");
-      if (away.join(",") !== was) void sb().from("rooms").update({ state: { ...room.state, away } }).eq("code", code).then(() => {});
+      const base = lobbyState(room), was = ((base.away as string[] | undefined) || []).join(",");
+      if (away.join(",") !== was) { lobbyMine.current.away = away; void sb().from("rooms").update({ state: { ...base, away } }).eq("code", code).then(() => {}); }
     }, 3000);
     return () => clearInterval(t);
   }, [isTv, code]);
