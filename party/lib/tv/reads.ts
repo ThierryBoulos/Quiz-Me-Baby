@@ -4,6 +4,7 @@ import { QMB, acceptFor } from "../engine";
 import type { Member } from "../room";
 import { other, type G, type W } from "./rules";
 import type { TvState } from "./state";
+import { offBy } from "../game";
 
 /* who answers first: fixed for the whole game when it starts (Settings → alternate) */
 export const seatOf = (g: G) => ({ alternateFirst: !!g?.alternateFirst });
@@ -44,7 +45,7 @@ export function closestW(s: TvState): W {
   if (a == null && b == null) return "none";
   if (a == null) return 1;
   if (b == null) return 0;
-  const ans = Number(q.answer), da = Math.abs(a - ans), db = Math.abs(b - ans);
+  const ans = Number(q.answer), da = offBy(a, ans), db = offBy(b, ans);
   return da === db ? "tie" : da < db ? 0 : 1;
 }
 /* Say Same: ok = dodged the word. One team dodging alone takes it; otherwise a point each */

@@ -5,7 +5,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { BattleAnswer, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Confetti, decidedCall, decidedHead, decidedSub, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
-import { DECIDED, TIE_SCREENS } from "@/lib/game";
+import { DECIDED, offBy, showNum, TIE_SCREENS } from "@/lib/game";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
@@ -165,8 +165,8 @@ function TvMini({ pub }: { pub: Pub }) {
       <div className="flex gap-20">{[0, 1].map((t) => { const gss = pub.reveal?.guesses?.[t]; return (
         <div key={t} style={{ opacity: w === t || w === "tie" ? 1 : 0.55 }}>
           <div className="display text-30" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
-          <div className="display text-70">{gss ?? "—"}</div>
-          <div className="text-20 text-[var(--color-ink-2)]">{gss == null ? "No answer" : `Off by ${Math.abs(gss - ans)}`}</div>
+          <div className="display text-70">{gss == null ? "—" : showNum(gss)}</div>
+          <div className="text-20 text-[var(--color-ink-2)]">{gss == null ? "No answer" : `Off by ${showNum(offBy(gss, ans))}`}</div>
         </div>); })}</div>
       <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : ""}</div>
     </>);

@@ -111,3 +111,8 @@ export const PARTY_LEGS: Partial<Record<MiniKey, number>> = { closest: 5, saysam
 /* A name inside a sentence, isolated, so a right-to-left name (Arabic) doesn't drag the
    punctuation around it out of order: "(Abdulrahman) left the screen" stays in order. */
 export const iso = (name: string) => "\u2068" + name + "\u2069";
+/* Closest To Wins: how far a guess is from the answer, without the computer's rounding noise
+   (361.6 − 281 is 80.60000000000002 to it: that's 80.6, and two guesses as far off are level) */
+export const offBy = (guess: number, answer: number) => Number(Math.abs(guess - answer).toPrecision(12));
+/* a number as people read it: 1,500,000 · 80.6 */
+export const showNum = (n: number) => n.toLocaleString("en-GB", { maximumFractionDigits: 6 });
