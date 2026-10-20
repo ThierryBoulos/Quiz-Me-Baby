@@ -319,7 +319,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .rule-btn:not(.on) .rule-tag { color: var(--color-ink-2); }
 .rule-pick.compact { gap: 6px; }
 .rule-pick.compact .btn.rule-btn { min-height: 48px; padding: 4px 6px; font-size: var(--text-14); }
-.rule-pick.compact .rule-tag { font-size: 8.5px; letter-spacing: .08em; }
+.rule-pick.compact .rule-tag { font-size: var(--text-8); letter-spacing: .08em; }
 
 
 /* a flag's thin light edge, so a black stripe never melts into the dark */
