@@ -644,8 +644,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!room) return;
     let from = members.find((m) => m.user_id === a.user_id);
     /* the line-up here can be a beat behind the phones (a captain who claimed a second ago, a
-       player who just joined): before refusing or ignoring a tap for that, read it fresh */
-    if ((!from && a.kind !== "count") || (a.kind === "setup" && !readyToStart(members))) {
+       player who just joined): before refusing or ignoring a tap for that, read it fresh
+       (a team named the moment its captain took the armband was dropped: 20 Oct) */
+    if ((!from && a.kind !== "count") || (a.kind === "setup" && !readyToStart(members)) || (a.kind === "team_name" && from?.role !== "captain")) {
       const { data } = await sb().from("members").select("*").eq("room", code);
       if (data) { members = data as Member[]; ctx.current.members = members; from = members.find((m) => m.user_id === a.user_id); }
     }
