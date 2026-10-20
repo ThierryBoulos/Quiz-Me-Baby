@@ -147,21 +147,53 @@
   }
   /* -> true when `typed` counts as `answer` (or any of `accept`) */
   function isMatch(typed, answer, accept){
-    const tn = asNumber(typed) ?? asNumber(numWords(tidy(typed)));
-    const wanted = variants(answer).concat(accept || []);
-    for(const w of wanted){
-      const wn = asNumber(w) ?? asNumber(numWords(tidy(w)));
-      if(tn != null && wn != null){ if(tn === wn) return true; continue; }
-      /* as written, with number words as digits (so a typo in "Sevn" still meets "Seven"),
-         and without a leading "Mount" or trailing "River" */
-      const ta = tidy(typed), tb = tidy(w);
-      for(const [a, b] of [[ta, tb], [numWords(ta), numWords(tb)], [bareGeo(ta), bareGeo(tb)]]){
-        if(!a || !b) continue;
-        if(a === b || a.replace(/ /g, '') === b.replace(/ /g, '')) return true;
-        const ca = countryOf(a), cb = countryOf(b);
-        if(ca >= 0 && cb >= 0 && ca !== cb) continue;                  // one country typed for another
-        if(distance(a, b) <= allowance(b.length)) return true;
+    return variants(answer).concat(accept || []).some(w => (matchOne(typed, w) && !thirdCountry(typed, w)) || matchPair(typed, w));
+  }
+  /* Two countries asked for: naming a third is wrong, however close it's spelt ("Nigeria and Mali"
+     is not "Niger and Mali"). Names are read longest first, so "Papua New Guinea" isn't Guinea. */
+  function thirdCountry(typed, w){
+    const halves = tidy(w).split(' and ');
+    if(halves.length !== 2) return false;
+    const want = halves.map(h => countryOf(h.replace(/^the /, '')));
+    if(want.some(i => i < 0)) return false;
+    const words = tidy(typed).split(' ').filter(x => x && x !== 'and' && x !== 'the');
+    for(let i = 0; i < words.length; i++){
+      for(let j = Math.min(words.length, i + 5); j > i; j--){
+        const c = countryOf(words.slice(i, j).join(' '));
+        if(c < 0) continue;
+        if(!want.includes(c)) return true;
+        i = j - 1; break;
       }
+    }
+    return false;
+  }
+  function matchOne(typed, w){
+    const tn = asNumber(typed) ?? asNumber(numWords(tidy(typed)));
+    const wn = asNumber(w) ?? asNumber(numWords(tidy(w)));
+    if(tn != null && wn != null) return tn === wn;
+    /* as written, with number words as digits (so a typo in "Sevn" still meets "Seven"),
+       and without a leading "Mount" or trailing "River" */
+    const ta = tidy(typed), tb = tidy(w);
+    for(const [a, b] of [[ta, tb], [numWords(ta), numWords(tb)], [bareGeo(ta), bareGeo(tb)]]){
+      if(!a || !b) continue;
+      if(a === b || a.replace(/ /g, '') === b.replace(/ /g, '')) return true;
+      const ca = countryOf(a), cb = countryOf(b);
+      if(ca >= 0 && cb >= 0 && ca !== cb) continue;                  // one country typed for another
+      if(distance(a, b) <= allowance(b.length)) return true;
+    }
+    return false;
+  }
+  /* A pair ("USA and Canada"): both of its halves, in either order, with or without the "and"
+     ("canada and usa", "Canada usa", "Canada, USA"), each half with its own slip allowed. Two
+     countries count by any of their names ("US and Canada"). Never one half alone. */
+  function matchPair(typed, w){
+    const halves = tidy(w).split(' and ');
+    if(halves.length !== 2 || !halves[0] || !halves[1]) return false;
+    const words = tidy(typed).split(' ').filter(x => x && x !== 'and');
+    const half = (t, h) => matchOne(t, h) || (countryOf(t.replace(/^the /, '')) >= 0 && countryOf(t.replace(/^the /, '')) === countryOf(h.replace(/^the /, '')));
+    for(let k = 1; k < words.length; k++){
+      const x = words.slice(0, k).join(' '), y = words.slice(k).join(' ');
+      if((half(x, halves[0]) && half(y, halves[1])) || (half(x, halves[1]) && half(y, halves[0]))) return true;
     }
     return false;
   }

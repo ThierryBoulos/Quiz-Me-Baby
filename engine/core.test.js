@@ -16,6 +16,24 @@ test('answers: exact, tidy and typo-tolerant', () => {
   assert.ok(Q.isMatch('Britain', 'United Kingdom', ['UK', 'Britain', 'Great Britain']));
   assert.ok(Q.isMatch('uk', 'United Kingdom', ['UK']));
   assert.ok(Q.isMatch('UK', 'UK / United Kingdom'));
+  /* a pair, either way round, with or without its "and" (20 Oct: "Canada usa" was called WRONG) */
+  assert.ok(Q.isMatch('Canada usa', 'USA and Canada'));
+  assert.ok(Q.isMatch('canada and usa', 'USA and Canada'));
+  assert.ok(Q.isMatch('Canada, USA', 'USA and Canada'));
+  assert.ok(Q.isMatch('canada & the usa', 'USA and Canada'));
+  assert.ok(Q.isMatch('US and Canada', 'USA and Canada'));
+  assert.ok(Q.isMatch('Canda and United States', 'USA and Canada'));
+  assert.ok(Q.isMatch('russia china', 'China and Russia'));
+  assert.ok(Q.isMatch('Yanny and Laurel', 'Laurel and Yanny'));
+  assert.ok(Q.isMatch('Erica and Jack', 'Jack and Erica'));
+  assert.ok(!Q.isMatch('Canada', 'USA and Canada'));                   // one half is not the pair
+  assert.ok(!Q.isMatch('Canada and Mexico', 'USA and Canada'));
+  assert.ok(!Q.isMatch('usa canada mexico', 'USA and Canada'));
+  assert.ok(!Q.isMatch('Nigeria and Mali', 'Niger and Mali'));         // one country for another
+  assert.ok(!Q.isMatch('Snow White', 'Snow White and the Seven Dwarfs'));
+  assert.ok(Q.isMatch('Trinidad Tobago', 'Trinidad and Tobago'));
+  assert.ok(Q.isMatch('Canada adn USA', 'USA and Canada', ['Canada and USA']));   // a slip anywhere, against its list
+  assert.ok(Q.isMatch('australia and papua new guinea', 'Papua New Guinea and Australia'));
   assert.ok(Q.isMatch('United Kingdom', 'UK / United Kingdom'));
   assert.ok(!Q.isMatch('Peru', 'Paris'));
   assert.ok(!Q.isMatch('Iran', 'Iraq'));                  // short words: no allowance
