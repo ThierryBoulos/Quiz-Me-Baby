@@ -39,6 +39,10 @@ const W = [
   /* the night must be exactly the night with one copy of each */
   { name: "every tap lands twice, up to 6 s apart (a phone's resend)", minis: ALL, net: { twice: 6000 }, twin: true },
   { name: "the same, with a host", minis: ALL, host: true, net: { twice: 6000 }, twin: true },
+  /* the phones must not wait behind a held update: they're never more than a few seconds behind the TV */
+  { name: "the server sits on the TV's updates for 5 to 28 s, now and then", minis: ALL, net: { stallWrites: 0.08 }, lag: true },
+  { name: "the same, with a host", minis: ALL, host: true, net: { stallWrites: 0.08 }, lag: true },
+  { name: "the room holds a stamp ahead of the TV's clock, twice", minis: DEF, events: [{ at: 30, type: "futureStamp" }, { at: 120, type: "futureStamp" }], lag: true },
 ];
 
 const only = process.argv.slice(2).filter((a) => /^\d+(:\d+)?$/.test(a)).map((a) => Number(a.split(":")[0]));
@@ -77,6 +81,10 @@ for (let i = 0; i < W.length; i++) {
     const ok = (r.outcome === "final" || r.outcome === "sudden-cap") && !errors.length && !lost;
     if (!ok) bad++;
     console.log(`${ok ? "ok  " : "FAIL"} ${i + 1}. ${w.name} [seed ${seed}]: ${r.outcome}${r.stuckOn ? " (" + r.stuckOn + ")" : ""}, ${r.score}, ${r.minutes.toFixed(1)} min, ${r.taps.length} taps${lost ? ", " + lost + " without a receipt" : ""}${errors.length ? ", errors: " + [...new Set(errors)].slice(0, 3).join(" | ") : ""}`);
+    if (w.lag) {
+      console.log(`     ${r.stalls} updates held; the phones were at most ${(r.behind / 1000).toFixed(1)} s behind the TV`);
+      if (r.behind > 7000) { bad++; console.log("FAIL the phones waited behind a held update"); }
+    }
     /* a held read must not hold the taps back: each one's receipt comes as fast as on a good night */
     if (w.net?.stall) {
       const waits = r.taps.filter((t) => t.done && !t.superseded).map((t) => t.done - t.at).sort((a, b) => a - b);

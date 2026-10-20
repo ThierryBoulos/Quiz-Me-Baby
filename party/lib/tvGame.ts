@@ -71,12 +71,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* ---- what the phones see (lib/tv/view.ts) ---- */
   const view = useCallback((): [Pub, Secret] | null => buildView(st.current, ctx.current.members), []);
 
-  /* One write at a time, each built from the latest state when its turn
-     comes. Two overlapping writes could otherwise land out of order and leave
-     the phones a step behind the TV — and a host tap from a stale step is
-     refused, which would freeze the game. */
+  /* One write at a time, each built from the latest state when its turn comes. Each carries a
+     stamp (state.pubAt, also pub.at), always later than the last, and the database only takes a
+     write newer than what it holds: two writes that land out of order can't leave the phones a
+     step behind (a host tap from a stale step is refused, which would freeze the game). So a write
+     the server sits on doesn't hold up the next: after 2 s the next goes out beside it, and the held
+     one, if it lands at all, is turned down (20 Oct: one update held 15 s kept five ingredients
+     of a recipe back, and they all appeared at once). */
   const chain = useRef<{ p: Promise<void>; queued: boolean }>({ p: Promise.resolve(), queued: false });
-  const lastSecret = useRef(""), lastSave = useRef(""), offline = useRef(false);
+  const lastSecret = useRef(""), lastSave = useRef(""), offline = useRef(false), lastAt = useRef(0);
+  const stamp = () => (lastAt.current = Math.max(Date.now(), lastAt.current + 1));
   /* a line across the TV when something's wrong that the room should know about */
   const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave">(null);
   /* the lobby: why a Start didn't start (a captain left a second ago) */
@@ -90,10 +94,18 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const c = chain.current;
     if (c.queued) return c.p;              // a write that hasn't started yet will pick up this change too
     c.queued = true;
+    /* The phones didn't get it (Wi-Fi dropped, the server hiccupped): say so on the TV and keep
+       trying, so a reveal or a final screen with nothing after it still reaches everyone. */
+    const failed = (e: unknown) => {
+      console.error("publish failed", e);
+      offline.current = true; setBanner((b) => b ?? "offline");
+      setTimeout(() => void publishRef.current(), 2000);
+    };
     c.p = c.p.then(async () => {
       c.queued = false;
       const v = view(); if (!v) return;
-      v[0].at = Date.now();
+      const at = stamp();
+      v[0].at = at;
       setPub(v[0]);
       const s = st.current;
       /* the game, kept on this laptop so a refresh picks it up (only written when it changed);
@@ -111,21 +123,30 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the answer and the screen go out together (the host's phone shows "Getting the answer…" until
          an answer for this very step lands), and the answer only when it changed: a +1, a pause,
          a ruling leave it as it was — one write, not two */
-      const sec = JSON.stringify(v[1]);
-      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0] } }).eq("code", code)];
-      if (sec !== lastSecret.current) writes.push(sb().from("secrets").update({ data: v[1] }).eq("room", code));
-      const res = await Promise.all(writes);
-      const bad = res.find((r) => r.error);
-      if (bad) throw bad.error;
-      lastSecret.current = sec;
-      if (offline.current) { offline.current = false; setBanner((b) => (b === "offline" ? null : b)); }
-    }).catch((e) => {
-      /* The phones didn't get it (Wi-Fi dropped, the server hiccupped): say so on the TV and keep
-         trying, so a reveal or a final screen with nothing after it still reaches everyone. */
-      console.error("publish failed", e);
-      offline.current = true; setBanner((b) => b ?? "offline");
-      setTimeout(() => void publishRef.current(), 2000);
-    });
+      const sec = JSON.stringify(v[1]), withSecret = sec !== lastSecret.current;
+      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0], pubAt: at } }).eq("code", code)
+        .or(`state->>pubAt.is.null,state->>pubAt.lt.${at}`).select("code")];
+      if (withSecret) writes.push(sb().from("secrets").update({ data: { ...v[1], at } }).eq("room", code)
+        .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).select("room"));
+      const done = Promise.all(writes).then(async (res) => {
+        const bad = res.find((r) => r.error);
+        if (bad) throw bad.error;
+        const latest = lastAt.current === at;
+        if (withSecret && latest) lastSecret.current = sec;
+        /* turned down while it's this TV's latest: the room holds a later stamp than this TV has (its
+           clock went back, or it reloaded and its clock is behind the last one's): go on from there */
+        if (latest && !res[0].data?.length) {
+          const r = await sb().from("rooms").select("state").eq("code", code).maybeSingle();
+          const theirs = Number((r.data?.state as { pubAt?: number } | undefined)?.pubAt) || 0;
+          if (theirs >= at) { lastAt.current = Math.max(lastAt.current, theirs); setTimeout(() => void publishRef.current(), 0); }
+        }
+        if (offline.current) { offline.current = false; setBanner((b) => (b === "offline" ? null : b)); }
+      });
+      let wait: ReturnType<typeof setTimeout> | undefined;
+      const held = await Promise.race([done.then(() => false), new Promise<boolean>((r) => { wait = setTimeout(() => r(true), 2000); })]);
+      clearTimeout(wait);
+      if (held) done.catch(failed);                  // (it can still fail later: then it's said, and tried again)
+    }).catch(failed);
     return c.p;
   }, [code, saveKey, view]);
   const publishRef = useRef(publish);
@@ -382,7 +403,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     lastSave.current = "";
     setPub(null);
     const rest = { ...(room?.state || {}) }; delete rest.pub;
-    void sb().from("rooms").update({ status: "lobby", mode: null, state: { ...rest, away: [] } }).eq("code", code).then(() => {});
+    /* (stamped, so a game update still on its way can't bring the old game back) */
+    void sb().from("rooms").update({ status: "lobby", mode: null, state: { ...rest, away: [], pubAt: stamp() } }).eq("code", code).then(() => {});
   };
 
   /* the moves a host makes — from the host's phone, or a captain's with no host */

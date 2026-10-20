@@ -61,7 +61,8 @@ function answerNow(g, pub) {
      { at, type: "capGone", team }    that team's captain's phone is gone for good
      { at, type: "hostGone", for }    the host's phone is gone for a while
      { at, type: "writesFail", for }  the TV's writes fail (no internet) for a while
-   net: { dup, delay, stall }  pushes sent twice / up to delay ms late (out of order) / that share of reads held 5-28 s
+     { at, type: "futureStamp" }      the room holds a stamp a minute ahead of the TV's clock
+   net: { dup, delay, stall, stallWrites }  pushes sent twice / up to delay ms late (out of order) / that share of reads, or of the TV's writes, held 5-28 s
    simul: both captains tap Next, buzz, rule at the very same moment
    edge: answers land at the exact moment the clock runs out */
 export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null }) {
@@ -124,8 +125,13 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   /* each new question counts once */
   const sc0 = (p) => (p.screen === "ask" && p.step !== lastAsk ? ((lastAsk = p.step), "ask") : "");
   let outcome = "timeout", recap = null, score = "", stuckOn = "", same = 0, prevKey = "", playedAgain = false;
+  /* how far the phones are behind the TV: what the TV shows that the room (what phones read) doesn't, yet */
+  const shows = (p) => (p ? JSON.stringify([p.screen, p.step, p.teams?.map((x) => x.score), p.dish?.ings?.length, p.auction?.count, p.sent, p.pending?.team ?? null]) : "");
+  let behindSince = null, behind = 0;
   while (clock() - t0 < 90 * 60000) {
     await tick(900);
+    { const tvp = api.current?.pub, dbp = fake.db.rooms[0].state?.pub;
+      if (tvp && shows(tvp) !== shows(dbp)) { behindSince ??= clock(); behind = Math.max(behind, clock() - behindSince); } else behindSince = null; }
     /* the TV's page reloads (the game comes back from this laptop's storage) */
     if (reload && !reloaded && clock() - t0 > reload * 1000) {
       reloaded = true; trace.push("(the TV reloads)");
@@ -153,6 +159,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
         setTimeout(() => { gone.delete("host"); fake.setPresence([...fake.presence, "host"]); trace.push("(the host is back)"); }, e.for * 1000);
       }
       if (e.type === "writesFail") { fake.net.failWrites = true; setTimeout(() => { fake.net.failWrites = false; }, e.for * 1000); }
+      /* the room holds a later stamp than this TV will give (another clock wrote it): the TV must carry on past it */
+      if (e.type === "futureStamp") fake.db.rooms[0].state.pubAt = clock() + 60000;
     }
     const pub = fake.db.rooms[0].state?.pub, g = api.current?.game;
     if (chaos) checkAcks();
@@ -274,8 +282,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       else send(C(pub.buzz), "answer", { text: guess(right) });
     }
   }
-  await tick(5000); checkAcks();                       // the last taps' late pushes land
+  await tick(fake.net.stallWrites ? 30000 : 5000); checkAcks();   // the last taps' late pushes land (and, on a slow server, the held updates)
   await act(async () => { tree.unmount(); await flush(); });
   resetClock();
-  return { taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls };
+  return { taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
 }

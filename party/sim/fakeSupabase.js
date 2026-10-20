@@ -3,7 +3,7 @@
 export const db = { rooms: [], members: [], secrets: [], actions: [], nextId: 1, writes: 0, stalls: 0 };
 /* a messy network: pushes sent twice, or late (so out of order), a TV whose writes fail for a while,
    and a server that now and then sits on a read for 5 to 28 s (Supabase's free plan, GRF2) */
-export const net = { dup: 0, delay: 0, stall: 0, twice: 0, rnd: Math.random, failWrites: false };
+export const net = { dup: 0, delay: 0, stall: 0, stallWrites: 0, twice: 0, rnd: Math.random, failWrites: false };
 /* twice: every tagged tap lands a second time, up to that many ms later (a phone's resend after a held send) */
 let twiceRnd = Math.random;
 const listeners = new Set();              // the harness re-renders when rooms or members change
@@ -13,32 +13,52 @@ const channels = new Set();
 
 export function reset() {
   db.rooms = []; db.members = []; db.secrets = []; db.actions = []; db.nextId = 1; db.writes = 0; db.stalls = 0;
-  net.dup = 0; net.delay = 0; net.stall = 0; net.twice = 0; net.failWrites = false;
+  net.dup = 0; net.delay = 0; net.stall = 0; net.stallWrites = 0; net.twice = 0; net.failWrites = false;
   twiceRnd = rngOf(4242);
   channels.clear(); listeners.clear();
 }
 
 /* a query: filters collected, run when awaited, as supabase-js does */
+/* a column as PostgREST names it: "id", or a path into a JSON one ("state->>pubAt": as text) */
+const col = (r, c) => {
+  const parts = c.split(/->>?/);
+  let v = r[parts[0]];
+  for (const k of parts.slice(1)) v = v == null ? undefined : v[k];
+  return /->>/.test(c) && v != null ? String(v) : v;
+};
+/* one condition of an or=(...): "c.is.null", "c.lt.v", "c.gt.v", "c.eq.v" */
+const cond = (part) => {
+  const m = /^(.+?)\.(is|lt|gt|eq)\.(.*)$/.exec(part);
+  const [, c, opr, v] = m;
+  const cmp = (x) => { if (c === "at") return Date.parse(x) - Date.parse(v); const a = Number(x), b = Number(v); return Number.isFinite(a) && Number.isFinite(b) ? a - b : String(x).localeCompare(v); };
+  return (r) => { const x = col(r, c);
+    if (opr === "is") return v === "null" ? x == null : false;
+    if (x == null) return false;
+    return opr === "lt" ? cmp(x) < 0 : opr === "gt" ? cmp(x) > 0 : String(x) === v; };
+};
 function query(table) {
   const f = [];
-  let op = { kind: "select" }, order = null;
+  let op = { kind: "select" }, order = null, returning = false, single = false;
   const q = {
-    select() { return q; },
+    /* after an update: hand back the rows it changed (none: the filter turned it down) */
+    select() { if (op.kind === "update") returning = true; return q; },
     eq(c, v) { f.push((r) => r[c] === v); return q; },
     neq(c, v) { f.push((r) => r[c] !== v); return q; },
     gt(c, v) { f.push((r) => (c === "at" ? Date.parse(r.at) > Date.parse(v) : r[c] > Number(v))); return q; },
-    /* only the form the inbox uses: "id.gt.N,at.gt.ISO" */
+    /* the inbox's "id.gt.N,at.gt.ISO", the TV's stamps "state->>pubAt.is.null,state->>pubAt.lt.N" */
     or(expr) {
-      const parts = expr.split(",").map((p) => { const [c, , ...v] = p.split("."); return [c, v.join(".")]; });
-      f.push((r) => parts.some(([c, v]) => (c === "at" ? Date.parse(r.at) > Date.parse(v) : r[c] > Number(v))));
+      const parts = expr.split(/,(?=[a-z_]+(?:->>?[a-zA-Z_]+)*\.(?:is|lt|gt|eq)\.)/).map(cond);
+      f.push((r) => parts.some((c) => c(r)));
       return q;
     },
     order(c) { order = c; return q; },
+    maybeSingle() { single = true; return q; },
     abortSignal() { return q; },
     update(v) { op = { kind: "update", v }; return q; },
     insert(v) { op = { kind: "insert", v }; return q; },
     then(res, rej) {
-      const hold = op.kind === "select" && net.stall && net.rnd() < net.stall ? 5000 + Math.floor(net.rnd() * 23000) : 0;
+      const hold = (op.kind === "select" && net.stall && net.rnd() < net.stall) || (op.kind === "update" && net.stallWrites && net.rnd() < net.stallWrites)
+        ? 5000 + Math.floor(net.rnd() * 23000) : 0;
       if (hold) db.stalls++;
       return (hold ? new Promise((r) => setTimeout(r, hold)) : Promise.resolve()).then(run).then(res, rej);
     },
@@ -52,11 +72,11 @@ function query(table) {
       db.writes++;
       hit.forEach((r) => Object.assign(r, structuredClone(op.v)));
       if (hit.length) changed(table);
-      return { data: null, error: null };
+      return { data: returning ? structuredClone(hit) : null, error: null };
     }
     const out = structuredClone(hit);
     if (order) out.sort((a, b) => a[order] - b[order]);
-    return { data: out, error: null };
+    return { data: single ? out[0] ?? null : out, error: null };
   };
   return q;
 }
