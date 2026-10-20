@@ -32,6 +32,8 @@ export function useSecret(code: string, on: boolean) {
   return s;
 }
 
+/* where a captain buzzes, then types */
+const BUZZ_SCREENS = ["dishQ", "sudden", "battleTie"];
 /* A captain's inbox: what their own players suggest for the question on
    screen, newest first, with who said it. */
 type Sug = { id: number; user_id: string; text: string };
@@ -682,7 +684,7 @@ function status(pub: Pub, me: Member) {
     case "sudden": return cap ? "Sudden death: captains only. Buzz to answer." : "Sudden death: captains only. Not a word!";
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country? One go." : "Guess the Flag: help your captain";
-    case "dishQ": return pub.buzz === mine ? (cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
+    case "dishQ": return pub.buzz === mine ? (pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
     case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same as Me: help your captain";
     case "sayReveal": return pub.reveal?.ok?.[mine] ? "You dodged the app's word" : "You said the app's word";
     case "battleQ": return pub.battle?.cap === mine ? (cap ? (pub.mode === "nohost" ? "Your question. Type it fast!" : "Your question. Say it out loud!") : "Your captain's battle. Not a word!") : cap ? "Your turn is next. Stay quiet." : "Captains only. Not a word!";
@@ -802,7 +804,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const sentHere = !!pub.sent?.[mine] || !!sentTxt;
   const locked = !!pub.pending || sentHere;
   const canType = !pub.paused && ((myTurn && !locked) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ") && !sentHere)
-    || (sc === "dishQ" && pub.buzz === mine && !pub.pending) || ((sc === "sudden" || sc === "battleTie") && pub.buzz === mine && !pub.pending)
+    /* a buzz: one answer, and once it's sent the box closes (it stayed open, with its Send, and got sent twice: 20 Oct) */
+    || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending && !sentHere)
     /* the Battle: typed with no host; with a host it's said out loud */
     || (sc === "battleQ" && nohost && pub.battle?.cap === mine && !locked));
   const canBuzz = (sc === "dishQ" && pub.buzz == null && !pub.out?.[mine]) || (sc === "sudden" && !!pub.sudden?.ready && pub.buzz == null && !pub.out?.[mine])
@@ -883,7 +886,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <button className="btn btn-gold btn-lg" disabled={busy || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
           {(sc === "ask" || sc === "steal") && <div className="text-13 text-[var(--color-ink-3)]">One go: once you send it, it&rsquo;s locked{nohost ? " and the app checks it" : " until the host decides"}.</div>}
         </div>)}
-      {!canType && sentHere && (["miniQ", "flagQ", "mapQ", "sayQ"].includes(sc) || (myTurn && !pub.pending)) && (
+      {!canType && sentHere && (["miniQ", "flagQ", "mapQ", "sayQ"].includes(sc) || (myTurn && !pub.pending) || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending)) && (
         <p className="text-center font-bold text-16" role="status">Locked in{sentTxt ? `: ${sentTxt}` : ""}.</p>)}
 
       {/* the lifelines: everyone sees them; the captain whose question it is taps */}
