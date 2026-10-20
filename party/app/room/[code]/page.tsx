@@ -96,10 +96,19 @@ export default function PhoneRoom() {
   const side = mine?.team === 0 ? "a" : mine?.team === 1 ? "b" : null;
   useEffect(() => { document.documentElement.style.setProperty("--tint", side ? `var(--color-${side})` : "var(--color-gold)"); }, [side]);
 
+  /* a call to the server in the lobby (claim, team, leave): it answers "ok" or a reason, then the room is read again */
   async function act(fn: () => Promise<unknown>) {
     setBusy(true); setMsg(null);
     try { const r = await fn(); if (typeof r === "string" && r !== "ok") setMsg(friendly(r)); await refresh(); }
     catch (e) { if (!(e as { announced?: boolean }).announced) setMsg(friendly(e)); }
+    setBusy(false);
+  }
+  /* a tap for the TV: the TV answers with its next update (the bar along the top waits for that), so
+     nothing is read back here. (Through act, the tap's tag it returns read as an error: every host tap
+     put "Something went wrong. Try again." up, and the buttons stayed off until a slow re-read was back.) */
+  async function tell(fn: () => Promise<unknown>) {
+    setBusy(true); setMsg(null);
+    try { await fn(); } catch (e) { if (!(e as { announced?: boolean }).announced) setMsg(friendly(e)); }
     setBusy(false);
   }
   const pickTeam = (t: 0 | 1 | null) => act(() => rpc<string>("qmb_update_me", { r: code, nm: mine?.name ?? "", tm: t }));
@@ -169,7 +178,7 @@ export default function PhoneRoom() {
   const live = !!pub && !!mine && mine.role !== "host" && ANSWERING.includes(pub.screen) && !pub.paused
     && !(pub.lifeline?.key === "friend" && pub.lifeline.team === mine.team);
   useAwayWatch(report, live, pub?.qid);
-  const sendMove = (move: Record<string, unknown>) => act(() => sendAction(code, "judge", { move, step: pub?.step }));
+  const sendMove = (move: Record<string, unknown>) => tell(() => sendAction(code, "judge", { move, step: pub?.step }));
   /* quick taps (+1, Undo, pausing a call): straight out, the buttons never wait for them */
   const fireMove = (move: Record<string, unknown>) => { void sendAction(code, "judge", { move, step: pub?.step }).catch(() => { /* the phone already says so */ }); };
 
@@ -293,7 +302,7 @@ export default function PhoneRoom() {
             </div>
           ) : myCaptain ? (
             ((room.state.away as string[] | undefined) || []).includes(myCaptain.user_id) ? (
-              <button className="btn btn-gold btn-block" disabled={busy} onClick={() => act(() => sendAction(code, "setup", { takeCaptain: true }))}>
+              <button className="btn btn-gold btn-block" disabled={busy} onClick={() => tell(() => sendAction(code, "setup", { takeCaptain: true }))}>
                 <bdi>{myCaptain.name}</bdi> seems away. Make me captain</button>
             ) : <p className="text-center text-16 text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}><bdi>{myCaptain.name}</bdi></b> is your captain</p>
           ) : (
@@ -325,7 +334,7 @@ export default function PhoneRoom() {
             <ShareButton code={code} />
           </div>
           {canStart ? (
-            <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => act(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-14 text-[var(--color-ink-2)]">
               You&rsquo;re in.{" "}
