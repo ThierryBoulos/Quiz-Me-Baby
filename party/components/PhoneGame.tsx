@@ -219,7 +219,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <Judge t={turn} right={{ type: pub.screen === "steal" ? "round/judgeSteal" : "round/judge", v: true }} wrong={{ type: pub.screen === "steal" ? "round/judgeSteal" : "round/judge", v: false }} />
         </div>
         <div className="flex flex-wrap gap-2 justify-center">
-          <Pause />
+          {/* (once the answer is in, its clock has stopped for your call: nothing to pause) */}
+          {!pub.sent?.[turn] && <Pause />}
           {pub.screen === "ask" && <Small ghost label="Change question" move={{ type: "round/swap" }} />}
         </div>
       </div>);

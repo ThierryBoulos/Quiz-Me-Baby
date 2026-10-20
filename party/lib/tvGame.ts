@@ -552,7 +552,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* no host: the first answer sent is the one checked. The app's RIGHT stands at once (nobody can take
        it away); a WRONG waits a few seconds, in case the other captain wants to give it to them. */
     const check = (kindP: PKind, q: G) => {
-      if (!s.nohost) return;
+      /* with a host, the answer waits for their call, and its clock stops where it was (it ran on, and
+         the teams thought something was wrong: 20 Oct); their call starts the next one */
+      if (!s.nohost) { applyFx([{ timer: "pause" }]); return; }
       const v = !!matchQ(s.typed[team], q);
       applyFx([{ timer: "pause" }]);
       s.pending = { kind: kindP, team, text: (s.typed[team] || []).join(" / "), v, until: Date.now() };
