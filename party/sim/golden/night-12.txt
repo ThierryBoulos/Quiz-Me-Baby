@@ -3,98 +3,105 @@
 2.00 ask | 2 | 0-0 |  |  | 
 3.75 answer | 3 | 1-0 |  | Lions +1 point | 
 4.75 answer | 3 | 1-0 |  |  | 
-5.75 answer | 3 | 1-0 |  | The host keeps the call. | 
-6.50 ask | 4 | 1-0 |  | The host keeps the call. | 
-8.25 steal | 5 | 1-0 |  | The host keeps the call. | 
-10.25 answer | 6 | 1-0 |  | The host keeps the call. | 
-11.00 roundScore | 7 | 1-0 |  | The host keeps the call. | 
-12.00 roundIntro | 8 | 1-0 |  | The host keeps the call. | 
-12.75 ask | 9 | 1-0 |  | The host keeps the call. | 
-14.75 steal | 10 | 1-0 |  | The host keeps the call. | 
-16.50 answer | 11 | 1-0 |  | The host keeps the call. | 
-17.25 ask | 12 | 1-0 |  | The host keeps the call. | 
-19.25 answer | 13 | 1-1 |  | Owls +1 point | 
-20.00 answer | 13 | 1-1 |  |  | 
-21.75 roundScore | 14 | 1-1 |  |  | 
-22.75 sayIntro | 15 | 1-1 | 0-0 |  | 
-23.75 sayQ | 16 | 1-1 | 0-0 |  | 
-24.50 sayReveal | 16 | 1-1 | 1-1 |  | 
+5.75 steal | 4 | 0-0 |  | Owls steal a new question. | 
+7.50 answer | 5 | 0-0 |  | Owls steal a new question. | 
+8.25 ask | 6 | 0-0 |  | Owls steal a new question. | 
+10.25 steal | 7 | 0-0 |  | Owls steal a new question. | 
+12.00 answer | 8 | 0-0 |  | Owls steal a new question. | 
+12.75 answer | 8 | 0-0 |  |  | 
+20.00 roundScore | 9 | 0-0 |  |  | 
+21.00 roundIntro | 10 | 0-0 |  |  | 
+21.75 ask | 11 | 0-0 |  |  | 
+23.75 answer | 12 | 1-0 |  | Lions +1 point | 
+24.50 ask | 13 | 1-0 |  | Lions +1 point | 
 (the TV reloads)
-28.30 sayReveal | 16 | 1-1 | 1-0 | Call changed: ⁨Lions⁩ DODGED IT. | 
-29.30 sayQ | 17 | 1-1 | 1-0 | Lions takes leg 1. | 
-30.05 sayReveal | 17 | 1-1 | 2-1 | Lions takes leg 1. | 
-31.05 sayQ | 18 | 1-1 | 2-1 | Tie — a point each. | 
-32.05 sayReveal | 18 | 1-1 | 3-2 | Tie — a point each. | 
-32.80 sayQ | 19 | 1-1 | 3-2 | Tie — a point each. | 
-33.80 sayReveal | 19 | 1-1 | 4-3 | Tie — a point each. | 
-34.55 sayReveal | 19 | 1-1 | 4-3 |  | 
-35.55 sayReveal | 19 | 1-1 | 4-2 | Call changed: ⁨Lions⁩ DODGED IT. | 
-36.55 sayQ | 20 | 1-1 | 4-2 | Lions takes leg 4. | 
-37.30 sayReveal | 20 | 1-1 | 5-3 | Lions takes leg 4. | 
-38.30 sayQ | 21 | 1-1 | 5-3 | Tie — a point each. | 
-39.05 sayReveal | 21 | 1-1 | 6-4 | Tie — a point each. | 
-40.05 decided | 22 | 1-1 | 6-4 |  | 
-41.05 saySummary | 23 | 4-1 | 6-4 |  | 
-41.80 roundIntro | 24 | 4-1 |  |  | 
-42.80 ask | 25 | 4-1 |  |  | 
-44.55 answer | 26 | 5-1 |  | Lions +1 point | 
-45.55 ask | 27 | 5-1 |  | Lions +1 point | 
-47.30 answer | 28 | 5-2 |  | Owls +1 point | 
-48.05 roundScore | 29 | 5-2 |  | Owls +1 point | 
-49.05 mapIntro | 30 | 5-2 | 0-0 | Owls +1 point | 
-50.05 mapQ | 31 | 5-2 | 0-0 | Owls +1 point | 
-50.80 mapReveal | 31 | 5-2 | 0-1 | Owls +1 point | 
-51.80 mapQ | 32 | 5-2 | 0-1 | Owls takes map 1. | 
-52.55 mapReveal | 32 | 5-2 | 1-2 | Owls takes map 1. | 
-53.55 mapQ | 33 | 5-2 | 1-2 | Both got it — a point each. | 
-54.55 mapReveal | 33 | 5-2 | 2-3 | Both got it — a point each. | 
-55.30 mapReveal | 33 | 5-2 | 2-3 |  | 
-57.05 mapReveal | 33 | 5-2 | 2-2 | Call changed: ⁨Owls⁩ WRONG. | 
-58.05 mapTie | 34 | 5-2 | 2-2 | Lions takes map 3. | 
-59.05 mapSummary | 35 | 6-3 | 2-2 | Lions takes map 3. | 
-59.80 roundIntro | 36 | 6-3 |  | Lions takes map 3. | 
-60.80 ask | 37 | 6-3 |  | Lions takes map 3. | 
-62.55 answer | 38 | 7-3 |  | Lions +1 point | 
-63.55 ask | 39 | 7-3 |  | Lions +1 point | 
-65.30 answer | 40 | 7-4 |  | Owls +1 point | 
-66.05 roundScore | 41 | 7-4 |  | Owls +1 point | 
-67.05 roundIntro | 42 | 7-4 |  | Owls +1 point | 
-68.80 ask | 43 | 7-4 |  | Owls +1 point | 
-70.55 steal | 44 | 7-4 |  | Owls +1 point | 
-72.55 answer | 45 | 7-6 |  | Owls +2 points — steal | 
-73.30 answer | 45 | 7-6 |  |  | 
-74.30 answer | 45 | 7-6 |  | The host keeps the call. | 
-75.05 ask | 46 | 7-6 |  | The host keeps the call. | 
-77.05 steal | 47 | 7-6 |  | The host keeps the call. | 
-78.80 answer | 48 | 7-6 |  | The host keeps the call. | 
-79.55 answer | 48 | 7-6 |  |  | 
-82.30 answer | 48 | 7-6 |  | The host keeps the call. | 
-83.30 roundScore | 49 | 7-6 |  | The host keeps the call. | 
-84.05 dishIntro | 50 | 7-6 | 0-0 | The host keeps the call. | 
-85.05 dishQ | 51 | 7-6 | 0-0 | The host keeps the call. | 
-87.80 dishQ | 52 | 7-6 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
-90.55 dishReveal | 53 | 7-6 | 0-1 | Owls takes number 1. | 
-91.30 dishReveal | 53 | 7-6 | 0-1 |  | 
-94.05 dishReveal | 53 | 7-6 | 1-0 | Call changed: Lions take it. | 
-95.05 dishQ | 54 | 7-6 | 1-0 | Call changed: Lions take it. | 
-97.55 dishQ | 55 | 7-6 | 1-0 | Lions is out of this one — Owls, it is yours to get. | 
-100.30 dishReveal | 56 | 7-6 | 1-0 | Nobody got it. | 
-101.30 dishReveal | 56 | 7-6 | 1-0 |  | 
-102.05 dishReveal | 56 | 7-6 | 1-0 | The host keeps the call. | 
-103.05 dishQ | 57 | 7-6 | 1-0 | The host keeps the call. | 
-105.80 dishQ | 58 | 7-6 | 1-0 | Lions is out of this one — Owls, it is yours to get. | 
-108.55 dishReveal | 59 | 7-6 | 1-1 | Owls takes number 3. | 
-109.30 dishQ | 60 | 7-6 | 1-1 | Owls takes number 3. | 
-112.05 dishReveal | 61 | 7-6 | 2-1 | Lions takes number 4. | 
-113.05 dishQ | 62 | 7-6 | 2-1 | Lions takes number 4. | 
-115.55 dishReveal | 63 | 7-6 | 3-1 | Lions takes number 5. | 
-116.55 dishSummary | 64 | 10-6 | 3-1 | Lions takes number 5. | 
-117.55 roundIntro | 65 | 10-6 |  | Lions takes number 5. | 
-118.30 ask | 66 | 10-6 |  | Lions takes number 5. | 
-120.05 answer | 67 | 11-6 |  | Lions +1 point | 
-121.05 ask | 68 | 11-6 |  | Lions +1 point | 
-122.80 steal | 69 | 11-6 |  | Lions +1 point | 
-124.55 answer | 70 | 12-6 |  | Lions +1 point — steal | 
-125.55 roundScore | 71 | 12-6 |  | Lions +1 point — steal | 
-126.55 final | 72 | 12-6 |  | Lions +1 point — steal | 
-recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[1,1],"minis":[2,0],"best":{"title":"Don't Say the Same as Me","team":0,"legs":[6,4]}}
+25.30 ask | 13 | 1-0 |  |  | 
+27.55 ask | 13 | 1-0 |  | Owls used Double Dip. | 
+29.30 steal | 14 | 1-0 |  | Owls used Double Dip. | 
+31.05 answer | 15 | 1-0 |  | Owls used Double Dip. | 
+32.05 roundScore | 16 | 1-0 |  | Owls used Double Dip. | 
+32.80 sayIntro | 17 | 1-0 | 0-0 | Owls used Double Dip. | 
+33.80 sayQ | 18 | 1-0 | 0-0 | Owls used Double Dip. | 
+34.55 sayReveal | 18 | 1-0 | 1-1 | Owls used Double Dip. | 
+35.55 sayQ | 19 | 1-0 | 1-1 | Tie — a point each. | 
+36.55 sayReveal | 19 | 1-0 | 2-2 | Tie — a point each. | 
+37.30 sayReveal | 19 | 1-0 | 2-2 |  | 
+38.30 sayReveal | 19 | 1-0 | 2-2 | The host keeps the call. | 
+39.05 sayQ | 20 | 1-0 | 2-2 | Tie — a point each. | 
+40.05 sayReveal | 20 | 1-0 | 3-3 | Tie — a point each. | 
+41.05 sayQ | 21 | 1-0 | 3-3 | Tie — a point each. | 
+41.80 sayReveal | 21 | 1-0 | 4-4 | Tie — a point each. | 
+42.80 sayQ | 22 | 1-0 | 4-4 | Tie — a point each. | 
+43.55 sayReveal | 22 | 1-0 | 5-5 | Tie — a point each. | 
+44.55 sayQ | 23 | 1-0 | 5-5 | Tie — a point each. | 
+45.55 sayReveal | 23 | 1-0 | 6-6 | Tie — a point each. | 
+46.30 sayQ | 24 | 1-0 | 6-6 | Tie — a point each. | 
+47.30 sayReveal | 24 | 1-0 | 7-7 | Tie — a point each. | 
+48.05 sayTie | 25 | 1-0 | 7-7 |  | 
+49.05 saySummary | 26 | 2-1 | 7-7 |  | 
+50.05 roundIntro | 27 | 2-1 |  |  | 
+50.80 ask | 28 | 2-1 |  |  | 
+51.80 ask | 28 | 2-1 |  | Lions used Call a Friend. | 
+53.55 ask | 29 | 2-1 |  | Lions used Call a Friend. | 
+55.30 answer | 30 | 3-1 |  | Lions +1 point | 
+56.30 answer | 30 | 3-1 |  |  | 
+57.05 steal | 31 | 2-1 |  | Owls steal a new question. | 
+59.05 answer | 32 | 2-1 |  | Owls steal a new question. | 
+59.80 ask | 33 | 2-1 |  | Owls steal a new question. | 
+61.55 answer | 34 | 2-2 |  | Owls +1 point | 
+62.55 roundScore | 35 | 2-2 |  | Owls +1 point | 
+63.55 mapIntro | 36 | 2-2 | 0-0 | Owls +1 point | 
+64.30 mapQ | 37 | 2-2 | 0-0 | Owls +1 point | 
+65.30 mapReveal | 37 | 2-2 | 0-0 | Owls +1 point | 
+66.05 mapQ | 38 | 2-2 | 0-0 | Nobody got it. | 
+67.05 mapReveal | 38 | 2-2 | 0-0 | Nobody got it. | 
+68.05 mapReveal | 38 | 2-2 | 0-0 |  | 
+70.55 mapQ | 39 | 2-2 | 0-0 | Nobody got it. | 
+71.55 mapReveal | 39 | 2-2 | 0-0 | Nobody got it. | 
+72.55 mapReveal | 39 | 2-2 | 0-0 |  | 
+74.30 mapTie | 40 | 2-2 | 0-0 | Nobody got it. | 
+75.05 mapSummary | 41 | 3-3 | 0-0 | Nobody got it. | 
+76.05 roundIntro | 42 | 3-3 |  | Nobody got it. | 
+77.05 ask | 43 | 3-3 |  | Nobody got it. | 
+79.55 steal | 44 | 3-3 |  | Nobody got it. | 
+81.55 answer | 45 | 3-3 |  | Nobody got it. | 
+82.30 ask | 46 | 3-3 |  | Nobody got it. | 
+84.05 steal | 47 | 3-3 |  | Nobody got it. | 
+86.05 answer | 48 | 4-3 |  | Lions +1 point — steal | 
+86.80 roundScore | 49 | 4-3 |  | Lions +1 point — steal | 
+87.80 roundIntro | 50 | 4-3 |  | Lions +1 point — steal | 
+88.55 ask | 51 | 4-3 |  | Lions +1 point — steal | 
+90.55 answer | 52 | 5-3 |  | Lions +1 point | 
+91.30 ask | 53 | 5-3 |  | Lions +1 point | 
+93.05 answer | 54 | 5-4 |  | Owls +1 point | 
+94.05 roundScore | 55 | 5-4 |  | Owls +1 point | 
+95.05 dishIntro | 56 | 5-4 | 0-0 | Owls +1 point | 
+95.80 dishQ | 57 | 5-4 | 0-0 | Owls +1 point | 
+98.55 dishQ | 58 | 5-4 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
+101.30 dishReveal | 59 | 5-4 | 0-0 | Nobody got it. | 
+102.05 dishQ | 60 | 5-4 | 0-0 | Nobody got it. | 
+104.80 dishQ | 61 | 5-4 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
+107.55 dishReveal | 62 | 5-4 | 0-0 | Nobody got it. | 
+108.55 dishQ | 63 | 5-4 | 0-0 | Nobody got it. | 
+111.05 dishQ | 64 | 5-4 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
+113.80 dishReveal | 65 | 5-4 | 0-1 | Owls takes number 3. | 
+114.80 dishQ | 66 | 5-4 | 0-1 | Owls takes number 3. | 
+117.55 dishReveal | 67 | 5-4 | 1-1 | Lions takes number 4. | 
+118.30 dishQ | 68 | 5-4 | 1-1 | Lions takes number 4. | 
+121.05 dishReveal | 69 | 5-4 | 2-1 | Lions takes number 5. | 
+122.05 dishReveal | 69 | 5-4 | 2-1 |  | 
+122.80 dishReveal | 69 | 5-4 | 2-1 | The host keeps the call. | 
+123.80 dishSummary | 70 | 8-4 | 2-1 | The host keeps the call. | 
+124.55 roundIntro | 71 | 8-4 |  | The host keeps the call. | 
+125.55 ask | 72 | 8-4 |  | The host keeps the call. | 
+127.30 answer | 73 | 9-4 |  | Lions +1 point | 
+128.30 ask | 74 | 9-4 |  | Lions +1 point | 
+130.05 answer | 75 | 9-5 |  | Owls +1 point | 
+131.05 answer | 75 | 9-5 |  |  | 
+131.80 steal | 76 | 9-4 |  | Lions steal a new question. | 
+133.55 answer | 77 | 10-4 |  | Lions +1 point — steal | 
+134.55 answer | 77 | 10-4 |  |  | 
+135.55 answer | 77 | 9-4 |  | Call changed: nobody scores this one. | 
+136.30 roundScore | 78 | 9-4 |  | Call changed: nobody scores this one. | 
+137.30 final | 79 | 9-4 |  | Call changed: nobody scores this one. | 
+recap: {"margin":5,"sudden":false,"leadChanges":0,"steals":[1,0],"minis":[1,0]}

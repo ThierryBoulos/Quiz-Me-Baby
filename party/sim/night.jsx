@@ -238,8 +238,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* where the app's calls are shown: now and then a captain contests one (once per screen) */
     else if ((pub.calls || []).some((c) => !c.done) && !contested.has(sc + step) && bot() < 0.35) {
       contested.add(sc + step);
-      /* (a captain contests their own team's call, or the other team's RIGHT) */
-      const open = pub.calls.filter((c) => !c.done), c = open[Math.floor(bot() * open.length)], by = c.ok && bot() < 0.5 ? 1 - c.team : c.team;
+      /* (a captain contests their own team's WRONG, or the other team's RIGHT) */
+      const open = pub.calls.filter((c) => !c.done), c = open[Math.floor(bot() * open.length)], by = c.ok ? 1 - c.team : c.team;
       if (C(by)) send(C(by), "next", { move: { type: "ui/contest", id: c.id }, step });
     }
     /* Double Points: armed now and then before a round */

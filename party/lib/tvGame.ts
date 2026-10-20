@@ -607,8 +607,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const c = callsOf(s).find((x) => x.id === move.id);
       if (!c) return false;
       if (c.done) return c.text ? "That call has already been looked at." : "Nothing was typed there.";
-      /* your own team's call, or the other team's RIGHT: never the other team's WRONG (that would only help them) */
-      if (c.team !== team && !c.ok) return "Contest your own team's call, or the other team's RIGHT.";
+      /* your own team's WRONG, or the other team's RIGHT: never your own RIGHT (it could only cost you)
+         nor their WRONG (it could only help them) */
+      if (c.team === team ? c.ok : !c.ok) return "Contest your own team's WRONG, or the other team's RIGHT.";
     }
     /* with no host, the other captain answers it (not the one who contested) */
     else if (t === "ui/contestOk") { if (!s.contest || team !== other(s.contest.by) || typeof move.v !== "boolean") return false; }

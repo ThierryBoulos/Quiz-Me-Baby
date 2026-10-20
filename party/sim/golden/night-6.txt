@@ -4,135 +4,129 @@
 3.75 steal | 3 | 0-0 |  |  | 
 5.75 answer | 4 | 0-1 |  | Owls +1 point — steal | 
 6.50 answer | 4 | 0-1 |  |  | 
-7.50 ask | 5 | 0-1 |  |  | 
-8.25 ask | 5 | 0-1 |  | Owls used Double Dip. | 
-10.25 steal | 6 | 0-1 |  | Owls used Double Dip. | 
-12.00 answer | 7 | 1-1 |  | Lions +1 point — steal | 
-12.75 roundScore | 8 | 1-1 |  | Lions +1 point — steal | 
-13.75 roundIntro | 9 | 1-1 |  | Lions +1 point — steal | 
-14.75 ask | 10 | 1-1 |  | Lions +1 point — steal | 
-16.50 steal | 11 | 1-1 |  | Lions +1 point — steal | 
-18.25 answer | 12 | 1-2 |  | Owls +1 point — steal | 
-19.25 answer | 12 | 1-2 |  |  | 
-20.00 answer | 12 | 1-2 |  | The host keeps the call. | 
-21.00 ask | 13 | 1-2 |  | The host keeps the call. | 
-22.75 steal | 14 | 1-2 |  | The host keeps the call. | 
-24.50 answer | 15 | 1-2 |  | The host keeps the call. | 
-25.50 answer | 15 | 1-2 |  |  | 
-27.25 roundScore | 16 | 1-2 |  |  | 
-28.25 flagIntro | 17 | 1-2 | 0-0 |  | 
-29.00 flagQ | 18 | 1-2 | 0-0 |  | 
-30.00 flagReveal | 18 | 1-2 | 0-0 |  | 
-31.75 flagReveal | 18 | 1-2 | 0-0 | The host keeps the call. | 
-32.75 flagQ | 19 | 1-2 | 0-0 | Nobody got it. | 
-33.50 flagReveal | 19 | 1-2 | 0-1 | Nobody got it. | 
-34.50 flagReveal | 19 | 1-2 | 0-1 |  | 
-35.25 flagReveal | 19 | 1-2 | 0-0 | Call changed: ⁨Owls⁩ WRONG. | 
-36.25 flagQ | 20 | 1-2 | 0-0 | Nobody got it. | 
-37.25 flagReveal | 20 | 1-2 | 1-0 | Nobody got it. | 
-38.00 flagReveal | 20 | 1-2 | 1-0 |  | 
-39.00 flagQ | 21 | 1-2 | 1-0 | Lions takes flag 3. | 
-39.75 flagReveal | 21 | 1-2 | 1-0 | Lions takes flag 3. | 
-40.75 flagQ | 22 | 1-2 | 1-0 | Nobody got it. | 
-41.75 flagReveal | 22 | 1-2 | 1-1 | Nobody got it. | 
-42.50 flagQ | 23 | 1-2 | 1-1 | Owls takes flag 5. | 
-43.50 flagReveal | 23 | 1-2 | 2-1 | Owls takes flag 5. | 
-44.25 flagQ | 24 | 1-2 | 2-1 | Lions takes flag 6. | 
-45.25 flagReveal | 24 | 1-2 | 2-2 | Lions takes flag 6. | 
-46.25 flagQ | 25 | 1-2 | 2-2 | Owls takes flag 7. | 
-47.00 flagReveal | 25 | 1-2 | 2-2 | Owls takes flag 7. | 
-48.00 flagReveal | 25 | 1-2 | 2-2 |  | 
-49.75 flagReveal | 25 | 1-2 | 3-2 | Call changed: ⁨Lions⁩ RIGHT. | 
-50.75 flagQ | 26 | 1-2 | 3-2 | Lions takes flag 8. | 
-51.50 flagReveal | 26 | 1-2 | 3-2 | Lions takes flag 8. | 
-52.50 flagQ | 27 | 1-2 | 3-2 | Nobody got it. | 
-53.25 flagReveal | 27 | 1-2 | 4-2 | Nobody got it. | 
-54.25 flagSummary | 28 | 3-2 | 4-2 | Lions takes flag 10. | 
-55.25 roundIntro | 29 | 3-2 |  | Lions takes flag 10. | 
-57.00 ask | 30 | 3-2 |  | Lions takes flag 10. | 
-58.75 answer | 31 | 5-2 |  | Lions +2 points | 
-59.75 ask | 32 | 5-2 |  | Lions +2 points | 
-61.50 answer | 33 | 5-3 |  | Owls +1 point | 
-62.25 roundScore | 34 | 5-3 |  | Owls +1 point | 
-63.25 miniIntro | 35 | 5-3 | 0-0 | Owls +1 point | 
-64.25 miniQ | 36 | 5-3 | 0-0 | Owls +1 point | 
-65.00 closestReveal | 36 | 5-3 | 0-1 | Owls +1 point | 
-66.00 miniQ | 37 | 5-3 | 0-1 | Owls takes leg 1. | 
-66.75 closestReveal | 37 | 5-3 | 1-1 | Owls takes leg 1. | 
-67.75 miniQ | 38 | 5-3 | 1-1 | Lions takes leg 2. | 
-68.75 closestReveal | 38 | 5-3 | 2-2 | Lions takes leg 2. | 
-69.50 miniQ | 39 | 5-3 | 2-2 | Tie — a point each. | 
-70.50 closestReveal | 39 | 5-3 | 3-2 | Tie — a point each. | 
-71.25 miniQ | 40 | 5-3 | 3-2 | Lions takes leg 4. | 
-72.25 closestReveal | 40 | 5-3 | 3-3 | Lions takes leg 4. | 
-73.25 miniTie | 41 | 5-3 | 3-3 |  | 
-74.00 miniSummary | 42 | 6-4 | 3-3 |  | 
-75.00 roundIntro | 43 | 6-4 |  |  | 
-75.75 ask | 44 | 6-4 |  |  | 
-77.75 answer | 45 | 7-4 |  | Lions +1 point | 
-78.50 ask | 46 | 7-4 |  | Lions +1 point | 
-80.25 answer | 47 | 7-5 |  | Owls +1 point | 
-81.25 answer | 47 | 7-5 |  |  | 
-82.25 steal | 48 | 7-4 |  | Lions steal a new question. | 
-84.00 answer | 49 | 8-4 |  | Lions +1 point — steal | 
-84.75 answer | 49 | 8-4 |  |  | 
-86.75 answer | 49 | 7-4 |  | Call changed: nobody scores this one. | 
-87.50 roundScore | 50 | 7-4 |  | Call changed: nobody scores this one. | 
-88.50 roundIntro | 51 | 7-4 |  | Call changed: nobody scores this one. | 
-90.25 ask | 52 | 7-4 |  | Call changed: nobody scores this one. | 
-92.00 answer | 53 | 8-4 |  | Lions +1 point | 
-93.00 answer | 53 | 8-4 |  |  | 
-93.75 answer | 53 | 8-4 |  | The host keeps the call. | 
-94.75 ask | 54 | 8-4 |  | The host keeps the call. | 
-96.50 answer | 55 | 8-5 |  | Owls +1 point | 
-97.50 roundScore | 56 | 8-5 |  | Owls +1 point | 
-98.25 auctionIntro | 57 | 8-5 | 0-0 | Owls +1 point | 
-99.25 auctionBid | 58 | 8-5 | 0-0 | Owls +1 point | 
-100.25 auctionBid | 59 | 8-5 | 0-0 | Owls +1 point | 
-101.00 auctionRun | 60 | 8-5 | 0-0 | Owls +1 point | 
-105.50 auctionLeg | 60 | 8-5 | 1-0 | Owls +1 point | 
-106.50 auctionBid | 61 | 8-5 | 1-0 | Owls +1 point | 
-107.25 auctionBid | 62 | 8-5 | 1-0 | Owls +1 point | 
-108.25 auctionRun | 63 | 8-5 | 1-0 | Owls +1 point | 
-111.75 auctionLeg | 63 | 8-5 | 1-1 | Owls +1 point | 
-112.75 auctionBid | 64 | 8-5 | 1-1 | Owls +1 point | 
-113.75 auctionBid | 65 | 8-5 | 1-1 | Owls +1 point | 
-114.50 auctionRun | 66 | 8-5 | 1-1 | Owls +1 point | 
-117.25 auctionLeg | 66 | 8-5 | 2-1 | Owls +1 point | 
-118.25 auctionResult | 67 | 10-5 | 2-1 | Owls +1 point | 
-119.00 roundIntro | 68 | 10-5 |  | Owls +1 point | 
-120.00 ask | 69 | 10-5 |  | Owls +1 point | 
-121.75 answer | 70 | 11-5 |  | Lions +1 point | 
-122.75 answer | 70 | 11-5 |  |  | 
-123.50 steal | 71 | 10-5 |  | Owls steal a new question. | 
-125.25 answer | 72 | 10-6 |  | Owls +1 point — steal | 
-126.25 ask | 73 | 10-6 |  | Owls +1 point — steal | 
-128.00 steal | 74 | 10-6 |  | Owls +1 point — steal | 
-129.75 answer | 75 | 11-6 |  | Lions +1 point — steal | 
-130.75 roundScore | 76 | 11-6 |  | Lions +1 point — steal | 
-131.75 battleIntro | 77 | 11-6 | 0-0 | Lions +1 point — steal | 
-132.50 battleQ | 78 | 11-6 | 0-0 | Lions +1 point — steal | 
-133.50 battleQ | 79 | 11-6 | 0-0 | Lions +1 point — steal | 
-134.25 battleQ | 80 | 11-6 | 1-0 | Lions +1 point — steal | 
-135.25 battleQ | 81 | 11-6 | 2-0 | Lions +1 point — steal | 
-136.25 battleQ | 82 | 11-6 | 2-0 | Lions +1 point — steal | 
-137.00 battleQ | 83 | 11-6 | 3-0 | Lions +1 point — steal | 
-138.00 battleQ | 84 | 11-6 | 3-0 | Lions +1 point — steal | 
-138.75 battleQ | 85 | 11-6 | 4-0 | Lions +1 point — steal | 
-139.75 battleQ | 86 | 11-6 | 5-0 | Lions +1 point — steal | 
-140.75 battleQ | 87 | 11-6 | 6-0 | Lions +1 point — steal | 
-141.50 battleHandoff | 88 | 11-6 | 6-0 | Lions +1 point — steal | 
-142.50 battleQ | 89 | 11-6 | 6-0 | Lions +1 point — steal | 
-143.25 battleQ | 90 | 11-6 | 6-1 | Lions +1 point — steal | 
-144.25 battleQ | 91 | 11-6 | 6-1 | Lions +1 point — steal | 
-145.25 battleQ | 92 | 11-6 | 6-2 | Lions +1 point — steal | 
-146.00 battleQ | 93 | 11-6 | 6-2 | Lions +1 point — steal | 
-147.00 battleQ | 94 | 11-6 | 6-3 | Lions +1 point — steal | 
-147.75 battleQ | 95 | 11-6 | 6-3 | Lions +1 point — steal | 
-148.75 battleQ | 96 | 11-6 | 6-4 | Lions +1 point — steal | 
-149.75 battleQ | 97 | 11-6 | 6-5 | Lions +1 point — steal | 
-150.50 battleQ | 98 | 11-6 | 6-5 | Lions +1 point — steal | 
-151.50 battleLevel | 99 | 11-6 | 6-6 |  | 
-152.25 battleSummary | 100 | 13-8 | 6-6 |  | 
-153.25 final | 101 | 13-8 |  |  | 
-recap: {"margin":5,"sudden":false,"leadChanges":1,"steals":[2,3],"minis":[2,0],"best":{"title":"Guess the Flag","team":0,"legs":[4,2]}}
+7.50 answer | 4 | 0-0 |  | Call changed: nobody scores this one. | 
+8.25 ask | 5 | 0-0 |  | Call changed: nobody scores this one. | 
+9.25 ask | 5 | 0-0 |  | Owls used Double Dip. | 
+11.00 steal | 6 | 0-0 |  | Owls used Double Dip. | 
+12.75 answer | 7 | 1-0 |  | Lions +1 point — steal | 
+13.75 roundScore | 8 | 1-0 |  | Lions +1 point — steal | 
+14.75 roundIntro | 9 | 1-0 |  | Lions +1 point — steal | 
+15.50 ask | 10 | 1-0 |  | Lions +1 point — steal | 
+17.25 steal | 11 | 1-0 |  | Lions +1 point — steal | 
+19.25 answer | 12 | 1-1 |  | Owls +1 point — steal | 
+20.00 answer | 12 | 1-1 |  |  | 
+21.00 answer | 12 | 1-1 |  | The host keeps the call. | 
+21.75 ask | 13 | 1-1 |  | The host keeps the call. | 
+23.75 steal | 14 | 1-1 |  | The host keeps the call. | 
+25.50 answer | 15 | 1-1 |  | The host keeps the call. | 
+26.25 answer | 15 | 1-1 |  |  | 
+28.25 roundScore | 16 | 1-1 |  |  | 
+29.00 flagIntro | 17 | 1-1 | 0-0 |  | 
+30.00 flagQ | 18 | 1-1 | 0-0 |  | 
+30.75 flagReveal | 18 | 1-1 | 0-0 |  | 
+32.75 flagReveal | 18 | 1-1 | 0-0 | The host keeps the call. | 
+33.50 flagQ | 19 | 1-1 | 0-0 | Nobody got it. | 
+34.50 flagReveal | 19 | 1-1 | 0-1 | Nobody got it. | 
+35.25 flagReveal | 19 | 1-1 | 0-1 |  | 
+37.25 flagQ | 20 | 1-1 | 0-1 | Owls takes flag 2. | 
+38.00 flagReveal | 20 | 1-1 | 1-2 | Owls takes flag 2. | 
+39.00 flagQ | 21 | 1-1 | 1-2 | Both got it — a point each. | 
+39.75 flagReveal | 21 | 1-1 | 1-3 | Both got it — a point each. | 
+40.75 flagQ | 22 | 1-1 | 1-3 | Owls takes flag 4. | 
+41.75 flagReveal | 22 | 1-1 | 2-4 | Owls takes flag 4. | 
+42.50 flagQ | 23 | 1-1 | 2-4 | Both got it — a point each. | 
+43.50 flagReveal | 23 | 1-1 | 3-4 | Both got it — a point each. | 
+44.25 flagQ | 24 | 1-1 | 3-4 | Lions takes flag 6. | 
+45.25 flagReveal | 24 | 1-1 | 3-5 | Lions takes flag 6. | 
+46.25 flagQ | 25 | 1-1 | 3-5 | Owls takes flag 7. | 
+47.00 flagReveal | 25 | 1-1 | 4-5 | Owls takes flag 7. | 
+48.00 flagQ | 26 | 1-1 | 4-5 | Lions takes flag 8. | 
+48.75 flagReveal | 26 | 1-1 | 4-6 | Lions takes flag 8. | 
+49.75 decided | 27 | 1-3 | 4-6 |  | 
+50.75 flagSummary | 28 | 1-3 | 4-6 |  | 
+51.50 roundIntro | 29 | 1-3 |  |  | 
+52.50 ask | 30 | 1-3 |  |  | 
+54.25 steal | 31 | 1-3 |  |  | 
+56.00 answer | 32 | 1-3 |  |  | 
+57.00 ask | 33 | 1-3 |  |  | 
+58.75 steal | 34 | 1-3 |  |  | 
+60.50 answer | 35 | 2-3 |  | Lions +1 point — steal | 
+61.50 roundScore | 36 | 2-3 |  | Lions +1 point — steal | 
+62.25 miniIntro | 37 | 2-3 | 0-0 | Lions +1 point — steal | 
+63.25 miniQ | 38 | 2-3 | 0-0 | Lions +1 point — steal | 
+64.25 closestReveal | 38 | 2-3 | 0-1 | Lions +1 point — steal | 
+65.00 miniQ | 39 | 2-3 | 0-1 | Owls takes leg 1. | 
+66.00 closestReveal | 39 | 2-3 | 1-1 | Owls takes leg 1. | 
+66.75 miniQ | 40 | 2-3 | 1-1 | Lions takes leg 2. | 
+67.75 closestReveal | 40 | 2-3 | 1-2 | Lions takes leg 2. | 
+68.75 miniQ | 41 | 2-3 | 1-2 | Owls takes leg 3. | 
+69.50 closestReveal | 41 | 2-3 | 2-2 | Owls takes leg 3. | 
+70.50 miniQ | 42 | 2-3 | 2-2 | Lions takes leg 4. | 
+71.25 closestReveal | 42 | 2-3 | 3-2 | Lions takes leg 4. | 
+72.25 miniSummary | 43 | 4-3 | 3-2 | Lions takes leg 5. | 
+73.25 roundIntro | 44 | 4-3 |  | Lions takes leg 5. | 
+75.00 ask | 45 | 4-3 |  | Lions takes leg 5. | 
+75.75 ask | 45 | 4-3 |  | Lions used Double Dip. | 
+77.75 answer | 46 | 5-3 |  | Lions +1 point | 
+78.50 ask | 47 | 5-3 |  | Lions +1 point | 
+80.25 steal | 48 | 5-3 |  | Lions +1 point | 
+82.25 answer | 49 | 5-3 |  | Lions +1 point | 
+83.00 answer | 49 | 5-3 |  |  | 
+84.75 roundScore | 50 | 5-3 |  |  | 
+85.75 roundIntro | 51 | 5-3 |  |  | 
+86.75 ask | 52 | 5-3 |  |  | 
+88.50 answer | 53 | 6-3 |  | Lions +1 point | 
+89.25 ask | 54 | 6-3 |  | Lions +1 point | 
+91.25 answer | 55 | 6-4 |  | Owls +1 point | 
+92.00 answer | 55 | 6-4 |  |  | 
+94.75 steal | 56 | 6-3 |  | Lions steal a new question. | 
+96.50 answer | 57 | 7-3 |  | Lions +1 point — steal | 
+97.50 answer | 57 | 7-3 |  |  | 
+98.25 roundScore | 58 | 7-3 |  |  | 
+99.25 auctionIntro | 59 | 7-3 | 0-0 |  | 
+100.25 auctionBid | 60 | 7-3 | 0-0 |  | 
+101.00 auctionBid | 61 | 7-3 | 0-0 |  | 
+102.00 auctionRun | 62 | 7-3 | 0-0 |  | 
+104.75 auctionLeg | 62 | 7-3 | 1-0 |  | 
+105.50 auctionBid | 63 | 7-3 | 1-0 |  | 
+106.50 auctionBid | 64 | 7-3 | 1-0 |  | 
+107.25 auctionRun | 65 | 7-3 | 1-0 |  | 
+110.00 auctionLeg | 65 | 7-3 | 1-1 |  | 
+111.00 auctionBid | 66 | 7-3 | 1-1 |  | 
+111.75 auctionBid | 67 | 7-3 | 1-1 |  | 
+112.75 auctionRun | 68 | 7-3 | 1-1 |  | 
+114.50 auctionLeg | 68 | 7-3 | 2-1 |  | 
+115.50 auctionResult | 69 | 9-3 | 2-1 |  | 
+116.25 roundIntro | 70 | 9-3 |  |  | 
+117.25 ask | 71 | 9-3 |  |  | 
+119.00 answer | 72 | 10-3 |  | Lions +1 point | 
+120.00 ask | 73 | 10-3 |  | Lions +1 point | 
+121.75 steal | 74 | 10-3 |  | Lions +1 point | 
+123.50 answer | 75 | 11-3 |  | Lions +1 point — steal | 
+124.50 answer | 75 | 11-3 |  |  | 
+127.25 roundScore | 76 | 11-3 |  |  | 
+128.00 battleIntro | 77 | 11-3 | 0-0 |  | 
+129.00 battleQ | 78 | 11-3 | 0-0 |  | 
+129.75 battleQ | 79 | 11-3 | 1-0 |  | 
+130.75 battleQ | 80 | 11-3 | 1-0 |  | 
+131.75 battleQ | 81 | 11-3 | 2-0 |  | 
+132.50 battleQ | 82 | 11-3 | 3-0 |  | 
+133.50 battleQ | 83 | 11-3 | 4-0 |  | 
+134.25 battleQ | 84 | 11-3 | 5-0 |  | 
+135.25 battleQ | 85 | 11-3 | 6-0 |  | 
+136.25 battleQ | 86 | 11-3 | 6-0 |  | 
+137.00 battleQ | 87 | 11-3 | 7-0 |  | 
+138.00 battleHandoff | 88 | 11-3 | 7-0 |  | 
+138.75 battleQ | 89 | 11-3 | 7-0 |  | 
+139.75 battleQ | 90 | 11-3 | 7-1 |  | 
+140.75 battleQ | 91 | 11-3 | 7-1 |  | 
+141.50 battleQ | 92 | 11-3 | 7-2 |  | 
+142.50 battleQ | 93 | 11-3 | 7-3 |  | 
+143.25 battleQ | 94 | 11-3 | 7-3 |  | 
+144.25 battleQ | 95 | 11-3 | 7-3 |  | 
+145.25 battleQ | 96 | 11-3 | 7-4 |  | 
+146.00 battleQ | 97 | 11-3 | 7-5 |  | 
+147.00 battleQ | 98 | 11-3 | 7-5 |  | 
+147.75 battleSummary | 99 | 15-3 | 7-6 |  | 
+148.75 final | 100 | 15-3 |  |  | 
+recap: {"margin":12,"sudden":false,"leadChanges":3,"steals":[4,1],"minis":[3,1],"best":{"title":"Guess the Flag","team":1,"legs":[4,6]}}
