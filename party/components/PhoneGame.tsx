@@ -6,7 +6,7 @@ import { QMB } from "@/lib/engine";
 import { joinLive, newTap, note, sb, sendAction, sendDraft } from "@/lib/supabase";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
-import { AskHead, battleNeeds, decidedCall, decidedHead, decidedSub, FlagImg, recapLines, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, decidedCall, decidedHead, decidedSub, FlagImg, recapLines, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
@@ -120,6 +120,12 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const fresh = !pub.qid || (raw.qid === pub.qid && (raw.step ?? 0) >= pub.step);
   const secret: Secret = fresh ? raw : {};
   const loading = !!pub.qid && !fresh;
+  /* A ruling on a reveal is a switch, and it shows the moment it's tapped (the TV confirms a beat later):
+     on a slow server a tap looked like it did nothing (20 Oct). Unconfirmed after 8 s, the TV's call shows again. */
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const pickKey = (t: 0 | 1) => `${pub.qid}|${pub.screen}|${t}`;
+  const okNow = `${pub.reveal?.ok?.[0]}|${pub.reveal?.ok?.[1]}`;
+  useEffect(() => { setPicked({}); }, [pub.qid, pub.screen, okNow]);
   const Main = ({ label, move, off }: { label: string; move: Record<string, unknown>; off?: boolean }) =>
     <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || off} onClick={() => send(move)}>{label}</button>;
   /* the host's private answer: the one box on this phone that isn't a button, so it can't be missed */
@@ -157,13 +163,20 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     const app = x ? secret.match?.[t] ?? null : late ? false : null;
     return <RulingPicker value={app} app={app} busy={busy || loading} label={`Rule on ${T[t].name}’s answer`} onPick={(v) => send(v ? right : wrong)} />;
   };
-  /* the reveal screens: each team's answer with its ruling, which the host can always flip */
-  const Rulings = ({ type, say, empty }: { type: string; say?: boolean; empty: string }) => (<>{([0, 1] as const).map((t) => { const x = pub.reveal?.typed?.[t]?.[0]; return (
-    <div key={t} className="flex flex-col gap-2">
-      <Said t={t} text={x} empty={empty} />
-      {/* nothing written: nothing to rule on */}
-      {x && <RulingPicker sticky value={pub.reveal?.ok?.[t]} app={pub.reveal?.app?.[t]} say={say} busy={busy} label={`Rule on ${T[t].name}’s answer`} onPick={(v) => send({ type, t, v })} />}
-    </div>); })}</>);
+  /* the reveal screens: each team's answer, and its ruling beside it, which the host can always flip */
+  const Rulings = ({ type, say, empty }: { type: string; say?: boolean; empty: string }) => (<>{([0, 1] as const).map((t) => {
+    const x = pub.reveal?.typed?.[t]?.[0], k = pickKey(t), app = pub.reveal?.app?.[t], v = k in picked ? picked[k] : pub.reveal?.ok?.[t];
+    const pick = (nv: boolean) => { setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire({ type, t, v: nv }); };
+    return (
+      <div key={t} className="flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
+          {x ? <div className="font-bold text-18 leading-snug break-words">{x}</div> : <div className="text-14 text-[var(--color-ink-3)]">{empty}</div>}
+          {x && v != null && app != null && v !== app && <div className="text-12 font-bold" style={{ color: v ? "var(--color-ok)" : "var(--color-no)" }}>You changed it: {verdictWord(v, say)}</div>}
+        </div>
+        {/* nothing written: nothing to rule on */}
+        {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} app={app} say={say} label={`Rule on ${T[t].name}’s answer`} onPick={pick} /></div>}
+      </div>); })}</>);
   /* a results screen: exactly what the players see, and the host's button */
   const Results = ({ children }: { children: React.ReactNode }) => (
     <div className="flex flex-col gap-4 flex-1">
@@ -276,8 +289,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change flag" move={{ type: "flag/swap" }} /></div>
       </div>);
     case "flagReveal": return (
-      <div className="flex flex-col gap-4 flex-1">
-        <OnScreen pub={pub} />
+      <div className="flex flex-col gap-3 flex-1">
+        <OnScreen pub={pub} small />
         <Result pub={pub} headOnly />
         <Rulings type="ui/flagOk" empty="No answer" />
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
@@ -346,8 +359,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause />{!pub.map?.hint && <Small label="Show hint" move={{ type: "map/hint" }} />}<Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change map" move={{ type: "map/swap" }} /></div>
       </div>);
     case "mapReveal": { const unruled = pub.reveal?.ok?.some((v) => v == null); return (
-      <div className="flex flex-col gap-4 flex-1">
-        <OnScreen pub={pub} />
+      <div className="flex flex-col gap-3 flex-1">
+        <OnScreen pub={pub} small />
         <Result pub={pub} headOnly />
         <Line className="!text-13">Who got it? The idea counts, not the exact words.</Line>
         <Rulings type="ui/mapOk" empty="No answer" />
@@ -615,12 +628,12 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
    the clock is paused it's hidden. */
 const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onContextMenu: (e: React.MouseEvent) => e.preventDefault() };
 /* counting: this phone counts the Auction's names, and shows its own count */
-function OnScreen({ pub, counting }: { pub: Pub; counting?: boolean }) {
+function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; small?: boolean }) {
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
     {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className="font-bold text-20 leading-snug text-center">{pub.question}</p>}
-    {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={150} />}
-    {pub.map && <MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={260} title={pub.map.title} />}
+    {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
+    {pub.map && <MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={small ? 170 : 260} title={pub.map.title} />}
     {pub.map?.reveal && <div className="display text-26 text-center" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>}
     {pub.auction && pub.screen === "auctionLeg" && <p className="text-center text-14 text-[var(--color-ink-2)]"><span className="eyebrow mr-2">Leg {pub.auction.wins[0] + pub.auction.wins[1]}</span>{pub.auction.cat}</p>}
     {pub.auction && /^auction(Bid|Run)$/.test(pub.screen) && <div className="text-center"><div className="eyebrow">Category</div><div className="display text-28" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>

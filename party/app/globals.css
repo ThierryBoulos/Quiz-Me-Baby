@@ -317,6 +317,9 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .btn.rule-btn.neg.on { background: var(--color-no); border-color: var(--color-no); color: #2b0206; }
 .rule-tag { font-size: var(--text-10); font-weight: 800; letter-spacing: .14em; opacity: .85; }
 .rule-btn:not(.on) .rule-tag { color: var(--color-ink-2); }
+.rule-pick.compact { gap: 6px; }
+.rule-pick.compact .btn.rule-btn { min-height: 48px; padding: 4px 6px; font-size: var(--text-14); }
+.rule-pick.compact .rule-tag { font-size: 8.5px; letter-spacing: .08em; }
 
 
 /* a flag's thin light edge, so a black stripe never melts into the dark */

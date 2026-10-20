@@ -60,7 +60,8 @@ export function Verdict({ v, say, size }: { v: boolean | null | undefined; say?:
    call carries an "App suggests" tag; the other button flips it. Wherever
    the app judges, the host (or, with no host, the other captain) can. ---- */
 /* sticky: the call already stands (a reveal), so tapping the lit button again changes nothing */
-export function RulingPicker({ value, app, say, onPick, busy, label, sticky }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string; sticky?: boolean }) {
+/* compact: the reveal screens' smaller pair, beside each team's answer */
+export function RulingPicker({ value, app, say, onPick, busy, label, sticky, compact }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string; sticky?: boolean; compact?: boolean }) {
   const opt = (v: boolean) => {
     const on = value === v;
     return (
@@ -69,7 +70,7 @@ export function RulingPicker({ value, app, say, onPick, busy, label, sticky }: {
         <span>{verdictWord(v, say)}</span>
       </button>);
   };
-  return <div className="rule-pick" role="group" aria-label={label || "Your call"}>{opt(true)}{opt(false)}</div>;
+  return <div className={"rule-pick" + (compact ? " compact" : "")} role="group" aria-label={label || "Your call"}>{opt(true)}{opt(false)}</div>;
 }
 
 /* ---- a mini-game's score, the same on the TV and every phone: each team's
