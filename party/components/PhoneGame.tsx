@@ -718,7 +718,9 @@ function status(pub: Pub, me: Member) {
     case "dishQ": return pub.buzz === mine ? (pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
     case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same as Me: help your captain";
     case "sayReveal": return pub.reveal?.ok?.[mine] ? "You dodged the app's word" : "You said the app's word";
-    case "battleQ": return pub.battle?.cap === mine ? (cap ? (pub.mode === "nohost" ? "Your question. Type it fast!" : "Your question. Say it out loud!") : "Your captain's battle. Not a word!") : cap ? "Your turn is next. Stay quiet." : "Captains only. Not a word!";
+    /* Team A's captain plays the first half, then Team B's: the one who's finished isn't "next" */
+    case "battleQ": return pub.battle?.cap === mine ? (cap ? (pub.mode === "nohost" ? "Your question. Type it fast!" : "Your question. Say it out loud!") : "Your captain's battle. Not a word!")
+      : cap ? (mine === 0 ? `Your half is done. ${T[1].name}'s captain now. Stay quiet.` : "Your turn is next. Stay quiet.") : "Captains only. Not a word!";
     case "battleHandoff": return `${T[1].name}'s captain is next`;
     case "battleTie": return cap ? "Tie-breaker: buzz to answer" : "Captains only. Not a word!";
     case "mapQ": return cap ? "What does the map show? One go." : "Guess the Map: help your captain";
