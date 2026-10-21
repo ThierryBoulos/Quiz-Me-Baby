@@ -300,7 +300,7 @@ function TvMini({ pub }: { pub: Pub }) {
     <div className="flex gap-16 text-left">{([0, 1] as const).map((t) => (
       <div key={t} className="flex flex-col gap-1 min-w-[420px]">
         <div className="display text-28" style={{ color: tc(t) }}>{T[t].name}</div>
-        {calls.filter((c) => c.team === t).map((c) => <div key={c.id} className="text-20 flex items-baseline gap-3"><span className="text-[var(--color-ink-3)] w-6">{c.note}</span><span className="flex-1 truncate">{c.text || "no answer"}</span><Verdict v={c.ok} size={16} /></div>)}
+        {calls.filter((c) => c.team === t).map((c) => <div key={c.id} className="text-20 flex items-baseline gap-3"><span className="text-[var(--color-ink-3)] w-6">{c.note}</span><span className="flex-1 truncate">{c.text || "no answer"}{c.answer && !c.ok && <span className="text-[var(--color-ink-3)]"> · {c.answer}</span>}</span><Verdict v={c.ok} size={16} /></div>)}
       </div>))}</div>
   </>); }
   if (pub.battle && sc === "battleSummary") { const B = pub.battle; return (<>

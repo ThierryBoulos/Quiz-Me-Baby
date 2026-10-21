@@ -30,7 +30,7 @@ export type Pub = {
   decided?: { key: MiniKey; title: string; winner: 0 | 1; spare: number; pts: number };
   /* the app's calls on this screen (answer card, reveals, Battle review), and one being contested:
      with no host the other captain agrees or not before `until` (then the call stands); with a host, the host decides */
-  calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string }[];
+  calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string }[];
   contest?: { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number } | null;
   /* with a host: what the captain typed (never the answer), so the host's phone shows it the moment it lands */
   said?: Two<string[] | null>;

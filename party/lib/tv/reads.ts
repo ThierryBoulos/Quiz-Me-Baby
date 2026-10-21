@@ -57,7 +57,7 @@ export const okWin = (s: TvState): W => { const [a, b] = s.ok; return a && b ? "
    review, and the sudden-death or tie-breaker question just decided (on the final, the Battle's
    summary, or the next question). A call with nothing typed, or already looked at, can't be
    contested again. */
-export type Call = { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string };
+export type Call = { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string };   // answer: the right one, where the screen doesn't show it
 export function callsOf(s: TvState): Call[] {
   const g = s.g, sc = s.screen, out: Call[] = [];
   if (!g) return out;
@@ -75,7 +75,7 @@ export function callsOf(s: TvState): Call[] {
     (s.legLog || []).forEach((e, i) => out.push({ id: "d" + i, team: e.team, text: e.text, ok: e.ok }));
   } else if (sc === "battleReview" && g.battle) {
     (g.battle.log as G[][]).forEach((L, cap) => (L || []).forEach((e: G, i: number) => {
-      if (e) out.push({ id: `b${cap}-${i}`, team: cap as 0 | 1, text: e.said || "", ok: !!e.got, note: String(i + 1) });
+      if (e) out.push({ id: `b${cap}-${i}`, team: cap as 0 | 1, text: e.said || "", ok: !!e.got, note: String(i + 1), answer: e.q?.answer });
     }));
   } else if (s.sdLog && (s.sdLog.kind === "sudden" ? sc === "final" || (sc === "sudden" && g.sdReady) : sc === "battleSummary" || sc === "battleTie")) {
     const last = sc === "sudden" || sc === "battleTie";
