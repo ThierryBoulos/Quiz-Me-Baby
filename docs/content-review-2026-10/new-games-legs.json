@@ -1,0 +1,1855 @@
+[
+ {
+  "type": "pin",
+  "level": "easy",
+  "landmark": "Eiffel Tower",
+  "city": "Paris",
+  "country": "France",
+  "lat": 48.8583,
+  "lon": 2.2945,
+  "photo": "https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons.jpg",
+  "licence": "CC BY-SA 3.0",
+  "credit": "Benh LIEU SONG",
+  "coords_source": "https://www.wikidata.org/wiki/Q243",
+  "why": "The most recognisable building on earth and everyone knows it is in Paris; the leg is won on whether you can find Paris on a borders-only map, so most pins land within 50 to 150 km."
+ },
+ {
+  "type": "pin",
+  "level": "easy",
+  "landmark": "Statue of Liberty",
+  "city": "New York",
+  "country": "United States",
+  "lat": 40.6892,
+  "lon": -74.0444,
+  "photo": "https://commons.wikimedia.org/wiki/File:Statue_of_Liberty_and_a_sightseeing_boat,_Liberty_Island,_New_York.jpg",
+  "licence": "CC BY-SA 4.0",
+  "credit": "Christian David",
+  "coords_source": "https://www.wikidata.org/wiki/Q9202",
+  "why": "Instantly known and the city is obvious; the only skill is putting New York on the right stretch of the US east coast."
+ },
+ {
+  "type": "pin",
+  "level": "easy",
+  "landmark": "Colosseum",
+  "city": "Rome",
+  "country": "Italy",
+  "lat": 41.8903,
+  "lon": 12.4922,
+  "photo": "https://commons.wikimedia.org/wiki/File:Colosseo_2020.jpg",
+  "licence": "CC BY-SA 4.0",
+  "credit": "FeaturedPics (Commons user, as credited on the file page)",
+  "coords_source": "https://www.wikidata.org/wiki/Q10285",
+  "why": "World-famous, city obvious. Rome sits halfway down the west side of the boot, which most people can hit."
+ },
+ {
+  "type": "pin",
+  "level": "easy",
+  "landmark": "Sydney Opera House",
+  "city": "Sydney",
+  "country": "Australia",
+  "lat": -33.8571,
+  "lon": 151.2149,
+  "photo": "https://commons.wikimedia.org/wiki/File:00_1375_Sydney_Opera_House_(Australia).jpg",
+  "licence": "CC BY-SA 4.0",
+  "credit": "W. Bulach",
+  "coords_source": "https://www.wikidata.org/wiki/Q45178",
+  "why": "Everyone knows it; the test is the south-east corner of Australia. Pins placed 'somewhere in Australia' lose by 2,000 km, so it still separates the teams."
+ },
+ {
+  "type": "pin",
+  "level": "easy",
+  "landmark": "Taj Mahal",
+  "city": "Agra",
+  "country": "India",
+  "lat": 27.175,
+  "lon": 78.0419,
+  "photo": "https://commons.wikimedia.org/wiki/File:Taj_Mahal_(Edited).jpeg",
+  "licence": "CC BY-SA 3.0",
+  "credit": "Yann, edited by Jim Carter",
+  "coords_source": "https://www.wikidata.org/wiki/Q9141",
+  "why": "Universally known and most people know it is near Delhi; a pin on Delhi is only about 180 km out."
+ },
+ {
+  "type": "pin",
+  "level": "easy",
+  "landmark": "Great Pyramid of Giza",
+  "city": "Giza (Cairo)",
+  "country": "Egypt",
+  "lat": 29.9792,
+  "lon": 31.1342,
+  "photo": "https://commons.wikimedia.org/wiki/File:Kheops-Pyramid.jpg",
+  "licence": "CC BY 2.5",
+  "credit": "Nina (Norwegian Wikipedia user)",
+  "coords_source": "https://www.wikidata.org/wiki/Q37200",
+  "why": "The city is obvious and Cairo sits right at the bottom of the Nile delta, an easy shape to find on a borders-only map."
+ },
+ {
+  "type": "pin",
+  "level": "easy",
+  "landmark": "Big Ben (Elizabeth Tower)",
+  "city": "London",
+  "country": "United Kingdom",
+  "lat": 51.5007,
+  "lon": -0.1246,
+  "photo": "https://commons.wikimedia.org/wiki/File:Elizabeth_Tower_and_the_north_front_of_the_Palace_of_Westminster,_London.jpg",
+  "licence": "CC BY-SA 4.0",
+  "credit": "Christian David",
+  "coords_source": "https://www.wikidata.org/wiki/Q41225",
+  "why": "A home banker for the British guests and known to everyone else; the only question is how close to the Thames estuary the pin lands."
+ },
+ {
+  "type": "pin",
+  "level": "medium",
+  "landmark": "Machu Picchu",
+  "city": "near Aguas Calientes, Cusco region",
+  "country": "Peru",
+  "lat": -13.1633,
+  "lon": -72.5456,
+  "photo": "https://commons.wikimedia.org/wiki/File:80_-_Machu_Picchu_-_Juin_2009_-_edit.jpg",
+  "licence": "CC BY-SA 3.0",
+  "credit": "Martin St-Amant (S23678)",
+  "coords_source": "https://www.wikidata.org/wiki/Q676203",
+  "why": "Everyone knows it is in Peru, but it is in the Andes 500 km south-east of Lima, not on the coast; pins on Lima lose."
+ },
+ {
+  "type": "pin",
+  "level": "medium",
+  "landmark": "Petra (Al-Khazneh, the Treasury)",
+  "city": "Wadi Musa",
+  "country": "Jordan",
+  "lat": 30.3221,
+  "lon": 35.4515,
+  "photo": "https://commons.wikimedia.org/wiki/File:The_Treasury,_Petra,_Jordan5.jpg",
+  "licence": "CC BY-SA 3.0",
+  "credit": "Diego Delso",
+  "coords_source": "https://www.wikidata.org/wiki/Q1259626",
+  "why": "Famous and the country is known, but Petra is in the south of Jordan, about 190 km south of Amman; the room's Middle East experts will beat a pin on Amman."
+ },
+ {
+  "type": "pin",
+  "level": "medium",
+  "landmark": "Angkor Wat",
+  "city": "Siem Reap",
+  "country": "Cambodia",
+  "lat": 13.4125,
+  "lon": 103.8667,
+  "photo": "https://commons.wikimedia.org/wiki/File:Angkor_Wat.jpg",
+  "licence": "CC BY-SA 3.0",
+  "credit": "Bjørn Christian Tørrissen",
+  "coords_source": "https://www.wikidata.org/wiki/Q43473",
+  "why": "Many people know it, fewer can say 'Cambodia' straight away, and fewer still can find north-west Cambodia on the map. It rewards real knowledge but stays fair."
+ },
+ {
+  "type": "pin",
+  "level": "medium",
+  "landmark": "Neuschwanstein Castle",
+  "city": "Schwangau, near Füssen (Bavaria)",
+  "country": "Germany",
+  "lat": 47.5575,
+  "lon": 10.7494,
+  "photo": "https://commons.wikimedia.org/wiki/File:Neuschwanstein_Castle_2024-02.jpg",
+  "licence": "CC0",
+  "credit": "Wilfredo Rafael Rodriguez Hernandez",
+  "coords_source": "https://www.wikidata.org/wiki/Q4152",
+  "why": "The 'Disney castle' is famous, but it sits right on the Austrian border in the Alps; a pin on Munich is about 90 km out, a pin in the middle of Germany 400 km or more."
+ },
+ {
+  "type": "pin",
+  "level": "medium",
+  "landmark": "Temple of Bacchus, Baalbek",
+  "city": "Baalbek",
+  "country": "Lebanon",
+  "lat": 34.0061,
+  "lon": 36.2039,
+  "photo": "https://commons.wikimedia.org/wiki/File:Lebanon,_Baalbek,_Temple_of_Bacchus_2.jpg",
+  "licence": "CC BY 4.0",
+  "credit": "© Vyacheslav Argenberg / http://www.vascoplanet.com/ (attribution as the author asks)",
+  "coords_source": "https://www.wikidata.org/wiki/Q1991217",
+  "why": "Easy for the Lebanese guests, a real test for everyone else: Baalbek is in the Bekaa, about 65 km east-north-east of Beirut, near the Syrian border. Lebanon is tiny, so the pin has to be precise."
+ },
+ {
+  "type": "pin",
+  "level": "medium",
+  "landmark": "Alhambra",
+  "city": "Granada",
+  "country": "Spain",
+  "lat": 37.1763,
+  "lon": -3.5882,
+  "photo": "https://commons.wikimedia.org/wiki/File:Dawn_Charles_V_Palace_Alhambra_Granada_Andalusia_Spain.jpg",
+  "licence": "CC0",
+  "credit": "Jebulon",
+  "coords_source": "https://www.wikidata.org/wiki/Q47476",
+  "why": "Well known, but people must remember 'Granada' and then place it in Andalusia, inland from the Costa del Sol. Pins on Seville or Madrid are 210 to 360 km out."
+ },
+ {
+  "type": "pin",
+  "level": "medium",
+  "landmark": "Iguazu Falls",
+  "city": "Puerto Iguazú (Argentina) / Foz do Iguaçu (Brazil)",
+  "country": "Argentina / Brazil",
+  "lat": -25.6953,
+  "lon": -54.4367,
+  "photo": "https://commons.wikimedia.org/wiki/File:Aerial_Foz_de_Igua%C3%A7u_26_Nov_2005.jpg",
+  "licence": "CC BY-SA 4.0",
+  "credit": "Mariordo (Mario Roberto Durán Ortiz)",
+  "coords_source": "https://www.wikidata.org/wiki/Q36332",
+  "why": "Famous falls whose location people roughly know (where Argentina, Brazil and Paraguay meet) but rarely precisely. The falls are 2.7 km wide, so the point is the Wikidata centre."
+ },
+ {
+  "type": "pin",
+  "level": "hard",
+  "landmark": "Jeita Grotto",
+  "city": "Jeita (Keserwan), north of Beirut",
+  "country": "Lebanon",
+  "lat": 33.9439,
+  "lon": 35.6406,
+  "photo": "https://commons.wikimedia.org/wiki/File:Upper_Jeita_Grotto.jpg",
+  "licence": "CC BY 2.0",
+  "credit": "kcakduman (via Flickr)",
+  "coords_source": "https://www.wikidata.org/wiki/Q1552568",
+  "why": "Show the name on the TV with this one: a cave photo alone is too ambiguous to be fair. Then it is pure placing: you must know Lebanon's famous grotto and put it in the hills just inland from Jounieh, about 15 km north-east of central Beirut. Teams who know it land within a few km; teams who don't can be a continent away. A great one for the Lebanese guests to show off."
+ },
+ {
+  "type": "pin",
+  "level": "hard",
+  "landmark": "Moai of Ahu Tongariki",
+  "city": "Rapa Nui (Easter Island)",
+  "country": "Chile",
+  "lat": -27.1258,
+  "lon": -109.2769,
+  "photo": "https://commons.wikimedia.org/wiki/File:Easter_Island_Ahu_(2006).jpg",
+  "licence": "CC BY 2.5",
+  "credit": "Honey Hooper (Hhooper1)",
+  "coords_source": "https://www.wikidata.org/wiki/Q3448354",
+  "why": "Everyone recognises the Moai, almost nobody can place a speck of land in the Pacific 3,500 km west of Chile. Distances will be large for both teams, which makes it a fun one."
+ },
+ {
+  "type": "pin",
+  "level": "hard",
+  "landmark": "Chichén Itzá (El Castillo)",
+  "city": "Yucatán",
+  "country": "Mexico",
+  "lat": 20.6831,
+  "lon": -88.5686,
+  "photo": "https://commons.wikimedia.org/wiki/File:Chichen_Itza_3.jpg",
+  "licence": "CC BY-SA 4.0",
+  "credit": "Daniel Schwen",
+  "coords_source": "https://www.wikidata.org/wiki/Q5859",
+  "why": "People know 'Mexico', but it is on the Yucatán peninsula, about 1,100 km east of Mexico City and 190 km west of Cancún; a pin on Mexico City is 1,100 km out."
+ },
+ {
+  "type": "pin",
+  "level": "hard",
+  "landmark": "Mont-Saint-Michel",
+  "city": "Le Mont-Saint-Michel (Normandy)",
+  "country": "France",
+  "lat": 48.6358,
+  "lon": -1.5103,
+  "photo": "https://commons.wikimedia.org/wiki/File:Mont_St_Michel_3,_Brittany,_France_-_July_2011.jpg",
+  "licence": "CC BY-SA 3.0",
+  "credit": "Diliff",
+  "coords_source": "https://www.wikidata.org/wiki/Q20892",
+  "why": "The French guests know it; the hard part is the exact spot on the Normandy/Brittany border in the bay. Note the photo's own title wrongly says Brittany: it is in Normandy, by a few km."
+ },
+ {
+  "type": "pin",
+  "level": "hard",
+  "landmark": "Matterhorn",
+  "city": "Zermatt",
+  "country": "Switzerland / Italy",
+  "lat": 45.9764,
+  "lon": 7.6586,
+  "photo": "https://commons.wikimedia.org/wiki/File:Matterhorn_from_Domh%C3%BCtte_-_2.jpg",
+  "licence": "CC BY-SA 3.0",
+  "credit": "chil, on Camptocamp.org",
+  "coords_source": "https://www.wikidata.org/wiki/Q1374",
+  "why": "Recognisable (the Toblerone mountain) but people put it in the middle of Switzerland; it is on the Italian border in the far south of Valais, about 110 km south of Bern."
+ },
+ {
+  "type": "pin",
+  "level": "hard",
+  "landmark": "Victoria Falls",
+  "city": "Livingstone (Zambia) / Victoria Falls (Zimbabwe)",
+  "country": "Zambia / Zimbabwe",
+  "lat": -17.9248,
+  "lon": 25.8581,
+  "photo": "https://commons.wikimedia.org/wiki/File:Cataratas_Victoria,_Zambia-Zimbabue,_2018-07-27,_DD_04.jpg",
+  "licence": "CC BY-SA 4.0",
+  "credit": "Diego Delso",
+  "coords_source": "https://www.wikidata.org/wiki/Q43278",
+  "why": "Known name, vague location: on the Zambezi between Zambia and Zimbabwe, about 950 km north of Johannesburg. Most pins land in the wrong country of southern Africa."
+ },
+ {
+  "type": "airport",
+  "level": "easy",
+  "airport": "Beirut–Rafic Hariri International Airport",
+  "code": "BEY",
+  "city": "Beirut",
+  "board_language": "Arabic / English",
+  "board_title": "المغادرة / DEPARTURES",
+  "board": [
+   {
+    "time": "07:20",
+    "status": "تم اغلاق البوابة / Gate closed",
+    "dest": "روما ROME",
+    "flight": "ME 231",
+    "gate": "9"
+   },
+   {
+    "time": "07:20",
+    "status": "تم اغلاق البوابة / Gate closed",
+    "dest": "فرانكفورت FRANKFURT",
+    "flight": "ME 217",
+    "gate": "11"
+   },
+   {
+    "time": "07:25",
+    "status": "صعود الطائرة / Boarding",
+    "dest": "دبي DUBAI",
+    "flight": "ME 426",
+    "gate": "7"
+   },
+   {
+    "time": "07:55",
+    "status": "صعود الطائرة / Boarding",
+    "dest": "باريس PARIS",
+    "flight": "ME 211",
+    "gate": "13"
+   },
+   {
+    "time": "08:00",
+    "status": "في الموعد / On time",
+    "dest": "ابوظبي ABU DHABI",
+    "flight": "EY 584",
+    "gate": "4"
+   },
+   {
+    "time": "08:10",
+    "status": "في الموعد / On time",
+    "dest": "لندن LONDON",
+    "flight": "ME 201",
+    "gate": "15"
+   },
+   {
+    "time": "08:25",
+    "status": "متأخرة / Delayed",
+    "dest": "اسطنبول ISTANBUL",
+    "flight": "ME 265",
+    "gate": "10"
+   },
+   {
+    "time": "09:10",
+    "status": "في الموعد / On time",
+    "dest": "أثينا ATHENS",
+    "flight": "ME 251",
+    "gate": "12"
+   }
+  ],
+  "clues": "Arabic and English side by side, and seven of the eight flights are ME, Middle East Airlines, whose home is Beirut (EY is Etihad). The destinations are MEA's network (Paris, London, Rome, Frankfurt, Dubai, Istanbul, Athens) and Beirut is the one city missing. Every flight number and time is real: it is the airport's own departure list for 22 October 2026.",
+  "why": "Easy: the language plus the home airline give it away, and half the room is Lebanese.",
+  "accept": [
+   "Beirut",
+   "BEY",
+   "Rafic Hariri",
+   "Beirut Rafic Hariri International Airport",
+   "Beyrouth",
+   "بيروت"
+  ],
+  "source": [
+   "https://www.beirutairport.gov.lb/_flight.php?lang=en&type=dprtr",
+   "https://en.wikipedia.org/wiki/Beirut%E2%80%93Rafic_Hariri_International_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "easy",
+  "airport": "Adolfo Suárez Madrid–Barajas Airport",
+  "code": "MAD",
+  "city": "Madrid",
+  "board_language": "Spanish",
+  "board_title": "Salidas",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "Embarcando",
+    "dest": "Barcelona",
+    "flight": "IB 3002",
+    "gate": "J52"
+   },
+   {
+    "time": "07:25",
+    "status": "A tiempo",
+    "dest": "Lisboa",
+    "flight": "IB 3100",
+    "gate": "J40"
+   },
+   {
+    "time": "07:40",
+    "status": "A tiempo",
+    "dest": "París-Charles de Gaulle",
+    "flight": "AF 1301",
+    "gate": "D62"
+   },
+   {
+    "time": "08:05",
+    "status": "Retrasado",
+    "dest": "Fráncfort",
+    "flight": "LH 1121",
+    "gate": "D58"
+   },
+   {
+    "time": "08:30",
+    "status": "A tiempo",
+    "dest": "Londres-Heathrow",
+    "flight": "IB 3163",
+    "gate": "K88"
+   },
+   {
+    "time": "09:15",
+    "status": "Cancelado",
+    "dest": "Roma-Fiumicino",
+    "flight": "IB 3230",
+    "gate": "J47"
+   },
+   {
+    "time": "11:50",
+    "status": "A tiempo",
+    "dest": "Bogotá",
+    "flight": "IB 6587",
+    "gate": "S24"
+   },
+   {
+    "time": "12:05",
+    "status": "A tiempo",
+    "dest": "Nueva York-JFK",
+    "flight": "IB 6251",
+    "gate": "S12"
+   }
+  ],
+  "clues": "A Spanish board where most flights are IB, Iberia, Spain's flag carrier. Barcelona is on the board, so it is not Barcelona; the long-haul flights to Bogotá and New York point to Iberia's hub. Madrid is missing.",
+  "why": "Easy: Spanish plus Iberia plus 'Barcelona is listed' leaves only Madrid.",
+  "accept": [
+   "Madrid",
+   "MAD",
+   "Barajas",
+   "Madrid-Barajas",
+   "Adolfo Suárez"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Adolfo_Su%C3%A1rez_Madrid%E2%80%93Barajas_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "easy",
+  "airport": "Lisbon Airport (Humberto Delgado)",
+  "code": "LIS",
+  "city": "Lisbon",
+  "board_language": "Portuguese",
+  "board_title": "Partidas",
+  "board": [
+   {
+    "time": "06:55",
+    "status": "Embarque",
+    "dest": "Porto",
+    "flight": "TP 1940",
+    "gate": "14"
+   },
+   {
+    "time": "07:20",
+    "status": "Última chamada",
+    "dest": "Funchal",
+    "flight": "TP 1689",
+    "gate": "11"
+   },
+   {
+    "time": "07:45",
+    "status": "",
+    "dest": "Madrid",
+    "flight": "TP 1012",
+    "gate": "18"
+   },
+   {
+    "time": "08:10",
+    "status": "",
+    "dest": "Paris-Orly",
+    "flight": "TP 432",
+    "gate": "21"
+   },
+   {
+    "time": "08:35",
+    "status": "Atrasado",
+    "dest": "Frankfurt",
+    "flight": "LH 1173",
+    "gate": "23"
+   },
+   {
+    "time": "09:05",
+    "status": "",
+    "dest": "Londres-Heathrow",
+    "flight": "TP 1350",
+    "gate": "42"
+   },
+   {
+    "time": "10:30",
+    "status": "Cancelado",
+    "dest": "Luanda",
+    "flight": "TP 289",
+    "gate": "45"
+   },
+   {
+    "time": "11:45",
+    "status": "",
+    "dest": "São Paulo-Guarulhos",
+    "flight": "TP 81",
+    "gate": "47"
+   }
+  ],
+  "clues": "Portuguese words (Embarque, Última chamada, Atrasado) and TP, TAP Air Portugal, on almost every flight. Porto and Funchal are on the board, so it is Portugal's other big airport; Luanda and São Paulo are TAP's Lusophone long-haul routes from its hub.",
+  "why": "Easy: the language and the flag carrier point to Portugal, and with Porto listed it can only be Lisbon. (Blank status = on time, as on real boards.)",
+  "accept": [
+   "Lisbon",
+   "LIS",
+   "Lisboa",
+   "Humberto Delgado",
+   "Portela"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Lisbon_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "easy",
+  "airport": "Athens International Airport",
+  "code": "ATH",
+  "city": "Athens",
+  "board_language": "Greek / English",
+  "board_title": "Αναχωρήσεις / Departures",
+  "board": [
+   {
+    "time": "06:40",
+    "status": "Επιβίβαση / Boarding",
+    "dest": "Θεσσαλονίκη Thessaloniki",
+    "flight": "A3 110",
+    "gate": "A12"
+   },
+   {
+    "time": "07:05",
+    "status": "Στην ώρα / On time",
+    "dest": "Ηράκλειο Heraklion",
+    "flight": "A3 320",
+    "gate": "A15"
+   },
+   {
+    "time": "07:30",
+    "status": "Ακυρώθηκε / Cancelled",
+    "dest": "Λάρνακα Larnaca",
+    "flight": "A3 900",
+    "gate": "A21"
+   },
+   {
+    "time": "07:50",
+    "status": "Στην ώρα / On time",
+    "dest": "Ρώμη Rome",
+    "flight": "A3 650",
+    "gate": "A18"
+   },
+   {
+    "time": "08:15",
+    "status": "Καθυστέρηση / Delayed",
+    "dest": "Λονδίνο-Χίθροου London-Heathrow",
+    "flight": "A3 600",
+    "gate": "B5"
+   },
+   {
+    "time": "08:40",
+    "status": "Στην ώρα / On time",
+    "dest": "Παρίσι Paris-CDG",
+    "flight": "A3 610",
+    "gate": "A9"
+   },
+   {
+    "time": "09:10",
+    "status": "Στην ώρα / On time",
+    "dest": "Βηρυτός Beirut",
+    "flight": "A3 944",
+    "gate": "B8"
+   },
+   {
+    "time": "09:35",
+    "status": "Στην ώρα / On time",
+    "dest": "Ντουμπάι Dubai",
+    "flight": "EK 104",
+    "gate": "B12"
+   }
+  ],
+  "clues": "The Greek alphabet and A3, Aegean Airlines, on seven of the eight flights. Thessaloniki and Heraklion are on the board, so it is not those; Aegean's hub is Athens, the city missing.",
+  "why": "Easy: an alphabet nobody can mistake, plus the national airline.",
+  "accept": [
+   "Athens",
+   "ATH",
+   "Athina",
+   "Αθήνα",
+   "Eleftherios Venizelos",
+   "Athens International"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Athens_International_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "easy",
+  "airport": "Istanbul Airport",
+  "code": "IST",
+  "city": "Istanbul",
+  "board_language": "Turkish",
+  "board_title": "Kalkış",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "Biniş",
+    "dest": "Ankara",
+    "flight": "TK 2120",
+    "gate": "A3"
+   },
+   {
+    "time": "07:05",
+    "status": "Son çağrı",
+    "dest": "Beyrut",
+    "flight": "TK 830",
+    "gate": "F7"
+   },
+   {
+    "time": "07:15",
+    "status": "Zamanında",
+    "dest": "İzmir",
+    "flight": "TK 2310",
+    "gate": "A8"
+   },
+   {
+    "time": "07:40",
+    "status": "Zamanında",
+    "dest": "Antalya",
+    "flight": "TK 2410",
+    "gate": "A12"
+   },
+   {
+    "time": "08:05",
+    "status": "Gecikmeli",
+    "dest": "Londra-Heathrow",
+    "flight": "TK 1971",
+    "gate": "F5"
+   },
+   {
+    "time": "08:20",
+    "status": "Zamanında",
+    "dest": "Paris-CDG",
+    "flight": "TK 1821",
+    "gate": "D4"
+   },
+   {
+    "time": "09:30",
+    "status": "İptal",
+    "dest": "Frankfurt",
+    "flight": "LH 1301",
+    "gate": "D9"
+   },
+   {
+    "time": "13:55",
+    "status": "Zamanında",
+    "dest": "New York-JFK",
+    "flight": "TK 1",
+    "gate": "F11"
+   }
+  ],
+  "clues": "Turkish words (Zamanında = on time, Gecikmeli = delayed, İptal = cancelled) and TK, Turkish Airlines, on almost every flight. Ankara, İzmir and Antalya are listed, so it is the one big Turkish city missing: Istanbul, TK's hub.",
+  "why": "Easy at city level (Istanbul). The exact airport is IST; the trickier Sabiha Gökçen board is a hard leg.",
+  "accept": [
+   "Istanbul",
+   "IST",
+   "Istanbul Airport",
+   "İstanbul Havalimanı"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Istanbul_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "easy",
+  "airport": "Amsterdam Airport Schiphol",
+  "code": "AMS",
+  "city": "Amsterdam",
+  "board_language": "Dutch",
+  "board_title": "Vertrek",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "Instappen",
+    "dest": "Londen-Heathrow",
+    "flight": "KL 1001",
+    "gate": "D61"
+   },
+   {
+    "time": "07:15",
+    "status": "Op tijd",
+    "dest": "Parijs-CDG",
+    "flight": "KL 1223",
+    "gate": "B17"
+   },
+   {
+    "time": "07:35",
+    "status": "Op tijd",
+    "dest": "Barcelona",
+    "flight": "KL 1665",
+    "gate": "C9"
+   },
+   {
+    "time": "08:00",
+    "status": "Vertraagd",
+    "dest": "Málaga",
+    "flight": "HV 5131",
+    "gate": "H3"
+   },
+   {
+    "time": "08:20",
+    "status": "Op tijd",
+    "dest": "Beiroet",
+    "flight": "ME 224",
+    "gate": "E18"
+   },
+   {
+    "time": "09:45",
+    "status": "Geannuleerd",
+    "dest": "Curaçao",
+    "flight": "KL 735",
+    "gate": "F4"
+   },
+   {
+    "time": "10:30",
+    "status": "Op tijd",
+    "dest": "Kaapstad",
+    "flight": "KL 597",
+    "gate": "F6"
+   },
+   {
+    "time": "10:40",
+    "status": "Op tijd",
+    "dest": "New York-JFK",
+    "flight": "KL 641",
+    "gate": "E7"
+   }
+  ],
+  "clues": "Dutch words (Vertrek, Op tijd, Vertraagd, Geannuleerd) and KL, KLM, on most flights, plus HV (Transavia's Dutch arm). Curaçao is a Dutch Caribbean island, a classic KLM route from its only hub.",
+  "why": "Easy: Dutch plus KLM can only be Amsterdam. (Real Schiphol screens are in English; the app draws this one in Dutch on purpose.)",
+  "accept": [
+   "Amsterdam",
+   "AMS",
+   "Schiphol"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Amsterdam_Airport_Schiphol"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "easy",
+  "airport": "Dubai International Airport",
+  "code": "DXB",
+  "city": "Dubai",
+  "board_language": "Arabic / English",
+  "board_title": "المغادرة / DEPARTURES",
+  "board": [
+   {
+    "time": "07:40",
+    "status": "صعود الطائرة / Boarding",
+    "dest": "بيروت BEIRUT",
+    "flight": "EK 957",
+    "gate": "B24"
+   },
+   {
+    "time": "08:15",
+    "status": "في الموعد / On time",
+    "dest": "لندن هيثرو LONDON HEATHROW",
+    "flight": "EK 1",
+    "gate": "A12"
+   },
+   {
+    "time": "08:40",
+    "status": "في الموعد / On time",
+    "dest": "باريس PARIS CDG",
+    "flight": "EK 73",
+    "gate": "A7"
+   },
+   {
+    "time": "09:05",
+    "status": "متأخرة / Delayed",
+    "dest": "عمّان AMMAN",
+    "flight": "FZ 143",
+    "gate": "F6"
+   },
+   {
+    "time": "09:30",
+    "status": "في الموعد / On time",
+    "dest": "نيويورك NEW YORK JFK",
+    "flight": "EK 201",
+    "gate": "A1"
+   },
+   {
+    "time": "09:45",
+    "status": "في الموعد / On time",
+    "dest": "مومباي MUMBAI",
+    "flight": "EK 500",
+    "gate": "B6"
+   },
+   {
+    "time": "10:05",
+    "status": "ملغاة / Cancelled",
+    "dest": "القاهرة CAIRO",
+    "flight": "EK 927",
+    "gate": "B18"
+   },
+   {
+    "time": "10:20",
+    "status": "في الموعد / On time",
+    "dest": "سيدني SYDNEY",
+    "flight": "EK 414",
+    "gate": "A3"
+   }
+  ],
+  "clues": "Arabic and English, and the airline is EK, Emirates, on seven flights (FZ is flydubai). Emirates has a single hub, Dubai, and the destinations span every continent, as a giant hub's would.",
+  "why": "Easy: Emirates is one of the best-known airlines in the world and it has one hub.",
+  "accept": [
+   "Dubai",
+   "DXB",
+   "Dubai International",
+   "دبي"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Dubai_International_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "medium",
+  "airport": "Frankfurt Airport",
+  "code": "FRA",
+  "city": "Frankfurt",
+  "board_language": "German",
+  "board_title": "Abflug",
+  "board": [
+   {
+    "time": "08:00",
+    "status": "Pünktlich",
+    "dest": "Hamburg",
+    "flight": "LH 2",
+    "gate": "A14"
+   },
+   {
+    "time": "08:05",
+    "status": "Boarding",
+    "dest": "London-Heathrow",
+    "flight": "LH 900",
+    "gate": "Z25"
+   },
+   {
+    "time": "08:15",
+    "status": "Pünktlich",
+    "dest": "Berlin",
+    "flight": "LH 172",
+    "gate": "A20"
+   },
+   {
+    "time": "08:25",
+    "status": "Pünktlich",
+    "dest": "Hurghada",
+    "flight": "DE 4141",
+    "gate": "B44"
+   },
+   {
+    "time": "08:35",
+    "status": "Verspätet",
+    "dest": "Palermo",
+    "flight": "LH 324",
+    "gate": "A26"
+   },
+   {
+    "time": "08:50",
+    "status": "Pünktlich",
+    "dest": "Laibach",
+    "flight": "LH 1460",
+    "gate": "A17"
+   },
+   {
+    "time": "09:10",
+    "status": "Annulliert",
+    "dest": "Rom",
+    "flight": "LH 230",
+    "gate": "A22"
+   },
+   {
+    "time": "09:20",
+    "status": "Gate offen",
+    "dest": "München",
+    "flight": "LH 98",
+    "gate": "A12"
+   }
+  ],
+  "clues": "German words (Abflug, Pünktlich, Verspätet, Annulliert) and German city names (Rom, München, Laibach = Ljubljana), so a German-speaking airport. LH, Lufthansa, has two hubs, Frankfurt and Munich, and München is on the board, so it must be Frankfurt. DE is Condor, also based in Frankfurt.",
+  "why": "Medium: the language narrows it to Germany, Austria or Switzerland; you need 'Lufthansa hub' plus 'Munich is listed' to finish.",
+  "accept": [
+   "Frankfurt",
+   "FRA",
+   "Frankfurt am Main",
+   "Frankfurt Main"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Frankfurt_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "medium",
+  "airport": "Munich Airport",
+  "code": "MUC",
+  "city": "Munich",
+  "board_language": "German",
+  "board_title": "Abflug",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "Boarding",
+    "dest": "Frankfurt",
+    "flight": "LH 93",
+    "gate": "G18"
+   },
+   {
+    "time": "07:15",
+    "status": "Pünktlich",
+    "dest": "Hamburg",
+    "flight": "LH 2051",
+    "gate": "G25"
+   },
+   {
+    "time": "07:25",
+    "status": "Pünktlich",
+    "dest": "Berlin",
+    "flight": "LH 1931",
+    "gate": "G31"
+   },
+   {
+    "time": "07:35",
+    "status": "Verspätet",
+    "dest": "Köln/Bonn",
+    "flight": "EW 8051",
+    "gate": "G12"
+   },
+   {
+    "time": "07:50",
+    "status": "Pünktlich",
+    "dest": "Paris-CDG",
+    "flight": "LH 2228",
+    "gate": "G40"
+   },
+   {
+    "time": "08:05",
+    "status": "Gate offen",
+    "dest": "London-Heathrow",
+    "flight": "LH 2470",
+    "gate": "H32"
+   },
+   {
+    "time": "08:30",
+    "status": "Annulliert",
+    "dest": "Rom",
+    "flight": "LH 1866",
+    "gate": "G22"
+   },
+   {
+    "time": "11:50",
+    "status": "Pünktlich",
+    "dest": "New York-JFK",
+    "flight": "LH 410",
+    "gate": "H45"
+   }
+  ],
+  "clues": "German board, Lufthansa everywhere, so one of its two hubs. Frankfurt is on the board, so this is the other one: Munich. Hamburg, Berlin and Köln are listed too, which rules them out.",
+  "why": "Medium: the mirror image of the Frankfurt leg (deal one to each team). You must notice which hub is missing.",
+  "accept": [
+   "Munich",
+   "MUC",
+   "München",
+   "Franz Josef Strauss",
+   "Munich Airport"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Munich_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "medium",
+  "airport": "Zurich Airport",
+  "code": "ZRH",
+  "city": "Zurich",
+  "board_language": "German",
+  "board_title": "Abflug",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "Boarding",
+    "dest": "Genf",
+    "flight": "LX 2800",
+    "gate": "A54"
+   },
+   {
+    "time": "07:10",
+    "status": "Pünktlich",
+    "dest": "London-Heathrow",
+    "flight": "LX 316",
+    "gate": "D7"
+   },
+   {
+    "time": "07:25",
+    "status": "Pünktlich",
+    "dest": "Berlin",
+    "flight": "LX 962",
+    "gate": "A62"
+   },
+   {
+    "time": "07:40",
+    "status": "Verspätet",
+    "dest": "Paris-CDG",
+    "flight": "LX 632",
+    "gate": "A71"
+   },
+   {
+    "time": "07:55",
+    "status": "Pünktlich",
+    "dest": "Lissabon",
+    "flight": "LX 2084",
+    "gate": "A66"
+   },
+   {
+    "time": "08:10",
+    "status": "Pünktlich",
+    "dest": "Palma de Mallorca",
+    "flight": "WK 342",
+    "gate": "B37"
+   },
+   {
+    "time": "12:55",
+    "status": "Pünktlich",
+    "dest": "New York-JFK",
+    "flight": "LX 14",
+    "gate": "E26"
+   },
+   {
+    "time": "22:35",
+    "status": "Annulliert",
+    "dest": "Singapur",
+    "flight": "LX 176",
+    "gate": "E31"
+   }
+  ],
+  "clues": "German again, but the airline is LX, Swiss (and WK, Edelweiss), not Lufthansa, so Switzerland. Genf (Geneva) is on the board, which leaves Swiss's hub, Zurich.",
+  "why": "Medium: you have to know that LX is Swiss and that German is not only spoken in Germany.",
+  "accept": [
+   "Zurich",
+   "Zürich",
+   "ZRH",
+   "Kloten",
+   "Zurich Airport"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Zurich_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "medium",
+  "airport": "Brussels Airport",
+  "code": "BRU",
+  "city": "Brussels",
+  "board_language": "French / Dutch",
+  "board_title": "Départs / Vertrek",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "Embarquement / Instappen",
+    "dest": "Genève",
+    "flight": "SN 2711",
+    "gate": "A41"
+   },
+   {
+    "time": "07:10",
+    "status": "À l'heure / Op tijd",
+    "dest": "Berlin",
+    "flight": "SN 2581",
+    "gate": "A48"
+   },
+   {
+    "time": "07:25",
+    "status": "À l'heure / Op tijd",
+    "dest": "Londres / Londen-Heathrow",
+    "flight": "SN 2093",
+    "gate": "B12"
+   },
+   {
+    "time": "07:40",
+    "status": "Retardé / Vertraagd",
+    "dest": "Lisbonne / Lissabon",
+    "flight": "SN 3815",
+    "gate": "A55"
+   },
+   {
+    "time": "08:00",
+    "status": "À l'heure / Op tijd",
+    "dest": "Rome",
+    "flight": "SN 3175",
+    "gate": "A63"
+   },
+   {
+    "time": "10:35",
+    "status": "À l'heure / Op tijd",
+    "dest": "Beyrouth / Beiroet",
+    "flight": "ME 214",
+    "gate": "B22"
+   },
+   {
+    "time": "10:50",
+    "status": "Annulé / Geannuleerd",
+    "dest": "Kinshasa",
+    "flight": "SN 357",
+    "gate": "B31"
+   },
+   {
+    "time": "11:00",
+    "status": "À l'heure / Op tijd",
+    "dest": "New York-JFK",
+    "flight": "SN 501",
+    "gate": "B40"
+   }
+  ],
+  "clues": "Every word in French AND Dutch, which only Belgium does. SN is Brussels Airlines, and Kinshasa is its trademark route to the former Belgian Congo.",
+  "why": "Medium: the bilingual board is a lovely clue, but people need to connect French plus Dutch to Belgium.",
+  "accept": [
+   "Brussels",
+   "BRU",
+   "Bruxelles",
+   "Brussel",
+   "Zaventem",
+   "Brussels Airport"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Brussels_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "medium",
+  "airport": "Paris Charles de Gaulle Airport",
+  "code": "CDG",
+  "city": "Paris",
+  "board_language": "French",
+  "board_title": "Départs",
+  "board": [
+   {
+    "time": "10:30",
+    "status": "Embarquement",
+    "dest": "New York-JFK",
+    "flight": "AF 6",
+    "gate": "M34"
+   },
+   {
+    "time": "10:45",
+    "status": "À l'heure",
+    "dest": "Nice",
+    "flight": "AF 7706",
+    "gate": "F24"
+   },
+   {
+    "time": "11:05",
+    "status": "Retardé",
+    "dest": "Toulouse",
+    "flight": "AF 7782",
+    "gate": "F31"
+   },
+   {
+    "time": "11:20",
+    "status": "À l'heure",
+    "dest": "Abidjan",
+    "flight": "AF 702",
+    "gate": "K41"
+   },
+   {
+    "time": "11:40",
+    "status": "À l'heure",
+    "dest": "Londres-Heathrow",
+    "flight": "AF 1180",
+    "gate": "L22"
+   },
+   {
+    "time": "13:20",
+    "status": "Annulé",
+    "dest": "Montréal",
+    "flight": "AF 344",
+    "gate": "L46"
+   },
+   {
+    "time": "13:45",
+    "status": "À l'heure",
+    "dest": "Beyrouth",
+    "flight": "ME 212",
+    "gate": "K38"
+   },
+   {
+    "time": "13:55",
+    "status": "À l'heure",
+    "dest": "Tokyo-Haneda",
+    "flight": "AF 274",
+    "gate": "M40"
+   }
+  ],
+  "clues": "French, Air France on seven flights, Nice and Toulouse on the board, so the capital. Since Air France left Orly in 2026 (it keeps only Corsica flights there), any Air France flight to Nice, Toulouse or long-haul is from Charles de Gaulle.",
+  "why": "Medium: 'Paris' is easy; naming Charles de Gaulle needs the long-haul Air France clue. Give the leg for 'Paris'; the Orly board is the hard twin where the exact airport is required.",
+  "accept": [
+   "Paris Charles de Gaulle",
+   "Charles de Gaulle",
+   "CDG",
+   "Roissy",
+   "Roissy-Charles de Gaulle",
+   "Paris"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Charles_de_Gaulle_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "medium",
+  "airport": "Singapore Changi Airport",
+  "code": "SIN",
+  "city": "Singapore",
+  "board_language": "English",
+  "board_title": "Departures",
+  "board": [
+   {
+    "time": "08:05",
+    "status": "Boarding",
+    "dest": "Bangkok",
+    "flight": "TR 606",
+    "gate": "D40"
+   },
+   {
+    "time": "08:15",
+    "status": "On time",
+    "dest": "Hong Kong",
+    "flight": "SQ 856",
+    "gate": "A15"
+   },
+   {
+    "time": "08:30",
+    "status": "On time",
+    "dest": "Bali (Denpasar)",
+    "flight": "TR 282",
+    "gate": "D44"
+   },
+   {
+    "time": "08:55",
+    "status": "Delayed",
+    "dest": "Mumbai",
+    "flight": "SQ 422",
+    "gate": "B5"
+   },
+   {
+    "time": "09:05",
+    "status": "On time",
+    "dest": "Tokyo-Haneda",
+    "flight": "SQ 634",
+    "gate": "A9"
+   },
+   {
+    "time": "09:15",
+    "status": "On time",
+    "dest": "Sydney",
+    "flight": "SQ 231",
+    "gate": "A20"
+   },
+   {
+    "time": "09:40",
+    "status": "Cancelled",
+    "dest": "London-Heathrow",
+    "flight": "SQ 322",
+    "gate": "A1"
+   },
+   {
+    "time": "23:35",
+    "status": "On time",
+    "dest": "New York-JFK",
+    "flight": "SQ 24",
+    "gate": "A3"
+   }
+  ],
+  "clues": "English gives nothing away, but SQ (Singapore Airlines) and TR (Scoot, its low-cost arm) fly every route. Destinations fan out across Asia and Australia, with London and New York.",
+  "why": "Medium: an English board saved by the home airline code. Teams who know SQ win.",
+  "accept": [
+   "Singapore",
+   "SIN",
+   "Changi",
+   "Singapore Changi"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Singapore_Changi_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "medium",
+  "airport": "Geneva Airport",
+  "code": "GVA",
+  "city": "Geneva",
+  "board_language": "French",
+  "board_title": "Départs",
+  "board": [
+   {
+    "time": "06:30",
+    "status": "Embarquement",
+    "dest": "Paris-Orly",
+    "flight": "U2 1371",
+    "gate": "A2"
+   },
+   {
+    "time": "06:45",
+    "status": "À l'heure",
+    "dest": "Londres-Gatwick",
+    "flight": "U2 8402",
+    "gate": "C55"
+   },
+   {
+    "time": "07:00",
+    "status": "À l'heure",
+    "dest": "Zurich",
+    "flight": "LX 2801",
+    "gate": "A8"
+   },
+   {
+    "time": "07:15",
+    "status": "Retardé",
+    "dest": "Lisbonne",
+    "flight": "U2 1593",
+    "gate": "A12"
+   },
+   {
+    "time": "08:30",
+    "status": "À l'heure",
+    "dest": "Dubaï",
+    "flight": "EK 84",
+    "gate": "C67"
+   },
+   {
+    "time": "09:45",
+    "status": "À l'heure",
+    "dest": "Beyrouth",
+    "flight": "ME 216",
+    "gate": "C61"
+   },
+   {
+    "time": "10:10",
+    "status": "Annulé",
+    "dest": "Abou Dabi",
+    "flight": "EY 52",
+    "gate": "C63"
+   },
+   {
+    "time": "13:05",
+    "status": "À l'heure",
+    "dest": "New York-JFK",
+    "flight": "LX 22",
+    "gate": "C58"
+   }
+  ],
+  "clues": "French, but Paris is ON the board (Orly), so this is not Paris. LX (Swiss) flies to Zurich and New York, so a Swiss airport, and a French-speaking one: Geneva. Lots of easyJet (U2) too: its Swiss arm, easyJet Switzerland (code DS), is based in Geneva.",
+  "why": "Medium: the French language is a red herring until you spot Paris on the board and the Swiss airline.",
+  "accept": [
+   "Geneva",
+   "GVA",
+   "Genève",
+   "Genf",
+   "Cointrin",
+   "Geneva Airport"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Geneva_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "hard",
+  "airport": "Paris Orly Airport",
+  "code": "ORY",
+  "city": "Paris",
+  "board_language": "French",
+  "board_title": "Départs",
+  "board": [
+   {
+    "time": "06:50",
+    "status": "Embarquement",
+    "dest": "Ajaccio",
+    "flight": "XK 701",
+    "gate": "B12"
+   },
+   {
+    "time": "07:00",
+    "status": "À l'heure",
+    "dest": "Bastia",
+    "flight": "AF 6072",
+    "gate": "B15"
+   },
+   {
+    "time": "07:15",
+    "status": "À l'heure",
+    "dest": "Barcelone",
+    "flight": "VY 8001",
+    "gate": "A21"
+   },
+   {
+    "time": "07:30",
+    "status": "Retardé",
+    "dest": "Lisbonne",
+    "flight": "TP 433",
+    "gate": "A27"
+   },
+   {
+    "time": "07:45",
+    "status": "À l'heure",
+    "dest": "Marrakech",
+    "flight": "TO 3076",
+    "gate": "C34"
+   },
+   {
+    "time": "08:10",
+    "status": "Annulé",
+    "dest": "Alger",
+    "flight": "AH 1009",
+    "gate": "C38"
+   },
+   {
+    "time": "10:40",
+    "status": "À l'heure",
+    "dest": "Pointe-à-Pitre",
+    "flight": "TX 540",
+    "gate": "D45"
+   },
+   {
+    "time": "11:15",
+    "status": "À l'heure",
+    "dest": "Saint-Denis (La Réunion)",
+    "flight": "BF 712",
+    "gate": "D51"
+   }
+  ],
+  "clues": "French and Paris is missing, so a Paris airport, but which? No Air France long-haul: Air France appears only to Corsica (it left Orly in 2026 except Corsican public-service routes). Instead Transavia (TO), Vueling, Air Algérie, and leisure long-haul carriers to the overseas departments (Air Caraïbes TX, French Bee BF): that is Orly.",
+  "why": "Hard: the language and city are easy, the second-airport question is not. Only the exact airport counts.",
+  "accept": [
+   "Paris Orly",
+   "Orly",
+   "ORY",
+   "Paris-Orly"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Orly_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "hard",
+  "airport": "London Gatwick Airport",
+  "code": "LGW",
+  "city": "London",
+  "board_language": "English",
+  "board_title": "Departures",
+  "board": [
+   {
+    "time": "06:00",
+    "status": "Boarding",
+    "dest": "Edinburgh",
+    "flight": "U2 801",
+    "gate": "12"
+   },
+   {
+    "time": "06:15",
+    "status": "On time",
+    "dest": "Geneva",
+    "flight": "U2 8401",
+    "gate": "14"
+   },
+   {
+    "time": "06:30",
+    "status": "On time",
+    "dest": "Amsterdam",
+    "flight": "U2 8873",
+    "gate": "21"
+   },
+   {
+    "time": "06:45",
+    "status": "Delayed",
+    "dest": "Barcelona",
+    "flight": "VY 7826",
+    "gate": "45"
+   },
+   {
+    "time": "07:00",
+    "status": "On time",
+    "dest": "Budapest",
+    "flight": "W6 2202",
+    "gate": "52"
+   },
+   {
+    "time": "07:30",
+    "status": "Cancelled",
+    "dest": "Málaga",
+    "flight": "BA 2690",
+    "gate": "56"
+   },
+   {
+    "time": "09:45",
+    "status": "On time",
+    "dest": "Dubai",
+    "flight": "EK 16",
+    "gate": "101"
+   },
+   {
+    "time": "10:20",
+    "status": "On time",
+    "dest": "Antigua",
+    "flight": "BA 2155",
+    "gate": "108"
+   }
+  ],
+  "clues": "English, a flight to Edinburgh (so a UK airport that is not Edinburgh) and London missing. Mostly easyJet (U2) and low-cost carriers, plus BA flying to the Caribbean (Antigua) and to sun spots: that is Gatwick, not Heathrow (no Virgin, no Qantas, no long list of flag carriers).",
+  "why": "Hard: an English board with no home-airline giveaway, and a city with six airports.",
+  "accept": [
+   "London Gatwick",
+   "Gatwick",
+   "LGW"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Gatwick_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "hard",
+  "airport": "London Heathrow Airport",
+  "code": "LHR",
+  "city": "London",
+  "board_language": "English",
+  "board_title": "Departures",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "Boarding",
+    "dest": "Edinburgh",
+    "flight": "BA 1434",
+    "gate": "A10"
+   },
+   {
+    "time": "08:20",
+    "status": "On time",
+    "dest": "New York-JFK",
+    "flight": "BA 117",
+    "gate": "C55"
+   },
+   {
+    "time": "09:30",
+    "status": "On time",
+    "dest": "Chicago-O'Hare",
+    "flight": "UA 939",
+    "gate": "B42"
+   },
+   {
+    "time": "09:45",
+    "status": "Delayed",
+    "dest": "Mumbai",
+    "flight": "AI 130",
+    "gate": "B38"
+   },
+   {
+    "time": "11:15",
+    "status": "On time",
+    "dest": "Los Angeles",
+    "flight": "VS 23",
+    "gate": "12"
+   },
+   {
+    "time": "12:45",
+    "status": "On time",
+    "dest": "Beirut",
+    "flight": "ME 202",
+    "gate": "B33"
+   },
+   {
+    "time": "21:00",
+    "status": "Cancelled",
+    "dest": "Hong Kong",
+    "flight": "CX 252",
+    "gate": "25"
+   },
+   {
+    "time": "21:15",
+    "status": "On time",
+    "dest": "Sydney",
+    "flight": "QF 2",
+    "gate": "23"
+   }
+  ],
+  "clues": "English, Edinburgh on the board, London missing. No easyJet or Ryanair, but BA long-haul, Virgin Atlantic, United, Air India, Cathay, Qantas and MEA: most of the world's flag carriers fly to Heathrow, not Gatwick.",
+  "why": "Hard: same language and city as Gatwick; you must read the airline mix.",
+  "accept": [
+   "London Heathrow",
+   "Heathrow",
+   "LHR"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Heathrow_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "hard",
+  "airport": "John F. Kennedy International Airport",
+  "code": "JFK",
+  "city": "New York",
+  "board_language": "English",
+  "board_title": "Departures",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "Boarding",
+    "dest": "Boston",
+    "flight": "B6 718",
+    "gate": "B23"
+   },
+   {
+    "time": "07:15",
+    "status": "Cancelled",
+    "dest": "Atlanta",
+    "flight": "DL 1234",
+    "gate": "B32"
+   },
+   {
+    "time": "08:00",
+    "status": "On time",
+    "dest": "Los Angeles",
+    "flight": "AA 1",
+    "gate": "B10"
+   },
+   {
+    "time": "17:30",
+    "status": "On time",
+    "dest": "Dublin",
+    "flight": "EI 104",
+    "gate": "B50"
+   },
+   {
+    "time": "18:00",
+    "status": "Delayed",
+    "dest": "London-Heathrow",
+    "flight": "DL 1",
+    "gate": "B28"
+   },
+   {
+    "time": "19:30",
+    "status": "On time",
+    "dest": "Paris-CDG",
+    "flight": "AF 23",
+    "gate": "B4"
+   },
+   {
+    "time": "20:30",
+    "status": "On time",
+    "dest": "Milan-Malpensa",
+    "flight": "EK 206",
+    "gate": "C3"
+   },
+   {
+    "time": "23:00",
+    "status": "On time",
+    "dest": "Tel Aviv",
+    "flight": "LY 2",
+    "gate": "B5"
+   }
+  ],
+  "clues": "English, US domestic flights (Boston, Atlanta, Los Angeles) plus a big international list: a US gateway with no single home airline. New York is missing; it is JFK, not Newark, because there is no United (UA), Newark's hub airline, and Emirates' New York to Milan flight goes from JFK.",
+  "why": "Hard: English board, three home-ish airlines (Delta, JetBlue, American), and a city with two big airports.",
+  "accept": [
+   "New York JFK",
+   "JFK",
+   "John F. Kennedy",
+   "Kennedy",
+   "JFK Airport"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/John_F._Kennedy_International_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "hard",
+  "airport": "Tokyo Haneda Airport",
+  "code": "HND",
+  "city": "Tokyo",
+  "board_language": "Japanese",
+  "board_title": "出発 Departures",
+  "board": [
+   {
+    "time": "07:00",
+    "status": "搭乗中",
+    "dest": "札幌(新千歳) Sapporo",
+    "flight": "JL 501",
+    "gate": "15"
+   },
+   {
+    "time": "07:10",
+    "status": "定刻",
+    "dest": "福岡 Fukuoka",
+    "flight": "NH 241",
+    "gate": "56"
+   },
+   {
+    "time": "07:20",
+    "status": "定刻",
+    "dest": "大阪(伊丹) Osaka-Itami",
+    "flight": "NH 15",
+    "gate": "62"
+   },
+   {
+    "time": "07:30",
+    "status": "遅延",
+    "dest": "那覇 Okinawa (Naha)",
+    "flight": "JL 901",
+    "gate": "8"
+   },
+   {
+    "time": "07:45",
+    "status": "定刻",
+    "dest": "神戸 Kobe",
+    "flight": "BC 301",
+    "gate": "18"
+   },
+   {
+    "time": "10:05",
+    "status": "定刻",
+    "dest": "ニューヨーク New York-JFK",
+    "flight": "NH 110",
+    "gate": "110"
+   },
+   {
+    "time": "11:10",
+    "status": "欠航",
+    "dest": "ロンドン London-Heathrow",
+    "flight": "JL 43",
+    "gate": "112"
+   },
+   {
+    "time": "15:30",
+    "status": "定刻",
+    "dest": "アトランタ Atlanta",
+    "flight": "DL 294",
+    "gate": "141"
+   }
+  ],
+  "clues": "Japanese, JAL (JL) and ANA (NH), Tokyo missing, so a Tokyo airport. Haneda, not Narita: Skymark (BC) and the Kobe flight are Haneda-only among Tokyo's airports, JAL's London and New York flights and Delta's Atlanta flight leave from Haneda, and a board this full of JAL/ANA domestic routes (Sapporo, Fukuoka, Okinawa) is Haneda's; Narita's domestic flights are mostly low-cost carriers.",
+  "why": "Hard: the language gives Japan and the airlines give Tokyo, but Haneda versus Narita needs real knowledge.",
+  "accept": [
+   "Tokyo Haneda",
+   "Haneda",
+   "HND",
+   "Tokyo International"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Haneda_Airport"
+  ]
+ },
+ {
+  "type": "airport",
+  "level": "hard",
+  "airport": "Istanbul Sabiha Gökçen International Airport",
+  "code": "SAW",
+  "city": "Istanbul",
+  "board_language": "Turkish",
+  "board_title": "Kalkış",
+  "board": [
+   {
+    "time": "06:30",
+    "status": "Biniş",
+    "dest": "Ankara",
+    "flight": "PC 2690",
+    "gate": "204"
+   },
+   {
+    "time": "06:45",
+    "status": "Zamanında",
+    "dest": "İzmir",
+    "flight": "PC 2210",
+    "gate": "208"
+   },
+   {
+    "time": "07:00",
+    "status": "Zamanında",
+    "dest": "Trabzon",
+    "flight": "VF 3012",
+    "gate": "212"
+   },
+   {
+    "time": "07:15",
+    "status": "Gecikmeli",
+    "dest": "Antalya",
+    "flight": "PC 2610",
+    "gate": "215"
+   },
+   {
+    "time": "07:50",
+    "status": "Zamanında",
+    "dest": "Londra-Stansted",
+    "flight": "PC 1167",
+    "gate": "306"
+   },
+   {
+    "time": "08:15",
+    "status": "Zamanında",
+    "dest": "Amsterdam",
+    "flight": "PC 1251",
+    "gate": "309"
+   },
+   {
+    "time": "09:40",
+    "status": "Zamanında",
+    "dest": "Beyrut",
+    "flight": "PC 754",
+    "gate": "312"
+   },
+   {
+    "time": "10:05",
+    "status": "İptal",
+    "dest": "Dubai",
+    "flight": "PC 512",
+    "gate": "318"
+   }
+  ],
+  "clues": "Turkish words, Ankara/İzmir/Antalya on the board, Istanbul missing. But no Turkish Airlines: it is Pegasus (PC) and AJet (VF), the low-cost carriers, flying to London-Stansted rather than Heathrow. That is Istanbul's Asian-side airport, Sabiha Gökçen.",
+  "why": "Hard: looks just like the easy Istanbul board; only the airline codes say it is the city's second airport.",
+  "accept": [
+   "Istanbul Sabiha Gökçen",
+   "Sabiha Gökçen",
+   "Sabiha Gokcen",
+   "SAW"
+  ],
+  "source": [
+   "https://en.wikipedia.org/wiki/Sabiha_G%C3%B6k%C3%A7en_International_Airport"
+  ]
+ }
+]
