@@ -163,6 +163,7 @@ function TvMini({ pub }: { pub: Pub }) {
       <div className="text-26 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
       <div className="eyebrow text-18">The answer</div>
       <div className="display" style={{ fontSize: 110, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
+      {pub.reveal.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2">{pub.reveal.notes}</div>}
       <div className="flex gap-20">{[0, 1].map((t) => { const gss = pub.reveal?.guesses?.[t]; return (
         <div key={t} style={{ opacity: w === t || w === "tie" ? 1 : 0.55 }}>
           <div className="display text-30" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>

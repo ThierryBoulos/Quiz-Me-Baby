@@ -43,7 +43,7 @@ export type Pub = {
     typeBy?: number | null };   // the buzzer's own clock to type it (the TV's time), while they haven't
   /* ok: the verdict that stands now; app: what the app said first (the "App suggests" tag) */
   reveal?: { answer: string; typed?: Two<string[] | null>; guesses?: Two<number | null>; ok?: Two<boolean | null>; app?: Two<boolean | null>; w: 0 | 1 | "tie" | "none" | null;
-    offList?: Two<boolean> };   // Say the Same: an answer that isn't a real answer to the prompt (it counts as SAID IT)
+    offList?: Two<boolean>; notes?: string };   // notes: Closest To Wins' word on the answer. offList: Say the Same: an answer that isn't a real answer to the prompt (it counts as SAID IT)
   summary?: { wins: Two<number>; winner: 0 | 1 | null; needsHost: boolean; note: string; award?: Two<number> };
   winner?: 0 | 1 | null;
   toast?: { id: number; text: string } | null;

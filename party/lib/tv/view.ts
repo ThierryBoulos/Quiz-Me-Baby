@@ -121,7 +121,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   if (s.screen === "sayReveal" && q) { p.question = q.question; p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: sayWin(s), offList: s.offList }; }
   if (s.screen === "closestReveal" && q) {
     p.question = q.question;
-    p.reveal = { answer: q.answer, guesses: s.guesses, w: closestW(s) };
+    p.reveal = { answer: q.answer, guesses: s.guesses, w: closestW(s), notes: q.notes };
   }
   if ((s.screen === "flagQ" || s.screen === "flagReveal") && q) p.flag = q.flag;
   if (s.screen === "flagReveal" && q) p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) };
