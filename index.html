@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.24', date:'16 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.25', date:'21 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1435,7 +1435,7 @@ const SEED = [
 ['Friends','easy','pet','What two pets did Joey and Chandler keep in their apartment?','A duck and a chick','The Duck and the Chick.'],
 ['Friends','easy','','What is the name of Phoebe\'s most famous song?','Smelly Cat',''],
 ['Friends','medium','soap-opera','Which soap opera does Joey act in?','Days of Our Lives',''],
-['Friends','medium','soap-opera','What is the name of Joey\'s character on that soap?','Dr Drake Ramoray','A neurosurgeon who later falls down an elevator shaft.'],
+['Friends','medium','soap-opera','What is the name of the doctor Joey plays on his soap opera?','Dr Drake Ramoray','A neurosurgeon who later falls down an elevator shaft.'],
 /* ---- GEEK & GAMER ---- */
 ['Geek & Gamer','medium','best-selling','What is the best-selling video game of all time?','Minecraft','Over 300 million copies. Tetris (all versions combined) is the usual counter-argument.'],
 ['Geek & Gamer','medium','best-selling','What is the best-selling games console of all time?','The PlayStation 2','About 160 million sold. The Nintendo DS is a close second and some counts rank it first — accept debate gracefully.'],
@@ -2971,7 +2971,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 26;   // bumped when the built-in bank changes
+const SEED_VERSION = 27;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -2983,6 +2983,8 @@ const SEED_VERSION = 26;   // bumped when the built-in bank changes
    `src:'seed'`, so anything the host built or imported on top of the same
    text is left alone. */
 const RETIRED_SEED = [
+  /* seed 27: it leaned on the soap-opera question before it ("that soap"), which the Battle can deal apart */
+  "What is the name of Joey's character on that soap?",
   /* copy fixes in seed 24 (possessive apostrophes, the Ottoman wording): the corrected rows replace these */
   'What are the names of Monica and Chandler twins?',
   'What is the name of Ross and Rachel daughter?',
