@@ -719,7 +719,10 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   const [text, setText] = useState(""), [sent, setSent] = useState<string | null>(null);
   useEffect(() => { setSent(null); setText(""); }, [pub.qid]);
   const cap = members.find((m) => m.team === mine && m.role === "captain");
-  const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !CAPTAINS_ONLY.includes(pub.screen);
+  /* only while it can help: not on the other team's question or steal (20 Oct: players suggested to a
+     captain who couldn't answer), nor once their captain's answer is in */
+  const notOurs = (pub.screen === "ask" || pub.screen === "steal") && pub.turn !== mine;
+  const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !CAPTAINS_ONLY.includes(pub.screen) && !notOurs && !pub.sent?.[mine];
   const np = useNoPaste(code, pub.qid);
   const suggest = async () => { const t = text.trim(); if (!t) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); } catch { /* the phone already says so; the text stays */ } };
   return (
