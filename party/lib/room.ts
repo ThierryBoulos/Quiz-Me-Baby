@@ -26,9 +26,11 @@ export function useRoom(code: string) {
   const [missing, setMissing] = useState(false);
   const alive = useRef(true);
 
-  /* The TV stamps every view it publishes (pub.at); a slower poll answer that
-     arrives after a newer push never rolls the screen back. */
-  const stamp = (r: Room | null) => ((r?.state as { pub?: { at?: number } } | undefined)?.pub?.at) ?? 0;
+  /* The TV stamps every write it makes (state.pubAt, and each view's pub.at); a slower poll answer
+     that arrives after a newer push never rolls the screen back. By pubAt, not pub.at: Play again
+     takes the view away (back to the lobby), and a room with no view read as older than the final
+     screen, so the phones stayed on it (21 Oct: "The TV hasn't answered"). */
+  const stamp = (r: Room | null) => { const st = r?.state as { pubAt?: number; pub?: { at?: number } } | undefined; return st?.pubAt ?? st?.pub?.at ?? 0; };
   const takeRoom = useCallback((r: Room | null) => setRoom((cur) => (r && cur && stamp(r) < stamp(cur) ? cur : r)), []);
   const pushed = useRef(0);                            // the newest view a push brought
   const onRead = useRef<(r: Room | null) => void>(() => {});

@@ -91,7 +91,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      captains naming their teams in the same second) must each build on the other, not on a room the
      push hasn't brought back yet: on 20 Oct the second name overwrote the first. */
   const lobbyMine = useRef<{ teamNames?: [string, string]; away?: string[] }>({});
-  const lobbyState = (room: Room) => ({ ...room.state, ...lobbyMine.current });
+  /* (and the newest stamp: a lobby write made before the TV has read back its own Play again must not carry the old one, which the phones would take for an old room) */
+  const lobbyState = (room: Room) => ({ ...room.state, ...lobbyMine.current, pubAt: Math.max(Number(room.state?.pubAt) || 0, lastAt.current) || undefined });
   const publish = useCallback(() => {
     pubN.current++;
     /* this TV shows the change at once; the phones get it with the next write */
