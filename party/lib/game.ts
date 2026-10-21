@@ -23,7 +23,7 @@ export type Pub = {
   out?: Two<boolean>;             // who is out of this one (dish, sudden death)
   result?: { answer: string; notes?: string; correct: boolean; stolen: boolean; by: 0 | 1 | null; pts: number; typed?: Two<string[] | null>; owner?: 0 | 1 };
   roundPts?: Two<number>;
-  lifeline?: { key: string; team: 0 | 1; deadline: number | null; left?: number } | null;   // left: Call a Friend paused with this many seconds to go
+  lifeline?: { key: string; team: 0 | 1; deadline: number | null; left?: number; wait?: boolean } | null;   // left: Call a Friend paused with this many seconds to go; wait: the call not started yet
   sudden?: { ready: boolean; shown: boolean; n: number; answer?: string } | null;
   mini?: { key: MiniKey; title: string; leg: number; of: number; wins: Two<number>; pts: number; kinds?: string; tie?: boolean; fun?: boolean };
   /* a mini-game won with legs to spare: keep playing for fun, or stop here (screen "decided") */

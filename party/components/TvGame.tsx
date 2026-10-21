@@ -105,6 +105,7 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
             <div className="eyebrow text-20">Lifeline · {T[pub.lifeline.team].name}</div>
             <div className="display mt-3" style={{ fontSize: 110, color: "var(--color-gold)" }}>{pub.lifeline.key === "friend" ? "Calling a friend" : "Double Dip"}</div>
             {pub.lifeline.key === "friend" && <div className="mt-6 grid place-items-center"><Clock deadline={pub.lifeline.deadline} left={pub.lifeline.left} size={150} timeUp={!pub.lifeline.deadline && !pub.lifeline.left} /></div>}
+            {pub.lifeline.wait && <div className="text-28 text-[var(--color-ink-2)] mt-4">Dialling… the clock starts when the call does.</div>}
             {pub.lifeline.key === "dip" && <div className="text-28 text-[var(--color-ink-2)] mt-4">Two answers this time. Either one right counts.</div>}
           </div>
         </div>

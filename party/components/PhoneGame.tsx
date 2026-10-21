@@ -200,10 +200,11 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     <div className="flex flex-col gap-4 flex-1">
       <Big eyebrow={`Lifeline · ${T[pub.lifeline.team].name}`} text={pub.lifeline.key === "friend" ? "Call a Friend" : "Double Dip"}
         sub={pub.lifeline.key === "friend"
-          ? <>Before the captain says a word, read this to the friend: &ldquo;Hi, quick quiz question. No ChatGPT, no Google, no asking anyone else. Straight off the top of your head. Ready?&rdquo;</>
+          ? <>Before the captain says a word, read this to the friend: &ldquo;Hi, quick quiz question. No ChatGPT, no Google, no asking anyone else. Straight off the top of your head. Ready?&rdquo;{pub.lifeline.wait && <> Then tap Start the call: the {pub.timers?.friend ?? 30} seconds start.</>}</>
           : "The captain gets two answers on this one. Either one right counts."} />
       {pub.lifeline.key === "friend" && <div className="flex flex-col items-center gap-2"><Clock deadline={pub.lifeline.deadline} left={pub.lifeline.left} size={90} timeUp={!pub.lifeline.deadline && !pub.lifeline.left} />
-        {(pub.lifeline.deadline || pub.lifeline.left) && <button className="btn btn-sm" onClick={() => fire({ type: "ui/pauseFriend" })}>{pub.lifeline.deadline ? "Pause the call" : "Resume the call"}</button>}</div>}
+        {pub.lifeline.wait ? <button className="btn btn-gold btn-lg" onClick={() => fire({ type: "ui/startCall" })}>Start the call</button>
+          : (pub.lifeline.deadline || pub.lifeline.left) && <button className="btn btn-sm" onClick={() => fire({ type: "ui/pauseFriend" })}>{pub.lifeline.deadline ? "Pause the call" : "Resume the call"}</button>}</div>}
       <p className="font-bold text-18">{pub.question}</p>
       <AnswerCard />
       <Main label="Back to the question" move={{ type: "ui/closeLifeline" }} />
@@ -874,11 +875,13 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc)) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
 
 
-      {/* no host, Call a Friend: the calling captain closes the card */}
+      {/* no host, Call a Friend: the calling captain starts the friend's clock once they're through, and closes the card */}
+      {nohost && pub.lifeline?.key === "friend" && pub.lifeline.team === mine && pub.lifeline.wait && (
+        <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "ui/startCall" })}>Start the call ({pub.timers?.friend ?? 30} s)</button>)}
       {nohost && pub.lifeline?.key === "friend" && pub.lifeline.team === mine && (
         <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "ui/closeLifeline" })}>Back to the question</button>)}
       {/* no host, Call a Friend: the lead captain can stop the call's clock */}
-      {nohost && lead && pub.lifeline?.key === "friend" && (pub.lifeline.deadline || pub.lifeline.left) && (
+      {nohost && lead && pub.lifeline?.key === "friend" && !pub.lifeline.wait && (pub.lifeline.deadline || pub.lifeline.left) && (
         <button className="btn btn-sm self-center" onClick={() => fire({ type: "ui/pauseFriend" })}>{pub.lifeline.deadline ? "Pause the call" : "Resume the call"}</button>)}
 
       {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy}

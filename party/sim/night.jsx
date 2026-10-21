@@ -203,7 +203,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     const sc = pub.screen, step = pub.step, lead = pub.lead ?? 0, other = (t) => 1 - t;
     const key = JSON.stringify([sc, step, pub.pending, pub.sent, pub.buzz, pub.auction?.count, pub.auction?.bid, pub.map?.ruled, pub.ok]);
-    if (key === prevKey) { if (++same > 120) { outcome = "stuck"; stuckOn = `${sc}${pub.paused ? ", paused" : ""}${pub.pending ? ", call pending" : ""}${pub.lifeline ? ", lifeline " + pub.lifeline.key + (pub.lifeline.deadline ? " running" : " stopped") : ""}${pub.deadline ? ", clock " + Math.round((pub.deadline - clock()) / 1000) + " s" : ", no clock"}${pub.nextBy ? ", waiting for " + pub.nextBy : ""}`; break; } } else { same = 0; prevKey = key; }
+    if (key === prevKey) { if (++same > 120) { outcome = "stuck"; stuckOn = `${sc}${pub.paused ? ", paused" : ""}${pub.pending ? ", call pending" : ""}${pub.lifeline ? ", lifeline " + pub.lifeline.key + (pub.lifeline.wait ? " not started" : pub.lifeline.deadline ? " running" : " stopped") : ""}${pub.deadline ? ", clock " + Math.round((pub.deadline - clock()) / 1000) + " s" : ", no clock"}${pub.nextBy ? ", waiting for " + pub.nextBy : ""}`; break; } } else { same = 0; prevKey = key; }
     const C = (t) => capOf(t);
     /* the lead captain gone: the other one moves the night on (the TV lets them after a while) */
     const by = (t, type) => (host && !gone.has("host") && !["auction/raise", "auction/pass"].includes(type) ? "host" : C(t) || C(1 - t));
@@ -241,8 +241,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       }
       continue;
     }
-    /* a lifeline card up (Call a Friend): the team closes it, or its clock does */
-    else if (pub.lifeline) { if (bot() < 0.4) next(pub.turn ?? 0, "ui/closeLifeline"); }
+    /* a lifeline card up (Call a Friend): the team starts the call, then closes it (or its clock does) */
+    else if (pub.lifeline) { if (pub.lifeline.wait) { if (bot() < 0.6) next(pub.turn ?? 0, "ui/startCall"); } else if (bot() < 0.4) next(pub.turn ?? 0, "ui/closeLifeline"); }
     /* where the app's calls are shown: now and then a captain contests one (once per screen) */
     else if ((pub.calls || []).some((c) => !c.done) && !contested.has(sc + step) && bot() < 0.35) {
       contested.add(sc + step);

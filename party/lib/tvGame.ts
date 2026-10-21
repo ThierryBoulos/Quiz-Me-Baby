@@ -173,7 +173,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (f.used) { usedMem.current.add(f.used.id); try { const u = used(); localStorage.setItem(usedKey, JSON.stringify([...u])); } catch { /* kept in memory */ } }
       if (f.lifeline) {
         const rd = s.g.rounds[s.g.r];
-        s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, seat()), deadline: f.lifeline === "friend" ? now + T().tFriend * 1000 : null };
+        s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, seat()), deadline: null, ...(f.lifeline === "friend" ? { left: T().tFriend, wait: true } : {}) };   // the friend's clock starts with the call (Start the call)
       }
       if (f.toast) s.toast = { id: ++s.toastN, text: f.toast };
       if (f.host) say(f.host, f.vars);
@@ -448,9 +448,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk") { const i = move.t === 1 ? 1 : 0; s.ok[i] = typeof move.v === "boolean" ? move.v : !s.ok[i]; }
     else if (t === "ui/exit") exitGame();
     else if (t === "ui/again") againGame();
+    else if (t === "ui/startCall") {
+      const L = s.lifeline;
+      if (!L || L.key !== "friend" || !L.wait) return;
+      s.lifeline = { ...L, wait: undefined, deadline: Date.now() + (L.left || T().tFriend) * 1000, left: undefined };
+    }
     else if (t === "ui/pauseFriend") {
       const L = s.lifeline;
-      if (!L || L.key !== "friend") return;
+      if (!L || L.key !== "friend" || L.wait) return;
       if (L.deadline) s.lifeline = { ...L, deadline: null, left: Math.max(0, (L.deadline - Date.now()) / 1000) };
       else if (L.left) s.lifeline = { ...L, deadline: Date.now() + L.left * 1000, left: undefined };
     }
@@ -644,6 +649,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* with no host, the other captain answers it (not the one who contested) */
     else if (t === "ui/contestOk") { if (!s.contest || team !== other(s.contest.by) || typeof move.v !== "boolean") return false; }
     else if (t === "ui/pauseFriend") { if (!s.lifeline || s.lifeline.key !== "friend" || leadTeam() !== team) return false; }
+    else if (t === "ui/startCall") { if (!s.lifeline?.wait || s.lifeline.team !== team) return false; }
     else if (t === "ui/exit") { /* either captain, with no host */ }
     else if (rule.who === "turn" && turnTeam() !== team) return false;
     else if (rule.who === "other" && turnTeam() === team) return false;
