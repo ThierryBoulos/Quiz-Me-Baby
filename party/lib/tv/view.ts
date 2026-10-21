@@ -106,6 +106,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.mini = { key, title: MINI_TITLES[key], leg: Math.min(b.i + 1, b.n), of: b.n, wins: [...b.score] as Two<number>, pts: g.battlePts || g.miniPts };
     p.battle = { cap: b.cap, i: b.i, n: b.n, score: [...b.score] as Two<number>, last: s.lastAns,
       tb: b.tb?.n, winner: b.done ? b.winner : null, note: b.note, award: b.award };
+    /* halfway: all ten of the first captain's, not just the last (20 Oct) */
+    if (s.screen === "battleHandoff") p.battle.half = ((b.log?.[0] || []) as G[]).filter(Boolean).map((e) => ({ said: e.said || "", got: !!e.got, answer: e.q?.answer || "" }));
     if (s.screen === "battleQ" || s.screen === "battleTie") { p.question = q?.question; p.turn = s.screen === "battleQ" ? b.cap : undefined; }
     if (s.screen === "battleTie") { p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>; }
   } else if (key) {

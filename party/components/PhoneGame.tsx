@@ -648,8 +648,23 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
     {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "battleQ"].includes(pub.screen) && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" ? 70 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div>}
     {/* the Battle: the last answer, once there's no new question to read (during the questions it's on the TV only) */}
-    {pub.battle?.last && /^battle(Handoff|Summary)$/.test(pub.screen) && <BattleAnswer last={pub.battle.last} />}
+    {pub.battle?.half?.length && pub.screen === "battleHandoff" ? <BattleHalf half={pub.battle.half} />
+      : pub.battle?.last && /^battle(Handoff|Summary)$/.test(pub.screen) && <BattleAnswer last={pub.battle.last} />}
   </div>);
+}
+
+/* the Battle at halfway: every one of the first captain's answers, the right one beside each miss */
+export function BattleHalf({ half, size = 14, cols = 1 }: { half: NonNullable<NonNullable<Pub["battle"]>["half"]>; size?: number; cols?: number }) {
+  return (
+    <div className="grid grid-flow-col gap-x-14 gap-y-1 w-full" style={{ fontSize: size, gridTemplateRows: `repeat(${Math.ceil(half.length / cols)}, auto)` }}>
+      {half.map((e, i) => (
+        <div key={i} className="flex items-baseline gap-2 text-left">
+          <span className="text-[var(--color-ink-3)] shrink-0" style={{ width: size * 1.6 }}>{i + 1}</span>
+          <span className="flex-1 min-w-0 truncate">{e.said || <span className="text-[var(--color-ink-3)]">No answer</span>}
+            {!e.got && e.answer && <span className="text-[var(--color-ink-3)]"> · {e.answer}</span>}</span>
+          <Verdict v={e.got} size={Math.round(size * 0.9)} />
+        </div>))}
+    </div>);
 }
 
 /* the Battle's last answer, once it's settled: "Answer: X" */

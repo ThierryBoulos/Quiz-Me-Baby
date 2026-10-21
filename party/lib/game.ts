@@ -53,7 +53,9 @@ export type Pub = {
   auction?: { cat: string; notes?: string; bid: number; by: 0 | 1 | null; turn: 0 | 1; count: number; leg: number; n: number; wins: Two<number>; bids?: Two<number | null>;
     last?: { bid: number; by: 0 | 1; count: number; made: boolean; won: 0 | 1 }; winner?: 0 | 1 | null; award?: Two<number>;
     countedBy?: string };   // who taps +1 while the bidder names them (the host, or with no host the other captain)
-  battle?: { cap: 0 | 1; i: number; n: number; score: Two<number>; last?: { answer: string; got: boolean | null } | null; tb?: number; winner?: 0 | 1 | null; note?: string; award?: Two<number> };
+  battle?: { cap: 0 | 1; i: number; n: number; score: Two<number>; last?: { answer: string; got: boolean | null } | null;
+    tb?: number; winner?: 0 | 1 | null; note?: string; award?: Two<number>;
+    half?: { said: string; got: boolean; answer: string }[] };   // half: at the handoff, the first captain's every answer
   autoAt?: number | null;         // no host: when this screen moves on by itself
   pips?: { kind: "std" | "mini"; state: "now" | "done" | "todo" }[];   // the night's progress, for the tracker
   captains?: [string | null, string | null];
