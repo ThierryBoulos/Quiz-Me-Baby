@@ -362,5 +362,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* the button that moves the night on (Start, Next, Go) stays in thumb reach on the phone that taps it,
    however much sits above it */
 .dock { position: sticky; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20; box-shadow: 0 -18px 30px -6px var(--color-bg), 0 14px 36px -12px rgba(245,197,24,.55); }
+/* two buttons docked together (One more / A point each): the pair stays in reach, with no box drawn round it
+   (.dock's fade and glow are for one button; round a pair they made a dark block behind the second) */
+.dock-group { position: sticky; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20; }
 /* a docked button that is off still covers what scrolls under it: solid and dimmed, not see-through */
 .dock:disabled { opacity: 1; background: #3b3527; color: rgba(255,255,255,.45); box-shadow: 0 -18px 30px -6px var(--color-bg); }

@@ -966,13 +966,13 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       </>)}
       {/* no host, won with legs to spare: the lead captain picks */}
       {nohost && sc === DECIDED && mayNext && pub.nextBy && (
-        <div className="flex flex-col gap-3 mt-auto dock">
+        <div className="flex flex-col gap-3 mt-auto dock-group">
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "decided/stop" })}>Stop here</button>
           <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "decided/more" })}>Keep playing for fun</button>
         </div>)}
       {/* no host, level at the end of a mini-game: the lead captain picks */}
       {nohost && TIE_SCREENS.includes(sc) && mayNext && pub.nextBy && (
-        <div className="flex flex-col gap-3 mt-auto dock">
+        <div className="flex flex-col gap-3 mt-auto dock-group">
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/more" })}>One more</button>
           <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/stop" })}>A point each</button>
         </div>)}
