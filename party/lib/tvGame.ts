@@ -553,6 +553,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return false;
     }
     if (kind !== "answer") return false;
+    /* an answer says which question it's for (the phone's k): one sent in the last second of a question,
+       landing once the next is up, is the old one's and goes nowhere (20 Oct: "Days" counted for two) */
+    if (typeof p.k === "string" && p.k !== draftKey()) return false;
     const texts = (Array.isArray(p.texts) ? p.texts : [p.text]).map((x: unknown) => String(x ?? "").trim().slice(0, 80)).filter(Boolean);
     /* no host: the first answer sent is the one checked. The app's RIGHT stands at once (nobody can take
        it away); a WRONG waits a few seconds, in case the other captain wants to give it to them. */
@@ -606,7 +609,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* an answer that can't go in here still says why (a phone a beat behind) */
     if (texts.length && ["dishQ", "sudden", "battleTie"].includes(sc)) return s.pending ? "Wait for the call on the last answer." : "Buzz first, then type it.";
     return false;
-  }, [applyFx, current, play, reveal, settle, contestWait]);
+  }, [applyFx, current, play, reveal, settle, contestWait, draftKey]);
 
   /* time's up with nothing sent: what the captain had typed is their answer (and the TV says so) */
   const takeDraft = useCallback((team: 0 | 1): boolean => {

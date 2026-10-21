@@ -858,11 +858,11 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   }, [a, b, canType, draftKey, sc, code]);
   const send = async () => {
     /* locked in on this phone straight away; put back if it couldn't go */
-    if (sc === "miniQ") { if (!Number.isFinite(guess)) return; setSentTxt(a); if (!(await act("answer", { n: a }))) setSentTxt(null); return; }
+    if (sc === "miniQ") { if (!Number.isFinite(guess)) return; setSentTxt(a); if (!(await act("answer", { n: a, k: draftKey }))) setSentTxt(null); return; }
     const texts = [a, b].map((x) => x.trim()).filter(Boolean);
     if (!texts.length) return;
     setSentTxt(texts.join(" / "));
-    if (!(await act("answer", { texts }))) setSentTxt(null);
+    if (!(await act("answer", { texts, k: draftKey }))) setSentTxt(null);
   };
 
   return (
