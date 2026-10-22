@@ -20,14 +20,14 @@ const HOST_ONLY = new Set([...readFileSync(join(root, "party/lib/engine.ts"), "u
 const QMB = require(join(root, "engine/core.js"));
 const bank = JSON.parse(readFileSync(join(root, "party/data/bank.json"), "utf8"));
 const accept = existsSync(join(root, "party/data/accept.json")) ? JSON.parse(readFileSync(join(root, "party/data/accept.json"), "utf8")) : { byId: {}, byAnswer: {} };
-const flagsDir = join(root, "party/public/flags"), mapsDir = join(root, "party/public/maps");
+const flagsDir = join(root, "party/public/flags"), mapsDir = join(root, "party/public/maps"), pinsDir = join(root, "party/public/pins");
 
 const errors = [], warns = [];
 const err = (id, msg) => errors.push(`${id}: ${msg}`);
 const warn = (id, msg) => warns.push(`${id}: ${msg}`);
 const tidy = QMB.tidy;
 
-const DIFF = ["easy", "medium", "hard"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish"];
+const DIFF = ["easy", "medium", "hard"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport"];
 const VOLATILE = /\b(most|latest|current|currently|record|to date|as of|best-selling|most-streamed|most-viewed|most-subscribed|most liked|most-watched|set to host|still)\b/i;
 const APOSTROPHE = /\b(Ross|Monica|Chandler|Phoebe|Joey|Rachel|Mickey|Simba|Spider-Man|Batman|YouTube|dog|Arab world)\s+(profession|pet|twin|most famous|job|daughter|twins|official|uncle|real name|parents|view counter)\b/;
 
@@ -63,6 +63,22 @@ for (const q of bank.bank) {
     /* the answer's key word must not appear before the last ingredient */
     const key = tidy(q.answer).split(" ").filter((w) => w.length > 3);
     ings.slice(0, -1).forEach((s, i) => { const t = tidy(s); key.forEach((w) => { if (t.includes(w)) warn(id, `answer word "${w}" leaks at ingredient ${i + 1} of ${ings.length}`); }); });
+  }
+  if (q.type === "pin") {
+    if (!DIFF.includes(q.level)) err(id, `pin level ${q.level}`);
+    if (!(Math.abs(q.lat) <= 85 && Math.abs(q.lon) <= 180)) err(id, `pin coordinates out of range: ${q.lat}, ${q.lon}`);
+    if (!q.place) err(id, "pin needs its place (\"city, country\")");
+    if (!q.credit || !q.licence || !/^https:\/\/commons\.wikimedia\.org\//.test(q.page || "")) err(id, "pin photo needs its credit, licence and Commons page");
+    for (const f of [q.photo + ".jpg", q.photo + "-s.jpg"]) if (!existsSync(join(pinsDir, f))) err(id, `pin photo missing: pins/${f}`);
+  }
+  if (q.type === "airport") {
+    if (!DIFF.includes(q.level)) err(id, `airport level ${q.level}`);
+    const rows = q.board || [];
+    if (rows.length < 6) err(id, `only ${rows.length} rows on the board`);
+    rows.forEach((r, i) => { if (!Array.isArray(r) || r.length !== 5 || !r[0] || !r[2] || !r[3]) err(id, `board row ${i + 1} must be [time, status, destination, flight, gate]`); });
+    if (!(q.accept || []).includes(q.code)) warn(id, `the code ${q.code} should be accepted`);
+    /* you can't fly to yourself: no destination is the airport's own city, and none reads as the answer */
+    rows.forEach((r, i) => { if ([q.answer, q.city, ...(q.accept || [])].some((a) => a.length > 3 && QMB.isMatch(String(r[2]), a))) err(id, `board row ${i + 1} (${r[2]}) gives the answer away`); });
   }
   if (q.type === "saysame") {
     const pool = q.pool || [];

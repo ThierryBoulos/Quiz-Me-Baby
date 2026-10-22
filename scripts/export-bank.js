@@ -21,7 +21,7 @@ const root = path.join(__dirname, '..');
   await p.goto(`http://127.0.0.1:${port}/index.html`);
   const out = await p.evaluate(() => ({
     version: BUILD.v, seed: SEED_VERSION, themes: THEMES,
-    bank: buildSeedBank().map(q => { const o = {}; Object.keys(q).forEach(k => { if(q[k] !== '' && q[k] != null && k !== 'src') o[k] = q[k]; }); return o; })
+    bank: buildSeedBank(true).map(q => { const o = {}; Object.keys(q).forEach(k => { if(q[k] !== '' && q[k] != null && k !== 'src') o[k] = q[k]; }); return o; })
   }));
   await b.close(); srv.close();
   const file = path.join(root, 'party/data/bank.json');
