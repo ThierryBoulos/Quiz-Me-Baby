@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, HOST_ONLY_THEMES, acceptFor, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, withoutHostOnly, type Q } from "./engine";
+import { QMB, HOST_ONLY_THEMES, acceptFor, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Q } from "./engine";
 import { cleanList } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
@@ -813,9 +813,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the house bank, this TV's own questions, and the starter's (cleaned: never trust a phone) */
       const base = await loadBank(code);
       s.custom = cleanList(cfgIn.custom, base.themes);
-      /* with no host, nothing only a person can judge: not Know the Host, not even one written on this TV */
+      /* with no host, nothing only a person can judge: not Know the Host, not even one written on this TV,
+         and no made-up theme */
       const all = withCustom(base, s.custom);
-      s.bank = members.some((m) => m.role === "host") ? all : withoutHostOnly(all);
+      s.bank = members.some((m) => m.role === "host") ? all : forNoHost(all);
       const names = lobbyState(room).teamNames || ["Team A", "Team B"];
       const team = (t: 0 | 1) => ({ name: cap1(names[t]), captain: cap1(members.find((m) => m.team === t && m.role === "captain")?.name || ""),
         players: members.filter((m) => m.team === t).map((m) => m.name).join(", ") });
@@ -935,7 +936,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         void loadBank(code).then(async (b) => {
           /* filtered as at Start: with no host, no question only a person can judge */
           const all = withCustom(b, st.current.custom || []);
-          st.current.bank = st.current.nohost ? withoutHostOnly(all) : all;
+          st.current.bank = st.current.nohost ? forNoHost(all) : all;
           /* a game saved by an older version of the app that this one can't read: say so, don't crash */
           try { setPub(view()?.[0] || null); }
           catch (e) { console.error("saved game unreadable", e); Object.assign(st.current, before); try { localStorage.removeItem(saveKey); } catch { /* */ } setBanner("oldSave"); return; }

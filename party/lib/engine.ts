@@ -89,5 +89,14 @@ const HOST_ONLY_IDS = new Set(["qzr4hzp", "q789ar9", "q8p4fti", "q1716tok", "q1p
 export const HOST_ONLY_THEMES = ["Know the Host"];
 export const hostOnly = (q: Q) => HOST_ONLY_IDS.has(q.id) || HOST_ONLY_THEMES.includes(q.theme || "");
 export const withoutHostOnly = (b: Bank): Bank => ({ ...b, bank: b.bank.filter((q) => !hostOnly(q)) });
+/* A theme made up on a phone or the TV (Settings, "Your questions"): like Know the Host, only in a
+   game with a host. Its questions go, and the theme with them; a question of one's own filed under a
+   house theme stays. */
+export function withoutCustomThemes(b: Bank): Bank {
+  const house = new Set(b.bank.filter((q) => q.src !== "manual").map((q) => q.theme).filter(Boolean));
+  return { ...b, themes: b.themes.filter((t) => house.has(t)), bank: b.bank.filter((q) => q.src !== "manual" || !q.theme || house.has(q.theme)) };
+}
+/* everything a game with no host leaves out */
+export const forNoHost = (b: Bank): Bank => withoutCustomThemes(withoutHostOnly(b));
 /* the host's own trivia: every answer is "Host knows this one", and the host says if it's right */
 export const aboutHost = (q: Q) => HOST_ONLY_THEMES.includes(q.theme || "");
