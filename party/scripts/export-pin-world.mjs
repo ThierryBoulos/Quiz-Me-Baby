@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* export-pin-world.mjs — the world map Drop the Pin is played on: party/public/pins/world-far.json and world-near.json.
-   Natural Earth 1:10m countries (public domain, via world-atlas) and 1:50m lakes, kept as a topology:
+   Natural Earth 1:10m countries (public domain, via world-atlas), 1:50m lakes and 1:10m rivers (the big
+   ones: something to find your way by when zoomed in, as a map has no names), kept as a topology:
    each border or coastline drawn once (an "arc"), the land made of arcs, every point in thousandths
    of a degree (about 110 m) and simplified to about 1 km, so a phone can zoom from the whole world
    to a single city. Two levels of detail: "far" for the whole world, "near" once zoomed in (each its own file).
@@ -13,6 +14,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const get = async (u) => { const r = await fetch(u, { headers: { "User-Agent": "QuizMeBabyParty/1.0 (private party quiz app)" } }); if (!r.ok) throw new Error(u + ": " + r.status); return r.json(); };
 const topo = await get("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-10m.json");
 const lakes = await get("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_50m_lakes.geojson");
+const rivers = await get("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_rivers_lake_centerlines.geojson");
 
 /* topojson arcs: quantized, delta-encoded -> [lon, lat] */
 const { scale: [kx, ky], translate: [tx, ty] } = topo.transform;
@@ -55,12 +57,18 @@ const lakeRings = (tol) => lakes.features.filter((f) => f.properties.scalerank <
   return polys.map((p) => pack(simplify(p[0], tol))).filter((r) => r.length >= 8);
 });
 
+/* rivers: the bigger the scalerank, the smaller the river (the Nile is 1, the Seine 4, the Thames 6) */
+const riverLines = (tol, rank) => rivers.features.filter((f) => f.properties.scalerank <= rank).flatMap((f) => {
+  const g = f.geometry, lines = g.type === "LineString" ? [g.coordinates] : g.coordinates;
+  return lines.map((l) => pack(simplify(l, tol))).filter((r) => r.length >= 4);
+});
+
 /* two files: the whole world loads first (small); the detail loads behind it, for zooming in */
-const head = { v: 1, src: "Natural Earth 1:10m countries and 1:50m lakes (public domain), via world-atlas", unit: 1000 };
+const head = { v: 1, src: "Natural Earth 1:10m countries and rivers, 1:50m lakes (public domain), via world-atlas", unit: 1000 };
 const pts = (L) => L.arcs.reduce((s, a) => s + a.length / 2, 0);
-for (const [name, tol] of [["far", 0.12], ["near", 0.01]]) {
-  const L = { ...head, ...level(tol), lakes: lakeRings(tol) };
+for (const [name, tol, rank] of [["far", 0.12, 3], ["near", 0.01, 6]]) {
+  const L = { ...head, ...level(tol), lakes: lakeRings(tol), rivers: riverLines(tol, rank) };
   const file = join(root, `party/public/pins/world-${name}.json`);
   writeFileSync(file, JSON.stringify(L));
-  console.log(`pins/world-${name}.json: ${(statSync(file).size / 1024).toFixed(0)} KB, ${pts(L)} points, ${L.borders.length} borders, ${L.lakes.length} lakes`);
+  console.log(`pins/world-${name}.json: ${(statSync(file).size / 1024).toFixed(0)} KB, ${pts(L)} points, ${L.borders.length} borders, ${L.lakes.length} lakes, ${L.rivers.length} rivers`);
 }
