@@ -27,7 +27,7 @@ const err = (id, msg) => errors.push(`${id}: ${msg}`);
 const warn = (id, msg) => warns.push(`${id}: ${msg}`);
 const tidy = QMB.tidy;
 
-const DIFF = ["easy", "medium", "hard"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport"];
+const DIFF = ["easy", "medium", "hard"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority"];
 const VOLATILE = /\b(most|latest|current|currently|record|to date|as of|best-selling|most-streamed|most-viewed|most-subscribed|most liked|most-watched|set to host|still)\b/i;
 const APOSTROPHE = /\b(Ross|Monica|Chandler|Phoebe|Joey|Rachel|Mickey|Simba|Spider-Man|Batman|YouTube|dog|Arab world)\s+(profession|pet|twin|most famous|job|daughter|twins|official|uncle|real name|parents|view counter)\b/;
 
@@ -79,6 +79,15 @@ for (const q of bank.bank) {
     if (!(q.accept || []).includes(q.code)) warn(id, `the code ${q.code} should be accepted`);
     /* you can't fly to yourself: no destination is the airport's own city, and none reads as the answer */
     rows.forEach((r, i) => { if ([q.answer, q.city, ...(q.accept || [])].some((a) => a.length > 3 && QMB.isMatch(String(r[2]), a))) err(id, `board row ${i + 1} (${r[2]}) gives the answer away`); });
+  }
+  /* Majority Rules: four different answers, the right one among them, and not a question the standard rounds ask too */
+  if (q.type === "majority") {
+    if (!DIFF.includes(q.level)) err(id, `majority level ${q.level}`);
+    const o = q.options || [];
+    if (o.length !== 4 || new Set(o.map(tidy)).size !== 4) err(id, "majority needs four different answers");
+    if (!o.includes(q.answer)) err(id, "majority: the right answer isn't one of the four");
+    const twin = bank.bank.find((x) => x.type === "standard" && tidy(x.question) === tidy(q.question));
+    if (twin) err(id, `majority repeats a standard question: ${twin.question}`);
   }
   if (q.type === "saysame") {
     const pool = q.pool || [];

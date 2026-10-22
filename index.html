@@ -2789,6 +2789,37 @@ const AIRPORTS = [
   ["SAW", "Istanbul Sabiha Gökçen International Airport", "hard", "Istanbul", "Turkish", "Kalkış", [["06:30","Biniş","Ankara","PC 2690","204"],["06:45","Zamanında","İzmir","PC 2210","208"],["07:00","Zamanında","Trabzon","VF 3012","212"],["07:15","Gecikmeli","Antalya","PC 2610","215"],["07:50","Zamanında","Londra-Stansted","PC 1167","306"],["08:15","Zamanında","Amsterdam","PC 1251","309"],["09:40","Zamanında","Beyrut","PC 754","312"],["10:05","İptal","Dubai","PC 512","318"]], ["Istanbul Sabiha Gökçen","Sabiha Gökçen","Sabiha Gokcen","Sabiha","SAW"], "Turkish words, Ankara/İzmir/Antalya on the board, Istanbul missing. But no Turkish Airlines: it is Pegasus (PC) and AJet (VF), the low-cost carriers, flying to London-Stansted rather than Heathrow. That is Istanbul's Asian-side airport, Sabiha Gökçen.", ["https://en.wikipedia.org/wiki/Sabiha_G%C3%B6k%C3%A7en_International_Airport"]],
 ];
 
+/* Majority Rules (Party only): every player answers on their own phone, four answers each.
+   [key, level, question, [the four answers, in the TV's order], which one is right (0-3), a word on it]
+   A starter set (23 Oct); none repeats a question in the bank, so nothing comes up twice in a night. */
+const MAJORITY = [
+  ["honey",        "easy",   "Which of these foods never goes off, if it's sealed and kept dry?", ["Bread", "Honey", "Cheese", "Butter"], 1, "Pots of honey thousands of years old, still edible, have been found in Egyptian tombs."],
+  ["koala",        "easy",   "Which of these animals sleeps up to 20 hours a day?", ["Giraffe", "Horse", "Dolphin", "Koala"], 3, "Eucalyptus leaves give it very little energy."],
+  ["spider",       "easy",   "How many legs does a spider have?", ["Six", "Eight", "Ten", "Twelve"], 1, ""],
+  ["red-planet",   "easy",   "Which planet is known as the Red Planet?", ["Mars", "Venus", "Jupiter", "Mercury"], 0, "The iron oxide (rust) in its dust makes it red."],
+  ["rainbow",      "easy",   "How many colours is a rainbow usually said to have?", ["Five", "Six", "Seven", "Eight"], 2, "Red, orange, yellow, green, blue, indigo, violet."],
+  ["mona-lisa",    "easy",   "In which museum is the Mona Lisa?", ["The Prado", "The Louvre", "The Uffizi", "The British Museum"], 1, "In Paris, behind glass."],
+  ["football",     "easy",   "How many players does a football (soccer) team have on the pitch?", ["Nine", "Ten", "Twelve", "Eleven"], 3, ""],
+  ["guitar",       "easy",   "How many strings does a standard guitar have?", ["Six", "Four", "Five", "Seven"], 0, ""],
+  ["vatican",      "medium", "What is the smallest country in the world?", ["Monaco", "San Marino", "Vatican City", "Liechtenstein"], 2, "About 0.44 km², smaller than many city parks."],
+  ["diamond",      "medium", "Diamonds are made of which element?", ["Silicon", "Carbon", "Boron", "Sulphur"], 1, "The same element as the graphite in a pencil, its atoms packed differently."],
+  ["sunlight",     "medium", "Roughly how long does sunlight take to reach Earth?", ["8 seconds", "8 hours", "8 days", "8 minutes"], 3, "About 8 minutes 20 seconds."],
+  ["yen",          "medium", "What is the currency of Japan?", ["The yen", "The yuan", "The won", "The ringgit"], 0, "The yuan is China's, the won Korea's, the ringgit Malaysia's."],
+  ["camel",        "medium", "What does a camel store in its hump?", ["Water", "Milk", "Fat", "Air"], 2, "Fat, which it turns into energy when food is scarce."],
+  ["telephone",    "medium", "Who patented the telephone, in 1876?", ["Thomas Edison", "Alexander Graham Bell", "Nikola Tesla", "Guglielmo Marconi"], 1, ""],
+  ["usain-bolt",   "medium", "Which country is Usain Bolt from?", ["Trinidad and Tobago", "Barbados", "The Bahamas", "Jamaica"], 3, ""],
+  ["bishop",       "medium", "Which chess piece can only ever move diagonally?", ["The bishop", "The rook", "The knight", "The queen"], 0, "The queen can too, but she can also go straight."],
+  ["great-fire",   "hard",   "The Great Fire of London, in 1666, started in a…", ["Church", "Tavern", "Bakery", "Blacksmith's forge"], 2, "Thomas Farriner's bakery, on Pudding Lane."],
+  ["wombat",       "hard",   "Which animal is famous for its cube-shaped droppings?", ["Koala", "Wombat", "Sloth", "Armadillo"], 1, "They stack them to mark their ground, and cubes don't roll away."],
+  ["hottest",      "hard",   "Which is the hottest planet in the solar system?", ["Mercury", "Mars", "Jupiter", "Venus"], 3, "About 465 °C: its thick air traps the heat. Mercury is nearer the Sun but has no air to hold it."],
+  ["flamingo",     "hard",   "What makes flamingos pink?", ["Their food", "Their genes", "The sun", "Their age"], 0, "Pigments in the algae and shrimp they eat; fed without them, they fade to white."],
+  ["qarawiyyin",   "hard",   "Which is the oldest university still running, founded in 859?", ["Bologna", "Oxford", "Al-Azhar, Cairo", "Al-Qarawiyyin, Fez"], 3, "Founded by Fatima al-Fihri in Fez, Morocco."],
+  ["eiffel-heat",  "hard",   "On a hot summer day, the Eiffel Tower can grow taller by up to…", ["2 mm", "15 cm", "1 metre", "Not at all"], 1, "The iron expands in the heat."],
+  ["banana",       "hard",   "Which of these is a berry, botanically speaking?", ["Strawberry", "Raspberry", "Banana", "Cherry"], 2, "Strawberries and raspberries aren't true berries; a cherry is a stone fruit."],
+  ["cleopatra",    "hard",   "Cleopatra lived closer in time to which of these?", ["The building of the Great Pyramid", "The Moon landing", "The first stones of Stonehenge", "The invention of writing"], 1, "She died in 30 BC: the Moon landing was about 2,000 years later, the Great Pyramid about 2,500 years earlier."],
+  ["lightning",    "hard",   "Roughly how hot can a bolt of lightning get?", ["About 3,000 °C", "About 10,000 °C", "About 30,000 °C", "About 300,000 °C"], 2, "About five times hotter than the surface of the Sun."],
+];
+
 /* shared out evenly over the levels that are on, exactly as the flags are */
 
 
@@ -2798,7 +2829,7 @@ function splitIng(t){
   return i < 0 ? ['', String(t)] : [t.slice(0, i), t.slice(i + 3)];
 }
 
-/* party: true adds the rows only Party plays (Drop the Pin, Guess the Airport); Classic's own bank
+/* party: true adds the rows only Party plays (Drop the Pin, Guess the Airport, Majority Rules); Classic's own bank
    leaves them out, so its question list never shows games it can't run (scripts/export-bank.js asks for them) */
 function buildSeedBank(party){
   const out = [];
@@ -2843,6 +2874,10 @@ function buildSeedBank(party){
       id:'airport:' + a[0], question:a[1], answer:a[1], notes:a[8], theme:'',
       type:'airport', difficulty:'', use_with:'', level:a[2], code:a[0], city:a[3], lang:a[4],
       boardTitle:a[5], board:a[6].map(function(r){ return r.slice(); }), accept:a[7].slice(), source:a[9], src:'seed'
+    }); });
+    MAJORITY.forEach(function(m){ out.push({
+      id:'mr:' + m[0], question:m[2], answer:m[3][m[4]], notes:m[5] || '', theme:'',
+      type:'majority', difficulty:'', use_with:'', level:m[1], options:m[3].slice(), src:'seed'
     }); });
   }
   return out;
