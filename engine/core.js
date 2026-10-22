@@ -336,7 +336,9 @@
       return shuffle(pairs);
     }
 
-    function closestPool(){
+    /* Closest To Wins: a round-robin over the themes. Given the night's own themes (its
+       rounds'), one question from each of those leads, then the rest in their usual order. */
+    function closestPool(prefer){
       const byTheme = {};
       bank().forEach(q => {
         if(q.type !== 'closest' || !isFresh(q)) return;
@@ -352,7 +354,17 @@
           const swap = decks[0]; decks[0] = decks[1]; decks[1] = swap;
         }
       }
-      return out;
+      if(!prefer || !prefer.length) return out;
+      const lead = [], seen = new Set();
+      out.forEach(q => { if(prefer.indexOf(q.theme) >= 0 && !seen.has(q.theme)){ seen.add(q.theme); lead.push(q); } });
+      const res = lead.concat(out.filter(q => lead.indexOf(q) < 0));
+      /* taking those out can leave two of a theme side by side: move the next other one up */
+      for(let i = 1; i < res.length; i++){
+        if(res[i].theme !== res[i - 1].theme) continue;
+        const j = res.findIndex((q, k) => k > i && q.theme !== res[i - 1].theme);
+        if(j > 0) res.splice(i, 0, res.splice(j, 1)[0]);
+      }
+      return res;
     }
 
     function capacity(themes, diff){
@@ -624,7 +636,7 @@
         .map(id => bank().find(q => q.id === id))
         .filter(q => q && q.type === 'closest');
       const handIds = new Set(handClosest.map(q => q.id));
-      const cpAll = handClosest.concat(closestPool().filter(q => !handIds.has(q.id)));
+      const cpAll = handClosest.concat(closestPool(rounds.map(r => r.theme)).filter(q => !handIds.has(q.id)));
       const cp = cpAll.slice(0, CLOSEST_LEGS);
       const spare = cpAll.slice(CLOSEST_LEGS, CLOSEST_LEGS + 6);   // held back for tie-breaker legs
     

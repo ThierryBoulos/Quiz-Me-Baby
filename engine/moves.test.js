@@ -658,3 +658,25 @@ test('majority: dead level brings one more question; counts are clamped to the l
   Q.play(h, { type:'majority/settle', right:[0, 3] });
   assert.equal(t.verdict.winner, 1);
 });
+
+/* Closest To Wins leads with the night's own themes: one question from each round's theme
+   that has any, then the others (22 Oct) */
+test('closest: one question from each round theme first, then the other themes', () => {
+  const bank = [];
+  ['T1', 'T2', 'T3', 'T4', 'T5'].forEach(t => { for(let i = 0; i < 4; i++) bank.push({ id:`${t}s${i}`, type:'standard', theme:t, difficulty:'easy', question:t + ' q' + i, answer:'a' }); });
+  ['T1', 'T2', 'T3', 'X', 'Y', 'Z'].forEach(t => { for(let i = 0; i < 4; i++) bank.push({ id:`${t}c${i}`, type:'closest', theme:t, difficulty:'easy', question:t + ' n' + i, answer:String(i) }); });
+  for(let run = 0; run < 40; run++){
+    const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => true });
+    const g = D.buildGame({ standard:true, rounds:4, themes:['T1', 'T2', 'T3', 'T4'], difficulty:'easy', minis:['closest'], teamA:{ name:'A' }, teamB:{ name:'B' } });
+    const night = g.rounds.map(r => r.theme), qs = g.mini.qs;
+    assert.equal(qs.length, 7);
+    const lead = qs.slice(0, 3).map(q => q.theme).sort();
+    assert.deepEqual(lead, ['T1', 'T2', 'T3'].filter(t => night.includes(t)).sort());   // T4 has no numbers
+    assert.ok(qs.slice(3).some(q => !night.includes(q.theme)));                          // then the others
+    for(let i = 1; i < qs.length; i++) assert.notEqual(qs[i].theme, qs[i - 1].theme);
+  }
+  /* no standard rounds: no preference, the plain round-robin */
+  const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => true });
+  const g = D.buildGame({ standard:false, rounds:0, themes:[], minis:['closest'], teamA:{ name:'A' }, teamB:{ name:'B' } });
+  assert.equal(new Set(g.mini.qs.slice(0, 6).map(q => q.theme)).size, 6);
+});
