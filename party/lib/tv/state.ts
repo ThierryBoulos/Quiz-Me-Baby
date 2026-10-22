@@ -26,6 +26,13 @@ export const newState = () => ({
   drafts: [null, null] as Two<null | { k: string; texts: string[]; n: string; pin?: LatLon | null; by?: string; seq?: number }>,   // ...and what each has typed (or pinned) but not sent (taken at time-up)
   guesses: [null, null] as Two<number | null>,       // Closest To Wins
   pins: [null, null] as Two<LatLon | null>,          // Drop the Pin: each captain's pin, locked in
+  /* Majority Rules: the teams' lists, fixed at Start (a seat is its name: a phone that rejoins keeps it);
+     on the join screen, who has been taken off and who's on the game screen, and a captain's request to
+     take someone off; then every answer to the question on screen, by name */
+  mrList: null as null | { name: string; uid: string; team: 0 | 1 }[],
+  mrOut: [] as string[], mrHere: [] as string[],
+  mrAsk: null as null | { name: string; team: 0 | 1; until: number },
+  votes: {} as Record<string, string>,
   ok: [null, null] as Two<boolean | null>,           // Flag / Map / Say verdicts, as they stand
   app: [null, null] as Two<boolean | null>,          // ...and what the app said first (the "App suggests" tag)
   sdBuzz: null as 0 | 1 | null, sdOut: [false, false] as Two<boolean>,

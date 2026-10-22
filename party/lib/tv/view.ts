@@ -5,7 +5,7 @@ import { getSettings } from "../settings";
 import type { Member } from "../room";
 import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two } from "../game";
 import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
-import { callsOf, closestW, currentQ, leadOf, matchQ, okWin, pinW, sayWin, seatOf } from "./reads";
+import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, pinW, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
 import type { TvState } from "./state";
 
@@ -55,7 +55,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   { const t = getSettings();
     p.tMini = t.tMini;
     p.timers = { question: t.tQuestion, steal: t.tSteal, friend: t.tFriend, contest: t.tContest, sudden: t.tSudden, mini: t.tMini, flag: t.tFlag, map: t.tMap, say: t.tSay,
-      auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport }; }
+      auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport, majority: t.tMajority }; }
   /* no host: whose Start or Next the room is waiting for */
   if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
     && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {
@@ -140,6 +140,26 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       p.reveal = { answer: q.answer, w: L.w, notes: q.place };
     }
   }
+  /* Majority Rules: the join screen lists everyone on each team as it stands; from Start, the list is fixed */
+  if (s.screen === "majorityIntro") {
+    const out = new Set(s.mrOut || []), here = new Set(s.mrHere || []);
+    p.majority = { list: mem.filter((m) => (m.team === 0 || m.team === 1) && m.role !== "host")
+      .map((m) => ({ name: iso(m.name), team: m.team as 0 | 1, here: here.has(m.user_id), out: out.has(m.name) || undefined })),
+      ask: s.mrAsk ? { name: iso(s.mrAsk.name), team: s.mrAsk.team, until: s.mrAsk.until } : null };
+  }
+  if ((s.screen === "majorityQ" || s.screen === "majorityReveal") && q) {
+    const m = g.majorityGame, t = mrTally(s);
+    p.question = q.question;
+    p.majority = { on: (s.mrList || []).map((e) => e.name), options: q.options, n: [m.n[0], m.n[1]], answered: t.answered,
+      totals: { right: [m.right[0], m.right[1]], of: [m.of[0], m.of[1]] } };
+    /* the reveal counts this question in the totals straight away (the engine adds it at Next) */
+    if (s.screen === "majorityReveal") {
+      p.majority.reveal = { answer: q.answer, counts: t.counts, right: t.right };
+      p.majority.totals = { right: [m.right[0] + t.right[0], m.right[1] + t.right[1]], of: [m.of[0] + m.n[0], m.of[1] + m.n[1]] };
+      if (p.mini) p.mini.wins = [0, 1].map((k) => Math.round((100 * p.majority!.totals!.right[k]) / (p.majority!.totals!.of[k] || 1))) as Two<number>;
+    }
+  }
+  if (key === "majority" && p.mini) p.mini.pct = true;
   /* Guess the Airport: the board (never its name, nor its code: they're the answer); at the reveal, all of it */
   if ((s.screen === "airportQ" || s.screen === "airportReveal") && q) {
     const reveal = s.screen === "airportReveal";

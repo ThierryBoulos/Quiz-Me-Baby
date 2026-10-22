@@ -10,10 +10,10 @@ import { PARTY_LEGS } from "@/lib/game";
    as usual. A theme can run at its own difficulty. */
 export type Picks = {
   picks: Record<string, string[]>; themeDiff: Record<string, string>;
-  pickClosest: string[]; pickAuction: string[]; pickSaySame: string[]; pickMap: string[]; pickFlag: string[]; pickDish: string[]; pickPin: string[]; pickAirport: string[];
+  pickClosest: string[]; pickAuction: string[]; pickSaySame: string[]; pickMap: string[]; pickFlag: string[]; pickDish: string[]; pickPin: string[]; pickAirport: string[]; pickMajority: string[];
 };
-export const NO_PICKS: Picks = { picks: {}, themeDiff: {}, pickClosest: [], pickAuction: [], pickSaySame: [], pickMap: [], pickFlag: [], pickDish: [], pickPin: [], pickAirport: [] };
-type MiniStore = "pickClosest" | "pickAuction" | "pickSaySame" | "pickMap" | "pickFlag" | "pickDish" | "pickPin" | "pickAirport";
+export const NO_PICKS: Picks = { picks: {}, themeDiff: {}, pickClosest: [], pickAuction: [], pickSaySame: [], pickMap: [], pickFlag: [], pickDish: [], pickPin: [], pickAirport: [], pickMajority: [] };
+type MiniStore = "pickClosest" | "pickAuction" | "pickSaySame" | "pickMap" | "pickFlag" | "pickDish" | "pickPin" | "pickAirport" | "pickMajority";
 const MINI: Record<string, { store: MiniStore; type: string; cap: number; label: string }> = {
   closest: { store: "pickClosest", type: "closest", cap: QMB.LEGS.closest, label: "Closest To Wins" },
   auction: { store: "pickAuction", type: "auction", cap: QMB.LEGS.auction, label: "The Auction" },
@@ -23,6 +23,7 @@ const MINI: Record<string, { store: MiniStore; type: string; cap: number; label:
   dish: { store: "pickDish", type: "dish", cap: PARTY_LEGS.dish ?? QMB.LEGS.dish, label: "Guess the Cocktail or Dish" },
   pin: { store: "pickPin", type: "pin", cap: QMB.LEGS.pin, label: "Drop the Pin" },
   airport: { store: "pickAirport", type: "airport", cap: QMB.LEGS.airport, label: "Guess the Airport" },
+  majority: { store: "pickMajority", type: "majority", cap: QMB.LEGS.majority, label: "Majority Rules" },
 };
 const DIFFS = [["", "Tonight's"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["mixed", "Mixed"]] as const;
 const cap = (s?: string) => (s ? s[0].toUpperCase() + s.slice(1) : "");
@@ -40,7 +41,7 @@ export function pickSummary(p: Picks, themes: string[], minis: string[]) {
 }
 
 /* the picture games only offer the levels switched on in Setup (a question with no level, one of yours, always shows) */
-export type PickLevels = Partial<Record<"map" | "flag" | "dish" | "pin" | "airport", string[]>>;
+export type PickLevels = Partial<Record<"map" | "flag" | "dish" | "pin" | "airport" | "majority", string[]>>;
 export const inLevels = (q: Q, levels: PickLevels) => {
   const on = levels[q.type as keyof PickLevels];
   return !on || !q.level || on.includes(String(q.level));
@@ -150,7 +151,8 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
                 return <Row key={q.id} on={i > -1} disabled={i < 0 && sel.length >= m.cap} onTap={() => tickMini(k, q.id)}
                   q={(i > -1 ? `${i + 1}. ` : "") + (m.type === "flag" || m.type === "dish" || m.type === "pin" || m.type === "airport" ? q.answer : q.question)}
                   sub={m.type === "flag" ? cap(String(q.level || "")) : m.type === "dish" ? String(q.level || "").replace(/^c-/, "Cocktail · ").replace(/^d-/, "Dish · ") : m.type === "map" ? q.answer
-                    : m.type === "pin" ? `${cap(String(q.level || ""))} · ${q.place}` : m.type === "airport" ? `${cap(String(q.level || ""))} · ${q.code}` : String(q.answer)} />;
+                    : m.type === "pin" ? `${cap(String(q.level || ""))} · ${q.place}` : m.type === "airport" ? `${cap(String(q.level || ""))} · ${q.code}`
+                    : m.type === "majority" ? `${cap(String(q.level || ""))} · ${q.answer}` : String(q.answer)} />;
               })}
             </section>);
         })}

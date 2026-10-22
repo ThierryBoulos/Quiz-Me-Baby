@@ -37,7 +37,8 @@ const NEXT = { roundIntro: "round/begin", miniIntro: "closest/start", flagIntro:
   sayIntro: "say/start", battleIntro: "battle/start", battleHandoff: "battle/start", sayReveal: "ui/next", mapReveal: "ui/next", saySummary: "say/done", battleSummary: "battle/done",
   answer: "round/afterAnswer", roundScore: "round/next", closestReveal: "ui/next", flagReveal: "ui/next", dishReveal: "dish/next", auctionLeg: "auction/nextLeg",
   auctionResult: "auction/done", miniSummary: "closest/done", flagSummary: "flag/done", dishSummary: "dish/done", mapSummary: "map/done", battleReview: "battle/reviewDone",
-  pinIntro: "pin/start", airportIntro: "airport/start", pinReveal: "ui/next", airportReveal: "ui/next", pinSummary: "pin/done", airportSummary: "airport/done" };
+  pinIntro: "pin/start", airportIntro: "airport/start", pinReveal: "ui/next", airportReveal: "ui/next", pinSummary: "pin/done", airportSummary: "airport/done",
+  majorityIntro: "majority/start", majorityReveal: "ui/next", majoritySummary: "majority/done" };
 
 /* the answer to what's on screen, from the TV's own game (bots peek, so some answers are right) */
 function answerNow(g, pub) {
@@ -74,7 +75,7 @@ function pinNear(g, bot) {
    net: { dup, delay, stall, stallWrites }  pushes sent twice / up to delay ms late (out of order) / that share of reads, or of the TV's writes, held 5-28 s
    simul: both captains tap Next, buzz, rule at the very same moment
    edge: answers land at the exact moment the clock runs out */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null }) {
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed);
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -88,7 +89,10 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     { room: CODE, user_id: "capB", name: "Lea", team: 1, role: "captain", face: null },
     { room: CODE, user_id: "p1", name: "Sam", team: 0, role: "player", face: null });
   if (host) fake.db.members.push({ room: CODE, user_id: "host", name: "Nour", team: null, role: "host", face: null });
-  fake.setPresence(fake.db.members.map((m) => m.user_id));
+  /* crowd: more players (Majority Rules plays them all), shared between the teams; absent: one of them never opens the game */
+  const FOLK = ["Maya", "Karim", "Joe", "Rita", "Nadim", "Lina", "Omar", "Tala"];
+  for (let i = 0; i < crowd; i++) fake.db.members.push({ room: CODE, user_id: "c" + i, name: FOLK[i], team: (i + 1) % 2, role: "player", face: null });
+  fake.setPresence(fake.db.members.map((m) => m.user_id).filter((u) => !absent || fake.db.members.find((m) => m.user_id === u)?.name !== absent));
   let last = "";
   fake.onChange((t) => {
     if (t !== "rooms") return;
@@ -118,7 +122,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: THEMES.slice(0, rounds), minis } });
 
   let reloaded = false;
-  const armed = new Set(), asked = new Set(), edged = new Set(), contested = new Set(), contestSeen = new Set();
+  const armed = new Set(), asked = new Set(), edged = new Set(), contested = new Set(), contestSeen = new Set(), voted = new Set(), dropped = new Set();
   let contestSilent = false;
   /* while the TV is off, the phones still tap: a captain answers or buzzes what they see */
   const playOnce = (p) => {
@@ -263,6 +267,26 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* Double Points: armed now and then before a round */
     else if (sc === "roundIntro" && !armed.has(step) && bot() < 0.3) { armed.add(step); send(C(bot() < 0.5 ? 0 : 1), "lifeline", { key: "dbl" }); }
     else if (sc === "decided") next(lead, bot() < 0.5 ? "decided/more" : "decided/stop");
+    /* Majority Rules' join screen: the one who never turned up is taken off (by the host; with no host their
+       captain asks, and the other captain agrees), then Start */
+    else if (sc === "majorityIntro" && absent && !dropped.has(absent)) {
+      const a = fake.db.members.find((m) => m.name === absent), A = pub.majority?.ask;
+      if (host && !gone.has("host")) { dropped.add(absent); send("host", "judge", { move: { type: "ui/mrOut", name: absent }, step }); }
+      else if (!A && a && C(a.team)) send(C(a.team), "next", { move: { type: "ui/mrOut", name: absent }, step });
+      else if (A && a && C(1 - a.team)) { dropped.add(absent); send(C(1 - a.team), "next", { move: { type: "ui/mrOutOk", v: true }, step }); }
+    }
+    /* every player answers for themselves: most of them, right now and then, and a few never do (it counts as wrong) */
+    else if (sc === "majorityQ" && pub.majority) {
+      const q = g?.majorityGame?.qs[g.majorityGame.i], opts = pub.majority.options || [];
+      for (const m of fake.db.members) {
+        const id = pub.qid + "|" + m.user_id;
+        if (m.role === "host" || m.team == null || voted.has(id) || gone.has(m.user_id) || m.name === absent) continue;
+        voted.add(id);
+        if (bot() < 0.12) continue;
+        send(m.user_id, "answer", { pick: bot() < 0.55 && q ? q.answer : opts[Math.floor(bot() * opts.length)], k: `${pub.qid}|majorityQ` });
+      }
+      if (host && bot() < 0.2) next(0, "ui/reveal");
+    }
     else if (NEXT[sc]) next(lead, NEXT[sc]);
     else if (/Tie$|Level$/.test(sc) && sc !== "battleTie") next(lead, "tie/stop");
     else if (sc === "ask" || sc === "steal") {

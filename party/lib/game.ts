@@ -3,7 +3,7 @@
    row only the host can read (Supabase row-level security). */
 export type Team = { name: string; score: number; ll: { friend: boolean; dip: boolean; dbl: boolean } };
 export type Two<T> = [T, T];
-export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "battle";
+export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "majority" | "battle";
 /* a spot on the earth (Drop the Pin), in degrees */
 export type LatLon = { lat: number; lon: number };
 export type Pub = {
@@ -27,7 +27,8 @@ export type Pub = {
   roundPts?: Two<number>;
   lifeline?: { key: string; team: 0 | 1; deadline: number | null; left?: number; wait?: boolean } | null;   // left: Call a Friend paused with this many seconds to go; wait: the call not started yet
   sudden?: { ready: boolean; shown: boolean; n: number; answer?: string } | null;
-  mini?: { key: MiniKey; title: string; leg: number; of: number; wins: Two<number>; pts: number; kinds?: string; tie?: boolean; fun?: boolean };
+  mini?: { key: MiniKey; title: string; leg: number; of: number; wins: Two<number>; pts: number; kinds?: string; tie?: boolean; fun?: boolean;
+    pct?: boolean };   // pct: the wins are each team's share of right answers, in percent (Majority Rules)
   /* a mini-game won with legs to spare: keep playing for fun, or stop here (screen "decided") */
   decided?: { key: MiniKey; title: string; winner: 0 | 1; spare: number; pts: number };
   /* the app's calls on this screen (answer card, reveals, Battle review), and one being contested:
@@ -47,6 +48,17 @@ export type Pub = {
     reveal?: { at: LatLon; name: string; place: string; pins: Two<LatLon | null>; km: Two<number | null> } };
   /* Guess the Airport: its departures board (time, status, destination, flight, gate); at the reveal, its code and city */
   airport?: { title: string; board: string[][]; code?: string; city?: string };
+  /* Majority Rules: every player answers. The join screen: each team's list (who's on the game screen, who's been
+     taken off), and with no host a captain asking to take an absent teammate off (the other captain agrees).
+     Then, the list fixed: the names on it, the four answers, how many have answered, and at the reveal how
+     each team answered; the running totals. */
+  majority?: {
+    list?: { name: string; team: 0 | 1; here: boolean; out?: boolean }[];
+    ask?: { name: string; team: 0 | 1; until: number } | null;
+    on?: string[]; options?: string[]; n?: Two<number>; answered?: Two<number>;
+    reveal?: { answer: string; counts: Two<number>[]; right: Two<number> };
+    totals?: { right: Two<number>; of: Two<number> };
+  };
   dish?: { kind: string; ings: string[]; n: number; late?: 0 | 1 | null;   // late: the team whose 10 s to type ran out
     typeBy?: number | null };   // the buzzer's own clock to type it (the TV's time), while they haven't
   /* ok: the verdict that stands now; app: what the app said first (the "App suggests" tag) */
@@ -70,7 +82,7 @@ export type Pub = {
   tMini?: number;
   /* the house timers (Settings, on the TV), for the rules shown on every screen */
   timers?: { question: number; steal: number; friend: number; contest: number; sudden: number; mini: number; flag: number; map: number; say: number;
-    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number };
+    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number; majority: number };
   paused?: boolean;          // the clock was paused: the question is hidden until it restarts
   lead?: 0 | 1;              // no host: the captain who starts and moves the night on (Team A's, or B's)
   nextBy?: string;           // no host: whose Start or Next the room is waiting for
@@ -91,12 +103,12 @@ export type Pub = {
 export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null> };
 
 /* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
-export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "battleLevel"];
+export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "battleLevel"];
 /* a mini-game can't be lost any more, with legs still to play: the same people choose — keep playing for fun, or stop here */
 export const DECIDED = "decided";
 export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Guess the Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me",
-  pin: "Drop the Pin", airport: "Guess the Airport", battle: "Battle of the Captains" };
-export const T_CLOSEST = 60, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30, T_PIN = 45, T_AIRPORT = 30;
+  pin: "Drop the Pin", airport: "Guess the Airport", majority: "Majority Rules", battle: "Battle of the Captains" };
+export const T_CLOSEST = 60, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30, T_PIN = 45, T_AIRPORT = 30, T_MAJORITY = 15;
 export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
 /* no host: the other captain has this long to give a point the app called WRONG (a RIGHT always stands) */
 /* T_OVERRULE: no host, how long a captain has to answer the other captain's contest before the app's call stands */

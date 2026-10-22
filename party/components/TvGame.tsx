@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import type { Pub } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
@@ -11,7 +12,9 @@ import { DECIDED, offBy, showKm, showNum, TIE_SCREENS } from "@/lib/game";
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
 /* The TV during the game: no buttons (but Exit at the very end), no answers before the reveal. */
-export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void; onAgain?: () => void }) {
+/* join: where a phone joins this room (Majority Rules puts the QR code up again before it starts) */
+export type Join = { url: string; code: string };
+export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () => void; onAgain?: () => void; join?: Join }) {
   const T = pub.teams;
   /* the end: celebrate the winner first, then the recap comes up under it */
   const [recap, setRecap] = useState(false);
@@ -73,7 +76,7 @@ export function TvGame({ pub, onExit, onAgain }: { pub: Pub; onExit?: () => void
           <SdCalls pub={pub} />
         </>))}
 
-        <TvMini pub={pub} />
+        <TvMini pub={pub} join={join} />
 
         {pub.screen === "final" && (<>
           <Confetti n={140} />
@@ -147,9 +150,52 @@ function Sent({ pub }: { pub: Pub }) {
 }
 
 /* the mini-games on the TV */
-function TvMini({ pub }: { pub: Pub }) {
+function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   const T = pub.teams, m = pub.mini, sc = pub.screen;
   if (!m) return null;
+  /* Majority Rules: before it starts, everyone on their phone: the QR code again, and each team's list */
+  if (sc === "majorityIntro") { const L = pub.majority?.list || [], A = pub.majority?.ask; return (
+    <div className="flex gap-10 items-start w-full">
+      <div className="flex-1 min-w-0"><MiniIntro pub={pub} size="tv" /></div>
+      <div className="w-[560px] shrink-0 flex flex-col gap-5 text-left">
+        <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>Everyone on their phone</div>
+        {join && <div className="flex items-center gap-6">
+          <div className="rounded-[18px] p-3 bg-[#f4f6ff] shrink-0"><QRCodeSVG value={join.url} size={170} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
+          <div><div className="display leading-none" style={{ fontSize: 88, color: "var(--color-gold)", letterSpacing: "0.08em" }}>{join.code}</div>
+            <div className="text-20 text-[var(--color-ink-2)] mt-2">Not in yet? Scan, pick your team, and you&rsquo;re on its list.</div></div>
+        </div>}
+        <div className="grid grid-cols-2 gap-6">{([0, 1] as const).map((t) => (
+          <div key={t} className="flex flex-col gap-1">
+            <div className="display text-28" style={{ color: tc(t) }}>{T[t].name} · {L.filter((x) => x.team === t && !x.out).length}</div>
+            {L.filter((x) => x.team === t).map((x) => (
+              <div key={x.name} className="text-22 flex items-center gap-2" style={{ opacity: x.out ? 0.4 : 1, textDecoration: x.out ? "line-through" : undefined }}>
+                <span style={{ color: x.here ? "var(--color-ok)" : "var(--color-ink-3)" }} aria-hidden>{x.here ? "●" : "○"}</span><span className="truncate">{x.name}</span>
+                {!x.here && !x.out && <span className="text-16 text-[var(--color-ink-3)]">not here</span>}</div>))}
+          </div>))}</div>
+        {A && <div className="card text-20" style={{ borderColor: "var(--color-gold)" }} role="status"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b> ask to take <b>{A.name}</b> off their list. The other captain decides.</div>}
+      </div>
+    </div>); }
+  if ((sc === "majorityQ" || sc === "majorityReveal") && pub.majority) { const M = pub.majority, R = M.reveal; return (<>
+    <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 40 : 50, lineHeight: 1.12 }}>{pub.question}</div>
+    <div className="grid grid-cols-2 gap-5 w-full max-w-[1400px]">{(M.options || []).map((o, i) => { const ok = R?.answer === o; return (
+      <div key={o} className={"mr-tv-opt " + (R ? (ok ? "ok" : "dim") : "")}>
+        <span className="flex-1 min-w-0"><bdi>{o}</bdi></span>
+        {/* how many on each team picked it: a dot in the team's colour, and the number */}
+        {R && <span className="flex gap-5 shrink-0 text-26" aria-label={`${T[0].name} ${R.counts[i]?.[0] ?? 0}, ${T[1].name} ${R.counts[i]?.[1] ?? 0}`}>{[0, 1].map((t) => (
+          <span key={t} className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded-full" style={{ background: tc(t as 0 | 1) }} aria-hidden /><b>{R.counts[i]?.[t] ?? 0}</b></span>))}</span>}
+      </div>); })}</div>
+    {!R ? (
+      <div className="flex items-center gap-12">
+        <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
+        <div className="flex flex-col gap-1 text-left">{[0, 1].map((t) => (
+          <span key={t} className="font-bold text-26" style={{ color: tc(t as 0 | 1) }}>{T[t].name}: {M.answered?.[t] ?? 0} of {M.n?.[t] ?? 0} answered</span>))}</div>
+      </div>) : (
+      <div className="flex flex-col items-center gap-2">
+        <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
+        <div className="display text-44">{[0, 1].map((t) => <span key={t}>{t ? <span className="text-[var(--color-ink-3)]"> – </span> : null}<span style={{ color: tc(t as 0 | 1) }}>{m.wins[t]}%</span></span>)}</div>
+        <div className="text-20 text-[var(--color-ink-2)]">So far, right answers out of all they could give: {M.totals?.right[0]} of {M.totals?.of[0]} and {M.totals?.right[1]} of {M.totals?.of[1]}</div>
+      </div>)}
+  </>); }
   if (/Intro$/.test(sc)) return (<>
     <div className="w-full max-w-[1080px]"><MiniIntro pub={pub} size="tv" /></div>
   </>);

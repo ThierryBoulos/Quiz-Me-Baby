@@ -153,6 +153,10 @@ export const HOST_LINES: Record<string, string[]> = {
     "Guess the Airport! Read the board, follow the planes.",
     "Departures! Where are we flying from tonight?"
   ],
+  "mini_majority": [
+    "Majority Rules! Phones out, everyone. Eyes on your own screen.",
+    "Everybody plays this one. No hiding behind your captain."
+  ],
   "mini_dish": [
     "Guess the Cocktail or Dish! I hope you ate before this.",
     "Ingredients incoming. First captain to buzz and name it wins. Easy, chef."

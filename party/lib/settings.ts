@@ -1,5 +1,5 @@
 "use client";
-import { DISH_STEP, T_AIRPORT, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_OVERRULE, T_PIN, T_SAY, T_SUDDEN_BUZZ } from "./game";
+import { DISH_STEP, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_OVERRULE, T_PIN, T_SAY, T_SUDDEN_BUZZ } from "./game";
 /* House rules for Party, kept on the device that runs the TV — Classic's
    Settings (index.html, DEFAULT_SETTINGS), minus what doesn't apply. */
 export type Settings = {
@@ -9,7 +9,7 @@ export type Settings = {
   tSudden: number;            // no host: sudden death and the Battle's tie-breaker, time to buzz
   /* the mini-games: */
   tMini: number; tFlag: number; tMap: number; tSay: number; tAuction: number;
-  tPin: number; tAirport: number;   // Drop the Pin, Guess the Airport
+  tPin: number; tAirport: number; tMajority: number;   // Drop the Pin, Guess the Airport, Majority Rules
   tDishStep: number;          // Guess the Cocktail or Dish: a new ingredient every…
   tDishType: number;          // …and after a buzz, this long to type it
   tBattleHost: number; tBattleTyped: number;   // the Battle, per question: out loud with a host, typed with none
@@ -20,7 +20,7 @@ export type Settings = {
   flagAway: boolean;          // flag a phone that leaves the game screen during a question
 };
 export const DEFAULTS: Settings = { tQuestion: 60, tSteal: 30, tFriend: 30, tContest: T_OVERRULE, tSudden: T_SUDDEN_BUZZ,
-  tMini: T_CLOSEST, tFlag: T_FLAG, tMap: T_MAP, tSay: T_SAY, tAuction: T_AUCTION, tPin: T_PIN, tAirport: T_AIRPORT, tDishStep: DISH_STEP, tDishType: T_DISH_TYPE,
+  tMini: T_CLOSEST, tFlag: T_FLAG, tMap: T_MAP, tSay: T_SAY, tAuction: T_AUCTION, tPin: T_PIN, tAirport: T_AIRPORT, tMajority: T_MAJORITY, tDishStep: DISH_STEP, tDishType: T_DISH_TYPE,
   tBattleHost: T_BATTLE_HOST, tBattleTyped: T_BATTLE_TYPED, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: true, flagAway: true };
 const KEY = "qmb.party.settings";
 /* Wave 2 changed the house timers (question 60→45, steal 30→20, overrule 15→8, Closest 90→60).

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
@@ -11,9 +11,9 @@ import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, Flag
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
-export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "sudden", "battleQ", "battleTie"];
-/* captains only: the players keep quiet */
-const CAPTAINS_ONLY = ["sudden", "battleQ", "battleTie"];
+export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "sudden", "battleQ", "battleTie"];
+/* captains only: the players keep quiet (and in Majority Rules everyone answers for themselves: nothing to suggest) */
+const CAPTAINS_ONLY = ["sudden", "battleQ", "battleTie", "majorityQ"];
 
 /* The answer for the current question. Only the host's phone can read it —
    the database refuses everyone else, so a player can't peek even with the
@@ -110,6 +110,84 @@ function Counter({ A, fire, h, fs, children }: { A: NonNullable<Pub["auction"]>;
     <button className="btn btn-gold btn-block display select-none" style={{ minHeight: h, fontSize: fs, touchAction: "manipulation" }} {...press(1)}>+1</button>
     <div className="flex gap-2 justify-center"><button className="btn btn-sm" {...press(-1)}>Undo</button>{children}</div>
   </>);
+}
+
+/* ---- Majority Rules ---- */
+/* this phone's own order of the four answers: the same all question long, different on every phone
+   (a glance at a neighbour's tap says nothing) */
+function phoneOrder(opts: string[], seed: string) {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+  const r = () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+  const a = opts.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const onList = (pub: Pub, me: Member) => !!pub.majority?.on?.some((n) => n.toLowerCase() === me.name.toLowerCase());
+/* every player's (and captain's) answer: four buttons, one tap, locked. After it, nothing says which:
+   a neighbour can't read it off this screen. At the reveal, this phone's own result. */
+function MajorityPad({ pub, me, code }: { pub: Pub; me: Member; code: string }) {
+  const M = pub.majority, key = `${pub.qid}|majorityQ`;
+  const [mine, setMine] = useState<{ key: string; pick: string; tap: string } | null>(null);
+  const [no, setNo] = useState<string | null>(null);
+  const order = useMemo(() => phoneOrder(M?.options || [], `${me.user_id}|${pub.qid}`), [M?.options, me.user_id, pub.qid]);
+  /* the TV's receipt: a tap it turned down says why, and lets go of it */
+  const got = mine ? pub.ack?.[me.user_id]?.[mine.tap] : undefined;
+  useEffect(() => { if (mine && got && got !== "+" && pub.screen === "majorityQ") { setNo(got === "-" ? "The TV didn't take that. Tap again." : got); setMine(null); } }, [got]);   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!no) return; const t = setTimeout(() => setNo(null), 5000); return () => clearTimeout(t); }, [no]);
+  if (!M || !onList(pub, me)) return pub.screen === "majorityQ" ? <Line>You joined after it started, so you&rsquo;re watching this one. You&rsquo;ll play the next Majority Rules.</Line> : null;
+  const picked = mine?.key === key ? mine.pick : null;
+  if (pub.screen === "majorityReveal") {
+    const R = M.reveal, right = !!picked && picked === R?.answer;
+    return <p className="text-center font-bold text-18" role="status" style={{ color: right ? "var(--color-ok)" : "var(--color-no)" }}>
+      {picked ? <>You said {picked}: {right ? "right!" : "wrong."}</> : "You didn't answer this one (it counts as wrong)."}</p>;
+  }
+  if (pub.paused) return null;
+  if (picked) return <p className="text-center font-bold text-16" role="status">Locked in. The answer comes up when the time&rsquo;s up.</p>;
+  const tap = (pick: string) => {
+    const t = newTap();
+    setMine({ key, pick, tap: t }); setNo(null); buzzHand(15);
+    void sendAction(code, "answer", { pick, k: key, tap: t }).catch(() => setMine(null));
+  };
+  return (
+    <div className="flex flex-col gap-2">
+      {no && <p className="text-center text-14 font-bold" role="alert" style={{ color: "var(--color-gold)" }}>{no}</p>}
+      <div className="grid gap-2.5" role="group" aria-label="The four answers">
+        {order.map((o) => <button key={o} type="button" className="btn btn-lg btn-block mr-opt" disabled={pub.tvAway} onClick={() => tap(o)}><bdi>{o}</bdi></button>)}
+      </div>
+      <p className="text-center text-12 text-[var(--color-ink-3)]">One tap, and it&rsquo;s locked. Eyes on your own phone.</p>
+    </div>);
+}
+/* the join screen's lists, on a phone: who's here; the host takes someone off (or puts them back); with
+   no host a captain asks to take an absent teammate off, and the other captain agrees, or not */
+function MajorityList({ pub, me, act }: { pub: Pub; me: Member; act?: (move: Record<string, unknown>) => void }) {
+  const L = pub.majority?.list || [], A = pub.majority?.ask, T = pub.teams, host = me.role === "host", cap = me.role === "captain";
+  const left = useSecondsLeft(A?.until);
+  const bare = (n: string) => n.replace(/[\u2068\u2069]/g, ""), meOn = L.find((x) => bare(x.name) === me.name);
+  return (
+    <div className="flex flex-col gap-3">
+      {!host && <p className="text-center font-bold text-16" role="status">{meOn && !meOn.out ? `You're on ${T[meOn.team].name}'s list: you play this one, on this phone.` : "You're not on a list yet."}</p>}
+      {A && cap && me.team !== A.team && act && (
+        <div className="card flex flex-col gap-2" style={{ borderColor: "var(--color-gold)" }}>
+          <p className="text-15"><b>{T[A.team].name}</b> ask to take <b>{A.name}</b> off their list: they&rsquo;re not on the game screen. Agree? ({left} s)</p>
+          <div className="grid grid-cols-2 gap-2"><button className="btn btn-gold" onClick={() => act({ type: "ui/mrOutOk", v: true })}>Agree</button><button className="btn" onClick={() => act({ type: "ui/mrOutOk", v: false })}>No, keep them</button></div>
+        </div>)}
+      {A && !(cap && me.team !== A.team) && <p className="text-center text-13 text-[var(--color-ink-2)]">Asking to take {A.name} off {T[A.team].name}&rsquo;s list…</p>}
+      <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
+        <div key={t} className="flex flex-col gap-1">
+          <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name} · {L.filter((x) => x.team === t && !x.out).length}</div>
+          {L.filter((x) => x.team === t).map((x) => {
+            const mayAsk = cap && me.team === t && !x.here && !x.out && !A && act;
+            return (
+              <div key={x.name} className="flex items-center gap-1.5 text-14 min-h-[32px]" style={{ opacity: x.out ? 0.45 : 1 }}>
+                <span aria-hidden style={{ color: x.here ? "var(--color-ok)" : "var(--color-ink-3)" }}>{x.here ? "●" : "○"}</span>
+                <span className="flex-1 min-w-0 truncate" style={{ textDecoration: x.out ? "line-through" : undefined }}>{x.name}</span>
+                {host && act && <button className="btn btn-sm !min-h-[32px] !px-2 !text-12" aria-label={`${x.out ? "Put back" : "Take off"}: ${bare(x.name)}`} onClick={() => act({ type: "ui/mrOut", name: x.name })}>{x.out ? "Put back" : "Take off"}</button>}
+                {mayAsk && <button className="btn btn-sm !min-h-[32px] !px-2 !text-12" aria-label={`Not here: ask to take ${bare(x.name)} off`} onClick={() => act({ type: "ui/mrOut", name: x.name })}>Not here</button>}
+              </div>); })}
+        </div>))}</div>
+      <p className="text-12 text-[var(--color-ink-3)] text-center">● on the game screen · ○ not here. Everyone on a list plays: not answering counts as wrong. Someone who has gone home can be taken off before Start{host ? "" : ", if the other captain agrees"}.</p>
+    </div>);
 }
 
 /* THE HOST'S PHONE: the answer always on top, one main button, judging only
@@ -265,8 +343,9 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "final": return <Results><Calls pub={pub} host busy={busy} act={send} /><Exit /></Results>;
 
     /* ---- the mini-games ---- */
-    case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "pinIntro": case "airportIntro": case "battleIntro": return (
+    case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "pinIntro": case "airportIntro": case "majorityIntro": case "battleIntro": return (
       <div className="flex flex-col gap-4 flex-1">
+        {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={{ role: "host" } as Member} act={fire} />}
         <MiniIntro pub={pub} size="phone" />
         <Main label="Start" move={{ type: mk === "auction" ? "auction/begin" : mk + "/start" }} />
       </div>);
@@ -310,6 +389,17 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change landmark" move={{ type: "pin/swap" }} /></div>
       </div>);
     case "pinReveal": return <Results><Main label="Next" move={{ type: "ui/next" }} /></Results>;
+    case "majorityQ": { const M = pub.majority; return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="flex items-center justify-between"><div className="eyebrow">Majority Rules · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
+        <p className="font-bold text-18">{pub.question}</p>
+        <AnswerCard />
+        <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
+          <div key={t} className="text-center"><div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
+            <div className="font-bold text-18 mt-0.5">{M?.answered?.[t] ?? 0} of {M?.n?.[t] ?? 0} answered</div></div>))}</div>
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change question" move={{ type: "majority/swap" }} /></div>
+      </div>); }
+    case "majorityReveal": return <Results><Main label="Next" move={{ type: "ui/next" }} /></Results>;
     case "airportQ": return (
       <div className="flex flex-col gap-3 flex-1">
         <div className="flex items-center justify-between"><div className="eyebrow">Board {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
@@ -359,7 +449,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         </div>
       </div>);
     /* level at the end of a mini-game: one more, or a point each */
-    case "miniTie": case "sayTie": case "flagTie": case "dishTie": case "mapTie": case "pinTie": case "airportTie": case "battleLevel": return (
+    case "miniTie": case "sayTie": case "flagTie": case "dishTie": case "mapTie": case "pinTie": case "airportTie": case "majorityTie": case "battleLevel": return (
       <div className="flex flex-col gap-4 flex-1">
         <Big eyebrow={pub.mini?.title} size={34} text={tieHead(pub)} sub={tieCall(pub)} />
         <div className="flex flex-col gap-3 mt-auto">
@@ -367,7 +457,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <button className="btn btn-lg" disabled={busy} onClick={() => send({ type: "tie/stop" })}>A point each</button>
         </div>
       </div>);
-    case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": case "saySummary": case "pinSummary": case "airportSummary": return (
+    case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": case "saySummary": case "pinSummary": case "airportSummary": case "majoritySummary": return (
       <div className="flex flex-col gap-4 flex-1">
         <Result pub={pub} />
         {S?.note && <Line className="!text-13">{S.note}</Line>}
@@ -606,6 +696,11 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
     {head(legW(w), w === "tie" ? "A point each" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
     {rows((t) => { const g = pub.reveal?.guesses?.[t]; return g == null ? "No answer" : `${showNum(g)} (off by ${showNum(offBy(g, ans))})`; })}
     {pub.reveal.notes && <div className="text-13 text-[var(--color-ink-2)] text-center">{pub.reveal.notes}</div>}</>); }
+  if (sc === "majorityReveal" && pub.majority?.reveal) { const M = pub.majority, R = M.reveal!; return (<>
+    <div className="eyebrow text-center">This question</div>
+    {rows((t) => `${R.right[t]} of ${M.n?.[t] ?? 0} right`)}
+    {M.totals && <p className="text-center text-14 text-[var(--color-ink-2)]">So far: {name(0)} {pub.mini?.wins[0] ?? 0}% · {name(1)} {pub.mini?.wins[1] ?? 0}%
+      <span className="block text-12 text-[var(--color-ink-3)]">({M.totals.right[0]} of {M.totals.of[0]} and {M.totals.right[1]} of {M.totals.of[1]} right)</span></p>}</>); }
   if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (<>
     {head(legW(w), w === "tie" ? "A point each" : w === "none" ? "No pins, no point" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
     {rows((t) => (R.pins[t] ? `${showKm(R.km[t] ?? 0)} off` : "No pin"))}</>); }
@@ -666,7 +761,8 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
 function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; small?: boolean }) {
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
-    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className="font-bold text-20 leading-snug text-center">{pub.question}</p>}
+    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className="font-bold text-20 leading-snug text-center">{pub.question}</p>}
+    {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
     {pub.screen === "pinQ" && (small
       /* the captain's phone: the photo beside the clock, so the map gets the room */
@@ -689,7 +785,7 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "battleQ"].includes(pub.screen) && !(small && pub.screen === "pinQ") && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || small ? 70 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div>}
+    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"].includes(pub.screen) && !(small && pub.screen === "pinQ") && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || small ? 70 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div>}
     {/* the Battle: the last answer, once there's no new question to read (during the questions it's on the TV only) */}
     {pub.battle?.half?.length && pub.screen === "battleHandoff" ? <BattleHalf half={pub.battle.half} />
       : pub.battle?.last && /^battle(Handoff|Summary)$/.test(pub.screen) && <BattleAnswer last={pub.battle.last} />}
@@ -717,7 +813,7 @@ export function BattleAnswer({ last, size = 15, prev }: { last: { answer: string
 }
 
 /* the screens that show who won what (see Result) */
-const RESULT = /^(answer|roundScore|closestReveal|flagReveal|sayReveal|mapReveal|pinReveal|airportReveal|dishReveal|auctionLeg|auctionResult|\w+Summary|final)$/;
+const RESULT = /^(answer|roundScore|closestReveal|flagReveal|sayReveal|mapReveal|pinReveal|airportReveal|majorityReveal|dishReveal|auctionLeg|auctionResult|\w+Summary|final)$/;
 
 /* what this question means for YOU, under the "Question for TEAM" head */
 function youLine(pub: Pub, me: Member, capName?: string) {
@@ -743,7 +839,7 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   return <p className={"text-center leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite">{status(pub, me)}</p>;
 }
 
-const QUIET = ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ"];
+const QUIET = ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ"];
 function status(pub: Pub, me: Member) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend" : "Double Dip: two answers") : `${T[pub.lifeline.team].name} used a lifeline`;
@@ -760,6 +856,7 @@ function status(pub: Pub, me: Member) {
     case "flagQ": return cap ? "Which country? One go." : "Guess the Flag: help your captain";
     case "pinQ": return cap ? "Where is it? Drop your pin. One go." : "Drop the Pin: help your captain";
     case "airportQ": return cap ? "Which airport? One go." : "Guess the Airport: help your captain";
+    case "majorityQ": return "Your own answer: eyes on your phone, no talking";
     case "dishQ": return pub.buzz === mine ? (pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
     case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same as Me: help your captain";
     case "sayReveal": return pub.reveal?.ok?.[mine] ? "You dodged the app's word" : "You said the app's word";
@@ -791,8 +888,11 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   const suggest = async () => { const t = text.trim(); if (!t) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); } catch { /* the phone already says so; the text stays */ } };
   return (
     <div className="flex flex-col gap-4 flex-1">
+      {/* Majority Rules' join screen: whether you're on the list, and who's here, before the rules */}
+      {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={me} />}
       <Head pub={pub} me={me} capName={cap?.name} />
       <OnScreen pub={pub} />
+      {/^majority(Q|Reveal)$/.test(pub.screen) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} />
       {canSuggest && (
         <div className="card flex flex-col gap-2">
@@ -819,6 +919,7 @@ const NEXT_LABEL: Record<string, [string, string]> = {
   battleHandoff: ["Start the second half", "battle/start"], sayReveal: ["Next", "ui/next"], mapReveal: ["Next", "ui/next"], saySummary: ["Next", "say/done"], battleSummary: ["Next", "battle/done"],
   pinIntro: ["Start", "pin/start"], airportIntro: ["Start", "airport/start"], pinReveal: ["Next", "ui/next"], airportReveal: ["Next", "ui/next"],
   pinSummary: ["Next", "pin/done"], airportSummary: ["Next", "airport/done"],
+  majorityIntro: ["Start: everyone's in", "majority/start"], majorityReveal: ["Next question", "ui/next"], majoritySummary: ["Next", "majority/done"],
   answer: ["Next", "round/afterAnswer"], roundScore: ["Next", "round/next"], closestReveal: ["Next", "ui/next"], flagReveal: ["Next", "ui/next"],
   dishReveal: ["Next", "dish/next"], auctionLeg: ["Next", "auction/nextLeg"], auctionResult: ["Next", "auction/done"], battleReview: ["Settle the Battle", "battle/reviewDone"],
   miniSummary: ["Next", "closest/done"], flagSummary: ["Next", "flag/done"], dishSummary: ["Next", "dish/done"], mapSummary: ["Next", "map/done"],
@@ -835,7 +936,7 @@ function WaitingFor({ pub }: { pub: Pub }) {
 const CALL_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "airportReveal", "dishReveal", "battleReview"];
 /* ...and sudden death / the tie-breaker: the question just decided, on the screen after it */
 const SD_CALL_SCREENS = ["final", "battleSummary", "sudden", "battleTie"];
-const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "battleQ"];
+const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"];
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
    lifelines; the number pad; the buzzer; the bidding; your players'
@@ -942,9 +1043,11 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   return (
     <div className="flex flex-col gap-3 flex-1">
       {no && <p className="text-center text-14 font-bold enter" role="alert" style={{ color: "var(--color-gold)" }}>{no}</p>}
+      {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
       <Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} />
 
             <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} />
+      {/^majority(Q|Reveal)$/.test(sc) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} />
       {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
       {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc)) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}

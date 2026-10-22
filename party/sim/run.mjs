@@ -47,6 +47,10 @@ const NIGHTS = [
   { seed: 14, minis: ["pin", "airport", "battle"] },
   { seed: 15, minis: ["closest", "pin", "airport"], host: true, rounds: 4 },
   { seed: 16, minis: ["pin", "airport"], slow: 0.97 },
+  /* 23 Oct: Majority Rules: everyone answers; with no host one player never turns up (their captain asks, the other agrees) */
+  { seed: 17, minis: ["majority", "battle"], crowd: 5, absent: "Joe" },
+  { seed: 18, minis: ["closest", "majority"], host: true, rounds: 4, crowd: 3, absent: "Karim" },
+  { seed: 19, minis: ["majority"], crowd: 2, slow: 0.9 },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

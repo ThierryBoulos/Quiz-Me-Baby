@@ -6,7 +6,7 @@
 import { useEffect, type ReactNode } from "react";
 import { preloadMap } from "./MapView";
 import { preloadWorld, type Mark } from "./PinMap";
-import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type Pub, type Two } from "@/lib/game";
+import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type Pub, type Two } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -24,13 +24,14 @@ function hudLabel(pub: Pub): ReactNode {
   if (m) {
     const tail = /Summary$|Result$/.test(sc) ? "Final" : /Tie$/.test(sc) && m.key !== "battle" ? "Tie"
       : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Tie" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
-      : sc === "decided" ? "Won" : m.tie ? "Tie-breaker" : `Leg ${m.leg} of ${m.of}${m.fun ? " · for fun" : ""}`;
+      : sc === "decided" ? "Won" : m.tie ? "Tie-breaker" : sc === "majorityIntro" ? "Everyone on their phone" : m.key === "majority" ? `Question ${m.leg} of ${m.of}`
+      : `Leg ${m.leg} of ${m.of}${m.fun ? " · for fun" : ""}`;
     return <><b>{m.title}</b> &nbsp;·&nbsp; {tail}</>;
   }
   return <>Round <b>{Math.min(pub.r + 1, pub.N)}</b> of {pub.N} &nbsp;·&nbsp; <b>{pub.theme}</b></>;
 }
 export function Hud({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
-  const T = pub.teams, w = pub.mini?.wins;
+  const T = pub.teams, w = pub.mini?.wins, u = pub.mini?.pct ? "%" : "";
   return (
     <div className={"hud " + size} role="group" aria-label="Scores">
       <div className="hud-in">
@@ -42,8 +43,8 @@ export function Hud({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
         <div className="hud-team b"><div className="sc">{T[1].score}</div><div className="nm">{T[1].name}</div><span className="dot" /></div>
       </div>
       {/* the mini-game's own score, small, under the night's: "This game: A 1 – 2 B" */}
-      {w && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}, ${T[1].name} ${w[1]}`}>
-        <span>This game:</span><span className="nm a">{T[0].name}</span><b className="a">{w[0]}</b><span aria-hidden>–</span><b className="b">{w[1]}</b><span className="nm b">{T[1].name}</span>
+      {w && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
+        <span>This game:</span><span className="nm a">{T[0].name}</span><b className="a">{w[0]}{u}</b><span aria-hidden>–</span><b className="b">{w[1]}{u}</b><span className="nm b">{T[1].name}</span>
       </div>}
     </div>);
 }
@@ -77,14 +78,14 @@ export function RulingPicker({ value, app, say, onPick, busy, label, sticky, com
 /* ---- a mini-game's score, the same on the TV and every phone: each team's
    number big in its colour, the team's name under it, the loser dimmed ---- */
 export function ScoreBoard({ pub, w, win, label, size }: { pub: Pub; w: Two<number>; win?: 0 | 1 | null; label?: string; size: "tv" | "phone" }) {
-  const T = pub.teams, tv = size === "tv";
+  const T = pub.teams, tv = size === "tv", u = pub.mini?.pct && /^majority/.test(pub.screen) ? "%" : "";
   const col = (t: 0 | 1) => (
     <div key={t} className={"flex flex-col items-center gap-1 min-w-0 " + (t === 1 ? "order-3" : "")} style={{ opacity: win == null || win === t ? 1 : 0.55 }}>
-      <div className="display leading-none" style={{ fontSize: tv ? 130 : 60, color: t === 0 ? "var(--color-a)" : "var(--color-b)" }}>{w[t]}</div>
+      <div className="display leading-none" style={{ fontSize: tv ? 130 : 60, color: t === 0 ? "var(--color-a)" : "var(--color-b)" }}>{w[t]}{u}</div>
       <div className="font-bold uppercase text-center leading-tight text-[var(--color-ink-2)] max-w-full truncate" style={{ fontSize: tv ? 22 : 12, letterSpacing: ".1em" }}>{T[t].name}</div>
     </div>);
   return (
-    <div className={tv ? "w-full max-w-[900px]" : "py-1"} aria-label={`${label ? label + ": " : ""}${T[0].name} ${w[0]}, ${T[1].name} ${w[1]}`}>
+    <div className={tv ? "w-full max-w-[900px]" : "py-1"} aria-label={`${label ? label + ": " : ""}${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
       {label && <div className="eyebrow text-center mb-2" style={tv ? { fontSize: 18 } : undefined}>{label}</div>}
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         {col(0)}{col(1)}
@@ -310,6 +311,11 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Both captains type which airport it is, at the same time. The city is enough, except where it has more than one: then name the airport (Heathrow, not London)." },
       { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
       { text: `Best of ${n} takes ${pts} points. ${level}` }];
+    case "majority": return [
+      { text: "Everyone plays on their own phone, captains too. The lists are fixed at Start.", warn: true },
+      { text: `${n} questions, four answers, ${sec(t?.majority, T_MAJORITY)} each. One tap and it's locked. No answer counts as wrong.` },
+      { text: "Eyes on your own phone: every phone has the answers in a different order." },
+      { text: `Score: right answers out of all your team could give (so 5 v 6 is fair). The bigger share takes ${pts} points.` }];
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },
@@ -326,7 +332,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
 export function MiniIntro({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
   const m = pub.mini, tv = size === "tv";
   if (!m) return null;
-  const band = m.key === "battle" ? `${m.of} questions each` : `Best of ${m.of}`;
+  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : `Best of ${m.of}`;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
       <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : "Mini-game"}</div>
@@ -354,7 +360,7 @@ export const silent = (pub: Pub, t: 0 | 1) => {
 };
 
 /* a tie at the end of a mini-game, in the same words on the TV and every phone */
-export const tieHead = (pub: Pub) => `Tie at ${pub.mini?.wins[0] ?? 0} each`;
+export const tieHead = (pub: Pub) => (pub.mini?.pct ? `Dead level at ${pub.mini.wins[0]}% each` : `Tie at ${pub.mini?.wins[0] ?? 0} each`);
 export const tieCall = (pub: Pub) =>
   `One more to settle it, or a point each: ${pub.mode === "host" ? "the host" : pub.captains?.[pub.lead ?? 0] || "the captain"} decides.`;
 /* the pictures coming up, fetched ahead (flags into the browser's cache, maps into MapView's) */

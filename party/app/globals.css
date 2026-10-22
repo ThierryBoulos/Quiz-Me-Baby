@@ -390,3 +390,9 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .board .b-dest { color: #fff; }
 .board .b-flight, .board .b-gate { color: #ffd25a; }
 .board .b-status { font-size: .88em; }
+/* Majority Rules: the four answers on a phone, big enough to hit without looking twice */
+.mr-opt { min-height: 64px; font-size: var(--text-18); white-space: normal; line-height: 1.2; text-align: center; }
+.mr-tv-opt { display: flex; align-items: center; gap: 18px; text-align: left; font-weight: 800; font-size: 34px; line-height: 1.15; padding: 20px 28px; border-radius: 22px;
+  background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.14); transition: opacity .3s, border-color .3s, background .3s; }
+.mr-tv-opt.ok { border-color: var(--color-ok); background: rgba(61,220,151,.16); }
+.mr-tv-opt.dim { opacity: .5; }

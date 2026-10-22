@@ -4,7 +4,7 @@ import { QMB, acceptFor } from "../engine";
 import type { Member } from "../room";
 import { other, type G, type W } from "./rules";
 import type { TvState } from "./state";
-import { offBy } from "../game";
+import { offBy, type Two } from "../game";
 
 /* who answers first: fixed for the whole game when it starts (Settings → alternate) */
 export const seatOf = (g: G) => ({ alternateFirst: !!g?.alternateFirst });
@@ -19,6 +19,7 @@ export function currentQ(s: TvState): G {
   if (["flagQ", "flagReveal"].includes(sc)) return g.flagGame.qs[g.flagGame.i];
   if (["pinQ", "pinReveal"].includes(sc)) return g.pinGame.qs[g.pinGame.i];
   if (["airportQ", "airportReveal"].includes(sc)) return g.airportGame.qs[g.airportGame.i];
+  if (["majorityQ", "majorityReveal"].includes(sc)) return g.majorityGame.qs[g.majorityGame.i];
   if (["mapQ", "mapReveal"].includes(sc)) return g.mapGame.qs[g.mapGame.i];
   if (["dishQ", "dishCheck"].includes(sc)) return g.dishGame.qs[g.dishGame.i];
   if (sc === "dishReveal") { const subs = g.dishGame.subs; return subs[subs.length - 1]?.q; }
@@ -56,6 +57,21 @@ export function closestW(s: TvState): W {
 }
 /* Drop the Pin: the nearer pin takes it (the engine's own sum, so the reveal and the score agree) */
 export function pinW(s: TvState): W { const q = s.g.pinGame.qs[s.g.pinGame.i]; return q ? QMB.pinLeg(q, s.pins).w : "none"; }
+/* Majority Rules: the answers so far, against the lists: how many on each team have answered, how many
+   are right, and how each of the four answers was picked (a name not on a list never counts) */
+export function mrTally(s: TvState) {
+  const q = currentQ(s), opts: string[] = q?.options || [];
+  const answered: Two<number> = [0, 0], right: Two<number> = [0, 0], counts: Two<number>[] = opts.map(() => [0, 0]);
+  for (const e of s.mrList || []) {
+    const v = s.votes?.[e.name];
+    if (v == null) continue;
+    answered[e.team]++;
+    if (q && v === q.answer) right[e.team]++;
+    const i = opts.indexOf(v);
+    if (i > -1) counts[i][e.team]++;
+  }
+  return { answered, right, counts };
+}
 /* Say Same: ok = dodged the word. One team dodging alone takes it; otherwise a point each */
 export const sayWin = (s: TvState): W => { const [a, b] = s.ok; return a && !b ? 0 : b && !a ? 1 : "tie"; };
 export const okWin = (s: TvState): W => { const [a, b] = s.ok; return a && b ? "tie" : a ? 0 : b ? 1 : "none"; };

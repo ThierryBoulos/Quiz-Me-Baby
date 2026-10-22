@@ -16,8 +16,8 @@ export function recap(s: TvState): NonNullable<Pub["recap"]> {
     /* "most one-sided" only for a clear win (2+ legs apart): a 3-2 is a close one */
     if (legs && Math.abs(legs[0] - legs[1]) >= 2 && (!best || Math.abs(legs[0] - legs[1]) > Math.abs(best.legs[0] - best.legs[1]))) best = { title, team: w, legs };
   };
-  ([["closest", g.mini], ["saysame", g.saySame], ["flag", g.flagGame], ["map", g.mapGame], ["pin", g.pinGame], ["airport", g.airportGame], ["dish", g.dishGame]] as [MiniKey, G][])
-    .forEach(([k, m]) => won(MINI_TITLES[k], m?.award, m ? [m.wins[0], m.wins[1]] : undefined));
+  ([["closest", g.mini], ["saysame", g.saySame], ["flag", g.flagGame], ["map", g.mapGame], ["pin", g.pinGame], ["airport", g.airportGame], ["majority", g.majorityGame], ["dish", g.dishGame]] as [MiniKey, G][])
+    .forEach(([k, m]) => won(MINI_TITLES[k], m?.award, m && k !== "majority" ? [m.wins[0], m.wins[1]] : undefined));   // (Majority Rules: shares, not legs)
   if (g.auction) won(MINI_TITLES.auction, g.auction.award, [g.auction.wins[0], g.auction.wins[1]]);
   if (g.battle) won(MINI_TITLES.battle, g.battle.award);
   let changes = 0, lead = 0;
