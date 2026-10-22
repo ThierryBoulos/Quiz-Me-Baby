@@ -208,7 +208,12 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const Main = ({ label, move, off }: { label: string; move: Record<string, unknown>; off?: boolean }) =>
     <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || off} onClick={() => send(move)}>{label}</button>;
   /* the host's private answer: the one box on this phone that isn't a button, so it can't be missed */
-  const AnswerCard = () => loading ? <Line>Getting the answer…</Line> : secret.answer ? (
+  const AnswerCard = () => loading ? <Line>Getting the answer…</Line> : secret.you ? (
+    <div className="card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
+      <div className="eyebrow" style={{ color: "var(--color-gold)" }}>This one&rsquo;s about you</div>
+      <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>You know the answer</div>
+      <div className="text-13 text-[var(--color-ink-2)] mt-1">Tap Right or Wrong for what they say.</div>
+    </div>) : secret.answer ? (
     <div className="card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answer, only you can see this</div>
       <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{secret.answer}</div>

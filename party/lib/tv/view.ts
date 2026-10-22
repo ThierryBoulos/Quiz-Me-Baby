@@ -1,6 +1,6 @@
 /* What the phones see: the TV's state turned into the public view (Pub, in the
    room for every phone) and the secret (the answer, for the TV and the host only). */
-import { QMB, acceptFor } from "../engine";
+import { QMB, aboutHost, acceptFor, hostOnly } from "../engine";
 import { getSettings } from "../settings";
 import type { Member } from "../room";
 import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two } from "../game";
@@ -62,8 +62,10 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.nextBy = p.captains[leadOf(mem)] || "The captain";
     p.nextOpenAt = s.waitSince + T_NEXT_FALLBACK * 1000; p.nextOther = p.captains[other(leadOf(mem))];
   }
-  const secret: Secret = { step: s.step, typed: s.typed, match: [matchQ(s.typed[0], q), matchQ(s.typed[1], q)], guesses: s.guesses };
-  if (q) { p.qid = secret.qid = qk(s, q.id); secret.answer = q.answer; secret.notes = q.notes; secret.accept = acceptFor(q).slice(0, 8); }
+  /* a question only a person can judge: the app has no call to suggest */
+  const judged = !!q && hostOnly(q);
+  const secret: Secret = { step: s.step, typed: s.typed, match: judged ? [null, null] : [matchQ(s.typed[0], q), matchQ(s.typed[1], q)], guesses: s.guesses };
+  if (q) { p.qid = secret.qid = qk(s, q.id); secret.answer = q.answer; secret.notes = q.notes; secret.accept = acceptFor(q).slice(0, 8); if (aboutHost(q)) secret.you = true; }
   if (rd) {
     p.first = QMB.seatTeam(g, rd, 0, seatOf(g));
     p.dbl = [...rd.dbl] as Two<boolean>;

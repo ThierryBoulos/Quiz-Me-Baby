@@ -100,7 +100,7 @@ export type Pub = {
   mode: "host" | "nohost";
 };
 /* host only: the answer, and what the captains typed with the app's opinion */
-export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null> };
+export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null>; you?: boolean };
 
 /* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
 export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "battleLevel"];

@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, acceptFor, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, withoutHostOnly, type Q } from "./engine";
+import { QMB, HOST_ONLY_THEMES, acceptFor, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, withoutHostOnly, type Q } from "./engine";
 import { cleanList } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
@@ -613,6 +613,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* with a host, the answer waits for their call, and its clock stops where it was (it ran on, and
          the teams thought something was wrong: 20 Oct); their call starts the next one */
       if (!s.nohost) { applyFx([{ timer: "pause" }]); return; }
+      /* the host away on a question only a person can judge (Know the Host): it waits for them */
+      if (hostOnly(q)) { applyFx([{ timer: "pause" }]); s.toast = { id: ++s.toastN, text: "Only the host can rule on this one. It waits for them." }; return; }
       const v = !!matchQ(s.typed[team], q);
       applyFx([{ timer: "pause" }]);
       s.pending = { kind: kindP, team, text: (s.typed[team] || []).join(" / "), v, until: Date.now() };
@@ -811,7 +813,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the house bank, this TV's own questions, and the starter's (cleaned: never trust a phone) */
       const base = await loadBank(code);
       s.custom = cleanList(cfgIn.custom, base.themes);
-      s.bank = withCustom(members.some((m) => m.role === "host") ? base : withoutHostOnly(base), s.custom);
+      /* with no host, nothing only a person can judge: not Know the Host, not even one written on this TV */
+      const all = withCustom(base, s.custom);
+      s.bank = members.some((m) => m.role === "host") ? all : withoutHostOnly(all);
       const names = lobbyState(room).teamNames || ["Team A", "Team B"];
       const team = (t: 0 | 1) => ({ name: cap1(names[t]), captain: cap1(members.find((m) => m.team === t && m.role === "captain")?.name || ""),
         players: members.filter((m) => m.team === t).map((m) => m.name).join(", ") });
@@ -829,7 +833,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const themeDiff = byHost && cfgIn.themeDiff && typeof cfgIn.themeDiff === "object"
         ? Object.fromEntries(Object.entries(cfgIn.themeDiff as Record<string, string>).filter(([, d]) => ["easy", "medium", "hard", "mixed"].includes(d))) : {};
       const hand = (k: string) => (byHost ? ids(cfgIn[k]) : []);
-      const cfg = { rounds, themes: cfgIn.themes || [], difficulty: diff, standard,
+      const hosted = members.some((m) => m.role === "host");
+      const cfg = { rounds, themes: (Array.isArray(cfgIn.themes) ? cfgIn.themes as string[] : []).filter((t) => hosted || !HOST_ONLY_THEMES.includes(t)), difficulty: diff, standard,
         /* maps, flags and dishes each have their own levels, set with the mini-games (as in Classic) */
         minis, mapLevels: levels(cfgIn.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), flagLevels: levels(cfgIn.flagLevels, QMB.FLAG_LEVEL_KEYS, ["veasy", "easy", "medium", "hard"]),
         dishLevels: levels(cfgIn.dishLevels, QMB.DISH_LEVEL_KEYS, ["c-medium", "d-medium"]), teamA: team(0), teamB: team(1), picks, themeDiff,
@@ -929,7 +934,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         /* the bank, then the view, to this TV and to every phone (they may still show "paused") */
         void loadBank(code).then(async (b) => {
           /* filtered as at Start: with no host, no question only a person can judge */
-          st.current.bank = withCustom(st.current.nohost ? withoutHostOnly(b) : b, st.current.custom || []);
+          const all = withCustom(b, st.current.custom || []);
+          st.current.bank = st.current.nohost ? withoutHostOnly(all) : all;
           /* a game saved by an older version of the app that this one can't read: say so, don't crash */
           try { setPub(view()?.[0] || null); }
           catch (e) { console.error("saved game unreadable", e); Object.assign(st.current, before); try { localStorage.removeItem(saveKey); } catch { /* */ } setBanner("oldSave"); return; }
@@ -1032,7 +1038,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const sc = s.screen, g = s.g, q = current();
         const who: 0 | 1 | null = sc === "ask" || sc === "steal" || sc === "battleQ" ? turnTeam() : sc === "dishQ" ? g.dishGame.leg.buzz : sc === "sudden" || sc === "battleTie" ? s.sdBuzz : null;
         const kind = ({ ask: "ask", steal: "steal", battleQ: "battle", dishQ: "dish", sudden: "sudden", battleTie: "battleTie" } as Record<string, PKind>)[sc];
-        if (kind && who != null && s.typed[who] && q) {
+        if (kind && who != null && s.typed[who] && q && hostOnly(q)) {
+          /* only a person can judge this one (Know the Host): it waits for the host */
+          s.toast = { id: s.toastN, text: "The host is away. Only they can rule on this answer, so it waits for them." };
+        } else if (kind && who != null && s.typed[who] && q) {
           applyFx([{ timer: "pause" }]);
           s.pending = { kind, team: who, text: (s.typed[who] || []).join(" / "), v: !!matchQ(s.typed[who], q), until: now };
           settle(false);                                 // the app's call, at once (it can be contested where the calls are shown)

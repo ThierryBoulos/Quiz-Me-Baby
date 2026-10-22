@@ -89,3 +89,5 @@ const HOST_ONLY_IDS = new Set(["qzr4hzp", "q789ar9", "q8p4fti", "q1716tok", "q1p
 export const HOST_ONLY_THEMES = ["Know the Host"];
 export const hostOnly = (q: Q) => HOST_ONLY_IDS.has(q.id) || HOST_ONLY_THEMES.includes(q.theme || "");
 export const withoutHostOnly = (b: Bank): Bank => ({ ...b, bank: b.bank.filter((q) => !hostOnly(q)) });
+/* the host's own trivia: every answer is "Host knows this one", and the host says if it's right */
+export const aboutHost = (q: Q) => HOST_ONLY_THEMES.includes(q.theme || "");
