@@ -611,3 +611,50 @@ test('the new games sit in the running order only when they have something to pl
   const none = Q.createDealer({ bank:() => [], used:() => new Set(), noRepeat:() => true }).buildGame({ standard:false, rounds:0, themes:[], minis:['pin', 'airport'], teamA:{ name:'A' }, teamB:{ name:'B' } });
   assert.deepEqual(none.plan, []);
 });
+
+/* 23 Oct: Majority Rules — every player answers; right answers out of all the answers a team could give */
+function mrGame(over){
+  const bank = [];
+  ['easy', 'medium', 'hard'].forEach(l => { for(let i = 0; i < 8; i++) bank.push({ id:`mr:${l}${i}`, type:'majority', level:l, question:'M' + i, answer:'A', options:['A', 'B', 'C', 'D'] }); });
+  const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => true, ok:{ majority:q => q.type === 'majority' } });
+  return D.buildGame(Object.assign({ standard:false, rounds:0, themes:[], minis:['majority'], teamA:{ name:'Falafel' }, teamB:{ name:'Shawarma' } }, over));
+}
+test('majority: fifteen questions; the share of right answers decides, not the head count', () => {
+  const g = mrGame(), s = g.majorityGame;
+  assert.equal(s.qs.length, 15);
+  assert.deepEqual(Q.play(g, { type:'majority/start', n:[5, 6] }), [{ go:'majorityQ' }]);
+  /* 4 of 5 every time is 80%; 5 of 6 is 83%: Team B wins on the share */
+  let fx;
+  for(let i = 0; i < 15; i++) fx = Q.play(g, { type:'majority/settle', right:[4, 5] });
+  assert.deepEqual(s.right, [60, 75]);
+  assert.deepEqual(s.of, [75, 90]);
+  assert.deepEqual(s.wins, [80, 83]);
+  assert.equal(s.verdict.winner, 1);
+  assert.equal(g.teams[1].score, g.miniPts);
+  assert.ok(types(fx).includes('go:majoritySummary'));
+  assert.match(s.verdict.note, /Falafel: 60 of 75 right \(80%\), Shawarma: 75 of 90 right \(83%\)/);
+  assert.deepEqual(Q.play(g, { type:'majority/done' }), [{ finalize:true }]);   // nothing after it tonight
+});
+test('majority: more right answers from the bigger team is not enough when its share is lower', () => {
+  const g = mrGame(), s = g.majorityGame;
+  Q.play(g, { type:'majority/start', n:[2, 3] });
+  for(let i = 0; i < 15; i++) Q.play(g, { type:'majority/settle', right:[2, 2] });   // 100% v 67%
+  assert.equal(s.verdict.winner, 0);
+});
+test('majority: dead level brings one more question; counts are clamped to the list', () => {
+  const g = mrGame(), s = g.majorityGame;
+  Q.play(g, { type:'majority/start', n:[4, 4] });
+  for(let i = 0; i < 14; i++) Q.play(g, { type:'majority/settle', right:[2, 2] });
+  Q.play(g, { type:'majority/settle', right:[9, 3] });   // 9 is more than the 4 on the list: 4
+  assert.deepEqual(s.right, [32, 31]);
+  assert.equal(s.verdict.winner, 0);
+  const h = mrGame(), t = h.majorityGame;
+  Q.play(h, { type:'majority/start', n:[3, 3] });
+  let f2;
+  for(let i = 0; i < 15; i++) f2 = Q.play(h, { type:'majority/settle', right:[1, 1] });
+  assert.equal(t.tieLegs, 1);
+  assert.equal(t.qs.length, 16);
+  assert.ok(types(f2).includes('go:majorityQ'));
+  Q.play(h, { type:'majority/settle', right:[0, 3] });
+  assert.equal(t.verdict.winner, 1);
+});
