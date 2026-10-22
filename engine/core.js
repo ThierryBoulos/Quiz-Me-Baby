@@ -1043,6 +1043,11 @@
     fx.push({ toast:g.teams[team].name + ' +' + pts + ' ' + (pts === 1 ? 'point' : 'points') + (why ? ' — ' + why : '') });
   }
 
+  /* Both teams answer at the same level in a round. A question swapped in, or a new one for a steal,
+     comes from the level of the question it stands beside; when that level has run out in the theme,
+     from the nearest one (an easier one before a harder one). */
+  const NEAR = { easy:['easy', 'medium', 'hard'], medium:['medium', 'easy', 'hard'], hard:['hard', 'medium', 'easy'] };
+  const levelsFrom = (d) => NEAR[d] || [d];
   const MOVES = {
     /* the game has just been dealt: the first round, or straight into the mini-games */
     'game/start'(g, a, env){ return g.rounds.length ? [{ go:'roundIntro' }] : nextStep(g, env, []); },
@@ -1072,25 +1077,25 @@
       const elsewhere = new Set();
       g.rounds.forEach((r, ri) => r.q.forEach((q, si) => { if(ri !== g.r || si !== seat) elsewhere.add(q.id); }));
       g.mini.qs.forEach(q => elsewhere.add(q.id));
-      const list = D.bank().filter(q =>
-        q.type === 'standard' && q.theme === rd.theme &&
-        D.matchDiff(q, D.diffOf(g.cfg, rd.theme)) && !elsewhere.has(q.id));
-      const none = [{ toast:'No other question left in ' + rd.theme + ' at this difficulty.', ms:4000 }];
-      if(list.length < 2) return none;
-      const cur = rd.q[seat];
+      const cur = rd.q[seat], mate = rd.q[1 - seat];
+      const inTheme = D.bank().filter(q => q.type === 'standard' && q.theme === rd.theme && !elsewhere.has(q.id) && q.id !== cur.id);
+      const want = (mate || cur).difficulty;
+      const at = (d) => inTheme.filter(q => q.difficulty === d);
       const seen = rd.swapSeen = rd.swapSeen || [];
       if(seen.indexOf(cur.id) < 0) seen.push(cur.id);
-      let next = list.filter(q => seen.indexOf(q.id) < 0)[0];
-      if(!next){                                    // whole theme exhausted — start again
-        seen.length = 0; seen.push(cur.id);
-        next = list.filter(q => q.id !== cur.id)[0];
+      let next = null;
+      /* one not offered yet, at the nearest level that has one */
+      for(const d of levelsFrom(want)){ next = at(d).find(q => seen.indexOf(q.id) < 0); if(next) break; }
+      if(!next){                                    // every one offered already: start again, same order
+        for(const d of levelsFrom(want)){ next = at(d)[0]; if(next){ seen.length = 0; seen.push(cur.id); break; } }
       }
-      if(!next) return none;
+      if(!next) return [{ toast:'No other question left in ' + rd.theme + '.', ms:4000 }];
       seen.push(next.id);
       rd.q[seat] = next;
       rd.strict = false;
       rd.picked = false;                 // no longer the pair the host chose by hand
-      return [{ used:next }, { toast:'New question.' }, { go:'ask' }];
+      const moved = next.difficulty !== want;
+      return [{ used:next }, moved ? { toast:'No more ' + want + ' questions in ' + rd.theme + ', so here is a ' + next.difficulty + ' one.', ms:4000 } : { toast:'New question.' }, { go:'ask' }];
     },
     /* a lifeline: key 'friend' | 'dip', i the team. With double armed, one extra only. */
     'round/lifeline'(g, a){
@@ -1183,7 +1188,9 @@
       g.mini.qs.forEach(q => inUse.add(q.id));
       (rd.swapSeen || []).forEach(id => inUse.add(id));
       const theme = (q) => q.type === 'standard' && q.theme === rd.theme && !inUse.has(q.id);
-      let list = D.bank().filter(q => theme(q) && D.matchDiff(q, D.diffOf(g.cfg, rd.theme)));
+      /* at the level of the question the first team had; none left there: the nearest level */
+      let list = [];
+      for(const d of levelsFrom(rd.q[seat].difficulty)){ list = D.bank().filter(q => theme(q) && q.difficulty === d); if(list.length) break; }
       if(!list.length) list = D.bank().filter(theme);
       if(!list.length) return [{ toast:'No other question left in ' + rd.theme + ', so nobody scores this one.' }, { render:true }];
       const owner = seatTeam(g, rd, seat, env.settings), next = D.shuffle(list)[0];

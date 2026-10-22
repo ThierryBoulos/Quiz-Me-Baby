@@ -492,3 +492,40 @@ test('contest: a tie-breaker call changed on the Battle summary moves its points
   assert.equal(g.battle.stage, 'tie');
   assert.equal(g.battle.tbRounds, 2);
 });
+
+/* 22 Oct: both teams always answer at the same level in a round, even after "Change question" */
+function levelGame(counts, difficulty){
+  const bank = [];
+  for(const [d, n] of Object.entries(counts)) for(let i = 0; i < n; i++) bank.push({ id:`Mu-${d}${i}`, type:'standard', theme:'Music', difficulty:d, use_with:`p-${d}${i >> 1}`, question:'Q ' + d + i, answer:'A' });
+  const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => false, ok:{ map:() => false, flag:() => false, dish:() => false } });
+  const g = D.buildGame({ rounds:1, themes:['Music'], difficulty:difficulty || 'mixed', minis:[], teamA:{ name:'A' }, teamB:{ name:'B' } });
+  const env = { deal:D, settings:{} };
+  Q.play(g, { type:'game/start' }, env); Q.play(g, { type:'round/begin' }, env);
+  return { g, env };
+}
+test('levels: in a mixed game, Change question keeps the level of the other team\'s question', () => {
+  for(let k = 0; k < 20; k++){
+    const { g, env } = levelGame({ easy:6, medium:6, hard:6 });
+    const rd = g.rounds[0], want = rd.q[1].difficulty;
+    assert.equal(rd.q[0].difficulty, want);                        // dealt as a pair
+    for(let i = 0; i < 4; i++){ Q.play(g, { type:'round/swap' }, env); assert.equal(rd.q[0].difficulty, want, 'swap ' + (i + 1)); }
+  }
+});
+test('levels: when the level runs out, the swap takes the nearest level and says so', () => {
+  const { g, env } = levelGame({ hard:2, medium:4, easy:4 }, 'hard');
+  const rd = g.rounds[0];
+  assert.equal(rd.q[0].difficulty, 'hard');
+  const fx = Q.play(g, { type:'round/swap' }, env);
+  assert.equal(rd.q[0].difficulty, 'medium');                   // not easy: the nearest first
+  assert.ok(fx.some(f => /No more hard questions in Music, so here is a medium one/.test(f.toast || '')));
+});
+test('levels: a steal on a new question is at the first team\'s level', () => {
+  for(let k = 0; k < 20; k++){
+    const { g, env } = levelGame({ easy:6, medium:6, hard:6 });
+    const want = g.rounds[0].q[0].difficulty;
+    Q.play(g, { type:'round/judge', v:true }, env);
+    Q.play(g, { type:'round/rule', line:'first', v:false }, env);
+    Q.play(g, { type:'round/freshSteal' }, env);
+    assert.equal(g.rounds[0].q[0].difficulty, want);
+  }
+});
