@@ -56,6 +56,27 @@ test('say-same: wide prompts first, a coin flip last', () => {
   for(let i = 1; i < legs.length - 1; i++) assert.ok(legs[i - 1].pool.length >= legs[i].pool.length);
 });
 
+/* only the last two can come down to luck: three or four answers, then two (22 Oct) */
+test('say-same: five answers or more until the last two, then four, then a coin flip', () => {
+  const b = [];
+  for(let i = 0; i < 12; i++) b.push({ id:'w' + i, type:'saysame', pool:'abcdefghijklmnop'.slice(0, 5 + (i % 6)).split('') });
+  for(let i = 0; i < 3; i++) b.push({ id:'f' + i, type:'saysame', pool:['n', 's', 'e', 'w'] });
+  for(let i = 0; i < 2; i++) b.push({ id:'t' + i, type:'saysame', pool:['r', 'p', 's'] });
+  for(let i = 0; i < 2; i++) b.push({ id:'c' + i, type:'saysame', pool:['x', 'y'] });
+  for(let run = 0; run < 30; run++){
+    const D2 = Q.createDealer({ bank:() => b, used:() => new Set(), noRepeat:() => true, ok:{ map:() => false, flag:() => false, dish:() => false } });
+    const deck = D2.saySameDeck({}), legs = deck.slice(0, 9), n = legs.map(q => q.pool.length);
+    assert.equal(n[8], 2, n.join(','));
+    assert.equal(n[7], 4, n.join(','));
+    assert.ok(n.slice(0, 7).every(k => k >= 5), n.join(','));
+    for(let i = 1; i < 8; i++) assert.ok(n[i - 1] >= n[i], n.join(','));
+    assert.ok(deck.slice(9, 14).every(q => q.pool.length >= 5));                 // tie-breakers: the wide ones left
+    /* the host's own three-answer pick is the next-to-last */
+    const own = D2.saySameDeck({ pickSaySame:['t1'] }).slice(0, 9);
+    assert.equal(own[7].id, 't1'); assert.equal(own[8].pool.length, 2);
+  }
+});
+
 test('mini-game plan and points', () => {
   const g = D.buildGame(cfg({ rounds:4, minis:['closest', 'flag', 'battle'] }));
   assert.deepEqual(g.plan.map(p => p.key), ['flag', 'closest']);       // Flag opens the night
@@ -91,10 +112,19 @@ test('sudden death never deals a question the dealer marks as not for sudden dea
 test('Say the Same: the hidden word leans to the top of the list; short sets stay even', () => {
   let s = 3; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const D3 = Q.createDealer({ bank:() => [], used:() => new Set(), noRepeat:() => false, rng:r, ok:{ map:() => false, flag:() => false, dish:() => false } });
+  /* only the common ones: half of a short list (a, b, c of six), weighted 1/k */
   const wide = { pool:['a', 'b', 'c', 'd', 'e', 'f'] }, n = {};
   for(let i = 0; i < 3000; i++){ const w = D3.drawSaySame(wide).answer; n[w] = (n[w] || 0) + 1; }
-  assert.ok(n.a > n.c && n.c > n.f, JSON.stringify(n));
-  assert.ok(n.a / 3000 > 0.33 && n.a / 3000 < 0.49, JSON.stringify(n));        // 1 / 2.45
+  assert.deepEqual(Object.keys(n).sort(), ['a', 'b', 'c'], JSON.stringify(n));
+  assert.ok(n.a > n.b && n.b > n.c, JSON.stringify(n));
+  assert.ok(n.a / 3000 > 0.48 && n.a / 3000 < 0.61, JSON.stringify(n));        // 1 / 1.83
+  /* five of a long list (never Wensleydale), or the count the prompt sets */
+  const cheese = { pool:'Cheddar Mozzarella Brie Parmesan Feta Gouda Camembert Halloumi Stilton Edam Wensleydale'.split(' ') }, m = new Set();
+  for(let i = 0; i < 2000; i++) m.add(D3.drawSaySame(cheese).answer);
+  assert.deepEqual([...m].sort(), ['Brie', 'Cheddar', 'Feta', 'Mozzarella', 'Parmesan']);
+  const friends = { pool:'Rachel Ross Joey Chandler Monica Phoebe Gunther Janice Mike Ursula'.split(' '), common:6 }, f = new Set();
+  for(let i = 0; i < 2000; i++) f.add(D3.drawSaySame(friends).answer);
+  assert.equal(f.size, 6); assert.ok(f.has('Phoebe') && !f.has('Gunther'));
   const coin = { pool:['Heads', 'Tails'] }, c = {};
   for(let i = 0; i < 2000; i++){ const w = D3.drawSaySame(coin).answer; c[w] = (c[w] || 0) + 1; }
   assert.ok(Math.abs(c.Heads - c.Tails) < 200, JSON.stringify(c));

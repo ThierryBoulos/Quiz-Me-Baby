@@ -436,24 +436,34 @@
       return bank().filter(q => q.type === 'saysame' && isFresh(q) && (q.pool || []).length >= 2);
     }
 
-    /* The hidden word leans towards what people actually say: the lists run from
-       the most common answer down, and the k-th word is drawn with weight 1/k, so
-       "Sean Connery" comes up far more often than "George Lazenby". Short closed
-       sets (heads or tails, the four suits) stay an even draw. */
+    /* The hidden word is always a common answer, what the person next to you would
+       say. The lists run from the most common answer down, and only the top few can
+       be drawn: the count a prompt sets (Friends: the six friends), or else five of
+       a long list (Cheddar, Mozzarella, Brie, Parmesan, Feta; never Wensleydale) and
+       about half of a short one. Within those the k-th is drawn with weight 1/k.
+       Closed sets of four or fewer (heads or tails, the four suits) stay an even draw. */
+    function commonOf(q){
+      const n = (q.pool || []).length, c = Math.floor(Number(q.common));
+      if(n <= 4) return n;
+      return c >= 1 ? Math.min(c, n) : Math.min(5, Math.max(3, Math.ceil(n / 2)));
+    }
     function drawSaySame(q){
       const pool = q.pool || [];
       if(pool.length <= 4) return Object.assign({}, q, { answer: pool[Math.floor(rand() * pool.length)] });
-      const w = pool.map((_, k) => 1 / (k + 1)), total = w.reduce((a, b) => a + b, 0);
+      const top = pool.slice(0, commonOf(q));
+      const w = top.map((_, k) => 1 / (k + 1)), total = w.reduce((a, b) => a + b, 0);
       let r = rand() * total, i = 0;
-      while(i < pool.length - 1 && r >= w[i]){ r -= w[i]; i++; }
-      return Object.assign({}, q, { answer: pool[i] });
+      while(i < top.length - 1 && r >= w[i]){ r -= w[i]; i++; }
+      return Object.assign({}, q, { answer: top[i] });
     }
 
     function saySameDeck(cfg){
-      /* Legs 1 to 8 are prompts with plenty of answers (four or more), widest
-         first; leg 9 — the last — is a two-way coin flip (heads or tails, cats or
-         dogs). Tie-breakers go back to the wide prompts. Fresh prompts first;
-         played ones only if the fresh ones run short. */
+      /* Only the last two legs can come down to luck (22 Oct): the next-to-last has
+         three or four answers (four if there is one: the four suits, the seasons),
+         the last is a two-way coin flip (heads or tails, cats or dogs). Every leg
+         before them has five answers or more, widest first. Tie-breakers go back to
+         the wide prompts. Fresh prompts first; played ones only if the fresh ones
+         run short. */
       const has = (q) => q && (q.pool || []).length >= 2;
       const two = (q) => q.pool.length === 2;
       const picked = ((cfg && cfg.pickSaySame) || [])
@@ -465,12 +475,16 @@
       const three = freshFirst(all.filter(q => q.pool.length === 3));
       const coins = freshFirst(all.filter(two));
     
+      const big = wide.filter(q => q.pool.length >= 5), fours = wide.filter(q => q.pool.length === 4);
+      const widest = (x, y) => y.pool.length - x.pool.length;
       const last = picked.filter(two)[0] || coins[0] || null;
-      const body = picked.filter(q => q !== last);
-      const fill = wide.concat(three).filter(q => q !== last);
-      while(body.length < SAYSAME_LEGS - (last ? 1 : 0) && fill.length) body.push(fill.shift());
-      body.sort((x, y) => y.pool.length - x.pool.length);       // widest first
-      const primary = body.concat(last ? [last] : []);
+      /* the host's own three- or four-answer prompt, if they picked one, is the next-to-last */
+      const near = picked.filter(q => q !== last && q.pool.length <= 4 && !two(q)).sort(widest)[0] || fours[0] || three[0] || null;
+      const body = picked.filter(q => q !== last && q !== near);
+      const fill = big.concat(fours, three).filter(q => q !== last && q !== near);
+      while(body.length < SAYSAME_LEGS - (last ? 1 : 0) - (near ? 1 : 0) && fill.length) body.push(fill.shift());
+      /* widest first (short of wide prompts, a small one can come before the next-to-last) */
+      const primary = body.concat(near ? [near] : []).sort(widest).concat(last ? [last] : []);
       return primary.concat(fill.slice(0, 6));                  // tie-breakers: more wide prompts
     }
 
@@ -723,7 +737,7 @@
     /* ctx.suddenOk: questions that can't be played in sudden death (Party: the ones a person must judge) */
     const suddenOk = ctx.suddenOk || (() => true);
     return { bank, shuffle, isFresh, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
-             auctionPool, auctionDeck, saySamePool, drawSaySame, saySameDeck,
+             auctionPool, auctionDeck, saySamePool, commonOf, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
              dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, diffOf, pickedPair, dishLeg, buildGame };
   }

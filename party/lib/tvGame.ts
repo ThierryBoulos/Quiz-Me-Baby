@@ -843,21 +843,21 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         pickClosest: hand("pickClosest"), pickAuction: hand("pickAuction"), pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish"),
         pickPin: hand("pickPin"), pickAirport: hand("pickAirport"), pickMajority: hand("pickMajority") };
       const g = env().deal.buildGame(cfg);
-      /* Party plays Don't Say the Same as Me best of 7 (the coin-flip prompt stays last) and
-         Guess the Cocktail or Dish best of 5. The engine deals Classic's lengths; the legs left
-         over are dropped (Say) or kept back for swaps and tie-breakers (Dish). The
-         host's own picks are the last to go. */
-      const trim = (m: G, n: number | undefined, mine: string[], keepLast: boolean) => {
+      /* Party plays Don't Say the Same as Me best of 7 (its last two prompts, the four-answer
+         one and the coin flip, stay last) and Guess the Cocktail or Dish best of 5. The engine
+         deals Classic's lengths; the legs left over are dropped (Say) or kept back for swaps and
+         tie-breakers (Dish). The host's own picks are the last to go. */
+      const trim = (m: G, n: number | undefined, mine: string[], keep = 0) => {
         if (!m || !n || m.qs.length <= n) return [];
-        const own = new Set(mine), last = keepLast ? m.qs.pop() : null, cut: G[] = [];
-        while (m.qs.length > n - (last ? 1 : 0)) { const i = m.qs.map((q: G) => own.has(q.id)).lastIndexOf(false); cut.unshift(m.qs.splice(i >= 0 ? i : m.qs.length - 1, 1)[0]); }
-        if (last) m.qs.push(last);
+        const own = new Set(mine), tail: G[] = keep ? m.qs.splice(-keep) : [], cut: G[] = [];
+        while (m.qs.length > n - tail.length) { const i = m.qs.map((q: G) => own.has(q.id)).lastIndexOf(false); cut.unshift(m.qs.splice(i >= 0 ? i : m.qs.length - 1, 1)[0]); }
+        m.qs.push(...tail);
         m.base = m.qs.length;
         return cut;
       };
-      trim(g.saySame, PARTY_LEGS.saysame, cfg.pickSaySame, true);
-      g.mini.spare = [...trim(g.mini, PARTY_LEGS.closest, cfg.pickClosest, false), ...(g.mini.spare || [])];
-      if (g.dishGame) g.dishGame.spare = [...trim(g.dishGame, PARTY_LEGS.dish, cfg.pickDish, false), ...(g.dishGame.spare || [])];
+      trim(g.saySame, PARTY_LEGS.saysame, cfg.pickSaySame, 2);
+      g.mini.spare = [...trim(g.mini, PARTY_LEGS.closest, cfg.pickClosest), ...(g.mini.spare || [])];
+      if (g.dishGame) g.dishGame.spare = [...trim(g.dishGame, PARTY_LEGS.dish, cfg.pickDish), ...(g.dishGame.spare || [])];
       /* The engine always plays "hosted" here: with no host the TV is the host
          (it checks the answers), so steals and buzzers work as with one. */
       g.hostless = false;

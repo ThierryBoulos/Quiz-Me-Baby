@@ -1215,7 +1215,7 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
 </div>
 <div id="modal" role="dialog" aria-modal="true"></div>
 <!-- the shared engine (v4 step 1): the rules with no screen in them -->
-<script src="engine/core.js?v=3.24"></script>
+<script src="engine/core.js?v=3.25"></script>
 <script>
 /* ==========================================================================
    QUIZ ME BABY
@@ -1971,14 +1971,16 @@ const SEED_AUCTION = [
      (planets, the countries of Africa, Bond actors) lists every member, and an
      open one (a fruit, a cheese) lists everything people would actually say.
      Obscure but correct answers stay, at the end; wrong ones never go on.
-   - It is ORDERED, most commonly given answer first. The secret word is drawn
-     leaning towards the top, the way the person next to you would answer —
-     so put Connery before Lazenby, Apple before Quince.
+   - It is ORDERED, most commonly given answer first. The secret word is only
+     ever one of the common ones at the top, the way the person next to you
+     would answer: five of a long list, about half of a short one, or the
+     count in the row's third place (the six Friends of 31 characters). So
+     put Connery before Lazenby, Apple before Quince.
    - Its LENGTH is the prompt's real-world scope: 2 for a true binary like
      Heads or Tails, dozens for something wide open like fast food chains.
      That number orders a night's nine prompts from vast (safe, many ways to
-     dodge) down to tight (a coin flip by the end) — see buildGame(), which
-     sorts the picked legs by pool length, descending.
+     dodge) down to tight: only the last two are small, one of three or four
+     answers, then a coin flip — see saySameDeck().
    Other ways of writing a word (Connery for Sean Connery, Yellow for Amber)
    live with Party's also-accepted answers (party/public/accept.json byAnswer),
    keyed by the word itself.
@@ -1995,12 +1997,12 @@ const SEED_SAYSAME = [
   ['Name a traffic light colour', ['Red','Green','Amber']],
   ['Name a suit in a deck of cards', ['Hearts','Spades','Diamonds','Clubs']],
   ['Name a season', ['Summer','Winter','Spring','Autumn']],
-  ['Name a Beatle', ['John','Paul','Ringo','George','Pete Best','Stuart Sutcliffe']],
+  ['Name a Beatle', ['John','Paul','Ringo','George','Pete Best','Stuart Sutcliffe'], 4],
   ['Name a compass direction', ['North','South','East','West']],
-  ['Name a vowel', ['A','E','I','O','U','Y']],
-  ['Name a James Bond actor', ['Sean Connery','Daniel Craig','Roger Moore','Pierce Brosnan','Timothy Dalton','George Lazenby']],
-  ['Name a Friends character', ['Rachel','Ross','Joey','Chandler','Monica','Phoebe','Gunther','Janice','Mike','Ursula','Richard','Carol','Susan','Emily','Ben','Emma','Marcel','Jack','Judy','Estelle','Frank Jr.','Paolo','Tag','Mr Heckles','Amy','Jill','Charlie','Kathy','Julie','Pete','David']],
-  ['Name a colour of the rainbow', ['Red','Blue','Green','Yellow','Orange','Violet','Indigo']],
+  ['Name a vowel', ['A','E','I','O','U','Y'], 5],
+  ['Name a James Bond actor', ['Sean Connery','Daniel Craig','Roger Moore','Pierce Brosnan','Timothy Dalton','George Lazenby'], 4],
+  ['Name a Friends character', ['Rachel','Ross','Joey','Chandler','Monica','Phoebe','Gunther','Janice','Mike','Ursula','Richard','Carol','Susan','Emily','Ben','Emma','Marcel','Jack','Judy','Estelle','Frank Jr.','Paolo','Tag','Mr Heckles','Amy','Jill','Charlie','Kathy','Julie','Pete','David'], 6],
+  ['Name a colour of the rainbow', ['Red','Blue','Green','Yellow','Orange','Violet','Indigo'], 5],
   ['Name a day of the week', ['Monday','Friday','Sunday','Saturday','Wednesday','Tuesday','Thursday']],
   ['Name a continent', ['Africa','Asia','Europe','Australia','North America','South America','Antarctica','Oceania']],
   ['Name a country that borders France', ['Spain','Germany','Italy','Belgium','Switzerland','Luxembourg','Monaco','Andorra','Brazil','Suriname','Netherlands']],
@@ -2845,10 +2847,10 @@ function buildSeedBank(party){
     id:hash(r[0]), question:r[0], answer:'Host counts', notes:r[1]||'', theme:'',
     type:'auction', difficulty:'', use_with:'', src:'seed'
   }); });
-  SEED_SAYSAME.forEach(function(r){ out.push({
+  SEED_SAYSAME.forEach(function(r){ out.push(Object.assign({
     id:hash(r[0]), question:r[0], answer:'', notes:'', theme:'',
     type:'saysame', difficulty:'', use_with:'', pool:r[1].slice(), src:'seed'
-  }); });
+  }, r[2] ? { common:r[2] } : {})); });
   /* The bank row carries the words; the drawing itself is looked up from
      SEED_MAPS by `map` at render time, so a corrected border or colour never
      needs a bank migration — only the words do. */
