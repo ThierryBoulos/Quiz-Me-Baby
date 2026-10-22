@@ -123,7 +123,24 @@ export function Rules() {
         ]} />
       </Rule>
 
-      <Rule n="10" title="Guess the Cocktail or Dish">
+      <Rule n="10" title="Drop the Pin">
+        <L items={[
+          <>A photo of a landmark goes up on the TV and every phone: <B>45 seconds</B>. On the hard ones its name comes too: the trick is finding it.</>,
+          <>Both captains drop a pin on the world map on their phone. Tap to drop it, drag it to move it, pinch or tap <B>+</B> to zoom right in (down to the streets of a city), then <B>Lock in</B>. A pin left on the map when time runs out counts where it is.</>,
+          <>The map has coastlines, borders, lakes and the big rivers, and no names. The reveal flies to the real spot and shows both pins, and how many km off each one was.</>,
+          <>The nearer pin takes the leg; the same distance (to the km) is a point each; no pin, no point. Best of 5.</>,
+        ]} />
+      </Rule>
+
+      <Rule n="11" title="Guess the Airport">
+        <L items={[
+          <>A departures board goes up: <B>30 seconds</B>. The destinations, the airlines and the language on it are the clues; the airport&rsquo;s own city is never on its board.</>,
+          <>Both captains type which airport it is. The city is enough, except where it has more than one: there, name the airport (Heathrow, not London). Its code counts too (LHR).</>,
+          <>The app checks them; a call it got wrong can be contested on the reveal, which also says how to read the board. Both right is a point each. Best of 5.</>,
+        ]} />
+      </Rule>
+
+      <Rule n="12" title="Guess the Cocktail or Dish">
         <L items={[
           <>The ingredients come up one at a time, a new one every <B>3 seconds</B>, the giveaway last.</>,
           <>Know it? Captain, hit <B>BUZZ</B>. The first buzz answers, and has <B>10 seconds</B> to type it. Wrong or out of time, and you&rsquo;re out of that one; the list keeps coming for the other team.</>,
@@ -132,7 +149,7 @@ export function Rules() {
         ]} />
       </Rule>
 
-      <Rule n="11" title="Battle of the Captains">
+      <Rule n="13" title="Battle of the Captains">
         <L items={[
           <>Captains only. The room says nothing, and that means nothing.</>,
           <>Ten questions each, one captain at a time: <B>7 seconds</B> a shot out loud with a host, or <B>15 seconds</B> typed with no host. The TV shows each answer once it&rsquo;s settled.</>,
@@ -141,14 +158,14 @@ export function Rules() {
         ]} />
       </Rule>
 
-      <Rule n="12" title="Winning">
+      <Rule n="14" title="Winning">
         <L items={[
           <>Highest score after the last round takes the night: confetti on every screen, then <B>Exit</B> sends everyone back to the home screen.</>,
           <>Tie? <B>Sudden death</B>: one question, both captains, first to buzz answers (<B>30 seconds</B> to buzz with no host). Wrong, and the other captain can buzz. Repeats until somebody gets one. The app checks each answer at once, and nothing waits for a contest: a captain can still contest a call on the final screen (or, when both were wrong, during the next question, whose clock waits for it). The first right answer, in the order they came, wins; nobody right after all, another question.</>,
         ]} />
       </Rule>
 
-      <Rule n="13" title="The phones">
+      <Rule n="15" title="The phones">
         <L items={[
           <><B>The TV</B> is the show: questions, clocks, scores, reveals. It never shows an answer early.</>,
           <><B>The host&rsquo;s phone</B> shows the answer and what the captain typed. Once the team has answered, two buttons, <B>RIGHT</B> and <B>WRONG</B>: the app&rsquo;s call is already picked (&ldquo;App suggests&rdquo;), and the other button changes it. When a captain contests a call, <B>the host decides</B>, and can change any call until Next. Something went wrong? <B>Players → Adjust the scores</B> (it asks first).</>,
@@ -159,7 +176,7 @@ export function Rules() {
           <>Phone died, in the lobby or during the game? Join again with the same name and tap &ldquo;take my seat back&rdquo;. A screen left open through an update refreshes itself between questions, and the night carries on.</>,
         ]} />
       </Rule>
-      <Rule n="14" title="Your data">
+      <Rule n="16" title="Your data">
         <L items={[
           <><B>No accounts.</B> Each phone gets an anonymous sign-in, so the game knows it&rsquo;s the same phone. No email, no phone number.</>,
           <>A room keeps the names, faces and teams people chose, what the captains sent, and the scores. It&rsquo;s deleted the day after the game; a sign-in nobody has used for 30 days is deleted too.</>,

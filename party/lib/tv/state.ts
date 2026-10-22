@@ -2,7 +2,7 @@
    the screen and its clocks, what each captain sent, pending calls, pop-ups. The
    TV saves most of it on this laptop (see SAVED) so a reload carries on. */
 import type { Bank, Q } from "../engine";
-import type { MiniKey, Pub, Two } from "../game";
+import type { LatLon, MiniKey, Pub, Two } from "../game";
 import type { G, PKind } from "./rules";
 
 export const newState = () => ({
@@ -23,8 +23,9 @@ export const newState = () => ({
   qkeys: {} as Record<string, number>,                                        // real question id → the number the phones see
   scoreLog: [] as Two<number>[],                                              // the score after every change (lead changes, for the recap)
   typed: [null, null] as Two<string[] | null>,       // what each captain sent for the question on screen
-  drafts: [null, null] as Two<null | { k: string; texts: string[]; n: string; by?: string; seq?: number }>,   // ...and what each has typed but not sent (taken at time-up)
+  drafts: [null, null] as Two<null | { k: string; texts: string[]; n: string; pin?: LatLon | null; by?: string; seq?: number }>,   // ...and what each has typed (or pinned) but not sent (taken at time-up)
   guesses: [null, null] as Two<number | null>,       // Closest To Wins
+  pins: [null, null] as Two<LatLon | null>,          // Drop the Pin: each captain's pin, locked in
   ok: [null, null] as Two<boolean | null>,           // Flag / Map / Say verdicts, as they stand
   app: [null, null] as Two<boolean | null>,          // ...and what the app said first (the "App suggests" tag)
   sdBuzz: null as 0 | 1 | null, sdOut: [false, false] as Two<boolean>,

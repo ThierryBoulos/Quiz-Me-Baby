@@ -3,7 +3,9 @@
    row only the host can read (Supabase row-level security). */
 export type Team = { name: string; score: number; ll: { friend: boolean; dip: boolean; dbl: boolean } };
 export type Two<T> = [T, T];
-export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "battle";
+export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "battle";
+/* a spot on the earth (Drop the Pin), in degrees */
+export type LatLon = { lat: number; lon: number };
 export type Pub = {
   step: number;                   // bumps on every host move and screen change; host taps carry it so stale ones are refused
   screen: string;                 // roundIntro | ask | steal | answer | roundScore | sudden | final | miniIntro | miniQ | closestReveal | miniSummary | flag… | dish…
@@ -34,11 +36,17 @@ export type Pub = {
   contest?: { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number } | null;
   /* with a host: what the captain typed (never the answer), so the host's phone shows it the moment it lands */
   said?: Two<string[] | null>;
-  /* pictures coming up next (flags under their public/fx names, map ids), fetched ahead so they show at once */
-  preload?: { flags?: string[]; maps?: string[] };
+  /* pictures coming up next (flags under their public/fx names, map ids, landmark photos), fetched ahead so they show at once */
+  preload?: { flags?: string[]; maps?: string[]; pins?: string[]; world?: boolean };
   /* the end of the night: a short story of it, shown after the confetti */
   recap?: { margin: number; sudden: boolean; leadChanges: number; steals: Two<number>; minis: Two<number>; best?: { title: string; team: 0 | 1; legs: Two<number> } };
   flag?: string;                  // the flag's file name (flags/<flag>.svg)
+  /* Drop the Pin: the landmark's photo (pins/<photo>.jpg, a name that says nothing) and its credit; the name only
+     on a hard one (the photo alone wouldn't say what it is). At the reveal: where it is, both pins, how far off */
+  pin?: { photo: string; credit: string; licence: string; name?: string;
+    reveal?: { at: LatLon; name: string; place: string; pins: Two<LatLon | null>; km: Two<number | null> } };
+  /* Guess the Airport: its departures board (time, status, destination, flight, gate); at the reveal, its code and city */
+  airport?: { title: string; board: string[][]; code?: string; city?: string };
   dish?: { kind: string; ings: string[]; n: number; late?: 0 | 1 | null;   // late: the team whose 10 s to type ran out
     typeBy?: number | null };   // the buzzer's own clock to type it (the TV's time), while they haven't
   /* ok: the verdict that stands now; app: what the app said first (the "App suggests" tag) */
@@ -62,7 +70,7 @@ export type Pub = {
   tMini?: number;
   /* the house timers (Settings, on the TV), for the rules shown on every screen */
   timers?: { question: number; steal: number; friend: number; contest: number; sudden: number; mini: number; flag: number; map: number; say: number;
-    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number };
+    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number };
   paused?: boolean;          // the clock was paused: the question is hidden until it restarts
   lead?: 0 | 1;              // no host: the captain who starts and moves the night on (Team A's, or B's)
   nextBy?: string;           // no host: whose Start or Next the room is waiting for
@@ -83,11 +91,12 @@ export type Pub = {
 export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null> };
 
 /* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
-export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "battleLevel"];
+export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "battleLevel"];
 /* a mini-game can't be lost any more, with legs still to play: the same people choose — keep playing for fun, or stop here */
 export const DECIDED = "decided";
-export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Guess the Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me", battle: "Battle of the Captains" };
-export const T_CLOSEST = 60, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30;
+export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Guess the Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me",
+  pin: "Drop the Pin", airport: "Guess the Airport", battle: "Battle of the Captains" };
+export const T_CLOSEST = 60, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30, T_PIN = 45, T_AIRPORT = 30;
 export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
 /* no host: the other captain has this long to give a point the app called WRONG (a RIGHT always stands) */
 /* T_OVERRULE: no host, how long a captain has to answer the other captain's contest before the app's call stands */
@@ -116,5 +125,7 @@ export const iso = (name: string) => "\u2068" + name + "\u2069";
 /* Closest To Wins: how far a guess is from the answer, without the computer's rounding noise
    (361.6 − 281 is 80.60000000000002 to it: that's 80.6, and two guesses as far off are level) */
 export const offBy = (guess: number, answer: number) => Number(Math.abs(guess - answer).toPrecision(12));
+/* Drop the Pin: how far off, as people say it: "under 1 km", "14 km", "1,112 km" */
+export const showKm = (km: number) => (km < 1 ? "under 1 km" : `${Math.round(km).toLocaleString("en-GB")} km`);
 /* a number as people read it: 1,500,000 · 80.6 */
 export const showNum = (n: number) => n.toLocaleString("en-GB", { maximumFractionDigits: 6 });

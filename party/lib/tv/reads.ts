@@ -17,6 +17,8 @@ export function currentQ(s: TvState): G {
   if (sc === "sudden") return g.sdReady ? g.sd?.q : null;
   if (["miniQ", "closestReveal"].includes(sc)) return g.mini.qs[g.mini.i];
   if (["flagQ", "flagReveal"].includes(sc)) return g.flagGame.qs[g.flagGame.i];
+  if (["pinQ", "pinReveal"].includes(sc)) return g.pinGame.qs[g.pinGame.i];
+  if (["airportQ", "airportReveal"].includes(sc)) return g.airportGame.qs[g.airportGame.i];
   if (["mapQ", "mapReveal"].includes(sc)) return g.mapGame.qs[g.mapGame.i];
   if (["dishQ", "dishCheck"].includes(sc)) return g.dishGame.qs[g.dishGame.i];
   if (sc === "dishReveal") { const subs = g.dishGame.subs; return subs[subs.length - 1]?.q; }
@@ -27,7 +29,11 @@ export function currentQ(s: TvState): G {
   return null;
 }
 /* right if it matches the answer or any other answer that counts (see acceptFor) */
-export const matchQ = (texts: string[] | null, q: G) => (texts && q ? texts.some((t) => QMB.isMatch(t, q.answer, acceptFor(q))) : null);
+export const matchQ = (texts: string[] | null, q: G) => (texts && q ? texts.some((t) => QMB.isMatch(t, q.answer, acceptFor(q))
+  || (q.type === "airport" && !!bare(t) && QMB.isMatch(bare(t), q.answer, acceptFor(q)))) : null);
+/* Guess the Airport: "Changi airport", "Flughafen Zürich" are the name with a word every airport has */
+const AIRPORT_WORDS = /(?<!\p{L})(international|intl|airport|aeroport|aéroport|aeropuerto|aeroporto|flughafen|luchthaven|havalimanı|havalimani|lufthavn)(?!\p{L})/giu;
+const bare = (t: string) => t.replace(AIRPORT_WORDS, " ").replace(/\s+/g, " ").trim();
 /* the captain who moves the night on with no host: Team A's, or B's if A has none */
 export const leadOf = (members: Member[]): 0 | 1 => (members.some((m) => m.team === 0 && m.role === "captain") ? 0 : 1);
 export function turnOf(s: TvState): 0 | 1 {
@@ -48,6 +54,8 @@ export function closestW(s: TvState): W {
   const ans = Number(q.answer), da = offBy(a, ans), db = offBy(b, ans);
   return da === db ? "tie" : da < db ? 0 : 1;
 }
+/* Drop the Pin: the nearer pin takes it (the engine's own sum, so the reveal and the score agree) */
+export function pinW(s: TvState): W { const q = s.g.pinGame.qs[s.g.pinGame.i]; return q ? QMB.pinLeg(q, s.pins).w : "none"; }
 /* Say Same: ok = dodged the word. One team dodging alone takes it; otherwise a point each */
 export const sayWin = (s: TvState): W => { const [a, b] = s.ok; return a && !b ? 0 : b && !a ? 1 : "tie"; };
 export const okWin = (s: TvState): W => { const [a, b] = s.ok; return a && b ? "tie" : a ? 0 : b ? 1 : "none"; };
@@ -69,7 +77,7 @@ export function callsOf(s: TvState): Call[] {
     out.push({ id: "first", team: owner, text: said(s.typed[owner]), ok: !!res.correct, done: !!res.fresh, note: res.fresh ? "the first question" : undefined });
     /* a steal with the first team's own answer gave it back to them: one call, theirs */
     if (res.steal && !res.same) out.push({ id: "steal", team: th, text: said(s.typed[th]), ok: !!res.stolen, done: !!res.correct, note: res.fresh ? "a new question" : "steal" });
-  } else if (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal") {
+  } else if (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal") {
     for (const t of [0, 1] as const) out.push({ id: "t" + t, team: t, text: said(s.typed[t]), ok: !!s.ok[t] });
   } else if (sc === "dishReveal") {
     (s.legLog || []).forEach((e, i) => out.push({ id: "d" + i, team: e.team, text: e.text, ok: e.ok }));

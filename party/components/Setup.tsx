@@ -5,7 +5,7 @@ import { NO_PICKS, Picker, inLevels, pickSummary, type Picks } from "./Picker";
 import { getCustom } from "@/lib/custom";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
-  mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; custom?: Q[] } & Partial<Picks>;
+  mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; custom?: Q[] } & Partial<Picks>;
 /* Classic's MINI_GAMES (index.html), name and one line each */
 const MINIS = [
   ["closest", "Closest To Wins", "Seven numbers. Closest guess wins the leg."],
@@ -13,6 +13,8 @@ const MINIS = [
   ["saysame", "Don't Say the Same as Me", "Answer without matching the app's hidden word."],
   ["map", "Guess the Map", "A map, sixty seconds: what does it show?"],
   ["flag", "Guess the Flag", "Ten flags, fifteen seconds each: whose is it?"],
+  ["pin", "Drop the Pin", "A landmark's photo: drop a pin on the map where it is. Nearest pin wins."],
+  ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
   ["battle", "Battle of the Captains", "Ten each, captains only. Closes the night."]] as const;
 /* each picture game has its own levels, as in Classic; more than one can be on */
@@ -40,6 +42,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
   const [mapLevels, setMapLevels] = useState<string[]>(["easy", "medium", "hard"]);
   const [flagLevels, setFlagLevels] = useState<string[]>(["veasy", "easy", "medium", "hard"]);   // a mix, Very easy to Hard
   const [dishLevels, setDishLevels] = useState<string[]>(["c-medium", "d-medium"]);
+  const [pinLevels, setPinLevels] = useState<string[]>(["easy", "medium", "hard"]);
+  const [airportLevels, setAirportLevels] = useState<string[]>(["easy", "medium", "hard"]);
   const [note, setNote] = useState<string | null>(null);
   const [open, setOpen] = useState<"themes" | null>(null);
   /* the host's advanced options: hand-picked questions, a difficulty per theme */
@@ -47,16 +51,17 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
   const [picking, setPicking] = useState(false);
   useEffect(() => { if (isHost && picking && !full) void loadBank(code).then(setFull).catch(() => setNote("Couldn't load the questions. Try again.")); }, [isHost, picking, full, code]);
   useEffect(() => { void loadBank().then(setBank); }, []);
-  /* a level switched off in Setup takes its hand-picked flags, maps and dishes with it */
+  /* a level switched off in Setup takes its hand-picked flags, maps, dishes, landmarks and boards with it */
   useEffect(() => {
     if (!bank) return;
-    const lv = { map: mapLevels, flag: flagLevels, dish: dishLevels }, byId = new Map(bank.bank.map((q) => [q.id, q]));
+    const lv = { map: mapLevels, flag: flagLevels, dish: dishLevels, pin: pinLevels, airport: airportLevels }, byId = new Map(bank.bank.map((q) => [q.id, q]));
     const keep = (ids: string[]) => ids.filter((id) => { const q = byId.get(id); return !q || inLevels(q, lv); });
+    const keys = ["pickMap", "pickFlag", "pickDish", "pickPin", "pickAirport"] as const;
     setPicks((p) => {
-      const n = { ...p, pickMap: keep(p.pickMap), pickFlag: keep(p.pickFlag), pickDish: keep(p.pickDish) };
-      return n.pickMap.length === p.pickMap.length && n.pickFlag.length === p.pickFlag.length && n.pickDish.length === p.pickDish.length ? p : n;
+      const n = { ...p }; for (const k of keys) n[k] = keep(p[k]);
+      return keys.every((k) => n[k].length === p[k].length) ? p : n;
     });
-  }, [bank, mapLevels, flagLevels, dishLevels]);
+  }, [bank, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels]);
 
   /* themes that can field a question for each team at this difficulty */
   /* with no host, the questions only a person can judge (and "Know the Host") are left out */
@@ -87,7 +92,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
   const worth = (k: string) => (k === "battle" ? 2 * each : each);   // the Battle pays double
   const plan: { key: string; after: number }[] = QMB.planMinis(standard ? rounds : 0, (QMB.INTERLEAVED as string[]).filter((k) => miniKeys.includes(k)));
   const slot = (k: string) => k === "battle" ? "last" : standard ? (plan.find((p) => p.key === k) ? `after R${plan.find((p) => p.key === k)!.after + 1}` : "")
-    : ["1st", "2nd", "3rd", "4th", "5th", "6th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";
+    : ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";
   /* a level row: tap to add or drop a level; the last one can't be dropped */
   const LevelRow = ({ label, opts, value, set, tag }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string }) => (
     <div className="flex flex-wrap items-center gap-2 pl-1 pb-2" role="group" aria-label={label}>
@@ -180,6 +185,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
             </button>
             {on && k === "map" && <LevelRow label="Guess the Map level" opts={MAP_LEVELS} value={mapLevels} set={setMapLevels} />}
             {on && k === "flag" && <LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} />}
+            {on && k === "pin" && <LevelRow label="Drop the Pin level" opts={MAP_LEVELS} value={pinLevels} set={setPinLevels} />}
+            {on && k === "airport" && <LevelRow label="Guess the Airport level" opts={MAP_LEVELS} value={airportLevels} set={setAirportLevels} />}
             {on && k === "dish" && (<>
               <LevelRow label="Cocktail levels" tag="Cocktails" opts={DISH_LEVELS.c} value={dishLevels.filter((l) => l[0] === "c")}
                 set={(v) => setDishLevels([...v, ...dishLevels.filter((l) => l[0] === "d")])} />
@@ -201,10 +208,10 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
             {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
           </div>
         </div>)}
-      {picking && full && <Picker bank={full} themes={standard ? picked : []} minis={minis} difficulty={difficulty} levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels }} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
+      {picking && full && <Picker bank={full} themes={standard ? picked : []} minis={minis} difficulty={difficulty} levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels, pin: pinLevels, airport: airportLevels }} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
 
       <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy}
-        onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, custom: getCustom(),
+        onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, custom: getCustom(),
           ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
       {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
       {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}

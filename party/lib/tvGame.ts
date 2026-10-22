@@ -13,7 +13,7 @@ const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
 import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
-import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, dishTotal, inScreen, levels, miniOf, miniState,
+import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, type Action, type G, type PKind, type W } from "./tv/rules";
 import { callsOf, closestW, currentQ, leadOf, matchQ, okWin, sayWin, turnOf } from "./tv/reads";
 import { buildView, qk } from "./tv/view";
@@ -56,7 +56,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const bank = st.current.bank!;
     /* sudden death is typed and checked fast: never a question only a person can judge, host or not */
     const deal = QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => getSettings().noRepeat, suddenOk: (q: Q) => !hostOnly(q),
-      ok: { map: (q: G) => q.type === "map", flag: (q: G) => q.type === "flag", dish: (q: G) => q.type === "dish" } });
+      ok: { map: (q: G) => q.type === "map", flag: (q: G) => q.type === "flag", dish: (q: G) => q.type === "dish",
+        pin: (q: G) => q.type === "pin" && Number.isFinite(q.lat) && Number.isFinite(q.lon) && !!q.photo,
+        airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0 } });
     return { deal, settings: seat() };
   }, [used]);
 
@@ -120,7 +122,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.exit) { localStorage.removeItem(saveKey); lastSave.current = ""; }
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
+            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
           if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
         }
@@ -187,7 +189,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const was = s.screen;
         s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now; s.contest = null; s.contested = [];
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
-        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; }
+        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; }
         if (f.go === "dishQ") s.legLog = [];
         if (f.go === "sudden" || f.go === "battleTie") {
           const n = (f.go === "sudden" ? s.g.sd?.n : s.g.battle?.tb?.n) || 0;
@@ -199,7 +201,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         }
         const g = s.g;
         const secs = f.go === "ask" ? T().tQuestion : f.go === "steal" ? T().tSteal : f.go === "miniQ" ? T().tMini : f.go === "flagQ" ? T().tFlag
-          : f.go === "mapQ" ? T().tMap : f.go === "auctionRun" ? T().tAuction
+          : f.go === "mapQ" ? T().tMap : f.go === "auctionRun" ? T().tAuction : f.go === "pinQ" ? T().tPin : f.go === "airportQ" ? T().tAirport
           : f.go === "dishQ" ? dishTotal(g.dishGame.qs[g.dishGame.i])
           : f.go === "sayQ" ? T().tSay : f.go === "battleQ" ? (s.nohost ? T().tBattleTyped : T().tBattleHost)
           : ((f.go === "sudden" && g.sdReady) || f.go === "battleTie") && s.nohost ? T().tSudden : 0;
@@ -209,6 +211,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (f.go === "miniQ") applyFx([{ used: g.mini.qs[g.mini.i] }]);
         if (f.go === "mapQ") applyFx([{ used: g.mapGame.qs[g.mapGame.i] }]);
         if (f.go === "sayQ") applyFx([{ used: g.saySame.qs[g.saySame.i] }]);
+        if (f.go === "pinQ") applyFx([{ used: g.pinGame.qs[g.pinGame.i] }]);
+        if (f.go === "airportQ") applyFx([{ used: g.airportGame.qs[g.airportGame.i] }]);
       }
       if (f.finalize) { s.contest = null; s.screen = "final"; s.deadline = null; s.autoAt = null; s.pending = null; if (isTvRef.current) playSound("win"); }
     }
@@ -235,8 +239,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     };
     if (move.type === "auction/nextLeg" && ask("auction")) { narrate(); return; }
     applyFx(QMB.play(s.g, move, env()));
-    if (/^(closest\/win|say\/verdict|flag\/verdict|map\/verdict|dish\/next)$/.test(move.type)) {
-      const k: MiniKey = move.type.startsWith("closest") ? "closest" : move.type.startsWith("say") ? "saysame" : move.type.startsWith("flag") ? "flag" : move.type.startsWith("map") ? "map" : "dish";
+    if (/^(closest\/win|say\/verdict|flag\/verdict|map\/verdict|dish\/next|pin\/settle|airport\/verdict)$/.test(move.type)) {
+      const k: MiniKey = move.type.startsWith("closest") ? "closest" : move.type.startsWith("say") ? "saysame" : move.type.startsWith("flag") ? "flag" : move.type.startsWith("map") ? "map"
+        : move.type.startsWith("pin") ? "pin" : move.type.startsWith("airport") ? "airport" : "dish";
       if (ask(k)) { narrate(); return; }
     }
     /* level at the end: stop and ask before a tie-breaker (see TIES); the Battle too, unless the host just asked for another */
@@ -244,7 +249,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const level = (screen: string) => {      // the screen itself says "Level at N each"
       s.screen = screen; s.deadline = null; s.left = 0; s.total = 0; s.timeUp = false; s.paused = false; s.waitSince = Date.now(); s.toast = null;
     };
-    if (tie && /^(closest\/win|say\/verdict|flag\/verdict)$/.test(move.type)) { const m = miniState(g, tie[1].key); if (m && m.i >= m.base) level(tie[0]); }
+    if (tie && /^(closest\/win|say\/verdict|flag\/verdict|pin\/settle|airport\/verdict)$/.test(move.type)) { const m = miniState(g, tie[1].key); if (m && m.i >= m.base) level(tie[0]); }
     if (s.screen === "battleTie" && (was === "battleQ" || (move.type === "battle/tbWin" && !move.byHost))) level("battleLevel");
     narrate();
     /* no host: the table's calls that a host would make, made at once */
@@ -259,11 +264,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const reveal = useCallback(() => {
     const s = st.current, g = s.g;
     if (s.screen === "miniQ") s.screen = "closestReveal";
-    else if (s.screen === "flagQ") {
-      const q = g.flagGame.qs[g.flagGame.i];
+    else if (s.screen === "pinQ") s.screen = "pinReveal";
+    else if (s.screen === "flagQ" || s.screen === "airportQ") {
+      const flag = s.screen === "flagQ", q = flag ? g.flagGame.qs[g.flagGame.i] : g.airportGame.qs[g.airportGame.i];
       s.ok = [0, 1].map((t) => !!matchQ(s.typed[t], q)) as Two<boolean>;
       s.app = [...s.ok] as Two<boolean>;
-      s.screen = "flagReveal";
+      s.screen = flag ? "flagReveal" : "airportReveal";
     } else if (s.screen === "sayQ") {
       /* dodged = wrote a real answer to the prompt (one on its list, typos allowed), and it isn't the
          app's word. Anything else — nothing, gibberish, an answer the list doesn't have — counts as
@@ -337,7 +343,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!res) return;
       play({ type: "round/rule", line: id, v });
       if (id === "first" && !v && !res.steal && !res.fresh) { s.step++; play({ type: "round/freshSteal" }); }
-    } else if ((sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal") && /^t[01]$/.test(id)) {
+    } else if ((sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal") && /^t[01]$/.test(id)) {
       const t = Number(id[1]) as 0 | 1;
       s.ok[t] = v;
       s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[t].name)} ${verdictWord(sc, v)}.` };
@@ -404,7 +410,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const againGame = () => {
     const s = st.current, room = ctx.current.room;
     Object.assign(s, { g: null, screen: "", step: 1, pending: null, lifeline: null, autoAt: null, deadline: null, left: 0, timeUp: false, paused: false,
-      typed: [null, null], guesses: [null, null], ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
+      typed: [null, null], guesses: [null, null], pins: [null, null], ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
     try { localStorage.removeItem(saveKey); } catch { /* */ }
     lastSave.current = "";
     setPub(null);
@@ -446,7 +452,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     else if (t === "ui/reveal") reveal();
     /* a ruling: v sets it (RIGHT/WRONG, DODGED IT/SAID IT); without v it flips */
-    else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk") { const i = move.t === 1 ? 1 : 0; s.ok[i] = typeof move.v === "boolean" ? move.v : !s.ok[i]; }
+    else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk" || t === "ui/airportOk") { const i = move.t === 1 ? 1 : 0; s.ok[i] = typeof move.v === "boolean" ? move.v : !s.ok[i]; }
     else if (t === "ui/exit") exitGame();
     else if (t === "ui/again") againGame();
     else if (t === "ui/startCall") {
@@ -497,6 +503,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else if (s.screen === "flagReveal") play({ type: "flag/verdict", w: okW() });
       else if (s.screen === "mapReveal") play({ type: "map/verdict", w: okW() });
       else if (s.screen === "sayReveal") play({ type: "say/verdict", w: sayW() });
+      else if (s.screen === "pinReveal") play({ type: "pin/settle", pins: [s.pins[0], s.pins[1]] });
+      else if (s.screen === "airportReveal") play({ type: "airport/verdict", w: okW() });
     }
     else if (t === "ui/sdRight" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, true)) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: s.sdBuzz } : { type: "sudden/win", w: s.sdBuzz });
     else if (t === "ui/sdWrong" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, false)) {
@@ -597,7 +605,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       check("battle", current());
       return true;
     }
-    if (sc === "flagQ" || sc === "mapQ" || sc === "sayQ") {
+    if (sc === "pinQ") {
+      /* Drop the Pin: one pin each, locked in; both in, and it's the reveal */
+      const pin = asPin(p.pin);
+      if (s.pins[team]) return `${nm(team)}'s pin is already in.`;
+      if (!pin) return "That pin didn't come through. Drop it again.";
+      s.pins[team] = pin;
+      if (s.pins[0] && s.pins[1]) reveal();
+      return true;
+    }
+    if (sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ") {
       if (!texts.length) return false;
       if (s.typed[team]) return `${nm(team)}'s answer is already in.`;
       s.typed[team] = texts.slice(0, 1);
@@ -617,11 +634,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const s = st.current, d = s.drafts[team];
     s.drafts[team] = null;
     if (!d || d.k !== draftKey()) return false;
-    const mini = s.screen === "miniQ";
-    if (mini ? !d.n : !d.texts.length) return false;
-    if (captainInput("answer", team, mini ? { n: d.n } : { texts: d.texts }) !== true) return false;
+    const mini = s.screen === "miniQ", pin = s.screen === "pinQ";
+    if (pin ? !d.pin : mini ? !d.n : !d.texts.length) return false;
+    if (captainInput("answer", team, pin ? { pin: d.pin } : mini ? { n: d.n } : { texts: d.texts }) !== true) return false;
     /* (not what it says: on a standard question the other team may be about to steal) */
-    s.toast = { id: ++s.toastN, text: `Time's up: what ${iso(s.g.teams[team].name)} typed counts as sent.` };
+    s.toast = { id: ++s.toastN, text: pin ? `Time's up: ${iso(s.g.teams[team].name)}'s pin counts where it is.` : `Time's up: what ${iso(s.g.teams[team].name)} typed counts as sent.` };
     return true;
   }, [captainInput, draftKey]);
 
@@ -705,7 +722,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const seq = Number(a.payload.seq) || 0, cur = s.drafts[t];
         if (cur && cur.by === a.user_id && cur.k === a.payload.k && (cur.seq || 0) > seq) return;
         const texts = (Array.isArray(a.payload.texts) ? a.payload.texts : []).map((x: unknown) => String(x ?? "").trim().slice(0, 80)).filter(Boolean);
-        s.drafts[t] = { k: String(a.payload.k), texts: texts.slice(0, 2), n: String(a.payload.n ?? "").trim().slice(0, 40), by: a.user_id, seq };
+        s.drafts[t] = { k: String(a.payload.k), texts: texts.slice(0, 2), n: String(a.payload.n ?? "").trim().slice(0, 40), pin: asPin(a.payload.pin), by: a.user_id, seq };
       }
       return;
     }
@@ -756,7 +773,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         /* maps, flags and dishes each have their own levels, set with the mini-games (as in Classic) */
         minis, mapLevels: levels(cfgIn.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), flagLevels: levels(cfgIn.flagLevels, QMB.FLAG_LEVEL_KEYS, ["veasy", "easy", "medium", "hard"]),
         dishLevels: levels(cfgIn.dishLevels, QMB.DISH_LEVEL_KEYS, ["c-medium", "d-medium"]), teamA: team(0), teamB: team(1), picks, themeDiff,
-        pickClosest: hand("pickClosest"), pickAuction: hand("pickAuction"), pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish") };
+        pinLevels: levels(cfgIn.pinLevels, QMB.PIN_ORDER, QMB.PIN_ORDER), airportLevels: levels(cfgIn.airportLevels, QMB.AIRPORT_ORDER, QMB.AIRPORT_ORDER),
+        pickClosest: hand("pickClosest"), pickAuction: hand("pickAuction"), pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish"),
+        pickPin: hand("pickPin"), pickAirport: hand("pickAirport") };
       const g = env().deal.buildGame(cfg);
       /* Party plays Don't Say the Same as Me best of 7 (the coin-flip prompt stays last) and
          Guess the Cocktail or Dish best of 5. The engine deals Classic's lengths; the legs left
@@ -921,7 +940,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (s.pending) return s.pending.team !== t;                                   // the other captain rules
     if (s.contest && s.nohost) return other(s.contest.by) === t;                  // the other captain decides a contest
     if (sc === "ask" || sc === "steal") return turnTeam() === t;
-    if (["miniQ", "flagQ", "mapQ", "sayQ", "dishQ", "sudden", "battleTie"].includes(sc)) return true;
+    if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "dishQ", "sudden", "battleTie"].includes(sc)) return true;
     if (sc === "battleQ") return g.battle?.cap === t;
     if (sc === "auctionBid") return g.auction?.turn === t;
     if (sc === "auctionRun") return s.nohost && g.auction?.by != null && g.auction.by !== t;   // the counter
@@ -1070,7 +1089,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };
         if (sc === "ask" || sc === "steal") { const t = turnTeam(); if (!s.typed[t] && !s.pending) took(t); }
-        else if (["miniQ", "flagQ", "mapQ", "sayQ"].includes(sc)) for (const t of [0, 1] as const) { if (sc === "miniQ" ? s.guesses[t] == null : !s.typed[t]) took(t); }
+        else if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ"].includes(sc)) for (const t of [0, 1] as const) { if (sc === "miniQ" ? s.guesses[t] == null : sc === "pinQ" ? !s.pins[t] : !s.typed[t]) took(t); }
         else if (sc === "battleQ" && s.nohost && !s.pending) took(g.battle.cap);
         else if (sc === "dishQ" && g.dishGame.leg.buzz != null && !s.typed[g.dishGame.leg.buzz] && !s.pending) took(g.dishGame.leg.buzz);
       }
@@ -1078,7 +1097,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         s.deadline = null; s.step++; changed = true;
         if (s.screen === "ask" || s.screen === "steal") { say("timeup", { t: turnTeam() }); if (!s.nohost) narrate(); }
-        if (["miniQ", "flagQ", "mapQ", "sayQ"].includes(s.screen)) reveal();
+        if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ"].includes(s.screen)) reveal();
         else if (s.screen === "battleQ" && s.nohost) { s.toast = { id: ++s.toastN, text: "Time's up." }; play({ type: "battle/mark", got: false }); }
         else if (s.screen === "battleTie" && s.nohost) play({ type: "battle/tbWin", w: "none" });
         else if (s.screen === "dishQ") play({ type: "dish/timeUp" });

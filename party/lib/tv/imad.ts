@@ -41,7 +41,7 @@ export function imadNarrate(s: TvState) {
   const sc = s.screen, rd = g.rounds[g.r];
   const opener = () => (g.hostHello ? [] : ((g.hostHello = true), ["start"]));
   if (sc === "roundIntro" && rd && !g.hostOnce?.["r" + g.r]) imadOnce(s, "r" + g.r, [...opener(), "round"], { t: QMB.seatTeam(g, rd, 0, seatOf(g)), theme: rd.theme, n: g.r + 1, N: g.rounds.length });
-  const intro = ({ miniIntro: "closest", auctionIntro: "auction", sayIntro: "saysame", mapIntro: "map", flagIntro: "flag", dishIntro: "dish", battleIntro: "battle" } as Record<string, string>)[sc];
+  const intro = ({ miniIntro: "closest", auctionIntro: "auction", sayIntro: "saysame", mapIntro: "map", flagIntro: "flag", pinIntro: "pin", airportIntro: "airport", dishIntro: "dish", battleIntro: "battle" } as Record<string, string>)[sc];
   if (intro && !g.hostOnce?.["mi:" + intro]) imadOnce(s, "mi:" + intro, [...opener(), "mini_" + intro]);
   if (/Summary$|^auctionResult$/.test(sc)) {
     const m = sc === "auctionResult" ? g.auction : sc === "battleSummary" ? g.battle : miniState(g, miniOf(sc));

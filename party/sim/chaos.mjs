@@ -9,7 +9,7 @@ await build({ entryPoints: [join(here, "night.jsx")], outfile: out, bundle: true
   define: { "process.env.NEXT_PUBLIC_BUILD": '"sim"' },
   plugins: [{ name: "fake-supabase", setup(b) { b.onResolve({ filter: /^(\.{1,2}\/)+(lib\/)?supabase$|^@\/lib\/supabase$/ }, () => ({ path: join(here, "fakeSupabase.js") })); } }] });
 const N = Number(process.argv[2] || 24);
-const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "battle"];
+const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "battle", "pin", "airport"];
 let bad = 0;
 const reasons = {}, silent = {};
 for (let seed = 100; seed < 100 + N; seed++) {

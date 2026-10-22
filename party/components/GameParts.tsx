@@ -5,7 +5,8 @@
    the mini-game intro with its rules. One look everywhere. */
 import { useEffect, type ReactNode } from "react";
 import { preloadMap } from "./MapView";
-import { DISH_STEP, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_SAY, type Pub, type Two } from "@/lib/game";
+import { preloadWorld, type Mark } from "./PinMap";
+import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type Pub, type Two } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -89,6 +90,55 @@ export function ScoreBoard({ pub, w, win, label, size }: { pub: Pub; w: Two<numb
         {col(0)}{col(1)}
         <div className="display text-[var(--color-ink-3)] order-2" style={{ fontSize: tv ? 70 : 36 }}>–</div>
       </div>
+    </div>);
+}
+
+/* ---- Drop the Pin: the landmark's photo (our own copy, under a name that says nothing), and whose photo it is ---- */
+export function PinPhoto({ pin, h, small, credit }: { pin?: Pub["pin"]; h: number; small?: boolean; credit?: boolean }) {
+  if (!pin) return null;
+  return (
+    <figure className="flex flex-col items-center gap-1 m-0">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/pins/${pin.photo}${small ? "-s" : ""}.jpg`} alt="The landmark" className="pin-photo" style={{ maxHeight: h }} draggable={false} />
+      {credit && <figcaption className="pin-credit">Photo: {pin.credit} · {pin.licence} · Wikimedia Commons</figcaption>}
+    </figure>);
+}
+
+/* the reveal on the map: where it is (the landmark's name on it), and each team's pin with how far off */
+export const TEAM_HEX = ["#31c9f7", "#ff4d82"] as const;   // --color-a, --color-b (a canvas can't read CSS variables)
+export function pinMarks(pub: Pub): Mark[] {
+  const R = pub.pin?.reveal;
+  if (!R) return [];
+  const out: Mark[] = [{ at: R.at, kind: "truth", color: "#F5C518", label: R.name }];
+  ([0, 1] as const).forEach((t) => { const p = R.pins[t], km = R.km[t]; if (p) out.push({ at: p, kind: "pin", color: TEAM_HEX[t], label: `${pub.teams[t].name.replace(/[\u2068\u2069]/g, "")} · ${km == null ? "" : showKm(km)}` }); });
+  return out;
+}
+
+/* ---- Guess the Airport: a departures board, drawn (not a photo): time, where to, the flight, the gate, its status ---- */
+/* the status's colour, whatever the language: cancelled red, delayed amber, boarding green */
+const TONE: [RegExp, string][] = [
+  [/cancel|annul|ακυρ|iptal|geannuleerd|ملغ|欠航/i, "#ff5566"],
+  [/delay|retras|atras|retard|καθυστ|gecik|vertraag|verspät|متأخر|遅延/i, "#ffb020"],
+  [/board|embar|instap|biniş|son çağrı|επιβίβ|صعود|搭乗|última|last call|gate offen/i, "#3ddc97"],
+];
+const tone = (st: string) => TONE.find(([r]) => r.test(st))?.[1] || "#ffd25a";
+export function Board({ air, size }: { air?: Pub["airport"]; size: "tv" | "phone" | "small" }) {
+  if (!air) return null;
+  const tv = size === "tv", fs = tv ? 21 : size === "small" ? 11 : 13;
+  return (
+    <div className="board" style={{ fontSize: fs }} role="table" aria-label="Departures board">
+      <div className="board-title" style={{ fontSize: fs * 1.25 }}>
+        <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg>
+        <bdi>{air.title}</bdi>
+      </div>
+      {air.board.map((r, i) => (
+        <div key={i} className={"board-row " + (tv ? "tv" : "")} role="row">
+          <span className="b-time" role="cell">{r[0]}</span>
+          <span className="b-dest" role="cell"><bdi>{r[2]}</bdi></span>
+          <span className="b-flight" role="cell">{r[3]}</span>
+          {tv && <span className="b-gate" role="cell">{r[4]}</span>}
+          <span className="b-status" role="cell" style={{ color: tone(r[1]) }}><bdi>{r[1]}</bdi></span>
+        </div>))}
     </div>);
 }
 
@@ -250,6 +300,16 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Both captains type whose flag it is, at the same time." },
       { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
       { text: `Best of ${n} takes ${pts} points. ${level}` }];
+    case "pin": return [
+      { text: `A photo of a landmark goes up. ${sec(t?.pin, T_PIN)}. On the hard ones its name comes too: the trick is finding it.` },
+      { text: "Both captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better." },
+      { text: "The nearer pin takes the leg, by the kilometre. The same distance? A point each. No pin? No point." },
+      { text: `Best of ${n} takes ${pts} points. ${level}` }];
+    case "airport": return [
+      { text: `A departures board goes up: where its flights go, the airlines, the language on it. ${sec(t?.airport, T_AIRPORT)}.` },
+      { text: "Both captains type which airport it is, at the same time. The city is enough, except where it has more than one: then name the airport (Heathrow, not London)." },
+      { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
+      { text: `Best of ${n} takes ${pts} points. ${level}` }];
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },
@@ -304,6 +364,8 @@ export function usePreload(pub: Pub | null) {
     const P = pub?.preload;
     P?.flags?.forEach((f) => { const i = new Image(); i.src = `/fx/${f}.svg`; });
     P?.maps?.forEach((m) => preloadMap(m));
+    P?.pins?.forEach((f) => { for (const v of ["", "-s"]) { const i = new Image(); i.src = `/pins/${f}${v}.jpg`; } });
+    if (P?.world) preloadWorld();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 }

@@ -5,7 +5,7 @@ import { getSettings } from "../settings";
 import type { Member } from "../room";
 import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two } from "../game";
 import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
-import { callsOf, closestW, currentQ, leadOf, matchQ, okWin, sayWin, seatOf } from "./reads";
+import { callsOf, closestW, currentQ, leadOf, matchQ, okWin, pinW, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
 import type { TvState } from "./state";
 
@@ -23,7 +23,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     /* names go out isolated, so a right-to-left (Arabic) name can't scramble the sentence it lands in */
     teams: g.teams.map((t: G) => ({ name: iso(t.name), score: t.score, ll: { ...t.ll } })),
     deadline: s.deadline, left: s.left, timeUp: s.timeUp, lifeline: s.lifeline, toast: s.toast, winner: g.winner ?? null,
-    sent: [!!s.typed[0] || s.guesses[0] != null, !!s.typed[1] || s.guesses[1] != null],
+    sent: [!!s.typed[0] || s.guesses[0] != null || !!s.pins?.[0], !!s.typed[1] || s.guesses[1] != null || !!s.pins?.[1]],
     pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
     autoAt: s.autoAt, paused: s.paused, lead: leadOf(mem), imad: s.imad || undefined, flags: s.flags.slice(-30), tvAway: !!s.tvAway,
   };
@@ -32,7 +32,10 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   /* the next pictures, fetched ahead on every screen (the TV takes the whole deck at the intro) */
   { const fg = g.flagGame, mg = g.mapGame, sc = s.screen, all = /Intro$/.test(sc);
     if (fg && /^flag/.test(sc)) p.preload = { flags: fg.qs.slice(fg.i, all ? undefined : fg.i + 3).map((x: G) => x.flag).filter(Boolean) };
-    if (mg && /^map/.test(sc)) p.preload = { maps: mg.qs.slice(mg.i, all ? undefined : mg.i + 2).map((x: G) => x.id) }; }
+    if (mg && /^map/.test(sc)) p.preload = { maps: mg.qs.slice(mg.i, all ? undefined : mg.i + 2).map((x: G) => x.id) };
+    /* Drop the Pin: the photos, and the world map itself (big: from the intro on) */
+    const pg = g.pinGame;
+    if (pg && /^pin/.test(sc)) p.preload = { pins: pg.qs.slice(pg.i, all ? undefined : pg.i + 2).map((x: G) => x.photo).filter(Boolean), world: true }; }
   /* every change of score, for the recap's lead changes */
   { const L = s.scoreLog, now: Two<number> = [g.teams[0].score, g.teams[1].score], last = L[L.length - 1];
     if (!last || last[0] !== now[0] || last[1] !== now[1]) L.push(now); }
@@ -52,7 +55,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   { const t = getSettings();
     p.tMini = t.tMini;
     p.timers = { question: t.tQuestion, steal: t.tSteal, friend: t.tFriend, contest: t.tContest, sudden: t.tSudden, mini: t.tMini, flag: t.tFlag, map: t.tMap, say: t.tSay,
-      auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped }; }
+      auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport }; }
   /* no host: whose Start or Next the room is waiting for */
   if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
     && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {
@@ -117,7 +120,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (/Summary$/.test(s.screen) && m.verdict) p.summary = { wins: [...m.wins] as Two<number>, winner: m.verdict.winner, needsHost: m.verdict.needsHost, note: m.verdict.note || "", award: m.award };
   }
   /* a reveal's leg counts in the tracker straight away (and moves with the ruling until Next) */
-  const prov: W | null = s.screen === "closestReveal" ? closestW(s) : s.screen === "flagReveal" || s.screen === "mapReveal" ? okWin(s) : s.screen === "sayReveal" ? sayWin(s) : null;
+  const prov: W | null = s.screen === "closestReveal" ? closestW(s) : s.screen === "flagReveal" || s.screen === "mapReveal" || s.screen === "airportReveal" ? okWin(s)
+    : s.screen === "sayReveal" ? sayWin(s) : s.screen === "pinReveal" ? pinW(s) : null;
   if (prov != null && p.mini) { if (prov === "tie") { p.mini.wins[0]++; p.mini.wins[1]++; } else if (prov === 0 || prov === 1) p.mini.wins[prov]++; }
   if (s.screen === "miniQ" || s.screen === "sayQ") p.question = q?.question;
   if (s.screen === "sayReveal" && q) { p.question = q.question; p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: sayWin(s), offList: s.offList }; }
@@ -127,6 +131,21 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   }
   if ((s.screen === "flagQ" || s.screen === "flagReveal") && q) p.flag = q.flag;
   if (s.screen === "flagReveal" && q) p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) };
+  /* Drop the Pin: the photo (and on a hard one, the name); at the reveal, where it is and both pins */
+  if ((s.screen === "pinQ" || s.screen === "pinReveal") && q) {
+    p.pin = { photo: q.photo, credit: q.credit, licence: q.licence, name: q.level === "hard" ? q.answer : undefined };
+    if (s.screen === "pinReveal") {
+      const L = QMB.pinLeg(q, s.pins);
+      p.pin.reveal = { at: { lat: q.lat, lon: q.lon }, name: q.answer, place: q.place, pins: [s.pins[0], s.pins[1]], km: L.km };
+      p.reveal = { answer: q.answer, w: L.w, notes: q.place };
+    }
+  }
+  /* Guess the Airport: the board (never its name, nor its code: they're the answer); at the reveal, all of it */
+  if ((s.screen === "airportQ" || s.screen === "airportReveal") && q) {
+    const reveal = s.screen === "airportReveal";
+    p.airport = { title: q.boardTitle, board: q.board, code: reveal ? q.code : undefined, city: reveal ? q.city : undefined };
+    if (reveal) p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s), notes: q.notes };
+  }
   if ((s.screen === "mapQ" || s.screen === "mapReveal") && q) {
     const reveal = s.screen === "mapReveal";
     p.map = { id: q.id, reveal, hint: (g.mapGame.hints || {})[q.id] ? "on" : undefined, title: reveal ? q.question : undefined, notes: reveal ? q.notes : undefined };

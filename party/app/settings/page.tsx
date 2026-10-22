@@ -24,6 +24,8 @@ const MINI_TIMERS: Timer[] = [
   ["tSay", "Don't Say the Same as Me", [10, 15, 20, 30, 45]],
   ["tMap", "Guess the Map", [30, 45, 60, 90, 120]],
   ["tFlag", "Guess the Flag", [10, 15, 20, 30]],
+  ["tPin", "Drop the Pin", [30, 45, 60, 90]],
+  ["tAirport", "Guess the Airport", [20, 30, 45, 60]],
   ["tDishStep", "Guess the Cocktail or Dish: a new ingredient every", [2, 3, 4, 5]],
   ["tDishType", "Guess the Cocktail or Dish: time to type after a buzz", [5, 10, 15, 20]],
   ["tBattleHost", "Battle, with a host: per question (out loud)", [5, 7, 10, 15]],

@@ -15,7 +15,7 @@ await build({ entryPoints: [join(here, "night.jsx")], outfile: out, bundle: true
   define: { "process.env.NEXT_PUBLIC_BUILD": '"sim"' },
   plugins: [{ name: "fake-supabase", setup(b) { b.onResolve({ filter: /^(\.{1,2}\/)+(lib\/)?supabase$|^@\/lib\/supabase$/ }, () => ({ path: join(here, "fakeSupabase.js") })); } }] });
 
-const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "battle"], DEF = ["flag", "closest", "auction", "battle"];
+const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "pin", "airport", "battle"], DEF = ["flag", "closest", "auction", "battle"];
 /* the TV switched off at many moments of the night: every 37 s, for 20 s to 5 min */
 const offs = (n, len) => Array.from({ length: n }, (_, i) => ({ at: 15 + i * 37, type: "tvOff", for: len[i % len.length] }));
 const W = [

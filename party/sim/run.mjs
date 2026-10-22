@@ -43,6 +43,10 @@ const NIGHTS = [
   { seed: 12, minis: ["dish", "saysame", "map"], host: true, reload: 25 },
   /* the TV's screen sleeps during a question: the answer sent meanwhile counts, a Resume can't start the clock */
   { seed: 13, minis: DEFAULT, sleep: 2 },
+  /* 22 Oct: Drop the Pin and Guess the Airport, with and without a host, and with slow captains (pins taken at time-up) */
+  { seed: 14, minis: ["pin", "airport", "battle"] },
+  { seed: 15, minis: ["closest", "pin", "airport"], host: true, rounds: 4 },
+  { seed: 16, minis: ["pin", "airport"], slow: 0.97 },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

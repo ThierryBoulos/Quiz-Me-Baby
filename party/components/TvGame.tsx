@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import type { Pub } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
+import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
-import { AskHead, battleNeeds, Confetti, decidedCall, decidedHead, decidedSub, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
-import { DECIDED, offBy, showNum, TIE_SCREENS } from "@/lib/game";
+import { AskHead, battleNeeds, Board, Confetti, decidedCall, decidedHead, decidedSub, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
+import { DECIDED, offBy, showKm, showNum, TIE_SCREENS } from "@/lib/game";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
@@ -180,6 +181,51 @@ function TvMini({ pub }: { pub: Pub }) {
       <TeamRows pub={pub} empty="No answer" />
     </>)}
   </>);
+  /* Drop the Pin: the photo while they place their pins; then the map, flying in to the spot */
+  if (sc === "pinQ" && pub.pin) return (
+    <div className="flex gap-12 items-center w-full justify-center">
+      <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={560} credit /></div>
+      <div className="w-[360px] flex flex-col items-center gap-5">
+        <div className="display text-44" style={{ color: "var(--color-gold)" }}>Where is this?</div>
+        {pub.pin.name && <div className="display text-40 leading-tight">{pub.pin.name}</div>}
+        <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
+        <div className="flex flex-col items-center gap-1" role="status">{[0, 1].map((t) => (
+          <span key={t} className="font-bold" style={{ fontSize: 22, color: pub.sent?.[t] ? tc(t as 0 | 1) : "var(--color-ink-3)" }}>{T[t].name}: {pub.sent?.[t] ? "pin in" : "placing…"}</span>))}</div>
+      </div>
+    </div>);
+  if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (
+    <div className="flex gap-10 items-center w-full">
+      <div className="flex-1 min-w-0"><PinMap marks={pinMarks(pub)} fly height={640} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
+      <div className="w-[380px] flex flex-col items-center gap-3 pb-10">
+        <div className="eyebrow text-16">It&rsquo;s here</div>
+        <div className="display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.name}</div>
+        <div className="text-22 text-[var(--color-ink-2)] -mt-1">{R.place}</div>
+        {[0, 1].map((t) => (
+          <div key={t} className="flex flex-col items-center" style={{ opacity: w === t || w === "tie" ? 1 : 0.6 }}>
+            <div className="display text-22" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
+            <div className="display text-40">{R.pins[t] ? showKm(R.km[t] ?? 0) : "No pin"}{R.pins[t] && <span className="text-22 text-[var(--color-ink-2)]"> off</span>}</div>
+          </div>))}
+        <div className="display text-36" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : "No point"}</div>
+      </div>
+    </div>); }
+  /* Guess the Airport: the board, then its name */
+  if ((sc === "airportQ" || sc === "airportReveal") && pub.airport) return (
+    <div className="flex gap-10 items-center w-full">
+      <div className="flex-1 min-w-0"><Board air={pub.airport} size="tv" /></div>
+      <div className="w-[380px] flex flex-col items-center gap-4">
+        {sc === "airportQ" ? (<>
+          <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which airport?</div>
+          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
+          <Sent pub={pub} />
+        </>) : (<>
+          <div className="eyebrow text-16">The airport</div>
+          <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
+          {pub.airport.code && <div className="text-24"><b>{pub.airport.code}</b> · {pub.airport.city}</div>}
+          {pub.reveal?.notes && <div className="text-16 text-[var(--color-ink-2)] leading-snug text-left">{pub.reveal.notes}</div>}
+          <TeamRows pub={pub} empty="No answer" small />
+        </>)}
+      </div>
+    </div>);
   if ((sc === "dishQ" || sc === "dishReveal") && pub.dish) {
     const long = pub.dish.n > 8;
     return (

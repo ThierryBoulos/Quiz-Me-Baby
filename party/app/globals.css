@@ -367,3 +367,26 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .dock-group { position: sticky; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20; }
 /* a docked button that is off still covers what scrolls under it: solid and dimmed, not see-through */
 .dock:disabled { opacity: 1; background: #3b3527; color: rgba(255,255,255,.45); box-shadow: 0 -18px 30px -6px var(--color-bg); }
+
+/* Drop the Pin: the world map (components/PinMap.tsx) and the landmark's photo */
+.pinmap { position: relative; width: 100%; border-radius: 16px; overflow: hidden; background: #0B1030; border: 1px solid rgba(255,255,255,.10); }
+.pinmap .pm-stage { position: absolute; inset: 0; }
+.pinmap canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; outline: none; }
+.pinmap canvas:focus-visible { box-shadow: inset 0 0 0 3px var(--color-gold); }
+.pinmap .pm-wait { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; color: var(--color-ink-3); }
+.pinmap .pm-tools { position: absolute; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.pinmap .pm-tools .btn { min-width: 44px; min-height: 44px; padding: 0 10px; background: rgba(11,16,48,.82); backdrop-filter: blur(6px); font-size: var(--text-18); }
+.pinmap .pm-tools .btn:last-child { font-size: var(--text-12); }
+.pin-photo { display: block; max-width: 100%; object-fit: contain; border-radius: 14px; box-shadow: 0 10px 36px rgba(0,0,0,.45); }
+.pin-credit { font-size: var(--text-11); color: var(--color-ink-3); }
+/* Guess the Airport: the departures board, drawn like the real thing (amber on black, a row a flight) */
+.board { background: #05060c; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: .7em .8em; width: 100%; color: #ffd25a;
+  font-variant-numeric: tabular-nums; box-shadow: inset 0 0 0 1px #000, 0 12px 40px rgba(0,0,0,.45); text-align: left; }
+.board .board-title { display: flex; align-items: center; gap: .5em; font-weight: 800; letter-spacing: .03em; color: #fff; padding: 0 .2em .45em; border-bottom: 2px solid #ffd25a; margin-bottom: .3em; }
+.board .board-row { display: grid; grid-template-columns: 3.4em minmax(0, 1fr) 5.2em minmax(0, .9fr); gap: .6em; align-items: baseline; padding: .32em .2em; font-weight: 700; }
+.board .board-row.tv { grid-template-columns: 3.6em minmax(0, 1.4fr) 5.2em 2.8em minmax(0, 1fr); }
+.board .board-row:nth-child(odd) { background: rgba(255,255,255,.035); }
+.board .board-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board .b-dest { color: #fff; }
+.board .b-flight, .board .b-gate { color: #ffd25a; }
+.board .b-status { font-size: .88em; }

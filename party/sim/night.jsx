@@ -36,7 +36,8 @@ function read() {
 const NEXT = { roundIntro: "round/begin", miniIntro: "closest/start", flagIntro: "flag/start", dishIntro: "dish/start", mapIntro: "map/start", auctionIntro: "auction/begin",
   sayIntro: "say/start", battleIntro: "battle/start", battleHandoff: "battle/start", sayReveal: "ui/next", mapReveal: "ui/next", saySummary: "say/done", battleSummary: "battle/done",
   answer: "round/afterAnswer", roundScore: "round/next", closestReveal: "ui/next", flagReveal: "ui/next", dishReveal: "dish/next", auctionLeg: "auction/nextLeg",
-  auctionResult: "auction/done", miniSummary: "closest/done", flagSummary: "flag/done", dishSummary: "dish/done", mapSummary: "map/done", battleReview: "battle/reviewDone" };
+  auctionResult: "auction/done", miniSummary: "closest/done", flagSummary: "flag/done", dishSummary: "dish/done", mapSummary: "map/done", battleReview: "battle/reviewDone",
+  pinIntro: "pin/start", airportIntro: "airport/start", pinReveal: "ui/next", airportReveal: "ui/next", pinSummary: "pin/done", airportSummary: "airport/done" };
 
 /* the answer to what's on screen, from the TV's own game (bots peek, so some answers are right) */
 function answerNow(g, pub) {
@@ -44,6 +45,7 @@ function answerNow(g, pub) {
     const sc = pub.screen;
     if (sc === "ask" || sc === "steal") return g.rounds[g.r].q[g.seat]?.answer;
     if (sc === "flagQ") return g.flagGame.qs[g.flagGame.i]?.answer;
+    if (sc === "airportQ") return g.airportGame.qs[g.airportGame.i]?.answer;
     if (sc === "mapQ") return g.mapGame.qs[g.mapGame.i]?.answer;
     if (sc === "miniQ") return String(g.mini.qs[g.mini.i]?.answer ?? "");
     if (sc === "dishQ") return g.dishGame.qs[g.dishGame.i]?.answer;
@@ -52,6 +54,13 @@ function answerNow(g, pub) {
     if (sc === "battleTie") return g.battle.tb?.q?.answer;
   } catch { /* the bot just guesses */ }
   return null;
+}
+
+/* Drop the Pin: a pin near the landmark (a bot's geography: spot on, a city off, or a country off) */
+function pinNear(g, bot) {
+  const q = g?.pinGame?.qs[g.pinGame.i], d = bot() < 0.3 ? 0.04 : bot() < 0.6 ? 1.5 : 18;
+  const lat = q ? Math.max(-80, Math.min(80, q.lat + (bot() - 0.5) * d)) : 48.85, lon = q ? ((q.lon + (bot() - 0.5) * d * 2 + 540) % 360) - 180 : 2.35;
+  return { lat, lon };
 }
 
 /* Weird nights (sim/weird.mjs): events at set times (seconds into the night):
@@ -117,7 +126,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     if (!who) return;
     if ((p.screen === "ask" || p.screen === "steal") && !p.sent?.[t]) send(who, "answer", { texts: ["Paris"] });
     else if (["dishQ", "sudden", "battleTie"].includes(p.screen) && p.buzz == null) send(capOf(0) || who, "buzz", {});
-    else if (["flagQ", "mapQ", "sayQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
+    else if (["flagQ", "mapQ", "sayQ", "airportQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
+    else if (p.screen === "pinQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { pin: { lat: 48.85, lon: 2.35 } }); }
     else if (p.screen === "miniQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { n: "50" }); }
     else if (p.pending && capOf(1 - p.pending.team)) send(capOf(1 - p.pending.team), "next", { move: { type: "ui/rule", v: true }, step: p.step });
   };
@@ -195,9 +205,9 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
        one has typed an answer and never presses Send: the TV takes it at time-up */
     if (slow && bot() < slow) {
       const sc = pub.screen;
-      if (["ask", "steal", "miniQ", "flagQ", "mapQ", "sayQ", "battleQ", "dishQ"].includes(sc) && bot() < 0.08) {
+      if (["ask", "steal", "miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "battleQ", "dishQ"].includes(sc) && bot() < 0.08) {
         const t = sc === "battleQ" ? pub.battle?.cap : sc === "dishQ" ? pub.buzz : sc === "ask" || sc === "steal" ? pub.turn : bot() < 0.5 ? 0 : 1;
-        if (t != null && !pub.sent?.[t] && capOf(t)) fake.insert("actions", { room: CODE, user_id: capOf(t), kind: "draft", payload: { k: `${pub.qid}|${sc}`, ...(sc === "miniQ" ? { n: "12" } : { texts: [bot() < 0.5 ? answerNow(g, pub) || "Paris" : "xyz"] }) } });
+        if (t != null && !pub.sent?.[t] && capOf(t)) fake.insert("actions", { room: CODE, user_id: capOf(t), kind: "draft", payload: { k: `${pub.qid}|${sc}`, ...(sc === "miniQ" ? { n: "12" } : sc === "pinQ" ? { pin: pinNear(g, bot) } : { texts: [bot() < 0.5 ? answerNow(g, pub) || "Paris" : "xyz"] }) } });
       }
       continue;
     }
@@ -263,10 +273,12 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       else if (host) next(0, sc === "ask" ? "round/judge" : "round/judgeSteal", { v: bot() < 0.5 });
     }
     else if (sc === "miniQ") { for (const t of [0, 1]) if (!pub.sent?.[t]) send(C(t), "answer", { n: String(Math.round((Number(right) || 100) * (0.6 + bot() * 0.8))) }); }
-    else if (["flagQ", "mapQ", "sayQ"].includes(sc)) {
+    else if (["flagQ", "mapQ", "sayQ", "airportQ"].includes(sc)) {
       for (const t of [0, 1]) if (!pub.sent?.[t]) send(C(t), "answer", { text: guess(right) });
       if (host && pub.sent?.[0] && pub.sent?.[1]) next(0, "ui/reveal");
     }
+    /* Drop the Pin: each captain locks in a pin (now and then one that isn't a pin at all, which is refused) */
+    else if (sc === "pinQ") { for (const t of [0, 1]) if (!pub.sent?.[t]) send(C(t), "answer", { pin: bot() < 0.05 ? { lat: "x", lon: 2 } : pinNear(g, bot) }); }
     else if (sc === "dishQ") {
       if (pub.buzz == null) { const t = pub.out?.[0] ? 1 : 0; if (!pub.out?.[t]) send(C(t), "buzz", {}); if (simul && !pub.out?.[1 - t]) send(C(1 - t), "buzz", {}); }
       else if (!pub.sent?.[pub.buzz]) send(C(pub.buzz), "answer", { text: guess(right) });

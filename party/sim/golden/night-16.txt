@@ -1,0 +1,85 @@
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+12.75 ask | 2 | 0-0 |  |  | 
+32.75 ask | 2 | 0-0 |  | Lions used Call a Friend. | 
+91.50 ask | 3 | 0-0 |  | Lions used Call a Friend. | 
+96.50 steal | 3 | 0-0 |  | Lions used Call a Friend. | 
+127.50 answer | 4 | 0-0 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+147.75 ask | 5 | 0-0 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+202.75 answer | 5 | 0-1 |  | Owls +1 point | 
+211.75 roundScore | 6 | 0-1 |  | Owls +1 point | 
+238.75 roundIntro | 7 | 0-1 |  | Owls +1 point | 
+320.75 ask | 8 | 0-1 |  | Owls +1 point | 
+334.25 answer | 8 | 1-1 |  | Lions +1 point | 
+354.00 ask | 9 | 1-1 |  | Lions +1 point | 
+399.75 steal | 9 | 1-1 |  | Lions +1 point | 
+420.50 answer | 9 | 1-1 |  | Lions +1 point | 
+531.25 answer | 9 | 1-1 |  |  | 
+546.25 answer | 9 | 1-1 |  | No answer in time: the call stands. | 
+568.25 roundScore | 10 | 1-1 |  | No answer in time: the call stands. | 
+601.50 pinIntro | 11 | 1-1 | 0-0 | No answer in time: the call stands. | 
+633.00 pinQ | 12 | 1-1 | 0-0 | No answer in time: the call stands. | 
+679.00 pinReveal | 14 | 1-1 | 1-0 | Time's up: ⁨Owls⁩'s pin counts where it is. | 
+697.75 pinQ | 15 | 1-1 | 1-0 | Lions takes landmark 1. | 
+705.00 pinReveal | 15 | 1-1 | 2-0 | Lions takes landmark 1. | 
+713.00 pinQ | 16 | 1-1 | 2-0 | Lions takes landmark 2. | 
+716.75 pinReveal | 16 | 1-1 | 2-1 | Lions takes landmark 2. | 
+744.50 pinQ | 17 | 1-1 | 2-1 | Owls takes landmark 3. | 
+745.50 pinReveal | 17 | 1-1 | 2-2 | Owls takes landmark 3. | 
+758.00 pinQ | 18 | 1-1 | 2-2 | Owls takes landmark 4. | 
+804.00 pinReveal | 20 | 1-1 | 3-2 | Time's up: ⁨Lions⁩'s pin counts where it is. | 
+821.00 pinSummary | 21 | 6-1 | 3-2 | Lions takes landmark 5. | 
+840.75 roundIntro | 22 | 6-1 |  | Lions takes landmark 5. | 
+896.75 ask | 23 | 6-1 |  | Lions takes landmark 5. | 
+898.50 steal | 23 | 6-1 |  | Lions takes landmark 5. | 
+917.25 answer | 23 | 6-1 |  | Lions takes landmark 5. | 
+931.75 answer | 23 | 6-1 |  |  | 
+946.75 answer | 23 | 6-1 |  | No answer in time: the call stands. | 
+947.00 ask | 24 | 6-1 |  | No answer in time: the call stands. | 
+1007.25 answer | 24 | 6-2 |  | Owls +1 point | 
+1008.25 roundScore | 25 | 6-2 |  | Owls +1 point | 
+1083.00 roundIntro | 26 | 6-2 |  | Owls +1 point | 
+1228.75 ask | 27 | 6-2 |  | Owls +1 point | 
+1282.75 answer | 27 | 7-2 |  | Lions +1 point | 
+1333.25 answer | 27 | 7-2 |  |  | 
+1348.25 answer | 27 | 7-2 |  | No answer in time: the call stands. | 
+1362.75 ask | 28 | 7-2 |  | No answer in time: the call stands. | 
+1371.00 steal | 28 | 7-2 |  | No answer in time: the call stands. | 
+1375.50 answer | 28 | 9-2 |  | Lions +2 points — steal | 
+1380.75 answer | 28 | 9-2 |  |  | 
+1395.75 answer | 28 | 9-2 |  | No answer in time: the call stands. | 
+1408.75 roundScore | 29 | 9-2 |  | No answer in time: the call stands. | 
+1499.75 airportIntro | 30 | 9-2 | 0-0 | No answer in time: the call stands. | 
+1502.25 airportQ | 31 | 9-2 | 0-0 | No answer in time: the call stands. | 
+1533.25 airportReveal | 33 | 9-2 | 0-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1544.75 airportQ | 34 | 9-2 | 0-1 | Owls takes board 1. | 
+1562.75 airportReveal | 34 | 9-2 | 0-1 | Owls takes board 1. | 
+1564.50 airportQ | 35 | 9-2 | 0-1 | Nobody got it. | 
+1566.25 airportReveal | 35 | 9-2 | 1-2 | Nobody got it. | 
+1586.00 airportQ | 36 | 9-2 | 1-2 | Both got it — a point each. | 
+1597.75 airportReveal | 36 | 9-2 | 2-3 | Both got it — a point each. | 
+1611.25 airportQ | 37 | 9-2 | 2-3 | Both got it — a point each. | 
+1642.25 airportReveal | 39 | 9-2 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1648.25 airportReveal | 39 | 9-2 | 3-4 |  | 
+1663.25 airportReveal | 39 | 9-2 | 3-4 | No answer in time: the call stands. | 
+1695.75 airportSummary | 40 | 9-7 | 3-4 | Both got it — a point each. | 
+1783.25 roundIntro | 41 | 9-7 |  | Both got it — a point each. | 
+1841.75 ask | 42 | 9-7 |  | Both got it — a point each. | 
+1858.75 steal | 42 | 9-7 |  | Both got it — a point each. | 
+1872.25 answer | 42 | 9-7 |  | Both got it — a point each. | 
+1964.00 ask | 43 | 9-7 |  | Both got it — a point each. | 
+1993.75 steal | 43 | 9-7 |  | Both got it — a point each. | 
+2024.75 answer | 44 | 10-7 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+2100.75 roundScore | 45 | 10-7 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+2108.00 roundIntro | 46 | 10-7 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+2119.75 ask | 47 | 10-7 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+2156.75 ask | 47 | 10-7 |  | Lions used Double Dip. | 
+2180.75 steal | 48 | 10-7 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+2211.75 answer | 49 | 10-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+2242.25 ask | 50 | 10-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+2273.75 answer | 50 | 10-9 |  | Owls +1 point | 
+2283.50 answer | 50 | 10-9 |  |  | 
+2298.50 answer | 50 | 10-9 |  | No answer in time: the call stands. | 
+2338.50 roundScore | 51 | 10-9 |  | No answer in time: the call stands. | 
+2350.25 final | 52 | 10-9 |  | No answer in time: the call stands. | 
+recap: {"margin":1,"sudden":false,"leadChanges":1,"steals":[2,1],"minis":[1,1]}

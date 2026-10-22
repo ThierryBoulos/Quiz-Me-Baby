@@ -145,6 +145,14 @@ export const HOST_LINES: Record<string, string[]> = {
     "Guess the Flag! Rectangles of national pride.",
     "Flags! Is it Chad? It's always Chad. Or Romania."
   ],
+  "mini_pin": [
+    "Drop the Pin! Somewhere on this planet. Good luck.",
+    "Drop the Pin. Zoom in, captains: every kilometre counts."
+  ],
+  "mini_airport": [
+    "Guess the Airport! Read the board, follow the planes.",
+    "Departures! Where are we flying from tonight?"
+  ],
   "mini_dish": [
     "Guess the Cocktail or Dish! I hope you ate before this.",
     "Ingredients incoming. First captain to buzz and name it wins. Easy, chef."
