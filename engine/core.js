@@ -286,19 +286,21 @@
        ctx.rng         optional; Math.random when absent
      Anything that needs tonight's game (the Battle's "already used") takes
      it as an argument instead of reading it.                               */
-  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, battle:10 };
+  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:5, airport:5, battle:10 };
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
-        FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, BATTLE_N = LEGS.battle;
-  /* Flag first: fast and loud, it opens the night */
-  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'dish'];
+        FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, PIN_LEGS = LEGS.pin, AIRPORT_LEGS = LEGS.airport, BATTLE_N = LEGS.battle;
+  /* Flag first: fast and loud, it opens the night. (Drop the Pin and Guess the Airport are Party's.) */
+  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'pin', 'airport', 'dish'];
   const MAP_ORDER = ['easy', 'medium', 'hard'];
+  /* Drop the Pin and Guess the Airport: easy, medium and hard, like the maps */
+  const PIN_ORDER = MAP_ORDER, AIRPORT_ORDER = MAP_ORDER;
   const FLAG_LEVEL_KEYS = ['veasy', 'easy', 'medium', 'hard', 'expert'];
   const DISH_LEVEL_KEYS = ['c-easy', 'c-medium', 'c-hard', 'd-easy', 'd-medium', 'd-hard'];
   const BATTLE_SKIP_THEMES = ['Know the Host', 'Sexy Time', 'Lebanon'];
 
   function createDealer(ctx){
     const bank = ctx.bank;
-    const ok = ctx.ok || { map:() => false, flag:() => false, dish:() => false };
+    const ok = Object.assign({ map:() => false, flag:() => false, dish:() => false, pin:() => false, airport:() => false }, ctx.ok || {});
     const rand = () => (ctx.rng || Math.random)();
     const shuffle = (a) => shuffleWith(a, ctx.rng);
     const isFresh = (q) => !ctx.noRepeat() || !ctx.used().has(q.id);
@@ -545,6 +547,32 @@
       return picked.concat(dishPool(levels, new Set(picked.map(q => q.id))));
     }
 
+    /* Drop the Pin and Guess the Airport: levels as the maps have them; the deck shares the legs out
+       over the levels that are on, fresh ones first, exactly as the flags do. The host's hand-picks lead. */
+    function levelsOf(want, order, dflt){
+      const ok = order.filter(k => (want || dflt).indexOf(k) > -1);
+      return ok.length ? ok : dflt.slice();
+    }
+    const pinLevelsOf = (c) => levelsOf(c && c.pinLevels, PIN_ORDER, PIN_ORDER);
+    const airportLevelsOf = (c) => levelsOf(c && c.airportLevels, AIRPORT_ORDER, AIRPORT_ORDER);
+    function levelPool(okq, levels, skip){
+      const queues = levels.map(l => {
+        const all = bank().filter(q => okq(q) && q.level === l && !(skip && skip.has(q.id)));
+        return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
+      });
+      const out = [];
+      for(let i = 0; queues.some(q => i < q.length); i++)
+        out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
+      return out;
+    }
+    function levelDeck(okq, picks, levels, n){
+      const picked = (picks || []).map(id => bank().find(q => q.id === id))
+        .filter(q => okq(q) && levels.indexOf(q.level) > -1).slice(0, n);
+      return picked.concat(levelPool(okq, levels, new Set(picked.map(q => q.id))));
+    }
+    const pinPool = (levels, skip) => levelPool(ok.pin, levels, skip);
+    const airportPool = (levels, skip) => levelPool(ok.airport, levels, skip);
+
     function diffOf(cfg, theme){
       const d = cfg && cfg.themeDiff && cfg.themeDiff[theme];
       return d || (cfg ? cfg.difficulty : 'mixed');
@@ -620,6 +648,13 @@
       const dsDeck = dishDeck(cfg, dsLevels);
       const dsLegs = dsDeck.slice(0, DISH_LEGS);
       const dsSpare = dsDeck.slice(DISH_LEGS);
+
+      /* dealt only when asked for, so a night without them draws exactly as before */
+      const asked = (k) => (cfg.minis || []).indexOf(k) > -1;
+      const pnLevels = pinLevelsOf(cfg);
+      const pnDeck = asked('pin') ? levelDeck(ok.pin, cfg.pickPin, pnLevels, PIN_LEGS) : [];
+      const apLevels = airportLevelsOf(cfg);
+      const apDeck = asked('airport') ? levelDeck(ok.airport, cfg.pickAirport, apLevels, AIRPORT_LEGS) : [];
     
       const mk = (t, color) => ({
         name:t.name, captain:t.captain, players:t.players,
@@ -635,7 +670,9 @@
                                 .filter(k => k !== 'saysame' || ssLegs.length)
                                 .filter(k => k !== 'map' || mpLegs.length)
                                 .filter(k => k !== 'flag' || fgLegs.length)
-                                .filter(k => k !== 'dish' || dsLegs.length);
+                                .filter(k => k !== 'dish' || dsLegs.length)
+                                .filter(k => k !== 'pin' || pnDeck.length)
+                                .filter(k => k !== 'airport' || apDeck.length);
       const hasBattle = wanted.indexOf('battle') > -1;
       /* no standard rounds: the mini-games simply run back to back, from the start */
       const plan = rounds.length ? planMinis(rounds.length, inter) : inter.map(k => ({ key:k, after:0 }));
@@ -655,6 +692,9 @@
         mapGame:{ levels:mapLevelsOf(cfg), qs:mpLegs, spare:mpSpare, base:mpLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
         flagGame:{ levels:fgLevels, qs:fgLegs, spare:fgSpare, base:fgLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
         dishGame:{ levels:dsLevels, qs:dsLegs, spare:dsSpare, base:dsLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0, leg:dishLeg() },
+        /* Drop the Pin: km off, all legs added up (the summary shows it) */
+        pinGame:{ levels:pnLevels, qs:pnDeck.slice(0, PIN_LEGS), spare:pnDeck.slice(PIN_LEGS), base:Math.min(PIN_LEGS, pnDeck.length), i:0, wins:[0, 0], subs:[], km:[0, 0], done:false, awarded:false, tieLegs:0 },
+        airportGame:{ levels:apLevels, qs:apDeck.slice(0, AIRPORT_LEGS), spare:apDeck.slice(AIRPORT_LEGS), base:Math.min(AIRPORT_LEGS, apDeck.length), i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
         auction:null,
         r:0, seat:0, sub:'intro', miniPlayed:false,
         battle:null,
@@ -667,7 +707,7 @@
     return { bank, shuffle, isFresh, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
-             dishLevelsOf, dishPool, dishDeck, diffOf, pickedPair, dishLeg, buildGame };
+             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, diffOf, pickedPair, dishLeg, buildGame };
   }
 
 
@@ -728,6 +768,8 @@
     flag:{ s:(g) => g.flagGame, q:'flagQ', summary:'flagSummary', left:(s) => s.base - s.i },
     map:{ s:(g) => g.mapGame, q:'mapQ', summary:'mapSummary', left:(s) => s.base - s.i },
     dish:{ s:(g) => g.dishGame, q:'dishQ', summary:'dishSummary', left:(s) => s.base - s.i },
+    pin:{ s:(g) => g.pinGame, q:'pinQ', summary:'pinSummary', left:(s) => s.base - s.i },
+    airport:{ s:(g) => g.airportGame, q:'airportQ', summary:'airportSummary', left:(s) => s.base - s.i },
     auction:{ s:(g) => g.auction, q:'auctionBid', summary:'auctionResult', left:(s) => s.n - s.leg - 1 }
   };
   /* -> { winner, spare } when this mini-game is settled with legs still to play, else null */
@@ -843,6 +885,54 @@
     fx.push({ go:'mapSummary' });
     return fx;
   }
+
+  /* ---- Guess the Airport: as Guess the Flag (a typed name, the app checks it) ---- */
+  function airportAfterLeg(g, fx){
+    const s = g.airportGame;
+    if(s.fun) return funLeg(s, 'airportQ', 'airportSummary', fx);
+    const out = bestOf(s);
+    if(out === 'next'){ fx.push({ go:'airportQ' }); return fx; }
+    if(out === 'level'){
+      if(s.spare && s.spare.length){
+        s.qs.push(s.spare.shift());
+        s.tieLegs++;
+        fx.push({ toast:s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next board decides it.' : 'Nobody on the board yet — next one.', ms:3600 });
+        fx.push({ go:'airportQ' });
+        return fx;
+      }
+      s.done = true;
+      s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no boards left at these levels. Your call.' };
+      fx.push({ go:'airportSummary' });
+      return fx;
+    }
+    s.done = true;
+    s.verdict = { winner:out.winner, needsHost:false,
+      note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker board' : s.tieLegs + ' tie-breaker boards') + '.'
+         : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' board' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
+    awardMini(g, s, out.winner, fx);
+    fx.push({ go:'airportSummary' });
+    return fx;
+  }
+
+  /* ---- Drop the Pin: the nearer pin takes the leg ----
+     Great-circle distance, in km (haversine, Earth's mean radius). The same distance as the screen
+     shows it (to the km) is a tie. */
+  function kmBetween(a, b){
+    const R = 6371.0088, rad = Math.PI / 180;
+    const dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  const isPin = (p) => !!p && Number.isFinite(p.lat) && Number.isFinite(p.lon) && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180;
+  /* -> { km:[a|null, b|null], w } for this leg's two pins */
+  function pinLeg(q, pins){
+    const km = [0, 1].map(t => isPin(pins[t]) ? kmBetween(pins[t], q) : null);
+    const w = km[0] == null && km[1] == null ? 'none' : km[1] == null ? 0 : km[0] == null ? 1
+      : Math.round(km[0]) === Math.round(km[1]) ? 'tie' : km[0] < km[1] ? 0 : 1;
+    return { km, w };
+  }
+  const PIN_END = { what:'landmark', again:'pinQ', summary:'pinSummary', draw:(q) => q,
+    dry:'Tied on legs, and there are no landmarks left at these levels for another tie-breaker. Your call.' };
 
   /* ---- Closest To Wins and Don't Say the Same as Me ----
      Both play every leg; level at the end means a tie-breaker leg from the
@@ -1023,6 +1113,8 @@
     if(key === 'map'){ fx.push({ go:'mapIntro' }); return fx; }
     if(key === 'flag'){ fx.push({ go:'flagIntro' }); return fx; }
     if(key === 'dish'){ fx.push({ go:'dishIntro' }); return fx; }
+    if(key === 'pin'){ fx.push({ go:'pinIntro' }); return fx; }
+    if(key === 'airport'){ fx.push({ go:'airportIntro' }); return fx; }
     if(key === 'battle'){ MOVES['battle/build'](g, {}, env).forEach(f => fx.push(f)); return fx; }
     return fx;
   }
@@ -1524,6 +1616,52 @@
     'flag/award'(g, a){ const fx = []; awardMini(g, g.flagGame, a.w, fx); fx.push({ render:true }); return fx; },
     'flag/done'(g){ return finishMini(g, 'flag', g.flagGame); },
 
+    'airport/start'(g){ g.airportGame.i = 0; return [{ go:'airportQ' }]; },
+    'airport/swap'(g){
+      const s = g.airportGame;
+      if(!s.spare.length) return [{ toast:'No other board left at these levels.' }];
+      s.qs[s.i] = s.spare.shift();
+      return [{ toast:'New board.' }, { go:'airportQ' }];
+    },
+    /* w: 0 | 1 | 'tie' (both right) | 'none' */
+    'airport/verdict'(g, a){
+      const s = g.airportGame, q = s.qs[s.i], w = a.w, fx = [];
+      s.subs.push({ q, winner:w });
+      if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Both got it — a point each.' }); }
+      else if(w === 'none'){ fx.push({ toast:'Nobody got it.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes board ' + (s.i + 1) + '.' }); }
+      s.i++;
+      return airportAfterLeg(g, fx);
+    },
+    'airport/award'(g, a){ const fx = []; awardMini(g, g.airportGame, a.w, fx); fx.push({ render:true }); return fx; },
+    'airport/done'(g){ return finishMini(g, 'airport', g.airportGame); },
+
+    'pin/start'(g){ g.pinGame.i = 0; return [{ go:'pinQ' }]; },
+    'pin/swap'(g){
+      const s = g.pinGame;
+      if(!s.spare.length) return [{ toast:'No other landmark left at these levels.' }];
+      s.qs[s.i] = s.spare.shift();
+      return [{ toast:'New landmark.' }, { go:'pinQ' }];
+    },
+    /* the two pins ({lat, lon}, or null: none dropped) -> the leg, by distance */
+    'pin/settle'(g, a){
+      const s = g.pinGame, q = s.qs[s.i], fx = [];
+      if(!q) return [];
+      const pins = [isPin(a.pins && a.pins[0]) ? a.pins[0] : null, isPin(a.pins && a.pins[1]) ? a.pins[1] : null];
+      const { km, w } = pinLeg(q, pins);
+      km.forEach((d, t) => { if(d != null) s.km[t] += d; });
+      s.subs.push({ q, pins, km, winner:w });
+      if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Dead level — a point each.' }); }
+      else if(w === 'none'){ fx.push({ toast:'No pins — no point.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes landmark ' + (s.i + 1) + '.' }); }
+      s.i++;
+      if(s.fun) return funLeg(s, 'pinQ', 'pinSummary', fx);
+      if(s.i < s.qs.length){ fx.push({ go:'pinQ' }); return fx; }
+      return legsFinish(g, s, PIN_END, fx);
+    },
+    'pin/award'(g, a){ const fx = []; awardMini(g, g.pinGame, a.w, fx); fx.push({ render:true }); return fx; },
+    'pin/done'(g){ return finishMini(g, 'pin', g.pinGame); },
+
     'dish/start'(g){ const s = g.dishGame; s.i = 0; s.leg = freshLeg(); return [{ go:'dishQ' }]; },
     'dish/swap'(g){
       const s = g.dishGame, L = s.leg;
@@ -1639,5 +1777,5 @@
   }
 
   return { tidy, asNumber, numWords, distance, isMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
-           createDealer, play, MOVES:Object.keys(MOVES), battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES };
+           createDealer, play, MOVES:Object.keys(MOVES), battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

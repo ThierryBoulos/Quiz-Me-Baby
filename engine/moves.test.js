@@ -529,3 +529,85 @@ test('levels: a steal on a new question is at the first team\'s level', () => {
     assert.equal(g.rounds[0].q[0].difficulty, want);
   }
 });
+
+/* 22 Oct: Drop the Pin (nearest pin takes the leg) and Guess the Airport (as the flags) */
+function newGames(over){
+  const bank = [];
+  ['easy', 'medium', 'hard'].forEach(l => { for(let i = 0; i < 8; i++){
+    bank.push({ id:`pin:${l}${i}`, type:'pin', level:l, question:'P' + i, answer:'P' + i, lat:48.8584, lon:2.2945 });
+    bank.push({ id:`airport:${l}${i}`, type:'airport', level:l, question:'A' + i, answer:'A' + i, code:'X' + i, board:[] });
+  } });
+  const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => true,
+    ok:{ pin:q => q.type === 'pin', airport:q => q.type === 'airport' } });
+  return D.buildGame(Object.assign({ standard:false, rounds:0, themes:[], minis:['pin', 'airport'],
+    teamA:{ name:'Falafel' }, teamB:{ name:'Shawarma' } }, over));
+}
+test('pin: km by the great circle — Eiffel Tower to Notre-Dame, and to New York', () => {
+  assert.equal(Math.round(Q.kmBetween({ lat:48.8584, lon:2.2945 }, { lat:48.8530, lon:2.3499 })), 4);
+  assert.equal(Math.round(Q.kmBetween({ lat:48.8584, lon:2.2945 }, { lat:40.6892, lon:-74.0445 })), 5837);
+  assert.equal(Math.round(Q.kmBetween({ lat:0, lon:179.5 }, { lat:0, lon:-179.5 })), 111);   // across the date line
+});
+test('pin: the nearer pin takes the leg; no pin loses; the same km is a point each', () => {
+  const g = newGames(), s = g.pinGame;
+  assert.deepEqual(s.levels, ['easy', 'medium', 'hard']);
+  assert.equal(s.qs.length, 5);
+  assert.ok(new Set(s.qs.map(q => q.level)).size === 3);           // shared over the levels
+  Q.play(g, { type:'pin/start' });
+  const near = { lat:48.86, lon:2.30 }, far = { lat:51.5, lon:-0.12 };
+  Q.play(g, { type:'pin/settle', pins:[far, near] });
+  assert.deepEqual(s.wins, [0, 1]);
+  assert.equal(s.subs[0].winner, 1);
+  assert.equal(Math.round(s.subs[0].km[0]), 340);
+  Q.play(g, { type:'pin/settle', pins:[near, null] });
+  assert.deepEqual(s.wins, [1, 1]);
+  assert.equal(s.subs[1].km[1], null);
+  Q.play(g, { type:'pin/settle', pins:[near, { lat:48.8601, lon:2.3001 }] });
+  assert.equal(s.subs[2].winner, 'tie');
+  assert.deepEqual(s.wins, [2, 2]);
+  Q.play(g, { type:'pin/settle', pins:[null, { lat:'x', lon:2 }] });       // nothing usable: nobody
+  assert.equal(s.subs[3].winner, 'none');
+  assert.equal(s.i, 4);
+});
+test('pin: level after five brings a tie-breaker landmark, then pays', () => {
+  const g = newGames(), s = g.pinGame;
+  Q.play(g, { type:'pin/start' });
+  const near = { lat:48.86, lon:2.30 }, far = { lat:51.5, lon:-0.12 };
+  for(let i = 0; i < 4; i++) Q.play(g, { type:'pin/settle', pins:i % 2 ? [near, far] : [far, near] });
+  let fx = Q.play(g, { type:'pin/settle', pins:[near, near] });
+  assert.deepEqual(s.wins, [3, 3]);
+  assert.equal(s.tieLegs, 1);
+  assert.equal(s.qs.length, 6);
+  assert.ok(types(fx).includes('go:pinQ'));
+  fx = Q.play(g, { type:'pin/settle', pins:[far, near] });
+  assert.equal(s.verdict.winner, 1);
+  assert.equal(g.teams[1].score, g.miniPts);
+  assert.ok(types(fx).includes('go:pinSummary'));
+  assert.deepEqual(Q.play(g, { type:'pin/done' }), [{ go:'airportIntro' }]);
+});
+test('pin: the setup\'s levels and hand-picks', () => {
+  const g = newGames({ pinLevels:['hard'], pickPin:['pin:easy3', 'pin:hard5'] });
+  assert.deepEqual(g.pinGame.levels, ['hard']);
+  assert.equal(g.pinGame.qs[0].id, 'pin:hard5');                   // a pick at a level that is off is dropped
+  assert.ok(g.pinGame.qs.every(q => q.level === 'hard'));
+  assert.equal(newGames({ pinLevels:['nope'] }).pinGame.levels.length, 3);
+});
+test('airport: as the flags — decided early stops, level brings another board', () => {
+  let g = newGames();
+  Q.play(g, { type:'airport/start' });
+  let fx;
+  for(let i = 0; i < 3; i++) fx = Q.play(g, { type:'airport/verdict', w:0 });
+  assert.equal(g.airportGame.verdict.note, 'Decided with 2 boards to spare.');
+  assert.equal(g.teams[0].score, g.miniPts);
+  assert.ok(types(fx).includes('go:airportSummary'));
+  g = newGames();
+  Q.play(g, { type:'airport/start' });
+  ['tie', 0, 1, 'none', 'tie'].forEach(w => Q.play(g, { type:'airport/verdict', w }));
+  assert.equal(g.airportGame.tieLegs, 1);
+  assert.equal(g.airportGame.qs.length, 6);
+});
+test('the new games sit in the running order only when they have something to play', () => {
+  const g = newGames({ minis:['flag', 'pin', 'airport'] });
+  assert.deepEqual(g.plan.map(p => p.key), ['pin', 'airport']);              // no flags in this bank
+  const none = Q.createDealer({ bank:() => [], used:() => new Set(), noRepeat:() => true }).buildGame({ standard:false, rounds:0, themes:[], minis:['pin', 'airport'], teamA:{ name:'A' }, teamB:{ name:'B' } });
+  assert.deepEqual(none.plan, []);
+});
