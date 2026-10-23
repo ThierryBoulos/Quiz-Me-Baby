@@ -819,6 +819,26 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
   .flag-frame .flag-img{height:clamp(110px,30svh,300px)}
   .flag-judge .flag-frame .flag-img{height:clamp(100px,26svh,260px)}
 }
+/* Guess the Airport: the departures board, drawn like the real thing (amber on black, a row a flight) */
+.board-frame{cursor:default;width:100%;justify-self:stretch}
+.board{background:#05060c;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.7em .8em;width:100%;color:#ffd25a;
+  font-variant-numeric:tabular-nums;box-shadow:inset 0 0 0 1px #000,0 12px 40px rgba(0,0,0,.45);text-align:left;font-size:clamp(12px,1.5vw,21px)}
+.board .board-title{display:flex;align-items:center;gap:.5em;font-weight:800;letter-spacing:.03em;color:#fff;font-size:1.25em;
+  padding:0 .2em .45em;border-bottom:2px solid #ffd25a;margin-bottom:.3em}
+.board .board-row{display:grid;grid-template-columns:3.6em minmax(0,1.4fr) 5.2em 2.8em minmax(0,1fr);gap:.6em;align-items:baseline;padding:.32em .2em;font-weight:700}
+.board .board-row:nth-child(odd){background:rgba(255,255,255,.035)}
+.board .board-row > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board .b-dest{color:#fff}
+.board .b-status{font-size:.88em}
+.airport-judge .board{font-size:clamp(11px,1.15vw,17px)}
+.airport-code{font-size:clamp(15px,2vh,20px);color:var(--ink-2)}
+.airport-code b{color:var(--ink);letter-spacing:.06em}
+.airport-counts{font-size:13px;line-height:1.5;text-align:left}
+@media (max-width:760px){
+  .board{font-size:12px}
+  .board .board-row{grid-template-columns:3.4em minmax(0,1fr) 4.8em minmax(0,.9fr)}
+  .board .b-gate{display:none}
+}
 /* Guess the Cocktail or Dish: every row is drawn from the start and lit as it
    comes due, so the list never jumps; an unlit row is an empty slot */
 .play.map-play.dish-play{max-height:none}
@@ -1252,7 +1272,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.29', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.30', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2893,6 +2913,11 @@ const DISH_STEP = 3;    // seconds between ingredients
 const DISH_LAST = 8;    // seconds still to answer once the whole list is up
 const DISH_LEVELS = { 'c-easy':'Easy', 'c-medium':'Medium', 'c-hard':'Hard', 'd-easy':'Easy', 'd-medium':'Medium', 'd-hard':'Hard' };
 const dishKind = (q) => (q && q.level || '')[0] === 'c' ? 'Cocktail' : 'Dish';
+/* Guess the Airport: a departures board, the airport's own city never on it. Both teams write down
+   which airport; the city is enough, except where it has more than one big airport. */
+const AIRPORT_LEGS = QMB.LEGS.airport;   // 5
+const AIRPORT_SECS = 30;
+const AIRPORT_LEVELS = { easy:'Easy', medium:'Medium', hard:'Hard' };
 /* "Cocktails", "Dishes" or "Cocktails + dishes" — the levels stay off screen */
 const dishKinds = (levels) => {
   const c = levels.some(l => l[0] === 'c'), d = levels.some(l => l[0] === 'd');
@@ -3335,7 +3360,7 @@ const PINS = [
 ];
 
 /* --------------------------------------------------------------------------
-   GUESS THE AIRPORT — the catalogue (Party plays it)
+   GUESS THE AIRPORT — the catalogue (Party and Classic play it)
    [code, airport, level, city, board language, board title, rows, also accepted, clues, source].
    Each row of the departure board is [time, status, destination, flight, gate]: real routes the
    airline flies from that airport (checked against the airport's destinations), drawn by the app.
@@ -3381,6 +3406,7 @@ const AIRPORTS = [
   ["MIA", "Miami International Airport", "hard", "Miami", "English", "Departures", [["06:00","Boarding","New York-LaGuardia","AA 1092","D18"],["06:15","On time","Chicago-O'Hare","AA 2350","D23"],["06:40","On time","Havana","AA 1335","D46"],["07:05","Delayed","Bogotá","AA 921","D50"],["07:30","On time","Lima","AA 917","D53"],["08:00","Cancelled","Los Angeles","AA 2405","D30"],["19:40","On time","London-Heathrow","BA 208","E8"],["21:10","On time","Buenos Aires-Ezeiza","AA 931","D41"]], ["Miami","MIA","Miami International","Miami International Airport"], "English, mostly AA, American Airlines. New York, Chicago and Los Angeles are on the board, so it is a US hub but not those, and the flights to Havana, Bogotá, Lima and Buenos Aires make it American's gateway to Latin America: Miami.", ["https://en.wikipedia.org/wiki/Miami_International_Airport","https://en.wikipedia.org/wiki/LaGuardia_Airport","https://en.wikipedia.org/wiki/O'Hare_International_Airport","https://en.wikipedia.org/wiki/Jos%C3%A9_Mart%C3%AD_International_Airport","https://en.wikipedia.org/wiki/El_Dorado_International_Airport","https://en.wikipedia.org/wiki/Jorge_Ch%C3%A1vez_International_Airport","https://en.wikipedia.org/wiki/Los_Angeles_International_Airport","https://en.wikipedia.org/wiki/Heathrow_Airport","https://en.wikipedia.org/wiki/Ezeiza_International_Airport"]],
   ["NCE", "Nice Côte d'Azur Airport", "hard", "Nice", "French", "Départs", [["06:00","Embarquement","Paris-Charles de Gaulle","AF 7701","A2"],["06:20","À l'heure","Paris-Orly","U2 4502","B21"],["06:35","À l'heure","Lyon","AF 7651","A5"],["06:50","Retardé","Ajaccio","XK 721","A8"],["07:10","À l'heure","Toulouse","U2 4372","B24"],["07:30","Annulé","Londres-Heathrow","BA 341","A11"],["09:30","À l'heure","Dubaï","EK 78","A15"],["10:10","À l'heure","Doha","QR 46","A14"]], ["Nice","NCE","Nice Côte d'Azur","Côte d'Azur","Nice Airport","Nice Cote d'Azur"], "French, with no home airline. Paris (both airports), Lyon and Toulouse are on the board, so a big French airport outside those. Corsica (Air Corsica to Ajaccio), an easyJet base, and Emirates and Qatar long-haul: Nice, France's third airport.", ["https://en.wikipedia.org/wiki/Nice_C%C3%B4te_d'Azur_Airport","https://en.wikipedia.org/wiki/Paris_Charles_de_Gaulle_Airport","https://en.wikipedia.org/wiki/Orly_Airport","https://en.wikipedia.org/wiki/Lyon%E2%80%93Saint-Exup%C3%A9ry_Airport","https://en.wikipedia.org/wiki/Ajaccio_Napoleon_Bonaparte_Airport","https://en.wikipedia.org/wiki/Toulouse%E2%80%93Blagnac_Airport","https://en.wikipedia.org/wiki/Heathrow_Airport","https://en.wikipedia.org/wiki/Dubai_International_Airport","https://en.wikipedia.org/wiki/Hamad_International_Airport"]]
 ];
+const airportOK = (q) => !!q && q.type === 'airport' && Array.isArray(q.board) && q.board.length > 0;
 
 /* Majority Rules (Party only): every player answers on their own phone, four answers each.
    [key, level, question, [the four answers, in the TV's order], which one is right (0-3), a word on it]
@@ -3501,8 +3527,9 @@ function splitIng(t){
   return i < 0 ? ['', String(t)] : [t.slice(0, i), t.slice(i + 3)];
 }
 
-/* party: true adds the rows only Party plays (Drop the Pin, Guess the Airport, Majority Rules); Classic's own bank
-   leaves them out, so its question list never shows games it can't run (scripts/export-bank.js asks for them) */
+/* party: true adds the rows only Party plays (Drop the Pin and Majority Rules: everyone answers on their own
+   phone); Classic's own bank leaves them out, so its question list never shows games it can't run
+   (scripts/export-bank.js asks for them). Guess the Airport is in both. */
 function buildSeedBank(party){
   const out = [];
   SEED.forEach(function(r){ out.push({
@@ -3536,16 +3563,16 @@ function buildSeedBank(party){
     id:hash('map:' + m.key), question:m.title, answer:m.answer, notes:m.notes, theme:'',
     type:'map', difficulty:'', use_with:'', map:m.key, level:m.level, src:'seed'
   }); });
+  AIRPORTS.forEach(function(a){ out.push({
+    id:'airport:' + a[0], question:a[1], answer:a[1], notes:a[8], theme:'',
+    type:'airport', difficulty:'', use_with:'', level:a[2], code:a[0], city:a[3], lang:a[4],
+    boardTitle:a[5], board:a[6].map(function(r){ return r.slice(); }), accept:a[7].slice(), source:a[9], src:'seed'
+  }); });
   if(party){
     PINS.forEach(function(p){ out.push({
       id:'pin:' + p[0], question:p[1], answer:p[1], notes:p[5], theme:'',
       type:'pin', difficulty:'', use_with:'', level:p[2], lat:p[3], lon:p[4], place:p[5],
       photo:p[6], credit:p[7], licence:p[8], page:p[9], src:'seed'
-    }); });
-    AIRPORTS.forEach(function(a){ out.push({
-      id:'airport:' + a[0], question:a[1], answer:a[1], notes:a[8], theme:'',
-      type:'airport', difficulty:'', use_with:'', level:a[2], code:a[0], city:a[3], lang:a[4],
-      boardTitle:a[5], board:a[6].map(function(r){ return r.slice(); }), accept:a[7].slice(), source:a[9], src:'seed'
     }); });
     MAJORITY.forEach(function(m){ out.push({
       id:'mr:' + m[0], question:m[2], answer:m[3][m[4]], notes:m[5] || '', theme:'',
@@ -3751,7 +3778,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 30;   // bumped when the built-in bank changes
+const SEED_VERSION = 31;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -3851,10 +3878,9 @@ const RETIRED_SEED = [
       /* pool is an array — a straight !== is always true between two distinct
          array references even when the contents match, which would report a
          false "correction" on every single load. Compare it by content. */
-      const moved = ['question','answer','notes','theme','type','difficulty','use_with','map','flag','dish','source','level']
+      const moved = ['question','answer','notes','theme','type','difficulty','use_with','map','flag','dish','source','level','code','city','boardTitle']
         .some(k => q[k] !== s[k])
-        || JSON.stringify(q.pool || null) !== JSON.stringify(s.pool || null)
-        || JSON.stringify(q.ings || null) !== JSON.stringify(s.ings || null);
+        || ['pool','ings','board','accept'].some(k => JSON.stringify(q[k] || null) !== JSON.stringify(s[k] || null));
       if(moved){ Object.assign(q, s); fixed++; }
     });
 
@@ -3926,11 +3952,11 @@ const DEAL = QMB.createDealer({
   bank: () => noHostTonight() ? S.bank.filter(q => !needsHost(q)) : S.bank,
   used: () => S.used,
   noRepeat: () => S.settings.noRepeat,
-  ok: { map: (q) => mapOK(q), flag: (q) => flagOK(q), dish: (q) => dishOK(q) }
+  ok: { map: (q) => mapOK(q), flag: (q) => flagOK(q), dish: (q) => dishOK(q), airport: (q) => airportOK(q) }
 });
 const { matchDiff, pairsFor, closestPool, capacity, auctionPool, auctionDeck, saySamePool, drawSaySame,
         saySameDeck, mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
-        dishLevelsOf, dishPool, dishDeck, diffOf, dishLeg, buildGame } = DEAL;
+        dishLevelsOf, dishPool, dishDeck, airportLevelsOf, diffOf, dishLeg, buildGame } = DEAL;
 /* the Battle's pool leaves out everything already used tonight */
 const battleSpent = () => QMB.battleSpent(G());
 const battlePool  = (diff) => DEAL.battlePool(battleSpent(), diff);
@@ -4284,6 +4310,7 @@ const MINI_GAMES = {
   map:    { key:'map',     name:'Guess the Map',              blurb:'A map, sixty seconds — what does it show?' },
   flag:   { key:'flag',    name:'Guess the Flag',             blurb:'Ten flags, fifteen seconds each — whose is it?' },
   dish:   { key:'dish',    name:'Guess the Cocktail or Dish', blurb:'The ingredients, one at a time — first captain to call it wins.' },
+  airport:{ key:'airport', name:'Guess the Airport',          blurb:'A departures board, thirty seconds — which airport?' },
   battle: { key:'battle',  name:'Battle of the Captains',     blurb:'Ten each, captains only, 7s a shot.' }
 };
 /* the four that get spread through the rounds — the Battle is the finale */
@@ -4331,6 +4358,7 @@ const SAYSAME_SCREENS = ['sayIntro','sayQ','sayJudge','saySummary'];
 const MAP_SCREENS = ['mapIntro','mapQ','mapJudge','mapTie','mapSummary'];
 const FLAG_SCREENS = ['flagIntro','flagQ','flagJudge','flagSummary'];
 const DISH_SCREENS = ['dishIntro','dishQ','dishCheck','dishReveal','dishTie','dishSummary'];
+const AIRPORT_SCREENS = ['airportIntro','airportQ','airportJudge','airportSummary'];
 /* which mini-game, if any, is on screen right now */
 function liveMini(){
   if(CLOSEST_SCREENS.indexOf(S.screen) > -1) return 'closest';
@@ -4339,6 +4367,7 @@ function liveMini(){
   if(MAP_SCREENS.indexOf(S.screen) > -1) return 'map';
   if(FLAG_SCREENS.indexOf(S.screen) > -1) return 'flag';
   if(DISH_SCREENS.indexOf(S.screen) > -1) return 'dish';
+  if(AIRPORT_SCREENS.indexOf(S.screen) > -1) return 'airport';
   if(BATTLE_SCREENS.indexOf(S.screen) > -1) return 'battle';
   return null;
 }
@@ -4385,8 +4414,8 @@ function render(){
      does fit the window. Any screen using .play or .fits MUST be in one of
      them — left out, it renders 88px of padding inside a box already sized to
      the viewport and the page scrolls by exactly that much. */
-  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ','flagQ','dishQ'].indexOf(S.screen) > -1);
-  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapTie','mapSummary','flagSummary','dishTie','dishSummary'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('playmode', ['ask','steal','miniQ','battleQ','auctionBid','auctionRun','sayQ','mapQ','flagQ','dishQ','airportQ'].indexOf(S.screen) > -1);
+  document.body.classList.toggle('fitmode', ['miniSummary','final','battleSummary','battleHandoff','auctionLeg','auctionResult','saySummary','mapTie','mapSummary','flagSummary','dishTie','dishSummary','airportSummary'].indexOf(S.screen) > -1);
   /* the enlarged map belongs to the screen that opened it */
   if(S.tmp.mzFor && S.tmp.mzFor !== S.screen) closeMapZoom();
   document.body.classList.toggle('homemode', S.screen === 'home');
@@ -4447,6 +4476,8 @@ function renderHUD(){
     label = '<b>GUESS THE MAP</b> &nbsp;·&nbsp; ' + (S.screen === 'mapSummary' ? 'Final' : S.screen === 'mapTie' ? 'Level' : mapLegLabel());
   } else if(FLAG_SCREENS.indexOf(S.screen) > -1){
     label = '<b>GUESS THE FLAG</b> &nbsp;·&nbsp; ' + (S.screen === 'flagSummary' ? 'Final' : flagLegLabel());
+  } else if(AIRPORT_SCREENS.indexOf(S.screen) > -1){
+    label = '<b>GUESS THE AIRPORT</b> &nbsp;·&nbsp; ' + (S.screen === 'airportSummary' ? 'Final' : airportLegLabel());
   } else if(DISH_SCREENS.indexOf(S.screen) > -1){
     label = '<b>GUESS THE COCKTAIL OR DISH</b> &nbsp;·&nbsp; ' + (S.screen === 'dishSummary' ? 'Final' : S.screen === 'dishTie' ? 'Level' : dishLegLabel());
   } else if(BATTLE_SCREENS.indexOf(S.screen) > -1){
@@ -4570,7 +4601,7 @@ SCREENS.rules = function(){
     ])) +
 
     ruleBlock('04', 'The mini-games', ul([
-      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or any of the six</strong>. They are announced at the start, not sprung on you.'),
+      li('The host picks which ones are on tonight&rsquo;s card — <strong>none, one, or any of the seven</strong>. They are announced at the start, not sprung on you.'),
       li('They drop in <strong>between the standard rounds</strong>, spaced out across the night. Where exactly depends on how many rounds you are playing.'),
       li('Each one is worth <strong>between 2 and 4 points</strong> to whoever wins it. The host can tell you which before you start.'),
       li('<span style="color:var(--warn)">No lifelines in any of them.</span>')
@@ -4615,14 +4646,22 @@ SCREENS.rules = function(){
       li('Both right — <strong>a point each</strong>. Best of ' + FLAG_LEGS + '; level at the end, and another flag comes out until somebody gets one.')
     ])) +
 
-    ruleBlock('10', 'Guess the Cocktail or Dish', ul([
+    ruleBlock('10', 'Guess the Airport', ul([
+      li('A departures board goes up. <strong>' + AIRPORT_SECS + ' seconds.</strong> The destinations, the airlines and the language on it are the clues; the airport&rsquo;s own city is never on its board.'),
+      li('Both teams write down <strong>which airport</strong>, at the same time. The city is enough, except where it has more than one big airport: there, name the airport (Heathrow, not London). Its code counts too (LHR).'),
+      li('The host reveals it, with how to read the board, and rules. Both right — <strong>a point each</strong>.'),
+      li('Three levels — <strong>easy, medium, hard</strong> — chosen in Setup, one or several, shared out evenly.'),
+      li('Best of ' + AIRPORT_LEGS + '; level at the end, and another board comes out until somebody gets one.')
+    ])) +
+
+    ruleBlock('11', 'Guess the Cocktail or Dish', ul([
       li('The ingredients come up <strong>one at a time</strong>, with their amounts — a new one every <strong>' + DISH_STEP + ' seconds</strong>, the giveaway last.'),
       li('Know it? <strong>Captain, call it out.</strong> The first voice gets to answer. <strong>One go per team</strong> — get it wrong and you are out of that one, and the list keeps coming for the other team.'),
       li('Six levels, chosen in Setup — <strong>cocktails</strong> and <strong>dishes</strong>, each easy, medium or hard. Pick any mix; they are shared out evenly.'),
       li('Best of ' + DISH_LEGS + '. Level at the end? <strong>One more as a tie-breaker, or stop there with a point each</strong> — your choice, again after every tied tie-breaker.')
     ])) +
 
-    ruleBlock('11', 'Battle of the Captains', ul([
+    ruleBlock('12', 'Battle of the Captains', ul([
       li('<strong>Captains only.</strong> The room says nothing — and that means nothing.'),
       li('Ten questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot, one captain at a time.'),
       li('Both captains get the <strong>same shape</strong> — five easy, five medium, in the same order — but never the same questions. Different sets, same difficulty, so nobody can claim they drew the harder ten.'),
@@ -4631,18 +4670,18 @@ SCREENS.rules = function(){
       li('It always runs <strong>last</strong>, after the final standard round.')
     ])) +
 
-    ruleBlock('12', 'Winning', ul([
+    ruleBlock('13', 'Winning', ul([
       li('Highest score after the last round takes the night.'),
       li('Tie? <strong>Sudden death</strong> — a quick rules screen, then one fresh question, both captains, first right answer wins. Repeats until somebody gets one.')
     ])) +
 
-    ruleBlock('13', 'Playing without a host', ul([
+    ruleBlock('14', 'Playing without a host', ul([
       li('Same game, same rounds, same mini-games — <strong>the TV does the hosting</strong>. Everyone reads the question off the screen.'),
       li('The captain answers out loud, then <strong>Lock it in</strong>: the answer comes straight up for everyone. Whoever is holding the phone taps <strong>Yes</strong> or <strong>No</strong>.'),
       li('<strong>No steals.</strong> Wrong or out of time, and it is the next question.'),
       li(ICON.dip + ' <strong>Double Dip</strong> — say both answers out loud <strong>before</strong> you lock it in. Either one right counts.'),
       li('<strong>The Auction</strong> — the other team does the counting. <strong>The Battle</strong> — show the answer after each one and mark it honestly.'),
-      li('<strong>Guess the Map</strong> and <strong>Guess the Flag</strong> — keep your answers face down until the reveal, then rule together.'),
+      li('<strong>Guess the Map</strong>, <strong>Guess the Flag</strong> and <strong>Guess the Airport</strong> — keep your answers face down until the reveal, then rule together.'),
       li('<strong>Guess the Cocktail or Dish</strong> — know it? Tap your team and <strong>write the answer down</strong>, face down. The list keeps coming for the other team. At the end the answers are turned over in the order they were called: <strong>the first team right wins it</strong>.')
     ])) +
 
@@ -4672,7 +4711,7 @@ function defaultSetup(){
     themeDiff:{},       // theme -> difficulty, overriding the house setting
     standard:true,      // false = a mini-games-only night, no standard rounds
     minis:['closest'],  // which mini-games are on tonight's card
-    pickClosest:[], pickAuction:[], pickSaySame:[], pickMap:[],   // hand-picked mini-game questions
+    pickClosest:[], pickAuction:[], pickSaySame:[], pickMap:[], pickAirport:[],   // hand-picked mini-game questions
     picks:{}            // theme -> [questionId, questionId] chosen by hand
   };
 }
@@ -4929,6 +4968,10 @@ SCREENS.setup = function(){
             ? '<div class="flag-lvl" role="group" aria-label="Guess the Flag level">' + Object.keys(FLAG_LEVELS).map(l =>
                 '<button data-act="flagLevel" data-v="' + l + '" aria-pressed="' + (flagLevelsOf(c).indexOf(l) > -1) + '">' + FLAG_LEVELS[l] + '</button>').join('') + '</div>'
             : '') +
+          (k === 'airport' && on
+            ? '<div class="flag-lvl" role="group" aria-label="Guess the Airport level">' + Object.keys(AIRPORT_LEVELS).map(l =>
+                '<button data-act="airportLevel" data-v="' + l + '" aria-pressed="' + (airportLevelsOf(c).indexOf(l) > -1) + '">' + AIRPORT_LEVELS[l] + '</button>').join('') + '</div>'
+            : '') +
           (k === 'dish' && on
             ? ['c', 'd'].map(kind =>
                 '<div class="flag-lvl dish-lvl" role="group" aria-label="' + (kind === 'c' ? 'Cocktail' : 'Dish') + ' levels">' +
@@ -5078,6 +5121,8 @@ const MINI_PICKS = {
             help:'Maps at tonight&rsquo;s level(s), in the order you tick them. Anything short is drawn from those levels, and the rest wait as tie-breakers.' },
   flag:   { store:'pickFlag', type:'flag', cap:FLAG_LEGS, label:'Guess the Flag',
             help:'Flags at tonight&rsquo;s level(s), in the order you tick them. Anything short is dealt from the level, and the rest wait as swaps and tie-breakers.' },
+  airport:{ store:'pickAirport', type:'airport', cap:AIRPORT_LEGS, label:'Guess the Airport',
+            help:'Boards at tonight&rsquo;s level(s), in the order you tick them. Anything short is dealt from those levels, and the rest wait as swaps and tie-breakers.' },
   dish:   { store:'pickDish', type:'dish', cap:DISH_LEGS, label:'Guess the Cocktail or Dish',
             help:'Cocktails and dishes at tonight&rsquo;s levels, in the order you tick them. Anything short is dealt from those levels, and the rest wait as swaps and tie-breakers.' }
 };
@@ -5095,6 +5140,9 @@ function miniPickBlocks(only){
       : m.type === 'flag'
       ? S.bank.filter(q => flagOK(q) && flagLevelsOf(c).indexOf(q.level) > -1)
           .sort((a, b) => (isFresh(b) - isFresh(a)) || a.question.localeCompare(b.question))
+      : m.type === 'airport'
+      ? S.bank.filter(q => airportOK(q) && airportLevelsOf(c).indexOf(q.level) > -1)
+          .sort((a, b) => (isFresh(b) - isFresh(a)) || Object.keys(AIRPORT_LEVELS).indexOf(a.level) - Object.keys(AIRPORT_LEVELS).indexOf(b.level) || a.question.localeCompare(b.question))
       : m.type === 'dish'
       ? S.bank.filter(q => dishOK(q) && dishLevelsOf(c).indexOf(q.level) > -1)
           .sort((a, b) => (isFresh(b) - isFresh(a)) || a.level.localeCompare(b.level) || a.question.localeCompare(b.question))
@@ -5120,6 +5168,7 @@ function miniPickBlocks(only){
              (isFresh(q) ? '' : ' · played before') + '</span>'
          : m.type === 'flag' ? '<span class="qa dim">' + esc(q.notes || FLAG_LEVELS[q.level]) + (isFresh(q) ? '' : ' · played before') + '</span>'
          : m.type === 'dish' ? '<span class="qa dim">' + esc(dishLevelName(q.level)) + ' · ' + q.ings.length + ' ingredients' + (isFresh(q) ? '' : ' · played before') + '</span>'
+         : m.type === 'airport' ? '<span class="qa dim">' + esc(q.code + ' · ' + q.city + ' · ' + (AIRPORT_LEVELS[q.level] || '')) + (isFresh(q) ? '' : ' · played before') + '</span>'
          : q.notes ? '<span class="qa dim">' + esc(q.notes) + '</span>' : '') +
         '</span></button>';
     }).join('');
@@ -6238,6 +6287,167 @@ SCREENS.mapSummary = function(){
 };
 
 /* ==========================================================================
+   17g. GUESS THE AIRPORT — screens
+   Guess the Flag with a departures board instead of a flag: both teams write
+   down which airport, the host reveals it and rules. The reveal lists what
+   counts (the city, unless it has more than one big airport) and how the
+   board gives it away.
+   ========================================================================== */
+/* the board, drawn like the real thing: amber on black, a row a flight; a status takes the board's
+   colour in any of its languages (boarding green, delayed amber, cancelled red) */
+const BOARD_TONE = [
+  [/cancel|annul|ακυρ|iptal|geannuleerd|ملغ|欠航/i, '#ff5566'],
+  [/delay|retras|atras|retard|καθυστ|gecik|vertraag|verspät|متأخر|遅延/i, '#ffb020'],
+  [/board|embar|instap|biniş|son çağrı|επιβίβ|صعود|搭乗|última|last call|gate offen/i, '#3ddc97']];
+function airportBoard(q){
+  const tone = (st) => (BOARD_TONE.find(t => t[0].test(st)) || [0, '#ffd25a'])[1];
+  return '<div class="board" role="table" aria-label="Departures board">' +
+    '<div class="board-title"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z"/></svg>' +
+      '<bdi>' + esc(q.boardTitle || '') + '</bdi></div>' +
+    (q.board || []).map(r => '<div class="board-row" role="row">' +
+      '<span class="b-time" role="cell">' + esc(r[0]) + '</span>' +
+      '<span class="b-dest" role="cell"><bdi>' + esc(r[2]) + '</bdi></span>' +
+      '<span class="b-flight" role="cell">' + esc(r[3]) + '</span>' +
+      '<span class="b-gate" role="cell">' + esc(r[4]) + '</span>' +
+      '<span class="b-status" role="cell" style="color:' + tone(r[1]) + '"><bdi>' + esc(r[1]) + '</bdi></span></div>').join('') +
+  '</div>';
+}
+function airportLegLabel(){
+  const s = G().airportGame;
+  const i = Math.min(s.i, s.qs.length - 1);
+  return i >= s.base ? 'Tie-breaker board ' + (i - s.base + 1) : 'Board ' + (i + 1) + ' of ' + s.base;
+}
+function airportDots(){
+  const s = G().airportGame;
+  let out = '<span class="mini-dots">';
+  for(let i = 0; i < s.qs.length; i++){
+    const r = s.subs[i];
+    out += '<i class="' + (!r ? '' : r.winner === 'tie' ? 't' : r.winner === 'none' ? 'n' : r.winner === 0 ? 'a' : 'b') + '"></i>';
+  }
+  return out + '</span>';
+}
+const airportBand = () => '<div class="center"><div class="mini-band tight"><span class="eyebrow gold">' + airportLegLabel() + '</span>' + airportDots() + '</div></div>';
+/* what the host accepts: the name, the code, the city where it has one big airport, other spellings */
+function airportCounts(q){
+  const seen = {}, out = [];
+  [q.answer, q.code].concat(q.accept || []).forEach(a => { const k = String(a).toLowerCase(); if(a && !seen[k]){ seen[k] = 1; out.push(a); } });
+  const city = (q.accept || []).some(a => String(a).toLowerCase() === String(q.city).toLowerCase());
+  return '<p class="help airport-counts"><strong>Counts:</strong> ' + out.map(a => '<bdi>' + esc(a) + '</bdi>').join(' · ') +
+    (city ? '' : '<br>The city alone does not: ' + esc(q.city) + ' has more than one big airport.') + '</p>';
+}
+
+SCREENS.airportIntro = function(){
+  const g = G(), s = g.airportGame, n = s.base;
+  return '<div class="stack lg intro-screen" style="padding-top:18px">' +
+    '<div class="center stack intro-head" style="gap:10px">' +
+      '<div class="eyebrow gold">Mini-game</div>' +
+      '<h1 class="display">Guess<br>the Airport</h1>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + s.levels.map(l => AIRPORT_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+    '</div>' +
+    '<div class="card pad lit stack">' +
+      '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
+        '<li><strong style="color:var(--gold)">1.</strong> A departures board goes up. <strong>' + AIRPORT_SECS + ' seconds.</strong> The destinations, the airlines and the language are the clues — the airport&rsquo;s own city is never on it.</li>' +
+        '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>which airport</strong>, at the same time.' + (NOHOST() ? ' Keep it face down.' : ' Captains hand it to the host.') + ' The city is enough, unless it has more than one big airport: then name the airport (Heathrow, not London). The code counts too.</li>' +
+        '<li><strong style="color:var(--gold)">3.</strong> ' + (NOHOST() ? 'Reveal it, turn the answers over, and rule together.' : 'The host reveals it and rules.') + ' Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level — even at nothing each — and another board comes out, <strong>until somebody gets one</strong>.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="btn-row center"><button class="btn gold lg" data-act="airportStart">Show board 1</button></div>' +
+  '</div>';
+};
+AFTER.airportIntro = function(){ jingleOnce('airport'); };
+
+SCREENS.airportQ = function(){
+  const g = G(), s = g.airportGame, q = s.qs[s.i];
+  return '<div class="play map-play airport-play">' +
+    airportBand() +
+    '<div class="map-stage">' +
+      '<div class="map-frame board-frame">' + airportBoard(q) + '</div>' +
+      '<div class="map-side">' +
+        '<div class="q-theme">Which airport is this?</div>' +
+        timerRing('seconds left') +
+        timerControls() +
+        peek({ answer:q.answer + ' (' + q.code + ')', notes:q.notes }) +
+      '</div>' +
+    '</div>' +
+    '<div class="row between" style="gap:10px">' +
+      '<button class="btn sm ghost" data-act="airportSwap">Change this board</button>' +
+      '<button class="btn gold" data-act="toAirportJudge">Pens down — reveal</button>' +
+    '</div>' +
+  '</div>';
+};
+AFTER.airportQ = function(){
+  const s = G().airportGame, q = s.qs[s.i];
+  if(!S.used.has(q.id)) markUsed(q);        // played the moment it is on screen
+  armTimer('airport' + s.i + '-' + q.id, AIRPORT_SECS, () => { if(S.screen === 'airportQ') go('airportJudge'); });
+};
+
+SCREENS.airportJudge = function(){
+  const g = G(), s = g.airportGame, q = s.qs[s.i];
+  return '<div class="compact map-judge airport-judge">' +
+    airportBand() +
+    '<div class="map-stage reveal">' +
+      '<div class="map-frame board-frame">' + airportBoard(q) + '</div>' +
+      '<div class="map-side">' +
+        '<div class="eyebrow gold">The airport</div>' +
+        '<div class="map-title">' + esc(q.answer) + '</div>' +
+        '<div class="airport-code"><b>' + esc(q.code) + '</b> · ' + esc(q.city) + '</div>' +
+        airportCounts(q) +
+        (q.notes ? '<p class="q-note">' + esc(q.notes) + '</p>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="card pad lit stack" style="gap:10px">' +
+      '<h3 class="display" style="font-size:clamp(16px,2.2vw,22px);text-align:center">Who got it?</h3>' +
+      '<div class="btn-row center" style="gap:10px">' +
+        '<button class="btn teamA lg" data-act="airportVerdict" data-w="0">' + esc(g.teams[0].name) + '</button>' +
+        '<button class="btn ghost" data-act="airportVerdict" data-w="tie">Both — 1 each</button>' +
+        '<button class="btn ghost" data-act="airportVerdict" data-w="none">Nobody</button>' +
+        '<button class="btn teamB lg" data-act="airportVerdict" data-w="1">' + esc(g.teams[1].name) + '</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+};
+
+SCREENS.airportSummary = function(){
+  const g = G(), s = g.airportGame;
+  const rows = s.subs.map((r, i) =>
+    '<tr><td class="rowhead" data-l="Board">' + (i + 1) + '</td>' +
+    '<td class="qcell" data-l="It was">' + esc(r.q.answer) + ' <span class="dim">' + esc(r.q.code) + '</span></td>' +
+    '<td data-l="Winner">' + (r.winner === 'tie' ? '<span class="badge line">Both</span>'
+      : r.winner === 'none' ? '<span class="badge line">Nobody</span>'
+      : '<span class="badge ' + (r.winner === 0 ? 'a' : 'b') + '">' + esc(g.teams[r.winner].name) + '</span>') + '</td></tr>'
+  ).join('');
+  const verdict = s.verdict || {};
+  return '<div class="fits">' +
+    '<div class="center stack" style="gap:6px">' +
+      '<div class="eyebrow gold">Guess the Airport — final</div>' +
+      '<h2 class="display">' + (verdict.winner == null ? 'Tie' : esc(g.teams[verdict.winner].name) + ' takes it') + '</h2>' +
+      '<div class="row center" style="justify-content:center;gap:20px">' +
+        '<span class="badge a">' + esc(g.teams[0].name) + ' — ' + s.wins[0] + '</span>' +
+        '<span class="badge b">' + esc(g.teams[1].name) + ' — ' + s.wins[1] + '</span>' +
+      '</div>' +
+      (verdict.note ? '<p class="help" style="max-width:52ch;margin:0 auto">' + verdict.note + '</p>' : '') +
+      (s.awarded && s.award ? '<p class="help">Points awarded: <strong style="color:var(--a)">' + s.award[0] + '</strong> / <strong style="color:var(--b)">' + s.award[1] + '</strong></p>' : '') +
+    '</div>' +
+    (verdict.needsHost
+      ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
+        '<p class="help">Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<div class="btn-row center">' +
+          '<button class="btn teamA lg" data-act="airportAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
+          '<button class="btn ghost" data-act="airportAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
+          '<button class="btn teamB lg" data-act="airportAward" data-w="1">' + esc(g.teams[1].name) + ' takes it</button>' +
+        '</div></div>'
+      : '') +
+    scoreBig() +
+    '<div class="tbl-wrap"><table><thead><tr><th>Board</th><th>It was</th><th>Winner</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="btn-row center">' +
+      '<button class="btn ghost" data-act="quit">End game</button>' +
+      '<button class="btn gold lg" data-act="afterAirport">' + afterMiniLabel('airport') + '</button>' +
+    '</div>' +
+  '</div>';
+};
+
+/* ==========================================================================
    17f. GUESS THE FLAG — screens
    Built on Guess the Map: same layout, same best-of with a tie-break that
    runs until somebody gets one, same verdict buttons.
@@ -7014,6 +7224,7 @@ SCREENS.bank = function(){
   rows.sort((a, b) =>
     ((a.type === 'flag') - (b.type === 'flag')) ||
     ((a.type === 'dish') - (b.type === 'dish')) ||
+    ((a.type === 'airport') - (b.type === 'airport')) ||
     coll.compare(a.theme, b.theme) ||
     dRank(a) - dRank(b) ||
     coll.compare(a.question, b.question));
@@ -7029,6 +7240,7 @@ SCREENS.bank = function(){
                                    : '<span class="dim" style="font-weight:500">' + (mapSpec(q) ? MAP_VIEW_NAME[mapSpec(q).view] + ' map' : '') + '</span>')
        : q.type === 'flag' ? (FLAG_KEYS.has(q.flag) ? '<img class="bank-thumb bank-flag" src="' + flagSrc(q) + '" alt="" loading="lazy">' : '')
        : q.type === 'dish' ? '<span class="dim" style="font-weight:500">' + esc((q.ings || []).map(t => splitIng(t)[1]).join(' · ')) + '</span>'
+       : q.type === 'airport' ? '<span class="dim" style="font-weight:500">' + esc(q.code + ' · ' + q.city) + '</span>'
        : esc(q.answer)) + '</td>' +
     '<td>' + esc(q.theme) + '</td>' +
     '<td>' + (q.type === 'closest' ? '<span class="badge gold">Closest</span>'
@@ -7037,8 +7249,9 @@ SCREENS.bank = function(){
             : q.type === 'map'     ? '<span class="badge ok">Map</span>'
             : q.type === 'flag'    ? '<span class="badge ok">Flag</span>'
             : q.type === 'dish'    ? '<span class="badge ok">' + dishKind(q) + '</span>'
+            : q.type === 'airport' ? '<span class="badge ok">Airport</span>'
             : '<span class="badge line">Standard</span>') + '</td>' +
-    '<td>' + (q.type === 'dish' ? esc(DISH_LEVELS[q.level] || '') : q.type === 'flag' ? esc(FLAG_LEVELS[q.level] || '') : q.type === 'map' ? esc(MAP_LEVELS[q.level] || '') : esc(Cap(q.difficulty))) + '</td>' +
+    '<td>' + (q.type === 'dish' ? esc(DISH_LEVELS[q.level] || '') : q.type === 'flag' ? esc(FLAG_LEVELS[q.level] || '') : q.type === 'map' ? esc(MAP_LEVELS[q.level] || '') : q.type === 'airport' ? esc(AIRPORT_LEVELS[q.level] || '') : esc(Cap(q.difficulty))) + '</td>' +
     '<td>' + (q.use_with ? '<code style="font-size:11px;color:var(--a)">' + esc(q.use_with) + '</code>' : '<span class="dim">—</span>') + '</td>' +
     '<td>' + (S.used.has(q.id) ? '<span class="badge no">played</span>' : '') + '</td>' +
     '<td><button class="btn sm ghost danger" data-act="qDel" data-id="' + q.id + '">Del</button></td></tr>').join('');
@@ -7072,7 +7285,7 @@ SCREENS.bank = function(){
         /* Cap() alone turns 'saysame' into "Saysame" — a real label, not a
            capitalised value, for the one type whose name is not one word. */
         '<label class="fld" style="flex:1;min-width:120px">Type<select data-act="bf" data-k="type">' +
-          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same'],['map','Map'],['flag','Flag'],['dish','Cocktail / dish']]
+          [['','All'],['standard','Standard'],['closest','Closest'],['auction','Auction'],['saysame','Say-Same'],['map','Map'],['flag','Flag'],['dish','Cocktail / dish'],['airport','Airport']]
             .map(([v, label]) => '<option value="' + esc(v) + '"' + (f.type === v ? ' selected' : '') + '>' + esc(label) + '</option>').join('') +
         '</select></label>' +
         '<label class="fld" style="flex:1;min-width:120px">Difficulty<select data-act="bf" data-k="diff">' + [''].concat(DIFFS).map(t => opt(t, f.diff)).join('') + '</select></label>' +
@@ -7224,7 +7437,7 @@ const csvCell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"
 function bankToCSV(list){
   const head = ['question','answer','notes','theme','type','difficulty','use_question_with','pool'];
   /* maps are pictures — they go in the JSON backup, not a spreadsheet */
-  return head.join(',') + '\n' + list.filter(q => q.type !== 'map' && q.type !== 'flag' && q.type !== 'dish').map(q =>
+  return head.join(',') + '\n' + list.filter(q => q.type !== 'map' && q.type !== 'flag' && q.type !== 'dish' && q.type !== 'airport').map(q =>
     [q.question, q.answer, q.notes, q.theme, q.type, q.difficulty, q.use_with, (q.pool || []).join(' | ')]
       .map(csvCell).join(',')).join('\n');
 }
@@ -7608,6 +7821,7 @@ const HOST_LINES = {
   mini_saysame:['Don\'t Say the Same as Me! Think different. Think weird.', 'Great minds think alike. Don\'t be a great mind.'],
   mini_map:['Guess the Map! Your geography teacher is watching.', 'Colours, dots, mystery. What on earth is this map?'],
   mini_flag:['Guess the Flag! Rectangles of national pride.', 'Flags! Is it Chad? It\'s always Chad. Or Romania.'],
+  mini_airport:['Guess the Airport! Fasten your seatbelts.', 'Departures board! Your gate is closing. Which airport is it?'],
   mini_dish:['Guess the Cocktail or Dish! I hope you ate before this.', 'Ingredients incoming. First captain to shout it wins. No pressure, chef.'],
   mini_battle:['Battle of the Captains! Everyone else, zip it.', 'Captains only. Teams, sit on your hands.'],
   miniwin:[
@@ -7765,12 +7979,12 @@ afterAlso('roundIntro', () => {
   Host.once('r' + g.r, opener().concat(['round']), { t:first, theme:rd.theme, n:rd.n, N:g.rounds.length });
 });
 [['miniIntro', 'closest'], ['auctionIntro', 'auction'], ['sayIntro', 'saysame'], ['mapIntro', 'map'],
- ['flagIntro', 'flag'], ['dishIntro', 'dish'], ['battleIntro', 'battle']].forEach(([scr, key]) =>
+ ['flagIntro', 'flag'], ['airportIntro', 'airport'], ['dishIntro', 'dish'], ['battleIntro', 'battle']].forEach(([scr, key]) =>
   afterAlso(scr, () => { const g = G(); if(!(g.hostOnce && g.hostOnce['mi:' + key])) Host.once('mi:' + key, opener().concat(['mini_' + key])); }));
 
 /* a mini-game's result, once the points are actually on the board */
 [['miniSummary', g => g.mini], ['auctionResult', g => g.auction], ['saySummary', g => g.saySame],
- ['mapSummary', g => g.mapGame], ['flagSummary', g => g.flagGame], ['dishSummary', g => g.dishGame],
+ ['mapSummary', g => g.mapGame], ['flagSummary', g => g.flagGame], ['airportSummary', g => g.airportGame], ['dishSummary', g => g.dishGame],
  ['battleSummary', g => g.battle]].forEach(([scr, get]) =>
   afterAlso(scr, () => {
     const g = G(), m = get(g);
@@ -7950,6 +8164,14 @@ const ACT = {
     S.setup.pickFlag = (S.setup.pickFlag || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && next.indexOf(q.level) > -1; });
     Snd.soft(); render();
   },
+  airportLevel(e){
+    const v = e.dataset.v, cur = airportLevelsOf(S.setup);
+    const next = cur.indexOf(v) > -1 ? cur.filter(x => x !== v) : cur.concat([v]);
+    if(!next.length) return toast('Keep at least one level.');
+    S.setup.airportLevels = Object.keys(AIRPORT_LEVELS).filter(k => next.indexOf(k) > -1);
+    S.setup.pickAirport = (S.setup.pickAirport || []).filter(id => { const q = S.bank.find(x => x.id === id); return q && next.indexOf(q.level) > -1; });
+    Snd.soft(); render();
+  },
   dishLevel(e){
     const v = e.dataset.v, cur = dishLevelsOf(S.setup);
     const next = cur.indexOf(v) > -1 ? cur.filter(x => x !== v) : cur.concat([v]);
@@ -8011,6 +8233,7 @@ const ACT = {
      : S.screen === 'sayQ'   ? 'sayJudge'
      : S.screen === 'mapQ'   ? 'mapJudge'
      : S.screen === 'flagQ'  ? 'flagJudge'
+     : S.screen === 'airportQ' ? 'airportJudge'
      : S.screen === 'soloQ'  ? 'soloA'      // solo has no steal and no host
      : 'reveal');
   },
@@ -8094,6 +8317,12 @@ const ACT = {
   flagVerdict(e){ run({ type:'flag/verdict', w:e.dataset.w === 'tie' || e.dataset.w === 'none' ? e.dataset.w : +e.dataset.w }); },
   flagAward(e){ run({ type:'flag/award', w:e.dataset.w === 'split' ? 'split' : +e.dataset.w }); },
   afterFlag(){ run({ type:'flag/done' }); },
+  airportStart(){ run({ type:'airport/start' }); },
+  airportSwap(){ run({ type:'airport/swap' }); },
+  toAirportJudge(){ Timer.stop(); go('airportJudge'); },
+  airportVerdict(e){ run({ type:'airport/verdict', w:e.dataset.w === 'tie' || e.dataset.w === 'none' ? e.dataset.w : +e.dataset.w }); },
+  airportAward(e){ run({ type:'airport/award', w:e.dataset.w === 'split' ? 'split' : +e.dataset.w }); },
+  afterAirport(){ run({ type:'airport/done' }); },
 
   /* ---- guess the cocktail or dish (moves in the engine) ---- */
   dishStart(){ run({ type:'dish/start' }); },

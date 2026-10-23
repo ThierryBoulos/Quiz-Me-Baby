@@ -426,7 +426,7 @@ Import merges — a question with identical text updates the existing row instea
 
 Acronyms · Art & Books · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech · TV Series · 90s Kids
 
-Party also plays 41 Drop the Pin landmarks, 39 Guess the Airport boards and 104 Majority Rules questions.
+Guess the Airport has 39 departures boards, in both Classic and Party. Party also plays 41 Drop the Pin landmarks and 104 Majority Rules questions, which need everyone's phone.
 
 Every standard question has one of four levels: Easy, Medium, Hard or Expert. A night plays Easy to Hard by default, with Expert only once a theme runs out of the others; Mixed is all four.
 
@@ -447,7 +447,7 @@ Only rows marked `src: 'seed'` are touched by any of the three. Anything you **i
 - **Sexy Time** is explicit adult trivia. It's a real theme with real answers, but deselect it at setup for a tamer room.
 - **Know the Host** has no real answers in the bank — every one reads *"Host knows this one."* You supply the truth on the spot. If you'd rather have them written down, open the bank, filter to that theme, and type your real answers in.
 
-**Restore starter bank** in the bank screen puts all 1,356 built-in rows back (questions, flags, dishes and maps) if you ever overwrite them.
+**Restore starter bank** in the bank screen puts all 1,395 built-in rows back (questions, flags, dishes, maps and airport boards) if you ever overwrite them.
 
 ## The engine (for v4 Party mode)
 
