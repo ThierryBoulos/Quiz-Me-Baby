@@ -55,6 +55,21 @@ const CASES = {
     ["volcanoes", "mountains", "mountain ranges", "everest"]],
   q1xscvvl: [["2026 world cup host cities", "world cup 2026", "world cup host cities", "fifa 2026", "2026 host cities", "world cup stadiums", "cities hosting the world cup", "world cup in the usa"],
     ["world cup winners", "big cities", "american cities", "world cup"]],
+  /* picked 23 Oct 2026 */
+  qlf3ihy: [["the stans","countries ending in stan","-stan countries","names that end with istan","stan","countries ending with -stan","the stan countries"],
+    ["central asia","muslim countries","former soviet union","deserts"]],
+  q1n3z7bn: [["french speaking countries","francophone","where they speak french","french as an official language","french","countries that speak french","la francophonie","frensh speaking"],
+    ["former french colonies","france","french empire","europe and africa"]],
+  qzkaulm: [["borders russia","russia's neighbours","countries next to russia","neighbours of russia","the russian border","russia","countries that touch russia","rusia neighbours"],
+    ["former soviet union","ussr","communist countries","nato"]],
+  q1hicliv: [["population","most populated countries","over 100 million people","biggest populations","most people","populous countries","100 million inhabitants","populaton"],
+    ["biggest countries","largest economies","g20","population density"]],
+  qrdkgbq: [["arab league","arab countries","the arab world","arabic speaking countries","arab states","arab nations"],
+    ["muslim countries","middle east","opec","deserts"]],
+  q1nthcja: [["guinea","countries called guinea","guinea in the name","the guineas","guinee","countries with guinea"],
+    ["west africa","former french colonies","islands","small countries"]],
+  qhhlwtg: [["world cup finalists","played in a world cup final","reached the world cup final","world cup finals","finalists","countries in the final","world cup finalist"],
+    ["world cup winners","world cup hosts","football","euro finals"]],
 };
 const bad = [];
 for (const q of maps) {

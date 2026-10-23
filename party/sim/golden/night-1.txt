@@ -112,7 +112,8 @@
 160.50 battleQ | 59 | 12-4 | 2-2 | Owls +1 point | 
 161.25 battleQ | 59 | 12-4 | 2-3 | Owls +1 point | 
 163.25 battleQ | 59 | 12-4 | 2-4 | Owls +1 point | 
-167.75 battleReview | 59 | 12-4 | 2-5 | Owls +1 point | 
-168.50 battleSummary | 60 | 12-8 | 2-5 | Owls +1 point | 
+164.00 battleQ | 59 | 12-4 | 2-5 | Owls +1 point | 
+167.75 battleReview | 59 | 12-4 | 2-6 | Owls +1 point | 
+168.50 battleSummary | 60 | 12-8 | 2-6 | Owls +1 point | 
 169.50 final | 61 | 12-8 |  | Owls +1 point | 
 recap: {"margin":4,"sudden":false,"leadChanges":2,"steals":[1,1],"minis":[3,1],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]}}

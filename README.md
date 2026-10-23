@@ -199,7 +199,7 @@ A standard or Closest question **must** have a theme. Without one there is no ch
 
 ## Custom themes
 
-Up to **four** of your own, alongside the house nineteen. Pick **+ New custom theme…** in the theme dropdown and name it — "Work Crew", "The Cousins", whatever the room is. Once it has questions it appears everywhere a theme can: the setup chip wall, solo, the bank filter.
+Up to **four** of your own, alongside the house twenty-two. Pick **+ New custom theme…** in the theme dropdown and name it — "Work Crew", "The Cousins", whatever the room is. Once it has questions it appears everywhere a theme can: the setup chip wall, solo, the bank filter.
 
 They are **derived from the bank**, not kept in a list of their own: a custom theme exists exactly as long as a question is filed under it, and deleting the last one takes the theme with it and frees the slot. Nothing to tidy up, and nothing that can go stale. The dialog shows how many slots are left and stops offering the option at four.
 
@@ -422,9 +422,13 @@ Import merges — a question with identical text updates the existing row instea
 
 ## What's in the box
 
-**572 questions** — 441 standard, 50 Closest To Wins, 22 Auction categories, 37 Don't Say the Same as Me prompts and 22 Guess the Map maps, across 19 themes:
+**1,012 questions** — 844 standard, 58 Closest To Wins, 29 Auction categories, 55 Don't Say the Same as Me prompts and 26 Guess the Map maps, across 22 themes — plus 254 flags and 90 cocktails and dishes:
 
-Acronyms · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech
+Acronyms · Art & Books · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech · TV Series · 90s Kids
+
+Party also plays 41 Drop the Pin landmarks, 39 Guess the Airport boards and 104 Majority Rules questions.
+
+Every standard question has one of four levels: Easy, Medium, Hard or Expert. A night plays Easy to Hard by default, with Expert only once a theme runs out of the others; Mixed is all four.
 
 This is the bank from `quiz-me-baby-bank-v5.csv`, baked in as the official set for everyone. It replaced the previous bank outright — if you open this file in a browser that ran an earlier version, the old questions are cleared out rather than merged, every time the bank is replaced. Your game history and played-question memory carry over.
 
@@ -443,7 +447,7 @@ Only rows marked `src: 'seed'` are touched by any of the three. Anything you **i
 - **Sexy Time** is explicit adult trivia. It's a real theme with real answers, but deselect it at setup for a tamer room.
 - **Know the Host** has no real answers in the bank — every one reads *"Host knows this one."* You supply the truth on the spot. If you'd rather have them written down, open the bank, filter to that theme, and type your real answers in.
 
-**Restore starter bank** in the bank screen puts all 488 back if you ever overwrite them.
+**Restore starter bank** in the bank screen puts all 1,356 built-in rows back (questions, flags, dishes and maps) if you ever overwrite them.
 
 ## The engine (for v4 Party mode)
 

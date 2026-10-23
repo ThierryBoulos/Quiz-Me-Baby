@@ -39,16 +39,21 @@
 34.50 roundScore | 17 | 3-1 |  | Call changed: nobody scores this one. | 
 35.25 roundIntro | 18 | 3-1 |  | Call changed: nobody scores this one. | 
 36.25 ask | 19 | 3-1 |  | Call changed: nobody scores this one. | 
-37.25 answer | 19 | 4-1 |  | Lions +1 point | 
-38.00 ask | 20 | 4-1 |  | Lions +1 point | 
-39.00 answer | 20 | 4-2 |  | Owls +1 point | 
-39.75 roundScore | 21 | 4-2 |  | Owls +1 point | 
-40.75 roundIntro | 22 | 4-2 |  | Owls +1 point | 
-41.75 ask | 23 | 4-2 |  | Owls +1 point | 
-42.50 answer | 23 | 5-2 |  | Lions +1 point | 
-43.50 ask | 24 | 5-2 |  | Lions +1 point | 
-44.25 steal | 24 | 5-2 |  | Lions +1 point | 
-45.25 answer | 24 | 5-2 |  | Lions +1 point | 
-46.25 roundScore | 25 | 5-2 |  | Lions +1 point | 
-47.00 final | 26 | 5-2 |  | Lions +1 point | 
-recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[2,1],"minis":[0,0]}
+37.25 steal | 19 | 3-1 |  | Call changed: nobody scores this one. | 
+38.00 answer | 19 | 3-1 |  | Call changed: nobody scores this one. | 
+39.00 ask | 20 | 3-1 |  | Call changed: nobody scores this one. | 
+39.75 steal | 20 | 3-1 |  | Call changed: nobody scores this one. | 
+40.75 answer | 20 | 3-1 |  | Call changed: nobody scores this one. | 
+41.75 roundScore | 21 | 3-1 |  | Call changed: nobody scores this one. | 
+42.50 roundIntro | 22 | 3-1 |  | Call changed: nobody scores this one. | 
+43.50 ask | 23 | 3-1 |  | Call changed: nobody scores this one. | 
+44.25 steal | 23 | 3-1 |  | Call changed: nobody scores this one. | 
+45.25 answer | 23 | 3-2 |  | Owls +1 point — steal | 
+46.25 ask | 24 | 3-2 |  | Owls +1 point — steal | 
+47.00 answer | 24 | 3-3 |  | Owls +1 point | 
+48.00 roundScore | 25 | 3-3 |  | Owls +1 point | 
+48.75 sudden | 26 | 3-3 |  | Owls +1 point | 
+49.75 sudden | 27 | 3-3 |  | Owls +1 point | 
+51.50 sudden | 27 | 3-3 |  | Wrong. The other captain can buzz. | 
+53.25 final | 27 | 3-4 |  | Wrong. The other captain can buzz. | 
+recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[2,2],"minis":[0,0]}

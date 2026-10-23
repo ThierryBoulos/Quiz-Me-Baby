@@ -25,3 +25,24 @@ The file name is a hash, so it doesn't give away the landmark. Written by `scrip
 | 469d53b9f2348338.jpg | Mont-Saint-Michel | Diliff | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Mont_St_Michel_3,_Brittany,_France_-_July_2011.jpg |
 | e3e225f11da71cb9.jpg | Matterhorn | chil, on Camptocamp.org | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Matterhorn_from_Domhütte_-_2.jpg |
 | 403f26165777c7d5.jpg | Victoria Falls | Diego Delso | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Cataratas_Victoria,_Zambia-Zimbabue,_2018-07-27,_DD_04.jpg |
+| 24db0609a32b15b3.jpg | Christ the Redeemer | Mucio Scorzelli | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Christ_the_Redeemer-(Corcovado)_front_view.jpg |
+| 00570a1fff66ab0d.jpg | Golden Gate Bridge | © Frank Schulenburg | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Golden_Gate_Bridge_as_seen_from_Battery_East.jpg |
+| 0a3e6f4bb1b2824a.jpg | Leaning Tower of Pisa | Chabe01 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Campanile_D%C3%B4me_-_Pise_(IT52)_-_2022-08-31_-_20.jpg |
+| f3c4c9cded4b2c40.jpg | Great Wall of China (Mutianyu section) | Velatrix (no credit required) | CC0 | https://commons.wikimedia.org/wiki/File:Great_Wall_of_China_July_2006.JPG |
+| 33176262ed315b97.jpg | Sagrada Família | Canaan | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:SF_maig_2026.jpg |
+| 83de3a5ba00edd61.jpg | Parthenon (Acropolis of Athens) | A.Savin | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Attica_06-13_Athens_50_View_from_Philopappos_-_Acropolis_Hill.jpg |
+| c2e1b9f9ae065ece.jpg | Mount Fuji | 名古屋太郎, edited by Hannes_24 | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Kodaki_fuji_frm_shojinko_refurb.jpg |
+| fc2d1af35ce56ad2.jpg | Pigeons' Rock (Raouché Rocks) | Heretiq | CC BY-SA 2.5 | https://commons.wikimedia.org/wiki/File:BeirutRaouche.jpg |
+| c48ccc06f0564ae9.jpg | Stonehenge | Stefan Kühn | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Stonehenge_Total.jpg |
+| e9d77cf04f9664d8.jpg | Hagia Sophia | Arild Vågen | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Hagia_Sophia_Mars_2013.jpg |
+| f09e2053d65440c0.jpg | St Basil's Cathedral | W. Bulach | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:00_0568_Saint_Basil's_Cathedral_-_Moscow.jpg |
+| 6902ac01c226868f.jpg | Uluru (Ayers Rock) | Corey Leopold | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Uluru,_helicopter_view,_cropped.jpg |
+| 0dcb4ea8c69b98ca.jpg | Mount Kilimanjaro | Chris 73 / Wikimedia Commons | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Mt._Kilimanjaro_12.2006.jpg |
+| e16db5ce640feb46.jpg | Petronas Towers | AwOiSoAk KaOsIoWa | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Kuala_Lumpur_-_panoramio_(18).jpg |
+| d644153c7b4f4b59.jpg | Charles Bridge | A.Savin | Free Art License 1.3 | https://commons.wikimedia.org/wiki/File:Prague_07-2016_view_from_Lesser_Town_Tower_of_Charles_Bridge_img3.jpg |
+| f67f77321cdd49e4.jpg | Krak des Chevaliers | Bernard Gagnon | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Krak_des_Chevaliers_01.jpg |
+| 6f3303d15ede70c9.jpg | Church of St George (Bete Giyorgis), Lalibela | Sailko | CC BY 3.0 | https://commons.wikimedia.org/wiki/File:Lalibela,_san_giorgio,_esterno_24.jpg |
+| 1192259143cd9a16.jpg | Borobudur | Gunawan Kartapranata | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Borobudur-Nothwest-view.jpg |
+| 01a25899bf0d8149.jpg | Leshan Giant Buddha | xiquinhosilva | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Leshan_Giant_Buddha_(1).jpg |
+| 58218edd79669edf.jpg | Perito Moreno Glacier | Fernando | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Perito_Moreno_Glacier_2023.jpg |
+| af35b4549acc15fc.jpg | Ha Long Bay | Thomas Hirsch / User:Ravn | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Halong_Bay_in_Vietnam.jpg |
