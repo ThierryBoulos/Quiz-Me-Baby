@@ -473,24 +473,17 @@
     }
 
     /* The hidden word is always a common answer, what the person next to you would
-       say. The lists run from the most common answer down, and only the top few can
-       be drawn: the count a prompt sets (Friends: the six friends), or else five of
-       a long list (Cheddar, Mozzarella, Brie, Parmesan, Feta; never Wensleydale) and
-       about half of a short one. Within those the k-th is drawn with weight 1/k.
-       Closed sets of four or fewer (heads or tails, the four suits) stay an even draw. */
+       say. The lists run from the most common answer down, and the word is drawn
+       from the top six (all of a shorter list), each as likely as the next: a room
+       that plays every week can't learn that the app always says Cheddar
+       (Cheddar, Mozzarella, Brie, Parmesan, Feta, Gouda; never Wensleydale). */
+    const SAY_TOP = 6;
     function commonOf(q){
-      const n = (q.pool || []).length, c = Math.floor(Number(q.common));
-      if(n <= 4) return n;
-      return c >= 1 ? Math.min(c, n) : Math.min(5, Math.max(3, Math.ceil(n / 2)));
+      return Math.min(SAY_TOP, (q.pool || []).length);
     }
     function drawSaySame(q){
-      const pool = q.pool || [];
-      if(pool.length <= 4) return Object.assign({}, q, { answer: pool[Math.floor(rand() * pool.length)] });
-      const top = pool.slice(0, commonOf(q));
-      const w = top.map((_, k) => 1 / (k + 1)), total = w.reduce((a, b) => a + b, 0);
-      let r = rand() * total, i = 0;
-      while(i < top.length - 1 && r >= w[i]){ r -= w[i]; i++; }
-      return Object.assign({}, q, { answer: top[i] });
+      const top = (q.pool || []).slice(0, commonOf(q));
+      return Object.assign({}, q, { answer: top[Math.floor(rand() * top.length)] });
     }
 
     function saySameDeck(cfg){

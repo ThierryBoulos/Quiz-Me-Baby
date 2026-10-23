@@ -109,22 +109,18 @@ test('sudden death never deals a question the dealer marks as not for sudden dea
   }
 });
 
-test('Say the Same: the hidden word leans to the top of the list; short sets stay even', () => {
+test('Say the Same: the hidden word is any of the top six, evenly; a shorter list, any of it', () => {
   let s = 3; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const D3 = Q.createDealer({ bank:() => [], used:() => new Set(), noRepeat:() => false, rng:r, ok:{ map:() => false, flag:() => false, dish:() => false } });
-  /* only the common ones: half of a short list (a, b, c of six), weighted 1/k */
-  const wide = { pool:['a', 'b', 'c', 'd', 'e', 'f'] }, n = {};
-  for(let i = 0; i < 3000; i++){ const w = D3.drawSaySame(wide).answer; n[w] = (n[w] || 0) + 1; }
-  assert.deepEqual(Object.keys(n).sort(), ['a', 'b', 'c'], JSON.stringify(n));
-  assert.ok(n.a > n.b && n.b > n.c, JSON.stringify(n));
-  assert.ok(n.a / 3000 > 0.48 && n.a / 3000 < 0.61, JSON.stringify(n));        // 1 / 1.83
-  /* five of a long list (never Wensleydale), or the count the prompt sets */
-  const cheese = { pool:'Cheddar Mozzarella Brie Parmesan Feta Gouda Camembert Halloumi Stilton Edam Wensleydale'.split(' ') }, m = new Set();
-  for(let i = 0; i < 2000; i++) m.add(D3.drawSaySame(cheese).answer);
-  assert.deepEqual([...m].sort(), ['Brie', 'Cheddar', 'Feta', 'Mozzarella', 'Parmesan']);
-  const friends = { pool:'Rachel Ross Joey Chandler Monica Phoebe Gunther Janice Mike Ursula'.split(' '), common:6 }, f = new Set();
-  for(let i = 0; i < 2000; i++) f.add(D3.drawSaySame(friends).answer);
-  assert.equal(f.size, 6); assert.ok(f.has('Phoebe') && !f.has('Gunther'));
+  /* a long list: the top six only (never Wensleydale), each about a sixth of the time */
+  const cheese = { pool:'Cheddar Mozzarella Brie Parmesan Feta Gouda Camembert Halloumi Stilton Edam Wensleydale'.split(' ') }, n = {};
+  for(let i = 0; i < 6000; i++){ const w = D3.drawSaySame(cheese).answer; n[w] = (n[w] || 0) + 1; }
+  assert.deepEqual(Object.keys(n).sort(), ['Brie', 'Cheddar', 'Feta', 'Gouda', 'Mozzarella', 'Parmesan'], JSON.stringify(n));
+  assert.ok(Object.values(n).every((k) => k > 850 && k < 1150), JSON.stringify(n));
+  /* six or fewer: any of them, the end of the list too (Pete Best) */
+  const beatles = { pool:['John', 'Paul', 'Ringo', 'George', 'Pete Best', 'Stuart Sutcliffe'] }, b = new Set();
+  for(let i = 0; i < 2000; i++) b.add(D3.drawSaySame(beatles).answer);
+  assert.equal(b.size, 6);
   const coin = { pool:['Heads', 'Tails'] }, c = {};
   for(let i = 0; i < 2000; i++){ const w = D3.drawSaySame(coin).answer; c[w] = (c[w] || 0) + 1; }
   assert.ok(Math.abs(c.Heads - c.Tails) < 200, JSON.stringify(c));
