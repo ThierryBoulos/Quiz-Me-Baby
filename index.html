@@ -3915,8 +3915,13 @@ const isFresh   = (q) => !S.settings.noRepeat || !S.used.has(q.id);
 /* Dealing lives in the shared engine (engine/core.js) — the same code Party
    mode deals with. It is handed the bank, the played list and the "never
    reuse" setting, plus how to tell a map, flag or recipe row is usable. */
+/* Know the Host and the host's own made-up themes need a host (23 Oct, as in Party): a no-host night
+   never offers them at setup and never deals them, not in a swap or a tie-breaker either */
+const needsHost = (q) => (q.type === 'standard' || q.type === 'closest') &&
+  (q.theme === 'Know the Host' || (BUILT_IN_THEMES.indexOf(q.theme) < 0 && THEMES.indexOf(q.theme) > -1));
+const noHostTonight = () => S.game && S.screen !== 'setup' ? !!S.game.hostless : !!(S.setup && S.setup.hostless);
 const DEAL = QMB.createDealer({
-  bank: () => S.bank,
+  bank: () => noHostTonight() ? S.bank.filter(q => !needsHost(q)) : S.bank,
   used: () => S.used,
   noRepeat: () => S.settings.noRepeat,
   ok: { map: (q) => mapOK(q), flag: (q) => flagOK(q), dish: (q) => dishOK(q) }
@@ -4646,9 +4651,13 @@ SCREENS.rules = function(){
 /* ==========================================================================
    12. SCREENS — SETUP
    ========================================================================== */
+/* the themes tonight's setup offers: all of them with a host; without one, not Know the Host or a made-up theme */
+function setupThemes(){
+  return THEMES.filter(t => !needsHost({ type:'standard', theme:t }) || !(S.setup && S.setup.hostless));
+}
 /* themes that can actually field a matched pair at this difficulty */
 function usableThemes(diff){
-  return THEMES.filter(t => pairsFor(t, diff).length > 0);
+  return setupThemes().filter(t => pairsFor(t, diff).length > 0);
 }
 function defaultSetup(){
   const rounds = 8;
@@ -4754,7 +4763,7 @@ SCREENS.setup = function(){
      host does not have — the capacity warning underneath already catches a
      theme that cannot field a round. A theme that is genuinely too thin is
      dimmed instead, which reads at a glance and costs no width. */
-  const themeChips = THEMES.map(t => {
+  const themeChips = setupThemes().map(t => {
     const d = diffFor(t);
     const n = S.bank.filter(q => q.theme === t && q.type === 'standard' && matchDiff(q, d) && isFresh(q)).length;
     const on = c.themes.indexOf(t) > -1;
@@ -7794,6 +7803,10 @@ const ACT = {
     Snd.soft();
     if(!S.setup) S.setup = defaultSetup();
     S.setup.hostless = e.dataset.h === '1';
+    /* no host: a theme that needs one leaves the card, and another takes its round */
+    const offered = setupThemes();
+    S.setup.themes = S.setup.themes.filter(t => offered.indexOf(t) > -1);
+    prunePicks(); syncThemes();
     nav('setup');
   },
   go(e){ Snd.soft(); if(e.dataset.to === 'setup' && !S.setup) S.setup = defaultSetup(); nav(e.dataset.to); },
