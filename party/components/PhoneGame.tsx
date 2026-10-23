@@ -707,8 +707,8 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
   if (sc === "majorityReveal" && pub.majority?.reveal) { const M = pub.majority, R = M.reveal!; return (<>
     <div className="eyebrow text-center">This question</div>
     {rows((t) => `${R.right[t]} of ${M.n?.[t] ?? 0} right`)}
-    {M.totals && <p className="text-center text-14 text-[var(--color-ink-2)]">So far: {name(0)} {pub.mini?.wins[0] ?? 0}% · {name(1)} {pub.mini?.wins[1] ?? 0}%
-      <span className="block text-12 text-[var(--color-ink-3)]">({M.totals.right[0]} of {M.totals.of[0]} and {M.totals.right[1]} of {M.totals.of[1]} right)</span></p>}</>); }
+    {/* the game so far, in percent, is in the bar at the top (this question counted already): here, the counts behind it */}
+    {M.totals && <p className="text-center text-13 text-[var(--color-ink-3)]">So far: {name(0)} {M.totals.right[0]} of {M.totals.of[0]} right · {name(1)} {M.totals.right[1]} of {M.totals.of[1]} right</p>}</>); }
   if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (<>
     {head(legW(w), w === "tie" ? "A point each" : w === "none" ? "No pins, no point" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
     {rows((t) => (R.pins[t] ? `${showKm(R.km[t] ?? 0)} off` : "No pin"))}</>); }

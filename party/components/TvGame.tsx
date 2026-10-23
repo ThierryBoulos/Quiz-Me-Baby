@@ -193,11 +193,8 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
           <span key={t} className="font-bold text-26" style={{ color: tc(t as 0 | 1) }}>{T[t].name}: {M.answered?.[t] ?? 0} of {M.n?.[t] ?? 0} answered</span>))}</div>
       </div>) : (
       <div className="flex flex-col items-center gap-2">
-        {/* this question, and the game so far beside it: one line, so the fact above has the room */}
-        <div className="flex items-baseline justify-center gap-8 flex-wrap">
-          <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
-          <div className="display text-36">{[0, 1].map((t) => <span key={t}>{t ? <span className="text-[var(--color-ink-3)]"> – </span> : null}<span style={{ color: tc(t as 0 | 1) }}>{m.wins[t]}%</span></span>)}</div>
-        </div>
+        {/* this question; the game so far is in the bar at the top, which counts this question already */}
+        <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
         {/* with no fact to tell, the game so far (the bar above has it too) */}
         {!R.notes && <div className="text-20 text-[var(--color-ink-2)]">So far, right answers out of all they could give: {M.totals?.right[0]} of {M.totals?.of[0]} and {M.totals?.right[1]} of {M.totals?.of[1]}</div>}
       </div>)}
