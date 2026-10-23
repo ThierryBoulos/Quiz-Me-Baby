@@ -440,6 +440,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const mrAnswer = (from: Member, p: G): boolean | string => {
     const s = st.current, q = currentQ(s);
     if (!q || !s.mrList) return false;
+    if (s.paused) return "The game is paused.";                            // (the last pick in would be the reveal)
     if (typeof p.k === "string" && p.k !== draftKey()) return false;     // the last question's, landing late
     const e = s.mrList.find((x) => x.uid === from.user_id) || s.mrList.find((x) => x.name.toLowerCase() === from.name.toLowerCase());
     if (!e) return "You joined after the start: watch this one.";
@@ -578,6 +579,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        Anything else waits for the TV, and says so. */
     if (kind !== "answer" && s.tvAway) return "The TV's screen was asleep. Tap again.";
     if (kind !== "answer" && s.paused) return "The game is paused.";
+    /* (Drop the Pin and Guess the Airport: both in would be the reveal, so not while the host has paused it, 23 Oct) */
+    if (s.paused && (sc === "pinQ" || sc === "airportQ")) return "The game is paused.";
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
