@@ -550,7 +550,7 @@ test('pin: km by the great circle — Eiffel Tower to Notre-Dame, and to New Yor
 test('pin: the nearer pin takes the leg; no pin loses; the same km is a point each', () => {
   const g = newGames(), s = g.pinGame;
   assert.deepEqual(s.levels, ['easy', 'medium', 'hard']);
-  assert.equal(s.qs.length, 5);
+  assert.equal(s.qs.length, 7);                                   // best of seven
   assert.ok(new Set(s.qs.map(q => q.level)).size === 3);           // shared over the levels
   Q.play(g, { type:'pin/start' });
   const near = { lat:48.86, lon:2.30 }, far = { lat:51.5, lon:-0.12 };
@@ -568,15 +568,16 @@ test('pin: the nearer pin takes the leg; no pin loses; the same km is a point ea
   assert.equal(s.subs[3].winner, 'none');
   assert.equal(s.i, 4);
 });
-test('pin: level after five brings a tie-breaker landmark, then pays', () => {
+test('pin: best of seven; level after seven brings a tie-breaker landmark, then pays', () => {
   const g = newGames(), s = g.pinGame;
+  assert.equal(s.base, 7);
   Q.play(g, { type:'pin/start' });
   const near = { lat:48.86, lon:2.30 }, far = { lat:51.5, lon:-0.12 };
-  for(let i = 0; i < 4; i++) Q.play(g, { type:'pin/settle', pins:i % 2 ? [near, far] : [far, near] });
+  for(let i = 0; i < 6; i++) Q.play(g, { type:'pin/settle', pins:i % 2 ? [near, far] : [far, near] });
   let fx = Q.play(g, { type:'pin/settle', pins:[near, near] });
-  assert.deepEqual(s.wins, [3, 3]);
+  assert.deepEqual(s.wins, [4, 4]);
   assert.equal(s.tieLegs, 1);
-  assert.equal(s.qs.length, 6);
+  assert.equal(s.qs.length, 8);
   assert.ok(types(fx).includes('go:pinQ'));
   fx = Q.play(g, { type:'pin/settle', pins:[far, near] });
   assert.equal(s.verdict.winner, 1);

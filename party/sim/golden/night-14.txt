@@ -31,70 +31,72 @@
 29.00 pinReveal | 14 | 0-4 | 2-2 | Lions takes landmark 3. | 
 30.00 pinQ | 15 | 0-4 | 2-2 | Owls takes landmark 4. | 
 30.75 pinReveal | 15 | 0-4 | 2-3 | Owls takes landmark 4. | 
-31.75 pinSummary | 16 | 0-6 | 2-3 | Owls takes landmark 5. | 
-32.75 roundIntro | 17 | 0-6 |  | Owls takes landmark 5. | 
-34.50 ask | 18 | 0-6 |  | Owls takes landmark 5. | 
-35.25 steal | 18 | 0-6 |  | Owls takes landmark 5. | 
-36.25 answer | 18 | 0-6 |  | Owls takes landmark 5. | 
-37.25 ask | 19 | 0-6 |  | Owls takes landmark 5. | 
-38.00 steal | 19 | 0-6 |  | Owls takes landmark 5. | 
-39.00 answer | 19 | 2-6 |  | Lions +2 points — steal | 
-39.75 roundScore | 20 | 2-6 |  | Lions +2 points — steal | 
-40.75 roundIntro | 21 | 2-6 |  | Lions +2 points — steal | 
-41.75 ask | 22 | 2-6 |  | Lions +2 points — steal | 
-42.50 answer | 22 | 3-6 |  | Lions +1 point | 
-43.50 ask | 23 | 3-6 |  | Lions +1 point | 
-44.25 steal | 23 | 3-6 |  | Lions +1 point | 
-45.25 answer | 23 | 3-6 |  | Lions +1 point | 
-46.25 roundScore | 24 | 3-6 |  | Lions +1 point | 
-47.00 airportIntro | 25 | 3-6 | 0-0 | Lions +1 point | 
-48.00 airportQ | 26 | 3-6 | 0-0 | Lions +1 point | 
-48.75 airportReveal | 26 | 3-6 | 0-0 | Lions +1 point | 
-49.75 airportQ | 27 | 3-6 | 0-0 | Nobody got it. | 
-50.75 airportReveal | 27 | 3-6 | 0-1 | Nobody got it. | 
-51.50 airportQ | 28 | 3-6 | 0-1 | Owls takes board 2. | 
-52.50 airportReveal | 28 | 3-6 | 1-1 | Owls takes board 2. | 
-53.25 airportQ | 29 | 3-6 | 1-1 | Lions takes board 3. | 
-54.25 airportReveal | 29 | 3-6 | 2-2 | Lions takes board 3. | 
-55.25 airportReveal | 29 | 3-6 | 2-2 |  | 
-56.00 airportReveal | 29 | 3-6 | 2-1 | Call changed: ⁨Owls⁩ WRONG. | 
-57.00 airportQ | 30 | 3-6 | 2-1 | Lions takes board 4. | 
-57.75 airportReveal | 30 | 3-6 | 2-2 | Lions takes board 4. | 
-58.75 airportTie | 31 | 3-6 | 2-2 |  | 
-59.75 airportSummary | 32 | 4-7 | 2-2 |  | 
-60.50 roundIntro | 33 | 4-7 |  |  | 
-61.50 ask | 34 | 4-7 |  |  | 
-62.25 ask | 34 | 4-7 |  | Lions used Double Dip. | 
-63.25 answer | 34 | 5-7 |  | Lions +1 point | 
-64.25 answer | 34 | 5-7 |  |  | 
-79.25 answer | 34 | 5-7 |  | No answer in time: the call stands. | 
-79.50 ask | 35 | 5-7 |  | No answer in time: the call stands. | 
-80.25 answer | 35 | 5-8 |  | Owls +1 point | 
-81.25 roundScore | 36 | 5-8 |  | Owls +1 point | 
-82.25 roundIntro | 37 | 5-8 |  | Owls +1 point | 
-84.00 ask | 38 | 5-8 |  | Owls +1 point | 
-84.75 answer | 38 | 6-8 |  | Lions +1 point | 
-85.75 answer | 38 | 6-8 |  |  | 
-86.75 answer | 38 | 6-8 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-87.50 ask | 39 | 6-8 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-88.50 answer | 39 | 6-9 |  | Owls +1 point | 
-89.25 roundScore | 40 | 6-9 |  | Owls +1 point | 
-90.25 battleIntro | 41 | 6-9 | 0-0 | Owls +1 point | 
-91.25 battleQ | 42 | 6-9 | 0-0 | Owls +1 point | 
-93.00 battleQ | 42 | 6-9 | 1-0 | Owls +1 point | 
-94.75 battleQ | 42 | 6-9 | 2-0 | Owls +1 point | 
-95.75 battleQ | 42 | 6-9 | 3-0 | Owls +1 point | 
-98.25 battleQ | 42 | 6-9 | 4-0 | Owls +1 point | 
-99.25 battleQ | 42 | 6-9 | 5-0 | Owls +1 point | 
-100.25 battleHandoff | 42 | 6-9 | 6-0 | Owls +1 point | 
-101.00 battleQ | 43 | 6-9 | 6-0 | Owls +1 point | 
-102.75 battleQ | 43 | 6-9 | 6-1 | Owls +1 point | 
-103.75 battleQ | 43 | 6-9 | 6-2 | Owls +1 point | 
-104.75 battleQ | 43 | 6-9 | 6-3 | Owls +1 point | 
-106.50 battleQ | 43 | 6-9 | 6-4 | Owls +1 point | 
-108.25 battleQ | 43 | 6-9 | 6-5 | Owls +1 point | 
-109.25 battleQ | 43 | 6-9 | 6-6 | Owls +1 point | 
-110.00 battleReview | 43 | 6-9 | 6-7 | Owls +1 point | 
-111.00 battleSummary | 44 | 6-13 | 6-7 | Owls +1 point | 
-111.75 final | 45 | 6-13 |  | Owls +1 point | 
-recap: {"margin":7,"sudden":false,"leadChanges":0,"steals":[1,2],"minis":[0,2]}
+31.75 pinQ | 16 | 0-4 | 2-3 | Owls takes landmark 5. | 
+32.75 pinReveal | 16 | 0-4 | 2-4 | Owls takes landmark 5. | 
+33.50 decided | 17 | 0-4 | 2-4 |  | 
+34.50 pinSummary | 18 | 0-6 | 2-4 |  | 
+35.25 roundIntro | 19 | 0-6 |  |  | 
+37.25 ask | 20 | 0-6 |  |  | 
+38.00 steal | 20 | 0-6 |  |  | 
+39.00 answer | 20 | 0-7 |  | Owls +1 point — steal | 
+39.75 ask | 21 | 0-7 |  | Owls +1 point — steal | 
+40.75 answer | 21 | 0-8 |  | Owls +1 point | 
+41.75 roundScore | 22 | 0-8 |  | Owls +1 point | 
+42.50 roundIntro | 23 | 0-8 |  | Owls +1 point | 
+43.50 ask | 24 | 0-8 |  | Owls +1 point | 
+44.25 answer | 24 | 1-8 |  | Lions +1 point | 
+45.25 ask | 25 | 1-8 |  | Lions +1 point | 
+46.25 steal | 25 | 1-8 |  | Lions +1 point | 
+47.00 answer | 25 | 1-8 |  | Lions +1 point | 
+48.00 answer | 25 | 1-8 |  |  | 
+49.75 answer | 25 | 2-8 |  | Call changed: Lions +1 point. | 
+50.75 roundScore | 26 | 2-8 |  | Call changed: Lions +1 point. | 
+51.50 airportIntro | 27 | 2-8 | 0-0 | Call changed: Lions +1 point. | 
+52.50 airportQ | 28 | 2-8 | 0-0 | Call changed: Lions +1 point. | 
+53.25 airportReveal | 28 | 2-8 | 1-0 | Call changed: Lions +1 point. | 
+54.25 airportQ | 29 | 2-8 | 1-0 | Lions takes board 1. | 
+55.25 airportReveal | 29 | 2-8 | 2-1 | Lions takes board 1. | 
+56.00 airportReveal | 29 | 2-8 | 2-1 |  | 
+57.00 airportReveal | 29 | 2-8 | 2-0 | Call changed: ⁨Owls⁩ WRONG. | 
+57.75 airportQ | 30 | 2-8 | 2-0 | Lions takes board 2. | 
+58.75 airportReveal | 30 | 2-8 | 2-1 | Lions takes board 2. | 
+59.75 airportQ | 31 | 2-8 | 2-1 | Owls takes board 3. | 
+60.50 airportReveal | 31 | 2-8 | 3-2 | Owls takes board 3. | 
+61.50 airportQ | 32 | 2-8 | 3-2 | Both got it — a point each. | 
+62.25 airportReveal | 32 | 2-8 | 3-3 | Both got it — a point each. | 
+63.25 airportReveal | 32 | 2-8 | 3-3 |  | 
+78.25 airportReveal | 32 | 2-8 | 3-3 | No answer in time: the call stands. | 
+78.50 airportTie | 33 | 2-8 | 3-3 |  | 
+79.50 airportSummary | 34 | 3-9 | 3-3 |  | 
+80.25 roundIntro | 35 | 3-9 |  |  | 
+81.25 ask | 36 | 3-9 |  |  | 
+82.25 answer | 36 | 4-9 |  | Lions +1 point | 
+83.00 answer | 36 | 4-9 |  |  | 
+84.00 answer | 36 | 4-9 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+84.75 ask | 37 | 4-9 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+85.75 answer | 37 | 4-10 |  | Owls +1 point | 
+86.75 roundScore | 38 | 4-10 |  | Owls +1 point | 
+87.50 roundIntro | 39 | 4-10 |  | Owls +1 point | 
+88.50 ask | 40 | 4-10 |  | Owls +1 point | 
+89.25 answer | 40 | 5-10 |  | Lions +1 point | 
+90.25 ask | 41 | 5-10 |  | Lions +1 point | 
+91.25 answer | 41 | 5-11 |  | Owls +1 point | 
+92.00 roundScore | 42 | 5-11 |  | Owls +1 point | 
+93.00 battleIntro | 43 | 5-11 | 0-0 | Owls +1 point | 
+93.75 battleQ | 44 | 5-11 | 0-0 | Owls +1 point | 
+95.75 battleQ | 44 | 5-11 | 1-0 | Owls +1 point | 
+98.25 battleQ | 44 | 5-11 | 2-0 | Owls +1 point | 
+99.25 battleQ | 44 | 5-11 | 3-0 | Owls +1 point | 
+100.25 battleQ | 44 | 5-11 | 4-0 | Owls +1 point | 
+102.00 battleQ | 44 | 5-11 | 5-0 | Owls +1 point | 
+102.75 battleHandoff | 44 | 5-11 | 6-0 | Owls +1 point | 
+103.75 battleQ | 45 | 5-11 | 6-0 | Owls +1 point | 
+104.75 battleQ | 45 | 5-11 | 6-1 | Owls +1 point | 
+106.50 battleQ | 45 | 5-11 | 6-2 | Owls +1 point | 
+108.25 battleQ | 45 | 5-11 | 6-3 | Owls +1 point | 
+109.25 battleQ | 45 | 5-11 | 6-4 | Owls +1 point | 
+110.00 battleQ | 45 | 5-11 | 6-5 | Owls +1 point | 
+112.75 battleReview | 45 | 5-11 | 6-5 | Owls +1 point | 
+113.75 battleSummary | 46 | 9-11 | 6-5 | Owls +1 point | 
+114.50 final | 47 | 9-11 |  | Owls +1 point | 
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[1,3],"minis":[1,1],"best":{"title":"Drop the Pin","team":1,"legs":[2,4]}}

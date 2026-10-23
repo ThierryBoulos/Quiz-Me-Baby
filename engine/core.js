@@ -313,7 +313,7 @@
        ctx.rng         optional; Math.random when absent
      Anything that needs tonight's game (the Battle's "already used") takes
      it as an argument instead of reading it.                               */
-  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:5, airport:5, majority:15, battle:10 };
+  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:15, battle:10 };
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
         FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, PIN_LEGS = LEGS.pin, AIRPORT_LEGS = LEGS.airport, MAJORITY_N = LEGS.majority, BATTLE_N = LEGS.battle;
   /* Flag first: fast and loud, it opens the night. (Drop the Pin, Guess the Airport and Majority Rules are Party's.) */
