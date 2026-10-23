@@ -108,7 +108,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   /* chaos: every tap carries a tag, as phones' do, and each must come back in the TV's receipts (pub.ack) */
   const taps = [], tapN = { n: 0 };
   const send = (who, kind, payload) => {
-    if (chaos) { const tap = "t" + (++tapN.n); const p0 = fake.db.rooms[0].state?.pub; taps.push({ tap, who, kind, payload, screen: p0?.screen, q: `${p0?.qid}|${p0?.screen}`, at: clock() }); payload = { ...payload, tap }; }
+    if (chaos) { const tap = "t" + (++tapN.n); const p0 = fake.db.rooms[0].state?.pub; taps.push({ tap, who, kind, payload, screen: p0?.screen, q: `${p0?.qid}|${p0?.screen}`, opts: p0?.majority?.options, at: clock() }); payload = { ...payload, tap }; }
     return fake.insert("actions", { room: CODE, user_id: who, kind, payload });
   };
   const checkAcks = () => {
@@ -183,12 +183,18 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* chaos: now and then a captain taps something at the wrong moment */
     if (chaos && bot() < chaos) {
       const who = capOf(bot() < 0.5 ? 0 : 1) || capOf(0) || capOf(1), r = bot();
-      const MOVES = ["round/begin", "round/afterAnswer", "round/next", "ui/next", "ui/contest", "ui/contestOk", "battle/reviewDone", "decided/stop", "tie/stop", "auction/pass", "auction/raise", "ui/pause", "flag/done", "closest/done", "battle/start", "sudden/go"];
-      /* only what a phone can send on this screen: a number on Closest, words elsewhere; BUZZ where there's a buzzer */
-      if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : { texts: ["Paris"] });
+      const MOVES = ["round/begin", "round/afterAnswer", "round/next", "ui/next", "ui/contest", "ui/contestOk", "battle/reviewDone", "decided/stop", "tie/stop", "auction/pass", "auction/raise", "ui/pause", "flag/done", "closest/done", "battle/start", "sudden/go",
+        /* the three newest games' own (23 Oct): their starts, swaps and ends, Reveal now, a call flipped, Majority Rules' list */
+        "pin/start", "pin/swap", "pin/done", "airport/start", "airport/swap", "airport/done", "majority/start", "majority/swap", "majority/done",
+        "ui/reveal", "ui/airportOk", "ui/mrOut", "ui/mrOutOk", "tie/more", "decided/more"];
+      /* only what a phone can send on this screen: a number on Closest, a pin on Drop the Pin, one of the four on
+         Majority Rules (any player's phone), words elsewhere; BUZZ where there's a buzzer */
+      if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : pub.screen === "pinQ" ? { pin: bot() < 0.2 ? { lat: 91, lon: "x" } : { lat: bot() * 140 - 70, lon: bot() * 360 - 180 } }
+        : pub.screen === "majorityQ" ? { pick: bot() < 0.2 ? "Not an answer" : (pub.majority?.options || ["x"])[Math.floor(bot() * 4)] || "x", k: bot() < 0.2 ? "old|majorityQ" : `${pub.qid}|majorityQ` } : { texts: ["Paris"] });
       else if (r < 0.45) { if (["dishQ", "sudden", "battleTie"].includes(pub.screen)) send(who, "buzz", {}); }
       else if (r < 0.6) send(who, "lifeline", { key: ["dbl", "friend", "dip"][Math.floor(bot() * 3)] });
-      else send(who, "next", { move: { type: MOVES[Math.floor(bot() * MOVES.length)], v: bot() < 0.5, n: 3, id: ["first", "steal", "t0", "t1", "d0", "b0-3", "s0", "s1"][Math.floor(bot() * 8)] }, step: pub.step - (bot() < 0.3 ? 1 : 0) });
+      else send(who, "next", { move: { type: MOVES[Math.floor(bot() * MOVES.length)], v: bot() < 0.5, n: 3, t: bot() < 0.5 ? 0 : 1, name: FOLK[Math.floor(bot() * FOLK.length)],
+        id: ["first", "steal", "t0", "t1", "d0", "b0-3", "s0", "s1"][Math.floor(bot() * 8)] }, step: pub.step - (bot() < 0.3 ? 1 : 0) });
     }
     /* the TV's screen goes to sleep during the sleep-th question; the captain answers meanwhile and
        the other captain taps Resume (the phones show the game as paused); then the TV wakes (18 Oct) */

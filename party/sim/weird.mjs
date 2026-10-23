@@ -6,7 +6,9 @@
    no clock running away, and a receipt for every tap.
      node sim/weird.mjs          all of them
      node sim/weird.mjs 7        one, with its trace (7:2 for its seed 2)
-     node sim/weird.mjs --quick  one seed each (npm test) */
+     node sim/weird.mjs --quick  one seed each (npm test)
+     node sim/weird.mjs --new    each of them on the three newest games only (Drop the Pin, Guess the Airport,
+                                 Majority Rules), with a room of players and, on seed 2, one who never opens the game */
 import { build } from "esbuild";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -16,6 +18,7 @@ await build({ entryPoints: [join(here, "night.jsx")], outfile: out, bundle: true
   plugins: [{ name: "fake-supabase", setup(b) { b.onResolve({ filter: /^(\.{1,2}\/)+(lib\/)?supabase$|^@\/lib\/supabase$/ }, () => ({ path: join(here, "fakeSupabase.js") })); } }] });
 
 const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "pin", "airport", "battle"], DEF = ["flag", "closest", "auction", "battle"];
+const NEW = process.argv.includes("--new");
 /* the TV switched off at many moments of the night: every 37 s, for 20 s to 5 min */
 const offs = (n, len) => Array.from({ length: n }, (_, i) => ({ at: 15 + i * 37, type: "tvOff", for: len[i % len.length] }));
 const W = [
@@ -67,10 +70,11 @@ for (let i = 0; i < W.length; i++) {
     let t0 = null;
     const fails = (w.events || []).filter((e) => e.type === "writesFail");
     const offline = (now) => { t0 ??= now; return fails.some((e) => now - t0 >= e.at * 1000 - 2000 && now - t0 <= (e.at + e.for) * 1000 + 8000); };
-    const r = await night({ seed: 500 + i * 10 + seed, minis: w.minis, rounds: 4, host: !!w.host, events: structuredClone(w.events || []), net: w.net, simul: w.simul, edge: w.edge, chaos: 0.15, check });
+    const minis = NEW ? ["pin", "airport", "majority"] : w.minis, room = NEW ? { crowd: 4, absent: seed === 2 ? "Rita" : null } : {};
+    const r = await night({ seed: 500 + i * 10 + seed, minis, rounds: 4, host: !!w.host, events: structuredClone(w.events || []), net: w.net, simul: w.simul, edge: w.edge, chaos: 0.15, check, ...room });
     if (w.twin) {
       const { night: once } = await import(pathToFileURL(out).href + `?w=${i}-${seed}-once`);
-      const one = await once({ seed: 500 + i * 10 + seed, minis: w.minis, rounds: 4, host: !!w.host, chaos: 0.15 });
+      const one = await once({ seed: 500 + i * 10 + seed, minis, rounds: 4, host: !!w.host, chaos: 0.15, ...room });
       /* (what was shown, in order: the times can move by a fraction of a second, as the copies wake the simulator's clock) */
       const shown = (t) => t.map((l) => l.replace(/^[\d.]+ /, ""));
       const a = shown(r.trace), b = shown(one.trace), k = b.findIndex((l, n) => l !== a[n]);
