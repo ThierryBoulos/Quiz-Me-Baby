@@ -129,3 +129,27 @@ test('Say the Same: the hidden word leans to the top of the list; short sets sta
   for(let i = 0; i < 2000; i++){ const w = D3.drawSaySame(coin).answer; c[w] = (c[w] || 0) + 1; }
   assert.ok(Math.abs(c.Heads - c.Tails) < 200, JSON.stringify(c));
 });
+
+/* the four levels (22 Oct): a mix without Expert deals Expert only once a theme runs out of the rest */
+test('levels: Easy+Medium+Hard by default, Mixed is all four, Expert only when the rest is spent', () => {
+  assert.deepEqual(Q.diffsOf(Q.DEFAULT_DIFF), ['easy', 'medium', 'hard']);
+  assert.deepEqual(Q.diffsOf('mixed'), ['easy', 'medium', 'hard', 'expert']);
+  assert.deepEqual(Q.diffsOf('expert+easy'), ['easy', 'expert']);
+  assert.deepEqual(Q.diffsOf('nonsense'), ['easy', 'medium', 'hard']);
+  const b = [];
+  ['easy', 'expert'].forEach(d => { for(let i = 0; i < 4; i++) b.push({ id:`T-${d}-${i}`, type:'standard', theme:'T', difficulty:d, question:d + i, answer:'a' }); });
+  const used = new Set();
+  const D2 = Q.createDealer({ bank:() => b, used:() => used, noRepeat:() => true });
+  const deal = (difficulty) => D2.buildGame({ standard:true, rounds:4, themes:['T'], difficulty, minis:[], teamA:{ name:'A' }, teamB:{ name:'B' } });
+  /* the default: the two easy pairs first; then, the easy ones spent, the Expert ones */
+  const g1 = deal(Q.DEFAULT_DIFF);
+  assert.deepEqual(g1.rounds.map(r => r.q[0].difficulty), ['easy', 'easy', 'expert', 'expert']);
+  assert.equal(g1.rounds.slice(0, 2).every(r => r.q.every(q => q.difficulty === 'easy')), true);
+  /* both questions of a round always share a level */
+  assert.ok(g1.rounds.every(r => r.q[0].difficulty === r.q[1].difficulty));
+  /* a single level stays that level */
+  assert.equal(deal('easy').rounds.length, 2);
+  /* Mixed takes all four from the start */
+  assert.equal(deal('mixed').rounds.length, 4);
+  assert.ok(D2.matchDiff({ difficulty:'expert' }, 'mixed') && !D2.matchDiff({ difficulty:'expert' }, Q.DEFAULT_DIFF));
+});

@@ -25,8 +25,14 @@ const MINI: Record<string, { store: MiniStore; type: string; cap: number; label:
   airport: { store: "pickAirport", type: "airport", cap: QMB.LEGS.airport, label: "Guess the Airport" },
   majority: { store: "pickMajority", type: "majority", cap: QMB.LEGS.majority, label: "Majority Rules" },
 };
-const DIFFS = [["", "Tonight's"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["mixed", "Mixed"]] as const;
+const DIFFS = [["", "Tonight's"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"], ["mixed", "Mixed"]] as const;
 const cap = (s?: string) => (s ? s[0].toUpperCase() + s.slice(1) : "");
+/* a night's difficulty in words: "Mixed", "Expert", "Easy, Medium and Hard" */
+const diffWords = (d: string) => {
+  if (d === "mixed") return "Mixed";
+  const l: string[] = QMB.diffsOf(d).map(cap);
+  return l.length > 1 ? l.slice(0, -1).join(", ") + " and " + l[l.length - 1] : l[0] || "";
+};
 
 /* how many themes have their pair, and how many mini-game picks there are */
 export function pickSummary(p: Picks, themes: string[], minis: string[]) {
@@ -124,14 +130,14 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
               <div className="flex items-center gap-2 flex-wrap">
                 <label className="text-13 text-[var(--color-ink-2)]" htmlFor={"d-" + t}>Difficulty</label>
                 <select id={"d-" + t} className="input !min-h-[44px] !text-16 !py-0 flex-1 min-w-0" value={value.themeDiff[t] || ""} onChange={(e) => setThemeDiff(t, e.target.value)}>
-                  {DIFFS.map(([k, l]) => <option key={k} value={k}>{k ? l : `${l} (${cap(difficulty)})`}</option>)}
+                  {DIFFS.map(([k, l]) => <option key={k} value={k}>{k ? l : `${l} (${diffWords(difficulty)})`}</option>)}
                 </select>
                 {sel.length > 0 && <button type="button" className="btn btn-sm btn-ghost shrink-0" onClick={() => { const picks = { ...value.picks }; delete picks[t]; onChange({ ...value, picks }); }}>Clear</button>}
               </div>
               {list.length ? list.map((q) => (
                 <Row key={q.id} on={sel.includes(q.id)} disabled={!sel.includes(q.id) && full} onTap={() => tick(t, q.id)}
                   q={q.question} sub={`${q.answer} · ${cap(q.difficulty)}${q.use_with ? ` · pairs with "${q.use_with}"` : ""}${q.src === "manual" ? " · Yours" : ""}`} />))
-                : <p className="text-14 text-[var(--color-ink-2)]">Nothing in this theme at {cap(diffFor(t))} difficulty.</p>}
+                : <p className="text-14 text-[var(--color-ink-2)]">Nothing in this theme at {diffWords(diffFor(t))}.</p>}
             </section>);
         })}
 

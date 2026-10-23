@@ -22,7 +22,9 @@ const MINIS = [
 const MAP_LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 const DISH_LEVELS = { c: [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]], d: [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] } as const;
-const LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["mixed", "Mixed"]] as const;
+/* the four levels of a standard question: any mix of them, or Mixed (all four). The default is the
+   first three: Expert comes in only when a theme runs out of those. */
+const LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 const ROUND_CHOICES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
 const OFF_BY_DEFAULT = ["Know the Host", "Sexy Time"];
 const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -37,7 +39,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
   const [full, setFull] = useState<Bank | null>(null);
   const [standard, setStandard] = useState(true);
   const [rounds, setRounds] = useState(6);
-  const [difficulty, setDiff] = useState("mixed");
+  const [difficulty, setDiff] = useState<string>(QMB.DEFAULT_DIFF);
   const [themes, setThemes] = useState<string[] | null>(null);
   const [minis, setMinis] = useState<string[]>(["flag", "closest", "auction", "battle"]);
   const [mapLevels, setMapLevels] = useState<string[]>(["easy", "medium", "hard"]);
@@ -120,13 +122,24 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
       </button>
       {open === id && <div className="flex flex-wrap gap-2 enter">{children}</div>}
     </div>);
-  const Levels = ({ value, set, label }: { value: string; set: (v: string) => void; label: string }) => (
-    <div className="flex flex-col gap-2" role="group" aria-label={label}>
-      <div className="field-label !mb-0">{label}</div>
-      <div className="grid grid-cols-4 gap-2">
-        {LEVELS.map(([k, l]) => <button key={k} type="button" className={"btn btn-sm !px-2 " + (value === k ? "btn-gold" : "")} aria-pressed={value === k} onClick={() => set(k)}>{l}</button>)}
-      </div>
-    </div>);
+  const Levels = ({ value, set, label }: { value: string; set: (v: string) => void; label: string }) => {
+    const all = value === "mixed", on: string[] = QMB.diffsOf(value);
+    /* tap a level to add or drop it (the last one can't go); all four is Mixed */
+    const toggle = (k: string) => {
+      const next = on.includes(k) ? on.filter((x) => x !== k) : [...on, k];
+      if (!next.length) return;
+      set(next.length === 4 ? "mixed" : (QMB.DIFFS as string[]).filter((x) => next.includes(x)).join("+"));
+    };
+    return (
+      <div className="flex flex-col gap-2" role="group" aria-label={label}>
+        <div className="field-label !mb-0">{label}</div>
+        <div className="grid grid-cols-5 gap-2">
+          {LEVELS.map(([k, l]) => <button key={k} type="button" className={"btn btn-sm !px-1 " + (on.includes(k) ? "btn-gold" : "")} aria-pressed={on.includes(k)} onClick={() => toggle(k)}>{l}</button>)}
+          <button type="button" className={"btn btn-sm !px-1 " + (all ? "btn-gold" : "")} aria-pressed={all} onClick={() => set(all ? QMB.DEFAULT_DIFF : "mixed")}>Mixed</button>
+        </div>
+        <p className="text-12 text-[var(--color-ink-3)] px-1">{all ? "All four levels, Expert included." : on.includes("expert") ? "Expert is on: only real buffs get those." : on.length > 1 ? "Expert comes in only when a theme runs out of the others." : `${LEVELS.find(([k]) => k === on[0])?.[1]} only.`}</p>
+      </div>);
+  };
 
   return (
     <section className="flex flex-col gap-3" aria-label="Tonight's game">

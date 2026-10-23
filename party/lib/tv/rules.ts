@@ -1,6 +1,7 @@
 /* The rules the TV checks every tap against: which moves a host or a captain may
    send, and on which screen; and the small pure helpers the TV's hook uses. */
 import { getSettings } from "../settings";
+import { QMB } from "../engine";
 import { DECIDED, DISH_LAST, TIE_SCREENS, type MiniKey } from "../game";
 
 /* the house timers come from Settings on this TV */
@@ -124,7 +125,9 @@ export const WAITS_FOR_NEXT = new Set(["battleReview", "roundIntro", "miniIntro"
   "answer", "roundScore", "closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "dishReveal", "auctionLeg", "auctionResult",
   "miniSummary", "flagSummary", "dishSummary", "mapSummary", "saySummary", "pinSummary", "airportSummary", "majoritySummary", "battleSummary", "sudden", DECIDED, ...TIE_SCREENS]);
 export const other = (t: 0 | 1) => (t === 0 ? 1 : 0) as 0 | 1;
-export const DIFFS = ["easy", "medium", "hard", "mixed"];
+/* a night's difficulty from a phone: "mixed" (all four levels), or levels joined with "+"; anything else is the default */
+export const DIFFS = ["easy", "medium", "hard", "expert", "mixed"];
+export const cleanDiff = (d: unknown): string => d === "mixed" ? "mixed" : QMB.diffsOf(String(d ?? "")).join("+");
 /* a picture game's levels from the phone: known ones only, or the default */
 export const levels = (x: unknown, keys: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((k) => keys.includes(k)); return v.length ? v : dflt; };
 export const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority", "battle"];

@@ -12,7 +12,7 @@ export const MAX_CUSTOM_THEMES = 4;
 export const MAX_CUSTOM = 300;
 export const CUSTOM_TYPES = [["standard", "Standard"], ["closest", "Closest To Wins"], ["auction", "Auction"], ["saysame", "Don't Say the Same as Me"]] as const;
 const TYPES: string[] = CUSTOM_TYPES.map(([k]) => k);
-const DIFFS = ["easy", "medium", "hard"];
+const DIFFS = ["easy", "medium", "hard", "expert"];
 
 /* Classic's id, so a question typed in both apps is the same question */
 export function hash(str: string) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return "q" + (h >>> 0).toString(36); }

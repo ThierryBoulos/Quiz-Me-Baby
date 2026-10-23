@@ -75,10 +75,12 @@ export async function loadBank(room?: string): Promise<Bank> {
   const { getCustom } = await import("./custom");
   return withCustom(base, getCustom());
 }
-/* themes that have at least two standard questions at a difficulty */
+/* themes that have at least two standard questions at a difficulty (a mix without Expert counts its
+   Expert ones too: they're dealt once the rest of the theme runs out) */
 export function themeCounts(bank: Bank, diff: string) {
-  const out: Record<string, number> = {};
-  bank.bank.forEach((q) => { if (q.type === "standard" && q.theme && (diff === "mixed" || q.difficulty === diff)) out[q.theme] = (out[q.theme] || 0) + 1; });
+  const out: Record<string, number> = {}, lv: string[] = QMB.diffsOf(diff);
+  const fallback = diff !== "mixed" && lv.length > 1 && !lv.includes("expert");
+  bank.bank.forEach((q) => { if (q.type === "standard" && q.theme && (diff === "mixed" || lv.includes(q.difficulty || "") || (fallback && q.difficulty === "expert"))) out[q.theme] = (out[q.theme] || 0) + 1; });
   return out;
 }
 

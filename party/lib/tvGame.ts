@@ -13,7 +13,7 @@ const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
 import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
-import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
+import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, type Action, type G, type PKind, type W } from "./tv/rules";
 import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, turnOf } from "./tv/reads";
 import { buildView, qk } from "./tv/view";
@@ -820,7 +820,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const names = lobbyState(room).teamNames || ["Team A", "Team B"];
       const team = (t: 0 | 1) => ({ name: cap1(names[t]), captain: cap1(members.find((m) => m.team === t && m.role === "captain")?.name || ""),
         players: members.filter((m) => m.team === t).map((m) => m.name).join(", ") });
-      const diff = DIFFS.includes(cfgIn.difficulty) ? cfgIn.difficulty : "mixed";
+      const diff = cleanDiff(cfgIn.difficulty);
       const minis = (Array.isArray(cfgIn.minis) ? cfgIn.minis : []).filter((k: string) => PARTY_MINIS.includes(k));
       /* standard rounds can be off (a mini-games-only night), as in Classic */
       const standard = cfgIn.standard !== false;
@@ -832,7 +832,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const pickIn = (byHost && cfgIn.picks && typeof cfgIn.picks === "object" ? cfgIn.picks : {}) as Record<string, unknown>;
       const picks = Object.fromEntries(Object.entries(pickIn).map(([t, v]) => [t, ids(v).slice(0, 2)]).filter(([, v]) => v.length === 2));
       const themeDiff = byHost && cfgIn.themeDiff && typeof cfgIn.themeDiff === "object"
-        ? Object.fromEntries(Object.entries(cfgIn.themeDiff as Record<string, string>).filter(([, d]) => ["easy", "medium", "hard", "mixed"].includes(d))) : {};
+        ? Object.fromEntries(Object.entries(cfgIn.themeDiff as Record<string, string>).filter(([, d]) => DIFFS.includes(d))) : {};
       const hand = (k: string) => (byHost ? ids(cfgIn[k]) : []);
       const hosted = members.some((m) => m.role === "host");
       const cfg = { rounds, themes: (Array.isArray(cfgIn.themes) ? cfgIn.themes as string[] : []).filter((t) => hosted || !HOST_ONLY_THEMES.includes(t)), difficulty: diff, standard,

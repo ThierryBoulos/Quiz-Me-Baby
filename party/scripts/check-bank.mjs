@@ -27,7 +27,7 @@ const err = (id, msg) => errors.push(`${id}: ${msg}`);
 const warn = (id, msg) => warns.push(`${id}: ${msg}`);
 const tidy = QMB.tidy;
 
-const DIFF = ["easy", "medium", "hard"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority"];
+const DIFF = ["easy", "medium", "hard", "expert"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority"];
 const VOLATILE = /\b(most|latest|current|currently|record|to date|as of|best-selling|most-streamed|most-viewed|most-subscribed|most liked|most-watched|set to host|still)\b/i;
 const APOSTROPHE = /\b(Ross|Monica|Chandler|Phoebe|Joey|Rachel|Mickey|Simba|Spider-Man|Batman|YouTube|dog|Arab world)\s+(profession|pet|twin|most famous|job|daughter|twins|official|uncle|real name|parents|view counter)\b/;
 
@@ -41,7 +41,7 @@ for (const q of bank.bank) {
   if (!q.question) err(id, "missing question");
   if (q.type !== "saysame" && !q.answer) err(id, "missing answer");
   if (q.type === "standard" || q.type === "closest") {
-    if (!DIFF.includes(q.difficulty)) err(id, `difficulty must be easy|medium|hard, got ${q.difficulty}`);
+    if (!DIFF.includes(q.difficulty)) err(id, `difficulty must be easy|medium|hard|expert, got ${q.difficulty}`);
     if (!q.theme) err(id, "missing theme");
     else if (!bank.themes.includes(q.theme)) err(id, `theme "${q.theme}" not in bank.themes`);
   }

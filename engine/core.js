@@ -297,6 +297,15 @@
   const FLAG_LEVEL_KEYS = ['veasy', 'easy', 'medium', 'hard', 'expert'];
   const DISH_LEVEL_KEYS = ['c-easy', 'c-medium', 'c-hard', 'd-easy', 'd-medium', 'd-hard'];
   const BATTLE_SKIP_THEMES = ['Know the Host', 'Sexy Time', 'Lebanon'];
+  /* The four levels of a standard question (22 Oct). A night's difficulty is one of them, several
+     joined with "+" ("easy+medium+hard", the default), or "mixed": all four. */
+  const DIFFS = ['easy', 'medium', 'hard', 'expert'];
+  const DEFAULT_DIFF = 'easy+medium+hard';
+  function diffsOf(d){
+    if(d === 'mixed') return DIFFS.slice();
+    const l = String(d || '').split('+').filter(x => DIFFS.indexOf(x) > -1);
+    return l.length ? DIFFS.filter(x => l.indexOf(x) > -1) : diffsOf(DEFAULT_DIFF);
+  }
 
   function createDealer(ctx){
     const bank = ctx.bank;
@@ -306,7 +315,7 @@
     const isFresh = (q) => !ctx.noRepeat() || !ctx.used().has(q.id);
     const uid = () => rand().toString(36).slice(2, 10);
 
-    const matchDiff = (q, d) => d === 'mixed' || q.difficulty === d;
+    const matchDiff = (q, d) => d === 'mixed' || diffsOf(d).indexOf(q.difficulty) > -1;
 
     function pairsFor(theme, diff, exclude){
       exclude = exclude || new Set();
@@ -630,7 +639,11 @@
           /* a hand-picked pair wins outright — the host chose those two on purpose */
           const hand = pickedPair(t, cfg.picks);
           if(hand && !taken.has(hand.a.id) && !taken.has(hand.b.id)){ pair = hand; theme = t; break; }
-          const p = pairsFor(t, diffOf(cfg, t), taken);
+          const d = diffOf(cfg, t);
+          let p = pairsFor(t, d, taken);
+          /* a mix without Expert that has run dry in this theme: Expert comes in only now, once the
+             rest of the theme's bank is spent (an explicit single level stays that level) */
+          if(!p.length && diffsOf(d).length > 1 && diffsOf(d).indexOf('expert') < 0) p = pairsFor(t, 'expert', taken);
           if(p.length){ pair = p[0]; theme = t; break; }
         }
         if(!pair) break;
@@ -1204,7 +1217,8 @@
   /* Both teams answer at the same level in a round. A question swapped in, or a new one for a steal,
      comes from the level of the question it stands beside; when that level has run out in the theme,
      from the nearest one (an easier one before a harder one). */
-  const NEAR = { easy:['easy', 'medium', 'hard'], medium:['medium', 'easy', 'hard'], hard:['hard', 'medium', 'easy'] };
+  const NEAR = { easy:['easy', 'medium', 'hard', 'expert'], medium:['medium', 'easy', 'hard', 'expert'], hard:['hard', 'medium', 'easy', 'expert'],
+                 expert:['expert', 'hard', 'medium', 'easy'] };    // Expert last, unless the question is one
   const levelsFrom = (d) => NEAR[d] || [d];
   const MOVES = {
     /* the game has just been dealt: the first round, or straight into the mini-games */
@@ -1869,5 +1883,5 @@
   }
 
   return { tidy, asNumber, numWords, distance, isMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
-           createDealer, play, MOVES:Object.keys(MOVES), battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           createDealer, play, MOVES:Object.keys(MOVES), DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

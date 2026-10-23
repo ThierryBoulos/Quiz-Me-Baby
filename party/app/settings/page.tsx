@@ -123,7 +123,7 @@ function AddQuestion() {
           </Field>
           <Field id="nd" label="Difficulty">
             <select id="nd" className="input !text-16 cursor-pointer" value={f.difficulty} onChange={(e) => set({ difficulty: e.target.value })}>
-              {["easy", "medium", "hard"].map((d) => <option key={d} value={d}>{d[0].toUpperCase() + d.slice(1)}</option>)}
+              {["easy", "medium", "hard", "expert"].map((d) => <option key={d} value={d}>{d[0].toUpperCase() + d.slice(1)}</option>)}
             </select>
           </Field>
         </div>)}

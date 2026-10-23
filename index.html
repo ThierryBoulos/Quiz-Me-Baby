@@ -1215,7 +1215,7 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
 </div>
 <div id="modal" role="dialog" aria-modal="true"></div>
 <!-- the shared engine (v4 step 1): the rules with no screen in them -->
-<script src="engine/core.js?v=3.25"></script>
+<script src="engine/core.js?v=3.26"></script>
 <script>
 /* ==========================================================================
    QUIZ ME BABY
@@ -1306,7 +1306,10 @@ const BUILD = { v:'3.26', date:'22 Oct 2026', author:'Thierry Boulos', year:2026
              team gets an unfairly different KIND of question.
    ========================================================================== */
 const THEMES = ['Acronyms','Disney & Pixar','Food & Drink','Friends','Geek & Gamer','Geography','History','Internet & Memes','Know the Host','Lebanon','Movies','Music','Nature','Pop Culture','Rave Culture','Science','Sexy Time','Sports','Tech'];
-const DIFFS  = ['easy','medium','hard'];
+const DIFFS  = ['easy','medium','hard','expert'];
+/* a night's difficulty in words: the default mix is Easy, Medium and Hard (Expert only once those run
+   out), Mixed is all four, or one level on its own */
+const DLabel = (d) => d === QMB.DEFAULT_DIFF ? 'Easy to Hard' : d === 'mixed' ? 'Mixed' : Cap(d);
 
 /* --------------------------------------------------------------------------
    CUSTOM THEMES
@@ -3977,8 +3980,8 @@ function defaultSetup(){
     teamA:{ name:'Team A', captain:'', players:'' },
     teamB:{ name:'Team B', captain:'', players:'' },
     rounds,
-    themes:shuffle(usableThemes('mixed')).slice(0, rounds),
-    difficulty:'mixed',
+    themes:shuffle(usableThemes(QMB.DEFAULT_DIFF)).slice(0, rounds),
+    difficulty:QMB.DEFAULT_DIFF,
     themeDiff:{},       // theme -> difficulty, overriding the house setting
     standard:true,      // false = a mini-games-only night, no standard rounds
     minis:['closest'],  // which mini-games are on tonight's card
@@ -4080,15 +4083,15 @@ SCREENS.setup = function(){
     const n = S.bank.filter(q => q.theme === t && q.type === 'standard' && matchDiff(q, d) && isFresh(q)).length;
     const on = c.themes.indexOf(t) > -1;
     return '<button class="chip' + (n < 2 ? ' thin' : '') + '" role="button" aria-pressed="' + on + '" data-act="theme" data-t="' + esc(t) + '"' +
-      (n < 2 ? ' title="Not enough questions in ' + esc(t) + ' at ' + esc(Cap(d)) + ' difficulty"' : '') + '>' +
+      (n < 2 ? ' title="Not enough questions in ' + esc(t) + ' at ' + esc(DLabel(d)) + ' difficulty"' : '') + '>' +
       esc(t) + '</button>';
   }).join('');
 
   const roundBtns = [];
   for(let i = 4; i <= 14; i++) roundBtns.push('<button data-act="rounds" data-n="' + i + '" aria-pressed="' + (c.rounds === i) + '" class="' + (c.rounds === i ? 'gold' : '') + '">' + i + '</button>');
 
-  const diffBtns = ['easy','medium','hard','mixed'].map(d =>
-    '<button data-act="diff" data-d="' + d + '" aria-pressed="' + (c.difficulty === d) + '" class="' + (c.difficulty === d ? 'gold' : '') + '">' + Cap(d) + '</button>').join('');
+  const diffBtns = [QMB.DEFAULT_DIFF, 'easy','medium','hard','expert','mixed'].map(d =>
+    '<button data-act="diff" data-d="' + d + '" aria-pressed="' + (c.difficulty === d) + '" class="' + (c.difficulty === d ? 'gold' : '') + '">' + DLabel(d) + '</button>').join('');
 
   /* ---- the advanced drawer ------------------------------------------------
      Three things the host almost never touches on a normal Tuesday, folded
@@ -4138,7 +4141,7 @@ SCREENS.setup = function(){
           const eff = own || c.difficulty;
           const dead = !pairsFor(t, eff).length;
           return '<div class="tdrow' + (own ? ' set' : '') + (dead ? ' dead' : '') + '"' +
-            (dead ? ' title="No pair left in ' + esc(t) + ' at ' + esc(Cap(eff)) + '"' : '') + '>' +
+            (dead ? ' title="No pair left in ' + esc(t) + ' at ' + esc(DLabel(eff)) + '"' : '') + '>' +
             '<div class="tdname">' + esc(t) + '</div>' +
             '<div class="seg tiny">' + DIFFS.map(d =>
               '<button data-act="themeDiff" data-t="' + esc(t) + '" data-d="' + d + '" aria-pressed="' + (eff === d) + '"' +
@@ -4151,7 +4154,7 @@ SCREENS.setup = function(){
     const diffBlock = '<div class="stack">' +
       '<div class="sec-head"><div class="eyebrow gold">Difficulty per theme</div>' +
         '<span class="badge ' + (ovr.length ? 'gold' : 'line') + '">' +
-          (ovr.length ? ovr.length + ' overridden' : 'all on ' + Cap(c.difficulty)) + '</span>' +
+          (ovr.length ? ovr.length + ' overridden' : 'all on ' + DLabel(c.difficulty)) + '</span>' +
         (ovr.length ? '<button class="btn sm ghost" data-act="themeDiffReset">Reset all</button>' : '') +
       '</div>' +
       '<div class="tdlist">' + rows + '</div>' +
@@ -4328,7 +4331,7 @@ function pickerHTML(){
     }).join('');
     return '<div class="stack" style="gap:8px">' +
       '<div class="row between">' +
-        '<div class="eyebrow gold">' + esc(t) + ' <span class="dim">· ' + esc(Cap(td)) + '</span></div>' +
+        '<div class="eyebrow gold">' + esc(t) + ' <span class="dim">· ' + esc(DLabel(td)) + '</span></div>' +
         '<div class="row" style="gap:8px">' +
           '<span class="badge ' + (full ? 'ok' : sel.length ? 'no' : 'line') + '">' + sel.length + ' of 2 ticked</span>' +
           (sel.length ? '<button class="btn sm ghost" data-act="pickThemeClear" data-t="' + esc(t) + '">Clear</button>' : '') +
@@ -4336,7 +4339,7 @@ function pickerHTML(){
       '</div>' +
       (pool.length
         ? '<div class="picklist">' + rows + '</div>'
-        : '<div class="empty">Nothing in this theme at ' + esc(Cap(td)) + ' difficulty' + (S.settings.noRepeat ? ' that has not been played' : '') + '.</div>') +
+        : '<div class="empty">Nothing in this theme at ' + esc(DLabel(td)) + ' difficulty' + (S.settings.noRepeat ? ' that has not been played' : '') + '.</div>') +
     '</div>';
   }).join('<hr class="hair">');
 
@@ -6153,7 +6156,7 @@ SCREENS.soloSetup = function(){
   const s = S.solo = S.solo || defaultSolo();
   const avail = soloPool().length;
 
-  const diffBtns = ['easy','medium','hard','mixed'].map(d =>
+  const diffBtns = ['easy','medium','hard','expert','mixed'].map(d =>
     '<button data-act="soloDiff" data-d="' + d + '" aria-pressed="' + (s.diff === d) + '" class="' +
       (s.diff === d ? 'gold' : '') + '">' + Cap(d) + '</button>').join('');
 
