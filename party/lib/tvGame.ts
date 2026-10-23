@@ -82,7 +82,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      one, if it lands at all, is turned down (20 Oct: one update held 15 s kept five ingredients
      of a recipe back, and they all appeared at once). */
   const chain = useRef<{ p: Promise<void>; queued: boolean }>({ p: Promise.resolve(), queued: false });
-  const lastSecret = useRef(""), lastSave = useRef(""), offline = useRef(false), lastAt = useRef(0);
+  const lastSecret = useRef(""), lastSave = useRef(""), offline = useRef(false), lastAt = useRef(0), resent = useRef(0);
   const stamp = () => (lastAt.current = Math.max(Date.now(), lastAt.current + 1));
   /* a line across the TV when something's wrong that the room should know about */
   const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave">(null);
@@ -140,6 +140,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const done = Promise.all(writes).then(async (res) => {
         const bad = res.find((r) => r.error);
         if (bad) throw bad.error;
+        resent.current = 0;
         const latest = lastAt.current === at;
         if (withSecret && latest) lastSecret.current = sec;
         /* turned down while it's this TV's latest: the room holds a later stamp than this TV has (its
@@ -154,7 +155,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       let wait: ReturnType<typeof setTimeout> | undefined;
       const held = await Promise.race([done.then(() => false), new Promise<boolean>((r) => { wait = setTimeout(() => r(true), 2000); })]);
       clearTimeout(wait);
-      if (held) done.catch(failed);                  // (it can still fail later: then it's said, and tried again)
+      if (held) {
+        done.catch(failed);                          // (it can still fail later: then it's said, and tried again)
+        /* nothing gone out since: the same screen goes again (23 Oct: a Majority Rules reveal at time-up, with
+           nothing after it, left the phones on a clock 8 s past zero while the server sat on that one write);
+           three times at most, till one lands, so a server that hangs on everything isn't sent a pile */
+        if (lastAt.current === at && resent.current < 3) { resent.current++; setTimeout(() => void publishRef.current(), 0); }
+      }
     }).catch(failed);
     return c.p;
   }, [code, saveKey, view]);
