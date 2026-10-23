@@ -28,7 +28,6 @@ The file name is a hash, so it doesn't give away the landmark. Written by `scrip
 | 24db0609a32b15b3.jpg | Christ the Redeemer | Mucio Scorzelli | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Christ_the_Redeemer-(Corcovado)_front_view.jpg |
 | 00570a1fff66ab0d.jpg | Golden Gate Bridge | © Frank Schulenburg | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Golden_Gate_Bridge_as_seen_from_Battery_East.jpg |
 | 0a3e6f4bb1b2824a.jpg | Leaning Tower of Pisa | Chabe01 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Campanile_D%C3%B4me_-_Pise_(IT52)_-_2022-08-31_-_20.jpg |
-| f3c4c9cded4b2c40.jpg | Great Wall of China (Mutianyu section) | Velatrix (no credit required) | CC0 | https://commons.wikimedia.org/wiki/File:Great_Wall_of_China_July_2006.JPG |
 | 33176262ed315b97.jpg | Sagrada Família | Canaan | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:SF_maig_2026.jpg |
 | 83de3a5ba00edd61.jpg | Parthenon (Acropolis of Athens) | A.Savin | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Attica_06-13_Athens_50_View_from_Philopappos_-_Acropolis_Hill.jpg |
 | c2e1b9f9ae065ece.jpg | Mount Fuji | 名古屋太郎, edited by Hannes_24 | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Kodaki_fuji_frm_shojinko_refurb.jpg |

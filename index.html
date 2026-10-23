@@ -1272,7 +1272,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.30', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.31', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3339,7 +3339,6 @@ const PINS = [
   ["christ-the-redeemer", "Christ the Redeemer", "easy", -22.9519, -43.2105, "Rio de Janeiro, Brazil", "24db0609a32b15b3", "Mucio Scorzelli", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Christ_the_Redeemer-(Corcovado)_front_view.jpg"],
   ["golden-gate-bridge", "Golden Gate Bridge", "easy", 37.8197, -122.4786, "San Francisco, United States", "00570a1fff66ab0d", "© Frank Schulenburg", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Golden_Gate_Bridge_as_seen_from_Battery_East.jpg"],
   ["leaning-tower-of-pisa", "Leaning Tower of Pisa", "easy", 43.723, 10.3966, "Pisa, Italy", "0a3e6f4bb1b2824a", "Chabe01", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Campanile_D%C3%B4me_-_Pise_(IT52)_-_2022-08-31_-_20.jpg"],
-  ["great-wall-of-china", "Great Wall of China (Mutianyu section)", "easy", 40.438, 116.5619, "Mutianyu, near Beijing, China", "f3c4c9cded4b2c40", "Velatrix (no credit required)", "CC0", "https://commons.wikimedia.org/wiki/File:Great_Wall_of_China_July_2006.JPG"],
   ["sagrada-familia", "Sagrada Família", "easy", 41.4037, 2.1743, "Barcelona, Spain", "33176262ed315b97", "Canaan", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:SF_maig_2026.jpg"],
   ["parthenon", "Parthenon (Acropolis of Athens)", "easy", 37.9715, 23.7266, "Athens, Greece", "83de3a5ba00edd61", "A.Savin", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Attica_06-13_Athens_50_View_from_Philopappos_-_Acropolis_Hill.jpg"],
   ["mount-fuji", "Mount Fuji", "easy", 35.3606, 138.7275, "Shizuoka and Yamanashi, Japan", "c2e1b9f9ae065ece", "名古屋太郎, edited by Hannes_24", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Kodaki_fuji_frm_shojinko_refurb.jpg"],
@@ -3778,7 +3777,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 31;   // bumped when the built-in bank changes
+const SEED_VERSION = 32;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
