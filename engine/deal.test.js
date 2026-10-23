@@ -117,10 +117,14 @@ test('Say the Same: the hidden word is any of the top six, evenly; a shorter lis
   for(let i = 0; i < 6000; i++){ const w = D3.drawSaySame(cheese).answer; n[w] = (n[w] || 0) + 1; }
   assert.deepEqual(Object.keys(n).sort(), ['Brie', 'Cheddar', 'Feta', 'Gouda', 'Mozzarella', 'Parmesan'], JSON.stringify(n));
   assert.ok(Object.values(n).every((k) => k > 850 && k < 1150), JSON.stringify(n));
-  /* six or fewer: any of them, the end of the list too (Pete Best) */
-  const beatles = { pool:['John', 'Paul', 'Ringo', 'George', 'Pete Best', 'Stuart Sutcliffe'] }, b = new Set();
-  for(let i = 0; i < 2000; i++) b.add(D3.drawSaySame(beatles).answer);
+  /* six or fewer: any of them (the planets' first six too) */
+  const six = { pool:['Mars', 'Earth', 'Jupiter', 'Saturn', 'Venus', 'Mercury'] }, b = new Set();
+  for(let i = 0; i < 2000; i++) b.add(D3.drawSaySame(six).answer);
   assert.equal(b.size, 6);
+  /* ...unless the list keeps to its famous answers: the four Beatles, never Pete Best */
+  const beatles = { pool:['John', 'Paul', 'Ringo', 'George', 'Pete Best', 'Stuart Sutcliffe'], common:4 }, f = new Set();
+  for(let i = 0; i < 2000; i++) f.add(D3.drawSaySame(beatles).answer);
+  assert.deepEqual([...f].sort(), ['George', 'John', 'Paul', 'Ringo']);
   const coin = { pool:['Heads', 'Tails'] }, c = {};
   for(let i = 0; i < 2000; i++){ const w = D3.drawSaySame(coin).answer; c[w] = (c[w] || 0) + 1; }
   assert.ok(Math.abs(c.Heads - c.Tails) < 200, JSON.stringify(c));

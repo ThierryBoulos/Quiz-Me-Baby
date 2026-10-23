@@ -1252,7 +1252,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.28', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.29', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2418,7 +2418,9 @@ const SEED_AUCTION = [
    - It is ORDERED, most commonly given answer first. The secret word is only
      ever one of the top six, the way the person next to you would answer,
      each as likely as the next (all of a list of six or fewer). So put
-     Connery before Lazenby, Apple before Quince.
+     Connery before Lazenby, Apple before Quince. A short list whose end is
+     little-known keeps to its famous answers with a count in the row's
+     third place: the four Beatles, never Pete Best.
    - Its LENGTH is the prompt's real-world scope: 2 for a true binary like
      Heads or Tails, dozens for something wide open like fast food chains.
      That number orders a night's nine prompts from vast (safe, many ways to
@@ -2440,10 +2442,10 @@ const SEED_SAYSAME = [
   ['Name a traffic light colour', ['Red','Green','Amber']],
   ['Name a suit in a deck of cards', ['Hearts','Spades','Diamonds','Clubs']],
   ['Name a season', ['Summer','Winter','Spring','Autumn']],
-  ['Name a Beatle', ['John','Paul','Ringo','George','Pete Best','Stuart Sutcliffe']],
+  ['Name a Beatle', ['John','Paul','Ringo','George','Pete Best','Stuart Sutcliffe'], 4],
   ['Name a compass direction', ['North','South','East','West']],
-  ['Name a vowel', ['A','E','I','O','U','Y']],
-  ['Name a James Bond actor', ['Sean Connery','Daniel Craig','Roger Moore','Pierce Brosnan','Timothy Dalton','George Lazenby']],
+  ['Name a vowel', ['A','E','I','O','U','Y'], 5],
+  ['Name a James Bond actor', ['Sean Connery','Daniel Craig','Roger Moore','Pierce Brosnan','Timothy Dalton','George Lazenby'], 4],
   ['Name a Friends character', ['Rachel','Ross','Joey','Chandler','Monica','Phoebe','Gunther','Janice','Mike','Ursula','Richard','Carol','Susan','Emily','Ben','Emma','Marcel','Jack','Judy','Estelle','Frank Jr.','Paolo','Tag','Mr Heckles','Amy','Jill','Charlie','Kathy','Julie','Pete','David','Barry','Mr Treeger','Ugly Naked Guy','Elizabeth','Mona','Gavin','Eddie','Fun Bobby','Erica','Leonard','Sandra','Nora','Alice','Joshua','Mary Angela']],
   ['Name a colour of the rainbow', ['Red','Blue','Green','Yellow','Orange','Violet','Indigo']],
   ['Name a day of the week', ['Monday','Friday','Sunday','Saturday','Wednesday','Tuesday','Thursday']],
@@ -3515,10 +3517,10 @@ function buildSeedBank(party){
     id:hash(r[0]), question:r[0], answer:'Host counts', notes:r[1]||'', theme:'',
     type:'auction', difficulty:'', use_with:'', src:'seed'
   }); });
-  SEED_SAYSAME.forEach(function(r){ out.push({
+  SEED_SAYSAME.forEach(function(r){ out.push(Object.assign({
     id:hash(r[0]), question:r[0], answer:'', notes:'', theme:'',
     type:'saysame', difficulty:'', use_with:'', pool:r[1].slice(), src:'seed'
-  }); });
+  }, r[2] ? { common:r[2] } : {})); });
   /* The bank row carries the words; the drawing itself is looked up from
      SEED_MAPS by `map` at render time, so a corrected border or colour never
      needs a bank migration — only the words do. */
@@ -3749,7 +3751,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 29;   // bumped when the built-in bank changes
+const SEED_VERSION = 30;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the

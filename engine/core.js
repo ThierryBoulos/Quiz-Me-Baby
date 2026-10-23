@@ -476,10 +476,13 @@
        say. The lists run from the most common answer down, and the word is drawn
        from the top six (all of a shorter list), each as likely as the next: a room
        that plays every week can't learn that the app always says Cheddar
-       (Cheddar, Mozzarella, Brie, Parmesan, Feta, Gouda; never Wensleydale). */
+       (Cheddar, Mozzarella, Brie, Parmesan, Feta, Gouda; never Wensleydale).
+       A short list whose end is little-known keeps to its famous answers with a
+       smaller count of its own (`common`): the four Beatles, never Pete Best. */
     const SAY_TOP = 6;
     function commonOf(q){
-      return Math.min(SAY_TOP, (q.pool || []).length);
+      const c = Math.floor(Number(q.common));
+      return Math.min(SAY_TOP, (q.pool || []).length, c >= 1 ? c : SAY_TOP);
     }
     function drawSaySame(q){
       const top = (q.pool || []).slice(0, commonOf(q));

@@ -93,6 +93,8 @@ for (const q of bank.bank) {
     const pool = q.pool || [];
     if (pool.length < 2) err(id, "saysame pool needs 2+ words");
     const t = pool.map(tidy); if (new Set(t).size !== t.length) err(id, "duplicate words in pool");
+    /* a short list that keeps to its famous answers: the app's word is one of its first `common` (at most six) */
+    if (q.common != null && !(Number.isInteger(q.common) && q.common >= 1 && q.common <= Math.min(6, pool.length))) err(id, `saysame common must be 1 to ${Math.min(6, pool.length)}`);
     pool.forEach((a) => pool.forEach((b) => { if (a !== b && QMB.isMatch(a, b, accept.byAnswer[b] || [])) warn(id, `pool word "${a}" is accepted as "${b}" by the matcher`); }));
   }
   if (q.type === "standard") {
