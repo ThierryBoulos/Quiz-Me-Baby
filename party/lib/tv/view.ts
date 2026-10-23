@@ -166,6 +166,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   if ((s.screen === "airportQ" || s.screen === "airportReveal") && q) {
     const reveal = s.screen === "airportReveal";
     p.airport = { title: q.boardTitle, board: q.board, code: reveal ? q.code : undefined, city: reveal ? q.city : undefined };
+    if (reveal) p.airport.cityOk = acceptFor(q).some((a) => QMB.tidy(a) === QMB.tidy(q.city || ""));
     if (reveal) p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s), notes: q.notes };
   }
   if ((s.screen === "mapQ" || s.screen === "mapReveal") && q) {

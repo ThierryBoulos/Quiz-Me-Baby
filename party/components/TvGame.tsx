@@ -269,6 +269,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
           <div className="eyebrow text-16">The airport</div>
           <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
           {pub.airport.code && <div className="text-24"><b>{pub.airport.code}</b> · {pub.airport.city}</div>}
+          {pub.airport.cityOk === false && <div className="text-18 font-bold text-center" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</div>}
           {pub.reveal?.notes && <div className="text-16 text-[var(--color-ink-2)] leading-snug text-left">{pub.reveal.notes}</div>}
           <TeamRows pub={pub} empty="No answer" small />
         </>)}

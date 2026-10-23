@@ -47,7 +47,8 @@ export type Pub = {
   pin?: { photo: string; credit: string; licence: string; name?: string;
     reveal?: { at: LatLon; name: string; place: string; pins: Two<LatLon | null>; km: Two<number | null> } };
   /* Guess the Airport: its departures board (time, status, destination, flight, gate); at the reveal, its code and city */
-  airport?: { title: string; board: string[][]; code?: string; city?: string };
+  /* cityOk, at the reveal: false where the city alone doesn't count (it has more than one big airport) */
+  airport?: { title: string; board: string[][]; code?: string; city?: string; cityOk?: boolean };
   /* Majority Rules: every player answers. The join screen: each team's list (who's on the game screen, who's been
      taken off), and with no host a captain asking to take an absent teammate off (the other captain agrees).
      Then, the list fixed: the names on it, the four answers, how many have answered, and at the reveal how
