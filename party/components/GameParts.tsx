@@ -3,7 +3,7 @@
    from Classic (index.html): the HUD tracker, the round intro with each
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { preloadWorld, type Mark } from "./PinMap";
@@ -110,11 +110,46 @@ export function PinPhoto({ pin, h, small, credit, zoom }: { pin?: Pub["pin"]; h:
       {/* on the page itself, so nothing on the screen (an animation, a card) can box it in */}
       {big && createPortal(
         <div className="pin-big" role="dialog" aria-label="The landmark, full screen" onClick={() => setBig(false)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/pins/${pin.photo}.jpg`} alt="The landmark" draggable={false} />
+          <PinchImg src={`/pins/${pin.photo}.jpg`} />
+          <span className="pin-pinch">Pinch to zoom</span>
           <button type="button" className="btn btn-sm">Close</button>
         </div>, document.body)}
     </figure>);
+}
+
+/* the enlarged photo: two fingers zoom it (up to 5×), one finger moves it about once zoomed, a double tap
+   goes back; the page itself stays locked like an app (23 Oct) */
+function PinchImg({ src }: { src: string }) {
+  const [t, setT] = useState({ k: 1, x: 0, y: 0 });
+  const pts = useRef(new Map<number, { x: number; y: number }>());
+  const start = useRef<{ d: number; k: number; x: number; y: number; cx: number; cy: number } | null>(null);
+  const lastTap = useRef(0);
+  const begin = () => {
+    const p = [...pts.current.values()];
+    if (p.length === 2) start.current = { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) || 1, k: t.k, x: t.x, y: t.y, cx: (p[0].x + p[1].x) / 2, cy: (p[0].y + p[1].y) / 2 };
+    else if (p.length === 1) start.current = { d: 0, k: t.k, x: t.x, y: t.y, cx: p[0].x, cy: p[0].y };
+  };
+  return (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img src={src} alt="The landmark" draggable={false}
+      style={{ transform: `translate(${t.x}px, ${t.y}px) scale(${t.k})` }}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => {
+        e.stopPropagation(); (e.target as Element).setPointerCapture?.(e.pointerId);
+        pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY }); begin();
+        if (pts.current.size === 1) { const now = Date.now(); if (now - lastTap.current < 300) setT({ k: 1, x: 0, y: 0 }); lastTap.current = now; }
+      }}
+      onPointerMove={(e) => {
+        if (!pts.current.has(e.pointerId) || !start.current) return;
+        pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        const p = [...pts.current.values()], s0 = start.current;
+        if (p.length >= 2 && s0.d) {
+          const k = Math.min(5, Math.max(1, (s0.k * Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y)) / s0.d));
+          setT({ k, x: k === 1 ? 0 : s0.x + (p[0].x + p[1].x) / 2 - s0.cx, y: k === 1 ? 0 : s0.y + (p[0].y + p[1].y) / 2 - s0.cy });
+        } else if (p.length === 1 && s0.k > 1) setT({ k: s0.k, x: s0.x + p[0].x - s0.cx, y: s0.y + p[0].y - s0.cy });
+      }}
+      onPointerUp={(e) => { pts.current.delete(e.pointerId); begin(); if (!pts.current.size) start.current = null; }}
+      onPointerCancel={(e) => { pts.current.delete(e.pointerId); begin(); if (!pts.current.size) start.current = null; }} />);
 }
 
 /* the reveal on the map: where it is (the landmark's name on it), and each team's pin with how far off */
