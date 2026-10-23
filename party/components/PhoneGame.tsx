@@ -155,7 +155,7 @@ function MajorityPad({ pub, me, code }: { pub: Pub; me: Member; code: string }) 
       <div className="grid gap-2.5" role="group" aria-label="The four answers">
         {order.map((o) => <button key={o} type="button" className="btn btn-lg btn-block mr-opt" disabled={pub.tvAway} onClick={() => tap(o)}><bdi>{o}</bdi></button>)}
       </div>
-      <p className="text-center text-12 text-[var(--color-ink-3)]">One tap, and it&rsquo;s locked. Eyes on your own phone.</p>
+      <p className="text-center text-12 text-[var(--color-ink-3)]">One tap, and it&rsquo;s locked.</p>
     </div>);
 }
 /* the join screen's lists, on a phone: who's here; the host takes someone off (or puts them back); with
