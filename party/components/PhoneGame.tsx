@@ -708,8 +708,7 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
     <div className="eyebrow text-center">This question</div>
     {rows((t) => `${R.right[t]} of ${M.n?.[t] ?? 0} right`)}
     {M.totals && <p className="text-center text-14 text-[var(--color-ink-2)]">So far: {name(0)} {pub.mini?.wins[0] ?? 0}% · {name(1)} {pub.mini?.wins[1] ?? 0}%
-      <span className="block text-12 text-[var(--color-ink-3)]">({M.totals.right[0]} of {M.totals.of[0]} and {M.totals.right[1]} of {M.totals.of[1]} right)</span></p>}
-    {R.notes && <div className="text-13 text-[var(--color-ink-2)] text-center">{R.notes}</div>}</>); }
+      <span className="block text-12 text-[var(--color-ink-3)]">({M.totals.right[0]} of {M.totals.of[0]} and {M.totals.right[1]} of {M.totals.of[1]} right)</span></p>}</>); }
   if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (<>
     {head(legW(w), w === "tie" ? "A point each" : w === "none" ? "No pins, no point" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
     {rows((t) => (R.pins[t] ? `${showKm(R.km[t] ?? 0)} off` : "No pin"))}</>); }
@@ -772,6 +771,8 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
   return (<div className="noselect contents" {...noCopy}>
     {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className="font-bold text-20 leading-snug text-center">{pub.question}</p>}
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
+    {/* the fact behind it, right under the answer */}
+    {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
     {pub.screen === "pinQ" && (small
       /* the captain's phone: the photo beside the clock, so the map gets the room */

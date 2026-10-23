@@ -184,6 +184,8 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
         {R && <span className="flex gap-5 shrink-0 text-26" aria-label={`${T[0].name} ${R.counts[i]?.[0] ?? 0}, ${T[1].name} ${R.counts[i]?.[1] ?? 0}`}>{[0, 1].map((t) => (
           <span key={t} className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded-full" style={{ background: tc(t as 0 | 1) }} aria-hidden /><b>{R.counts[i]?.[t] ?? 0}</b></span>))}</span>}
       </div>); })}</div>
+    {/* the fact behind the answer, right under it, for the whole room */}
+    {R?.notes && <div className="max-w-[1300px] text-28 leading-snug -mt-1" style={{ color: "var(--color-gold)" }}>{R.notes}</div>}
     {!R ? (
       <div className="flex items-center gap-12">
         <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
@@ -193,9 +195,8 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       <div className="flex flex-col items-center gap-2">
         <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
         <div className="display text-44">{[0, 1].map((t) => <span key={t}>{t ? <span className="text-[var(--color-ink-3)]"> – </span> : null}<span style={{ color: tc(t as 0 | 1) }}>{m.wins[t]}%</span></span>)}</div>
-        {/* the fact behind the answer, for the whole room (the bar above has the game so far) */}
+        {/* with no fact to tell, the game so far (the bar above has it too) */}
         {!R.notes && <div className="text-20 text-[var(--color-ink-2)]">So far, right answers out of all they could give: {M.totals?.right[0]} of {M.totals?.of[0]} and {M.totals?.right[1]} of {M.totals?.of[1]}</div>}
-        {R.notes && <div className="mt-2 max-w-[1300px] text-28 leading-snug" style={{ color: "var(--color-gold)" }}>{R.notes}</div>}
       </div>)}
   </>); }
   if (/Intro$/.test(sc)) return (<>
