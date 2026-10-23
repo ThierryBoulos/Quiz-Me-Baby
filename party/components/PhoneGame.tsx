@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
@@ -645,18 +645,21 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
   const decider = K ? (nohost ? pub.captains?.[K.by === 0 ? 1 : 0] || "The other captain" : "The host") : "";
   return (
     <div className="flex flex-col gap-2">
-      {!cardOnly && <div className={"flex flex-col gap-1.5" + (C.length > 6 ? " max-h-[52vh] overflow-y-auto pr-1" : "")}>
-        {lastQ && <div className="eyebrow text-center">The last question</div>}
-        {C.map((c) => (
-          <div key={c.id} className="flex items-center gap-2 text-14" style={{ opacity: K && K.id !== c.id ? 0.6 : 1 }}>
-            <span className="font-bold shrink-0" style={{ color: tc(c.team) }}>{T[c.team].name}{c.note && !lastQ ? <span className="font-normal text-12 text-[var(--color-ink-3)]"> · {c.note}</span> : null}</span>
-            <span className="flex-1 min-w-0 truncate text-[var(--color-ink-2)]">{c.text || "No answer"}
+      {/* one grid for every call, so the names, the answers, the RIGHT/WRONG and the Contest each line up in a column */}
+      {!cardOnly && <div className={"grid items-center gap-x-2 gap-y-1.5 text-14" + (C.length > 6 ? " max-h-[52vh] overflow-y-auto pr-1" : "")}
+        style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto auto" }}>
+        {lastQ && <div className="eyebrow text-center col-span-4">The last question</div>}
+        {C.map((c) => { const dim = { opacity: K && K.id !== c.id ? 0.6 : 1 }; return (
+          <Fragment key={c.id}>
+            <span className="font-bold" style={{ color: tc(c.team), ...dim }}>{T[c.team].name}{c.note && !lastQ ? <span className="font-normal text-12 text-[var(--color-ink-3)]"> · {c.note}</span> : null}</span>
+            <span className="min-w-0 truncate text-[var(--color-ink-2)]" style={dim}>{c.text || "No answer"}
               {c.answer && !c.ok && <span className="block truncate text-12 text-[var(--color-ink-3)]">Answer: {c.answer}</span>}</span>
-            <Verdict v={c.ok} say={say} size={13} />
-            {host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
-              : !c.done && !K && mine != null && (c.team === mine ? !c.ok : c.ok) ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[36px] px-1" disabled={busy}
-                onClick={() => act({ type: "ui/contest", id: c.id })}>Contest</button> : <span className="w-[52px]" />}
-          </div>))}
+            <span className="justify-self-start" style={dim}><Verdict v={c.ok} say={say} size={13} /></span>
+            <span className="justify-self-start min-h-[36px] flex items-center" style={dim}>
+              {host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
+                : !c.done && !K && mine != null && (c.team === mine ? !c.ok : c.ok) ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[36px] px-1" disabled={busy}
+                  onClick={() => act({ type: "ui/contest", id: c.id })}>Contest</button> : null}</span>
+          </Fragment>); })}
       </div>}
       {K && (host || (nohost && mine != null && mine !== K.by) ? (
         <div className="card flex flex-col gap-2 text-center" role="alert">
