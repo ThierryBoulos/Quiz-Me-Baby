@@ -400,4 +400,6 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .mr-tv-opt { display: flex; align-items: center; gap: 18px; text-align: left; font-weight: 800; font-size: 34px; line-height: 1.15; padding: 20px 28px; border-radius: 22px;
   background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.14); transition: opacity .3s, border-color .3s, background .3s; }
 .mr-tv-opt.ok { border-color: var(--color-ok); background: rgba(61,220,151,.16); }
+/* at the reveal the answers make room for the fact under them */
+.mr-tv-opt.rev { font-size: 30px; padding: 12px 24px; border-radius: 18px; }
 .mr-tv-opt.dim { opacity: .5; }

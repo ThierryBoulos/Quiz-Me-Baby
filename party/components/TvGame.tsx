@@ -178,7 +178,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   if ((sc === "majorityQ" || sc === "majorityReveal") && pub.majority) { const M = pub.majority, R = M.reveal; return (<>
     <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 40 : 50, lineHeight: 1.12 }}>{pub.question}</div>
     <div className="grid grid-cols-2 gap-5 w-full max-w-[1400px]">{(M.options || []).map((o, i) => { const ok = R?.answer === o; return (
-      <div key={o} className={"mr-tv-opt " + (R ? (ok ? "ok" : "dim") : "")}>
+      <div key={o} className={"mr-tv-opt " + (R ? (ok ? "ok rev" : "dim rev") : "")}>
         <span className="flex-1 min-w-0"><bdi>{o}</bdi></span>
         {/* how many on each team picked it: a dot in the team's colour, and the number */}
         {R && <span className="flex gap-5 shrink-0 text-26" aria-label={`${T[0].name} ${R.counts[i]?.[0] ?? 0}, ${T[1].name} ${R.counts[i]?.[1] ?? 0}`}>{[0, 1].map((t) => (
@@ -193,8 +193,11 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
           <span key={t} className="font-bold text-26" style={{ color: tc(t as 0 | 1) }}>{T[t].name}: {M.answered?.[t] ?? 0} of {M.n?.[t] ?? 0} answered</span>))}</div>
       </div>) : (
       <div className="flex flex-col items-center gap-2">
-        <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
-        <div className="display text-44">{[0, 1].map((t) => <span key={t}>{t ? <span className="text-[var(--color-ink-3)]"> – </span> : null}<span style={{ color: tc(t as 0 | 1) }}>{m.wins[t]}%</span></span>)}</div>
+        {/* this question, and the game so far beside it: one line, so the fact above has the room */}
+        <div className="flex items-baseline justify-center gap-8 flex-wrap">
+          <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
+          <div className="display text-36">{[0, 1].map((t) => <span key={t}>{t ? <span className="text-[var(--color-ink-3)]"> – </span> : null}<span style={{ color: tc(t as 0 | 1) }}>{m.wins[t]}%</span></span>)}</div>
+        </div>
         {/* with no fact to tell, the game so far (the bar above has it too) */}
         {!R.notes && <div className="text-20 text-[var(--color-ink-2)]">So far, right answers out of all they could give: {M.totals?.right[0]} of {M.totals?.of[0]} and {M.totals?.right[1]} of {M.totals?.of[1]}</div>}
       </div>)}
