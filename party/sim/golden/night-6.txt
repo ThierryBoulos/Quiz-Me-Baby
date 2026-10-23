@@ -62,71 +62,72 @@
 68.75 miniQ | 41 | 2-3 | 1-2 | Owls takes leg 3. | 
 69.50 closestReveal | 41 | 2-3 | 2-2 | Owls takes leg 3. | 
 70.50 miniQ | 42 | 2-3 | 2-2 | Lions takes leg 4. | 
-71.25 closestReveal | 42 | 2-3 | 3-2 | Lions takes leg 4. | 
-72.25 miniSummary | 43 | 4-3 | 3-2 | Lions takes leg 5. | 
-73.25 roundIntro | 44 | 4-3 |  | Lions takes leg 5. | 
-75.00 ask | 45 | 4-3 |  | Lions takes leg 5. | 
-75.75 ask | 45 | 4-3 |  | Lions used Double Dip. | 
-77.75 answer | 46 | 5-3 |  | Lions +1 point | 
-78.50 ask | 47 | 5-3 |  | Lions +1 point | 
-80.25 steal | 48 | 5-3 |  | Lions +1 point | 
-82.25 answer | 49 | 5-3 |  | Lions +1 point | 
-83.00 answer | 49 | 5-3 |  |  | 
-84.75 roundScore | 50 | 5-3 |  |  | 
-85.75 roundIntro | 51 | 5-3 |  |  | 
-86.75 ask | 52 | 5-3 |  |  | 
-88.50 answer | 53 | 6-3 |  | Lions +1 point | 
-89.25 ask | 54 | 6-3 |  | Lions +1 point | 
-91.25 answer | 55 | 6-4 |  | Owls +1 point | 
-92.00 answer | 55 | 6-4 |  |  | 
-94.75 steal | 56 | 6-3 |  | Lions steal a new question. | 
-96.50 answer | 57 | 7-3 |  | Lions +1 point — steal | 
-97.50 answer | 57 | 7-3 |  |  | 
-98.25 roundScore | 58 | 7-3 |  |  | 
-99.25 auctionIntro | 59 | 7-3 | 0-0 |  | 
-100.25 auctionBid | 60 | 7-3 | 0-0 |  | 
-101.00 auctionBid | 61 | 7-3 | 0-0 |  | 
-102.00 auctionRun | 62 | 7-3 | 0-0 |  | 
-104.75 auctionLeg | 62 | 7-3 | 1-0 |  | 
-105.50 auctionBid | 63 | 7-3 | 1-0 |  | 
-106.50 auctionBid | 64 | 7-3 | 1-0 |  | 
-107.25 auctionRun | 65 | 7-3 | 1-0 |  | 
-110.00 auctionLeg | 65 | 7-3 | 1-1 |  | 
-111.00 auctionBid | 66 | 7-3 | 1-1 |  | 
-111.75 auctionBid | 67 | 7-3 | 1-1 |  | 
-112.75 auctionRun | 68 | 7-3 | 1-1 |  | 
-114.50 auctionLeg | 68 | 7-3 | 2-1 |  | 
-115.50 auctionResult | 69 | 9-3 | 2-1 |  | 
-116.25 roundIntro | 70 | 9-3 |  |  | 
-117.25 ask | 71 | 9-3 |  |  | 
-119.00 answer | 72 | 10-3 |  | Lions +1 point | 
-120.00 ask | 73 | 10-3 |  | Lions +1 point | 
-121.75 steal | 74 | 10-3 |  | Lions +1 point | 
-123.50 answer | 75 | 11-3 |  | Lions +1 point — steal | 
-124.50 answer | 75 | 11-3 |  |  | 
-127.25 roundScore | 76 | 11-3 |  |  | 
-128.00 battleIntro | 77 | 11-3 | 0-0 |  | 
-129.00 battleQ | 78 | 11-3 | 0-0 |  | 
-129.75 battleQ | 79 | 11-3 | 1-0 |  | 
-130.75 battleQ | 80 | 11-3 | 1-0 |  | 
-131.75 battleQ | 81 | 11-3 | 2-0 |  | 
-132.50 battleQ | 82 | 11-3 | 3-0 |  | 
-133.50 battleQ | 83 | 11-3 | 4-0 |  | 
-134.25 battleQ | 84 | 11-3 | 5-0 |  | 
-135.25 battleQ | 85 | 11-3 | 6-0 |  | 
-136.25 battleQ | 86 | 11-3 | 6-0 |  | 
-137.00 battleQ | 87 | 11-3 | 7-0 |  | 
-138.00 battleHandoff | 88 | 11-3 | 7-0 |  | 
-138.75 battleQ | 89 | 11-3 | 7-0 |  | 
-139.75 battleQ | 90 | 11-3 | 7-1 |  | 
-140.75 battleQ | 91 | 11-3 | 7-1 |  | 
-141.50 battleQ | 92 | 11-3 | 7-2 |  | 
-142.50 battleQ | 93 | 11-3 | 7-3 |  | 
-143.25 battleQ | 94 | 11-3 | 7-3 |  | 
-144.25 battleQ | 95 | 11-3 | 7-3 |  | 
-145.25 battleQ | 96 | 11-3 | 7-4 |  | 
-146.00 battleQ | 97 | 11-3 | 7-5 |  | 
-147.00 battleQ | 98 | 11-3 | 7-5 |  | 
-147.75 battleSummary | 99 | 15-3 | 7-6 |  | 
-148.75 final | 100 | 15-3 |  |  | 
-recap: {"margin":12,"sudden":false,"leadChanges":3,"steals":[4,1],"minis":[3,1],"best":{"title":"Guess the Flag","team":1,"legs":[4,6]}}
+71.25 closestReveal | 42 | 2-3 | 3-3 | Lions takes leg 4. | 
+72.25 miniTie | 43 | 2-3 | 3-3 |  | 
+73.25 miniSummary | 44 | 3-4 | 3-3 |  | 
+74.00 roundIntro | 45 | 3-4 |  |  | 
+75.75 ask | 46 | 3-4 |  |  | 
+76.75 ask | 46 | 3-4 |  | Lions used Double Dip. | 
+78.50 answer | 47 | 4-4 |  | Lions +1 point | 
+79.50 ask | 48 | 4-4 |  | Lions +1 point | 
+81.25 steal | 49 | 4-4 |  | Lions +1 point | 
+83.00 answer | 50 | 4-4 |  | Lions +1 point | 
+84.00 answer | 50 | 4-4 |  |  | 
+85.75 roundScore | 51 | 4-4 |  |  | 
+86.75 roundIntro | 52 | 4-4 |  |  | 
+87.50 ask | 53 | 4-4 |  |  | 
+89.25 answer | 54 | 5-4 |  | Lions +1 point | 
+90.25 ask | 55 | 5-4 |  | Lions +1 point | 
+92.00 answer | 56 | 5-5 |  | Owls +1 point | 
+93.00 answer | 56 | 5-5 |  |  | 
+95.75 steal | 57 | 5-4 |  | Lions steal a new question. | 
+97.50 answer | 58 | 6-4 |  | Lions +1 point — steal | 
+98.25 answer | 58 | 6-4 |  |  | 
+99.25 roundScore | 59 | 6-4 |  |  | 
+100.25 auctionIntro | 60 | 6-4 | 0-0 |  | 
+101.00 auctionBid | 61 | 6-4 | 0-0 |  | 
+102.00 auctionBid | 62 | 6-4 | 0-0 |  | 
+102.75 auctionRun | 63 | 6-4 | 0-0 |  | 
+105.50 auctionLeg | 63 | 6-4 | 1-0 |  | 
+106.50 auctionBid | 64 | 6-4 | 1-0 |  | 
+107.25 auctionBid | 65 | 6-4 | 1-0 |  | 
+108.25 auctionRun | 66 | 6-4 | 1-0 |  | 
+111.00 auctionLeg | 66 | 6-4 | 1-1 |  | 
+111.75 auctionBid | 67 | 6-4 | 1-1 |  | 
+112.75 auctionBid | 68 | 6-4 | 1-1 |  | 
+113.75 auctionRun | 69 | 6-4 | 1-1 |  | 
+115.50 auctionLeg | 69 | 6-4 | 2-1 |  | 
+116.25 auctionResult | 70 | 8-4 | 2-1 |  | 
+117.25 roundIntro | 71 | 8-4 |  |  | 
+118.25 ask | 72 | 8-4 |  |  | 
+120.00 answer | 73 | 9-4 |  | Lions +1 point | 
+120.75 ask | 74 | 9-4 |  | Lions +1 point | 
+122.75 steal | 75 | 9-4 |  | Lions +1 point | 
+124.50 answer | 76 | 10-4 |  | Lions +1 point — steal | 
+125.25 answer | 76 | 10-4 |  |  | 
+128.00 roundScore | 77 | 10-4 |  |  | 
+129.00 battleIntro | 78 | 10-4 | 0-0 |  | 
+129.75 battleQ | 79 | 10-4 | 0-0 |  | 
+130.75 battleQ | 80 | 10-4 | 1-0 |  | 
+131.75 battleQ | 81 | 10-4 | 1-0 |  | 
+132.50 battleQ | 82 | 10-4 | 2-0 |  | 
+133.50 battleQ | 83 | 10-4 | 3-0 |  | 
+134.25 battleQ | 84 | 10-4 | 4-0 |  | 
+135.25 battleQ | 85 | 10-4 | 5-0 |  | 
+136.25 battleQ | 86 | 10-4 | 6-0 |  | 
+137.00 battleQ | 87 | 10-4 | 6-0 |  | 
+138.00 battleQ | 88 | 10-4 | 7-0 |  | 
+138.75 battleHandoff | 89 | 10-4 | 7-0 |  | 
+139.75 battleQ | 90 | 10-4 | 7-0 |  | 
+140.75 battleQ | 91 | 10-4 | 7-1 |  | 
+141.50 battleQ | 92 | 10-4 | 7-1 |  | 
+142.50 battleQ | 93 | 10-4 | 7-2 |  | 
+143.25 battleQ | 94 | 10-4 | 7-3 |  | 
+144.25 battleQ | 95 | 10-4 | 7-3 |  | 
+145.25 battleQ | 96 | 10-4 | 7-3 |  | 
+146.00 battleQ | 97 | 10-4 | 7-4 |  | 
+147.00 battleQ | 98 | 10-4 | 7-5 |  | 
+147.75 battleQ | 99 | 10-4 | 7-5 |  | 
+148.75 battleSummary | 100 | 14-4 | 7-6 |  | 
+149.75 final | 101 | 14-4 |  |  | 
+recap: {"margin":10,"sudden":false,"leadChanges":3,"steals":[4,1],"minis":[2,1],"best":{"title":"Guess the Flag","team":1,"legs":[4,6]}}

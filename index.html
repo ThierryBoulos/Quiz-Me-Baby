@@ -1272,7 +1272,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.31', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.32', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1498,7 +1498,7 @@ const SEED = [
 ['Geography','hard','desert','What is the largest desert in the world overall?','Antarctica','It gets almost no precipitation, which is what makes it a desert.'],
 ['Geography','medium','ocean','What is the smallest ocean on Earth?','The Arctic Ocean',''],
 /* ---- HISTORY ---- */
-['History','easy','first-person','Who was the first person to walk on the Moon?','Neil Armstrong','Apollo 11, 20 July 1969.'],
+['History','easy','first-person','Who was the first person to walk on the Moon?','Neil Armstrong','Buzz Aldrin followed him down the ladder about 20 minutes later.'],
 ['History','easy','famous-leader','Who was the first President of the United States?','George Washington','1789-1797.'],
 ['History','easy','famous-leader','Who was the first President of post-apartheid South Africa?','Nelson Mandela','1994-1999.'],
 ['History','hard','','In which year did the Titanic sink?','1912','15 April 1912.'],
@@ -2295,6 +2295,36 @@ const SEED = [
 ['Art & Books','hard','complete-the-line','Complete Juliet\'s line: \'O Romeo, Romeo...\'','Wherefore art thou Romeo?','\'Wherefore\' means \'why\', not \'where\': she is asking why he has to be a Montague.'],
 ['Art & Books','expert','pen-name','What was George Orwell\'s real name?','Eric Blair','Born Eric Arthur Blair in 1903, in Motihari, British India.'],
 ['Art & Books','expert','pen-name','What was Mark Twain\'s real name?','Samuel Clemens','\'Mark twain\' was the riverboat call for water two fathoms deep: safe for a steamboat.'],
+/* ---- HISTORY (23 Oct) ---- */
+['History','medium','silk-road','What name is given to the ancient network of trade routes that linked China with the Mediterranean and Europe?','The Silk Road','The traders never called it that: a German geographer, Ferdinand von Richthofen, named it in 1877.'],
+['History','medium','us-bought','From which country did the United States buy Alaska in 1867?','Russia','For $7.2 million, about two cents an acre. Critics called it "Seward\'s Folly".'],
+['History','medium','ww2-leaders','Who was Britain\'s Prime Minister for most of the Second World War?','Winston Churchill','Neville Chamberlain was Prime Minister when the war began; Churchill took over in May 1940 and stayed until July 1945.'],
+['History','hard','pandemic','What name is usually given to the flu pandemic of 1918 to 1920, which killed tens of millions of people?','The Spanish flu','It didn\'t start in Spain. Neutral Spain\'s newspapers reported it freely while the countries at war censored the news, so Spain looked like the worst hit.'],
+['History','expert','american-firsts','Which ship carried the Pilgrims from England to Plymouth, in what is now Massachusetts, in 1620?','The Mayflower','Not the first English colony in America: Jamestown, Virginia, was founded 13 years earlier, in 1607.'],
+['History','expert','american-firsts','Who was charged with assassinating President John F. Kennedy in 1963?','Lee Harvey Oswald','Two days after his arrest, before any trial, Oswald was himself shot dead by Jack Ruby, live on television.'],
+['History','easy','moon-year','In what year did Apollo 11 land the first people on the Moon?','1969','On 20 July. An estimated 600 million people watched it live on television.'],
+['History','expert','rome','Which Roman emperor was the first to convert to Christianity?','Constantine the Great','He refounded the old city of Byzantium as his new capital in 330 and named it after himself: Constantinople, today\'s Istanbul.'],
+/* ---- SCIENCE (23 Oct) ---- */
+['Science','hard','space-firsts','What was the name of the Soviet dog that, in 1957, became the first animal to orbit the Earth?','Laika','Not the first animal in space: fruit flies flew on a US rocket in 1947. Laika did not survive the flight.'],
+['Science','hard','space-firsts','What was the name of the first artificial satellite, launched by the Soviet Union in 1957?','Sputnik 1','A metal ball 58 cm across with four long antennas. Radio amateurs around the world could hear its beeps.'],
+['Science','medium','ology','Etymology is the study of what?','The origins of words','From the Greek etymon, a word\'s "true sense".'],
+['Science','medium','ology','Entomology is the study of what?','Insects','From the Greek entomon, "cut into": for the way an insect\'s body is divided into segments.'],
+['Science','medium','human','What is the scientific name for modern humans?','Homo sapiens','Latin for "wise man".'],
+['Science','medium','diet','What do we call an animal that eats both plants and meat?','An omnivore','Humans, bears, pigs and raccoons are all omnivores.'],
+/* ---- NATURE (23 Oct) ---- */
+['Nature','medium','national-animal','What is the national animal of Canada?','The beaver','The North American beaver, made official in 1975. It\'s on the Canadian five-cent coin.'],
+/* ---- SPORTS (23 Oct) ---- */
+['Sports','easy','olympic-ceremony','At the Olympic opening ceremony, which country\'s team always enters the stadium first?','Greece','As the birthplace of the Olympics. The host country always comes in last.'],
+/* ---- ART & BOOKS (23 Oct) ---- */
+['Art & Books','easy','japan-arts','What is the Japanese art of growing miniature trees in pots called?','Bonsai','The word means "planted in a tray". Some bonsai trees are hundreds of years old.'],
+['Art & Books','expert','shakespeare','In Shakespeare\'s play, what is Romeo\'s family name?','Montague','The feud between the two families is the "ancient grudge" of the play\'s prologue.'],
+['Art & Books','expert','shakespeare','In Shakespeare\'s play, what is Juliet\'s family name?','Capulet','Her hot-headed cousin Tybalt is the one who kills Mercutio.'],
+['Art & Books','hard','oldest-story','Which poem from ancient Mesopotamia is often called the oldest great work of literature to survive?','The Epic of Gilgamesh','Its oldest parts are about 4,000 years old, written in cuneiform on clay tablets. Its flood story is strikingly like Noah\'s.'],
+/* ---- POP CULTURE (23 Oct) ---- */
+['Pop Culture','hard','zodiac','Which sign of the zodiac is represented by a crab?','Cancer','From the crab that Hera sent to nip at Hercules while he fought the Hydra.'],
+/* ---- TECH (23 Oct) ---- */
+['Tech','hard','investing','If you buy VOO or QQQ, what kind of investment are you buying?','An ETF (exchange-traded fund)','A basket of stocks that you buy and sell in one go, like a single share.'],
+['Tech','expert','investing-x','Which stock market index does the fund with the ticker QQQ track?','The Nasdaq-100','The 100 biggest non-financial companies on the Nasdaq exchange, so mostly tech: Apple, Microsoft, Nvidia and the like.']
 ];
 
 const SEED_CLOSEST = [
@@ -2506,6 +2536,7 @@ const SEED_SAYSAME = [
   ['Name a Disney or Pixar animated villain', ['Ursula','Scar','Jafar','Maleficent','Cruella de Vil','Captain Hook','The Evil Queen','Hades','Gaston','Mother Gothel','Lady Tremaine','Hans','Shere Khan','Frollo','Queen of Hearts','Yzma','Dr Facilier','Shan Yu','Governor Ratcliffe','Kaa','Syndrome','Lotso','Randall','Hopper','Sid','Stinky Pete','Emperor Zurg','Chef Skinner','Charles Muntz','Ernesto de la Cruz','Te Kā','Tamatoa','King Candy','Bellwether','King Magnifico','Mor’du','Madam Mim','Madame Medusa','Prince John','Sir Hiss','Sheriff of Nottingham','Professor Ratigan','The Horned King','Sykes','McLeach','Clayton','Stromboli','Honest John','The Coachman','Monstro','Chernabog','Big Bad Wolf','Pete','Lucifer','Iago','The Hyenas','Zira','Flotsam and Jetsam','Pain and Panic','Mr Smee','LeFou','Kronk','Stepsisters','Waternoose','Al McWhiggin','Duke of Weselton','Captain Gantu','Rourke','Helga Sinclair','Edgar','Callaghan','Chick Hicks','Professor Z','Miles Axlerod','Jackson Storm','Screenslaver','AUTO','Gabby Gabby','Ercole Visconti','Darla','Bruce','Molt','Pawbert Lynxley','Oogie Boogie','Bowler Hat Guy','The Ringmaster','Headless Horseman','Si and Am','Jasper and Horace','Amos Slade','Jumba','Dr Hämsterviel','Stabbington brothers','Willie the Giant','Diablo','Kakamora']],
   ['Name a Greek god or goddess', ['Zeus','Poseidon','Hades','Athena','Aphrodite','Apollo','Hermes','Ares','Hera','Artemis','Dionysus','Hephaestus','Demeter','Persephone','Hestia','Eros','Nike','Gaia','Cronus','Pan','Heracles','Helios','Selene','Eos','Uranus','Rhea','Atlas','Prometheus','Hecate','Nemesis','Hypnos','Thanatos','Morpheus','Iris','Hebe','Tyche','Nyx','Chaos','Erebus','Tartarus','Triton','Amphitrite','Asclepius','Eris','Harmonia','Psyche','Charon','Aeolus','Boreas','Zephyrus','Leto','Metis','Themis','Mnemosyne','Oceanus','Hyperion','Tethys','Theia','Phoebe','Coeus','Crius','Iapetus','Epimetheus','Nereus','Proteus','Hygieia','Plutus','Phobos','Deimos','Pontus','Styx','Dione','Eileithyia','Ananke','Aether','Hemera','Kratos','Bia','Priapus','Hymen','The Fates','Clotho','Lachesis','Atropos','The Muses','Calliope','Clio','Erato','Euterpe','Melpomene','Polyhymnia','Terpsichore','Thalia','Urania','The Graces','Aglaea','Euphrosyne']],
   ['Name a music genre', ['Pop','Rock','Jazz','Hip hop','Classical','R&B','Country','Reggae','Techno','House','Metal','Blues','Soul','Funk','Disco','Punk','Electronic','Indie','Folk','Grunge','Reggaeton','K-pop','Dubstep','Drum and bass','Trance','Gospel','Opera','Salsa','Samba','Bossa nova','Ska','Trap','Afrobeats','Afro house','Dancehall','Rock and roll','Grime','Garage','Swing','Motown','Lo-fi','Ambient','Emo','Hardcore','Hardstyle','Synth-pop','Synthwave','New wave','Britpop','Bluegrass','Latin','Bachata','Merengue','Flamenco','Tango','Fado','Raï','Tarab','Arabic pop','Dabke','Zouk','Chanson','Deep house','Tech house','Minimal','Acid house','Progressive house','Prog rock','Hard rock','Death metal','Black metal','Thrash metal','Nu metal','Post-punk','Alternative','Psychedelic rock','Psytrance','Industrial','Trip hop','Chillout','Jungle','Breakbeat','Big band','Baroque','Gregorian chant','Choral','Musical theatre','Soundtrack','Doo-wop','Ragtime','Bebop','Smooth jazz','Calypso','Soca','Cumbia','Mariachi','Polka','Celtic','Neo-soul','Shoegaze','Electro swing','Phonk','Drill','Amapiano','Hyperpop','Italo disco','Eurodance','Gabber','Downtempo','Americana','Bhangra','Bollywood','Mahraganat','Shaabi','Dub','New age','Metalcore','Glam rock','Soft rock','Surf rock','Melodic techno','Nu-disco']],
+  ['Name a landlocked country', ['Switzerland','Austria','Mongolia','Bolivia','Nepal','Afghanistan','Paraguay','Hungary','Luxembourg','Czechia','Liechtenstein','Kazakhstan','Vatican City','Ethiopia','Uganda','Zimbabwe','Zambia','Chad','Mali','Niger','Slovakia','Serbia','Belarus','Andorra','San Marino','Laos','Bhutan','Uzbekistan','Rwanda','Botswana','Kyrgyzstan','Tajikistan','Turkmenistan','Armenia','Azerbaijan','Moldova','North Macedonia','Kosovo','Burkina Faso','Burundi','Malawi','Lesotho','Eswatini','South Sudan','Central African Republic']]
 ];
 
 /* --------------------------------------------------------------------------
@@ -3179,7 +3210,8 @@ const FLAGS = [["us", "United States", "veasy", ""],
   ["svn", "South Vietnam", "expert", "Former country, 1955–1975"],
   ["za28", "South Africa (1928–1994)", "expert", "Former flag"],
   ["chr", "Christiania", "expert", "Self-governing commune in Copenhagen, Denmark"],
-  ["epo", "Esperanto", "expert", "Flag of the Esperanto language and movement"]];
+  ["epo", "Esperanto", "expert", "Flag of the Esperanto language and movement"],
+  ["abu", "Abu Dhabi", "expert", "Emirate of the United Arab Emirates"]];
 /* Each flag is a bank row (type 'flag', built in buildSeedBank) so it shows in
    the bank, can be deleted there, and can be hand-picked in Setup. The bank row
    carries the words; the picture is found from `flag`, its file key. */
@@ -3355,7 +3387,23 @@ const PINS = [
   ["borobudur", "Borobudur", "hard", -7.6079, 110.2038, "Central Java, Indonesia", "1192259143cd9a16", "Gunawan Kartapranata", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Borobudur-Nothwest-view.jpg"],
   ["leshan-giant-buddha", "Leshan Giant Buddha", "hard", 29.5469, 103.7693, "Leshan, China", "01a25899bf0d8149", "xiquinhosilva", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Leshan_Giant_Buddha_(1).jpg"],
   ["perito-moreno-glacier", "Perito Moreno Glacier", "hard", -50.4932, -73.128, "Santa Cruz, Argentina", "58218edd79669edf", "Fernando", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Perito_Moreno_Glacier_2023.jpg"],
-  ["ha-long-bay", "Ha Long Bay", "hard", 20.9, 107.2, "Quang Ninh, Vietnam", "af35b4549acc15fc", "Thomas Hirsch / User:Ravn", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Halong_Bay_in_Vietnam.jpg"]
+  ["ha-long-bay", "Ha Long Bay", "hard", 20.9, 107.2, "Quang Ninh, Vietnam", "af35b4549acc15fc", "Thomas Hirsch / User:Ravn", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Halong_Bay_in_Vietnam.jpg"],
+  ["pena-palace", "Pena Palace", "hard", 38.7876, -9.3906, "Sintra, Portugal", "580e1587b1684ced", "Singa Hitam", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Sintra_-_Palacio_da_Pena_(20332995770).jpg"],
+  ["louvre-pyramid", "Louvre Pyramid", "easy", 48.8611, 2.3358, "Paris, France", "ac36c1560dc48777", "Benh LIEU SONG", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Louvre_Museum_Wikimedia_Commons.jpg"],
+  ["niagara-falls", "Niagara Falls (Horseshoe Falls)", "medium", 43.0772, -79.0757, "Ontario, Canada, and New York, United States", "11418c0467037c7d", "DXR", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Maid_of_the_Mist_VII_approaching_the_Horseshoe_Falls,_West_view_20170418_1.jpg"],
+  ["chicago-river", "Chicago River", "medium", 41.8885, -87.6245, "Chicago, United States", "cad84dbd3fcefcb8", "JeffieAlex", "Public domain", "https://commons.wikimedia.org/wiki/File:Chicago_River_from_Michigan_Ave.jpg"],
+  ["trulli-of-alberobello", "Trulli of Alberobello", "hard", 40.7821, 17.2369, "Alberobello, Puglia, Italy", "d45294f717d56718", "Berthold Werner", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Alberobello_BW_2016-10-16_13-44-51.jpg"],
+  ["cappadocia", "Cappadocia (Göreme)", "medium", 38.6431, 34.8289, "Nevşehir, Turkey", "20dd8343e864ea73", "MusikAnimal", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Hot_air_balloons_over_valleys_near_Göreme,_Cappadocia_at_dawn_2.JPG"],
+  ["blue-lagoon", "Blue Lagoon", "hard", 63.8804, -22.4495, "Grindavík, Iceland", "4c7050890b58910c", "Bloody-libu", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Blue_Lagoon_2012-08-23_(4).JPG"],
+  ["brandenburg-gate", "Brandenburg Gate", "medium", 52.5163, 13.3777, "Berlin, Germany", "36077766115612fa", "Thomas Wolf, www.foto-tw.de", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Brandenburger_Tor_morgens.jpg"],
+  ["mount-everest", "Mount Everest", "hard", 27.9881, 86.925, "Nepal and China (Tibet)", "65dfc423a864760a", "shrimpo1967, edited by Papa Lima Whiskey 2", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Mount_Everest_as_seen_from_Drukair2_PLW_edit.jpg"],
+  ["darvaza-gas-crater", "Darvaza gas crater (the Door to Hell)", "hard", 40.2526, 58.4394, "Karakum Desert, Turkmenistan", "7ceb75fa199d28d9", "Tormod Sandtorv", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Darvasa_gas_crater_panorama.jpg"],
+  ["nine-arch-bridge", "Nine Arch Bridge", "hard", 6.8768, 81.0606, "Ella, Sri Lanka", "eb72b6e5fe1c690f", "MichaelJames2468", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:The_Nine_Arches_Bridge.jpg"],
+  ["nyhavn", "Nyhavn", "medium", 55.6798, 12.5904, "Copenhagen, Denmark", "aee4ddd131193224", "Jakub Hałun", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Boats_at_Nyhavn,_Copenhagen,_20220616_1937_6628.jpg"],
+  ["oia-santorini", "Oia, Santorini", "easy", 36.4618, 25.3753, "Santorini, Greece", "6e540ccf2e74aeda", "Giles Laurent", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:1000_Three_domes_of_Oia_in_Santorini_Photo_by_Giles_Laurent.jpg"],
+  ["chefchaouen", "Chefchaouen (the Blue City)", "hard", 35.1688, -5.2684, "Chefchaouen, Morocco", "b8c3d92de6e51ed1", "Ismailbrk", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Chefcha'ouen_City_,_Morocco.jpg"],
+  ["great-mosque-of-djenne", "Great Mosque of Djenné", "hard", 13.9053, -4.5556, "Djenné, Mali", "d763f8a6e996e725", "Ruud Zwart", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Djenne_great_mud_mosque.jpg"],
+  ["deadvlei", "Deadvlei", "hard", -24.7593, 15.2924, "Namib-Naukluft National Park, Namibia", "ae63d6e555a86457", "Giles Laurent", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:054c_Dead_camel_thorn_trees_in_Deadvlei_Photo_by_Giles_Laurent.jpg"]
 ];
 
 /* --------------------------------------------------------------------------
@@ -3777,7 +3825,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 32;   // bumped when the built-in bank changes
+const SEED_VERSION = 33;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the

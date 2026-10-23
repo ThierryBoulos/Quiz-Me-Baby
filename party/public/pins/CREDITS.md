@@ -45,3 +45,19 @@ The file name is a hash, so it doesn't give away the landmark. Written by `scrip
 | 01a25899bf0d8149.jpg | Leshan Giant Buddha | xiquinhosilva | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Leshan_Giant_Buddha_(1).jpg |
 | 58218edd79669edf.jpg | Perito Moreno Glacier | Fernando | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Perito_Moreno_Glacier_2023.jpg |
 | af35b4549acc15fc.jpg | Ha Long Bay | Thomas Hirsch / User:Ravn | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Halong_Bay_in_Vietnam.jpg |
+| 580e1587b1684ced.jpg | Pena Palace | Singa Hitam | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Sintra_-_Palacio_da_Pena_(20332995770).jpg |
+| ac36c1560dc48777.jpg | Louvre Pyramid | Benh LIEU SONG | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Louvre_Museum_Wikimedia_Commons.jpg |
+| 11418c0467037c7d.jpg | Niagara Falls (Horseshoe Falls) | DXR | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Maid_of_the_Mist_VII_approaching_the_Horseshoe_Falls,_West_view_20170418_1.jpg |
+| cad84dbd3fcefcb8.jpg | Chicago River | JeffieAlex | Public domain | https://commons.wikimedia.org/wiki/File:Chicago_River_from_Michigan_Ave.jpg |
+| d45294f717d56718.jpg | Trulli of Alberobello | Berthold Werner | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Alberobello_BW_2016-10-16_13-44-51.jpg |
+| 20dd8343e864ea73.jpg | Cappadocia (Göreme) | MusikAnimal | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Hot_air_balloons_over_valleys_near_Göreme,_Cappadocia_at_dawn_2.JPG |
+| 4c7050890b58910c.jpg | Blue Lagoon | Bloody-libu | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Blue_Lagoon_2012-08-23_(4).JPG |
+| 36077766115612fa.jpg | Brandenburg Gate | Thomas Wolf, www.foto-tw.de | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Brandenburger_Tor_morgens.jpg |
+| 65dfc423a864760a.jpg | Mount Everest | shrimpo1967, edited by Papa Lima Whiskey 2 | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File:Mount_Everest_as_seen_from_Drukair2_PLW_edit.jpg |
+| 7ceb75fa199d28d9.jpg | Darvaza gas crater (the Door to Hell) | Tormod Sandtorv | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File:Darvasa_gas_crater_panorama.jpg |
+| eb72b6e5fe1c690f.jpg | Nine Arch Bridge | MichaelJames2468 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:The_Nine_Arches_Bridge.jpg |
+| aee4ddd131193224.jpg | Nyhavn | Jakub Hałun | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Boats_at_Nyhavn,_Copenhagen,_20220616_1937_6628.jpg |
+| 6e540ccf2e74aeda.jpg | Oia, Santorini | Giles Laurent | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:1000_Three_domes_of_Oia_in_Santorini_Photo_by_Giles_Laurent.jpg |
+| b8c3d92de6e51ed1.jpg | Chefchaouen (the Blue City) | Ismailbrk | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Chefcha'ouen_City_,_Morocco.jpg |
+| d763f8a6e996e725.jpg | Great Mosque of Djenné | Ruud Zwart | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Djenne_great_mud_mosque.jpg |
+| ae63d6e555a86457.jpg | Deadvlei | Giles Laurent | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:054c_Dead_camel_thorn_trees_in_Deadvlei_Photo_by_Giles_Laurent.jpg |

@@ -266,3 +266,4 @@ Licences: most are public domain. The others are credited here as their licences
 | `za28.svg` | South Africa (1928–1994) | Expert | [Flag of South Africa (1928–1994, dark colors).svg](https://commons.wikimedia.org/wiki/File:Flag_of_South_Africa_(1928%E2%80%931994,_dark_colors).svg) | Public domain |
 | `chr.svg` | Christiania | Expert | [Flag of Christiania.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Christiania.svg) | Public domain |
 | `epo.svg` | Esperanto | Expert | [Flag of Esperanto.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Esperanto.svg) | Public domain |
+| `abu.svg` | Abu Dhabi | Expert | [Flag of Abu Dhabi.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Abu_Dhabi.svg) | Public domain |

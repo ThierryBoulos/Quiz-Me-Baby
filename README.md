@@ -422,11 +422,11 @@ Import merges — a question with identical text updates the existing row instea
 
 ## What's in the box
 
-**1,012 questions** — 844 standard, 58 Closest To Wins, 29 Auction categories, 55 Don't Say the Same as Me prompts and 26 Guess the Map maps, across 22 themes — plus 254 flags and 90 cocktails and dishes:
+**1,036 questions** — 867 standard, 58 Closest To Wins, 29 Auction categories, 56 Don't Say the Same as Me prompts and 26 Guess the Map maps, across 22 themes — plus 255 flags and 90 cocktails and dishes:
 
 Acronyms · Art & Books · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech · TV Series · 90s Kids
 
-Guess the Airport has 39 departures boards, in both Classic and Party. Party also plays 40 Drop the Pin landmarks and 104 Majority Rules questions, which need everyone's phone.
+Guess the Airport has 39 departures boards, in both Classic and Party. Party also plays 56 Drop the Pin landmarks and 104 Majority Rules questions, which need everyone's phone.
 
 Every standard question has one of four levels: Easy, Medium, Hard or Expert. A night plays Easy to Hard by default, with Expert only once a theme runs out of the others; Mixed is all four.
 
