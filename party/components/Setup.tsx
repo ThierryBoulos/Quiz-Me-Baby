@@ -133,9 +133,9 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
     return (
       <div className="flex flex-col gap-2" role="group" aria-label={label}>
         <div className="field-label !mb-0">{label}</div>
-        <div className="grid grid-cols-5 gap-2">
-          {LEVELS.map(([k, l]) => <button key={k} type="button" className={"btn btn-sm !px-1 " + (on.includes(k) ? "btn-gold" : "")} aria-pressed={on.includes(k)} onClick={() => toggle(k)}>{l}</button>)}
-          <button type="button" className={"btn btn-sm !px-1 " + (all ? "btn-gold" : "")} aria-pressed={all} onClick={() => set(all ? QMB.DEFAULT_DIFF : "mixed")}>Mixed</button>
+        <div className="grid grid-cols-5 gap-1.5">
+          {LEVELS.map(([k, l]) => <button key={k} type="button" className={"btn btn-sm lvl-chip " + (on.includes(k) ? "btn-gold" : "")} aria-pressed={on.includes(k)} onClick={() => toggle(k)}>{l}</button>)}
+          <button type="button" className={"btn btn-sm lvl-chip " + (all ? "btn-gold" : "")} aria-pressed={all} onClick={() => set(all ? QMB.DEFAULT_DIFF : "mixed")}>Mixed</button>
         </div>
         <p className="text-12 text-[var(--color-ink-3)] px-1">{all ? "All four levels, Expert included." : on.includes("expert") ? "Expert is on: only real buffs get those." : on.length > 1 ? "Expert comes in only when a theme runs out of the others." : `${LEVELS.find(([k]) => k === on[0])?.[1]} only.`}</p>
       </div>);
