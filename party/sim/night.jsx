@@ -318,7 +318,9 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       else send(C(pub.buzz), "answer", { text: guess(right) });
     }
   }
-  await tick(fake.net.stallWrites ? 30000 : 5000); checkAcks();   // the last taps' late pushes land (and, on a slow server, the held updates)
+  /* the last taps' late pushes land (and, on a slow server, the held updates); their receipts are read as they come,
+     not once at the end (a tap sent as the final screen went up measured the whole wait: 5.0 s) */
+  for (let k = 0, n = (fake.net.stallWrites ? 30000 : 5000) / 250; k < n; k++) { await tick(250); checkAcks(); }
   await act(async () => { tree.unmount(); await flush(); });
   resetClock();
   return { taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
