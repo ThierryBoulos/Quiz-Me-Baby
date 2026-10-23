@@ -156,7 +156,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       totals: { right: [m.right[0], m.right[1]], of: [m.of[0], m.of[1]] } };
     /* the reveal counts this question in the totals straight away (the engine adds it at Next) */
     if (s.screen === "majorityReveal") {
-      p.majority.reveal = { answer: q.answer, counts: t.counts, right: t.right };
+      p.majority.reveal = { answer: q.answer, counts: t.counts, right: t.right, notes: q.notes || undefined };
       p.majority.totals = { right: [m.right[0] + t.right[0], m.right[1] + t.right[1]], of: [m.of[0] + m.n[0], m.of[1] + m.n[1]] };
       if (p.mini) p.mini.wins = [0, 1].map((k) => Math.round((100 * p.majority!.totals!.right[k]) / (p.majority!.totals!.of[k] || 1))) as Two<number>;
     }

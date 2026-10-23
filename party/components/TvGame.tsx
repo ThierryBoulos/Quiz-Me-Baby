@@ -193,7 +193,9 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       <div className="flex flex-col items-center gap-2">
         <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
         <div className="display text-44">{[0, 1].map((t) => <span key={t}>{t ? <span className="text-[var(--color-ink-3)]"> – </span> : null}<span style={{ color: tc(t as 0 | 1) }}>{m.wins[t]}%</span></span>)}</div>
-        <div className="text-20 text-[var(--color-ink-2)]">So far, right answers out of all they could give: {M.totals?.right[0]} of {M.totals?.of[0]} and {M.totals?.right[1]} of {M.totals?.of[1]}</div>
+        {/* the fact behind the answer, for the whole room (the bar above has the game so far) */}
+        {!R.notes && <div className="text-20 text-[var(--color-ink-2)]">So far, right answers out of all they could give: {M.totals?.right[0]} of {M.totals?.of[0]} and {M.totals?.right[1]} of {M.totals?.of[1]}</div>}
+        {R.notes && <div className="mt-2 max-w-[1300px] text-28 leading-snug" style={{ color: "var(--color-gold)" }}>{R.notes}</div>}
       </div>)}
   </>); }
   if (/Intro$/.test(sc)) return (<>
