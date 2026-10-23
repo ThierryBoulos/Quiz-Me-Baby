@@ -385,7 +385,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "pinQ": return (
       <div className="flex flex-col gap-3 flex-1">
         <div className="flex items-center justify-between"><div className="eyebrow">Landmark {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <PinPhoto pin={pub.pin} h={150} small />
+        <PinPhoto pin={pub.pin} h={150} small zoom />
         <AnswerCard />
         <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
           <div key={t} className="text-center">
@@ -775,8 +775,8 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
     {pub.screen === "pinQ" && (small
       /* the captain's phone: the photo beside the clock, so the map gets the room */
-      ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small /><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></div>
-      : <PinPhoto pin={pub.pin} h={230} small />)}
+      ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></div>
+      : <PinPhoto pin={pub.pin} h={230} small zoom />)}
     {pub.screen === "pinQ" && pub.pin?.name && <div className="display text-24 text-center" style={{ color: "var(--color-gold)" }}>{pub.pin.name}</div>}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <PinMap marks={pinMarks(pub)} fly height={small ? 220 : 300} label={`Where it is: ${pub.pin.reveal.place}`} />}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <div className="text-center"><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.pin.reveal.name}</div>

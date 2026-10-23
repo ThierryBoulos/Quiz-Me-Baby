@@ -379,6 +379,11 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .pinmap .pm-tools .btn:last-child { font-size: var(--text-12); }
 .pin-photo { display: block; max-width: 100%; object-fit: contain; border-radius: 14px; box-shadow: 0 10px 36px rgba(0,0,0,.45); }
 .pin-credit { font-size: var(--text-11); color: var(--color-ink-3); }
+.pin-zoom { position: relative; display: block; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.pin-zoom-hint { position: absolute; right: 6px; bottom: 6px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.62); color: #fff; font-size: var(--text-11); font-weight: 700; }
+/* the photo full screen on a phone: over everything, a tap anywhere closes it */
+.pin-big { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.94); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 12px; }
+.pin-big img { max-width: 100%; max-height: calc(100dvh - 90px); object-fit: contain; border-radius: 12px; }
 /* Guess the Airport: the departures board, drawn like the real thing (amber on black, a row a flight) */
 .board { background: #05060c; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: .7em .8em; width: 100%; color: #ffd25a;
   font-variant-numeric: tabular-nums; box-shadow: inset 0 0 0 1px #000, 0 12px 40px rgba(0,0,0,.45); text-align: left; }

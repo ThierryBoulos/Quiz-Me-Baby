@@ -3,7 +3,8 @@
    from Classic (index.html): the HUD tracker, the round intro with each
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { preloadWorld, type Mark } from "./PinMap";
 import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type Pub, type Two } from "@/lib/game";
@@ -94,14 +95,25 @@ export function ScoreBoard({ pub, w, win, label, size }: { pub: Pub; w: Two<numb
     </div>);
 }
 
-/* ---- Drop the Pin: the landmark's photo (our own copy, under a name that says nothing), and whose photo it is ---- */
-export function PinPhoto({ pin, h, small, credit }: { pin?: Pub["pin"]; h: number; small?: boolean; credit?: boolean }) {
+/* ---- Drop the Pin: the landmark's photo (our own copy, under a name that says nothing), and whose photo it is ----
+   zoom (the phones): a tap opens it full screen, in the TV's size, and another tap closes it */
+export function PinPhoto({ pin, h, small, credit, zoom }: { pin?: Pub["pin"]; h: number; small?: boolean; credit?: boolean; zoom?: boolean }) {
+  const [big, setBig] = useState(false);
+  useEffect(() => setBig(false), [pin?.photo]);
   if (!pin) return null;
+  /* eslint-disable-next-line @next/next/no-img-element */
+  const img = <img src={`/pins/${pin.photo}${small ? "-s" : ""}.jpg`} alt="The landmark" className="pin-photo" style={{ maxHeight: h }} draggable={false} />;
   return (
     <figure className="flex flex-col items-center gap-1 m-0">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/pins/${pin.photo}${small ? "-s" : ""}.jpg`} alt="The landmark" className="pin-photo" style={{ maxHeight: h }} draggable={false} />
+      {zoom ? <button type="button" className="pin-zoom" onClick={() => setBig(true)} aria-label="Make the photo bigger">{img}<span className="pin-zoom-hint" aria-hidden>Tap to enlarge</span></button> : img}
       {credit && <figcaption className="pin-credit">Photo: {pin.credit} · {pin.licence} · Wikimedia Commons</figcaption>}
+      {/* on the page itself, so nothing on the screen (an animation, a card) can box it in */}
+      {big && createPortal(
+        <div className="pin-big" role="dialog" aria-label="The landmark, full screen" onClick={() => setBig(false)}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`/pins/${pin.photo}.jpg`} alt="The landmark" draggable={false} />
+          <button type="button" className="btn btn-sm">Close</button>
+        </div>, document.body)}
     </figure>);
 }
 
