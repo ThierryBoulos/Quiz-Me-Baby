@@ -14,10 +14,12 @@ let bankP: Promise<Bank> | null = null;
    it (data/accept.json, served with the full bank): by question id, and by
    answer for flags, dishes, maps and Say-the-Same words ("United States"
    also takes "USA"). */
-type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; mapKeys?: Record<string, string[][]> };
+type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
 let accept: Accept = { byId: {}, byAnswer: {} };
 export const acceptFor = (q: { id?: string; answer?: string; accept?: string[] } | null | undefined) =>
   !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(accept.byAnswer[q.answer || ""] || [])];
+/* a ranking's items, right order first, each with the names it goes by (accept.json rankById) */
+export const rankFor = (q: { id?: string } | null | undefined): string[][] | null => (q && accept.rankById?.[q.id || ""]) || null;
 /* Guess the Map: the idea counts, not the wording. Each map has a few key ideas (data/accept.json,
    mapKeys), each a handful of word stems; an answer has the idea when every stem of one of them is
    among its words, in any order: "they drive on the left" has [driv], "kings and queens" has [king].
@@ -84,10 +86,10 @@ export function themeCounts(bank: Bank, diff: string) {
   return out;
 }
 
-/* Questions only a person can judge: answers in an order ("Rank these…"), answers in several
-   parts, and the host's own trivia. With no host the app would rule every sane answer WRONG, so
+/* Questions only a person can judge: answers in several parts, and the host's own trivia (a
+   ranking is judged by its items, rankById). With no host the app would rule every sane answer WRONG, so
    they're only dealt when someone is hosting. */
-const HOST_ONLY_IDS = new Set(["qzr4hzp", "q789ar9", "q8p4fti", "q1716tok", "q1po4l94", "qhpf4ri", "q14dop1c", "q1s7n34n", "q12k9xj3"]);
+const HOST_ONLY_IDS = new Set(["q14dop1c", "q1s7n34n", "q12k9xj3"]);   // the rankings are judged by the app now (rankById)
 export const HOST_ONLY_THEMES = ["Know the Host"];
 export const hostOnly = (q: Q) => HOST_ONLY_IDS.has(q.id) || HOST_ONLY_THEMES.includes(q.theme || "");
 export const withoutHostOnly = (b: Bank): Bank => ({ ...b, bank: b.bank.filter((q) => !hostOnly(q)) });

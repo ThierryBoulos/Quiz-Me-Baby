@@ -98,7 +98,13 @@ for (const q of bank.bank) {
     pool.forEach((a) => pool.forEach((b) => { if (a !== b && QMB.isMatch(a, b, accept.byAnswer[b] || [])) warn(id, `pool word "${a}" is accepted as "${b}" by the matcher`); }));
   }
   if (q.type === "standard") {
-    if (/→/.test(q.answer) || /^rank /i.test(q.question) || /^name (three|the four|two)/i.test(q.question) || /, and who /.test(q.question)) (HOST_ONLY.has(q.id) ? () => {} : err)(id, "ordering / multi-part answer: the matcher cannot check it (host-only question, or split it)");
+    /* a ranking is judged by its items (accept.json rankById): written in order it counts, reversed it doesn't */
+    const rank = accept.rankById?.[q.id];
+    if (rank) {
+      if (rank.length < 2 || rank.some((n) => !Array.isArray(n) || !n.length)) err(id, "rankById: two items or more, each with a name");
+      else if (!QMB.rankMatch(rank.map((n) => n[0]).join(", "), rank)) err(id, "rankById: the items in order don't match themselves");
+      else if (QMB.rankMatch([...rank].reverse().map((n) => n[0]).join(", "), rank)) err(id, "rankById: the reversed order also matches (names overlap)");
+    } else if (/→/.test(q.answer) || /^rank /i.test(q.question) || /^name (three|the four|two)/i.test(q.question) || /, and who /.test(q.question)) (HOST_ONLY.has(q.id) ? () => {} : err)(id, "ordering / multi-part answer: the matcher cannot check it (give a ranking its rankById, make it host-only, or split it)");
     if (/\/(?! )/.test(q.answer) || / \/(?! )/.test(q.answer)) warn(id, `"${q.answer}": alternatives must be separated by " / " (space, slash, space) to be split`);
     if (/Host knows/i.test(q.answer)) warn(id, "host-only answer: unplayable without a host");
     if (/^(what|which|who|where|when|how|in which|name one)/i.test(q.question) && !/[?]$/.test(q.question.trim())) warn(id, "question does not end with ?");

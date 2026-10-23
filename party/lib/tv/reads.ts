@@ -1,6 +1,6 @@
 /* What the TV's state says, without changing it: the question in play, whose turn
    it is, who leads the night with no host, who won the leg on screen. */
-import { QMB, acceptFor } from "../engine";
+import { QMB, acceptFor, rankFor } from "../engine";
 import type { Member } from "../room";
 import { other, type G, type W } from "./rules";
 import type { TvState } from "./state";
@@ -30,7 +30,7 @@ export function currentQ(s: TvState): G {
   return null;
 }
 /* right if it matches the answer or any other answer that counts (see acceptFor) */
-export const matchQ = (texts: string[] | null, q: G) => (texts && q ? texts.some((t) => QMB.isMatch(t, q.answer, acceptFor(q))
+export const matchQ = (texts: string[] | null, q: G) => (texts && q && rankFor(q) ? texts.some((t) => QMB.rankMatch(t, rankFor(q))) : texts && q ? texts.some((t) => QMB.isMatch(t, q.answer, acceptFor(q))
   || (q.type === "airport" && !!bare(t) && QMB.isMatch(bare(t), q.answer, acceptFor(q)))) : null);
 /* Guess the Airport: "Changi airport", "Flughafen Zürich" are the name with a word every airport has */
 const AIRPORT_WORDS = /(?<!\p{L})(international|intl|airport|aeroport|aéroport|aeropuerto|aeroporto|flughafen|luchthaven|havalimanı|havalimani|lufthavn)(?!\p{L})/giu;

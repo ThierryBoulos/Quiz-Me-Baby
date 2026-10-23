@@ -146,6 +146,33 @@
     return r.replace(/ /g, '').length >= 4 ? r : t;
   }
   /* -> true when `typed` counts as `answer` (or any of `accept`) */
+  /* A ranking ("Rank these from oldest to newest: A, B, C"), 23 Oct: every item named, in the right
+     order, however it's written: "Gutenberg, Columbus, Mona Lisa", "1. printing press 2. Columbus
+     3. Leonardo", "gutenberg > columbus > mona lisa", or no separators at all. `items` is the right
+     order, each item with the names it goes by ([["Gutenberg's printing press", "Gutenberg",
+     "printing press"], ...]); an item is where any of its names first appears after the one before,
+     typos allowed (a word more or fewer for a stray "the"). */
+  function rankMatch(typed, items){
+    if(!items || !items.length) return false;
+    const words = tidy(typed).split(' ').filter(Boolean);
+    let from = 0;
+    for(const names of items){
+      let end = -1;
+      for(let i = from; i < words.length && end < 0; i++){
+        for(const n of names){
+          const k = tidy(n).split(' ').filter(Boolean).length;
+          for(const len of [k, k + 1, k - 1]){
+            if(len < 1 || i + len > words.length) continue;
+            if(matchOne(words.slice(i, i + len).join(' '), n)){ end = i + len; break; }
+          }
+          if(end >= 0) break;
+        }
+      }
+      if(end < 0) return false;
+      from = end;
+    }
+    return true;
+  }
   function isMatch(typed, answer, accept){
     return variants(answer).concat(accept || []).some(w => (matchOne(typed, w) && !thirdCountry(typed, w)) || matchPair(typed, w));
   }
@@ -1882,6 +1909,6 @@
     return b;
   }
 
-  return { tidy, asNumber, numWords, distance, isMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
+  return { tidy, asNumber, numWords, distance, isMatch, rankMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

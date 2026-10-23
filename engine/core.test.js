@@ -231,3 +231,17 @@ test('parseNumber: in the question\'s own units', () => {
   assert.equal(P('300m', 'Height of the Eiffel Tower, in metres'), 300);    // metres, said so
   assert.equal(P('300m', 'How many people?'), 300000000);
 });
+
+/* rankings in any written form (23 Oct) */
+test('rankMatch: the right order however it is written, never the wrong one or a missing item', () => {
+  const items = [["Gutenberg's printing press", 'Gutenberg', 'printing press'], ['Columbus reaches the Americas', 'Columbus'], ['Michelangelo paints the Sistine Chapel ceiling', 'Michelangelo', 'Sistine Chapel', 'Sistine']];
+  for (const t of ['Gutenberg, Columbus, Michelangelo', 'gutenberg > columbus > sistine chapel', '1. printing press 2. Columbus 3. Sistine',
+    'Gutenburg Colombus Michaelangelo', "Gutenberg's printing press → Columbus reaches the Americas → Michelangelo paints the Sistine Chapel ceiling",
+    'the printing press then columbus then the sistine chapel', 'Gutenberg/Columbus/Sistine'])
+    assert.ok(Q.rankMatch(t, items), t);
+  for (const t of ['Columbus, Gutenberg, Michelangelo', 'Gutenberg, Sistine, Columbus', 'Gutenberg, Columbus', 'Michelangelo Columbus Gutenberg', ''])
+    assert.ok(!Q.rankMatch(t, items), t);
+  const tw = [['Myspace'], ['YouTube'], ['Twitter']];
+  assert.ok(Q.rankMatch('myspace youtube twitter', tw));
+  assert.ok(!Q.rankMatch('youtube myspace twitter', tw));
+});
