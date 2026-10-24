@@ -955,7 +955,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* Majority Rules: every player answers, captains too (the host doesn't play) */
     if (a.kind === "answer" && s.screen === "majorityQ") {
       const ok = mrAnswer(from, a.payload as G);
-      if (ok === true) { took.current = true; void publish(); }
+      if (ok === true) took.current = true;            // (the reply goes with the next update: see handleAndReply)
       else if (ok) refused.current = ok;
       return;
     }
@@ -1033,6 +1033,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* the inbox: every tap from the phones, in the order the server received it (lib/tv/useInbox.ts) */
   /* every tap gets a reply: one the TV ignored (a double tap, the second captain's Next) still sends the
      view again, so that phone stops waiting instead of saying the TV hasn't answered */
+  const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const publishSoon = useCallback(() => {
+    if (soon.current) return;
+    soon.current = setTimeout(() => { soon.current = null; void publish(); }, 1000);
+  }, [publish]);
   const handleAndReply = useCallback(async (a: Action) => {
     const n = pubN.current;
     refused.current = null; took.current = false;
@@ -1044,9 +1049,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const r = took.current ? "+" : refused.current || "-";
       const mine = Object.entries(s.ack[a.user_id] || {}).filter(([k]) => k !== tap).slice(-4);
       s.ack = { ...s.ack, [a.user_id]: Object.fromEntries([...mine, [tap, r]]) };
-      void publish();
+      /* Majority Rules: everyone answering at once, each answer an update to every phone (30 phones, 30 answers in
+         two seconds: 180 messages a second, over the realtime limit: 24 Oct). While the question is up, the answers
+         that come in within a second go out together; the last one in is the reveal, and goes at once. */
+      if (a.kind === "answer" && s.screen === "majorityQ") publishSoon();
+      else void publish();
     } else if (a.kind !== "count" && a.kind !== "suggest" && a.kind !== "draft" && s.g && pubN.current === n) void publish();
-  }, [handle, publish]);
+  }, [handle, publish, publishSoon]);
   useInbox(code, isTv, handleAndReply);
 
   /* Who's here: every phone on screen is present on the room's realtime channel (see
