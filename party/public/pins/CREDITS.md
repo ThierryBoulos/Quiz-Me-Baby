@@ -58,6 +58,18 @@ The file name is a hash, so it doesn't give away the landmark. Written by `scrip
 | eb72b6e5fe1c690f.jpg | Nine Arch Bridge | MichaelJames2468 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:The_Nine_Arches_Bridge.jpg |
 | aee4ddd131193224.jpg | Nyhavn | Jakub Hałun | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Boats_at_Nyhavn,_Copenhagen,_20220616_1937_6628.jpg |
 | 6e540ccf2e74aeda.jpg | Oia, Santorini | Giles Laurent | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:1000_Three_domes_of_Oia_in_Santorini_Photo_by_Giles_Laurent.jpg |
-| b8c3d92de6e51ed1.jpg | Chefchaouen (the Blue City) | Ismailbrk | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Chefcha'ouen_City_,_Morocco.jpg |
 | d763f8a6e996e725.jpg | Great Mosque of Djenné | Ruud Zwart | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Djenne_great_mud_mosque.jpg |
 | ae63d6e555a86457.jpg | Deadvlei | Giles Laurent | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:054c_Dead_camel_thorn_trees_in_Deadvlei_Photo_by_Giles_Laurent.jpg |
+| f49fc5cad90ae4f3.jpg | Burj Khalifa | Tim.Reckmann | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Dubai_skyline_2015_(crop).jpg |
+| 32ec315f44f5bf27.jpg | Hollywood Sign | Thomas Wolf, www.foto-tw.de | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Hollywood_Sign_(Zuschnitt).jpg |
+| ea72779c26a69149.jpg | Forbidden City | N509FZ | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Hall_of_Supreme_Harmony_(20241127120000).jpg |
+| 7bd8899039e644af.jpg | Marina Bay Sands | Tony Hisgett | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Marina_Bay_Sands_Hotel_3_(31345110894).jpg |
+| 24ea799cdff35f97.jpg | Mount Rushmore | Thomas Wolf, www.foto-tw.de | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Mount_Rushmore_detail_view_(100MP).jpg |
+| 5e7528e5eaa48ae3.jpg | CN Tower | Maksim Sokolov (maxergon.com) | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Toronto_skyline_viewed_from_Trillium_Park.jpg |
+| 2be5e8d1a0955fdd.jpg | Sheikh Zayed Grand Mosque | Guilhem Vellut | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Sheikh_Zayed_Grand_Mosque_@_Abu_Dhabi_(15856602738).jpg |
+| bdd09d202260e059.jpg | Dubrovnik Old Town | Zysko serhii | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:The_walls_of_the_fortress_and_View_of_the_old_city._panorama.jpg |
+| 80f616ce49db9b7d.jpg | Potala Palace | Ondřej Žváček | CC BY 2.5 | https://commons.wikimedia.org/wiki/File:Potala.jpg |
+| 5d3b9068348ce85f.jpg | Salar de Uyuni | Christopher Crouzet | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Reflection_on_the_Salar_de_Uyuni,_bolivia.jpg |
+| 8e016fd8cf0d5910.jpg | Golden Temple | Oleg Yunakov | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Hamandir_Sahib_(Golden_Temple).jpg |
+| 0ef0f09c2d057a24.jpg | Twelve Apostles | Leonard Koh | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:12_Apostles_Victoria_Sunset.jpg |
+| 789f504f2babc787.jpg | Hobbiton | Jackie.lck | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Hobbit_holes_reflected_in_water.jpg |

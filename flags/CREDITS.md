@@ -267,3 +267,4 @@ Licences: most are public domain. The others are credited here as their licences
 | `chr.svg` | Christiania | Expert | [Flag of Christiania.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Christiania.svg) | Public domain |
 | `epo.svg` | Esperanto | Expert | [Flag of Esperanto.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Esperanto.svg) | Public domain |
 | `abu.svg` | Abu Dhabi | Expert | [Flag of Abu Dhabi.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Abu_Dhabi.svg) | Public domain |
+| `af.svg` | Afghanistan | Hard | [Flag of Afghanistan (2013–2021).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Afghanistan_(2013%E2%80%932021).svg) | Public domain |
