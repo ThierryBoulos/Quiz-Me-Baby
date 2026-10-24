@@ -138,8 +138,10 @@
 166.75 battleQ | 72 | 6-4 | 2-0 | Owls +1 point | 
 169.50 battleQ | 72 | 6-4 | 2-1 | Owls +1 point | 
 171.25 battleQ | 72 | 6-4 | 2-2 | Owls +1 point | 
-175.75 battleReview | 72 | 6-4 | 2-2 | Owls +1 point | 
-176.75 battleTie | 73 | 6-4 | 2-2 | Owls +1 point | 
-178.50 battleSummary | 73 | 8-4 | 2-2 | Owls +1 point | 
-179.25 final | 74 | 8-4 |  | Owls +1 point | 
-recap: {"margin":4,"sudden":false,"leadChanges":2,"steals":[1,0],"minis":[4,2],"best":{"title":"Guess the Cocktail or Dish","team":0,"legs":[3,0]}}
+174.00 battleQ | 72 | 6-4 | 2-3 | Owls +1 point | 
+175.75 battleReview | 72 | 6-4 | 2-3 | Owls +1 point | 
+176.75 battleSummary | 73 | 6-6 | 2-3 | Owls +1 point | 
+177.50 sudden | 74 | 6-6 |  | Owls +1 point | 
+178.50 sudden | 75 | 6-6 |  | Owls +1 point | 
+180.25 final | 75 | 7-6 |  | Owls +1 point | 
+recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[1,0],"minis":[3,3],"best":{"title":"Guess the Cocktail or Dish","team":0,"legs":[3,0]}}

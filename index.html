@@ -1272,7 +1272,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.34', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.35', date:'24 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2245,7 +2245,7 @@ const SEED = [
 ['Tech','expert','named-after','The programming language Python is named after which British comedy group?','Monty Python','Not the snake. Its creator, Guido van Rossum, was a fan of the show.'],
 /* ---- TV SERIES (picked 23 Oct 2026) ---- */
 ['TV Series','easy','costume-colour','What colour are the players\' tracksuits in Squid Game?','Green','The masked guards wear pink.'],
-['TV Series','easy','costume-colour','What colour are the robbers\' jumpsuits in La Casa de Papel (Money Heist)?','Red','Worn with Salvador Dalí masks.'],
+['TV Series','easy','costume-colour','What colour are the robbers\' jumpsuits in La Casa de Papel (Money Heist)?','Red','Worn with masks of a famous Spanish painter.'],
 ['TV Series','easy','tv-alias','In Stranger Things, what number does the girl with psychic powers go by?','Eleven','Played by Millie Bobby Brown. It\'s tattooed on her wrist.'],
 ['TV Series','medium','tv-alias','In Breaking Bad, what alias does chemistry teacher Walter White use as a drug lord?','Heisenberg','Borrowed from the German physicist Werner Heisenberg.'],
 ['TV Series','medium','tv-family','In Succession, what is the surname of the family fighting over a media empire?','Roy','Their company is Waystar Royco, run by patriarch Logan Roy.'],
@@ -2287,7 +2287,7 @@ const SEED = [
 ['Art & Books','medium','french-novel','Who wrote Les Misérables?','Victor Hugo','Published in 1862. He also wrote The Hunchback of Notre-Dame.'],
 ['Art & Books','medium','french-novel','Who wrote The Three Musketeers?','Alexandre Dumas','Published in 1844. He also wrote The Count of Monte Cristo.'],
 ['Art & Books','medium','museum-city','In which city is the Prado museum?','Madrid','Home of Velázquez\'s Las Meninas, in its collection since the museum opened in 1819.'],
-['Art & Books','medium','museum-city','In which city is the Rijksmuseum?','Amsterdam','Home of Rembrandt\'s The Night Watch, which hangs at the end of its Gallery of Honour.'],
+['Art & Books','medium','museum-city','In which city is the Rijksmuseum?','Amsterdam','The Netherlands\' national museum, with more than 8,000 works on show.'],
 ['Art & Books','medium','signature-subject','Which pop artist painted 32 canvases of Campbell\'s soup cans?','Andy Warhol','1962, one canvas per flavour. All 32 are now at MoMA in New York.'],
 ['Art & Books','medium','signature-subject','Which French Impressionist painted about 250 pictures of the water lilies in his garden at Giverny?','Claude Monet','The Water Lilies filled the last 30 years of his life, much of it with cataracts.'],
 ['Art & Books','hard','arab-poet','Who is widely regarded as the national poet of Palestine?','Mahmoud Darwish','His poem Identity Card repeats the cry \'Write down: I am an Arab\'.'],
@@ -2393,7 +2393,74 @@ const SEED = [
 ['Art & Books','expert','painters-x','Which Dutch artist painted \'Girl with a Pearl Earring\'?','Johannes Vermeer',''],
 ['Art & Books','expert','painters-x','Which Norwegian artist painted \'The Scream\'?','Edvard Munch','He made four versions: two paintings and two in pastel.'],
 ['Art & Books','expert','novelists-x','Which Colombian author wrote \'One Hundred Years of Solitude\'?','Gabriel García Márquez',''],
-['Art & Books','expert','novelists-x','Which Russian novelist wrote \'Crime and Punishment\'?','Fyodor Dostoevsky','']
+['Art & Books','expert','novelists-x','Which Russian novelist wrote \'Crime and Punishment\'?','Fyodor Dostoevsky',''],
+/* ---- 90S KIDS (24 Oct, round 4) ---- */
+['90s Kids','easy','r4-90s-easy-1','Sugar, spice and everything nice: what extra ingredient, spilled by accident, created the Powerpuff Girls?','Chemical X','Professor Utonium knocked it into the mix. The show started in 1998.'],
+['90s Kids','easy','r4-90s-easy-1','Which Cartoon Network boy genius hides a secret laboratory behind his bedroom bookcase?','Dexter','Dexter\'s Laboratory, from 1996.'],
+['90s Kids','easy','r4-90s-easy-2','Which Cartoon Network show follows three boys with nearly the same name, scheming for money to buy jawbreakers?','Ed, Edd n Eddy','It ran from 1999 to 2009.'],
+['90s Kids','easy','r4-90s-easy-2','What is the name of the cowardly pink dog who lives with an old farming couple in Nowhere, Kansas?','Courage','Courage the Cowardly Dog, from 1999.'],
+['90s Kids','easy','r4-90s-easy-3','Which Cartoon Network muscleman, with sunglasses and a huge quiff, never gets the girl?','Johnny Bravo','His voice was an Elvis impression.'],
+['90s Kids','easy','r4-90s-easy-3','What were the round cardboard discs kids stacked, then smashed with a heavy \'slammer\', in the mid-90s?','Pogs','You kept the ones that landed face up.'],
+['90s Kids','easy','r4-90s-easy-4','Which ringtone character went \'ring ding ding ding\' and took \'Axel F\' to UK number one in 2005?','Crazy Frog','It kept Coldplay\'s \'Speed of Sound\' off the top. The sound began as a Swedish teenager\'s moped impression.'],
+['90s Kids','easy','r4-90s-easy-4','On MSN Messenger, what was the button that shook your friend\'s chat window called?','Nudge','In French MSN it was the \'Wizz\'.'],
+['90s Kids','medium','r4-90s-medium-1','Which of the Powerpuff Girls wears green?','Buttercup','Blossom wears pink and Bubbles blue. Buttercup is the tough one.'],
+['90s Kids','medium','r4-90s-medium-1','What is the name of the Powerpuff Girls\' arch-enemy, a chimpanzee with a giant brain?','Mojo Jojo','He used to be the Professor\'s lab chimp.'],
+['90s Kids','medium','r4-90s-medium-2','In the Cartoon Network show about a boy genius with a secret lab, what is the name of his ballet-dancing older sister?','Dee Dee','Her line: \'Ooh, what does this button do?\''],
+['90s Kids','medium','r4-90s-medium-2','Which Cartoon Network samurai is flung into the future by the demon Aku and fights to get back to the past?','Samurai Jack','Created by Genndy Tartakovsky. It started in 2001.'],
+['90s Kids','medium','r4-90s-medium-3','In which town do the Flintstones live?','Bedrock','Their neighbours are the Rubbles. Kids watched the reruns all through the 90s.'],
+['90s Kids','medium','r4-90s-medium-3','What did French kids call the plastic strings they knotted into keyrings and bracelets?','Scoubidou','Named after Sacha Distel\'s 1958 hit \'Scoubidou\'. The craze came back in the 80s and again in the 2000s.'],
+['90s Kids','medium','r4-90s-medium-4','On an old phone keypad, with no predictive text, what do you type with 555 666 555?','LOL','5 is J-K-L (three presses: L), 6 is M-N-O (three presses: O).'],
+['90s Kids','medium','r4-90s-medium-4','Which Nickelodeon cartoon was about a cat and a dog sharing one body?','CatDog','It started in 1998. Cat was the brainy half, Dog the excitable one.'],
+['90s Kids','hard','r4-90s-hard-1','In the Cartoon Network show about three boys scheming for jawbreakers, what is the name of the piece of wood Jonny carries everywhere and talks to?','Plank','Jonny 2x4 treats Plank as his best friend.'],
+['90s Kids','hard','r4-90s-hard-1','Which red Sesame Street toy started a Christmas stampede in 1996 by laughing when you squeezed it?','Tickle Me Elmo','Shops ran out; some sold for hundreds of dollars.'],
+['90s Kids','expert','r4-90s-expert-1','In the Cartoon Network show about a boy genius with a secret lab, what is the name of his rival, the boy genius next door?','Mandark','His real name is Susan.'],
+['90s Kids','expert','r4-90s-expert-1','In the Cartoon Network show about a cowardly pink dog in Nowhere, Kansas, what is the name of the grumpy farmer who calls him \'stupid dog\'?','Eustace','Eustace Bagge, Muriel\'s husband.'],
+/* ---- ART & BOOKS (24 Oct, round 4) ---- */
+['Art & Books','easy','r4-art-easy-1','In The Phantom of the Opera, which city\'s opera house does the Phantom haunt?','Paris','The Palais Garnier, which really has an underground lake.'],
+['Art & Books','easy','r4-art-easy-1','Who composed the opera The Magic Flute?','Mozart','It premiered in Vienna in 1791, two months before he died.'],
+['Art & Books','easy','r4-art-easy-2','Which Renaissance artist carved the marble statue of David that stands in Florence?','Michelangelo','Carved from a single block of marble between 1501 and 1504. It is over 5 metres tall.'],
+['Art & Books','easy','r4-art-easy-2','Which Spanish artist painted Guernica, about the bombing of a Basque town?','Pablo Picasso','Painted in 1937. It hangs in the Reina Sofía museum.'],
+['Art & Books','easy','r4-art-easy-3','Which mural on a convent wall in Milan shows Jesus and the twelve apostles at a meal?','The Last Supper','Painted in the 1490s. A door was later cut through the bottom of it.'],
+['Art & Books','easy','r4-art-easy-3','Who wrote the Harry Potter books?','J. K. Rowling','The first, Harry Potter and the Philosopher\'s Stone, came out in 1997.'],
+['Art & Books','medium','r4-art-medium-1','Which novel opens with the line \'Call me Ishmael\'?','Moby-Dick','Herman Melville, 1851: Captain Ahab\'s hunt for the white whale.'],
+['Art & Books','medium','r4-art-medium-1','Which Spanish surrealist painted melting clocks in The Persistence of Memory?','Salvador Dalí','It is in New York\'s Museum of Modern Art, and only 24 by 33 cm.'],
+['Art & Books','medium','r4-art-medium-2','Which Dan Brown thriller follows symbologist Robert Langdon after a murder in a Paris museum?','The Da Vinci Code','2003. It sold more than 80 million copies.'],
+['Art & Books','medium','r4-art-medium-2','In The Hunger Games, which district does Katniss Everdeen come from?','District 12','The coal-mining district.'],
+['Art & Books','medium','r4-art-medium-3','Which Paulo Coelho novel follows a shepherd boy named Santiago to the pyramids of Egypt?','The Alchemist','First published in Portuguese in 1988, it is one of the best-selling books ever.'],
+['Art & Books','medium','r4-art-medium-3','Who wrote The Great Gatsby?','F. Scott Fitzgerald','1925. Jay Gatsby throws parties to win back Daisy Buchanan.'],
+['Art & Books','medium','r4-art-medium-4','Which author wrote Fifty Shades of Grey?','E. L. James','It began as Twilight fan fiction.'],
+['Art & Books','medium','r4-art-medium-4','Which Shakespeare play has three witches tell a Scottish general he will be king?','Macbeth','Actors call it \'the Scottish play\': saying its name in a theatre is said to bring bad luck.'],
+['Art & Books','hard','r4-art-hard-1','Who wrote The Old Man and the Sea?','Ernest Hemingway','1952: an old Cuban fisherman and a giant marlin. It won him the Pulitzer Prize.'],
+['Art & Books','hard','r4-art-hard-1','Which Bizet opera follows a fiery cigarette-factory worker in Seville?','Carmen','Home of the \'Habanera\' and the \'Toreador Song\'.'],
+['Art & Books','hard','r4-art-hard-2','Which Italian painted The Birth of Venus, with the goddess standing on a giant shell?','Botticelli','Sandro Botticelli, around 1485. It hangs in Florence\'s Uffizi.'],
+['Art & Books','hard','r4-art-hard-2','Who painted The Night Watch?','Rembrandt','1642. It is more than 4 metres wide.'],
+['Art & Books','hard','r4-art-hard-3','Which Austrian painter covered The Kiss in gold leaf?','Gustav Klimt','Painted in 1907–08. It hangs in Vienna\'s Belvedere.'],
+['Art & Books','hard','r4-art-hard-3','Who wrote The Girl with the Dragon Tattoo?','Stieg Larsson','The first of his Millennium trilogy. All three came out after he died in 2004.'],
+['Art & Books','expert','r4-art-expert-1','Who won the Oscar for Best Actor for playing Hamlet in his own 1948 film, the first British film to win Best Picture?','Laurence Olivier','He also directed it. Disney\'s The Lion King is loosely based on the same play.'],
+['Art & Books','expert','r4-art-expert-1','Which French writer wrote the 1910 novel The Phantom of the Opera?','Gaston Leroux','He was a journalist and crime writer.'],
+['Art & Books','expert','r4-art-expert-2','Which American painted Nighthawks, three customers in an all-night diner?','Edward Hopper','1942. It hangs in the Art Institute of Chicago.'],
+['Art & Books','expert','r4-art-expert-2','In Pride and Prejudice, what is Mr Darcy\'s first name?','Fitzwilliam','Jane Austen, 1813.'],
+/* ---- TV SERIES (24 Oct, round 4) ---- */
+['TV Series','easy','r4-tv-easy-1','In Game of Thrones, which family\'s motto is \'Winter is coming\'?','Stark','House Stark of Winterfell, the North.'],
+['TV Series','easy','r4-tv-easy-1','In Game of Thrones, which two words did \'Hodor\' come from?','Hold the door','Revealed in season 6, episode 5.'],
+['TV Series','easy','r4-tv-easy-2','In Prison Break, where does Michael Scofield keep the prison\'s blueprints?','Tattooed on his body','Hidden inside a full-body tattoo.'],
+['TV Series','easy','r4-tv-easy-2','In How I Met Your Mother, what is the name of the architect telling his kids the story?','Ted Mosby','Played by Josh Radnor; the older Ted\'s voice is Bob Saget.'],
+['TV Series','easy','r4-tv-easy-3','In Grey\'s Anatomy, what nickname do the doctors give neurosurgeon Derek Shepherd?','McDreamy','Played by Patrick Dempsey. Mark Sloan is McSteamy.'],
+['TV Series','easy','r4-tv-easy-3','In The Walking Dead, what do the survivors mostly call the zombies?','Walkers','The show almost never says \'zombie\'.'],
+['TV Series','easy','r4-tv-easy-4','Which British royal is The Crown about?','Queen Elizabeth II','Claire Foy, Olivia Colman and Imelda Staunton played her as she aged.'],
+['TV Series','easy','r4-tv-easy-4','In The Simpsons, what is the name of Homer\'s wife?','Marge','Marjorie Simpson, née Bouvier, with the tall blue hair.'],
+['TV Series','medium','r4-tv-medium-1','In Game of Thrones, what is the name of Jon Snow\'s white direwolf?','Ghost','The runt of the litter, and the only one with no voice.'],
+['TV Series','medium','r4-tv-medium-1','Which Breaking Bad lawyer, played by Bob Odenkirk, got his own spin-off series?','Saul Goodman','Better Call Saul ran for six seasons. His real name is Jimmy McGill.'],
+['TV Series','medium','r4-tv-medium-2','In Lost, what nickname does con man James Ford go by?','Sawyer','He took it from the con man he blamed for his parents\' deaths.'],
+['TV Series','medium','r4-tv-medium-2','In Lost, what is the name of the doctor who becomes the survivors\' leader?','Jack Shephard','Played by Matthew Fox.'],
+['TV Series','medium','r4-tv-medium-3','Which actor plays Sherlock Holmes in the BBC\'s Sherlock?','Benedict Cumberbatch','Three 90-minute episodes a series, from 2010 to 2017.'],
+['TV Series','medium','r4-tv-medium-3','Which actor plays Michael Scofield in Prison Break?','Wentworth Miller','He was born in England, in Chipping Norton.'],
+['TV Series','hard','r4-tv-hard-1','In Breaking Bad, what is the name of Walter White\'s DEA brother-in-law?','Hank Schrader','Played by Dean Norris.'],
+['TV Series','hard','r4-tv-hard-1','In Prison Break, what is the name of the prison in season 1?','Fox River','Fox River State Penitentiary, in Illinois.'],
+['TV Series','hard','r4-tv-hard-2','In How I Met Your Mother, what colour is the French horn stolen from a restaurant wall on a first date in episode one?','Blue','The blue French horn became the show\'s symbol of a grand romantic gesture.'],
+['TV Series','hard','r4-tv-hard-2','In Lost, what do the survivors call the mysterious people who were already living on the island?','The Others','Their leader for much of the show is Ben Linus.'],
+['TV Series','expert','r4-tv-expert-1','In How I Met Your Mother, what is the name of the bar where the friends always drink?','MacLaren\'s','It\'s in the gang\'s own building, downstairs.'],
+['TV Series','expert','r4-tv-expert-1','In Grey\'s Anatomy, what is the name of Meredith Grey\'s mother, a famous surgeon?','Ellis Grey','She invented the \'Grey method\'.']
 ];
 
 const SEED_CLOSEST = [
@@ -3917,7 +3984,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 35;   // bumped when the built-in bank changes
+const SEED_VERSION = 36;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
