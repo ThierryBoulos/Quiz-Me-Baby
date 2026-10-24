@@ -1272,7 +1272,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.33', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.34', date:'23 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3581,7 +3581,6 @@ const MAJORITY = [
   ["gives-lebanese", "easy",   "What gives Lebanese arak its flavour?", ["Mint", "Lemon", "Rose water", "Aniseed"], 3, "Distilled from grapes with aniseed. It turns milky white when you add water."],
   ["superhero-comes", "easy",   "Which superhero comes from the planet Krypton?", ["Superman", "Thor", "Captain Marvel", "Green Lantern"], 0, "His Kryptonian name is Kal-El."],
   ["city-nicknamed", "easy",   "Which city is nicknamed 'the Big Apple'?", ["New York", "Chicago", "Los Angeles", "Boston"], 0, "Chicago is 'the Windy City'; Los Angeles is 'the City of Angels'."],
-  ["country-s",    "easy",   "Which country's flag is a red circle on a plain white background?", ["South Korea", "Bangladesh", "China", "Japan"], 3, "Bangladesh also has a red disc, but on green."],
   ["rings-there",  "easy",   "How many rings are there on the Olympic flag?", ["Four", "Five", "Six", "Seven"], 1, "Blue, yellow, black, green and red, on white."],
   ["kind-creature", "easy",   "What kind of creature is Shrek?", ["A troll", "A giant", "A goblin", "An ogre"], 3, "'Ogres are like onions... they have layers.'"],
   ["disney-princess", "easy",   "Which Disney princess has a pet tiger called Rajah?", ["Mulan", "Pocahontas", "Jasmine", "Moana"], 2, "In Aladdin (1992), Rajah scares off Jasmine's unwanted suitors."],
@@ -3918,7 +3917,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 34;   // bumped when the built-in bank changes
+const SEED_VERSION = 35;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
