@@ -196,7 +196,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
         {/* this question; the game so far is in the bar at the top, which counts this question already */}
         <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
         {/* with no fact to tell, the game so far (the bar above has it too) */}
-        {!R.notes && <div className="text-20 text-[var(--color-ink-2)]">So far, right answers out of all they could give: {M.totals?.right[0]} of {M.totals?.of[0]} and {M.totals?.right[1]} of {M.totals?.of[1]}</div>}
+        {!R.notes && <div className="text-20 text-[var(--color-ink-2)]">So far: {M.totals?.right[0]} of {M.totals?.of[0]} answers right, and {M.totals?.right[1]} of {M.totals?.of[1]}</div>}
       </div>)}
   </>); }
   if (/Intro$/.test(sc)) return (<>

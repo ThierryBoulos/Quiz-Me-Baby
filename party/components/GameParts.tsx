@@ -362,7 +362,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Everyone plays on their own phone, captains too. The lists are fixed at Start.", warn: true },
       { text: `${n} questions, four answers, ${sec(t?.majority, T_MAJORITY)} each. One tap and it's locked. No answer counts as wrong.` },
       { text: "Eyes on your own phone: every phone has the answers in a different order." },
-      { text: `Score: right answers out of all your team could give (so 5 v 6 is fair). The bigger share takes ${pts} points.` }];
+      { text: `Each team scores the share of its answers that are right, so a smaller team isn't at a disadvantage. The higher share takes ${pts} points.` }];
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },

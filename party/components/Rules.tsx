@@ -146,7 +146,7 @@ export function Rules() {
           <>15 questions, four answers each, <B>15 seconds</B> a question. One tap and it&rsquo;s locked. <B>No answer counts as wrong</B>, so closing the screen never helps: have a guess.</>,
           <>Eyes on your own phone, no talking. The four answers come in a different order on every phone, and after your tap it only says &ldquo;Locked in&rdquo;, so a neighbour&rsquo;s screen tells you nothing.</>,
           <>When the time&rsquo;s up (or everyone has answered) the answer comes up, with how each team answered; the host (or Team A&rsquo;s captain) taps Next for the next question.</>,
-          <>A team&rsquo;s score is its right answers out of all the answers it could give, so a team of 5 and a team of 6 are on the same footing. Someone who has gone home can come off their team&rsquo;s list before Start: the host decides, or with no host the other captain agrees. Someone who joins late watches this one.</>,
+          <>Each team scores the share of its answers that are right (no answer counts as wrong), so a smaller team isn&rsquo;t at a disadvantage: 4 right out of 5 beats 4 out of 6. Someone who has gone home can come off their team&rsquo;s list before Start: the host decides, or with no host the other captain agrees. Someone who joins late watches this one.</>,
         ]} />
       </Rule>
 

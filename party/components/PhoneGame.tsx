@@ -166,7 +166,7 @@ function MajorityList({ pub, me, act }: { pub: Pub; me: Member; act?: (move: Rec
   const bare = (n: string) => n.replace(/[\u2068\u2069]/g, ""), meOn = L.find((x) => bare(x.name) === me.name);
   return (
     <div className="flex flex-col gap-3">
-      {!host && <p className="text-center font-bold text-16" role="status">{meOn && !meOn.out ? `You're on ${T[meOn.team].name}'s list: you play this one, on this phone.` : "You're not on a list yet."}</p>}
+      {!host && !(meOn && !meOn.out) && <p className="text-center font-bold text-16" role="status">You&rsquo;re not on a list yet.</p>}
       {A && cap && me.team !== A.team && act && (
         <div className="card flex flex-col gap-2" style={{ borderColor: "var(--color-gold)" }}>
           <p className="text-15"><b>{T[A.team].name}</b> ask to take <b>{A.name}</b> off their list: they&rsquo;re not on the game screen. Agree? ({left} s)</p>
@@ -186,7 +186,7 @@ function MajorityList({ pub, me, act }: { pub: Pub; me: Member; act?: (move: Rec
                 {mayAsk && <button className="btn btn-sm !min-h-[32px] !px-2 !text-12" aria-label={`Not here: ask to take ${bare(x.name)} off`} onClick={() => act({ type: "ui/mrOut", name: x.name })}>Not here</button>}
               </div>); })}
         </div>))}</div>
-      <p className="text-12 text-[var(--color-ink-3)] text-center">● on the game screen · ○ not here. Everyone on a list plays: not answering counts as wrong. Someone who has gone home can be taken off before Start{host ? "" : ", if the other captain agrees"}.</p>
+      <p className="text-12 text-[var(--color-ink-3)] text-center">● on the game screen · ○ not here. Everyone listed plays: no answer counts as wrong.</p>
     </div>);
 }
 
