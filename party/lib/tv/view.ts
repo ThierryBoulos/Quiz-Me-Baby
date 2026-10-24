@@ -27,7 +27,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
     autoAt: s.autoAt, paused: s.paused, lead: leadOf(mem), imad: s.imad || undefined, flags: s.flags.slice(-30), tvAway: !!s.tvAway,
   };
-  if (s.agree) p.agree = { id: s.agree.id, kind: s.agree.kind, team: s.agree.team, until: s.agree.until, a: s.agree.a, b: s.agree.b };
+  if (s.agree) { const A = s.agree; p.agree = { id: A.id, kind: A.kind, team: A.team, until: A.until, ...(A.kind === "score" ? { a: A.a, b: A.b } : { what: A.what }) }; }
   /* with a host: the typed answer rides with the screen (the host's phone shows it at once; the app's opinion follows with the secret) */
   if (!s.nohost && ["ask", "steal", "dishQ", "battleQ", "sudden", "battleTie"].includes(s.screen)) p.said = [s.typed[0], s.typed[1]];
   /* the next pictures, fetched ahead on every screen (the TV takes the whole deck at the intro) */

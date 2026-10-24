@@ -14,7 +14,7 @@ import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from
 import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
-  other, serverMs, type Action, type G, type PKind, type W } from "./tv/rules";
+  other, serverMs, SWAPS, swapWord, type Action, type G, type PKind, type W } from "./tv/rules";
 import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, turnOf } from "./tv/reads";
 import { buildView, qk } from "./tv/view";
 import { useInbox } from "./tv/useInbox";
@@ -695,6 +695,22 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     return true;
   }, [captainInput, draftKey]);
 
+  /* No host, a new question asked for: only while nobody has answered this one, nor had a go at it
+     (null), else why not. (A lifeline open, or a buzz in the cocktail or dish, counts as a go.) */
+  const answeredYet = useCallback((): string | null => {
+    const s = st.current, g = s.g;
+    if (s.contest) return `One at a time: ${iso(g.teams[s.contest.by].name)}'s contest is open.`;
+    if (s.lifeline) return "Wait for the lifeline to finish.";
+    if (s.pending || s.typed[0] || s.typed[1] || s.guesses[0] != null || s.guesses[1] != null || s.pins[0] || s.pins[1] || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
+    if (s.screen === "dishQ") { const L = g.dishGame.leg; if (L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length || s.buzzAt) return "Too late: someone has already had a go at this one."; }
+    return null;
+  }, []);
+  /* ...not changed after all (No, no answer, too late): the clock that stopped for it goes on */
+  const swapBack = useCallback((A: NonNullable<TvState["agree"]>) => {
+    const s = st.current;
+    if (A.kind === "swap" && A.held && s.paused) { s.paused = false; applyFx([{ timer: "resume" }]); }
+  }, [applyFx]);
+
   /* a captain's tap on a host-style button: who may, where, and when */
   const captainMove = useCallback((team: 0 | 1, move: G): boolean | string => {
     const s = st.current, g = s.g, sc = s.screen;
@@ -752,12 +768,40 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.agree = { id: Date.now(), kind: "score", team, until: Date.now() + T_AGREE * 1000, a, b, from };
       return true;
     }
+    /* ...or a new question, before anyone has answered it: the clock stops (and the question hides, as for a
+       Pause) while the other captain decides */
+    else if (t === "ui/askSwap") {
+      if (s.agree) return `One at a time: ${iso(g.teams[s.agree.team].name)}'s request is open.`;
+      if (s.tvAway) return "The TV's screen was asleep. Tap again.";
+      const why = answeredYet();
+      if (why) return why;
+      if ((!s.deadline && !s.paused) || (s.deadline && Date.now() >= s.deadline)) return "Time's up.";
+      const held = !!s.deadline;
+      if (held) { applyFx([{ timer: "pause" }]); s.paused = true; }
+      s.agree = { id: Date.now(), kind: "swap", team, until: Date.now() + T_AGREE * 1000, screen: sc, key: draftKey(), held, what: swapWord(sc, currentQ(s)) };
+      return true;
+    }
+    /* (the clock stays stopped for the answer: no Resume meanwhile) */
+    else if (t === "ui/pause" && s.agree?.kind === "swap") return `Waiting for ${iso(g.teams[other(s.agree.team)].name)}'s captain: a new ${s.agree.what}, or not.`;
     /* ...and the other captain's answer (to that request: id), not the one who asked */
     else if (t === "ui/agree") {
       const A = s.agree;
       if (!A || team === A.team || typeof move.v !== "boolean" || move.id !== A.id) return false;
       s.agree = null;
       const by = iso(g.teams[team].name);
+      if (A.kind === "swap") {
+        if (!move.v) { swapBack(A); s.toast = { id: ++s.toastN, text: `${by} said no: the ${A.what} stays.` }; return true; }
+        if (s.screen !== A.screen || draftKey() !== A.key) return true;                 // moved on meanwhile: nothing to change
+        /* an answer that landed while it was asked (typed just before the clock stopped): too late */
+        if (answeredYet()) { swapBack(A); s.toast = { id: ++s.toastN, text: `Too late: someone answered meanwhile, so the ${A.what} stays.` }; return true; }
+        s.toast = null;
+        hostMove({ type: SWAPS[sc] });
+        s.step++;
+        /* nothing spare at these levels: the same one goes on (the engine's toast says so); else a new one, a fresh clock */
+        if (draftKey() === A.key) swapBack(A);
+        else s.toast = { id: ++s.toastN, text: `Both captains agreed. ${(s.toast as Pub["toast"])?.text || `A new ${A.what}.`}` };
+        return true;
+      }
       if (!move.v) s.toast = { id: ++s.toastN, text: `${by} said no: the scores stay as they were.` };
       /* points won since the request was made would be wiped out: nothing changes, ask again */
       else if (g.teams[0].score !== A.from[0] || g.teams[1].score !== A.from[1]) s.toast = { id: ++s.toastN, text: "The scores changed meanwhile, so they stay as they are. Ask again if they're still wrong." };
@@ -785,7 +829,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     else hostMove(move);
     return true;
-  }, [hostMove, play, openContest, closeContest, contestWait]);
+  }, [hostMove, play, openContest, closeContest, contestWait, answeredYet, swapBack, applyFx, draftKey]);
 
   /* a tap the TV won't take: say why on the TV (and the update ends the phone's "Sending…") */
   const refused = useRef<string | null>(null);        // why the tap being handled was turned down (for its receipt)
@@ -1248,10 +1292,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         }
         if (s.mrAsk && now >= s.mrAsk.until) { s.toast = { id: ++s.toastN, text: `No answer: ${iso(s.mrAsk.name)} stays on the list.` }; s.mrAsk = null; changed = true; }
       }
-      /* a captain's request the other captain never answered lapses (nothing changes); the host back: the host's to do */
-      if (s.agree && (now >= s.agree.until || !s.nohost)) {
-        if (s.nohost) s.toast = { id: ++s.toastN, text: "No answer: the scores stay as they were." };
-        s.agree = null; changed = true;
+      /* a captain's request the other captain never answered lapses (nothing changes); the host back: the host's to do;
+         a new question asked for, and the screen has moved on since (an answer that came in ended it): nothing to change */
+      if (s.agree) {
+        const A = s.agree, moved = A.kind === "swap" && (s.screen !== A.screen || draftKey() !== A.key);
+        if (moved || now >= A.until || !s.nohost) {
+          s.agree = null; changed = true;
+          if (!moved) swapBack(A);
+          if (!moved && s.nohost) s.toast = { id: ++s.toastN, text: A.kind === "score" ? "No answer: the scores stay as they were." : `No answer: the ${A.what} stays.` };
+        }
       }
       /* The Auction waits on a captain with no clock: one whose phone has been gone 20 s (and no
          teammate to take the armband) passes after 30 s, or, with nothing bid yet, the other team opens */
@@ -1275,7 +1324,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (changed) void publish();
     }, 250);
     return () => clearInterval(t);
-  }, [isTv, publish, play, reveal, settle, hostMove, applyFx, handOver, closeContest, takeDraft]);
+  }, [isTv, publish, play, reveal, settle, hostMove, applyFx, handOver, closeContest, takeDraft, draftKey, swapBack]);
 
   /* Exit on the TV itself (it has a mouse): the same as the host's Exit */
   const exit = useCallback(() => { if (st.current.screen !== "final") return; exitGame(); void publish(); }, [publish]);  // eslint-disable-line react-hooks/exhaustive-deps

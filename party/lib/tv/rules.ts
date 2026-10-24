@@ -58,6 +58,12 @@ export const HOST_MOVES: Record<string, Where> = {
   /* Call a Friend's clock */
   "ui/pauseFriend": "ask", "ui/startCall": "ask",
 };
+/* no host: the question on screen changed, if both captains agree (before anyone has answered it):
+   the engine's own swap for each screen, and what the TV and the phones call the thing changed */
+export const SWAPS: Record<string, string> = { ask: "round/swap", miniQ: "closest/swap", flagQ: "flag/swap", pinQ: "pin/swap", airportQ: "airport/swap",
+  majorityQ: "majority/swap", dishQ: "dish/swap", mapQ: "map/swap", sayQ: "say/swap", battleQ: "battle/swap" };
+export const swapWord = (sc: string, q: G) => sc === "flagQ" ? "flag" : sc === "pinQ" ? "landmark" : sc === "airportQ" ? "board" : sc === "mapQ" ? "map"
+  : sc === "sayQ" ? "prompt" : sc === "dishQ" ? dishKind(q).toLowerCase() : "question";
 /* What a CAPTAIN may tap, and who: "any" captain, the team whose "turn" it
    is, the "other" one (the referee), or the "lead": Team A's captain (Team
    B's if A has none), who starts and moves the night on, like a host would.
@@ -79,6 +85,8 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   /* no host: either captain asks to set the total scores (something went wrong); the other captain agrees, or nothing changes */
   "ui/askScore": { where: "*", who: "any", nohostOnly: true },
   "ui/agree": { where: "*", who: "any", nohostOnly: true },
+  /* ...or a new question (flag, landmark…), before anyone has answered it: the clock stops while the other captain decides */
+  "ui/askSwap": { where: Object.keys(SWAPS), who: "any", nohostOnly: true },
   "dish/start": { where: "dishIntro", who: "lead", nohostOnly: true },
   "map/start": { where: "mapIntro", who: "lead", nohostOnly: true },
   "auction/begin": { where: "auctionIntro", who: "lead", nohostOnly: true },

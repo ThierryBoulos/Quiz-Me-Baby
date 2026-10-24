@@ -771,6 +771,7 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
 const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onContextMenu: (e: React.MouseEvent) => e.preventDefault() };
 /* counting: this phone counts the Auction's names, and shows its own count */
 function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; small?: boolean }) {
+  if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
     {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className="font-bold text-20 leading-snug text-center">{pub.question}</p>}
@@ -949,22 +950,27 @@ function WaitingFor({ pub }: { pub: Pub }) {
 const CALL_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "airportReveal", "dishReveal", "battleReview"];
 /* ...and sudden death / the tie-breaker: the question just decided, on the screen after it */
 const SD_CALL_SCREENS = ["final", "battleSummary", "sudden", "battleTie"];
+/* no host: the screens where both captains can agree to a new one, and what it's called */
+const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", battleQ: "question" };
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"];
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
    lifelines; the number pad; the buzzer; the bidding; your players'
    suggestions. With no host, also the referee's buttons and Next. */
-/* No host: a captain's request (new total scores) that the other captain agrees to, or not.
+/* No host: a captain's request (new total scores, or a new question) that the other captain agrees to, or not.
    No answer in time: nothing changes. The asking captain sees it waiting. */
 function AgreeCard({ pub, mine, busy, act }: { pub: Pub; mine: 0 | 1; busy: boolean; act: (move: Record<string, unknown>) => void }) {
   const A = pub.agree, T = pub.teams, left = useSecondsLeft(A?.until);
   if (!A) return null;
-  if (A.team === mine) return <p className="text-center text-14 text-[var(--color-ink-2)]" role="status">Asking {T[mine === 0 ? 1 : 0].name}&rsquo;s captain to agree to the new scores… ({left} s)</p>;
+  if (A.team === mine) return <p className="text-center text-14 text-[var(--color-ink-2)]" role="status">Asking {T[mine === 0 ? 1 : 0].name}&rsquo;s captain to agree to {A.kind === "swap" ? `a new ${A.what}` : "the new scores"}… ({left} s)</p>;
   return (
     <div className="card flex flex-col gap-2 enter" style={{ borderColor: "var(--color-gold)" }} role="group" aria-label="Do you agree?">
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Do you agree?</div>
-      <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants to set the scores to <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
-        <span className="text-[var(--color-ink-2)]"> Now: {T[0].score}–{T[1].score}.</span></p>
+      {A.kind === "swap"
+        ? <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants a new {A.what}, at the same level.
+          <span className="text-[var(--color-ink-2)]"> The clock is stopped meanwhile; a new one gets a fresh clock.</span></p>
+        : <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants to set the scores to <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
+          <span className="text-[var(--color-ink-2)]"> Now: {T[0].score}–{T[1].score}.</span></p>}
       <div className="grid grid-cols-2 gap-2">
         <button className="btn btn-gold" disabled={busy} onClick={() => act({ type: "ui/agree", v: true, id: A.id })}>Agree</button>
         <button className="btn" disabled={busy} onClick={() => act({ type: "ui/agree", v: false, id: A.id })}>No</button>
@@ -1041,6 +1047,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const mayNext = lead || open;
   const next = nohost && mayNext && pub.nextBy ? NEXT_LABEL[sc] : undefined;
   const showNext = !!next && sc !== "sudden";
+  /* no host: a new question (flag, landmark…) if both captains agree, while nobody has answered this one */
+  const swapWord = sc === "dishQ" ? (pub.dish?.kind || "dish").toLowerCase() : SWAP_WORDS[sc];
+  const canSwap = nohost && !!swapWord && !pub.sent?.[0] && !pub.sent?.[1] && !sentHere && pub.buzz == null && !pub.out?.[0] && !pub.out?.[1]
+    && !((pub.majority?.answered?.[0] || 0) + (pub.majority?.answered?.[1] || 0));
 
   /* Closest To Wins: "1.5 million", "2k", "€25" all count; what the TV will read is shown back */
   const guess: number = sc === "miniQ" && a.trim() ? QMB.parseNumber(a, pub.question) : NaN;
@@ -1182,9 +1192,13 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
       {pub.nextBy && !lead && open && <p className="text-center text-13 text-[var(--color-ink-3)]">{pub.nextBy} hasn&rsquo;t tapped it, so you can.</p>}
       {pub.nextBy && !lead && !open && <WaitingFor pub={pub} />}
-      {/* no host: either captain can stop the clock (the question hides until it restarts) */}
-      {nohost && PAUSABLE.includes(sc) && !pub.lifeline && !pub.pending && !pub.tvAway && (pub.deadline || pub.paused) && (
-        <button className="btn btn-sm self-center" disabled={busy} onClick={() => void nxt({ type: "ui/pause", on: pub.paused ? "resume" : "pause" })}>{pub.paused ? "Resume" : "Pause"}</button>)}
+      {/* no host: either captain can stop the clock (the question hides until it restarts), and, before anyone has
+          answered, ask for a new question (the other captain agrees) */}
+      {nohost && (PAUSABLE.includes(sc) || canSwap) && !pub.lifeline && !pub.pending && !pub.tvAway && (pub.deadline || pub.paused) && pub.agree?.kind !== "swap" && (
+        <div className="flex justify-center gap-2">
+          {PAUSABLE.includes(sc) && <button className="btn btn-sm" disabled={busy} onClick={() => void nxt({ type: "ui/pause", on: pub.paused ? "resume" : "pause" })}>{pub.paused ? "Resume" : "Pause"}</button>}
+          {canSwap && <button className="btn btn-sm btn-ghost" disabled={busy || !!pub.agree} onClick={() => void nxt({ type: "ui/askSwap" })}>Change the {swapWord}</button>}
+        </div>)}
 
       {sugs.length > 0 && (canType || ANSWERING.includes(sc)) && (
         <div className="card">

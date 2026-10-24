@@ -101,7 +101,7 @@ export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () =
           </div>
         </>)}
         {pub.contest && <ContestBanner pub={pub} />}
-        {pub.agree && <AgreeBanner pub={pub} />}
+        {pub.agree?.kind === "score" && <AgreeBanner pub={pub} />}
       </div>
 
       {pub.lifeline && (
@@ -118,8 +118,9 @@ export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () =
       {pub.paused && !pub.lifeline && (
         <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", backdropFilter: "blur(12px)", zIndex: 20 }}>
           <div className="text-center">
-            <div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
-            <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div>
+            {pub.agree?.kind === "swap" ? <SwapAsk pub={pub} /> : (<>
+              <div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
+              <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></>)}
           </div>
         </div>)}
       {pub.nextBy && !pub.contest && <NextHint pub={pub} />}
@@ -468,6 +469,15 @@ function AgreeBanner({ pub }: { pub: Pub }) {
       <b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain asks for <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
       {" "}<b style={{ color: tc(o) }}>{T[o].name}</b>&rsquo;s captain decides<span className="text-[var(--color-ink-2)]"> · {left} s</span>.
     </div>);
+}
+/* no host: a new question asked for; the clock is stopped (and the question hidden) while the other captain decides */
+function SwapAsk({ pub }: { pub: Pub }) {
+  const T = pub.teams, A = pub.agree!, left = useSecondsLeft(A.until), o = A.team === 0 ? 1 : 0;
+  return (<>
+    <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>A new {A.what}?</div>
+    <div className="text-30 mt-3 max-w-[1300px]"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain asks for one. <b style={{ color: tc(o) }}>{T[o].name}</b>&rsquo;s captain decides<span className="text-[var(--color-ink-2)]"> · {left} s</span>.</div>
+    <div className="text-24 text-[var(--color-ink-2)] mt-2">The clock is stopped meanwhile.</div>
+  </>);
 }
 /* who left the game screen during this question, in red, bottom left, until the question changes */
 function AwayFlags({ pub }: { pub: Pub }) {

@@ -35,8 +35,9 @@ export type Pub = {
      with no host the other captain agrees or not before `until` (then the call stands); with a host, the host decides */
   calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string }[];
   contest?: { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number } | null;
-  /* no host: a captain's request (new total scores a–b) the other captain agrees to before `until`, or nothing changes */
-  agree?: { id: number; kind: "score"; team: 0 | 1; until: number; a?: number; b?: number } | null;
+  /* no host: a captain's request (new total scores a–b, or a new question: what = "flag", "landmark"…) the other
+     captain agrees to before `until`, or nothing changes */
+  agree?: { id: number; kind: "score" | "swap"; team: 0 | 1; until: number; a?: number; b?: number; what?: string } | null;
   /* with a host: what the captain typed (never the answer), so the host's phone shows it the moment it lands */
   said?: Two<string[] | null>;
   /* pictures coming up next (flags under their public/fx names, map ids, landmark photos), fetched ahead so they show at once */

@@ -34,8 +34,10 @@ export const newState = () => ({
   mrAsk: null as null | { name: string; team: 0 | 1; until: number },
   votes: {} as Record<string, string>,
   /* no host: a captain's request the other captain agrees to, or not (no answer by `until`: nothing changes):
-     new total scores (a, b; from: the scores when asked, so points won meanwhile aren't wiped out) */
-  agree: null as null | { id: number; kind: "score"; team: 0 | 1; until: number; a: number; b: number; from: Two<number> },
+     new total scores (a, b; from: the scores when asked, so points won meanwhile aren't wiped out), or a new
+     question on this screen (key: the one asked about; held: the clock was running, and stopped for it) */
+  agree: null as null | ({ id: number; team: 0 | 1; until: number } & ({ kind: "score"; a: number; b: number; from: Two<number> }
+    | { kind: "swap"; screen: string; key: string; held: boolean; what: string })),
   ok: [null, null] as Two<boolean | null>,           // Flag / Map / Say verdicts, as they stand
   app: [null, null] as Two<boolean | null>,          // ...and what the app said first (the "App suggests" tag)
   sdBuzz: null as 0 | 1 | null, sdOut: [false, false] as Two<boolean>,

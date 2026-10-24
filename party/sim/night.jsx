@@ -188,7 +188,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
         "pin/start", "pin/swap", "pin/done", "airport/start", "airport/swap", "airport/done", "majority/start", "majority/swap", "majority/done",
         "ui/reveal", "ui/airportOk", "ui/mrOut", "ui/mrOutOk", "tie/more", "decided/more",
         /* no host: a captain asks for new scores, and the other agrees or not (24 Oct) */
-        "ui/askScore", "ui/agree"];
+        "ui/askScore", "ui/agree", "ui/askSwap", "ui/askSwap"];
       /* only what a phone can send on this screen: a number on Closest, a pin on Drop the Pin, one of the four on
          Majority Rules (any player's phone), words elsewhere; BUZZ where there's a buzzer */
       if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : pub.screen === "pinQ" ? { pin: bot() < 0.2 ? { lat: 91, lon: "x" } : { lat: bot() * 140 - 70, lon: bot() * 360 - 180 } }
