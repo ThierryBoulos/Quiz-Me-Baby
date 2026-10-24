@@ -42,9 +42,9 @@ export type Pub = {
   /* the end of the night: a short story of it, shown after the confetti */
   recap?: { margin: number; sudden: boolean; leadChanges: number; steals: Two<number>; minis: Two<number>; best?: { title: string; team: 0 | 1; legs: Two<number> } };
   flag?: string;                  // the flag's file name (flags/<flag>.svg)
-  /* Drop the Pin: the landmark's photo (pins/<photo>.jpg, a name that says nothing) and its credit; the name only
-     on a hard one (the photo alone wouldn't say what it is). At the reveal: where it is, both pins, how far off */
-  pin?: { photo: string; credit: string; licence: string; name?: string;
+  /* Drop the Pin: the landmark's photo (pins/<photo>.jpg, a name that says nothing) and its credit, never its name.
+     At the reveal: where it is, both pins, how far off */
+  pin?: { photo: string; credit: string; licence: string;
     reveal?: { at: LatLon; name: string; place: string; pins: Two<LatLon | null>; km: Two<number | null> } };
   /* Guess the Airport: its departures board (time, status, destination, flight, gate); at the reveal, its code and city */
   /* cityOk, at the reveal: false where the city alone doesn't count (it has more than one big airport) */

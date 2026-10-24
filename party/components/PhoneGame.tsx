@@ -778,7 +778,6 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
       /* the captain's phone: the photo beside the clock, so the map gets the room */
       ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></div>
       : <PinPhoto pin={pub.pin} h={230} small zoom />)}
-    {pub.screen === "pinQ" && pub.pin?.name && <div className="display text-24 text-center" style={{ color: "var(--color-gold)" }}>{pub.pin.name}</div>}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <PinMap marks={pinMarks(pub)} fly height={small ? 220 : 300} label={`Where it is: ${pub.pin.reveal.place}`} />}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <div className="text-center"><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.pin.reveal.name}</div>
       <div className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pin.reveal.place}</div></div>}

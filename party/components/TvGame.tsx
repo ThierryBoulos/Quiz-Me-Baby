@@ -236,7 +236,6 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={560} credit /></div>
       <div className="w-[360px] flex flex-col items-center gap-5">
         <div className="display text-44" style={{ color: "var(--color-gold)" }}>Where is this?</div>
-        {pub.pin.name && <div className="display text-40 leading-tight">{pub.pin.name}</div>}
         <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
         <div className="flex flex-col items-center gap-1" role="status">{[0, 1].map((t) => (
           <span key={t} className="font-bold" style={{ fontSize: 22, color: pub.sent?.[t] ? tc(t as 0 | 1) : "var(--color-ink-3)" }}>{T[t].name}: {pub.sent?.[t] ? "pin in" : "placing…"}</span>))}</div>

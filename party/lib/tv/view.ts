@@ -133,9 +133,9 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   }
   if ((s.screen === "flagQ" || s.screen === "flagReveal") && q) p.flag = q.flag;
   if (s.screen === "flagReveal" && q) p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) };
-  /* Drop the Pin: the photo (and on a hard one, the name); at the reveal, where it is and both pins */
+  /* Drop the Pin: the photo alone, at every level (24 Oct: no name on the hard ones); at the reveal, where it is and both pins */
   if ((s.screen === "pinQ" || s.screen === "pinReveal") && q) {
-    p.pin = { photo: q.photo, credit: q.credit, licence: q.licence, name: q.level === "hard" ? q.answer : undefined };
+    p.pin = { photo: q.photo, credit: q.credit, licence: q.licence };
     if (s.screen === "pinReveal") {
       const L = QMB.pinLeg(q, s.pins);
       p.pin.reveal = { at: { lat: q.lat, lon: q.lon }, name: q.answer, place: q.place, pins: [s.pins[0], s.pins[1]], km: L.km };

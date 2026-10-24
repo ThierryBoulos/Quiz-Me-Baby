@@ -125,7 +125,7 @@ export function Rules() {
 
       <Rule n="10" title="Drop the Pin">
         <L items={[
-          <>A photo of a landmark goes up on the TV and every phone: <B>45 seconds</B>. On the hard ones its name comes too: the trick is finding it.</>,
+          <>A photo of a landmark goes up on the TV and every phone: <B>45 seconds</B>. No name, at any level: just the photo.</>,
           <>Both captains drop a pin on the world map on their phone. Tap to drop it, drag it to move it, pinch or tap <B>+</B> to zoom right in (down to the streets of a city), then <B>Lock in</B>. A pin left on the map when time runs out counts where it is.</>,
           <>The map has coastlines, borders, lakes and the big rivers, and no names. The reveal flies to the real spot and shows both pins, and how many km off each one was.</>,
           <>The nearer pin takes the leg; the same distance (to the km) is a point each; no pin, no point. Best of 7.</>,
