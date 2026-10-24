@@ -426,7 +426,7 @@ Import merges — a question with identical text updates the existing row instea
 
 Acronyms · Art & Books · Disney & Pixar · Food & Drink · Friends · Geek & Gamer · Geography · History · Internet & Memes · Know the Host · Lebanon · Movies · Music · Nature · Pop Culture · Rave Culture · Science · Sexy Time · Sports · Tech · TV Series · 90s Kids
 
-Guess the Airport has 44 departures boards, in both Classic and Party. Party also plays 68 Drop the Pin landmarks and 105 Majority Rules questions, which need everyone's phone.
+Guess the Airport has 44 departures boards, in both Classic and Party. Party also plays 67 Drop the Pin landmarks and 105 Majority Rules questions, which need everyone's phone.
 
 Every standard question has one of four levels: Easy, Medium, Hard or Expert. A night plays Easy to Hard by default, with Expert only once a theme runs out of the others; Mixed is all four.
 

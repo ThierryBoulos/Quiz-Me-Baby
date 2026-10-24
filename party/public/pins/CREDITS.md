@@ -66,7 +66,6 @@ The file name is a hash, so it doesn't give away the landmark. Written by `scrip
 | 7bd8899039e644af.jpg | Marina Bay Sands | Tony Hisgett | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Marina_Bay_Sands_Hotel_3_(31345110894).jpg |
 | 24ea799cdff35f97.jpg | Mount Rushmore | Thomas Wolf, www.foto-tw.de | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Mount_Rushmore_detail_view_(100MP).jpg |
 | 5e7528e5eaa48ae3.jpg | CN Tower | Maksim Sokolov (maxergon.com) | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Toronto_skyline_viewed_from_Trillium_Park.jpg |
-| 2be5e8d1a0955fdd.jpg | Sheikh Zayed Grand Mosque | Guilhem Vellut | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Sheikh_Zayed_Grand_Mosque_@_Abu_Dhabi_(15856602738).jpg |
 | bdd09d202260e059.jpg | Dubrovnik Old Town | Zysko serhii | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:The_walls_of_the_fortress_and_View_of_the_old_city._panorama.jpg |
 | 80f616ce49db9b7d.jpg | Potala Palace | Ondřej Žváček | CC BY 2.5 | https://commons.wikimedia.org/wiki/File:Potala.jpg |
 | 5d3b9068348ce85f.jpg | Salar de Uyuni | Christopher Crouzet | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Reflection_on_the_Salar_de_Uyuni,_bolivia.jpg |
