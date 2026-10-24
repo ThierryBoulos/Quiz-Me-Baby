@@ -44,10 +44,9 @@ export function Rules() {
       <First30 />
       <Rule n="01" title="The setup">
         <L items={[
-          <><B>Two teams</B>, as many players each as you like. One screen everyone can see is the TV: tap <B>Create game</B> on it. Everyone else joins on their phone with the code or the QR.</>,
+          <><B>Two teams</B>, as many players each as you like. One screen everyone can see is the TV: open the game on a laptop and put it up big (plug it into a TV or a projector, or cast it), then tap <B>Create game</B> on it. Everyone else joins on their phone with the code or the QR.</>,
           <>Each team picks a <B>captain</B> on their phone. The captain gives the final answer. Nobody else. If the captain hasn&rsquo;t sent it, it hasn&rsquo;t been said.</>,
           <>Want a host? One person taps <B>I&rsquo;m the host</B>. They see every answer and rule on it. No host? The app checks the answers, and the captains can contest its calls.</>,
-          <>Settle who goes first by chance, not by argument. Coin toss, rock paper scissors, anything, as long as it&rsquo;s luck. The winner chooses Team A, who answers first, or Team B, who gets the first steal. (Settings can make the teams take turns going first.)</>,
           <>Phones are for the game only. No searching, no asking anyone outside the room.</>,
           <>Between <B>4 and 12</B> standard rounds, one theme each, plus however many mini-games are on the card. Or switch the standard rounds off in Setup for a night of nothing but mini-games, back to back.</>,
         ]} />
