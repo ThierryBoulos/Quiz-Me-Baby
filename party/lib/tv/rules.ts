@@ -76,6 +76,9 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   /* no host: a captain asks to take an absent teammate off the list; the other captain agrees, or not */
   "ui/mrOut": { where: "majorityIntro", who: "any", nohostOnly: true },
   "ui/mrOutOk": { where: "majorityIntro", who: "any", nohostOnly: true },
+  /* no host: either captain asks to set the total scores (something went wrong); the other captain agrees, or nothing changes */
+  "ui/askScore": { where: "*", who: "any", nohostOnly: true },
+  "ui/agree": { where: "*", who: "any", nohostOnly: true },
   "dish/start": { where: "dishIntro", who: "lead", nohostOnly: true },
   "map/start": { where: "mapIntro", who: "lead", nohostOnly: true },
   "auction/begin": { where: "auctionIntro", who: "lead", nohostOnly: true },
@@ -119,7 +122,7 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
    right or wrong, pausing. They skip the stale-tap check (and don't bump the
    step): a host tapping +1 five times fast must get five, and a tap on
    "Next" straight after marking a team must not be refused as stale. */
-export const SAME_SCREEN = new Set(["ui/setScore", "auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/airportOk", "ui/mrOut", "ui/mrOutOk", "ui/pause", "ui/pauseFriend", "ui/startCall", "ui/contest", "ui/contestOk", "ui/flip"]);
+export const SAME_SCREEN = new Set(["ui/setScore", "ui/askScore", "ui/agree", "auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/airportOk", "ui/mrOut", "ui/mrOutOk", "ui/pause", "ui/pauseFriend", "ui/startCall", "ui/contest", "ui/contestOk", "ui/flip"]);
 /* no host: the screens that wait for the lead captain's Start or Next (nothing moves on by itself) */
 export const WAITS_FOR_NEXT = new Set(["battleReview", "roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "pinIntro", "airportIntro", "majorityIntro", "battleIntro", "battleHandoff",
   "answer", "roundScore", "closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "dishReveal", "auctionLeg", "auctionResult",

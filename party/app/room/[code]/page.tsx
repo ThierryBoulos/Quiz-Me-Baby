@@ -245,6 +245,9 @@ export default function PhoneRoom() {
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {mine.role === "host" && pub && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
+            {/* no host: either captain asks for new scores; the other captain agrees, or not (back on the game screen) */}
+            {mine.role === "captain" && pub?.mode === "nohost" && <ScoreFix pub={pub} ask busy={busy || waiting}
+              send={(move) => { void tell(() => sendAction(code, "next", { move, step: pub.step })); setPanel(false); }} />}
             {/* leaving is kept away from everyday buttons, and asks first */}
             <button className="btn btn-sm btn-ghost self-center mt-6" style={{ color: "var(--color-no)", borderColor: "color-mix(in srgb, var(--color-no) 45%, transparent)" }} onClick={leave}>Leave the game</button>
           </section>

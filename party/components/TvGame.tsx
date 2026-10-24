@@ -101,6 +101,7 @@ export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () =
           </div>
         </>)}
         {pub.contest && <ContestBanner pub={pub} />}
+        {pub.agree && <AgreeBanner pub={pub} />}
       </div>
 
       {pub.lifeline && (
@@ -456,6 +457,16 @@ function ContestBanner({ pub }: { pub: Pub }) {
     <div className="card enter text-24 max-w-[1300px]" style={{ borderColor: "var(--color-gold)", position: "relative", zIndex: 26 }} role="status">
       <div className="eyebrow text-16 mb-1" style={{ color: "var(--color-gold)" }}>Contested</div>
       <b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>&rsquo;s </> : null}&ldquo;{K.text}&rdquo; was <b>{word(!K.ok)}</b>. <b>{decider}</b> decides{nohost ? <span className="text-[var(--color-ink-2)]"> · {left} s</span> : null}.
+    </div>);
+}
+/* no host: a captain's request (new scores) waiting for the other captain's yes or no */
+function AgreeBanner({ pub }: { pub: Pub }) {
+  const T = pub.teams, A = pub.agree!, left = useSecondsLeft(A.until), o = A.team === 0 ? 1 : 0;
+  return (
+    <div className="card enter text-24 max-w-[1300px]" style={{ borderColor: "var(--color-gold)", position: "relative", zIndex: 26 }} role="status">
+      <div className="eyebrow text-16 mb-1" style={{ color: "var(--color-gold)" }}>New scores?</div>
+      <b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain asks for <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
+      {" "}<b style={{ color: tc(o) }}>{T[o].name}</b>&rsquo;s captain decides<span className="text-[var(--color-ink-2)]"> · {left} s</span>.
     </div>);
 }
 /* who left the game screen during this question, in red, bottom left, until the question changes */

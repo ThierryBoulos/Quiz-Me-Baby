@@ -11,7 +11,7 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
    onto the new version then says so and offers Exit, instead of playing on with a broken game. */
 const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
-import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK,
+import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE,
   type MiniKey, type Pub, type Secret, type Two } from "./game";
 import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, type Action, type G, type PKind, type W } from "./tv/rules";
@@ -123,7 +123,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.exit) { localStorage.removeItem(saveKey); lastSave.current = ""; }
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, votes: s.votes, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
+            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
           if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
         }
@@ -420,7 +420,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const againGame = () => {
     const s = st.current, room = ctx.current.room;
     Object.assign(s, { g: null, screen: "", step: 1, pending: null, lifeline: null, autoAt: null, deadline: null, left: 0, timeUp: false, paused: false,
-      typed: [null, null], guesses: [null, null], pins: [null, null], mrList: null, mrOut: [], mrAsk: null, mrHere: [], votes: {}, ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
+      typed: [null, null], guesses: [null, null], pins: [null, null], mrList: null, mrOut: [], mrAsk: null, agree: null, mrHere: [], votes: {}, ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
     try { localStorage.removeItem(saveKey); } catch { /* */ }
     lastSave.current = "";
     setPub(null);
@@ -741,6 +741,32 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.toast = { id: ++s.toastN, text: move.v ? `${iso(A.name)} is off ${iso(g.teams[A.team].name)}'s list for this one.` : `${iso(A.name)} stays on the list.` };
       return true;
     }
+    /* no host: either captain asks to set the total scores; the other captain agrees, or nothing changes */
+    else if (t === "ui/askScore") {
+      const n = (x: unknown) => Math.max(0, Math.min(999, Math.floor(Number(x))));
+      if (!Number.isFinite(Number(move.a)) || !Number.isFinite(Number(move.b))) return false;
+      if (s.agree) return `One at a time: ${iso(g.teams[s.agree.team].name)}'s request is open.`;
+      const a = n(move.a), b = n(move.b), from: [number, number] = [g.teams[0].score, g.teams[1].score];
+      if (a === from[0] && b === from[1]) return "Those are the scores already.";
+      /* (the TV and both captains' phones show it while it's open: no toast as well) */
+      s.agree = { id: Date.now(), kind: "score", team, until: Date.now() + T_AGREE * 1000, a, b, from };
+      return true;
+    }
+    /* ...and the other captain's answer (to that request: id), not the one who asked */
+    else if (t === "ui/agree") {
+      const A = s.agree;
+      if (!A || team === A.team || typeof move.v !== "boolean" || move.id !== A.id) return false;
+      s.agree = null;
+      const by = iso(g.teams[team].name);
+      if (!move.v) s.toast = { id: ++s.toastN, text: `${by} said no: the scores stay as they were.` };
+      /* points won since the request was made would be wiped out: nothing changes, ask again */
+      else if (g.teams[0].score !== A.from[0] || g.teams[1].score !== A.from[1]) s.toast = { id: ++s.toastN, text: "The scores changed meanwhile, so they stay as they are. Ask again if they're still wrong." };
+      else {
+        g.teams[0].score = A.a; g.teams[1].score = A.b;
+        s.toast = { id: ++s.toastN, text: `Both captains agreed: ${iso(g.teams[0].name)} ${A.a}, ${iso(g.teams[1].name)} ${A.b}.` };
+      }
+      return true;
+    }
     else if (t === "majority/start" && (!mrRoster().some((e) => e.team === 0) || !mrRoster().some((e) => e.team === 1))) return "Both teams need someone on their list.";
     else if (t === "ui/startCall") { if (!s.lifeline?.wait || s.lifeline.team !== team) return false; }
     else if (t === "ui/exit") { /* either captain, with no host */ }
@@ -874,7 +900,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       g.hostless = false;
       g.alternateFirst = getSettings().alternateFirst;
       s.nohost = !members.some((m) => m.role === "host");
-      s.g = g; s.screen = ""; s.lifeline = null; s.pending = null; s.autoAt = null; s.step = 1; s.scoreLog = [];
+      s.g = g; s.screen = ""; s.lifeline = null; s.pending = null; s.autoAt = null; s.step = 1; s.scoreLog = []; s.agree = null;
       g.rounds.forEach((r: G) => r.q.forEach((q: G) => applyFx([{ used: q }])));
       play({ type: "game/start" });
       await sb().from("rooms").update({ status: "playing", mode: s.nohost ? "nohost" : "host" }).eq("code", code);
@@ -938,6 +964,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           if (s.autoAt) s.autoAt += d;
           if (s.waitSince) s.waitSince += d;
           if (s.buzzAt) s.buzzAt += d;
+          if (s.agree) s.agree = { ...s.agree, until: s.agree.until + d };
           if (s.awayPaused && s.left && !s.pending) { s.deadline = Date.now() + s.left * 1000; s.left = 0; }
           if (s.awayPaused) s.paused = false;
           s.tvAway = 0; s.awayPaused = false;
@@ -1127,6 +1154,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.autoAt) s.autoAt += d;
         if (s.waitSince) s.waitSince += d;
         if (s.buzzAt) s.buzzAt += d;
+        if (s.agree) s.agree = { ...s.agree, until: s.agree.until + d };
         /* the clock picks up where it was, unless an answer that came in meanwhile is waiting for its call */
         if (s.awayPaused) { s.paused = false; s.awayPaused = false; if (!s.pending) applyFx([{ timer: "resume" }]); }
         void publish();
@@ -1219,6 +1247,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           if (s.mrAsk && back.includes(s.mrAsk.name)) s.mrAsk = null;
         }
         if (s.mrAsk && now >= s.mrAsk.until) { s.toast = { id: ++s.toastN, text: `No answer: ${iso(s.mrAsk.name)} stays on the list.` }; s.mrAsk = null; changed = true; }
+      }
+      /* a captain's request the other captain never answered lapses (nothing changes); the host back: the host's to do */
+      if (s.agree && (now >= s.agree.until || !s.nohost)) {
+        if (s.nohost) s.toast = { id: ++s.toastN, text: "No answer: the scores stay as they were." };
+        s.agree = null; changed = true;
       }
       /* The Auction waits on a captain with no clock: one whose phone has been gone 20 s (and no
          teammate to take the armband) passes after 30 s, or, with nothing bid yet, the other team opens */

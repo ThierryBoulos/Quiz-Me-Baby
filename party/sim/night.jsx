@@ -186,15 +186,19 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       const MOVES = ["round/begin", "round/afterAnswer", "round/next", "ui/next", "ui/contest", "ui/contestOk", "battle/reviewDone", "decided/stop", "tie/stop", "auction/pass", "auction/raise", "ui/pause", "flag/done", "closest/done", "battle/start", "sudden/go",
         /* the three newest games' own (23 Oct): their starts, swaps and ends, Reveal now, a call flipped, Majority Rules' list */
         "pin/start", "pin/swap", "pin/done", "airport/start", "airport/swap", "airport/done", "majority/start", "majority/swap", "majority/done",
-        "ui/reveal", "ui/airportOk", "ui/mrOut", "ui/mrOutOk", "tie/more", "decided/more"];
+        "ui/reveal", "ui/airportOk", "ui/mrOut", "ui/mrOutOk", "tie/more", "decided/more",
+        /* no host: a captain asks for new scores, and the other agrees or not (24 Oct) */
+        "ui/askScore", "ui/agree"];
       /* only what a phone can send on this screen: a number on Closest, a pin on Drop the Pin, one of the four on
          Majority Rules (any player's phone), words elsewhere; BUZZ where there's a buzzer */
       if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : pub.screen === "pinQ" ? { pin: bot() < 0.2 ? { lat: 91, lon: "x" } : { lat: bot() * 140 - 70, lon: bot() * 360 - 180 } }
         : pub.screen === "majorityQ" ? { pick: bot() < 0.2 ? "Not an answer" : (pub.majority?.options || ["x"])[Math.floor(bot() * 4)] || "x", k: bot() < 0.2 ? "old|majorityQ" : `${pub.qid}|majorityQ` } : { texts: ["Paris"] });
       else if (r < 0.45) { if (["dishQ", "sudden", "battleTie"].includes(pub.screen)) send(who, "buzz", {}); }
       else if (r < 0.6) send(who, "lifeline", { key: ["dbl", "friend", "dip"][Math.floor(bot() * 3)] });
-      else send(who, "next", { move: { type: MOVES[Math.floor(bot() * MOVES.length)], v: bot() < 0.5, n: 3, t: bot() < 0.5 ? 0 : 1, name: FOLK[Math.floor(bot() * FOLK.length)],
-        id: ["first", "steal", "t0", "t1", "d0", "b0-3", "s0", "s1"][Math.floor(bot() * 8)] }, step: pub.step - (bot() < 0.3 ? 1 : 0) });
+      else { const type = MOVES[Math.floor(bot() * MOVES.length)];
+        send(who, "next", { move: { type, v: bot() < 0.5, n: 3, t: bot() < 0.5 ? 0 : 1, name: FOLK[Math.floor(bot() * FOLK.length)],
+          id: type === "ui/agree" ? (bot() < 0.7 ? pub.agree?.id : 1) : ["first", "steal", "t0", "t1", "d0", "b0-3", "s0", "s1"][Math.floor(bot() * 8)],
+          ...(type === "ui/askScore" ? { a: bot() < 0.1 ? "x" : Math.floor(bot() * 40), b: Math.floor(bot() * 40) } : {}) }, step: pub.step - (bot() < 0.3 ? 1 : 0) }); }
     }
     /* the TV's screen goes to sleep during the sleep-th question; the captain answers meanwhile and
        the other captain taps Resume (the phones show the game as paused); then the TV wakes (18 Oct) */
@@ -248,6 +252,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     const right = answerNow(g, pub);
     /* whoever paused resumes (a real person does) */
     if (pub.paused && !pub.tvAway && bot() < 0.3) { const w = host && !gone.has("host") ? "host" : C(0) || C(1); if (w) send(w, w === "host" ? "judge" : "next", { move: { type: "ui/pause", on: "resume" }, step }); continue; }
+    /* a captain's request open (no host): the other captain agrees, says no, or lets it lapse */
+    if (pub.agree && !host && bot() < 0.3) { const A = pub.agree; if (C(1 - A.team)) send(C(1 - A.team), "next", { move: { type: "ui/agree", v: bot() < 0.6, id: A.id }, step }); }
     /* a contest open: the other captain (or the host) agrees, says no, or (now and then) doesn't answer at all */
     if (pub.contest) {
       const K = pub.contest;

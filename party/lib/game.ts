@@ -35,6 +35,8 @@ export type Pub = {
      with no host the other captain agrees or not before `until` (then the call stands); with a host, the host decides */
   calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string }[];
   contest?: { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number } | null;
+  /* no host: a captain's request (new total scores a–b) the other captain agrees to before `until`, or nothing changes */
+  agree?: { id: number; kind: "score"; team: 0 | 1; until: number; a?: number; b?: number } | null;
   /* with a host: what the captain typed (never the answer), so the host's phone shows it the moment it lands */
   said?: Two<string[] | null>;
   /* pictures coming up next (flags under their public/fx names, map ids, landmark photos), fetched ahead so they show at once */
@@ -118,6 +120,8 @@ export const T_OVERRULE = 15, T_SUDDEN_BUZZ = 30, T_MAP_RULE = 30;
 export const T_OVERRULE_BATTLE = 8;
 /* no host: if the lead captain hasn't tapped Next after this long, the other captain can */
 export const T_NEXT_FALLBACK = 20;
+/* no host: how long the other captain has to agree to a request (new scores, a new question); no answer: nothing changes */
+export const T_AGREE = 20;
 /* a captain whose phone has been gone this long hands over to a teammate who's still here */
 export const T_AWAY = 60;
 /* in the lobby: a captain silent this long shows as away on the TV, and a teammate can take the armband */

@@ -1,6 +1,6 @@
 "use client";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
+import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
 import { joinLive, newTap, note, sb, sendAction, sendDraft } from "@/lib/supabase";
@@ -586,8 +586,9 @@ export function AwayLog({ pub }: { pub: Pub | null }) {
 }
 
 /* The host, if something went wrong (a call that couldn't be put right, a bug): set the total scores
-   by hand. Out of the way at the bottom of the Players panel, and it asks first. */
-export function ScoreFix({ pub, send, busy }: { pub: Pub; send: Send; busy: boolean }) {
+   by hand. Out of the way at the bottom of the Players panel, and it asks first.
+   ask: a captain with no host, who asks for it instead: the other captain has to agree. */
+export function ScoreFix({ pub, send, busy, ask }: { pub: Pub; send: Send; busy: boolean; ask?: boolean }) {
   const T = pub.teams;
   const [open, setOpen] = useState(false), [v, setV] = useState<[number, number]>([T[0].score, T[1].score]);
   useEffect(() => { if (!open) setV([T[0].score, T[1].score]); }, [open, T]);
@@ -595,13 +596,16 @@ export function ScoreFix({ pub, send, busy }: { pub: Pub; send: Send; busy: bool
   const step = (t: 0 | 1, d: number) => setV((x) => (t === 0 ? [Math.max(0, x[0] + d), x[1]] : [x[0], Math.max(0, x[1] + d)]));
   const changed = v[0] !== T[0].score || v[1] !== T[1].score;
   const save = () => {
+    if (ask) { send({ type: "ui/askScore", a: v[0], b: v[1] }); setOpen(false); return; }
     if (!window.confirm(`Are you sure? ${T[0].name}: ${T[0].score} → ${v[0]}. ${T[1].name}: ${T[1].score} → ${v[1]}.`)) return;
     send({ type: "ui/setScore", a: v[0], b: v[1] }); setOpen(false);
   };
   return (
     <div className="card flex flex-col gap-3">
       <div className="eyebrow">Adjust the scores</div>
-      <p className="text-13 text-[var(--color-ink-2)]">Only if something went wrong. The TV and every phone show the new scores at once.</p>
+      <p className="text-13 text-[var(--color-ink-2)]">{ask ? <>Only if something went wrong. The other captain has to agree within {T_AGREE} seconds; if not, the scores stay as they are.</>
+        : "Only if something went wrong. The TV and every phone show the new scores at once."}</p>
+      {ask && pub.agree && <p className="text-13 font-bold" role="status" style={{ color: "var(--color-gold)" }}>One request at a time: wait for the open one first.</p>}
       {([0, 1] as const).map((t) => (
         <div key={t} className="flex items-center gap-3">
           <b className="flex-1 truncate" style={{ color: tc(t) }}>{T[t].name}</b>
@@ -610,7 +614,7 @@ export function ScoreFix({ pub, send, busy }: { pub: Pub; send: Send; busy: bool
           <button className="btn btn-sm" aria-label={`${T[t].name} plus one`} onClick={() => step(t, 1)}>+</button>
         </div>))}
       <div className="flex gap-2">
-        <button className="btn btn-gold flex-1" disabled={busy || !changed} onClick={save}>Save the scores</button>
+        <button className="btn btn-gold flex-1" disabled={busy || !changed || (ask && !!pub.agree)} onClick={save}>{ask ? "Ask the other captain" : "Save the scores"}</button>
         <button className="btn btn-ghost" onClick={() => setOpen(false)}>Cancel</button>
       </div>
     </div>);
@@ -950,6 +954,25 @@ const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
    lifelines; the number pad; the buzzer; the bidding; your players'
    suggestions. With no host, also the referee's buttons and Next. */
+/* No host: a captain's request (new total scores) that the other captain agrees to, or not.
+   No answer in time: nothing changes. The asking captain sees it waiting. */
+function AgreeCard({ pub, mine, busy, act }: { pub: Pub; mine: 0 | 1; busy: boolean; act: (move: Record<string, unknown>) => void }) {
+  const A = pub.agree, T = pub.teams, left = useSecondsLeft(A?.until);
+  if (!A) return null;
+  if (A.team === mine) return <p className="text-center text-14 text-[var(--color-ink-2)]" role="status">Asking {T[mine === 0 ? 1 : 0].name}&rsquo;s captain to agree to the new scores… ({left} s)</p>;
+  return (
+    <div className="card flex flex-col gap-2 enter" style={{ borderColor: "var(--color-gold)" }} role="group" aria-label="Do you agree?">
+      <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Do you agree?</div>
+      <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants to set the scores to <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
+        <span className="text-[var(--color-ink-2)]"> Now: {T[0].score}–{T[1].score}.</span></p>
+      <div className="grid grid-cols-2 gap-2">
+        <button className="btn btn-gold" disabled={busy} onClick={() => act({ type: "ui/agree", v: true, id: A.id })}>Agree</button>
+        <button className="btn" disabled={busy} onClick={() => act({ type: "ui/agree", v: false, id: A.id })}>No</button>
+      </div>
+      <p className="text-12 text-[var(--color-ink-3)]">No answer in {left} s: nothing changes.</p>
+    </div>);
+}
+
 export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub; me: Member; members: Member[]; code: string; hold?: boolean }) {
   const mine = me.team as 0 | 1, T = pub.teams, sc = pub.screen, nohost = pub.mode === "nohost";
   const theirs = (mine === 0 ? 1 : 0) as 0 | 1;
@@ -1052,6 +1075,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   return (
     <div className="flex flex-col gap-3 flex-1">
       {no && <p className="text-center text-14 font-bold enter" role="alert" style={{ color: "var(--color-gold)" }}>{no}</p>}
+      {nohost && <AgreeCard pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
       {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
       <Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} />
 
