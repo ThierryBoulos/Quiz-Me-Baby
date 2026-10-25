@@ -867,6 +867,9 @@
     g.done[key] = true;
     return [{ next:true }];
   }
+  /* a swap (or a new one for both): the next spare at the level of the one it replaces, so the deal's
+     share of levels holds (25 Oct); none left there, the next spare at all */
+  const spareLike = (s) => { const cur = s.qs[s.i], i = cur ? s.spare.findIndex(q => q.level === cur.level) : -1; return s.spare.splice(i > -1 ? i : 0, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
 
   /* ---- decided early: keep playing for fun, or stop there ----
@@ -1709,7 +1712,7 @@
       const inPlay = new Set(s.qs.map(q => q.id));
       const pool = env.deal.mapPool(s.levels || MAP_ORDER, inPlay);
       if(!pool.length) return [{ toast:'No other map left in the bank.' }];
-      const q = pool[0];
+      const cur = s.qs[s.i], q = pool.find(x => cur && x.level === cur.level) || pool[0];   // the same level, when there's one
       s.spare = (s.spare || []).filter(x => x.id !== q.id);
       s.qs[s.i] = q;
       return [{ toast:'New map.' }, { go:'mapQ' }];
@@ -1747,7 +1750,7 @@
     'flag/swap'(g){
       const s = g.flagGame;
       if(!s.spare.length) return [{ toast:'No other flag left at this level.' }];
-      s.qs[s.i] = s.spare.shift();
+      s.qs[s.i] = spareLike(s);
       return [{ toast:'New flag.' }, { go:'flagQ' }];
     },
     /* w: 0 | 1 | 'tie' (both right) | 'none' */
@@ -1767,7 +1770,7 @@
     'airport/swap'(g){
       const s = g.airportGame;
       if(!s.spare.length) return [{ toast:'No other board left at these levels.' }];
-      s.qs[s.i] = s.spare.shift();
+      s.qs[s.i] = spareLike(s);
       return [{ toast:'New board.' }, { go:'airportQ' }];
     },
     /* w: 0 | 1 | 'tie' (both right) | 'none' */
@@ -1793,7 +1796,7 @@
     'majority/swap'(g){
       const s = g.majorityGame;
       if(!s.spare.length) return [{ toast:'No other question left at these levels.' }];
-      s.qs[s.i] = s.spare.shift();
+      s.qs[s.i] = spareLike(s);
       return [{ toast:'New question.' }, { go:'majorityQ' }];
     },
     /* right: how many on each team's list got this one right (no answer is a wrong one) */
@@ -1813,7 +1816,7 @@
     'pin/swap'(g){
       const s = g.pinGame;
       if(!s.spare.length) return [{ toast:'No other landmark left at these levels.' }];
-      s.qs[s.i] = s.spare.shift();
+      s.qs[s.i] = spareLike(s);
       return [{ toast:'New landmark.' }, { go:'pinQ' }];
     },
     /* the two pins ({lat, lon}, or null: none dropped) -> the leg, by distance */
@@ -1840,7 +1843,7 @@
       const s = g.dishGame, L = s.leg;
       if(L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length) return [{ toast:'Somebody has already had a go at this one.' }];
       if(!s.spare.length) return [{ toast:'Nothing else left at these levels.' }];
-      s.qs[s.i] = s.spare.shift();
+      s.qs[s.i] = spareLike(s);
       s.leg = freshLeg();
       return [{ toast:'New one.' }, { go:'dishQ' }];
     },
@@ -1905,7 +1908,7 @@
       if(!s.spare.length) return MOVES['dish/rule'](g, { w:'none' });
       s.subs.pop();
       if(sub.winner === 0 || sub.winner === 1) s.wins[sub.winner]--;
-      s.qs[s.i] = s.spare.shift();
+      s.qs[s.i] = spareLike(s);
       s.leg = freshLeg();
       return [{ toast:'Call changed. A new one, for both teams.' }, { go:'dishQ' }];
     },
