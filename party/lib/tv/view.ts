@@ -12,6 +12,8 @@ import type { TvState } from "./state";
 /* The question in play goes out under a number that means nothing outside this game (D5): its
    real id would find the answer in a bank file. The phones use it only to tell questions apart. */
 export const qk = (s: TvState, id: string) => "k" + (s.qkeys[id] ??= Object.keys(s.qkeys).length + 1);
+/* sudden death and the Battle's tie-breaker, no host: when the buzzer's time to type runs out */
+const typeByOf = (s: TvState) => s.nohost && s.sdBuzz != null && s.buzzAt && !s.typed[s.sdBuzz] && !s.pending ? s.buzzAt + getSettings().tDishType * 1000 : null;
 export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   const g = s.g;
   if (!g) return null;
@@ -87,6 +89,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.question = g.sdReady ? g.sd.q.question : undefined;
     p.sudden = { ready: !!g.sdReady, shown: !!g.sd.shown, n: g.sd.n, answer: g.sd.shown ? g.sd.q.answer : undefined };
     p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>;
+    p.typeBy = typeByOf(s);
     secret.qid = p.qid = qk(s, g.sd.q.id); secret.answer = g.sd.q.answer; secret.notes = g.sd.q.notes;
   }
   /* the mini-games */
@@ -115,7 +118,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     /* halfway: all ten of the first captain's, not just the last (20 Oct) */
     if (s.screen === "battleHandoff") p.battle.half = ((b.log?.[0] || []) as G[]).filter(Boolean).map((e) => ({ said: e.said || "", got: !!e.got, answer: e.q?.answer || "" }));
     if (s.screen === "battleQ" || s.screen === "battleTie") { p.question = q?.question; p.turn = s.screen === "battleQ" ? b.cap : undefined; }
-    if (s.screen === "battleTie") { p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>; }
+    if (s.screen === "battleTie") { p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>; p.typeBy = typeByOf(s); }
   } else if (key) {
     const m = miniState(g, key);
     p.mini = { key, title: MINI_TITLES[key], leg: Math.min(m.i + 1, m.qs.length), of: m.base, wins: [...m.wins] as Two<number>, pts: g.miniPts, tie: m.i >= m.base, fun: !!m.fun };

@@ -327,7 +327,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       sdRecord(s, P.team, v);
       if (v) play(tb ? { type: "battle/tbWin", w: P.team } : { type: "sudden/win", w: P.team });
       else {
-        s.sdOut[P.team] = true; s.typed[P.team] = null; s.sdBuzz = null;
+        s.sdOut[P.team] = true; s.typed[P.team] = null; s.sdBuzz = null; s.buzzAt = 0;
         if (s.sdOut[0] && s.sdOut[1]) play(tb ? { type: "battle/tbWin", w: "none" } : { type: "sudden/win", w: "none" });
         else { s.toast = { id: ++s.toastN, text: "Wrong. The other captain can buzz." }; s.deadline = Date.now() + T().tSudden * 1000; }
       }
@@ -608,7 +608,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.contest) return contestWait();
         if (s.sdOut[team]) return `${nm(team)} is out of this one.`;
         if (s.sdBuzz != null) return s.sdBuzz === team ? true : `${nm(s.sdBuzz)} buzzed first.`;
-        s.sdBuzz = team; s.deadline = null; playSound("soft"); return true;
+        s.sdBuzz = team; s.deadline = null; s.buzzAt = Date.now(); playSound("soft"); return true;
       }
       return false;
     }
@@ -1252,6 +1252,21 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           hostMove({ type: "dish/wrong" });
           s.late = b;
           s.toast = { id: ++s.toastN, text: `Time's up. ${iso(g.teams[b].name)} is out of this one.` };
+        }
+      }
+      /* sudden death and the Battle's tie-breaker, no host: a buzz gets the same time to type it (25 Oct: one
+         that never came held the night up for good); then what was typed counts, or nothing, which is wrong */
+      if ((s.screen === "sudden" || s.screen === "battleTie") && s.nohost && s.buzzAt && !s.pending && !s.contest) {
+        const b = s.sdBuzz;
+        if (b == null || s.typed[b]) s.buzzAt = 0;
+        else if (now - s.buzzAt >= T().tDishType * 1000 + T_GRACE_MS) {
+          s.buzzAt = 0; s.step++; changed = true;
+          if (!takeDraft(b)) {
+            const theyCan = !s.sdOut[other(b)];           // (both out: the next question is up instead)
+            s.pending = { kind: s.screen === "sudden" ? "sudden" : "battleTie", team: b, text: "", v: false, until: now };
+            settle(false);
+            if (theyCan) s.toast = { id: ++s.toastN, text: `Time's up: ${iso(g.teams[b].name)} didn't answer. The other captain can buzz.` };
+          }
         }
       }
       /* time's up (a moment after the clock shows 0, see T_GRACE_MS): first, what was typed but not sent goes in */

@@ -27,6 +27,7 @@ export type Pub = {
   roundPts?: Two<number>;
   lifeline?: { key: string; team: 0 | 1; deadline: number | null; left?: number; wait?: boolean } | null;   // left: Call a Friend paused with this many seconds to go; wait: the call not started yet
   sudden?: { ready: boolean; shown: boolean; n: number; answer?: string } | null;
+  typeBy?: number | null;   // sudden death and the Battle's tie-breaker, no host: the buzzer's time to type runs out then
   mini?: { key: MiniKey; title: string; leg: number; of: number; wins: Two<number>; pts: number; kinds?: string; tie?: boolean; fun?: boolean;
     pct?: boolean };   // pct: the wins are each team's share of right answers, in percent (Majority Rules)
   /* a mini-game won with legs to spare: keep playing for fun, or stop here (screen "decided") */

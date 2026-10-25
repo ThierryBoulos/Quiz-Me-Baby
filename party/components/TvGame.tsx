@@ -137,7 +137,12 @@ const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? [
 /* who buzzed, and who is out (Guess the Cocktail or Dish, sudden death) */
 function Buzzed({ pub }: { pub: Pub }) {
   const T = pub.teams;
-  if (pub.buzz != null) return <div className="display text-60 enter" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed!</div>;
+  if (pub.buzz != null) return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="display text-60 enter" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed!</div>
+      {/* no host: the time they have to type it */}
+      {pub.typeBy && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.typeBy} size={80} /><span>to type it</span></div>}
+    </div>);
   const out = [0, 1].filter((t) => pub.out?.[t]);
   return <div className="h-10 text-24 text-[var(--color-ink-2)]">{out.map((t) => `${T[t].name} is out of this one`).join(" · ")}</div>;
 }

@@ -1115,6 +1115,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
             <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
             {/* the cocktail or dish: you buzzed, now type it before your own clock runs out */}
             {sc === "dishQ" && pub.dish?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.dish.typeBy} size={52} />to type it</div>}
+            {(sc === "sudden" || sc === "battleTie") && pub.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.typeBy} size={52} />to type it</div>}
           </div>
           <input id="ans" {...np.props} className="input" value={a} maxLength={80} autoComplete="off" autoCorrect="off" spellCheck={false}
             /* Closest: the number pad, fastest (the reader still takes "1.5 million" if a keyboard sends it) */
