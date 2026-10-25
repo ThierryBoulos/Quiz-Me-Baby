@@ -78,6 +78,7 @@ export function Rules() {
           <>Whoever wins one takes its points (Setup shows how many; the Battle is worth double). Together they count for a bit less than the standard rounds. No lifelines in any of them. A small &ldquo;This game&rdquo; score sits under the night&rsquo;s score while one is on.</>,
           <>Won with legs to spare? The points are paid there and then, and you choose: <B>keep playing for fun</B> (those legs don&rsquo;t change the score) <B>or stop here</B>. The host decides, or Team A&rsquo;s captain with no host.</>,
           <>Tied at the end of any of them? <B>One more to settle it, or a point each</B>: the same people decide.</>,
+          <><B>Levels:</B> pick one or several in Setup. The easiest level (very easy flags, easy everything else) gives <B>2 at most</B>, fewer in a short game; the harder levels you picked share the rest evenly. Flags, maps and landmarks always open on one from the easiest level you picked.</>,
         ]} />
       </Rule>
 

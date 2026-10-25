@@ -3365,10 +3365,10 @@ const flagOK = (q) => !!q && q.type === 'flag' && FLAG_KEYS.has(q.flag);
    one of them (it used to hold back only fifteen). */
 /* One or more levels can be on. Older setups stored a single `flagLevel`. */
 
-/* Several levels share the flags EVENLY: each level is its own queue (fresh
-   first), and the deck takes one from every level in turn — shuffled within
-   each turn, so the easy one is not always first. Ten flags over two levels
-   is five and five; over three, 4-3-3. */
+/* Several levels share the flags (engine/core.js, shareLegs): very easy gives
+   2 at most and the other levels share the rest evenly, fresh ones first; the
+   first flag is from the easiest level on. Very easy, easy and medium: 2-4-4.
+   Without very easy, every level shares evenly: over three, 4-3-3. */
 
 /* Hand-picks first, in the order ticked; the chosen levels fill the rest. */
 
@@ -3724,7 +3724,7 @@ const MAJORITY = [
   ["first-in-space", "hard", "What was the first animal sent into space?", ["A dog","A monkey","Fruit flies","A mouse"], 2, "In 1947, on a captured German V-2 rocket fired from New Mexico, to see what radiation would do to living things. They came back alive."]
 ];
 
-/* shared out evenly over the levels that are on, exactly as the flags are */
+/* shared out over the levels that are on, exactly as the flags are (easy: 2 at most) */
 
 
 /* "45 ml (1½ oz) — White rum" -> ['45 ml (1½ oz)', 'White rum'] */
@@ -4312,8 +4312,8 @@ const MAP_ORDER = QMB.MAP_ORDER;
 
 /* A host's own map has no level, so it plays at every level. */
 
-/* The ticked levels share the maps EVENLY — one from each level in turn,
-   shuffled within each turn — with the host's own maps as one more queue.
+/* The ticked levels share the maps: with other levels on, easy gives one map,
+   always the first; the rest share evenly (engine/core.js, shareLegs).
    When they run dry, the next-nearest level steps in: the next EASIER one
    first (or the next harder, from Easy), then the rest. */
 
@@ -4842,13 +4842,13 @@ SCREENS.rules = function(){
       li('The host reveals it and rules. The idea counts, not the exact wording. <strong>Both right — a point each.</strong> Nobody right — nobody scores.'),
       li('<strong>One hint per map</strong> — press it and the map&rsquo;s subject comes up: History, Sport, Geography&hellip; Same hint for both teams.'),
       li('Best of ' + MAP_LEGS + '. Once a team cannot be caught, the rest are not played.'),
-      li('Three levels — <strong>easy, medium, hard</strong> — chosen in Setup, one or several, shared out evenly.'),
+      li('Three levels — <strong>easy, medium, hard</strong> — chosen in Setup, one or several. With other levels on, easy gives one map, always the first; the others share the rest.'),
       li('Level after ' + MAP_LEGS + ' — even at nothing each? <strong>The host decides: another map, or stop there with a point each</strong> — and decides again after every tied tie-breaker.')
     ])) +
 
     ruleBlock('09', 'Guess the Flag', ul([
       li('A flag goes up. <strong>' + FLAG_SECS + ' seconds.</strong> Both teams write down whose it is, at the same time.'),
-      li('Five levels, chosen in Setup — <strong>one or several</strong>, shared out evenly: <strong>very easy, easy, medium, hard</strong> (all UN members) and <strong>expert</strong> — flags outside the 193: unrecognised states, nations and regions, former countries, unions and organisations.'),
+      li('Five levels, chosen in Setup — <strong>one or several</strong>. Very easy gives <strong>2 flags at most</strong>, the others share the rest evenly, and the first flag is always from the easiest level you picked: <strong>very easy, easy, medium, hard</strong> (all UN members) and <strong>expert</strong> — flags outside the 193: unrecognised states, nations and regions, former countries, unions and organisations.'),
       li('Both right — <strong>a point each</strong>. Best of ' + FLAG_LEGS + '; level at the end, and another flag comes out until somebody gets one.')
     ])) +
 
@@ -4856,14 +4856,14 @@ SCREENS.rules = function(){
       li('A departures board goes up. <strong>' + AIRPORT_SECS + ' seconds.</strong> The destinations, the airlines and the language on it are the clues; the airport&rsquo;s own city is never on its board.'),
       li('Both teams write down <strong>which airport</strong>, at the same time. The city is enough, except where it has more than one big airport: there, name the airport (Heathrow, not London). Its code counts too (LHR).'),
       li('The host reveals it, with how to read the board, and rules. Both right — <strong>a point each</strong>.'),
-      li('Three levels — <strong>easy, medium, hard</strong> — chosen in Setup, one or several, shared out evenly.'),
+      li('Three levels — <strong>easy, medium, hard</strong> — chosen in Setup, one or several. Easy gives 2 boards at most, fewer when every level is on; the others share the rest evenly.'),
       li('Best of ' + AIRPORT_LEGS + '; level at the end, and another board comes out until somebody gets one.')
     ])) +
 
     ruleBlock('11', 'Guess the Cocktail or Dish', ul([
       li('The ingredients come up <strong>one at a time</strong>, with their amounts — a new one every <strong>' + DISH_STEP + ' seconds</strong>, the giveaway last.'),
       li('Know it? <strong>Captain, call it out.</strong> The first voice gets to answer. <strong>One go per team</strong> — get it wrong and you are out of that one, and the list keeps coming for the other team.'),
-      li('Six levels, chosen in Setup — <strong>cocktails</strong> and <strong>dishes</strong>, each easy, medium or hard. Pick any mix; they are shared out evenly.'),
+      li('Six levels, chosen in Setup — <strong>cocktails</strong> and <strong>dishes</strong>, each easy, medium or hard. Pick any mix: the easy ones (cocktails and dishes together) give 2 at most, and the rest are shared out evenly.'),
       li('Best of ' + DISH_LEGS + '. Level at the end? <strong>One more as a tie-breaker, or stop there with a point each</strong> — your choice, again after every tied tie-breaker.')
     ])) +
 

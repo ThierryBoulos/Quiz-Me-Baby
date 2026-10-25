@@ -153,3 +153,27 @@ test('levels: Easy+Medium+Hard by default, Mixed is all four, Expert only when t
   assert.equal(deal('mixed').rounds.length, 4);
   assert.ok(D2.matchDiff({ difficulty:'expert' }, 'mixed') && !D2.matchDiff({ difficulty:'expert' }, Q.DEFAULT_DIFF));
 });
+
+/* 25 Oct: the bank's easiest level gives 2 at most (or its even share), the harder ones share the rest;
+   flags, maps and landmarks open on an easiest one */
+test('very easy flags: 2 at most, the first of them first; easy and medium share the rest', () => {
+  for(let n = 0; n < 50; n++){
+    const legs = D.flagDeck({}, ['veasy', 'easy', 'medium']).slice(0, 10).map(q => q.level);
+    assert.equal(legs[0], 'veasy');
+    assert.equal(legs.filter(l => l === 'veasy').length, 2);
+    assert.equal(legs.filter(l => l === 'easy').length, 4);
+    assert.equal(legs.filter(l => l === 'medium').length, 4);
+  }
+});
+test('the cap only applies to the bank\'s easiest level; a hand-picked very easy one counts', () => {
+  const legs = D.flagDeck({}, ['easy', 'medium', 'hard']).slice(0, 10).map(q => q.level);
+  assert.equal(legs[0], 'easy');
+  assert.ok(legs.filter(l => l === 'easy').length >= 3);
+  const picked = D.flagDeck({ pickFlag:['flag:veasy3'] }, ['veasy', 'medium']).slice(0, 10);
+  assert.equal(picked[0].id, 'flag:veasy3');
+  assert.equal(picked.filter(q => q.level === 'veasy').length, 2);
+});
+test('a mystery map night of 3: one easy map, first', () => {
+  const legs = D.mapDeck({ mapLevels:['easy', 'medium', 'hard'] }).slice(0, 3).map(q => q.level);
+  assert.deepEqual([legs[0], legs.filter(l => l === 'easy').length], ['easy', 1]);
+});

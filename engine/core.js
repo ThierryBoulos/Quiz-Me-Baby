@@ -546,13 +546,47 @@
       return out;
     }
 
+    /* How a mini-game's legs share out over the levels that are on (25 Oct: too many very easy flags).
+       queues: one per level that's on, easiest first, fresh ones first. With the bank's easiest level on
+       (capped: very easy flags, easy maps, landmarks, boards, questions, cocktails and dishes), it gives
+       EASY_CAP legs at most (or its even share, if that's fewer) and the harder ones share the rest evenly; short of harder ones, the easiest
+       fills in. Otherwise every level on shares evenly, as before. The host's picks lead, and count.
+       warm: with no picks, the first leg is from the easiest level that's on (a warm-up), the rest in any
+       order. What's left over (swaps, tie-breakers, playing on for fun) keeps the harder ones first. */
+    const EASY_CAP = 2;
+    function mixQueues(queues){
+      const out = [];
+      for(let i = 0; queues.some(q => i < q.length); i++)
+        out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
+      return out;
+    }
+    function shareLegs(picked, queues, n, isLow, capped, warm){
+      const legs = picked.slice(0, n), room = Math.max(0, n - legs.length);
+      let rest;
+      if(capped && queues.length > 1){
+        const low = queues[0].slice(), high = mixQueues(queues.slice(1));
+        /* (never more than its even share: 1 of a Mystery Map's 3, 1 of the Airport's 5) */
+        const want = Math.max(0, Math.min(EASY_CAP, Math.floor(n / queues.length)) - legs.filter(isLow).length);
+        const nHigh = Math.min(high.length, room - Math.min(low.length, want));
+        const nLow = Math.min(low.length, room - nHigh);
+        rest = shuffle(low.splice(0, nLow).concat(high.splice(0, nHigh))).concat(high, low);
+      } else rest = mixQueues(queues);
+      if(warm && !legs.length){ const i = rest.findIndex(isLow); if(i > 0) rest.unshift(rest.splice(i, 1)[0]); }
+      return legs.concat(rest);
+    }
+    const freshFirst = (all) => shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
+
     function mapDeck(cfg){
       const levels = mapLevelsOf(cfg);
       const picked = ((cfg && cfg.pickMap) || [])
         .map(id => bank().find(q => q.id === id))
         .filter(q => ok.map(q) && mapAt(q, levels))
         .slice(0, MAP_LEGS);
-      return picked.concat(mapPool(levels, new Set(picked.map(q => q.id))));
+      const skip = new Set(picked.map(q => q.id));
+      const deck = shareLegs(picked, levels.map(l => mapQueue(q => q.level === l, skip)), MAP_LEGS,
+        q => q.level === levels[0], levels[0] === MAP_ORDER[0], true);
+      /* then the maps with no level, and those at levels that are off (nearest first), if the bank runs short */
+      return deck.concat(mapPool(levels, new Set(deck.map(q => q.id))));
     }
 
     function flagLevelsOf(c){
@@ -577,7 +611,9 @@
         .map(id => bank().find(q => q.id === id))
         .filter(q => ok.flag(q) && levels.indexOf(q.level) > -1)
         .slice(0, FLAG_LEGS);
-      return picked.concat(flagPool(levels, new Set(picked.map(q => q.id))));
+      const skip = new Set(picked.map(q => q.id));
+      return shareLegs(picked, levels.map(l => freshFirst(bank().filter(q => ok.flag(q) && q.level === l && !skip.has(q.id)))), FLAG_LEGS,
+        q => q.level === levels[0], levels[0] === FLAG_LEVEL_KEYS[0], true);
     }
 
     function dishLevelsOf(c){
@@ -602,7 +638,13 @@
         .map(id => bank().find(q => q.id === id))
         .filter(q => ok.dish(q) && levels.indexOf(q.level) > -1)
         .slice(0, DISH_LEGS);
-      return picked.concat(dishPool(levels, new Set(picked.map(q => q.id))));
+      const skip = new Set(picked.map(q => q.id));
+      const queue = (l) => freshFirst(bank().filter(q => ok.dish(q) && q.level === l && !skip.has(q.id)));
+      /* the easy cocktails and the easy dishes count together as the easiest level */
+      const isLow = (q) => /-easy$/.test(q.level || '');
+      const lows = levels.filter(l => /-easy$/.test(l)), highs = levels.filter(l => !/-easy$/.test(l));
+      if(!lows.length) return shareLegs(picked, levels.map(queue), DISH_LEGS, isLow, false, false);
+      return shareLegs(picked, [mixQueues(lows.map(queue))].concat(highs.map(queue)), DISH_LEGS, isLow, true, false);
     }
 
     /* Drop the Pin and Guess the Airport: levels as the maps have them; the deck shares the legs out
@@ -623,10 +665,12 @@
         out.push.apply(out, shuffle(queues.filter(q => i < q.length).map(q => q[i])));
       return out;
     }
-    function levelDeck(okq, picks, levels, n){
+    function levelDeck(okq, picks, levels, n, warm){
       const picked = (picks || []).map(id => bank().find(q => q.id === id))
         .filter(q => okq(q) && levels.indexOf(q.level) > -1).slice(0, n);
-      return picked.concat(levelPool(okq, levels, new Set(picked.map(q => q.id))));
+      const skip = new Set(picked.map(q => q.id));
+      return shareLegs(picked, levels.map(l => freshFirst(bank().filter(q => okq(q) && q.level === l && !skip.has(q.id)))), n,
+        q => q.level === levels[0], levels[0] === MAP_ORDER[0], !!warm);
     }
     const pinPool = (levels, skip) => levelPool(ok.pin, levels, skip);
     const airportPool = (levels, skip) => levelPool(ok.airport, levels, skip);
@@ -715,7 +759,7 @@
       /* dealt only when asked for, so a night without them draws exactly as before */
       const asked = (k) => (cfg.minis || []).indexOf(k) > -1;
       const pnLevels = pinLevelsOf(cfg);
-      const pnDeck = asked('pin') ? levelDeck(ok.pin, cfg.pickPin, pnLevels, PIN_LEGS) : [];
+      const pnDeck = asked('pin') ? levelDeck(ok.pin, cfg.pickPin, pnLevels, PIN_LEGS, true) : [];   // a warm-up first, as flags and maps
       const apLevels = airportLevelsOf(cfg);
       const apDeck = asked('airport') ? levelDeck(ok.airport, cfg.pickAirport, apLevels, AIRPORT_LEGS) : [];
       const mrLevels = majorityLevelsOf(cfg);
