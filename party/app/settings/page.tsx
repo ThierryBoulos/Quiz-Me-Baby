@@ -28,7 +28,7 @@ const MINI_TIMERS: Timer[] = [
   ["tAirport", "Guess the Airport", [20, 30, 45, 60]],
   ["tMajority", "Majority Rules: per question", [10, 15, 20, 30]],
   ["tDishStep", "Guess the Cocktail or Dish: a new ingredient every", [2, 3, 4, 5]],
-  ["tDishType", "Time to type after a buzz (Cocktail or Dish; sudden death with no host)", [5, 10, 15, 20]],
+  ["tDishType", "Time to type after a buzz (Cocktail or Dish, sudden death)", [5, 10, 15, 20]],
   ["tBattleHost", "Battle, with a host: per question (out loud)", [5, 7, 10, 15]],
   ["tBattleTyped", "Battle, no host: per question (typed)", [10, 15, 20, 30]],
 ];

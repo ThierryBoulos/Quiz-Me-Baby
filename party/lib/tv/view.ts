@@ -12,8 +12,8 @@ import type { TvState } from "./state";
 /* The question in play goes out under a number that means nothing outside this game (D5): its
    real id would find the answer in a bank file. The phones use it only to tell questions apart. */
 export const qk = (s: TvState, id: string) => "k" + (s.qkeys[id] ??= Object.keys(s.qkeys).length + 1);
-/* sudden death and the Battle's tie-breaker, no host: when the buzzer's time to type runs out */
-const typeByOf = (s: TvState) => s.nohost && s.sdBuzz != null && s.buzzAt && !s.typed[s.sdBuzz] && !s.pending ? s.buzzAt + getSettings().tDishType * 1000 : null;
+/* sudden death and the Battle's tie-breaker: when the buzzer's time to type runs out */
+const typeByOf = (s: TvState) => s.sdBuzz != null && s.buzzAt && !s.typed[s.sdBuzz] && !s.pending ? s.buzzAt + getSettings().tDishType * 1000 : null;
 export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   const g = s.g;
   if (!g) return null;

@@ -1254,17 +1254,18 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           s.toast = { id: ++s.toastN, text: `Time's up. ${iso(g.teams[b].name)} is out of this one.` };
         }
       }
-      /* sudden death and the Battle's tie-breaker, no host: a buzz gets the same time to type it (25 Oct: one
-         that never came held the night up for good); then what was typed counts, or nothing, which is wrong */
-      if ((s.screen === "sudden" || s.screen === "battleTie") && s.nohost && s.buzzAt && !s.pending && !s.contest) {
+      /* sudden death and the Battle's tie-breaker: a buzz gets the same time to type it (25 Oct: with no host, one
+         that never came held the night up for good; with a host too, so nobody stalls). Then what was typed
+         counts (with a host, it goes to them), or nothing, which is wrong */
+      if ((s.screen === "sudden" || s.screen === "battleTie") && s.buzzAt && !s.pending && !s.contest) {
         const b = s.sdBuzz;
         if (b == null || s.typed[b]) s.buzzAt = 0;
         else if (now - s.buzzAt >= T().tDishType * 1000 + T_GRACE_MS) {
           s.buzzAt = 0; s.step++; changed = true;
           if (!takeDraft(b)) {
             const theyCan = !s.sdOut[other(b)];           // (both out: the next question is up instead)
-            s.pending = { kind: s.screen === "sudden" ? "sudden" : "battleTie", team: b, text: "", v: false, until: now };
-            settle(false);
+            if (s.nohost) { s.pending = { kind: s.screen === "sudden" ? "sudden" : "battleTie", team: b, text: "", v: false, until: now }; settle(false); }
+            else hostMove({ type: "ui/sdWrong" });
             if (theyCan) s.toast = { id: ++s.toastN, text: `Time's up: ${iso(g.teams[b].name)} didn't answer. The other captain can buzz.` };
           }
         }

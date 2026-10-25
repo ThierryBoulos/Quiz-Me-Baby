@@ -140,7 +140,7 @@ function Buzzed({ pub }: { pub: Pub }) {
   if (pub.buzz != null) return (
     <div className="flex flex-col items-center gap-3">
       <div className="display text-60 enter" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed!</div>
-      {/* no host: the time they have to type it */}
+      {/* the time they have to type it */}
       {pub.typeBy && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.typeBy} size={80} /><span>to type it</span></div>}
     </div>);
   const out = [0, 1].filter((t) => pub.out?.[t]);

@@ -171,7 +171,7 @@ export function Rules() {
       <Rule n="15" title="Winning">
         <L items={[
           <>Highest score after the last round takes the night: confetti on every screen, then <B>Exit</B> sends everyone back to the home screen.</>,
-          <>Tie? <B>Sudden death</B>: one question, both captains, first to buzz answers (<B>30 seconds</B> to buzz with no host, then <B>10 seconds</B> to type it, or it counts as wrong). Wrong, and the other captain can buzz. Repeats until somebody gets one. The app checks each answer at once, and nothing waits for a contest: a captain can still contest a call on the final screen (or, when both were wrong, during the next question, whose clock waits for it). The first right answer, in the order they came, wins; nobody right after all, another question.</>,
+          <>Tie? <B>Sudden death</B>: one question, both captains, first to buzz answers (<B>30 seconds</B> to buzz with no host). Whoever buzzes has <B>10 seconds</B> to type it, or it counts as wrong. Wrong, and the other captain can buzz. Repeats until somebody gets one. The app checks each answer at once, and nothing waits for a contest: a captain can still contest a call on the final screen (or, when both were wrong, during the next question, whose clock waits for it). The first right answer, in the order they came, wins; nobody right after all, another question.</>,
         ]} />
       </Rule>
 
