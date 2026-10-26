@@ -33,60 +33,60 @@
 272.00 majorityQ | 15 | 1-4 | 0-0 | Lions +1 point — steal | 
 278.25 majorityReveal | 15 | 1-4 | 67-50 | Lions +1 point — steal | 
 291.75 majorityQ | 16 | 1-4 | 67-50 | Lions +1 point — steal | 
-307.75 majorityReveal | 17 | 1-4 | 33-25 | Lions +1 point — steal | 
-324.25 majorityQ | 18 | 1-4 | 33-25 | Lions +1 point — steal | 
-332.25 majorityReveal | 18 | 1-4 | 33-50 | Lions +1 point — steal | 
-333.25 majorityQ | 19 | 1-4 | 33-50 | Lions +1 point — steal | 
-340.50 majorityReveal | 19 | 1-4 | 50-50 | Lions +1 point — steal | 
-354.75 majorityQ | 20 | 1-4 | 50-50 | Lions +1 point — steal | 
-370.75 majorityReveal | 21 | 1-4 | 47-50 | Lions +1 point — steal | 
-372.75 majorityQ | 22 | 1-4 | 47-50 | Lions +1 point — steal | 
-376.50 majorityReveal | 22 | 1-4 | 50-42 | Lions +1 point — steal | 
-381.00 majorityQ | 23 | 1-4 | 50-42 | Lions +1 point — steal | 
-384.50 majorityReveal | 23 | 1-4 | 48-43 | Lions +1 point — steal | 
-395.25 majorityQ | 24 | 1-4 | 48-43 | Lions +1 point — steal | 
-411.25 majorityReveal | 25 | 1-4 | 50-50 | Lions +1 point — steal | 
-416.00 majorityQ | 26 | 1-4 | 50-50 | Lions +1 point — steal | 
-432.00 majorityReveal | 27 | 1-4 | 52-50 | Lions +1 point — steal | 
-444.75 majorityQ | 28 | 1-4 | 52-50 | Lions +1 point — steal | 
-460.75 majorityReveal | 29 | 1-4 | 53-55 | Lions +1 point — steal | 
-464.75 majorityQ | 30 | 1-4 | 53-55 | Lions +1 point — steal | 
-477.25 majorityReveal | 30 | 1-4 | 55-55 | Lions +1 point — steal | 
-480.00 majorityQ | 31 | 1-4 | 55-55 | Lions +1 point — steal | 
-496.00 majorityReveal | 32 | 1-4 | 53-50 | Lions +1 point — steal | 
-505.25 majorityQ | 33 | 1-4 | 53-50 | Lions +1 point — steal | 
-507.00 majorityReveal | 33 | 1-4 | 54-54 | Lions +1 point — steal | 
-511.50 majorityQ | 34 | 1-4 | 54-54 | Lions +1 point — steal | 
-527.50 majorityReveal | 35 | 1-4 | 52-57 | Lions +1 point — steal | 
-528.50 majorityQ | 36 | 1-4 | 52-57 | Lions +1 point — steal | 
-532.25 majorityReveal | 36 | 1-4 | 53-60 | Lions +1 point — steal | 
-541.25 majoritySummary | 37 | 1-13 | 53-60 | Lions +1 point — steal | 
-543.00 roundIntro | 38 | 1-13 |  | Lions +1 point — steal | 
-543.75 ask | 39 | 1-13 |  | Lions +1 point — steal | 
-576.25 steal | 39 | 1-13 |  | Lions +1 point — steal | 
-589.75 answer | 39 | 1-13 |  | Lions +1 point — steal | 
-594.25 ask | 40 | 1-13 |  | Lions +1 point — steal | 
-601.50 answer | 40 | 1-14 |  | Owls +1 point | 
-609.50 roundScore | 41 | 1-14 |  | Owls +1 point | 
-623.00 roundIntro | 42 | 1-14 |  | Owls +1 point | 
-630.25 ask | 43 | 1-14 |  | Owls +1 point | 
-633.00 steal | 43 | 1-14 |  | Owls +1 point | 
-639.25 answer | 43 | 1-14 |  | Owls +1 point | 
-642.75 ask | 44 | 1-14 |  | Owls +1 point | 
-651.75 steal | 44 | 1-14 |  | Owls +1 point | 
-652.75 answer | 44 | 2-14 |  | Lions +1 point — steal | 
-657.25 roundScore | 45 | 2-14 |  | Lions +1 point — steal | 
-660.75 roundIntro | 46 | 2-14 |  | Lions +1 point — steal | 
-668.00 ask | 47 | 2-14 |  | Lions +1 point — steal | 
-672.50 steal | 47 | 2-14 |  | Lions +1 point — steal | 
-682.50 answer | 47 | 2-15 |  | Owls +1 point — steal | 
-693.25 answer | 47 | 2-15 |  |  | 
-699.50 answer | 47 | 2-15 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-702.25 ask | 48 | 2-15 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-703.25 steal | 48 | 2-15 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-709.50 answer | 48 | 2-15 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-712.25 answer | 48 | 2-15 |  |  | 
-721.25 answer | 48 | 2-15 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-723.75 roundScore | 49 | 2-15 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-725.75 final | 50 | 2-15 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-recap: {"margin":13,"sudden":false,"leadChanges":1,"steals":[2,3],"minis":[0,1]}
+307.75 majorityReveal | 17 | 1-4 | 50-25 | Lions +1 point — steal | 
+324.25 majorityQ | 18 | 1-4 | 50-25 | Lions +1 point — steal | 
+332.25 majorityReveal | 18 | 1-4 | 67-50 | Lions +1 point — steal | 
+333.25 majorityQ | 19 | 1-4 | 67-50 | Lions +1 point — steal | 
+340.50 majorityReveal | 19 | 1-4 | 75-50 | Lions +1 point — steal | 
+354.75 majorityQ | 20 | 1-4 | 75-50 | Lions +1 point — steal | 
+370.75 majorityReveal | 21 | 1-4 | 67-50 | Lions +1 point — steal | 
+372.75 majorityQ | 22 | 1-4 | 67-50 | Lions +1 point — steal | 
+376.50 majorityReveal | 22 | 1-4 | 61-50 | Lions +1 point — steal | 
+381.00 majorityQ | 23 | 1-4 | 61-50 | Lions +1 point — steal | 
+384.50 majorityReveal | 23 | 1-4 | 57-50 | Lions +1 point — steal | 
+395.25 majorityQ | 24 | 1-4 | 57-50 | Lions +1 point — steal | 
+411.25 majorityReveal | 25 | 1-4 | 54-50 | Lions +1 point — steal | 
+416.00 majorityQ | 26 | 1-4 | 54-50 | Lions +1 point — steal | 
+432.00 majorityReveal | 27 | 1-4 | 56-50 | Lions +1 point — steal | 
+444.75 majorityQ | 28 | 1-4 | 56-50 | Lions +1 point — steal | 
+460.75 majorityReveal | 29 | 1-4 | 57-55 | Lions +1 point — steal | 
+464.75 majorityQ | 30 | 1-4 | 57-55 | Lions +1 point — steal | 
+477.25 majorityReveal | 30 | 1-4 | 58-55 | Lions +1 point — steal | 
+480.00 majorityQ | 31 | 1-4 | 58-55 | Lions +1 point — steal | 
+496.00 majorityReveal | 32 | 1-4 | 56-50 | Lions +1 point — steal | 
+505.25 majorityQ | 33 | 1-4 | 56-50 | Lions +1 point — steal | 
+507.00 majorityReveal | 33 | 1-4 | 56-54 | Lions +1 point — steal | 
+511.50 majorityQ | 34 | 1-4 | 56-54 | Lions +1 point — steal | 
+527.50 majorityReveal | 35 | 1-4 | 57-54 | Lions +1 point — steal | 
+528.50 majorityQ | 36 | 1-4 | 57-54 | Lions +1 point — steal | 
+532.25 majorityReveal | 36 | 1-4 | 58-53 | Lions +1 point — steal | 
+541.25 majoritySummary | 37 | 10-4 | 58-53 | Lions +1 point — steal | 
+543.00 roundIntro | 38 | 10-4 |  | Lions +1 point — steal | 
+543.75 ask | 39 | 10-4 |  | Lions +1 point — steal | 
+576.25 steal | 39 | 10-4 |  | Lions +1 point — steal | 
+589.75 answer | 39 | 10-4 |  | Lions +1 point — steal | 
+594.25 ask | 40 | 10-4 |  | Lions +1 point — steal | 
+601.50 answer | 40 | 10-5 |  | Owls +1 point | 
+609.50 roundScore | 41 | 10-5 |  | Owls +1 point | 
+623.00 roundIntro | 42 | 10-5 |  | Owls +1 point | 
+630.25 ask | 43 | 10-5 |  | Owls +1 point | 
+633.00 steal | 43 | 10-5 |  | Owls +1 point | 
+639.25 answer | 43 | 10-5 |  | Owls +1 point | 
+642.75 ask | 44 | 10-5 |  | Owls +1 point | 
+651.75 steal | 44 | 10-5 |  | Owls +1 point | 
+652.75 answer | 44 | 11-5 |  | Lions +1 point — steal | 
+657.25 roundScore | 45 | 11-5 |  | Lions +1 point — steal | 
+660.75 roundIntro | 46 | 11-5 |  | Lions +1 point — steal | 
+668.00 ask | 47 | 11-5 |  | Lions +1 point — steal | 
+672.50 steal | 47 | 11-5 |  | Lions +1 point — steal | 
+682.50 answer | 47 | 11-6 |  | Owls +1 point — steal | 
+693.25 answer | 47 | 11-6 |  |  | 
+699.50 answer | 47 | 11-6 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+702.25 ask | 48 | 11-6 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+703.25 steal | 48 | 11-6 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+709.50 answer | 48 | 11-6 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+712.25 answer | 48 | 11-6 |  |  | 
+721.25 answer | 48 | 11-6 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+723.75 roundScore | 49 | 11-6 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+725.75 final | 50 | 11-6 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+recap: {"margin":5,"sudden":false,"leadChanges":2,"steals":[2,3],"minis":[1,0]}

@@ -1272,7 +1272,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.35', date:'24 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.36', date:'26 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2460,7 +2460,44 @@ const SEED = [
 ['TV Series','hard','r4-tv-hard-2','In How I Met Your Mother, what colour is the French horn stolen from a restaurant wall on a first date in episode one?','Blue','The blue French horn became the show\'s symbol of a grand romantic gesture.'],
 ['TV Series','hard','r4-tv-hard-2','In Lost, what do the survivors call the mysterious people who were already living on the island?','The Others','Their leader for much of the show is Ben Linus.'],
 ['TV Series','expert','r4-tv-expert-1','In How I Met Your Mother, what is the name of the bar where the friends always drink?','MacLaren\'s','It\'s in the gang\'s own building, downstairs.'],
-['TV Series','expert','r4-tv-expert-1','In Grey\'s Anatomy, what is the name of Meredith Grey\'s mother, a famous surgeon?','Ellis Grey','She invented the \'Grey method\'.']
+['TV Series','expert','r4-tv-expert-1','In Grey\'s Anatomy, what is the name of Meredith Grey\'s mother, a famous surgeon?','Ellis Grey','She invented the \'Grey method\'.'],
+/* ---- 26 Oct, round 5: the owner's ideas ---- */
+['Geek & Gamer','hard','r5-geek-and-gamer-hard-1','Counter-Strike began as a fan-made mod of which game?','Half-Life','Valve hired its two creators.'],
+['Geek & Gamer','hard','r5-geek-and-gamer-hard-1','The first Battlefield game was named after which year?','1942','Battlefield 1942 came out in 2002.'],
+['Acronyms','medium','r5-acronyms-medium-1','What does GMT stand for?','Greenwich Mean Time','The time at the Royal Observatory in Greenwich.'],
+['Acronyms','medium','r5-acronyms-medium-1','In business, what does B2C stand for?','Business to consumer','B2B is business to business.'],
+['Acronyms','hard','r5-acronyms-hard-1','In finance, what does OTC stand for, for shares traded directly between two parties?','Over the counter','The same as OTC medicines, sold without a prescription.'],
+['Acronyms','hard','r5-acronyms-hard-1','In the S&P 500, what does S&P stand for?','Standard & Poor\'s','The ratings company behind the index, which started in 1957.'],
+['Rave Culture','medium','r5-rave-culture-medium-1','Which German techno DJ performs in a Venetian-style carnival mask, and calls his sound \'high-tech minimal\'?','Boris Brejcha',''],
+['Rave Culture','medium','r5-rave-culture-medium-1','What does EDC, the giant dance festival in Las Vegas, stand for?','Electric Daisy Carnival',''],
+['Art & Books','medium','r5-art-and-books-medium-1','Who wrote To Kill a Mockingbird?','Harper Lee','It came out in 1960 and won the Pulitzer Prize.'],
+['Art & Books','medium','r5-art-and-books-medium-1','In Orwell\'s 1984, what is the name of the leader whose face is on every poster?','Big Brother','\'Big Brother is watching you.\''],
+['Art & Books','medium','r5-art-and-books-medium-2','In The Great Gatsby, what colour is the light at the end of Daisy\'s dock?','Green',''],
+['Art & Books','medium','r5-art-and-books-medium-2','In the Iliad, which Greek hero sulks in his tent, then comes back to kill Hector?','Achilles',''],
+['Art & Books','medium','r5-art-and-books-medium-3','Which artist created Tintin?','Hergé','His real name was Georges Remi: his initials backwards, R.G., said in French.'],
+['Art & Books','medium','r5-art-and-books-medium-3','Which four outlaw brothers keep breaking out of jail in Lucky Luke?','The Daltons','Joe, William, Jack and Averell, shortest to tallest.'],
+['Art & Books','hard','r5-art-and-books-hard-1','In The Little Prince, what does the prince love and leave behind on his tiny planet?','A rose',''],
+['Art & Books','hard','r5-art-and-books-hard-1','Who is Sherlock Holmes\'s arch-enemy, \'the Napoleon of crime\'?','Professor Moriarty',''],
+['Art & Books','hard','r5-art-and-books-hard-2','Which language, invented in 1887 for the whole world to share, takes its name from the word for \'one who hopes\'?','Esperanto','Its creator, L. L. Zamenhof, was an eye doctor in Warsaw.'],
+['Art & Books','hard','r5-art-and-books-hard-2','Which French pilot and writer wrote The Little Prince?','Antoine de Saint-Exupéry',''],
+['Art & Books','expert','r5-art-and-books-expert-1','Which Israeli historian wrote Sapiens: A Brief History of Humankind?','Yuval Noah Harari',''],
+['Art & Books','expert','r5-art-and-books-expert-1','Who wrote the self-help best-seller Atomic Habits?','James Clear',''],
+['Art & Books','expert','r5-art-and-books-expert-2','At what address does Sherlock Holmes live?','221B Baker Street',''],
+['Art & Books','expert','r5-art-and-books-expert-2','Over which Swiss waterfall does Conan Doyle send Sherlock Holmes in 1893?','The Reichenbach Falls','Fans were so upset that Holmes came back in 1903.'],
+['Geography','medium','r5-geography-medium-1','The Faroe Islands are a self-governing part of which country?','Denmark',''],
+['Geography','medium','r5-geography-medium-1','In which country is the Atacama, the driest non-polar desert on Earth?','Chile',''],
+['Geography','hard','r5-geography-hard-1','What is the study of flags called?','Vexillology','From the Latin vexillum, a Roman banner.'],
+['Geography','hard','r5-geography-hard-1','What was the Democratic Republic of the Congo called from 1971 to 1997?','Zaire',''],
+['Geography','expert','r5-geography-expert-1','Which Caribbean island is shared by Haiti and the Dominican Republic?','Hispaniola',''],
+['Geography','expert','r5-geography-expert-1','Which is the only island in the world shared by three countries?','Borneo',''],
+['Geography','expert','r5-geography-expert-2','Which South Atlantic island, about 2,400 km from its nearest neighbours, is called the most remote inhabited island on Earth?','Tristan da Cunha','No airport: the only way in is a six-day boat trip from Cape Town.'],
+['Geography','expert','r5-geography-expert-2','What is the capital of the Faroe Islands?','Tórshavn',''],
+['History','expert','r5-history-expert-1','Which Gaulish chief led the great revolt against Rome, and surrendered at Alesia in 52 BC?','Vercingetorix',''],
+['History','expert','r5-history-expert-1','Which Zulu king built the Zulu kingdom into a great power in the 1820s?','Shaka',''],
+['Disney & Pixar','expert','r5-disney-and-pixar-expert-1','In Toy Story, at which restaurant is the claw machine full of three-eyed aliens?','Pizza Planet','\'The claw is our master.\''],
+['Disney & Pixar','expert','r5-disney-and-pixar-expert-1','In WALL-E, what is the name of the giant company that ran the Earth?','Buy n Large',''],
+['Science','medium','r5-science-medium-1','What is the name of the supercontinent that held almost all of Earth\'s land about 300 million years ago?','Pangaea',''],
+['Science','medium','r5-science-medium-1','What is the name for the theory that Earth\'s surface is split into slowly moving plates?','Plate tectonics','']
 ];
 
 const SEED_CLOSEST = [
@@ -2546,7 +2583,8 @@ const SEED_CLOSEST = [
 ['Movies','medium','Including the end credits, how long is the original cinema version of James Cameron\'s Titanic (1997), to the nearest minute?',195,'The BBFC timed the 1997 cinema release at 194 minutes 36 seconds, credits included. Many sites round it down to 194.'],
 ['Sexy Time','medium','A big 2015 medical review (Veale and colleagues) pooled measurements taken by health professionals. What is the average erect penis length, in centimetres, to two decimal places?',13.12,'13.12 cm, about 5.2 inches. The average flaccid length was 9.16 cm.'],
 ['90s Kids','medium','How many Pokémon were there in the original Red and Blue games?',151,''],
-['Art & Books','medium','By the usual dating, in what year was work on the Mona Lisa begun?',1503,'']
+['Art & Books','medium','By the usual dating, in what year was work on the Mona Lisa begun?',1503,''],
+['Food & Drink','medium','How many herbs, spices and other botanicals go into Jägermeister?',56,'Steeped in four batches, then aged in oak for a year.']
 ];
 
 /* ---- THE AUCTION ----------------------------------------------------------
@@ -3764,7 +3802,45 @@ const MAJORITY = [
   ["barbie-s",     "hard",   "What is Barbie's full name?", ["Barbara Ann Roberts", "Barbara Millicent Roberts", "Barbara Jean Carson", "Barbara Margaret Robertson"], 1, "Named after creator Ruth Handler's daughter Barbara; Ken after her son Kenneth."],
   ["decade-michelin", "hard",   "In which decade did the Michelin Guide award its first stars?", ["1900s", "1920s", "1950s", "1970s"], 1, "Single stars from 1926; the three-star scale came in 1931. The guide itself dates from 1900."],
   ["bluetooth-named", "hard",   "Bluetooth is named after a 10th-century king who united his country's tribes into one kingdom. Which country?", ["Sweden", "Denmark", "Finland", "Iceland"], 1, "King Harald 'Bluetooth' Gormsson united the Danish tribes. The logo joins his initials, H and B, in runes."],
-  ["first-in-space", "hard", "What was the first animal sent into space?", ["A dog","A monkey","Fruit flies","A mouse"], 2, "In 1947, on a captured German V-2 rocket fired from New Mexico, to see what radiation would do to living things. They came back alive."]
+  ["first-in-space", "hard", "What was the first animal sent into space?", ["A dog","A monkey","Fruit flies","A mouse"], 2, "In 1947, on a captured German V-2 rocket fired from New Mexico, to see what radiation would do to living things. They came back alive."],
+  /* ---- 26 Oct, round 5: the owner's ideas ---- */,
+  ["fps-first", "medium", "Which of these shooters came out first?", ["Call of Duty", "Halo", "Counter-Strike", "Battlefield"], 2, "Counter-Strike started as a fan-made mod in 1999. Then came Halo, then Battlefield, then Call of Duty."],
+  ["mobile-first", "medium", "Which of these phone games came out first?", ["Clash of Clans", "Fruit Ninja", "Angry Birds", "Candy Crush Saga"], 2, "Angry Birds came first, then Fruit Ninja. Candy Crush and Clash of Clans followed in 2012."],
+  ["kfc-11", "medium", "According to KFC, how many herbs and spices are in the Colonel's Original Recipe?", ["7", "11", "21", "32"], 1, "The handwritten recipe is kept in a vault at KFC's headquarters in Kentucky."],
+  ["michelin-tyres", "easy", "The Michelin Guide was started by a company that makes…", ["Tyres", "Wine", "Cookware", "Maps"], 0, "It started in 1900, to get people driving more, and wearing out their tyres."],
+  ["michelin-three", "hard", "Officially, what do three Michelin stars mean?", ["Worth a special journey", "The best in the country", "Perfect, can't be improved", "Booked months ahead"], 0, "Two stars mean 'worth a detour'. One star means 'high-quality cooking'."],
+  ["tokyo-stars", "hard", "Which city has the most Michelin-starred restaurants?", ["Paris", "Tokyo", "London", "Lyon"], 1, "Tokyo has topped the list every year since its first guide."],
+  ["ticker-ko", "medium", "Which company trades on the stock market as KO?", ["Kodak", "Coca-Cola", "Kellogg's", "Kraft"], 1, "It has used KO since 1919. PepsiCo is PEP."],
+  ["holmes-violin", "hard", "Which instrument does Sherlock Holmes play?", ["Violin", "Piano", "Cello", "Flute"], 0, "A Stradivarius, he says, which he bought for 55 shillings."],
+  ["lupin-sholmes", "hard", "When Arsène Lupin's author set him against Sherlock Holmes, Conan Doyle objected. What was Holmes renamed?", ["Herlock Sholmès", "Sherlock Bones", "Shirley Holmes", "Hemlock Stone"], 0, "Watson got a new name too."],
+  ["odysseus-home", "hard", "After the Trojan War, how long did it take Odysseus to get home?", ["One year", "Three years", "Ten years", "Twenty years"], 2, "Ten years at war, then ten more at sea: twenty years away in all."],
+  ["galapagos", "medium", "Darwin's voyage on HMS Beagle took him to which islands, famous for giant tortoises and finches?", ["The Canary Islands", "The Galápagos", "The Azores", "The Maldives"], 1, "Darwin was 26 when he got there, in 1835."],
+  ["prince-translated", "hard", "After religious texts, which book is said to be translated into the most languages?", ["The Little Prince", "Harry Potter", "Don Quixote", "Alice in Wonderland"], 0, "More than 600 languages and dialects."],
+  ["sapiens-fraud", "hard", "In the best-seller Sapiens, which revolution is called 'history's biggest fraud'?", ["The Agricultural Revolution", "The Industrial Revolution", "The French Revolution", "The Scientific Revolution"], 0, "Farming, the book argues, gave most people harder lives than foraging: 'We did not domesticate wheat. It domesticated us.'"],
+  ["four-hemispheres", "hard", "Which country has islands in all four hemispheres (north, south, east and west), all part of the country itself, not overseas territories?", ["Kiribati", "Fiji", "Indonesia", "Ecuador"], 0, "Its islands straddle both the Equator and the 180° line."],
+  ["landlocked-largest", "medium", "Which is the largest landlocked country in the world?", ["Mongolia", "Kazakhstan", "Chad", "Bolivia"], 1, "Mongolia is second."],
+  ["oldest-flag", "medium", "Which country's flag is said to be the oldest still in use?", ["Denmark", "Japan", "Switzerland", "The Netherlands"], 0, "The Dannebrog: legend says it fell from the sky during a battle in 1219."],
+  ["liberty-tablet", "medium", "What is written on the Statue of Liberty's tablet?", ["JULY IV MDCCLXXVI", "IN GOD WE TRUST", "WE THE PEOPLE", "LIBERTÉ, ÉGALITÉ, FRATERNITÉ"], 0, "4 July 1776 in Roman numerals: the date of the Declaration of Independence."],
+  ["lucky-luke", "medium", "Lucky Luke is 'the man who shoots faster than…'", ["Lightning", "A bullet", "His shadow", "The wind"], 2, "Since 1946. He swapped his cigarette for a blade of grass in 1983."],
+  ["belgian-bd", "medium", "Tintin, the Smurfs and Lucky Luke were all created in which country?", ["France", "Belgium", "Switzerland", "The Netherlands"], 1, "Brussels has a comics museum and comic murals all over town."],
+  ["duff", "easy", "Duff beer is from which show?", ["Family Guy", "The Simpsons", "Futurama", "South Park"], 1, "Its mascot, Duff Man, says 'Oh yeah!'"],
+  ["dunder", "easy", "In The Office, what does Dunder Mifflin sell?", ["Paper", "Insurance", "Printers", "Office chairs"], 0, "From its Scranton branch."],
+  ["nuka", "medium", "Nuka-Cola is the fizzy drink of which video game world?", ["BioShock", "Fallout", "Borderlands", "Grand Theft Auto"], 1, "Its bottle caps are the money in the wasteland."],
+  ["oxford-aztec", "medium", "Which of these is the oldest?", ["Oxford University", "The Aztec Empire", "The Inca Empire", "Machu Picchu"], 0, "Teaching at Oxford began around 1096. The Aztecs founded their capital in 1325."],
+  ["sun-earths", "hard", "Roughly how many Earths could fit inside the Sun?", ["About 100", "About 1,000", "About 1.3 million", "About 1 billion"], 2, ""],
+  ["baby-bones", "medium", "Roughly how many bones is a baby born with?", ["About 100", "About 206", "About 300", "About 500"], 2, "Many fuse together as you grow."],
+  ["tittle", "hard", "What is the dot over a lowercase i called?", ["A tittle", "A jot", "A pip", "A dit"], 0, ""],
+  ["pepsi-349", "hard", "In 1992 a Pepsi contest went wrong when the winning number, 349, was printed on 800,000 bottle caps. In which country?", ["The Philippines", "Mexico", "India", "Brazil"], 0, "Each cap was meant to win a million pesos. Pepsi refused to pay them all, and riots followed."],
+  ["bikini-name", "medium", "The bikini swimsuit was named after…", ["A Pacific atoll used for nuclear tests", "Its designer's daughter", "A Brazilian beach", "A 1940s film star"], 0, "Its designer, Louis Réard, launched it in 1946, days after the first bomb tests there."],
+  ["godzilla", "hard", "In 1954 a Japanese fishing boat, the Lucky Dragon No. 5, was showered with radioactive dust from a US H-bomb test. Which film monster did it help inspire?", ["Godzilla", "King Kong", "Mothra", "The Kraken"], 0, "Godzilla came out the same year. The test, Castle Bravo, was the biggest the US ever set off."],
+  ["whisky-war", "hard", "For decades, Canada and Denmark argued over tiny Hans Island, in the Arctic, by taking turns to visit it, plant their flag and leave…", ["A bottle of booze", "A fishing boat", "A tent", "A sheep"], 0, "Canada left whisky, Denmark left schnapps. The papers called it the Whisky War."],
+  ["arago-line", "hard", "A line of 135 small bronze medallions runs through the pavements of Paris. What do they mark?", ["The old Paris meridian", "The Tour de France finish route", "The Seine's great flood of 1910", "Napoleon's funeral route"], 0, "Named after the astronomer François Arago. The Da Vinci Code calls it the Rose Line."],
+  ["point-nemo", "hard", "At Point Nemo, the spot in the ocean farthest from any land, the nearest people are often…", ["Astronauts on the Space Station", "Fishermen from Chile", "Sailors in a round-the-world race", "Scientists in Antarctica"], 0, "The station passes about 400 km overhead; the nearest land is over 2,600 km away. Old spacecraft are sent there to crash."],
+  ["card-kings", "hard", "On French playing cards, the King of Hearts is meant to be…", ["Charlemagne", "Henry VIII", "Louis XIV", "King Arthur"], 0, "The King of Spades is King David, and the King of Clubs is Alexander the Great."],
+  ["jules-verne-name", "hard", "What is the two-Michelin-star restaurant inside the Eiffel Tower called?", ["Le Jules Verne", "Le Victor Hugo", "Le Gustave", "Le Ciel de Paris"], 0, "On the second floor, 125 m up, with its own lift. Le Ciel de Paris is the one at the top of the Montparnasse Tower."],
+  ["ticker-cake", "medium", "Which company trades on the stock market as CAKE?", ["The Cheesecake Factory", "Krispy Kreme", "Hostess", "Baskin-Robbins"], 0, "Krispy Kreme's ticker is DNUT."],
+  ["ticker-tap", "hard", "Which beer company trades on the stock market as TAP?", ["Molson Coors", "Heineken", "Carlsberg", "Anheuser-Busch InBev"], 0, "As in a beer tap. Anheuser-Busch InBev's ticker is BUD."],
+  ["caesar-title", "medium", "What was Julius Caesar's title when he was murdered?", ["Emperor", "Dictator", "President", "Lord"], 1, "Dictator for life, since early 44 BC. His adopted heir, Augustus, became Rome's first emperor."]
 ];
 
 /* shared out over the levels that are on, exactly as the flags are (easy: 2 at most) */
@@ -4027,7 +4103,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 36;   // bumped when the built-in bank changes
+const SEED_VERSION = 37;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
