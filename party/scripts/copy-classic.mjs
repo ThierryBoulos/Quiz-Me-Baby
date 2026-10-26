@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 const party = join(dirname(fileURLToPath(import.meta.url)), "..");
 const root = join(party, "..");
 const out = join(party, "public", "classic");
-const FILES = ["maps-geo.js", "manifest.webmanifest", "version.json", "icon-180.png", "icon-512.png", "alt-icon-b-180.png", "alt-icon-b-512.png", "host-imad.png"];
+const FILES = ["maps-geo.js", "maps-night.png", "manifest.webmanifest", "version.json", "icon-180.png", "icon-512.png", "alt-icon-b-180.png", "alt-icon-b-512.png", "host-imad.png"];
 
 if (!existsSync(join(root, "index.html"))) { console.log("copy-classic: no Classic beside Party, skipped"); process.exit(0); }
 rmSync(out, { recursive: true, force: true });

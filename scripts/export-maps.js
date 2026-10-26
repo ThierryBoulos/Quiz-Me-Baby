@@ -16,14 +16,17 @@ const root = path.join(__dirname, '..');
   const b = await chromium.launch(process.env.CHROME ? { executablePath:process.env.CHROME } : {});
   const p = await b.newPage();
   await p.goto(`http://127.0.0.1:${port}/index.html`);
-  const out = await p.evaluate(async () => {
+  /* a map's picture layer (the night lights) goes inside its SVG, so Party needs no extra file */
+  const raster = { 'maps-night.png': 'data:image/png;base64,' + fs.readFileSync(path.join(root, 'maps-night.png')).toString('base64') };
+  const out = await p.evaluate(async (raster) => {
+    window.MAPRASTER = raster;
     await loadMapGeo();
     const maps = {};
     buildSeedBank().filter(q => q.type === 'map').forEach(q => {
       maps[q.id] = { q: mapSVG(q, false), r: mapSVG(q, true), lq: mapLegend(q, false), lr: mapLegend(q, true), topic: (mapSpec(q) || {}).topic || '' };
     });
     return { version: BUILD.v, maps };
-  });
+  }, raster);
   await b.close(); srv.close();
   /* one file per map: a phone only ever loads the map on screen */
   const dir = path.join(root, 'party/public/maps');

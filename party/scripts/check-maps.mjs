@@ -25,6 +25,8 @@ const CASES = {
     ["independence year", "democracy", "gender equality", "year of independence"]],
   qdoluxk: [["vikings", "where the vikings went", "viking raids", "norse expansion", "norsemen", "vikinks", "scandinavian raids", "viking voyages and trade"],
     ["roman empire", "mongols", "trade routes", "crusades"]],
+  q69b4gy: [["lights at night", "night lights", "city lights", "the earth at night", "light pollution", "electricity", "satellite photo at night", "where the lights are on", "nightlights", "lights from space"],
+    ["population", "cities", "sunlight", "time zones"]],
   q12hja9x: [["monarchies", "countries with a king", "kings and queens", "royal families", "countries with royals", "monarchy", "kingdoms", "has a queen", "emperors", "crown"],
     ["dictatorships", "commonwealth", "former colonies", "republics"]],
   qu7g7n2: [["landlocked", "land locked countries", "no coastline", "no sea", "countries without sea", "no access to the ocean", "no coast", "not on the sea", "landlockd"],
