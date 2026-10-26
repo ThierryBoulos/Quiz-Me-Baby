@@ -118,8 +118,9 @@
 165.75 battleQ | 60 | 8-7 | 6-0 | Owls +1 point | 
 167.75 battleHandoff | 60 | 8-7 | 6-0 | Owls +1 point | 
 168.50 battleQ | 61 | 8-7 | 6-0 | Owls +1 point | 
-173.00 battleQ | 61 | 8-7 | 6-1 | Owls +1 point | 
-177.50 battleReview | 61 | 8-7 | 6-1 | Owls +1 point | 
-178.50 battleSummary | 62 | 12-7 | 6-1 | Owls +1 point | 
+170.25 battleQ | 61 | 8-7 | 6-1 | Owls +1 point | 
+173.00 battleQ | 61 | 8-7 | 6-2 | Owls +1 point | 
+177.50 battleReview | 61 | 8-7 | 6-2 | Owls +1 point | 
+178.50 battleSummary | 62 | 12-7 | 6-2 | Owls +1 point | 
 179.25 final | 63 | 12-7 |  | Owls +1 point | 
 recap: {"margin":5,"sudden":false,"leadChanges":2,"steals":[1,3],"minis":[3,1],"best":{"title":"Guess the Flag","team":0,"legs":[6,4]}}
