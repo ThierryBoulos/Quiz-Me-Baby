@@ -2755,22 +2755,48 @@ const SEED_MAPS = [
     topic:'History',
     level:'hard',
     title:'Everywhere the Vikings reached',
-    answer:'The Vikings — how far they sailed, raided and traded from Scandinavia',
+    answer:'The Vikings — where they settled, raided and sailed from Scandinavia',
     notes:'c. 793–1110. West to Newfoundland (L’Anse aux Meadows — tree rings date the wood cutting to exactly 1021), east down the Russian rivers to Constantinople, Baghdad and the Caspian. Lindisfarne 793, Seville 844, Paris 845. Jerusalem: King Sigurd the Crusader, 1110.',
-    cls:[{ c:MC.vio, label:'Viking homelands', codes:'NOR SWE DNK' }],
-    ptLabel:'Reached by Vikings', ptColor:MC.vio,      // gold dots read as a second, different thing
+    cls:[{ c:MC.gold, label:'Viking homelands', codes:'NOR SWE DNK' }],
+    /* drawn well out to sea and clipped to the coast (mapSVG), so a rough outline is enough */
+    areas:[
+      { c:MC.coral, o:.5, label:'Raided', polys:[
+        [[61,-11],[61,2],[50.2,2],[49.8,-11]],                                                    // Britain and Ireland
+        [[54.1,8.9],[53.3,8.8],[52.6,7.0],[51.8,5.8],[51.0,4.5],[50.6,3.2],[50.0,2.4],[49.4,2.7],[48.6,2.6],[48.6,1.4],
+         [48.2,-1.0],[47.3,0.8],[46.5,-0.4],[45.3,-0.3],[44.4,0.4],[43.4,-1.0],[43.0,-3.0],[42.8,-6.0],[42.6,-8.0],
+         [41.0,-8.0],[39.3,-8.6],[38.5,-8.4],[37.6,-8.0],[37.6,-5.6],[36.6,-5.8],[35.8,-7.0],[36.8,-10.5],[43.9,-10.5],
+         [44.6,-2.2],[46.6,-3.2],[48.4,-6.0],[49.9,-5.5],[50.4,0.5],[51.1,1.9],[52.6,3.6],[53.9,6.0]],      // Frisia, France, Spain, Portugal
+        [[44.4,9.4],[44.4,10.6],[43.5,10.6],[43.5,9.4]],                                          // Luni and Pisa
+        [[35.6,-4.4],[35.6,-3.4],[34.9,-3.4],[34.9,-4.4]]                                         // Nekor, Morocco
+      ] },
+      { c:MC.coral, label:'Settled or ruled', polys:[
+        [[67,-25],[67,-12],[63,-12],[63,-25]],                                                    // Iceland
+        [[62.6,-8],[62.6,-6],[61.3,-6],[61.3,-8]],                                                // Faroes
+        [[65.6,-54],[65.6,-49],[61.6,-44],[59.6,-42.8],[59.6,-46.6],[62.2,-50.8]],               // Greenland's two settlements
+        [[61,-4.2],[61,-0.5],[58.2,-0.5],[58.2,-4.2]], [[58.7,-8],[58.7,-5.6],[56.7,-5.6],[56.7,-8]],   // Orkney, Shetland, Caithness, the Hebrides
+        [[54.5,-4.9],[54.5,-4.2],[54.0,-4.2],[54.0,-4.9]],                                        // Isle of Man
+        [[51.5,0.9],[51.5,-0.2],[52.1,-1.0],[52.6,-1.7],[53.2,-2.9],[53.7,-3.2],[54.5,-3.6],[55.0,-2.5],[55.7,-1.6],
+         [54.6,-0.9],[54.2,0.3],[53.0,0.7],[52.9,2.0],[52.2,2.0],[51.8,1.5]],                     // the Danelaw
+        [[53.75,-6.7],[53.75,-5.8],[53.1,-5.8],[53.1,-6.7]], [[52.45,-7.4],[52.45,-6.1],[52.0,-6.1],[52.0,-7.4]], [[52.8,-9.1],[52.8,-8.4],[52.5,-8.4],[52.5,-9.1]],  // Dublin, Wexford and Waterford, Limerick
+        [[49.8,-2.0],[50.1,1.6],[49.3,1.8],[48.6,1.2],[48.5,-1.6],[48.65,-2.0]],                  // Normandy
+        [[61.3,29.5],[61.0,33.5],[59.0,35.0],[57.6,37.0],[56.4,40.5],[55.2,38.5],[54.2,35.0],[52.2,33.8],[50.4,32.6],[49.7,30.8],[50.2,29.2],[52.0,28.8],[54.5,28.6],[56.6,28.2],[58.6,28.4],[60.2,28.6]],   // the Rus', Novgorod and Rostov to Kyiv
+        [[51.75,-56.1],[51.75,-55.2],[51.25,-55.2],[51.25,-56.1]]                                 // L’Anse aux Meadows
+      ] }
+    ],
+    routes:[{ c:'#FFFFFF', label:'Routes they sailed', lines:[
+      [[61.5,4.5],[62.2,-4],[63.6,-14.5],[63.6,-24],[61.5,-38],[60.0,-44.5]],                      // Norway, the Faroes, Iceland, Greenland
+      [[61.0,-48.5],[57,-53.5],[52.5,-55.0]],                                                       // on to Vinland
+      [[59.2,18.5],[59.8,24.5],[60.0,30.3],[59.4,31.9],[57.0,31.6],[54.8,31.6],[51.0,30.6],[47.0,31.6],[43.5,30.5],[41.3,29.0]],   // Birka to Constantinople, down the Dnieper
+      [[60.0,32.6],[57.8,38.5],[56.2,44.0],[55.0,48.6],[50.5,46.0],[46.0,48.2],[41.5,48.5],[37.0,46.0],[33.6,44.4]],                 // the Volga, the Caspian, to Baghdad
+      [[49.5,-3.5],[45.5,-8.5],[40.5,-10.4],[36.8,-9.5],[36.0,-5.6],[37.5,1.5],[41.2,6.5],[43.6,9.0]] ] }],   // round Spain into the Mediterranean
+    ptsReveal:true, ptLabel:'Places they reached', ptColor:'#FFFFFF',
     pts:[
-      [51.5964,-55.5333,'L’Anse aux Meadows',[0,-14,'middle']], [61.1522,-45.515,'Greenland',[0,-14,'middle']],
-      [64.1458,-21.9425,'Iceland',[0,-14,'middle']], [62.0117,-6.7675,'Faroes',[-10,4,'end']],
-      [58.981,-2.96,'Orkney',[-10,4,'end']], [55.68,-1.8025,'Lindisfarne',[10,4,'start']],
-      [53.96,-1.08,'York',[10,8,'start']], [54.235,-4.525,'Isle of Man',[-10,4,'end']],
-      [53.35,-6.2603,'Dublin',[-10,8,'end']], [48.8547,2.3475,'Paris',[10,4,'start']],
-      [49.4428,1.0886,'Rouen',[-10,-4,'end']], [37.3886,-5.995,'Seville',[10,4,'start']],
-      [38.7253,-9.15,'Lisbon',[-10,4,'end']], [44.0848,10.042,'Luni',[-10,4,'end']],
+      [51.5964,-55.5333,'L’Anse aux Meadows',[0,18,'middle']], [61.1522,-45.515,'Greenland',[12,-12,'start']],
+      [64.1458,-21.9425,'Iceland',[0,-14,'middle']], [55.68,-1.8025,'Lindisfarne',[10,4,'start']],
+      [53.35,-6.2603,'Dublin',[-10,4,'end']], [48.8547,2.3475,'Paris',[10,4,'start']],
+      [37.3886,-5.995,'Seville',[10,4,'start']], [44.0848,10.042,'Luni',[10,4,'start']],
       [41.0083,28.98,'Constantinople',[0,16,'middle']], [50.45,30.5233,'Kyiv',[10,4,'start']],
-      [58.55,31.2667,'Novgorod',[10,10,'start']], [59.9972,32.2981,'Staraya Ladoga',[10,-4,'start']],
-      [33.3153,44.3661,'Baghdad',[0,16,'middle']], [40.3744,47.1267,'Barda (Caspian)',[10,4,'start']],
-      [54.9789,49.0564,'Bolghar',[0,-12,'middle']], [31.7789,35.2256,'Jerusalem',[-10,4,'end']]
+      [58.55,31.2667,'Novgorod',[10,4,'start']], [33.3153,44.3661,'Baghdad',[0,16,'middle']]
     ] },
 
   { key:'monarch', view:'world',
@@ -4400,17 +4426,20 @@ function mapSVG(q, reveal){
   const fill = {};
   (spec.cls || []).forEach(c => c.codes.split(' ').forEach(k => { fill[k] = c.c; }));
 
+  /* a map with areas clips them to the land, so each country's path gets an id to reuse */
+  const lid = (spec.areas || []).length ? 'ml-' + spec.key + (reveal ? 'r-' : 'q-') : '';
   let land = '';
   Object.keys(v.shapes).forEach(k => {
     if(k === 'ATA' && !spec.ata) return;
     const f = fill[k] || (spec.rest && k !== 'ATA' ? spec.rest.c : MAP_LAND);
-    land += '<path d="' + v.shapes[k].d + '" fill="' + f + '"/>';
+    land += '<path' + (lid ? ' id="' + lid + k + '"' : '') + ' d="' + v.shapes[k].d + '" fill="' + f + '"/>';
   });
   /* microstates and islands too small to see get a dot — only when they are
      in a group, or the map would be freckled with every atoll on Earth */
   let dots = '';
   const dotR = spec.view === 'world' ? 34 : 42;
   Object.keys(fill).forEach(k => {
+    if(fill[k] === MAP_LAND) return;                                                      // a group drawn as plain land needs no dots
     const p = v.tiny[k] || (v.shapes[k] && v.shapes[k].a < 12 ? v.shapes[k].l : null);   // Malta-sized and under
     if(p) dots += '<circle cx="' + Math.round(p[0] * 10) + '" cy="' + Math.round(p[1] * 10) + '" r="' + dotR + '" fill="' + fill[k] + '"/>';
   });
@@ -4443,8 +4472,44 @@ function mapSVG(q, reveal){
     });
   }
 
+  /* Areas: a region, not a whole country. Each is drawn freehand, well out
+     to sea, and clipped to the coastline, so only its land takes the colour
+     (the borders stay crisp, and a rough outline is enough). Routes are
+     smooth lines through their points, with an arrowhead at the far end. */
+  const P = (ll) => { const p = mapProject(v, ll[0], ll[1]); return [Math.round(p[0] * 10), Math.round(p[1] * 10)]; };
+  let areas = '';
+  if(lid && v.proj){
+    const cid = lid + 'clip';
+    let shapes = '';
+    Object.keys(v.shapes).forEach(k => { if(k !== 'ATA' || spec.ata) shapes += '<use href="#' + lid + k + '"/>'; });
+    areas = '<clipPath id="' + cid + '">' + shapes + '</clipPath><g clip-path="url(#' + cid + ')">';
+    spec.areas.forEach(a => a.polys.forEach(poly => {
+      areas += '<path d="M' + poly.map(P).map(p => p.join(' ')).join('L') + 'Z" fill="' + a.c + '"' + (a.o ? ' fill-opacity="' + a.o + '"' : '') + '/>';
+    }));
+    areas += '</g>';
+  }
+  let routes = '';
+  if((spec.routes || []).length && v.proj){
+    spec.routes.forEach(r => r.lines.forEach(line => {
+      const q = line.map(P);
+      let d = 'M' + q[0].join(' ');
+      for(let i = 0; i < q.length - 1; i++){      // Catmull-Rom through every point
+        const a = q[i - 1] || q[i], b = q[i], c = q[i + 1], e = q[i + 2] || c;
+        d += 'C' + Math.round(b[0] + (c[0] - a[0]) / 6) + ' ' + Math.round(b[1] + (c[1] - a[1]) / 6) + ' ' +
+                   Math.round(c[0] - (e[0] - b[0]) / 6) + ' ' + Math.round(c[1] - (e[1] - b[1]) / 6) + ' ' + c.join(' ');
+      }
+      const [x1, y1] = q[q.length - 2], [x2, y2] = q[q.length - 1], ang = Math.atan2(y2 - y1, x2 - x1), L = 150, Wd = 90;
+      const tip = [x2, y2], l = [x2 - L * Math.cos(ang) + Wd * Math.sin(ang), y2 - L * Math.sin(ang) - Wd * Math.cos(ang)], rr = [x2 - L * Math.cos(ang) - Wd * Math.sin(ang), y2 - L * Math.sin(ang) + Wd * Math.cos(ang)];
+      routes += '<path d="' + d + '" fill="none" stroke="#0B1030" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".7"/>' +
+        '<path d="' + d + '" fill="none" stroke="' + r.c + '" stroke-width="2.4" stroke-linecap="round"' + (r.dash ? ' stroke-dasharray="7 5"' : '') + ' vector-effect="non-scaling-stroke"/>' +
+        '<path d="M' + tip.join(' ') + 'L' + l.map(Math.round).join(' ') + 'L' + rr.map(Math.round).join(' ') + 'Z" fill="' + r.c + '"/>';
+    }));
+  }
+  /* a picture layer, already in this view's projection (the night lights) */
+  const raster = spec.raster ? '<image href="' + esc((window.MAPRASTER || {})[spec.raster] || spec.raster) + '" x="0" y="0" width="10000" height="' + (H * 10) + '" preserveAspectRatio="none"/>' : '';
+
   let pts = '', ptl = '';
-  (spec.pts || []).forEach(pt => {
+  (spec.ptsReveal && !reveal ? [] : spec.pts || []).forEach(pt => {
     const p = mapProject(v, pt[0], pt[1]);
     const x = Math.round(p[0] * 10), y = Math.round(p[1] * 10);
     pts += '<circle class="mpt" cx="' + x + '" cy="' + y + '" r="' + (spec.pts.length > 10 ? 52 : 64) + '"' + (spec.ptColor ? ' style="fill:' + spec.ptColor + '"' : '') + '/>';
@@ -4459,8 +4524,9 @@ function mapSVG(q, reveal){
   const out = '<svg class="map-svg" viewBox="0 0 10000 ' + (H * 10) + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map" style="--ar:' + (1000 / H).toFixed(4) + '">' +
     (v.sphere ? '<path class="msea" d="' + v.sphere + '"/>' : '<rect class="msea" width="10000" height="' + (H * 10) + '"/>') +
     '<g class="mland">' + land + '</g>' +
+    areas + raster +
     '<g class="mdots">' + dots + '</g>' +
-    lines +
+    lines + routes +
     '<g class="mlead">' + leaders + '</g>' +
     '<g class="mpts">' + pts + '</g>' +
     '<g class="mlab">' + labels + ptl + '</g>' +
@@ -4477,7 +4543,9 @@ function mapLegend(q, reveal){
   const items = [];
   (spec.cls || []).forEach(c => { const t = reveal ? c.label : c.hint; if(t) items.push('<span><i style="background:' + c.c + '"></i>' + esc(t) + '</span>'); });
   if(spec.rest){ const t = reveal ? spec.rest.label : spec.rest.hint; if(t) items.push('<span><i style="background:' + spec.rest.c + '"></i>' + esc(t) + '</span>'); }
-  if(spec.pts) items.push('<span><i class="pt"' + (spec.ptColor ? ' style="background:' + spec.ptColor + '"' : '') + '></i>' + (reveal ? esc(spec.ptLabel) : spec.pts.length + ' places') + '</span>');
+  (spec.areas || []).forEach(a => { const t = reveal ? a.label : a.hint; if(t) items.push('<span><i style="background:' + a.c + (a.o ? ';opacity:' + a.o : '') + '"></i>' + esc(t) + '</span>'); });
+  (spec.routes || []).forEach(r => { const t = reveal ? r.label : r.hint; if(t) items.push('<span><i style="background:' + r.c + ';height:3px;border-radius:2px"></i>' + esc(t) + '</span>'); });
+  if(spec.pts && (reveal || !spec.ptsReveal)) items.push('<span><i class="pt"' + (spec.ptColor ? ' style="background:' + spec.ptColor + '"' : '') + '></i>' + (reveal ? esc(spec.ptLabel) : spec.pts.length + ' places') + '</span>');
   return items.length ? '<div class="map-legend">' + items.join('') + '</div>' : '';
 }
 
