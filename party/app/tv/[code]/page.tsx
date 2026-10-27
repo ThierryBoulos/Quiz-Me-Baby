@@ -19,7 +19,8 @@ import { sb } from "@/lib/supabase";
 import { useFreshBuild } from "@/lib/fresh";
 import { ANSWERING } from "@/components/PhoneGame";
 
-/* Classic lives on this same site, at /classic (copied in at build time) */
+/* Classic lives on this same site, at /classic (copied in at build time); from here it opens
+   straight on its host setup, and its Back comes back to this lobby */
 const CLASSIC = "/classic";
 
 /* THE TV. No buttons: it shows the room and runs the night. Phones send it
@@ -127,7 +128,7 @@ export default function TvRoom() {
             </div>
             <div className="flex gap-3">
               <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>
-              {members.length === 0 && <a href={CLASSIC} className="btn btn-sm">Just play on this screen</a>}
+              {members.length === 0 && <a href={`${CLASSIC}/?start=host&back=/tv/${code}`} className="btn btn-sm">Just play on this screen</a>}
             </div>
           </div>
         </>

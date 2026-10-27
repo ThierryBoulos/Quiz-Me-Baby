@@ -4805,7 +4805,19 @@ function render(){
   if(S.tmp.toTop){ S.tmp.toTop = false; window.scrollTo(0, 0); }
   else window.scrollTo(0, y);
 }
-function nav(screen){ S.tmp.toTop = true; S.screen = screen; render(); }
+/* Opened from Party's TV lobby ("Just play on this screen"): the night is always
+   one with a host on this screen, so home is the host's setup, and leaving the
+   setup goes back to the lobby it came from. */
+let FROM_PARTY = (() => { try{ return sessionStorage.getItem('qmb.fromParty') || ''; }catch(e){ return ''; } })();
+function nav(screen){
+  if(screen === 'home' && FROM_PARTY){
+    if(S.screen === 'setup'){ location.href = FROM_PARTY; return; }
+    if(!S.setup) S.setup = defaultSetup();
+    S.setup.hostless = false; prunePicks(); syncThemes();
+    screen = 'setup';
+  }
+  S.tmp.toTop = true; S.screen = screen; render();
+}
 
 function renderHUD(){
   const h = el('hud');
@@ -9055,6 +9067,19 @@ if(!DB.get('qn.audiodefaults.v2', false)){
   saveSettings();
   DB.set('qn.audiodefaults.v2', true);
 }
+
+/* Party's TV lobby links here as /classic/?start=host&back=/tv/CODE: straight to
+   the host's setup (the menu, solo and no-host play are not wanted from there).
+   The way back is kept for the session, so a reload doesn't lose it. */
+(function(){
+  const q = new URLSearchParams(location.search);
+  if(q.get('start') !== 'host') return;
+  const back = q.get('back') || '/';
+  FROM_PARTY = /^\/(?!\/)[\w\/-]*$/.test(back) ? back : '/';
+  try{ sessionStorage.setItem('qmb.fromParty', FROM_PARTY); }catch(e){}
+  history.replaceState(null, '', location.pathname);
+})();
+if(FROM_PARTY && !S.game && S.screen === 'home'){ S.setup = S.setup || defaultSetup(); S.setup.hostless = false; prunePicks(); syncThemes(); S.screen = 'setup'; }
 
 render();
 if(S.tmp.seedNews) setTimeout(() => {
