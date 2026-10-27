@@ -82,6 +82,16 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
         <button type="button" className="btn btn-sm btn-ghost self-center" disabled={!changed}
           onClick={() => set(Object.fromEntries(TIMER_KEYS.map((k) => [k, DEFAULTS[k]])) as Partial<Settings>)}>Back to the default timers</button>
       </>) : (<>
+      <Section title="Gameplay">
+        <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="Never reuse a question I've already played" help="Every question this TV plays is remembered. The same group can play week after week with no repeats." />
+        <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="Alternate which team answers first each round" help="Off = Team A always goes first." />
+        <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help="Someone switches app or tab while a question is up (a search, a chatbot)? The TV says so, and the host's phone keeps the list. Call a Friend is allowed." />
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <span className="text-14 text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played{remote ? " on the TV" : ""}.</span>
+          <button type="button" className="btn btn-sm" disabled={!played}
+            onClick={() => { if (window.confirm(remote ? "Forget every played question on the TV?" : "Forget every played question on this device?")) onForget(); }}>Forget played questions</button>
+        </div>
+      </Section>
       {addQuestion && <Section title="Add a question">{addQuestion}</Section>}
       <Section title="Sound">
         <Toggle on={s.sound} set={(v) => set({ sound: v })} title="Jingles and chimes" help="A calm 5-second sting at the top of every round, soft bells when a timer runs out. Played on the TV only." />
@@ -100,16 +110,6 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
         <Toggle on={s.imad} set={(v) => set({ imad: v })} title="Imad comments" help="He comments on the game in a speech bubble on the TV: round intros, right and wrong answers, steals, lead changes, the final. Text only, no voice." />
       </Section>
 
-      <Section title="Gameplay">
-        <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="Never reuse a question I've already played" help="Every question this TV plays is remembered. The same group can play week after week with no repeats." />
-        <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="Alternate which team answers first each round" help="Off = Team A always goes first." />
-        <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help="Someone switches app or tab while a question is up (a search, a chatbot)? The TV says so, and the host's phone keeps the list. Call a Friend is allowed." />
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <span className="text-14 text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played{remote ? " on the TV" : ""}.</span>
-          <button type="button" className="btn btn-sm" disabled={!played}
-            onClick={() => { if (window.confirm(remote ? "Forget every played question on the TV?" : "Forget every played question on this device?")) onForget(); }}>Forget played questions</button>
-        </div>
-      </Section>
       </>)}
   </>);
 }
