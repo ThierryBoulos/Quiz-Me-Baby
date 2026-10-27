@@ -229,7 +229,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
           </div>
           <div className="flex gap-2 flex-wrap">
             <button type="button" className="btn btn-sm" onClick={() => setPicking(true)}>Choose questions</button>
-            <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "TV settings" : "TV settings (waiting for the TV…)"}</button>
+            <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : "Settings (waiting for the TV…)"}</button>
             {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
           </div>
         </div>)}

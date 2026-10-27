@@ -30,7 +30,7 @@ export function TvSettings({ code, tv, onClose }: { code: string; tv: TvShare; o
     <div className="fixed inset-0 z-40 overflow-y-auto" style={{ background: "var(--color-bg)" }} role="dialog" aria-modal="true" aria-label="The TV's settings">
       <div className="screen !gap-4">
         <header className="flex items-start justify-between gap-3 sticky top-0 z-10 -mx-5 px-5 pt-1 pb-3" style={{ background: "var(--color-bg)" }}>
-          <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>Host only</div><h2 className="display text-30">TV settings</h2>
+          <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>Host only</div><h2 className="display text-30">Settings</h2>
             <div className="text-13 mt-1" style={{ color: err ? "var(--color-no)" : "var(--color-ink-2)" }} role="status">
               {err || (saving ? "Saving on the TV…" : "Saved on the TV, as if changed on its own Settings page.")}</div></div>
           <button type="button" className="btn btn-gold btn-sm shrink-0" onClick={onClose}>Done</button>

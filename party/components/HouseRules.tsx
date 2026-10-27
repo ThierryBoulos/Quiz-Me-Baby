@@ -4,7 +4,7 @@ import { DEFAULTS, type Settings } from "@/lib/settings";
 import { Snd } from "@/lib/sound";
 
 /* THE HOUSE RULES — every setting, on two tabs (General, Timers). The Settings
-   page shows them for this device; the host's "TV settings" (Setup, Advanced)
+   page shows them for this device; the host's "Settings" (Setup, Advanced)
    shows the very same controls for the TV, where each change is sent to the TV
    and saved there (remote: no test sounds, as they would play on the phone). */
 /* every clock in the game, on its own tab: the standard rounds, then the mini-games */

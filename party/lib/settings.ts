@@ -48,7 +48,7 @@ export function saveSettings(s: Partial<Settings>) {
   if (typeof window !== "undefined") window.dispatchEvent(new Event("qmb:settings"));
   return next;
 }
-/* What the host's phone sends to change the TV's settings (Setup, Advanced, TV settings): only known
+/* What the host's phone sends to change the TV's settings (Setup, Advanced, Settings): only known
    settings, of the right kind; timers whole seconds from 1 to 600, the volume 0 to 1. Never trust a phone. */
 export function cleanSettings(x: unknown): Partial<Settings> {
   const out: Record<string, unknown> = {};

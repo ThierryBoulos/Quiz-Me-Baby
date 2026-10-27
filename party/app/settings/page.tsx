@@ -122,7 +122,7 @@ export default function SettingsPage() {
         <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>Settings</div><h1 className="display text-40">House rules</h1></div>
         <Link className="btn btn-sm btn-ghost" href="/">Back</Link>
       </header>
-      <p className="text-13 text-[var(--color-ink-2)] -mt-2">Saved on this device. Change them on the screen that will be the TV, or as the host from your phone (Setup, Advanced, TV settings).</p>
+      <p className="text-13 text-[var(--color-ink-2)] -mt-2">Saved on this device. Change them on the screen that will be the TV, or as the host from your phone (Setup, Advanced, Settings).</p>
 
       <HouseRules s={s} set={set} tab={tab} pick={pick} played={played} onForget={() => { forgetUsed(); setPlayed(0); }} addQuestion={<AddQuestion />} />
     </main>

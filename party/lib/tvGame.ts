@@ -953,7 +953,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       await publish();
       return;
     }
-    /* the host changes the TV's settings from their phone (Setup, Advanced, TV settings): saved here, on the TV,
+    /* the host changes the TV's settings from their phone (Setup, Advanced, Settings): saved here, on the TV,
        as if changed on its Settings page; the lobby share below sends them back to the host */
     if (a.kind === "setup" && (a.payload.settings || a.payload.forgetPlayed) && room.status === "lobby" && from?.role === "host") {
       if (a.payload.settings) saveSettings(cleanSettings(a.payload.settings));
