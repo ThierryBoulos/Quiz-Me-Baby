@@ -63,6 +63,15 @@ function save(list: Q[]) {
   localStorage.setItem(CUSTOM_KEY, JSON.stringify(list));
   window.dispatchEvent(new Event("qmb:custom"));
 }
+/* The host's own questions, saved on the TV too when the host starts a game (only the new ones; the
+   limits as ever: 300 questions, four themes of their own). How many were added. */
+export function mergeCustom(list: Q[], builtIn: string[] = []): number {
+  const mine = getCustom(), have = new Set(mine.map((q) => q.id));
+  const next = cleanList([...mine, ...list.filter((q) => !have.has(q.id))], builtIn);
+  const added = next.length - mine.length;
+  if (added > 0) save(next);
+  return Math.max(0, added);
+}
 /* the themes made up on this device, from the questions filed under them */
 export function customThemes(builtIn: string[], list = getCustom()) {
   return [...new Set(list.map((q) => q.theme).filter((t): t is string => !!t && !builtIn.includes(t)))].sort();

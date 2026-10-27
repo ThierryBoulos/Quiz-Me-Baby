@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { QMB, forNoHost, loadBank, themeCounts, type Bank, type Q } from "@/lib/engine";
+import { QMB, forNoHost, loadBank, themeCounts, withCustom, type Bank, type Q } from "@/lib/engine";
 import { NO_PICKS, Picker, inLevels, pickSummary, type Picks } from "./Picker";
-import { getCustom } from "@/lib/custom";
+import { cleanList, getCustom } from "@/lib/custom";
+import type { TvShare } from "@/lib/game";
+import { TvSettings } from "./TvSettings";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; custom?: Q[] } & Partial<Picks>;
@@ -33,10 +35,16 @@ const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1
    rounds can be switched off (a mini-games-only night); one theme per round,
    so the number of themes always matches the number of rounds; mini-games
    are their own section. Sensible defaults, so Start works straight away. */
-export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean; code: string }) {
-  const [bank, setBank] = useState<Bank | null>(null);
+export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean; code: string; tv?: TvShare }) {
+  const [mine, setBank] = useState<Bank | null>(null);
   /* the host's question picker shows the answers: the full bank, which only the host's phone gets */
-  const [full, setFull] = useState<Bank | null>(null);
+  const [fullMine, setFull] = useState<Bank | null>(null);
+  /* ...and the TV's own questions (written in its Settings), which it shares with the host in the lobby:
+     their themes are on the list, and they can be picked, as if written on this phone */
+  const tvQs = useMemo(() => (isHost ? cleanList(tv?.custom).map((q) => ({ ...q, onTv: true })) : []), [isHost, tv?.custom]);
+  const bank = useMemo(() => (mine && tvQs.length ? withCustom(mine, tvQs) : mine), [mine, tvQs]);
+  const full = useMemo(() => (fullMine && tvQs.length ? withCustom(fullMine, tvQs) : fullMine), [fullMine, tvQs]);
+  const [tvOpen, setTvOpen] = useState(false);
   const [standard, setStandard] = useState(true);
   const [rounds, setRounds] = useState(6);
   const [difficulty, setDiff] = useState<string>(QMB.DEFAULT_DIFF);
@@ -53,7 +61,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
   /* the host's advanced options: hand-picked questions, a difficulty per theme */
   const [picks, setPicks] = useState<Picks>(NO_PICKS);
   const [picking, setPicking] = useState(false);
-  useEffect(() => { if (isHost && picking && !full) void loadBank(code).then(setFull).catch(() => setNote("Couldn't load the questions. Try again.")); }, [isHost, picking, full, code]);
+  useEffect(() => { if (isHost && picking && !fullMine) void loadBank(code).then(setFull).catch(() => setNote("Couldn't load the questions. Try again.")); }, [isHost, picking, fullMine, code]);
   useEffect(() => { void loadBank().then(setBank); }, []);
   /* a level switched off in Setup takes its hand-picked flags, maps, dishes, landmarks and boards with it */
   useEffect(() => {
@@ -217,13 +225,15 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code }: { onS
         <div className="card flex flex-col gap-3">
           <div>
             <div className="display text-24">Advanced</div>
-            <div className="text-13 text-[var(--color-ink-2)]">Host only. {pickSummary(picks, standard ? picked : [], minis)}</div>
+            <div className="text-13 text-[var(--color-ink-2)]">Host only. {pickSummary(picks, standard ? picked : [], minis)}{tvQs.length > 0 && ` The TV's own ${tvQs.length} question${tvQs.length === 1 ? " is" : "s are"} in the picker too.`}</div>
           </div>
           <div className="flex gap-2 flex-wrap">
             <button type="button" className="btn btn-sm" onClick={() => setPicking(true)}>Choose questions</button>
+            <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "TV settings" : "TV settings (waiting for the TV…)"}</button>
             {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
           </div>
         </div>)}
+      {tvOpen && tv && <TvSettings code={code} tv={tv} onClose={() => setTvOpen(false)} />}
       {picking && full && <Picker bank={full} themes={standard ? picked : []} minis={minis} difficulty={difficulty} levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels, pin: pinLevels, airport: airportLevels, majority: majorityLevels }} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
 
       <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy}

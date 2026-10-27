@@ -136,7 +136,7 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
               </div>
               {list.length ? list.map((q) => (
                 <Row key={q.id} on={sel.includes(q.id)} disabled={!sel.includes(q.id) && full} onTap={() => tick(t, q.id)}
-                  q={q.question} sub={`${q.answer} · ${cap(q.difficulty)}${q.use_with ? ` · pairs with "${q.use_with}"` : ""}${q.src === "manual" ? " · Yours" : ""}`} />))
+                  q={q.question} sub={`${q.answer} · ${cap(q.difficulty)}${q.use_with ? ` · pairs with "${q.use_with}"` : ""}${q.onTv ? " · The TV's" : q.src === "manual" ? " · Yours" : ""}`} />))
                 : <p className="text-14 text-[var(--color-ink-2)]">Nothing in this theme at {diffWords(diffFor(t))}.</p>}
             </section>);
         })}

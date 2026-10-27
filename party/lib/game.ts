@@ -105,7 +105,10 @@ export type Pub = {
   mode: "host" | "nohost";
 };
 /* host only: the answer, and what the captains typed with the app's opinion */
-export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null>; you?: boolean };
+export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null>; you?: boolean;
+  lobby?: TvShare };
+/* In the lobby, what the TV shares with the host's phone: its settings, its own questions, how many it has played */
+export type TvShare = { settings: import("./settings").Settings; custom: import("./engine").Q[]; played: number };
 
 /* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
 export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "battleLevel"];

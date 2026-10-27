@@ -1,10 +1,10 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, HOST_ONLY_THEMES, acceptFor, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Q } from "./engine";
-import { cleanList } from "./custom";
+import { cleanList, getCustom, mergeCustom } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
-import { getSettings, USED_KEY } from "./settings";
+import { cleanSettings, forgetUsed, getSettings, saveSettings, usedCount, USED_KEY } from "./settings";
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
 /* The shape of the saved game. Bump it whenever a change means a game saved before it can't be
    carried on (new required state, renamed screens, a changed engine game object): a TV reloaded
@@ -893,6 +893,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the house bank, this TV's own questions, and the starter's (cleaned: never trust a phone) */
       const base = await loadBank(code);
       s.custom = cleanList(cfgIn.custom, base.themes);
+      /* the host's own questions are kept on this TV too, for next time (and shown in its Settings) */
+      if (members.find((m) => m.user_id === a.user_id)?.role === "host") mergeCustom(s.custom, base.themes);
       /* with no host, nothing only a person can judge: not Know the Host, not even one written on this TV,
          and no made-up theme */
       const all = withCustom(base, s.custom);
@@ -951,6 +953,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       await publish();
       return;
     }
+    /* the host changes the TV's settings from their phone (Setup, Advanced, TV settings): saved here, on the TV,
+       as if changed on its Settings page; the lobby share below sends them back to the host */
+    if (a.kind === "setup" && (a.payload.settings || a.payload.forgetPlayed) && room.status === "lobby" && from?.role === "host") {
+      if (a.payload.settings) saveSettings(cleanSettings(a.payload.settings));
+      if (a.payload.forgetPlayed) { forgetUsed(); usedMem.current.clear(); window.dispatchEvent(new Event("qmb:settings")); }
+      return;
+    }
     if (!s.g || !from) return;
     /* Majority Rules: every player answers, captains too (the host doesn't play) */
     if (a.kind === "answer" && s.screen === "majorityQ") {
@@ -984,6 +993,25 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else if (ok) refuse(ok);
     }
   }, [applyFx, captainInput, captainMove, code, draftKey, env, hostMove, play, publish, refuse]);
+
+  /* In the lobby, the TV's settings and its own questions go to the host's phone (the secrets row: the
+     host's alone, as the answers are), so the host can pick the TV's questions and change its settings
+     (Setup, Advanced). Sent again whenever either changes here; the game's first update replaces it. */
+  const status = room?.status;
+  useEffect(() => {
+    if (!isTv || status !== "lobby") return;
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const share = () => { clearTimeout(t); t = setTimeout(() => {
+      const at = stamp();
+      lastSecret.current = "";                         // the game's first answer goes out whatever it is
+      void sb().from("secrets").update({ data: { at, lobby: { settings: getSettings(), custom: getCustom(), played: usedCount() } } }).eq("room", code)
+        .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).then(({ error }) => { if (error) console.error("lobby share failed", error); });
+    }, 250); };
+    share();
+    const onStorage = (e: StorageEvent) => { if (!e.key || e.key.startsWith("qmb.party.")) share(); };
+    window.addEventListener("qmb:settings", share); window.addEventListener("qmb:custom", share); window.addEventListener("storage", onStorage);
+    return () => { clearTimeout(t); window.removeEventListener("qmb:settings", share); window.removeEventListener("qmb:custom", share); window.removeEventListener("storage", onStorage); };
+  }, [isTv, status, code]);
 
   /* fetch the questions while everyone's still joining, not when Start is tapped */
   useEffect(() => { if (isTv) void loadBank(code).catch(() => { /* tried again at Start */ }); }, [isTv, code]);

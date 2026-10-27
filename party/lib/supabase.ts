@@ -100,6 +100,13 @@ export function sendDraft(room: string, payload: Record<string, unknown>) {
   void insistInsert({ room, kind: "draft", payload: { ...payload, seq: draftN } }).catch(() => {});
 }
 
+/* The host changing the TV's settings from the lobby: sent quietly too (no waiting bar); the TV
+   saves it and sends its settings back, which is the answer the phone shows. */
+export async function sendQuiet(room: string, kind: string, payload: Record<string, unknown>) {
+  const error = await insistInsert({ room, kind, payload: { ...payload, tap: newTap() } });
+  if (error) throw new Error(error.message);
+}
+
 /* "I'm here" / "I left the screen" / "I'm back": small notes from a phone to
    the TV, sent through the same log as every other action (the TV reads it
    every 1.5 s, so none get lost), quietly (no waiting bar), and with

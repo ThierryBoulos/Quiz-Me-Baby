@@ -173,7 +173,8 @@ export default function PhoneRoom() {
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline));
   /* the night is over and somebody tapped Exit: everyone back to the home screen */
   useEffect(() => { if (pub?.exit) router.replace("/"); }, [pub?.exit, router]);
-  const secret = useSecret(code, !!mine && mine.role === "host" && playing);
+  /* (in the lobby too: the TV shares its settings and its own questions with the host there) */
+  const secret = useSecret(code, !!mine && mine.role === "host" && (playing || room?.status === "lobby"));
   /* a question is live on this phone: leaving the screen now gets flagged on the TV */
   const live = !!pub && !!mine && mine.role !== "host" && ANSWERING.includes(pub.screen) && !pub.paused
     && !(pub.lifeline?.key === "friend" && pub.lifeline.team === mine.team);
@@ -337,7 +338,7 @@ export default function PhoneRoom() {
             <ShareButton code={code} />
           </div>
           {canStart ? (
-            <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} tv={mine.role === "host" ? secret.lobby : undefined} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-14 text-[var(--color-ink-2)]">
               You&rsquo;re in.{" "}

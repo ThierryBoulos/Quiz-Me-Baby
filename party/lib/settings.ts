@@ -48,6 +48,20 @@ export function saveSettings(s: Partial<Settings>) {
   if (typeof window !== "undefined") window.dispatchEvent(new Event("qmb:settings"));
   return next;
 }
+/* What the host's phone sends to change the TV's settings (Setup, Advanced, TV settings): only known
+   settings, of the right kind; timers whole seconds from 1 to 600, the volume 0 to 1. Never trust a phone. */
+export function cleanSettings(x: unknown): Partial<Settings> {
+  const out: Record<string, unknown> = {};
+  if (!x || typeof x !== "object") return out;
+  for (const [k, v] of Object.entries(x as Record<string, unknown>)) {
+    if (!(k in DEFAULTS) || k === "v") continue;
+    const d = DEFAULTS[k as keyof Settings];
+    if (typeof d === "boolean" && typeof v === "boolean") out[k] = v;
+    else if (k === "volume" && typeof v === "number" && Number.isFinite(v)) out[k] = Math.max(0, Math.min(1, v));
+    else if (typeof d === "number" && typeof v === "number" && Number.isFinite(v)) out[k] = Math.max(1, Math.min(600, Math.round(v)));
+  }
+  return out as Partial<Settings>;
+}
 /* the played-question memory (Party's own; Classic keeps its own) */
 export const USED_KEY = "qmb.party.used";
 export function usedCount() { try { return JSON.parse(localStorage.getItem(USED_KEY) || "[]").length; } catch { return 0; } }
