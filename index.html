@@ -1272,7 +1272,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.36', date:'26 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.37', date:'27 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3838,8 +3838,8 @@ const MAJORITY = [
   ["point-nemo", "hard", "At Point Nemo, the spot in the ocean farthest from any land, the nearest people are often…", ["Astronauts on the Space Station", "Fishermen from Chile", "Sailors in a round-the-world race", "Scientists in Antarctica"], 0, "The station passes about 400 km overhead; the nearest land is over 2,600 km away. Old spacecraft are sent there to crash."],
   ["card-kings", "hard", "On French playing cards, the King of Hearts is meant to be…", ["Charlemagne", "Henry VIII", "Louis XIV", "King Arthur"], 0, "The King of Spades is King David, and the King of Clubs is Alexander the Great."],
   ["jules-verne-name", "hard", "What is the two-Michelin-star restaurant inside the Eiffel Tower called?", ["Le Jules Verne", "Le Victor Hugo", "Le Gustave", "Le Ciel de Paris"], 0, "On the second floor, 125 m up, with its own lift. Le Ciel de Paris is the one at the top of the Montparnasse Tower."],
-  ["ticker-cake", "medium", "Which company trades on the stock market as CAKE?", ["The Cheesecake Factory", "Krispy Kreme", "Hostess", "Baskin-Robbins"], 0, "Krispy Kreme's ticker is DNUT."],
-  ["ticker-tap", "hard", "Which beer company trades on the stock market as TAP?", ["Molson Coors", "Heineken", "Carlsberg", "Anheuser-Busch InBev"], 0, "As in a beer tap. Anheuser-Busch InBev's ticker is BUD."],
+  ["ticker-race", "medium", "Which company trades on the stock market as RACE?", ["Ferrari", "Formula 1", "Red Bull", "Porsche"], 0, "Ferrari picked it when it listed in New York in 2015. Porsche's ticker in Frankfurt is P911."],
+  ["ticker-cmg", "hard", "Which company trades on the stock market as CMG?", ["Chipotle", "CMA CGM", "Chrysler Motor Group", "Comcast"], 0, "Chipotle Mexican Grill. CMA CGM, the shipping giant run by the Lebanese-French Saadé family, isn't listed at all; Comcast is CMCSA."],
   ["caesar-title", "medium", "What was Julius Caesar's title when he was murdered?", ["Emperor", "Dictator", "President", "Lord"], 1, "Dictator for life, since early 44 BC. His adopted heir, Augustus, became Rome's first emperor."]
 ];
 
@@ -4103,7 +4103,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 37;   // bumped when the built-in bank changes
+const SEED_VERSION = 38;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
