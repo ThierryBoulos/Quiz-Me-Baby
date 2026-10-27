@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, HOST_ONLY_THEMES, acceptFor, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Q } from "./engine";
+import { QMB, HOST_ONLY_THEMES, acceptFor, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { cleanList, getCustom, mergeCustom } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
@@ -12,7 +12,7 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
 const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
 import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE,
-  type MiniKey, type Pub, type Secret, type Two } from "./game";
+  type MiniKey, type Pub, type Secret, type Thin, type Two } from "./game";
 import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, SWAPS, swapWord, type Action, type G, type PKind, type W } from "./tv/rules";
 import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, turnOf } from "./tv/reads";
@@ -24,6 +24,16 @@ import { newState, type TvState } from "./tv/state";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
    right one, or both out) it's the one whose calls can be contested on the next screen. (true: go on) */
+/* the dealer over a bank, with what this TV has played (sudden death is typed and checked fast: never a
+   question only a person can judge, host or not) */
+function dealerFor(bank: Bank, used: () => Set<string>) {
+  return QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => getSettings().noRepeat, suddenOk: (q: Q) => !hostOnly(q),
+    ok: { map: (q: G) => q.type === "map", flag: (q: G) => q.type === "flag", dish: (q: G) => q.type === "dish",
+      pin: (q: G) => q.type === "pin" && Number.isFinite(q.lat) && Number.isFinite(q.lon) && !!q.photo,
+      airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0,
+      majority: (q: G) => q.type === "majority" && Array.isArray(q.options) && q.options.length === 4 && q.options.includes(q.answer) } });
+}
+
 function sdRecord(s: TvState, team: 0 | 1, ok: boolean) {
   s.sdCur = [...s.sdCur, { team, text: (s.typed[team] || []).join(" / "), ok }];
   if (ok || s.sdOut[other(team)]) { s.sdLog = { kind: s.screen === "battleTie" ? "battleTie" : "sudden", calls: s.sdCur }; s.contested = []; s.contest = null; }
@@ -54,14 +64,24 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   }, []);
   const env = useCallback(() => {
     const bank = st.current.bank!;
-    /* sudden death is typed and checked fast: never a question only a person can judge, host or not */
-    const deal = QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => getSettings().noRepeat, suddenOk: (q: Q) => !hostOnly(q),
-      ok: { map: (q: G) => q.type === "map", flag: (q: G) => q.type === "flag", dish: (q: G) => q.type === "dish",
-        pin: (q: G) => q.type === "pin" && Number.isFinite(q.lat) && Number.isFinite(q.lon) && !!q.photo,
-        airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0,
-        majority: (q: G) => q.type === "majority" && Array.isArray(q.options) && q.options.length === 4 && q.options.includes(q.answer) } });
-    return { deal, settings: seat() };
+    return { deal: dealerFor(bank, used), settings: seat() };
   }, [used]);
+
+  /* the lobby: game types nearly out of unplayed questions (the "bank is getting thin" note, on the TV
+     and the host's Setup); worked out again whenever the settings or the played list change here */
+  const [thin, setThin] = useState<Thin[]>([]);
+  const status = room?.status;
+  useEffect(() => {
+    if (!isTv || status !== "lobby") return;
+    let live = true;
+    const check = () => { void loadBank(code).then((b) => { if (live) setThin(dealerFor(b, used).thinBank(PARTY_LEGS)); }).catch(() => { /* no note, then */ }); };
+    check();
+    const onStorage = (e: StorageEvent) => { if (!e.key || e.key === USED_KEY || e.key.startsWith("qmb.party.")) check(); };
+    window.addEventListener("qmb:settings", check); window.addEventListener("qmb:custom", check); window.addEventListener("storage", onStorage);
+    return () => { live = false; window.removeEventListener("qmb:settings", check); window.removeEventListener("qmb:custom", check); window.removeEventListener("storage", onStorage); };
+  }, [isTv, status, code, used]);
+  /* every question played on this TV counts as new again (its Settings page has the same button) */
+  const resetPlayed = useCallback(() => { forgetUsed(); usedMem.current.clear(); window.dispatchEvent(new Event("qmb:settings")); }, []);
 
   /* what the state says: the question in play, whose turn, who won the leg on screen (lib/tv/reads.ts) */
   const current = useCallback((): G => currentQ(st.current), []);
@@ -957,7 +977,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        as if changed on its Settings page; the lobby share below sends them back to the host */
     if (a.kind === "setup" && (a.payload.settings || a.payload.forgetPlayed) && room.status === "lobby" && from?.role === "host") {
       if (a.payload.settings) saveSettings(cleanSettings(a.payload.settings));
-      if (a.payload.forgetPlayed) { forgetUsed(); usedMem.current.clear(); window.dispatchEvent(new Event("qmb:settings")); }
+      if (a.payload.forgetPlayed) resetPlayed();
       return;
     }
     if (!s.g || !from) return;
@@ -992,26 +1012,32 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (ok === true) { took.current = true; void publish(); }
       else if (ok) refuse(ok);
     }
-  }, [applyFx, captainInput, captainMove, code, draftKey, env, hostMove, play, publish, refuse]);
+  }, [applyFx, captainInput, captainMove, code, draftKey, env, hostMove, play, publish, refuse, resetPlayed]);
 
   /* In the lobby, the TV's settings and its own questions go to the host's phone (the secrets row: the
      host's alone, as the answers are), so the host can pick the TV's questions and change its settings
-     (Setup, Advanced). Sent again whenever either changes here; the game's first update replaces it. */
-  const status = room?.status;
+     (Setup, Advanced). Sent again whenever either changes here; the game's first update replaces it.
+     With them, what's nearly played out (the host's Setup shows the same note as the TV). */
+  const thinRef = useRef(thin);
+  thinRef.current = thin;
   useEffect(() => {
     if (!isTv || status !== "lobby") return;
     let t: ReturnType<typeof setTimeout> | undefined;
     const share = () => { clearTimeout(t); t = setTimeout(() => {
       const at = stamp();
       lastSecret.current = "";                         // the game's first answer goes out whatever it is
-      void sb().from("secrets").update({ data: { at, lobby: { settings: getSettings(), custom: getCustom(), played: usedCount() } } }).eq("room", code)
+      void sb().from("secrets").update({ data: { at, lobby: { settings: getSettings(), custom: getCustom(), played: usedCount(), thin: thinRef.current } } }).eq("room", code)
         .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).then(({ error }) => { if (error) console.error("lobby share failed", error); });
     }, 250); };
     share();
+    window.addEventListener("qmb:thin", share);
     const onStorage = (e: StorageEvent) => { if (!e.key || e.key.startsWith("qmb.party.")) share(); };
     window.addEventListener("qmb:settings", share); window.addEventListener("qmb:custom", share); window.addEventListener("storage", onStorage);
-    return () => { clearTimeout(t); window.removeEventListener("qmb:settings", share); window.removeEventListener("qmb:custom", share); window.removeEventListener("storage", onStorage); };
+    return () => { clearTimeout(t); window.removeEventListener("qmb:thin", share); window.removeEventListener("qmb:settings", share); window.removeEventListener("qmb:custom", share); window.removeEventListener("storage", onStorage); };
   }, [isTv, status, code]);
+
+  /* a new thin list goes to the host too */
+  useEffect(() => { if (isTv) window.dispatchEvent(new Event("qmb:thin")); }, [isTv, thin]);
 
   /* fetch the questions while everyone's still joining, not when Start is tapped */
   useEffect(() => { if (isTv) void loadBank(code).catch(() => { /* tried again at Start */ }); }, [isTv, code]);
@@ -1382,5 +1408,5 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* Exit on the TV itself (it has a mouse): the same as the host's Exit */
   const exit = useCallback(() => { if (st.current.screen !== "final") return; exitGame(); void publish(); }, [publish]);  // eslint-disable-line react-hooks/exhaustive-deps
   const again = useCallback(() => { if (st.current.screen === "final") againGame(); }, []);  // eslint-disable-line react-hooks/exhaustive-deps
-  return { pub, game: st.current.g as G, exit, again, banner, lobbyNote };
+  return { pub, game: st.current.g as G, exit, again, banner, lobbyNote, thin, resetPlayed };
 }

@@ -11,7 +11,7 @@ import { TvStage } from "@/components/TvStage";
 import { useTvGame } from "@/lib/tvGame";
 import { ensureSession } from "@/lib/supabase";
 import { notReadyWhy, readyToStart, starter, useRoom } from "@/lib/room";
-import type { Pub } from "@/lib/game";
+import { thinLine, type Pub } from "@/lib/game";
 import { Snd } from "@/lib/sound";
 import { useWakeLock } from "@/lib/wakeLock";
 import { useTabLock } from "@/lib/tabLock";
@@ -38,7 +38,11 @@ export default function TvRoom() {
   const lock = useTabLock(code, owner);
   const isTv = owner && lock.state === "mine";
 
-  const { pub: own, exit, again, banner, lobbyNote } = useTvGame(code, isTv, room, members);
+  const { pub: own, exit, again, banner, lobbyNote, thin, resetPlayed } = useTvGame(code, isTv, room, members);
+  /* the bank is getting thin: a pop-up in the lobby. "Not now" hides it until the next game */
+  const [notNow, setNotNow] = useState(false);
+  const status = room?.status;
+  useEffect(() => { if (status && status !== "lobby") setNotNow(false); }, [status]);
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
   const pub = own || ((room?.state?.pub || null) as Pub | null);
@@ -95,6 +99,21 @@ export default function TvRoom() {
             <div className="text-24 text-[var(--color-ink-2)] max-w-[760px]">This game was saved by an older version and can&rsquo;t carry on. Sorry! Exit, then start a new game from the home screen.</div>
             <button className="btn btn-gold" style={{ fontSize: 22, padding: "14px 30px" }}
               onClick={() => { void sb().from("rooms").update({ status: "done" }).eq("code", code).then(() => router.replace("/")); }}>Exit this game</button>
+          </div>
+        </div>)}
+      {room.status === "lobby" && isTv && thin.length > 0 && !notNow && lock.state === "mine" && (
+        <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.93)", zIndex: 35 }} role="dialog" aria-modal="true" aria-labelledby="thin-title">
+          <div className="card text-center flex flex-col items-center gap-5" style={{ maxWidth: 880, padding: "40px 48px", background: "var(--color-bg-2)" }}>
+            <div id="thin-title" className="display" style={{ fontSize: 56, color: "var(--color-gold)" }}>The bank is getting thin</div>
+            <div className="text-22 text-[var(--color-ink-2)]">This TV has played most of these. Their games will bring back questions you&rsquo;ve already played:</div>
+            <ul className="text-20 text-left flex flex-col gap-1" style={{ listStyle: "disc", paddingLeft: 28 }}>
+              {thin.map((t) => <li key={t.key}>{thinLine(t)}</li>)}
+            </ul>
+            <div className="text-20 text-[var(--color-ink-2)]">Reset, and every question counts as new again.</div>
+            <div className="flex gap-4">
+              <button className="btn btn-gold" style={{ fontSize: 22, padding: "14px 30px" }} onClick={resetPlayed}>Reset played questions</button>
+              <button className="btn btn-ghost" style={{ fontSize: 22, padding: "14px 30px" }} onClick={() => setNotNow(true)}>Not now</button>
+            </div>
           </div>
         </div>)}
       {room.status === "lobby" ? (

@@ -83,7 +83,7 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
           onClick={() => set(Object.fromEntries(TIMER_KEYS.map((k) => [k, DEFAULTS[k]])) as Partial<Settings>)}>Back to the default timers</button>
       </>) : (<>
       <Section title="Gameplay">
-        <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="Never reuse a question I've already played" help="Every question this TV plays is remembered. The same group can play week after week with no repeats." />
+        <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="New questions first" help="Every question this TV plays is remembered, and the next games deal the ones you haven't played. When a game runs out of new ones, played ones come back (a night never gets shorter) and the lobby offers to reset." />
         <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="Alternate which team answers first each round" help="Off = Team A always goes first." />
         <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help="Someone switches app or tab while a question is up (a search, a chatbot)? The TV says so, and the host's phone keeps the list. Call a Friend is allowed." />
         <div className="flex items-center justify-between gap-3 flex-wrap">

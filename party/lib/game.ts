@@ -108,7 +108,14 @@ export type Pub = {
 export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null>; you?: boolean;
   lobby?: TvShare };
 /* In the lobby, what the TV shares with the host's phone: its settings, its own questions, how many it has played */
-export type TvShare = { settings: import("./settings").Settings; custom: import("./engine").Q[]; played: number };
+export type TvShare = { settings: import("./settings").Settings; custom: import("./engine").Q[]; played: number; thin?: Thin[] };
+/* a game type nearly out of unplayed questions: left of need (standard rounds: themes with two rounds' worth left, of how many) */
+export type Thin = { key: "standard" | MiniKey; left: number; need?: number; of?: number };
+/* what the note says about each */
+export function thinLine(t: Thin): string {
+  if (t.key === "standard") return `Standard rounds: ${t.left} of ${t.of} themes have two rounds of new questions left`;
+  return `${MINI_TITLES[t.key]}: ${t.left} new ${t.left === 1 ? "question" : "questions"} left, a game plays ${t.need}`;
+}
 
 /* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
 export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "battleLevel"];

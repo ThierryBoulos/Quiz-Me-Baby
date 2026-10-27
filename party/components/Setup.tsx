@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { QMB, forNoHost, loadBank, themeCounts, withCustom, type Bank, type Q } from "@/lib/engine";
 import { NO_PICKS, Picker, inLevels, pickSummary, type Picks } from "./Picker";
 import { cleanList, getCustom } from "@/lib/custom";
-import type { TvShare } from "@/lib/game";
+import { thinLine, type TvShare } from "@/lib/game";
+import { sendQuiet } from "@/lib/supabase";
 import { TvSettings } from "./TvSettings";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
@@ -153,6 +154,9 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
     <section className="flex flex-col gap-3" aria-label="Tonight's game">
       <div className="eyebrow px-1" style={{ color: "var(--color-gold)" }}>Tonight&rsquo;s game</div>
 
+      {/* the TV's bank is nearly played out in places (the TV shows the same, as a pop-up) */}
+      {isHost && !!tv?.thin?.length && <ThinNote code={code} lines={tv.thin.map(thinLine)} />}
+
       {/* ---- STANDARD TRIVIA ROUNDS ---- */}
       <div className="card flex flex-col gap-4" style={{ borderColor: standard ? "color-mix(in srgb, var(--color-gold) 40%, transparent)" : undefined }}>
         <div className="flex items-center justify-between gap-3">
@@ -243,4 +247,21 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
       {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
     </section>
   );
+}
+
+/* "The bank is getting thin", on the host's Setup: Reset forgets what the TV has played (the note goes once the TV says so) */
+function ThinNote({ code, lines }: { code: string; lines: string[] }) {
+  const [state, setState] = useState<"idle" | "sent" | "failed">("idle");
+  return (
+    <div className="card flex flex-col gap-2" role="status" style={{ borderColor: "color-mix(in srgb, var(--color-gold) 55%, transparent)" }}>
+      <div className="display text-20" style={{ color: "var(--color-gold)" }}>The bank is getting thin</div>
+      <div className="text-13 text-[var(--color-ink-2)]">The TV has played most of these, so their games will bring back questions you&rsquo;ve already played:</div>
+      <ul className="text-13 flex flex-col gap-0.5" style={{ listStyle: "disc", paddingLeft: 18 }}>{lines.map((l) => <li key={l}>{l}</li>)}</ul>
+      <div className="flex items-center gap-3 flex-wrap">
+        <button type="button" className="btn btn-sm btn-gold" disabled={state === "sent"}
+          onClick={() => { setState("sent"); sendQuiet(code, "setup", { forgetPlayed: true }).catch(() => setState("failed")); }}>
+          {state === "sent" ? "Resetting…" : "Reset played questions"}</button>
+        {state === "failed" && <span className="text-13 text-[var(--color-no)]">That didn&rsquo;t reach the TV. Try again.</span>}
+      </div>
+    </div>);
 }

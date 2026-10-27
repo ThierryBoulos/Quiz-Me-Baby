@@ -212,3 +212,15 @@ test('unplayed Closest numbers come before played ones', () => {
   assert.equal(pool.length, 12);
   assert.deepEqual(pool.slice(0, 4).map(q => q.id).sort(), ['c10', 'c11', 'c8', 'c9']);
 });
+test('thin bank: a game type with less than one game of unplayed questions left, only once played ones are what is missing', () => {
+  assert.deepEqual(D.thinBank(), []);
+  const closestPlayed = new Set(bank.filter(q => q.type === 'closest').slice(0, 8).map(q => q.id));
+  const Dp = Q.createDealer({ bank:() => bank, used:() => closestPlayed, noRepeat:() => true, rng });
+  assert.deepEqual(Dp.thinBank(), [{ key:'closest', left:4, need:7 }]);
+  assert.deepEqual(Dp.thinBank({ closest:4 }), []);
+  const off = Q.createDealer({ bank:() => bank, used:() => closestPlayed, noRepeat:() => false, rng });
+  assert.deepEqual(off.thinBank(), []);
+  const all = new Set(bank.filter(q => q.type === 'standard').map(q => q.id));
+  const Ds = Q.createDealer({ bank:() => bank, used:() => all, noRepeat:() => true, rng });
+  assert.deepEqual(Ds.thinBank().map(t => t.key), ['standard', 'battle']);
+});

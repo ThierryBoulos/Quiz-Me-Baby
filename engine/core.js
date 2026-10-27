@@ -836,12 +836,33 @@
       };
     }
 
+    /* 27 Oct: what's nearly played out, for the "bank is getting thin" note. A game type is thin with
+       less than one game's worth of unplayed questions left (at any level), and only if played ones are
+       what's missing (a reset would help). Standard rounds: once half the themes or more are down to
+       under two rounds' worth. legs: a front end's own lengths (Party plays some shorter). */
+    function thinBank(legs){
+      if(!ctx.noRepeat()) return [];
+      const n = Object.assign({}, LEGS, { battle:BATTLE_N * 2 }, legs || {});
+      const left = (test) => { const all = bank().filter(test); return { all:all.length, fresh:all.filter(isFresh).length }; };
+      const out = [];
+      const std = (q) => q.type === 'standard';
+      const themes = bank().filter(std).map(q => q.theme).filter((t, i, a) => a.indexOf(t) === i);
+      const low = themes.filter(t => { const c = left(q => std(q) && q.theme === t); return c.fresh < 4 && c.all > c.fresh; });
+      if(themes.length && low.length * 2 >= themes.length) out.push({ key:'standard', left:themes.length - low.length, of:themes.length });
+      const tests = { closest:q => q.type === 'closest', auction:q => q.type === 'auction',
+        saysame:q => q.type === 'saysame' && (q.pool || []).length >= 2, map:ok.map, flag:ok.flag, dish:ok.dish,
+        pin:ok.pin, airport:ok.airport, majority:ok.majority,
+        battle:q => std(q) && BATTLE_SKIP_THEMES.indexOf(q.theme) < 0 && (q.difficulty === 'easy' || q.difficulty === 'medium') };
+      Object.keys(tests).forEach(k => { const c = left(tests[k]); if(c.fresh < n[k] && c.all > c.fresh) out.push({ key:k, left:c.fresh, need:n[k] }); });
+      return out;
+    }
+
     /* ctx.suddenOk: questions that can't be played in sudden death (Party: the ones a person must judge) */
     const suddenOk = ctx.suddenOk || (() => true);
     return { bank, shuffle, isFresh, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, commonOf, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
-             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, diffOf, pickedPair, dishLeg, buildGame };
+             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, diffOf, pickedPair, dishLeg, buildGame, thinBank };
   }
 
 

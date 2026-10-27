@@ -193,7 +193,7 @@ export function Rules() {
         <L items={[
           <><B>No accounts.</B> Each phone gets an anonymous sign-in, so the game knows it&rsquo;s the same phone. No email, no phone number.</>,
           <>A room keeps the names, faces and teams people chose, what the captains sent, and the scores. It&rsquo;s deleted the day after the game; a sign-in nobody has used for 30 days is deleted too.</>,
-          <>The TV keeps the game in progress, and which questions it has already played, in its own browser (Settings &rarr; &ldquo;Forget played questions&rdquo; clears the list).</>,
+          <>The TV keeps the game in progress, and which questions it has already played, in its own browser. New questions come first; when a game runs low, the lobby says so and offers to reset (Settings &rarr; &ldquo;Forget played questions&rdquo; does the same).</>,
           <>Where: the game server is Supabase, in the EU (Ireland); the site runs on Vercel. Nothing is sold or shared, and there are no ads or trackers.</>,
         ]} />
       </Rule>

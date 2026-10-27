@@ -1233,6 +1233,8 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
   background:var(--gold-dim);border:1px solid rgba(245,197,24,.45);color:var(--gold);
   font-family:var(--font-d);font-size:13px;display:grid;place-items:center}
 .warnbox{border:1px solid rgba(255,162,58,.4);background:rgba(255,162,58,.09);border-radius:var(--r);padding:14px 16px;font-size:13px;line-height:1.6;color:#FFD9A8}
+.warnbox.thin ul{margin:6px 0 10px;padding-left:18px}
+.thin-list{text-align:left;margin:0 auto;padding-left:20px;max-width:46ch;line-height:1.5}
 .okbox{border:1px solid rgba(61,220,151,.35);background:rgba(61,220,151,.08);border-radius:var(--r);padding:14px 16px;font-size:13px;line-height:1.6;color:#B6F2D6}
 .list-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);padding:14px 16px;border-radius:var(--r);border:1px solid var(--line);background:var(--glass);flex-wrap:wrap}
 </style>
@@ -1283,7 +1285,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.38', date:'27 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.39', date:'27 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -5314,6 +5316,7 @@ SCREENS.setup = function(){
          maths does not need spelling out at the cost of a screen of scroll. */
     '</div>' +
 
+    thinNote() +
     '<div class="card pad stack">' +
       '<div><h3 class="display">Advanced</h3><p class="help">' + (c.hostless ? '' : 'Host only. ') + advSummary + '</p></div>' +
       (halfThemes.length
@@ -5328,11 +5331,38 @@ SCREENS.setup = function(){
 
     (!stdOn ? (miniKeys.length ? '' : '<div class="warnbox"><strong>Nothing to play.</strong> Standard rounds are off — switch on at least one mini-game.</div>')
      : enough ? ''
-      : '<div class="warnbox"><strong>Not enough questions.</strong> Only ' + cap.rounds + ' matched pair(s) available for ' + c.rounds + ' rounds. Add themes, change difficulty, lower the round count, or turn off &ldquo;never reuse&rdquo; in Settings.</div>') +
+      : '<div class="warnbox"><strong>Not enough questions.</strong> Only ' + cap.rounds + ' matched pair(s) available for ' + c.rounds + ' rounds. Add themes, change difficulty or lower the round count.</div>') +
     (enoughMini || miniKeys.indexOf('closest') < 0 ? '' : '<div class="warnbox">Only ' + cap.closest + ' of 7 Closest To Wins questions available — that leg will be shortened to ' + cap.closest + ' leg(s).</div>') +
 
     '<button class="btn gold lg block" data-act="startGame"' + (canStart ? '' : ' disabled') + '>Start the game</button>' +
   '</div>';
+};
+
+/* 27 Oct: the bank is getting thin. A game type with less than one game of unplayed questions left brings back
+   played ones; the setup says so (and, once per visit until the next game, pops it up), with the reset. */
+function thinLines(){
+  return DEAL.thinBank().map(t => t.key === 'standard'
+    ? 'Standard rounds: ' + t.left + ' of ' + t.of + ' themes have two rounds of new questions left'
+    : ((MINI_GAMES[t.key] || {}).name || t.key) + ': ' + t.left + ' new question' + (t.left === 1 ? '' : 's') + ' left, a game plays ' + t.need);
+}
+function thinNote(){
+  const lines = thinLines();
+  if(!lines.length) return '';
+  return '<div class="warnbox thin"><strong>The bank is getting thin.</strong> You&rsquo;ve played most of these, so their games will bring back questions you&rsquo;ve already played:' +
+    '<ul>' + lines.map(l => '<li>' + esc(l) + '</li>').join('') + '</ul>' +
+    '<button class="btn sm gold" data-act="thinReset">Reset played questions</button></div>';
+}
+AFTER.setup = function(){
+  if(S.tmp.thinShown) return;
+  const lines = thinLines();
+  if(!lines.length) return;
+  S.tmp.thinShown = true;
+  openModal('<div class="center stack"><h3 class="display">The bank is getting thin</h3>' +
+    '<p class="help">You&rsquo;ve played most of these. Their games will bring back questions you&rsquo;ve already played:</p>' +
+    '<ul class="thin-list">' + lines.map(l => '<li>' + esc(l) + '</li>').join('') + '</ul>' +
+    '<p class="help">Reset, and every question counts as new again.</p>' +
+    '<div class="btn-row center"><button class="btn gold" data-act="thinReset">Reset played questions</button>' +
+    '<button class="btn ghost" data-act="closeModal">Not now</button></div></div>');
 };
 
 function teamSetupCard(side, t){
@@ -7876,7 +7906,7 @@ SCREENS.settings = function(){
 
     '<div class="card pad stack">' +
       '<div class="eyebrow">Gameplay</div>' +
-      toggleRow('noRepeat', 'Never reuse a question I&rsquo;ve already played', 'Every question you use is remembered. The same group can play week after week with zero repeats.') +
+      toggleRow('noRepeat', 'New questions first', 'Every question you use is remembered, and the next games deal the ones you haven&rsquo;t played. When a game runs out of new ones, played ones come back (a night never gets shorter) and the setup offers to reset.') +
       toggleRow('alternateFirst', 'Alternate which team answers first each round', 'Off = Team A always goes first.') +
       '<div class="row between"><span class="help">' + S.used.size + ' question(s) marked as played.</span>' +
         '<button class="btn sm ghost danger" data-act="resetUsed">Forget played questions</button></div>' +
@@ -8546,6 +8576,7 @@ const ACT = {
     if(!std && !(c.minis || []).length) return toast('Standard rounds are off — switch on at least one mini-game.');
     c.teamA.name = (c.teamA.name || '').trim() || 'Team A';
     c.teamB.name = (c.teamB.name || '').trim() || 'Team B';
+    S.tmp.thinShown = false;                 // the thin-bank pop-up may come up again after this game
     const g = buildGame(c);
     if(std && g.rounds.length < c.rounds) toast('Only enough questions for ' + g.rounds.length + ' rounds — shortened.', 4500);
     if(std && !g.rounds.length) return toast('No usable questions. Widen the themes or difficulty.');
@@ -8952,6 +8983,7 @@ const ACT = {
   histClearYes(){ S.history = []; saveHistory(); closeModal(); render(); },
   histExport(){ download('quiz-me-baby-history.json', JSON.stringify(S.history, null, 2), 'application/json'); },
   resetUsed(){ S.used = new Set(); saveUsed(); toast('Played-question memory cleared.'); render(); },
+  thinReset(){ S.used = new Set(); saveUsed(); if(el('modal').classList.contains('on')) closeModal(); toast('Every question counts as new again.'); render(); },
   exportAll(){
     download('quiz-me-baby-backup.json', JSON.stringify({
       v:1, exported:new Date().toISOString(),
