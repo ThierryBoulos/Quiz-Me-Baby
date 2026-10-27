@@ -147,8 +147,9 @@ test('levels: Easy+Medium+Hard by default, Mixed is all four, Expert only when t
   assert.equal(g1.rounds.slice(0, 2).every(r => r.q.every(q => q.difficulty === 'easy')), true);
   /* both questions of a round always share a level */
   assert.ok(g1.rounds.every(r => r.q[0].difficulty === r.q[1].difficulty));
-  /* a single level stays that level */
-  assert.equal(deal('easy').rounds.length, 2);
+  /* a single level stays that level while it lasts; then the nearest other level, never fewer rounds */
+  const g2 = deal('easy');
+  assert.deepEqual(g2.rounds.map(r => r.q[0].difficulty), ['easy', 'easy', 'expert', 'expert']);
   /* Mixed takes all four from the start */
   assert.equal(deal('mixed').rounds.length, 4);
   assert.ok(D2.matchDiff({ difficulty:'expert' }, 'mixed') && !D2.matchDiff({ difficulty:'expert' }, Q.DEFAULT_DIFF));
@@ -183,4 +184,31 @@ test('a flag swapped for another keeps its level', () => {
   s.i = i;
   Q.play(g, { type:'flag/swap' }, { deal:D });
   assert.equal(s.qs[i].level, 'medium');
+});
+
+/* 27 Oct: a thin bank reuses, it never shrinks: a game is as long as it was set up to be */
+test('everything played: same number of rounds, Closest legs, Auction and Say legs (the played ones come back)', () => {
+  const all = new Set(bank.map(q => q.id));
+  const Dp = Q.createDealer({ bank:() => bank, used:() => all, noRepeat:() => true, rng,
+    ok:{ map:q => q.type === 'map', flag:q => q.type === 'flag', dish:q => q.type === 'dish' } });
+  const g = Dp.buildGame(cfg({ rounds:4, minis:['closest', 'auction', 'saysame'] }));
+  assert.equal(g.rounds.length, 4);
+  assert.equal(g.mini.qs.length, Q.LEGS.closest);
+  assert.ok(Dp.auctionPool().length >= 3);
+  assert.ok(Dp.saySamePool().length >= 7);
+  assert.equal(Dp.capacity(['Music', 'Movies'], 'medium').rounds > 0, true);
+});
+test('a theme out of unplayed questions at tonight\'s level takes an unplayed one at the nearest level first', () => {
+  const played = new Set(bank.filter(q => q.type === 'standard' && q.difficulty === 'medium').map(q => q.id));
+  const Dp = Q.createDealer({ bank:() => bank, used:() => played, noRepeat:() => true, rng });
+  const g = Dp.buildGame(cfg({ rounds:4, difficulty:'medium' }));
+  assert.equal(g.rounds.length, 4);
+  g.rounds.forEach(r => r.q.forEach(q => { assert.ok(!played.has(q.id)); assert.equal(q.difficulty, 'easy'); }));   // easy is as near as hard, and easier
+});
+test('unplayed Closest numbers come before played ones', () => {
+  const played = new Set(['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']);
+  const Dp = Q.createDealer({ bank:() => bank, used:() => played, noRepeat:() => true, rng });
+  const pool = Dp.closestPool();
+  assert.equal(pool.length, 12);
+  assert.deepEqual(pool.slice(0, 4).map(q => q.id).sort(), ['c10', 'c11', 'c8', 'c9']);
 });

@@ -344,11 +344,12 @@
 
     const matchDiff = (q, d) => d === 'mixed' || diffsOf(d).indexOf(q.difficulty) > -1;
 
-    function pairsFor(theme, diff, exclude){
+    /* stale: played ones count too (the last resort before a round would go missing) */
+    function pairsFor(theme, diff, exclude, stale){
       exclude = exclude || new Set();
       const pool = bank().filter(q =>
         q.type === 'standard' && q.theme === theme && matchDiff(q, diff) &&
-        !exclude.has(q.id) && isFresh(q));
+        !exclude.has(q.id) && (stale || isFresh(q)));
       /* Group by ticker AND difficulty — on "mixed" one team must never get an
          easy question while the other gets a hard one. */
       const groups = {};
@@ -375,21 +376,25 @@
     /* Closest To Wins: a round-robin over the themes. Given the night's own themes (its
        rounds'), one question from each of those leads, then the rest in their usual order. */
     function closestPool(prefer){
-      const byTheme = {};
-      bank().forEach(q => {
-        if(q.type !== 'closest' || !isFresh(q)) return;
-        (byTheme[q.theme] = byTheme[q.theme] || []).push(q);
-      });
-      let decks = shuffle(Object.keys(byTheme)).map(t => shuffle(byTheme[t]));
-      const out = [];
-      while(decks.length){
-        decks.forEach(d => out.push(d.shift()));
-        decks = shuffle(decks.filter(d => d.length));
-        /* a fresh lap must not open on the theme the last lap closed with */
-        if(decks.length > 1 && out.length && decks[0][0].theme === out[out.length - 1].theme){
-          const swap = decks[0]; decks[0] = decks[1]; decks[1] = swap;
+      /* the unplayed ones first, round-robin over the themes; then the played ones the same way,
+         so a leg is never short (27 Oct: a thin bank reuses, it doesn't shrink) */
+      const lap = (list) => {
+        const byTheme = {};
+        list.forEach(q => { (byTheme[q.theme] = byTheme[q.theme] || []).push(q); });
+        let decks = shuffle(Object.keys(byTheme)).map(t => shuffle(byTheme[t]));
+        const out = [];
+        while(decks.length){
+          decks.forEach(d => out.push(d.shift()));
+          decks = shuffle(decks.filter(d => d.length));
+          /* a fresh lap must not open on the theme the last lap closed with */
+          if(decks.length > 1 && out.length && decks[0][0].theme === out[out.length - 1].theme){
+            const swap = decks[0]; decks[0] = decks[1]; decks[1] = swap;
+          }
         }
-      }
+        return out;
+      };
+      const all = bank().filter(q => q.type === 'closest');
+      const out = lap(all.filter(isFresh)).concat(lap(all.filter(q => !isFresh(q))));
       if(!prefer || !prefer.length) return out;
       const lead = [], seen = new Set();
       out.forEach(q => { if(prefer.indexOf(q.theme) >= 0 && !seen.has(q.theme)){ seen.add(q.theme); lead.push(q); } });
@@ -406,7 +411,8 @@
     function capacity(themes, diff){
       const at = typeof diff === 'function' ? diff : () => diff;
       let loose = 0, strict = 0;
-      themes.forEach(t => { const p = pairsFor(t, at(t)); loose += p.length; strict += p.filter(x => x.strict).length; });
+      /* played ones count: a round reuses rather than goes missing */
+      themes.forEach(t => { const p = pairsFor(t, at(t), null, true); loose += p.length; strict += p.filter(x => x.strict).length; });
       return { rounds:loose, strict, closest:closestPool().length };
     }
 
@@ -457,19 +463,22 @@
       };
     }
 
+    /* unplayed first, then the played ones (each part shuffled) */
     function auctionPool(){
-      return bank().filter(q => q.type === 'auction' && isFresh(q));
+      const all = bank().filter(q => q.type === 'auction');
+      return shuffle(all.filter(isFresh)).concat(shuffle(all.filter(q => !isFresh(q))));
     }
 
     function auctionDeck(cfg){
       const picked = ((cfg && cfg.pickAuction) || [])
         .map(id => bank().find(q => q.id === id)).filter(Boolean);
       const ids = new Set(picked.map(q => q.id));
-      return picked.concat(shuffle(auctionPool().filter(q => !ids.has(q.id))));
+      return picked.concat(auctionPool().filter(q => !ids.has(q.id)));
     }
 
+    /* every prompt; the deck plays the unplayed ones first (freshFirst, below) */
     function saySamePool(){
-      return bank().filter(q => q.type === 'saysame' && isFresh(q) && (q.pool || []).length >= 2);
+      return bank().filter(q => q.type === 'saysame' && (q.pool || []).length >= 2);
     }
 
     /* The hidden word is always a common answer, what the person next to you would
@@ -692,6 +701,14 @@
 
     function dishLeg(){ return { shown:1, out:[false, false], buzz:null, calls:[], k:0 }; }
 
+    /* the levels a night didn't ask for, nearest first (the easier one on a tie) */
+    function otherLevels(d){
+      const on = diffsOf(d).map(x => DIFFS.indexOf(x));
+      return DIFFS.filter(x => diffsOf(d).indexOf(x) < 0)
+        .map(x => ({ x, k:Math.min(...on.map(i => Math.abs(i - DIFFS.indexOf(x)))) * 10 + DIFFS.indexOf(x) }))
+        .sort((a, b) => a.k - b.k).map(o => o.x);
+    }
+
     function buildGame(cfg){
       const N = cfg.standard === false ? 0 : cfg.rounds;   // 0 = mini-games only
       const themes = shuffle(cfg.themes.slice());
@@ -711,6 +728,11 @@
           /* a mix without Expert that has run dry in this theme: Expert comes in only now, once the
              rest of the theme's bank is spent (an explicit single level stays that level) */
           if(!p.length && diffsOf(d).length > 1 && diffsOf(d).indexOf('expert') < 0) p = pairsFor(t, 'expert', taken);
+          /* still dry: an unplayed pair at the nearest other level, and only then a played one
+             (tonight's levels first), so a round is never lost to a thin theme (27 Oct) */
+          if(!p.length) p = otherLevels(d).reduce((got, l) => got.length ? got : pairsFor(t, l, taken), []);
+          if(!p.length) p = pairsFor(t, d, taken, true);
+          if(!p.length) p = otherLevels(d).reduce((got, l) => got.length ? got : pairsFor(t, l, taken, true), []);
           if(p.length){ pair = p[0]; theme = t; break; }
         }
         if(!pair) break;
@@ -1676,7 +1698,8 @@
       (s.spare || []).forEach(q => inPlay.add(q.id));
       const lastLeg = s.i === s.base - 1, cur = s.qs[s.i];
       const fits = (q) => lastLeg && cur.pool.length === 2 ? q.pool.length === 2 : q.pool.length >= 4;
-      const avail = D.saySamePool().filter(q => !inPlay.has(q.id));
+      const all = D.saySamePool().filter(q => !inPlay.has(q.id)), fresh = all.filter(D.isFresh);
+      const avail = fresh.length ? fresh : all;
       let pool = avail.filter(fits);
       if(!pool.length) pool = avail;
       if(!pool.length) return [{ toast:'No spare prompt left in the bank.' }];
