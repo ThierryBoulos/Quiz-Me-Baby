@@ -325,6 +325,15 @@ body.homemode main{padding-top:8px;padding-bottom:8px}
 
 /* ---------- FORM ---------- */
 label.fld{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+/* the setup's fields and its themes fold, laid out as in Party's setup */
+div.fld{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+div.fld .chip, div.fld .help{text-transform:none;letter-spacing:normal}
+div.fld .help{margin:0;font-weight:400}
+.fold-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;width:100%;text-align:left;cursor:pointer;background:none;border:0;color:inherit;padding:0}
+.fold-row .fld{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.fold-row .help{font-weight:400;font-size:14px;color:var(--ink-2);margin:2px 0 0}
+.fold-act{flex:none;font-size:13px;font-weight:700;color:var(--gold)}
+.tdsel{min-height:36px;padding:4px 30px 4px 10px;font-size:13px;width:auto}
 input[type=text],input[type=number],select,textarea{
   color:var(--ink);          /* don't inherit the dim label colour */
   background:rgba(0,0,0,.35);border:1px solid var(--line-2);border-radius:var(--r-s);
@@ -1274,7 +1283,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.37', date:'27 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.38', date:'27 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1331,7 +1340,7 @@ const THEMES = ['Acronyms','Art & Books','Disney & Pixar','Food & Drink','Friend
 const DIFFS  = ['easy','medium','hard','expert'];
 /* a night's difficulty in words: the default mix is Easy, Medium and Hard (Expert only once those run
    out), Mixed is all four, or one level on its own */
-const DLabel = (d) => d === QMB.DEFAULT_DIFF ? 'Easy to Hard' : d === 'mixed' ? 'Mixed' : Cap(d);
+const DLabel = (d) => d === QMB.DEFAULT_DIFF ? 'Easy to Hard' : d === 'mixed' ? 'Mixed' : QMB.diffsOf(d).map(Cap).join(' + ');
 
 /* --------------------------------------------------------------------------
    CUSTOM THEMES
@@ -5082,7 +5091,7 @@ function usableThemes(diff){
   return setupThemes().filter(t => pairsFor(t, diff).length > 0);
 }
 function defaultSetup(){
-  const rounds = 8;
+  const rounds = 6;   // as in Party's setup
   return {
     teamA:{ name:'Team A', captain:'', players:'' },
     teamB:{ name:'Team B', captain:'', players:'' },
@@ -5091,7 +5100,8 @@ function defaultSetup(){
     difficulty:QMB.DEFAULT_DIFF,
     themeDiff:{},       // theme -> difficulty, overriding the house setting
     standard:true,      // false = a mini-games-only night, no standard rounds
-    minis:['closest'],  // which mini-games are on tonight's card
+    minis:['flag','closest','auction','battle'],  // which mini-games are on tonight's card (Party's defaults)
+    flagLevels:['veasy','easy','medium','hard'],    // Very easy to Hard, as in Party
     pickClosest:[], pickAuction:[], pickSaySame:[], pickMap:[], pickAirport:[],   // hand-picked mini-game questions
     picks:{}            // theme -> [questionId, questionId] chosen by hand
   };
@@ -5159,6 +5169,7 @@ function prunePicks(){
 
 SCREENS.setup = function(){
   const c = S.setup = S.setup || defaultSetup();
+  if(c.rounds > 12){ c.rounds = 12; syncThemes(); }   // up to 12, as in Party (an older setup could hold 13 or 14)
   prunePicks();
   const setThemes  = c.themes.filter(t => picksFor(t).length === 2);
   const halfThemes = c.themes.filter(t => picksFor(t).length === 1);
@@ -5194,89 +5205,30 @@ SCREENS.setup = function(){
       esc(t) + '</button>';
   }).join('');
 
-  const roundBtns = [];
-  for(let i = 4; i <= 14; i++) roundBtns.push('<button data-act="rounds" data-n="' + i + '" aria-pressed="' + (c.rounds === i) + '" class="' + (c.rounds === i ? 'gold' : '') + '">' + i + '</button>');
+  /* As in Party's setup (party/components/Setup.tsx): 4 to 12 rounds from a list; any mix of
+     the four levels, or Mixed (all four); the themes folded behind Change. */
+  const roundSel = '<select class="rsel" data-act="roundsSel" aria-label="How many rounds?">' +
+    [4,5,6,7,8,9,10,11,12].map(i => '<option value="' + i + '"' + (c.rounds === i ? ' selected' : '') + '>' + i + ' rounds</option>').join('') + '</select>';
+  const dOn = QMB.diffsOf(c.difficulty), dAll = c.difficulty === 'mixed';
+  const diffBtns = '<div class="chips lvl-chips" role="group" aria-label="Difficulty">' +
+    QMB.DIFFS.map(d => '<button class="chip" data-act="diffTog" data-d="' + d + '" aria-pressed="' + (dOn.indexOf(d) > -1) + '">' + Cap(d) + '</button>').join('') +
+    '<button class="chip" data-act="diffTog" data-d="mixed" aria-pressed="' + dAll + '">Mixed</button></div>' +
+    '<p class="help">' + (dAll ? 'All four levels, Expert included.' : dOn.indexOf('expert') > -1 ? 'Expert is on: only real buffs get those.'
+      : dOn.length > 1 ? 'Expert comes in only when a theme runs out of the others.' : Cap(dOn[0]) + ' only.') + '</p>';
+  const themesOpen = !!S.tmp.themesOpen;
 
-  const diffBtns = [QMB.DEFAULT_DIFF, 'easy','medium','hard','expert','mixed'].map(d =>
-    '<button data-act="diff" data-d="' + d + '" aria-pressed="' + (c.difficulty === d) + '" class="' + (c.difficulty === d ? 'gold' : '') + '">' + DLabel(d) + '</button>').join('');
-
-  /* ---- the advanced drawer ------------------------------------------------
-     Three things the host almost never touches on a normal Tuesday, folded
-     away behind one button so the setup screen stays a phone screen: the
-     hand-picked questions, a difficulty per theme, and tonight's rules.
-     Collapsed by default. The summary line under the button says what is
-     configured in there, so nothing set can hide behind a closed drawer. */
-  const adv  = !!S.tmp.advOpen;
+  /* ---- Advanced: as in Party, a card with two buttons. Choose questions (the
+     picker, where each theme can also take its own difficulty) and Settings (the
+     timers and the rules of play, which hold for every game). The line under the
+     title says what is set, so nothing set can hide. */
   const ovr  = overrideThemes();
   const bits = [];
   if(setThemes.length)  bits.push(setThemes.length + ' theme' + (setThemes.length > 1 ? 's' : '') + ' hand-picked');
   if(halfThemes.length) bits.push(halfThemes.length + ' half-picked');
   if(ovr.length)        bits.push(ovr.length === 1 ? '1 theme on its own difficulty' : ovr.length + ' themes on their own difficulty');
-  if(S.settings.noRepeat)       bits.push('no repeats');
-  if(S.settings.alternateFirst) bits.push('alternating first answer');
-  const advSummary = bits.length
-    ? bits.join(' <span class="sep">·</span> ')
-    : 'Hand-pick the questions, set a difficulty per theme, change tonight&rsquo;s rules.';
-
-  function advBody(){
-    /* A. hand-picked questions */
-    const pickBlock = '<div class="stack">' +
-      '<div class="sec-head"><div class="eyebrow gold">Hand-picked questions</div>' +
-        '<span class="badge ' + (setThemes.length ? 'gold' : 'line') + '">' + setThemes.length + ' of ' + c.themes.length + ' themes set</span></div>' +
-      '<p class="help">Optional. Tick exactly <strong>two</strong> questions in a theme — one for each team — and that round is locked to the pair you chose. Leave a theme alone and the app matches a pair itself, as always.</p>' +
-      (halfThemes.length
-        ? '<div class="warnbox"><strong>' + esc(halfThemes.join(', ')) + '</strong> ' + (halfThemes.length > 1 ? 'have' : 'has') + ' only one question ticked. A round needs two — tick a second one or clear it, otherwise that theme falls back to a random pair.</div>'
-        : '') +
-      '<div class="btn-row">' +
-        '<button class="btn gold" data-act="pickOpen"' + ((stdOn && c.themes.length) || miniKeys.some(k => MINI_PICKS[k]) ? '' : ' disabled') + '>Choose questions</button>' +
-        (setThemes.length || halfThemes.length ? '<button class="btn ghost" data-act="pickClear">Clear all picks</button>' : '') +
-      '</div>' +
-      (setThemes.length
-        ? '<div class="chips">' + setThemes.map(t => '<span class="chip" aria-pressed="true" style="pointer-events:none">' + esc(t) + '<span class="ct">2</span></span>').join('') + '</div>'
-        : '') +
-    '</div>';
-
-    /* B. a difficulty per theme.
-       No Mixed here. Mixed is a statement about a SPREAD of rounds — some easy,
-       some hard — which is a thing a whole game can be and a single theme
-       cannot. A theme is one round, and one round is one difficulty.
-       Mixed can still be the HOUSE setting, and a theme nobody has touched
-       inherits it; that is the case where no pill is lit. */
-    const rows = c.themes.length
-      ? c.themes.map(t => {
-          const own = (c.themeDiff || {})[t] || '';
-          const eff = own || c.difficulty;
-          const dead = !pairsFor(t, eff).length;
-          return '<div class="tdrow' + (own ? ' set' : '') + (dead ? ' dead' : '') + '"' +
-            (dead ? ' title="No pair left in ' + esc(t) + ' at ' + esc(DLabel(eff)) + '"' : '') + '>' +
-            '<div class="tdname">' + esc(t) + '</div>' +
-            '<div class="seg tiny">' + DIFFS.map(d =>
-              '<button data-act="themeDiff" data-t="' + esc(t) + '" data-d="' + d + '" aria-pressed="' + (eff === d) + '"' +
-                ' class="' + (eff === d ? (own ? 'gold' : 'inherit') : '') + '">' + Cap(d) + '</button>').join('') +
-            '</div>' +
-          '</div>';
-        }).join('')
-      : '<div class="empty">Pick tonight&rsquo;s themes first.</div>';
-
-    const diffBlock = '<div class="stack">' +
-      '<div class="sec-head"><div class="eyebrow gold">Difficulty per theme</div>' +
-        '<span class="badge ' + (ovr.length ? 'gold' : 'line') + '">' +
-          (ovr.length ? ovr.length + ' overridden' : 'all on ' + DLabel(c.difficulty)) + '</span>' +
-        (ovr.length ? '<button class="btn sm ghost" data-act="themeDiffReset">Reset all</button>' : '') +
-      '</div>' +
-      '<div class="tdlist">' + rows + '</div>' +
-    '</div>';
-
-    /* C. tonight's rules */
-    const rulesBlock = '<div class="stack">' +
-      '<div class="sec-head"><div class="eyebrow gold">Rules for tonight</div></div>' +
-      toggleRow('noRepeat', 'Never reuse a question I&rsquo;ve already played', 'Same group can play again next week with zero repeats.') +
-      toggleRow('alternateFirst', 'Alternate which team answers first each round', 'Off = Team A always goes first, as in the classic format.') +
-      '<p class="help">Timers live in <strong>Settings</strong> — change them there and they hold for every game.</p>' +
-    '</div>';
-
-    return '<div class="stack lg">' + pickBlock + '<hr class="hair">' + (stdOn ? diffBlock + '<hr class="hair">' : '') + rulesBlock + '</div>';
-  }
+  const miniPicked = Object.keys(MINI_PICKS).filter(k => miniKeys.indexOf(k) > -1 && miniPicksFor(k).length).length;
+  if(miniPicked)        bits.push(miniPicked + ' mini-game' + (miniPicked > 1 ? 's' : '') + ' hand-picked');
+  const advSummary = bits.length ? bits.join(' <span class="sep">·</span> ') : 'Pick tonight&rsquo;s questions yourself, or set a difficulty per theme.';
 
   return '' +
   '<div class="stack lg" style="padding-top:12px">' +
@@ -5298,37 +5250,31 @@ SCREENS.setup = function(){
           (stdOn ? 'Question rounds, one theme each, with steals and lifelines.' : 'Off — tonight is mini-games only.') +
         '</span></span><span class="sw"></span></button>' +
       (stdOn ? (
-    '<div class="card pad lit stack">' +
-      '<div class="sec-head"><div class="eyebrow gold">01</div><h3 class="display">How many standard rounds?</h3></div>' +
-      '<div class="seg" style="flex-wrap:wrap">' + roundBtns.join('') + '</div>' +
-      '<p class="help">Each round = one theme, one question per team' + (c.hostless ? '. No host, so no steals.' : ', plus steal chances.') + '</p>' +
-    '</div>' +
-
-    '<div class="card pad lit stack">' +
-      '<div class="sec-head"><div class="eyebrow gold">02</div><h3 class="display">Difficulty</h3></div>' +
-      '<div class="seg">' + diffBtns + '</div>' +
-    '</div>' +
-
-    '<div class="card pad lit stack">' +
-      '<div class="sec-head"><div class="eyebrow gold">03</div><h3 class="display">Themes in play</h3>' +
-        '<span class="badge ' + (themesOK ? 'ok' : 'no') + '">' + c.themes.length + ' of ' + c.rounds + ' picked</span>' +
-        '<button class="btn sm ghost" data-act="themeNone">Clear</button></div>' +
-      '<div class="chips theme-chips">' + themeChips + '</div>' +
-      '<p class="help">One theme per round — pick exactly <strong>' + c.rounds + '</strong>. Dimmed themes are too thin at this difficulty.</p>' +
+      '<label class="fld">How many rounds?' + roundSel + '</label>' +
+      '<div class="fld">Difficulty' + diffBtns + '</div>' +
+      '<div class="stack" style="gap:8px">' +
+        '<button class="fold-row" data-act="themesFold" aria-expanded="' + themesOpen + '">' +
+          '<span><span class="fld" style="margin:0">Themes &middot; one per round</span><span class="help" style="display:block">' + c.themes.length + ' of ' + c.rounds + ' picked</span></span>' +
+          '<span class="fold-act">' + (themesOpen ? 'Done' : 'Change') + '</span></button>' +
+        (themesOpen
+          ? '<div class="chips theme-chips">' + themeChips + '</div>' +
+            '<div class="row between"><p class="help">One theme per round: pick exactly <strong>' + c.rounds + '</strong>. Dimmed themes are too thin at this difficulty.</p>' +
+              '<button class="btn sm ghost" data-act="themeNone">Clear</button></div>'
+          : '') +
       (themesOK ? '' : '<div class="warnbox"><strong>' +
         (themeGap > 0
           ? themeGap + ' theme' + (themeGap > 1 ? 's' : '') + ' too many.</strong> You have ' + c.rounds + ' rounds and ' + c.themes.length + ' themes — drop ' + themeGap + '.'
           : (-themeGap) + ' more theme' + (themeGap < -1 ? 's' : '') + ' needed.</strong> You have ' + c.rounds + ' rounds and only ' + c.themes.length + ' theme' + (c.themes.length === 1 ? '' : 's') + ' — add ' + (-themeGap) + ', or drop the round count to ' + c.themes.length + '.') +
         '</div>') +
-    '</div>'
+      '</div>'
       ) : '') +
     '</div>' +
 
     '<div class="card pad stack">' +
-    '<div class="card pad lit stack">' +
-      '<div class="sec-head"><div class="eyebrow gold">04</div><h3 class="display">Mini-games</h3>' +
+      '<div class="sec-head"><h3 class="display">Mini-games</h3>' +
         '<span class="badge ' + (miniKeys.length ? 'gold' : 'line') + '">' +
-          (miniKeys.length ? miniTotal + ' points on the table' : 'None') + '</span></div>' +
+          (miniKeys.length ? miniTotal + ' pts on the table' : 'None') + '</span></div>' +
+      '<p class="help" style="margin-top:-6px">Spread between the rounds; the Battle closes the night.</p>' +
       '<div class="stack mini-list">' +
       Object.keys(MINI_GAMES).map(k => {
         const m = MINI_GAMES[k], on = c.minis.indexOf(k) > -1;
@@ -5368,12 +5314,16 @@ SCREENS.setup = function(){
          maths does not need spelling out at the cost of a screen of scroll. */
     '</div>' +
 
-      '<button class="advbtn" data-act="advToggle" aria-pressed="' + adv + '" aria-expanded="' + adv + '">' +
-        '<span><span class="tl">Advanced Game Configuration</span><br>' +
-          '<span class="help">' + advSummary + '</span></span>' +
-        '<span class="chev" aria-hidden="true"></span>' +
-      '</button>' +
-      (adv ? '<hr class="hair">' + advBody() : '') +
+    '<div class="card pad stack">' +
+      '<div><h3 class="display">Advanced</h3><p class="help">' + (c.hostless ? '' : 'Host only. ') + advSummary + '</p></div>' +
+      (halfThemes.length
+        ? '<div class="warnbox"><strong>' + esc(halfThemes.join(', ')) + '</strong> ' + (halfThemes.length > 1 ? 'have' : 'has') + ' only one question ticked; ' + (halfThemes.length > 1 ? 'they fall' : 'it falls') + ' back to a random pair.</div>'
+        : '') +
+      '<div class="btn-row">' +
+        '<button class="btn" data-act="pickOpen"' + ((stdOn && c.themes.length) || miniKeys.some(k => MINI_PICKS[k]) ? '' : ' disabled') + '>Choose questions</button>' +
+        '<button class="btn" data-act="go" data-to="settings">Settings</button>' +
+        (setThemes.length || halfThemes.length || ovr.length ? '<button class="btn ghost" data-act="pickClear">Clear all picks</button>' : '') +
+      '</div>' +
     '</div>' +
 
     (!stdOn ? (miniKeys.length ? '' : '<div class="warnbox"><strong>Nothing to play.</strong> Standard rounds are off — switch on at least one mini-game.</div>')
@@ -5381,10 +5331,7 @@ SCREENS.setup = function(){
       : '<div class="warnbox"><strong>Not enough questions.</strong> Only ' + cap.rounds + ' matched pair(s) available for ' + c.rounds + ' rounds. Add themes, change difficulty, lower the round count, or turn off &ldquo;never reuse&rdquo; in Settings.</div>') +
     (enoughMini || miniKeys.indexOf('closest') < 0 ? '' : '<div class="warnbox">Only ' + cap.closest + ' of 7 Closest To Wins questions available — that leg will be shortened to ' + cap.closest + ' leg(s).</div>') +
 
-    '<div class="btn-row end">' +
-      '<button class="btn ghost" data-act="go" data-to="home">Cancel</button>' +
-      '<button class="btn gold lg" data-act="startGame"' + (canStart ? '' : ' disabled') + '>Start the game</button>' +
-    '</div>' +
+    '<button class="btn gold lg block" data-act="startGame"' + (canStart ? '' : ' disabled') + '>Start the game</button>' +
   '</div>';
 };
 
@@ -5442,8 +5389,13 @@ function pickerHTML(){
     }).join('');
     return '<div class="stack" style="gap:8px">' +
       '<div class="row between">' +
-        '<div class="eyebrow gold">' + esc(t) + ' <span class="dim">· ' + esc(DLabel(td)) + '</span></div>' +
+        '<div class="eyebrow gold">' + esc(t) + '</div>' +
         '<div class="row" style="gap:8px">' +
+          '<label class="help" style="display:flex;align-items:center;gap:6px">Difficulty' +
+            '<select class="tdsel" data-act="themeDiffSel" data-t="' + esc(t) + '">' +
+              '<option value="">Tonight&rsquo;s (' + esc(DLabel(c.difficulty)) + ')</option>' +
+              QMB.DIFFS.map(d => '<option value="' + d + '"' + ((c.themeDiff || {})[t] === d ? ' selected' : '') + '>' + Cap(d) + '</option>').join('') +
+            '</select></label>' +
           '<span class="badge ' + (full ? 'ok' : sel.length ? 'no' : 'line') + '">' + sel.length + ' of 2 ticked</span>' +
           (sel.length ? '<button class="btn sm ghost" data-act="pickThemeClear" data-t="' + esc(t) + '">Clear</button>' : '') +
         '</div>' +
@@ -8412,6 +8364,19 @@ const ACT = {
   tf(e){ S.setup['team' + e.dataset.side.toUpperCase()][e.dataset.k] = e.value; },
   rounds(e){ S.setup.rounds = +e.dataset.n; syncThemes(); prunePicks(); render(); },
   diff(e){ S.setup.difficulty = e.dataset.d; prunePicks(); render(); },
+  /* tap a level to add or drop it (the last one can't go); all four is Mixed (as in Party) */
+  diffTog(e){
+    const c = S.setup, d = e.dataset.d;
+    if(d === 'mixed') c.difficulty = c.difficulty === 'mixed' ? QMB.DEFAULT_DIFF : 'mixed';
+    else {
+      const on = QMB.diffsOf(c.difficulty), next = on.indexOf(d) > -1 ? on.filter(x => x !== d) : on.concat(d);
+      if(!next.length) return;
+      c.difficulty = next.length === 4 ? 'mixed' : QMB.DIFFS.filter(x => next.indexOf(x) > -1).join('+');
+    }
+    prunePicks(); Snd.soft(); render();
+  },
+  roundsSel(e){ S.setup.rounds = +e.value; syncThemes(); prunePicks(); render(); },
+  themesFold(){ S.tmp.themesOpen = !S.tmp.themesOpen; Snd.soft(); render(); },
   theme(e){
     const c = S.setup, t = e.dataset.t, i = c.themes.indexOf(t);
     if(i > -1){ c.themes.splice(i, 1); delete (c.picks || {})[t]; }
@@ -8495,6 +8460,12 @@ const ACT = {
     render();
   },
   themeDiffReset(){ S.setup.themeDiff = {}; prunePicks(); Snd.soft(); render(); },
+  /* the picker's own difficulty for one theme ("" = tonight's) */
+  themeDiffSel(e){
+    const td = S.setup.themeDiff = S.setup.themeDiff || {}, t = e.dataset.t;
+    if(e.value) td[t] = e.value; else delete td[t];
+    prunePicks(); repaintPicker(); render();
+  },
 
   /* ---- hand-picked questions ---- */
   pickOpen(){ prunePicks(); S.tmp.pickFilter = ''; openPicker(); },
@@ -9014,7 +8985,7 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   const t = e.target.closest('[data-act]');
   if(!t) return;
-  if(['setNum','bf','qType','qThemeSel','qMapImg'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
+  if(['setNum','bf','qType','qThemeSel','qMapImg','roundsSel','themeDiffSel'].indexOf(t.dataset.act) > -1) ACT[t.dataset.act](t);
 });
 el('modal').addEventListener('click', e => {
   if(e.target.id !== 'modal') return;
