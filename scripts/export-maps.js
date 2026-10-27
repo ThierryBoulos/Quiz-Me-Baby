@@ -9,13 +9,13 @@ const path = require('path'), fs = require('fs'), http = require('http');
 const root = path.join(__dirname, '..');
 (async () => {
   const srv = http.createServer((req, res) => {
-    const f = path.join(root, decodeURIComponent(req.url.split('?')[0]).replace(/^\/$/, '/index.html'));
+    const f = path.join(root, decodeURIComponent(req.url.split('?')[0]).replace(/^\/$/, '/classic.html'));
     fs.readFile(f, (e, d) => { if(e){ res.writeHead(404); res.end(); } else { res.writeHead(200, { 'content-type': f.endsWith('.js') ? 'text/javascript' : f.endsWith('.json') ? 'application/json' : 'text/html' }); res.end(d); } });
   }).listen(0);
   const port = srv.address().port;
   const b = await chromium.launch(process.env.CHROME ? { executablePath:process.env.CHROME } : {});
   const p = await b.newPage();
-  await p.goto(`http://127.0.0.1:${port}/index.html`);
+  await p.goto(`http://127.0.0.1:${port}/classic.html`);
   /* a map's picture layer (the night lights) goes inside its SVG, so Party needs no extra file */
   const raster = { 'maps-night.png': 'data:image/png;base64,' + fs.readFileSync(path.join(root, 'maps-night.png')).toString('base64') };
   const out = await p.evaluate(async (raster) => {
