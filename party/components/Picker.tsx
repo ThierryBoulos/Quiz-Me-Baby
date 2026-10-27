@@ -158,7 +158,7 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
                   q={(i > -1 ? `${i + 1}. ` : "") + (m.type === "flag" || m.type === "dish" || m.type === "pin" || m.type === "airport" ? q.answer : q.question)}
                   sub={m.type === "flag" ? cap(String(q.level || "")) : m.type === "dish" ? String(q.level || "").replace(/^c-/, "Cocktail · ").replace(/^d-/, "Dish · ") : m.type === "map" ? q.answer
                     : m.type === "pin" ? `${cap(String(q.level || ""))} · ${q.place}` : m.type === "airport" ? `${cap(String(q.level || ""))} · ${q.code}`
-                    : m.type === "majority" ? `${cap(String(q.level || ""))} · ${q.answer}` : String(q.answer)} />;
+                    : m.type === "majority" ? `${cap(String(q.level || ""))} · ${q.answer}${q.onTv ? " · The TV's" : q.src === "manual" ? " · Yours" : ""}` : String(q.answer)} />;
               })}
             </section>);
         })}

@@ -14,7 +14,7 @@ function Field({ id, label, children }: { id: string; label: string; children: R
   return <div className="flex flex-col gap-2 min-w-0"><label className="field-label !mb-0" htmlFor={id}>{label}</label>{children}</div>;
 }
 /* Classic's "Add a question" form: every field exists once, the type decides what shows */
-const BLANK = { type: "standard", question: "", answer: "", notes: "", theme: "", newTheme: "", difficulty: "medium", pool: "", use_with: "" };
+const BLANK = { type: "standard", question: "", answer: "", notes: "", theme: "", newTheme: "", difficulty: "medium", pool: "", use_with: "", options: ["", "", "", ""], correct: 0, level: "medium" };
 function AddQuestion() {
   const [base, setBase] = useState<Bank | null>(null);
   const [mine, setMine] = useState<Q[]>([]);
@@ -36,9 +36,9 @@ function AddQuestion() {
     const theme = f.theme === "__new__" ? (themes.find((t) => t.toLowerCase() === f.newTheme.trim().toLowerCase()) || f.newTheme.trim()) : (f.theme || themes[0]);
     if (themed && f.theme === "__new__" && !f.newTheme.trim()) { setMsg({ ok: false, text: "Name the custom theme, or pick an existing one." }); return; }
     const err = addCustom({ type: f.type, question: f.question, answer: f.answer, notes: f.notes, theme, difficulty: f.difficulty, use_with: f.use_with,
-      pool: f.pool.split("\n") }, builtIn, new Set(base.bank.map((q) => q.id)));
+      pool: f.pool.split("\n"), options: f.options, correct: f.correct, level: f.level }, builtIn, new Set(base.bank.map((q) => q.id)));
     if (err) { setMsg({ ok: false, text: err }); return; }
-    setF({ ...BLANK, type: f.type, theme: f.theme === "__new__" ? theme : f.theme, difficulty: f.difficulty });
+    setF({ ...BLANK, type: f.type, theme: f.theme === "__new__" ? theme : f.theme, difficulty: f.difficulty, level: f.level });
     setMsg({ ok: true, text: `Added${themed && !builtIn.includes(theme) ? " under " + theme : ""}.` });
   };
   return (
@@ -55,6 +55,26 @@ function AddQuestion() {
       </Field>
       {f.type === "standard" && <Field id="na" label="Answer"><input id="na" className="input !text-16" value={f.answer} placeholder="The answer" onChange={(e) => set({ answer: e.target.value })} /></Field>}
       {f.type === "closest" && <Field id="naNum" label="Answer, a number"><input id="naNum" className="input !text-16" inputMode="decimal" value={f.answer} placeholder="e.g. 236" onChange={(e) => set({ answer: e.target.value })} /></Field>}
+      {f.type === "majority" && (
+        <fieldset className="flex flex-col gap-2 min-w-0">
+          <legend className="field-label !mb-2">The four answers: tap the circle by the right one</legend>
+          {f.options.map((o, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <button type="button" role="radio" aria-checked={f.correct === i} aria-label={`Answer ${i + 1} is the right one`} onClick={() => set({ correct: i })}
+                className="shrink-0 w-[44px] h-[44px] grid place-items-center rounded-full">
+                <span className="block w-[24px] h-[24px] rounded-full border-2" style={{ borderColor: f.correct === i ? "var(--color-ok)" : "rgba(255,255,255,.3)", background: f.correct === i ? "var(--color-ok)" : "transparent" }} />
+              </button>
+              <input id={"nmo" + i} className="input !text-16 flex-1 min-w-0" maxLength={60} value={o} placeholder={i === f.correct ? "The right answer" : `Wrong answer ${i < f.correct ? i + 1 : i}`}
+                aria-label={`Answer ${i + 1}`} onChange={(e) => set({ options: f.options.map((x, j) => (j === i ? e.target.value : x)) })} />
+            </div>))}
+          <span className="text-13 text-[var(--color-ink-3)]">Every phone shuffles them. The note below shows with the answer on the TV.</span>
+        </fieldset>)}
+      {f.type === "majority" && (
+        <Field id="nml" label="Level">
+          <select id="nml" className="input !text-16 cursor-pointer" value={f.level} onChange={(e) => set({ level: e.target.value })}>
+            {["easy", "medium", "hard"].map((d) => <option key={d} value={d}>{d[0].toUpperCase() + d.slice(1)}</option>)}
+          </select>
+        </Field>)}
       {f.type === "saysame" && <Field id="npool" label="Possible answers, one per line (at least two)">
         <textarea id="npool" rows={5} className="input !py-3 !text-16 !font-semibold" value={f.pool} placeholder={"Feta\nCheddar\nBrie\nMozzarella"} onChange={(e) => set({ pool: e.target.value })} /></Field>}
       {f.type !== "saysame" && <Field id="nn" label={f.type === "auction" ? "Ruling note: what counts" : "Notes (shown with the answer)"}>
@@ -95,7 +115,7 @@ function AddQuestion() {
           {mine.map((q) => (
             <li key={q.id} className="flex items-start gap-3 rounded-[14px] px-3 py-2.5" style={{ background: "rgba(255,255,255,.04)" }}>
               <span className="flex-1 min-w-0"><span className="block text-15 font-semibold leading-snug">{q.question}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] mt-0.5">{CUSTOM_TYPES.find(([k]) => k === q.type)?.[1]}{q.theme ? ` · ${q.theme}` : ""}{q.difficulty ? ` · ${q.difficulty}` : ""}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] mt-0.5">{CUSTOM_TYPES.find(([k]) => k === q.type)?.[1]}{q.theme ? ` · ${q.theme}` : ""}{q.difficulty ? ` · ${q.difficulty}` : ""}{q.level ? ` · ${q.level} · ${q.answer}` : ""}</span></span>
               <button type="button" className="btn btn-sm btn-ghost shrink-0" onClick={() => removeCustom(q.id)}>Delete</button>
             </li>))}
         </ul>)}

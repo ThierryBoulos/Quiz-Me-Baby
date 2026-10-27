@@ -10,9 +10,10 @@ import type { Q } from "./engine";
 export const CUSTOM_KEY = "qmb.party.custom";
 export const MAX_CUSTOM_THEMES = 4;
 export const MAX_CUSTOM = 300;
-export const CUSTOM_TYPES = [["standard", "Standard"], ["closest", "Closest To Wins"], ["auction", "Auction"], ["saysame", "Don't Say the Same as Me"]] as const;
+export const CUSTOM_TYPES = [["standard", "Standard"], ["closest", "Closest To Wins"], ["majority", "Majority Rules"], ["auction", "Auction"], ["saysame", "Don't Say the Same as Me"]] as const;
 const TYPES: string[] = CUSTOM_TYPES.map(([k]) => k);
 const DIFFS = ["easy", "medium", "hard", "expert"];
+const MR_LEVELS = ["easy", "medium", "hard"];
 
 /* Classic's id, so a question typed in both apps is the same question */
 export function hash(str: string) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return "q" + (h >>> 0).toString(36); }
@@ -35,6 +36,14 @@ export function cleanOne(x: unknown): Q | null {
   }
   if (type === "standard") { q.answer = cut(r.answer, 120); if (!q.answer) return null; const u = cut(r.use_with, 40); if (u) q.use_with = u; }
   else if (type === "closest") { const n = Number(String(r.answer ?? "").replace(/[,\s]/g, "")); if (!String(r.answer ?? "").trim() || !Number.isFinite(n)) return null; q.answer = String(n); }
+  else if (type === "majority") {
+    /* four different answers, one of them right (the phones shuffle them); a level, as Majority Rules has */
+    const opts = (Array.isArray(r.options) ? r.options : []).map((o) => cut(o, 60));
+    const right = Number.isInteger(r.correct) ? Number(r.correct) : opts.indexOf(cut(r.answer, 60));
+    if (opts.length !== 4 || opts.some((o) => !o) || new Set(opts.map((o) => o.toLowerCase())).size !== 4 || right < 0 || right > 3) return null;
+    q.options = opts; q.answer = opts[right];
+    q.level = MR_LEVELS.includes(String(r.level)) ? String(r.level) : "medium";
+  }
   else if (type === "auction") q.answer = "Host counts";
   else if (type === "saysame") {
     const pool = [...new Set((Array.isArray(r.pool) ? r.pool : []).map((p) => cut(p, 40)).filter(Boolean))].slice(0, 40);
@@ -83,6 +92,7 @@ export function addCustom(raw: Record<string, unknown>, builtIn: string[], bankI
   if (!cut(raw.question, 300)) return "The question is required.";
   if (!q) return type === "closest" ? "Closest To Wins needs a number as the answer."
     : type === "saysame" ? "At least two possible answers, one per line."
+    : type === "majority" ? "Four different answers, all filled in, and one picked as the right one."
     : type === "standard" && !cut(raw.answer, 120) ? "The answer is required." : "Pick a theme for this question.";
   const list = getCustom();
   if (list.length >= MAX_CUSTOM) return `${MAX_CUSTOM} questions is the limit on one device.`;
