@@ -31,17 +31,40 @@ function hudLabel(pub: Pub): ReactNode {
   }
   return <>Round <b>{Math.min(pub.r + 1, pub.N)}</b> of {pub.N} &nbsp;·&nbsp; <b>{pub.theme}</b></>;
 }
-export function Hud({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
+/* A score that changes rolls like a car's odometer: the old number goes up and out, the new one comes in from
+   below (down, the other way), with a pop and a ring in the team's colour when it goes up. */
+function Roll({ v }: { v: number }) {
+  const last = useRef(v), [m, setM] = useState<{ from: number; n: number } | null>(null);
+  useEffect(() => {
+    if (v === last.current) return;
+    setM((x) => ({ from: last.current, n: (x?.n ?? 0) + 1 })); last.current = v;
+    const t = setTimeout(() => setM((x) => (x ? { ...x, from: v } : x)), 600);
+    return () => clearTimeout(t);
+  }, [v]);
+  const up = !!m && m.from < v, moving = !!m && m.from !== v;
+  return (
+    <span className={"roll" + (moving && up ? " pop" : "")} key={m?.n ?? 0}>
+      <span className="roll-win">
+        {moving && <span className={"roll-out " + (up ? "up" : "down")} aria-hidden>{m!.from}</span>}
+        <span className={moving ? "roll-in " + (up ? "up" : "down") : ""}>{v}</span>
+      </span>
+      {moving && up && <span className="roll-ring" aria-hidden />}
+    </span>);
+}
+
+/* shown: the scores to show for now (the TV holds the old one while the points fly up to it) */
+export function Hud({ pub, size, shown }: { pub: Pub; size: "tv" | "phone"; shown?: Two<number> }) {
   const T = pub.teams, w = pub.mini?.wins, u = pub.mini?.pct ? "%" : "";
+  const sc = (t: 0 | 1) => shown?.[t] ?? T[t].score;
   return (
     <div className={"hud " + size} role="group" aria-label="Scores">
       <div className="hud-in">
-        <div className="hud-team a"><span className="dot" /><div className="nm">{T[0].name}</div><div className="sc">{T[0].score}</div></div>
+        <div className="hud-team a"><span className="dot" /><div className="nm">{T[0].name}</div><div className="sc" data-score="0"><Roll v={sc(0)} /></div></div>
         <div className="hud-mid">
           <div className="hud-label">{hudLabel(pub)}</div>
           {pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>}
         </div>
-        <div className="hud-team b"><div className="sc">{T[1].score}</div><div className="nm">{T[1].name}</div><span className="dot" /></div>
+        <div className="hud-team b"><div className="sc" data-score="1"><Roll v={sc(1)} /></div><div className="nm">{T[1].name}</div><span className="dot" /></div>
       </div>
       {/* the mini-game's own score, small, under the night's: "This game: A 1 – 2 B" */}
       {w && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
@@ -53,9 +76,10 @@ export function Hud({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
 /* ---- a ruling, in words: RIGHT / WRONG, or DODGED IT / SAID IT. Capitals,
    green for the good one and red for the bad, on the TV and every phone ---- */
 export const verdictWord = (v: boolean, say?: boolean) => (say ? (v ? "Dodged it" : "Said it") : v ? "Right" : "Wrong");
-export function Verdict({ v, say, size }: { v: boolean | null | undefined; say?: boolean; size?: number }) {
+/* stamp: on the TV's reveal, the call comes down like a rubber stamp (on the drumroll's hit) */
+export function Verdict({ v, say, size, stamp }: { v: boolean | null | undefined; say?: boolean; size?: number; stamp?: boolean }) {
   if (v == null) return null;
-  return <span className={"verdict " + (v ? "pos" : "neg")} style={size ? { fontSize: size } : undefined}>{verdictWord(v, say)}</span>;
+  return <span className={"verdict " + (v ? "pos" : "neg") + (stamp ? " stamped" : "")} style={size ? { fontSize: size } : undefined}>{verdictWord(v, say)}</span>;
 }
 
 /* ---- the ruling buttons under a team's answer: [RIGHT] [WRONG] (or
@@ -249,7 +273,7 @@ export function RoundIntro({ pub, canArm, onArm, size, busy }: { pub: Pub; canAr
     <div className={"flex flex-col items-center text-center " + (tv ? "gap-5" : "gap-4")}>
       <div className="flex flex-col items-center gap-2">
         <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>Round {pub.r + 1} of {pub.N}</div>
-        <h1 className="display" style={{ fontSize: tv ? 104 : 46 }}>{pub.theme}</h1>
+        <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? 104 : 46 }}>{pub.theme}</h1>
         <p className="text-[var(--color-ink-2)]" style={{ fontSize: tv ? 22 : 13 }}>{T[pub.first ?? 0].name} answers first</p>
       </div>
       {/* the TV, the host and the players: no explaining, just a badge once a team has armed it */}
@@ -383,7 +407,7 @@ export function MiniIntro({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
       <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : "Mini-game"}</div>
-      <h1 className="display" style={{ fontSize: tv ? 88 : 44 }}>{m.title}</h1>
+      <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? 88 : 44 }}>{m.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
         <span className="sep text-[var(--color-ink-3)]">·</span>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import type { Pub } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
@@ -7,29 +7,42 @@ import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Board, Confetti, decidedCall, decidedHead, decidedSub, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
-import { DECIDED, offBy, showKm, showNum, TIE_SCREENS } from "@/lib/game";
+import { BEAT_MS, BEAT_SCREENS, DECIDED, offBy, showKm, showNum, TIE_SCREENS } from "@/lib/game";
+import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
 
+/* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
+const d = (s: number) => ({ ["--d" as string]: s + "s" });
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
 /* The TV during the game: no buttons (but Exit at the very end), no answers before the reveal. */
 /* join: where a phone joins this room (Majority Rules puts the QR code up again before it starts) */
 export type Join = { url: string; code: string };
-export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () => void; onAgain?: () => void; join?: Join }) {
+/* sound: this is the TV itself (it plays the coins and the whoosh; another screen showing the TV stays quiet) */
+export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub; onExit?: () => void; onAgain?: () => void; join?: Join; sound?: boolean }) {
   const T = pub.teams;
+  /* the motion: when this screen came up, and the scores as the top bar shows them (points fly up to them) */
+  const key = pub.screen + pub.r + (pub.turn ?? "");
+  const screenAt = useScreenAt(key);
+  const root = useRef<HTMLDivElement>(null);
+  const shown = useFlyingPoints(root, pub, screenAt, sound);
+  const beat = BEAT_SCREENS.includes(pub.screen);
   /* the end: celebrate the winner first, then the recap comes up under it */
   const [recap, setRecap] = useState(false);
   useEffect(() => { if (pub.screen !== "final") { setRecap(false); return; } const t = setTimeout(() => setRecap(true), 7000); return () => clearTimeout(t); }, [pub.screen]);
   /* a pop-up shows for three seconds, then goes */
-  const [shown, setShown] = useState<number | null>(null);
+  const [shownToast, setShownToast] = useState<number | null>(null);
   const tid = pub.toast?.id ?? null;
-  useEffect(() => { if (tid == null) return; setShown(tid); const t = setTimeout(() => setShown(null), 3000); return () => clearTimeout(t); }, [tid]);
+  useEffect(() => { if (tid == null) return; setShownToast(tid); const t = setTimeout(() => setShownToast(null), 3000); return () => clearTimeout(t); }, [tid]);
+  const pointsToast = / \+\d+ points?( — |$)/.test(pub.toast?.text || "");
   return (
     /* nothing on the TV can be selected or copied */
-    <div className="flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
+    <div ref={root} className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       {/* the tracker, always: Classic's HUD */}
-      <Hud pub={pub} size="tv" />
+      <Hud pub={pub} size="tv" shown={shown} />
 
-      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] " + (pub.turn === 1 ? "b" : "a") : "gap-6")} key={pub.screen + pub.r + (pub.turn ?? "")}>
+      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : "gap-6")} key={key}>
+        {/* a steal: the light swings over from the team that missed to the one stealing */}
+        {pub.screen === "steal" && <div className={"steal-beam " + (pub.turn === 1 ? "b" : "a")} aria-hidden />}
         {pub.screen === "roundIntro" && <div className="w-full max-w-[1080px]"><RoundIntro pub={pub} size="tv" /></div>}
 
         {(pub.screen === "ask" || pub.screen === "steal") && (<>
@@ -42,19 +55,24 @@ export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () =
           <div className="h-7 text-22 font-bold" style={{ color: tc(pub.turn) }}>{pub.sent?.[pub.turn ?? 0] ? `${T[pub.turn ?? 0].name} has answered…` : ""}</div>
         </>)}
 
-        {pub.screen === "answer" && pub.result && (<>
+        {/* the answer, the calls and who scores land on the drumroll's hit (BEAT_MS); then the points fly up */}
+        {pub.screen === "answer" && pub.result && (<div className={"flex flex-col items-center gap-6 " + (pub.result.stolen ? "shake-beat" : "")}>
           <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
           <div className="eyebrow text-18">The answer</div>
-          <div className="display" style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
+          <div className="display beat slam" style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
           {/* the fun fact goes with the answer */}
-          {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2">{pub.result.notes}</div>}
+          {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2 beat" style={d(0.25)}>{pub.result.notes}</div>}
           {/* what each team said, and the app's call on it (contestable until Next) */}
-          {(pub.calls || []).map((c) => <div key={c.id} className="text-24 flex items-baseline gap-3 justify-center"><b style={{ color: tc(c.team) }}>{T[c.team].name}{c.note === "steal" ? " (steal)" : c.note ? ` (${c.note})` : ""}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={20} /></div>)}
-          {[0, 1].map((t) => !(pub.calls || []).some((c) => c.team === t) && silent(pub, t as 0 | 1) ? <div key={t} className="text-24 text-[var(--color-ink-2)]"><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {silent(pub, t as 0 | 1)}</div> : null)}
-          <div className="display text-44" style={{ color: pub.result.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>
-            {pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? " — stolen!" : ""}`}
+          {(pub.calls || []).map((c, i) => <div key={c.id} className="text-24 flex items-baseline gap-3 justify-center beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}{c.note === "steal" ? " (steal)" : c.note ? ` (${c.note})` : ""}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={20} stamp /></div>)}
+          {[0, 1].map((t) => !(pub.calls || []).some((c) => c.team === t) && silent(pub, t as 0 | 1) ? <div key={t} className="text-24 text-[var(--color-ink-2)] beat" style={d(0.1)}><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {silent(pub, t as 0 | 1)}</div> : null)}
+          <div className="display text-44 beat flex items-center gap-4" style={{ ...d(0.35), color: pub.result.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>
+            {pub.result.by == null ? "Nobody scores" : <span data-fly-src={pub.result.by}>{`${T[pub.result.by].name} +${pub.result.pts}`}</span>}
+            {/* a steal: a STOLEN stamp in the stealing team's colour (a dash there read as a minus) */}
+            {pub.result.by != null && pub.result.stolen && <span className="tv-stamp stamp-beat" style={{ ...d(0.45), color: tc(pub.result.by) }}>Stolen</span>}
+            {/* Double Points: the ×2 stamp */}
+            {pub.result.by != null && pub.result.pts >= 2 && (pub.dbl?.[0] || pub.dbl?.[1]) && <span className="x2 stamp-beat" style={d(0.5)}>×2</span>}
           </div>
-        </>)}
+        </div>)}
 
         {pub.screen === "roundScore" && (<>
           <div className="eyebrow text-20">End of round {pub.r + 1}</div>
@@ -66,7 +84,7 @@ export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () =
         </>)}
 
         {pub.screen === "sudden" && pub.sudden && (!pub.sudden.ready ? (<>
-          <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Sudden death</div>
+          <div className="display slam" style={{ fontSize: 120, color: "var(--color-gold)" }}>Sudden death</div>
           <div className="text-28 text-[var(--color-ink-2)] max-w-[900px]">Scores are level. One question, captains only — first hand up answers. First right answer wins the night.</div>
         </>) : (<>
           <div className="eyebrow text-20">Sudden death · question {pub.sudden.n}</div>
@@ -79,9 +97,15 @@ export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () =
         <TvMini pub={pub} join={join} />
 
         {pub.screen === "final" && (<>
-          <Confetti n={140} />
-          <div className="eyebrow text-22">{pub.winner == null ? "The night ends" : "The winner"}</div>
-          <div className="display" style={{ fontSize: recap ? 100 : 150, color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
+          {/* the winner: "The winner", a beat, then the name slams down with a flash and a shockwave, and the confetti bursts */}
+          <div className="win-flash" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
+          <div className="confetti-late"><Confetti n={140} /></div>
+          <div className="eyebrow text-22 enter">{pub.winner == null ? "The night ends" : "The winner"}</div>
+          <div className="relative grid place-items-center">
+            <span className="win-ring" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
+            <span className="win-ring r2" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
+            <div className="display win-slam" style={{ fontSize: recap ? 100 : 150, color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
+          </div>
           {/* once the recap is up, the big score board gives way to one line (the scores stay in the top bar too) */}
           {recap ? (
             <div className="display leading-none" style={{ fontSize: 72 }} aria-label={`${T[0].name} ${T[0].score}, ${T[1].name} ${T[1].score}`}>
@@ -125,8 +149,9 @@ export function TvGame({ pub, onExit, onAgain, join }: { pub: Pub; onExit?: () =
         </div>)}
       {pub.nextBy && !pub.contest && <NextHint pub={pub} />}
       <AwayFlags pub={pub} />
-      <ImadBubble imad={pub.imad} />
-      {pub.toast && shown === pub.toast.id && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" role="status" aria-live="polite" style={{ fontSize: 24, padding: "12px 28px" }}>{pub.toast.text}</div>}
+      <ImadBubble imad={pub.imad} wait={beat ? Math.max(0, screenAt + BEAT_MS - Date.now()) : 0} />
+      <LeadBanner shown={shown} names={[T[0].name, T[1].name]} sound={sound} lift={pub.screen !== "answer"} />
+      {pub.toast && shownToast === pub.toast.id && !pointsToast && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" role="status" aria-live="polite" style={{ fontSize: 24, padding: "12px 28px" }}>{pub.toast.text}</div>}
     </div>
   );
 }
@@ -299,9 +324,9 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
             {/* the buzzer's own clock to type it */}
             {pub.dish.typeBy && pub.buzz != null && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.dish.typeBy} size={80} /><span>to type it</span></div>}
           </>) : (<>
-            <div className="display" style={{ fontSize: 76, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
-            {(pub.calls || []).map((c) => <div key={c.id} className="text-22 flex items-baseline gap-2"><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={18} /></div>)}
-            <div className="display text-36" style={{ color: tc(pub.reveal?.w === 0 || pub.reveal?.w === 1 ? pub.reveal.w : null) }}>
+            <div className="display beat slam" style={{ fontSize: 76, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
+            {(pub.calls || []).map((c, i) => <div key={c.id} className="text-22 flex items-baseline gap-2 beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={18} stamp /></div>)}
+            <div className="display text-36 beat" style={{ ...d(0.35), color: tc(pub.reveal?.w === 0 || pub.reveal?.w === 1 ? pub.reveal.w : null) }}>
               {pub.reveal?.w === 0 || pub.reveal?.w === 1 ? `${T[pub.reveal.w].name} got it` : "Nobody got it"}</div>
           </>)}
         </div>
@@ -351,14 +376,14 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     </>);
     if (sc === "auctionLeg" && A.last) return (<>
       <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{A.cat}</div>
-      <div className="display" style={{ fontSize: 90, color: A.last.made ? "var(--color-ok)" : "var(--color-no)" }}>{A.last.made ? "Delivered!" : "Short!"}</div>
-      <div className="text-30">{T[A.last.by].name} bid {A.last.bid}, named {A.last.count}.</div>
-      <div className="display text-48" style={{ color: tc(A.last.won) }}>{T[A.last.won].name} take{A.last.won === A.last.by ? "" : "s"} the leg</div>
+      <div className="display beat slam" style={{ fontSize: 90, color: A.last.made ? "var(--color-ok)" : "var(--color-no)" }}>{A.last.made ? "Delivered!" : "Short!"}</div>
+      <div className="text-30 beat" style={d(0.15)}>{T[A.last.by].name} bid {A.last.bid}, named {A.last.count}.</div>
+      <div className="display text-48 beat" style={{ ...d(0.3), color: tc(A.last.won) }}>{T[A.last.won].name} take{A.last.won === A.last.by ? "" : "s"} the leg</div>
     </>);
     if (sc === "auctionResult") return (<>
       <div className="eyebrow text-20">The Auction</div>
       <ScoreBoard pub={pub} w={A.wins} win={A.winner} size="tv" />
-      {A.winner != null && <div className="display text-52" style={{ color: tc(A.winner) }}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</div>}
+      {A.winner != null && <div className="display text-52" style={{ color: tc(A.winner) }}><span data-fly-src={A.winner}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</span></div>}
     </>);
   }
   if (sc === "sayQ") return (<>
@@ -409,7 +434,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     {B.last && <BattleAnswer last={B.last} size={24} />}
     <div className="eyebrow text-20">Battle of the Captains</div>
     <ScoreBoard pub={pub} w={B.score} win={B.winner} size="tv" />
-    <div className="display text-52" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Tie") : `${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</div>
+    <div className="display text-52" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Tie") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
     <SdCalls pub={pub} />
   </>); }
 
@@ -419,7 +444,8 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       <div className="eyebrow text-20">{m.title}</div>
       <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />
       <div className="display text-52" style={{ color: tc(S.winner) }}>
-        {S.needsHost ? "Still level: the host decides" : S.winner == null ? pointsEach(S.award?.[0] ?? 0) : `${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</div>
+        {S.needsHost ? "Still level: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{pointsEach(S.award?.[0] ?? 0)}</span>
+          : <span data-fly-src={S.winner}>{`${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</span>}</div>
       {S.note && !/^split/i.test(S.note) && <div className="text-22 text-[var(--color-ink-2)]">{S.note}</div>}
     </>);
   }
@@ -510,10 +536,18 @@ function NextHint({ pub }: { pub: Pub }) {
 }
 
 /* Imad's line: his face and a speech bubble, up top, for as long as it takes to read (Classic's #hostBubble) */
-function ImadBubble({ imad }: { imad?: Pub["imad"] }) {
+/* wait: on a reveal with a drumroll he speaks on its hit, not before it (he'd give the answer away) */
+function ImadBubble({ imad, wait = 0 }: { imad?: Pub["imad"]; wait?: number }) {
   const [on, setOn] = useState<number | null>(null);
   const id = imad?.id ?? null, len = imad?.text.length ?? 0;
-  useEffect(() => { if (id == null) return; setOn(id); const t = setTimeout(() => setOn(null), 2800 + len * 60); return () => clearTimeout(t); }, [id, len]);
+  const delay = useRef(wait);
+  delay.current = wait;
+  useEffect(() => {
+    if (id == null) return;
+    const w = delay.current;
+    const a = setTimeout(() => setOn(id), w), b = setTimeout(() => setOn(null), w + 2800 + len * 60);
+    return () => { clearTimeout(a); clearTimeout(b); };
+  }, [id, len]);
   if (!imad || on !== imad.id) return null;
   return (
     <div className="imad-bubble" role="status" aria-live="polite" key={imad.id}>

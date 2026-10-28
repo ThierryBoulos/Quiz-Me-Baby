@@ -94,6 +94,8 @@ export const Snd = {
     chord([349.23, 440.0, 523.25], 1.2, 2.6, { type: "sine", gain: 0.07 });
   },
   soft() { this.resume(); note(660, 0, 0.16, { type: "sine", gain: 0.06 }); },
+  /* a coin landing on the score (a mini-game's points, one coin each) */
+  coin(k = 0) { this.resume(); const f = 1046.5 * Math.pow(2, Math.min(k, 7) / 12); note(f, 0, 0.12, { type: "triangle", gain: 0.07 }); note(f * 2, 0.01, 0.08, { type: "sine", gain: 0.025 }); },
 };
-export type SoundName = "jingle" | "alarm" | "whoosh" | "drumroll" | "tick" | "correct" | "wrong" | "point" | "win" | "soft";
+export type SoundName = "jingle" | "alarm" | "whoosh" | "drumroll" | "tick" | "correct" | "wrong" | "point" | "win" | "soft" | "coin";
 export const playSound = (n: SoundName) => { try { Snd[n](); } catch { /* no audio */ } };

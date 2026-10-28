@@ -11,7 +11,7 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
    onto the new version then says so and offers Exit, instead of playing on with a broken game. */
 const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
-import { DECIDED, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE,
+import { BEAT_MS, BEAT_SCREENS, DECIDED, FLY_MS, flyAt, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE,
   type MiniKey, type Pub, type Secret, type Thin, type Two } from "./game";
 import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, SWAPS, swapWord, type Action, type G, type PKind, type W } from "./tv/rules";
@@ -33,6 +33,9 @@ function dealerFor(bank: Bank, used: () => Set<string>) {
       airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0,
       majority: (q: G) => q.type === "majority" && Array.isArray(q.options) && q.options.length === 4 && q.options.includes(q.answer) } });
 }
+
+/* a browser that can play sound at all (the simulator can't: no timers for sounds there) */
+const canPlay = () => typeof window !== "undefined" && !!(window.AudioContext || (window as unknown as { webkitAudioContext?: unknown }).webkitAudioContext);
 
 function sdRecord(s: TvState, team: 0 | 1, ok: boolean) {
   s.sdCur = [...s.sdCur, { team, text: (s.typed[team] || []).join(" / "), ok }];
@@ -195,6 +198,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* ---- carrying out what the engine says ---- */
   const applyFx = useCallback((fx: G[]) => {
     const s = st.current, now = Date.now();
+    /* a move that brings up a reveal with a drumroll: its right/wrong chime waits for the drumroll's hit, and the
+       point chime for the points landing on the score (lib/game.ts, BEAT_MS); a summary's points fly up too */
+    const goes = (fx || []).map((f) => f.go).filter(Boolean) as string[];
+    const beat = goes.some((g) => BEAT_SCREENS.includes(g)), sum = goes.find((g) => /Summary$|^auctionResult$/.test(g));
+    const soundAt = (n: string) => (beat && (n === "correct" || n === "wrong") ? BEAT_MS : n === "point" && (beat || sum) ? flyAt(beat ? "answer" : sum!) + FLY_MS : 0);
     for (const f of fx || []) {
       if (f.timer === "stop") { s.deadline = null; s.left = 0; }
       /* (a clock paused in its unseen second after 0 keeps a sliver, so Resume brings it back and it closes:
@@ -208,7 +216,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
       if (f.toast) s.toast = { id: ++s.toastN, text: f.toast };
       if (f.host) say(f.host, f.vars);
-      if (f.sound && isTvRef.current) playSound(f.sound as SoundName);
+      if (f.sound && isTvRef.current) { const n = f.sound as SoundName, ms = soundAt(n); if (ms && canPlay()) setTimeout(() => playSound(n), ms); else playSound(n); }
       if (f.go && isTvRef.current) {
         if (f.go === "roundIntro" || /Intro$/.test(f.go) || (f.go === "sudden" && !s.g.sdReady)) { playSound("whoosh"); playSound("jingle"); }
         else if (f.go === "answer" || f.go === "dishReveal" || f.go === "auctionLeg") playSound("drumroll");

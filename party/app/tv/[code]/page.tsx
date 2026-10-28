@@ -151,7 +151,7 @@ export default function TvRoom() {
             </div>
           </div>
         </>
-      ) : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} /> : (
+      ) : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
         <div className="m-auto text-center enter">
           <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
         </div>

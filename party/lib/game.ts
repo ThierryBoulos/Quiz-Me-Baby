@@ -123,6 +123,13 @@ export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie",
 export const DECIDED = "decided";
 export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Guess the Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me",
   pin: "Drop the Pin", airport: "Guess the Airport", majority: "Majority Rules", battle: "Battle of the Captains" };
+/* 28 Oct, motion on the TV. The drumroll (answer, dish, auction leg) hits at 0.82 s: the answer, the calls and
+   the right/wrong chime land on that hit, not before it. The points then fly up to the score: from the line that
+   says "+2" (it shows FLY_AT after the screen comes up), FLY_MS in the air; the point chime plays as they land. */
+export const BEAT_SCREENS = ["answer", "dishReveal", "auctionLeg"];
+export const BEAT_MS = 820;
+export const FLY_MS = 650;
+export const flyAt = (screen: string) => (BEAT_SCREENS.includes(screen) ? BEAT_MS + 600 : /Summary$|^auctionResult$/.test(screen) ? 450 : 0);
 export const T_CLOSEST = 60, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30, T_PIN = 45, T_AIRPORT = 30, T_MAJORITY = 15;
 export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
 /* no host: the other captain has this long to give a point the app called WRONG (a RIGHT always stands) */
