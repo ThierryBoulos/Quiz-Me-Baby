@@ -28,14 +28,15 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
   const root = useRef<HTMLDivElement>(null);
   const shown = useFlyingPoints(root, pub, screenAt, sound);
   const beat = BEAT_SCREENS.includes(pub.screen);
+  /* a message shows for four seconds, then goes. Not the points or who took a leg: the screen itself shows those */
+  const [shownToast, setShownToast] = useState<number | null>(null);
+  const tid = pub.toast?.id ?? null;
+  useEffect(() => { if (tid == null) return; setShownToast(tid); const t = setTimeout(() => setShownToast(null), 4000); return () => clearTimeout(t); }, [tid]);
+  const said = / \+\d+ points?( — |$)| takes (leg|map|flag|board|landmark|number) \d+\.$| takes the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
+  const toastOn = !!pub.toast && shownToast === pub.toast.id && !said;
   /* the end: celebrate the winner first, then the recap comes up under it */
   const [recap, setRecap] = useState(false);
   useEffect(() => { if (pub.screen !== "final") { setRecap(false); return; } const t = setTimeout(() => setRecap(true), 7000); return () => clearTimeout(t); }, [pub.screen]);
-  /* a pop-up shows for three seconds, then goes */
-  const [shownToast, setShownToast] = useState<number | null>(null);
-  const tid = pub.toast?.id ?? null;
-  useEffect(() => { if (tid == null) return; setShownToast(tid); const t = setTimeout(() => setShownToast(null), 3000); return () => clearTimeout(t); }, [tid]);
-  const pointsToast = / \+\d+ points?( — |$)/.test(pub.toast?.text || "");
   return (
     /* nothing on the TV can be selected or copied */
     <div ref={root} className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
@@ -149,11 +150,15 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
               <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></>)}
           </div>
         </div>)}
-      {pub.nextBy && !pub.contest && <NextHint pub={pub} />}
       <AwayFlags pub={pub} />
       <ImadBubble imad={pub.imad} wait={beat ? Math.max(0, screenAt + BEAT_MS - Date.now()) : 0} />
       <LeadBanner shown={shown} names={[T[0].name, T[1].name]} sound={sound} lift={pub.screen !== "answer"} />
-      {pub.toast && shownToast === pub.toast.id && !pointsToast && <div key={pub.toast.id} className="enter absolute left-1/2 bottom-8 -translate-x-1/2 chip" role="status" aria-live="polite" style={{ fontSize: 24, padding: "12px 28px" }}>{pub.toast.text}</div>}
+      {/* the strip along the bottom, kept clear of the screen's content: news (a call changed, the host is away,
+          a refused tap) and who taps Next, small, on the right */}
+      <div className="tv-foot" role="status" aria-live="polite">
+        {toastOn && <span key={pub.toast!.id} className="tv-note enter">{pub.toast!.text}</span>}
+        {pub.nextBy && !pub.contest && <NextHint pub={pub} />}
+      </div>
     </div>
   );
 }
@@ -620,7 +625,7 @@ function awayTotals(pub: Pub) {
 function NextHint({ pub }: { pub: Pub }) {
   const open = useAfter(pub.nextOpenAt);
   const label = /Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" ? "Start" : pub.screen === "sudden" ? "Go" : "Next";
-  return <div className="absolute right-8 bottom-8 text-18 text-[var(--color-ink-2)]">Waiting for <b>{pub.nextBy}</b>{open && pub.nextOther ? <> or <b>{pub.nextOther}</b></> : null} to {TIE_SCREENS.includes(pub.screen) || pub.screen === DECIDED ? "choose" : `tap ${label}`}</div>;
+  return <span className="next-hint">Waiting for <b>{pub.nextBy}</b>{open && pub.nextOther ? <> or <b>{pub.nextOther}</b></> : null} to {TIE_SCREENS.includes(pub.screen) || pub.screen === DECIDED ? "choose" : `tap ${label}`}</span>;
 }
 
 /* Imad's line: his face and a speech bubble, up top, for as long as it takes to read (Classic's #hostBubble) */

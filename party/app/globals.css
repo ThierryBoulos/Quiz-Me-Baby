@@ -209,6 +209,11 @@ button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .hud-mid { min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; }
 .hud-label { font-size: var(--text-11); font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--color-ink-3); text-align: center; }
 .hud-label b { color: var(--color-gold); font-weight: 700; }
+/* the TV's bottom strip: its own row, so nothing on the screen ever sits under it */
+.tv-foot { flex: none; height: 34px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 0 4px; min-width: 0; }
+.tv-note, .next-hint { font-size: var(--text-14); padding: 5px 12px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tv-note { color: var(--color-ink); background: var(--color-bg-2); border: 1px solid color-mix(in srgb, var(--color-gold) 45%, transparent); max-width: 760px; }
+.next-hint { color: var(--color-ink-2); flex: none; }
 .pips { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center; }
 .pip { height: 8px; width: 8px; border-radius: 50%; background: rgba(255,255,255,.16); transition: all .3s var(--ease); }
 .pip.mini { width: 26px; border-radius: 5px; }
