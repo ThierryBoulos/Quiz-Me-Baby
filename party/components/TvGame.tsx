@@ -41,7 +41,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
     /* nothing on the TV can be selected or copied */
     <div ref={root} className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       {/* the tracker, always: Classic's HUD */}
-      <Hud pub={pub} size="tv" shown={shown} />
+      <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
 
       <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : "gap-6")} key={key}>
         {/* a steal: the light swings over from the team that missed to the one stealing */}

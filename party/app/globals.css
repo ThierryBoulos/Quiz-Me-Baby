@@ -214,6 +214,7 @@ button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .tv-note, .next-hint { font-size: var(--text-14); padding: 5px 12px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tv-note { color: var(--color-ink); background: var(--color-bg-2); border: 1px solid color-mix(in srgb, var(--color-gold) 45%, transparent); max-width: 760px; }
 .next-hint { color: var(--color-ink-2); flex: none; }
+.hud-code { font-size: var(--text-11); font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--color-ink-3); opacity: .8; margin-bottom: -4px; }
 .pips { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center; }
 .pip { height: 8px; width: 8px; border-radius: 50%; background: rgba(255,255,255,.16); transition: all .3s var(--ease); }
 .pip.mini { width: 26px; border-radius: 5px; }

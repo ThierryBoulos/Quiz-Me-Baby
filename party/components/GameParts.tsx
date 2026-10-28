@@ -53,7 +53,8 @@ function Roll({ v }: { v: number }) {
 }
 
 /* shown: the scores to show for now (the TV holds the old one while the points fly up to it) */
-export function Hud({ pub, size, shown }: { pub: Pub; size: "tv" | "phone"; shown?: Two<number> }) {
+/* code: the room's code, tiny above the round's name, so someone signed out can find their way back in (the TV) */
+export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"; shown?: Two<number>; code?: string }) {
   const T = pub.teams, w = pub.mini?.wins, u = pub.mini?.pct ? "%" : "";
   const sc = (t: 0 | 1) => shown?.[t] ?? T[t].score;
   return (
@@ -61,6 +62,7 @@ export function Hud({ pub, size, shown }: { pub: Pub; size: "tv" | "phone"; show
       <div className="hud-in">
         <div className="hud-team a"><span className="dot" /><div className="nm">{T[0].name}</div><div className="sc" data-score="0"><Roll v={sc(0)} /></div></div>
         <div className="hud-mid">
+          {code && <div className="hud-code">Room {code}</div>}
           <div className="hud-label">{hudLabel(pub)}</div>
           {pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>}
         </div>
