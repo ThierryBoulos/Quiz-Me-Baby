@@ -206,6 +206,9 @@
       if(a === b || a.replace(/ /g, '') === b.replace(/ /g, '')) return true;
       const ca = countryOf(a), cb = countryOf(b);
       if(ca >= 0 && cb >= 0 && ca !== cb) continue;                  // one country typed for another
+      /* a slip is in the letters, never the numbers: "2022 World Cup" isn't "2026 World Cup", "Apollo 12" isn't "Apollo 11" */
+      const da = a.match(/\d+/g), db = b.match(/\d+/g);
+      if(da && db && da.join(' ') !== db.join(' ')) continue;
       if(distance(a, b) <= allowance(b.length)) return true;
     }
     return false;
