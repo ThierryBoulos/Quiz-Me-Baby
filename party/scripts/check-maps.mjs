@@ -75,14 +75,18 @@ const CASES = {
   qhhlwtg: [["world cup finalists","played in a world cup final","reached the world cup final","world cup finals","finalists","countries in the final","world cup finalist"],
     ["world cup winners","world cup hosts","football","euro finals"]],
 };
+/* 28 Oct: a sweep of ~40 ways people write each map's idea, and ~15 near misses (scripts/map-answers.json) */
+const SWEEP = JSON.parse(readFileSync(join(root, "scripts/map-answers.json"), "utf8"));
 const bad = [];
 for (const q of maps) {
   const c = CASES[q.id];
+  for (const t of SWEEP[q.id]?.[0] || []) if (!ok(t, q)) bad.push(`${q.question}: "${t}" should count (sweep)`);
+  for (const t of SWEEP[q.id]?.[1] || []) if (ok(t, q)) bad.push(`${q.question}: "${t}" should not count (sweep)`);
   if (!c) { bad.push(`${q.id} (${q.question}): no test answers yet — add some to scripts/check-maps.mjs`); continue; }
   for (const t of c[0]) if (!ok(t, q)) bad.push(`${q.question}: "${t}" should count`);
   for (const t of c[1]) if (ok(t, q)) bad.push(`${q.question}: "${t}" should not count`);
   if (!A.mapKeys?.[q.answer]?.length) bad.push(`${q.question}: no key ideas in data/accept.json mapKeys`);
 }
-const n = Object.values(CASES).reduce((s, c) => s + c[0].length + c[1].length, 0);
+const n = [...Object.values(CASES), ...Object.values(SWEEP)].reduce((s, c) => s + c[0].length + c[1].length, 0);
 if (bad.length) { console.log(`check-maps: ${bad.length} wrong\n  ` + bad.join("\n  ")); process.exit(1); }
 console.log(`check-maps: ${maps.length} maps, ${n} answers, all called right`);
