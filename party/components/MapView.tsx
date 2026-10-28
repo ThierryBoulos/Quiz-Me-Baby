@@ -7,15 +7,18 @@ import { createPortal } from "react-dom";
    and their legends). Our own files, so the markup is trusted. */
 type MapFile = { q: string; r: string; lq: string; lr: string; topic: string };
 const cache: Record<string, Promise<MapFile>> = {};
-const load = (id: string) => (cache[id] ||= fetch(`/maps/${id}.json`).then((r) => r.json()));
+/* the ones already here: drawn straight away, with no "Loading" frame in between */
+const ready: Record<string, MapFile> = {};
+const load = (id: string) => (cache[id] ||= fetch(`/maps/${id}.json`).then((r) => r.json()).then((m: MapFile) => (ready[id] = m)));
 /* fetched ahead (usePreload), so the map is there the moment it's asked */
 export const preloadMap = (id: string) => { void load(id).catch(() => { delete cache[id]; }); };
 
-/* wipe: the TV's reveal, where the answer's drawing sweeps in over the question's, left to right */
+/* wipe: the TV, where the answer's drawing is laid ready under the question's and, on the reveal, simply
+   shows over it (no reloading, no flash in between) */
 export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wipe }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string; wipe?: boolean }) {
-  const [m, setM] = useState<MapFile | null>(null);
+  const [m, setM] = useState<MapFile | null>(() => ready[id] || null);
   const [big, setBig] = useState(false);
-  useEffect(() => { setM(null); void load(id).then(setM); }, [id]);
+  useEffect(() => { if (ready[id]) { setM(ready[id]); return; } setM(null); void load(id).then(setM); }, [id]);
   /* a new map, or the reveal: the enlarged one closes (the phone's answer box is underneath) */
   useEffect(() => { setBig(false); }, [id, reveal]);
   if (!m) return <div className="flex flex-col items-center gap-3 py-10 text-[var(--color-ink-3)]" aria-busy="true"><div className="spinner" />Loading the map…</div>;
@@ -23,11 +26,10 @@ export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wi
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <button type="button" className="map-frame" onClick={() => setBig(true)} aria-label="Enlarge the map">
-        {wipe && reveal ? (
+        {wipe ? (
           <div className="relative w-full">
             <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: m.q }} />
-            <div className="map-box map-wipe w-full absolute inset-0" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: m.r }} />
-            <div className="map-wipe-edge" aria-hidden />
+            <div className={"map-box map-wipe w-full absolute inset-0" + (reveal ? " on" : "")} style={{ maxHeight: maxH }} aria-hidden={!reveal} dangerouslySetInnerHTML={{ __html: m.r }} />
           </div>
         ) : <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: html }} />}
         <span className="map-enlarge">Enlarge</span>

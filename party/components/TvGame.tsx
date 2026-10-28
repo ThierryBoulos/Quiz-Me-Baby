@@ -34,6 +34,8 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
   useEffect(() => { if (tid == null) return; setShownToast(tid); const t = setTimeout(() => setShownToast(null), 4000); return () => clearTimeout(t); }, [tid]);
   const said = / \+\d+ points?( — |$)| takes (leg|map|flag|board|landmark|number) \d+\.$| takes the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
   const toastOn = !!pub.toast && shownToast === pub.toast.id && !said;
+  /* a map's question and its reveal are one screen: the map stays put and the answer comes in over it */
+  const bodyKey = (pub.screen === "mapQ" || pub.screen === "mapReveal") && pub.map ? "map" + pub.map.id : key;
   /* the end: celebrate the winner first, then the recap comes up under it */
   const [recap, setRecap] = useState(false);
   useEffect(() => { if (pub.screen !== "final") { setRecap(false); return; } const t = setTimeout(() => setRecap(true), 7000); return () => clearTimeout(t); }, [pub.screen]);
@@ -43,7 +45,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
       {/* the tracker, always: Classic's HUD */}
       <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
 
-      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : "gap-6")} key={key}>
+      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : "gap-6")} key={bodyKey}>
         {/* a steal: the light swings over from the team that missed to the one stealing */}
         {pub.screen === "steal" && <div className={"steal-beam " + (pub.turn === 1 ? "b" : "a")} aria-hidden />}
         {pub.screen === "roundIntro" && <div className="w-full max-w-[1080px]"><RoundIntro pub={pub} size="tv" /></div>}
@@ -422,7 +424,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   }
   if ((sc === "mapQ" || sc === "mapReveal") && pub.map) return (
     <div className="flex gap-10 items-center w-full" style={{ fontSize: 22 }}>
-      <div className="flex-1 min-w-0"><MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} title={pub.map.title} wipe={sc === "mapReveal"} /></div>
+      <div className="flex-1 min-w-0"><MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} title={pub.map.title} wipe /></div>
       <div className="w-[340px] flex flex-col items-center gap-4">
         {sc === "mapQ" ? (<>
           <div className="display text-40" style={{ color: "var(--color-gold)" }}>What does this map show?</div>

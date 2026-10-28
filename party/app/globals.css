@@ -560,11 +560,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .board-row.board-flip { animation: boardFlip .42s var(--ease) both; transform-origin: top; }
 @keyframes boardFlip { 0% { transform: perspective(600px) rotateX(-90deg); opacity: 0; } 60% { opacity: 1; } 100% { transform: none; opacity: 1; } }
 /* the map's reveal: the answer's drawing sweeps in over the question's, a gold edge leading */
-.map-wipe-edge { position: absolute; top: 0; bottom: 0; left: 0; width: 4px; margin-left: -2px; border-radius: 2px; background: var(--color-gold);
-  box-shadow: 0 0 18px 4px rgba(245,197,24,.75); pointer-events: none; animation: wipeEdge .9s var(--ease) both; animation-delay: .15s; }
-@keyframes wipeEdge { 0% { left: 0; opacity: 1; } 92% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
-.map-wipe { animation: mapWipe .9s var(--ease) both; animation-delay: .15s; }
-@keyframes mapWipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.map-wipe { visibility: hidden; }
+.map-wipe.on { visibility: visible; }
 /* the Battle: the two captains fly in, VS slams between them */
 .vs-in { animation: vsIn .6s var(--ease) both; animation-delay: .15s; }
 .vs-in.a { --from: -260px; } .vs-in.b { --from: 260px; }
@@ -576,4 +573,4 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* the night's dots: one fills in as its round or game ends */
 .pip.done { animation: pipDone .6s var(--ease); }
 @keyframes pipDone { 0% { transform: scale(1.9); background: var(--color-gold); } 100% { transform: none; } }
-@media (prefers-reduced-motion: reduce) { .steal-beam, .lead-banner, .roll-ring, .win-ring, .win-flash, .ruler-band, .map-wipe-edge { display: none; } }
+@media (prefers-reduced-motion: reduce) { .steal-beam, .lead-banner, .roll-ring, .win-ring, .win-flash, .ruler-band { display: none; } }
