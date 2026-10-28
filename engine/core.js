@@ -209,6 +209,9 @@
       /* a slip is in the letters, never the numbers: "2022 World Cup" isn't "2026 World Cup", "Apollo 12" isn't "Apollo 11" */
       const da = a.match(/\d+/g), db = b.match(/\d+/g);
       if(da && db && da.join(' ') !== db.join(' ')) continue;
+      /* a letter doubled or not ("Fetta" for Feta, "Mozarella"): short words get no other slip */
+      const single = (x) => x.replace(/([a-z])\1+/g, '$1');
+      if(single(a) === single(b)) return true;
       if(distance(a, b) <= allowance(b.length)) return true;
     }
     return false;

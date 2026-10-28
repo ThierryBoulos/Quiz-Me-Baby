@@ -43,6 +43,9 @@ test('answers: exact, tidy and typo-tolerant', () => {
   assert.ok(!Q.isMatch('', 'Paris'));
   assert.ok(Q.isMatch('salt and pepper', 'Salt & Pepper'));
   assert.ok(Q.isMatch('newyork', 'New York'));
+  assert.ok(Q.isMatch('Fetta', 'Feta'));                   // a doubled letter, even in a short word
+  assert.ok(Q.isMatch('mozarella', 'Mozzarella'));
+  assert.ok(!Q.isMatch('Bree', 'Brie'));
 });
 
 test('answers: numbers compare as numbers', () => {
