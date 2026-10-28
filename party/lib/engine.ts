@@ -23,7 +23,9 @@ export const rankFor = (q: { id?: string } | null | undefined): string[][] | nul
 /* Guess the Map: the idea counts, not the wording. Each map has a few key ideas (data/accept.json,
    mapKeys), each a handful of word stems; an answer has the idea when every stem of one of them is
    among its words, in any order: "they drive on the left" has [driv], "kings and queens" has [king].
-   A stem matches the start of a word, with one slip allowed from five letters ("vikinks"); one marked
+   A stem matches the start of a word, with one slip allowed from four letters (a letter wrong, missing,
+   extra or swapped: "vikinks", "vikngs", "wrld"; a four-letter one only a letter missing, extra or
+   swapped, and keeps its first; from eight letters, two: "sengen"); one marked
    "=" must be the whole word ("no" isn't "north"); one marked "!" must not be there at all
    ("nuclear", but not "nuclear energy"). */
 export function mapHit(text: string, keys: string[][] | undefined) {
@@ -32,8 +34,14 @@ export function mapHit(text: string, keys: string[][] | undefined) {
   const has = (stem: string): boolean => {
     if (stem.startsWith("!")) return !has(stem.slice(1));
     const exact = stem.startsWith("="), s = stem.replace(/^=/, "");
+    /* the word's start, a letter shorter or longer than the stem, one slip from it */
+    const slips = s.length >= 8 ? 2 : 1;                        // two in a long one ("sengen" for schengen)
+    const near = (w: string, lens: number[]) => lens.some((n) => n >= 3 && n <= w.length && QMB.distance(w.slice(0, n), s) <= slips);
+    /* a four-letter one: a letter missing, extra or swapped, never a wrong one ("stadium" isn't "stag") */
+    const swapped = (w: string) => w.length >= 4 && [...w.slice(0, 4)].sort().join("") === [...s].sort().join("") && QMB.distance(w.slice(0, 4), s) <= 1;
     return words.some((w) => exact ? w === s || w === s + "s"
-      : w.startsWith(s) || (s.length >= 5 && w.length >= s.length - 1 && QMB.distance(w.slice(0, s.length), s) <= 1));
+      : w.startsWith(s) || (s.length >= 5 && near(w, [s.length - slips, s.length - 1, s.length, s.length + 1, s.length + slips]))
+        || (s.length === 4 && w[0] === s[0] && ((w.length === 3 && near(w, [3])) || near(w, [5]) || swapped(w))));
   };
   return keys.some((k) => k.every(has));
 }
