@@ -79,7 +79,7 @@ export const verdictWord = (v: boolean, say?: boolean) => (say ? (v ? "Dodged it
 /* stamp: on the TV's reveal, the call comes down like a rubber stamp (on the drumroll's hit) */
 export function Verdict({ v, say, size, stamp }: { v: boolean | null | undefined; say?: boolean; size?: number; stamp?: boolean }) {
   if (v == null) return null;
-  return <span className={"verdict " + (v ? "pos" : "neg") + (stamp ? " stamped" : "")} style={size ? { fontSize: size } : undefined}>{verdictWord(v, say)}</span>;
+  return <span className={"verdict " + (v ? "pos" : "neg") + (stamp ? " stamped" : "")} style={size ? { fontSize: stamp ? Math.round(size * 0.84) : size } : undefined}>{verdictWord(v, say)}</span>;
 }
 
 /* ---- the ruling buttons under a team's answer: [RIGHT] [WRONG] (or
@@ -194,7 +194,8 @@ const TONE: [RegExp, string][] = [
   [/board|embar|instap|biniş|son çağrı|επιβίβ|صعود|搭乗|última|last call|gate offen/i, "#3ddc97"],
 ];
 const tone = (st: string) => TONE.find(([r]) => r.test(st))?.[1] || "#ffd25a";
-export function Board({ air, size }: { air?: Pub["airport"]; size: "tv" | "phone" | "small" }) {
+/* flip: the TV, a new board: its rows flip in one after another, like a real departures board */
+export function Board({ air, size, flip }: { air?: Pub["airport"]; size: "tv" | "phone" | "small"; flip?: boolean }) {
   if (!air) return null;
   const tv = size === "tv", fs = tv ? 21 : size === "small" ? 11 : 13;
   return (
@@ -204,7 +205,7 @@ export function Board({ air, size }: { air?: Pub["airport"]; size: "tv" | "phone
         <bdi>{air.title}</bdi>
       </div>
       {air.board.map((r, i) => (
-        <div key={i} className={"board-row " + (tv ? "tv" : "")} role="row">
+        <div key={i} className={"board-row " + (tv ? "tv" : "") + (flip ? " board-flip" : "")} role="row" style={flip ? { animationDelay: 0.05 + i * 0.06 + "s" } : undefined}>
           <span className="b-time" role="cell">{r[0]}</span>
           <span className="b-dest" role="cell"><bdi>{r[2]}</bdi></span>
           <span className="b-flight" role="cell">{r[3]}</span>
@@ -400,13 +401,14 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Best score takes ${pts} points. Tied? One buzzer question to settle it (first captain in takes it), or a point each: ${call}.` }];
   }
 }
-export function MiniIntro({ pub, size }: { pub: Pub; size: "tv" | "phone" }) {
+/* head: in place of the small heading above the title (the TV's Battle: its two captains, VS between them) */
+export function MiniIntro({ pub, size, head }: { pub: Pub; size: "tv" | "phone"; head?: ReactNode }) {
   const m = pub.mini, tv = size === "tv";
   if (!m) return null;
   const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : `Best of ${m.of}`;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
-      <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : "Mini-game"}</div>
+      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : "Mini-game"}</div>}
       <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? 88 : 44 }}>{m.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>

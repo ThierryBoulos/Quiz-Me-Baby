@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
 import { usePreload } from "@/components/GameParts";
 import { ShareButton } from "@/components/Share";
@@ -43,6 +43,9 @@ export default function TvRoom() {
   const [notNow, setNotNow] = useState(false);
   const status = room?.status;
   useEffect(() => { if (status && status !== "lobby") setNotNow(false); }, [status]);
+  /* the lobby: someone takes a seat (their face pops into the team), with a soft pop on the TV */
+  const seats = members.length, lastSeats = useRef(seats);
+  useEffect(() => { if (isTv && status === "lobby" && seats > lastSeats.current) Snd.soft(); lastSeats.current = seats; }, [seats, isTv, status]);
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
   const pub = own || ((room?.state?.pub || null) as Pub | null);

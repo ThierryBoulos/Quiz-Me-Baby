@@ -12,6 +12,8 @@ import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
+/* a mini-game's reveal: no drumroll, so its pieces land straight away (the same moves, a shorter beat) */
+const QUICK = { ["--beat" as string]: ".15s" };
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
 /* The TV during the game: no buttons (but Exit at the very end), no answers before the reveal. */
@@ -181,6 +183,82 @@ function Sent({ pub }: { pub: Pub }) {
     </div>);
 }
 
+/* A split-flap board (the old airport kind): every letter cycles through the alphabet, then lands, one after
+   another left to right; words wrap whole. start: ms before it begins. With "reduce motion", just the text. */
+const FLAPS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+function SplitFlap({ text, size, start = 0 }: { text: string; size: number; start?: number }) {
+  const final = text.toUpperCase();
+  const still = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const [shown, setShown] = useState(() => (still ? final : final.replace(/\S/g, " ")));
+  useEffect(() => {
+    if (still) { setShown(final); return; }
+    const t0 = Date.now() + start;
+    const tick = () => {
+      const el = Date.now() - t0;
+      let done = true;
+      setShown([...final].map((ch, i) => {
+        if (ch === " ") return " ";
+        if (el >= 380 + i * 55) return ch;
+        done = false;
+        return el < i * 55 ? " " : FLAPS[(Math.floor(el / 50) * 7 + i * 13) % FLAPS.length];
+      }).join(""));
+      if (done) clearInterval(iv);
+    };
+    const iv = setInterval(tick, 50);
+    return () => clearInterval(iv);
+  }, [final, start, still]);
+  let k = 0;
+  return (
+    <div className="flap" style={{ fontSize: size }} aria-label={text}>
+      {final.split(" ").map((w, wi) => { const at = k; k += w.length + 1; return (
+        <span key={wi} className="flap-word" aria-hidden>{[...w].map((_, ci) => <span key={ci} className="flap-t"><span>{shown[at + ci] ?? ""}</span></span>)}</span>); })}
+    </div>);
+}
+
+/* Closest To Wins: a ruler with the answer in the middle. A guess under the answer sits to its left, over it to
+   its right, the farther one near the end; A's card above the ruler, B's below. The pins drop in, then a band
+   in the team's colour runs from the answer out to each guess: the longer the band, the further off. */
+function NumberLine({ pub, ans, w }: { pub: Pub; ans: number; w: 0 | 1 | "tie" | "none" | null | undefined }) {
+  const T = pub.teams, g = pub.reveal?.guesses || [];
+  const far = Math.max(...[0, 1].map((t) => (g[t] == null ? 0 : Math.abs(Number(g[t]) - ans))), 0);
+  const at = (t: number) => (g[t] == null || !far ? 50 : 50 + ((Number(g[t]) - ans) / far) * 42);
+  return (
+    <div className="ruler relative w-[1040px] h-[210px]" style={QUICK}>
+      <div className="ruler-track"><span className="ruler-ticks" /></div>
+      {([0, 1] as const).map((t) => { const gss = g[t]; if (gss == null) return null; const x = at(t); return (
+        <div key={"b" + t} className={"ruler-band " + (t ? "b" : "a")} style={{ left: Math.min(x, 50) + "%", width: Math.abs(x - 50) + "%", background: tc(t), transformOrigin: x < 50 ? "right" : "left", ...d(0.5 + t * 0.12) }} />); })}
+      <div className="ruler-mid"><span className="lbl">answer</span></div>
+      {([0, 1] as const).map((t) => { const gss = g[t], x = at(t), win = w === t || w === "tie"; if (gss == null) return (
+        <div key={t} className={"ruler-none " + (t ? "b" : "a")}><b style={{ color: tc(t) }}>{T[t].name}</b> · no answer</div>);
+        const off = offBy(gss, ans), side = x < 18 ? "l" : x > 82 ? "r" : "c";
+        return (
+        <div key={t} className={"ruler-pin " + (t ? "b" : "a") + (win ? " win" : "")} style={{ left: x + "%", ["--c" as string]: tc(t), ...d(0.12 + t * 0.14) }}>
+          <span className="stem" /><span className="dot" />
+          <span className={"card-l " + side}>
+            <span className="nm" style={{ color: tc(t) }}>{T[t].name}</span>
+            <span className="v display">{showNum(gss)}</span>
+            <span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off)}</span>
+          </span>
+        </div>); })}
+    </div>);
+}
+
+/* the Auction's run: a notch per answer counted, up to the bid. A big bid (over 12) is one bar instead, marked
+   every 5, so 25 never means 25 dots. Full, it glows green. */
+function BidBar({ n, of, color }: { n: number; of: number; color: string }) {
+  if (!of) return null;
+  const full = n >= of;
+  if (of > 12) return (
+    <div className={"bid-bar relative w-[760px] h-[22px] " + (full ? "full" : "")} aria-hidden>
+      <span style={{ width: Math.min(100, (100 * n) / of) + "%", background: full ? undefined : color }} />
+      {Array.from({ length: Math.floor((of - 1) / 5) }, (_, i) => <i key={i} style={{ left: (100 * (i + 1) * 5) / of + "%" }} />)}
+    </div>);
+  return (
+    <div className={"bid-notches flex gap-2 " + (full ? "full" : "")} aria-hidden>
+      {Array.from({ length: of }, (_, i) => <span key={i} className={i < n ? "on" : ""} style={i < n && !full ? { background: color } : undefined} />)}
+    </div>);
+}
+
 /* the mini-games on the TV */
 function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   const T = pub.teams, m = pub.mini, sc = pub.screen;
@@ -209,11 +287,14 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     </div>); }
   if ((sc === "majorityQ" || sc === "majorityReveal") && pub.majority) { const M = pub.majority, R = M.reveal; return (<>
     <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 40 : 50, lineHeight: 1.12 }}>{pub.question}</div>
-    <div className="grid grid-cols-2 gap-5 w-full max-w-[1400px]">{(M.options || []).map((o, i) => { const ok = R?.answer === o; return (
-      <div key={o} className={"mr-tv-opt " + (R ? (ok ? "ok rev" : "dim rev") : "")}>
+    <div className="grid grid-cols-2 gap-5 w-full max-w-[1400px]">{(M.options || []).map((o, i) => { const ok = R?.answer === o;
+      /* the reveal: the wrong answers drop away one after another, then the right one lights up */
+      const k = (M.options || []).filter((x, j) => j < i && x !== R?.answer).length;
+      return (
+      <div key={o} className={"mr-tv-opt " + (R ? (ok ? "ok rev mr-win" : "dim rev mr-out") : "")} style={R ? d(ok ? 0.75 : 0.12 + k * 0.2) : undefined}>
         <span className="flex-1 min-w-0"><bdi>{o}</bdi></span>
         {/* how many on each team picked it: a dot in the team's colour, and the number */}
-        {R && <span className="flex gap-5 shrink-0 text-26" aria-label={`${T[0].name} ${R.counts[i]?.[0] ?? 0}, ${T[1].name} ${R.counts[i]?.[1] ?? 0}`}>{[0, 1].map((t) => (
+        {R && <span className="flex gap-5 shrink-0 text-26 mr-counts" aria-label={`${T[0].name} ${R.counts[i]?.[0] ?? 0}, ${T[1].name} ${R.counts[i]?.[1] ?? 0}`}>{[0, 1].map((t) => (
           <span key={t} className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded-full" style={{ background: tc(t as 0 | 1) }} aria-hidden /><b>{R.counts[i]?.[t] ?? 0}</b></span>))}</span>}
       </div>); })}</div>
     {/* the fact behind the answer, right under it, for the whole room */}
@@ -232,7 +313,13 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       </div>)}
   </>); }
   if (/Intro$/.test(sc)) return (<>
-    <div className="w-full max-w-[1080px]"><MiniIntro pub={pub} size="tv" /></div>
+    {/* the Battle: the two captains fly in from their sides, VS slams down between them */}
+    <div className="w-full max-w-[1080px]"><MiniIntro pub={pub} size="tv" head={sc === "battleIntro" && pub.captains ? (
+      <div className="flex items-center justify-center gap-8 w-full -mb-2" aria-label={`${pub.captains[0]} versus ${pub.captains[1]}`}>
+        <div className="display vs-in a text-48 text-right flex-1 truncate" style={{ color: tc(0) }}><bdi>{pub.captains[0] || T[0].name}</bdi></div>
+        <div className="display vs-x text-60" style={{ color: "var(--color-gold)" }}>VS</div>
+        <div className="display vs-in b text-48 text-left flex-1 truncate" style={{ color: tc(1) }}><bdi>{pub.captains[1] || T[1].name}</bdi></div>
+      </div>) : undefined} /></div>
   </>);
   if (sc === "miniQ") return (<>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 50, lineHeight: 1.15 }}>{pub.question}</div>
@@ -246,19 +333,14 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       <div className="eyebrow text-18">The answer</div>
       <div className="display" style={{ fontSize: 110, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
       {pub.reveal.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2">{pub.reveal.notes}</div>}
-      <div className="flex gap-20">{[0, 1].map((t) => { const gss = pub.reveal?.guesses?.[t]; return (
-        <div key={t} style={{ opacity: w === t || w === "tie" ? 1 : 0.55 }}>
-          <div className="display text-30" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
-          <div className="display text-70">{gss == null ? "—" : showNum(gss)}</div>
-          <div className="text-20 text-[var(--color-ink-2)]">{gss == null ? "No answer" : `Off by ${showNum(offBy(gss, ans))}`}</div>
-        </div>); })}</div>
+      <NumberLine pub={pub} ans={ans} w={w} />
       <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : ""}</div>
     </>);
   }
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (<>
     <FlagImg name={pub.flag} h={sc === "flagQ" ? 300 : 220} maxW={520} />
     {sc === "flagQ" ? (<><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} /><Sent pub={pub} /></>) : (<>
-      <div className="display" style={{ fontSize: 90, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
+      <div className="display beat slam" style={{ ...QUICK, fontSize: 90, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
       <TeamRows pub={pub} empty="No answer" />
     </>)}
   </>);
@@ -291,7 +373,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   /* Guess the Airport: the board, then its name */
   if ((sc === "airportQ" || sc === "airportReveal") && pub.airport) return (
     <div className="flex gap-10 items-center w-full">
-      <div className="flex-1 min-w-0"><Board air={pub.airport} size="tv" /></div>
+      <div className="flex-1 min-w-0"><Board air={pub.airport} size="tv" flip={sc === "airportQ"} /></div>
       <div className="w-[380px] flex flex-col items-center gap-4">
         {sc === "airportQ" ? (<>
           <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which airport?</div>
@@ -299,8 +381,9 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
           <Sent pub={pub} />
         </>) : (<>
           <div className="eyebrow text-16">The airport</div>
-          <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
-          {pub.airport.code && <div className="text-24"><b>{pub.airport.code}</b> · {pub.airport.city}</div>}
+          {/* the airport's name comes up on a split-flap board: each letter clatters through the alphabet and lands, left to right */}
+          <SplitFlap text={pub.reveal?.answer || ""} size={30} />
+          {pub.airport.code && <div className="text-24 flex items-center gap-3"><SplitFlap text={pub.airport.code} size={26} start={300} /> · {pub.airport.city}</div>}
           {pub.airport.cityOk === false && <div className="text-18 font-bold text-center" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</div>}
           {pub.reveal?.notes && <div className="text-16 text-[var(--color-ink-2)] leading-snug text-left">{pub.reveal.notes}</div>}
           <TeamRows pub={pub} empty="No answer" small />
@@ -334,7 +417,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   }
   if ((sc === "mapQ" || sc === "mapReveal") && pub.map) return (
     <div className="flex gap-10 items-center w-full" style={{ fontSize: 22 }}>
-      <div className="flex-1 min-w-0"><MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} title={pub.map.title} /></div>
+      <div className="flex-1 min-w-0"><MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} title={pub.map.title} wipe={sc === "mapReveal"} /></div>
       <div className="w-[340px] flex flex-col items-center gap-4">
         {sc === "mapQ" ? (<>
           <div className="display text-40" style={{ color: "var(--color-gold)" }}>What does this map show?</div>
@@ -342,7 +425,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
           <Sent pub={pub} />
         </>) : (<>
           <div className="eyebrow text-16">The map shows</div>
-          <div className="display text-40" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>
+          <div className="display text-40 beat slam" style={{ ...QUICK, color: "var(--color-gold)" }}>{pub.map.title}</div>
           <TeamRows pub={pub} empty="No answer" small />
         </>)}
       </div>
@@ -363,14 +446,16 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     if (sc === "auctionBid") return (<>
       <div className="eyebrow text-20">Category</div>
       <div className="display max-w-[1100px]" style={{ fontSize: 76, color: "var(--color-gold)", lineHeight: 1.05 }}>{A.cat}</div>
-      <div className="display text-60">{A.bid ? <>Bid: {A.bid} <span style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}</span></> : "No bid yet"}</div>
+      <div className="display text-60">{A.bid ? <>Bid: <span key={A.bid} className="bump inline-block">{A.bid}</span> <span style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}</span></> : "No bid yet"}</div>
       <div className="text-28" style={{ color: tc(A.turn) }}><b>{T[A.turn].name}</b>: raise{A.bid ? " or pass" : ""}</div>
       <div className="text-24 text-[var(--color-ink-2)]">Whoever wins the bid has <b>{pub.timers?.auction ?? 30} seconds</b> to name them.</div>
     </>);
     if (sc === "auctionRun") return (<>
       <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{A.cat}</div>
       <div className="display text-44" style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}: name {A.bid}!</div>
-      <div className="display" style={{ fontSize: 170, lineHeight: 1 }}>{A.count}<span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span></div>
+      <div className="display" style={{ fontSize: 170, lineHeight: 1 }}><span key={A.count} className="bump inline-block">{A.count}</span><span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span></div>
+      {/* a notch for each one named, up to the bid (a long bid fills a bar); full, it glows */}
+      <BidBar n={A.count} of={A.bid} color={tc(A.by)} />
       <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
       {A.countedBy && <div className="text-22 text-[var(--color-ink-2)]">Counted by <b>{A.countedBy}</b></div>}
     </>);
@@ -395,7 +480,11 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   if (sc === "sayReveal" && pub.reveal) return (<>
     <div className="text-26 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
     <div className="eyebrow text-18">The app&rsquo;s word</div>
-    <div className="display" style={{ fontSize: 100, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
+    {/* the app's word: a card face down ("?"), turned over */}
+    <div className="say-card" aria-label={pub.reveal.answer}><div className="say-inner">
+      <div className="face back display" style={{ fontSize: 96 }}>{pub.reveal.answer}</div>
+      <div className="face front display" aria-hidden>?</div>
+    </div></div>
     <TeamRows pub={pub} say empty="Nothing" />
     <div className="display text-40" style={{ color: tc(pub.reveal.w === 0 || pub.reveal.w === 1 ? pub.reveal.w : null) }}>{pub.reveal.w === "tie" ? "A point each" : pub.reveal.w === 0 || pub.reveal.w === 1 ? `${T[pub.reveal.w].name} take the leg` : ""}</div>
   </>);
@@ -456,11 +545,11 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
 function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: string; small?: boolean }) {
   const T = pub.teams;
   return (
-    <div className={"flex justify-center " + (small ? "gap-8" : "gap-20")}>{([0, 1] as const).map((t) => { const ok = pub.reveal?.ok?.[t], x = pub.reveal?.typed?.[t]?.[0]; return (
-      <div key={t} className="flex flex-col items-center gap-1 min-w-0">
+    <div className={"flex justify-center " + (small ? "gap-8" : "gap-20")} style={{ ["--beat" as string]: ".4s" }}>{([0, 1] as const).map((t) => { const ok = pub.reveal?.ok?.[t], x = pub.reveal?.typed?.[t]?.[0]; return (
+      <div key={t} className="flex flex-col items-center gap-1 min-w-0 beat" style={d(t * 0.12)}>
         <div className="flex items-baseline gap-3 whitespace-nowrap" style={{ fontSize: small ? 22 : 30 }}>
           <span className="display" style={{ color: tc(t) }}>{T[t].name}</span>
-          {ok == null ? null : <Verdict v={ok} say={say} />}
+          {ok == null ? null : <Verdict v={ok} say={say} stamp />}
         </div>
         <div className="font-bold" style={{ fontSize: small ? 20 : 28, color: x ? undefined : "var(--color-ink-3)" }}>{x ?? empty}</div>
         {say && pub.reveal?.offList?.[t] && !ok && <div className="text-[var(--color-ink-2)]" style={{ fontSize: small ? 16 : 20 }}>Not on the list</div>}

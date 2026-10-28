@@ -11,7 +11,8 @@ const load = (id: string) => (cache[id] ||= fetch(`/maps/${id}.json`).then((r) =
 /* fetched ahead (usePreload), so the map is there the moment it's asked */
 export const preloadMap = (id: string) => { void load(id).catch(() => { delete cache[id]; }); };
 
-export function MapView({ id, reveal, hint, maxH = 420, legend = true, title }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string }) {
+/* wipe: the TV's reveal, where the answer's drawing sweeps in over the question's, left to right */
+export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wipe }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string; wipe?: boolean }) {
   const [m, setM] = useState<MapFile | null>(null);
   const [big, setBig] = useState(false);
   useEffect(() => { setM(null); void load(id).then(setM); }, [id]);
@@ -22,7 +23,13 @@ export function MapView({ id, reveal, hint, maxH = 420, legend = true, title }: 
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <button type="button" className="map-frame" onClick={() => setBig(true)} aria-label="Enlarge the map">
-        <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: html }} />
+        {wipe && reveal ? (
+          <div className="relative w-full">
+            <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: m.q }} />
+            <div className="map-box map-wipe w-full absolute inset-0" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: m.r }} />
+            <div className="map-wipe-edge" aria-hidden />
+          </div>
+        ) : <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: html }} />}
         <span className="map-enlarge">Enlarge</span>
       </button>
       {legend && <div dangerouslySetInnerHTML={{ __html: reveal ? m.lr : m.lq }} />}

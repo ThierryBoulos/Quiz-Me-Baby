@@ -21,7 +21,7 @@ export function Lineup({ room, members, onMove, onRemove, big }: { room: Room | 
             <div className="flex flex-wrap gap-2">
               {list.length === 0 && <span className="text-[var(--color-ink-3)]" style={{ fontSize: big ? 22 : 14 }}>Nobody yet</span>}
               {list.map((m) => (
-                <span key={m.user_id} className={"chip " + side} style={big ? { fontSize: 22, padding: "8px 18px 8px 8px" } : undefined}>
+                <span key={m.user_id} className={"chip pop-in " + side} style={big ? { fontSize: 22, padding: "8px 18px 8px 8px" } : undefined}>
                   <span className="face" style={big ? { width: 44, height: 44, fontSize: 28 } : undefined}>{m.avatar || "🙂"}</span>
                   {m.name}
                   {m.role === "captain" && <span className="cap">Captain</span>}
