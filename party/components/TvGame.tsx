@@ -364,7 +364,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     </div>);
   if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (
     <div className="flex gap-10 items-center w-full">
-      <div className="flex-1 min-w-0"><PinMap marks={pinMarks(pub)} fly height={640} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
+      <div className="flex-1 min-w-0"><PinMap marks={pinMarks(pub)} fly height={490} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
       <div className="w-[380px] flex flex-col items-center gap-3 pb-10">
         <div className="eyebrow text-16">It&rsquo;s here</div>
         <div className="display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.name}</div>
@@ -374,7 +374,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
             <div className="display text-22" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
             <div className="display text-40">{R.pins[t] ? showKm(R.km[t] ?? 0) : "No pin"}{R.pins[t] && <span className="text-22 text-[var(--color-ink-2)]"> off</span>}</div>
           </div>))}
-        <div className="display text-36" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : "No point"}</div>
+        <div className="display text-36 mt-6" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : "No point"}</div>
       </div>
     </div>); }
   /* Guess the Airport: the board, then its name */
@@ -563,7 +563,8 @@ function MiniTitle({ title }: { title?: string }) {
 function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: string; small?: boolean }) {
   const T = pub.teams;
   return (
-    <div className={"flex justify-center " + (small ? "gap-8" : "gap-20")} style={{ ["--beat" as string]: ".4s" }}>{([0, 1] as const).map((t) => { const ok = pub.reveal?.ok?.[t], x = pub.reveal?.typed?.[t]?.[0]; return (
+    /* small: a side column, so one team above the other */
+    <div className={"flex justify-center " + (small ? "flex-col items-center gap-3" : "gap-20")} style={{ ["--beat" as string]: ".4s" }}>{([0, 1] as const).map((t) => { const ok = pub.reveal?.ok?.[t], x = pub.reveal?.typed?.[t]?.[0]; return (
       <div key={t} className="flex flex-col items-center gap-1 min-w-0 beat" style={d(t * 0.12)}>
         <div className="flex items-baseline gap-3 whitespace-nowrap" style={{ fontSize: small ? 22 : 30 }}>
           <span className="display" style={{ color: tc(t) }}>{T[t].name}</span>
