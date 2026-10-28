@@ -927,14 +927,14 @@
      played "for fun" still count on the mini-game's own scoreboard, never on
      the night's score. s.fun: the rest is for fun; s.asked: already asked.  */
   const LEGGED = {
-    closest:{ s:(g) => g.mini, q:'miniQ', summary:'miniSummary', left:(s) => s.base - s.i },
-    saysame:{ s:(g) => g.saySame, q:'sayQ', summary:'saySummary', left:(s) => s.base - s.i },
-    flag:{ s:(g) => g.flagGame, q:'flagQ', summary:'flagSummary', left:(s) => s.base - s.i },
-    map:{ s:(g) => g.mapGame, q:'mapQ', summary:'mapSummary', left:(s) => s.base - s.i },
-    dish:{ s:(g) => g.dishGame, q:'dishQ', summary:'dishSummary', left:(s) => s.base - s.i },
-    pin:{ s:(g) => g.pinGame, q:'pinQ', summary:'pinSummary', left:(s) => s.base - s.i },
-    airport:{ s:(g) => g.airportGame, q:'airportQ', summary:'airportSummary', left:(s) => s.base - s.i },
-    auction:{ s:(g) => g.auction, q:'auctionBid', summary:'auctionResult', left:(s) => s.n - s.leg - 1 }
+    closest:{ s:(g) => g.mini, q:'miniQ', summary:'miniSummary', left:(s) => s.base - s.i, unit:'question' },
+    saysame:{ s:(g) => g.saySame, q:'sayQ', summary:'saySummary', left:(s) => s.base - s.i, unit:'prompt' },
+    flag:{ s:(g) => g.flagGame, q:'flagQ', summary:'flagSummary', left:(s) => s.base - s.i, unit:'flag' },
+    map:{ s:(g) => g.mapGame, q:'mapQ', summary:'mapSummary', left:(s) => s.base - s.i, unit:'map' },
+    dish:{ s:(g) => g.dishGame, q:'dishQ', summary:'dishSummary', left:(s) => s.base - s.i, unit:'recipe' },
+    pin:{ s:(g) => g.pinGame, q:'pinQ', summary:'pinSummary', left:(s) => s.base - s.i, unit:'landmark' },
+    airport:{ s:(g) => g.airportGame, q:'airportQ', summary:'airportSummary', left:(s) => s.base - s.i, unit:'board' },
+    auction:{ s:(g) => g.auction, q:'auctionBid', summary:'auctionResult', left:(s) => s.n - s.leg - 1, unit:'category' }
   };
   /* -> { winner, spare } when this mini-game is settled with legs still to play, else null */
   function decidedEarly(g, key){
@@ -946,7 +946,7 @@
   }
   /* pay the winner of a mini-game decided early (once) */
   function payEarly(g, key, s, d, fx){
-    const note = 'Decided with ' + d.spare + ' to spare.';
+    const u = LEGGED[key].unit, note = 'Won with ' + d.spare + ' ' + (d.spare > 1 ? u.replace(/y$/, 'ie') + 's' : u) + ' still to play.';
     if(key === 'auction'){
       if(!s.awarded){ s.awarded = true; s.winner = d.winner; s.award = [d.winner === 0 ? g.miniPts : 0, d.winner === 1 ? g.miniPts : 0]; g.teams[d.winner].score += g.miniPts; fx.push({ sound:'point' }); }
       return;
@@ -986,7 +986,7 @@
     s.done = true;
     s.verdict = { winner, needsHost:false,
       note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker flag' : s.tieLegs + ' tie-breaker flags') + '.'
-         : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' flag' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
+         : s.i < s.base ? 'Won with ' + (s.base - s.i) + ' flag' + (s.base - s.i > 1 ? 's' : '') + ' still to play.' : '' };
     awardMini(g, s, winner, fx);
     fx.push({ go:'flagSummary' });
     return fx;
@@ -1044,7 +1044,7 @@
     s.done = true;
     s.verdict = { winner:out.winner, needsHost:false,
       note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker map' : s.tieLegs + ' tie-breaker maps') + '.'
-         : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' map' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
+         : s.i < s.base ? 'Won with ' + (s.base - s.i) + ' map' + (s.base - s.i > 1 ? 's' : '') + ' still to play.' : '' };
     awardMini(g, s, out.winner, fx);
     fx.push({ go:'mapSummary' });
     return fx;
@@ -1072,7 +1072,7 @@
     s.done = true;
     s.verdict = { winner:out.winner, needsHost:false,
       note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker board' : s.tieLegs + ' tie-breaker boards') + '.'
-         : s.i < s.base ? 'Decided with ' + (s.base - s.i) + ' board' + (s.base - s.i > 1 ? 's' : '') + ' to spare.' : '' };
+         : s.i < s.base ? 'Won with ' + (s.base - s.i) + ' board' + (s.base - s.i > 1 ? 's' : '') + ' still to play.' : '' };
     awardMini(g, s, out.winner, fx);
     fx.push({ go:'airportSummary' });
     return fx;

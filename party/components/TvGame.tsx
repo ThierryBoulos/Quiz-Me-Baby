@@ -6,7 +6,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
-import { AskHead, battleNeeds, Board, Confetti, decidedCall, decidedHead, decidedSub, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, offBy, showKm, showNum, TIE_SCREENS } from "@/lib/game";
 import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
 
@@ -435,14 +435,19 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
         </>)}
       </div>
     </div>);
-  if (sc === DECIDED && pub.decided) return (<>
-    <div className="eyebrow text-20">{m.title}</div>
-    <div className="display" style={{ fontSize: 100, color: tc(pub.decided.winner) }}>{decidedHead(pub)}</div>
-    <div className="text-30">{decidedSub(pub)}</div>
-    <div className="text-26 text-[var(--color-ink-2)]">{decidedCall(pub)}</div>
-  </>);
+  /* won early: who, the score, the points; then only that the rest is for fun, and who chooses */
+  if (sc === DECIDED && pub.decided) { const D = pub.decided; return (<>
+    <MiniTitle title={m.title} />
+    <div className="display slam" style={{ fontSize: 88, color: tc(D.winner) }}>{decidedHead(pub)}</div>
+    {m.wins && <ScoreBoard pub={pub} w={m.wins} win={D.winner} size="tv" />}
+    <div className="flex items-center gap-5">
+      <span className="display text-36 pts-pill" style={{ color: tc(D.winner) }} data-fly-src={D.winner}>{decidedPts(pub)}</span>
+      <span className="text-24 text-[var(--color-ink-2)]">{decidedFun(pub)}</span>
+    </div>
+    <div className="text-24 mt-1">Play on, or stop here? <b>{decidedWho(pub)}</b> decides.</div>
+  </>); }
   if (TIE_SCREENS.includes(sc)) return (<>
-    <div className="eyebrow text-20">{m.title}</div>
+    <MiniTitle title={m.title} />
     <div className="display" style={{ fontSize: 100, color: "var(--color-gold)" }}>{tieHead(pub)}</div>
     <div className="text-28 text-[var(--color-ink-2)]">{tieCall(pub)}</div>
   </>);
@@ -526,7 +531,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   </>); }
   if (pub.battle && sc === "battleSummary") { const B = pub.battle; return (<>
     {B.last && <BattleAnswer last={B.last} size={24} />}
-    <div className="eyebrow text-20">Battle of the Captains</div>
+    <MiniTitle title="Battle of the Captains" />
     <ScoreBoard pub={pub} w={B.score} win={B.winner} size="tv" />
     <div className="display text-52" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Tie") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
     <SdCalls pub={pub} />
@@ -535,7 +540,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   if (/Summary$/.test(sc) && pub.summary) {
     const S = pub.summary;
     return (<>
-      <div className="eyebrow text-20">{m.title}</div>
+      <MiniTitle title={m.title} />
       <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />
       <div className="display text-52" style={{ color: tc(S.winner) }}>
         {S.needsHost ? "Still level: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{pointsEach(S.award?.[0] ?? 0)}</span>
@@ -544,6 +549,12 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     </>);
   }
   return null;
+}
+
+/* a mini-game's name over its result: big, in gold, the way its intro showed it */
+function MiniTitle({ title }: { title?: string }) {
+  if (!title) return null;
+  return <div className="display text-52 leading-none slam" style={{ color: "var(--color-gold)" }}>{title}</div>;
 }
 
 /* each team's ruling, then what they wrote under it: "TEAM A  DODGED IT" / "Mcdo" */

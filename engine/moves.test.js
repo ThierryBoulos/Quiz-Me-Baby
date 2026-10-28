@@ -23,7 +23,7 @@ test('flag: a 6–0 run ends early and pays the mini-game points', () => {
   let fx;
   for(let i = 0; i < 6; i++) fx = Q.play(g, { type:'flag/verdict', w:0 });
   assert.deepEqual(g.flagGame.wins, [6, 0]);
-  assert.equal(g.flagGame.verdict.note, 'Decided with 4 flags to spare.');
+  assert.equal(g.flagGame.verdict.note, 'Won with 4 flags still to play.');
   assert.equal(g.teams[0].score, g.miniPts);
   assert.ok(types(fx).includes('go:flagSummary'));
   assert.deepEqual(Q.play(g, { type:'flag/done' }), [{ go:'dishIntro' }]);   // next in the running order
@@ -597,7 +597,7 @@ test('airport: as the flags — decided early stops, level brings another board'
   Q.play(g, { type:'airport/start' });
   let fx;
   for(let i = 0; i < 3; i++) fx = Q.play(g, { type:'airport/verdict', w:0 });
-  assert.equal(g.airportGame.verdict.note, 'Decided with 2 boards to spare.');
+  assert.equal(g.airportGame.verdict.note, 'Won with 2 boards still to play.');
   assert.equal(g.teams[0].score, g.miniPts);
   assert.ok(types(fx).includes('go:airportSummary'));
   g = newGames();

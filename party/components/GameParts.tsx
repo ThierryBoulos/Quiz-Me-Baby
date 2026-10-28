@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { preloadWorld, type Mark } from "./PinMap";
-import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type Pub, type Two } from "@/lib/game";
+import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type MiniKey, type Pub, type Two } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -465,13 +465,14 @@ export const recapLines = (pub: Pub): string[] => {
 };
 /* won with legs to spare: the same words on the TV and every phone */
 export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
-export const decidedSub = (pub: Pub) => {
-  const d = pub.decided, w = pub.mini?.wins;
-  if (!d) return "";
-  return `${w ? `${w[0]}–${w[1]} with ${d.spare} to spare, ` : ""}+${d.pts} point${d.pts === 1 ? "" : "s"}. The rest can be played for fun (it won't change the score).`;
-};
-export const decidedCall = (pub: Pub) =>
-  `Keep playing for fun, or stop here: ${pub.mode === "host" ? "the host" : pub.captains?.[pub.lead ?? 0] || "the captain"} decides.`;
+/* what a mini-game's legs are called ("4 flags", "the last landmark") */
+const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category" };
+export const legsLeft = (key: MiniKey, n: number) => { const u = LEG_UNIT[key] || "leg"; return n === 1 ? `The last ${u} is` : `The last ${n} ${u.replace(/y$/, "ie")}s are`; };
+export const decidedPts = (pub: Pub) => (pub.decided ? `+${pub.decided.pts} point${pub.decided.pts === 1 ? "" : "s"}` : "");
+export const decidedFun = (pub: Pub) => (pub.decided ? `${legsLeft(pub.decided.key, pub.decided.spare)} just for fun.` : "");
+export const decidedSub = (pub: Pub) => (pub.decided ? `${decidedPts(pub)}. ${decidedFun(pub)}` : "");
+export const decidedWho = (pub: Pub) => (pub.mode === "host" ? "The host" : pub.captains?.[pub.lead ?? 0] || "The captain");
+export const decidedCall = (pub: Pub) => `Play on, or stop here? ${decidedWho(pub)} decides.`;
 /* the Battle at halftime: what the second captain needs (the Battle pays mini.pts) */
 export const battleNeeds = (pub: Pub) => {
   const B = pub.battle, T = pub.teams;
