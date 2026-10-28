@@ -1285,7 +1285,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.39', date:'27 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.40', date:'28 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -4821,7 +4821,8 @@ function render(){
 /* Opened from Party's TV lobby ("Just play on this screen"): the night is always
    one with a host on this screen, so home is the host's setup, and leaving the
    setup goes back to the lobby it came from. */
-let FROM_PARTY = (() => { try{ return sessionStorage.getItem('qmb.fromParty') || ''; }catch(e){ return ''; } })();
+/* (on its own, Classic still has a way back: Party's main menu; its own menu is never shown) */
+let FROM_PARTY = (() => { try{ return sessionStorage.getItem('qmb.fromParty') || '/'; }catch(e){ return '/'; } })();
 function nav(screen){
   if(screen === 'home' && FROM_PARTY){
     if(S.screen === 'setup'){ location.href = FROM_PARTY; return; }
@@ -8764,7 +8765,8 @@ const ACT = {
       '<div class="btn-row center"><button class="btn ghost" data-act="closeModal">Keep playing</button>' +
       '<button class="btn danger" data-act="quitYes">Leave</button></div></div>');
   },
-  quitYes(){ closeModal(); Timer.stop(); Host.hush(); S.game = null; S.screen = 'home'; render(); },
+  /* leaving a game: Party's main menu, never Classic's own */
+  quitYes(){ closeModal(); Timer.stop(); Host.hush(); S.game = null; location.href = '/'; },
   closeModal(){ closeModal(); },
   newGame(){ S.game = null; S.setup = defaultSetup(); S.screen = 'setup'; render(); },
   exportResult(){
