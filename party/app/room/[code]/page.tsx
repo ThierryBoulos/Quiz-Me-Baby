@@ -86,11 +86,22 @@ export default function PhoneRoom() {
   const report = usePresence(code, me);
   const mine = useMemo(() => members.find((m) => m.user_id === me) || null, [members, me]);
 
-  /* not in this room (yet): to the join screen with the code filled in */
+  /* not in this room (yet): to the join screen with the code filled in. But only once sure: a phone waking
+     up (back from another app) can read with a sign-in a few seconds out of date, and the room then looks
+     empty or gone (28 Oct: a player was sent to the join screen mid-game). So it renews the sign-in, reads
+     the room again, and goes only if it still isn't there. */
+  const gone = !!missing || !!(room && me && members.length && !mine);
+  const goneRef = useRef(gone);
+  goneRef.current = gone;
   useEffect(() => {
-    if (missing) router.replace("/join?code=" + code);
-    else if (room && me && members.length && !mine) router.replace("/join?code=" + code);
-  }, [missing, room, me, members.length, mine, code, router]);
+    if (!gone) return;
+    let live = true;
+    const t = setTimeout(async () => {
+      try { await sb().auth.getSession(); await refreshRef.current(); } catch { /* read again below */ }
+      setTimeout(() => { if (live && goneRef.current) router.replace("/join?code=" + code); }, 800);
+    }, 2500);
+    return () => { live = false; clearTimeout(t); };
+  }, [gone, code, router]);
 
   const host = members.find((m) => m.role === "host") || null;
   const side = mine?.team === 0 ? "a" : mine?.team === 1 ? "b" : null;
