@@ -137,7 +137,11 @@ button{cursor:pointer;background:none;border:none}
 }
 
 /* ---------- SHELL ---------- */
-#shell{position:relative;min-height:100svh;display:flex;flex-direction:column}
+/* Opened from the Home Screen, Party's status bar is see-through: a solid strip sits under it and the page
+   starts below it. In a Safari tab the inset is 0, so nothing changes there. */
+:root{--top:env(safe-area-inset-top,0px)}
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--top);background:var(--bg);z-index:45;pointer-events:none}
+#shell{position:relative;min-height:100svh;display:flex;flex-direction:column;padding-top:var(--top)}
 main{flex:1;width:100%;max-width:1240px;margin:0 auto;padding:var(--sp-4) var(--sp-4) var(--sp-7)}
 @media(max-width:640px){ main{padding:var(--sp-3) var(--sp-3) var(--sp-6)} }
 
@@ -201,7 +205,7 @@ h3.display{font-size:clamp(20px,3vw,30px)}
 
 /* ---------- HUD (always-on tracker) ---------- */
 #hud{
-  position:sticky;top:0;z-index:40;
+  position:sticky;top:var(--top);z-index:40;
   background:linear-gradient(180deg,rgba(4,5,14,.92),rgba(4,5,14,.62) 70%,transparent);
   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border-bottom:1px solid var(--line);
@@ -238,7 +242,7 @@ h3.display{font-size:clamp(20px,3vw,30px)}
 }
 
 /* ---------- HOME ---------- */
-.home{position:relative;min-height:calc(100svh - 40px);display:flex;flex-direction:column;
+.home{position:relative;min-height:calc(100svh - var(--top) - 40px);display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;gap:clamp(18px,3vh,32px);padding:clamp(16px,3vh,40px) 0}
 .home-main{display:flex;flex-direction:column;align-items:center;gap:inherit;width:min(460px,100%)}
 /* The host stands beside the menu, not in the row with it — he is taken out of
@@ -303,7 +307,7 @@ h3.display{font-size:clamp(20px,3vw,30px)}
 @media(hover:none){.colophon{opacity:.5}}
 @media(prefers-reduced-motion:reduce){.colophon{transition:none}}
 body.homemode main{padding-top:8px;padding-bottom:8px}
-.home{min-height:calc(100svh - 20px)}
+.home{min-height:calc(100svh - var(--top) - 20px)}
 /* keep the home screen inside one browser window on short displays */
 @media(max-height:820px){
   .home{padding:10px 0}
@@ -542,7 +546,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 /* ---- ONE-SCREEN PLAY MODE ----
    The ask / steal / mini question screens must fit a laptop without scrolling. */
 body.playmode main{padding-top:4px;padding-bottom:6px}
-.play{min-height:calc(100svh - 96px);display:flex;flex-direction:column;gap:clamp(6px,1.1vh,14px)}
+.play{min-height:calc(100svh - var(--top) - 96px);display:flex;flex-direction:column;gap:clamp(6px,1.1vh,14px)}
 .play .spot{justify-content:safe center}
 .play .spot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:clamp(12px,2vh,28px) var(--sp-3);gap:clamp(6px,1vh,12px)}
@@ -711,7 +715,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
    to scroll inside itself when a 14-round game simply has too many rows. */
 body.fitmode main{padding-top:4px;padding-bottom:10px}
 .fits{display:flex;flex-direction:column;justify-content:center;
-  height:calc(100svh - 96px);gap:clamp(6px,1.3vh,16px);padding:clamp(4px,.8vh,12px) 0}
+  height:calc(100svh - var(--top) - 96px);gap:clamp(6px,1.3vh,16px);padding:clamp(4px,.8vh,12px) 0}
 /* nothing squashes except the results table, which is the one thing that can
    afford to scroll inside itself when a 14-round game has too many rows */
 .fits > *{flex:none}
@@ -792,13 +796,13 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
    the clock on a laptop, above it on a phone. The question screen is .play and
    capped at the window like the auction's, so nothing runs past the fold. */
 .mini-dots i.n{background:rgba(255,255,255,.42)}
-.play.map-play{max-height:calc(100svh - 96px)}
+.play.map-play{max-height:calc(100svh - var(--top) - 96px)}
 .map-stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(230px,24vw,300px);gap:clamp(10px,1.6vw,22px);align-items:center}
 /* the frame hugs the drawing, so the Enlarge chip sits on the map's corner */
 .map-frame{position:relative;min-height:0;align-self:center;display:flex;align-items:center;justify-content:center;cursor:zoom-in;border-radius:var(--r)}
-.map-svg,.map-img{display:block;width:100%;height:auto;max-height:calc(100svh - 230px);border-radius:var(--r);
+.map-svg,.map-img{display:block;width:100%;height:auto;max-height:calc(100svh - var(--top) - 230px);border-radius:var(--r);
   filter:drop-shadow(0 18px 40px rgba(0,0,0,.45))}
-.map-svg{width:min(100%,calc((100svh - 230px) * var(--ar,2)))}
+.map-svg{width:min(100%,calc((100svh - var(--top) - 230px) * var(--ar,2)))}
 .map-frame:has(> .map-img){justify-self:center}
 .map-img{object-fit:contain;width:auto;max-width:100%}
 .map-svg .msea{fill:#0B1030}
@@ -891,8 +895,8 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
   background:linear-gradient(180deg,#FFF7DA,var(--gold) 70%,#C79306);-webkit-background-clip:text;background-clip:text;color:transparent;
   animation:reveal .5s var(--ease) both;text-wrap:balance}
 .map-judge .map-stage{grid-template-columns:minmax(0,1.8fr) minmax(240px,1fr)}
-.map-judge .map-svg,.map-judge .map-img{max-height:calc(100svh - 330px)}
-.map-judge .map-svg{width:min(100%,calc((100svh - 330px) * var(--ar,2)))}
+.map-judge .map-svg,.map-judge .map-img{max-height:calc(100svh - var(--top) - 330px)}
+.map-judge .map-svg{width:min(100%,calc((100svh - var(--top) - 330px) * var(--ar,2)))}
 .map-judge .q-note{font-size:13px;line-height:1.5;margin-top:2px;text-align:left}
 .map-judge .map-side{align-items:stretch;text-align:left}
 .map-judge .map-legend{justify-content:flex-start}
@@ -934,7 +938,7 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 #mapzoom .mz-help{text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
 
 /* ---------- MODAL ---------- */
-#modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:var(--sp-3);
+#modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:var(--sp-3);padding-top:max(var(--sp-3),var(--top));
   background:rgba(2,3,10,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #modal.on{display:grid;animation:fade .2s var(--ease)}
 @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -972,7 +976,7 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
   animation:reveal .7s var(--ease) both;
 }
 /* ---- Imad's speech bubble: up top, over the content, never in the way of a tap ---- */
-#hostBubble{position:fixed;z-index:90;top:62px;right:16px;max-width:min(440px,calc(100vw - 32px));display:flex;align-items:flex-end;gap:10px;
+#hostBubble{position:fixed;z-index:90;top:calc(62px + var(--top));right:16px;max-width:min(440px,calc(100vw - 32px));display:flex;align-items:flex-end;gap:10px;
   pointer-events:none;opacity:0;transform:translateY(-12px) scale(.96);transition:opacity .25s,transform .25s var(--ease)}
 #hostBubble.on{opacity:1;transform:none}
 #hostBubble img{width:76px;height:76px;object-fit:contain;flex:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));order:2}
@@ -981,7 +985,7 @@ body.fitmode main{padding-top:4px;padding-bottom:10px}
 #hostBubble.on .hb-text{animation:hbPop .45s var(--ease) both}
 @keyframes hbPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:none}}
 @media(max-width:760px){
-  #hostBubble{top:96px;right:12px;left:12px;max-width:none}
+  #hostBubble{top:calc(96px + var(--top));right:12px;left:12px;max-width:none}
   #hostBubble img{width:46px;height:46px}
   #hostBubble .hb-text{font-size:14px;padding:10px 14px}
 }

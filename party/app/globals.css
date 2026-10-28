@@ -70,6 +70,9 @@ body { min-height: 100svh; background:
   radial-gradient(120% 70% at 50% -10%, color-mix(in srgb, var(--tint) 16%, transparent), transparent 60%),
   radial-gradient(90% 60% at 50% 110%, rgba(18, 22, 58, 0.9), transparent 70%), var(--color-bg); }
 
+/* Opened from the Home Screen the status bar is see-through: a solid strip under it, so what scrolls up
+   goes under the strip, not under the clock (0 high in a Safari tab) */
+body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: env(safe-area-inset-top, 0px); background: var(--color-bg); z-index: 45; pointer-events: none; }
 /* clear of the notch, the Dynamic Island and the home bar */
 .screen { min-height: 100svh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px;
   padding: calc(28px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left)); }
