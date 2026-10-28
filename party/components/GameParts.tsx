@@ -77,9 +77,10 @@ export function Hud({ pub, size, shown }: { pub: Pub; size: "tv" | "phone"; show
    green for the good one and red for the bad, on the TV and every phone ---- */
 export const verdictWord = (v: boolean, say?: boolean) => (say ? (v ? "Dodged it" : "Said it") : v ? "Right" : "Wrong");
 /* stamp: on the TV's reveal, the call comes down like a rubber stamp (on the drumroll's hit) */
-export function Verdict({ v, say, size, stamp }: { v: boolean | null | undefined; say?: boolean; size?: number; stamp?: boolean }) {
+/* word: a bad call said more exactly ("No answer", "Not on list") */
+export function Verdict({ v, say, size, stamp, word }: { v: boolean | null | undefined; say?: boolean; size?: number; stamp?: boolean; word?: string }) {
   if (v == null) return null;
-  return <span className={"verdict " + (v ? "pos" : "neg") + (stamp ? " stamped" : "")} style={size ? { fontSize: stamp ? Math.round(size * 0.84) : size } : undefined}>{verdictWord(v, say)}</span>;
+  return <span className={"verdict " + (v ? "pos" : "neg") + (stamp ? " stamped" : "")} style={size ? { fontSize: stamp ? Math.round(size * 0.84) : size } : undefined}>{word || verdictWord(v, say)}</span>;
 }
 
 /* ---- the ruling buttons under a team's answer: [RIGHT] [WRONG] (or

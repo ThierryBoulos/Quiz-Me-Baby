@@ -549,10 +549,9 @@ function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: 
       <div key={t} className="flex flex-col items-center gap-1 min-w-0 beat" style={d(t * 0.12)}>
         <div className="flex items-baseline gap-3 whitespace-nowrap" style={{ fontSize: small ? 22 : 30 }}>
           <span className="display" style={{ color: tc(t) }}>{T[t].name}</span>
-          {ok == null ? null : <Verdict v={ok} say={say} stamp />}
+          {ok == null ? null : <Verdict v={ok} say={say} stamp word={ok ? undefined : !x ? "No answer" : say && pub.reveal?.offList?.[t] ? "Not on list" : undefined} />}
         </div>
-        <div className="font-bold" style={{ fontSize: small ? 20 : 28, color: x ? undefined : "var(--color-ink-3)" }}>{x ?? empty}</div>
-        {say && pub.reveal?.offList?.[t] && !ok && <div className="text-[var(--color-ink-2)]" style={{ fontSize: small ? 16 : 20 }}>Not on the list</div>}
+        {(x || ok == null) && <div className="font-bold" style={{ fontSize: small ? 20 : 28, color: x ? undefined : "var(--color-ink-3)" }}>{x ?? empty}</div>}
       </div>); })}
     </div>);
 }
