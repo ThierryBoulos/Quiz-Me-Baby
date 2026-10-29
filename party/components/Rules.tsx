@@ -96,7 +96,7 @@ export function Rules({ fixing = true }: { fixing?: boolean }) {
 
       <Rule n="06" title="Your data">
         <L items={[
-          <><B>No accounts.</B> Each phone gets an anonymous sign-in. No email, no phone number. A room keeps the names, teams, answers and scores for three days, then it&rsquo;s deleted; a sign-in unused for 30 days is deleted too.</>,
+          <><B>No accounts.</B> Each phone gets an anonymous sign-in. No email, no phone number. A room keeps the names, teams, answers and scores for three days, then it&rsquo;s deleted; a sign-in unused for 7 days is deleted too.</>,
           <>The TV keeps the game in progress, and which questions it has played, in its own browser. Server: Supabase (EU, Ireland); site: Vercel. No ads, no trackers, nothing sold or shared.</>,
         ]} />
       </Rule>
