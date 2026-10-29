@@ -34,6 +34,7 @@ export default function PhoneRoom() {
   /* It lasts until the TV has actually answered (its next update), not until this phone's own refresh;
      if nothing comes back in 8 s the phone says so (and takes it back if the reply comes after all), and a tap that couldn't even leave says so at once. */
   const [waiting, setWaiting] = useState(false);
+  const [lineupOpen, setLineupOpen] = useState(false);
   const [tapErr, setTapErr] = useState<string | null>(null);
   /* where the failed tap was: the message sits just under that button (above it when the button is docked at the bottom) */
   const [tapAt, setTapAt] = useState<{ top?: number; bottom?: number } | null>(null);
@@ -283,9 +284,17 @@ export default function PhoneRoom() {
           <section className="card enter text-center">
             <div className="eyebrow">You&rsquo;re the host</div>
             <h1 className="display text-40 mt-1" style={{ color: "var(--color-gold)" }}>Run the night</h1>
-            <p className="text-14 text-[var(--color-ink-2)] mt-1">You&rsquo;ll see every answer. Tap an arrow to move a player across.</p>
+            <p className="text-14 text-[var(--color-ink-2)] mt-1">You&rsquo;ll see every answer.</p>
           </section>
-          <Lineup room={room} members={members} onMove={move} onRemove={remove} />
+          {/* the line-up on one line, so Setup is right here (13 players used to push it 1,400 px down) */}
+          <button type="button" className="card flex items-center justify-between gap-3 text-left" aria-expanded={lineupOpen} onClick={() => setLineupOpen((v) => !v)}>
+            <span className="text-14"><b>{members.filter((m) => m.role !== "host").length} in</b> · {[0, 1].map((t) => members.filter((m) => m.team === t).length).join(" v ")} · {notReadyWhy(members) || "both captains set"}</span>
+            <span className="text-12 font-bold text-[var(--color-ink-2)]">{lineupOpen ? "Hide" : "Show"}</span>
+          </button>
+          {lineupOpen && <>
+            <p className="text-14 text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>
+            <Lineup room={room} members={members} onMove={move} onRemove={remove} />
+          </>}
           <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => claim("player")}>Stop hosting</button>
         </>
       ) : mine.team == null ? (
