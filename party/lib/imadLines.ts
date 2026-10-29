@@ -8,10 +8,10 @@ export const HOST_LINES: Record<string, string[]> = {
     "Are you ready to QUIZ ME BABYYYY?!",
     "Welcome, welcome, welcome! Phones down, brains on, egos at the door.",
     "Tonight: {team} versus {other}. Only one leaves with dignity.",
-    "Ladies and gentlemen… and whoever brought the hummus… let's QUIZ!",
+    "Ladies and gentlemen, phones charged, drinks poured? Let's QUIZ!",
     "Captains, you speak for your team. Everyone else, you speak for nobody.",
     "I've seen the questions. Some of you are not ready.",
-    "Yalla! Let's see who actually paid attention at school.",
+    "Let's see who actually paid attention at school.",
     "Friendships may end tonight. That's fine. That's the game."
   ],
   "round": [
@@ -35,7 +35,7 @@ export const HOST_LINES: Record<string, string[]> = {
     "Correct. I'm honestly a bit emotional.",
     "That's the one! Smooth. Very smooth.",
     "Correct! Mama would be proud.",
-    "Yes! And with that, {team} becomes slightly more unbearable.",
+    "Yes! And with that, {team} become slightly more unbearable.",
     "Right answer. {captain}, take the rest of the night off. Actually don't."
   ],
   "wrong": [
