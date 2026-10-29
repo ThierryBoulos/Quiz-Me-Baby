@@ -9,6 +9,7 @@ const CODES: Record<string, string> = {
   face_taken: "Someone already took that face. Pick another.",
   not_started: "That game hasn't started yet, so just join with your name.",
   no_such_player: "Nobody with that name is in this game.",
+  seat_in_use: "That seat's phone is still here. If it's yours and it died, wait a minute and try again.",
   "not in this room": "You're not in this room any more. Join again with the code on the TV.",
   "pick a team first": "Pick a team first.",
   "unknown role": "That didn't work. Try again.",
