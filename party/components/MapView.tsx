@@ -9,16 +9,27 @@ type MapFile = { q: string; r: string; lq: string; lr: string; topic: string };
 const cache: Record<string, Promise<MapFile>> = {};
 /* the ones already here: drawn straight away, with no "Loading" frame in between */
 const ready: Record<string, MapFile> = {};
-const load = (id: string) => (cache[id] ||= fetch(`/maps/${id}.json`).then((r) => r.json()).then((m: MapFile) => (ready[id] = m)));
+/* a download that failed (one bad request on party Wi-Fi) is forgotten, so the next ask tries again */
+const load = (id: string) => (cache[id] ||= fetch(`/maps/${id}.json`).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+  .then((m: MapFile) => (ready[id] = m)).catch((e) => { delete cache[id]; throw e; }));
 /* fetched ahead (usePreload), so the map is there the moment it's asked */
-export const preloadMap = (id: string) => { void load(id).catch(() => { delete cache[id]; }); };
+export const preloadMap = (id: string) => { void load(id).catch(() => { /* tried again when the map is shown */ }); };
 
 /* wipe: the TV, where the answer's drawing is laid ready under the question's and, on the reveal, simply
    shows over it (no reloading, no flash in between) */
 export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wipe }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string; wipe?: boolean }) {
   const [m, setM] = useState<MapFile | null>(() => ready[id] || null);
   const [big, setBig] = useState(false);
-  useEffect(() => { if (ready[id]) { setM(ready[id]); return; } setM(null); void load(id).then(setM); }, [id]);
+  /* not here yet: fetched, and fetched again every few seconds until it comes (29 Oct: one failed download
+     left "Loading the map…" up for the whole leg) */
+  useEffect(() => {
+    if (ready[id]) { setM(ready[id]); return; }
+    setM(null);
+    let on = true, t: ReturnType<typeof setTimeout> | undefined;
+    const go = () => { void load(id).then((m) => { if (on) setM(m); }).catch(() => { if (on) t = setTimeout(go, 3000); }); };
+    go();
+    return () => { on = false; clearTimeout(t); };
+  }, [id]);
   /* a new map, or the reveal: the enlarged one closes (the phone's answer box is underneath) */
   useEffect(() => { setBig(false); }, [id, reveal]);
   if (!m) return <div className="flex flex-col items-center gap-3 py-10 text-[var(--color-ink-3)]" aria-busy="true"><div className="spinner" />Loading the map…</div>;
