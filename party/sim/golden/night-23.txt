@@ -1,0 +1,137 @@
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+2.00 ask | 2 | 0-0 |  |  | 
+3.00 answer | 2 | 1-0 |  | Lions +1 point | 
+3.75 ask | 3 | 1-0 |  | Lions +1 point | 
+4.75 steal | 3 | 1-0 |  | Lions +1 point | 
+5.75 answer | 3 | 1-0 |  | Lions +1 point | 
+6.50 roundScore | 4 | 1-0 |  | Lions +1 point | 
+7.50 roundIntro | 5 | 1-0 |  | Lions +1 point | 
+8.25 ask | 6 | 1-0 |  | Lions +1 point | 
+9.25 steal | 6 | 1-0 |  | Lions +1 point | 
+10.25 answer | 6 | 1-0 |  | Lions +1 point | 
+11.00 ask | 7 | 1-0 |  | Lions +1 point | 
+12.00 answer | 7 | 1-1 |  | Owls +1 point | 
+12.75 roundScore | 8 | 1-1 |  | Owls +1 point | 
+13.75 flagIntro | 9 | 1-1 | 0-0 | Owls +1 point | 
+14.75 flagQ | 10 | 1-1 | 0-0 | Owls +1 point | 
+15.50 flagReveal | 10 | 1-1 | 0-1 | Owls +1 point | 
+16.50 flagReveal | 10 | 1-1 | 0-1 |  | 
+(capGone team 0)
+31.50 flagReveal | 10 | 1-1 | 0-1 | No answer in time: the call stands. | 
+31.75 flagReveal | 10 | 1-1 | 0-1 | ⁨Rami⁩ moves the game on. You can in 3 s. | 
+32.75 flagReveal | 10 | 1-1 | 0-1 | ⁨Rami⁩ moves the game on. You can in 2 s. | 
+34.50 flagReveal | 10 | 1-1 | 0-1 | ⁨Rami⁩ moves the game on. You can in 1 s. | 
+35.25 flagQ | 11 | 1-1 | 0-1 | Owls takes flag 1. | 
+51.25 flagReveal | 12 | 1-1 | 0-2 | Owls takes flag 1. | 
+52.50 flagReveal | 12 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 3 s. | 
+53.25 flagReveal | 12 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 2 s. | 
+54.25 flagReveal | 12 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 1 s. | 
+55.25 flagQ | 13 | 1-1 | 0-2 | Owls takes flag 2. | 
+71.25 flagReveal | 14 | 1-1 | 0-2 | Owls takes flag 2. | 
+72.25 flagReveal | 14 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 3 s. | 
+73.25 flagReveal | 14 | 1-1 | 0-2 |  | 
+88.25 flagReveal | 14 | 1-1 | 0-2 | No answer in time: the call stands. | 
+88.50 flagQ | 15 | 1-1 | 0-2 | Nobody got it. | 
+(the scores set to 2-3)
+91.50 flagQ | 15 | 1-1 | 0-2 | ⁨Rami⁩ seems to be away. ⁨Sam⁩ is ⁨Lions⁩'s captain now. | 
+92.00 flagQ | 15 | 2-3 | 0-2 | Both captains agreed: ⁨Lions⁩ 2, ⁨Owls⁩ 3. | 
+92.00 flagReveal | 15 | 2-3 | 0-2 | Both captains agreed: ⁨Lions⁩ 2, ⁨Owls⁩ 3. | 
+93.00 flagQ | 16 | 2-3 | 0-2 | Nobody got it. | 
+93.75 flagReveal | 16 | 2-3 | 0-3 | Nobody got it. | 
+94.75 flagReveal | 16 | 2-3 | 0-3 |  | 
+96.50 flagReveal | 16 | 2-3 | 0-3 | ⁨Lea⁩ doesn't agree: the call stands. | 
+97.50 flagQ | 17 | 2-3 | 0-3 | Owls takes flag 5. | 
+98.25 flagReveal | 17 | 2-3 | 0-4 | Owls takes flag 5. | 
+99.25 flagQ | 18 | 2-3 | 0-4 | Owls takes flag 6. | 
+100.25 flagReveal | 18 | 2-3 | 0-4 | Owls takes flag 6. | 
+101.00 decided | 19 | 2-5 | 0-4 |  | 
+102.00 roundIntro | 20 | 2-5 |  |  | 
+103.75 ask | 21 | 2-5 |  |  | 
+104.75 ask | 21 | 2-5 |  | Lions used Call a Friend. | 
+107.25 ask | 22 | 2-5 |  | Lions used Call a Friend. | 
+108.25 answer | 22 | 3-5 |  | Lions +1 point | 
+109.25 answer | 22 | 3-5 |  |  | 
+110.00 steal | 23 | 2-5 |  | Owls steal a new question. | 
+111.00 answer | 23 | 2-6 |  | Owls +1 point — steal | 
+111.75 ask | 24 | 2-6 |  | Owls +1 point — steal | 
+112.75 answer | 24 | 2-8 |  | Owls +2 points | 
+113.75 roundScore | 25 | 2-8 |  | Owls +2 points | 
+114.50 miniIntro | 26 | 2-8 | 0-0 | Owls +2 points | 
+115.50 miniQ | 27 | 2-8 | 0-0 | Owls +2 points | 
+116.25 closestReveal | 27 | 2-8 | 0-1 | Owls +2 points | 
+117.25 miniQ | 28 | 2-8 | 0-1 | Owls takes leg 1. | 
+118.25 closestReveal | 28 | 2-8 | 0-2 | Owls takes leg 1. | 
+119.00 miniQ | 29 | 2-8 | 0-2 | Owls takes leg 2. | 
+120.00 closestReveal | 29 | 2-8 | 1-2 | Owls takes leg 2. | 
+120.75 miniQ | 30 | 2-8 | 1-2 | Lions takes leg 3. | 
+(pause, 8 s)
+(resume)
+130.75 closestReveal | 30 | 2-8 | 2-2 | Lions takes leg 3. | 
+131.75 miniQ | 31 | 2-8 | 2-2 | Lions takes leg 4. | 
+132.50 closestReveal | 31 | 2-8 | 2-3 | Lions takes leg 4. | 
+133.50 miniSummary | 32 | 2-10 | 2-3 | Owls takes leg 5. | 
+134.25 roundIntro | 33 | 2-10 |  | Owls takes leg 5. | 
+135.25 ask | 34 | 2-10 |  | Owls takes leg 5. | 
+136.25 answer | 34 | 3-10 |  | Lions +1 point | 
+137.00 ask | 35 | 3-10 |  | Lions +1 point | 
+138.00 ask | 35 | 3-10 |  | Owls used Call a Friend. | 
+141.50 ask | 36 | 3-10 |  | Owls used Call a Friend. | 
+142.50 answer | 36 | 3-11 |  | Owls +1 point | 
+143.25 answer | 36 | 3-11 |  |  | 
+147.75 answer | 36 | 3-11 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+148.75 roundScore | 37 | 3-11 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+149.75 roundIntro | 38 | 3-11 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+150.50 ask | 39 | 3-11 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+151.50 answer | 39 | 4-11 |  | Lions +1 point | 
+152.25 answer | 39 | 4-11 |  |  | 
+153.25 answer | 39 | 4-11 |  | ⁨Sam⁩ doesn't agree: the call stands. | 
+154.25 ask | 40 | 4-11 |  | ⁨Sam⁩ doesn't agree: the call stands. | 
+155.00 steal | 40 | 4-11 |  | ⁨Sam⁩ doesn't agree: the call stands. | 
+156.00 answer | 40 | 4-11 |  | ⁨Sam⁩ doesn't agree: the call stands. | 
+156.75 answer | 40 | 4-11 |  |  | 
+157.75 answer | 40 | 5-11 |  | Call changed: Lions +1 point. | 
+158.75 roundScore | 41 | 5-11 |  | Call changed: Lions +1 point. | 
+159.50 pinIntro | 42 | 5-11 | 0-0 | Call changed: Lions +1 point. | 
+160.50 pinQ | 43 | 5-11 | 0-0 | Call changed: Lions +1 point. | 
+(a new question)
+161.25 pinQ | 44 | 5-11 | 0-0 | Call changed: Lions +1 point. | 
+162.25 pinQ | 45 | 5-11 | 0-0 | Both captains agreed. New landmark. | 
+162.25 pinQ | 45 | 5-11 | 0-0 | That pin didn't come through. Drop it again. | 
+163.25 pinReveal | 45 | 5-11 | 1-0 | That pin didn't come through. Drop it again. | 
+164.00 pinQ | 46 | 5-11 | 1-0 | Lions takes landmark 1. | 
+165.00 pinReveal | 46 | 5-11 | 1-1 | Lions takes landmark 1. | 
+165.75 pinQ | 47 | 5-11 | 1-1 | Owls takes landmark 2. | 
+166.75 pinReveal | 47 | 5-11 | 1-2 | Owls takes landmark 2. | 
+167.75 pinQ | 48 | 5-11 | 1-2 | Owls takes landmark 3. | 
+168.50 pinReveal | 48 | 5-11 | 2-2 | Owls takes landmark 3. | 
+169.50 pinQ | 49 | 5-11 | 2-2 | Lions takes landmark 4. | 
+170.25 pinReveal | 49 | 5-11 | 3-2 | Lions takes landmark 4. | 
+171.25 pinQ | 50 | 5-11 | 3-2 | Lions takes landmark 5. | 
+172.25 pinReveal | 50 | 5-11 | 4-2 | Lions takes landmark 5. | 
+173.00 decided | 51 | 5-11 | 4-2 |  | 
+174.00 roundIntro | 52 | 7-11 |  |  | 
+175.75 ask | 53 | 7-11 |  |  | 
+176.75 answer | 53 | 9-11 |  | Lions +2 points | 
+177.50 ask | 54 | 9-11 |  | Lions +2 points | 
+178.50 steal | 54 | 9-11 |  | Lions +2 points | 
+179.25 answer | 54 | 9-11 |  | Lions +2 points | 
+180.25 answer | 54 | 9-11 |  |  | 
+181.25 answer | 54 | 10-11 |  | Call changed: Lions +1 point. | 
+182.00 roundScore | 55 | 10-11 |  | Call changed: Lions +1 point. | 
+183.00 battleIntro | 56 | 10-11 | 0-0 | Call changed: Lions +1 point. | 
+183.75 battleQ | 57 | 10-11 | 0-0 | Call changed: Lions +1 point. | 
+184.75 battleQ | 57 | 10-11 | 1-0 | Call changed: Lions +1 point. | 
+185.75 battleQ | 57 | 10-11 | 2-0 | Call changed: Lions +1 point. | 
+187.50 battleQ | 57 | 10-11 | 3-0 | Call changed: Lions +1 point. | 
+191.00 battleQ | 57 | 10-11 | 4-0 | Call changed: Lions +1 point. | 
+192.00 battleQ | 57 | 10-11 | 5-0 | Call changed: Lions +1 point. | 
+192.75 battleHandoff | 57 | 10-11 | 5-0 | Call changed: Lions +1 point. | 
+193.75 battleQ | 58 | 10-11 | 5-0 | Call changed: Lions +1 point. | 
+197.25 battleQ | 58 | 10-11 | 5-1 | Call changed: Lions +1 point. | 
+198.25 battleQ | 58 | 10-11 | 5-2 | Call changed: Lions +1 point. | 
+201.00 battleQ | 58 | 10-11 | 5-3 | Call changed: Lions +1 point. | 
+202.75 battleReview | 58 | 10-11 | 5-4 | Call changed: Lions +1 point. | 
+203.75 battleSummary | 59 | 14-11 | 5-4 | Call changed: Lions +1 point. | 
+204.50 final | 60 | 14-11 |  | Call changed: Lions +1 point. | 
+recap: {"margin":3,"sudden":false,"leadChanges":2,"steals":[2,1],"minis":[2,2],"best":{"title":"Guess the Flag","team":1,"legs":[0,4]}}

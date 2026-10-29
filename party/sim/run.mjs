@@ -51,6 +51,12 @@ const NIGHTS = [
   { seed: 17, minis: ["majority", "battle"], crowd: 5, absent: "Joe" },
   { seed: 18, minis: ["closest", "majority"], host: true, rounds: 4, crowd: 3, absent: "Karim" },
   { seed: 19, minis: ["majority"], crowd: 2, slow: 0.9 },
+  /* 29 Oct: the "something went wrong" paths: Pause and Resume, the scores set by hand, a question swapped,
+     the host's and a captain's phone gone (and back), "one more" at a tie */
+  { seed: 20, minis: DEFAULT, host: true, events: [{ at: 20, type: "pause", for: 15 }, { at: 70, type: "score", a: 5, b: 1 }, { at: 110, type: "swap" }, { at: 150, type: "pause", for: 10 }], tieMore: 1 },
+  { seed: 21, minis: DEFAULT, events: [{ at: 25, type: "pause", for: 12 }, { at: 60, type: "score", a: 4, b: 4 }, { at: 100, type: "swap" }, { at: 140, type: "swap" }], tieMore: 1 },
+  { seed: 22, minis: ["dish", "saysame", "map", "closest"], host: true, rounds: 4, events: [{ at: 40, type: "hostGone", for: 90 }, { at: 150, type: "capGone", team: 1 }, { at: 200, type: "swap" }] },
+  { seed: 23, minis: ["flag", "closest", "pin", "battle"], events: [{ at: 30, type: "capGone", team: 0 }, { at: 90, type: "score", a: 2, b: 3 }, { at: 120, type: "pause", for: 8 }, { at: 160, type: "swap" }], tieMore: 2 },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

@@ -9,6 +9,7 @@ import { act, useEffect, useState } from "react";
 import TestRenderer from "react-test-renderer";
 import * as fake from "./fakeSupabase.js";
 import { useTvGame } from "../lib/tvGame";
+import { SWAPS } from "../lib/tv/rules";
 import fullBank from "../data/bank.json";
 import accept from "../data/accept.json";
 import liteBank from "../public/bank.json";
@@ -72,10 +73,15 @@ function pinNear(g, bot) {
      { at, type: "hostGone", for }    the host's phone is gone for a while
      { at, type: "writesFail", for }  the TV's writes fail (no internet) for a while
      { at, type: "futureStamp" }      the room holds a stamp a minute ahead of the TV's clock
+   Scripted nights (sim/run.mjs, 29 Oct), the "something went wrong" paths, at the next screen that allows them:
+     { at, type: "pause", for }       Pause (the host; a captain with no host), Resume after `for` seconds
+     { at, type: "score", a, b }      the scores set by hand (the host sets them; with no host a captain asks, the other agrees)
+     { at, type: "swap" }             a new question before anyone answered (the host swaps; with no host a captain asks, the other agrees)
+   tieMore: at that many ties, "one more" instead of "a point each"
    net: { dup, delay, stall, stallWrites }  pushes sent twice / up to delay ms late (out of order) / that share of reads, or of the TV's writes, held 5-28 s
    simul: both captains tap Next, buzz, rule at the very same moment
    edge: answers land at the exact moment the clock runs out */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null }) {
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0 }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed);
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -122,6 +128,10 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: THEMES.slice(0, rounds), minis } });
 
   let reloaded = false;
+  /* the scripted things, waiting for a screen that allows them; a scripted Pause lasts its `for`; a scripted
+     request (no host) is agreed to by the other captain */
+  const scripted = []; let pauseUntil = 0, agreeNext = false, tieMoreLeft = tieMore;
+  const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"];
   const armed = new Set(), asked = new Set(), edged = new Set(), contested = new Set(), contestSeen = new Set(), voted = new Set(), dropped = new Set();
   let contestSilent = false;
   /* while the TV is off, the phones still tap: a captain answers or buzzes what they see */
@@ -156,7 +166,9 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* the weird things, when their time comes */
     for (const e of events) {
       if (e.done || clock() - t0 < e.at * 1000) continue;
-      e.done = true; trace.push(`(${e.type}${e.for ? " " + e.for + " s" : ""}${e.team != null ? " team " + e.team : ""})`);
+      e.done = true;
+      if (e.type === "pause" || e.type === "score" || e.type === "swap") { scripted.push(e); continue; }
+      trace.push(`(${e.type}${e.for ? " " + e.for + " s" : ""}${e.team != null ? " team " + e.team : ""})`);
       if (e.type === "tvOff" || e.type === "offReload") {
         await act(async () => { setVisible(false); await flush(); });
         /* the phones carry on meanwhile */
@@ -227,7 +239,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     const sc = pub.screen, step = pub.step, lead = pub.lead ?? 0, other = (t) => 1 - t;
     const key = JSON.stringify([sc, step, pub.pending, pub.sent, pub.buzz, pub.auction?.count, pub.auction?.bid, pub.map?.ruled, pub.ok]);
-    if (key === prevKey) { if (++same > 120) { outcome = "stuck"; stuckOn = `${sc}${pub.paused ? ", paused" : ""}${pub.pending ? ", call pending" : ""}${pub.lifeline ? ", lifeline " + pub.lifeline.key + (pub.lifeline.wait ? " not started" : pub.lifeline.deadline ? " running" : " stopped") : ""}${pub.deadline ? ", clock " + Math.round((pub.deadline - clock()) / 1000) + " s" : ", no clock"}${pub.nextBy ? ", waiting for " + pub.nextBy : ""}`; break; } } else { same = 0; prevKey = key; }
+    if (key === prevKey) { if (++same > 120) { outcome = "stuck"; trace.push("stuck: " + JSON.stringify({ timeUp: pub.timeUp, sent: pub.sent, turn: pub.turn, left: pub.left, nextBy: pub.nextBy, typed: pub.typed, ack: pub.ack })); stuckOn = `${sc}${pub.paused ? ", paused" : ""}${pub.pending ? ", call pending" : ""}${pub.lifeline ? ", lifeline " + pub.lifeline.key + (pub.lifeline.wait ? " not started" : pub.lifeline.deadline ? " running" : " stopped") : ""}${pub.deadline ? ", clock " + Math.round((pub.deadline - clock()) / 1000) + " s" : ", no clock"}${pub.nextBy ? ", waiting for " + pub.nextBy : ""}`; break; } } else { same = 0; prevKey = key; }
     const C = (t) => capOf(t);
     /* the lead captain gone: the other one moves the night on (the TV lets them after a while) */
     const by = (t, type) => (host && !gone.has("host") && !["auction/raise", "auction/pass"].includes(type) ? "host" : C(t) || C(1 - t));
@@ -250,10 +262,41 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     if (sc === "sudden" && (pub.sudden?.n || 0) > 6) { outcome = "sudden-cap"; break; }
     const right = answerNow(g, pub);
-    /* whoever paused resumes (a real person does) */
-    if (pub.paused && !pub.tvAway && bot() < 0.3) { const w = host && !gone.has("host") ? "host" : C(0) || C(1); if (w) send(w, w === "host" ? "judge" : "next", { move: { type: "ui/pause", on: "resume" }, step }); continue; }
+    /* the scripted things, when a screen allows them (and nothing else is open) */
+    const sp = scripted[0], hostHere = host && !gone.has("host"), hostOr = (t) => (hostHere ? "host" : C(t) || C(1 - t));
+    if (sp && !pub.agree && !pub.contest && !pub.lifeline) {
+      const w = hostOr(0), kind = w === "host" ? "judge" : "next";
+      if (sp.type === "pause" && pub.deadline && !pub.paused && PAUSABLE.includes(sc) && w) {
+        scripted.shift(); pauseUntil = clock() + sp.for * 1000; trace.push(`(pause, ${sp.for} s)`);
+        send(w, kind, { move: { type: "ui/pause", on: "pause" }, step }); continue;
+      }
+      if (sp.type === "score" && w) {
+        scripted.shift(); trace.push(`(the scores set to ${sp.a}-${sp.b})`);
+        if (hostHere) send("host", "judge", { move: { type: "ui/setScore", a: sp.a, b: sp.b }, step });
+        else { agreeNext = true; send(w, "next", { move: { type: "ui/askScore", a: sp.a, b: sp.b }, step }); }
+        continue;
+      }
+      if (sp.type === "swap" && SWAPS[sc] && pub.deadline && !(pub.sent || []).some(Boolean) && w) {
+        scripted.shift(); trace.push("(a new question)");
+        if (hostHere) send("host", "judge", { move: { type: SWAPS[sc] }, step });
+        else { agreeNext = true; send(w, "next", { move: { type: "ui/askSwap" }, step }); }
+        continue;
+      }
+    }
+    /* paused: the phones show "Paused" and nothing else, so nobody answers; whoever paused resumes (a real person
+       does), a scripted pause when its time is up. (A request open with no host also stops the clock: that one
+       waits for the other captain's answer, above.) */
+    if (pub.paused && !pub.tvAway && !pub.agree) {
+      if (pauseUntil ? clock() >= pauseUntil : bot() < 0.3) {
+        if (pauseUntil) trace.push("(resume)");
+        pauseUntil = 0; const w = hostOr(0);
+        if (w) send(w, w === "host" ? "judge" : "next", { move: { type: "ui/pause", on: "resume" }, step });
+      }
+      continue;
+    }
+    if (false) { const w = host && !gone.has("host") ? "host" : C(0) || C(1); if (w) send(w, w === "host" ? "judge" : "next", { move: { type: "ui/pause", on: "resume" }, step }); continue; }
     /* a captain's request open (no host): the other captain agrees, says no, or lets it lapse */
-    if (pub.agree && !host && bot() < 0.3) { const A = pub.agree; if (C(1 - A.team)) send(C(1 - A.team), "next", { move: { type: "ui/agree", v: bot() < 0.6, id: A.id }, step }); }
+    if (pub.agree && !host && (agreeNext || bot() < 0.3)) { const A = pub.agree, yes = agreeNext || bot() < 0.6; agreeNext = false; if (C(1 - A.team)) send(C(1 - A.team), "next", { move: { type: "ui/agree", v: yes, id: A.id }, step }); }
     /* a contest open: the other captain (or the host) agrees, says no, or (now and then) doesn't answer at all */
     if (pub.contest) {
       const K = pub.contest;
@@ -300,9 +343,11 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       if (host && bot() < 0.2) next(0, "ui/reveal");
     }
     else if (NEXT[sc]) next(lead, NEXT[sc]);
-    else if (/Tie$|Level$/.test(sc) && sc !== "battleTie") next(lead, "tie/stop");
+    else if (/Tie$|Level$/.test(sc) && sc !== "battleTie") next(lead, tieMoreLeft-- > 0 ? "tie/more" : "tie/stop");
     else if (sc === "ask" || sc === "steal") {
-      if (!pub.sent?.[pub.turn] && sc === "ask" && !asked.has(step) && bot() < 0.15) { asked.add(step); send(C(pub.turn), "lifeline", { key: bot() < 0.5 ? "dip" : "friend" }); }
+      /* the clock ran out with nothing typed (a captain's phone gone): with a host, the host calls it wrong */
+      if (host && pub.timeUp && !pub.sent?.[pub.turn] && !gone.has("host")) next(0, sc === "ask" ? "round/judge" : "round/judgeSteal", { v: false });
+      else if (!pub.sent?.[pub.turn] && sc === "ask" && !asked.has(step) && bot() < 0.15) { asked.add(step); send(C(pub.turn), "lifeline", { key: bot() < 0.5 ? "dip" : "friend" }); }
       /* edge: the answer lands at the very moment the clock runs out */
       else if (!pub.sent?.[pub.turn] && edge && pub.deadline && !edged.has(step)) { edged.add(step); const who = C(pub.turn), txt = guess(right); setTimeout(() => send(who, "answer", { texts: [txt] }), Math.max(0, pub.deadline - clock())); }
       else if (!pub.sent?.[pub.turn] && !edge) send(C(pub.turn), "answer", { texts: [guess(right), guess(right)] });
