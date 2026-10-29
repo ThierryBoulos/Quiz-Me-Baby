@@ -1289,7 +1289,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.42', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.43', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2516,6 +2516,7 @@ const SEED = [
 ['Science','medium','r5-science-medium-1','What is the name of the supercontinent that held almost all of Earth\'s land about 300 million years ago?','Pangaea',''],
 ['Science','medium','r5-science-medium-1','What is the name for the theory that Earth\'s surface is split into slowly moving plates?','Plate tectonics',''],
 /* ---- 29 Oct: the owner's ideas ---- */
+['History','medium','','In May 1940, German forces surprised France by attacking through which dense forest, thought too thick for tanks?','The Ardennes','It bypassed the Maginot Line. France fell in six weeks.'],
 ['Geography','medium','','If you\'re talking to a Pinoy, which country are they from?','The Philippines','Pinoy (Pinay for a woman) is what Filipinos call themselves, from the end of the word Filipino.'],
 ];
 
@@ -4225,7 +4226,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 40;   // bumped when the built-in bank changes
+const SEED_VERSION = 41;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
