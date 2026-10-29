@@ -1289,7 +1289,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.40', date:'28 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.41', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2514,7 +2514,9 @@ const SEED = [
 ['Disney & Pixar','expert','r5-disney-and-pixar-expert-1','In Toy Story, at which restaurant is the claw machine full of three-eyed aliens?','Pizza Planet','\'The claw is our master.\''],
 ['Disney & Pixar','expert','r5-disney-and-pixar-expert-1','In WALL-E, what is the name of the giant company that ran the Earth?','Buy n Large',''],
 ['Science','medium','r5-science-medium-1','What is the name of the supercontinent that held almost all of Earth\'s land about 300 million years ago?','Pangaea',''],
-['Science','medium','r5-science-medium-1','What is the name for the theory that Earth\'s surface is split into slowly moving plates?','Plate tectonics','']
+['Science','medium','r5-science-medium-1','What is the name for the theory that Earth\'s surface is split into slowly moving plates?','Plate tectonics',''],
+/* ---- 29 Oct: the owner's ideas ---- */
+['Geography','medium','','If you\'re talking to a Pinoy, which country are they from?','The Philippines','Pinoy (Pinay for a woman) is what Filipinos call themselves, from the end of the word Filipino.'],
 ];
 
 const SEED_CLOSEST = [
@@ -3857,7 +3859,9 @@ const MAJORITY = [
   ["jules-verne-name", "hard", "What is the two-Michelin-star restaurant inside the Eiffel Tower called?", ["Le Jules Verne", "Le Victor Hugo", "Le Gustave", "Le Ciel de Paris"], 0, "On the second floor, 125 m up, with its own lift. Le Ciel de Paris is the one at the top of the Montparnasse Tower."],
   ["ticker-race", "medium", "Which company trades on the stock market as RACE?", ["Ferrari", "Formula 1", "Red Bull", "Porsche"], 0, "Ferrari picked it when it listed in New York in 2015. Porsche's ticker in Frankfurt is P911."],
   ["ticker-cmg", "hard", "Which company trades on the stock market as CMG?", ["Chipotle", "CMA CGM", "Chrysler Motor Group", "Comcast"], 0, "Chipotle Mexican Grill. CMA CGM, the shipping giant run by the Lebanese-French Saadé family, isn't listed at all; Comcast is CMCSA."],
-  ["caesar-title", "medium", "What was Julius Caesar's title when he was murdered?", ["Emperor", "Dictator", "President", "Lord"], 1, "Dictator for life, since early 44 BC. His adopted heir, Augustus, became Rome's first emperor."]
+  ["caesar-title", "medium", "What was Julius Caesar's title when he was murdered?", ["Emperor", "Dictator", "President", "Lord"], 1, "Dictator for life, since early 44 BC. His adopted heir, Augustus, became Rome's first emperor."],
+  /* ---- 29 Oct: the owner's ideas ---- */
+  ["stock-25y", "medium", "Which of these stocks grew the most in the 25 years to 2025?", ["Apple", "Tesla", "Monster Beverage", "Nvidia"], 2, "The energy drink: up about 155,000%, just ahead of Nvidia (126,000%). $1,000 put in in 2000 became about $1.5 million."],
 ];
 
 /* shared out over the levels that are on, exactly as the flags are (easy: 2 at most) */
@@ -4120,7 +4124,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 38;   // bumped when the built-in bank changes
+const SEED_VERSION = 39;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
