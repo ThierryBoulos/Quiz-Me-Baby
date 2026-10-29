@@ -603,7 +603,7 @@ export function TvTakeover({ code }: { code: string }) {
   return (
     <div className="card flex flex-col gap-2">
       <div className="eyebrow">Move the TV to another laptop</div>
-      <p className="text-13 text-[var(--color-ink-2)]">Only if the TV laptop is really dead. On the new one, open the site and tap <b>Take over as the TV</b>, then type the room code and this code. The night carries on from the TV&rsquo;s last save; the old laptop stops being the TV.</p>
+      <p className="text-13 text-[var(--color-ink-2)]">Only if the TV laptop is really dead. On the new one, open the site, tap <b>Join a game</b>, then <b>The TV died?</b> at the very bottom, then type the room code and this code. The night carries on from the TV&rsquo;s last save; the old laptop stops being the TV.</p>
       {got ? (<>
         <div className="display text-52 text-center tracking-[.2em]" style={{ color: "var(--color-gold)" }}>{got.code}</div>
         <p className="text-12 text-[var(--color-ink-3)] text-center">Room {code} · good for 10 minutes · last saved {got.saved < 60 ? `${got.saved} s` : `${Math.round(got.saved / 60)} min`} ago</p>

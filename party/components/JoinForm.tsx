@@ -120,6 +120,8 @@ export function JoinForm({ initial }: { initial: string }) {
       <button className="btn btn-gold btn-lg btn-block" disabled={!ready || busy} onClick={() => join(name)}>
         {busy ? "Taking your seat…" : "Take my seat"}
       </button>
+      {/* quiet, at the very bottom: a new laptop taking over a game whose TV died */}
+      <Link href="/take-over" className="text-12 text-center text-[var(--color-ink-3)] underline underline-offset-4 py-2">The TV died? Take over as the TV</Link>
     </main>
   );
 }

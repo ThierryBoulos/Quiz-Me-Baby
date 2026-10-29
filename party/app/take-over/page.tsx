@@ -25,7 +25,7 @@ export default function TakeOver() {
     <main className="screen !max-w-[520px]">
       <header className="flex items-end justify-between gap-3">
         <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>The TV died?</div><h1 className="display text-40">Take over as the TV</h1></div>
-        <Link className="btn btn-sm btn-ghost" href="/">Back</Link>
+        <Link className="btn btn-sm btn-ghost" href="/join">Back</Link>
       </header>
       <p className="text-15 text-[var(--color-ink-2)]">On the host&rsquo;s phone: <b>Team Members → The TV died? → Get a code</b>. Type it here with the room code, and this laptop becomes the TV. The night carries on where the old TV last saved it.</p>
       <label className="field-label" htmlFor="room">Room code</label>
