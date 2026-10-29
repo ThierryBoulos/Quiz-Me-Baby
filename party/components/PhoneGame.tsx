@@ -975,7 +975,8 @@ const NEXT_LABEL: Record<string, [string, string]> = {
 /* no host: whose tap the room is waiting for */
 function WaitingFor({ pub }: { pub: Pub }) {
   const label = pub.screen === "sudden" ? "Go" : NEXT_LABEL[pub.screen]?.[0] || "Next";
-  const open = useAfter(pub.nextOpenAt);
+  const open = useAfter(pub.nextOpenAt), auto = useSecondsLeft(pub.autoAt);
+  if (pub.autoAt && auto > 0) return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Next in {auto} s, or {pub.nextBy} taps Next.</p>;
   const who = open && pub.nextOther ? `${pub.nextBy} or ${pub.nextOther}` : pub.nextBy;
   return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Waiting for {who} to {TIE_SCREENS.includes(pub.screen) ? "choose: one more, or a point each" : pub.screen === DECIDED ? "choose: keep playing for fun, or stop here" : `tap ${/^Start/.test(label) ? "Start" : label}`}.</p>;
 }

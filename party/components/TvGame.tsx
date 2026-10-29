@@ -647,7 +647,8 @@ function awayTotals(pub: Pub) {
 
 /* no host: whose tap the room is waiting for (after a while, either captain's) */
 function NextHint({ pub }: { pub: Pub }) {
-  const open = useAfter(pub.nextOpenAt);
+  const open = useAfter(pub.nextOpenAt), auto = useSecondsLeft(pub.autoAt);
+  if (pub.autoAt && auto > 0) return <span className="next-hint">Next in <b>{auto} s</b>, or <b>{pub.nextBy}</b> taps Next</span>;
   const label = /Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" ? "Start" : pub.screen === "sudden" ? "Go" : "Next";
   return <span className="next-hint">Waiting for <b>{pub.nextBy}</b>{open && pub.nextOther ? <> or <b>{pub.nextOther}</b></> : null} to {TIE_SCREENS.includes(pub.screen) || pub.screen === DECIDED ? "choose" : `tap ${label}`}</span>;
 }

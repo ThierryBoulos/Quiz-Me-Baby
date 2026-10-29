@@ -142,38 +142,46 @@
 3915.50 dishReveal | 102 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
 3918.75 dishQ | 103 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
 3936.75 dishReveal | 104 | 6-5 | 1-0 | Nobody got it. | 
-4011.50 dishQ | 105 | 6-5 | 1-0 | Nobody got it. | 
-4026.50 dishReveal | 106 | 6-5 | 1-0 | Nobody got it. | 
-4027.75 dishQ | 107 | 6-5 | 1-0 | Nobody got it. | 
-4046.75 dishReveal | 108 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4077.25 decided | 109 | 7-5 | 2-0 |  | 
-4116.00 roundIntro | 110 | 7-5 |  |  | 
-4125.75 ask | 111 | 7-5 |  |  | 
-4141.25 steal | 111 | 7-5 |  |  | 
-4172.25 answer | 112 | 7-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4181.75 ask | 113 | 7-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4242.75 steal | 114 | 7-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4257.25 answer | 114 | 8-6 |  | Lions +1 point — steal | 
-4268.00 roundScore | 115 | 8-6 |  | Lions +1 point — steal | 
-4287.00 battleIntro | 116 | 8-6 | 0-0 | Lions +1 point — steal | 
-4346.25 battleQ | 117 | 8-6 | 0-0 | Lions +1 point — steal | 
-4362.25 battleQ | 118 | 8-6 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4378.25 battleQ | 119 | 8-6 | 0-0 | Time's up. | 
-4394.25 battleQ | 120 | 8-6 | 0-0 | Time's up. | 
-4395.75 battleQ | 120 | 8-6 | 1-0 | Time's up. | 
-4439.75 battleQ | 121 | 8-6 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4456.25 battleQ | 121 | 8-6 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4472.25 battleHandoff | 122 | 8-6 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4524.50 battleQ | 123 | 8-6 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4540.50 battleQ | 124 | 8-6 | 2-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4556.50 battleQ | 125 | 8-6 | 2-1 | Time's up. | 
-4572.50 battleQ | 126 | 8-6 | 2-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4588.50 battleQ | 127 | 8-6 | 2-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4613.50 battleQ | 128 | 8-6 | 2-1 | Time's up. | 
-4629.50 battleQ | 129 | 8-6 | 2-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4645.50 battleQ | 130 | 8-6 | 2-2 | Time's up. | 
-4661.50 battleQ | 131 | 8-6 | 2-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4677.50 battleLevel | 132 | 8-6 | 2-2 |  | 
-4692.00 battleSummary | 133 | 9-7 | 2-2 |  | 
-4760.25 final | 134 | 9-7 |  |  | 
-recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[2,1],"minis":[3,1],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]},"chart":[[0,0],[0,0],[0,1],[1,2],[2,2],[2,3],[2,4],[3,4],[4,4],[5,4],[6,5],[7,5],[7,6],[8,6],[9,7]],"awards":[{"t":"Closest To Wins","who":"Lions, 3 legs to 1","team":0},{"t":"Best thief","who":"Lions, 2 steals","team":0}]}
+3944.75 dishQ | 105 | 6-5 | 1-0 | Nobody got it. | 
+3959.75 dishReveal | 106 | 6-5 | 1-0 | Nobody got it. | 
+3967.75 dishQ | 107 | 6-5 | 1-0 | Nobody got it. | 
+3991.75 dishReveal | 108 | 6-5 | 1-0 | Nobody got it. | 
+3999.75 dishQ | 109 | 6-5 | 1-0 | Nobody got it. | 
+4012.75 dishReveal | 110 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4020.75 dishSummary | 111 | 7-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4058.25 roundIntro | 112 | 7-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4098.00 ask | 113 | 7-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4103.25 answer | 113 | 8-5 |  | Lions +1 point | 
+4133.00 ask | 114 | 8-5 |  | Lions +1 point | 
+4170.00 answer | 114 | 8-6 |  | Owls +1 point | 
+4205.00 answer | 114 | 8-6 |  |  | 
+4206.00 steal | 115 | 8-5 |  | Lions steal a new question. | 
+4237.00 answer | 116 | 9-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4287.75 answer | 116 | 9-5 |  |  | 
+4299.50 answer | 116 | 8-5 |  | Call changed: nobody scores this one. | 
+4316.75 roundScore | 117 | 8-5 |  | Call changed: nobody scores this one. | 
+4376.00 battleIntro | 118 | 8-5 | 0-0 | Call changed: nobody scores this one. | 
+4475.00 battleQ | 119 | 8-5 | 0-0 | Call changed: nobody scores this one. | 
+4519.00 battleQ | 120 | 8-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4535.25 battleQ | 120 | 8-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4551.25 battleQ | 121 | 8-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4567.25 battleQ | 122 | 8-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4583.25 battleQ | 123 | 8-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4599.25 battleQ | 124 | 8-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4615.25 battleHandoff | 125 | 8-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4682.00 battleQ | 126 | 8-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4698.00 battleQ | 127 | 8-5 | 3-0 | Time's up. | 
+4714.00 battleQ | 128 | 8-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4730.00 battleQ | 129 | 8-5 | 3-1 | Time's up. | 
+4746.00 battleQ | 130 | 8-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4762.00 battleQ | 131 | 8-5 | 3-1 | Time's up. | 
+4778.00 battleQ | 132 | 8-5 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4794.00 battleQ | 133 | 8-5 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4810.00 battleQ | 134 | 8-5 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4826.00 battleQ | 135 | 8-5 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4842.00 battleReview | 136 | 8-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4842.25 battleReview | 136 | 8-5 | 3-4 |  | 
+4857.25 battleReview | 136 | 8-5 | 3-4 | No answer in time: the call stands. | 
+4881.75 battleSummary | 137 | 8-7 | 3-4 | No answer in time: the call stands. | 
+4915.25 final | 138 | 8-7 |  | No answer in time: the call stands. | 
+recap: {"margin":1,"sudden":false,"leadChanges":1,"steals":[1,0],"minis":[3,2],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]},"chart":[[0,0],[0,0],[0,1],[1,2],[2,2],[2,3],[2,4],[3,4],[4,4],[5,4],[6,5],[7,5],[8,5],[8,6],[8,5],[9,5],[8,5],[8,7]],"awards":[{"t":"Closest To Wins","who":"Lions, 3 legs to 1","team":0},{"t":"Best thief","who":"Lions, 1 steal","team":0},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1}]}

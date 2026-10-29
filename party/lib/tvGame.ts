@@ -57,6 +57,11 @@ function mrWho(s: TvState) {
   const W: Record<string, { r: number; of: number; team: 0 | 1 }> = (g.majorityGame.who = g.majorityGame.who || {});
   for (const e of s.mrList) { const w = (W[e.name] = W[e.name] || { r: 0, of: 0, team: e.team }); w.of++; if (q && s.votes[e.name] === q.answer) w.r++; }
 }
+/* no host: a mini-game leg's reveal moves on by itself after this long (a tap still moves it on sooner);
+   the answer card, the round score, intros and summaries still wait for a tap, so people can argue (29 Oct, D27) */
+const T_AUTO_NEXT = 8;
+const AUTO_NEXT: Record<string, string> = { closestReveal: "ui/next", flagReveal: "ui/next", pinReveal: "ui/next", airportReveal: "ui/next",
+  mapReveal: "ui/next", sayReveal: "ui/next", dishReveal: "dish/next" };
 function shiftClocks(s: TvState, d: number) {
   if (s.pending) s.pending = { ...s.pending, until: s.pending.until + d };
   if (s.lifeline?.deadline) s.lifeline = { ...s.lifeline, deadline: s.lifeline.deadline + d };
@@ -273,6 +278,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           const n = (f.go === "sudden" ? s.g.sd?.n : s.g.battle?.tb?.n) || 0;
           /* sudden death starting, or the first tie-breaker: no question decided yet; the next question
              (not the same one swapped): the last one's calls, however it ended (time up with none is none) */
+        if (s.nohost && AUTO_NEXT[f.go]) s.autoAt = now + T_AUTO_NEXT * 1000;
           if ((f.go === "sudden" && !s.g.sdReady) || (f.go === "battleTie" && was !== "battleTie")) s.sdLog = null;
           else if (was === f.go && n !== s.sdQ) s.sdLog = { kind: f.go, calls: s.sdCur };
           s.sdBuzz = null; s.sdOut = [false, false]; s.sdCur = []; s.sdQ = n;
@@ -1427,8 +1433,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
       /* no host: a map answer the other captain never ruled on stands as right; then the lead captain taps Next */
       if (s.nohost && s.autoAt && now >= s.autoAt) {
-        s.autoAt = null; changed = true;
-        if (s.screen === "mapReveal") { s.ok = [s.ok[0] ?? true, s.ok[1] ?? true]; s.waitSince = now; }
+        const mv = AUTO_NEXT[s.screen];
+        /* a contest or a request open, or paused: it waits for that, then 3 s more */
+        if (mv && (s.contest || s.agree || s.paused)) s.autoAt = now + 3000;
+        else {
+          s.autoAt = null; changed = true;
+          if (s.screen === "mapReveal") { s.ok = [s.ok[0] ?? true, s.ok[1] ?? true]; s.waitSince = now; }
+          if (mv) { s.step++; hostMove({ type: mv }); }
+        }
       }
       if (now - here.current.checked > 2000) { here.current.checked = now; void handOver(); }
       /* Majority Rules' join screen: who's on the game screen (and someone taken off who turns up is back on);
