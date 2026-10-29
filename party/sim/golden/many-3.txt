@@ -1,0 +1,51 @@
+start majority | q | 0-0-0
+reveal majority 1 won by - | reveal | 0-0-0
+reveal majority 2 won by - | reveal | 0-0-0
+reveal majority 3 won by - | reveal | 0-0-0
+reveal majority 4 won by - | reveal | 0-0-0
+reveal majority 5 won by - | reveal | 0-0-0
+reveal majority 6 won by - | reveal | 0-0-0
+reveal majority 7 won by - | reveal | 0-0-0
+reveal majority 8 won by - | reveal | 0-0-0
+reveal majority 9 won by - | reveal | 0-0-0
+reveal majority 10 won by - | reveal | 0-0-0
+reveal majority 11 won by - | reveal | 0-0-0
+reveal majority 12 won by - | reveal | 0-0-0
+reveal majority 13 won by - | reveal | 0-0-0
+reveal majority 14 won by - | reveal | 0-0-0
+reveal majority 15 won by - | reveal | 0-0-0
+summary majority award 0,2,0 | summary | 0-2-0
+next game | intro | 0-2-0
+start flag | q | 0-2-0
+reveal flag 1 won by 1 | reveal | 0-2-0
+reveal flag 2 won by - | reveal | 0-2-0
+reveal flag 3 won by - | reveal | 0-2-0
+reveal flag 4 won by 2 | reveal | 0-2-0
+reveal flag 5 won by 1 | reveal | 0-2-0
+reveal flag 6 won by 2 | reveal | 0-2-0
+reveal flag 7 won by 1 | reveal | 0-2-0
+reveal flag 8 won by 0,2 | reveal | 0-2-0
+reveal flag 9 won by 1,2 | reveal | 0-2-0
+reveal flag 10 won by 2 | reveal | 0-2-0
+summary flag award 0,0,2 | summary | 0-2-2
+next game | intro | 0-2-2
+start closest | q | 0-2-2
+reveal closest 1 won by 0 | reveal | 0-2-2
+reveal closest 2 won by 0 | reveal | 0-2-2
+reveal closest 3 won by 1 | reveal | 0-2-2
+reveal closest 4 won by 1 | reveal | 0-2-2
+reveal closest 5 won by 1 | reveal | 0-2-2
+summary closest award 0,2,0 | summary | 0-4-2
+next game | intro | 0-4-2
+start pin | q | 0-4-2
+reveal pin 1 won by 2 | reveal | 0-4-2
+reveal pin 2 won by 0 | reveal | 0-4-2
+reveal pin 3 won by 1 | reveal | 0-4-2
+reveal pin 4 won by 0 | reveal | 0-4-2
+reveal pin 5 won by 1 | reveal | 0-4-2
+reveal pin 6 won by 0 | reveal | 0-4-2
+reveal pin 7 won by 2 | reveal | 0-4-2
+summary pin award 2,0,0 | summary | 2-4-2
+next game | final | 2-4-2
+final 1:Team B 2:Team A 2:Team C
+majority: Most right: P1, 11 of 15 · Wooden spoon: P2, 5 of 15

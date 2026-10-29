@@ -12,7 +12,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "node --test ../engine/core.test.js ../engine/deal.test.js ../engine/moves.test.js && node scripts/check-bank.mjs && node scripts/check-type.mjs && node scripts/check-maps.mjs && node sim/run.mjs && node sim/chaos.mjs 8 && node sim/weird.mjs --quick",
+    "test": "node --test ../engine/core.test.js ../engine/deal.test.js ../engine/moves.test.js && node scripts/check-bank.mjs && node scripts/check-type.mjs && node scripts/check-maps.mjs && node sim/run.mjs && node sim/many.mjs && node sim/chaos.mjs 8 && node sim/weird.mjs --quick",
     "sim": "node sim/run.mjs",
     "check-bank": "node scripts/check-bank.mjs"
   },
