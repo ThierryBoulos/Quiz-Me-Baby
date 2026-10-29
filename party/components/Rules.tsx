@@ -139,8 +139,7 @@ export function FixingACall({ standalone = false }: { standalone?: boolean }) {
           <><B>Captain gone?</B> After a while the armband passes to a teammate who is still here. <B>Host gone?</B> The captains run the night meanwhile; the host picks it back up on return.</>,
           <><B>The TV&rsquo;s Wi-Fi dropped, or its screen went to sleep?</B> The clocks stand still until it&rsquo;s back; nothing times out meanwhile. A TV reloaded or reopened picks the night up where it was.</>,
           <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question, or pastes an answer, is flagged on the TV; the host sees the list.</>,
-          <><B>The TV laptop died?</B> The host taps <B>Team Members &rarr; The TV died? &rarr; Get a code</B>. On another laptop, open the site, tap <B>Take over as the TV</B>, and type the room code and that code: the night carries on from the TV&rsquo;s last save.</>,
-          <>A new version of the game waits for the night to end before any screen reloads itself.</>,
+          <><B>The TV laptop died?</B> The host taps <B>Team Members &rarr; The TV died? &rarr; Get a code</B>. On another laptop, open the site, tap <B>Join a game</B>, then <B>The TV died?</B> at the very bottom, and type the room code and that code: the night carries on from the TV&rsquo;s last save.</>,
         ]} />
       </Rule>
     </>);
