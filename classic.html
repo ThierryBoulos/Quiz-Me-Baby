@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.44', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.45', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2520,14 +2520,12 @@ const SEED = [
 ['Geography','medium','','If you\'re talking to a Pinoy, which country are they from?','The Philippines','Pinoy (Pinay for a woman) is what Filipinos call themselves, from the end of the word Filipino.'],
 /* ---- 29 Oct: the thin spots topped up (Sexy Time hard/expert, Internet expert, Movies hard, Geography easy) ---- */
 ['Sexy Time','hard','','What is the Japanese art of rope bondage called?','Shibari','Also called kinbaku. It grew out of a samurai-era way of tying prisoners.'],
-['Sexy Time','hard','','Which 1972 bestseller by Alex Comfort was laid out like a cookbook, with starters and main courses?','The Joy of Sex','Its chapters were literally called Starters, Main Courses and Sauces & Pickles.'],
+['Sexy Time','expert','','Which 1972 bestseller by Alex Comfort was laid out like a cookbook, with starters and main courses?','The Joy of Sex','Its chapters were literally called Starters, Main Courses and Sauces & Pickles.'],
 ['Sexy Time','hard','','On the Kinsey scale, what does a score of 0 mean?','Exclusively heterosexual','The scale runs from 0 to 6; 6 is exclusively homosexual.'],
 ['Sexy Time','expert','','Which married research duo studied volunteers having sex in their 1960s lab to describe the sexual response cycle?','Masters and Johnson','William Masters and Virginia Johnson, in St Louis. The TV series Masters of Sex is about them.'],
-['Sexy Time','expert','','In which year did the United States approve the first contraceptive pill?','1960','Enovid, approved by the FDA in May 1960. The UK followed in 1961.'],
-['Sexy Time','expert','','Which Indian temple complex in Madhya Pradesh is famous for its erotic carvings?','Khajuraho','Built between about 950 and 1050; only a small share of the carvings are erotic.'],
-['Internet & Memes','expert','','Which meme line came from the English translation of the 1991 video game Zero Wing?','All your base are belong to us','Said by the villain CATS in the Mega Drive version. It went viral in 2001.'],
+['Sexy Time','expert','','Which word, popularised by sex columnist Dan Savage in 2001, means a woman penetrating a man with a strap-on?','Pegging','His readers voted the name in a poll; "bend over boyfriend" came second.'],
+['Sexy Time','expert','','Kinksters call it CNC: a scene where one partner agrees in advance to be "taken". What do the letters stand for?','Consensual non-consent','Everything is agreed beforehand, with a safe word; the "non-consent" is the role-play.'],
 ['Internet & Memes','expert','','Which 1996 animation of a cha-cha-ing infant, passed around by email, became one of the first viral videos?','Dancing Baby','Also called Baby Cha-Cha. It later danced through Ally McBeal.'],
-['Internet & Memes','expert','','In which year did Facebook add the Like button?','2009','In February 2009. Reactions (love, haha, wow, sad, angry) came in 2016.'],
 ['Internet & Memes','expert','','In 1969 the first message on ARPANET, the internet\'s ancestor, crashed after two letters. Which two got through?','LO','It was meant to be LOGIN, sent from UCLA to Stanford.'],
 ['Internet & Memes','expert','','What was Grumpy Cat\'s real name?','Tardar Sauce','Her grumpy face came from feline dwarfism and an underbite. She died in 2019.'],
 ['Internet & Memes','expert','','What was Google called when Larry Page and Sergey Brin first built it at Stanford in 1996?','BackRub','Named for the way it analysed the web\'s back links. Google came in 1997.'],
@@ -2539,10 +2537,10 @@ const SEED = [
 ['Movies','hard','','Which 2014 film was shot over twelve years with the same cast, following a boy from age six to eighteen?','Boyhood','Richard Linklater filmed a few days each year from 2002 to 2013. Patricia Arquette won an Oscar for it.'],
 ['Geography','easy','','Which ocean separates Europe from the Americas?','The Atlantic Ocean',''],
 ['Geography','easy','','Which country is shaped like a boot?','Italy',''],
-['Geography','easy','','What is the largest continent?','Asia','About 30% of the world\'s land and 60% of its people.'],
-['Geography','easy','','What is the capital of Japan?','Tokyo',''],
-['Geography','easy','','Which is the largest country in the world by area?','Russia','About 17 million square kilometres, across eleven time zones.'],
-['Geography','easy','','In which country are the pyramids of Giza?','Egypt','On the edge of Cairo.'],
+['Geography','easy','','Which country has the most people in the world?','India','It overtook China in 2023: both have over 1.4 billion people.'],
+['Geography','easy','','What is the capital of China?','Beijing','Peking in older spellings. Shanghai is the biggest city.'],
+['Geography','easy','','After Russia, which is the second-largest country in the world by area?','Canada','Just ahead of the US and China. Russia is about 1.7 times bigger.'],
+['Geography','easy','','Which desert covers most of North Africa?','The Sahara','The largest hot desert in the world. Antarctica is the largest desert of all.'],
 ];
 
 const SEED_CLOSEST = [
@@ -4251,7 +4249,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 42;   // bumped when the built-in bank changes
+const SEED_VERSION = 43;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -4263,6 +4261,15 @@ const SEED_VERSION = 42;   // bumped when the built-in bank changes
    `src:'seed'`, so anything the host built or imported on top of the same
    text is left alone. */
 const RETIRED_SEED = [
+  /* seed 43 (29 Oct, the owner's notes on the new questions): replaced or dropped */
+  'In which year did the United States approve the first contraceptive pill?',
+  'Which Indian temple complex in Madhya Pradesh is famous for its erotic carvings?',
+  'Which meme line came from the English translation of the 1991 video game Zero Wing?',
+  'In which year did Facebook add the Like button?',
+  'What is the largest continent?',
+  'What is the capital of Japan?',
+  'Which is the largest country in the world by area?',
+  'In which country are the pyramids of Giza?',
   /* seed 42 (29 Oct review): reworded or dropped; the new wording arrives as a fresh row */
   'Which band is the most-streamed band on Spotify?',
   'Which spirit is the base of a Negroni, alongside gin and sweet vermouth?',
