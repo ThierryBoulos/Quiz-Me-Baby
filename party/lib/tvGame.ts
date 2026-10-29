@@ -141,6 +141,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* (and the newest stamp: a lobby write made before the TV has read back its own Play again must not carry the old one, which the phones would take for an old room) */
   const lobbyState = (room: Room) => ({ ...room.state, ...lobbyMine.current, pubAt: Math.max(Number(room.state?.pubAt) || 0, lastAt.current) || undefined });
   const publish = useCallback(() => {
+  /* the TV's last errors (29 Oct): kept in the room with the next write, so a night that broke can be read
+     back afterwards (rooms stay 3 days). Short, few, and never the answers. */
+  const errs = useRef<{ t: number; m: string }[]>([]);
+  const logErr = (m: string) => { errs.current = [...errs.current.slice(-11), { t: Date.now(), m: String(m).slice(0, 160) }]; };
+  useEffect(() => {
+    if (!isTv) return;
+    const onErr = (e: ErrorEvent) => logErr((e.message || "error") + (e.filename ? ` @${e.filename.split("/").pop()}:${e.lineno}` : ""));
+    const onRej = (e: PromiseRejectionEvent) => logErr("unhandled: " + (e.reason instanceof Error ? e.reason.message : String(e.reason)).slice(0, 140));
+    window.addEventListener("error", onErr); window.addEventListener("unhandledrejection", onRej);
+    return () => { window.removeEventListener("error", onErr); window.removeEventListener("unhandledrejection", onRej); };
+  }, [isTv]);
     pubN.current++;
     /* this TV shows the change at once; the phones get it with the next write */
     const now = view(); if (now) { now[0].at = Date.now(); setPub(now[0]); }
@@ -150,7 +161,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* The phones didn't get it (Wi-Fi dropped, the server hiccupped): say so on the TV and keep
        trying, so a reveal or a final screen with nothing after it still reaches everyone. */
     const failed = (e: unknown) => {
-      console.error("publish failed", e);
+      console.error("publish failed", e); logErr("publish: " + (e instanceof Error ? e.message : JSON.stringify(e)));
       if (!offline.current) offlineAt.current = Date.now();
       offline.current = true; setBanner((b) => b ?? "offline");
       setTimeout(() => void publishRef.current(), 2000);
@@ -178,7 +189,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
          an answer for this very step lands), and the answer only when it changed: a +1, a pause,
          a ruling leave it as it was — one write, not two */
       const sec = JSON.stringify(v[1]), withSecret = sec !== lastSecret.current;
-      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0], pubAt: at } }).eq("code", code)
+      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0], pubAt: at, ...(errs.current.length ? { errs: errs.current } : {}) } }).eq("code", code)
         .or(`state->>pubAt.is.null,state->>pubAt.lt.${at}`).select("code")];
       if (withSecret) writes.push(sb().from("secrets").update({ data: { ...v[1], at } }).eq("room", code)
         .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).select("room"));
