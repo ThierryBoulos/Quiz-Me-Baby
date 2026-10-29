@@ -56,8 +56,15 @@ Classic needs nothing: it runs on its own.
 - `.github/workflows/check.yml` runs the types, the lint rules, the engine tests and
   the question-bank checker on every push.
 - `.github/workflows/ping.yml` calls `/api/health` every 30 minutes, which keeps a
-  Free Supabase project from pausing after a quiet week. **Change the URL in it** if
-  the site's address changes. A red run emails the repository owner.
+  Free Supabase project from pausing after a quiet week, and once a day asks for
+  `?deep=1` (a sign-in and one RPC, as a phone does). **Change the URL in it** if
+  the site's address changes. A red run emails the repository owner. GitHub switches
+  a schedule off after 60 days without a push, so `party/vercel.json` runs the deep
+  check once a day from Vercel as well.
+- `party/deploy.json`: `"urgent": true` makes open TVs and phones reload at the next
+  calm moment even mid-night (a changed save format); otherwise a new build waits for
+  the night to end. Set it back to false in the next commit.
+- The TV leaves its last errors in `rooms.state.errs`; rooms are kept 3 days.
 
 ## 5. Try it (10 min)
 

@@ -1,11 +1,15 @@
 # Keeps the game server awake and tells the owner if it isn't.
 # Every 30 minutes GitHub calls the live site's health check; the check reads one
 # row from the Supabase database (a Free project pauses after a quiet week).
+# Once a day it asks for the deep check too: a sign-in and one RPC, as a phone does.
 # If it fails, the run goes red and GitHub emails the repo owner.
+# (A second leg lives on Vercel: party/vercel.json calls the deep check daily, in
+# case GitHub switches this schedule off after 60 days without a push.)
 name: Keep awake
 on:
   schedule:
     - cron: "17,47 * * * *"
+    - cron: "33 4 * * *"
   workflow_dispatch:
 jobs:
   ping:
@@ -14,8 +18,10 @@ jobs:
     steps:
       - name: Health check
         run: |
+          URL=https://quiz-me-baby-eta.vercel.app/api/health
+          if [ "${{ github.event.schedule }}" = "33 4 * * *" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then URL="$URL?deep=1"; fi
           for i in 1 2 3; do
-            if curl -fsS --max-time 20 https://quiz-me-baby-eta.vercel.app/api/health; then exit 0; fi
+            if curl -fsS --max-time 25 "$URL"; then exit 0; fi
             sleep 20
           done
           echo "The game server didn't answer 3 times in a row."; exit 1

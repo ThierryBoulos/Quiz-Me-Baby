@@ -1,0 +1,3 @@
+{
+  "crons": [{ "path": "/api/health?deep=1", "schedule": "23 5 * * *" }]
+}
