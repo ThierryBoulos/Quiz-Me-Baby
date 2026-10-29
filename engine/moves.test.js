@@ -17,6 +17,17 @@ function game(over){
 }
 const types = (fx) => fx.map(f => Object.keys(f)[0] + ':' + Object.values(f)[0]);
 
+test('flag: "a point each" is 1 each whatever the game is worth', () => {
+  const g = game();
+  g.miniPts = 1;                                           // a long card: each game worth one point
+  Q.play(g, { type:'flag/start' });
+  g.flagGame.verdict = { winner:null, needsHost:true, note:'' };   // level at the end: the host says "a point each"
+  Q.play(g, { type:'flag/award', w:'split' });
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [1, 1]);
+  assert.deepEqual(g.flagGame.award, [1, 1]);
+  assert.equal(g.flagGame.verdict.note, 'Split — 1 point each.');
+});
+
 test('flag: a 6–0 run ends early and pays the mini-game points', () => {
   const g = game();
   Q.play(g, { type:'flag/start' });

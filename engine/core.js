@@ -897,10 +897,10 @@
     if(s.awarded) return;
     s.awarded = true;
     if(w === 'split'){
-      const half = Math.floor(g.miniPts / 2);
-      g.teams[0].score += half; g.teams[1].score += half;
-      s.award = [half, half];
-      s.verdict.note = 'Split — ' + half + ' point' + (half > 1 ? 's' : '') + ' each.';
+      /* "a point each" is a point each, whatever the game is worth (29 Oct: half of 1, rounded down, was 0) */
+      g.teams[0].score += 1; g.teams[1].score += 1;
+      s.award = [1, 1];
+      s.verdict.note = 'Split — 1 point each.';
       s.verdict.winner = null;
     } else {
       g.teams[w].score += g.miniPts;
