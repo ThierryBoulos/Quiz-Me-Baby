@@ -127,7 +127,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           {recap && recapLines(pub).length > 0 && (
             <div className="card enter text-left max-w-[1000px] !py-2" style={{ position: "relative", zIndex: 60 }}>
               <div className="eyebrow text-13 mb-0.5" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
-              <ul className="flex flex-col text-17 leading-snug">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>
+              <ul className="flex flex-col text-18 leading-snug">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>
             </div>)}
           {(pub.flags?.length ?? 0) > 0 && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}
         </>)}
