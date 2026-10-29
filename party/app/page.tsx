@@ -38,6 +38,7 @@ export default function Home() {
         <div className="home-menu">
           <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={play}>{busy ? "Opening the room…" : "Create game"}</button>
           <Link className="btn btn-block" href="/join">Join a game</Link>
+          <Link className="text-13 text-center underline underline-offset-4 text-[var(--color-ink-3)] py-2" href="/take-over">The TV died? Take over as the TV</Link>
           <Link className="btn btn-ghost btn-block" href="/settings">Settings</Link>
           {err && <p className="field-error" role="alert">Couldn&rsquo;t open a room. {err}</p>}
           <Link className="howto" href="/how-to-play">How to Play</Link>

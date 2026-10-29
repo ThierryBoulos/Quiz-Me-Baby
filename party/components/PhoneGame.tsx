@@ -3,7 +3,8 @@ import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
-import { joinLive, newTap, note, sb, sendAction, sendDraft } from "@/lib/supabase";
+import { joinLive, newTap, note, rpc, sb, sendAction, sendDraft } from "@/lib/supabase";
+import { friendly } from "@/lib/errors";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
@@ -588,6 +589,30 @@ export function AwayLog({ pub }: { pub: Pub | null }) {
 /* The host, if something went wrong (a call that couldn't be put right, a bug): set the total scores
    by hand. Out of the way at the bottom of the Players panel, and it asks first.
    ask: a captain with no host, who asks for it instead: the other captain has to agree. */
+/* The host: the TV laptop died? A 6-digit code for a new one (29 Oct, B9). The new laptop opens the site,
+   taps "Take over as the TV", types the room and this code, and the night carries on from its last save. */
+export function TvTakeover({ code }: { code: string }) {
+  const [open, setOpen] = useState(false), [got, setGot] = useState<{ code: string; saved: number } | null>(null), [err, setErr] = useState<string | null>(null), [busy, setBusy] = useState(false);
+  if (!open) return <button className="btn btn-sm btn-ghost self-center" onClick={() => setOpen(true)}>The TV died?</button>;
+  const ask = async () => {
+    setBusy(true); setErr(null);
+    try { const r = await rpc<{ ok?: boolean; code?: string; saved?: number; error?: string }>("qmb_tv_code", { r: code }); if (r?.error) setErr(friendly(new Error(r.error))); else if (r?.code) setGot({ code: r.code, saved: r.saved ?? 0 }); }
+    catch (e) { setErr(friendly(e)); }
+    setBusy(false);
+  };
+  return (
+    <div className="card flex flex-col gap-2">
+      <div className="eyebrow">Move the TV to another laptop</div>
+      <p className="text-13 text-[var(--color-ink-2)]">Only if the TV laptop is really dead. On the new one, open the site and tap <b>Take over as the TV</b>, then type the room code and this code. The night carries on from the TV&rsquo;s last save; the old laptop stops being the TV.</p>
+      {got ? (<>
+        <div className="display text-52 text-center tracking-[.2em]" style={{ color: "var(--color-gold)" }}>{got.code}</div>
+        <p className="text-12 text-[var(--color-ink-3)] text-center">Room {code} · good for 10 minutes · last saved {got.saved < 60 ? `${got.saved} s` : `${Math.round(got.saved / 60)} min`} ago</p>
+      </>) : <button className="btn btn-gold" disabled={busy} onClick={() => void ask()}>{busy ? "Getting a code…" : "Get a code"}</button>}
+      {err && <p className="text-13" style={{ color: "var(--color-bad)" }} role="alert">{err}</p>}
+      <button className="btn btn-sm btn-ghost self-center" onClick={() => { setOpen(false); setGot(null); setErr(null); }}>Close</button>
+    </div>);
+}
+
 export function ScoreFix({ pub, send, busy, ask }: { pub: Pub; send: Send; busy: boolean; ask?: boolean }) {
   const T = pub.teams;
   const [open, setOpen] = useState(false), [v, setV] = useState<[number, number]>([T[0].score, T[1].score]);
@@ -712,6 +737,7 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
   if (sc === "majorityReveal" && pub.majority?.reveal) { const M = pub.majority, R = M.reveal!; return (<>
     <div className="eyebrow text-center">This question</div>
     {rows((t) => `${R.right[t]} of ${M.n?.[t] ?? 0} right`)}
+    {pub.mrFire && <p className="text-center text-15 font-bold">{pub.mrFire.map((f) => <span key={f.name} className="mx-2"><span className="flame">🔥</span>{f.name} · {f.n} in a row</span>)}</p>}
     {/* the game so far, in percent, is in the bar at the top (this question counted already): here, the counts behind it */}
     {M.totals && <p className="text-center text-13 text-[var(--color-ink-3)]">So far: {name(0)} {M.totals.right[0]} of {M.totals.of[0]} right · {name(1)} {M.totals.right[1]} of {M.totals.of[1]} right</p>}</>); }
   if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (<>
@@ -737,7 +763,6 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
   }
   if (sc === "dishReveal" && pub.reveal) return head(legW(pub.reveal.w), legW(pub.reveal.w) != null ? `${T[pub.reveal.w as 0 | 1].name} got it` : "Nobody got it");
   if (sc === "auctionLeg" && pub.auction?.last) { const L = pub.auction.last; return (<>
-    {pub.mrFire && <p className="text-center text-15 font-bold">{pub.mrFire.map((f) => <span key={f.name} className="mx-2"><span className="flame">🔥</span>{f.name} · {f.n} in a row</span>)}</p>}
     {/* one headline (who takes the leg); the how, small; the legs, as a board */}
     <div className="text-center flex flex-col items-center gap-2" role="status" aria-live="polite">
       <span className={"verdict text-13 " + (L.made ? "pos" : "neg")}>{L.made ? "Delivered" : "Short"}</span>

@@ -155,6 +155,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* the TV's last errors (29 Oct): kept in the room with the next write, so a night that broke can be read
      back afterwards (rooms stay 3 days). Short, few, and never the answers. */
   const errs = useRef<{ t: number; m: string }[]>([]);
+  const backupAt = useRef({ t: 0, screen: "" });
   const logErr = (m: string) => { errs.current = [...errs.current.slice(-11), { t: Date.now(), m: String(m).slice(0, 160) }]; };
   useEffect(() => {
     if (!isTv) return;
@@ -193,7 +194,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
-          if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
+          if (save !== lastSave.current) {
+            localStorage.setItem(saveKey, save); lastSave.current = save;
+            /* ...and a copy on the server, so a new laptop can take over if this one dies (29 Oct, B9): on a new
+               screen at once, otherwise every 15 s at most. One row per room, overwritten, gone with the room. */
+            const due = s.screen !== backupAt.current.screen || Date.now() - backupAt.current.t > 15000;
+            if (due && isTvRef.current) { backupAt.current = { t: Date.now(), screen: s.screen }; void sb().rpc("qmb_tv_backup", { r: code, s: JSON.parse(save) }).then(() => {}, () => {}); }
+          }
         }
       } catch { setBanner("cantSave"); }
       const room = ctx.current.room;
@@ -271,6 +278,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (f.go) {
         const was = s.screen;
         s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now; s.contest = null; s.contested = [];
+        if (s.nohost && AUTO_NEXT[f.go]) s.autoAt = now + T_AUTO_NEXT * 1000;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
         if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; }
         if (f.go === "dishQ") s.legLog = [];
@@ -278,7 +286,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           const n = (f.go === "sudden" ? s.g.sd?.n : s.g.battle?.tb?.n) || 0;
           /* sudden death starting, or the first tie-breaker: no question decided yet; the next question
              (not the same one swapped): the last one's calls, however it ended (time up with none is none) */
-        if (s.nohost && AUTO_NEXT[f.go]) s.autoAt = now + T_AUTO_NEXT * 1000;
           if ((f.go === "sudden" && !s.g.sdReady) || (f.go === "battleTie" && was !== "battleTie")) s.sdLog = null;
           else if (was === f.go && n !== s.sdQ) s.sdLog = { kind: f.go, calls: s.sdCur };
           s.sdBuzz = null; s.sdOut = [false, false]; s.sdCur = []; s.sdQ = n;

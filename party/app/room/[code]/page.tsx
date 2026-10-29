@@ -3,7 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Lineup } from "@/components/Lineup";
 import { ShareButton } from "@/components/Share";
-import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, ScoreFix, useSecret } from "@/components/PhoneGame";
+import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, ScoreFix, TvTakeover, useSecret } from "@/components/PhoneGame";
 import { Confetti, Hud, usePreload } from "@/components/GameParts";
 import { noteTvTime } from "@/components/Clock";
 import { Rules } from "@/components/Rules";
@@ -263,6 +263,7 @@ export default function PhoneRoom() {
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {mine.role === "host" && pub && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
+            {mine.role === "host" && pub && <TvTakeover code={code} />}
             {/* no host: either captain asks for new scores; the other captain agrees, or not (back on the game screen) */}
             {mine.role === "captain" && pub?.mode === "nohost" && <ScoreFix pub={pub} ask busy={busy || waiting}
               send={(move) => { void tell(() => sendAction(code, "next", { move, step: pub.step })); setPanel(false); }} />}
