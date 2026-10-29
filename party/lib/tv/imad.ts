@@ -12,6 +12,9 @@ import type { TvState } from "./state";
 /* Imad's own dice, so his chatter never touches Math.random (the simulator seeds that one for the bots) */
 let dice = (Date.now() ^ 0x9e3779b9) >>> 0;
 const rnd = () => { dice = (Math.imul(dice, 1664525) + 1013904223) >>> 0; return dice / 4294967296; };
+/* how he takes a moment: a hop, a head shake, a lean-in (the bubble's picture moves with it) */
+const MOOD: Record<string, string> = { correct: "yes", stolen: "yes", leg: "yes", miniwin: "yes", fire: "yes", final: "yes", lead: "yes",
+  wrong: "no", nosteal: "no", timeup: "no", nobody: "no", steal: "lean", sudden: "lean", close: "lean", battle_half: "lean" };
 export function imadSay(s: TvState, moments: string[] | string, extra?: G) {
   const g = s.g;
   if (!g || !getSettings().imad) return;

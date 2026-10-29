@@ -655,7 +655,7 @@ function ImadBubble({ imad, wait = 0 }: { imad?: Pub["imad"]; wait?: number }) {
   }, [id, len]);
   if (!imad || on !== imad.id) return null;
   return (
-    <div className="imad-bubble" role="status" aria-live="polite" key={imad.id}>
+    <div className={"imad-bubble" + (imad.mood ? " " + imad.mood : "")} role="status" aria-live="polite" key={imad.id}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/imad.webp" alt="" />
       <div className="hb-text">{imad.text}</div>
