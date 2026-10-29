@@ -109,7 +109,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           <div className="relative grid place-items-center">
             <span className="win-ring" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
             <span className="win-ring r2" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
-            <div className="display win-slam" style={{ fontSize: (pub.winner != null && T[pub.winner].name.length > 10 ? 0.74 : 1) * (recap ? 100 : 150), color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
+            <div className="display win-slam" style={{ fontSize: (pub.winner != null && T[pub.winner].name.length > 10 ? 0.74 : 1) * (recap ? 80 : 150), color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
           </div>
           {/* once the recap is up, the big score board goes (the scores stay in the top bar) */}
           {!recap && <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
@@ -155,6 +155,8 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           </div>
         </div>)}
       <AwayFlags pub={pub} />
+      {/* between questions: a soft glow in the leader's colour (29 Oct); it fades out when a question comes up */}
+      <div className="tv-glow" style={{ ["--c" as string]: pub.glow != null ? tc(pub.glow) : "transparent", opacity: pub.glow != null ? 1 : 0 }} aria-hidden />
       <ImadBubble imad={pub.imad} wait={beat ? Math.max(0, screenAt + BEAT_MS - Date.now()) : 0} />
       <LeadBanner shown={shown} names={[T[0].name, T[1].name]} sound={sound} lift={pub.screen !== "answer"} />
       {/* the strip along the bottom, kept clear of the screen's content: news (a call changed, the host is away,
