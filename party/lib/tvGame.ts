@@ -925,7 +925,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
       const base = lobbyState(room), names = [...(base.teamNames || ["Team A", "Team B"])] as [string, string];
-      names[from.team as 0 | 1] = cap1(String(a.payload.name || "").trim().slice(0, 18)) || names[from.team as 0 | 1];
+      names[from.team as 0 | 1] = cap1(String(a.payload.name || "").trim().slice(0, 14)) || names[from.team as 0 | 1];
       lobbyMine.current.teamNames = names;
       await sb().from("rooms").update({ state: { ...base, teamNames: names } }).eq("code", code);
       return;

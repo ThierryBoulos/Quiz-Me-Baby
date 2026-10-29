@@ -14,7 +14,7 @@ import { friendly } from "@/lib/errors";
 import { useFreshBuild } from "@/lib/fresh";
 import { cap1, useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
-const TEAM_MAX = 18;                                  // as the TV keeps them (lib/tvGame.ts)
+const TEAM_MAX = 14;                                  // as the TV keeps them (lib/tvGame.ts)
 
 /* THE PHONE. In the lobby: pick a side, take the captaincy (one per team),
    name the team, or be the host. The colour of your team fills the screen. */

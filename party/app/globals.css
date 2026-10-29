@@ -226,7 +226,7 @@ button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 /* phones: the scores on one line, the label and pips under them (Classic's narrow layout) */
 .hud.phone .hud-in { grid-template-columns: 1fr 1fr; row-gap: 8px; }
 .hud.phone .hud-mid { grid-column: 1 / -1; grid-row: 2; }
-.hud.phone .hud-team .nm { max-width: 110px; }
+.hud.phone .hud-team .nm { max-width: 140px; }
 /* the TV, read from the sofa */
 .hud.tv { padding: 0 0 14px; }
 .hud.tv .hud-team .nm { font-size: var(--text-18); max-width: 230px; }
@@ -312,7 +312,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* ---- the mini-game's own score, under the night's (TV and phones) ---- */
 .hud-mini { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; min-width: 0;
   font-size: var(--text-11); font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-3); }
-.hud-mini .nm { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud-mini .nm { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hud-mini b { font-family: var(--font-display); font-weight: 400; font-size: var(--text-18); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
 .hud-mini .a { color: var(--color-a); } .hud-mini .b { color: var(--color-b); }
 .hud.tv .hud-mini { font-size: var(--text-14); gap: 12px; margin-top: 8px; } .hud.tv .hud-mini b { font-size: var(--text-26); } .hud.tv .hud-mini .nm { max-width: 260px; }
