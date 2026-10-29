@@ -49,6 +49,18 @@ function sdRecord(s: TvState, team: 0 | 1, ok: boolean) {
    only device that writes the room, and it checks who sent each action.
    With no host, the TV is the host too: it checks answers, runs the clocks
    and moves the night along, and the captains referee each other. */
+/* the clocks stood still for d ms (the TV was asleep, offline, or without its questions): every moment
+   the game is waiting for moves on by that much */
+function shiftClocks(s: TvState, d: number) {
+  if (s.pending) s.pending = { ...s.pending, until: s.pending.until + d };
+  if (s.lifeline?.deadline) s.lifeline = { ...s.lifeline, deadline: s.lifeline.deadline + d };
+  if (s.autoAt) s.autoAt += d;
+  if (s.waitSince) s.waitSince += d;
+  if (s.buzzAt) s.buzzAt += d;
+  if (s.agree) s.agree = { ...s.agree, until: s.agree.until + d };
+  if (s.deadline) s.deadline += d;
+}
+
 export function useTvGame(code: string, isTv: boolean, room: Room | null, members: Member[]) {
   const ctx = useRef({ room, members });
   ctx.current = { room, members };
@@ -108,10 +120,19 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const lastSecret = useRef(""), lastSave = useRef(""), offline = useRef(false), lastAt = useRef(0), resent = useRef(0);
   const stamp = () => (lastAt.current = Math.max(Date.now(), lastAt.current + 1));
   /* a line across the TV when something's wrong that the room should know about */
-  const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave">(null);
+  const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave" | "noBank">(null);
+  const bankRetry = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const offlineAt = useRef(0);                          // when the phones stopped hearing from this TV (the clocks wait)
   /* the lobby: why a Start didn't start (a captain left a second ago) */
   const [lobbyNote, setLobbyNote] = useState<string | null>(null);
   useEffect(() => { if (!lobbyNote) return; const t = setTimeout(() => setLobbyNote(null), 6000); return () => clearTimeout(t); }, [lobbyNote]);
+  /* why a Start didn't start: on the TV, and written to the room, so the phone that tapped gets it as its reply
+     instead of "The TV hasn't answered" (29 Oct) */
+  const sayLobby = useCallback((text: string) => {
+    setLobbyNote(text);
+    const room = ctx.current.room; if (!room) return;
+    void sb().from("rooms").update({ state: { ...lobbyState(room), note: { text, at: Date.now() } } }).eq("code", code).then(() => {}, () => {});
+  }, [code]);
   const pubN = useRef(0);                             // publishes so far (a tap with none after it still gets a reply)
   /* The lobby's team names and who's away, as this TV last wrote them. Two writes a beat apart (both
      captains naming their teams in the same second) must each build on the other, not on a room the
@@ -126,17 +147,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const c = chain.current;
     if (c.queued) return c.p;              // a write that hasn't started yet will pick up this change too
     c.queued = true;
-  /* why a Start didn't start: on the TV, and written to the room, so the phone that tapped gets it as its reply
-     instead of "The TV hasn't answered" (29 Oct) */
-  const sayLobby = useCallback((text: string) => {
-    setLobbyNote(text);
-    const room = ctx.current.room; if (!room) return;
-    void sb().from("rooms").update({ state: { ...lobbyState(room), note: { text, at: Date.now() } } }).eq("code", code).then(() => {}, () => {});
-  }, [code]);
     /* The phones didn't get it (Wi-Fi dropped, the server hiccupped): say so on the TV and keep
        trying, so a reveal or a final screen with nothing after it still reaches everyone. */
     const failed = (e: unknown) => {
       console.error("publish failed", e);
+      if (!offline.current) offlineAt.current = Date.now();
       offline.current = true; setBanner((b) => b ?? "offline");
       setTimeout(() => void publishRef.current(), 2000);
     };
@@ -180,7 +195,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           const theirs = Number((r.data?.state as { pubAt?: number } | undefined)?.pubAt) || 0;
           if (theirs >= at) { lastAt.current = Math.max(lastAt.current, theirs); setTimeout(() => void publishRef.current(), 0); }
         }
-        if (offline.current) { offline.current = false; setBanner((b) => (b === "offline" ? null : b)); }
+        /* back: the clocks stood still meanwhile (29 Oct: a 30 s drop with no host used to run a question out,
+           though no phone could deliver its answer), so they move on by that much, and go out with the next write */
+        if (offline.current) { offline.current = false; shiftClocks(st.current, Date.now() - offlineAt.current); setBanner((b) => (b === "offline" ? null : b)); setTimeout(() => void publishRef.current(), 0); }
       });
       let wait: ReturnType<typeof setTimeout> | undefined;
       const held = await Promise.race([done.then(() => false), new Promise<boolean>((r) => { wait = setTimeout(() => r(true), 2000); })]);
@@ -875,6 +892,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const handle = useCallback(async (a: Action) => {
     const { room } = ctx.current, s = st.current;
     let { members } = ctx.current;
+    /* a game restored without its questions yet (the download failed, being tried again): the tap is refused, not
+       taken and dropped; the phone shows why */
+    if (s.g && !s.bank && a.kind !== "suggest" && a.kind !== "count") { refused.current = "The TV is still loading the questions. Try again in a moment."; return; }
     if (!room) return;
     let from = members.find((m) => m.user_id === a.user_id);
     /* the line-up here can be a beat behind the phones (a captain who claimed a second ago, a
@@ -1075,30 +1095,33 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const s = st.current;
         if (s.tvAway) {
           const d = Date.now() - s.tvAway;
-          if (s.pending) s.pending = { ...s.pending, until: s.pending.until + d };
-          if (s.lifeline?.deadline) s.lifeline = { ...s.lifeline, deadline: s.lifeline.deadline + d };
-          if (s.autoAt) s.autoAt += d;
-          if (s.waitSince) s.waitSince += d;
-          if (s.buzzAt) s.buzzAt += d;
-          if (s.agree) s.agree = { ...s.agree, until: s.agree.until + d };
+          const dl = s.deadline; s.deadline = null; shiftClocks(s, d); s.deadline = dl;   // (a running clock was parked in s.left)
           if (s.awayPaused && s.left && !s.pending) { s.deadline = Date.now() + s.left * 1000; s.left = 0; }
           if (s.awayPaused) s.paused = false;
           s.tvAway = 0; s.awayPaused = false;
         }
-        /* the bank, then the view, to this TV and to every phone (they may still show "paused") */
-        void loadBank(code).then(async (b) => {
+        /* The bank, then the view, to this TV and to every phone (they may still show "paused"). A download
+           that fails (one bad request on party Wi-Fi) is tried again every few seconds, with a line on the TV
+           meanwhile; the clocks stand still until it comes, and taps are turned down, not swallowed (29 Oct:
+           they were acknowledged and dropped, and the night looked alive while nothing could move). */
+        const since = Date.now();
+        const fetchBank = () => void loadBank(code).then(async (b) => {
           /* filtered as at Start: with no host, no question only a person can judge */
           const all = withCustom(b, st.current.custom || []);
+          shiftClocks(st.current, Date.now() - since);
           st.current.bank = st.current.nohost ? forNoHost(all) : all;
+          setBanner((x) => (x === "noBank" ? null : x));
           /* a game saved by an older version of the app that this one can't read: say so, don't crash */
           try { setPub(view()?.[0] || null); }
           catch (e) { console.error("saved game unreadable", e); Object.assign(st.current, before); try { localStorage.removeItem(saveKey); } catch { /* */ } setBanner("oldSave"); return; }
           /* publish once the room is loaded: its state carries the team names too */
           for (let i = 0; i < 40 && !ctx.current.room; i++) await new Promise((r) => setTimeout(r, 250));
           if (ctx.current.room) void publish();
-        });
+        }).catch((e) => { console.error("bank", e); setBanner((x) => x ?? "noBank"); bankRetry.current = setTimeout(fetchBank, 3000); });
+        fetchBank();
       }
     } catch { /* nothing saved */ }
+    return () => clearTimeout(bankRetry.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTv, saveKey]);
 
@@ -1274,12 +1297,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       } else if (document.visibilityState === "visible" && s.tvAway) {
         const d = now - s.tvAway;
         s.tvAway = 0;
-        if (s.pending) s.pending = { ...s.pending, until: s.pending.until + d };
-        if (s.lifeline?.deadline) s.lifeline = { ...s.lifeline, deadline: s.lifeline.deadline + d };
-        if (s.autoAt) s.autoAt += d;
-        if (s.waitSince) s.waitSince += d;
-        if (s.buzzAt) s.buzzAt += d;
-        if (s.agree) s.agree = { ...s.agree, until: s.agree.until + d };
+        { const dl = s.deadline; s.deadline = null; shiftClocks(s, d); s.deadline = dl; }   // (the clock itself was paused, in s.left)
         /* the clock picks up where it was, unless an answer that came in meanwhile is waiting for its call */
         if (s.awayPaused) { s.paused = false; s.awayPaused = false; if (!s.pending) applyFx([{ timer: "resume" }]); }
         void publish();
@@ -1300,7 +1318,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     const t = setInterval(() => {
       const s = st.current, now = Date.now(), g = s.g;
-      if (!g || s.tvAway) return;                     // the TV is asleep: nothing moves
+      if (!g || s.tvAway || offline.current || !s.bank) return;   // asleep, cut off, or still loading the questions: nothing moves
       let changed = false;
       /* the last ten seconds tick; the bells ring at zero */
       const whole = s.deadline ? Math.ceil((s.deadline - now) / 1000) : null;

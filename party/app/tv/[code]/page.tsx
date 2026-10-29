@@ -81,7 +81,8 @@ export default function TvRoom() {
       {room.status !== "lobby" && <SoundNote />}
       {/* notices for the room, stacked under the scores so they never sit on each other */}
       <div className="absolute left-1/2 top-[104px] -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none" style={{ zIndex: 30 }}>
-        {banner === "offline" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">Reconnecting… the phones are a step behind</div>}
+        {banner === "offline" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">Reconnecting… the clocks wait, the phones are a step behind</div>}
+        {banner === "noBank" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">Loading the questions… if this stays, check the TV&rsquo;s internet</div>}
         {banner === "cantSave" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">This browser can&rsquo;t save the game, so don&rsquo;t refresh this page</div>}
         {room.status !== "lobby" && isTv && [0, 1].filter((t) => !members.some((m) => m.team === t && m.role === "captain")).map((t) => (
           <div key={t} className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: `var(--color-${t === 0 ? "a" : "b"})` }}>
