@@ -333,10 +333,9 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   if (sc === "closestReveal" && pub.reveal) {
     const ans = Number(pub.reveal.answer), w = pub.reveal.w;
     return (<>
-      <div className="text-26 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
       <div className="eyebrow text-18">The answer</div>
-      <div className="display" style={{ fontSize: 110, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
-      {pub.reveal.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2">{pub.reveal.notes}</div>}
+      <div className="display" style={{ fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
+      {pub.reveal.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-2 truncate">{pub.reveal.notes}</div>}
       <NumberLine pub={pub} ans={ans} w={w} />
       <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : ""}</div>
     </>);

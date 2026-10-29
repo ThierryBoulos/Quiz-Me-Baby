@@ -90,6 +90,7 @@ export function addCustom(raw: Record<string, unknown>, builtIn: string[], bankI
   const q = cleanOne(raw);
   const type = String(raw.type);
   if (!cut(raw.question, 300)) return "The question is required.";
+  if (cut(raw.question, 300).length > 200) return "That question is too long: 200 characters at most.";
   if (!q) return type === "closest" ? "Closest To Wins needs a number as the answer."
     : type === "saysame" ? "At least two possible answers, one per line."
     : type === "majority" ? "Four different answers, all filled in, and one picked as the right one."

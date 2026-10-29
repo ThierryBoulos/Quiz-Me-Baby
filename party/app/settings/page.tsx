@@ -50,7 +50,7 @@ function AddQuestion() {
         </select>
       </Field>
       <Field id="nq" label={f.type === "auction" ? "Category" : f.type === "saysame" ? "Prompt" : "Question"}>
-        <textarea id="nq" rows={2} className="input !py-3 !text-16 !font-semibold" value={f.question}
+        <textarea id="nq" rows={2} maxLength={200} className="input !py-3 !text-16 !font-semibold" value={f.question}
           placeholder={f.type === "auction" ? "How many countries can you name?" : f.type === "saysame" ? "Name a cheese" : "Type the question"} onChange={(e) => set({ question: e.target.value })} />
       </Field>
       {f.type === "standard" && <Field id="na" label="Answer"><input id="na" className="input !text-16" value={f.answer} placeholder="The answer" onChange={(e) => set({ answer: e.target.value })} /></Field>}
