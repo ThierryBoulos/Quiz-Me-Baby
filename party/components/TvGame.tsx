@@ -350,7 +350,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   /* Drop the Pin: the photo while they place their pins; then the map, flying in to the spot */
   if (sc === "pinQ" && pub.pin) return (
     <div className="flex gap-12 items-center w-full justify-center">
-      <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={560} credit /></div>
+      <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={460} credit /></div>
       <div className="w-[360px] flex flex-col items-center gap-5">
         <div className="display text-44" style={{ color: "var(--color-gold)" }}>Where is this?</div>
         <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
