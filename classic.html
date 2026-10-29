@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.45', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.46', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2518,6 +2518,23 @@ const SEED = [
 /* ---- 29 Oct: the owner's ideas ---- */
 ['History','medium','','In May 1940, German forces surprised France by attacking through which forest, thought too thick for tanks?','The Ardennes','It bypassed the Maginot Line. France fell in six weeks.'],
 ['Geography','medium','','If you\'re talking to a Pinoy, which country are they from?','The Philippines','Pinoy (Pinay for a woman) is what Filipinos call themselves, from the end of the word Filipino.'],
+/* ---- 29 Oct: Sexy Time, explicit: positions, toys, fantasies (the owner's ask) ---- */
+['Sexy Time','easy','','Which position has both partners lying on their sides, one behind the other, like cutlery in a drawer?','Spooning','The one most couples fall asleep in, too.'],
+['Sexy Time','medium','','What is the position called where the woman is on top, facing away from her partner?','Reverse cowgirl','Cowgirl, turned around.'],
+['Sexy Time','hard','','In which position does one partner stand and hold the other\'s legs up, like a gardening cart?','The wheelbarrow','Mostly a test of arm strength.'],
+['Sexy Time','expert','','Which position has both partners sitting face to face, legs wrapped around each other, named after a yoga pose?','The lotus','Slow and close; also called yab-yum in Tibetan art.'],
+['Sexy Time','easy','','What is the name of the toy designed for anal play, flared at the base so it can\'t slip all the way in?','A butt plug','The flared base is the safety feature.'],
+['Sexy Time','medium','','Which toy, worn at the base of the penis, keeps an erection firmer for longer?','A cock ring','Many vibrate, for both partners.'],
+['Sexy Time','hard','','Which small weighted balls are worn inside the vagina, said to strengthen the pelvic floor?','Ben Wa balls','Also sold as Kegel balls or geisha balls.'],
+['Sexy Time','expert','','Which German brand, launched in 2014, made its name with a toy that uses pulses of air on the clitoris instead of vibration?','Womanizer','It started the "air pulse" or suction-toy craze.'],
+['Sexy Time','expert','','Which Swedish luxury sex-toy company, founded in Stockholm in 2003, makes the Gigi and Ina vibrators?','Lelo','Founded by three Swedish industrial designers.'],
+['Sexy Time','easy','','What is a woman called who is paid to dominate her clients, often with a whip and thigh-high boots?','A dominatrix','Dominatrices often don\'t have sex with clients at all.'],
+['Sexy Time','medium','','What is the term for getting aroused by secretly watching other people undress or have sex?','Voyeurism','From the French voir, to see.'],
+['Sexy Time','medium','','What is the term for getting aroused by being watched, or by showing yourself off, during sex?','Exhibitionism','Its partner fantasy is voyeurism.'],
+['Sexy Time','medium','','What word describes someone who is turned on, above all, by a partner\'s intelligence?','Sapiosexual','From the Latin sapiens, wise. Dating apps added it as an option in the 2010s.'],
+['Sexy Time','hard','','What is the BDSM term for the cuddling and care partners give each other after an intense scene?','Aftercare','Water, blankets, talking it through: it can matter as much as the scene.'],
+['Sexy Time','hard','','What do swingers call a 1970s-style party where couples swap partners by drawing car keys out of a bowl?','A key party','Made famous by the film The Ice Storm (1997).'],
+['Sexy Time','expert','','In swinger slang, what is a married woman called whose husband encourages her to sleep with other men?','A hotwife','Not quite a cuckold: in hotwifing the husband is proud, not humiliated.'],
 /* ---- 29 Oct: the thin spots topped up (Sexy Time hard/expert, Internet expert, Movies hard, Geography easy) ---- */
 ['Sexy Time','hard','','What is the Japanese art of rope bondage called?','Shibari','Also called kinbaku. It grew out of a samurai-era way of tying prisoners.'],
 ['Sexy Time','expert','','Which 1972 bestseller by Alex Comfort was laid out like a cookbook, with starters and main courses?','The Joy of Sex','Its chapters were literally called Starters, Main Courses and Sauces & Pickles.'],
@@ -4249,7 +4266,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 43;   // bumped when the built-in bank changes
+const SEED_VERSION = 44;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
