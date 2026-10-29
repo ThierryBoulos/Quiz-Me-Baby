@@ -19,7 +19,7 @@ import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, tu
 import { buildView, qk } from "./tv/view";
 import { useInbox } from "./tv/useInbox";
 import { usePresent } from "./tv/usePresent";
-import { imadNarrate, imadSay } from "./tv/imad";
+import { imadNarrate, imadOnToast, imadSay } from "./tv/imad";
 import { newState, type TvState } from "./tv/state";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
@@ -256,7 +256,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const rd = s.g.rounds[s.g.r];
         s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, seat()), deadline: null, ...(f.lifeline === "friend" ? { left: T().tFriend, wait: true } : {}) };   // the friend's clock starts with the call (Start the call)
       }
-      if (f.toast) s.toast = { id: ++s.toastN, text: f.toast };
+      if (f.toast) { s.toast = { id: ++s.toastN, text: f.toast }; imadOnToast(s, String(f.toast)); }
       if (f.host) say(f.host, f.vars);
       if (f.sound && isTvRef.current) { const n = f.sound as SoundName, ms = soundAt(n); if (ms && canPlay()) setTimeout(() => playSound(n), ms); else playSound(n); }
       if (f.go && isTvRef.current) {
@@ -427,7 +427,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     } else if ((sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal") && /^t[01]$/.test(id)) {
       const t = Number(id[1]) as 0 | 1;
       s.ok[t] = v;
-      s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[t].name)} ${verdictWord(sc, v)}.` };
+      s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[t].name)} ${verdictWord(sc, v)}.` }; imadOnToast(s, "Call changed");
     } else if (sc === "dishReveal" && /^d\d+$/.test(id)) {
       const i = Number(id.slice(1)), L = s.legLog;
       if (!L[i]) return;
@@ -440,7 +440,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     } else if (sc === "battleReview" && /^b[01]-\d+$/.test(id)) {
       const [cap, i] = id.slice(1).split("-").map(Number);
       play({ type: "battle/rule", cap, i, got: v });
-      s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[cap].name)}'s answer ${i + 1} is ${v ? "RIGHT" : "WRONG"}.` };
+      s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[cap].name)}'s answer ${i + 1} is ${v ? "RIGHT" : "WRONG"}.` }; imadOnToast(s, "Call changed");
     } else if (/^s\d+$/.test(id) && s.sdLog?.calls[Number(id.slice(1))]) {
       /* sudden death / the tie-breaker: the first right answer (in the order they came) takes it; nobody right
          after all, another question */
@@ -454,6 +454,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.toast = { id: ++s.toastN, text: !right ? "Call changed: nobody was right. Another question."
         : right.team === was ? `Call changed, but ${iso(g.teams[was].name)} were right first: it stands.`
         : `Call changed: ${iso(g.teams[right.team].name)} ${tb ? "take the tie-breaker" : "win the night"}.` };
+      imadOnToast(s, "Call changed");
     }
   }, [play]);
 
@@ -1057,7 +1058,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       void publish();
       return;
     }
-    if (from.role !== "captain" || (from.team !== 0 && from.team !== 1)) return;
     /* the Battle: a player's call on their own captain's score, before that captain's first question (29 Oct) */
     if (a.kind === "answer" && from.role === "player" && (s.screen === "battleIntro" || s.screen === "battleHandoff") && s.g?.battle && typeof a.payload.predict === "number") {
       const b = s.g.battle, n = Math.max(0, Math.min(b.n, Math.floor(a.payload.predict as number)));
@@ -1067,6 +1067,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       took.current = true;
       return;
     }
+    if (from.role !== "captain" || (from.team !== 0 && from.team !== 1)) return;
     if (a.kind === "next") {
       const move = (a.payload.move || {}) as G, free = SAME_SCREEN.has(move.type);
       if (!free && a.payload.step !== s.step) return;

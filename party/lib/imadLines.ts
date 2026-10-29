@@ -186,6 +186,37 @@ export const HOST_LINES: Record<string, string[]> = {
     "{leader} win! {trailer}, you were great. Not good enough, but great.",
     "Victory to {leader}! Somebody tell the neighbours."
   ],
+  /* the mini-games (29 Oct): a leg taken, both right, nobody right, a game decided early, the Battle's halftime, a contest settled */
+  "leg": [
+    "{team} take it. Smooth.",
+    "Leg to {team}. Don't get comfortable.",
+    "{team}! One step closer.",
+    "That one's {team}'s. {other}, deep breaths."
+  ],
+  "both": [
+    "Both right. A point each and nothing settled.",
+    "Two right answers. I'm shocked, frankly.",
+    "Both got it. Boring. Brilliant, but boring."
+  ],
+  "nobody": [
+    "Nobody. Not one. The question wins.",
+    "Both wrong. The silence says it all.",
+    "No points. The scoreboard didn't even notice."
+  ],
+  "decided": [
+    "It's decided! {team} have it with legs to spare.",
+    "{team} wrap it up early. Show-offs.",
+    "Done already. {other}, that's rough."
+  ],
+  "battle_half": [
+    "Halftime! {othercap} sits down. {captain}, your turn to sweat.",
+    "First half done. Captains, no coaching from the sofa."
+  ],
+  "contest": [
+    "Contest settled. Let's all move on with our lives.",
+    "Deliberation over. Play on.",
+    "The referee has spoken. Me. I'm the referee."
+  ],
   "finaltie": [
     "A draw! Everybody wins! Nobody wins! Philosophy!",
     "Tied at the end. Fine. Rematch. Now.",

@@ -122,16 +122,18 @@
 139.10 battleQ | 58 | 6-6 | 1-0 | Lions +1 point | 
 139.85 battleQ | 58 | 6-6 | 2-0 | Lions +1 point | 
 141.85 battleQ | 58 | 6-6 | 3-0 | Lions +1 point | 
-144.35 battleQ | 58 | 6-6 | 4-0 | Lions +1 point | 
-147.10 battleHandoff | 58 | 6-6 | 5-0 | Lions +1 point | 
-148.10 battleQ | 59 | 6-6 | 5-0 | Lions +1 point | 
-148.85 battleQ | 59 | 6-6 | 5-1 | Lions +1 point | 
-151.60 battleQ | 59 | 6-6 | 5-2 | Lions +1 point | 
-154.35 battleQ | 59 | 6-6 | 5-3 | Lions +1 point | 
-156.10 battleQ | 59 | 6-6 | 5-4 | Lions +1 point | 
-157.10 battleReview | 59 | 6-6 | 5-5 | Lions +1 point | 
-157.85 battleReview | 59 | 6-6 | 5-5 |  | 
-158.85 battleReview | 59 | 6-6 | 4-5 | Call changed: ⁨Lions⁩'s answer 1 is WRONG. | 
-159.85 battleSummary | 60 | 6-10 | 4-5 | Call changed: ⁨Lions⁩'s answer 1 is WRONG. | 
-160.60 final | 61 | 6-10 |  | Call changed: ⁨Lions⁩'s answer 1 is WRONG. | 
-recap: {"margin":4,"sudden":false,"leadChanges":1,"steals":[2,2],"minis":[1,3],"best":{"title":"Closest To Wins","team":1,"legs":[1,4]}}
+142.60 battleQ | 58 | 6-6 | 4-0 | Lions +1 point | 
+144.35 battleQ | 58 | 6-6 | 5-0 | Lions +1 point | 
+147.10 battleHandoff | 58 | 6-6 | 6-0 | Lions +1 point | 
+148.10 battleQ | 59 | 6-6 | 6-0 | Lions +1 point | 
+148.85 battleQ | 59 | 6-6 | 6-1 | Lions +1 point | 
+151.60 battleQ | 59 | 6-6 | 6-2 | Lions +1 point | 
+154.35 battleQ | 59 | 6-6 | 6-3 | Lions +1 point | 
+156.10 battleQ | 59 | 6-6 | 6-4 | Lions +1 point | 
+157.10 battleReview | 59 | 6-6 | 6-5 | Lions +1 point | 
+157.85 battleReview | 59 | 6-6 | 6-5 |  | 
+158.85 battleReview | 59 | 6-6 | 5-5 | Call changed: ⁨Lions⁩'s answer 1 is WRONG. | 
+159.85 battleTie | 60 | 6-6 | 5-5 | Call changed: ⁨Lions⁩'s answer 1 is WRONG. | 
+161.60 battleSummary | 60 | 10-6 | 5-5 | Call changed: ⁨Lions⁩'s answer 1 is WRONG. | 
+162.35 final | 61 | 10-6 |  | Call changed: ⁨Lions⁩'s answer 1 is WRONG. | 
+recap: {"margin":4,"sudden":false,"leadChanges":2,"steals":[2,2],"minis":[2,2],"best":{"title":"Closest To Wins","team":1,"legs":[1,4]}}

@@ -9,6 +9,9 @@ import { miniOf, miniState, other, type G } from "./rules";
 import { seatOf } from "./reads";
 import type { TvState } from "./state";
 
+/* Imad's own dice, so his chatter never touches Math.random (the simulator seeds that one for the bots) */
+let dice = (Date.now() ^ 0x9e3779b9) >>> 0;
+const rnd = () => { dice = (Math.imul(dice, 1664525) + 1013904223) >>> 0; return dice / 4294967296; };
 export function imadSay(s: TvState, moments: string[] | string, extra?: G) {
   const g = s.g;
   if (!g || !getSettings().imad) return;
@@ -23,7 +26,7 @@ export function imadSay(s: TvState, moments: string[] | string, extra?: G) {
     const seen: number[] = ((g.hostUsed = g.hostUsed || {})[m] = g.hostUsed[m] || []);
     let free = pool.map((_, i) => i).filter((i) => !seen.includes(i));
     if (!free.length) { seen.length = 0; free = pool.map((_, i) => i); }
-    const i = free[Math.floor(Math.random() * free.length)];
+    const i = free[Math.floor(rnd() * free.length)];
     seen.push(i);
     s.imadQ.push(pool[i].replace(/\{(\w+)\}/g, (_x, k) => (v[k] != null ? String(v[k]) : "")));
   }
@@ -52,5 +55,20 @@ export function imadNarrate(s: TvState) {
   if (sc === "final") imadOnce(s, "final", g.winner == null ? "finaltie" : "final");
   const d = g.teams[0].score - g.teams[1].score, lead = d > 0 ? 0 : d < 0 ? 1 : null;
   if (lead != null) { if (g.hostLeader != null && g.hostLeader !== lead) imadSay(s, "lead"); g.hostLeader = lead; }
+  if (sc === "decided" && s.decided && !g.hostOnce?.["dec:" + s.decided.key]) imadOnce(s, "dec:" + s.decided.key, "decided", { t: s.decided.winner });
+  if (sc === "battleHandoff" && g.battle) imadOnce(s, "bh", "battle_half", { t: g.battle.cap });
+  imadFlush(s);
+}
+export function imadFlush(s: TvState) {
   if (s.imadQ.length) { s.imad = { id: ++s.imadN, text: s.imadQ.join(" ") }; s.imadQ = []; }
+}
+/* a leg's outcome, as the engine says it in a toast; a contest settled. Not every time: he'd never shut up. (29 Oct) */
+export function imadOnToast(s: TvState, text: string) {
+  const g = s.g; if (!g) return;
+  const r = rnd(), m = /^(.+?) takes (?:leg|map|flag|landmark|board|number) \d+\.$/.exec(text);
+  if (m) { const t = g.teams.findIndex((x: G) => x.name === m[1]); if (t >= 0 && r < 0.3) imadSay(s, "leg", { t }); }
+  else if (/^Both got it/.test(text)) { if (r < 0.4) imadSay(s, "both"); }
+  else if (/^Nobody got it/.test(text)) { if (r < 0.4) imadSay(s, "nobody"); }
+  else if (/^Call changed/.test(text)) imadSay(s, "contest");
+  imadFlush(s);
 }
