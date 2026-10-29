@@ -85,6 +85,7 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
       <Section title="Gameplay">
         <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="New questions first" help="Every question this TV plays is remembered, and the next games deal the ones you haven't played. When a game runs out of new ones, played ones come back (a night never gets shorter) and the lobby offers to reset." />
         <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="Alternate which team answers first each round" help="Off = Team A always goes first." />
+        <Toggle on={s.manyTeams} set={(v) => set({ manyTeams: v })} title="Allow more than two teams" help="Adds Teams: 2 [−] [+] to the TV lobby, up to 8 teams. Needs a host; mini-games only (Majority Rules, Flags, Closest To Wins, Drop the Pin)." />
         <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help="Someone switches app or tab while a question is up (a search, a chatbot)? The TV says so, and the host's phone keeps the list. Call a Friend is allowed." />
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <span className="text-14 text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played{remote ? " on the TV" : ""}.</span>

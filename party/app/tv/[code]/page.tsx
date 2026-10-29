@@ -18,6 +18,12 @@ import { useTabLock } from "@/lib/tabLock";
 import { sb } from "@/lib/supabase";
 import { useFreshBuild } from "@/lib/fresh";
 import { ANSWERING } from "@/components/PhoneGame";
+import { LineupMany } from "@/components/many/LineupMany";
+import { TvMany } from "@/components/many/TvMany";
+import { manyNotReady, teamCountOf, useTvMany } from "@/lib/many/useTvMany";
+import { MANY_MAX } from "@/lib/many/logic";
+import type { PubMany } from "@/lib/many/view";
+import { getSettings } from "@/lib/settings";
 
 /* Classic lives on this same site, at /classic (copied in at build time); from here it opens
    straight on its host setup, and its Back comes back to this lobby */
@@ -38,7 +44,12 @@ export default function TvRoom() {
   const lock = useTabLock(code, owner);
   const isTv = owner && lock.state === "mine";
 
-  const { pub: own, exit, again, banner, lobbyNote, thin, resetPlayed } = useTvGame(code, isTv, room, members);
+  /* more than two teams (a TV setting, off by default) runs its own game: the two-team one stands aside */
+  const teamCount = teamCountOf(room), many = teamCount > 2 || room?.mode === "many";
+  const { pub: own, exit, again, banner, lobbyNote, thin, resetPlayed } = useTvGame(code, isTv && !many, room, members);
+  const M = useTvMany(code, isTv && many, room, members);
+  const [allowMany, setAllowMany] = useState(false);
+  useEffect(() => { const read = () => setAllowMany(getSettings().manyTeams); read(); window.addEventListener("qmb:settings", read); return () => window.removeEventListener("qmb:settings", read); }, []);
   /* the bank is getting thin: a pop-up in the lobby. "Not now" hides it until the next game */
   const [notNow, setNotNow] = useState(false);
   const status = room?.status;
@@ -48,12 +59,13 @@ export default function TvRoom() {
   useEffect(() => { if (isTv && status === "lobby" && seats > lastSeats.current) Snd.soft(); lastSeats.current = seats; }, [seats, isTv, status]);
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
-  const pub = own || ((room?.state?.pub || null) as Pub | null);
+  const pub = many ? null : own || ((room?.state?.pub || null) as Pub | null);
+  const pubMany = many ? (M.pub || ((room?.state?.pub as PubMany | null)?.many ? (room?.state?.pub as PubMany) : null)) : null;
   usePreload(pub);
   /* an old copy of the app (left open across a deploy) reloads between questions */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline), room?.status === "playing");
   /* the night is over and somebody tapped Exit: home (a moment later, so every phone hears it first) */
-  useEffect(() => { if (!pub?.exit) return; const t = setTimeout(() => router.replace("/"), 1500); return () => clearTimeout(t); }, [pub?.exit, router]);
+  useEffect(() => { if (!pub?.exit && !pubMany?.exit) return; const t = setTimeout(() => router.replace("/"), 1500); return () => clearTimeout(t); }, [pub?.exit, pubMany?.exit, router]);
   /* for the end-to-end tests: what the TV is showing */
   useEffect(() => { (window as unknown as { __qmb?: Pub | null }).__qmb = pub; }, [pub]);
 
@@ -84,7 +96,7 @@ export default function TvRoom() {
         {banner === "offline" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">Reconnecting… the clocks wait, the phones are a step behind</div>}
         {banner === "noBank" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">Loading the questions… if this stays, check the TV&rsquo;s internet</div>}
         {banner === "cantSave" && <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-no)" }} role="status">This browser can&rsquo;t save the game, so don&rsquo;t refresh this page</div>}
-        {room.status !== "lobby" && isTv && [0, 1].filter((t) => !members.some((m) => m.team === t && m.role === "captain")).map((t) => (
+        {room.status !== "lobby" && isTv && !many && [0, 1].filter((t) => !members.some((m) => m.team === t && m.role === "captain")).map((t) => (
           <div key={t} className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: `var(--color-${t === 0 ? "a" : "b"})` }}>
             {(room.state.teamNames || ["Team A", "Team B"])[t]} needs a captain: tap &ldquo;Make me captain&rdquo; on a phone</div>))}
       </div>
@@ -140,22 +152,28 @@ export default function TvRoom() {
               <QRCodeSVG value={joinUrl} size={200} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" />
             </div>
           </div>
-          <div className="mt-8"><Lineup room={room} members={members} big /></div>
+          <div className="mt-8">{many ? <LineupMany room={room} members={members} k={teamCount} big /> : <Lineup room={room} members={members} big />}</div>
           <div className="mt-auto flex items-end justify-between text-20 text-[var(--color-ink-2)]">
             <div>
               {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b></> : "No host yet — the app will check answers."}
               <br />
-              {readyToStart(members) ? <>Ready. <b><bdi>{who?.name}</bdi></b> starts the game.</> : notReadyWhy(members)}
+              {many ? (manyNotReady(members, teamCount) || <>Ready. <b><bdi>{host?.name}</bdi></b> starts the game.</>)
+                : readyToStart(members) ? <>Ready. <b><bdi>{who?.name}</bdi></b> starts the game.</> : notReadyWhy(members)}
               {lobbyNote && <><br /><span className="text-18 font-bold" style={{ color: "var(--color-no)" }} role="status">Start didn&rsquo;t go through: {lobbyNote}</span></>}
               {awake === false && <><br /><span className="text-16 text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
             </div>
             <div className="flex gap-3">
+              {/* more than two teams: only when the TV's setting allows it (Settings → Allow more than two teams) */}
+              {isTv && (allowMany || teamCount > 2) && (
+                <div className="flex items-center gap-2 chip" style={{ fontSize: 16 }}>Teams: <b>{teamCount}</b>
+                  <button className="btn btn-sm btn-ghost !px-3" aria-label="One team fewer" disabled={teamCount <= 2} onClick={() => void M.setTeamCount(teamCount - 1)}>−</button>
+                  <button className="btn btn-sm btn-ghost !px-3" aria-label="One team more" disabled={teamCount >= MANY_MAX} onClick={() => void M.setTeamCount(teamCount + 1)}>+</button></div>)}
               <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>
               {members.length === 0 && <a href={`${CLASSIC}/?start=host&back=/tv/${code}`} className="btn btn-sm">Just play on this screen</a>}
             </div>
           </div>
         </>
-      ) : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
+      ) : pubMany ? <TvMany pub={pubMany} join={{ url: joinUrl, code }} /> : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
         <div className="m-auto text-center enter">
           <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
         </div>

@@ -4,14 +4,14 @@ import { joinLive, note, sb } from "./supabase";
 
 export type Role = "player" | "captain" | "host";
 export type Member = { room: string; user_id: string; name: string; team: 0 | 1 | null; role: Role; avatar: string | null; joined_at: string };
-export type RoomState = { teamNames?: [string, string]; [k: string]: unknown };
-export type Room = { code: string; tv_id: string; status: "lobby" | "playing" | "done"; mode: "classic" | "host" | "nohost" | null; state: RoomState; version: number };
+export type RoomState = { teamNames?: string[]; [k: string]: unknown };
+export type Room = { code: string; tv_id: string; status: "lobby" | "playing" | "done"; mode: "classic" | "host" | "nohost" | "many" | null; state: RoomState; version: number };
 
 export const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 export const cleanCode = (s: string) => s.toUpperCase().split("").filter((c) => CODE_ALPHABET.includes(c)).join("").slice(0, 4);
 /* names always start with a capital ("sanofi" shows as "Sanofi") */
 export const cap1 = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-export const teamName = (room: Room | null, t: 0 | 1) => cap1(room?.state?.teamNames?.[t] || (t === 0 ? "Team A" : "Team B"));
+export const teamName = (room: Room | null, t: number) => cap1(((room?.state?.teamNames as string[] | undefined) || [])[t] || "Team " + "ABCDEFGH"[t]);
 
 /* The room and its line-up, kept live: Supabase pushes every change and the
    phone uses what the push carries. A poll sits underneath as a safety net:

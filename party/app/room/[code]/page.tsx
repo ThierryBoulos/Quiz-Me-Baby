@@ -11,6 +11,11 @@ import { Setup } from "@/components/Setup";
 import { iso, type Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
+import { LineupMany, PickMany, SetupMany } from "@/components/many/LineupMany";
+import { PhoneMany } from "@/components/many/PhoneMany";
+import { manyNames, manyNotReady, teamCountOf } from "@/lib/many/useTvMany";
+import { MANY_COLORS } from "@/lib/many/logic";
+import type { PubMany } from "@/lib/many/view";
 import { useFreshBuild } from "@/lib/fresh";
 import { cap1, useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
@@ -106,7 +111,10 @@ export default function PhoneRoom() {
 
   const host = members.find((m) => m.role === "host") || null;
   const side = mine?.team === 0 ? "a" : mine?.team === 1 ? "b" : null;
-  useEffect(() => { document.documentElement.style.setProperty("--tint", side ? `var(--color-${side})` : "var(--color-gold)"); }, [side]);
+  /* more than two teams (3 to 8): their own lobby buttons and game screens */
+  const teamCount = teamCountOf(room), many = teamCount > 2 || room?.mode === "many";
+  const manyColor = many && mine?.team != null ? MANY_COLORS[mine.team as number] : null;
+  useEffect(() => { document.documentElement.style.setProperty("--tint", manyColor || (side ? `var(--color-${side})` : "var(--color-gold)")); }, [side, manyColor]);
 
   /* a call to the server in the lobby (claim, team, leave): it answers "ok" or a reason, then the room is read again */
   async function act(fn: () => Promise<unknown>) {
@@ -123,7 +131,7 @@ export default function PhoneRoom() {
     try { await fn(); } catch (e) { if (!(e as { announced?: boolean }).announced) setMsg(friendly(e)); }
     setBusy(false);
   }
-  const pickTeam = (t: 0 | 1 | null) => act(() => rpc<string>("qmb_update_me", { r: code, nm: mine?.name ?? "", tm: t }));
+  const pickTeam = (t: number | null) => act(() => rpc<string>("qmb_update_me", { r: code, nm: mine?.name ?? "", tm: t }));
   const self = useRef(0);                              // when I last changed my own role
   const claim = (want: "captain" | "host" | "player") => { self.current = Date.now(); return act(() => rpc<string>("qmb_claim", { r: code, want })); };
   const move = (m: Member, to: 0 | 1) => act(async () => {
@@ -235,7 +243,7 @@ export default function PhoneRoom() {
           The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</p>)}
 
       {/* the tracker, as on the TV: scores, where we are, the night's progress */}
-      {room.status !== "lobby" && pub && !panel && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
+      {room.status !== "lobby" && pub && !many && !panel && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
 
       {room.status !== "lobby" ? (
         /* joined after the start: pick a side first */
@@ -243,8 +251,9 @@ export default function PhoneRoom() {
           <section className="flex flex-col gap-3 enter">
             <h1 className="display text-40 text-center">Pick a side</h1>
             <p className="text-center text-14 text-[var(--color-ink-2)]">The game&rsquo;s on. Join a team and help your captain.</p>
+            {many ? <PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} /> : <>
             <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
-            <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
+            <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button></>}
           </section>
         ) : panel ? (
           /* mid-game: who's where, and a new captain when one is needed */
@@ -259,10 +268,10 @@ export default function PhoneRoom() {
               <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>)}
             {mine.role === "player" && myCaptain && <div className="card text-center text-14">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
             {mine.role === "host" && <p className="text-14 text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
-            <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />
+            {many ? <LineupMany room={room} members={members} k={teamCount} /> : <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />}
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
-            {mine.role === "host" && pub && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
+            {mine.role === "host" && pub && !many && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
             {mine.role === "host" && pub && <TvTakeover code={code} />}
             {/* no host: either captain asks for new scores; the other captain agrees, or not (back on the game screen) */}
             {mine.role === "captain" && pub?.mode === "nohost" && <ScoreFix pub={pub} ask busy={busy || waiting}
@@ -270,6 +279,8 @@ export default function PhoneRoom() {
             {/* leaving is kept away from everyday buttons, and asks first */}
             <button className="btn btn-sm btn-ghost self-center mt-6" style={{ color: "var(--color-no)", borderColor: "color-mix(in srgb, var(--color-no) 45%, transparent)" }} onClick={leave}>Leave the game</button>
           </section>
+        ) : many ? ((room.state?.pub as PubMany | null)?.many ? <PhoneMany pub={room.state.pub as PubMany} me={mine} code={code} />
+            : <section className="card text-center enter flex-1 grid place-items-center"><div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">Eyes on the TV</h1></div></section>
         ) : !pub ? (
           <section className="card text-center enter flex-1 grid place-items-center">
             <div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">Eyes on the TV</h1></div>
@@ -289,28 +300,30 @@ export default function PhoneRoom() {
           </section>
           {/* the line-up on one line, so Setup is right here (13 players used to push it 1,400 px down) */}
           <button type="button" className="card flex items-center justify-between gap-3 text-left" aria-expanded={lineupOpen} onClick={() => setLineupOpen((v) => !v)}>
-            <span className="text-14"><b>{members.filter((m) => m.role !== "host").length} in</b> · {[0, 1].map((t) => members.filter((m) => m.team === t).length).join(" v ")} · {notReadyWhy(members) || "both captains set"}</span>
+            <span className="text-14">{many ? <><b>{members.filter((m) => m.role !== "host").length} in</b> · {teamCount} teams · {manyNotReady(members, teamCount) || "every captain set"}</>
+              : <><b>{members.filter((m) => m.role !== "host").length} in</b> · {[0, 1].map((t) => members.filter((m) => m.team === t).length).join(" v ")} · {notReadyWhy(members) || "both captains set"}</>}</span>
             <span className="text-12 font-bold text-[var(--color-ink-2)]">{lineupOpen ? "Hide" : "Show"}</span>
           </button>
           {lineupOpen && <>
             <p className="text-14 text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>
-            <Lineup room={room} members={members} onMove={move} onRemove={remove} />
+            {many ? <LineupMany room={room} members={members} k={teamCount} /> : <Lineup room={room} members={members} onMove={move} onRemove={remove} />}
           </>}
           <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => claim("player")}>Stop hosting</button>
         </>
       ) : mine.team == null ? (
         <section className="flex flex-col gap-3 enter">
           <h1 className="display text-44 text-center">Pick a side</h1>
+          {many ? <PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} /> : <>
           <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
-          <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button>
+          <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button></>}
           <div className="h-2" />
           {!host && <button className="btn btn-block" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>}
         </section>
       ) : (
         <section className="flex flex-col gap-3 enter">
-          <div className="card text-center" style={{ borderColor: `var(--color-${side})` }}>
+          <div className="card text-center" style={{ borderColor: manyColor || `var(--color-${side})` }}>
             <div className="eyebrow">You&rsquo;re on</div>
-            <div className="display text-48 mt-1" style={{ color: `var(--color-${side})` }}>{teamName(room, mine.team)}</div>
+            <div className="display text-48 mt-1" style={{ color: manyColor || `var(--color-${side})` }}>{many ? manyNames(room, teamCount)[mine.team as number] : teamName(room, mine.team)}</div>
           </div>
           {mine.role === "captain" ? (
             <div className="card flex flex-col gap-3">
@@ -338,7 +351,8 @@ export default function PhoneRoom() {
           ) : (
             <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>
           )}
-          <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => pickTeam(mine.team === 0 ? 1 : 0)}>Switch to {teamName(room, mine.team === 0 ? 1 : 0)}</button>
+          {many ? <><div className="eyebrow text-center mt-2">Change team</div><PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} current={mine.team as number} /></>
+            : <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => pickTeam(mine.team === 0 ? 1 : 0)}>Switch to {teamName(room, mine.team === 0 ? 1 : 0)}</button>}
         </section>
       )}
 
@@ -363,7 +377,9 @@ export default function PhoneRoom() {
             <button type="button" className="text-14 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" onClick={() => setRules(true)}>How to play</button>
             <ShareButton code={code} />
           </div>
-          {canStart ? (
+          {many && mine.role === "host" ? (
+            <SetupMany busy={busy} why={manyNotReady(members, teamCount)} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
+          ) : canStart && !many ? (
             <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} tv={mine.role === "host" ? secret.lobby : undefined} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-14 text-[var(--color-ink-2)]">
