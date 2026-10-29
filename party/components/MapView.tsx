@@ -43,7 +43,7 @@ export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wi
             <div className={"map-box map-wipe w-full absolute inset-0" + (reveal ? " on" : "")} style={{ maxHeight: maxH }} aria-hidden={!reveal} dangerouslySetInnerHTML={{ __html: m.r }} />
           </div>
         ) : <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: html }} />}
-        <span className="map-enlarge">Enlarge</span>
+        {!wipe && <span className="map-enlarge">Enlarge</span>}
       </button>
       {legend && <div dangerouslySetInnerHTML={{ __html: reveal ? m.lr : m.lq }} />}
       {hint && !reveal && m.topic && <div className="text-[0.9em] text-[var(--color-ink-2)]">Hint: <b style={{ color: "var(--color-gold)" }}>{m.topic}</b></div>}
