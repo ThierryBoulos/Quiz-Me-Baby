@@ -52,7 +52,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
 
         {(pub.screen === "ask" || pub.screen === "steal") && (<>
           <AskHead pub={pub} size="tv" />
-          <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 110 ? 36 : 46, lineHeight: 1.15 }}>{pub.question}</div>
+          <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 180 ? 30 : (pub.question || "").length > 110 ? 36 : 46, lineHeight: 1.15 }}>{pub.question}</div>
           <div className="flex items-center gap-8">
             <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
             {pub.screen === "ask" && <div className="w-[560px]"><LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="tv" /></div>}

@@ -289,7 +289,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       {pub.lifeline.key === "friend" && <div className="flex flex-col items-center gap-2"><Clock deadline={pub.lifeline.deadline} left={pub.lifeline.left} size={90} timeUp={!pub.lifeline.deadline && !pub.lifeline.left} />
         {pub.lifeline.wait ? <button className="btn btn-gold btn-lg" onClick={() => fire({ type: "ui/startCall" })}>Start the call</button>
           : (pub.lifeline.deadline || pub.lifeline.left) && <button className="btn btn-sm" onClick={() => fire({ type: "ui/pauseFriend" })}>{pub.lifeline.deadline ? "Pause the call" : "Resume the call"}</button>}</div>}
-      <p className="font-bold text-18">{pub.question}</p>
+      <p className={qCls(pub.question)}>{pub.question}</p>
       <AnswerCard />
       <Main label="Back to the question" move={{ type: "ui/closeLifeline" }} />
     </div>);
@@ -308,7 +308,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="flex flex-col gap-3 flex-1">
         <AskHead pub={pub} size="phone" />
         <div className="flex items-start gap-3">
-          <p className="font-bold text-18 leading-snug flex-1">{pub.question}</p>
+          <p className={qCls(pub.question) + " leading-snug flex-1"}>{pub.question}</p>
           <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} />
         </div>
         <AnswerCard />
@@ -330,7 +330,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <Main label="Go" move={{ type: "sudden/go" }} />
       </div>) : (
       <div className="flex flex-col gap-3 flex-1">
-        <p className="font-bold text-18">{pub.question}</p>
+        <p className={qCls(pub.question)}>{pub.question}</p>
         <AnswerCard />
         <Calls pub={pub} host busy={busy} act={send} />
         {pub.buzz != null ? (<div className="flex flex-col gap-2 mt-auto">
@@ -357,7 +357,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "miniQ": return (
       <div className="flex flex-col gap-3 flex-1">
         <div className="flex items-center justify-between"><div className="eyebrow">Closest To Wins · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <p className="font-bold text-18">{pub.question}</p>
+        <p className={qCls(pub.question)}>{pub.question}</p>
         <AnswerCard />
         <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
           <div key={t} className="text-center">
@@ -397,7 +397,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "majorityQ": { const M = pub.majority; return (
       <div className="flex flex-col gap-3 flex-1">
         <div className="flex items-center justify-between"><div className="eyebrow">Majority Rules · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <p className="font-bold text-18">{pub.question}</p>
+        <p className={qCls(pub.question)}>{pub.question}</p>
         <AnswerCard />
         <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
           <div key={t} className="text-center"><div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
@@ -510,7 +510,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "sayQ": return (
       <div className="flex flex-col gap-3 flex-1">
         <div className="flex items-center justify-between"><div className="eyebrow">Don&rsquo;t Say the Same as Me · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <p className="font-bold text-18">{pub.question}</p>
+        <p className={qCls(pub.question)}>{pub.question}</p>
         <AnswerCard />
         {([0, 1] as const).map((t) => <p key={t} className="text-15"><b style={{ color: tc(t) }}>{T[t].name}:</b> {secret.typed?.[t]?.[0] ?? "thinking…"}{secret.typed?.[t] ? <> · <Verdict v={!secret.match?.[t]} say /></> : ""}</p>)}
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change prompt" move={{ type: "say/swap" }} /></div>
@@ -526,7 +526,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "battleQ": { const B = pub.battle!; return (
       <div className="flex flex-col gap-3 flex-1">
         <div className="flex items-center justify-between"><div className="display text-22" style={{ color: tc(B.cap) }}>{T[B.cap].name} · {B.i + 1}/{B.n}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <p className="font-bold text-18">{pub.question}</p>
+        <p className={qCls(pub.question)}>{pub.question}</p>
         <AnswerCard />
         <div className="flex flex-col gap-2 mt-auto">
           {secret.typed?.[B.cap] && <Typed t={B.cap} />}
@@ -542,7 +542,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "battleTie": return (
       <div className="flex flex-col gap-3 flex-1">
         <div className="eyebrow">Battle tie-breaker: first captain to buzz</div>
-        <p className="font-bold text-18">{pub.question}</p>
+        <p className={qCls(pub.question)}>{pub.question}</p>
         <AnswerCard />
         <Calls pub={pub} host busy={busy} act={send} />
         {pub.buzz != null ? (<div className="flex flex-col gap-2 mt-auto">
@@ -774,7 +774,7 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
-    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className="font-bold text-20 leading-snug text-center">{pub.question}</p>}
+    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className={qCls(pub.question, 20) + " leading-snug text-center"}>{pub.question}</p>}
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
     {/* the fact behind it, right under the answer */}
     {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
@@ -830,6 +830,9 @@ export function BattleAnswer({ last, size = 15, prev }: { last: { answer: string
 const RESULT = /^(answer|roundScore|closestReveal|flagReveal|sayReveal|mapReveal|pinReveal|airportReveal|majorityReveal|dishReveal|auctionLeg|auctionResult|\w+Summary|final)$/;
 
 /* what this question means for YOU, under the "Question for TEAM" head */
+/* a long question (over 120 characters) in a size that keeps Send on screen */
+const qCls = (q?: string | null, base = 18) => "font-bold " + ((q || "").length > 120 ? "text-16" : "text-" + base);
+
 function youLine(pub: Pub, me: Member, capName?: string) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain", ours = pub.turn === mine, them = T[pub.turn ?? 0].name;
   if (capName) capName = iso(capName);
