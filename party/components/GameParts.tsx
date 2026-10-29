@@ -289,7 +289,7 @@ export function RoundIntro({ pub, canArm, onArm, size, busy }: { pub: Pub; canAr
       {captain && <div className={"card flex flex-col gap-3 w-full " + (tv ? "" : "ri-sm !p-3")}>
         <div>
           <div className="eyebrow" style={{ fontSize: tv ? 15 : undefined }}>{tv ? "Captains: double points, yes or no?" : "Double points, yes or no?"}</div>
-          <p className="text-[var(--color-ink-3)] mt-1.5" style={{ fontSize: tv ? 16 : 12 }}>{tv ? "Armed now, before the questions. A team that arms it may use only one other lifeline this round." : "Captains arm it now. Armed, a team gets one other lifeline this round."}</p>
+          <p className="text-[var(--color-ink-3)] mt-1.5" style={{ fontSize: tv ? 16 : 12 }}>{tv ? "Armed now, before the questions: a right answer scores 2, and a steal against you pays them 2. One other lifeline at most this round." : "Arm it now. Right: 2 points. Stolen from you: they get 2. One other lifeline at most this round."}</p>
         </div>
         <div className={tv ? "grid grid-cols-2 gap-4" : "grid grid-cols-1 gap-3"}>{card(0)}{card(1)}</div>
       </div>}
