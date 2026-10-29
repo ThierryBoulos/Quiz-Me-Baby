@@ -45,7 +45,7 @@ export type Pub = {
   preload?: { flags?: string[]; maps?: string[]; pins?: string[]; world?: boolean };
   /* the end of the night: a short story of it, shown after the confetti */
   recap?: { margin: number; sudden: boolean; leadChanges: number; steals: Two<number>; minis: Two<number>; best?: { title: string; team: 0 | 1; legs: Two<number> };
-    chart?: Two<number>[]; awards?: { t: string; who: string; team?: 0 | 1 | null }[] };   // the scores through the night; the awards (29 Oct)
+    chart?: Two<number>[]; awards?: { t: string; who: string; team?: 0 | 1 | null; note?: string; spoon?: boolean }[] };   // the scores through the night; the awards (29 Oct)
   flag?: string;                  // the flag's file name (flags/<flag>.svg)
   /* Drop the Pin: the landmark's photo (pins/<photo>.jpg, a name that says nothing) and its credit, never its name.
      At the reveal: where it is, both pins, how far off */

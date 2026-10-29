@@ -120,7 +120,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
             <div className="flex gap-3 justify-center enter" style={{ position: "relative", zIndex: 60 }}>
               {pub.recap!.awards!.map((a) => (
                 <div key={a.t} className="card !p-2 !px-3 text-left min-w-[180px]" style={{ borderColor: a.team != null ? tc(a.team) : undefined }}>
-                  <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>🏆 {a.t}</div>
+                  <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
                   <div className="text-16 font-bold" style={{ color: a.team != null ? tc(a.team) : undefined }}>{a.who}</div>
                 </div>))}
             </div>)}

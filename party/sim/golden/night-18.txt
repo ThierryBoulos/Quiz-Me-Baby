@@ -75,4 +75,4 @@
 107.25 answer | 57 | 5-3 |  | Owls +1 point | 
 108.25 roundScore | 58 | 5-3 |  | Owls +1 point | 
 109.25 final | 59 | 5-3 |  | Owls +1 point | 
-recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[1,1],"minis":[2,0],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]},"chart":[[0,0],[0,0],[1,0],[1,1],[2,1],[2,2],[3,2],[4,2],[5,2],[5,3]],"awards":[{"t":"Sharpest in Majority Rules","who":"Rami, 12 of 15","team":0},{"t":"Closest To Wins","who":"Lions, 4 legs to 1","team":0}]}
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[1,1],"minis":[2,0],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]},"chart":[[0,0],[0,0],[1,0],[1,1],[2,1],[2,2],[3,2],[4,2],[5,2],[5,3]],"awards":[{"t":"Sharpest in Majority Rules","who":"Rami, 12 of 15","team":0},{"t":"Wooden spoon, Majority Rules","who":"Joe, 8 of 15","team":1,"note":"Last, but with dignity.","spoon":true},{"t":"Closest To Wins","who":"Lions, 4 legs to 1","team":0}]}

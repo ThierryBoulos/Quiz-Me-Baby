@@ -89,4 +89,4 @@
 721.25 answer | 48 | 2-8 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
 723.75 roundScore | 49 | 2-8 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
 725.75 final | 50 | 2-8 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-recap: {"margin":6,"sudden":false,"leadChanges":1,"steals":[2,3],"minis":[0,1],"chart":[[0,0],[0,0],[2,0],[0,0],[0,2],[0,3],[0,4],[1,4],[1,6],[1,7],[2,7],[2,8]],"awards":[{"t":"Sharpest in Majority Rules","who":"Maya, 13 of 15","team":1},{"t":"Best thief","who":"Owls, 3 steals","team":1}]}
+recap: {"margin":6,"sudden":false,"leadChanges":1,"steals":[2,3],"minis":[0,1],"chart":[[0,0],[0,0],[2,0],[0,0],[0,2],[0,3],[0,4],[1,4],[1,6],[1,7],[2,7],[2,8]],"awards":[{"t":"Sharpest in Majority Rules","who":"Maya, 13 of 15","team":1},{"t":"Wooden spoon, Majority Rules","who":"Lea, 6 of 15","team":1,"note":"Last, but with dignity.","spoon":true},{"t":"Best thief","who":"Owls, 3 steals","team":1}]}
