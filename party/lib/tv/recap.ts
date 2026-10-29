@@ -22,5 +22,28 @@ export function recap(s: TvState): NonNullable<Pub["recap"]> {
   if (g.battle) won(MINI_TITLES.battle, g.battle.award);
   let changes = 0, lead = 0;
   s.scoreLog.forEach(([a, b]) => { const now = Math.sign(a - b); if (now && lead && now !== lead) changes++; if (now) lead = now; });
-  return { margin: Math.abs(g.teams[0].score - g.teams[1].score), sudden: !!g.sdRounds, leadChanges: changes, steals, minis, best };
+  return { margin: Math.abs(g.teams[0].score - g.teams[1].score), sudden: !!g.sdRounds, leadChanges: changes, steals, minis, best, chart: chartOf(s.scoreLog), awards: awardsOf(s, steals) };
+}
+
+/* the scores through the night, at most 48 points (the first and the last always in) */
+function chartOf(L: Two<number>[]): Two<number>[] {
+  const pts: Two<number>[] = [[0, 0], ...L];
+  if (pts.length <= 48) return pts;
+  const out: Two<number>[] = []; const step = (pts.length - 1) / 47;
+  for (let i = 0; i < 48; i++) out.push(pts[Math.round(i * step)]);
+  return out;
+}
+/* the awards (29 Oct): the sharpest player in Majority Rules, the best aim in Drop the Pin, the best thief, the Battle's captain */
+function awardsOf(s: TvState, steals: Two<number>): NonNullable<Pub["recap"]>["awards"] {
+  const g = s.g, out: NonNullable<NonNullable<Pub["recap"]>["awards"]> = [], nm = (t: 0 | 1) => g.teams[t].name;
+  const who = (g.majorityGame?.who || {}) as Record<string, { r: number; of: number; team: 0 | 1 }>;
+  const mr = Object.entries(who).filter(([, w]) => w.of > 0).sort((a, b) => b[1].r - a[1].r);
+  if (mr.length >= 2 && mr[0][1].r > mr[1][1].r) out.push({ t: "Sharpest in Majority Rules", who: `${mr[0][0]}, ${mr[0][1].r} of ${mr[0][1].of}`, team: mr[0][1].team });
+  const pg = g.pinGame;
+  if (pg?.done && pg.km && pg.km[0] !== pg.km[1]) { const t = pg.km[0] < pg.km[1] ? 0 : 1; out.push({ t: "Best aim, Drop the Pin", who: `${nm(t)}, ${Math.round(pg.km[t]).toLocaleString("en")} km off in all`, team: t }); }
+  if (g.mini?.done && g.mini.wins[0] !== g.mini.wins[1]) { const t = g.mini.wins[0] > g.mini.wins[1] ? 0 : 1; out.push({ t: "Closest To Wins", who: `${nm(t)}, ${g.mini.wins[t]} legs to ${g.mini.wins[other(t)]}`, team: t }); }
+  if (steals[0] !== steals[1]) { const t = steals[0] > steals[1] ? 0 : 1; out.push({ t: "Best thief", who: `${nm(t)}, ${steals[t]} steal${steals[t] === 1 ? "" : "s"}`, team: t }); }
+  const b = g.battle;
+  if (b?.done && b.winner != null) out.push({ t: "Battle of the Captains", who: `${g.teams[b.winner].captain || nm(b.winner)}, ${b.score[b.winner]} of ${b.n}`, team: b.winner });
+  return out.slice(0, 4);
 }

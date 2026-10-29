@@ -114,10 +114,20 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           {/* once the recap is up, the big score board goes (the scores stay in the top bar) */}
           {!recap && <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
           {(!recap || pub.contest) && <SdCalls pub={pub} />}
+          {/* the night, drawn: both scores through the night (29 Oct), then the awards and the nutshell */}
+          {recap && pub.recap?.chart && pub.recap.chart.length > 2 && <NightChart pub={pub} />}
+          {recap && (pub.recap?.awards?.length ?? 0) > 0 && (
+            <div className="flex gap-3 justify-center enter" style={{ position: "relative", zIndex: 60 }}>
+              {pub.recap!.awards!.map((a) => (
+                <div key={a.t} className="card !p-2 !px-3 text-left min-w-[180px]" style={{ borderColor: a.team != null ? tc(a.team) : undefined }}>
+                  <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>🏆 {a.t}</div>
+                  <div className="text-16 font-bold" style={{ color: a.team != null ? tc(a.team) : undefined }}>{a.who}</div>
+                </div>))}
+            </div>)}
           {recap && recapLines(pub).length > 0 && (
-            <div className="card enter text-left max-w-[1000px]" style={{ position: "relative", zIndex: 60 }}>
-              <div className="eyebrow text-18 mb-2" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
-              <ul className="flex flex-col gap-1 text-22">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>
+            <div className="card enter text-left max-w-[1000px] !py-2" style={{ position: "relative", zIndex: 60 }}>
+              <div className="eyebrow text-13 mb-0.5" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
+              <ul className="flex flex-col text-17 leading-snug">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>
             </div>)}
           {(pub.flags?.length ?? 0) > 0 && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}
         </>)}
@@ -660,4 +670,17 @@ function ImadBubble({ imad, wait = 0 }: { imad?: Pub["imad"]; wait?: number }) {
       <img src="/imad.webp" alt="" />
       <div className="hb-text">{imad.text}</div>
     </div>);
+}
+
+/* the chart of the night: both scores, drawing themselves across (29 Oct) */
+function NightChart({ pub }: { pub: Pub }) {
+  const C = pub.recap!.chart!, W = 1000, H = 84, n = C.length, max = Math.max(1, ...C.map((p) => Math.max(p[0], p[1])));
+  const x = (i: number) => (i / (n - 1)) * W, y = (v: number) => H - 8 - (v / max) * (H - 16);
+  const line = (t: 0 | 1) => C.map((p, i) => `${x(i).toFixed(1)},${y(p[t]).toFixed(1)}`).join(" ");
+  return (
+    <svg className="night-chart enter" viewBox={`0 0 ${W} ${H}`} width={W} height={H} aria-label="The scores through the night">
+      <line x1={0} y1={H - 8} x2={W} y2={H - 8} stroke="rgba(255,255,255,.14)" strokeWidth={2} />
+      {([0, 1] as const).map((t) => <polyline key={t} points={line(t)} fill="none" stroke={tc(t)} strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-line" style={{ animationDelay: t ? ".3s" : "0s" }} />)}
+      {([0, 1] as const).map((t) => <text key={"l" + t} x={W - 4} y={y(C[n - 1][t]) + (t ? 22 : -10)} textAnchor="end" fill={tc(t)} fontSize={18} fontWeight={800}>{pub.teams[t].score}</text>)}
+    </svg>);
 }
