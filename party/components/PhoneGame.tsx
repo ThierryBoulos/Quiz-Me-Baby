@@ -215,7 +215,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="text-13 text-[var(--color-ink-2)] mt-1">Tap Right or Wrong for what they say.</div>
     </div>) : secret.answer ? (
     <div className="card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
-      <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answer, only you can see this</div>
+      <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answer. Only you see this</div>
       <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{secret.answer}</div>
       {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
       {(secret.accept?.length ?? 0) > 0 && <div className="text-13 text-[var(--color-ink-2)] mt-1"><b className="text-[var(--color-ink)]">Also accepted:</b> {secret.accept!.join(", ")}</div>}

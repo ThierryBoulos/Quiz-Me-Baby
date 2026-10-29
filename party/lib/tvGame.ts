@@ -570,6 +570,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const key = s.decided.key;
       s.decided = null;
       play({ type: t === "decided/more" ? "mini/fun" : "mini/stop", key });
+      /* stopped: the decided screen said it all, so no summary (29 Oct) */
+      if (t === "decided/stop") play({ type: PREFIX[key] + "/done" });
     }
     else if (t === "tie/more" || t === "tie/stop") {
       const more = t === "tie/more", sc = s.screen;

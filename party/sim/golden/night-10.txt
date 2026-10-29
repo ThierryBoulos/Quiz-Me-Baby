@@ -88,48 +88,50 @@
 1904.75 auctionRun | 73 | 5-8 | 1-0 | Owls +1 point | 
 1935.75 auctionLeg | 74 | 5-8 | 2-0 | Owls +1 point | 
 1957.75 decided | 75 | 5-8 | 2-0 |  | 
-1968.50 auctionResult | 76 | 7-8 | 2-0 |  | 
-1993.75 roundIntro | 77 | 7-8 |  |  | 
-1994.75 ask | 78 | 7-8 |  |  | 
-1996.50 ask | 78 | 7-8 |  | Lions used Double Dip. | 
-2011.75 answer | 79 | 8-8 |  | Lions +1 point | 
-2019.00 answer | 79 | 8-8 |  |  | 
-2040.50 ask | 80 | 8-8 |  |  | 
-2075.75 answer | 81 | 8-9 |  | Owls +1 point | 
-2154.75 roundScore | 82 | 8-9 |  | Owls +1 point | 
-2166.50 battleIntro | 83 | 8-9 | 0-0 | Owls +1 point | 
-2181.75 battleQ | 84 | 8-9 | 0-0 | Owls +1 point | 
-2182.75 battleQ | 85 | 8-9 | 0-0 | Owls +1 point | 
-2190.75 battleQ | 86 | 8-9 | 0-0 | Owls +1 point | 
-2191.75 battleQ | 87 | 8-9 | 0-0 | Owls +1 point | 
-2199.75 battleQ | 88 | 8-9 | 0-0 | Owls +1 point | 
-2208.00 battleQ | 89 | 8-9 | 1-0 | Owls +1 point | 
-2214.25 battleQ | 90 | 8-9 | 2-0 | Owls +1 point | 
-2222.25 battleQ | 91 | 8-9 | 2-0 | Owls +1 point | 
-2226.00 battleQ | 92 | 8-9 | 3-0 | Owls +1 point | 
-2234.00 battleQ | 93 | 8-9 | 3-0 | Owls +1 point | 
-2277.25 battleQ | 94 | 8-9 | 3-0 | Owls +1 point | 
-2285.25 battleQ | 95 | 8-9 | 3-0 | Owls +1 point | 
-2286.25 battleQ | 96 | 8-9 | 3-0 | Owls +1 point | 
-2294.25 battleQ | 97 | 8-9 | 3-0 | Owls +1 point | 
-2316.00 battleQ | 98 | 8-9 | 4-0 | Owls +1 point | 
-2324.00 battleQ | 99 | 8-9 | 4-0 | Owls +1 point | 
-2326.75 battleQ | 100 | 8-9 | 5-0 | Owls +1 point | 
-2334.75 battleQ | 101 | 8-9 | 5-0 | Owls +1 point | 
-2337.50 battleHandoff | 102 | 8-9 | 6-0 | Owls +1 point | 
-2353.75 battleQ | 103 | 8-9 | 6-0 | Owls +1 point | 
-2361.00 battleQ | 104 | 8-9 | 6-0 | Owls +1 point | 
-2369.00 battleQ | 105 | 8-9 | 6-0 | Owls +1 point | 
-2379.00 battleQ | 106 | 8-9 | 6-0 | Owls +1 point | 
-2381.75 battleQ | 107 | 8-9 | 6-1 | Owls +1 point | 
-2382.50 battleQ | 108 | 8-9 | 6-1 | Owls +1 point | 
-2385.25 battleQ | 109 | 8-9 | 6-2 | Owls +1 point | 
-2387.00 battleQ | 110 | 8-9 | 6-2 | Owls +1 point | 
-2388.75 battleQ | 111 | 8-9 | 6-2 | Owls +1 point | 
-2396.75 battleQ | 112 | 8-9 | 6-2 | Owls +1 point | 
-2424.00 battleQ | 113 | 8-9 | 6-3 | Owls +1 point | 
-2430.25 battleQ | 114 | 8-9 | 6-4 | Owls +1 point | 
-2438.25 battleQ | 115 | 8-9 | 6-4 | Owls +1 point | 
-2458.25 battleSummary | 116 | 12-9 | 6-5 | Owls +1 point | 
-2470.75 final | 117 | 12-9 |  | Owls +1 point | 
-recap: {"margin":3,"sudden":false,"leadChanges":2,"steals":[0,1],"minis":[3,1],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]}}
+1968.50 roundIntro | 76 | 7-8 |  |  | 
+1993.75 ask | 77 | 7-8 |  |  | 
+2003.75 ask | 77 | 7-8 |  | Lions used Call a Friend. | 
+2011.75 ask | 78 | 7-8 |  | Lions used Call a Friend. | 
+2027.00 ask | 78 | 7-8 |  | Lions used Double Dip. | 
+2063.00 answer | 79 | 8-8 |  | Lions +1 point | 
+2142.25 ask | 80 | 8-8 |  | Lions +1 point | 
+2163.75 steal | 81 | 8-8 |  | Lions +1 point | 
+2181.75 answer | 82 | 9-8 |  | Lions +1 point — steal | 
+2189.00 answer | 82 | 9-8 |  |  | 
+2211.50 roundScore | 83 | 9-8 |  |  | 
+2315.00 battleIntro | 84 | 9-8 | 0-0 |  | 
+2334.00 battleQ | 85 | 9-8 | 0-0 |  | 
+2334.75 battleQ | 86 | 9-8 | 1-0 |  | 
+2342.75 battleQ | 87 | 9-8 | 1-0 |  | 
+2363.75 battleQ | 88 | 9-8 | 2-0 |  | 
+2371.75 battleQ | 89 | 9-8 | 2-0 |  | 
+2374.50 battleQ | 90 | 9-8 | 3-0 |  | 
+2382.50 battleQ | 91 | 9-8 | 3-0 |  | 
+2385.25 battleQ | 92 | 9-8 | 4-0 |  | 
+2393.25 battleQ | 93 | 9-8 | 4-0 |  | 
+2400.50 battleQ | 94 | 9-8 | 4-0 |  | 
+2408.50 battleQ | 95 | 9-8 | 4-0 |  | 
+2418.50 battleQ | 96 | 9-8 | 4-0 |  | 
+2421.25 battleQ | 97 | 9-8 | 5-0 |  | 
+2422.25 battleQ | 98 | 9-8 | 5-0 |  | 
+2424.75 battleQ | 99 | 9-8 | 6-0 |  | 
+2426.75 battleHandoff | 100 | 9-8 | 6-0 |  | 
+2429.25 battleQ | 101 | 9-8 | 6-0 |  | 
+2437.25 battleQ | 102 | 9-8 | 6-0 |  | 
+2464.50 battleQ | 103 | 9-8 | 6-1 |  | 
+2470.75 battleQ | 104 | 9-8 | 6-2 |  | 
+2478.75 battleQ | 105 | 9-8 | 6-2 |  | 
+2498.75 battleQ | 106 | 9-8 | 6-3 |  | 
+2506.75 battleQ | 107 | 9-8 | 6-3 |  | 
+2524.75 battleQ | 108 | 9-8 | 6-3 |  | 
+2532.75 battleQ | 109 | 9-8 | 6-3 |  | 
+2583.25 battleQ | 110 | 9-8 | 6-3 |  | 
+2589.50 battleQ | 111 | 9-8 | 6-4 |  | 
+2597.50 battleQ | 112 | 9-8 | 6-4 |  | 
+2640.00 battleQ | 113 | 9-8 | 6-5 |  | 
+2643.50 battleQ | 114 | 9-8 | 6-6 |  | 
+2651.50 battleQ | 115 | 9-8 | 6-6 |  | 
+2658.00 battleQ | 116 | 9-8 | 6-6 |  | 
+2663.25 battleSummary | 117 | 9-12 | 6-7 |  | 
+2676.75 final | 118 | 9-12 |  |  | 
+recap: {"margin":3,"sudden":false,"leadChanges":3,"steals":[1,1],"minis":[2,2],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]}}

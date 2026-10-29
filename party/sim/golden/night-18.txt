@@ -16,69 +16,68 @@
 23.75 miniQ | 11 | 1-1 | 2-0 | Lions takes leg 2. | 
 24.50 closestReveal | 11 | 1-1 | 3-0 | Lions takes leg 2. | 
 25.50 decided | 12 | 1-1 | 3-0 |  | 
-26.25 miniSummary | 13 | 4-1 | 3-0 |  | 
-27.25 roundIntro | 14 | 4-1 |  |  | 
-28.25 ask | 15 | 4-1 |  |  | 
-30.00 answer | 16 | 5-1 |  | Lions +1 point | 
-30.75 ask | 17 | 5-1 |  | Lions +1 point | 
-32.75 answer | 18 | 5-2 |  | Owls +1 point | 
-33.50 answer | 18 | 5-2 |  |  | 
-36.25 answer | 18 | 5-2 |  | The host keeps the call. | 
-37.25 roundScore | 19 | 5-2 |  | The host keeps the call. | 
-38.00 roundIntro | 20 | 5-2 |  | The host keeps the call. | 
-39.00 ask | 21 | 5-2 |  | The host keeps the call. | 
-40.75 steal | 22 | 5-2 |  | The host keeps the call. | 
-42.50 answer | 23 | 5-2 |  | The host keeps the call. | 
-43.50 answer | 23 | 5-2 |  |  | 
-44.25 answer | 23 | 6-2 |  | Call changed: Lions +1 point. | 
-45.25 ask | 24 | 6-2 |  | Call changed: Lions +1 point. | 
-47.00 answer | 25 | 6-3 |  | Owls +1 point | 
-48.00 answer | 25 | 6-3 |  |  | 
-49.75 answer | 25 | 6-3 |  | The host keeps the call. | 
-50.75 roundScore | 26 | 6-3 |  | The host keeps the call. | 
-51.50 majorityIntro | 27 | 6-3 | 0-0 | The host keeps the call. | 
-52.50 majorityIntro | 27 | 6-3 | 0-0 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-53.25 majorityQ | 28 | 6-3 | 0-0 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-65.00 majorityReveal | 29 | 6-3 | 50-100 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-66.00 majorityQ | 30 | 6-3 | 50-100 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-66.75 majorityReveal | 30 | 6-3 | 75-100 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-67.75 majorityQ | 31 | 6-3 | 75-100 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-68.75 majorityReveal | 31 | 6-3 | 83-78 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-69.50 majorityQ | 32 | 6-3 | 83-78 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-70.50 majorityReveal | 32 | 6-3 | 75-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-71.25 majorityQ | 33 | 6-3 | 75-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-72.25 majorityReveal | 33 | 6-3 | 70-87 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-73.25 majorityQ | 34 | 6-3 | 70-87 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-74.00 majorityReveal | 34 | 6-3 | 67-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-75.00 majorityQ | 35 | 6-3 | 67-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-76.75 majorityReveal | 36 | 6-3 | 64-86 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-77.75 majorityQ | 37 | 6-3 | 64-86 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-78.50 majorityReveal | 37 | 6-3 | 69-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-79.50 majorityQ | 38 | 6-3 | 69-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-80.25 majorityReveal | 38 | 6-3 | 72-85 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-81.25 majorityQ | 39 | 6-3 | 72-85 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-83.00 majorityReveal | 40 | 6-3 | 70-87 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-84.00 majorityQ | 41 | 6-3 | 70-87 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-84.75 majorityReveal | 41 | 6-3 | 68-82 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-85.75 majorityQ | 42 | 6-3 | 68-82 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-91.25 majorityReveal | 43 | 6-3 | 71-78 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-92.00 majorityQ | 44 | 6-3 | 71-78 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-93.75 majorityReveal | 45 | 6-3 | 69-79 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-94.75 majorityQ | 46 | 6-3 | 69-79 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-95.75 majorityReveal | 46 | 6-3 | 71-76 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-96.50 majorityQ | 47 | 6-3 | 71-76 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-97.50 majorityReveal | 47 | 6-3 | 70-76 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-98.25 majoritySummary | 48 | 6-6 | 70-76 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-99.25 roundIntro | 49 | 6-6 |  | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-100.25 ask | 50 | 6-6 |  | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
-102.00 answer | 51 | 7-6 |  | Lions +1 point | 
-102.75 ask | 52 | 7-6 |  | Lions +1 point | 
-104.75 answer | 53 | 7-7 |  | Owls +1 point | 
-105.50 roundScore | 54 | 7-7 |  | Owls +1 point | 
+26.25 roundIntro | 13 | 4-1 |  |  | 
+27.25 ask | 14 | 4-1 |  |  | 
+29.00 answer | 15 | 5-1 |  | Lions +1 point | 
+30.00 ask | 16 | 5-1 |  | Lions +1 point | 
+31.75 answer | 17 | 5-2 |  | Owls +1 point | 
+32.75 answer | 17 | 5-2 |  |  | 
+35.25 answer | 17 | 5-2 |  | The host keeps the call. | 
+36.25 roundScore | 18 | 5-2 |  | The host keeps the call. | 
+37.25 roundIntro | 19 | 5-2 |  | The host keeps the call. | 
+38.00 ask | 20 | 5-2 |  | The host keeps the call. | 
+39.75 steal | 21 | 5-2 |  | The host keeps the call. | 
+41.75 answer | 22 | 5-2 |  | The host keeps the call. | 
+42.50 answer | 22 | 5-2 |  |  | 
+43.50 answer | 22 | 6-2 |  | Call changed: Lions +1 point. | 
+44.25 ask | 23 | 6-2 |  | Call changed: Lions +1 point. | 
+46.25 answer | 24 | 6-3 |  | Owls +1 point | 
+47.00 answer | 24 | 6-3 |  |  | 
+48.75 answer | 24 | 6-3 |  | The host keeps the call. | 
+49.75 roundScore | 25 | 6-3 |  | The host keeps the call. | 
+50.75 majorityIntro | 26 | 6-3 | 0-0 | The host keeps the call. | 
+51.50 majorityIntro | 26 | 6-3 | 0-0 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+52.50 majorityQ | 27 | 6-3 | 0-0 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+64.25 majorityReveal | 28 | 6-3 | 50-100 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+65.00 majorityQ | 29 | 6-3 | 50-100 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+66.00 majorityReveal | 29 | 6-3 | 75-100 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+66.75 majorityQ | 30 | 6-3 | 75-100 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+67.75 majorityReveal | 30 | 6-3 | 83-78 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+68.75 majorityQ | 31 | 6-3 | 83-78 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+69.50 majorityReveal | 31 | 6-3 | 75-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+70.50 majorityQ | 32 | 6-3 | 75-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+71.25 majorityReveal | 32 | 6-3 | 70-87 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+72.25 majorityQ | 33 | 6-3 | 70-87 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+73.25 majorityReveal | 33 | 6-3 | 67-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+74.00 majorityQ | 34 | 6-3 | 67-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+75.75 majorityReveal | 35 | 6-3 | 64-86 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+76.75 majorityQ | 36 | 6-3 | 64-86 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+77.75 majorityReveal | 36 | 6-3 | 69-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+78.50 majorityQ | 37 | 6-3 | 69-83 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+79.50 majorityReveal | 37 | 6-3 | 72-85 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+80.25 majorityQ | 38 | 6-3 | 72-85 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+82.25 majorityReveal | 39 | 6-3 | 70-87 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+83.00 majorityQ | 40 | 6-3 | 70-87 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+84.00 majorityReveal | 40 | 6-3 | 68-82 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+84.75 majorityQ | 41 | 6-3 | 68-82 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+90.25 majorityReveal | 42 | 6-3 | 71-78 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+91.25 majorityQ | 43 | 6-3 | 71-78 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+93.00 majorityReveal | 44 | 6-3 | 69-79 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+93.75 majorityQ | 45 | 6-3 | 69-79 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+94.75 majorityReveal | 45 | 6-3 | 71-76 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+95.75 majorityQ | 46 | 6-3 | 71-76 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+96.50 majorityReveal | 46 | 6-3 | 70-76 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+97.50 majoritySummary | 47 | 6-6 | 70-76 | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+98.25 roundIntro | 48 | 6-6 |  | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+99.25 ask | 49 | 6-6 |  | ⁨Karim⁩ is off ⁨Lions⁩'s list for this one. | 
+101.00 answer | 50 | 7-6 |  | Lions +1 point | 
+102.00 ask | 51 | 7-6 |  | Lions +1 point | 
+103.75 answer | 52 | 7-7 |  | Owls +1 point | 
+104.75 roundScore | 53 | 7-7 |  | Owls +1 point | 
+105.50 sudden | 54 | 7-7 |  | Owls +1 point | 
 106.50 sudden | 55 | 7-7 |  | Owls +1 point | 
-107.25 sudden | 56 | 7-7 |  | Owls +1 point | 
-109.25 sudden | 57 | 7-7 |  | Wrong. The other captain can have a go. | 
-111.00 sudden | 58 | 7-7 |  | Wrong. The other captain can have a go. | 
-112.75 sudden | 59 | 7-7 |  | Wrong. The other captain can have a go. | 
-114.50 final | 60 | 7-8 |  | Wrong. The other captain can have a go. | 
+108.25 sudden | 56 | 7-7 |  | Wrong. The other captain can have a go. | 
+110.00 sudden | 57 | 7-7 |  | Wrong. The other captain can have a go. | 
+111.75 sudden | 58 | 7-7 |  | Wrong. The other captain can have a go. | 
+113.75 final | 59 | 7-8 |  | Wrong. The other captain can have a go. | 
 recap: {"margin":1,"sudden":true,"leadChanges":1,"steals":[0,0],"minis":[1,1],"best":{"title":"Closest To Wins","team":0,"legs":[3,0]}}
