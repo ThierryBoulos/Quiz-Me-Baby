@@ -109,25 +109,17 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           <div className="relative grid place-items-center">
             <span className="win-ring" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
             <span className="win-ring r2" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
-            <div className="display win-slam" style={{ fontSize: recap ? 100 : 150, color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
+            <div className="display win-slam" style={{ fontSize: (pub.winner != null && T[pub.winner].name.length > 10 ? 0.74 : 1) * (recap ? 100 : 150), color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
           </div>
-          {/* once the recap is up, the big score board gives way to one line (the scores stay in the top bar too) */}
-          {recap ? (
-            <div className="display leading-none" style={{ fontSize: 72 }} aria-label={`${T[0].name} ${T[0].score}, ${T[1].name} ${T[1].score}`}>
-              <span style={{ color: "var(--color-a)" }}>{T[0].score}</span><span className="text-[var(--color-ink-3)]"> – </span><span style={{ color: "var(--color-b)" }}>{T[1].score}</span>
-            </div>
-          ) : <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
+          {/* once the recap is up, the big score board goes (the scores stay in the top bar) */}
+          {!recap && <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
           {(!recap || pub.contest) && <SdCalls pub={pub} />}
           {recap && recapLines(pub).length > 0 && (
             <div className="card enter text-left max-w-[1000px]" style={{ position: "relative", zIndex: 60 }}>
               <div className="eyebrow text-18 mb-2" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
-              <ul className="flex flex-col gap-1.5 text-26">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>
+              <ul className="flex flex-col gap-1 text-22">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>
             </div>)}
           {(pub.flags?.length ?? 0) > 0 && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}
-          <div className="flex gap-3" style={{ position: "relative", zIndex: 70 }}>
-            {onAgain && <button className="btn btn-sm" onClick={onAgain}>Play again: same teams</button>}
-            {onExit && <button className="btn btn-sm btn-ghost" onClick={onExit}>Exit: everyone back to the home screen</button>}
-          </div>
         </>)}
         {pub.contest && <ContestBanner pub={pub} />}
         {pub.agree?.kind === "score" && <AgreeBanner pub={pub} />}
@@ -158,6 +150,11 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
       {/* the strip along the bottom, kept clear of the screen's content: news (a call changed, the host is away,
           a refused tap) and who taps Next, small, on the right */}
       <div className="tv-foot" role="status" aria-live="polite">
+        {/* the end: the two buttons live here, in the strip nothing else can push off the stage */}
+        {pub.screen === "final" && (onAgain || onExit) && <div className="flex gap-3 mr-auto" style={{ pointerEvents: "auto" }}>
+          {onAgain && <button className="btn btn-sm" onClick={onAgain}>Play again: same teams</button>}
+          {onExit && <button className="btn btn-sm btn-ghost" onClick={onExit}>Exit: everyone back to the home screen</button>}
+        </div>}
         {toastOn && <span key={pub.toast!.id} className="tv-note enter">{pub.toast!.text}</span>}
         {pub.nextBy && !pub.contest && <NextHint pub={pub} />}
       </div>
