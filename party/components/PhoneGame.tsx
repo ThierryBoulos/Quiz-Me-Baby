@@ -655,9 +655,10 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
         {lastQ && <div className="eyebrow text-center col-span-4">The last question</div>}
         {C.map((c) => { const dim = { opacity: K && K.id !== c.id ? 0.6 : 1 }; return (
           <Fragment key={c.id}>
-            <span className="font-bold" style={{ color: tc(c.team), ...dim }}>{T[c.team].name}{c.note && !lastQ ? <span className="font-normal text-12 text-[var(--color-ink-3)]"> · {c.note}</span> : null}</span>
-            <span className="min-w-0 truncate text-[var(--color-ink-2)]" style={dim}>{c.text || "No answer"}
-              {c.answer && !c.ok && <span className="block truncate text-12 text-[var(--color-ink-3)]">Answer: {c.answer}</span>}</span>
+            {/* the name cut short, the answer whole: this list is the only place a captain sees what was typed (29 Oct) */}
+            <span className="font-bold max-w-[88px] truncate" style={{ color: tc(c.team), ...dim }} title={T[c.team].name}>{T[c.team].name}{c.note && !lastQ ? <span className="font-normal text-12 text-[var(--color-ink-3)]"> · {c.note}</span> : null}</span>
+            <span className="min-w-0 break-words text-[var(--color-ink-2)]" style={dim}>{c.text || "No answer"}
+              {c.answer && !c.ok && <span className="block break-words text-12 text-[var(--color-ink-3)]">Answer: {c.answer}</span>}</span>
             <span className="justify-self-start" style={dim}><Verdict v={c.ok} say={say} size={13} /></span>
             <span className="justify-self-start min-h-[36px] flex items-center" style={dim}>
               {host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
