@@ -1164,6 +1164,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else void publish();
     } else if (a.kind !== "count" && a.kind !== "suggest" && a.kind !== "draft" && s.g && pubN.current === n) void publish();
   }, [handle, publish, publishSoon]);
+      /* a player's tap (an idea for the captain, a count): the same, so a big room can't make the TV write
+         thirty times a second; a captain's or the host's goes out at once (29 Oct) */
+      else if (ctx.current.members.find((m) => m.user_id === a.user_id)?.role === "player") publishSoon();
   useInbox(code, isTv, handleAndReply);
 
   /* Who's here: every phone on screen is present on the room's realtime channel (see
