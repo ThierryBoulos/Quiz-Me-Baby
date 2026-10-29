@@ -58,13 +58,15 @@ test('answers: numbers compare as numbers', () => {
   assert.ok(!Q.isMatch('100', '1000'));
 });
 
-test('mini-game points: about three quarters of the rounds, the Battle double', () => {
+test('mini-game points: about three quarters of the rounds, the Battle double, no game over a third of a round each (29 Oct)', () => {
   assert.equal(Q.miniPointValue(8, 0), 0);
   assert.equal(Q.miniPointValue(0, 3), 2);                       // no standard rounds: 2 each
   assert.equal(Q.miniPointValue(6, 4, true), 2);                 // the default night: 2 each, the Battle 4
   assert.equal(Q.miniPointValue(4, 4, true), 1);                 // a short night: never more than the rounds
-  assert.equal(Q.miniPointValue(10, 3, true), 4);
-  assert.equal(Q.miniPointValue(12, 2, true), 6);
+  assert.equal(Q.miniPointValue(10, 3, true), 3);                // capped: round(10 / 3)
+  assert.equal(Q.miniPointValue(12, 2, true), 4);                // capped: 12 / 3 (was 6)
+  assert.equal(Q.miniPointValue(6, 1, false), 2);                // one game on the card: 2, not 9
+  assert.equal(Q.miniPointValue(6, 2, true), 2);                 // two games: 2 each, the Battle 4 (was 3 and 6)
   for(const [N, M] of [[4, 2], [6, 4], [8, 4], [10, 3], [12, 2], [6, 2]]){
     const v = Q.miniPointValue(N, M, true), total = v * (M - 1) + 2 * v;
     assert.ok(total < 2 * N, `${N} rounds, ${M} mini-games: ${total} vs ${2 * N}`);

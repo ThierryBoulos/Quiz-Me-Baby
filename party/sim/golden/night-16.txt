@@ -32,63 +32,63 @@
 867.00 pinReveal | 23 | 1-1 | 3-3 | Time's up: ⁨Owls⁩'s pin counts where it is. | 
 873.25 pinQ | 24 | 1-1 | 3-3 | Owls takes landmark 6. | 
 919.25 pinReveal | 26 | 1-1 | 3-4 | Time's up: ⁨Owls⁩'s pin counts where it is. | 
-948.00 pinSummary | 27 | 1-6 | 3-4 | Owls takes landmark 7. | 
-974.00 roundIntro | 28 | 1-6 |  | Owls takes landmark 7. | 
-978.50 ask | 29 | 1-6 |  | Owls takes landmark 7. | 
-1039.50 steal | 30 | 1-6 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1070.50 answer | 31 | 1-7 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1074.00 answer | 31 | 1-7 |  |  | 
-1089.00 answer | 31 | 1-7 |  | No answer in time: the call stands. | 
-1101.00 ask | 32 | 1-7 |  | No answer in time: the call stands. | 
-1155.00 answer | 32 | 1-8 |  | Owls +1 point | 
-1205.25 answer | 32 | 1-8 |  |  | 
-1220.25 answer | 32 | 1-8 |  | No answer in time: the call stands. | 
-1235.00 roundScore | 33 | 1-8 |  | No answer in time: the call stands. | 
-1250.25 roundIntro | 34 | 1-8 |  | No answer in time: the call stands. | 
-1263.75 ask | 35 | 1-8 |  | No answer in time: the call stands. | 
-1281.75 steal | 35 | 1-8 |  | No answer in time: the call stands. | 
-1312.75 answer | 36 | 1-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1333.25 answer | 36 | 1-8 |  |  | 
-1348.25 answer | 36 | 1-8 |  | No answer in time: the call stands. | 
-1382.75 ask | 37 | 1-8 |  | No answer in time: the call stands. | 
-1397.00 steal | 37 | 1-8 |  | No answer in time: the call stands. | 
-1410.50 answer | 37 | 3-8 |  | Lions +2 points — steal | 
-1414.25 roundScore | 38 | 3-8 |  | Lions +2 points — steal | 
-1418.75 airportIntro | 39 | 3-8 | 0-0 | Lions +2 points — steal | 
-1422.25 airportQ | 40 | 3-8 | 0-0 | Lions +2 points — steal | 
-1434.75 airportReveal | 40 | 3-8 | 0-1 | Lions +2 points — steal | 
-1456.50 airportQ | 41 | 3-8 | 0-1 | Owls takes board 1. | 
-1486.25 airportReveal | 41 | 3-8 | 0-1 | Owls takes board 1. | 
-1506.00 airportQ | 42 | 3-8 | 0-1 | Nobody got it. | 
-1530.25 airportReveal | 42 | 3-8 | 0-2 | Nobody got it. | 
-1614.75 airportReveal | 42 | 3-8 | 0-2 |  | 
-1629.75 airportReveal | 42 | 3-8 | 0-2 | No answer in time: the call stands. | 
-1670.75 airportQ | 43 | 3-8 | 0-2 | Owls takes board 3. | 
-1672.50 airportReveal | 43 | 3-8 | 0-2 | Owls takes board 3. | 
-1681.50 airportReveal | 43 | 3-8 | 0-2 |  | 
-1696.50 airportReveal | 43 | 3-8 | 0-2 | No answer in time: the call stands. | 
-1700.25 decided | 44 | 3-13 | 0-2 |  | 
-1713.00 airportQ | 45 | 3-13 | 0-2 |  | 
-1715.75 airportReveal | 45 | 3-13 | 0-3 |  | 
-1724.75 airportSummary | 46 | 3-13 | 0-3 | Owls takes board 5. | 
-1818.25 roundIntro | 47 | 3-13 |  | Owls takes board 5. | 
-1854.25 ask | 48 | 3-13 |  | Owls takes board 5. | 
-1857.00 steal | 48 | 3-13 |  | Owls takes board 5. | 
-1888.00 answer | 49 | 3-14 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1984.75 ask | 50 | 3-14 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1995.50 ask | 50 | 3-14 |  | Owls used Double Dip. | 
-2031.50 answer | 50 | 3-15 |  | Owls +1 point | 
-2109.00 roundScore | 51 | 3-15 |  | Owls +1 point | 
-2127.00 roundIntro | 52 | 3-15 |  | Owls +1 point | 
-2174.75 ask | 53 | 3-15 |  | Owls +1 point | 
-2206.25 answer | 53 | 4-15 |  | Lions +1 point | 
-2216.00 answer | 53 | 4-15 |  |  | 
-2231.00 answer | 53 | 4-15 |  | No answer in time: the call stands. | 
-2271.00 ask | 54 | 4-15 |  | No answer in time: the call stands. | 
-2277.25 steal | 54 | 4-15 |  | No answer in time: the call stands. | 
-2292.50 answer | 54 | 4-15 |  | No answer in time: the call stands. | 
-2393.25 answer | 54 | 4-15 |  |  | 
-2397.00 answer | 54 | 4-16 |  | Call changed: Owls +1 point. | 
-2467.25 roundScore | 55 | 4-16 |  | Call changed: Owls +1 point. | 
-2577.00 final | 56 | 4-16 |  | Call changed: Owls +1 point. | 
-recap: {"margin":12,"sudden":false,"leadChanges":0,"steals":[1,2],"minis":[0,2],"best":{"title":"Guess the Airport","team":1,"legs":[0,3]}}
+948.00 pinSummary | 27 | 1-3 | 3-4 | Owls takes landmark 7. | 
+974.00 roundIntro | 28 | 1-3 |  | Owls takes landmark 7. | 
+978.50 ask | 29 | 1-3 |  | Owls takes landmark 7. | 
+1039.50 steal | 30 | 1-3 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1070.50 answer | 31 | 1-4 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1074.00 answer | 31 | 1-4 |  |  | 
+1089.00 answer | 31 | 1-4 |  | No answer in time: the call stands. | 
+1101.00 ask | 32 | 1-4 |  | No answer in time: the call stands. | 
+1155.00 answer | 32 | 1-5 |  | Owls +1 point | 
+1205.25 answer | 32 | 1-5 |  |  | 
+1220.25 answer | 32 | 1-5 |  | No answer in time: the call stands. | 
+1235.00 roundScore | 33 | 1-5 |  | No answer in time: the call stands. | 
+1250.25 roundIntro | 34 | 1-5 |  | No answer in time: the call stands. | 
+1263.75 ask | 35 | 1-5 |  | No answer in time: the call stands. | 
+1281.75 steal | 35 | 1-5 |  | No answer in time: the call stands. | 
+1312.75 answer | 36 | 1-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1333.25 answer | 36 | 1-5 |  |  | 
+1348.25 answer | 36 | 1-5 |  | No answer in time: the call stands. | 
+1382.75 ask | 37 | 1-5 |  | No answer in time: the call stands. | 
+1397.00 steal | 37 | 1-5 |  | No answer in time: the call stands. | 
+1410.50 answer | 37 | 3-5 |  | Lions +2 points — steal | 
+1414.25 roundScore | 38 | 3-5 |  | Lions +2 points — steal | 
+1418.75 airportIntro | 39 | 3-5 | 0-0 | Lions +2 points — steal | 
+1422.25 airportQ | 40 | 3-5 | 0-0 | Lions +2 points — steal | 
+1434.75 airportReveal | 40 | 3-5 | 0-1 | Lions +2 points — steal | 
+1456.50 airportQ | 41 | 3-5 | 0-1 | Owls takes board 1. | 
+1486.25 airportReveal | 41 | 3-5 | 0-1 | Owls takes board 1. | 
+1506.00 airportQ | 42 | 3-5 | 0-1 | Nobody got it. | 
+1530.25 airportReveal | 42 | 3-5 | 0-2 | Nobody got it. | 
+1614.75 airportReveal | 42 | 3-5 | 0-2 |  | 
+1629.75 airportReveal | 42 | 3-5 | 0-2 | No answer in time: the call stands. | 
+1670.75 airportQ | 43 | 3-5 | 0-2 | Owls takes board 3. | 
+1672.50 airportReveal | 43 | 3-5 | 0-2 | Owls takes board 3. | 
+1681.50 airportReveal | 43 | 3-5 | 0-2 |  | 
+1696.50 airportReveal | 43 | 3-5 | 0-2 | No answer in time: the call stands. | 
+1700.25 decided | 44 | 3-7 | 0-2 |  | 
+1713.00 airportQ | 45 | 3-7 | 0-2 |  | 
+1715.75 airportReveal | 45 | 3-7 | 0-3 |  | 
+1724.75 airportSummary | 46 | 3-7 | 0-3 | Owls takes board 5. | 
+1818.25 roundIntro | 47 | 3-7 |  | Owls takes board 5. | 
+1854.25 ask | 48 | 3-7 |  | Owls takes board 5. | 
+1857.00 steal | 48 | 3-7 |  | Owls takes board 5. | 
+1888.00 answer | 49 | 3-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1984.75 ask | 50 | 3-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1995.50 ask | 50 | 3-8 |  | Owls used Double Dip. | 
+2031.50 answer | 50 | 3-9 |  | Owls +1 point | 
+2109.00 roundScore | 51 | 3-9 |  | Owls +1 point | 
+2127.00 roundIntro | 52 | 3-9 |  | Owls +1 point | 
+2174.75 ask | 53 | 3-9 |  | Owls +1 point | 
+2206.25 answer | 53 | 4-9 |  | Lions +1 point | 
+2216.00 answer | 53 | 4-9 |  |  | 
+2231.00 answer | 53 | 4-9 |  | No answer in time: the call stands. | 
+2271.00 ask | 54 | 4-9 |  | No answer in time: the call stands. | 
+2277.25 steal | 54 | 4-9 |  | No answer in time: the call stands. | 
+2292.50 answer | 54 | 4-9 |  | No answer in time: the call stands. | 
+2393.25 answer | 54 | 4-9 |  |  | 
+2397.00 answer | 54 | 4-10 |  | Call changed: Owls +1 point. | 
+2467.25 roundScore | 55 | 4-10 |  | Call changed: Owls +1 point. | 
+2577.00 final | 56 | 4-10 |  | Call changed: Owls +1 point. | 
+recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[1,2],"minis":[0,2],"best":{"title":"Guess the Airport","team":1,"legs":[0,3]}}

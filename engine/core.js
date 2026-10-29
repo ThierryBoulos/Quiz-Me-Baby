@@ -272,7 +272,11 @@
   function miniPointValue(N, M, battle){
     if(!M) return 0;
     if(!N) return 2;
-    return Math.max(1, Math.round(0.75 * 2 * N / (M + (battle ? 1 : 0))));
+    /* the games together are worth a bit less than the rounds; and no single game is worth more than
+       about a third of a round's worth of them (6 rounds: 2 a game, the Battle 4), so a night with one
+       or two games on the card can't turn on one of them (29 Oct) */
+    const share = Math.max(1, Math.round(0.75 * 2 * N / (M + (battle ? 1 : 0))));
+    return Math.min(share, Math.max(1, Math.round(N / 3)));
   }
   /* -> [{key, after}]: `after` is the 0-based round each mini-game follows.
      Equal `after` values run back to back. */

@@ -17,62 +17,62 @@
 17.25 closestReveal | 12 | 1-0 | 2-2 | Owls takes leg 3. | 
 18.25 miniQ | 13 | 1-0 | 2-2 | Lions takes leg 4. | 
 19.25 closestReveal | 13 | 1-0 | 3-2 | Lions takes leg 4. | 
-20.00 miniSummary | 14 | 3-0 | 3-2 | Lions takes leg 5. | 
-21.00 roundIntro | 15 | 3-0 |  | Lions takes leg 5. | 
-21.75 ask | 16 | 3-0 |  | Lions takes leg 5. | 
-23.75 answer | 17 | 4-0 |  | Lions +1 point | 
-24.50 ask | 18 | 4-0 |  | Lions +1 point | 
-26.25 answer | 19 | 4-1 |  | Owls +1 point | 
-27.25 roundScore | 20 | 4-1 |  | Owls +1 point | 
-28.25 pinIntro | 21 | 4-1 | 0-0 | Owls +1 point | 
-29.00 pinQ | 22 | 4-1 | 0-0 | Owls +1 point | 
-30.00 pinReveal | 22 | 4-1 | 0-1 | Owls +1 point | 
-30.75 pinQ | 23 | 4-1 | 0-1 | Owls takes landmark 1. | 
-31.75 pinReveal | 23 | 4-1 | 1-1 | Owls takes landmark 1. | 
-32.75 pinQ | 24 | 4-1 | 1-1 | Lions takes landmark 2. | 
-33.50 pinReveal | 24 | 4-1 | 2-1 | Lions takes landmark 2. | 
-34.50 pinQ | 25 | 4-1 | 2-1 | Lions takes landmark 3. | 
-35.25 pinReveal | 25 | 4-1 | 2-2 | Lions takes landmark 3. | 
-36.25 pinQ | 26 | 4-1 | 2-2 | Owls takes landmark 4. | 
-37.25 pinReveal | 26 | 4-1 | 2-3 | Owls takes landmark 4. | 
-38.00 pinQ | 27 | 4-1 | 2-3 | Owls takes landmark 5. | 
-39.00 pinReveal | 27 | 4-1 | 2-4 | Owls takes landmark 5. | 
-39.75 decided | 28 | 4-1 | 2-4 |  | 
-40.75 roundIntro | 29 | 4-3 |  |  | 
-41.75 ask | 30 | 4-3 |  |  | 
-43.50 steal | 31 | 4-3 |  |  | 
-45.25 answer | 32 | 4-4 |  | Owls +1 point — steal | 
-46.25 answer | 32 | 4-4 |  |  | 
-48.00 answer | 32 | 4-3 |  | Call changed: nobody scores this one. | 
-48.75 ask | 33 | 4-3 |  | Call changed: nobody scores this one. | 
-50.75 steal | 34 | 4-3 |  | Call changed: nobody scores this one. | 
-52.50 answer | 35 | 5-3 |  | Lions +1 point — steal | 
-53.25 roundScore | 36 | 5-3 |  | Lions +1 point — steal | 
-54.25 airportIntro | 37 | 5-3 | 0-0 | Lions +1 point — steal | 
-55.25 airportQ | 38 | 5-3 | 0-0 | Lions +1 point — steal | 
-56.00 airportReveal | 38 | 5-3 | 1-0 | Lions +1 point — steal | 
-57.00 airportQ | 39 | 5-3 | 1-0 | Lions takes board 1. | 
-57.75 airportReveal | 39 | 5-3 | 2-1 | Lions takes board 1. | 
-58.75 airportReveal | 39 | 5-3 | 2-1 |  | 
-59.75 airportReveal | 39 | 5-3 | 2-1 | The host keeps the call. | 
-60.50 airportQ | 40 | 5-3 | 2-1 | Both got it — a point each. | 
-61.50 airportReveal | 40 | 5-3 | 2-1 | Both got it — a point each. | 
-62.25 airportReveal | 40 | 5-3 | 2-1 |  | 
-65.00 airportReveal | 40 | 5-3 | 2-1 | The host keeps the call. | 
-66.00 airportQ | 41 | 5-3 | 2-1 | Nobody got it. | 
-66.75 airportReveal | 41 | 5-3 | 2-1 | Nobody got it. | 
-67.75 airportQ | 42 | 5-3 | 2-1 | Nobody got it. | 
-68.75 airportReveal | 42 | 5-3 | 2-2 | Nobody got it. | 
-69.50 airportTie | 43 | 5-3 | 2-2 |  | 
-70.50 airportSummary | 44 | 6-4 | 2-2 |  | 
-71.25 roundIntro | 45 | 6-4 |  |  | 
-72.25 ask | 46 | 6-4 |  |  | 
-74.00 answer | 47 | 7-4 |  | Lions +1 point | 
-75.00 ask | 48 | 7-4 |  | Lions +1 point | 
-76.75 answer | 49 | 7-5 |  | Owls +1 point | 
-77.75 answer | 49 | 7-5 |  |  | 
-79.50 steal | 50 | 7-4 |  | Lions steal a new question. | 
-81.25 answer | 51 | 8-4 |  | Lions +1 point — steal | 
-82.25 roundScore | 52 | 8-4 |  | Lions +1 point — steal | 
-83.00 final | 53 | 8-4 |  | Lions +1 point — steal | 
+20.00 miniSummary | 14 | 2-0 | 3-2 | Lions takes leg 5. | 
+21.00 roundIntro | 15 | 2-0 |  | Lions takes leg 5. | 
+21.75 ask | 16 | 2-0 |  | Lions takes leg 5. | 
+23.75 answer | 17 | 3-0 |  | Lions +1 point | 
+24.50 ask | 18 | 3-0 |  | Lions +1 point | 
+26.25 answer | 19 | 3-1 |  | Owls +1 point | 
+27.25 roundScore | 20 | 3-1 |  | Owls +1 point | 
+28.25 pinIntro | 21 | 3-1 | 0-0 | Owls +1 point | 
+29.00 pinQ | 22 | 3-1 | 0-0 | Owls +1 point | 
+30.00 pinReveal | 22 | 3-1 | 0-1 | Owls +1 point | 
+30.75 pinQ | 23 | 3-1 | 0-1 | Owls takes landmark 1. | 
+31.75 pinReveal | 23 | 3-1 | 1-1 | Owls takes landmark 1. | 
+32.75 pinQ | 24 | 3-1 | 1-1 | Lions takes landmark 2. | 
+33.50 pinReveal | 24 | 3-1 | 2-1 | Lions takes landmark 2. | 
+34.50 pinQ | 25 | 3-1 | 2-1 | Lions takes landmark 3. | 
+35.25 pinReveal | 25 | 3-1 | 2-2 | Lions takes landmark 3. | 
+36.25 pinQ | 26 | 3-1 | 2-2 | Owls takes landmark 4. | 
+37.25 pinReveal | 26 | 3-1 | 2-3 | Owls takes landmark 4. | 
+38.00 pinQ | 27 | 3-1 | 2-3 | Owls takes landmark 5. | 
+39.00 pinReveal | 27 | 3-1 | 2-4 | Owls takes landmark 5. | 
+39.75 decided | 28 | 3-1 | 2-4 |  | 
+40.75 roundIntro | 29 | 3-2 |  |  | 
+41.75 ask | 30 | 3-2 |  |  | 
+43.50 steal | 31 | 3-2 |  |  | 
+45.25 answer | 32 | 3-3 |  | Owls +1 point — steal | 
+46.25 answer | 32 | 3-3 |  |  | 
+48.00 answer | 32 | 3-2 |  | Call changed: nobody scores this one. | 
+48.75 ask | 33 | 3-2 |  | Call changed: nobody scores this one. | 
+50.75 steal | 34 | 3-2 |  | Call changed: nobody scores this one. | 
+52.50 answer | 35 | 4-2 |  | Lions +1 point — steal | 
+53.25 roundScore | 36 | 4-2 |  | Lions +1 point — steal | 
+54.25 airportIntro | 37 | 4-2 | 0-0 | Lions +1 point — steal | 
+55.25 airportQ | 38 | 4-2 | 0-0 | Lions +1 point — steal | 
+56.00 airportReveal | 38 | 4-2 | 1-0 | Lions +1 point — steal | 
+57.00 airportQ | 39 | 4-2 | 1-0 | Lions takes board 1. | 
+57.75 airportReveal | 39 | 4-2 | 2-1 | Lions takes board 1. | 
+58.75 airportReveal | 39 | 4-2 | 2-1 |  | 
+59.75 airportReveal | 39 | 4-2 | 2-1 | The host keeps the call. | 
+60.50 airportQ | 40 | 4-2 | 2-1 | Both got it — a point each. | 
+61.50 airportReveal | 40 | 4-2 | 2-1 | Both got it — a point each. | 
+62.25 airportReveal | 40 | 4-2 | 2-1 |  | 
+65.00 airportReveal | 40 | 4-2 | 2-1 | The host keeps the call. | 
+66.00 airportQ | 41 | 4-2 | 2-1 | Nobody got it. | 
+66.75 airportReveal | 41 | 4-2 | 2-1 | Nobody got it. | 
+67.75 airportQ | 42 | 4-2 | 2-1 | Nobody got it. | 
+68.75 airportReveal | 42 | 4-2 | 2-2 | Nobody got it. | 
+69.50 airportTie | 43 | 4-2 | 2-2 |  | 
+70.50 airportSummary | 44 | 5-3 | 2-2 |  | 
+71.25 roundIntro | 45 | 5-3 |  |  | 
+72.25 ask | 46 | 5-3 |  |  | 
+74.00 answer | 47 | 6-3 |  | Lions +1 point | 
+75.00 ask | 48 | 6-3 |  | Lions +1 point | 
+76.75 answer | 49 | 6-4 |  | Owls +1 point | 
+77.75 answer | 49 | 6-4 |  |  | 
+79.50 steal | 50 | 6-3 |  | Lions steal a new question. | 
+81.25 answer | 51 | 7-3 |  | Lions +1 point — steal | 
+82.25 roundScore | 52 | 7-3 |  | Lions +1 point — steal | 
+83.00 final | 53 | 7-3 |  | Lions +1 point — steal | 
 recap: {"margin":4,"sudden":false,"leadChanges":0,"steals":[2,0],"minis":[1,1],"best":{"title":"Drop the Pin","team":1,"legs":[2,4]}}

@@ -59,48 +59,48 @@
 217.00 majorityReveal | 38 | 0-5 | 52-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 217.25 majorityQ | 39 | 0-5 | 52-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 218.00 majorityReveal | 39 | 0-5 | 55-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-219.00 majoritySummary | 40 | 3-5 | 55-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-219.75 roundIntro | 41 | 3-5 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-220.75 ask | 42 | 3-5 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-221.75 ask | 42 | 3-5 |  | Lions used Double Dip. | 
-222.50 answer | 42 | 4-5 |  | Lions +1 point | 
-223.50 answer | 42 | 4-5 |  |  | 
-224.25 steal | 43 | 3-5 |  | Owls steal a new question. | 
-225.25 answer | 43 | 3-5 |  | Owls steal a new question. | 
-226.25 ask | 44 | 3-5 |  | Owls steal a new question. | 
-227.00 steal | 44 | 3-5 |  | Owls steal a new question. | 
-228.00 answer | 44 | 3-5 |  | Owls steal a new question. | 
-228.75 answer | 44 | 3-5 |  |  | 
-243.75 answer | 44 | 3-5 |  | No answer in time: the call stands. | 
-244.25 roundScore | 45 | 3-5 |  | No answer in time: the call stands. | 
-245.00 roundIntro | 46 | 3-5 |  | No answer in time: the call stands. | 
-246.00 ask | 47 | 3-5 |  | No answer in time: the call stands. | 
-246.75 answer | 47 | 4-5 |  | Lions +1 point | 
-247.75 answer | 47 | 4-5 |  |  | 
-262.75 answer | 47 | 4-5 |  | No answer in time: the call stands. | 
-263.00 ask | 48 | 4-5 |  | No answer in time: the call stands. | 
-264.00 steal | 48 | 4-5 |  | No answer in time: the call stands. | 
-264.75 answer | 48 | 4-5 |  | No answer in time: the call stands. | 
-265.75 roundScore | 49 | 4-5 |  | No answer in time: the call stands. | 
-266.75 roundIntro | 50 | 4-5 |  | No answer in time: the call stands. | 
-267.50 ask | 51 | 4-5 |  | No answer in time: the call stands. | 
-268.50 steal | 51 | 4-5 |  | No answer in time: the call stands. | 
-269.25 answer | 51 | 4-5 |  | No answer in time: the call stands. | 
-270.25 ask | 52 | 4-5 |  | No answer in time: the call stands. | 
-271.25 steal | 52 | 4-5 |  | No answer in time: the call stands. | 
-272.00 answer | 52 | 4-5 |  | No answer in time: the call stands. | 
-273.00 roundScore | 53 | 4-5 |  | No answer in time: the call stands. | 
-273.75 battleIntro | 54 | 4-5 | 0-0 | No answer in time: the call stands. | 
-274.75 battleQ | 55 | 4-5 | 0-0 | No answer in time: the call stands. | 
-277.50 battleQ | 55 | 4-5 | 1-0 | No answer in time: the call stands. | 
-278.25 battleQ | 55 | 4-5 | 2-0 | No answer in time: the call stands. | 
-282.75 battleQ | 55 | 4-5 | 3-0 | No answer in time: the call stands. | 
-283.75 battleHandoff | 55 | 4-5 | 3-0 | No answer in time: the call stands. | 
-284.75 battleQ | 56 | 4-5 | 3-0 | No answer in time: the call stands. | 
-285.50 battleQ | 56 | 4-5 | 3-1 | No answer in time: the call stands. | 
-286.50 battleQ | 56 | 4-5 | 3-2 | No answer in time: the call stands. | 
-291.00 battleQ | 56 | 4-5 | 3-3 | No answer in time: the call stands. | 
-293.75 battleReview | 56 | 4-5 | 3-4 | No answer in time: the call stands. | 
-294.50 battleSummary | 57 | 4-11 | 3-4 | No answer in time: the call stands. | 
-295.50 final | 58 | 4-11 |  | No answer in time: the call stands. | 
-recap: {"margin":7,"sudden":false,"leadChanges":0,"steals":[0,2],"minis":[1,1]}
+219.00 majoritySummary | 40 | 2-5 | 55-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+219.75 roundIntro | 41 | 2-5 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+220.75 ask | 42 | 2-5 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+221.75 ask | 42 | 2-5 |  | Lions used Double Dip. | 
+222.50 answer | 42 | 3-5 |  | Lions +1 point | 
+223.50 answer | 42 | 3-5 |  |  | 
+224.25 steal | 43 | 2-5 |  | Owls steal a new question. | 
+225.25 answer | 43 | 2-5 |  | Owls steal a new question. | 
+226.25 ask | 44 | 2-5 |  | Owls steal a new question. | 
+227.00 steal | 44 | 2-5 |  | Owls steal a new question. | 
+228.00 answer | 44 | 2-5 |  | Owls steal a new question. | 
+228.75 answer | 44 | 2-5 |  |  | 
+243.75 answer | 44 | 2-5 |  | No answer in time: the call stands. | 
+244.25 roundScore | 45 | 2-5 |  | No answer in time: the call stands. | 
+245.00 roundIntro | 46 | 2-5 |  | No answer in time: the call stands. | 
+246.00 ask | 47 | 2-5 |  | No answer in time: the call stands. | 
+246.75 answer | 47 | 3-5 |  | Lions +1 point | 
+247.75 answer | 47 | 3-5 |  |  | 
+262.75 answer | 47 | 3-5 |  | No answer in time: the call stands. | 
+263.00 ask | 48 | 3-5 |  | No answer in time: the call stands. | 
+264.00 steal | 48 | 3-5 |  | No answer in time: the call stands. | 
+264.75 answer | 48 | 3-5 |  | No answer in time: the call stands. | 
+265.75 roundScore | 49 | 3-5 |  | No answer in time: the call stands. | 
+266.75 roundIntro | 50 | 3-5 |  | No answer in time: the call stands. | 
+267.50 ask | 51 | 3-5 |  | No answer in time: the call stands. | 
+268.50 steal | 51 | 3-5 |  | No answer in time: the call stands. | 
+269.25 answer | 51 | 3-5 |  | No answer in time: the call stands. | 
+270.25 ask | 52 | 3-5 |  | No answer in time: the call stands. | 
+271.25 steal | 52 | 3-5 |  | No answer in time: the call stands. | 
+272.00 answer | 52 | 3-5 |  | No answer in time: the call stands. | 
+273.00 roundScore | 53 | 3-5 |  | No answer in time: the call stands. | 
+273.75 battleIntro | 54 | 3-5 | 0-0 | No answer in time: the call stands. | 
+274.75 battleQ | 55 | 3-5 | 0-0 | No answer in time: the call stands. | 
+277.50 battleQ | 55 | 3-5 | 1-0 | No answer in time: the call stands. | 
+278.25 battleQ | 55 | 3-5 | 2-0 | No answer in time: the call stands. | 
+282.75 battleQ | 55 | 3-5 | 3-0 | No answer in time: the call stands. | 
+283.75 battleHandoff | 55 | 3-5 | 3-0 | No answer in time: the call stands. | 
+284.75 battleQ | 56 | 3-5 | 3-0 | No answer in time: the call stands. | 
+285.50 battleQ | 56 | 3-5 | 3-1 | No answer in time: the call stands. | 
+286.50 battleQ | 56 | 3-5 | 3-2 | No answer in time: the call stands. | 
+291.00 battleQ | 56 | 3-5 | 3-3 | No answer in time: the call stands. | 
+293.75 battleReview | 56 | 3-5 | 3-4 | No answer in time: the call stands. | 
+294.50 battleSummary | 57 | 3-9 | 3-4 | No answer in time: the call stands. | 
+295.50 final | 58 | 3-9 |  | No answer in time: the call stands. | 
+recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[0,2],"minis":[1,1]}
