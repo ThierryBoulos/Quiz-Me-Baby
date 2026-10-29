@@ -301,7 +301,7 @@ Checked against every screen and every button handler in v3.13 (12 Oct 2026). No
 | Double Dip (two answers) | Captain gets two answer boxes |
 | Change this question ("swapQ") | Host. No host: the answering captain, once per question, before sending |
 | Timer pause / +10s / "Time is up" | Host. No host: either captain can pause; +10s and "time up" are host-only |
-| Steal (other team, own timer) | Other captain's phone opens when the first answer is wrong. No host: **no steal**, same as v3 |
+| Steal (other team, own timer) | Other captain's phone opens when the first answer is wrong. No host: the app checks the first answer at once and the steal opens just the same (the captains can contest its calls) |
 | Right / wrong judging, peek at answer | Host (answer always visible). No host: app check + the other captain's overrule |
 | Alternate who goes first | Engine, unchanged |
 | Imad's bubbles, title slam, count-up, lead banner, drumroll, shake, confetti | **TV only** |
