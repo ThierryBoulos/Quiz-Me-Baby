@@ -1289,7 +1289,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.41', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.42', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2867,11 +2867,13 @@ const SEED_MAPS = [
   { key:'nomcd', view:'world',
     topic:'Food & Drink',
     level:'hard',
-    title:'Every country that has never had a McDonald’s',
-    answer:'Never had a McDonald’s, ever',
-    notes:'About 100 countries have one today. Most of Africa and Central Asia never did, nor Iran, North Korea, Mongolia or Nepal. Cuba’s only one is on the US Navy base at Guantánamo. Not shaded, because they had one and lost it: Bolivia (2002), Iceland (2009), Russia, Belarus and Bosnia (2022), Kazakhstan (2023), Sri Lanka (2024), Jamaica, Barbados, Montenegro, North Macedonia and San Marino. Source: Wikipedia, List of countries with McDonald’s restaurants (October 2026).',
-    cls:[{ c:'#2B3152', codes:'USA CAN PRI VIR CRI AUS GUM JPN NLD PAN DEU FRA SLV SWE GTM CUW GBR HKG BHS NZL CHE IRL AUT BEL BRA SGP ESP DNK PHL MYS NOR TWN AND FIN THA ITA ABW LUX VEN MEX TUR ARG MAC SRB KOR HUN CHN CHL IDN PRT GRC URY CZE POL MCO BRN MAR MNP ISR SVN SAU KWT NCL OMN EGY BGR BHR LVA ARE EST ROU MLT COL SVK ZAF QAT HND SXM HRV WSM FJI LIE LTU IND PER JOR PRY DOM PYF TTO UKR CYP JEY ECU IMN SUR MDA NIC LBN PAK GEO GIB AZE ASM MUS VNM MAF ESH NCYP XKX SOML SIAC ATF HMD SGS FLK ALA RUS BLR KAZ BOL ISL MNE MKD BIH LKA JAM BRB SMR BMU' }],     // have one now, or had one: plain land (and a few places the list doesn't settle)
-    rest:{ c:MC.gold, label:'Never had one' } },
+    title:'Where McDonald’s is today, and where it left',
+    answer:'McDonald’s — gold has one today, red had one and lost it',
+    notes:'About 100 countries have one today. Red had one and lost it: Bermuda (1996), Bolivia (2002), Iceland (2009), Russia, Belarus and Bosnia (2022), Kazakhstan (2023), Sri Lanka (2024), and Jamaica, Barbados, Montenegro, North Macedonia and San Marino. Most of Africa and Central Asia never had one, nor Iran, North Korea, Mongolia or Nepal. Cuba’s only one is on the US Navy base at Guantánamo. Source: Wikipedia, List of countries with McDonald’s restaurants (October 2026).',
+    cls:[
+      { c:MC.gold,  label:'Has one today', codes:'USA CAN PRI VIR CRI AUS GUM JPN NLD PAN DEU FRA SLV SWE GTM CUW GBR HKG BHS NZL CHE IRL AUT BEL BRA SGP ESP DNK PHL MYS NOR TWN AND FIN THA ITA ABW LUX VEN MEX TUR ARG MAC SRB KOR HUN CHN CHL IDN PRT GRC URY CZE POL MCO BRN MAR MNP ISR SVN SAU KWT NCL OMN EGY BGR BHR LVA ARE EST ROU MLT COL SVK ZAF QAT HND SXM HRV WSM FJI LIE LTU IND PER JOR PRY DOM PYF TTO UKR CYP JEY ECU IMN SUR MDA NIC LBN PAK GEO GIB AZE ASM MUS VNM MAF' },
+      { c:MC.coral, label:'Had one, then it left', codes:'RUS BLR KAZ BOL ISL MNE MKD BIH LKA JAM BRB SMR BMU' }
+    ] },
 
   { key:'monarch', view:'world',
     topic:'Politics',
@@ -3141,7 +3143,106 @@ const SEED_MAPS = [
     answer:'Countries that have played in a World Cup final — gold won at least one',
     notes:'Thirteen nations, 23 finals, 1930 to 2026. Won at least one (gold): Germany (8 finals, six as West Germany), Brazil (7), Argentina (7), Italy (6), France (4), Uruguay (2), Spain (2) and England (1, shaded on the whole UK). Reached a final but never won (purple): the Netherlands (3), Hungary (2), Czechoslovakia (2, in 1934 and 1962, shaded on Czechia and Slovakia), Sweden (1) and Croatia (1). 1950 had no final as such: the Uruguay v Brazil decider of the final group counts. Source: Wikipedia, List of FIFA World Cup finals.',
     cls:[{ c:MC.gold, label:'Won a final', codes:'DEU BRA ARG ITA FRA URY ESP GBR' },
-      { c:MC.vio, label:'Lost every final they played', codes:'NLD HUN CZE SVK SWE HRV' }] }
+      { c:MC.vio, label:'Lost every final they played', codes:'NLD HUN CZE SVK SWE HRV' }] },
+
+  /* ---- 29 Oct: the owner's ideas ---- */
+  { key:'ussr', view:'world',
+    topic:'History',
+    level:'easy',
+    title:'The 15 republics of the Soviet Union',
+    answer:'The Soviet Union (USSR) — its 15 republics, 1922–1991',
+    notes:'Formed in 1922, gone on 26 December 1991. Russia, Ukraine, Belarus, Moldova, the three Baltic states (Estonia, Latvia, Lithuania, the first to leave), Georgia, Armenia, Azerbaijan, and the five in Central Asia: Kazakhstan, Turkmenistan, Uzbekistan, Kyrgyzstan and Tajikistan. Source: Wikipedia, Republics of the Soviet Union.',
+    cls:[{ c:MC.coral, label:'Soviet republics', codes:'RUS UKR BLR MDA EST LVA LTU GEO ARM AZE KAZ TKM UZB KGZ TJK' }] },
+
+  { key:'ukindep', view:'world',
+    topic:'History',
+    level:'medium',
+    title:'Every country that won its independence from the UK',
+    answer:'Independence from Britain — every country that was once ruled by the UK',
+    notes:'About 65. The first was the USA, in 1776; the last, Brunei, in 1984. Counted: colonies, protectorates and mandates (Iraq, Jordan, Israel and Palestine), and the dominions Canada, Australia, New Zealand, South Africa and Ireland. Bangladesh is not shaded: it broke away from Pakistan, in 1971. Nor is South Sudan, which left Sudan in 2011. Source: Wikipedia, List of countries that have gained independence from the United Kingdom.',
+    cls:[{ c:MC.coral, label:'Independent from the UK', codes:'USA CAN AUS NZL ZAF IRL AFG ATG BHS BHR BRB BLZ BWA BRN CYP DMA EGY SWZ FJI GMB GHA GRD GUY IND IRQ ISR JAM JOR KEN KIR KWT LSO LBY MWI MYS SGP MDV MLT MUS MMR NRU NGA OMN PAK PSE QAT LCA KNA VCT SYC SLE SLB SOML YEM LKA SDN TZA TON TTO TUV UGA ARE VUT ZMB ZWE' }] },
+
+  { key:'communist', view:'world',
+    topic:'Politics',
+    level:'medium',
+    title:'Every country that is, or was, a communist state',
+    answer:'Communism — dark red still communist today, light red once were',
+    notes:'Five today: China, Vietnam, Laos, Cuba and North Korea. Once communist: the Soviet Union, the Eastern Bloc (Poland, Czechoslovakia, Hungary, Romania, Bulgaria, Albania), Yugoslavia, Mongolia, and Afghanistan, Cambodia, Ethiopia, Somalia, Angola, Mozambique, Benin, the Congo and Madagascar. And East Germany (1949–1990) and South Yemen (1967–1990): only their part of today’s Germany and Yemen is shaded. Source: Wikipedia, List of communist states.',
+    cls:[
+      { c:'#E0283F', label:'Communist today', codes:'CHN VNM LAO CUB PRK' },
+      { c:'#FF8C8C', label:'Communist once', codes:'RUS UKR BLR MDA EST LVA LTU GEO ARM AZE KAZ TKM UZB KGZ TJK POL CZE SVK HUN ROU BGR ALB SVN HRV BIH SRB MNE MKD XKX MNG AFG KHM ETH SOM SOML AGO MOZ BEN COG MDG' }
+    ],
+    /* the half countries, drawn as the Vikings are and clipped to the coast; no legend line of their own (the colour is "Communist once") */
+    areas:[{ c:'#FF8C8C', polys:[
+      [[54.0,10.95],[53.6,10.95],[53.37,10.6],[53.15,11.1],[53.04,11.57],[52.9,11.05],[52.6,10.95],[52.22,11.03],[51.95,10.6],
+       [51.8,10.62],[51.6,10.5],[51.4,10.1],[51.2,10.0],[51.0,10.0],[50.8,10.05],[50.6,10.05],[50.4,10.6],[50.3,11.0],[50.25,11.6],
+       [50.3,11.9],[50.32,12.1],[50.2,13.5],[50.6,15.2],[51.5,15.3],[53.0,15.0],[54.5,14.5],[54.8,13.5],[54.5,12.4],[54.15,11.4]],   // East Germany: west of it, the inner German border
+      [[12.95,43.45],[13.3,44.1],[13.7,44.7],[14.1,45.3],[14.7,45.9],[15.5,46.6],[17.0,47.4],[18.2,49.5],[18.8,51.2],[18.9,51.95],
+       [16.65,52.2],[15.0,53.0],[13.0,55.5],[11.8,55.0],[11.5,52.0],[12.4,45.0],[12.5,43.5]]                                       // South Yemen, with Socotra
+    ] }] },
+
+  { key:'spanish', view:'world',
+    topic:'Language',
+    level:'easy',
+    title:'Every country where Spanish is an official language',
+    answer:'Countries where Spanish is an official language',
+    notes:'20 countries, and Puerto Rico: Spain, Mexico, all of Central America but Belize, Cuba and the Dominican Republic, South America but Brazil, Guyana, Suriname and French Guiana, and Equatorial Guinea, the only one in Africa. Mexico has the most speakers. The USA has no official language, yet over 40 million people speak Spanish at home there. Source: Wikipedia, Hispanophone.',
+    cls:[{ c:MC.gold, label:'Spanish is official', codes:'ESP MEX GTM HND SLV NIC CRI PAN CUB DOM PRI COL VEN ECU PER BOL CHL ARG URY PRY GNQ' }] },
+
+  { key:'islands', view:'world',
+    topic:'Geography',
+    level:'medium',
+    title:'Every island country',
+    answer:'Island countries — every country made only of islands',
+    notes:'46 countries, about a quarter of the world’s. Indonesia has the most islands, over 17,000. Some share theirs: the UK and Ireland, Haiti and the Dominican Republic, Indonesia with Papua New Guinea and Timor-Leste, and Brunei, on Borneo. Australia counts as a continent. Source: Wikipedia, List of island countries.',
+    cls:[{ c:MC.sky, label:'Island countries', codes:'ATG BHS BHR BRB BRN CPV COM CUB CYP DMA DOM TLS FJI GRD HTI ISL IDN IRL JAM JPN KIR MDG MDV MLT MHL MUS FSM NRU NZL PLW PNG PHL KNA LCA VCT WSM STP SYC SGP SLB LKA TON TTO TUV GBR VUT' }] },
+
+  /* the empires: drawn out to sea and clipped to the coast (as the Vikings), so the outline only has to be right on land */
+  { key:'rome', view:'world',
+    topic:'History',
+    level:'medium',
+    title:'The Roman Empire at its height, in AD 117',
+    answer:'The Roman Empire at its biggest, under Trajan',
+    notes:'About 5 million km², under the emperor Trajan, in AD 117: from Britain to the Persian Gulf, around the whole Mediterranean, which the Romans called Mare Nostrum, our sea. Trajan had just taken Dacia (Romania) and Mesopotamia; his successor Hadrian gave Mesopotamia back the same year, and started his wall in Britain in 122. Source: Wikipedia, Roman Empire.',
+    areas:[{ c:MC.coral, label:'The Roman Empire, AD 117', polys:[[
+      [44,-10.5],[48.5,-6],[50.2,-6.5],[52,-7],[54.6,-5.8],[55.1,-3.4],[55.1,-1.4],[55,1],[52.3,4.2],[51.8,6.0],[50.6,7.2],[50.3,8.6],
+      [49.2,9.6],[48.9,10.5],[49.0,12.0],[48.5,13.5],[48.2,16.5],[47.8,18.8],[46.0,19.0],[44.9,20.3],[46.2,20.8],[47.2,22.0],
+      [47.6,23.5],[47.2,25.0],[45.7,25.3],[44.6,25.4],[44.1,27.0],[45.4,28.2],[45.2,29.8],[44.5,31],[43,31],[42.4,35],[41.6,41.6],
+      [41.2,44.0],[40.3,46.5],[38.6,46.6],[37.2,45.4],[35.5,46.2],[33.5,46.2],[31.0,47.8],[29.8,48.5],[29.6,47.6],[31.0,45.0],
+      [33.0,41.0],[32.0,38.6],[30.0,37.8],[27.0,38.2],[26.5,37.2],[27.5,34.8],[24,35.5],[23.8,33.4],[24,32.4],[27,30.6],[29.4,30.3],
+      [30.6,29.0],[31.0,27.0],[31.6,25.0],[32.2,22.5],[30.6,19.5],[31.0,17.5],[32.0,13.5],[31.4,12.0],[33.0,10.0],[33.6,8.0],
+      [34.6,5.5],[35.0,2.0],[35.0,-1.5],[34.1,-4.5],[33.4,-7.0],[33.4,-10]
+    ]] }] },
+
+  { key:'mongols', view:'world',
+    topic:'History',
+    level:'medium',
+    title:'The Mongol Empire at its height, in 1279',
+    answer:'The Mongol Empire at its biggest — Genghis Khan’s heirs',
+    notes:'About 24 million km², the biggest empire of joined-up land there has ever been, built from 1206 by Genghis Khan and his sons and grandsons. In 1279 Kublai Khan’s armies finished off Song China. By then it was four khanates under one Great Khan in name: the Yuan in China, the Golden Horde, the Chagatai Khanate and the Ilkhanate in Persia. Korea and the Russian princes paid tribute. Source: Wikipedia, Mongol Empire.',
+    areas:[{ c:MC.sky, label:'The Mongol Empire, 1279', polys:[[
+      [45.0,29.5],[48.5,26.8],[51.5,27.2],[55.0,30.0],[58.5,30.5],[61.0,36.0],[62.5,45.0],[60.0,55.0],[58.0,65.0],[56.0,75.0],
+      [55.0,85.0],[54.0,95.0],[53.0,105.0],[54.0,115.0],[53.0,123.0],[50.0,128.5],[46.5,134.5],[43.0,131.5],[41.0,130.5],[38.0,130.0],
+      [35.5,130.0],[33.8,127.0],[35.0,125.0],[38.0,124.0],[37.2,122.8],[31.0,123.0],[28.0,122.0],[25.0,120.0],[22.3,114.5],[21.3,111.0],
+      [21.4,108.0],[22.6,106.0],[22.8,103.5],[21.6,101.5],[24.0,98.5],[28.0,97.5],[28.2,92.0],[28.2,86.0],[30.2,81.0],[32.5,79.0],
+      [35.5,77.0],[36.6,73.0],[35.0,71.5],[32.0,69.5],[30.0,66.5],[27.5,63.0],[25.0,61.5],[25.0,58.0],[26.6,56.4],[27.3,52.0],
+      [29.5,49.6],[30.3,47.9],[31.5,46.0],[33.2,43.8],[34.6,41.0],[36.6,38.5],[36.8,36.4],[36.5,32.0],[38.6,29.6],[41.4,31.0],
+      [42.0,33.0],[43.2,35.0],[45.4,33.4]
+    ]] }] },
+
+  { key:'macedon', view:'world',
+    topic:'History',
+    level:'hard',
+    title:'Alexander the Great’s empire, in 323 BC',
+    answer:'Alexander the Great’s empire — Macedon, from Greece to India',
+    notes:'About 5.2 million km², won in eleven years of fighting, from 334 BC, when Alexander was 22, to his death in Babylon in 323 BC, at 32. Greece and Macedon, the whole Persian Empire with Egypt, and on to the Indus, where his army refused to go further. He named about twenty cities Alexandria. Source: Wikipedia, Wars of Alexander the Great.',
+    areas:[{ c:MC.gold, label:'Alexander’s empire, 323 BC', polys:[[
+      [42.3,22.4],[42.7,25.0],[43.0,28.2],[42.5,31.0],[42.0,36.0],[41.5,41.5],[40.8,44.5],[40.0,48.0],[41.0,50.0],[38.0,54.0],
+      [38.5,57.0],[40.5,62.0],[41.6,66.0],[40.6,69.4],[39.5,71.5],[37.2,71.6],[35.5,72.5],[33.0,75.0],[31.0,75.0],[28.0,71.0],
+      [25.0,69.0],[23.6,67.6],[25.0,62.0],[25.3,58.0],[26.6,56.3],[27.4,52.0],[29.7,48.9],[29.5,47.5],[30.5,45.5],[31.5,44.5],
+      [33.5,41.0],[32.0,38.0],[30.0,36.6],[29.4,34.95],[28.0,34.0],[27.0,34.5],[24.0,33.4],[24.0,32.3],[27.0,30.5],[29.3,30.0],
+      [29.0,25.4],[31.4,25.0],[34.5,26.6],[35.8,26.9],[36.5,24.5],[36.2,22.0],[37.0,21.0],[39.5,19.5],[40.5,19.3],[41.5,20.5]
+    ]] }] }
 ];
 /* A graded map lists each place's number once (`vals`) and its colour bands
    from the best down (`bands`); the shaded groups are worked out
@@ -4124,7 +4225,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 39;   // bumped when the built-in bank changes
+const SEED_VERSION = 40;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the

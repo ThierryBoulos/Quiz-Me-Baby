@@ -140,51 +140,51 @@
 3839.75 roundScore | 100 | 5-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
 3887.25 dishIntro | 101 | 5-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
 3894.50 dishQ | 102 | 5-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3909.50 dishReveal | 103 | 5-5 | 0-0 | Nobody got it. | 
-3922.50 dishQ | 104 | 5-5 | 0-0 | Nobody got it. | 
-3937.75 dishQ | 104 | 5-5 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
-3961.50 dishReveal | 105 | 5-5 | 0-0 | Nobody got it. | 
-4021.50 dishQ | 106 | 5-5 | 0-0 | Nobody got it. | 
-4047.75 dishReveal | 107 | 5-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4093.50 dishQ | 108 | 5-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4124.25 dishQ | 109 | 5-5 | 1-0 | Time's up. ⁨Lions⁩ is out of this one. | 
-4140.50 dishReveal | 110 | 5-5 | 1-0 | Nobody got it. | 
-4143.75 dishQ | 111 | 5-5 | 1-0 | Nobody got it. | 
-4167.75 dishReveal | 112 | 5-5 | 1-0 | Nobody got it. | 
-4184.25 dishSummary | 113 | 6-5 | 1-0 | Nobody got it. | 
-4223.00 roundIntro | 114 | 6-5 |  | Nobody got it. | 
-4225.75 ask | 115 | 6-5 |  | Nobody got it. | 
-4281.50 ask | 115 | 6-5 |  | Lions used Call a Friend. | 
-4296.75 ask | 116 | 6-5 |  | Lions used Call a Friend. | 
-4302.00 steal | 117 | 6-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4333.00 answer | 118 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4416.50 ask | 119 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4429.25 steal | 119 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4443.50 answer | 119 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4480.50 roundScore | 120 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4508.25 battleIntro | 121 | 6-5 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4535.25 battleQ | 122 | 6-5 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4551.25 battleQ | 123 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4567.25 battleQ | 124 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4583.25 battleQ | 125 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4599.25 battleQ | 126 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4615.25 battleQ | 127 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4631.25 battleQ | 128 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4651.25 battleQ | 129 | 6-5 | 2-0 | Time's up. | 
-4667.25 battleQ | 130 | 6-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4683.25 battleHandoff | 131 | 6-5 | 3-0 | Time's up. | 
-4709.00 battleQ | 132 | 6-5 | 3-0 | Time's up. | 
-4725.00 battleQ | 133 | 6-5 | 3-0 | Time's up. | 
-4741.00 battleQ | 134 | 6-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4757.00 battleQ | 135 | 6-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4773.00 battleQ | 136 | 6-5 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4789.00 battleQ | 137 | 6-5 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4805.00 battleQ | 138 | 6-5 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4808.00 battleQ | 138 | 6-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4828.50 battleQ | 139 | 6-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4828.75 battleReview | 139 | 6-5 | 3-5 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4861.25 battleReview | 139 | 6-5 | 3-5 |  | 
-4869.25 battleReview | 139 | 6-5 | 4-5 | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
-4907.00 battleSummary | 140 | 6-7 | 4-5 | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
-4947.50 final | 141 | 6-7 |  | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
+3915.50 dishReveal | 103 | 5-5 | 0-0 | Nobody got it. | 
+3916.25 dishQ | 104 | 5-5 | 0-0 | Nobody got it. | 
+3931.50 dishQ | 104 | 5-5 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
+3961.25 dishReveal | 105 | 5-5 | 0-0 | Nobody got it. | 
+4008.75 dishQ | 106 | 5-5 | 0-0 | Nobody got it. | 
+4035.25 dishReveal | 107 | 5-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4080.75 dishQ | 108 | 5-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4111.75 dishQ | 109 | 5-5 | 1-0 | Time's up. ⁨Lions⁩ is out of this one. | 
+4121.75 dishReveal | 110 | 5-5 | 1-0 | Nobody got it. | 
+4123.25 dishQ | 111 | 5-5 | 1-0 | Nobody got it. | 
+4153.25 dishReveal | 112 | 5-5 | 1-0 | Nobody got it. | 
+4171.75 dishSummary | 113 | 6-5 | 1-0 | Nobody got it. | 
+4210.50 roundIntro | 114 | 6-5 |  | Nobody got it. | 
+4213.25 ask | 115 | 6-5 |  | Nobody got it. | 
+4269.00 ask | 115 | 6-5 |  | Lions used Call a Friend. | 
+4284.25 ask | 116 | 6-5 |  | Lions used Call a Friend. | 
+4289.50 steal | 117 | 6-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4320.50 answer | 118 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4404.00 ask | 119 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4416.50 steal | 119 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4431.00 answer | 119 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4467.75 roundScore | 120 | 6-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4495.75 battleIntro | 121 | 6-5 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4522.75 battleQ | 122 | 6-5 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4538.75 battleQ | 123 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4554.75 battleQ | 124 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4570.75 battleQ | 125 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4586.75 battleQ | 126 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4602.75 battleQ | 127 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4618.75 battleQ | 128 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4638.75 battleQ | 129 | 6-5 | 2-0 | Time's up. | 
+4654.75 battleQ | 130 | 6-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4670.75 battleHandoff | 131 | 6-5 | 3-0 | Time's up. | 
+4696.50 battleQ | 132 | 6-5 | 3-0 | Time's up. | 
+4712.50 battleQ | 133 | 6-5 | 3-0 | Time's up. | 
+4728.50 battleQ | 134 | 6-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4744.50 battleQ | 135 | 6-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4760.50 battleQ | 136 | 6-5 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4776.50 battleQ | 137 | 6-5 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4792.50 battleQ | 138 | 6-5 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4795.50 battleQ | 138 | 6-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4816.00 battleQ | 139 | 6-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4816.25 battleReview | 139 | 6-5 | 3-5 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4848.50 battleReview | 139 | 6-5 | 3-5 |  | 
+4856.75 battleReview | 139 | 6-5 | 4-5 | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
+4894.50 battleSummary | 140 | 6-7 | 4-5 | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
+4935.00 final | 141 | 6-7 |  | Call changed: ⁨Lions⁩'s answer 4 is RIGHT. | 
 recap: {"margin":1,"sudden":false,"leadChanges":2,"steals":[1,1],"minis":[3,2],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]}}
