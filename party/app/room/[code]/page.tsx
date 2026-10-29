@@ -173,12 +173,17 @@ export default function PhoneRoom() {
   usePreload(pub);
   /* the TV's reply has landed: the game moved on (a new update from the TV, or the game started) */
   /* in the lobby the TV answers by changing the room itself (a team name, who's away), not a game view */
-  const lobbyKey = room?.status === "lobby" ? JSON.stringify([room.state?.teamNames, room.state?.away]) : "";
+  /* (and by writing why a Start didn't start: that note is the reply, and the phone that tapped shows it) */
+  const lobbyNote = room?.status === "lobby" ? (room.state?.note as { text: string; at: number } | undefined) : undefined;
+  const lobbyKey = room?.status === "lobby" ? JSON.stringify([room.state?.teamNames, room.state?.away, lobbyNote?.at]) : "";
   viewKey.current = `${room?.status}|${pub?.at ?? ""}|${lobbyKey}`;
   useEffect(() => {
-    if (waitRef.current.on && viewKey.current !== waitRef.current.key) { waitRef.current.on = false; setWaiting(false); setTapErr(null); }
+    if (waitRef.current.on && viewKey.current !== waitRef.current.key) {
+      waitRef.current.on = false; setWaiting(false);
+      setTapErr(lobbyNote && Date.now() - lobbyNote.at < 15000 ? lobbyNote.text : null);
+    }
     if (lateKey.current != null && viewKey.current !== lateKey.current) { lateKey.current = null; setTapErr(null); }
-  }, [room?.status, pub?.at, lobbyKey]);
+  }, [room?.status, pub?.at, lobbyKey]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { noteTvTime(pub?.at); }, [pub?.at]);
   /* an old copy of the app (left open across a deploy) reloads when nothing is being answered */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline));

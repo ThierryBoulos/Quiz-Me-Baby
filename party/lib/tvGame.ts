@@ -126,6 +126,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const c = chain.current;
     if (c.queued) return c.p;              // a write that hasn't started yet will pick up this change too
     c.queued = true;
+  /* why a Start didn't start: on the TV, and written to the room, so the phone that tapped gets it as its reply
+     instead of "The TV hasn't answered" (29 Oct) */
+  const sayLobby = useCallback((text: string) => {
+    setLobbyNote(text);
+    const room = ctx.current.room; if (!room) return;
+    void sb().from("rooms").update({ state: { ...lobbyState(room), note: { text, at: Date.now() } } }).eq("code", code).then(() => {}, () => {});
+  }, [code]);
     /* The phones didn't get it (Wi-Fi dropped, the server hiccupped): say so on the TV and keep
        trying, so a reveal or a final screen with nothing after it still reaches everyone. */
     const failed = (e: unknown) => {
@@ -913,13 +920,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return;
     }
     if (a.kind === "setup" && a.payload.start && room.status === "lobby" && starter(members)?.user_id === a.user_id && !readyToStart(members)) {
-      setLobbyNote(notReadyWhy(members) || "Not ready yet.");
+      sayLobby(notReadyWhy(members) || "Not ready yet.");
       return;
     }
     if (a.kind === "setup" && a.payload.start && room.status === "lobby" && starter(members)?.user_id === a.user_id && readyToStart(members)) {
       const cfgIn = (a.payload.cfg || {}) as G;
       /* the house bank, this TV's own questions, and the starter's (cleaned: never trust a phone) */
-      const base = await loadBank(code);
+      let base: Bank;
+      try { base = await loadBank(code); }
+      catch (e) { console.error("bank at Start", e); sayLobby("The TV couldn't load the questions. Check its internet, then tap Start again."); return; }
+      if (!(cfgIn.standard !== false && Number(cfgIn.rounds) > 0) && !(Array.isArray(cfgIn.minis) && cfgIn.minis.length)) { sayLobby("Pick some rounds or a game first."); return; }
       s.custom = cleanList(cfgIn.custom, base.themes);
       /* the host's own questions are kept on this TV too, for next time (and shown in its Settings) */
       if (members.find((m) => m.user_id === a.user_id)?.role === "host") mergeCustom(s.custom, base.themes);
