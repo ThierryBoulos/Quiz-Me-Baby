@@ -315,6 +315,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       </div>); })}</div>
     {/* the fact behind the answer, right under it, for the whole room */}
     {R?.notes && <div className="max-w-[1300px] text-28 leading-snug -mt-1" style={{ color: "var(--color-gold)" }}>{R.notes}</div>}
+    {R && pub.mrFire && <div className="text-26 font-bold enter">{pub.mrFire.map((f) => <span key={f.name} className="mx-3"><span className="flame">🔥</span>{f.name} · {f.n} in a row</span>)}</div>}
     {!R ? (
       <div className="flex items-center gap-12">
         <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />

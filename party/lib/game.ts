@@ -97,7 +97,8 @@ export type Pub = {
   nextOpenAt?: number;       // ...and from when the other captain may tap it too
   nextOther?: string | null; // that other captain
   imad?: { id: number; text: string; mood?: string };   // Imad's latest line (text), and how he takes it: yes | no | lean
-  fire?: Two<boolean>;            // on fire: three right in a row in the rounds, four legs in a row in a mini-game (29 Oct)
+  fire?: Two<boolean>;
+  mrFire?: { name: string; n: number }[];   // Majority Rules: players right ten (or more) in a row            // on fire: three right in a row in the rounds, four legs in a row in a mini-game (29 Oct)
   glow?: 0 | 1 | null;            // between questions: a soft glow in the leader's colour; never during a question
   at?: number;               // the TV's clock when this was published (phones correct their own clock with it)
   /* per phone, its last few taps the TV has dealt with (tag → "+" taken, else why not, "-" if nothing to say):

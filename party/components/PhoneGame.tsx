@@ -737,6 +737,7 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
   }
   if (sc === "dishReveal" && pub.reveal) return head(legW(pub.reveal.w), legW(pub.reveal.w) != null ? `${T[pub.reveal.w as 0 | 1].name} got it` : "Nobody got it");
   if (sc === "auctionLeg" && pub.auction?.last) { const L = pub.auction.last; return (<>
+    {pub.mrFire && <p className="text-center text-15 font-bold">{pub.mrFire.map((f) => <span key={f.name} className="mx-2"><span className="flame">🔥</span>{f.name} · {f.n} in a row</span>)}</p>}
     {/* one headline (who takes the leg); the how, small; the legs, as a board */}
     <div className="text-center flex flex-col items-center gap-2" role="status" aria-live="polite">
       <span className={"verdict text-13 " + (L.made ? "pos" : "neg")}>{L.made ? "Delivered" : "Short"}</span>

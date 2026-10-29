@@ -54,8 +54,8 @@ function sdRecord(s: TvState, team: 0 | 1, ok: boolean) {
 /* Majority Rules: each player's own count of right answers across the game (for the summary's line) */
 function mrWho(s: TvState) {
   const g = s.g, q = currentQ(s); if (!g?.majorityGame || !s.mrList) return;
-  const W: Record<string, { r: number; of: number; team: 0 | 1 }> = (g.majorityGame.who = g.majorityGame.who || {});
-  for (const e of s.mrList) { const w = (W[e.name] = W[e.name] || { r: 0, of: 0, team: e.team }); w.of++; if (q && s.votes[e.name] === q.answer) w.r++; }
+  const W: Record<string, { r: number; of: number; team: 0 | 1; run?: number }> = (g.majorityGame.who = g.majorityGame.who || {});
+  for (const e of s.mrList) { const w = (W[e.name] = W[e.name] || { r: 0, of: 0, team: e.team, run: 0 }); w.of++; if (q && s.votes[e.name] === q.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
 }
 /* no host: a mini-game leg's reveal moves on by itself after this long (a tap still moves it on sooner);
    the answer card, the round score, intros and summaries still wait for a tap, so people can argue (29 Oct, D27) */

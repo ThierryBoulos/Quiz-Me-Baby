@@ -46,6 +46,12 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   /* on fire (29 Oct), and the glow between questions in the leader's colour: intros, reveals, summaries, the
      answer card and the round score; never while a clock runs or a question is up */
   { const f = fireOf(s); if (f[0] || f[1]) p.fire = f; }
+  /* Majority Rules: a player right ten in a row (counting this one) gets a flame on the reveal (29 Oct) */
+  if (s.screen === "majorityReveal" && g.majorityGame && s.mrList) {
+    const q = currentQ(s), W = (g.majorityGame.who || {}) as Record<string, { run?: number }>;
+    const hot = s.mrList.map((e) => ({ name: e.name, n: q && s.votes[e.name] === q.answer ? (W[e.name]?.run || 0) + 1 : 0 })).filter((x) => x.n >= 10);
+    if (hot.length) p.mrFire = hot;
+  }
   if (/Intro$|Reveal$|Summary$|^(answer|roundScore|decided|auctionLeg|auctionResult|battleHandoff)$/.test(s.screen)) {
     const d = g.teams[0].score - g.teams[1].score; p.glow = d > 0 ? 0 : d < 0 ? 1 : null;
   }
