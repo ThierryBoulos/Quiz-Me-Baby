@@ -1265,6 +1265,7 @@ svg.ic{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.7;stro
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (id) => document.getElementById(id);
+const ptsWord = (n) => n === 1 ? '1 point' : n + ' points';
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -6010,7 +6011,7 @@ SCREENS.miniIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Halfway — the mini-game</div>' +
       '<h1 class="display">Closest<br>To Wins</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + ptsWord(g.miniPts) + '</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
@@ -6018,7 +6019,7 @@ SCREENS.miniIntro = function(){
         '<li><strong style="color:var(--gold)">2.</strong> ' + S.settings.tMini + ' seconds to write one number down. Captains hand it to you.</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> Closest number wins the leg. Tie = one point each.</li>' +
         '<li><strong style="color:var(--gold)">4.</strong> <span style="color:var(--warn)">No lifelines in this leg.</span></li>' +
-        '<li><strong style="color:var(--gold)">5.</strong> After ' + n + ' legs, whoever leads takes ' + g.miniPts + ' points. Tied on legs? An extra tie-breaker question is pulled straight away.</li>' +
+        '<li><strong style="color:var(--gold)">5.</strong> After ' + n + ' legs, whoever leads takes ' + ptsWord(g.miniPts) + '. Tied on legs? An extra tie-breaker question is pulled straight away.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="miniStart">Start leg 1</button></div>' +
@@ -6124,7 +6125,7 @@ SCREENS.miniSummary = function(){
     '</div>' +
     (verdict.needsHost
       ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
-        '<p class="help">Legs are tied and there is nothing to separate them. Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<p class="help">Legs are tied and there is nothing to separate them. Award the ' + ptsWord(g.miniPts) + ' however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="miniAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
           '<button class="btn ghost" data-act="miniAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
@@ -6178,7 +6179,7 @@ SCREENS.battleIntro = function(){
         '<li><strong style="color:var(--gold)">2.</strong> ' + b.n + ' questions each, <strong>' + BATTLE_SECS + ' seconds</strong> a shot. ' + esc(battleCapName(0)) + ' goes first.</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> Same spread for both — five easy, five medium, in the same order. Different questions.</li>' +
         '<li><strong style="color:var(--gold)">4.</strong> <span style="color:var(--warn)">No lifelines, no conferring, no second guesses.</span></li>' +
-        '<li><strong style="color:var(--gold)">5.</strong> Best score takes <strong>' + (g.battlePts || g.miniPts) + ' points</strong>. Tie? One more question, first captain in wins it.</li>' +
+        '<li><strong style="color:var(--gold)">5.</strong> Best score takes <strong>' + ptsWord(g.battlePts || g.miniPts) + '</strong>. Tie? One more question, first captain in wins it.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="battleStart">Start — ' + esc(battleCapName(0)) + '</button></div>' +
@@ -6296,7 +6297,7 @@ SCREENS.battleSummary = function(){
       '<h2 class="display">' + headline + '</h2>' +
       (b.tbRounds ? '<p class="help">Settled on tie breaker ' + b.tbRounds + '.</p>' : '') +
       (b.note ? '<p class="help" style="max-width:52ch;margin:0 auto">' + esc(b.note) + '</p>' : '') +
-      (b.awarded ? '<p class="help">' + esc(g.teams[b.winner].name) + ' <strong style="color:var(--gold)">+' + (g.battlePts || g.miniPts) + ' points</strong>.</p>' : '') +
+      (b.awarded ? '<p class="help">' + esc(g.teams[b.winner].name) + ' <strong style="color:var(--gold)">+' + ptsWord(g.battlePts || g.miniPts) + '</strong>.</p>' : '') +
     '</div>' +
     battleCounter() +
     '<div class="tbl-wrap"><table><thead><tr><th>Q</th><th>' + esc(battleCapName(0)) + '</th><th>Result</th><th>' + esc(battleCapName(1)) + '</th><th>Result</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' +
@@ -6321,7 +6322,7 @@ SCREENS.auctionIntro = function(){
       /* A band OR a flavour line, not both — Closest To Wins carries a band,
          the Battle carries a line, and carrying both put this intro 81px past
          the bottom of a phone. */
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + a.n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + a.n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + ptsWord(g.miniPts) + '</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
@@ -6329,7 +6330,7 @@ SCREENS.auctionIntro = function(){
         '<li><strong style="color:var(--gold)">2.</strong> One team says a number — how many they can name. The other <strong>bids higher</strong> or <strong>lets them take it</strong>.</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> Whoever holds the bid gets <strong>' + AUCTION_SECS + ' seconds</strong> to name that many.</li>' +
         '<li><strong style="color:var(--gold)">4.</strong> Make it, they take the leg. Fall short and <strong>the other team takes it</strong>.</li>' +
-        '<li><strong style="color:var(--gold)">5.</strong> <span style="color:var(--warn)">No lifelines, no help from the room.</span> Most legs takes <strong>' + g.miniPts + ' points</strong>.</li>' +
+        '<li><strong style="color:var(--gold)">5.</strong> <span style="color:var(--warn)">No lifelines, no help from the room.</span> Most legs takes <strong>' + ptsWord(g.miniPts) + '</strong>.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="auctionBegin">Read the category</button></div>' +
@@ -6447,7 +6448,7 @@ SCREENS.auctionResult = function(){
     '<div class="winner tight">' +
       '<div class="eyebrow gold">The Auction &nbsp;·&nbsp; ' + a.wins[0] + '&ndash;' + a.wins[1] + ' on legs</div>' +
       '<div class="name ' + (a.winner === 0 ? 'tint-a' : 'tint-b') + '">' + esc(win.name) + '</div>' +
-      '<p class="muted"><strong style="color:var(--gold)">+' + g.miniPts + ' points</strong></p>' +
+      '<p class="muted"><strong style="color:var(--gold)">+' + ptsWord(g.miniPts) + '</strong></p>' +
     '</div>' +
     '<div class="card pad stack" style="gap:8px">' +
       '<div class="eyebrow">Leg by leg</div>' + rows +
@@ -6482,7 +6483,7 @@ SCREENS.sayIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">Don&rsquo;t Say the<br>Same as Me</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + ptsWord(g.miniPts) + '</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
@@ -6492,7 +6493,7 @@ SCREENS.sayIntro = function(){
           : '<li><strong style="color:var(--gold)">1.</strong> A prompt, <strong>' + SAYSAME_SECS + ' seconds</strong>, both teams answer. The host has a word loaded — <strong>matching each other is fine</strong>, only matching the host costs you.</li>' +
             '<li><strong style="color:var(--gold)">2.</strong> Time&rsquo;s up — the word is revealed and the host rules who said it.</li>') +
         '<li><strong style="color:var(--gold)">3.</strong> Dodged it alone? You take the leg. Both dodged or both said it? <strong>Tie — a point each.</strong></li>' +
-        '<li><strong style="color:var(--gold)">4.</strong> Most legs after ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level? Straight into a tie-breaker.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Most legs after ' + n + ' takes <strong>' + ptsWord(g.miniPts) + '</strong>. Level? Straight into a tie-breaker.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="sayStart">Start leg 1</button></div>' +
@@ -6565,7 +6566,7 @@ SCREENS.saySummary = function(){
     '</div>' +
     (verdict.needsHost
       ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
-        '<p class="help">Legs are tied and there is nothing to separate them. Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<p class="help">Legs are tied and there is nothing to separate them. Award the ' + ptsWord(g.miniPts) + ' however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="sayAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
           '<button class="btn ghost" data-act="sayAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
@@ -6618,14 +6619,14 @@ SCREENS.mapIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">Guess<br>the Map</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + (s.levels || MAP_ORDER).map(l => MAP_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + (s.levels || MAP_ORDER).map(l => MAP_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + ptsWord(g.miniPts) + '</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> A map goes up — no title, just the colours. <strong>' + MAP_SECS + ' seconds.</strong></li>' +
         '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>what the map shows</strong>, at the same time.' + (NOHOST() ? ' Keep it face down.' : ' Captains hand it to the host.') + '</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> ' + (NOHOST() ? 'Reveal it, turn the answers over, and rule together.' : 'The host reveals it and rules.') + ' Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
-        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level at the end? The host decides: <strong>another map</strong>, or <strong>stop with a point each</strong>.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + ptsWord(g.miniPts) + '</strong>. Level at the end? The host decides: <strong>another map</strong>, or <strong>stop with a point each</strong>.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="mapStart">Show map 1</button></div>' +
@@ -6744,7 +6745,7 @@ SCREENS.mapSummary = function(){
     '</div>' +
     (verdict.needsHost
       ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
-        '<p class="help">Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<p class="help">Award the ' + ptsWord(g.miniPts) + ' however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="mapAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
           '<button class="btn ghost" data-act="mapAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
@@ -6816,14 +6817,14 @@ SCREENS.airportIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">Guess<br>the Airport</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + s.levels.map(l => AIRPORT_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + s.levels.map(l => AIRPORT_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + ptsWord(g.miniPts) + '</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> A departures board goes up. <strong>' + AIRPORT_SECS + ' seconds.</strong> The destinations, the airlines and the language are the clues — the airport&rsquo;s own city is never on it.</li>' +
         '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>which airport</strong>, at the same time.' + (NOHOST() ? ' Keep it face down.' : ' Captains hand it to the host.') + ' The city is enough, unless it has more than one big airport: then name the airport (Heathrow, not London). The code counts too.</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> ' + (NOHOST() ? 'Reveal it, turn the answers over, and rule together.' : 'The host reveals it and rules.') + ' Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
-        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level — even at nothing each — and another board comes out, <strong>until somebody gets one</strong>.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + ptsWord(g.miniPts) + '</strong>. Level — even at nothing each — and another board comes out, <strong>until somebody gets one</strong>.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="airportStart">Show board 1</button></div>' +
@@ -6905,7 +6906,7 @@ SCREENS.airportSummary = function(){
     '</div>' +
     (verdict.needsHost
       ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
-        '<p class="help">Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<p class="help">Award the ' + ptsWord(g.miniPts) + ' however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="airportAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
           '<button class="btn ghost" data-act="airportAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
@@ -6948,14 +6949,14 @@ SCREENS.flagIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">Guess<br>the Flag</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + s.levels.map(l => FLAG_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + s.levels.map(l => FLAG_LEVELS[l]).join(' + ') + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + ptsWord(g.miniPts) + '</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> A flag goes up. <strong>' + FLAG_SECS + ' seconds.</strong></li>' +
         '<li><strong style="color:var(--gold)">2.</strong> Both teams write down <strong>whose flag it is</strong>, at the same time.' + (NOHOST() ? ' Keep it face down.' : ' Captains hand it to the host.') + '</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> ' + (NOHOST() ? 'Reveal it, turn the answers over, and rule together.' : 'The host reveals it and rules.') + ' Both right? <strong>A point each.</strong> Nobody? Nobody.</li>' +
-        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level — even at nothing each — and another flag comes out, <strong>until somebody gets one</strong>.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + ptsWord(g.miniPts) + '</strong>. Level — even at nothing each — and another flag comes out, <strong>until somebody gets one</strong>.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="flagStart">Show flag 1</button></div>' +
@@ -7036,7 +7037,7 @@ SCREENS.flagSummary = function(){
     '</div>' +
     (verdict.needsHost
       ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
-        '<p class="help">Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<p class="help">Award the ' + ptsWord(g.miniPts) + ' however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="flagAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
           '<button class="btn ghost" data-act="flagAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
@@ -7088,14 +7089,14 @@ SCREENS.dishIntro = function(){
     '<div class="center stack intro-head" style="gap:10px">' +
       '<div class="eyebrow gold">Mini-game</div>' +
       '<h1 class="display">Guess the<br>Cocktail or Dish</h1>' +
-      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + dishKinds(s.levels) + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + g.miniPts + ' points</span></div>' +
+      '<div class="mini-band" style="margin:8px auto"><span class="eyebrow gold">Best of ' + n + '</span><span class="dim">·</span><span class="eyebrow">' + dishKinds(s.levels) + '</span><span class="dim">·</span><span class="eyebrow">Winner takes ' + ptsWord(g.miniPts) + '</span></div>' +
     '</div>' +
     '<div class="card pad lit stack">' +
       '<ul class="intro-rules" style="list-style:none;display:grid;gap:12px;font-size:14px;line-height:1.6">' +
         '<li><strong style="color:var(--gold)">1.</strong> The ingredients come up <strong>one at a time</strong>, a new one every <strong>' + DISH_STEP + ' seconds</strong>. The giveaway comes last.</li>' +
         '<li><strong style="color:var(--gold)">2.</strong> Know it? <strong>Captain, call it out</strong> — first voice answers.' + (NOHOST() ? ' Tap your team and <strong>write it down</strong>, face down — the app keeps the order.' : ' The host taps who called it.') + '</li>' +
         '<li><strong style="color:var(--gold)">3.</strong> <strong>One go per team.</strong> ' + (NOHOST() ? 'The list keeps coming for the other team. At the end the answers are turned over in the order they were called — <strong>the first one right wins it</strong>.' : 'Wrong, and you are out of that one — the list keeps coming for the other team.') + '</li>' +
-        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + g.miniPts + ' points</strong>. Level at the end? <strong>One more to settle it, or a point each</strong> — your choice.</li>' +
+        '<li><strong style="color:var(--gold)">4.</strong> Best of ' + n + ' takes <strong>' + ptsWord(g.miniPts) + '</strong>. Level at the end? <strong>One more to settle it, or a point each</strong> — your choice.</li>' +
       '</ul>' +
     '</div>' +
     '<div class="btn-row center"><button class="btn gold lg" data-act="dishStart">Show number 1</button></div>' +
@@ -7249,7 +7250,7 @@ SCREENS.dishSummary = function(){
     '</div>' +
     (verdict.needsHost
       ? '<div class="card pad lit center stack"><h3 class="display">Your call' + (NOHOST() ? '' : ', host') + '</h3>' +
-        '<p class="help">Award the ' + g.miniPts + ' points however you see fit.</p>' +
+        '<p class="help">Award the ' + ptsWord(g.miniPts) + ' however you see fit.</p>' +
         '<div class="btn-row center">' +
           '<button class="btn teamA lg" data-act="dishAward" data-w="0">' + esc(g.teams[0].name) + ' takes it</button>' +
           '<button class="btn ghost" data-act="dishAward" data-w="split">Split ' + Math.floor(g.miniPts / 2) + ' each</button>' +
