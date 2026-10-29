@@ -122,6 +122,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
                 <div key={a.t} className="card !p-2 !px-3 text-left min-w-[180px]" style={{ borderColor: a.team != null ? tc(a.team) : undefined }}>
                   <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
                   <div className="text-16 font-bold" style={{ color: a.team != null ? tc(a.team) : undefined }}>{a.who}</div>
+                  {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}
                 </div>))}
             </div>)}
           {recap && recapLines(pub).length > 0 && (
