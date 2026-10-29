@@ -229,7 +229,7 @@ button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .hud.phone .hud-team .nm { max-width: 110px; }
 /* the TV, read from the sofa */
 .hud.tv { padding: 0 0 14px; }
-.hud.tv .hud-team .nm { font-size: var(--text-18); max-width: 300px; }
+.hud.tv .hud-team .nm { font-size: var(--text-18); max-width: 230px; }
 .hud.tv .hud-team .sc { font-size: var(--text-48); }
 .hud.tv .hud-team .dot { width: 14px; height: 14px; }
 .hud.tv .hud-label { font-size: var(--text-15); }
@@ -299,11 +299,11 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 
 /* ---- Imad's speech bubble on the TV: in the middle of the score bar, over the round label for
    the few seconds he talks, so he never covers a title, a question or a card. His whole line shows. ---- */
-.imad-bubble { position: absolute; z-index: 40; top: 4px; left: 50%; margin-left: -296px; width: 592px; min-height: 80px; padding: 4px 6px; display: flex; align-items: center; gap: 10px; pointer-events: none;
+.imad-bubble { position: absolute; z-index: 40; top: 4px; left: 50%; margin-left: -235px; width: 470px; min-height: 72px; padding: 4px 6px; display: flex; align-items: center; gap: 10px; pointer-events: none;
   background: rgba(4,5,14,.97); border-radius: 20px;
   animation: hbIn .3s var(--ease) both; }
-.imad-bubble img { width: 64px; height: 64px; object-fit: contain; flex: none; filter: drop-shadow(0 6px 14px rgba(0,0,0,.5)); }
-.imad-bubble .hb-text { flex: 1; padding: 10px 16px; border-radius: 4px 18px 18px 18px; background: #FFF7DA; color: #1A1400; font-weight: 700; font-size: var(--text-18); line-height: 1.3;
+.imad-bubble img { width: 52px; height: 52px; object-fit: contain; flex: none; filter: drop-shadow(0 6px 14px rgba(0,0,0,.5)); }
+.imad-bubble .hb-text { flex: 1; padding: 8px 14px; border-radius: 4px 18px 18px 18px; background: #FFF7DA; color: #1A1400; font-weight: 700; font-size: var(--text-16); line-height: 1.3;
   box-shadow: 0 14px 34px rgba(0,0,0,.55); animation: hbPop .45s var(--ease) both; }
 @keyframes hbIn { from { opacity: 0; transform: translateY(-10px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes hbPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: none; } }
