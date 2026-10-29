@@ -300,6 +300,12 @@ export function RoundIntro({ pub, canArm, onArm, size, busy }: { pub: Pub; canAr
 export function AskHead({ pub, you, go, size }: { pub: Pub; you?: string; go?: boolean; size: "tv" | "phone" }) {
   const t = (pub.turn ?? 0) as 0 | 1, T = pub.teams, steal = pub.screen === "steal", tv = size === "tv";
   const armed = !steal && !!pub.dbl?.[t];
+  /* phones, a team's own question: one line, "THEME · Question for TEAM", so Send stays on screen (29 Oct, C18 B) */
+  if (!tv && !steal) return (
+    <div className="flex flex-col items-center text-center gap-1.5">
+      <p className={"whofor " + side(t)} style={{ fontSize: 18 }}><span className="text-[var(--color-ink-2)]">{pub.theme}{armed ? " · Double points" : ""} · </span>Question for <b>{T[t].name}</b></p>
+      {you && <p className={"you-line mt-1 " + (go ? "go" : "")}>{you}</p>}
+    </div>);
   return (
     <div className="flex flex-col items-center text-center gap-2">
       <div className="q-theme" style={steal ? { borderColor: "var(--color-gold)", color: "var(--color-gold)", fontSize: tv ? 15 : undefined } : { fontSize: tv ? 15 : undefined }}>
