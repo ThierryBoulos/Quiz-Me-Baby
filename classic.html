@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.47', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.48', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2533,21 +2533,17 @@ const SEED = [
 ['Sexy Time','medium','','Which upside-down fruit, on a porch or a cruise-cabin door, secretly signals a couple into partner swapping?','A pineapple','Some cruise lines have had to ask guests to stop.'],
 ['Sexy Time','medium','','What is the slang term for two women rubbing their vulvas together, legs crossed like blades?','Scissoring','Tribadism, or "tribbing", is the broader term.'],
 ['Sexy Time','medium','','Which porn genre stages a nervous "first audition" with a producer on a sofa?','Casting couch','Backroom Casting Couch is the best-known series.'],
-['Sexy Time','medium','','According to the internet\'s Rule 34, if something exists, there is ___ of it.','Porn','No exceptions, says the rule.'],
 ['Sexy Time','medium','','What does GILF stand for?','Grandma I\'d like to f***','MILF\'s older relative.'],
 ['Sexy Time','medium','','Which Beirut-born performer, in porn for about three months in 2014, became one of Pornhub\'s most-searched names?','Mia Khalifa','She has spent years since speaking out about the industry.'],
 ['Sexy Time','medium','','Which porn category is short for "female domination"?','Femdom','A woman in charge: anything from bossing to whips.'],
-['Sexy Time','medium','','Which shock video from 2007 became famous mostly for the reaction videos of people watching it, and featured two women and a cup?','2 Girls 1 Cup','The trailer for a Brazilian fetish film. You were warned.'],
-['Sexy Time','hard','','What is the British slang for having sex in a parked car while strangers watch?','Dogging','Car parks, a flash of headlights, and the Daily Mail.'],
+['Sexy Time','medium','','Which 2007 gross-out clip, the trailer for a Brazilian fetish film, went viral through videos of people filming their faces while they watched it?','2 Girls 1 Cup','The trailer for a Brazilian fetish film. You were warned.'],
+['Sexy Time','expert','','What is the British slang for having sex in a parked car while strangers watch?','Dogging','Car parks, a flash of headlights, and the Daily Mail.'],
 ['Sexy Time','hard','','In open-relationship slang, which mythical animal is a single bisexual woman who joins a couple?','A unicorn','So called because she is said to be so hard to find.'],
 ['Sexy Time','hard','','In kink\'s traffic-light system, what does saying "yellow" usually mean?','Slow down','Red stops everything; green means keep going.'],
-['Sexy Time','hard','','On old porn sets, what was the job of keeping male performers aroused between takes called?','A fluffer','Mostly a legend today: pills did the job instead.'],
-['Sexy Time','hard','','What are the porn industry\'s own Oscars, held every January in Las Vegas, called?','The AVN Awards','AVN stands for Adult Video News.'],
-['Sexy Time','hard','','What is the name for the recovery time after orgasm before a man can get hard again?','The refractory period','It gets longer with age; for some women it barely exists.'],
-['Sexy Time','expert','','Which Japanese artist\'s 1814 woodblock print "The Dream of the Fisherman\'s Wife" shows a woman with two octopuses?','Hokusai','The same artist made "The Great Wave off Kanagawa".'],
+['Sexy Time','expert','','On old porn sets, what was the job of keeping male performers aroused between takes called?','A fluffer','Mostly a legend today: pills did the job instead.'],
+['Sexy Time','expert','','What are the porn industry\'s own Oscars, held every January in Las Vegas, called?','The AVN Awards','AVN stands for Adult Video News.'],
+['Sexy Time','expert','','What is the name for the recovery time after orgasm before a man can get hard again?','The refractory period','It gets longer with age; for some women it barely exists.'],
 ['Sexy Time','expert','','What is the term for arousal from restricting a partner\'s breathing, the riskiest of kinks?','Erotic asphyxiation','Also called breath play. It kills people every year.'],
-['Sexy Time','expert','','Which Canadian brand, launched in 2008, makes a C-shaped vibrator that couples wear during sex?','We-Vibe','Made in Ottawa.'],
-['Sexy Time','expert','','Which Hustler publisher, sued by the preacher Jerry Falwell, was played by Woody Harrelson in a 1996 film?','Larry Flynt','The film is The People vs. Larry Flynt.'],
 ['Sexy Time','expert','','In 2023 the company behind Pornhub and Brazzers renamed itself. What is it called now?','Aylo','It was called MindGeek before.'],
 /* ---- 29 Oct: Sexy Time, explicit: positions, toys, fantasies (the owner's ask) ---- */
 ['Sexy Time','easy','','Which position has both partners lying on their sides, one behind the other, like cutlery in a drawer?','Spooning','The one most couples fall asleep in, too.'],
@@ -4297,7 +4293,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 45;   // bumped when the built-in bank changes
+const SEED_VERSION = 46;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the
@@ -4309,6 +4305,12 @@ const SEED_VERSION = 45;   // bumped when the built-in bank changes
    `src:'seed'`, so anything the host built or imported on top of the same
    text is left alone. */
 const RETIRED_SEED = [
+  /* seed 46: the owner's cuts and rewordings */
+  'According to the internet\'s Rule 34, if something exists, there is ___ of it.',
+  'Which Japanese artist\'s 1814 woodblock print "The Dream of the Fisherman\'s Wife" shows a woman with two octopuses?',
+  'Which Canadian brand, launched in 2008, makes a C-shaped vibrator that couples wear during sex?',
+  'Which Hustler publisher, sued by the preacher Jerry Falwell, was played by Woody Harrelson in a 1996 film?',
+  'Which shock video from 2007 became famous mostly for the reaction videos of people watching it, and featured two women and a cup?',
   /* seed 45: reworded so they don't give away 'Swingers' */
   'What do swingers call a 1970s-style party where couples swap partners by drawing car keys out of a bowl?',
   'In swinger slang, what is a married woman called whose husband encourages her to sleep with other men?',
