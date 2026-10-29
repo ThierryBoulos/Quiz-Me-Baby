@@ -21,7 +21,10 @@ export const newState = () => ({
   sdLog: null as null | { kind: "sudden" | "battleTie"; calls: { team: 0 | 1; text: string; ok: boolean }[] },
   offList: [false, false] as Two<boolean>,                                   // Say the Same: not a real answer to the prompt
   qkeys: {} as Record<string, number>,                                        // real question id → the number the phones see
-  scoreLog: [] as Two<number>[],                                              // the score after every change (lead changes, for the recap)
+  scoreLog: [] as Two<number>[],
+  streak: [0, 0] as Two<number>,                                              // legs taken in a row, this mini-game (on fire at four)
+  fireWas: [false, false] as Two<boolean>,                                    // so the flame is announced once each time it lights
+  imadMood: "" as string,                                                     // how Imad takes the latest moment (yes | no | lean)                                              // the score after every change (lead changes, for the recap)
   typed: [null, null] as Two<string[] | null>,       // what each captain sent for the question on screen
   drafts: [null, null] as Two<null | { k: string; texts: string[]; n: string; pin?: LatLon | null; by?: string; seq?: number }>,   // ...and what each has typed (or pinned) but not sent (taken at time-up)
   guesses: [null, null] as Two<number | null>,       // Closest To Wins

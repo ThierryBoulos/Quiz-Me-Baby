@@ -2,7 +2,7 @@
    it is, who leads the night with no host, who won the leg on screen. */
 import { QMB, acceptFor, rankFor } from "../engine";
 import type { Member } from "../room";
-import { other, type G, type W } from "./rules";
+import { miniOf, other, type G, type W } from "./rules";
 import type { TvState } from "./state";
 import { offBy, type Two } from "../game";
 
@@ -107,4 +107,18 @@ export function callsOf(s: TvState): Call[] {
   }
   for (const c of out) if (!c.text || (s.contested || []).includes(c.id)) c.done = true;
   return out;
+}
+
+/* On fire (29 Oct): in the rounds, a team's own questions right three times in a row (a miss puts it out; a
+   steal neither lights nor puts it out); in a mini-game, four legs in a row (s.streak, from the legs' toasts). */
+export function fireOf(s: TvState): Two<boolean> {
+  const g = s.g; if (!g) return [false, false];
+  if (miniOf(s.screen) || s.screen === "decided") return [s.streak[0] >= 4, s.streak[1] >= 4];
+  const st: Two<number> = [0, 0], opts = seatOf(g);
+  for (const rd of g.rounds || []) for (const seat of [0, 1]) {
+    const r = rd.res?.[seat]; if (!r) continue;
+    const t = QMB.seatTeam(g, rd, seat, opts) as 0 | 1;
+    st[t] = r.correct ? st[t] + 1 : 0;
+  }
+  return [st[0] >= 3, st[1] >= 3];
 }

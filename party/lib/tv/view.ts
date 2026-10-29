@@ -5,7 +5,7 @@ import { getSettings } from "../settings";
 import type { Member } from "../room";
 import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two } from "../game";
 import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
-import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, pinW, sayWin, seatOf } from "./reads";
+import { callsOf, closestW, currentQ, fireOf, leadOf, matchQ, mrTally, okWin, pinW, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
 import type { TvState } from "./state";
 
@@ -43,6 +43,12 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   { const L = s.scoreLog, now: Two<number> = [g.teams[0].score, g.teams[1].score], last = L[L.length - 1];
     if (!last || last[0] !== now[0] || last[1] !== now[1]) L.push(now); }
   if (s.screen === "final") p.recap = recap(s);
+  /* on fire (29 Oct), and the glow between questions in the leader's colour: intros, reveals, summaries, the
+     answer card and the round score; never while a clock runs or a question is up */
+  { const f = fireOf(s); if (f[0] || f[1]) p.fire = f; }
+  if (/Intro$|Reveal$|Summary$|^(answer|roundScore|decided|auctionLeg|auctionResult|battleHandoff)$/.test(s.screen)) {
+    const d = g.teams[0].score - g.teams[1].score; p.glow = d > 0 ? 0 : d < 0 ? 1 : null;
+  }
   /* the app's calls on this screen, and one being contested */
   if (CONTEST_SCREENS.includes(s.screen)) { p.calls = callsOf(s); p.contest = s.contest; }
   /* the tracker: every round and mini-game of the night, in order (Classic's schedule/pipState) */

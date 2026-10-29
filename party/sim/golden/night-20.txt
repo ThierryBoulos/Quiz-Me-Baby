@@ -132,4 +132,4 @@
 165.00 battleQ | 93 | 11-6 | 6-2 | Lions steal a new question. | 
 165.75 battleSummary | 94 | 15-6 | 6-3 | Lions steal a new question. | 
 166.75 final | 95 | 15-6 |  | Lions steal a new question. | 
-recap: {"margin":9,"sudden":false,"leadChanges":1,"steals":[1,1],"minis":[2,2],"best":{"title":"Closest To Wins","team":1,"legs":[0,3]}}
+recap: {"margin":9,"sudden":false,"leadChanges":1,"steals":[1,1],"minis":[2,2],"best":{"title":"Closest To Wins","team":1,"legs":[0,3]},"chart":[[0,0],[0,0],[0,1],[0,2],[2,2],[2,3],[2,5],[3,5],[5,1],[6,1],[6,3],[7,3],[7,5],[8,5],[8,6],[10,6],[11,6],[11,7],[11,6],[15,6]],"awards":[{"t":"Closest To Wins","who":"Owls, 3 legs to 0","team":1},{"t":"Battle of the Captains","who":"Rami, 6 of 10","team":0}]}

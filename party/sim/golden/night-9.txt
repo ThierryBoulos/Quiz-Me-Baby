@@ -176,4 +176,4 @@
 4677.50 battleLevel | 132 | 8-6 | 2-2 |  | 
 4692.00 battleSummary | 133 | 9-7 | 2-2 |  | 
 4760.25 final | 134 | 9-7 |  |  | 
-recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[2,1],"minis":[3,1],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]}}
+recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[2,1],"minis":[3,1],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]},"chart":[[0,0],[0,0],[0,1],[1,2],[2,2],[2,3],[2,4],[3,4],[4,4],[5,4],[6,5],[7,5],[7,6],[8,6],[9,7]],"awards":[{"t":"Closest To Wins","who":"Lions, 3 legs to 1","team":0},{"t":"Best thief","who":"Lions, 2 steals","team":0}]}

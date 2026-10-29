@@ -19,7 +19,7 @@ import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, tu
 import { buildView, qk } from "./tv/view";
 import { useInbox } from "./tv/useInbox";
 import { usePresent } from "./tv/usePresent";
-import { imadNarrate, imadOnToast, imadSay } from "./tv/imad";
+import { fireLeg, imadNarrate, imadOnToast, imadSay } from "./tv/imad";
 import { newState, type TvState } from "./tv/state";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
@@ -186,7 +186,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.exit) { localStorage.removeItem(saveKey); lastSave.current = ""; }
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
+            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
           if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
         }
@@ -256,7 +256,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const rd = s.g.rounds[s.g.r];
         s.lifeline = { key: f.lifeline, team: QMB.seatTeam(s.g, rd, s.g.seat, seat()), deadline: null, ...(f.lifeline === "friend" ? { left: T().tFriend, wait: true } : {}) };   // the friend's clock starts with the call (Start the call)
       }
-      if (f.toast) { s.toast = { id: ++s.toastN, text: f.toast }; imadOnToast(s, String(f.toast)); }
+      if (f.toast) { s.toast = { id: ++s.toastN, text: f.toast }; fireLeg(s, String(f.toast)); imadOnToast(s, String(f.toast)); }
       if (f.host) say(f.host, f.vars);
       if (f.sound && isTvRef.current) { const n = f.sound as SoundName, ms = soundAt(n); if (ms && canPlay()) setTimeout(() => playSound(n), ms); else playSound(n); }
       if (f.go && isTvRef.current) {
@@ -492,7 +492,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const againGame = () => {
     const s = st.current, room = ctx.current.room;
     Object.assign(s, { g: null, screen: "", step: 1, pending: null, lifeline: null, autoAt: null, deadline: null, left: 0, timeUp: false, paused: false,
-      typed: [null, null], guesses: [null, null], pins: [null, null], mrList: null, mrOut: [], mrAsk: null, agree: null, mrHere: [], votes: {}, predict: {}, ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
+      typed: [null, null], guesses: [null, null], pins: [null, null], mrList: null, mrOut: [], mrAsk: null, agree: null, mrHere: [], votes: {}, predict: {}, streak: [0, 0], fireWas: [false, false], ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
     try { localStorage.removeItem(saveKey); } catch { /* */ }
     lastSave.current = "";
     setPub(null);

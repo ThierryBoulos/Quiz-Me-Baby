@@ -44,7 +44,8 @@ export type Pub = {
   /* pictures coming up next (flags under their public/fx names, map ids, landmark photos), fetched ahead so they show at once */
   preload?: { flags?: string[]; maps?: string[]; pins?: string[]; world?: boolean };
   /* the end of the night: a short story of it, shown after the confetti */
-  recap?: { margin: number; sudden: boolean; leadChanges: number; steals: Two<number>; minis: Two<number>; best?: { title: string; team: 0 | 1; legs: Two<number> } };
+  recap?: { margin: number; sudden: boolean; leadChanges: number; steals: Two<number>; minis: Two<number>; best?: { title: string; team: 0 | 1; legs: Two<number> };
+    chart?: Two<number>[]; awards?: { t: string; who: string; team?: 0 | 1 | null }[] };   // the scores through the night; the awards (29 Oct)
   flag?: string;                  // the flag's file name (flags/<flag>.svg)
   /* Drop the Pin: the landmark's photo (pins/<photo>.jpg, a name that says nothing) and its credit, never its name.
      At the reveal: where it is, both pins, how far off */
@@ -95,7 +96,9 @@ export type Pub = {
   nextBy?: string;           // no host: whose Start or Next the room is waiting for
   nextOpenAt?: number;       // ...and from when the other captain may tap it too
   nextOther?: string | null; // that other captain
-  imad?: { id: number; text: string };   // Imad's latest line (text only)
+  imad?: { id: number; text: string; mood?: string };   // Imad's latest line (text), and how he takes it: yes | no | lean
+  fire?: Two<boolean>;            // on fire: three right in a row in the rounds, four legs in a row in a mini-game (29 Oct)
+  glow?: 0 | 1 | null;            // between questions: a soft glow in the leader's colour; never during a question
   at?: number;               // the TV's clock when this was published (phones correct their own clock with it)
   /* per phone, its last few taps the TV has dealt with (tag → "+" taken, else why not, "-" if nothing to say):
      a few, not one, as two quick taps can reach the TV the other way round */

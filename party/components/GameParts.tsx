@@ -60,13 +60,13 @@ export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"
   return (
     <div className={"hud " + size} role="group" aria-label="Scores">
       <div className="hud-in">
-        <div className="hud-team a"><span className="dot" /><div className="nm">{T[0].name}</div><div className="sc" data-score="0"><Roll v={sc(0)} /></div></div>
+        <div className="hud-team a"><span className="dot" /><div className="nm">{T[0].name}</div><div className="sc" data-score="0"><Roll v={sc(0)} /></div>{pub.fire?.[0] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}</div>
         <div className="hud-mid">
           {code && <div className="hud-code">Room {code}</div>}
           <div className="hud-label">{hudLabel(pub)}</div>
           {pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>}
         </div>
-        <div className="hud-team b"><div className="sc" data-score="1"><Roll v={sc(1)} /></div><div className="nm">{T[1].name}</div><span className="dot" /></div>
+        <div className="hud-team b">{pub.fire?.[1] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}<div className="sc" data-score="1"><Roll v={sc(1)} /></div><div className="nm">{T[1].name}</div><span className="dot" /></div>
       </div>
       {/* the mini-game's own score, small, under the night's: "This game: A 1 – 2 B" */}
       {w && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>

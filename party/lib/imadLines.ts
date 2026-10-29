@@ -217,6 +217,11 @@ export const HOST_LINES: Record<string, string[]> = {
     "Deliberation over. Play on.",
     "The referee has spoken. Me. I'm the referee."
   ],
+  "fire": [
+    "{team} are ON FIRE. Somebody get water.",
+    "Three in a row! {team}, leave some for the rest of us.",
+    "{team} can't miss right now. Annoying, isn't it, {other}?"
+  ],
   "finaltie": [
     "A draw! Everybody wins! Nobody wins! Philosophy!",
     "Tied at the end. Fine. Rematch. Now.",

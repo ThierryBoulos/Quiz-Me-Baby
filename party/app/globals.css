@@ -574,3 +574,21 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .pip.done { animation: pipDone .6s var(--ease); }
 @keyframes pipDone { 0% { transform: scale(1.9); background: var(--color-gold); } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .steal-beam, .lead-banner, .roll-ring, .win-ring, .win-flash, .ruler-band { display: none; } }
+
+/* ---- phase 6 (29 Oct): the glow between questions, the flame, Imad's moves, the chart ---- */
+.tv-glow { position: absolute; inset: 0; z-index: -1; pointer-events: none; transition: opacity 1.4s ease;
+  background: radial-gradient(60% 55% at 50% 100%, color-mix(in srgb, var(--c) 26%, transparent), transparent 70%);
+  animation: glowBreathe 5s ease-in-out infinite; }
+@keyframes glowBreathe { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.06); filter: brightness(1.25); } }
+.flame { display: inline-block; font-size: .8em; margin: 0 6px; transform-origin: 50% 90%; animation: flameFlicker .7s ease-in-out infinite alternate; filter: drop-shadow(0 0 8px rgba(255,140,0,.8)); }
+@keyframes flameFlicker { from { transform: scale(1) rotate(-4deg); } to { transform: scale(1.15) rotate(4deg); } }
+.imad-bubble.yes img { animation: imadHop .7s cubic-bezier(.3,1.4,.5,1) both; }
+.imad-bubble.no img { animation: imadShake .7s ease-in-out both; }
+.imad-bubble.lean img { animation: imadLean .9s ease-in-out both; }
+@keyframes imadHop { 0% { transform: translateY(0); } 35% { transform: translateY(-16px) scale(1.06); } 60% { transform: translateY(0) scale(.96); } 80% { transform: translateY(-5px); } 100% { transform: none; } }
+@keyframes imadShake { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-12deg); } 40% { transform: rotate(10deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(6deg); } }
+@keyframes imadLean { 0% { transform: none; } 40% { transform: translateX(10px) rotate(8deg) scale(1.08); } 100% { transform: none; } }
+.night-chart { overflow: visible; }
+.chart-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: chartDraw 2.2s ease-out forwards; filter: drop-shadow(0 0 6px currentColor); }
+@keyframes chartDraw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .tv-glow, .flame, .imad-bubble img { animation: none; } .chart-line { animation: none; stroke-dashoffset: 0; } }
