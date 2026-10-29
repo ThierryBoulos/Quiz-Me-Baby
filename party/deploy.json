@@ -1,0 +1,4 @@
+{
+  "urgent": false,
+  "_": "urgent: true makes every open TV and phone reload at the next calm moment even mid-night. Set it in the commit whose build must reach a live game (a changed save format, a bug that breaks play); set it back to false in the next one. Otherwise a build waits for the night to end."
+}

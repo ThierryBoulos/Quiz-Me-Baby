@@ -51,7 +51,7 @@ export default function TvRoom() {
   const pub = own || ((room?.state?.pub || null) as Pub | null);
   usePreload(pub);
   /* an old copy of the app (left open across a deploy) reloads between questions */
-  useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline));
+  useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline), room?.status === "playing");
   /* the night is over and somebody tapped Exit: home (a moment later, so every phone hears it first) */
   useEffect(() => { if (!pub?.exit) return; const t = setTimeout(() => router.replace("/"), 1500); return () => clearTimeout(t); }, [pub?.exit, router]);
   /* for the end-to-end tests: what the TV is showing */

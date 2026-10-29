@@ -76,7 +76,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const usedMem = useRef(new Set<string>());
   const used = useCallback((): Set<string> => {
     try { return new Set([...JSON.parse(localStorage.getItem(usedKey) || "[]"), ...usedMem.current]); } catch { return new Set(usedMem.current); }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);   // usedKey only changes with the room code, which remounts the page
   const env = useCallback(() => {
     const bank = st.current.bank!;
     return { deal: dealerFor(bank, used), settings: seat() };
@@ -140,7 +141,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const lobbyMine = useRef<{ teamNames?: [string, string]; away?: string[] }>({});
   /* (and the newest stamp: a lobby write made before the TV has read back its own Play again must not carry the old one, which the phones would take for an old room) */
   const lobbyState = (room: Room) => ({ ...room.state, ...lobbyMine.current, pubAt: Math.max(Number(room.state?.pubAt) || 0, lastAt.current) || undefined });
-  const publish = useCallback(() => {
   /* the TV's last errors (29 Oct): kept in the room with the next write, so a night that broke can be read
      back afterwards (rooms stay 3 days). Short, few, and never the answers. */
   const errs = useRef<{ t: number; m: string }[]>([]);
@@ -152,6 +152,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     window.addEventListener("error", onErr); window.addEventListener("unhandledrejection", onRej);
     return () => { window.removeEventListener("error", onErr); window.removeEventListener("unhandledrejection", onRej); };
   }, [isTv]);
+  const publish = useCallback(() => {
     pubN.current++;
     /* this TV shows the change at once; the phones get it with the next write */
     const now = view(); if (now) { now[0].at = Date.now(); setPub(now[0]); }
@@ -290,7 +291,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     /* the TV is asleep: a clock that started meanwhile (the steal, after an answer) waits with the rest */
     if (s.tvAway && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; s.paused = true; s.awayPaused = true; }
-  }, [used]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [used]);   // usedKey: as above
 
   const play = useCallback((move: G) => {
     const s = st.current;
@@ -1063,7 +1065,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (ok === true) { took.current = true; void publish(); }
       else if (ok) refuse(ok);
     }
-  }, [applyFx, captainInput, captainMove, code, draftKey, env, hostMove, play, publish, refuse, resetPlayed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applyFx, captainInput, captainMove, code, draftKey, env, hostMove, play, publish, refuse, resetPlayed]);   // mrAnswer, onNote, sayLobby: stable (refs and setters)
 
   /* In the lobby, the TV's settings and its own questions go to the host's phone (the secrets row: the
      host's alone, as the answers are), so the host can pick the TV's questions and change its settings
@@ -1161,12 +1164,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
          two seconds: 180 messages a second, over the realtime limit: 24 Oct). While the question is up, the answers
          that come in within a second go out together; the last one in is the reveal, and goes at once. */
       if (a.kind === "answer" && s.screen === "majorityQ") publishSoon();
-      else void publish();
-    } else if (a.kind !== "count" && a.kind !== "suggest" && a.kind !== "draft" && s.g && pubN.current === n) void publish();
-  }, [handle, publish, publishSoon]);
       /* a player's tap (an idea for the captain, a count): the same, so a big room can't make the TV write
          thirty times a second; a captain's or the host's goes out at once (29 Oct) */
       else if (ctx.current.members.find((m) => m.user_id === a.user_id)?.role === "player") publishSoon();
+      else void publish();
+    } else if (a.kind !== "count" && a.kind !== "suggest" && a.kind !== "draft" && s.g && pubN.current === n) void publish();
+  }, [handle, publish, publishSoon]);
   useInbox(code, isTv, handleAndReply);
 
   /* Who's here: every phone on screen is present on the room's realtime channel (see
@@ -1275,7 +1278,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       } finally { H.busy = false; }
       return;
     }
-  }, [code, publish, current, play, applyFx, settle]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, publish, current, play, applyFx, settle]);   // waitsOn reads state through refs
   /* The lobby: a captain silent for T_LOBBY_AWAY (phone asleep, gone) shows as away on the TV, and any
      teammate can take the armband (the "setup" takeCaptain action). Kept in the room's state for the phones. */
   useEffect(() => {

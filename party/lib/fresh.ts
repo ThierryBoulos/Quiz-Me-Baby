@@ -6,31 +6,34 @@ import { useEffect, useRef } from "react";
    minute (and when the screen comes back) each page asks which deploy is
    live; if it isn't the one it came from, it reloads at the next calm moment
    (`safe`: not while someone is typing an answer or a clock is running). A
-   reload is safe mid-game: the TV restores the night, phones take their seat. */
+   reload is safe mid-game: the TV restores the night, phones take their seat.
+   29 Oct: not while the room is PLAYING, though, unless the deploy says it is urgent (deploy.json): a build
+   that changes the save format can end a live night, and most builds can wait for the final screen. */
 const MINE = process.env.NEXT_PUBLIC_BUILD || "";
 /* once per new deploy at most: if a reload still doesn't bring the new code (a cache), never loop */
 const reload = (to: string) => {
   try { if (sessionStorage.getItem("qmb.reloadedFor") === to) return; sessionStorage.setItem("qmb.reloadedFor", to); } catch { return; }
   location.reload();
 };
-export function useFreshBuild(safe: boolean) {
-  const stale = useRef(""), safeRef = useRef(safe);
-  safeRef.current = safe;
+export function useFreshBuild(safe: boolean, playing = false) {
+  const stale = useRef(""), safeRef = useRef(safe), playingRef = useRef(playing), urgent = useRef(false);
+  safeRef.current = safe; playingRef.current = playing;
+  const may = () => safeRef.current && (!playingRef.current || urgent.current);
   useEffect(() => {
     if (!MINE) return;
     const check = async () => {
       try {
         const r = await fetch("/api/build", { cache: "no-store" });
-        const { build } = (await r.json()) as { build?: string };
-        if (build && build !== MINE) stale.current = build;
+        const { build, urgent: u } = (await r.json()) as { build?: string; urgent?: boolean };
+        if (build && build !== MINE) { stale.current = build; urgent.current = !!u; }
       } catch { /* offline: try again later */ }
-      if (stale.current && safeRef.current) reload(stale.current);
+      if (stale.current && may()) reload(stale.current);
     };
     const t = setInterval(() => void check(), 60000);
     const vis = () => { if (document.visibilityState === "visible") void check(); };
     document.addEventListener("visibilitychange", vis);
     return () => { clearInterval(t); document.removeEventListener("visibilitychange", vis); };
   }, []);
-  /* already known to be old, and now it's calm: reload */
-  useEffect(() => { if (safe && stale.current) reload(stale.current); }, [safe]);
+  /* already known to be old, and now it's calm (and the night is over, or the build can't wait): reload */
+  useEffect(() => { if (stale.current && may()) reload(stale.current); }, [safe, playing]);
 }

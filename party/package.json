@@ -3,6 +3,7 @@
   "version": "4.2.0",
   "private": true,
   "description": "Quiz Me Baby, Party mode: the TV is the show, phones are the controllers.",
+  "engines": { "node": "22.x" },
   "scripts": {
     "predev": "node scripts/copy-classic.mjs && node scripts/hash-flags.mjs",
     "dev": "next dev",
