@@ -69,7 +69,8 @@ export type Pub = {
   /* ok: the verdict that stands now; app: what the app said first (the "App suggests" tag) */
   reveal?: { answer: string; typed?: Two<string[] | null>; guesses?: Two<number | null>; ok?: Two<boolean | null>; app?: Two<boolean | null>; w: 0 | 1 | "tie" | "none" | null;
     offList?: Two<boolean>; notes?: string };   // notes: Closest To Wins' word on the answer. offList: Say the Same: an answer that isn't a real answer to the prompt (it counts as SAID IT)
-  summary?: { wins: Two<number>; winner: 0 | 1 | null; needsHost: boolean; note: string; award?: Two<number> };
+  summary?: { wins: Two<number>; winner: 0 | 1 | null; needsHost: boolean; note: string; award?: Two<number>;
+    who?: string };   // Majority Rules: the players with the most and the fewest right (29 Oct)
   winner?: 0 | 1 | null;
   toast?: { id: number; text: string } | null;
   /* no host: what a captain sent, the app's verdict, and how long the other captain has to change the call */
@@ -80,7 +81,8 @@ export type Pub = {
     countedBy?: string };   // who taps +1 while the bidder names them (the host, or with no host the other captain)
   battle?: { cap: 0 | 1; i: number; n: number; score: Two<number>; last?: { answer: string; got: boolean | null } | null;
     tb?: number; winner?: 0 | 1 | null; note?: string; award?: Two<number>;
-    half?: { said: string; got: boolean; answer: string }[] };   // half: at the handoff, the first captain's every answer
+    half?: { said: string; got: boolean; answer: string }[];   // half: at the handoff, the first captain's every answer
+    predict?: string };   // at the summary: the players who called their captain's score (29 Oct)
   autoAt?: number | null;         // no host: when this screen moves on by itself
   pips?: { kind: "std" | "mini"; state: "now" | "done" | "todo" }[];   // the night's progress, for the tracker
   captains?: [string | null, string | null];

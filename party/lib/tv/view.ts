@@ -115,6 +115,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.mini = { key, title: MINI_TITLES[key], leg: Math.min(b.i + 1, b.n), of: b.n, wins: [...b.score] as Two<number>, pts: g.battlePts || g.miniPts };
     p.battle = { cap: b.cap, i: b.i, n: b.n, score: [...b.score] as Two<number>, last: s.lastAns,
       tb: b.tb?.n, winner: b.done ? b.winner : null, note: b.note, award: b.award };
+    if (s.screen === "battleSummary") { const pr = predictLine(s, g); if (pr) p.battle.predict = pr; }
     /* halfway: all ten of the first captain's, not just the last (20 Oct) */
     if (s.screen === "battleHandoff") p.battle.half = ((b.log?.[0] || []) as G[]).filter(Boolean).map((e) => ({ said: e.said || "", got: !!e.got, answer: e.q?.answer || "" }));
     if (s.screen === "battleQ" || s.screen === "battleTie") { p.question = q?.question; p.turn = s.screen === "battleQ" ? b.cap : undefined; }
@@ -124,6 +125,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.mini = { key, title: MINI_TITLES[key], leg: Math.min(m.i + 1, m.qs.length), of: m.base, wins: [...m.wins] as Two<number>, pts: g.miniPts, tie: m.i >= m.base, fun: !!m.fun };
     if (key === "dish") p.mini.kinds = m.levels.some((l: string) => l[0] === "c") && m.levels.some((l: string) => l[0] === "d") ? "Cocktails + dishes" : m.levels[0][0] === "c" ? "Cocktails" : "Dishes";
     if (/Summary$/.test(s.screen) && m.verdict) p.summary = { wins: [...m.wins] as Two<number>, winner: m.verdict.winner, needsHost: m.verdict.needsHost, note: m.verdict.note || "", award: m.award };
+    if (s.screen === "majoritySummary" && p.summary) { const who = mrWhoLine(g); if (who) p.summary.who = who; }
   }
   /* a reveal's leg counts in the tracker straight away (and moves with the ruling until Next) */
   const prov: W | null = s.screen === "closestReveal" ? closestW(s) : s.screen === "flagReveal" || s.screen === "mapReveal" || s.screen === "airportReveal" ? okWin(s)
@@ -189,4 +191,29 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   if (s.exit) p.exit = true;
   if (Object.keys(s.ack).length) p.ack = s.ack;
   return [p, secret];
+}
+
+/* Majority Rules: the players with the most and the fewest right answers over the game (29 Oct) */
+function mrWhoLine(g: G): string {
+  const W = (g.majorityGame?.who || {}) as Record<string, { r: number; of: number }>;
+  const all = Object.entries(W).filter(([, w]) => w.of > 0);
+  if (all.length < 2) return "";
+  const hi = Math.max(...all.map(([, w]) => w.r)), lo = Math.min(...all.map(([, w]) => w.r));
+  const names = (n: number) => { const L = all.filter(([, w]) => w.r === n).map(([k]) => k); return L.length > 3 ? `${L.length} players` : L.join(" & "); };
+  const of = Math.max(...all.map(([, w]) => w.of));
+  return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of} · Fewest: ${names(lo)}, ${lo} of ${of}`;
+}
+/* the Battle: whose call on their captain's score was closest, per team (29 Oct) */
+function predictLine(s: TvState, g: G): string {
+  const b = g.battle; if (!b) return "";
+  const out: string[] = [];
+  for (const t of [0, 1] as const) {
+    const ps = Object.values(s.predict || {}).filter((p) => p.team === t);
+    if (!ps.length) continue;
+    const got = b.score[t], best = Math.min(...ps.map((p) => Math.abs(p.n - got)));
+    const w = ps.filter((p) => Math.abs(p.n - got) === best);
+    out.push(best === 0 ? `${w.map((p) => p.name).join(" & ")} called ${g.teams[t].name}'s ${got} spot on`
+      : `${w.map((p) => p.name).join(" & ")} closest for ${g.teams[t].name}: ${w[0].n} (they got ${got})`);
+  }
+  return out.join(" · ");
 }

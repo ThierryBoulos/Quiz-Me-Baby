@@ -751,10 +751,12 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
   if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary; return (<>
     {head(S.winner, S.needsHost ? "Still level" : S.winner == null ? "A split" : `${T[S.winner].name} win ${m?.title ?? "it"}`,
       S.needsHost ? "The host decides" : S.winner == null ? `${S.award?.[0] ?? 0} point${S.award?.[0] === 1 ? "" : "s"} each` : `+${S.award?.[S.winner] ?? m?.pts} points`)}
-    {board(S.wins, "Legs won", S.winner)}</>); }
+    {board(S.wins, "Legs won", S.winner)}
+    {S.who && <div className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{S.who}</div>}</>); }
   if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null; return (<>
     {head(w, w == null ? (B.note || "Tie") : `${T[w].name} win the Battle`, w != null ? `+${B.award?.[w] ?? m?.pts} points` : "")}
-    {board(B.score, "Right answers", w)}</>); }
+    {board(B.score, "Right answers", w)}
+    {B.predict && <div className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{B.predict}</div>}</>); }
   if (sc === "final") { const w = pub.winner ?? null; return (
     <div className="text-center flex flex-col gap-2 py-4" role="status" aria-live="polite">
       <div className="eyebrow">{w == null ? "The night ends" : "The winner"}</div>
@@ -903,11 +905,29 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   const notOurs = (pub.screen === "ask" || pub.screen === "steal") && pub.turn !== mine;
   const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !CAPTAINS_ONLY.includes(pub.screen) && !notOurs && !pub.sent?.[mine];
   const np = useNoPaste(code, pub.qid);
+  /* the Auction: a count-along, on this phone only (the TV's count is the one that counts); the Battle: one call on
+     your captain's score, before their first question (29 Oct) */
+  const [tally, setTally] = useState(0), [pred, setPred] = useState<number | null>(null), [predBusy, setPredBusy] = useState(false);
+  useEffect(() => { setTally(0); }, [pub.qid]);
+  useEffect(() => { setPred(null); }, [pub.screen]);
+  const predict = async (n: number) => {
+    setPredBusy(true);
+    try { await sendAction(code, "answer", { predict: n, team: mine, k: `${pub.qid}|${pub.screen}` }); setPred(n); } catch { /* the TV says why, under the buttons */ }
+    setPredBusy(false);
+  };
+  const callIt = (pub.screen === "battleIntro" || pub.screen === "battleHandoff") && pub.battle && pub.battle.cap === mine;
   const suggest = async () => { const t = text.trim(); if (!t) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); } catch { /* the phone already says so; the text stays */ } };
   return (
     <div className="flex flex-col gap-4 flex-1">
       {/* Majority Rules' join screen: whether you're on the list, and who's here, before the rules */}
       {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={me} />}
+      {/* the Battle: your call on your captain's score, above the intro so nobody has to scroll for it */}
+      {callIt && (
+        <div className="card flex flex-col gap-2">
+          <div className="eyebrow">Your call: how many will {cap?.name || "your captain"} get, out of {pub.battle!.n}?</div>
+          {pred != null ? <p className="text-15">You said <b>{pred}</b>. The summary tells.</p>
+            : <div className="grid grid-cols-6 gap-1.5">{Array.from({ length: pub.battle!.n + 1 }, (_, n) => <button key={n} className="btn btn-sm" disabled={predBusy} onClick={() => void predict(n)}>{n}</button>)}</div>}
+        </div>)}
       <Head pub={pub} me={me} capName={cap?.name} />
       <OnScreen pub={pub} />
       {/^majority(Q|Reveal)$/.test(pub.screen) && <MajorityPad pub={pub} me={me} code={code} />}
@@ -921,6 +941,16 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
           </div>
           {np.hint}
           {sent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sent}</b></div>}
+        </div>)}
+      {pub.screen === "auctionRun" && (
+        <div className="card flex flex-col gap-2 items-center">
+          <div className="eyebrow">Count along (just for you)</div>
+          <div className="display text-52" style={{ color: "var(--color-gold)" }}>{tally}</div>
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <button className="btn btn-gold btn-lg" onClick={() => setTally((t) => t + 1)}>+1</button>
+            <button className="btn" disabled={!tally} onClick={() => setTally((t) => Math.max(0, t - 1))}>Undo</button>
+          </div>
+          <p className="text-12 text-[var(--color-ink-3)] text-center">The TV&rsquo;s count is the one that counts: {pub.auction?.count ?? 0} so far.</p>
         </div>)}
       {pub.screen === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />}
       {pub.nextBy && <WaitingFor pub={pub} />}

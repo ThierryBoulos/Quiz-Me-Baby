@@ -33,6 +33,8 @@ export const newState = () => ({
   mrOut: [] as string[], mrHere: [] as string[],
   mrAsk: null as null | { name: string; team: 0 | 1; until: number },
   votes: {} as Record<string, string>,
+  /* the Battle: each player's call on their captain's score, by phone (29 Oct) */
+  predict: {} as Record<string, { name: string; team: 0 | 1; n: number }>,
   /* no host: a captain's request the other captain agrees to, or not (no answer by `until`: nothing changes):
      new total scores (a, b; from: the scores when asked, so points won meanwhile aren't wiped out), or a new
      question on this screen (key: the one asked about; held: the clock was running, and stopped for it) */

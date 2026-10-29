@@ -532,6 +532,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     <MiniTitle title="Battle of the Captains" />
     <ScoreBoard pub={pub} w={B.score} win={B.winner} size="tv" />
     <div className="display text-52" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Tie") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
+    {B.predict && <div className="text-22" style={{ color: "var(--color-gold)" }}>{B.predict}</div>}
     <SdCalls pub={pub} />
   </>); }
 
@@ -544,6 +545,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
         {S.needsHost ? "Still level: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{pointsEach(S.award?.[0] ?? 0)}</span>
           : <span data-fly-src={S.winner}>{`${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</span>}</div>
       {S.note && !/^split/i.test(S.note) && <div className="text-22 text-[var(--color-ink-2)]">{S.note}</div>}
+      {S.who && <div className="text-22" style={{ color: "var(--color-gold)" }}>{S.who}</div>}
     </>);
   }
   return null;

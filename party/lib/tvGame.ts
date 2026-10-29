@@ -51,6 +51,12 @@ function sdRecord(s: TvState, team: 0 | 1, ok: boolean) {
    and moves the night along, and the captains referee each other. */
 /* the clocks stood still for d ms (the TV was asleep, offline, or without its questions): every moment
    the game is waiting for moves on by that much */
+/* Majority Rules: each player's own count of right answers across the game (for the summary's line) */
+function mrWho(s: TvState) {
+  const g = s.g, q = currentQ(s); if (!g?.majorityGame || !s.mrList) return;
+  const W: Record<string, { r: number; of: number; team: 0 | 1 }> = (g.majorityGame.who = g.majorityGame.who || {});
+  for (const e of s.mrList) { const w = (W[e.name] = W[e.name] || { r: 0, of: 0, team: e.team }); w.of++; if (q && s.votes[e.name] === q.answer) w.r++; }
+}
 function shiftClocks(s: TvState, d: number) {
   if (s.pending) s.pending = { ...s.pending, until: s.pending.until + d };
   if (s.lifeline?.deadline) s.lifeline = { ...s.lifeline, deadline: s.lifeline.deadline + d };
@@ -180,7 +186,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.exit) { localStorage.removeItem(saveKey); lastSave.current = ""; }
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
+            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
           if (save !== lastSave.current) { localStorage.setItem(saveKey, save); lastSave.current = save; }
         }
@@ -485,7 +491,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const againGame = () => {
     const s = st.current, room = ctx.current.room;
     Object.assign(s, { g: null, screen: "", step: 1, pending: null, lifeline: null, autoAt: null, deadline: null, left: 0, timeUp: false, paused: false,
-      typed: [null, null], guesses: [null, null], pins: [null, null], mrList: null, mrOut: [], mrAsk: null, agree: null, mrHere: [], votes: {}, ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
+      typed: [null, null], guesses: [null, null], pins: [null, null], mrList: null, mrOut: [], mrAsk: null, agree: null, mrHere: [], votes: {}, predict: {}, ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
     try { localStorage.removeItem(saveKey); } catch { /* */ }
     lastSave.current = "";
     setPub(null);
@@ -620,7 +626,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else if (s.screen === "sayReveal") play({ type: "say/verdict", w: sayW() });
       else if (s.screen === "pinReveal") play({ type: "pin/settle", pins: [s.pins[0], s.pins[1]] });
       else if (s.screen === "airportReveal") play({ type: "airport/verdict", w: okW() });
-      else if (s.screen === "majorityReveal") play({ type: "majority/settle", right: mrTally(s).right });
+      else if (s.screen === "majorityReveal") { mrWho(s); play({ type: "majority/settle", right: mrTally(s).right }); }
     }
     else if (t === "ui/sdRight" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, true)) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: s.sdBuzz } : { type: "sudden/win", w: s.sdBuzz });
     else if (t === "ui/sdWrong" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, false)) {
@@ -1052,6 +1058,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return;
     }
     if (from.role !== "captain" || (from.team !== 0 && from.team !== 1)) return;
+    /* the Battle: a player's call on their own captain's score, before that captain's first question (29 Oct) */
+    if (a.kind === "answer" && from.role === "player" && (s.screen === "battleIntro" || s.screen === "battleHandoff") && s.g?.battle && typeof a.payload.predict === "number") {
+      const b = s.g.battle, n = Math.max(0, Math.min(b.n, Math.floor(a.payload.predict as number)));
+      if (from.team !== b.cap) { refused.current = s.screen === "battleIntro" ? "Your captain goes second: call it at halftime." : "Your captain has played already."; return; }
+      if (s.predict[a.user_id]) { refused.current = "One call each."; return; }
+      s.predict = { ...s.predict, [a.user_id]: { name: from.name, team: b.cap as 0 | 1, n } };
+      took.current = true;
+      return;
+    }
     if (a.kind === "next") {
       const move = (a.payload.move || {}) as G, free = SAME_SCREEN.has(move.type);
       if (!free && a.payload.step !== s.step) return;
