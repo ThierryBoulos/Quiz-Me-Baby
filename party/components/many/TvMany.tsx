@@ -155,15 +155,11 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
               <span className="win-ring r2" style={{ ["--c" as string]: c }} aria-hidden />
               <div className="display win-slam max-w-[1160px] leading-none" style={{ fontSize: (name.length > 10 ? 0.74 : 1) * (recap ? 64 : 150), color: c, transition: "font-size .6s ease" }}><bdi>{name}</bdi></div>
             </div>
-            {/* the recap (the two-team night's, for N teams): the night drawn, the nutshell beside it, then the awards */}
+            {/* the recap: the night drawn across the whole screen, the award cards under it (the owner, 30 Oct: no
+                nutshell, it crowded the chart) */}
             {recap && (<>
-              <div className="flex gap-8 items-center justify-center w-full enter" style={{ position: "relative", zIndex: 60 }}>
-                {pub.final!.log.length > 2 ? <NightChartMany pub={pub} /> : <BoardMany pub={pub} cols={finalCols(pub)} size="tv" label="Final standings" width={700} />}
-                {pub.final!.lines.length > 0 && (
-                  <div className="card text-left !py-2 w-[380px] shrink-0">
-                    <div className="eyebrow text-13 mb-0.5" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
-                    <ul className="flex flex-col gap-1 text-18 leading-snug">{pub.final!.lines.map((l) => <li key={l}><bdi>{l}</bdi></li>)}</ul>
-                  </div>)}
+              <div className="flex justify-center w-full enter" style={{ position: "relative", zIndex: 60 }}>
+                {pub.final!.log.length > 2 ? <NightChartMany pub={pub} /> : <BoardMany pub={pub} cols={finalCols(pub)} size="tv" label="Final standings" />}
               </div>
               {pub.final!.awards.length > 0 && (
                 <div className="grid gap-3 enter w-full max-w-[1168px]" style={{ gridTemplateColumns: `repeat(${pub.final!.awards.length}, minmax(0, 1fr))`, position: "relative", zIndex: 60 }}>
@@ -212,20 +208,23 @@ function Answered({ pub }: { pub: PubMany }) {
   return <span className="font-bold text-26 text-left" style={{ color: v >= n && n > 0 ? "var(--color-ok)" : "var(--color-ink-2)" }}>{v} of {n}<br />answered</span>;
 }
 
-/* the night, drawn (the two-team NightChart, for N teams): every team's score after each game, drawing itself
-   across; each line ends on the team's place and score, the labels kept apart so none sits on another */
+/* the night, drawn (the two-team NightChart, for N teams), the whole width of the screen: every team's score after
+   each game, drawing itself across, the games named along the bottom; each line ends on the team's place and score,
+   the labels kept apart so none sits on another */
 function NightChartMany({ pub }: { pub: PubMany }) {
-  const L = pub.final!.log, T = pub.teams, W = 480, H = 190, PAD = 14, n = L.length, max = Math.max(1, ...L.flat());
-  const x = (i: number) => (i / (n - 1)) * W, y = (v: number) => H - PAD - (v / max) * (H - 2 * PAD);
+  const L = pub.final!.log, T = pub.teams, W = 890, H = 270, PAD = 16, B = H - 30, n = L.length, max = Math.max(1, ...L.flat());
+  const x = (i: number) => (i / (n - 1)) * W, y = (v: number) => B - (v / max) * (B - PAD);
   const place = Object.fromEntries(pub.final!.order.map((o) => [o.team, o.place]));
   /* the labels: in score order, each at least 22 apart, kept inside the chart */
   const lab = T.map((_, t) => t).sort((a, b) => T[b].score - T[a].score || a - b), at: Record<number, number> = {};
   let last = -Infinity; for (const t of lab) { const v = Math.max(y(L[n - 1][t]), last + 22); at[t] = v; last = v; }
-  const over = last - (H - 4); if (over > 0) for (const t of lab) at[t] -= over;
+  const over = last - (B + 6); if (over > 0) for (const t of lab) at[t] -= over;
   return (
     <svg className="night-chart shrink-0" viewBox={`0 0 ${W + 250} ${H}`} width={W + 250} height={H} aria-label={"The scores through the night: " + lab.map((t) => `${T[t].name} ${T[t].score}`).join(", ")}>
-      <line x1={0} y1={H - PAD} x2={W} y2={H - PAD} stroke="rgba(255,255,255,.14)" strokeWidth={2} />
-      {L.map((_, i) => i > 0 && <line key={i} x1={x(i)} y1={PAD} x2={x(i)} y2={H - PAD} stroke="rgba(255,255,255,.06)" strokeWidth={1} />)}
+      <line x1={0} y1={B} x2={W} y2={B} stroke="rgba(255,255,255,.14)" strokeWidth={2} />
+      {L.map((_, i) => i > 0 && <line key={i} x1={x(i)} y1={PAD} x2={x(i)} y2={B} stroke="rgba(255,255,255,.06)" strokeWidth={1} />)}
+      {/* each game, under the point its scores were counted */}
+      {pub.final!.games.map((gm, i) => <text key={"g" + i} x={x(i + 1)} y={H - 6} textAnchor={i + 1 === n - 1 ? "end" : "middle"} fill="rgba(185,192,222,.75)" fontSize={14} fontWeight={700} letterSpacing=".12em">{gm.toUpperCase()}</text>)}
       {T.map((t, i) => <polyline key={i} points={L.map((row, j) => `${x(j).toFixed(1)},${y(row[i]).toFixed(1)}`).join(" ")} fill="none" stroke={t.color} strokeWidth={4} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-line" style={{ animationDelay: i * 0.12 + "s" }} />)}
       {lab.map((t) => (
         <g key={"l" + t}>

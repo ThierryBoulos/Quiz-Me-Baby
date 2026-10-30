@@ -219,14 +219,14 @@ export function mrLine(s: StateM): string {
   return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of} · Wooden spoon: ${names(lo)}, ${lo} of ${of}`;
 }
 
-/* ---- the end of the night (the two-team night's recap, for N teams): awards and the night in a nutshell ---- */
+/* ---- the end of the night (the two-team night's recap, for N teams): the award cards ---- */
 export type AwardM = { t: string; who: string; team: number | null; note?: string; spoon?: boolean };
 /* the wooden spoon's word from the judges, as the two-team night says it (lib/tv/recap.ts) */
 const spoonQuip = (lo: number, of: number) => { const coin = Math.round(of / 4);
   return lo === 0 ? `Zero. Guessing blind gets about ${coin}.` : lo < coin ? `Guessing blind gets about ${coin}. Just saying.` : lo === coin ? "Exactly what a coin would get. Respect." : "Last, but with dignity."; };
 /* the one team with the most of something (a tie, nobody) */
 const topOf = (v: number[], min = 1): number | null => { const best = Math.max(...v); const at = v.filter((x) => x === best).length; return best >= min && at === 1 ? v.indexOf(best) : null; };
-export function recapMany(s: StateM): { awards: AwardM[]; lines: string[] } {
+export function recapMany(s: StateM): AwardM[] {
   const S = s.stats, T = s.teams, nm = (t: number) => T[t].name, out: AwardM[] = [], has = (k: ManyKey) => s.minis.some((m) => m.key === k);
   let t: number | null;
   if ((t = topOf(S.firsts, 2)) != null) out.push({ t: "Most questions won", who: `${nm(t)}, ${S.firsts[t]}`, team: t });
@@ -245,20 +245,5 @@ export function recapMany(s: StateM): { awards: AwardM[]; lines: string[] } {
     if (hi > lo && low.length <= 2) out.push({ t: "Wooden spoon, Majority Rules", who: `${low.map(([k]) => k).join(" & ")}, ${lo} of ${of}`, team: low.length === 1 ? low[0][1].team : null,
       note: spoonQuip(lo, of), spoon: true });
   }
-  /* the nutshell: who led through the night, the biggest climb, how close the top was */
-  const lines: string[] = [], L = s.log.slice(1), place = (row: number[], i: number) => 1 + row.filter((x) => x > row[i]).length;
-  const leaders = L.map((row) => { const b = Math.max(...row); const at = row.map((x, i) => (x === b ? i : -1)).filter((i) => i >= 0); return at.length === 1 ? at[0] : -1; });
-  const fin = ranking(s), first = fin.filter((x) => x.place === 1).map((x) => x.team);
-  if (L.length >= 2 && first.length === 1 && leaders.every((x) => x === first[0])) lines.push(`${nm(first[0])} led after every game.`);
-  else { const ch = leaders.filter((x, i) => i > 0 && x >= 0 && leaders[i - 1] >= 0 && x !== leaders[i - 1]).length; if (ch >= 1) lines.push(`The lead changed hands ${ch === 1 ? "once" : ch + " times"}.`); }
-  if (L.length >= 2) {
-    const climb = T.map((_, i) => place(L[0], i) - place(L[L.length - 1], i)), up = Math.max(...climb);
-    if (up >= 2) { const i = climb.indexOf(up); lines.push(`${nm(i)} climbed from ${ordinal(place(L[0], i))} after the first game to ${ordinal(place(L[L.length - 1], i))}.`); }
-  }
-  const sc = fin.map((x) => T[x.team].score);
-  if (first.length > 1) lines.push(`A shared win: ${first.map(nm).join(" & ")} on ${T[first[0]].score}.`);
-  else if (sc.length > 1 && sc[0] - sc[1] <= 2) lines.push(`${nm(fin[0].team)} held off ${nm(fin[1].team)} by ${sc[0] - sc[1]} point${sc[0] - sc[1] === 1 ? "" : "s"}.`);
-  else if (sc.length > 1) lines.push(`${nm(fin[0].team)} won by ${sc[0] - sc[1]} points.`);
-  return { awards: out.slice(0, 5), lines: lines.slice(0, 3) };
+  return out.slice(0, 5);
 }
-const ordinal = (n: number) => ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"][n] || `${n}th`;

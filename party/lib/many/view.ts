@@ -18,7 +18,7 @@ export type PubMany = {
     places?: (number | null)[]; pts?: number[] };            // this leg's places and what they pay this game
   /* a game's result: its tally (or shares), its places, what each place pays the night */
   summary?: { wins: number[]; pts: number[]; shares?: number[]; places: number[]; award: number[]; line?: string };
-  final?: { order: { team: number; place: number }[]; log: number[][]; awards: AwardM[]; lines: string[] };
+  final?: { order: { team: number; place: number }[]; log: number[][]; awards: AwardM[]; games: string[] };
   fire?: boolean[];                                // three legs in a row at 1st, this game
   toast: { id: number; text: string } | null; exit?: boolean; ack?: Record<string, Record<string, string>>;
 };
@@ -49,7 +49,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   }
   if (m && s.screen === "summary") pub.summary = { wins: [...m.wins], pts: [...m.pts], shares: m.key === "majority" ? s.teams.map((_, t) => share(m, t)) : undefined,
     places: m.places || s.teams.map(() => s.teams.length), award: m.award || [], line: m.key === "majority" ? mrLine(s) || undefined : undefined };
-  if (s.screen === "final") pub.final = { order: ranking(s), log: s.log, ...recapMany(s) };
+  if (s.screen === "final") pub.final = { order: ranking(s), log: s.log, awards: recapMany(s), games: s.minis.map((m) => MANY_TITLES[m.key]) };
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
   /* the host's phone: the answer while it's up, and what every captain typed */
   const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal") ? { answer: String(q.answer), notes: q.notes, typed: s.typed, nums: s.nums } : {};
