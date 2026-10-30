@@ -98,4 +98,4 @@
 111.75 battleReview | 44 | 5-11 | 6-5 | Owls +1 point | 
 112.75 battleSummary | 45 | 9-11 | 6-5 | Owls +1 point | 
 113.75 final | 46 | 9-11 |  | Owls +1 point | 
-recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[1,3],"minis":[1,1],"best":{"title":"Drop the Pin","team":1,"legs":[2,4]},"chart":[[0,0],[0,0],[0,1],[0,3],[0,4],[0,6],[0,7],[0,8],[1,8],[2,8],[3,9],[4,9],[4,10],[5,10],[5,11],[9,11]],"awards":[{"t":"Best aim, Drop the Pin","who":"Owls, 212 km off in all","team":1},{"t":"Best thief","who":"Owls, 3 steals","team":1},{"t":"Battle of the Captains","who":"Rami, 6 of 10","team":0}]}
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[1,3],"minis":[1,1],"best":{"title":"Drop the Pin","team":1,"legs":[2,4]},"chart":[[0,0],[0,0],[0,1],[0,3],[0,4],[0,6],[0,7],[0,8],[1,8],[2,8],[3,9],[4,9],[4,10],[5,10],[5,11],[9,11]],"awards":[{"t":"Best aim, Drop the Pin","who":"Owls, 199 km off in all","team":1},{"t":"Best thief","who":"Owls, 3 steals","team":1},{"t":"Battle of the Captains","who":"Rami, 6 of 10","team":0}]}

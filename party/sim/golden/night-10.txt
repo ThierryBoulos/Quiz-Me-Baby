@@ -55,82 +55,83 @@
 1203.50 miniQ | 47 | 2-5 | 1-0 | Lions takes leg 1. | 
 1246.75 closestReveal | 47 | 2-5 | 1-1 | Lions takes leg 1. | 
 1272.75 miniQ | 48 | 2-5 | 1-1 | Owls takes leg 2. | 
-1313.25 closestReveal | 48 | 2-5 | 2-2 | Owls takes leg 2. | 
-1332.25 miniQ | 49 | 2-5 | 2-2 | Tie — a point each. | 
-1372.75 closestReveal | 49 | 2-5 | 3-2 | Tie — a point each. | 
-1378.25 miniQ | 50 | 2-5 | 3-2 | Lions takes leg 4. | 
-1409.75 closestReveal | 50 | 2-5 | 4-2 | Lions takes leg 4. | 
-1429.50 miniSummary | 51 | 4-5 | 4-2 | Lions takes leg 5. | 
-1434.00 roundIntro | 52 | 4-5 |  | Lions takes leg 5. | 
-1438.50 ask | 53 | 4-5 |  | Lions takes leg 5. | 
-1461.75 answer | 54 | 5-5 |  | Lions +1 point | 
-1516.75 answer | 54 | 5-5 |  |  | 
-1522.25 answer | 54 | 5-5 |  | The host keeps the call. | 
-1526.75 ask | 55 | 5-5 |  | The host keeps the call. | 
-1572.50 answer | 56 | 5-6 |  | Owls +1 point | 
-1581.50 roundScore | 57 | 5-6 |  | Owls +1 point | 
-1585.25 roundIntro | 58 | 5-6 |  | Owls +1 point | 
-1604.00 ask | 59 | 5-6 |  | Owls +1 point | 
-1641.75 steal | 60 | 5-6 |  | Owls +1 point | 
-1672.75 steal | 61 | 5-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1680.50 answer | 62 | 5-7 |  | Owls +1 point — steal | 
-1710.25 ask | 63 | 5-7 |  | Owls +1 point — steal | 
-1806.50 answer | 64 | 5-8 |  | Owls +1 point | 
-1810.25 roundScore | 65 | 5-8 |  | Owls +1 point | 
-1845.25 auctionIntro | 66 | 5-8 | 0-0 | Owls +1 point | 
-1857.00 auctionBid | 67 | 5-8 | 0-0 | Owls +1 point | 
-1858.75 auctionBid | 68 | 5-8 | 0-0 | Owls +1 point | 
-1864.25 auctionRun | 69 | 5-8 | 0-0 | Owls +1 point | 
-1871.25 auctionLeg | 69 | 5-8 | 1-0 | Owls +1 point | 
-1884.75 auctionBid | 70 | 5-8 | 1-0 | Owls +1 point | 
-1896.50 auctionBid | 71 | 5-8 | 1-0 | Owls +1 point | 
-1901.00 auctionRun | 72 | 5-8 | 1-0 | Owls +1 point | 
-1932.00 auctionLeg | 73 | 5-8 | 2-0 | Owls +1 point | 
-1954.25 decided | 74 | 5-8 | 2-0 |  | 
-1965.00 roundIntro | 75 | 7-8 |  |  | 
-1990.25 ask | 76 | 7-8 |  |  | 
-2000.00 ask | 76 | 7-8 |  | Lions used Call a Friend. | 
-2008.25 ask | 77 | 7-8 |  | Lions used Call a Friend. | 
-2023.50 ask | 77 | 7-8 |  | Lions used Double Dip. | 
-2059.50 answer | 78 | 8-8 |  | Lions +1 point | 
-2138.75 ask | 79 | 8-8 |  | Lions +1 point | 
-2160.25 steal | 80 | 8-8 |  | Lions +1 point | 
-2178.25 answer | 81 | 9-8 |  | Lions +1 point — steal | 
-2185.50 answer | 81 | 9-8 |  |  | 
-2208.00 roundScore | 82 | 9-8 |  |  | 
-2311.50 battleIntro | 83 | 9-8 | 0-0 |  | 
-2330.25 battleQ | 84 | 9-8 | 0-0 |  | 
-2331.25 battleQ | 85 | 9-8 | 1-0 |  | 
-2339.25 battleQ | 86 | 9-8 | 1-0 |  | 
-2360.00 battleQ | 87 | 9-8 | 2-0 |  | 
-2368.00 battleQ | 88 | 9-8 | 2-0 |  | 
-2370.75 battleQ | 89 | 9-8 | 3-0 |  | 
-2378.75 battleQ | 90 | 9-8 | 3-0 |  | 
-2381.75 battleQ | 91 | 9-8 | 4-0 |  | 
-2389.75 battleQ | 92 | 9-8 | 4-0 |  | 
-2397.00 battleQ | 93 | 9-8 | 4-0 |  | 
-2405.00 battleQ | 94 | 9-8 | 4-0 |  | 
-2415.00 battleQ | 95 | 9-8 | 4-0 |  | 
-2417.75 battleQ | 96 | 9-8 | 5-0 |  | 
-2418.50 battleQ | 97 | 9-8 | 5-0 |  | 
-2421.25 battleQ | 98 | 9-8 | 6-0 |  | 
-2423.00 battleHandoff | 99 | 9-8 | 6-0 |  | 
-2425.75 battleQ | 100 | 9-8 | 6-0 |  | 
-2433.75 battleQ | 101 | 9-8 | 6-0 |  | 
-2460.75 battleQ | 102 | 9-8 | 6-1 |  | 
-2467.25 battleQ | 103 | 9-8 | 6-2 |  | 
-2475.25 battleQ | 104 | 9-8 | 6-2 |  | 
-2495.00 battleQ | 105 | 9-8 | 6-3 |  | 
-2503.00 battleQ | 106 | 9-8 | 6-3 |  | 
-2521.25 battleQ | 107 | 9-8 | 6-3 |  | 
-2529.25 battleQ | 108 | 9-8 | 6-3 |  | 
-2579.75 battleQ | 109 | 9-8 | 6-3 |  | 
-2586.00 battleQ | 110 | 9-8 | 6-4 |  | 
-2594.00 battleQ | 111 | 9-8 | 6-4 |  | 
-2636.25 battleQ | 112 | 9-8 | 6-5 |  | 
-2640.00 battleQ | 113 | 9-8 | 6-6 |  | 
-2648.00 battleQ | 114 | 9-8 | 6-6 |  | 
-2654.25 battleQ | 115 | 9-8 | 6-6 |  | 
-2659.75 battleSummary | 116 | 9-12 | 6-7 |  | 
-2673.25 final | 117 | 9-12 |  |  | 
-recap: {"margin":3,"sudden":false,"leadChanges":3,"steals":[1,1],"minis":[2,2],"best":{"title":"Closest To Wins","team":0,"legs":[4,2]},"chart":[[0,0],[0,0],[1,0],[1,1],[2,1],[2,2],[2,4],[2,5],[4,5],[5,5],[5,6],[5,7],[5,8],[7,8],[8,8],[9,8],[9,12]],"awards":[{"t":"Closest To Wins","who":"Lions, 4 legs to 2","team":0},{"t":"Battle of the Captains","who":"Lea, 7 of 10","team":1}]}
+1313.25 closestReveal | 48 | 2-5 | 2-1 | Owls takes leg 2. | 
+1332.25 miniQ | 49 | 2-5 | 2-1 | Lions takes leg 3. | 
+1372.75 closestReveal | 49 | 2-5 | 3-1 | Lions takes leg 3. | 
+1378.25 decided | 50 | 2-5 | 3-1 |  | 
+1385.25 miniQ | 51 | 4-5 | 3-1 |  | 
+1413.25 closestReveal | 51 | 4-5 | 4-1 |  | 
+1433.00 miniSummary | 52 | 4-5 | 4-1 | Lions takes leg 5. | 
+1437.50 roundIntro | 53 | 4-5 |  | Lions takes leg 5. | 
+1442.00 ask | 54 | 4-5 |  | Lions takes leg 5. | 
+1465.50 answer | 55 | 5-5 |  | Lions +1 point | 
+1520.25 answer | 55 | 5-5 |  |  | 
+1525.75 answer | 55 | 5-5 |  | The host keeps the call. | 
+1530.25 ask | 56 | 5-5 |  | The host keeps the call. | 
+1576.25 answer | 57 | 5-6 |  | Owls +1 point | 
+1585.25 roundScore | 58 | 5-6 |  | Owls +1 point | 
+1588.75 roundIntro | 59 | 5-6 |  | Owls +1 point | 
+1607.75 ask | 60 | 5-6 |  | Owls +1 point | 
+1645.50 steal | 61 | 5-6 |  | Owls +1 point | 
+1676.50 steal | 62 | 5-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1684.25 answer | 63 | 5-7 |  | Owls +1 point — steal | 
+1713.75 ask | 64 | 5-7 |  | Owls +1 point — steal | 
+1810.25 answer | 65 | 5-8 |  | Owls +1 point | 
+1813.75 roundScore | 66 | 5-8 |  | Owls +1 point | 
+1848.75 auctionIntro | 67 | 5-8 | 0-0 | Owls +1 point | 
+1860.50 auctionBid | 68 | 5-8 | 0-0 | Owls +1 point | 
+1862.25 auctionBid | 69 | 5-8 | 0-0 | Owls +1 point | 
+1867.75 auctionRun | 70 | 5-8 | 0-0 | Owls +1 point | 
+1875.00 auctionLeg | 70 | 5-8 | 1-0 | Owls +1 point | 
+1888.50 auctionBid | 71 | 5-8 | 1-0 | Owls +1 point | 
+1900.25 auctionBid | 72 | 5-8 | 1-0 | Owls +1 point | 
+1904.75 auctionRun | 73 | 5-8 | 1-0 | Owls +1 point | 
+1935.75 auctionLeg | 74 | 5-8 | 2-0 | Owls +1 point | 
+1957.75 decided | 75 | 5-8 | 2-0 |  | 
+1968.50 roundIntro | 76 | 7-8 |  |  | 
+1993.75 ask | 77 | 7-8 |  |  | 
+2003.75 ask | 77 | 7-8 |  | Lions used Call a Friend. | 
+2011.75 ask | 78 | 7-8 |  | Lions used Call a Friend. | 
+2027.00 ask | 78 | 7-8 |  | Lions used Double Dip. | 
+2063.00 answer | 79 | 8-8 |  | Lions +1 point | 
+2142.25 ask | 80 | 8-8 |  | Lions +1 point | 
+2163.75 steal | 81 | 8-8 |  | Lions +1 point | 
+2181.75 answer | 82 | 9-8 |  | Lions +1 point — steal | 
+2189.00 answer | 82 | 9-8 |  |  | 
+2211.50 roundScore | 83 | 9-8 |  |  | 
+2315.00 battleIntro | 84 | 9-8 | 0-0 |  | 
+2334.00 battleQ | 85 | 9-8 | 0-0 |  | 
+2334.75 battleQ | 86 | 9-8 | 1-0 |  | 
+2342.75 battleQ | 87 | 9-8 | 1-0 |  | 
+2363.75 battleQ | 88 | 9-8 | 2-0 |  | 
+2371.75 battleQ | 89 | 9-8 | 2-0 |  | 
+2374.50 battleQ | 90 | 9-8 | 3-0 |  | 
+2382.50 battleQ | 91 | 9-8 | 3-0 |  | 
+2385.25 battleQ | 92 | 9-8 | 4-0 |  | 
+2393.25 battleQ | 93 | 9-8 | 4-0 |  | 
+2400.50 battleQ | 94 | 9-8 | 4-0 |  | 
+2408.50 battleQ | 95 | 9-8 | 4-0 |  | 
+2418.50 battleQ | 96 | 9-8 | 4-0 |  | 
+2421.25 battleQ | 97 | 9-8 | 5-0 |  | 
+2422.25 battleQ | 98 | 9-8 | 5-0 |  | 
+2424.75 battleQ | 99 | 9-8 | 6-0 |  | 
+2426.75 battleHandoff | 100 | 9-8 | 6-0 |  | 
+2429.25 battleQ | 101 | 9-8 | 6-0 |  | 
+2437.25 battleQ | 102 | 9-8 | 6-0 |  | 
+2464.50 battleQ | 103 | 9-8 | 6-1 |  | 
+2470.75 battleQ | 104 | 9-8 | 6-2 |  | 
+2478.75 battleQ | 105 | 9-8 | 6-2 |  | 
+2498.75 battleQ | 106 | 9-8 | 6-3 |  | 
+2506.75 battleQ | 107 | 9-8 | 6-3 |  | 
+2524.75 battleQ | 108 | 9-8 | 6-3 |  | 
+2532.75 battleQ | 109 | 9-8 | 6-3 |  | 
+2583.25 battleQ | 110 | 9-8 | 6-3 |  | 
+2589.50 battleQ | 111 | 9-8 | 6-4 |  | 
+2597.50 battleQ | 112 | 9-8 | 6-4 |  | 
+2640.00 battleQ | 113 | 9-8 | 6-5 |  | 
+2643.50 battleQ | 114 | 9-8 | 6-6 |  | 
+2651.50 battleQ | 115 | 9-8 | 6-6 |  | 
+2658.00 battleQ | 116 | 9-8 | 6-6 |  | 
+2663.25 battleSummary | 117 | 9-12 | 6-7 |  | 
+2676.75 final | 118 | 9-12 |  |  | 
+recap: {"margin":3,"sudden":false,"leadChanges":3,"steals":[1,1],"minis":[2,2],"best":{"title":"Closest To Wins","team":0,"legs":[4,1]},"chart":[[0,0],[0,0],[1,0],[1,1],[2,1],[2,2],[2,4],[2,5],[4,5],[5,5],[5,6],[5,7],[5,8],[7,8],[8,8],[9,8],[9,12]],"awards":[{"t":"Closest To Wins","who":"Lions, 4 legs to 1","team":0},{"t":"Battle of the Captains","who":"Lea, 7 of 10","team":1}]}
