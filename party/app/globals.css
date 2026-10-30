@@ -628,8 +628,9 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* Guess the Flag's result: the pole, the finial, the flags hoisted up it one after another (the winner's last) */
 .flag-pole { position: absolute; left: 8px; top: 10px; bottom: 0; width: 10px; border-radius: 5px; background: linear-gradient(90deg, #6d7393, #d9dcef 45%, #6d7393); }
 .flag-finial { position: absolute; left: 3px; top: 0; width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c2, var(--color-gold) 50%, #b8860b); box-shadow: 0 0 14px rgba(245,197,24,.7); }
-.flag-cloth { display: flex; align-items: center; gap: 12px; padding: 0 34px 0 16px; color: #04050e; min-width: 0;
-  background: linear-gradient(100deg, var(--c), color-mix(in srgb, var(--c) 70%, #fff) 55%, var(--c)); clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%);
+/* the swallowtail cut the same depth on every flag, long or short, and the number kept clear of it */
+.flag-cloth { --notch: 24px; display: flex; align-items: center; gap: 12px; padding: 0 calc(var(--notch) + 14px) 0 16px; color: #04050e; min-width: 0;
+  background: linear-gradient(100deg, var(--c), color-mix(in srgb, var(--c) 70%, #fff) 55%, var(--c)); clip-path: polygon(0 0, 100% 0, calc(100% - var(--notch)) 50%, 100% 100%, 0 100%);
   transform-origin: left center; animation: flagWave 2.6s ease-in-out infinite alternate; }
 .flag-cloth.lit { filter: drop-shadow(0 0 16px var(--c)); }
 @keyframes flagWave { from { transform: skewY(-1.2deg); } to { transform: skewY(1.2deg); } }

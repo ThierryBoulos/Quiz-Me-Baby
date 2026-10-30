@@ -205,7 +205,7 @@ export function FlagPoleMany({ pub }: { pub: PubMany }) {
         <ol className="flex flex-col" style={{ gap: dense ? 4 : 10 }}>
           {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
             <li key={t} role="listitem" className="flag-hoist grid items-center" style={{ gridTemplateColumns: `${minW + spread}px ${dense ? 40 : 48}px ${dense ? 52 : 64}px`, columnGap: 10, animationDelay: (k - 1 - j) * 0.09 + "s" }}>
-              <div className={"flag-cloth" + (lit ? " lit" : "")} style={{ ["--c" as string]: T[t].color, height: rowH, width: minW + (S.pts[t] / best) * spread, opacity: paid ? 1 : 0.5 }}>
+              <div className={"flag-cloth" + (lit ? " lit" : "")} style={{ ["--c" as string]: T[t].color, ["--notch" as string]: dense ? "16px" : "24px", height: rowH, width: minW + (S.pts[t] / best) * spread, opacity: paid ? 1 : 0.5 }}>
                 <span className="display leading-none" style={{ fontSize: dense ? 16 : 24 }}>{paid ? S.places[t] : "–"}</span>
                 <span className="truncate font-bold uppercase tracking-[.08em]" style={{ fontSize: dense ? 13 : 18 }}><bdi>{T[t].name}</bdi></span>
                 <span className="display leading-none ml-auto" style={{ fontSize: dense ? 22 : 32 }}>{S.pts[t]}</span>
