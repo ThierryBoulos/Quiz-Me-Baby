@@ -9,8 +9,10 @@ import { Clock } from "../Clock";
 import { Confetti, FlagImg, PinPhoto } from "../GameParts";
 import { PinMap } from "../PinMap";
 import { showKm, showNum } from "@/lib/game";
+import { LETTERS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
-import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, summaryCols, takes } from "./PartsMany";
+import { Ruler } from "../Ruler";
+import { BoardMany, byDistance, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, summaryCols, takes } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -94,11 +96,10 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "closest" && (<>
-          <div className="text-26 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
-          <div className="eyebrow text-18">The answer</div>
-          <div className="display beat slam" style={{ ...QUICK, fontSize: 80, color: "var(--color-gold)" }}>{showNum(Number(R.answer))}</div>
+          <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] truncate">{pub.question}</div>
+          <div className="display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{showNum(Number(R.answer))}</div>
           {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 truncate">{R.notes}</div>}
-          <div className="beat w-full" style={{ ...QUICK, ...d(0.3) }}><BoardMany pub={pub} cols={closestCols(pub)} size="tv" label="Nearest first" /></div>
+          <Ruler ans={Number(R.answer)} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i) }))} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.6), color: W.color }}>{W.text}</div>
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "pin" && R.at && (

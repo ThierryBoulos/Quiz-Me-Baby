@@ -7,7 +7,8 @@ import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
-import { BEAT_MS, BEAT_SCREENS, DECIDED, offBy, showKm, showNum, TIE_SCREENS } from "@/lib/game";
+import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
+import { Ruler } from "./Ruler";
 import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
@@ -232,32 +233,10 @@ function SplitFlap({ text, size, start = 0 }: { text: string; size: number; star
     </div>);
 }
 
-/* Closest To Wins: a ruler with the answer in the middle. A guess under the answer sits to its left, over it to
-   its right, the farther one near the end; A's card above the ruler, B's below. The pins drop in, then a band
-   in the team's colour runs from the answer out to each guess: the longer the band, the further off. */
+/* Closest To Wins: the ruler (components/Ruler.tsx): A's card above it, B's below; no answer at the far end */
 function NumberLine({ pub, ans, w }: { pub: Pub; ans: number; w: 0 | 1 | "tie" | "none" | null | undefined }) {
   const T = pub.teams, g = pub.reveal?.guesses || [];
-  const far = Math.max(...[0, 1].map((t) => (g[t] == null ? 0 : Math.abs(Number(g[t]) - ans))), 0);
-  const at = (t: number) => (g[t] == null || !far ? 50 : 50 + ((Number(g[t]) - ans) / far) * 42);
-  return (
-    <div className="ruler relative w-[1040px] h-[210px]" style={QUICK}>
-      <div className="ruler-track"><span className="ruler-ticks" /></div>
-      {([0, 1] as const).map((t) => { const gss = g[t]; if (gss == null) return null; const x = at(t); return (
-        <div key={"b" + t} className={"ruler-band " + (t ? "b" : "a")} style={{ left: Math.min(x, 50) + "%", width: Math.abs(x - 50) + "%", background: tc(t), transformOrigin: x < 50 ? "right" : "left", ...d(0.5 + t * 0.12) }} />); })}
-      <div className="ruler-mid"><span className="lbl">answer</span></div>
-      {([0, 1] as const).map((t) => { const gss = g[t], x = at(t), win = w === t || w === "tie"; if (gss == null) return (
-        <div key={t} className={"ruler-none " + (t ? "b" : "a")}><b style={{ color: tc(t) }}>{T[t].name}</b> · no answer</div>);
-        const off = offBy(gss, ans), side = x < 18 ? "l" : x > 82 ? "r" : "c";
-        return (
-        <div key={t} className={"ruler-pin " + (t ? "b" : "a") + (win ? " win" : "")} style={{ left: x + "%", ["--c" as string]: tc(t), ...d(0.12 + t * 0.14) }}>
-          <span className="stem" /><span className="dot" />
-          <span className={"card-l " + side}>
-            <span className="nm" style={{ color: tc(t) }}>{T[t].name}</span>
-            <span className="v display">{showNum(gss)}</span>
-            <span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off)}</span>
-          </span>
-        </div>); })}
-    </div>);
+  return <Ruler ans={ans} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t), guess: g[t] == null ? null : Number(g[t]), win: w === t || w === "tie" }))} />;
 }
 
 /* the Auction's run: a notch per answer counted, up to the bid. A big bid (over 12) is one bar instead, marked

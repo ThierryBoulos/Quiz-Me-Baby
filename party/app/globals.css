@@ -521,34 +521,36 @@ button.ll:not([disabled]):active { transform: scale(.97); }
   background: linear-gradient(180deg, #161a36, #0d1029); border: 3px solid rgba(245,197,24,.55); box-shadow: 0 18px 40px -16px rgba(0,0,0,.7); }
 .say-inner .back { transform: rotateY(180deg); color: var(--color-gold); }
 .say-inner .front { font-size: 96px; color: rgba(245,197,24,.75); background: repeating-linear-gradient(45deg, #161a36 0 14px, #12152e 14px 28px); }
-/* Closest To Wins: the ruler. The track, its ticks, the answer's gold marker in the middle; each guess a pin with
-   a card (A's above, B's below) and a band from the answer out to it */
+/* Closest To Wins: the ruler (components/Ruler.tsx). The track, its ticks, the answer's gold marker in the middle;
+   each guess a dot with a card on a lane (A's above, B's below with two teams) and a band from the answer out to it */
 .ruler-track { position: absolute; left: 0; right: 0; top: 98px; height: 14px; border-radius: 7px; overflow: hidden;
   background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.13) 50%, rgba(255,255,255,.05)); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
 .ruler-ticks { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 2px, transparent 2px 52px); background-position: 25px 0; opacity: .7; }
 .ruler-band { position: absolute; height: 7px; border-radius: 4px; opacity: .85; animation: gapIn .55s var(--ease) both; animation-delay: calc(var(--beat) + var(--d, 0s)); }
-.ruler-band.a { top: 98px; } .ruler-band.b { top: 105px; }
 @keyframes gapIn { from { transform: scaleX(0); } to { transform: none; } }
 .ruler-mid { position: absolute; left: 50%; top: 84px; width: 6px; height: 42px; margin-left: -3px; border-radius: 3px; background: var(--color-gold);
   box-shadow: 0 0 0 3px rgba(245,197,24,.18), 0 0 22px rgba(245,197,24,.8); }
 .ruler-mid .lbl { position: absolute; left: 50%; top: 48px; transform: translateX(-50%); font-size: 12px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase;
   color: var(--color-gold); white-space: nowrap; opacity: .85; }
-.ruler-pin { position: absolute; top: 0; width: 0; height: 210px; animation: pinDrop .55s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(var(--beat) + var(--d, 0s)); }
-.ruler-pin.a { --drop: -36px; } .ruler-pin.b { --drop: 36px; }
+.ruler-grp { position: absolute; inset: 0; pointer-events: none; animation: pinDrop .55s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(var(--beat) + var(--d, 0s)); }
 @keyframes pinDrop { from { opacity: 0; transform: translateY(var(--drop)); } to { opacity: 1; transform: none; } }
-.ruler-pin .dot { position: absolute; left: -12px; top: 93px; width: 24px; height: 24px; border-radius: 50%; background: var(--c); border: 3px solid #fff; box-shadow: 0 0 16px var(--c); }
-.ruler-pin .stem { position: absolute; left: -1px; width: 2px; background: var(--c); opacity: .8; }
-.ruler-pin.a .stem { top: 62px; height: 34px; } .ruler-pin.b .stem { top: 114px; height: 34px; }
-.ruler-pin .card-l { position: absolute; display: flex; align-items: baseline; gap: 10px; white-space: nowrap; padding: 6px 14px; border-radius: 14px;
+.ruler-dot { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: var(--c); border: 3px solid #fff; box-shadow: 0 0 16px var(--c);
+  display: grid; place-items: center; font-size: 10px; font-weight: 800; line-height: 1; color: #04050e; }
+.ruler-grp .card-l { position: absolute; display: flex; align-items: baseline; gap: 10px; white-space: nowrap; padding: 6px 14px; border-radius: 14px;
   background: color-mix(in srgb, var(--c) 14%, #0b0e24); border: 2px solid color-mix(in srgb, var(--c) 70%, transparent); }
-.ruler-pin.a .card-l { top: 8px; } .ruler-pin.b .card-l { top: 146px; }
-.ruler-pin .card-l.c { left: 0; transform: translateX(-50%); } .ruler-pin .card-l.l { left: -26px; } .ruler-pin .card-l.r { right: -26px; }
-.ruler-pin .card-l .nm { font-size: 14px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-.ruler-pin .card-l .v { font-size: 38px; line-height: 1; color: #fff; }
-.ruler-pin .card-l .off { font-size: 18px; color: var(--color-ink-2); }
-.ruler-pin.win .card-l { border-color: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), 0 10px 34px -10px var(--c); }
-.ruler-pin.win .dot { box-shadow: 0 0 0 7px color-mix(in srgb, var(--c) 28%, transparent), 0 0 26px var(--c); }
-.ruler-none { position: absolute; font-size: 20px; color: var(--color-ink-2); } .ruler-none.a { left: 0; top: 30px; } .ruler-none.b { right: 0; top: 160px; }
+.ruler-grp .card-l .nm { font-size: 14px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.ruler-grp .card-l .v { font-size: 38px; line-height: 1; color: #fff; }
+.ruler-grp .card-l .off { font-size: 18px; color: var(--color-ink-2); }
+/* more than two teams: the same card a size smaller, so eight fit */
+.ruler-grp .card-l.sm { gap: 8px; padding: 4px 11px; border-radius: 12px; }
+.ruler-grp .card-l.sm .nm { font-size: 12px; letter-spacing: .12em; max-width: 170px; overflow: hidden; text-overflow: ellipsis; }
+.ruler-grp .card-l.sm .v { font-size: 26px; } .ruler-grp .card-l.sm .off { font-size: 14px; }
+.ruler-grp.win .card-l { border-color: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), 0 10px 34px -10px var(--c); }
+.ruler-grp.win .ruler-dot { box-shadow: 0 0 0 7px color-mix(in srgb, var(--c) 28%, transparent), 0 0 26px var(--c); }
+/* no answer: off the scale, at the far right end: a hatched end to the track, a hollow dot, a dashed card */
+.ruler-off { position: absolute; right: 0; border-radius: 0 7px 7px 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.16) 0 4px, transparent 4px 9px); }
+.ruler-grp.none .ruler-dot { background: #0b0e24; border: 3px dashed var(--c); box-shadow: none; color: var(--c); }
+.ruler-grp.none .card-l { border-style: dashed; background: #0b0e24; }
 /* a split-flap board: dark tiles, a hinge line across the middle, the letter in the board's yellow */
 .flap { display: flex; flex-wrap: wrap; justify-content: center; gap: .28em .42em; line-height: 1; }
 .flap-word { display: inline-flex; gap: .08em; }
