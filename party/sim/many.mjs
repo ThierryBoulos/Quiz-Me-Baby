@@ -44,6 +44,7 @@ function night(k, crowd, seed) {
   }
   trace.push("final " + L.ranking(s).map((x) => `${x.place}:${s.teams[x.team].name}`).join(" "));
   if (L.mrLine(s)) trace.push("majority: " + L.mrLine(s));
+  trace.push("awards: " + L.recapMany(s).map((x) => `${x.t}: ${x.who}`).join(" | "));
   return { s, trace };
 }
 

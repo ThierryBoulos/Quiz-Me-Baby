@@ -231,19 +231,24 @@ export function recapMany(s: StateM): AwardM[] {
   let t: number | null;
   if ((t = topOf(S.firsts, 2)) != null) out.push({ t: "Most questions won", who: `${nm(t)}, ${S.firsts[t]}`, team: t });
   if ((t = topOf(S.seconds, 2)) != null && t !== topOf(S.firsts, 2)) out.push({ t: "Always the bridesmaid", who: `${nm(t)}, 2nd ${S.seconds[t]} times`, team: t });
-  if (has("flag") && (t = topOf(S.fastest, 2)) != null) out.push({ t: "Fastest fingers, Guess the Flag", who: `${nm(t)}, first right ${S.fastest[t]} times`, team: t });
   if (has("pin")) {
     const legs = s.minis.find((m) => m.key === "pin")!.qs.length, avg = T.map((_, i) => (S.kmN[i] >= Math.ceil(legs / 2) ? S.km[i] / S.kmN[i] : Infinity));
     const lo = Math.min(...avg); if (Number.isFinite(lo) && avg.filter((x) => x === lo).length === 1) { t = avg.indexOf(lo); out.push({ t: "Best aim, Drop the Pin", who: `${nm(t)}, ${lo < 1 ? "under 1 km" : Math.round(lo).toLocaleString("en") + " km"} off on average`, team: t }); }
   }
-  if ((t = topOf(S.best, 3)) != null) out.push({ t: "Hot streak", who: `${nm(t)}, ${S.best[t]} in a row`, team: t });
+  /* Majority Rules' players, one by one (the owner, 30 Oct: these over the flag and streak cards): the sharpest and the
+     wooden spoon, shared by up to three, more than that counted */
   const mr = Object.entries(s.who).filter(([, w]) => w.of > 0);
-  if (mr.length >= 2) {
-    const hi = Math.max(...mr.map(([, w]) => w.r)), lo = Math.min(...mr.map(([, w]) => w.r)), of = Math.max(...mr.map(([, w]) => w.of));
-    const top = mr.filter(([, w]) => w.r === hi), low = mr.filter(([, w]) => w.r === lo);
-    if (hi > lo && top.length === 1) out.push({ t: "Sharpest in Majority Rules", who: `${top[0][0]}, ${hi} of ${of}`, team: top[0][1].team });
-    if (hi > lo && low.length <= 2) out.push({ t: "Wooden spoon, Majority Rules", who: `${low.map(([k]) => k).join(" & ")}, ${lo} of ${of}`, team: low.length === 1 ? low[0][1].team : null,
-      note: spoonQuip(lo, of), spoon: true });
+  const hi = Math.max(0, ...mr.map(([, w]) => w.r)), lo = Math.min(...mr.map(([, w]) => w.r)), of = Math.max(0, ...mr.map(([, w]) => w.of));
+  const mrOn = mr.length >= 2 && hi > lo;
+  if (mrOn) {
+    const at = (v: number) => mr.filter(([, w]) => w.r === v), names = (L: typeof mr) => (L.length > 3 ? `${L.length} players` : L.map(([k]) => k).join(" & "));
+    const top = at(hi), low = at(lo), one = (L: typeof mr) => (L.length === 1 ? L[0][1].team : null);
+    out.push({ t: "Sharpest in Majority Rules", who: `${names(top)}, ${hi} of ${of}`, team: one(top) });
+    out.push({ t: "Wooden spoon, Majority Rules", who: `${names(low)}, ${lo} of ${of}`, team: one(low), note: spoonQuip(lo, of), spoon: true });
+  } else {
+    /* no Majority Rules tonight (or everyone level): the quickest flags and the longest run instead */
+    if (has("flag") && (t = topOf(S.fastest, 2)) != null) out.push({ t: "Fastest fingers, Guess the Flag", who: `${nm(t)}, first right ${S.fastest[t]} times`, team: t });
+    if ((t = topOf(S.best, 3)) != null) out.push({ t: "Hot streak", who: `${nm(t)}, ${S.best[t]} in a row`, team: t });
   }
   return out.slice(0, 5);
 }
