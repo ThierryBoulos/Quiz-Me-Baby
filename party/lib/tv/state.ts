@@ -22,6 +22,8 @@ export const newState = () => ({
   offList: [false, false] as Two<boolean>,                                   // Say the Same: not a real answer to the prompt
   qkeys: {} as Record<string, number>,                                        // real question id → the number the phones see
   scoreLog: [] as Two<number>[],
+  /* the parts of the night as they came (R1, R2…, each mini-game, sudden death) and where each starts in scoreLog: the end chart's X axis */
+  segLog: [] as { label: string; at: number }[],
   streak: [0, 0] as Two<number>,                                              // legs taken in a row, this mini-game (on fire at four)
   fireWas: [false, false] as Two<boolean>,                                    // so the flame is announced once each time it lights
   imadMood: "" as string,                                                     // how Imad takes the latest moment (yes | no | lean)                                              // the score after every change (lead changes, for the recap)

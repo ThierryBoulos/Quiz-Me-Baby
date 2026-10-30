@@ -14,6 +14,14 @@ import type { TvState } from "./state";
 export const qk = (s: TvState, id: string) => "k" + (s.qkeys[id] ??= Object.keys(s.qkeys).length + 1);
 /* sudden death and the Battle's tie-breaker: when the buzzer's time to type runs out */
 const typeByOf = (s: TvState) => s.sdBuzz != null && s.buzzAt && !s.typed[s.sdBuzz] && !s.pending ? s.buzzAt + getSettings().tDishType * 1000 : null;
+/* which part of the night a screen is in: a round ("R2"), a mini-game (its name), sudden death; the end tie's
+   question (One more / A point each) stays with the part before it */
+const segOf = (s: TvState): string | null => {
+  const sc = s.screen, k = sc === DECIDED ? s.decided?.key ?? null : miniOf(sc);
+  if (k) return MINI_TITLES[k];
+  if (sc === "sudden") return "Sudden death";
+  return ["roundIntro", "ask", "steal", "answer", "roundScore"].includes(sc) ? `R${s.g.r + 1}` : null;
+};
 export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   const g = s.g;
   if (!g) return null;
@@ -39,7 +47,9 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     /* Drop the Pin: the photos, and the world map itself (big: from the intro on) */
     const pg = g.pinGame;
     if (pg && /^pin/.test(sc)) p.preload = { pins: pg.qs.slice(pg.i, all ? undefined : pg.i + 2).map((x: G) => x.photo).filter(Boolean), world: true }; }
-  /* every change of score, for the recap's lead changes */
+  /* the part of the night this screen is in (a new one starts where the score log is now), then every change of
+     score, for the recap's chart and lead changes */
+  { const seg = segOf(s), S = (s.segLog ||= []); if (seg && S[S.length - 1]?.label !== seg) S.push({ label: seg, at: s.scoreLog.length }); }
   { const L = s.scoreLog, now: Two<number> = [g.teams[0].score, g.teams[1].score], last = L[L.length - 1];
     if (!last || last[0] !== now[0] || last[1] !== now[1]) L.push(now); }
   if (s.screen === "final") p.recap = recap(s);

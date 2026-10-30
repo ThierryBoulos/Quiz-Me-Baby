@@ -193,7 +193,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog });
+            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
           if (save !== lastSave.current) {
             localStorage.setItem(saveKey, save); lastSave.current = save;
             /* ...and a copy on the server, so a new laptop can take over if this one dies (29 Oct, B9): on a new
@@ -505,7 +505,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const againGame = () => {
     const s = st.current, room = ctx.current.room;
     Object.assign(s, { g: null, screen: "", step: 1, pending: null, lifeline: null, autoAt: null, deadline: null, left: 0, timeUp: false, paused: false,
-      typed: [null, null], guesses: [null, null], pins: [null, null], mrList: null, mrOut: [], mrAsk: null, agree: null, mrHere: [], votes: {}, predict: {}, streak: [0, 0], fireWas: [false, false], ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [] });
+      typed: [null, null], guesses: [null, null], pins: [null, null], mrList: null, mrOut: [], mrAsk: null, agree: null, mrHere: [], votes: {}, predict: {}, streak: [0, 0], fireWas: [false, false], ok: [null, null], app: [null, null], decided: null, contest: null, contested: [], legLog: [], sdCur: [], sdQ: 0, sdLog: null, flags: [], toast: null, scoreLog: [], segLog: [] });
     try { localStorage.removeItem(saveKey); } catch { /* */ }
     lastSave.current = "";
     setPub(null);
@@ -1039,7 +1039,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       g.hostless = false;
       g.alternateFirst = getSettings().alternateFirst;
       s.nohost = !members.some((m) => m.role === "host");
-      s.g = g; s.screen = ""; s.lifeline = null; s.pending = null; s.autoAt = null; s.step = 1; s.scoreLog = []; s.agree = null;
+      s.g = g; s.screen = ""; s.lifeline = null; s.pending = null; s.autoAt = null; s.step = 1; s.scoreLog = []; s.segLog = []; s.agree = null;
       g.rounds.forEach((r: G) => r.q.forEach((q: G) => applyFx([{ used: q }])));
       play({ type: "game/start" });
       await sb().from("rooms").update({ status: "playing", mode: s.nohost ? "nohost" : "host" }).eq("code", code);

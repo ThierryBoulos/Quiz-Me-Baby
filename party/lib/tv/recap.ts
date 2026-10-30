@@ -22,8 +22,20 @@ export function recap(s: TvState): NonNullable<Pub["recap"]> {
   if (g.battle) won(MINI_TITLES.battle, g.battle.award);
   let changes = 0, lead = 0;
   s.scoreLog.forEach(([a, b]) => { const now = Math.sign(a - b); if (now && lead && now !== lead) changes++; if (now) lead = now; });
-  return { margin: Math.abs(g.teams[0].score - g.teams[1].score), sudden: !!g.sdRounds, leadChanges: changes, steals, minis, best, chart: chartOf(s.scoreLog), awards: awardsOf(s, steals) };
+  return { margin: Math.abs(g.teams[0].score - g.teams[1].score), sudden: !!g.sdRounds, leadChanges: changes, steals, minis, best, chart: chartOf(s.scoreLog), segs: segsOf(s), awards: awardsOf(s, steals) };
 }
+
+/* the night by its parts, each with its scores (at most 8, the last always in) */
+function segsOf(s: TvState): { label: string; pts: Two<number>[] }[] {
+  const L = s.scoreLog, S = s.segLog || [];
+  return S.map((seg, k) => {
+    const pts = L.slice(seg.at, k + 1 < S.length ? S[k + 1].at : L.length);
+    if (pts.length <= 8) return { label: seg.label, pts };
+    const step = (pts.length - 1) / 7;
+    return { label: seg.label, pts: Array.from({ length: 8 }, (_, i) => pts[Math.round(i * step)]) };
+  });
+}
+
 
 /* the scores through the night, at most 48 points (the first and the last always in) */
 function chartOf(L: Two<number>[]): Two<number>[] {
