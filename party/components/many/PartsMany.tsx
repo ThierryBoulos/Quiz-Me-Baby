@@ -2,7 +2,7 @@
 /* MANY TEAMS: the pieces the TV and every phone share, each the two-team one (components/GameParts.tsx)
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
-import { type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
 import { showKm, showNum } from "@/lib/game";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
@@ -57,9 +57,15 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
     : null;
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
-  /* this game's tally: on a reveal only (not while a question is up, the owner found it crowded the question; not on
-     the result, where the board in the middle says it, bigger) */
-  const tally = g && pub.screen === "reveal" ? (pc ? g.shares || g.wins.map(() => 0) : g.pts) : null;
+  /* the team row's number (the owner's idea, 30 Oct: the game's score and the night's on screen at once was too much):
+     during a game, this game's points (Majority Rules: its share right); between games, the night's totals. On a
+     game's result, what each place pays flies up from the board into the totals, then they roll up */
+  const inGame = !!g && (pub.screen === "q" || pub.screen === "reveal");
+  const award = pub.screen === "summary" ? pub.summary?.award : undefined;
+  const [landed, setLanded] = useState(false);
+  useEffect(() => { setLanded(false); if (pub.screen !== "summary") return; const t = setTimeout(() => setLanded(true), 1500); return () => clearTimeout(t); }, [pub.screen, pub.step]);
+  const num = (i: number) => (inGame && !pc ? g!.pts[i] : award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
+  const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
   return (
     <div className={`hud ${size} many ${packing(k)}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, top middle, where the two-team TV has it */}
@@ -69,18 +75,17 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
           <div key={i} className="hud-team" style={{ ["--c" as string]: t.color }}>
             <div className="flex items-center gap-2 min-w-0"><Dot t={i} color={t.color} size={k > 5 ? 16 : k > 4 ? 18 : 22} /><div className="nm"><bdi>{t.name}</bdi></div>
               {pub.fire?.[i] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}</div>
-            <div className="sc" data-score={i}><Roll v={t.score} /></div>
+            {/* a new mode starts its numbers fresh (no roll from a game's points down to the totals) */}
+            <div className="sc" data-score={i}>{inGame && pc ? pct(g!.shares?.[i] ?? 0) : <Roll key={inGame ? "g" + g!.index : "t"} v={num(i)} />}</div>
+            {award && !landed && (award[i] || 0) > 0 && <span className="hud-plus" style={{ animationDelay: order.indexOf(i) * 0.07 + "s" }} aria-hidden>+{award[i]}</span>}
           </div>))}
       </div>}
       <div className="hud-mid">
         {label && <div className="hud-label">{label}</div>}
         {pips.length > 0 && <div className="pips" aria-hidden>{pips.map((p, i) => <span key={i} className={`pip mini ${p}`} />)}</div>}
       </div>
-      {tv && tally && (
-        <div className="hud-mini" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(tally[i]) : tally[i]}`).join(", ")}`}>
-          <span>This game:</span>
-          {T.map((t, i) => <span key={i} className="flex items-center gap-1.5" style={{ ["--c" as string]: t.color }}><Dot t={i} color={t.color} size={14} /><span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span><b>{pc ? pct(tally[i]) : tally[i]}</b></span>)}
-        </div>)}
+      {/* what the numbers are: this game's, while it's on */}
+      {tv && inGame && <div className="hud-mini"><span>{pc ? "Share right, this game" : "Points this game"} · the night&rsquo;s totals after it</span></div>}
       {/* the phone: whose side you're on, small, in the team's colour (the screen's glow is that colour too) */}
       {!tv && me != null && T[me] && <div className="hud-mini" style={{ ["--c" as string]: T[me].color }}><span>You&rsquo;re on</span><Dot t={me} color={T[me].color} size={14} /><span className="nm" style={{ color: T[me].color }}><bdi>{T[me].name}</bdi></span></div>}
       {!tv && me == null && host && <div className="hud-mini"><span>You&rsquo;re the host</span></div>}
@@ -157,6 +162,28 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
         </div>))}
     </div>);
 }
+/* ---- Majority Rules' result on the TV (the owner's idea, 30 Oct): a bar a team, as tall as its share right, in
+   place order, growing up one after another; the share on top, the place, the name and what it pays under it ---- */
+export function BarsMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 180 : 240;
+  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
+  return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Share right: " + order.map((t) => `${T[t].name} ${pct(S.shares?.[t] ?? 0)}`).join(", ")}>
+      {order.map((t, j) => { const v = S.shares?.[t] ?? 0, paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
+        <div key={t} role="listitem" className="flex flex-col items-center gap-1 min-w-0" style={{ width: dense ? 124 : 180 }}>
+          <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{pct(v)}</div>
+          <div className="w-full flex items-end" style={{ height: H }}>
+            <div className="bar-grow w-full" style={{ height: Math.max(4, v * H), borderRadius: "12px 12px 3px 3px", animationDelay: j * 0.08 + "s", opacity: paid ? 1 : 0.4,
+              background: `linear-gradient(180deg, ${T[t].color}, color-mix(in srgb, ${T[t].color} 35%, transparent))`, boxShadow: lit ? `0 0 28px ${T[t].color}` : undefined }} />
+          </div>
+          <div className="display text-16 leading-none mt-1" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "—"}</div>
+          <div className="flex items-center gap-1.5 min-w-0 max-w-full"><Dot t={t} color={T[t].color} size={dense ? 14 : 18} />
+            <span className="eyebrow truncate" style={{ color: T[t].color, fontSize: dense ? 12 : 15 }}><bdi>{T[t].name}</bdi></span></div>
+          <div className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</div>
+        </div>); })}
+    </div>);
+}
+
 /* the columns of a game's result, by place: the game's points (or the share right), and what the place pays */
 export const summaryCols = (pub: PubMany): Col[] => {
   const S = pub.summary!;

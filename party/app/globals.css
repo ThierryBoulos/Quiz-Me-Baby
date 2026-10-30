@@ -616,6 +616,15 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .hud.tv.many .hud-mini b { font-size: var(--text-22); }
 .hud.tv.many .hud-mini { margin-top: 6px; }
 .hud.many .hud-mini { flex-wrap: wrap; row-gap: 2px; }
+/* a game's result: each place's points fly up from the board into the team's total (then it rolls up) */
+.hud.many .hud-team { position: relative; }
+.hud-plus { position: absolute; left: 50%; top: 100%; z-index: 70; pointer-events: none; font-family: var(--font-display); font-size: 40px; line-height: 1; color: var(--color-ok);
+  text-shadow: 0 0 18px rgba(46,204,113,.7); animation: plusUp 1.45s cubic-bezier(.2,.8,.3,1) both; }
+@keyframes plusUp { 0% { opacity: 0; transform: translate(-50%, 260px) scale(1.4); } 20% { opacity: 1; } 78% { opacity: 1; transform: translate(-50%, -34px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50px) scale(.7); } }
+@media (prefers-reduced-motion: reduce) { .hud-plus { display: none; } }
+.bar-grow { transform-origin: bottom; animation: barGrow .7s var(--ease) both; }
+@keyframes barGrow { from { transform: scaleY(0); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .bar-grow { animation: none; } }
 .hud.many .hud-mini .dot { width: 14px; height: 14px; font-size: var(--text-8); }
 .hud.many .hud-mini b { color: var(--c); }
 .hud.tv.many .hud-team .nm { font-size: var(--text-18); max-width: 200px; } .hud.tv.many .hud-team .sc { font-size: var(--text-48); }
