@@ -21,6 +21,7 @@ import { useInbox } from "./tv/useInbox";
 import { usePresent } from "./tv/usePresent";
 import { fireLeg, imadNarrate, imadOnToast, imadSay } from "./tv/imad";
 import { newState, type TvState } from "./tv/state";
+import { setTeams } from "./many/useTvMany";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
    right one, or both out) it's the one whose calls can be contested on the next screen. (true: go on) */
@@ -958,6 +959,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
       return;
     }
+    /* the host's phone adds a team (three or more play the 3-8 team game, which takes the lobby over from here) */
+    if (a.kind === "setup" && a.payload.teams != null && from?.role === "host" && room.status === "lobby") { await setTeams(code, lobbyState(room), members, Number(a.payload.teams)); return; }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
       const base = lobbyState(room), names = [...(base.teamNames || ["Team A", "Team B"])] as [string, string];
       names[from.team as 0 | 1] = cap1(String(a.payload.name || "").trim().slice(0, 14)) || names[from.team as 0 | 1];

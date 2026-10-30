@@ -28,6 +28,16 @@ export function manyNotReady(members: Member[], k: number): string {
   return "";
 }
 
+/* how many teams (2 to 8): the TV writes it, from its own stepper or the host's phone (the owner, 30 Oct: the host
+   can add a team without going to the TV). Players on a team that goes are left with no team. state: the room's
+   state as the TV holds it now */
+export async function setTeams(code: string, state: Record<string, unknown>, members: Member[], k: number) {
+  const v = Math.max(2, Math.min(MANY_MAX, Math.floor(k) || 2));
+  await sb().from("rooms").update({ state: { ...state, teamCount: v } }).eq("code", code);
+  const gone = members.filter((m) => m.team != null && (m.team as number) >= v);
+  for (const m of gone) await sb().from("members").update({ team: null, role: m.role === "captain" ? "player" : m.role }).eq("room", code).eq("user_id", m.user_id);
+}
+
 /* each game's seconds, from the TV's house settings */
 const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST }; };
 
@@ -76,6 +86,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     const k = teamCountOf(room);
     /* the lobby */
     if (room.status === "lobby") {
+      if (a.kind === "setup" && a.payload.teams != null && from?.role === "host") { await setTeams(code, room.state || {}, members, Number(a.payload.teams)); return; }
       if (a.kind === "team_name" && from?.role === "captain" && (from.team as number) === Number(a.payload.team) && (from.team as number) < k) {
         const names = manyNames(room, MANY_MAX); names[from.team as number] = cap1(String(a.payload.name || "").trim().slice(0, 14)) || names[from.team as number];
         await sb().from("rooms").update({ state: { ...room.state, teamNames: names } }).eq("code", code);
@@ -180,10 +191,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   /* the TV's own stepper in the lobby: how many teams (players on a team that goes are left with no team) */
   const setTeamCount = useCallback(async (k: number) => {
     const room = ctx.current.room; if (!room || room.status !== "lobby") return;
-    const v = Math.max(2, Math.min(MANY_MAX, k));
-    await sb().from("rooms").update({ state: { ...room.state, teamCount: v } }).eq("code", code);
-    const gone = ctx.current.members.filter((m) => m.team != null && (m.team as number) >= v);
-    for (const m of gone) await sb().from("members").update({ team: null, role: m.role === "captain" ? "player" : m.role }).eq("room", code).eq("user_id", m.user_id);
+    await setTeams(code, room.state || {}, ctx.current.members, k);
   }, [code]);
 
   return { pub, setTeamCount };

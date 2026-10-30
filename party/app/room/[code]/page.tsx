@@ -15,6 +15,7 @@ import { LineupMany, PickMany, SetupMany } from "@/components/many/LineupMany";
 import { PhoneMany } from "@/components/many/PhoneMany";
 import { ScoresMany } from "@/components/many/PartsMany";
 import { manyNames, manyNotReady, teamCountOf } from "@/lib/many/useTvMany";
+import { MANY_MAX } from "@/lib/many/logic";
 import { MANY_COLORS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { useFreshBuild } from "@/lib/fresh";
@@ -387,6 +388,16 @@ export default function PhoneRoom() {
             <button type="button" className="text-14 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] px-3" onClick={() => setRules(true)}>How to play</button>
             <ShareButton code={code} />
           </div>
+          {/* the host can add or take away a team from here, as the TV's own stepper does */}
+          {mine.role === "host" && (
+            <div className="card flex items-center justify-between gap-3 !py-2" role="group" aria-label="How many teams">
+              <span className="min-w-0"><span className="block font-bold text-15">Teams</span><span className="block text-12 text-[var(--color-ink-2)]">{teamCount > 2 ? "Three or more: every game played by every team at once." : "Add a team for three or more."}</span></span>
+              <span className="flex items-center gap-1 shrink-0">
+                <button className="btn btn-sm !px-0 w-11" aria-label="One team fewer" disabled={busy || teamCount <= 2} onClick={() => tell(() => sendAction(code, "setup", { teams: teamCount - 1 }))}>−</button>
+                <b className="display text-26 w-8 text-center" aria-live="polite">{teamCount}</b>
+                <button className="btn btn-sm !px-0 w-11" aria-label="One team more" disabled={busy || teamCount >= MANY_MAX} onClick={() => tell(() => sendAction(code, "setup", { teams: teamCount + 1 }))}>+</button>
+              </span>
+            </div>)}
           {many && mine.role === "host" ? (
             <SetupMany busy={busy} k={teamCount} why={manyNotReady(members, teamCount)} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : canStart && !many ? (
