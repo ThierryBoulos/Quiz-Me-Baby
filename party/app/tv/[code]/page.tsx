@@ -163,17 +163,20 @@ export default function TvRoom() {
               {awake === false && <><br /><span className="text-16 text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
             </div>
             <div className="flex gap-3">
-              {/* more than two teams: only when the TV's setting allows it (Settings → Allow more than two teams) */}
+              {/* more than two teams: only when the TV's setting allows it (Settings → Allow more than two teams).
+                  A stepper in the row's own pills: [−] 3 teams [+] */}
               {isTv && (allowMany || teamCount > 2) && (
-                <div className="flex items-center gap-2 chip" style={{ fontSize: 16 }}>Teams: <b>{teamCount}</b>
-                  <button className="btn btn-sm btn-ghost !px-3" aria-label="One team fewer" disabled={teamCount <= 2} onClick={() => void M.setTeamCount(teamCount - 1)}>−</button>
-                  <button className="btn btn-sm btn-ghost !px-3" aria-label="One team more" disabled={teamCount >= MANY_MAX} onClick={() => void M.setTeamCount(teamCount + 1)}>+</button></div>)}
+                <div className="flex items-center gap-2" role="group" aria-label="How many teams">
+                  <button className="btn btn-sm btn-ghost !px-0 w-11" aria-label="One team fewer" disabled={teamCount <= 2} onClick={() => void M.setTeamCount(teamCount - 1)}>−</button>
+                  <span className="eyebrow text-14 whitespace-nowrap" aria-live="polite"><b className="display text-26 align-middle mr-1.5" style={{ color: "var(--color-gold)" }}>{teamCount}</b>teams</span>
+                  <button className="btn btn-sm btn-ghost !px-0 w-11" aria-label="One team more" disabled={teamCount >= MANY_MAX} onClick={() => void M.setTeamCount(teamCount + 1)}>+</button>
+                </div>)}
               <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>
               {members.length === 0 && <a href={`${CLASSIC}/?start=host&back=/tv/${code}`} className="btn btn-sm">Just play on this screen</a>}
             </div>
           </div>
         </>
-      ) : pubMany ? <TvMany pub={pubMany} join={{ url: joinUrl, code }} /> : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
+      ) : pubMany ? <TvMany pub={pubMany} join={{ url: joinUrl, code }} host={host?.name} seats={Array.from({ length: pubMany.teams.length }, (_, t) => members.filter((m) => m.role !== "host" && (m.team as number) === t).length)} /> : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
         <div className="m-auto text-center enter">
           <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
         </div>
