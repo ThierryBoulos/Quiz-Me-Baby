@@ -592,3 +592,47 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .chart-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: chartDraw 2.2s ease-out forwards; filter: drop-shadow(0 0 6px currentColor); }
 @keyframes chartDraw { to { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .tv-glow, .flame, .imad-bubble img { animation: none; } .chart-line { animation: none; stroke-dashoffset: 0; } }
+
+/* ---- MANY TEAMS (30 Oct): 3 to 8 teams in the same tracker. The teams run along the top in one row,
+   the night's label and pips under them (the phone's two-team layout, on the TV too). Every dot carries
+   its team's letter, so eight colours never need telling apart; --c is the team's colour. ---- */
+.dot.ltr { display: inline-grid; place-items: center; border-radius: 50%; flex: none; font-family: var(--font-body); font-weight: 800; line-height: 1; color: #04050e; }
+.hud.many .hud-in { display: flex; justify-content: space-between; gap: 10px; }
+.hud.many .hud-team { flex: 1 1 0; min-width: 0; justify-content: center; gap: 8px; }
+.hud.many .hud-team:first-child { justify-content: flex-start; } .hud.many .hud-team:last-child { justify-content: flex-end; }
+.hud.many .hud-team .sc { color: var(--c); } .hud.many .hud-team .dot { background: var(--c); box-shadow: 0 0 12px var(--c); }
+.hud.many .hud-team .nm { color: var(--color-ink-2); }
+/* six teams or more: the name over the score, so eight fit */
+.hud.many.stack .hud-team { flex-direction: column; gap: 4px; }
+.hud.many.stack .hud-team .sc { line-height: .9; }
+/* the night's label on one line under the teams: the room code, the game and its leg, the pips */
+.hud.many .hud-mid { margin-top: 8px; flex-direction: row; justify-content: center; gap: 14px; }
+.hud.many .hud-code { margin-bottom: 0; }
+.hud.many .hud-label { white-space: nowrap; }
+.hud.tv.many .hud-mini b { font-size: var(--text-22); }
+.hud.tv.many .hud-mini { margin-top: 6px; }
+.hud.many .hud-mini { flex-wrap: wrap; row-gap: 2px; }
+.hud.many .hud-mini .dot { width: 14px; height: 14px; font-size: var(--text-8); }
+.hud.many .hud-mini b { color: var(--c); }
+.hud.tv.many .hud-team .nm { font-size: var(--text-18); max-width: 200px; } .hud.tv.many .hud-team .sc { font-size: var(--text-48); }
+.hud.tv.many.mid .hud-team .nm { font-size: var(--text-15); max-width: 130px; } .hud.tv.many.mid .hud-team .sc { font-size: var(--text-40); }
+.hud.tv.many.stack .hud-team .nm { font-size: var(--text-13); max-width: 120px; } .hud.tv.many.stack .hud-team .sc { font-size: var(--text-40); }
+.hud.tv.many .hud-mini .nm { max-width: 190px; }
+/* seven or eight teams: the tally by letter alone (the dot carries it), so the line never wraps */
+.hud.tv.many.stack .hud-mini .nm { display: none; } .hud.tv.many.stack .hud-mini .dot { width: 18px; height: 18px; font-size: var(--text-10); }
+.hud.tv.many .hud-mini { gap: 6px 10px; } .hud.tv.many .hud-mini .nm { margin-left: 4px; }
+/* the phone keeps the two-team stack: the label, the pips under it, then whose side you're on */
+.hud.phone.many .hud-mid { flex-direction: column; gap: 6px; margin-top: 0; } .hud.phone.many { padding-top: 4px; }
+/* the lobby: a team's chip in its own colour (.chip.a and .chip.b, for any colour) */
+.chip.team { background: color-mix(in srgb, var(--c) 12%, transparent); border-color: color-mix(in srgb, var(--c) 40%, transparent); }
+/* a board of N columns (a mini-game's result, the final standings): each team's number big in its colour,
+   its name under it, the ones who didn't take it dimmed (GameParts' ScoreBoard, for any number of teams) */
+.board-many { display: grid; gap: 10px 14px; width: 100%; }
+.board-many .col { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; transition: opacity .3s; }
+.board-many .col .v { font-family: var(--font-display); line-height: 1; color: var(--c); font-variant-numeric: tabular-nums; }
+.board-many .col .nm { display: flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--color-ink-2); }
+.board-many .col .nm span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board-many .col .sub { color: var(--color-ink-2); font-weight: 600; }
+.board-many .col.dim { opacity: .5; }
+.board-many .col .place { font-family: var(--font-display); letter-spacing: .08em; color: var(--color-ink-3); }
+.board-many .col.first .place { color: var(--color-gold); }
