@@ -4,14 +4,15 @@
    inbox (lib/tv/useInbox.ts), the bank and the dealer's decks with the two-team game; none of the two-team
    reducer (lib/tvGame.ts) runs while this one does. */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, acceptFor, hostOnly, loadBank, type Bank, type Q } from "../engine";
+import { QMB, HOST_ONLY_THEMES, hostOnly, loadBank, type Bank, type Q } from "../engine";
+import { DISH_LAST } from "../game";
 import { sb } from "../supabase";
 import { getSettings, USED_KEY } from "../settings";
 import { cap1, type Member, type Room } from "../room";
 import { useInbox } from "../tv/useInbox";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_MAX, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, flip, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishRight, dishShown, flip, lineup, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 
 const SHAPE = 1;
@@ -27,6 +28,9 @@ export function manyNotReady(members: Member[], k: number): string {
   return "";
 }
 
+/* each game's seconds, from the TV's house settings */
+const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST }; };
+
 export function useTvMany(code: string, isTv: boolean, room: Room | null, members: Member[]) {
   const st = useRef<StateM | null>(null);
   const [pub, setPub] = useState<PubMany | null>(null);
@@ -35,7 +39,6 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const saveKey = "qmb.tv." + code + ".many";
   const lastAt = useRef(0);
   const ack = useRef<Record<string, Record<string, string>>>({});
-  const timers = (): Timers => { const t = getSettings(); return { flag: t.tFlag, closest: t.tMini, pin: t.tPin, majority: t.tMajority }; };
 
   /* publish: the view for every phone, the answer for the host; one write at a time, newest wins */
   const chain = useRef<Promise<void>>(Promise.resolve());
@@ -64,7 +67,6 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   }, [isTv, saveKey, code, publish]);
 
   const roster = () => ctx.current.members.filter((m) => m.role !== "host" && m.team != null).map((m) => ({ name: m.name, team: m.team as number }));
-  const accept = (q: Q) => acceptFor(q);
 
   const handle = useCallback(async (a: Action) => {
     const { room, members } = ctx.current; if (!room) return;
@@ -83,7 +85,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const why = manyNotReady(members, k);
         if (why) { await sb().from("rooms").update({ state: { ...room.state, note: { text: why, at: Date.now() } } }).eq("code", code); return; }
         const cfg = (a.payload.cfg || {}) as G;
-        const keys = (Array.isArray(cfg.minis) ? cfg.minis : []).filter((x: string) => (MANY_MINIS as readonly string[]).includes(x)) as ManyKey[];
+        const picked = (Array.isArray(cfg.minis) ? cfg.minis : []).filter((x: string) => (MANY_MINIS as readonly string[]).includes(x)) as ManyKey[];
+        /* the question rounds: how many (1 to 3), spread through the night */
+        const rounds = picked.includes("quiz") ? Math.max(1, Math.min(3, Math.floor(Number(cfg.rounds) || 1))) : 0;
+        const keys = lineup(rounds, picked.filter((x) => x !== "quiz"));
         if (!keys.length) { await sb().from("rooms").update({ state: { ...room.state, note: { text: "Pick at least one game.", at: Date.now() } } }).eq("code", code); return; }
         let b: Bank;
         try { b = await loadBank(code); } catch { await sb().from("rooms").update({ state: { ...room.state, note: { text: "The TV couldn't load the questions. Check its internet, then tap Start again.", at: Date.now() } } }).eq("code", code); return; }
@@ -96,13 +101,25 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
             airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0,
             majority: (q: G) => q.type === "majority" && Array.isArray(q.options) && q.options.length === 4 && q.options.includes(q.answer) } });
         const lv = (x: unknown, all: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((y) => all.includes(y)); return v.length ? v : dflt; };
-        const g = dealer.buildGame({ standard: false, rounds: 0, themes: [], difficulty: "mixed", minis: keys, picks: {}, themeDiff: {},
+        /* the question rounds come from the two-team rounds' pairs, three pairs a round, every theme in the mix
+           but the host's own (a captain can't know the host's answers here) */
+        const themes = [...new Set(b.bank.filter((q: G) => q.type === "standard" && q.theme && !HOST_ONLY_THEMES.includes(q.theme)).map((q: G) => q.theme as string))];
+        const quizLevels = lv(cfg.quizLevels, ["easy", "medium", "hard", "expert"], ["easy", "medium", "hard"]);
+        /* (three pairs more than the rounds take: held back for sudden death) */
+        const g = dealer.buildGame({ standard: true, rounds: (rounds + 1) * Math.ceil(MANY_LEGS.quiz / 2), themes, difficulty: quizLevels.join("+"),
+          minis: keys.map((x) => (x === "say" ? "saysame" : x)), picks: {}, themeDiff: {},
           mapLevels: QMB.MAP_ORDER, dishLevels: ["c-medium", "d-medium"], airportLevels: QMB.AIRPORT_ORDER,
           flagLevels: lv(cfg.flagLevels, QMB.FLAG_LEVEL_KEYS, ["veasy", "easy", "medium", "hard"]), pinLevels: lv(cfg.pinLevels, QMB.PIN_ORDER, QMB.PIN_ORDER),
           majorityLevels: lv(cfg.majorityLevels, QMB.MAJORITY_ORDER, QMB.MAJORITY_ORDER),
           teamA: { name: "A", captain: "", players: "" }, teamB: { name: "B", captain: "", players: "" },
           pickClosest: [], pickAuction: [], pickSaySame: [], pickMap: [], pickFlag: [], pickDish: [], pickPin: [], pickAirport: [], pickMajority: [] });
-        const decks: Partial<Record<ManyKey, Q[]>> = { flag: g.flagGame?.qs, closest: g.mini?.qs, pin: g.pinGame?.qs, majority: g.majorityGame?.qs };
+        /* Don't Say the Same: only the wide prompts (five answers or more), so eight teams have room to dodge */
+        const say = (dealer.saySameDeck({ pickSaySame: [] }) as G[]).filter((q) => (q.pool || []).length >= 5).slice(0, MANY_LEGS.say).map((q) => dealer.drawSaySame(q) as Q);
+        const quiz = (g.rounds || []).flatMap((r: G) => r.q as Q[]);
+        /* the two-team game deals fewer airports, maps and recipes: the rest of each deck comes after them */
+        const all = (m: G): Q[] => [...(m?.qs || []), ...(m?.spare || [])];
+        const decks: Partial<Record<ManyKey, Q[]>> = { quiz: quiz.slice(0, rounds * MANY_LEGS.quiz), sudden: quiz.slice(rounds * MANY_LEGS.quiz), flag: g.flagGame?.qs, airport: all(g.airportGame), map: all(g.mapGame),
+          closest: g.mini?.qs, pin: g.pinGame?.qs, majority: g.majorityGame?.qs, say, dish: all(g.dishGame) };
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
         st.current = newNight(teams, decks, keys);
@@ -120,7 +137,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (t !== "m/flip" && Number(a.payload.step) !== s.step) { reply("-"); publish(); return; }
       let ok = false;
       if (t === "m/start") ok = startMini(s, Date.now(), timers(), roster());
-      else if (t === "m/reveal" && s.screen === "q") ok = reveal(s, accept);
+      else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);
       else if (t === "m/next") ok = next(s, Date.now(), timers());
       else if (t === "m/flip") ok = flip(s, Number(mv.t));
       else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code); }
@@ -140,7 +157,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
         : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G) : "Your captain answers this one.";
       reply(r === true ? "+" : r);
-      if (r === true && allIn(s)) reveal(s, accept);
+      /* the Cocktail or Dish: the first right guess ends the race */
+      if (r === true && (allIn(s) || (m?.key === "dish" && dishRight(s, from.team as number)))) reveal(s);
       publish(); return;
     }
   }, [code, publish, saveKey]);
@@ -152,7 +170,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     const t = setInterval(() => {
       const s = st.current; if (!s || s.screen !== "q" || !s.deadline) return;
-      if (Date.now() >= s.deadline) { reveal(s, (q) => acceptFor(q)); publish(); }
+      if (Date.now() >= s.deadline) { reveal(s); publish(); return; }
+      /* the Cocktail or Dish: the next ingredient */
+      if (miniOf(s)?.key === "dish") { const n = dishShown(s, Date.now(), timers()); if (n !== s.shown) { s.shown = n; publish(); } }
     }, 250);
     return () => clearInterval(t);
   }, [isTv, publish]);

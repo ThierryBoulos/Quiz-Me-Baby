@@ -5,13 +5,15 @@
    button in the header, and the tracker says whose side you're on. */
 import { useEffect, useMemo, useState } from "react";
 import { Clock } from "../Clock";
-import { FlagImg, PinPhoto, RulingPicker } from "../GameParts";
+import { Board, FlagImg, PinPhoto, RulingPicker } from "../GameParts";
+import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
 import { sendAction, sb } from "@/lib/supabase";
 import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
-import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, paid, place, RowsMany, summaryCols, takes } from "./PartsMany";
+import { typedKey } from "@/lib/many/logic";
+import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, paid, place, RowsMany, splitIng, summaryCols, takes } from "./PartsMany";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 function useSecretMany(code: string, on: boolean, step: number) {
@@ -71,6 +73,14 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
     <div className="noselect contents" {...noCopy}>
       {g.key === "flag" && <FlagImg name={pub.flag} h={small ? 110 : 150} />}
+      {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
+      {g.key === "map" && pub.map && <MapView id={pub.map.id} reveal={false} maxH={small ? 180 : 240} legend={false} />}
+      {g.key === "dish" && pub.dish && (
+        <div className="card !py-2">
+          <div className="eyebrow mb-1" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div>
+          <ol className="flex flex-col gap-0.5 text-15">{pub.dish.ings.map((t, i) => { const [qty, name] = splitIng(t); return <li key={i} className="flex gap-2 items-baseline"><b>{name}</b>{qty && <span className="text-13 text-[var(--color-ink-2)]">{qty}</span>}</li>; })}</ol>
+        </div>)}
+      {g.key === "quiz" && pub.theme && <div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
       {g.key === "pin" && (small
         ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><Clock deadline={pub.deadline} left={pub.left} size={64} /></div>
         : <PinPhoto pin={pub.pin} h={230} small zoom />)}
@@ -81,16 +91,18 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   const Answer = () => !R || !g ? null : (
     <div className="noselect text-center" {...noCopy}>
       {g.key === "flag" && <div className="mb-2"><FlagImg name={pub.flag} h={96} /></div>}
+      {g.key === "map" && pub.map && <div className="mb-2"><MapView id={pub.map.id} reveal maxH={180} legend={false} /></div>}
+      {(g.key === "quiz" || g.key === "say") && pub.question && <p className="font-bold text-16 leading-snug mb-1">{pub.question}</p>}
       {g.key === "pin" && R.at && <div className="mb-3"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
         ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
         fly height={240} label={`Where it is: ${R.place}`} /></div>}
       {g.key === "majority" && pub.question && <p className="font-bold text-18 leading-snug mb-1">{pub.question}</p>}
-      {g.key !== "pin" && <div className="eyebrow">The answer</div>}
+      {g.key !== "pin" && <div className="eyebrow">{g.key === "say" ? "The app's secret answer" : "The answer"}</div>}
       <div className="display text-30" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(R.answer)) : R.answer}</div>
       {(R.notes || R.place) && <p className="text-14 text-[var(--color-ink-2)] leading-snug mt-1">{R.place || R.notes}</p>}
     </div>);
   /* a reveal's rows: each team's line (Majority Rules: right out of how many; the rest: how near) */
-  const Rows = () => !R || !g ? null : g.key === "flag" ? <FlagRowsMany pub={pub} size="phone" />
+  const Rows = () => !R || !g ? null : typedKey(g.key) ? <FlagRowsMany pub={pub} size="phone" />
     : g.key === "closest" ? <BoardMany pub={pub} cols={closestCols(pub)} size="phone" label="Nearest first" />
     : g.key === "pin" ? <RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="phone" pts={R.pts} />
     : <RowsMany pub={pub} order={T.map((_, i) => i)} right={(t) => <span className="text-16 font-bold" style={{ fontFamily: "var(--font-body)", textTransform: "none" }}>{R.right?.[t] ?? 0} of {R.of?.[t] ?? 0}</span>} size="phone" />;
@@ -136,7 +148,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       </>)}
       {host && sc === "reveal" && g && R && (<>
         <Answer />
-        {g.key === "flag" ? (
+        {typedKey(g.key) ? (
           /* each team's answer, and its ruling beside it, which the host can always flip (the TV confirms it a beat later) */
           <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; return (
             <div key={i} className="flex items-center gap-3">
@@ -144,7 +156,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
                 <div className="eyebrow flex items-center gap-2" style={{ color: t.color }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
                 {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
               </div>
-              {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}
+              {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} say={g.key === "say"} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}
             </div>); })}</div>
         ) : <Rows />}
         {g.key !== "majority" && <Big text={W.text} color={W.color} />}
@@ -180,10 +192,13 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
           </div>}
       </>)}
 
-      {/* THE CAPTAIN answers the other three */}
-      {cap && sc === "q" && g && g.key !== "majority" && (<>
+      {/* sudden death: a captain whose team isn't level at the top watches */}
+      {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>Sudden death: only the teams level at the top answer this one.</Line></>)}
+      {/* THE CAPTAIN answers the rest */}
+      {cap && sc === "q" && g && g.key !== "majority" && !(g.only && mine != null && !g.only.includes(mine)) && (<>
         <OnScreen small={g.key === "pin" && !sentMine} />
-        {sentMine ? <p className="text-center font-bold text-16" role="status">Locked in{sentTxt && g.key !== "pin" ? `: ${sentTxt}` : ""}.</p>
+        {sentMine ? <p className="text-center font-bold text-16" role="status" style={pub.out?.[mine!] ? { color: "var(--color-no)" } : undefined}>
+            {pub.out?.[mine!] ? `Wrong${sentTxt ? `: ${sentTxt}` : ""}. Your team is out of this one.` : `Locked in${sentTxt && g.key !== "pin" ? `: ${sentTxt}` : ""}.`}</p>
           : g.key === "pin" ? (
             <div className="flex flex-col gap-2">
               <p className="text-center text-13 text-[var(--color-ink-3)]">{pin ? "Drag your pin to move it. Zoom in (pinch, or +) to place it exactly." : "Tap the map to drop your pin."}</p>
@@ -195,7 +210,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
               <label className="field-label !mb-0" htmlFor="mans">{g.key === "closest" ? "Your number" : "Your answer"}</label>
               <input id="mans" className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
-              <div className="text-13 text-[var(--color-ink-3)]">One go: once you send it, it&rsquo;s locked{g.key === "flag" ? " and the app checks it" : ""}.</div>
+              <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The first right answer wins it." : g.key === "say" ? "One answer on the list: not the app's secret one, and not the same as another team's." : `One go: once you send it, it’s locked${typedKey(g.key) ? " and the app checks it" : ""}.`}</div>
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
       </>)}

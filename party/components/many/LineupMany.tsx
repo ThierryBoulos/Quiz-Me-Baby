@@ -5,9 +5,9 @@
 import { useState } from "react";
 import type { Member, Room } from "@/lib/room";
 import { QMB } from "@/lib/engine";
-import { MANY_COLORS, MANY_MINIS, MANY_TITLES, PLACE_PTS, type ManyKey } from "@/lib/many/logic";
+import { MANY_COLORS, MANY_MINIS, MANY_TITLES, PLACE_PTS, lineup, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
-import { colsFor, Dot } from "./PartsMany";
+import { colsFor, Dot, place as ordinal } from "./PartsMany";
 
 /* every team, every face, the captains marked. The TV (big) packs up to four in a row, then rows of three or four;
    the phones stack them. away: captains the TV hasn't heard from (the lobby). */
@@ -53,24 +53,35 @@ export function PickMany({ room, k, busy, pick, current }: { room: Room; k: numb
     </div>);
 }
 
-/* ---- the host's setup when there are more than two teams: Setup's mini-games card, with the four games that
-   work for any number of teams, each with its levels; the Start button docked under it ---- */
+/* ---- the host's setup when there are more than two teams: Setup's mini-games card, with the games that work for
+   any number of teams, each with its levels; the Start button docked under it ---- */
 const GAMES: [ManyKey, string][] = [
+  ["quiz", "Six questions, any theme, every captain at once. The fastest right answer scores most. Spread through the night."],
   ["majority", "Everyone plays on their own phone: 15 questions, four answers. Teams ranked by their share of right answers."],
   ["flag", "Ten flags, every captain at once: whose is it? The fastest right answer scores most. The app checks, the host can overrule."],
   ["closest", "Five numbers. Every guess is ranked by how far off: the nearest scores most."],
-  ["pin", "A landmark's photo: every captain drops a pin on the map. Ranked by the kilometre."]];
+  ["pin", "A landmark's photo: every captain drops a pin on the map. Ranked by the kilometre."],
+  ["airport", "Six departure boards, every captain at once: which airport? The fastest right answer scores most."],
+  ["map", "Six world maps with countries lit: what do they have in common? The fastest right answer scores most."],
+  ["say", "Six prompts. One answer each from the list: not the app's secret one, and not the same as another team's."],
+  ["dish", "Five recipes, an ingredient at a time. One guess a team; the first right answer wins it."]];
+const LEVELS4 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 const LEVELS3 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
-export type CfgMany = { minis: string[]; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[] };
+export type CfgMany = { minis: string[]; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[]; rounds: number; quizLevels: string[] };
 
 export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void }) {
-  const [minis, setMinis] = useState<string[]>([...MANY_MINIS]);
+  /* on to start with: a question round and the first four games; the rest are a tap away */
+  const [minis, setMinis] = useState<string[]>(["quiz", "majority", "flag", "closest", "pin"]);
+  const [rounds, setRounds] = useState(2);
+  const [quizLevels, setQuizLevels] = useState<string[]>(["easy", "medium", "hard"]);
   const [flagLevels, setFlagLevels] = useState<string[]>(["veasy", "easy", "medium", "hard"]);
   const [pinLevels, setPinLevels] = useState<string[]>([...QMB.PIN_ORDER as string[]]);
   const [majorityLevels, setMajorityLevels] = useState<string[]>([...QMB.MAJORITY_ORDER as string[]]);
   const on = MANY_MINIS.filter((x) => minis.includes(x));
-  const slot = (x: string) => ["1st", "2nd", "3rd", "4th"][on.indexOf(x as ManyKey)] || "";
+  /* the order they'll play in: the question rounds spread through the night */
+  const night = lineup(on.includes("quiz") ? rounds : 0, on.filter((x) => x !== "quiz"));
+  const slot = (x: string) => { const at = night.map((y, i) => (y === x ? i + 1 : 0)).filter(Boolean); return at.length ? at.map((n) => ordinal(n)).join(", ") : ""; };
   const blocker = why || (!on.length ? "Switch on at least one game." : "");
   /* a level row: tap to add or drop a level; the last one can't be dropped */
   const LevelRow = ({ label, opts, value, set }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void }) => (
@@ -86,9 +97,9 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
         <div className="mb-1">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="display text-24">Mini-games</div>
-            <span className={"badge shrink-0 " + (on.length ? "gold" : "line")}>{on.length ? `${on.length} game${on.length === 1 ? "" : "s"}` : "None"}</span>
+            <span className={"badge shrink-0 " + (night.length ? "gold" : "line")}>{night.length ? `${night.length} game${night.length === 1 ? "" : "s"}` : "None"}</span>
           </div>
-          <div className="text-13 text-[var(--color-ink-2)]">{k} teams, so mini-games only, played one after another: every team at once, and the app checks the answers.
+          <div className="text-13 text-[var(--color-ink-2)]">{k} teams: every game is played by every team at once, and the app checks the answers.
             Every team scores every game, by place: <b style={{ color: "var(--color-gold)" }}>{PLACE_PTS.slice(0, k).join(" · ")}</b>.</div>
         </div>
         {GAMES.map(([key, blurb]) => { const lit = minis.includes(key); return (
@@ -101,12 +112,19 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: lit ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>
             </button>
+            {lit && key === "quiz" && (<>
+              <div className="flex flex-wrap items-center gap-2 pl-1 pb-1" role="group" aria-label="How many question rounds">
+                <span className="text-13 text-[var(--color-ink-2)] mr-1">Rounds</span>
+                {[1, 2, 3].map((r) => <button key={r} type="button" className={"chip !min-h-[44px] !px-4 !text-13 " + (rounds === r ? "chip-on" : "")} aria-pressed={rounds === r} onClick={() => setRounds(r)}>{r}</button>)}
+              </div>
+              <LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} />
+            </>)}
             {lit && key === "flag" && <LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} />}
             {lit && key === "pin" && <LevelRow label="Drop the Pin level" opts={LEVELS3} value={pinLevels} set={setPinLevels} />}
             {lit && key === "majority" && <LevelRow label="Majority Rules level" opts={LEVELS3} value={majorityLevels} set={setMajorityLevels} />}
           </div>); })}
       </div>
-      <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels })}>Start the game</button>
+      <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels })}>Start the game</button>
       {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
     </section>);
 }

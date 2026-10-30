@@ -53,7 +53,7 @@ export const byDistance = (pub: PubMany) => {
 export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
-    ? <><b>{g.title}</b> &nbsp;·&nbsp; {pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Final" : `${pc ? "Question" : "Leg"} ${g.leg} of ${g.of}`}</>
+    ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Level at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Final" : `${pc || g.key === "quiz" ? "Question" : "Leg"} ${g.leg} of ${g.of}`}</>
     : null;
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
@@ -84,7 +84,7 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
         {pips.length > 0 && <div className="pips" aria-hidden>{pips.map((p, i) => <span key={i} className={`pip mini ${p}`} />)}</div>}
       </div>
       {/* this game's points, under its name, in their own small line (a dot, the name, the points; on fire beside) */}
-      {tv && inGame && (
+      {tv && inGame && g.key !== "sudden" && (
         <div className="hud-mini game-line" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}`).join(", ")}`}>
           <span>This game</span>
           {T.map((t, i) => <span key={i} className="flex items-center gap-2" style={{ ["--c" as string]: t.color }}><Dot t={i} color={t.color} size={k > 5 ? 18 : 20} /><span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
@@ -102,6 +102,7 @@ function rules(pub: PubMany): string[] {
   /* points by place (30 Oct): what a question pays, and what the game's places pay the night */
   const pay = `At the end, places pay the night: ${PLACE_PTS.slice(0, k).join(", ")}. Level teams share the better place.`;
   const each = (by: string) => `Every leg ranks all ${k} teams ${by}: 1st scores ${k}, 2nd ${k - 1}, down to 1 for last. No answer scores nothing.`;
+  const fastest = `The app checks them, and the host can change a call. Right answers are ranked by who sent first: the fastest scores ${k}, the next ${k - 1}, and so on. Wrong scores nothing.`;
   switch (g.key) {
     case "majority": return [
       "Everyone plays on their own phone, captains too. The lists are fixed at Start.",
@@ -117,16 +118,28 @@ function rules(pub: PubMany): string[] {
     case "pin": return [
       `A photo of a landmark goes up. All ${k} captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better.`,
       each("by the kilometre"), pay];
+    case "quiz": return [`${n} questions, any theme. All ${k} captains type their answer at the same time.`, fastest, pay];
+    case "airport": return [`A departures board goes up. All ${k} captains type which airport it is: its name or its city.`, fastest, pay];
+    case "map": return [`A world map goes up with some countries lit. All ${k} captains type what they have in common.`, fastest, pay];
+    case "say": return [
+      `A prompt goes up, like "Name a colour of the rainbow". Each captain types one answer that's on the list.`,
+      "The app has picked one answer in secret: say it and you score nothing. Say the same as another team and you both score nothing.",
+      `Every answer that dodges both scores ${k}.`, pay];
+    case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
+      return [`${names} finished the night level at the top.`, "One question at a time, and only they answer, on the captain's phone. The fastest right answer wins the night.", "Nobody right: another question."]; }
+    case "dish": return [
+      `The ingredients of a cocktail or a dish come up one at a time. Any captain can guess, any time.`,
+      `One guess a team per recipe: a wrong one puts your team out of it. The first right answer ends it and scores ${k}.`, pay];
   }
 }
 /* compact: the TV's Majority Rules intro, which shares the screen with the QR code */
 export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Size; head?: ReactNode; compact?: boolean }) {
   const g = pub.game, tv = size === "tv";
   if (!g) return null;
-  const band = g.key === "majority" ? `${g.of} questions` : `Best of ${g.of}`;
+  const band = g.key === "sudden" ? "First right wins" : g.key === "majority" || g.key === "quiz" ? `${g.of} questions` : g.key === "say" ? `${g.of} prompts` : g.key === "dish" ? `${g.of} recipes` : `Best of ${g.of}`;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
-      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>Game {g.index + 1} of {g.count}</div>}
+      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{g.key === "sudden" ? "Level at the top" : `Game ${g.index + 1} of ${g.count}`}</div>}
       <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{g.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
@@ -167,15 +180,18 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
     </div>);
 }
 /* ---- Majority Rules' result on the TV (the owner's idea, 30 Oct): a bar a team, as tall as its share right, in
-   place order, growing up one after another; the share on top, the place, the name and what it pays under it ---- */
+   place order, growing up one after another; the share on top, the place, the name and what it pays under it.
+   The games that have no look of their own yet (the question rounds, airports, maps, Don't Say the Same, the
+   Cocktail or Dish) draw their points the same way, the best as the tallest ---- */
 export function BarsMany({ pub }: { pub: PubMany }) {
-  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 140 : 150;
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 140 : 150, pc = !!S.shares, best = Math.max(1, ...S.pts);
+  const val = (t: number) => (pc ? S.shares?.[t] ?? 0 : S.pts[t] / best), lab = (t: number) => (pc ? pct(S.shares?.[t] ?? 0) : String(S.pts[t]));
   const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
   return (
-    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Share right: " + order.map((t) => `${T[t].name} ${pct(S.shares?.[t] ?? 0)}`).join(", ")}>
-      {order.map((t, j) => { const v = S.shares?.[t] ?? 0, paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={(pc ? "Share right: " : "Points this game: ") + order.map((t) => `${T[t].name} ${lab(t)}`).join(", ")}>
+      {order.map((t, j) => { const v = val(t), paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
         <div key={t} role="listitem" className="flex flex-col items-center gap-1 min-w-0" style={{ width: dense ? 124 : 180 }}>
-          <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{pct(v)}</div>
+          <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{lab(t)}</div>
           <div className="w-full flex items-end" style={{ height: H }}>
             <div className="bar-grow w-full" style={{ height: Math.max(4, v * H), borderRadius: "12px 12px 3px 3px", animationDelay: j * 0.08 + "s", opacity: paid ? 1 : 0.4,
               background: `linear-gradient(180deg, ${T[t].color}, color-mix(in srgb, ${T[t].color} 35%, transparent))`, boxShadow: lit ? `0 0 28px ${T[t].color}` : undefined }} />
@@ -284,17 +300,21 @@ export function RowsMany({ pub, order, right, size, label, pts }: { pub: PubMany
 /* a Drop the Pin reveal's rows: how far off */
 export const kmOf = (pub: PubMany, t: number): ReactNode => (pub.reveal?.pins?.[t] ? showKm(pub.reveal.off?.[t] ?? 0) : <span className="text-[var(--color-ink-3)]">No pin</span>);
 
-/* ---- a flag reveal: each team's ruling beside its name, what it typed under them (TvGame's TeamRows) ---- */
+/* Don't Say the Same: why an answer scores nothing */
+const SAY_WHY: Record<string, string> = { said: "Said it", off: "Not on the list", same: "Same as another team" };
+/* the Cocktail or Dish: "60 ml — gin" splits into the amount and the ingredient */
+export const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
+/* ---- a typed answer's reveal: each team's ruling beside its name, what it typed under them (TvGame's TeamRows) ---- */
 export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; delay?: (i: number) => React.CSSProperties }) {
   const T = pub.teams, R = pub.reveal!, k = T.length, tv = size === "tv", n = tv ? colsFor(k) : k > 4 ? 2 : 1, dense = k > 4;
   const long = T.some((t) => t.name.length > 10);
   return (
     <div className="grid w-full" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gap: tv ? "12px 24px" : "12px 10px", maxWidth: tv ? Math.min(1168, n * (dense ? 300 : 390)) : undefined, ["--beat" as string]: ".4s" }}>
-      {T.map((t, i) => { const ok = R.ok?.[i], x = R.typed?.[i]; return (
+      {T.map((t, i) => { const ok = R.ok?.[i], x = R.typed?.[i]; if (pub.game?.only && !pub.game.only.includes(i)) return null; return (
         <div key={i} className={"flex flex-col items-center gap-1 min-w-0 " + (tv ? "beat" : "")} style={delay?.(i)}>
           <div className="flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
             <span className={tv ? "display truncate" : "eyebrow truncate"} style={{ color: t.color }}><bdi>{t.name}</bdi></span>
-            {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={ok ? undefined : !x ? "No answer" : undefined} />}
+            {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
             {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
           </div>
           {(x || ok == null) && <div className="font-bold truncate max-w-full" style={{ fontSize: tv ? (dense ? 20 : 26) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}

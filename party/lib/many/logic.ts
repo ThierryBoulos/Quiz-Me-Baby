@@ -1,19 +1,33 @@
 /* MANY TEAMS (3 to 8), phase 1: the night's rules, pure. No React, no network: the TV's hook
    (lib/many/useTvMany.ts) feeds it taps and the clock, the simulator (sim/many.mjs) feeds it bots.
    Nothing here is shared with the two-team game but the matcher and the distance (engine/core.js).
-   Always with a host. Four games, all simultaneous, all judged by the app (the host can flip a flag):
-   Majority Rules, Guess the Flag, Closest To Wins, Drop the Pin.
+   Always with a host. Every game simultaneous, judged by the app (the host can flip a typed answer's call):
+   Majority Rules, Guess the Flag, Closest To Wins, Drop the Pin; and (phase 2, 30 Oct) question rounds, Guess
+   the Airport, Guess the Map, Don't Say the Same as Me (an answer scores only if no other team said it too) and
+   Guess the Cocktail or Dish (a race: one guess a team, the first right ends it).
    Points by place (the owner's pick, 30 Oct: one winner taking 2 left 2nd and 8th level). Every question ranks
    the teams and pays this game's tally by place: with 8 teams the nearest (Closest, Pin) or the first right
    (Flags: the fastest typist) takes 8, the next 7, down to 1; wrong or no answer, nothing. Majority Rules ranks
    by the share of answers right. At the end of a game its places pay the night: 10, 8, 6, 5, 4, 3, 2, 1
    (3 teams: 10, 8, 6). Level teams share the better place. */
-import { QMB } from "../engine";
+import { QMB, acceptFor, mapHit, mapKeysFor } from "../engine";
+import { matchQ } from "../tv/reads";
 
-export const MANY_MINIS = ["majority", "flag", "closest", "pin"] as const;
-export type ManyKey = (typeof MANY_MINIS)[number];
-export const MANY_TITLES: Record<ManyKey, string> = { majority: "Majority Rules", flag: "Guess the Flag", closest: "Closest To Wins", pin: "Drop the Pin" };
-export const MANY_LEGS: Record<ManyKey, number> = { majority: 15, flag: 10, closest: 5, pin: 7 };
+export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish"] as const;
+/* sudden death isn't picked: it comes when the night ends with teams level at the top */
+export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
+export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Question round", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
+  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish" };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 6, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5 };
+/* the games where each captain types one answer (the app calls it, the host can flip the call) */
+export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "sudden"];
+export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
+/* a game's name on screen: the question rounds numbered when there's more than one */
+export const titleOf = (minis: { key: ManyKey }[], i: number) => {
+  const key = minis[i]?.key; if (!key) return "";
+  const rounds = minis.filter((m) => m.key === "quiz").length;
+  return key === "quiz" && rounds > 1 ? `Question round ${minis.slice(0, i + 1).filter((m) => m.key === "quiz").length}` : MANY_TITLES[key];
+};
 export const MANY_MIN = 3, MANY_MAX = 8, MANY_PLAYERS = 60;
 /* what a game's places pay the night (1st, 2nd, ...); fewer teams take the top of the same table */
 export const PLACE_PTS = [10, 8, 6, 5, 4, 3, 2, 1];
@@ -29,7 +43,8 @@ type Q = any;
 export type LatLon = { lat: number; lon: number };
 export type TeamM = { name: string; captain: string; score: number };
 /* wins: legs taken (flag: legs right); pts: this game's place points so far; places: its final places */
-export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: number[]; of: number[]; pts: number[]; award?: number[]; places?: number[] };
+export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: number[]; of: number[]; pts: number[]; award?: number[]; places?: number[];
+  only?: number[] };                              // sudden death: the teams level at the top, the only ones who answer
 /* the night's numbers for the awards: legs placed 1st and 2nd, the fastest right flags, Drop the Pin's km
    (and how many pins), the run of 1st places now (on fire at 3; a new game starts cold) and the best run */
 export type Stats = { firsts: number[]; seconds: number[]; fastest: number[]; km: number[]; kmN: number[]; run: number[]; best: number[] };
@@ -38,6 +53,8 @@ export type StateM = {
   v: 2; teams: TeamM[]; minis: MiniM[]; mi: number; screen: Screen; step: number;
   deadline: number | null; left: number; total: number;
   typed: (string | null)[]; nums: (number | null)[]; pins: (LatLon | null)[];
+  why: (string | null)[];                       // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
+  shown: number;                                // the Cocktail or Dish: the ingredients up so far
   at: (number | null)[]; seq: number;           // the order this leg's answers came in (Flags: the fastest right first)
   ok: (boolean | null)[];                       // this leg's call per team (the app's, then the host's)
   roster: { name: string; team: number }[];     // Majority Rules: who plays (fixed at its start)
@@ -45,9 +62,11 @@ export type StateM = {
   who: Record<string, { r: number; of: number; team: number }>;
   toast: { id: number; text: string } | null; toastN: number;
   exit?: boolean; log: number[][];            // the scores after each game, for the final chart
+  spare: Q[];                                   // questions held back for sudden death
   stats: Stats;
 };
-export type Timers = { flag: number; closest: number; pin: number; majority: number };
+/* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
+export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number };
 
 const n = (k: number, v = 0) => Array.from({ length: k }, () => v);
 export const miniOf = (s: StateM) => s.minis[s.mi] as MiniM | undefined;
@@ -55,14 +74,24 @@ export const qOf = (s: StateM) => { const m = miniOf(s); return m ? m.qs[m.i] : 
 
 export function newNight(teams: { name: string; captain: string }[], decks: Partial<Record<ManyKey, Q[]>>, order: ManyKey[]): StateM {
   const k = teams.length;
-  const minis: MiniM[] = order.filter((key) => (decks[key] || []).length).map((key) => ({ key, qs: (decks[key] || []).slice(0, MANY_LEGS[key]), i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k) }));
+  /* a game that comes more than once (the question rounds) takes the next questions of its deck each time */
+  const used: Partial<Record<ManyKey, number>> = {};
+  const minis: MiniM[] = order.map((key) => { const at = used[key] ?? 0; used[key] = at + MANY_LEGS[key];
+    return { key, qs: (decks[key] || []).slice(at, at + MANY_LEGS[key]), i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k) }; }).filter((m) => m.qs.length);
   return { v: 2, teams: teams.map((t) => ({ ...t, score: 0 })), minis, mi: 0, screen: minis.length ? "intro" : "final", step: 1,
-    deadline: null, left: 0, total: 0, typed: Array(k).fill(null), nums: Array(k).fill(null), pins: Array(k).fill(null), ok: Array(k).fill(null),
-    at: Array(k).fill(null), seq: 0, roster: [], votes: {}, who: {}, toast: null, toastN: 0, log: [n(k)],
+    deadline: null, left: 0, total: 0, typed: Array(k).fill(null), nums: Array(k).fill(null), pins: Array(k).fill(null), ok: Array(k).fill(null), why: Array(k).fill(null), shown: 0,
+    at: Array(k).fill(null), seq: 0, roster: [], votes: {}, who: {}, toast: null, toastN: 0, log: [n(k)], spare: (decks.sudden || []).slice(0, MANY_LEGS.sudden),
     stats: { firsts: n(k), seconds: n(k), fastest: n(k), km: n(k), kmN: n(k), run: n(k), best: n(k) } };
 }
 
-const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.at = Array(k).fill(null); s.votes = {}; };
+/* the night's order: the question rounds spread through it, one leading each run of the other games */
+export function lineup(rounds: number, games: ManyKey[]): ManyKey[] {
+  if (rounds <= 0) return games;
+  const out: ManyKey[] = [], per = Math.ceil(games.length / rounds);
+  for (let r = 0; r < rounds; r++) out.push("quiz", ...games.slice(r * per, (r + 1) * per));
+  return out;
+}
+const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.votes = {}; s.shown = 1; };
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
 
 /* the host taps Start on a game's intro: its first question */
@@ -74,15 +103,32 @@ export function startMini(s: StateM, now: number, t: Timers, roster: { name: str
 }
 function ask(s: StateM, now: number, t: Timers) {
   const m = miniOf(s)!; clear(s);
-  s.screen = "q"; s.total = t[m.key]; s.deadline = now + s.total * 1000; s.left = 0; s.step++;
+  /* the Cocktail or Dish: an ingredient every few seconds, the last one with longer to think */
+  s.total = m.key === "dish" ? Math.max(0, ((qOf(s)?.ings || []).length - 1)) * t.dish + t.dishLast : t[m.key];
+  s.screen = "q"; s.deadline = now + s.total * 1000; s.left = 0; s.step++;
 }
+/* the Cocktail or Dish: how many ingredients are up at this moment (the clock's tick moves it on) */
+export function dishShown(s: StateM, now: number, t: Timers): number {
+  const q = qOf(s), n = (q?.ings || []).length; if (!n || !s.deadline) return n;
+  const gone = s.total * 1000 - (s.deadline - now);
+  return Math.max(1, Math.min(n, 1 + Math.floor(gone / (t.dish * 1000))));
+}
+/* is a typed answer right? The question rounds, flags, airports and dishes as the two-team game checks them
+   (lib/tv/reads.ts); a map by its title and its short forms */
+export function rightOf(key: ManyKey, text: string, q: Q): boolean {
+  if (key === "map") return QMB.isMatch(text, q.answer, [...acceptFor(q), q.question]) || mapHit(text, mapKeysFor(q));
+  return !!matchQ([text], q);
+}
+/* Don't Say the Same: the word on the prompt's list an answer is (typos allowed), or null if it isn't on it */
+const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: string) => QMB.isMatch(text, w, acceptFor({ answer: w }))) ?? null;
 
 /* a captain's answer (one each, the first stands) */
 export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown }): true | string {
   const m = miniOf(s); if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
-  if (m.key === "flag") {
-    if (s.typed[team] != null) return "Your answer is in.";
-    const text = String(p.text ?? "").trim().slice(0, 60); if (!text) return "Type an answer first.";
+  if (m.only && !m.only.includes(team)) return "Only the teams level at the top answer this one.";
+  if (typedKey(m.key)) {
+    if (s.typed[team] != null) return m.key === "dish" ? "Your team has had its guess at this one." : "Your answer is in.";
+    const text = String(p.text ?? "").trim().slice(0, 80); if (!text) return "Type an answer first.";
     s.typed[team] = text; s.at[team] = ++s.seq; return true;
   }
   if (m.key === "closest") {
@@ -109,21 +155,33 @@ export function vote(s: StateM, name: string, pick: unknown): true | string {
 }
 export const answered = (s: StateM): boolean[] => {
   const m = miniOf(s); if (!m) return [];
-  return s.teams.map((_, t) => (m.key === "flag" ? s.typed[t] != null : m.key === "closest" ? s.nums[t] != null : m.key === "pin" ? !!s.pins[t]
+  return s.teams.map((_, t) => (m.only && !m.only.includes(t) ? true : typedKey(m.key) ? s.typed[t] != null : m.key === "closest" ? s.nums[t] != null : m.key === "pin" ? !!s.pins[t]
     : s.roster.filter((r) => r.team === t).every((r) => s.votes[r.name] != null)));
 };
 export const allIn = (s: StateM) => s.screen === "q" && (miniOf(s)?.key === "majority" ? s.roster.length > 0 && s.roster.every((r) => s.votes[r.name] != null) : answered(s).every(Boolean));
 
-/* the reveal: the app's calls (the host can flip a flag's) */
-export function reveal(s: StateM, accept: (q: Q) => string[]) {
+/* the reveal: the app's calls (the host can flip any typed answer's) */
+export function reveal(s: StateM) {
   const m = miniOf(s), q = qOf(s); if (!m || !q || s.screen !== "q") return false;
-  if (m.key === "flag") s.ok = s.typed.map((x) => (x == null ? false : !!QMB.isMatch(x, q.answer, accept(q))));
+  if (m.key === "say") sayCalls(s, q);
+  else if (typedKey(m.key)) s.ok = s.typed.map((x) => (x == null ? false : rightOf(m.key, x, q)));
+  if (m.key === "dish") s.shown = (q.ings || []).length;
   s.screen = "reveal"; s.deadline = null; s.left = 0; s.step++; return true;
 }
-/* this leg: who takes it (closest and pin: the nearest, ties all take it; flag: everyone right) */
+/* Don't Say the Same, with many teams (the plan's idea 5): an answer scores if it's on the prompt's list, isn't the
+   word the app picked, and no other team said it too. Two teams on the same word both lose it */
+function sayCalls(s: StateM, q: Q) {
+  const word = s.typed.map((x) => (x == null ? null : listWord(x, q)));
+  s.why = s.typed.map((x, t) => x == null ? null : !word[t] ? "off" : rightOf("say", x, q) ? "said"
+    : word.some((w, u) => u !== t && w === word[t] && !rightOf("say", s.typed[u]!, q)) ? "same" : null);
+  s.ok = s.typed.map((x, t) => x != null && s.why[t] == null);
+}
+/* the Cocktail or Dish: a team's guess is in. Right ends the leg (the caller shows the reveal); wrong, that team is out */
+export const dishRight = (s: StateM, team: number) => { const q = qOf(s), x = s.typed[team]; return !!q && x != null && rightOf("dish", x, q); };
+/* this leg: who takes it (closest and pin: the nearest, ties all take it; a typed answer: everyone right) */
 export function legWinners(s: StateM): number[] {
   const m = miniOf(s), q = qOf(s); if (!m || !q) return [];
-  if (m.key === "flag") return s.ok.map((v, t) => (v ? t : -1)).filter((t) => t >= 0);
+  if (typedKey(m.key)) return s.ok.map((v, t) => (v ? t : -1)).filter((t) => t >= 0);
   const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer))))
     : m.key === "pin" ? s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null)) : [];
   if (m.key === "majority") return [];
@@ -140,11 +198,13 @@ export const fireOfMany = (s: StateM): boolean[] => s.teams.map((_, i) => (s.sta
 export function placesBy(keys: (number | null)[]): (number | null)[] {
   return keys.map((x) => (x == null ? null : 1 + keys.filter((y) => y != null && y < x - 1e-9).length));
 }
-/* this leg's places: Closest and Drop the Pin by how far off; Flags, the right answers in the order they came in
-   (a call the host turned RIGHT for a team that sent nothing goes last of the right ones); wrong or none, no place */
+/* this leg's places: Closest and Drop the Pin by how far off; a typed answer, the right ones in the order they came
+   in (the fastest right first; a call the host turned RIGHT for a team that sent nothing goes last of them); Don't
+   Say the Same, every answer that scores shares 1st; wrong or none, no place */
 export function legPlaces(s: StateM): (number | null)[] {
   const m = miniOf(s), q = qOf(s); if (!m || !q || m.key === "majority") return s.teams.map(() => null);
-  if (m.key === "flag") return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? 1e9 : null)));
+  if (m.key === "say") return placesBy(s.ok.map((v) => (v ? 0 : null)));
+  if (typedKey(m.key)) return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? 1e9 : null)));
   const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null));
   return placesBy(d);
 }
@@ -159,12 +219,22 @@ export function mrCount(s: StateM) {
 }
 export const share = (m: MiniM, t: number) => (m.of[t] ? m.right[t] / m.of[t] : 0);
 
-/* the host flips one flag call on the reveal */
-export function flip(s: StateM, t: number) { if (s.screen !== "reveal" || miniOf(s)?.key !== "flag" || t < 0 || t >= s.teams.length) return false; s.ok[t] = !s.ok[t]; return true; }
+/* the host flips one typed answer's call on the reveal */
+export function flip(s: StateM, t: number) { if (s.screen !== "reveal" || !typedKey(miniOf(s)?.key) || t < 0 || t >= s.teams.length) return false; s.ok[t] = !s.ok[t]; return true; }
 
 /* Next: the leg counts, then the next question, or the game's summary (its points paid), then the next game */
 export function next(s: StateM, now: number, t: Timers) {
   const m = miniOf(s); if (!m) return false;
+  /* sudden death: the fastest right answer wins the night (+1, so the standings say so); nobody right, another
+     question; none left, the win stays shared */
+  if (s.screen === "reveal" && m.key === "sudden") {
+    const pl = legPlaces(s), w = pl.findIndex((p) => p === 1);
+    if (w >= 0) { s.teams[w].score += 1; toast(s, `${s.teams[w].name} wins it in sudden death.`); }
+    else toast(s, "Nobody got it.");
+    m.i++;
+    if (w < 0 && m.i < m.qs.length) { ask(s, now, t); return true; }
+    s.log.push(s.teams.map((x) => x.score)); s.screen = "final"; s.step++; return true;
+  }
   if (s.screen === "reveal") {
     if (m.key === "majority") {
       const c = mrCount(s);
@@ -182,7 +252,8 @@ export function next(s: StateM, now: number, t: Timers) {
         if (m.key === "pin" && s.pins[i] && q) { S.km[i] += QMB.kmBetween(s.pins[i]!, q) as number; S.kmN[i]++; }
       });
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
-      toast(s, !first.length ? "Nobody got it." : first.length === 1 ? (m.key === "flag" ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} takes leg ${m.i + 1}: +${pts[first[0]]}.`) : `${first.length} teams share leg ${m.i + 1}.`);
+      toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
+        : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} takes leg ${m.i + 1}: +${pts[first[0]]}.`) : `${first.length} teams share leg ${m.i + 1}.`);
     }
     m.i++;
     if (m.i < m.qs.length) { ask(s, now, t); return true; }
@@ -191,6 +262,10 @@ export function next(s: StateM, now: number, t: Timers) {
   if (s.screen === "summary") {
     s.log.push(s.teams.map((x) => x.score));
     s.mi++; s.toast = null;
+    /* the last game played and teams level at the top: sudden death between them, with the questions held back */
+    if (s.mi >= s.minis.length) { const top = Math.max(...s.teams.map((x) => x.score)), tied = s.teams.map((x, i) => (x.score === top ? i : -1)).filter((i) => i >= 0);
+      if (tied.length > 1 && top > 0 && (s.spare || []).length) { const k = s.teams.length;
+        s.minis.push({ key: "sudden", qs: s.spare, i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k), only: tied }); s.spare = []; } }
     s.screen = s.mi < s.minis.length ? "intro" : "final"; s.step++; return true;
   }
   return false;
