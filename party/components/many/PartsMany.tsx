@@ -210,16 +210,22 @@ export function ScoresMany({ pub, me }: { pub: PubMany; me: number | null }) {
   return (
     <div className="card flex flex-col gap-3" role="group" aria-label="Scores">
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{pub.screen === "final" ? "Final standings" : "The scores"}</div>
+      {/* the column titles: what the grey number is, and that the big one is the night's total */}
+      <div className="flex items-end gap-2 px-2 -mx-2 text-11 font-bold uppercase tracking-[.14em] leading-tight text-[var(--color-ink-3)]" aria-hidden>
+        <span className="flex-1">Team</span>
+        {tally && <span className="w-14 text-right">This game</span>}
+        <span className="w-12 text-right">Total</span>
+      </div>
       <ol className="flex flex-col gap-1">
         {order.map((t) => (
-          <li key={t} className="flex items-center gap-3 min-h-[44px] rounded-[14px] px-2 -mx-2" style={t === me ? { background: `color-mix(in srgb, ${T[t].color} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${T[t].color} 40%, transparent)` } : undefined}>
+          <li key={t} className="flex items-center gap-2 min-h-[44px] rounded-[14px] px-2 -mx-2" style={t === me ? { background: `color-mix(in srgb, ${T[t].color} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${T[t].color} 40%, transparent)` } : undefined}>
             <span className="display text-16 w-7 text-right" style={{ color: placeOf(t) === 1 ? "var(--color-gold)" : "var(--color-ink-3)" }}>{placeOf(t)}</span>
             <Dot t={t} color={T[t].color} size={16} />
-            <span className="font-bold text-16 truncate flex-1 min-w-0" style={{ color: T[t].color }}><bdi>{T[t].name}</bdi>{t === me && <span className="cap ml-2">You</span>}</span>
-            {tally && <span className="text-13 text-[var(--color-ink-3)] tabular-nums">{pc ? pct(tally[t]) : tally[t]}</span>}
-            <span className="display text-26 w-10 text-right" style={{ color: T[t].color }}>{T[t].score}</span>
+            <span className="flex-1 min-w-0 flex flex-col"><span className="font-bold text-16 truncate" style={{ color: T[t].color }}><bdi>{T[t].name}</bdi></span>{t === me && <span className="cap self-start">Your team</span>}</span>
+            {tally && <span className="w-14 shrink-0 text-13 text-[var(--color-ink-2)] tabular-nums text-right" aria-label={`${g!.title}: ${pc ? pct(tally[t]) : `${tally[t]} won`}`}>{pc ? pct(tally[t]) : `${tally[t]} won`}</span>}
+            <span className="display text-26 w-12 text-right" style={{ color: T[t].color }} aria-label={`Total ${T[t].score}`}>{T[t].score}</span>
           </li>))}
       </ol>
-      {tally && g && <div className="text-12 text-[var(--color-ink-3)]">In grey: {g.title} so far, {pc ? "the share right" : "legs won"}.</div>}
+      {tally && g && <div className="text-12 text-[var(--color-ink-3)]">This game: {g.title}, {pc ? "the share of answers right so far" : `legs won so far, of ${g.of}`}. Total: the night&rsquo;s points.</div>}
     </div>);
 }
