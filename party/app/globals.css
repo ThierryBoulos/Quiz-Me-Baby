@@ -651,8 +651,9 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* seven or eight teams: the tally by letter alone (the dot carries it), so the line never wraps */
 .hud.tv.many.stack .hud-mini .nm { display: none; } .hud.tv.many.stack .hud-mini .dot { width: 18px; height: 18px; font-size: var(--text-10); }
 .hud.tv.many .hud-mini { gap: 6px 10px; } .hud.tv.many .hud-mini .nm { margin-left: 4px; }
-/* during a game, its own points line spreads across the whole width (the totals' row is away), a size up */
-.hud.tv.many .hud-mini.game-line { justify-content: space-evenly; width: 100%; margin-top: 10px; }
+/* during a game, its own points line, a size up, the teams spaced out a little (the owner: not across the whole row) */
+.hud.tv.many .hud-mini.game-line { justify-content: center; column-gap: 56px; margin-top: 10px; }
+.hud.tv.many.mid .hud-mini.game-line { column-gap: 40px; } .hud.tv.many.stack .hud-mini.game-line { column-gap: 34px; }
 .hud.tv.many .hud-mini.game-line b { font-size: var(--text-28); }
 .hud.tv.many .hud-mini.game-line .nm { font-size: var(--text-15); max-width: 220px; }
 .hud.tv.many.stack .hud-mini.game-line .dot { width: 18px; height: 18px; }
