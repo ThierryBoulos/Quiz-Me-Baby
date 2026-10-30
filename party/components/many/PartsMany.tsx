@@ -3,9 +3,9 @@
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
 import { type ReactNode } from "react";
-import { Verdict } from "../GameParts";
+import { Roll, Verdict } from "../GameParts";
 import { showKm, showNum } from "@/lib/game";
-import { LETTERS, MANY_PTS } from "@/lib/many/logic";
+import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 
 export type Size = "tv" | "phone";
@@ -34,14 +34,13 @@ export function takes(pub: PubMany): { text: string; color: string } {
   if (w.length === T.length) return { text: "Everyone takes it", color: "var(--color-gold)" };
   return { text: `${w.length} teams take it`, color: "var(--color-gold)" };
 }
-/* a game's points, in words: "TEAM A +2", "TEAM A & TEAM C +1 EACH", "Nobody scores" */
+/* a game's result, in words: who came 1st and what it pays ("TEAM A +10", "2 TEAMS SHARE 1ST · +10 EACH") */
 export function paid(pub: PubMany): { text: string; color: string } {
   const S = pub.summary, T = pub.teams;
-  const top = (S?.award || []).map((p, t) => (p > 0 ? t : -1)).filter((t) => t >= 0);
+  const top = (S?.places || []).map((p, t) => (p === 1 && (S?.award[t] ?? 0) > 0 ? t : -1)).filter((t) => t >= 0);
   if (!top.length) return { text: "Nobody scores", color: "var(--color-ink-2)" };
   if (top.length === 1) return { text: `${T[top[0]].name} +${S!.award[top[0]]}`, color: T[top[0]].color };
-  /* three or more level at the top: counted, not named (the board above names them, lit) */
-  return { text: `${top.length > 2 ? `${top.length} teams` : top.map((t) => T[t].name).join(" & ")} +${S!.award[top[0]]} each`, color: "var(--color-gold)" };
+  return { text: `${top.length > 2 ? `${top.length} teams` : top.map((t) => T[t].name).join(" & ")} share 1st · +${S!.award[top[0]]} each`, color: "var(--color-gold)" };
 }
 /* the teams in the order of a reveal: the nearest first, the ones with nothing at the end */
 export const byDistance = (pub: PubMany) => {
@@ -59,7 +58,7 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
   /* this game's tally: not before it starts, and not on its result (the board in the middle says it, bigger) */
-  const tally = g && pub.screen !== "intro" && pub.screen !== "final" && pub.screen !== "summary" ? (pc ? g.shares || g.wins.map(() => 0) : g.wins) : null;
+  const tally = g && pub.screen !== "intro" && pub.screen !== "final" && pub.screen !== "summary" ? (pc ? g.shares || g.wins.map(() => 0) : g.pts) : null;
   return (
     <div className={`hud ${size} many ${packing(k)}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, top middle, where the two-team TV has it */}
@@ -67,8 +66,9 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
       {tv && <div className="hud-in">
         {T.map((t, i) => (
           <div key={i} className="hud-team" style={{ ["--c" as string]: t.color }}>
-            <div className="flex items-center gap-2 min-w-0"><Dot t={i} color={t.color} size={k > 5 ? 16 : k > 4 ? 18 : 22} /><div className="nm"><bdi>{t.name}</bdi></div></div>
-            <div className="sc" data-score={i}>{t.score}</div>
+            <div className="flex items-center gap-2 min-w-0"><Dot t={i} color={t.color} size={k > 5 ? 16 : k > 4 ? 18 : 22} /><div className="nm"><bdi>{t.name}</bdi></div>
+              {pub.fire?.[i] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}</div>
+            <div className="sc" data-score={i}><Roll v={t.score} /></div>
           </div>))}
       </div>}
       <div className="hud-mid">
@@ -88,23 +88,25 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
 
 /* ---- a game's intro: the title, the gold band, the numbered rules (GameParts' MiniIntro, for N teams) ---- */
 function rules(pub: PubMany): string[] {
-  const g = pub.game!, n = g.of, k = pub.teams.length, pts = `${MANY_PTS} points`;
-  const top = `Most legs out of ${n} takes ${pts}; a tie at the top is a point each.`;
+  const g = pub.game!, n = g.of, k = pub.teams.length;
+  /* points by place (30 Oct): what a question pays, and what the game's places pay the night */
+  const pay = `At the end, places pay the night: ${PLACE_PTS.slice(0, k).join(", ")}. Level teams share the better place.`;
+  const each = (by: string) => `Every leg ranks all ${k} teams ${by}: 1st scores ${k}, 2nd ${k - 1}, down to 1 for last. No answer scores nothing.`;
   switch (g.key) {
     case "majority": return [
       "Everyone plays on their own phone, captains too. The lists are fixed at Start.",
       `${n} questions, four answers each. One tap and it's locked. No answer counts as wrong.`,
       "Eyes on your own phone: every phone has the answers in a different order.",
-      `Each team scores the share of its answers that are right, so a smaller team isn't at a disadvantage. The highest share of the ${k} takes ${pts}; a tie at the top is a point each.`];
+      `Teams are ranked by the share of their answers that are right, so a smaller team isn't at a disadvantage. ${pay}`];
     case "flag": return [
       `A flag goes up. All ${k} captains type whose it is, at the same time.`,
-      "The app checks them, and the host can change a call. Every team that gets it takes the leg.", top];
+      `The app checks them, and the host can change a call. Right answers are ranked by who sent first: the fastest scores ${k}, the next ${k - 1}, and so on. Wrong scores nothing.`, pay];
     case "closest": return [
       `All ${k} teams get the same number question at the same time. Each captain locks in one number on their phone.`,
-      "The nearest guess takes the leg; the same distance, they both take it. No answer, no leg.", top];
+      each("by how far off"), pay];
     case "pin": return [
       `A photo of a landmark goes up. All ${k} captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better.`,
-      "The nearest pin takes the leg, by the kilometre. No pin, no leg.", top];
+      each("by the kilometre"), pay];
   }
 }
 /* compact: the TV's Majority Rules intro, which shares the screen with the QR code */
@@ -119,7 +121,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
         <span className="sep text-[var(--color-ink-3)]">·</span>
-        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>Winner takes {MANY_PTS} points</span>
+        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>Places pay {PLACE_PTS.slice(0, Math.min(3, pub.teams.length)).join(" · ")}{pub.teams.length > 3 ? " …" : ""}</span>
         <span className="sep text-[var(--color-ink-3)]">·</span>
         <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{pub.teams.length} teams</span>
       </div>
@@ -154,10 +156,12 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
         </div>))}
     </div>);
 }
-/* the columns of a game's result: legs won, or the share right */
+/* the columns of a game's result, by place: the game's points (or the share right), and what the place pays */
 export const summaryCols = (pub: PubMany): Col[] => {
-  const S = pub.summary!, val = (t: number) => (S.shares ? S.shares[t] : S.wins[t]);
-  return pub.teams.map((_, t) => t).sort((a, b) => val(b) - val(a) || a - b).map((t) => ({ t, big: S.shares ? pct(S.shares[t]) : String(S.wins[t]), lit: S.award[t] > 0 }));
+  const S = pub.summary!;
+  return pub.teams.map((_, t) => t).sort((a, b) => S.places[a] - S.places[b] || a - b).map((t) => ({ t, big: S.shares ? pct(S.shares[t]) : String(S.pts[t]),
+    place: S.award[t] > 0 ? S.places[t] : undefined, lit: S.places[t] === 1 && S.award[t] > 0,
+    sub: S.award[t] > 0 ? <b style={{ color: "var(--color-ok)" }}>+{S.award[t]}</b> : <span className="text-[var(--color-ink-3)]">nothing</span> }));
 };
 /* the columns of the final standings: by place */
 export const finalCols = (pub: PubMany): Col[] => pub.final!.order.map(({ team, place: p }) => ({ t: team, big: String(pub.teams[team].score), place: p, lit: p === 1 }));
@@ -171,7 +175,7 @@ export const closestCols = (pub: PubMany): Col[] => {
 
 /* ---- a reveal's rows: each team's line, in the order given (a side column on the TV, a list on a phone), the
    ones who take it with a trophy ---- */
-export function RowsMany({ pub, order, right, size, label }: { pub: PubMany; order: number[]; right: (t: number) => ReactNode; size: Size; label?: (t: number) => ReactNode }) {
+export function RowsMany({ pub, order, right, size, label, pts }: { pub: PubMany; order: number[]; right: (t: number) => ReactNode; size: Size; label?: (t: number) => ReactNode; pts?: number[] }) {
   const T = pub.teams, tv = size === "tv", dense = T.length > 4, W = pub.reveal?.winners || [];
   return (
     <div className="flex flex-col w-full" style={{ gap: tv ? (dense ? 2 : 8) : 4 }} role="list">
@@ -182,6 +186,8 @@ export function RowsMany({ pub, order, right, size, label }: { pub: PubMany; ord
           {/* who takes it: a trophy in a slot of its own, so a long name stops short of it and nothing moves */}
           {W.length > 0 && <span className="shrink-0 text-center leading-none" style={{ width: tv ? (dense ? 26 : 32) : 20, fontSize: tv ? (dense ? 18 : 24) : 14 }} role={W.includes(t) ? "img" : undefined} aria-label={W.includes(t) ? "takes it" : undefined}>{W.includes(t) ? "🏆" : ""}</span>}
           <span className="display shrink-0 text-right" style={{ fontSize: tv ? (dense ? 24 : 32) : 18 }}>{right(t)}</span>
+          {/* what this leg pays, in a column of its own */}
+          {pts && <span className="display shrink-0 text-right" style={{ width: tv ? (dense ? 40 : 52) : 30, fontSize: tv ? (dense ? 20 : 26) : 14, color: pts[t] ? "var(--color-ok)" : "var(--color-ink-3)" }}>{pts[t] ? "+" + pts[t] : "0"}</span>}
         </div>))}
     </div>);
 }
@@ -199,6 +205,7 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
           <div className="flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
             <span className={tv ? "display truncate" : "eyebrow truncate"} style={{ color: t.color }}><bdi>{t.name}</bdi></span>
             {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={ok ? undefined : !x ? "No answer" : undefined} />}
+            {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
           </div>
           {(x || ok == null) && <div className="font-bold truncate max-w-full" style={{ fontSize: tv ? (dense ? 20 : 26) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}
         </div>); })}
@@ -211,7 +218,7 @@ export function ScoresMany({ pub, me }: { pub: PubMany; me: number | null }) {
   const T = pub.teams, g = pub.game, pc = g?.key === "majority";
   const order = pub.final ? pub.final.order.map((o) => o.team) : T.map((_, i) => i).sort((a, b) => T[b].score - T[a].score || a - b);
   const placeOf = (t: number) => pub.final ? pub.final.order.find((o) => o.team === t)!.place : order.findIndex((x) => T[x].score === T[t].score) + 1;
-  const tally = g && pub.screen !== "intro" && pub.screen !== "final" ? (pc ? g.shares : g.wins) : null;
+  const tally = g && pub.screen !== "intro" && pub.screen !== "final" ? (pc ? g.shares : g.pts) : null;
   return (
     <div className="card flex flex-col gap-3" role="group" aria-label="Scores">
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{pub.screen === "final" ? "Final standings" : "The scores"}</div>
@@ -227,10 +234,10 @@ export function ScoresMany({ pub, me }: { pub: PubMany; me: number | null }) {
             <span className="display text-16 w-7 text-right" style={{ color: placeOf(t) === 1 ? "var(--color-gold)" : "var(--color-ink-3)" }}>{placeOf(t)}</span>
             <Dot t={t} color={T[t].color} size={16} />
             <span className="flex-1 min-w-0 flex flex-col"><span className="font-bold text-16 truncate" style={{ color: T[t].color }}><bdi>{T[t].name}</bdi></span>{t === me && <span className="cap self-start">Your team</span>}</span>
-            {tally && <span className="w-14 shrink-0 text-13 text-[var(--color-ink-2)] tabular-nums text-right" aria-label={`${g!.title}: ${pc ? pct(tally[t]) : `${tally[t]} won`}`}>{pc ? pct(tally[t]) : `${tally[t]} won`}</span>}
+            {tally && <span className="w-14 shrink-0 text-13 text-[var(--color-ink-2)] tabular-nums text-right" aria-label={`${g!.title}: ${pc ? pct(tally[t]) : `${tally[t]} points`}`}>{pc ? pct(tally[t]) : `${tally[t]} pts`}</span>}
             <span className="display text-26 w-12 text-right" style={{ color: T[t].color }} aria-label={`Total ${T[t].score}`}>{T[t].score}</span>
           </li>))}
       </ol>
-      {tally && g && <div className="text-12 text-[var(--color-ink-3)]">This game: {g.title}, {pc ? "the share of answers right so far" : `legs won so far, of ${g.of}`}. Total: the night&rsquo;s points.</div>}
+      {tally && g && <div className="text-12 text-[var(--color-ink-3)]">This game: {g.title}, {pc ? "the share of answers right so far" : `points by place so far, ${g.of} legs`}; its places pay the night at the end. Total: the night&rsquo;s points.</div>}
     </div>);
 }

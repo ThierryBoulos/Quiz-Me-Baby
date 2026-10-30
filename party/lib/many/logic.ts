@@ -2,15 +2,21 @@
    (lib/many/useTvMany.ts) feeds it taps and the clock, the simulator (sim/many.mjs) feeds it bots.
    Nothing here is shared with the two-team game but the matcher and the distance (engine/core.js).
    Always with a host. Four games, all simultaneous, all judged by the app (the host can flip a flag):
-   Majority Rules, Guess the Flag, Closest To Wins, Drop the Pin. The winner of each takes 2 points;
-   a tie at the top is a point each. */
+   Majority Rules, Guess the Flag, Closest To Wins, Drop the Pin.
+   Points by place (the owner's pick, 30 Oct: one winner taking 2 left 2nd and 8th level). Every question ranks
+   the teams and pays this game's tally by place: with 8 teams the nearest (Closest, Pin) or the first right
+   (Flags: the fastest typist) takes 8, the next 7, down to 1; wrong or no answer, nothing. Majority Rules ranks
+   by the share of answers right. At the end of a game its places pay the night: 10, 8, 6, 5, 4, 3, 2, 1
+   (3 teams: 10, 8, 6). Level teams share the better place. */
 import { QMB } from "../engine";
 
 export const MANY_MINIS = ["majority", "flag", "closest", "pin"] as const;
 export type ManyKey = (typeof MANY_MINIS)[number];
 export const MANY_TITLES: Record<ManyKey, string> = { majority: "Majority Rules", flag: "Guess the Flag", closest: "Closest To Wins", pin: "Drop the Pin" };
 export const MANY_LEGS: Record<ManyKey, number> = { majority: 15, flag: 10, closest: 5, pin: 7 };
-export const MANY_MIN = 3, MANY_MAX = 8, MANY_PLAYERS = 60, MANY_PTS = 2;
+export const MANY_MIN = 3, MANY_MAX = 8, MANY_PLAYERS = 60;
+/* what a game's places pay the night (1st, 2nd, ...); fewer teams take the top of the same table */
+export const PLACE_PTS = [10, 8, 6, 5, 4, 3, 2, 1];
 /* team colours: Team A's cyan and Team B's pink exactly (--color-a, --color-b), then six more that sit apart
    from each other and from the show's gold, the green of RIGHT and the red of WRONG; a letter in every dot too
    (colour-blind). A canvas can't read CSS variables, so they're hex. */
@@ -22,18 +28,26 @@ export const defaultName = (t: number) => "Team " + LETTERS[t];
 type Q = any;
 export type LatLon = { lat: number; lon: number };
 export type TeamM = { name: string; captain: string; score: number };
-export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: number[]; of: number[]; award?: number[] };
+/* wins: legs taken (flag: legs right); pts: this game's place points so far; places: its final places */
+export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: number[]; of: number[]; pts: number[]; award?: number[]; places?: number[] };
+/* the night's numbers for the awards: legs placed 1st and 2nd, the fastest right flags, Drop the Pin's km
+   (and how many pins), the run of 1st places now (on fire at 3; a new game starts cold) and the best run */
+export type Stats = { firsts: number[]; seconds: number[]; fastest: number[]; km: number[]; kmN: number[]; run: number[]; best: number[] };
 export type Screen = "intro" | "q" | "reveal" | "summary" | "final";
 export type StateM = {
-  v: 1; teams: TeamM[]; minis: MiniM[]; mi: number; screen: Screen; step: number;
+  v: 2; teams: TeamM[]; minis: MiniM[]; mi: number; screen: Screen; step: number;
   deadline: number | null; left: number; total: number;
   typed: (string | null)[]; nums: (number | null)[]; pins: (LatLon | null)[];
+  at: (number | null)[]; seq: number;           // the order this leg's answers came in (Flags: the fastest right first)
   ok: (boolean | null)[];                       // this leg's call per team (the app's, then the host's)
   roster: { name: string; team: number }[];     // Majority Rules: who plays (fixed at its start)
   votes: Record<string, string>;
   who: Record<string, { r: number; of: number; team: number }>;
   toast: { id: number; text: string } | null; toastN: number;
   exit?: boolean; log: number[][];            // the scores after each game, for the final chart
+  stats: Stats;
+  /* Imad, the MC (lib/many/imad.ts): his line, the lines he's used, the moments said once, who led */
+  imad?: { id: number; text: string; mood?: string }; imadN?: number; imadUsed?: Record<string, number[]>; imadOnce?: Record<string, boolean>; leader?: number | null; fireWas?: boolean[];
 };
 export type Timers = { flag: number; closest: number; pin: number; majority: number };
 
@@ -43,19 +57,21 @@ export const qOf = (s: StateM) => { const m = miniOf(s); return m ? m.qs[m.i] : 
 
 export function newNight(teams: { name: string; captain: string }[], decks: Partial<Record<ManyKey, Q[]>>, order: ManyKey[]): StateM {
   const k = teams.length;
-  const minis: MiniM[] = order.filter((key) => (decks[key] || []).length).map((key) => ({ key, qs: (decks[key] || []).slice(0, MANY_LEGS[key]), i: 0, wins: n(k), right: n(k), of: n(k) }));
-  return { v: 1, teams: teams.map((t) => ({ ...t, score: 0 })), minis, mi: 0, screen: minis.length ? "intro" : "final", step: 1,
+  const minis: MiniM[] = order.filter((key) => (decks[key] || []).length).map((key) => ({ key, qs: (decks[key] || []).slice(0, MANY_LEGS[key]), i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k) }));
+  return { v: 2, teams: teams.map((t) => ({ ...t, score: 0 })), minis, mi: 0, screen: minis.length ? "intro" : "final", step: 1,
     deadline: null, left: 0, total: 0, typed: Array(k).fill(null), nums: Array(k).fill(null), pins: Array(k).fill(null), ok: Array(k).fill(null),
-    roster: [], votes: {}, who: {}, toast: null, toastN: 0, log: [n(k)] };
+    at: Array(k).fill(null), seq: 0, roster: [], votes: {}, who: {}, toast: null, toastN: 0, log: [n(k)],
+    stats: { firsts: n(k), seconds: n(k), fastest: n(k), km: n(k), kmN: n(k), run: n(k), best: n(k) } };
 }
 
-const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.votes = {}; };
+const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.at = Array(k).fill(null); s.votes = {}; };
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
 
 /* the host taps Start on a game's intro: its first question */
 export function startMini(s: StateM, now: number, t: Timers, roster: { name: string; team: number }[]) {
   const m = miniOf(s); if (!m || s.screen !== "intro") return false;
   if (m.key === "majority") s.roster = roster.filter((r) => r.team >= 0 && r.team < s.teams.length).slice(0, MANY_PLAYERS);
+  s.stats.run = n(s.teams.length);                 // a new game starts cold
   ask(s, now, t); return true;
 }
 function ask(s: StateM, now: number, t: Timers) {
@@ -69,18 +85,18 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
   if (m.key === "flag") {
     if (s.typed[team] != null) return "Your answer is in.";
     const text = String(p.text ?? "").trim().slice(0, 60); if (!text) return "Type an answer first.";
-    s.typed[team] = text; return true;
+    s.typed[team] = text; s.at[team] = ++s.seq; return true;
   }
   if (m.key === "closest") {
     if (s.nums[team] != null) return "Your number is in.";
     const v = QMB.parseNumber(String(p.n ?? ""), qOf(s)?.question); if (v == null || !Number.isFinite(v)) return "That isn't a number.";
-    s.nums[team] = v; return true;
+    s.nums[team] = v; s.at[team] = ++s.seq; return true;
   }
   if (m.key === "pin") {
     if (s.pins[team]) return "Your pin is in.";
     const q = p.pin as LatLon | undefined;
     if (!q || !Number.isFinite(Number(q.lat)) || !Number.isFinite(Number(q.lon)) || Math.abs(q.lat) > 90 || Math.abs(q.lon) > 180) return "That isn't a pin.";
-    s.pins[team] = { lat: Number(q.lat), lon: Number(q.lon) }; return true;
+    s.pins[team] = { lat: Number(q.lat), lon: Number(q.lon) }; s.at[team] = ++s.seq; return true;
   }
   return "Everyone answers this one on their own phone.";
 }
@@ -120,6 +136,21 @@ export const distances = (s: StateM): (number | null)[] => {
   const m = miniOf(s), q = qOf(s); if (!m || !q) return [];
   return m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q)) : null)) : [];
 };
+/* places by a key, lower better (null: no place); level keys share the better place (1, 1, 3) */
+export function placesBy(keys: (number | null)[]): (number | null)[] {
+  return keys.map((x) => (x == null ? null : 1 + keys.filter((y) => y != null && y < x - 1e-9).length));
+}
+/* this leg's places: Closest and Drop the Pin by how far off; Flags, the right answers in the order they came in
+   (a call the host turned RIGHT for a team that sent nothing goes last of the right ones); wrong or none, no place */
+export function legPlaces(s: StateM): (number | null)[] {
+  const m = miniOf(s), q = qOf(s); if (!m || !q || m.key === "majority") return s.teams.map(() => null);
+  if (m.key === "flag") return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? 1e9 : null)));
+  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null));
+  return placesBy(d);
+}
+/* ...and what they pay this game's tally: 1st as many points as there are teams, one less a place, down to 1 */
+export const legPoints = (s: StateM): number[] => legPlaces(s).map((p) => (p == null ? 0 : s.teams.length - p + 1));
+
 /* Majority Rules, this question: right answers per team, and how many play */
 export function mrCount(s: StateM) {
   const q = qOf(s), k = s.teams.length, right = n(k), of = n(k), counts: number[] = (q?.options || []).map(() => 0);
@@ -142,7 +173,16 @@ export function next(s: StateM, now: number, t: Timers) {
       for (const r of s.roster) { const w = (s.who[r.name] = s.who[r.name] || { r: 0, of: 0, team: r.team }); w.of++; if (s.votes[r.name] === q?.answer) w.r++; }
     } else {
       const w = legWinners(s); w.forEach((i) => m.wins[i]++);
-      toast(s, w.length === 0 ? "Nobody got it." : w.length === 1 ? `${s.teams[w[0]].name} takes leg ${m.i + 1}.` : `${w.length} teams take leg ${m.i + 1}.`);
+      const pl = legPlaces(s), pts = legPoints(s), S = s.stats, q = qOf(s);
+      pts.forEach((p, i) => { m.pts[i] += p; });
+      pl.forEach((p, i) => {
+        if (p === 1) { S.firsts[i]++; S.run[i]++; S.best[i] = Math.max(S.best[i], S.run[i]); } else S.run[i] = 0;
+        if (p === 2) S.seconds[i]++;
+        if (p === 1 && m.key === "flag") S.fastest[i]++;
+        if (m.key === "pin" && s.pins[i] && q) { S.km[i] += QMB.kmBetween(s.pins[i]!, q) as number; S.kmN[i]++; }
+      });
+      const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
+      toast(s, !first.length ? "Nobody got it." : first.length === 1 ? (m.key === "flag" ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} takes leg ${m.i + 1}: +${pts[first[0]]}.`) : `${first.length} teams share leg ${m.i + 1}.`);
     }
     m.i++;
     if (m.i < m.qs.length) { ask(s, now, t); return true; }
@@ -155,12 +195,14 @@ export function next(s: StateM, now: number, t: Timers) {
   }
   return false;
 }
-/* a game's points: the top team takes 2; a tie at the top is a point each */
+/* a game's result: its places (the tally, or Majority Rules' share right), paid by PLACE_PTS. A team that scored
+   nothing in the game (no answer that placed, no right answer) gets nothing */
+export const gameVal = (m: MiniM, t: number) => (m.key === "majority" ? share(m, t) : m.pts[t]);
 export function award(s: StateM, m: MiniM) {
-  const val = s.teams.map((_, t) => (m.key === "majority" ? share(m, t) : m.wins[t]));
-  const best = Math.max(...val), top = val.map((v, t) => (Math.abs(v - best) < 1e-9 ? t : -1)).filter((t) => t >= 0);
-  m.award = s.teams.map((_, t) => (top.includes(t) ? (top.length === 1 ? MANY_PTS : 1) : 0));
-  if (best <= 0) m.award = s.teams.map(() => 0);          // nobody scored anything: nobody is paid
+  const val = s.teams.map((_, t) => gameVal(m, t));
+  const pl = placesBy(val.map((v) => (v > 0 ? -v : null)));
+  m.places = pl.map((p) => p ?? s.teams.length);
+  m.award = pl.map((p) => (p == null ? 0 : PLACE_PTS[p - 1] ?? 0));
   m.award.forEach((p, t) => { s.teams[t].score += p; });
 }
 /* the final order: score, then games won; places shared on a tie */
@@ -176,3 +218,47 @@ export function mrLine(s: StateM): string {
   const names = (v: number) => { const L = all.filter(([, w]) => w.r === v).map(([k]) => k); return L.length > 3 ? `${L.length} players` : L.join(" & "); };
   return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of} · Wooden spoon: ${names(lo)}, ${lo} of ${of}`;
 }
+
+/* ---- the end of the night (the two-team night's recap, for N teams): awards and the night in a nutshell ---- */
+export type AwardM = { t: string; who: string; team: number | null; note?: string; spoon?: boolean };
+/* the wooden spoon's word from the judges, as the two-team night says it (lib/tv/recap.ts) */
+const spoonQuip = (lo: number, of: number) => { const coin = Math.round(of / 4);
+  return lo === 0 ? `Zero. Guessing blind gets about ${coin}.` : lo < coin ? `Guessing blind gets about ${coin}. Just saying.` : lo === coin ? "Exactly what a coin would get. Respect." : "Last, but with dignity."; };
+/* the one team with the most of something (a tie, nobody) */
+const topOf = (v: number[], min = 1): number | null => { const best = Math.max(...v); const at = v.filter((x) => x === best).length; return best >= min && at === 1 ? v.indexOf(best) : null; };
+export function recapMany(s: StateM): { awards: AwardM[]; lines: string[] } {
+  const S = s.stats, T = s.teams, nm = (t: number) => T[t].name, out: AwardM[] = [], has = (k: ManyKey) => s.minis.some((m) => m.key === k);
+  let t: number | null;
+  if ((t = topOf(S.firsts, 2)) != null) out.push({ t: "Most questions won", who: `${nm(t)}, ${S.firsts[t]}`, team: t });
+  if ((t = topOf(S.seconds, 2)) != null && t !== topOf(S.firsts, 2)) out.push({ t: "Always the bridesmaid", who: `${nm(t)}, 2nd ${S.seconds[t]} times`, team: t });
+  if (has("flag") && (t = topOf(S.fastest, 2)) != null) out.push({ t: "Fastest fingers, Guess the Flag", who: `${nm(t)}, first right ${S.fastest[t]} times`, team: t });
+  if (has("pin")) {
+    const legs = s.minis.find((m) => m.key === "pin")!.qs.length, avg = T.map((_, i) => (S.kmN[i] >= Math.ceil(legs / 2) ? S.km[i] / S.kmN[i] : Infinity));
+    const lo = Math.min(...avg); if (Number.isFinite(lo) && avg.filter((x) => x === lo).length === 1) { t = avg.indexOf(lo); out.push({ t: "Best aim, Drop the Pin", who: `${nm(t)}, ${lo < 1 ? "under 1 km" : Math.round(lo).toLocaleString("en") + " km"} off on average`, team: t }); }
+  }
+  if ((t = topOf(S.best, 3)) != null) out.push({ t: "Hot streak", who: `${nm(t)}, ${S.best[t]} in a row`, team: t });
+  const mr = Object.entries(s.who).filter(([, w]) => w.of > 0);
+  if (mr.length >= 2) {
+    const hi = Math.max(...mr.map(([, w]) => w.r)), lo = Math.min(...mr.map(([, w]) => w.r)), of = Math.max(...mr.map(([, w]) => w.of));
+    const top = mr.filter(([, w]) => w.r === hi), low = mr.filter(([, w]) => w.r === lo);
+    if (hi > lo && top.length === 1) out.push({ t: "Sharpest in Majority Rules", who: `${top[0][0]}, ${hi} of ${of}`, team: top[0][1].team });
+    if (hi > lo && low.length <= 2) out.push({ t: "Wooden spoon, Majority Rules", who: `${low.map(([k]) => k).join(" & ")}, ${lo} of ${of}`, team: low.length === 1 ? low[0][1].team : null,
+      note: spoonQuip(lo, of), spoon: true });
+  }
+  /* the nutshell: who led through the night, the biggest climb, how close the top was */
+  const lines: string[] = [], L = s.log.slice(1), place = (row: number[], i: number) => 1 + row.filter((x) => x > row[i]).length;
+  const leaders = L.map((row) => { const b = Math.max(...row); const at = row.map((x, i) => (x === b ? i : -1)).filter((i) => i >= 0); return at.length === 1 ? at[0] : -1; });
+  const fin = ranking(s), first = fin.filter((x) => x.place === 1).map((x) => x.team);
+  if (L.length >= 2 && first.length === 1 && leaders.every((x) => x === first[0])) lines.push(`${nm(first[0])} led after every game.`);
+  else { const ch = leaders.filter((x, i) => i > 0 && x >= 0 && leaders[i - 1] >= 0 && x !== leaders[i - 1]).length; if (ch >= 1) lines.push(`The lead changed hands ${ch === 1 ? "once" : ch + " times"}.`); }
+  if (L.length >= 2) {
+    const climb = T.map((_, i) => place(L[0], i) - place(L[L.length - 1], i)), up = Math.max(...climb);
+    if (up >= 2) { const i = climb.indexOf(up); lines.push(`${nm(i)} climbed from ${ordinal(place(L[0], i))} after the first game to ${ordinal(place(L[L.length - 1], i))}.`); }
+  }
+  const sc = fin.map((x) => T[x.team].score);
+  if (first.length > 1) lines.push(`A shared win: ${first.map(nm).join(" & ")} on ${T[first[0]].score}.`);
+  else if (sc.length > 1 && sc[0] - sc[1] <= 2) lines.push(`${nm(fin[0].team)} held off ${nm(fin[1].team)} by ${sc[0] - sc[1]} point${sc[0] - sc[1] === 1 ? "" : "s"}.`);
+  else if (sc.length > 1) lines.push(`${nm(fin[0].team)} won by ${sc[0] - sc[1]} points.`);
+  return { awards: out.slice(0, 5), lines: lines.slice(0, 3) };
+}
+const ordinal = (n: number) => ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"][n] || `${n}th`;

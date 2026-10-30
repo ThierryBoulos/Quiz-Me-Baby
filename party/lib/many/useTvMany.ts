@@ -13,6 +13,7 @@ import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
 import { MANY_MAX, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, flip, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
+import { imadMany } from "./imad";
 
 const SHAPE = 1;
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
@@ -59,7 +60,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     try {
       const raw = JSON.parse(localStorage.getItem(saveKey) || "null");
-      if (raw && raw.shape === SHAPE && raw.s && raw.s.v === 1) { st.current = raw.s; void loadBank(code).then((b) => { bank.current = b; }).catch(() => {}); publish(); }
+      if (raw && raw.shape === SHAPE && raw.s && raw.s.v === 2) { st.current = raw.s; void loadBank(code).then((b) => { bank.current = b; }).catch(() => {}); publish(); }
     } catch { /* nothing saved */ }
   }, [isTv, saveKey, code, publish]);
 
@@ -106,6 +107,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
         st.current = newNight(teams, decks, keys);
+        imadMany(st.current, getSettings().imad);
         /* the questions dealt count as played on this TV */
         try { for (const mm of st.current.minis) for (const q of mm.qs) if (q?.id) used.add(q.id); localStorage.setItem(USED_KEY, JSON.stringify([...used])); } catch { /* in memory only */ }
         await sb().from("rooms").update({ status: "playing", mode: "many" }).eq("code", code);
@@ -132,6 +134,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       }
       reply(ok ? "+" : "-");
       if (ok && s.screen === "summary") playSound("win");
+      if (ok) imadMany(s, getSettings().imad);
       publish(); return;
     }
     /* captains answer; in Majority Rules everyone does */
@@ -140,7 +143,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
         : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G) : "Your captain answers this one.";
       reply(r === true ? "+" : r);
-      if (r === true && allIn(s)) reveal(s, accept);
+      if (r === true && allIn(s) && reveal(s, accept)) imadMany(s, getSettings().imad);
       publish(); return;
     }
   }, [code, publish, saveKey]);
@@ -152,7 +155,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     const t = setInterval(() => {
       const s = st.current; if (!s || s.screen !== "q" || !s.deadline) return;
-      if (Date.now() >= s.deadline) { reveal(s, (q) => acceptFor(q)); publish(); }
+      if (Date.now() >= s.deadline) { if (reveal(s, (q) => acceptFor(q))) imadMany(s, getSettings().imad); publish(); }
     }, 250);
     return () => clearInterval(t);
   }, [isTv, publish]);

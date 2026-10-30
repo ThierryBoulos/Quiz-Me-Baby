@@ -60,8 +60,12 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       {sub && <div className="text-13 font-bold">{sub}</div>}
     </div>);
   /* "That's your team!", under who takes it */
-  const yours = (ok: boolean | null) => ok == null ? undefined : <span style={{ color: ok ? "var(--color-ok)" : "var(--color-ink-3)" }}>{ok ? "That's your team!" : "Not this time."}</span>;
-  const W = takes(pub), won = mine != null && !!R?.winners.includes(mine);
+  const W = takes(pub);
+  /* your team's place on this leg, or in this game, and what it scores: "2nd · +7", "No points this time" */
+  const mineLeg = () => { if (mine == null || !R?.places) return undefined; const p = R.places[mine], v = R.pts?.[mine] ?? 0;
+    return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{p == null || !v ? "No points this time." : `Your team: ${place(p)} · +${v}`}</span>; };
+  const mineGame = () => { if (mine == null || !pub.summary) return undefined; const S = pub.summary, v = S.award[mine];
+    return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{v ? `Your team: ${place(S.places[mine])} · +${v} to the night` : "No points for your team this game."}</span>; };
 
   /* what's on screen, close up: the flag, the photo, the question, and the clock. It can't be selected or copied */
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
@@ -88,12 +92,12 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   /* a reveal's rows: each team's line (Majority Rules: right out of how many; the rest: how near) */
   const Rows = () => !R || !g ? null : g.key === "flag" ? <FlagRowsMany pub={pub} size="phone" />
     : g.key === "closest" ? <BoardMany pub={pub} cols={closestCols(pub)} size="phone" label="Nearest first" />
-    : g.key === "pin" ? <RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="phone" />
+    : g.key === "pin" ? <RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="phone" pts={R.pts} />
     : <RowsMany pub={pub} order={T.map((_, i) => i)} right={(t) => <span className="text-16 font-bold" style={{ fontFamily: "var(--font-body)", textTransform: "none" }}>{R.right?.[t] ?? 0} of {R.of?.[t] ?? 0}</span>} size="phone" />;
   /* a game's result and the night's end, the same on every phone */
   const Summary = () => !g || !pub.summary ? null : (<>
-    <Big text={paid(pub).text} color={paid(pub).color} eyebrow={g.title} sub={mine != null ? yours(pub.summary.award[mine] > 0) : undefined} />
-    <BoardMany pub={pub} cols={summaryCols(pub)} size="phone" label={pub.summary.shares ? "Share right" : "Legs won"} />
+    <Big text={paid(pub).text} color={paid(pub).color} eyebrow={g.title} sub={mineGame()} />
+    <BoardMany pub={pub} cols={summaryCols(pub)} size="phone" label={pub.summary.shares ? "Share right" : "Points this game"} />
     {pub.summary.line && <p className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{pub.summary.line}</p>}
   </>);
   const Final = () => { if (!pub.final) return null; const tops = pub.final.order.filter((x) => x.place === 1).map((x) => x.team), c = tops.length === 1 ? T[tops[0]].color : "var(--color-gold)";
@@ -202,7 +206,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
 
       {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}
       {!host && sc === "reveal" && g && R && (<>
-        {g.key !== "majority" && <Big text={W.text} color={W.color} sub={mine != null ? yours(won) : undefined} />}
+        {g.key !== "majority" && <Big text={W.text} color={W.color} sub={mineLeg()} />}
         <Answer />
         {g.key === "majority" && mine != null && <p className="text-center font-bold text-15" style={{ color: (R.right?.[mine] ?? 0) > 0 ? "var(--color-ok)" : "var(--color-ink-3)" }}><bdi>{T[mine].name}</bdi>: {R.right?.[mine] ?? 0} of {R.of?.[mine] ?? 0} right</p>}
         <Rows />

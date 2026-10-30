@@ -14,38 +14,38 @@ reveal majority 12 won by - | reveal | 0-0-0-0-0
 reveal majority 13 won by - | reveal | 0-0-0-0-0
 reveal majority 14 won by - | reveal | 0-0-0-0-0
 reveal majority 15 won by - | reveal | 0-0-0-0-0
-summary majority award 2,0,0,0,0 | summary | 2-0-0-0-0
-next game | intro | 2-0-0-0-0
-start flag | q | 2-0-0-0-0
-reveal flag 1 won by 2,3,4 | reveal | 2-0-0-0-0
-reveal flag 2 won by 0,1,2 | reveal | 2-0-0-0-0
-reveal flag 3 won by 0,2 | reveal | 2-0-0-0-0
-reveal flag 4 won by 0,1,3 | reveal | 2-0-0-0-0
-reveal flag 5 won by 0,1,3 | reveal | 2-0-0-0-0
-reveal flag 6 won by 3,4 | reveal | 2-0-0-0-0
-reveal flag 7 won by 0,1 | reveal | 2-0-0-0-0
-reveal flag 8 won by 0 | reveal | 2-0-0-0-0
-reveal flag 9 won by 1 | reveal | 2-0-0-0-0
-reveal flag 10 won by 0,1,4 | reveal | 2-0-0-0-0
-summary flag award 2,0,0,0,0 | summary | 4-0-0-0-0
-next game | intro | 4-0-0-0-0
-start closest | q | 4-0-0-0-0
-reveal closest 1 won by 3 | reveal | 4-0-0-0-0
-reveal closest 2 won by 2 | reveal | 4-0-0-0-0
-reveal closest 3 won by 0 | reveal | 4-0-0-0-0
-reveal closest 4 won by 0 | reveal | 4-0-0-0-0
-reveal closest 5 won by 1 | reveal | 4-0-0-0-0
-summary closest award 2,0,0,0,0 | summary | 6-0-0-0-0
-next game | intro | 6-0-0-0-0
-start pin | q | 6-0-0-0-0
-reveal pin 1 won by 3 | reveal | 6-0-0-0-0
-reveal pin 2 won by 4 | reveal | 6-0-0-0-0
-reveal pin 3 won by 0 | reveal | 6-0-0-0-0
-reveal pin 4 won by 0 | reveal | 6-0-0-0-0
-reveal pin 5 won by 0 | reveal | 6-0-0-0-0
-reveal pin 6 won by 3 | reveal | 6-0-0-0-0
-reveal pin 7 won by 4 | reveal | 6-0-0-0-0
-summary pin award 2,0,0,0,0 | summary | 8-0-0-0-0
-next game | final | 8-0-0-0-0
-final 1:Team A 2:Team B 2:Team C 2:Team D 2:Team E
+summary majority award 10,5,6,4,8 | summary | 10-5-6-4-8
+next game | intro | 10-5-6-4-8
+start flag | q | 10-5-6-4-8
+reveal flag 1 won by 2,3,4 | reveal | 10-5-6-4-8
+reveal flag 2 won by 0,1,2 | reveal | 10-5-6-4-8
+reveal flag 3 won by 0,2 | reveal | 10-5-6-4-8
+reveal flag 4 won by 0,1,3 | reveal | 10-5-6-4-8
+reveal flag 5 won by 0,1,3 | reveal | 10-5-6-4-8
+reveal flag 6 won by 3,4 | reveal | 10-5-6-4-8
+reveal flag 7 won by 0,1 | reveal | 10-5-6-4-8
+reveal flag 8 won by 0 | reveal | 10-5-6-4-8
+reveal flag 9 won by 1 | reveal | 10-5-6-4-8
+reveal flag 10 won by 0,1,4 | reveal | 10-5-6-4-8
+summary flag award 10,8,5,6,4 | summary | 20-13-11-10-12
+next game | intro | 20-13-11-10-12
+start closest | q | 20-13-11-10-12
+reveal closest 1 won by 3 | reveal | 20-13-11-10-12
+reveal closest 2 won by 2 | reveal | 20-13-11-10-12
+reveal closest 3 won by 0 | reveal | 20-13-11-10-12
+reveal closest 4 won by 0 | reveal | 20-13-11-10-12
+reveal closest 5 won by 1 | reveal | 20-13-11-10-12
+summary closest award 6,8,4,5,10 | summary | 26-21-15-15-22
+next game | intro | 26-21-15-15-22
+start pin | q | 26-21-15-15-22
+reveal pin 1 won by 3 | reveal | 26-21-15-15-22
+reveal pin 2 won by 4 | reveal | 26-21-15-15-22
+reveal pin 3 won by 0 | reveal | 26-21-15-15-22
+reveal pin 4 won by 0 | reveal | 26-21-15-15-22
+reveal pin 5 won by 0 | reveal | 26-21-15-15-22
+reveal pin 6 won by 3 | reveal | 26-21-15-15-22
+reveal pin 7 won by 4 | reveal | 26-21-15-15-22
+summary pin award 10,6,4,6,8 | summary | 36-27-19-21-30
+next game | final | 36-27-19-21-30
+final 1:Team A 2:Team E 3:Team B 4:Team D 5:Team C
 majority: Most right: P2, 13 of 15 · Wooden spoon: P7, 4 of 15

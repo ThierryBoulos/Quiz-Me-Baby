@@ -33,7 +33,7 @@ function hudLabel(pub: Pub): ReactNode {
 }
 /* A score that changes rolls like a car's odometer: the old number goes up and out, the new one comes in from
    below (down, the other way), with a pop and a ring in the team's colour when it goes up. */
-function Roll({ v }: { v: number }) {
+export function Roll({ v }: { v: number }) {
   const last = useRef(v), [m, setM] = useState<{ from: number; n: number } | null>(null);
   useEffect(() => {
     if (v === last.current) return;

@@ -547,6 +547,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .ruler-grp .card-l.sm .v { font-size: 26px; } .ruler-grp .card-l.sm .off { font-size: 14px; }
 .ruler-grp.win .card-l { border-color: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), 0 10px 34px -10px var(--c); }
 .ruler-grp .card-l .trophy { font-size: 22px; line-height: 1; align-self: center; margin-left: -4px; } .ruler-grp .card-l.sm .trophy { font-size: 17px; margin-left: -2px; }
+.ruler-grp .card-l .pts { font-size: 22px; line-height: 1; color: var(--color-ok); } .ruler-grp .card-l.sm .pts { font-size: 20px; }
 .ruler-grp.win .ruler-dot { box-shadow: 0 0 0 7px color-mix(in srgb, var(--c) 28%, transparent), 0 0 26px var(--c); }
 /* no answer: off the scale, at the far right end: a hatched end to the track, a hollow dot, a dashed card */
 .ruler-off { position: absolute; right: 0; border-radius: 0 7px 7px 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.16) 0 4px, transparent 4px 9px); }
@@ -585,6 +586,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 @keyframes glowBreathe { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.06); filter: brightness(1.25); } }
 .flame { display: inline-block; font-size: .8em; margin: 0 6px; transform-origin: 50% 90%; animation: flameFlicker .7s ease-in-out infinite alternate; filter: drop-shadow(0 0 8px rgba(255,140,0,.8)); }
 @keyframes flameFlicker { from { transform: scale(1) rotate(-4deg); } to { transform: scale(1.15) rotate(4deg); } }
+/* more than two teams: the top is full of teams, so he speaks from the bottom left, over the strip */
+.imad-bubble.many { top: auto; bottom: 0; left: 0; margin-left: 0; width: 430px; }
 .imad-bubble.yes img { animation: imadHop .7s cubic-bezier(.3,1.4,.5,1) both; }
 .imad-bubble.no img { animation: imadShake .7s ease-in-out both; }
 .imad-bubble.lean img { animation: imadLean .9s ease-in-out both; }

@@ -5,7 +5,7 @@
 import { useState } from "react";
 import type { Member, Room } from "@/lib/room";
 import { QMB } from "@/lib/engine";
-import { MANY_COLORS, MANY_MINIS, MANY_PTS, MANY_TITLES, type ManyKey } from "@/lib/many/logic";
+import { MANY_COLORS, MANY_MINIS, MANY_TITLES, PLACE_PTS, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot } from "./PartsMany";
 
@@ -56,10 +56,10 @@ export function PickMany({ room, k, busy, pick, current }: { room: Room; k: numb
 /* ---- the host's setup when there are more than two teams: Setup's mini-games card, with the four games that
    work for any number of teams, each with its levels; the Start button docked under it ---- */
 const GAMES: [ManyKey, string][] = [
-  ["majority", "Everyone plays on their own phone: 15 questions, four answers. The highest share of right answers wins."],
-  ["flag", "Ten flags, every captain at once: whose is it? The app checks, the host can overrule."],
-  ["closest", "Five numbers. The nearest guess takes the leg."],
-  ["pin", "A landmark's photo: every captain drops a pin on the map. Nearest pin takes the leg."]];
+  ["majority", "Everyone plays on their own phone: 15 questions, four answers. Teams ranked by their share of right answers."],
+  ["flag", "Ten flags, every captain at once: whose is it? The fastest right answer scores most. The app checks, the host can overrule."],
+  ["closest", "Five numbers. Every guess is ranked by how far off: the nearest scores most."],
+  ["pin", "A landmark's photo: every captain drops a pin on the map. Ranked by the kilometre."]];
 const LEVELS3 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 export type CfgMany = { minis: string[]; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[] };
@@ -86,16 +86,17 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
         <div className="mb-1">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="display text-24">Mini-games</div>
-            <span className={"badge shrink-0 " + (on.length ? "gold" : "line")}>{on.length ? `${on.length * MANY_PTS} pts on the table` : "None"}</span>
+            <span className={"badge shrink-0 " + (on.length ? "gold" : "line")}>{on.length ? `${on.length} game${on.length === 1 ? "" : "s"}` : "None"}</span>
           </div>
-          <div className="text-13 text-[var(--color-ink-2)]">{k} teams, so mini-games only, played one after another: every team at once, and the app checks the answers.</div>
+          <div className="text-13 text-[var(--color-ink-2)]">{k} teams, so mini-games only, played one after another: every team at once, and the app checks the answers.
+            Every team scores every game, by place: <b style={{ color: "var(--color-gold)" }}>{PLACE_PTS.slice(0, k).join(" · ")}</b>.</div>
         </div>
         {GAMES.map(([key, blurb]) => { const lit = minis.includes(key); return (
           <div key={key}>
             <button type="button" role="switch" aria-checked={lit} data-mini={key} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(lit ? minis.filter((x) => x !== key) : [...minis, key])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{MANY_TITLES[key]}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{lit && <b style={{ color: "var(--color-gold)" }}> {MANY_PTS} pts · {slot(key)}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{lit && <b style={{ color: "var(--color-gold)" }}> {slot(key)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: lit ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: lit ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

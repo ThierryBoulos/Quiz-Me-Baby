@@ -9,7 +9,8 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { offBy, showNum } from "@/lib/game";
 
-export type RulerTeam = { name: string; color: string; letter?: string; guess: number | null; win: boolean };
+/* pts: what the guess pays (more than two teams: points by place), shown at the end of its card */
+export type RulerTeam = { name: string; color: string; letter?: string; guess: number | null; win: boolean; pts?: number };
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
 const GAP = 10;
 
@@ -34,7 +35,7 @@ export function Ruler({ teams, ans, width }: { teams: RulerTeam[]; ans: number; 
   /* the cards are measured, then packed (before the first paint, so nothing jumps) */
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const [box, setBox] = useState<{ w: number[]; h: number }>({ w: teams.map(() => two ? 300 : 210), h: two ? 54 : 40 });
-  const sig = teams.map((t) => `${t.name}|${t.guess}|${t.win}`).join(",");
+  const sig = teams.map((t) => `${t.name}|${t.guess}|${t.win}|${t.pts}`).join(",");
   useLayoutEffect(() => {
     const w = teams.map((_, i) => refs.current[i]?.offsetWidth || 210), h = Math.max(...teams.map((_, i) => refs.current[i]?.offsetHeight || 40));
     setBox((b) => (b.h === h && b.w.join() === w.join() ? b : { w, h }));
@@ -100,6 +101,7 @@ export function Ruler({ teams, ans, width }: { teams: RulerTeam[]; ans: number; 
               {/* who takes it, at a glance, however bunched the cards are */}
               {t.win && <span className="trophy" role="img" aria-label="takes it">🏆</span>}
               {t.guess == null ? <span className="off">no answer</span> : <><span className="v display">{showNum(t.guess)}</span><span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off!)}</span></>}
+              {t.pts != null && t.guess != null && <span className="pts display">+{t.pts}</span>}
             </div>
           </div>); })}
     </div>);

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock } from "../Clock";
 import { Confetti, FlagImg, PinPhoto } from "../GameParts";
+import { ImadBubble } from "../TvGame";
 import { PinMap } from "../PinMap";
 import { showKm, showNum } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
@@ -39,6 +40,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
     /* nothing on the TV can be selected or copied */
     <div className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       <HudMany pub={pub} size="tv" code={join?.code} />
+      <ImadBubble imad={pub.imad} cls="many" />
 
       <div className="flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}
@@ -99,7 +101,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
           <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] truncate">{pub.question}</div>
           <div className="display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{showNum(Number(R.answer))}</div>
           {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 truncate">{R.notes}</div>}
-          <Ruler ans={Number(R.answer)} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i) }))} />
+          <Ruler ans={Number(R.answer)} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i), pts: R.pts?.[i] }))} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.6), color: W.color }}>{W.text}</div>
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "pin" && R.at && (
@@ -111,7 +113,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
               <div className="eyebrow text-16">It&rsquo;s here</div>
               <div className="display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.answer}</div>
               <div className="text-22 text-[var(--color-ink-2)] -mt-1">{R.place}</div>
-              <div className="w-full mt-2"><RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="tv" /></div>
+              <div className="w-full mt-2"><RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="tv" pts={R.pts} /></div>
               <div className="display text-36 mt-3" style={{ color: W.color }}>{W.text}</div>
             </div>
           </div>)}
@@ -136,7 +138,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
         {/* a game's result: the board, and who it pays */}
         {pub.screen === "summary" && g && pub.summary && (<>
           <div className="display text-52 leading-none slam" style={{ color: "var(--color-gold)" }}>{g.title}</div>
-          <BoardMany pub={pub} cols={summaryCols(pub)} size="tv" label={pub.summary.shares ? "Share right" : "Legs won"} />
+          <BoardMany pub={pub} cols={summaryCols(pub)} size="tv" label={pub.summary.shares ? "Share right" : "Points this game"} />
           <div className="display text-52" style={{ color: paid(pub).color }}>{paid(pub).text}</div>
           {pub.summary.line && <div className="text-22" style={{ color: "var(--color-gold)" }}>{pub.summary.line}</div>}
         </>)}
@@ -153,9 +155,28 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
             <div className="relative grid place-items-center">
               <span className="win-ring" style={{ ["--c" as string]: c }} aria-hidden />
               <span className="win-ring r2" style={{ ["--c" as string]: c }} aria-hidden />
-              <div className="display win-slam max-w-[1160px] leading-none" style={{ fontSize: (name.length > 10 ? 0.74 : 1) * (recap ? 90 : 150), color: c, transition: "font-size .6s ease" }}><bdi>{name}</bdi></div>
+              <div className="display win-slam max-w-[1160px] leading-none" style={{ fontSize: (name.length > 10 ? 0.74 : 1) * (recap ? 64 : 150), color: c, transition: "font-size .6s ease" }}><bdi>{name}</bdi></div>
             </div>
-            {recap && <div className="enter w-full"><BoardMany pub={pub} cols={finalCols(pub)} size="tv" label="Final standings" /></div>}
+            {/* the recap (the two-team night's, for N teams): the night drawn, the nutshell beside it, then the awards */}
+            {recap && (<>
+              <div className="flex gap-8 items-center justify-center w-full enter" style={{ position: "relative", zIndex: 60 }}>
+                {pub.final!.log.length > 2 ? <NightChartMany pub={pub} /> : <BoardMany pub={pub} cols={finalCols(pub)} size="tv" label="Final standings" width={700} />}
+                {pub.final!.lines.length > 0 && (
+                  <div className="card text-left !py-2 w-[380px] shrink-0">
+                    <div className="eyebrow text-13 mb-0.5" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
+                    <ul className="flex flex-col gap-1 text-18 leading-snug">{pub.final!.lines.map((l) => <li key={l}><bdi>{l}</bdi></li>)}</ul>
+                  </div>)}
+              </div>
+              {pub.final!.awards.length > 0 && (
+                <div className="grid gap-3 enter w-full max-w-[1168px]" style={{ gridTemplateColumns: `repeat(${pub.final!.awards.length}, minmax(0, 1fr))`, position: "relative", zIndex: 60 }}>
+                  {pub.final!.awards.map((a) => (
+                    <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ borderColor: a.team != null ? T[a.team].color : undefined }}>
+                      <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
+                      <div className="text-15 font-bold leading-snug" style={{ color: a.team != null ? T[a.team].color : undefined }}><bdi>{a.who}</bdi></div>
+                      {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}
+                    </div>))}
+                </div>)}
+            </>)}
           </>); })()}
       </div>
 
@@ -184,4 +205,27 @@ function Answered({ pub }: { pub: PubMany }) {
   const roster = pub.roster || [], voted = new Set(pub.voted || []);
   const n = roster.length, v = roster.filter((r) => voted.has(r)).length;
   return <span className="font-bold text-26 text-left" style={{ color: v >= n && n > 0 ? "var(--color-ok)" : "var(--color-ink-2)" }}>{v} of {n}<br />answered</span>;
+}
+
+/* the night, drawn (the two-team NightChart, for N teams): every team's score after each game, drawing itself
+   across; each line ends on the team's place and score, the labels kept apart so none sits on another */
+function NightChartMany({ pub }: { pub: PubMany }) {
+  const L = pub.final!.log, T = pub.teams, W = 480, H = 190, PAD = 14, n = L.length, max = Math.max(1, ...L.flat());
+  const x = (i: number) => (i / (n - 1)) * W, y = (v: number) => H - PAD - (v / max) * (H - 2 * PAD);
+  const place = Object.fromEntries(pub.final!.order.map((o) => [o.team, o.place]));
+  /* the labels: in score order, each at least 22 apart, kept inside the chart */
+  const lab = T.map((_, t) => t).sort((a, b) => T[b].score - T[a].score || a - b), at: Record<number, number> = {};
+  let last = -Infinity; for (const t of lab) { const v = Math.max(y(L[n - 1][t]), last + 22); at[t] = v; last = v; }
+  const over = last - (H - 4); if (over > 0) for (const t of lab) at[t] -= over;
+  return (
+    <svg className="night-chart shrink-0" viewBox={`0 0 ${W + 250} ${H}`} width={W + 250} height={H} aria-label={"The scores through the night: " + lab.map((t) => `${T[t].name} ${T[t].score}`).join(", ")}>
+      <line x1={0} y1={H - PAD} x2={W} y2={H - PAD} stroke="rgba(255,255,255,.14)" strokeWidth={2} />
+      {L.map((_, i) => i > 0 && <line key={i} x1={x(i)} y1={PAD} x2={x(i)} y2={H - PAD} stroke="rgba(255,255,255,.06)" strokeWidth={1} />)}
+      {T.map((t, i) => <polyline key={i} points={L.map((row, j) => `${x(j).toFixed(1)},${y(row[i]).toFixed(1)}`).join(" ")} fill="none" stroke={t.color} strokeWidth={4} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-line" style={{ animationDelay: i * 0.12 + "s" }} />)}
+      {lab.map((t) => (
+        <g key={"l" + t}>
+          <line x1={W} y1={y(L[n - 1][t])} x2={W + 14} y2={at[t]} stroke={T[t].color} strokeWidth={1.5} opacity={0.6} />
+          <text x={W + 20} y={at[t] + 6} fill={T[t].color} fontSize={17} fontWeight={800}>{place[t]}. {T[t].name.length > 14 ? T[t].name.slice(0, 13) + "…" : T[t].name} · {T[t].score}</text>
+        </g>))}
+    </svg>);
 }
