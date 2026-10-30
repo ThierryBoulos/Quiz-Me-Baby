@@ -457,18 +457,6 @@ export function usePreload(pub: Pub | null) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 }
-/* the end of the night: the recap, the same lines on the TV and every phone */
-export const recapLines = (pub: Pub): string[] => {
-  const R = pub.recap, T = pub.teams;
-  if (!R) return [];
-  const out: string[] = [];
-  out.push(R.sudden ? "Decided in sudden death." : R.margin === 0 ? "Level at the end." : `Won by ${R.margin} point${R.margin === 1 ? "" : "s"}.`);
-  out.push(R.leadChanges === 0 ? "The lead never changed hands." : `The lead changed hands ${R.leadChanges === 1 ? "once" : R.leadChanges + " times"}.`);
-  if (R.steals[0] || R.steals[1]) out.push(`Steals: ${T[0].name} ${R.steals[0]}, ${T[1].name} ${R.steals[1]}.`);
-  if (R.minis[0] || R.minis[1]) out.push(`Mini-games won: ${T[0].name} ${R.minis[0]}, ${T[1].name} ${R.minis[1]}.`);
-  if (R.best) out.push(`Most one-sided: ${R.best.title}, ${T[R.best.team].name} ${Math.max(...R.best.legs)}–${Math.min(...R.best.legs)}.`);
-  return out;
-};
 /* won with legs to spare: the same words on the TV and every phone */
 export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
 /* what a mini-game's legs are called ("4 flags", "the last landmark") */

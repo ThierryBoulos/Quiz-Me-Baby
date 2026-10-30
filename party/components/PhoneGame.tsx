@@ -8,7 +8,7 @@ import { friendly } from "@/lib/errors";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
-import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, recapLines, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
+import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
@@ -789,7 +789,13 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
       <div className="display text-52 leading-none" style={{ color: tc(w) }}>{w == null ? "A draw" : T[w].name}</div>
       {w != null && mine != null && <div className="text-15 font-bold" style={{ color: w === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{w === mine ? "You won the night!" : "Not tonight."}</div>}
       <div className="mt-2">{board([T[0].score, T[1].score], "Final score", w)}</div>
-      {recapLines(pub).length > 0 && <ul className="mt-3 flex flex-col gap-1 text-14 text-[var(--color-ink-2)]">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>}
+      {/* the night's awards, as the TV shows them (30 Oct: they took the nutshell's place) */}
+      {(pub.recap?.awards?.length ?? 0) > 0 && <ul className="mt-3 flex flex-col gap-2 text-left">{pub.recap!.awards!.map((a) => (
+        <li key={a.t} className="card !p-2 !px-3" style={{ borderColor: a.team != null ? tc(a.team) : undefined }}>
+          <div className="eyebrow text-11" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
+          <div className="text-14 font-bold" style={{ color: a.team != null ? tc(a.team) : undefined }}><bdi>{a.who}</bdi></div>
+          {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}
+        </li>))}</ul>}
     </div>); }
   return null;
 }
