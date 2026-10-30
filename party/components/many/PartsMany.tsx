@@ -223,9 +223,10 @@ export function FlagPoleMany({ pub }: { pub: PubMany }) {
    it pays the night under it; the trophy over the winner ---- */
 export function PinsMapMany({ pub, map }: { pub: PubMany; map?: ReactNode }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = 1120, H = dense ? 300 : 310, ground = H - 78, best = Math.max(1, ...S.pts);
-  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), r = dense ? 26 : 34;
+  /* read left to right, as the Closest To Wins race: the last place on the left, the winner on the right (the owner, 30 Oct) */
+  const order = T.map((_, i) => i).sort((a, b) => S.places[b] - S.places[a] || b - a), r = dense ? 26 : 34;
   return (
-    <div className="relative rounded-[18px] overflow-hidden" style={{ width: W, height: H }} role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+    <div className="relative rounded-[18px] overflow-hidden" style={{ width: W, height: H }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
       <div className="absolute inset-0 opacity-40" aria-hidden>{map}</div>
       <div className="absolute left-6 right-6 h-[2px]" style={{ top: ground, background: "rgba(255,255,255,.18)" }} aria-hidden />
       {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1, x = ((j + 0.5) / k) * W, tall = 30 + (S.pts[t] / best) * (ground - 2 * r - 30 - 50);   /* the tallest head 50px below the top: room for the trophy */
