@@ -620,7 +620,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .hud.many .hud-team { position: relative; }
 .hud-plus { position: absolute; left: 50%; top: 100%; z-index: 70; pointer-events: none; font-family: var(--font-display); font-size: 40px; line-height: 1; color: var(--color-ok);
   text-shadow: 0 0 18px rgba(46,204,113,.7); animation: plusUp 1.45s cubic-bezier(.2,.8,.3,1) both; }
-@keyframes plusUp { 0% { opacity: 0; transform: translate(-50%, 260px) scale(1.4); } 20% { opacity: 1; } 78% { opacity: 1; transform: translate(-50%, -34px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50px) scale(.7); } }
+/* it rises to the total and shrinks into it as it arrives (never parked over the digits); the total then rolls up */
+@keyframes plusUp { 0% { opacity: 0; transform: translate(-50%, 260px) scale(1.3); } 18% { opacity: 1; } 72% { opacity: 1; transform: translate(-50%, 8px) scale(.9); } 100% { opacity: 0; transform: translate(-50%, -26px) scale(.15); } }
 @media (prefers-reduced-motion: reduce) { .hud-plus { display: none; } }
 /* Guess the Flag's result: the pole, the finial, the flags hoisted up it one after another (the winner's last) */
 .flag-pole { position: absolute; left: 8px; top: 10px; bottom: 0; width: 10px; border-radius: 5px; background: linear-gradient(90deg, #6d7393, #d9dcef 45%, #6d7393); }

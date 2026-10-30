@@ -192,6 +192,9 @@ export function BarsMany({ pub }: { pub: PubMany }) {
    place, the team and its points, and what the place pays the night beside it ---- */
 export function FlagPoleMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, rowH = dense ? 30 : 46, best = Math.max(1, ...S.pts);
+  /* the flags take the first column (the longest the full width); the trophy and what each place pays sit in
+     columns of their own after it, so they line up down the pole */
+  const minW = dense ? 300 : 360, spread = dense ? 330 : 380;
   const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
   return (
     <div className="relative flex justify-center w-full" role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
@@ -200,14 +203,14 @@ export function FlagPoleMany({ pub }: { pub: PubMany }) {
         <span className="flag-pole" aria-hidden /><span className="flag-finial" aria-hidden />
         <ol className="flex flex-col" style={{ gap: dense ? 4 : 10 }}>
           {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
-            <li key={t} role="listitem" className="flag-hoist flex items-center gap-4" style={{ animationDelay: (k - 1 - j) * 0.09 + "s" }}>
-              <div className={"flag-cloth" + (lit ? " lit" : "")} style={{ ["--c" as string]: T[t].color, height: rowH, width: (dense ? 300 : 360) + (S.pts[t] / best) * (dense ? 330 : 380), opacity: paid ? 1 : 0.5 }}>
+            <li key={t} role="listitem" className="flag-hoist grid items-center" style={{ gridTemplateColumns: `${minW + spread}px ${dense ? 40 : 48}px ${dense ? 52 : 64}px`, columnGap: 10, animationDelay: (k - 1 - j) * 0.09 + "s" }}>
+              <div className={"flag-cloth" + (lit ? " lit" : "")} style={{ ["--c" as string]: T[t].color, height: rowH, width: minW + (S.pts[t] / best) * spread, opacity: paid ? 1 : 0.5 }}>
                 <span className="display leading-none" style={{ fontSize: dense ? 16 : 24 }}>{paid ? S.places[t] : "–"}</span>
                 <span className="truncate font-bold uppercase tracking-[.08em]" style={{ fontSize: dense ? 13 : 18 }}><bdi>{T[t].name}</bdi></span>
                 <span className="display leading-none ml-auto" style={{ fontSize: dense ? 22 : 32 }}>{S.pts[t]}</span>
               </div>
-              {lit && <span className="leading-none" style={{ fontSize: dense ? 22 : 30 }} role="img" aria-label="takes it">🏆</span>}
-              <span className="display leading-none" style={{ fontSize: dense ? 20 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
+              <span className="leading-none text-center" style={{ fontSize: dense ? 22 : 30 }} role={lit ? "img" : undefined} aria-label={lit ? "takes it" : undefined}>{lit ? "🏆" : ""}</span>
+              <span className="display leading-none text-right" style={{ fontSize: dense ? 20 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
             </li>); })}
         </ol>
       </div>
