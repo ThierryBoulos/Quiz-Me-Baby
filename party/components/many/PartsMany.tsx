@@ -165,7 +165,7 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
 /* ---- Majority Rules' result on the TV (the owner's idea, 30 Oct): a bar a team, as tall as its share right, in
    place order, growing up one after another; the share on top, the place, the name and what it pays under it ---- */
 export function BarsMany({ pub }: { pub: PubMany }) {
-  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 180 : 240;
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 140 : 220;
   const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
   return (
     <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Share right: " + order.map((t) => `${T[t].name} ${pct(S.shares?.[t] ?? 0)}`).join(", ")}>

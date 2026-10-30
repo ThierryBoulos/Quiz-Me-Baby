@@ -135,9 +135,10 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
 
         {/* a game's result: the board, and who it pays */}
         {pub.screen === "summary" && g && pub.summary && (<>
-          <div className="display text-52 leading-none slam" style={{ color: "var(--color-gold)" }}>{g.title}</div>
+          {/* five teams or more with the bars: a size smaller, so it all sits under the tracker */}
+          <div className={"display leading-none slam " + (dense && pub.summary.shares ? "text-40" : "text-52")} style={{ color: "var(--color-gold)" }}>{g.title}</div>
           {pub.summary.shares ? <BarsMany pub={pub} /> : <BoardMany pub={pub} cols={summaryCols(pub)} size="tv" label="Points this game" />}
-          <div className="display text-52" style={{ color: paid(pub).color }}>{paid(pub).text}</div>
+          <div className={"display " + (dense && pub.summary.shares ? "text-44" : "text-52")} style={{ color: paid(pub).color }}>{paid(pub).text}</div>
           {pub.summary.line && <div className="text-22" style={{ color: "var(--color-gold)" }}>{pub.summary.line}</div>}
         </>)}
 
