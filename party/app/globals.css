@@ -607,9 +607,9 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* six teams or more: the name over the score, so eight fit */
 .hud.many.stack .hud-team { flex-direction: column; gap: 4px; }
 .hud.many.stack .hud-team .sc { line-height: .9; }
-/* the night's label on one line under the teams: the room code, the game and its leg, the pips */
+/* the room code over the teams, centred; the night's label on one line under them: the game and its leg, the pips */
+.hud.many .many-code { text-align: center; margin: 0 0 6px; }
 .hud.many .hud-mid { margin-top: 8px; flex-direction: row; justify-content: center; gap: 14px; }
-.hud.many .hud-code { margin-bottom: 0; }
 .hud.many .hud-label { white-space: nowrap; }
 .hud.tv.many .hud-mini b { font-size: var(--text-22); }
 .hud.tv.many .hud-mini { margin-top: 6px; }

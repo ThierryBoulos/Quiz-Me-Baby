@@ -49,7 +49,7 @@ export const byDistance = (pub: PubMany) => {
   return pub.teams.map((_, i) => i).sort((a, b) => (off[a] == null ? 1 : 0) - (off[b] == null ? 1 : 0) || (off[a] ?? 0) - (off[b] ?? 0) || a - b);
 };
 
-/* ---- the tracker: the teams along the top, the night's label and pips under them, then this game's tally.
+/* ---- the tracker: the room code, the teams along the top, the night's label and pips under them, then this game's tally.
    The phone keeps only the label, the pips and whose side you're on: the scores are behind its Scores button. ---- */
 export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
@@ -58,9 +58,12 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
     : null;
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
-  const tally = g && pub.screen !== "intro" && pub.screen !== "final" ? (pc ? g.shares || g.wins.map(() => 0) : g.wins) : null;
+  /* this game's tally: not before it starts, and not on its result (the board in the middle says it, bigger) */
+  const tally = g && pub.screen !== "intro" && pub.screen !== "final" && pub.screen !== "summary" ? (pc ? g.shares || g.wins.map(() => 0) : g.wins) : null;
   return (
     <div className={`hud ${size} many ${packing(k)}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
+      {/* the room code, small, top middle, where the two-team TV has it */}
+      {tv && code && <div className="hud-code many-code">Room {code}</div>}
       {tv && <div className="hud-in">
         {T.map((t, i) => (
           <div key={i} className="hud-team" style={{ ["--c" as string]: t.color }}>
@@ -69,7 +72,6 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
           </div>))}
       </div>}
       <div className="hud-mid">
-        {tv && code && <div className="hud-code">Room {code}</div>}
         {label && <div className="hud-label">{label}</div>}
         {pips.length > 0 && <div className="pips" aria-hidden>{pips.map((p, i) => <span key={i} className={`pip mini ${p}`} />)}</div>}
       </div>
