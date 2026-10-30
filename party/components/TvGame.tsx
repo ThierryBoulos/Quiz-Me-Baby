@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import type { Pub } from "@/lib/game";
+import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
-import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, recapLines, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
@@ -46,7 +46,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
       {/* the tracker, always: Classic's HUD */}
       <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
 
-      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : "gap-6")} key={bodyKey}>
+      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : pub.screen === "final" && recap ? "gap-3" : "gap-6")} key={bodyKey}>
         {/* a steal: the light swings over from the team that missed to the one stealing */}
         {pub.screen === "steal" && <div className={"steal-beam " + (pub.turn === 1 ? "b" : "a")} aria-hidden />}
         {pub.screen === "roundIntro" && <div className="w-full max-w-[1080px]"><RoundIntro pub={pub} size="tv" /></div>}
@@ -110,27 +110,24 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           <div className="relative grid place-items-center">
             <span className="win-ring" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
             <span className="win-ring r2" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
-            <div className="display win-slam" style={{ fontSize: (pub.winner != null && T[pub.winner].name.length > 10 ? 0.74 : 1) * (recap ? 80 : 150), color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
+            <div className="display win-slam leading-none" style={{ fontSize: (pub.winner != null && T[pub.winner].name.length > 10 ? 0.74 : 1) * (recap ? 64 : 150), color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
           </div>
           {/* once the recap is up, the big score board goes (the scores stay in the top bar) */}
           {!recap && <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
           {(!recap || pub.contest) && <SdCalls pub={pub} />}
-          {/* the night, drawn: both scores through the night (29 Oct), then the awards and the nutshell */}
-          {recap && pub.recap?.chart && pub.recap.chart.length > 2 && <NightChart pub={pub} />}
-          {recap && (pub.recap?.awards?.length ?? 0) > 0 && (
-            <div className="flex gap-3 justify-center enter" style={{ position: "relative", zIndex: 60 }}>
-              {pub.recap!.awards!.map((a) => (
-                <div key={a.t} className="card !p-2 !px-3 text-left min-w-[180px]" style={{ borderColor: a.team != null ? tc(a.team) : undefined }}>
+          {/* the night, drawn across the screen, each round and mini-game named under it; then the award cards, up to
+              eight in two rows (the owner, 30 Oct: as the 3-8 team end, no nutshell: its facts are awards now) */}
+          {recap && pub.recap && ((pub.recap.segs?.length ?? 0) > 1 || (pub.recap.chart?.length ?? 0) > 2) && (
+            <div className="flex justify-center w-full enter" style={{ position: "relative", zIndex: 60 }}><NightChart pub={pub} short={(pub.recap.awards?.length ?? 0) > 4} /></div>)}
+          {recap && (pub.recap?.awards?.length ?? 0) > 0 && (() => { const A = pub.recap!.awards!, cols = A.length <= 4 ? A.length : Math.ceil(A.length / 2); return (
+            <div className="flex flex-wrap justify-center gap-3 enter w-full max-w-[1168px]" style={{ position: "relative", zIndex: 60 }}>
+              {A.map((a) => (
+                <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ width: `calc((100% - ${(cols - 1) * 12}px) / ${cols})`, borderColor: a.team != null ? tc(a.team) : undefined }}>
                   <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
-                  <div className="text-16 font-bold" style={{ color: a.team != null ? tc(a.team) : undefined }}>{a.who}</div>
-                  {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}
+                  <div className="text-15 font-bold leading-snug" style={{ color: a.team != null ? tc(a.team) : undefined }}><bdi>{a.who}</bdi></div>
+                  {a.note && <div className="text-12 text-[var(--color-ink-2)] italic line-clamp-2">{a.note}</div>}
                 </div>))}
-            </div>)}
-          {recap && recapLines(pub).length > 0 && (
-            <div className="card enter text-left max-w-[1000px] !py-2" style={{ position: "relative", zIndex: 60 }}>
-              <div className="eyebrow text-13 mb-0.5" style={{ color: "var(--color-gold)" }}>The night in a nutshell</div>
-              <ul className="flex flex-col text-18 leading-snug">{recapLines(pub).map((l) => <li key={l}>{l}</li>)}</ul>
-            </div>)}
+            </div>); })()}
           {(pub.flags?.length ?? 0) > 0 && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}
         </>)}
         {pub.contest && <ContestBanner pub={pub} />}
@@ -656,15 +653,43 @@ function ImadBubble({ imad, wait = 0 }: { imad?: Pub["imad"]; wait?: number }) {
     </div>);
 }
 
-/* the chart of the night: both scores, drawing themselves across (29 Oct) */
-function NightChart({ pub }: { pub: Pub }) {
-  const C = pub.recap!.chart!, W = 1000, H = 84, n = C.length, max = Math.max(1, ...C.map((p) => Math.max(p[0], p[1])));
-  const x = (i: number) => (i / (n - 1)) * W, y = (v: number) => H - 8 - (v / max) * (H - 16);
-  const line = (t: 0 | 1) => C.map((p, i) => `${x(i).toFixed(1)},${y(p[t]).toFixed(1)}`).join(" ");
+/* the chart of the night: both scores drawing themselves across the screen (29 Oct), as the 3-8 team end draws it
+   (30 Oct): the night's parts along the bottom, a question round narrow ("R2"), a mini-game wider, named in full on
+   up to three lines; each part's scores spread across it; each team's place, name and score at the end of its line */
+function NightChart({ pub, short }: { pub: Pub; short?: boolean }) {
+  const T = pub.teams, R = pub.recap!, W = 890, H = short ? 184 : 250, PAD = 14, FOOT = 46, B = H - FOOT;
+  /* the parts (an old night without them: the scores as one stretch) */
+  const S = R.segs && R.segs.length > 1 ? R.segs : [{ label: "", pts: (R.chart || []).slice(1) }];
+  const wt = S.map((g) => (/^R\d+$/.test(g.label) ? 1 : 1.7)), sum = wt.reduce((a, b) => a + b, 0) || 1;
+  const x0 = S.map((_, k) => (wt.slice(0, k).reduce((a, b) => a + b, 0) / sum) * W), sw = wt.map((v) => (v / sum) * W);
+  /* the points: the night's start, then each part's scores across it (a part with none stays level to its end) */
+  const pts: { x: number; v: Two<number> }[] = [{ x: 0, v: [0, 0] }];
+  S.forEach((g, k) => { const prev = pts[pts.length - 1].v, P = g.pts.length ? g.pts : [prev];
+    P.forEach((v, j) => pts.push({ x: x0[k] + ((j + 1) / P.length) * sw[k], v })); });
+  const max = Math.max(1, ...pts.map((p) => Math.max(p.v[0], p.v[1]))), y = (v: number) => B - (v / max) * (B - PAD);
+  /* a mini-game's name in lines that fit its part (about 8px a letter at this size) */
+  const lines = (label: string, w: number) => { const fit = Math.max(4, Math.floor((w - 6) / 8)), out: string[] = [];
+    for (const word of label.toUpperCase().split(" ")) { const l = out[out.length - 1]; if (l != null && (l + " " + word).length <= fit) out[out.length - 1] = l + " " + word; else out.push(word); }
+    return out.slice(0, 3); };
+  const order = ([0, 1] as const).slice().sort((a, b) => T[b].score - T[a].score || a - b);
+  const place = (t: 0 | 1) => (T[t].score >= T[t ? 0 : 1].score ? 1 : 2);
+  /* the end labels, at least 22 apart, the leader's on top */
+  const at: Record<number, number> = {}; let last = -Infinity;
+  for (const t of order) { const v = Math.max(y(pts[pts.length - 1].v[t]), last + 22); at[t] = v; last = v; }
+  const over = last - (B + 6); if (over > 0) for (const t of order) at[t] -= over;
   return (
-    <svg className="night-chart enter" viewBox={`0 0 ${W} ${H}`} width={W} height={H} aria-label="The scores through the night">
-      <line x1={0} y1={H - 8} x2={W} y2={H - 8} stroke="rgba(255,255,255,.14)" strokeWidth={2} />
-      {([0, 1] as const).map((t) => <polyline key={t} points={line(t)} fill="none" stroke={tc(t)} strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-line" style={{ animationDelay: t ? ".3s" : "0s" }} />)}
-      {([0, 1] as const).map((t) => <text key={"l" + t} x={W - 4} y={y(C[n - 1][t]) + (t ? 22 : -10)} textAnchor="end" fill={tc(t)} fontSize={18} fontWeight={800}>{pub.teams[t].score}</text>)}
+    <svg className="night-chart shrink-0" viewBox={`0 0 ${W + 250} ${H}`} width={W + 250} height={H} aria-label={"The scores through the night: " + order.map((t) => `${T[t].name} ${T[t].score}`).join(", ")}>
+      <line x1={0} y1={B} x2={W} y2={B} stroke="rgba(255,255,255,.14)" strokeWidth={2} />
+      {S.map((g, k) => k > 0 && <line key={"s" + k} x1={x0[k]} y1={PAD} x2={x0[k]} y2={B} stroke="rgba(255,255,255,.06)" strokeWidth={1} />)}
+      {S.map((g, k) => g.label && (
+        <text key={"g" + k} x={x0[k] + sw[k] / 2} y={B + 18} textAnchor="middle" fill="rgba(185,192,222,.75)" fontSize={12} fontWeight={700} letterSpacing=".08em">
+          {lines(g.label, sw[k]).map((l, i) => <tspan key={i} x={x0[k] + sw[k] / 2} dy={i ? 13 : 0}>{l}</tspan>)}
+        </text>))}
+      {([0, 1] as const).map((t) => <polyline key={t} points={pts.map((p) => `${p.x.toFixed(1)},${y(p.v[t]).toFixed(1)}`).join(" ")} fill="none" stroke={tc(t)} strokeWidth={4} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-line" style={{ animationDelay: t ? ".3s" : "0s" }} />)}
+      {order.map((t) => (
+        <g key={"l" + t}>
+          <line x1={W} y1={y(pts[pts.length - 1].v[t])} x2={W + 14} y2={at[t]} stroke={tc(t)} strokeWidth={1.5} opacity={0.6} />
+          <text x={W + 20} y={at[t] + 6} fill={tc(t)} fontSize={17} fontWeight={800}>{place(t)}. {T[t].name.length > 14 ? T[t].name.slice(0, 13) + "…" : T[t].name} · {T[t].score}</text>
+        </g>))}
     </svg>);
 }
