@@ -143,8 +143,8 @@
 3918.75 dishQ | 103 | 6-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
 3936.75 dishReveal | 104 | 6-5 | 1-0 | Nobody got it. | 
 3944.75 dishQ | 105 | 6-5 | 1-0 | Nobody got it. | 
-3959.75 dishReveal | 106 | 6-5 | 1-0 | Nobody got it. | 
-3967.75 dishQ | 107 | 6-5 | 1-0 | Nobody got it. | 
+3962.75 dishReveal | 106 | 6-5 | 1-0 | Nobody got it. | 
+3970.75 dishQ | 107 | 6-5 | 1-0 | Nobody got it. | 
 3991.75 dishReveal | 108 | 6-5 | 1-0 | Nobody got it. | 
 3999.75 dishQ | 109 | 6-5 | 1-0 | Nobody got it. | 
 4012.75 dishReveal | 110 | 6-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 

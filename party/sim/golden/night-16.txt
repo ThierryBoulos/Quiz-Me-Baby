@@ -91,4 +91,4 @@
 2397.00 answer | 54 | 4-10 |  | Call changed: Owls +1 point. | 
 2467.25 roundScore | 55 | 4-10 |  | Call changed: Owls +1 point. | 
 2577.00 final | 56 | 4-10 |  | Call changed: Owls +1 point. | 
-recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[1,2],"minis":[0,2],"best":{"title":"Guess the Airport","team":1,"legs":[0,3]},"chart":[[0,0],[0,0],[0,1],[1,1],[1,3],[1,4],[1,5],[3,5],[3,7],[3,8],[3,9],[4,9],[4,10]],"awards":[{"t":"Best aim, Drop the Pin","who":"Lions, 1,899 km off in all","team":0},{"t":"Best thief","who":"Owls, 2 steals","team":1}]}
+recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[1,2],"minis":[0,2],"best":{"title":"Guess the Airport","team":1,"legs":[0,3]},"chart":[[0,0],[0,0],[0,1],[1,1],[1,3],[1,4],[1,5],[3,5],[3,7],[3,8],[3,9],[4,9],[4,10]],"awards":[{"t":"Best aim, Drop the Pin","who":"Owls, 1,928 km off in all","team":1},{"t":"Best thief","who":"Owls, 2 steals","team":1}]}

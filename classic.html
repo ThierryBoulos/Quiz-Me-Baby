@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.48', date:'29 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.49', date:'30 Oct 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1675,6 +1675,8 @@ const SEED = [
 ['Science','easy','','What is the name of the galaxy we live in?','The Milky Way',''],
 ['Science','hard','','What is the closest star to Earth after the Sun?','Proxima Centauri','About 4.24 light years away.'],
 ['Science','hard','discovery','Who discovered penicillin?','Alexander Fleming','1928, by accident.'],
+['Science','expert','corrosion','Ships have blocks of zinc bolted to their steel hulls that slowly dissolve away in seawater, on purpose. What are these blocks called?','Sacrificial anodes','Zinc gives up its electrons more easily than steel, so the sea eats the zinc instead of the hull.'],
+['Science','hard','corrosion','Steel that is coated in a thin layer of zinc so it won\'t rust is said to have been what?','Galvanised','The zinc rusts first and protects the steel even where the coating is scratched. Named after Luigi Galvani.'],
 ['Science','expert','discovery','Who discovered radioactivity, sharing the 1903 Nobel with the Curies?','Henri Becquerel',''],
 ['Science','medium','','How many chemical elements are known?','118','118 confirmed on the periodic table as of 2024.'],
 ['Science','easy','planet','Which planet is closest to the Sun?','Mercury',''],
@@ -4293,7 +4295,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 46;   // bumped when the built-in bank changes
+const SEED_VERSION = 47;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the

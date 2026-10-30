@@ -67,10 +67,10 @@
 120.75 miniQ | 30 | 2-8 | 1-2 | Lions takes leg 3. | 
 (pause, 8 s)
 (resume)
-130.75 closestReveal | 30 | 2-8 | 2-2 | Lions takes leg 3. | 
-131.75 miniQ | 31 | 2-8 | 2-2 | Lions takes leg 4. | 
-132.50 closestReveal | 31 | 2-8 | 2-3 | Lions takes leg 4. | 
-133.50 miniSummary | 32 | 2-10 | 2-3 | Owls takes leg 5. | 
+130.75 closestReveal | 30 | 2-8 | 2-3 | Lions takes leg 3. | 
+131.75 miniQ | 31 | 2-8 | 2-3 | Tie — a point each. | 
+132.50 closestReveal | 31 | 2-8 | 2-4 | Tie — a point each. | 
+133.50 miniSummary | 32 | 2-10 | 2-4 | Owls takes leg 5. | 
 134.25 roundIntro | 33 | 2-10 |  | Owls takes leg 5. | 
 135.25 ask | 34 | 2-10 |  | Owls takes leg 5. | 
 136.25 answer | 34 | 3-10 |  | Lions +1 point | 
@@ -134,4 +134,4 @@
 202.75 battleReview | 58 | 10-11 | 5-4 | Call changed: Lions +1 point. | 
 203.75 battleSummary | 59 | 14-11 | 5-4 | Call changed: Lions +1 point. | 
 204.50 final | 60 | 14-11 |  | Call changed: Lions +1 point. | 
-recap: {"margin":3,"sudden":false,"leadChanges":2,"steals":[2,1],"minis":[2,2],"best":{"title":"Guess the Flag","team":1,"legs":[0,4]},"chart":[[0,0],[0,0],[1,0],[1,1],[2,3],[2,5],[3,5],[2,5],[2,6],[2,8],[2,10],[3,10],[3,11],[4,11],[5,11],[7,11],[9,11],[10,11],[14,11]],"awards":[{"t":"Best aim, Drop the Pin","who":"Lions, 1,783 km off in all","team":0},{"t":"Closest To Wins","who":"Owls, 3 legs to 2","team":1},{"t":"Best thief","who":"Lions, 2 steals","team":0},{"t":"Battle of the Captains","who":"Sam, 5 of 10","team":0}]}
+recap: {"margin":3,"sudden":false,"leadChanges":2,"steals":[2,1],"minis":[2,2],"best":{"title":"Guess the Flag","team":1,"legs":[0,4]},"chart":[[0,0],[0,0],[1,0],[1,1],[2,3],[2,5],[3,5],[2,5],[2,6],[2,8],[2,10],[3,10],[3,11],[4,11],[5,11],[7,11],[9,11],[10,11],[14,11]],"awards":[{"t":"Best aim, Drop the Pin","who":"Lions, 1,261 km off in all","team":0},{"t":"Closest To Wins","who":"Owls, 4 legs to 2","team":1},{"t":"Best thief","who":"Lions, 2 steals","team":0},{"t":"Battle of the Captains","who":"Sam, 5 of 10","team":0}]}

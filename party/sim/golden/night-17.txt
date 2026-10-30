@@ -38,28 +38,28 @@
 81.25 majorityQ | 20 | 0-5 | 58-56 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 97.25 majorityReveal | 21 | 0-5 | 56-42 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 97.50 majorityQ | 22 | 0-5 | 56-42 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-113.50 majorityReveal | 23 | 0-5 | 50-40 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-113.75 majorityQ | 24 | 0-5 | 50-40 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-114.50 majorityReveal | 24 | 0-5 | 54-39 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-115.50 majorityQ | 25 | 0-5 | 54-39 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-116.25 majorityReveal | 25 | 0-5 | 54-38 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-117.25 majorityQ | 26 | 0-5 | 54-38 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-133.25 majorityReveal | 27 | 0-5 | 50-42 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-133.50 majorityQ | 28 | 0-5 | 50-42 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-149.50 majorityReveal | 29 | 0-5 | 50-41 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-149.75 majorityQ | 30 | 0-5 | 50-41 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-165.75 majorityReveal | 31 | 0-5 | 48-43 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-166.75 majorityQ | 32 | 0-5 | 48-43 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-182.75 majorityReveal | 33 | 0-5 | 50-45 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-183.00 majorityQ | 34 | 0-5 | 50-45 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-199.00 majorityReveal | 35 | 0-5 | 48-47 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-199.25 majorityQ | 36 | 0-5 | 48-47 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-200.00 majorityReveal | 36 | 0-5 | 52-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-201.00 majorityQ | 37 | 0-5 | 52-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-217.00 majorityReveal | 38 | 0-5 | 52-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-217.25 majorityQ | 39 | 0-5 | 52-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-218.00 majorityReveal | 39 | 0-5 | 55-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-219.00 majoritySummary | 40 | 2-5 | 55-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+113.50 majorityReveal | 23 | 0-5 | 60-40 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+113.75 majorityQ | 24 | 0-5 | 60-40 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+114.50 majorityReveal | 24 | 0-5 | 58-44 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+115.50 majorityQ | 25 | 0-5 | 58-44 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+116.25 majorityReveal | 25 | 0-5 | 61-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+117.25 majorityQ | 26 | 0-5 | 61-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+133.25 majorityReveal | 27 | 0-5 | 56-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+133.50 majorityQ | 28 | 0-5 | 56-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+149.50 majorityReveal | 29 | 0-5 | 56-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+149.75 majorityQ | 30 | 0-5 | 56-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+165.75 majorityReveal | 31 | 0-5 | 55-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+166.75 majorityQ | 32 | 0-5 | 55-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+182.75 majorityReveal | 33 | 0-5 | 57-55 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+183.00 majorityQ | 34 | 0-5 | 57-55 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+199.00 majorityReveal | 35 | 0-5 | 54-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+199.25 majorityQ | 36 | 0-5 | 54-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+200.00 majorityReveal | 36 | 0-5 | 58-59 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+201.00 majorityQ | 37 | 0-5 | 58-59 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+217.00 majorityReveal | 38 | 0-5 | 57-57 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+217.25 majorityQ | 39 | 0-5 | 57-57 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+218.00 majorityReveal | 39 | 0-5 | 58-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+219.00 majoritySummary | 40 | 2-5 | 58-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 219.75 roundIntro | 41 | 2-5 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 220.75 ask | 42 | 2-5 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 221.75 ask | 42 | 2-5 |  | Lions used Double Dip. | 
@@ -103,4 +103,4 @@
 293.75 battleReview | 56 | 3-5 | 3-4 | No answer in time: the call stands. | 
 294.50 battleSummary | 57 | 3-9 | 3-4 | No answer in time: the call stands. | 
 295.50 final | 58 | 3-9 |  | No answer in time: the call stands. | 
-recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[0,2],"minis":[1,1],"chart":[[0,0],[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[2,5],[3,5],[2,5],[3,5],[3,9]],"awards":[{"t":"Sharpest in Majority Rules","who":"Karim, 10 of 15","team":0},{"t":"Wooden spoon, Majority Rules","who":"Maya, 6 of 15","team":1,"note":"Last, but with dignity.","spoon":true},{"t":"Best thief","who":"Owls, 2 steals","team":1},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1}]}
+recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[0,2],"minis":[1,1],"chart":[[0,0],[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[2,5],[3,5],[2,5],[3,5],[3,9]],"awards":[{"t":"Best thief","who":"Owls, 2 steals","team":1},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1}]}
