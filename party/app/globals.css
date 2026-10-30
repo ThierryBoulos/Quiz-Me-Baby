@@ -546,7 +546,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .ruler-grp .card-l.sm .nm { font-size: 12px; letter-spacing: .12em; max-width: 170px; overflow: hidden; text-overflow: ellipsis; }
 .ruler-grp .card-l.sm .v { font-size: 26px; } .ruler-grp .card-l.sm .off { font-size: 14px; }
 .ruler-grp.win .card-l { border-color: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), 0 10px 34px -10px var(--c); }
-.ruler-grp .card-l .trophy { font-size: 22px; line-height: 1; align-self: center; margin-left: -4px; } .ruler-grp .card-l.sm .trophy { font-size: 17px; margin-left: -2px; }
+.ruler-grp .card-l .trophy { font-size: 22px; line-height: 1; align-self: center; margin-left: -4px; } .ruler-grp .card-l.sm .trophy { font-size: 16px; margin-left: -2px; }
 .ruler-grp .card-l .pts { font-size: 22px; line-height: 1; color: var(--color-ok); } .ruler-grp .card-l.sm .pts { font-size: 20px; }
 .ruler-grp.win .ruler-dot { box-shadow: 0 0 0 7px color-mix(in srgb, var(--c) 28%, transparent), 0 0 26px var(--c); }
 /* no answer: off the scale, at the far right end: a hatched end to the track, a hollow dot, a dashed card */
