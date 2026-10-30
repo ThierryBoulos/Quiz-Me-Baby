@@ -57,26 +57,24 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
     : null;
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
-  /* the team row's number (the owner's idea, 30 Oct: the game's score and the night's on screen at once was too much):
-     during a game, this game's points (Majority Rules: its share right); between games, the night's totals. On a
-     game's result, what each place pays flies up from the board into the totals, then they roll up */
+  /* two scores, never on screen together (the owner, 30 Oct): the night's totals, the team row, only between games
+     (a game's rules, its result, the end); during a game only its own points, in their own line under its name.
+     On a game's result, what each place pays flies up into the totals, then they roll up */
   const inGame = !!g && (pub.screen === "q" || pub.screen === "reveal");
   const award = pub.screen === "summary" ? pub.summary?.award : undefined;
   const [landed, setLanded] = useState(false);
   useEffect(() => { setLanded(false); if (pub.screen !== "summary") return; const t = setTimeout(() => setLanded(true), 1500); return () => clearTimeout(t); }, [pub.screen, pub.step]);
-  const num = (i: number) => (inGame && !pc ? g!.pts[i] : award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
+  const num = (i: number) => (award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
   const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
   return (
     <div className={`hud ${size} many ${packing(k)}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, top middle, where the two-team TV has it */}
       {tv && code && <div className="hud-code many-code">Room {code}</div>}
-      {tv && <div className="hud-in">
+      {tv && !inGame && <div className="hud-in">
         {T.map((t, i) => (
           <div key={i} className="hud-team" style={{ ["--c" as string]: t.color }}>
-            <div className="flex items-center gap-2 min-w-0"><Dot t={i} color={t.color} size={k > 5 ? 16 : k > 4 ? 18 : 22} /><div className="nm"><bdi>{t.name}</bdi></div>
-              {pub.fire?.[i] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}</div>
-            {/* a new mode starts its numbers fresh (no roll from a game's points down to the totals) */}
-            <div className="sc" data-score={i}>{inGame && pc ? pct(g!.shares?.[i] ?? 0) : <Roll key={inGame ? "g" + g!.index : "t"} v={num(i)} />}</div>
+            <div className="flex items-center gap-2 min-w-0"><Dot t={i} color={t.color} size={k > 5 ? 16 : k > 4 ? 18 : 22} /><div className="nm"><bdi>{t.name}</bdi></div></div>
+            <div className="sc" data-score={i}><Roll v={num(i)} /></div>
             {award && !landed && (award[i] || 0) > 0 && <span className="hud-plus" style={{ animationDelay: order.indexOf(i) * 0.07 + "s" }} aria-hidden>+{award[i]}</span>}
           </div>))}
       </div>}
@@ -84,8 +82,13 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
         {label && <div className="hud-label">{label}</div>}
         {pips.length > 0 && <div className="pips" aria-hidden>{pips.map((p, i) => <span key={i} className={`pip mini ${p}`} />)}</div>}
       </div>
-      {/* what the numbers are: this game's, while it's on */}
-      {tv && inGame && <div className="hud-mini"><span>{pc ? "Share right, this game" : "Points this game"} · the night&rsquo;s totals after it</span></div>}
+      {/* this game's points, under its name, in their own small line (a dot, the name, the points; on fire beside) */}
+      {tv && inGame && (
+        <div className="hud-mini" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}`).join(", ")}`}>
+          <span>This game:</span>
+          {T.map((t, i) => <span key={i} className="flex items-center gap-1.5" style={{ ["--c" as string]: t.color }}><Dot t={i} color={t.color} size={14} /><span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
+            <b>{pc ? pct(g!.shares?.[i] ?? 0) : <Roll v={g!.pts[i]} />}</b>{pub.fire?.[i] && <span className="flame !mx-0" aria-label="on fire">🔥</span>}</span>)}
+        </div>)}
       {/* the phone: whose side you're on, small, in the team's colour (the screen's glow is that colour too) */}
       {!tv && me != null && T[me] && <div className="hud-mini" style={{ ["--c" as string]: T[me].color }}><span>You&rsquo;re on</span><Dot t={me} color={T[me].color} size={14} /><span className="nm" style={{ color: T[me].color }}><bdi>{T[me].name}</bdi></span></div>}
       {!tv && me == null && host && <div className="hud-mini"><span>You&rsquo;re the host</span></div>}
@@ -181,6 +184,60 @@ export function BarsMany({ pub }: { pub: PubMany }) {
             <span className="eyebrow truncate" style={{ color: T[t].color, fontSize: dense ? 12 : 15 }}><bdi>{T[t].name}</bdi></span></div>
           <div className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</div>
         </div>); })}
+    </div>);
+}
+
+/* ---- Guess the Flag's result on the TV (the owner's pick, 30 Oct): one pole, every team's flag hoisted on it in
+   place order, the winner's at the top with the trophy; the longer the flag, the more points; each flag carries its
+   place, the team and its points, and what the place pays the night beside it ---- */
+export function FlagPoleMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, rowH = dense ? 36 : 50, best = Math.max(1, ...S.pts);
+  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
+  return (
+    <div className="relative flex justify-center w-full" role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      <div className="relative pl-[26px] pt-[18px] pb-[26px]">
+        {/* the pole and its gold finial */}
+        <span className="flag-pole" aria-hidden /><span className="flag-finial" aria-hidden />
+        <ol className="flex flex-col" style={{ gap: dense ? 6 : 10 }}>
+          {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
+            <li key={t} role="listitem" className="flag-hoist flex items-center gap-4" style={{ animationDelay: (k - 1 - j) * 0.09 + "s" }}>
+              <div className={"flag-cloth" + (lit ? " lit" : "")} style={{ ["--c" as string]: T[t].color, height: rowH, width: (dense ? 300 : 360) + (S.pts[t] / best) * (dense ? 330 : 380), opacity: paid ? 1 : 0.5 }}>
+                <span className="display leading-none" style={{ fontSize: dense ? 18 : 24 }}>{paid ? S.places[t] : "–"}</span>
+                <span className="truncate font-bold uppercase tracking-[.08em]" style={{ fontSize: dense ? 14 : 18 }}><bdi>{T[t].name}</bdi></span>
+                <span className="display leading-none ml-auto" style={{ fontSize: dense ? 24 : 32 }}>{S.pts[t]}</span>
+              </div>
+              {lit && <span className="leading-none" style={{ fontSize: dense ? 24 : 30 }} role="img" aria-label="takes it">🏆</span>}
+              <span className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
+            </li>); })}
+        </ol>
+      </div>
+    </div>);
+}
+
+/* ---- Drop the Pin's result on the TV (the owner's pick, 30 Oct): a faint world map behind, a pin a team standing on
+   it in place order from the left, the taller the more points, the points in its head; the place, the team and what
+   it pays the night under it; the trophy over the winner ---- */
+export function PinsMapMany({ pub, map }: { pub: PubMany; map?: ReactNode }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = 1120, H = dense ? 330 : 360, ground = H - 78, best = Math.max(1, ...S.pts);
+  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), r = dense ? 26 : 34;
+  return (
+    <div className="relative rounded-[18px] overflow-hidden" style={{ width: W, height: H }} role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      <div className="absolute inset-0 opacity-40" aria-hidden>{map}</div>
+      <div className="absolute left-6 right-6 h-[2px]" style={{ top: ground, background: "rgba(255,255,255,.18)" }} aria-hidden />
+      {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1, x = ((j + 0.5) / k) * W, tall = 40 + (S.pts[t] / best) * (ground - 2 * r - 70);
+        return (
+          <div key={t} role="listitem" className="pin-stand absolute flex flex-col items-center" style={{ left: x - W / k / 2, width: W / k, top: 0, height: H, ["--c" as string]: T[t].color, animationDelay: j * 0.08 + "s", opacity: paid ? 1 : 0.5 }}>
+            <div className="absolute flex flex-col items-center" style={{ top: ground - tall - 2 * r }}>
+              {lit && <span className="absolute leading-none" style={{ top: -(dense ? 30 : 38), fontSize: dense ? 24 : 30 }} role="img" aria-label="takes it">🏆</span>}
+              <span className="pin-head display" style={{ width: 2 * r, height: 2 * r, fontSize: dense ? 20 : 26 }}>{S.pts[t]}</span>
+              <span className="pin-stem" style={{ height: tall }} />
+            </div>
+            <div className="absolute flex flex-col items-center gap-0.5" style={{ top: ground + 8, width: W / k - 8 }}>
+              <span className="display text-15 leading-none" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "–"}</span>
+              <span className="flex items-center gap-1 min-w-0 max-w-full"><Dot t={t} color={T[t].color} size={14} /><span className="eyebrow truncate" style={{ color: T[t].color, fontSize: dense ? 11 : 13 }}><bdi>{T[t].name}</bdi></span></span>
+              <span className="display leading-none" style={{ fontSize: dense ? 20 : 24, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
+            </div>
+          </div>); })}
     </div>);
 }
 

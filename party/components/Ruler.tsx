@@ -14,8 +14,12 @@ export type RulerTeam = { name: string; color: string; letter?: string; guess: n
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
 const GAP = 10;
 
-export function Ruler({ teams, ans, width }: { teams: RulerTeam[]; ans: number; width?: number }) {
-  const two = teams.length <= 2, W = width ?? (two ? 1040 : 1120);
+/* scale: a game's points instead of guesses (the many-teams Closest To Wins result, 30 Oct): the line runs from 0 on
+   the left to the best score on the right, each team's dot at its points, the band from 0 out to it; no answer
+   marker, no "off by"; the winner's card carries the trophy, pts what its place pays the night */
+export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: number; width?: number; scale?: boolean }) {
+  const two = teams.length <= 2 && !scale, W = width ?? (two ? 1040 : 1120);
+  const best = Math.max(1, ...teams.map((t) => t.guess ?? 0)), x0 = W * 0.04;
   /* the scale: the farthest guess sits 42% (two teams) or 40% out from the middle; no answer at 97% */
   const far = Math.max(0, ...teams.map((t) => (t.guess == null ? 0 : Math.abs(t.guess - ans))));
   /* no answer: the hatched end of the track, wide enough for each of them side by side; the scale stops short of it */
@@ -23,13 +27,15 @@ export function Ruler({ teams, ans, width }: { teams: RulerTeam[]; ans: number; 
   const zone = Math.max(W * 0.06, nones.length * 16 + 22);
   const span = Math.min(two ? 42 : 40, ((W / 2 - zone - 24) / W) * 100);
   const xOf = (t: RulerTeam) => {
+    if (scale) return x0 + ((t.guess ?? 0) / best) * W * 0.9;
     if (t.guess == null) { const j = nones.indexOf(teams.indexOf(t)); return W - zone / 2 + (j - (nones.length - 1) / 2) * 16; }
     return (W * (!far ? 50 : 50 + ((t.guess - ans) / far) * span)) / 100;
   };
   /* the order they drop in: the farthest first, the nearest last; no answer before them all */
   const order = useMemo(() => teams.map((_, i) => i).sort((a, b) => {
+    if (scale) return (teams[a].guess ?? 0) - (teams[b].guess ?? 0) || b - a;     /* the lowest first, the winner last */
     const da = teams[a].guess == null ? Infinity : Math.abs(teams[a].guess! - ans), db = teams[b].guess == null ? Infinity : Math.abs(teams[b].guess! - ans);
-    return db - da || a - b; }), [teams, ans]);
+    return db - da || a - b; }), [teams, ans, scale]);
   const drop = (i: number) => order.indexOf(i);
 
   /* the cards are measured, then packed (before the first paint, so nothing jumps) */
@@ -82,12 +88,12 @@ export function Ruler({ teams, ans, width }: { teams: RulerTeam[]; ans: number; 
   const bandH = two ? 7 : 3;
 
   return (
-    <div className="ruler relative" style={{ width: W, height: H, ["--beat" as string]: ".15s" }} aria-label={`The answer, ${showNum(ans)}: ` + teams.map((t) => `${t.name} ${t.guess == null ? "no answer" : showNum(t.guess)}`).join(", ")}>
+    <div className="ruler relative" style={{ width: W, height: H, ["--beat" as string]: ".15s" }} aria-label={(scale ? "Points this game: " : `The answer, ${showNum(ans)}: `) + teams.map((t) => `${t.name} ${t.guess == null ? "no answer" : showNum(t.guess)}`).join(", ")}>
       <div className="ruler-track" style={{ top: TY - th / 2, height: th, borderRadius: th / 2 }}><span className="ruler-ticks" style={none ? { right: zone } : undefined} /></div>
       {none && <div className="ruler-off" style={{ top: TY - th / 2, height: th, width: zone }} aria-hidden />}
-      {teams.map((t, i) => { if (t.guess == null) return null; const x = xOf(t), mid = W / 2; return (
+      {teams.map((t, i) => { if (t.guess == null) return null; const x = xOf(t), mid = scale ? x0 : W / 2; return (
         <div key={"b" + i} className="ruler-band" style={{ top: bandTop(i), height: bandH, left: Math.min(x, mid), width: Math.abs(x - mid), background: t.color, transformOrigin: x < mid ? "right" : "left", ...d(0.5 + drop(i) * (two ? 0.12 : 0.07)) }} />); })}
-      <div className="ruler-mid" style={{ top: TY - th / 2 - 14, height: th + 28 }}>{two && <span className="lbl" style={{ top: th + 34 }}>answer</span>}</div>
+      {!scale && <div className="ruler-mid" style={{ top: TY - th / 2 - 14, height: th + 28 }}>{two && <span className="lbl" style={{ top: th + 34 }}>answer</span>}</div>}
       {teams.map((t, i) => {
         const x = xOf(t), a = lay.at[i], w = box.w[i], ct = cardTop(a.lane), up = a.lane % 2 === 0;
         const lx = Math.min(Math.max(x, a.x + 16), a.x + w - 16), ly = up ? ct + CH : ct, dy = up ? TY - 12 : TY + 12;
@@ -100,7 +106,7 @@ export function Ruler({ teams, ans, width }: { teams: RulerTeam[]; ans: number; 
               <span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
               {/* who takes it, at a glance, however bunched the cards are */}
               {t.win && <span className="trophy" role="img" aria-label="takes it">🏆</span>}
-              {t.guess == null ? <span className="off">no answer</span> : <><span className="v display">{showNum(t.guess)}</span><span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off!)}</span></>}
+              {t.guess == null ? <span className="off">no answer</span> : <><span className="v display">{showNum(t.guess)}</span>{!scale && <span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off!)}</span>}</>}
               {t.pts != null && t.guess != null && <span className="pts display">+{t.pts}</span>}
             </div>
           </div>); })}

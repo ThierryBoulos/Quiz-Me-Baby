@@ -12,7 +12,7 @@ import { showKm, showNum } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { Ruler } from "../Ruler";
-import { BarsMany, BoardMany, byDistance, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, summaryCols, takes } from "./PartsMany";
+import { BarsMany, BoardMany, byDistance, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, takes } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -136,9 +136,13 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
         {/* a game's result: the board, and who it pays */}
         {pub.screen === "summary" && g && pub.summary && (<>
           {/* five teams or more with the bars: a size smaller, so it all sits under the tracker */}
-          <div className={"display leading-none slam " + (dense && pub.summary.shares ? "text-40" : "text-52")} style={{ color: "var(--color-gold)" }}>{g.title}</div>
-          {pub.summary.shares ? <BarsMany pub={pub} /> : <BoardMany pub={pub} cols={summaryCols(pub)} size="tv" label="Points this game" />}
-          <div className={"display " + (dense && pub.summary.shares ? "text-44" : "text-52")} style={{ color: paid(pub).color }}>{paid(pub).text}</div>
+          <div className={"display leading-none slam " + (dense ? "text-40" : "text-52")} style={{ color: "var(--color-gold)" }}>{g.title}</div>
+          {/* each game's points in a look of its own, never the totals' row (the owner, 30 Oct) */}
+          {g.key === "majority" ? <BarsMany pub={pub} />
+            : g.key === "flag" ? <FlagPoleMany pub={pub} />
+            : g.key === "closest" ? <Ruler ans={0} scale teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: pub.summary!.pts[i], win: pub.summary!.places[i] === 1 && pub.summary!.award[i] > 0, pts: pub.summary!.award[i] }))} />
+            : <PinsMapMany pub={pub} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" />} />}
+          <div className={"display " + (dense ? "text-44" : "text-52")} style={{ color: paid(pub).color }}>{paid(pub).text}</div>
           {pub.summary.line && <div className="text-22" style={{ color: "var(--color-gold)" }}>{pub.summary.line}</div>}
         </>)}
 
