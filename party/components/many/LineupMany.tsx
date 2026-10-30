@@ -8,7 +8,7 @@ import { manyNames } from "@/lib/many/useTvMany";
 export function LineupMany({ room, members, k, big }: { room: Room; members: Member[]; k: number; big?: boolean }) {
   const names = manyNames(room, k);
   return (
-    <div className={"grid gap-3 " + (big ? "grid-cols-4" : "grid-cols-2")}>
+    <div className={"grid gap-3 mx-auto w-full " + (big ? "" : "grid-cols-2")} style={big ? { gridTemplateColumns: `repeat(${Math.min(k, 4)}, minmax(0, 1fr))`, maxWidth: Math.min(k, 4) * 300 } : undefined}>
       {names.map((name, t) => {
         const team = members.filter((m) => (m.team as number) === t), cap = team.find((m) => m.role === "captain");
         return (

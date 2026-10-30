@@ -51,7 +51,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   return (
     <div className="flex flex-col gap-4 flex-1">
       {/* the scores, small */}
-      <div className="grid grid-cols-4 gap-1.5">{T.map((t, i) => (
+      <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${Math.min(T.length, 4)}, minmax(0, 1fr))` }}>{T.map((t, i) => (
         <div key={i} className="rounded-[10px] px-2 py-1 text-center" style={{ background: "var(--glass)", border: `1px solid ${i === mine ? t.color : "var(--line)"}` }}>
           <div className="text-11 font-bold truncate" style={{ color: t.color }}>{LETTERS[i]} · {t.name}</div><div className="display text-22 leading-none">{t.score}</div></div>))}</div>
       {g && pub.screen !== "final" && <div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{MANY_TITLES[g.key]} · {pub.screen === "intro" ? "next up" : pub.screen === "summary" ? "result" : `${g.leg} of ${g.of}`}</div>}

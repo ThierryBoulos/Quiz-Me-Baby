@@ -72,10 +72,10 @@ export function TvMany({ pub, join }: { pub: PubMany; join?: { url: string; code
 
         {pub.screen === "reveal" && g && R && (<>
           <div className="eyebrow text-18">The answer</div>
-          <div className="display" style={{ fontSize: g.key === "majority" ? 64 : 80, color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(R.answer)) : R.answer}</div>
-          {(R.notes || R.place) && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] truncate">{R.place || R.notes}</div>}
+          <div className="display leading-none" style={{ fontSize: g.key === "majority" || R.answer.length > 18 ? 56 : 80, color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(R.answer)) : R.answer}</div>
+          {(R.notes || R.place) && g.key !== "pin" && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] truncate">{R.place || R.notes}</div>}
           {g.key === "flag" && (
-            <div className="grid grid-cols-4 gap-3 w-full max-w-[1180px]">
+            <div className="grid gap-3 w-full" style={{ gridTemplateColumns: `repeat(${Math.min(T.length, 4)}, minmax(0, 1fr))`, maxWidth: Math.min(T.length, 4) * 295 }}>
               {T.map((t, i) => (
                 <div key={i} className="card !p-3 text-left" style={{ borderColor: R.ok?.[i] ? "var(--color-ok)" : "var(--line)" }}>
                   <div className="flex items-center gap-2"><Badge pub={pub} t={i} /><b className="truncate" style={{ color: t.color }}>{t.name}</b></div>
@@ -86,7 +86,7 @@ export function TvMany({ pub, join }: { pub: PubMany; join?: { url: string; code
           {(g.key === "closest" || g.key === "pin") && (
             <div className={"flex gap-6 w-full max-w-[1180px] items-start " + (g.key === "pin" ? "" : "justify-center")}>
               {g.key === "pin" && R.at && <div className="flex-1 min-w-0"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
-                ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: LETTERS[i] } : null)).filter((x): x is NonNullable<typeof x> => !!x)]} fly height={360} interactive={false} label={`Where it is: ${R.place}`} /></div>}
+                ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: LETTERS[i] } : null)).filter((x): x is NonNullable<typeof x> => !!x)]} fly height={300} interactive={false} label={`Where it is: ${R.place}`} /></div>}
               <ol className="flex flex-col gap-1.5 text-left min-w-[380px]">
                 {T.map((_, i) => i).filter((i) => R.off?.[i] != null).sort((a, b) => (R.off![a]! - R.off![b]!)).concat(T.map((_, i) => i).filter((i) => R.off?.[i] == null)).map((i) => (
                   <li key={i} className="flex items-center gap-3 text-22" style={{ fontWeight: R.winners.includes(i) ? 800 : 500 }}>
