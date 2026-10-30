@@ -643,6 +643,16 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .pin-stem { width: 4px; background: linear-gradient(180deg, #fff, var(--c)); border-radius: 0 0 2px 2px; }
 @media (prefers-reduced-motion: reduce) { .flag-cloth, .flag-hoist, .pin-stand { animation: none; } }
 .bar-grow { transform-origin: bottom; animation: barGrow .7s var(--ease) both; }
+/* the new games' results (30 Oct): a glass filling, a bubble popping up, a lectern rising, the winner's spotlight */
+.glass-fill { transform-box: fill-box; transform-origin: bottom; animation: barGrow .9s var(--ease) both; }
+.glass-cherry { animation: cherryDrop .5s var(--ease) both; }
+@keyframes cherryDrop { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: none; } }
+.bubble-pop { animation: bubblePop .5s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes bubblePop { from { opacity: 0; transform: scale(.2); } to { opacity: 1; transform: none; } }
+.lectern-in { animation: flagHoist .6s var(--ease) both; }
+.lectern-spot { position: absolute; left: 50%; top: -60px; width: 240%; height: calc(100% + 60px); transform: translateX(-50%); pointer-events: none;
+  background: radial-gradient(ellipse 50% 70% at 50% 0%, rgba(255,236,170,.28), transparent 70%); }
+@media (prefers-reduced-motion: reduce) { .glass-fill, .glass-cherry, .bubble-pop, .lectern-in { animation: none; } }
 @keyframes barGrow { from { transform: scaleY(0); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .bar-grow { animation: none; } }
 .hud.many .hud-mini .dot { width: 14px; height: 14px; font-size: var(--text-8); }

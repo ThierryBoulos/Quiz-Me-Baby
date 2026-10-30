@@ -216,6 +216,101 @@ export function BarsMany({ pub }: { pub: PubMany }) {
     </div>);
 }
 
+/* ---- the new games' results (the owner, 30 Oct: a more creative way than bars), each in its own world. They read left
+   to right to the winner, as Drop the Pin and the Closest To Wins race do; the board reads top down, as boards do ---- */
+const byPlace = (S: NonNullable<PubMany["summary"]>, k: number, winnerLast = true) =>
+  Array.from({ length: k }, (_, i) => i).sort((a, b) => (winnerLast ? S.places[b] - S.places[a] || b - a : S.places[a] - S.places[b] || a - b));
+/* under each one: its place, its name, what the place pays the night */
+function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boolean }) {
+  const S = pub.summary!, T = pub.teams, paid = S.award[t] > 0, lit = paid && S.places[t] === 1;
+  return (<>
+    <div className="display text-16 leading-none mt-1" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "—"}</div>
+    <div className="flex items-center gap-1.5 min-w-0 max-w-full"><Dot t={t} color={T[t].color} size={dense ? 14 : 18} />
+      <span className="eyebrow truncate" style={{ color: T[t].color, fontSize: dense ? 11 : 14 }}><bdi>{T[t].name}</bdi></span></div>
+    <div className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</div>
+  </>);
+}
+/* Guess the Airport: the departures board, each team a flight, flipping in from the top: 1st boards first */
+export function DeparturesMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k, false);
+  const status = (t: number) => (S.award[t] <= 0 ? "Cancelled" : S.places[t] === 1 ? "Boarding" : S.places[t] === k ? "Delayed" : "On time");
+  return (
+    <div className="board" style={{ fontSize: dense ? 16 : 22, maxWidth: dense ? 900 : 860 }} role="table" aria-label={"Departures: " + order.map((t) => `${T[t].name} ${S.pts[t]} points`).join(", ")}>
+      <div className="board-title" style={{ fontSize: "1.2em" }}>
+        <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg>
+        Departures · tonight&rsquo;s result
+      </div>
+      {order.map((t, i) => { const lit = S.award[t] > 0 && S.places[t] === 1; return (
+        <div key={t} className="board-row tv board-flip" role="row" style={{ animationDelay: 0.1 + i * 0.12 + "s" }}>
+          <span className="b-time" role="cell">{S.award[t] > 0 ? place(S.places[t]).toUpperCase() : "—"}</span>
+          <span className="b-dest flex items-center gap-2" role="cell" style={{ color: T[t].color }}><Dot t={t} color={T[t].color} size={dense ? 14 : 18} /><bdi className="truncate">{T[t].name}</bdi>{lit && <span aria-label="takes it">🏆</span>}</span>
+          <span className="b-flight" role="cell">{S.pts[t]} pts</span>
+          <span className="b-gate" role="cell" style={{ color: S.award[t] > 0 ? "var(--color-ok)" : undefined }}>{S.award[t] > 0 ? "+" + S.award[t] : "0"}</span>
+          <span className="b-status" role="cell" style={{ color: S.award[t] <= 0 ? "#ff5566" : lit ? "#3ddc97" : S.places[t] === k ? "#ffb020" : "#ffd25a" }}>{status(t)}</span>
+        </div>); })}
+    </div>);
+}
+/* the Cocktail or Dish: a cocktail glass a team, filled in its colour to its points (the best full to the brim,
+   a cherry on its rim) */
+export function GlassesMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, best = Math.max(1, ...S.pts), order = byPlace(S, k), w = dense ? 112 : 170, h = w * 1.25;
+  return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 14 : 34 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      {order.map((t, j) => { const lvl = S.pts[t] / best, lit = S.award[t] > 0 && S.places[t] === 1, id = "g" + t; return (
+        <div key={t} role="listitem" className="flex flex-col items-center gap-1 min-w-0" style={{ width: w }}>
+          <div className="display leading-none" style={{ fontSize: dense ? 26 : 34, color: T[t].color }}>{S.pts[t]}</div>
+          <svg viewBox="0 0 100 125" width={w} height={h} aria-hidden style={{ overflow: "visible" }}>
+            <defs><clipPath id={id}><path d="M8 8 L92 8 L54 58 L46 58 Z" /></clipPath></defs>
+            {/* the drink, rising from the bottom of the bowl, one glass after another */}
+            <g clipPath={`url(#${id})`}><rect className="glass-fill" x="0" y={58 - 50 * lvl} width="100" height={50 * lvl + 1} fill={T[t].color} style={{ animationDelay: 0.2 + j * 0.15 + "s", opacity: S.award[t] > 0 ? 0.9 : 0.4 }} /></g>
+            <path d="M8 8 L92 8 L54 58 L46 58 Z" fill="none" stroke="rgba(255,255,255,.75)" strokeWidth="2.5" strokeLinejoin="round" />
+            <path d="M50 58 L50 104 M30 112 Q50 102 70 112" fill="none" stroke="rgba(255,255,255,.75)" strokeWidth="2.5" strokeLinecap="round" />
+            {lit && <g className="glass-cherry" style={{ animationDelay: 0.6 + j * 0.15 + "s" }}><path d="M74 9 Q78 -4 86 -8" stroke="#3ddc97" strokeWidth="2" fill="none" /><circle cx="73" cy="10" r="7" fill="#ff3b5c" /></g>}
+          </svg>
+          <Caption pub={pub} t={t} dense={dense} />
+        </div>); })}
+    </div>);
+}
+/* Don't Say the Same: a speech bubble a team, as big as what it scored (nothing, a small one) */
+export function BubblesMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, best = Math.max(1, ...S.pts), order = byPlace(S, k), max = dense ? 128 : 190;
+  return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 10 : 26, minHeight: max + 90 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      {order.map((t, j) => { const size = Math.round(max * (0.42 + 0.58 * (S.pts[t] / best))), lit = S.award[t] > 0 && S.places[t] === 1; return (
+        <div key={t} role="listitem" className="flex flex-col items-center gap-1 min-w-0" style={{ width: dense ? 128 : 190 }}>
+          {lit && <span className="text-28 leading-none" role="img" aria-label="takes it">🏆</span>}
+          <div className="bubble-pop relative grid place-items-center" style={{ width: size, height: size * 0.72, borderRadius: size * 0.36, background: `color-mix(in srgb, ${T[t].color} ${S.award[t] > 0 ? 85 : 35}%, #0b0e24)`,
+            boxShadow: lit ? `0 0 30px ${T[t].color}` : undefined, animationDelay: 0.1 + j * 0.12 + "s" }}>
+            <span className="display leading-none" style={{ fontSize: Math.max(22, size * 0.32), color: "#04050e" }}>{S.pts[t]}</span>
+            <span className="absolute" style={{ bottom: -size * 0.1, left: "30%", width: 0, height: 0, borderLeft: `${size * 0.09}px solid transparent`, borderRight: `${size * 0.09}px solid transparent`,
+              borderTop: `${size * 0.13}px solid color-mix(in srgb, ${T[t].color} ${S.award[t] > 0 ? 85 : 35}%, #0b0e24)` }} aria-hidden />
+          </div>
+          <div style={{ height: dense ? 6 : 10 }} />
+          <Caption pub={pub} t={t} dense={dense} />
+        </div>); })}
+    </div>);
+}
+/* a question round: a game show's lecterns, a team's score lit on each; the winner's under a spotlight */
+export function LecternsMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k), w = dense ? 118 : 176;
+  return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 12 : 26 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      {order.map((t, j) => { const lit = S.award[t] > 0 && S.places[t] === 1, paid = S.award[t] > 0; return (
+        <div key={t} role="listitem" className="lectern-in relative flex flex-col items-center min-w-0" style={{ width: w, animationDelay: j * 0.1 + "s" }}>
+          {lit && <span className="lectern-spot" aria-hidden />}
+          {lit && <span className="text-28 leading-none mb-1 relative" role="img" aria-label="takes it">🏆</span>}
+          {/* the score panel, lit in the team's colour */}
+          <div className="relative w-full grid place-items-center rounded-t-[14px] border-2" style={{ height: dense ? 74 : 100, background: "#05060c", borderColor: T[t].color, boxShadow: paid ? `0 0 24px color-mix(in srgb, ${T[t].color} 55%, transparent) inset` : undefined }}>
+            <span className="display leading-none" style={{ fontSize: dense ? 44 : 64, color: paid ? T[t].color : "var(--color-ink-3)", textShadow: paid ? `0 0 18px ${T[t].color}` : undefined }}>{S.pts[t]}</span>
+          </div>
+          {/* the front, narrowing to the floor, the team's name plate on it */}
+          <div className="w-[86%] flex flex-col items-center justify-start pt-2 gap-1" style={{ height: dense ? 92 : 112, background: `linear-gradient(180deg, color-mix(in srgb, ${T[t].color} 30%, #10142e), #0b0e24)`, clipPath: "polygon(0 0, 100% 0, 92% 100%, 8% 100%)" }}>
+            <Caption pub={pub} t={t} dense={dense} />
+          </div>
+        </div>); })}
+    </div>);
+}
+
 /* ---- Guess the Flag's result on the TV (the owner's pick, 30 Oct): one pole, every team's flag hoisted on it in
    place order, the winner's at the top with the trophy; the longer the flag, the more points; each flag carries its
    place, the team and its points, and what the place pays the night beside it ---- */
