@@ -124,25 +124,26 @@ export function rightOf(key: ManyKey, text: string, q: Q): boolean {
 /* Don't Say the Same: the word on the prompt's list an answer is (typos allowed), or null if it isn't on it */
 const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: string) => QMB.isMatch(text, w, acceptFor({ answer: w }))) ?? null;
 
-/* a captain's answer (one each, the first stands) */
-export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown }): true | string {
+/* a captain's answer (one each, the first stands). order: when it reached the server (the action's id), so the
+   fastest is the first to arrive there, however the network hands the answers to the TV; none, the order they come */
+export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown }, order?: number): true | string {
   const m = miniOf(s); if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
   if (m.only && !m.only.includes(team)) return "Only the teams level at the top answer this one.";
   if (typedKey(m.key)) {
     if (s.typed[team] != null) return m.key === "dish" ? "Your team has had its guess at this one." : "Your answer is in.";
     const text = String(p.text ?? "").trim().slice(0, 80); if (!text) return "Type an answer first.";
-    s.typed[team] = text; s.at[team] = ++s.seq; return true;
+    s.typed[team] = text; s.at[team] = order ?? ++s.seq; return true;
   }
   if (m.key === "closest") {
     if (s.nums[team] != null) return "Your number is in.";
     const v = QMB.parseNumber(String(p.n ?? ""), qOf(s)?.question); if (v == null || !Number.isFinite(v)) return "That isn't a number.";
-    s.nums[team] = v; s.at[team] = ++s.seq; return true;
+    s.nums[team] = v; s.at[team] = order ?? ++s.seq; return true;
   }
   if (m.key === "pin") {
     if (s.pins[team]) return "Your pin is in.";
     const q = p.pin as LatLon | undefined;
     if (!q || !Number.isFinite(Number(q.lat)) || !Number.isFinite(Number(q.lon)) || Math.abs(q.lat) > 90 || Math.abs(q.lon) > 180) return "That isn't a pin.";
-    s.pins[team] = { lat: Number(q.lat), lon: Number(q.lon) }; s.at[team] = ++s.seq; return true;
+    s.pins[team] = { lat: Number(q.lat), lon: Number(q.lon) }; s.at[team] = order ?? ++s.seq; return true;
   }
   return "Everyone answers this one on their own phone.";
 }
@@ -206,7 +207,7 @@ export function placesBy(keys: (number | null)[]): (number | null)[] {
 export function legPlaces(s: StateM): (number | null)[] {
   const m = miniOf(s), q = qOf(s); if (!m || !q || m.key === "majority") return s.teams.map(() => null);
   if (m.key === "say") return placesBy(s.ok.map((v) => (v ? 0 : null)));
-  if (typedKey(m.key)) return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? 1e9 : null)));
+  if (typedKey(m.key)) return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? Number.MAX_SAFE_INTEGER : null)));
   const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null));
   return placesBy(d);
 }

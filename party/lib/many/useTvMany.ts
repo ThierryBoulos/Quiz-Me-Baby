@@ -169,7 +169,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "answer") {
       const m = miniOf(s);
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
-        : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G) : "Your captain answers this one.";
+        : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G, Number(a.id) || undefined) : "Your captain answers this one.";
       reply(r === true ? "+" : r);
       /* the Cocktail or Dish: the first right guess ends the race */
       if (r === true && (allIn(s) || (m?.key === "dish" && dishRight(s, from.team as number)))) reveal(s);
