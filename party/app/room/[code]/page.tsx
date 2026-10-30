@@ -13,6 +13,7 @@ import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 import { LineupMany, PickMany, SetupMany } from "@/components/many/LineupMany";
 import { PhoneMany } from "@/components/many/PhoneMany";
+import { ScoresMany } from "@/components/many/PartsMany";
 import { manyNames, manyNotReady, teamCountOf } from "@/lib/many/useTvMany";
 import { MANY_COLORS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
@@ -32,7 +33,7 @@ export default function PhoneRoom() {
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<string | null>(null);        // the team name being typed (null: not touched)
   const [nameState, setNameState] = useState<null | "saving" | "saved" | "late">(null);
-  const [panel, setPanel] = useState(false);          // mid-game: the line-up, and changing captain
+  const [panel, setPanel] = useState<false | "team" | "scores">(false);   // mid-game: the line-up and changing captain; many teams: the scores too
   const [rules, setRules] = useState(false);          // the lobby: How to Play over the room, so nobody leaves it
   /* Between a tap and the TV's reply (a second or two): a bar along the top,
      and the buttons stay off, so nobody taps twice wondering if it worked. */
@@ -227,8 +228,11 @@ export default function PhoneRoom() {
         <span className="chip"><span className="face">{mine.avatar || "🙂"}</span>{mine.name}</span>
         <span className="eyebrow whitespace-nowrap">{room.status === "lobby" ? `Room ${code}` : code}</span>
         <div className="flex gap-2">
+          {/* many teams: the scores live behind their own button (a strip of eight clutters a phone); the line-up's reads "Team" to make room */}
+          {room.status !== "lobby" && many && panel !== "team" && (room.state?.pub as PubMany | null)?.many && (
+            <button className={"btn btn-sm " + (panel === "scores" ? "btn-gold" : "btn-ghost")} aria-expanded={panel === "scores"} onClick={() => setPanel(panel === "scores" ? false : "scores")}>Scores</button>)}
           {room.status !== "lobby"
-            ? <button className="btn btn-sm btn-ghost" aria-expanded={panel} onClick={() => setPanel(!panel)}>{panel ? "Back" : mine.role === "host" ? "Players" : "Team Members"}</button>
+            ? <button className="btn btn-sm btn-ghost" aria-expanded={panel === "team"} onClick={() => setPanel(panel === "team" ? false : "team")}>{panel === "team" ? "Back" : mine.role === "host" ? "Players" : many ? "Team" : "Team Members"}</button>
             : <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}
         </div>
       </header>
@@ -254,6 +258,12 @@ export default function PhoneRoom() {
             {many ? <PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} /> : <>
             <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
             <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button></>}
+          </section>
+        ) : panel === "scores" && (room.state?.pub as PubMany | null)?.many ? (
+          /* many teams: every team's score, in order, yours marked */
+          <section className="flex flex-col gap-3 enter">
+            <ScoresMany pub={room.state.pub as PubMany} me={mine.team as number | null} />
+            <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
           </section>
         ) : panel ? (
           /* mid-game: who's where, and a new captain when one is needed */
@@ -378,7 +388,7 @@ export default function PhoneRoom() {
             <ShareButton code={code} />
           </div>
           {many && mine.role === "host" ? (
-            <SetupMany busy={busy} why={manyNotReady(members, teamCount)} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <SetupMany busy={busy} k={teamCount} why={manyNotReady(members, teamCount)} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : canStart && !many ? (
             <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} tv={mine.role === "host" ? secret.lobby : undefined} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (

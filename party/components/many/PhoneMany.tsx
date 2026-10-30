@@ -1,15 +1,17 @@
 "use client";
-/* MANY TEAMS: the phones. The host runs it (Start, Reveal, Next, flip a flag's call, Play again, Exit);
-   each captain answers for their team; in Majority Rules everyone answers on their own phone. */
+/* MANY TEAMS: the phones, laid out as the two-team phones are (components/PhoneGame.tsx): the host's answer
+   card on top and one main button docked at the bottom; a captain's answer box, the pin map, the four answers
+   of Majority Rules; a result as a headline, then the rows. No score strip: the scores sit behind the Scores
+   button in the header, and the tracker says whose side you're on. */
 import { useEffect, useMemo, useState } from "react";
 import { Clock } from "../Clock";
-import { FlagImg, PinPhoto } from "../GameParts";
+import { FlagImg, PinPhoto, RulingPicker } from "../GameParts";
 import { PinMap } from "../PinMap";
 import { sendAction, sb } from "@/lib/supabase";
-import { showNum, type LatLon } from "@/lib/game";
+import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
-import { LETTERS, MANY_TITLES } from "@/lib/many/logic";
 import type { PubMany, SecretMany } from "@/lib/many/view";
+import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, paid, place, RowsMany, summaryCols, takes } from "./PartsMany";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 function useSecretMany(code: string, on: boolean, step: number) {
@@ -29,90 +31,184 @@ function order<T>(xs: T[], seed: string) {
   const a = xs.slice(); for (let i = a.length - 1; i > 0; i--) { h = Math.imul(h ^ (h >>> 13), 0x5bd1e995) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
+const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onContextMenu: (e: React.MouseEvent) => e.preventDefault() };
+const Line = ({ children, className = "" }: { children: React.ReactNode; className?: string }) =>
+  <p className={"text-center text-15 text-[var(--color-ink-2)] " + className} role="status">{children}</p>;
 
 export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: string }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
-  const g = pub.game, R = pub.reveal, T = pub.teams;
+  const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
   const secret = useSecretMany(code, host, pub.step);
   const [busy, setBusy] = useState(false), [err, setErr] = useState<string | null>(null);
-  const [text, setText] = useState(""), [pin, setPin] = useState<LatLon | null>(null);
-  useEffect(() => { setText(""); setPin(null); setErr(null); }, [pub.qid]);
+  const [text, setText] = useState(""), [pin, setPin] = useState<LatLon | null>(null), [sentTxt, setSentTxt] = useState<string | null>(null);
+  useEffect(() => { setText(""); setPin(null); setErr(null); setSentTxt(null); }, [pub.qid]);
   const send = async (kind: string, payload: Record<string, unknown>) => {
     setBusy(true); setErr(null);
-    try { await sendAction(code, kind, { ...payload, step: pub.step }); } catch { setErr("That didn't reach the TV. Try again."); }
-    setBusy(false);
+    try { await sendAction(code, kind, { ...payload, step: pub.step }); return true; } catch { setErr("That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
   };
   const move = (type: string, extra: Record<string, unknown> = {}) => void send("judge", { move: { type, ...extra } });
   const opts = useMemo(() => order(pub.options || [], me.name + (pub.qid || "")), [pub.options, me.name, pub.qid]);
   const sentMine = mine != null && pub.sent[mine];
   const voted = !!pub.voted?.includes(me.name), onList = !!pub.roster?.includes(me.name);
-  const Big = ({ label, on }: { label: string; on: () => void }) => <button className="btn btn-gold btn-lg btn-block mt-auto" disabled={busy} onClick={on}>{label}</button>;
+  /* the host's one main button, docked in thumb reach */
+  const Main = ({ label, on }: { label: string; on: () => void }) => <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={on}>{label}</button>;
+  /* a big outcome headline, no box (boxes are for things you can tap) */
+  const Big = ({ eyebrow, text, color, size = 32, sub }: { eyebrow?: string; text: React.ReactNode; color?: string; size?: number; sub?: React.ReactNode }) => (
+    <div className="text-center flex flex-col gap-1" role="status" aria-live="polite">
+      {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+      <div className="display leading-tight" style={{ fontSize: typeof text === "string" && text.length > 18 ? 28 : size, color: color ?? "var(--color-gold)" }}>{text}</div>
+      {sub && <div className="text-13 font-bold">{sub}</div>}
+    </div>);
+  /* "That's your team!", under who takes it */
+  const yours = (ok: boolean | null) => ok == null ? undefined : <span style={{ color: ok ? "var(--color-ok)" : "var(--color-ink-3)" }}>{ok ? "That's your team!" : "Not this time."}</span>;
+  const W = takes(pub), won = mine != null && !!R?.winners.includes(mine);
+
+  /* what's on screen, close up: the flag, the photo, the question, and the clock. It can't be selected or copied */
+  const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
+    <div className="noselect contents" {...noCopy}>
+      {g.key === "flag" && <FlagImg name={pub.flag} h={small ? 110 : 150} />}
+      {g.key === "pin" && (small
+        ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><Clock deadline={pub.deadline} left={pub.left} size={64} /></div>
+        : <PinPhoto pin={pub.pin} h={230} small zoom />)}
+      {pub.question && <p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p>}
+      {!(small && g.key === "pin") && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} size={small ? 70 : 90} /></div>}
+    </div>);
+  /* the answer, on a reveal: big, in gold, with the fact behind it */
+  const Answer = () => !R || !g ? null : (
+    <div className="noselect text-center" {...noCopy}>
+      {g.key === "flag" && <div className="mb-2"><FlagImg name={pub.flag} h={96} /></div>}
+      {g.key === "pin" && R.at && <div className="mb-3"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
+        ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
+        fly height={240} label={`Where it is: ${R.place}`} /></div>}
+      {g.key === "majority" && pub.question && <p className="font-bold text-18 leading-snug mb-1">{pub.question}</p>}
+      {g.key !== "pin" && <div className="eyebrow">The answer</div>}
+      <div className="display text-30" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(R.answer)) : R.answer}</div>
+      {(R.notes || R.place) && <p className="text-14 text-[var(--color-ink-2)] leading-snug mt-1">{R.place || R.notes}</p>}
+    </div>);
+  /* a reveal's rows: each team's line (Majority Rules: right out of how many; the rest: how near) */
+  const Rows = () => !R || !g ? null : g.key === "flag" ? <FlagRowsMany pub={pub} size="phone" />
+    : g.key === "closest" ? <BoardMany pub={pub} cols={closestCols(pub)} size="phone" label="Nearest first" />
+    : g.key === "pin" ? <RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="phone" />
+    : <RowsMany pub={pub} order={T.map((_, i) => i)} right={(t) => <span className="text-16 font-bold" style={{ fontFamily: "var(--font-body)", textTransform: "none" }}>{R.right?.[t] ?? 0} of {R.of?.[t] ?? 0}</span>} size="phone" />;
+  /* a game's result and the night's end, the same on every phone */
+  const Summary = () => !g || !pub.summary ? null : (<>
+    <Big text={paid(pub).text} color={paid(pub).color} eyebrow={g.title} sub={mine != null ? yours(pub.summary.award[mine] > 0) : undefined} />
+    <BoardMany pub={pub} cols={summaryCols(pub)} size="phone" label={pub.summary.shares ? "Share right" : "Legs won"} />
+    {pub.summary.line && <p className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{pub.summary.line}</p>}
+  </>);
+  const Final = () => { if (!pub.final) return null; const tops = pub.final.order.filter((x) => x.place === 1).map((x) => x.team), c = tops.length === 1 ? T[tops[0]].color : "var(--color-gold)";
+    const my = mine != null ? pub.final.order.find((x) => x.team === mine)?.place : undefined;
+    return (
+      <div className="text-center flex flex-col gap-2 py-2" role="status" aria-live="polite">
+        <div className="eyebrow">{tops.length > 1 ? "A shared win" : "The winner"}</div>
+        <div className="display text-52 leading-none" style={{ color: c }}><bdi>{tops.map((t) => T[t].name).join(" & ")}</bdi></div>
+        {my != null && <div className="text-15 font-bold" style={{ color: my === 1 ? "var(--color-ok)" : "var(--color-ink-3)" }}>{my === 1 ? "You won the night!" : `Your team finished ${place(my)}.`}</div>}
+        <div className="mt-2"><BoardMany pub={pub} cols={finalCols(pub)} size="phone" label="Final standings" /></div>
+      </div>); };
 
   return (
     <div className="flex flex-col gap-4 flex-1">
-      {/* the scores, small */}
-      <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${Math.min(T.length, 4)}, minmax(0, 1fr))` }}>{T.map((t, i) => (
-        <div key={i} className="rounded-[10px] px-2 py-1 text-center" style={{ background: "var(--glass)", border: `1px solid ${i === mine ? t.color : "var(--line)"}` }}>
-          <div className="text-11 font-bold truncate" style={{ color: t.color }}>{LETTERS[i]} · {t.name}</div><div className="display text-22 leading-none">{t.score}</div></div>))}</div>
-      {g && pub.screen !== "final" && <div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{MANY_TITLES[g.key]} · {pub.screen === "intro" ? "next up" : pub.screen === "summary" ? "result" : `${g.leg} of ${g.of}`}</div>}
+      <HudMany pub={pub} size="phone" me={mine} host={host} />
 
-      {/* the question, on every phone */}
-      {pub.screen === "q" && g && (<>
-        {g.key === "flag" && <div className="flex justify-center"><FlagImg name={pub.flag} h={140} /></div>}
-        {g.key === "pin" && <PinPhoto pin={pub.pin} h={180} small zoom />}
-        {pub.question && <p className="font-bold text-18 text-center leading-snug">{pub.question}</p>}
-        <div className="flex justify-center"><Clock deadline={pub.deadline} left={pub.left} size={70} /></div>
+      {/* THE HOST: the answer on top, one main button */}
+      {host && sc === "intro" && g && (<>
+        <IntroMany pub={pub} size="phone" />
+        <Main label={g.key === "majority" ? "Start: everyone's in" : "Start"} on={() => move("m/start")} />
       </>)}
-
-      {/* HOST */}
-      {host && (<>
-        {pub.screen === "intro" && g && <><p className="text-center text-15 text-[var(--color-ink-2)]">{MANY_TITLES[g.key]} is next. When everyone&rsquo;s ready:</p><Big label="Start" on={() => move("m/start")} /></>}
-        {pub.screen === "q" && (<>
-          {secret.answer && <div className="card" style={{ borderColor: "rgba(245,197,24,.5)" }}><div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answer. Only you see this</div><div className="display text-28 mt-1" style={{ color: "var(--color-gold)" }}>{g?.key === "closest" ? showNum(Number(secret.answer)) : secret.answer}</div></div>}
-          <p className="text-center text-14">{g?.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} answered` : `${pub.sent.filter(Boolean).length} of ${T.length} teams in`}</p>
-          <button className="btn btn-block mt-auto" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
-        </>)}
-        {pub.screen === "reveal" && g?.key === "flag" && R && (
-          <div className="card flex flex-col gap-1.5"><div className="eyebrow">The app&rsquo;s calls · tap to change one</div>
-            {T.map((t, i) => (
-              <button key={i} className="flex items-center justify-between gap-2 min-h-[40px] text-left" disabled={busy} onClick={() => move("m/flip", { t: i })}>
-                <span className="truncate"><b style={{ color: t.color }}>{t.name}</b> · {R.typed?.[i] ?? "No answer"}</span>
-                <b style={{ color: R.ok?.[i] ? "var(--color-ok)" : "var(--color-no)" }}>{R.ok?.[i] ? "RIGHT" : "WRONG"}</b></button>))}
+      {host && sc === "q" && g && (<>
+        <OnScreen />
+        {secret.answer && (
+          <div className="card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
+            <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answer. Only you see this</div>
+            <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(secret.answer)) : secret.answer}</div>
+            {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
           </div>)}
-        {(pub.screen === "reveal" || pub.screen === "summary") && <Big label="Next" on={() => move("m/next")} />}
-        {pub.screen === "final" && (<div className="flex flex-col gap-2 mt-auto">
-          <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => move("m/again")}>Play again: same teams</button>
-          <button className="btn btn-ghost" disabled={busy} onClick={() => move("m/exit")}>Exit: everyone back to the home screen</button></div>)}
+        {/* who's in: every team, as the TV shows them */}
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1" role="status" aria-label="Who has answered">
+          {g.key === "majority" && <p className="col-span-2 text-center text-14 font-bold mb-1">{pub.voted?.length ?? 0} of {pub.roster?.length ?? 0} answered</p>}
+          {T.map((t, i) => <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span><span className="shrink-0 font-semibold">{pub.sent[i] ? (g.key === "pin" ? "· pin in" : g.key === "majority" ? "· all in" : "· in") : "…"}</span></span>)}
+        </div>
+        <div className="flex justify-center mt-auto"><button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button></div>
+      </>)}
+      {host && sc === "reveal" && g && R && (<>
+        <Answer />
+        {g.key === "flag" ? (
+          /* each team's answer, and its ruling beside it, which the host can always flip (the TV confirms it a beat later) */
+          <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; return (
+            <div key={i} className="flex items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="eyebrow flex items-center gap-2" style={{ color: t.color }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
+                {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
+              </div>
+              {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}
+            </div>); })}</div>
+        ) : <Rows />}
+        {g.key !== "majority" && <Big text={W.text} color={W.color} />}
+        <Main label="Next" on={() => move("m/next")} />
+      </>)}
+      {host && sc === "summary" && (<><Summary /><Main label="Next" on={() => move("m/next")} /></>)}
+      {host && sc === "final" && (<>
+        <Final />
+        <div className="mt-auto flex flex-col gap-2">
+          <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => move("m/again")}>Play again: same teams</button>
+          <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone and the TV back to the home screen.</p>
+          <button className="btn btn-lg btn-block" disabled={busy} onClick={() => { move("m/exit"); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+        </div>
       </>)}
 
-      {/* MAJORITY RULES: everyone on the list answers */}
-      {!host && pub.screen === "q" && g?.key === "majority" && (
-        !onList ? <p className="text-center text-15 text-[var(--color-ink-2)]">You joined after this game started: watch this one.</p>
-          : voted ? <p className="text-center display text-32" style={{ color: "var(--color-gold)" }}>Locked in</p>
-          : <div className="grid gap-2">{opts.map((o) => <button key={o} className="btn btn-lg btn-block" disabled={busy} onClick={() => void send("answer", { pick: o, k: `${pub.qid}|q` })}><bdi>{o}</bdi></button>)}</div>)}
+      {/* EVERYONE ELSE */}
+      {!host && sc === "intro" && g && (<>
+        <IntroMany pub={pub} size="phone" />
+        <Line className="mt-auto">Eyes on the TV. The host starts it.</Line>
+      </>)}
+
+      {/* MAJORITY RULES: everyone on the list answers, on their own phone */}
+      {!host && sc === "q" && g?.key === "majority" && (<>
+        <p className="text-center text-14 font-bold text-[var(--color-ink-2)]">Your own answer: eyes on your phone, no talking</p>
+        <OnScreen />
+        {!onList ? <Line>You joined after it started, so you&rsquo;re watching this one. You&rsquo;ll play the next Majority Rules.</Line>
+          : voted ? <p className="text-center font-bold text-16" role="status">Locked in. The answer comes up when the time&rsquo;s up.</p>
+          : <div className="flex flex-col gap-2">
+            <div className="grid gap-2.5" role="group" aria-label="The four answers">
+              {opts.map((o) => <button key={o} type="button" className="btn btn-lg btn-block mr-opt" disabled={busy} onClick={() => void send("answer", { pick: o, k: `${pub.qid}|q` })}><bdi>{o}</bdi></button>)}
+            </div>
+            <p className="text-center text-12 text-[var(--color-ink-3)]">One tap, and it&rsquo;s locked.</p>
+          </div>}
+      </>)}
 
       {/* THE CAPTAIN answers the other three */}
-      {cap && pub.screen === "q" && g && g.key !== "majority" && (
-        sentMine ? <p className="text-center display text-32" style={{ color: "var(--color-gold)" }}>Sent. Eyes on the TV</p> : (
-          <div className="card flex flex-col gap-2">
-            {g.key === "pin" ? (<>
-              <PinMap value={pin} onChange={setPin} color={mine != null ? T[mine].color : undefined} height={300} label="Drop your pin" />
-              <button className="btn btn-gold btn-lg" disabled={busy || !pin} onClick={() => void send("answer", { pin, k: `${pub.qid}|q` })}>Lock in</button>
-            </>) : (<>
+      {cap && sc === "q" && g && g.key !== "majority" && (<>
+        <OnScreen small={g.key === "pin" && !sentMine} />
+        {sentMine ? <p className="text-center font-bold text-16" role="status">Locked in{sentTxt && g.key !== "pin" ? `: ${sentTxt}` : ""}.</p>
+          : g.key === "pin" ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-center text-13 text-[var(--color-ink-3)]">{pin ? "Drag your pin to move it. Zoom in (pinch, or +) to place it exactly." : "Tap the map to drop your pin."}</p>
+              <PinMap value={pin} onChange={setPin} color={mine != null ? T[mine].color : undefined} height="min(520px, max(300px, calc(100dvh - 460px)))" />
+              <button className="btn btn-gold btn-lg btn-block dock" disabled={busy || !pin} onClick={() => void send("answer", { pin, k: `${pub.qid}|q` })}>Lock in</button>
+            </div>
+          ) : (
+            <div className="card flex flex-col gap-2">
               <label className="field-label !mb-0" htmlFor="mans">{g.key === "closest" ? "Your number" : "Your answer"}</label>
-              <input id="mans" className="input" autoComplete="off" inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "A number" : "Type it"} />
-              <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onClick={() => void send("answer", g.key === "closest" ? { n: text, k: `${pub.qid}|q` } : { text, k: `${pub.qid}|q` })}>Send</button>
-              <p className="text-12 text-[var(--color-ink-3)]">One go: once it&rsquo;s sent, it&rsquo;s locked.</p>
-            </>)}
-          </div>))}
-      {!host && !cap && pub.screen === "q" && g && g.key !== "majority" && <p className="text-center text-15 text-[var(--color-ink-2)]">Your captain answers this one. Shout your idea.</p>}
+              <input id="mans" className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
+              <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
+              <div className="text-13 text-[var(--color-ink-3)]">One go: once you send it, it&rsquo;s locked{g.key === "flag" ? " and the app checks it" : ""}.</div>
+            </div>)}
+        {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
+      </>)}
+      {!host && !cap && sc === "q" && g && g.key !== "majority" && (<>
+        <OnScreen />
+        <Line>Your captain answers this one. Shout your idea.</Line>
+      </>)}
 
-      {/* the result, on every phone that isn't the host's */}
-      {!host && pub.screen === "reveal" && R && <div className="text-center"><div className="eyebrow">The answer</div><div className="display text-36" style={{ color: "var(--color-gold)" }}>{g?.key === "closest" ? showNum(Number(R.answer)) : R.answer}</div>
-        {mine != null && g?.key !== "majority" && <p className="text-15 font-bold mt-1" style={{ color: R.winners.includes(mine) ? "var(--color-ok)" : "var(--color-ink-3)" }}>{R.winners.includes(mine) ? "Your team takes this one!" : "Not this time."}</p>}</div>}
-      {!host && pub.screen === "summary" && pub.summary && mine != null && <p className="text-center text-18 font-bold">{pub.summary.award[mine] > 0 ? `Your team: +${pub.summary.award[mine]}` : "No points for your team this time."}</p>}
-      {!host && pub.screen === "final" && pub.final && mine != null && <div className="text-center"><div className="eyebrow">Your team finished</div><div className="display text-52" style={{ color: "var(--color-gold)" }}>{["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"][pub.final.order.find((x) => x.team === mine)?.place ?? 0]}</div></div>}
-      {!host && (pub.screen === "intro") && <p className="text-center text-15 text-[var(--color-ink-2)]">Eyes on the TV. The host starts it.</p>}
+      {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}
+      {!host && sc === "reveal" && g && R && (<>
+        {g.key !== "majority" && <Big text={W.text} color={W.color} sub={mine != null ? yours(won) : undefined} />}
+        <Answer />
+        {g.key === "majority" && mine != null && <p className="text-center font-bold text-15" style={{ color: (R.right?.[mine] ?? 0) > 0 ? "var(--color-ok)" : "var(--color-ink-3)" }}><bdi>{T[mine].name}</bdi>: {R.right?.[mine] ?? 0} of {R.of?.[mine] ?? 0} right</p>}
+        <Rows />
+      </>)}
+      {!host && sc === "summary" && <Summary />}
+      {!host && sc === "final" && <Final />}
       {err && <p className="field-error text-center" role="alert">{err}</p>}
     </div>);
 }
