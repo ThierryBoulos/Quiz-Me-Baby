@@ -84,9 +84,9 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
       </div>
       {/* this game's points, under its name, in their own small line (a dot, the name, the points; on fire beside) */}
       {tv && inGame && (
-        <div className="hud-mini" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}`).join(", ")}`}>
-          <span>This game:</span>
-          {T.map((t, i) => <span key={i} className="flex items-center gap-1.5" style={{ ["--c" as string]: t.color }}><Dot t={i} color={t.color} size={14} /><span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
+        <div className="hud-mini game-line" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}`).join(", ")}`}>
+          <span>This game</span>
+          {T.map((t, i) => <span key={i} className="flex items-center gap-2" style={{ ["--c" as string]: t.color }}><Dot t={i} color={t.color} size={k > 5 ? 18 : 20} /><span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
             <b>{pc ? pct(g!.shares?.[i] ?? 0) : <Roll v={g!.pts[i]} />}</b>{pub.fire?.[i] && <span className="flame !mx-0" aria-label="on fire">🔥</span>}</span>)}
         </div>)}
       {/* the phone: whose side you're on, small, in the team's colour (the screen's glow is that colour too) */}
