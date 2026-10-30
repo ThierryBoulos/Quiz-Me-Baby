@@ -143,10 +143,18 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
       <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{g.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
-        <span className="sep text-[var(--color-ink-3)]">·</span>
-        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>Places pay {PLACE_PTS.slice(0, Math.min(3, pub.teams.length)).join(" · ")}{pub.teams.length > 3 ? " …" : ""}</span>
-        <span className="sep text-[var(--color-ink-3)]">·</span>
-        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{pub.teams.length} teams</span>
+        {/* sudden death pays no places: it's between the teams level at the top, for one point */}
+        {g.key === "sudden" ? (<>
+          <span className="sep text-[var(--color-ink-3)]">·</span>
+          <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{(g.only || []).length} teams level</span>
+          <span className="sep text-[var(--color-ink-3)]">·</span>
+          <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>+1 to the winner</span>
+        </>) : (<>
+          <span className="sep text-[var(--color-ink-3)]">·</span>
+          <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>Places pay {PLACE_PTS.slice(0, Math.min(3, pub.teams.length)).join(" · ")}{pub.teams.length > 3 ? " …" : ""}</span>
+          <span className="sep text-[var(--color-ink-3)]">·</span>
+          <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{pub.teams.length} teams</span>
+        </>)}
       </div>
       <div className="card w-full">
         <ol className="rules" style={tv ? { fontSize: compact ? 18 : 20, gap: compact ? 8 : 12 } : undefined}>

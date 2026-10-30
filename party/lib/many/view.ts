@@ -57,7 +57,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes); }
   }
   if (m && q && s.screen === "reveal") {
-    const w = legWinners(s), pl = { places: legPlaces(s), pts: legPoints(s) };
+    /* (sudden death pays the night one point, to the fastest right answer) */
+    const w = legWinners(s), places = legPlaces(s), pl = { places, pts: m.key === "sudden" ? places.map((p) => (p === 1 ? 1 : 0)) : legPoints(s) };
     if (m.key === "map") pub.reveal = { answer: q.question, notes: q.answer, typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (typedKey(m.key)) pub.reveal = { answer: q.answer, notes: q.notes || (m.key === "airport" ? [q.city, q.code].filter(Boolean).join(", ") : undefined), typed: s.typed, ok: s.ok, winners: w, ...pl,
       ...(m.key === "say" ? { why: s.why } : {}) };
