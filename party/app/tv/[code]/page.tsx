@@ -23,7 +23,6 @@ import { TvMany } from "@/components/many/TvMany";
 import { manyNotReady, teamCountOf, useTvMany } from "@/lib/many/useTvMany";
 import { MANY_MAX } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
-import { getSettings } from "@/lib/settings";
 
 /* Classic lives on this same site, at /classic (copied in at build time); from here it opens
    straight on its host setup, and its Back comes back to this lobby */
@@ -44,12 +43,10 @@ export default function TvRoom() {
   const lock = useTabLock(code, owner);
   const isTv = owner && lock.state === "mine";
 
-  /* more than two teams (a TV setting, off by default) runs its own game: the two-team one stands aside */
+  /* more than two teams (the lobby's Teams stepper, 3 to 8) runs its own game: the two-team one stands aside */
   const teamCount = teamCountOf(room), many = teamCount > 2 || room?.mode === "many";
   const { pub: own, exit, again, banner, lobbyNote, thin, resetPlayed } = useTvGame(code, isTv && !many, room, members);
   const M = useTvMany(code, isTv && many, room, members);
-  const [allowMany, setAllowMany] = useState(false);
-  useEffect(() => { const read = () => setAllowMany(getSettings().manyTeams); read(); window.addEventListener("qmb:settings", read); return () => window.removeEventListener("qmb:settings", read); }, []);
   /* the bank is getting thin: a pop-up in the lobby. "Not now" hides it until the next game */
   const [notNow, setNotNow] = useState(false);
   const status = room?.status;
@@ -163,9 +160,8 @@ export default function TvRoom() {
               {awake === false && <><br /><span className="text-16 text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
             </div>
             <div className="flex gap-3">
-              {/* more than two teams: only when the TV's setting allows it (Settings → Allow more than two teams).
-                  A stepper in the row's own pills: [−] 3 teams [+] */}
-              {isTv && (allowMany || teamCount > 2) && (
+              {/* how many teams, 2 to 8: a stepper in the row's own pills: [−] 3 teams [+] */}
+              {isTv && (
                 <div className="flex items-center gap-2" role="group" aria-label="How many teams">
                   <button className="btn btn-sm btn-ghost !px-0 w-11" aria-label="One team fewer" disabled={teamCount <= 2} onClick={() => void M.setTeamCount(teamCount - 1)}>−</button>
                   <span className="eyebrow text-14 whitespace-nowrap" aria-live="polite"><b className="display text-26 align-middle mr-1.5" style={{ color: "var(--color-gold)" }}>{teamCount}</b>teams</span>

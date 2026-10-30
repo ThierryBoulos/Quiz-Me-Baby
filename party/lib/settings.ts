@@ -18,11 +18,10 @@ export type Settings = {
   alternateFirst: boolean;    // alternate which team answers first each round
   imad: boolean;              // Imad comments on the game in a bubble on the TV (text only)
   flagAway: boolean;          // flag a phone that leaves the game screen during a question
-  manyTeams: boolean;         // the TV lobby offers more than two teams (3 to 8; always with a host)
 };
 export const DEFAULTS: Settings = { tQuestion: 60, tSteal: 30, tFriend: 30, tContest: T_OVERRULE, tSudden: T_SUDDEN_BUZZ,
   tMini: T_CLOSEST, tFlag: T_FLAG, tMap: T_MAP, tSay: T_SAY, tAuction: T_AUCTION, tPin: T_PIN, tAirport: T_AIRPORT, tMajority: T_MAJORITY, tDishStep: DISH_STEP, tDishType: T_DISH_TYPE,
-  tBattleHost: T_BATTLE_HOST, tBattleTyped: T_BATTLE_TYPED, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: true, flagAway: true, manyTeams: false };
+  tBattleHost: T_BATTLE_HOST, tBattleTyped: T_BATTLE_TYPED, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: true, flagAway: true };
 const KEY = "qmb.party.settings";
 /* Wave 2 changed the house timers (question 60→45, steal 30→20, overrule 15→8, Closest 90→60).
    A TV that saved its settings before keeps any timer it actually changed; one still on an old
