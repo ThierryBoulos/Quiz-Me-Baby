@@ -97,6 +97,8 @@ export function Ruler({ teams, ans, width }: { teams: RulerTeam[]; ans: number; 
             <span className="ruler-dot" style={{ left: x - 12, top: TY - 12 }}>{!two && t.letter}</span>
             <div ref={(el) => { refs.current[i] = el; }} className={"card-l " + (two ? "" : "sm")} style={{ left: a.x, top: ct }}>
               <span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
+              {/* who takes it, at a glance, however bunched the cards are */}
+              {t.win && <span className="trophy" role="img" aria-label="takes it">🏆</span>}
               {t.guess == null ? <span className="off">no answer</span> : <><span className="v display">{showNum(t.guess)}</span><span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off!)}</span></>}
             </div>
           </div>); })}

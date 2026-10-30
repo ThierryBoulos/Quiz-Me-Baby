@@ -169,7 +169,8 @@ export const closestCols = (pub: PubMany): Col[] => {
     sub: n == null ? "No answer" : off === 0 ? "Spot on!" : `Off by ${showNum(off ?? 0)}` }; });
 };
 
-/* ---- a reveal's rows: each team's line, in the order given (a side column on the TV, a list on a phone) ---- */
+/* ---- a reveal's rows: each team's line, in the order given (a side column on the TV, a list on a phone), the
+   ones who take it with a trophy ---- */
 export function RowsMany({ pub, order, right, size, label }: { pub: PubMany; order: number[]; right: (t: number) => ReactNode; size: Size; label?: (t: number) => ReactNode }) {
   const T = pub.teams, tv = size === "tv", dense = T.length > 4, W = pub.reveal?.winners || [];
   return (
@@ -178,6 +179,8 @@ export function RowsMany({ pub, order, right, size, label }: { pub: PubMany; ord
         <div key={t} role="listitem" className="flex items-center gap-3 min-w-0" style={{ opacity: W.length && !W.includes(t) ? 0.55 : 1 }}>
           <Dot t={t} color={T[t].color} size={tv ? (dense ? 16 : 20) : 14} />
           <span className="display truncate flex-1 text-left" style={{ fontSize: tv ? (dense ? 22 : 28) : 16, color: T[t].color }}><bdi>{T[t].name}</bdi>{label?.(t)}</span>
+          {/* who takes it: a trophy in a slot of its own, so a long name stops short of it and nothing moves */}
+          {W.length > 0 && <span className="shrink-0 text-center leading-none" style={{ width: tv ? (dense ? 26 : 32) : 20, fontSize: tv ? (dense ? 18 : 24) : 14 }} role={W.includes(t) ? "img" : undefined} aria-label={W.includes(t) ? "takes it" : undefined}>{W.includes(t) ? "🏆" : ""}</span>}
           <span className="display shrink-0 text-right" style={{ fontSize: tv ? (dense ? 24 : 32) : 18 }}>{right(t)}</span>
         </div>))}
     </div>);
