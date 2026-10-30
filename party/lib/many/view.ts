@@ -5,7 +5,7 @@ import { MANY_COLORS, MANY_TITLES, allIn, answered, distances, legWinners, miniO
 export type TeamPub = { name: string; captain: string; score: number; color: string };
 export type PubMany = {
   many: true; at?: number; step: number; screen: StateM["screen"];
-  teams: TeamPub[]; game?: { key: ManyKey; title: string; leg: number; of: number; wins: number[]; index: number; count: number };
+  teams: TeamPub[]; game?: { key: ManyKey; title: string; leg: number; of: number; wins: number[]; shares?: number[]; index: number; count: number };
   qid?: string; question?: string; flag?: string; options?: string[];
   pin?: { photo: string; credit: string; licence: string };
   deadline: number | null; left: number; sent: boolean[];
@@ -24,6 +24,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit,
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
   if (m) pub.game = { key: m.key, title: MANY_TITLES[m.key], leg: Math.min(m.i + 1, m.qs.length), of: m.qs.length, wins: [...m.wins], index: s.mi, count: s.minis.length };
+  /* Majority Rules: each team's share so far, for the tracker's "this game" line (the questions counted already) */
+  if (m && m.key === "majority" && pub.game) pub.game.shares = s.teams.map((_, t) => share(m, t));
   if (m && q && (s.screen === "q" || s.screen === "reveal")) {
     pub.qid = String(q.id ?? m.key + m.i);
     if (m.key === "flag") pub.flag = q.flag;

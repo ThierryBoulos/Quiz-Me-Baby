@@ -11,8 +11,10 @@ export type ManyKey = (typeof MANY_MINIS)[number];
 export const MANY_TITLES: Record<ManyKey, string> = { majority: "Majority Rules", flag: "Guess the Flag", closest: "Closest To Wins", pin: "Drop the Pin" };
 export const MANY_LEGS: Record<ManyKey, number> = { majority: 15, flag: 10, closest: 5, pin: 7 };
 export const MANY_MIN = 3, MANY_MAX = 8, MANY_PLAYERS = 60, MANY_PTS = 2;
-/* team colours: cyan and pink first, so they match the two-team game; a letter badge too (colour-blind) */
-export const MANY_COLORS = ["#31c9f7", "#ff4f8b", "#7ce35b", "#ff9a3c", "#a97cff", "#ffd23f", "#3ce0c2", "#ff6b6b"];
+/* team colours: Team A's cyan and Team B's pink exactly (--color-a, --color-b), then six more that sit apart
+   from each other and from the show's gold, the green of RIGHT and the red of WRONG; a letter in every dot too
+   (colour-blind). A canvas can't read CSS variables, so they're hex. */
+export const MANY_COLORS = ["#31c9f7", "#ff4d82", "#7ce35b", "#ff9a3c", "#a97cff", "#5b8cff", "#2dd4bf", "#e879f9"];
 export const LETTERS = "ABCDEFGH";
 export const defaultName = (t: number) => "Team " + LETTERS[t];
 
