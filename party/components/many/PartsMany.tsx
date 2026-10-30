@@ -34,13 +34,13 @@ export function takes(pub: PubMany): { text: string; color: string } {
   if (w.length === T.length) return { text: "Everyone takes it", color: "var(--color-gold)" };
   return { text: `${w.length} teams take it`, color: "var(--color-gold)" };
 }
-/* a game's result, in words: who came 1st and what it pays ("TEAM A +10", "2 TEAMS SHARE 1ST · +10 EACH") */
+/* a game's result, in words: who came 1st and what it pays ("TEAM A +10", "2 TEAMS SHARE 1ST, +10 EACH") */
 export function paid(pub: PubMany): { text: string; color: string } {
   const S = pub.summary, T = pub.teams;
   const top = (S?.places || []).map((p, t) => (p === 1 && (S?.award[t] ?? 0) > 0 ? t : -1)).filter((t) => t >= 0);
   if (!top.length) return { text: "Nobody scores", color: "var(--color-ink-2)" };
   if (top.length === 1) return { text: `${T[top[0]].name} +${S!.award[top[0]]}`, color: T[top[0]].color };
-  return { text: `${top.length > 2 ? `${top.length} teams` : top.map((t) => T[t].name).join(" & ")} share 1st · +${S!.award[top[0]]} each`, color: "var(--color-gold)" };
+  return { text: `${top.length > 2 ? `${top.length} teams` : top.map((t) => T[t].name).join(" & ")} share 1st, +${S!.award[top[0]]} each`, color: "var(--color-gold)" };
 }
 /* the teams in the order of a reveal: the nearest first, the ones with nothing at the end */
 export const byDistance = (pub: PubMany) => {

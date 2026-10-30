@@ -48,5 +48,5 @@ reveal pin 7 won by 4 | reveal | 26-21-15-15-22
 summary pin award 10,6,4,6,8 | summary | 36-27-19-21-30
 next game | final | 36-27-19-21-30
 final 1:Team A 2:Team E 3:Team B 4:Team D 5:Team C
-majority: Most right: P2, 13 of 15 · Wooden spoon: P7, 4 of 15
+majority: Most right: P2, 13 of 15. Wooden spoon: P7, 4 of 15.
 awards: Most questions won: Team A, 12 | Always the bridesmaid: Team B, 2nd 8 times | Best aim, Drop the Pin: Team A, 647 km off on average | Sharpest in Majority Rules: P2, 13 of 15 | Wooden spoon, Majority Rules: P7, 4 of 15

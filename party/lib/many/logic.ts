@@ -211,12 +211,14 @@ export function ranking(s: StateM): { team: number; place: number }[] {
   let place = 0, last = -1;
   return order.map((t, i) => { if (s.teams[t].score !== last) { place = i + 1; last = s.teams[t].score; } return { team: t, place }; });
 }
+/* names in a sentence: "Lea", "Lea & Omar", "Lea, Dana & Omar" */
+const andList = (L: string[]) => (L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join(""));
 /* Majority Rules: the sharpest player and the wooden spoon, over the game */
 export function mrLine(s: StateM): string {
   const all = Object.entries(s.who).filter(([, w]) => w.of > 0); if (all.length < 2) return "";
   const hi = Math.max(...all.map(([, w]) => w.r)), lo = Math.min(...all.map(([, w]) => w.r)), of = Math.max(...all.map(([, w]) => w.of));
-  const names = (v: number) => { const L = all.filter(([, w]) => w.r === v).map(([k]) => k); return L.length > 3 ? `${L.length} players` : L.join(" & "); };
-  return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of} · Wooden spoon: ${names(lo)}, ${lo} of ${of}`;
+  const names = (v: number) => { const L = all.filter(([, w]) => w.r === v).map(([k]) => k); return L.length > 3 ? `${L.length} players` : andList(L); };
+  return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of}. Wooden spoon: ${names(lo)}, ${lo} of ${of}.`;
 }
 
 /* ---- the end of the night (the two-team night's recap, for N teams): the award cards ---- */
@@ -241,7 +243,7 @@ export function recapMany(s: StateM): AwardM[] {
   const hi = Math.max(0, ...mr.map(([, w]) => w.r)), lo = Math.min(...mr.map(([, w]) => w.r)), of = Math.max(0, ...mr.map(([, w]) => w.of));
   const mrOn = mr.length >= 2 && hi > lo;
   if (mrOn) {
-    const at = (v: number) => mr.filter(([, w]) => w.r === v), names = (L: typeof mr) => (L.length > 3 ? `${L.length} players` : L.map(([k]) => k).join(" & "));
+    const at = (v: number) => mr.filter(([, w]) => w.r === v), names = (L: typeof mr) => (L.length > 3 ? `${L.length} players` : andList(L.map(([k]) => k)));
     const top = at(hi), low = at(lo), one = (L: typeof mr) => (L.length === 1 ? L[0][1].team : null);
     out.push({ t: "Sharpest in Majority Rules", who: `${names(top)}, ${hi} of ${of}`, team: one(top) });
     out.push({ t: "Wooden spoon, Majority Rules", who: `${names(low)}, ${lo} of ${of}`, team: one(low), note: spoonQuip(lo, of), spoon: true });

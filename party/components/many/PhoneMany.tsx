@@ -61,11 +61,11 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
     </div>);
   /* "That's your team!", under who takes it */
   const W = takes(pub);
-  /* your team's place on this leg, or in this game, and what it scores: "2nd · +7", "No points this time" */
+  /* your team's place on this leg, or in this game, and what it scores: "2nd, +7", "No points this time" */
   const mineLeg = () => { if (mine == null || !R?.places) return undefined; const p = R.places[mine], v = R.pts?.[mine] ?? 0;
-    return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{p == null || !v ? "No points this time." : `Your team: ${place(p)} · +${v}`}</span>; };
+    return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{p == null || !v ? "No points this time." : `Your team: ${place(p)}, +${v}`}</span>; };
   const mineGame = () => { if (mine == null || !pub.summary) return undefined; const S = pub.summary, v = S.award[mine];
-    return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{v ? `Your team: ${place(S.places[mine])} · +${v} to the night` : "No points for your team this game."}</span>; };
+    return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{v ? `Your team: ${place(S.places[mine])}, +${v} to the night` : "No points for your team this game."}</span>; };
 
   /* what's on screen, close up: the flag, the photo, the question, and the clock. It can't be selected or copied */
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
