@@ -47,11 +47,12 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     /* Drop the Pin: the photos, and the world map itself (big: from the intro on) */
     const pg = g.pinGame;
     if (pg && /^pin/.test(sc)) p.preload = { pins: pg.qs.slice(pg.i, all ? undefined : pg.i + 2).map((x: G) => x.photo).filter(Boolean), world: true }; }
-  /* the part of the night this screen is in (a new one starts where the score log is now), then every change of
-     score, for the recap's chart and lead changes */
-  { const seg = segOf(s), S = (s.segLog ||= []); if (seg && S[S.length - 1]?.label !== seg) S.push({ label: seg, at: s.scoreLog.length }); }
+  /* every change of score, for the recap's chart and lead changes; then the part of the night this screen is in (a
+     new one starts where the score log is now). The score first: a mini-game's points land as its result screen
+     gives way to the next part's, and they're the mini-game's */
   { const L = s.scoreLog, now: Two<number> = [g.teams[0].score, g.teams[1].score], last = L[L.length - 1];
     if (!last || last[0] !== now[0] || last[1] !== now[1]) L.push(now); }
+  { const seg = segOf(s), S = (s.segLog ||= []); if (seg && S[S.length - 1]?.label !== seg) S.push({ label: seg, at: s.scoreLog.length }); }
   if (s.screen === "final") p.recap = recap(s);
   /* on fire (29 Oct), and the glow between questions in the leader's colour: intros, reveals, summaries, the
      answer card and the round score; never while a clock runs or a question is up */
