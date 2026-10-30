@@ -143,7 +143,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
             : g.key === "closest" ? <Ruler ans={0} scale teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: pub.summary!.pts[i], win: pub.summary!.places[i] === 1 && pub.summary!.award[i] > 0, pts: pub.summary!.award[i] }))} />
             : <PinsMapMany pub={pub} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />}
           <div className={"display " + (dense ? "text-44" : "text-52")} style={{ color: paid(pub).color }}>{paid(pub).text}</div>
-          {pub.summary.line && <div className="text-22" style={{ color: "var(--color-gold)" }}>{pub.summary.line}</div>}
+          {pub.summary.line && <div className="text-18 max-w-[900px] truncate" style={{ color: "var(--color-gold)" }}><bdi>{pub.summary.line}</bdi></div>}
         </>)}
 
         {/* the end: "The winner", a beat, then the name slams down with a flash and a shockwave, and the confetti

@@ -168,7 +168,7 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
 /* ---- Majority Rules' result on the TV (the owner's idea, 30 Oct): a bar a team, as tall as its share right, in
    place order, growing up one after another; the share on top, the place, the name and what it pays under it ---- */
 export function BarsMany({ pub }: { pub: PubMany }) {
-  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 140 : 220;
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 140 : 150;
   const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
   return (
     <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Share right: " + order.map((t) => `${T[t].name} ${pct(S.shares?.[t] ?? 0)}`).join(", ")}>
@@ -218,13 +218,13 @@ export function FlagPoleMany({ pub }: { pub: PubMany }) {
    it in place order from the left, the taller the more points, the points in its head; the place, the team and what
    it pays the night under it; the trophy over the winner ---- */
 export function PinsMapMany({ pub, map }: { pub: PubMany; map?: ReactNode }) {
-  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = 1120, H = dense ? 300 : 350, ground = H - 78, best = Math.max(1, ...S.pts);
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = 1120, H = dense ? 300 : 310, ground = H - 78, best = Math.max(1, ...S.pts);
   const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), r = dense ? 26 : 34;
   return (
     <div className="relative rounded-[18px] overflow-hidden" style={{ width: W, height: H }} role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
       <div className="absolute inset-0 opacity-40" aria-hidden>{map}</div>
       <div className="absolute left-6 right-6 h-[2px]" style={{ top: ground, background: "rgba(255,255,255,.18)" }} aria-hidden />
-      {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1, x = ((j + 0.5) / k) * W, tall = 40 + (S.pts[t] / best) * (ground - 2 * r - 70);
+      {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1, x = ((j + 0.5) / k) * W, tall = 30 + (S.pts[t] / best) * (ground - 2 * r - 30 - 50);   /* the tallest head 50px below the top: room for the trophy */
         return (
           <div key={t} role="listitem" className="pin-stand absolute flex flex-col items-center" style={{ left: x - W / k / 2, width: W / k, top: 0, height: H, ["--c" as string]: T[t].color, animationDelay: j * 0.08 + "s", opacity: paid ? 1 : 0.5 }}>
             <div className="absolute flex flex-col items-center" style={{ top: ground - tall - 2 * r }}>
