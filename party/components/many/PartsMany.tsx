@@ -191,23 +191,23 @@ export function BarsMany({ pub }: { pub: PubMany }) {
    place order, the winner's at the top with the trophy; the longer the flag, the more points; each flag carries its
    place, the team and its points, and what the place pays the night beside it ---- */
 export function FlagPoleMany({ pub }: { pub: PubMany }) {
-  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, rowH = dense ? 36 : 50, best = Math.max(1, ...S.pts);
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, rowH = dense ? 30 : 46, best = Math.max(1, ...S.pts);
   const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
   return (
     <div className="relative flex justify-center w-full" role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
       <div className="relative pl-[26px] pt-[18px] pb-[26px]">
         {/* the pole and its gold finial */}
         <span className="flag-pole" aria-hidden /><span className="flag-finial" aria-hidden />
-        <ol className="flex flex-col" style={{ gap: dense ? 6 : 10 }}>
+        <ol className="flex flex-col" style={{ gap: dense ? 4 : 10 }}>
           {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
             <li key={t} role="listitem" className="flag-hoist flex items-center gap-4" style={{ animationDelay: (k - 1 - j) * 0.09 + "s" }}>
               <div className={"flag-cloth" + (lit ? " lit" : "")} style={{ ["--c" as string]: T[t].color, height: rowH, width: (dense ? 300 : 360) + (S.pts[t] / best) * (dense ? 330 : 380), opacity: paid ? 1 : 0.5 }}>
-                <span className="display leading-none" style={{ fontSize: dense ? 18 : 24 }}>{paid ? S.places[t] : "–"}</span>
-                <span className="truncate font-bold uppercase tracking-[.08em]" style={{ fontSize: dense ? 14 : 18 }}><bdi>{T[t].name}</bdi></span>
-                <span className="display leading-none ml-auto" style={{ fontSize: dense ? 24 : 32 }}>{S.pts[t]}</span>
+                <span className="display leading-none" style={{ fontSize: dense ? 16 : 24 }}>{paid ? S.places[t] : "–"}</span>
+                <span className="truncate font-bold uppercase tracking-[.08em]" style={{ fontSize: dense ? 13 : 18 }}><bdi>{T[t].name}</bdi></span>
+                <span className="display leading-none ml-auto" style={{ fontSize: dense ? 22 : 32 }}>{S.pts[t]}</span>
               </div>
-              {lit && <span className="leading-none" style={{ fontSize: dense ? 24 : 30 }} role="img" aria-label="takes it">🏆</span>}
-              <span className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
+              {lit && <span className="leading-none" style={{ fontSize: dense ? 22 : 30 }} role="img" aria-label="takes it">🏆</span>}
+              <span className="display leading-none" style={{ fontSize: dense ? 20 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
             </li>); })}
         </ol>
       </div>
@@ -218,7 +218,7 @@ export function FlagPoleMany({ pub }: { pub: PubMany }) {
    it in place order from the left, the taller the more points, the points in its head; the place, the team and what
    it pays the night under it; the trophy over the winner ---- */
 export function PinsMapMany({ pub, map }: { pub: PubMany; map?: ReactNode }) {
-  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = 1120, H = dense ? 330 : 360, ground = H - 78, best = Math.max(1, ...S.pts);
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = 1120, H = dense ? 300 : 350, ground = H - 78, best = Math.max(1, ...S.pts);
   const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), r = dense ? 26 : 34;
   return (
     <div className="relative rounded-[18px] overflow-hidden" style={{ width: W, height: H }} role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>

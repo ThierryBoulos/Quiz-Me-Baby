@@ -183,8 +183,9 @@ function fitView(pts: LatLon[], W: number, H: number, minKm: number): View {
 
 /* value: my pin; onChange: a pin dropped or moved (pick: this map takes pins). marks: what to show
    (the reveal); fly: fly in to them from the whole world. size: 1 on a phone, bigger on the TV */
-export function PinMap({ value, onChange, color = "#31c9f7", marks, fly, height, size = 1, interactive = true, tools = !!onChange, label: aria }:
-  { value?: LatLon | null; onChange?: (p: LatLon) => void; color?: string; marks?: Mark[]; fly?: boolean; height: number | string; size?: number; interactive?: boolean; tools?: boolean; label?: string }) {
+/* bare: the map alone, no scale bar (a backdrop, as behind Drop the Pin's many-teams result) */
+export function PinMap({ value, onChange, color = "#31c9f7", marks, fly, height, size = 1, interactive = true, tools = !!onChange, label: aria, bare }:
+  { value?: LatLon | null; onChange?: (p: LatLon) => void; color?: string; marks?: Mark[]; fly?: boolean; height: number | string; size?: number; interactive?: boolean; tools?: boolean; label?: string; bare?: boolean }) {
   const box = useRef<HTMLDivElement>(null), cv = useRef<HTMLCanvasElement>(null);
   const [lv, setLv] = useState<{ far?: Lvl; near?: Lvl }>({});
   const [failed, setFailed] = useState(false);
@@ -247,11 +248,11 @@ export function PinMap({ value, onChange, color = "#31c9f7", marks, fly, height,
       }
     }
     if (pin.current) { const [x, y] = at(pin.current); drawPin(ctx, x, y, color, k); }
-    scaleBar(ctx, v, k, font);
+    if (!bare) scaleBar(ctx, v, k, font);
     /* where the map is looking, and how close (for the browser tests, and a curious eye) */
     c.dataset.view = `${latOf(v.cy).toFixed(6)},${lonOf(v.cx).toFixed(6)},${(v.s / minS()).toFixed(3)},${L === lv.near ? "near" : L ? "far" : "none"}`;
     c.dataset.pin = pin.current ? `${pin.current.lat.toFixed(6)},${pin.current.lon.toFixed(6)}` : "";
-  }, [lv, marks, color, size]);
+  }, [lv, marks, color, size, bare]);
   /* (animations and the reveal's fly-in started before the map arrived call the latest drawing) */
   const drawRef = useRef(draw);
   drawRef.current = draw;
