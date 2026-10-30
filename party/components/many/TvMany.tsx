@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock } from "../Clock";
 import { Confetti, FlagImg, PinPhoto } from "../GameParts";
-import { ImadBubble } from "../TvGame";
 import { PinMap } from "../PinMap";
 import { showKm, showNum } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
@@ -40,7 +39,6 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
     /* nothing on the TV can be selected or copied */
     <div className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       <HudMany pub={pub} size="tv" code={join?.code} />
-      <ImadBubble imad={pub.imad} cls="many" />
 
       <div className="flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}
@@ -193,6 +191,13 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
 /* every team: locked in, or still thinking (the two-team "Team A: thinking…", for N teams: a row that wraps, or a column) */
 function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
   const T = pub.teams, dense = T.length > 4, pin = pub.game?.key === "pin", mr = pub.game?.key === "majority";
+  /* five teams or more: one row of lettered dots, lit with a tick when the team is in (two rows of names were too much) */
+  if (dense && !column) return (
+    <div className="flex flex-wrap justify-center gap-x-5 gap-y-1" role="status" aria-label={T.map((t, i) => `${t.name} ${pub.sent[i] ? "in" : "not yet"}`).join(", ")}>
+      {T.map((t, i) => (
+        <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ opacity: pub.sent[i] ? 1 : 0.4, color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
+          <Dot t={i} color={t.color} size={22} />{pub.sent[i] ? "✓" : "…"}</span>))}
+    </div>);
   return (
     <div className={"flex " + (column ? "flex-col items-center gap-0.5" : "flex-wrap justify-center gap-y-0.5 " + (dense ? "gap-x-5" : "gap-x-10"))} role="status" style={{ maxWidth: 1168 }}>{T.map((t, i) => (
       <span key={i} className="font-bold whitespace-nowrap" style={{ fontSize: column && dense ? 20 : 22, color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>

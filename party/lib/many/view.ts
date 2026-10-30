@@ -1,7 +1,6 @@
 /* MANY TEAMS: what the TV publishes (PubMany, for every phone) and what only the host's phone gets
    (the answer and every team's typed answer). Built from the night's state, never stored. */
-import { MANY_COLORS, MANY_TITLES, allIn, answered, distances, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, type AwardM, type LatLon, type ManyKey, type StateM } from "./logic";
-import { fireOfMany } from "./imad";
+import { MANY_COLORS, MANY_TITLES, allIn, answered, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, type AwardM, type LatLon, type ManyKey, type StateM } from "./logic";
 
 export type TeamPub = { name: string; captain: string; score: number; color: string };
 export type PubMany = {
@@ -21,7 +20,6 @@ export type PubMany = {
   summary?: { wins: number[]; pts: number[]; shares?: number[]; places: number[]; award: number[]; line?: string };
   final?: { order: { team: number; place: number }[]; log: number[][]; awards: AwardM[]; lines: string[] };
   fire?: boolean[];                                // three legs in a row at 1st, this game
-  imad?: { id: number; text: string; mood?: string };
   toast: { id: number; text: string } | null; exit?: boolean; ack?: Record<string, Record<string, string>>;
 };
 export type SecretMany = { answer?: string; notes?: string; typed?: (string | null)[]; nums?: (number | null)[] };
@@ -53,7 +51,6 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     places: m.places || s.teams.map(() => s.teams.length), award: m.award || [], line: m.key === "majority" ? mrLine(s) || undefined : undefined };
   if (s.screen === "final") pub.final = { order: ranking(s), log: s.log, ...recapMany(s) };
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
-  if (s.imad) pub.imad = s.imad;
   /* the host's phone: the answer while it's up, and what every captain typed */
   const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal") ? { answer: String(q.answer), notes: q.notes, typed: s.typed, nums: s.nums } : {};
   void allIn;

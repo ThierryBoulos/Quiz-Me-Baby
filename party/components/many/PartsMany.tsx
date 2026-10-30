@@ -57,8 +57,9 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
     : null;
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
-  /* this game's tally: not before it starts, and not on its result (the board in the middle says it, bigger) */
-  const tally = g && pub.screen !== "intro" && pub.screen !== "final" && pub.screen !== "summary" ? (pc ? g.shares || g.wins.map(() => 0) : g.pts) : null;
+  /* this game's tally: on a reveal only (not while a question is up, the owner found it crowded the question; not on
+     the result, where the board in the middle says it, bigger) */
+  const tally = g && pub.screen === "reveal" ? (pc ? g.shares || g.wins.map(() => 0) : g.pts) : null;
   return (
     <div className={`hud ${size} many ${packing(k)}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, top middle, where the two-team TV has it */}

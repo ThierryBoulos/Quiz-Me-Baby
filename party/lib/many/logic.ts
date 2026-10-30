@@ -46,8 +46,6 @@ export type StateM = {
   toast: { id: number; text: string } | null; toastN: number;
   exit?: boolean; log: number[][];            // the scores after each game, for the final chart
   stats: Stats;
-  /* Imad, the MC (lib/many/imad.ts): his line, the lines he's used, the moments said once, who led */
-  imad?: { id: number; text: string; mood?: string }; imadN?: number; imadUsed?: Record<string, number[]>; imadOnce?: Record<string, boolean>; leader?: number | null; fireWas?: boolean[];
 };
 export type Timers = { flag: number; closest: number; pin: number; majority: number };
 
@@ -136,6 +134,8 @@ export const distances = (s: StateM): (number | null)[] => {
   const m = miniOf(s), q = qOf(s); if (!m || !q) return [];
   return m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q)) : null)) : [];
 };
+/* on fire: 1st three legs in a row in this game */
+export const fireOfMany = (s: StateM): boolean[] => s.teams.map((_, i) => (s.stats?.run?.[i] ?? 0) >= 3);
 /* places by a key, lower better (null: no place); level keys share the better place (1, 1, 3) */
 export function placesBy(keys: (number | null)[]): (number | null)[] {
   return keys.map((x) => (x == null ? null : 1 + keys.filter((y) => y != null && y < x - 1e-9).length));

@@ -636,8 +636,7 @@ function NextHint({ pub }: { pub: Pub }) {
 
 /* Imad's line: his face and a speech bubble, up top, for as long as it takes to read (Classic's #hostBubble) */
 /* wait: on a reveal with a drumroll he speaks on its hit, not before it (he'd give the answer away) */
-/* cls: where it sits ("many": bottom left, since eight teams fill the top) */
-export function ImadBubble({ imad, wait = 0, cls = "" }: { imad?: Pub["imad"]; wait?: number; cls?: string }) {
+function ImadBubble({ imad, wait = 0 }: { imad?: Pub["imad"]; wait?: number }) {
   const [on, setOn] = useState<number | null>(null);
   const id = imad?.id ?? null, len = imad?.text.length ?? 0;
   const delay = useRef(wait);
@@ -650,7 +649,7 @@ export function ImadBubble({ imad, wait = 0, cls = "" }: { imad?: Pub["imad"]; w
   }, [id, len]);
   if (!imad || on !== imad.id) return null;
   return (
-    <div className={"imad-bubble" + (imad.mood ? " " + imad.mood : "") + (cls ? " " + cls : "")} role="status" aria-live="polite" key={imad.id}>
+    <div className={"imad-bubble" + (imad.mood ? " " + imad.mood : "")} role="status" aria-live="polite" key={imad.id}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/imad.webp" alt="" />
       <div className="hb-text">{imad.text}</div>
