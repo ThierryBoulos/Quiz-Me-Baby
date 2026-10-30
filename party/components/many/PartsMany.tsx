@@ -235,7 +235,8 @@ export function DeparturesMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k, false);
   const status = (t: number) => (S.award[t] <= 0 ? "Cancelled" : S.places[t] === 1 ? "Boarding" : S.places[t] === k ? "Delayed" : "On time");
   return (
-    <div className="board" style={{ fontSize: dense ? 16 : 22, maxWidth: dense ? 900 : 860 }} role="table" aria-label={"Departures: " + order.map((t) => `${T[t].name} ${S.pts[t]} points`).join(", ")}>
+    /* eight flights fit under the tracker a size down, rows tighter */
+    <div className={"board" + (dense ? " dense" : "")} style={{ fontSize: dense ? 15 : 22, maxWidth: dense ? 820 : 860 }} role="table" aria-label={"Departures: " + order.map((t) => `${T[t].name} ${S.pts[t]} points`).join(", ")}>
       <div className="board-title" style={{ fontSize: "1.2em" }}>
         <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg>
         Departures · tonight&rsquo;s result
