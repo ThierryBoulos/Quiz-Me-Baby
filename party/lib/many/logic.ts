@@ -18,7 +18,7 @@ export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closes
 export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
 export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Question round", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
   closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish" };
-export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 6, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5 };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
 export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "sudden"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
@@ -29,6 +29,8 @@ export const titleOf = (minis: { key: ManyKey }[], i: number) => {
   return key === "quiz" && rounds > 1 ? `Question round ${minis.slice(0, i + 1).filter((m) => m.key === "quiz").length}` : MANY_TITLES[key];
 };
 export const MANY_MIN = 3, MANY_MAX = 8, MANY_PLAYERS = 60;
+/* question rounds (the owner, 30 Oct): up to six, each two themes of two questions; up to six themes for the night */
+export const MANY_ROUNDS = 6, MANY_THEMES = 6;
 /* what a game's places pay the night (1st, 2nd, ...); fewer teams take the top of the same table */
 export const PLACE_PTS = [10, 8, 6, 5, 4, 3, 2, 1];
 /* team colours: Team A's cyan and Team B's pink exactly (--color-a, --color-b), then six more that sit apart

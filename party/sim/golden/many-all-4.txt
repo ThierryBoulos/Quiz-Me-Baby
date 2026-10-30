@@ -3,104 +3,100 @@ reveal quiz 1 won by 3 | reveal | 0-0-0-0
 reveal quiz 2 won by - | reveal | 0-0-0-0
 reveal quiz 3 won by 0,2,3 | reveal | 0-0-0-0
 reveal quiz 4 won by 0 | reveal | 0-0-0-0
-reveal quiz 5 won by 2 | reveal | 0-0-0-0
-reveal quiz 6 won by 1 | reveal | 0-0-0-0
-summary quiz award 10,5,8,6 | summary | 10-5-8-6
-next game | intro | 10-5-8-6
-start majority | q | 10-5-8-6
-reveal majority 1 won by - | reveal | 10-5-8-6
-reveal majority 2 won by - | reveal | 10-5-8-6
-reveal majority 3 won by - | reveal | 10-5-8-6
-reveal majority 4 won by - | reveal | 10-5-8-6
-reveal majority 5 won by - | reveal | 10-5-8-6
-reveal majority 6 won by - | reveal | 10-5-8-6
-reveal majority 7 won by - | reveal | 10-5-8-6
-reveal majority 8 won by - | reveal | 10-5-8-6
-reveal majority 9 won by - | reveal | 10-5-8-6
-reveal majority 10 won by - | reveal | 10-5-8-6
-reveal majority 11 won by - | reveal | 10-5-8-6
-reveal majority 12 won by - | reveal | 10-5-8-6
-reveal majority 13 won by - | reveal | 10-5-8-6
-reveal majority 14 won by - | reveal | 10-5-8-6
-reveal majority 15 won by - | reveal | 10-5-8-6
-summary majority award 6,8,5,10 | summary | 16-13-13-16
-next game | intro | 16-13-13-16
-start flag | q | 16-13-13-16
-reveal flag 1 won by 0,1,2 | reveal | 16-13-13-16
-reveal flag 2 won by - | reveal | 16-13-13-16
-reveal flag 3 won by 1,3 | reveal | 16-13-13-16
-reveal flag 4 won by 0 | reveal | 16-13-13-16
-reveal flag 5 won by 1 | reveal | 16-13-13-16
-reveal flag 6 won by 3 | reveal | 16-13-13-16
-reveal flag 7 won by 0,1 | reveal | 16-13-13-16
-reveal flag 8 won by - | reveal | 16-13-13-16
-reveal flag 9 won by 0 | reveal | 16-13-13-16
-reveal flag 10 won by 1 | reveal | 16-13-13-16
-summary flag award 8,10,5,6 | summary | 24-23-18-22
-next game | intro | 24-23-18-22
-start airport | q | 24-23-18-22
-reveal airport 1 won by 0,3 | reveal | 24-23-18-22
-reveal airport 2 won by 0,3 | reveal | 24-23-18-22
-reveal airport 3 won by 1,2 | reveal | 24-23-18-22
-reveal airport 4 won by 1,3 | reveal | 24-23-18-22
-reveal airport 5 won by 1 | reveal | 24-23-18-22
-reveal airport 6 won by - | reveal | 24-23-18-22
-summary airport award 6,10,5,8 | summary | 30-33-23-30
-next game | intro | 30-33-23-30
-start map | q | 30-33-23-30
-reveal map 1 won by 0,2 | reveal | 30-33-23-30
-reveal map 2 won by 0,1,2,3 | reveal | 30-33-23-30
-reveal map 3 won by 1,2,3 | reveal | 30-33-23-30
-reveal map 4 won by 0,2 | reveal | 30-33-23-30
-reveal map 5 won by 1,2,3 | reveal | 30-33-23-30
-reveal map 6 won by - | reveal | 30-33-23-30
-summary map award 8,6,10,5 | summary | 38-39-33-35
-next game | intro | 38-39-33-35
-start quiz | q | 38-39-33-35
-reveal quiz 1 won by 0,2 | reveal | 38-39-33-35
-reveal quiz 2 won by 0 | reveal | 38-39-33-35
-reveal quiz 3 won by 1,3 | reveal | 38-39-33-35
-reveal quiz 4 won by 0,3 | reveal | 38-39-33-35
-reveal quiz 5 won by 0,3 | reveal | 38-39-33-35
-reveal quiz 6 won by 0,1 | reveal | 38-39-33-35
-summary quiz award 10,6,5,8 | summary | 48-45-38-43
-next game | intro | 48-45-38-43
-start closest | q | 48-45-38-43
-reveal closest 1 won by 3 | reveal | 48-45-38-43
-reveal closest 2 won by 1 | reveal | 48-45-38-43
-reveal closest 3 won by 1 | reveal | 48-45-38-43
-reveal closest 4 won by 3 | reveal | 48-45-38-43
-reveal closest 5 won by 2 | reveal | 48-45-38-43
-summary closest award 6,5,8,10 | summary | 54-50-46-53
-next game | intro | 54-50-46-53
-start pin | q | 54-50-46-53
-reveal pin 1 won by 1 | reveal | 54-50-46-53
-reveal pin 2 won by 2 | reveal | 54-50-46-53
-reveal pin 3 won by 2 | reveal | 54-50-46-53
-reveal pin 4 won by 0 | reveal | 54-50-46-53
-reveal pin 5 won by 1 | reveal | 54-50-46-53
-reveal pin 6 won by 1 | reveal | 54-50-46-53
-reveal pin 7 won by 2 | reveal | 54-50-46-53
-summary pin award 5,10,10,6 | summary | 59-60-56-59
-next game | intro | 59-60-56-59
-start say | q | 59-60-56-59
-reveal say 1 won by 0 | reveal | 59-60-56-59
-reveal say 2 won by - | reveal | 59-60-56-59
-reveal say 3 won by - | reveal | 59-60-56-59
-reveal say 4 won by 0 | reveal | 59-60-56-59
-reveal say 5 won by 0,2,3 | reveal | 59-60-56-59
-reveal say 6 won by 3 | reveal | 59-60-56-59
-summary say award 10,0,6,8 | summary | 69-60-62-67
-next game | intro | 69-60-62-67
-start dish | q | 69-60-62-67
-reveal dish 1 won by 2 | reveal | 69-60-62-67
-reveal dish 2 won by - | reveal | 69-60-62-67
-reveal dish 3 won by 1 | reveal | 69-60-62-67
-reveal dish 4 won by 2 | reveal | 69-60-62-67
-reveal dish 5 won by 0 | reveal | 69-60-62-67
-summary dish award 8,8,10,0 | summary | 77-68-72-67
-next game | final | 77-68-72-67
+summary quiz award 10,0,6,8 | summary | 10-0-6-8
+next game | intro | 10-0-6-8
+start majority | q | 10-0-6-8
+reveal majority 1 won by - | reveal | 10-0-6-8
+reveal majority 2 won by - | reveal | 10-0-6-8
+reveal majority 3 won by - | reveal | 10-0-6-8
+reveal majority 4 won by - | reveal | 10-0-6-8
+reveal majority 5 won by - | reveal | 10-0-6-8
+reveal majority 6 won by - | reveal | 10-0-6-8
+reveal majority 7 won by - | reveal | 10-0-6-8
+reveal majority 8 won by - | reveal | 10-0-6-8
+reveal majority 9 won by - | reveal | 10-0-6-8
+reveal majority 10 won by - | reveal | 10-0-6-8
+reveal majority 11 won by - | reveal | 10-0-6-8
+reveal majority 12 won by - | reveal | 10-0-6-8
+reveal majority 13 won by - | reveal | 10-0-6-8
+reveal majority 14 won by - | reveal | 10-0-6-8
+reveal majority 15 won by - | reveal | 10-0-6-8
+summary majority award 5,10,8,6 | summary | 15-10-14-14
+next game | intro | 15-10-14-14
+start flag | q | 15-10-14-14
+reveal flag 1 won by 0 | reveal | 15-10-14-14
+reveal flag 2 won by - | reveal | 15-10-14-14
+reveal flag 3 won by 0,2 | reveal | 15-10-14-14
+reveal flag 4 won by - | reveal | 15-10-14-14
+reveal flag 5 won by 1,3 | reveal | 15-10-14-14
+reveal flag 6 won by 0 | reveal | 15-10-14-14
+reveal flag 7 won by 1 | reveal | 15-10-14-14
+reveal flag 8 won by 3 | reveal | 15-10-14-14
+reveal flag 9 won by 0,1 | reveal | 15-10-14-14
+reveal flag 10 won by - | reveal | 15-10-14-14
+summary flag award 10,8,5,6 | summary | 25-18-19-20
+next game | intro | 25-18-19-20
+start airport | q | 25-18-19-20
+reveal airport 1 won by 0 | reveal | 25-18-19-20
+reveal airport 2 won by 1 | reveal | 25-18-19-20
+reveal airport 3 won by 0,3 | reveal | 25-18-19-20
+reveal airport 4 won by 0,3 | reveal | 25-18-19-20
+reveal airport 5 won by 1,2 | reveal | 25-18-19-20
+reveal airport 6 won by 1,3 | reveal | 25-18-19-20
+summary airport award 10,10,5,6 | summary | 35-28-24-26
+next game | intro | 35-28-24-26
+start map | q | 35-28-24-26
+reveal map 1 won by 1 | reveal | 35-28-24-26
+reveal map 2 won by - | reveal | 35-28-24-26
+reveal map 3 won by 0,2 | reveal | 35-28-24-26
+reveal map 4 won by 0,1,2,3 | reveal | 35-28-24-26
+reveal map 5 won by 1,2,3 | reveal | 35-28-24-26
+reveal map 6 won by 0,2 | reveal | 35-28-24-26
+summary map award 10,8,8,5 | summary | 45-36-32-31
+next game | intro | 45-36-32-31
+start quiz | q | 45-36-32-31
+reveal quiz 1 won by 1,2,3 | reveal | 45-36-32-31
+reveal quiz 2 won by - | reveal | 45-36-32-31
+reveal quiz 3 won by 0,2 | reveal | 45-36-32-31
+reveal quiz 4 won by 0 | reveal | 45-36-32-31
+summary quiz award 10,6,8,5 | summary | 55-42-40-36
+next game | intro | 55-42-40-36
+start closest | q | 55-42-40-36
+reveal closest 1 won by 1 | reveal | 55-42-40-36
+reveal closest 2 won by 0 | reveal | 55-42-40-36
+reveal closest 3 won by 0 | reveal | 55-42-40-36
+reveal closest 4 won by 2 | reveal | 55-42-40-36
+reveal closest 5 won by 3 | reveal | 55-42-40-36
+summary closest award 10,5,6,8 | summary | 65-47-46-44
+next game | intro | 65-47-46-44
+start pin | q | 65-47-46-44
+reveal pin 1 won by 3 | reveal | 65-47-46-44
+reveal pin 2 won by 0 | reveal | 65-47-46-44
+reveal pin 3 won by 1 | reveal | 65-47-46-44
+reveal pin 4 won by 1 | reveal | 65-47-46-44
+reveal pin 5 won by 1 | reveal | 65-47-46-44
+reveal pin 6 won by 1 | reveal | 65-47-46-44
+reveal pin 7 won by 3 | reveal | 65-47-46-44
+summary pin award 6,10,8,6 | summary | 71-57-54-50
+next game | intro | 71-57-54-50
+start say | q | 71-57-54-50
+reveal say 1 won by 1 | reveal | 71-57-54-50
+reveal say 2 won by 0,2 | reveal | 71-57-54-50
+reveal say 3 won by 0,1 | reveal | 71-57-54-50
+reveal say 4 won by - | reveal | 71-57-54-50
+reveal say 5 won by 0 | reveal | 71-57-54-50
+reveal say 6 won by 1 | reveal | 71-57-54-50
+summary say award 10,10,6,0 | summary | 81-67-60-50
+next game | intro | 81-67-60-50
+start dish | q | 81-67-60-50
+reveal dish 1 won by 0 | reveal | 81-67-60-50
+reveal dish 2 won by 1 | reveal | 81-67-60-50
+reveal dish 3 won by 0 | reveal | 81-67-60-50
+reveal dish 4 won by 0 | reveal | 81-67-60-50
+reveal dish 5 won by - | reveal | 81-67-60-50
+summary dish award 10,8,0,0 | summary | 91-75-60-50
+next game | final | 91-75-60-50
 games: Question round 1, Majority Rules, Guess the Flag, Guess the Airport, Guess the Map, Question round 2, Closest To Wins, Drop the Pin, Don't Say the Same as Me, Guess the Cocktail or Dish
-final 1:Team A 2:Team C 3:Team B 4:Team D
-majority: Most right: P11, 12 of 15. Wooden spoon: P10, 3 of 15.
-awards: Most questions won: Team A, 21 | Always the bridesmaid: Team D, 2nd 14 times | Best aim, Drop the Pin: Team B, 605 km off on average | Sharpest in Majority Rules: P11, 12 of 15 | Wooden spoon, Majority Rules: P10, 3 of 15
+final 1:Team A 2:Team B 3:Team C 4:Team D
+majority: Most right: P5, 11 of 15. Wooden spoon: P4, 4 of 15.
+awards: Most questions won: Team A, 23 | Always the bridesmaid: Team C, 2nd 14 times | Best aim, Drop the Pin: Team B, 519 km off on average | Sharpest in Majority Rules: P5, 11 of 15 | Wooden spoon, Majority Rules: P4, 4 of 15

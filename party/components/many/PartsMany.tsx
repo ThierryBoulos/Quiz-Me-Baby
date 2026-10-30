@@ -118,7 +118,9 @@ function rules(pub: PubMany): string[] {
     case "pin": return [
       `A photo of a landmark goes up. All ${k} captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better.`,
       each("by the kilometre"), pay];
-    case "quiz": return [`${n} questions, any theme. All ${k} captains type their answer at the same time.`, fastest, pay];
+    case "quiz": { const th = g.themes || [];
+      return [th.length >= 2 ? `Two questions on ${th[0]}, then two on ${th[1]}.` : th.length ? `${n} questions on ${th[0]}.` : `${n} questions.`,
+        `All ${k} captains type their answer at the same time.`, fastest, pay]; }
     case "airport": return [`A departures board goes up. All ${k} captains type which airport it is: its name or its city.`, fastest, pay];
     case "map": return [`A world map goes up with some countries lit. All ${k} captains type what they have in common.`, fastest, pay];
     case "say": return [

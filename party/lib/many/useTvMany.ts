@@ -12,7 +12,7 @@ import { cap1, type Member, type Room } from "../room";
 import { useInbox } from "../tv/useInbox";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishRight, dishShown, flip, lineup, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishRight, dishShown, flip, lineup, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 
 const SHAPE = 1;
@@ -97,8 +97,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         if (why) { await sb().from("rooms").update({ state: { ...room.state, note: { text: why, at: Date.now() } } }).eq("code", code); return; }
         const cfg = (a.payload.cfg || {}) as G;
         const picked = (Array.isArray(cfg.minis) ? cfg.minis : []).filter((x: string) => (MANY_MINIS as readonly string[]).includes(x)) as ManyKey[];
-        /* the question rounds: how many (1 to 3), spread through the night */
-        const rounds = picked.includes("quiz") ? Math.max(1, Math.min(3, Math.floor(Number(cfg.rounds) || 1))) : 0;
+        /* the question rounds: how many (1 to 6), spread through the night */
+        const rounds = picked.includes("quiz") ? Math.max(1, Math.min(MANY_ROUNDS, Math.floor(Number(cfg.rounds) || 1))) : 0;
         const keys = lineup(rounds, picked.filter((x) => x !== "quiz"));
         if (!keys.length) { await sb().from("rooms").update({ state: { ...room.state, note: { text: "Pick at least one game.", at: Date.now() } } }).eq("code", code); return; }
         let b: Bank;
@@ -112,14 +112,17 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
             airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0,
             majority: (q: G) => q.type === "majority" && Array.isArray(q.options) && q.options.length === 4 && q.options.includes(q.answer) } });
         const lv = (x: unknown, all: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((y) => all.includes(y)); return v.length ? v : dflt; };
-        /* the question rounds come from the two-team rounds' pairs, three pairs a round, every theme in the mix
-           but the host's own (a captain can't know the host's answers here) */
-        const themes = [...new Set(b.bank.filter((q: G) => q.type === "standard" && q.theme && !HOST_ONLY_THEMES.includes(q.theme)).map((q: G) => q.theme as string))];
+        /* the question rounds come from the two-team rounds' pairs: a pair is a theme's two questions, a round two
+           pairs (two themes), the host's themes in turn (up to six); none picked, any theme but the host's own */
+        const every = [...new Set(b.bank.filter((q: G) => q.type === "standard" && q.theme && !HOST_ONLY_THEMES.includes(q.theme)).map((q: G) => q.theme as string))];
+        const chosen = (Array.isArray(cfg.themes) ? cfg.themes : []).filter((t: string) => every.includes(t)).slice(0, MANY_THEMES);
+        const themes = chosen.length ? chosen : every;
         const quizLevels = lv(cfg.quizLevels, ["easy", "medium", "hard", "expert"], ["easy", "medium", "hard"]);
         /* (three pairs more than the rounds take: held back for sudden death) */
-        const g = dealer.buildGame({ standard: true, rounds: (rounds + 1) * Math.ceil(MANY_LEGS.quiz / 2), themes, difficulty: quizLevels.join("+"),
+        const g = dealer.buildGame({ standard: true, rounds: rounds * Math.ceil(MANY_LEGS.quiz / 2) + 3, themes, difficulty: quizLevels.join("+"),
           minis: keys.map((x) => (x === "say" ? "saysame" : x)), picks: {}, themeDiff: {},
-          mapLevels: QMB.MAP_ORDER, dishLevels: ["c-medium", "d-medium"], airportLevels: QMB.AIRPORT_ORDER,
+          mapLevels: lv(cfg.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), airportLevels: lv(cfg.airportLevels, QMB.AIRPORT_ORDER, QMB.AIRPORT_ORDER),
+          dishLevels: lv(cfg.dishLevels, ["c-easy", "c-medium", "c-hard", "d-easy", "d-medium", "d-hard"], ["c-medium", "d-medium"]),
           flagLevels: lv(cfg.flagLevels, QMB.FLAG_LEVEL_KEYS, ["veasy", "easy", "medium", "hard"]), pinLevels: lv(cfg.pinLevels, QMB.PIN_ORDER, QMB.PIN_ORDER),
           majorityLevels: lv(cfg.majorityLevels, QMB.MAJORITY_ORDER, QMB.MAJORITY_ORDER),
           teamA: { name: "A", captain: "", players: "" }, teamB: { name: "B", captain: "", players: "" },

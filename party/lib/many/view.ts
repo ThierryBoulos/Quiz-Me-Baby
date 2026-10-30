@@ -9,7 +9,8 @@ export type PubMany = {
   teams: TeamPub[];
   /* this game: legs taken, its place points so far (this leg's counted from its reveal), Majority Rules' shares */
   game?: { key: ManyKey; title: string; leg: number; of: number; wins: number[]; pts: number[]; shares?: number[]; index: number; count: number;
-    only?: number[] };                            // sudden death: the teams level at the top, the only ones who answer
+    only?: number[];                              // sudden death: the teams level at the top, the only ones who answer
+    themes?: string[] };                          // a question round: its themes, in the order they come
   qid?: string; question?: string; flag?: string; options?: string[];
   pin?: { photo: string; credit: string; licence: string };
   /* Guess the Airport: the board (its name and code only at the reveal); Guess the Map: the map; the Cocktail or
@@ -40,7 +41,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
   const now = m && m.key !== "majority" && s.screen === "reveal" ? legPoints(s) : null;
   if (m) pub.game = { key: m.key, title: titleOf(s.minis, s.mi), leg: Math.min(m.i + 1, m.qs.length), of: m.qs.length, wins: [...m.wins],
-    pts: m.pts.map((p, t) => p + (now ? now[t] : 0)), index: s.mi, count: s.minis.filter((x) => x.key !== "sudden").length, ...(m.only ? { only: m.only } : {}) };
+    pts: m.pts.map((p, t) => p + (now ? now[t] : 0)), index: s.mi, count: s.minis.filter((x) => x.key !== "sudden").length, ...(m.only ? { only: m.only } : {}),
+    ...(m.key === "quiz" ? { themes: [...new Set(m.qs.map((q) => String(q.theme || "")).filter(Boolean))] } : {}) };
   /* Majority Rules: each team's share so far, for the tracker's "this game" line (the questions counted already) */
   if (m && m.key === "majority" && pub.game) pub.game.shares = s.teams.map((_, t) => share(m, t));
   if (m && q && (s.screen === "q" || s.screen === "reveal")) {
