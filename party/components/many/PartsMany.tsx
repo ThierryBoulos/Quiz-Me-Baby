@@ -130,8 +130,10 @@ function rules(pub: PubMany): string[] {
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
       return [`${names} finished the night level at the top.`, "One question at a time, and only they answer, on the captain's phone. The fastest right answer wins the night.", "Nobody right: another question."]; }
     case "dish": return [
-      `The ingredients of a cocktail or a dish come up one at a time. Any captain can guess, any time.`,
-      `One guess a team per recipe: a wrong one puts your team out of it. The first right answer ends it and scores ${k}.`, pay];
+      "A recipe goes up one ingredient at a time, the giveaway last. Which cocktail or dish is it?",
+      "Captains: as soon as you know it, type it and send. Your team gets one guess per recipe.",
+      `Right: your team wins the recipe and scores ${k}, and it stops there for everyone.`,
+      "Wrong: your team is out of this recipe. The others keep going.", pay];
   }
 }
 /* compact: the TV's Majority Rules intro, which shares the screen with the QR code */

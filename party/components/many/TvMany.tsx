@@ -81,7 +81,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
               <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{g.key === "airport" ? "Which airport?" : "What do they have in common?"}</div>
               <Clock deadline={pub.deadline} left={pub.left} size={120} />
-              <Sent pub={pub} column />
+              <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
         {/* the Cocktail or Dish: the ingredients come up one by one; a team that guessed wrong is out of this one */}
@@ -95,7 +95,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
               <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}?</div>
               <div className="text-22 text-[var(--color-ink-2)]"><b>{pub.dish.ings.length}</b> of {pub.dish.n} ingredients</div>
               <Clock deadline={pub.deadline} left={pub.left} size={110} />
-              <Sent pub={pub} column />
+              <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
         {pub.screen === "q" && g && g.key === "closest" && (<>
