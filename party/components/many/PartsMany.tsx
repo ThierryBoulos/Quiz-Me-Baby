@@ -67,15 +67,16 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
   const num = (i: number) => (award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
   const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
   return (
-    <div className={`hud ${size} many ${packing(k)}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
+    <div className={`hud ${size} many ${packing(k)}${award && !landed ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, top middle, where the two-team TV has it */}
       {tv && code && <div className="hud-code many-code">Room {code}</div>}
       {tv && !inGame && <div className="hud-in">
         {T.map((t, i) => (
           <div key={i} className="hud-team" style={{ ["--c" as string]: t.color }}>
             <div className="flex items-center gap-2 min-w-0"><Dot t={i} color={t.color} size={k > 5 ? 16 : k > 4 ? 18 : 22} /><div className="nm"><bdi>{t.name}</bdi></div></div>
-            <div className="sc" data-score={i}><Roll v={num(i)} /></div>
-            {award && !landed && (award[i] || 0) > 0 && <span className="hud-plus" style={{ animationDelay: order.indexOf(i) * 0.07 + "s" }} aria-hidden>+{award[i]}</span>}
+            {/* the +points rise to the number itself, centred on it */}
+            <div className="sc" data-score={i}><Roll v={num(i)} />
+              {award && !landed && (award[i] || 0) > 0 && <span className="hud-plus" style={{ animationDelay: order.indexOf(i) * 0.07 + "s" }} aria-hidden>+{award[i]}</span>}</div>
           </div>))}
       </div>}
       <div className="hud-mid">

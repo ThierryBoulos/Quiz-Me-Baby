@@ -618,6 +618,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .hud.many .hud-mini { flex-wrap: wrap; row-gap: 2px; }
 /* a game's result: each place's points fly up from the board into the team's total (then it rolls up) */
 .hud.many .hud-team { position: relative; }
+/* while the +points fly, the game's label and pips under the totals step aside (nothing for them to cross), then come back */
+.hud.many .hud-team .sc { position: relative; } .hud.many .hud-mid { transition: opacity .45s; } .hud.many.flying .hud-mid { opacity: 0; }
 .hud-plus { position: absolute; left: 50%; top: 100%; z-index: 70; pointer-events: none; font-family: var(--font-display); font-size: 40px; line-height: 1; color: var(--color-ok);
   text-shadow: 0 0 18px rgba(46,204,113,.7); animation: plusUp 1.45s cubic-bezier(.2,.8,.3,1) both; }
 /* it rises to the total and shrinks into it as it arrives (never parked over the digits); the total then rolls up */
