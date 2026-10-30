@@ -6,7 +6,7 @@
    at the far right end, past the last tick ("off the scale"), side by side when there are several: a hollow dot and a card that says No answer.
    Two teams: A's card above, B's below, as the two-team TV always drew it. More: the cards are packed on two
    lanes a side, as near their dot as the others let them, a size smaller, and the dots carry the team's letter. */
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { offBy, showNum } from "@/lib/game";
 
 /* pts: what the guess pays (more than two teams: points by place), shown at the end of its card */
@@ -42,6 +42,15 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const [box, setBox] = useState<{ w: number[]; h: number }>({ w: teams.map(() => two ? 300 : 210), h: two ? 54 : 40 });
   const sig = teams.map((t) => `${t.name}|${t.guess}|${t.win}|${t.pts}`).join(",");
+  /* the race's progress, 0 to 1 (scale only): a beat, then two seconds, fast off the line and easing in */
+  const [p, setP] = useState(scale ? 0 : 1);
+  useEffect(() => {
+    if (!scale) return;
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setP(1); return; }
+    let raf = 0; const t0 = performance.now() + 500, D = 2000;
+    const tick = (now: number) => { const k = Math.min(1, Math.max(0, (now - t0) / D)); setP(1 - Math.pow(1 - k, 3)); if (k < 1) raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick); return () => cancelAnimationFrame(raf);
+  }, [scale, sig]);
   useLayoutEffect(() => {
     const w = teams.map((_, i) => refs.current[i]?.offsetWidth || 210), h = Math.max(...teams.map((_, i) => refs.current[i]?.offsetHeight || 40));
     setBox((b) => (b.h === h && b.w.join() === w.join() ? b : { w, h }));
@@ -86,28 +95,40 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
   const cardTop = (lane: number) => (lane === 0 ? TY - G - CH : lane === 1 ? TY + G : lane === 2 ? TY - G - 2 * CH - GAP : TY + G + CH + GAP);
   const bandTop = (i: number) => (two ? TY - th / 2 + i * 7 : TY - th / 2 + 4 + i * 3);
   const bandH = two ? 7 : 3;
+  /* where a team is drawn: its dot, its card and the line between. The race (scale): every team sets off from the
+     left end at once and runs to its points, its card and number with it, the band filling behind it */
+  const at = (t: RulerTeam) => (scale ? x0 + (xOf(t) - x0) * p : xOf(t));
+  const geo = (t: RulerTeam, i: number) => {
+    const x = at(t), a = lay.at[i], w = box.w[i], ct = cardTop(a.lane), up = a.lane % 2 === 0;
+    const cx = scale ? Math.max(0, x0 - w / 2) + (a.x - Math.max(0, x0 - w / 2)) * p : a.x;
+    return { x, ct, up, cx, lx: Math.min(Math.max(x, cx + 16), cx + w - 16), ly: up ? ct + CH : ct, dy: up ? TY - 12 : TY + 12 };
+  };
 
   return (
     <div className="ruler relative" style={{ width: W, height: H, ["--beat" as string]: ".15s" }} aria-label={(scale ? "Points this game: " : `The answer, ${showNum(ans)}: `) + teams.map((t) => `${t.name} ${t.guess == null ? "no answer" : showNum(t.guess)}`).join(", ")}>
       <div className="ruler-track" style={{ top: TY - th / 2, height: th, borderRadius: th / 2 }}><span className="ruler-ticks" style={none ? { right: zone } : undefined} /></div>
       {none && <div className="ruler-off" style={{ top: TY - th / 2, height: th, width: zone }} aria-hidden />}
-      {teams.map((t, i) => { if (t.guess == null) return null; const x = xOf(t), mid = scale ? x0 : W / 2; return (
-        <div key={"b" + i} className="ruler-band" style={{ top: bandTop(i), height: bandH, left: Math.min(x, mid), width: Math.abs(x - mid), background: t.color, transformOrigin: x < mid ? "right" : "left", ...d(0.5 + drop(i) * (two ? 0.12 : 0.07)) }} />); })}
+      {teams.map((t, i) => { if (t.guess == null) return null; const x = at(t), mid = scale ? x0 : W / 2; return (
+        <div key={"b" + i} className="ruler-band" style={{ top: bandTop(i), height: bandH, left: Math.min(x, mid), width: Math.abs(x - mid), background: t.color, transformOrigin: x < mid ? "right" : "left", ...d(0.5 + drop(i) * (two ? 0.12 : 0.07)), ...(scale ? { animation: "none" } : {}) }} />); })}
       {!scale && <div className="ruler-mid" style={{ top: TY - th / 2 - 14, height: th + 28 }}>{two && <span className="lbl" style={{ top: th + 34 }}>answer</span>}</div>}
+      {/* the lines first, every card over them (the owner: no line across another team's card) */}
+      {teams.map((t, i) => { const g = geo(t, i); return (
+        <div key={"l" + i} className="ruler-grp" style={{ ["--drop" as string]: g.up ? "-36px" : "36px", ...d(0.12 + drop(i) * (two ? 0.14 : 0.1)) }} aria-hidden>
+          <svg className="absolute inset-0 pointer-events-none" width={W} height={H}><line x1={g.x} y1={g.dy} x2={g.lx} y2={g.ly} stroke={t.color} strokeWidth={2} strokeOpacity={0.8} strokeDasharray={t.guess == null ? "4 4" : undefined} /></svg>
+        </div>); })}
       {teams.map((t, i) => {
-        const x = xOf(t), a = lay.at[i], w = box.w[i], ct = cardTop(a.lane), up = a.lane % 2 === 0;
-        const lx = Math.min(Math.max(x, a.x + 16), a.x + w - 16), ly = up ? ct + CH : ct, dy = up ? TY - 12 : TY + 12;
-        const off = t.guess == null ? null : offBy(t.guess, ans);
+        const g = geo(t, i), off = t.guess == null ? null : offBy(t.guess, ans);
         return (
-          <div key={i} className={"ruler-grp" + (t.win ? " win" : "") + (t.guess == null ? " none" : "")} style={{ ["--c" as string]: t.color, ["--drop" as string]: up ? "-36px" : "36px", ...d(0.12 + drop(i) * (two ? 0.14 : 0.1)) }}>
-            <svg className="absolute inset-0 pointer-events-none" width={W} height={H} aria-hidden><line x1={x} y1={dy} x2={lx} y2={ly} stroke={t.color} strokeWidth={2} strokeOpacity={0.8} strokeDasharray={t.guess == null ? "4 4" : undefined} /></svg>
-            <span className="ruler-dot" style={{ left: x - 12, top: TY - 12 }}>{!two && t.letter}</span>
-            <div ref={(el) => { refs.current[i] = el; }} className={"card-l " + (two ? "" : "sm")} style={{ left: a.x, top: ct }}>
+          <div key={i} className={"ruler-grp" + (t.win ? " win" : "") + (t.guess == null ? " none" : "")} style={{ ["--c" as string]: t.color, ["--drop" as string]: g.up ? "-36px" : "36px", ...d(0.12 + drop(i) * (two ? 0.14 : 0.1)) }}>
+            <span className="ruler-dot" style={{ left: g.x - 12, top: TY - 12 }}>{!two && t.letter}</span>
+            <div ref={(el) => { refs.current[i] = el; }} className={"card-l " + (two ? "" : "sm")} style={{ left: g.cx, top: g.ct }}>
               <span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
-              {/* who takes it, at a glance, however bunched the cards are */}
-              {t.win && <span className="trophy" role="img" aria-label="takes it">🏆</span>}
-              {t.guess == null ? <span className="off">no answer</span> : <><span className="v display">{showNum(t.guess)}</span>{!scale && <span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off!)}</span>}</>}
-              {t.pts != null && t.guess != null && <span className="pts display">+{t.pts}</span>}
+              {/* who takes it, at a glance, however bunched the cards are (the race: once it's run) */}
+              {/* (the race: the number counts up; the trophy and the +points keep their room and show at the finish,
+                  so the cards, measured at the start, never grow into each other) */}
+              {t.win && <span className="trophy" role="img" aria-label="takes it" style={p < 1 ? { visibility: "hidden" } : undefined}>🏆</span>}
+              {t.guess == null ? <span className="off">no answer</span> : <><span className="v display text-right" style={scale ? { minWidth: showNum(t.guess).length + "ch" } : undefined}>{showNum(scale ? Math.round(t.guess * p) : t.guess)}</span>{!scale && <span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off!)}</span>}</>}
+              {t.pts != null && t.guess != null && <span className="pts display" style={p < 1 ? { visibility: "hidden" } : undefined}>+{t.pts}</span>}
             </div>
           </div>); })}
     </div>);
