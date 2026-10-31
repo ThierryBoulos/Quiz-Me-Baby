@@ -211,7 +211,7 @@ export function BarsMany({ pub }: { pub: PubMany }) {
 const byPlace = (S: NonNullable<PubMany["summary"]>, k: number, winnerLast = true) =>
   Array.from({ length: k }, (_, i) => i).sort((a, b) => (winnerLast ? S.places[b] - S.places[a] || b - a : S.places[a] - S.places[b] || a - b));
 /* under each one: its place, its name, what the place pays the night */
-function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boolean }) {
+export function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boolean }) {
   const S = pub.summary!, T = pub.teams, paid = S.award[t] > 0, lit = paid && S.places[t] === 1;
   return (<>
     <div className="display text-16 leading-none mt-1" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "—"}</div>
@@ -222,7 +222,8 @@ function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boolean })
       <div className="eyebrow text-center min-w-0 max-w-full" style={{ color: T[t].color, fontSize: "inherit", letterSpacing: ".1em", lineHeight: 1.25, overflowWrap: "anywhere",
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
         <span className="inline-block align-middle mr-1.5" style={{ marginTop: -2 }}><Dot t={t} color={T[t].color} size={dense ? 14 : 18} /></span><bdi>{T[t].name}</bdi></div></div>
-    <div className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</div>
+    {/* (a two-team round's lecterns: the big number is already what the round adds) */}
+    {!S.noAward && <div className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</div>}
   </>);
 }
 /* Guess the Airport: the departures board, each team a flight, flipping in from the top: 1st boards first */

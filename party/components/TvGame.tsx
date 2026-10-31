@@ -9,7 +9,7 @@ import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
-import { TWO_LOOKS, TwoResult } from "./TwoResults";
+import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult } from "./TwoResults";
 import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
@@ -81,14 +81,13 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           </div>
         </div>)}
 
-        {pub.screen === "roundScore" && (<>
-          <div className="eyebrow text-20">End of round {pub.r + 1}</div>
-          <div className="flex gap-24">{[0, 1].map((t) => (
-            <div key={t}><div className="display text-40" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
-              <div className="display text-120">{T[t].score}</div>
-              <div className="text-24 text-[var(--color-ink-2)]">+{pub.roundPts?.[t] ?? 0} this round</div></div>))}
-          </div>
-        </>)}
+        {/* the end of a round: the game-show lecterns, each lit with the round's points (the owner, 31 Oct: the same
+            layout as every game's result); the night's totals are in the header */}
+        {pub.screen === "roundScore" && (() => { const p = pub.roundPts ?? [0, 0], w = p[0] === p[1] ? null : p[0] > p[1] ? 0 : 1; return (<>
+          <div className="display text-44 leading-none slam" style={{ color: "var(--color-gold)" }}>Round {pub.r + 1}</div>
+          <RoundLecterns pub={pub} />
+          <div className="display text-52" style={{ color: tc(w) }}>{w == null ? (p[0] ? "A tied round" : "No points this round") : `${T[w].name} win the round`}</div>
+        </>); })()}
 
         {pub.screen === "sudden" && pub.sudden && (!pub.sudden.ready ? (<>
           <div className="display slam" style={{ fontSize: 120, color: "var(--color-gold)" }}>Sudden death</div>
@@ -467,8 +466,8 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       <div className="display text-48 beat" style={{ ...d(0.3), color: tc(A.last.won) }}>{T[A.last.won].name} take{A.last.won === A.last.by ? "" : "s"} the leg</div>
     </>);
     if (sc === "auctionResult") return (<>
-      <div className="eyebrow text-20">The Auction</div>
-      <ScoreBoard pub={pub} w={A.wins} win={A.winner} size="tv" />
+      <MiniTitle title="The Auction" small />
+      <AuctionPaddles pub={pub} />
       {A.winner != null && <div className="display text-52" style={{ color: tc(A.winner) }}><span data-fly-src={A.winner}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</span></div>}
     </>);
   }
@@ -522,8 +521,8 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   </>); }
   if (pub.battle && sc === "battleSummary") { const B = pub.battle; return (<>
     {B.last && <BattleAnswer last={B.last} size={24} />}
-    <MiniTitle title="Battle of the Captains" />
-    <ScoreBoard pub={pub} w={B.score} win={B.winner} size="tv" />
+    <MiniTitle title="Battle of the Captains" small />
+    <BattleShields pub={pub} />
     <div className="display text-52" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Tie") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
     {B.predict && <div className="text-22" style={{ color: "var(--color-gold)" }}>{B.predict}</div>}
     <SdCalls pub={pub} />

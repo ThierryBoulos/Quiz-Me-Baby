@@ -28,7 +28,7 @@ export type PubMany = {
     why?: (string | null)[];                      // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
     places?: (number | null)[]; pts?: number[] };            // this leg's places and what they pay this game
   /* a game's result: its tally (or shares), its places, what each place pays the night */
-  summary?: { wins: number[]; pts: number[]; shares?: number[]; places: number[]; award: number[]; line?: string };
+  summary?: { wins: number[]; pts: number[]; shares?: number[]; places: number[]; award: number[]; line?: string; noAward?: boolean };
   final?: { order: { team: number; place: number }[]; log: number[][]; awards: AwardM[]; games: string[] };
   fire?: boolean[];                                // three legs in a row at 1st, this game
   toast: { id: number; text: string } | null; exit?: boolean; ack?: Record<string, Record<string, string>>;

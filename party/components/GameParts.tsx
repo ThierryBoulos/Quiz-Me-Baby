@@ -72,7 +72,7 @@ export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"
       </div>
       {/* the mini-game's own score, small, under the night's: "This game: A 1 – 2 B" */}
       {/* (not on a game's result: its picture says it) */}
-      {w && !/Summary$/.test(pub.screen) && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
+      {w && !/Summary$|^auctionResult$/.test(pub.screen) && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
         <span>This game:</span><span className="nm a">{T[0].name}</span><b className="a">{w[0]}{u}</b><span aria-hidden>–</span><b className="b">{w[1]}{u}</b><span className="nm b">{T[1].name}</span>
       </div>}
     </div>);
