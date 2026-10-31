@@ -140,10 +140,18 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
             {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
           </div>)}
         {/* who's in: every team, as the TV shows them */}
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1" role="status" aria-label="Who has answered">
-          {g.key === "majority" && <p className="col-span-2 text-center text-14 font-bold mb-1">{pub.voted?.length ?? 0} of {pub.roster?.length ?? 0} answered</p>}
-          {T.map((t, i) => <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span><span className="shrink-0 font-semibold">{pub.sent[i] ? (g.key === "pin" ? "· pin in" : g.key === "majority" ? "· all in" : "· in") : "…"}</span></span>)}
-        </div>
+        {/* who has answered, live (the owner, 31 Oct): a count, then each team ticked green as it locks in */}
+        {(() => { const who = T.map((_, i) => i).filter((i) => !g.only || g.only.includes(i)), n = who.filter((i) => pub.sent[i]).length; return (
+          <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who has answered">
+            <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered` : `${n} of ${who.length} teams answered`}</p>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+              {who.map((i) => { const t = T[i], on = pub.sent[i] && !pub.out?.[i]; return (
+                <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
+                  <Dot t={i} color={t.color} size={14} /><span className="truncate flex-1"><bdi>{t.name}</bdi></span>
+                  <span className="shrink-0 font-bold" style={{ color: pub.out?.[i] ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)" }}>{pub.out?.[i] ? "✗ out" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting"}</span>
+                </span>); })}
+            </div>
+          </div>); })()}
         <div className="flex justify-center mt-auto"><button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button></div>
       </>)}
       {host && sc === "reveal" && g && R && (<>
