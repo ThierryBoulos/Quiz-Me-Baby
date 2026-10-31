@@ -56,15 +56,15 @@ export function PickMany({ room, k, busy, pick, current }: { room: Room; k: numb
 /* ---- the host's setup when there are more than two teams: Setup's mini-games card, with the games that work for
    any number of teams, each with its levels; the Start button docked under it ---- */
 const GAMES: [ManyKey, string][] = [
-  ["quiz", "Four questions a round: two on one theme, two on another. Every captain at once; the fastest right answer scores most. Spread through the night."],
-  ["majority", "Everyone plays on their own phone: 15 questions, four answers. Teams ranked by their share of right answers."],
-  ["flag", "Ten flags, every captain at once: whose is it? The fastest right answer scores most. The app checks, the host can overrule."],
-  ["closest", "Five numbers. Every guess is ranked by how far off: the nearest scores most."],
-  ["pin", "A landmark's photo: every captain drops a pin on the map. Ranked by the kilometre."],
-  ["airport", "Six departure boards, every captain at once: which airport? The fastest right answer scores most."],
-  ["map", "Six world maps with countries lit: what do they have in common? The fastest right answer scores most."],
-  ["say", "Six prompts. One answer each from the list: not the app's secret one, and not the same as another team's."],
-  ["dish", "Five recipes, an ingredient at a time. One guess a team; the first right answer wins it."]];
+  ["quiz", "Rounds of 4 questions on 2 themes. Captains type; the fastest right answer scores most."],
+  ["majority", "Everyone answers on their own phone. 15 questions, 4 answers each."],
+  ["flag", "10 flags. Captains type the country; the fastest right answer scores most."],
+  ["closest", "5 number questions. The closest guess scores most."],
+  ["pin", "7 famous places. Captains drop a pin; the closest scores most."],
+  ["airport", "6 departure boards. Captains type the airport; the fastest right answer scores most."],
+  ["map", "6 maps with countries lit. Captains type what they have in common."],
+  ["say", "6 questions with many answers. No points for the app's secret answer, or another team's."],
+  ["dish", "5 recipes, one ingredient at a time. One guess per team; the first right answer wins."]];
 const LEVELS4 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 const LEVELS3 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const COCKTAILS = [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]] as const, DISHES = [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] as const;
@@ -115,8 +115,7 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
             <div className="display text-24">Mini-games</div>
             <span className={"badge shrink-0 " + (night.length ? "gold" : "line")}>{night.length ? `${night.length} game${night.length === 1 ? "" : "s"}` : "None"}</span>
           </div>
-          <div className="text-13 text-[var(--color-ink-2)]">{k} teams: every game is played by every team at once, and the app checks the answers.
-            Every team scores every game, by place: <b style={{ color: "var(--color-gold)" }}>{PLACE_PTS.slice(0, k).join(" · ")}</b>.</div>
+          <div className="text-13 text-[var(--color-ink-2)]">Every team plays every game at the same time. In each game the best rank scores <b style={{ color: "var(--color-gold)" }}>{PLACE_PTS.slice(0, Math.min(3, k)).join(", ")}{k > 3 ? "…" : ""}</b></div>
         </div>
         {GAMES.map(([key, blurb]) => { const lit = minis.includes(key); return (
           <div key={key}>

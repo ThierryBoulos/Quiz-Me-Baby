@@ -98,42 +98,28 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
 
 /* ---- a game's intro: the title, the gold band, the numbered rules (GameParts' MiniIntro, for N teams) ---- */
 function rules(pub: PubMany): string[] {
+  /* plain English, only what you need to play (the owner, 31 Oct): no ties, no team counts */
   const g = pub.game!, n = g.of, k = pub.teams.length;
-  /* points by place (30 Oct): what a question pays, and what the game's places pay the night */
-  const pay = `At the end, places pay the night: ${PLACE_PTS.slice(0, k).join(", ")}. Level teams share the better place.`;
-  const each = (by: string) => `Every leg ranks all ${k} teams ${by}: 1st scores ${k}, 2nd ${k - 1}, down to 1 for last. No answer scores nothing.`;
-  const fastest = `The app checks them, and the host can change a call. Right answers are ranked by who sent first: the fastest scores ${k}, the next ${k - 1}, and so on. Wrong scores nothing.`;
+  const pay = `At the end, the best rank scores ${k > 3 ? `${PLACE_PTS.slice(0, 3).join(", ")}…` : PLACE_PTS.slice(0, k).join(", ")}.`;
+  const fast = "The faster your right answer, the more points.";
   switch (g.key) {
     case "majority": return [
-      "Everyone plays on their own phone, captains too. The lists are fixed at Start.",
-      `${n} questions, four answers each. One tap and it's locked. No answer counts as wrong.`,
-      "Eyes on your own phone: every phone has the answers in a different order.",
-      `Teams are ranked by the share of their answers that are right, so a smaller team isn't at a disadvantage. ${pay}`];
-    case "flag": return [
-      `A flag goes up. All ${k} captains type whose it is, at the same time.`,
-      `The app checks them, and the host can change a call. Right answers are ranked by who sent first: the fastest scores ${k}, the next ${k - 1}, and so on. Wrong scores nothing.`, pay];
-    case "closest": return [
-      `All ${k} teams get the same number question at the same time. Each captain locks in one number on their phone.`,
-      each("by how far off"), pay];
-    case "pin": return [
-      `A photo of a landmark goes up. All ${k} captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better.`,
-      each("by the kilometre"), pay];
+      "Everyone plays and answers on their own phone, captains too.",
+      `${n} questions, 4 answers each. One tap and it's locked.`,
+      `Teams are ranked by the share of their answers that are right. The best rank scores ${k > 3 ? `${PLACE_PTS.slice(0, 3).join(", ")}…` : PLACE_PTS.slice(0, k).join(", ")}.`];
     case "quiz": { const th = g.themes || [];
-      return [th.length >= 2 ? `Two questions on ${th[0]}, then two on ${th[1]}.` : th.length ? `${n} questions on ${th[0]}.` : `${n} questions.`,
-        `All ${k} captains type their answer at the same time.`, fastest, pay]; }
-    case "airport": return [`A departures board goes up. All ${k} captains type which airport it is: its name or its city.`, fastest, pay];
-    case "map": return [`A world map goes up with some countries lit. All ${k} captains type what they have in common.`, fastest, pay];
-    case "say": return [
-      `A prompt goes up, like "Name a colour of the rainbow". Each captain types one answer that's on the list.`,
-      "The app has picked one answer in secret: say it and you score nothing. Say the same as another team and you both score nothing.",
-      `Every answer that dodges both scores ${k}.`, pay];
+      return [th.length >= 2 ? `Two questions on ${th[0]}, then two on ${th[1]}.` : `${n} questions.`, "Captains type the answer on their phone.", fast, pay]; }
+    case "flag": return ["A flag goes up. Captains type the country on their phone.", fast, pay];
+    case "airport": return ["A departures board goes up. Captains type which airport it is.", fast, pay];
+    case "map": return ["A map goes up with some countries lit. Captains type what they have in common.", fast, pay];
+    case "closest": return ["A question with a number for an answer. Captains type their best guess.", "The closer your guess, the more points.", pay];
+    case "pin": return ["A photo of a famous place. Captains drop a pin on the map where they think it is.", "The closer your pin, the more points.", pay];
+    case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
+      "No points if you say the app's secret answer, or the same as another team.", pay];
+    case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
+      "One guess per team. The first right answer wins it. A wrong guess puts you out of that one.", pay];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
-      return [`${names} finished the night level at the top.`, "One question at a time, and only they answer, on the captain's phone. The fastest right answer wins the night.", "Nobody right: another question."]; }
-    case "dish": return [
-      "A recipe goes up one ingredient at a time, the giveaway last. Which cocktail or dish is it?",
-      "Captains: as soon as you know it, type it and send. Your team gets one guess per recipe.",
-      `Right: your team wins the recipe and scores ${k}, and it stops there for everyone.`,
-      "Wrong: your team is out of this recipe. The others keep going.", pay];
+      return [`${names} are level at the top.`, "One question at a time, and only they answer. The first right answer wins the night."]; }
   }
 }
 /* compact: the TV's Majority Rules intro, which shares the screen with the QR code */
@@ -148,18 +134,6 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
       <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{g.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
-        {/* sudden death pays no places: it's between the teams level at the top, for one point */}
-        {g.key === "sudden" ? (<>
-          <span className="sep text-[var(--color-ink-3)]">·</span>
-          <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{(g.only || []).length} teams level</span>
-          <span className="sep text-[var(--color-ink-3)]">·</span>
-          <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>+1 to the winner</span>
-        </>) : (<>
-          <span className="sep text-[var(--color-ink-3)]">·</span>
-          <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>Places pay {PLACE_PTS.slice(0, Math.min(3, pub.teams.length)).join(" · ")}{pub.teams.length > 3 ? " …" : ""}</span>
-          <span className="sep text-[var(--color-ink-3)]">·</span>
-          <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{pub.teams.length} teams</span>
-        </>)}
       </div>
       <div className="card w-full">
         <ol className="rules" style={tv ? { fontSize: compact ? 18 : 20, gap: compact ? 8 : 12 } : undefined}>
