@@ -43,8 +43,10 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   if (m) pub.game = { key: m.key, title: titleOf(s.minis, s.mi), leg: Math.min(m.i + 1, m.qs.length), of: m.qs.length, wins: [...m.wins],
     pts: m.pts.map((p, t) => p + (now ? now[t] : 0)), index: s.mi, count: s.minis.filter((x) => x.key !== "sudden").length, ...(m.only ? { only: m.only } : {}),
     ...(m.key === "quiz" ? { themes: [...new Set(m.qs.map((q) => String(q.theme || "")).filter(Boolean))] } : {}) };
-  /* Majority Rules: each team's share so far, for the tracker's "this game" line (the questions counted already) */
-  if (m && m.key === "majority" && pub.game) pub.game.shares = s.teams.map((_, t) => share(m, t));
+  /* Majority Rules: each team's share so far, for the tracker's "this game" line; on the reveal this question
+     counts too (it is only banked at Next), so the line agrees with "2 of 2 right" under it (the reviewers, 31 Oct) */
+  if (m && m.key === "majority" && pub.game) { const c = s.screen === "reveal" ? mrCount(s) : null;
+    pub.game.shares = s.teams.map((_, t) => { const r = m.right[t] + (c ? c.right[t] : 0), of = m.of[t] + (c ? c.of[t] : 0); return of ? r / of : 0; }); }
   if (m && q && (s.screen === "q" || s.screen === "reveal")) {
     pub.qid = String(q.id ?? m.key + m.i);
     const rev = s.screen === "reveal";
