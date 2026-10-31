@@ -89,14 +89,14 @@ reveal say 6 won by 1 | reveal | 71-57-54-50
 summary say award 10,10,6,0 | summary | 81-67-60-50
 next game | intro | 81-67-60-50
 start dish | q | 81-67-60-50
-reveal dish 1 won by 0 | reveal | 81-67-60-50
-reveal dish 2 won by 1 | reveal | 81-67-60-50
-reveal dish 3 won by 0 | reveal | 81-67-60-50
-reveal dish 4 won by 0 | reveal | 81-67-60-50
-reveal dish 5 won by - | reveal | 81-67-60-50
-summary dish award 10,8,0,0 | summary | 91-75-60-50
-next game | final | 91-75-60-50
+reveal dish 1 won by 0,2,3 | reveal | 81-67-60-50
+reveal dish 2 won by 0 | reveal | 81-67-60-50
+reveal dish 3 won by 2,3 | reveal | 81-67-60-50
+reveal dish 4 won by 0,1 | reveal | 81-67-60-50
+reveal dish 5 won by 1 | reveal | 81-67-60-50
+summary dish award 10,8,8,5 | summary | 91-75-68-55
+next game | final | 91-75-68-55
 games: Question round 1, Majority Rules, Guess the Flag, Guess the Airport, Guess the Map, Question round 2, Closest To Wins, Drop the Pin, Don't Say the Same as Me, Guess the Cocktail or Dish
 final 1:Team A 2:Team B 3:Team C 4:Team D
 majority: Most right: P5, 11 of 15. Least right: P4, 4 of 15.
-awards: Most questions won: Team A, 23 | Always the bridesmaid: Team C, 2nd 14 times | Best aim, Drop the Pin: Team B, 519 km off on average | Sharpest in Majority Rules: P5, 11 of 15 | Wooden spoon, Majority Rules: P4, 4 of 15
+awards: Most questions won: Team A, 23 | Always the bridesmaid: Team C, 2nd 15 times | Best aim, Drop the Pin: Team B, 519 km off on average | Sharpest in Majority Rules: P5, 11 of 15 | Wooden spoon, Majority Rules: P4, 4 of 15

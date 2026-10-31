@@ -4,7 +4,7 @@
    Always with a host. Every game simultaneous, judged by the app (the host can flip a typed answer's call):
    Majority Rules, Guess the Flag, Closest To Wins, Drop the Pin; and (phase 2, 30 Oct) question rounds, Guess
    the Airport, Guess the Map, Don't Say the Same as Me (an answer scores only if no other team said it too) and
-   Guess the Cocktail or Dish (a race: one guess a team, the first right ends it).
+   Guess the Cocktail or Dish (one guess a team, the ingredients one by one; every team can get it, the faster the more).
    Points by place (the owner's pick, 30 Oct: one winner taking 2 left 2nd and 8th level). Every question ranks
    the teams and pays this game's tally by place: with 8 teams the nearest (Closest, Pin) or the first right
    (Flags: the fastest typist) takes 8, the next 7, down to 1; wrong or no answer, nothing. Majority Rules ranks

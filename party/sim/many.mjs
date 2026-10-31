@@ -37,7 +37,7 @@ function night(k, crowd, seed, order = ["majority", "flag", "closest", "pin"]) {
       const m = L.miniOf(s), q = L.qOf(s);
       if (m.key === "majority") for (const p of s.roster) { if (r() < 0.1) continue; L.vote(s, p.name, r() < 0.5 ? q.answer : q.options[Math.floor(r() * 4)]); }
       /* the Cocktail or Dish: guesses come in one by one; the first right one ends the race */
-      else if (m.key === "dish") { for (let t = 0; t < k && s.screen === "q"; t++) { if (r() < 0.2) continue; L.captainAnswer(s, t, { text: typedFor("dish", q, r) }); if (L.dishRight(s, t)) break; } }
+      else if (m.key === "dish") { for (let t = 0; t < k && s.screen === "q"; t++) { if (r() < 0.2) continue; L.captainAnswer(s, t, { text: typedFor("dish", q, r) }); } }
       else for (let t = 0; t < k; t++) {
         if (r() < 0.1) continue;
         if (L.typedKey(m.key)) L.captainAnswer(s, t, { text: typedFor(m.key, q, r) });

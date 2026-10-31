@@ -12,7 +12,7 @@ import { cap1, type Member, type Room } from "../room";
 import { useInbox } from "../tv/useInbox";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishRight, dishShown, flip, lineup, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishShown, flip, lineup, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 
 const SHAPE = 1;
@@ -171,8 +171,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
         : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G, Number(a.id) || undefined) : "Your captain answers this one.";
       reply(r === true ? "+" : r);
-      /* the Cocktail or Dish: the first right guess ends the race */
-      if (r === true && (allIn(s) || (m?.key === "dish" && dishRight(s, from.team as number)))) reveal(s);
+      /* everyone answers, the Cocktail or Dish too: the faster right, the more points (the owner, 31 Oct) */
+      if (r === true && allIn(s)) reveal(s);
       publish(); return;
     }
   }, [code, publish, saveKey]);

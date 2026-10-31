@@ -119,7 +119,7 @@ function rules(pub: PubMany): string[] {
     case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
       "No points if you say the app's secret answer, or the same as another team.", pay];
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
-      "One guess per team. The first right answer wins it. A wrong guess puts you out of that one.", pay];
+      "One guess per team. A wrong guess puts you out of that one.", fast, pay];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
       return [`${names} are level at the top.`, "One question at a time, and only they answer. The first right answer wins the night."]; }
   }
