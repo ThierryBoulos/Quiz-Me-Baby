@@ -669,7 +669,12 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* a result's reveal: a team comes in at its turn (the last place first, the winner last), and the line under the picture after */
 .rv { animation: rvIn .55s var(--ease) both; }
 @keyframes rvIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .glass-fill, .glass-cherry, .bubble-pop, .lectern-in, .rv, .bar-grow, .flag-hoist, .pin-stand, .board-flip { animation: none; } }
+/* the Auction's paddles wave in the bidders' hands, from the grip: the winner's waves bigger and faster (the owner, 31 Oct) */
+.paddle-wave { transform-origin: 50% 92%; animation: paddleWave 1.8s ease-in-out infinite both; }
+.paddle-wave.win { animation: paddleWaveWin 1.1s ease-in-out infinite both; }
+@keyframes paddleWave { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+@keyframes paddleWaveWin { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@media (prefers-reduced-motion: reduce) { .glass-fill, .glass-cherry, .bubble-pop, .lectern-in, .rv, .bar-grow, .flag-hoist, .pin-stand, .board-flip, .paddle-wave { animation: none; } }
 @keyframes barGrow { from { transform: scaleY(0); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .bar-grow { animation: none; } }
 .hud.many .hud-mini .dot { width: 14px; height: 14px; font-size: var(--text-8); }

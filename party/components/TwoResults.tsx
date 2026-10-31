@@ -56,6 +56,8 @@ export function AuctionPaddles({ pub }: { pub: Pub }) {
       {[0, 1].map((t) => { const lit = S.award[t] > 0 && S.places[t] === 1, c = T[t].color; return (
         <div key={t} role="listitem" className="lectern-in flex flex-col items-center gap-1" style={{ width: 200, paddingTop: 30, animationDelay: revealOf(S, 2).at(t) + "s" }}>
           {/* room above for the winner's paddle, held up */}
+          {/* a little wave once it's up: the winner's bigger and faster */}
+          <div className={"paddle-wave" + (lit ? " win" : "")} style={{ animationDelay: revealOf(S, 2).at(t) + 0.6 + "s" }}>
           <svg viewBox="0 0 120 190" width={150} height={238} aria-hidden style={{ overflow: "visible", transform: lit ? "translateY(-28px) rotate(-6deg)" : "rotate(4deg)", transition: "transform .6s" }}>
             <rect x="52" y="104" width="16" height="80" rx="6" fill="#c9a26b" stroke="rgba(0,0,0,.35)" />
             {/* a solid paddle under the colour, so a dimmed one never shows its handle through it (the owner, 31 Oct) */}
@@ -66,6 +68,7 @@ export function AuctionPaddles({ pub }: { pub: Pub }) {
             <text x="60" y={lit ? 67 : 76} textAnchor="middle" fontFamily="var(--font-display)" fontSize={lit ? 46 : 52} fill="#04050e">{S.pts[t]}</text>
             {lit && <text x="60" y="99" textAnchor="middle" fontSize="24" role="img" aria-label="takes it">🏆</text>}
           </svg>
+          </div>
           <Caption pub={P} t={t} dense={false} />
         </div>); })}
     </div>);
