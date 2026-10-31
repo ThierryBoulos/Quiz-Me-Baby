@@ -154,7 +154,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
           <div className="display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
           {R.notes && g.key !== "say" && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 truncate">{R.notes}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
-          <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{g.key === "sudden" ? (R.winners.length ? `${T[firstOf(pub)].name} wins the night!` : "Nobody got it: another one") : W.text}</div>
+          <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "closest" && (<>
           <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] truncate">{pub.question}</div>
@@ -256,7 +256,6 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
 }
 
 /* sudden death: the fastest right answer, the night's winner */
-const firstOf = (pub: PubMany) => { const P = pub.reveal?.places || []; const i = P.findIndex((p) => p === 1); return i >= 0 ? i : pub.reveal!.winners[0]; };
 /* every team: locked in, or still thinking (the two-team "Team A: thinking…", for N teams: a row that wraps, or a
    column); in sudden death only the teams level at the top */
 function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {

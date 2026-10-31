@@ -65,6 +65,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   const W = takes(pub);
   /* your team's place on this leg, or in this game, and what it scores: "2nd, +7", "No points this time" */
   const mineLeg = () => { if (mine == null || !R?.places) return undefined; const p = R.places[mine], v = R.pts?.[mine] ?? 0;
+    if (g?.key === "sudden") return R.winners.length ? (p === 1 ? <span style={{ color: "var(--color-ok)" }}>That&rsquo;s your team!</span> : undefined) : <span style={{ color: "var(--color-ink-3)" }}>Another question is coming.</span>;
     return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{p == null || !v ? "No points this time." : `Your team: ${place(p)}, +${v}`}</span>; };
   const mineGame = () => { if (mine == null || !pub.summary) return undefined; const S = pub.summary, v = S.award[mine];
     return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{v ? `Your team: ${place(S.places[mine])}, +${v} to the night` : "No points for your team this game."}</span>; };
@@ -158,7 +159,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
         <Answer />
         {typedKey(g.key) ? (
           /* each team's answer, and its ruling beside it, which the host can always flip (the TV confirms it a beat later) */
-          <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; return (
+          <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; if (g.only && !g.only.includes(i)) return null; return (
             <div key={i} className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="eyebrow flex items-center gap-2" style={{ color: t.color }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>

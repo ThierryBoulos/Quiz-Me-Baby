@@ -30,6 +30,9 @@ export function leader(pub: PubMany): number | null {
 /* who takes this leg, in words, and whose colour it's said in (the TV and every phone say the same) */
 export function takes(pub: PubMany): { text: string; color: string } {
   const w = pub.reveal?.winners || [], T = pub.teams;
+  /* sudden death, the same words on the TV and every phone (the reviewers, 31 Oct) */
+  if (pub.game?.key === "sudden") { const f = (pub.reveal?.places || []).findIndex((p) => p === 1), t = f >= 0 ? f : w[0];
+    return w.length ? { text: `${T[t].name} wins the night!`, color: T[t].color } : { text: "Nobody got it: another one", color: "var(--color-ink-2)" }; }
   if (!w.length) return { text: pub.game?.key === "flag" ? "Nobody gets it" : "Nobody takes it", color: "var(--color-ink-2)" };
   if (w.length === 1) return { text: `${T[w[0]].name} takes it`, color: T[w[0]].color };
   if (w.length === T.length) return { text: "Everyone takes it", color: "var(--color-gold)" };
