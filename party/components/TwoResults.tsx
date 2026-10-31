@@ -48,22 +48,23 @@ export function RoundLecterns({ pub }: { pub: Pub }) {
   return <LecternsMany pub={two(pub, p, w, [...p], { noAward: true })} />;
 }
 
-/* the Auction: a bidding paddle a team, the lots it won on it; the winner's held up high */
+/* the Auction: a bidding paddle a team, the lots it won on it; the winner's held up high, the trophy on it */
 export function AuctionPaddles({ pub }: { pub: Pub }) {
   const A = pub.auction!, P = two(pub, A.wins, A.winner, awardOf(pub, A.winner, A.award)), S = P.summary!, T = P.teams;
   return (
     <div className="flex items-end justify-center gap-24" role="list" aria-label={"Lots won: " + T.map((t, i) => `${t.name} ${S.pts[i]}`).join(", ")}>
       {[0, 1].map((t) => { const lit = S.award[t] > 0 && S.places[t] === 1, c = T[t].color; return (
-        <div key={t} role="listitem" className="lectern-in flex flex-col items-center gap-1" style={{ width: 200, animationDelay: revealOf(S, 2).at(t) + "s" }}>
-          {/* the winner's paddle held up: the trophy rides above it */}
-          <span className="text-28 leading-none relative z-10" style={{ visibility: lit ? "visible" : "hidden", marginBottom: lit ? 34 : 0 }} role={lit ? "img" : undefined} aria-label={lit ? "takes it" : undefined}>🏆</span>
+        <div key={t} role="listitem" className="lectern-in flex flex-col items-center gap-1" style={{ width: 200, paddingTop: 30, animationDelay: revealOf(S, 2).at(t) + "s" }}>
+          {/* room above for the winner's paddle, held up */}
           <svg viewBox="0 0 120 190" width={150} height={238} aria-hidden style={{ overflow: "visible", transform: lit ? "translateY(-28px) rotate(-6deg)" : "rotate(4deg)", transition: "transform .6s" }}>
             <rect x="52" y="104" width="16" height="80" rx="6" fill="#c9a26b" stroke="rgba(0,0,0,.35)" />
             {/* a solid paddle under the colour, so a dimmed one never shows its handle through it (the owner, 31 Oct) */}
             <circle cx="60" cy="58" r="54" fill="#0b0e24" />
             <circle cx="60" cy="58" r="54" fill={c} opacity={S.award[t] > 0 ? 1 : 0.45} style={{ filter: lit ? `drop-shadow(0 0 18px ${c})` : undefined }} />
             <circle cx="60" cy="58" r="44" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="2" />
-            <text x="60" y="76" textAnchor="middle" fontFamily="var(--font-display)" fontSize="52" fill="#04050e">{S.pts[t]}</text>
+            {/* the winner's trophy sits on the paddle, under the lots won (the owner, 31 Oct) */}
+            <text x="60" y={lit ? 67 : 76} textAnchor="middle" fontFamily="var(--font-display)" fontSize={lit ? 46 : 52} fill="#04050e">{S.pts[t]}</text>
+            {lit && <text x="60" y="99" textAnchor="middle" fontSize="24" role="img" aria-label="takes it">🏆</text>}
           </svg>
           <Caption pub={P} t={t} dense={false} />
         </div>); })}
