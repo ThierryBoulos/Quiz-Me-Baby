@@ -13,7 +13,8 @@ import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { typedKey } from "@/lib/many/logic";
-import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, paid, place, RowsMany, splitIng, summaryCols, takes, SAY_WHY } from "./PartsMany";
+import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, paid, place, revealOf, RowsMany, splitIng, summaryCols, takes, SAY_WHY } from "./PartsMany";
+import { useRevealHold, WatchTv } from "../WatchTv";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 function useSecretMany(code: string, on: boolean, step: number) {
@@ -63,6 +64,8 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
     </div>);
   /* "That's your team!", under who takes it */
   const W = takes(pub);
+  /* a game's result waits on the phones while the TV reveals it, last place first (the owner, 31 Oct) */
+  const held = useRevealHold(sc === "summary" && g && pub.summary ? `${g.key}:${g.index}` : null, pub.summary ? revealOf(pub.summary, T.length).done + 0.3 : 0);
   /* your team's place on this leg, or in this game, and what it scores: "2nd, +7", "No points this time" */
   const mineLeg = () => { if (mine == null || !R?.places) return undefined; const p = R.places[mine], v = R.pts?.[mine] ?? 0;
     if (g?.key === "sudden") return R.winners.length ? (p === 1 ? <span style={{ color: "var(--color-ok)" }}>That&rsquo;s your team!</span> : undefined) : <span style={{ color: "var(--color-ink-3)" }}>Another question is coming.</span>;
@@ -108,7 +111,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
     : g.key === "pin" ? <RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="phone" pts={R.pts} />
     : <RowsMany pub={pub} order={T.map((_, i) => i)} right={(t) => <span className="text-16 font-bold" style={{ fontFamily: "var(--font-body)", textTransform: "none" }}>{R.right?.[t] ?? 0} of {R.of?.[t] ?? 0}</span>} size="phone" />;
   /* a game's result and the night's end, the same on every phone */
-  const Summary = () => !g || !pub.summary ? null : (<>
+  const Summary = () => !g || !pub.summary ? null : held ? <WatchTv /> : (<>
     <Big text={paid(pub).text} color={paid(pub).color} eyebrow={g.title} sub={mineGame()} />
     <BoardMany pub={pub} cols={summaryCols(pub)} size="phone" label={pub.summary.shares ? "Share right" : "Points this game"} />
     {pub.summary.line && <p className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{pub.summary.line}</p>}

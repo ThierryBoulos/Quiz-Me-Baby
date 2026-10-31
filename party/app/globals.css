@@ -587,6 +587,10 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 @keyframes planeGo { 0% { transform: translateX(0) rotate(90deg) scale(.8); opacity: 0; } 8% { opacity: 1; } 100% { transform: translateX(1500px) rotate(90deg) scale(1.7); opacity: 1; } }
 @keyframes planeTrail { 0% { transform: scaleX(0); opacity: 1; } 80% { opacity: .9; } 100% { transform: scaleX(1); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .plane-fly { display: none; } }
+/* a phone waiting for the TV's reveal: the little TV glows softly */
+.watch-tv svg { color: var(--color-gold); animation: watchTv 1.2s ease-in-out infinite alternate; }
+@keyframes watchTv { from { opacity: .45; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .watch-tv svg { animation: none; } }
 /* the map's reveal: the answer's drawing sweeps in over the question's, a gold edge leading */
 .map-wipe { visibility: hidden; }
 .map-wipe.on { visibility: visible; }

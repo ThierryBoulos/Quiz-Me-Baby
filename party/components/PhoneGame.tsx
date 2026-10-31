@@ -1,4 +1,6 @@
 "use client";
+import { twoDone } from "./TwoResults";
+import { useRevealHold, WatchTv } from "./WatchTv";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
@@ -708,6 +710,11 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
 
 function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean }) {
   const T = pub.teams, sc = pub.screen, m = pub.mini;
+  /* a game's or a round's result waits on the phones while the TV reveals it (the winner comes in last) */
+  const won = sc === "auctionResult" ? pub.auction?.winner : sc === "battleSummary" ? pub.battle?.winner
+    : sc === "roundScore" ? (pub.roundPts && pub.roundPts[0] !== pub.roundPts[1] ? (pub.roundPts[0] > pub.roundPts[1] ? 0 : 1) : null) : pub.summary?.winner;
+  const holdKey = /Summary$|^auctionResult$|^roundScore$/.test(sc) ? `${sc}:${m?.key ?? ""}:${pub.r}` : null;
+  if (useRevealHold(holdKey, twoDone(won) + 0.3)) return <WatchTv />;
   const name = (t: 0 | 1) => <b style={{ color: tc(t) }}>{T[t].name}</b>;
   /* the outcome: a big headline, no box (boxes are for things you can tap) */
   const head = (t: 0 | 1 | null | undefined, text: string, sub?: string) => (
