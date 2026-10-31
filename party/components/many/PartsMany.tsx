@@ -179,7 +179,7 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
           {/* the place line on every column once any has one ("—" for none), so the numbers line up across a row (the owner, 31 Oct) */}
           {hasPlace && <div className="place" style={{ fontSize: tv ? (dense ? 15 : 18) : 11 }}>{c.place != null ? place(c.place) : "—"}</div>}
           <div className="v" style={{ fontSize: v }}>{c.big}</div>
-          <div className="nm" style={{ fontSize: tv ? (dense ? 13 : 18) : dense ? 10 : 12 }}><Dot t={c.t} color={T[c.t].color} size={tv ? (dense ? 14 : 18) : 12} /><span><bdi>{T[c.t].name}</bdi></span></div>
+          <div className={"nm" + (!tv && dense ? " tight" : "")} style={{ fontSize: tv ? (dense ? 13 : 18) : dense ? 10 : 12 }}><Dot t={c.t} color={T[c.t].color} size={tv ? (dense ? 14 : 18) : 12} /><span><bdi>{T[c.t].name}</bdi></span></div>
           {c.sub && <div className="sub" style={{ fontSize: tv ? (dense ? 15 : 20) : 12 }}>{c.sub}</div>}
         </div>))}
     </div>);
@@ -423,7 +423,7 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
             {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
             {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
           </div>
-          {(x || ok == null) && <div className="font-bold max-w-full text-center leading-tight clamp2" style={{ fontSize: tv ? (dense ? 18 : 24) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}
+          {(x || ok == null) && <div className={"font-bold max-w-full text-center leading-tight " + (tv && dense ? "truncate" : "clamp2")} style={{ fontSize: tv ? (dense ? 18 : 24) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}
         </div>); })}
     </div>);
 }

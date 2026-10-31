@@ -147,7 +147,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
         {pub.screen === "reveal" && g && R && ["quiz", "airport", "map", "say", "dish", "sudden"].includes(g.key) && (<>
           {g.key === "map" && pub.map ? <MapView id={pub.map.id} reveal maxH={dense ? 150 : 200} legend={false} still />
-            : g.key === "airport" ? <div className="w-full max-w-[640px]"><Board air={pub.airport} size="small" /></div>
+            : g.key === "airport" ? <div className={"w-full max-w-[640px]" + (dense ? " board-tight" : "")}><Board air={pub.airport} size="small" /></div>
             : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
             : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
           {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
@@ -234,8 +234,9 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
               </div>
               {pub.final!.awards.length > 0 && (
                 <div className="grid gap-3 enter w-full max-w-[1168px]" style={{ gridTemplateColumns: `repeat(${pub.final!.awards.length}, minmax(0, 1fr))`, position: "relative", zIndex: 60 }}>
+                  {/* solid cards: the confetti behind them stays behind them */}
                   {pub.final!.awards.map((a) => (
-                    <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ borderColor: a.team != null ? T[a.team].color : undefined }}>
+                    <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ borderColor: a.team != null ? T[a.team].color : undefined, background: "linear-gradient(180deg, #151a3c, #0c1028)" }}>
                       <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
                       <div className="text-15 font-bold leading-snug" style={{ color: a.team != null ? T[a.team].color : undefined }}><bdi>{a.who}</bdi></div>
                       {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}

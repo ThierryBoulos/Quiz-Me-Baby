@@ -420,6 +420,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .board .b-flight, .board .b-gate { color: #ffd25a; }
 .board .b-status { font-size: .88em; }
 .board.dense { padding: .45em .7em; } .board.dense .board-title { padding-bottom: .3em; margin-bottom: .15em; } .board.dense .board-row { padding: .18em .2em; }
+/* the TV's reveal: the board tight, so eight flights and eight answers fit under the tracker */
+.board-tight .board { padding: .4em .7em; } .board-tight .board .board-title { padding-bottom: .25em; margin-bottom: .1em; } .board-tight .board .board-row { padding: .12em .2em; }
 /* Majority Rules: the four answers on a phone, big enough to hit without looking twice */
 .mr-opt { min-height: 64px; font-size: var(--text-18); white-space: normal; line-height: 1.2; text-align: center; }
 .mr-tv-opt { display: flex; align-items: center; gap: 18px; text-align: left; font-weight: 800; font-size: 34px; line-height: 1.15; padding: 20px 28px; border-radius: 22px;
@@ -672,7 +674,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .hud.tv.many .hud-team .nm { font-size: var(--text-18); max-width: 200px; } .hud.tv.many .hud-team .sc { font-size: var(--text-48); }
 .hud.tv.many.mid .hud-team .nm { font-size: var(--text-15); max-width: 130px; } .hud.tv.many.mid .hud-team .sc { font-size: var(--text-40); }
 /* seven or eight teams: a 14-letter name fits its column, tracked a touch tighter (the reviewers, 31 Oct) */
-.hud.tv.many.stack .hud-team .nm { font-size: var(--text-13); letter-spacing: .06em; max-width: 150px; }
+.hud.tv.many.stack .hud-team .nm { font-size: var(--text-12); letter-spacing: .04em; max-width: 150px; }
 .hud.tv.many.stack .hud-team .nm { font-size: var(--text-13); max-width: 120px; } .hud.tv.many.stack .hud-team .sc { font-size: var(--text-40); }
 .hud.tv.many .hud-mini .nm { max-width: 190px; }
 /* seven or eight teams: the tally by letter alone (the dot carries it), so the line never wraps */
@@ -694,6 +696,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .board-many .col { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; transition: opacity .3s; }
 .board-many .col .v { font-family: var(--font-display); line-height: 1; color: var(--c); font-variant-numeric: tabular-nums; }
 .board-many .col .nm { display: flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--color-ink-2); }
+/* a phone's four narrow columns: a 10-letter word fits a line */
+.board-many .col .nm.tight { letter-spacing: .03em; gap: 4px; }
 /* a line that may run long (a question, a recipe's ingredients, a note): up to two lines, then cut */
 .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 /* a long name wraps to a second line, never cut to "THE QUIZZ…" */
