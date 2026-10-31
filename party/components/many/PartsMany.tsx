@@ -205,8 +205,13 @@ function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boolean })
   const S = pub.summary!, T = pub.teams, paid = S.award[t] > 0, lit = paid && S.places[t] === 1;
   return (<>
     <div className="display text-16 leading-none mt-1" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "—"}</div>
-    <div className="flex items-center gap-1.5 min-w-0 max-w-full"><Dot t={t} color={T[t].color} size={dense ? 14 : 18} />
-      <span className="eyebrow truncate" style={{ color: T[t].color, fontSize: dense ? 11 : 14 }}><bdi>{T[t].name}</bdi></span></div>
+    {/* a long name wraps to a second line, tracking a touch tighter, rather than running off or being cut (the owner, 31 Oct);
+        the letter flows in front of the name's first word, so the second line has the whole width; every name keeps a
+        two-line slot, so the places, the glasses and the points stay level across */}
+    <div className="flex items-center justify-center w-full" style={{ fontSize: dense ? 11 : 14, height: "2.5em" }}>
+      <div className="eyebrow text-center min-w-0 max-w-full" style={{ color: T[t].color, fontSize: "inherit", letterSpacing: ".1em", lineHeight: 1.25, overflowWrap: "anywhere",
+        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        <span className="inline-block align-middle mr-1.5" style={{ marginTop: -2 }}><Dot t={t} color={T[t].color} size={dense ? 14 : 18} /></span><bdi>{T[t].name}</bdi></div></div>
     <div className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</div>
   </>);
 }
@@ -273,9 +278,9 @@ export function BubblesMany({ pub }: { pub: PubMany }) {
 }
 /* a question round: a game show's lecterns, a team's score lit on each; the winner's under a spotlight */
 export function LecternsMany({ pub }: { pub: PubMany }) {
-  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k), w = dense ? 118 : 176;
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k), w = dense ? 130 : 176;
   return (
-    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 12 : 26 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 10 : 26 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
       {order.map((t, j) => { const lit = S.award[t] > 0 && S.places[t] === 1, paid = S.award[t] > 0; return (
         <div key={t} role="listitem" className="lectern-in relative flex flex-col items-center min-w-0" style={{ width: w, animationDelay: j * 0.1 + "s" }}>
           {lit && <span className="lectern-spot" aria-hidden />}
@@ -285,7 +290,8 @@ export function LecternsMany({ pub }: { pub: PubMany }) {
             <span className="display leading-none" style={{ fontSize: dense ? 44 : 64, color: paid ? T[t].color : "var(--color-ink-3)", textShadow: paid ? `0 0 18px ${T[t].color}` : undefined }}>{S.pts[t]}</span>
           </div>
           {/* the front, narrowing to the floor, the team's name plate on it */}
-          <div className="w-[86%] flex flex-col items-center justify-start pt-2 gap-1" style={{ height: dense ? 92 : 112, background: `linear-gradient(180deg, color-mix(in srgb, ${T[t].color} 30%, #10142e), #0b0e24)`, clipPath: "polygon(0 0, 100% 0, 92% 100%, 8% 100%)" }}>
+          {/* padded in from the sloping sides, so a name never runs under them */}
+          <div className="w-[86%] flex flex-col items-center justify-start pt-2 gap-1 px-[6%]" style={{ height: dense ? 92 : 112, background: `linear-gradient(180deg, color-mix(in srgb, ${T[t].color} 30%, #10142e), #0b0e24)`, clipPath: "polygon(0 0, 100% 0, 92% 100%, 8% 100%)" }}>
             <Caption pub={pub} t={t} dense={dense} />
           </div>
         </div>); })}
