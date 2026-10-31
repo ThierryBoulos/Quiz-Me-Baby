@@ -157,8 +157,10 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       </>)}
       {host && sc === "reveal" && g && R && (<>
         <Answer />
-        {typedKey(g.key) ? (
-          /* each team's answer, and its ruling beside it, which the host can always flip (the TV confirms it a beat later) */
+        {typedKey(g.key) ? (<>
+          {/* the host is told the calls are theirs to change (the reviewers, 31 Oct) */}
+          <p className="text-center text-13 text-[var(--color-ink-2)]">The app made these calls. Tap one to change it.</p>
+          {/* each team's answer, and its ruling beside it, which the host can always flip (the TV confirms it a beat later) */}
           <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; if (g.only && !g.only.includes(i)) return null; return (
             <div key={i} className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
@@ -166,7 +168,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
                 {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
               </div>
               {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={v} say={g.key === "say"} neg={g.key === "say" ? SAY_WHY[R.why?.[i] || ""] : undefined} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}
-            </div>); })}</div>
+            </div>); })}</div></>
         ) : <Rows />}
         {g.key !== "majority" && <Big text={W.text} color={W.color} />}
         <Main label="Next" on={() => move("m/next")} />
