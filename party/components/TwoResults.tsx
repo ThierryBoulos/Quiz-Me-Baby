@@ -20,11 +20,11 @@ export const TWO_LOOKS = ["majority", "flag", "closest", "pin", "map", "airport"
 
 /* a two-team result, as the 3-8 team pieces read it: each team's points (or share), its place (a tie shares 1st),
    and what the place adds to the night */
-function two(pub: Pub, pts: Two<number>, winner: 0 | 1 | null | undefined, award: number[], opts: { pct?: boolean; noAward?: boolean } = {}): PubMany {
+function two(pub: Pub, pts: Two<number>, winner: 0 | 1 | null | undefined, award: number[], opts: { pct?: boolean; noAward?: boolean; plus?: boolean } = {}): PubMany {
   const places = [0, 1].map((t) => (winner == null ? 1 : winner === t ? 1 : 2));
   return {
     teams: pub.teams.map((t, i) => ({ name: t.name, score: t.score, color: MANY_COLORS[i] })),
-    summary: { wins: [...pts], pts: [...pts], shares: opts.pct ? pts.map((x) => x / 100) : undefined, places, award, noAward: opts.noAward },
+    summary: { wins: [...pts], pts: [...pts], shares: opts.pct ? pts.map((x) => x / 100) : undefined, places, award, noAward: opts.noAward, plus: opts.plus },
   } as unknown as PubMany;
 }
 const awardOf = (pub: Pub, winner: 0 | 1 | null | undefined, award?: Two<number>) => (award ?? [winner === 0 ? pub.mini?.pts ?? 0 : 0, winner === 1 ? pub.mini?.pts ?? 0 : 0]) as number[];
@@ -42,10 +42,11 @@ export function TwoResult({ pub }: { pub: Pub }) {
   return <BubblesMany pub={P} />;
 }
 
-/* the end of a round of questions: the question-round lecterns, each lit with what the team scored this round */
+/* the end of a round of questions: the question-round lecterns, each lit with what the team scored this round,
+   written "+2", so it reads as points added, not the night's total (the owner, 31 Oct) */
 export function RoundLecterns({ pub }: { pub: Pub }) {
   const p = (pub.roundPts ?? [0, 0]) as Two<number>, w = p[0] === p[1] ? null : p[0] > p[1] ? 0 : 1;
-  return <LecternsMany pub={two(pub, p, w, [...p], { noAward: true })} />;
+  return <LecternsMany pub={two(pub, p, w, [...p], { noAward: true, plus: true })} />;
 }
 
 /* the Auction: a bidding paddle a team, the lots it won on it; the winner's held up high, the trophy on it */

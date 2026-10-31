@@ -310,14 +310,14 @@ export function LecternsMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k), w = dense ? 130 : 176;
   const rv = revealOf(S, k);
   return (
-    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 10 : 26 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 10 : 26 }} role="list" aria-label={(S.plus ? "Points this round: " : "Points this game: ") + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
       {order.map((t) => { const lit = S.award[t] > 0 && S.places[t] === 1, paid = S.award[t] > 0; return (
         <div key={t} role="listitem" className="lectern-in relative flex flex-col items-center min-w-0" style={{ width: w, animationDelay: rv.at(t) + "s" }}>
           {lit && <span className="lectern-spot" aria-hidden />}
           {lit && <span className="text-28 leading-none mb-1 relative" role="img" aria-label="takes it">🏆</span>}
           {/* the score panel, lit in the team's colour */}
           <div className="relative w-full grid place-items-center rounded-t-[14px] border-2" style={{ height: dense ? 74 : 100, background: "#05060c", borderColor: T[t].color, boxShadow: paid ? `0 0 24px color-mix(in srgb, ${T[t].color} 55%, transparent) inset` : undefined }}>
-            <span className="display leading-none" style={{ fontSize: dense ? 44 : 64, color: paid ? T[t].color : "var(--color-ink-3)", textShadow: paid ? `0 0 18px ${T[t].color}` : undefined }}>{S.pts[t]}</span>
+            <span className="display leading-none" style={{ fontSize: dense ? 44 : 64, color: paid ? T[t].color : "var(--color-ink-3)", textShadow: paid ? `0 0 18px ${T[t].color}` : undefined }}>{S.plus && S.pts[t] > 0 ? "+" + S.pts[t] : S.pts[t]}</span>
           </div>
           {/* the front, narrowing to the floor, the team's name plate on it */}
           {/* padded in from the sloping sides, so a name never runs under them */}
