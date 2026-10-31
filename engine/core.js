@@ -38,9 +38,13 @@
       .toLowerCase()
       .replace(/&/g, ' and ')
       .replace(/['’`]/g, '')
+      /* blood types, however written: "O-", "O neg", "0 negative" all read "o negative"; "AB+", "AB pos" read "ab positive"
+         (31 Oct: a team typed "O-" for "O negative" and was marked wrong) */
+      .replace(/\b(ab|a|b|o|0)\s*(\+|plus|pos|positive)(?![a-z0-9])/g, (m, t) => (t === '0' ? 'o' : t) + ' positive')
+      .replace(/\b(ab|a|b|o|0)\s*(-|−|–|minus|neg|negative)(?![a-z0-9])/g, (m, t) => (t === '0' ? 'o' : t) + ' negative')
       .replace(/[^a-z0-9]+/g, ' ')
       .trim()
-      .replace(/^(the|a|an) /, '');
+      .replace(/^(the|a|an) (?!(positive|negative)\b)/, '');   // "A negative" is a blood type, not "negative"
   }
   function asNumber(s){
     const t = String(s == null ? '' : s).replace(/[,\s]/g, '');
