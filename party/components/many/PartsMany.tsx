@@ -249,12 +249,17 @@ export function DeparturesMany({ pub }: { pub: PubMany }) {
         Departures: the result
       </div>
       {order.map((t) => { const lit = S.award[t] > 0 && S.places[t] === 1; return (
-        <div key={t} className="board-row tv board-flip" role="row" style={{ animationDelay: rv.at(t) + "s" }}>
+        <div key={t} className="board-row tv board-flip relative" role="row" style={{ animationDelay: rv.at(t) + "s" }}>
           <span className="b-time" role="cell">{S.award[t] > 0 ? place(S.places[t]).toUpperCase() : "—"}</span>
           <span className="b-dest flex items-center gap-2" role="cell" style={{ color: T[t].color }}><Dot t={t} color={T[t].color} size={dense ? 14 : 18} /><bdi className="truncate">{T[t].name}</bdi>{lit && <span aria-label="takes it">🏆</span>}</span>
           <span className="b-flight" role="cell">{S.pts[t]} pts</span>
           <span className="b-gate" role="cell" style={{ color: S.award[t] > 0 ? "var(--color-ok)" : undefined }}>{S.award[t] > 0 ? "+" + S.award[t] : "0"}</span>
           <span className="b-status" role="cell" style={{ color: S.award[t] <= 0 ? "#ff5566" : lit ? "#3ddc97" : S.places[t] === k ? "#ffb020" : "#ffd25a" }}>{status(t)}</span>
+          {/* the winner's flight takes off: a plane climbs off its Boarding row and up off the screen, a trail behind it (the owner, 31 Oct) */}
+          {lit && <span className="plane-fly" aria-hidden style={{ animationDelay: rv.at(t) + 0.5 + "s" }}>
+            <span className="plane-trail" style={{ animationDelay: rv.at(t) + 0.5 + "s" }} />
+            <span className="plane-ico" style={{ animationDelay: rv.at(t) + 0.5 + "s" }}><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg></span>
+          </span>}
         </div>); })}
     </div>);
 }

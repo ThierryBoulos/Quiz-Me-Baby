@@ -577,6 +577,16 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* Guess the Airport: the board's rows flip in like a departures board */
 .board-row.board-flip { animation: boardFlip .42s var(--ease) both; transform-origin: top; }
 @keyframes boardFlip { 0% { transform: perspective(600px) rotateX(-90deg); opacity: 0; } 60% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+/* the winner's plane: from the right end of its Boarding row, a steep climb up and off the screen, speeding up as
+   it goes, a white trail drawn behind it that fades once it's gone. All runs once; the row stays as it was. */
+.board .board-row > .plane-fly { overflow: visible; position: absolute; right: 1.4em; top: 50%; width: 0; height: 0; transform: rotate(-58deg); pointer-events: none; z-index: 5; }
+.plane-fly .plane-ico { position: absolute; left: 0; top: -1em; font-size: 2.1em; color: #fff; filter: drop-shadow(0 0 6px rgba(255,255,255,.6));
+  transform: rotate(90deg); animation: planeGo 1.9s cubic-bezier(.55,0,.75,.4) both; }
+.plane-fly .plane-trail { position: absolute; left: 0; top: -2px; height: 4px; width: 1500px; transform-origin: left center; border-radius: 3px;
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.55)); animation: planeTrail 1.9s cubic-bezier(.55,0,.75,.4) both; }
+@keyframes planeGo { 0% { transform: translateX(0) rotate(90deg) scale(.8); opacity: 0; } 8% { opacity: 1; } 100% { transform: translateX(1500px) rotate(90deg) scale(1.7); opacity: 1; } }
+@keyframes planeTrail { 0% { transform: scaleX(0); opacity: 1; } 80% { opacity: .9; } 100% { transform: scaleX(1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .plane-fly { display: none; } }
 /* the map's reveal: the answer's drawing sweeps in over the question's, a gold edge leading */
 .map-wipe { visibility: hidden; }
 .map-wipe.on { visibility: visible; }
