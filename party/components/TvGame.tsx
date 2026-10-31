@@ -375,10 +375,12 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
         </>) : (<>
           <div className="eyebrow text-16">The airport</div>
           {/* the airport's name comes up on a split-flap board: each letter clatters through the alphabet and lands, left to right */}
-          <SplitFlap text={pub.reveal?.answer || ""} size={30} />
+          {/* a long name ("Ministro Pistarini International Airport (Ezeiza)") on smaller flaps, so the column fits the screen */}
+          <SplitFlap text={pub.reveal?.answer || ""} size={(pub.reveal?.answer || "").length > 34 ? 22 : (pub.reveal?.answer || "").length > 26 ? 26 : 30} />
           {pub.airport.code && <div className="text-24 flex items-center gap-3"><SplitFlap text={pub.airport.code} size={26} start={300} /> · {pub.airport.city}</div>}
           {pub.airport.cityOk === false && <div className="text-18 font-bold text-center" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</div>}
-          {pub.reveal?.notes && <div className="text-16 text-[var(--color-ink-2)] leading-snug text-left">{pub.reveal.notes}</div>}
+          {/* the explanation keeps to four lines: with a long airport name on the flaps it ran off the bottom (the owner, 31 Oct) */}
+          {pub.reveal?.notes && <div className="text-15 text-[var(--color-ink-2)] leading-snug text-left w-full" style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{pub.reveal.notes}</div>}
           <TeamRows pub={pub} empty="No answer" small />
         </>)}
       </div>
