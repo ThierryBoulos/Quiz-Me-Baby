@@ -346,6 +346,9 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 
 /* ---- the end of the night ---- */
 .confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 60; }
+/* the end of the night: the confetti falls behind the words, the chart, the cards and the buttons (the reviewers, 31 Oct) */
+.confetti-back .confetti, .confetti-late .confetti { z-index: 0; }
+.screen > .over-confetti { position: relative; z-index: 1; }
 .confetti i { position: absolute; top: -24px; display: block; opacity: .95; animation-name: confettiFall; animation-timing-function: linear; animation-iteration-count: infinite; }
 @keyframes confettiFall {
   0% { transform: translate3d(0, -5vh, 0) rotate(var(--rot)); }

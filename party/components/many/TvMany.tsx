@@ -220,8 +220,8 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
           return (<>
             <div className="win-flash" style={{ ["--c" as string]: c }} aria-hidden />
             <div className="confetti-late"><Confetti n={140} /></div>
-            <div className="eyebrow text-22 enter">{tops.length > 1 ? "A shared win" : "The winner"}</div>
-            <div className="relative grid place-items-center">
+            <div className="eyebrow text-22 enter relative z-10">{tops.length > 1 ? "A shared win" : "The winner"}</div>
+            <div className="relative z-10 grid place-items-center">
               <span className="win-ring" style={{ ["--c" as string]: c }} aria-hidden />
               <span className="win-ring r2" style={{ ["--c" as string]: c }} aria-hidden />
               <div className="display win-slam max-w-[1160px] leading-none" style={{ fontSize: (name.length > 10 ? 0.74 : 1) * (recap ? 64 : 150), color: c, transition: "font-size .6s ease" }}><bdi>{name}</bdi></div>
@@ -264,13 +264,13 @@ function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
   if (dense && !column) return (
     <div className="flex flex-wrap justify-center gap-x-5 gap-y-1" role="status" aria-label={T.map((t) => `${t.name} ${pub.sent[t.i] ? "in" : "not yet"}`).join(", ")}>
       {T.map(({ i, color }) => (
-        <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ opacity: pub.sent[i] ? 1 : 0.4, color: pub.sent[i] ? color : "var(--color-ink-3)" }}>
-          <Dot t={i} color={color} size={22} />{pub.out?.[i] ? "✗" : pub.sent[i] ? "✓" : "…"}</span>))}
+        <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ opacity: pub.sent[i] ? 1 : 0.4, color: pub.out?.[i] ? "var(--color-no)" : pub.sent[i] ? color : "var(--color-ink-3)" }}>
+          <Dot t={i} color={color} size={22} />{pub.out?.[i] ? "out" : pub.sent[i] ? "✓" : "…"}</span>))}
     </div>);
   return (
     <div className={"flex " + (column ? "flex-col items-center gap-0.5" : "flex-wrap justify-center gap-y-0.5 " + (dense ? "gap-x-5" : "gap-x-10"))} role="status" style={{ maxWidth: 1168 }}>{T.map(({ i, ...t }) => (
       <span key={i} className="font-bold whitespace-nowrap" style={{ fontSize: column && dense ? 20 : 22, color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
-        <bdi>{t.name}</bdi>: {pub.out?.[i] ? "out" : pub.sent[i] ? (pin ? "pin in" : mr ? "all in" : "locked in") : pin ? "placing…" : mr ? "answering…" : "thinking…"}</span>))}
+        <bdi>{t.name}</bdi>: {pub.out?.[i] ? <span style={{ color: "var(--color-no)" }}>out</span> : pub.sent[i] ? (pin ? "pin in" : mr ? "all in" : "locked in") : pin ? "placing…" : mr ? "answering…" : "thinking…"}</span>))}
     </div>);
 }
 /* Majority Rules: how many of the room have answered (the roster is names only, so the count is the room's;
@@ -308,7 +308,7 @@ function NightChartMany({ pub }: { pub: PubMany }) {
       {lab.map((t) => (
         <g key={"l" + t}>
           <line x1={W} y1={y(L[n - 1][t])} x2={W + 14} y2={at[t]} stroke={T[t].color} strokeWidth={1.5} opacity={0.6} />
-          <text x={W + 20} y={at[t] + 6} fill={T[t].color} fontSize={17} fontWeight={800}>{place[t]}. {T[t].name.length > 14 ? T[t].name.slice(0, 13) + "…" : T[t].name} · {T[t].score}</text>
+          <text x={W + 20} y={at[t] + 6} fill={T[t].color} fontSize={17} fontWeight={800}>{place[t]}. {T[t].name.length > 14 ? T[t].name.slice(0, 13) + "…" : T[t].name}  {T[t].score}</text>
         </g>))}
     </svg>);
 }

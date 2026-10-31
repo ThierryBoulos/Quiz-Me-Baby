@@ -124,7 +124,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       </div>); };
 
   return (
-    <div className="flex flex-col gap-4 flex-1">
+    <div className={"flex flex-col gap-4 flex-1" + (sc === "final" ? " over-confetti" : "")}>
       <HudMany pub={pub} size="phone" me={mine} host={host} />
 
       {/* THE HOST: the answer on top, one main button */}

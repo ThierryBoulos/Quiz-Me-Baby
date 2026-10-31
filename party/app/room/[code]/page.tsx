@@ -227,7 +227,7 @@ export default function PhoneRoom() {
       {tapErr && <div className="fixed left-4 right-4 enter text-center font-bold rounded-[16px]" role="alert" data-taperr
         style={{ zIndex: 50, ...(tapAt ?? { top: "calc(12px + env(safe-area-inset-top))" }), fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
           boxShadow: "0 12px 30px rgba(0,0,0,.6)" }}>{tapErr}</div>}
-      {pub?.screen === "final" && !panel && <Confetti n={60} />}
+      {pub?.screen === "final" && !panel && <div className="confetti-back"><Confetti n={60} /></div>}
       <header className="flex items-center justify-between gap-3">
         {/* in a game, your name is the one button up here (the owner, 31 Oct): it opens the teams, their scores and
             players, your captaincy and Leave, in place of a Scores and a Team button; in the lobby it's just your name */}
@@ -315,7 +315,7 @@ export default function PhoneRoom() {
           </section>
           {/* the line-up on one line, so Setup is right here (13 players used to push it 1,400 px down) */}
           <button type="button" className="card flex items-center justify-between gap-3 text-left" aria-expanded={lineupOpen} onClick={() => setLineupOpen((v) => !v)}>
-            <span className="text-14">{many ? <><b>{members.filter((m) => m.role !== "host").length} in</b> · {teamCount} teams · {manyNotReady(members, teamCount) || "every captain set"}</>
+            <span className="text-14">{many ? <><b>{members.filter((m) => m.role !== "host").length} in</b>, {teamCount} teams, {manyNotReady(members, teamCount) || "every captain set"}</>
               : <><b>{members.filter((m) => m.role !== "host").length} in</b> · {[0, 1].map((t) => members.filter((m) => m.team === t).length).join(" v ")} · {notReadyWhy(members) || "both captains set"}</>}</span>
             <span className="text-12 font-bold text-[var(--color-ink-2)]">{lineupOpen ? "Hide" : "Show"}</span>
           </button>

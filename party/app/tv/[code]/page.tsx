@@ -137,7 +137,7 @@ export default function TvRoom() {
               <div className="relative z-10 flex items-center gap-5">
                 <Link href="/" className="btn btn-sm btn-ghost" aria-label="Back to the home screen">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
-                <div className="eyebrow text-16">Join on your phone · scan or type</div>
+                <div className="eyebrow text-16 whitespace-nowrap">Join: scan or type the code</div>
                 <ShareButton code={code} big />
               </div>
               <div className="display mt-2 pointer-events-none select-none" style={{ fontSize: 150, lineHeight: 0.85, color: "var(--color-gold)", textShadow: "6px 6px 0 rgba(49,201,247,.55)", letterSpacing: "0.08em" }}>{code}</div>
