@@ -49,12 +49,15 @@ export const byDistance = (pub: PubMany) => {
   return pub.teams.map((_, i) => i).sort((a, b) => (off[a] == null ? 1 : 0) - (off[b] == null ? 1 : 0) || (off[a] ?? 0) - (off[b] ?? 0) || a - b);
 };
 
+/* what one go of a game is called, in plain words (no "leg": the reviewers, 31 Oct): "Flag 3 of 10", "Recipe 2 of 5" */
+export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe" };
+export const unitOf = (key: string) => UNIT[key] || "Question";
 /* ---- the tracker: the room code, the teams along the top, the night's label and pips under them, then this game's tally.
    The phone keeps only the label, the pips and whose side you're on: the scores are behind your name at the top left. ---- */
 export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
-    ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Level at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Final" : `${pc || g.key === "quiz" ? "Question" : "Leg"} ${g.leg} of ${g.of}`}</>
+    ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Level at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Final" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</>
     : null;
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
@@ -449,7 +452,7 @@ export function ScoresMany({ pub, me, members }: { pub: PubMany; me: number | nu
             <span className="display text-26 w-12 text-right" style={{ color: T[t].color }} aria-label={`Total ${T[t].score}`}>{T[t].score}</span>
           </li>))}
       </ol>
-      {tally && g && <div className="text-12 text-[var(--color-ink-3)]">This game: {g.title}, {pc ? "the share of answers right so far" : `points by place so far, ${g.of} legs`}; its places pay the night at the end. Total: the night&rsquo;s points.</div>}
+      {tally && g && <div className="text-12 text-[var(--color-ink-3)]">This game: {pc ? "the share of answers right so far." : "points so far."} Total: points for the night.</div>}
     </div>);
 }
 /* a team's players on one small wrapping line, the captain first and marked */

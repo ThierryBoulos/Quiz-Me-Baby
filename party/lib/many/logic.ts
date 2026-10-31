@@ -256,7 +256,7 @@ export function next(s: StateM, now: number, t: Timers) {
       });
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
       toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
-        : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} takes leg ${m.i + 1}: +${pts[first[0]]}.`) : `${first.length} teams share leg ${m.i + 1}.`);
+        : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} takes it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
     }
     m.i++;
     if (m.i < m.qs.length) { ask(s, now, t); return true; }
