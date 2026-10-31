@@ -303,16 +303,13 @@ export function mrLine(s: StateM): string {
 
 /* ---- the end of the night (the two-team night's recap, for N teams): the award cards ---- */
 export type AwardM = { t: string; who: string; team: number | null; note?: string; spoon?: boolean };
-/* the wooden spoon's word from the judges, as the two-team night says it (lib/tv/recap.ts) */
-const spoonQuip = (lo: number, of: number) => { const coin = Math.round(of / 4);
-  return lo === 0 ? `Zero. Guessing blind gets about ${coin}.` : lo < coin ? `Guessing blind gets about ${coin}. Just saying.` : lo === coin ? "Exactly what a coin would get. Respect." : "Last, but with dignity."; };
 /* the one team with the most of something (a tie, nobody) */
 const topOf = (v: number[], min = 1): number | null => { const best = Math.max(...v); const at = v.filter((x) => x === best).length; return best >= min && at === 1 ? v.indexOf(best) : null; };
 export function recapMany(s: StateM): AwardM[] {
   const S = s.stats, T = s.teams, nm = (t: number) => T[t].name, out: AwardM[] = [], has = (k: ManyKey) => s.minis.some((m) => m.key === k);
   let t: number | null;
   if ((t = topOf(S.firsts, 2)) != null) out.push({ t: "Most questions won", who: `${nm(t)}, ${S.firsts[t]}`, team: t });
-  if ((t = topOf(S.seconds, 2)) != null && t !== topOf(S.firsts, 2)) out.push({ t: "Always the bridesmaid", who: `${nm(t)}, 2nd ${S.seconds[t]} times`, team: t });
+  if ((t = topOf(S.seconds, 2)) != null && t !== topOf(S.firsts, 2)) out.push({ t: "Always the bridesmaid", who: `${nm(t)}, came 2nd ${S.seconds[t]} times`, team: t });
   if (has("pin")) {
     const legs = s.minis.find((m) => m.key === "pin")!.qs.length, avg = T.map((_, i) => (S.kmN[i] >= Math.ceil(legs / 2) ? S.km[i] / S.kmN[i] : Infinity));
     const lo = Math.min(...avg); if (Number.isFinite(lo) && avg.filter((x) => x === lo).length === 1) { t = avg.indexOf(lo); out.push({ t: "Best aim, Drop the Pin", who: `${nm(t)}, ${lo < 1 ? "under 1 km" : Math.round(lo).toLocaleString("en") + " km"} off on average`, team: t }); }
@@ -326,7 +323,8 @@ export function recapMany(s: StateM): AwardM[] {
     const at = (v: number) => mr.filter(([, w]) => w.r === v), names = (L: typeof mr) => (L.length > 3 ? `${L.length} players` : andList(L.map(([k]) => k)));
     const top = at(hi), low = at(lo), one = (L: typeof mr) => (L.length === 1 ? L[0][1].team : null);
     out.push({ t: "Sharpest in Majority Rules", who: `${names(top)}, ${hi} of ${of}`, team: one(top) });
-    out.push({ t: "Wooden spoon, Majority Rules", who: `${names(low)}, ${lo} of ${of}`, team: one(low), note: spoonQuip(lo, of), spoon: true });
+    /* said plainly, no jab (the owner, 31 Oct) */
+    out.push({ t: "Least right, Majority Rules", who: `${names(low)}, ${lo} of ${of}`, team: one(low), spoon: true });
   } else {
     /* no Majority Rules tonight (or everyone level): the quickest flags and the longest run instead */
     if (has("flag") && (t = topOf(S.fastest, 2)) != null) out.push({ t: "Fastest fingers, Guess the Flag", who: `${nm(t)}, first right ${S.fastest[t]} times`, team: t });
