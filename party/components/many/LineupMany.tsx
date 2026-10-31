@@ -14,7 +14,8 @@ import { colsFor, Dot, place as ordinal } from "./PartsMany";
 export function LineupMany({ room, members, k, big }: { room: Room; members: Member[]; k: number; big?: boolean }) {
   const names = manyNames(room, k), away = ((room.state?.away as string[] | undefined) || []);
   const cols = big ? colsFor(k) : 1, dense = big && k > 4, gap = dense ? 14 : 24;
-  const nameSize = !big ? 24 : k <= 4 ? 36 : k <= 6 ? 30 : 26;
+  /* the name on a line of its own, the width of the card (the owner, 31 Oct: beside the count it shrank to "TE…") */
+  const nameSize = !big ? 24 : k <= 3 ? 36 : k <= 4 ? 30 : k <= 6 ? 28 : 24;
   return (
     <div className={big ? "flex flex-wrap justify-center" : "grid grid-cols-1 gap-3"} style={big ? { gap } : undefined}>
       {names.map((name, t) => {
@@ -22,9 +23,10 @@ export function LineupMany({ room, members, k, big }: { room: Room; members: Mem
         const list = members.filter((m) => (m.team as number) === t).sort((x, y) => (x.role === "captain" ? -1 : 0) - (y.role === "captain" ? -1 : 0));
         return (
           <div key={t} className="card min-w-0" style={{ borderColor: `color-mix(in srgb, ${c} 45%, transparent)`, ...(big ? { flex: `0 0 calc((100% - ${(cols - 1) * gap}px) / ${cols})`, padding: dense ? "12px 14px" : undefined } : {}) }}>
-            <div className={"flex items-center justify-between gap-3 " + (dense ? "mb-2" : "mb-3")}>
-              <div className="flex items-center gap-2 min-w-0"><Dot t={t} color={c} size={!big ? 20 : dense ? 22 : 28} /><div className="display truncate" style={{ color: c, fontSize: name.length > 10 ? ({ 36: 28, 30: 24, 26: 22, 24: 20 } as Record<number, number>)[nameSize] : nameSize }}><bdi>{name}</bdi></div></div>
-              <div className={"eyebrow shrink-0 " + (dense ? "text-13" : "")}>{list.length} {list.length === 1 ? "player" : "players"}</div>
+            <div className={dense ? "mb-2" : "mb-3"}>
+              <div className="flex items-center gap-2 min-w-0"><Dot t={t} color={c} size={!big ? 20 : dense ? 22 : 26} />
+                <div className="display truncate leading-tight" style={{ color: c, fontSize: name.length > 10 ? ({ 36: 30, 30: 26, 28: 24, 24: 20 } as Record<number, number>)[nameSize] : nameSize }}><bdi>{name}</bdi></div></div>
+              <div className={"eyebrow mt-1 " + (dense ? "text-12" : "")}>{list.length} {list.length === 1 ? "player" : "players"}</div>
             </div>
             <div className="flex flex-wrap gap-2">
               {list.length === 0 && <span className="text-[var(--color-ink-3)]" style={{ fontSize: big ? (dense ? 16 : 22) : 14 }}>Nobody yet</span>}
