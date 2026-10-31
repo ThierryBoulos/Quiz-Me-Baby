@@ -9,7 +9,7 @@ import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
-import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult } from "./TwoResults";
+import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
 import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
@@ -86,7 +86,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
         {pub.screen === "roundScore" && (() => { const p = pub.roundPts ?? [0, 0], w = p[0] === p[1] ? null : p[0] > p[1] ? 0 : 1; return (<>
           <div className="display text-44 leading-none slam" style={{ color: "var(--color-gold)" }}>Round {pub.r + 1}</div>
           <RoundLecterns pub={pub} />
-          <div className="display text-52" style={{ color: tc(w) }}>{w == null ? (p[0] ? "A tied round" : "No points this round") : `${T[w].name} win the round`}</div>
+          <div className="rv display text-52" style={{ color: tc(w), animationDelay: twoDone(w) + "s" }}>{w == null ? (p[0] ? "A tied round" : "No points this round") : `${T[w].name} win the round`}</div>
         </>); })()}
 
         {pub.screen === "sudden" && pub.sudden && (!pub.sudden.ready ? (<>
@@ -468,7 +468,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     if (sc === "auctionResult") return (<>
       <MiniTitle title="The Auction" small />
       <AuctionPaddles pub={pub} />
-      {A.winner != null && <div className="display text-52" style={{ color: tc(A.winner) }}><span data-fly-src={A.winner}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</span></div>}
+      {A.winner != null && <div className="rv display text-52" style={{ color: tc(A.winner), animationDelay: twoDone(A.winner) + "s" }}><span data-fly-src={A.winner}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</span></div>}
     </>);
   }
   if (sc === "sayQ") return (<>
@@ -523,7 +523,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     {B.last && <BattleAnswer last={B.last} size={24} />}
     <MiniTitle title="Battle of the Captains" small />
     <BattleShields pub={pub} />
-    <div className="display text-52" style={{ color: tc(B.winner) }}>{B.winner == null ? (B.note || "Tie") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
+    <div className="rv display text-52" style={{ color: tc(B.winner), animationDelay: twoDone(B.winner) + "s" }}>{B.winner == null ? (B.note || "Tie") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
     {B.predict && <div className="text-22" style={{ color: "var(--color-gold)" }}>{B.predict}</div>}
     <SdCalls pub={pub} />
   </>); }
@@ -534,7 +534,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
       <MiniTitle title={m.title} small={TWO_LOOKS.includes(m.key)} />
       {/* the game's own look (the 3-8 team night's), or the board for Auction and Battle */}
       {TWO_LOOKS.includes(m.key) ? <TwoResult pub={pub} /> : <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />}
-      <div className="display text-52" style={{ color: tc(S.winner) }}>
+      <div className="rv display text-52" style={{ color: tc(S.winner), animationDelay: (TWO_LOOKS.includes(m.key) ? twoDone(S.winner) : 0) + "s" }}>
         {S.needsHost ? "Still a tie: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{pointsEach(S.award?.[0] ?? 0)}</span>
           : <span data-fly-src={S.winner}>{`${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</span>}</div>
       {S.note && !/^split|point each/i.test(S.note) && <div className="text-22 text-[var(--color-ink-2)]">{S.note}</div>}

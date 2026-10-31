@@ -137,7 +137,8 @@ export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins"
 export const BEAT_SCREENS = ["answer", "dishReveal", "auctionLeg"];
 export const BEAT_MS = 820;
 export const FLY_MS = 650;
-export const flyAt = (screen: string) => (BEAT_SCREENS.includes(screen) ? BEAT_MS + 600 : /Summary$|^auctionResult$/.test(screen) ? 450 : 0);
+/* (a game's result: once its picture has revealed both teams and the line under it is in, 31 Oct) */
+export const flyAt = (screen: string) => (BEAT_SCREENS.includes(screen) ? BEAT_MS + 600 : /Summary$|^auctionResult$/.test(screen) ? 1900 : 0);
 export const T_CLOSEST = 60, T_FLAG = 15, DISH_STEP = 3, DISH_LAST = 8, T_MAP = 60, T_AUCTION = 30, T_PIN = 45, T_AIRPORT = 30, T_MAJORITY = 15;
 export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
 /* no host: the other captain has this long to give a point the app called WRONG (a RIGHT always stands) */

@@ -13,7 +13,7 @@ import { showKm, showNum } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { Ruler } from "../Ruler";
-import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes } from "./PartsMany";
+import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -209,8 +209,9 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
             : g.key === "say" ? <BubblesMany pub={pub} />
             : g.key === "quiz" ? <LecternsMany pub={pub} />
             : <BarsMany pub={pub} />}
-          <div className={"display " + (dense ? "text-44" : "text-52")} style={{ color: paid(pub).color }}>{paid(pub).text}</div>
-          {pub.summary.line && <div className="text-18 max-w-[900px] truncate" style={{ color: "var(--color-gold)" }}><bdi>{pub.summary.line}</bdi></div>}
+          {/* the line comes once the last team (the winner) is in */}
+          <div className={"rv display " + (dense ? "text-44" : "text-52")} style={{ color: paid(pub).color, animationDelay: revealOf(pub.summary, T.length).done + "s" }}>{paid(pub).text}</div>
+          {pub.summary.line && <div className="rv text-18 max-w-[900px] truncate" style={{ color: "var(--color-gold)", animationDelay: revealOf(pub.summary, T.length).done + 0.2 + "s" }}><bdi>{pub.summary.line}</bdi></div>}
         </>)}
 
         {/* the end: "The winner", a beat, then the name slams down with a flash and a shockwave, and the confetti

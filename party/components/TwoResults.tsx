@@ -8,9 +8,12 @@ import { Fragment } from "react";
 import type { Pub, Two } from "@/lib/game";
 import { MANY_COLORS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
-import { BarsMany, BubblesMany, Caption, DeparturesMany, FlagPoleMany, GlassesMany, LecternsMany, PinsMapMany } from "./many/PartsMany";
+import { BarsMany, BubblesMany, Caption, DeparturesMany, FlagPoleMany, GlassesMany, LecternsMany, PinsMapMany, revealOf } from "./many/PartsMany";
 import { PinMap } from "./PinMap";
 import { Ruler } from "./Ruler";
+
+/* when the line under a two-team picture comes in: once the second team (the winner) has landed; a tie, both at once */
+export const twoDone = (winner: 0 | 1 | null | undefined) => revealOf({ places: winner == null ? [1, 1] : [1, 2] }, 2).done;
 
 /* the mini-games with a look of their own */
 export const TWO_LOOKS = ["majority", "flag", "closest", "pin", "map", "airport", "dish", "saysame"];
@@ -51,7 +54,7 @@ export function AuctionPaddles({ pub }: { pub: Pub }) {
   return (
     <div className="flex items-end justify-center gap-24" role="list" aria-label={"Lots won: " + T.map((t, i) => `${t.name} ${S.pts[i]}`).join(", ")}>
       {[0, 1].map((t) => { const lit = S.award[t] > 0 && S.places[t] === 1, c = T[t].color; return (
-        <div key={t} role="listitem" className="lectern-in flex flex-col items-center gap-1" style={{ width: 200, animationDelay: t * 0.15 + "s" }}>
+        <div key={t} role="listitem" className="lectern-in flex flex-col items-center gap-1" style={{ width: 200, animationDelay: revealOf(S, 2).at(t) + "s" }}>
           {/* the winner's paddle held up: the trophy rides above it */}
           <span className="text-28 leading-none relative z-10" style={{ visibility: lit ? "visible" : "hidden", marginBottom: lit ? 34 : 0 }} role={lit ? "img" : undefined} aria-label={lit ? "takes it" : undefined}>🏆</span>
           <svg viewBox="0 0 120 190" width={150} height={238} aria-hidden style={{ overflow: "visible", transform: lit ? "translateY(-28px) rotate(-6deg)" : "rotate(4deg)", transition: "transform .6s" }}>
@@ -75,7 +78,7 @@ export function BattleShields({ pub }: { pub: Pub }) {
     <div className="flex items-end justify-center gap-10" role="list" aria-label={"Battle of the Captains: " + T.map((t, i) => `${t.name} ${S.pts[i]}`).join(", ")}>
       {[0, 1].map((t) => { const lit = S.award[t] > 0 && S.places[t] === 1, c = T[t].color; return (<Fragment key={t}>
         {t === 1 && <div className="display text-44 self-center mb-24" style={{ color: "var(--color-ink-3)" }}>VS</div>}
-        <div role="listitem" className="lectern-in flex flex-col items-center gap-1" style={{ width: 200, animationDelay: t * 0.15 + "s" }}>
+        <div role="listitem" className="lectern-in flex flex-col items-center gap-1" style={{ width: 200, animationDelay: revealOf(S, 2).at(t) + "s" }}>
           <span className="text-28 leading-none" style={{ visibility: lit ? "visible" : "hidden" }} role={lit ? "img" : undefined} aria-label={lit ? "takes it" : undefined}>🏆</span>
           <svg viewBox="0 0 120 160" width={160} height={213} aria-hidden style={{ overflow: "visible" }}>
             <defs><linearGradient id={"sh" + t} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={c} /><stop offset="1" stopColor={c} stopOpacity=".35" /></linearGradient></defs>
