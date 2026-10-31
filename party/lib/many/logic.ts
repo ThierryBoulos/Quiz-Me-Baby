@@ -260,7 +260,8 @@ export function next(s: StateM, now: number, t: Timers) {
     }
     m.i++;
     if (m.i < m.qs.length) { ask(s, now, t); return true; }
-    award(s, m); s.screen = "summary"; s.step++; return true;
+    /* the last go's message ("first right: +8") goes: next to the game's +10 it read as a contradiction (the reviewers, 31 Oct) */
+    award(s, m); s.screen = "summary"; s.step++; s.toast = null; return true;
   }
   if (s.screen === "summary") {
     s.log.push(s.teams.map((x) => x.score));
