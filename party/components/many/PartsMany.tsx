@@ -421,7 +421,7 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
             {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
             {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
           </div>
-          {(x || ok == null) && <div className="font-bold truncate max-w-full" style={{ fontSize: tv ? (dense ? 20 : 26) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}
+          {(x || ok == null) && <div className="font-bold max-w-full text-center leading-tight clamp2" style={{ fontSize: tv ? (dense ? 18 : 24) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}
         </div>); })}
     </div>);
 }

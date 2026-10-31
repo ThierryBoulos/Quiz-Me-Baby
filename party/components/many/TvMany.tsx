@@ -91,7 +91,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
         {/* Guess the Airport, Guess the Map: the board or the map, the clock and the teams beside it */}
         {pub.screen === "q" && g && (g.key === "airport" || g.key === "map") && (
           <div className="flex gap-10 items-center w-full justify-center">
-            <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} reveal={false} maxH={460} />}</div>
+            <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} reveal={false} maxH={460} still />}</div>
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
               <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{g.key === "airport" ? "Which airport?" : "What do they have in common?"}</div>
               <Clock deadline={pub.deadline} left={pub.left} size={120} />
@@ -146,20 +146,20 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
         {/* a typed answer's reveal (question rounds, airports, maps, Don't Say the Same, the Cocktail or Dish): what was
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
         {pub.screen === "reveal" && g && R && ["quiz", "airport", "map", "say", "dish", "sudden"].includes(g.key) && (<>
-          {g.key === "map" && pub.map ? <MapView id={pub.map.id} reveal maxH={dense ? 150 : 200} legend={false} />
-            : g.key === "airport" ? <Board air={pub.airport} size="small" />
-            : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] truncate">{pub.question}</div>
-            : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] truncate">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
+          {g.key === "map" && pub.map ? <MapView id={pub.map.id} reveal maxH={dense ? 150 : 200} legend={false} still />
+            : g.key === "airport" ? <div className="w-full max-w-[640px]"><Board air={pub.airport} size="small" /></div>
+            : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
+            : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
           {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
           <div className="display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
-          {R.notes && g.key !== "say" && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 truncate">{R.notes}</div>}
+          {R.notes && g.key !== "say" && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 leading-snug clamp2">{R.notes}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "closest" && (<>
-          <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] truncate">{pub.question}</div>
+          <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
           <div className="display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{showNum(Number(R.answer))}</div>
-          {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 truncate">{R.notes}</div>}
+          {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 leading-snug clamp2">{R.notes}</div>}
           <Ruler ans={Number(R.answer)} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i), pts: R.pts?.[i] }))} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.6), color: W.color }}>{W.text}</div>
         </>)}

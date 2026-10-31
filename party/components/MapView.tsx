@@ -17,7 +17,8 @@ export const preloadMap = (id: string) => { void load(id).catch(() => { /* tried
 
 /* wipe: the TV, where the answer's drawing is laid ready under the question's and, on the reveal, simply
    shows over it (no reloading, no flash in between) */
-export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wipe }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string; wipe?: boolean }) {
+/* still: the TV's copy, nothing to tap (no "Enlarge", no button) */
+export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wipe, still }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string; wipe?: boolean; still?: boolean }) {
   const [m, setM] = useState<MapFile | null>(() => ready[id] || null);
   const [big, setBig] = useState(false);
   /* not here yet: fetched, and fetched again every few seconds until it comes (29 Oct: one failed download
@@ -36,14 +37,14 @@ export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wi
   const html = reveal ? m.r : m.q;
   return (
     <div className="flex flex-col items-center gap-2 w-full">
-      <button type="button" className="map-frame" onClick={() => setBig(true)} aria-label="Enlarge the map">
+      <button type="button" className="map-frame" onClick={() => { if (!still) setBig(true); }} aria-label={still ? "The map" : "Enlarge the map"} tabIndex={still ? -1 : undefined} style={still ? { cursor: "default" } : undefined}>
         {wipe ? (
           <div className="relative w-full">
             <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: m.q }} />
             <div className={"map-box map-wipe w-full absolute inset-0" + (reveal ? " on" : "")} style={{ maxHeight: maxH }} aria-hidden={!reveal} dangerouslySetInnerHTML={{ __html: m.r }} />
           </div>
         ) : <div className="map-box w-full" style={{ maxHeight: maxH }} dangerouslySetInnerHTML={{ __html: html }} />}
-        {!wipe && <span className="map-enlarge">Enlarge</span>}
+        {!wipe && !still && <span className="map-enlarge">Enlarge</span>}
       </button>
       {legend && <div dangerouslySetInnerHTML={{ __html: reveal ? m.lr : m.lq }} />}
       {hint && !reveal && m.topic && <div className="text-[0.9em] text-[var(--color-ink-2)]">Hint: <b style={{ color: "var(--color-gold)" }}>{m.topic}</b></div>}
