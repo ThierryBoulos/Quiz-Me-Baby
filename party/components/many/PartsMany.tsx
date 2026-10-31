@@ -143,7 +143,8 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const band = g.key === "sudden" ? "First right wins" : g.key === "majority" || g.key === "quiz" ? `${g.of} questions` : g.key === "say" ? `${g.of} prompts` : g.key === "dish" ? `${g.of} recipes` : `Best of ${g.of}`;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
-      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{g.key === "sudden" ? "Level at the top" : `Game ${g.index + 1} of ${g.count}`}</div>}
+      {/* "Game 2 of 5" is in the tracker right above: not said twice (the owner, 31 Oct) */}
+      {head}
       <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{g.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>

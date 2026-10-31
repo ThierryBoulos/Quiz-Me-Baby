@@ -46,16 +46,30 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
         {pub.screen === "intro" && g && (g.key === "majority" ? (
           <div className="flex gap-10 items-start w-full">
             <div className="flex-1 min-w-0"><IntroMany pub={pub} size="tv" compact /></div>
-            <div className="w-[460px] shrink-0 flex flex-col gap-4 text-left">
-              <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>Everyone on their phone</div>
-              {join && <div className="flex items-center gap-6">
-                <div className="rounded-[18px] p-3 bg-[#f4f6ff] shrink-0"><QRCodeSVG value={join.url} size={140} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
-                <div><div className="display leading-none" style={{ fontSize: 72, color: "var(--color-gold)", letterSpacing: "0.08em" }}>{join.code}</div>
-                  <div className="text-18 text-[var(--color-ink-2)] mt-2">Not in yet? Scan, pick your team, and you&rsquo;re on its list.</div></div>
-              </div>}
-              {seats && <div className="grid grid-cols-2 gap-x-6 gap-y-1">{T.map((t, i) => (
-                <div key={i} className="flex items-center gap-2 min-w-0 text-20"><Dot t={i} color={t.color} size={18} /><span className="display truncate" style={{ color: t.color }}><bdi>{t.name}</bdi></span><span className="text-[var(--color-ink-2)] shrink-0">· {seats[i] ?? 0} in</span></div>))}
-              </div>}
+            {/* joining: the code and its QR side by side, one short line under them; then who's in, a team a row,
+                the name on the left and its count lined up on the right (the owner, 31 Oct: it read untidy) */}
+            <div className="w-[440px] shrink-0 flex flex-col gap-4 text-left">
+              {join && (<>
+                <div className="flex items-center gap-5">
+                  <div className="rounded-[16px] p-2.5 bg-[#f4f6ff] shrink-0"><QRCodeSVG value={join.url} size={dense ? 112 : 132} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
+                  <div className="min-w-0">
+                    <div className="eyebrow text-14 whitespace-nowrap">Not in yet? Join with</div>
+                    <div className="display leading-none mt-1" style={{ fontSize: dense ? 60 : 72, color: "var(--color-gold)", letterSpacing: "0.08em" }}>{join.code}</div>
+                  </div>
+                </div>
+              </>)}
+              {seats && (
+                <div className="card !py-2 !px-4 flex flex-col" role="list" aria-label="Who's in, team by team">
+                  <div className="eyebrow text-12 mb-1">On each team&rsquo;s list</div>
+                  <div className={"grid gap-x-6 " + (k > 4 ? "grid-cols-2" : "grid-cols-1")}>
+                    {T.map((t, i) => (
+                      <div key={i} role="listitem" className="flex items-center gap-2 min-w-0 py-0.5" style={{ fontSize: k > 4 ? 16 : 18 }}>
+                        <Dot t={i} color={t.color} size={k > 4 ? 14 : 16} />
+                        <span className="font-bold truncate flex-1" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
+                        <span className="tabular-nums font-bold shrink-0 text-[var(--color-ink-2)]">{seats[i] ?? 0}</span>
+                      </div>))}
+                  </div>
+                </div>)}
             </div>
           </div>) : <div className="w-full max-w-[1080px]"><IntroMany pub={pub} size="tv" /></div>)}
 
