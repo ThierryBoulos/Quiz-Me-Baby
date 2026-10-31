@@ -391,7 +391,7 @@ export default function PhoneRoom() {
           {/* the host can add or take away a team from here, as the TV's own stepper does */}
           {mine.role === "host" && (
             <div className="card flex items-center justify-between gap-3 !py-2" role="group" aria-label="How many teams">
-              <span className="min-w-0"><span className="block font-bold text-15">Teams</span><span className="block text-12 text-[var(--color-ink-2)]">{teamCount > 2 ? "Three or more: every game played by every team at once." : "Add a team for three or more."}</span></span>
+              <span className="font-bold text-15">Teams</span>
               <span className="flex items-center gap-1 shrink-0">
                 <button className="btn btn-sm !px-0 w-11" aria-label="One team fewer" disabled={busy || teamCount <= 2} onClick={() => tell(() => sendAction(code, "setup", { teams: teamCount - 1 }))}>−</button>
                 <b className="display text-26 w-8 text-center" aria-live="polite">{teamCount}</b>
