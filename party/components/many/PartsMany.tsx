@@ -154,12 +154,14 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
   /* the numbers: a score fits big; a long guess (1,500,000) comes down a size */
   const v = tv ? (dense ? (long > 4 ? 44 : 64) : long > 6 ? 60 : long > 4 ? 80 : 110) : dense ? (long > 4 ? 24 : 32) : long > 4 ? 32 : 44;
   const anyLit = cols.some((c) => c.lit);
+  const hasPlace = cols.some((c) => c.place != null);
   return (
     <div className="board-many" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, maxWidth: width ?? (tv ? Math.min(1168, n * (dense ? 290 : 320)) : undefined), margin: "0 auto" }}
       aria-label={`${label ? label + ": " : ""}${cols.map((c) => `${T[c.t].name} ${c.big}`).join(", ")}`}>
       {cols.map((c) => (
         <div key={c.t} className={"col " + (anyLit && !c.lit ? "dim" : "") + (c.place === 1 ? " first" : "")} style={{ ["--c" as string]: T[c.t].color }}>
-          {c.place != null && <div className="place" style={{ fontSize: tv ? (dense ? 15 : 18) : 11 }}>{place(c.place)}</div>}
+          {/* the place line on every column once any has one ("—" for none), so the numbers line up across a row (the owner, 31 Oct) */}
+          {hasPlace && <div className="place" style={{ fontSize: tv ? (dense ? 15 : 18) : 11 }}>{c.place != null ? place(c.place) : "—"}</div>}
           <div className="v" style={{ fontSize: v }}>{c.big}</div>
           <div className="nm" style={{ fontSize: tv ? (dense ? 13 : 18) : dense ? 10 : 12 }}><Dot t={c.t} color={T[c.t].color} size={tv ? (dense ? 14 : 18) : 12} /><span><bdi>{T[c.t].name}</bdi></span></div>
           {c.sub && <div className="sub" style={{ fontSize: tv ? (dense ? 15 : 20) : 12 }}>{c.sub}</div>}
