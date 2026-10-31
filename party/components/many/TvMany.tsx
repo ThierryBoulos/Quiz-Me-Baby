@@ -84,7 +84,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
           {g.key === "sudden" && <div className="display text-36 leading-none" style={{ color: "var(--color-gold)" }}>First right answer wins the night</div>}
           {pub.theme && <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
           <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 160 ? 34 : (pub.question || "").length > 100 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
-          {g.key === "say" && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px]">One answer on the list. Not the app&rsquo;s secret one, and not the same as another team&rsquo;s.</div>}
+          {g.key === "say" && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px]">One answer each. No points for the app&rsquo;s secret answer, or the same word as another team.</div>}
           <Clock deadline={pub.deadline} left={pub.left} size={130} />
           <Sent pub={pub} />
         </>)}

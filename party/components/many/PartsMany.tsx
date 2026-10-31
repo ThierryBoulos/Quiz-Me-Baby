@@ -136,7 +136,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const g = pub.game, tv = size === "tv";
   if (!g) return null;
   /* how many, in plain words ("5 questions", "10 flags"): no "Best of", every one counts */
-  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "prompts", dish: "recipes" } as Record<string, string>)[g.key] || "questions"}`;
+  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "questions", dish: "recipes" } as Record<string, string>)[g.key] || "questions"}`;
   /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */
