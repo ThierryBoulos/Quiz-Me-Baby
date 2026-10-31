@@ -109,8 +109,8 @@ function rules(pub: PubMany): string[] {
       "Everyone plays and answers on their own phone, captains too.",
       `${n} questions, 4 answers each. One tap and it's locked.`,
       `Teams are ranked by the share of their answers that are right. The best rank scores ${scale}`];
-    case "quiz": { const th = g.themes || [];
-      return [th.length >= 2 ? `Two questions on ${th[0]}, then two on ${th[1]}.` : `${n} questions.`, "Captains type the answer on their phone.", fast, pay]; }
+    /* the round's themes are in the gold band above ("4 questions – Science & Music"), not said again here (the owner, 31 Oct) */
+    case "quiz": return ["Captains type the answer on their phone.", fast, pay];
     case "flag": return ["A flag goes up. Captains type the country on their phone.", fast, pay];
     case "airport": return ["A departures board goes up. Captains type which airport it is.", fast, pay];
     case "map": return ["A map goes up with some countries lit. Captains type what they have in common.", fast, pay];
@@ -129,7 +129,11 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const g = pub.game, tv = size === "tv";
   if (!g) return null;
   /* how many, in plain words ("5 questions", "10 flags"): no "Best of", every one counts */
-  const band = g.key === "sudden" ? "First right wins" : `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "prompts", dish: "recipes" } as Record<string, string>)[g.key] || "questions"}`;
+  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "prompts", dish: "recipes" } as Record<string, string>)[g.key] || "questions"}`;
+  /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
+  const th = g.key === "quiz" ? g.themes || [] : [];
+  /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */
+  const band = g.key === "sudden" ? "First right wins" : th.length ? `${count} – ${th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
       {/* "Game 2 of 5" is in the tracker right above: not said twice (the owner, 31 Oct) */}
