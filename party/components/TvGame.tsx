@@ -9,6 +9,7 @@ import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
+import { TWO_LOOKS, TwoResult } from "./TwoResults";
 import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
@@ -531,12 +532,13 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
   if (/Summary$/.test(sc) && pub.summary) {
     const S = pub.summary;
     return (<>
-      <MiniTitle title={m.title} />
-      <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />
+      <MiniTitle title={m.title} small={TWO_LOOKS.includes(m.key)} />
+      {/* the game's own look (the 3-8 team night's), or the board for Auction and Battle */}
+      {TWO_LOOKS.includes(m.key) ? <TwoResult pub={pub} /> : <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />}
       <div className="display text-52" style={{ color: tc(S.winner) }}>
         {S.needsHost ? "Still a tie: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{pointsEach(S.award?.[0] ?? 0)}</span>
           : <span data-fly-src={S.winner}>{`${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</span>}</div>
-      {S.note && !/^split/i.test(S.note) && <div className="text-22 text-[var(--color-ink-2)]">{S.note}</div>}
+      {S.note && !/^split|point each/i.test(S.note) && <div className="text-22 text-[var(--color-ink-2)]">{S.note}</div>}
       {S.who && <div className="text-22" style={{ color: "var(--color-gold)" }}>{S.who}</div>}
     </>);
   }
@@ -544,9 +546,9 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
 }
 
 /* a mini-game's name over its result: big, in gold, the way its intro showed it */
-function MiniTitle({ title }: { title?: string }) {
+function MiniTitle({ title, small }: { title?: string; small?: boolean }) {
   if (!title) return null;
-  return <div className="display text-52 leading-none slam" style={{ color: "var(--color-gold)" }}>{title}</div>;
+  return <div className={"display leading-none slam " + (small ? "text-44" : "text-52")} style={{ color: "var(--color-gold)" }}>{title}</div>;
 }
 
 /* each team's ruling, then what they wrote under it: "TEAM A  DODGED IT" / "Mcdo" */

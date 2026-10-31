@@ -18,15 +18,17 @@ const LL_NAME = { friend: "Call a Friend", dip: "Double Dip", dbl: "Double Point
 const side = (t: 0 | 1) => (t === 0 ? "a" : "b");
 
 /* ---- the tracker: scores, where we are, and the night's progress ---- */
+/* what one go of a mini-game is called, as the 3-8 team night says it (no "leg", 31 Oct) */
+const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round" };
 function hudLabel(pub: Pub): ReactNode {
   const m = pub.mini, sc = pub.screen;
   if (sc === "final") return <b>Final result</b>;
   if (sc === "sudden") return <b>Sudden death</b>;
   if (m) {
-    const tail = /Summary$|Result$/.test(sc) ? "Final" : /Tie$/.test(sc) && m.key !== "battle" ? "Tie"
+    const tail = /Summary$|Result$/.test(sc) ? "Result" : /Tie$/.test(sc) && m.key !== "battle" ? "Tie"
       : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Tie" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
       : sc === "decided" ? "Won" : m.tie ? "Tie-breaker" : sc === "majorityIntro" ? "Everyone on their phone" : m.key === "majority" ? `Question ${m.leg} of ${m.of}`
-      : `Leg ${m.leg} of ${m.of}${m.fun ? " · for fun" : ""}`;
+      : `${GO[m.key] || "Question"} ${m.leg} of ${m.of}${m.fun ? " · for fun" : ""}`;
     return <><b>{m.title}</b> &nbsp;·&nbsp; {tail}</>;
   }
   return <>Round <b>{Math.min(pub.r + 1, pub.N)}</b> of {pub.N} &nbsp;·&nbsp; <b>{pub.theme}</b></>;
@@ -69,7 +71,8 @@ export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"
         <div className="hud-team b">{pub.fire?.[1] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}<div className="sc" data-score="1"><Roll v={sc(1)} /></div><div className="nm">{T[1].name}</div><span className="dot" /></div>
       </div>
       {/* the mini-game's own score, small, under the night's: "This game: A 1 – 2 B" */}
-      {w && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
+      {/* (not on a game's result: its picture says it) */}
+      {w && !/Summary$/.test(pub.screen) && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
         <span>This game:</span><span className="nm a">{T[0].name}</span><b className="a">{w[0]}{u}</b><span aria-hidden>–</span><b className="b">{w[1]}{u}</b><span className="nm b">{T[1].name}</span>
       </div>}
     </div>);
