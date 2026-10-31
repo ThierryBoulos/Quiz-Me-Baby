@@ -8,6 +8,7 @@ import { showKm, showNum } from "@/lib/game";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import type { Member } from "@/lib/room";
+import { playSound } from "@/lib/sound";
 
 export type Size = "tv" | "phone";
 /* the team's letter in its dot: eight colours never need telling apart */
@@ -57,7 +58,7 @@ export const UNIT: Record<string, string> = { quiz: "Question", majority: "Quest
 export const unitOf = (key: string) => UNIT[key] || "Question";
 /* ---- the tracker: the room code, the teams along the top, the night's label and pips under them, then this game's tally.
    The phone keeps only the label, the pips and whose side you're on: the scores are behind your name at the top left. ---- */
-export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean }) {
+export function HudMany({ pub, size, code, me, host, sound = false }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean; sound?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
     ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Tie at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</>
@@ -72,7 +73,12 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
   const [landed, setLanded] = useState(false);
   /* the +points rise once the result's reveal is done (the last team in), and land 1.5 s later */
   const flyAfter = pub.screen === "summary" && pub.summary ? revealOf(pub.summary, k).done : 0;
-  useEffect(() => { setLanded(false); if (pub.screen !== "summary") return; const t = setTimeout(() => setLanded(true), 1500 + flyAfter * 1000); return () => clearTimeout(t); }, [pub.screen, pub.step]);   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    setLanded(false); if (pub.screen !== "summary") return;
+    /* as the points land, the TV itself plays the soft "coin in a jar" */
+    const t = setTimeout(() => { setLanded(true); if (sound && award?.some((x) => x > 0)) playSound("point"); }, 1500 + flyAfter * 1000);
+    return () => clearTimeout(t);
+  }, [pub.screen, pub.step]);   // eslint-disable-line react-hooks/exhaustive-deps
   const num = (i: number) => (award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
   const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
   return (
@@ -265,9 +271,15 @@ export function DeparturesMany({ pub }: { pub: PubMany }) {
 }
 /* the Cocktail or Dish: a cocktail glass a team, filled in its colour to its points (the best full to the brim,
    a cherry on its rim) */
-export function GlassesMany({ pub }: { pub: PubMany }) {
+export function GlassesMany({ pub, sound = false }: { pub: PubMany; sound?: boolean }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, best = Math.max(1, ...S.pts), order = byPlace(S, k), w = dense ? 112 : 170, h = w * 1.25;
   const rv = revealOf(S, k);
+  /* on the TV itself, a soft pour as each glass with something in it fills */
+  useEffect(() => {
+    if (!sound) return;
+    const ts = T.map((_, t) => (S.pts[t] > 0 ? setTimeout(() => playSound("pour"), (rv.at(t) + 0.3) * 1000) : null));
+    return () => ts.forEach((x) => x && clearTimeout(x));
+  }, [pub.step]);   // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 14 : 34 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
       {order.map((t) => { const lvl = S.pts[t] / best, lit = S.award[t] > 0 && S.places[t] === 1, id = "g" + t; return (

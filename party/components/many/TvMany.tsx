@@ -22,7 +22,8 @@ const QUICK = { ["--beat" as string]: ".15s" };
 
 /* join: where a phone joins this room (Majority Rules puts the QR code up again before it starts)
    host: who taps Start and Next (the strip at the bottom says so); seats: players on each team (the join screen's counts) */
-export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url: string; code: string }; host?: string; seats?: number[] }) {
+/* sound: this is the TV itself (it plays the pours and the coins landing; another screen showing the TV stays quiet) */
+export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany; join?: { url: string; code: string }; host?: string; seats?: number[]; sound?: boolean }) {
   const g = pub.game, R = pub.reveal, T = pub.teams, k = T.length, dense = k > 4;
   const key = pub.screen + pub.step;
   /* a message shows for four seconds, then goes */
@@ -39,7 +40,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
   return (
     /* nothing on the TV can be selected or copied */
     <div className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
-      <HudMany pub={pub} size="tv" code={join?.code} />
+      <HudMany pub={pub} size="tv" code={join?.code} sound={sound} />
 
       <div className="flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}
@@ -205,7 +206,7 @@ export function TvMany({ pub, join, host, seats }: { pub: PubMany; join?: { url:
             : g.key === "closest" ? <Ruler ans={0} scale teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: pub.summary!.pts[i], win: pub.summary!.places[i] === 1 && pub.summary!.award[i] > 0, pts: pub.summary!.award[i] }))} />
             : g.key === "pin" || g.key === "map" ? <PinsMapMany pub={pub} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />
             : g.key === "airport" ? <DeparturesMany pub={pub} />
-            : g.key === "dish" ? <GlassesMany pub={pub} />
+            : g.key === "dish" ? <GlassesMany pub={pub} sound={sound} />
             : g.key === "say" ? <BubblesMany pub={pub} />
             : g.key === "quiz" ? <LecternsMany pub={pub} />
             : <BarsMany pub={pub} />}

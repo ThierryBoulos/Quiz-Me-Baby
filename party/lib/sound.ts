@@ -3,8 +3,8 @@
    jingle, the whoosh, the drumroll, the ticks, the bells at time-up, right,
    wrong, points and the win. All made by the browser, no audio files. Only
    the TV plays them; phones stay quiet. No voice. */
-type Opt = { type?: OscillatorType; gain?: number };
-type NOpt = { type?: BiquadFilterType; f0?: number; f1?: number; q?: number; gain?: number; att?: number };
+type Opt = { type?: OscillatorType; gain?: number; att?: number; to?: number; glide?: number };
+type NOpt = { type?: BiquadFilterType; f0?: number; f1?: number; q?: number; gain?: number; att?: number; hold?: number };
 
 import { getSettings, saveSettings } from "./settings";
 
@@ -29,10 +29,11 @@ function note(freq: number, at: number, dur: number, opt: Opt = {}) {
   if (!ctx || !master || !on) return;
   const t = ctx.currentTime + at;
   const o = ctx.createOscillator(), g = ctx.createGain();
-  o.type = opt.type || "sine"; o.frequency.value = freq;
+  o.type = opt.type || "sine"; o.frequency.setValueAtTime(freq, t);
+  if (opt.to) o.frequency.exponentialRampToValueAtTime(opt.to, t + (opt.glide || dur * 0.5));   // a pitch that slides (a bubble)
   const peak = opt.gain == null ? 0.16 : opt.gain;
   g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(peak, t + 0.035);
+  g.gain.exponentialRampToValueAtTime(peak, t + (opt.att || 0.035));
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o.connect(g); g.connect(master);
   o.start(t); o.stop(t + dur + 0.05);
@@ -51,6 +52,7 @@ function noise(at: number, dur: number, opt: NOpt = {}) {
   const g = ctx.createGain();
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(opt.gain || 0.2, t + (opt.att || dur * 0.6));
+  if (opt.hold) g.gain.setValueAtTime(opt.gain || 0.2, t + opt.hold);                              // held, then let go
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   src.connect(f); f.connect(g); g.connect(master);
   src.start(t); src.stop(t + dur + 0.05);
@@ -86,7 +88,17 @@ export const Snd = {
   tick() { if (!cfg().tick) return; note(1320, 0, 0.07, { type: "sine", gain: 0.095 }); note(2640, 0, 0.04, { type: "sine", gain: 0.03 }); },
   correct() { this.resume(); note(659.25, 0, 0.42, { type: "triangle", gain: 0.14 }); note(987.77, 0.09, 0.6, { type: "triangle", gain: 0.11 }); },
   wrong() { this.resume(); note(311.13, 0, 0.4, { type: "sine", gain: 0.12 }); note(233.08, 0.11, 0.6, { type: "sine", gain: 0.1 }); },
-  point() { this.resume(); [523.25, 659.25, 783.99].forEach((f, i) => note(f, i * 0.07, 0.5, { type: "triangle", gain: 0.1 })); },
+  /* points landing on a team's total: a soft "coin in a jar" (the owner's pick, 31 Oct): two quick coin taps, a
+     little shimmer after */
+  point() { this.resume(); note(1568, 0, 0.14, { type: "triangle", gain: 0.05, att: 0.004 }); note(2093, 0.085, 0.55, { type: "triangle", gain: 0.05, att: 0.004 });
+    note(4186, 0.1, 0.4, { type: "sine", gain: 0.012, att: 0.01 }); note(3520, 0.16, 0.35, { type: "sine", gain: 0.008, att: 0.01 }); },
+  /* a glass filling (the Cocktail or Dish result, the owner's pick, 31 Oct): a soft pour whose note climbs as the
+     glass fills, a few small bubbles in it; about as long as the glass takes */
+  pour() {
+    this.resume();
+    noise(0, 1.25, { q: 5, f0: 420, f1: 1500, gain: 0.035, att: 0.12, hold: 0.95 });
+    [0.18, 0.37, 0.52, 0.74, 0.9, 1.04].forEach((at, i) => { const f = 380 + i * 90 + Math.random() * 60; note(f, at, 0.09, { gain: 0.03, att: 0.005, to: f * 2.1, glide: 0.06 }); });
+  },
   win() {
     this.resume();
     [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5, 1318.51].forEach((f, i) => note(f, i * 0.16, 1.6, { type: "triangle", gain: 0.125 }));
@@ -97,5 +109,5 @@ export const Snd = {
   /* a coin landing on the score (a mini-game's points, one coin each) */
   coin(k = 0) { this.resume(); const f = 1046.5 * Math.pow(2, Math.min(k, 7) / 12); note(f, 0, 0.12, { type: "triangle", gain: 0.07 }); note(f * 2, 0.01, 0.08, { type: "sine", gain: 0.025 }); },
 };
-export type SoundName = "jingle" | "alarm" | "whoosh" | "drumroll" | "tick" | "correct" | "wrong" | "point" | "win" | "soft" | "coin";
+export type SoundName = "jingle" | "alarm" | "whoosh" | "drumroll" | "tick" | "correct" | "wrong" | "point" | "win" | "soft" | "coin" | "pour";
 export const playSound = (n: SoundName) => { try { Snd[n](); } catch { /* no audio */ } };

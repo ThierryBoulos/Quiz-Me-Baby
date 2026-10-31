@@ -100,7 +100,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           <SdCalls pub={pub} />
         </>))}
 
-        <TvMini pub={pub} join={join} />
+        <TvMini pub={pub} join={join} sound={sound} />
 
         {pub.screen === "final" && (<>
           {/* the winner: "The winner", a beat, then the name slams down with a flash and a shockwave, and the confetti bursts */}
@@ -253,7 +253,7 @@ function BidBar({ n, of, color }: { n: number; of: number; color: string }) {
 }
 
 /* the mini-games on the TV */
-function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
+function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: boolean }) {
   const T = pub.teams, m = pub.mini, sc = pub.screen;
   if (!m) return null;
   /* Majority Rules: before it starts, everyone on their phone: the QR code again, and each team's list */
@@ -533,7 +533,7 @@ function TvMini({ pub, join }: { pub: Pub; join?: Join }) {
     return (<>
       <MiniTitle title={m.title} small={TWO_LOOKS.includes(m.key)} />
       {/* the game's own look (the 3-8 team night's), or the board for Auction and Battle */}
-      {TWO_LOOKS.includes(m.key) ? <TwoResult pub={pub} /> : <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />}
+      {TWO_LOOKS.includes(m.key) ? <TwoResult pub={pub} sound={sound} /> : <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />}
       <div className="rv display text-52" style={{ color: tc(S.winner), animationDelay: (TWO_LOOKS.includes(m.key) ? twoDone(S.winner) : 0) + "s" }}>
         {S.needsHost ? "Still a tie: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{pointsEach(S.award?.[0] ?? 0)}</span>
           : <span data-fly-src={S.winner}>{`${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</span>}</div>

@@ -29,7 +29,7 @@ function two(pub: Pub, pts: Two<number>, winner: 0 | 1 | null | undefined, award
 }
 const awardOf = (pub: Pub, winner: 0 | 1 | null | undefined, award?: Two<number>) => (award ?? [winner === 0 ? pub.mini?.pts ?? 0 : 0, winner === 1 ? pub.mini?.pts ?? 0 : 0]) as number[];
 
-export function TwoResult({ pub }: { pub: Pub }) {
+export function TwoResult({ pub, sound = false }: { pub: Pub; sound?: boolean }) {
   const key = pub.mini?.key, S0 = pub.summary;
   if (!S0 || !key || !TWO_LOOKS.includes(key)) return null;
   const P = two(pub, S0.wins, S0.winner, awardOf(pub, S0.winner, S0.award), { pct: !!pub.mini?.pct }), S = P.summary!;
@@ -38,7 +38,7 @@ export function TwoResult({ pub }: { pub: Pub }) {
   if (key === "closest") return <Ruler ans={0} scale teams={P.teams.map((t, i) => ({ name: t.name, color: t.color, letter: "AB"[i], guess: S.pts[i], win: S.places[i] === 1 && S.award[i] > 0, pts: S.award[i] || undefined }))} />;
   if (key === "pin" || key === "map") return <PinsMapMany pub={P} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />;
   if (key === "airport") return <DeparturesMany pub={P} />;
-  if (key === "dish") return <GlassesMany pub={P} />;
+  if (key === "dish") return <GlassesMany pub={P} sound={sound} />;
   return <BubblesMany pub={P} />;
 }
 

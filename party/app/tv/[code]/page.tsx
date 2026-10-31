@@ -172,7 +172,7 @@ export default function TvRoom() {
             </div>
           </div>
         </>
-      ) : pubMany ? <TvMany pub={pubMany} join={{ url: joinUrl, code }} host={host?.name} seats={Array.from({ length: pubMany.teams.length }, (_, t) => members.filter((m) => m.role !== "host" && (m.team as number) === t).length)} /> : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
+      ) : pubMany ? <TvMany pub={pubMany} join={{ url: joinUrl, code }} sound={isTv} host={host?.name} seats={Array.from({ length: pubMany.teams.length }, (_, t) => members.filter((m) => m.role !== "host" && (m.team as number) === t).length)} /> : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
         <div className="m-auto text-center enter">
           <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
         </div>
