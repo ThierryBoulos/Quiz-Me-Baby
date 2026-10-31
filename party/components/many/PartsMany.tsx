@@ -106,25 +106,26 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
 /* ---- a game's intro: the title, the gold band, the numbered rules (GameParts' MiniIntro, for N teams) ---- */
 function rules(pub: PubMany): string[] {
   /* plain English, only what you need to play (the owner, 31 Oct): no ties, no team counts */
-  const g = pub.game!, n = g.of, k = pub.teams.length;
-  /* "10, 8, 6…" (no full stop after the dots), or with three teams "10, 8, 6." */
-  const scale = k > 3 ? `${PLACE_PTS.slice(0, 3).join(", ")}…` : `${PLACE_PTS.slice(0, k).join(", ")}.`;
-  const pay = `At the end, the best rank scores ${scale}`;
-  const fast = "The faster your right answer, the more points.";
+  const g = pub.game!, n = g.of, k = pub.teams.length, more = k > 3 ? "…" : ".";
+  /* the points, in numbers (the reviewers, 31 Oct): each go pays by place, 1st as many as there are teams; at the
+     end the game's places add 10, 8, 6… to the night. With three teams the lists end with a full stop, not dots */
+  const per = `1st gets ${k} points, 2nd ${k - 1}, 3rd ${k - 2}${more} Wrong, nothing.`;
+  const pay = `At the end of the game, 1st place adds ${PLACE_PTS[0]} to the night, 2nd ${PLACE_PTS[1]}, 3rd ${PLACE_PTS[2]}${more}`;
+  const fast = `Fastest right answer first: ${per}`;
   switch (g.key) {
     case "majority": return [
       "Everyone plays and answers on their own phone, captains too.",
       `${n} questions, 4 answers each. One tap and it's locked.`,
-      `Teams are ranked by the share of their answers that are right. The best rank scores ${scale}`];
+      "Teams are ranked by the share of their answers that are right.", pay];
     /* the round's themes are in the gold band above ("4 questions – Science & Music"), not said again here (the owner, 31 Oct) */
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
     case "flag": return ["A flag goes up. Captains type the country on their phone.", fast, pay];
     case "airport": return ["A departures board goes up. Captains type which airport it is.", fast, pay];
     case "map": return ["A map goes up with some places marked. Captains type what they have in common.", fast, pay];
-    case "closest": return ["A question with a number for an answer. Captains type their best guess.", "The closer your guess, the more points.", pay];
-    case "pin": return ["A photo of a famous place. Captains drop a pin on the map where they think it is.", "The closer your pin, the more points.", pay];
+    case "closest": return ["A question with a number for an answer. Captains type their best guess.", `Closest guess first: ${per}`, pay];
+    case "pin": return ["A photo of a famous place. Captains drop a pin on the map where they think it is.", `Closest pin first: ${per}`, pay];
     case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
-      "No points if you say the app's secret answer, or the same as another team.", pay];
+      `No points if you say the app's secret answer, or the same as another team. Any other answer gets ${k} points.`, pay];
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
       "One guess per team. A wrong guess puts you out of that one.", fast, pay];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");

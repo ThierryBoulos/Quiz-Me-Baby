@@ -117,7 +117,7 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
             <div className="display text-24">Mini-games</div>
             <span className={"badge shrink-0 " + (night.length ? "gold" : "line")}>{night.length ? `${night.length} game${night.length === 1 ? "" : "s"}` : "None"}</span>
           </div>
-          <div className="text-13 text-[var(--color-ink-2)]">Every team plays every game at the same time. In each game the best rank scores <b style={{ color: "var(--color-gold)" }}>{PLACE_PTS.slice(0, Math.min(3, k)).join(", ")}{k > 3 ? "…" : ""}</b></div>
+          <div className="text-13 text-[var(--color-ink-2)]">Every team plays every game at the same time. At the end of each game, 1st place adds <b style={{ color: "var(--color-gold)" }}>{PLACE_PTS[0]}</b> to the night, 2nd <b style={{ color: "var(--color-gold)" }}>{PLACE_PTS[1]}</b>, 3rd <b style={{ color: "var(--color-gold)" }}>{PLACE_PTS[2]}</b>{k > 3 ? "…" : "."}</div>
         </div>
         {GAMES.map(([key, blurb]) => { const lit = minis.includes(key); return (
           <div key={key}>
