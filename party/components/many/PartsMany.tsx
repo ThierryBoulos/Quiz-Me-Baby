@@ -199,10 +199,7 @@ export function BarsMany({ pub }: { pub: PubMany }) {
             <div className="bar-grow w-full" style={{ height: Math.max(4, v * H), borderRadius: "12px 12px 3px 3px", animationDelay: j * 0.08 + "s", opacity: paid ? 1 : 0.4,
               background: `linear-gradient(180deg, ${T[t].color}, color-mix(in srgb, ${T[t].color} 35%, transparent))`, boxShadow: lit ? `0 0 28px ${T[t].color}` : undefined }} />
           </div>
-          <div className="display text-16 leading-none mt-1" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "—"}</div>
-          <div className="flex items-center gap-1.5 min-w-0 max-w-full"><Dot t={t} color={T[t].color} size={dense ? 14 : 18} />
-            <span className="eyebrow truncate" style={{ color: T[t].color, fontSize: dense ? 12 : 15 }}><bdi>{T[t].name}</bdi></span></div>
-          <div className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</div>
+          <Caption pub={pub} t={t} dense={dense} />
         </div>); })}
     </div>);
 }
@@ -360,7 +357,8 @@ export function PinsMapMany({ pub, map }: { pub: PubMany; map?: ReactNode }) {
             </div>
             <div className="absolute flex flex-col items-center gap-0.5" style={{ top: ground + 8, width: W / k - 8 }}>
               <span className="display text-15 leading-none" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "–"}</span>
-              <span className="flex items-center gap-1 min-w-0 max-w-full"><Dot t={t} color={T[t].color} size={14} /><span className="eyebrow truncate" style={{ color: T[t].color, fontSize: dense ? 11 : 13 }}><bdi>{T[t].name}</bdi></span></span>
+              <span className="eyebrow text-center min-w-0 max-w-full" style={{ color: T[t].color, fontSize: dense ? 11 : 13, letterSpacing: ".1em", lineHeight: 1.2, overflowWrap: "anywhere", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                <span className="inline-block align-middle mr-1" style={{ marginTop: -2 }}><Dot t={t} color={T[t].color} size={14} /></span><bdi>{T[t].name}</bdi></span>
               <span className="display leading-none" style={{ fontSize: dense ? 20 : 24, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
             </div>
           </div>); })}
@@ -417,8 +415,9 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
     <div className="grid w-full" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gap: tv ? "12px 24px" : "12px 10px", maxWidth: tv ? Math.min(1168, n * (dense ? 300 : 390)) : undefined, ["--beat" as string]: ".4s" }}>
       {T.map((t, i) => { const ok = R.ok?.[i], x = R.typed?.[i]; if (pub.game?.only && !pub.game.only.includes(i)) return null; return (
         <div key={i} className={"flex flex-col items-center gap-1 min-w-0 " + (tv ? "beat" : "")} style={delay?.(i)}>
-          <div className="flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
-            <span className={tv ? "display truncate" : "eyebrow truncate"} style={{ color: t.color }}><bdi>{t.name}</bdi></span>
+          {/* a phone with five teams or more (two columns): the name on a line of its own, so it's never "THE …" */}
+          <div className={"flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + (!tv && dense ? " flex-wrap gap-y-0" : "")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
+            <span className={tv ? "display truncate" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
             {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
             {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
           </div>

@@ -145,7 +145,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
         {(() => { const who = T.map((_, i) => i).filter((i) => !g.only || g.only.includes(i)), n = who.filter((i) => pub.sent[i]).length; return (
           <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who has answered">
             <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered` : `${n} of ${who.length} teams answered`}</p>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+            <div className={"grid gap-x-3 gap-y-1 " + (T.some((t) => t.name.length > 8) ? "grid-cols-1" : "grid-cols-2")}>
               {who.map((i) => { const t = T[i], on = pub.sent[i] && !pub.out?.[i]; return (
                 <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
                   <Dot t={i} color={t.color} size={14} /><span className="truncate flex-1"><bdi>{t.name}</bdi></span>
@@ -162,7 +162,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
           <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; if (g.only && !g.only.includes(i)) return null; return (
             <div key={i} className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
-                <div className="eyebrow flex items-center gap-2" style={{ color: t.color }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
+                <div className="eyebrow flex items-center gap-2" style={{ color: t.color, letterSpacing: ".1em" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
                 {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
               </div>
               {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={v} say={g.key === "say"} neg={g.key === "say" ? SAY_WHY[R.why?.[i] || ""] : undefined} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}

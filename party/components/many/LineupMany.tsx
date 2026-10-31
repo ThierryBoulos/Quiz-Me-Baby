@@ -51,7 +51,7 @@ export function PickMany({ room, k, busy, pick, current }: { room: Room; k: numb
       {names.map((name, t) => { const c = MANY_COLORS[t]; return (
         <button key={t} className="btn btn-lg min-w-0 !px-4 !gap-2" disabled={busy || current === t} aria-pressed={current === t} aria-label={`${"ABCDEFGH"[t]} · ${name}`} onClick={() => pick(t)}
           style={{ borderColor: c, color: "var(--color-ink)", background: `color-mix(in srgb, ${c} ${current === t ? 28 : 14}%, transparent)` }}>
-          <Dot t={t} color={c} size={22} /><span className="truncate"><bdi>{name}</bdi></span></button>); })}
+          <Dot t={t} color={c} size={22} /><span className="text-left leading-tight text-15"><bdi>{name}</bdi></span></button>); })}
     </div>);
 }
 
