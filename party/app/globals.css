@@ -226,6 +226,8 @@ button.chip.me-chip.chip-on { color: var(--color-gold); }
 .pip.done { background: var(--color-ink-2); }
 .pip.now { background: var(--color-gold); box-shadow: 0 0 0 4px rgba(245,197,24,.18), 0 0 14px var(--color-gold); animation: pulse 1.8s ease-in-out infinite; }
 .pip.now.mini { width: 30px; }
+.pips-tag { font-size: var(--text-11); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-3); margin-right: 4px; white-space: nowrap; }
+.hud.tv .pips-tag { font-size: var(--text-13); }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 /* phones: the scores on one line, the label and pips under them (Classic's narrow layout) */
 .hud.phone .hud-in { grid-template-columns: 1fr 1fr; row-gap: 8px; }
