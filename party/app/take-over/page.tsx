@@ -27,7 +27,7 @@ export default function TakeOver() {
         <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>The TV died?</div><h1 className="display text-40">Take over as the TV</h1></div>
         <Link className="btn btn-sm btn-ghost" href="/join">Back</Link>
       </header>
-      <p className="text-15 text-[var(--color-ink-2)]">On the host&rsquo;s phone: <b>Team Members → The TV died? → Get a code</b>. Type it here with the room code, and this laptop becomes the TV. The night carries on where the old TV last saved it.</p>
+      <p className="text-15 text-[var(--color-ink-2)]">On the host&rsquo;s phone: <b>their name (top left) → The TV died? → Get a code</b>. Type it here with the room code, and this laptop becomes the TV. The night carries on where the old TV last saved it.</p>
       <label className="field-label" htmlFor="room">Room code</label>
       <input id="room" className="input !text-22 uppercase tracking-[.2em]" maxLength={4} value={room} onChange={(e) => setRoom(e.target.value)} placeholder="ABCD" autoComplete="off" />
       <label className="field-label" htmlFor="tvcode">The host&rsquo;s 6-digit code</label>

@@ -147,6 +147,10 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
   padding: 44px 56px; display: flex; flex-direction: column; }
 button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .chip.chip-on { background: color-mix(in srgb, var(--color-gold) 18%, transparent); border-color: var(--color-gold); color: var(--color-gold); }
+/* the phone's top left: your name, the button to the teams sheet in a game; just your name in the lobby */
+button.chip.me-chip { padding: 6px 12px 6px 6px; min-width: 0; max-width: 64vw; color: var(--color-ink); }
+button.chip.me-chip.chip-on { color: var(--color-gold); }
+.chip.me-flat { background: transparent; border-color: transparent; padding-left: 0; min-width: 0; max-width: 64vw; }
 
 /* Guess the Map — the drawing rules copied from Classic */
 .map-box { display: flex; justify-content: center; }

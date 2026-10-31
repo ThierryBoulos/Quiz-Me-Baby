@@ -7,6 +7,7 @@ import { Roll, Verdict } from "../GameParts";
 import { showKm, showNum } from "@/lib/game";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
+import type { Member } from "@/lib/room";
 
 export type Size = "tv" | "phone";
 /* the team's letter in its dot: eight colours never need telling apart */
@@ -49,7 +50,7 @@ export const byDistance = (pub: PubMany) => {
 };
 
 /* ---- the tracker: the room code, the teams along the top, the night's label and pips under them, then this game's tally.
-   The phone keeps only the label, the pips and whose side you're on: the scores are behind its Scores button. ---- */
+   The phone keeps only the label, the pips and whose side you're on: the scores are behind your name at the top left. ---- */
 export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
@@ -420,16 +421,17 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
     </div>);
 }
 
-/* ---- the phone's Scores sheet: every team in order, yours marked (behind the Scores button: the owner found a
-   score strip for eight teams too much on a phone) ---- */
-export function ScoresMany({ pub, me }: { pub: PubMany; me: number | null }) {
+/* ---- the phone's Teams sheet, behind the name at the top left (the owner, 31 Oct: one place for the scores and
+   the players, instead of a Scores and a Team button): every team in order with its score, its players under its
+   name, yours marked (a score strip for eight teams is too much on a phone) ---- */
+export function ScoresMany({ pub, me, members }: { pub: PubMany; me: number | null; members?: Member[] }) {
   const T = pub.teams, g = pub.game, pc = g?.key === "majority";
   const order = pub.final ? pub.final.order.map((o) => o.team) : T.map((_, i) => i).sort((a, b) => T[b].score - T[a].score || a - b);
   const placeOf = (t: number) => pub.final ? pub.final.order.find((o) => o.team === t)!.place : order.findIndex((x) => T[x].score === T[t].score) + 1;
   const tally = g && pub.screen !== "intro" && pub.screen !== "final" ? (pc ? g.shares : g.pts) : null;
   return (
-    <div className="card flex flex-col gap-3" role="group" aria-label="Scores">
-      <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{pub.screen === "final" ? "Final standings" : "The scores"}</div>
+    <div className="card flex flex-col gap-3" role="group" aria-label="Teams and scores">
+      <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{pub.screen === "final" ? "Final standings" : "Teams and scores"}</div>
       {/* the column titles: what the grey number is, and that the big one is the night's total */}
       <div className="flex items-end gap-2 px-2 -mx-2 text-11 font-bold uppercase tracking-[.14em] leading-tight text-[var(--color-ink-3)]" aria-hidden>
         <span className="flex-1">Team</span>
@@ -438,14 +440,24 @@ export function ScoresMany({ pub, me }: { pub: PubMany; me: number | null }) {
       </div>
       <ol className="flex flex-col gap-1">
         {order.map((t) => (
-          <li key={t} className="flex items-center gap-2 min-h-[44px] rounded-[14px] px-2 -mx-2" style={t === me ? { background: `color-mix(in srgb, ${T[t].color} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${T[t].color} 40%, transparent)` } : undefined}>
+          <li key={t} className={"flex items-center gap-2 min-h-[44px] rounded-[14px] px-2 -mx-2" + (members ? " py-1.5" : "")} style={t === me ? { background: `color-mix(in srgb, ${T[t].color} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${T[t].color} 40%, transparent)` } : undefined}>
             <span className="display text-16 w-7 text-right" style={{ color: placeOf(t) === 1 ? "var(--color-gold)" : "var(--color-ink-3)" }}>{placeOf(t)}</span>
             <Dot t={t} color={T[t].color} size={16} />
-            <span className="flex-1 min-w-0 flex flex-col"><span className="font-bold text-16 truncate" style={{ color: T[t].color }}><bdi>{T[t].name}</bdi></span>{t === me && <span className="cap self-start">Your team</span>}</span>
+            <span className="flex-1 min-w-0 flex flex-col"><span className="font-bold text-16 truncate" style={{ color: T[t].color }}><bdi>{T[t].name}</bdi></span>{t === me && <span className="cap self-start">Your team</span>}
+              {members && <Players list={members.filter((m) => (m.team as number) === t)} />}</span>
             {tally && <span className="w-14 shrink-0 text-13 text-[var(--color-ink-2)] tabular-nums text-right" aria-label={`${g!.title}: ${pc ? pct(tally[t]) : `${tally[t]} points`}`}>{pc ? pct(tally[t]) : `${tally[t]} pts`}</span>}
             <span className="display text-26 w-12 text-right" style={{ color: T[t].color }} aria-label={`Total ${T[t].score}`}>{T[t].score}</span>
           </li>))}
       </ol>
       {tally && g && <div className="text-12 text-[var(--color-ink-3)]">This game: {g.title}, {pc ? "the share of answers right so far" : `points by place so far, ${g.of} legs`}; its places pay the night at the end. Total: the night&rsquo;s points.</div>}
     </div>);
+}
+/* a team's players on one small wrapping line, the captain first and marked */
+function Players({ list }: { list: Member[] }) {
+  const L = [...list].sort((x, y) => (x.role === "captain" ? 0 : 1) - (y.role === "captain" ? 0 : 1));
+  if (!L.length) return <span className="text-13 text-[var(--color-ink-3)]">Nobody yet</span>;
+  return (
+    <span className="text-13 leading-snug text-[var(--color-ink-2)] mt-0.5">
+      {L.map((m, i) => <span key={m.user_id}>{i > 0 && ", "}<span className="whitespace-nowrap"><span aria-hidden>{m.avatar || "🙂"}</span> <bdi>{m.name}</bdi>{m.role === "captain" && <span className="cap ml-1">Captain</span>}</span></span>)}
+    </span>);
 }

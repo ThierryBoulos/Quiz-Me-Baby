@@ -34,7 +34,7 @@ export default function PhoneRoom() {
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<string | null>(null);        // the team name being typed (null: not touched)
   const [nameState, setNameState] = useState<null | "saving" | "saved" | "late">(null);
-  const [panel, setPanel] = useState<false | "team" | "scores">(false);   // mid-game: the line-up and changing captain; many teams: the scores too
+  const [panel, setPanel] = useState(false);          // mid-game, behind your name: the teams (and their scores), changing captain, leaving
   const [rules, setRules] = useState(false);          // the lobby: How to Play over the room, so nobody leaves it
   /* Between a tap and the TV's reply (a second or two): a bar along the top,
      and the buttons stay off, so nobody taps twice wondering if it worked. */
@@ -225,17 +225,17 @@ export default function PhoneRoom() {
         style={{ zIndex: 50, ...(tapAt ?? { top: "calc(12px + env(safe-area-inset-top))" }), fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
           boxShadow: "0 12px 30px rgba(0,0,0,.6)" }}>{tapErr}</div>}
       {pub?.screen === "final" && !panel && <Confetti n={60} />}
-      <header className="flex items-center justify-between">
-        <span className="chip"><span className="face">{mine.avatar || "🙂"}</span>{mine.name}</span>
+      <header className="flex items-center justify-between gap-3">
+        {/* in a game, your name is the one button up here (the owner, 31 Oct): it opens the teams, their scores and
+            players, your captaincy and Leave, in place of a Scores and a Team button; in the lobby it's just your name */}
+        {room.status !== "lobby"
+          ? <button type="button" className={"chip me-chip" + (panel ? " chip-on" : "")} aria-expanded={panel} aria-label={`${mine.name}: teams and scores`} onClick={() => setPanel(!panel)}>
+              <span className="face">{mine.avatar || "🙂"}</span><span className="truncate"><bdi>{mine.name}</bdi></span>
+              <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden className="shrink-0 opacity-70" style={{ transform: panel ? "rotate(180deg)" : undefined, transition: "transform .2s" }}><path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+          : <span className="chip me-flat"><span className="face">{mine.avatar || "🙂"}</span><span className="truncate"><bdi>{mine.name}</bdi></span></span>}
         <span className="eyebrow whitespace-nowrap">{room.status === "lobby" ? `Room ${code}` : code}</span>
-        <div className="flex gap-2">
-          {/* many teams: the scores live behind their own button (a strip of eight clutters a phone); the line-up's reads "Team" to make room */}
-          {room.status !== "lobby" && many && panel !== "team" && (room.state?.pub as PubMany | null)?.many && (
-            <button className={"btn btn-sm " + (panel === "scores" ? "btn-gold" : "btn-ghost")} aria-expanded={panel === "scores"} onClick={() => setPanel(panel === "scores" ? false : "scores")}>Scores</button>)}
-          {room.status !== "lobby"
-            ? <button className="btn btn-sm btn-ghost" aria-expanded={panel === "team"} onClick={() => setPanel(panel === "team" ? false : "team")}>{panel === "team" ? "Back" : mine.role === "host" ? "Players" : many ? "Team" : "Team Members"}</button>
-            : <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}
-        </div>
+        {room.status === "lobby" && <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}
       </header>
 
       {/* the lobby: the logo, small, while everyone waits */}
@@ -248,7 +248,8 @@ export default function PhoneRoom() {
           The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</p>)}
 
       {/* the tracker, as on the TV: scores, where we are, the night's progress */}
-      {room.status !== "lobby" && pub && !many && !panel && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
+      {/* (two teams: it stays over the teams sheet too, so the scores and the players are on one screen) */}
+      {room.status !== "lobby" && pub && !many && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
 
       {room.status !== "lobby" ? (
         /* joined after the start: pick a side first */
@@ -260,15 +261,10 @@ export default function PhoneRoom() {
             <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
             <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button></>}
           </section>
-        ) : panel === "scores" && (room.state?.pub as PubMany | null)?.many ? (
-          /* many teams: every team's score, in order, yours marked */
-          <section className="flex flex-col gap-3 enter">
-            <ScoresMany pub={room.state.pub as PubMany} me={mine.team as number | null} />
-            <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
-          </section>
         ) : panel ? (
-          /* mid-game: who's where, and a new captain when one is needed */
+          /* mid-game, behind your name: the teams (many: in order, with their scores and players), a new captain when one is needed */
           <section className="flex flex-col gap-3 enter">
+            {many && (room.state?.pub as PubMany | null)?.many && <ScoresMany pub={room.state.pub as PubMany} me={mine.team as number | null} members={members} />}
             {mine.role === "captain" && (
               <div className="card flex flex-col gap-2">
                 <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
@@ -278,8 +274,8 @@ export default function PhoneRoom() {
             {mine.role === "player" && !myCaptain && (
               <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>)}
             {mine.role === "player" && myCaptain && <div className="card text-center text-14">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
-            {mine.role === "host" && <p className="text-14 text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
-            {many ? <LineupMany room={room} members={members} k={teamCount} /> : <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />}
+            {mine.role === "host" && !many && <p className="text-14 text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
+            {many ? (!(room.state?.pub as PubMany | null)?.many && <LineupMany room={room} members={members} k={teamCount} />) : <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />}
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {mine.role === "host" && pub && !many && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}

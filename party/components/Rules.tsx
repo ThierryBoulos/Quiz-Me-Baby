@@ -127,7 +127,7 @@ export function FixingACall({ standalone = false }: { standalone?: boolean }) {
       </Rule>
       <Rule n="C" title="No host: the two captains agree">
         <L items={[
-          <>Scores wrong? Either captain: <B>Team Members &rarr; Adjust the scores</B>. The other captain gets Agree or No; no answer in <B>20 seconds</B>, nothing changes.</>,
+          <>Scores wrong? Either captain: <B>your name (top left) &rarr; Adjust the scores</B>. The other captain gets Agree or No; no answer in <B>20 seconds</B>, nothing changes.</>,
           <>A question nobody wants? Before anyone has answered it, either captain taps <B>Change the question</B> (or the flag, landmark, board, dish, map or prompt). The clock stops while the other captain decides. Agree, and a new one comes at the same level with a fresh clock; No, or no answer in 20 seconds, and it carries on.</>,
           <>Team A&rsquo;s captain moves the night on (Start, Next, the choices at a tie or a game decided early). If they haven&rsquo;t after a while, the other captain can.</>,
           <>Majority Rules: someone who has gone home comes off their team&rsquo;s list before Start, with the other captain&rsquo;s agreement.</>,
@@ -139,7 +139,7 @@ export function FixingACall({ standalone = false }: { standalone?: boolean }) {
           <><B>Captain gone?</B> After a while the armband passes to a teammate who is still here. <B>Host gone?</B> The captains run the night meanwhile; the host picks it back up on return.</>,
           <><B>The TV&rsquo;s Wi-Fi dropped, or its screen went to sleep?</B> The clocks stand still until it&rsquo;s back; nothing times out meanwhile. A TV reloaded or reopened picks the night up where it was.</>,
           <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question, or pastes an answer, is flagged on the TV; the host sees the list.</>,
-          <><B>The TV laptop died?</B> The host taps <B>Team Members &rarr; The TV died? &rarr; Get a code</B>. On another laptop, open the site, tap <B>Join a game</B>, then <B>The TV died?</B> at the very bottom, and type the room code and that code: the night carries on from the TV&rsquo;s last save.</>,
+          <><B>The TV laptop died?</B> The host taps <B>their name (top left) &rarr; The TV died? &rarr; Get a code</B>. On another laptop, open the site, tap <B>Join a game</B>, then <B>The TV died?</B> at the very bottom, and type the room code and that code: the night carries on from the TV&rsquo;s last save.</>,
         ]} />
       </Rule>
     </>);
