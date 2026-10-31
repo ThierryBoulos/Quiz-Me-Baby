@@ -1,6 +1,7 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Lineup } from "@/components/Lineup";
 import { ShareButton } from "@/components/Share";
 import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, ScoreFix, TvTakeover, useSecret } from "@/components/PhoneGame";
@@ -36,6 +37,8 @@ export default function PhoneRoom() {
   const [nameState, setNameState] = useState<null | "saving" | "saved" | "late">(null);
   const [panel, setPanel] = useState(false);          // mid-game, behind your name: the teams (and their scores), changing captain, leaving
   const [rules, setRules] = useState(false);          // the lobby: How to Play over the room, so nobody leaves it
+  const [invite, setInvite] = useState<string | null>(null);   // the room code tapped: its QR code and Share, over the screen (the join link)
+  useEffect(() => { if (!invite) return; const k = (e: KeyboardEvent) => { if (e.key === "Escape") setInvite(null); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, [invite]);
   /* Between a tap and the TV's reply (a second or two): a bar along the top,
      and the buttons stay off, so nobody taps twice wondering if it worked. */
   /* It lasts until the TV has actually answered (its next update), not until this phone's own refresh;
@@ -234,7 +237,12 @@ export default function PhoneRoom() {
               <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden className="shrink-0 opacity-70" style={{ transform: panel ? "rotate(180deg)" : undefined, transition: "transform .2s" }}><path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
           : <span className="chip me-flat"><span className="face">{mine.avatar || "🙂"}</span><span className="truncate"><bdi>{mine.name}</bdi></span></span>}
-        <span className="eyebrow whitespace-nowrap">{room.status === "lobby" ? `Room ${code}` : code}</span>
+        {/* the room code opens its QR code and Share, so a late friend can scan this phone (the owner, 31 Oct) */}
+        <button type="button" className="eyebrow whitespace-nowrap inline-flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 rounded-[12px]" aria-haspopup="dialog" aria-label={`Room ${code}: show the QR code to join`}
+          onClick={() => setInvite(`${window.location.origin}/join?code=${code}`)}>
+          {room.status === "lobby" ? `Room ${code}` : code}
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden fill="currentColor"><path d="M1 1h6v6H1V1Zm1.5 1.5v3h3v-3h-3ZM9 1h6v6H9V1Zm1.5 1.5v3h3v-3h-3ZM1 9h6v6H1V9Zm1.5 1.5v3h3v-3h-3ZM9 9h2v2H9V9Zm4 0h2v2h-2V9Zm-2 2h2v2h-2v-2Zm-2 2h2v2H9v-2Zm4 0h2v2h-2v-2Z" /></svg>
+        </button>
         {room.status === "lobby" && <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}
       </header>
 
@@ -364,6 +372,19 @@ export default function PhoneRoom() {
       )}
 
       {msg && <p className="field-error text-center">{msg}</p>}
+
+      {/* the room code, tapped: the QR code to scan, the code, and Share; a tap outside or Close puts it away */}
+      {invite && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4 enter" style={{ background: "rgba(3,4,10,.82)" }} role="dialog" aria-modal="true" aria-label="Join this game" onClick={() => setInvite(null)}>
+          <div className="card w-full max-w-[360px] flex flex-col items-center gap-3 text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Join this game</div>
+            <div className="rounded-[18px] p-3 bg-[#f4f6ff]"><QRCodeSVG value={invite} size={220} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
+            <div className="display text-52 leading-none tracking-[.12em]">{code}</div>
+            <p className="text-14 text-[var(--color-ink-2)]">Scan it with the camera, or open <b>{invite.replace(/^https?:\/\//, "").replace(/\/join.*$/, "")}</b> and type the code.</p>
+            <ShareButton code={code} big />
+            <button className="btn btn-gold btn-block" autoFocus onClick={() => setInvite(null)}>Close</button>
+          </div>
+        </div>)}
 
       {rules && room.status === "lobby" && (
         <div className="fixed inset-0 z-40 overflow-y-auto" style={{ background: "var(--color-bg)" }} role="dialog" aria-modal="true" aria-label="How to play">
