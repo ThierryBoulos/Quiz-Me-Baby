@@ -291,12 +291,13 @@ export function ranking(s: StateM): { team: number; place: number }[] {
 }
 /* names in a sentence: "Lea", "Lea & Omar", "Lea, Dana & Omar" */
 const andList = (L: string[]) => (L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join(""));
-/* Majority Rules: the sharpest player and the wooden spoon, over the game */
+/* Majority Rules: who had the most right and who the least, over the game (said plainly here, the owner, 31 Oct:
+   the wooden spoon is the end of the night's card) */
 export function mrLine(s: StateM): string {
   const all = Object.entries(s.who).filter(([, w]) => w.of > 0); if (all.length < 2) return "";
   const hi = Math.max(...all.map(([, w]) => w.r)), lo = Math.min(...all.map(([, w]) => w.r)), of = Math.max(...all.map(([, w]) => w.of));
   const names = (v: number) => { const L = all.filter(([, w]) => w.r === v).map(([k]) => k); return L.length > 3 ? `${L.length} players` : andList(L); };
-  return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of}. Wooden spoon: ${names(lo)}, ${lo} of ${of}.`;
+  return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of}. Least right: ${names(lo)}, ${lo} of ${of}.`;
 }
 
 /* ---- the end of the night (the two-team night's recap, for N teams): the award cards ---- */

@@ -98,5 +98,5 @@ summary dish award 10,8,0,0 | summary | 91-75-60-50
 next game | final | 91-75-60-50
 games: Question round 1, Majority Rules, Guess the Flag, Guess the Airport, Guess the Map, Question round 2, Closest To Wins, Drop the Pin, Don't Say the Same as Me, Guess the Cocktail or Dish
 final 1:Team A 2:Team B 3:Team C 4:Team D
-majority: Most right: P5, 11 of 15. Wooden spoon: P4, 4 of 15.
+majority: Most right: P5, 11 of 15. Least right: P4, 4 of 15.
 awards: Most questions won: Team A, 23 | Always the bridesmaid: Team C, 2nd 14 times | Best aim, Drop the Pin: Team B, 519 km off on average | Sharpest in Majority Rules: P5, 11 of 15 | Wooden spoon, Majority Rules: P4, 4 of 15
