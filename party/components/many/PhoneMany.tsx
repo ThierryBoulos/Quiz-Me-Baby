@@ -13,7 +13,7 @@ import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { typedKey } from "@/lib/many/logic";
-import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, paid, place, RowsMany, splitIng, summaryCols, takes } from "./PartsMany";
+import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, paid, place, RowsMany, splitIng, summaryCols, takes, SAY_WHY } from "./PartsMany";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 function useSecretMany(code: string, on: boolean, step: number) {
@@ -164,7 +164,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
                 <div className="eyebrow flex items-center gap-2" style={{ color: t.color }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
                 {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
               </div>
-              {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} say={g.key === "say"} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}
+              {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={v} say={g.key === "say"} neg={g.key === "say" ? SAY_WHY[R.why?.[i] || ""] : undefined} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}
             </div>); })}</div>
         ) : <Rows />}
         {g.key !== "majority" && <Big text={W.text} color={W.color} />}

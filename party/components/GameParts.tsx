@@ -91,13 +91,14 @@ export function Verdict({ v, say, size, stamp, word }: { v: boolean | null | und
    the app judges, the host (or, with no host, the other captain) can. ---- */
 /* sticky: the call already stands (a reveal), so tapping the lit button again changes nothing */
 /* compact: the reveal screens' smaller pair, beside each team's answer */
-export function RulingPicker({ value, app, say, onPick, busy, label, sticky, compact }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string; sticky?: boolean; compact?: boolean }) {
+/* neg: the exact word for the call that scores nothing ("Same word", "Off the list"), where the app has one */
+export function RulingPicker({ value, app, say, onPick, busy, label, sticky, compact, neg }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string; sticky?: boolean; compact?: boolean; neg?: string }) {
   const opt = (v: boolean) => {
     const on = value === v;
     return (
       <button type="button" className={"btn btn-lg rule-btn " + (v ? "pos" : "neg") + (on ? " on" : "")} aria-pressed={on} disabled={busy} onClick={() => { if (!(sticky && on)) onPick(v); }}>
         {app === v && <span className="rule-tag">App suggests</span>}
-        <span>{verdictWord(v, say)}</span>
+        <span>{!v && neg ? neg : verdictWord(v, say)}</span>
       </button>);
   };
   return <div className={"rule-pick" + (compact ? " compact" : "")} role="group" aria-label={label || "Your call"}>{opt(true)}{opt(false)}</div>;

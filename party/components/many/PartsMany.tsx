@@ -403,7 +403,7 @@ export function RowsMany({ pub, order, right, size, label, pts }: { pub: PubMany
 export const kmOf = (pub: PubMany, t: number): ReactNode => (pub.reveal?.pins?.[t] ? showKm(pub.reveal.off?.[t] ?? 0) : <span className="text-[var(--color-ink-3)]">No pin</span>);
 
 /* Don't Say the Same: why an answer scores nothing */
-const SAY_WHY: Record<string, string> = { said: "Said it", off: "Off the list", same: "Same word" };
+export const SAY_WHY: Record<string, string> = { said: "Said it", off: "Off the list", same: "Same word" };
 /* the Cocktail or Dish: "60 ml — gin" splits into the amount and the ingredient */
 export const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
 /* ---- a typed answer's reveal: each team's ruling beside its name, what it typed under them (TvGame's TeamRows) ---- */
