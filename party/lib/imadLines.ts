@@ -121,7 +121,7 @@ export const HOST_LINES: Record<string, string[]> = {
   ],
   "level": [
     "All square! Who wants it more?",
-    "Dead level. Back to square one, everybody.",
+    "A dead tie. Back to square one, everybody.",
     "Tied up. It's anybody's night.",
     "Nothing in it. Somebody break the deadlock, please."
   ],
@@ -225,6 +225,6 @@ export const HOST_LINES: Record<string, string[]> = {
   "finaltie": [
     "A draw! Everybody wins! Nobody wins! Philosophy!",
     "Tied at the end. Fine. Rematch. Now.",
-    "Dead level! You're all equally brilliant. Or equally lost."
+    "A dead tie! You're all equally brilliant. Or equally lost."
   ]
 };

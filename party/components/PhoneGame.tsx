@@ -468,7 +468,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <Result pub={pub} />
         {S?.note && <Line className="!text-13">{S.note}</Line>}
         {S?.needsHost ? (<>
-          <div className="eyebrow text-center">Still level. Who gets the {pub.mini?.pts} points?</div>
+          <div className="eyebrow text-center">Still a tie. Who gets the {pub.mini?.pts} points?</div>
           <div className="grid grid-cols-3 gap-2 mt-auto">
             <button className="btn btn-a" disabled={busy} onClick={() => send({ type: mk + "/award", w: 0 })}>{T[0].name}</button>
             <button className="btn" disabled={busy} onClick={() => send({ type: mk + "/award", w: "split" })}>Split</button>
@@ -775,7 +775,7 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
     {head(w, w == null ? "Tie" : `${T[w].name} win the Auction`, w != null ? `+${A.award?.[w] ?? m?.pts} points` : "")}
     {board(A.wins, "Legs won", w)}</>); }
   if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary; return (<>
-    {head(S.winner, S.needsHost ? "Still level" : S.winner == null ? "A split" : `${T[S.winner].name} win ${m?.title ?? "it"}`,
+    {head(S.winner, S.needsHost ? "Still a tie" : S.winner == null ? "A split" : `${T[S.winner].name} win ${m?.title ?? "it"}`,
       S.needsHost ? "The host decides" : S.winner == null ? `${S.award?.[0] ?? 0} point${S.award?.[0] === 1 ? "" : "s"} each` : `+${S.award?.[S.winner] ?? m?.pts} points`)}
     {board(S.wins, "Legs won", S.winner)}
     {S.who && <div className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{S.who}</div>}</>); }
@@ -1034,7 +1034,7 @@ function AgreeCard({ pub, mine, busy, act }: { pub: Pub; mine: 0 | 1; busy: bool
     <div className="card flex flex-col gap-2 enter" style={{ borderColor: "var(--color-gold)" }} role="group" aria-label="Do you agree?">
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Do you agree?</div>
       {A.kind === "swap"
-        ? <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants a new {A.what}, at the same level.
+        ? <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants a new {A.what}, just as hard.
           <span className="text-[var(--color-ink-2)]"> The clock is stopped meanwhile; a new one gets a fresh clock.</span></p>
         : <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants to set the scores to <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
           <span className="text-[var(--color-ink-2)]"> Now: {T[0].score}–{T[1].score}.</span></p>}

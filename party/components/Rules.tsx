@@ -83,7 +83,7 @@ export function Rules({ fixing = true }: { fixing?: boolean }) {
           <><B>Guess the Airport.</B> A departures board, <B>30 s</B>: the destinations, the airlines and the language are the clues. The city is enough, unless it has more than one airport. Best of 5.</>,
           <><B>Majority Rules.</B> Everyone plays, on their own phone: 15 questions, four answers, <B>15 s</B> each, one tap and it&rsquo;s locked. No answer counts as wrong. Each team scores the share of its answers that are right, so a small team isn&rsquo;t at a disadvantage.</>,
           <><B>Guess the Cocktail or Dish.</B> The ingredients come up one every <B>3 s</B>, the giveaway last. Captain, hit <B>BUZZ</B> and type it in <B>10 s</B>. Wrong, and you&rsquo;re out of that one. Best of 5.</>,
-          <><B>Battle of the Captains.</B> Captains only, the room says nothing. Ten questions each: <B>7 s</B> out loud with a host, <B>15 s</B> typed without. Best score takes double points; level is a buzzer tie-breaker. Always last.</>,
+          <><B>Battle of the Captains.</B> Captains only, the room says nothing. Ten questions each: <B>7 s</B> out loud with a host, <B>15 s</B> typed without. Best score takes double points; a tie goes to a buzzer tie-breaker. Always last.</>,
         ]} />
       </Rule>
 
@@ -128,7 +128,7 @@ export function FixingACall({ standalone = false }: { standalone?: boolean }) {
       <Rule n="C" title="No host: the two captains agree">
         <L items={[
           <>Scores wrong? Either captain: <B>your name (top left) &rarr; Adjust the scores</B>. The other captain gets Agree or No; no answer in <B>20 seconds</B>, nothing changes.</>,
-          <>A question nobody wants? Before anyone has answered it, either captain taps <B>Change the question</B> (or the flag, landmark, board, dish, map or prompt). The clock stops while the other captain decides. Agree, and a new one comes at the same level with a fresh clock; No, or no answer in 20 seconds, and it carries on.</>,
+          <>A question nobody wants? Before anyone has answered it, either captain taps <B>Change the question</B> (or the flag, landmark, board, dish, map or prompt). The clock stops while the other captain decides. Agree, and a new one, just as hard, comes with a fresh clock; No, or no answer in 20 seconds, and it carries on.</>,
           <>Team A&rsquo;s captain moves the night on (Start, Next, the choices at a tie or a game decided early). If they haven&rsquo;t after a while, the other captain can.</>,
           <>Majority Rules: someone who has gone home comes off their team&rsquo;s list before Start, with the other captain&rsquo;s agreement.</>,
         ]} />

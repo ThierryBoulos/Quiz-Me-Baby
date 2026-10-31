@@ -443,7 +443,7 @@ export const silent = (pub: Pub, t: 0 | 1) => {
 };
 
 /* a tie at the end of a mini-game, in the same words on the TV and every phone */
-export const tieHead = (pub: Pub) => (pub.mini?.pct ? `Dead level at ${pub.mini.wins[0]}% each` : `Tie at ${pub.mini?.wins[0] ?? 0} each`);
+export const tieHead = (pub: Pub) => (pub.mini?.pct ? `Tie at ${pub.mini.wins[0]}% each` : `Tie at ${pub.mini?.wins[0] ?? 0} each`);
 export const tieCall = (pub: Pub) =>
   `One more to settle it, or a point each: ${pub.mode === "host" ? "the host" : pub.captains?.[pub.lead ?? 0] || "the captain"} decides.`;
 /* the pictures coming up, fetched ahead (flags into the browser's cache, maps into MapView's) */

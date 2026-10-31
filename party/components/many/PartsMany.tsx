@@ -60,7 +60,7 @@ export const unitOf = (key: string) => UNIT[key] || "Question";
 export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
-    ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Level at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</>
+    ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Tie at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</>
     : null;
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
@@ -130,7 +130,7 @@ function rules(pub: PubMany): string[] {
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
       "One guess per team. A wrong guess puts you out of that one.", fast, pay];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
-      return [`${names} are level at the top.`, "One question at a time, and only they answer. The first right answer wins the night."]; }
+      return [`${names} are tied at the top.`, "One question at a time, and only they answer. The first right answer wins the night."]; }
   }
 }
 /* compact: the TV's Majority Rules intro, which shares the screen with the QR code */

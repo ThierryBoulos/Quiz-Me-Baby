@@ -204,7 +204,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       </>)}
 
       {/* sudden death: a captain whose team isn't level at the top watches */}
-      {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>Sudden death: only the teams level at the top answer this one.</Line></>)}
+      {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>Sudden death: only the teams tied at the top answer this one.</Line></>)}
       {/* THE CAPTAIN answers the rest */}
       {cap && sc === "q" && g && g.key !== "majority" && !(g.only && mine != null && !g.only.includes(mine)) && (<>
         <OnScreen small={g.key === "pin" && !sentMine} />

@@ -128,7 +128,7 @@ const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: 
    fastest is the first to arrive there, however the network hands the answers to the TV; none, the order they come */
 export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown }, order?: number): true | string {
   const m = miniOf(s); if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
-  if (m.only && !m.only.includes(team)) return "Only the teams level at the top answer this one.";
+  if (m.only && !m.only.includes(team)) return "Only the teams tied at the top answer this one.";
   if (typedKey(m.key)) {
     if (s.typed[team] != null) return m.key === "dish" ? "Your team has had its guess at this one." : "Your answer is in.";
     const text = String(p.text ?? "").trim().slice(0, 80); if (!text) return "Type an answer first.";
