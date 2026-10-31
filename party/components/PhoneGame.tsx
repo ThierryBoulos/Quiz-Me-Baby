@@ -906,7 +906,7 @@ function status(pub: Pub, me: Member) {
     case "sudden": return cap ? "Sudden death: captains only. Buzz to answer." : "Sudden death: captains only. Not a word!";
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country? One go." : "Guess the Flag: help your captain";
-    case "pinQ": return cap ? "Where is it? Drop your pin. One go." : "Drop the Pin: help your captain";
+    case "pinQ": return cap ? "Where is it? Drop your pin, then lock it in." : "Drop the Pin: help your captain";
     case "airportQ": return cap ? "Which airport? One go." : "Guess the Airport: help your captain";
     case "majorityQ": return "Your own answer: eyes on your phone, no talking";
     case "dishQ": return pub.buzz === mine ? (pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
@@ -1197,7 +1197,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         </div>)}
       {canPin && (
         <div className="flex flex-col gap-2">
-          <p className="text-center text-13 text-[var(--color-ink-3)]">{pinAt ? "Drag your pin to move it. Zoom in (pinch, or +) to place it exactly." : "Tap the map to drop your pin."}</p>
+          <p className="text-center text-13 text-[var(--color-ink-3)]">{pinAt ? "Tap anywhere to move your pin, or drag it. Zoom in (pinch, or +) to place it exactly, then Lock in." : "Tap the map to drop your pin. You can move it until you lock in."}</p>
           <PinMap value={pinAt} onChange={setPinAt} color={TEAM_HEX[mine]} height="min(520px, max(300px, calc(100dvh - 460px)))" />
           <button className="btn btn-gold btn-lg btn-block dock" disabled={busy || !pinAt} onClick={() => void sendPin()}>Lock in</button>
         </div>)}

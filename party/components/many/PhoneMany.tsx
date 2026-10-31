@@ -212,7 +212,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
             {pub.out?.[mine!] ? `Wrong${sentTxt ? `: ${sentTxt}` : ""}. Your team is out of this one.` : `Locked in${sentTxt && g.key !== "pin" ? `: ${sentTxt}` : ""}.`}</p>
           : g.key === "pin" ? (
             <div className="flex flex-col gap-2">
-              <p className="text-center text-13 text-[var(--color-ink-3)]">{pin ? "Drag your pin to move it. Zoom in (pinch, or +) to place it exactly." : "Tap the map to drop your pin."}</p>
+              <p className="text-center text-13 text-[var(--color-ink-3)]">{pin ? "Tap anywhere to move your pin, or drag it. Zoom in (pinch, or +) to place it exactly, then Lock in." : "Tap the map to drop your pin. You can move it until you lock in."}</p>
               <PinMap value={pin} onChange={setPin} color={mine != null ? T[mine].color : undefined} height="min(520px, max(300px, calc(100dvh - 460px)))" />
               <button className="btn btn-gold btn-lg btn-block dock" disabled={busy || !pin} onClick={() => void send("answer", { pin, k: `${pub.qid}|q` })}>Lock in</button>
             </div>

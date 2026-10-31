@@ -311,7 +311,8 @@ export function PinMap({ value, onChange, color = "#31c9f7", marks, fly, height,
   const toLatLon = (x: number, y: number): LatLon => { const { wx, wy } = toWorld(x, y); return { lat: latOf(Math.max(0, Math.min(1, wy))), lon: lonOf(Math.max(0, Math.min(1, wx))) }; };
   const pinXY = () => { const v = V.current, p = pin.current, { W, H } = dim.current; return v && p ? { x: (mx(p.lon) - v.cx) * v.s + W / 2, y: (my(p.lat) - v.cy) * v.s + H / 2 } : null; };
   /* on the pin: its head (above the finger) or its tip */
-  const onPin = (x: number, y: number) => { const p = pinXY(), r = 11 * size; return !!p && (Math.hypot(x - p.x, y - (p.y - 2.3 * r)) < r * 1.9 || Math.hypot(x - p.x, y - p.y) < r * 1.2); };
+  /* a finger's width around the pin's head and its tip (31 Oct: the owner couldn't move a dropped pin on a phone) */
+  const onPin = (x: number, y: number) => { const p = pinXY(), r = 11 * size; return !!p && (Math.hypot(x - p.x, y - (p.y - 2.3 * r)) < r * 2.8 || Math.hypot(x - p.x, y - p.y) < r * 2); };
   const commit = () => { if (pin.current && onChange) onChange({ lat: Math.round(pin.current.lat * 1e5) / 1e5, lon: Math.round(pin.current.lon * 1e5) / 1e5 }); };
   const two = () => { const [a, b] = [...ptrs.current.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; };
 
@@ -342,7 +343,7 @@ export function PinMap({ value, onChange, color = "#31c9f7", marks, fly, height,
       redraw(); return;
     }
     const dx = p.x - G.x, dy = p.y - G.y;
-    if (Math.abs(dx) + Math.abs(dy) > 7) G.moved = true;
+    if (Math.abs(dx) + Math.abs(dy) > 12) G.moved = true;   // a finger's jitter is still a tap
     if (G.mode === "pin") { pin.current = toLatLon(p.x + G.ox!, p.y + G.oy!); redraw(); return; }
     if (G.mode === "pan" && G.moved) { V.current = clampV({ cx: G.v.cx - dx / G.v.s, cy: G.v.cy - dy / G.v.s, s: G.v.s }); redraw(); }
   };
@@ -362,7 +363,7 @@ export function PinMap({ value, onChange, color = "#31c9f7", marks, fly, height,
     if (!G) return;
     if (G.mode === "pin") { if (G.moved) commit(); return; }
     /* a tap: the pin goes there */
-    if (G.mode === "pan" && !G.moved && pick && Date.now() - G.t < 700) { pin.current = toLatLon(p.x, p.y); redraw(); commit(); }
+    if (G.mode === "pan" && !G.moved && pick && Date.now() - G.t < 1000) { pin.current = toLatLon(p.x, p.y); redraw(); commit(); }
   };
   /* +/−: in on your pin when it's on screen, else on the middle */
   const zoomBy = (f: number) => {
