@@ -64,7 +64,7 @@ const GAMES: [ManyKey, string][] = [
   ["closest", "5 number questions. The closest guess scores most."],
   ["pin", "7 famous places. Captains drop a pin; the closest scores most."],
   ["airport", "6 departure boards. Captains type the airport; the fastest right answer scores most."],
-  ["map", "6 maps with countries lit. Captains type what they have in common."],
+  ["map", "6 maps with places marked. Captains type what they have in common."],
   ["say", "6 questions with many answers. No points for the app's secret answer, or another team's."],
   ["dish", "5 recipes, one ingredient at a time. One guess per team; the faster right, the more points."]];
 const LEVELS4 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;

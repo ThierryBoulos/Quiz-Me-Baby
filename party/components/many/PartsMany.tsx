@@ -120,7 +120,7 @@ function rules(pub: PubMany): string[] {
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
     case "flag": return ["A flag goes up. Captains type the country on their phone.", fast, pay];
     case "airport": return ["A departures board goes up. Captains type which airport it is.", fast, pay];
-    case "map": return ["A map goes up with some countries lit. Captains type what they have in common.", fast, pay];
+    case "map": return ["A map goes up with some places marked. Captains type what they have in common.", fast, pay];
     case "closest": return ["A question with a number for an answer. Captains type their best guess.", "The closer your guess, the more points.", pay];
     case "pin": return ["A photo of a famous place. Captains drop a pin on the map where they think it is.", "The closer your pin, the more points.", pay];
     case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
