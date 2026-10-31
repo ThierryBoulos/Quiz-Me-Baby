@@ -100,13 +100,15 @@ export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Siz
 function rules(pub: PubMany): string[] {
   /* plain English, only what you need to play (the owner, 31 Oct): no ties, no team counts */
   const g = pub.game!, n = g.of, k = pub.teams.length;
-  const pay = `At the end, the best rank scores ${k > 3 ? `${PLACE_PTS.slice(0, 3).join(", ")}…` : PLACE_PTS.slice(0, k).join(", ")}.`;
+  /* "10, 8, 6…" (no full stop after the dots), or with three teams "10, 8, 6." */
+  const scale = k > 3 ? `${PLACE_PTS.slice(0, 3).join(", ")}…` : `${PLACE_PTS.slice(0, k).join(", ")}.`;
+  const pay = `At the end, the best rank scores ${scale}`;
   const fast = "The faster your right answer, the more points.";
   switch (g.key) {
     case "majority": return [
       "Everyone plays and answers on their own phone, captains too.",
       `${n} questions, 4 answers each. One tap and it's locked.`,
-      `Teams are ranked by the share of their answers that are right. The best rank scores ${k > 3 ? `${PLACE_PTS.slice(0, 3).join(", ")}…` : PLACE_PTS.slice(0, k).join(", ")}.`];
+      `Teams are ranked by the share of their answers that are right. The best rank scores ${scale}`];
     case "quiz": { const th = g.themes || [];
       return [th.length >= 2 ? `Two questions on ${th[0]}, then two on ${th[1]}.` : `${n} questions.`, "Captains type the answer on their phone.", fast, pay]; }
     case "flag": return ["A flag goes up. Captains type the country on their phone.", fast, pay];
@@ -126,7 +128,8 @@ function rules(pub: PubMany): string[] {
 export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Size; head?: ReactNode; compact?: boolean }) {
   const g = pub.game, tv = size === "tv";
   if (!g) return null;
-  const band = g.key === "sudden" ? "First right wins" : g.key === "majority" || g.key === "quiz" ? `${g.of} questions` : g.key === "say" ? `${g.of} prompts` : g.key === "dish" ? `${g.of} recipes` : `Best of ${g.of}`;
+  /* how many, in plain words ("5 questions", "10 flags"): no "Best of", every one counts */
+  const band = g.key === "sudden" ? "First right wins" : `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "prompts", dish: "recipes" } as Record<string, string>)[g.key] || "questions"}`;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
       {/* "Game 2 of 5" is in the tracker right above: not said twice (the owner, 31 Oct) */}
