@@ -60,7 +60,7 @@ export const unitOf = (key: string) => UNIT[key] || "Question";
 export function HudMany({ pub, size, code, me, host }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
-    ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Level at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Final" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</>
+    ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Level at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</>
     : null;
   /* a pip a game, as the two-team night's mini-games are pips */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
@@ -232,7 +232,7 @@ export function DeparturesMany({ pub }: { pub: PubMany }) {
     <div className={"board" + (dense ? " dense" : "")} style={{ fontSize: dense ? 15 : 22, maxWidth: dense ? 820 : 860 }} role="table" aria-label={"Departures: " + order.map((t) => `${T[t].name} ${S.pts[t]} points`).join(", ")}>
       <div className="board-title" style={{ fontSize: "1.2em" }}>
         <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg>
-        Departures · tonight&rsquo;s result
+        Departures: the result
       </div>
       {order.map((t, i) => { const lit = S.award[t] > 0 && S.places[t] === 1; return (
         <div key={t} className="board-row tv board-flip" role="row" style={{ animationDelay: 0.1 + i * 0.12 + "s" }}>
