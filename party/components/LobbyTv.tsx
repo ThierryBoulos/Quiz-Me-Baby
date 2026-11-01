@@ -44,12 +44,12 @@ export function TvLobby({ room, members, code, k, joinUrl, site, status, control
               <div className="ppl">
                 {list.length === 0 && <span className="none">Nobody yet</span>}
                 {list.length > 0 && !cap && <span className="need">Needs a captain</span>}
-                {shown.map((m) => (
-                  <span key={m.user_id} className={"pop-in" + (m.role === "captain" ? " capt" : "")}>
+                {shown.map((m) => { const gone = m.role === "captain" && away.includes(m.user_id); return (
+                  /* a captain whose phone the TV hasn't heard from: the cell dims, the face sleeps (the owner, 1 Nov: no red badge) */
+                  <span key={m.user_id} className={"pop-in" + (m.role === "captain" ? " capt" : "") + (gone ? " is-away" : "")} title={gone ? `${m.name} is away` : undefined}>
                     {m.role === "captain" && <b className="arm" aria-label="Captain">C</b>}
-                    <i>{m.avatar || "🙂"}</i><bdi>{m.name}</bdi>
-                    {m.role === "captain" && away.includes(m.user_id) && <em className="away">away</em>}
-                  </span>))}
+                    <i aria-label={gone ? "away" : undefined}>{gone ? "💤" : m.avatar || "🙂"}</i><bdi>{m.name}</bdi>
+                  </span>); })}
                 {more > 0 && <span className="more">+{more} more</span>}
               </div>
             </div>);
