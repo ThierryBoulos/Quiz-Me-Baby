@@ -1,9 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useRef, useState } from "react";
-import { Lineup } from "@/components/Lineup";
 import { usePreload } from "@/components/GameParts";
 import { ShareButton } from "@/components/Share";
 import { TvGame } from "@/components/TvGame";
@@ -18,7 +16,7 @@ import { useTabLock } from "@/lib/tabLock";
 import { sb } from "@/lib/supabase";
 import { useFreshBuild } from "@/lib/fresh";
 import { ANSWERING } from "@/components/PhoneGame";
-import { LineupMany } from "@/components/many/LineupMany";
+import { TvLobby } from "@/components/LobbyTv";
 import { TvMany } from "@/components/many/TvMany";
 import { manyNotReady, teamCountOf, useTvMany } from "@/lib/many/useTvMany";
 import { MANY_MAX } from "@/lib/many/logic";
@@ -130,48 +128,29 @@ export default function TvRoom() {
           </div>
         </div>)}
       {room.status === "lobby" ? (
-        <>
-          <div className="flex items-start justify-between gap-10">
-            <div>
-              {/* the Back row sits above the code: the code's tall letters overhang their box and used to swallow the tap */}
-              <div className="relative z-10 flex items-center gap-5">
-                <Link href="/" className="btn btn-sm btn-ghost" aria-label="Back to the home screen">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
-                <div className="eyebrow text-16 whitespace-nowrap">Join: scan or type the code</div>
-                <ShareButton code={code} big />
-              </div>
-              <div className="display mt-2 pointer-events-none select-none" style={{ fontSize: 150, lineHeight: 0.85, color: "var(--color-gold)", textShadow: "6px 6px 0 rgba(49,201,247,.55)", letterSpacing: "0.08em" }}>{code}</div>
-              <div className="text-22 text-[var(--color-ink-2)] mt-1">{origin.replace(/^https?:\/\//, "")}/join</div>
-            </div>
-            {/* two lines, never taller than the QR code beside it (232px) */}
-            <div className="logo self-center text-center pointer-events-none select-none whitespace-nowrap" style={{ fontSize: 84 }} aria-hidden>Quiz Me<br />Baby</div>
-            <div className="rounded-[22px] p-4 bg-[#f4f6ff] shrink-0">
-              <QRCodeSVG value={joinUrl} size={200} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" />
-            </div>
-          </div>
-          <div className="mt-8">{many ? <LineupMany room={room} members={members} k={teamCount} big /> : <Lineup room={room} members={members} big />}</div>
-          <div className="mt-auto flex items-end justify-between text-20 text-[var(--color-ink-2)]">
-            <div>
-              {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b></> : "No host yet — the app will check answers."}
-              <br />
-              {many ? (manyNotReady(members, teamCount) || <>Ready. <b><bdi>{host?.name}</bdi></b> starts the game.</>)
-                : readyToStart(members) ? <>Ready. <b><bdi>{who?.name}</bdi></b> starts the game.</> : notReadyWhy(members)}
-              {lobbyNote && <><br /><span className="text-18 font-bold" style={{ color: "var(--color-no)" }} role="status">Start didn&rsquo;t go through: {lobbyNote}</span></>}
-              {awake === false && <><br /><span className="text-16 text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
-            </div>
-            <div className="flex gap-3">
-              {/* how many teams, 2 to 8: a stepper in the row's own pills: [−] 3 teams [+] */}
-              {isTv && (
-                <div className="flex items-center gap-2" role="group" aria-label="How many teams">
-                  <button className="btn btn-sm btn-ghost !px-0 w-11" aria-label="One team fewer" disabled={teamCount <= 2} onClick={() => void M.setTeamCount(teamCount - 1)}>−</button>
-                  <span className="eyebrow text-14 whitespace-nowrap" aria-live="polite"><b className="display text-26 align-middle mr-1.5" style={{ color: "var(--color-gold)" }}>{teamCount}</b>teams</span>
-                  <button className="btn btn-sm btn-ghost !px-0 w-11" aria-label="One team more" disabled={teamCount >= MANY_MAX} onClick={() => void M.setTeamCount(teamCount + 1)}>+</button>
-                </div>)}
-              <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>
-              {members.length === 0 && <a href={`${CLASSIC}/?start=host&back=/tv/${code}`} className="btn btn-sm">Just play on this screen</a>}
-            </div>
-          </div>
-        </>
+        <TvLobby room={room} members={members} code={code} k={teamCount} joinUrl={joinUrl} site={origin.replace(/^https?:\/\//, "")}
+          status={<>
+            <Link href="/" className="btn btn-sm btn-ghost shrink-0" aria-label="Back to the home screen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
+            <div className="min-w-0">
+              {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>. </> : "No host yet: the app will check answers. "}
+              {many ? (manyNotReady(members, teamCount) || <>Ready: <b><bdi>{host?.name}</bdi></b> starts the game.</>)
+                : readyToStart(members) ? <>Ready: <b><bdi>{who?.name}</bdi></b> starts the game.</> : notReadyWhy(members)}
+              {lobbyNote && <><br /><span className="font-bold" style={{ color: "var(--color-no)" }} role="status">Start didn&rsquo;t go through: {lobbyNote}</span></>}
+              {awake === false && <><br /><span className="text-14 text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
+            </div></>}
+          controls={<>
+            {/* how many teams, 2 to 8: [−] 3 teams [+] */}
+            {isTv && (
+              <div className="flex items-center gap-2 rounded-full px-1 h-[42px]" style={{ border: "2px solid var(--line-2)", background: "rgba(255,255,255,.04)" }} role="group" aria-label="How many teams">
+                <button className="btn btn-sm btn-ghost !px-0 w-8 !min-h-8 h-8 !border-0" style={{ background: "rgba(255,255,255,.07)" }} aria-label="One team fewer" disabled={teamCount <= 2} onClick={() => void M.setTeamCount(teamCount - 1)}>−</button>
+                <span className="eyebrow text-12 whitespace-nowrap" aria-live="polite"><b className="display text-26 align-middle mr-1.5" style={{ color: "var(--color-gold)" }}>{teamCount}</b>teams</span>
+                <button className="btn btn-sm btn-ghost !px-0 w-8 !min-h-8 h-8 !border-0" style={{ background: "rgba(255,255,255,.07)" }} aria-label="One team more" disabled={teamCount >= MANY_MAX} onClick={() => void M.setTeamCount(teamCount + 1)}>+</button>
+              </div>)}
+            <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>
+            <ShareButton code={code} />
+            {members.length === 0 && <a href={`${CLASSIC}/?start=host&back=/tv/${code}`} className="btn btn-sm btn-ghost">Just play on this screen</a>}
+          </>} />
       ) : pubMany ? <TvMany pub={pubMany} join={{ url: joinUrl, code }} sound={isTv} host={host?.name} seats={Array.from({ length: pubMany.teams.length }, (_, t) => members.filter((m) => m.role !== "host" && (m.team as number) === t).length)} /> : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
         <div className="m-auto text-center enter">
           <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
