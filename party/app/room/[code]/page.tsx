@@ -14,6 +14,7 @@ import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 import { LineupMany, PickMany, SetupMany } from "@/components/many/LineupMany";
 import { PhoneMany } from "@/components/many/PhoneMany";
+import { NightIntroPhone } from "@/components/NightIntro";
 import { ScoresMany } from "@/components/many/PartsMany";
 import { manyNames, manyNotReady, teamCountOf } from "@/lib/many/useTvMany";
 import { MANY_MAX } from "@/lib/many/logic";
@@ -307,13 +308,22 @@ export default function PhoneRoom() {
             {/* leaving is kept away from everyday buttons, and asks first */}
             <button className="btn btn-sm btn-ghost self-center mt-6" style={{ color: "var(--color-no)", borderColor: "color-mix(in srgb, var(--color-no) 45%, transparent)" }} onClick={leave}>Leave the game</button>
           </section>
-        ) : many ? ((room.state?.pub as PubMany | null)?.many ? <PhoneMany pub={room.state.pub as PubMany} me={mine} code={code} />
+        ) : many ? ((room.state?.pub as PubMany | null)?.many ? ((room.state.pub as PubMany).intro
+              ? <NightIntroPhone intro={(room.state.pub as PubMany).intro!} busy={busy || waiting} who="The host starts the night."
+                  go={mine.role === "host" ? () => void sendMove({ type: "m/go" }) : undefined} />
+              : <PhoneMany pub={room.state.pub as PubMany} me={mine} code={code} />)
             : <section className="card text-center enter flex-1 grid place-items-center"><div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">Eyes on the TV</h1></div></section>
         ) : !pub ? (
           <section className="card text-center enter flex-1 grid place-items-center">
             <div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">Eyes on the TV</h1></div>
           </section>
-        ) : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} fire={fireMove} busy={busy || waiting} />
+        ) : pub.intro ? (() => { const I = pub.intro, lead = I.go != null && mine.role === "captain" && mine.team === I.go;
+            const capGo = () => void tell(() => sendAction(code, "next", { move: { type: "ui/introGo" }, step: pub.step }));
+            return <NightIntroPhone intro={I} busy={busy || waiting}
+              who={I.go != null ? `${pub.captains?.[I.go as 0 | 1] || "The captain"} starts the night from their phone.` : "The host starts the night."}
+              go={mine.role === "host" ? () => void sendMove({ type: "ui/introGo" }) : mine.role === "captain" && I.go != null ? capGo : undefined}
+              goAt={mine.role === "captain" && !lead && pub.nextOpenAt ? pub.nextOpenAt : undefined} />; })()
+        : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} fire={fireMove} busy={busy || waiting} />
           : mine.role === "captain" ? <CaptainGame pub={pub} me={mine} members={members} code={code} hold={waiting} />
           : <>
               {!myCaptain && <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Your team has no captain. Make me captain</button>}

@@ -151,6 +151,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
         st.current = newNight(teams, decks, keys);
+        st.current.intro = true;
         /* the questions dealt count as played on this TV */
         try { for (const mm of st.current.minis) for (const q of mm.qs) if (q?.id) used.add(q.id); localStorage.setItem(USED_KEY, JSON.stringify([...used])); } catch { /* in memory only */ }
         await sb().from("rooms").update({ status: "playing", mode: "many" }).eq("code", code);
@@ -164,7 +165,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const mv = (a.payload.move || {}) as G, t = String(mv.type || "");
       if (t !== "m/flip" && Number(a.payload.step) !== s.step) { reply("-"); publish(); return; }
       let ok = false;
-      if (t === "m/start") ok = startMini(s, Date.now(), timers(), roster());
+      if (t === "m/go") { ok = !!s.intro; delete s.intro; }
+      else if (s.intro) ok = false;
+      else if (t === "m/start") ok = startMini(s, Date.now(), timers(), roster());
       else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);
       else if (t === "m/next") ok = next(s, Date.now(), timers());
       else if (t === "m/flip") ok = flip(s, Number(mv.t));

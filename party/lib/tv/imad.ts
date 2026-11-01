@@ -44,7 +44,7 @@ export function imadOnce(s: TvState, key: string, moments: string[] | string, ex
 /* after every move: the screen's own moment, a change of leader, then up it goes */
 export function imadNarrate(s: TvState) {
   const g = s.g;
-  if (!g) return;
+  if (!g || g.nightIntro) return;
   const sc = s.screen, rd = g.rounds[g.r];
   const opener = () => (g.hostHello ? [] : ((g.hostHello = true), ["start"]));
   if (sc === "roundIntro" && rd && !g.hostOnce?.["r" + g.r]) imadOnce(s, "r" + g.r, [...opener(), "round"], { t: QMB.seatTeam(g, rd, 0, seatOf(g)), theme: rd.theme, n: g.r + 1, N: g.rounds.length });

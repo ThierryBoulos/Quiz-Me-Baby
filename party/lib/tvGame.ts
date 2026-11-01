@@ -61,6 +61,8 @@ function mrWho(s: TvState) {
 /* no host: a mini-game leg's reveal moves on by itself after this long (a tap still moves it on sooner);
    the answer card, the round score, intros and summaries still wait for a tap, so people can argue (29 Oct, D27) */
 const T_AUTO_NEXT = 8;
+/* a tap while the night's intro is up (a stale screen): said at once, not left for the next update */
+const INTRO_WAIT = "Not yet: the night starts with Let's go.";
 const AUTO_NEXT: Record<string, string> = { closestReveal: "ui/next", flagReveal: "ui/next", pinReveal: "ui/next", airportReveal: "ui/next",
   mapReveal: "ui/next", sayReveal: "ui/next", dishReveal: "dish/next" };
 function shiftClocks(s: TvState, d: number) {
@@ -545,6 +547,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const t = move.type as string;
     /* the host moving on past an open contest: that's the host's call */
     if (s.contest && NEXT_MOVES.has(t) && !s.nohost) s.contest = null;
+    /* the night's intro: Let's go puts the first round (or game) up; nothing else moves meanwhile */
+    if (t === "ui/introGo") { if (g?.nightIntro) { delete g.nightIntro; s.waitSince = Date.now(); imadNarrate(s); } return; }
+    if (g?.nightIntro && t !== "ui/setScore") return;
     if (t === "ui/contestOk") closeContest(!!move.v, true);
     else if (t === "ui/flip") { const c = callsOf(s).find((x) => x.id === move.id); if (c) applyCall(c.id, !c.ok); }
     else if ((t === "dish/right" || t === "dish/wrong") && g.dishGame.leg.buzz != null && !s.nohost) {
@@ -805,6 +810,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const rule = CAPTAIN_MOVES[move.type];
     if (!rule || (rule.nohostOnly && !s.nohost) || !inScreen(rule.where, sc)) return false;
     const t = move.type as string;
+    if (t === "ui/introGo" && !g?.nightIntro) return false;
+    if (g?.nightIntro && t !== "ui/introGo" && t !== "ui/askScore" && t !== "ui/agree") return INTRO_WAIT;
     /* the lead captain moves the night on; if they haven't after a while, the other captain may */
     if (rule.who === "lead" && leadTeam() !== team && Date.now() - s.waitSince < T_NEXT_FALLBACK * 1000) {
       const lead = g.teams[leadTeam()];
@@ -1042,6 +1049,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       g.hostless = false;
       g.alternateFirst = getSettings().alternateFirst;
       s.nohost = !members.some((m) => m.role === "host");
+      /* the night's intro comes first (the owner, 1 Nov): the plan on the TV until Let's go */
+      g.nightIntro = true;
       s.g = g; s.screen = ""; s.lifeline = null; s.pending = null; s.autoAt = null; s.step = 1; s.scoreLog = []; s.segLog = []; s.agree = null;
       g.rounds.forEach((r: G) => r.q.forEach((q: G) => applyFx([{ used: q }])));
       play({ type: "game/start" });
@@ -1093,6 +1102,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return;
     }
     if (["answer", "buzz", "lifeline"].includes(a.kind)) {
+      if (s.g?.nightIntro) { refuse(INTRO_WAIT); return; }
       const ok = captainInput(a.kind, from.team, a.payload as G);
       if (ok === true) { took.current = true; void publish(); }
       else if (ok) refuse(ok);

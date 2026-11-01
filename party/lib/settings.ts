@@ -21,7 +21,7 @@ export type Settings = {
 };
 export const DEFAULTS: Settings = { tQuestion: 60, tSteal: 30, tFriend: 30, tContest: T_OVERRULE, tSudden: T_SUDDEN_BUZZ,
   tMini: T_CLOSEST, tFlag: T_FLAG, tMap: T_MAP, tSay: T_SAY, tAuction: T_AUCTION, tPin: T_PIN, tAirport: T_AIRPORT, tMajority: T_MAJORITY, tDishStep: DISH_STEP, tDishType: T_DISH_TYPE,
-  tBattleHost: T_BATTLE_HOST, tBattleTyped: T_BATTLE_TYPED, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: true, flagAway: true };
+  tBattleHost: T_BATTLE_HOST, tBattleTyped: T_BATTLE_TYPED, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: false, flagAway: true };
 const KEY = "qmb.party.settings";
 /* Wave 2 changed the house timers (question 60→45, steal 30→20, overrule 15→8, Closest 90→60).
    A TV that saved its settings before keeps any timer it actually changed; one still on an old
@@ -29,13 +29,15 @@ const KEY = "qmb.party.settings";
 const OLD_DEFAULTS: Partial<Settings> = { tQuestion: 60, tSteal: 30, tContest: 15, tMini: 90 };
 /* ...and the question and the steal went back to 60 and 30 (18 Oct): a TV still on 45 / 20 moves back */
 const WAVE2_DEFAULTS: Partial<Settings> = { tQuestion: 45, tSteal: 20 };
-const VERSION = 3;
+/* ...and Imad's bubble went off by default (1 Nov): a TV that only saved the old default (on) moves to off, once */
+const VERSION = 4;
 export function getSettings(): Settings {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
     if (saved && (saved.v ?? 1) < VERSION) {
       if ((saved.v ?? 1) < 2) for (const [k, v] of Object.entries(OLD_DEFAULTS)) if (saved[k] === v) delete saved[k];
-      for (const [k, v] of Object.entries(WAVE2_DEFAULTS)) if (saved[k] === v) delete saved[k];
+      if ((saved.v ?? 1) < 3) for (const [k, v] of Object.entries(WAVE2_DEFAULTS)) if (saved[k] === v) delete saved[k];
+      if ((saved.v ?? 1) < 4 && saved.imad === true) delete saved.imad;
       saved.v = VERSION;
       try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch { /* private mode */ }
     }

@@ -260,6 +260,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       }
       outcome = "final"; break;
     }
+    /* the night's intro (1 Nov): its Let's go, after a look at the plan */
+    if (pub.intro) { for (let k = 0; k < 12; k++) { await tick(250); checkAcks(); } next(lead, "ui/introGo"); for (let k = 0; k < 3; k++) { await tick(250); checkAcks(); } continue; }
     if (sc === "sudden" && (pub.sudden?.n || 0) > 6) { outcome = "sudden-cap"; break; }
     const right = answerNow(g, pub);
     /* the scripted things, when a screen allows them (and nothing else is open) */

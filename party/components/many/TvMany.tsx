@@ -13,6 +13,7 @@ import { showKm, showNum } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { Ruler } from "../Ruler";
+import { NightIntroTv } from "../NightIntro";
 import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
@@ -41,6 +42,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
     /* nothing on the TV can be selected or copied */
     <div className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       <HudMany pub={pub} size="tv" code={join?.code} sound={sound} />
+      {/* the night's intro, before the first game: the plan, until the host's Let's go */}
+      {pub.intro && <NightIntroTv intro={pub.intro} who="When you’re all ready, the host taps" />}
 
       <div className="flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}

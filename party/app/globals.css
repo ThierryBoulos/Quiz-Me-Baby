@@ -778,3 +778,52 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .board-many .col.dim { opacity: .5; }
 .board-many .col .place { font-family: var(--font-display); letter-spacing: .08em; color: var(--color-ink-3); }
 .board-many .col.first .place { color: var(--color-gold); }
+
+/* ---- the night's intro (1 Nov): the plan, on the TV before the first round (components/NightIntro.tsx) ---- */
+/* fixed: inside the scaled TV stage that is the whole stage (a transformed parent holds fixed children) */
+.night-intro { position: fixed; inset: 0; z-index: 30; background: radial-gradient(ellipse at 50% 0%, var(--color-stage) 0%, var(--color-bg) 70%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 56px 28px; gap: 26px; text-align: left; }
+.ni-top { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.ni-pips { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; max-width: 1160px; }
+.ni-pip { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.14); animation: niLight .9s var(--ease) both; }
+.ni-pip.mini { width: 92px; border-radius: 11px; }
+.ni-pip.first { animation-name: niLight, niNow; animation-duration: .9s, 1.8s; animation-iteration-count: 1, infinite; animation-timing-function: var(--ease), ease-in-out; }
+@keyframes niLight { 0% { background: rgba(255,255,255,.14); transform: scale(1); box-shadow: none; }
+  35% { background: var(--color-gold); transform: scale(1.35); box-shadow: 0 0 0 6px rgba(245,197,24,.2), 0 0 26px var(--color-gold); }
+  100% { background: var(--color-ink-2); transform: none; box-shadow: none; } }
+@keyframes niNow { 0%, 100% { background: var(--color-gold); box-shadow: 0 0 0 5px rgba(245,197,24,.18), 0 0 18px var(--color-gold); } 50% { background: var(--color-gold); box-shadow: 0 0 0 2px rgba(245,197,24,.1); opacity: .7; } }
+.ni-body { flex: 0 1 auto; min-height: 0; width: 100%; max-width: 1160px; display: flex; justify-content: center; gap: 48px; }
+.ni-body .ni-col { width: 100%; max-width: 720px; }
+.ni-body.two .ni-col:first-child { flex: 0 0 400px; }
+.ni-body.two .ni-col:last-child { flex: 1; }
+.ni-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ni-head { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .01em; font-size: var(--text-36); color: var(--color-gold); line-height: 1.1; flex-wrap: wrap; }
+.ni-pts { font-family: var(--font-body); text-transform: none; font-weight: 700; font-size: var(--text-16); color: var(--color-ink-2); letter-spacing: .02em; }
+.ni-glyph { display: inline-block; flex: none; width: 16px; height: 16px; border-radius: 50%; background: var(--color-gold); }
+.ni-glyph.mini { width: 44px; height: 14px; border-radius: 6px; }
+.ni-cap { font-size: var(--text-16); color: var(--color-ink-2); line-height: 1.35; margin-bottom: 4px; }
+.ni-list { display: flex; flex-direction: column; gap: 8px; }
+.ni-list.q.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+.ni-row { display: flex; align-items: baseline; gap: 12px; padding: 8px 14px; border-radius: 12px; background: rgba(255,255,255,.05); border-left: 3px solid var(--color-gold); min-width: 0; }
+.ni-list.q .ni-row { align-items: center; }
+.ni-n { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(245,197,24,.16); color: var(--color-gold); font-weight: 800; font-size: var(--text-16); }
+.ni-t { font-weight: 800; font-size: var(--text-22); color: var(--color-ink); line-height: 1.2; min-width: 0; overflow-wrap: anywhere; }
+.ni-list.m .ni-t { flex: none; font-size: var(--text-20); }
+.ni-l { font-size: var(--text-16); color: var(--color-ink-2); line-height: 1.3; min-width: 0; }
+.ni-list.m.tight { gap: 5px; } .ni-list.m.tight .ni-row { padding: 5px 12px; } .ni-list.m.tight .ni-t { font-size: var(--text-18); } .ni-list.m.tight .ni-l { font-size: var(--text-14); }
+.ni-foot { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.ni-win { font-weight: 800; font-size: var(--text-22); color: var(--color-ink); }
+.ni-sub { font-size: var(--text-16); color: var(--color-ink-2); }
+.ni-go { margin-top: 8px; font-size: var(--text-20); color: var(--color-ink-2); padding: 8px 22px; border-radius: 999px; border: 2px solid rgba(245,197,24,.45); animation: pulse 2.2s ease-in-out infinite; }
+.ni-go b { color: var(--color-gold); }
+.ni-in { animation: niIn .55s var(--ease) both; }
+@keyframes niIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.ni-row.ni-in { animation-name: niRow; animation-duration: .7s; }
+@keyframes niRow { 0% { opacity: 0; transform: translateX(-18px); background: rgba(245,197,24,.0); } 45% { opacity: 1; transform: none; background: rgba(245,197,24,.2); } 100% { opacity: 1; background: rgba(255,255,255,.05); } }
+.ni-foot.ni-in .ni-go { animation-delay: inherit; }
+@media (prefers-reduced-motion: reduce) { .night-intro *, .ni-pip { animation: none !important; } .ni-pip { background: var(--color-ink-2); } .ni-pip.first { background: var(--color-gold); } }
+/* the phones' copy: a list with the same glyphs */
+.ni-phone { display: flex; flex-direction: column; gap: 8px; text-align: left; font-size: var(--text-14); }
+.ni-phone li { display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: baseline; column-gap: 6px; }
+.ni-phone li > .ni-glyph { justify-self: center; }
+.ni-phone .ni-glyph { width: 9px; height: 9px; } .ni-phone .ni-glyph.mini { width: 24px; height: 8px; border-radius: 4px; }

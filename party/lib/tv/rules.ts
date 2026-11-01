@@ -46,6 +46,8 @@ export const HOST_MOVES: Record<string, Where> = {
   "ui/sayOk": "sayReveal",
   /* the host decides a captain's contest (v: change the call), and can change any call on these screens */
   "ui/contestOk": CONTEST_SCREENS, "ui/flip": CONTEST_SCREENS, "battle/reviewDone": "battleReview",
+  /* the night's intro (before the first round): Let's go */
+  "ui/introGo": "*",
   "ui/closeLifeline": "*", "ui/setScore": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"],
   "ui/reveal": ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/airportOk": "airportReveal",
   "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal"],
@@ -73,6 +75,7 @@ export type Who = "any" | "turn" | "other" | "lead";
 export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?: boolean }> = {
   "auction/raise": { where: "auctionBid", who: "turn" },
   "auction/pass": { where: "auctionBid", who: "turn" },
+  "ui/introGo": { where: "*", who: "lead", nohostOnly: true },
   "round/begin": { where: "roundIntro", who: "lead", nohostOnly: true },
   "closest/start": { where: "miniIntro", who: "lead", nohostOnly: true },
   "flag/start": { where: "flagIntro", who: "lead", nohostOnly: true },

@@ -11,6 +11,7 @@ import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game"
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
 import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
+import { NightIntroTv } from "./NightIntro";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -46,6 +47,8 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
     <div ref={root} className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       {/* the tracker, always: Classic's HUD */}
       <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
+      {/* the night's intro, before the first round: the plan, until Let's go */}
+      {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `When you’re all ready, ${pub.captains?.[pub.intro.go as 0 | 1] || "the captain"} taps` : "When you’re all ready, the host taps"} />}
 
       <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : pub.screen === "final" && recap ? "gap-3" : "gap-6")} key={bodyKey}>
         {/* a steal: the light swings over from the team that missed to the one stealing */}
@@ -644,7 +647,7 @@ function ImadBubble({ imad, wait = 0 }: { imad?: Pub["imad"]; wait?: number }) {
   useEffect(() => {
     if (id == null) return;
     const w = delay.current;
-    const a = setTimeout(() => setOn(id), w), b = setTimeout(() => setOn(null), w + 2800 + len * 60);
+    const a = setTimeout(() => setOn(id), w), b = setTimeout(() => setOn(null), w + 1800 + len * 60);
     return () => { clearTimeout(a); clearTimeout(b); };
   }, [id, len]);
   if (!imad || on !== imad.id) return null;

@@ -66,6 +66,7 @@ export type StateM = {
   exit?: boolean; log: number[][];            // the scores after each game, for the final chart
   spare: Q[];                                   // questions held back for sudden death
   stats: Stats;
+  intro?: boolean;                              // the night's intro is up (before the first game), until the host's Let's go
 };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
 export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number };

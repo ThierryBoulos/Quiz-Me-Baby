@@ -98,6 +98,7 @@ export type Pub = {
   nextBy?: string;           // no host: whose Start or Next the room is waiting for
   nextOpenAt?: number;       // ...and from when the other captain may tap it too
   nextOther?: string | null; // that other captain
+  intro?: import("./intro").IntroPub;   // the night's intro, before the first round (until Let's go)
   imad?: { id: number; text: string; mood?: string };   // Imad's latest line (text), and how he takes it: yes | no | lean
   fire?: Two<boolean>;
   mrFire?: { name: string; n: number }[];   // Majority Rules: players right ten (or more) in a row            // on fire: three right in a row in the rounds, four legs in a row in a mini-game (29 Oct)

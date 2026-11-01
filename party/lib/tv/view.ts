@@ -77,6 +77,13 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   p.pips = sched.map((x) => ({ kind: x.kind, state: x.kind === "mini"
     ? (live === x.key ? "now" : g.done[x.key!] ? "done" : "todo")
     : (x.i === g.r && !live && s.screen !== "final" && s.screen !== "sudden" ? "now" : g.rounds[x.i!]?.done ? "done" : "todo") }));
+  /* the night's intro: the same order, each round with its theme, each mini-game named */
+  if (g.nightIntro) {
+    let r = 0;
+    p.intro = { teams: 2, miniPts: g.miniPts, battlePts: g.battlePts || g.miniPts, go: s.nohost ? leadOf(mem) : null,
+      items: sched.map((x) => x.kind === "std" ? { kind: "q" as const, key: "q" + x.i, game: "quiz", title: `Round ${++r}`, themes: [String(g.rounds[x.i!]?.theme || "")].filter(Boolean) }
+        : { kind: "mini" as const, key: x.key!, game: x.key!, title: MINI_TITLES[x.key as MiniKey] }) };
+  }
   p.captains = [0, 1].map((t) => { const n = mem.find((m) => m.team === t && m.role === "captain")?.name; return n ? iso(n) : null; }) as [string | null, string | null];
   { const t = getSettings();
     p.tMini = t.tMini;
