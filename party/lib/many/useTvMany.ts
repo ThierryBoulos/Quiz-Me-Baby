@@ -67,6 +67,20 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     }).catch((e) => console.error("publish (many)", e));
   }, [code, saveKey]);
 
+  /* a safety net (live test, 1 Nov): a lobby write landing as the game begins (a team's new name, the "away" check)
+     can replace the room's state without the screen in it, and every phone then waits on nothing. The TV knows what
+     it last published: missing, or older than that, it publishes again */
+  useEffect(() => {
+    if (!isTv) return;
+    const t = setInterval(() => {
+      const room = ctx.current.room, s = st.current;
+      if (!s || !room || room.status !== "playing" || !lastAt.current || Date.now() - lastAt.current < 2500) return;
+      const at = Number((room.state as { pubAt?: number } | null)?.pubAt) || 0;
+      if (!(room.state as { pub?: unknown } | null)?.pub || at < lastAt.current) publish();
+    }, 2000);
+    return () => clearInterval(t);
+  }, [isTv, publish]);
+
   /* a reload picks the night up where it was */
   useEffect(() => {
     if (!isTv) return;
