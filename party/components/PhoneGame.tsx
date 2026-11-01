@@ -1,6 +1,7 @@
 "use client";
 import { twoDone } from "./TwoResults";
 import { useRevealHold, WatchTv } from "./WatchTv";
+import { Pts, ResultTable, YouPill, type RRow, type Tone } from "./ResultTable";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
@@ -677,7 +678,8 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
   return (
     <div className="flex flex-col gap-2">
       {/* one grid for every call, so the names, the answers, the RIGHT/WRONG and the Contest each line up in a column */}
-      {!cardOnly && <div className={"grid items-center gap-x-2 gap-y-1.5 text-14" + (C.length > 6 ? " max-h-[52vh] overflow-y-auto pr-1" : "")}
+      {/* in the results table's frame (the owner's pick, 1 Nov), with the Contest beside each call */}
+      {!cardOnly && <div className={"rtable-box grid items-center gap-x-2 gap-y-1.5 text-14" + (C.length > 6 ? " max-h-[52vh] overflow-y-auto pr-1" : "")}
         style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto auto" }}>
         {lastQ && <div className="eyebrow text-center col-span-4">The last question</div>}
         {C.map((c) => { const dim = { opacity: K && K.id !== c.id ? 0.6 : 1 }; return (
@@ -708,13 +710,37 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
     </div>);
 }
 
-function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean }) {
+/* part: "pill" is only how your team did (it goes at the top of the phone, above the question), "rest" the result without it */
+function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean; part?: "pill" | "rest" }) {
   const T = pub.teams, sc = pub.screen, m = pub.mini;
   /* a game's or a round's result waits on the phones while the TV reveals it (the winner comes in last) */
   const won = sc === "auctionResult" ? pub.auction?.winner : sc === "battleSummary" ? pub.battle?.winner
     : sc === "roundScore" ? (pub.roundPts && pub.roundPts[0] !== pub.roundPts[1] ? (pub.roundPts[0] > pub.roundPts[1] ? 0 : 1) : null) : pub.summary?.winner;
   const holdKey = /Summary$|^auctionResult$|^roundScore$/.test(sc) ? `${sc}:${m?.key ?? ""}:${pub.r}` : null;
-  if (useRevealHold(holdKey, twoDone(won) + 0.3)) return <WatchTv />;
+  const heldNow = useRevealHold(holdKey, twoDone(won) + 0.3);
+  /* a question's result (the owner's pick, 1 Nov): how your team did in one pill, then a table, a row a team */
+  const pill = (text: string, tone: Tone) => <YouPill text={text} tone={tone} />;
+  const row = (t: 0 | 1, val: React.ReactNode, ok: boolean | null | undefined, end?: React.ReactNode, sub?: React.ReactNode): RRow =>
+    ({ team: t, name: T[t].name, color: tc(t), letter: "AB"[t], val, ok: ok ?? null, end, sub, me: t === mine });
+  /* the mini-games' last column: the leg, to whoever takes it (both on a tie) */
+  const leg = (t: 0 | 1, w: unknown) => (w === t || w === "tie" ? <span style={{ color: "var(--color-ok)" }}>✓</span> : <span style={{ color: "var(--color-ink-3)" }}>–</span>);
+  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill("Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
+    : w === "none" ? pill("Nobody gets it", "mid") : w === 0 || w === 1 ? pill("Not this time", "no") : null;
+  const legW = (w: unknown) => (w === 0 || w === 1 ? w : null) as 0 | 1 | null;
+  /* how your team did on this question, in one pill */
+  const dishW = legW(pub.reveal?.w), MR = pub.majority?.reveal;
+  const you: React.ReactNode = mine == null ? null
+    : sc === "answer" && pub.result ? (pub.result.by === mine ? pill(`Your team +${pub.result.pts}${pub.result.stolen ? ", stolen!" : ""}`, "ok")
+      : (pub.calls || []).some((c) => c.team === mine && !c.ok) ? pill("Your team: wrong", "no")
+      : pub.result.by != null ? pill(`${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? ", stolen" : ""}`, "mid") : pill("Nobody scores", "mid"))
+    : sc === "closestReveal" || sc === "pinReveal" ? legPill(pub.reveal?.w)
+    : sc === "majorityReveal" && MR ? pill(`Your team: ${MR.right[mine]} of ${pub.majority?.n?.[mine] ?? 0} right`, MR.right[mine] > 0 ? "ok" : "mid")
+    : /^(flag|say|map|airport)Reveal$/.test(sc) && pub.reveal ? (sc !== "mapReveal" || (pub.map?.ruled?.[0] != null && pub.map?.ruled?.[1] != null) ? legPill(pub.reveal.w) : null)
+    : sc === "dishReveal" && pub.reveal ? (dishW === mine ? pill("Your team got it", "ok") : dishW != null ? pill(`${T[dishW].name} got it`, "no") : pill("Nobody got it", "mid"))
+    : null;
+  if (part === "pill") return heldNow ? null : <>{you}</>;
+  if (heldNow) return <WatchTv />;
+  const P = part === "rest" ? null : you;
   const name = (t: 0 | 1) => <b style={{ color: tc(t) }}>{T[t].name}</b>;
   /* the outcome: a big headline, no box (boxes are for things you can tap) */
   const head = (t: 0 | 1 | null | undefined, text: string, sub?: string) => (
@@ -723,51 +749,48 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
       {t != null && mine != null && <div className="text-13 font-bold" style={{ color: t === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{t === mine ? "That's your team!" : "Not this time."}</div>}
       {sub && <div className="text-13 text-[var(--color-ink-2)]">{sub}</div>}
     </div>);
-  const legW = (w: unknown) => (w === 0 || w === 1 ? w : null) as 0 | 1 | null;
   /* the mini-game's own score, big: TEAM A 3 – 4 TEAM B (the same board as the TV's) */
   const board = (w: Two<number>, label: string, win: 0 | 1 | null) => <ScoreBoard pub={pub} w={w} win={win} label={label} size="phone" />;
-  const rows = (ok: (t: 0 | 1) => React.ReactNode) => (
-    <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
-      <div key={t} className="text-center"><div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div><div className="text-15 font-bold mt-1">{ok(t)}</div></div>))}</div>);
   if (sc === "answer" && pub.result) {
+    const Rr = pub.result, by = Rr.by;
     const quiet = ([0, 1] as const).filter((t) => silent(pub, t)).map((t) => `${T[t].name}: ${silent(pub, t)}`).join(" · ");
-    return head(pub.result.by, pub.result.by == null ? "Nobody scores" : `${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? ", stolen!" : ""}`, quiet || undefined);
+    const top = P;
+    if (headOnly) return <>{top}</>;
+    /* a row for each team that answered: the team asked, then the steal */
+    const rows = (pub.calls || []).map((c) => row(c.team, c.text || "No answer", c.text ? c.ok : null, <Pts n={by === c.team && c.ok ? Rr.pts : 0} />, c.note));
+    return (<>{top}{rows.length > 0 && <ResultTable rows={rows} head={["Said", "Pts"]} />}
+      {quiet && <p className="text-center text-13 text-[var(--color-ink-3)]">{quiet}</p>}</>);
   }
   if (sc === "roundScore") return (<>
     {head(null, `End of round ${pub.r + 1}`)}
     {board([T[0].score, T[1].score], "The score", null)}
     <p className="text-center text-13 text-[var(--color-ink-2)]">This round: {name(0)} +{pub.roundPts?.[0] ?? 0} · {name(1)} +{pub.roundPts?.[1] ?? 0}</p></>);
   if (sc === "closestReveal" && pub.reveal) { const w = pub.reveal.w, ans = Number(pub.reveal.answer); return (<>
-    {head(legW(w), w === "tie" ? "A point each" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
-    {rows((t) => { const g = pub.reveal?.guesses?.[t]; return g == null ? "No answer" : `${showNum(g)} (off by ${showNum(offBy(g, ans))})`; })}
-    {pub.reveal.notes && <div className="text-13 text-[var(--color-ink-2)] text-center">{pub.reveal.notes}</div>}</>); }
+    {P}
+    <ResultTable head={["Guess", "Leg"]} rows={([0, 1] as const).map((t) => { const g = pub.reveal?.guesses?.[t]; const o = g == null ? 0 : offBy(g, ans);
+      return row(t, g == null ? "No answer" : showNum(g), null, leg(t, w), g == null ? undefined : o === 0 ? "Spot on!" : `Off by ${showNum(o)}`); })} />
+    {pub.reveal.notes && <div className="text-13 text-[var(--color-ink-3)] text-center">{pub.reveal.notes}</div>}</>); }
   if (sc === "majorityReveal" && pub.majority?.reveal) { const M = pub.majority, R = M.reveal!; return (<>
-    <div className="eyebrow text-center">This question</div>
-    {rows((t) => `${R.right[t]} of ${M.n?.[t] ?? 0} right`)}
+    {P}
+    <ResultTable head={["Right"]} rows={([0, 1] as const).map((t) => row(t, `${R.right[t]} of ${M.n?.[t] ?? 0}`, null))} />
     {pub.mrFire && <p className="text-center text-15 font-bold">{pub.mrFire.map((f) => <span key={f.name} className="mx-2"><span className="flame">🔥</span>{f.name} · {f.n} in a row</span>)}</p>}
     {/* (the game so far is in the bar at the top: no second line saying it again, the owner, 1 Nov) */}</>); }
   if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (<>
-    {head(legW(w), w === "tie" ? "A point each" : w === "none" ? "No pins, no point" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
-    {rows((t) => (R.pins[t] ? `${showKm(R.km[t] ?? 0)} off` : "No pin"))}</>); }
+    {P}
+    <ResultTable head={["Off by", "Leg"]} rows={([0, 1] as const).map((t) => row(t, R.pins[t] ? showKm(R.km[t] ?? 0) : "No pin", null, leg(t, w)))} /></>); }
   if ((sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal") && pub.reveal) {
     const say = sc === "sayReveal", w = pub.reveal.w;
     const ok = (t: 0 | 1) => sc === "mapReveal" ? pub.map?.ruled?.[t] : pub.reveal?.ok?.[t];
-    const top = (sc !== "mapReveal" || (ok(0) != null && ok(1) != null)) && head(legW(w), w === "tie" ? "A point each" : w === "none" ? "Nobody gets it" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "");
+    const top = P;
     if (headOnly) return <>{top}</>;
-    /* "TEAM A  DODGED IT", and what they wrote under it */
     return (<>
       {top}
-      <div className="flex flex-col gap-3">{([0, 1] as const).map((t) => { const v = ok(t), x = pub.reveal?.typed?.[t]?.[0]; return (
-        <div key={t} className="text-center">
-          <div className="flex items-baseline justify-center gap-x-2">
-            <span className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</span>
-            {v == null ? <span className="text-12 text-[var(--color-ink-3)]">waiting for a ruling</span> : <Verdict v={v} say={say} size={14} />}
-          </div>
-          <div className="text-16 font-bold mt-1" style={{ color: x ? undefined : "var(--color-ink-3)" }}>{x ?? (say ? "Nothing" : "No answer")}</div>
-          {say && pub.reveal?.offList?.[t] && !v && <div className="text-12 text-[var(--color-ink-2)]">Not on the list, so it counts as said</div>}
-        </div>); })}</div></>);
+      <ResultTable head={["Said", "Leg"]} rows={([0, 1] as const).map((t) => { const v = ok(t), x = pub.reveal?.typed?.[t]?.[0];
+        return row(t, x ?? (say ? "Nothing" : "No answer"), x ? v : null, leg(t, w),
+          v == null && x ? "Waiting for a ruling" : say && x && !v ? (pub.reveal?.offList?.[t] ? "Not on the list" : "Said it") : undefined); })} /></>);
   }
-  if (sc === "dishReveal" && pub.reveal) return head(legW(pub.reveal.w), legW(pub.reveal.w) != null ? `${T[pub.reveal.w as 0 | 1].name} got it` : "Nobody got it");
+  if (sc === "dishReveal" && pub.reveal) { const w = legW(pub.reveal.w);
+    return mine == null ? head(w, w != null ? `${T[w].name} got it` : "Nobody got it") : <>{P}</>; }
   if (sc === "auctionLeg" && pub.auction?.last) { const L = pub.auction.last; return (<>
     {/* one headline (who takes the leg); the how, small; the legs, as a board */}
     <div className="text-center flex flex-col items-center gap-2" role="status" aria-live="polite">
@@ -815,7 +838,7 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
-    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className={qCls(pub.question, 20) + " leading-snug text-center"}>{pub.question}</p>}
+    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p>}
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
     {/* the fact behind it, right under the answer */}
     {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
@@ -967,9 +990,10 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
             : <div className="grid grid-cols-6 gap-1.5">{Array.from({ length: pub.battle!.n + 1 }, (_, n) => <button key={n} className="btn btn-sm" disabled={predBusy} onClick={() => void predict(n)}>{n}</button>)}</div>}
         </div>)}
       <Head pub={pub} me={me} capName={cap?.name} />
+      <Result pub={pub} mine={mine} part="pill" />
       <OnScreen pub={pub} />
       {/^majority(Q|Reveal)$/.test(pub.screen) && <MajorityPad pub={pub} me={me} code={code} />}
-      <Result pub={pub} mine={mine} />
+      <Result pub={pub} mine={mine} part="rest" />
       {canSuggest && (
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
@@ -1161,10 +1185,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {nohost && <AgreeCard pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
       {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
       <Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} />
-
-            <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} />
+      <Result pub={pub} mine={mine} part="pill" />
+      <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} />
       {/^majority(Q|Reveal)$/.test(sc) && <MajorityPad pub={pub} me={me} code={code} />}
-      <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} />
+      <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} part="rest" />
       {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
       {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc)) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
 

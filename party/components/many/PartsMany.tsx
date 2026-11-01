@@ -63,7 +63,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   const label = pub.screen === "final" ? <b>Final result</b> : g
     ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Tie at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</>
     : null;
-  /* a pip a game, as the two-team night's mini-games are pips */
+  /* a pip a game, as the two-team night's: a dot a question round, a dash a mini-game (the owner, 1 Nov) */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
   /* two scores, never on screen together (the owner, 30 Oct): the night's totals, the team row, only between games
      (a game's rules, its result, the end); during a game only its own points, in their own line under its name.
@@ -97,7 +97,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
       <div className="hud-mid">
         {label && <div className="hud-label">{label}</div>}
         {/* the pips are the night's games; during a game they sit by "Question 1 of 15", so they say what they are (the reviewers, 31 Oct) */}
-        {pips.length > 0 && <div className="pips" aria-hidden>{g && pub.screen !== "intro" && pub.screen !== "final" && g.key !== "sudden" && <span className="pips-tag">Game {g.index + 1} of {g.count}</span>}{pips.map((p, i) => <span key={i} className={`pip ${p}`} />)}</div>}
+        {pips.length > 0 && <div className="pips" aria-hidden>{g && pub.screen !== "intro" && pub.screen !== "final" && g.key !== "sudden" && <span className="pips-tag">Game {g.index + 1} of {g.count}</span>}{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>}
       </div>
       {/* this game's points, under its name, in their own small line (a dot, the name, the points; on fire beside) */}
       {tv && inGame && g.key !== "sudden" && (

@@ -12,9 +12,10 @@ import { sendAction, sb } from "@/lib/supabase";
 import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
-import { typedKey } from "@/lib/many/logic";
-import { BoardMany, byDistance, closestCols, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, paid, place, revealOf, RowsMany, splitIng, summaryCols, takes, SAY_WHY } from "./PartsMany";
+import { LETTERS, typedKey } from "@/lib/many/logic";
+import { BoardMany, Dot, finalCols, HudMany, IntroMany, paid, place, revealOf, splitIng, summaryCols, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
+import { AnswerLine, Pts, ResultTable, YouPill, type RRow, type Tone } from "../ResultTable";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 function useSecretMany(code: string, on: boolean, step: number) {
@@ -68,10 +69,6 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   const W = takes(pub);
   /* a game's result waits on the phones while the TV reveals it, last place first (the owner, 31 Oct) */
   const held = useRevealHold(sc === "summary" && g && pub.summary ? `${g.key}:${g.index}` : null, pub.summary ? revealOf(pub.summary, T.length).done + 0.3 : 0);
-  /* your team's place on this leg, or in this game, and what it scores: "2nd, +7", "No points this time" */
-  const mineLeg = () => { if (mine == null || !R?.places) return undefined; const p = R.places[mine], v = R.pts?.[mine] ?? 0;
-    if (g?.key === "sudden") return R.winners.length ? (p === 1 ? <span style={{ color: "var(--color-ok)" }}>That&rsquo;s your team!</span> : undefined) : <span style={{ color: "var(--color-ink-3)" }}>Another question is coming.</span>;
-    return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{p == null || !v ? "No points this time." : `Your team: ${place(p)}, +${v}`}</span>; };
   const mineGame = () => { if (mine == null || !pub.summary) return undefined; const S = pub.summary, v = S.award[mine];
     return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{v ? `Your team: ${place(S.places[mine])}, +${v} to the night` : "No points for your team this game."}</span>; };
 
@@ -95,23 +92,44 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (
-    <div className="noselect text-center" {...noCopy}>
-      {g.key === "flag" && <div className="mb-2"><FlagImg name={pub.flag} h={96} /></div>}
-      {g.key === "map" && pub.map && <div className="mb-2"><MapView id={pub.map.id} reveal maxH={180} legend={false} /></div>}
-      {(g.key === "quiz" || g.key === "say") && pub.question && <p className="font-bold text-16 leading-snug mb-1">{pub.question}</p>}
-      {g.key === "pin" && R.at && <div className="mb-3"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
-        ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
-        fly height={240} label={`Where it is: ${R.place}`} /></div>}
-      {g.key === "majority" && pub.question && <p className="font-bold text-18 leading-snug mb-1">{pub.question}</p>}
-      {g.key !== "pin" && <div className="eyebrow">{g.key === "say" ? "The app's secret answer" : "The answer"}</div>}
-      <div className="display text-30" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(R.answer)) : R.answer}</div>
-      {(R.notes || R.place) && <p className="text-14 text-[var(--color-ink-2)] leading-snug mt-1">{R.place || R.notes}</p>}
+    <div className="noselect" {...noCopy}>
+      <AnswerLine question={["quiz", "say", "majority", "sudden"].includes(g.key) ? pub.question : null}
+        media={g.key === "flag" ? <FlagImg name={pub.flag} h={96} />
+          : g.key === "map" && pub.map ? <MapView id={pub.map.id} reveal maxH={180} legend={false} />
+          : g.key === "pin" && R.at ? <div className="w-full"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
+            ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
+            fly height={220} label={`Where it is: ${R.place}`} /></div> : null}
+        label={g.key === "say" ? "The app's secret answer" : undefined}
+        answer={g.key === "closest" ? showNum(Number(R.answer)) : R.answer} fact={R.place || R.notes} />
     </div>);
-  /* a reveal's rows: each team's line (Majority Rules: right out of how many; the rest: how near) */
-  const Rows = () => !R || !g ? null : typedKey(g.key) ? <FlagRowsMany pub={pub} size="phone" />
-    : g.key === "closest" ? <BoardMany pub={pub} cols={closestCols(pub)} size="phone" label="Nearest first" />
-    : g.key === "pin" ? <RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="phone" pts={R.pts} />
-    : <RowsMany pub={pub} order={T.map((_, i) => i)} right={(t) => <span className="text-16 font-bold" style={{ fontFamily: "var(--font-body)", textTransform: "none" }}>{R.right?.[t] ?? 0} of {R.of?.[t] ?? 0}</span>} size="phone" />;
+  /* the result after a question (the owner's pick, 1 Nov): how your team did, in one pill */
+  const youOf = (): { text: string; tone: Tone } | null => {
+    if (mine == null || !R || !g) return null;
+    if (g.key === "majority") { const r = R.right?.[mine] ?? 0, of = R.of?.[mine] ?? 0; return { text: `Your team: ${r} of ${of} right`, tone: r > 0 ? "ok" : "mid" }; }
+    if (g.only && !g.only.includes(mine)) return null;
+    const v = R.pts?.[mine] ?? 0, p = R.places?.[mine];
+    if (v > 0) return { text: `Your team: ${p ? place(p) + " · " : ""}+${v}`, tone: "ok" };
+    if (typedKey(g.key)) { const x = R.typed?.[mine]; if (!x) return { text: "Your team: no answer", tone: "mid" };
+      if (R.ok?.[mine] === false) return { text: g.key === "say" ? `Your team: ${(SAY_WHY[R.why?.[mine] || ""] || "Said it").toLowerCase()}` : "Your team: wrong", tone: "no" }; }
+    if (g.key === "pin" && !R.pins?.[mine]) return { text: "Your team: no pin", tone: "mid" };
+    if (g.key === "closest" && R.nums?.[mine] == null) return { text: "Your team: no answer", tone: "mid" };
+    return { text: "Your team: no points this time", tone: "mid" };
+  };
+  /* ...then one table, a row a team: its place, what it said (how far off, how many right), what it scored */
+  const Table = () => { if (!R || !g) return null;
+    const pl = (i: number) => R.places?.[i] ?? null, far = (i: number) => (g.key === "pin" || g.key === "closest" ? (R.off?.[i] ?? 1e15) : 0);
+    const idx = T.map((_, i) => i).filter((i) => !(g.only && !g.only.includes(i)))
+      .sort((a, b) => (pl(a) ?? 99) - (pl(b) ?? 99) || far(a) - far(b) || (R.ok?.[a] ? 0 : 1) - (R.ok?.[b] ? 0 : 1) || a - b);
+    const rows: RRow[] = idx.map((i) => {
+      const base = { team: i, name: T[i].name, color: T[i].color, letter: LETTERS[i], place: pl(i), me: i === mine, end: <Pts n={R.pts?.[i]} /> };
+      if (typedKey(g.key)) { const x = R.typed?.[i]; return { ...base, val: x ?? "No answer", ok: x ? R.ok?.[i] ?? null : null,
+        sub: g.key === "say" && x && R.ok?.[i] === false ? SAY_WHY[R.why?.[i] || ""] : undefined }; }
+      if (g.key === "closest") { const n = R.nums?.[i], off = R.off?.[i]; return { ...base, val: n == null ? "No answer" : showNum(n), sub: n == null ? undefined : off === 0 ? "Spot on!" : `Off by ${showNum(off ?? 0)}` }; }
+      if (g.key === "pin") return { ...base, val: R.pins?.[i] ? showKm(R.off?.[i] ?? 0) : "No pin" };
+      return { ...base, place: null, end: undefined, val: `${R.right?.[i] ?? 0} of ${R.of?.[i] ?? 0}` };
+    });
+    const head: [string, string?] = g.key === "majority" ? ["Right"] : [g.key === "closest" ? "Guess" : g.key === "pin" ? "Off by" : "Said", "Pts"];
+    return <ResultTable rows={rows} head={head} places={g.key !== "majority" && idx.some((i) => pl(i) != null)} />; };
   /* a game's result and the night's end, the same on every phone */
   const Summary = () => !g || !pub.summary ? null : held ? <WatchTv /> : (<>
     <Big text={paid(pub).text} color={paid(pub).color} eyebrow={g.title} sub={mineGame()} />
@@ -174,7 +192,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
               </div>
               {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={v} say={g.key === "say"} neg={g.key === "say" ? SAY_WHY[R.why?.[i] || ""] : undefined} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}
             </div>); })}</div></>
-        ) : <Rows />}
+        ) : <Table />}
         {g.key !== "majority" && <Big text={W.text} color={W.color} />}
         <Main label="Next" on={() => move("m/next")} />
       </>)}
@@ -237,9 +255,11 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
 
       {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}
       {!host && sc === "reveal" && g && R && (<>
-        {g.key !== "majority" && <Big text={W.text} color={W.color} sub={mineLeg()} />}
+        {/* sudden death keeps its headline: it's the night's winner */}
+        {g.key === "sudden" && <Big text={W.text} color={W.color} />}
+        {(() => { const y = youOf(); return y && <YouPill text={y.text} tone={y.tone} />; })()}
         <Answer />
-        <Rows />
+        <Table />
       </>)}
       {!host && sc === "summary" && <Summary />}
       {!host && sc === "final" && <Final />}

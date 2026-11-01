@@ -9,6 +9,7 @@ export type PubMany = {
   teams: TeamPub[];
   /* this game: legs taken, its place points so far (this leg's counted from its reveal), Majority Rules' shares */
   game?: { key: ManyKey; title: string; leg: number; of: number; wins: number[]; pts: number[]; shares?: number[]; index: number; count: number;
+    keys?: ManyKey[];                             // the night's games in order (the pips: a dot a question round, a dash a mini-game)
     only?: number[];                              // sudden death: the teams level at the top, the only ones who answer
     themes?: string[] };                          // a question round: its themes, in the order they come
   qid?: string; question?: string; flag?: string; options?: string[];
@@ -41,7 +42,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
   const now = m && m.key !== "majority" && s.screen === "reveal" ? legPoints(s) : null;
   if (m) pub.game = { key: m.key, title: titleOf(s.minis, s.mi), leg: Math.min(m.i + 1, m.qs.length), of: m.qs.length, wins: [...m.wins],
-    pts: m.pts.map((p, t) => p + (now ? now[t] : 0)), index: s.mi, count: s.minis.filter((x) => x.key !== "sudden").length, ...(m.only ? { only: m.only } : {}),
+    pts: m.pts.map((p, t) => p + (now ? now[t] : 0)), index: s.mi, count: s.minis.filter((x) => x.key !== "sudden").length, keys: s.minis.filter((x) => x.key !== "sudden").map((x) => x.key), ...(m.only ? { only: m.only } : {}),
     ...(m.key === "quiz" ? { themes: [...new Set(m.qs.map((q) => String(q.theme || "")).filter(Boolean))] } : {}) };
   /* Majority Rules: each team's share so far, for the tracker's "this game" line; on the reveal this question
      counts too (it is only banked at Next), so the line agrees with "2 of 2 right" under it (the reviewers, 31 Oct) */
