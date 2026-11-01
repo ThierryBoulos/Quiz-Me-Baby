@@ -44,6 +44,8 @@ export default function PhoneRoom() {
   /* It lasts until the TV has actually answered (its next update), not until this phone's own refresh;
      if nothing comes back in 8 s the phone says so (and takes it back if the reply comes after all), and a tap that couldn't even leave says so at once. */
   const [waiting, setWaiting] = useState(false);
+  const [waitLong, setWaitLong] = useState(false);
+  useEffect(() => { if (!waiting) { setWaitLong(false); return; } const t = setTimeout(() => setWaitLong(true), 450); return () => clearTimeout(t); }, [waiting]);
   const [lineupOpen, setLineupOpen] = useState(false);
   const [tapErr, setTapErr] = useState<string | null>(null);
   /* where the failed tap was: the message sits just under that button (above it when the button is docked at the bottom) */
@@ -107,9 +109,20 @@ export default function PhoneRoom() {
   useEffect(() => {
     if (!gone) return;
     let live = true;
+    /* (1 Nov: back from another app, the owner was sent to the join screen anyway: the phone's connection can take
+       longer than that to wake up.) So up to three tries, each with a fresh sign-in, about ten seconds in all, and
+       never while the page is out of sight */
     const t = setTimeout(async () => {
-      try { await sb().auth.getSession(); await refreshRef.current(); } catch { /* read again below */ }
-      setTimeout(() => { if (live && goneRef.current) router.replace("/join?code=" + code); }, 800);
+      for (let i = 0; i < 3 && live; i++) {
+        try {
+          const { data } = await sb().auth.getSession();
+          if (!data.session || (data.session.expires_at ?? 0) * 1000 < Date.now() + 60000) await sb().auth.refreshSession();
+          await refreshRef.current();
+        } catch { /* try again */ }
+        await new Promise((r) => setTimeout(r, 2500));
+        if (!goneRef.current) return;
+      }
+      if (live && goneRef.current && document.visibilityState === "visible") router.replace("/join?code=" + code);
     }, 2500);
     return () => { live = false; clearTimeout(t); };
   }, [gone, code, router]);
@@ -222,8 +235,8 @@ export default function PhoneRoom() {
   const tooLong = (draft ?? "").trim().length > TEAM_MAX;
 
   return (
-    <main className="screen">
-      {waiting && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
+    <main className="screen" data-soft={waiting && !waitLong ? "" : undefined}>
+      {waiting && waitLong && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
       {tapErr && <div className="fixed left-4 right-4 enter text-center font-bold rounded-[16px]" role="alert" data-taperr
         style={{ zIndex: 50, ...(tapAt ?? { top: "calc(12px + env(safe-area-inset-top))" }), fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
           boxShadow: "0 12px 30px rgba(0,0,0,.6)" }}>{tapErr}</div>}

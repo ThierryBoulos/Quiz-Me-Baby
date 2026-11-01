@@ -57,3 +57,29 @@ export function TitleLine({ eyebrow, text, color }: { eyebrow: string; text: str
       <div className="display leading-tight" style={{ color, fontSize: text.length > 24 ? 26 : 32 }}>{text}</div>
     </div>);
 }
+
+/* the night's end (the owner, 1 Nov): the winner in a card of their own colour, clear at the top */
+export function WinnerCard({ eyebrow, name, color, sub }: { eyebrow: string; name: string; color: string; sub?: string }) {
+  return (
+    <div className="winner-card" style={{ ["--wc" as string]: color }} role="status" aria-live="polite">
+      <div className="text-40 leading-none" aria-hidden>🏆</div>
+      <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{eyebrow}</div>
+      <div className="display leading-none" style={{ color, fontSize: name.length > 18 ? 34 : 48 }}><bdi>{name}</bdi></div>
+      {sub && <div className="text-14 font-bold text-[var(--color-ink-2)]">{sub}</div>}
+    </div>);
+}
+
+/* the night's awards, a line each */
+export function AwardList({ awards }: { awards: { t: string; who: string; color?: string; note?: string; spoon?: boolean }[] }) {
+  if (!awards.length) return null;
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="eyebrow text-center">The awards</div>
+      <ul className="flex flex-col gap-2 text-left">{awards.map((a) => (
+        <li key={a.t} className="card !p-2 !px-3" style={{ borderColor: a.color ? `color-mix(in srgb, ${a.color} 55%, transparent)` : undefined }}>
+          <div className="eyebrow !text-11" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
+          <div className="text-14 font-bold" style={{ color: a.color }}><bdi>{a.who}</bdi></div>
+          {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}
+        </li>))}</ul>
+    </div>);
+}

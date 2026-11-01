@@ -13,9 +13,9 @@ import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
-import { BoardMany, Dot, finalCols, HudMany, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
+import { Dot, HudMany, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
-import { AnswerLine, Pts, ResultTable, TitleLine, YouPill, type RRow, type Tone } from "../ResultTable";
+import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 function useSecretMany(code: string, on: boolean, step: number) {
@@ -46,10 +46,16 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   const [busy, setBusy] = useState(false), [err, setErr] = useState<string | null>(null);
   const [text, setText] = useState(""), [pin, setPin] = useState<LatLon | null>(null), [sentTxt, setSentTxt] = useState<string | null>(null);
   useEffect(() => { setText(""); setPin(null); setErr(null); setSentTxt(null); }, [pub.qid]);
+  /* a tap holds the buttons (no second tap) but they only dim if the TV takes more than half a second (1 Nov) */
+  const [busyLong, setBusyLong] = useState(false);
+  useEffect(() => { if (!busy) { setBusyLong(false); return; } const t = setTimeout(() => setBusyLong(true), 450); return () => clearTimeout(t); }, [busy]);
   const send = async (kind: string, payload: Record<string, unknown>) => {
     setBusy(true); setErr(null);
     try { await sendAction(code, kind, { ...payload, step: pub.step }); return true; } catch { setErr("That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
   };
+  /* the host's change of a call shows at once, until the TV's own update says the same */
+  const [flips, setFlips] = useState<Record<string, boolean>>({});
+  useEffect(() => { setFlips((f) => { const n = { ...f }; let ch = false; for (const k of Object.keys(n)) { const [q, t] = k.split("|"); if (q !== String(pub.qid) || pub.reveal?.ok?.[Number(t)] === n[k]) { delete n[k]; ch = true; } } return ch ? n : f; }); }, [pub.reveal, pub.qid]);
   const move = (type: string, extra: Record<string, unknown> = {}) => void send("judge", { move: { type, ...extra } });
   const opts = useMemo(() => order(pub.options || [], me.name + (pub.qid || "")), [pub.options, me.name, pub.qid]);
   const sentMine = mine != null && pub.sent[mine];
@@ -142,18 +148,19 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       <ResultTable rows={rows} head={[S.shares ? "Right" : "Points", "Night"]} places big />
       {S.line && <p className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{S.line}</p>}
     </>); };
-  const Final = () => { if (!pub.final) return null; const tops = pub.final.order.filter((x) => x.place === 1).map((x) => x.team), c = tops.length === 1 ? T[tops[0]].color : "var(--color-gold)";
-    const my = mine != null ? pub.final.order.find((x) => x.team === mine)?.place : undefined;
-    return (
-      <div className="text-center flex flex-col gap-2 py-2" role="status" aria-live="polite">
-        <div className="eyebrow">{tops.length > 1 ? "A shared win" : "The winner"}</div>
-        <div className="display text-52 leading-none" style={{ color: c }}><bdi>{tops.map((t) => T[t].name).join(" & ")}</bdi></div>
-        {my != null && <div className="text-15 font-bold" style={{ color: my === 1 ? "var(--color-ok)" : "var(--color-ink-3)" }}>{my === 1 ? "You won the night!" : `Your team finished ${place(my)}.`}</div>}
-        <div className="mt-2"><BoardMany pub={pub} cols={finalCols(pub)} size="phone" label="Final standings" /></div>
-      </div>); };
+  /* the night's end (the owner, 1 Nov): the winner clear at the top, how your team did, then the standings */
+  const Final = () => { if (!pub.final) return null; const F = pub.final, tops = F.order.filter((x) => x.place === 1).map((x) => x.team), c = tops.length === 1 ? T[tops[0]].color : "var(--color-gold)";
+    const my = mine != null ? F.order.find((x) => x.team === mine)?.place : undefined;
+    const rows: RRow[] = F.order.map((o) => ({ team: o.team, name: T[o.team].name, color: T[o.team].color, letter: LETTERS[o.team], place: o.place, val: String(T[o.team].score), me: o.team === mine }));
+    return (<>
+      <WinnerCard eyebrow={tops.length > 1 ? "A shared win" : "The winner"} name={tops.map((t) => T[t].name).join(" & ")} color={c} sub={`${T[tops[0]].score} points`} />
+      {my != null && <YouPill text={my === 1 ? "You won the night!" : `Your team finished ${place(my)}`} tone={my === 1 ? "ok" : "mid"} />}
+      <ResultTable rows={rows} head={["Points"]} places big />
+      <AwardList awards={F.awards.map((a) => ({ ...a, color: a.team != null ? T[a.team].color : undefined }))} />
+    </>); };
 
   return (
-    <div className={"flex flex-col gap-4 flex-1" + (sc === "final" ? " over-confetti" : "")}>
+    <div className={"flex flex-col gap-4 flex-1" + (sc === "final" ? " over-confetti" : "")} data-soft={busy && !busyLong ? "" : undefined}>
       <HudMany pub={pub} size="phone" me={mine} host={host} />
 
       {/* THE HOST: the answer on top, one main button */}
@@ -196,13 +203,14 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
                 <div className="eyebrow flex items-center gap-2" style={{ color: t.color, letterSpacing: ".1em" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
                 {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
               </div>
-              {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={v} say={g.key === "say"} neg={g.key === "say" ? SAY_WHY[R.why?.[i] || ""] : undefined} label={`Rule on ${t.name}’s answer`} busy={busy} onPick={() => move("m/flip", { t: i })} /></div>}
+              {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={flips[`${pub.qid}|${i}`] ?? v} say={g.key === "say"} neg={g.key === "say" ? SAY_WHY[R.why?.[i] || ""] : undefined} label={`Rule on ${t.name}’s answer`} busy={false}
+                onPick={(nv) => { if ((flips[`${pub.qid}|${i}`] ?? v) === nv) return; setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i }); }} /></div>}
             </div>); })}</div></>
         ) : <Table />}
         {g.key !== "majority" && <Big text={W.text} color={W.color} />}
         <Main label="Next" on={() => move("m/next")} />
       </>)}
-      {host && sc === "summary" && (<><Summary /><Main label="Next" on={() => move("m/next")} /></>)}
+      {host && sc === "summary" && (<><Summary />{/* the host's Next waits with the result, so a tap can't skip the TV's reveal (the owner, 1 Nov) */}{!held && <Main label="Next" on={() => move("m/next")} />}</>)}
       {host && sc === "final" && (<>
         <Final />
         <div className="mt-auto flex flex-col gap-2">

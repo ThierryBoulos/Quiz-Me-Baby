@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 /* Every deadline is the TV's time. A phone whose own clock is set wrong (by
    more than a few seconds) would count down wrong, so phones learn how far
@@ -36,14 +36,17 @@ export function useAfter(at?: number | null) {
 }
 /* The clock: a ring that drains as the time goes (the full ring is the most time it has shown: a new question,
    or +10 s, fills it again), red for the last 10 seconds, and the number jumps on each of those ticks. */
+const TOPS = new Map<number, number>();
 export function Clock({ deadline, left, timeUp, size = 120 }: { deadline?: number | null; left?: number; timeUp?: boolean; size?: number }) {
   const s = useSecondsLeft(deadline, left);
   const [now, setNow] = useState(tvNow());
   useEffect(() => { if (!deadline) return; const t = setInterval(() => setNow(tvNow()), 250); return () => clearInterval(t); }, [deadline]);
   const ms = timeUp ? 0 : deadline ? Math.max(0, deadline - now) : (left || 0) * 1000;
-  const top = useRef(0);
-  if (ms > top.current) top.current = ms;
-  const frac = top.current ? ms / top.current : 0;
+  /* how long this clock started at, kept by its deadline so a screen built afresh (an answer coming in) doesn't
+     start the ring again from full (1 Nov: the host's ring stayed full) */
+  const key = deadline ?? -1, top = Math.max(TOPS.get(key) ?? 0, ms);
+  TOPS.set(key, top); if (TOPS.size > 40) TOPS.delete(TOPS.keys().next().value!);
+  const frac = top ? ms / top : 0;
   const paused = !deadline && !!left;
   const col = timeUp ? "var(--color-no)" : s <= 10 ? "var(--color-no)" : "var(--color-gold)";
   const w = Math.max(4, size / 22), r = (size - w) / 2, C = 2 * Math.PI * r;

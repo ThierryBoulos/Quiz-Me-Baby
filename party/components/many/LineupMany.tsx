@@ -103,7 +103,7 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
   const blocker = why || (!on.length ? "Switch on at least one game." : on.includes("quiz") && bank && !picked.length ? "Pick at least one theme for the question rounds." : "");
   /* a level row: tap to add or drop a level; the last one can't be dropped */
   const LevelRow = ({ label, opts, value, set }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void }) => (
-    <div className="flex flex-wrap items-center gap-2 pl-1 pb-2" role="group" aria-label={label}>
+    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={label}>
       {opts.map(([key, l]) => { const lit = value.includes(key); return (
         <button key={key} type="button" className={"chip !min-h-[44px] !px-3 !text-13 " + (lit ? "chip-on" : "")} aria-pressed={lit}
           onClick={() => { const next = lit ? value.filter((x) => x !== key) : [...value, key]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{l}</button>); })}
@@ -129,17 +129,19 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: lit ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>
             </button>
-            {lit && key === "quiz" && (<>
-              <div className="flex flex-wrap items-center gap-2 pl-1 pb-1" role="group" aria-label="How many question rounds">
-                <span className="text-13 text-[var(--color-ink-2)] mr-1">Rounds</span>
-                {Array.from({ length: MANY_ROUNDS }, (_, i) => i + 1).map((r) => <button key={r} type="button" className={"chip !min-h-[44px] !px-4 !text-13 " + (rounds === r ? "chip-on" : "")} aria-pressed={rounds === r} onClick={() => setRounds(r)}>{r}</button>)}
-              </div>
-              <LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} />
+            {lit && key === "quiz" && (<div className="sub-panel">
+              {/* how many rounds: a dropdown, not a row of six (the owner, 1 Nov) */}
+              <label className="sp-row"><span className="sp-k">Rounds</span>
+                <select className="select" aria-label="How many question rounds" value={rounds} onChange={(e) => setRounds(Number(e.target.value))}>
+                  {Array.from({ length: MANY_ROUNDS }, (_, i) => i + 1).map((r) => <option key={r} value={r}>{r} round{r === 1 ? "" : "s"}</option>)}
+                </select></label>
+              <div className="flex flex-col gap-2"><span className="sp-k">Level</span><LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} /></div>
               {/* the themes: a summary, and a tap to change them (up to six; each round takes two in turn) */}
-              <div className="flex flex-col gap-2 pl-1 pb-2">
+              <div className="flex flex-col gap-2">
                 <button type="button" className="flex items-center justify-between gap-3 min-h-[44px] text-left" aria-expanded={picking} onClick={() => setPicking(!picking)}>
-                  <span className="min-w-0"><span className="block text-13 text-[var(--color-ink-2)]">Themes, {picked.length} of {MANY_THEMES} (each round takes two in turn)</span>
-                    <span className="block text-14 font-bold leading-snug">{picked.length ? picked.join(", ") : bank ? "None yet" : "Loading…"}</span></span>
+                  <span className="min-w-0"><span className="sp-k block">Themes · {picked.length} of {MANY_THEMES}</span>
+                    <span className="block text-14 font-bold leading-snug mt-1">{picked.length ? picked.join(", ") : bank ? "None yet" : "Loading…"}</span>
+                    <span className="block text-12 text-[var(--color-ink-3)] mt-0.5">Each round takes two, in turn.</span></span>
                   <span className="text-13 font-bold shrink-0" style={{ color: "var(--color-gold)" }}>{picking ? "Done" : "Change"}</span>
                 </button>
                 {picking && <div className="flex flex-wrap gap-2 enter" role="group" aria-label="Question round themes">
@@ -148,21 +150,23 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
                       onClick={() => setThemes(lit ? picked.filter((x) => x !== t) : [...picked, t])}>{t}</button>); })}
                 </div>}
               </div>
-            </>)}
-            {lit && key === "flag" && <LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} />}
-            {lit && key === "pin" && <LevelRow label="Drop the Pin level" opts={LEVELS3} value={pinLevels} set={setPinLevels} />}
-            {lit && key === "majority" && <LevelRow label="Majority Rules level" opts={LEVELS3} value={majorityLevels} set={setMajorityLevels} />}
-            {lit && key === "airport" && <LevelRow label="Guess the Airport level" opts={LEVELS3} value={airportLevels} set={setAirportLevels} />}
-            {lit && key === "map" && <LevelRow label="Guess the Map level" opts={LEVELS3} value={mapLevels} set={setMapLevels} />}
-            {lit && key === "dish" && (<>
-              <span className="eyebrow !text-11 pl-1">Cocktails</span>
+            </div>)}
+            {lit && key === "flag" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} /></div>}
+            {lit && key === "pin" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Drop the Pin level" opts={LEVELS3} value={pinLevels} set={setPinLevels} /></div>}
+            {lit && key === "majority" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Majority Rules level" opts={LEVELS3} value={majorityLevels} set={setMajorityLevels} /></div>}
+            {lit && key === "airport" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Airport level" opts={LEVELS3} value={airportLevels} set={setAirportLevels} /></div>}
+            {lit && key === "map" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Map level" opts={LEVELS3} value={mapLevels} set={setMapLevels} /></div>}
+            {lit && key === "dish" && (<div className="sub-panel">
+              <span className="sp-k">Cocktails</span>
               <LevelRow label="Cocktail levels" opts={COCKTAILS} value={dishLevels.filter((l) => l[0] === "c")} set={(v) => setDishLevels([...v, ...dishLevels.filter((l) => l[0] === "d")])} />
-              <span className="eyebrow !text-11 pl-1">Dishes</span>
+              <span className="sp-k">Dishes</span>
               <LevelRow label="Dish levels" opts={DISHES} value={dishLevels.filter((l) => l[0] === "d")} set={(v) => setDishLevels([...dishLevels.filter((l) => l[0] === "c"), ...v])} />
-            </>)}
+            </div>)}
           </div>); })}
       </div>
-      <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels })}>Start the game</button>
-      {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
+      <div className="start-bar">
+        {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
+        <button className="btn btn-gold btn-block" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels })}>Start the game</button>
+      </div>
     </section>);
 }

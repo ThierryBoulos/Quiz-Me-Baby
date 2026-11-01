@@ -1,7 +1,7 @@
 "use client";
 import { twoDone } from "./TwoResults";
 import { useRevealHold, WatchTv } from "./WatchTv";
-import { Pts, ResultTable, TitleLine, YouPill, type RRow, type Tone } from "./ResultTable";
+import { AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
@@ -266,11 +266,12 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} app={app} say={say} label={`Rule on ${T[t].name}’s answer`} onPick={pick} /></div>}
       </div>); })}</>);
   /* a results screen: exactly what the players see, and the host's button */
+  const resultHeld = useTwoHold(pub);
   const Results = ({ children }: { children: React.ReactNode }) => (
     <div className="flex flex-col gap-4 flex-1">
       <OnScreen pub={pub} />
       <Result pub={pub} />
-      {children}
+      {!resultHeld && children}
     </div>);
   const Exit = () => (
     <div className="mt-auto flex flex-col gap-2">
@@ -710,14 +711,20 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
     </div>);
 }
 
-/* part: "pill" is only how your team did (it goes at the top of the phone, above the question), "rest" the result without it */
-function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean; part?: "pill" | "rest" }) {
-  const T = pub.teams, sc = pub.screen, m = pub.mini;
-  /* a game's or a round's result waits on the phones while the TV reveals it (the winner comes in last) */
+/* a game's or a round's result waits on the phones while the TV reveals it (the winner comes in last): true while it
+   waits. The host's buttons wait with it, so Next can't skip the reveal by mistake (the owner, 1 Nov) */
+function useTwoHold(pub: Pub) {
+  const sc = pub.screen, m = pub.mini;
   const won = sc === "auctionResult" ? pub.auction?.winner : sc === "battleSummary" ? pub.battle?.winner
     : sc === "roundScore" ? (pub.roundPts && pub.roundPts[0] !== pub.roundPts[1] ? (pub.roundPts[0] > pub.roundPts[1] ? 0 : 1) : null) : pub.summary?.winner;
   const holdKey = /Summary$|^auctionResult$|^roundScore$/.test(sc) ? `${sc}:${m?.key ?? ""}:${pub.r}` : null;
-  const heldNow = useRevealHold(holdKey, twoDone(won) + 0.3);
+  return useRevealHold(holdKey, twoDone(won) + 0.3);
+}
+
+/* part: "pill" is only how your team did (it goes at the top of the phone, above the question), "rest" the result without it */
+function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean; part?: "pill" | "rest" }) {
+  const T = pub.teams, sc = pub.screen, m = pub.mini;
+  const heldNow = useTwoHold(pub);
   /* a question's result (the owner's pick, 1 Nov): how your team did in one pill, then a table, a row a team */
   const pill = (text: string, tone: Tone) => <YouPill text={text} tone={tone} />;
   const row = (t: 0 | 1, val: React.ReactNode, ok: boolean | null | undefined, end?: React.ReactNode, sub?: React.ReactNode): RRow =>
@@ -821,20 +828,14 @@ function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnl
   if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null, aw = w != null ? B.award?.[w] ?? m?.pts : B.award?.[0];
     return standings({ title: "Battle of the Captains", text: w == null ? (B.note || "A tie") : `${T[w].name} +${aw}`, w, vals: B.score, col: "Right", endCol: "Night",
       end: (t) => <Pts n={B.award?.[t]} />, note: B.predict, you: won3(w, aw, "the Battle") }); }
-  if (sc === "final") { const w = pub.winner ?? null; return (
-    <div className="text-center flex flex-col gap-2 py-4" role="status" aria-live="polite">
-      <div className="eyebrow">{w == null ? "The night ends" : "The winner"}</div>
-      <div className="display text-52 leading-none" style={{ color: tc(w) }}>{w == null ? "A draw" : T[w].name}</div>
-      {w != null && mine != null && <div className="text-15 font-bold" style={{ color: w === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{w === mine ? "You won the night!" : "Not tonight."}</div>}
-      <div className="mt-2">{board([T[0].score, T[1].score], "Final score", w)}</div>
-      {/* the night's awards, as the TV shows them (30 Oct: they took the nutshell's place) */}
-      {(pub.recap?.awards?.length ?? 0) > 0 && <ul className="mt-3 flex flex-col gap-2 text-left">{pub.recap!.awards!.map((a) => (
-        <li key={a.t} className="card !p-2 !px-3" style={{ borderColor: a.team != null ? tc(a.team) : undefined }}>
-          <div className="eyebrow text-11" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
-          <div className="text-14 font-bold" style={{ color: a.team != null ? tc(a.team) : undefined }}><bdi>{a.who}</bdi></div>
-          {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}
-        </li>))}</ul>}
-    </div>); }
+  /* the night's end (the owner, 1 Nov): the winner clear at the top, how your team did, then the two teams' points */
+  if (sc === "final") { const w = pub.winner ?? null; return (<>
+    <WinnerCard eyebrow={w == null ? "The night ends" : "The winner"} name={w == null ? "A draw" : T[w].name} color={tc(w)} sub={w != null ? `${T[w].score} points` : `${T[0].score} each`} />
+    {mine != null && <YouPill text={w == null ? "A draw" : w === mine ? "You won the night!" : "Not tonight"} tone={w === mine ? "ok" : w == null ? "mid" : "no"} />}
+    <ResultTable big places head={["Points"]} rows={(w === 1 ? [1, 0] as const : [0, 1] as const).map((t) => ({ ...row(t, String(T[t].score), null), place: w == null || w === t ? 1 : 2 }))} />
+    {/* the night's awards, as the TV shows them (30 Oct: they took the nutshell's place) */}
+    <AwardList awards={(pub.recap?.awards || []).map((a) => ({ ...a, color: a.team != null ? tc(a.team) : undefined }))} />
+  </>); }
   return null;
 }
 

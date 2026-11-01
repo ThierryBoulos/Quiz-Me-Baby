@@ -86,6 +86,10 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
   cursor: pointer; transition: transform 0.15s var(--ease), filter 0.15s, opacity 0.2s; }
 .btn:active:not(:disabled) { transform: scale(0.97); filter: brightness(1.15); }
 .btn:disabled { opacity: 0.38; cursor: not-allowed; }
+/* a tap on its way to the TV: the buttons are held (no second tap) but don't dim for the first half second, so a quick
+   reply doesn't flash the whole screen off and on (the owner, 1 Nov) */
+[data-soft] .btn:disabled, [data-soft] .chip:disabled { opacity: 1; cursor: default; }
+[data-soft] .dock.btn-gold:disabled { background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); color: #1a1400; }
 /* keyboard focus is always visible */
 .btn:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--color-gold-2); outline-offset: 3px; }
 .btn-gold { background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); color: #1a1400; border-color: transparent;
@@ -587,6 +591,26 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 @keyframes planeGo { 0% { transform: translateX(0) rotate(90deg) scale(.8); opacity: 0; } 8% { opacity: 1; } 100% { transform: translateX(1500px) rotate(90deg) scale(1.7); opacity: 1; } }
 @keyframes planeTrail { 0% { transform: scaleX(0); opacity: 1; } 80% { opacity: .9; } 100% { transform: scaleX(1); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .plane-fly { display: none; } }
+/* the lobby's Start, in a solid bar along the bottom, so nothing shows through it (the owner, 1 Nov) */
+.start-bar { position: sticky; bottom: 0; z-index: 20; margin: 4px calc(-20px - env(safe-area-inset-right)) 0 calc(-20px - env(safe-area-inset-left));
+  padding: 12px calc(20px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+  background: color-mix(in srgb, var(--color-bg) 94%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(185,192,222,.14); display: flex; flex-direction: column; gap: 8px; }
+.start-bar .btn { min-height: 52px; }
+/* the night's winner, on the phones' last screen */
+.winner-card { border-radius: 22px; padding: 18px 16px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--wc) 26%, transparent), rgba(255,255,255,.02) 70%);
+  border: 1px solid color-mix(in srgb, var(--wc) 55%, transparent); box-shadow: 0 0 40px -12px var(--wc); }
+/* a game's options under its switch: one quiet panel, a labelled row each (the owner, 1 Nov: tidier) */
+.sub-panel { margin: 0 0 10px; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid rgba(185,192,222,.12); display: flex; flex-direction: column; gap: 10px; }
+.sp-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sp-k { font-size: var(--text-11); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-3); }
+.select { appearance: none; -webkit-appearance: none; min-height: 44px; padding: 0 40px 0 14px; border-radius: 12px; font: inherit; font-weight: 700; font-size: var(--text-15);
+  color: var(--color-ink); border: 1px solid rgba(185,192,222,.25); cursor: pointer;
+  background: rgba(255,255,255,.06) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23a9b0d4' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center; }
+.select:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
+.select option { background: #10142e; color: var(--color-ink); }
+
 /* the phones' result after a question (ResultTable): your team's pill, then a table, a row a team */
 .you-pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 14px; font-weight: 800; font-size: var(--text-14);
   border: 1px solid rgba(169,176,212,.35); background: rgba(255,255,255,.04); color: var(--color-ink); }

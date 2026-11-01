@@ -240,11 +240,13 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
       {tvOpen && tv && <TvSettings code={code} tv={tv} onClose={() => setTvOpen(false)} />}
       {picking && full && <Picker bank={full} themes={standard ? picked : []} minis={minis} difficulty={difficulty} levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels, pin: pinLevels, airport: airportLevels, majority: majorityLevels }} value={picks} onChange={setPicks} onClose={() => setPicking(false)} />}
 
-      <button className="btn btn-gold btn-lg btn-block dock" disabled={!!blocker || busy}
-        onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, custom: getCustom(),
-          ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
-      {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
-      {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
+      <div className="start-bar">
+        {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
+        {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
+        <button className="btn btn-gold btn-block" disabled={!!blocker || busy}
+          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, custom: getCustom(),
+            ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
+      </div>
     </section>
   );
 }
