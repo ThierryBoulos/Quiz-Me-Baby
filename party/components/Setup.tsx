@@ -108,11 +108,13 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
     : ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";
   /* a level row: tap to add or drop a level; the last one can't be dropped */
   const LevelRow = ({ label, opts, value, set, tag }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string }) => (
-    <div className="flex flex-wrap items-center gap-2 pl-1 pb-2" role="group" aria-label={label}>
-      {tag && <span className="eyebrow !text-11 basis-full">{tag}</span>}
+    <div className="flex flex-col gap-1.5 pl-1 pb-2" role="group" aria-label={label}>
+      {tag && <span className="eyebrow !text-11">{tag}</span>}
+      <div className="lvl-row">
       {opts.map(([k, l]) => { const on = value.includes(k); return (
-        <button key={k} type="button" className={"chip !min-h-[44px] !px-3 !text-13 " + (on ? "chip-on" : "")} aria-pressed={on}
+        <button key={k} type="button" className={"chip " + (on ? "chip-on" : "")} aria-pressed={on}
           onClick={() => { const next = on ? value.filter((x) => x !== k) : [...value, k]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{l}</button>); })}
+      </div>
     </div>);
   const half = picked.filter((t) => (picks.picks[t] || []).length === 1);
 

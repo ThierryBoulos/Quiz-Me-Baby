@@ -102,6 +102,10 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
 .btn-sm { min-height: 44px; font-size: var(--text-14); padding: 0 16px; }
 /* the five level chips in one row on a phone: smaller words, so "Medium" sits inside its chip (23 Oct) */
 .lvl-chip { font-size: var(--text-12); padding: 0 2px; letter-spacing: 0; min-width: 0; }
+/* a game's levels on one row, equal widths (the owner, 1 Nov): "Very easy" may take two lines inside its chip */
+.lvl-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
+.lvl-row .chip { min-height: 44px; min-width: 0; padding: 4px; font-size: var(--text-13); line-height: 1.15; white-space: normal; text-align: center; justify-content: center; }
+.lvl-row:has(> :nth-child(5)) .chip { font-size: var(--text-12); padding: 4px 2px; }
 
 .field-label { display: block; font-size: var(--text-12); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-ink-2); margin-bottom: 8px; }
 .field-error { font-size: var(--text-13); font-style: italic; color: var(--color-no); }

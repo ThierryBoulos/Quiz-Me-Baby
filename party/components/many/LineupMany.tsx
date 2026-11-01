@@ -103,9 +103,9 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
   const blocker = why || (!on.length ? "Switch on at least one game." : on.includes("quiz") && bank && !picked.length ? "Pick at least one theme for the question rounds." : "");
   /* a level row: tap to add or drop a level; the last one can't be dropped */
   const LevelRow = ({ label, opts, value, set }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void }) => (
-    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={label}>
+    <div className="lvl-row" role="group" aria-label={label}>
       {opts.map(([key, l]) => { const lit = value.includes(key); return (
-        <button key={key} type="button" className={"chip !min-h-[44px] !px-3 !text-13 " + (lit ? "chip-on" : "")} aria-pressed={lit}
+        <button key={key} type="button" className={"chip " + (lit ? "chip-on" : "")} aria-pressed={lit}
           onClick={() => { const next = lit ? value.filter((x) => x !== key) : [...value, key]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{l}</button>); })}
     </div>);
   return (
