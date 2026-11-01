@@ -745,8 +745,7 @@ function Result({ pub, mine, headOnly }: { pub: Pub; mine?: 0 | 1; headOnly?: bo
     <div className="eyebrow text-center">This question</div>
     {rows((t) => `${R.right[t]} of ${M.n?.[t] ?? 0} right`)}
     {pub.mrFire && <p className="text-center text-15 font-bold">{pub.mrFire.map((f) => <span key={f.name} className="mx-2"><span className="flame">🔥</span>{f.name} · {f.n} in a row</span>)}</p>}
-    {/* the game so far, in percent, is in the bar at the top (this question counted already): here, the counts behind it */}
-    {M.totals && <p className="text-center text-13 text-[var(--color-ink-3)]">So far: {name(0)} {M.totals.right[0]} of {M.totals.of[0]} right · {name(1)} {M.totals.right[1]} of {M.totals.of[1]} right</p>}</>); }
+    {/* (the game so far is in the bar at the top: no second line saying it again, the owner, 1 Nov) */}</>); }
   if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (<>
     {head(legW(w), w === "tie" ? "A point each" : w === "none" ? "No pins, no point" : legW(w) != null ? `${T[w as 0 | 1].name} take the leg` : "")}
     {rows((t) => (R.pins[t] ? `${showKm(R.km[t] ?? 0)} off` : "No pin"))}</>); }
@@ -912,9 +911,9 @@ function status(pub: Pub, me: Member) {
     case "roundScore": return `End of round ${pub.r + 1}`;
     case "sudden": return cap ? "Sudden death: captains only. Buzz to answer." : "Sudden death: captains only. Not a word!";
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
-    case "flagQ": return cap ? "Which country? One go." : "Guess the Flag: help your captain";
+    case "flagQ": return cap ? "Which country?" : "Guess the Flag: help your captain";
     case "pinQ": return cap ? "Where is it? Drop your pin, then lock it in." : "Drop the Pin: help your captain";
-    case "airportQ": return cap ? "Which airport? One go." : "Guess the Airport: help your captain";
+    case "airportQ": return cap ? "Which airport?" : "Guess the Airport: help your captain";
     case "majorityQ": return "Your own answer: eyes on your phone, no talking";
     case "dishQ": return pub.buzz === mine ? (pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
     case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same as Me: help your captain";
@@ -924,7 +923,7 @@ function status(pub: Pub, me: Member) {
       : cap ? (mine === 0 ? `Your half is done. ${T[1].name}'s captain now. Stay quiet.` : "Your turn is next. Stay quiet.") : "Captains only. Not a word!";
     case "battleHandoff": return `${T[1].name}'s captain is next`;
     case "battleTie": return cap ? "Tie-breaker: buzz to answer" : "Captains only. Not a word!";
-    case "mapQ": return cap ? "What does the map show? One go." : "Guess the Map: help your captain";
+    case "mapQ": return cap ? "What does the map show?" : "Guess the Map: help your captain";
     case "mapReveal": return "The answer's on the TV";
     case "auctionBid": return pub.auction?.turn === mine ? (cap ? "Your bid: raise, or pass" : "Your captain is bidding") : `${T[pub.auction?.turn ?? 0].name} is bidding`;
     case "auctionRun": return pub.auction?.by === mine ? (cap ? `Name ${pub.auction?.bid}! Out loud!` : `Name ${pub.auction?.bid}! Out loud!`) : `${T[pub.auction?.by ?? 0].name} has to name ${pub.auction?.bid}`;
@@ -1200,7 +1199,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           {dip && <input {...np.props} className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {np.hint}
           <button className="btn btn-gold btn-lg" disabled={busy || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
-          {(sc === "ask" || sc === "steal") && <div className="text-13 text-[var(--color-ink-3)]">One go: once you send it, it&rsquo;s locked{nohost ? " and the app checks it" : " until the host decides"}.</div>}
+          {["ask", "steal", "flagQ", "airportQ", "mapQ"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
         </div>)}
       {canPin && (
         <div className="flex flex-col gap-2">
