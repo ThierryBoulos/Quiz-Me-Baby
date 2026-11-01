@@ -602,6 +602,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .rt-val { display: flex; flex-direction: column; min-width: 0; }
 .rt-v { font-weight: 600; overflow-wrap: anywhere; line-height: 1.25; }
 .rt-ok { color: var(--color-ok); font-weight: 800; }
+.rt-v.big { font-family: var(--font-display); font-weight: 400; font-size: var(--text-20); letter-spacing: .01em; }
 .rt-sub { font-size: var(--text-12); color: var(--color-ink-3); line-height: 1.25; }
 .rt-end { font-family: var(--font-display); font-size: var(--text-20); text-align: right; }
 .rt-row.me { background: color-mix(in srgb, var(--tc) 11%, transparent); box-shadow: inset 3px 0 0 var(--tc); }
@@ -668,7 +669,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* a game's result: each place's points fly up from the board into the team's total (then it rolls up) */
 .hud.many .hud-team { position: relative; }
 /* while the +points fly, the game's label and pips under the totals step aside (nothing for them to cross), then come back */
-.hud.many .hud-team .sc { position: relative; } .hud.many .hud-mid { transition: opacity .45s; } .hud.many.flying .hud-mid { opacity: 0; }
+.hud.many .hud-team .sc { position: relative; } .hud.many .hud-mid { transition: opacity .45s; } .hud.tv.many.flying .hud-mid { opacity: 0; }
 .hud-plus { position: absolute; left: 50%; top: 100%; z-index: 70; pointer-events: none; font-family: var(--font-display); font-size: 40px; line-height: 1; color: var(--color-ok);
   text-shadow: 0 0 18px rgba(46,204,113,.7); animation: plusUp 1.45s cubic-bezier(.2,.8,.3,1) both; }
 /* it rises to the total and shrinks into it as it arrives (never parked over the digits); the total then rolls up */

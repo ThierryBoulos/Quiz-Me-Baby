@@ -13,9 +13,9 @@ import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
-import { BoardMany, Dot, finalCols, HudMany, IntroMany, paid, place, revealOf, splitIng, summaryCols, takes, SAY_WHY } from "./PartsMany";
+import { BoardMany, Dot, finalCols, HudMany, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
-import { AnswerLine, Pts, ResultTable, YouPill, type RRow, type Tone } from "../ResultTable";
+import { AnswerLine, Pts, ResultTable, TitleLine, YouPill, type RRow, type Tone } from "../ResultTable";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 function useSecretMany(code: string, on: boolean, step: number) {
@@ -69,8 +69,6 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   const W = takes(pub);
   /* a game's result waits on the phones while the TV reveals it, last place first (the owner, 31 Oct) */
   const held = useRevealHold(sc === "summary" && g && pub.summary ? `${g.key}:${g.index}` : null, pub.summary ? revealOf(pub.summary, T.length).done + 0.3 : 0);
-  const mineGame = () => { if (mine == null || !pub.summary) return undefined; const S = pub.summary, v = S.award[mine];
-    return <span style={{ color: v ? "var(--color-ok)" : "var(--color-ink-3)" }}>{v ? `Your team: ${place(S.places[mine])}, +${v} to the night` : "No points for your team this game."}</span>; };
 
   /* what's on screen, close up: the flag, the photo, the question, and the clock. It can't be selected or copied */
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
@@ -131,11 +129,19 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
     const head: [string, string?] = g.key === "majority" ? ["Right"] : [g.key === "closest" ? "Guess" : g.key === "pin" ? "Off by" : "Said", "Pts"];
     return <ResultTable rows={rows} head={head} places={g.key !== "majority" && idx.some((i) => pl(i) != null)} />; };
   /* a game's result and the night's end, the same on every phone */
-  const Summary = () => !g || !pub.summary ? null : held ? <WatchTv /> : (<>
-    <Big text={paid(pub).text} color={paid(pub).color} eyebrow={g.title} sub={mineGame()} />
-    <BoardMany pub={pub} cols={summaryCols(pub)} size="phone" label={pub.summary.shares ? "Share right" : "Points this game"} />
-    {pub.summary.line && <p className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{pub.summary.line}</p>}
-  </>);
+  /* a game's result (the owner's pick, 1 Nov): your team in a pill, who won in one line, then the standings: place,
+     team, the game's score, and what it adds to the night */
+  const Summary = () => { if (!g || !pub.summary) return null; if (held) return <WatchTv />;
+    const S = pub.summary, P = paid(pub), mineAw = mine != null ? S.award[mine] : 0;
+    const order = T.map((_, t) => t).sort((a, b) => S.places[a] - S.places[b] || a - b);
+    const rows: RRow[] = order.map((t) => ({ team: t, name: T[t].name, color: T[t].color, letter: LETTERS[t], place: S.award[t] > 0 ? S.places[t] : null,
+      val: S.shares ? pct(S.shares[t]) : String(S.pts[t]), end: <Pts n={S.award[t]} />, me: t === mine }));
+    return (<>
+      {mine != null && <YouPill text={mineAw > 0 ? `Your team: ${place(S.places[mine])} · +${mineAw} to the night` : "Your team: no points this game"} tone={mineAw > 0 ? "ok" : "mid"} />}
+      <TitleLine eyebrow={g.title} text={P.text} color={P.color} />
+      <ResultTable rows={rows} head={[S.shares ? "Right" : "Points", "Night"]} places big />
+      {S.line && <p className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{S.line}</p>}
+    </>); };
   const Final = () => { if (!pub.final) return null; const tops = pub.final.order.filter((x) => x.place === 1).map((x) => x.team), c = tops.length === 1 ? T[tops[0]].color : "var(--color-gold)";
     const my = mine != null ? pub.final.order.find((x) => x.team === mine)?.place : undefined;
     return (

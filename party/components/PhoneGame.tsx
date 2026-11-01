@@ -1,7 +1,7 @@
 "use client";
 import { twoDone } from "./TwoResults";
 import { useRevealHold, WatchTv } from "./WatchTv";
-import { Pts, ResultTable, YouPill, type RRow, type Tone } from "./ResultTable";
+import { Pts, ResultTable, TitleLine, YouPill, type RRow, type Tone } from "./ResultTable";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
 import type { Member } from "@/lib/room";
@@ -751,6 +751,17 @@ function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnl
     </div>);
   /* the mini-game's own score, big: TEAM A 3 – 4 TEAM B (the same board as the TV's) */
   const board = (w: Two<number>, label: string, win: 0 | 1 | null) => <ScoreBoard pub={pub} w={w} win={win} label={label} size="phone" />;
+  /* a game's (or a round's) result, as the 3-8 night's (the owner's pick, 1 Nov): your team in a pill, who won in one
+     line, then the two teams' standings: the game's score, and what it adds to the night (or the night's total) */
+  const standings = (o: { title: string; text: string; w: 0 | 1 | null; vals: Two<string | number>; col: string; endCol?: string;
+    end?: (t: 0 | 1) => React.ReactNode; note?: string | null; you?: [string, Tone] | null }) => (<>
+    {o.you && pill(o.you[0], o.you[1])}
+    <TitleLine eyebrow={o.title} text={o.text} color={o.w == null ? "var(--color-gold)" : tc(o.w)} />
+    <ResultTable big head={[o.col, o.endCol]} rows={(o.w === 1 ? [1, 0] as const : [0, 1] as const).map((t) => row(t, String(o.vals[t]), null, o.end?.(t)))} />
+    {o.note && <div className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{o.note}</div>}
+  </>);
+  const won3 = (w: 0 | 1 | null, aw: number | undefined, what: string): [string, Tone] | null => mine == null ? null
+    : w == null ? [aw ? `A tie: +${aw} each` : `A tie`, aw ? "ok" : "mid"] : w === mine ? [`Your team wins ${what} · +${aw ?? 0}`, "ok"] : ["Not this time", "no"];
   if (sc === "answer" && pub.result) {
     const Rr = pub.result, by = Rr.by;
     const quiet = ([0, 1] as const).filter((t) => silent(pub, t)).map((t) => `${T[t].name}: ${silent(pub, t)}`).join(" · ");
@@ -761,10 +772,10 @@ function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnl
     return (<>{top}{rows.length > 0 && <ResultTable rows={rows} head={["Said", "Pts"]} />}
       {quiet && <p className="text-center text-13 text-[var(--color-ink-3)]">{quiet}</p>}</>);
   }
-  if (sc === "roundScore") return (<>
-    {head(null, `End of round ${pub.r + 1}`)}
-    {board([T[0].score, T[1].score], "The score", null)}
-    <p className="text-center text-13 text-[var(--color-ink-2)]">This round: {name(0)} +{pub.roundPts?.[0] ?? 0} · {name(1)} +{pub.roundPts?.[1] ?? 0}</p></>);
+  if (sc === "roundScore") { const rp = pub.roundPts ?? [0, 0], w = rp[0] === rp[1] ? null : rp[0] > rp[1] ? 0 : 1;
+    return standings({ title: `Round ${pub.r + 1}`, text: w == null ? "A tied round" : `${T[w].name} win the round`, w,
+      vals: [`+${rp[0]}`, `+${rp[1]}`], col: "This round", endCol: "Total", end: (t) => <span>{T[t].score}</span>,
+      you: mine == null ? null : w == null ? ["A tied round", "mid"] : w === mine ? ["Your team wins the round", "ok"] : ["Not this round", "no"] }); }
   if (sc === "closestReveal" && pub.reveal) { const w = pub.reveal.w, ans = Number(pub.reveal.answer); return (<>
     {P}
     <ResultTable head={["Guess", "Leg"]} rows={([0, 1] as const).map((t) => { const g = pub.reveal?.guesses?.[t]; const o = g == null ? 0 : offBy(g, ans);
@@ -800,18 +811,16 @@ function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnl
       {mine != null && <div className="text-13 font-bold" style={{ color: L.won === mine ? "var(--color-ok)" : "var(--color-ink-3)" }}>{L.won === mine ? "That's your team!" : "Not this time."}</div>}
     </div>
     {board(pub.auction.wins, "Legs so far", null)}</>); }
-  if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null; return (<>
-    {head(w, w == null ? "Tie" : `${T[w].name} win the Auction`, w != null ? `+${A.award?.[w] ?? m?.pts} points` : "")}
-    {board(A.wins, "Legs won", w)}</>); }
-  if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary; return (<>
-    {head(S.winner, S.needsHost ? "Still a tie" : S.winner == null ? "A split" : `${T[S.winner].name} win ${m?.title ?? "it"}`,
-      S.needsHost ? "The host decides" : S.winner == null ? `${S.award?.[0] ?? 0} point${S.award?.[0] === 1 ? "" : "s"} each` : `+${S.award?.[S.winner] ?? m?.pts} points`)}
-    {board(S.wins, "Legs won", S.winner)}
-    {S.who && <div className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{S.who}</div>}</>); }
-  if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null; return (<>
-    {head(w, w == null ? (B.note || "Tie") : `${T[w].name} win the Battle`, w != null ? `+${B.award?.[w] ?? m?.pts} points` : "")}
-    {board(B.score, "Right answers", w)}
-    {B.predict && <div className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{B.predict}</div>}</>); }
+  if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null, aw = w != null ? A.award?.[w] ?? m?.pts : A.award?.[0];
+    return standings({ title: "The Auction", text: w == null ? "A tie" : `${T[w].name} +${aw}`, w, vals: A.wins, col: "Legs", endCol: "Night",
+      end: (t) => <Pts n={A.award?.[t]} />, you: won3(w, aw, "the Auction") }); }
+  if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary, w = S.winner, aw = w != null ? S.award?.[w] ?? m?.pts : S.award?.[0];
+    return standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still a tie" : w == null ? "A split" : `${T[w].name} +${aw}`, w,
+      vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : "Legs", endCol: "Night", end: (t) => <Pts n={S.award?.[t]} />,
+      note: S.needsHost ? "The host decides." : S.who, you: S.needsHost ? (mine == null ? null : ["Still a tie: the host decides", "mid"]) : won3(w, aw, m?.title ?? "it") }); }
+  if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null, aw = w != null ? B.award?.[w] ?? m?.pts : B.award?.[0];
+    return standings({ title: "Battle of the Captains", text: w == null ? (B.note || "A tie") : `${T[w].name} +${aw}`, w, vals: B.score, col: "Right", endCol: "Night",
+      end: (t) => <Pts n={B.award?.[t]} />, note: B.predict, you: won3(w, aw, "the Battle") }); }
   if (sc === "final") { const w = pub.winner ?? null; return (
     <div className="text-center flex flex-col gap-2 py-4" role="status" aria-live="polite">
       <div className="eyebrow">{w == null ? "The night ends" : "The winner"}</div>
