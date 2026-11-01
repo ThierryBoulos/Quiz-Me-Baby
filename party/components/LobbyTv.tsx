@@ -11,7 +11,9 @@ import { manyNames } from "@/lib/many/useTvMany";
 import { CodeTiles, MqStage, Sign, useLights } from "./Marquee";
 
 const colsOf = (k: number) => (k <= 2 ? 2 : k === 3 ? 3 : k === 4 ? 4 : k <= 6 ? 3 : 4);
-const roomFor = (k: number) => (k <= 2 ? 14 : k <= 4 ? 10 : 7);
+/* the cells a team shows: six (two columns of three; one column of six for 4 teams), eight for 3 teams (four rows);
+   a bigger team shows its last cell as "+N more" */
+const roomFor = (k: number) => (k === 3 ? 8 : 6);
 
 export function TvLobby({ room, members, code, k, joinUrl, site, status, controls }: {
   room: Room; members: Member[]; code: string; k: number; joinUrl: string; site: string; status: ReactNode; controls: ReactNode }) {
@@ -19,19 +21,20 @@ export function TvLobby({ room, members, code, k, joinUrl, site, status, control
   const names = many ? manyNames(room, k) : [teamName(room, 0), teamName(room, 1)];
   const away = ((room.state?.away as string[] | undefined) || []);
   return (
-    <div className={"mq mq-lobby" + (many ? " many" : "") + (k >= 7 ? " k7" : "") + lights}>
+    <div className={"mq mq-lobby k" + k + lights}>
       <MqStage floor />
-      <div className="brand"><Sign size={many ? 34 : 40}>Quiz Me Baby</Sign></div>
+      <div className="brand"><Sign size={many ? 42 : 50}>Quiz Me Baby</Sign></div>
       <div className="code">
         <div className="lab">Join with this code</div>
         <CodeTiles code={code} />
         <div className="url">Go to <b>{site}</b> or scan the code</div>
       </div>
-      <div className="qr"><QRCodeSVG value={joinUrl} size={many ? 128 : 178} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
+      <div className="qr"><QRCodeSVG value={joinUrl} size={k >= 5 ? 160 : 196} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
       <div className="teams" style={{ gridTemplateColumns: `repeat(${colsOf(k)}, minmax(0, 1fr))` }}>
         {names.map((name, t) => {
           const list = members.filter((m) => (m.team as number) === t).sort((x, y) => (x.role === "captain" ? -1 : 0) - (y.role === "captain" ? -1 : 0));
-          const cap = list.find((m) => m.role === "captain"), max = roomFor(k) - (cap || !list.length ? 0 : 1), shown = list.slice(0, max), more = list.length - shown.length;
+          const cap = list.find((m) => m.role === "captain"), cells = roomFor(k) - (cap || !list.length ? 0 : k === 4 ? 1 : 2);   // ("Needs a captain" takes a whole row)
+          const shown = list.length > cells ? list.slice(0, cells - 1) : list, more = list.length - shown.length;
           return (
             <div key={t} className="team" style={{ ["--c" as string]: MANY_COLORS[t] }}>
               <div className="hd">

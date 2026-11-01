@@ -931,52 +931,61 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 }
 .mq-join .big-sign { display: none; align-self: center; }
 
-/* the TV lobby (components/LobbyTv.tsx): code, sign and QR on top, the teams under them, the controls along the bottom */
-.mq-lobby { position: absolute; inset: 0; padding: 34px 56px 28px; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto 1fr auto; gap: 16px 40px; }
-.mq-lobby .brand { grid-column: 1 / -1; justify-self: center; }
-.mq-lobby .code { display: flex; flex-direction: column; gap: 10px; }
-.mq-lobby .code .lab { font-size: var(--text-14); font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--color-ink-2); }
-.mq-lobby .mq-tiles { width: 500px; gap: 14px; }
-.mq-lobby .mq-tile { font-size: 100px; border-radius: 18px; }
+/* the TV lobby (components/LobbyTv.tsx): the code, the sign and the QR across the top, the teams under them (each
+   player a big cell, up to six a team: the owner, 1 Nov: use the space), the controls along the bottom */
+.mq-lobby { position: absolute; inset: 0; padding: 30px 48px 24px; display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto 1fr auto; gap: 18px 32px; }
+.mq-lobby .brand { grid-column: 2; grid-row: 1; justify-self: center; align-self: center; }
+.mq-lobby .code { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; gap: 10px; align-self: center; }
+.mq-lobby .code .lab { font-size: var(--text-16); font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--color-ink-2); }
+.mq-lobby .mq-tiles { width: 488px; gap: 12px; }
+.mq-lobby .mq-tile { font-size: 98px; border-radius: 18px; }
 .mq-lobby .code .url { font-size: var(--text-18); color: var(--color-ink-2); }
 .mq-lobby .code .url b { color: var(--color-ink); }
-.mq-lobby .qr { align-self: start; border-radius: 22px; background: #f4f6ff; padding: 14px; line-height: 0; box-shadow: 0 0 0 2px rgba(245,197,24,.6), 0 0 40px rgba(255,200,90,.25); }
-.mq-lobby .teams { grid-column: 1 / -1; display: grid; grid-auto-rows: 1fr; gap: 20px; min-height: 0; }
-.mq-lobby .team { --c: var(--color-a); min-width: 0; min-height: 0; overflow: hidden; border-radius: 20px; padding: 16px 22px; display: flex; flex-direction: column; gap: 10px;
+.mq-lobby .qr { grid-column: 3; grid-row: 1; align-self: center; border-radius: 22px; background: #f4f6ff; padding: 12px; line-height: 0; box-shadow: 0 0 0 2px rgba(245,197,24,.6), 0 0 40px rgba(255,200,90,.25); }
+.mq-lobby .teams { grid-column: 1 / -1; grid-row: 2; display: grid; grid-auto-rows: 1fr; gap: 20px; min-height: 0; }
+.mq-lobby .team { --c: var(--color-a); --pc: 2; min-width: 0; min-height: 0; overflow: hidden; border-radius: 22px; padding: 18px 22px; display: flex; flex-direction: column; gap: 20px;
   border: 1.5px solid color-mix(in srgb, var(--c) 50%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, transparent), rgba(255,255,255,.02)); }
-.mq-lobby .team .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.mq-lobby .team .hd b { display: inline-flex; align-items: center; gap: 10px; min-width: 0; color: var(--c); font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; font-size: 40px; line-height: 1; }
+.mq-lobby .team .hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.mq-lobby .team .hd b { display: inline-flex; align-items: center; gap: 12px; min-width: 0; color: var(--c); font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; font-size: 44px; line-height: 1; }
 .mq-lobby .team .hd b .dt { flex: none; width: 1.9em; height: 1.9em; border-radius: 50%; background: var(--c); color: #0b0e24; font: 800 .42em/1 var(--font-body); display: grid; place-items: center; }
 .mq-lobby .team .hd b .tn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mq-lobby .team .hd > span { flex: none; white-space: nowrap; font-size: var(--text-14); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-3); }
-.mq-lobby .ppl { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
-.mq-lobby .ppl > span { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px 7px 10px; border-radius: 999px; background: rgba(255,255,255,.06); font-size: var(--text-18); font-weight: 700; }
-.mq-lobby .ppl > span i { font-style: normal; font-size: var(--text-22); line-height: 1; }
-.mq-lobby .ppl > span.capt { background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); color: #1a1400; box-shadow: 0 0 0 2px rgba(245,197,24,.25), 0 6px 16px -8px rgba(245,197,24,.8); }
-.mq-lobby .ppl .arm { font: 800 var(--text-12)/1 var(--font-body); width: 20px; height: 20px; border-radius: 50%; background: #1a1400; color: var(--color-gold); display: grid; place-items: center; }
-.mq-lobby .ppl .away { font: 800 var(--text-11)/1 var(--font-body); font-style: normal; text-transform: uppercase; letter-spacing: .08em; padding: 3px 6px; border-radius: 6px; background: var(--color-no); color: #fff; }
-.mq-lobby .ppl > span.need { background: none; border: 1.5px dashed rgba(245,197,24,.7); color: var(--color-gold); }
-.mq-lobby .ppl > span.none, .mq-lobby .ppl > span.more { background: none; color: var(--color-ink-3); padding-left: 4px; }
-.mq-lobby .bar { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; font-size: var(--text-16); color: var(--color-ink-2); }
+.mq-lobby .team .hd > span { flex: none; white-space: nowrap; font-size: var(--text-15); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-3); }
+/* the players: a grid of big cells, the captain's in gold first */
+.mq-lobby .ppl { display: grid; grid-template-columns: repeat(var(--pc), minmax(0, 1fr)); grid-auto-rows: var(--ph, 64px); gap: 12px; align-content: start; }
+.mq-lobby .ppl > span { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 18px 0 12px; border-radius: 999px; background: rgba(255,255,255,.07); font-size: var(--pf, 26px); font-weight: 800; }
+.mq-lobby .ppl > span bdi { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.mq-lobby .ppl > span i { flex: none; font-style: normal; font-size: 1.25em; line-height: 1; }
+.mq-lobby .ppl > span.capt { background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); color: #1a1400; box-shadow: 0 0 0 2px rgba(245,197,24,.25), 0 8px 20px -10px rgba(245,197,24,.8); }
+.mq-lobby .ppl .arm { flex: none; font: 800 .5em/1 var(--font-body); width: 1.6em; height: 1.6em; border-radius: 50%; background: #1a1400; color: var(--color-gold); display: grid; place-items: center; }
+/* a captain the TV hasn't heard from: a red dot on their cell ("away" for screen readers) */
+.mq-lobby .ppl > span.capt { position: relative; }
+.mq-lobby .ppl .away { position: absolute; top: -3px; right: -3px; width: .5em; height: .5em; min-width: 10px; min-height: 10px; border-radius: 50%; background: var(--color-no); box-shadow: 0 0 0 3px rgba(255,85,102,.25); font-size: inherit; overflow: hidden; color: transparent; }
+.mq-lobby .ppl > span.need { grid-column: 1 / -1; justify-content: center; background: none; border: 2px dashed rgba(245,197,24,.7); color: var(--color-gold); font-size: calc(var(--pf, 26px) * .8); }
+.mq-lobby .ppl > span.none, .mq-lobby .ppl > span.more { background: none; color: var(--color-ink-3); padding-left: 6px; font-weight: 700; }
+.mq-lobby .ppl > span.none { grid-column: 1 / -1; }
+.mq-lobby .bar { grid-column: 1 / -1; grid-row: 3; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; font-size: var(--text-16); color: var(--color-ink-2); }
 .mq-lobby .bar .bl { display: flex; align-items: center; gap: 14px; min-width: 0; line-height: 1.35; }
 .mq-lobby .bar .br { display: flex; align-items: center; gap: 10px; flex: none; }
 .mq-lobby .bar .btn { min-height: 42px; }
-/* 3 to 8 teams: the code, the sign and the QR share the top row; the teams get the rest */
-.mq-lobby.many { grid-template-columns: auto 1fr auto; grid-template-rows: auto 1fr auto; gap: 16px 28px; padding: 28px 44px 24px; }
-.mq-lobby.many .brand { grid-column: 2; grid-row: 1; align-self: center; }
-.mq-lobby.many .code { grid-column: 1; grid-row: 1; gap: 8px; }
-.mq-lobby.many .mq-tiles { width: 326px; gap: 9px; }
-.mq-lobby.many .mq-tile { font-size: 62px; border-radius: 14px; }
-.mq-lobby.many .code .url { font-size: var(--text-15); }
-.mq-lobby.many .qr { grid-column: 3; grid-row: 1; padding: 10px; border-radius: 18px; }
-.mq-lobby.many .teams { grid-row: 2; gap: 14px; }
-.mq-lobby.many .bar { grid-row: 3; font-size: var(--text-15); }
-.mq-lobby.many .team { padding: 12px 14px; gap: 9px; border-radius: 16px; }
-.mq-lobby.many .team .hd b { font-size: 26px; }
-.mq-lobby.many.k7 .team .hd b { font-size: 22px; gap: 7px; }
-.mq-lobby.many .team .hd > span { font-size: var(--text-11); letter-spacing: .12em; }
-.mq-lobby.many .ppl { gap: 6px; }
-.mq-lobby.many .ppl > span { font-size: var(--text-14); padding: 4px 9px 4px 6px; gap: 5px; }
-.mq-lobby.many .ppl > span i { font-size: var(--text-15); }
-.mq-lobby.many .ppl .arm { width: 17px; height: 17px; font-size: var(--text-11); }
+/* two teams: two big cards, players in two columns of tall cells */
+.mq-lobby.k2 .team { --ph: 70px; --pf: 28px; }
+/* 3 or 4 teams: one row of cards */
+.mq-lobby.k3 .team { --ph: 58px; --pf: 24px; padding: 16px 18px; gap: 18px; }
+.mq-lobby.k4 .team { --pc: 1; --ph: 42px; --pf: 20px; padding: 14px 16px; gap: 14px; }
+.mq-lobby.k3 .team .hd b { font-size: 34px; }
+.mq-lobby.k4 .team .hd b { font-size: 28px; gap: 9px; }
+.mq-lobby.k4 .team .hd > span { font-size: var(--text-12); letter-spacing: .1em; }
+.mq-lobby.k3 .ppl { gap: 10px; } .mq-lobby.k4 .ppl { gap: 8px; }
+/* 5 to 8 teams: two rows of cards; the top row a little smaller */
+.mq-lobby.k5 .mq-tiles, .mq-lobby.k6 .mq-tiles, .mq-lobby.k7 .mq-tiles, .mq-lobby.k8 .mq-tiles { width: 392px; gap: 10px; }
+.mq-lobby.k5 .mq-tile, .mq-lobby.k6 .mq-tile, .mq-lobby.k7 .mq-tile, .mq-lobby.k8 .mq-tile { font-size: 78px; border-radius: 16px; }
+.mq-lobby.k5, .mq-lobby.k6, .mq-lobby.k7, .mq-lobby.k8 { gap: 14px 28px; padding-top: 24px; }
+.mq-lobby.k5 .teams, .mq-lobby.k6 .teams, .mq-lobby.k7 .teams, .mq-lobby.k8 .teams { gap: 14px; }
+.mq-lobby.k5 .team, .mq-lobby.k6 .team { --ph: 38px; --pf: 18px; padding: 12px 16px; gap: 14px; border-radius: 18px; }
+.mq-lobby.k7 .team, .mq-lobby.k8 .team { --ph: 36px; --pf: 16px; padding: 12px 14px; gap: 12px; border-radius: 18px; }
+.mq-lobby.k5 .team .hd b, .mq-lobby.k6 .team .hd b { font-size: 28px; }
+.mq-lobby.k7 .team .hd b, .mq-lobby.k8 .team .hd b { font-size: 24px; gap: 8px; }
+.mq-lobby.k5 .team .hd > span, .mq-lobby.k6 .team .hd > span, .mq-lobby.k7 .team .hd > span, .mq-lobby.k8 .team .hd > span { font-size: var(--text-12); letter-spacing: .12em; }
+.mq-lobby.k5 .ppl, .mq-lobby.k6 .ppl, .mq-lobby.k7 .ppl, .mq-lobby.k8 .ppl { gap: 8px; }
+.mq-lobby.k5 .ppl > span, .mq-lobby.k6 .ppl > span, .mq-lobby.k7 .ppl > span, .mq-lobby.k8 .ppl > span { gap: 8px; padding: 0 12px 0 8px; }
 @media not ((min-width: 900px) and (min-height: 560px)) { .mq-home .mq-floor { display: none; } }
