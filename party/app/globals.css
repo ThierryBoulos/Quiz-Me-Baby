@@ -814,13 +814,11 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .ni-foot { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
 .ni-win { font-weight: 800; font-size: var(--text-22); color: var(--color-ink); }
 .ni-sub { font-size: var(--text-16); color: var(--color-ink-2); }
-.ni-go { margin-top: 8px; font-size: var(--text-20); color: var(--color-ink-2); padding: 8px 22px; border-radius: 999px; border: 2px solid rgba(245,197,24,.45); animation: pulse 2.2s ease-in-out infinite; }
-.ni-go b { color: var(--color-gold); }
+.ni-go { margin-top: 6px; font-size: var(--text-18); font-weight: 600; color: var(--color-ink-3); }   /* a sentence, not a button (the owner, 1 Nov) */
 .ni-in { animation: niIn .55s var(--ease) both; }
 @keyframes niIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .ni-row.ni-in { animation-name: niRow; animation-duration: .7s; }
 @keyframes niRow { 0% { opacity: 0; transform: translateX(-18px); background: rgba(245,197,24,.0); } 45% { opacity: 1; transform: none; background: rgba(245,197,24,.2); } 100% { opacity: 1; background: rgba(255,255,255,.05); } }
-.ni-foot.ni-in .ni-go { animation-delay: inherit; }
 @media (prefers-reduced-motion: reduce) { .night-intro *, .ni-pip { animation: none !important; } .ni-pip { background: var(--color-ink-2); } .ni-pip.first { background: var(--color-gold); } }
 /* the phones' copy: a list with the same glyphs */
 .ni-phone { display: flex; flex-direction: column; gap: 8px; text-align: left; font-size: var(--text-14); }
