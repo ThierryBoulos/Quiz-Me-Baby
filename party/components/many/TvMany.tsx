@@ -43,7 +43,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
     <div className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       <HudMany pub={pub} size="tv" code={join?.code} sound={sound} />
       {/* the night's intro, before the first game: the plan, until the host's Let's go */}
-      {pub.intro && <NightIntroTv intro={pub.intro} who="When you’re all ready, the host taps" />}
+      {pub.intro && <NightIntroTv intro={pub.intro} who="The host starts the game" />}
 
       <div className="flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}

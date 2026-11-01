@@ -309,7 +309,7 @@ export default function PhoneRoom() {
             <button className="btn btn-sm btn-ghost self-center mt-6" style={{ color: "var(--color-no)", borderColor: "color-mix(in srgb, var(--color-no) 45%, transparent)" }} onClick={leave}>Leave the game</button>
           </section>
         ) : many ? ((room.state?.pub as PubMany | null)?.many ? ((room.state.pub as PubMany).intro
-              ? <NightIntroPhone intro={(room.state.pub as PubMany).intro!} busy={busy || waiting} who="The host starts the night."
+              ? <NightIntroPhone intro={(room.state.pub as PubMany).intro!} busy={busy || waiting} who="The host starts the game."
                   go={mine.role === "host" ? () => void sendMove({ type: "m/go" }) : undefined} />
               : <PhoneMany pub={room.state.pub as PubMany} me={mine} code={code} />)
             : <section className="card text-center enter flex-1 grid place-items-center"><div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">Eyes on the TV</h1></div></section>
@@ -320,7 +320,7 @@ export default function PhoneRoom() {
         ) : pub.intro ? (() => { const I = pub.intro, lead = I.go != null && mine.role === "captain" && mine.team === I.go;
             const capGo = () => void tell(() => sendAction(code, "next", { move: { type: "ui/introGo" }, step: pub.step }));
             return <NightIntroPhone intro={I} busy={busy || waiting}
-              who={I.go != null ? `${pub.captains?.[I.go as 0 | 1] || "The captain"} starts the night from their phone.` : "The host starts the night."}
+              who={I.go != null ? `${pub.captains?.[I.go as 0 | 1] || "The captain"} starts the game.` : "The host starts the game."}
               go={mine.role === "host" ? () => void sendMove({ type: "ui/introGo" }) : mine.role === "captain" && I.go != null ? capGo : undefined}
               goAt={mine.role === "captain" && !lead && pub.nextOpenAt ? pub.nextOpenAt : undefined} />; })()
         : mine.role === "host" ? <HostGame pub={pub} secret={secret} send={sendMove} fire={fireMove} busy={busy || waiting} />

@@ -48,7 +48,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
       {/* the tracker, always: Classic's HUD */}
       <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
       {/* the night's intro, before the first round: the plan, until Let's go */}
-      {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `When you’re all ready, ${pub.captains?.[pub.intro.go as 0 | 1] || "the captain"} taps` : "When you’re all ready, the host taps"} />}
+      {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `${pub.captains?.[pub.intro.go as 0 | 1] || "The captain"} starts the game` : "The host starts the game"} />}
 
       <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : pub.screen === "final" && recap ? "gap-3" : "gap-6")} key={bodyKey}>
         {/* a steal: the light swings over from the team that missed to the one stealing */}

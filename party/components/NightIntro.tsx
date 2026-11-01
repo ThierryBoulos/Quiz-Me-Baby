@@ -1,7 +1,7 @@
 "use client";
 /* The night's intro (the owner, 1 Nov): before the first round, the plan on the TV. The tracker's dots and
    dashes big across the top; the question rounds light up one by one with their themes, then the mini-games
-   with their names and a line on each; then how to win and who taps Let's go. It explains itself without a
+   with their names and a line on each; then how to win and who starts the game. It explains itself without a
    host, and a host can talk over it. The phones show the same plan, small, and the Let's go button to the one
    who starts the night. Both modes (lib/intro.ts). */
 import { introLine, introTimes, type IntroPub } from "@/lib/intro";
@@ -65,7 +65,7 @@ export function NightIntroTv({ intro: I, who }: { intro: IntroPub; who: string }
       <div className="ni-foot ni-in" style={d(end)}>
         <div className="ni-win">{introWin(I)}</div>
         <div className="ni-sub">Captains answer for their team on their phones.</div>
-        <div className="ni-go">{who} <b>Let&rsquo;s go</b></div>
+        <div className="ni-go">{who}</div>
       </div>
     </div>);
 }
