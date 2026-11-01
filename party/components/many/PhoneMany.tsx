@@ -52,7 +52,9 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   const move = (type: string, extra: Record<string, unknown> = {}) => void send("judge", { move: { type, ...extra } });
   const opts = useMemo(() => order(pub.options || [], me.name + (pub.qid || "")), [pub.options, me.name, pub.qid]);
   const sentMine = mine != null && pub.sent[mine];
-  const voted = !!pub.voted?.includes(me.name), onList = !!pub.roster?.includes(me.name);
+  /* a tap locks in at once on this phone (the owner, 1 Nov: the four stayed up a second while the TV answered) */
+  const [tapped, setTapped] = useState<string | null>(null);
+  const voted = !!pub.voted?.includes(me.name) || tapped === `${pub.qid}`, onList = !!pub.roster?.includes(me.name);
   /* the host's one main button, docked in thumb reach */
   const Main = ({ label, on }: { label: string; on: () => void }) => <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={on}>{label}</button>;
   /* a big outcome headline, no box (boxes are for things you can tap) */
@@ -200,7 +202,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
           : voted ? <p className="text-center font-bold text-16" role="status">Locked in. The answer comes up when the time&rsquo;s up.</p>
           : <div className="flex flex-col gap-2">
             <div className="grid gap-2.5" role="group" aria-label="The four answers">
-              {opts.map((o) => <button key={o} type="button" className="btn btn-lg btn-block mr-opt" disabled={busy} onClick={() => void send("answer", { pick: o, k: `${pub.qid}|q` })}><bdi>{o}</bdi></button>)}
+              {opts.map((o) => <button key={o} type="button" className="btn btn-lg btn-block mr-opt" disabled={busy} onClick={() => { setTapped(`${pub.qid}`); void send("answer", { pick: o, k: `${pub.qid}|q` }).then((ok) => { if (!ok) setTapped(null); }); }}><bdi>{o}</bdi></button>)}
             </div>
             <p className="text-center text-12 text-[var(--color-ink-3)]">One tap, and it&rsquo;s locked.</p>
           </div>}
@@ -224,7 +226,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
               <label className="field-label !mb-0" htmlFor="mans">{g.key === "closest" ? "Your number" : "Your answer"}</label>
               <input id="mans" className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
-              <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : `One go: once you send it, it’s locked${typedKey(g.key) ? " and the app checks it" : ""}.`}</div>
+              <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
       </>)}
@@ -237,7 +239,6 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       {!host && sc === "reveal" && g && R && (<>
         {g.key !== "majority" && <Big text={W.text} color={W.color} sub={mineLeg()} />}
         <Answer />
-        {g.key === "majority" && mine != null && <p className="text-center font-bold text-15" style={{ color: (R.right?.[mine] ?? 0) > 0 ? "var(--color-ok)" : "var(--color-ink-3)" }}><bdi>{T[mine].name}</bdi>: {R.right?.[mine] ?? 0} of {R.of?.[mine] ?? 0} right</p>}
         <Rows />
       </>)}
       {!host && sc === "summary" && <Summary />}

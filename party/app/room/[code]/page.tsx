@@ -376,7 +376,7 @@ export default function PhoneRoom() {
       {/* the room code, tapped: the QR code to scan, the code, and Share; a tap outside or Close puts it away */}
       {invite && (
         <div className="fixed inset-0 z-50 grid place-items-center p-4 enter" style={{ background: "rgba(3,4,10,.82)" }} role="dialog" aria-modal="true" aria-label="Join this game" onClick={() => setInvite(null)}>
-          <div className="card w-full max-w-[360px] flex flex-col items-center gap-3 text-center" onClick={(e) => e.stopPropagation()}>
+          <div className="card w-full max-w-[360px] flex flex-col items-center gap-3 text-center" style={{ background: "#10142e" }} onClick={(e) => e.stopPropagation()}>
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Join this game</div>
             <div className="rounded-[18px] p-3 bg-[#f4f6ff]"><QRCodeSVG value={invite} size={220} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
             <div className="display text-52 leading-none tracking-[.12em]">{code}</div>

@@ -628,7 +628,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 /* ---- MANY TEAMS (30 Oct): 3 to 8 teams in the same tracker. The teams run along the top in one row,
    the night's label and pips under them (the phone's two-team layout, on the TV too). Every dot carries
    its team's letter, so eight colours never need telling apart; --c is the team's colour. ---- */
-.dot.ltr { display: inline-grid; place-items: center; border-radius: 50%; flex: none; font-family: var(--font-body); font-weight: 800; line-height: 1; color: #04050e; }
+.dot.ltr { display: inline-grid; place-items: center; border-radius: 50%; flex: none; font-family: var(--font-body); font-weight: 800; line-height: 1; color: #04050e; padding-top: .1em; box-sizing: border-box; }
 .hud.many .hud-in { display: flex; justify-content: space-between; gap: 10px; }
 .hud.many .hud-team { flex: 1 1 0; min-width: 0; justify-content: center; gap: 8px; }
 .hud.many .hud-team:first-child { justify-content: flex-start; } .hud.many .hud-team:last-child { justify-content: flex-end; }
