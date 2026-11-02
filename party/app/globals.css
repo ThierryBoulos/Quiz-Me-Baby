@@ -1151,8 +1151,15 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .win-eyebrow { display: none; }
 [data-look="house"] .win-tag { display: inline-block; margin-bottom: 12px; padding: 4px 12px 2px; border-radius: 7px; background: var(--board); color: var(--board-ink);
   font-family: var(--font-display); font-size: var(--text-22); letter-spacing: .16em; text-transform: uppercase; line-height: 1.1; box-shadow: 0 0 18px rgba(255,236,190,.3); }
-[data-look="house"] .recap-on .win-tag { font-size: var(--text-14); margin-bottom: 6px; padding: 2px 8px 1px; }
-[data-look="house"] .recap-on .win-sign { padding: 16px 40px 14px; }
+/* with the recap under it the sign is small: as tall as "The winner" and the name were */
+[data-look="house"] .recap-on .win-tag { font-size: var(--text-12); margin-bottom: 2px; padding: 1px 8px 0; letter-spacing: .14em; }
+[data-look="house"] .recap-on .win-sign { padding: 9px 36px 6px; border-width: 2px; border-radius: 20px; }
+[data-look="house"] .recap-on .win-sign::before { inset: 4px; border-radius: 15px;
+  background:
+    radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 0 / 14px 6px repeat-x,
+    radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 100% / 14px 6px repeat-x,
+    radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 0 / 6px 14px repeat-y,
+    radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 100% 0 / 6px 14px repeat-y; }
 [data-look="house"] .win-sign { padding: 30px 52px 26px; border-radius: 28px; border: 3px solid rgba(245,197,24,.75); background: linear-gradient(180deg, #1d1636, #0d0a1f 70%);
   box-shadow: 0 0 0 6px rgba(245,197,24,.08), 0 0 60px -10px rgba(255,190,80,.55), inset 0 0 40px rgba(245,197,24,.08); }
 [data-look="house"] .win-sign::before, [data-look="house"] .winner-card::before { content: ""; position: absolute; inset: 9px; border-radius: 20px; pointer-events: none;
