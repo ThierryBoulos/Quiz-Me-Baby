@@ -1070,7 +1070,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 
 /* ==== HOUSE LIGHTS (phase 3, a proposal under review, 2 Nov): the game inside the cinema, with the lobby's marquee
    outside. The lobby's navy, gold and ivory, the light holding still: scores in ivory tiles on plates lit in the
-   team's colour, a row of bulbs under them, a clock that is a ring of bulbs, answers on the letter board, the host's
+   team's colour, today's thin line under them, a clock that is a ring of bulbs, answers on the letter board, the host's
    answer on an ivory cue card, the winner on the marquee sign. Behind html[data-look="house"] while it's reviewed:
    nothing changes without it. Nothing on a phone moves that doesn't have to. ==== */
 .clock-bulbs { display: none; }
@@ -1092,12 +1092,9 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   -webkit-mask-image: linear-gradient(to top, #000 25%, transparent 92%); mask-image: linear-gradient(to top, #000 25%, transparent 92%); }
 [data-look="house"] .tv-glow { animation: none; }
 
-/* the scores: a plate a team, lit in its colour, the score on an ivory tile; a row of bulbs under them */
-[data-look="house"] .hud { border-bottom: 0; position: relative; }
-/* (in place of the line, at its height: the screen under it keeps every pixel it had) */
-[data-look="house"] .hud::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; opacity: .8; pointer-events: none;
-  background: radial-gradient(circle, var(--bulb) 0 1.5px, transparent 2.1px) 0 50% / 12px 6px repeat-x; filter: drop-shadow(0 0 2px rgba(255,200,90,.8)); }
-[data-look="house"] .hud.tv::after { height: 8px; bottom: 0; background-image: radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px); background-size: 16px 8px; }
+/* the scores: a plate a team, lit in its colour, the score on an ivory tile; under them today's thin grey line
+   (the owner, 2 Nov: option A, no bulbs, no colour) */
+[data-look="house"] .hud { position: relative; }
 [data-look="house"] .hud-team { --pc: var(--c, var(--color-gold)); padding: 5px 6px 5px 12px; border-radius: 14px; border: 2px solid color-mix(in srgb, var(--pc) 80%, transparent);
   background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--pc) 22%, transparent), transparent 70%), rgba(10,10,28,.55); }
 [data-look="house"] .hud-team.a { --pc: var(--color-a); justify-self: start; }
@@ -1206,7 +1203,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .mr-intro h1.display { font-size: 70px !important; }
 [data-look="house"] .mr-intro .rules { font-size: var(--text-18) !important; gap: 8px !important; line-height: 1.42; }
 [data-look="house"] .mr-intro > div:first-child > div { gap: 14px !important; }
-/* the plates stand in front of the row of bulbs (solid, never see-through to it) */
+/* the plates are solid (never see-through to the line or the stage behind them) */
 [data-look="house"] .hud .hud-team { position: relative; z-index: 1; background-color: #0c0c22; }
 /* the Auction's count: a little smaller, so "Counted by" sits on the screen (today it is cut at the bottom) */
 [data-look="house"] .auc-count { font-size: 140px !important; }
