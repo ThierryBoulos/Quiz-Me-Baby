@@ -13,7 +13,7 @@ import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
-import { Dot, HudMany, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
+import { Dot, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 
@@ -161,7 +161,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
 
   return (
     <div className={"flex flex-col gap-4 flex-1" + (sc === "final" ? " over-confetti" : "")} data-soft={busy && !busyLong ? "" : undefined}>
-      <HudMany pub={pub} size="phone" me={mine} host={host} />
+      {/* (the score bar: the room page draws it, with your name, so a phone held sideways can keep it on the left) */}
 
       {/* THE HOST: the answer on top, one main button */}
       {host && sc === "intro" && g && (<>

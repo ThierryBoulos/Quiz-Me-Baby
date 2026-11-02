@@ -15,7 +15,7 @@ import { friendly } from "@/lib/errors";
 import { LineupMany, PickMany, SetupMany } from "@/components/many/LineupMany";
 import { PhoneMany } from "@/components/many/PhoneMany";
 import { NightIntroPhone } from "@/components/NightIntro";
-import { ScoresMany } from "@/components/many/PartsMany";
+import { HudMany, ScoresMany } from "@/components/many/PartsMany";
 import { manyNames, manyNotReady, teamCountOf } from "@/lib/many/useTvMany";
 import { MANY_MAX } from "@/lib/many/logic";
 import { MANY_COLORS } from "@/lib/many/logic";
@@ -133,6 +133,7 @@ export default function PhoneRoom() {
   const side = mine?.team === 0 ? "a" : mine?.team === 1 ? "b" : null;
   /* more than two teams (3 to 8): their own lobby buttons and game screens */
   const teamCount = teamCountOf(room), many = teamCount > 2 || room?.mode === "many";
+  const pubM = many ? (room?.state?.pub as PubMany | null | undefined) : null;
   const manyColor = many && mine?.team != null ? MANY_COLORS[mine.team as number] : null;
   useEffect(() => { document.documentElement.style.setProperty("--tint", manyColor || (side ? `var(--color-${side})` : "var(--color-gold)")); }, [side, manyColor]);
 
@@ -251,13 +252,16 @@ export default function PhoneRoom() {
     </>);
 
   return (
-    <main className={"screen" + (lobby ? " mq mq-room" + lights : "")} data-soft={waiting && !waitLong ? "" : undefined}>
+    <main className={"screen split" + (lobby ? " mq mq-room" + lights : "")} data-soft={waiting && !waitLong ? "" : undefined}>
       {lobby && <MqStage />}
       {waiting && waitLong && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
       {tapErr && <div className="fixed left-4 right-4 enter text-center font-bold rounded-[16px]" role="alert" data-taperr
         style={{ zIndex: 50, ...(tapAt ?? { top: "calc(12px + env(safe-area-inset-top))" }), fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
           boxShadow: "0 12px 30px rgba(0,0,0,.6)" }}>{tapErr}</div>}
       {pub?.screen === "final" && !panel && <div className="confetti-back"><Confetti n={60} /></div>}
+      {/* a phone held sideways: who you are, the room and the scores in a column on the left, the game on the right
+          (phase 4, 2 Nov). Upright, both wrappers fold away (display: contents) and nothing moves */}
+      <div className="side">
       <header className="flex items-center justify-between gap-3">
         {/* in a game, your name is the one button up here (the owner, 31 Oct): it opens the teams, their scores and
             players, your captaincy and Leave, in place of a Scores and a Team button; in the lobby it's just your name */}
@@ -279,15 +283,20 @@ export default function PhoneRoom() {
       {/* the lobby: the logo, small, while everyone waits */}
       {lobby && <div className="mq-room-sign" aria-hidden><Sign size={30}>Quiz Me Baby!</Sign></div>}
 
+      {/* the tracker, as on the TV: scores, where we are, the night's progress */}
+      {/* (two teams: it stays over the teams sheet too, so the scores and the players are on one screen) */}
+      {room.status !== "lobby" && pub && !many && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
+      {/* (3-8 teams: over the game, not over the teams sheet) */}
+      {room.status !== "lobby" && many && !panel && pubM?.many && !pubM.intro && (mine.team != null || mine.role === "host")
+        && <HudMany pub={pubM} size="phone" me={mine.team as number | null} host={mine.role === "host"} />}
+      </div>
+      <div className="main">
+
       {note && <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>{note}</p>}
 
       {pub?.tvAway && room.status !== "lobby" && (
         <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>
           The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</p>)}
-
-      {/* the tracker, as on the TV: scores, where we are, the night's progress */}
-      {/* (two teams: it stays over the teams sheet too, so the scores and the players are on one screen) */}
-      {room.status !== "lobby" && pub && !many && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
 
       {room.status !== "lobby" ? (
         /* joined after the start: pick a side first */
@@ -472,6 +481,7 @@ export default function PhoneRoom() {
           )}
         </footer>
       )}
+      </div>
     </main>
   );
 }

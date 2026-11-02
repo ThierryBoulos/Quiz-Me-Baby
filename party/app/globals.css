@@ -365,7 +365,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 60; }
 /* the end of the night: the confetti falls behind the words, the chart, the cards and the buttons (the reviewers, 31 Oct) */
 .confetti-back .confetti, .confetti-late .confetti { z-index: 0; }
-.screen > .over-confetti { position: relative; z-index: 1; }
+.screen .over-confetti { position: relative; z-index: 1; }
 .confetti i { position: absolute; top: -24px; display: block; opacity: .95; animation-name: confettiFall; animation-timing-function: linear; animation-iteration-count: infinite; }
 @keyframes confettiFall {
   0% { transform: translate3d(0, -5vh, 0) rotate(var(--rot)); }
@@ -1223,3 +1223,37 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .hud.tv.many.stack .hud-team { padding: 4px 3px 5px; }
 [data-look="house"] .hud.tv.many.stack .hud-team > div:first-child { gap: 4px; }
 [data-look="house"] .hud.tv.many.stack .hud-team .nm { font-size: var(--text-12); letter-spacing: 0; }
+
+/* ==== PHONES HELD SIDEWAYS (phase 4, 2 Nov): a phone on its side gets a layout of its own, not the upright one
+   stretched. Only phones (landscape, under 500px tall): tablets, laptops and TVs keep theirs. ==== */
+/* the room (lobby and game): who you are, the room and the scores on the left; the game on the right. Upright, the two
+   wrappers fold away and the screen is exactly as before */
+.screen > .side, .screen > .main { display: contents; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .screen.split { max-width: 1040px; display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); column-gap: 28px; align-items: start;
+    padding: calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
+  .screen.split > .side { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(12px + env(safe-area-inset-top)); z-index: 2; }
+  .screen.split > .main { display: flex; flex-direction: column; gap: 14px; min-width: 0; min-height: calc(100svh - 26px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+  /* the lobby's start bar spans the game's column only */
+  .screen.split .start-bar { margin-left: 0; margin-right: calc(-16px - env(safe-area-inset-right)); }
+
+  /* home: the sign on one line, the two buttons side by side */
+  .mq-home { justify-content: center; padding: calc(10px + env(safe-area-inset-top)) 20px calc(8px + env(safe-area-inset-bottom)); }
+  .mq-home .mq-sign { font-size: min(13svh, 54px); }
+  .mq-home .mq-br { display: none; }
+  .mq-home .mq-menu { margin-top: 0; padding-top: 22px; width: auto; display: flex; gap: 14px; }
+  .mq-home .mq-menu .btn { width: min(280px, 40vw); }
+  .mq-home .mq-foot { margin-top: 8px; gap: 2px; }
+
+  /* join: the code and your name on the left, the faces on the right, Take my seat under both */
+  .mq-join { gap: 10px; padding: calc(8px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left)); }
+  .mq-join .top .mq-sign { font-size: 22px; }
+  .mq-join .card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 22px; row-gap: 10px; align-content: start; padding: 14px 18px; }
+  .mq-join .card > * { grid-column: 1; }
+  .mq-join .card > :nth-child(4) { grid-column: 2; grid-row: 1 / span 3; }
+  .mq-join h1 { font-size: var(--text-24); }
+  .mq-join .mq-tiles { width: min(100%, 250px); }
+  .mq-join .mq-tile { font-size: 26px; }
+  .mq-join .bottom { margin-top: 0; flex-direction: row; align-items: center; justify-content: center; gap: 18px; }
+  .mq-join .bottom .btn { width: min(360px, 50vw); }
+}
