@@ -1181,3 +1181,6 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* 3-8 teams: a name longer than its plate is cut with "…", never out of it */
 [data-look="house"] .hud.many .hud-team > div:first-child { max-width: 100%; min-width: 0; overflow: hidden; }
 [data-look="house"] .hud.many .hud-team .nm { max-width: 100%; letter-spacing: .05em; }
+/* the plates take no more height than the bare scores did: the screen under the bar keeps every pixel it had */
+[data-look="house"] .hud.tv .hud-team { margin-block: -9px; }
+[data-look="house"] .hud.phone .hud-team { margin-block: -6px; }
