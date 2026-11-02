@@ -943,18 +943,21 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .mq-lobby .code .url b { color: var(--color-ink); }
 .mq-lobby .qr { grid-column: 3; grid-row: 1; align-self: center; border-radius: 22px; background: #f4f6ff; padding: 12px; line-height: 0; box-shadow: 0 0 0 2px rgba(245,197,24,.6), 0 0 40px rgba(255,200,90,.25); }
 .mq-lobby .teams { grid-column: 1 / -1; grid-row: 2; display: grid; grid-auto-rows: 1fr; gap: 20px; min-height: 0; }
-.mq-lobby .team { --c: var(--color-a); --pc: 2; min-width: 0; min-height: 0; overflow: hidden; border-radius: 22px; padding: 18px 22px; display: flex; flex-direction: column; gap: 20px;
+.mq-lobby .team { --c: var(--color-a); min-width: 0; min-height: 0; overflow: hidden; border-radius: 22px; padding: 18px 22px; display: flex; flex-direction: column; gap: 20px;
   border: 1.5px solid color-mix(in srgb, var(--c) 50%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, transparent), rgba(255,255,255,.02)); }
 .mq-lobby .team .hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.mq-lobby .team .hd b { display: inline-flex; align-items: center; gap: 12px; min-width: 0; color: var(--c); font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; font-size: 44px; line-height: 1; }
+.mq-lobby .team .hd b { flex: 1 1 auto; display: inline-flex; align-items: center; gap: 12px; min-width: 0; color: var(--c); font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: .03em; font-size: 44px; line-height: 1; }
 .mq-lobby .team .hd b .dt { flex: none; width: 1.9em; height: 1.9em; border-radius: 50%; background: var(--c); color: #0b0e24; font: 800 .42em/1 var(--font-body); display: grid; place-items: center; }
 .mq-lobby .team .hd b .tn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mq-lobby .team .hd > span { flex: none; white-space: nowrap; font-size: var(--text-15); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-3); }
 /* the players: a grid of big cells, the captain's in gold first */
-.mq-lobby .ppl { display: grid; grid-template-columns: repeat(var(--pc), minmax(0, 1fr)); grid-auto-rows: var(--ph, 64px); gap: 12px; align-content: start; }
-.mq-lobby .ppl > span { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 18px 0 12px; border-radius: 999px; background: rgba(255,255,255,.07); font-size: var(--pf, 26px); font-weight: 800; }
-.mq-lobby .ppl > span bdi { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* the cells' columns, height, text size and gap come from the team with the most players (LobbyTv.tsx: TIERS) */
+.mq-lobby .ppl { display: grid; grid-template-columns: repeat(var(--pc, 2), minmax(0, 1fr)); grid-auto-rows: var(--ph, 64px); gap: var(--pg, 12px); align-content: start; }
+.mq-lobby .ppl > span { display: flex; align-items: center; gap: .45em; min-width: 0; padding: 0 .65em 0 .45em; border-radius: 999px; background: rgba(255,255,255,.07); font-size: var(--pf, 26px); font-weight: 800; }
+.mq-lobby .fit { display: block; flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mq-lobby .ppl > span i { flex: none; font-style: normal; font-size: 1.25em; line-height: 1; }
+/* the dense layouts: no faces, so the names keep their size (an away captain keeps the 💤) */
+.mq-lobby .team.nf .ppl > span:not(.is-away) i { display: none; }
 .mq-lobby .ppl > span.capt { background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); color: #1a1400; box-shadow: 0 0 0 2px rgba(245,197,24,.25), 0 8px 20px -10px rgba(245,197,24,.8); }
 .mq-lobby .ppl .arm { flex: none; font: 800 .5em/1 var(--font-body); width: 1.6em; height: 1.6em; border-radius: 50%; background: #1a1400; color: var(--color-gold); display: grid; place-items: center; }
 /* a captain the TV hasn't heard from: greyed and faded, a faint red dashed outline, the face sleeps (gold would say
@@ -970,24 +973,20 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .mq-lobby .bar .br { display: flex; align-items: center; gap: 10px; flex: none; }
 .mq-lobby .bar .btn { min-height: 42px; }
 /* two teams: two big cards, players in two columns of tall cells */
-.mq-lobby.k2 .team { --ph: 70px; --pf: 28px; }
 /* 3 or 4 teams: one row of cards */
-.mq-lobby.k3 .team { --ph: 58px; --pf: 24px; padding: 16px 18px; gap: 18px; }
-.mq-lobby.k4 .team { --pc: 1; --ph: 42px; --pf: 20px; padding: 14px 16px; gap: 14px; }
+.mq-lobby.k3 .team { padding: 16px 18px; gap: 18px; }
+.mq-lobby.k4 .team { padding: 14px 16px; gap: 14px; }
 .mq-lobby.k3 .team .hd b { font-size: 34px; }
 .mq-lobby.k4 .team .hd b { font-size: 28px; gap: 9px; }
 .mq-lobby.k4 .team .hd > span { font-size: var(--text-12); letter-spacing: .1em; }
-.mq-lobby.k3 .ppl { gap: 10px; } .mq-lobby.k4 .ppl { gap: 8px; }
 /* 5 to 8 teams: two rows of cards; the top row a little smaller */
 .mq-lobby.k5 .mq-tiles, .mq-lobby.k6 .mq-tiles, .mq-lobby.k7 .mq-tiles, .mq-lobby.k8 .mq-tiles { width: 392px; gap: 10px; }
 .mq-lobby.k5 .mq-tile, .mq-lobby.k6 .mq-tile, .mq-lobby.k7 .mq-tile, .mq-lobby.k8 .mq-tile { font-size: 78px; border-radius: 16px; }
 .mq-lobby.k5, .mq-lobby.k6, .mq-lobby.k7, .mq-lobby.k8 { gap: 14px 28px; padding-top: 24px; }
 .mq-lobby.k5 .teams, .mq-lobby.k6 .teams, .mq-lobby.k7 .teams, .mq-lobby.k8 .teams { gap: 14px; }
-.mq-lobby.k5 .team, .mq-lobby.k6 .team { --ph: 38px; --pf: 18px; padding: 12px 16px; gap: 14px; border-radius: 18px; }
-.mq-lobby.k7 .team, .mq-lobby.k8 .team { --ph: 36px; --pf: 16px; padding: 12px 14px; gap: 12px; border-radius: 18px; }
+.mq-lobby.k5 .team, .mq-lobby.k6 .team { padding: 12px 16px; gap: 14px; border-radius: 18px; }
+.mq-lobby.k7 .team, .mq-lobby.k8 .team { padding: 12px 14px; gap: 12px; border-radius: 18px; }
 .mq-lobby.k5 .team .hd b, .mq-lobby.k6 .team .hd b { font-size: 28px; }
 .mq-lobby.k7 .team .hd b, .mq-lobby.k8 .team .hd b { font-size: 24px; gap: 8px; }
 .mq-lobby.k5 .team .hd > span, .mq-lobby.k6 .team .hd > span, .mq-lobby.k7 .team .hd > span, .mq-lobby.k8 .team .hd > span { font-size: var(--text-12); letter-spacing: .12em; }
-.mq-lobby.k5 .ppl, .mq-lobby.k6 .ppl, .mq-lobby.k7 .ppl, .mq-lobby.k8 .ppl { gap: 8px; }
-.mq-lobby.k5 .ppl > span, .mq-lobby.k6 .ppl > span, .mq-lobby.k7 .ppl > span, .mq-lobby.k8 .ppl > span { gap: 8px; padding: 0 12px 0 8px; }
 @media not ((min-width: 900px) and (min-height: 560px)) { .mq-home .mq-floor { display: none; } }
