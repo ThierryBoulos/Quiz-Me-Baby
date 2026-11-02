@@ -14,7 +14,7 @@ const colsOf = (k: number) => (k <= 2 ? 2 : k === 3 ? 3 : k === 4 ? 4 : k <= 6 ?
 /* the players' cells: big while every team fits, then smaller and in more columns as the biggest team grows (the
    owner, 2 Nov), the same size in every card. c columns × r rows, h px tall, f px text, g px apart; each tier fits
    its card at that many teams. Past the last tier, the last cell is "+N more". */
-type Tier = { c: number; r: number; h: number; f: number; g: number; nf?: boolean };   // nf: no faces (the dense ones: the name gets the room)
+type Tier = { c: number; r: number; h: number; f: number; g: number; nf?: boolean };   // nf: the dense ones (smaller faces, tighter cells: the name gets the room)
 const TIERS: Record<string, Tier[]> = {
   k2: [{ c: 2, r: 3, h: 70, f: 28, g: 12 }, { c: 3, r: 4, h: 54, f: 22, g: 10 }, { c: 3, r: 5, h: 44, f: 18, g: 8 }, { c: 4, r: 6, h: 36, f: 15, g: 6, nf: true }],
   k3: [{ c: 2, r: 4, h: 58, f: 24, g: 10 }, { c: 2, r: 5, h: 46, f: 19, g: 8 }, { c: 3, r: 6, h: 38, f: 15, g: 6, nf: true }],

@@ -956,8 +956,12 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .mq-lobby .ppl > span { display: flex; align-items: center; gap: .45em; min-width: 0; padding: 0 .65em 0 .45em; border-radius: 999px; background: rgba(255,255,255,.07); font-size: var(--pf, 26px); font-weight: 800; }
 .mq-lobby .fit { display: block; flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mq-lobby .ppl > span i { flex: none; font-style: normal; font-size: 1.25em; line-height: 1; }
-/* the dense layouts: no faces, so the names keep their size (an away captain keeps the 💤) */
-.mq-lobby .team.nf .ppl > span:not(.is-away) i { display: none; }
+/* the dense layouts: the faces stay (the owner, 2 Nov), a little smaller and closer to the name, so the names keep their room */
+.mq-lobby .team.nf .ppl > span { gap: .3em; padding: 0 .5em 0 .35em; }
+.mq-lobby .team.nf .ppl > span i { font-size: 1.05em; }
+/* ...and the captain's C sits on the corner of their face, so their name has the same room as everyone's */
+.mq-lobby .team.nf .ppl > span.capt { position: relative; }
+.mq-lobby .team.nf .ppl > span.capt .arm { position: absolute; left: .1em; top: 50%; margin-top: -.95em; width: 1.25em; height: 1.25em; font-size: .42em; box-shadow: 0 0 0 1.5px var(--color-gold-2); z-index: 1; }
 .mq-lobby .ppl > span.capt { background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); color: #1a1400; box-shadow: 0 0 0 2px rgba(245,197,24,.25), 0 8px 20px -10px rgba(245,197,24,.8); }
 .mq-lobby .ppl .arm { flex: none; font: 800 .5em/1 var(--font-body); width: 1.6em; height: 1.6em; border-radius: 50%; background: #1a1400; color: var(--color-gold); display: grid; place-items: center; }
 /* a captain the TV hasn't heard from: greyed and faded, a faint red dashed outline, the face sleeps (gold would say
