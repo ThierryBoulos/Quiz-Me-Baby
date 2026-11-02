@@ -855,7 +855,7 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
     {pub.screen === "pinQ" && (small
       /* the captain's phone: the photo beside the clock, so the map gets the room */
-      ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></div>
+      ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
       : <PinPhoto pin={pub.pin} h={230} small zoom />)}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <PinMap marks={pinMarks(pub)} fly height={small ? 220 : 300} label={`Where it is: ${pub.pin.reveal.place}`} />}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <div className="text-center"><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.pin.reveal.name}</div>
@@ -873,7 +873,7 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.airport.cityOk === false && <span className="block mt-1 text-13 font-bold" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</span>}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"].includes(pub.screen) && !(small && pub.screen === "pinQ") && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || small ? 70 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div>}
+    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"].includes(pub.screen) && !(small && pub.screen === "pinQ") && <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || small ? 70 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div>}
     {/* the Battle: the last answer, once there's no new question to read (during the questions it's on the TV only) */}
     {pub.battle?.half?.length && pub.screen === "battleHandoff" ? <BattleHalf half={pub.battle.half} />
       : pub.battle?.last && /^battle(Handoff|Summary)$/.test(pub.screen) && <BattleAnswer last={pub.battle.last} />}

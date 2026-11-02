@@ -132,6 +132,7 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
 
 .enter { animation: enter 0.22s var(--ease) both; }
 @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes enterFade { from { opacity: 0; } to { opacity: 1; } }
 
 /* waiting for the TV: a thin bar along the top of the phone */
 .sending { position: fixed; left: 0; right: 0; top: 0; height: 3px; z-index: 50; overflow: hidden; background: color-mix(in srgb, var(--tint) 20%, transparent); }
@@ -1230,10 +1231,14 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
    wrappers fold away and the screen is exactly as before */
 .screen > .side, .screen > .main { display: contents; }
 @media (orientation: landscape) and (max-height: 500px) {
-  .screen.split { max-width: 1040px; display: grid; grid-template-columns: minmax(250px, 340px) minmax(0, 1fr); column-gap: 26px; align-items: start;
+  .screen.split { --side: clamp(250px, 38vw, 340px); max-width: 1040px; display: grid; grid-template-columns: var(--side) minmax(0, 1fr); column-gap: 26px; align-items: start;
     padding: calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
   .screen.split > .side { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(12px + env(safe-area-inset-top)); z-index: 2; }
   .screen.split > .main { display: flex; flex-direction: column; gap: 14px; min-width: 0; min-height: calc(100svh - 26px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+  /* the question's clock goes to the foot of the left column (free under the scores): the game's column gets its room.
+     Fixed, so nothing between can hold a transform: the entrance only fades here */
+  .screen.split .main-clock { position: fixed; z-index: 3; left: calc(16px + env(safe-area-inset-left) + var(--side) / 2); bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%); }
+  .screen.split .enter { animation-name: enterFade; }
   /* the lobby's start bar spans the game's column only */
   .screen.split .start-bar { margin-left: 0; margin-right: calc(-16px - env(safe-area-inset-right)); }
 

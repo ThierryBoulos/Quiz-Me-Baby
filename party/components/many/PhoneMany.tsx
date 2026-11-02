@@ -89,10 +89,10 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
         </div>)}
       {g.key === "quiz" && pub.theme && <div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
       {g.key === "pin" && (small
-        ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><Clock deadline={pub.deadline} left={pub.left} size={64} /></div>
+        ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
         : <PinPhoto pin={pub.pin} h={230} small zoom />)}
       {pub.question && <p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p>}
-      {!(small && g.key === "pin") && <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} size={small ? 70 : 90} /></div>}
+      {!(small && g.key === "pin") && <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} size={small ? 70 : 90} /></div>}
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (
