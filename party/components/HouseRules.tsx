@@ -2,6 +2,7 @@
 import type { ReactNode } from "react";
 import { DEFAULTS, type Settings } from "@/lib/settings";
 import { Snd } from "@/lib/sound";
+import { MotionSetting } from "./Marquee";
 
 /* THE HOUSE RULES — every setting, on two tabs (General, Timers). The Settings
    page shows them for this device; the host's "Settings" (Setup, Advanced)
@@ -105,6 +106,8 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
           <button type="button" className="btn btn-sm" onClick={() => Snd.alarm()}>Test end-of-timer chime</button>
         </div>}
       </Section>
+
+      {!remote && <Section title="This screen"><MotionSetting /></Section>}
 
       <Section title="Your MC: Imad">
         <Toggle on={s.imad} set={(v) => set({ imad: v })} title="Imad comments" help="He comments on the game in a speech bubble on the TV: round intros, right and wrong answers, steals, lead changes, the final. Text only, no voice." />

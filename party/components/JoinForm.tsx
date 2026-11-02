@@ -99,8 +99,8 @@ export function JoinForm({ initial }: { initial: string }) {
   return (
     <main className={"mq mq-join" + lights} onKeyDown={(e) => { if (e.key === "Enter" && ready && !busy) void join(name); }}>
       <MqStage floor={false} />
-      <div className="top">{back}<Sign size={30}>Quiz Me Baby</Sign><span /></div>
-      <Sign className="big-sign">Quiz Me Baby</Sign>
+      <div className="top">{back}<Sign size={30}>Quiz Me Baby!</Sign><span /></div>
+      <Sign className="big-sign">Quiz Me Baby!</Sign>
       {/* one card: the code, your name, a face (the owner, 1 Nov: fewer screens, fewer taps; no name, no seat) */}
       <section className="card">
         <h1>Join a game</h1>

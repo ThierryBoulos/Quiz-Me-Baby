@@ -61,7 +61,7 @@ export function TvLobby({ room, members, code, k, joinUrl, site, status, control
   return (
     <div className={"mq mq-lobby k" + k + lights}>
       <MqStage floor />
-      <div className="brand"><Sign size={many ? 42 : 50}>Quiz Me Baby</Sign></div>
+      <div className="brand"><Sign size={many ? 42 : 50}>Quiz Me Baby!</Sign></div>
       <div className="code">
         <div className="lab">Join with this code</div>
         <CodeTiles code={code} />

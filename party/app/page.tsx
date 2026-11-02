@@ -33,7 +33,7 @@ export default function Home() {
     <main className={"mq mq-home" + lights}>
       <MqStage floor />
       <h1 className="sr-only">Quiz Me Baby: quiz night done right</h1>
-      <Sign slogan={SLOGAN} neon className="mq-hero">Quiz Me<br className="mq-br" /><span className="mq-sp"> </span>Baby</Sign>
+      <Sign slogan={SLOGAN} neon className="mq-hero">Quiz Me<br className="mq-br" /><span className="mq-sp"> </span>Baby!</Sign>
       <div className="mq-menu mq-rise">
         <button className="btn btn-gold btn-lg btn-block btn-two shine" disabled={busy} onClick={play}>
           {busy ? "Opening the room…" : <>Create game<small>This screen becomes the TV</small></>}</button>
