@@ -1141,8 +1141,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .ans-board:not(.sm) { margin-inline: -.36em; max-width: calc(100% + .72em); }
 /* a long answer (a ranking, a two-part answer) a size down, so the calls under it stay on the screen (today a
    two-line answer pushes a contest off the bottom of the TV) */
-[data-look="house"] .ans-board[data-len="l"] { font-size: 72px !important; }
-[data-look="house"] .ans-board[data-len="xl"] { font-size: 56px !important; }
+[data-look="house"] .ans-board[data-len="l"] { font-size: var(--text-70) !important; }
+[data-look="house"] .ans-board[data-len="xl"] { font-size: var(--text-52) !important; }
 /* the calls: upright lit plates; the reveal lands without a slam, a shake or a flash */
 [data-look="house"] .verdict.stamped, [data-look="house"] .tv-stamp { transform: none; animation-name: stampH; box-shadow: 0 0 .7em -.2em currentColor, inset 0 0 .5em -.3em currentColor; }
 [data-look="house"] .stamp-beat { animation-name: stampH; }
