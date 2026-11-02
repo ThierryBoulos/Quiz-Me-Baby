@@ -1195,3 +1195,5 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .mr-intro h1.display { font-size: 70px !important; }
 [data-look="house"] .mr-intro .rules { font-size: var(--text-18) !important; gap: 8px !important; line-height: 1.42; }
 [data-look="house"] .mr-intro > div:first-child > div { gap: 14px !important; }
+/* the plates stand in front of the row of bulbs (solid, never see-through to it) */
+[data-look="house"] .hud .hud-team { position: relative; z-index: 1; background-color: #0c0c22; }
