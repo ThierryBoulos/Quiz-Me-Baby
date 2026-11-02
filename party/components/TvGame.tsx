@@ -457,7 +457,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     if (sc === "auctionRun") return (<>
       <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{A.cat}</div>
       <div className="display text-44" style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}: name {A.bid}!</div>
-      <div className="display" style={{ fontSize: 170, lineHeight: 1 }}><span key={A.count} className="bump inline-block">{A.count}</span><span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span></div>
+      <div className="display auc-count" style={{ fontSize: 170, lineHeight: 1 }}><span key={A.count} className="bump inline-block">{A.count}</span><span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span></div>
       {/* a notch for each one named, up to the bid (a long bid fills a bar); full, it glows */}
       <BidBar n={A.count} of={A.bid} color={tc(A.by)} />
       <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
