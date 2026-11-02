@@ -1184,3 +1184,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* the plates take no more height than the bare scores did: the screen under the bar keeps every pixel it had */
 [data-look="house"] .hud.tv .hud-team { margin-block: -9px; }
 [data-look="house"] .hud.phone .hud-team { margin-block: -6px; }
+/* Majority Rules' start on the TV (two teams): its rules ran off the bottom of the screen; a little tighter, it all shows */
+[data-look="house"] .mr-intro h1.display { font-size: 70px !important; }
+[data-look="house"] .mr-intro .rules { font-size: var(--text-18) !important; gap: 8px !important; line-height: 1.42; }
+[data-look="house"] .mr-intro > div:first-child > div { gap: 14px !important; }

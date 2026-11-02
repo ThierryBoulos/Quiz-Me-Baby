@@ -262,7 +262,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if (!m) return null;
   /* Majority Rules: before it starts, everyone on their phone: the QR code again, and each team's list */
   if (sc === "majorityIntro") { const L = pub.majority?.list || [], A = pub.majority?.ask; return (
-    <div className="flex gap-10 items-start w-full">
+    <div className="flex gap-10 items-start w-full mr-intro">
       <div className="flex-1 min-w-0"><MiniIntro pub={pub} size="tv" /></div>
       <div className="w-[560px] shrink-0 flex flex-col gap-5 text-left">
         <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>Everyone on their phone</div>
