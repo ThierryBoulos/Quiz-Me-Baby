@@ -14,7 +14,8 @@ export const metadata: Metadata = {
   applicationName: "Quiz Me Baby",
   /* added to an iPhone's home screen: its own icon, full screen */
   appleWebApp: { capable: true, title: "Quiz Me Baby", statusBarStyle: "black-translucent" },
-  icons: { icon: "/icons/icon-180.png", apple: "/icons/icon-180.png" },
+  /* the marquee sign (the owner, 2 Nov); new file names so a phone doesn't keep the old picture */
+  icons: { icon: [{ url: "/icons/sign-32.png", sizes: "32x32" }, { url: "/icons/sign-192.png", sizes: "192x192" }], apple: "/icons/sign-180.png" },
   openGraph: { title: "Quiz Me Baby", description: "Tap to join the quiz. The TV is the show, your phone is the buzzer.", type: "website", siteName: "Quiz Me Baby" },
 };
 /* locked like an app: no zooming (see NoZoom for iOS); viewport-fit lets the safe-area padding in .screen work */
