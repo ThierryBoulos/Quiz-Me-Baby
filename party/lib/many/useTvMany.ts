@@ -5,11 +5,12 @@
    reducer (lib/tvGame.ts) runs while this one does. */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, HOST_ONLY_THEMES, hostOnly, loadBank, type Bank, type Q } from "../engine";
-import { DISH_LAST } from "../game";
 import { sb } from "../supabase";
 import { getSettings, USED_KEY } from "../settings";
 import { cap1, type Member, type Room } from "../room";
 import { useInbox } from "../tv/useInbox";
+import { usePresent } from "../tv/usePresent";
+import { DISH_LAST, T_LOBBY_AWAY } from "../game";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
 import { MANY_LEGS, MANY_MAX, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishShown, flip, lineup, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
@@ -49,6 +50,13 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const saveKey = "qmb.tv." + code + ".many";
   const lastAt = useRef(0);
   const ack = useRef<Record<string, Record<string, string>>>({});
+  /* the lobby's own writes (team names, who's away, a note): each carries the others this TV wrote last, so two
+     in the same moment never undo each other (this TV is the lobby's only writer) */
+  const lobbyMine = useRef<Record<string, unknown>>({});
+  const lobbyWrite = useCallback((patch: Record<string, unknown>) => {
+    if (!("note" in patch)) lobbyMine.current = { ...lobbyMine.current, ...patch };
+    return sb().from("rooms").update({ state: { ...(ctx.current.room?.state || {}), ...lobbyMine.current, ...patch } }).eq("code", code);
+  }, [code]);
 
   /* publish: the view for every phone, the answer for the host; one write at a time, newest wins */
   const chain = useRef<Promise<void>>(Promise.resolve());
@@ -103,18 +111,18 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (a.kind === "setup" && a.payload.teams != null && from?.role === "host") { await setTeams(code, room.state || {}, members, Number(a.payload.teams)); return; }
       if (a.kind === "team_name" && from?.role === "captain" && (from.team as number) === Number(a.payload.team) && (from.team as number) < k) {
         const names = manyNames(room, MANY_MAX); names[from.team as number] = cap1(String(a.payload.name || "").trim().slice(0, 14)) || names[from.team as number];
-        await sb().from("rooms").update({ state: { ...room.state, teamNames: names } }).eq("code", code);
+        await lobbyWrite({ teamNames: names });
         return;
       }
       if (a.kind === "setup" && a.payload.start && from?.role === "host") {
         const why = manyNotReady(members, k);
-        if (why) { await sb().from("rooms").update({ state: { ...room.state, note: { text: why, at: Date.now() } } }).eq("code", code); return; }
+        if (why) { await lobbyWrite({ note: { text: why, at: Date.now() } }); return; }
         const cfg = (a.payload.cfg || {}) as G;
         const picked = (Array.isArray(cfg.minis) ? cfg.minis : []).filter((x: string) => (MANY_MINIS as readonly string[]).includes(x)) as ManyKey[];
         /* the question rounds: how many (1 to 6), spread through the night */
         const rounds = picked.includes("quiz") ? Math.max(1, Math.min(MANY_ROUNDS, Math.floor(Number(cfg.rounds) || 1))) : 0;
         const keys = lineup(rounds, picked.filter((x) => x !== "quiz"));
-        if (!keys.length) { await sb().from("rooms").update({ state: { ...room.state, note: { text: "Pick at least one game.", at: Date.now() } } }).eq("code", code); return; }
+        if (!keys.length) { await lobbyWrite({ note: { text: "Pick at least one game.", at: Date.now() } }); return; }
         let b: Bank;
         try { b = await loadBank(code); } catch { await sb().from("rooms").update({ state: { ...room.state, note: { text: "The TV couldn't load the questions. Check its internet, then tap Start again.", at: Date.now() } } }).eq("code", code); return; }
         bank.current = b;
@@ -192,9 +200,26 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (r === true && allIn(s)) reveal(s);
       publish(); return;
     }
-  }, [code, publish, saveKey]);
+  }, [code, publish, saveKey, lobbyWrite]);
 
   useInbox(code, isTv, handle);
+
+  /* who's here (every phone on the room's live channel), and in the lobby a captain silent for T_LOBBY_AWAY shows as
+     away on the TV, as with two teams (the owner, 2 Nov: 3-8 teams never showed it) */
+  const here = useRef({ at: {} as Record<string, number> });
+  usePresent(code, isTv, here, members);
+  useEffect(() => {
+    if (!isTv) return;
+    const since = Date.now();                       // (a TV just switched to 3+ teams hasn't heard anyone yet)
+    const t = setInterval(() => {
+      const { room, members } = ctx.current, H = here.current, now = Date.now();
+      if (!room || room.status !== "lobby") return;
+      const away = members.filter((m) => m.role === "captain" && now - (H.at[m.user_id] ?? since) >= T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
+      const was = ((lobbyMine.current.away ?? room.state?.away) as string[] | undefined || []).join(",");
+      if (away.join(",") !== was) void lobbyWrite({ away }).then(() => {}, () => { /* the next tick tries again */ });
+    }, 3000);
+    return () => clearInterval(t);
+  }, [isTv, code, lobbyWrite]);
 
   /* the clock: time up shows the reveal */
   useEffect(() => {
