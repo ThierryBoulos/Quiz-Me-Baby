@@ -50,7 +50,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
       {/* the night's intro, before the first round: the plan, until Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `${pub.captains?.[pub.intro.go as 0 | 1] || "The captain"} starts the game` : "The host starts the game"} />}
 
-      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : pub.screen === "final" && recap ? "gap-3" : "gap-6")} key={bodyKey}>
+      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : pub.screen === "final" && recap ? "gap-3 recap-on" : "gap-6")} key={bodyKey}>
         {/* a steal: the light swings over from the team that missed to the one stealing */}
         {pub.screen === "steal" && <div className={"steal-beam " + (pub.turn === 1 ? "b" : "a")} aria-hidden />}
         {pub.screen === "roundIntro" && <div className="w-full max-w-[1080px]"><RoundIntro pub={pub} size="tv" /></div>}
@@ -69,7 +69,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
         {pub.screen === "answer" && pub.result && (<div className={"flex flex-col items-center gap-6 " + (pub.result.stolen ? "shake-beat" : "")}>
           <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
           <div className="eyebrow text-18">The answer</div>
-          <div className="display beat slam" style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
+          <div className="ans-board display beat slam" style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
           {/* the fun fact goes with the answer */}
           {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2 beat" style={d(0.25)}>{pub.result.notes}</div>}
           {/* what each team said, and the app's call on it (contestable until Next) */}
@@ -99,7 +99,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           <div className="eyebrow text-20">Sudden death · question {pub.sudden.n}</div>
           <div className="font-bold text-52 max-w-[1000px] leading-tight">{pub.question}</div>
           <Buzzed pub={pub} />
-          {pub.sudden.shown && <div className="display text-80" style={{ color: "var(--color-gold)" }}>{pub.sudden.answer}</div>}
+          {pub.sudden.shown && <div className="ans-board display text-80" style={{ color: "var(--color-gold)" }}>{pub.sudden.answer}</div>}
           <SdCalls pub={pub} />
         </>))}
 
@@ -109,8 +109,9 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           {/* the winner: "The winner", a beat, then the name slams down with a flash and a shockwave, and the confetti bursts */}
           <div className="win-flash" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
           <div className="confetti-late"><Confetti n={140} /></div>
-          <div className="eyebrow text-22 enter">{pub.winner == null ? "The night ends" : "The winner"}</div>
-          <div className="relative grid place-items-center">
+          <div className="eyebrow text-22 enter win-eyebrow">{pub.winner == null ? "The night ends" : "The winner"}</div>
+          <div className="win-sign relative grid place-items-center">
+            <span className="win-tag" aria-hidden>{pub.winner == null ? "The night ends" : "Tonight\u2019s winner"}</span>
             <span className="win-ring" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
             <span className="win-ring r2" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
             <div className="display win-slam leading-none" style={{ fontSize: (pub.winner != null && T[pub.winner].name.length > 10 ? 0.74 : 1) * (recap ? 64 : 150), color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
@@ -327,7 +328,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     const ans = Number(pub.reveal.answer), w = pub.reveal.w;
     return (<>
       <div className="eyebrow text-18">The answer</div>
-      <div className="display" style={{ fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
+      <div className="ans-board display" style={{ fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
       {pub.reveal.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-2 truncate">{pub.reveal.notes}</div>}
       <NumberLine pub={pub} ans={ans} w={w} />
       <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : ""}</div>
@@ -336,7 +337,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (<>
     <FlagImg name={pub.flag} h={sc === "flagQ" ? 300 : 220} maxW={520} />
     {sc === "flagQ" ? (<><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} /><Sent pub={pub} /></>) : (<>
-      <div className="display beat slam" style={{ ...QUICK, fontSize: 90, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
+      <div className="ans-board display beat slam" style={{ ...QUICK, fontSize: 90, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
       <TeamRows pub={pub} empty="No answer" />
     </>)}
   </>);
@@ -405,7 +406,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
             {/* the buzzer's own clock to type it */}
             {pub.dish.typeBy && pub.buzz != null && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.dish.typeBy} size={80} /><span>to type it</span></div>}
           </>) : (<>
-            <div className="display beat slam" style={{ fontSize: 76, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
+            <div className="ans-board display beat slam" style={{ fontSize: 76, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
             {(pub.calls || []).map((c, i) => <div key={c.id} className="text-22 flex items-baseline gap-2 beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={18} stamp /></div>)}
             <div className="display text-36 beat" style={{ ...d(0.35), color: tc(pub.reveal?.w === 0 || pub.reveal?.w === 1 ? pub.reveal.w : null) }}>
               {pub.reveal?.w === 0 || pub.reveal?.w === 1 ? `${T[pub.reveal.w].name} got it` : "Nobody got it"}</div>

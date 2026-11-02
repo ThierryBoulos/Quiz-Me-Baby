@@ -1066,3 +1066,117 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .mq-lobby.k7 .team .hd b, .mq-lobby.k8 .team .hd b { font-size: 24px; gap: 8px; }
 .mq-lobby.k5 .team .hd > span, .mq-lobby.k6 .team .hd > span, .mq-lobby.k7 .team .hd > span, .mq-lobby.k8 .team .hd > span { font-size: var(--text-12); letter-spacing: .12em; }
 @media not ((min-width: 900px) and (min-height: 560px)) { .mq-home .mq-floor { display: none; } }
+
+/* ==== HOUSE LIGHTS (phase 3, a proposal under review, 2 Nov): the game inside the cinema, with the lobby's marquee
+   outside. The lobby's navy, gold and ivory, the light holding still: scores in ivory tiles on plates lit in the
+   team's colour, a row of bulbs under them, a clock that is a ring of bulbs, answers on the letter board, the host's
+   answer on an ivory cue card, the winner on the marquee sign. Behind html[data-look="house"] while it's reviewed:
+   nothing changes without it. Nothing on a phone moves that doesn't have to. ==== */
+.clock-bulbs { display: none; }
+.clock-bulbs circle { fill: #2c2740; }
+.clock-bulbs circle.on { fill: var(--bulb); }
+.code-game { display: none !important; }
+
+[data-look="house"] body { background:
+  radial-gradient(110% 45% at 50% -8%, color-mix(in srgb, var(--tint) 18%, transparent), transparent 62%),
+  radial-gradient(ellipse 85% 60% at 50% 40%, #1a1840 0%, #0b0d26 52%, var(--color-bg) 88%), var(--color-bg); }
+/* the TV: two still pools of light from the floor, the floor itself, the leader's glow held still */
+[data-look="house"] .tv-wrap { z-index: 0; background:
+  radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,214,120,.12), transparent 72%),
+  radial-gradient(ellipse 80% 65% at 50% 42%, #1a1840 0%, #0b0d26 52%, var(--color-bg) 88%), var(--color-bg); }
+[data-look="house"] .tv-wrap::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    conic-gradient(from 6deg at 18% 106%, transparent 0deg, rgba(255,226,150,.075) 6deg, rgba(255,226,150,.035) 20deg, transparent 27deg),
+    conic-gradient(from -33deg at 82% 106%, transparent 0deg, rgba(255,226,150,.035) 7deg, rgba(255,226,150,.075) 21deg, transparent 27deg);
+  -webkit-mask-image: linear-gradient(to top, #000 25%, transparent 92%); mask-image: linear-gradient(to top, #000 25%, transparent 92%); }
+[data-look="house"] .tv-glow { animation: none; }
+
+/* the scores: a plate a team, lit in its colour, the score on an ivory tile; a row of bulbs under them */
+[data-look="house"] .hud { border-bottom: 0; position: relative; }
+/* (in place of the line, at its height: the screen under it keeps every pixel it had) */
+[data-look="house"] .hud::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 6px; opacity: .8; pointer-events: none;
+  background: radial-gradient(circle, var(--bulb) 0 1.5px, transparent 2.1px) 0 50% / 12px 6px repeat-x; filter: drop-shadow(0 0 2px rgba(255,200,90,.8)); }
+[data-look="house"] .hud.tv::after { height: 8px; bottom: -4px; background-image: radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px); background-size: 16px 8px; }
+[data-look="house"] .hud-team { --pc: var(--c, var(--color-gold)); padding: 5px 6px 5px 12px; border-radius: 14px; border: 2px solid color-mix(in srgb, var(--pc) 80%, transparent);
+  background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--pc) 22%, transparent), transparent 70%), rgba(10,10,28,.55); }
+[data-look="house"] .hud-team.a { --pc: var(--color-a); justify-self: start; }
+[data-look="house"] .hud-team.b { --pc: var(--color-b); justify-self: end; padding: 5px 12px 5px 6px;
+  background: radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--pc) 22%, transparent), transparent 70%), rgba(10,10,28,.55); }
+[data-look="house"] .hud:not(.many) .hud-team .dot { display: none; }
+[data-look="house"] .hud .hud-team .nm { color: var(--color-ink); }
+[data-look="house"] .hud .hud-team .sc { color: var(--board-ink); background: var(--board); border-radius: .14em; padding: .1em .16em .02em; min-width: 1.1em; text-align: center;
+  box-shadow: 0 0 14px rgba(255,236,190,.22), inset 0 -.06em 0 rgba(0,0,0,.14); }
+[data-look="house"] .hud.tv .hud-team { padding: 7px 8px 7px 16px; border-radius: 18px; }
+[data-look="house"] .hud.tv .hud-team.b { padding: 7px 16px 7px 8px; }
+[data-look="house"] .hud.many .hud-team, [data-look="house"] .hud.tv.many .hud-team { padding: 5px 6px 5px 8px; border-radius: 14px; }
+[data-look="house"] .hud.phone .hud-team { padding: 4px 5px 4px 10px; border-radius: 12px; }
+[data-look="house"] .hud.phone .hud-team.b { padding: 4px 10px 4px 5px; }
+/* the night's dots: the ones played lit gold, this one an ivory bulb (still: no pulse) */
+[data-look="house"] .pip { background: #2c2740; }
+[data-look="house"] .pip.done { background: var(--color-gold); box-shadow: 0 0 6px rgba(245,197,24,.55); }
+[data-look="house"] .pip.now { background: var(--bulb); box-shadow: 0 0 0 3px rgba(255,243,196,.22), 0 0 12px rgba(255,220,140,.9); animation: none; }
+
+/* the clock: a ring of bulbs, one going out as each part of the time goes; red for the last 10 seconds */
+[data-look="house"] .clock > svg:not(.clock-bulbs) { display: none; }
+[data-look="house"] .clock-bulbs { display: block; filter: drop-shadow(0 0 2px rgba(255,200,90,.6)); }
+[data-look="house"] .clock { box-shadow: none !important; }
+[data-look="house"] .screen .tick-pop { animation: none; }
+
+/* cards: gold hairline glass (as the lobby's), solid enough to read over anything */
+[data-look="house"] .card { border-radius: 22px; border-color: rgba(245,197,24,.24);
+  background: linear-gradient(180deg, rgba(245,197,24,.07), rgba(245,197,24,.015)), rgba(13,13,34,.74); }
+[data-look="house"] .rtable, [data-look="house"] .rtable-box { border-color: rgba(245,197,24,.24); background: rgba(13,13,34,.6); }
+/* the host's answer: an ivory cue card, the one thing on the phone nobody else sees */
+[data-look="house"] .cue-card { background: repeating-linear-gradient(180deg, var(--board) 0 38px, #efe4c4 38px 39px) !important; border-color: transparent !important;
+  box-shadow: 0 0 30px rgba(255,236,190,.18), inset 0 -4px 0 rgba(0,0,0,.08); }
+[data-look="house"] .cue-card, [data-look="house"] .cue-card * { color: var(--board-ink) !important; }
+[data-look="house"] .cue-card .eyebrow { color: #555a78 !important; }
+/* the answer, on the letter board */
+/* (about as tall as the gold word was: the screen under it keeps its place) */
+[data-look="house"] .ans-board { color: var(--board-ink) !important; text-shadow: none; max-width: 100%; border-radius: .14em; padding: .09em .36em .02em; margin-block: -.05em;
+  background: repeating-linear-gradient(180deg, var(--board) 0 .92em, #ece0bd .92em calc(.92em + 2px));
+  box-shadow: 0 0 .7em rgba(255,236,190,.22), inset 0 -.05em 0 rgba(0,0,0,.1); }
+[data-look="house"] .ans-board.sm { border-radius: 10px; padding: .18em .4em .08em; }
+/* the calls: upright lit plates; the reveal lands without a slam, a shake or a flash */
+[data-look="house"] .verdict.stamped, [data-look="house"] .tv-stamp { transform: none; animation-name: stampH; box-shadow: 0 0 .7em -.2em currentColor, inset 0 0 .5em -.3em currentColor; }
+[data-look="house"] .stamp-beat { animation-name: stampH; }
+@keyframes stampH { from { opacity: 0; transform: scale(1.7); } to { opacity: 1; transform: none; } }
+[data-look="house"] .slam, [data-look="house"] .beat.slam { animation-name: houseIn; animation-duration: .45s; }
+@keyframes houseIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+[data-look="house"] .shake-beat, [data-look="house"] .flame, [data-look="house"] .flag-cloth { animation: none; }
+[data-look="house"] .win-ring, [data-look="house"] .win-flash { display: none; }
+/* the winner on the marquee sign: bulbs round its edge (lit, still), "Tonight's winner" on its letter board */
+.win-tag { display: none; }
+[data-look="house"] .win-eyebrow { display: none; }
+[data-look="house"] .win-tag { display: inline-block; margin-bottom: 12px; padding: 4px 12px 2px; border-radius: 7px; background: var(--board); color: var(--board-ink);
+  font-family: var(--font-display); font-size: var(--text-22); letter-spacing: .16em; text-transform: uppercase; line-height: 1.1; box-shadow: 0 0 18px rgba(255,236,190,.3); }
+[data-look="house"] .recap-on .win-tag { font-size: var(--text-14); margin-bottom: 6px; padding: 2px 8px 1px; }
+[data-look="house"] .recap-on .win-sign { padding: 16px 40px 14px; }
+[data-look="house"] .win-sign { padding: 30px 52px 26px; border-radius: 28px; border: 3px solid rgba(245,197,24,.75); background: linear-gradient(180deg, #1d1636, #0d0a1f 70%);
+  box-shadow: 0 0 0 6px rgba(245,197,24,.08), 0 0 60px -10px rgba(255,190,80,.55), inset 0 0 40px rgba(245,197,24,.08); }
+[data-look="house"] .win-sign::before, [data-look="house"] .winner-card::before { content: ""; position: absolute; inset: 9px; border-radius: 20px; pointer-events: none;
+  background:
+    radial-gradient(circle, var(--bulb) 0 3px, transparent 3.6px) 0 0 / 22px 10px repeat-x,
+    radial-gradient(circle, var(--bulb) 0 3px, transparent 3.6px) 0 100% / 22px 10px repeat-x,
+    radial-gradient(circle, var(--bulb) 0 3px, transparent 3.6px) 0 0 / 10px 22px repeat-y,
+    radial-gradient(circle, var(--bulb) 0 3px, transparent 3.6px) 100% 0 / 10px 22px repeat-y;
+  filter: drop-shadow(0 0 3px rgba(255,200,90,.85)); }
+[data-look="house"] .winner-card { position: relative; padding: 26px 18px 22px; border: 2px solid rgba(245,197,24,.75); background: linear-gradient(180deg, #1d1636, #0d0a1f 70%);
+  box-shadow: 0 0 0 4px rgba(245,197,24,.08), 0 0 40px -10px rgba(255,190,80,.55); }
+[data-look="house"] .winner-card::before { inset: 6px; border-radius: 16px;
+  background:
+    radial-gradient(circle, var(--bulb) 0 2.2px, transparent 2.8px) 0 0 / 16px 8px repeat-x,
+    radial-gradient(circle, var(--bulb) 0 2.2px, transparent 2.8px) 0 100% / 16px 8px repeat-x,
+    radial-gradient(circle, var(--bulb) 0 2.2px, transparent 2.8px) 0 0 / 8px 16px repeat-y,
+    radial-gradient(circle, var(--bulb) 0 2.2px, transparent 2.8px) 100% 0 / 8px 16px repeat-y; }
+/* phones: the room code in tiles; no confetti (the TV has it) */
+[data-look="house"] .code-txt { display: none; }
+[data-look="house"] .code-game { display: grid !important; }
+[data-look="house"] .screen .confetti { display: none; }
+/* 3-8 teams, during a game: this game's points, a small plate a team, the points on an ivory tile */
+[data-look="house"] .game-line > span[style] { padding: 3px 4px 3px 6px; border-radius: 10px; border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent);
+  background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--c) 18%, transparent), transparent 70%), rgba(10,10,28,.5); }
+[data-look="house"] .game-line b { background: var(--board); color: var(--board-ink); border-radius: 5px; padding: .06em .22em 0; min-width: 1.15em; text-align: center; line-height: 1.05; }
+/* 3-8 teams: a name longer than its plate is cut with "…", never out of it */
+[data-look="house"] .hud.many .hud-team > div:first-child { max-width: 100%; min-width: 0; overflow: hidden; }
+[data-look="house"] .hud.many .hud-team .nm { max-width: 100%; letter-spacing: .05em; }

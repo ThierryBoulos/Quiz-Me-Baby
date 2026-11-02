@@ -21,7 +21,7 @@ export function AnswerLine({ question, answer, fact, label, media }: { question?
       {question && <p className="text-15 text-[var(--color-ink-2)] leading-snug">{question}</p>}
       {media}
       {label && <div className="eyebrow">{label}</div>}
-      {answer != null && answer !== "" && <div className="display leading-none" style={{ color: "var(--color-gold)", fontSize: typeof answer === "string" && answer.length > 22 ? 28 : 40 }}>{answer}</div>}
+      {answer != null && answer !== "" && <div className="ans-board sm display leading-none" style={{ color: "var(--color-gold)", fontSize: typeof answer === "string" && answer.length > 22 ? 28 : 40 }}>{answer}</div>}
       {fact && <p className="text-13 text-[var(--color-ink-3)] leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{fact}</p>}
     </div>);
 }

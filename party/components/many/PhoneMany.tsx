@@ -171,7 +171,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       {host && sc === "q" && g && (<>
         <OnScreen />
         {secret.answer && (
-          <div className="card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
+          <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{g.key === "say" ? "The app's secret answer: it scores nothing. Only you see this" : "The answer. Only you see this"}</div>
             <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(secret.answer)) : secret.answer}</div>
             {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}

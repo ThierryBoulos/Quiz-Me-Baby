@@ -270,7 +270,7 @@ export default function PhoneRoom() {
         {/* the room code opens its QR code and Share, so a late friend can scan this phone (the owner, 31 Oct) */}
         <button type="button" className="eyebrow whitespace-nowrap inline-flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 rounded-[12px]" aria-haspopup="dialog" aria-label={`Room ${code}: show the QR code to join`}
           onClick={() => setInvite(`${window.location.origin}/join?code=${code}`)}>
-          {lobby ? <CodeTiles code={code} className="mini" /> : code}
+          {lobby ? <CodeTiles code={code} className="mini" /> : <><span className="code-txt">{code}</span><CodeTiles code={code} className="mini code-game" /></>}
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden fill="currentColor"><path d="M1 1h6v6H1V1Zm1.5 1.5v3h3v-3h-3ZM9 1h6v6H9V1Zm1.5 1.5v3h3v-3h-3ZM1 9h6v6H1V9Zm1.5 1.5v3h3v-3h-3ZM9 9h2v2H9V9Zm4 0h2v2h-2V9Zm-2 2h2v2h-2v-2Zm-2 2h2v2H9v-2Zm4 0h2v2h-2v-2Z" /></svg>
         </button>
         {room.status === "lobby" && <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}

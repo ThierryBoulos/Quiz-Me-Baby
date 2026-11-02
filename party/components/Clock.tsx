@@ -37,6 +37,7 @@ export function useAfter(at?: number | null) {
 /* The clock: a ring that drains as the time goes (the full ring is the most time it has shown: a new question,
    or +10 s, fills it again), red for the last 10 seconds, and the number jumps on each of those ticks. */
 const TOPS = new Map<number, number>();
+const BULBS = 30;
 export function Clock({ deadline, left, timeUp, size = 120 }: { deadline?: number | null; left?: number; timeUp?: boolean; size?: number }) {
   const s = useSecondsLeft(deadline, left);
   const [now, setNow] = useState(tvNow());
@@ -57,6 +58,11 @@ export function Clock({ deadline, left, timeUp, size = 120 }: { deadline?: numbe
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={col} strokeWidth={w} strokeLinecap="round"
           strokeDasharray={C} strokeDashoffset={C * (1 - frac)} transform={`rotate(-90 ${size / 2} ${size / 2})`}
           style={{ transition: "stroke-dashoffset .3s linear, stroke .3s" }} />
+      </svg>
+      {/* the house look (phase 3): the ring is a ring of bulbs, one going out as each part of the time goes */}
+      <svg className="clock-bulbs absolute inset-0" width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
+        {Array.from({ length: BULBS }, (_, i) => { const a = -Math.PI / 2 + (2 * Math.PI * i) / BULBS, br = Math.max(2, w * 0.62), R = size / 2 - br - 1;
+          return <circle key={i} cx={size / 2 + R * Math.cos(a)} cy={size / 2 + R * Math.sin(a)} r={br} className={i < Math.round(frac * BULBS) ? "on" : ""} style={i < Math.round(frac * BULBS) ? { fill: s <= 10 || timeUp ? "var(--color-no)" : undefined } : undefined} />; })}
       </svg>
       <div className="text-center leading-none relative">
         <div key={s <= 10 && !paused && !timeUp ? s : "n"} className={"display " + (s <= 10 && s > 0 && !paused && !timeUp ? "tick-pop" : "")} style={{ fontSize: size * 0.42, color: col }}>{timeUp ? "0" : s}</div>

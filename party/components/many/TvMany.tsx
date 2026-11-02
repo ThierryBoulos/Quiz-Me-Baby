@@ -45,7 +45,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
       {/* the night's intro, before the first game: the plan, until the host's Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who="The host starts the game" />}
 
-      <div className="flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" key={key}>
+      <div className={"flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}
         {pub.screen === "intro" && g && (g.key === "majority" ? (
           <div className="flex gap-10 items-start w-full">
@@ -143,7 +143,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* the reveal: the answer lands, then the calls, then who takes it */}
         {pub.screen === "reveal" && g && R && g.key === "flag" && (<>
           <FlagImg name={pub.flag} h={dense ? 120 : 170} maxW={400} />
-          <div className="display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
+          <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
@@ -155,7 +155,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
             : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
           {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
-          <div className="display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
+          <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
           {/* (the airport's explanation stays on the phones with eight teams: the board and eight answers fill the TV) */}
           {R.notes && g.key !== "say" && !(g.key === "airport" && dense) && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 leading-snug clamp2">{R.notes}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
@@ -163,7 +163,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "closest" && (<>
           <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
-          <div className="display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{showNum(Number(R.answer))}</div>
+          <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{showNum(Number(R.answer))}</div>
           {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 leading-snug clamp2">{R.notes}</div>}
           <Ruler ans={Number(R.answer)} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i), pts: R.pts?.[i] }))} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.6), color: W.color }}>{W.text}</div>
@@ -175,7 +175,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
               fly height={430} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
             <div className="w-[400px] shrink-0 flex flex-col items-center gap-3">
               <div className="eyebrow text-16">It&rsquo;s here</div>
-              <div className="display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.answer}</div>
+              <div className="ans-board display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.answer}</div>
               <div className="text-22 text-[var(--color-ink-2)] -mt-1">{R.place}</div>
               <div className="w-full mt-2"><RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="tv" pts={R.pts} /></div>
               <div className="display text-36 mt-3" style={{ color: W.color }}>{W.text}</div>
@@ -226,8 +226,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           return (<>
             <div className="win-flash" style={{ ["--c" as string]: c }} aria-hidden />
             <div className="confetti-late"><Confetti n={140} /></div>
-            <div className="eyebrow text-22 enter relative z-10">{tops.length > 1 ? "A shared win" : "The winner"}</div>
-            <div className="relative z-10 grid place-items-center">
+            <div className="eyebrow text-22 enter relative z-10 win-eyebrow">{tops.length > 1 ? "A shared win" : "The winner"}</div>
+            <div className="win-sign relative z-10 grid place-items-center">
+              <span className="win-tag" aria-hidden>{tops.length > 1 ? "A shared win" : "Tonight\u2019s winner"}</span>
               <span className="win-ring" style={{ ["--c" as string]: c }} aria-hidden />
               <span className="win-ring r2" style={{ ["--c" as string]: c }} aria-hidden />
               <div className="display win-slam max-w-[1160px] leading-none" style={{ fontSize: (name.length > 10 ? 0.74 : 1) * (recap ? 64 : 150), color: c, transition: "font-size .6s ease" }}><bdi>{name}</bdi></div>
