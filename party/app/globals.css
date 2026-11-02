@@ -230,11 +230,12 @@ button.chip.me-chip.chip-on { color: var(--color-gold); }
 .next-hint { color: var(--color-ink-2); flex: none; }
 .hud-code { font-size: var(--text-11); font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--color-ink-3); opacity: .8; margin-bottom: -4px; }
 .pips { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center; }
-.pip { height: 8px; width: 8px; border-radius: 50%; background: rgba(255,255,255,.16); transition: all .3s var(--ease); }
-.pip.mini { width: 26px; border-radius: 5px; }
+/* the night's track (the owner, 2 Nov): a question round is a dash, a mini-game a dot */
+.pip { height: 8px; width: 26px; border-radius: 5px; background: rgba(255,255,255,.16); transition: all .3s var(--ease); }
+.pip.mini { width: 8px; border-radius: 50%; }
 .pip.done { background: var(--color-ink-2); }
 .pip.now { background: var(--color-gold); box-shadow: 0 0 0 4px rgba(245,197,24,.18), 0 0 14px var(--color-gold); animation: pulse 1.8s ease-in-out infinite; }
-.pip.now.mini { width: 30px; }
+.pip.now:not(.mini) { width: 30px; }
 .pips-tag { font-size: var(--text-11); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-3); margin-right: 4px; white-space: nowrap; }
 .hud.tv .pips-tag { font-size: var(--text-13); }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
@@ -248,7 +249,7 @@ button.chip.me-chip.chip-on { color: var(--color-gold); }
 .hud.tv .hud-team .sc { font-size: var(--text-48); }
 .hud.tv .hud-team .dot { width: 14px; height: 14px; }
 .hud.tv .hud-label { font-size: var(--text-15); }
-.hud.tv .pip { height: 11px; width: 11px; } .hud.tv .pip.mini { width: 34px; } .hud.tv .pip.now.mini { width: 40px; }
+.hud.tv .pip { height: 11px; width: 34px; } .hud.tv .pip.mini { width: 11px; } .hud.tv .pip.now:not(.mini) { width: 40px; }
 
 .team-card { border-radius: 22px; padding: 18px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
 .team-card.a { background: linear-gradient(180deg, rgba(49,201,247,.10), rgba(255,255,255,.02)); border-color: rgba(49,201,247,.3); }
@@ -786,8 +787,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
   display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 56px 28px; gap: 26px; text-align: left; }
 .ni-top { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .ni-pips { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; max-width: 1160px; }
-.ni-pip { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.14); animation: niLight .9s var(--ease) both; }
-.ni-pip.mini { width: 92px; border-radius: 11px; }
+.ni-pip { width: 92px; height: 30px; border-radius: 11px; background: rgba(255,255,255,.14); animation: niLight .9s var(--ease) both; }
+.ni-pip.mini { width: 30px; border-radius: 50%; }
 .ni-pip.first { animation-name: niLight, niNow; animation-duration: .9s, 1.8s; animation-iteration-count: 1, infinite; animation-timing-function: var(--ease), ease-in-out; }
 @keyframes niLight { 0% { background: rgba(255,255,255,.14); transform: scale(1); box-shadow: none; }
   35% { background: var(--color-gold); transform: scale(1.35); box-shadow: 0 0 0 6px rgba(245,197,24,.2), 0 0 26px var(--color-gold); }
@@ -800,8 +801,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .ni-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .ni-head { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .01em; font-size: var(--text-36); color: var(--color-gold); line-height: 1.1; flex-wrap: wrap; }
 .ni-pts { font-family: var(--font-body); text-transform: none; font-weight: 700; font-size: var(--text-16); color: var(--color-ink-2); letter-spacing: .02em; }
-.ni-glyph { display: inline-block; flex: none; width: 16px; height: 16px; border-radius: 50%; background: var(--color-gold); }
-.ni-glyph.mini { width: 44px; height: 14px; border-radius: 6px; }
+.ni-glyph { display: inline-block; flex: none; width: 44px; height: 14px; border-radius: 6px; background: var(--color-gold); }
+.ni-glyph.mini { width: 16px; height: 16px; border-radius: 50%; }
 .ni-cap { font-size: var(--text-16); color: var(--color-ink-2); line-height: 1.35; margin-bottom: 4px; }
 .ni-list { display: flex; flex-direction: column; gap: 8px; }
 .ni-list.q.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
@@ -825,7 +826,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .ni-phone { display: flex; flex-direction: column; gap: 8px; text-align: left; font-size: var(--text-14); }
 .ni-phone li { display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: baseline; column-gap: 6px; }
 .ni-phone li > .ni-glyph { justify-self: center; }
-.ni-phone .ni-glyph { width: 9px; height: 9px; } .ni-phone .ni-glyph.mini { width: 24px; height: 8px; border-radius: 4px; }
+.ni-phone .ni-glyph { width: 24px; height: 8px; border-radius: 4px; } .ni-phone .ni-glyph.mini { width: 9px; height: 9px; border-radius: 50%; }
 
 /* ---- the marquee (1 Nov, the owner's option 3): home, join and the TV lobby (components/Marquee.tsx) ---- */
 :root { --bulb: #fff3c4; --halo: rgba(255, 200, 90, .75); --board: #fbf2d7; --board-ink: #0b0e24; }
@@ -1160,6 +1161,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* with the recap under it the sign is small: as tall as "The winner" and the name were */
 [data-look="house"] .recap-on .win-tag { font-size: var(--text-12); margin-bottom: 2px; padding: 1px 8px 0; letter-spacing: .14em; }
 [data-look="house"] .recap-on .win-sign { padding: 9px 36px 6px; border-width: 2px; border-radius: 20px; }
+/* the recap is taller than the screen under the bar: it starts under the bar (never up over its line), a little tighter (the owner, 2 Nov) */
+[data-look="house"] .recap-on { gap: 12px; justify-content: safe center; }
 [data-look="house"] .recap-on .win-sign::before { inset: 4px; border-radius: 15px;
   background:
     radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 0 / 14px 6px repeat-x,
@@ -1196,6 +1199,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .hud.many .hud-team .nm { max-width: 100%; letter-spacing: .05em; }
 /* the plates take no more height than the bare scores did: the screen under the bar keeps every pixel it had */
 [data-look="house"] .hud.tv .hud-team { margin-block: -9px; }
+/* 3-8 teams: the room code sits over the plates, so they keep their top (the code had no air above them) */
+[data-look="house"] .hud.tv.many .hud-team { margin-top: 0; }
 [data-look="house"] .hud.phone .hud-team { margin-block: -6px; }
 /* Majority Rules' start on the TV (two teams): its rules ran off the bottom of the screen; a little tighter, it all shows */
 [data-look="house"] .mr-intro h1.display { font-size: 70px !important; }

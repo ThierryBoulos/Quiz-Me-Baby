@@ -233,8 +233,8 @@ export function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boo
     <div className="display text-16 leading-none mt-1" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "—"}</div>
     {/* a long name wraps to a second line, tracking a touch tighter, rather than running off or being cut (the owner, 31 Oct);
         the letter flows in front of the name's first word, so the second line has the whole width; every name keeps a
-        two-line slot, so the places, the glasses and the points stay level across */}
-    <div className="flex items-center justify-center w-full" style={{ fontSize: dense ? 11 : 14, height: "2.5em" }}>
+        two-line slot, top-aligned, so the places, the names, the glasses and the points stay level across (the owner, 2 Nov) */}
+    <div className="flex items-start justify-center w-full" style={{ fontSize: dense ? 11 : 14, height: "2.5em" }}>
       <div className="eyebrow text-center min-w-0 max-w-full" style={{ color: T[t].color, fontSize: "inherit", letterSpacing: ".1em", lineHeight: 1.25, overflowWrap: "anywhere",
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
         <span className="inline-block align-middle mr-1.5" style={{ marginTop: -2 }}><Dot t={t} color={T[t].color} size={dense ? 14 : 18} /></span><bdi>{T[t].name}</bdi></div></div>
