@@ -1,8 +1,8 @@
 "use client";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { DEFAULTS, type Settings } from "@/lib/settings";
 import { Snd } from "@/lib/sound";
-import { MotionSetting } from "./Marquee";
+import { getMotionPref, setMotionPref } from "./Marquee";
 
 /* THE HOUSE RULES — every setting, on two tabs (General, Timers). The Settings
    page shows them for this device; the host's "Settings" (Setup, Advanced)
@@ -44,6 +44,13 @@ function Toggle({ on, set, title, help }: { on: boolean; set: (v: boolean) => vo
         <span className="absolute top-[3px] w-[28px] h-[28px] rounded-full bg-white transition-all" style={{ left: on ? 29 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
       </span>
     </button>);
+}
+
+/* the marquee's moving lights on this device (Marquee.tsx: useMotion) */
+function MotionToggle() {
+  const [on, setOn] = useState(true);
+  useEffect(() => { setOn(getMotionPref() !== "off"); }, []);
+  return <Toggle on={on} set={(v) => { setOn(v); setMotionPref(v ? "auto" : "off"); }} title="Background motion" help="Moving lights on the home, join and lobby screens." />;
 }
 
 function Timers({ list, s, set }: { list: Timer[]; s: Settings; set: (p: Partial<Settings>) => void }) {
@@ -107,7 +114,7 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
         </div>}
       </Section>
 
-      {!remote && <Section title="This screen"><MotionSetting /></Section>}
+      {!remote && <Section title="This screen"><MotionToggle /></Section>}
 
       <Section title="Your MC: Imad">
         <Toggle on={s.imad} set={(v) => set({ imad: v })} title="Imad comments" help="He comments on the game in a speech bubble on the TV: round intros, right and wrong answers, steals, lead changes, the final. Text only, no voice." />

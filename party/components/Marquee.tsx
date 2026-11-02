@@ -7,19 +7,19 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 export const SLOGAN = "Quiz night done right";
 const useIso = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-/* MOTION (the owner, 2 Nov): saved per device. "auto" (the default): everything, except on a phone set to Reduce
-   Motion, where the lights still chase and sparkle (light changing, nothing moving) but the spotlights, the dust and
-   the grain hold still. "on": everything, whatever the phone says. "off": a still, lit sign. */
-export type MotionPref = "auto" | "on" | "off";
+/* MOTION (the owner, 2 Nov): one switch in Settings, saved per device. On (the default): everything, except on a
+   phone set to Reduce Motion, where the lights still chase and sparkle (light changing, nothing moving) but the
+   spotlights, the dust and the grain hold still. Off: a still, lit sign. */
+export type MotionPref = "auto" | "off";
 export type Motion = "full" | "lights" | "off";
 const MOTION_KEY = "qmb.motion";
-export const getMotionPref = (): MotionPref => { try { const v = localStorage.getItem(MOTION_KEY); return v === "on" || v === "off" ? v : "auto"; } catch { return "auto"; } };
+export const getMotionPref = (): MotionPref => { try { return localStorage.getItem(MOTION_KEY) === "off" ? "off" : "auto"; } catch { return "auto"; } };
 export const setMotionPref = (v: MotionPref) => { try { localStorage.setItem(MOTION_KEY, v); } catch { /* private mode */ } window.dispatchEvent(new Event("qmb:motion")); };
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 export function useMotion(): Motion {
   const [m, setM] = useState<Motion>("full");
   useEffect(() => {
-    const calc = () => { const p = getMotionPref(); setM(p === "off" ? "off" : p === "on" ? "full" : reduced() ? "lights" : "full"); };
+    const calc = () => setM(getMotionPref() === "off" ? "off" : reduced() ? "lights" : "full");
     calc();
     const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     window.addEventListener("qmb:motion", calc); mq?.addEventListener?.("change", calc);
@@ -43,23 +43,6 @@ export function useLights(delay = 200) {
     return () => { clearTimeout(a); clearTimeout(b); clearInterval(sp); if (off) clearTimeout(off); };
   }, [delay, motion]);
   return " m-" + motion + (s.lit ? " lit" : "") + (s.chase && !s.sparkle ? " chase" : "") + (s.sparkle ? " sparkle" : "");
-}
-
-/* the Settings switch for this device */
-export function MotionSetting() {
-  const [p, setP] = useState<MotionPref>("auto");
-  useEffect(() => { setP(getMotionPref()); }, []);
-  const pick = (v: MotionPref) => { setP(v); setMotionPref(v); };
-  return (
-    <div className="flex flex-col gap-2">
-      <span><span className="block font-bold text-16">Background motion</span>
-        <span className="block text-13 text-[var(--color-ink-2)] mt-0.5">The chasing bulbs, the sparkle and the moving spotlights on the home, join and lobby screens. Auto: all of it, except on a phone set to Reduce Motion, where the bulbs still chase but the spotlights hold still. Saved on this device.</span></span>
-      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Background motion">
-        {(["auto", "on", "off"] as const).map((v) => (
-          <button key={v} type="button" role="radio" aria-checked={p === v} className={"btn btn-sm " + (p === v ? "btn-gold" : "btn-ghost")} onClick={() => pick(v)}>
-            {v === "auto" ? "Auto" : v === "on" ? "On" : "Off"}</button>))}
-      </div>
-    </div>);
 }
 
 /* bulbs, evenly spaced along a rounded rectangle that follows the sign's own corners */
