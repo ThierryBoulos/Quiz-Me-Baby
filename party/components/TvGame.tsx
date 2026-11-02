@@ -69,7 +69,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
         {pub.screen === "answer" && pub.result && (<div className={"flex flex-col items-center gap-6 " + (pub.result.stolen ? "shake-beat" : "")}>
           <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
           <div className="eyebrow text-18">The answer</div>
-          <div className="ans-board display beat slam" style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
+          <div className="ans-board display beat slam" data-len={(pub.result.answer || "").length > 40 ? "xl" : (pub.result.answer || "").length > 22 ? "l" : undefined} style={{ fontSize: 96, color: "var(--color-gold)" }}>{pub.result.answer}</div>
           {/* the fun fact goes with the answer */}
           {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2 beat" style={d(0.25)}>{pub.result.notes}</div>}
           {/* what each team said, and the app's call on it (contestable until Next) */}

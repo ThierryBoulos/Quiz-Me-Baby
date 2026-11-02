@@ -1137,6 +1137,12 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   background: repeating-linear-gradient(180deg, var(--board) 0 .92em, #ece0bd .92em calc(.92em + 2px));
   box-shadow: 0 0 .7em rgba(255,236,190,.22), inset 0 -.05em 0 rgba(0,0,0,.1); }
 [data-look="house"] .ans-board.sm { border-radius: 10px; padding: .18em .4em .08em; }
+/* the board's sides stand outside the words' width, so an answer wraps exactly where the gold word did */
+[data-look="house"] .ans-board:not(.sm) { margin-inline: -.36em; max-width: calc(100% + .72em); }
+/* a long answer (a ranking, a two-part answer) a size down, so the calls under it stay on the screen (today a
+   two-line answer pushes a contest off the bottom of the TV) */
+[data-look="house"] .ans-board[data-len="l"] { font-size: 72px !important; }
+[data-look="house"] .ans-board[data-len="xl"] { font-size: 56px !important; }
 /* the calls: upright lit plates; the reveal lands without a slam, a shake or a flash */
 [data-look="house"] .verdict.stamped, [data-look="house"] .tv-stamp { transform: none; animation-name: stampH; box-shadow: 0 0 .7em -.2em currentColor, inset 0 0 .5em -.3em currentColor; }
 [data-look="house"] .stamp-beat { animation-name: stampH; }
