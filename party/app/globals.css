@@ -1230,7 +1230,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
    wrappers fold away and the screen is exactly as before */
 .screen > .side, .screen > .main { display: contents; }
 @media (orientation: landscape) and (max-height: 500px) {
-  .screen.split { max-width: 1040px; display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); column-gap: 28px; align-items: start;
+  .screen.split { max-width: 1040px; display: grid; grid-template-columns: minmax(250px, 340px) minmax(0, 1fr); column-gap: 26px; align-items: start;
     padding: calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
   .screen.split > .side { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(12px + env(safe-area-inset-top)); z-index: 2; }
   .screen.split > .main { display: flex; flex-direction: column; gap: 14px; min-width: 0; min-height: calc(100svh - 26px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
