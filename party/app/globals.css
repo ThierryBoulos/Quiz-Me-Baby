@@ -1094,9 +1094,9 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* the scores: a plate a team, lit in its colour, the score on an ivory tile; a row of bulbs under them */
 [data-look="house"] .hud { border-bottom: 0; position: relative; }
 /* (in place of the line, at its height: the screen under it keeps every pixel it had) */
-[data-look="house"] .hud::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 6px; opacity: .8; pointer-events: none;
+[data-look="house"] .hud::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; opacity: .8; pointer-events: none;
   background: radial-gradient(circle, var(--bulb) 0 1.5px, transparent 2.1px) 0 50% / 12px 6px repeat-x; filter: drop-shadow(0 0 2px rgba(255,200,90,.8)); }
-[data-look="house"] .hud.tv::after { height: 8px; bottom: -4px; background-image: radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px); background-size: 16px 8px; }
+[data-look="house"] .hud.tv::after { height: 8px; bottom: 0; background-image: radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px); background-size: 16px 8px; }
 [data-look="house"] .hud-team { --pc: var(--c, var(--color-gold)); padding: 5px 6px 5px 12px; border-radius: 14px; border: 2px solid color-mix(in srgb, var(--pc) 80%, transparent);
   background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--pc) 22%, transparent), transparent 70%), rgba(10,10,28,.55); }
 [data-look="house"] .hud-team.a { --pc: var(--color-a); justify-self: start; }
@@ -1143,7 +1143,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 @keyframes stampH { from { opacity: 0; transform: scale(1.7); } to { opacity: 1; transform: none; } }
 [data-look="house"] .slam, [data-look="house"] .beat.slam { animation-name: houseIn; animation-duration: .45s; }
 @keyframes houseIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
-[data-look="house"] .shake-beat, [data-look="house"] .flame, [data-look="house"] .flag-cloth { animation: none; }
+/* (the flags on Guess the Flag's result still wave: that picture stays as it was) */
+[data-look="house"] .shake-beat, [data-look="house"] .flame { animation: none; }
 [data-look="house"] .win-ring, [data-look="house"] .win-flash { display: none; }
 /* the winner on the marquee sign: bulbs round its edge (lit, still), "Tonight's winner" on its letter board */
 .win-tag { display: none; }
