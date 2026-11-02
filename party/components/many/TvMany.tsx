@@ -272,13 +272,14 @@ function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
   if (dense && !column) return (
     <div className="flex flex-wrap justify-center gap-x-5 gap-y-1" role="status" aria-label={T.map((t) => `${t.name} ${pub.sent[t.i] ? "in" : "not yet"}`).join(", ")}>
       {T.map(({ i, color }) => (
-        <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ opacity: pub.sent[i] ? 1 : 0.4, color: pub.out?.[i] ? "var(--color-no)" : pub.sent[i] ? color : "var(--color-ink-3)" }}>
-          <Dot t={i} color={color} size={22} />{pub.out?.[i] ? "out" : pub.sent[i] ? "✓" : "…"}</span>))}
+        <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ opacity: pub.sent[i] ? 1 : 0.4, color: pub.sent[i] ? color : "var(--color-ink-3)" }}>
+          <Dot t={i} color={color} size={22} />{pub.sent[i] ? "✓" : "…"}</span>))}
     </div>);
   return (
     <div className={"flex " + (column ? "flex-col items-center gap-0.5" : "flex-wrap justify-center gap-y-0.5 " + (dense ? "gap-x-5" : "gap-x-10"))} role="status" style={{ maxWidth: 1168 }}>{T.map(({ i, ...t }) => (
       <span key={i} className="font-bold whitespace-nowrap" style={{ fontSize: column && dense ? 20 : 22, color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
-        <bdi>{t.name}</bdi>: {pub.out?.[i] ? <span style={{ color: "var(--color-no)" }}>out</span> : pub.sent[i] ? (pin ? "pin in" : mr ? "all in" : "locked in") : pin ? "placing…" : mr ? "answering…" : "thinking…"}</span>))}
+        {/* a wrong guess in the Cocktail or Dish reads "locked in" too: who got it shows at the reveal (the owner, 2 Nov) */}
+        <bdi>{t.name}</bdi>: {pub.sent[i] ? (pin ? "pin in" : mr ? "all in" : "locked in") : pin ? "placing…" : mr ? "answering…" : "thinking…"}</span>))}
     </div>);
 }
 /* Majority Rules: how many of the room have answered (the roster is names only, so the count is the room's;

@@ -55,18 +55,21 @@ export function Roll({ v }: { v: number }) {
 }
 
 /* shown: the scores to show for now (the TV holds the old one while the points fly up to it) */
-/* code: the room's code, tiny above the round's name, so someone signed out can find their way back in (the TV) */
+/* code: the room's code, tiny in the TV's top-right corner, so someone signed out can find their way back in */
 export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"; shown?: Two<number>; code?: string }) {
   const T = pub.teams, w = pub.mini?.wins, u = pub.mini?.pct ? "%" : "";
   const sc = (t: 0 | 1) => shown?.[t] ?? T[t].score;
+  const pips = pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>;
   return (
     <div className={"hud " + size} role="group" aria-label="Scores">
+      {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov) */}
+      {code && <div className="hud-code corner">Room {code}</div>}
       <div className="hud-in">
         <div className="hud-team a"><span className="dot" /><div className="nm">{T[0].name}</div><div className="sc" data-score="0"><Roll v={sc(0)} /></div>{pub.fire?.[0] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}</div>
         <div className="hud-mid">
-          {code && <div className="hud-code">Room {code}</div>}
+          {size === "tv" && pips}
           <div className="hud-label">{hudLabel(pub)}</div>
-          {pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>}
+          {size !== "tv" && pips}
         </div>
         <div className="hud-team b">{pub.fire?.[1] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}<div className="sc" data-score="1"><Roll v={sc(1)} /></div><div className="nm">{T[1].name}</div><span className="dot" /></div>
       </div>

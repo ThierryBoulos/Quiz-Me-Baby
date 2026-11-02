@@ -81,10 +81,15 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   }, [pub.screen, pub.step]);   // eslint-disable-line react-hooks/exhaustive-deps
   const num = (i: number) => (award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
   const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
+  /* the pips are the night's games; they say what they are with "Game 1 of 9" beside them (the reviewers, 31 Oct) */
+  const track = pips.length > 0 && <div className="pips" aria-hidden>{g && pub.screen !== "intro" && pub.screen !== "final" && g.key !== "sudden" && <span className="pips-tag">Game {g.index + 1} of {g.count}</span>}{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>;
   return (
     <div className={`hud ${size} many ${packing(k)}${award && !landed ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
-      {/* the room code, small, top middle, where the two-team TV has it */}
-      {tv && code && <div className="hud-code many-code">Room {code}</div>}
+      {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov: it matters little once the game is on) */}
+      {tv && code && <div className="hud-code corner">Room {code}</div>}
+      {/* the TV: the night's tracker on its own line at the top ("Game 3 of 3" and a dot or dash a game), not beside the
+          game's line (the owner, 2 Nov) */}
+      {tv && track}
       {tv && !inGame && <div className="hud-in">
         {T.map((t, i) => (
           <div key={i} className="hud-team" style={{ ["--c" as string]: t.color }}>
@@ -96,8 +101,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
       </div>}
       <div className="hud-mid">
         {label && <div className="hud-label">{label}</div>}
-        {/* the pips are the night's games; during a game they sit by "Question 1 of 15", so they say what they are (the reviewers, 31 Oct) */}
-        {pips.length > 0 && <div className="pips" aria-hidden>{g && pub.screen !== "intro" && pub.screen !== "final" && g.key !== "sudden" && <span className="pips-tag">Game {g.index + 1} of {g.count}</span>}{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>}
+        {!tv && track}
       </div>
       {/* this game's points, under its name, in their own small line (a dot, the name, the points; on fire beside) */}
       {tv && inGame && g.key !== "sudden" && (

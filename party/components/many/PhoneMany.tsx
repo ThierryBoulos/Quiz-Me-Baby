@@ -245,8 +245,8 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       {/* THE CAPTAIN answers the rest */}
       {cap && sc === "q" && g && g.key !== "majority" && !(g.only && mine != null && !g.only.includes(mine)) && (<>
         <OnScreen small={g.key === "pin" && !sentMine} />
-        {sentMine ? <p className="text-center font-bold text-16" role="status" style={pub.out?.[mine!] ? { color: "var(--color-no)" } : undefined}>
-            {pub.out?.[mine!] ? `Wrong${sentTxt ? `: ${sentTxt}` : ""}. Your team is out of this one.` : `Locked in${sentTxt && g.key !== "pin" ? `: ${sentTxt}` : ""}.`}</p>
+        {sentMine ? <p className="text-center font-bold text-16" role="status">
+            {`Locked in${sentTxt && g.key !== "pin" ? `: ${sentTxt}` : ""}.`}</p>
           : g.key === "pin" ? (
             <div className="flex flex-col gap-2">
               <p className="text-center text-13 text-[var(--color-ink-3)]">{pin ? "Tap anywhere to move your pin, or drag it. Zoom in (pinch, or +) to place it exactly, then Lock in." : "Tap the map to drop your pin. You can move it until you lock in."}</p>
