@@ -765,7 +765,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .hud.tv.many .hud-mini.game-line b { font-size: var(--text-28); }
 .hud.tv.many .hud-mini.game-line .nm { font-size: var(--text-15); max-width: 220px; }
 .hud.tv.many.stack .hud-mini.game-line .dot { width: 18px; height: 18px; }
-/* the phone keeps the two-team stack: the label, the pips under it, then whose side you're on */
+/* the phone keeps the two-team stack: the pips, the label under them, then whose side you're on */
 .hud.phone.many .hud-mid { flex-direction: column; gap: 6px; margin-top: 0; } .hud.phone.many { padding-top: 4px; }
 /* the lobby: a team's chip in its own colour (.chip.a and .chip.b, for any colour) */
 .chip.team { background: color-mix(in srgb, var(--c) 12%, transparent); border-color: color-mix(in srgb, var(--c) 40%, transparent); }
@@ -1209,6 +1209,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .hud.tv.many .hud-mid { margin-top: 10px; }
 [data-look="house"] .hud.tv.many > .pips + .hud-mid { margin-top: 0; }
 [data-look="house"] .hud.phone .hud-team { margin-block: -6px; }
+/* two teams on a phone: the night's dots come first under the plates, so they get a little air from them */
+[data-look="house"] .hud.phone:not(.many) .hud-mid { margin-top: 4px; }
 /* Majority Rules' start on the TV (two teams): its rules ran off the bottom of the screen; a little tighter, it all shows */
 [data-look="house"] .mr-intro h1.display { font-size: 70px !important; }
 [data-look="house"] .mr-intro .rules { font-size: var(--text-18) !important; gap: 8px !important; line-height: 1.42; }

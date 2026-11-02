@@ -67,9 +67,9 @@ export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"
       <div className="hud-in">
         <div className="hud-team a"><span className="dot" /><div className="nm">{T[0].name}</div><div className="sc" data-score="0"><Roll v={sc(0)} /></div>{pub.fire?.[0] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}</div>
         <div className="hud-mid">
-          {size === "tv" && pips}
+          {/* the night's dots above the round's name, on the TV and the phones (the owner, 2 Nov) */}
+          {pips}
           <div className="hud-label">{hudLabel(pub)}</div>
-          {size !== "tv" && pips}
         </div>
         <div className="hud-team b">{pub.fire?.[1] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}<div className="sc" data-score="1"><Roll v={sc(1)} /></div><div className="nm">{T[1].name}</div><span className="dot" /></div>
       </div>

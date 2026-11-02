@@ -100,8 +100,9 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
           </div>))}
       </div>}
       <div className="hud-mid">
-        {label && <div className="hud-label">{label}</div>}
+        {/* the phone: the night's tracker above the game's line too (the owner, 2 Nov) */}
         {!tv && track}
+        {label && <div className="hud-label">{label}</div>}
       </div>
       {/* this game's points, under its name, in their own small line (a dot, the name, the points; on fire beside) */}
       {tv && inGame && g.key !== "sudden" && (
