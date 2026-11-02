@@ -1199,3 +1199,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .hud .hud-team { position: relative; z-index: 1; background-color: #0c0c22; }
 /* the Auction's count: a little smaller, so "Counted by" sits on the screen (today it is cut at the bottom) */
 [data-look="house"] .auc-count { font-size: 140px !important; }
+/* six teams or more on one row: the plate's padding and the letter's gap kept small, so every name shows in full */
+[data-look="house"] .hud.tv.many.stack .hud-team { padding: 4px 4px 5px; }
+[data-look="house"] .hud.tv.many.stack .hud-team > div:first-child { gap: 5px; }
+[data-look="house"] .hud.tv.many.stack .hud-team .nm { font-size: var(--text-12); letter-spacing: .03em; }
