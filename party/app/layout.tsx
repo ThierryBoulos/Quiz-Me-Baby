@@ -22,7 +22,8 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, maxi
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${anton.variable} ${sora.variable}`}>
+    /* data-look="house": the in-game look (House Lights, the owner approved 2 Nov; globals.css) */
+    <html lang="en" data-look="house" className={`${anton.variable} ${sora.variable}`}>
       <body><NoZoom />{children}</body>
     </html>
   );

@@ -1068,11 +1068,11 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .mq-lobby.k5 .team .hd > span, .mq-lobby.k6 .team .hd > span, .mq-lobby.k7 .team .hd > span, .mq-lobby.k8 .team .hd > span { font-size: var(--text-12); letter-spacing: .12em; }
 @media not ((min-width: 900px) and (min-height: 560px)) { .mq-home .mq-floor { display: none; } }
 
-/* ==== HOUSE LIGHTS (phase 3, a proposal under review, 2 Nov): the game inside the cinema, with the lobby's marquee
+/* ==== HOUSE LIGHTS (phase 3, approved by the owner 2 Nov): the game inside the cinema, with the lobby's marquee
    outside. The lobby's navy, gold and ivory, the light holding still: scores in ivory tiles on plates lit in the
    team's colour, today's thin line under them, a clock that is a ring of bulbs, answers on the letter board, the host's
-   answer on an ivory cue card, the winner on the marquee sign. Behind html[data-look="house"] while it's reviewed:
-   nothing changes without it. Nothing on a phone moves that doesn't have to. ==== */
+   answer on an ivory cue card, the winner on the marquee sign. Under html[data-look="house"], which the root layout
+   always sets (take it off to see the old look). Nothing on a phone moves that doesn't have to. ==== */
 .clock-bulbs { display: none; }
 .clock-bulbs circle { fill: #2c2740; }
 .clock-bulbs circle.on { fill: var(--bulb); }
