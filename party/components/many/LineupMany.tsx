@@ -44,14 +44,16 @@ export function LineupMany({ room, members, k, big }: { room: Room; members: Mem
 }
 
 /* the phone's team buttons when there are more than two: the two-team "Team A" / "Team B" pills, two to a row */
-export function PickMany({ room, k, busy, pick, current }: { room: Room; k: number; busy: boolean; pick: (t: number | null) => void; current?: number | null }) {
+/* (the marquee's tickets, 2 Nov: the team's colour lit round it, its name big, how many are on it so far) */
+export function PickMany({ room, k, busy, pick, current, members }: { room: Room; k: number; busy: boolean; pick: (t: number | null) => void; current?: number | null; members?: Member[] }) {
   const names = manyNames(room, k);
   return (
     <div className="grid grid-cols-2 gap-2" role="group" aria-label="Pick a team">
-      {names.map((name, t) => { const c = MANY_COLORS[t]; return (
-        <button key={t} className="btn btn-lg min-w-0 !px-4 !gap-2" disabled={busy || current === t} aria-pressed={current === t} aria-label={`${"ABCDEFGH"[t]} · ${name}`} onClick={() => pick(t)}
-          style={{ borderColor: c, color: "var(--color-ink)", background: `color-mix(in srgb, ${c} ${current === t ? 28 : 14}%, transparent)` }}>
-          <Dot t={t} color={c} size={22} /><span className="text-left leading-tight text-15"><bdi>{name}</bdi></span></button>); })}
+      {names.map((name, t) => { const c = MANY_COLORS[t], n = members?.filter((m) => (m.team as number) === t && m.role !== "host").length; return (
+        <button key={t} className={"mq-pick sm min-w-0" + (current === t ? " on" : "")} disabled={busy || current === t} aria-pressed={current === t} aria-label={`${"ABCDEFGH"[t]} · ${name}`} onClick={() => pick(t)}
+          style={{ ["--c" as string]: c }}>
+          <span className="flex items-center gap-2 min-w-0 max-w-full"><Dot t={t} color={c} size={20} /><span className={"tn truncate" + (name.length > 10 ? " long" : "")}><bdi>{name}</bdi></span></span>
+          {n != null && <small>{current === t ? "You\u2019re here" : n === 0 ? "Nobody yet" : `${n} ${n === 1 ? "player" : "players"}`}</small>}</button>); })}
     </div>);
 }
 

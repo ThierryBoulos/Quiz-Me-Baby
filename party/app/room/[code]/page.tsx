@@ -21,6 +21,7 @@ import { MANY_MAX } from "@/lib/many/logic";
 import { MANY_COLORS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { useFreshBuild } from "@/lib/fresh";
+import { CodeTiles, MqStage, MqTop, Sign, useLights } from "@/components/Marquee";
 import { cap1, useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
 const TEAM_MAX = 14;                                  // as the TV keeps them (lib/tvGame.ts)
@@ -227,6 +228,8 @@ export default function PhoneRoom() {
   /* quick taps (+1, Undo, pausing a call): straight out, the buttons never wait for them */
   const fireMove = (move: Record<string, unknown>) => { void sendAction(code, "judge", { move, step: pub?.step }).catch(() => { /* the phone already says so */ }); };
 
+  /* the lobby in the marquee's look (the owner, 2 Nov): the stage behind, the sign small at the top */
+  const lights = useLights(120, room?.status === "lobby" && !!mine);
   if (!room || !mine) return <main className="screen justify-center items-center gap-4" aria-busy="true"><div className="spinner" /><div className="eyebrow">Finding your seat…</div></main>;
 
   const myCaptain = mine.team != null ? members.find((m) => m.team === mine.team && m.role === "captain") : null;
@@ -234,9 +237,22 @@ export default function PhoneRoom() {
   const canStart = who?.user_id === me;
   const ready = readyToStart(members);
   const tooLong = (draft ?? "").trim().length > TEAM_MAX;
+  const lobby = room.status === "lobby";
+  const awayIds = (room.state?.away as string[] | undefined) || [];
+  /* a side to pick: a ticket in the team's colour, with who's on it so far */
+  const onTeam = (t: number) => members.filter((m) => m.team === t && m.role !== "host");
+  const sideInfo = (t: number) => { const l = onTeam(t), c = l.find((m) => m.role === "captain");
+    return l.length === 0 ? "Nobody yet" : <>{l.length} {l.length === 1 ? "player" : "players"}{c && <> · Captain <bdi>{c.name}</bdi></>}</>; };
+  const twoSides = (
+    <>
+      <button className="mq-pick" style={{ ["--c" as string]: "var(--color-a)" }} disabled={busy} onClick={() => pickTeam(0)}><span className="tn"><bdi>{teamName(room, 0)}</bdi></span><small>{sideInfo(0)}</small></button>
+      <span className="mq-vs" aria-hidden>vs</span>
+      <button className="mq-pick" style={{ ["--c" as string]: "var(--color-b)" }} disabled={busy} onClick={() => pickTeam(1)}><span className="tn"><bdi>{teamName(room, 1)}</bdi></span><small>{sideInfo(1)}</small></button>
+    </>);
 
   return (
-    <main className="screen" data-soft={waiting && !waitLong ? "" : undefined}>
+    <main className={"screen" + (lobby ? " mq mq-room" + lights : "")} data-soft={waiting && !waitLong ? "" : undefined}>
+      {lobby && <MqStage />}
       {waiting && waitLong && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
       {tapErr && <div className="fixed left-4 right-4 enter text-center font-bold rounded-[16px]" role="alert" data-taperr
         style={{ zIndex: 50, ...(tapAt ?? { top: "calc(12px + env(safe-area-inset-top))" }), fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
@@ -254,14 +270,14 @@ export default function PhoneRoom() {
         {/* the room code opens its QR code and Share, so a late friend can scan this phone (the owner, 31 Oct) */}
         <button type="button" className="eyebrow whitespace-nowrap inline-flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 rounded-[12px]" aria-haspopup="dialog" aria-label={`Room ${code}: show the QR code to join`}
           onClick={() => setInvite(`${window.location.origin}/join?code=${code}`)}>
-          {room.status === "lobby" ? `Room ${code}` : code}
+          {lobby ? <CodeTiles code={code} className="mini" /> : code}
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden fill="currentColor"><path d="M1 1h6v6H1V1Zm1.5 1.5v3h3v-3h-3ZM9 1h6v6H9V1Zm1.5 1.5v3h3v-3h-3ZM1 9h6v6H1V9Zm1.5 1.5v3h3v-3h-3ZM9 9h2v2H9V9Zm4 0h2v2h-2V9Zm-2 2h2v2h-2v-2Zm-2 2h2v2H9v-2Zm4 0h2v2h-2v-2Z" /></svg>
         </button>
         {room.status === "lobby" && <button className="btn btn-sm btn-ghost" onClick={leave} aria-label="Leave the room">Leave</button>}
       </header>
 
       {/* the lobby: the logo, small, while everyone waits */}
-      {room.status === "lobby" && <div className="logo text-center pointer-events-none select-none -mt-1" style={{ fontSize: 34 }} aria-hidden>Quiz Me Baby</div>}
+      {lobby && <div className="mq-room-sign" aria-hidden><Sign size={30}>Quiz Me Baby!</Sign></div>}
 
       {note && <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>{note}</p>}
 
@@ -279,9 +295,7 @@ export default function PhoneRoom() {
           <section className="flex flex-col gap-3 enter">
             <h1 className="display text-40 text-center">Pick a side</h1>
             <p className="text-center text-14 text-[var(--color-ink-2)]">The game&rsquo;s on. Join a team and help your captain.</p>
-            {many ? <PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} /> : <>
-            <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
-            <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button></>}
+            {many ? <PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} members={members} /> : twoSides}
           </section>
         ) : panel ? (
           /* mid-game, behind your name: the teams (many: in order, with their scores and players), a new captain when one is needed */
@@ -331,10 +345,10 @@ export default function PhoneRoom() {
             </>
       ) : mine.role === "host" ? (
         <>
-          <section className="card enter text-center">
+          <section className="mq-host enter">
             <div className="eyebrow">You&rsquo;re the host</div>
-            <h1 className="display text-40 mt-1" style={{ color: "var(--color-gold)" }}>Run the night</h1>
-            <p className="text-14 text-[var(--color-ink-2)] mt-1">You&rsquo;ll see every answer.</p>
+            <h1 className="mq-h1">Run the night</h1>
+            <p>You&rsquo;ll see every answer.</p>
           </section>
           {/* the line-up on one line, so Setup is right here (13 players used to push it 1,400 px down) */}
           <button type="button" className="card flex items-center justify-between gap-3 text-left" aria-expanded={lineupOpen} onClick={() => setLineupOpen((v) => !v)}>
@@ -350,22 +364,30 @@ export default function PhoneRoom() {
         </>
       ) : mine.team == null ? (
         <section className="flex flex-col gap-3 enter">
-          <h1 className="display text-44 text-center">Pick a side</h1>
-          {many ? <PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} /> : <>
-          <button className="btn btn-a btn-lg" disabled={busy} onClick={() => pickTeam(0)}>{teamName(room, 0)}</button>
-          <button className="btn btn-b btn-lg" disabled={busy} onClick={() => pickTeam(1)}>{teamName(room, 1)}</button></>}
+          <h1 className="mq-h1 text-center">Pick a side</h1>
+          {many ? <PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} members={members} /> : twoSides}
           <div className="h-2" />
-          {!host && <button className="btn btn-block" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>}
+          {!host && <button className="btn btn-block btn-ghost" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>}
         </section>
       ) : (
         <section className="flex flex-col gap-3 enter">
-          <div className="card text-center" style={{ borderColor: manyColor || `var(--color-${side})` }}>
+          {/* your team's card, lit in its colour, with who's on it (the captain first, with the armband) */}
+          <div className="mq-team" style={{ ["--c" as string]: manyColor || `var(--color-${side})` }}>
             <div className="eyebrow">You&rsquo;re on</div>
-            <div className="display text-48 mt-1" style={{ color: manyColor || `var(--color-${side})` }}>{many ? manyNames(room, teamCount)[mine.team as number] : teamName(room, mine.team)}</div>
+            <div className="tn"><bdi>{many ? manyNames(room, teamCount)[mine.team as number] : teamName(room, mine.team)}</bdi></div>
+            <ul className="mq-mates" aria-label="Your team">
+              {onTeam(mine.team as number).sort((x, y) => (x.role === "captain" ? -1 : 0) - (y.role === "captain" ? -1 : 0)).map((m) => {
+                const gone = m.role === "captain" && awayIds.includes(m.user_id);
+                return (
+                  <li key={m.user_id} className={(m.role === "captain" ? "capt" : "") + (gone ? " away" : "") + (m.user_id === me ? " me" : "")}>
+                    {m.role === "captain" && <b className="arm-c" aria-label="Captain">C</b>}
+                    <i aria-hidden>{gone ? "💤" : m.avatar || "🙂"}</i><bdi className="truncate">{m.name}</bdi>{m.user_id === me && <span className="you">You</span>}
+                  </li>); })}
+            </ul>
           </div>
           {mine.role === "captain" ? (
             <div className="card flex flex-col gap-3">
-              <div className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</div>
+              <div className="flex items-center gap-2"><b className="arm-c lg" aria-hidden>C</b><span className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</span></div>
               <div className="flex items-baseline justify-between"><label className="field-label !mb-0" htmlFor="tname">Name your team</label>
                 <span className="text-12 tabular-nums" aria-live="polite" style={{ color: tooLong ? "var(--color-no)" : "var(--color-ink-3)", fontWeight: tooLong ? 700 : 400 }}>
                   {(draft ?? teamName(room, mine.team)).trim().length}/{TEAM_MAX}</span></div>
@@ -387,9 +409,9 @@ export default function PhoneRoom() {
                 <bdi>{myCaptain.name}</bdi> seems away. Make me captain</button>
             ) : <p className="text-center text-16 text-[var(--color-ink-2)] py-2"><b style={{ color: "var(--color-ink)" }}><bdi>{myCaptain.name}</bdi></b> is your captain</p>
           ) : (
-            <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>
+            <button className="btn btn-gold btn-block shine" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>
           )}
-          {many ? <><div className="eyebrow text-center mt-2">Change team</div><PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} current={mine.team as number} /></>
+          {many ? <><div className="eyebrow text-center mt-2">Change team</div><PickMany room={room} k={teamCount} busy={busy} pick={pickTeam} current={mine.team as number} members={members} /></>
             : <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => pickTeam(mine.team === 0 ? 1 : 0)}>Switch to {teamName(room, mine.team === 0 ? 1 : 0)}</button>}
         </section>
       )}
@@ -402,7 +424,7 @@ export default function PhoneRoom() {
           <div className="card w-full max-w-[360px] flex flex-col items-center gap-3 text-center" style={{ background: "#10142e" }} onClick={(e) => e.stopPropagation()}>
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Join this game</div>
             <div className="rounded-[18px] p-3 bg-[#f4f6ff]"><QRCodeSVG value={invite} size={220} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
-            <div className="display text-52 leading-none tracking-[.12em]">{code}</div>
+            <CodeTiles code={code} className="w-[240px]" /><span className="sr-only">{code}</span>
             <p className="text-14 text-[var(--color-ink-2)]">Scan it with the camera, or open <b>{invite.replace(/^https?:\/\//, "").replace(/\/join.*$/, "")}</b> and type the code.</p>
             <ShareButton code={code} big />
             <button className="btn btn-gold btn-block" autoFocus onClick={() => setInvite(null)}>Close</button>
@@ -410,12 +432,10 @@ export default function PhoneRoom() {
         </div>)}
 
       {rules && room.status === "lobby" && (
-        <div className="fixed inset-0 z-40 overflow-y-auto" style={{ background: "var(--color-bg)" }} role="dialog" aria-modal="true" aria-label="How to play">
+        <div className="fixed inset-0 z-40 overflow-y-auto mq-over" role="dialog" aria-modal="true" aria-label="How to play">
+          <MqStage />
           <div className="screen !max-w-[720px]">
-            <header className="flex items-end justify-between gap-3">
-              <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>How to Play</div><h1 className="display text-40">How the night works</h1></div>
-              <button className="btn btn-sm btn-ghost" onClick={() => setRules(false)}>Back</button>
-            </header>
+            <MqTop onBack={() => setRules(false)} eyebrow="How to play" title="How the night works" />
             <p className="text-13 text-[var(--color-ink-2)] -mt-2">Times below are the defaults; the TV&rsquo;s Settings can change them.</p>
             <Rules />
             <button className="btn btn-gold btn-lg btn-block" onClick={() => setRules(false)}>Back to the lobby</button>

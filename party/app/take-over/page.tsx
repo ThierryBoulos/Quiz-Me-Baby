@@ -1,9 +1,9 @@
 "use client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ensureSession, rpc } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
+import { MqPage, MqTop } from "@/components/Marquee";
 
 /* A new laptop takes over as the TV (29 Oct, B9): the room code and the 6-digit code from the host's phone.
    The server makes this device the room's TV and hands back the TV's last save; the TV page picks it up
@@ -22,11 +22,8 @@ export default function TakeOver() {
     } catch (e) { setErr(friendly(e)); setBusy(false); }
   };
   return (
-    <main className="screen !max-w-[520px]">
-      <header className="flex items-end justify-between gap-3">
-        <div><div className="eyebrow" style={{ color: "var(--color-gold)" }}>The TV died?</div><h1 className="display text-40">Take over as the TV</h1></div>
-        <Link className="btn btn-sm btn-ghost" href="/join">Back</Link>
-      </header>
+    <MqPage>
+      <MqTop href="/join" eyebrow="The TV died?" title="Take over as the TV" />
       <p className="text-15 text-[var(--color-ink-2)]">On the host&rsquo;s phone: <b>their name (top left) → The TV died? → Get a code</b>. Type it here with the room code, and this laptop becomes the TV. The night carries on where the old TV last saved it.</p>
       <label className="field-label" htmlFor="room">Room code</label>
       <input id="room" className="input !text-22 uppercase tracking-[.2em]" maxLength={4} value={room} onChange={(e) => setRoom(e.target.value)} placeholder="ABCD" autoComplete="off" />
@@ -34,5 +31,5 @@ export default function TakeOver() {
       <input id="tvcode" className="input !text-22 tracking-[.3em]" inputMode="numeric" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} placeholder="000000" autoComplete="off" />
       <button className="btn btn-gold btn-lg btn-block" disabled={busy || room.trim().length !== 4 || code.length !== 6} onClick={() => void go()}>{busy ? "Taking over…" : "Become the TV"}</button>
       {err && <p className="text-14" style={{ color: "var(--color-bad)" }} role="alert">{err}</p>}
-    </main>);
+    </MqPage>);
 }

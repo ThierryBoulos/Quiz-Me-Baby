@@ -2,6 +2,7 @@
 /* THE MARQUEE (the owner, 1 Nov: option 3, "a million dollar game"): the front door's look. A lit sign with
    bulbs round its rounded corners, the name in neon, the slogan on an ivory letter board; a stage behind it
    (searchlights, a glossy floor, drifting dust, a little film grain). Home, Join and the TV lobby use it. */
+import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 export const SLOGAN = "Quiz night done right";
@@ -31,17 +32,20 @@ export function useMotion(): Motion {
 /* the opening: the bulbs light round the sign, the name flickers on; then the bulbs chase round it, every third
    one lit, stepping like a cinema's; every 10 s the whole sign sparkles, then the chase goes on. The classes go on
    the stage ("m-full" / "m-lights" / "m-off", "lit", "chase", "sparkle") and everything in it follows */
-export function useLights(delay = 200) {
+/* (on: false, a screen that isn't showing the marquee right now: no timers, no classes) */
+export function useLights(delay = 200, on = true) {
   const motion = useMotion();
   const [s, setS] = useState({ lit: false, chase: false, sparkle: false });
   useEffect(() => {
+    if (!on) { setS({ lit: false, chase: false, sparkle: false }); return; }
     if (motion === "off") { setS({ lit: true, chase: false, sparkle: false }); return; }
     let off: ReturnType<typeof setTimeout> | undefined;
     const a = setTimeout(() => setS((x) => ({ ...x, lit: true })), delay);
     const b = setTimeout(() => setS((x) => ({ ...x, chase: true })), delay + 2600);
     const sp = setInterval(() => { setS((x) => ({ ...x, sparkle: true })); off = setTimeout(() => setS((x) => ({ ...x, sparkle: false })), 1300); }, 10000);
     return () => { clearTimeout(a); clearTimeout(b); clearInterval(sp); if (off) clearTimeout(off); };
-  }, [delay, motion]);
+  }, [delay, motion, on]);
+  if (!on) return "";
   return " m-" + motion + (s.lit ? " lit" : "") + (s.chase && !s.sparkle ? " chase" : "") + (s.sparkle ? " sparkle" : "");
 }
 
@@ -146,4 +150,23 @@ export function MqStage({ floor, beams = true }: { floor?: boolean; beams?: bool
       {beams && <><div className="mq-beam l" /><div className="mq-beam r" /></>}
       <Dust />
     </div>);
+}
+
+/* the top of a page in the marquee (Settings, How to play, taking over as the TV): Back on the left, the sign small
+   in the middle (as on Join), then the page's name */
+const arrow = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>;
+export function MqTop({ href, onBack, eyebrow, title }: { href?: string; onBack?: () => void; eyebrow: string; title: string }) {
+  return (<>
+    <div className="mq-top">
+      {href ? <Link href={href} className="mq-back">{arrow}Back</Link> : <button type="button" className="mq-back" onClick={onBack}>{arrow}Back</button>}
+      <Sign size={30}>Quiz Me Baby!</Sign><span />
+    </div>
+    <header className="mq-head"><div className="eyebrow">{eyebrow}</div><h1 className="mq-h1">{title}</h1></header>
+  </>);
+}
+
+/* a page round the game in the marquee: the stage behind it (wide: How to play and Settings, which have tables and long lists) */
+export function MqPage({ children, wide }: { children: ReactNode; wide?: boolean }) {
+  const lights = useLights(120);
+  return <main className={"screen mq mq-page" + (wide ? " !max-w-[720px]" : "") + lights}><MqStage />{children}</main>;
 }
