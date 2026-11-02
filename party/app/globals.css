@@ -1196,8 +1196,12 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .hud.many .hud-team .nm { max-width: 100%; letter-spacing: .05em; }
 /* the plates take no more height than the bare scores did: the screen under the bar keeps every pixel it had */
 [data-look="house"] .hud.tv .hud-team { margin-block: -9px; }
-/* 3-8 teams: the room code sits over the plates, so they keep their top (the code had no air above them) */
-[data-look="house"] .hud.tv.many .hud-team { margin-top: 0; }
+/* 3-8 teams: the plates a size smaller and in their own space (the owner, 2 Nov: they crowded the header and sat on
+   "Final result"); the room code has air above them, the game's line 10px under them */
+[data-look="house"] .hud.tv.many .hud-team { margin-block: 0; }
+[data-look="house"] .hud.tv.many .hud-team .sc { font-size: var(--text-36); }
+[data-look="house"] .hud.tv.many.mid .hud-team .sc, [data-look="house"] .hud.tv.many.stack .hud-team .sc { font-size: var(--text-32); }
+[data-look="house"] .hud.tv.many .hud-mid { margin-top: 10px; }
 [data-look="house"] .hud.phone .hud-team { margin-block: -6px; }
 /* Majority Rules' start on the TV (two teams): its rules ran off the bottom of the screen; a little tighter, it all shows */
 [data-look="house"] .mr-intro h1.display { font-size: 70px !important; }
