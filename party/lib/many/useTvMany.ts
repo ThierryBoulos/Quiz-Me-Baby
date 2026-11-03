@@ -42,12 +42,14 @@ export async function setTeams(code: string, state: Record<string, unknown>, mem
 /* each game's seconds, from the TV's house settings */
 const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST }; };
 
-export function useTvMany(code: string, isTv: boolean, room: Room | null, members: Member[]) {
+export function useTvMany(code: string, isTv: boolean, room: Room | null, members: Member[], phone = false) {
   const st = useRef<StateM | null>(null);
   const [pub, setPub] = useState<PubMany | null>(null);
   const ctx = useRef({ room, members }); ctx.current = { room, members };
   const bank = useRef<Bank | null>(null);
   const saveKey = "qmb.tv." + code + ".many";
+  const phoneRef = useRef(phone); phoneRef.current = phone;
+  const backedUp = useRef({ t: 0, screen: "" });
   const lastAt = useRef(0);
   const ack = useRef<Record<string, Record<string, string>>>({});
   /* the lobby's own writes (team names, who's away, a note): each carries the others this TV wrote last, so two
@@ -67,6 +69,13 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at;
     setPub(p);
     try { localStorage.setItem(saveKey, JSON.stringify({ build: BUILD_ID, shape: SHAPE, s })); } catch { /* in memory only */ }
+    /* a copy on the server, so another phone can carry on if this one goes quiet (no TV, 3 Nov): on a new screen
+       at once, otherwise every 4 s at most. (Not with a TV: 3-8 teams always have a host, and a laptop doesn't doze.) */
+    if (phoneRef.current && !s.exit && (s.screen !== backedUp.current.screen || Date.now() - backedUp.current.t > 4000)) {
+      backedUp.current = { t: Date.now(), screen: s.screen };
+      let inboxLast = 0; try { inboxLast = Number(localStorage.getItem("qmb.tv." + code + ".last") || 0); } catch { /* none */ }
+      void sb().rpc("qmb_tv_backup", { r: code, s: { many: true, build: BUILD_ID, shape: SHAPE, s, inboxLast, settings: getSettings() } }).then(() => {}, () => {});
+    }
     chain.current = chain.current.then(async () => {
       const room = ctx.current.room;
       const r = await sb().from("rooms").update({ state: { ...(room?.state || {}), pub: p, pubAt: at } }).eq("code", code);
@@ -207,7 +216,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   /* who's here (every phone on the room's live channel), and in the lobby a captain silent for T_LOBBY_AWAY shows as
      away on the TV, as with two teams (the owner, 2 Nov: 3-8 teams never showed it) */
   const here = useRef({ at: {} as Record<string, number> });
-  usePresent(code, isTv, here, members);
+  usePresent(code, isTv, here, members, phone);
   useEffect(() => {
     if (!isTv) return;
     const since = Date.now();                       // (a TV just switched to 3+ teams hasn't heard anyone yet)

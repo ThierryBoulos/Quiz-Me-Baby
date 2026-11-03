@@ -1,6 +1,7 @@
 "use client";
 import { twoDone } from "./TwoResults";
 import { useRevealHold, WatchTv } from "./WatchTv";
+import { useNoTv } from "./NoTv";
 import { AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
@@ -78,6 +79,7 @@ function Ings({ ings, small }: { ings: string[]; small?: boolean }) {
 /* No pasting into an answer: typed by hand or not at all. A paste (or a
    dropped text) is refused, and the TV flags it, like leaving the screen. */
 function useNoPaste(code: string, qid?: string) {
+  const noTv = useNoTv();
   const [said, setSaid] = useState(false);
   useEffect(() => { if (!said) return; const t = setTimeout(() => setSaid(false), 3500); return () => clearTimeout(t); }, [said]);
   const block = (e: { preventDefault: () => void }) => { e.preventDefault(); setSaid(true); note(code, { paste: { qid } }); };
@@ -85,7 +87,7 @@ function useNoPaste(code: string, qid?: string) {
     onPaste: block, onDrop: block,
     onBeforeInput: (e: React.FormEvent<HTMLInputElement>) => { const t = (e.nativeEvent as InputEvent).inputType || ""; if (/^insertFrom(Paste|Drop)/.test(t)) block(e); },
   };
-  const hint = said ? <p className="text-13 font-bold text-[var(--color-no)]" role="alert">No pasting: type it yourself. The TV has been told.</p> : null;
+  const hint = said ? <p className="text-13 font-bold text-[var(--color-no)]" role="alert">No pasting: type it yourself. {noTv ? "It's been flagged." : "The TV has been told."}</p> : null;
   return { props, hint };
 }
 
@@ -132,13 +134,14 @@ const onList = (pub: Pub, me: Member) => !!pub.majority?.on?.some((n) => n.toLow
 /* every player's (and captain's) answer: four buttons, one tap, locked. After it, nothing says which:
    a neighbour can't read it off this screen. At the reveal, this phone's own result. */
 function MajorityPad({ pub, me, code }: { pub: Pub; me: Member; code: string }) {
+  const noTv = useNoTv();
   const M = pub.majority, key = `${pub.qid}|majorityQ`;
   const [mine, setMine] = useState<{ key: string; pick: string; tap: string } | null>(null);
   const [no, setNo] = useState<string | null>(null);
   const order = useMemo(() => phoneOrder(M?.options || [], `${me.user_id}|${pub.qid}`), [M?.options, me.user_id, pub.qid]);
   /* the TV's receipt: a tap it turned down says why, and lets go of it */
   const got = mine ? pub.ack?.[me.user_id]?.[mine.tap] : undefined;
-  useEffect(() => { if (mine && got && got !== "+" && pub.screen === "majorityQ") { setNo(got === "-" ? "The TV didn't take that. Tap again." : got); setMine(null); } }, [got]);   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (mine && got && got !== "+" && pub.screen === "majorityQ") { setNo(got === "-" ? (noTv ? "That didn't go through. Tap again." : "The TV didn't take that. Tap again.") : got); setMine(null); } }, [got]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!no) return; const t = setTimeout(() => setNo(null), 5000); return () => clearTimeout(t); }, [no]);
   if (!M || !onList(pub, me)) return pub.screen === "majorityQ" ? <Line>You joined after it started, so you&rsquo;re watching this one. You&rsquo;ll play the next Majority Rules.</Line> : null;
   const picked = mine?.key === key ? mine.pick : null;
@@ -198,6 +201,7 @@ function MajorityList({ pub, me, act }: { pub: Pub; me: Member; act?: (move: Rec
 /* THE HOST'S PHONE: the answer always on top, one main button, judging only
    when there's something to judge. */
 export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: Pub; secret: Secret; send: Send; busy: boolean; fire?: Send }) {
+  const noTv = useNoTv();
   const T = pub.teams, turn = pub.turn ?? 0;
   /* only trust the secret when it belongs to this very screen: the question
      and the answer travel separately, and the answer must never be the last one */
@@ -277,7 +281,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const Exit = () => (
     <div className="mt-auto flex flex-col gap-2">
       <button className="btn btn-gold btn-lg btn-block" onClick={() => send({ type: "ui/again" })}>Play again: same teams</button>
-      <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone and the TV back to the home screen.</p>
+      <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
       {/* home on this phone too, even if the TV is slow to answer */}
       <button className="btn btn-lg btn-block" onClick={() => { send({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
     </div>);
@@ -566,7 +570,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         </>)}
       </div>);
     case "battleSummary": return <Results><Calls pub={pub} host busy={busy} act={send} /><Main label="Next" move={{ type: "battle/done" }} /></Results>;
-    default: return <div className="eyebrow text-center">Eyes on the TV</div>;
+    default: return <div className="eyebrow text-center">{noTv ? "Get ready" : "Eyes on the TV"}</div>;
   }
   }
 }
@@ -584,12 +588,13 @@ function AwayCard({ pub }: { pub: Pub }) {
 /* the host's full list, in the Players panel */
 export function AwayLog({ pub }: { pub: Pub | null }) {
   const all = pub?.flags || [];
+  const noTv = useNoTv();
   return (
     <div className="card flex flex-col gap-2">
       <div className="eyebrow" style={{ color: "var(--color-no)" }}>Flagged: left the screen or pasted</div>
       {all.length ? [...all].reverse().map((f) => (
         <div key={f.id} className="text-14"><b style={{ color: tc(f.team) }}>{f.name}</b> · {f.label} · {f.kind === "paste" ? "tried to paste an answer" : f.ms != null ? `left the screen ${Math.round(f.ms / 1000)}s` : "left the screen, still away"}</div>))
-        : <p className="text-14 text-[var(--color-ink-2)]">Nobody so far. A phone that switches app or tab during a question shows up here and on the TV.</p>}
+        : <p className="text-14 text-[var(--color-ink-2)]">Nobody so far. A phone that switches app or tab during a question shows up here{noTv ? "" : " and on the TV"}.</p>}
     </div>);
 }
 
@@ -621,6 +626,7 @@ export function TvTakeover({ code }: { code: string }) {
 }
 
 export function ScoreFix({ pub, send, busy, ask }: { pub: Pub; send: Send; busy: boolean; ask?: boolean }) {
+  const noTv = useNoTv();
   const T = pub.teams;
   const [open, setOpen] = useState(false), [v, setV] = useState<[number, number]>([T[0].score, T[1].score]);
   useEffect(() => { if (!open) setV([T[0].score, T[1].score]); }, [open, T]);
@@ -636,7 +642,7 @@ export function ScoreFix({ pub, send, busy, ask }: { pub: Pub; send: Send; busy:
     <div className="card flex flex-col gap-3">
       <div className="eyebrow">Adjust the scores</div>
       <p className="text-13 text-[var(--color-ink-2)]">{ask ? <>Only if something went wrong. The other captain has to agree within {T_AGREE} seconds; if not, the scores stay as they are.</>
-        : "Only if something went wrong. The TV and every phone show the new scores at once."}</p>
+        : "Only if something went wrong. " + (noTv ? "Every phone shows" : "The TV and every phone show") + " the new scores at once."}</p>
       {ask && pub.agree && <p className="text-13 font-bold" role="status" style={{ color: "var(--color-gold)" }}>One request at a time: wait for the open one first.</p>}
       {([0, 1] as const).map((t) => (
         <div key={t} className="flex items-center gap-3">
@@ -926,19 +932,20 @@ function youLine(pub: Pub, me: Member, capName?: string) {
 
 /* the top of a phone: Classic's layouts for the intros and questions, a plain status line for the rest */
 function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member; capName?: string; canArm?: (t: 0 | 1) => boolean; onArm?: (t: 0 | 1) => void; busy?: boolean }) {
+  const noTv = useNoTv();
   if (pub.screen === "roundIntro") return <RoundIntro pub={pub} size="phone" canArm={canArm} onArm={onArm} busy={busy} />;
   if (pub.screen === "ask" || pub.screen === "steal") return <AskHead pub={pub} size="phone" you={youLine(pub, me, capName)} go={pub.turn === me.team && !pub.lifeline && !pub.pending} />;
   if (/Intro$/.test(pub.screen) && pub.mini) return <MiniIntro pub={pub} size="phone" />;
   if (RESULT.test(pub.screen)) return null;            // the result says it
   /* on a question, the question (or flag, or map) is the thing to look at: the instruction steps back */
   const quiet = QUIET.includes(pub.screen) && !pub.paused;
-  return <p className={"text-center leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite">{status(pub, me)}</p>;
+  return <p className={"text-center leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite">{status(pub, me, noTv)}</p>;
 }
 
 const QUIET = ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ"];
 /* a phone held sideways: on these, the top line (the question's title, or what to do) goes to the left column too */
 const SIDE_Q = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"];
-function status(pub: Pub, me: Member) {
+function status(pub: Pub, me: Member, noTv = false) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend" : "Double Dip: two answers") : `${T[pub.lifeline.team].name} used a lifeline`;
   if (TIE_SCREENS.includes(pub.screen)) return `${tieHead(pub)}. ${tieCall(pub)}`;
@@ -964,16 +971,17 @@ function status(pub: Pub, me: Member) {
     case "battleHandoff": return `${T[1].name}'s captain is next`;
     case "battleTie": return cap ? "Tie-breaker: buzz to answer" : "Captains only. Not a word!";
     case "mapQ": return cap ? "What does the map show?" : "Guess the Map: help your captain";
-    case "mapReveal": return "The answer's on the TV";
+    case "mapReveal": return noTv ? "The answer" : "The answer's on the TV";
     case "auctionBid": return pub.auction?.turn === mine ? (cap ? "Your bid: raise, or pass" : "Your captain is bidding") : `${T[pub.auction?.turn ?? 0].name} is bidding`;
     case "auctionRun": return pub.auction?.by === mine ? (cap ? `Name ${pub.auction?.bid}! Out loud!` : `Name ${pub.auction?.bid}! Out loud!`) : `${T[pub.auction?.by ?? 0].name} has to name ${pub.auction?.bid}`;
-    default: return pub.mini ? pub.mini.title : "Eyes on the TV";
+    default: return pub.mini ? pub.mini.title : noTv ? "Get ready" : "Eyes on the TV";
   }
 }
 
 /* A PLAYER's phone: what's on screen, the scores, and a box to suggest an
    answer to the captain. Players never answer directly. */
 export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; members: Member[]; code: string }) {
+  const noTv = useNoTv();
   const mine = me.team as 0 | 1;
   const [text, setText] = useState(""), [sent, setSent] = useState<string | null>(null);
   useEffect(() => { setSent(null); setText(""); }, [pub.qid]);
@@ -1029,7 +1037,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
             <button className="btn btn-gold btn-lg" onClick={() => setTally((t) => t + 1)}>+1</button>
             <button className="btn" disabled={!tally} onClick={() => setTally((t) => Math.max(0, t - 1))}>Undo</button>
           </div>
-          <p className="text-12 text-[var(--color-ink-3)] text-center">The TV&rsquo;s count is the one that counts: {pub.auction?.count ?? 0} so far.</p>
+          <p className="text-12 text-[var(--color-ink-3)] text-center">{noTv ? "The game\u2019s" : "The TV\u2019s"} count is the one that counts: {pub.auction?.count ?? 0} so far.</p>
         </div>)}
       {pub.screen === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />}
       {pub.nextBy && <WaitingFor pub={pub} />}
@@ -1094,6 +1102,7 @@ function AgreeCard({ pub, mine, busy, act }: { pub: Pub; mine: 0 | 1; busy: bool
 }
 
 export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub; me: Member; members: Member[]; code: string; hold?: boolean }) {
+  const noTv = useNoTv();
   const mine = me.team as 0 | 1, T = pub.teams, sc = pub.screen, nohost = pub.mode === "nohost";
   const theirs = (mine === 0 ? 1 : 0) as 0 | 1;
   const [a, setA] = useState(""), [b, setB] = useState(""), [sending, setBusy] = useState(false), [sentTxt, setSentTxt] = useState<string | null>(null);
@@ -1125,8 +1134,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
     const ack = { no: got === "-" ? undefined : got };
     /* taken: it shows as sent, it's waiting for its call, or the question has already moved on (a right answer) */
     const mineIn = !!pub.sent?.[mine] || pub.pending?.team === mine || `${pub.qid}|${sc}` !== L.q;
-    if (L.kind === "answer" && !mineIn) { setSentTxt(null); setNo(ack.no || "The TV didn't take that answer. Send it again."); }
-    else if (L.kind === "buzz" && pub.buzz !== mine && `${pub.qid}|${sc}` === L.q) { setBuzzed(false); setNo(ack.no || "The TV didn't take the buzz. Tap again."); }
+    if (L.kind === "answer" && !mineIn) { setSentTxt(null); setNo(ack.no || (noTv ? "That answer didn't go through. Send it again." : "The TV didn't take that answer. Send it again.")); }
+    else if (L.kind === "buzz" && pub.buzz !== mine && `${pub.qid}|${sc}` === L.q) { setBuzzed(false); setNo(ack.no || (noTv ? "That buzz didn't go through. Tap again." : "The TV didn't take the buzz. Tap again.")); }
     else if (ack.no) setNo(ack.no);
   }, [got, acks]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!no) return; const t = setTimeout(() => setNo(null), 6000); return () => clearTimeout(t); }, [no]);
@@ -1285,7 +1294,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {/* the end of the night, no host: either captain sends everyone home */}
       {nohost && sc === "final" && (<>
         <button className="btn btn-gold btn-lg btn-block mt-auto" disabled={busy} onClick={() => void nxt({ type: "ui/again" })}>Play again: same teams</button>
-        <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone and the TV back to the home screen.</p>
+        <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
         <button className="btn btn-lg btn-block" disabled={busy} onClick={() => { void nxt({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
       </>)}
       {/* no host, won with legs to spare: the lead captain picks */}

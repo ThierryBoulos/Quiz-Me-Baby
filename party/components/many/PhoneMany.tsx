@@ -16,6 +16,7 @@ import { LETTERS, typedKey } from "@/lib/many/logic";
 import { ToSide } from "../Side";
 import { Dot, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
+import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
@@ -43,6 +44,7 @@ const Line = ({ children, className = "" }: { children: React.ReactNode; classNa
 export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: string }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
+  const noTv = useNoTv();
   const secret = useSecretMany(code, host, pub.step);
   const [busy, setBusy] = useState(false), [err, setErr] = useState<string | null>(null);
   const [text, setText] = useState(""), [pin, setPin] = useState<LatLon | null>(null), [sentTxt, setSentTxt] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   useEffect(() => { if (!busy) { setBusyLong(false); return; } const t = setTimeout(() => setBusyLong(true), 450); return () => clearTimeout(t); }, [busy]);
   const send = async (kind: string, payload: Record<string, unknown>) => {
     setBusy(true); setErr(null);
-    try { await sendAction(code, kind, { ...payload, step: pub.step }); return true; } catch { setErr("That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
+    try { await sendAction(code, kind, { ...payload, step: pub.step }); return true; } catch { setErr(noTv ? "That didn't go through. Try again." : "That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
   };
   /* the host's change of a call shows at once, until the TV's own update says the same */
   const [flips, setFlips] = useState<Record<string, boolean>>({});
@@ -216,7 +218,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
         <Final />
         <div className="mt-auto flex flex-col gap-2">
           <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => move("m/again")}>Play again: same teams</button>
-          <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone and the TV back to the home screen.</p>
+          <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
           <button className="btn btn-lg btn-block" disabled={busy} onClick={() => { move("m/exit"); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
         </div>
       </>)}
@@ -224,7 +226,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
       {/* EVERYONE ELSE */}
       {!host && sc === "intro" && g && (<>
         <IntroMany pub={pub} size="phone" />
-        <Line className="mt-auto">Eyes on the TV. The host starts it.</Line>
+        <Line className="mt-auto">{noTv ? "The host starts it." : "Eyes on the TV. The host starts it."}</Line>
       </>)}
 
       {/* MAJORITY RULES: everyone on the list answers, on their own phone */}

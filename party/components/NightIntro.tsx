@@ -7,6 +7,7 @@
 import { introLine, introTimes, type IntroPub } from "@/lib/intro";
 import { PLACE_PTS } from "@/lib/many/logic";
 import { useAfter } from "./Clock";
+import { useNoTv } from "./NoTv";
 
 const ordinal = (n: number) => n + (n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th");
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
@@ -74,13 +75,14 @@ export function NightIntroTv({ intro: I, who }: { intro: IntroPub; who: string }
 /* goAt: the button only from then (no host: the other captain, if the one who starts hasn't after a while) */
 export function NightIntroPhone({ intro: I, go, goAt, busy, who }: { intro: IntroPub; go?: () => void; goAt?: number; busy?: boolean; who: string }) {
   const late = useAfter(goAt ?? null);
+  const noTv = useNoTv();
   if (goAt != null && !late) go = undefined;
   const qs = I.items.filter((x) => x.kind === "q").length, ms = I.items.length - qs;
   return (
     <section className="flex flex-col gap-3 enter flex-1">
       <div className="card text-center">
         <div className="eyebrow">Tonight</div>
-        <h1 className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>Eyes on the TV</h1>
+        <h1 className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{noTv ? "Tonight\u2019s game" : "Eyes on the TV"}</h1>
         <p className="text-14 text-[var(--color-ink-2)] mt-1">{[qs ? plural(qs, "question round", "question rounds") : "", ms ? plural(ms, "mini-game", "mini-games") : ""].filter(Boolean).join(" and ")}. The plan is on the TV.</p>
       </div>
       <ol className="card ni-phone" aria-label="Tonight's game, in order">

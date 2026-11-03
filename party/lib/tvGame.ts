@@ -75,13 +75,15 @@ function shiftClocks(s: TvState, d: number) {
   if (s.deadline) s.deadline += d;
 }
 
-export function useTvGame(code: string, isTv: boolean, room: Room | null, members: Member[]) {
+export function useTvGame(code: string, isTv: boolean, room: Room | null, members: Member[], phone = false) {
   const ctx = useRef({ room, members });
   ctx.current = { room, members };
   const st = useRef<TvState>(newState());
   const [pub, setPub] = useState<Pub | null>(null);
   const isTvRef = useRef(isTv);
   isTvRef.current = isTv;
+  const phoneRef = useRef(phone);
+  phoneRef.current = phone;
   const saveKey = "qmb.tv." + code + ".game", usedKey = USED_KEY;
   /* who answers first: fixed for the whole game when it starts (Settings → alternate) */
   const seat = () => ({ alternateFirst: !!st.current.g?.alternateFirst });
@@ -201,8 +203,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
             localStorage.setItem(saveKey, save); lastSave.current = save;
             /* ...and a copy on the server, so a new laptop can take over if this one dies (29 Oct, B9): on a new
                screen at once, otherwise every 15 s at most. One row per room, overwritten, gone with the room. */
-            const due = s.screen !== backupAt.current.screen || Date.now() - backupAt.current.t > 15000;
-            if (due && isTvRef.current) { backupAt.current = { t: Date.now(), screen: s.screen }; void sb().rpc("qmb_tv_backup", { r: code, s: JSON.parse(save) }).then(() => {}, () => {}); }
+            /* (a phone running the game, with no TV, every 4 s at most: a phone can go quiet any moment, and the one
+               that takes over carries on from here, with the taps this one hadn't read yet: inboxLast) */
+            const due = s.screen !== backupAt.current.screen || Date.now() - backupAt.current.t > (phoneRef.current ? 4000 : 15000);
+            if (due && isTvRef.current) {
+              backupAt.current = { t: Date.now(), screen: s.screen };
+              let inboxLast = 0; try { inboxLast = Number(localStorage.getItem("qmb.tv." + code + ".last") || 0); } catch { /* none */ }
+              void sb().rpc("qmb_tv_backup", { r: code, s: { ...JSON.parse(save), inboxLast, settings: getSettings() } }).then(() => {}, () => {});
+            }
           }
         }
       } catch { setBanner("cantSave"); }
@@ -1220,7 +1228,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      night. Nobody is removed. */
   const here = useRef({ at: {} as Record<string, number>, since: Date.now(), busy: false, checked: 0, lags: [] as number[],
     away: {} as Record<string, { at: number; qid?: string; flag?: number }> });
-  usePresent(code, isTv, here, members);
+  usePresent(code, isTv, here, members, phone);
   /* Left the game screen during a question: flagged once they've been gone two
      seconds (a glance at a notification doesn't count), with how long when
      they come back. The TV says it; the host's phone keeps the list. */

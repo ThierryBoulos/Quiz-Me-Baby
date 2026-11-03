@@ -3,10 +3,14 @@
    last, so a phone showing it at once would spoil it. For as long as the TV's reveal takes, phones show "Eyes on
    the TV", then the result as before. Only the result waits: the host's buttons stay where they are. */
 import { useEffect, useState } from "react";
+import { useNoTv } from "./NoTv";
 
 /* true while the result for `key` should wait (secs from when it first came up); a new key starts a new wait,
    null means nothing to hold */
+/* (no TV: nobody is watching a reveal, so nothing waits) */
 export function useRevealHold(key: string | null, secs: number) {
+  const noTv = useNoTv();
+  if (noTv) key = null;
   const [done, setDone] = useState<string | null>(null);
   useEffect(() => {
     if (!key) return;

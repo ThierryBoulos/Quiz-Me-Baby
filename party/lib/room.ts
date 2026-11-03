@@ -100,12 +100,14 @@ export function useRoom(code: string) {
    says "hello" in the log (a reload: they're back). */
 export type AwayMeta = { away?: { qid?: string } | null; back?: { qid?: string; ms: number } | null };
 export const presenceChannel = (code: string) => "here:" + code;
-export function usePresence(code: string, me: string | null) {
+/* listen: this phone also runs the game (no TV): its channel keeps the list of who's here, for the game to read */
+export function usePresence(code: string, me: string | null, listen = false) {
   useEffect(() => {
     if (!me) return;
     note(code, { hello: 1 });
     let live = false;
     const ch = sb().channel(presenceChannel(code), { config: { presence: { key: me } } });
+    if (listen) ch.on("presence", { event: "sync" }, () => {});
     const show = () => {
       if (!live) return;
       if (document.visibilityState === "visible") void ch.track({ on: 1 }).catch(() => {});
@@ -116,7 +118,7 @@ export function usePresence(code: string, me: string | null) {
     const t = setInterval(beat, 15000);
     document.addEventListener("visibilitychange", show);
     return () => { clearInterval(t); document.removeEventListener("visibilitychange", show); void sb().removeChannel(ch); };
-  }, [code, me]);
+  }, [code, me, listen]);
   return useCallback((m: AwayMeta) => note(code, m as Record<string, unknown>), [code]);
 }
 

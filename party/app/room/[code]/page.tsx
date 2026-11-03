@@ -23,6 +23,11 @@ import { MANY_COLORS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { useFreshBuild } from "@/lib/fresh";
 import { CodeTiles, MqStage, MqTop, Sign, useLights } from "@/components/Marquee";
+import { NoTv, isNoTv } from "@/components/NoTv";
+import { useTvGame } from "@/lib/tvGame";
+import { useTvMany } from "@/lib/many/useTvMany";
+import { useTabLock } from "@/lib/tabLock";
+import { useWakeLock } from "@/lib/wakeLock";
 import { cap1, useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
 const TEAM_MAX = 14;                                  // as the TV keeps them (lib/tvGame.ts)
@@ -47,6 +52,7 @@ export default function PhoneRoom() {
   /* It lasts until the TV has actually answered (its next update), not until this phone's own refresh;
      if nothing comes back in 8 s the phone says so (and takes it back if the reply comes after all), and a tap that couldn't even leave says so at once. */
   const [waiting, setWaiting] = useState(false);
+  const noTvRef = useRef(false);
   const [waitLong, setWaitLong] = useState(false);
   useEffect(() => { if (!waiting) { setWaitLong(false); return; } const t = setTimeout(() => setWaitLong(true), 450); return () => clearTimeout(t); }, [waiting]);
   const [lineupOpen, setLineupOpen] = useState(false);
@@ -71,7 +77,7 @@ export default function PhoneRoom() {
       again.forEach(clearTimeout);
       again = [1200, 3000, 5500].map((ms) => setTimeout(() => { if (waitRef.current.on) void refreshRef.current(); }, ms));
       /* 8 s with no reply (slow Wi-Fi at a party): say so; a reply that comes after all takes the message away */
-      t = setTimeout(() => { if (waitRef.current.on) { const key = waitRef.current.key; stop(); lateKey.current = key; window.dispatchEvent(new Event("qmb:late")); setTapErr("The TV hasn't answered. If nothing changes, tap again."); } }, 8000);
+      t = setTimeout(() => { if (waitRef.current.on) { const key = waitRef.current.key; stop(); lateKey.current = key; window.dispatchEvent(new Event("qmb:late")); setTapErr(noTvRef.current ? "The game hasn't answered. If nothing changes, tap again." : "The TV hasn't answered. If nothing changes, tap again."); } }, 8000);
     };
     const place = () => {
       const r = lastBtn.current?.isConnected ? lastBtn.current.getBoundingClientRect() : null;
@@ -99,7 +105,12 @@ export default function PhoneRoom() {
   useEffect(() => { if (!tapErr) return; const t = setTimeout(() => setTapErr(null), 6000); return () => clearTimeout(t); }, [tapErr]);
 
   useEffect(() => { void ensureSession().then(setMe); }, []);
-  const report = usePresence(code, me);
+  /* No TV (3 Nov): the phone of whoever created the room (the room's "TV" in the database) runs the game for
+     everyone, as the TV would: the same game, nothing drawn for it. One tab at a time; the screen stays awake. */
+  const noTv = isNoTv(room?.state);
+  noTvRef.current = noTv;
+  const referee = noTv && !!room && !!me && room.tv_id === me;
+  const report = usePresence(code, me, referee);
   const mine = useMemo(() => members.find((m) => m.user_id === me) || null, [members, me]);
 
   /* not in this room (yet): to the join screen with the code filled in. But only once sure: a phone waking
@@ -131,6 +142,7 @@ export default function PhoneRoom() {
   }, [gone, code, router]);
 
   const host = members.find((m) => m.role === "host") || null;
+  const refName = noTv ? members.find((m) => m.user_id === room?.tv_id)?.name ?? null : null;
   const side = mine?.team === 0 ? "a" : mine?.team === 1 ? "b" : null;
   /* more than two teams (3 to 8): their own lobby buttons and game screens */
   const teamCount = teamCountOf(room), many = teamCount > 2 || room?.mode === "many";
@@ -140,6 +152,56 @@ export default function PhoneRoom() {
   const [sideSlot, setSideSlot] = useState<HTMLDivElement | null>(null);
   const manyColor = many && mine?.team != null ? MANY_COLORS[mine.team as number] : null;
   useEffect(() => { document.documentElement.style.setProperty("--tint", manyColor || (side ? `var(--color-${side})` : "var(--color-gold)")); }, [side, manyColor]);
+  const refLock = useTabLock(code, referee);
+  /* (taking over: the room says so the moment the server does, a beat before this phone has stored the save it
+     carries on from, so the game waits for the save; started without it, it would start empty) */
+  const [taking, setTaking] = useState(false);
+  const runs = referee && refLock.state === "mine" && !taking;
+  useTvGame(code, runs && !many, room, members, true);
+  useTvMany(code, runs && many, room, members, true);
+  useWakeLock(runs);
+  /* the phone running the game says it's still here, every 5 s while it's on screen */
+  useEffect(() => {
+    if (!runs) return;
+    const beat = () => { if (document.visibilityState === "visible") void sb().rpc("qmb_ref_beat", { r: code }).then(() => {}, () => {}); };
+    beat();
+    const t = setInterval(beat, 5000);
+    document.addEventListener("visibilitychange", beat);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", beat); };
+  }, [runs, code]);
+  /* ...and if it goes quiet for 20 s (asleep, another app, a flat battery), the host's or a captain's phone takes
+     the game over from its last save (the server picks one; the others carry on as they were). That phone then
+     runs the game as above. Nothing to tap: the night pauses, then carries on. */
+  const takerRole = mine?.role === "host" || mine?.role === "captain";
+  const [tookOver, setTookOver] = useState(false);
+  useEffect(() => {
+    if (!noTv || referee || !takerRole || !me || room?.status === "done") return;
+    let live = true;
+    const tryTake = async () => {
+      if (!live || document.visibilityState !== "visible") return;
+      setTaking(true);
+      try {
+        const r = await rpc<{ ok?: boolean; taken?: boolean; save?: Record<string, unknown> | null }>("qmb_take_game", { r: code });
+        if (!r?.taken) return;                       // (taken: stored even if this loop has just stopped, as this phone became the game's)
+        const sv = r.save;
+        try {
+          if (sv) {
+            const { inboxLast, many: isMany, settings, ...rest } = sv as { inboxLast?: number; many?: boolean; settings?: unknown } & Record<string, unknown>;
+            /* the night's settings (its timers, its rules) come with it: this phone plays it as it was set up */
+            if (settings) localStorage.setItem("qmb.party.settings", JSON.stringify(settings));
+            localStorage.setItem("qmb.tv." + code + (isMany ? ".many" : ".game"), JSON.stringify(rest));
+            if (inboxLast) localStorage.setItem("qmb.tv." + code + ".last", String(inboxLast));
+          }
+        } catch { /* in memory only: the room carries the lobby, and a game starts afresh */ }
+        setTookOver(true);
+        void refreshRef.current();
+      } catch { /* the next try */ }
+      finally { setTaking(false); }
+    };
+    const t = setInterval(() => void tryTake(), 6000 + Math.floor(Math.random() * 2000));
+    return () => { live = false; clearInterval(t); };
+  }, [noTv, referee, takerRole, me, code, room?.status]);
+  useEffect(() => { if (!tookOver) return; const t = setTimeout(() => setTookOver(false), 12000); return () => clearTimeout(t); }, [tookOver]);
 
   /* a call to the server in the lobby (claim, team, leave): it answers "ok" or a reason, then the room is read again */
   async function act(fn: () => Promise<unknown>) {
@@ -255,10 +317,10 @@ export default function PhoneRoom() {
       <button className="mq-pick" style={{ ["--c" as string]: "var(--color-b)" }} disabled={busy} onClick={() => pickTeam(1)}><span className="tn"><bdi>{teamName(room, 1)}</bdi></span><small>{sideInfo(1)}</small></button>
     </>);
 
-  return (
+  return (<NoTv.Provider value={noTv}>
     <main className={"screen split" + (lobby ? " mq mq-room" + lights : "")} data-soft={waiting && !waitLong ? "" : undefined}>
       {lobby && <MqStage />}
-      {waiting && waitLong && <div className="sending" role="progressbar" aria-label="Sending to the TV" />}
+      {waiting && waitLong && <div className="sending" role="progressbar" aria-label="Sending" />}
       {tapErr && <div className="fixed left-4 right-4 enter text-center font-bold rounded-[16px]" role="alert" data-taperr
         style={{ zIndex: 50, ...(tapAt ?? { top: "calc(12px + env(safe-area-inset-top))" }), fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
           boxShadow: "0 12px 30px rgba(0,0,0,.6)" }}>{tapErr}</div>}
@@ -302,7 +364,14 @@ export default function PhoneRoom() {
 
       {pub?.tvAway && room.status !== "lobby" && (
         <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>
-          The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</p>)}
+          {noTv ? <>{refName ? <><bdi>{refName}</bdi>&rsquo;s phone runs the game, and it&rsquo;s</> : "The phone running the game is"} asleep or on another app. Everything is paused until it&rsquo;s back.</>
+            : <>The TV has gone to sleep or out of sight. Everything is paused until it&rsquo;s back.</>}</p>)}
+      {/* this phone runs the game: keep it on, in this app */}
+      {runs && tookOver && <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>The phone running the game went quiet, so this one runs it now. Keep it on, on this screen.</p>}
+      {runs && !tookOver && room.status !== "lobby" && <p className="text-center text-12 text-[var(--color-ink-3)]">This phone runs the game: keep it on, on this screen.</p>}
+      {referee && refLock.state === "other" && (
+        <div className="card flex flex-col gap-2 text-center"><p className="text-14">This game runs in another tab of this browser.</p>
+          <button className="btn btn-sm self-center" onClick={refLock.takeOver}>Run it here instead</button></div>)}
 
       {room.status !== "lobby" ? (
         /* joined after the start: pick a side first */
@@ -330,7 +399,7 @@ export default function PhoneRoom() {
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {mine.role === "host" && pub && !many && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
-            {mine.role === "host" && pub && <TvTakeover code={code} />}
+            {mine.role === "host" && pub && !noTv && <TvTakeover code={code} />}
             {/* no host: either captain asks for new scores; the other captain agrees, or not (back on the game screen) */}
             {mine.role === "captain" && pub?.mode === "nohost" && <ScoreFix pub={pub} ask busy={busy || waiting}
               send={(move) => { void tell(() => sendAction(code, "next", { move, step: pub.step })); setPanel(false); }} />}
@@ -341,10 +410,10 @@ export default function PhoneRoom() {
               ? <NightIntroPhone intro={(room.state.pub as PubMany).intro!} busy={busy || waiting} who="The host starts the game."
                   go={mine.role === "host" ? () => void sendMove({ type: "m/go" }) : undefined} />
               : <PhoneMany pub={room.state.pub as PubMany} me={mine} code={code} />)
-            : <section className="card text-center enter flex-1 grid place-items-center"><div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">Eyes on the TV</h1></div></section>
+            : <section className="card text-center enter flex-1 grid place-items-center"><div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">{noTv ? "Get ready" : "Eyes on the TV"}</h1></div></section>
         ) : !pub ? (
           <section className="card text-center enter flex-1 grid place-items-center">
-            <div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">Eyes on the TV</h1></div>
+            <div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">{noTv ? "Get ready" : "Eyes on the TV"}</h1></div>
           </section>
         ) : pub.intro ? (() => { const I = pub.intro, lead = I.go != null && mine.role === "captain" && mine.team === I.go;
             const capGo = () => void tell(() => sendAction(code, "next", { move: { type: "ui/introGo" }, step: pub.step }));
@@ -417,8 +486,8 @@ export default function PhoneRoom() {
                   disabled={busy || nameState === "saving" || tooLong || !(draft ?? "").trim() || (draft ?? "").trim() === teamName(room, mine.team)}>{nameState === "saving" ? "Saving…" : "Save"}</button>
               </form>
               {tooLong && <p className="field-error" role="alert">Team names can be up to {TEAM_MAX} characters. Try a shorter one.</p>}
-              {nameState === "saved" && <p className="text-13 font-bold" role="status" style={{ color: "var(--color-ok)" }}>Saved. It&rsquo;s on the TV.</p>}
-              {nameState === "late" && <p className="field-error" role="alert">The TV didn&rsquo;t pick it up. Is the TV screen still open? Try again.</p>}
+              {nameState === "saved" && <p className="text-13 font-bold" role="status" style={{ color: "var(--color-ok)" }}>Saved.{noTv ? "" : <> It&rsquo;s on the TV.</>}</p>}
+              {nameState === "late" && <p className="field-error" role="alert">{noTv ? "That didn\u2019t go through. Try again." : <>The TV didn&rsquo;t pick it up. Is the TV screen still open? Try again.</>}</p>}
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
             </div>
           ) : myCaptain ? (
@@ -454,8 +523,8 @@ export default function PhoneRoom() {
           <MqStage />
           <div className="screen !max-w-[720px]">
             <MqTop onBack={() => setRules(false)} eyebrow="How to play" title="How the night works" />
-            <p className="text-13 text-[var(--color-ink-2)] -mt-2">Times below are the defaults; the TV&rsquo;s Settings can change them.</p>
-            <Rules />
+            <p className="text-13 text-[var(--color-ink-2)] -mt-2">Times below are the defaults; the {noTv ? "host" : "TV"}&rsquo;s Settings can change them.</p>
+            <Rules noTv={noTv} />
             <button className="btn btn-gold btn-lg btn-block" onClick={() => setRules(false)}>Back to the lobby</button>
           </div>
         </div>)}
@@ -485,7 +554,7 @@ export default function PhoneRoom() {
               You&rsquo;re in.{" "}
               {host && who?.user_id === host.user_id ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>, who starts the game.</>
                 : <>{host && <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>. </>}{who ? <><b style={{ color: "var(--color-gold)" }}><bdi>{who.name}</bdi></b> starts the game.</> : "The host, or Team A's captain, starts the game."}</>}
-              <br /><span className="text-12 text-[var(--color-ink-3)]">Heads up: leaving this screen during a question (another app, a search) is flagged on the TV.</span>
+              <br /><span className="text-12 text-[var(--color-ink-3)]">Heads up: leaving this screen during a question (another app, a search) is flagged{noTv ? "" : " on the TV"}.</span>
             </p>
           )}
         </footer>
@@ -493,5 +562,5 @@ export default function PhoneRoom() {
       </div>
       </SideSlot.Provider>
     </main>
-  );
+  </NoTv.Provider>);
 }

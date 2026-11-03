@@ -1284,3 +1284,13 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   .mq-join .bottom { margin-top: 0; flex-direction: row; align-items: center; justify-content: center; gap: 18px; }
   .mq-join .bottom .btn { width: min(360px, 50vw); }
 }
+
+/* the TV's lobby opened on a phone: "Play without TV", phone-sized, along the bottom (3 Nov). Never on a laptop or TV */
+.notv-bar { display: none; }
+@media (max-width: 760px), (orientation: landscape) and (max-height: 500px) {
+  .notv-bar { display: flex; flex-direction: column; gap: 8px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    padding: 12px max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    background: linear-gradient(to top, rgba(4,5,14,.98) 70%, rgba(4,5,14,0)); }
+  .notv-bar p { margin: 0; text-align: center; font-size: var(--text-13); color: var(--color-ink-2); }
+}
+@media (orientation: landscape) and (max-height: 500px) { .notv-bar { flex-direction: row; align-items: center; } .notv-bar .btn { width: auto; flex: none; padding-inline: 28px; } .notv-bar p { text-align: left; } }

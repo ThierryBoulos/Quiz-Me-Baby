@@ -18,12 +18,13 @@ const L = ({ items }: { items: ReactNode[] }) => (
 const B = ({ children }: { children: ReactNode }) => <strong className="text-[var(--color-ink)]">{children}</strong>;
 
 /* the one screen to read before the first question */
-function First30() {
+function First30({ noTv = false }: { noTv?: boolean }) {
   const steps: [string, ReactNode][] = [
     ["Pick a side", <>Tap Team A or Team B on your phone. One of you taps <B>Make me captain</B>.</>],
     ["The captain types", <>Only the captain&rsquo;s answer counts. It goes in once, from the captain&rsquo;s phone.</>],
     ["Everyone else suggests", <>Type your idea on your phone: it lands on your captain&rsquo;s screen. Shout too, why not.</>],
-    ["Watch the TV", <>Questions, clocks, scores and reveals are on the TV. Your phone shows what you can do right now.</>],
+    noTv ? ["No TV tonight", <>Questions, clocks, scores and results are all on your phone. The game runs on the phone of whoever made the room: they keep it on, on the game.</>]
+      : ["Watch the TV", <>Questions, clocks, scores and reveals are on the TV. Your phone shows what you can do right now.</>],
   ];
   return (
     <section className="card flex flex-col gap-3" style={{ borderColor: "rgba(245,197,24,.5)" }}>
@@ -40,10 +41,10 @@ function First30() {
 }
 
 /* the game: on How to Play, and in the lobby while people wait */
-export function Rules({ fixing = true }: { fixing?: boolean }) {
+export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?: boolean }) {
   return (
     <>
-      <First30 />
+      <First30 noTv={noTv} />
       <Rule n="01" title="The setup">
         <L items={[
           <><B>Two teams</B>, any size. The TV is a laptop with the game open, put up big; everyone else joins on their phone with the code or the QR. Each team picks a <B>captain</B>: the captain gives the final answer, nobody else.</>,

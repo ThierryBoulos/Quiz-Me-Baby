@@ -20,11 +20,8 @@ import { TvLobby } from "@/components/LobbyTv";
 import { TvMany } from "@/components/many/TvMany";
 import { manyNotReady, teamCountOf, useTvMany } from "@/lib/many/useTvMany";
 import { MANY_MAX } from "@/lib/many/logic";
+import { isNoTv } from "@/components/NoTv";
 import type { PubMany } from "@/lib/many/view";
-
-/* Classic lives on this same site, at /classic (copied in at build time); from here it opens
-   straight on its host setup, and its Back comes back to this lobby */
-const CLASSIC = "/classic";
 
 /* THE TV. No buttons: it shows the room and runs the night. Phones send it
    actions (a team name, "start", later buzzes and answers); the TV checks the
@@ -61,6 +58,26 @@ export default function TvRoom() {
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline), room?.status === "playing");
   /* the night is over and somebody tapped Exit: home (a moment later, so every phone hears it first) */
   useEffect(() => { if (!pub?.exit && !pubMany?.exit) return; const t = setTimeout(() => router.replace("/"), 1500); return () => clearTimeout(t); }, [pub?.exit, pubMany?.exit, router]);
+  /* No TV (3 Nov): this screen hands the game to the phones. The room is marked as having no TV, and this
+     browser goes to the join screen: its owner takes a seat, and their phone runs the game from there
+     (app/room). Back here in the lobby (the browser's Back), it's the TV again. */
+  const leaving = useRef(false);
+  const [noTvErr, setNoTvErr] = useState(false);
+  const goNoTv = async () => {
+    if (!room || leaving.current) return;
+    leaving.current = true; setNoTvErr(false);
+    const { error } = await sb().from("rooms").update({ state: { ...room.state, notv: true } }).eq("code", code);
+    if (error) { leaving.current = false; setNoTvErr(true); return; }
+    router.push("/join?code=" + code);
+  };
+  const noTvNow = room?.status === "lobby" && isNoTv(room.state);
+  useEffect(() => {
+    if (!isTv || !noTvNow || leaving.current || !room) return;
+    const rest = { ...room.state }; delete rest.notv;
+    void sb().from("rooms").update({ state: rest }).eq("code", code).then(() => {}, () => {});
+  }, [isTv, noTvNow]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const noTvBtn = (cls: string) => <button type="button" className={cls} onClick={() => void goNoTv()}>Play without TV</button>;
+
   /* for the end-to-end tests: what the TV is showing */
   useEffect(() => { (window as unknown as { __qmb?: Pub | null }).__qmb = pub; }, [pub]);
 
@@ -82,7 +99,7 @@ export default function TvRoom() {
 
   if (!room) return <TvStage><div className="m-auto flex flex-col items-center gap-4"><div className="spinner" style={{ width: 48, height: 48, borderWidth: 5 }} /><div className="eyebrow text-20">Opening the room…</div></div></TvStage>;
 
-  return (
+  return (<>
     <TvStage>
       {/* not in the lobby: the first tap there (anywhere) turns the sound on anyway */}
       {room.status !== "lobby" && <SoundNote />}
@@ -132,10 +149,12 @@ export default function TvRoom() {
           status={<>
             <Link href="/" className="btn btn-sm btn-ghost shrink-0" aria-label="Back to the home screen">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
+            {isTv && noTvBtn("btn btn-sm btn-ghost shrink-0")}
             <div className="min-w-0">
               {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>. </> : "No host yet: the app will check answers. "}
               {many ? (manyNotReady(members, teamCount) || <>Ready: <b><bdi>{host?.name}</bdi></b> starts the game.</>)
                 : readyToStart(members) ? <>Ready: <b><bdi>{who?.name}</bdi></b> starts the game.</> : notReadyWhy(members)}
+              {noTvErr && <><br /><span className="font-bold" style={{ color: "var(--color-no)" }} role="alert">That didn&rsquo;t go through. Check the internet, then tap Play without TV again.</span></>}
               {lobbyNote && <><br /><span className="font-bold" style={{ color: "var(--color-no)" }} role="status">Start didn&rsquo;t go through: {lobbyNote}</span></>}
               {awake === false && <><br /><span className="text-14 text-[var(--color-no)]">This browser can&rsquo;t keep the screen awake: switch off sleep in the laptop&rsquo;s settings, or use Chrome.</span></>}
             </div></>}
@@ -149,7 +168,6 @@ export default function TvRoom() {
               </div>)}
             <button className="btn btn-sm btn-ghost" onClick={() => { Snd.set(!soundOn); setSoundOn(!soundOn); if (!soundOn) Snd.soft(); }}>Sound: {soundOn ? "on" : "off"}</button>
             <ShareButton code={code} />
-            {members.length === 0 && <a href={`${CLASSIC}/?start=host&back=/tv/${code}`} className="btn btn-sm btn-ghost">Just play on this screen</a>}
           </>} />
       ) : pubMany ? <TvMany pub={pubMany} join={{ url: joinUrl, code }} sound={isTv} host={host?.name} seats={Array.from({ length: pubMany.teams.length }, (_, t) => members.filter((m) => m.role !== "host" && (m.team as number) === t).length)} /> : pub ? <TvGame pub={pub} onExit={isTv ? exit : undefined} onAgain={isTv ? again : undefined} join={{ url: joinUrl, code }} sound={isTv} /> : (
         <div className="m-auto text-center enter">
@@ -157,5 +175,8 @@ export default function TvRoom() {
         </div>
       )}
     </TvStage>
-  );
+    {/* opened on a phone, the TV's lobby is tiny: the same choice, phone-sized, along the bottom */}
+    {isTv && room.status === "lobby" && (
+      <div className="notv-bar">{noTvBtn("btn btn-gold btn-lg btn-block")}<p>No TV? Everyone plays on their phones. Share the code on WhatsApp, or read it out.</p></div>)}
+  </>);
 }
