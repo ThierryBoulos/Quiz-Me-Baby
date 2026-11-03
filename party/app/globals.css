@@ -1252,6 +1252,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   .screen.split .main .board .board-row { padding-block: .2em; }
   /* Drop the Pin: the clock first, then the photo (the map has the right column to itself) */
   .side-part .pin-row { flex-direction: row-reverse; }
+  /* Closest To Wins: the clock under Lock in, in the right column (the owner, 3 Nov) */
+  .screen.split .main .clock-last { order: 10; }
   .screen.split .enter { animation-name: enterFade; }
   /* (the end's confetti layer: a phone shows none, and in the grid it would take a column's place) */
   .screen.split > .confetti-back { display: none; }
