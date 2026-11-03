@@ -1243,6 +1243,13 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   .side-slot:empty { display: none; }
   .side-part { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .side-part > p { text-align: center; }
+  /* the clock beside what you read (right of it, centred on the room), not under it: the column keeps the screen's height */
+  .side-slot { position: relative; }
+  .side-part.side-clock { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
+  .side-slot:has(> .side-clock) > .side-part:not(.side-clock) { margin-right: 100px; }
+  .side-part > p.font-bold:not(.text-16) { font-size: var(--text-18); }
+  /* the departures board a little tighter, so the answer box under it reaches the screen */
+  .screen.split .main .board .board-row { padding-block: .2em; }
   /* Drop the Pin: the clock first, then the photo (the map has the right column to itself) */
   .side-part .pin-row { flex-direction: row-reverse; }
   .screen.split .enter { animation-name: enterFade; }
