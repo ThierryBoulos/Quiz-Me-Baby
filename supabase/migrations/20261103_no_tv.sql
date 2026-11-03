@@ -44,3 +44,10 @@ $$;
 
 revoke execute on function public.qmb_ref_beat(text), public.qmb_take_game(text) from anon, public;
 grant  execute on function public.qmb_ref_beat(text), public.qmb_take_game(text) to authenticated;
+
+-- the join screen asks whether a room has no TV, so it doesn't point people at a TV
+create or replace function public.qmb_room_notv(r text) returns boolean
+  language sql stable security definer set search_path = '' as
+$$ select coalesce((select (state->>'notv')::boolean from public.rooms where code = upper(trim(r))), false) $$;
+revoke execute on function public.qmb_room_notv(text) from public;
+grant  execute on function public.qmb_room_notv(text) to anon, authenticated;

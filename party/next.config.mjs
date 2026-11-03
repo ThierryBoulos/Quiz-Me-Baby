@@ -10,8 +10,8 @@ const nextConfig = {
   experimental: { externalDir: true },
   /* which deploy this page came from: a TV or phone left open across a deploy reloads itself (lib/fresh.ts) */
   env: { NEXT_PUBLIC_BUILD: BUILD, NEXT_PUBLIC_BUILD_DATE: new Date().toISOString() },
-  /* Classic, copied into public/classic by scripts/copy-classic.mjs before each build */
-  async rewrites() { return [{ source: "/classic", destination: "/classic/index.html" }]; },
+  /* Classic is retired (3 Nov: "Play without TV" took its place): an old link to it lands on the home screen */
+  async redirects() { return [{ source: "/classic", destination: "/", permanent: false }, { source: "/classic/:p*", destination: "/", permanent: false }]; },
   /* flags (their names change only with the key) and maps keep in the phone's cache: no second download */
   async headers() {
     return [

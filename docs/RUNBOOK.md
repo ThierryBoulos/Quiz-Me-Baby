@@ -7,11 +7,11 @@ plus three free accounts: GitHub, Vercel and Supabase.
 
 | Piece | Where | What it is |
 |---|---|---|
-| Classic | `index.html` at the root (one screen, a host runs it) | Also served at `/classic` on the Party site |
+| Classic | `classic.html` at the root | Retired as a game (3 Nov 2026): `/classic` redirects home. Kept as the source of the bank, maps and pins exports |
 | Party | `party/` (Next.js) on Vercel | The TV (`/tv/CODE`), the phones (`/join`, `/room/CODE`), `/api/health`, `/api/bank` |
 | Game server | Supabase project (EU, Ireland) | Rooms, members, the action log, secrets; anonymous sign-ins |
 | Shared rules | `engine/core.js` | Used by Classic and Party alike; tests in `engine/*.test.js` |
-| Question bank | Built into Classic (`index.html`); exported to `party/data/bank.json` (full, server only) and `party/public/bank.json` (no answers) by `node scripts/export-bank.js` | |
+| Question bank | Kept in `classic.html` (the retired Classic); exported to `party/data/bank.json` (full, server only) and `party/public/bank.json` (no answers) by `node scripts/export-bank.js` | |
 
 ## 1. Supabase (15 min)
 

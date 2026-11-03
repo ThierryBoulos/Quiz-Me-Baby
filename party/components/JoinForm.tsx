@@ -11,6 +11,9 @@ import { CodeTiles, MqStage, Sign, useLights } from "@/components/Marquee";
 
 /* JOIN — one card in the marquee's look (the owner, 1 Nov): the room code in lit letter tiles, your name
    under it, a face, "Take my seat". Errors sit beside the thing that's wrong; a taken name offers a fix. */
+/* (no TV: nobody has a TV to read a new code from) */
+const GAME_OVER_NO_TV = "That game is over. Ask whoever made it for the new code.";
+
 export function JoinForm({ initial }: { initial: string }) {
   const router = useRouter();
   const [code, setCode] = useState(cleanCode(initial));
@@ -40,6 +43,9 @@ export function JoinForm({ initial }: { initial: string }) {
   }, [code]);
   /* the fourth letter in: is there a game with this code? ("Found it", or what's wrong, under the tiles) */
   const [found, setFound] = useState<string | null>(null);
+  /* a game with no TV (Play without TV): nothing here points at a TV (3 Nov) */
+  const [noTv, setNoTv] = useState<string | null>(null);
+  const tvless = noTv === code && code.length === 4;
   useEffect(() => {
     setFound(null);
     if (code.length !== 4) return;
@@ -47,9 +53,10 @@ export function JoinForm({ initial }: { initial: string }) {
     void (async () => {
       try {
         await ensureSession();
-        const st = await rpc<string>("qmb_room_state", { r: code });
+        const [st, nt] = await Promise.all([rpc<string>("qmb_room_state", { r: code }), rpc<boolean>("qmb_room_notv", { r: code }).catch(() => false)]);
         if (!live) return;
-        if (st === "done") setCodeErr(friendly("game_over")); else if (st === "gone") setCodeErr(friendly("no_room")); else setFound(code);
+        setNoTv(nt ? code : null);
+        if (st === "done") setCodeErr(nt ? GAME_OVER_NO_TV : friendly("game_over")); else if (st === "gone") setCodeErr(friendly("no_room")); else setFound(code);
       } catch { /* offline: Take my seat says so */ }
     })();
     return () => { live = false; };
@@ -69,7 +76,7 @@ export function JoinForm({ initial }: { initial: string }) {
       await ensureSession();
       /* is this a game you can join? (an old QR on the fridge, a mistyped code) */
       const state = await rpc<string>("qmb_room_state", { r: code });
-      if (state === "done") { setCodeErr(friendly("game_over")); setBusy(false); return; }
+      if (state === "done") { setCodeErr(tvless ? GAME_OVER_NO_TV : friendly("game_over")); setBusy(false); return; }
       if (state === "gone") { setCodeErr(friendly("no_room")); setBusy(false); return; }
       /* the server seats one phone at a time and hands out the next free face if this one just went */
       const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean; face?: string }>("qmb_join", { r: code, nm: cap1(useName.trim()), face });
@@ -109,14 +116,14 @@ export function JoinForm({ initial }: { initial: string }) {
             <label className="field-label !mb-0" htmlFor="room-code">Room code</label>
             {codeErr ? <span className="field-error">{codeErr}</span>
               : found === code && code.length === 4 ? <span className="text-13 font-bold" style={{ color: "var(--color-ok)" }}>✓ Found it</span>
-              : <span className="text-12 text-[var(--color-ink-3)]">The 4 letters on the TV</span>}
+              : <span className="text-12 text-[var(--color-ink-3)]">{tvless ? "The room\u2019s 4 letters" : "The 4 letters on the TV"}</span>}
           </div>
           <div className="code-box mt-2">
             <CodeTiles code={code} cur={codeFocus && code.length < 4 ? code.length : null} />
             <input id="room-code" ref={codeRef} defaultValue={code} autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={8}
               aria-describedby="code-help" autoFocus={code.length === 0} onFocus={() => setCodeFocus(true)} onBlur={() => setCodeFocus(false)}
               onChange={(e) => { const v = cleanCode(e.target.value); e.target.value = v; setCode(v); setCodeErr(null); }} />
-            <span id="code-help" className="sr-only">Type the 4-letter room code shown on the TV</span>
+            <span id="code-help" className="sr-only">{tvless ? "Type the 4-letter room code" : "Type the 4-letter room code shown on the TV"}</span>
           </div>
         </div>
         <div>
@@ -150,7 +157,7 @@ export function JoinForm({ initial }: { initial: string }) {
           {busy ? "Taking your seat…" : "Take my seat"}
         </button>
         {/* quiet, at the very bottom: a new laptop taking over a game whose TV died */}
-        <Link href="/take-over" className="text-12 text-center text-[var(--color-ink-3)] underline underline-offset-4 py-2">The TV died? Take over as the TV</Link>
+        {!tvless && <Link href="/take-over" className="text-12 text-center text-[var(--color-ink-3)] underline underline-offset-4 py-2">The TV died? Take over as the TV</Link>}
       </div>
     </main>
   );

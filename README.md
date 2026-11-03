@@ -1,6 +1,6 @@
 # QUIZ ME BABY
 
-**Where it lives.** Everything is on one site now: <https://quiz-me-baby-eta.vercel.app/> is Party (phones as controllers, see `party/`), and Classic, this one-screen app, is at <https://quiz-me-baby-eta.vercel.app/classic>. Vercel copies Classic in from the repo root on every deploy (`party/scripts/copy-classic.mjs`), so `index.html` here is still the only copy. GitHub Pages keeps serving it too, at <https://thierryboulos.github.io/Quiz-Me-Baby/>. A browser keeps Classic's saved bank, history and settings per site, so the two addresses don't share them.
+**Where it lives.** <https://quiz-me-baby-eta.vercel.app/> is the game (Party, see `party/`): with a TV, or with no TV ("Play without TV" in the TV's lobby: everyone plays on their phones). Classic, the old one-screen app, is retired (3 Nov 2026): `/classic` lands on the home screen, and the old GitHub Pages address shows a legacy notice. `classic.html` stays here only as the source the question bank, maps and pins are exported from (`scripts/export-bank.js`, `scripts/export-maps.js`, `party/scripts/fetch-pins.mjs`).
 
 Two files and a folder: `index.html`, `maps-geo.js` and `flags/`, side by side. Double-click `index.html`. That's the whole install. (It is named `index.html` because that is the name GitHub Pages serves at the root of the site — upload it as-is, no renaming.) `maps-geo.js` is the real-world borders that **Guess the Map** draws from; the app only reads it when a game actually has maps on the card, so if it is missing, everything else still works.
 
