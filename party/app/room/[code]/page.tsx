@@ -16,6 +16,7 @@ import { LineupMany, PickMany, SetupMany } from "@/components/many/LineupMany";
 import { PhoneMany } from "@/components/many/PhoneMany";
 import { NightIntroPhone } from "@/components/NightIntro";
 import { HudMany, ScoresMany } from "@/components/many/PartsMany";
+import { SideSlot, ToSide, useSideways } from "@/components/Side";
 import { manyNames, manyNotReady, teamCountOf } from "@/lib/many/useTvMany";
 import { MANY_MAX } from "@/lib/many/logic";
 import { MANY_COLORS } from "@/lib/many/logic";
@@ -134,6 +135,9 @@ export default function PhoneRoom() {
   /* more than two teams (3 to 8): their own lobby buttons and game screens */
   const teamCount = teamCountOf(room), many = teamCount > 2 || room?.mode === "many";
   const pubM = many ? (room?.state?.pub as PubMany | null | undefined) : null;
+  /* a phone on its side: the left column's slot for the question, the clock and your team's card (components/Side) */
+  const sideways = useSideways();
+  const [sideSlot, setSideSlot] = useState<HTMLDivElement | null>(null);
   const manyColor = many && mine?.team != null ? MANY_COLORS[mine.team as number] : null;
   useEffect(() => { document.documentElement.style.setProperty("--tint", manyColor || (side ? `var(--color-${side})` : "var(--color-gold)")); }, [side, manyColor]);
 
@@ -289,7 +293,9 @@ export default function PhoneRoom() {
       {/* (3-8 teams: over the game, not over the teams sheet) */}
       {room.status !== "lobby" && many && !panel && pubM?.many && !pubM.intro && (mine.team != null || mine.role === "host")
         && <HudMany pub={pubM} size="phone" me={mine.team as number | null} host={mine.role === "host"} />}
+      {sideways && <div className="side-slot" ref={setSideSlot} />}
       </div>
+      <SideSlot.Provider value={sideways ? sideSlot : null}>
       <div className="main">
 
       {note && <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>{note}</p>}
@@ -380,7 +386,9 @@ export default function PhoneRoom() {
         </section>
       ) : (
         <section className="flex flex-col gap-3 enter">
-          {/* your team's card, lit in its colour, with who's on it (the captain first, with the armband) */}
+          {/* your team's card, lit in its colour, with who's on it (the captain first, with the armband); a phone on its
+              side shows it in the left column, under the sign */}
+          <ToSide order={3}>
           <div className="mq-team" style={{ ["--c" as string]: manyColor || `var(--color-${side})` }}>
             <div className="eyebrow">You&rsquo;re on</div>
             <div className="tn"><bdi>{many ? manyNames(room, teamCount)[mine.team as number] : teamName(room, mine.team)}</bdi></div>
@@ -394,6 +402,7 @@ export default function PhoneRoom() {
                   </li>); })}
             </ul>
           </div>
+          </ToSide>
           {mine.role === "captain" ? (
             <div className="card flex flex-col gap-3">
               <div className="flex items-center gap-2"><b className="arm-c lg" aria-hidden>C</b><span className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</span></div>
@@ -482,6 +491,7 @@ export default function PhoneRoom() {
         </footer>
       )}
       </div>
+      </SideSlot.Provider>
     </main>
   );
 }

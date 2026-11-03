@@ -13,6 +13,7 @@ import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
+import { ToSide } from "../Side";
 import { Dot, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
@@ -79,20 +80,20 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   /* what's on screen, close up: the flag, the photo, the question, and the clock. It can't be selected or copied */
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
     <div className="noselect contents" {...noCopy}>
-      {g.key === "flag" && <FlagImg name={pub.flag} h={small ? 110 : 150} />}
+      {g.key === "flag" && <ToSide order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 110 : 150} /></ToSide>}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
       {g.key === "map" && pub.map && <MapView id={pub.map.id} reveal={false} maxH={small ? 180 : 240} legend={false} />}
-      {g.key === "dish" && pub.dish && (
+      {g.key === "dish" && pub.dish && (<ToSide order={4} className="noselect" {...noCopy}>
         <div className="card !py-2">
           <div className="eyebrow mb-1" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div>
           <ol className="flex flex-col gap-0.5 text-15">{pub.dish.ings.map((t, i) => { const [qty, name] = splitIng(t); return <li key={i} className="flex gap-2 items-baseline"><b>{name}</b>{qty && <span className="text-13 text-[var(--color-ink-2)]">{qty}</span>}</li>; })}</ol>
-        </div>)}
-      {g.key === "quiz" && pub.theme && <div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
-      {g.key === "pin" && (small
-        ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
-        : <PinPhoto pin={pub.pin} h={230} small zoom />)}
-      {pub.question && <p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p>}
-      {!(small && g.key === "pin") && <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} size={small ? 70 : 90} /></div>}
+        </div></ToSide>)}
+      {g.key === "quiz" && pub.theme && <ToSide order={2}><div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div></ToSide>}
+      {g.key === "pin" && <ToSide order={4} className="noselect" {...noCopy}>{small
+        ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
+        : <PinPhoto pin={pub.pin} h={230} small zoom />}</ToSide>}
+      {pub.question && <ToSide order={3} className="noselect" {...noCopy}><p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p></ToSide>}
+      {!(small && g.key === "pin") && <ToSide order={9}><div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} size={small ? 70 : 90} /></div></ToSide>}
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (

@@ -11,6 +11,7 @@ import { friendly } from "@/lib/errors";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
+import { ToSide } from "./Side";
 import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
@@ -311,11 +312,13 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>);
     case "ask": case "steal": return (
       <div className="flex flex-col gap-3 flex-1">
+        <ToSide order={2}>
         <AskHead pub={pub} size="phone" />
         <div className="flex items-start gap-3">
           <p className={qCls(pub.question) + " leading-snug flex-1"}>{pub.question}</p>
           <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} />
         </div>
+        </ToSide>
         <AnswerCard />
         <div className="flex flex-col gap-2 mt-auto">
           <Typed t={turn} />
@@ -844,19 +847,21 @@ function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnl
    the clock is paused it's hidden. */
 const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onContextMenu: (e: React.MouseEvent) => e.preventDefault() };
 /* counting: this phone counts the Auction's names, and shows its own count */
-function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; small?: boolean }) {
+/* side: on a phone held sideways, the question, the flag, the photo, the recipe and the clock go to the left column
+   (components/Side; upright nothing moves) */
+function OnScreen({ pub, counting, small, side }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean }) {
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
-    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p>}
+    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <ToSide when={side} order={3} className="noselect" {...noCopy}><p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p></ToSide>}
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
     {/* the fact behind it, right under the answer */}
     {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
-    {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
-    {pub.screen === "pinQ" && (small
+    {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <ToSide when={side} order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 96 : 150} /></ToSide>}
+    {pub.screen === "pinQ" && <ToSide when={side} order={4} className="noselect" {...noCopy}>{small
       /* the captain's phone: the photo beside the clock, so the map gets the room */
-      ? <div className="flex items-center justify-center gap-4"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
-      : <PinPhoto pin={pub.pin} h={230} small zoom />)}
+      ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
+      : <PinPhoto pin={pub.pin} h={230} small zoom />}</ToSide>}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <PinMap marks={pinMarks(pub)} fly height={small ? 220 : 300} label={`Where it is: ${pub.pin.reveal.place}`} />}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <div className="text-center"><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.pin.reveal.name}</div>
       <div className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pin.reveal.place}</div></div>}
@@ -868,12 +873,12 @@ function OnScreen({ pub, counting, small }: { pub: Pub; counting?: boolean; smal
       {pub.screen === "auctionBid" && <BidBoard pub={pub} />}
       {pub.screen === "auctionRun" && !counting && <div className="display text-44 mt-1">{pub.auction.count} / {pub.auction.bid}</div>}
       {pub.screen === "auctionRun" && pub.auction.countedBy && <div className="text-13 text-[var(--color-ink-2)] mt-1">Counted by <b>{pub.auction.countedBy}</b></div>}</div>}
-    {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
+    {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <ToSide when={side} order={4} className="noselect" {...noCopy}><div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div></ToSide>}
     {pub.reveal && /Reveal$/.test(pub.screen) && !["mapReveal", "sayReveal", "pinReveal"].includes(pub.screen) && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.airport.cityOk === false && <span className="block mt-1 text-13 font-bold" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</span>}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"].includes(pub.screen) && !(small && pub.screen === "pinQ") && <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || small ? 70 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div>}
+    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"].includes(pub.screen) && !(small && pub.screen === "pinQ") && <ToSide when={side} order={9}><div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || small ? 70 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div></ToSide>}
     {/* the Battle: the last answer, once there's no new question to read (during the questions it's on the TV only) */}
     {pub.battle?.half?.length && pub.screen === "battleHandoff" ? <BattleHalf half={pub.battle.half} />
       : pub.battle?.last && /^battle(Handoff|Summary)$/.test(pub.screen) && <BattleAnswer last={pub.battle.last} />}
@@ -931,6 +936,8 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
 }
 
 const QUIET = ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ"];
+/* a phone held sideways: on these, the top line (the question's title, or what to do) goes to the left column too */
+const SIDE_Q = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"];
 function status(pub: Pub, me: Member) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend" : "Double Dip: two answers") : `${T[pub.lifeline.team].name} used a lifeline`;
@@ -999,9 +1006,9 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
           {pred != null ? <p className="text-15">You said <b>{pred}</b>. The summary tells.</p>
             : <div className="grid grid-cols-6 gap-1.5">{Array.from({ length: pub.battle!.n + 1 }, (_, n) => <button key={n} className="btn btn-sm" disabled={predBusy} onClick={() => void predict(n)}>{n}</button>)}</div>}
         </div>)}
-      <Head pub={pub} me={me} capName={cap?.name} />
+      <ToSide order={2} when={SIDE_Q.includes(pub.screen) && !pub.paused}><Head pub={pub} me={me} capName={cap?.name} /></ToSide>
       <Result pub={pub} mine={mine} part="pill" />
-      <OnScreen pub={pub} />
+      <OnScreen pub={pub} side />
       {/^majority(Q|Reveal)$/.test(pub.screen) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} part="rest" />
       {canSuggest && (
@@ -1194,9 +1201,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {no && <p className="text-center text-14 font-bold enter" role="alert" style={{ color: "var(--color-gold)" }}>{no}</p>}
       {nohost && <AgreeCard pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
       {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
-      <Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} />
+      <ToSide order={2} when={SIDE_Q.includes(sc) && !pub.paused}><Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} /></ToSide>
       <Result pub={pub} mine={mine} part="pill" />
-      <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} />
+      <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side />
       {/^majority(Q|Reveal)$/.test(sc) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} part="rest" />
       {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
