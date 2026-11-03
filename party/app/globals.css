@@ -609,6 +609,13 @@ button.ll:not([disabled]):active { transform: scale(.97); }
   background: color-mix(in srgb, var(--color-bg) 94%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   border-top: 1px solid rgba(185,192,222,.14); display: flex; flex-direction: column; gap: 8px; }
 .start-bar .btn { min-height: 52px; }
+/* wider than a phone (a laptop, a tablet): the bar runs the full width of the window, not a dark box the width of
+   the column (the owner, 3 Nov). Painted with an outset border image, which overflows the window without making
+   it scroll sideways. Phones, and phones on their side, keep the bar as it was. */
+@media (min-width: 561px) and (min-height: 501px) {
+  .start-bar { background: none; border-top: 0;
+    border-image: linear-gradient(to bottom, rgba(185,192,222,.14) 0 1px, color-mix(in srgb, var(--color-bg) 94%, transparent) 1px) fill 0 / 0 / 0 100vmax; }
+}
 /* the night's winner, on the phones' last screen */
 .winner-card { border-radius: 22px; padding: 18px 16px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
   background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--wc) 26%, transparent), rgba(255,255,255,.02) 70%);
