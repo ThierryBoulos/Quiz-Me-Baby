@@ -900,16 +900,22 @@ function OnScreen({ pub, counting, small, side }: { pub: Pub; counting?: boolean
 }
 
 /* the Battle at halfway: every one of the first captain's answers, the right one beside each miss */
+/* (3 Nov, the owner: no RIGHT/WRONG word, which ran off a phone's edge: the captain's answer in green or red, with a
+   small tick or cross in front for anyone who can't tell the two apart, and the right answer after a wrong one, in
+   grey. Long ones wrap, nothing is cut) */
 export function BattleHalf({ half, size = 14, cols = 1 }: { half: NonNullable<NonNullable<Pub["battle"]>["half"]>; size?: number; cols?: number }) {
   return (
-    <div className="grid grid-flow-col gap-x-14 gap-y-1 w-full" style={{ fontSize: size, gridTemplateRows: `repeat(${Math.ceil(half.length / cols)}, auto)` }}>
-      {half.map((e, i) => (
-        <div key={i} className="flex items-baseline gap-2 text-left">
-          <span className="text-[var(--color-ink-3)] shrink-0" style={{ width: size * 1.6 }}>{i + 1}</span>
-          <span className="flex-1 min-w-0 truncate">{e.said || <span className="text-[var(--color-ink-3)]">No answer</span>}
+    <div className="grid grid-flow-col gap-x-14 gap-y-1.5 w-full" style={{ fontSize: size, gridTemplateRows: `repeat(${Math.ceil(half.length / cols)}, auto)`, gridAutoColumns: "minmax(0, 1fr)" }}>
+      {half.map((e, i) => { const c = e.got === true ? "var(--color-ok)" : e.got === false ? "var(--color-no)" : "var(--color-ink-2)"; return (
+        <div key={i} className="flex items-baseline gap-2 text-left min-w-0">
+          <span className="text-[var(--color-ink-3)] shrink-0 tabular-nums" style={{ width: size * 1.6 }}>{i + 1}</span>
+          <span className="flex-1 min-w-0 break-words leading-snug">
+            <span className="font-bold" style={{ color: c }}>
+              {e.got != null && <span aria-label={e.got ? "right:" : "wrong:"} className="mr-1">{e.got ? "\u2713" : "\u2717"}</span>}
+              {/* (said aloud, with a host, nothing was typed: the answer itself when right, "Missed" when not) */}
+              {e.said || (e.got && e.answer) || (e.got === false ? "Missed" : <span className="font-normal text-[var(--color-ink-3)]">No answer</span>)}</span>
             {!e.got && e.answer && <span className="text-[var(--color-ink-3)]"> · {e.answer}</span>}</span>
-          <Verdict v={e.got} size={Math.round(size * 0.9)} />
-        </div>))}
+        </div>); })}
     </div>);
 }
 
