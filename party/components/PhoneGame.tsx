@@ -695,7 +695,10 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
         {C.map((c) => { const dim = { opacity: K && K.id !== c.id ? 0.6 : 1 }; return (
           <Fragment key={c.id}>
             {/* the name cut short, the answer whole: this list is the only place a captain sees what was typed (29 Oct) */}
-            <span className="font-bold max-w-[88px] truncate" style={{ color: tc(c.team), ...dim }} title={T[c.team].name}>{T[c.team].name}{c.note && !lastQ ? <span className="font-normal text-12 text-[var(--color-ink-3)]"> · {c.note}</span> : null}</span>
+            {/* (its note, "steal" or "a new question", on its own line under the name: beside it, it was cut to "s…", 3 Nov) */}
+            <span className="max-w-[96px] min-w-0 flex flex-col leading-tight" style={dim}>
+              <span className="font-bold truncate" style={{ color: tc(c.team) }} title={T[c.team].name}>{T[c.team].name}</span>
+              {c.note && !lastQ && <span className="text-12 text-[var(--color-ink-3)]">{c.note}</span>}</span>
             <span className="min-w-0 break-words text-[var(--color-ink-2)]" style={dim}>{c.text || "No answer"}
               {c.answer && !c.ok && <span className="block break-words text-12 text-[var(--color-ink-3)]">Answer: {c.answer}</span>}</span>
             <span className="justify-self-start" style={dim}><Verdict v={c.ok} say={say} size={13} /></span>
