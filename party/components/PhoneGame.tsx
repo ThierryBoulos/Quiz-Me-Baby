@@ -694,20 +694,25 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
     <div className="flex flex-col gap-2">
       {/* one grid for every call, so the names, the answers, the RIGHT/WRONG and the Contest each line up in a column */}
       {/* in the results table's frame (the owner's pick, 1 Nov), with the Contest beside each call */}
-      {!cardOnly && <div className={"rtable-box grid items-center gap-x-2 gap-y-1.5 text-14" + (C.length > 6 ? " max-h-[52vh] overflow-y-auto pr-1" : "")}
-        style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto auto" }}>
-        {lastQ && <div className="eyebrow text-center col-span-4">The last question</div>}
-        {C.map((c) => { const dim = { opacity: K && K.id !== c.id ? 0.6 : 1 }; return (
+      {/* (3 Nov, the owner: no RIGHT/WRONG word, which crowded the row: what was typed in green or red, with a tick or a
+          cross for anyone who can't tell the two apart, and the right answer after a wrong one, in grey. A long list (the
+          Battle's twenty) puts each team's name once, as a heading, and numbers its rows) */}
+      {!cardOnly && <div className={"rtable-box grid items-center gap-x-3 gap-y-1.5 text-14" + (C.length > 6 ? " max-h-[52vh] overflow-y-auto pr-1" : "")}
+        style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto" }}>
+        {lastQ && <div className="eyebrow text-center col-span-3">The last question</div>}
+        {C.map((c, i) => { const dim = { opacity: K && K.id !== c.id ? 0.6 : 1 }, grouped = C.length > 4, head = grouped && (i === 0 || C[i - 1].team !== c.team);
+          const col = c.ok ? "var(--color-ok)" : "var(--color-no)", said = c.text || (c.ok && c.answer) || (say ? "" : "No answer"); return (
           <Fragment key={c.id}>
+            {head && <div className={"col-span-3 font-bold text-13 eyebrow" + (i ? " mt-2" : "")} style={{ color: tc(c.team) }}>{T[c.team].name}</div>}
             {/* the name cut short, the answer whole: this list is the only place a captain sees what was typed (29 Oct) */}
             {/* (its note, "steal" or "a new question", on its own line under the name: beside it, it was cut to "s…", 3 Nov) */}
             <span className="max-w-[96px] min-w-0 flex flex-col leading-tight" style={dim}>
-              <span className="font-bold truncate" style={{ color: tc(c.team) }} title={T[c.team].name}>{T[c.team].name}</span>
-              {c.note && !lastQ && <span className="text-12 text-[var(--color-ink-3)]">{c.note}</span>}</span>
-            <span className="min-w-0 break-words text-[var(--color-ink-2)]" style={dim}>{c.text || "No answer"}
-              {c.answer && !c.ok && <span className="block break-words text-12 text-[var(--color-ink-3)]">Answer: {c.answer}</span>}</span>
-            <span className="justify-self-start" style={dim}><Verdict v={c.ok} say={say} size={13} /></span>
-            <span className="justify-self-start min-h-[36px] flex items-center" style={dim}>
+              {!grouped && <span className="font-bold truncate" style={{ color: tc(c.team) }} title={T[c.team].name}>{T[c.team].name}</span>}
+              {c.note && !lastQ && <span className={grouped ? "text-13 tabular-nums text-[var(--color-ink-3)]" : "text-12 text-[var(--color-ink-3)]"}>{c.note}</span>}</span>
+            <span className="min-w-0 break-words leading-snug" style={dim}>
+              <span className="font-bold" style={{ color: col }}><span aria-label={say ? (c.ok ? "dodged it:" : "said it:") : c.ok ? "right:" : "wrong:"} className="mr-1">{c.ok ? "\u2713" : "\u2717"}</span>{said}</span>
+              {c.answer && !c.ok && <span className="text-[var(--color-ink-3)]">{said ? " · " : ""}{c.answer}</span>}</span>
+            <span className="justify-self-end min-h-[36px] flex items-center" style={dim}>
               {host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
                 : !c.done && !K && mine != null && (c.team === mine ? !c.ok : c.ok) ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[36px] px-1" disabled={busy}
                   onClick={() => act({ type: "ui/contest", id: c.id })}>Contest</button> : null}</span>
@@ -953,7 +958,18 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   if (RESULT.test(pub.screen)) return null;            // the result says it
   /* on a question, the question (or flag, or map) is the thing to look at: the instruction steps back */
   const quiet = QUIET.includes(pub.screen) && !pub.paused;
-  return <p className={"text-center leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite">{status(pub, me, noTv)}</p>;
+  /* your move now (gold) or stay out of it (grey), so "Type it fast!" and "Not a word!" can't be mixed up (3 Nov) */
+  const tone = statusTone(pub, me);
+  return <p className={"text-center leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite"
+    style={!quiet && tone ? { color: tone === "go" ? "var(--color-gold)" : "var(--color-ink-3)" } : undefined}>{status(pub, me, noTv)}</p>;
+}
+function statusTone(pub: Pub, me: Member): "go" | "hush" | null {
+  const mine = me.team, cap = me.role === "captain", sc = pub.screen;
+  if (pub.lifeline || pub.paused) return null;
+  if (sc === "battleQ") return cap && pub.battle?.cap === mine ? "go" : "hush";
+  if (sc === "battleTie" || sc === "sudden") return cap ? "go" : "hush";
+  if (sc === "dishQ" && cap && pub.buzz === mine && !pub.sent?.[mine as 0 | 1]) return "go";
+  return null;
 }
 
 const QUIET = ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ"];
