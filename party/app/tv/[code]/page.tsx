@@ -21,6 +21,7 @@ import { TvMany } from "@/components/many/TvMany";
 import { manyNotReady, teamCountOf, useTvMany } from "@/lib/many/useTvMany";
 import { MANY_MAX } from "@/lib/many/logic";
 import { isNoTv } from "@/components/NoTv";
+import { useLiveRoom } from "@/lib/liveCount";
 import type { PubMany } from "@/lib/many/view";
 
 /* THE TV. No buttons: it shows the room and runs the night. Phones send it
@@ -29,6 +30,7 @@ import type { PubMany } from "@/lib/many/view";
 export default function TvRoom() {
   const { code } = useParams<{ code: string }>();
   const { room, members } = useRoom(code);
+  useLiveRoom(code);
   const router = useRouter();
   const [me, setMe] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");

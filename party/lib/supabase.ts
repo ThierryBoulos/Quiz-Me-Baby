@@ -71,8 +71,12 @@ export async function sendAction(room: string, kind: string, payload: Record<str
   /* a tag the TV hands back once it has dealt with this tap (pub.ack), taken or not */
   const tap = typeof payload.tap === "string" ? payload.tap : newTap();
   payload = { ...payload, tap };
-  /* about to go: the room page notes the TV's latest update now, as the TV's reply can land before the send returns */
-  if (typeof window !== "undefined" && kind !== "suggest") window.dispatchEvent(new Event("qmb:sending"));
+  /* quick same-screen taps (+1, undo, marking right/wrong, pause): counting names fast must stay fast, nothing waits on them */
+  const move = (payload.move as { type?: string } | undefined)?.type || "";
+  const quick = ["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/airportOk", "ui/pause"].includes(move);
+  /* about to go: the room page notes the TV's latest update now, as the TV's reply can land before the send returns
+     (and, for a tap that waits, counts its half second of "still looks lit" from now: see the room page) */
+  if (typeof window !== "undefined" && kind !== "suggest") window.dispatchEvent(new CustomEvent("qmb:sending", { detail: { quick } }));
   /* (a suggestion isn't sent twice: the captain's list would show it twice, and it's never in a hurry) */
   const error = kind === "suggest"
     ? await sb().from("actions").insert({ room, kind, payload }).then((r) => r.error, (e) => ({ message: e instanceof Error ? e.message : String(e) }))
@@ -82,11 +86,9 @@ export async function sendAction(room: string, kind: string, payload: Record<str
     if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("qmb:failed", { detail: friendly(error.message) }));
     throw Object.assign(new Error(error.message), { announced: true });
   }
-  /* sent — the phone now waits for the TV's answer (see useWaiting) */
-  /* except quick same-screen taps (+1, undo, marking right/wrong, pause): counting names fast must stay fast */
-  const move = (payload.move as { type?: string } | undefined)?.type || "";
-  const quick = ["auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/airportOk", "ui/pause"].includes(move);
+  /* sent — the phone now waits for the TV's answer (see the room page), except after a quick tap */
   if (typeof window !== "undefined" && kind !== "suggest" && !quick) window.dispatchEvent(new Event("qmb:sent"));
+  if (typeof window !== "undefined" && kind !== "suggest") window.dispatchEvent(new Event("qmb:landed"));
   return tap;
 }
 

@@ -27,6 +27,7 @@ import { NoTv, isNoTv } from "@/components/NoTv";
 import { useTvGame } from "@/lib/tvGame";
 import { useTvMany } from "@/lib/many/useTvMany";
 import { useTabLock } from "@/lib/tabLock";
+import { useLiveRoom } from "@/lib/liveCount";
 import { useWakeLock } from "@/lib/wakeLock";
 import { cap1, useAwayWatch, notReadyWhy, readyToStart, starter, teamName, usePresence, useRoom, type Member } from "@/lib/room";
 
@@ -53,8 +54,13 @@ export default function PhoneRoom() {
      if nothing comes back in 8 s the phone says so (and takes it back if the reply comes after all), and a tap that couldn't even leave says so at once. */
   const [waiting, setWaiting] = useState(false);
   const noTvRef = useRef(false);
+  /* the tap on its way to the server (before it waits for the reply). The half second in which the buttons still look
+     lit counts from the tap, not from when it reached the server: counted from there, a button dimmed while the tap
+     went, lit up again, then dimmed with the bar (3 Nov, on a phone: "turning on and off") */
+  const [inFlight, setInFlight] = useState(false);
+  const busyAny = waiting || inFlight;
   const [waitLong, setWaitLong] = useState(false);
-  useEffect(() => { if (!waiting) { setWaitLong(false); return; } const t = setTimeout(() => setWaitLong(true), 450); return () => clearTimeout(t); }, [waiting]);
+  useEffect(() => { if (!busyAny) { setWaitLong(false); return; } const t = setTimeout(() => setWaitLong(true), 450); return () => clearTimeout(t); }, [busyAny]);
   const [lineupOpen, setLineupOpen] = useState(false);
   const [tapErr, setTapErr] = useState<string | null>(null);
   /* where the failed tap was: the message sits just under that button (above it when the button is docked at the bottom) */
@@ -67,7 +73,8 @@ export default function PhoneRoom() {
     let t: ReturnType<typeof setTimeout> | undefined, again: ReturnType<typeof setTimeout>[] = [];
     const stop = () => { clearTimeout(t); again.forEach(clearTimeout); again = []; waitRef.current.on = false; setWaiting(false); };
     /* the TV's latest update just before the tap went: any newer one is its reply, even one that beat the send back */
-    const sending = () => { sendKey.current = viewKey.current; };
+    const sending = (e: Event) => { sendKey.current = viewKey.current; if (!(e as CustomEvent<{ quick?: boolean }>).detail?.quick) setInFlight(true); };
+    const landed = () => setInFlight(false);
     const on = () => {
       clearTimeout(t); setTapErr(null); lateKey.current = null;
       if (viewKey.current !== sendKey.current) { stop(); return; }   // the reply is already here
@@ -85,7 +92,7 @@ export default function PhoneRoom() {
       setTapAt(window.innerHeight - r.bottom > 90 ? { top: r.bottom + 8 } : { bottom: window.innerHeight - r.top + 8 });
     };
     const failed = (e: Event) => {
-      stop(); place();
+      stop(); place(); setInFlight(false);
       const said = (e as CustomEvent<string>).detail;
       setTapErr(!said || /^No connection/.test(said) ? "No connection. Tap again." : said);
     };
@@ -97,8 +104,9 @@ export default function PhoneRoom() {
     window.addEventListener("qmb:sending", sending);
     window.addEventListener("qmb:sent", on);
     window.addEventListener("qmb:failed", failed);
+    window.addEventListener("qmb:landed", landed);
     return () => {
-      window.removeEventListener("qmb:sending", sending); window.removeEventListener("qmb:sent", on); window.removeEventListener("qmb:failed", failed); window.removeEventListener("qmb:late", late);
+      window.removeEventListener("qmb:sending", sending); window.removeEventListener("qmb:sent", on); window.removeEventListener("qmb:failed", failed); window.removeEventListener("qmb:late", late); window.removeEventListener("qmb:landed", landed);
       document.removeEventListener("pointerdown", tapped, true); document.removeEventListener("keydown", tapped, true); clearTimeout(t); again.forEach(clearTimeout);
     };
   }, []);
@@ -111,6 +119,7 @@ export default function PhoneRoom() {
   noTvRef.current = noTv;
   const referee = noTv && !!room && !!me && room.tv_id === me;
   const report = usePresence(code, me, referee);
+  useLiveRoom(code);
   const mine = useMemo(() => members.find((m) => m.user_id === me) || null, [members, me]);
 
   /* not in this room (yet): to the join screen with the code filled in. But only once sure: a phone waking
@@ -318,9 +327,9 @@ export default function PhoneRoom() {
     </>);
 
   return (<NoTv.Provider value={noTv}>
-    <main className={"screen split" + (lobby ? " mq mq-room" + lights : "")} data-soft={waiting && !waitLong ? "" : undefined}>
+    <main className={"screen split" + (lobby ? " mq mq-room" + lights : "")} data-soft={busyAny && !waitLong ? "" : undefined}>
       {lobby && <MqStage />}
-      {waiting && waitLong && <div className="sending" role="progressbar" aria-label="Sending" />}
+      {busyAny && waitLong && <div className="sending" role="progressbar" aria-label="Sending" />}
       {tapErr && <div className="fixed left-4 right-4 enter text-center font-bold rounded-[16px]" role="alert" data-taperr
         style={{ zIndex: 50, ...(tapAt ?? { top: "calc(12px + env(safe-area-inset-top))" }), fontSize: 15, padding: "12px 16px", background: "#2a0d16", border: "1px solid var(--color-no)", color: "#ffd5dc",
           boxShadow: "0 12px 30px rgba(0,0,0,.6)" }}>{tapErr}</div>}

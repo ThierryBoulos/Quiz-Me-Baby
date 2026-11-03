@@ -13,6 +13,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { ToSide } from "./Side";
+import { sayCount, useLiveCount } from "@/lib/liveCount";
 import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
@@ -104,7 +105,8 @@ function Counter({ A, fire, h, fs, children }: { A: NonNullable<Pub["auction"]>;
   useEffect(() => { if (opt && opt.leg === leg && A.count === opt.n) setOpt(null); }, [A.count, opt, leg]);
   useEffect(() => { if (!opt) return; const t = setTimeout(() => setOpt(null), 6000); return () => clearTimeout(t); }, [opt]);
   const shown = opt && opt.leg === leg ? opt.n : A.count;
-  const tap = (d: 1 | -1) => { setOpt({ leg, n: Math.max(0, shown + d) }); fire({ type: d > 0 ? "auction/tick" : "auction/untick" }); buzzHand(15); };
+  /* (and says its number on the room's live channel: the other phones and the TV show it at once, lib/liveCount) */
+  const tap = (d: 1 | -1) => { const n = Math.max(0, shown + d); setOpt({ leg, n }); sayCount(leg, n); fire({ type: d > 0 ? "auction/tick" : "auction/untick" }); buzzHand(15); };
   /* Every touch counts, however fast. An iPhone can take two quick taps on the same spot for one double
      tap and never send the second "click" (GRF2: the host had to tap +1 twice, again and again), so this
      counts when the finger lifts, which comes for every touch; a click counts only from the keyboard. */
@@ -118,6 +120,9 @@ function Counter({ A, fire, h, fs, children }: { A: NonNullable<Pub["auction"]>;
     <div className="flex gap-2 justify-center"><button className="btn btn-sm" {...press(-1)}>Undo</button>{children}</div>
   </>);
 }
+
+/* the Auction's count on a phone that isn't counting: the counting phone's number, live (lib/liveCount) */
+function LiveN({ A }: { A: NonNullable<Pub["auction"]> }) { return <>{useLiveCount(`${A.leg}:${A.cat}`, A.count)}</>; }
 
 /* ---- Majority Rules ---- */
 /* this phone's own order of the four answers: the same all question long, different on every phone
@@ -880,7 +885,7 @@ function OnScreen({ pub, counting, small, side }: { pub: Pub; counting?: boolean
     {pub.auction && pub.screen === "auctionLeg" && <p className="text-center text-14 text-[var(--color-ink-2)]"><span className="eyebrow mr-2">Leg {pub.auction.wins[0] + pub.auction.wins[1]}</span>{pub.auction.cat}</p>}
     {pub.auction && /^auction(Bid|Run)$/.test(pub.screen) && <div className="text-center"><div className="eyebrow">Category</div><div className="display text-28" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>
       {pub.screen === "auctionBid" && <BidBoard pub={pub} />}
-      {pub.screen === "auctionRun" && !counting && <div className="display text-44 mt-1">{pub.auction.count} / {pub.auction.bid}</div>}
+      {pub.screen === "auctionRun" && !counting && <div className="display text-44 mt-1"><LiveN A={pub.auction} /> / {pub.auction.bid}</div>}
       {pub.screen === "auctionRun" && pub.auction.countedBy && <div className="text-13 text-[var(--color-ink-2)] mt-1">Counted by <b>{pub.auction.countedBy}</b></div>}</div>}
     {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <ToSide when={side} order={4} className="noselect" {...noCopy}><div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div></ToSide>}
     {pub.reveal && /Reveal$/.test(pub.screen) && !["mapReveal", "sayReveal", "pinReveal"].includes(pub.screen) && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}

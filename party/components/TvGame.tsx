@@ -12,6 +12,7 @@ import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
 import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
 import { NightIntroTv } from "./NightIntro";
+import { useLiveCount } from "@/lib/liveCount";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -243,6 +244,15 @@ function NumberLine({ pub, ans, w }: { pub: Pub; ans: number; w: 0 | 1 | "tie" |
 
 /* the Auction's run: a notch per answer counted, up to the bid. A big bid (over 12) is one bar instead, marked
    every 5, so 25 never means 25 dots. Full, it glows green. */
+/* the count, big, and the bar: the counting phone's number, live (lib/liveCount), until the game's catches up */
+function AuctionCount({ A, color }: { A: NonNullable<Pub["auction"]>; color: string }) {
+  const n = useLiveCount(`${A.leg}:${A.cat}`, A.count);
+  return (<>
+    <div className="display auc-count" style={{ fontSize: 170, lineHeight: 1 }}><span key={n} className="bump inline-block">{n}</span><span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span></div>
+    {/* a notch for each one named, up to the bid (a long bid fills a bar); full, it glows */}
+    <BidBar n={n} of={A.bid} color={color} />
+  </>);
+}
 function BidBar({ n, of, color }: { n: number; of: number; color: string }) {
   if (!of) return null;
   const full = n >= of;
@@ -458,9 +468,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     if (sc === "auctionRun") return (<>
       <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{A.cat}</div>
       <div className="display text-44" style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}: name {A.bid}!</div>
-      <div className="display auc-count" style={{ fontSize: 170, lineHeight: 1 }}><span key={A.count} className="bump inline-block">{A.count}</span><span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span></div>
-      {/* a notch for each one named, up to the bid (a long bid fills a bar); full, it glows */}
-      <BidBar n={A.count} of={A.bid} color={tc(A.by)} />
+      <AuctionCount A={A} color={tc(A.by)} />
       <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
       {A.countedBy && <div className="text-22 text-[var(--color-ink-2)]">Counted by <b>{A.countedBy}</b></div>}
     </>);
