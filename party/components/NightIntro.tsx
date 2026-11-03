@@ -82,8 +82,8 @@ export function NightIntroPhone({ intro: I, go, goAt, busy, who }: { intro: Intr
     <section className="flex flex-col gap-3 enter flex-1">
       <div className="card text-center">
         <div className="eyebrow">Tonight</div>
-        <h1 className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{noTv ? "Tonight\u2019s game" : "Eyes on the TV"}</h1>
-        <p className="text-14 text-[var(--color-ink-2)] mt-1">{[qs ? plural(qs, "question round", "question rounds") : "", ms ? plural(ms, "mini-game", "mini-games") : ""].filter(Boolean).join(" and ")}. The plan is on the TV.</p>
+        <h1 className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{noTv ? "Here\u2019s the plan" : "Eyes on the TV"}</h1>
+        <p className="text-14 text-[var(--color-ink-2)] mt-1">{[qs ? plural(qs, "question round", "question rounds") : "", ms ? plural(ms, "mini-game", "mini-games") : ""].filter(Boolean).join(" and ")}.{noTv ? "" : " The plan is on the TV."}</p>
       </div>
       <ol className="card ni-phone" aria-label="Tonight's game, in order">
         {I.items.map((x) => (

@@ -1221,6 +1221,9 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 [data-look="house"] .hud.tv.many .hud-mid { margin-top: 10px; }
 [data-look="house"] .hud.tv.many > .pips + .hud-mid { margin-top: 0; }
 [data-look="house"] .hud.phone .hud-team { margin-block: -6px; }
+/* a phone's header a little tighter: less air above the scores (under your name and the code) and under the game's
+   line (3 Nov, the owner: "a tiny bit") */
+[data-look="house"] .hud.phone { padding-top: 4px; padding-bottom: 8px; }
 /* two teams on a phone: the night's dots come first under the plates, so they get a little air from them */
 [data-look="house"] .hud.phone:not(.many) .hud-mid { margin-top: 4px; }
 /* Majority Rules' start on the TV (two teams): its rules ran off the bottom of the screen; a little tighter, it all shows */
