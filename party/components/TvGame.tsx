@@ -129,9 +129,9 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
             <div className="flex flex-wrap justify-center gap-3 enter w-full max-w-[1168px]" style={{ position: "relative", zIndex: 60 }}>
               {A.map((a) => (
                 <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ width: `calc((100% - ${(cols - 1) * 12}px) / ${cols})`, borderColor: a.team != null ? tc(a.team) : undefined }}>
-                  <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
+                  <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
                   <div className="text-15 font-bold leading-snug" style={{ color: a.team != null ? tc(a.team) : undefined }}><bdi>{a.who}</bdi></div>
-                  {a.note && <div className="text-12 text-[var(--color-ink-2)] italic line-clamp-2">{a.note}</div>}
+                  {a.note && <div className="text-18 text-[var(--color-ink-2)] italic line-clamp-2">{a.note}</div>}
                 </div>))}
             </div>); })()}
           {(pub.flags?.length ?? 0) > 0 && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}

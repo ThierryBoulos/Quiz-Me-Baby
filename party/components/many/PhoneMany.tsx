@@ -202,7 +202,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {(() => { const who = T.map((_, i) => i).filter((i) => !g.only || g.only.includes(i)), n = who.filter((i) => pub.sent[i]).length; return (
           <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who has answered">
             <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered` : `${n} of ${who.length} teams answered`}</p>
-            <div className={"grid gap-x-3 gap-y-1 " + (T.some((t) => t.name.length > 8) ? "grid-cols-1" : "grid-cols-2")}>
+            <div className={"who-grid grid gap-x-3 gap-y-1 " + (T.some((t) => t.name.length > 8) ? "grid-cols-1" : "grid-cols-2")}>
               {who.map((i) => { const out = (secret.out ?? pub.out)?.[i], t = T[i], on = pub.sent[i] && !out; return (
                 <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
                   <Dot t={i} color={t.color} size={14} /><span className="truncate flex-1"><bdi>{t.name}</bdi></span>

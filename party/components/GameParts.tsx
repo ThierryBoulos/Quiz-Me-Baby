@@ -308,9 +308,11 @@ export function AskHead({ pub, you, go, size }: { pub: Pub; you?: string; go?: b
   const t = (pub.turn ?? 0) as 0 | 1, T = pub.teams, steal = pub.screen === "steal", tv = size === "tv";
   const armed = !steal && !!pub.dbl?.[t];
   /* phones, a team's own question: one line, "THEME · Question for TEAM", so Send stays on screen (29 Oct, C18 B) */
-  if (!tv && !steal) return (
+  /* (the steal too, in one line: sideways, its four lines pushed the question off the left column: the 4 Nov audit, 1.20) */
+  if (!tv) return (
     <div className="flex flex-col items-center text-center gap-1.5">
-      <p className={"whofor " + side(t)} style={{ fontSize: 18 }}><span className="text-[var(--color-ink-2)]">{pub.theme}{armed ? " · Double points" : ""} · </span>Question for <b>{T[t].name}</b></p>
+      <p className={"whofor " + side(t)} style={{ fontSize: 18 }}>{steal ? <><span style={{ color: "var(--color-gold)" }}>Steal · </span>for <b>{T[t].name}</b><span className="text-[var(--color-ink-2)]"> · no lifelines</span></>
+        : <><span className="text-[var(--color-ink-2)]">{pub.theme}{armed ? " · Double Points" : ""} · </span>Question for <b>{T[t].name}</b></>}</p>
       {you && <p className={"you-line mt-1 " + (go ? "go" : "")}>{you}</p>}
     </div>);
   return (

@@ -1318,3 +1318,20 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .hud-strip .hs.me { color: var(--c); border-color: color-mix(in srgb, var(--c) 60%, transparent); background: color-mix(in srgb, var(--c) 12%, transparent); }
 .hud-strip .hs.me b { color: var(--c); }
 .hud-strip .hs.me .hs-nm { max-width: 110px; }
+
+/* the phone's departures board (the 4 Nov audit, 3.4): the status column gets the room it needs ("Embarquement" was cut,
+   and the status is a clue), the destinations the rest */
+.board .board-row:not(.tv) { grid-template-columns: 3.1em minmax(0, 1fr) 4.4em minmax(0, 1fr); gap: .45em; padding: .26em .2em; }
+.board .board-row:not(.tv) .b-status { white-space: normal; overflow: visible; line-height: 1.1; font-size: .82em; }
+/* up to four teams, "This game" stays on one line (Team D was left alone on a second one: the 4 Nov audit, 3.6) */
+.hud.tv.many:not(.mid):not(.stack) .hud-mini.game-line { flex-wrap: nowrap; column-gap: 32px; }
+.hud.tv.many:not(.mid):not(.stack) .hud-mini.game-line .nm { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tv-stage .hud-code.corner, .hud.tv .hud-code.corner { font-size: var(--text-18); }   /* readable from the sofa (the 4 Nov audit, 3.6) */
+
+/* sideways (the 4 Nov audit, 3.7): 8 teams' "who's answered" in two columns, maps and the board capped, so Reveal and
+   Send stay on screen */
+@media (orientation: landscape) and (max-height: 500px) {
+  .screen.split .who-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .screen.split .main .board { max-height: 62svh; overflow-y: auto; }
+  .screen.split .side-part .board .board-row { padding-block: .15em; }
+}

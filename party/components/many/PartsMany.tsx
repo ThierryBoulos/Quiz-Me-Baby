@@ -117,7 +117,8 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
         <div className="hud-strip" aria-label={`The night so far: ${T.map((t, i) => `${t.name} ${num(i)}`).join(", ")}`}>
           {T.map((t, i) => (
             <span key={i} className={"hs" + (i === me ? " me" : "")} style={{ ["--c" as string]: t.color }}>
-              <Dot t={i} color={t.color} size={10} /><bdi className="hs-nm">{t.name}</bdi><b>{num(i)}</b>
+              {/* (6 teams or more: the others as their lettered dot and score, so the strip stays on one or two lines) */}
+              <Dot t={i} color={t.color} size={k > 5 && i !== me ? 14 : 10} />{(k <= 5 || i === me) && <bdi className="hs-nm">{t.name}</bdi>}<b>{num(i)}</b>
             </span>))}
         </div>)}
       {/* the phone: whose side you're on, small, in the team's colour (the screen's glow is that colour too) */}
@@ -469,8 +470,10 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
       {T.map((t, i) => { const ok = R.ok?.[i], x = R.typed?.[i]; if (pub.game?.only && !pub.game.only.includes(i)) return null; return (
         <div key={i} className={"flex flex-col items-center gap-1 min-w-0 " + (tv ? "beat" : "")} style={delay?.(i)}>
           {/* a phone with five teams or more (two columns): the name on a line of its own, so it's never "THE …" */}
-          <div className={"flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + (!tv && dense ? " flex-wrap gap-y-0" : "")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
-            <span className={tv ? "display truncate" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
+          {/* (the TV: the name on a line of its own, whole, over two lines if it must: "THE QUIZZIC…" on the screen that says
+              who scored, the 4 Nov audit, 3.6) */}
+          <div className={"flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + ((!tv && dense) || tv ? " flex-wrap gap-y-0" : "")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
+            <span className={tv ? "display basis-full text-center whitespace-normal leading-tight clamp2" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
             {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
             {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
             {/* why that many: the order the right answers came in (the 4 Nov audit, 3.8: +4, +3, +2 said nothing) */}

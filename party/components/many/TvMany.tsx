@@ -63,14 +63,14 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
                 <div className="flex items-center gap-5">
                   <div className="rounded-[16px] p-2.5 bg-[#f4f6ff] shrink-0"><QRCodeSVG value={join.url} size={dense ? 112 : 132} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
                   <div className="min-w-0">
-                    <div className="eyebrow text-14 whitespace-nowrap">Not in yet? Join with</div>
+                    <div className="eyebrow text-18 whitespace-nowrap">Not in yet? Join with</div>
                     <div className="display leading-none mt-1" style={{ fontSize: dense ? 60 : 72, color: "var(--color-gold)", letterSpacing: "0.08em" }}>{join.code}</div>
                   </div>
                 </div>
               </>)}
               {seats && (
                 <div className="card !py-2 !px-4 flex flex-col" role="list" aria-label="Who's in, team by team">
-                  <div className="eyebrow text-12 mb-1">On each team&rsquo;s list</div>
+                  <div className="eyebrow text-18 mb-1">On each team&rsquo;s list</div>
                   <div className={"grid gap-x-6 " + (k > 4 ? "grid-cols-2" : "grid-cols-1")}>
                     {T.map((t, i) => (
                       <div key={i} role="listitem" className="flex items-center gap-2 min-w-0 py-0.5" style={{ fontSize: k > 4 ? 16 : 18 }}>
@@ -250,9 +250,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
                   {/* solid cards: the confetti behind them stays behind them */}
                   {pub.final!.awards.map((a) => (
                     <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ borderColor: a.team != null ? T[a.team].color : undefined, background: "linear-gradient(180deg, #151a3c, #0c1028)" }}>
-                      <div className="eyebrow text-12" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
+                      <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
                       <div className="text-15 font-bold leading-snug" style={{ color: a.team != null ? T[a.team].color : undefined }}><bdi>{a.who}</bdi></div>
-                      {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}
+                      {a.note && <div className="text-18 text-[var(--color-ink-2)] italic line-clamp-2">{a.note}</div>}
                     </div>))}
                 </div>)}
             </>)}
