@@ -64,6 +64,9 @@ export function loadBaseBank(): Promise<Bank> {
 /* The bank with the answers, for this room's TV or its host only: the server
    checks who's asking (app/api/bank). */
 const fullP: Record<string, Promise<Bank>> = {};
+/* a map's answer drawing, by the map's id: for a game saved before the questions carried it (5 Nov review) */
+const revs: Record<string, string> = {};
+export const revOf = (q: { id?: string; rev?: unknown } | null | undefined): string | undefined => (q ? (typeof q.rev === "string" ? q.rev : revs[q.id || ""]) : undefined);
 export function loadFullBank(room: string): Promise<Bank> {
   if (!fullP[room]) fullP[room] = (async () => {
     const { sb } = await import("./supabase");
@@ -73,6 +76,7 @@ export function loadFullBank(room: string): Promise<Bank> {
     if (!r.ok) throw new Error(r.status === 403 ? "not allowed" : "Could not load the questions (" + r.status + ")");
     const j = (await r.json()) as { bank: Bank; accept: Accept };
     accept = j.accept;
+    for (const q of j.bank.bank) if (q.type === "map" && typeof q.rev === "string") revs[q.id] = q.rev;
     return j.bank;
   })().catch((e) => { delete fullP[room]; throw e; });
   return fullP[room];

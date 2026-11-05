@@ -437,6 +437,8 @@ button.ll:not([disabled]):active { transform: scale(.97); }
 .board .b-status { font-size: .88em; }
 .board.dense { padding: .45em .7em; } .board.dense .board-title { padding-bottom: .3em; margin-bottom: .15em; } .board.dense .board-row { padding: .18em .2em; }
 /* the TV's reveal: the board tight, so eight flights and eight answers fit under the tracker */
+/* a reveal with five teams or more: the board's first four flights are enough to recall it, and the teams' answers fit under it (5 Nov review) */
+.board-tight .board-row:nth-child(n+6) { display: none; }
 .board-tight .board { padding: .4em .7em; } .board-tight .board .board-title { padding-bottom: .25em; margin-bottom: .1em; } .board-tight .board .board-row { padding: .12em .2em; }
 /* Majority Rules: the four answers on a phone, big enough to hit without looking twice */
 .mr-opt { min-height: 64px; font-size: var(--text-18); white-space: normal; line-height: 1.2; text-align: center; }
@@ -1345,7 +1347,10 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* the room code on the TV: small letter tiles, top centre (3.5) */
 .hud-tiles { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
 .hud-tiles > span { font-size: var(--text-14); font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--color-ink-3); }
-.hud.many .hud-tiles { margin: 0 auto 4px; }
+.hud.many .hud-tiles { margin: 0; }
+.hud.tv.many > .hud-top { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; margin: 0 0 8px; }
+.hud.tv.many > .hud-top > .pips { margin: 0; }
+.hud.tv.many > .hud-top + .hud-mid { margin-top: 0; }
 /* a gold button that's off (Send before anything is typed): a faint gold outline, not a muddy fill (the owner's pick on the
    4 Nov audit, 3.5). [data-soft] (a tap in flight) keeps its full gold, as before */
 .btn-gold:disabled:not([data-soft] *), .dock.btn-gold:disabled:not([data-soft] *) { opacity: 1; background: transparent; border: 1.5px solid rgba(245,197,24,.45); color: rgba(245,197,24,.6); box-shadow: none; }

@@ -1,7 +1,8 @@
 /* MANY TEAMS: what the TV publishes (PubMany, for every phone) and what only the host's phone gets
    (the answer and every team's typed answer). Built from the night's state, never stored. */
-import { MANY_COLORS, allIn, answered, dishRight, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, typedKey, type AwardM, type LatLon, type ManyKey, type StateM } from "./logic";
+import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, typedKey, type AwardM, type LatLon, type ManyKey, type StateM } from "./logic";
 import { dishKind } from "../tv/rules";
+import { revOf } from "../engine";
 import type { IntroPub } from "../intro";
 
 export type TeamPub = { name: string; captain: string; score: number; color: string };
@@ -54,12 +55,12 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     pub.game.shares = s.teams.map((_, t) => { const r = m.right[t] + (c ? c.right[t] : 0), of = m.of[t] + (c ? c.of[t] : 0); return of ? r / of : 0; }); }
   if (m && q && (s.screen === "q" || s.screen === "reveal")) {
     /* (a key for this question, not its id in the bank, which anyone can look up: the 4 Nov audit, 4.5) */
-    pub.qid = `${s.mi}.${m.i}`;
+    pub.qid = qidOf(s);
     const rev = s.screen === "reveal";
     if (m.key === "flag") pub.flag = q.flag;
     else if (m.key === "pin") pub.pin = { photo: q.photo, credit: q.credit, licence: q.licence };
     else if (m.key === "airport") pub.airport = { title: q.boardTitle, board: q.board, code: rev ? q.code : undefined, city: rev ? q.city : undefined };
-    else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined, ...(rev && q.rev ? { rev: q.rev } : {}) };
+    else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined, ...(rev && revOf(q) ? { rev: revOf(q) } : {}) };
     else if (m.key === "dish") { pub.dish = { kind: dishKind(q), ings: (q.ings || []).slice(0, rev ? undefined : Math.max(1, s.shown)), n: (q.ings || []).length };
       if (rev) pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }
     else pub.question = q.question;

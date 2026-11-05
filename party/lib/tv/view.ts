@@ -1,6 +1,6 @@
 /* What the phones see: the TV's state turned into the public view (Pub, in the
    room for every phone) and the secret (the answer, for the TV and the host only). */
-import { QMB, aboutHost, acceptFor, hostOnly } from "../engine";
+import { QMB, aboutHost, acceptFor, hostOnly, revOf } from "../engine";
 import { getSettings } from "../settings";
 import type { Member } from "../room";
 import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two, poss } from "../game";
@@ -207,7 +207,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   }
   if ((s.screen === "mapQ" || s.screen === "mapReveal") && q) {
     const reveal = s.screen === "mapReveal";
-    p.map = { id: q.id, reveal, hint: (g.mapGame.hints || {})[q.id] ? "on" : undefined, title: reveal ? q.question : undefined, notes: reveal ? q.notes : undefined, ...(reveal && q.rev ? { rev: q.rev } : {}) };
+    p.map = { id: q.id, reveal, hint: (g.mapGame.hints || {})[q.id] ? "on" : undefined, title: reveal ? q.question : undefined, notes: reveal ? q.notes : undefined, ...(reveal && revOf(q) ? { rev: revOf(q) } : {}) };
     if (reveal) { p.map.ruled = s.ok; p.reveal = { answer: q.question, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) }; }
     secret.answer = q.question; secret.notes = q.answer;
   }

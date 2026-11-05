@@ -70,6 +70,7 @@ export type StateM = {
   away?: number;                                // when the game phone's screen went to sleep (0 or none: it's on); the clock waits meanwhile
   paused?: boolean;                             // the host paused the clock (the question hides on the phones)
   extra?: Partial<Record<ManyKey, Q[]>>;         // a few questions per game left in its deck: the host's "Change question"
+  night?: number; qn?: number;                   // this night's number and its questions asked so far: the question's key
 };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
 export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number };
@@ -78,6 +79,9 @@ const n = (k: number, v = 0) => Array.from({ length: k }, () => v);
 export const miniOf = (s: StateM) => s.minis[s.mi] as MiniM | undefined;
 export const qOf = (s: StateM) => { const m = miniOf(s); return m ? m.qs[m.i] : null; };
 
+/* the question on screen, as the phones and the TV name it: new each question asked, a changed one too, and each night
+   (so last night's suggestions, or an answer for the question just changed, are never taken for this one; 5 Nov review) */
+export const qidOf = (s: StateM) => `${s.night ?? 0}.${s.qn ?? `${s.mi}${miniOf(s)?.i ?? 0}`}`;
 export function newNight(teams: { name: string; captain: string }[], decks: Partial<Record<ManyKey, Q[]>>, order: ManyKey[]): StateM {
   const k = teams.length;
   /* a game that comes more than once (the question rounds) takes the next questions of its deck each time */
@@ -89,7 +93,8 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
   return { v: 2, teams: teams.map((t) => ({ ...t, score: 0 })), minis, mi: 0, screen: minis.length ? "intro" : "final", step: 1,
     deadline: null, left: 0, total: 0, typed: Array(k).fill(null), nums: Array(k).fill(null), pins: Array(k).fill(null), ok: Array(k).fill(null), why: Array(k).fill(null), shown: 0,
     at: Array(k).fill(null), seq: 0, roster: [], votes: {}, who: {}, toast: null, toastN: 0, log: [n(k)], spare: (decks.sudden || []).slice(0, MANY_LEGS.sudden),
-    stats: { firsts: n(k), seconds: n(k), fastest: n(k), km: n(k), kmN: n(k), run: n(k), best: n(k) }, extra };
+    stats: { firsts: n(k), seconds: n(k), fastest: n(k), km: n(k), kmN: n(k), run: n(k), best: n(k) }, extra,
+    night: Math.floor(Math.random() * 1e6), qn: 0 };
 }
 /* the host's Pause (the clock stops, the question hides) and Change question (before anyone has answered: another from
    the game's deck, with a fresh clock). The same controls as with two teams (the 4 Nov audit, 3.11) */
@@ -126,7 +131,8 @@ function ask(s: StateM, now: number, t: Timers) {
   const m = miniOf(s)!; clear(s);
   /* the Cocktail or Dish: an ingredient every few seconds, the last one with longer to think */
   s.total = m.key === "dish" ? Math.max(0, ((qOf(s)?.ings || []).length - 1)) * t.dish + t.dishLast : t[m.key];
-  s.screen = "q"; s.deadline = now + s.total * 1000; s.left = 0; s.step++;
+  s.screen = "q"; s.deadline = now + s.total * 1000; s.left = 0; s.paused = false; s.step++;   // (a pause never carries over)
+  s.qn = (s.qn ?? 0) + 1;
 }
 /* the Cocktail or Dish: how many ingredients are up at this moment (the clock's tick moves it on) */
 export function dishShown(s: StateM, now: number, t: Timers): number {
@@ -188,7 +194,7 @@ export function reveal(s: StateM) {
   if (m.key === "say") sayCalls(s, q);
   else if (typedKey(m.key)) s.ok = s.typed.map((x) => (x == null ? false : rightOf(m.key, x, q)));
   if (m.key === "dish") s.shown = (q.ings || []).length;
-  s.screen = "reveal"; s.deadline = null; s.left = 0; s.step++; return true;
+  s.screen = "reveal"; s.deadline = null; s.left = 0; s.paused = false; s.step++; return true;
 }
 /* Don't Say the Same, with many teams (the plan's idea 5): an answer scores if it's on the prompt's list, isn't the
    word the app picked, and no other team said it too. Two teams on the same word both lose it */

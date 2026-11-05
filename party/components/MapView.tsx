@@ -31,7 +31,9 @@ export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wi
     if (!rev) { setRv(null); return; }
     if (revReady[rev]) { setRv(revReady[rev]); return; }
     let on = true, t: ReturnType<typeof setTimeout> | undefined;
-    const go = () => { void loadRev(rev).then((x) => { if (on) setRv(x); }).catch(() => { if (on) t = setTimeout(go, 3000); }); };
+    let tries = 0;
+    /* (a file that isn't there at all is said once and not asked for again and again: the drawing stays the question's) */
+    const go = () => { void loadRev(rev).then((x) => { if (on) setRv(x); }).catch((e) => { delete revCache[rev]; if (String(e?.message) === "404") { console.error("map answer missing", rev); return; } if (on && ++tries < 20) t = setTimeout(go, 3000); }); };
     go();
     return () => { on = false; clearTimeout(t); };
   }, [rev]);

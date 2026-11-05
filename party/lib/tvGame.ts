@@ -246,7 +246,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (bad) throw bad.error;
         resent.current = 0; pendingSince.current = 0;
         const latest = lastAt.current === at;
-        if (withSecret && latest) lastSecret.current = sec;
+        if (withSecret && latest && res[1]?.data?.length) lastSecret.current = sec;   // (a write turned down is sent again with the next)
         /* turned down while it's this TV's latest: the room holds a later stamp than this TV has (its
            clock went back, or it reloaded and its clock is behind the last one's): go on from there */
         if (latest && !res[0].data?.length) {
@@ -1412,6 +1412,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const d = now - s.tvAway;
         s.tvAway = 0;
         { const dl = s.deadline; s.deadline = null; shiftClocks(s, d); s.deadline = dl; }   // (the clock itself was paused, in s.left)
+        /* a write left hanging when the page was put to sleep: the time asleep is already taken off just above, so the
+           "offline" catch-up only counts from now (it pushed every clock back twice after a lock screen) */
+        if (pendingSince.current) pendingSince.current = now;
+        if (offline.current) offlineAt.current = Math.max(offlineAt.current, now);
         /* the clock picks up where it was, unless an answer that came in meanwhile is waiting for its call */
         if (s.awayPaused) { s.paused = false; s.awayPaused = false; if (!s.pending) applyFx([{ timer: "resume" }]); }
         void publish();

@@ -198,13 +198,25 @@ export default function PhoneRoom() {
       try {
         const r = await rpc<{ ok?: boolean; taken?: boolean; save?: Record<string, unknown> | null; status?: string; saved_ago?: number | null }>("qmb_take_game", { r: code });
         if (!r?.taken) return;                       // (taken: stored even if this loop has just stopped, as this phone became the game's)
-        const sv = r.save;
+        /* no game to carry on (the lobby, or a game lost; the server may send just where the taps had got to): this
+           phone reads the room's taps from the newest one on, not from the room's first (it replayed an old night's
+           Start, the 5 Nov review), and an old copy of its own from an earlier turn as the game phone is dropped */
+        const bare = !r.save || Object.keys(r.save).every((k) => k === "inboxLast" || k === "inboxTags");
+        const sv = bare ? null : r.save;
+        if (bare) {
+          let last = Number(r.save?.inboxLast) || 0;
+          if (!last) { const a = await sb().from("actions").select("id").eq("room", code).order("id", { ascending: false }).limit(1).maybeSingle(); last = Number(a.data?.id) || 0; }
+          try {
+            localStorage.setItem("qmb.tv." + code + ".last", String(last));
+            localStorage.removeItem("qmb.tv." + code + ".game"); localStorage.removeItem("qmb.tv." + code + ".many");
+          } catch { /* in memory only */ }
+        }
         /* mid-game with no copy to carry on from (the old phone couldn't make one): the game can't go on, and
            everyone is told, with Exit, rather than left tapping a game nobody runs (the 4 Nov audit, 1.2) */
         if (!sv && r.status === "playing") {
           const cur = await sb().from("rooms").select("state").eq("code", code).maybeSingle();
           const rest = { ...((cur.data?.state as Record<string, unknown> | null) || {}) }; delete rest.pub;
-          await sb().from("rooms").update({ status: "lobby", mode: null, state: { ...rest, pubAt: Date.now(), lost: Date.now() } }).eq("code", code);
+          await sb().from("rooms").update({ status: "lobby", mode: null, state: { ...rest, pubAt: Math.max(Date.now(), Number(rest.pubAt || 0) + 1), lost: Date.now() } }).eq("code", code);
           void refreshRef.current(); return;
         }
         try {

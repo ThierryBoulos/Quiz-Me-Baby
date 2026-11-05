@@ -23,7 +23,7 @@ import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 /* (only the one for this very question: the TV writes the screen first and the answer just after, so a read in between
    brought the last question's answer for a second or more; it asks again until they match. The 4 Nov audit, 1.12) */
-function useSecretMany(code: string, on: boolean, step: number) {
+function useSecretMany(code: string, on: boolean, step: number, again = "") {
   const [s, setS] = useState<SecretMany>({});
   useEffect(() => {
     if (!on) return;
@@ -36,7 +36,7 @@ function useSecretMany(code: string, on: boolean, step: number) {
     }, () => { if (live && ++n < 12) t = setTimeout(pull, 1500); });
     pull();
     return () => { live = false; clearTimeout(t); };
-  }, [code, on, step]);
+  }, [code, on, step, again]);
   return s.step == null || s.step === step ? s : {};
 }
 /* each phone its own order of the four (seeded by the player's name: a neighbour's screen tells you nothing) */
@@ -53,7 +53,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
   const noTv = useNoTv();
-  const secret = useSecretMany(code, host, pub.step);
+  /* (read again as answers come in during the Cocktail or Dish: who's out is on the host's card only; 5 Nov review) */
+  const secret = useSecretMany(code, host, pub.step, pub.screen === "q" ? (pub.sent || []).join() : "");
   const [busy, setBusy] = useState(false), [err, setErr] = useState<string | null>(null);
   const [text, setText] = useState(""), [pin, setPin] = useState<LatLon | null>(null), [sentTxt, setSentTxt] = useState<string | null>(null);
   useEffect(() => { setText(""); setPin(null); setErr(null); setSentTxt(null); }, [pub.qid]);

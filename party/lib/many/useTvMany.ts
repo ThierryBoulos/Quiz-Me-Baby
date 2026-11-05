@@ -13,7 +13,7 @@ import { usePresent } from "../tv/usePresent";
 import { DISH_LAST, T_LOBBY_AWAY } from "../game";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 
 const SHAPE = 1;
@@ -96,7 +96,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (bad) { setBanner((b) => b ?? "offline"); throw bad.error; }
       setBanner((b) => (b === "offline" ? null : b));
       const latest = lastAt.current === at;
-      if (withSecret && latest) lastSecret.current = sec;
+      if (withSecret && latest && res[1]?.data?.length) lastSecret.current = sec;   // (a write turned down is sent again with the next)
       if (latest && !res[0].data?.length) {
         const r = await sb().from("rooms").select("state").eq("code", code).maybeSingle();
         const theirs = Number((r.data?.state as { pubAt?: number } | undefined)?.pubAt) || 0;
@@ -198,8 +198,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const chosen = (Array.isArray(cfg.themes) ? cfg.themes : []).filter((t: string) => every.includes(t)).slice(0, MANY_THEMES);
         const themes = chosen.length ? chosen : every;
         const quizLevels = lv(cfg.quizLevels, ["easy", "medium", "hard", "expert"], ["easy", "medium", "hard"]);
-        /* (three pairs more than the rounds take: held back for sudden death) */
-        const g = dealer.buildGame({ standard: true, rounds: rounds * Math.ceil(MANY_LEGS.quiz / 2) + 3, themes, difficulty: quizLevels.join("+"),
+        /* (four pairs more than the rounds take: one for "Change question", three held back for sudden death) */
+        const g = dealer.buildGame({ standard: true, rounds: rounds * Math.ceil(MANY_LEGS.quiz / 2) + 4, themes, difficulty: quizLevels.join("+"),
           minis: keys.map((x) => (x === "say" ? "saysame" : x)), picks: {}, themeDiff: {},
           mapLevels: lv(cfg.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), airportLevels: lv(cfg.airportLevels, QMB.AIRPORT_ORDER, QMB.AIRPORT_ORDER),
           dishLevels: lv(cfg.dishLevels, ["c-easy", "c-medium", "c-hard", "d-easy", "d-medium", "d-hard"], ["c-medium", "d-medium"]),
@@ -208,12 +208,14 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
           teamA: { name: "A", captain: "", players: "" }, teamB: { name: "B", captain: "", players: "" },
           pickClosest: [], pickAuction: [], pickSaySame: [], pickMap: [], pickFlag: [], pickDish: [], pickPin: [], pickAirport: [], pickMajority: [] });
         /* Don't Say the Same: only the wide prompts (five answers or more), so eight teams have room to dodge */
-        const say = (dealer.saySameDeck({ pickSaySame: [] }) as G[]).filter((q) => (q.pool || []).length >= 5).slice(0, MANY_LEGS.say).map((q) => dealer.drawSaySame(q) as Q);
+        const say = (dealer.saySameDeck({ pickSaySame: [] }) as G[]).filter((q) => (q.pool || []).length >= 5).slice(0, MANY_LEGS.say + 4).map((q) => dealer.drawSaySame(q) as Q);
         const quiz = (g.rounds || []).flatMap((r: G) => r.q as Q[]);
-        /* the two-team game deals fewer airports, maps and recipes: the rest of each deck comes after them */
+        /* each game's deck, its spares after it (the two-team game deals fewer airports, maps and recipes, and every game
+           keeps a few back): what a game doesn't play is there for the host's "Change question" (the 5 Nov review) */
         const all = (m: G): Q[] => [...(m?.qs || []), ...(m?.spare || [])];
-        const decks: Partial<Record<ManyKey, Q[]>> = { quiz: quiz.slice(0, rounds * MANY_LEGS.quiz), sudden: quiz.slice(rounds * MANY_LEGS.quiz), flag: g.flagGame?.qs, airport: all(g.airportGame), map: all(g.mapGame),
-          closest: g.mini?.qs, pin: g.pinGame?.qs, majority: g.majorityGame?.qs, say, dish: all(g.dishGame) };
+        const qn = rounds * MANY_LEGS.quiz + 2;
+        const decks: Partial<Record<ManyKey, Q[]>> = { quiz: quiz.slice(0, qn), sudden: quiz.slice(qn), flag: all(g.flagGame), airport: all(g.airportGame), map: all(g.mapGame),
+          closest: all(g.mini), pin: all(g.pinGame), majority: all(g.majorityGame), say, dish: all(g.dishGame) };
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
         st.current = newNight(teams, decks, keys);
@@ -254,8 +256,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "answer") {
       const m = miniOf(s);
       /* an answer for an earlier question, landing late (a send the server sat on): it goes nowhere, and isn't counted
-         as this question's (the 4 Nov audit, 1.10: it could even rank first) */
-      if (typeof a.payload.k === "string" && a.payload.k !== `${s.mi}.${m?.i}|q`) { reply("Too late: that answer was for the last question."); publishSoon(); return; }
+         as this question's (the 4 Nov audit, 1.10: it could even rank first). A phone still on the build before
+         (its key was the bank's id) isn't checked, so a night that spans an update goes on. */
+      if (typeof a.payload.k === "string" && /^\d+\.\d+\|q$/.test(a.payload.k) && a.payload.k !== `${qidOf(s)}|q`) { reply("Too late: that answer was for the last question."); publishSoon(); return; }
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
         : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G, Number(a.id) || undefined) : "Your captain answers this one.";
       reply(r === true ? "+" : r);

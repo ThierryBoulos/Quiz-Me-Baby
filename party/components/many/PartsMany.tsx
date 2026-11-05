@@ -87,10 +87,9 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   return (
     <div className={`hud ${size} many ${packing(k)}${award && !landed ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov: it matters little once the game is on) */}
-      {tv && code && <div className="hud-tiles" aria-label={`Room ${code}`}><span>Room</span><CodeTiles code={code} className="mini" /></div>}
-      {/* the TV: the night's tracker on its own line at the top ("Game 3 of 3" and a dot or dash a game), not beside the
-          game's line (the owner, 2 Nov) */}
-      {tv && track}
+      {/* the TV: the room code and the night's tracker ("Game 3 of 3" and a dot or dash a game) on one line at the top, not
+          beside the game's line (the owner, 2 Nov); one line, not two, so a reveal with eight teams clears it (5 Nov review) */}
+      {tv && (code ? <div className="hud-top">{<div className="hud-tiles" aria-label={`Room ${code}`}><span>Room</span><CodeTiles code={code} className="mini" /></div>}{track}</div> : track)}
       {tv && !inGame && <div className="hud-in">
         {T.map((t, i) => (
           <div key={i} className="hud-team" style={{ ["--c" as string]: t.color }}>
