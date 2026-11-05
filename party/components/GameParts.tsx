@@ -364,8 +364,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
   /* the house timers, as set in Settings on the TV */
   const t = pub.timers, sec = (v: number | undefined, d: number) => `${v ?? d} seconds`;
   /* level at the end: the same choice in every mini-game */
-  const call = host ? "the host's call" : `${pub.captains?.[pub.lead ?? 0] || "Team A's captain"}'s call`;
-  const level = `Won with legs to spare? Keep playing for fun, or stop. Tied at the end? One more, or a point each. Both ${call}.`;
+  const level = `Won with legs to spare? Keep playing for fun, or stop. Tied at the end? One more, or a point each. ${host ? "The host's call." : "Either captain's call (in 10 seconds, or it's a point each; keep playing, if won early)."}`;
   switch (m.key) {
     case "closest": return [
       { text: "Both teams get the same number question at the same time." },
@@ -420,7 +419,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `${n} questions each, ${host ? `${sec(t?.battleHost, T_BATTLE_HOST)} a shot, out loud` : `${sec(t?.battleTyped, T_BATTLE_TYPED)} a shot, typed on the phone`}. ${poss(pub.teams[0].name)} captain goes first.` },
       { text: "Same spread for both: five easy, five medium, in the same order. Different questions." },
       { text: "No lifelines, no conferring, no second guesses." },
-      { text: `Best score takes ${pts}. Tied? One buzzer question to settle it (first captain in takes it), or a point each: ${call}.` }];
+      { text: `Best score takes ${pts}. Tied? One buzzer question to settle it (first captain in takes it), or the points shared: ${host ? "the host's call" : "either captain's call"}.` }];
   }
 }
 /* head: in place of the small heading above the title (the TV's Battle: its two captains, VS between them) */
@@ -456,8 +455,8 @@ export const silent = (pub: Pub, t: 0 | 1) => {
 
 /* a tie at the end of a mini-game, in the same words on the TV and every phone */
 export const tieHead = (pub: Pub) => (pub.mini?.pct ? `Tie at ${pub.mini.wins[0]}% each` : `Tie at ${pub.mini?.wins[0] ?? 0} each`);
-export const tieCall = (pub: Pub) =>
-  `One more to settle it, or a point each: ${pub.mode === "host" ? "the host decides" : "either captain decides (a point each if nobody does)"}.`;
+export const tieCall = (pub: Pub) => { const each = pub.screen === "battleLevel" ? "the points shared" : "a point each";
+  return `One more to settle it, or ${each}: ${pub.mode === "host" ? "the host decides" : `either captain decides (${each} if nobody does)`}.`; };
 /* the pictures coming up, fetched ahead (flags into the browser's cache, maps into MapView's) */
 export function usePreload(pub: Pub | null) {
   const key = JSON.stringify(pub?.preload || null);

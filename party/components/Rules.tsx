@@ -73,7 +73,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
       </Rule>
 
       <Rule n="04" title="The mini-games">
-        <p className="text-15 leading-relaxed text-[var(--color-ink-2)]">Chosen in Setup and announced at the start, they drop in between the rounds; the Battle always closes the night. Whoever wins one takes its points (Setup shows how many; the Battle is worth double). Won with legs to spare? The points are paid at once and you choose: keep playing for fun, or stop. Tied at the end? One more to settle it, or a point each. The host decides, or Team A&rsquo;s captain with no host. The app checks every typed answer; a call it got wrong can be contested on the reveal. Each reveal waits for Next, so there&rsquo;s time to argue.</p>
+        <p className="text-15 leading-relaxed text-[var(--color-ink-2)]">Chosen in Setup and announced at the start, they drop in between the rounds; the Battle always closes the night. Whoever wins one takes its points (Setup shows how many; the Battle is worth double). Won with legs to spare? The points are paid at once and you choose: keep playing for fun, or stop. Tied at the end? One more to settle it, or a point each. The host decides; with no host, either captain, and if nobody picks in 10 seconds, it&rsquo;s a point each (or keep playing, for a game won early). The app checks every typed answer; a call it got wrong can be contested on the reveal. Each reveal waits for Next, so there&rsquo;s time to argue.</p>
         <L items={[
           <><B>Closest To Wins.</B> The same number question for both captains, <B>60 s</B> on the number pad. Closest takes the leg. 5 legs.</>,
           <><B>The Auction.</B> &ldquo;How many countries can you name?&rdquo; Captains bid up to 100, raise or pass; whoever holds the bid has <B>30 s</B> to name that many, out loud, counted by the host (or the other captain). Make it or lose it. 3 categories.</>,
@@ -130,7 +130,7 @@ export function FixingACall({ standalone = false, noTv = false }: { standalone?:
         <L items={[
           <>Scores wrong? Either captain: <B>your name (top left) &rarr; Adjust the scores</B>. The other captain gets Agree or No; no answer in <B>20 seconds</B>, nothing changes.</>,
           <>A question nobody wants? Before anyone has answered it, either captain taps <B>Change the question</B> (or the flag, landmark, board, cocktail or dish, map or prompt). The clock stops while the other captain decides. Agree, and a new one, just as hard, comes with a fresh clock; No, or no answer in 20 seconds, and it carries on.</>,
-          <>Team A&rsquo;s captain moves the night on (Start, Next, the choices at a tie or a game decided early). If they haven&rsquo;t after a while, the other captain can.</>,
+          <>Team A&rsquo;s captain moves the night on (Start, Next). If they haven&rsquo;t after a while, the other captain can. At a tie or a game decided early, either captain picks.</>,
           <>Majority Rules: someone who has gone home comes off their team&rsquo;s list before Start, with the other captain&rsquo;s agreement.</>,
         ]} />
       </Rule>

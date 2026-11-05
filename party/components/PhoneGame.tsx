@@ -492,7 +492,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <Big eyebrow={pub.mini?.title} size={34} text={tieHead(pub)} sub={tieCall(pub)} />
         <div className="flex flex-col gap-3 mt-auto">
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => send({ type: "tie/more" })}>One more</button>
-          <button className="btn btn-lg" disabled={busy} onClick={() => send({ type: "tie/stop" })}>A point each</button>
+          <button className="btn btn-lg" disabled={busy} onClick={() => send({ type: "tie/stop" })}>{pub.screen === "battleLevel" ? "Share the points" : "A point each"}</button>
         </div>
       </div>);
     case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": case "saySummary": case "pinSummary": case "airportSummary": case "majoritySummary": return (
@@ -786,7 +786,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
       : pub.result.by != null ? pill(`${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? ", stolen" : ""}`, "mid") : pill("Nobody scores", "mid"))
     : sc === "closestReveal" || sc === "pinReveal" ? legPill(pub.reveal?.w)
     : sc === "majorityReveal" && MR ? pill(`Your team: ${MR.right[mine]} of ${pub.majority?.n?.[mine] ?? 0} right`, MR.right[mine] > 0 ? "ok" : "mid")
-    : sc === "sayReveal" && pub.reveal?.w === "tie" ? pill(pub.reveal.ok?.[0] === false && pub.reveal.ok?.[1] === false ? "Both said it · a point each" : "Both dodged it · a point each", "ok")
+    : sc === "sayReveal" && pub.reveal?.w === "tie" ? pill(pub.reveal.ok?.[0] === false && pub.reveal.ok?.[1] === false ? (!pub.reveal.typed?.[0]?.length && !pub.reveal.typed?.[1]?.length ? "Nobody answered · a point each" : "Both said it · a point each") : "Both dodged it · a point each", "ok")
     : /^(flag|say|map|airport)Reveal$/.test(sc) && pub.reveal ? (sc !== "mapReveal" || (pub.map?.ruled?.[0] != null && pub.map?.ruled?.[1] != null) ? legPill(pub.reveal.w) : null)
     : sc === "dishReveal" && pub.reveal ? (dishW === mine ? pill("Your team got it", "ok") : dishW != null ? pill(`${T[dishW].name} got it`, "no") : pill("Nobody got it", "mid"))
     : null;
@@ -1133,7 +1133,7 @@ function WaitingFor({ pub }: { pub: Pub }) {
 /* the other team's lifelines, as a line of text (3.10) */
 function LifelineLine({ pub, t }: { pub: Pub; t: 0 | 1 }) {
   const T = pub.teams, used = pub.llUsed?.[t] || [], L = pub.lifeline;
-  const st = (k: "friend" | "dip" | "dbl", name: string) => `${name} ${L?.team === t && L.key === k ? "(in use)" : used.includes(k) ? "(used)" : T[t].ll?.[k] === false ? "(gone)" : ""}`.trim();
+  const st = (k: "friend" | "dip" | "dbl", name: string) => `${name} ${(L?.team === t && L.key === k) || (k === "dbl" && pub.dbl?.[t]) ? "(in use)" : used.includes(k) ? "(used)" : T[t].ll?.[k] === false ? "(gone)" : ""}`.trim();
   return <p className="text-center text-13 text-[var(--color-ink-3)]">{poss(T[t].name)} lifelines: {st("friend", "Call a Friend")} · {st("dip", "Double Dip")} · {st("dbl", "Double Points")}</p>;
 }
 /* with a host: the screens that wait for the host's tap say so on the other phones, as with no host (the 4 Nov audit, 3.9) */
@@ -1405,7 +1405,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {nohost && TIE_SCREENS.includes(sc) && (
         <div className="flex flex-col gap-3 mt-auto dock-group">
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/more" })}>One more</button>
-          <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/stop" })}>A point each</button>
+          <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/stop" })}>{sc === "battleLevel" ? "Share the points" : "A point each"}</button>
           <AutoPick at={pub.autoAt} what="A point each" />
         </div>)}
 
@@ -1414,7 +1414,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: next[1] })}>{next[0]}</button>)}
       {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
       {pub.nextBy && !lead && open && <p className="text-center text-13 text-[var(--color-ink-3)]">{pub.nextBy} hasn&rsquo;t tapped it, so you can.</p>}
-      {pub.nextBy && !lead && !open && sc !== DECIDED && !TIE_SCREENS.includes(sc) && <WaitingFor pub={pub} />}
+      {pub.nextBy && !lead && !open && sc !== DECIDED && !TIE_SCREENS.includes(sc) && sc !== "battleReview" && <WaitingFor pub={pub} />}
       {/* no host: either captain can stop the clock (the question hides until it restarts), and, before anyone has
           answered, ask for a new question (the other captain agrees) */}
       {nohost && (PAUSABLE.includes(sc) || canSwap) && !pub.lifeline && !pub.pending && !pub.tvAway && (pub.deadline || pub.paused) && pub.agree?.kind !== "swap" && (
