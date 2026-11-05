@@ -182,4 +182,4 @@ export const showNum = (n: number) => n.toLocaleString("en-GB", { maximumFractio
 
 /* a team's name in a sentence (the 4 Nov audit, 3.15): its own, with "s’" after a plural ("the Owls’ captain", not
    "Owls's"); and team names take plural verbs ("Owls answer first", "The Quizzicals take it") */
-export const poss = (name: string) => (/s$/i.test(name.trim()) ? name + "’" : name + "’s");
+export const poss = (name: string) => (/s$/i.test(name.replace(/[\u2066-\u2069]/g, "").trim()) ? name + "’" : name + "’s");
