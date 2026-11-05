@@ -11,7 +11,7 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
    onto the new version then says so and offers Exit, instead of playing on with a broken game. */
 const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
-import { BEAT_MS, BEAT_SCREENS, DECIDED, FLY_MS, flyAt, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE,
+import { BEAT_MS, BEAT_SCREENS, DECIDED, FLY_MS, flyAt, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE, TIE_SCREENS,
   type MiniKey, type Pub, type Secret, type Thin, type Two } from "./game";
 import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, SWAPS, swapWord, type Action, type G, type PKind, type W } from "./tv/rules";
@@ -63,6 +63,12 @@ function mrWho(s: TvState) {
 const T_AUTO_NEXT = 8;
 /* a tap while the night's intro is up (a stale screen): said at once, not left for the next update */
 const INTRO_WAIT = "Not yet: the night starts with Let's go.";
+/* no host: a tie at the end of a mini-game, or a game won early, waits this long for either captain to pick, then
+   the night carries on (a point each; keep playing). The owner's pick on the 4 Nov audit, decision 8 */
+const T_PICK = 10;
+/* a Know the Host answer waits this long for an absent host before the captains may skip it */
+const T_HOST_SKIP = 20;
+const PICK_DEFAULT = (sc: string) => (sc === DECIDED ? "decided/more" : TIE_SCREENS.includes(sc) ? "tie/stop" : undefined);
 const AUTO_NEXT: Record<string, string> = { closestReveal: "ui/next", flagReveal: "ui/next", pinReveal: "ui/next", airportReveal: "ui/next",
   mapReveal: "ui/next", sayReveal: "ui/next", dishReveal: "dish/next" };
 function shiftClocks(s: TvState, d: number) {
@@ -189,6 +195,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const v = view(); if (!v) return;
       const at = stamp();
       v[0].at = at;
+      /* the TV's own clock, for the phones' clocks (at is an ordering stamp, which can jump ahead of the real time
+         after a takeover; the phones read it as the time once, and ran fast for the rest of the night: the 4 Nov audit, 1.16) */
+      v[0].now = Date.now();
       setPub(v[0]);
       const s = st.current;
       /* the game, kept on this laptop so a refresh picks it up (only written when it changed);
@@ -198,7 +207,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-            app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
+            app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
           if (save !== lastSave.current) {
             lastSave.current = save;
             try { localStorage.setItem(saveKey, save); } catch { setBanner("cantSave"); }
@@ -293,7 +302,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now; s.contest = null; s.contested = [];
         if (s.nohost && AUTO_NEXT[f.go]) s.autoAt = now + T_AUTO_NEXT * 1000;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
-        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; }
+        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; s.typedLate = null; }
         if (f.go === "dishQ") s.legLog = [];
         if (f.go === "sudden" || f.go === "battleTie") {
           const n = (f.go === "sudden" ? s.g.sd?.n : s.g.battle?.tb?.n) || 0;
@@ -341,6 +350,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!d) return false;
       s.decided = { key, winner: d.winner, spare: d.spare };
       s.screen = DECIDED; s.deadline = null; s.left = 0; s.total = 0; s.timeUp = false; s.paused = false; s.waitSince = Date.now(); s.toast = null;
+      s.autoAt = s.nohost ? Date.now() + T_PICK * 1000 : null;
       return true;
     };
     if (move.type === "auction/nextLeg" && ask("auction")) { narrate(); return; }
@@ -354,6 +364,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const g = s.g, tie = Object.entries(TIES).find(([, x]) => x.q === s.screen);
     const level = (screen: string) => {      // the screen itself says "Level at N each"
       s.screen = screen; s.deadline = null; s.left = 0; s.total = 0; s.timeUp = false; s.paused = false; s.waitSince = Date.now(); s.toast = null;
+      s.autoAt = s.nohost ? Date.now() + T_PICK * 1000 : null;
     };
     if (tie && /^(closest\/win|say\/verdict|flag\/verdict|pin\/settle|airport\/verdict|majority\/settle)$/.test(move.type)) { const m = miniState(g, tie[1].key); if (m && m.i >= m.base) level(tie[0]); }
     if (s.screen === "battleTie" && (was === "battleQ" || (move.type === "battle/tbWin" && !move.byHost))) level("battleLevel");
@@ -688,7 +699,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
       /* lifelines before the answer goes in, not after (nor once the clock has run out) */
-      if ((p.key === "friend" || p.key === "dip") && sc === "ask" && s.deadline && Date.now() >= s.deadline) return "Time's up.";
+      if ((p.key === "friend" || p.key === "dip") && sc === "ask" && (s.timeUp || (s.deadline && Date.now() >= s.deadline))) return "Time's up.";
       if ((p.key === "friend" || p.key === "dip") && sc === "ask" && !s.lifeline && !s.pending && turnTeam() === team && !s.typed[team]) {
         const usedLl = rd.llUsed[team] || [];
         if (!g.teams[team].ll[p.key] || (rd.dbl[team] && usedLl.length >= 1)) return false;
@@ -742,6 +753,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.lifeline) return "Wait for the lifeline to finish.";
       const dip = sc === "ask" && (rd.llUsed[team] || []).includes("dip");
       s.typed[team] = texts.slice(0, dip ? 2 : 1);
+      /* with a host, an answer that lands after time's up still goes to them, marked as late (the 4 Nov audit, 1.15) */
+      if (s.timeUp) s.typedLate = team;
       check(sc, current());
       return true;
     }
@@ -842,6 +855,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (c.team === team ? c.ok : !c.ok) return "Contest your own team's WRONG, or the other team's RIGHT.";
     }
     /* with no host, the other captain answers it (not the one who contested) */
+    else if (t === "ui/skipHostQ") {
+      if (!s.skipHostQ) return "The host can still rule on this one.";
+      s.skipHostQ = false; s.step++;
+      play({ type: "round/skip" });
+      return true;
+    }
     else if (t === "ui/contestOk") { if (!s.contest || team !== other(s.contest.by) || typeof move.v !== "boolean") return false; }
     else if (t === "ui/pauseFriend") { if (!s.lifeline || s.lifeline.key !== "friend" || leadTeam() !== team) return false; }
     /* Majority Rules, no host: a captain asks to take an absent teammate off the list; the other captain says yes or no */
@@ -1290,6 +1309,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        answers, as in a game with no host, until the host is back. */
     const hostM = members.find((m) => m.role === "host");
     const hostHere = !!hostM && now - (H.at[hostM.user_id] ?? H.since) < T_AWAY * 1000;
+    /* a Know the Host answer waiting for a host who's been gone 20 s: the captains may skip it (decision 7) */
+    { const q = current(), sc = s.screen;
+      const wait = !!hostM && (sc === "ask" || sc === "steal") && !!q && hostOnly(q) && (!!s.typed[turnTeam()] || s.timeUp)
+        && now - (H.at[hostM.user_id] ?? H.since) >= T_HOST_SKIP * 1000;
+      if (wait !== !!s.skipHostQ) { s.skipHostQ = wait; void publish(); } }
     if (s.nohost === hostHere && !s.pending) {
       s.nohost = !hostHere;
       s.toast = { id: ++s.toastN, text: s.nohost ? "The host is away, so the app checks the answers for now." : "The host is back." };
@@ -1448,7 +1472,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         s.deadline = null; s.step++; changed = true;
         if (s.screen === "ask" || s.screen === "steal") { say("timeup", { t: turnTeam() }); if (!s.nohost) narrate(); }
         if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ"].includes(s.screen)) reveal();
-        else if (s.screen === "battleQ" && s.nohost) { s.toast = { id: ++s.toastN, text: "Time's up." }; play({ type: "battle/mark", got: false }); }
+        else if (s.screen === "battleQ" && s.nohost) { s.toast = { id: ++s.toastN, text: "Time's up." }; play({ type: "battle/mark", got: false, said: "", review: s.nohost }); }   // (the review after the last one, as a typed answer gets: the 4 Nov audit, 1.14)
         else if (s.screen === "battleTie" && s.nohost) play({ type: "battle/tbWin", w: "none" });
         else if (s.screen === "dishQ") play({ type: "dish/timeUp" });
         else if (s.screen === "auctionRun") play({ type: "auction/resolve" });
@@ -1466,7 +1490,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
       /* no host: a map answer the other captain never ruled on stands as right; then the lead captain taps Next */
       if (s.nohost && s.autoAt && now >= s.autoAt) {
-        const mv = AUTO_NEXT[s.screen];
+        const mv = AUTO_NEXT[s.screen] ?? PICK_DEFAULT(s.screen);
         /* a contest or a request open, or paused: it waits for that, then 3 s more */
         if (mv && (s.contest || s.agree || s.paused)) s.autoAt = now + 3000;
         else {

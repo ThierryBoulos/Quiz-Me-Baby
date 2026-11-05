@@ -64,39 +64,39 @@ next game | intro | 55-42-40-36
 start closest | q | 55-42-40-36
 reveal closest 1 won by 1 | reveal | 55-42-40-36
 reveal closest 2 won by 0 | reveal | 55-42-40-36
-reveal closest 3 won by 0 | reveal | 55-42-40-36
+reveal closest 3 won by 0,2 | reveal | 55-42-40-36
 reveal closest 4 won by 2 | reveal | 55-42-40-36
 reveal closest 5 won by 3 | reveal | 55-42-40-36
-summary closest award 10,5,6,8 | summary | 65-47-46-44
-next game | intro | 65-47-46-44
-start pin | q | 65-47-46-44
-reveal pin 1 won by 3 | reveal | 65-47-46-44
-reveal pin 2 won by 0 | reveal | 65-47-46-44
-reveal pin 3 won by 1 | reveal | 65-47-46-44
-reveal pin 4 won by 1 | reveal | 65-47-46-44
-reveal pin 5 won by 1 | reveal | 65-47-46-44
-reveal pin 6 won by 1 | reveal | 65-47-46-44
-reveal pin 7 won by 3 | reveal | 65-47-46-44
-summary pin award 6,10,8,6 | summary | 71-57-54-50
-next game | intro | 71-57-54-50
-start say | q | 71-57-54-50
-reveal say 1 won by 1 | reveal | 71-57-54-50
-reveal say 2 won by 0,2 | reveal | 71-57-54-50
-reveal say 3 won by 0,1 | reveal | 71-57-54-50
-reveal say 4 won by - | reveal | 71-57-54-50
-reveal say 5 won by 0 | reveal | 71-57-54-50
-reveal say 6 won by 1 | reveal | 71-57-54-50
-summary say award 10,10,6,0 | summary | 81-67-60-50
-next game | intro | 81-67-60-50
-start dish | q | 81-67-60-50
-reveal dish 1 won by 0,2,3 | reveal | 81-67-60-50
-reveal dish 2 won by 0 | reveal | 81-67-60-50
-reveal dish 3 won by 2,3 | reveal | 81-67-60-50
-reveal dish 4 won by 0,1 | reveal | 81-67-60-50
-reveal dish 5 won by 1 | reveal | 81-67-60-50
-summary dish award 10,8,8,5 | summary | 91-75-68-55
-next game | final | 91-75-68-55
+summary closest award 10,5,8,8 | summary | 65-47-48-44
+next game | intro | 65-47-48-44
+start pin | q | 65-47-48-44
+reveal pin 1 won by 3 | reveal | 65-47-48-44
+reveal pin 2 won by 0 | reveal | 65-47-48-44
+reveal pin 3 won by 1 | reveal | 65-47-48-44
+reveal pin 4 won by 1 | reveal | 65-47-48-44
+reveal pin 5 won by 1 | reveal | 65-47-48-44
+reveal pin 6 won by 1 | reveal | 65-47-48-44
+reveal pin 7 won by 3 | reveal | 65-47-48-44
+summary pin award 6,10,8,6 | summary | 71-57-56-50
+next game | intro | 71-57-56-50
+start say | q | 71-57-56-50
+reveal say 1 won by 1 | reveal | 71-57-56-50
+reveal say 2 won by 0,2 | reveal | 71-57-56-50
+reveal say 3 won by 0,1 | reveal | 71-57-56-50
+reveal say 4 won by - | reveal | 71-57-56-50
+reveal say 5 won by 0 | reveal | 71-57-56-50
+reveal say 6 won by 1 | reveal | 71-57-56-50
+summary say award 10,10,6,0 | summary | 81-67-62-50
+next game | intro | 81-67-62-50
+start dish | q | 81-67-62-50
+reveal dish 1 won by 0,2,3 | reveal | 81-67-62-50
+reveal dish 2 won by 0 | reveal | 81-67-62-50
+reveal dish 3 won by 2,3 | reveal | 81-67-62-50
+reveal dish 4 won by 0,1 | reveal | 81-67-62-50
+reveal dish 5 won by 1 | reveal | 81-67-62-50
+summary dish award 10,8,8,5 | summary | 91-75-70-55
+next game | final | 91-75-70-55
 games: Question round 1, Majority Rules, Guess the Flag, Guess the Airport, Guess the Map, Question round 2, Closest To Wins, Drop the Pin, Don't Say the Same as Me, Guess the Cocktail or Dish
 final 1:Team A 2:Team B 3:Team C 4:Team D
 majority: Most right: P5, 11 of 15. Least right: P4, 4 of 15.
-awards: Most questions won: Team A, 23 | Always the bridesmaid: Team C, came 2nd 15 times | Best aim, Drop the Pin: Team B, 519 km off on average | Sharpest in Majority Rules: P5, 11 of 15 | Least right, Majority Rules: P4, 4 of 15
+awards: Most questions won: Team A, 23 | Always the bridesmaid: Team C, came 2nd 14 times | Best aim, Drop the Pin: Team B, 519 km off on average | Sharpest in Majority Rules: P5, 11 of 15 | Least right, Majority Rules: P4, 4 of 15

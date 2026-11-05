@@ -1511,6 +1511,13 @@
     },
     /* from the round's score: whatever comes next in the running order */
     'round/next'(g, a, env){ return nextStep(g, env, []); },
+    /* a question only the host can judge (Know the Host) while the host is away: a captain skips it, and
+       nobody scores (the owner's pick on the 4 Nov audit, decision 7) */
+    'round/skip'(g){
+      const rd = g.rounds[g.r], was = rd.res[g.seat];
+      rd.res[g.seat] = was ? Object.assign({}, was, { stolen:false, steal:true, skipped:true }) : { correct:false, stolen:false, skipped:true };
+      return [{ toast:'Skipped: the host is away. No points.' }, { go:'answer' }];
+    },
 
 
     /* deal the auction's deck when it comes round */

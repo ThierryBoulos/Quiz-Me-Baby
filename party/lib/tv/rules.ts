@@ -117,17 +117,19 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
      the other captain agrees or not (the app's call stands after a while); with a host, the host decides */
   "ui/contest": { where: CONTEST_SCREENS, who: "any" },
   "ui/contestOk": { where: CONTEST_SCREENS, who: "any", nohostOnly: true },
-  "battle/reviewDone": { where: "battleReview", who: "lead", nohostOnly: true },
+  "battle/reviewDone": { where: "battleReview", who: "any", nohostOnly: true },
   "auction/tick": { where: "auctionRun", who: "other", nohostOnly: true },
   "auction/untick": { where: "auctionRun", who: "other", nohostOnly: true },
   "ui/exit": { where: "final", who: "any", nohostOnly: true },
   "ui/again": { where: "final", who: "any", nohostOnly: true },
-  "tie/more": { where: TIE_SCREENS, who: "lead", nohostOnly: true },
-  "tie/stop": { where: TIE_SCREENS, who: "lead", nohostOnly: true },
-  "decided/more": { where: DECIDED, who: "lead", nohostOnly: true },
-  "decided/stop": { where: DECIDED, who: "lead", nohostOnly: true },
+  "tie/more": { where: TIE_SCREENS, who: "any", nohostOnly: true },
+  "tie/stop": { where: TIE_SCREENS, who: "any", nohostOnly: true },
+  "decided/more": { where: DECIDED, who: "any", nohostOnly: true },
+  "decided/stop": { where: DECIDED, who: "any", nohostOnly: true },
   "ui/pauseFriend": { where: "ask", who: "lead", nohostOnly: true },
   "ui/startCall": { where: "ask", who: "turn", nohostOnly: true },
+  /* a Know the Host answer with the host away 20 s: either captain skips it, no points (decision 7, 4 Nov audit) */
+  "ui/skipHostQ": { where: ["ask", "steal"], who: "any" },
 };
 /* Taps that adjust the screen they're on — counting names, marking a team
    right or wrong, pausing. They skip the stale-tap check (and don't bump the

@@ -22,7 +22,7 @@ export type PubMany = {
   dish?: { kind: string; ings: string[]; n: number };
   out?: boolean[];
   theme?: string;                                 // a question round: the question's theme
-  deadline: number | null; left: number; sent: boolean[];
+  deadline: number | null; left: number; sent: boolean[]; now?: number;
   roster?: string[];                              // Majority Rules: who plays
   voted?: string[];                               // ...and who has answered (names only, never what)
   reveal?: { answer: string; notes?: string; typed?: (string | null)[]; ok?: (boolean | null)[]; nums?: (number | null)[]; off?: (number | null)[];

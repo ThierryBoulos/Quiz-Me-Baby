@@ -250,7 +250,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const Typed = ({ t }: { t: 0 | 1 }) => {
     /* what they typed comes with the screen itself, so it shows before the secret (the answer, the app's call) lands */
     const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
-    return <Said t={t} text={x?.join("  /  ")} label={x ? `${T[t].name} typed` : T[t].name} empty={pub.timeUp ? "No answer" : `Waiting for ${T[t].name}’s captain to type…`} />;
+    return <Said t={t} text={x?.join("  /  ")} label={x ? `${T[t].name} typed${pub.saidLate === t ? " after time’s up" : ""}` : T[t].name} empty={pub.timeUp ? "No answer" : `Waiting for ${T[t].name}’s captain to type…`} />;
   };
   /* RIGHT / WRONG under the answer, once there IS an answer (or the clock ran out with none: then the
      app suggests WRONG). The app's call is pre-selected; either button rules. `aloud`: the Battle with a
@@ -362,7 +362,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           </div>
         </>)}
       </div>);
-    case "final": return <Results><Calls pub={pub} host busy={busy} act={send} /><Exit /></Results>;
+    /* (no list of calls here: sudden death's last one showed as a stray row under the awards: the 4 Nov audit, 1.17) */
+    case "final": return <Results><Exit /></Results>;
 
     /* ---- the mini-games ---- */
     case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "pinIntro": case "airportIntro": case "majorityIntro": case "battleIntro": return (
@@ -1101,7 +1102,7 @@ function WaitingFor({ pub }: { pub: Pub }) {
 /* where the app's calls are listed, and can be contested */
 const CALL_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "airportReveal", "dishReveal", "battleReview"];
 /* ...and sudden death / the tie-breaker: the question just decided, on the screen after it */
-const SD_CALL_SCREENS = ["final", "battleSummary", "sudden", "battleTie"];
+const SD_CALL_SCREENS = ["battleSummary", "sudden", "battleTie"];
 /* no host: the screens where both captains can agree to a new one, and what it's called */
 const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", battleQ: "question" };
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"];
@@ -1179,7 +1180,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   /* sentTxt: what this phone has just sent, locked at once (before the TV's update comes back) */
   const sentHere = !!pub.sent?.[mine] || !!sentTxt;
   const locked = !!pub.pending || sentHere;
-  const canType = !pub.paused && ((myTurn && !locked) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ") && !sentHere)
+  /* (time's up with a host: nothing more to type or use, the host rules on what's in: the 4 Nov audit, 1.15) */
+  const canType = !pub.paused && ((myTurn && !locked && !pub.timeUp) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ") && !sentHere)
     /* a buzz: one answer, and once it's sent the box closes (it stayed open, with its Send, and got sent twice: 20 Oct) */
     || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending && !sentHere)
     /* the Battle: typed with no host; with a host it's said out loud */
@@ -1198,7 +1200,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   /* ...and if they haven't after a while (phone in a pocket), the other captain can */
   const open = useAfter(pub.nextOpenAt);
   const mayNext = lead || open;
-  const next = nohost && mayNext && pub.nextBy ? NEXT_LABEL[sc] : undefined;
+  /* (the Battle's review: either captain settles it, the owner's pick on the 4 Nov audit, decision 8) */
+  const next = nohost && (mayNext || sc === "battleReview") && pub.nextBy ? NEXT_LABEL[sc] : undefined;
   const showNext = !!next && sc !== "sudden";
   /* no host: a new question (flag, landmark…) if both captains agree, while nobody has answered this one */
   const swapWord = sc === "dishQ" ? (pub.dish?.kind || "dish").toLowerCase() : SWAP_WORDS[sc];
@@ -1293,7 +1296,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
 
       {/* the lifelines: everyone sees them; the captain whose question it is taps */}
       {sc === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" busy={busy}
-        onUse={myTurn && !locked ? (k) => void act("lifeline", { key: k }) : undefined} />}
+        onUse={myTurn && !locked && !pub.timeUp ? (k) => void act("lifeline", { key: k }) : undefined} />}
 
       {/* the Auction: bidding is always the captains' */}
       {sc === "auctionBid" && A && A.turn === mine && (
@@ -1321,23 +1324,32 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <Counter A={A} fire={fire} h={92} fs={44} />
         </div>)}
 
+      {/* a Know the Host answer, and the host gone 20 s: either captain can skip it (the owner's pick, 4 Nov audit, decision 7) */}
+      {pub.skipHostQ && (sc === "ask" || sc === "steal") && (
+        <div className="card flex flex-col gap-2 text-center">
+          <p className="text-14">The host is away, and only they can rule on this one.</p>
+          <button type="button" className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "ui/skipHostQ" })}>Skip it: no points</button>
+        </div>)}
       {/* the end of the night, no host: either captain sends everyone home */}
       {nohost && sc === "final" && (<>
         <button className="btn btn-gold btn-lg btn-block mt-auto" disabled={busy} onClick={() => void nxt({ type: "ui/again" })}>Play again: same teams</button>
         <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
         <button className="btn btn-lg btn-block" disabled={busy} onClick={() => { void nxt({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
       </>)}
-      {/* no host, won with legs to spare: the lead captain picks */}
-      {nohost && sc === DECIDED && mayNext && pub.nextBy && (
+      {/* no host, won with legs to spare, or level at the end of a mini-game: either captain picks, and if neither
+          does in 10 s the night carries on (keep playing; a point each). The owner's pick on the 4 Nov audit, decision 8:
+          the lead captain alone used to decide, and the other could only wait */}
+      {nohost && sc === DECIDED && (
         <div className="flex flex-col gap-3 mt-auto dock-group">
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "decided/stop" })}>Stop here</button>
           <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "decided/more" })}>Keep playing for fun</button>
+          <AutoPick at={pub.autoAt} what="Keep playing" />
         </div>)}
-      {/* no host, level at the end of a mini-game: the lead captain picks */}
-      {nohost && TIE_SCREENS.includes(sc) && mayNext && pub.nextBy && (
+      {nohost && TIE_SCREENS.includes(sc) && (
         <div className="flex flex-col gap-3 mt-auto dock-group">
           <button className="btn btn-gold btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/more" })}>One more</button>
           <button className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "tie/stop" })}>A point each</button>
+          <AutoPick at={pub.autoAt} what="A point each" />
         </div>)}
 
       {/* no host: start, go and next — the lead captain (Team A's) */}
@@ -1345,7 +1357,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: next[1] })}>{next[0]}</button>)}
       {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
       {pub.nextBy && !lead && open && <p className="text-center text-13 text-[var(--color-ink-3)]">{pub.nextBy} hasn&rsquo;t tapped it, so you can.</p>}
-      {pub.nextBy && !lead && !open && <WaitingFor pub={pub} />}
+      {pub.nextBy && !lead && !open && sc !== DECIDED && !TIE_SCREENS.includes(sc) && <WaitingFor pub={pub} />}
       {/* no host: either captain can stop the clock (the question hides until it restarts), and, before anyone has
           answered, ask for a new question (the other captain agrees) */}
       {nohost && (PAUSABLE.includes(sc) || canSwap) && !pub.lifeline && !pub.pending && !pub.tvAway && (pub.deadline || pub.paused) && pub.agree?.kind !== "swap" && (
@@ -1366,4 +1378,11 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
 
     </div>
   );
+}
+
+/* the default that happens if neither captain picks (no host: a tie, or a game won early) */
+function AutoPick({ at, what }: { at?: number | null; what: string }) {
+  const left = useSecondsLeft(at ?? undefined);
+  if (!at || left <= 0) return null;
+  return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{what} in {left} s if nobody picks.</p>;
 }

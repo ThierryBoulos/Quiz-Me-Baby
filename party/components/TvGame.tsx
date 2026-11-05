@@ -449,7 +449,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       <span className="display text-36 pts-pill" style={{ color: tc(D.winner) }} data-fly-src={D.winner}>{decidedPts(pub)}</span>
       <span className="text-24 text-[var(--color-ink-2)]">{decidedFun(pub)}</span>
     </div>
-    <div className="text-24 mt-1">Play on, or stop here? <b>{decidedWho(pub)}</b> decides.</div>
+    <div className="text-24 mt-1">Play on, or stop here? <b>{decidedWho(pub)}</b> decides{pub.mode === "host" ? "" : " (play on if nobody does)"}.</div>
   </>); }
   if (TIE_SCREENS.includes(sc)) return (<>
     <MiniTitle title={m.title} />

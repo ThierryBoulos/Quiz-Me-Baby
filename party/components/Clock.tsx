@@ -5,11 +5,15 @@ import { useEffect, useState } from "react";
    more than a few seconds) would count down wrong, so phones learn how far
    off they are from each update the TV sends (the smallest gap seen is the
    closest to the truth) and correct for it. */
-let skew = 0, best: number | null = null;
-export function noteTvTime(tvAt?: number) {
-  if (!tvAt) return;
-  const gap = Date.now() - tvAt;
-  if (best == null || gap < best) best = gap;
+/* (the smallest of the last 20 gaps, not of the whole night: after the game moves to another TV or phone, whose
+   clock may be set differently, the old one's gaps age out. The 4 Nov audit, 1.16) */
+let skew = 0;
+const gaps: number[] = [];
+export function noteTvTime(tvNowAt?: number) {
+  if (!tvNowAt) return;
+  gaps.push(Date.now() - tvNowAt);
+  if (gaps.length > 20) gaps.shift();
+  const best = Math.min(...gaps);
   skew = Math.abs(best) > 3000 ? best : 0;
 }
 const tvNow = () => Date.now() - skew;

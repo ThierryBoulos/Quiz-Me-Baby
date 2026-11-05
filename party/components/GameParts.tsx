@@ -451,7 +451,7 @@ export const silent = (pub: Pub, t: 0 | 1) => {
 /* a tie at the end of a mini-game, in the same words on the TV and every phone */
 export const tieHead = (pub: Pub) => (pub.mini?.pct ? `Tie at ${pub.mini.wins[0]}% each` : `Tie at ${pub.mini?.wins[0] ?? 0} each`);
 export const tieCall = (pub: Pub) =>
-  `One more to settle it, or a point each: ${pub.mode === "host" ? "the host" : pub.captains?.[pub.lead ?? 0] || "the captain"} decides.`;
+  `One more to settle it, or a point each: ${pub.mode === "host" ? "the host decides" : "either captain decides (a point each if nobody does)"}.`;
 /* the pictures coming up, fetched ahead (flags into the browser's cache, maps into MapView's) */
 export function usePreload(pub: Pub | null) {
   const key = JSON.stringify(pub?.preload || null);
@@ -472,8 +472,8 @@ export const legsLeft = (key: MiniKey, n: number) => { const u = LEG_UNIT[key] |
 export const decidedPts = (pub: Pub) => (pub.decided ? `+${pub.decided.pts} point${pub.decided.pts === 1 ? "" : "s"}` : "");
 export const decidedFun = (pub: Pub) => (pub.decided ? `${legsLeft(pub.decided.key, pub.decided.spare)} just for fun.` : "");
 export const decidedSub = (pub: Pub) => (pub.decided ? `${decidedPts(pub)}. ${decidedFun(pub)}` : "");
-export const decidedWho = (pub: Pub) => (pub.mode === "host" ? "The host" : pub.captains?.[pub.lead ?? 0] || "The captain");
-export const decidedCall = (pub: Pub) => `Play on, or stop here? ${decidedWho(pub)} decides.`;
+export const decidedWho = (pub: Pub) => (pub.mode === "host" ? "The host" : "Either captain");
+export const decidedCall = (pub: Pub) => `Play on, or stop here? ${decidedWho(pub)} decides${pub.mode === "host" ? "" : " (play on if nobody does)"}.`;
 /* the Battle at halftime: what the second captain needs (the Battle pays mini.pts) */
 export const battleNeeds = (pub: Pub) => {
   const B = pub.battle, T = pub.teams;

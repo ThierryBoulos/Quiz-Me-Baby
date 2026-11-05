@@ -305,7 +305,7 @@ export default function PhoneRoom() {
     }
     if (lateKey.current != null && viewKey.current !== lateKey.current) { lateKey.current = null; setTapErr(null); }
   }, [room?.status, pub?.at, lobbyKey]);   // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { noteTvTime(pub?.at); }, [pub?.at]);
+  useEffect(() => { noteTvTime(pub?.now ?? pub?.at); }, [pub?.at, pub?.now]);
   /* an old copy of the app (left open across a deploy) reloads when nothing is being answered */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline), room?.status === "playing");
   /* the night is over and somebody tapped Exit: everyone back to the home screen */

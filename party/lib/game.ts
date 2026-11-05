@@ -86,6 +86,9 @@ export type Pub = {
     tb?: number; winner?: 0 | 1 | null; note?: string; award?: Two<number>;
     half?: { said: string; got: boolean; answer: string }[];   // half: at the handoff, the first captain's every answer
     predict?: string };   // at the summary: the players who called their captain's score (29 Oct)
+  now?: number;                  // the TV's own clock when this went out (the phones' clocks follow it; at is an ordering stamp)
+  skipHostQ?: boolean;           // a Know the Host answer, the host away 20 s: either captain can skip it (no points)
+  saidLate?: 0 | 1;              // with a host: the team whose answer came in after time's up
   autoAt?: number | null;         // no host: when this screen moves on by itself
   pips?: { kind: "std" | "mini"; state: "now" | "done" | "todo" }[];   // the night's progress, for the tracker
   captains?: [string | null, string | null];

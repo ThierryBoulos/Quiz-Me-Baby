@@ -68,27 +68,27 @@
 1771.50 airportReveal | 44 | 6-5 | 0-2 |  | 
 1786.50 airportReveal | 44 | 6-5 | 0-2 | No answer in time: the call stands. | 
 1790.50 decided | 45 | 6-7 | 0-2 |  | 
-1803.00 airportQ | 46 | 6-7 | 0-2 |  | 
-1805.75 airportReveal | 46 | 6-7 | 0-3 |  | 
-1814.75 airportSummary | 47 | 6-7 | 0-3 | Owls takes board 5. | 
-1908.50 roundIntro | 48 | 6-7 |  | Owls takes board 5. | 
-1944.50 ask | 49 | 6-7 |  | Owls takes board 5. | 
-1947.00 steal | 49 | 6-7 |  | Owls takes board 5. | 
-1978.00 answer | 50 | 6-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-2075.00 ask | 51 | 6-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-2085.75 ask | 51 | 6-8 |  | Owls used Double Dip. | 
-2121.75 answer | 51 | 6-9 |  | Owls +1 point | 
-2199.00 roundScore | 52 | 6-9 |  | Owls +1 point | 
-2217.00 roundIntro | 53 | 6-9 |  | Owls +1 point | 
-2264.75 ask | 54 | 6-9 |  | Owls +1 point | 
-2296.25 answer | 54 | 7-9 |  | Lions +1 point | 
-2306.25 answer | 54 | 7-9 |  |  | 
-2321.25 answer | 54 | 7-9 |  | No answer in time: the call stands. | 
-2361.00 ask | 55 | 7-9 |  | No answer in time: the call stands. | 
-2367.50 steal | 55 | 7-9 |  | No answer in time: the call stands. | 
-2382.75 answer | 55 | 7-9 |  | No answer in time: the call stands. | 
-2483.50 answer | 55 | 7-9 |  |  | 
-2487.00 answer | 55 | 7-10 |  | Call changed: Owls +1 point. | 
-2557.25 roundScore | 56 | 7-10 |  | Call changed: Owls +1 point. | 
-2667.00 final | 57 | 7-10 |  | Call changed: Owls +1 point. | 
-recap: {"margin":3,"sudden":false,"leadChanges":4,"steals":[3,3],"minis":[0,2],"best":{"title":"Guess the Airport","team":1,"legs":[0,3]},"chart":[[0,0],[0,0],[0,1],[1,1],[3,1],[4,1],[4,3],[4,4],[4,5],[6,5],[6,7],[6,8],[6,9],[7,9],[7,10]],"segs":[{"label":"R1","pts":[[0,1],[1,1]]},{"label":"R2","pts":[[3,1],[4,1]]},{"label":"Drop the Pin","pts":[[4,3]]},{"label":"R3","pts":[[4,4],[4,5]]},{"label":"R4","pts":[[6,5]]},{"label":"Guess the Airport","pts":[[6,7]]},{"label":"R5","pts":[[6,8],[6,9]]},{"label":"R6","pts":[[7,9],[7,10]]}],"awards":[{"t":"Comeback","who":"Owls, 3 points down in Round 2","team":1},{"t":"Whitewash","who":"Guess the Airport, Owls 3–0","team":1},{"t":"Best aim, Drop the Pin","who":"Lions, 1,961 km off in all","team":0},{"t":"Furthest pin","who":"Owls, 2,108 km off","team":1,"note":"Petronas Towers (Kuala Lumpur, Malaysia)"}]}
+1800.50 airportQ | 46 | 6-7 | 0-2 |  | 
+1802.25 airportReveal | 46 | 6-7 | 1-3 |  | 
+1805.75 airportSummary | 47 | 6-7 | 1-3 | Both got it — a point each. | 
+1816.50 roundIntro | 48 | 6-7 |  | Both got it — a point each. | 
+1911.00 ask | 49 | 6-7 |  | Both got it — a point each. | 
+1940.75 steal | 49 | 6-7 |  | Both got it — a point each. | 
+1971.75 answer | 50 | 6-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+2048.00 ask | 51 | 6-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+2058.75 ask | 51 | 6-8 |  | Owls used Double Dip. | 
+2094.75 answer | 51 | 6-9 |  | Owls +1 point | 
+2172.00 roundScore | 52 | 6-9 |  | Owls +1 point | 
+2190.00 roundIntro | 53 | 6-9 |  | Owls +1 point | 
+2237.75 ask | 54 | 6-9 |  | Owls +1 point | 
+2269.25 answer | 54 | 7-9 |  | Lions +1 point | 
+2279.25 answer | 54 | 7-9 |  |  | 
+2294.25 answer | 54 | 7-9 |  | No answer in time: the call stands. | 
+2334.00 ask | 55 | 7-9 |  | No answer in time: the call stands. | 
+2340.50 steal | 55 | 7-9 |  | No answer in time: the call stands. | 
+2355.75 answer | 55 | 7-9 |  | No answer in time: the call stands. | 
+2456.50 answer | 55 | 7-9 |  |  | 
+2460.00 answer | 55 | 7-10 |  | Call changed: Owls +1 point. | 
+2530.25 roundScore | 56 | 7-10 |  | Call changed: Owls +1 point. | 
+2640.00 final | 57 | 7-10 |  | Call changed: Owls +1 point. | 
+recap: {"margin":3,"sudden":false,"leadChanges":4,"steals":[3,3],"minis":[0,2],"best":{"title":"Guess the Airport","team":1,"legs":[1,3]},"chart":[[0,0],[0,0],[0,1],[1,1],[3,1],[4,1],[4,3],[4,4],[4,5],[6,5],[6,7],[6,8],[6,9],[7,9],[7,10]],"segs":[{"label":"R1","pts":[[0,1],[1,1]]},{"label":"R2","pts":[[3,1],[4,1]]},{"label":"Drop the Pin","pts":[[4,3]]},{"label":"R3","pts":[[4,4],[4,5]]},{"label":"R4","pts":[[6,5]]},{"label":"Guess the Airport","pts":[[6,7]]},{"label":"R5","pts":[[6,8],[6,9]]},{"label":"R6","pts":[[7,9],[7,10]]}],"awards":[{"t":"Comeback","who":"Owls, 3 points down in Round 2","team":1},{"t":"One-way traffic","who":"Guess the Airport, Owls 3–1","team":1},{"t":"Best aim, Drop the Pin","who":"Lions, 1,961 km off in all","team":0},{"t":"Furthest pin","who":"Owls, 2,108 km off","team":1,"note":"Petronas Towers (Kuala Lumpur, Malaysia)"}]}

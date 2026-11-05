@@ -67,7 +67,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     const s = st.current; if (!s) return;
     const { pub: p, secret } = buildMany(s);
     p.ack = ack.current;
-    const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at;
+    const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at; p.now = Date.now();
     setPub(p);
     try { localStorage.setItem(saveKey, JSON.stringify({ build: BUILD_ID, shape: SHAPE, s })); setBanner((b) => (b === "cantSave" ? null : b)); } catch { setBanner("cantSave"); }
     /* a copy on the server, so another phone can carry on if this one goes quiet (no TV, 3 Nov): on a new screen
