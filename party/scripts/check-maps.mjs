@@ -53,6 +53,8 @@ const CASES = {
     ["axis powers", "allies", "world war 2", "ww2 losers"]],
   q1hp1eug: [["schengen", "schengen area", "shengen", "border free europe", "no borders", "passport free travel", "free movement", "open borders", "no border checks", "without passport"],
     ["european union", "eurozone", "euro", "nato"]],
+  qqcjz40: [["death penalty", "the death penalty", "capital punishment", "countries that execute people", "executions", "death row", "death sentence", "peine de mort"],
+    ["prisons", "crime rates", "murder rate", "police", "life in prison"]],
   ql2dao5: [["ASEAN", "asean countries", "southeast asia", "south east asia", "south-east asian nations", "association of southeast asian nations", "asian association"],
     ["asia", "east asia", "pacific islands", "indonesia", "commonwealth"]],
   q12zbjmn: [["seven wonders", "the 7 wonders", "wonders of the world", "new seven wonders", "7 wonders of the world", "wonderz"],

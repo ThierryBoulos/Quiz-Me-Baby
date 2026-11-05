@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.55', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.56', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2568,6 +2568,18 @@ const SEED = [
 ['Sexy Time','expert','','Which married research duo studied volunteers having sex in their 1960s lab to describe the sexual response cycle?','Masters and Johnson','William Masters and Virginia Johnson, in St Louis. The TV series Masters of Sex is about them.'],
 ['Sexy Time','expert','','Which word, popularised by sex columnist Dan Savage in 2001, means a woman penetrating a man with a strap-on?','Pegging','His readers voted the name in a poll; "bend over boyfriend" came second.'],
 ['Sexy Time','expert','','Kinksters call it CNC: a scene where one partner agrees in advance to be \'taken\'. What do the letters stand for?','Consensual non-consent','Everything is agreed beforehand, with a safe word; the "non-consent" is the role-play.'],
+['Sexy Time','medium','pelvic-floor','Which exercises for the pelvic floor are named after the American gynaecologist who made them popular in 1948?','Kegel exercises','Arnold Kegel; squeezing as if to stop the flow of pee is the classic way to find the right muscles.'],
+['Sexy Time','easy','pelvic-floor','Kegel exercises strengthen which group of muscles?','The pelvic floor','The hammock of muscle under the bladder, bowel and womb (or prostate); stronger ones are linked to stronger orgasms.'],
+['Sexy Time','easy','','In men\'s sexual health, what does \'PE\' stand for?','Premature ejaculation','Alongside erectile dysfunction, the most common sexual complaint men bring to a doctor.'],
+['Sexy Time','medium','','In Australia, a \'thong\' is worn on which part of the body?','The feet','Australians call flip-flops thongs; the underwear is a G-string.'],
+['Sexy Time','medium','','In a bra size like 34C, what does the number measure?','The band','The band, around the ribcage under the bust (in inches); the letter is the cup, the difference between bust and band.'],
+['Sexy Time','medium','fluids','What is the slang name for getting urinated on for sexual pleasure?','A golden shower','The clinical name is urolagnia.'],
+['Sexy Time','hard','fluids','Which 2023 internet rumour, about influencers flown to the Gulf for degrading paid \'favours\', is known as the Dubai ___?','Porta potty','A TikTok-fuelled rumour and meme, never proven in any single case.'],
+['Sexy Time','medium','','In porn, what does \'DP\' stand for?','Double penetration',''],
+['Sexy Time','medium','','What is the porn term for one person having sex with several partners, one after another?','A gang bang',''],
+['Sexy Time','easy','','What is the word for a food or drink said to make you horny, like oysters?','An aphrodisiac','From Aphrodite, the Greek goddess of love; science backs almost none of them.'],
+['Sexy Time','medium','','What is the name for a hole in a wall, often between toilet cubicles, used for anonymous sex?','A glory hole',''],
+['Sexy Time','medium','','In porn, what does \'BBW\' stand for?','Big beautiful woman','Coined in 1979 by Carole Shaw for her magazine for plus-size women, long before porn sites took it up.'],
 ['Internet & Memes','expert','','Which 1996 animation of a cha-cha-ing infant, passed around by email, became one of the first viral videos?','Dancing Baby','Also called Baby Cha-Cha. It later danced through Ally McBeal.'],
 ['Internet & Memes','expert','','In 1969 the first message on ARPANET, the internet\'s ancestor, crashed after two letters. Which two got through?','LO','It was meant to be LOGIN, sent from UCLA to Stanford.'],
 ['Internet & Memes','expert','','What was Grumpy Cat\'s real name?','Tardar Sauce','Her grumpy face came from feline dwarfism and an underbite. She died in 2019.'],
@@ -3321,7 +3333,17 @@ const SEED_MAPS = [
     title:"The members of ASEAN in 2026",
     answer:"ASEAN — the Association of Southeast Asian Nations",
     notes:"Eleven: founded in Bangkok in 1967 by Indonesia, Malaysia, the Philippines, Singapore and Thailand; Brunei, Vietnam, Laos, Myanmar and Cambodia joined by 1999, and Timor-Leste became the 11th on 26 October 2025. Source: Wikipedia, ASEAN.",
-    cls:[{ c:MC.gold, label:"ASEAN member", codes:"BRN KHM IDN LAO MYS MMR PHL SGP THA VNM" }, { c:MC.org, label:"Newest member, since October 2025", codes:"TLS" }] }
+    cls:[{ c:MC.gold, label:"ASEAN member", codes:"BRN KHM IDN LAO MYS MMR PHL SGP THA VNM" }, { c:MC.org, label:"Newest member, since October 2025", codes:"TLS" }] },
+  { key:'deathpenalty', view:'world',
+    topic:'Politics',
+    level:'medium',
+    title:'The death penalty around the world',
+    answer:'The death penalty — where it is still carried out, abolished in practice, kept only for exceptional crimes, or abolished',
+    notes:'54 countries still execute, in law and in practice: among them the USA, China, Iran, Saudi Arabia, India and Japan. 23 keep it in law but have executed nobody for at least ten years (Russia, South Korea, Morocco…); 8 keep it only for crimes such as wartime treason (Brazil, Chile, Peru…); 112 have abolished it entirely, Lebanon among them since August 2026. Amnesty International\'s categories. Source: Wikipedia, Capital punishment by country (November 2026).',
+    cls:[{ c:MC.coral, label:'Still carried out', codes:'BWA COM COD EGY ETH GMB LSO LBY NGA SOM SSD SDN UGA ATG BHS BRB BLZ CUB DMA GUY JAM KNA LCA VCT TTO USA AFG BHR BGD MMR CHN IND IDN IRN IRQ ISR JPN JOR KWT MYS PRK OMN PAK PSE QAT SAU SGP SYR TWN THA ARE VNM YEM BLR' },
+      { c:MC.vio, label:'Abolished in practice', codes:'DZA CMR ERI SWZ GHA KEN LBR MWI MLI MRT MAR NER TZA TUN GRD BRN LAO MDV KOR LKA TJK RUS TON' },
+      { c:MC.gold, label:'Exceptional crimes only', codes:'BFA GNQ ZWE BRA CHL SLV GTM PER' },
+      { c:MC.sky, label:'Abolished for all crimes', codes:'AGO BEN BDI CPV CAF TCD COG DJI GAB GIN GNB CIV MDG MUS MOZ NAM RWA STP SEN SYC SLE ZAF TGO ZMB ARG BOL CAN COL CRI DOM ECU HTI HND MEX NIC PAN PRY SUR URY VEN ARM AZE BTN KHM CYP TLS GEO KAZ KGZ LBN MNG NPL PHL TUR TKM UZB ALB AND AUT BEL BIH BGR HRV CZE DNK EST FIN FRA DEU GRC HUN ISL IRL ITA XKX LVA LIE LTU LUX MLT MDA MCO MNE NLD MKD NOR POL PRT ROU SMR SRB SVK SVN ESP SWE CHE UKR GBR VAT AUS FJI KIR MHL FSM NRU NZL PLW PNG WSM SLB TUV VUT' }] }
 ];
 /* A graded map lists each place's number once (`vals`) and its colour bands
    from the best down (`bands`); the shaded groups are worked out
@@ -4082,7 +4104,11 @@ const MAJORITY = [
   ["panda-food", "easy", "What do giant pandas eat almost all day?", ["Bamboo", "Eucalyptus", "Fish", "Berries"], 0, "Bamboo is about 99% of their diet. Eucalyptus is the koala's."],
   ["chessboard", "easy", "How many squares are there on a chessboard?", ["36", "49", "64", "100"], 2, "Eight rows of eight, light and dark."],
   ["card-deck", "easy", "How many cards are there in a standard deck, without the jokers?", ["48", "52", "54", "56"], 1, "Four suits of 13."],
-  ["emerald-colour", "easy", "What colour is an emerald?", ["Red", "Blue", "Green", "Purple"], 2, "A ruby is red, a sapphire blue, an amethyst purple."]
+  ["emerald-colour", "easy", "What colour is an emerald?", ["Red", "Blue", "Green", "Purple"], 2, "A ruby is red, a sapphire blue, an amethyst purple."],
+  ["catan-wool", "medium", "In the board game Catan, what is the official name of the resource that sheep give?", ["Wool", "Sheep", "Fleece", "Lamb"], 0, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
+  ["catan-lumber", "medium", "In Catan, what is the official name of the resource that forests give?", ["Wood", "Lumber", "Timber", "Logs"], 1, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
+  ["catan-grain", "medium", "In Catan, what is the official name of the resource that fields give?", ["Wheat", "Grain", "Corn", "Hay"], 1, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
+  ["catan-ore", "medium", "In Catan, what is the official name of the resource that mountains give?", ["Stone", "Rock", "Ore", "Iron"], 2, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."]
 ];
 
 /* shared out over the levels that are on, exactly as the flags are (easy: 2 at most) */
@@ -4345,11 +4371,14 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 53;   // bumped when the built-in bank changes
+const SEED_VERSION = 54;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
 const SEED_NEVER = [
+  ["q1f0ezzu", "qqv3lxm"],
+  ["qgw9neb", "q175twlm"],
+  ["mr:catan-wool", "mr:catan-lumber", "mr:catan-grain", "mr:catan-ore"],
   ["q1coaj68", "mr:country-has"],
   ["qbgc884", "mr:friends-chandler"],
   ["qa4el1y", "qtgsdrc"],
