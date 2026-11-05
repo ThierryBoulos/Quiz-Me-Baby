@@ -105,7 +105,8 @@ export function pause(s: StateM, now: number): boolean {
 }
 export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   const m = miniOf(s); if (!m || s.screen !== "q" || m.key === "sudden") return false;
-  if (answered(s).some(Boolean) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
+  /* (Majority Rules: a vote counts, not a team with nobody on the list) */
+  if ((m.key === "majority" ? false : answered(s).some(Boolean)) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;
 }

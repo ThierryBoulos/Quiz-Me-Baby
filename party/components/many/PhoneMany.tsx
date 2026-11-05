@@ -214,7 +214,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {/* the same controls as with two teams: Pause, Change question, Reveal now (the 4 Nov audit, 3.11) */}
         <div className="flex flex-wrap justify-center gap-2 mt-auto">
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
-          {g.key !== "sudden" && !pub.sent.some(Boolean) && !(pub.voted?.length) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change question</button>}
+          {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change question</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
         </div>
       </>)}
