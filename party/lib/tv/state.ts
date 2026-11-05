@@ -57,9 +57,9 @@ export const newState = () => ({
   tvAway: 0, awayPaused: false,                      // when the TV's screen went to sleep (0: it's on), and whether that paused the clock
   imad: null as Pub["imad"] | null, imadN: 0, imadQ: [] as string[],   // Imad's latest line, and the ones waiting to go up together
   custom: [] as Q[],                                 // questions of their own, sent by the phone that started
-  typedLate: null as 0 | 1 | null,
-  skipHostQ: false,
-  pausedBy: "",                                       // who tapped Pause (the phones say so: the 4 Nov audit, 3.14)                                   // a Know the Host answer, the host away 20 s: the captains may skip it                    // with a host: the team whose answer came in after time's up
+  typedLate: null as 0 | 1 | null,                  // with a host: the team whose answer came in after time's up
+  skipHostQ: false,                                  // a Know the Host answer, the host away 20 s: the captains may skip it
+  pausedBy: "",                                      // who tapped Pause (the phones say so: the 4 Nov audit, 3.14)
   buzzAt: 0, late: null as 0 | 1 | null,             // Guess the Cocktail or Dish: when the buzz came (10 s to type), and who ran out
   lastAns: null as null | { answer: string; got: boolean | null },   // the Battle: the last question's answer, shown once it's settled
   exit: false,                                       // the night is over and Exit was tapped: every screen goes home

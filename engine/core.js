@@ -1704,8 +1704,10 @@
       g.rounds.forEach(r => r.q.forEach(q => inPlay.add(q.id)));
       m.qs.forEach(q => inPlay.add(q.id));
       (m.spare || []).forEach(q => inPlay.add(q.id));
-      let pool = D.bank().filter(q => q.type === 'closest' && !inPlay.has(q.id) && D.isFresh(q));
-      if(!pool.length) pool = D.bank().filter(q => q.type === 'closest' && !inPlay.has(q.id));
+      /* Sexy Time and Lebanon only when they're the night's own themes, as when the night was dealt */
+      const own = g.rounds.map(r => r.theme), mine = q => CLOSEST_ONLY_IF_PICKED.indexOf(q.theme) < 0 || own.indexOf(q.theme) >= 0;
+      let pool = D.bank().filter(q => q.type === 'closest' && !inPlay.has(q.id) && mine(q) && D.isFresh(q));
+      if(!pool.length) pool = D.bank().filter(q => q.type === 'closest' && !inPlay.has(q.id) && mine(q));
       if(!pool.length) return [{ toast:'No spare Closest To Wins question left in the bank.' }];
       const spent = new Set(m.qs.filter((q, i) => i !== m.i).map(q => q.theme));
       const offTheme = pool.filter(q => !spent.has(q.theme));

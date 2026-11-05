@@ -309,8 +309,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
       if (f.go) {
         const was = s.screen;
-        s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now; s.contest = null; s.contested = [];
+        s.screen = f.go; s.timeUp = false; s.left = 0; s.lifeline = null; s.deadline = null; s.pending = null; s.autoAt = null; s.paused = false; s.waitSince = now; s.contest = null; s.contested = []; s.skipHostQ = false;
         if (s.nohost && AUTO_NEXT[f.go]) s.autoAt = now + T_AUTO_NEXT * 1000;
+        /* no host: a tie (the Cocktail or Dish and the Map end here straight from the engine) or a game decided early takes its default after 10 s */
+        else if (s.nohost && PICK_DEFAULT(f.go)) s.autoAt = now + T_PICK * 1000;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
         if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; s.typedLate = null; }
         if (f.go === "dishQ") s.legLog = [];
@@ -341,7 +343,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (f.finalize) { s.contest = null; s.screen = "final"; s.deadline = null; s.autoAt = null; s.pending = null; if (isTvRef.current) playSound("win"); }
     }
     /* the TV is asleep: a clock that started meanwhile (the steal, after an answer) waits with the rest */
-    if (s.tvAway && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; s.paused = true; s.awayPaused = true; }
+    if (s.tvAway && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; s.paused = true; s.awayPaused = true; s.pausedBy = ""; }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [used]);   // usedKey: as above
 
@@ -911,7 +913,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (why) return why;
       if ((!s.deadline && !s.paused) || (s.deadline && Date.now() >= s.deadline)) return "Time's up.";
       const held = !!s.deadline;
-      if (held) { applyFx([{ timer: "pause" }]); s.paused = true; }
+      if (held) { applyFx([{ timer: "pause" }]); s.paused = true; s.pausedBy = ""; }
       s.agree = { id: Date.now(), kind: "swap", team, until: Date.now() + T_AGREE * 1000, screen: sc, key: draftKey(), held, what: swapWord(sc, currentQ(s)) };
       return true;
     }
@@ -1322,12 +1324,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const hostHere = !!hostM && now - (H.at[hostM.user_id] ?? H.since) < T_AWAY * 1000;
     /* a Know the Host answer waiting for a host who's been gone 20 s: the captains may skip it (decision 7) */
     { const q = current(), sc = s.screen;
-      const wait = !!hostM && (sc === "ask" || sc === "steal") && !!q && hostOnly(q) && (!!s.typed[turnTeam()] || s.timeUp)
-        && now - (H.at[hostM.user_id] ?? H.since) >= T_HOST_SKIP * 1000;
+      const wait = (sc === "ask" || sc === "steal") && !!q && hostOnly(q) && (!!s.typed[turnTeam()] || s.timeUp)
+        && (!hostM || now - (H.at[hostM.user_id] ?? H.since) >= T_HOST_SKIP * 1000);   // a host who left the room counts as away
       if (wait !== !!s.skipHostQ) { s.skipHostQ = wait; void publish(); } }
     if (s.nohost === hostHere && !s.pending) {
       s.nohost = !hostHere;
       s.toast = { id: ++s.toastN, text: s.nohost ? "The host is away, so the app checks the answers for now." : "The host is back." };
+      /* a tie or a game decided early already on screen: with no host, it takes its default after 10 s */
+      if (s.nohost && PICK_DEFAULT(s.screen) && !s.autoAt) s.autoAt = now + T_PICK * 1000;
       if (s.nohost) {
         /* an answer already typed for the host to judge: the app checks it now */
         const sc = s.screen, g = s.g, q = current();
@@ -1402,7 +1406,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (document.visibilityState === "hidden" && !s.tvAway) {
         s.tvAway = now;
         s.awayPaused = !!s.deadline && !s.paused && !s.lifeline;
-        if (s.awayPaused) { applyFx([{ timer: "pause" }]); s.paused = true; }
+        if (s.awayPaused) { applyFx([{ timer: "pause" }]); s.paused = true; s.pausedBy = ""; }
         void publish();
       } else if (document.visibilityState === "visible" && s.tvAway) {
         const d = now - s.tvAway;

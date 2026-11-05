@@ -1123,8 +1123,11 @@ const NEXT_LABEL: Record<string, [string, string]> = {
 function WaitingFor({ pub }: { pub: Pub }) {
   const label = pub.screen === "sudden" ? "Go" : NEXT_LABEL[pub.screen]?.[0] || "Next";
   const open = useAfter(pub.nextOpenAt), auto = useSecondsLeft(pub.autoAt);
-  if (pub.autoAt && auto > 0) return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Next in {auto} s, or {pub.nextBy} taps Next.</p>;
-  const who = open && pub.nextOther ? `${pub.nextBy} or ${pub.nextOther}` : pub.nextBy;
+  const tie = TIE_SCREENS.includes(pub.screen), decided = pub.screen === DECIDED;
+  if (pub.autoAt && auto > 0) return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{
+    tie ? `${pub.screen === "battleLevel" ? "The points are shared" : "A point each"} in ${auto} s, unless a captain picks one more.`
+    : decided ? `Playing on for fun in ${auto} s, unless a captain stops here.` : `Next in ${auto} s, or ${pub.nextBy} taps Next.`}</p>;
+  const who = tie || decided ? "a captain" : open && pub.nextOther ? `${pub.nextBy} or ${pub.nextOther}` : pub.nextBy;
   return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Waiting for {who} to {TIE_SCREENS.includes(pub.screen) ? "choose: one more, or a point each" : pub.screen === DECIDED ? "choose: keep playing for fun, or stop here" : `tap ${/^Start/.test(label) ? "Start" : label}`}.</p>;
 }
 /* the other team's lifelines, as a line of text (3.10) */
@@ -1136,7 +1139,7 @@ function LifelineLine({ pub, t }: { pub: Pub; t: 0 | 1 }) {
 /* with a host: the screens that wait for the host's tap say so on the other phones, as with no host (the 4 Nov audit, 3.9) */
 function WaitingForHost({ pub, members }: { pub: Pub; members: Member[] }) {
   const h = members.find((m) => m.role === "host");
-  if (pub.mode === "nohost" || !h || !WAITS_FOR_NEXT.has(pub.screen) || pub.screen === "final") return null;
+  if (pub.mode === "nohost" || !h || !WAITS_FOR_NEXT.has(pub.screen) || pub.screen === "final" || (pub.screen === "sudden" && pub.sudden?.ready)) return null;
   return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Waiting for <bdi>{h.name}</bdi> to move the night on.</p>;
 }
 /* the screens a clock runs on, and so the ones a Pause makes sense on */
@@ -1290,7 +1293,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {/^majority(Q|Reveal)$/.test(sc) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} part="rest" />
       {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
-      {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc)) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
+      {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc) || (nohost && sc === "final")) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
 
 
       {/* Call a Friend: the calling captain has the script and the call's clock; with no host they start it, with a host the
