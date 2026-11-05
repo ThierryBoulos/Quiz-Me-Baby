@@ -70,6 +70,9 @@ export default function TvRoom() {
     leaving.current = true; setNoTvErr(false);
     const { error } = await sb().from("rooms").update({ state: { ...room.state, notv: true } }).eq("code", code);
     if (error) { leaving.current = false; setNoTvErr(true); return; }
+    /* a first "still here" at once, so the other phones know whose game it is while its owner takes a seat; and if
+       they never do, the host's or a captain's phone can take it over after a while (the 4 Nov audit, 1.1) */
+    await sb().rpc("qmb_ref_beat", { r: code, away: true }).then(() => {}, () => {});
     router.push("/join?code=" + code);
   };
   const noTvNow = room?.status === "lobby" && isNoTv(room.state);

@@ -17,7 +17,7 @@ import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PA
   other, serverMs, SWAPS, swapWord, type Action, type G, type PKind, type W } from "./tv/rules";
 import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, turnOf } from "./tv/reads";
 import { buildView, qk } from "./tv/view";
-import { useInbox } from "./tv/useInbox";
+import { inboxMark, useInbox } from "./tv/useInbox";
 import { usePresent } from "./tv/usePresent";
 import { fireLeg, imadNarrate, imadOnToast, imadSay } from "./tv/imad";
 import { newState, type TvState } from "./tv/state";
@@ -200,16 +200,18 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
           if (save !== lastSave.current) {
-            localStorage.setItem(saveKey, save); lastSave.current = save;
+            lastSave.current = save;
+            try { localStorage.setItem(saveKey, save); } catch { setBanner("cantSave"); }
             /* ...and a copy on the server, so a new laptop can take over if this one dies (29 Oct, B9): on a new
                screen at once, otherwise every 15 s at most. One row per room, overwritten, gone with the room. */
             /* (a phone running the game, with no TV, every 4 s at most: a phone can go quiet any moment, and the one
-               that takes over carries on from here, with the taps this one hadn't read yet: inboxLast) */
+               that takes over carries on from here, with the taps this one hadn't read yet: inboxLast. It goes even
+               when this phone can't keep a copy of its own: private browsing, a full phone (the 4 Nov audit, 1.2).
+               savedAt: the time it was taken, so the phone taking over takes the quiet time off the clocks (1.3)) */
             const due = s.screen !== backupAt.current.screen || Date.now() - backupAt.current.t > (phoneRef.current ? 4000 : 15000);
             if (due && isTvRef.current) {
               backupAt.current = { t: Date.now(), screen: s.screen };
-              let inboxLast = 0; try { inboxLast = Number(localStorage.getItem("qmb.tv." + code + ".last") || 0); } catch { /* none */ }
-              void sb().rpc("qmb_tv_backup", { r: code, s: { ...JSON.parse(save), inboxLast, settings: getSettings() } }).then(() => {}, () => {});
+              void sb().rpc("qmb_tv_backup", { r: code, s: { ...JSON.parse(save), ...inboxMark(code), savedAt: Date.now(), settings: getSettings() } }).then(() => {}, () => {});
             }
           }
         }
@@ -1154,7 +1156,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (saved?.g && (saved.shape ?? 1) !== SAVE_SHAPE) { try { localStorage.removeItem(saveKey); } catch { /* */ } setBanner("oldSave"); }
       else if (saved?.g) {
         const before = { ...st.current };
-        delete saved.build; delete saved.shape;
+        /* savedAt: a copy another phone made, taken over from the server (no TV): the time since it was made is
+           taken off every clock, as a pause would (the 4 Nov audit, 1.3: a question ran out during the hand-over) */
+        const savedAt = Number(saved.savedAt) || 0;
+        delete saved.build; delete saved.shape; delete saved.savedAt; delete saved.inboxLast; delete saved.inboxTags; delete saved.settings;
         Object.assign(st.current, saved);
         /* A reload (or a sleep) hides the page first, which pauses everyone; the
            new page must take that pause back, or the game stays frozen. */
@@ -1165,7 +1170,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           if (s.awayPaused && s.left && !s.pending) { s.deadline = Date.now() + s.left * 1000; s.left = 0; }
           if (s.awayPaused) s.paused = false;
           s.tvAway = 0; s.awayPaused = false;
-        }
+        } else if (savedAt) shiftClocks(s, Math.max(0, Date.now() - savedAt));
         /* The bank, then the view, to this TV and to every phone (they may still show "paused"). A download
            that fails (one bad request on party Wi-Fi) is tried again every few seconds, with a line on the TV
            meanwhile; the clocks stand still until it comes, and taps are turned down, not swallowed (29 Oct:

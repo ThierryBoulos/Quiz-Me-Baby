@@ -8,7 +8,7 @@ import { QMB, HOST_ONLY_THEMES, hostOnly, loadBank, type Bank, type Q } from "..
 import { sb } from "../supabase";
 import { getSettings, USED_KEY } from "../settings";
 import { cap1, type Member, type Room } from "../room";
-import { useInbox } from "../tv/useInbox";
+import { inboxMark, useInbox } from "../tv/useInbox";
 import { usePresent } from "../tv/usePresent";
 import { DISH_LAST, T_LOBBY_AWAY } from "../game";
 import type { Action, G } from "../tv/rules";
@@ -43,6 +43,7 @@ export async function setTeams(code: string, state: Record<string, unknown>, mem
 const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST }; };
 
 export function useTvMany(code: string, isTv: boolean, room: Room | null, members: Member[], phone = false) {
+  const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave" | "noBank">(null);
   const st = useRef<StateM | null>(null);
   const [pub, setPub] = useState<PubMany | null>(null);
   const ctx = useRef({ room, members }); ctx.current = { room, members };
@@ -68,13 +69,12 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     p.ack = ack.current;
     const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at;
     setPub(p);
-    try { localStorage.setItem(saveKey, JSON.stringify({ build: BUILD_ID, shape: SHAPE, s })); } catch { /* in memory only */ }
+    try { localStorage.setItem(saveKey, JSON.stringify({ build: BUILD_ID, shape: SHAPE, s })); setBanner((b) => (b === "cantSave" ? null : b)); } catch { setBanner("cantSave"); }
     /* a copy on the server, so another phone can carry on if this one goes quiet (no TV, 3 Nov): on a new screen
        at once, otherwise every 4 s at most. (Not with a TV: 3-8 teams always have a host, and a laptop doesn't doze.) */
     if (phoneRef.current && !s.exit && (s.screen !== backedUp.current.screen || Date.now() - backedUp.current.t > 4000)) {
       backedUp.current = { t: Date.now(), screen: s.screen };
-      let inboxLast = 0; try { inboxLast = Number(localStorage.getItem("qmb.tv." + code + ".last") || 0); } catch { /* none */ }
-      void sb().rpc("qmb_tv_backup", { r: code, s: { many: true, build: BUILD_ID, shape: SHAPE, s, inboxLast, settings: getSettings() } }).then(() => {}, () => {});
+      void sb().rpc("qmb_tv_backup", { r: code, s: { many: true, build: BUILD_ID, shape: SHAPE, s, ...inboxMark(code), savedAt: Date.now(), settings: getSettings() } }).then(() => {}, () => {});
     }
     chain.current = chain.current.then(async () => {
       const room = ctx.current.room;
@@ -103,7 +103,15 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     try {
       const raw = JSON.parse(localStorage.getItem(saveKey) || "null");
-      if (raw && raw.shape === SHAPE && raw.s && raw.s.v === 2) { st.current = raw.s; void loadBank(code).then((b) => { bank.current = b; }).catch(() => {}); publish(); }
+      if (raw && raw.shape === SHAPE && raw.s && raw.s.v === 2) {
+        const s = raw.s as StateM, now = Date.now();
+        /* the clock picks up where it was: after a sleep (or a reload, which hides the page first) from the time it
+           had left; after taking the game over from another phone's copy (savedAt), less the time since that copy
+           (the 4 Nov audit, 1.3: a question ran out while the game changed phones) */
+        if (s.away) { if (s.left && s.screen === "q") { s.deadline = now + s.left * 1000; s.left = 0; } s.away = 0; }
+        else if (raw.savedAt && s.deadline) s.deadline += Math.max(0, now - Number(raw.savedAt));
+        st.current = s; void loadBank(code).then((b) => { bank.current = b; }).catch(() => {}); publish();
+      }
     } catch { /* nothing saved */ }
   }, [isTv, saveKey, code, publish]);
 
@@ -230,6 +238,29 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     return () => clearInterval(t);
   }, [isTv, code, lobbyWrite]);
 
+  /* The game's screen goes to sleep or out of sight (a phone running the game, with no TV: a call, another app, the
+     screen locking): the clock waits, so nobody's question runs out meanwhile, and picks up where it was when the
+     screen's back (the 4 Nov audit, 1.3: 3-8 teams had no pause at all). A copy goes to the server at once, so a
+     phone that takes over knows the clock was waiting. */
+  useEffect(() => {
+    if (!isTv) return;
+    const vis = () => {
+      const s = st.current, now = Date.now(); if (!s) return;
+      if (document.visibilityState === "hidden" && !s.away) {
+        s.away = now;
+        if (s.screen === "q" && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; }
+        backedUp.current = { t: 0, screen: "" };
+        publish();
+      } else if (document.visibilityState === "visible" && s.away) {
+        if (s.screen === "q" && !s.deadline && s.left) { s.deadline = now + s.left * 1000; s.left = 0; }
+        s.away = 0;
+        publish();
+      }
+    };
+    document.addEventListener("visibilitychange", vis);
+    return () => document.removeEventListener("visibilitychange", vis);
+  }, [isTv, publish]);
+
   /* the clock: time up shows the reveal */
   useEffect(() => {
     if (!isTv) return;
@@ -248,5 +279,5 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     await setTeams(code, room.state || {}, ctx.current.members, k);
   }, [code]);
 
-  return { pub, setTeamCount };
+  return { pub, setTeamCount, banner };
 }

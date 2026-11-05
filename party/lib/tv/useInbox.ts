@@ -8,6 +8,18 @@ import { serverMs, type Action } from "./rules";
 /* a read the server hasn't answered in this long is stuck: another goes out beside it */
 const READ_STUCK_MS = 4000, READS_AT_ONCE = 3;
 
+/* What the game's server copy says it has read (the 4 Nov audit, 1.5): the tap being handled counts as read the
+   moment it starts, since the copy that goes out during it already holds its effect (a phone taking the game
+   over from that copy mustn't do it again: an Auction +1 twice, a host's change flipped back). The last tags go
+   with it too, so a late second copy of a tap isn't taken by the new phone either. */
+const marks: Record<string, { id: number; tags: () => string[] }> = {};
+export function inboxMark(code: string): { inboxLast: number; inboxTags: string[] } {
+  let last = 0;
+  try { last = Number(localStorage.getItem("qmb.tv." + code + ".last") || 0); } catch { /* none */ }
+  const m = marks[code];
+  return { inboxLast: Math.max(last, m?.id || 0), inboxTags: m ? m.tags().slice(-60) : [] };
+}
+
 export function useInbox(code: string, isTv: boolean, handle: (a: Action) => Promise<void>) {
   useEffect(() => {
     if (!isTv) return;
@@ -38,7 +50,9 @@ export function useInbox(code: string, isTv: boolean, handle: (a: Action) => Pro
       try { localStorage.setItem(tapsKey, JSON.stringify(tags)); } catch { /* in memory only */ }
       return true;
     };
+    marks[code] = { id: last, tags: () => tags };
     const take = async (a: Action) => {
+      if (a.id > marks[code].id) marks[code].id = a.id;
       if (firstCopy(a)) { try { await handle(a); } catch (e) { console.error("action refused", a, e); } }
       if (a.id > last) { last = a.id; try { localStorage.setItem(key, String(last)); } catch { /* in memory only */ } }
       const t = ms(a.at); if (t > newest) newest = t;

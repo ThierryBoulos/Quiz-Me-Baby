@@ -166,15 +166,20 @@ export default function PhoneRoom() {
      carries on from, so the game waits for the save; started without it, it would start empty) */
   const [taking, setTaking] = useState(false);
   const runs = referee && refLock.state === "mine" && !taking;
-  useTvGame(code, runs && !many, room, members, true);
-  useTvMany(code, runs && many, room, members, true);
-  useWakeLock(runs);
-  /* the phone running the game says it's still here, every 5 s while it's on screen */
+  const two = useTvGame(code, runs && !many, room, members, true);
+  const tvM = useTvMany(code, runs && many, room, members, true);
+  const awake = useWakeLock(runs);
+  /* the game phone's own warnings, in a red line under the header (the 4 Nov audit, 1.8: they only ever showed on a TV) */
+  const refBanner = !runs ? null : (many ? tvM.banner : two.banner);
+  /* the phone running the game says it's still here, every 5 s while it's on screen; going out of sight (a call,
+     another app, the screen locking) it says so, and the others then give it 45 s, not 20, before one takes over
+     (the owner's pick on the 4 Nov audit, decision 2) */
   useEffect(() => {
     if (!runs) return;
-    const beat = () => { if (document.visibilityState === "visible") void sb().rpc("qmb_ref_beat", { r: code }).then(() => {}, () => {}); };
+    const beat = () => void sb().rpc("qmb_ref_beat", { r: code, away: document.visibilityState !== "visible" }).then(() => {}, () => {});
+    const tick = () => { if (document.visibilityState === "visible") beat(); };
     beat();
-    const t = setInterval(beat, 5000);
+    const t = setInterval(tick, 5000);
     document.addEventListener("visibilitychange", beat);
     return () => { clearInterval(t); document.removeEventListener("visibilitychange", beat); };
   }, [runs, code]);
@@ -190,16 +195,27 @@ export default function PhoneRoom() {
       if (!live || document.visibilityState !== "visible") return;
       setTaking(true);
       try {
-        const r = await rpc<{ ok?: boolean; taken?: boolean; save?: Record<string, unknown> | null }>("qmb_take_game", { r: code });
+        const r = await rpc<{ ok?: boolean; taken?: boolean; save?: Record<string, unknown> | null; status?: string; saved_ago?: number | null }>("qmb_take_game", { r: code });
         if (!r?.taken) return;                       // (taken: stored even if this loop has just stopped, as this phone became the game's)
         const sv = r.save;
+        /* mid-game with no copy to carry on from (the old phone couldn't make one): the game can't go on, and
+           everyone is told, with Exit, rather than left tapping a game nobody runs (the 4 Nov audit, 1.2) */
+        if (!sv && r.status === "playing") {
+          const cur = await sb().from("rooms").select("state").eq("code", code).maybeSingle();
+          const rest = { ...((cur.data?.state as Record<string, unknown> | null) || {}) }; delete rest.pub;
+          await sb().from("rooms").update({ status: "lobby", mode: null, state: { ...rest, pubAt: Date.now(), lost: Date.now() } }).eq("code", code);
+          void refreshRef.current(); return;
+        }
         try {
           if (sv) {
-            const { inboxLast, many: isMany, settings, ...rest } = sv as { inboxLast?: number; many?: boolean; settings?: unknown } & Record<string, unknown>;
+            const { inboxLast, inboxTags, many: isMany, settings, ...rest } = sv as { inboxLast?: number; inboxTags?: string[]; many?: boolean; settings?: unknown } & Record<string, unknown>;
             /* the night's settings (its timers, its rules) come with it: this phone plays it as it was set up */
             if (settings) localStorage.setItem("qmb.party.settings", JSON.stringify(settings));
+            /* when the copy was made, by this phone's clock: the quiet time since is taken off the clocks */
+            if (r.saved_ago != null) rest.savedAt = Date.now() - Math.round(Number(r.saved_ago) * 1000);
             localStorage.setItem("qmb.tv." + code + (isMany ? ".many" : ".game"), JSON.stringify(rest));
             if (inboxLast) localStorage.setItem("qmb.tv." + code + ".last", String(inboxLast));
+            if (inboxTags?.length) localStorage.setItem("qmb.tv." + code + ".taps", JSON.stringify(inboxTags));
           }
         } catch { /* in memory only: the room carries the lobby, and a game starts afresh */ }
         setTookOver(true);
@@ -378,6 +394,17 @@ export default function PhoneRoom() {
       {/* this phone runs the game: keep it on, in this app */}
       {runs && tookOver && <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>The phone running the game went quiet, so this one runs it now. Keep it on, on this screen.</p>}
       {runs && !tookOver && room.status !== "lobby" && <p className="text-center text-12 text-[var(--color-ink-3)]">This phone runs the game: keep it on, on this screen.</p>}
+      {runs && (refBanner || awake === false) && (
+        <div className="flex flex-col items-center gap-1 text-center text-14 font-bold" role="alert" style={{ color: "var(--color-no)" }}>
+          {refBanner === "offline" && <p>No connection: the game waits until it&rsquo;s back.</p>}
+          {refBanner === "noBank" && <p>Can&rsquo;t load the questions. Check this phone&rsquo;s internet.</p>}
+          {refBanner === "cantSave" && <p>This phone can&rsquo;t save the game (private browsing?). Don&rsquo;t close this page.</p>}
+          {refBanner === "oldSave" && <><p>The app was updated, so this game can&rsquo;t carry on.</p>
+            <button type="button" className="btn btn-sm" onClick={() => { void sb().from("rooms").update({ status: "done" }).eq("code", code).then(() => router.replace("/")); }}>End the game</button></>}
+          {awake === false && <p>This phone can&rsquo;t stay awake by itself: turn off auto-lock, and keep it plugged in.</p>}
+        </div>)}
+      {room.status === "lobby" && Number(room.state?.lost) > Date.now() - 600000 && (
+        <p className="text-center text-14 font-bold" role="status" style={{ color: "var(--color-gold)" }}>The phone running the game went quiet before it could save the game, so it couldn&rsquo;t carry on. Start a new game from here.</p>)}
       {referee && refLock.state === "other" && (
         <div className="card flex flex-col gap-2 text-center"><p className="text-14">This game runs in another tab of this browser.</p>
           <button className="btn btn-sm self-center" onClick={refLock.takeOver}>Run it here instead</button></div>)}
