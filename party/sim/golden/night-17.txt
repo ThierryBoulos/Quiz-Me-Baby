@@ -33,75 +33,75 @@
 50.75 majorityQ | 16 | 0-5 | 0-0 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 66.75 majorityReveal | 17 | 0-5 | 75-33 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 67.00 majorityQ | 18 | 0-5 | 75-33 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-68.00 majorityReveal | 18 | 0-5 | 75-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-68.75 majorityQ | 19 | 0-5 | 75-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-84.75 majorityReveal | 20 | 0-5 | 58-56 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-85.00 majorityQ | 21 | 0-5 | 58-56 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-101.00 majorityReveal | 22 | 0-5 | 56-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-101.25 majorityQ | 23 | 0-5 | 56-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-117.25 majorityReveal | 24 | 0-5 | 50-47 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-117.50 majorityQ | 25 | 0-5 | 50-47 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-118.25 majorityReveal | 25 | 0-5 | 54-44 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-119.25 majorityQ | 26 | 0-5 | 54-44 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-120.00 majorityReveal | 26 | 0-5 | 54-43 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-121.00 majorityQ | 27 | 0-5 | 54-43 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-137.00 majorityReveal | 28 | 0-5 | 56-46 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-137.25 majorityQ | 29 | 0-5 | 56-46 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-153.25 majorityReveal | 30 | 0-5 | 56-44 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-153.50 majorityQ | 31 | 0-5 | 56-44 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-169.50 majorityReveal | 32 | 0-5 | 55-47 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-170.50 majorityQ | 33 | 0-5 | 55-47 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-186.50 majorityReveal | 34 | 0-5 | 57-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-186.75 majorityQ | 35 | 0-5 | 57-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-202.75 majorityReveal | 36 | 0-5 | 54-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-203.00 majorityQ | 37 | 0-5 | 54-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-203.75 majorityReveal | 37 | 0-5 | 54-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-204.75 majorityQ | 38 | 0-5 | 54-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-220.75 majorityReveal | 39 | 0-5 | 54-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-221.00 majorityQ | 40 | 0-5 | 54-48 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-221.75 majorityReveal | 40 | 0-5 | 55-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-222.75 majoritySummary | 41 | 2-5 | 55-49 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-223.50 roundIntro | 42 | 2-5 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-224.50 ask | 43 | 2-5 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-225.50 ask | 43 | 2-5 |  | Lions used Double Dip. | 
-226.25 answer | 43 | 3-5 |  | Lions +1 point | 
-227.25 answer | 43 | 3-5 |  |  | 
-228.00 steal | 44 | 2-5 |  | Owls steal a new question. | 
-229.00 answer | 44 | 2-5 |  | Owls steal a new question. | 
-230.00 ask | 45 | 2-5 |  | Owls steal a new question. | 
-230.75 steal | 45 | 2-5 |  | Owls steal a new question. | 
-231.75 answer | 45 | 2-5 |  | Owls steal a new question. | 
-232.50 answer | 45 | 2-5 |  |  | 
-247.50 answer | 45 | 2-5 |  | No answer in time: the call stands. | 
-248.00 roundScore | 46 | 2-5 |  | No answer in time: the call stands. | 
-248.75 roundIntro | 47 | 2-5 |  | No answer in time: the call stands. | 
-249.75 ask | 48 | 2-5 |  | No answer in time: the call stands. | 
-250.50 answer | 48 | 3-5 |  | Lions +1 point | 
-251.50 answer | 48 | 3-5 |  |  | 
-266.50 answer | 48 | 3-5 |  | No answer in time: the call stands. | 
-266.75 ask | 49 | 3-5 |  | No answer in time: the call stands. | 
-267.75 steal | 49 | 3-5 |  | No answer in time: the call stands. | 
-268.50 answer | 49 | 3-5 |  | No answer in time: the call stands. | 
-269.50 roundScore | 50 | 3-5 |  | No answer in time: the call stands. | 
-270.50 roundIntro | 51 | 3-5 |  | No answer in time: the call stands. | 
-271.25 ask | 52 | 3-5 |  | No answer in time: the call stands. | 
-272.25 steal | 52 | 3-5 |  | No answer in time: the call stands. | 
-273.00 answer | 52 | 3-5 |  | No answer in time: the call stands. | 
-274.00 ask | 53 | 3-5 |  | No answer in time: the call stands. | 
-275.00 steal | 53 | 3-5 |  | No answer in time: the call stands. | 
-275.75 answer | 53 | 3-5 |  | No answer in time: the call stands. | 
-276.75 roundScore | 54 | 3-5 |  | No answer in time: the call stands. | 
-277.50 battleIntro | 55 | 3-5 | 0-0 | No answer in time: the call stands. | 
-278.50 battleQ | 56 | 3-5 | 0-0 | No answer in time: the call stands. | 
-281.25 battleQ | 56 | 3-5 | 1-0 | No answer in time: the call stands. | 
-282.00 battleQ | 56 | 3-5 | 2-0 | No answer in time: the call stands. | 
-286.50 battleQ | 56 | 3-5 | 3-0 | No answer in time: the call stands. | 
-287.50 battleHandoff | 56 | 3-5 | 3-0 | No answer in time: the call stands. | 
-288.50 battleQ | 57 | 3-5 | 3-0 | No answer in time: the call stands. | 
-289.25 battleQ | 57 | 3-5 | 3-1 | No answer in time: the call stands. | 
-290.25 battleQ | 57 | 3-5 | 3-2 | No answer in time: the call stands. | 
-294.75 battleQ | 57 | 3-5 | 3-3 | No answer in time: the call stands. | 
-297.50 battleReview | 57 | 3-5 | 3-4 | No answer in time: the call stands. | 
-298.25 battleSummary | 58 | 3-9 | 3-4 | No answer in time: the call stands. | 
-299.25 final | 59 | 3-9 |  | No answer in time: the call stands. | 
-recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[0,2],"minis":[1,1],"chart":[[0,0],[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[2,5],[3,5],[2,5],[3,5],[3,9]],"segs":[{"label":"R1","pts":[[0,1],[0,2]]},{"label":"R2","pts":[[0,3],[0,4]]},{"label":"R3","pts":[[0,5]]},{"label":"Majority Rules","pts":[[2,5]]},{"label":"R4","pts":[[3,5],[2,5]]},{"label":"R5","pts":[[3,5]]},{"label":"R6","pts":[]},{"label":"Battle of the Captains","pts":[[3,9]]}],"awards":[{"t":"Best thief","who":"Owls, 2 steals","team":1},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1},{"t":"Sharpest in Majority Rules","who":"Karim, 11 of 15","team":0},{"t":"Wooden spoon, Majority Rules","who":"Rami, Maya & Rita, 6 of 15","team":null,"note":"Last, but with dignity.","spoon":true}]}
+68.00 majorityReveal | 18 | 0-5 | 63-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+68.75 majorityQ | 19 | 0-5 | 63-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+84.75 majorityReveal | 20 | 0-5 | 50-56 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+85.00 majorityQ | 21 | 0-5 | 50-56 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+101.00 majorityReveal | 22 | 0-5 | 50-42 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+101.25 majorityQ | 23 | 0-5 | 50-42 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+117.25 majorityReveal | 24 | 0-5 | 45-47 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+117.50 majorityQ | 25 | 0-5 | 45-47 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+118.25 majorityReveal | 25 | 0-5 | 46-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+119.25 majorityQ | 26 | 0-5 | 46-50 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+120.00 majorityReveal | 26 | 0-5 | 50-52 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+121.00 majorityQ | 27 | 0-5 | 50-52 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+137.00 majorityReveal | 28 | 0-5 | 47-54 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+137.25 majorityQ | 29 | 0-5 | 47-54 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+153.25 majorityReveal | 30 | 0-5 | 50-56 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+153.50 majorityQ | 31 | 0-5 | 50-56 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+169.50 majorityReveal | 32 | 0-5 | 50-57 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+170.50 majorityQ | 33 | 0-5 | 50-57 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+186.50 majorityReveal | 34 | 0-5 | 52-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+186.75 majorityQ | 35 | 0-5 | 52-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+202.75 majorityReveal | 36 | 0-5 | 50-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+203.00 majorityQ | 37 | 0-5 | 50-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+203.75 majorityReveal | 37 | 0-5 | 50-59 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+204.75 majorityQ | 38 | 0-5 | 50-59 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+220.75 majorityReveal | 39 | 0-5 | 50-57 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+221.00 majorityQ | 40 | 0-5 | 50-57 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+221.75 majorityReveal | 40 | 0-5 | 52-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+222.75 majoritySummary | 41 | 0-7 | 52-58 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+223.50 roundIntro | 42 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+224.50 ask | 43 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+225.50 ask | 43 | 0-7 |  | Lions used Double Dip. | 
+226.25 answer | 43 | 1-7 |  | Lions +1 point | 
+227.25 answer | 43 | 1-7 |  |  | 
+228.00 steal | 44 | 0-7 |  | Owls steal a new question. | 
+229.00 answer | 44 | 0-7 |  | Owls steal a new question. | 
+230.00 ask | 45 | 0-7 |  | Owls steal a new question. | 
+230.75 steal | 45 | 0-7 |  | Owls steal a new question. | 
+231.75 answer | 45 | 0-7 |  | Owls steal a new question. | 
+232.50 answer | 45 | 0-7 |  |  | 
+247.50 answer | 45 | 0-7 |  | No answer in time: the call stands. | 
+248.00 roundScore | 46 | 0-7 |  | No answer in time: the call stands. | 
+248.75 roundIntro | 47 | 0-7 |  | No answer in time: the call stands. | 
+249.75 ask | 48 | 0-7 |  | No answer in time: the call stands. | 
+250.50 answer | 48 | 1-7 |  | Lions +1 point | 
+251.50 answer | 48 | 1-7 |  |  | 
+266.50 answer | 48 | 1-7 |  | No answer in time: the call stands. | 
+266.75 ask | 49 | 1-7 |  | No answer in time: the call stands. | 
+267.75 steal | 49 | 1-7 |  | No answer in time: the call stands. | 
+268.50 answer | 49 | 1-7 |  | No answer in time: the call stands. | 
+269.50 roundScore | 50 | 1-7 |  | No answer in time: the call stands. | 
+270.50 roundIntro | 51 | 1-7 |  | No answer in time: the call stands. | 
+271.25 ask | 52 | 1-7 |  | No answer in time: the call stands. | 
+272.25 steal | 52 | 1-7 |  | No answer in time: the call stands. | 
+273.00 answer | 52 | 1-7 |  | No answer in time: the call stands. | 
+274.00 ask | 53 | 1-7 |  | No answer in time: the call stands. | 
+275.00 steal | 53 | 1-7 |  | No answer in time: the call stands. | 
+275.75 answer | 53 | 1-7 |  | No answer in time: the call stands. | 
+276.75 roundScore | 54 | 1-7 |  | No answer in time: the call stands. | 
+277.50 battleIntro | 55 | 1-7 | 0-0 | No answer in time: the call stands. | 
+278.50 battleQ | 56 | 1-7 | 0-0 | No answer in time: the call stands. | 
+281.25 battleQ | 56 | 1-7 | 1-0 | No answer in time: the call stands. | 
+282.00 battleQ | 56 | 1-7 | 2-0 | No answer in time: the call stands. | 
+286.50 battleQ | 56 | 1-7 | 3-0 | No answer in time: the call stands. | 
+287.50 battleHandoff | 56 | 1-7 | 3-0 | No answer in time: the call stands. | 
+288.50 battleQ | 57 | 1-7 | 3-0 | No answer in time: the call stands. | 
+289.25 battleQ | 57 | 1-7 | 3-1 | No answer in time: the call stands. | 
+290.25 battleQ | 57 | 1-7 | 3-2 | No answer in time: the call stands. | 
+294.75 battleQ | 57 | 1-7 | 3-3 | No answer in time: the call stands. | 
+297.50 battleReview | 57 | 1-7 | 3-4 | No answer in time: the call stands. | 
+298.25 battleSummary | 58 | 1-11 | 3-4 | No answer in time: the call stands. | 
+299.25 final | 59 | 1-11 |  | No answer in time: the call stands. | 
+recap: {"margin":10,"sudden":false,"leadChanges":0,"steals":[0,2],"minis":[0,2],"chart":[[0,0],[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,7],[1,7],[0,7],[1,7],[1,11]],"segs":[{"label":"R1","pts":[[0,1],[0,2]]},{"label":"R2","pts":[[0,3],[0,4]]},{"label":"R3","pts":[[0,5]]},{"label":"Majority Rules","pts":[[0,7]]},{"label":"R4","pts":[[1,7],[0,7]]},{"label":"R5","pts":[[1,7]]},{"label":"R6","pts":[]},{"label":"Battle of the Captains","pts":[[1,11]]}],"awards":[{"t":"Best thief","who":"Owls, 2 steals","team":1},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1},{"t":"Sharpest in Majority Rules","who":"Lea, 12 of 15","team":1},{"t":"Wooden spoon, Majority Rules","who":"Rami & Maya, 6 of 15","team":null,"note":"Last, but with dignity.","spoon":true}]}

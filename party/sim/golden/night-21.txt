@@ -68,74 +68,64 @@
 81.50 miniQ | 30 | 6-6 | 0-2 | Owls take leg 2. | 
 82.25 closestReveal | 30 | 6-6 | 1-2 | Owls take leg 2. | 
 83.25 miniQ | 31 | 6-6 | 1-2 | Lions take leg 3. | 
-84.00 closestReveal | 31 | 6-6 | 2-3 | Lions take leg 3. | 
-85.00 miniQ | 32 | 6-6 | 2-3 | Tie — a point each. | 
-86.00 closestReveal | 32 | 6-6 | 3-3 | Tie — a point each. | 
-86.75 miniTie | 33 | 6-6 | 3-3 |  | 
-87.75 miniQ | 34 | 6-6 | 3-3 |  | 
-88.50 closestReveal | 34 | 6-6 | 4-3 |  | 
-89.50 miniSummary | 35 | 8-6 | 4-3 | Lions take leg 6. | 
-90.50 roundIntro | 36 | 8-6 |  | Lions take leg 6. | 
-91.25 ask | 37 | 8-6 |  | Lions take leg 6. | 
-92.25 ask | 37 | 8-6 |  | Lions used Double Dip. | 
-93.00 answer | 37 | 9-6 |  | Lions +1 point | 
-94.00 ask | 38 | 9-6 |  | Lions +1 point | 
-95.00 steal | 38 | 9-6 |  | Lions +1 point | 
-95.75 answer | 38 | 9-6 |  | Lions +1 point | 
-96.75 roundScore | 39 | 9-6 |  | Lions +1 point | 
-97.50 roundIntro | 40 | 9-6 |  | Lions +1 point | 
-98.50 ask | 41 | 9-6 |  | Lions +1 point | 
-99.50 steal | 41 | 9-6 |  | Lions +1 point | 
-100.25 answer | 41 | 9-6 |  | Lions +1 point | 
-101.25 ask | 42 | 9-6 |  | Lions +1 point | 
+84.00 closestReveal | 31 | 6-6 | 1-3 | Lions take leg 3. | 
+85.00 decided | 32 | 6-6 | 1-3 |  | 
+86.00 roundIntro | 33 | 6-8 |  |  | 
+86.75 ask | 34 | 6-8 |  |  | 
+87.75 steal | 34 | 6-8 |  |  | 
+88.50 answer | 34 | 6-9 |  | Owls +1 point — steal | 
+89.50 ask | 35 | 6-9 |  | Owls +1 point — steal | 
+90.50 steal | 35 | 6-9 |  | Owls +1 point — steal | 
+91.25 answer | 35 | 7-9 |  | Lions +1 point — steal | 
+92.25 answer | 35 | 7-9 |  |  | 
+93.00 answer | 35 | 7-9 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+94.00 roundScore | 36 | 7-9 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+95.00 roundIntro | 37 | 7-9 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+95.75 ask | 38 | 7-9 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+96.75 steal | 38 | 7-9 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+97.50 answer | 38 | 7-10 |  | Owls +1 point — steal | 
+98.50 ask | 39 | 7-10 |  | Owls +1 point — steal | 
+99.50 steal | 39 | 7-10 |  | Owls +1 point — steal | 
+100.25 answer | 39 | 7-10 |  | Owls +1 point — steal | 
+101.25 roundScore | 40 | 7-10 |  | Owls +1 point — steal | 
+102.00 auctionIntro | 41 | 7-10 | 0-0 | Owls +1 point — steal | 
+103.00 auctionBid | 42 | 7-10 | 0-0 | Owls +1 point — steal | 
+104.00 auctionBid | 43 | 7-10 | 0-0 | Owls +1 point — steal | 
+104.75 auctionRun | 44 | 7-10 | 0-0 | Owls +1 point — steal | 
+106.50 auctionLeg | 44 | 7-10 | 1-0 | Owls +1 point — steal | 
+107.50 auctionBid | 45 | 7-10 | 1-0 | Owls +1 point — steal | 
+108.50 auctionBid | 46 | 7-10 | 1-0 | Owls +1 point — steal | 
+109.25 auctionRun | 47 | 7-10 | 1-0 | Owls +1 point — steal | 
+113.75 auctionLeg | 47 | 7-10 | 1-1 | Owls +1 point — steal | 
+114.75 auctionBid | 48 | 7-10 | 1-1 | Owls +1 point — steal | 
+115.50 auctionBid | 49 | 7-10 | 1-1 | Owls +1 point — steal | 
+116.50 auctionRun | 50 | 7-10 | 1-1 | Owls +1 point — steal | 
+120.00 auctionLeg | 50 | 7-10 | 2-1 | Owls +1 point — steal | 
+121.00 auctionResult | 51 | 9-10 | 2-1 | Owls +1 point — steal | 
+122.00 roundIntro | 52 | 9-10 |  | Owls +1 point — steal | 
+123.75 ask | 53 | 9-10 |  | Owls +1 point — steal | 
 (a new question)
-102.00 ask | 43 | 9-6 |  | Lions +1 point | 
-103.00 ask | 44 | 9-6 |  | Both captains agreed. New question. | 
-103.00 steal | 44 | 9-6 |  | Both captains agreed. New question. | 
-104.00 answer | 44 | 10-6 |  | Lions +1 point — steal | 
-104.75 roundScore | 45 | 10-6 |  | Lions +1 point — steal | 
-105.75 auctionIntro | 46 | 10-6 | 0-0 | Lions +1 point — steal | 
-106.50 auctionBid | 47 | 10-6 | 0-0 | Lions +1 point — steal | 
-107.50 auctionBid | 48 | 10-6 | 0-0 | Lions +1 point — steal | 
-108.50 auctionRun | 49 | 10-6 | 0-0 | Lions +1 point — steal | 
-112.00 auctionLeg | 49 | 10-6 | 1-0 | Lions +1 point — steal | 
-113.00 auctionBid | 50 | 10-6 | 1-0 | Lions +1 point — steal | 
-113.75 auctionBid | 51 | 10-6 | 1-0 | Lions +1 point — steal | 
-114.75 auctionRun | 52 | 10-6 | 1-0 | Lions +1 point — steal | 
-118.25 auctionLeg | 52 | 10-6 | 1-1 | Lions +1 point — steal | 
-119.25 auctionBid | 53 | 10-6 | 1-1 | Lions +1 point — steal | 
-120.00 auctionBid | 54 | 10-6 | 1-1 | Lions +1 point — steal | 
-121.00 auctionRun | 55 | 10-6 | 1-1 | Lions +1 point — steal | 
-122.75 auctionLeg | 55 | 10-6 | 2-1 | Lions +1 point — steal | 
-123.75 auctionResult | 56 | 12-6 | 2-1 | Lions +1 point — steal | 
-124.50 roundIntro | 57 | 12-6 |  | Lions +1 point — steal | 
-125.50 ask | 58 | 12-6 |  | Lions +1 point — steal | 
-126.50 answer | 58 | 13-6 |  | Lions +1 point | 
-127.25 answer | 58 | 13-6 |  |  | 
-128.25 answer | 58 | 13-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-129.00 ask | 59 | 13-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-130.00 steal | 59 | 13-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-131.00 answer | 59 | 13-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-131.75 answer | 59 | 13-6 |  |  | 
-132.75 answer | 59 | 13-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-133.50 roundScore | 60 | 13-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-134.50 battleIntro | 61 | 13-6 | 0-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
-135.50 battleQ | 62 | 13-6 | 0-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
-136.25 battleQ | 62 | 13-6 | 1-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
-139.00 battleQ | 62 | 13-6 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+124.50 ask | 54 | 9-10 |  | Owls +1 point — steal | 
+125.50 ask | 55 | 9-10 |  | Both captains agreed. New question. | 
+125.50 steal | 55 | 9-10 |  | Both captains agreed. New question. | 
+126.50 answer | 55 | 9-10 |  | Both captains agreed. New question. | 
+127.25 ask | 56 | 9-10 |  | Both captains agreed. New question. | 
+128.25 steal | 56 | 9-10 |  | Both captains agreed. New question. | 
+129.00 answer | 56 | 10-10 |  | Lions +1 point — steal | 
+130.00 roundScore | 57 | 10-10 |  | Lions +1 point — steal | 
+131.00 battleIntro | 58 | 10-10 | 0-0 | Lions +1 point — steal | 
+131.75 battleQ | 59 | 10-10 | 0-0 | Lions +1 point — steal | 
+136.25 battleQ | 59 | 10-10 | 1-0 | Lions +1 point — steal | 
+140.00 battleQ | 59 | 10-10 | 2-0 | Lions +1 point — steal | 
 (a new question)
-140.75 battleQ | 63 | 13-6 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
-141.75 battleQ | 64 | 13-6 | 2-0 | Both captains agreed. New question. | 
-143.50 battleQ | 64 | 13-6 | 3-0 | Both captains agreed. New question. | 
-145.25 battleHandoff | 64 | 13-6 | 3-0 | Both captains agreed. New question. | 
-146.25 battleQ | 65 | 13-6 | 3-0 | Both captains agreed. New question. | 
-149.75 battleQ | 65 | 13-6 | 3-1 | Both captains agreed. New question. | 
-151.50 battleQ | 65 | 13-6 | 3-2 | Both captains agreed. New question. | 
-153.50 battleQ | 65 | 13-6 | 3-3 | Both captains agreed. New question. | 
-154.25 battleQ | 65 | 13-6 | 3-4 | Both captains agreed. New question. | 
-155.25 battleReview | 65 | 13-6 | 3-5 | Both captains agreed. New question. | 
-156.00 battleReview | 65 | 13-6 | 3-5 |  | 
-171.00 battleReview | 65 | 13-6 | 3-5 | No answer in time: the call stands. | 
-171.50 battleSummary | 66 | 13-10 | 3-5 | No answer in time: the call stands. | 
-172.25 final | 67 | 13-10 |  | No answer in time: the call stands. | 
-recap: {"margin":3,"sudden":false,"leadChanges":0,"steals":[2,1],"minis":[3,1],"chart":[[0,0],[0,0],[1,0],[2,0],[4,4],[6,4],[6,5],[6,6],[8,6],[9,6],[10,6],[12,6],[13,6],[13,10]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"R2","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[4,4],[6,4]]},{"label":"R3","pts":[[6,5],[6,6]]},{"label":"Closest To Wins","pts":[[8,6]]},{"label":"R4","pts":[[9,6]]},{"label":"R5","pts":[[10,6]]},{"label":"The Auction","pts":[[12,6]]},{"label":"R6","pts":[[13,6]]},{"label":"Battle of the Captains","pts":[[13,10]]}],"awards":[{"t":"Best thief","who":"Lions, 2 steals","team":0},{"t":"Battle of the Captains","who":"Lea, 5 of 10","team":1}]}
+140.75 battleQ | 60 | 10-10 | 2-0 | Lions +1 point — steal | 
+141.75 battleQ | 61 | 10-10 | 2-0 | Both captains agreed. New question. | 
+141.75 battleHandoff | 61 | 10-10 | 2-0 | Both captains agreed. New question. | 
+142.50 battleQ | 62 | 10-10 | 2-0 | Both captains agreed. New question. | 
+147.00 battleQ | 62 | 10-10 | 2-1 | Both captains agreed. New question. | 
+149.00 battleQ | 62 | 10-10 | 2-2 | Both captains agreed. New question. | 
+150.75 battleQ | 62 | 10-10 | 2-3 | Both captains agreed. New question. | 
+151.50 battleReview | 62 | 10-10 | 2-4 | Both captains agreed. New question. | 
+152.50 battleSummary | 63 | 10-14 | 2-4 | Both captains agreed. New question. | 
+153.50 final | 64 | 10-14 |  | Both captains agreed. New question. | 
+recap: {"margin":4,"sudden":false,"leadChanges":1,"steals":[3,3],"minis":[2,2],"best":{"title":"Closest To Wins","team":1,"legs":[1,3]},"chart":[[0,0],[0,0],[1,0],[2,0],[4,4],[6,4],[6,5],[6,6],[6,8],[6,9],[7,9],[7,10],[9,10],[10,10],[10,14]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"R2","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[4,4],[6,4]]},{"label":"R3","pts":[[6,5],[6,6]]},{"label":"Closest To Wins","pts":[[6,8]]},{"label":"R4","pts":[[6,9],[7,9]]},{"label":"R5","pts":[[7,10]]},{"label":"The Auction","pts":[[9,10]]},{"label":"R6","pts":[[10,10]]},{"label":"Battle of the Captains","pts":[[10,14]]}],"awards":[{"t":"Down to the wire","who":"Owls took the lead for good in the Battle of the Captains","team":1},{"t":"One-way traffic","who":"Closest To Wins, Owls 3–1","team":1},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1}]}

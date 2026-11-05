@@ -40,7 +40,7 @@ const bare = (t: string) => t.replace(AIRPORT_WORDS, " ").replace(/\s+/g, " ").t
 const fold = (t: string) => t.normalize("NFD").replace(/\p{M}/gu, "");
 const noCity = (t: string, q: G) => {
   const c = fold(String(q.city || "")).trim(); if (!c) return "";
-  const re = new RegExp(`(?<!\\p{L})${c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!\\p{L})`, "giu");
+  const re = new RegExp(`(?<!\\p{L})(?:new\\s+)?${c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!\\p{L})`, "giu");
   return fold(t).replace(re, " ").replace(/\s+/g, " ").trim();
 };
 const airportHit = (t: string, q: G) => [bare(t), bare(noCity(t, q))].some((x) => !!x && QMB.isMatch(x, q.answer, acceptFor(q)));

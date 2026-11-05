@@ -54,13 +54,13 @@
 80.50 mapReveal | 25 | 5-1 | 0-1 |  | 
 95.50 mapReveal | 25 | 5-1 | 0-1 | No answer in time: the call stands. | 
 95.75 mapQ | 26 | 5-1 | 0-1 | Owls take map 2. | 
-96.75 mapReveal | 26 | 5-1 | 1-2 | Owls take map 2. | 
-97.50 mapSummary | 27 | 5-3 | 1-2 | Both got it — a point each. | 
-98.50 roundIntro | 28 | 5-3 |  | Both got it — a point each. | 
-99.50 ask | 29 | 5-3 |  | Both got it — a point each. | 
-100.25 steal | 29 | 5-3 |  | Both got it — a point each. | 
-101.25 answer | 29 | 5-3 |  | Both got it — a point each. | 
-102.00 ask | 30 | 5-3 |  | Both got it — a point each. | 
+96.75 mapReveal | 26 | 5-1 | 0-1 | Owls take map 2. | 
+97.50 mapSummary | 27 | 5-3 | 0-1 | Nobody got it. | 
+98.50 roundIntro | 28 | 5-3 |  | Nobody got it. | 
+99.50 ask | 29 | 5-3 |  | Nobody got it. | 
+100.25 steal | 29 | 5-3 |  | Nobody got it. | 
+101.25 answer | 29 | 5-3 |  | Nobody got it. | 
+102.00 ask | 30 | 5-3 |  | Nobody got it. | 
 103.00 answer | 30 | 5-4 |  | Owls +1 point | 
 104.00 answer | 30 | 5-4 |  |  | 
 107.50 steal | 31 | 5-3 |  | Lions steal a new question. | 

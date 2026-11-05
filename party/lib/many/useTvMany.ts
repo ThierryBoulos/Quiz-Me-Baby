@@ -186,7 +186,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         bank.current = b;
         /* the decks, dealt exactly as the two-team game deals them (fresh questions first) */
         let used = new Set<string>(); try { used = new Set(JSON.parse(localStorage.getItem(USED_KEY) || "[]")); } catch { /* none */ }
-        const dealer = QMB.createDealer({ bank: () => b.bank, used: () => used, noRepeat: () => getSettings().noRepeat, suddenOk: (q: Q) => !hostOnly(q),
+        const dealer = QMB.createDealer({ bank: () => b.bank, never: () => b.never || [], used: () => used, noRepeat: () => getSettings().noRepeat, suddenOk: (q: Q) => !hostOnly(q),
           ok: { map: (q: G) => q.type === "map", flag: (q: G) => q.type === "flag", dish: (q: G) => q.type === "dish",
             pin: (q: G) => q.type === "pin" && Number.isFinite(q.lat) && Number.isFinite(q.lon) && !!q.photo,
             airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0,

@@ -147,5 +147,10 @@ bank.bank.forEach((q) => { counts[q.type] = (counts[q.type] || 0) + 1; });
 console.log("bank", bank.version, "—", bank.bank.length, "rows", JSON.stringify(counts));
 if (showWarnings) warns.forEach((w) => console.log("WARN ", w));
 errors.forEach((e) => console.log("ERROR", e));
+/* never on the same night: every id there must still be in the bank (a reworded question has a new id), and every
+   id an accept list is kept for too */
+{ const ids = new Set(bank.bank.map((q) => q.id));
+  (bank.never || []).forEach((g, i) => g.forEach((id) => { if (!ids.has(id)) err(`never #${i + 1}`, `no question ${id} (reworded? its id changed)`); }));
+  for (const k of ["byId", "notById", "byPool", "rankById"]) Object.keys(accept[k] || {}).forEach((id) => { if (!ids.has(id)) warn(`accept.${k}`, `no question ${id}`); }); }
 console.log(`${errors.length} error(s), ${warns.length} warning(s)${showWarnings || !warns.length ? "" : " (npm run check-bank -- --warnings to list them)"}`);
 process.exit(errors.length ? 1 : 0);

@@ -7,17 +7,22 @@ import core from "../../engine/core.js";
 export const QMB: any = core;
 
 export type Q = { id: string; type: string; theme?: string; difficulty?: string; question: string; answer: string; notes?: string; use_with?: string; [k: string]: unknown };
-export type Bank = { version: string; themes: string[]; bank: Q[] };
+export type Bank = { version: string; themes: string[]; bank: Q[]; never?: string[][] };
 
 let bankP: Promise<Bank> | null = null;
 /* Other answers that count, for questions with more than one fair way to say
    it (data/accept.json, served with the full bank): by question id, and by
    answer for flags, dishes, maps and Say-the-Same words ("United States"
    also takes "USA"). */
-type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
+type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; notById?: Record<string, string[]>; byPool?: Record<string, Record<string, string[]>>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
 let accept: Accept = { byId: {}, byAnswer: {} };
 export const acceptFor = (q: { id?: string; type?: string; question?: string; answer?: string; accept?: string[] } | null | undefined) =>
-  !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(givesItAway(q) ? [] : accept.byAnswer[q.answer || ""] || [])];
+  !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(q.type === "saysame" ? sayAccept(q.id || "", q.answer || "") : givesItAway(q) ? [] : accept.byAnswer[q.answer || ""] || [])]
+    .filter((x) => !(accept.notById?.[q.id || ""] || []).includes(x));   // (another name that counts elsewhere but not here: "Tony Stark" isn't the film Iron Man)
+/* Don't Say the Same: the other names a word on a prompt's list goes by. A prompt may have its own (accept.json
+   byPool), so a name shared with another list doesn't leak in: "Purple" is the colour Violet, not the flower; "Remus"
+   is Lupin in Harry Potter, not the flower (5 Nov, content review 2.5) */
+export const sayAccept = (promptId: string, w: string): string[] => accept.byPool?.[promptId]?.[w] ?? accept.byAnswer[w] ?? [];
 /* 5 Nov (content review 1.18): a question that names the answer's other name ("Which country was known as Burma
    until 1989?") doesn't take that name, nor any other name of the same place ("DRC" for "What was the Democratic
    Republic of the Congo called?"). Questions only: a flag or a dish is asked by its picture. */
@@ -109,7 +114,7 @@ export function themeCounts(bank: Bank, diff: string) {
 /* Questions only a person can judge: answers in several parts, and the host's own trivia (a
    ranking is judged by its items, rankById). With no host the app would rule every sane answer WRONG, so
    they're only dealt when someone is hosting. */
-const HOST_ONLY_IDS = new Set(["q14dop1c", "q1s7n34n", "q12k9xj3"]);   // the rankings are judged by the app now (rankById)
+const HOST_ONLY_IDS = new Set(["q14dop1c", "q1n3wa05", "q1t26sy5"]);   // the rankings are judged by the app now (rankById)
 export const HOST_ONLY_THEMES = ["Know the Host"];
 export const hostOnly = (q: Q) => HOST_ONLY_IDS.has(q.id) || HOST_ONLY_THEMES.includes(q.theme || "");
 export const withoutHostOnly = (b: Bank): Bank => ({ ...b, bank: b.bank.filter((q) => !hostOnly(q)) });

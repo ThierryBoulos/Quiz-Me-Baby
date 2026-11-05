@@ -61,8 +61,15 @@
     eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19 };
   const TENS = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
   const SCALES = { hundred:100, thousand:1000, million:1e6, billion:1e9 };
+  /* ordinals and small Roman numerals count as the number too (5 Nov, content review 2.3): "The 6th Sense" and
+     "The Sixth Sense" both read "6 sense"; "Elizabeth the Second" and "Elizabeth II" both read "elizabeth 2". (Not
+     "i", "v", "x" or "xi" alone: a pronoun, a letter, a name.) */
+  const ORD = { first:1, second:2, third:3, fourth:4, fifth:5, sixth:6, seventh:7, eighth:8, ninth:9, tenth:10, eleventh:11,
+    twelfth:12, thirteenth:13, fourteenth:14, fifteenth:15, sixteenth:16, seventeenth:17, eighteenth:18, nineteenth:19, twentieth:20 };
+  const ROMAN = { ii:2, iii:3, iv:4, vi:6, vii:7, viii:8, ix:9, xii:12, xiii:13, xiv:14, xv:15, xvi:16, xvii:17, xviii:18, xix:19, xx:20 };
+  const ordOf = (w) => ORD[w] ?? ROMAN[w] ?? (/^\d+(st|nd|rd|th)$/.test(w) ? parseInt(w, 10) : null);
   function numWords(t){
-    const words = t.split(' '), out = [];
+    const words = t.split(' ').filter((w, i, a) => !(w === 'the' && i + 1 < a.length && ordOf(a[i + 1]) != null)).map((w) => { const o = ordOf(w); return o == null ? w : String(o); }), out = [];
     let total = 0, cur = 0, inNum = false;
     const flush = () => { if(inNum){ out.push(String(total + cur)); total = 0; cur = 0; inNum = false; } };
     for(let i = 0; i < words.length; i++){
@@ -150,7 +157,7 @@
      "Amazon" = "Amazon River"), but only when a name of 4 letters or more is left: "Red" alone
      is not the Red River. */
   function bareGeo(t){
-    const r = t.replace(/^(mount|mt|river|lake) /, '').replace(/ (mount|mt|river|lake)$/, '');
+    const r = t.replace(/^(mount|mt|river|lake) /, '').replace(/ (mount|mt|river|lake|mountains|mountain range|range)$/, '');
     return r.replace(/ /g, '').length >= 4 ? r : t;
   }
   /* -> true when `typed` counts as `answer` (or any of `accept`) */
@@ -217,6 +224,8 @@
       /* a slip is in the letters, never the numbers: "2022 World Cup" isn't "2026 World Cup", "Apollo 12" isn't "Apollo 11" */
       const da = a.match(/\d+/g), db = b.match(/\d+/g);
       if(da && db && da.join(' ') !== db.join(' ')) continue;
+      /* an answer with a number in it isn't met by letters alone: "Number of" isn't "Number 20" (5 Nov review, 2.3) */
+      if(db && !da) continue;
       /* one letter doubled or not ("Fetta" for Feta, "Mozarella"): short words get no other slip. One
          only, and not in words of three letters ("to" isn't "too", "Bob" isn't "Boob") */
       const single = (x) => x.replace(/([a-z])\1+/g, '$1');
@@ -361,6 +370,24 @@
     const shuffle = (a) => shuffleWith(a, ctx.rng);
     const isFresh = (q) => !ctx.noRepeat() || !ctx.used().has(q.id);
     const uid = () => rand().toString(36).slice(2, 10);
+    /* Never on the same night (5 Nov, content review 2.6): groups of questions where one gives another away or
+       repeats its fact ("Google was first BackRub" twice; a Majority Rules question that answers a round's). The bank
+       lists them (ctx.never: arrays of ids); a night deals at most one of each group. */
+    const CLASH = new Map();
+    ((ctx.never && ctx.never()) || []).forEach(g => g.forEach(a => g.forEach(b => { if(a !== b){ if(!CLASH.has(a)) CLASH.set(a, new Set()); CLASH.get(a).add(b); } })));
+    const clashesWith = (id, inNight) => { const c = CLASH.get(id); if(!c) return false; for(const x of c) if(inNight.has(x)) return true; return false; };
+    /* a deck's legs, keeping clear of what the night already has: a leg that clashes swaps for its first spare that
+       doesn't (it keeps its place, so a deck's order of levels holds); none spare, it stays */
+    function unclash(legs, spare, inNight){
+      if(!CLASH.size) { legs.forEach(q => inNight.add(q.id)); return; }
+      for(let i = 0; i < legs.length; i++){
+        if(clashesWith(legs[i].id, inNight)){
+          const j = spare.findIndex(q => !clashesWith(q.id, inNight) && !legs.some(l => l.id === q.id));
+          if(j > -1){ const was = legs[i]; legs[i] = spare[j]; spare[j] = was; }
+        }
+        inNight.add(legs[i].id);
+      }
+    }
 
     const matchDiff = (q, d) => d === 'mixed' || diffsOf(d).indexOf(q.difficulty) > -1;
 
@@ -390,7 +417,7 @@
         const lo = shuffle(odd[diff]);
         for(let i = 0; i + 1 < lo.length; i += 2) pairs.push({ key:'', a:lo[i], b:lo[i+1], strict:false });
       });
-      return shuffle(pairs);
+      return shuffle(pairs.filter(x => !(CLASH.get(x.a.id) && CLASH.get(x.a.id).has(x.b.id))));   // (never a pair of two that clash)
     }
 
     /* Closest To Wins: a round-robin over the themes. Given the night's own themes (its
@@ -760,6 +787,8 @@
         }
         if(!pair) break;
         taken.add(pair.a.id); taken.add(pair.b.id);
+        /* (what a pair clashes with is taken too: never dealt later the same night) */
+        [pair.a.id, pair.b.id].forEach(id => (CLASH.get(id) || []).forEach(x => taken.add(x)));
         rounds.push({
           n:i + 1, theme, strict:pair.strict, picked:!!pair.picked, pairKey:pair.key,
           q:[pair.a, pair.b],                 // q[0] -> team that goes first slot 0
@@ -808,8 +837,19 @@
       const apLevels = airportLevelsOf(cfg);
       const apDeck = asked('airport') ? levelDeck(ok.airport, cfg.pickAirport, apLevels, AIRPORT_LEGS) : [];
       const mrLevels = majorityLevelsOf(cfg);
-      const mrDeck = asked('majority') ? levelDeck(ok.majority, cfg.pickMajority, mrLevels, MAJORITY_N) : [];
+      /* (each night its own order of the four options: in the bank the right one is first far more often than last;
+         5 Nov content review) */
+      const mrDeck = (asked('majority') ? levelDeck(ok.majority, cfg.pickMajority, mrLevels, MAJORITY_N) : [])
+        .map(q => Array.isArray(q.options) ? Object.assign({}, q, { options:shuffle(q.options.slice()) }) : q);
     
+      /* the never-together groups across the night: the rounds' questions first, then each game's legs in turn */
+      { const inNight = new Set(); rounds.forEach(r => r.q.forEach(q => inNight.add(q.id)));
+        unclash(cp, spare, inNight); unclash(ssLegs, ssSpare, inNight); unclash(mpLegs, mpSpare, inNight);
+        unclash(fgLegs, fgSpare, inNight); unclash(dsLegs, dsSpare, inNight);
+        const pnL = pnDeck.slice(0, PIN_LEGS), pnS = pnDeck.slice(PIN_LEGS); unclash(pnL, pnS, inNight); pnDeck.splice(0, pnDeck.length, ...pnL, ...pnS);
+        const apL = apDeck.slice(0, AIRPORT_LEGS), apS = apDeck.slice(AIRPORT_LEGS); unclash(apL, apS, inNight); apDeck.splice(0, apDeck.length, ...apL, ...apS);
+        const mrL = mrDeck.slice(0, MAJORITY_N), mrS = mrDeck.slice(MAJORITY_N); unclash(mrL, mrS, inNight); mrDeck.splice(0, mrDeck.length, ...mrL, ...mrS); }
+
       const mk = (t, color) => ({
         name:t.name, captain:t.captain, players:t.players,
         score:0, ll:{ friend:true, dip:true, dbl:true }, color
@@ -882,7 +922,7 @@
 
     /* ctx.suddenOk: questions that can't be played in sudden death (Party: the ones a person must judge) */
     const suddenOk = ctx.suddenOk || (() => true);
-    return { bank, shuffle, isFresh, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
+    return { bank, shuffle, isFresh, clashesWith, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, commonOf, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
              dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, diffOf, pickedPair, dishLeg, buildGame, thinBank };

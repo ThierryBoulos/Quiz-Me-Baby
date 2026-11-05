@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QMB, HOST_ONLY_THEMES, acceptFor, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
+import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { cleanList, getCustom, mergeCustom } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
@@ -28,7 +28,7 @@ import { setTeams } from "./many/useTvMany";
 /* the dealer over a bank, with what this TV has played (sudden death is typed and checked fast: never a
    question only a person can judge, host or not) */
 function dealerFor(bank: Bank, used: () => Set<string>) {
-  return QMB.createDealer({ bank: () => bank.bank, used, noRepeat: () => getSettings().noRepeat, suddenOk: (q: Q) => !hostOnly(q),
+  return QMB.createDealer({ bank: () => bank.bank, never: () => bank.never || [], used, noRepeat: () => getSettings().noRepeat, suddenOk: (q: Q) => !hostOnly(q),
     ok: { map: (q: G) => q.type === "map", flag: (q: G) => q.type === "flag", dish: (q: G) => q.type === "dish",
       pin: (q: G) => q.type === "pin" && Number.isFinite(q.lat) && Number.isFinite(q.lon) && !!q.photo,
       airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0,
@@ -405,7 +405,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
          app's word. Anything else — nothing, gibberish, an answer the list doesn't have — counts as
          SAID IT (the other captain can still give a fair answer the list missed). */
       const q = g.saySame.qs[g.saySame.i];
-      const real = (texts: string[] | null) => !!texts && texts.some((t) => (q.pool || []).some((w: string) => QMB.isMatch(t, w, acceptFor({ answer: w }))));
+      const real = (texts: string[] | null) => !!texts && texts.some((t) => (q.pool || []).some((w: string) => QMB.isMatch(t, w, sayAccept(q.id, w))));
       s.offList = [0, 1].map((t) => !!s.typed[t] && !real(s.typed[t])) as Two<boolean>;
       s.ok = [0, 1].map((t) => !!s.typed[t] && !s.offList[t] && !matchQ(s.typed[t], q)) as Two<boolean>;
       s.app = [...s.ok] as Two<boolean>;

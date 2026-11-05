@@ -87,19 +87,19 @@
 172.25 dishReveal | 55 | 3-4 | 1-0 | Nobody got it. | 
 173.25 dishQ | 56 | 3-4 | 1-0 | Nobody got it. | 
 176.00 dishQ | 57 | 3-4 | 1-0 | Lions are out of this one — Owls, it is yours to get. | 
-199.25 dishReveal | 58 | 3-4 | 1-0 | Nobody got it. | 
-200.25 dishReveal | 58 | 3-4 | 1-0 |  | 
-201.00 dishReveal | 58 | 3-4 | 2-0 | Call changed: Lions take it. | 
-202.00 decided | 59 | 4-4 | 2-0 |  | 
-203.00 roundIntro | 60 | 4-4 |  |  | 
-204.75 ask | 61 | 4-4 |  |  | 
 (a new question)
-205.50 ask | 62 | 4-4 |  | New question. | 
-207.50 answer | 63 | 6-4 |  | Lions +2 points | 
-208.25 ask | 64 | 6-4 |  | Lions +2 points | 
-269.25 ask | 65 | 6-4 |  | Lions +2 points | 
-269.50 steal | 66 | 6-4 |  | Lions +2 points | 
-271.25 answer | 67 | 7-4 |  | Lions +1 point — steal | 
-273.00 roundScore | 68 | 7-4 |  | Lions +1 point — steal | 
-274.00 final | 69 | 7-4 |  | Lions +1 point — steal | 
+200.25 dishQ | 58 | 3-4 | 1-0 | Somebody has already had a go at this one. | 
+205.25 dishReveal | 59 | 3-4 | 1-0 | Nobody got it. | 
+205.50 dishReveal | 59 | 3-4 | 1-0 |  | 
+206.50 dishReveal | 59 | 3-4 | 2-0 | Call changed: Lions take it. | 
+207.50 decided | 60 | 4-4 | 2-0 |  | 
+208.25 roundIntro | 61 | 4-4 |  |  | 
+210.00 ask | 62 | 4-4 |  |  | 
+212.00 answer | 63 | 6-4 |  | Lions +2 points | 
+212.75 ask | 64 | 6-4 |  | Lions +2 points | 
+273.75 ask | 65 | 6-4 |  | Lions +2 points | 
+274.00 steal | 66 | 6-4 |  | Lions +2 points | 
+275.75 answer | 67 | 7-4 |  | Lions +1 point — steal | 
+277.50 roundScore | 68 | 7-4 |  | Lions +1 point — steal | 
+278.50 final | 69 | 7-4 |  | Lions +1 point — steal | 
 recap: {"margin":3,"sudden":false,"leadChanges":3,"steals":[2,1],"minis":[2,1],"best":{"title":"Guess the Cocktail or Dish","team":0,"legs":[2,0]},"chart":[[0,0],[0,0],[0,1],[1,1],[2,1],[3,1],[2,1],[2,2],[2,1],[2,2],[3,3],[3,4],[4,4],[6,4],[7,4]],"segs":[{"label":"R1","pts":[[0,1],[1,1]]},{"label":"Closest To Wins","pts":[[2,1]]},{"label":"R2","pts":[[3,1],[2,1],[2,2],[2,1]]},{"label":"Don't Say the Same as Me","pts":[[2,2]]},{"label":"Guess the Map","pts":[[3,3]]},{"label":"R3","pts":[[3,4]]},{"label":"Guess the Cocktail or Dish","pts":[[4,4]]},{"label":"R4","pts":[[6,4],[7,4]]}],"awards":[{"t":"Down to the wire","who":"Lions took the lead for good in Round 4","team":0},{"t":"Best thief","who":"Lions, 2 steals","team":0}]}

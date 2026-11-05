@@ -10,7 +10,7 @@
    (Flags: the fastest typist) takes 8, the next 7, down to 1; wrong or no answer, nothing. Majority Rules ranks
    by the share of answers right. At the end of a game its places pay the night: 10, 8, 6, 5, 4, 3, 2, 1
    (3 teams: 10, 8, 6). Level teams share the better place. */
-import { QMB, acceptFor, mapHit, mapKeysFor } from "../engine";
+import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 
 export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish"] as const;
@@ -148,7 +148,7 @@ export function rightOf(key: ManyKey, text: string, q: Q): boolean {
   return !!matchQ([text], q);
 }
 /* Don't Say the Same: the word on the prompt's list an answer is (typos allowed), or null if it isn't on it */
-const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: string) => QMB.isMatch(text, w, acceptFor({ answer: w }))) ?? null;
+const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: string) => QMB.isMatch(text, w, sayAccept(q.id, w))) ?? null;
 
 /* a captain's answer (one each, the first stands). order: when it reached the server (the action's id), so the
    fastest is the first to arrive there, however the network hands the answers to the TV; none, the order they come */

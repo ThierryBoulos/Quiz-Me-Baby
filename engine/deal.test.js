@@ -234,3 +234,21 @@ test('Closest To Wins: Sexy Time and Lebanon only when they are the night\'s own
   assert.ok(themes(['Music', 'Sexy Time']).has('Sexy Time') && !themes(['Music', 'Sexy Time']).has('Lebanon'));
   assert.ok(themes(['Lebanon']).has('Lebanon'));
 });
+
+test('never on the same night: a question that clashes with one already dealt is left out (5 Nov)', () => {
+  const qs = [];
+  for(let i = 0; i < 12; i++) qs.push({ id:'s' + i, type:'standard', theme:'T', difficulty:'medium', question:'Q' + i, answer:'A' + i });
+  for(let i = 0; i < 14; i++) qs.push({ id:'c' + i, type:'closest', theme:'T', difficulty:'medium', question:'C' + i, answer:String(i) });
+  /* every standard question clashes with c0..c3: with all of them dealt in rounds, Closest must use the others */
+  const never = [];
+  for(let i = 0; i < 12; i++) for(const c of ['c0', 'c1', 'c2', 'c3']) never.push(['s' + i, c]);
+  never.push(['s0', 's1'], ['s2', 's3']);
+  for(let seed = 1; seed <= 20; seed++){
+    let x = seed; const r = () => ((x = (x * 16807) % 2147483647) / 2147483647);
+    const D3 = Q.createDealer({ bank:() => qs, used:() => new Set(), noRepeat:() => true, rng:r, never:() => never });
+    const g = D3.buildGame({ standard:true, rounds:4, themes:['T'], difficulty:'medium', minis:['closest'], teamA:{ name:'A' }, teamB:{ name:'B' } });
+    const dealt = new Set(g.rounds.flatMap(rd => rd.q.map(q => q.id)));
+    assert.ok(!(dealt.has('s0') && dealt.has('s1')) && !(dealt.has('s2') && dealt.has('s3')), 'two of one group in the rounds');
+    assert.ok(g.mini.qs.every(q => !['c0', 'c1', 'c2', 'c3'].includes(q.id)), 'a clashing Closest leg: ' + g.mini.qs.map(q => q.id));
+  }
+});

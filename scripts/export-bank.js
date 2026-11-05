@@ -20,7 +20,7 @@ const root = path.join(__dirname, '..');
   const p = await b.newPage();
   await p.goto(`http://127.0.0.1:${port}/classic.html`);
   const out = await p.evaluate(() => ({
-    version: BUILD.v, seed: SEED_VERSION, themes: THEMES,
+    version: BUILD.v, seed: SEED_VERSION, themes: THEMES, never: typeof SEED_NEVER === 'undefined' ? [] : SEED_NEVER,
     bank: buildSeedBank(true).map(q => { const o = {}; Object.keys(q).forEach(k => { if(q[k] !== '' && q[k] != null && k !== 'src') o[k] = q[k]; }); return o; })
   }));
   await b.close(); srv.close();
@@ -28,7 +28,7 @@ const root = path.join(__dirname, '..');
   fs.mkdirSync(path.dirname(file), { recursive:true });
   fs.writeFileSync(file, JSON.stringify(out));
   const LITE = ['id', 'type', 'theme', 'difficulty', 'level', 'use_with'];
-  const lite = Object.assign({}, out, { bank:out.bank.map(q => { const o = {}; LITE.forEach(k => { if(q[k] != null) o[k] = q[k]; }); return o; }) });
+  const lite = Object.assign({}, out, { never:undefined, bank:out.bank.map(q => { const o = {}; LITE.forEach(k => { if(q[k] != null) o[k] = q[k]; }); return o; }) });
   fs.writeFileSync(path.join(root, 'party/public/bank.json'), JSON.stringify(lite));
   const by = {}; out.bank.forEach(q => by[q.type] = (by[q.type] || 0) + 1);
   console.log('bank.json:', out.bank.length, 'rows', JSON.stringify(by), (fs.statSync(file).size / 1024).toFixed(0) + ' KB, from v' + out.version);
