@@ -33,9 +33,9 @@ export function takes(pub: PubMany): { text: string; color: string } {
   const w = pub.reveal?.winners || [], T = pub.teams;
   /* sudden death, the same words on the TV and every phone (the reviewers, 31 Oct) */
   if (pub.game?.key === "sudden") { const f = (pub.reveal?.places || []).findIndex((p) => p === 1), t = f >= 0 ? f : w[0];
-    return w.length ? { text: `${T[t].name} wins the night!`, color: T[t].color } : { text: "Nobody got it: another one", color: "var(--color-ink-2)" }; }
+    return w.length ? { text: `${T[t].name} win the night!`, color: T[t].color } : { text: "Nobody got it: another one", color: "var(--color-ink-2)" }; }
   if (!w.length) return { text: pub.game?.key === "flag" ? "Nobody gets it" : "Nobody takes it", color: "var(--color-ink-2)" };
-  if (w.length === 1) return { text: `${T[w[0]].name} takes it`, color: T[w[0]].color };
+  if (w.length === 1) return { text: `${T[w[0]].name} take it`, color: T[w[0]].color };
   if (w.length === T.length) return { text: "Everyone takes it", color: "var(--color-gold)" };
   return { text: `${w.length} teams take it`, color: "var(--color-gold)" };
 }

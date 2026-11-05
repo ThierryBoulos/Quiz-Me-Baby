@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useNoTv } from "./NoTv";
 import { QMB, forNoHost, loadBank, themeCounts, withCustom, type Bank, type Q } from "@/lib/engine";
 import { NO_PICKS, Picker, inLevels, pickSummary, type Picks } from "./Picker";
 import { cleanList, getCustom } from "@/lib/custom";
@@ -11,14 +12,14 @@ export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficu
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; custom?: Q[] } & Partial<Picks>;
 /* Classic's MINI_GAMES (index.html), name and one line each */
 const MINIS = [
-  ["closest", "Closest To Wins", "Seven numbers. Closest guess wins the leg."],
+  ["closest", "Closest To Wins", "Five numbers. Closest guess wins the leg."],
   ["auction", "The Auction", "Bid how many you can name, then deliver it."],
   ["saysame", "Don't Say the Same as Me", "Answer without matching the app's hidden word."],
   ["map", "Guess the Map", "A map, sixty seconds: what does it show?"],
   ["flag", "Guess the Flag", "Ten flags, fifteen seconds each: whose is it?"],
   ["pin", "Drop the Pin", "A landmark's photo: drop a pin on the map where it is. Nearest pin wins."],
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
-  ["majority", "Majority Rules", "Everyone plays on their own phone: 15 questions, four answers. The team with more of its answers right wins."],
+  ["majority", "Majority Rules", "Everyone plays on their own phone: 15 questions, four answers. The team with the bigger share of right answers wins."],
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
   ["battle", "Battle of the Captains", "Ten each, captains only. Closes the night."]] as const;
 /* each picture game has its own levels, as in Classic; more than one can be on */
@@ -37,6 +38,7 @@ const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1
    so the number of themes always matches the number of rounds; mini-games
    are their own section. Sensible defaults, so Start works straight away. */
 export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean; code: string; tv?: TvShare }) {
+  const noTv = useNoTv();
   const [mine, setBank] = useState<Bank | null>(null);
   /* the host's question picker shows the answers: the full bank, which only the host's phone gets */
   const [fullMine, setFull] = useState<Bank | null>(null);
@@ -231,11 +233,11 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
         <div className="card flex flex-col gap-3">
           <div>
             <div className="display text-24">Advanced</div>
-            <div className="text-13 text-[var(--color-ink-2)]">Host only. {pickSummary(picks, standard ? picked : [], minis)}{tvQs.length > 0 && ` The TV's own ${tvQs.length} question${tvQs.length === 1 ? " is" : "s are"} in the picker too.`}</div>
+            <div className="text-13 text-[var(--color-ink-2)]">Host only. {pickSummary(picks, standard ? picked : [], minis)}{tvQs.length > 0 && ` ${noTv ? "The game phone's" : "The TV's"} own ${tvQs.length} question${tvQs.length === 1 ? " is" : "s are"} in the picker too.`}</div>
           </div>
           <div className="flex gap-2 flex-wrap">
             <button type="button" className="btn btn-sm" onClick={() => setPicking(true)}>Choose questions</button>
-            <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : "Settings (waiting for the TV…)"}</button>
+            <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : noTv ? "Settings (waiting for the game…)" : "Settings (waiting for the TV…)"}</button>
             {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
           </div>
         </div>)}
@@ -259,13 +261,13 @@ function ThinNote({ code, lines }: { code: string; lines: string[] }) {
   return (
     <div className="card flex flex-col gap-2" role="status" style={{ borderColor: "color-mix(in srgb, var(--color-gold) 55%, transparent)" }}>
       <div className="display text-20" style={{ color: "var(--color-gold)" }}>The bank is getting thin</div>
-      <div className="text-13 text-[var(--color-ink-2)]">The TV has played most of these, so their games will bring back questions you&rsquo;ve already played:</div>
+      <div className="text-13 text-[var(--color-ink-2)]">{useNoTv() ? "The game phone has" : "The TV has"} played most of these, so their games will bring back questions you&rsquo;ve already played:</div>
       <ul className="text-13 flex flex-col gap-0.5" style={{ listStyle: "disc", paddingLeft: 18 }}>{lines.map((l) => <li key={l}>{l}</li>)}</ul>
       <div className="flex items-center gap-3 flex-wrap">
         <button type="button" className="btn btn-sm btn-gold" disabled={state === "sent"}
           onClick={() => { setState("sent"); sendQuiet(code, "setup", { forgetPlayed: true }).catch(() => setState("failed")); }}>
           {state === "sent" ? "Resetting…" : "Reset played questions"}</button>
-        {state === "failed" && <span className="text-13 text-[var(--color-no)]">That didn&rsquo;t reach the TV. Try again.</span>}
+        {state === "failed" && <span className="text-13 text-[var(--color-no)]">That didn&rsquo;t go through. Try again.</span>}
       </div>
     </div>);
 }

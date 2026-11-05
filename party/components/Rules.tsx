@@ -13,7 +13,7 @@ function Rule({ n, title, children }: { n: string; title: string; children: Reac
 }
 const L = ({ items }: { items: ReactNode[] }) => (
   <ol className="flex flex-col gap-2.5 text-15 leading-relaxed text-[var(--color-ink-2)] list-decimal pl-5 marker:text-[var(--color-gold)] marker:font-bold">
-    {items.map((x, i) => <li key={i}>{x}</li>)}
+    {items.filter((x) => x !== false && x != null).map((x, i) => <li key={i}>{x}</li>)}
   </ol>);
 const B = ({ children }: { children: ReactNode }) => <strong className="text-[var(--color-ink)]">{children}</strong>;
 
@@ -23,7 +23,7 @@ function First30({ noTv = false }: { noTv?: boolean }) {
     ["Pick a side", <>Tap Team A or Team B on your phone. One of you taps <B>Make me captain</B>.</>],
     ["The captain types", <>Only the captain&rsquo;s answer counts. It goes in once, from the captain&rsquo;s phone.</>],
     ["Everyone else suggests", <>Type your idea on your phone: it lands on your captain&rsquo;s screen. Shout too, why not.</>],
-    noTv ? ["No TV tonight", <>Questions, clocks, scores and results are all on your phone. The game runs on the phone of whoever made the room: they keep it on, on the game.</>]
+    noTv ? ["No TV tonight", <>Questions, clocks, scores and results are all on your phone. The game runs on the phone of whoever made the room: they keep that phone awake and on the game screen.</>]
       : ["Watch the TV", <>Questions, clocks, scores and reveals are on the TV. Your phone shows what you can do right now.</>],
   ];
   return (
@@ -47,9 +47,9 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
       <First30 noTv={noTv} />
       <Rule n="01" title="The setup">
         <L items={[
-          <><B>Two teams</B>, any size. The TV is a laptop with the game open, put up big; everyone else joins on their phone with the code or the QR. Each team picks a <B>captain</B>: the captain gives the final answer, nobody else.</>,
+          <><B>Two teams</B>, any size. {noTv ? <>Everyone joins on their phone with the code or the QR; the phone that made the room runs the game.</> : <>The TV is a laptop with the game open, put up big; everyone else joins on their phone with the code or the QR.</>} Each team picks a <B>captain</B>: the captain gives the final answer, nobody else.</>,
           <>Want a host? One person taps <B>I&rsquo;m the host</B>: they see every answer and rule on it. No host? The app rules, and the captains can contest its calls (see <B>Fixing a call</B>).</>,
-          <>Phones are for the game only: no searching, no asking anyone outside the room. A phone that leaves the game screen during a question is flagged on the TV.</>,
+          <>Phones are for the game only: no searching, no asking anyone outside the room. A phone that leaves the game screen during a question is flagged{noTv ? " on the host's list" : " on the TV"}.</>,
           <><B>4 to 12</B> standard rounds, one theme each, plus the mini-games on the card. Or no standard rounds at all: a night of mini-games back to back.</>,
         ]} />
       </Rule>
@@ -59,7 +59,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
           <>One theme, one question for each team at the same difficulty. <B>Team A always answers first</B>, every round; then Team B gets their own question.</>,
           <><B>60 seconds.</B> The team sends ideas to the captain; the captain types the answer and sends it. <B>One go:</B> sent is locked. Typed but not sent when the clock runs out? What&rsquo;s in the box counts as sent (on every clock, mini-games too).</>,
           <>Wrong or out of time? The other team can <B>steal</B>: <B>30 seconds</B>, no lifelines. A steal pays what the question was worth: 1 point, or 2 if Double Points was armed on it. <B>Both miss</B>, and nobody scores; the answer comes up and the night moves on.</>,
-          <>The answer stays hidden until the question is finished, so a stealing team can never read it off a screen. One point per right answer, whoever gets it.</>,
+          <>The answer stays hidden until the question is finished, so a stealing team can never read it off a screen. A point per right answer (2 with Double Points), whoever gets it. A 🔥 beside a team: on fire, three right in a row.</>,
         ]} />
       </Rule>
 
@@ -73,18 +73,18 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
       </Rule>
 
       <Rule n="04" title="The mini-games">
-        <p className="text-15 leading-relaxed text-[var(--color-ink-2)]">Chosen in Setup and announced at the start, they drop in between the rounds; the Battle always closes the night. Whoever wins one takes its points (Setup shows how many; the Battle is worth double). Won with legs to spare? The points are paid at once and you choose: keep playing for fun, or stop. Tied at the end? One more to settle it, or a point each. The host decides, or Team A&rsquo;s captain with no host. The app checks every typed answer; a call it got wrong can be contested on the reveal. With no host, a leg&rsquo;s reveal moves on by itself after 8 seconds (or sooner, with Next).</p>
+        <p className="text-15 leading-relaxed text-[var(--color-ink-2)]">Chosen in Setup and announced at the start, they drop in between the rounds; the Battle always closes the night. Whoever wins one takes its points (Setup shows how many; the Battle is worth double). Won with legs to spare? The points are paid at once and you choose: keep playing for fun, or stop. Tied at the end? One more to settle it, or a point each. The host decides, or Team A&rsquo;s captain with no host. The app checks every typed answer; a call it got wrong can be contested on the reveal. Each reveal waits for Next, so there&rsquo;s time to argue (with no host, a Cocktail or Dish reveal moves on by itself after 8 seconds).</p>
         <L items={[
           <><B>Closest To Wins.</B> The same number question for both captains, <B>60 s</B> on the number pad. Closest takes the leg. 5 legs.</>,
           <><B>The Auction.</B> &ldquo;How many countries can you name?&rdquo; Captains bid up to 100, raise or pass; whoever holds the bid has <B>30 s</B> to name that many, out loud, counted by the host (or the other captain). Make it or lose it. 3 categories.</>,
-          <><B>Don&rsquo;t Say the Same as Me.</B> &ldquo;Name a cheese.&rdquo; <B>20 s</B> to type one, hidden from each other. The app has a common word in mind: say it and you&rsquo;ve lost the leg. Your answer must be a real one for the prompt. Best of 7.</>,
+          <><B>Don&rsquo;t Say the Same as Me.</B> &ldquo;Name a cheese.&rdquo; <B>20 s</B> to type one, hidden from each other. The app has a common word in mind: say it and the leg goes to the other captain (you both say it: a point each). Your answer must be a real one for the prompt. Best of 7.</>,
           <><B>Guess the Map.</B> A map with no title, <B>60 s</B>. Type what it shows: the idea counts, not the wording. With a host, one hint per map. Best of 3.</>,
           <><B>Guess the Flag.</B> <B>15 s</B> to type the country. Best of 10.</>,
           <><B>Drop the Pin.</B> A landmark photo, <B>45 s</B>. Drop a pin on the world map on your phone, zoom right in, Lock in. The nearer pin takes the leg. Best of 7.</>,
           <><B>Guess the Airport.</B> A departures board, <B>30 s</B>: the destinations, the airlines and the language are the clues. The city is enough, unless it has more than one airport. Best of 5.</>,
           <><B>Majority Rules.</B> Everyone plays, on their own phone: 15 questions, four answers, <B>15 s</B> each, one tap and it&rsquo;s locked. No answer counts as wrong. Each team scores the share of its answers that are right, so a small team isn&rsquo;t at a disadvantage.</>,
           <><B>Guess the Cocktail or Dish.</B> The ingredients come up one every <B>3 s</B>, the giveaway last. Captain, hit <B>BUZZ</B> and type it in <B>10 s</B>. Wrong, and you&rsquo;re out of that one. Best of 5.</>,
-          <><B>Battle of the Captains.</B> Captains only, the room says nothing. Ten questions each: <B>7 s</B> out loud with a host, <B>15 s</B> typed without. Best score takes double points; a tie goes to a buzzer tie-breaker. Always last.</>,
+          <><B>Battle of the Captains.</B> Captains only, the room says nothing. Ten questions each: <B>7 s</B> out loud with a host, <B>15 s</B> typed without. Best score takes double points; tied? One buzzer question to settle it, or a point each: the host decides, or either captain with no host. Always last.</>,
         ]} />
       </Rule>
 
@@ -98,16 +98,16 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
       <Rule n="06" title="Your data">
         <L items={[
           <><B>No accounts.</B> Each phone gets an anonymous sign-in. No email, no phone number. A room keeps the names, teams, answers and scores for three days, then it&rsquo;s deleted; a sign-in unused for 7 days is deleted too.</>,
-          <>The TV keeps the game in progress, and which questions it has played, in its own browser. Server: Supabase (EU, Ireland); site: Vercel. No ads, no trackers, nothing sold or shared.</>,
+          <>{noTv ? "The phone running the game" : "The TV"} keeps the game in progress, and which questions it has played, in its own browser. Server: Supabase (EU, Ireland); site: Vercel. No ads, no trackers, nothing sold or shared.</>,
         ]} />
       </Rule>
 
-      {fixing && <FixingACall />}
+      {fixing && <FixingACall noTv={noTv} />}
     </>);
 }
 
 /* when something needs changing: who taps what, and what happens if they don't */
-export function FixingACall({ standalone = false }: { standalone?: boolean }) {
+export function FixingACall({ standalone = false, noTv = false }: { standalone?: boolean; noTv?: boolean }) {
   return (
     <>
       {!standalone && <h2 className="display text-32 mt-2" style={{ color: "var(--color-gold)" }}>Fixing a call</h2>}
@@ -129,18 +129,19 @@ export function FixingACall({ standalone = false }: { standalone?: boolean }) {
       <Rule n="C" title="No host: the two captains agree">
         <L items={[
           <>Scores wrong? Either captain: <B>your name (top left) &rarr; Adjust the scores</B>. The other captain gets Agree or No; no answer in <B>20 seconds</B>, nothing changes.</>,
-          <>A question nobody wants? Before anyone has answered it, either captain taps <B>Change the question</B> (or the flag, landmark, board, dish, map or prompt). The clock stops while the other captain decides. Agree, and a new one, just as hard, comes with a fresh clock; No, or no answer in 20 seconds, and it carries on.</>,
+          <>A question nobody wants? Before anyone has answered it, either captain taps <B>Change the question</B> (or the flag, landmark, board, cocktail or dish, map or prompt). The clock stops while the other captain decides. Agree, and a new one, just as hard, comes with a fresh clock; No, or no answer in 20 seconds, and it carries on.</>,
           <>Team A&rsquo;s captain moves the night on (Start, Next, the choices at a tie or a game decided early). If they haven&rsquo;t after a while, the other captain can.</>,
           <>Majority Rules: someone who has gone home comes off their team&rsquo;s list before Start, with the other captain&rsquo;s agreement.</>,
         ]} />
       </Rule>
-      <Rule n="D" title="Phones and the TV">
+      <Rule n="D" title={noTv ? "Phones" : "Phones and the TV"}>
         <L items={[
           <><B>Phone died?</B> Join again with the same name and tap &ldquo;take my seat back&rdquo;. A host&rsquo;s or a captain&rsquo;s seat only frees up once that phone has been silent for a minute and a half, so nobody can take it by typing the name.</>,
           <><B>Captain gone?</B> After a while the armband passes to a teammate who is still here. <B>Host gone?</B> The captains run the night meanwhile; the host picks it back up on return.</>,
-          <><B>The TV&rsquo;s Wi-Fi dropped, or its screen went to sleep?</B> The clocks stand still until it&rsquo;s back; nothing times out meanwhile. A TV reloaded or reopened picks the night up where it was.</>,
-          <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question, or pastes an answer, is flagged on the TV; the host sees the list.</>,
-          <><B>The TV laptop died?</B> The host taps <B>their name (top left) &rarr; The TV died? &rarr; Get a code</B>. On another laptop, open the site, tap <B>Join a game</B>, then <B>The TV died?</B> at the very bottom, and type the room code and that code: the night carries on from the TV&rsquo;s last save.</>,
+          noTv ? <><B>The phone running the game went to sleep or lost Wi-Fi?</B> The clocks stand still until it&rsquo;s back; after a while the host&rsquo;s or a captain&rsquo;s phone carries the night on from its last save, by itself.</>
+            : <><B>The TV&rsquo;s Wi-Fi dropped, or its screen went to sleep?</B> The clocks stand still until it&rsquo;s back; nothing times out meanwhile. A TV reloaded or reopened picks the night up where it was.</>,
+          <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question, or pastes an answer, is flagged{noTv ? "" : " on the TV"}; the host sees the list.</>,
+          !noTv && <><B>The TV laptop died?</B> The host taps <B>their name (top left) &rarr; The TV died? &rarr; Get a code</B>. On another laptop, open the site, tap <B>Join a game</B>, then <B>The TV died?</B> at the very bottom, and type the room code and that code: the night carries on from the TV&rsquo;s last save.</>,
         ]} />
       </Rule>
     </>);

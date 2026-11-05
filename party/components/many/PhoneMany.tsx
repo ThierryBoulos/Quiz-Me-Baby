@@ -210,7 +210,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
                 </span>); })}
             </div>
           </div>); })()}
-        <div className="flex justify-center mt-auto"><button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button></div>
+        {/* the same controls as with two teams: Pause, Change question, Reveal now (the 4 Nov audit, 3.11) */}
+        <div className="flex flex-wrap justify-center gap-2 mt-auto">
+          <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
+          {g.key !== "sudden" && !pub.sent.some(Boolean) && !(pub.voted?.length) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change question</button>}
+          <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
+        </div>
       </>)}
       {host && sc === "reveal" && g && R && (<>
         <Answer />
@@ -248,7 +253,10 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       </>)}
 
       {/* MAJORITY RULES: everyone on the list answers, on their own phone */}
-      {!host && sc === "q" && g?.key === "majority" && (<>
+      {!host && sc === "q" && pub.paused && (
+        <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div>
+          <p className="text-14 text-[var(--color-ink-2)] mt-1">The host paused it. The question comes back when the clock restarts.</p></div>)}
+      {!host && sc === "q" && !pub.paused && g?.key === "majority" && (<>
         <p className="text-center text-14 font-bold text-[var(--color-ink-2)]">Your own answer: eyes on your phone, no talking</p>
         <OnScreen />
         {!onList ? <Line>You joined after it started, so you&rsquo;re watching this one. You&rsquo;ll play the next Majority Rules.</Line>
@@ -264,7 +272,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* sudden death: a captain whose team isn't level at the top watches */}
       {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>Sudden death: only the teams tied at the top answer this one.</Line></>)}
       {/* THE CAPTAIN answers the rest */}
-      {cap && sc === "q" && g && g.key !== "majority" && !(g.only && mine != null && !g.only.includes(mine)) && (<>
+      {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !(g.only && mine != null && !g.only.includes(mine)) && (<>
         <OnScreen small={g.key === "pin" && !sentMine} />
         {sentMine ? <p className="text-center font-bold text-16" role="status">
             {`Locked in${sentTxt && g.key !== "pin" ? `: ${sentTxt}` : ""}.`}</p>
@@ -292,7 +300,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             </div>
           </div>)}
       </>)}
-      {!host && !cap && sc === "q" && g && g.key !== "majority" && (<>
+      {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && (<>
         <OnScreen />
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
         {mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) ? (

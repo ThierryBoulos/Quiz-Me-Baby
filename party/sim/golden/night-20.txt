@@ -28,18 +28,18 @@
 50.75 flagReveal | 18 | 2-3 | 2-2 | Both got it — a point each. | 
 51.75 flagQ | 19 | 2-3 | 2-2 | Both got it — a point each. | 
 52.50 flagReveal | 19 | 2-3 | 2-3 | Both got it — a point each. | 
-53.50 flagQ | 20 | 2-3 | 2-3 | Owls takes flag 3. | 
-54.50 flagReveal | 20 | 2-3 | 2-3 | Owls takes flag 3. | 
+53.50 flagQ | 20 | 2-3 | 2-3 | Owls take flag 3. | 
+54.50 flagReveal | 20 | 2-3 | 2-3 | Owls take flag 3. | 
 55.25 flagReveal | 20 | 2-3 | 2-3 |  | 
 56.25 flagReveal | 20 | 2-3 | 2-4 | Call changed: ⁨Owls⁩ RIGHT. | 
-57.00 flagQ | 21 | 2-3 | 2-4 | Owls takes flag 4. | 
-58.00 flagReveal | 21 | 2-3 | 3-4 | Owls takes flag 4. | 
-59.00 flagQ | 22 | 2-3 | 3-4 | Lions takes flag 5. | 
-59.75 flagReveal | 22 | 2-3 | 3-5 | Lions takes flag 5. | 
-60.75 flagQ | 23 | 2-3 | 3-5 | Owls takes flag 6. | 
-61.50 flagReveal | 23 | 2-3 | 3-6 | Owls takes flag 6. | 
-62.50 flagQ | 24 | 2-3 | 3-6 | Owls takes flag 7. | 
-63.50 flagReveal | 24 | 2-3 | 3-6 | Owls takes flag 7. | 
+57.00 flagQ | 21 | 2-3 | 2-4 | Owls take flag 4. | 
+58.00 flagReveal | 21 | 2-3 | 3-4 | Owls take flag 4. | 
+59.00 flagQ | 22 | 2-3 | 3-4 | Lions take flag 5. | 
+59.75 flagReveal | 22 | 2-3 | 3-5 | Lions take flag 5. | 
+60.75 flagQ | 23 | 2-3 | 3-5 | Owls take flag 6. | 
+61.50 flagReveal | 23 | 2-3 | 3-6 | Owls take flag 6. | 
+62.50 flagQ | 24 | 2-3 | 3-6 | Owls take flag 7. | 
+63.50 flagReveal | 24 | 2-3 | 3-6 | Owls take flag 7. | 
 64.25 decided | 25 | 2-5 | 3-6 |  | 
 65.25 flagQ | 26 | 2-5 | 3-6 |  | 
 66.00 flagReveal | 26 | 2-5 | 3-6 |  | 
@@ -59,10 +59,10 @@
 81.50 miniIntro | 36 | 7-1 | 0-0 | Lions +1 point — steal | 
 82.25 miniQ | 37 | 7-1 | 0-0 | Lions +1 point — steal | 
 83.25 closestReveal | 37 | 7-1 | 0-1 | Lions +1 point — steal | 
-84.00 miniQ | 38 | 7-1 | 0-1 | Owls takes leg 1. | 
-85.00 closestReveal | 38 | 7-1 | 0-2 | Owls takes leg 1. | 
-86.00 miniQ | 39 | 7-1 | 0-2 | Owls takes leg 2. | 
-86.75 closestReveal | 39 | 7-1 | 0-3 | Owls takes leg 2. | 
+84.00 miniQ | 38 | 7-1 | 0-1 | Owls take leg 1. | 
+85.00 closestReveal | 38 | 7-1 | 0-2 | Owls take leg 1. | 
+86.00 miniQ | 39 | 7-1 | 0-2 | Owls take leg 2. | 
+86.75 closestReveal | 39 | 7-1 | 0-3 | Owls take leg 2. | 
 87.75 decided | 40 | 7-1 | 0-3 |  | 
 88.50 roundIntro | 41 | 7-3 |  |  | 
 90.50 ask | 42 | 7-3 |  |  | 

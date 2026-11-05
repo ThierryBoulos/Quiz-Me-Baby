@@ -12,7 +12,7 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
 const SAVE_SHAPE = 1;
 import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, FLY_MS, flyAt, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE, TIE_SCREENS,
-  type MiniKey, type Pub, type Secret, type Thin, type Two } from "./game";
+  type MiniKey, type Pub, type Secret, type Thin, type Two, poss } from "./game";
 import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, SWAPS, swapWord, type Action, type G, type PKind, type W } from "./tv/rules";
 import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, turnOf } from "./tv/reads";
@@ -700,7 +700,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* An answer is never thrown away: one sent while the TV is asleep or the game is paused (typed
        before the pause landed) is taken and checked as usual; the clock stays stopped meanwhile.
        Anything else waits for the TV, and says so. */
-    if (kind !== "answer" && s.tvAway) return "The TV's screen was asleep. Tap again.";
+    if (kind !== "answer" && s.tvAway) return (phoneRef.current ? "The game phone's screen was asleep. Tap again." : "The TV's screen was asleep. Tap again.");
     if (kind !== "answer" && s.paused) return "The game is paused.";
     /* (Drop the Pin and Guess the Airport: both in would be the reveal, so not while the host has paused it, 23 Oct) */
     if (s.paused && (sc === "pinQ" || sc === "airportQ")) return "The game is paused.";
@@ -757,7 +757,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* one answer: once it's sent it's locked, host or no host */
       if (!texts.length) return false;
       if (team !== turnTeam()) return `It's ${nm(turnTeam())}'s turn to answer.`;
-      if (s.typed[team]) return `${nm(team)}'s answer is already in.`;
+      if (s.typed[team]) return `${poss(nm(team))} answer is already in.`;
       if (s.pending) return "Wait for the call on the last answer.";
       if (s.lifeline) return "Wait for the lifeline to finish.";
       const dip = sc === "ask" && (rd.llUsed[team] || []).includes("dip");
@@ -769,7 +769,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (sc === "miniQ") {
       const n = QMB.parseNumber(String(p.n ?? ""), current()?.question);   // "1.5 million", "2k", "€25"...
-      if (s.guesses[team] != null) return `${nm(team)}'s guess is already in.`;
+      if (s.guesses[team] != null) return `${poss(nm(team))} guess is already in.`;
       if (!Number.isFinite(n)) return "That isn't a number.";
       s.guesses[team] = n;
       if (s.guesses[0] != null && s.guesses[1] != null) reveal();
@@ -777,7 +777,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (sc === "battleQ") {
       if (!texts.length) return false;
-      if (team !== g.battle.cap) return `It's ${nm(g.battle.cap)}'s turn in the Battle.`;
+      if (team !== g.battle.cap) return `It's ${poss(nm(g.battle.cap))} turn in the Battle.`;
       if (s.pending) return "Wait for the call on the last answer.";
       s.typed[team] = texts.slice(0, 1);
       check("battle", current());
@@ -786,7 +786,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (sc === "pinQ") {
       /* Drop the Pin: one pin each, locked in; both in, and it's the reveal */
       const pin = asPin(p.pin);
-      if (s.pins[team]) return `${nm(team)}'s pin is already in.`;
+      if (s.pins[team]) return `${poss(nm(team))} pin is already in.`;
       if (!pin) return "That pin didn't come through. Drop it again.";
       s.pins[team] = pin;
       if (s.pins[0] && s.pins[1]) reveal();
@@ -794,7 +794,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     if (sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ") {
       if (!texts.length) return false;
-      if (s.typed[team]) return `${nm(team)}'s answer is already in.`;
+      if (s.typed[team]) return `${poss(nm(team))} answer is already in.`;
       s.typed[team] = texts.slice(0, 1);
       if (s.typed[0] && s.typed[1]) reveal();
       return true;
@@ -905,7 +905,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        Pause) while the other captain decides */
     else if (t === "ui/askSwap") {
       if (s.agree) return `One at a time: ${iso(g.teams[s.agree.team].name)}'s request is open.`;
-      if (s.tvAway) return "The TV's screen was asleep. Tap again.";
+      if (s.tvAway) return (phoneRef.current ? "The game phone's screen was asleep. Tap again." : "The TV's screen was asleep. Tap again.");
       const why = answeredYet();
       if (why) return why;
       if ((!s.deadline && !s.paused) || (s.deadline && Date.now() >= s.deadline)) return "Time's up.";
@@ -960,7 +960,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.bids.by[team] = n;
       play({ type: t, n });
     }
-    else hostMove(move);
+    else { if (t === "ui/pause") s.pausedBy = g.teams[team].captain || g.teams[team].name; hostMove(move); }
     return true;
   }, [hostMove, play, openContest, closeContest, contestWait, answeredYet, swapBack, applyFx, draftKey]);
 
@@ -975,7 +975,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     let { members } = ctx.current;
     /* a game restored without its questions yet (the download failed, being tried again): the tap is refused, not
        taken and dropped; the phone shows why */
-    if (s.g && !s.bank && a.kind !== "suggest" && a.kind !== "count") { refused.current = "The TV is still loading the questions. Try again in a moment."; return; }
+    if (s.g && !s.bank && a.kind !== "suggest" && a.kind !== "count") { refused.current = (phoneRef.current ? "The game is still loading the questions. Try again in a moment." : "The TV is still loading the questions. Try again in a moment."); return; }
     if (!room) return;
     let from = members.find((m) => m.user_id === a.user_id);
     /* the line-up here can be a beat behind the phones (a captain who claimed a second ago, a
@@ -1031,7 +1031,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the house bank, this TV's own questions, and the starter's (cleaned: never trust a phone) */
       let base: Bank;
       try { base = await loadBank(code); }
-      catch (e) { console.error("bank at Start", e); sayLobby("The TV couldn't load the questions. Check its internet, then tap Start again."); return; }
+      catch (e) { console.error("bank at Start", e); sayLobby((phoneRef.current ? "The game phone couldn't load the questions. Check its internet, then tap Start again." : "The TV couldn't load the questions. Check its internet, then tap Start again.")); return; }
       if (!(cfgIn.standard !== false && Number(cfgIn.rounds) > 0) && !(Array.isArray(cfgIn.minis) && cfgIn.minis.length)) { sayLobby("Pick some rounds or a game first."); return; }
       s.custom = cleanList(cfgIn.custom, base.themes);
       /* the host's own questions are kept on this TV too, for next time (and shown in its Settings) */
@@ -1117,6 +1117,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!where || !inScreen(where, s.screen)) return;
       /* a tap made on an earlier screen (a double tap, a slow phone) is ignored */
       if (!SAME_SCREEN.has(move.type)) { if (a.payload.step !== s.step) return; s.step++; }
+      if (move.type === "ui/pause") s.pausedBy = "The host";
       hostMove(move); took.current = true;
       void publish();
       return;

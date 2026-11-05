@@ -2,9 +2,10 @@
 import { twoDone } from "./TwoResults";
 import { useRevealHold, WatchTv } from "./WatchTv";
 import { useNoTv } from "./NoTv";
+import { NEXT_MOVES, WAITS_FOR_NEXT } from "@/lib/tv/rules";
 import { AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two } from "@/lib/game";
+import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two, poss } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
 import { joinLive, newTap, note, rpc, sb, sendAction, sendDraft } from "@/lib/supabase";
@@ -143,6 +144,9 @@ function MajorityPad({ pub, me, code }: { pub: Pub; me: Member; code: string }) 
   const M = pub.majority, key = `${pub.qid}|majorityQ`;
   const [mine, setMine] = useState<{ key: string; pick: string; tap: string } | null>(null);
   const [no, setNo] = useState<string | null>(null);
+  /* this phone's pick, kept for the question, so a reload doesn't turn it into "You didn't answer" (the 4 Nov audit, 3.14) */
+  const store = "qmb.mr." + code;
+  useEffect(() => { try { const x = JSON.parse(sessionStorage.getItem(store) || "null"); if (x?.key === key && !mine) setMine({ ...x, tap: "" }); } catch { /* none */ } }, [key]);   // eslint-disable-line react-hooks/exhaustive-deps
   const order = useMemo(() => phoneOrder(M?.options || [], `${me.user_id}|${pub.qid}`), [M?.options, me.user_id, pub.qid]);
   /* the TV's receipt: a tap it turned down says why, and lets go of it */
   const got = mine ? pub.ack?.[me.user_id]?.[mine.tap] : undefined;
@@ -160,6 +164,7 @@ function MajorityPad({ pub, me, code }: { pub: Pub; me: Member; code: string }) 
   const tap = (pick: string) => {
     const t = newTap();
     setMine({ key, pick, tap: t }); setNo(null); buzzHand(15);
+    try { sessionStorage.setItem(store, JSON.stringify({ key, pick })); } catch { /* in memory only */ }
     void sendAction(code, "answer", { pick, k: key, tap: t }).catch(() => setMine(null));
   };
   return (
@@ -219,8 +224,10 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const pickKey = (t: 0 | 1) => `${pub.qid}|${pub.screen}|${t}`;
   const okNow = `${pub.reveal?.ok?.[0]}|${pub.reveal?.ok?.[1]}`;
   useEffect(() => { setPicked({}); }, [pub.qid, pub.screen, okNow]);
-  const Main = ({ label, move, off }: { label: string; move: Record<string, unknown>; off?: boolean }) =>
-    <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || off} onClick={() => send(move)}>{label}</button>;
+  /* (Next waits while a captain's contest waits for the host's ruling: the 4 Nov audit, 3.11) */
+  const Main = ({ label, move, off }: { label: string; move: Record<string, unknown>; off?: boolean }) => {
+    const wait = !!pub.contest && NEXT_MOVES.has(String(move.type));
+    return <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || off || wait} onClick={() => send(move)}>{wait ? "Rule on the contest first" : label}</button>; };
   /* the host's private answer: the one box on this phone that isn't a button, so it can't be missed */
   const AnswerCard = () => loading ? <Line>Getting the answer…</Line> : secret.you ? (
     <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
@@ -280,8 +287,9 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const Results = ({ children }: { children: React.ReactNode }) => (
     <div className="flex flex-col gap-4 flex-1">
       <OnScreen pub={pub} />
-      <Result pub={pub} />
-      {!resultHeld && children}
+      <Result pub={pub} host />
+      {/* (the host sees the result at once; Next waits until the TV has shown it, so it can't be skipped by mistake) */}
+      {resultHeld ? <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Next comes up once the TV has shown it.</p> : children}
     </div>);
   const Exit = () => (
     <div className="mt-auto flex flex-col gap-2">
@@ -317,6 +325,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "roundIntro": return (
       <div className="flex flex-col gap-4 flex-1">
         <RoundIntro pub={pub} size="phone" />
+        {/* whether the captains have armed Double Points yet, before the host starts (the 4 Nov audit, 3.11) */}
+        <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">Double Points: {([0, 1] as const).map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t) }}>{T[t].name}</b> {pub.dbl?.[t] ? "armed" : T[t].ll?.dbl === false ? "used" : "not armed"}</span>)}</p>
         <Main label={`Start: question for ${T[pub.first ?? 0].name}`} move={{ type: "round/begin" }} />
       </div>);
     case "ask": case "steal": return (
@@ -355,7 +365,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <Typed t={pub.buzz} />
           <Judge t={pub.buzz} right={{ type: "ui/sdRight" }} wrong={{ type: "ui/sdWrong" }} />
         </div>) : (<>
-          <Waiting>Waiting for a captain to buzz…{pub.out?.some(Boolean) ? ` (${T[pub.out[0] ? 0 : 1].name} is out)` : ""}</Waiting>
+          <Waiting>Waiting for a captain to buzz…{pub.out?.some(Boolean) ? ` (${T[pub.out[0] ? 0 : 1].name} are out)` : ""}</Waiting>
           <div className="flex gap-2 justify-center">
             <Small label="Neither, next question" move={{ type: "sudden/win", w: "none" }} />
             <Small ghost label="Change question" move={{ type: "sudden/swap" }} />
@@ -395,7 +405,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "flagReveal": return (
       <div className="flex flex-col gap-3 flex-1">
         <OnScreen pub={pub} small />
-        <Result pub={pub} headOnly />
+        <Result pub={pub} host headOnly />
         <Rulings type="ui/flagOk" empty="No answer" />
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
@@ -434,7 +444,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "airportReveal": return (
       <div className="flex flex-col gap-3 flex-1">
         <OnScreen pub={pub} small />
-        <Result pub={pub} headOnly />
+        <Result pub={pub} host headOnly />
         <Rulings type="ui/airportOk" empty="No answer" />
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
@@ -450,7 +460,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           {!secret.typed?.[pub.buzz] && pub.dish?.typeBy && <div className="flex items-center justify-center gap-3 text-14 text-[var(--color-ink-2)]"><Clock deadline={pub.dish.typeBy} size={48} />to type it</div>}
         </div>) : (<>
           {pub.dish && <div className="card"><Ings ings={pub.dish.ings} small /></div>}
-          <Waiting>{pub.dish?.late != null ? `Time's up for ${T[pub.dish.late].name}. ` : ""}Waiting for a buzz…{[0, 1].filter((t) => pub.out?.[t]).map((t) => ` ${T[t].name} is out.`).join("")}</Waiting>
+          <Waiting>{pub.dish?.late != null ? `Time's up for ${T[pub.dish.late].name}. ` : ""}Waiting for a buzz…{[0, 1].filter((t) => pub.out?.[t]).map((t) => ` ${T[t].name} are out.`).join("")}</Waiting>
           <div className="flex gap-2 justify-center"><Pause />{!pub.out?.some(Boolean) && <Small ghost label="Change this one" move={{ type: "dish/swap" }} />}</div>
         </>)}
       </div>);
@@ -482,7 +492,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>);
     case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": case "saySummary": case "pinSummary": case "airportSummary": case "majoritySummary": return (
       <div className="flex flex-col gap-4 flex-1">
-        <Result pub={pub} />
+        <Result pub={pub} host />
         {S?.note && <Line className="!text-13">{S.note}</Line>}
         {S?.needsHost ? (<>
           <div className="eyebrow text-center">Still a tie. Who gets the {pub.mini?.pts} points?</div>
@@ -504,7 +514,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "mapReveal": { const unruled = pub.reveal?.ok?.some((v) => v == null); return (
       <div className="flex flex-col gap-3 flex-1">
         <OnScreen pub={pub} small />
-        <Result pub={pub} headOnly />
+        <Result pub={pub} host headOnly />
         <Line className="!text-13">Who got it? The idea counts, not the exact words.</Line>
         <Rulings type="ui/mapOk" empty="No answer" />
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
@@ -536,7 +546,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "sayReveal": return (
       <div className="flex flex-col gap-4 flex-1">
         <OnScreen pub={pub} />
-        <Result pub={pub} headOnly />
+        <Result pub={pub} host headOnly />
         <Rulings type="ui/sayOk" say empty="Nothing" />
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
@@ -555,7 +565,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "battleHandoff": return (
       <div className="flex flex-col gap-4 flex-1">
         <Big eyebrow="Halfway" size={30} color="var(--color-ink)" text={`${T[0].name} scored ${pub.battle?.score[0]}`} sub={`Now ${T[1].name}’s captain. ${battleNeeds(pub)}`} />
-        <Main label={`Start ${T[1].name}'s questions`} move={{ type: "battle/start" }} />
+        <Main label={`Start ${poss(T[1].name)} questions`} move={{ type: "battle/start" }} />
       </div>);
     case "battleTie": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -709,7 +719,8 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
             {/* (its note, "steal" or "a new question", on its own line under the name: beside it, it was cut to "s…", 3 Nov) */}
             <span className="max-w-[96px] min-w-0 flex flex-col leading-tight" style={dim}>
               {!grouped && <span className="font-bold truncate" style={{ color: tc(c.team) }} title={T[c.team].name}>{T[c.team].name}</span>}
-              {c.note && !lastQ && <span className={grouped ? "text-13 tabular-nums text-[var(--color-ink-3)]" : "text-12 text-[var(--color-ink-3)]"}>{c.note}</span>}</span>
+              {c.note && !lastQ && <span className={grouped ? "text-13 tabular-nums text-[var(--color-ink-3)]" : "text-12 text-[var(--color-ink-3)]"}>{c.note}</span>}
+              {c.changed && <span className="text-12 text-[var(--color-gold)]">{nohost ? "changed" : "host’s call"}</span>}</span>
             <span className="min-w-0 break-words leading-snug" style={dim}>
               <span className="font-bold" style={{ color: col }}><span aria-label={say ? (c.ok ? "dodged it:" : "said it:") : c.ok ? "right:" : "wrong:"} className="mr-1">{c.ok ? "\u2713" : "\u2717"}</span>{said}</span>
               {c.answer && !c.ok && <span className="text-[var(--color-ink-3)]">{said ? " · " : ""}{c.answer}</span>}</span>
@@ -745,9 +756,11 @@ function useTwoHold(pub: Pub) {
 }
 
 /* part: "pill" is only how your team did (it goes at the top of the phone, above the question), "rest" the result without it */
-function Result({ pub, mine, headOnly, part }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean; part?: "pill" | "rest" }) {
+/* host: the host's phone sees the result at once; everyone else gets "Eyes on the TV" while the TV reveals it (the owner,
+   on the 4 Nov audit, 3.9) */
+function Result({ pub, mine, headOnly, part, host = false }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean; part?: "pill" | "rest"; host?: boolean }) {
   const T = pub.teams, sc = pub.screen, m = pub.mini;
-  const heldNow = useTwoHold(pub);
+  const heldNow = useTwoHold(pub) && !host;
   /* a question's result (the owner's pick, 1 Nov): how your team did in one pill, then a table, a row a team */
   const pill = (text: string, tone: Tone) => <YouPill text={text} tone={tone} />;
   const row = (t: 0 | 1, val: React.ReactNode, ok: boolean | null | undefined, end?: React.ReactNode, sub?: React.ReactNode): RRow =>
@@ -871,7 +884,7 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
    (components/Side; upright nothing moves) */
 function OnScreen({ pub, counting, small, side }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean }) {
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
-  if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The question comes back when the clock restarts.</p></div>;
+  if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
     {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <ToSide when={side} order={3} className="noselect" {...noCopy}><p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p></ToSide>}
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
@@ -982,12 +995,12 @@ function status(pub: Pub, me: Member, noTv = false) {
   if (TIE_SCREENS.includes(pub.screen)) return `${tieHead(pub)}. ${tieCall(pub)}`;
   if (pub.screen === DECIDED) return `${decidedHead(pub)} ${decidedCall(pub)}`;
   switch (pub.screen) {
-    case "ask": return pub.turn === mine ? (cap ? "Your question. Type your answer." : "Your team's question. Help your captain!") : `${T[pub.turn ?? 0].name} is answering. Get ready to steal.`;
+    case "ask": return pub.turn === mine ? (cap ? "Your question. Type your answer." : "Your team's question. Help your captain!") : `${T[pub.turn ?? 0].name} are answering. Get ready to steal.`;
     case "steal": return pub.turn === mine ? (cap ? "Steal! Type your answer." : "Steal! Help your captain.") : `${T[pub.turn ?? 0].name} can steal it`;
     case "answer": return pub.result?.by == null ? "Nobody scored" : pub.result.by === mine ? `+${pub.result.pts} to your team!` : `${T[pub.result.by].name} scored`;
     case "roundIntro": return `Round ${pub.r + 1}: ${pub.theme}`;
     case "roundScore": return `End of round ${pub.r + 1}`;
-    case "sudden": return cap ? "Sudden death: captains only. Buzz to answer." : "Sudden death: captains only. Not a word!";
+    case "sudden": return cap ? (pub.sudden?.ready ? "Sudden death: captains only. Buzz to answer." : "Sudden death: captains only. The buzzer comes with the question.") : "Sudden death: captains only. Not a word!";
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country?" : "Guess the Flag: help your captain";
     case "pinQ": return cap ? "Where is it? Drop your pin, then lock it in." : "Drop the Pin: help your captain";
@@ -998,13 +1011,13 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "sayReveal": return pub.reveal?.ok?.[mine] ? "You dodged the app's word" : "You said the app's word";
     /* Team A's captain plays the first half, then Team B's: the one who's finished isn't "next" */
     case "battleQ": return pub.battle?.cap === mine ? (cap ? (pub.mode === "nohost" ? "Your question. Type it fast!" : "Your question. Say it out loud!") : "Your captain's battle. Not a word!")
-      : cap ? (mine === 0 ? `Your half is done. ${T[1].name}'s captain now. Stay quiet.` : "Your turn is next. Stay quiet.") : "Captains only. Not a word!";
-    case "battleHandoff": return `${T[1].name}'s captain is next`;
+      : cap ? (mine === 0 ? `Your half is done. ${poss(T[1].name)} captain now. Stay quiet.` : "Your turn is next. Stay quiet.") : "Captains only. Not a word!";
+    case "battleHandoff": return `${poss(T[1].name)} captain is next`;
     case "battleTie": return cap ? "Tie-breaker: buzz to answer" : "Captains only. Not a word!";
     case "mapQ": return cap ? "What does the map show?" : "Guess the Map: help your captain";
     case "mapReveal": return noTv ? "The answer" : "The answer's on the TV";
-    case "auctionBid": return pub.auction?.turn === mine ? (cap ? "Your bid: raise, or pass" : "Your captain is bidding") : `${T[pub.auction?.turn ?? 0].name} is bidding`;
-    case "auctionRun": return pub.auction?.by === mine ? (cap ? `Name ${pub.auction?.bid}! Out loud!` : `Name ${pub.auction?.bid}! Out loud!`) : `${T[pub.auction?.by ?? 0].name} has to name ${pub.auction?.bid}`;
+    case "auctionBid": return pub.auction?.turn === mine ? (cap ? "Your bid: raise, or pass" : "Your captain is bidding") : `${T[pub.auction?.turn ?? 0].name} are bidding`;
+    case "auctionRun": return pub.auction?.by === mine ? (cap ? `Name ${pub.auction?.bid}! Out loud!` : `Name ${pub.auction?.bid}! Out loud!`) : `${T[pub.auction?.by ?? 0].name} have to name ${pub.auction?.bid}`;
     default: return pub.mini ? pub.mini.title : noTv ? "Get ready" : "Eyes on the TV";
   }
 }
@@ -1050,6 +1063,10 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       <OnScreen pub={pub} side />
       {/^majority(Q|Reveal)$/.test(pub.screen) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} part="rest" />
+      {pub.screen === "final" && <Line className="!text-13">{pub.mode === "nohost" ? "A captain chooses" : "The host chooses"}: play again with the same teams, or end the night.</Line>}
+      {/* the Battle's twenty calls, read-only, on every phone (the 4 Nov audit, 3.12: players only saw "Waiting for…") */}
+      {pub.screen === "battleReview" && <Calls pub={pub} act={() => {}} />}
+      <WaitingForHost pub={pub} members={members} />
       {canSuggest && (
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
@@ -1097,6 +1114,12 @@ function WaitingFor({ pub }: { pub: Pub }) {
   if (pub.autoAt && auto > 0) return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Next in {auto} s, or {pub.nextBy} taps Next.</p>;
   const who = open && pub.nextOther ? `${pub.nextBy} or ${pub.nextOther}` : pub.nextBy;
   return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Waiting for {who} to {TIE_SCREENS.includes(pub.screen) ? "choose: one more, or a point each" : pub.screen === DECIDED ? "choose: keep playing for fun, or stop here" : `tap ${/^Start/.test(label) ? "Start" : label}`}.</p>;
+}
+/* with a host: the screens that wait for the host's tap say so on the other phones, as with no host (the 4 Nov audit, 3.9) */
+function WaitingForHost({ pub, members }: { pub: Pub; members: Member[] }) {
+  const h = members.find((m) => m.role === "host");
+  if (pub.mode === "nohost" || !h || !WAITS_FOR_NEXT.has(pub.screen) || pub.screen === "final") return null;
+  return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Waiting for <bdi>{h.name}</bdi> to move the night on.</p>;
 }
 /* the screens a clock runs on, and so the ones a Pause makes sense on */
 /* where the app's calls are listed, and can be contested */
@@ -1304,7 +1327,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <div className="eyebrow">{A.bid ? `Beat ${A.bid}, or pass` : "Open the bidding"}</div>
           <p className="text-13 text-[var(--color-ink-2)]">Whoever wins the bid has <b>{pub.timers?.auction ?? 30} seconds</b> to name them, out loud.</p>
           {/* a number typed in the box: its Bid is the big button, and +1 steps back (people typed 15, then tapped "Raise to 2") */}
-          {A.bid < MAX_BID && <button className={"btn " + (bid ? "btn-sm self-start" : "btn-gold btn-lg")} disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>Raise to {A.bid + 1}</button>}
+          {A.bid < MAX_BID && <button className={"btn " + (bid ? "btn-sm self-start" : "btn-gold btn-lg")} disabled={busy} onClick={() => void nxt({ type: "auction/raise", n: A.bid + 1 })}>{A.bid ? `Raise to ${A.bid + 1}` : "Open at 1"}</button>}
           <div className="flex gap-2">
             <input {...np.props} className="input" aria-label="Custom bid" inputMode="numeric" value={bid} placeholder="Or type your bid" onChange={(e) => setBid(e.target.value.replace(/\D/g, "").slice(0, 3))} />
             <button className={"btn shrink-0 " + (bid ? "btn-gold btn-lg" : "")} disabled={busy || !(Number(bid) > A.bid) || Number(bid) > MAX_BID} onClick={() => void nxt({ type: "auction/raise", n: Number(bid) })}>{bid && Number(bid) > A.bid ? `Bid ${Number(bid)}` : "Bid"}</button>
@@ -1331,6 +1354,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <button type="button" className="btn btn-lg" disabled={busy} onClick={() => void nxt({ type: "ui/skipHostQ" })}>Skip it: no points</button>
         </div>)}
       {/* the end of the night, no host: either captain sends everyone home */}
+      {/* what happens now, said (the 4 Nov audit, 3.14) */}
+      {!nohost && sc === "final" && <Line className="!text-13">The host chooses: play again with the same teams, or end the night.</Line>}
+      <WaitingForHost pub={pub} members={members} />
       {nohost && sc === "final" && (<>
         <button className="btn btn-gold btn-lg btn-block mt-auto" disabled={busy} onClick={() => void nxt({ type: "ui/again" })}>Play again: same teams</button>
         <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>

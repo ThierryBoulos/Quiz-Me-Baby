@@ -64,7 +64,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
             <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
             {pub.screen === "ask" && <div className="w-[560px]"><LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="tv" /></div>}
           </div>
-          <div className="h-7 text-22 font-bold" style={{ color: tc(pub.turn) }}>{pub.sent?.[pub.turn ?? 0] ? `${T[pub.turn ?? 0].name} has answered…` : ""}</div>
+          <div className="h-7 text-22 font-bold" style={{ color: tc(pub.turn) }}>{pub.sent?.[pub.turn ?? 0] ? `${T[pub.turn ?? 0].name} have answered…` : ""}</div>
         </>)}
 
         {/* the answer, the calls and who scores land on the drumroll's hit (BEAT_MS); then the points fly up */}
@@ -156,7 +156,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           <div className="text-center">
             {pub.agree?.kind === "swap" ? <SwapAsk pub={pub} /> : (<>
               <div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
-              <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></>)}
+              <div className="text-26 text-[var(--color-ink-2)] mt-2">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</div></>)}
           </div>
         </div>)}
       <AwayFlags pub={pub} />
@@ -192,7 +192,7 @@ function Buzzed({ pub }: { pub: Pub }) {
       {pub.typeBy && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.typeBy} size={80} /><span>to type it</span></div>}
     </div>);
   const out = [0, 1].filter((t) => pub.out?.[t]);
-  return <div className="h-10 text-24 text-[var(--color-ink-2)]">{out.map((t) => `${T[t].name} is out of this one`).join(" · ")}</div>;
+  return <div className="h-10 text-24 text-[var(--color-ink-2)]">{out.map((t) => `${T[t].name} are out of this one`).join(" · ")}</div>;
 }
 
 function Sent({ pub }: { pub: Pub }) {
@@ -342,7 +342,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       <div className="ans-board display" style={{ fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
       {pub.reveal.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-2 truncate">{pub.reveal.notes}</div>}
       <NumberLine pub={pub} ans={ans} w={w} />
-      <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : ""}</div>
+      <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} take it` : ""}</div>
     </>);
   }
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (<>
@@ -375,7 +375,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
             <div className="display text-22" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
             <div className="display text-40">{R.pins[t] ? showKm(R.km[t] ?? 0) : "No pin"}{R.pins[t] && <span className="text-22 text-[var(--color-ink-2)]"> off</span>}</div>
           </div>))}
-        <div className="display text-36 mt-6" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} takes it` : "No point"}</div>
+        <div className="display text-36 mt-6" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} take it` : "No point"}</div>
       </div>
     </div>); }
   /* Guess the Airport: the board, then its name */

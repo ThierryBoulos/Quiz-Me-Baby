@@ -23,17 +23,17 @@
 25.50 pinIntro | 11 | 0-4 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
 26.50 pinQ | 12 | 0-4 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
 27.50 pinReveal | 12 | 0-4 | 1-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
-28.25 pinQ | 13 | 0-4 | 1-0 | Lions takes landmark 1. | 
+28.25 pinQ | 13 | 0-4 | 1-0 | Lions take landmark 1. | 
 29.25 pinQ | 13 | 0-4 | 1-0 | That pin didn't come through. Drop it again. | 
 30.00 pinReveal | 13 | 0-4 | 1-1 | That pin didn't come through. Drop it again. | 
-31.00 pinQ | 14 | 0-4 | 1-1 | Owls takes landmark 2. | 
-32.00 pinReveal | 14 | 0-4 | 2-1 | Owls takes landmark 2. | 
-32.75 pinQ | 15 | 0-4 | 2-1 | Lions takes landmark 3. | 
-33.75 pinReveal | 15 | 0-4 | 2-2 | Lions takes landmark 3. | 
-34.50 pinQ | 16 | 0-4 | 2-2 | Owls takes landmark 4. | 
-35.50 pinReveal | 16 | 0-4 | 2-3 | Owls takes landmark 4. | 
-36.50 pinQ | 17 | 0-4 | 2-3 | Owls takes landmark 5. | 
-37.25 pinReveal | 17 | 0-4 | 2-4 | Owls takes landmark 5. | 
+31.00 pinQ | 14 | 0-4 | 1-1 | Owls take landmark 2. | 
+32.00 pinReveal | 14 | 0-4 | 2-1 | Owls take landmark 2. | 
+32.75 pinQ | 15 | 0-4 | 2-1 | Lions take landmark 3. | 
+33.75 pinReveal | 15 | 0-4 | 2-2 | Lions take landmark 3. | 
+34.50 pinQ | 16 | 0-4 | 2-2 | Owls take landmark 4. | 
+35.50 pinReveal | 16 | 0-4 | 2-3 | Owls take landmark 4. | 
+36.50 pinQ | 17 | 0-4 | 2-3 | Owls take landmark 5. | 
+37.25 pinReveal | 17 | 0-4 | 2-4 | Owls take landmark 5. | 
 38.25 decided | 18 | 0-4 | 2-4 |  | 
 39.00 roundIntro | 19 | 0-6 |  |  | 
 41.00 ask | 20 | 0-6 |  |  | 
@@ -54,14 +54,14 @@
 55.25 airportIntro | 27 | 2-8 | 0-0 | Call changed: Lions +1 point. | 
 56.25 airportQ | 28 | 2-8 | 0-0 | Call changed: Lions +1 point. | 
 57.00 airportReveal | 28 | 2-8 | 1-0 | Call changed: Lions +1 point. | 
-58.00 airportQ | 29 | 2-8 | 1-0 | Lions takes board 1. | 
-59.00 airportReveal | 29 | 2-8 | 2-1 | Lions takes board 1. | 
+58.00 airportQ | 29 | 2-8 | 1-0 | Lions take board 1. | 
+59.00 airportReveal | 29 | 2-8 | 2-1 | Lions take board 1. | 
 59.75 airportReveal | 29 | 2-8 | 2-1 |  | 
 60.75 airportReveal | 29 | 2-8 | 2-0 | Call changed: ⁨Owls⁩ WRONG. | 
-61.50 airportQ | 30 | 2-8 | 2-0 | Lions takes board 2. | 
-62.50 airportReveal | 30 | 2-8 | 2-1 | Lions takes board 2. | 
-63.50 airportQ | 31 | 2-8 | 2-1 | Owls takes board 3. | 
-64.25 airportReveal | 31 | 2-8 | 3-2 | Owls takes board 3. | 
+61.50 airportQ | 30 | 2-8 | 2-0 | Lions take board 2. | 
+62.50 airportReveal | 30 | 2-8 | 2-1 | Lions take board 2. | 
+63.50 airportQ | 31 | 2-8 | 2-1 | Owls take board 3. | 
+64.25 airportReveal | 31 | 2-8 | 3-2 | Owls take board 3. | 
 65.25 airportQ | 32 | 2-8 | 3-2 | Both got it — a point each. | 
 66.00 airportReveal | 32 | 2-8 | 3-3 | Both got it — a point each. | 
 67.00 airportReveal | 32 | 2-8 | 3-3 |  | 

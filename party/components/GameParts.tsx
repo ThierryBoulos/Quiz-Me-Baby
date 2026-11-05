@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { preloadWorld, type Mark } from "./PinMap";
-import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type MiniKey, type Pub, type Two } from "@/lib/game";
+import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -285,7 +285,7 @@ export function RoundIntro({ pub, canArm, onArm, size, busy }: { pub: Pub; canAr
       <div className="flex flex-col items-center gap-2">
         <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>Round {pub.r + 1} of {pub.N}</div>
         <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? 104 : 46 }}>{pub.theme}</h1>
-        <p className="text-[var(--color-ink-2)]" style={{ fontSize: tv ? 22 : 13 }}>{T[pub.first ?? 0].name} answers first</p>
+        <p className="text-[var(--color-ink-2)]" style={{ fontSize: tv ? 22 : 13 }}>{T[pub.first ?? 0].name} answer first</p>
       </div>
       {/* the TV, the host and the players: no explaining, just a badge once a team has armed it */}
       {!captain && (pub.dbl?.[0] || pub.dbl?.[1]) && (
@@ -411,7 +411,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     case "battle": return [
       { text: "Captains only. The room says nothing, and that means nothing.", warn: true },
-      { text: `${n} questions each, ${host ? `${sec(t?.battleHost, T_BATTLE_HOST)} a shot, out loud` : `${sec(t?.battleTyped, T_BATTLE_TYPED)} a shot, typed on the phone`}. ${pub.teams[0].name}'s captain goes first.` },
+      { text: `${n} questions each, ${host ? `${sec(t?.battleHost, T_BATTLE_HOST)} a shot, out loud` : `${sec(t?.battleTyped, T_BATTLE_TYPED)} a shot, typed on the phone`}. ${poss(pub.teams[0].name)} captain goes first.` },
       { text: "Same spread for both: five easy, five medium, in the same order. Different questions." },
       { text: "No lifelines, no conferring, no second guesses." },
       { text: `Best score takes ${pts}. Tied? One buzzer question to settle it (first captain in takes it), or a point each: ${call}.` }];

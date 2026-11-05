@@ -2,11 +2,11 @@
    HOST_LINES). Text only: he speaks in a bubble on the TV, never out loud.
    Placeholders: {team} {other} {captain} {othercap}: the team the moment is
    about, the other one, and their captains; {leader} {trailer} {gap}: the
-   scoreboard; {theme} {n} {N}: the round; {pts}: a mini-game prize. */
+   scoreboard; {theme} {n} {N}: the round; {pts}: a mini-game prize ({ptsWord}: "1 point", "3 points"). */
 export const HOST_LINES: Record<string, string[]> = {
   "start": [
     "Are you ready to QUIZ ME BABYYYY?!",
-    "Welcome, welcome, welcome! Phones down, brains on, egos at the door.",
+    "Welcome, welcome, welcome! Phones up, brains on, egos at the door.",
     "Tonight: {team} versus {other}. Only one leaves with dignity.",
     "Ladies and gentlemen, phones charged, drinks poured? Let's QUIZ!",
     "Captains, you speak for your team. Everyone else, you speak for nobody.",
@@ -70,7 +70,7 @@ export const HOST_LINES: Record<string, string[]> = {
   ],
   "stolen": [
     "STOLEN! Daylight robbery!",
-    "{team} just walked out with your point and didn't even say thank you.",
+    "{team} just walked out with your points and didn't even say thank you.",
     "Stolen! That's going to sting for a while.",
     "Thief! Brilliant, brilliant thief.",
     "Stolen! {other}, I'd lock up your valuables.",
@@ -166,11 +166,11 @@ export const HOST_LINES: Record<string, string[]> = {
     "Captains only. Teams, sit on your hands."
   ],
   "miniwin": [
-    "{team} take the mini-game! {pts} sweet points!",
+    "{team} take the mini-game! {ptsWord}, sweet!",
     "Mini-game to {team}! Did that hurt, {other}?",
-    "And {team} win it! Grab those {pts} points.",
+    "And {team} win it! Grab those {ptsWord}.",
     "{team} walk away with it. Classy.",
-    "That's {pts} points to {team}. The scoreboard shakes."
+    "That's {ptsWord} to {team}. The scoreboard shakes."
   ],
   "sudden": [
     "SUDDEN DEATH! One question. One winner. One very sad team.",

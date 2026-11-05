@@ -44,6 +44,12 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
       <HudMany pub={pub} size="tv" code={join?.code} sound={sound} />
       {/* the night's intro, before the first game: the plan, until the host's Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who="The host starts the game" />}
+      {/* the host paused it: the question hides until the clock restarts, as with two teams */}
+      {pub.screen === "q" && pub.paused && (
+        <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", zIndex: 20 }}>
+          <div className="text-center"><div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
+            <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></div>
+        </div>)}
 
       <div className={"flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}

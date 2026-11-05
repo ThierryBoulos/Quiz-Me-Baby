@@ -75,19 +75,19 @@
 100.45 roundScore | 55 | 7-4 |  | Call changed: Owls +2 points. | 
 101.45 dishIntro | 56 | 7-4 | 0-0 | Call changed: Owls +2 points. | 
 102.20 dishQ | 57 | 7-4 | 0-0 | Call changed: Owls +2 points. | 
-104.95 dishQ | 58 | 7-4 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
+104.95 dishQ | 58 | 7-4 | 0-0 | Lions are out of this one — Owls, it is yours to get. | 
 107.70 dishReveal | 59 | 7-4 | 0-0 | Nobody got it. | 
 108.70 dishReveal | 59 | 7-4 | 0-0 |  | 
 109.45 dishReveal | 59 | 7-4 | 0-0 | The host keeps the call. | 
 110.45 dishQ | 60 | 7-4 | 0-0 | The host keeps the call. | 
-113.20 dishQ | 61 | 7-4 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
-115.70 dishReveal | 62 | 7-4 | 0-1 | Owls takes number 2. | 
-116.70 dishQ | 63 | 7-4 | 0-1 | Owls takes number 2. | 
-119.45 dishReveal | 64 | 7-4 | 1-1 | Lions takes number 3. | 
-120.20 dishQ | 65 | 7-4 | 1-1 | Lions takes number 3. | 
-122.95 dishReveal | 66 | 7-4 | 2-1 | Lions takes number 4. | 
-123.95 dishQ | 67 | 7-4 | 2-1 | Lions takes number 4. | 
-126.70 dishReveal | 68 | 7-4 | 3-1 | Lions takes number 5. | 
+113.20 dishQ | 61 | 7-4 | 0-0 | Lions are out of this one — Owls, it is yours to get. | 
+115.70 dishReveal | 62 | 7-4 | 0-1 | Owls take number 2. | 
+116.70 dishQ | 63 | 7-4 | 0-1 | Owls take number 2. | 
+119.45 dishReveal | 64 | 7-4 | 1-1 | Lions take number 3. | 
+120.20 dishQ | 65 | 7-4 | 1-1 | Lions take number 3. | 
+122.95 dishReveal | 66 | 7-4 | 2-1 | Lions take number 4. | 
+123.95 dishQ | 67 | 7-4 | 2-1 | Lions take number 4. | 
+126.70 dishReveal | 68 | 7-4 | 3-1 | Lions take number 5. | 
 127.45 dishReveal | 68 | 7-4 | 3-1 |  | 
 128.45 dishReveal | 68 | 7-4 | 3-1 | The host keeps the call. | 
 129.20 dishSummary | 69 | 9-4 | 3-1 | The host keeps the call. | 

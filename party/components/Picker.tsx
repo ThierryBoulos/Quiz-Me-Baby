@@ -15,7 +15,7 @@ export type Picks = {
 export const NO_PICKS: Picks = { picks: {}, themeDiff: {}, pickClosest: [], pickAuction: [], pickSaySame: [], pickMap: [], pickFlag: [], pickDish: [], pickPin: [], pickAirport: [], pickMajority: [] };
 type MiniStore = "pickClosest" | "pickAuction" | "pickSaySame" | "pickMap" | "pickFlag" | "pickDish" | "pickPin" | "pickAirport" | "pickMajority";
 const MINI: Record<string, { store: MiniStore; type: string; cap: number; label: string }> = {
-  closest: { store: "pickClosest", type: "closest", cap: QMB.LEGS.closest, label: "Closest To Wins" },
+  closest: { store: "pickClosest", type: "closest", cap: PARTY_LEGS.closest ?? QMB.LEGS.closest, label: "Closest To Wins" },
   auction: { store: "pickAuction", type: "auction", cap: QMB.LEGS.auction, label: "The Auction" },
   saysame: { store: "pickSaySame", type: "saysame", cap: PARTY_LEGS.saysame ?? QMB.LEGS.saysame, label: "Don't Say the Same as Me" },
   map: { store: "pickMap", type: "map", cap: QMB.LEGS.map, label: "Guess the Map" },

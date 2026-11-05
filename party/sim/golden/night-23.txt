@@ -23,13 +23,13 @@
 36.50 flagReveal | 11 | 1-1 | 0-1 | ⁨Rami⁩ moves the game on. You can in 3 s. | 
 37.25 flagReveal | 11 | 1-1 | 0-1 | ⁨Rami⁩ moves the game on. You can in 2 s. | 
 38.25 flagReveal | 11 | 1-1 | 0-1 | ⁨Rami⁩ moves the game on. You can in 1 s. | 
-40.00 flagQ | 12 | 1-1 | 0-1 | Owls takes flag 1. | 
-56.00 flagReveal | 13 | 1-1 | 0-2 | Owls takes flag 1. | 
+40.00 flagQ | 12 | 1-1 | 0-1 | Owls take flag 1. | 
+56.00 flagReveal | 13 | 1-1 | 0-2 | Owls take flag 1. | 
 57.00 flagReveal | 13 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 3 s. | 
 58.00 flagReveal | 13 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 2 s. | 
 59.00 flagReveal | 13 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 1 s. | 
-60.75 flagQ | 14 | 1-1 | 0-2 | Owls takes flag 2. | 
-76.75 flagReveal | 15 | 1-1 | 0-2 | Owls takes flag 2. | 
+60.75 flagQ | 14 | 1-1 | 0-2 | Owls take flag 2. | 
+76.75 flagReveal | 15 | 1-1 | 0-2 | Owls take flag 2. | 
 77.00 flagReveal | 15 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 4 s. | 
 77.75 flagReveal | 15 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 3 s. | 
 78.75 flagReveal | 15 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 2 s. | 
@@ -40,8 +40,8 @@
 94.00 flagReveal | 15 | 2-3 | 0-2 | Both captains agreed: ⁨Lions⁩ 2, ⁨Owls⁩ 3. | 
 94.00 flagQ | 16 | 2-3 | 0-2 | Nobody got it. | 
 95.00 flagReveal | 16 | 2-3 | 1-2 | Nobody got it. | 
-95.75 flagQ | 17 | 2-3 | 1-2 | Lions takes flag 4. | 
-96.75 flagReveal | 17 | 2-3 | 1-2 | Lions takes flag 4. | 
+95.75 flagQ | 17 | 2-3 | 1-2 | Lions take flag 4. | 
+96.75 flagReveal | 17 | 2-3 | 1-2 | Lions take flag 4. | 
 97.50 flagQ | 18 | 2-3 | 1-2 | Nobody got it. | 
 98.50 flagReveal | 18 | 2-3 | 2-3 | Nobody got it. | 
 99.50 flagQ | 19 | 2-3 | 2-3 | Both got it — a point each. | 
@@ -50,8 +50,8 @@
 104.00 flagReveal | 19 | 2-3 | 2-3 | ⁨Lea⁩ doesn't agree: the call stands. | 
 104.75 flagQ | 20 | 2-3 | 2-3 | Nobody got it. | 
 105.75 flagReveal | 20 | 2-3 | 2-4 | Nobody got it. | 
-106.50 flagQ | 21 | 2-3 | 2-4 | Owls takes flag 8. | 
-107.50 flagReveal | 21 | 2-3 | 2-4 | Owls takes flag 8. | 
+106.50 flagQ | 21 | 2-3 | 2-4 | Owls take flag 8. | 
+107.50 flagReveal | 21 | 2-3 | 2-4 | Owls take flag 8. | 
 108.50 decided | 22 | 2-5 | 2-4 |  | 
 109.25 roundIntro | 23 | 2-5 |  |  | 
 111.00 ask | 24 | 2-5 |  |  | 
@@ -69,17 +69,17 @@
 (pause, 8 s)
 (resume)
 132.75 closestReveal | 30 | 2-8 | 0-1 | Owls +2 points | 
-133.50 miniQ | 31 | 2-8 | 0-1 | Owls takes leg 1. | 
-134.50 closestReveal | 31 | 2-8 | 0-2 | Owls takes leg 1. | 
-135.50 miniQ | 32 | 2-8 | 0-2 | Owls takes leg 2. | 
-136.25 closestReveal | 32 | 2-8 | 1-2 | Owls takes leg 2. | 
-137.25 miniQ | 33 | 2-8 | 1-2 | Lions takes leg 3. | 
-138.00 closestReveal | 33 | 2-8 | 2-2 | Lions takes leg 3. | 
-139.00 miniQ | 34 | 2-8 | 2-2 | Lions takes leg 4. | 
-140.00 closestReveal | 34 | 2-8 | 2-3 | Lions takes leg 4. | 
-140.75 miniSummary | 35 | 2-10 | 2-3 | Owls takes leg 5. | 
-141.75 roundIntro | 36 | 2-10 |  | Owls takes leg 5. | 
-142.50 ask | 37 | 2-10 |  | Owls takes leg 5. | 
+133.50 miniQ | 31 | 2-8 | 0-1 | Owls take leg 1. | 
+134.50 closestReveal | 31 | 2-8 | 0-2 | Owls take leg 1. | 
+135.50 miniQ | 32 | 2-8 | 0-2 | Owls take leg 2. | 
+136.25 closestReveal | 32 | 2-8 | 1-2 | Owls take leg 2. | 
+137.25 miniQ | 33 | 2-8 | 1-2 | Lions take leg 3. | 
+138.00 closestReveal | 33 | 2-8 | 2-2 | Lions take leg 3. | 
+139.00 miniQ | 34 | 2-8 | 2-2 | Lions take leg 4. | 
+140.00 closestReveal | 34 | 2-8 | 2-3 | Lions take leg 4. | 
+140.75 miniSummary | 35 | 2-10 | 2-3 | Owls take leg 5. | 
+141.75 roundIntro | 36 | 2-10 |  | Owls take leg 5. | 
+142.50 ask | 37 | 2-10 |  | Owls take leg 5. | 
 143.50 answer | 37 | 3-10 |  | Lions +1 point | 
 144.50 ask | 38 | 3-10 |  | Lions +1 point | 
 145.25 ask | 38 | 3-10 |  | Owls used Call a Friend. | 
@@ -106,16 +106,16 @@
 168.75 pinQ | 48 | 5-11 | 0-0 | Call changed: Lions +1 point. | 
 169.50 pinQ | 48 | 5-11 | 0-0 | That pin didn't come through. Drop it again. | 
 170.50 pinReveal | 48 | 5-11 | 1-0 | That pin didn't come through. Drop it again. | 
-171.50 pinQ | 49 | 5-11 | 1-0 | Lions takes landmark 1. | 
-172.25 pinReveal | 49 | 5-11 | 1-1 | Lions takes landmark 1. | 
-173.25 pinQ | 50 | 5-11 | 1-1 | Owls takes landmark 2. | 
-174.00 pinReveal | 50 | 5-11 | 1-2 | Owls takes landmark 2. | 
-175.00 pinQ | 51 | 5-11 | 1-2 | Owls takes landmark 3. | 
-176.00 pinReveal | 51 | 5-11 | 2-2 | Owls takes landmark 3. | 
-176.75 pinQ | 52 | 5-11 | 2-2 | Lions takes landmark 4. | 
-177.75 pinReveal | 52 | 5-11 | 3-2 | Lions takes landmark 4. | 
-178.50 pinQ | 53 | 5-11 | 3-2 | Lions takes landmark 5. | 
-179.50 pinReveal | 53 | 5-11 | 4-2 | Lions takes landmark 5. | 
+171.50 pinQ | 49 | 5-11 | 1-0 | Lions take landmark 1. | 
+172.25 pinReveal | 49 | 5-11 | 1-1 | Lions take landmark 1. | 
+173.25 pinQ | 50 | 5-11 | 1-1 | Owls take landmark 2. | 
+174.00 pinReveal | 50 | 5-11 | 1-2 | Owls take landmark 2. | 
+175.00 pinQ | 51 | 5-11 | 1-2 | Owls take landmark 3. | 
+176.00 pinReveal | 51 | 5-11 | 2-2 | Owls take landmark 3. | 
+176.75 pinQ | 52 | 5-11 | 2-2 | Lions take landmark 4. | 
+177.75 pinReveal | 52 | 5-11 | 3-2 | Lions take landmark 4. | 
+178.50 pinQ | 53 | 5-11 | 3-2 | Lions take landmark 5. | 
+179.50 pinReveal | 53 | 5-11 | 4-2 | Lions take landmark 5. | 
 180.50 decided | 54 | 5-11 | 4-2 |  | 
 181.25 roundIntro | 55 | 7-11 |  |  | 
 183.00 ask | 56 | 7-11 |  |  | 

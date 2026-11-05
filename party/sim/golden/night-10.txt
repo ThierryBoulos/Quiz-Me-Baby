@@ -26,26 +26,26 @@
 485.50 flagReveal | 23 | 2-2 | 0-1 | Nobody got it. | 
 518.00 flagReveal | 23 | 2-2 | 0-1 |  | 
 568.25 flagReveal | 23 | 2-2 | 0-1 | The host keeps the call. | 
-594.50 flagQ | 24 | 2-2 | 0-1 | Owls takes flag 4. | 
-598.00 flagReveal | 24 | 2-2 | 0-1 | Owls takes flag 4. | 
+594.50 flagQ | 24 | 2-2 | 0-1 | Owls take flag 4. | 
+598.00 flagReveal | 24 | 2-2 | 0-1 | Owls take flag 4. | 
 607.00 flagQ | 25 | 2-2 | 0-1 | Nobody got it. | 
 623.00 flagReveal | 27 | 2-2 | 0-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
 629.50 flagQ | 28 | 2-2 | 0-1 | Nobody got it. | 
 645.50 flagReveal | 30 | 2-2 | 0-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-676.25 flagQ | 31 | 2-2 | 0-2 | Owls takes flag 7. | 
+676.25 flagQ | 31 | 2-2 | 0-2 | Owls take flag 7. | 
 692.25 flagReveal | 33 | 2-2 | 1-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
 701.50 flagQ | 34 | 2-2 | 1-3 | Both got it — a point each. | 
 710.50 flagReveal | 34 | 2-2 | 1-3 | Both got it — a point each. | 
 729.50 flagReveal | 34 | 2-2 | 1-3 |  | 
 860.00 flagReveal | 34 | 2-2 | 2-3 | Call changed: ⁨Lions⁩ RIGHT. | 
-866.25 flagQ | 35 | 2-2 | 2-3 | Lions takes flag 9. | 
+866.25 flagQ | 35 | 2-2 | 2-3 | Lions take flag 9. | 
 882.25 flagReveal | 37 | 2-2 | 2-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-911.25 flagSummary | 38 | 2-4 | 2-4 | Owls takes flag 10. | 
-935.50 roundIntro | 39 | 2-4 |  | Owls takes flag 10. | 
-954.50 ask | 40 | 2-4 |  | Owls takes flag 10. | 
-997.50 steal | 41 | 2-4 |  | Owls takes flag 10. | 
-1058.00 answer | 42 | 2-4 |  | Owls takes flag 10. | 
-1066.00 ask | 43 | 2-4 |  | Owls takes flag 10. | 
+911.25 flagSummary | 38 | 2-4 | 2-4 | Owls take flag 10. | 
+935.50 roundIntro | 39 | 2-4 |  | Owls take flag 10. | 
+954.50 ask | 40 | 2-4 |  | Owls take flag 10. | 
+997.50 steal | 41 | 2-4 |  | Owls take flag 10. | 
+1058.00 answer | 42 | 2-4 |  | Owls take flag 10. | 
+1066.00 ask | 43 | 2-4 |  | Owls take flag 10. | 
 1082.25 answer | 44 | 2-5 |  | Owls +1 point | 
 1141.50 answer | 44 | 2-5 |  |  | 
 1143.50 answer | 44 | 2-5 |  | The host keeps the call. | 
@@ -53,18 +53,18 @@
 1183.00 miniIntro | 46 | 2-5 | 0-0 | The host keeps the call. | 
 1193.75 miniQ | 47 | 2-5 | 0-0 | The host keeps the call. | 
 1216.25 closestReveal | 47 | 2-5 | 1-0 | The host keeps the call. | 
-1228.00 miniQ | 48 | 2-5 | 1-0 | Lions takes leg 1. | 
-1271.25 closestReveal | 48 | 2-5 | 1-1 | Lions takes leg 1. | 
-1297.25 miniQ | 49 | 2-5 | 1-1 | Owls takes leg 2. | 
-1337.75 closestReveal | 49 | 2-5 | 2-1 | Owls takes leg 2. | 
-1356.75 miniQ | 50 | 2-5 | 2-1 | Lions takes leg 3. | 
-1397.25 closestReveal | 50 | 2-5 | 3-1 | Lions takes leg 3. | 
+1228.00 miniQ | 48 | 2-5 | 1-0 | Lions take leg 1. | 
+1271.25 closestReveal | 48 | 2-5 | 1-1 | Lions take leg 1. | 
+1297.25 miniQ | 49 | 2-5 | 1-1 | Owls take leg 2. | 
+1337.75 closestReveal | 49 | 2-5 | 2-1 | Owls take leg 2. | 
+1356.75 miniQ | 50 | 2-5 | 2-1 | Lions take leg 3. | 
+1397.25 closestReveal | 50 | 2-5 | 3-1 | Lions take leg 3. | 
 1402.50 decided | 51 | 2-5 | 3-1 |  | 
 1409.75 miniQ | 52 | 4-5 | 3-1 |  | 
 1437.75 closestReveal | 52 | 4-5 | 4-1 |  | 
-1457.50 miniSummary | 53 | 4-5 | 4-1 | Lions takes leg 5. | 
-1462.00 roundIntro | 54 | 4-5 |  | Lions takes leg 5. | 
-1466.50 ask | 55 | 4-5 |  | Lions takes leg 5. | 
+1457.50 miniSummary | 53 | 4-5 | 4-1 | Lions take leg 5. | 
+1462.00 roundIntro | 54 | 4-5 |  | Lions take leg 5. | 
+1466.50 ask | 55 | 4-5 |  | Lions take leg 5. | 
 1490.00 answer | 56 | 5-5 |  | Lions +1 point | 
 1544.75 answer | 56 | 5-5 |  |  | 
 1550.25 answer | 56 | 5-5 |  | The host keeps the call. | 

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
+import { useNoTv } from "./NoTv";
 import { DEFAULTS, type Settings } from "@/lib/settings";
 import { Snd } from "@/lib/sound";
 import { getMotionPref, setMotionPref } from "./Marquee";
@@ -27,7 +28,7 @@ const MINI_TIMERS: Timer[] = [
   ["tAirport", "Guess the Airport", [20, 30, 45, 60]],
   ["tMajority", "Majority Rules: per question", [10, 15, 20, 30]],
   ["tDishStep", "Guess the Cocktail or Dish: a new ingredient every", [2, 3, 4, 5]],
-  ["tDishType", "Time to type after a buzz (Cocktail or Dish, sudden death)", [5, 10, 15, 20]],
+  ["tDishType", "Time to type after a buzz (Cocktail or Dish, sudden death, the Battle's tie-breaker)", [5, 10, 15, 20]],
   ["tBattleHost", "Battle, with a host: per question (out loud)", [5, 7, 10, 15]],
   ["tBattleTyped", "Battle, no host: per question (typed)", [10, 15, 20, 30]],
 ];
@@ -73,6 +74,8 @@ function Timers({ list, s, set }: { list: Timer[]; s: Settings; set: (p: Partial
 export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, remote = false }: {
   s: Settings; set: (p: Partial<Settings>) => void; tab: "general" | "timers"; pick: (t: "general" | "timers") => void;
   played: number; onForget: () => void; addQuestion?: ReactNode; remote?: boolean }) {
+  /* with no TV, the phone running the game plays the part (the 4 Nov audit, 3.1), and Imad, who lives on the TV, isn't there */
+  const noTv = useNoTv(), the = noTv ? "the phone running the game" : "the TV";
   const changed = TIMER_KEYS.some((k) => s[k] !== DEFAULTS[k]);
   return (<>
       <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Settings">
@@ -91,18 +94,18 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
           onClick={() => set(Object.fromEntries(TIMER_KEYS.map((k) => [k, DEFAULTS[k]])) as Partial<Settings>)}>Back to the default timers</button>
       </>) : (<>
       <Section title="Gameplay">
-        <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="New questions first" help="Every question this TV plays is remembered, and the next games deal the ones you haven't played. When a game runs out of new ones, played ones come back (a night never gets shorter) and the lobby offers to reset." />
+        <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="New questions first" help={`Every question ${noTv ? "the phone running the game" : "this TV"} plays is remembered, and the next games deal the ones you haven't played. When a game runs out of new ones, played ones come back (a night never gets shorter) and the lobby offers to reset.`} />
         <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="Alternate which team answers first each round" help="Off = Team A always goes first." />
-        <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help="Someone switches app or tab while a question is up (a search, a chatbot)? The TV says so, and the host's phone keeps the list. Call a Friend is allowed." />
+        <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help={`Someone switches app or tab while a question is up (a search, a chatbot)? ${noTv ? "The host's phone keeps the list" : "The TV says so, and the host's phone keeps the list"}. Call a Friend is allowed.`} />
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <span className="text-14 text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played{remote ? " on the TV" : ""}.</span>
+          <span className="text-14 text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played{remote ? ` on ${the}` : ""}.</span>
           <button type="button" className="btn btn-sm" disabled={!played}
-            onClick={() => { if (window.confirm(remote ? "Forget every played question on the TV?" : "Forget every played question on this device?")) onForget(); }}>Forget played questions</button>
+            onClick={() => { if (window.confirm(remote ? `Forget every played question on ${the}?` : "Forget every played question on this device?")) onForget(); }}>Forget played questions</button>
         </div>
       </Section>
       {addQuestion && <Section title="Add a question">{addQuestion}</Section>}
       <Section title="Sound">
-        <Toggle on={s.sound} set={(v) => set({ sound: v })} title="Jingles and chimes" help="A calm 5-second sting at the top of every round, soft bells when a timer runs out. Played on the TV only." />
+        <Toggle on={s.sound} set={(v) => set({ sound: v })} title="Jingles and chimes" help={`A calm 5-second sting at the top of every round, soft bells when a timer runs out. ${noTv ? "Played on the phone running the game." : "Played on the TV only."}`} />
         <Toggle on={s.tick} set={(v) => set({ tick: v })} title="Quiet tick in the last 10 seconds" help="Barely there. Turn it off if the room is small." />
         <div className="flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="vol">Volume: {Math.round(s.volume * 100)}%</label>
@@ -116,9 +119,10 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
 
       {!remote && <Section title="This screen"><MotionToggle /></Section>}
 
-      <Section title="Your MC: Imad">
+      {/* (Imad is on the TV: with no TV his switch does nothing, so it's hidden: the owner, 4 Nov audit, 3.1) */}
+      {!noTv && <Section title="Your MC: Imad">
         <Toggle on={s.imad} set={(v) => set({ imad: v })} title="Imad comments" help="He comments on the game in a speech bubble on the TV: round intros, right and wrong answers, steals, lead changes, the final. Text only, no voice." />
-      </Section>
+      </Section>}
 
       </>)}
   </>);

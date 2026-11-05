@@ -22,7 +22,7 @@ export type PubMany = {
   dish?: { kind: string; ings: string[]; n: number };
   out?: boolean[];
   theme?: string;                                 // a question round: the question's theme
-  deadline: number | null; left: number; sent: boolean[]; now?: number;
+  deadline: number | null; left: number; sent: boolean[]; now?: number; paused?: boolean;
   roster?: string[];                              // Majority Rules: who plays
   voted?: string[];                               // ...and who has answered (names only, never what)
   reveal?: { answer: string; notes?: string; typed?: (string | null)[]; ok?: (boolean | null)[]; nums?: (number | null)[]; off?: (number | null)[];
@@ -42,7 +42,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
 
 export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
-  const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit,
+  const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
   const now = m && m.key !== "majority" && s.screen === "reveal" ? legPoints(s) : null;
   if (m) pub.game = { key: m.key, title: titleOf(s.minis, s.mi), leg: Math.min(m.i + 1, m.qs.length), of: m.qs.length, wins: [...m.wins],

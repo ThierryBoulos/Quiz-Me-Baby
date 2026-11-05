@@ -13,7 +13,7 @@ export type IntroPub = {
 /* what each game is, in a line (the TV's intro; the long rules are in How to play) */
 const TWO: Record<string, string> = {
   closest: "A number question. The nearest guess takes the leg.",
-  auction: "Bid how many you can name, then name them in 30 s.",
+  auction: "Bid how many you can name, then name them against the clock.",
   saysame: "Give a real answer, but not the app's hidden word.",
   map: "A map with no title. Say what it shows.",
   flag: "Name the country from its flag.",

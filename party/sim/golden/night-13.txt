@@ -27,28 +27,28 @@
 109.50 flagReveal | 12 | 2-3 | 0-0 | No answer in time: the call stands. | 
 110.00 flagQ | 13 | 2-3 | 0-0 | Nobody got it. | 
 110.75 flagReveal | 13 | 2-3 | 0-1 | Nobody got it. | 
-111.75 flagQ | 14 | 2-3 | 0-1 | Owls takes flag 2. | 
-112.50 flagReveal | 14 | 2-3 | 1-2 | Owls takes flag 2. | 
+111.75 flagQ | 14 | 2-3 | 0-1 | Owls take flag 2. | 
+112.50 flagReveal | 14 | 2-3 | 1-2 | Owls take flag 2. | 
 113.50 flagReveal | 14 | 2-3 | 1-2 |  | 
 116.25 flagReveal | 14 | 2-3 | 1-1 | Call changed: ⁨Owls⁩ WRONG. | 
-117.00 flagQ | 15 | 2-3 | 1-1 | Lions takes flag 3. | 
-118.00 flagReveal | 15 | 2-3 | 1-2 | Lions takes flag 3. | 
-119.00 flagQ | 16 | 2-3 | 1-2 | Owls takes flag 4. | 
-119.75 flagReveal | 16 | 2-3 | 1-2 | Owls takes flag 4. | 
+117.00 flagQ | 15 | 2-3 | 1-1 | Lions take flag 3. | 
+118.00 flagReveal | 15 | 2-3 | 1-2 | Lions take flag 3. | 
+119.00 flagQ | 16 | 2-3 | 1-2 | Owls take flag 4. | 
+119.75 flagReveal | 16 | 2-3 | 1-2 | Owls take flag 4. | 
 120.75 flagReveal | 16 | 2-3 | 1-2 |  | 
 122.50 flagReveal | 16 | 2-3 | 2-2 | Call changed: ⁨Lions⁩ RIGHT. | 
-123.50 flagQ | 17 | 2-3 | 2-2 | Lions takes flag 5. | 
-124.25 flagReveal | 17 | 2-3 | 2-2 | Lions takes flag 5. | 
+123.50 flagQ | 17 | 2-3 | 2-2 | Lions take flag 5. | 
+124.25 flagReveal | 17 | 2-3 | 2-2 | Lions take flag 5. | 
 125.25 flagQ | 18 | 2-3 | 2-2 | Nobody got it. | 
 126.00 flagReveal | 18 | 2-3 | 3-3 | Nobody got it. | 
 127.00 flagQ | 19 | 2-3 | 3-3 | Both got it — a point each. | 
 128.00 flagReveal | 19 | 2-3 | 3-4 | Both got it — a point each. | 
 128.75 flagReveal | 19 | 2-3 | 3-4 |  | 
 129.75 flagReveal | 19 | 2-3 | 3-4 | ⁨Lea⁩ doesn't agree: the call stands. | 
-130.50 flagQ | 20 | 2-3 | 3-4 | Owls takes flag 8. | 
-131.50 flagReveal | 20 | 2-3 | 4-4 | Owls takes flag 8. | 
-132.50 flagQ | 21 | 2-3 | 4-4 | Lions takes flag 9. | 
-133.25 flagReveal | 21 | 2-3 | 5-5 | Lions takes flag 9. | 
+130.50 flagQ | 20 | 2-3 | 3-4 | Owls take flag 8. | 
+131.50 flagReveal | 20 | 2-3 | 4-4 | Owls take flag 8. | 
+132.50 flagQ | 21 | 2-3 | 4-4 | Lions take flag 9. | 
+133.25 flagReveal | 21 | 2-3 | 5-5 | Lions take flag 9. | 
 134.25 flagTie | 22 | 2-3 | 5-5 |  | 
 135.00 flagSummary | 23 | 3-4 | 5-5 |  | 
 136.00 roundIntro | 24 | 3-4 |  |  | 
@@ -66,10 +66,10 @@
 146.75 closestReveal | 30 | 4-4 | 1-1 | Lions +1 point — steal | 
 147.75 miniQ | 31 | 4-4 | 1-1 | Tie — a point each. | 
 148.50 closestReveal | 31 | 4-4 | 2-1 | Tie — a point each. | 
-149.50 miniQ | 32 | 4-4 | 2-1 | Lions takes leg 2. | 
-150.50 closestReveal | 32 | 4-4 | 3-1 | Lions takes leg 2. | 
-151.25 miniQ | 33 | 4-4 | 3-1 | Lions takes leg 3. | 
-152.25 closestReveal | 33 | 4-4 | 4-1 | Lions takes leg 3. | 
+149.50 miniQ | 32 | 4-4 | 2-1 | Lions take leg 2. | 
+150.50 closestReveal | 32 | 4-4 | 3-1 | Lions take leg 2. | 
+151.25 miniQ | 33 | 4-4 | 3-1 | Lions take leg 3. | 
+152.25 closestReveal | 33 | 4-4 | 4-1 | Lions take leg 3. | 
 153.00 decided | 34 | 4-4 | 4-1 |  | 
 154.00 roundIntro | 35 | 6-4 |  |  | 
 155.00 ask | 36 | 6-4 |  |  | 

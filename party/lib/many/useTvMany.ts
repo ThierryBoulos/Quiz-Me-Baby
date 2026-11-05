@@ -13,7 +13,7 @@ import { usePresent } from "../tv/usePresent";
 import { DISH_LAST, T_LOBBY_AWAY } from "../game";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishShown, flip, lineup, miniOf, newNight, next, reveal, startMini, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 
 const SHAPE = 1;
@@ -139,7 +139,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         /* the clock picks up where it was: after a sleep (or a reload, which hides the page first) from the time it
            had left; after taking the game over from another phone's copy (savedAt), less the time since that copy
            (the 4 Nov audit, 1.3: a question ran out while the game changed phones) */
-        if (s.away) { if (s.left && s.screen === "q") { s.deadline = now + s.left * 1000; s.left = 0; } s.away = 0; }
+        if (s.away) { if (s.left && s.screen === "q" && !s.paused) { s.deadline = now + s.left * 1000; s.left = 0; } s.away = 0; }
         else if (raw.savedAt && s.deadline) s.deadline += Math.max(0, now - Number(raw.savedAt));
         st.current = s; void loadBank(code).then((b) => { bank.current = b; }).catch(() => {}); publish();
       }
@@ -182,7 +182,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const keys = lineup(rounds, picked.filter((x) => x !== "quiz"));
         if (!keys.length) { await lobbyWrite({ note: { text: "Pick at least one game.", at: Date.now() } }); return; }
         let b: Bank;
-        try { b = await loadBank(code); } catch { await sb().from("rooms").update({ state: { ...room.state, note: { text: "The TV couldn't load the questions. Check its internet, then tap Start again.", at: Date.now() } } }).eq("code", code); return; }
+        try { b = await loadBank(code); } catch { await sb().from("rooms").update({ state: { ...room.state, note: { text: phoneRef.current ? "The game phone couldn't load the questions. Check its internet, then tap Start again." : "The TV couldn't load the questions. Check its internet, then tap Start again.", at: Date.now() } } }).eq("code", code); return; }
         bank.current = b;
         /* the decks, dealt exactly as the two-team game deals them (fresh questions first) */
         let used = new Set<string>(); try { used = new Set(JSON.parse(localStorage.getItem(USED_KEY) || "[]")); } catch { /* none */ }
@@ -237,6 +237,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);
       else if (t === "m/next") ok = next(s, Date.now(), timers());
       else if (t === "m/flip") ok = flip(s, Number(mv.t));
+      else if (t === "m/pause") ok = pause(s, Date.now());
+      else if (t === "m/swap") { const r = swapQ(s, Date.now(), timers()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code); }
       else if (t === "m/again") {
         try { localStorage.removeItem(saveKey); } catch { /* fine */ }
@@ -296,7 +298,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         backedUp.current = { t: 0, screen: "" };
         publish();
       } else if (document.visibilityState === "visible" && s.away) {
-        if (s.screen === "q" && !s.deadline && s.left) { s.deadline = now + s.left * 1000; s.left = 0; }
+        if (s.screen === "q" && !s.deadline && s.left && !s.paused) { s.deadline = now + s.left * 1000; s.left = 0; }
         s.away = 0;
         publish();
       }

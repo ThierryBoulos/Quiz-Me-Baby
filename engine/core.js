@@ -1015,7 +1015,7 @@
     else {
       s.wins[w]++;
       fx.push({ sound:'correct' });
-      fx.push({ toast:g.teams[w].name + ' takes ' + (s.i < s.base ? 'number ' + (s.i + 1) : 'the tie-breaker') + '.' });
+      fx.push({ toast:g.teams[w].name + ' take ' + (s.i < s.base ? 'number ' + (s.i + 1) : 'the tie-breaker') + '.' });
     }
     fx.push({ go:'dishReveal' });
     return fx;
@@ -1721,7 +1721,7 @@
       m.subs.push({ q, gA:ga, gB:gb, winner:w });
       if(w === 'tie'){ m.wins[0]++; m.wins[1]++; fx.push({ toast:'Tie — a point each.' }); }
       else if(w === 'none'){ fx.push({ toast:'Nobody answered — no point.' }); }
-      else { m.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes leg ' + (m.i + 1) + '.' }); }
+      else { m.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take leg ' + (m.i + 1) + '.' }); }
       m.i++;
       if(m.fun) return funLeg(m, 'miniQ', 'miniSummary', fx);
       if(m.i < m.qs.length){ fx.push({ go:'miniQ' }); return fx; }
@@ -1758,7 +1758,7 @@
       const s = g.saySame, q = s.qs[s.i], w = a.w, fx = [];
       s.subs.push({ q, winner:w });
       if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Tie — a point each.' }); }
-      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes leg ' + (s.i + 1) + '.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take leg ' + (s.i + 1) + '.' }); }
       s.i++;
       if(s.fun) return funLeg(s, 'sayQ', 'saySummary', fx);
       if(s.i < s.qs.length){ fx.push({ go:'sayQ' }); return fx; }
@@ -1792,7 +1792,7 @@
       s.subs.push({ q, winner:w });
       if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Both got it — a point each.' }); }
       else if(w === 'none'){ fx.push({ toast:'Nobody got it.' }); }
-      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes map ' + (s.i + 1) + '.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take map ' + (s.i + 1) + '.' }); }
       s.i++;
       return mapAfterLeg(g, fx);
     },
@@ -1829,7 +1829,7 @@
       s.subs.push({ q, winner:w });
       if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Both got it — a point each.' }); }
       else if(w === 'none'){ fx.push({ toast:'Nobody got it.' }); }
-      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes flag ' + (s.i + 1) + '.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take flag ' + (s.i + 1) + '.' }); }
       s.i++;
       return flagAfterLeg(g, fx);
     },
@@ -1849,7 +1849,7 @@
       s.subs.push({ q, winner:w });
       if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Both got it — a point each.' }); }
       else if(w === 'none'){ fx.push({ toast:'Nobody got it.' }); }
-      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes board ' + (s.i + 1) + '.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take board ' + (s.i + 1) + '.' }); }
       s.i++;
       return airportAfterLeg(g, fx);
     },
@@ -1899,7 +1899,7 @@
       s.subs.push({ q, pins, km, winner:w });
       if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Dead level — a point each.' }); }
       else if(w === 'none'){ fx.push({ toast:'No pins — no point.' }); }
-      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' takes landmark ' + (s.i + 1) + '.' }); }
+      else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take landmark ' + (s.i + 1) + '.' }); }
       s.i++;
       if(s.fun) return funLeg(s, 'pinQ', 'pinSummary', fx);
       if(s.i < s.qs.length){ fx.push({ go:'pinQ' }); return fx; }
@@ -1936,7 +1936,7 @@
       L.out[w] = true; L.buzz = null;
       fx.push({ sound:'wrong' });
       if(L.out[o]) return dishEndLeg(g, 'none', fx);
-      fx.push({ toast:g.teams[w].name + ' is out of this one — ' + g.teams[o].name + ', it is yours to get.', ms:3600 });
+      fx.push({ toast:g.teams[w].name + ' are out of this one — ' + g.teams[o].name + ', it is yours to get.', ms:3600 });
       fx.push({ timer:'resume' }, { render:true });
       return fx;
     },

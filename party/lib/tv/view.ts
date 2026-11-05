@@ -3,7 +3,7 @@
 import { QMB, aboutHost, acceptFor, hostOnly } from "../engine";
 import { getSettings } from "../settings";
 import type { Member } from "../room";
-import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two } from "../game";
+import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two, poss } from "../game";
 import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
 import { callsOf, closestW, currentQ, fireOf, leadOf, matchQ, mrTally, okWin, pinW, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
@@ -35,7 +35,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     deadline: s.deadline, left: s.left, timeUp: s.timeUp, lifeline: s.lifeline, toast: s.toast, winner: g.winner ?? null,
     sent: [!!s.typed[0] || s.guesses[0] != null || !!s.pins?.[0], !!s.typed[1] || s.guesses[1] != null || !!s.pins?.[1]],
     pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
-    autoAt: s.autoAt, paused: s.paused, ...(s.skipHostQ ? { skipHostQ: true } : {}), lead: leadOf(mem), imad: s.imad || undefined, flags: s.flags.slice(-30), tvAway: !!s.tvAway,
+    autoAt: s.autoAt, paused: s.paused, ...(s.skipHostQ ? { skipHostQ: true } : {}), ...(s.paused && s.pausedBy ? { pausedBy: s.pausedBy } : {}), lead: leadOf(mem), imad: s.imad || undefined, flags: s.flags.slice(-30), tvAway: !!s.tvAway,
   };
   if (s.agree) { const A = s.agree; p.agree = { id: A.id, kind: A.kind, team: A.team, until: A.until, ...(A.kind === "score" ? { a: A.a, b: A.b } : { what: A.what }) }; }
   /* with a host: the typed answer rides with the screen (the host's phone shows it at once; the app's opinion follows with the secret) */
@@ -242,7 +242,7 @@ function predictLine(s: TvState, g: G): string {
     if (!ps.length) continue;
     const got = b.score[t], best = Math.min(...ps.map((p) => Math.abs(p.n - got)));
     const w = ps.filter((p) => Math.abs(p.n - got) === best);
-    out.push(best === 0 ? `${w.map((p) => p.name).join(" & ")} called ${g.teams[t].name}'s ${got} spot on`
+    out.push(best === 0 ? `${w.map((p) => p.name).join(" & ")} called ${poss(g.teams[t].name)} ${got} spot on`
       : `${w.map((p) => p.name).join(" & ")} closest for ${g.teams[t].name}: ${w[0].n} (they got ${got})`);
   }
   return out.join(" · ");

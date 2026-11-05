@@ -52,7 +52,7 @@ export function imadNarrate(s: TvState) {
   if (intro && !g.hostOnce?.["mi:" + intro]) imadOnce(s, "mi:" + intro, [...opener(), "mini_" + intro]);
   if (/Summary$|^auctionResult$/.test(sc)) {
     const m = sc === "auctionResult" ? g.auction : sc === "battleSummary" ? g.battle : miniState(g, miniOf(sc));
-    if (m?.award) { const w = m.award[0] > m.award[1] ? 0 : m.award[1] > m.award[0] ? 1 : null; if (w != null) imadOnce(s, "mw:" + sc, "miniwin", { t: w, pts: Math.max(m.award[0], m.award[1]) }); }
+    if (m?.award) { const w = m.award[0] > m.award[1] ? 0 : m.award[1] > m.award[0] ? 1 : null; if (w != null) imadOnce(s, "mw:" + sc, "miniwin", { t: w, pts: Math.max(m.award[0], m.award[1]), ptsWord: ((p: number) => (p === 1 ? "1 point" : p + " points"))(Math.max(m.award[0], m.award[1])) }); }
   }
   if (sc === "roundScore") { const d = Math.abs(g.teams[0].score - g.teams[1].score); if (d >= 5) imadOnce(s, "rs" + g.r, "big"); else if (d === 1) imadOnce(s, "rs" + g.r, "close"); else if (d === 0) imadOnce(s, "rs" + g.r, "level"); }
   if (sc === "sudden") imadOnce(s, "sd" + (g.sdRounds || 1), "sudden");

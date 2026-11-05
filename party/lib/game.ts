@@ -34,7 +34,7 @@ export type Pub = {
   decided?: { key: MiniKey; title: string; winner: 0 | 1; spare: number; pts: number };
   /* the app's calls on this screen (answer card, reveals, Battle review), and one being contested:
      with no host the other captain agrees or not before `until` (then the call stands); with a host, the host decides */
-  calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string }[];
+  calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string; changed?: boolean }[];
   contest?: { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number } | null;
   /* no host: a captain's request (new total scores a–b, or a new question: what = "flag", "landmark"…) the other
      captain agrees to before `until`, or nothing changes */
@@ -87,6 +87,7 @@ export type Pub = {
     half?: { said: string; got: boolean; answer: string }[];   // half: at the handoff, the first captain's every answer
     predict?: string };   // at the summary: the players who called their captain's score (29 Oct)
   now?: number;                  // the TV's own clock when this went out (the phones' clocks follow it; at is an ordering stamp)
+  pausedBy?: string;             // who paused ("The host", or a captain's name)
   skipHostQ?: boolean;           // a Know the Host answer, the host away 20 s: either captain can skip it (no points)
   saidLate?: 0 | 1;              // with a host: the team whose answer came in after time's up
   autoAt?: number | null;         // no host: when this screen moves on by itself
@@ -178,3 +179,7 @@ export const offBy = (guess: number, answer: number) => Number(Math.abs(guess - 
 export const showKm = (km: number) => (km < 1 ? "under 1 km" : `${Math.round(km).toLocaleString("en-GB")} km`);
 /* a number as people read it: 1,500,000 · 80.6 */
 export const showNum = (n: number) => n.toLocaleString("en-GB", { maximumFractionDigits: 6 });
+
+/* a team's name in a sentence (the 4 Nov audit, 3.15): its own, with "s’" after a plural ("the Owls’ captain", not
+   "Owls's"); and team names take plural verbs ("Owls answer first", "The Quizzicals take it") */
+export const poss = (name: string) => (/s$/i.test(name.trim()) ? name + "’" : name + "’s");

@@ -90,7 +90,7 @@ export const okWin = (s: TvState): W => { const [a, b] = s.ok; return a && b ? "
    review, and the sudden-death or tie-breaker question just decided (on the final, the Battle's
    summary, or the next question). A call with nothing typed, or already looked at, can't be
    contested again. */
-export type Call = { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string };   // answer: the right one, where the screen doesn't show it
+export type Call = { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string; changed?: boolean };   // changed: not the app's call any more (the host's, or agreed on a contest)   // answer: the right one, where the screen doesn't show it
 export function callsOf(s: TvState): Call[] {
   const g = s.g, sc = s.screen, out: Call[] = [];
   if (!g) return out;
@@ -103,7 +103,7 @@ export function callsOf(s: TvState): Call[] {
     /* a steal with the first team's own answer gave it back to them: one call, theirs */
     if (res.steal && !res.same) out.push({ id: "steal", team: th, text: said(s.typed[th]), ok: !!res.stolen, done: !!res.correct, note: res.fresh ? "a new question" : "steal" });
   } else if (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal") {
-    for (const t of [0, 1] as const) out.push({ id: "t" + t, team: t, text: said(s.typed[t]), ok: !!s.ok[t] });
+    for (const t of [0, 1] as const) out.push({ id: "t" + t, team: t, text: said(s.typed[t]), ok: !!s.ok[t], ...(s.app[t] != null && s.ok[t] != null && s.app[t] !== s.ok[t] ? { changed: true } : {}) });
   } else if (sc === "dishReveal") {
     (s.legLog || []).forEach((e, i) => out.push({ id: "d" + i, team: e.team, text: e.text, ok: e.ok }));
   } else if (sc === "battleReview" && g.battle) {

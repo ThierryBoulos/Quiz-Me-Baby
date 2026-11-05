@@ -3,7 +3,7 @@
    members_name_check"); nobody at a party should ever read those. */
 const CODES: Record<string, string> = {
   not_signed_in: "We couldn't connect your phone. Refresh the page and try again.",
-  no_room: "Room not found. Check the code on the TV.",
+  no_room: "Room not found. Check the room code.",
   bad_name: "Names can be 1 to 12 characters.",
   name_taken: "Someone here already has that name.",
   face_taken: "Someone already took that face. Pick another.",
@@ -13,10 +13,10 @@ const CODES: Record<string, string> = {
   bad_code: "That code doesn't match, or it ran out (10 minutes). Ask the host for a new one.",
   not_host: "Only the host can do that.",
   no_backup: "The TV hasn't saved the game yet. Give it a moment after the first question.",
-  "not in this room": "You're not in this room any more. Join again with the code on the TV.",
+  "not in this room": "You're not in this room any more. Join again with the room code.",
   "pick a team first": "Pick a team first.",
   "unknown role": "That didn't work. Try again.",
-  game_over: "That game is over. Ask for the new code on the TV.",
+  game_over: "That game is over. Ask for the new room code.",
 };
 const DB: [RegExp, string][] = [
   [/members_name_check|name.*too long|value too long/i, "Names can be 1 to 12 characters."],
