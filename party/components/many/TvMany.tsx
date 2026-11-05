@@ -101,7 +101,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* Guess the Airport, Guess the Map: the board or the map, the clock and the teams beside it */}
         {pub.screen === "q" && g && (g.key === "airport" || g.key === "map") && (
           <div className="flex gap-10 items-center w-full justify-center">
-            <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} reveal={false} maxH={460} still />}</div>
+            <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} maxH={460} still />}</div>
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
               <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{g.key === "airport" ? "Which airport?" : "What do they have in common?"}</div>
               <Clock deadline={pub.deadline} left={pub.left} size={120} />
@@ -156,7 +156,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* a typed answer's reveal (question rounds, airports, maps, Don't Say the Same, the Cocktail or Dish): what was
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
         {pub.screen === "reveal" && g && R && ["quiz", "airport", "map", "say", "dish", "sudden"].includes(g.key) && (<>
-          {g.key === "map" && pub.map ? <MapView id={pub.map.id} reveal maxH={dense ? 150 : 200} legend={false} still />
+          {g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={dense ? 150 : 200} legend={false} still />
             : g.key === "airport" ? <div className={"w-full max-w-[640px]" + (dense ? " board-tight" : "")}><Board air={pub.airport} size="small" /></div>
             : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
             : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}

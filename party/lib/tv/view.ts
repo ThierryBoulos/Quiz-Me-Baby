@@ -207,7 +207,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   }
   if ((s.screen === "mapQ" || s.screen === "mapReveal") && q) {
     const reveal = s.screen === "mapReveal";
-    p.map = { id: q.id, reveal, hint: (g.mapGame.hints || {})[q.id] ? "on" : undefined, title: reveal ? q.question : undefined, notes: reveal ? q.notes : undefined };
+    p.map = { id: q.id, reveal, hint: (g.mapGame.hints || {})[q.id] ? "on" : undefined, title: reveal ? q.question : undefined, notes: reveal ? q.notes : undefined, ...(reveal && q.rev ? { rev: q.rev } : {}) };
     if (reveal) { p.map.ruled = s.ok; p.reveal = { answer: q.question, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) }; }
     secret.answer = q.question; secret.notes = q.answer;
   }

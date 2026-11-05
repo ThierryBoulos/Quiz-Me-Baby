@@ -509,7 +509,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "mapQ": return (
       <div className="flex flex-col gap-3 flex-1">
         <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Map {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        {pub.map && <MapView id={pub.map.id} reveal={false} hint={!!pub.map.hint} maxH={200} legend={false} />}</ToSide>
+        {pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={200} legend={false} />}</ToSide>
         <AnswerCard />
         <Typed t={0} /><Typed t={1} />
         <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause />{!pub.map?.hint && <Small label="Show hint" move={{ type: "map/hint" }} />}<Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change map" move={{ type: "map/swap" }} /></div>
@@ -902,7 +902,7 @@ function OnScreen({ pub, counting, small, side }: { pub: Pub; counting?: boolean
     {pub.screen === "pinReveal" && pub.pin?.reveal && <div className="text-center"><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.pin.reveal.name}</div>
       <div className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pin.reveal.place}</div></div>}
     {(pub.screen === "airportQ" || pub.screen === "airportReveal") && <Board air={pub.airport} size={small ? "small" : "phone"} />}
-    {pub.map && <MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={small ? 170 : 260} title={pub.map.title} />}
+    {pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={small ? 170 : 260} title={pub.map.title} />}
     {pub.map?.reveal && <div className="display text-26 text-center" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>}
     {pub.auction && pub.screen === "auctionLeg" && <p className="text-center text-14 text-[var(--color-ink-2)]"><span className="eyebrow mr-2">Leg {pub.auction.wins[0] + pub.auction.wins[1]}</span>{pub.auction.cat}</p>}
     {pub.auction && /^auction(Bid|Run)$/.test(pub.screen) && <div className="text-center"><div className="eyebrow">Category</div><div className="display text-28" style={{ color: "var(--color-gold)" }}>{pub.auction.cat}</div>

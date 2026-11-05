@@ -13,7 +13,9 @@ const KEY = process.env.NEXT_PUBLIC_SUPABASE_KEY || "sb_publishable_eGQwRBjnVd4y
 const FLAG_KEY = process.env.QMB_FLAG_KEY || "qmb-fx-2026-wave2";
 const fx = (code: string) => createHash("sha256").update(FLAG_KEY + ":" + code).digest("hex").slice(0, 16);
 type Row = { type: string; flag?: string; [k: string]: unknown };
-const bank = { ...full, bank: (full.bank as Row[]).map((q) => (q.type === "flag" && q.flag ? { ...q, flag: fx(q.flag) } : q)) };
+/* a map's reveal drawing: its file's name, which the TV puts out only at the reveal (scripts/export-maps.js) */
+const rev = (id: string) => createHash("sha256").update(FLAG_KEY + ":map:" + id).digest("hex").slice(0, 16);
+const bank = { ...full, bank: (full.bank as Row[]).map((q) => (q.type === "flag" && q.flag ? { ...q, flag: fx(q.flag) } : q.type === "map" ? { ...q, rev: rev(String(q.id)) } : q)) };
 
 export const dynamic = "force-dynamic";
 export async function POST(req: Request) {

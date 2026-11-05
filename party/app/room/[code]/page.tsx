@@ -1,4 +1,5 @@
 "use client";
+import { storeTakenSave } from "@/lib/takeSave";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
@@ -207,16 +208,8 @@ export default function PhoneRoom() {
           void refreshRef.current(); return;
         }
         try {
-          if (sv) {
-            const { inboxLast, inboxTags, many: isMany, settings, ...rest } = sv as { inboxLast?: number; inboxTags?: string[]; many?: boolean; settings?: unknown } & Record<string, unknown>;
-            /* the night's settings (its timers, its rules) come with it: this phone plays it as it was set up */
-            if (settings) localStorage.setItem("qmb.party.settings", JSON.stringify(settings));
-            /* when the copy was made, by this phone's clock: the quiet time since is taken off the clocks */
-            if (r.saved_ago != null) rest.savedAt = Date.now() - Math.round(Number(r.saved_ago) * 1000);
-            localStorage.setItem("qmb.tv." + code + (isMany ? ".many" : ".game"), JSON.stringify(rest));
-            if (inboxLast) localStorage.setItem("qmb.tv." + code + ".last", String(inboxLast));
-            if (inboxTags?.length) localStorage.setItem("qmb.tv." + code + ".taps", JSON.stringify(inboxTags));
-          }
+          /* (the night's settings come with it: this phone plays it as it was set up; lib/takeSave.ts) */
+          if (sv) storeTakenSave(code, sv, r.saved_ago);
         } catch { /* in memory only: the room carries the lobby, and a game starts afresh */ }
         setTookOver(true);
         void refreshRef.current();

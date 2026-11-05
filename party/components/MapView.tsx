@@ -5,7 +5,13 @@ import { createPortal } from "react-dom";
 /* A map exactly as Classic draws it — pre-drawn by scripts/export-maps.js
    into public/maps/<id>.json (the drawing for play, the one for the reveal,
    and their legends). Our own files, so the markup is trusted. */
-type MapFile = { q: string; r: string; lq: string; lr: string; topic: string };
+type MapFile = { q: string; r?: string; lq: string; lr?: string; topic: string };
+/* the reveal's drawing: its own file, named by the TV only at the reveal (rev), so the answer doesn't come down with the
+   question (the 4 Nov audit, 4.5) */
+type RevFile = { r: string; lr: string };
+const revCache: Record<string, Promise<RevFile>> = {}, revReady: Record<string, RevFile> = {};
+const loadRev = (rev: string) => (revCache[rev] ||= fetch(`/maps/r/${rev}.json`).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+  .then((m: RevFile) => (revReady[rev] = m)).catch((e) => { delete revCache[rev]; throw e; }));
 const cache: Record<string, Promise<MapFile>> = {};
 /* the ones already here: drawn straight away, with no "Loading" frame in between */
 const ready: Record<string, MapFile> = {};
@@ -18,8 +24,19 @@ export const preloadMap = (id: string) => { void load(id).catch(() => { /* tried
 /* wipe: the TV, where the answer's drawing is laid ready under the question's and, on the reveal, simply
    shows over it (no reloading, no flash in between) */
 /* still: the TV's copy, nothing to tap (no "Enlarge", no button) */
-export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wipe, still }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string; wipe?: boolean; still?: boolean }) {
-  const [m, setM] = useState<MapFile | null>(() => ready[id] || null);
+export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wipe, still, rev }: { id: string; reveal: boolean; hint?: boolean; maxH?: number; legend?: boolean; title?: string; wipe?: boolean; still?: boolean; rev?: string }) {
+  const [m0, setM] = useState<MapFile | null>(() => ready[id] || null);
+  const [rv, setRv] = useState<RevFile | null>(() => (rev && revReady[rev]) || null);
+  useEffect(() => {
+    if (!rev) { setRv(null); return; }
+    if (revReady[rev]) { setRv(revReady[rev]); return; }
+    let on = true, t: ReturnType<typeof setTimeout> | undefined;
+    const go = () => { void loadRev(rev).then((x) => { if (on) setRv(x); }).catch(() => { if (on) t = setTimeout(go, 3000); }); };
+    go();
+    return () => { on = false; clearTimeout(t); };
+  }, [rev]);
+  /* the reveal from its own file when there is one (an old map file still carries it) */
+  const m: (MapFile & RevFile) | null = m0 ? { ...m0, r: rv?.r ?? m0.r ?? m0.q, lr: rv?.lr ?? m0.lr ?? m0.lq } : null;
   const [big, setBig] = useState(false);
   /* not here yet: fetched, and fetched again every few seconds until it comes (29 Oct: one failed download
      left "Loading the map…" up for the whole leg) */

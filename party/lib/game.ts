@@ -78,7 +78,7 @@ export type Pub = {
   toast?: { id: number; text: string } | null;
   /* no host: what a captain sent, the app's verdict, and how long the other captain has to change the call */
   pending?: { team: 0 | 1; text: string; v: boolean; until: number } | null;
-  map?: { id: string; reveal: boolean; hint?: string; title?: string; notes?: string; ruled?: Two<boolean | null> };
+  map?: { id: string; reveal: boolean; hint?: string; title?: string; notes?: string; ruled?: Two<boolean | null>; rev?: string };   // rev: the reveal drawing's file, at the reveal
   auction?: { cat: string; notes?: string; bid: number; by: 0 | 1 | null; turn: 0 | 1; count: number; leg: number; n: number; wins: Two<number>; bids?: Two<number | null>;
     last?: { bid: number; by: 0 | 1; count: number; made: boolean; won: 0 | 1 }; winner?: 0 | 1 | null; award?: Two<number>;
     countedBy?: string };   // who taps +1 while the bidder names them (the host, or with no host the other captain)

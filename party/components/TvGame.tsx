@@ -427,7 +427,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   }
   if ((sc === "mapQ" || sc === "mapReveal") && pub.map) return (
     <div className="flex gap-10 items-center w-full" style={{ fontSize: 22 }}>
-      <div className="flex-1 min-w-0"><MapView id={pub.map.id} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} title={pub.map.title} wipe /></div>
+      <div className="flex-1 min-w-0"><MapView id={pub.map.id} rev={pub.map.rev} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} title={pub.map.title} wipe /></div>
       <div className="w-[340px] flex flex-col items-center gap-4">
         {sc === "mapQ" ? (<>
           <div className="display text-40" style={{ color: "var(--color-gold)" }}>What does this map show?</div>

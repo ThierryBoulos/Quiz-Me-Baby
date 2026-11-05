@@ -101,7 +101,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     <div className="noselect contents" {...noCopy}>
       {g.key === "flag" && <ToSide order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 110 : 150} /></ToSide>}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
-      {g.key === "map" && pub.map && <MapView id={pub.map.id} reveal={false} maxH={small ? 180 : 240} legend={false} />}
+      {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} maxH={small ? 180 : 240} legend={false} />}
       {g.key === "dish" && pub.dish && (<ToSide order={4} className="noselect" {...noCopy}>
         <div className="card !py-2">
           <div className="eyebrow mb-1" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div>
@@ -119,7 +119,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     <div className="noselect" {...noCopy}>
       <AnswerLine question={["quiz", "say", "majority", "sudden"].includes(g.key) ? pub.question : null}
         media={g.key === "flag" ? <FlagImg name={pub.flag} h={96} />
-          : g.key === "map" && pub.map ? <MapView id={pub.map.id} reveal maxH={180} legend={false} />
+          : g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={180} legend={false} />
           : g.key === "pin" && R.at ? <div className="w-full"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
             ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
             fly height={220} label={`Where it is: ${R.place}`} /></div> : null}

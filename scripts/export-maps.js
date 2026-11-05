@@ -7,6 +7,9 @@
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs'), http = require('http');
 const root = path.join(__dirname, '..');
+/* the reveal's drawing goes in a file of its own, kept out of public/ (party/data/maps-r/<id>.json); each build copies
+   it to public/maps/r/ under a name only the server knows until the reveal (party/scripts/hash-flags.mjs, with the
+   flags' key): the answer's drawing no longer comes down with the question (the 4 Nov audit, 4.5) */
 (async () => {
   const srv = http.createServer((req, res) => {
     const f = path.join(root, decodeURIComponent(req.url.split('?')[0]).replace(/^\/$/, '/classic.html'));
@@ -33,6 +36,10 @@ const root = path.join(__dirname, '..');
   fs.rmSync(dir, { recursive:true, force:true });
   fs.mkdirSync(dir, { recursive:true });
   let total = 0;
-  Object.keys(out.maps).forEach(id => { const f = path.join(dir, id + '.json'); fs.writeFileSync(f, JSON.stringify(out.maps[id])); total += fs.statSync(f).size; });
+  const rdir = path.join(root, 'party/data/maps-r');
+  fs.rmSync(rdir, { recursive:true, force:true }); fs.mkdirSync(rdir, { recursive:true });
+  Object.keys(out.maps).forEach(id => { const m = out.maps[id];
+    const f = path.join(dir, id + '.json'); fs.writeFileSync(f, JSON.stringify({ q:m.q, lq:m.lq, topic:m.topic })); total += fs.statSync(f).size;
+    const r = path.join(rdir, id + '.json'); fs.writeFileSync(r, JSON.stringify({ r:m.r, lr:m.lr })); total += fs.statSync(r).size; });
   console.log('maps/:', Object.keys(out.maps).length, 'maps', (total / 1024).toFixed(0) + ' KB in all, from v' + out.version);
 })();

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ensureSession, rpc } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 import { MqPage, MqTop } from "@/components/Marquee";
+import { storeTakenSave } from "@/lib/takeSave";
 
 /* A new laptop takes over as the TV (29 Oct, B9): the room code and the 6-digit code from the host's phone.
    The server makes this device the room's TV and hands back the TV's last save; the TV page picks it up
@@ -15,9 +16,10 @@ export default function TakeOver() {
     setBusy(true); setErr(null);
     try {
       await ensureSession();
-      const r = await rpc<{ ok?: boolean; room?: string; save?: unknown; error?: string }>("qmb_take_tv", { r: room.trim().toUpperCase(), c: code.trim() });
+      const r = await rpc<{ ok?: boolean; room?: string; save?: unknown; error?: string; saved_ago?: number | null }>("qmb_take_tv", { r: room.trim().toUpperCase(), c: code.trim() });
       if (!r?.ok || !r.room) throw new Error(r?.error || "bad_code");
-      try { localStorage.setItem("qmb.tv." + r.room + ".game", JSON.stringify(r.save)); } catch { /* the TV page asks the room instead */ }
+      /* unpacked as a phone taking over does (lib/takeSave.ts): not the whole night's taps again, the night's own settings */
+      try { if (r.save && typeof r.save === "object") storeTakenSave(r.room, r.save as Record<string, unknown>, r.saved_ago); } catch { /* the TV page asks the room instead */ }
       router.push("/tv/" + r.room);
     } catch (e) { setErr(friendly(e)); setBusy(false); }
   };

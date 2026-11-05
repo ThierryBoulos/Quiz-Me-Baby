@@ -18,7 +18,7 @@ export type PubMany = {
   /* Guess the Airport: the board (its name and code only at the reveal); Guess the Map: the map; the Cocktail or
      Dish: the ingredients up so far, and the teams whose one guess was wrong (out of this one) */
   airport?: { title: string; board: string[][]; code?: string; city?: string };
-  map?: { id: string; reveal: boolean; title?: string };
+  map?: { id: string; reveal: boolean; title?: string; rev?: string };
   dish?: { kind: string; ings: string[]; n: number };
   out?: boolean[];
   theme?: string;                                 // a question round: the question's theme
@@ -59,7 +59,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     if (m.key === "flag") pub.flag = q.flag;
     else if (m.key === "pin") pub.pin = { photo: q.photo, credit: q.credit, licence: q.licence };
     else if (m.key === "airport") pub.airport = { title: q.boardTitle, board: q.board, code: rev ? q.code : undefined, city: rev ? q.city : undefined };
-    else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined };
+    else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined, ...(rev && q.rev ? { rev: q.rev } : {}) };
     else if (m.key === "dish") { pub.dish = { kind: dishKind(q), ings: (q.ings || []).slice(0, rev ? undefined : Math.max(1, s.shown)), n: (q.ings || []).length };
       if (rev) pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }
     else pub.question = q.question;
