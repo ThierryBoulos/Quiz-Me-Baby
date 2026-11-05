@@ -42,6 +42,10 @@
          (31 Oct: a team typed "O-" for "O negative" and was marked wrong) */
       .replace(/\b(ab|a|b|o|0)\s*(\+|plus|pos|positive)(?![a-z0-9])/g, (m, t) => (t === '0' ? 'o' : t) + ' positive')
       .replace(/\b(ab|a|b|o|0)\s*(-|−|–|minus|neg|negative)(?![a-z0-9])/g, (m, t) => (t === '0' ? 'o' : t) + ' negative')
+      /* symbols read as their names, not dropped (5 Nov, content review 2.3: "÷" for Ed Sheeran's Divide was
+         marked wrong); a currency sign next to a number stays out of the way ("$5" is still 5) */
+      .replace(/÷/g, ' divide ').replace(/ω/g, ' ohm ').replace(/(?<=\S)\+/g, ' plus ')
+      .replace(/(?<![0-9.,]\s*)([€£$])(?!\s*[0-9])/g, (m, c) => ({ '€': ' euro ', '£': ' pound ', '$': ' dollar ' })[c])
       .replace(/[^a-z0-9]+/g, ' ')
       .trim()
       .replace(/^(the|a|an) (?!(positive|negative)\b)/, '');   // "A negative" is a blood type, not "negative"

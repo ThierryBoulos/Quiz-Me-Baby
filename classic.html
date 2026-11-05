@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.51', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.52', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1487,7 +1487,7 @@ const SEED = [
 ['Geek & Gamer','medium','pokemon','Which Pokemon is number 1 in the National Pokedex?','Bulbasaur','Pikachu is number 25.'],
 ['Geek & Gamer','expert','pokemon','What is the very first Pokémon that Ash attempts to catch using a Poké Ball in the first episode of the anime?','Pidgey','Though he threw the Poké Ball at a Pidgey and hit it, the catch failed'],
 ['Geek & Gamer','medium','pokemon','In English, what is the full name of the protagonist in Pokémon?','Ash Ketchum',''],
-['Geek & Gamer','expert','pokemon','In Japanese, what is the full name of the protagonist in Pokémon?','Satoshi',''],
+['Geek & Gamer','expert','pokemon','In the Japanese original, what is Ash Ketchum\'s name?','Satoshi',''],
 ['Geek & Gamer','hard','developer','Which studio makes the Grand Theft Auto series?','Rockstar Games','Originally DMA Design.'],
 ['Geek & Gamer','hard','developer','Which studio created Fortnite?','Epic',''],
 ['Geek & Gamer','medium','game-name','Sun, Moon, Pearl, and SoulSilver have all been names of games in what franchise?','Pokemon',''],
@@ -1499,7 +1499,7 @@ const SEED = [
 ['Geography','medium','capital-of','What is the capital of Canada?','Ottawa','Not Toronto.'],
 ['Geography','medium','capital-of-2','What is the capital of Brazil?','Brasilia','Not Rio.'],
 ['Geography','medium','capital-of-2','What is the capital of Turkey?','Ankara','Not Istanbul.'],
-['Geography','hard','most-of','Which country has the most islands?','Sweden','More than any other country, and only about a thousand of them are inhabited.'],
+['Geography','hard','most-of','Which country has the most islands?','Sweden','By Sweden\'s own count, more than any other country; only about a thousand of them are inhabited.'],
 ['Geography','expert','','Name one country that is doubly landlocked — landlocked and surrounded only by landlocked countries?','Liechtenstein or Uzbekistan','Either one counts.'],
 ['Geography','medium','','What is the largest island in the world?','Greenland',''],
 ['Geography','medium','borders','Which two countries share the world\'s longest border?','USA and Canada',''],
@@ -1524,7 +1524,7 @@ const SEED = [
 ['History','hard','empire','Which ancient empire was ruled by Cyrus the Great?','The Persian Empire','Also accept "Achaemenid Empire".'],
 ['History','hard','explorer','Which explorer led the first expedition to circumnavigate the globe, though he died en route?','Ferdinand Magellan','Elcano completed the voyage in 1522.'],
 ['History','expert','explorer','Which explorer reached the South Pole first, in 1911?','Roald Amundsen','Beat Scott by about five weeks.'],
-['History','medium','','Which city was destroyed by the eruption of Mount Vesuvius in AD 79?','Pompeii','Herculaneum also counts.'],
+['History','medium','','Which city was destroyed by the eruption of Mount Vesuvius in AD 79?','Pompeii','Herculaneum and Stabiae also count.'],
 ['History','expert','','Which city was the capital of the Inca Empire?','Cusco','In modern-day Peru.'],
 ['History','hard','order','Rank these events from oldest to most recent: Start of World War I, Wright brothers\' first flight, Sinking of the Titanic','Wright brothers\' first flight (1903) → Sinking of the Titanic (1912) → Start of World War I (1914)',''],
 ['History','hard','order','Rank these events from oldest to most recent: Fall of the Berlin Wall, Chernobyl nuclear disaster, End of apartheid in South Africa','Chernobyl disaster (1986) → Fall of the Berlin Wall (1989) → End of apartheid (1994)',''],
@@ -1564,16 +1564,15 @@ const SEED = [
 ['Know the Host','hard','','What was the host\'s first car?','Host knows this one',''],
 /* ---- LEBANON ---- */
 ['Lebanon','easy','lb-city','Which Lebanese coastal city, a UNESCO site, is one of the oldest continuously inhabited cities on Earth?','Byblos','Jbeil in Arabic.'],
-['Lebanon','medium','lb-national','What is the national dish of Lebanon?','Kibbeh',''],
 ['Lebanon','hard','lb-national','What is the national animal of Lebanon?','Striped Hyena',''],
 ['Lebanon','easy','lb-city','Which Lebanese city holds one of the largest Roman temple complexes in the world?','Baalbek','Known in antiquity as Heliopolis.'],
 ['Lebanon','medium','','Which Lebanese city was the ancient Phoenician city famous for purple dye?','Tyre / Sour','Sour in Arabic. UNESCO World Heritage site.'],
 ['Lebanon','medium','lb-history','In which year did Lebanon gain independence from France?','1943','22 November 1943.'],
 ['Lebanon','medium','lb-history','In which years did the Lebanese Civil War run?','1975 to 1990',''],
-['Lebanon','easy','lb-site','Which Lebanese cave system is the most famous tourist site north of Beirut?','Jeita Grotto','Two interconnected limestone caves.'],
-['Lebanon','easy','lb-site','Which UNESCO-listed Lebanese valley contains ancient monasteries and the cedar forest?','The Qadisha Valley','Wadi Qadisha, near Bsharri.'],
-['Lebanon','easy','','Which sport is Lebanon\'s national team historically strongest at?','Basketball','Lebanon reached the FIBA World Cup in 2002, 2006, 2010 and 2023.'],
-['Lebanon','expert','lb-taif','Which year was the Taif Agreement signed?','1989','Signed on 22 October 1989, ending the civil war.'],
+['Lebanon','easy','lb-site','Which limestone cave system near Nahr el Kalb is one of Lebanon\'s top tourist sites?','Jeita Grotto','Two interconnected limestone caves.'],
+['Lebanon','easy','lb-site','Which UNESCO-listed Lebanese valley of rock-cut monasteries is listed together with the Cedars of God forest?','The Qadisha Valley','Wadi Qadisha, near Bsharri.'],
+['Lebanon','easy','','Which sport\'s Lebanese national team has played at four World Cups (2002, 2006, 2010, 2023)?','Basketball','The FIBA Basketball World Cup.'],
+['Lebanon','expert','lb-taif','Which year was the Taif Agreement signed?','1989','Agreed on 22 October 1989; it laid the basis for ending the civil war in 1990.'],
 ['Lebanon','expert','lb-taif','Who was Speaker of Parliament that negotiated the Taif Agreement?','Hussein El-Husseini',''],
 ['Lebanon','expert','','How many UNESCO World Heritage sites does Lebanon have?','6','Anjar, Baalbek, Byblos, Tyre, Qadisha Valley and the Rachid Karami Fair in Tripoli.'],
 ['Lebanon','easy','','Which Lebanese-American writer wrote The Prophet?','Khalil Gibran','Published 1923, born in Bsharri.'],
@@ -1631,7 +1630,7 @@ const SEED = [
 ['Nature','hard','bird','What is the only mammal capable of true flight?','The bat',''],
 ['Nature','expert','animal-group','What is a group of crows called?','A murder',''],
 ['Nature','medium','','How many hearts does an octopus have?','Three','Two pump blood to the gills, one to the body.'],
-['Nature','expert','','What is the most venomous animal in the world by toxin potency?','The box jellyfish','Often cited as the most venomous marine animal.'],
+['Nature','expert','','What is the most venomous marine animal in the world by toxin potency?','The box jellyfish','Its sting can kill a person within minutes.'],
 ['Nature','hard','','Which animal makes the loudest sound?','The sperm whale','Its clicks reach about 230 decibels under water. The blue whale, the usual textbook answer, calls at around 188.'],
 ['Nature','medium','','Which animal kills the most humans per year?','The mosquito','Via malaria, dengue and other diseases.'],
 /* ---- POP CULTURE ---- */
@@ -1740,7 +1739,7 @@ const SEED = [
 /* ---- SCIENCE ---- */
 ['Science','medium','','Who is the only person to have won Nobel Prizes in two different sciences?','Marie Curie','Physics in 1903 and Chemistry in 1911.'],
 ['Science','expert','','Which particle is nicknamed the "God particle"?','The Higgs boson','Confirmed at CERN in 2012.'],
-['Science','expert','','Which planet rotates in the opposite direction to most others in the solar system?','Venus','The Sun rises in the west there.'],
+['Science','expert','','Which planet spins backwards so slowly that its day is longer than its year?','Venus','The Sun rises in the west there.'],
 /* ---- INTERNET & MEMES ---- */
 ['Internet & Memes','medium','','What does "AMA" stand for on Reddit?','Ask Me Anything',''],
 ['Internet & Memes','medium','','Which 19th-century sea shanty went massively viral on TikTok in early 2021?','Wellerman','Popularized by Scottish postman Nathan Evans.'],
@@ -1754,7 +1753,7 @@ const SEED = [
 ['Tech','hard','','Which company\'s famous early motto was "Don\'t be evil"?','Google','Quietly demoted from its code of conduct in 2018.'],
 /* ---- SEXY TIME ---- */
 ['Sexy Time','easy','','What does "MILF" stand for?','Mom I\'d Like to F***',''],
-['Sexy Time','medium','','What is the name of the best-selling male sex toy?','The Fleshlight',''],
+['Sexy Time','medium','','Which male sex toy, shaped like a torch with a soft insert, is the best-known of its kind?','The Fleshlight',''],
 ['Sexy Time','medium','','What does "NSFW" stand for?','Not Safe For Work',''],
 ['Sexy Time','hard','','Who is the most famous Italian male porn star of all time, nicknamed the "Italian Stallion"?','Rocco Siffredi',''],
 ['Sexy Time','medium','','As of 2025, which porn website gets the most visits worldwide?','Pornhub','About 4 billion visits a month in August 2025 (Similarweb, via Statista); XVideos was second, so it counts too.'],
@@ -1772,7 +1771,7 @@ const SEED = [
 ['Internet & Memes','medium','','Which animal was Harambe, the 2016 meme legend?','A gorilla','Shot at Cincinnati Zoo after a child fell into his enclosure.'],
 ['Internet & Memes','hard','','What is the name of the cartoon frog that became one of the internet\'s most famous memes?','Pepe','Pepe the Frog, created by Matt Furie.'],
 ['Internet & Memes','hard','','What was the name of the ship that blocked the Suez Canal in 2021 and memed worldwide?','Ever Given','Stuck for six days; ~12% of global trade held up.'],
-['Internet & Memes','easy','','Which 2020 lockdown game about finding the impostor became a meme goldmine?','Among Us','"Sus" entered the dictionary because of it.'],
+['Internet & Memes','easy','','Which 2018 game about finding the impostor became a lockdown hit in 2020?','Among Us','"Sus" entered the dictionary because of it.'],
 /* ---- TECH ---- */
 ['Tech','medium','','Which country is Nokia from?','Finland','Originally a paper mill, founded 1865.'],
 /* ---- HISTORY ---- */
@@ -1785,7 +1784,7 @@ const SEED = [
 ['Geography','hard','second-largest','After London, what is the largest city in the UK by population?','Birmingham','Around 1.1 million people in the city proper.'],
 ['Geography','hard','second-largest','After Berlin, what is the largest city in Germany by population?','Hamburg','Roughly 1.9 million, and Germany\'s largest port.'],
 ['Geography','medium','borders','Which two countries are tied for sharing land borders with the most neighbouring countries?','China and Russia','Fourteen each.'],
-['Geography','medium','most-of','Which country has the most active volcanoes?','Indonesia','Roughly 130, sitting on the Ring of Fire.'],
+['Geography','medium','most-of','Which country has the most volcanoes that have erupted in recorded history?','Indonesia','About 130 active volcanoes on the Ring of Fire.'],
 ['Geography','hard','','Excluding Antarctic territory, what is the largest British Overseas Territory?','The Falkland Islands','About 12,000 square kilometres.'],
 ['Geography','hard','country-renames','Which country was known as Swaziland until 2018?','Eswatini','Renamed by King Mswati III on the 50th anniversary of independence.'],
 ['Geography','hard','country-renames','Which country was known as Rhodesia until 1979?','Zimbabwe',''],
@@ -1793,7 +1792,7 @@ const SEED = [
 ['Geography','medium','country-renames','Which country was known as Ceylon until 1972?','Sri Lanka',''],
 /* ---- LEBANON ---- */
 ['Lebanon','expert','','In what year was the Sykes-Picot Agreement signed?','1916','The secret Anglo-French deal carving up Ottoman territory.'],
-['Lebanon','hard','','How many presidents have taken office in Lebanon since independence?','13','Joseph Aoun, elected in January 2025, is the 13th to take office. Bachir Gemayel was elected in 1982 and assassinated before his inauguration: count him and it is 14. Presidents under the French Mandate are not counted.'],
+['Lebanon','hard','','How many presidents have taken office in Lebanon since independence?','13','Joseph Aoun, elected in January 2025, is the 13th to take office. Bachir Gemayel was elected in 1982 but killed before he was sworn in, so he doesn\'t count. Presidents under the French Mandate are not counted.'],
 ['Lebanon','hard','','What is the name of Ziad Doueiri\'s 1998 civil war film?','West Beirut','His coming-of-age film set in 1975 Beirut.'],
 /* ---- HISTORY ---- */
 ['History','hard','','How did Mahatma Gandhi die?','He was shot','Shot in New Delhi in 1948.'],
@@ -1810,7 +1809,7 @@ const SEED = [
 ['Tech','expert','what-year','In what year did BlackBerry shut down service for its legacy devices?','2022','Classic BlackBerry phones stopped working in January 2022.'],
 /* ---- MOVIES ---- */
 ['Movies','expert','','After M*A*S*H and Cheers, which sitcom had the most-watched series finale?','Seinfeld','Around 76 million viewers in 1998.'],
-['Movies','medium','','Which scripted series has won the most Emmy Awards?','Game of Thrones','59 wins across its run.'],
+['Movies','medium','','Which drama series has won the most Emmy Awards?','Game of Thrones','59 wins across its run.'],
 ['Movies','medium','','What is the name of the town where The Simpsons live?','Springfield','Deliberately never assigned to a state.'],
 /* ---- FRIENDS ---- */
 /* ---- SPORTS ---- */
@@ -1835,7 +1834,7 @@ const SEED = [
 ['Sports','hard','','Name three of the four sports that made their Olympic debut at Tokyo 2020','Skateboarding, surfing, sport climbing, karate','Any three count. Baseball and softball also returned but were not new.'],
 /* ---- MOVIES ---- */
 ['Movies','easy','','Who plays Iron Man in the Marvel movies?','Robert Downey Jr.',''],
-['Movies','easy','','Which film\'s famous line is "I\'ll be back"?','The Terminator',''],
+['Movies','easy','','Which 1984 film first used the line "I\'ll be back"?','The Terminator',''],
 ['Movies','easy','','Who plays Rose in Titanic?','Kate Winslet',''],
 ['Movies','easy','','What is the name of the ring-obsessed creature in The Lord of the Rings?','Gollum','"My precious."'],
 /* ---- MUSIC ---- */
@@ -2103,7 +2102,7 @@ const SEED = [
 ['Music','easy','who-sang','Who sang \'...Baby One More Time\' in 1998?','Britney Spears','Her debut single. The school-uniform video is just as famous.'],
 ['Music','easy','who-sang','Who sang \'I Kissed a Girl\' in 2008?','Katy Perry','Her breakthrough hit: seven weeks at number one in the US.'],
 ['Music','easy','who-sang','Who sang \'Baby\' in 2010, with a rap from Ludacris?','Justin Bieber','He was 15. Its video was YouTube\'s most-disliked for over seven years.'],
-['Music','medium','album-title','Which maths symbol is the title of Ed Sheeran\'s album with \'Shape of You\' and \'Perfect\' on it?','÷ (Divide)','It came after + (Plus) and × (Multiply).'],
+['Music','medium','album-title','Which maths symbol (give its name) is the title of Ed Sheeran\'s album with \'Shape of You\' and \'Perfect\' on it?','÷ (Divide)','It came after + (Plus) and × (Multiply).'],
 ['Music','medium','euro-pop-star','Which Belgian singer had a 2013 hit with \'Papaoutai\'?','Stromae','\'Papa, où t\'es ?\' means \'Dad, where are you?\'. His name is \'maestro\' in verlan.'],
 ['Music','medium','euro-pop-star','Which Spanish singer had a 2014 hit with \'Bailando\'?','Enrique Iglesias','Julio Iglesias\'s son. It spent 41 weeks at number one on Billboard\'s Hot Latin Songs chart, a record at the time.'],
 ['Music','medium','rank-songs','Rank these from oldest to newest: Wonderwall, Billie Jean, Smells Like Teen Spirit','Billie Jean → Smells Like Teen Spirit → Wonderwall','1983, 1991 and 1995.'],
@@ -2551,7 +2550,7 @@ const SEED = [
 ['Sexy Time','medium','','What is the position called where the woman is on top, facing away from her partner?','Reverse cowgirl','Cowgirl, turned around.'],
 ['Sexy Time','hard','','In which position does one partner stand and hold the other\'s legs up, like a gardening cart?','The wheelbarrow','Mostly a test of arm strength.'],
 ['Sexy Time','expert','','Which position has both partners sitting face to face, legs wrapped around each other, named after a yoga pose?','The lotus','Slow and close; also called yab-yum in Tibetan art.'],
-['Sexy Time','easy','','What is the name of the toy designed for anal play, flared at the base so it can\'t slip all the way in?','A butt plug','The flared base is the safety feature.'],
+['Sexy Time','easy','','What is the name of the toy designed for the back door, flared at the base so it can\'t slip all the way in?','A butt plug','The flared base is the safety feature.'],
 ['Sexy Time','medium','','Which toy, worn at the base of the penis, keeps an erection firmer for longer?','A cock ring','Many vibrate, for both partners.'],
 ['Sexy Time','hard','','Which small weighted balls are worn inside the vagina, said to strengthen the pelvic floor?','Ben Wa balls','Also sold as Kegel balls or geisha balls.'],
 ['Sexy Time','expert','','Which German brand, launched in 2014, made its name with a toy that uses pulses of air on the clitoris instead of vibration?','Womanizer','It started the "air pulse" or suction-toy craze.'],
@@ -2658,7 +2657,7 @@ const SEED_CLOSEST = [
 ['Food & Drink','medium','In millions, how many baguettes are consumed in France every year?',10000,'10,000 million — 10 billion, roughly 320 every second.'],
 ['Food & Drink','medium','How many tonnes of bananas were consumed in the UAE in 2024?',192000,'About 17 kg per person across 11.3 million people.'],
 /* ---- MUSIC ---- */
-['Music','medium','How many times is the word "hips" sung in My Humps by The Black Eyed Peas?',35,''],
+['Music','medium','How many times is the word "hump" sung in My Humps by The Black Eyed Peas?',37,''],
 ['Music','medium','How many times is the word "boom" sung in Boom Boom Pow by The Black Eyed Peas?',109,''],
 ['Music','medium','How many times is the word "human" sung in Human by The Killers?',17,''],
 /* ---- PICKED 23 OCT 2026 ---- */
@@ -2686,7 +2685,7 @@ const SEED_CLOSEST = [
    the bank by Type instead.
    -------------------------------------------------------------------------- */
 const SEED_AUCTION = [
-  ['How many countries can you name?','195 UN member states. Say the country, not the capital.'],
+  ['How many countries can you name?','193 UN members (195 with the Vatican and Palestine). Say the country, not the capital.'],
   ['How many capital cities can you name?','The city alone counts — no need to name its country.'],
   ['How many car brands can you name?','Marques only. Toyota counts, Corolla does not.'],
   ['How many football clubs can you name?','Any country, any division, men’s or women’s.'],
@@ -2999,12 +2998,12 @@ const SEED_MAPS = [
     level:'medium',
     title:'How many time zones every country spans',
     answer:'Time zones — how many each country spans, overseas territories included (shaded with their country)',
-    notes:'France has the most: 12, thanks to its overseas territories from Polynesia to the Indian Ocean (13 counting its Antarctic claim). Then Russia and the USA 11, Australia and the UK 9, Canada and New Zealand 5, Brazil, Denmark (with Greenland) and Mexico 4. China, nearly as wide as the USA, uses just one. Source: Wikipedia, List of time zones by country.',
+    notes:'France has the most: 12, thanks to its overseas territories from Polynesia to the Indian Ocean (13 counting its Antarctic claim). Then Russia and the USA 11, Australia and the UK 9, Canada 6, New Zealand and Denmark (with the Faroes and Greenland, which split into three zones in 2023) 5, Brazil and Mexico 4. China, nearly as wide as the USA, uses just one. Source: Wikipedia, List of time zones by country.',
     /* every country is shaded; overseas territories take their country's
        count, since that is where its extra zones come from */
     vals:{ ATF:12, BLM:12, FRA:12, MAF:12, NCL:12, PYF:12, SPM:12, WLF:12, ASM:11, GUM:11, MNP:11, PRI:11, RUS:11, UMI:11, USA:11, VIR:11,
       AIA:9, AUS:9, BMU:9, CYM:9, FLK:9, GBR:9, GGY:9, GIB:9, HMD:9, IMN:9, IOT:9, IOT2:9, JEY:9, MSR:9, NFK:9, PCN:9,
-      SGS:9, SHN:9, TCA:9, VGB:9, CAN:5, COK:5, NIU:5, NZL:5, BRA:4, DNK:4, FRO:4, GRL:4, MEX:4, CHL:3, IDN:3, KIR:3,
+      SGS:9, SHN:9, TCA:9, VGB:9, CAN:6, COK:5, NIU:5, NZL:5, DNK:5, FRO:5, GRL:5, BRA:4, MEX:4, CHL:3, IDN:3, KIR:3,
       ABW:2, COD:2, CUW:2, ECU:2, ESP:2, FSM:2, MNG:2, NLD:2, PNG:2, PRT:2, SXM:2, ZAF:2, AFG:1, AGO:1, ALB:1, AND:1,
       ARE:1, ARG:1, ARM:1, ATG:1, AUT:1, AZE:1, BDI:1, BEL:1, BEN:1, BFA:1, BGD:1, BGR:1, BHR:1, BHS:1, BIH:1, BLR:1,
       BLZ:1, BOL:1, BRB:1, BRN:1, BTN:1, BWA:1, CAF:1, CHE:1, CHN:1, CIV:1, CMR:1, COG:1, COL:1, COM:1, CPV:1, CRI:1,
@@ -3019,11 +3018,11 @@ const SEED_MAPS = [
       UZB:1, VAT:1, VCT:1, VEN:1, VNM:1, VUT:1, WSM:1, YEM:1, ZMB:1, ZWE:1 },
     bands:[
       { min:9, c:MC.gold, hint:'9–12', label:'9–12 time zones' },
-      { min:4, c:'#F07F3C', hint:'4–5',  label:'4–5 time zones' },
+      { min:4, c:'#F07F3C', hint:'4–6',  label:'4–6 time zones' },
       { min:2, c:'#C2416B', hint:'2–3',  label:'2–3 time zones' },
       { min:1, c:'#6E3B8C', hint:'1',    label:'1 time zone' }
     ],
-    labels:{ FRA:'12', RUS:'11', USA:'11', AUS:'9', GBR:'9', CAN:'5', NZL:'5', BRA:'4', DNK:'4', MEX:'4' },
+    labels:{ FRA:'12', RUS:'11', USA:'11', AUS:'9', GBR:'9', CAN:'6', NZL:'5', BRA:'4', DNK:'5', MEX:'4' },
     callout:{ DNK:[-8,0] } },
 
   { key:'medals', view:'world',
@@ -3255,7 +3254,7 @@ const SEED_MAPS = [
     level:'easy',
     title:'Every country where Spanish is an official language',
     answer:'Countries where Spanish is an official language',
-    notes:'20 countries, and Puerto Rico: Spain, Mexico, all of Central America but Belize, Cuba and the Dominican Republic, South America but Brazil, Guyana, Suriname and French Guiana, and Equatorial Guinea, the only one in Africa. Mexico has the most speakers. The USA has no official language, yet over 40 million people speak Spanish at home there. Source: Wikipedia, Hispanophone.',
+    notes:'20 countries, and Puerto Rico: Spain, Mexico, all of Central America but Belize, Cuba and the Dominican Republic, South America but Brazil, Guyana, Suriname and French Guiana, and Equatorial Guinea, the only one in Africa. Mexico has the most speakers. Source: Wikipedia, Hispanophone.',
     cls:[{ c:MC.gold, label:'Spanish is official', codes:'ESP MEX GTM HND SLV NIC CRI PAN CUB DOM PRI COL VEN ECU PER BOL CHL ARG URY PRY GNQ' }] },
 
   { key:'islands', view:'world',
@@ -3743,7 +3742,7 @@ const DISHES = /*DISHES-DATA*/[
   ["quiche-lorraine", "Quiche Lorraine", "d-hard", "https://www.bbcgoodfood.com/recipes/quiche-lorraine", ["Generous grating — Nutmeg","150 ml (5 fl oz) — Milk","284 ml (10 fl oz) carton — Single cream","5 large — Eggs","140 g (5 oz) — Gruyère, finely grated","6 lean rashers — Smoked dry-cure bacon, chopped","1 deep 24 cm (9½ in) — Blind-baked shortcrust pastry case"]],
   ["sweet-and-sour-chicken", "Sweet and sour chicken", "d-hard", "https://www.bbcgoodfood.com/recipes/sweet-sour-chicken", ["4 — Star anise","50 g (1¾ oz) — Tamarind paste","100 ml (3½ fl oz) — Rice wine vinegar or Chinese vinegar","100 g (3½ oz) — Caster sugar","1 — Red pepper, in chunks","140 g (5 oz) + 25 g (1 oz) — Self-raising flour & cornflour, with chilled soda water (batter)","4 — Skinless, boneless chicken breasts, in chunks","425 g (15 oz) can — Pineapple chunks"]],
   ["banoffee-pie", "Banoffee pie", "d-hard", "https://www.bbcgoodfood.com/recipes/banoffee-pie", ["1 tbsp — Golden caster sugar","1 medium — Egg, separated","200 g (7 oz) — Plain flour","100 g (3½ oz) — Butter, chilled","Grated (optional) — Dark chocolate","300 ml (10 fl oz) — Double cream, whipped","394 g (14 oz) — Caramel or dulce de leche","4 — Bananas, sliced"]],
-  ["mimosa", "Mimosa", "c-easy", "https://iba-world.com/iba-cocktail/mimosa/", ["Glass — A flute","Method — Poured gently, stirred gently","75 ml (2½ oz) — Prosecco","Garnish — Orange twist (optional)","75 ml (2½ oz) — Freshly squeezed orange juice"]],
+  ["mimosa", "Mimosa", "c-easy", "https://iba-world.com/iba-cocktail/mimosa/", ["Glass — A flute","Method — Poured gently, stirred gently","75 ml (2½ oz) — Sparkling wine","Garnish — Orange twist (optional)","75 ml (2½ oz) — Freshly squeezed orange juice"]],
   ["mulled-wine", "Mulled wine", "c-easy", "https://www.bbcgoodfood.com/recipes/mulled-wine", ["2 strips — Lemon zest, pared","4 tbsp — Caster sugar","750 ml (25 oz) bottle — Red wine","2 — Star anise","4 — Cloves","1 large (or 2 small) — Cinnamon stick","To serve — Heated without boiling, in mugs or heatproof glasses"]],
   ["kir-royale", "Kir Royale", "c-hard", "https://iba-world.com/iba-cocktail/kir/", ["Garnish — None","Method — Poured into the glass, then topped up","90 ml (3 oz) — Champagne","10 ml (¼ oz) — Crème de cassis"]],
   ["b-52", "B-52", "c-hard", "https://www.diffordsguide.com/cocktails/recipe/133/b-52-shot", ["Glass — A chilled shot glass","Method — Layered, poured carefully one on top of another","15 ml (½ oz) — Coffee liqueur","15 ml (½ oz) — Irish cream liqueur","15 ml (½ oz) — Grand Marnier (or other cognac orange liqueur)"]],
@@ -3842,7 +3841,7 @@ const AIRPORTS = [
   ["LIS", "Lisbon Airport (Humberto Delgado)", "easy", "Lisbon", "Portuguese", "Partidas", [["06:55","Embarque","Porto","TP 1940","14"],["07:20","Última chamada","Funchal","TP 1689","11"],["07:45","","Madrid","TP 1012","18"],["08:10","","Paris-Orly","TP 432","21"],["08:35","Atrasado","Frankfurt","LH 1173","23"],["09:05","","Londres-Heathrow","TP 1350","42"],["10:30","Cancelado","Luanda","TP 289","45"],["11:45","","São Paulo-Guarulhos","TP 81","47"]], ["Lisbon","LIS","Lisboa","Humberto Delgado","Portela"], "Portuguese words (Embarque, Última chamada, Atrasado) and TP, TAP Air Portugal, on almost every flight. Porto and Funchal are on the board, so it is Portugal's other big airport; Luanda and São Paulo are TAP's Lusophone long-haul routes from its hub.", ["https://en.wikipedia.org/wiki/Lisbon_Airport"]],
   ["ATH", "Athens International Airport", "easy", "Athens", "Greek / English", "Αναχωρήσεις / Departures", [["06:40","Επιβίβαση / Boarding","Θεσσαλονίκη Thessaloniki","A3 110","A12"],["07:05","Στην ώρα / On time","Ηράκλειο Heraklion","A3 320","A15"],["07:30","Ακυρώθηκε / Cancelled","Λάρνακα Larnaca","A3 900","A21"],["07:50","Στην ώρα / On time","Ρώμη Rome","A3 650","A18"],["08:15","Καθυστέρηση / Delayed","Λονδίνο-Χίθροου London-Heathrow","A3 600","B5"],["08:40","Στην ώρα / On time","Παρίσι Paris-CDG","A3 610","A9"],["09:10","Στην ώρα / On time","Βηρυτός Beirut","A3 944","B8"],["09:35","Στην ώρα / On time","Ντουμπάι Dubai","EK 104","B12"]], ["Athens","ATH","Athina","Αθήνα","Eleftherios Venizelos","Athens International"], "The Greek alphabet and A3, Aegean Airlines, on seven of the eight flights. Thessaloniki and Heraklion are on the board, so it is not those; Aegean's hub is Athens, the city missing.", ["https://en.wikipedia.org/wiki/Athens_International_Airport"]],
   ["IST", "Istanbul Airport", "easy", "Istanbul", "Turkish", "Kalkış", [["07:00","Biniş","Ankara","TK 2120","A3"],["07:05","Son çağrı","Beyrut","TK 830","F7"],["07:15","Zamanında","İzmir","TK 2310","A8"],["07:40","Zamanında","Antalya","TK 2410","A12"],["08:05","Gecikmeli","Londra-Heathrow","TK 1971","F5"],["08:20","Zamanında","Paris-CDG","TK 1821","D4"],["09:30","İptal","Frankfurt","LH 1301","D9"],["13:55","Zamanında","New York-JFK","TK 1","F11"]], ["Istanbul","IST","Istanbul Airport","İstanbul Havalimanı"], "Turkish words (Zamanında = on time, Gecikmeli = delayed, İptal = cancelled) and TK, Turkish Airlines, on almost every flight. Ankara, İzmir and Antalya are listed, so it is the one big Turkish city missing: Istanbul, TK's hub.", ["https://en.wikipedia.org/wiki/Istanbul_Airport"]],
-  ["AMS", "Amsterdam Airport Schiphol", "easy", "Amsterdam", "Dutch", "Vertrek", [["07:00","Instappen","Londen-Heathrow","KL 1001","D61"],["07:15","Op tijd","Parijs-CDG","KL 1223","B17"],["07:35","Op tijd","Barcelona","KL 1665","C9"],["08:00","Vertraagd","Málaga","HV 5131","H3"],["08:20","Op tijd","Beiroet","ME 224","E18"],["09:45","Geannuleerd","Curaçao","KL 735","F4"],["10:30","Op tijd","Kaapstad","KL 597","F6"],["10:40","Op tijd","New York-JFK","KL 641","E7"]], ["Amsterdam","AMS","Schiphol"], "Dutch words (Vertrek, Op tijd, Vertraagd, Geannuleerd) and KL, KLM, on most flights, plus HV (Transavia's Dutch arm). Curaçao is a Dutch Caribbean island, a classic KLM route from its only hub.", ["https://en.wikipedia.org/wiki/Amsterdam_Airport_Schiphol"]],
+  ["AMS", "Amsterdam Airport Schiphol", "easy", "Amsterdam", "Dutch", "Vertrek", [["07:00","Instappen","Londen-Heathrow","KL 1001","D61"],["07:15","Op tijd","Parijs-CDG","KL 1223","B17"],["07:35","Op tijd","Barcelona","KL 1665","C9"],["08:00","Vertraagd","Málaga","HV 5131","H3"],["08:20","Op tijd","Lissabon","KL 1691","D5"],["09:45","Geannuleerd","Curaçao","KL 735","F4"],["10:30","Op tijd","Kaapstad","KL 597","F6"],["10:40","Op tijd","New York-JFK","KL 641","E7"]], ["Amsterdam","AMS","Schiphol"], "Dutch words (Vertrek, Op tijd, Vertraagd, Geannuleerd) and KL, KLM, on most flights, plus HV (Transavia's Dutch arm). Curaçao is a Dutch Caribbean island, a classic KLM route from its only hub.", ["https://en.wikipedia.org/wiki/Amsterdam_Airport_Schiphol"]],
   ["DXB", "Dubai International Airport", "easy", "Dubai", "Arabic / English", "المغادرة / DEPARTURES", [["07:40","صعود الطائرة / Boarding","بيروت BEIRUT","EK 957","B24"],["08:15","في الموعد / On time","لندن هيثرو LONDON HEATHROW","EK 1","A12"],["08:40","في الموعد / On time","باريس PARIS CDG","EK 73","A7"],["09:05","متأخرة / Delayed","عمّان AMMAN","FZ 143","F6"],["09:30","في الموعد / On time","نيويورك NEW YORK JFK","EK 201","A1"],["09:45","في الموعد / On time","مومباي MUMBAI","EK 500","B6"],["10:05","ملغاة / Cancelled","القاهرة CAIRO","EK 927","B18"],["10:20","في الموعد / On time","سيدني SYDNEY","EK 414","A3"]], ["Dubai","DXB","Dubai International","دبي"], "Arabic and English, and the airline is EK, Emirates, on seven flights (FZ is flydubai). Emirates has a single hub, Dubai, and the destinations span every continent, as a giant hub's would.", ["https://en.wikipedia.org/wiki/Dubai_International_Airport"]],
   ["FRA", "Frankfurt Airport", "medium", "Frankfurt", "German", "Abflug", [["08:00","Pünktlich","Hamburg","LH 2","A14"],["08:05","Boarding","London-Heathrow","LH 900","Z25"],["08:15","Pünktlich","Berlin","LH 172","A20"],["08:25","Pünktlich","Hurghada","DE 4141","B44"],["08:35","Verspätet","Palermo","LH 324","A26"],["08:50","Pünktlich","Laibach","LH 1460","A17"],["09:10","Annulliert","Rom","LH 230","A22"],["09:20","Gate offen","München","LH 98","A12"]], ["Frankfurt","FRA","Frankfurt am Main","Frankfurt Main"], "German words (Abflug, Pünktlich, Verspätet, Annulliert) and German city names (Rom, München, Laibach = Ljubljana), so a German-speaking airport. LH, Lufthansa, has two hubs, Frankfurt and Munich, and München is on the board, so it must be Frankfurt. DE is Condor, also based in Frankfurt.", ["https://en.wikipedia.org/wiki/Frankfurt_Airport"]],
   ["MUC", "Munich Airport", "medium", "Munich", "German", "Abflug", [["07:00","Boarding","Frankfurt","LH 93","G18"],["07:15","Pünktlich","Hamburg","LH 2051","G25"],["07:25","Pünktlich","Berlin","LH 1931","G31"],["07:35","Verspätet","Köln/Bonn","EW 8051","G12"],["07:50","Pünktlich","Paris-CDG","LH 2228","G40"],["08:05","Gate offen","London-Heathrow","LH 2470","H32"],["08:30","Annulliert","Rom","LH 1866","G22"],["11:50","Pünktlich","New York-JFK","LH 410","H45"]], ["Munich","MUC","München","Franz Josef Strauss","Munich Airport"], "German board, Lufthansa everywhere, so one of its two hubs. Frankfurt is on the board, so this is the other one: Munich. Hamburg, Berlin and Köln are listed too, which rules them out.", ["https://en.wikipedia.org/wiki/Munich_Airport"]],
@@ -4026,7 +4025,7 @@ const MAJORITY = [
   ["arago-line", "hard", "A line of 135 small bronze medallions runs through the pavements of Paris. What do they mark?", ["The old Paris meridian", "The Tour de France finish route", "The Seine's great flood of 1910", "Napoleon's funeral route"], 0, "Named after the astronomer François Arago. The Da Vinci Code calls it the Rose Line."],
   ["point-nemo", "hard", "At Point Nemo, the spot in the ocean farthest from any land, the nearest people are often…", ["Astronauts on the Space Station", "Fishermen from Chile", "Sailors in a round-the-world race", "Scientists in Antarctica"], 0, "The station passes about 400 km overhead; the nearest land is over 2,600 km away. Old spacecraft are sent there to crash."],
   ["card-kings", "hard", "On French playing cards, the King of Hearts is meant to be…", ["Charlemagne", "Henry VIII", "Louis XIV", "King Arthur"], 0, "The King of Spades is King David, and the King of Clubs is Alexander the Great."],
-  ["jules-verne-name", "hard", "What is the two-Michelin-star restaurant inside the Eiffel Tower called?", ["Le Jules Verne", "Le Victor Hugo", "Le Gustave", "Le Ciel de Paris"], 0, "On the second floor, 125 m up, with its own lift. Le Ciel de Paris is the one at the top of the Montparnasse Tower."],
+  ["jules-verne-name", "hard", "What is the Michelin-starred restaurant inside the Eiffel Tower called?", ["Le Jules Verne", "Le Victor Hugo", "Le Gustave", "Le Ciel de Paris"], 0, "On the second floor, 125 m up, with its own lift. Le Ciel de Paris is the one at the top of the Montparnasse Tower."],
   ["ticker-race", "medium", "Which company trades on the stock market as RACE?", ["Ferrari", "Formula 1", "Red Bull", "Porsche"], 0, "Ferrari picked it when it listed in New York in 2015. Porsche's ticker in Frankfurt is P911."],
   ["ticker-cmg", "hard", "Which company trades on the stock market as CMG?", ["Chipotle", "CMA CGM", "Chrysler Motor Group", "Comcast"], 0, "Chipotle Mexican Grill. CMA CGM, the shipping giant run by the Lebanese-French Saadé family, isn't listed at all; Comcast is CMCSA."],
   ["caesar-title", "medium", "What was Julius Caesar's title when he was murdered?", ["Emperor", "Dictator", "President", "Lord"], 1, "Dictator for life, since early 44 BC. His adopted heir, Augustus, became Rome's first emperor."],
@@ -4295,7 +4294,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 49;   // bumped when the built-in bank changes
+const SEED_VERSION = 50;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the

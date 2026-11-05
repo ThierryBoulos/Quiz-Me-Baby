@@ -253,3 +253,12 @@ test('rankMatch: the right order however it is written, never the wrong one or a
   assert.ok(Q.rankMatch('myspace youtube twitter', tw));
   assert.ok(!Q.rankMatch('youtube myspace twitter', tw));
 });
+
+test('answers: symbols read as their names, a currency sign by a number stays out of the way (5 Nov)', () => {
+  assert.ok(Q.isMatch('÷', '÷ (Divide)'));
+  assert.ok(Q.isMatch('Divide', '÷ (Divide)'));
+  assert.ok(Q.isMatch('€', 'Euro'));
+  assert.ok(Q.isMatch('Google+', 'Google Plus'));
+  assert.ok(Q.isMatch('AB+', 'AB positive') && Q.isMatch('O-', 'O negative'));
+  assert.ok(Q.isMatch('$5', '5') && Q.isMatch('£ 10', '10') && Q.isMatch('100 €', '100'));
+});

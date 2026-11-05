@@ -16,8 +16,16 @@ let bankP: Promise<Bank> | null = null;
    also takes "USA"). */
 type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
 let accept: Accept = { byId: {}, byAnswer: {} };
-export const acceptFor = (q: { id?: string; answer?: string; accept?: string[] } | null | undefined) =>
-  !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(accept.byAnswer[q.answer || ""] || [])];
+export const acceptFor = (q: { id?: string; type?: string; question?: string; answer?: string; accept?: string[] } | null | undefined) =>
+  !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(givesItAway(q) ? [] : accept.byAnswer[q.answer || ""] || [])];
+/* 5 Nov (content review 1.18): a question that names the answer's other name ("Which country was known as Burma
+   until 1989?") doesn't take that name, nor any other name of the same place ("DRC" for "What was the Democratic
+   Republic of the Congo called?"). Questions only: a flag or a dish is asked by its picture. */
+const givesItAway = (q: { type?: string; question?: string; answer?: string }) => {
+  if (q.type !== "standard" || !q.question) return false;
+  const said = ` ${QMB.tidy(q.question)} `;
+  return (accept.byAnswer[q.answer || ""] || []).some((s) => { const t = QMB.tidy(s); return !!t && said.includes(` ${t} `); });
+};
 /* a ranking's items, right order first, each with the names it goes by (accept.json rankById) */
 export const rankFor = (q: { id?: string } | null | undefined): string[][] | null => (q && accept.rankById?.[q.id || ""]) || null;
 /* Guess the Map: the idea counts, not the wording. Each map has a few key ideas (data/accept.json,
