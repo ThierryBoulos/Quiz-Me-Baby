@@ -59,6 +59,7 @@ export const newState = () => ({
   custom: [] as Q[],                                 // questions of their own, sent by the phone that started
   typedLate: null as 0 | 1 | null,                  // with a host: the team whose answer came in after time's up
   skipHostQ: false,                                  // a Know the Host answer, the host away 20 s: the captains may skip it
+  changedIds: [] as string[],                        // the calls this question that aren't the app's any more (shown as "changed")
   pausedBy: "",                                      // who tapped Pause (the phones say so: the 4 Nov audit, 3.14)
   buzzAt: 0, late: null as 0 | 1 | null,             // Guess the Cocktail or Dish: when the buzz came (10 s to type), and who ran out
   lastAns: null as null | { answer: string; got: boolean | null },   // the Battle: the last question's answer, shown once it's settled

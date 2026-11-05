@@ -14,7 +14,9 @@ export function noteTvTime(tvNowAt?: number) {
   gaps.push(Date.now() - tvNowAt);
   if (gaps.length > 20) gaps.shift();
   const best = Math.min(...gaps);
-  skew = Math.abs(best) > 3000 ? best : 0;
+  /* (three updates first: a phone opening mid-question reads the update already stored, which can be many seconds
+   old, and one old gap looked like a wrong clock: its countdown ran long until the next update. 5 Nov review) */
+  skew = gaps.length >= 3 && Math.abs(best) > 3000 ? best : 0;
 }
 const tvNow = () => Date.now() - skew;
 

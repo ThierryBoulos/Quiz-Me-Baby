@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.53', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.54', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3316,7 +3316,7 @@ const SEED_MAPS = [
       [33.5,41.0],[32.0,38.0],[30.0,36.6],[29.4,34.95],[28.0,34.0],[27.0,34.5],[24.0,33.4],[24.0,32.3],[27.0,30.5],[29.3,30.0],
       [29.0,25.4],[31.4,25.0],[34.5,26.6],[35.8,26.9],[36.5,24.5],[36.2,22.0],[37.0,21.0],[39.5,19.5],[40.5,19.3],[41.5,20.5]
     ]] }] },
-  { key:'asean', view:'world',
+  { key:'asean', view:'asia',
     topic:"Politics",
     level:"hard",
     title:"The members of ASEAN in 2026",
@@ -4346,7 +4346,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 51;   // bumped when the built-in bank changes
+const SEED_VERSION = 52;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
@@ -4820,8 +4820,8 @@ const MAP_SEA = '#0B1030', MAP_LAND = '#2B3152';
 /* the world map stops just below Cape Horn unless a map needs Antarctica */
 const MAP_CROP = { world:450 };
 /* label sizes per base map, in the geometry's own units (1000 = full width) */
-const MAP_FS = { world:12, europe:10.5, northatl:11, namerica:12, us:13 };
-const MAP_VIEW_NAME = { world:'World', europe:'Europe', northatl:'North Atlantic', namerica:'North America', us:'US' };
+const MAP_FS = { world:12, europe:10.5, northatl:11, namerica:12, us:13, asia:11 };
+const MAP_VIEW_NAME = { world:'World', europe:'Europe', northatl:'North Atlantic', namerica:'North America', us:'US', asia:'Asia' };
 /* Countries too small, or too crowded, to hold their own label. The label is
    moved by [dx, dy] to the nearest spot where it covers nothing but sea or its
    own country and no other label, and a hairline leads back to it. Found by
@@ -4833,7 +4833,7 @@ const MAP_CALLOUT = {
            AND:[16,28], LIE:[-11,61], SMR:[-22,38], MCO:[-3,20] },
   us:{ WV:[10,-17], MD:[36,20], VT:[-11,-13], NH:[17,0], MA:[30,36], NJ:[14,0], CT:[20,3] },
   world:{ DEU:[-6,34], GBR:[-1,-8], GRC:[4,7] },
-  northatl:{}, namerica:{}
+  northatl:{}, namerica:{}, asia:{}
 };
 
 const MAP_R = Math.PI / 180;

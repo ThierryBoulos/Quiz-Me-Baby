@@ -717,7 +717,7 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
         style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto" }}>
         {lastQ && <div className="eyebrow text-center col-span-3">The last question</div>}
         {C.map((c, i) => { const dim = { opacity: K && K.id !== c.id ? 0.6 : 1 }, grouped = C.length > 4, head = grouped && (i === 0 || C[i - 1].team !== c.team);
-          const col = c.ok ? "var(--color-ok)" : "var(--color-no)", said = c.text || (c.ok && c.answer) || (say ? "" : "No answer"); return (
+          const col = c.skipped ? "var(--color-ink-2)" : c.ok ? "var(--color-ok)" : "var(--color-no)", said = c.text || (c.ok && c.answer) || (say ? "" : "No answer"); return (
           <Fragment key={c.id}>
             {head && <div className={"col-span-3 font-bold text-13 eyebrow" + (i ? " mt-2" : "")} style={{ color: tc(c.team) }}>{T[c.team].name}</div>}
             {/* the name cut short, the answer whole: this list is the only place a captain sees what was typed (29 Oct) */}
@@ -730,10 +730,10 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
                   "A point each" read as a loss) */}
               {say && c.text && <span className="text-12 text-[var(--color-ink-3)]">{c.ok ? "Dodged it" : pub.reveal?.offList?.[c.team] ? "Not on the list" : "Said the app’s word"}</span>}</span>
             <span className="min-w-0 break-words leading-snug" style={dim}>
-              <span className="font-bold" style={{ color: col }}><span aria-label={say ? (c.ok ? "dodged it:" : "said it:") : c.ok ? "right:" : "wrong:"} className="mr-1">{c.ok ? "\u2713" : "\u2717"}</span>{said}</span>
+              <span className="font-bold" style={{ color: col }}><span aria-label={say ? (c.ok ? "dodged it:" : "said it:") : c.ok ? "right:" : "wrong:"} className="mr-1">{c.skipped ? "–" : c.ok ? "\u2713" : "\u2717"}</span>{said}</span>
               {c.answer && !c.ok && <span className="text-[var(--color-ink-3)]">{said ? " · " : ""}{c.answer}</span>}</span>
             <span className="justify-self-end min-h-[36px] flex items-center" style={dim}>
-              {host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
+              {c.skipped ? null : host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
                 : !c.done && !K && mine != null && (c.team === mine ? !c.ok : c.ok) ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[36px] px-1" disabled={busy}
                   onClick={() => act({ type: "ui/contest", id: c.id })}>Contest</button> : null}</span>
           </Fragment>); })}
@@ -821,7 +821,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     if (headOnly) return <>{top}</>;
     /* a row for each team that answered: the team asked, then the steal */
     /* (the host: Change in each row, which flips the call, as the list under it used to) */
-    const rows = (pub.calls || []).map((c) => row(c.team, c.text || "No answer", c.text ? c.ok : null, <Pts n={by === c.team && c.ok ? Rr.pts : 0} />,
+    const rows = (pub.calls || []).map((c) => row(c.team, c.text || "No answer", c.text && !c.skipped ? c.ok : null, <Pts n={by === c.team && c.ok ? Rr.pts : 0} />,
       host && act ? <span className="flex items-center gap-2">{c.note && <span>{c.note}</span>}{c.changed && <span style={{ color: "var(--color-gold)" }}>host&rsquo;s call</span>}
         <button type="button" className="text-13 font-bold underline underline-offset-4 min-h-[32px]" style={{ color: "var(--color-ink-2)" }} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button></span> : c.note));
     return (<>{top}{rows.length > 0 && <ResultTable rows={rows} head={["Said", "Pts"]} />}

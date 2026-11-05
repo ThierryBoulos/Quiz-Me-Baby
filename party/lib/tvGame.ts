@@ -213,7 +213,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-            app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
+            app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, changedIds: s.changedIds, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
           if (save !== lastSave.current) {
             lastSave.current = save;
             try { localStorage.setItem(saveKey, save); } catch { setBanner("cantSave"); }
@@ -314,7 +314,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         /* no host: a tie (the Cocktail or Dish and the Map end here straight from the engine) or a game decided early takes its default after 10 s */
         else if (s.nohost && PICK_DEFAULT(f.go)) s.autoAt = now + T_PICK * 1000;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
-        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; s.typedLate = null; }
+        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ", "battleTie"].includes(f.go)) { s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; s.typedLate = null; s.changedIds = []; }
         if (f.go === "dishQ") s.legLog = [];
         if (f.go === "sudden" || f.go === "battleTie") {
           const n = (f.go === "sudden" ? s.g.sd?.n : s.g.battle?.tb?.n) || 0;
@@ -468,6 +468,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* a call changed: the score moves with it (or, a RIGHT turned down with no steal played, a steal on a new question) */
   const applyCall = useCallback((id: string, v: boolean) => {
     const s = st.current, g = s.g, sc = s.screen;
+    /* every list marks a call that isn't the app's any more (the host changed it, or a contest was agreed): changed
+       twice, it's the app's again (5 Nov: only four reveals said so) */
+    s.changedIds = (s.changedIds || []).includes(id) ? s.changedIds.filter((x) => x !== id) : [...(s.changedIds || []), id];
     if (sc === "answer" && (id === "first" || id === "steal")) {
       const res = g.rounds[g.r]?.res?.[g.seat];
       if (!res) return;

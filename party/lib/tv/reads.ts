@@ -90,7 +90,7 @@ export const okWin = (s: TvState): W => { const [a, b] = s.ok; return a && b ? "
    review, and the sudden-death or tie-breaker question just decided (on the final, the Battle's
    summary, or the next question). A call with nothing typed, or already looked at, can't be
    contested again. */
-export type Call = { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string; changed?: boolean };   // changed: not the app's call any more (the host's, or agreed on a contest)   // answer: the right one, where the screen doesn't show it
+export type Call = { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string; changed?: boolean; skipped?: boolean };   // skipped: a Know the Host answer the captains skipped (nobody judged it)   // changed: not the app's call any more (the host's, or agreed on a contest)   // answer: the right one, where the screen doesn't show it
 export function callsOf(s: TvState): Call[] {
   const g = s.g, sc = s.screen, out: Call[] = [];
   if (!g) return out;
@@ -99,9 +99,12 @@ export function callsOf(s: TvState): Call[] {
     const rd = g.rounds[g.r], res = rd?.res?.[g.seat];
     if (!res) return out;
     const owner = QMB.seatTeam(g, rd, g.seat, seatOf(g)) as 0 | 1, th = other(owner);
+    /* skipped (a Know the Host answer, the host away): nobody judged it, so it isn't a WRONG and can't be contested */
+    if (res.skipped && !res.steal) { out.push({ id: "first", team: owner, text: said(s.typed[owner]), ok: false, done: true, skipped: true, note: "skipped" }); return out; }
     out.push({ id: "first", team: owner, text: said(s.typed[owner]), ok: !!res.correct, done: !!res.fresh, note: res.fresh ? "the first question" : undefined });
     /* a steal with the first team's own answer gave it back to them: one call, theirs */
-    if (res.steal && !res.same) out.push({ id: "steal", team: th, text: said(s.typed[th]), ok: !!res.stolen, done: !!res.correct, note: res.fresh ? "a new question" : "steal" });
+    if (res.steal && !res.same) out.push(res.skipped ? { id: "steal", team: th, text: said(s.typed[th]), ok: false, done: true, skipped: true, note: "skipped" }
+      : { id: "steal", team: th, text: said(s.typed[th]), ok: !!res.stolen, done: !!res.correct, note: res.fresh ? "a new question" : "steal" });
   } else if (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal") {
     for (const t of [0, 1] as const) out.push({ id: "t" + t, team: t, text: said(s.typed[t]), ok: !!s.ok[t], ...(s.app[t] != null && s.ok[t] != null && s.app[t] !== s.ok[t] ? { changed: true } : {}) });
   } else if (sc === "dishReveal") {
@@ -114,7 +117,7 @@ export function callsOf(s: TvState): Call[] {
     const last = sc === "sudden" || sc === "battleTie";
     s.sdLog.calls.forEach((e, i) => out.push({ id: "s" + i, team: e.team, text: e.text, ok: e.ok, note: last ? "last question" : undefined }));
   }
-  for (const c of out) if (!c.text || (s.contested || []).includes(c.id)) c.done = true;
+  for (const c of out) { if (!c.text || (s.contested || []).includes(c.id)) c.done = true; if ((s.changedIds || []).includes(c.id) && !c.skipped) c.changed = true; }
   return out;
 }
 

@@ -75,10 +75,10 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
           {/* the fun fact goes with the answer */}
           {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2 beat" style={d(0.25)}>{pub.result.notes}</div>}
           {/* what each team said, and the app's call on it (contestable until Next) */}
-          {(pub.calls || []).map((c, i) => <div key={c.id} className="text-24 flex items-baseline gap-3 justify-center beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}{c.note === "steal" ? " (steal)" : c.note ? ` (${c.note})` : ""}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={20} stamp /></div>)}
+          {(pub.calls || []).map((c, i) => <div key={c.id} className="text-24 flex items-baseline gap-3 justify-center beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}{c.note === "steal" ? " (steal)" : c.note ? ` (${c.note})` : ""}:</b> {c.text || "no answer"} {c.skipped ? <span className="text-[var(--color-ink-2)]">— skipped, nobody judged it</span> : <Verdict v={c.ok} size={20} stamp />}{c.changed && <span className="text-18 text-[var(--color-gold)]">{pub.mode === "host" ? "host’s call" : "changed"}</span>}</div>)}
           {[0, 1].map((t) => !(pub.calls || []).some((c) => c.team === t) && silent(pub, t as 0 | 1) ? <div key={t} className="text-24 text-[var(--color-ink-2)] beat" style={d(0.1)}><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {silent(pub, t as 0 | 1)}</div> : null)}
           <div className="display text-44 beat flex items-center gap-4" style={{ ...d(0.35), color: pub.result.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>
-            {pub.result.by == null ? "Nobody scores" : <span data-fly-src={pub.result.by}>{`${T[pub.result.by].name} +${pub.result.pts}`}</span>}
+            {pub.result.by == null ? ((pub.calls || []).some((c) => c.skipped) ? "Skipped · nobody scores" : "Nobody scores") : <span data-fly-src={pub.result.by}>{`${T[pub.result.by].name} +${pub.result.pts}`}</span>}
             {/* a steal: a STOLEN stamp in the stealing team's colour (a dash there read as a minus) */}
             {pub.result.by != null && pub.result.stolen && <span className="tv-stamp stamp-beat" style={{ ...d(0.45), color: tc(pub.result.by) }}>Stolen</span>}
             {/* Double Points: the ×2 stamp */}

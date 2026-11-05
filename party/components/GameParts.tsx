@@ -209,11 +209,12 @@ const TONE: [RegExp, string][] = [
 ];
 const tone = (st: string) => TONE.find(([r]) => r.test(st))?.[1] || "#ffd25a";
 /* flip: the TV, a new board: its rows flip in one after another, like a real departures board */
-export function Board({ air, size, flip }: { air?: Pub["airport"]; size: "tv" | "phone" | "small"; flip?: boolean }) {
+/* (size "reveal": the TV's 3-8 team reveal, under the answer and every team's call: 18 px, the first four flights) */
+export function Board({ air, size, flip }: { air?: Pub["airport"]; size: "tv" | "phone" | "small" | "reveal"; flip?: boolean }) {
   if (!air) return null;
-  const tv = size === "tv", fs = tv ? 21 : size === "small" ? 11 : 13;
+  const tv = size === "tv", fs = tv ? 21 : size === "reveal" ? 18 : size === "small" ? 11 : 13;
   return (
-    <div className="board" style={{ fontSize: fs }} role="table" aria-label="Departures board">
+    <div className={"board" + (size === "reveal" ? " reveal" : "")} style={{ fontSize: fs }} role="table" aria-label="Departures board">
       <div className="board-title" style={{ fontSize: fs * 1.25 }}>
         <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg>
         <bdi>{air.title}</bdi>

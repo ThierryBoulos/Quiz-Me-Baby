@@ -34,7 +34,7 @@ export type Pub = {
   decided?: { key: MiniKey; title: string; winner: 0 | 1; spare: number; pts: number };
   /* the app's calls on this screen (answer card, reveals, Battle review), and one being contested:
      with no host the other captain agrees or not before `until` (then the call stands); with a host, the host decides */
-  calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string; changed?: boolean }[];
+  calls?: { id: string; team: 0 | 1; text: string; ok: boolean; done?: boolean; note?: string; answer?: string; changed?: boolean; skipped?: boolean }[];
   contest?: { id: string; by: 0 | 1; team: 0 | 1; text: string; ok: boolean; until: number } | null;
   /* no host: a captain's request (new total scores a–b, or a new question: what = "flag", "landmark"…) the other
      captain agrees to before `until`, or nothing changes */

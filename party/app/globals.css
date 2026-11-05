@@ -775,7 +775,7 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 .hud.tv.many .hud-mini { gap: 6px 10px; } .hud.tv.many .hud-mini .nm { margin-left: 4px; }
 /* during a game, its own points line, a size up, the teams spaced out a little (the owner: not across the whole row) */
 .hud.tv.many .hud-mini.game-line { justify-content: center; column-gap: 56px; margin-top: 10px; }
-.hud.tv.many.mid .hud-mini.game-line { column-gap: 40px; } .hud.tv.many.stack .hud-mini.game-line { column-gap: 34px; }
+.hud.tv.many.mid .hud-mini.game-line { column-gap: 26px; flex-wrap: nowrap; } .hud.tv.many.mid .hud-mini.game-line .nm { max-width: 150px; }   /* (five teams on one line: two lines pushed a reveal into the scores) */ .hud.tv.many.stack .hud-mini.game-line { column-gap: 34px; }
 .hud.tv.many .hud-mini.game-line b { font-size: var(--text-28); }
 .hud.tv.many .hud-mini.game-line .nm { font-size: var(--text-15); max-width: 220px; }
 .hud.tv.many.stack .hud-mini.game-line .dot { width: 18px; height: 18px; }
@@ -1325,6 +1325,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
    and the status is a clue), the destinations the rest */
 .board .board-row:not(.tv) { grid-template-columns: 3.1em minmax(0, 1fr) 4.4em minmax(0, 1fr); gap: .45em; padding: .26em .2em; }
 .board .board-row:not(.tv) .b-status { white-space: normal; overflow: visible; line-height: 1.1; font-size: .82em; }
+.board.reveal .board-row .b-status { font-size: 1em; white-space: nowrap; }
+.board-tight .board.reveal .board-row:nth-child(n+5) { display: none; }   /* (the reveal: three flights are enough to recall the board) */
 /* up to four teams, "This game" stays on one line (Team D was left alone on a second one: the 4 Nov audit, 3.6) */
 .hud.tv.many:not(.mid):not(.stack) .hud-mini.game-line { flex-wrap: nowrap; column-gap: 32px; }
 .hud.tv.many:not(.mid):not(.stack) .hud-mini.game-line .nm { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1348,6 +1350,10 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .hud-tiles { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
 .hud-tiles > span { font-size: var(--text-14); font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--color-ink-3); }
 .hud.many .hud-tiles { margin: 0; }
+/* the TV: nothing under 18 px across the room (the label and the tiles were 14 and 16) */
+.hud.tv .hud-tiles > span { font-size: var(--text-18); }
+.hud.tv .mq-tiles.mini { grid-template-columns: repeat(4, 28px); }
+.hud.tv .mq-tiles.mini .mq-tile { font-size: var(--text-18); }
 .hud.tv.many > .hud-top { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; margin: 0 0 8px; }
 .hud.tv.many > .hud-top > .pips { margin: 0; }
 .hud.tv.many > .hud-top + .hud-mid { margin-top: 0; }

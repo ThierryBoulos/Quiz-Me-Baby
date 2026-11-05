@@ -51,7 +51,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></div>
         </div>)}
 
-      <div className={"flex-1 flex flex-col items-center justify-center text-center enter gap-5 min-h-0" + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
+      <div className={"flex-1 flex flex-col items-center justify-center text-center enter min-h-0" + (pub.screen === "reveal" && (g?.key === "airport" || g?.key === "map") ? " gap-3" : " gap-5") + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}
         {pub.screen === "intro" && g && (g.key === "majority" ? (
           <div className="flex gap-10 items-start w-full">
@@ -73,7 +73,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
                   <div className="eyebrow text-18 mb-1">On each team&rsquo;s list</div>
                   <div className={"grid gap-x-6 " + (k > 4 ? "grid-cols-2" : "grid-cols-1")}>
                     {T.map((t, i) => (
-                      <div key={i} role="listitem" className="flex items-center gap-2 min-w-0 py-0.5" style={{ fontSize: k > 4 ? 16 : 18 }}>
+                      <div key={i} role="listitem" className="flex items-center gap-2 min-w-0 py-0.5" style={{ fontSize: 18 }}>
                         <Dot t={i} color={t.color} size={k > 4 ? 14 : 16} />
                         <span className="font-bold truncate flex-1" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
                         <span className="tabular-nums font-bold shrink-0 text-[var(--color-ink-2)]">{seats[i] ?? 0}</span>
@@ -157,11 +157,11 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
         {pub.screen === "reveal" && g && R && ["quiz", "airport", "map", "say", "dish", "sudden"].includes(g.key) && (<>
           {g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={dense ? 130 : 200} legend={false} still />
-            : g.key === "airport" ? <div className={"w-full max-w-[640px]" + (dense ? " board-tight" : "")}><Board air={pub.airport} size="small" /></div>
+            : g.key === "airport" ? <div className="w-full max-w-[860px] board-tight"><Board air={pub.airport} size="reveal" /></div>
             : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
             : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
           {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
-          <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
+          <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
           {/* (the airport's explanation stays on the phones with eight teams: the board and eight answers fill the TV) */}
           {R.notes && g.key !== "say" && !(g.key === "airport" && dense) && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 leading-snug clamp2">{R.notes}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
@@ -180,7 +180,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
               ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
               fly height={430} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
             <div className="w-[400px] shrink-0 flex flex-col items-center gap-3">
-              <div className="eyebrow text-16">It&rsquo;s here</div>
+              <div className="eyebrow text-18">It&rsquo;s here</div>
               <div className="ans-board display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.answer}</div>
               <div className="text-22 text-[var(--color-ink-2)] -mt-1">{R.place}</div>
               <div className="w-full mt-2"><RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="tv" pts={R.pts} /></div>
@@ -195,7 +195,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             return (
               <div key={o} className={"mr-tv-opt rev " + (ok ? "ok mr-win" : "dim mr-out")} style={d(ok ? 0.75 : 0.12 + n * 0.2)}>
                 <span className="flex-1 min-w-0"><bdi>{o}</bdi></span>
-                <span className="shrink-0 text-26 mr-counts flex items-baseline gap-2" aria-label={`${R.counts![i] ?? 0} picked it`}><b>{R.counts![i] ?? 0}</b><span className="text-16 text-[var(--color-ink-2)]">{(R.counts![i] ?? 0) === 1 ? "pick" : "picks"}</span></span>
+                <span className="shrink-0 text-26 mr-counts flex items-baseline gap-2" aria-label={`${R.counts![i] ?? 0} picked it`}><b>{R.counts![i] ?? 0}</b><span className="text-18 text-[var(--color-ink-2)]">{(R.counts![i] ?? 0) === 1 ? "pick" : "picks"}</span></span>
               </div>); })}</div>
           {R.notes && <div className="max-w-[1300px] text-26 leading-snug -mt-1" style={{ color: "var(--color-gold)" }}>{R.notes}</div>}
           {/* this question, team by team; the game so far is in the bar at the top */}
@@ -251,7 +251,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
                   {pub.final!.awards.map((a) => (
                     <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ borderColor: a.team != null ? T[a.team].color : undefined, background: "linear-gradient(180deg, #151a3c, #0c1028)" }}>
                       <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
-                      <div className="text-15 font-bold leading-snug" style={{ color: a.team != null ? T[a.team].color : undefined }}><bdi>{a.who}</bdi></div>
+                      <div className="text-20 font-bold leading-snug" style={{ color: a.team != null ? T[a.team].color : undefined }}><bdi>{a.who}</bdi></div>
                       {a.note && <div className="text-18 text-[var(--color-ink-2)] italic line-clamp-2">{a.note}</div>}
                     </div>))}
                 </div>)}

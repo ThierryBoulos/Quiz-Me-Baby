@@ -212,7 +212,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             </div>
           </div>); })()}
         {/* the same controls as with two teams: Pause, Change question, Reveal now (the 4 Nov audit, 3.11) */}
-        <div className="flex flex-wrap justify-center gap-2 mt-auto">
+        {/* (docked: sideways, the question pushed these below the fold; 5 Nov review) */}
+        <div className="flex flex-wrap justify-center gap-2 mt-auto dock-group py-2" style={{ background: "var(--color-bg)" }}>
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
           {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change question</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>

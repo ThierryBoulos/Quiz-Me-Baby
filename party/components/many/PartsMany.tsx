@@ -477,7 +477,7 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
             {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
             {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
             {/* why that many: the order the right answers came in (the 4 Nov audit, 3.8: +4, +3, +2 said nothing) */}
-            {ok && (R.pts?.[i] ?? 0) > 0 && R.places?.[i] && pub.game?.key !== "say" && <span className="shrink-0" style={{ color: "var(--color-ink-3)", fontSize: tv ? (dense ? 16 : 20) : 12 }}>{place(R.places[i]!)} right</span>}
+            {ok && (R.pts?.[i] ?? 0) > 0 && R.places?.[i] && pub.game?.key !== "say" && <span className="shrink-0" style={{ color: "var(--color-ink-3)", fontSize: tv ? (dense ? 18 : 20) : 12 }}>{place(R.places[i]!)} right</span>}
           </div>
           {(x || ok == null) && <div className={"font-bold max-w-full text-center leading-tight " + (tv && dense ? "truncate" : "clamp2")} style={{ fontSize: tv ? (dense ? 18 : 24) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}
         </div>); })}

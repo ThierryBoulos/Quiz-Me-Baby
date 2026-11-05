@@ -70,6 +70,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const lastSecret = useRef("");
   const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publishRef = useRef<() => void>(() => {});
+  const retryT = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publish = useCallback(() => {
     if (soon.current) { clearTimeout(soon.current); soon.current = null; }
     const s = st.current; if (!s) return;
@@ -104,7 +105,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       }
     };
     chain.current = chain.current.then(() => {
-      const done = job().catch((e) => { console.error("publish (many)", e); setTimeout(() => publishRef.current(), 2000); });
+      /* a failed write tries again in 2 s: one try waiting at a time, however many writes failed meanwhile (with no
+         connection, every tap used to add a retry of its own; 5 Nov review) */
+      const done = job().catch((e) => { console.error("publish (many)", e); if (!retryT.current) retryT.current = setTimeout(() => { retryT.current = null; publishRef.current(); }, 2000); });
       return Promise.race([done, new Promise<void>((r) => setTimeout(r, 2000))]);
     });
   }, [code, saveKey]);
