@@ -79,6 +79,11 @@ function shiftClocks(s: TvState, d: number) {
   if (s.buzzAt) s.buzzAt += d;
   if (s.agree) s.agree = { ...s.agree, until: s.agree.until + d };
   if (s.deadline) s.deadline += d;
+  /* (and the three that were missed: a contest's time to answer, a Majority Rules take-off request, the Auction
+     turn's absent-captain pass: the 4 Nov audit, 4.2) */
+  if (s.contest?.until) s.contest = { ...s.contest, until: s.contest.until + d };
+  if (s.mrAsk?.until) s.mrAsk = { ...s.mrAsk, until: s.mrAsk.until + d };
+  if (s.bidTurn?.at) s.bidTurn = { ...s.bidTurn, at: s.bidTurn.at + d };
 }
 
 export function useTvGame(code: string, isTv: boolean, room: Room | null, members: Member[], phone = false) {
@@ -140,7 +145,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      one, if it lands at all, is turned down (20 Oct: one update held 15 s kept five ingredients
      of a recipe back, and they all appeared at once). */
   const chain = useRef<{ p: Promise<void>; queued: boolean }>({ p: Promise.resolve(), queued: false });
-  const lastSecret = useRef(""), lastSave = useRef(""), offline = useRef(false), lastAt = useRef(0), resent = useRef(0);
+  const lastSecret = useRef(""), lastSave = useRef(""), offline = useRef(false), lastAt = useRef(0), resent = useRef(0), pendingSince = useRef(0);
   const stamp = () => (lastAt.current = Math.max(Date.now(), lastAt.current + 1));
   /* a line across the TV when something's wrong that the room should know about */
   const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave" | "noBank">(null);
@@ -229,6 +234,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the answer and the screen go out together (the host's phone shows "Getting the answer…" until
          an answer for this very step lands), and the answer only when it changed: a +1, a pause,
          a ruling leave it as it was — one write, not two */
+      if (!pendingSince.current) pendingSince.current = Date.now();   // (the oldest write not landed yet)
       const sec = JSON.stringify(v[1]), withSecret = sec !== lastSecret.current;
       const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0], pubAt: at, ...(errs.current.length ? { errs: errs.current } : {}) } }).eq("code", code)
         .or(`state->>pubAt.is.null,state->>pubAt.lt.${at}`).select("code")];
@@ -237,7 +243,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const done = Promise.all(writes).then(async (res) => {
         const bad = res.find((r) => r.error);
         if (bad) throw bad.error;
-        resent.current = 0;
+        resent.current = 0; pendingSince.current = 0;
         const latest = lastAt.current === at;
         if (withSecret && latest) lastSecret.current = sec;
         /* turned down while it's this TV's latest: the room holds a later stamp than this TV has (its
@@ -256,6 +262,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       clearTimeout(wait);
       if (held) {
         done.catch(failed);                          // (it can still fail later: then it's said, and tried again)
+        /* a write the server sits on, not one that fails: nothing has landed for 8 s, so it's as good as offline,
+           and the clocks wait (they ran on while no phone heard from the TV: the 4 Nov audit, 4.2) */
+        if (!offline.current && pendingSince.current && Date.now() - pendingSince.current > 8000) { offline.current = true; offlineAt.current = pendingSince.current; setBanner((b) => b ?? "offline"); }
         /* nothing gone out since: the same screen goes again (23 Oct: a Majority Rules reveal at time-up, with
            nothing after it, left the phones on a clock 8 s past zero while the server sat on that one write);
            three times at most, till one lands, so a server that hangs on everything isn't sent a pile */
@@ -1417,6 +1426,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!isTv) return;
     const t = setInterval(() => {
       const s = st.current, now = Date.now(), g = s.g;
+      /* a write the server has sat on for 8 s: as good as offline (see publish) */
+      if (!offline.current && pendingSince.current && now - pendingSince.current > 8000) { offline.current = true; offlineAt.current = pendingSince.current; setBanner((b) => b ?? "offline"); }
       if (!g || s.tvAway || offline.current || !s.bank) return;   // asleep, cut off, or still loading the questions: nothing moves
       let changed = false;
       /* the last ten seconds tick; the bells ring at zero */

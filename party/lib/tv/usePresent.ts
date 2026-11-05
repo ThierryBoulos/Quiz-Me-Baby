@@ -26,7 +26,9 @@ export function usePresent(code: string, isTv: boolean, here: RefObject<{ at: Re
       const H = here.current, now = Date.now();
       const ch = own ?? sb().getChannels().find((c) => c.topic === "realtime:" + topic);
       if (phone) { const was = live; live = ch?.state === "joined"; if (was && !live) down = now; }
-      if (live && ch) { for (const k of Object.keys(ch.presenceState())) H.at[k] = now; return; }
+      /* (only the room's own phones: a key that isn't one of its members is someone else's, and a phone could
+         claim a captain's to look present: the 4 Nov audit, 4.4) */
+      if (live && ch) { const ids = new Set(mem.current.map((m) => m.user_id)); for (const k of Object.keys(ch.presenceState())) if (ids.has(k)) H.at[k] = now; return; }
       /* the TV can't see who's present (its realtime link is down): nobody is taken for away
          meanwhile, since the phones that are present aren't writing to the log */
       if (now - down > 5000) for (const m of mem.current) H.at[m.user_id] = now;
