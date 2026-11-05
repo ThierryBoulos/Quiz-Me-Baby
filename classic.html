@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.56', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.57', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2568,11 +2568,8 @@ const SEED = [
 ['Sexy Time','expert','','Which married research duo studied volunteers having sex in their 1960s lab to describe the sexual response cycle?','Masters and Johnson','William Masters and Virginia Johnson, in St Louis. The TV series Masters of Sex is about them.'],
 ['Sexy Time','expert','','Which word, popularised by sex columnist Dan Savage in 2001, means a woman penetrating a man with a strap-on?','Pegging','His readers voted the name in a poll; "bend over boyfriend" came second.'],
 ['Sexy Time','expert','','Kinksters call it CNC: a scene where one partner agrees in advance to be \'taken\'. What do the letters stand for?','Consensual non-consent','Everything is agreed beforehand, with a safe word; the "non-consent" is the role-play.'],
-['Sexy Time','medium','pelvic-floor','Which exercises for the pelvic floor are named after the American gynaecologist who made them popular in 1948?','Kegel exercises','Arnold Kegel; squeezing as if to stop the flow of pee is the classic way to find the right muscles.'],
-['Sexy Time','easy','pelvic-floor','Kegel exercises strengthen which group of muscles?','The pelvic floor','The hammock of muscle under the bladder, bowel and womb (or prostate); stronger ones are linked to stronger orgasms.'],
+['Sexy Time','medium','','Which exercises for the pelvic floor are named after the American gynaecologist who made them popular in 1948?','Kegel exercises','Arnold Kegel; squeezing as if to stop the flow of pee is the classic way to find the right muscles.'],
 ['Sexy Time','easy','','In men\'s sexual health, what does \'PE\' stand for?','Premature ejaculation','Alongside erectile dysfunction, the most common sexual complaint men bring to a doctor.'],
-['Sexy Time','medium','','In Australia, a \'thong\' is worn on which part of the body?','The feet','Australians call flip-flops thongs; the underwear is a G-string.'],
-['Sexy Time','medium','','In a bra size like 34C, what does the number measure?','The band','The band, around the ribcage under the bust (in inches); the letter is the cup, the difference between bust and band.'],
 ['Sexy Time','medium','fluids','What is the slang name for getting urinated on for sexual pleasure?','A golden shower','The clinical name is urolagnia.'],
 ['Sexy Time','hard','fluids','Which 2023 internet rumour, about influencers flown to the Gulf for degrading paid \'favours\', is known as the Dubai ___?','Porta potty','A TikTok-fuelled rumour and meme, never proven in any single case.'],
 ['Sexy Time','medium','','In porn, what does \'DP\' stand for?','Double penetration',''],
@@ -4105,10 +4102,7 @@ const MAJORITY = [
   ["chessboard", "easy", "How many squares are there on a chessboard?", ["36", "49", "64", "100"], 2, "Eight rows of eight, light and dark."],
   ["card-deck", "easy", "How many cards are there in a standard deck, without the jokers?", ["48", "52", "54", "56"], 1, "Four suits of 13."],
   ["emerald-colour", "easy", "What colour is an emerald?", ["Red", "Blue", "Green", "Purple"], 2, "A ruby is red, a sapphire blue, an amethyst purple."],
-  ["catan-wool", "medium", "In the board game Catan, what is the official name of the resource that sheep give?", ["Wool", "Sheep", "Fleece", "Lamb"], 0, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
-  ["catan-lumber", "medium", "In Catan, what is the official name of the resource that forests give?", ["Wood", "Lumber", "Timber", "Logs"], 1, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
-  ["catan-grain", "medium", "In Catan, what is the official name of the resource that fields give?", ["Wheat", "Grain", "Corn", "Hay"], 1, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
-  ["catan-ore", "medium", "In Catan, what is the official name of the resource that mountains give?", ["Stone", "Rock", "Ore", "Iron"], 2, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."]
+  ["catan", "medium", "In the board game Catan, what are the official names of the five resources?", ["Brick, wood, sheep, wheat, stone", "Clay, timber, wool, wheat, stone", "Brick, lumber, wool, grain, ore", "Brick, lumber, sheep, grain, stone"], 2, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
 ];
 
 /* shared out over the levels that are on, exactly as the flags are (easy: 2 at most) */
@@ -4371,14 +4365,12 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 54;   // bumped when the built-in bank changes
+const SEED_VERSION = 55;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
 const SEED_NEVER = [
-  ["q1f0ezzu", "qqv3lxm"],
   ["qgw9neb", "q175twlm"],
-  ["mr:catan-wool", "mr:catan-lumber", "mr:catan-grain", "mr:catan-ore"],
   ["q1coaj68", "mr:country-has"],
   ["qbgc884", "mr:friends-chandler"],
   ["qa4el1y", "qtgsdrc"],
