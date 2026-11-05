@@ -55,7 +55,7 @@ a one-command re-run; that file doesn't exist yet.
 
 | Door | Today | What changes when it's a product |
 |---|---|---|
-| 1. What the browser shows | Only the public Supabase address and its public key are in the browser, which is normal. `public/bank.json` has no answers; the full bank is served by `/api/bank` on the server. In a no-TV game the referee phone holds the answers (decision 1 in the Nov audit). | Check source maps are off in production; full fix for decision 1 (judge answers on the server). |
+| 1. What the browser shows | (5 Nov: no source maps in the production build, checked; a map's answer drawing and 3-8 teams' question ids no longer reach phones early.) Only the public Supabase address and its public key are in the browser, which is normal. `public/bank.json` has no answers; the full bank is served by `/api/bank` on the server. In a no-TV game the referee phone holds the answers (decision 1 in the Nov audit). | Check source maps are off in production; full fix for decision 1 (judge answers on the server). |
 | 2. The AI key | No AI is called while playing; no AI key anywhere in the app. | Applies only if a paid feature uses AI (question writing, hints). Then: server side only, a spending cap per account. |
 | 3. Row-level security (RLS) | On for every table; rules tie rows to room membership. The Nov security review found 17 issues, none critical (see §2 below). | Re-test with two real accounts; add paid tables (accounts, purchases) with owner-only rules. |
 | 4. Who owns each piece of data | Rooms, seats and answers are checked by membership in the database functions. Known gaps: a referee seat can be taken, rooms can be guessed by code (§2). | Every route that takes an id (account, purchase, saved night) checks the owner on the server. |
@@ -73,12 +73,12 @@ strangers play. Details, file and line: the security section of the audit page
 there; then mark them here with the wave.
 
 - **todo**: Answers held by the referee phone in no-host games (decision 1): full fix is judging on the server.
-- **todo**: A member can break every captain's suggestion inbox with one bad row (actions read rule casts a number).
-- **todo**: The no-TV referee's seat can be taken from the join screen, stopping the game.
-- **todo**: The action log has no size or rate limit; one member can flood a room.
-- **todo**: Live channels (presence, the Auction count) are open: fake presence or fake counts are possible.
+- **done (5 Nov 2026)**: A member can break every captain's suggestion inbox with one bad row (actions read rule casts a number).
+- **done (5 Nov 2026)**: The no-TV referee's seat can be taken from the join screen, stopping the game.
+- **done (5 Nov 2026)**: The action log has no size or rate limit; one member can flood a room (8 KB a tap, 40 taps in 4 s a phone).
+- **doing**: Live channels (presence, the Auction count) are open: fake presence or fake counts are possible. 5 Nov: presence now counts only the room's members; private channels still to do.
 - **todo**: Anyone can try room codes and find live rooms (about 900,000 codes, no limit).
-- **todo**: The 6-digit TV take-over code has no attempt limit.
+- **done (5 Nov 2026)**: The 6-digit TV take-over code has no attempt limit (now 5 tries).
 - **todo**: Team changes and stepping down allowed mid-game.
 
 ---

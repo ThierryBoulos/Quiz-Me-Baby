@@ -1335,3 +1335,9 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   .screen.split .main .board { max-height: 62svh; overflow-y: auto; }
   .screen.split .side-part .board .board-row { padding-block: .15em; }
 }
+
+/* sideways, the steal's line stays one line and the question fits under it (1.20) */
+@media (orientation: landscape) and (max-height: 500px) {
+  .screen.split .side-part .whofor { font-size: 15px !important; }
+  .screen.split .side-part .nolife { display: none; }
+}
