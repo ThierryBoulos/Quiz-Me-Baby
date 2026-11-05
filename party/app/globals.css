@@ -1341,3 +1341,12 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   .screen.split .side-part .whofor { font-size: 15px !important; }
   .screen.split .side-part .nolife { display: none; }
 }
+
+/* the room code on the TV: small letter tiles, top centre (3.5) */
+.hud-tiles { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
+.hud-tiles > span { font-size: var(--text-14); font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--color-ink-3); }
+.hud.many .hud-tiles { margin: 0 auto 4px; }
+/* a gold button that's off (Send before anything is typed): a faint gold outline, not a muddy fill (the owner's pick on the
+   4 Nov audit, 3.5). [data-soft] (a tap in flight) keeps its full gold, as before */
+.btn-gold:disabled:not([data-soft] *), .dock.btn-gold:disabled:not([data-soft] *) { opacity: 1; background: transparent; border: 1.5px solid rgba(245,197,24,.45); color: rgba(245,197,24,.6); box-shadow: none; }
+.dock.btn-gold:disabled:not([data-soft] *) { background: var(--color-bg); box-shadow: 0 -18px 30px -6px var(--color-bg); }

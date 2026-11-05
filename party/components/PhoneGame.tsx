@@ -268,10 +268,11 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     const x = !loading && !!secret.typed?.[t], late = !x && !!pub.timeUp;
     if (!x && !late && !aloud) return null;
     const app = x ? secret.match?.[t] ?? null : late ? false : null;
-    return <RulingPicker value={app} app={app} busy={busy || loading} label={`Rule on ${T[t].name}’s answer`} onPick={(v) => send(v ? right : wrong)} />;
+    return (<>{app != null && <p className="text-center text-13 text-[var(--color-ink-2)]">The app&rsquo;s call is filled in. Tap one to rule.</p>}
+      <RulingPicker value={app} app={app} busy={busy || loading} label={`Rule on ${T[t].name}’s answer`} onPick={(v) => send(v ? right : wrong)} /></>);
   };
   /* the reveal screens: each team's answer, and its ruling beside it, which the host can always flip */
-  const Rulings = ({ type, say, empty }: { type: string; say?: boolean; empty: string }) => (<>{([0, 1] as const).map((t) => {
+  const Rulings = ({ type, say, empty }: { type: string; say?: boolean; empty: string }) => (<><p className="text-center text-13 text-[var(--color-ink-2)]">The app made these calls. Tap one to change it.</p>{([0, 1] as const).map((t) => {
     const x = pub.reveal?.typed?.[t]?.[0], k = pickKey(t), app = pub.reveal?.app?.[t], v = k in picked ? picked[k] : pub.reveal?.ok?.[t];
     const pick = (nv: boolean) => { setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire({ type, t, v: nv }); };
     return (
@@ -286,10 +287,10 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>); })}</>);
   /* a results screen: exactly what the players see, and the host's button */
   const resultHeld = useTwoHold(pub);
-  const Results = ({ children }: { children: React.ReactNode }) => (
+  const Results = ({ children, act }: { children: React.ReactNode; act?: Send }) => (
     <div className="flex flex-col gap-4 flex-1">
       <OnScreen pub={pub} />
-      <Result pub={pub} host />
+      <Result pub={pub} host act={act} />
       {/* (the host sees the result at once; Next waits until the TV has shown it, so it can't be skipped by mistake) */}
       {resultHeld ? <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Next comes up once the TV has shown it.</p> : children}
     </div>);
@@ -351,7 +352,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           {pub.screen === "ask" && <Small ghost label="Change question" move={{ type: "round/swap" }} />}
         </div>
       </div>);
-    case "answer": return <Results><Calls pub={pub} host busy={busy} act={send} /><Main label="Next" move={{ type: "round/afterAnswer" }} /></Results>;
+    /* one table, with Change in each row (the owner's pick on the 4 Nov audit, 3.5: the calls were listed twice) */
+    case "answer": return <Results act={send}><Calls pub={pub} host cardOnly busy={busy} act={send} /><Main label="Next" move={{ type: "round/afterAnswer" }} /></Results>;
     case "roundScore": return <Results><Main label="Next" move={{ type: "round/next" }} /></Results>;
     case "sudden": return !pub.sudden?.ready ? (
       <div className="flex flex-col gap-4 flex-1">
@@ -723,7 +725,10 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
             <span className="max-w-[96px] min-w-0 flex flex-col leading-tight" style={dim}>
               {!grouped && <span className="font-bold truncate" style={{ color: tc(c.team) }} title={T[c.team].name}>{T[c.team].name}</span>}
               {c.note && !lastQ && <span className={grouped ? "text-13 tabular-nums text-[var(--color-ink-3)]" : "text-12 text-[var(--color-ink-3)]"}>{c.note}</span>}
-              {c.changed && <span className="text-12 text-[var(--color-gold)]">{nohost ? "changed" : "host’s call"}</span>}</span>
+              {c.changed && <span className="text-12 text-[var(--color-gold)]">{nohost ? "changed" : "host’s call"}</span>}
+              {/* Don't Say the Same: why, in the game's own words (the owner's pick on the 4 Nov audit, 1.21: a red cross under
+                  "A point each" read as a loss) */}
+              {say && c.text && <span className="text-12 text-[var(--color-ink-3)]">{c.ok ? "Dodged it" : pub.reveal?.offList?.[c.team] ? "Not on the list" : "Said the app’s word"}</span>}</span>
             <span className="min-w-0 break-words leading-snug" style={dim}>
               <span className="font-bold" style={{ color: col }}><span aria-label={say ? (c.ok ? "dodged it:" : "said it:") : c.ok ? "right:" : "wrong:"} className="mr-1">{c.ok ? "\u2713" : "\u2717"}</span>{said}</span>
               {c.answer && !c.ok && <span className="text-[var(--color-ink-3)]">{said ? " · " : ""}{c.answer}</span>}</span>
@@ -761,7 +766,7 @@ function useTwoHold(pub: Pub) {
 /* part: "pill" is only how your team did (it goes at the top of the phone, above the question), "rest" the result without it */
 /* host: the host's phone sees the result at once; everyone else gets "Eyes on the TV" while the TV reveals it (the owner,
    on the 4 Nov audit, 3.9) */
-function Result({ pub, mine, headOnly, part, host = false }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean; part?: "pill" | "rest"; host?: boolean }) {
+function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mine?: 0 | 1; headOnly?: boolean; part?: "pill" | "rest"; host?: boolean; act?: (move: Record<string, unknown>) => void }) {
   const T = pub.teams, sc = pub.screen, m = pub.mini;
   const heldNow = useTwoHold(pub) && !host;
   /* a question's result (the owner's pick, 1 Nov): how your team did in one pill, then a table, a row a team */
@@ -781,6 +786,7 @@ function Result({ pub, mine, headOnly, part, host = false }: { pub: Pub; mine?: 
       : pub.result.by != null ? pill(`${T[pub.result.by].name} +${pub.result.pts}${pub.result.stolen ? ", stolen" : ""}`, "mid") : pill("Nobody scores", "mid"))
     : sc === "closestReveal" || sc === "pinReveal" ? legPill(pub.reveal?.w)
     : sc === "majorityReveal" && MR ? pill(`Your team: ${MR.right[mine]} of ${pub.majority?.n?.[mine] ?? 0} right`, MR.right[mine] > 0 ? "ok" : "mid")
+    : sc === "sayReveal" && pub.reveal?.w === "tie" ? pill(pub.reveal.ok?.[0] === false && pub.reveal.ok?.[1] === false ? "Both said it · a point each" : "Both dodged it · a point each", "ok")
     : /^(flag|say|map|airport)Reveal$/.test(sc) && pub.reveal ? (sc !== "mapReveal" || (pub.map?.ruled?.[0] != null && pub.map?.ruled?.[1] != null) ? legPill(pub.reveal.w) : null)
     : sc === "dishReveal" && pub.reveal ? (dishW === mine ? pill("Your team got it", "ok") : dishW != null ? pill(`${T[dishW].name} got it`, "no") : pill("Nobody got it", "mid"))
     : null;
@@ -814,7 +820,10 @@ function Result({ pub, mine, headOnly, part, host = false }: { pub: Pub; mine?: 
     const top = P;
     if (headOnly) return <>{top}</>;
     /* a row for each team that answered: the team asked, then the steal */
-    const rows = (pub.calls || []).map((c) => row(c.team, c.text || "No answer", c.text ? c.ok : null, <Pts n={by === c.team && c.ok ? Rr.pts : 0} />, c.note));
+    /* (the host: Change in each row, which flips the call, as the list under it used to) */
+    const rows = (pub.calls || []).map((c) => row(c.team, c.text || "No answer", c.text ? c.ok : null, <Pts n={by === c.team && c.ok ? Rr.pts : 0} />,
+      host && act ? <span className="flex items-center gap-2">{c.note && <span>{c.note}</span>}{c.changed && <span style={{ color: "var(--color-gold)" }}>host&rsquo;s call</span>}
+        <button type="button" className="text-13 font-bold underline underline-offset-4 min-h-[32px]" style={{ color: "var(--color-ink-2)" }} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button></span> : c.note));
     return (<>{top}{rows.length > 0 && <ResultTable rows={rows} head={["Said", "Pts"]} />}
       {quiet && <p className="text-center text-13 text-[var(--color-ink-3)]">{quiet}</p>}</>);
   }
@@ -1090,7 +1099,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
           </div>
           <p className="text-12 text-[var(--color-ink-3)] text-center">{noTv ? "The game\u2019s" : "The TV\u2019s"} count is the one that counts: {pub.auction?.count ?? 0} so far.</p>
         </div>)}
-      {pub.screen === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />}
+      {pub.screen === "ask" && (pub.turn === mine ? <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" /> : <LifelineLine pub={pub} t={(pub.turn ?? 0) as 0 | 1} />)}
       {pub.nextBy && <WaitingFor pub={pub} />}
     </div>
   );
@@ -1117,6 +1126,12 @@ function WaitingFor({ pub }: { pub: Pub }) {
   if (pub.autoAt && auto > 0) return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Next in {auto} s, or {pub.nextBy} taps Next.</p>;
   const who = open && pub.nextOther ? `${pub.nextBy} or ${pub.nextOther}` : pub.nextBy;
   return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Waiting for {who} to {TIE_SCREENS.includes(pub.screen) ? "choose: one more, or a point each" : pub.screen === DECIDED ? "choose: keep playing for fun, or stop here" : `tap ${/^Start/.test(label) ? "Start" : label}`}.</p>;
+}
+/* the other team's lifelines, as a line of text (3.10) */
+function LifelineLine({ pub, t }: { pub: Pub; t: 0 | 1 }) {
+  const T = pub.teams, used = pub.llUsed?.[t] || [], L = pub.lifeline;
+  const st = (k: "friend" | "dip" | "dbl", name: string) => `${name} ${L?.team === t && L.key === k ? "(in use)" : used.includes(k) ? "(used)" : T[t].ll?.[k] === false ? "(gone)" : ""}`.trim();
+  return <p className="text-center text-13 text-[var(--color-ink-3)]">{poss(T[t].name)} lifelines: {st("friend", "Call a Friend")} · {st("dip", "Double Dip")} · {st("dbl", "Double Points")}</p>;
 }
 /* with a host: the screens that wait for the host's tap say so on the other phones, as with no host (the 4 Nov audit, 3.9) */
 function WaitingForHost({ pub, members }: { pub: Pub; members: Member[] }) {
@@ -1278,6 +1293,15 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc)) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
 
 
+      {/* Call a Friend: the calling captain has the script and the call's clock; with no host they start it, with a host the
+          host does (the owner's pick on the 4 Nov audit, 3.10) */}
+      {pub.lifeline?.key === "friend" && pub.lifeline.team === mine && (
+        <div className="card flex flex-col items-center gap-2 text-center">
+          <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Your lifeline · Call a Friend</div>
+          <p className="text-14 text-[var(--color-ink-2)]">Read this to your friend first: &ldquo;Hi, quick quiz question. No ChatGPT, no Google, no asking anyone else. Straight off the top of your head. Ready?&rdquo;</p>
+          <Clock deadline={pub.lifeline.deadline} left={pub.lifeline.left} size={72} timeUp={!pub.lifeline.deadline && !pub.lifeline.left} />
+          {pub.lifeline.wait && !nohost && <p className="text-13 text-[var(--color-ink-3)]">The host starts the {pub.timers?.friend ?? 30} seconds when you&rsquo;re through.</p>}
+        </div>)}
       {/* no host, Call a Friend: the calling captain starts the friend's clock once they're through, and closes the card */}
       {nohost && pub.lifeline?.key === "friend" && pub.lifeline.team === mine && pub.lifeline.wait && (
         <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => void nxt({ type: "ui/startCall" })}>Start the call ({pub.timers?.friend ?? 30} s)</button>)}
@@ -1321,8 +1345,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {sc === "pinQ" && sentHere && pinAt && <PinMap value={pinAt} color={TEAM_HEX[mine]} height="min(40vh, 340px)" label="Your pin" />}
 
       {/* the lifelines: everyone sees them; the captain whose question it is taps */}
-      {sc === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" busy={busy}
-        onUse={myTurn && !locked && !pub.timeUp ? (k) => void act("lifeline", { key: k }) : undefined} />}
+      {/* (the other team's: a line of text, not tiles that look tappable: 3.10) */}
+      {sc === "ask" && (pub.turn === mine ? <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" busy={busy}
+        onUse={myTurn && !locked && !pub.timeUp ? (k) => void act("lifeline", { key: k }) : undefined} /> : <LifelineLine pub={pub} t={(pub.turn ?? 0) as 0 | 1} />)}
 
       {/* the Auction: bidding is always the captains' */}
       {sc === "auctionBid" && A && A.turn === mine && (

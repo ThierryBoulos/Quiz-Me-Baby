@@ -69,8 +69,9 @@ const T_PICK = 10;
 /* a Know the Host answer waits this long for an absent host before the captains may skip it */
 const T_HOST_SKIP = 20;
 const PICK_DEFAULT = (sc: string) => (sc === DECIDED ? "decided/more" : TIE_SCREENS.includes(sc) ? "tie/stop" : undefined);
-const AUTO_NEXT: Record<string, string> = { closestReveal: "ui/next", flagReveal: "ui/next", pinReveal: "ui/next", airportReveal: "ui/next",
-  mapReveal: "ui/next", sayReveal: "ui/next", dishReveal: "dish/next" };
+/* (nothing moves on by itself: every reveal waits for Next, so people can argue. The owner, 4 Nov audit, 1.13: the
+   Cocktail or Dish was the last one that moved on after 8 s) */
+const AUTO_NEXT: Record<string, string> = {};
 function shiftClocks(s: TvState, d: number) {
   if (s.pending) s.pending = { ...s.pending, until: s.pending.until + d };
   if (s.lifeline?.deadline) s.lifeline = { ...s.lifeline, deadline: s.lifeline.deadline + d };

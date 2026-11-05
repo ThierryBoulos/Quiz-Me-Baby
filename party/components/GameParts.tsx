@@ -3,6 +3,7 @@
    from Classic (index.html): the HUD tracker, the round intro with each
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
+import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
@@ -62,11 +63,13 @@ export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"
   const pips = pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>;
   return (
     <div className={"hud " + size} role="group" aria-label="Scores">
-      {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov) */}
-      {code && <div className="hud-code corner">Room {code}</div>}
+
       <div className="hud-in">
         <div className="hud-team a"><span className="dot" /><div className="nm">{T[0].name}</div><div className="sc" data-score="0"><Roll v={sc(0)} /></div>{pub.fire?.[0] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}</div>
         <div className="hud-mid">
+          {/* the room code in small letter tiles, top centre, clear of the scores (the owner's pick on the 4 Nov audit, 3.5:
+              tiles everywhere; the corner text sat over the Lions plate) */}
+          {code && <div className="hud-tiles" aria-label={`Room ${code}`}><span>Room</span><CodeTiles code={code} className="mini" /></div>}
           {/* the night's dots above the round's name, on the TV and the phones (the owner, 2 Nov) */}
           {pips}
           <div className="hud-label">{hudLabel(pub)}</div>
@@ -98,12 +101,13 @@ export function Verdict({ v, say, size, stamp, word }: { v: boolean | null | und
 /* sticky: the call already stands (a reveal), so tapping the lit button again changes nothing */
 /* compact: the reveal screens' smaller pair, beside each team's answer */
 /* neg: the exact word for the call that scores nothing ("Same word", "Off the list"), where the app has one */
-export function RulingPicker({ value, app, say, onPick, busy, label, sticky, compact, neg }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string; sticky?: boolean; compact?: boolean; neg?: string }) {
+export function RulingPicker({ value, say, onPick, busy, label, sticky, compact, neg }: { value: boolean | null | undefined; app?: boolean | null; say?: boolean; onPick: (v: boolean) => void; busy?: boolean; label?: string; sticky?: boolean; compact?: boolean; neg?: string }) {
   const opt = (v: boolean) => {
     const on = value === v;
     return (
       <button type="button" className={"btn btn-lg rule-btn " + (v ? "pos" : "neg") + (on ? " on" : "")} aria-pressed={on} disabled={busy} onClick={() => { if (!(sticky && on)) onPick(v); }}>
-        {app === v && <span className="rule-tag">App suggests</span>}
+        {/* (no "App suggests" tag in the button any more: the call that stands is the filled one, and the screen says once
+            that the app made them. The owner's pick on the 4 Nov audit, 1.21 and 3.5) */}
         <span>{!v && neg ? neg : verdictWord(v, say)}</span>
       </button>);
   };

@@ -2,6 +2,7 @@
 /* MANY TEAMS: the pieces the TV and every phone share, each the two-team one (components/GameParts.tsx)
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
+import { CodeTiles } from "../Marquee";
 import { useEffect, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
 import { showKm, showNum } from "@/lib/game";
@@ -86,7 +87,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   return (
     <div className={`hud ${size} many ${packing(k)}${award && !landed ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov: it matters little once the game is on) */}
-      {tv && code && <div className="hud-code corner">Room {code}</div>}
+      {tv && code && <div className="hud-tiles" aria-label={`Room ${code}`}><span>Room</span><CodeTiles code={code} className="mini" /></div>}
       {/* the TV: the night's tracker on its own line at the top ("Game 3 of 3" and a dot or dash a game), not beside the
           game's line (the owner, 2 Nov) */}
       {tv && track}
