@@ -24,6 +24,8 @@ const DB: [RegExp, string][] = [
   [/members_avatar_unique/i, "Someone already took that face. Pick another."],
   [/members_one_captain/i, "Your team already has a captain."],
   [/members_one_host/i, "There's already a host."],
+  [/too many taps/i, "Slow down a little: that's a lot of taps at once. Try again in a second."],
+  [/actions_payload_size/i, "That's too much to send at once. If you added your own questions, pick fewer and try again."],
   [/rate limit|too many requests|over_request_rate_limit|\b429\b/i, "Too many phones joined at once. Wait a minute and try again."],
   [/project.*(paused|inactive)/i, "The game server is asleep. Try again in a minute."],
   [/failed to fetch|networkerror|network request failed|load failed|timeout/i, "No connection. Check your internet and try again."],
