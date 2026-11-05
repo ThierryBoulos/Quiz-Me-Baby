@@ -50,54 +50,55 @@
 77.00 mapQ | 24 | 5-1 | 0-0 | Lions +1 point — steal | 
 77.75 mapReveal | 24 | 5-1 | 0-0 | Lions +1 point — steal | 
 78.75 mapQ | 25 | 5-1 | 0-0 | Nobody got it. | 
-79.50 mapReveal | 25 | 5-1 | 0-1 | Nobody got it. | 
-80.50 mapReveal | 25 | 5-1 | 0-1 |  | 
-95.50 mapReveal | 25 | 5-1 | 0-1 | No answer in time: the call stands. | 
-95.75 mapQ | 26 | 5-1 | 0-1 | Owls take map 2. | 
-96.75 mapReveal | 26 | 5-1 | 0-1 | Owls take map 2. | 
-97.50 mapSummary | 27 | 5-3 | 0-1 | Nobody got it. | 
-98.50 roundIntro | 28 | 5-3 |  | Nobody got it. | 
-99.50 ask | 29 | 5-3 |  | Nobody got it. | 
-100.25 steal | 29 | 5-3 |  | Nobody got it. | 
-101.25 answer | 29 | 5-3 |  | Nobody got it. | 
-102.00 ask | 30 | 5-3 |  | Nobody got it. | 
-103.00 answer | 30 | 5-4 |  | Owls +1 point | 
-104.00 answer | 30 | 5-4 |  |  | 
-107.50 steal | 31 | 5-3 |  | Lions steal a new question. | 
-108.50 answer | 31 | 5-3 |  | Lions steal a new question. | 
-109.25 roundScore | 32 | 5-3 |  | Lions steal a new question. | 
-110.25 roundIntro | 33 | 5-3 |  | Lions steal a new question. | 
-112.00 ask | 34 | 5-3 |  | Lions steal a new question. | 
-113.00 steal | 34 | 5-3 |  | Lions steal a new question. | 
-113.75 answer | 34 | 5-3 |  | Lions steal a new question. | 
-114.75 ask | 35 | 5-3 |  | Lions steal a new question. | 
-115.50 answer | 35 | 5-4 |  | Owls +1 point | 
-116.50 roundScore | 36 | 5-4 |  | Owls +1 point | 
-117.50 dishIntro | 37 | 5-4 | 0-0 | Owls +1 point | 
-118.25 dishQ | 38 | 5-4 | 0-0 | Owls +1 point | 
-120.00 dishReveal | 38 | 5-4 | 1-0 | Lions take number 1. | 
-121.00 dishQ | 39 | 5-4 | 1-0 | Lions take number 1. | 
-122.75 dishQ | 39 | 5-4 | 1-0 | Lions are out of this one — Owls, it is yours to get. | 
-124.50 dishReveal | 39 | 5-4 | 1-1 | Owls take number 2. | 
-125.50 dishQ | 40 | 5-4 | 1-1 | Owls take number 2. | 
-127.25 dishReveal | 40 | 5-4 | 2-1 | Lions take number 3. | 
-128.25 dishQ | 41 | 5-4 | 2-1 | Lions take number 3. | 
-130.00 dishReveal | 41 | 5-4 | 3-1 | Lions take number 4. | 
-131.00 dishReveal | 41 | 5-4 | 3-1 |  | 
-131.75 dishQ | 42 | 5-4 | 2-1 | Call changed. A new one, for both teams. | 
-133.50 dishReveal | 42 | 5-4 | 3-1 | Lions take number 4. | 
-134.50 decided | 43 | 7-4 | 3-1 |  | 
-135.50 dishQ | 44 | 7-4 | 3-1 |  | 
-137.25 dishQ | 44 | 7-4 | 3-1 | Lions are out of this one — Owls, it is yours to get. | 
-139.00 dishReveal | 44 | 7-4 | 3-2 | Owls take number 5. | 
-140.00 dishSummary | 45 | 7-4 | 3-2 | Owls take number 5. | 
-140.75 roundIntro | 46 | 7-4 |  | Owls take number 5. | 
-141.75 ask | 47 | 7-4 |  | Owls take number 5. | 
-142.50 answer | 47 | 8-4 |  | Lions +1 point | 
-143.50 answer | 47 | 8-4 |  |  | 
-144.50 answer | 47 | 8-4 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-145.25 ask | 48 | 8-4 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-146.25 answer | 48 | 8-5 |  | Owls +1 point | 
-147.00 roundScore | 49 | 8-5 |  | Owls +1 point | 
-148.00 final | 50 | 8-5 |  | Owls +1 point | 
-recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[1,0],"minis":[2,1],"chart":[[0,0],[0,0],[0,1],[1,1],[3,1],[4,1],[5,1],[5,3],[5,4],[5,3],[5,4],[7,4],[8,4],[8,5]],"segs":[{"label":"R1","pts":[[0,1]]},{"label":"R2","pts":[[1,1]]},{"label":"Don't Say the Same as Me","pts":[[3,1]]},{"label":"R3","pts":[[4,1],[5,1]]},{"label":"Guess the Map","pts":[[5,3]]},{"label":"R4","pts":[[5,4],[5,3]]},{"label":"R5","pts":[[5,4]]},{"label":"Guess the Cocktail or Dish","pts":[[7,4]]},{"label":"R6","pts":[[8,4],[8,5]]}],"awards":[{"t":"Best thief","who":"Lions, 1 steal","team":0}]}
+79.50 mapReveal | 25 | 5-1 | 0-0 | Nobody got it. | 
+80.50 mapReveal | 25 | 5-1 | 0-0 |  | 
+95.50 mapReveal | 25 | 5-1 | 0-0 | No answer in time: the call stands. | 
+95.75 mapQ | 26 | 5-1 | 0-0 | Nobody got it. | 
+96.75 mapReveal | 26 | 5-1 | 1-1 | Nobody got it. | 
+97.50 mapTie | 27 | 5-1 | 1-1 | Both got it — a point each. | 
+98.50 mapSummary | 28 | 6-2 | 1-1 | Both got it — a point each. | 
+99.50 roundIntro | 29 | 6-2 |  | Both got it — a point each. | 
+100.25 ask | 30 | 6-2 |  | Both got it — a point each. | 
+101.25 steal | 30 | 6-2 |  | Both got it — a point each. | 
+102.00 answer | 30 | 6-2 |  | Both got it — a point each. | 
+103.00 ask | 31 | 6-2 |  | Both got it — a point each. | 
+104.00 answer | 31 | 6-3 |  | Owls +1 point | 
+104.75 answer | 31 | 6-3 |  |  | 
+108.50 steal | 32 | 6-2 |  | Lions steal a new question. | 
+109.25 answer | 32 | 6-2 |  | Lions steal a new question. | 
+110.25 roundScore | 33 | 6-2 |  | Lions steal a new question. | 
+111.00 roundIntro | 34 | 6-2 |  | Lions steal a new question. | 
+113.00 ask | 35 | 6-2 |  | Lions steal a new question. | 
+113.75 steal | 35 | 6-2 |  | Lions steal a new question. | 
+114.75 answer | 35 | 6-2 |  | Lions steal a new question. | 
+115.50 ask | 36 | 6-2 |  | Lions steal a new question. | 
+116.50 answer | 36 | 6-3 |  | Owls +1 point | 
+117.50 roundScore | 37 | 6-3 |  | Owls +1 point | 
+118.25 dishIntro | 38 | 6-3 | 0-0 | Owls +1 point | 
+119.25 dishQ | 39 | 6-3 | 0-0 | Owls +1 point | 
+121.00 dishReveal | 39 | 6-3 | 1-0 | Lions take number 1. | 
+122.00 dishQ | 40 | 6-3 | 1-0 | Lions take number 1. | 
+123.75 dishQ | 40 | 6-3 | 1-0 | Lions are out of this one — Owls, it is yours to get. | 
+125.50 dishReveal | 40 | 6-3 | 1-1 | Owls take number 2. | 
+126.50 dishQ | 41 | 6-3 | 1-1 | Owls take number 2. | 
+128.25 dishReveal | 41 | 6-3 | 2-1 | Lions take number 3. | 
+129.00 dishQ | 42 | 6-3 | 2-1 | Lions take number 3. | 
+131.00 dishReveal | 42 | 6-3 | 3-1 | Lions take number 4. | 
+131.75 dishReveal | 42 | 6-3 | 3-1 |  | 
+132.75 dishQ | 43 | 6-3 | 2-1 | Call changed. A new one, for both teams. | 
+134.50 dishReveal | 43 | 6-3 | 3-1 | Lions take number 4. | 
+135.50 decided | 44 | 8-3 | 3-1 |  | 
+136.25 dishQ | 45 | 8-3 | 3-1 |  | 
+138.00 dishQ | 45 | 8-3 | 3-1 | Lions are out of this one — Owls, it is yours to get. | 
+140.00 dishReveal | 45 | 8-3 | 3-2 | Owls take number 5. | 
+140.75 dishSummary | 46 | 8-3 | 3-2 | Owls take number 5. | 
+141.75 roundIntro | 47 | 8-3 |  | Owls take number 5. | 
+142.50 ask | 48 | 8-3 |  | Owls take number 5. | 
+143.50 answer | 48 | 9-3 |  | Lions +1 point | 
+144.50 answer | 48 | 9-3 |  |  | 
+145.25 answer | 48 | 9-3 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+146.25 ask | 49 | 9-3 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+147.00 answer | 49 | 9-4 |  | Owls +1 point | 
+148.00 roundScore | 50 | 9-4 |  | Owls +1 point | 
+149.00 final | 51 | 9-4 |  | Owls +1 point | 
+recap: {"margin":5,"sudden":false,"leadChanges":1,"steals":[1,0],"minis":[2,0],"chart":[[0,0],[0,0],[0,1],[1,1],[3,1],[4,1],[5,1],[6,2],[6,3],[6,2],[6,3],[8,3],[9,3],[9,4]],"segs":[{"label":"R1","pts":[[0,1]]},{"label":"R2","pts":[[1,1]]},{"label":"Don't Say the Same as Me","pts":[[3,1]]},{"label":"R3","pts":[[4,1],[5,1]]},{"label":"Guess the Map","pts":[[6,2]]},{"label":"R4","pts":[[6,3],[6,2]]},{"label":"R5","pts":[[6,3]]},{"label":"Guess the Cocktail or Dish","pts":[[8,3]]},{"label":"R6","pts":[[9,3],[9,4]]}],"awards":[{"t":"Best thief","who":"Lions, 1 steal","team":0}]}

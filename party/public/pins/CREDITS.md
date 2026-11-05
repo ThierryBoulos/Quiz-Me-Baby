@@ -72,3 +72,12 @@ The file name is a hash, so it doesn't give away the landmark. Written by `scrip
 | 8e016fd8cf0d5910.jpg | Golden Temple | Oleg Yunakov | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Hamandir_Sahib_(Golden_Temple).jpg |
 | 0ef0f09c2d057a24.jpg | Twelve Apostles | Leonard Koh | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:12_Apostles_Victoria_Sunset.jpg |
 | 789f504f2babc787.jpg | Hobbiton | Jackie.lck | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Hobbit_holes_reflected_in_water.jpg |
+| 70003c6c28ff6630.jpg | Kaaba, Great Mosque of Mecca | Richard Mortel | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:The_Ka%27ba,_Great_Mosque_of_Mecca,_Saudi_Arabia_(4).jpg |
+| 553fb6f45370047e.jpg | Saint Catherine’s Monastery | Berthold Werner | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Katharinenkloster_Sinai_BW_2.jpg |
+| 300b2f12a37a94b9.jpg | Gyeongbokgung Palace | Seoul Tourism Archive (서울관광 아카이브) | KOGL Type 1 | https://commons.wikimedia.org/wiki/File:%EA%B4%91%ED%99%94%EB%AC%B8_%EC%9B%94%EB%8C%80.jpg |
+| 4fcc4f3fd8968943.jpg | Table Mountain | Danie van der Merwe | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Table_Mountain_DanieVDM.jpg |
+| 6ba6f65afdd051fa.jpg | Wat Arun (Temple of Dawn) | Diliff | CC BY 2.5 | https://commons.wikimedia.org/wiki/File:Wat_Arun_from_Chao_Phraya_River.jpg |
+| 49faacf90f06f623.jpg | Persepolis (Gate of All Nations) | Alborzagros | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Gate_of_All_Nations,_Persepolis.jpg |
+| fee483b8fbd2b827.jpg | Registan | Bernard Gagnon | CC0 | https://commons.wikimedia.org/wiki/File:Registan_01.jpg |
+| 6b0b1facd18c6315.jpg | Cliffs of Moher | Berthold Werner | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Ireland_Cliffs_of_Moher_BW_2025-09-11_14-27-51.jpg |
+| a572a6805c0ef078.jpg | Fushimi Inari Shrine | Basile Morin | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Torii_path_with_lantern_at_Fushimi_Inari_Taisha_Shrine,_Kyoto,_Japan.jpg |

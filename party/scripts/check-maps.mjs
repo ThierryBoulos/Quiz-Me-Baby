@@ -53,6 +53,8 @@ const CASES = {
     ["axis powers", "allies", "world war 2", "ww2 losers"]],
   q1hp1eug: [["schengen", "schengen area", "shengen", "border free europe", "no borders", "passport free travel", "free movement", "open borders", "no border checks", "without passport"],
     ["european union", "eurozone", "euro", "nato"]],
+  ql2dao5: [["ASEAN", "asean countries", "southeast asia", "south east asia", "south-east asian nations", "association of southeast asian nations", "asian association"],
+    ["asia", "east asia", "pacific islands", "indonesia", "commonwealth"]],
   q12zbjmn: [["seven wonders", "the 7 wonders", "wonders of the world", "new seven wonders", "7 wonders of the world", "wonderz"],
     ["unesco sites", "monuments", "tourist attractions", "famous places"]],
   qsg3hn3: [["seven summits", "highest mountains", "highest peak on each continent", "tallest mountains", "highest point of each continent", "7 summits", "mountains of each continent"],
