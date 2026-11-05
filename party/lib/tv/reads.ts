@@ -31,10 +31,19 @@ export function currentQ(s: TvState): G {
 }
 /* right if it matches the answer or any other answer that counts (see acceptFor) */
 export const matchQ = (texts: string[] | null, q: G) => (texts && q && rankFor(q) ? texts.some((t) => QMB.rankMatch(t, rankFor(q))) : texts && q ? texts.some((t) => QMB.isMatch(t, q.answer, acceptFor(q))
-  || (q.type === "airport" && !!bare(t) && QMB.isMatch(bare(t), q.answer, acceptFor(q)))) : null);
+  || (q.type === "airport" && airportHit(t, q))) : null);
 /* Guess the Airport: "Changi airport", "Flughafen Zürich" are the name with a word every airport has */
 const AIRPORT_WORDS = /(?<!\p{L})(international|intl|airport|aeroport|aéroport|aeropuerto|aeroporto|flughafen|luchthaven|havalimanı|havalimani|lufthavn)(?!\p{L})/giu;
 const bare = (t: string) => t.replace(AIRPORT_WORDS, " ").replace(/\s+/g, " ").trim();
+/* ...and with its city in front or behind: "Paris CDG", "Amsterdam Schiphol", "Doha Hamad" are "CDG", "Schiphol",
+   "Hamad" (the 4 Nov audit, 2.2: they were marked wrong, while the short name alone passed) */
+const fold = (t: string) => t.normalize("NFD").replace(/\p{M}/gu, "");
+const noCity = (t: string, q: G) => {
+  const c = fold(String(q.city || "")).trim(); if (!c) return "";
+  const re = new RegExp(`(?<!\\p{L})${c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!\\p{L})`, "giu");
+  return fold(t).replace(re, " ").replace(/\s+/g, " ").trim();
+};
+const airportHit = (t: string, q: G) => [bare(t), bare(noCity(t, q))].some((x) => !!x && QMB.isMatch(x, q.answer, acceptFor(q)));
 /* the captain who moves the night on with no host: Team A's, or B's if A has none */
 export const leadOf = (members: Member[]): 0 | 1 => (members.some((m) => m.team === 0 && m.role === "captain") ? 0 : 1);
 export function turnOf(s: TvState): 0 | 1 {

@@ -339,6 +339,7 @@
   const FLAG_LEVEL_KEYS = ['veasy', 'easy', 'medium', 'hard', 'expert'];
   const DISH_LEVEL_KEYS = ['c-easy', 'c-medium', 'c-hard', 'd-easy', 'd-medium', 'd-hard'];
   const BATTLE_SKIP_THEMES = ['Know the Host', 'Sexy Time', 'Lebanon'];
+  const CLOSEST_ONLY_IF_PICKED = ['Sexy Time', 'Lebanon'];
   /* The four levels of a standard question (22 Oct). A night's difficulty is one of them, several
      joined with "+" ("easy+medium+hard", the default), or "mixed": all four. */
   const DIFFS = ['easy', 'medium', 'hard', 'expert'];
@@ -408,7 +409,10 @@
         }
         return out;
       };
-      const all = bank().filter(q => q.type === 'closest');
+      /* Sexy Time and Lebanon only when they're among the night's own themes (the owner, 5 Nov: the decision on
+         the 4 Nov audit; the Battle already keeps clear of both) */
+      const own = prefer || [];
+      const all = bank().filter(q => q.type === 'closest' && (CLOSEST_ONLY_IF_PICKED.indexOf(q.theme) < 0 || own.indexOf(q.theme) >= 0));
       const out = lap(all.filter(isFresh)).concat(lap(all.filter(q => !isFresh(q))));
       if(!prefer || !prefer.length) return out;
       const lead = [], seen = new Set();

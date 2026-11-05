@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.50', date:'30 Oct 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.51', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1477,8 +1477,8 @@ const SEED = [
 ['Friends','medium','soap-opera','Which soap opera does Joey act in?','Days of Our Lives',''],
 ['Friends','medium','soap-opera','What is the name of the doctor Joey plays on his soap opera?','Dr Drake Ramoray','A neurosurgeon who later falls down an elevator shaft.'],
 /* ---- GEEK & GAMER ---- */
-['Geek & Gamer','medium','best-selling','What is the best-selling video game of all time?','Minecraft','Over 300 million copies. Tetris, counting every version since 1984, claims more than 500 million, so it counts too.'],
-['Geek & Gamer','medium','best-selling','What is the best-selling games console of all time?','The PlayStation 2','About 160 million sold. The Nintendo DS is a close second and some counts rank it first — accept debate gracefully.'],
+['Geek & Gamer','medium','best-selling','As of 2025, what is the best-selling video game of all time?','Minecraft','Over 350 million copies (2025). Tetris, counting every version since 1984, claims more than 500 million, so it counts too.'],
+['Geek & Gamer','medium','best-selling','As of 2025, what is the best-selling games console of all time?','The PlayStation 2','About 160 million sold. The Nintendo DS is a close second and some counts rank it first — accept debate gracefully.'],
 ['Geek & Gamer','easy','character-job','What is Mario\'s job?','A plumber','Though he barely plumbs.'],
 ['Geek & Gamer','easy','character-job','What is the name of Mario\'s brother?','Luigi',''],
 ['Geek & Gamer','medium','who-is-the-hero','In The Legend of Zelda, what is the name of the hero you actually play as?','Link','Zelda is the princess. This ruins friendships.'],
@@ -1542,7 +1542,7 @@ const SEED = [
 ['Internet & Memes','medium','','What breed of dog is the "Doge" meme?','A Shiba Inu','The dog\'s real name was Kabosu.'],
 ['Internet & Memes','easy','challenge','Which charity challenge involved tipping freezing water over your head in 2014?','The Ice Bucket Challenge','It raised money for ALS research.'],
 ['Internet & Memes','easy','challenge','Which 2013 dance craze involved one person dancing, then a hard cut to a room going wild?','The Harlem Shake','To the Baauer track of the same name.'],
-['Internet & Memes','medium','most-viewed','Which video is the most-viewed on YouTube of all time?','Baby Shark Dance','By Pinkfong; overtook Despacito in 2020, now ~17 billion views. Despacito has since slipped to third.'],
+['Internet & Memes','medium','most-viewed','As of 2025, which video is the most-viewed on YouTube of all time?','Baby Shark Dance','By Pinkfong; overtook Despacito in 2020, over 16 billion views. Despacito was second until mid-2026, when Wheels on the Bus passed it.'],
 ['Internet & Memes','hard','the-first','What was the first ever tweet, and who posted it?','"just setting up my twttr" — Jack Dorsey','21 March 2006.'],
 ['Internet & Memes','hard','the-first','What was the first video uploaded to YouTube?','Me at the Zoo','By co-founder Jawed Karim, April 2005.'],
 ['Internet & Memes','hard','optical-illusion','In 2015, the internet split in half over what colour a certain dress was — what were the two options?','Blue and black, or white and gold','It was actually blue and black.'],
@@ -1710,7 +1710,7 @@ const SEED = [
 ['Sports','medium','olympic-history','Which athlete has won the most Olympic medals of all time?','Michael Phelps','28 medals, 23 of them gold.'],
 ['Sports','hard','boxing','Which boxer retired undefeated at 50 and 0 in 2017?','Floyd Mayweather Jr',''],
 ['Sports','hard','cricket','How many players are in a cricket team?','Eleven',''],
-['Sports','medium','','Which city is set to host the 2028 Summer Olympics?','Los Angeles',''],
+['Sports','medium','','Which city will host the 2028 Summer Olympics?','Los Angeles',''],
 ['Sports','medium','grand-slam','Which tennis Grand Slam is played on clay?','The French Open','Roland Garros.'],
 ['Sports','medium','grand-slam','Which tennis Grand Slam is played on grass?','Wimbledon',''],
 ['Sports','easy','','Which club has won the most UEFA Champions League titles?','Real Madrid','15+ titles — more than double the next club (AC Milan, 7).'],
@@ -1757,16 +1757,16 @@ const SEED = [
 ['Sexy Time','medium','','What is the name of the best-selling male sex toy?','The Fleshlight',''],
 ['Sexy Time','medium','','What does "NSFW" stand for?','Not Safe For Work',''],
 ['Sexy Time','hard','','Who is the most famous Italian male porn star of all time, nicknamed the "Italian Stallion"?','Rocco Siffredi',''],
-['Sexy Time','medium','','What is the most visited porn website in the world?','XVideos','Similarweb\'s traffic rankings put XVideos ahead of Pornhub.'],
+['Sexy Time','medium','','As of 2025, which porn website gets the most visits worldwide?','Pornhub','About 4 billion visits a month in August 2025 (Similarweb, via Statista); XVideos was second, so it counts too.'],
 ['Sexy Time','easy','','Which platform, founded in 2016, lets creators sell subscription-based adult content?','OnlyFans',''],
 ['Sexy Time','medium','','What is the slang term for oral stimulation of the anus?','Rimming','Also known as analingus.'],
 ['Sexy Time','medium','','What is the practice of deliberately stopping just before orgasm, over and over, to intensify it?','Edging',''],
 ['Sexy Time','easy','','What is the name of the position where the woman is on top, facing her partner?','Cowgirl','Facing away is the "reverse" version.'],
 /* ---- POP CULTURE ---- */
-['Pop Culture','medium','','Who is the most-subscribed individual YouTuber in the world?','MrBeast','Real name Jimmy Donaldson.'],
+['Pop Culture','medium','','As of 2025, who is the most-subscribed individual YouTuber in the world?','MrBeast','Real name Jimmy Donaldson.'],
 ['Pop Culture','medium','','What does "rizz", Oxford\'s 2023 Word of the Year, mean?','Charisma / charm (flirting ability)',''],
 ['Pop Culture','medium','','Which "ugly-cute" blind-box monster toy by Pop Mart became a global craze?','Labubu',''],
-['Pop Culture','hard','','Who has the most liked picture on Instagram?','Lionel Messi','His 2022 World Cup celebration post — it dethroned the world-record egg.'],
+['Pop Culture','hard','','As of 2025, who has the most-liked picture on Instagram?','Lionel Messi','His 2022 World Cup celebration post — it dethroned the world-record egg.'],
 ['Pop Culture','medium','','What is the name of Kim Kardashian\'s shapewear brand?','Skims',''],
 /* ---- INTERNET & MEMES ---- */
 ['Internet & Memes','medium','','Which animal was Harambe, the 2016 meme legend?','A gorilla','Shot at Cincinnati Zoo after a child fell into his enclosure.'],
@@ -1825,7 +1825,7 @@ const SEED = [
 ['Pop Culture','hard','viral-ranking','Rank these oldest to newest: Mannequin Challenge, Gangnam Style, Harlem Shake','Gangnam Style, Harlem Shake, Mannequin Challenge','July 2012, February 2013, late 2016.'],
 ['Pop Culture','hard','','Which video did MrBeast\'s baguette video overtake to become YouTube\'s most-liked?','Despacito','Held the record from 2017 until January 2025.'],
 /* ---- MUSIC ---- */
-['Music','hard','','Which is the most-streamed English-language band on Spotify?','Coldplay','Bands, not solo artists. Counting every language, BTS are ahead.'],
+['Music','hard','','As of 2025, which is the most-streamed English-language band on Spotify?','Coldplay','Bands, not solo artists. Counting every language, BTS are ahead.'],
 /* ---- FOOD & DRINK ---- */
 /* ---- SPORTS ---- */
 ['Sports','easy','','Which sport uses the terms "birdie" and "eagle"?','Golf','One and two strokes under par.'],
@@ -1874,7 +1874,7 @@ const SEED = [
 /* ---- TECH ---- */
 ['Tech','easy','','Which company makes the Galaxy range of phones?','Samsung',''],
 ['Tech','easy','','Which app has a white ghost on a yellow background as its logo?','Snapchat',''],
-['Tech','expert','','Which website calls itself "the front page of the internet"?','Reddit',''],
+['Tech','expert','','Which website used to call itself "the front page of the internet"?','Reddit',''],
 /* ---- INTERNET & MEMES ---- */
 ['Internet & Memes','easy','','What is the term for using a fake online identity to lure someone into a relationship?','Catfishing','From the 2010 documentary.'],
 ['Internet & Memes','easy','','In internet slang, what does "IYKYK" stand for?','If You Know You Know',''],
@@ -2596,9 +2596,9 @@ const SEED_CLOSEST = [
 ['Food & Drink','medium','Tabasco is around 3,000 Scoville Heat Units - How many does a Carolina Reaper average?',1600000,'About 1.6 million. The Guinness-tested average from 2017 was 1,641,183; individual peppers exceed 2 million SHU.'],
 ['Food & Drink','medium','A single espresso uses about 7g of coffee - Roughly how many coffee beans is that?',60,'Average is 50 to 70 depending on bean size.'],
 ['Food & Drink','medium','Number of seeds on an average strawberry',200,'About 200. They are technically achenes, not seeds, and the strawberry is not technically a berry.'],
-['Food & Drink','medium','In millions, how many bottles of champagne are shipped from the Champagne region in a year?',266,'266 million in 2025, per the Comite Champagne. Peaked at 326 million in 2022.'],
-['Food & Drink','medium','Number of coffee cups drunk worldwide every day, in billions',2.25,'About 2.25 billion cups a day — SCA Global Estimate, Q3 2025'],
-['Food & Drink','medium','Number of McDonald\'s restaurants in the world',44000,'~44,000 in 2025; the company is expanding toward 50,000 by 2027.'],
+['Food & Drink','medium','In millions, how many bottles of champagne were shipped from the Champagne region in 2025?',266,'266 million in 2025, per the Comite Champagne. Peaked at 326 million in 2022.'],
+['Food & Drink','medium','Number of coffee cups drunk worldwide every day, in billions (a widely quoted estimate)',2.25,'About 2.25 billion cups a day, the figure most often quoted.'],
+['Food & Drink','medium','Number of McDonald\'s restaurants in the world at the end of 2025',45356,'45,356 at the end of 2025 (McDonald\'s results); it aims for 50,000 by 2027.'],
 ['Food & Drink','medium','Number of litres of beer drunk at Oktoberfest in a typical year',6500000,'About 6 to 7 million litres over the festival — City of Munich figures.'],
 ['Food & Drink','medium','Number of different Coca-Cola distinct brands sold worldwide',200,'Coca-Cola cut its portfolio from ~500 to about 200 master brands in 2020.'],
 /* ---- GEOGRAPHY ---- */
@@ -2607,7 +2607,7 @@ const SEED_CLOSEST = [
 ['Geography','medium','Surface area of the Mediterranean Sea, in square kilometres',2500000,'About 2.5 million square kilometres.'],
 ['Geography','medium','Number of islands in Sweden',267570,'267,570 — Statistics Sweden. Only about 1,000 are inhabited.'],
 ['Geography','medium','Number of countries in Africa',54,'54 UN member states. 55 if you count Western Sahara as recognised by the African Union.'],
-['Geography','medium','In millions, what is the population of Brazil?',212.8,'About 212.8 million. As per World Bank, 2025.'],
+['Geography','medium','In millions, what was the population of Brazil in 2025?',212.8,'About 212.8 million. As per World Bank, 2025.'],
 ['Geography','medium','Number of steps to the top of the Eiffel Tower',1665,''],
 ['Geography','medium','Length of the Nile, in kilometres',6650,''],
 ['Geography','medium','Distance between Beirut and Paris in a straight line, in kilometres',3200,'About 3,200 km great-circle distance.'],
@@ -2618,9 +2618,9 @@ const SEED_CLOSEST = [
 ['Lebanon','medium','Length of the Litani river, in kilometres',170,'About 170 km — the longest river entirely inside Lebanon.'],
 ['Lebanon','medium','Height of the highest peak in Lebanon, Qurnat as Sawda, in metres',3088,'3,088 m, in the north of the Mount Lebanon range.'],
 /* ---- MOVIES ---- */
-['Movies','medium','Number of films in the Marvel Cinematic Universe to date',38,'As of August 2026, most recent: Spider-Man: Brand New Day. This changes often — re-verify before quiz night.'],
+['Movies','medium','Number of films in the Marvel Cinematic Universe released by September 2026',38,'As of August 2026, most recent: Spider-Man: Brand New Day. This changes often — re-verify before quiz night.'],
 /* ---- MUSIC ---- */
-['Music','medium','Number of songs on Spotify, in millions',100,'Over 100 million tracks — Spotify website'],
+['Music','medium','Number of songs on Spotify in 2025, in millions (Spotify\'s own figure)',100,'Over 100 million tracks — Spotify website'],
 ['Music','medium','Number of keys on a standard full-size piano',88,'52 white, 36 black.'],
 /* ---- NATURE ---- */
 ['Nature','medium','Number of species of bird in the world',11000,'About 11,000 recognised species — International Ornithological Congress.'],
@@ -2635,12 +2635,12 @@ const SEED_CLOSEST = [
 /* ---- SPORTS ---- */
 ['Sports','medium','Speed of a professional tennis serve at its fastest recorded, in km per hour',263,'Sam Groth, 2012 — not ratified by the ATP; the official tour record is John Isner\'s 253 km/h.'],
 /* ---- TECH ---- */
-['Tech','medium','Number of emails sent worldwide every day, in billions',361.6,'Statista estimate for 2024; grows every year.'],
+['Tech','medium','Number of emails sent and received worldwide every day in 2025, in billions',376,'About 376 billion a day in 2025 (Radicati, via Statista); it grows every year.'],
 /* ---- POP CULTURE ---- */
 ['Pop Culture','medium','Official record of the most memorized number of pi digits',70000,''],
 ['Pop Culture','medium','Probability of being dealt a royal flush in a standard 5-card poker hand (1 in ?)',649740,''],
 /* ---- TECH ---- */
-['Tech','medium','Number of hours of video uploaded to YouTube every minute',500,'YouTube\'s last officially confirmed figure.'],
+['Tech','medium','Number of hours of video uploaded to YouTube every minute, as of 2019 (YouTube\'s last official figure)',500,'YouTube\'s last officially confirmed figure.'],
 /* ---- MOVIES ---- */
 ['Movies','medium','How many episodes of Game of Thrones were made?',73,'Eight seasons, 2011 to 2019.'],
 /* ---- SPORTS ---- */
@@ -2648,8 +2648,8 @@ const SEED_CLOSEST = [
 /* ---- FOOD & DRINK ---- */
 ['Food & Drink','medium','How many calories are in a 360g airport-size Toblerone?',1890,'About 525 calories per 100g.'],
 /* ---- GEOGRAPHY ---- */
-['Geography','medium','In millions, what is the population of Colombia?',53,'About 53 million.'],
-['Geography','medium','In millions, what is the population of Nigeria?',230,'About 230 million. Africa\'s most populous country.'],
+['Geography','medium','In millions, what was the population of Colombia in 2025?',53,'About 53 million.'],
+['Geography','medium','In millions, what was the population of Nigeria in 2025?',237.5,'About 237.5 million (UN, mid-2025). Africa\'s most populous country.'],
 /* ---- LEBANON ---- */
 ['Lebanon','medium','How many km is it from Beirut to Arez by road?',116,''],
 /* ---- NATURE ---- */
@@ -4295,7 +4295,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 48;   // bumped when the built-in bank changes
+const SEED_VERSION = 49;   // bumped when the built-in bank changes
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST
    deleting a question, and the app must never bring it back. This is the

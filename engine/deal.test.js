@@ -224,3 +224,13 @@ test('thin bank: a game type with less than one game of unplayed questions left,
   const Ds = Q.createDealer({ bank:() => bank, used:() => all, noRepeat:() => true, rng });
   assert.deepEqual(Ds.thinBank().map(t => t.key), ['standard', 'battle']);
 });
+
+test('Closest To Wins: Sexy Time and Lebanon only when they are the night\'s own themes', () => {
+  const b2 = bank.concat([0, 1, 2].flatMap(i => [{ id:'cx' + i, type:'closest', theme:'Sexy Time' }, { id:'cl' + i, type:'closest', theme:'Lebanon' }]));
+  const D2 = Q.createDealer({ bank:() => b2, used:() => new Set(), noRepeat:() => true, rng });
+  const themes = (p) => new Set(D2.closestPool(p).map(q => q.theme));
+  assert.ok(!themes(['Music']).has('Sexy Time') && !themes(['Music']).has('Lebanon'));
+  assert.ok(!themes().has('Sexy Time'));
+  assert.ok(themes(['Music', 'Sexy Time']).has('Sexy Time') && !themes(['Music', 'Sexy Time']).has('Lebanon'));
+  assert.ok(themes(['Lebanon']).has('Lebanon'));
+});

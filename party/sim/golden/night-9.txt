@@ -137,54 +137,44 @@
 3827.25 roundScore | 99 | 7-5 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
 3875.00 dishIntro | 100 | 7-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
 3882.00 dishQ | 101 | 7-5 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-3900.00 dishReveal | 102 | 7-5 | 0-0 | Nobody got it. | 
-3906.50 dishQ | 103 | 7-5 | 0-0 | Nobody got it. | 
-3921.75 dishQ | 103 | 7-5 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
-3951.50 dishReveal | 104 | 7-5 | 0-0 | Nobody got it. | 
-3959.50 dishQ | 105 | 7-5 | 0-0 | Nobody got it. | 
-3977.50 dishReveal | 106 | 7-5 | 0-0 | Nobody got it. | 
-3981.00 dishQ | 107 | 7-5 | 0-0 | Nobody got it. | 
-4015.50 dishReveal | 108 | 7-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4023.50 dishQ | 109 | 7-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4046.00 dishQ | 110 | 7-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4066.00 dishReveal | 111 | 7-5 | 1-0 | Time's up. ⁨Owls⁩ is out of this one. | 
-4074.00 dishSummary | 112 | 8-5 | 1-0 | Time's up. ⁨Owls⁩ is out of this one. | 
-4087.25 roundIntro | 113 | 8-5 |  | Time's up. ⁨Owls⁩ is out of this one. | 
-4101.75 ask | 114 | 8-5 |  | Time's up. ⁨Owls⁩ is out of this one. | 
-4132.25 answer | 114 | 9-5 |  | Lions +1 point | 
-4167.50 answer | 114 | 9-5 |  |  | 
-4168.25 steal | 115 | 8-5 |  | Owls steal a new question. | 
-4199.25 answer | 116 | 8-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4250.25 answer | 116 | 8-6 |  |  | 
-4262.00 answer | 116 | 8-5 |  | Call changed: nobody scores this one. | 
-4279.00 ask | 117 | 8-5 |  | Call changed: nobody scores this one. | 
-4340.00 steal | 118 | 8-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4357.25 answer | 118 | 9-5 |  | Lions +1 point — steal | 
-4381.50 roundScore | 119 | 9-5 |  | Lions +1 point — steal | 
-4414.00 battleIntro | 120 | 9-5 | 0-0 | Lions +1 point — steal | 
-4453.50 battleQ | 121 | 9-5 | 0-0 | Lions +1 point — steal | 
-4468.00 battleQ | 121 | 9-5 | 1-0 | Lions +1 point — steal | 
-4484.00 battleQ | 122 | 9-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4500.00 battleQ | 123 | 9-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4516.00 battleQ | 124 | 9-5 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4532.00 battleQ | 125 | 9-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4548.00 battleQ | 126 | 9-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4564.00 battleQ | 127 | 9-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4580.00 battleQ | 128 | 9-5 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-4596.50 battleHandoff | 129 | 9-5 | 3-0 | Time's up. | 
-4627.25 battleQ | 130 | 9-5 | 3-0 | Time's up. | 
-4643.25 battleQ | 131 | 9-5 | 3-0 | Time's up. | 
-4659.25 battleQ | 132 | 9-5 | 3-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4675.25 battleQ | 133 | 9-5 | 3-0 | Time's up. | 
-4691.25 battleQ | 134 | 9-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4707.25 battleQ | 135 | 9-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4723.25 battleQ | 136 | 9-5 | 3-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4739.25 battleQ | 137 | 9-5 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4755.25 battleQ | 138 | 9-5 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4756.00 battleQ | 138 | 9-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4760.50 battleReview | 138 | 9-5 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-4793.75 battleReview | 138 | 9-5 | 3-4 |  | 
-4808.75 battleReview | 138 | 9-5 | 3-4 | No answer in time: the call stands. | 
-4825.25 battleSummary | 139 | 9-7 | 3-4 | No answer in time: the call stands. | 
-4835.25 final | 140 | 9-7 |  | No answer in time: the call stands. | 
-recap: {"margin":2,"sudden":false,"leadChanges":2,"steals":[2,0],"minis":[3,2],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]},"chart":[[0,0],[0,0],[1,0],[1,1],[2,2],[3,2],[3,3],[3,4],[4,4],[5,4],[6,4],[7,5],[8,5],[9,5],[8,5],[8,6],[8,5],[9,5],[9,7]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Guess the Flag","pts":[[2,2]]},{"label":"R2","pts":[]},{"label":"Closest To Wins","pts":[[3,2]]},{"label":"R3","pts":[[3,3]]},{"label":"The Auction","pts":[[3,4]]},{"label":"Don't Say the Same as Me","pts":[[4,4]]},{"label":"R4","pts":[[5,4],[6,4]]},{"label":"Guess the Map","pts":[[7,5]]},{"label":"R5","pts":[]},{"label":"Guess the Cocktail or Dish","pts":[[8,5]]},{"label":"R6","pts":[[9,5],[8,5],[8,6],[8,5],[9,5]]},{"label":"Battle of the Captains","pts":[[9,7]]}],"awards":[{"t":"One-way traffic","who":"Closest To Wins, Lions 3–1","team":0},{"t":"Best thief","who":"Lions, 2 steals","team":0},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1},{"t":"Wildest guess, Closest To Wins","who":"Lions said 12, it was 195","team":0,"note":"Including the credits, how many minutes long is the original 1997 cinema cut of…"}]}
+3897.00 dishReveal | 102 | 7-5 | 0-0 | Nobody got it. | 
+3905.00 dishQ | 103 | 7-5 | 0-0 | Nobody got it. | 
+3922.50 dishQ | 103 | 7-5 | 0-0 | Lions is out of this one — Owls, it is yours to get. | 
+3944.00 dishReveal | 104 | 7-5 | 0-0 | Nobody got it. | 
+3952.00 dishQ | 105 | 7-5 | 0-0 | Nobody got it. | 
+3988.00 dishReveal | 106 | 7-5 | 0-0 | Nobody got it. | 
+3996.00 dishQ | 107 | 7-5 | 0-0 | Nobody got it. | 
+4011.00 dishReveal | 108 | 7-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4019.00 dishQ | 109 | 7-5 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4037.00 dishReveal | 110 | 7-5 | 1-0 | Nobody got it. | 
+4038.75 dishSummary | 111 | 8-5 | 1-0 | Nobody got it. | 
+4078.25 roundIntro | 112 | 8-5 |  | Nobody got it. | 
+4089.00 ask | 113 | 8-5 |  | Nobody got it. | 
+4104.50 steal | 113 | 8-5 |  | Nobody got it. | 
+4135.50 answer | 114 | 8-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4145.00 ask | 115 | 8-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4206.00 steal | 116 | 8-6 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4220.50 answer | 116 | 9-6 |  | Lions +1 point — steal | 
+4231.25 roundScore | 117 | 9-6 |  | Lions +1 point — steal | 
+4250.25 battleIntro | 118 | 9-6 | 0-0 | Lions +1 point — steal | 
+4309.50 battleQ | 119 | 9-6 | 0-0 | Lions +1 point — steal | 
+4325.50 battleQ | 120 | 9-6 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4341.50 battleQ | 121 | 9-6 | 0-0 | Time's up. | 
+4357.50 battleQ | 122 | 9-6 | 0-0 | Time's up. | 
+4359.00 battleQ | 122 | 9-6 | 1-0 | Time's up. | 
+4403.00 battleQ | 123 | 9-6 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4419.50 battleQ | 123 | 9-6 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4435.50 battleHandoff | 124 | 9-6 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4487.75 battleQ | 125 | 9-6 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+4503.75 battleQ | 126 | 9-6 | 2-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4519.75 battleQ | 127 | 9-6 | 2-1 | Time's up. | 
+4535.75 battleQ | 128 | 9-6 | 2-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4551.75 battleQ | 129 | 9-6 | 2-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4576.75 battleQ | 130 | 9-6 | 2-1 | Time's up. | 
+4592.75 battleQ | 131 | 9-6 | 2-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4608.75 battleQ | 132 | 9-6 | 2-2 | Time's up. | 
+4624.75 battleQ | 133 | 9-6 | 2-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+4640.75 battleLevel | 134 | 9-6 | 2-2 |  | 
+4655.25 battleSummary | 135 | 10-7 | 2-2 |  | 
+4723.50 final | 136 | 10-7 |  |  | 
+recap: {"margin":3,"sudden":false,"leadChanges":2,"steals":[2,1],"minis":[3,1],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]},"chart":[[0,0],[0,0],[1,0],[1,1],[2,2],[3,2],[3,3],[3,4],[4,4],[5,4],[6,4],[7,5],[8,5],[8,6],[9,6],[10,7]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Guess the Flag","pts":[[2,2]]},{"label":"R2","pts":[]},{"label":"Closest To Wins","pts":[[3,2]]},{"label":"R3","pts":[[3,3]]},{"label":"The Auction","pts":[[3,4]]},{"label":"Don't Say the Same as Me","pts":[[4,4]]},{"label":"R4","pts":[[5,4],[6,4]]},{"label":"Guess the Map","pts":[[7,5]]},{"label":"R5","pts":[]},{"label":"Guess the Cocktail or Dish","pts":[[8,5]]},{"label":"R6","pts":[[8,6],[9,6]]},{"label":"Battle of the Captains","pts":[[10,7]]}],"awards":[{"t":"One-way traffic","who":"Closest To Wins, Lions 3–1","team":0},{"t":"Best thief","who":"Lions, 2 steals","team":0},{"t":"Wildest guess, Closest To Wins","who":"Lions said 12, it was 299,792","team":0,"note":"Speed of light in a vacuum, in kilometres per second"}]}
