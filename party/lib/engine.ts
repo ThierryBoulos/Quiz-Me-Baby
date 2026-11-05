@@ -14,7 +14,7 @@ let bankP: Promise<Bank> | null = null;
    it (data/accept.json, served with the full bank): by question id, and by
    answer for flags, dishes, maps and Say-the-Same words ("United States"
    also takes "USA"). */
-type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; notById?: Record<string, string[]>; byPool?: Record<string, Record<string, string[]>>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
+type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; notById?: Record<string, string[]>; byPool?: Record<string, Record<string, string[]>>; someOf?: Record<string, { items: string[][]; min: number }>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
 let accept: Accept = { byId: {}, byAnswer: {} };
 export const acceptFor = (q: { id?: string; type?: string; question?: string; answer?: string; accept?: string[] } | null | undefined) =>
   !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(q.type === "saysame" ? sayAccept(q.id || "", q.answer || "") : givesItAway(q) ? [] : accept.byAnswer[q.answer || ""] || [])]
@@ -31,6 +31,8 @@ const givesItAway = (q: { type?: string; question?: string; answer?: string }) =
   const said = ` ${QMB.tidy(q.question)} `;
   return (accept.byAnswer[q.answer || ""] || []).some((s) => { const t = QMB.tidy(s); return !!t && said.includes(` ${t} `); });
 };
+/* "any two of these" (accept.json someOf): the names, each with its other names, and how many must be there */
+export const someOfFor = (q: { id?: string } | null | undefined) => (q && accept.someOf?.[q.id || ""]) || null;
 /* a ranking's items, right order first, each with the names it goes by (accept.json rankById) */
 export const rankFor = (q: { id?: string } | null | undefined): string[][] | null => (q && accept.rankById?.[q.id || ""]) || null;
 /* Guess the Map: the idea counts, not the wording. Each map has a few key ideas (data/accept.json,

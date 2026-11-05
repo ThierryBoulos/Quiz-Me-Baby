@@ -262,3 +262,9 @@ test('answers: symbols read as their names, a currency sign by a number stays ou
   assert.ok(Q.isMatch('AB+', 'AB positive') && Q.isMatch('O-', 'O negative'));
   assert.ok(Q.isMatch('$5', '5') && Q.isMatch('£ 10', '10') && Q.isMatch('100 €', '100'));
 });
+
+test('someOfMatch: any two of the four colours of the dress, in any order, never one alone (5 Nov)', () => {
+  const it = [['blue'], ['black'], ['white'], ['gold', 'golden']];
+  for(const t of ['blue and black', 'white and gold', 'black, blue', 'golden and white', 'white or gold', 'blue black white gold']) assert.ok(Q.someOfMatch(t, it, 2), t);
+  for(const t of ['blue', 'white', 'pink and green', 'blue and pink', '']) assert.ok(!Q.someOfMatch(t, it, 2), t);
+});

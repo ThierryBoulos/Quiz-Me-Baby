@@ -167,6 +167,15 @@
      order, each item with the names it goes by ([["Gutenberg's printing press", "Gutenberg",
      "printing press"], ...]); an item is where any of its names first appears after the one before,
      typos allowed (a word more or fewer for a stray "the"). */
+  /* "Name any two of these" (5 Nov, the owner: the dress was blue and black, or white and gold; any two of the
+     four colours count): at least `min` of `items` named, in any order, each by any of its names, typos allowed */
+  function someOfMatch(typed, items, min){
+    if(!items || !items.length) return false;
+    const words = tidy(typed).split(' ').filter(w => w && w !== 'and' && w !== 'or');
+    const got = items.filter(names => names.some(n => { const k = tidy(n).split(' ').length;
+      for(let i = 0; i + k <= words.length; i++) if(matchOne(words.slice(i, i + k).join(' '), n)) return true; return false; }));
+    return got.length >= (min || 2);
+  }
   function rankMatch(typed, items){
     if(!items || !items.length) return false;
     const words = tidy(typed).split(' ').filter(Boolean);
@@ -2068,6 +2077,6 @@
     return b;
   }
 
-  return { tidy, asNumber, numWords, distance, isMatch, rankMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
+  return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

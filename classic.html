@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.54', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.55', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1545,9 +1545,9 @@ const SEED = [
 ['Internet & Memes','medium','most-viewed','As of 2025, which video is the most-viewed on YouTube of all time?','Baby Shark Dance','By Pinkfong; overtook Despacito in 2020, over 16 billion views. Despacito was second until mid-2026, when Wheels on the Bus passed it.'],
 ['Internet & Memes','hard','the-first','What was the first ever tweet, and who posted it?','"just setting up my twttr" — Jack Dorsey','21 March 2006.'],
 ['Internet & Memes','hard','the-first','What was the first video uploaded to YouTube?','Me at the Zoo','By co-founder Jawed Karim, April 2005.'],
-['Internet & Memes','hard','optical-illusion','In 2015, the internet split in half over what colour a certain dress was — what were the two options?','Blue and black, or white and gold','It was actually blue and black.'],
+['Internet & Memes','hard','optical-illusion','In 2015, the internet split in half over the colours of a certain dress. Name at least two of the colours people argued about.','Any two of blue, black, white and gold','It was blue and black; half the internet saw white and gold.'],
 ['Internet & Memes','hard','optical-illusion','In 2018, an audio clip split the internet — what were the two words people heard?','Laurel and Yanny',''],
-['Internet & Memes','medium','order','Rank these from oldest to most recent: Harlem Shake trend, Ice Bucket Challenge, Rickrolling','Rickrolling (2007) → Harlem Shake trend (2013) → Ice Bucket Challenge (2014)',''],
+['Internet & Memes','medium','order','Rank these from oldest to most recent: Ice Bucket Challenge, KONY 2012, Rickrolling','Rickrolling (2007) → KONY 2012 (2012) → Ice Bucket Challenge (2014)',''],
 ['Internet & Memes','medium','order','Rank these launches from oldest to most recent: Twitter, Myspace, YouTube','Myspace (2003) → YouTube (2005) → Twitter (2006)',''],
 /* ---- KNOW THE HOST ---- */
 ['Know the Host','easy','','What is the host\'s date of birth — day and month?','Host knows this one',''],
@@ -1820,7 +1820,6 @@ const SEED = [
 ['Sports','hard','','Which climber free-soloed El Capitan in the documentary Free Solo?','Alex Honnold','Completed the climb in June 2017.'],
 ['Sports','hard','','Name the four cities that host tennis\'s Grand Slam tournaments.','Melbourne, Paris, London, New York','Australian Open, French Open, Wimbledon, US Open.'],
 /* ---- POP CULTURE ---- */
-['Pop Culture','hard','viral-ranking','Rank these oldest to newest: Ice Bucket Challenge, KONY, Harlem Shake','KONY 2012, Harlem Shake, Ice Bucket Challenge','March 2012, February 2013, summer 2014.'],
 ['Pop Culture','hard','viral-ranking','Rank these oldest to newest: Mannequin Challenge, Gangnam Style, Harlem Shake','Gangnam Style, Harlem Shake, Mannequin Challenge','July 2012, February 2013, late 2016.'],
 ['Pop Culture','hard','','Which video did MrBeast\'s baguette video overtake to become YouTube\'s most-liked?','Despacito','Held the record from 2017 until January 2025.'],
 /* ---- MUSIC ---- */
@@ -4346,7 +4345,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 52;   // bumped when the built-in bank changes
+const SEED_VERSION = 53;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
