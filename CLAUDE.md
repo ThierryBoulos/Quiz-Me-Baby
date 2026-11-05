@@ -5,6 +5,9 @@ the home of the question bank; `engine/core.js` is the game engine both share.
 
 - **Writing or changing content?** Read `docs/CONTENT-RULES.md` first and follow it; add the owner's new rulings
   there.
+- **Showing the owner new content**: never a summary or table. Each item numbered and written out exactly: question,
+  answer, accepted answers, notes, and the 4 options for Majority Rules (rulebook §0). The owner accepts, rejects or
+  comments by number.
 - **Commercial-phase and security to-dos**: `docs/COMMERCIAL.md`.
 - **Push only when the owner says "push".** Commit locally meanwhile.
 - **Database changes need the owner's approval**: write the SQL to `supabase/migrations/` and a paste-ready copy to

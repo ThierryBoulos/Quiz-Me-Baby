@@ -6,6 +6,22 @@ When the owner rules on something new, add it here.
 
 ---
 
+## 0. How to show the owner new content (always)
+
+The owner's ruling, 5 Nov 2026: new or changed content is **never** given as a summary or a table. Every item is
+shown **numbered and written out exactly as it will appear**, so the owner can accept, reject or comment by number:
+
+- the level (and theme or game);
+- the question, word for word;
+- the answer;
+- the accepted answers (everything added in `accept.json`; for a map, the ideas that count);
+- the notes, word for word (or "none");
+- for Majority Rules, **all four options** and which one is right;
+- for a map: title, answer, notes, and the categories with their colours;
+- any "never on the same night" group it joins.
+
+Then wait for the owner's verdict; rejected items come out, comments are applied, and only then is it final.
+
 ## 1. Questions
 
 - **Quote style: single quotes** for a named word or title inside a question: `What does 'ATM' stand for?`,
