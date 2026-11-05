@@ -111,6 +111,15 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
           {T.map((t, i) => <span key={i} className="flex items-center gap-2" style={{ ["--c" as string]: t.color }}><Dot t={i} color={t.color} size={k > 5 ? 18 : 20} /><span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
             <b>{pc ? pct(g!.shares?.[i] ?? 0) : <Roll v={g!.pts[i]} />}</b>{pub.fire?.[i] && <span className="flame !mx-0" aria-label="on fire">🔥</span>}</span>)}
         </div>)}
+      {/* the phone: the night's standings, small, every team, yours lit (the owner's pick on the 4 Nov audit, decision 3:
+          with no TV, nobody could see them during a game) */}
+      {!tv && (
+        <div className="hud-strip" aria-label={`The night so far: ${T.map((t, i) => `${t.name} ${num(i)}`).join(", ")}`}>
+          {T.map((t, i) => (
+            <span key={i} className={"hs" + (i === me ? " me" : "")} style={{ ["--c" as string]: t.color }}>
+              <Dot t={i} color={t.color} size={10} /><bdi className="hs-nm">{t.name}</bdi><b>{num(i)}</b>
+            </span>))}
+        </div>)}
       {/* the phone: whose side you're on, small, in the team's colour (the screen's glow is that colour too) */}
       {!tv && me != null && T[me] && <div className="hud-mini" style={{ ["--c" as string]: T[me].color }}><span>You&rsquo;re on</span><Dot t={me} color={T[me].color} size={14} /><span className="nm" style={{ color: T[me].color }}><bdi>{T[me].name}</bdi></span></div>}
       {!tv && me == null && host && <div className="hud-mini"><span>You&rsquo;re the host</span></div>}
@@ -120,11 +129,14 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
 /* ---- a game's intro: the title, the gold band, the numbered rules (GameParts' MiniIntro, for N teams) ---- */
 function rules(pub: PubMany): string[] {
   /* plain English, only what you need to play (the owner, 31 Oct): no ties, no team counts */
-  const g = pub.game!, n = g.of, k = pub.teams.length, more = k > 3 ? "…" : ".";
+  const g = pub.game!, n = g.of, k = pub.teams.length;
   /* the points, in numbers (the reviewers, 31 Oct): each go pays by place, 1st as many as there are teams; at the
      end the game's places add 10, 8, 6… to the night. With three teams the lists end with a full stop, not dots */
-  const per = `1st gets ${k} points, 2nd ${k - 1}, 3rd ${k - 2}${more} Wrong, nothing.`;
-  const pay = `At the end of the game, 1st place adds ${PLACE_PTS[0]} to the night, 2nd ${PLACE_PTS[1]}, 3rd ${PLACE_PTS[2]}${more}`;
+  /* (in full, every place: the card used to stop at "3rd 6…"; and a team that scores nothing gets nothing, which
+     the place list alone never said: the 4 Nov audit, 3.8) */
+  const per = k <= 4 ? `1st gets ${k} points, ${Array.from({ length: k - 1 }, (_, i) => `${place(i + 2)} ${k - i - 1}`).join(", ")}. Wrong, nothing.`
+    : `1st gets ${k} points, 2nd ${k - 1}, and so on down to 1. Wrong, nothing.`;
+  const pay = `At the end of the game, the places add to the night: ${PLACE_PTS.slice(0, k).map((p, i) => `${place(i + 1)} ${p}`).join(", ")}. Score nothing in a game, add nothing.`;
   const fast = `Fastest right answer first: ${per}`;
   switch (g.key) {
     case "majority": return [
@@ -461,6 +473,8 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
             <span className={tv ? "display truncate" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
             {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
             {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
+            {/* why that many: the order the right answers came in (the 4 Nov audit, 3.8: +4, +3, +2 said nothing) */}
+            {ok && (R.pts?.[i] ?? 0) > 0 && R.places?.[i] && pub.game?.key !== "say" && <span className="shrink-0" style={{ color: "var(--color-ink-3)", fontSize: tv ? (dense ? 16 : 20) : 12 }}>{place(R.places[i]!)} right</span>}
           </div>
           {(x || ok == null) && <div className={"font-bold max-w-full text-center leading-tight " + (tv && dense ? "truncate" : "clamp2")} style={{ fontSize: tv ? (dense ? 18 : 24) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}
         </div>); })}

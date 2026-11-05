@@ -1308,3 +1308,13 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   .notv-bar p { margin: 0; text-align: center; font-size: var(--text-13); color: var(--color-ink-2); }
 }
 @media (orientation: landscape) and (max-height: 500px) { .notv-bar { flex-direction: row; align-items: center; } .notv-bar .btn { width: auto; flex: none; padding-inline: 28px; } .notv-bar p { text-align: left; } }
+
+/* the phone's standings strip for 3-8 teams (decision 3, 4 Nov audit): every team's night total, yours lit */
+.hud-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; margin-top: 8px; min-width: 0; }
+.hud-strip .hs { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: var(--text-12);
+  color: var(--color-ink-3); border: 1px solid rgba(255, 255, 255, .08); min-width: 0; }
+.hud-strip .hs-nm { max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud-strip .hs b { font-family: var(--font-display); font-weight: 400; font-size: var(--text-14); color: var(--color-ink-2); font-variant-numeric: tabular-nums; }
+.hud-strip .hs.me { color: var(--c); border-color: color-mix(in srgb, var(--c) 60%, transparent); background: color-mix(in srgb, var(--c) 12%, transparent); }
+.hud-strip .hs.me b { color: var(--c); }
+.hud-strip .hs.me .hs-nm { max-width: 110px; }

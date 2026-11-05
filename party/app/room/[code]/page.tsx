@@ -429,6 +429,12 @@ export default function PhoneRoom() {
               </div>)}
             {mine.role === "player" && !myCaptain && (
               <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>)}
+            {/* 3-8 teams: only the host moves the night on, so with none, anyone can be it (the 4 Nov audit, 1.9) */}
+            {many && !host && (
+              <div className="card flex flex-col gap-2 text-center">
+                <p className="text-14">The night has no host, and only the host can move it on.</p>
+                <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>
+              </div>)}
             {mine.role === "player" && myCaptain && <div className="card text-center text-14">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
             {mine.role === "host" && !many && <p className="text-14 text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
             {many ? (!(room.state?.pub as PubMany | null)?.many && <LineupMany room={room} members={members} k={teamCount} />) : <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />}
@@ -445,7 +451,11 @@ export default function PhoneRoom() {
         ) : many ? ((room.state?.pub as PubMany | null)?.many ? ((room.state.pub as PubMany).intro
               ? <NightIntroPhone intro={(room.state.pub as PubMany).intro!} busy={busy || waiting} who="The host starts the game."
                   go={mine.role === "host" ? () => void sendMove({ type: "m/go" }) : undefined} />
-              : <PhoneMany pub={room.state.pub as PubMany} me={mine} code={code} />)
+              : <>
+                  {!host && <button type="button" className="btn btn-block" onClick={() => setPanel(true)}>The night needs a host. Tap here to be it</button>}
+                  {mine.role === "player" && !myCaptain && <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("captain")}>Your team has no captain. Make me captain</button>}
+                  <PhoneMany pub={room.state.pub as PubMany} me={mine} code={code} members={members} />
+                </>)
             : <section className="card text-center enter flex-1 grid place-items-center"><div><div className="eyebrow">Game on</div><h1 className="display text-44 mt-2">{noTv ? "Get ready" : "Eyes on the TV"}</h1></div></section>
         ) : !pub ? (
           <section className="card text-center enter flex-1 grid place-items-center">

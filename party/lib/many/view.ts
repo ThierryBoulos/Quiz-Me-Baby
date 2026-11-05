@@ -36,7 +36,9 @@ export type PubMany = {
   intro?: IntroPub;                              // the night's intro (before the first game), until Let's go
   toast: { id: number; text: string } | null; exit?: boolean; ack?: Record<string, Record<string, string>>;
 };
-export type SecretMany = { answer?: string; notes?: string; typed?: (string | null)[]; nums?: (number | null)[] };
+export type SecretMany = { answer?: string; notes?: string; typed?: (string | null)[]; nums?: (number | null)[];
+  step?: number; qid?: string;                  // which question this answer is for (the host's card shows only a match)
+  out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
 export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
@@ -51,14 +53,15 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   if (m && m.key === "majority" && pub.game) { const c = s.screen === "reveal" ? mrCount(s) : null;
     pub.game.shares = s.teams.map((_, t) => { const r = m.right[t] + (c ? c.right[t] : 0), of = m.of[t] + (c ? c.of[t] : 0); return of ? r / of : 0; }); }
   if (m && q && (s.screen === "q" || s.screen === "reveal")) {
-    pub.qid = String(q.id ?? m.key + m.i);
+    /* (a key for this question, not its id in the bank, which anyone can look up: the 4 Nov audit, 4.5) */
+    pub.qid = `${s.mi}.${m.i}`;
     const rev = s.screen === "reveal";
     if (m.key === "flag") pub.flag = q.flag;
     else if (m.key === "pin") pub.pin = { photo: q.photo, credit: q.credit, licence: q.licence };
     else if (m.key === "airport") pub.airport = { title: q.boardTitle, board: q.board, code: rev ? q.code : undefined, city: rev ? q.city : undefined };
     else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined };
     else if (m.key === "dish") { pub.dish = { kind: dishKind(q), ings: (q.ings || []).slice(0, rev ? undefined : Math.max(1, s.shown)), n: (q.ings || []).length };
-      pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }
+      if (rev) pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }
     else pub.question = q.question;
     if (m.key === "quiz" && q.theme) pub.theme = q.theme;
     if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes); }
@@ -82,7 +85,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
   /* the host's phone: the answer while it's up, and what every captain typed */
   const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal")
-    ? { answer: String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : q.notes, typed: s.typed, nums: s.nums } : {};
+    ? { answer: String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : q.notes, typed: s.typed, nums: s.nums,
+        step: s.step, qid: pub.qid, ...(m.key === "dish" ? { out: s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)) } : {}) } : { step: s.step };
   void allIn;
   return { pub, secret };
 }

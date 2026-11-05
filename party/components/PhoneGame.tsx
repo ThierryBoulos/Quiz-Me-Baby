@@ -45,7 +45,7 @@ const BUZZ_SCREENS = ["dishQ", "sudden", "battleTie"];
 /* A captain's inbox: what their own players suggest for the question on
    screen, newest first, with who said it. */
 type Sug = { id: number; user_id: string; text: string };
-function useSuggestions(code: string, qid: string | undefined, members: Member[], team: 0 | 1, on: boolean) {
+export function useSuggestions(code: string, qid: string | undefined, members: Member[], team: number, on: boolean) {
   const [list, setList] = useState<Sug[]>([]);
   useEffect(() => {
     setList([]);

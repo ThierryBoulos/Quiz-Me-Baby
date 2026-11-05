@@ -13,6 +13,7 @@ import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
+import { useSuggestions } from "../PhoneGame";
 import { ToSide } from "../Side";
 import { Dot, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
@@ -20,16 +21,23 @@ import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
+/* (only the one for this very question: the TV writes the screen first and the answer just after, so a read in between
+   brought the last question's answer for a second or more; it asks again until they match. The 4 Nov audit, 1.12) */
 function useSecretMany(code: string, on: boolean, step: number) {
   const [s, setS] = useState<SecretMany>({});
   useEffect(() => {
     if (!on) return;
-    let live = true;
-    const pull = () => void sb().from("secrets").select("data").eq("room", code).maybeSingle().then(({ data }) => { if (live && data) setS((data.data || {}) as SecretMany); });
-    pull(); const t = setTimeout(pull, 900);
+    let live = true, n = 0, t: ReturnType<typeof setTimeout> | undefined;
+    const pull = () => void sb().from("secrets").select("data").eq("room", code).maybeSingle().then(({ data }) => {
+      if (!live) return;
+      const d = (data?.data || {}) as SecretMany;
+      if (d.step === step || d.step == null) { setS(d); return; }
+      if (++n < 12) t = setTimeout(pull, Math.min(3000, 400 * n));
+    }, () => { if (live && ++n < 12) t = setTimeout(pull, 1500); });
+    pull();
     return () => { live = false; clearTimeout(t); };
   }, [code, on, step]);
-  return s;
+  return s.step == null || s.step === step ? s : {};
 }
 /* each phone its own order of the four (seeded by the player's name: a neighbour's screen tells you nothing) */
 function order<T>(xs: T[], seed: string) {
@@ -41,7 +49,7 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
 const Line = ({ children, className = "" }: { children: React.ReactNode; className?: string }) =>
   <p className={"text-center text-15 text-[var(--color-ink-2)] " + className} role="status">{children}</p>;
 
-export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: string }) {
+export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
   const noTv = useNoTv();
@@ -52,10 +60,19 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
   /* a tap holds the buttons (no second tap) but they only dim if the TV takes more than half a second (1 Nov) */
   const [busyLong, setBusyLong] = useState(false);
   useEffect(() => { if (!busy) { setBusyLong(false); return; } const t = setTimeout(() => setBusyLong(true), 450); return () => clearTimeout(t); }, [busy]);
+  /* the TV's receipt for the last tap: one it turned down says why (the 4 Nov audit, 3.3: the reasons were written, never shown) */
+  const [lastTap, setLastTap] = useState<string | null>(null);
+  const got = lastTap ? pub.ack?.[me.user_id]?.[lastTap] : undefined;
+  useEffect(() => { if (got && got !== "+" && got !== "-") { setErr(got); setSentTxt(null); } }, [got]);
   const send = async (kind: string, payload: Record<string, unknown>) => {
     setBusy(true); setErr(null);
-    try { await sendAction(code, kind, { ...payload, step: pub.step }); return true; } catch { setErr(noTv ? "That didn't go through. Try again." : "That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
+    try { setLastTap(await sendAction(code, kind, { ...payload, step: pub.step })); return true; } catch { setErr(noTv ? "That didn't go through. Try again." : "That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
   };
+  /* players suggest, the captain sees their own team's suggestions (the 4 Nov audit, 3.13) */
+  const [sug, setSug] = useState(""), [sugSent, setSugSent] = useState<string | null>(null);
+  useEffect(() => { setSug(""); setSugSent(null); }, [pub.qid]);
+  const sugs = useSuggestions(code, pub.qid, members, mine ?? -1, cap && sc === "q");
+  const suggest = async () => { const t = sug.trim(); if (!t || mine == null) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSugSent(t); setSug(""); } catch { /* the phone says so */ } };
   /* the host's change of a call shows at once, until the TV's own update says the same */
   const [flips, setFlips] = useState<Record<string, boolean>>({});
   useEffect(() => { setFlips((f) => { const n = { ...f }; let ch = false; for (const k of Object.keys(n)) { const [q, t] = k.split("|"); if (q !== String(pub.qid) || pub.reveal?.ok?.[Number(t)] === n[k]) { delete n[k]; ch = true; } } return ch ? n : f; }); }, [pub.reveal, pub.qid]);
@@ -148,7 +165,7 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
     return (<>
       {mine != null && <YouPill text={mineAw > 0 ? `Your team: ${place(S.places[mine])} · +${mineAw} to the night` : "Your team: no points this game"} tone={mineAw > 0 ? "ok" : "mid"} />}
       <TitleLine eyebrow={g.title} text={P.text} color={P.color} />
-      <ResultTable rows={rows} head={[S.shares ? "Right" : "Points", "Night"]} places big />
+      <ResultTable rows={rows} head={[S.shares ? "Right" : "This game", "Tonight"]} places big />
       {S.line && <p className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{S.line}</p>}
     </>); };
   /* the night's end (the owner, 1 Nov): the winner clear at the top, how your team did, then the standings */
@@ -179,16 +196,17 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
             <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(secret.answer)) : secret.answer}</div>
             {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
           </div>)}
+        {!secret.answer && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Getting the answer…</p>}
         {/* who's in: every team, as the TV shows them */}
         {/* who has answered, live (the owner, 31 Oct): a count, then each team ticked green as it locks in */}
         {(() => { const who = T.map((_, i) => i).filter((i) => !g.only || g.only.includes(i)), n = who.filter((i) => pub.sent[i]).length; return (
           <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who has answered">
             <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered` : `${n} of ${who.length} teams answered`}</p>
             <div className={"grid gap-x-3 gap-y-1 " + (T.some((t) => t.name.length > 8) ? "grid-cols-1" : "grid-cols-2")}>
-              {who.map((i) => { const t = T[i], on = pub.sent[i] && !pub.out?.[i]; return (
+              {who.map((i) => { const out = (secret.out ?? pub.out)?.[i], t = T[i], on = pub.sent[i] && !out; return (
                 <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
                   <Dot t={i} color={t.color} size={14} /><span className="truncate flex-1"><bdi>{t.name}</bdi></span>
-                  <span className="shrink-0 font-bold" style={{ color: pub.out?.[i] ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)" }}>{pub.out?.[i] ? "✗ out" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting"}</span>
+                  <span className="shrink-0 font-bold" style={{ color: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)" }}>{out ? "✗ out" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting"}</span>
                 </span>); })}
             </div>
           </div>); })()}
@@ -264,10 +282,30 @@ export function PhoneMany({ pub, me, code }: { pub: PubMany; me: Member; code: s
               <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
+        {!sentMine && sugs.length > 0 && g.key !== "pin" && (
+          <div className="card">
+            <div className="eyebrow mb-2">Your team suggests. Tap one to use it.</div>
+            <div className="flex flex-col gap-1">
+              {sugs.map((x) => (
+                <button key={x.id} type="button" className="text-left text-15 min-h-[44px] px-2 -mx-2 rounded-[12px] active:bg-white/10" onClick={() => setText(x.text)}>
+                  <b style={{ color: mine != null ? T[mine].color : undefined }}><bdi>{members.find((m) => m.user_id === x.user_id)?.name}</bdi>:</b> {x.text}</button>))}
+            </div>
+          </div>)}
       </>)}
       {!host && !cap && sc === "q" && g && g.key !== "majority" && (<>
         <OnScreen />
-        <Line>Your captain answers this one. Shout your idea.</Line>
+        {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
+        {mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) ? (
+          <div className="card flex flex-col gap-2">
+            <label className="field-label !mb-0" htmlFor="msug">Suggest to {T[mine]?.captain || "your captain"}</label>
+            <div className="flex gap-2">
+              <input id="msug" className="input" autoComplete="off" value={sug} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} placeholder={g.key === "closest" ? "A number" : "Your answer"}
+                onChange={(e) => setSug(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
+              <button className="btn" disabled={!sug.trim()} onClick={() => void suggest()}>Send</button>
+            </div>
+            {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
+          </div>)
+          : <Line>Your captain answers this one.</Line>}
       </>)}
 
       {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}

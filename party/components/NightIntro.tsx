@@ -13,7 +13,7 @@ const ordinal = (n: number) => n + (n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 /* how the night is won, in a line */
 export function introWin(I: IntroPub) {
-  if (I.many) return `Each game ranks the teams: ${PLACE_PTS.slice(0, Math.min(I.teams, 4)).map((p, i) => `${ordinal(i + 1)} ${p}`).join(", ")}${I.teams > 4 ? "…" : ""} points. Most points at the end wins.`;
+  if (I.many) return `Each game ranks the teams: ${PLACE_PTS.slice(0, Math.min(I.teams, 4)).map((p, i) => `${ordinal(i + 1)} ${p}`).join(", ")}${I.teams > 4 ? "…" : ""} points to the night. Score nothing in a game, add nothing. Most points at the end wins.`;
   return "Most points at the end wins the night. Level at the end? Sudden death.";
 }
 const qCaption = (I: IntroPub) => I.many ? "Two themes a round, four questions. Every team answers every one."

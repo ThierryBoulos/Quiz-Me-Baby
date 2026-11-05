@@ -116,6 +116,12 @@ export default function TvRoom() {
         {room.status !== "lobby" && isTv && !many && [0, 1].filter((t) => !members.some((m) => m.team === t && m.role === "captain")).map((t) => (
           <div key={t} className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: `var(--color-${t === 0 ? "a" : "b"})` }}>
             {(room.state.teamNames || ["Team A", "Team B"])[t]} needs a captain: tap &ldquo;Make me captain&rdquo; on a phone</div>))}
+        {/* 3-8 teams (the 4 Nov audit, 1.9 and 3.3): the same for each team, and the host, who alone moves the night on */}
+        {room.status !== "lobby" && isTv && many && pubMany && !members.some((m) => m.role === "host") && (
+          <div className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: "var(--color-gold)" }}>The night needs a host: tap your name on a phone, then &ldquo;I&rsquo;m the host&rdquo;</div>)}
+        {room.status !== "lobby" && isTv && many && pubMany && pubMany.teams.map((T, t) => ({ T, t })).filter(({ t }) => !members.some((m) => m.team === t && m.role === "captain")).map(({ T, t }) => (
+          <div key={"m" + t} className="chip" style={{ fontSize: 18, padding: "10px 20px", borderColor: T.color }}>
+            <bdi>{T.name}</bdi> needs a captain: tap &ldquo;Make me captain&rdquo; on a phone</div>))}
       </div>
       {owner && lock.state === "other" && (
         <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", zIndex: 40 }}>

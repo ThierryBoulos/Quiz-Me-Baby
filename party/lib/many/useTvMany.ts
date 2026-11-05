@@ -61,9 +61,17 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     return sb().from("rooms").update({ state: { ...(ctx.current.room?.state || {}), ...lobbyMine.current, ...patch } }).eq("code", code);
   }, [code]);
 
-  /* publish: the view for every phone, the answer for the host; one write at a time, newest wins */
+  /* publish: the view for every phone, the answer for the host; one write at a time, newest wins. The two-team
+     game's safeguards (the 4 Nov audit, 4.1): each write only lands over an older one (a held write landing late
+     can't roll the screen back), a write the server sits on doesn't hold up the next ones past 2 s, a write turned
+     down because the room holds a later stamp (this phone's clock behind the last one's) goes again from there,
+     and the answer is only written when it changed */
   const chain = useRef<Promise<void>>(Promise.resolve());
+  const lastSecret = useRef("");
+  const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const publishRef = useRef<() => void>(() => {});
   const publish = useCallback(() => {
+    if (soon.current) { clearTimeout(soon.current); soon.current = null; }
     const s = st.current; if (!s) return;
     const { pub: p, secret } = buildMany(s);
     p.ack = ack.current;
@@ -76,13 +84,36 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       backedUp.current = { t: Date.now(), screen: s.screen };
       void sb().rpc("qmb_tv_backup", { r: code, s: { many: true, build: BUILD_ID, shape: SHAPE, s, ...inboxMark(code), savedAt: Date.now(), settings: getSettings() } }).then(() => {}, () => {});
     }
-    chain.current = chain.current.then(async () => {
+    const sec = JSON.stringify(secret), withSecret = sec !== lastSecret.current;
+    const job = async () => {
       const room = ctx.current.room;
-      const r = await sb().from("rooms").update({ state: { ...(room?.state || {}), pub: p, pubAt: at } }).eq("code", code);
-      if (r.error) console.error("publish (many)", r.error);
-      await sb().from("secrets").update({ data: { ...secret, at } }).eq("room", code);
-    }).catch((e) => console.error("publish (many)", e));
+      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: p, pubAt: at } }).eq("code", code)
+        .or(`state->>pubAt.is.null,state->>pubAt.lt.${at}`).select("code")];
+      if (withSecret) writes.push(sb().from("secrets").update({ data: { ...secret, at } }).eq("room", code)
+        .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).select("room"));
+      const res = await Promise.all(writes);
+      const bad = res.find((r) => r.error);
+      if (bad) { setBanner((b) => b ?? "offline"); throw bad.error; }
+      setBanner((b) => (b === "offline" ? null : b));
+      const latest = lastAt.current === at;
+      if (withSecret && latest) lastSecret.current = sec;
+      if (latest && !res[0].data?.length) {
+        const r = await sb().from("rooms").select("state").eq("code", code).maybeSingle();
+        const theirs = Number((r.data?.state as { pubAt?: number } | undefined)?.pubAt) || 0;
+        if (theirs >= at) { lastAt.current = Math.max(lastAt.current, theirs); setTimeout(() => publishRef.current(), 0); }
+      }
+    };
+    chain.current = chain.current.then(() => {
+      const done = job().catch((e) => { console.error("publish (many)", e); setTimeout(() => publishRef.current(), 2000); });
+      return Promise.race([done, new Promise<void>((r) => setTimeout(r, 2000))]);
+    });
   }, [code, saveKey]);
+  publishRef.current = publish;
+  /* answers coming in (60 phones in Majority Rules): one update a second, not one each (the 4 Nov audit, 1.11) */
+  const publishSoon = useCallback(() => {
+    if (soon.current) return;
+    soon.current = setTimeout(() => { soon.current = null; publishRef.current(); }, 1000);
+  }, []);
 
   /* a safety net (live test, 1 Nov): a lobby write landing as the game begins (a team's new name, the "away" check)
      can replace the room's state without the screen in it, and every phone then waits on nothing. The TV knows what
@@ -129,6 +160,16 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (a.kind === "team_name" && from?.role === "captain" && (from.team as number) === Number(a.payload.team) && (from.team as number) < k) {
         const names = manyNames(room, MANY_MAX); names[from.team as number] = cap1(String(a.payload.name || "").trim().slice(0, 14)) || names[from.team as number];
         await lobbyWrite({ teamNames: names });
+        return;
+      }
+      /* my captain is away, so I take the armband (the 4 Nov audit, 3.3: the button was there, and nothing happened) */
+      if (a.kind === "setup" && a.payload.takeCaptain && from && from.team != null && from.role === "player") {
+        const cap = members.find((m) => m.team === from.team && m.role === "captain");
+        if (!cap) return;
+        const away = ((lobbyMine.current.away ?? room.state?.away) as string[] | undefined) || [];
+        if (!away.includes(cap.user_id)) { await lobbyWrite({ note: { text: `${cap.name} is still here.`, at: Date.now() } }); return; }
+        const x = await sb().from("members").update({ role: "player" }).eq("room", code).eq("user_id", cap.user_id);
+        if (!x.error) await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", a.user_id);
         return;
       }
       if (a.kind === "setup" && a.payload.start && from?.role === "host") {
@@ -210,14 +251,17 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     /* captains answer; in Majority Rules everyone does */
     if (a.kind === "answer") {
       const m = miniOf(s);
+      /* an answer for an earlier question, landing late (a send the server sat on): it goes nowhere, and isn't counted
+         as this question's (the 4 Nov audit, 1.10: it could even rank first) */
+      if (typeof a.payload.k === "string" && a.payload.k !== `${s.mi}.${m?.i}|q`) { reply("Too late: that answer was for the last question."); publishSoon(); return; }
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
         : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G, Number(a.id) || undefined) : "Your captain answers this one.";
       reply(r === true ? "+" : r);
       /* everyone answers, the Cocktail or Dish too: the faster right, the more points (the owner, 31 Oct) */
-      if (r === true && allIn(s)) reveal(s);
-      publish(); return;
+      if (r === true && allIn(s)) { reveal(s); publish(); return; }
+      publishSoon(); return;
     }
-  }, [code, publish, saveKey, lobbyWrite]);
+  }, [code, publish, publishSoon, saveKey, lobbyWrite]);
 
   useInbox(code, isTv, handle);
 
