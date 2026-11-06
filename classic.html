@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.57', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.58', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1538,6 +1538,7 @@ const SEED = [
 ['History','hard','documents','Which 1215 English document limited the power of the king?','Magna Carta',''],
 /* ---- INTERNET & MEMES ---- */
 ['Internet & Memes','easy','','Which song plays when you get Rickrolled?','Never Gonna Give You Up','Rick Astley, 1987.'],
+['Internet & Memes','medium','','Which 1999 trance track is the joke reply to every \'What\'s the name of this song?\' comment online?','Sandstorm','The meme took off on Twitch and YouTube around 2014: whatever the tune, someone answers \'Darude – Sandstorm\'. By the Finnish producer Ville Virtanen.'],
 ['Internet & Memes','easy','','Which K-pop track was the first YouTube video to reach one billion views?','Gangnam Style','PSY, 2012. It also broke YouTube\'s view counter.'],
 ['Internet & Memes','medium','','What breed of dog is the \'Doge\' meme?','A Shiba Inu','The dog\'s real name was Kabosu.'],
 ['Internet & Memes','easy','challenge','Which charity challenge involved tipping freezing water over your head in 2014?','The Ice Bucket Challenge','It raised money for ALS research.'],
@@ -1656,7 +1657,10 @@ const SEED = [
 ['Rave Culture','medium','','Which DJ\'s 2015 Boiler Room set in Tulum became one of the most-watched sets on the platform?','Solomun',''],
 ['Rave Culture','expert','','What is the name of the famous art car known for its sunrise DJ sets at Burning Man?','Robot Heart',''],
 ['Rave Culture','medium','artist','Which Finnish producer made the 1999 trance anthem \'Sandstorm\'?','Darude',''],
-['Rave Culture','medium','artist','Which Italian producer made the 1995 piano-led anthem \'Children\'?','Robert Miles',''],
+['Rave Culture','hard','','Which Swedish producer made \'Opus\', the nine-minute slow-builder that became one of the great festival anthems?','Eric Prydz','From his 2016 album \'Opus\'. He also records as Pryda and Cirez D.'],
+['Rave Culture','medium','','Which Dutch DJ turned Samuel Barber\'s \'Adagio for Strings\' into a 2005 trance anthem?','Tiësto','Barber wrote it in 1936; it was played at the funerals of Roosevelt and Einstein.'],
+['Rave Culture','expert','','Which German duo made the 1993 Balearic trance anthem \'Café del Mar\'?','Energy 52','Named after the Ibiza sunset bar; Kid Paul and Cosmic Baby.'],
+['Rave Culture','medium','','Which 1995 track did Robert Miles write to close the night in Italian clubs, so ravers would calm down before driving home?','Children','Italy was losing young clubbers in car crashes after nights out (the \'stragi del sabato sera\'). Photos of children caught in the Yugoslav wars, brought home by his father, inspired it too.'],
 ['Rave Culture','hard','','Which label was founded by the trio Above & Beyond?','Anjunabeats','Or its sister label, Anjunadeep'],
 ['Rave Culture','hard','','Which label was founded by Michael Bibi and PAWSA?','Solid Grooves',''],
 ['Rave Culture','hard','','Which Monday-night party at DC-10 in Ibiza is a techno institution?','Circoloco',''],
@@ -2385,6 +2389,17 @@ const SEED = [
 ['Geek & Gamer','hard','consoles','What was the name of Sega\'s last games console, launched in 1998?','Dreamcast',''],
 ['Geek & Gamer','expert','dragon-ball','In Dragon Ball, what is Goku\'s Saiyan birth name?','Kakarot',''],
 ['Geek & Gamer','easy','dragon-ball','In Dragon Ball, how many Dragon Balls must be gathered to summon the wish-granting dragon?','Seven','The dragon is called Shenron.'],
+['Geek & Gamer','easy','','Which fire-breathing Pokémon\'s 1999 Base Set holographic card is the most famous card of the original set?','Charizard','Top-grade copies have sold for over $400,000.'],
+['Geek & Gamer','medium','','Which YouTuber and wrestler paid a record $5.275 million in 2021 for a Pikachu Illustrator card, then wore it round his neck into the ring at WrestleMania?','Logan Paul','A Guinness World Record for the most expensive Pokémon card sold privately. Only around 40 Illustrator cards were ever given out, as prizes in a 1998 art contest.'],
+['Geek & Gamer','easy','','In One Piece, what title is Monkey D. Luffy determined to win?','King of the Pirates','One Piece, by Eiichiro Oda, has run since 1997 and is the best-selling manga ever.'],
+['Geek & Gamer','medium','one-piece','In One Piece, which member of Luffy\'s crew fights with three swords, one held in his mouth?','Roronoa Zoro','His style is called Santoryu, \'three-sword style\'.'],
+['Geek & Gamer','medium','one-piece','In One Piece, what is the name of Luffy\'s pirate crew?','The Straw Hat Pirates','Named after the straw hat Luffy was given as a boy by the pirate Shanks.'],
+['Geek & Gamer','medium','attack-on-titan','In Attack on Titan, what is the name of the main character, who can turn into a Titan himself?','Eren Yeager','Created by Hajime Isayama; the manga ran from 2009 to 2021.'],
+['Geek & Gamer','medium','attack-on-titan','In Attack on Titan, which captain is known as \'humanity\'s strongest soldier\'?','Levi Ackerman',''],
+['Geek & Gamer','expert','','In Attack on Titan, name the three walls that protect humanity.','Maria, Rose and Sina','Outermost to innermost: Wall Maria, Wall Rose, Wall Sina. The Titans break through Wall Maria in the very first episode.'],
+['Geek & Gamer','easy','death-note','In Death Note, what name does the public give to Light Yagami, the killer behind the notebook?','Kira','From the Japanese way of saying \'killer\'.'],
+['Geek & Gamer','medium','','In Death Note, what is the name of the death god (Shinigami) who drops the notebook into the human world?','Ryuk','He drops it because he\'s bored.'],
+['Geek & Gamer','easy','death-note','In Death Note, which fruit is the death god Ryuk hooked on?','Apples','Human-world apples are, to him, like cigarettes and alcohol.'],
 /* ---- TV SERIES (24 Oct) ---- */
 ['TV Series','easy','worlds','In Game of Thrones, what is the name of the continent where most of the story takes place?','Westeros',''],
 ['TV Series','easy','partners','In Breaking Bad, who is Walter White\'s partner, his former student?','Jesse Pinkman',''],
@@ -4365,11 +4380,13 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 55;   // bumped when the built-in bank changes
+const SEED_VERSION = 56;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
 const SEED_NEVER = [
+  ["q16sivxa", "q8ogfvl"],
+  ["qqxubah", "qy955r"],
   ["qgw9neb", "q175twlm"],
   ["q1coaj68", "mr:country-has"],
   ["qbgc884", "mr:friends-chandler"],

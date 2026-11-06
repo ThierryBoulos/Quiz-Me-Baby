@@ -114,6 +114,11 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   one answers another's ranking, or the same answer comes up too often (paella and Manchego: Spain). Sister
   airports (CDG/ORY, LHR/LGW, IST/SAW, JNB/CPT), a map and the pins it shows, a family of Majority Rules questions
   (the Michelin ones, the stock tickers) all count.
+- **Same fact, two questions: delete one, don't pair them.** Before writing, search the bank for the subject. If
+  a new question asks what an old one asks (only the way round differs: "Which producer made 'Children'?" /
+  "Which Robert Miles track…?"), the new one replaces the old one, and say so when showing it (owner, 6 Nov).
+  Never-together is only for questions that are different facts but give each other away (the Sandstorm meme and
+  "Which producer made 'Sandstorm'?").
 - They go in `SEED_NEVER` in `classic.html` (groups of ids); the dealer deals at most one of each group.
 - **Better still, don't write the overlap**: a ranking shares no item with another ranking (the trend rankings:
   Rickrolling → KONY 2012 → Ice Bucket; Gangnam → Harlem Shake → Mannequin).
