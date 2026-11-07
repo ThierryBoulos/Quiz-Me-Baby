@@ -81,7 +81,7 @@ function pinNear(g, bot) {
    net: { dup, delay, stall, stallWrites }  pushes sent twice / up to delay ms late (out of order) / that share of reads, or of the TV's writes, held 5-28 s
    simul: both captains tap Next, buzz, rule at the very same moment
    edge: answers land at the exact moment the clock runs out */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0 }) {
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed);
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -139,7 +139,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     const t = p.turn ?? 0, who = capOf(t);
     if (!who) return;
     if ((p.screen === "ask" || p.screen === "steal") && !p.sent?.[t]) send(who, "answer", { texts: ["Paris"] });
-    else if (["dishQ", "sudden", "battleTie"].includes(p.screen) && p.buzz == null) send(capOf(0) || who, "buzz", {});
+    else if (p.screen === "dishQ" && p.buzz == null) send(capOf(0) || who, "buzz", {});
+    else if (["sudden", "battleTie"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && !p.out?.[k] && capOf(k)) send(capOf(k), "answer", { text: "Paris" }); }
     else if (["flagQ", "mapQ", "sayQ", "airportQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
     else if (p.screen === "pinQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { pin: { lat: 48.85, lon: 2.35 } }); }
     else if (p.screen === "miniQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { n: "50" }); }
@@ -167,7 +168,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     for (const e of events) {
       if (e.done || clock() - t0 < e.at * 1000) continue;
       e.done = true;
-      if (e.type === "pause" || e.type === "score" || e.type === "swap") { scripted.push(e); continue; }
+      if (e.type === "pause" || e.type === "score" || e.type === "swap" || e.type === "levelEnd") { scripted.push(e); continue; }
       trace.push(`(${e.type}${e.for ? " " + e.for + " s" : ""}${e.team != null ? " team " + e.team : ""})`);
       if (e.type === "tvOff" || e.type === "offReload") {
         await act(async () => { setVisible(false); await flush(); });
@@ -278,6 +279,13 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
         else { agreeNext = true; send(w, "next", { move: { type: "ui/askScore", a: sp.a, b: sp.b }, step }); }
         continue;
       }
+      /* the scores set level on the last round's score screen, so the night ends in sudden death (7 Nov) */
+      if (sp.type === "levelEnd" && sc === "roundScore" && pub.r === rounds - 1 && w) {
+        const m = Math.max(...pub.teams.map((x) => x.score)); scripted.shift(); trace.push(`(the scores set level, ${m}-${m})`);
+        if (hostHere) send("host", "judge", { move: { type: "ui/setScore", a: m, b: m }, step });
+        else { agreeNext = true; send(w, "next", { move: { type: "ui/askScore", a: m, b: m }, step }); }
+        continue;
+      }
       if (sp.type === "swap" && SWAPS[sc] && pub.deadline && !(pub.sent || []).some(Boolean) && w) {
         scripted.shift(); trace.push("(a new question)");
         if (hostHere) send("host", "judge", { move: { type: SWAPS[sc] }, step });
@@ -302,7 +310,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* a contest open: the other captain (or the host) agrees, says no, or (now and then) doesn't answer at all */
     if (pub.contest) {
       const K = pub.contest;
-      if (!contestSeen.has(K.id + step)) { contestSeen.add(K.id + step); contestSilent = bot() < 0.2; }
+      /* (a host can only let it go where Next closes it: in sudden death or a tie-breaker, they decide it) */
+      if (!contestSeen.has(K.id + step)) { contestSeen.add(K.id + step); contestSilent = bot() < 0.2 && !(host && !gone.has("host") && !NEXT[sc]); }
       /* a host who lets it go simply moves on: Next closes the contest */
       if (contestSilent && host && !gone.has("host") && NEXT[sc] && bot() < 0.3) { send("host", "judge", { move: { type: NEXT[sc] }, step }); continue; }
       if (!contestSilent && bot() < 0.6) {
@@ -369,12 +378,15 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     else if (sc === "auctionBid") { const a = pub.auction; if (a.bid === 0) send(C(a.turn), "next", { move: { type: "auction/raise", n: 2 + Math.floor(bot() * 4) }, step }); else send(C(a.turn), "next", { move: { type: "auction/pass" }, step }); }
     else if (sc === "auctionRun") { const a = pub.auction; if (a.count < a.bid) next(other(a.by), "auction/tick"); else if (host) next(0, "auction/resolve"); }
-    else if (sc === "battleQ") { if (host) next(0, "battle/mark", { got: bot() < 0.5 }); else send(C(pub.battle.cap), "answer", { text: guess(right) }); }
+    /* battleLevel: both captains get the even ones right and the odd ones wrong, so the Battle ends level (the tie-breaker) */
+    else if (sc === "battleQ") { const lv = battleLevel && pub.battle.i % 2 === 0;
+      if (host) next(0, "battle/mark", { got: battleLevel ? lv : bot() < 0.5 }); else send(C(pub.battle.cap), "answer", { text: battleLevel ? (lv ? right : "xyz") : guess(right) }); }
     else if (sc === "sudden" || sc === "battleTie") {
       if (sc === "sudden" && !pub.sudden?.ready) next(lead, "sudden/go");
-      else if (pub.buzz == null) { const t = pub.out?.[0] ? 1 : 0; send(C(t), "buzz", {}); if (simul && !pub.out?.[1 - t]) send(C(1 - t), "buzz", {}); }
-      else if (host) next(0, bot() < 0.5 ? "ui/sdRight" : "ui/sdWrong");
-      else send(C(pub.buzz), "answer", { text: guess(right) });
+      /* (no buzzer since 7 Nov: both captains type; simul, both at the very same moment) */
+      else if (host && pub.buzz != null) next(0, bot() < 0.5 ? "ui/sdRight" : "ui/sdWrong");
+      else { const can = [0, 1].filter((t) => !pub.out?.[t] && !pub.sent?.[t]);
+        for (const t of simul ? can : can.length ? [can[Math.floor(bot() * can.length)]] : []) send(C(t), "answer", { text: guess(right) }); }
     }
   }
   /* the last taps' late pushes land (and, on a slow server, the held updates); their receipts are read as they come,

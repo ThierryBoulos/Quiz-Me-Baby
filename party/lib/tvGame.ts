@@ -443,13 +443,23 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (P.kind === "dish") { s.legLog = [...s.legLog, { team: P.team, text: P.text, ok: v }]; play({ type: v ? "dish/right" : "dish/wrong" }); if (!v) s.typed[P.team] = null; }
     else if (P.kind === "battle") play({ type: "battle/mark", got: v, said: P.text, review: s.nohost });
     else if (P.kind === "sudden" || P.kind === "battleTie") {
+      /* (7 Nov, the owner: no buzzer. Both captains type; the first right answer sent wins. A wrong one is out of
+         that question, and the other captain's clock runs on) */
       const tb = P.kind === "battleTie";
       sdRecord(s, P.team, v);
       if (v) play(tb ? { type: "battle/tbWin", w: P.team } : { type: "sudden/win", w: P.team });
       else {
-        s.sdOut[P.team] = true; s.typed[P.team] = null; s.sdBuzz = null; s.buzzAt = 0;
+        s.sdOut[P.team] = true; s.typed[P.team] = null; s.sdBuzz = null;
+        const o = other(P.team), oName = iso(s.g.teams[o].name);
         if (s.sdOut[0] && s.sdOut[1]) play(tb ? { type: "battle/tbWin", w: "none" } : { type: "sudden/win", w: "none" });
-        else { s.toast = { id: ++s.toastN, text: "Wrong. The other captain can buzz." }; s.deadline = Date.now() + T().tSudden * 1000; }
+        /* the other captain's answer came in meanwhile (the host was away when it did): it's checked now */
+        else if (s.typed[o]) {
+          const v2 = !!matchQ(s.typed[o], currentQ(s));
+          sdRecord(s, o, v2);
+          if (v2) play(tb ? { type: "battle/tbWin", w: o } : { type: "sudden/win", w: o });
+          else { s.sdOut[o] = true; s.typed[o] = null; play(tb ? { type: "battle/tbWin", w: "none" } : { type: "sudden/win", w: "none" }); }
+        }
+        else s.toast = { id: ++s.toastN, text: `${iso(s.g.teams[P.team].name)}: wrong. ${oName} can still win it.` };
       }
     }
   }, [play]);
@@ -686,9 +696,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     else if (t === "ui/sdRight" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, true)) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: s.sdBuzz } : { type: "sudden/win", w: s.sdBuzz });
     else if (t === "ui/sdWrong" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, false)) {
-      s.sdOut[s.sdBuzz] = true; s.typed[s.sdBuzz] = null; s.sdBuzz = null;
+      /* the answer that came in first was wrong: the other captain's, if it's in, is next up for the host's call */
+      const b = s.sdBuzz, o = other(b);
+      s.sdOut[b] = true; s.typed[b] = null; s.sdBuzz = null;
       if (s.sdOut[0] && s.sdOut[1]) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: "none" } : { type: "sudden/win", w: "none" });
-      else s.toast = { id: ++s.toastN, text: "Wrong. The other captain can have a go." };
+      else if (s.typed[o]) { s.sdBuzz = o; s.toast = { id: ++s.toastN, text: `${iso(g.teams[b].name)}: wrong. ${poss(iso(g.teams[o].name))} answer is next.` }; }
+      else s.toast = { id: ++s.toastN, text: `${iso(g.teams[b].name)}: wrong. ${iso(g.teams[o].name)} can still win it.` };
     }
     else if (t === "dish/wrong") { const b = g.dishGame.leg.buzz; play(move); if (b != null) s.typed[b] = null; s.buzzAt = 0; }
     else if (t === "battle/tbWin") play({ ...move, byHost: true });
@@ -733,12 +746,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (L.buzz != null) return L.buzz === team ? true : `${nm(L.buzz)} buzzed first.`;
         play({ type: "dish/buzz", w: team }); s.buzzAt = Date.now(); return true;
       }
-      if ((sc === "sudden" && g.sdReady) || sc === "battleTie") {
-        if (s.contest) return contestWait();
-        if (s.sdOut[team]) return `${nm(team)} is out of this one.`;
-        if (s.sdBuzz != null) return s.sdBuzz === team ? true : `${nm(s.sdBuzz)} buzzed first.`;
-        s.sdBuzz = team; s.deadline = null; s.buzzAt = Date.now(); playSound("soft"); return true;
-      }
+      /* (no buzzer in sudden death or the tie-breaker any more: a phone a version behind still says why) */
+      if (sc === "sudden" || sc === "battleTie") return "No buzzer: type your answer and send it.";
       return false;
     }
     if (kind !== "answer") return false;
@@ -806,10 +815,23 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return true;
     }
     if (sc === "dishQ" && g.dishGame.leg.buzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check("dish", current()); return true; }
-    if ((sc === "sudden" || sc === "battleTie") && s.contest && texts.length) return contestWait();
-    if ((sc === "sudden" || sc === "battleTie") && s.sdBuzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check(sc === "sudden" ? "sudden" : "battleTie", current()); return true; }
+    /* sudden death and the Battle's tie-breaker (7 Nov, the owner: no buzzer): both captains type at once, one answer
+       each. No host: the app checks each as it lands, so the first right one sent wins. With a host: they rule on the
+       answers in the order they came (the first one in is "up", pub.buzz) */
+    if (((sc === "sudden" && g.sdReady) || sc === "battleTie") && texts.length) {
+      if (s.contest) return contestWait();
+      if (s.sdOut[team]) return `${nm(team)} is out of this one.`;
+      if (s.typed[team]) return `${poss(nm(team))} answer is already in.`;
+      if (s.pending) return "Wait for the call on the last answer.";
+      s.typed[team] = texts.slice(0, 1);
+      const kindP: PKind = sc === "sudden" ? "sudden" : "battleTie", q = current();
+      if (s.nohost && !hostOnly(q)) { s.pending = { kind: kindP, team, text: texts[0], v: !!matchQ(s.typed[team], q), until: Date.now() }; settle(false); }
+      else if (s.sdBuzz == null) s.sdBuzz = team;
+      return true;
+    }
     /* an answer that can't go in here still says why (a phone a beat behind) */
-    if (texts.length && ["dishQ", "sudden", "battleTie"].includes(sc)) return s.pending ? "Wait for the call on the last answer." : "Buzz first, then type it.";
+    if (texts.length && sc === "dishQ") return s.pending ? "Wait for the call on the last answer." : "Buzz first, then type it.";
+    if (texts.length && sc === "sudden") return "Wait for the question.";
     return false;
   }, [applyFx, current, play, reveal, settle, contestWait, draftKey]);
 
@@ -1006,7 +1028,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const seq = Number(a.payload.seq) || 0, cur = s.drafts[t];
         if (cur && cur.by === a.user_id && cur.k === a.payload.k && (cur.seq || 0) > seq) return;
         const texts = (Array.isArray(a.payload.texts) ? a.payload.texts : []).map((x: unknown) => String(x ?? "").trim().slice(0, 80)).filter(Boolean);
-        s.drafts[t] = { k: String(a.payload.k), texts: texts.slice(0, 2), n: String(a.payload.n ?? "").trim().slice(0, 40), pin: asPin(a.payload.pin), by: a.user_id, seq };
+        s.drafts[t] = { k: String(a.payload.k), texts: texts.slice(0, 2), n: String(a.payload.n ?? "").trim().slice(0, 40), pin: asPin(a.payload.pin), by: a.user_id, seq, at: Date.now() };
       }
       return;
     }
@@ -1352,6 +1374,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           s.timeUp = false; s.step++;
           play({ type: sc === "ask" ? "round/judge" : "round/judgeSteal", v: false });
         }
+        /* sudden death or the tie-breaker still on, and no clock (a host has none): the no-host clock starts, so it can't stall */
+        if (s.screen === sc && ((sc === "sudden" && g.sdReady) || sc === "battleTie") && !s.deadline && !s.contest) { s.deadline = now + T().tSudden * 1000; s.total = T().tSudden; }
       }
       void publish();
     }
@@ -1467,22 +1491,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           s.toast = { id: ++s.toastN, text: `Time's up. ${iso(g.teams[b].name)} is out of this one.` };
         }
       }
-      /* sudden death and the Battle's tie-breaker: a buzz gets the same time to type it (25 Oct: with no host, one
-         that never came held the night up for good; with a host too, so nobody stalls). Then what was typed
-         counts (with a host, it goes to them), or nothing, which is wrong */
-      if ((s.screen === "sudden" || s.screen === "battleTie") && s.buzzAt && !s.pending && !s.contest) {
-        const b = s.sdBuzz;
-        if (b == null || s.typed[b]) s.buzzAt = 0;
-        else if (now - s.buzzAt >= T().tDishType * 1000 + T_GRACE_MS) {
-          s.buzzAt = 0; s.step++; changed = true;
-          if (!takeDraft(b)) {
-            const theyCan = !s.sdOut[other(b)];           // (both out: the next question is up instead)
-            if (s.nohost) { s.pending = { kind: s.screen === "sudden" ? "sudden" : "battleTie", team: b, text: "", v: false, until: now }; settle(false); }
-            else hostMove({ type: "ui/sdWrong" });
-            if (theyCan) s.toast = { id: ++s.toastN, text: `Time's up: ${iso(g.teams[b].name)} didn't answer. The other captain can buzz.` };
-          }
-        }
-      }
       /* time's up (a moment after the clock shows 0, see T_GRACE_MS): first, what was typed but not sent goes in */
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };
@@ -1490,6 +1498,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ"].includes(sc)) for (const t of [0, 1] as const) { if (sc === "miniQ" ? s.guesses[t] == null : sc === "pinQ" ? !s.pins[t] : !s.typed[t]) took(t); }
         else if (sc === "battleQ" && s.nohost && !s.pending) took(g.battle.cap);
         else if (sc === "dishQ" && g.dishGame.leg.buzz != null && !s.typed[g.dishGame.leg.buzz] && !s.pending) took(g.dishGame.leg.buzz);
+        /* sudden death and the tie-breaker: both captains' boxes, the one who stopped typing first going first */
+        else if (((sc === "sudden" && g.sdReady) || sc === "battleTie") && !s.contest) {
+          const order = ([0, 1] as const).slice().sort((a, b) => (s.drafts[a]?.at ?? Infinity) - (s.drafts[b]?.at ?? Infinity));
+          for (const t of order) if (s.screen === sc && !s.typed[t] && !s.sdOut[t] && !s.pending) took(t);
+        }
       }
       /* (an answer taken just now may have moved the night on already: a new screen, or a new clock) */
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {

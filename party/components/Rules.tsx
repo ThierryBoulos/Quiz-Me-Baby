@@ -84,14 +84,14 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
           <><B>Guess the Airport.</B> A departures board, <B>30 s</B>: the destinations, the airlines and the language are the clues. The city is enough, unless it has more than one airport. Best of 5.</>,
           <><B>Majority Rules.</B> Everyone plays, on their own phone: 15 questions, four answers, <B>15 s</B> each, one tap and it&rsquo;s locked. No answer counts as wrong. Each team scores the share of its answers that are right, so a small team isn&rsquo;t at a disadvantage.</>,
           <><B>Guess the Cocktail or Dish.</B> The ingredients come up one every <B>3 s</B>, the giveaway last. Captain, hit <B>BUZZ</B> and type it in <B>10 s</B>. Wrong, and you&rsquo;re out of that one. Best of 5.</>,
-          <><B>Battle of the Captains.</B> Captains only, the room says nothing. Ten questions each: <B>7 s</B> out loud with a host, <B>15 s</B> typed without. Best score takes double points; tied? One buzzer question to settle it, or a point each: the host decides, or either captain with no host. Always last.</>,
+          <><B>Battle of the Captains.</B> Captains only, the room says nothing. Ten questions each: <B>7 s</B> out loud with a host, <B>15 s</B> typed without. Best score takes double points; tied? One question to settle it (both captains type, the first right answer takes it), or a point each: the host decides, or either captain with no host. Always last.</>,
         ]} />
       </Rule>
 
       <Rule n="05" title="Winning">
         <L items={[
           <>Highest score after the last game takes the night: confetti on every screen, the night in a nutshell, then <B>Play again</B> or <B>Exit</B>.</>,
-          <>Tie? <B>Sudden death</B>: one question, both captains, first to buzz answers, <B>10 s</B> to type it. Wrong, and the other captain can buzz. Repeats until somebody gets one.</>,
+          <>Tie? <B>Sudden death</B>: one question at a time, captains only. Both type their answer and send it: <B>the first right answer wins the night</B>. Wrong, and you&rsquo;re out of that question; nobody right, another one.</>,
         ]} />
       </Rule>
 

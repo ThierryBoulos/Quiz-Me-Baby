@@ -1,0 +1,47 @@
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+8.50 steal | 4 | 0-0 |  |  | 
+10.25 answer | 5 | 0-0 |  |  | 
+12.00 answer | 5 | 0-0 |  | The host keeps the call. | 
+13.00 ask | 6 | 0-0 |  | The host keeps the call. | 
+14.75 answer | 7 | 0-1 |  | Owls +1 point | 
+15.75 answer | 7 | 0-1 |  |  | 
+22.00 steal | 8 | 0-0 |  | Lions steal a new question. | 
+23.75 answer | 9 | 0-0 |  | Lions steal a new question. | 
+24.75 answer | 9 | 0-0 |  |  | 
+26.50 roundScore | 10 | 0-0 |  |  | 
+27.50 roundIntro | 11 | 0-0 |  |  | 
+28.25 ask | 12 | 0-0 |  |  | 
+30.00 answer | 13 | 1-0 |  | Lions +1 point | 
+31.00 answer | 13 | 1-0 |  |  | 
+36.50 steal | 14 | 0-0 |  | Owls steal a new question. | 
+38.25 answer | 15 | 0-1 |  | Owls +1 point — steal | 
+39.00 ask | 16 | 0-1 |  | Owls +1 point — steal | 
+40.00 ask | 16 | 0-1 |  | Owls used Call a Friend. | 
+42.75 ask | 17 | 0-1 |  | Owls used Call a Friend. | 
+44.50 steal | 18 | 0-1 |  | Owls used Call a Friend. | 
+46.25 answer | 19 | 1-1 |  | Lions +1 point — steal | 
+47.25 roundScore | 20 | 1-1 |  | Lions +1 point — steal | 
+48.00 roundIntro | 21 | 1-1 |  | Lions +1 point — steal | 
+49.00 ask | 22 | 1-1 |  | Lions +1 point — steal | 
+50.75 answer | 23 | 2-1 |  | Lions +1 point | 
+51.75 ask | 24 | 2-1 |  | Lions +1 point | 
+53.50 steal | 25 | 2-1 |  | Lions +1 point | 
+55.25 answer | 26 | 2-1 |  | Lions +1 point | 
+56.25 roundScore | 27 | 2-1 |  | Lions +1 point | 
+57.00 roundIntro | 28 | 2-1 |  | Lions +1 point | 
+58.00 ask | 29 | 2-1 |  | Lions +1 point | 
+59.00 ask | 29 | 2-1 |  | Lions used Double Dip. | 
+60.75 steal | 30 | 2-1 |  | Lions used Double Dip. | 
+62.50 answer | 31 | 2-1 |  | Lions used Double Dip. | 
+63.50 ask | 32 | 2-1 |  | Lions used Double Dip. | 
+65.25 answer | 33 | 2-2 |  | Owls +1 point | 
+66.00 roundScore | 34 | 2-2 |  | Owls +1 point | 
+(the scores set level, 2-2)
+67.00 roundScore | 34 | 2-2 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 2. | 
+68.00 sudden | 35 | 2-2 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 2. | 
+68.75 sudden | 36 | 2-2 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 2. | 
+70.50 final | 37 | 2-3 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 2. | 
+recap: {"margin":1,"sudden":true,"leadChanges":4,"steals":[1,1],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[0,0],[1,0],[0,0],[0,1],[1,1],[2,1],[2,2],[2,3]],"segs":[{"label":"R1","pts":[[0,1],[0,0]]},{"label":"R2","pts":[[1,0],[0,0],[0,1],[1,1]]},{"label":"R3","pts":[[2,1]]},{"label":"R4","pts":[[2,2]]},{"label":"Sudden death","pts":[[2,3]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":1}]}

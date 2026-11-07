@@ -1,0 +1,44 @@
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+7.50 ask | 3 | 0-0 |  | Lions used Double Dip. | 
+8.50 answer | 3 | 1-0 |  | Lions +1 point | 
+9.50 answer | 3 | 1-0 |  |  | 
+11.25 answer | 3 | 1-0 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+12.00 ask | 4 | 1-0 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+13.00 answer | 4 | 1-1 |  | Owls +1 point | 
+14.00 roundScore | 5 | 1-1 |  | Owls +1 point | 
+14.75 roundIntro | 6 | 1-1 |  | Owls +1 point | 
+15.75 ask | 7 | 1-1 |  | Owls +1 point | 
+16.50 ask | 7 | 1-1 |  | Lions used Call a Friend. | 
+20.25 ask | 8 | 1-1 |  | Lions used Call a Friend. | 
+21.00 steal | 8 | 1-1 |  | Lions used Call a Friend. | 
+22.00 answer | 8 | 1-1 |  | Lions used Call a Friend. | 
+23.00 ask | 9 | 1-1 |  | Lions used Call a Friend. | 
+23.75 steal | 9 | 1-1 |  | Lions used Call a Friend. | 
+24.75 answer | 9 | 1-1 |  | Lions used Call a Friend. | 
+25.50 roundScore | 10 | 1-1 |  | Lions used Call a Friend. | 
+26.50 roundIntro | 11 | 1-1 |  | Lions used Call a Friend. | 
+27.50 ask | 12 | 1-1 |  | Lions used Call a Friend. | 
+28.25 steal | 12 | 1-1 |  | Lions used Call a Friend. | 
+29.25 answer | 12 | 1-2 |  | Owls +1 point — steal | 
+30.00 ask | 13 | 1-2 |  | Owls +1 point — steal | 
+31.00 answer | 13 | 1-3 |  | Owls +1 point | 
+32.00 roundScore | 14 | 1-3 |  | Owls +1 point | 
+32.75 roundIntro | 15 | 1-3 |  | Owls +1 point | 
+33.75 ask | 16 | 1-3 |  | Owls +1 point | 
+34.50 steal | 16 | 1-3 |  | Owls +1 point | 
+35.50 answer | 16 | 1-3 |  | Owls +1 point | 
+36.50 answer | 16 | 1-3 |  |  | 
+37.25 answer | 16 | 2-3 |  | Call changed: Lions +1 point. | 
+38.25 ask | 17 | 2-3 |  | Call changed: Lions +1 point. | 
+39.00 steal | 17 | 2-3 |  | Call changed: Lions +1 point. | 
+40.00 answer | 17 | 2-3 |  | Call changed: Lions +1 point. | 
+41.00 roundScore | 18 | 2-3 |  | Call changed: Lions +1 point. | 
+(the scores set level, 3-3)
+42.75 roundScore | 18 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
+42.75 sudden | 19 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
+43.50 sudden | 20 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
+44.50 final | 20 | 4-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
+recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[0,1],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[1,1],[1,2],[1,3],[2,3],[3,3],[4,3]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"R2","pts":[]},{"label":"R3","pts":[[1,2],[1,3]]},{"label":"R4","pts":[[2,3],[3,3]]},{"label":"Sudden death","pts":[[4,3]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

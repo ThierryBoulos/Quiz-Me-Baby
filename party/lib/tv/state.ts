@@ -28,7 +28,7 @@ export const newState = () => ({
   fireWas: [false, false] as Two<boolean>,                                    // so the flame is announced once each time it lights
   imadMood: "" as string,                                                     // how Imad takes the latest moment (yes | no | lean)                                              // the score after every change (lead changes, for the recap)
   typed: [null, null] as Two<string[] | null>,       // what each captain sent for the question on screen
-  drafts: [null, null] as Two<null | { k: string; texts: string[]; n: string; pin?: LatLon | null; by?: string; seq?: number }>,   // ...and what each has typed (or pinned) but not sent (taken at time-up)
+  drafts: [null, null] as Two<null | { k: string; texts: string[]; n: string; pin?: LatLon | null; by?: string; seq?: number; at?: number }>,   // ...and what each has typed (or pinned) but not sent (taken at time-up)
   guesses: [null, null] as Two<number | null>,       // Closest To Wins
   pins: [null, null] as Two<LatLon | null>,          // Drop the Pin: each captain's pin, locked in
   /* Majority Rules: the teams' lists, fixed at Start (a seat is its name: a phone that rejoins keeps it);

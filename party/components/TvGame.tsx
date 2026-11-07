@@ -6,7 +6,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
-import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -96,11 +96,12 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
 
         {pub.screen === "sudden" && pub.sudden && (!pub.sudden.ready ? (<>
           <div className="display slam" style={{ fontSize: 120, color: "var(--color-gold)" }}>Sudden death</div>
-          <div className="text-28 text-[var(--color-ink-2)] max-w-[900px]">It&rsquo;s a tie. One question, captains only — first hand up answers. First right answer wins the night.</div>
+          <SuddenRules pub={pub} />
         </>) : (<>
           <div className="eyebrow text-20">Sudden death · question {pub.sudden.n}</div>
           <div className="font-bold text-52 max-w-[1000px] leading-tight">{pub.question}</div>
-          <Buzzed pub={pub} />
+          {(pub.deadline || (pub.left ?? 0) > 0) && <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />}
+          <SdRace pub={pub} />
           {pub.sudden.shown && <div className="ans-board display text-80" style={{ color: "var(--color-gold)" }}>{pub.sudden.answer}</div>}
           <SdCalls pub={pub} />
         </>))}
@@ -182,17 +183,24 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
 const pointsEach = (n: number) => `${n} point${n === 1 ? "" : "s"} each`;
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
 
-/* who buzzed, and who is out (Guess the Cocktail or Dish, sudden death) */
+/* who buzzed, and who is out (Guess the Cocktail or Dish) */
 function Buzzed({ pub }: { pub: Pub }) {
   const T = pub.teams;
-  if (pub.buzz != null) return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="display text-60 enter" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed!</div>
-      {/* the time they have to type it */}
-      {pub.typeBy && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.typeBy} size={80} /><span>to type it</span></div>}
-    </div>);
+  if (pub.buzz != null) return <div className="display text-60 enter" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed!</div>;
   const out = [0, 1].filter((t) => pub.out?.[t]);
   return <div className="h-10 text-24 text-[var(--color-ink-2)]">{out.map((t) => `${T[t].name} are out of this one`).join(" · ")}</div>;
+}
+/* sudden death and the Battle's tie-breaker (7 Nov, no buzzer): where each captain's answer is */
+function SdRace({ pub }: { pub: Pub }) {
+  const T = pub.teams, host = pub.mode !== "nohost";
+  return (
+    <div className="flex gap-10 justify-center text-28">
+      {([0, 1] as const).map((t) => (
+        <div key={t} className="flex items-baseline gap-3" style={{ opacity: pub.out?.[t] ? 0.5 : 1 }}>
+          <b style={{ color: tc(t) }}>{T[t].name}</b>
+          <span className="text-[var(--color-ink-2)]">{pub.out?.[t] ? "wrong, out of this one" : pub.buzz === t ? "answer in: the host is checking it" : pub.sent?.[t] ? (host ? "answer in, next for the host" : "answer in") : "typing…"}</span>
+        </div>))}
+    </div>);
 }
 
 function Sent({ pub }: { pub: Pub }) {
@@ -516,10 +524,10 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       : pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} />}
   </>);
   if (pub.battle && sc === "battleTie") return (<>
-    <div className="eyebrow text-20">Tie at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: first captain to buzz</div>
+    <div className="eyebrow text-20">Tie at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: both captains type, the first right answer takes it</div>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 52, lineHeight: 1.12 }}>{pub.question}</div>
     {(pub.deadline || (pub.left ?? 0) > 0) && <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />}
-    <Buzzed pub={pub} />
+    <SdRace pub={pub} />
     {pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} prev />}
     <SdCalls pub={pub} />
   </>);
@@ -643,7 +651,7 @@ function awayTotals(pub: Pub) {
 function NextHint({ pub }: { pub: Pub }) {
   const open = useAfter(pub.nextOpenAt), auto = useSecondsLeft(pub.autoAt);
   if (pub.autoAt && auto > 0) return <span className="next-hint">Next in <b>{auto} s</b>, or <b>{pub.nextBy}</b> taps Next</span>;
-  const label = /Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" ? "Start" : pub.screen === "sudden" ? "Go" : "Next";
+  const label = /Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" || pub.screen === "sudden" ? "Start" : "Next";
   return <span className="next-hint">Waiting for <b>{pub.nextBy}</b>{open && pub.nextOther ? <> or <b>{pub.nextOther}</b></> : null} to {TIE_SCREENS.includes(pub.screen) || pub.screen === DECIDED ? "choose" : `tap ${label}`}</span>;
 }
 

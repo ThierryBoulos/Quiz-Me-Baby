@@ -1,0 +1,45 @@
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+7.50 answer | 3 | 1-0 |  | Lions +1 point | 
+8.50 ask | 4 | 1-0 |  | Lions +1 point | 
+9.50 steal | 4 | 1-0 |  | Lions +1 point | 
+10.25 answer | 4 | 1-0 |  | Lions +1 point | 
+11.25 roundScore | 5 | 1-0 |  | Lions +1 point | 
+12.00 roundIntro | 6 | 1-0 |  | Lions +1 point | 
+14.00 ask | 7 | 1-0 |  | Lions +1 point | 
+14.75 steal | 7 | 1-0 |  | Lions +1 point | 
+15.75 answer | 7 | 1-0 |  | Lions +1 point | 
+16.50 answer | 7 | 1-0 |  |  | 
+31.50 answer | 7 | 1-0 |  | No answer in time: the call stands. | 
+32.00 ask | 8 | 1-0 |  | No answer in time: the call stands. | 
+32.75 steal | 8 | 1-0 |  | No answer in time: the call stands. | 
+33.75 answer | 8 | 1-0 |  | No answer in time: the call stands. | 
+34.50 roundScore | 9 | 1-0 |  | No answer in time: the call stands. | 
+35.50 roundIntro | 10 | 1-0 |  | No answer in time: the call stands. | 
+36.50 ask | 11 | 1-0 |  | No answer in time: the call stands. | 
+37.25 steal | 11 | 1-0 |  | No answer in time: the call stands. | 
+38.25 answer | 11 | 1-0 |  | No answer in time: the call stands. | 
+39.00 ask | 12 | 1-0 |  | No answer in time: the call stands. | 
+40.00 steal | 12 | 1-0 |  | No answer in time: the call stands. | 
+41.00 answer | 12 | 2-0 |  | Lions +1 point — steal | 
+41.75 roundScore | 13 | 2-0 |  | Lions +1 point — steal | 
+42.75 roundIntro | 14 | 2-0 |  | Lions +1 point — steal | 
+43.50 ask | 15 | 2-0 |  | Lions +1 point — steal | 
+44.50 steal | 15 | 2-0 |  | Lions +1 point — steal | 
+45.50 answer | 15 | 2-0 |  | Lions +1 point — steal | 
+46.25 answer | 15 | 2-0 |  |  | 
+47.25 answer | 15 | 3-0 |  | Call changed: Lions +1 point. | 
+48.00 ask | 16 | 3-0 |  | Call changed: Lions +1 point. | 
+49.00 steal | 16 | 3-0 |  | Call changed: Lions +1 point. | 
+50.00 answer | 16 | 3-0 |  | Call changed: Lions +1 point. | 
+50.75 answer | 16 | 3-0 |  |  | 
+51.75 answer | 16 | 3-0 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+52.50 roundScore | 17 | 3-0 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+(the scores set level, 3-3)
+54.50 roundScore | 17 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
+54.50 sudden | 18 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
+55.25 sudden | 19 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
+56.25 final | 19 | 4-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
+recap: {"margin":1,"sudden":true,"leadChanges":0,"steals":[1,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[2,0],[3,0],[3,3],[4,3]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"R2","pts":[]},{"label":"R3","pts":[[2,0]]},{"label":"R4","pts":[[3,0],[3,3]]},{"label":"Sudden death","pts":[[4,3]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0},{"t":"Best thief","who":"Lions, 1 steal","team":0}]}

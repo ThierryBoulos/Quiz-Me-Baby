@@ -57,6 +57,13 @@ const NIGHTS = [
   { seed: 21, minis: DEFAULT, events: [{ at: 25, type: "pause", for: 12 }, { at: 60, type: "score", a: 4, b: 4 }, { at: 100, type: "swap" }, { at: 140, type: "swap" }], tieMore: 1 },
   { seed: 22, minis: ["dish", "saysame", "map", "closest"], host: true, rounds: 4, events: [{ at: 40, type: "hostGone", for: 90 }, { at: 150, type: "capGone", team: 1 }, { at: 200, type: "swap" }] },
   { seed: 23, minis: ["flag", "closest", "pin", "battle"], events: [{ at: 30, type: "capGone", team: 0 }, { at: 90, type: "score", a: 2, b: 3 }, { at: 120, type: "pause", for: 8 }, { at: 160, type: "swap" }], tieMore: 2 },
+  /* 7 Nov: sudden death and the Battle's tie-breaker with no buzzer: both captains type, the first right answer wins
+     (no host, with a host, both answers in the same instant; a Battle that ends level) */
+  { seed: 24, minis: [], rounds: 4, events: [{ at: 0, type: "levelEnd" }] },
+  { seed: 25, minis: [], rounds: 4, host: true, events: [{ at: 0, type: "levelEnd" }] },
+  { seed: 26, minis: [], rounds: 4, simul: true, events: [{ at: 0, type: "levelEnd" }] },
+  { seed: 27, minis: ["battle"], rounds: 4, battleLevel: true, tieMore: 1 },
+  { seed: 28, minis: ["battle"], rounds: 4, host: true, battleLevel: true, tieMore: 1 },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

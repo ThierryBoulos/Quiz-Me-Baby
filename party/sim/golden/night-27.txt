@@ -1,0 +1,52 @@
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+7.50 answer | 3 | 1-0 |  | Lions +1 point | 
+8.50 ask | 4 | 1-0 |  | Lions +1 point | 
+9.50 answer | 4 | 1-1 |  | Owls +1 point | 
+10.25 roundScore | 5 | 1-1 |  | Owls +1 point | 
+11.25 roundIntro | 6 | 1-1 |  | Owls +1 point | 
+12.00 ask | 7 | 1-1 |  | Owls +1 point | 
+13.00 answer | 7 | 2-1 |  | Lions +1 point | 
+14.00 ask | 8 | 2-1 |  | Lions +1 point | 
+14.75 steal | 8 | 2-1 |  | Lions +1 point | 
+15.75 answer | 8 | 2-1 |  | Lions +1 point | 
+16.50 roundScore | 9 | 2-1 |  | Lions +1 point | 
+17.50 roundIntro | 10 | 2-1 |  | Lions +1 point | 
+19.25 ask | 11 | 2-1 |  | Lions +1 point | 
+20.25 steal | 11 | 2-1 |  | Lions +1 point | 
+21.00 answer | 11 | 2-3 |  | Owls +2 points — steal | 
+22.00 answer | 11 | 2-3 |  |  | 
+37.00 answer | 11 | 2-3 |  | No answer in time: the call stands. | 
+37.25 ask | 12 | 2-3 |  | No answer in time: the call stands. | 
+38.25 answer | 12 | 2-4 |  | Owls +1 point | 
+39.00 roundScore | 13 | 2-4 |  | Owls +1 point | 
+40.00 roundIntro | 14 | 2-4 |  | Owls +1 point | 
+41.00 ask | 15 | 2-4 |  | Owls +1 point | 
+41.75 ask | 15 | 2-4 |  | Lions used Call a Friend. | 
+49.00 ask | 16 | 2-4 |  | Lions used Call a Friend. | 
+50.00 steal | 16 | 2-4 |  | Lions used Call a Friend. | 
+50.75 answer | 16 | 2-5 |  | Owls +1 point — steal | 
+51.75 ask | 17 | 2-5 |  | Owls +1 point — steal | 
+52.50 answer | 17 | 2-6 |  | Owls +1 point | 
+53.50 roundScore | 18 | 2-6 |  | Owls +1 point | 
+54.50 battleIntro | 19 | 2-6 | 0-0 | Owls +1 point | 
+55.25 battleQ | 20 | 2-6 | 0-0 | Owls +1 point | 
+56.25 battleQ | 20 | 2-6 | 1-0 | Owls +1 point | 
+58.00 battleQ | 20 | 2-6 | 2-0 | Owls +1 point | 
+59.75 battleQ | 20 | 2-6 | 3-0 | Owls +1 point | 
+63.50 battleQ | 20 | 2-6 | 4-0 | Owls +1 point | 
+64.25 battleHandoff | 20 | 2-6 | 4-0 | Owls +1 point | 
+65.25 battleQ | 21 | 2-6 | 4-0 | Owls +1 point | 
+66.00 battleQ | 21 | 2-6 | 4-1 | Owls +1 point | 
+68.00 battleQ | 21 | 2-6 | 4-2 | Owls +1 point | 
+69.75 battleQ | 21 | 2-6 | 4-3 | Owls +1 point | 
+71.50 battleQ | 21 | 2-6 | 4-4 | Owls +1 point | 
+73.25 battleQ | 21 | 2-6 | 4-5 | Owls +1 point | 
+74.25 battleReview | 21 | 2-6 | 4-5 | Owls +1 point | 
+75.00 battleReview | 21 | 2-6 | 4-5 |  | 
+76.00 battleReview | 21 | 2-6 | 4-6 | Call changed: ⁨Owls⁩'s answer 8 is RIGHT. | 
+77.00 battleSummary | 22 | 2-8 | 4-6 | Call changed: ⁨Owls⁩'s answer 8 is RIGHT. | 
+77.75 final | 23 | 2-8 |  | Call changed: ⁨Owls⁩'s answer 8 is RIGHT. | 
+recap: {"margin":6,"sudden":false,"leadChanges":1,"steals":[0,2],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[1,1],[2,1],[2,3],[2,4],[2,5],[2,6],[2,8]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"R2","pts":[[2,1]]},{"label":"R3","pts":[[2,3],[2,4]]},{"label":"R4","pts":[[2,5],[2,6]]},{"label":"Battle of the Captains","pts":[[2,8]]}],"awards":[{"t":"Best thief","who":"Owls, 2 steals","team":1},{"t":"Battle of the Captains","who":"Lea, 6 of 10","team":1}]}

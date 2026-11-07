@@ -6,7 +6,7 @@ export type Settings = {
   /* the timers, in seconds. Standard trivia: */
   tQuestion: number; tSteal: number; tFriend: number;
   tContest: number;           // no host: how long the other captain has to change the app's call
-  tSudden: number;            // no host: sudden death and the Battle's tie-breaker, time to buzz
+  tSudden: number;            // no host: sudden death and the Battle's tie-breaker, time to answer (both captains type)
   /* the mini-games: */
   tMini: number; tFlag: number; tMap: number; tSay: number; tAuction: number;
   tPin: number; tAirport: number; tMajority: number;   // Drop the Pin, Guess the Airport, Majority Rules

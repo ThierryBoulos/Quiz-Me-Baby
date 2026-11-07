@@ -420,7 +420,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `${n} questions each, ${host ? `${sec(t?.battleHost, T_BATTLE_HOST)} a shot, out loud` : `${sec(t?.battleTyped, T_BATTLE_TYPED)} a shot, typed on the phone`}. ${poss(pub.teams[0].name)} captain goes first.` },
       { text: "Same spread for both: five easy, five medium, in the same order. Different questions." },
       { text: "No lifelines, no conferring, no second guesses." },
-      { text: `Best score takes ${pts}. Tied? One buzzer question to settle it (first captain in takes it), or the points shared: ${host ? "the host's call" : "either captain's call"}.` }];
+      { text: `Best score takes ${pts}. Tied? One question to settle it (both captains type, the first right answer takes it), or the points shared: ${host ? "the host's call" : "either captain's call"}.` }];
   }
 }
 /* head: in place of the small heading above the title (the TV's Battle: its two captains, VS between them) */
@@ -443,6 +443,23 @@ export function MiniIntro({ pub, size, head }: { pub: Pub; size: "tv" | "phone";
           {rules(pub).map((r, i) => <li key={i} className={r.warn ? "warn" : undefined}>{r.text}</li>)}
         </ol>
       </div>
+    </div>);
+}
+
+/* sudden death, before its first question (7 Nov, the owner: what it means, that you're tied, who starts it; no
+   buzzer), in the same words on the TV and every phone */
+export const suddenLines = (pub: Pub) => {
+  const T = pub.teams;
+  return [`${T[0].name} and ${T[1].name} are tied on ${T[0].score}.`,
+    "One question at a time, captains only. Type your answer and send it: the first right answer wins the night.",
+    "Wrong, and you're out of that question. Nobody right? Another question.",
+    pub.mode === "host" ? "The host starts it." : `${poss(T[pub.lead ?? 0].name)} captain taps Start.`];
+};
+export function SuddenRules({ pub, size = "tv" }: { pub: Pub; size?: "tv" | "phone" }) {
+  const tv = size === "tv";
+  return (
+    <div className="card w-full text-left" style={tv ? { maxWidth: 980 } : undefined}>
+      <ol className="rules" style={tv ? { fontSize: 24, gap: 12 } : undefined}>{suddenLines(pub).map((r, i) => <li key={i}>{r}</li>)}</ol>
     </div>);
 }
 

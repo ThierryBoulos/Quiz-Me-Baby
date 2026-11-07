@@ -15,7 +15,7 @@ import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { ToSide } from "./Side";
 import { sayCount, useLiveCount } from "@/lib/liveCount";
-import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
+import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, SuddenRules, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
@@ -41,8 +41,9 @@ export function useSecret(code: string, on: boolean) {
   return s;
 }
 
-/* where a captain buzzes, then types */
-const BUZZ_SCREENS = ["dishQ", "sudden", "battleTie"];
+/* where a captain buzzes, then types (sudden death and the Battle's tie-breaker have no buzzer since 7 Nov: both type) */
+const BUZZ_SCREENS = ["dishQ"];
+const RACE = (pub: Pub) => (pub.screen === "sudden" && !!pub.sudden?.ready) || pub.screen === "battleTie";
 /* A captain's inbox: what their own players suggest for the question on
    screen, newest first, with who said it. */
 type Sug = { id: number; user_id: string; text: string };
@@ -357,19 +358,20 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "roundScore": return <Results><Main label="Next" move={{ type: "round/next" }} /></Results>;
     case "sudden": return !pub.sudden?.ready ? (
       <div className="flex flex-col gap-4 flex-1">
-        <Big size={40} text="Sudden death" sub="One question, captains only. They buzz on their phones; first buzz types the answer. Wrong, and the other captain can buzz." />
-        <Main label="Go" move={{ type: "sudden/go" }} />
+        <Big size={40} text="Sudden death" />
+        <SuddenRules pub={pub} size="phone" />
+        <Main label="Start" move={{ type: "sudden/go" }} />
       </div>) : (
       <div className="flex flex-col gap-3 flex-1">
         <p className={qCls(pub.question)}>{pub.question}</p>
         <AnswerCard />
         <Calls pub={pub} host busy={busy} act={send} />
         {pub.buzz != null ? (<div className="flex flex-col gap-2 mt-auto">
-          <div className="display text-26 text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed</div>
+          <div className="display text-26 text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} answered first</div>
           <Typed t={pub.buzz} />
           <Judge t={pub.buzz} right={{ type: "ui/sdRight" }} wrong={{ type: "ui/sdWrong" }} />
         </div>) : (<>
-          <Waiting>Waiting for a captain to buzz…{pub.out?.some(Boolean) ? ` (${T[pub.out[0] ? 0 : 1].name} are out)` : ""}</Waiting>
+          <Waiting>Waiting for the captains&rsquo; answers…{pub.out?.some(Boolean) ? ` (${T[pub.out[0] ? 0 : 1].name} are out)` : ""}</Waiting>
           <div className="flex gap-2 justify-center">
             <Small label="Neither, next question" move={{ type: "sudden/win", w: "none" }} />
             <Small ghost label="Change question" move={{ type: "sudden/swap" }} />
@@ -574,16 +576,16 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>);
     case "battleTie": return (
       <div className="flex flex-col gap-3 flex-1">
-        <div className="eyebrow">Battle tie-breaker: first captain to buzz</div>
+        <div className="eyebrow">Battle tie-breaker: the first right answer takes it</div>
         <p className={qCls(pub.question)}>{pub.question}</p>
         <AnswerCard />
         <Calls pub={pub} host busy={busy} act={send} />
         {pub.buzz != null ? (<div className="flex flex-col gap-2 mt-auto">
-          <div className="display text-26 text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed</div>
+          <div className="display text-26 text-center" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} answered first</div>
           <Typed t={pub.buzz} />
           <Judge t={pub.buzz} right={{ type: "ui/sdRight" }} wrong={{ type: "ui/sdWrong" }} />
         </div>) : (<>
-          <Waiting>Waiting for a buzz…</Waiting>
+          <Waiting>Waiting for the captains&rsquo; answers…{pub.out?.some(Boolean) ? ` (${T[pub.out[0] ? 0 : 1].name} are out)` : ""}</Waiting>
           <div className="flex gap-2 justify-center">
             <Small label="Neither, another one" move={{ type: "battle/tbWin", w: "none" }} />
             <Small ghost label="Change question" move={{ type: "battle/tbSwap" }} />
@@ -898,6 +900,7 @@ function OnScreen({ pub, counting, small, side }: { pub: Pub; counting?: boolean
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
+    {pub.screen === "sudden" && !pub.sudden?.ready && <SuddenRules pub={pub} size="phone" />}
     {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <ToSide when={side} order={3} className="noselect" {...noCopy}><p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p></ToSide>}
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
     {/* the fact behind it, right under the answer */}
@@ -923,7 +926,9 @@ function OnScreen({ pub, counting, small, side }: { pub: Pub; counting?: boolean
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.airport.cityOk === false && <span className="block mt-1 text-13 font-bold" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</span>}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"].includes(pub.screen) && !(small && pub.screen === "pinQ") && !(pub.screen === "dishQ" && pub.dish?.typeBy) && <ToSide when={side && pub.screen !== "miniQ"} order={9} className="side-clock"><div className={"grid place-items-center main-clock" + (pub.screen === "miniQ" ? " clock-last" : "")}><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || pub.screen === "airportQ" || pub.screen === "mapQ" || small ? 64 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div></ToSide>}
+    {(["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "battleQ"].includes(pub.screen)
+      /* sudden death and the tie-breaker: their clock (with no host; a host's has none) */
+      || (RACE(pub) && (!!pub.deadline || (pub.left ?? 0) > 0))) && !(small && pub.screen === "pinQ") && !(pub.screen === "dishQ" && pub.dish?.typeBy) && <ToSide when={side && pub.screen !== "miniQ"} order={9} className="side-clock"><div className={"grid place-items-center main-clock" + (pub.screen === "miniQ" ? " clock-last" : "")}><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || pub.screen === "airportQ" || pub.screen === "mapQ" || small ? 64 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div></ToSide>}
     {/* the Battle: the last answer, once there's no new question to read (during the questions it's on the TV only) */}
     {pub.battle?.half?.length && pub.screen === "battleHandoff" ? <BattleHalf half={pub.battle.half} />
       : pub.battle?.last && /^battle(Handoff|Summary)$/.test(pub.screen) && <BattleAnswer last={pub.battle.last} />}
@@ -1012,7 +1017,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "answer": return pub.result?.by == null ? "Nobody scored" : pub.result.by === mine ? `+${pub.result.pts} to your team!` : `${T[pub.result.by].name} scored`;
     case "roundIntro": return `Round ${pub.r + 1}: ${pub.theme}`;
     case "roundScore": return `End of round ${pub.r + 1}`;
-    case "sudden": return cap ? (pub.sudden?.ready ? "Sudden death: captains only. Buzz to answer." : "Sudden death: captains only. The buzzer comes with the question.") : "Sudden death: captains only. Not a word!";
+    case "sudden": return !pub.sudden?.ready ? "Sudden death: you're tied" : cap ? (pub.out?.[mine] ? "Wrong. You're out of this one." : pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : "Type it and send it. First right answer wins!") : "Sudden death: captains only. Not a word!";
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country?" : "Guess the Flag: help your captain";
     case "pinQ": return cap ? "Where is it? Drop your pin, then lock it in." : "Drop the Pin: help your captain";
@@ -1025,7 +1030,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "battleQ": return pub.battle?.cap === mine ? (cap ? (pub.mode === "nohost" ? "Your question. Type it fast!" : "Your question. Say it out loud!") : "Your captain's battle. Not a word!")
       : cap ? (mine === 0 ? `Your half is done. ${poss(T[1].name)} captain now. Stay quiet.` : "Your turn is next. Stay quiet.") : "Captains only. Not a word!";
     case "battleHandoff": return `${poss(T[1].name)} captain is next`;
-    case "battleTie": return cap ? "Tie-breaker: buzz to answer" : "Captains only. Not a word!";
+    case "battleTie": return cap ? (pub.out?.[mine] ? "Wrong. You're out of this one." : pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : "Tie-breaker: type it and send it. First right answer takes it!") : "Captains only. Not a word!";
     case "mapQ": return cap ? "What does the map show?" : "Guess the Map: help your captain";
     case "mapReveal": return noTv ? "The answer" : "The answer's on the TV";
     case "auctionBid": return pub.auction?.turn === mine ? (cap ? "Your bid: raise, or pass" : "Your captain is bidding") : `${T[pub.auction?.turn ?? 0].name} are bidding`;
@@ -1121,7 +1126,7 @@ const NEXT_LABEL: Record<string, [string, string]> = {
 };
 /* no host: whose tap the room is waiting for */
 function WaitingFor({ pub }: { pub: Pub }) {
-  const label = pub.screen === "sudden" ? "Go" : NEXT_LABEL[pub.screen]?.[0] || "Next";
+  const label = pub.screen === "sudden" ? "Start" : NEXT_LABEL[pub.screen]?.[0] || "Next";
   const open = useAfter(pub.nextOpenAt), auto = useSecondsLeft(pub.autoAt);
   const tie = TIE_SCREENS.includes(pub.screen), decided = pub.screen === DECIDED;
   if (pub.autoAt && auto > 0) return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{
@@ -1228,10 +1233,11 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const canType = !pub.paused && ((myTurn && !locked && !pub.timeUp) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ") && !sentHere)
     /* a buzz: one answer, and once it's sent the box closes (it stayed open, with its Send, and got sent twice: 20 Oct) */
     || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending && !sentHere)
+    /* sudden death and the tie-breaker: both captains type at once, one answer each */
+    || (RACE(pub) && !pub.out?.[mine] && !sentHere && !pub.contest)
     /* the Battle: typed with no host; with a host it's said out loud */
     || (sc === "battleQ" && nohost && pub.battle?.cap === mine && !locked));
-  const canBuzz = (sc === "dishQ" && pub.buzz == null && !pub.out?.[mine]) || (sc === "sudden" && !!pub.sudden?.ready && pub.buzz == null && !pub.out?.[mine])
-    || (sc === "battleTie" && pub.buzz == null && !pub.out?.[mine]);
+  const canBuzz = sc === "dishQ" && pub.buzz == null && !pub.out?.[mine];
   /* Drop the Pin: the map is the answer box */
   const canPin = !pub.paused && sc === "pinQ" && !sentHere;
   const sugs = useSuggestions(code, pub.qid, members, mine, ANSWERING.includes(sc));
@@ -1324,7 +1330,6 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
             <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
             {/* the cocktail or dish: you buzzed, now type it before your own clock runs out */}
             {sc === "dishQ" && pub.dish?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.dish.typeBy} size={52} />to type it</div>}
-            {(sc === "sudden" || sc === "battleTie") && pub.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.typeBy} size={52} />to type it</div>}
           </div>
           <input id="ans" {...np.props} className="input" value={a} maxLength={80} autoComplete="off" autoCorrect="off" spellCheck={false}
             /* Closest: the number pad, fastest (the reader still takes "1.5 million" if a keyboard sends it) */
@@ -1412,7 +1417,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {/* no host: start, go and next — the lead captain (Team A's) */}
       {showNext && next && (
         <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: next[1] })}>{next[0]}</button>)}
-      {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Go</button>}
+      {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Start</button>}
       {pub.nextBy && !lead && open && <p className="text-center text-13 text-[var(--color-ink-3)]">{pub.nextBy} hasn&rsquo;t tapped it, so you can.</p>}
       {pub.nextBy && !lead && !open && sc !== DECIDED && !TIE_SCREENS.includes(sc) && sc !== "battleReview" && <WaitingFor pub={pub} />}
       {/* no host: either captain can stop the clock (the question hides until it restarts), and, before anyone has

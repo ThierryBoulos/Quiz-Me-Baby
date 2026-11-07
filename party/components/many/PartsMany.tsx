@@ -156,7 +156,9 @@ function rules(pub: PubMany): string[] {
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
       "One guess per team. A wrong guess puts you out of that one.", fast, pay];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
-      return [`${names} are tied at the top.`, "One question at a time, and only they answer. The first right answer wins the night."]; }
+      /* (7 Nov, the owner: what sudden death means, said before it starts, as with two teams) */
+      return [`${names} are tied at the top: sudden death.`, "One question at a time, and only their captains answer: type it and send it. The first right answer wins the night.",
+        "Wrong, and you're out of that question. Nobody right? Another question."]; }
   }
 }
 /* compact: the TV's Majority Rules intro, which shares the screen with the QR code */
