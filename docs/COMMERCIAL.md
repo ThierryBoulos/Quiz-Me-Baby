@@ -101,6 +101,7 @@ Some of these may not apply now or ever; they're here so nothing is forgotten.
 
 ### Legal and privacy
 - **todo**: Privacy policy and terms; cookie / local storage notice where needed (EU: GDPR).
+  - **doing (7 Nov 2026)**: a short "Data privacy" window at the foot of Settings (what is kept, where, for how long; copyright and credits). Still missing: a contact address for privacy requests, and terms.
 - **todo**: What personal data is kept (names, team names, answers), for how long (nightly clean-up exists), deletion on request.
 - **todo**: Age: party drinking themes (cocktails, Sexy Time); age gate or a family mode.
 - **todo**: The name "Quiz Me Baby": trademark search; domain.

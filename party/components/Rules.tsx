@@ -95,13 +95,6 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
         ]} />
       </Rule>
 
-      <Rule n="06" title="Your data">
-        <L items={[
-          <><B>No accounts.</B> Each phone gets an anonymous sign-in. No email, no phone number. A room keeps the names, teams, answers and scores for three days, then it&rsquo;s deleted; a sign-in unused for 7 days is deleted too.</>,
-          <>{noTv ? "The phone running the game" : "The TV"} keeps the game in progress, and which questions it has played, in its own browser. Server: Supabase (EU, Ireland); site: Vercel. No ads, no trackers, nothing sold or shared.</>,
-        ]} />
-      </Rule>
-
       {fixing && <FixingACall noTv={noTv} />}
     </>);
 }

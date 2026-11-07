@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
+import { DataPrivacy } from "@/components/Privacy";
 import { useNoTv } from "./NoTv";
 import { DEFAULTS, type Settings } from "@/lib/settings";
 import { Snd } from "@/lib/sound";
@@ -125,5 +126,6 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
       </Section>}
 
       </>)}
+      <DataPrivacy />
   </>);
 }
