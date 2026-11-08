@@ -624,14 +624,14 @@ export function AwayLog({ pub }: { pub: Pub | null }) {
 /* The host, if something went wrong (a call that couldn't be put right, a bug): set the total scores
    by hand. Out of the way at the bottom of the Players panel, and it asks first.
    ask: a captain with no host, who asks for it instead: the other captain has to agree. */
-/* The host: the TV laptop died? A 6-digit code for a new one (29 Oct, B9). The new laptop opens the site,
+/* The host (with no host, either captain: 8 Nov): the TV laptop died? A 6-digit code for a new one (29 Oct, B9). The new laptop opens the site,
    taps "Take over as the TV", types the room and this code, and the night carries on from its last save. */
 export function TvTakeover({ code }: { code: string }) {
   const [open, setOpen] = useState(false), [got, setGot] = useState<{ code: string; saved: number } | null>(null), [err, setErr] = useState<string | null>(null), [busy, setBusy] = useState(false);
   if (!open) return <button className="btn btn-sm btn-ghost self-center" onClick={() => setOpen(true)}>The TV died?</button>;
   const ask = async () => {
     setBusy(true); setErr(null);
-    try { const r = await rpc<{ ok?: boolean; code?: string; saved?: number; error?: string }>("qmb_tv_code", { r: code }); if (r?.error) setErr(friendly(new Error(r.error))); else if (r?.code) setGot({ code: r.code, saved: r.saved ?? 0 }); }
+    try { const r = await rpc<{ ok?: boolean; code?: string; saved?: number; error?: string }>("qmb_tv_code", { r: code }); if (r?.error) setErr(r.error === "not_host" ? "Only the host can get a code. With no host, either captain can." : friendly(new Error(r.error))); else if (r?.code) setGot({ code: r.code, saved: r.saved ?? 0 }); }
     catch (e) { setErr(friendly(e)); }
     setBusy(false);
   };

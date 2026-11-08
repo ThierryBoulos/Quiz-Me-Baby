@@ -457,7 +457,8 @@ export default function PhoneRoom() {
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {mine.role === "host" && pub && !many && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
             {mine.role === "host" && many && pubM?.many && <ScoreFixMany pub={pubM} code={code} />}
-            {mine.role === "host" && pub && !noTv && <TvTakeover code={code} />}
+            {/* the TV laptop died: the host gets the code; with no host, either captain (8 Nov: every kind of game) */}
+            {(mine.role === "host" || (mine.role === "captain" && !host)) && pub && !noTv && <TvTakeover code={code} />}
             {/* (8 Nov) the host can step down mid-game too, and stays in the room as a player */}
             {mine.role === "host" && <button className="btn btn-sm btn-ghost self-center" disabled={busy}
               onClick={() => { if (window.confirm(`Stop hosting? The game goes on: ${hostGoes} You stay in the room as a player.`)) { void claim("player"); setPanel(false); } }}>Stop hosting</button>}

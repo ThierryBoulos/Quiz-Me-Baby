@@ -134,7 +134,7 @@ export function FixingACall({ standalone = false, noTv = false }: { standalone?:
           noTv ? <><B>The phone running the game went to sleep or lost Wi-Fi?</B> The clocks stand still until it&rsquo;s back; after a while the host&rsquo;s or a captain&rsquo;s phone carries the night on from its last save, by itself.</>
             : <><B>The TV&rsquo;s Wi-Fi dropped, or its screen went to sleep?</B> The clocks stand still until it&rsquo;s back; nothing times out meanwhile. A TV reloaded or reopened picks the night up where it was.</>,
           <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question, or pastes an answer, is flagged{noTv ? "" : " on the TV"}; the host sees the list.</>,
-          !noTv && <><B>The TV laptop died?</B> The host taps <B>their name (top left) &rarr; The TV died? &rarr; Get a code</B>. On another laptop, open the site, tap <B>Join a game</B>, then <B>The TV died?</B> at the very bottom, and type the room code and that code: the night carries on from the TV&rsquo;s last save.</>,
+          !noTv && <><B>The TV laptop died?</B> The host (with no host, either captain) taps <B>their name (top left) &rarr; The TV died? &rarr; Get a code</B>. On another laptop, open the site, tap <B>Join a game</B>, then <B>The TV died?</B> at the very bottom, and type the room code and that code: the night carries on from the TV&rsquo;s last save.</>,
         ]} />
       </Rule>
     </>);
