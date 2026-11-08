@@ -729,8 +729,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* lifelines before the answer goes in, not after (nor once the clock has run out) */
       if ((p.key === "friend" || p.key === "dip") && sc === "ask" && (s.timeUp || (s.deadline && Date.now() >= s.deadline))) return "Time's up.";
       if ((p.key === "friend" || p.key === "dip") && sc === "ask" && !s.lifeline && !s.pending && turnTeam() === team && !s.typed[team]) {
-        const usedLl = rd.llUsed[team] || [];
-        if (!g.teams[team].ll[p.key] || (rd.dbl[team] && usedLl.length >= 1)) return false;
+        /* (all three in one round if they like: 8 Nov, the owner) */
+        if (!g.teams[team].ll[p.key]) return false;
         play({ type: "round/lifeline", key: p.key, i: team });
         /* Double Dip needs no pause card here: the captain's phone simply shows a second box */
         if (p.key === "dip") { s.lifeline = null; applyFx([{ timer: "resume" }]); }

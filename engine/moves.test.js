@@ -265,12 +265,12 @@ test('round: no host means no steal', () => {
   assert.ok(types(Q.play(g, { type:'round/judge', v:false }, env)).includes('go:answer'));
 });
 
-test('round: a lifeline is spent once; with double armed, only one extra', () => {
+test('round: a lifeline is spent once; with double armed, the other two still work (8 Nov)', () => {
   const { g, env } = game4();
   Q.play(g, { type:'round/armDbl', i:0 }, env);
   Q.play(g, { type:'round/begin' }, env);
   assert.ok(types(Q.play(g, { type:'round/lifeline', key:'dip', i:0 }, env)).includes('lifeline:dip'));
-  assert.deepEqual(Q.play(g, { type:'round/lifeline', key:'friend', i:0 }, env), [{ toast:'Double points is armed — one extra lifeline only.' }]);
+  assert.ok(types(Q.play(g, { type:'round/lifeline', key:'friend', i:0 }, env)).includes('lifeline:friend'));
   assert.deepEqual(Q.play(g, { type:'round/lifeline', key:'dip', i:0 }, env), []);   // already gone
 });
 

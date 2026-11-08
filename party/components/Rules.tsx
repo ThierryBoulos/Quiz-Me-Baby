@@ -67,7 +67,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
         <L items={[
           <><B>Call a Friend</B>: <B>30 seconds</B>. Before the captain speaks, tell the friend: no ChatGPT, no Google, no asking the room.</>,
           <><B>Double Dip</B>: two answers; either one right counts. Burned either way.</>,
-          <><B>Double Points</B>: armed on the captain&rsquo;s phone before the round starts. Right: 2 points. Stolen from you: they get 2. With it armed you may use only one of the other two that round.</>,
+          <><B>Double Points</B>: armed on the captain&rsquo;s phone before the round starts. Right: 2 points. Stolen from you: they get 2. The other two still work that round: use all three at once if you like.</>,
           <>No lifelines on a steal, none after an answer is sent, and none in the mini-games.</>,
         ]} />
       </Rule>

@@ -336,11 +336,10 @@ export function AskHead({ pub, you, go, size }: { pub: Pub; you?: string; go?: b
 /* ---- the lifelines of the team answering: tiles everyone sees; the captain taps ---- */
 export function LifelineStrip({ pub, t, onUse, busy, size }: { pub: Pub; t: 0 | 1; onUse?: (k: "friend" | "dip") => void; busy?: boolean; size: "tv" | "phone" }) {
   const team = pub.teams[t], used = pub.llUsed?.[t] || [], armed = !!pub.dbl?.[t];
-  const blocked = armed && used.length >= 1;
   const tile = (k: "friend" | "dip") => {
     const inuse = used.includes(k), spent = !team.ll[k] && !inuse;
-    const cls = "ll " + (inuse ? "inuse" : spent ? "spent" : blocked ? "off" : "");
-    const can = !!onUse && !inuse && !spent && !blocked;
+    const cls = "ll " + (inuse ? "inuse" : spent ? "spent" : "");
+    const can = !!onUse && !inuse && !spent;
     return can
       ? <button key={k} type="button" className={cls} disabled={busy} onClick={() => onUse!(k)}>{ICON[k]}<span className="nm">{LL_NAME[k]}</span></button>
       : <div key={k} className={cls}>{ICON[k]}<span className="nm">{inuse ? `${LL_NAME[k]}: used now` : LL_NAME[k]}</span></div>;
@@ -355,7 +354,6 @@ export function LifelineStrip({ pub, t, onUse, busy, size }: { pub: Pub; t: 0 | 
         {tile("friend")}{tile("dip")}
         <div className={"ll " + (armed ? "armed" : "off")}>{ICON.dbl}<span className="nm">{armed ? "Double armed" : "Round start only"}</span></div>
       </div>
-      {onUse && blocked && <p className="text-12 text-[var(--color-ink-3)]">Double points armed: no more lifelines this round.</p>}
     </div>);
 }
 

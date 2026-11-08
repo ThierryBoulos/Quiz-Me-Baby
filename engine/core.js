@@ -1454,11 +1454,11 @@
       const moved = next.difficulty !== want;
       return [{ used:next }, moved ? { toast:'No more ' + want + ' questions in ' + rd.theme + ', so here is a ' + next.difficulty + ' one.', ms:4000 } : { toast:'New question.' }, { go:'ask' }];
     },
-    /* a lifeline: key 'friend' | 'dip', i the team. With double armed, one extra only. */
+    /* a lifeline: key 'friend' | 'dip', i the team. Any number in one round, Double Points armed or not (8 Nov, the
+       owner: the old "one extra lifeline only with Double Points" rule is gone) */
     'round/lifeline'(g, a){
       const key = a.key, i = a.i, rd = g.rounds[g.r], t = g.teams[i];
       if(!t.ll[key]) return [];
-      if(rd.dbl[i] && rd.llUsed[i].length >= 1) return [{ toast:'Double points is armed — one extra lifeline only.' }];
       t.ll[key] = false;
       rd.llUsed[i].push(key);
       return [{ timer:'pause' }, { lifeline:key }, { host:['ll_' + key], vars:{ t:i } },

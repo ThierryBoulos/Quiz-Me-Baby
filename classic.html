@@ -5370,7 +5370,7 @@ SCREENS.rules = function(){
       li(ICON.phone + ' <strong>Call a Friend</strong> — ' + S.settings.tFriend + ' seconds. The host speaks to the friend first and tells them: no ChatGPT, no Google, no asking the room.'),
       li(ICON.dip + ' <strong>Double Dip</strong> — two attempts at the answer. Burned either way, even if the first attempt is right.'),
       li(ICON.x2 + ' <strong>Double Points</strong> — must be <strong>declared before the round starts</strong>. Once the question is read, it is too late.'),
-      li('<span style="color:var(--warn)">If you arm Double Points you may use only <strong>one</strong> of the other two lifelines that round.</span>'),
+      li('Double Points armed? The other two still work that round: use all three at once if you like.'),
       li('<span style="color:var(--warn)">If you arm Double Points and miss, the other team can steal it — and if they get it right it is worth <strong>2 points</strong> to them, even though they spent nothing.</span>'),
       li('No lifelines on a steal. <strong>No lifelines at all in the mini-games.</strong>')
     ])) +
@@ -6076,10 +6076,9 @@ function slamTitle(){
 SCREENS.ask = function(){
   const g = G(), rd = curRound(), ti = curTeam(), t = g.teams[ti], q = rd.q[g.seat];
   const armed = rd.dbl[ti];
-  const blocked = armed && rd.llUsed[ti].length >= 1;
   const llBtn = (key) => {
     const spent = !t.ll[key];
-    return '<button class="ll ' + (spent ? 'spent' : '') + '"' + (spent || blocked ? ' disabled' : '') +
+    return '<button class="ll ' + (spent ? 'spent' : '') + '"' + (spent ? ' disabled' : '') +
       ' data-act="useLL" data-k="' + key + '" data-i="' + ti + '">' + LL[key].icon +
       '<span class="nm">' + LL[key].name + '</span></button>';
   };
@@ -6094,9 +6093,7 @@ SCREENS.ask = function(){
     '</div>' +
     '<div class="card pad stack" style="gap:10px">' +
       '<div class="row between"><div class="eyebrow">Lifelines — ' + esc(t.name) + '</div>' +
-        (armed ? '<span class="badge gold">Double points armed</span>' +
-          '<span class="badge ' + (blocked ? 'no' : 'line') + '" style="margin-left:6px">' +
-          (blocked ? 'No lifelines left this round' : '1 more lifeline allowed') + '</span>' : '') + '</div>' +
+        (armed ? '<span class="badge gold">Double points armed</span>' : '') + '</div>' +
       '<div class="ll-grid">' + llBtn('friend') + llBtn('dip') +
         '<div class="ll" style="opacity:.35;pointer-events:none">' + ICON.x2 + '<span class="nm">' + (armed ? 'Armed this round' : 'Round start only') + '</span></div>' +
       '</div>' +

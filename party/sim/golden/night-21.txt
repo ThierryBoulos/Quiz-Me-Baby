@@ -4,10 +4,11 @@
 7.50 ask | 3 | 0-0 |  |  | 
 8.50 ask | 3 | 0-0 |  | Lions used Call a Friend. | 
 12.00 ask | 4 | 0-0 |  | Lions used Call a Friend. | 
-14.00 steal | 4 | 0-0 |  | Lions used Call a Friend. | 
-14.75 answer | 4 | 0-0 |  | Lions used Call a Friend. | 
-15.75 ask | 5 | 0-0 |  | Lions used Call a Friend. | 
-16.50 steal | 5 | 0-0 |  | Lions used Call a Friend. | 
+13.00 ask | 4 | 0-0 |  | Lions used Double Dip. | 
+14.00 steal | 4 | 0-0 |  | Lions used Double Dip. | 
+14.75 answer | 4 | 0-0 |  | Lions used Double Dip. | 
+15.75 ask | 5 | 0-0 |  | Lions used Double Dip. | 
+16.50 steal | 5 | 0-0 |  | Lions used Double Dip. | 
 17.50 answer | 5 | 1-0 |  | Lions +1 point — steal | 
 18.50 roundScore | 6 | 1-0 |  | Lions +1 point — steal | 
 19.25 roundIntro | 7 | 1-0 |  | Lions +1 point — steal | 
