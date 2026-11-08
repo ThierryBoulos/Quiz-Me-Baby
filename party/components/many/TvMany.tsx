@@ -264,7 +264,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
       {/* the strip along the bottom, kept clear of the screen's content: news, and who taps Next, small, on the right */}
       <div className="tv-foot" role="status" aria-live="polite">
         {toastOn && <span key={pub.toast!.id} className="tv-note enter">{pub.toast!.text}</span>}
-        {host && next && <span className="next-hint">Waiting for <b><bdi>{host}</bdi></b> to tap {next}</span>}
+        {/* a captain's contest, open: the host decides (8 Nov) */}
+        {pub.screen === "reveal" && pub.contest ? <span className="next-hint"><b style={{ color: T[pub.contest.by].color }}><bdi>{T[pub.contest.by].name}</bdi></b> contest {pub.contest.t !== pub.contest.by ? <><b style={{ color: T[pub.contest.t].color }}><bdi>{T[pub.contest.t].name}</bdi></b>&rsquo;s </> : "their "}call. {host ? <><b><bdi>{host}</bdi></b> decides</> : "The host decides"}.</span>
+          : host && next && <span className="next-hint">Waiting for <b><bdi>{host}</bdi></b> to tap {next}</span>}
       </div>
     </div>);
 }

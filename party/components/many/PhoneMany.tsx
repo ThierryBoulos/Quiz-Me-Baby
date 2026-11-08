@@ -49,6 +49,36 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
 const Line = ({ children, className = "" }: { children: React.ReactNode; className?: string }) =>
   <p className={"text-center text-15 text-[var(--color-ink-2)] " + className} role="status">{children}</p>;
 
+/* Contesting a call on the reveal (8 Nov, the owner: the same as with two teams, the host decides). A captain: their own
+   team's WRONG, or another team's RIGHT, once each. The host: Agree or No. Everyone else: who contests, and that the host decides */
+function ContestMany({ pub, mine, host, busy, act }: { pub: PubMany; mine: number | null; host: boolean; busy: boolean; act: (move: Record<string, unknown>) => void }) {
+  const R = pub.reveal, T = pub.teams, K = pub.contest, g = pub.game;
+  if (!R || !g || !typedKey(g.key)) return null;
+  const say = g.key === "say", word = (ok: boolean) => (say ? (ok ? "scores" : "doesn't score") : ok ? "RIGHT" : "WRONG");
+  const nm = (t: number) => <b style={{ color: T[t].color }}><bdi>{T[t].name}</bdi></b>;
+  if (K) return host ? (
+    <div className="card flex flex-col gap-2 text-center" role="alert">
+      <div className="text-14">{nm(K.by)} say {K.t !== K.by ? <>{nm(K.t)}&rsquo;s </> : null}&ldquo;<bdi>{K.text}</bdi>&rdquo; {say ? (K.ok ? "shouldn't score" : "should score") : <>was <b>{word(!K.ok)}</b></>}. Your call.</div>
+      <div className="flex gap-2 justify-center">
+        <button className="btn btn-sm" disabled={busy} onClick={() => act({ type: "m/contestOk", v: true })}>{say ? (K.ok ? "Make it not score" : "Make it score") : `Make it ${word(!K.ok)}`}</button>
+        <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => act({ type: "m/contestOk", v: false })}>{say ? "Keep the call" : `Keep ${word(K.ok)}`}</button>
+      </div>
+    </div>)
+    : <Line>{nm(K.by)} contest {K.t !== K.by ? <>{nm(K.t)}&rsquo;s</> : "their"} &ldquo;<bdi>{K.text}</bdi>&rdquo;. The host decides.</Line>;
+  if (host || mine == null) return null;
+  const can = T.map((_, t) => t).filter((t) => R.typed?.[t] != null && !(pub.contested || []).includes(t) && (t === mine ? !R.ok?.[t] : !!R.ok?.[t]));
+  if (!can.length) return null;
+  return (
+    <div className="card flex flex-col gap-2 !p-3">
+      <div className="eyebrow">Think a call is wrong? The host decides</div>
+      {can.map((t) => (
+        <div key={t} className="flex items-center gap-3">
+          <div className="flex-1 min-w-0 text-15 leading-snug break-words">{nm(t)}: &ldquo;<bdi>{R.typed?.[t]}</bdi>&rdquo; <span className="text-[var(--color-ink-3)]">{word(!!R.ok?.[t])}</span></div>
+          <button className="btn btn-sm shrink-0" disabled={busy} onClick={() => act({ type: "m/contest", t })}>Contest</button>
+        </div>))}
+    </div>);
+}
+
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -236,7 +266,10 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             </div>); })}</div></>
         ) : <Table />}
         {g.key !== "majority" && <Big text={W.text} color={W.color} />}
-        <Main label="Next" on={() => move("m/next")} />
+        <ContestMany pub={pub} mine={null} host busy={busy} act={(mv) => { const { type, ...x } = mv; move(String(type), x); }} />
+        {/* (Next waits for the ruling, as with two teams) */}
+        {pub.contest ? <p className="text-center text-13 text-[var(--color-ink-3)] mt-auto" role="status">Next comes back once you&rsquo;ve ruled on the contest.</p>
+          : <Main label="Next" on={() => move("m/next")} />}
       </>)}
       {host && sc === "summary" && (<><Summary />{/* the host's Next waits with the result, so a tap can't skip the TV's reveal (the owner, 1 Nov) */}{!held && <Main label="Next" on={() => move("m/next")} />}</>)}
       {host && sc === "final" && (<>
@@ -325,6 +358,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {(() => { const y = youOf(); return y && <YouPill text={y.text} tone={y.tone} />; })()}
         <Answer />
         <Table />
+        <ContestMany pub={pub} mine={cap ? mine : null} host={false} busy={busy} act={(mv) => void send("next", { move: mv })} />
       </>)}
       {!host && sc === "summary" && <Summary />}
       {!host && sc === "final" && <Final />}

@@ -71,6 +71,10 @@ export type StateM = {
   paused?: boolean;                             // the host paused the clock (the question hides on the phones)
   extra?: Partial<Record<ManyKey, Q[]>>;         // a few questions per game left in its deck: the host's "Change question"
   night?: number; qn?: number;                   // this night's number and its questions asked so far: the question's key
+  /* a captain's contest of a call on the reveal (8 Nov, the owner: as with two teams, the host decides): whose call (t),
+     who asked (by), the call then (ok), what was typed; and the calls already looked at on this reveal */
+  contest?: { t: number; by: number; ok: boolean; text: string } | null;
+  contested?: number[];
 };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
 export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number };
@@ -118,7 +122,7 @@ export function lineup(rounds: number, games: ManyKey[]): ManyKey[] {
   for (let r = 0; r < rounds; r++) out.push("quiz", ...games.slice(r * per, (r + 1) * per));
   return out;
 }
-const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.votes = {}; s.shown = 1; };
+const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; };
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
 
 /* the host taps Start on a game's intro: its first question */
@@ -195,6 +199,7 @@ export function reveal(s: StateM) {
   if (m.key === "say") sayCalls(s, q);
   else if (typedKey(m.key)) s.ok = s.typed.map((x) => (x == null ? false : rightOf(m.key, x, q)));
   if (m.key === "dish") s.shown = (q.ings || []).length;
+  s.contest = null; s.contested = [];
   s.screen = "reveal"; s.deadline = null; s.left = 0; s.paused = false; s.step++; return true;
 }
 /* Don't Say the Same, with many teams (the plan's idea 5): an answer scores if it's on the prompt's list, isn't the
@@ -249,11 +254,43 @@ export function mrCount(s: StateM) {
 export const share = (m: MiniM, t: number) => (m.of[t] ? m.right[t] / m.of[t] : 0);
 
 /* the host flips one typed answer's call on the reveal */
-export function flip(s: StateM, t: number) { if (s.screen !== "reveal" || !typedKey(miniOf(s)?.key) || t < 0 || t >= s.teams.length) return false; s.ok[t] = !s.ok[t]; return true; }
+export function flip(s: StateM, t: number) {
+  if (s.screen !== "reveal" || !typedKey(miniOf(s)?.key) || t < 0 || t >= s.teams.length) return false;
+  s.ok[t] = !s.ok[t];
+  /* (the host changed the very call a captain is contesting: that's the contest decided) */
+  if (s.contest?.t === t) { s.contest = null; s.contested = [...(s.contested || []), t]; }
+  return true;
+}
+/* how a call reads: Don't Say the Same's "scores" or not, else RIGHT or WRONG */
+const callWord = (s: StateM, ok: boolean) => (miniOf(s)?.key === "say" ? (ok ? "scores" : "doesn't score") : ok ? "RIGHT" : "WRONG");
+/* A captain contests a call on the reveal (8 Nov, the owner: the same as with two teams, the host decides): their own
+   team's WRONG, or another team's RIGHT; one at a time, each call once. Next with one open: the call stands */
+export function contestCall(s: StateM, by: number, t: number): true | string {
+  const m = miniOf(s), k = s.teams.length;
+  if (!m || s.screen !== "reveal" || !typedKey(m.key)) return "There's no call to contest here.";
+  if (by < 0 || by >= k || !Number.isInteger(t) || t < 0 || t >= k) return "Not now.";
+  if (s.contest) return `One at a time: ${s.teams[s.contest.by].name}'s contest is open.`;
+  if ((s.contested || []).includes(t)) return "That call has already been looked at.";
+  const text = s.typed[t]; if (text == null) return "Nothing was typed there.";
+  const ok = !!s.ok[t];
+  if (t === by ? ok : !ok) return "Contest your own team's WRONG, or another team's RIGHT.";
+  s.contest = { t, by, ok, text };
+  return true;
+}
+/* the host's ruling on it: agree, the call changes (the points with it); no, it stands */
+export function decideContest(s: StateM, agree: boolean): boolean {
+  const C = s.contest; if (!C || s.screen !== "reveal") return false;
+  s.contest = null; s.contested = [...(s.contested || []), C.t];
+  if (agree) s.ok[C.t] = !C.ok;
+  toast(s, agree ? `Call changed: ${s.teams[C.t].name}'s answer ${callWord(s, !C.ok)}.` : "The host keeps the call.");
+  return true;
+}
 
 /* Next: the leg counts, then the next question, or the game's summary (its points paid), then the next game */
 export function next(s: StateM, now: number, t: Timers) {
   const m = miniOf(s); if (!m) return false;
+  /* a contest still open when the host moves on: the call stands */
+  if (s.contest) { s.contest = null; }
   /* sudden death: the fastest right answer wins the night (+1, so the standings say so); nobody right, another
      question; none left, the win stays shared */
   if (s.screen === "reveal" && m.key === "sudden") {

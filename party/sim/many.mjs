@@ -98,6 +98,25 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`sudden death: tied teams only ${intro}, a third team refused ${refused}, nobody right brings another ${again}, the fastest right wins (+1) ${won} — ${ok ? "ok" : "FAILED"}`);
 }
+/* 8 Nov: a captain contests a call on the reveal, the host decides (as with two teams): own WRONG or another team's
+   RIGHT only, one at a time, each call once; agreed, the call (and the points) move; Next with one open, it stands */
+{
+  const teams = [0, 1, 2].map((t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+  const s = L.newNight(teams, { quiz: decks.quiz.slice(0, 4) }, ["quiz"]);
+  L.startMini(s, 0, T, []);
+  let q = L.qOf(s); L.captainAnswer(s, 0, { text: "Atlantis" }); L.captainAnswer(s, 1, { text: q.answer }); L.reveal(s);
+  const own = L.contestCall(s, 0, 0) === true, twice = L.contestCall(s, 2, 1) !== true;
+  const agreed = L.decideContest(s, true) && s.ok[0] === true && L.legWinners(s).includes(0) && /Call changed/.test(s.toast?.text || "");
+  const once = L.contestCall(s, 0, 0) !== true, ownRight = L.contestCall(s, 1, 1) !== true, nothing = L.contestCall(s, 0, 2) !== true;
+  const theirs = L.contestCall(s, 2, 1) === true && L.decideContest(s, false) && s.ok[1] === true;
+  L.next(s, 0, T);
+  q = L.qOf(s); L.captainAnswer(s, 0, { text: q.answer }); L.captainAnswer(s, 1, { text: "Atlantis" }); L.reveal(s);
+  const open = L.contestCall(s, 1, 1) === true; L.next(s, 0, T);
+  const stands = !s.contest && s.screen === "q";
+  const ok = own && twice && agreed && once && ownRight && nothing && theirs && open && stands;
+  if (!ok) bad++;
+  console.log(`contest: own WRONG ${own}, one at a time ${twice}, agreed moves the call ${agreed}, once each ${once}, not your own RIGHT ${ownRight}, nothing typed ${nothing}, another team's RIGHT kept ${theirs}, Next leaves it standing ${open && stands} — ${ok ? "ok" : "FAILED"}`);
+}
 /* the cap: 60 players on one Majority Rules question, every one of them in, in one go */
 {
   const k = 8, roster = Array.from({ length: 60 }, (_, i) => ({ name: "P" + i, team: i % k }));
