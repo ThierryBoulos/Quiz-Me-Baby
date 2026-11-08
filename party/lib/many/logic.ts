@@ -80,6 +80,9 @@ export type StateM = {
   /* phones that left the game screen during a question, or pasted an answer (8 Nov: as with two teams) */
   flags?: FlagM[]; flagN?: number;
   mrOut?: string[];                             // Majority Rules: players the host took off the list (they've left), before Start
+  mapHint?: boolean;                            // Guess the Map: the host showed this map's hint (8 Nov: as with two teams)
+  /* Imad, the MC (8 Nov: as with two teams; lib/many/imad.ts): his latest line, and what he's said */
+  imad?: { id: number; text: string; mood?: string }; imadN?: number; imadUsed?: Record<string, number[]>; imadOnce?: Record<string, boolean>; imadLeader?: number | null;
 };
 export type FlagM = { id: number; name: string; team: number | null; label: string; qid?: string; ms: number | null; kind: "away" | "paste" };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
@@ -128,7 +131,7 @@ export function lineup(rounds: number, games: ManyKey[]): ManyKey[] {
   for (let r = 0; r < rounds; r++) out.push("quiz", ...games.slice(r * per, (r + 1) * per));
   return out;
 }
-const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; };
+const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; s.mapHint = false; };
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
 
 /* the host taps Start on a game's intro: its first question */
@@ -275,6 +278,11 @@ export function toggleMrOut(s: StateM, name: unknown): boolean {
   s.mrOut = out.includes(name) ? out.filter((x) => x !== name) : [...out, name];
   toast(s, out.includes(name) ? `${name} is back on the list.` : `${name} is off the list for this one.`);
   return true;
+}
+/* Guess the Map: the host shows the map's hint, once a map, while it's up (8 Nov: as with two teams) */
+export function showMapHint(s: StateM): boolean {
+  const m = miniOf(s); if (!m || m.key !== "map" || s.screen !== "q" || s.mapHint) return false;
+  s.mapHint = true; return true;
 }
 /* the host sets the night's totals by hand, when something went wrong (8 Nov, the owner: as with two teams) */
 export function setScores(s: StateM, scores: unknown): boolean {

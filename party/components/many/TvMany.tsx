@@ -14,6 +14,7 @@ import { LETTERS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { Ruler } from "../Ruler";
 import { NightIntroTv } from "../NightIntro";
+import { ImadBubble } from "../TvGame";
 import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
@@ -109,7 +110,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* Guess the Airport, Guess the Map: the board or the map, the clock and the teams beside it */}
         {pub.screen === "q" && g && (g.key === "airport" || g.key === "map") && (
           <div className="flex gap-10 items-center w-full justify-center">
-            <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} maxH={460} still />}</div>
+            <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={460} still />}</div>
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
               <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{g.key === "airport" ? "Which airport?" : "What do they have in common?"}</div>
               <Clock deadline={pub.deadline} left={pub.left} size={120} />
@@ -268,6 +269,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
       </div>
 
       {/* between questions: a soft glow in the leader's colour; it fades out when a question comes up */}
+      {/* Imad, the MC (8 Nov: as with two teams; Settings turns him on) */}
+      <ImadBubble imad={pub.imad} />
       <div className="tv-glow" style={{ ["--c" as string]: lead != null ? T[lead].color : "transparent", opacity: lead != null && pub.screen !== "q" ? 1 : 0 }} aria-hidden />
       {/* the strip along the bottom, kept clear of the screen's content: news, and who taps Next, small, on the right */}
       <div className="tv-foot" role="status" aria-live="polite">

@@ -169,7 +169,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     <div className="noselect contents" {...noCopy}>
       {g.key === "flag" && <ToSide order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 110 : 150} /></ToSide>}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
-      {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} maxH={small ? 180 : 240} legend={false} />}
+      {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={small ? 180 : 240} legend={false} />}
       {g.key === "dish" && pub.dish && (<ToSide order={4} className="noselect" {...noCopy}>
         <div className="card !py-2">
           <div className="eyebrow mb-1" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div>
@@ -293,6 +293,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <div className="flex flex-wrap justify-center gap-2 mt-auto dock-group py-2" style={{ background: "var(--color-bg)" }}>
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
           {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change question</button>}
+          {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
+          {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
         </div>
       </>)}

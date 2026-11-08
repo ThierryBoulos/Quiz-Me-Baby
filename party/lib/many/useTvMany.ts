@@ -13,8 +13,9 @@ import { usePresent } from "../tv/usePresent";
 import { DISH_LAST, T_AWAY, T_LOBBY_AWAY } from "../game";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, captainAnswer, contestCall, decideContest, setScores, toggleMrOut, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, captainAnswer, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
+import { imadContest, imadMany } from "./imad";
 
 /* a phone flagged (8 Nov, as with two teams): who, in which game, how long (null: still away); not the host's, and
    not with the house rule off. The TV says so; the host's list (no host: the captains') keeps it */
@@ -86,6 +87,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const publish = useCallback(() => {
     if (soon.current) { clearTimeout(soon.current); soon.current = null; }
     const s = st.current; if (!s) return;
+    imadMany(s);                                    // (Imad's line for this moment, if Settings has him on)
     const { pub: p, secret } = buildMany(s);
     p.ack = ack.current;
     const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at; p.now = Date.now();
@@ -274,7 +276,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);
       else if (t === "m/next") ok = next(s, Date.now(), timers());
       else if (t === "m/flip") ok = flip(s, Number(mv.t));
-      else if (t === "m/contestOk") ok = decideContest(s, !!mv.v);
+      else if (t === "m/contestOk") { ok = decideContest(s, !!mv.v); if (ok) imadContest(s); }
+      else if (t === "m/hint") ok = showMapHint(s);
       else if (t === "m/setScores") ok = setScores(s, mv.scores);
       else if (t === "m/mrOut") ok = toggleMrOut(s, mv.name);
       else if (t === "m/pause") ok = pause(s, Date.now());

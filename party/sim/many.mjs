@@ -138,6 +138,30 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`Majority Rules list: off ${off}, back ${back}, only before Start ${notNow} — ${ok ? "ok" : "FAILED"}`);
 }
+/* 8 Nov: Imad with 3-8 teams (Settings on): a line at each game's intro, a mini-game won, a new leader, the final;
+   every placeholder filled, nothing only two teams have ("both", a buzzer) */
+{
+  const store = { "qmb.party.settings": JSON.stringify({ v: 99, imad: true }) };
+  globalThis.localStorage = { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } };
+  const io = join(here, ".out/imad.mjs");
+  await build({ entryPoints: [join(here, "../lib/many/imad.ts")], outfile: io, bundle: true, platform: "node", format: "esm", logLevel: "error", alias: { "@": join(here, "..") } });
+  const I = await import(pathToFileURL(io).href);
+  const teams = [0, 1, 2, 3].map((t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+  const s = L.newNight(teams, { quiz: decks.quiz.slice(0, 4), flag: decks.flag, closest: decks.closest }, ["quiz", "flag", "closest"]);
+  const said = []; let last = 0;
+  const look = () => { I.imadMany(s); if (s.imad && s.imad.id !== last) { last = s.imad.id; said.push(s.imad.text); } };
+  for (let guard = 0; s.screen !== "final" && guard < 400; guard++) {
+    look();
+    if (s.screen === "intro") L.startMini(s, 0, T, []);
+    else if (s.screen === "q") { const q = L.qOf(s), m = L.miniOf(s); for (let t = 0; t < 4; t++) L.captainAnswer(s, t, m.key === "closest" ? { n: String(Number(q.answer) + t) } : { text: t === guard % 4 ? (m.key === "map" ? q.question : q.answer) : "Atlantis" }); L.reveal(s); }
+    else L.next(s, 0, T);
+  }
+  look();
+  const ok = said.length >= 4 && said.every((x) => !/\{\w+\}/.test(x) && !/\bboth\b|buzz/i.test(x));
+  if (!ok) bad++;
+  console.log(`Imad, 3-8 teams: ${said.length} lines, all filled in and fit for many teams ${ok} — ${ok ? "ok" : "FAILED"}`);
+  delete globalThis.localStorage;
+}
 /* the cap: 60 players on one Majority Rules question, every one of them in, in one go */
 {
   const k = 8, roster = Array.from({ length: 60 }, (_, i) => ({ name: "P" + i, team: i % k }));

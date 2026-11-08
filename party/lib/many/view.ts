@@ -19,7 +19,7 @@ export type PubMany = {
   /* Guess the Airport: the board (its name and code only at the reveal); Guess the Map: the map; the Cocktail or
      Dish: the ingredients up so far, and the teams whose one guess was wrong (out of this one) */
   airport?: { title: string; board: string[][]; code?: string; city?: string };
-  map?: { id: string; reveal: boolean; title?: string; rev?: string };
+  map?: { id: string; reveal: boolean; title?: string; rev?: string; hint?: string };
   dish?: { kind: string; ings: string[]; n: number };
   out?: boolean[];
   theme?: string;                                 // a question round: the question's theme
@@ -41,6 +41,7 @@ export type PubMany = {
   contested?: number[];
   hostGone?: { name: string | null; since: number; openAt: number } | null;   // the night waits for a host (TV time)
   mrOut?: string[];                               // Majority Rules: taken off the list (the host's, at its intro)
+  imad?: { id: number; text: string; mood?: string };   // Imad's latest line (the TV's bubble)
   flags?: FlagM[];                                // left the screen during a question, or pasted (the host's list; no host: the captains')
 };
 export type SecretMany = { answer?: string; notes?: string; typed?: (string | null)[]; nums?: (number | null)[];
@@ -66,7 +67,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     if (m.key === "flag") pub.flag = q.flag;
     else if (m.key === "pin") pub.pin = { photo: q.photo, credit: q.credit, licence: q.licence };
     else if (m.key === "airport") pub.airport = { title: q.boardTitle, board: q.board, code: rev ? q.code : undefined, city: rev ? q.city : undefined };
-    else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined, ...(rev && revOf(q) ? { rev: revOf(q) } : {}) };
+    else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined, ...(rev && revOf(q) ? { rev: revOf(q) } : {}), ...(s.mapHint ? { hint: "on" } : {}) };
     else if (m.key === "dish") { pub.dish = { kind: dishKind(q), ings: (q.ings || []).slice(0, rev ? undefined : Math.max(1, s.shown)), n: (q.ings || []).length };
       if (rev) pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }
     else pub.question = q.question;
@@ -77,6 +78,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   if (s.hostGone) pub.hostGone = s.hostGone;
   if (s.flags?.length) pub.flags = s.flags.slice(-30);
   if (s.mrOut?.length) pub.mrOut = s.mrOut;
+  if (s.imad) pub.imad = s.imad;
   if (m && q && s.screen === "reveal") {
     /* (sudden death pays the night one point, to the fastest right answer) */
     const w = legWinners(s), places = legPlaces(s), pl = { places, pts: m.key === "sudden" ? places.map((p) => (p === 1 ? 1 : 0)) : legPoints(s) };

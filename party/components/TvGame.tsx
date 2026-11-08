@@ -657,7 +657,7 @@ function NextHint({ pub }: { pub: Pub }) {
 
 /* Imad's line: his face and a speech bubble, up top, for as long as it takes to read (Classic's #hostBubble) */
 /* wait: on a reveal with a drumroll he speaks on its hit, not before it (he'd give the answer away) */
-function ImadBubble({ imad, wait = 0 }: { imad?: Pub["imad"]; wait?: number }) {
+export function ImadBubble({ imad, wait = 0 }: { imad?: Pub["imad"]; wait?: number }) {
   const [on, setOn] = useState<number | null>(null);
   const id = imad?.id ?? null, len = imad?.text.length ?? 0;
   const delay = useRef(wait);
