@@ -22,17 +22,19 @@ const OL = ({ items }: { items: ReactNode[] }) => (
     {items.map((x, i) => <li key={i}>{x}</li>)}
   </ol>);
 /* a mini-game: its name in bold, then its line */
-const Mini = ({ name, children }: { name: string; children: ReactNode }) => <P><B>{name}:</B> {children}</P>;
+const Mini = ({ name, children }: { name: string; children: ReactNode }) => <li><B>{name}:</B> {children}</li>;
 
 /* the night: on How to Play, and in the lobby while people wait */
 export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?: boolean }) {
   return (
     <>
       <section className="card flex flex-col gap-3" style={{ borderColor: "rgba(245,197,24,.5)" }}>
-        <P>Welcome to Quiz Me Baby! Get your team together, go head-to-head against the others, and see who comes out on top.</P>
-        <P>The night is made up of different types of games: standard trivia rounds and mini-games. Trivia tests your knowledge across different themes, while mini-games bring a variety of challenges, from guessing and bidding to quick-fire questions.</P>
-        <P>You decide how to build your night. Play trivia and mini-games together, or choose just one type. As you play, your team earns points. The goal is simple: finish with the highest score and take the top spot!</P>
-        <P>You can play with 2–8 teams, using a TV as your main screen or just your phones. Each team chooses a captain to submit its final answers, while teammates can suggest answers from their own phones.</P>
+        <UL items={[
+          <>Welcome to Quiz Me Baby! Get your team together, go head-to-head against the others, and see who comes out on top.</>,
+          <>The night is made up of different types of games: standard trivia rounds and mini-games. Trivia tests your knowledge across different themes, while mini-games bring a variety of challenges, from guessing and bidding to quick-fire questions.</>,
+          <>You decide how to build your night. Play trivia and mini-games together, or choose just one type. As you play, your team earns points. The goal is simple: finish with the highest score and take the top spot!</>,
+          <>You can play with 2–8 teams, using a TV as your main screen or just your phones. Each team chooses a captain to submit its final answers, while teammates can suggest answers from their own phones.</>,
+        ]} />
         <P><B>Ready? Here’s how to get started.</B></P>
       </section>
 
@@ -69,7 +71,8 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
 
       <Rule n="4" title="Mini-games">
         <P>Mini-games are selected during setup and appear between trivia rounds.</P>
-        <Mini name="Closest To Wins">Teams get the same number-based question and have 60 seconds to enter their estimates. The closest answer wins the leg. Best of 5.</Mini>
+        <ul className="flex flex-col gap-2 text-15 leading-relaxed text-[var(--color-ink-2)] list-disc pl-5 marker:text-[var(--color-gold)]">
+          <Mini name="Closest To Wins">Teams get the same number-based question and have 60 seconds to enter their estimates. The closest answer wins the leg. Best of 5.</Mini>
         <Mini name="The Auction">2-team setup only. The question is something like: “How many countries can you name?” Captains take turns bidding, raising the number or passing. The highest bidder has 30 seconds to name that many answers aloud. The host or the other captain counts them. Make your bid and you win the leg; fail and you lose it. Best of 3.</Mini>
         <Mini name="Don’t Say the Same as Me">You’ll be given a prompt such as “Name a cheese.” Each team has 20 seconds to secretly enter one answer. The app has an answer in mind. If your answer matches the app’s answer, you lose the point. With 3–8 teams, matching another team’s answer loses it too. Answers must be real and valid. Best of 7.</Mini>
         <Mini name="Guess the Map">A map appears without its title. You have 60 seconds to identify what it represents and type your answer. The general idea counts, not necessarily the exact wording. Best of 3.</Mini>
@@ -79,6 +82,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
         <Mini name="Majority Rules">Everyone plays individually on their own phone. Answer 15 questions, each with four options and 15 seconds to choose. Tapping an answer locks it in. No answer counts as wrong. Each team’s score is based on the percentage of its members’ answers that are correct, so smaller teams aren’t disadvantaged.</Mini>
         <Mini name="Guess the Cocktail or Dish">Ingredients appear one at a time, every 3 seconds, with the giveaway ingredient appearing last. The fastest team to answer wins. With 3–8 teams, each team gets one guess. Best of 5.</Mini>
         <Mini name="Battle of the Captains">2-team setup only. The captains go head-to-head. Everyone else stays quiet. Each captain gets 10 questions. With a host, answers are given aloud within 7 seconds; without a host, captains type their answers within 15 seconds. The captain with the highest score wins double points. This is always the last mini-game.</Mini>
+        </ul>
         <P>In a 2-team setup, if the game is tied, you can play one more to settle it or award a point to each team.</P>
       </Rule>
 
