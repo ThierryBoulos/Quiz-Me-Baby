@@ -7,6 +7,10 @@ only where the question bank lives. Don't change its screens or rules text; only
 - **It's one game.** Two teams, 3 to 8 teams, with a TV or without, with a host or without: every change the owner
   asks for, and every change made, applies to all of them unless the owner says otherwise. Where something can't work
   the same way in one of them, say so and say what happens there instead (8 Nov, the owner).
+- **The owner's wording (8 Nov).** How to Play (`party/components/Rules.tsx`) is the owner's own text: never reword
+  it. When a change to the game makes it wrong, or it looks wrong, tell the owner exactly how you'd change it (the
+  sentence as it is, the sentence you'd write) and wait for a yes. In everything else written for players, follow the
+  owner's style: their words, their tone; don't invent new phrasing of your own.
 - **Writing or changing content?** Read `docs/CONTENT-RULES.md` first and follow it; add the owner's new rulings
   there.
 - **Showing the owner new content**: never a summary or table. Each item numbered and written out exactly: question,
