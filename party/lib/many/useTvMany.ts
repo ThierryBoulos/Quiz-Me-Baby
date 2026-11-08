@@ -13,7 +13,7 @@ import { usePresent } from "../tv/usePresent";
 import { DISH_LAST, T_LOBBY_AWAY } from "../game";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, contestCall, decideContest, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, contestCall, decideContest, setScores, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 
 const SHAPE = 1;
@@ -235,7 +235,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "judge" && from.role === "host") {
       const mv = (a.payload.move || {}) as G, t = String(mv.type || "");
       /* (a call changed, or a contest ruled on, carries no step: the reveal's step doesn't move for either) */
-      if (t !== "m/flip" && t !== "m/contestOk" && Number(a.payload.step) !== s.step) { reply("-"); publish(); return; }
+      if (t !== "m/flip" && t !== "m/contestOk" && t !== "m/setScores" && Number(a.payload.step) !== s.step) { reply("-"); publish(); return; }
       let ok = false;
       if (t === "m/go") { ok = !!s.intro; delete s.intro; }
       else if (s.intro) ok = false;
@@ -244,6 +244,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/next") ok = next(s, Date.now(), timers());
       else if (t === "m/flip") ok = flip(s, Number(mv.t));
       else if (t === "m/contestOk") ok = decideContest(s, !!mv.v);
+      else if (t === "m/setScores") ok = setScores(s, mv.scores);
       else if (t === "m/pause") ok = pause(s, Date.now());
       else if (t === "m/swap") { const r = swapQ(s, Date.now(), timers()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code); }
@@ -298,6 +299,29 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     }, 3000);
     return () => clearInterval(t);
   }, [isTv, code, lobbyWrite]);
+
+  /* The host gone quiet mid-game (8 Nov, the owner): only the host moves a 3-8 night on, so after 20 s every phone
+     and the TV say the night is waiting for a host, and from 90 s since the host was last heard (the server's own
+     wait, qmb_claim) anyone in the room can take over. A host who's back, or a new one, clears it */
+  const hostFrom = useRef<Record<string, number>>({});
+  useEffect(() => {
+    if (!isTv) return;
+    const t = setInterval(() => {
+      const { room, members } = ctx.current, s = st.current, H = here.current, now = Date.now();
+      if (!s) return;
+      const h = members.find((m) => m.role === "host");
+      if (h && hostFrom.current[h.user_id] == null) hostFrom.current[h.user_id] = now;   // (a new host: from when it was noticed)
+      const playing = room?.status === "playing" && s.screen !== "final";
+      const last = h ? Math.max(H.at[h.user_id] ?? 0, hostFrom.current[h.user_id]) : null;
+      const gone = playing && (!h || now - (last as number) >= 20000);
+      const v = !gone ? null : h ? { name: h.name, since: last as number, openAt: (last as number) + 90000 }
+        : { name: null, since: s.hostGone && s.hostGone.name == null ? s.hostGone.since : now, openAt: s.hostGone && s.hostGone.name == null ? s.hostGone.openAt : now };
+      const was = s.hostGone;
+      if ((!v && !was) || (v && was && v.name === was.name && v.since === was.since)) return;
+      s.hostGone = v; publish();
+    }, 2000);
+    return () => clearInterval(t);
+  }, [isTv, publish]);
 
   /* The game's screen goes to sleep or out of sight (a phone running the game, with no TV: a call, another app, the
      screen locking): the clock waits, so nobody's question runs out meanwhile, and picks up where it was when the

@@ -117,6 +117,16 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`contest: own WRONG ${own}, one at a time ${twice}, agreed moves the call ${agreed}, once each ${once}, not your own RIGHT ${ownRight}, nothing typed ${nothing}, another team's RIGHT kept ${theirs}, Next leaves it standing ${open && stands} — ${ok ? "ok" : "FAILED"}`);
 }
+/* 8 Nov: the host sets the totals by hand (as with two teams): a number per team, nothing else */
+{
+  const teams = [0, 1, 2].map((t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+  const s = L.newNight(teams, { quiz: decks.quiz.slice(0, 4) }, ["quiz"]);
+  const set = L.setScores(s, [5, 3, 12]) && s.teams.map((x) => x.score).join() === "5,3,12" && /set the scores/.test(s.toast?.text || "");
+  const bad1 = !L.setScores(s, [1, 2]) && !L.setScores(s, [1, -2, 3]) && !L.setScores(s, ["x", 2, 3]) && !L.setScores(s, [5, 3, 12]);
+  const ok = set && bad1;
+  if (!ok) bad++;
+  console.log(`scores by hand: set ${set}, a wrong list or no change refused ${bad1} — ${ok ? "ok" : "FAILED"}`);
+}
 /* the cap: 60 players on one Majority Rules question, every one of them in, in one go */
 {
   const k = 8, roster = Array.from({ length: 60 }, (_, i) => ({ name: "P" + i, team: i % k }));

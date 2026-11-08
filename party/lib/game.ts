@@ -111,6 +111,7 @@ export type Pub = {
      a few, not one, as two quick taps can reach the TV the other way round */
   ack?: Record<string, Record<string, string>>;
   tvAway?: boolean;          // the TV's screen is asleep or hidden: everything is paused until it's back
+  hostGone?: { name: string | null; since: number; openAt: number } | null;   // (8 Nov) a night that started with a host: the host gone quiet (TV time)
   /* phones that left the game screen during a question (another app or tab): name, team, how long (null: still away) */
   flags?: { id: number; name: string; team: 0 | 1 | null; label: string; qid?: string; ms: number | null; kind?: "away" | "paste" }[];                 // Closest To Wins clock, for its rules
   exit?: boolean;            // the night is over and someone tapped Exit: every screen goes home

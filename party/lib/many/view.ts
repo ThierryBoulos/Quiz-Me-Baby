@@ -39,6 +39,7 @@ export type PubMany = {
   /* a captain's contest open on the reveal (the host decides), and the calls already looked at */
   contest?: { t: number; by: number; ok: boolean; text: string } | null;
   contested?: number[];
+  hostGone?: { name: string | null; since: number; openAt: number } | null;   // the night waits for a host (TV time)
 };
 export type SecretMany = { answer?: string; notes?: string; typed?: (string | null)[]; nums?: (number | null)[];
   step?: number; qid?: string;                  // which question this answer is for (the host's card shows only a match)
@@ -71,6 +72,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes); }
   }
   if (s.screen === "reveal") { pub.contest = s.contest ?? null; pub.contested = s.contested || []; }
+  if (s.hostGone) pub.hostGone = s.hostGone;
   if (m && q && s.screen === "reveal") {
     /* (sudden death pays the night one point, to the fastest right answer) */
     const w = legWinners(s), places = legPlaces(s), pl = { places, pts: m.key === "sudden" ? places.map((p) => (p === 1 ? 1 : 0)) : legPoints(s) };

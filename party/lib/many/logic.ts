@@ -75,6 +75,8 @@ export type StateM = {
      who asked (by), the call then (ok), what was typed; and the calls already looked at on this reveal */
   contest?: { t: number; by: number; ok: boolean; text: string } | null;
   contested?: number[];
+  /* the host gone quiet mid-game (8 Nov, the owner): who (null: no host at all), last heard, and when anyone may take over */
+  hostGone?: { name: string | null; since: number; openAt: number } | null;
 };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
 export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number };
@@ -259,6 +261,15 @@ export function flip(s: StateM, t: number) {
   s.ok[t] = !s.ok[t];
   /* (the host changed the very call a captain is contesting: that's the contest decided) */
   if (s.contest?.t === t) { s.contest = null; s.contested = [...(s.contested || []), t]; }
+  return true;
+}
+/* the host sets the night's totals by hand, when something went wrong (8 Nov, the owner: as with two teams) */
+export function setScores(s: StateM, scores: unknown): boolean {
+  if (!Array.isArray(scores) || scores.length !== s.teams.length) return false;
+  const v = scores.map((x) => Math.round(Number(x)));
+  if (v.some((x) => !Number.isFinite(x) || x < 0 || x > 9999) || v.every((x, t) => x === s.teams[t].score)) return false;
+  v.forEach((x, t) => { s.teams[t].score = x; });
+  toast(s, `The host set the scores: ${s.teams.map((t) => `${t.name} ${t.score}`).join(", ")}.`);
   return true;
 }
 /* how a call reads: Don't Say the Same's "scores" or not, else RIGHT or WRONG */

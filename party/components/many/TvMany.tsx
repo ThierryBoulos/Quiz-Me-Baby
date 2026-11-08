@@ -5,7 +5,7 @@
    number of teams changes: up to four sit as the two do, eight pack into rows. No buttons: the host's phone runs it. */
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Clock } from "../Clock";
+import { Clock, useSecondsLeft } from "../Clock";
 import { Board, Confetti, FlagImg, PinPhoto } from "../GameParts";
 import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
@@ -24,6 +24,14 @@ const QUICK = { ["--beat" as string]: ".15s" };
 /* join: where a phone joins this room (Majority Rules puts the QR code up again before it starts)
    host: who taps Start and Next (the strip at the bottom says so); seats: players on each team (the join screen's counts) */
 /* sound: this is the TV itself (it plays the pours and the coins landing; another screen showing the TV stays quiet) */
+/* the TV's line while the night waits for a host (8 Nov): big enough to read across the room */
+function HostGoneTv({ info }: { info: { name: string | null; openAt: number } }) {
+  const left = useSecondsLeft(info.openAt);
+  return <span className="tv-note enter" style={{ color: "var(--color-gold)", fontWeight: 800 }}>
+    {info.name ? <><bdi>{info.name}</bdi>&rsquo;s phone has gone quiet: the night is waiting for a host. </> : "The night has no host, so it is waiting. "}
+    {left > 0 ? `In ${left} s, anyone can take over as the host on their phone.` : "Anyone can take over now: tap Be the host on your phone."}</span>;
+}
+
 export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany; join?: { url: string; code: string }; host?: string; seats?: number[]; sound?: boolean }) {
   const g = pub.game, R = pub.reveal, T = pub.teams, k = T.length, dense = k > 4;
   const key = pub.screen + pub.step;
@@ -264,6 +272,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
       {/* the strip along the bottom, kept clear of the screen's content: news, and who taps Next, small, on the right */}
       <div className="tv-foot" role="status" aria-live="polite">
         {toastOn && <span key={pub.toast!.id} className="tv-note enter">{pub.toast!.text}</span>}
+        {/* the host gone quiet (8 Nov): the night waits; anyone can take over on their phone */}
+        {pub.hostGone && <HostGoneTv info={pub.hostGone} />}
         {/* a captain's contest, open: the host decides (8 Nov) */}
         {pub.screen === "reveal" && pub.contest ? <span className="next-hint"><b style={{ color: T[pub.contest.by].color }}><bdi>{T[pub.contest.by].name}</bdi></b> contest {pub.contest.t !== pub.contest.by ? <><b style={{ color: T[pub.contest.t].color }}><bdi>{T[pub.contest.t].name}</bdi></b>&rsquo;s </> : "their "}call. {host ? <><b><bdi>{host}</bdi></b> decides</> : "The host decides"}.</span>
           : host && next && <span className="next-hint">Waiting for <b><bdi>{host}</bdi></b> to tap {next}</span>}

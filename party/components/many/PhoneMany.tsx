@@ -79,6 +79,42 @@ function ContestMany({ pub, mine, host, busy, act }: { pub: PubMany; mine: numbe
     </div>);
 }
 
+/* the host's Adjust the scores, in the teams sheet (8 Nov, the owner: as with two teams): every team's total, an
+   "Are you sure?", and the TV and every phone show the new scores at once */
+export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
+  const noTv = useNoTv(), T = pub.teams;
+  const [open, setOpen] = useState(false), [v, setV] = useState<number[]>(T.map((t) => t.score)), [busy, setBusy] = useState(false), [err, setErr] = useState<string | null>(null);
+  const now = T.map((t) => t.score).join();
+  useEffect(() => { if (!open) setV(T.map((t) => t.score)); }, [open, now]);   // eslint-disable-line react-hooks/exhaustive-deps
+  if (!open) return <button className="btn btn-sm btn-ghost self-center" onClick={() => setOpen(true)}>Adjust the scores</button>;
+  const step = (t: number, d: number) => setV((x) => x.map((n, i) => (i === t ? Math.max(0, n + d) : n)));
+  const changed = v.some((n, t) => n !== T[t].score);
+  const save = async () => {
+    const what = T.map((t, i) => (v[i] !== t.score ? `${t.name}: ${t.score} → ${v[i]}` : null)).filter(Boolean).join(". ");
+    if (!window.confirm(`Are you sure? ${what}.`)) return;
+    setBusy(true); setErr(null);
+    try { await sendAction(code, "judge", { move: { type: "m/setScores", scores: v }, step: pub.step }); setOpen(false); }
+    catch { setErr(noTv ? "That didn't go through. Try again." : "That didn't reach the TV. Try again."); } finally { setBusy(false); }
+  };
+  return (
+    <div className="card flex flex-col gap-3">
+      <div className="eyebrow">Adjust the scores</div>
+      <p className="text-13 text-[var(--color-ink-2)]">Only if something went wrong. {noTv ? "Every phone shows" : "The TV and every phone show"} the new scores at once.</p>
+      {T.map((t, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <b className="flex-1 truncate" style={{ color: t.color }}><bdi>{t.name}</bdi></b>
+          <button className="btn btn-sm" aria-label={`${t.name} minus one`} onClick={() => step(i, -1)}>−</button>
+          <span className="display text-32 w-14 text-center">{v[i]}</span>
+          <button className="btn btn-sm" aria-label={`${t.name} plus one`} onClick={() => step(i, 1)}>+</button>
+        </div>))}
+      {err && <p className="field-error text-center" role="alert">{err}</p>}
+      <div className="flex gap-2">
+        <button className="btn btn-gold flex-1" disabled={busy || !changed} onClick={() => void save()}>Save the scores</button>
+        <button className="btn btn-ghost" onClick={() => setOpen(false)}>Cancel</button>
+      </div>
+    </div>);
+}
+
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;

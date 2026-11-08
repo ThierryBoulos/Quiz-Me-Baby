@@ -48,6 +48,8 @@ export const newState = () => ({
   ok: [null, null] as Two<boolean | null>,           // Flag / Map / Say verdicts, as they stand
   app: [null, null] as Two<boolean | null>,          // ...and what the app said first (the "App suggests" tag)
   sdBuzz: null as 0 | 1 | null, sdOut: [false, false] as Two<boolean>,
+  /* a night that started with a host, the host gone quiet (8 Nov): who (null: none), last heard, when anyone may take over */
+  hostGone: null as null | { name: string | null; since: number; openAt: number },
   pending: null as null | { kind: PKind; team: 0 | 1; text: string; v: boolean; until: number },
   autoAt: null as number | null,                     // (games saved before contests: when an unruled map answer stood as right)
   paused: false,                                     // the clock stopped by a Pause (the question hides meanwhile)

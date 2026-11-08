@@ -1288,6 +1288,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      usePresence), and anything it sends counts too. A captain gone for T_AWAY hands over
      to the first teammate still here, so a phone left in a pocket never stalls the
      night. Nobody is removed. */
+  const hostFrom = useRef<Record<string, number>>({});   // when each host was first noticed (a new one isn't "gone" before it's heard)
   const here = useRef({ at: {} as Record<string, number>, since: Date.now(), busy: false, checked: 0, lags: [] as number[],
     away: {} as Record<string, { at: number; qid?: string; flag?: number }> });
   usePresent(code, isTv, here, members, phone);
@@ -1347,6 +1348,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        answers, as in a game with no host, until the host is back. */
     const hostM = members.find((m) => m.role === "host");
     const hostHere = !!hostM && now - (H.at[hostM.user_id] ?? H.since) < T_AWAY * 1000;
+    /* (8 Nov) a night that started with a host, and the host gone quiet 20 s: the teams sheet says so, and from 90 s
+       since the host was last heard (the server's own wait, qmb_claim) anyone can take over as the host. The captains
+       carry the night meanwhile, as before */
+    { if (hostM && hostFrom.current[hostM.user_id] == null) hostFrom.current[hostM.user_id] = now;
+      const last = hostM ? Math.max(H.at[hostM.user_id] ?? 0, hostFrom.current[hostM.user_id]) : null;
+      const gone = room?.mode === "host" && s.screen !== "final" && (!hostM || now - (last as number) >= 20000);
+      const was = s.hostGone, none = was && was.name == null;
+      const v = !gone ? null : hostM ? { name: hostM.name, since: last as number, openAt: (last as number) + 90000 } : { name: null, since: none ? was.since : now, openAt: none ? was.openAt : now };
+      if (!((!v && !was) || (v && was && v.name === was.name && v.since === was.since))) { s.hostGone = v; void publish(); } }
     /* a Know the Host answer waiting for a host who's been gone 20 s: the captains may skip it (decision 7) */
     { const q = current(), sc = s.screen;
       const wait = (sc === "ask" || sc === "steal") && !!q && hostOnly(q) && (!!s.typed[turnTeam()] || s.timeUp)

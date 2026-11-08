@@ -130,7 +130,7 @@ export function FixingACall({ standalone = false, noTv = false }: { standalone?:
       <Rule n="D" title={noTv ? "Phones" : "Phones and the TV"}>
         <L items={[
           <><B>Phone died?</B> Join again with the same name and tap &ldquo;take my seat back&rdquo;. A host&rsquo;s or a captain&rsquo;s seat only frees up once that phone has been silent for a minute and a half, so nobody can take it by typing the name.</>,
-          <><B>Captain gone?</B> After a while the armband passes to a teammate who is still here. <B>Host gone?</B> The captains run the night meanwhile; the host picks it back up on return.</>,
+          <><B>Captain gone?</B> After a while the armband passes to a teammate who is still here. <B>Host gone?</B> With two teams the captains run the night meanwhile; with three teams or more it waits. The host comes back by opening the game again, or joining again with the same name; after 90 seconds anyone in the room can tap <B>Be the host</B> instead.</>,
           noTv ? <><B>The phone running the game went to sleep or lost Wi-Fi?</B> The clocks stand still until it&rsquo;s back; after a while the host&rsquo;s or a captain&rsquo;s phone carries the night on from its last save, by itself.</>
             : <><B>The TV&rsquo;s Wi-Fi dropped, or its screen went to sleep?</B> The clocks stand still until it&rsquo;s back; nothing times out meanwhile. A TV reloaded or reopened picks the night up where it was.</>,
           <><B>No peeking, no pasting.</B> A phone that leaves the game screen during a question, or pastes an answer, is flagged{noTv ? "" : " on the TV"}; the host sees the list.</>,

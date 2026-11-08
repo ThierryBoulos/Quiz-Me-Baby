@@ -14,7 +14,8 @@ import { iso, type Pub } from "@/lib/game";
 import { ensureSession, rpc, sb, sendAction } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 import { LineupMany, PickMany, SetupMany } from "@/components/many/LineupMany";
-import { PhoneMany } from "@/components/many/PhoneMany";
+import { PhoneMany, ScoreFixMany } from "@/components/many/PhoneMany";
+import { HostGone } from "@/components/HostGone";
 import { NightIntroPhone } from "@/components/NightIntro";
 import { HudMany, ScoresMany } from "@/components/many/PartsMany";
 import { SideSlot, ToSide, useSideways } from "@/components/Side";
@@ -391,6 +392,9 @@ export default function PhoneRoom() {
       <div className="main">
 
       {note && <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>{note}</p>}
+      {/* (8 Nov) 3-8 teams: the host gone quiet and the night waiting: every phone says so, with "Be the host" from 90 s */}
+      {many && room.status === "playing" && pubM?.many && pubM.hostGone && mine.role !== "host" && (
+        <HostGone info={pubM.hostGone} many onClaim={() => void claim("host")} busy={busy} onTeam={mine.team != null} />)}
 
       {pub?.tvAway && room.status !== "lobby" && (
         <p className="text-center text-14 font-bold enter" role="status" style={{ color: "var(--color-gold)" }}>
@@ -434,8 +438,10 @@ export default function PhoneRoom() {
               </div>)}
             {mine.role === "player" && !myCaptain && (
               <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => claim("captain")}>Make me captain</button>)}
+            {/* two teams, a night that started with a host: the host gone quiet, the captains carry on; anyone can take over (8 Nov) */}
+            {!many && pub?.hostGone && mine.role !== "host" && <HostGone info={pub.hostGone} many={false} onClaim={() => void claim("host")} busy={busy} onTeam={mine.team != null} />}
             {/* 3-8 teams: only the host moves the night on, so with none, anyone can be it (the 4 Nov audit, 1.9) */}
-            {many && !host && (
+            {many && !host && !pubM?.hostGone && (
               <div className="card flex flex-col gap-2 text-center">
                 <p className="text-14">The night has no host, and only the host can move it on.</p>
                 <button className="btn btn-gold btn-block" disabled={busy} onClick={() => claim("host")}>I&rsquo;m the host</button>
@@ -446,6 +452,7 @@ export default function PhoneRoom() {
             {mine.role === "host" && <AwayLog pub={pub} />}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {mine.role === "host" && pub && !many && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
+            {mine.role === "host" && many && pubM?.many && <ScoreFixMany pub={pubM} code={code} />}
             {mine.role === "host" && pub && !noTv && <TvTakeover code={code} />}
             {/* no host: either captain asks for new scores; the other captain agrees, or not (back on the game screen) */}
             {mine.role === "captain" && pub?.mode === "nohost" && <ScoreFix pub={pub} ask busy={busy || waiting}
