@@ -127,6 +127,17 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`scores by hand: set ${set}, a wrong list or no change refused ${bad1} — ${ok ? "ok" : "FAILED"}`);
 }
+/* 8 Nov: Majority Rules, someone who has left comes off their team's list at the intro (the host), and back again */
+{
+  const teams = [0, 1, 2].map((t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+  const s = L.newNight(teams, { majority: decks.majority }, ["majority"]);
+  const off = L.toggleMrOut(s, "Joe") && (s.mrOut || []).includes("Joe"), back = L.toggleMrOut(s, "Joe") && !(s.mrOut || []).includes("Joe");
+  L.toggleMrOut(s, "Joe"); L.startMini(s, 0, T, [{ name: "Ann", team: 0 }]);
+  const notNow = !L.toggleMrOut(s, "Ann");
+  const ok = off && back && notNow;
+  if (!ok) bad++;
+  console.log(`Majority Rules list: off ${off}, back ${back}, only before Start ${notNow} — ${ok ? "ok" : "FAILED"}`);
+}
 /* the cap: 60 players on one Majority Rules question, every one of them in, in one go */
 {
   const k = 8, roster = Array.from({ length: 60 }, (_, i) => ({ name: "P" + i, team: i % k }));

@@ -13,7 +13,7 @@ import { showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
-import { useSuggestions } from "../PhoneGame";
+import { useNoPaste, useSuggestions } from "../PhoneGame";
 import { ToSide } from "../Side";
 import { Dot, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
@@ -139,6 +139,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const [sug, setSug] = useState(""), [sugSent, setSugSent] = useState<string | null>(null);
   useEffect(() => { setSug(""); setSugSent(null); }, [pub.qid]);
   const sugs = useSuggestions(code, pub.qid, members, mine ?? -1, cap && sc === "q");
+  const np = useNoPaste(code, pub.qid);   // (no pasting into an answer: refused, and flagged, as with two teams)
   const suggest = async () => { const t = sug.trim(); if (!t || mine == null) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSugSent(t); setSug(""); } catch { /* the phone says so */ } };
   /* the host's change of a call shows at once, until the TV's own update says the same */
   const [flips, setFlips] = useState<Record<string, boolean>>({});
@@ -253,6 +254,16 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* THE HOST: the answer on top, one main button */}
       {host && sc === "intro" && g && (<>
         <IntroMany pub={pub} size="phone" />
+        {/* Majority Rules: someone who has left comes off their team's list before Start (8 Nov: as with two teams) */}
+        {g.key === "majority" && (
+          <div className="card flex flex-col gap-2 !p-3">
+            <div className="eyebrow">Who plays: take off anyone who has left</div>
+            {members.filter((m) => m.role !== "host" && m.team != null).map((m) => { const off = (pub.mrOut || []).includes(m.name); return (
+              <div key={m.user_id} className="flex items-center gap-3" style={{ opacity: off ? 0.55 : 1 }}>
+                <span className="flex-1 min-w-0 truncate text-15"><b style={{ color: T[m.team as number]?.color }}><bdi>{m.name}</bdi></b>{off ? " · off the list" : ""}</span>
+                <button className="btn btn-sm shrink-0" disabled={busy} onClick={() => move("m/mrOut", { name: m.name })}>{off ? "Put back" : "Take off"}</button>
+              </div>); })}
+          </div>)}
         <Main label={g.key === "majority" ? "Start: everyone's in" : "Start"} on={() => move("m/start")} />
       </>)}
       {host && sc === "q" && g && (<>
@@ -356,7 +367,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           ) : (
             <div className="card flex flex-col gap-2">
               <label className="field-label !mb-0" htmlFor="mans">{g.key === "closest" ? "Your number" : "Your answer"}</label>
-              <input id="mans" className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
+              <input id="mans" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
+              {np.hint}
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
               <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>
             </div>)}
@@ -378,10 +390,11 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <div className="card flex flex-col gap-2">
             <label className="field-label !mb-0" htmlFor="msug">Suggest to {T[mine]?.captain || "your captain"}</label>
             <div className="flex gap-2">
-              <input id="msug" className="input" autoComplete="off" value={sug} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} placeholder={g.key === "closest" ? "A number" : "Your answer"}
+              <input id="msug" {...np.props} className="input" autoComplete="off" value={sug} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} placeholder={g.key === "closest" ? "A number" : "Your answer"}
                 onChange={(e) => setSug(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
               <button className="btn" disabled={!sug.trim()} onClick={() => void suggest()}>Send</button>
             </div>
+            {np.hint}
             {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
           </div>)
           : <Line>Your captain answers this one.</Line>}

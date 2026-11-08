@@ -77,7 +77,11 @@ export type StateM = {
   contested?: number[];
   /* the host gone quiet mid-game (8 Nov, the owner): who (null: no host at all), last heard, and when anyone may take over */
   hostGone?: { name: string | null; since: number; openAt: number } | null;
+  /* phones that left the game screen during a question, or pasted an answer (8 Nov: as with two teams) */
+  flags?: FlagM[]; flagN?: number;
+  mrOut?: string[];                             // Majority Rules: players the host took off the list (they've left), before Start
 };
+export type FlagM = { id: number; name: string; team: number | null; label: string; qid?: string; ms: number | null; kind: "away" | "paste" };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
 export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number };
 
@@ -261,6 +265,15 @@ export function flip(s: StateM, t: number) {
   s.ok[t] = !s.ok[t];
   /* (the host changed the very call a captain is contesting: that's the contest decided) */
   if (s.contest?.t === t) { s.contest = null; s.contested = [...(s.contested || []), t]; }
+  return true;
+}
+/* Majority Rules: before Start, the host takes a player who has left off their team's list, or puts them back (8 Nov:
+   as with two teams) */
+export function toggleMrOut(s: StateM, name: unknown): boolean {
+  const m = miniOf(s); if (!m || m.key !== "majority" || s.screen !== "intro" || typeof name !== "string" || !name) return false;
+  const out = s.mrOut || [];
+  s.mrOut = out.includes(name) ? out.filter((x) => x !== name) : [...out, name];
+  toast(s, out.includes(name) ? `${name} is back on the list.` : `${name} is off the list for this one.`);
   return true;
 }
 /* the host sets the night's totals by hand, when something went wrong (8 Nov, the owner: as with two teams) */

@@ -1,6 +1,6 @@
 /* MANY TEAMS: what the TV publishes (PubMany, for every phone) and what only the host's phone gets
    (the answer and every team's typed answer). Built from the night's state, never stored. */
-import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, typedKey, type AwardM, type LatLon, type ManyKey, type StateM } from "./logic";
+import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, typedKey, type AwardM, type FlagM, type LatLon, type ManyKey, type StateM } from "./logic";
 import { dishKind } from "../tv/rules";
 import { revOf } from "../engine";
 import type { IntroPub } from "../intro";
@@ -40,6 +40,8 @@ export type PubMany = {
   contest?: { t: number; by: number; ok: boolean; text: string } | null;
   contested?: number[];
   hostGone?: { name: string | null; since: number; openAt: number } | null;   // the night waits for a host (TV time)
+  mrOut?: string[];                               // Majority Rules: taken off the list (the host's, at its intro)
+  flags?: FlagM[];                                // left the screen during a question, or pasted (the host's list; no host: the captains')
 };
 export type SecretMany = { answer?: string; notes?: string; typed?: (string | null)[]; nums?: (number | null)[];
   step?: number; qid?: string;                  // which question this answer is for (the host's card shows only a match)
@@ -73,6 +75,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   }
   if (s.screen === "reveal") { pub.contest = s.contest ?? null; pub.contested = s.contested || []; }
   if (s.hostGone) pub.hostGone = s.hostGone;
+  if (s.flags?.length) pub.flags = s.flags.slice(-30);
+  if (s.mrOut?.length) pub.mrOut = s.mrOut;
   if (m && q && s.screen === "reveal") {
     /* (sudden death pays the night one point, to the fastest right answer) */
     const w = legWinners(s), places = legPlaces(s), pl = { places, pts: m.key === "sudden" ? places.map((p) => (p === 1 ? 1 : 0)) : legPoints(s) };

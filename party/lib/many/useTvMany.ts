@@ -10,11 +10,23 @@ import { getSettings, USED_KEY } from "../settings";
 import { cap1, type Member, type Room } from "../room";
 import { inboxMark, useInbox } from "../tv/useInbox";
 import { usePresent } from "../tv/usePresent";
-import { DISH_LAST, T_LOBBY_AWAY } from "../game";
+import { DISH_LAST, T_AWAY, T_LOBBY_AWAY } from "../game";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, captainAnswer, contestCall, decideContest, setScores, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, captainAnswer, contestCall, decideContest, setScores, toggleMrOut, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
+
+/* a phone flagged (8 Nov, as with two teams): who, in which game, how long (null: still away); not the host's, and
+   not with the house rule off. The TV says so; the host's list (no host: the captains') keeps it */
+function flagIt(s: StateM, m: Member, qid: string | undefined, ms: number | null, kind: "away" | "paste" = "away"): number | undefined {
+  if (m.role === "host" || !getSettings().flagAway) return undefined;
+  const id = (s.flagN = (s.flagN || 0) + 1);
+  s.flags = [...(s.flags || []), { id, name: m.name, team: m.team, label: titleOf(s.minis, s.mi) || "A question", qid, ms, kind }].slice(-60);
+  s.toast = { id: ++s.toastN, text: kind === "paste" ? `${m.name} tried to paste an answer.` : `${m.name} left the game screen during the question.` };
+  playSound("wrong");
+  return id;
+}
+const setFlagMs = (s: StateM, id: number, ms: number) => { s.flags = (s.flags || []).map((f) => (f.id === id ? { ...f, ms } : f)); };
 
 const SHAPE = 1;
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
@@ -149,8 +161,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     } catch { /* nothing saved */ }
   }, [isTv, saveKey, code, publish]);
 
-  const roster = () => ctx.current.members.filter((m) => m.role !== "host" && m.team != null).map((m) => ({ name: m.name, team: m.team as number }));
+  const roster = () => ctx.current.members.filter((m) => m.role !== "host" && m.team != null && !(st.current?.mrOut || []).includes(m.name)).map((m) => ({ name: m.name, team: m.team as number }));
 
+  /* who's away from the game screen right now (their note came, they're not back yet), and the flag it made */
+  const awayAt = useRef<Record<string, { at: number; qid?: string; flag?: number }>>({});
   const handle = useCallback(async (a: Action) => {
     const { room, members } = ctx.current; if (!room) return;
     const from = members.find((m) => m.user_id === a.user_id);
@@ -231,11 +245,28 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       return;
     }
     const s = st.current; if (!s || !from) return;
+    /* a phone's note: it left the game screen during a question, it's back (and for how long, by its own clock), it
+       tried to paste an answer (8 Nov: flagged as with two teams; the TV says so, the host's list keeps it) */
+    if (a.kind === "count") {
+      const n = a.payload as { away?: { qid?: string }; back?: { qid?: string; ms: number }; hello?: number; paste?: { qid?: string } };
+      const A = awayAt.current, k = a.user_id, now = Date.now();
+      if (n.away && !A[k]) A[k] = { at: now, qid: n.away.qid };
+      if (n.paste && !(s.flags || []).some((f) => f.kind === "paste" && f.qid === n.paste!.qid && f.name === from.name) && flagIt(s, from, n.paste.qid, null, "paste")) publish();
+      if (n.hello && A[k]) { const x = A[k]; delete A[k]; if (x.flag) { setFlagMs(s, x.flag, now - x.at); publish(); } }
+      if (n.back) {
+        const x = A[k]; delete A[k];
+        const ms = Math.max(0, Number(n.back.ms) || 0);
+        if (x?.flag && ms < 2000) { s.flags = (s.flags || []).filter((f) => f.id !== x.flag); publish(); }
+        else if (x?.flag) { setFlagMs(s, x.flag, ms); publish(); }
+        else if (ms >= 2000 && flagIt(s, from, n.back.qid, ms)) publish();
+      }
+      return;
+    }
     /* the host runs it */
     if (a.kind === "judge" && from.role === "host") {
       const mv = (a.payload.move || {}) as G, t = String(mv.type || "");
       /* (a call changed, or a contest ruled on, carries no step: the reveal's step doesn't move for either) */
-      if (t !== "m/flip" && t !== "m/contestOk" && t !== "m/setScores" && Number(a.payload.step) !== s.step) { reply("-"); publish(); return; }
+      if (t !== "m/flip" && t !== "m/contestOk" && t !== "m/setScores" && t !== "m/mrOut" && Number(a.payload.step) !== s.step) { reply("-"); publish(); return; }
       let ok = false;
       if (t === "m/go") { ok = !!s.intro; delete s.intro; }
       else if (s.intro) ok = false;
@@ -245,6 +276,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/flip") ok = flip(s, Number(mv.t));
       else if (t === "m/contestOk") ok = decideContest(s, !!mv.v);
       else if (t === "m/setScores") ok = setScores(s, mv.scores);
+      else if (t === "m/mrOut") ok = toggleMrOut(s, mv.name);
       else if (t === "m/pause") ok = pause(s, Date.now());
       else if (t === "m/swap") { const r = swapQ(s, Date.now(), timers()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code); }
@@ -303,12 +335,46 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   /* The host gone quiet mid-game (8 Nov, the owner): only the host moves a 3-8 night on, so after 20 s every phone
      and the TV say the night is waiting for a host, and from 90 s since the host was last heard (the server's own
      wait, qmb_claim) anyone in the room can take over. A host who's back, or a new one, clears it */
-  const hostFrom = useRef<Record<string, number>>({});
+  const hostFrom = useRef<Record<string, number>>({}), capBusy = useRef(false);
   useEffect(() => {
     if (!isTv) return;
+    const since = Date.now();
     const t = setInterval(() => {
       const { room, members } = ctx.current, s = st.current, H = here.current, now = Date.now();
       if (!s) return;
+      let changed = false;
+      /* away from the game screen 2 s and not back yet: flagged now (how long comes with their "back") */
+      for (const [k, x] of Object.entries(awayAt.current)) {
+        if (x.flag || now - x.at < 2000) continue;
+        const m = members.find((y) => y.user_id === k);
+        if (!m) { delete awayAt.current[k]; continue; }
+        const id = flagIt(s, m, x.qid, null); x.flag = id ?? -1; if (id) changed = true;
+      }
+      /* a captain gone a minute while their team still has to answer: the armband passes to a teammate who's still
+         here (8 Nov: as with two teams) */
+      if (room?.status === "playing" && s.screen === "q" && !capBusy.current) {
+        const m = miniOf(s), done = answered(s);
+        for (let tm = 0; tm < s.teams.length && m && m.key !== "majority"; tm++) {
+          if ((m.only && !m.only.includes(tm)) || done[tm]) continue;
+          const cap = members.find((x) => x.team === tm && x.role === "captain");
+          if (!cap || now - Math.max(H.at[cap.user_id] ?? 0, since) < T_AWAY * 1000) continue;
+          const nx = members.find((x) => x.team === tm && x.role === "player" && now - (H.at[x.user_id] ?? 0) < 40000);
+          if (!nx) continue;
+          capBusy.current = true;
+          void (async () => {
+            try {
+              const r1 = await sb().from("members").update({ role: "player" }).eq("room", code).eq("user_id", cap.user_id); if (r1.error) return;
+              const r2 = await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", nx.user_id);
+              if (r2.error) { await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", cap.user_id); return; }
+              H.at[nx.user_id] = Date.now(); s.teams[tm].captain = nx.name;
+              s.toast = { id: ++s.toastN, text: `${cap.name} seems to be away. ${nx.name} is ${s.teams[tm].name}'s captain now.` };
+              publish();
+            } finally { capBusy.current = false; }
+          })();
+          break;
+        }
+      }
+      if (changed) publish();
       const h = members.find((m) => m.role === "host");
       if (h && hostFrom.current[h.user_id] == null) hostFrom.current[h.user_id] = now;   // (a new host: from when it was noticed)
       const playing = room?.status === "playing" && s.screen !== "final";
@@ -321,7 +387,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       s.hostGone = v; publish();
     }, 2000);
     return () => clearInterval(t);
-  }, [isTv, publish]);
+  }, [isTv, publish, code]);
 
   /* The game's screen goes to sleep or out of sight (a phone running the game, with no TV: a call, another app, the
      screen locking): the clock waits, so nobody's question runs out meanwhile, and picks up where it was when the

@@ -81,7 +81,7 @@ function Ings({ ings, small }: { ings: string[]; small?: boolean }) {
 }
 /* No pasting into an answer: typed by hand or not at all. A paste (or a
    dropped text) is refused, and the TV flags it, like leaving the screen. */
-function useNoPaste(code: string, qid?: string) {
+export function useNoPaste(code: string, qid?: string) {
   const noTv = useNoTv();
   const [said, setSaid] = useState(false);
   useEffect(() => { if (!said) return; const t = setTimeout(() => setSaid(false), 3500); return () => clearTimeout(t); }, [said]);
@@ -609,14 +609,15 @@ function AwayCard({ pub }: { pub: Pub }) {
     </p>);
 }
 /* the host's full list, in the Players panel */
-export function AwayLog({ pub }: { pub: Pub | null }) {
-  const all = pub?.flags || [];
+/* the flagged list: the host's, and with no host both captains' (8 Nov, the owner); color: a team's colour (3-8 teams) */
+export function AwayLog({ flags, color = (t) => tc(t === 0 || t === 1 ? t : null) }: { flags?: { id: number; name: string; team: number | null; label: string; ms: number | null; kind?: string }[] | null; color?: (t: number | null) => string }) {
+  const all = flags || [];
   const noTv = useNoTv();
   return (
     <div className="card flex flex-col gap-2">
       <div className="eyebrow" style={{ color: "var(--color-no)" }}>Flagged: left the screen or pasted</div>
       {all.length ? [...all].reverse().map((f) => (
-        <div key={f.id} className="text-14"><b style={{ color: tc(f.team) }}>{f.name}</b> · {f.label} · {f.kind === "paste" ? "tried to paste an answer" : f.ms != null ? `left the screen ${Math.round(f.ms / 1000)}s` : "left the screen, still away"}</div>))
+        <div key={f.id} className="text-14"><b style={{ color: color(f.team) }}>{f.name}</b> · {f.label} · {f.kind === "paste" ? "tried to paste an answer" : f.ms != null ? `left the screen ${Math.round(f.ms / 1000)}s` : "left the screen, still away"}</div>))
         : <p className="text-14 text-[var(--color-ink-2)]">Nobody so far. A phone that switches app or tab during a question shows up here{noTv ? "" : " and on the TV"}.</p>}
     </div>);
 }

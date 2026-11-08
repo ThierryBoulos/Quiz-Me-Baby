@@ -323,8 +323,8 @@ export default function PhoneRoom() {
   /* (in the lobby too: the TV shares its settings and its own questions with the host there) */
   const secret = useSecret(code, !!mine && mine.role === "host" && (playing || room?.status === "lobby"));
   /* a question is live on this phone: leaving the screen now gets flagged on the TV */
-  const live = !!pub && !!mine && mine.role !== "host" && ANSWERING.includes(pub.screen) && !pub.paused
-    && !(pub.lifeline?.key === "friend" && pub.lifeline.team === mine.team);
+  const live = !!pub && !!mine && mine.role !== "host" && !pub.paused && (many ? pub.screen === "q"
+    : ANSWERING.includes(pub.screen) && !(pub.lifeline?.key === "friend" && pub.lifeline.team === mine.team));
   useAwayWatch(report, live, pub?.qid);
   const sendMove = (move: Record<string, unknown>) => tell(() => sendAction(code, "judge", { move, step: pub?.step }));
   /* quick taps (+1, Undo, pausing a call): straight out, the buttons never wait for them */
@@ -453,7 +453,10 @@ export default function PhoneRoom() {
             {mine.role === "player" && myCaptain && <div className="card text-center text-14">{myCaptain.name} is your captain. If they step down, you can take over here.</div>}
             {mine.role === "host" && !many && <p className="text-14 text-[var(--color-ink-2)]">Tap an arrow to move a player across. A moved captain becomes a player, and their team picks a new one.</p>}
             {many ? (!(room.state?.pub as PubMany | null)?.many && <LineupMany room={room} members={members} k={teamCount} />) : <Lineup room={room} members={members} onMove={mine.role === "host" ? move : undefined} onRemove={mine.role === "host" ? remove : undefined} />}
-            {mine.role === "host" && <AwayLog pub={pub} />}
+            {/* who left the screen or pasted: the host's list; with no host (or the host gone quiet), both captains' (8 Nov) */}
+            {(mine.role === "host" || (mine.role === "captain" && (many ? !host || !!pubM?.hostGone : pub?.mode === "nohost"))) && (many
+              ? <AwayLog flags={pubM?.flags} color={(t) => (t == null ? "var(--color-ink)" : pubM?.teams[t]?.color || "var(--color-ink)")} />
+              : <AwayLog flags={pub?.flags} />)}
             <button className="btn btn-gold btn-block" onClick={() => setPanel(false)}>Back to the game</button>
             {mine.role === "host" && pub && !many && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
             {mine.role === "host" && many && pubM?.many && <ScoreFixMany pub={pubM} code={code} />}

@@ -25,7 +25,7 @@ const OL = ({ items }: { items: ReactNode[] }) => (
 const Mini = ({ name, children }: { name: string; children: ReactNode }) => <P><B>{name}:</B> {children}</P>;
 
 /* the night: on How to Play, and in the lobby while people wait */
-export function Rules({ fixing = true }: { fixing?: boolean; noTv?: boolean }) {
+export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?: boolean }) {
   return (
     <>
       <section className="card flex flex-col gap-3" style={{ borderColor: "rgba(245,197,24,.5)" }}>
@@ -45,7 +45,7 @@ export function Rules({ fixing = true }: { fixing?: boolean; noTv?: boolean }) {
       <Rule n="2" title="Set up your night">
         <P>The host (or Captain A) decides how you want to play:</P>
         <UL items={[
-          <><B>Standard trivia rounds:</B> Choose between 4 and 12 rounds, each with its own theme.</>,
+          <><B>Standard trivia rounds:</B> Choose up to 12 rounds, each with its own themes.</>,
           <><B>Mini-games:</B> Pick the mini-games you want to include. They’ll be played between standard rounds.</>,
           <><B>Mix and match:</B> You can play with both or choose either one.</>,
         ]} />
@@ -71,19 +71,19 @@ export function Rules({ fixing = true }: { fixing?: boolean; noTv?: boolean }) {
         <P>Mini-games are selected during setup and appear between trivia rounds.</P>
         <Mini name="Closest To Wins">Teams get the same number-based question and have 60 seconds to enter their estimates. The closest answer wins the leg. Best of 5.</Mini>
         <Mini name="The Auction">2-team setup only. The question is something like: “How many countries can you name?” Captains take turns bidding, raising the number or passing. The highest bidder has 30 seconds to name that many answers aloud. The host or the other captain counts them. Make your bid and you win the leg; fail and you lose it. Best of 3.</Mini>
-        <Mini name="Don’t Say the Same as Me">You’ll be given a prompt such as “Name a cheese.” Each team has 20 seconds to secretly enter one answer. The app has an answer in mind. If your answer matches the app’s answer or another team’s, you loose the point. Answers must be real and valid. Best of 7.</Mini>
+        <Mini name="Don’t Say the Same as Me">You’ll be given a prompt such as “Name a cheese.” Each team has 20 seconds to secretly enter one answer. The app has an answer in mind. If your answer matches the app’s answer, you lose the point. With 3–8 teams, matching another team’s answer loses it too. Answers must be real and valid. Best of 7.</Mini>
         <Mini name="Guess the Map">A map appears without its title. You have 60 seconds to identify what it represents and type your answer. The general idea counts, not necessarily the exact wording. Best of 3.</Mini>
         <Mini name="Guess the Flag">Identify the country or region shown by typing its name within 15 seconds. Best of 10.</Mini>
         <Mini name="Drop the Pin">A landmark photo appears. You have 45 seconds to find the location on the world map on your phone, zoom in and lock in your pin. The closest pin wins. Best of 7.</Mini>
         <Mini name="Guess the Airport">A departures board appears. You have 30 seconds to identify the airport using clues such as destinations, airlines and language. Naming the city is enough unless it has more than one airport. Best of 5.</Mini>
         <Mini name="Majority Rules">Everyone plays individually on their own phone. Answer 15 questions, each with four options and 15 seconds to choose. Tapping an answer locks it in. No answer counts as wrong. Each team’s score is based on the percentage of its members’ answers that are correct, so smaller teams aren’t disadvantaged.</Mini>
-        <Mini name="Guess the Cocktail or Dish">Ingredients appear one at a time, every 3 seconds, with the giveaway ingredient appearing last. The fastest team to answer wins. Best of 5.</Mini>
+        <Mini name="Guess the Cocktail or Dish">Ingredients appear one at a time, every 3 seconds, with the giveaway ingredient appearing last. The fastest team to answer wins. With 3–8 teams, each team gets one guess. Best of 5.</Mini>
         <Mini name="Battle of the Captains">2-team setup only. The captains go head-to-head. Everyone else stays quiet. Each captain gets 10 questions. With a host, answers are given aloud within 7 seconds; without a host, captains type their answers within 15 seconds. The captain with the highest score wins double points. This is always the last mini-game.</Mini>
         <P>In a 2-team setup, if the game is tied, you can play one more to settle it or award a point to each team.</P>
       </Rule>
 
       <Rule n="5" title="Who wins?">
-        <P>The team with the highest score at the end wins. If there’s a tie, it’s time for sudden death: the captains get one question, and the first to answer correctly wins.</P>
+        <P>The team with the highest score at the end wins. If there’s a tie, it’s time for sudden death: the tied teams’ captains get one question at a time, and the first to answer correctly wins.</P>
         <P>At the end, enjoy the confetti, check out the recap, and play again!</P>
       </Rule>
 
@@ -93,12 +93,12 @@ export function Rules({ fixing = true }: { fixing?: boolean; noTv?: boolean }) {
         <P>The app checks every typed answer. If you think a call is wrong, you can contest it when the answer is revealed.</P>
       </section>
 
-      {fixing && <FixingACall />}
+      {fixing && <FixingACall noTv={noTv} />}
     </>);
 }
 
 /* when things go wrong: its own page (How to Play links to it), and the lobby after the night */
-export function FixingACall({ standalone = false }: { standalone?: boolean; noTv?: boolean }) {
+export function FixingACall({ standalone = false, noTv = false }: { standalone?: boolean; noTv?: boolean }) {
   return (
     <>
       {!standalone && <h2 className="display text-32 mt-2" style={{ color: "var(--color-gold)" }}>When things go wrong</h2>}
@@ -108,7 +108,7 @@ export function FixingACall({ standalone = false }: { standalone?: boolean; noTv
         <Sub>Playing with a host</Sub>
         <P>The host has the final say on answers.</P>
         <OL items={[
-          <>The host’s phone displays the correct answer and the captains submitted answer, along with two buttons: <B>RIGHT</B> and <B>WRONG</B>.</>,
+          <>The host’s phone displays the correct answer and the captain’s submitted answer, along with two buttons: <B>RIGHT</B> and <B>WRONG</B>.</>,
           <>The app automatically suggests a decision. The host can accept it or choose the other option.</>,
           <>A captain who disagrees can tap <B>Contest</B> on the result. The host makes the final decision.</>,
           <>The host can change a decision at any point before tapping <B>Next</B>.</>,
@@ -126,7 +126,7 @@ export function FixingACall({ standalone = false }: { standalone?: boolean; noTv
       <Rule n="02" title="Need to change something?">
         <Sub>Adjusting the score</Sub>
         <UL items={[
-          <><B>With a host:</B> On the host’s phone, go to <B>Players → Adjust the scores</B>.</>,
+          <><B>With a host:</B> The host taps their name (top left) → <B>Adjust the scores</B>.</>,
           <><B>Without a host:</B> Either captain can tap their name (top left) → <B>Adjust the scores</B>. The other captain must agree to the change.</>,
           <>The other captain has 20 seconds to <B>Agree</B> or <B>No</B>. If they don’t respond, the scores remain unchanged.</>,
         ]} />
@@ -138,7 +138,7 @@ export function FixingACall({ standalone = false }: { standalone?: boolean; noTv
           <>A new question of comparable difficulty appears with a fresh timer.</>,
         ]} />
         <Sub>Pausing the game</Sub>
-        <P>The host can pause any timer, including the Call a Friend timer.</P>
+        <P>The host can pause any timer. Without a host, either captain can.</P>
       </Rule>
 
       <Rule n="03" title="Players and phones">
@@ -147,12 +147,13 @@ export function FixingACall({ standalone = false }: { standalone?: boolean; noTv
         <Sub>The captain disconnected</Sub>
         <P>If a captain is gone for a while, the captain role automatically passes to a teammate who is still connected.</P>
         <Sub>The host disconnected</Sub>
-        <P>In a 2-team setup, the captains can keep the game going while the host is away. In a 3-8-team setup, a player can step up as the host. When the host reconnects, they can resume their role.</P>
+        <P>In a 2-team setup, the captains can keep the game going while the host is away. In a 3-8-team setup, the game waits for the host. When the host reconnects, they can resume their role. If they’re gone for 90 seconds, anyone can tap Be the host and take over.</P>
         <Sub>Someone left during Majority Rules?</Sub>
-        <P>Before starting the next set of questions, a player who has left can be removed from their team’s list. The other captain must agree to the change.</P>
+        <P>Before starting the next set of questions, a player who has left can be removed from their team’s list.</P>
       </Rule>
 
-      <Rule n="04" title="The TV and connection">
+      {/* (no TV tonight: nothing here applies, the owner, 8 Nov) */}
+      {!noTv && <Rule n="04" title="The TV and connection">
         <Sub>The TV lost Wi-Fi or went to sleep</Sub>
         <P>The game pauses automatically. Timers stop, and no answers time out while the TV is disconnected. Once the TV reconnects, the game resumes.</P>
         <Sub>The TV page reloaded or closed</Sub>
@@ -160,18 +161,18 @@ export function FixingACall({ standalone = false }: { standalone?: boolean; noTv
         <Sub>The TV laptop stopped working</Sub>
         <P>You can move the game to another laptop without losing your progress.</P>
         <OL items={[
-          <>On the host’s phone, tap their name (top left) → <B>The TV died?</B> → <B>Get a code</B>.</>,
-          <>On the replacement laptop, open the Quiz me Baby! website.</>,
+          <>On the host’s phone (no host: either captain’s), tap their name (top left) → <B>The TV died?</B> → <B>Get a code</B>.</>,
+          <>On the replacement laptop, open the Quiz Me Baby! website.</>,
           <>Select <B>Join a game</B>.</>,
           <>Scroll to the bottom and select <B>The TV died?</B>.</>,
           <>Enter the room code and the recovery code generated on the host’s phone. The game will resume from the TV’s last saved state.</>,
         ]} />
-      </Rule>
+      </Rule>}
 
       <Rule n="05" title="Fair play">
-        <P>Quiz me Baby! is more fun when everyone plays fair.</P>
+        <P>Quiz Me Baby! is more fun when everyone plays fair.</P>
         <UL items={[
-          <>No Googling, or AI tools.</>,
+          <>No Googling or AI tools.</>,
           <>No asking people outside the game for answers.</>,
           <>Don’t leave the game screen during a question.</>,
           <>Don’t copy and paste answers.</>,
