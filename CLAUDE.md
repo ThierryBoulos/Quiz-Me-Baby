@@ -1,8 +1,12 @@
 # Quiz Me Baby
 
-Party trivia game. The live app is `party/` (Next.js, Supabase); `classic.html` is the original one-screen app and
-the home of the question bank; `engine/core.js` is the game engine both share.
+Party trivia game. The live app is `party/` (Next.js, Supabase); `engine/core.js` is its game engine. `classic.html`
+is the old one-screen app, **retired as a game on 3 Nov** (nobody can reach it; `/classic` redirects home): it is
+only where the question bank lives. Don't change its screens or rules text; only its bank data.
 
+- **It's one game.** Two teams, 3 to 8 teams, with a TV or without, with a host or without: every change the owner
+  asks for, and every change made, applies to all of them unless the owner says otherwise. Where something can't work
+  the same way in one of them, say so and say what happens there instead (8 Nov, the owner).
 - **Writing or changing content?** Read `docs/CONTENT-RULES.md` first and follow it; add the owner's new rulings
   there.
 - **Showing the owner new content**: never a summary or table. Each item numbered and written out exactly: question,
