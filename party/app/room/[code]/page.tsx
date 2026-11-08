@@ -261,7 +261,11 @@ export default function PhoneRoom() {
     const { error } = await sb().from("members").delete().eq("room", code).eq("user_id", m.user_id);
     if (error) throw new Error(error.message);
   });
-  const leave = () => (room?.status === "lobby" || window.confirm("Leave the game? You can come back with the same name.")) && act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
+  /* (8 Nov) mid-game, a host is told what happens to the night without them */
+  const hostGoes = (many ? "The night waits until someone taps Be the host." : "The captains carry on, and the app checks the answers, until someone takes over as the host.");
+  const leave = () => (room?.status === "lobby" || window.confirm(mine?.role === "host"
+    ? `Leave the game? The game goes on without you: ${hostGoes} You can come back with the same name, as a player.`
+    : "Leave the game? You can come back with the same name.")) && act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });
 
   /* the armband moved without me asking (a captain's phone was away): say so, once */
   const [note, setNote] = useState<string | null>(null);
@@ -454,6 +458,9 @@ export default function PhoneRoom() {
             {mine.role === "host" && pub && !many && <ScoreFix pub={pub} send={sendMove} busy={busy || waiting} />}
             {mine.role === "host" && many && pubM?.many && <ScoreFixMany pub={pubM} code={code} />}
             {mine.role === "host" && pub && !noTv && <TvTakeover code={code} />}
+            {/* (8 Nov) the host can step down mid-game too, and stays in the room as a player */}
+            {mine.role === "host" && <button className="btn btn-sm btn-ghost self-center" disabled={busy}
+              onClick={() => { if (window.confirm(`Stop hosting? The game goes on: ${hostGoes} You stay in the room as a player.`)) { void claim("player"); setPanel(false); } }}>Stop hosting</button>}
             {/* no host: either captain asks for new scores; the other captain agrees, or not (back on the game screen) */}
             {mine.role === "captain" && pub?.mode === "nohost" && <ScoreFix pub={pub} ask busy={busy || waiting}
               send={(move) => { void tell(() => sendAction(code, "next", { move, step: pub.step })); setPanel(false); }} />}
