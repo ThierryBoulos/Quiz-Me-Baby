@@ -52,7 +52,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
           <><B>Mix and match:</B> You can play with both or choose either one.</>,
         ]} />
         <P>You can also adjust the default timings in Settings → Timers on the TV screen.</P>
-        <P><B>Scoring with 3–8 teams:</B> Throughout the night, teams are ranked in each game, earning 10 points for 1st place, 8 for 2nd, then 6, 5, 4, 3, 2 and 1 point respectively. Teams tied for a position share the points for the higher-ranked place; incorrect answers earn no points, and the fastest correct answer gets the highest score.</P>
+        <P><B>Scoring with 3–8 teams:</B> Throughout the night, teams are ranked in each game, earning 10 points for 1st place, 8 for 2nd, then 6, 5, 4, 3, 3 and 3 points respectively. Teams tied for a position share the points for the higher-ranked place; incorrect answers earn no points, and the fastest correct answer gets the highest score.</P>
       </Rule>
 
       <Rule n="3" title="Standard trivia rounds">

@@ -8,8 +8,8 @@
    Points by place (the owner's pick, 30 Oct: one winner taking 2 left 2nd and 8th level). Every question ranks
    the teams and pays this game's tally by place: with 8 teams the nearest (Closest, Pin) or the first right
    (Flags: the fastest typist) takes 8, the next 7, down to 1; wrong or no answer, nothing. Majority Rules ranks
-   by the share of answers right. At the end of a game its places pay the night: 10, 8, 6, 5, 4, 3, 2, 1
-   (3 teams: 10, 8, 6). Level teams share the better place. */
+   by the share of answers right. At the end of a game its places pay the night: 10, 8, 6, 5, 4, 3, 3, 3
+   (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). Level teams share the better place. */
 import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 
@@ -32,7 +32,7 @@ export const MANY_MIN = 3, MANY_MAX = 8, MANY_PLAYERS = 60;
 /* question rounds (the owner, 30 Oct): up to six, each two themes of two questions; up to six themes for the night */
 export const MANY_ROUNDS = 6, MANY_THEMES = 6;
 /* what a game's places pay the night (1st, 2nd, ...); fewer teams take the top of the same table */
-export const PLACE_PTS = [10, 8, 6, 5, 4, 3, 2, 1];
+export const PLACE_PTS = [10, 8, 6, 5, 4, 3, 3, 3];
 /* team colours: Team A's cyan and Team B's pink exactly (--color-a, --color-b), then six more that sit apart
    from each other and from the show's gold, the green of RIGHT and the red of WRONG; a letter in every dot too
    (colour-blind). A canvas can't read CSS variables, so they're hex. */
