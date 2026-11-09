@@ -3,9 +3,10 @@
    row only the host can read (Supabase row-level security). */
 export type Team = { name: string; score: number; ll: { friend: boolean; dip: boolean; dbl: boolean } };
 export type Two<T> = [T, T];
-export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "majority" | "battle";
+export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "majority" | "roulette" | "battle";
 /* a spot on the earth (Drop the Pin), in degrees */
 export type LatLon = { lat: number; lon: number };
+import type { RrPub } from "./roulette";
 export type Pub = {
   step: number;                   // bumps on every host move and screen change; host taps carry it so stale ones are refused
   screen: string;                 // roundIntro | ask | steal | answer | roundScore | sudden | final | miniIntro | miniQ | closestReveal | miniSummary | flag… | dish…
@@ -55,6 +56,7 @@ export type Pub = {
   /* Guess the Airport: its departures board (time, status, destination, flight, gate); at the reveal, its code and city */
   /* cityOk, at the reveal: false where the city alone doesn't count (it has more than one big airport) */
   airport?: { title: string; board: string[][]; code?: string; city?: string; cityOk?: boolean };
+  roulette?: RrPub;                     // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
   /* Majority Rules: every player answers. The join screen: each team's list (who's on the game screen, who's been
      taken off), and with no host a captain asking to take an absent teammate off (the other captain agrees).
      Then, the list fixed: the names on it, the four answers, how many have answered, and at the reveal how
@@ -119,6 +121,7 @@ export type Pub = {
 };
 /* host only: the answer, and what the captains typed with the app's opinion */
 export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null>; you?: boolean;
+  answers?: Two<string>;                // Russian Roulette: each team's own question's answer
   lobby?: TvShare };
 /* In the lobby, what the TV shares with the host's phone: its settings, its own questions, how many it has played */
 export type TvShare = { settings: import("./settings").Settings; custom: import("./engine").Q[]; played: number; thin?: Thin[] };
@@ -131,11 +134,11 @@ export function thinLine(t: Thin): string {
 }
 
 /* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
-export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "battleLevel"];
+export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "rouletteTie", "battleLevel"];
 /* a mini-game can't be lost any more, with legs still to play: the same people choose — keep playing for fun, or stop here */
 export const DECIDED = "decided";
 export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Guess the Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me",
-  pin: "Drop the Pin", airport: "Guess the Airport", majority: "Majority Rules", battle: "Battle of the Captains" };
+  pin: "Drop the Pin", airport: "Guess the Airport", majority: "Majority Rules", roulette: "Russian Roulette", battle: "Battle of the Captains" };
 /* 28 Oct, motion on the TV. The drumroll (answer, dish, auction leg) hits at 0.82 s: the answer, the calls and
    the right/wrong chime land on that hit, not before it. The points then fly up to the score: from the line that
    says "+2" (it shows FLY_AT after the screen comes up), FLY_MS in the air; the point chime plays as they land. */

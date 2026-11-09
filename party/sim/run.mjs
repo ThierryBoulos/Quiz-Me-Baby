@@ -64,6 +64,11 @@ const NIGHTS = [
   { seed: 26, minis: [], rounds: 4, simul: true, events: [{ at: 0, type: "levelEnd" }] },
   { seed: 27, minis: ["battle"], rounds: 4, battleLevel: true, tieMore: 1 },
   { seed: 28, minis: ["battle"], rounds: 4, host: true, battleLevel: true, tieMore: 1 },
+  /* 9 Nov: Russian Roulette: no host (the app calls, the captains contest), with a host, and mini-games only with a
+     reload in the middle of it */
+  { seed: 29, minis: ["roulette", "flag"], rounds: 4, tieMore: 1 },
+  { seed: 30, minis: ["roulette", "closest"], rounds: 4, host: true, tieMore: 1 },
+  { seed: 31, minis: ["roulette"], rounds: 0, reload: 11 },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

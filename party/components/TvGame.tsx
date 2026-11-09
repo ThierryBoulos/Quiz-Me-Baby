@@ -7,6 +7,7 @@ import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
+import { RouletteTv } from "./Roulette";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -338,6 +339,11 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
         <div className="display vs-in b text-48 text-left flex-1 truncate" style={{ color: tc(1) }}><bdi>{pub.captains[1] || T[1].name}</bdi></div>
       </div>) : undefined} /></div>
   </>);
+  /* Russian Roulette: the barrel spins, each team's chamber lights up with its question; at the reveal they click, the bullet last */
+  if ((sc === "rouletteQ" || sc === "rouletteReveal") && pub.roulette) return (
+    <RouletteTv rr={pub.roulette} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))} showQs
+      sent={pub.sent} typed={pub.reveal?.typed?.map((x) => x?.[0] ?? null)} ok={pub.reveal?.ok} reveal={sc === "rouletteReveal"} sound={sound}
+      clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />} />);
   if (sc === "miniQ") return (<>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 50, lineHeight: 1.15 }}>{pub.question}</div>
     <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={150} />
@@ -651,7 +657,8 @@ function awayTotals(pub: Pub) {
 function NextHint({ pub }: { pub: Pub }) {
   const open = useAfter(pub.nextOpenAt), auto = useSecondsLeft(pub.autoAt);
   if (pub.autoAt && auto > 0) return <span className="next-hint">Next in <b>{auto} s</b>, or <b>{pub.nextBy}</b> taps Next</span>;
-  const label = /Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" || pub.screen === "sudden" ? "Start" : "Next";
+  const label = pub.screen === "rouletteIntro" || (pub.screen === "rouletteReveal" && (pub.mini?.leg ?? 0) < (pub.mini?.of ?? 0)) ? "Spin"
+    : /Intro$|^roundIntro$/.test(pub.screen) || pub.screen === "battleHandoff" || pub.screen === "sudden" ? "Start" : "Next";
   return <span className="next-hint">Waiting for <b>{pub.nextBy}</b>{open && pub.nextOther ? <> or <b>{pub.nextOther}</b></> : null} to {TIE_SCREENS.includes(pub.screen) || pub.screen === DECIDED ? "choose" : `tap ${label}`}</span>;
 }
 

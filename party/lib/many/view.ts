@@ -4,6 +4,7 @@ import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, 
 import { dishKind } from "../tv/rules";
 import { revOf } from "../engine";
 import type { IntroPub } from "../intro";
+import { rrPub, rrQ, type RrLap, type RrPub } from "../roulette";
 
 export type TeamPub = { name: string; captain: string; score: number; color: string };
 export type PubMany = {
@@ -22,6 +23,7 @@ export type PubMany = {
   map?: { id: string; reveal: boolean; title?: string; rev?: string; hint?: string };
   dish?: { kind: string; ings: string[]; n: number };
   out?: boolean[];
+  roulette?: RrPub;                               // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
   theme?: string;                                 // a question round: the question's theme
   deadline: number | null; left: number; sent: boolean[]; now?: number; paused?: boolean;
   roster?: string[];                              // Majority Rules: who plays
@@ -45,6 +47,7 @@ export type PubMany = {
   flags?: FlagM[];                                // left the screen during a question, or pasted (the host's list; no host: the captains')
 };
 export type SecretMany = { answer?: string; notes?: string; typed?: (string | null)[]; nums?: (number | null)[];
+  answers?: string[];                           // Russian Roulette: each team's own question's answer
   step?: number; qid?: string;                  // which question this answer is for (the host's card shows only a match)
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
@@ -70,6 +73,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined, ...(rev && revOf(q) ? { rev: revOf(q) } : {}), ...(s.mapHint ? { hint: "on" } : {}) };
     else if (m.key === "dish") { pub.dish = { kind: dishKind(q), ings: (q.ings || []).slice(0, rev ? undefined : Math.max(1, s.shown)), n: (q.ings || []).length };
       if (rev) pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }
+    else if (m.key === "roulette") pub.roulette = rrPub(q as RrLap, m.i, m.qs.length, (q as RrLap).ch.length, m.pts, s.spinAt ?? null, rev ? s.ok : null);
     else pub.question = q.question;
     if (m.key === "quiz" && q.theme) pub.theme = q.theme;
     if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes); }
@@ -83,6 +87,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     /* (sudden death pays the night one point, to the fastest right answer) */
     const w = legWinners(s), places = legPlaces(s), pl = { places, pts: m.key === "sudden" ? places.map((p) => (p === 1 ? 1 : 0)) : legPoints(s) };
     if (m.key === "map") pub.reveal = { answer: q.question, notes: q.answer, typed: s.typed, ok: s.ok, winners: w, ...pl };
+    else if (m.key === "roulette") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (typedKey(m.key)) pub.reveal = { answer: q.answer, notes: q.notes || (m.key === "airport" ? [q.city, q.code].filter(Boolean).join(", ") : undefined), typed: s.typed, ok: s.ok, winners: w, ...pl,
       ...(m.key === "say" ? { why: s.why } : {}) };
     else if (m.key === "closest") pub.reveal = { answer: String(q.answer), notes: q.notes, nums: s.nums, off: distances(s), winners: w, ...pl };
@@ -98,7 +103,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
   /* the host's phone: the answer while it's up, and what every captain typed */
   const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal")
-    ? { answer: String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : q.notes, typed: s.typed, nums: s.nums,
+    ? { answer: m.key === "roulette" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : m.key === "roulette" ? undefined : q.notes, typed: s.typed, nums: s.nums,
+        ...(m.key === "roulette" ? { answers: s.teams.map((_, t) => String(rrQ(q as RrLap, t)?.answer ?? "")) } : {}),
         step: s.step, qid: pub.qid, ...(m.key === "dish" ? { out: s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)) } : {}) } : { step: s.step };
   void allIn;
   return { pub, secret };

@@ -20,7 +20,7 @@ const side = (t: 0 | 1) => (t === 0 ? "a" : "b");
 
 /* ---- the tracker: scores, where we are, and the night's progress ---- */
 /* what one go of a mini-game is called, as the 3-8 team night says it (no "leg", 31 Oct) */
-const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round" };
+const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round", roulette: "Spin" };
 function hudLabel(pub: Pub): ReactNode {
   const m = pub.mini, sc = pub.screen;
   if (sc === "final") return <b>Final result</b>;
@@ -408,6 +408,13 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `${n} questions, four answers, ${sec(t?.majority, T_MAJORITY)} each. One tap and it's locked. No answer counts as wrong.` },
       { text: "Eyes on your own phone: every phone has the answers in a different order." },
       { text: `Each team scores the share of its answers that are right, so a smaller team isn't at a disadvantage. The higher share takes ${pts}.` }];
+    /* Russian Roulette (9 Nov, the owner): one barrel, both captains at once, one bullet in the whole game */
+    case "roulette": return [
+      { text: `The barrel spins and each team lands on its own chamber: a theme and a question. Both captains type their answer at the same time, ${sec(t?.question, 60)}.` },
+      { text: "One chamber holds the bullet: an Expert question. Nobody knows who has it until the reveal.", warn: true },
+      { text: "Right on Medium: 2 points. Right on Hard: 3. The bullet: right +5, wrong −3. Wrong on any other: nothing." },
+      { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}.` },
+      { text: `${n} spins, one bullet in the whole game. The most points takes ${pts}. Tied at the end? One more spin, or a point each. ${host ? "The host's call." : "Either captain's call (in 10 seconds, or it's a point each)."}` }];
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },
@@ -488,7 +495,7 @@ export function usePreload(pub: Pub | null) {
 /* won with legs to spare: the same words on the TV and every phone */
 export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
 /* what a mini-game's legs are called ("4 flags", "the last landmark") */
-const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category" };
+const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin" };
 export const legsLeft = (key: MiniKey, n: number) => { const u = LEG_UNIT[key] || "leg"; return n === 1 ? `The last ${u} is` : `The last ${n} ${u.replace(/y$/, "ie")}s are`; };
 export const decidedPts = (pub: Pub) => (pub.decided ? `+${pub.decided.pts} point${pub.decided.pts === 1 ? "" : "s"}` : "");
 export const decidedFun = (pub: Pub) => (pub.decided ? `${legsLeft(pub.decided.key, pub.decided.spare)} just for fun.` : "");

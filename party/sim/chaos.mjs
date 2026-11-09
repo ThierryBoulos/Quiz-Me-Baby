@@ -11,7 +11,7 @@ await build({ entryPoints: [join(here, "night.jsx")], outfile: out, bundle: true
   define: { "process.env.NEXT_PUBLIC_BUILD": '"sim"' },
   plugins: [{ name: "fake-supabase", setup(b) { b.onResolve({ filter: /^(\.{1,2}\/)+(lib\/)?supabase$|^@\/lib\/supabase$/ }, () => ({ path: join(here, "fakeSupabase.js") })); } }] });
 const N = Number(process.argv[2] || 24);
-const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "battle", "pin", "airport", "majority"];
+const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "battle", "pin", "airport", "majority", "roulette"];
 const NEW = process.argv.includes("--new");
 let bad = 0;
 const reasons = {}, silent = {};
@@ -23,7 +23,7 @@ for (let seed = 100; seed < 100 + N; seed++) {
   const missing = r.taps.filter((t) => !t.done);
   for (const t of r.taps) if (t.no) reasons[t.no.replace(/⁨|⁩/g, "").replace(/(Lions|Owls|Rami|Lea)/g, "X")] = (reasons[t.no.replace(/⁨|⁩/g, "").replace(/(Lions|Owls|Rami|Lea)/g, "X")] || 0) + 1;
   /* answers / buzzes not taken, with no reason given: where? */
-  const TYPE = ["ask", "steal", "miniQ", "flagQ", "mapQ", "sayQ", "dishQ", "battleQ", "sudden", "battleTie", "pinQ", "airportQ", "majorityQ"];
+  const TYPE = ["ask", "steal", "miniQ", "flagQ", "mapQ", "sayQ", "dishQ", "battleQ", "sudden", "battleTie", "pinQ", "airportQ", "majorityQ", "rouletteQ"];
   for (const t of r.taps) if (t.done && !t.superseded && !t.no && !t.took && !t.moved && TYPE.includes(t.screen)
     && ((t.kind === "answer" && !t.sent && !t.pend) || (t.kind === "buzz" && t.buzz !== (t.who === "capA" ? 0 : 1)))) {
     /* Majority Rules: say which picks no real phone could send (its four buttons only, keyed to the question on it) */

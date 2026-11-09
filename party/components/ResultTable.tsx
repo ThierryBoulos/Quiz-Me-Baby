@@ -47,7 +47,8 @@ export function ResultTable({ rows, head, places, big }: { rows: RRow[]; head: [
 }
 
 /* what a row scored: "+3" in green, a plain 0 */
-export const Pts = ({ n }: { n?: number | null }) => (n != null && n > 0 ? <span style={{ color: "var(--color-ok)" }}>+{n}</span> : <span style={{ color: "var(--color-ink-3)" }}>0</span>);
+/* (Russian Roulette's bullet can cost points: "−3" in red) */
+export const Pts = ({ n }: { n?: number | null }) => (n != null && n > 0 ? <span style={{ color: "var(--color-ok)" }}>+{n}</span> : n != null && n < 0 ? <span style={{ color: "var(--color-no)" }}>−{-n}</span> : <span style={{ color: "var(--color-ink-3)" }}>0</span>);
 
 /* a game's result, above its standings: the game's name, small, and who won it, big, in the winner's colour */
 export function TitleLine({ eyebrow, text, color }: { eyebrow: string; text: string; color: string }) {

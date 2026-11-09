@@ -21,7 +21,8 @@ const TWO: Record<string, string> = {
   airport: "A departures board. Name the airport.",
   majority: "Everyone plays on their own phone. Four options, one tap.",
   dish: "Ingredients one at a time. Buzz and name it.",
-  battle: "Captains only, ten questions each. Double points.",
+  roulette: "Spin the barrel: a theme and a question each. One chamber is the bullet.",
+  battle: "Captains only, ten questions each.",
 };
 const MANY: Record<string, string> = {
   ...TWO,

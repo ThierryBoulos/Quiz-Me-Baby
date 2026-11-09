@@ -350,7 +350,7 @@
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
         FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, PIN_LEGS = LEGS.pin, AIRPORT_LEGS = LEGS.airport, MAJORITY_N = LEGS.majority, BATTLE_N = LEGS.battle;
   /* Flag first: fast and loud, it opens the night. (Drop the Pin, Guess the Airport and Majority Rules are Party's.) */
-  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'pin', 'airport', 'majority', 'dish'];
+  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'pin', 'airport', 'majority', 'dish', 'roulette'];
   const MAP_ORDER = ['easy', 'medium', 'hard'];
   /* Drop the Pin and Guess the Airport: easy, medium and hard, like the maps */
   const PIN_ORDER = MAP_ORDER, AIRPORT_ORDER = MAP_ORDER, MAJORITY_ORDER = MAP_ORDER;
@@ -358,6 +358,11 @@
   const DISH_LEVEL_KEYS = ['c-easy', 'c-medium', 'c-hard', 'd-easy', 'd-medium', 'd-hard'];
   const BATTLE_SKIP_THEMES = ['Know the Host', 'Sexy Time', 'Lebanon'];
   const CLOSEST_ONLY_IF_PICKED = ['Sexy Time', 'Lebanon'];
+  /* Russian Roulette (9 Nov, the owner): three laps; a barrel of 6 chambers (2 to 6 teams) or 8 (7 or 8 teams), each
+     chamber its own theme: one is the bullet (an Expert question), the rest Medium or Hard. Spare barrels after them:
+     a tie-breaker lap, or Change question. Never the host's own theme. */
+  const ROULETTE_LAPS = 3, ROULETTE_SPARE = 3, ROULETTE_SKIP_THEMES = ['Know the Host'];
+  const rouletteChambers = (k) => (k > 6 ? 8 : 6);
   /* The four levels of a standard question (22 Oct). A night's difficulty is one of them, several
      joined with "+" ("easy+medium+hard", the default), or "mixed": all four. */
   const DIFFS = ['easy', 'medium', 'hard', 'expert'];
@@ -740,6 +745,41 @@
     const airportPool = (levels, skip) => levelPool(ok.airport, levels, skip);
     const majorityLevelsOf = (c) => levelsOf(c && c.majorityLevels, MAJORITY_ORDER, MAJORITY_ORDER);
 
+    /* Russian Roulette: a barrel for each lap (n chambers, laps of them). Every chamber of a barrel its own theme; one
+       bullet (Expert), the rest Medium and Hard (6 chambers: 3 and 2; 8: 4 and 3), in no set order. The themes: any
+       but the host's own, and Sexy Time and Lebanon only on a night that picked them (cfg.rouletteThemes, else the
+       rounds' cfg.themes). Fresh questions first (another theme before a played one), none the night has already,
+       none that clashes with it: inNight takes each one dealt. A level a theme has run out of: the nearest other. */
+    function rouletteDeck(cfg, n, laps, inNight){
+      const own = cfg.rouletteThemes || cfg.themes || [];
+      const std = bank().filter(q => q.type === 'standard' && q.theme && ROULETTE_SKIP_THEMES.indexOf(q.theme) < 0
+        && (CLOSEST_ONLY_IF_PICKED.indexOf(q.theme) < 0 || own.indexOf(q.theme) > -1));
+      const themes = std.map(q => q.theme).filter((t, i, a) => a.indexOf(t) === i);
+      const near = { expert:['expert', 'hard'], hard:['hard', 'medium'], medium:['medium', 'hard'] };
+      const take = (t, level, stale) => {
+        const ok = std.filter(q => q.theme === t && q.difficulty === level && !inNight.has(q.id) && !clashesWith(q.id, inNight) && (stale || isFresh(q)));
+        return ok.length ? shuffle(ok)[0] : null;
+      };
+      const mids = n === 8 ? 4 : 3, out = [];
+      for(let l = 0; l < laps; l++){
+        const levels = shuffle(['expert'].concat(Array(mids).fill('medium'), Array(n - 1 - mids).fill('hard')));
+        const bullet = levels.indexOf('expert'), ch = Array(n).fill(null), free = shuffle(themes.slice());
+        /* the bullet's chamber first: fewer themes have an Expert question left */
+        for(const j of [bullet].concat(levels.map((x, j) => j).filter(j => j !== bullet))){
+          let got = null;
+          for(const stale of [false, true]) for(const lv of near[levels[j]]) for(let x = 0; x < free.length && !got; x++){
+            const q = take(free[x], lv, stale);
+            if(q){ got = { theme:free[x], level:lv, q }; free.splice(x, 1); }
+          }
+          if(!got) break;
+          ch[j] = got; inNight.add(got.q.id);
+        }
+        if(ch.some(c => !c)) break;        // the bank can't fill a whole barrel any more: the laps loaded so far
+        out.push({ ch, bullet });
+      }
+      return out;
+    }
+
     function diffOf(cfg, theme){
       const d = cfg && cfg.themeDiff && cfg.themeDiff[theme];
       return d || (cfg ? cfg.difficulty : 'mixed');
@@ -848,12 +888,16 @@
         .map(q => Array.isArray(q.options) ? Object.assign({}, q, { options:shuffle(q.options.slice()) }) : q);
     
       /* the never-together groups across the night: the rounds' questions first, then each game's legs in turn */
-      { const inNight = new Set(); rounds.forEach(r => r.q.forEach(q => inNight.add(q.id)));
+      const inNight = new Set();
+      { rounds.forEach(r => r.q.forEach(q => inNight.add(q.id)));
         unclash(cp, spare, inNight); unclash(ssLegs, ssSpare, inNight); unclash(mpLegs, mpSpare, inNight);
         unclash(fgLegs, fgSpare, inNight); unclash(dsLegs, dsSpare, inNight);
         const pnL = pnDeck.slice(0, PIN_LEGS), pnS = pnDeck.slice(PIN_LEGS); unclash(pnL, pnS, inNight); pnDeck.splice(0, pnDeck.length, ...pnL, ...pnS);
         const apL = apDeck.slice(0, AIRPORT_LEGS), apS = apDeck.slice(AIRPORT_LEGS); unclash(apL, apS, inNight); apDeck.splice(0, apDeck.length, ...apL, ...apS);
         const mrL = mrDeck.slice(0, MAJORITY_N), mrS = mrDeck.slice(MAJORITY_N); unclash(mrL, mrS, inNight); mrDeck.splice(0, mrDeck.length, ...mrL, ...mrS); }
+      /* Russian Roulette's barrels, last: clear of everything else tonight (6 chambers; 8 with 7 or 8 teams) */
+      const rrN = cfg.rouletteChambers === 8 ? 8 : 6;
+      const rrDeck = asked('roulette') ? rouletteDeck(cfg, rrN, ROULETTE_LAPS + ROULETTE_SPARE, inNight) : [];
 
       const mk = (t, color) => ({
         name:t.name, captain:t.captain, players:t.players,
@@ -872,7 +916,8 @@
                                 .filter(k => k !== 'dish' || dsLegs.length)
                                 .filter(k => k !== 'pin' || pnDeck.length)
                                 .filter(k => k !== 'airport' || apDeck.length)
-                                .filter(k => k !== 'majority' || mrDeck.length);
+                                .filter(k => k !== 'majority' || mrDeck.length)
+                                .filter(k => k !== 'roulette' || rrDeck.length >= ROULETTE_LAPS);
       const hasBattle = wanted.indexOf('battle') > -1;
       /* no standard rounds: the mini-games simply run back to back, from the start */
       const plan = rounds.length ? planMinis(rounds.length, inter) : inter.map(k => ({ key:k, after:0 }));
@@ -897,6 +942,11 @@
         airportGame:{ levels:apLevels, qs:apDeck.slice(0, AIRPORT_LEGS), spare:apDeck.slice(AIRPORT_LEGS), base:Math.min(AIRPORT_LEGS, apDeck.length), i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
         /* Majority Rules: n = how many are on each team's list (fixed at Start); right / of = answers right, answers there were */
         majorityGame:{ levels:mrLevels, qs:mrDeck.slice(0, MAJORITY_N), spare:mrDeck.slice(MAJORITY_N), base:Math.min(MAJORITY_N, mrDeck.length), i:0, wins:[0, 0], n:[0, 0], right:[0, 0], of:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+        /* Russian Roulette: qs its laps (a barrel each); pts the game's own points; had: each team's themes so far;
+           bulletLap: with two teams, the one lap the bullet lands in a team's chamber; fired: bullets that hit a team */
+        rouletteGame:{ n:rrN, qs:rrDeck.slice(0, ROULETTE_LAPS), spare:rrDeck.slice(ROULETTE_LAPS), base:Math.min(ROULETTE_LAPS, rrDeck.length), i:0,
+          wins:[0, 0], pts:[0, 0], had:[[], []], bulletLap:rrDeck.length ? Math.floor(rand() * Math.min(ROULETTE_LAPS, rrDeck.length)) : 0, fired:0,
+          subs:[], done:false, awarded:false, tieLegs:0 },
         auction:null,
         r:0, seat:0, sub:'intro', miniPlayed:false,
         battle:null,
@@ -930,7 +980,7 @@
     return { bank, shuffle, isFresh, clashesWith, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, commonOf, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
-             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, diffOf, pickedPair, dishLeg, buildGame, thinBank };
+             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, rouletteDeck, diffOf, pickedPair, dishLeg, buildGame, thinBank };
   }
 
 
@@ -1024,6 +1074,60 @@
     return fx;
   }
   const other = (t) => t === 0 ? 1 : 0;
+
+  /* ---- Russian Roulette (9 Nov, the owner) ----
+     Each lap the barrel spins and every team lands on a chamber of its own; the chambers nobody drew stay dark.
+     Whether the bullet is in one of theirs: two teams, one bullet in the whole game (in its lap it's always a team's
+     chamber; the other laps it sits in a dark one); three teams or more, wherever it falls, but if no bullet has hit
+     anyone by the last lap, that one does. A tie-breaker lap: wherever it falls.
+     s: the game ({i, base, bulletLap, fired}); k: teams -> true (a team draws it), false (nobody does), null */
+  function rouletteHit(s, k){
+    if(s.i >= s.base) return null;
+    if(k === 2) return s.i === s.bulletLap;
+    return s.i === s.base - 1 && !s.fired ? true : null;
+  }
+  /* the spin: lap.draw[t], the chamber team t lands on. The bullet first (in a team's chamber k times in n, where it
+     falls), then the rest at random; a team that has already had a chamber's theme this game gets another if it can */
+  function rouletteSpin(lap, k, hit, had, shuffle){
+    shuffle = shuffle || shuffleWith;
+    const n = lap.ch.length, b = lap.bullet, idx = (m) => Array.from({ length:m }, (_, j) => j);
+    const bulletIn = k >= n || (hit === true ? true : hit === false ? false : shuffle(idx(n))[0] < k);
+    let best = null;
+    for(let x = 0; x < 16; x++){
+      const rest = shuffle(idx(n).filter(j => j !== b)), who = bulletIn ? shuffle(idx(k))[0] : -1;
+      const draw = idx(k).map(t => (t === who ? b : rest.shift()));
+      const rep = draw.filter((j, t) => ((had && had[t]) || []).indexOf(lap.ch[j].theme) > -1).length;
+      if(!best || rep < best.rep) best = { draw, rep };
+      if(!rep) break;
+    }
+    return best.draw;
+  }
+  /* a chamber's points: right on Medium 2, on Hard 3; the bullet right +5, wrong -3 (the caller keeps the game's
+     total at 0 or more) */
+  function roulettePts(lap, j, ok){
+    if(j === lap.bullet) return ok ? 5 : -3;
+    return ok ? (lap.ch[j].level === 'medium' ? 2 : 3) : 0;
+  }
+  /* two teams: the lap on now, spun and up */
+  function rouletteGo(g, env, fx){
+    const s = g.rouletteGame, lap = s.qs[s.i], D = env && env.deal;
+    lap.draw = rouletteSpin(lap, 2, rouletteHit(s, 2), s.had, D && D.shuffle);
+    fx.push({ go:'rouletteQ' });
+    return fx;
+  }
+  /* after a lap: the next one; after the third, the most points wins (level: one more lap, or a point each) */
+  function rouletteAfterLap(g, env, fx){
+    const s = g.rouletteGame;
+    if(s.i < s.base) return rouletteGo(g, env, fx);
+    if(s.pts[0] === s.pts[1]){ fx.push({ go:'rouletteTie' }); return fx; }
+    const w = s.pts[0] > s.pts[1] ? 0 : 1;
+    s.done = true;
+    s.verdict = { winner:w, needsHost:false,
+      note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker spin' : s.tieLegs + ' tie-breaker spins') + '.' : '' };
+    awardMini(g, s, w, fx);
+    fx.push({ go:'rouletteSummary' });
+    return fx;
+  }
 
   /* ---- Guess the Flag ---- */
   function flagAfterLeg(g, fx){
@@ -1375,6 +1479,7 @@
     if(key === 'pin'){ fx.push({ go:'pinIntro' }); return fx; }
     if(key === 'airport'){ fx.push({ go:'airportIntro' }); return fx; }
     if(key === 'majority'){ fx.push({ go:'majorityIntro' }); return fx; }
+    if(key === 'roulette'){ fx.push({ go:'rouletteIntro' }); return fx; }
     if(key === 'battle'){ MOVES['battle/build'](g, {}, env).forEach(f => fx.push(f)); return fx; }
     return fx;
   }
@@ -1907,6 +2012,50 @@
     'airport/award'(g, a){ const fx = []; awardMini(g, g.airportGame, a.w, fx); fx.push({ render:true }); return fx; },
     'airport/done'(g){ return finishMini(g, 'airport', g.airportGame); },
 
+    /* Russian Roulette: Spin (the first lap) */
+    'roulette/start'(g, a, env){ const s = g.rouletteGame; if(!s.qs.length) return []; s.i = 0; return rouletteGo(g, env, []); },
+    /* Change question (before anyone has answered): another barrel, spun again (the same bullet rule) */
+    'roulette/swap'(g, a, env){
+      const s = g.rouletteGame;
+      if(!s.spare.length) return [{ toast:'No other barrel left.' }];
+      s.qs[s.i] = s.spare.shift();
+      return [{ toast:'New barrel, new spin.' }].concat(rouletteGo(g, env, []));
+    },
+    /* ok: each team's call as it stands. The lap's points (the game's total never below 0), then the next lap */
+    'roulette/verdict'(g, a, env){
+      const s = g.rouletteGame, lap = s.qs[s.i];
+      if(!lap || !lap.draw || s.done) return [];
+      const ok = [!!(a.ok && a.ok[0]), !!(a.ok && a.ok[1])];
+      const got = [0, 1].map(t => { const was = s.pts[t]; s.pts[t] = Math.max(0, was + roulettePts(lap, lap.draw[t], ok[t])); return s.pts[t] - was; });
+      const hit = lap.draw.indexOf(lap.bullet);
+      lap.ok = ok; lap.got = got;
+      [0, 1].forEach(t => s.had[t].push(lap.ch[lap.draw[t]].theme));
+      if(hit > -1) s.fired++;
+      s.subs.push({ lap:s.i, draw:lap.draw.slice(), ok, got, hit });
+      s.i++;
+      return rouletteAfterLap(g, env, hit > -1 ? [{ sound:ok[hit] ? 'correct' : 'wrong' }] : []);
+    },
+    /* level after the laps: one more lap, or a point each */
+    'roulette/more'(g, a, env){
+      const s = g.rouletteGame;
+      if(s.done) return [];
+      if(!s.spare.length) return [{ toast:'No barrels left: a point each.' }];
+      s.qs.push(s.spare.shift());
+      s.tieLegs++;
+      return rouletteGo(g, env, []);
+    },
+    'roulette/stop'(g){
+      const s = g.rouletteGame;
+      if(s.awarded) return [];
+      s.done = true; s.awarded = true;
+      s.award = [1, 1];
+      g.teams[0].score += 1; g.teams[1].score += 1;
+      s.verdict = { winner:null, needsHost:false, note:'Level after ' + s.i + ' laps — called there, a point each.' };
+      return [{ sound:'point' }, { go:'rouletteSummary' }];
+    },
+    'roulette/award'(g, a){ const fx = []; awardMini(g, g.rouletteGame, a.w, fx); fx.push({ render:true }); return fx; },
+    'roulette/done'(g){ return finishMini(g, 'roulette', g.rouletteGame); },
+
     /* n: how many are on each team's list, fixed now (the screen that runs it decides who) */
     'majority/start'(g, a){
       const s = g.majorityGame, n = (a && a.n) || [];
@@ -2074,5 +2223,5 @@
   }
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
-           createDealer, play, MOVES:Object.keys(MOVES), DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

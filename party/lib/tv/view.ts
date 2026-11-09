@@ -7,6 +7,7 @@ import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, typ
 import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
 import { callsOf, closestW, currentQ, fireOf, leadOf, matchQ, mrTally, okWin, pinW, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
+import { rrGot, rrPub, rrQ, type RrLap } from "../roulette";
 import type { TvState } from "./state";
 
 /* The question in play goes out under a number that means nothing outside this game (D5): its
@@ -154,6 +155,21 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (key === "dish") p.mini.kinds = m.levels.some((l: string) => l[0] === "c") && m.levels.some((l: string) => l[0] === "d") ? "Cocktails + dishes" : m.levels[0][0] === "c" ? "Cocktails" : "Dishes";
     if (/Summary$/.test(s.screen) && m.verdict) p.summary = { wins: [...m.wins] as Two<number>, winner: m.verdict.winner, needsHost: m.verdict.needsHost, note: m.verdict.note || "", award: m.award };
     if (s.screen === "majoritySummary" && p.summary) { const who = mrWhoLine(g); if (who) p.summary.who = who; }
+    /* Russian Roulette keeps points, not legs: the tracker and the result show them (this lap's counted from its reveal) */
+    if (key === "roulette") {
+      const lap = m.qs[m.i] as RrLap | undefined, rev = s.screen === "rouletteReveal" && lap?.draw;
+      p.mini.wins = (rev ? rrGot(lap!, m.pts, s.ok).map((v, t) => m.pts[t] + v) : [...m.pts]) as Two<number>;
+      if (p.summary) p.summary.wins = [...m.pts] as Two<number>;
+      if ((s.screen === "rouletteQ" || s.screen === "rouletteReveal") && lap?.draw) {
+        p.roulette = rrPub(lap, m.i, m.base, m.n || lap.ch.length, m.pts, s.screen === "rouletteQ" ? s.spinAt : null, rev ? s.ok : null);
+        const qs = [rrQ(lap, 0), rrQ(lap, 1)];
+        p.qid = secret.qid = qk(s, `rr${m.i}:${qs.map((x: G) => x?.id).join(",")}`);
+        secret.answers = [String(qs[0]?.answer ?? ""), String(qs[1]?.answer ?? "")];
+        secret.match = [matchQ(s.typed[0], qs[0]), matchQ(s.typed[1], qs[1])];
+        secret.answer = ""; secret.notes = "";
+        if (rev) p.reveal = { answer: "", typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) };
+      }
+    }
   }
   /* a reveal's leg counts in the tracker straight away (and moves with the ruling until Next) */
   const prov: W | null = s.screen === "closestReveal" ? closestW(s) : s.screen === "flagReveal" || s.screen === "mapReveal" || s.screen === "airportReveal" ? okWin(s)

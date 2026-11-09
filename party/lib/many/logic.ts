@@ -12,15 +12,16 @@
    (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). Level teams share the better place. */
 import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
+import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 
-export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish"] as const;
+export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "roulette"] as const;
 /* sudden death isn't picked: it comes when the night ends with teams level at the top */
 export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
 export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Question round", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
-  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish" };
-export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5 };
+  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", roulette: "Russian Roulette" };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, roulette: 3 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
-export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "sudden"];
+export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "sudden", "roulette"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
 /* a game's name on screen: the question rounds numbered when there's more than one */
 export const titleOf = (minis: { key: ManyKey }[], i: number) => {
@@ -46,7 +47,8 @@ export type LatLon = { lat: number; lon: number };
 export type TeamM = { name: string; captain: string; score: number };
 /* wins: legs taken (flag: legs right); pts: this game's place points so far; places: its final places */
 export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: number[]; of: number[]; pts: number[]; award?: number[]; places?: number[];
-  only?: number[] };                              // sudden death: the teams level at the top, the only ones who answer
+  only?: number[];                                // sudden death: the teams level at the top, the only ones who answer
+  fired?: number; had?: string[][] };             // Russian Roulette: bullets that hit a team so far; each team's themes so far
 /* the night's numbers for the awards: legs placed 1st and 2nd, the fastest right flags, Drop the Pin's km
    (and how many pins), the run of 1st places now (on fire at 3; a new game starts cold) and the best run */
 export type Stats = { firsts: number[]; seconds: number[]; fastest: number[]; km: number[]; kmN: number[]; run: number[]; best: number[] };
@@ -54,6 +56,7 @@ export type Screen = "intro" | "q" | "reveal" | "summary" | "final";
 export type StateM = {
   v: 2; teams: TeamM[]; minis: MiniM[]; mi: number; screen: Screen; step: number;
   deadline: number | null; left: number; total: number;
+  spinAt?: number | null;                       // Russian Roulette: when this lap's barrel started spinning (the question is up SPIN_MS later)
   typed: (string | null)[]; nums: (number | null)[]; pins: (LatLon | null)[];
   why: (string | null)[];                       // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
   shown: number;                                // the Cocktail or Dish: the ingredients up so far
@@ -86,7 +89,7 @@ export type StateM = {
 };
 export type FlagM = { id: number; name: string; team: number | null; label: string; qid?: string; ms: number | null; kind: "away" | "paste" };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
-export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number };
+export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number; roulette: number };
 
 const n = (k: number, v = 0) => Array.from({ length: k }, () => v);
 export const miniOf = (s: StateM) => s.minis[s.mi] as MiniM | undefined;
@@ -145,7 +148,16 @@ function ask(s: StateM, now: number, t: Timers) {
   const m = miniOf(s)!; clear(s);
   /* the Cocktail or Dish: an ingredient every few seconds, the last one with longer to think */
   s.total = m.key === "dish" ? Math.max(0, ((qOf(s)?.ings || []).length - 1)) * t.dish + t.dishLast : t[m.key];
-  s.screen = "q"; s.deadline = now + s.total * 1000; s.left = 0; s.paused = false; s.step++;   // (a pause never carries over)
+  /* Russian Roulette: the barrel spins, every team lands on a chamber of its own (the engine's spin: two chambers
+     never the same, the bullet where it falls, but it hits someone in the last lap if it hasn't yet); the clock
+     starts once it stops */
+  s.spinAt = null;
+  if (m.key === "roulette") {
+    const lap = m.qs[m.i] as RrLap, k = s.teams.length;
+    lap.draw = QMB.rouletteSpin(lap, k, QMB.rouletteHit({ i: m.i, base: m.qs.length, fired: m.fired || 0 }, k), m.had || []);
+    s.spinAt = now;
+  }
+  s.screen = "q"; s.deadline = now + s.total * 1000 + (s.spinAt != null ? SPIN_MS : 0); s.left = 0; s.paused = false; s.step++;   // (a pause never carries over)
   s.qn = (s.qn ?? 0) + 1;
 }
 /* the Cocktail or Dish: how many ingredients are up at this moment (the clock's tick moves it on) */
@@ -206,6 +218,7 @@ export const allIn = (s: StateM) => s.screen === "q" && (miniOf(s)?.key === "maj
 export function reveal(s: StateM) {
   const m = miniOf(s), q = qOf(s); if (!m || !q || s.screen !== "q") return false;
   if (m.key === "say") sayCalls(s, q);
+  else if (m.key === "roulette") s.ok = s.typed.map((x, t) => (x == null ? false : !!matchQ([x], rrQ(q, t))));   // (each team its own chamber's question)
   else if (typedKey(m.key)) s.ok = s.typed.map((x) => (x == null ? false : rightOf(m.key, x, q)));
   if (m.key === "dish") s.shown = (q.ings || []).length;
   s.contest = null; s.contested = [];
@@ -247,12 +260,16 @@ export function placesBy(keys: (number | null)[]): (number | null)[] {
 export function legPlaces(s: StateM): (number | null)[] {
   const m = miniOf(s), q = qOf(s); if (!m || !q || m.key === "majority") return s.teams.map(() => null);
   if (m.key === "say") return placesBy(s.ok.map((v) => (v ? 0 : null)));
+  if (m.key === "roulette") return placesBy(rrGot(q, m.pts, s.ok).map((g) => (g > 0 ? -g : null)));   // (the most this lap: the bullet right first)
   if (typedKey(m.key)) return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? Number.MAX_SAFE_INTEGER : null)));
   const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null));
   return placesBy(d);
 }
 /* ...and what they pay this game's tally: 1st as many points as there are teams, one less a place, down to 1 */
-export const legPoints = (s: StateM): number[] => legPlaces(s).map((p) => (p == null ? 0 : s.teams.length - p + 1));
+export const legPoints = (s: StateM): number[] => { const m = miniOf(s), q = qOf(s);
+  /* Russian Roulette pays by the chamber, not the place: Medium 2, Hard 3, the bullet +5 or -3 (the game's total never below 0) */
+  if (m?.key === "roulette" && q) return rrGot(q, m.pts, s.ok);
+  return legPlaces(s).map((p) => (p == null ? 0 : s.teams.length - p + 1)); };
 
 /* Majority Rules, this question: right answers per team, and how many play */
 export function mrCount(s: StateM) {
@@ -339,6 +356,15 @@ export function next(s: StateM, now: number, t: Timers) {
       c.right.forEach((v, i) => { m.right[i] += v; m.of[i] += c.of[i]; });
       const q = qOf(s);
       for (const r of s.roster) { const w = (s.who[r.name] = s.who[r.name] || { r: 0, of: 0, team: r.team }); w.of++; if (s.votes[r.name] === q?.answer) w.r++; }
+    } else if (m.key === "roulette") {
+      /* the lap's points (as the calls stand), the bullet, and the themes each team has had (the next spin avoids them) */
+      const lap = qOf(s) as RrLap, got = rrGot(lap, m.pts, s.ok), hit = lap.draw ? lap.draw.indexOf(lap.bullet) : -1;
+      got.forEach((g, i) => { m.pts[i] += g; if (s.ok[i]) m.wins[i]++; });
+      lap.ok = s.ok.map(Boolean); lap.got = got;
+      if (hit >= 0) m.fired = (m.fired || 0) + 1;
+      m.had = s.teams.map((_, i) => [...(m.had?.[i] || []), ...(lap.draw ? [lap.ch[lap.draw[i]].theme] : [])]);
+      s.stats.run = n(s.teams.length);
+      toast(s, hit < 0 ? "Nobody drew the bullet this time." : `${s.teams[hit].name} drew the bullet: ${s.ok[hit] ? "+5" : got[hit] < 0 ? `−${-got[hit]}` : "wrong, with nothing to lose"}.`);
     } else {
       const w = legWinners(s); w.forEach((i) => m.wins[i]++);
       const pl = legPlaces(s), pts = legPoints(s), S = s.stats, q = qOf(s);

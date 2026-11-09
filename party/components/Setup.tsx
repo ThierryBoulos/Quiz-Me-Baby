@@ -21,6 +21,7 @@ const MINIS = [
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
   ["majority", "Majority Rules", "Everyone plays on their own phone: 15 questions, four answers. The team with the bigger share of right answers wins."],
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
+  ["roulette", "Russian Roulette", "Spin the barrel: a theme and a question each. One chamber is the bullet."],
   ["battle", "Battle of the Captains", "Ten each, captains only. Closes the night."]] as const;
 /* each picture game has its own levels, as in Classic; more than one can be on */
 /* the line under the difficulty: what the levels picked mean, Expert only when it's on (9 Nov, the owner's words) */

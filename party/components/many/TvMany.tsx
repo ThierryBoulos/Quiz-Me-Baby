@@ -15,6 +15,7 @@ import type { PubMany } from "@/lib/many/view";
 import { Ruler } from "../Ruler";
 import { NightIntroTv } from "../NightIntro";
 import { ImadBubble } from "../TvGame";
+import { RouletteTv } from "../Roulette";
 import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
@@ -45,7 +46,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
   const [recap, setRecap] = useState(false);
   useEffect(() => { if (pub.screen !== "final") { setRecap(false); return; } const t = setTimeout(() => setRecap(true), 2500); return () => clearTimeout(t); }, [pub.screen]);
   const lead = leader(pub);
-  const next = pub.screen === "intro" ? "Start" : pub.screen === "reveal" || pub.screen === "summary" ? "Next" : null;
+  /* (Russian Roulette: the host's Start and Next spin the barrel, so the strip says Spin) */
+  const spinNext = g?.key === "roulette" && (pub.screen === "intro" || (pub.screen === "reveal" && g.leg < g.of));
+  const next = spinNext ? "Spin" : pub.screen === "intro" ? "Start" : pub.screen === "reveal" || pub.screen === "summary" ? "Next" : null;
   const W = takes(pub);
   return (
     /* nothing on the TV can be selected or copied */
@@ -131,6 +134,10 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
               <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
+        {/* Russian Roulette: the barrel spins, each team's chamber lights up; at the reveal they click, the bullet last */}
+        {(pub.screen === "q" || pub.screen === "reveal") && g && g.key === "roulette" && pub.roulette && (
+          <RouletteTv rr={pub.roulette} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent} typed={R?.typed} ok={R?.ok}
+            reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} size={dense ? 96 : 110} />} />)}
         {pub.screen === "q" && g && g.key === "closest" && (<>
           <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 110 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
           <Clock deadline={pub.deadline} left={pub.left} size={140} />

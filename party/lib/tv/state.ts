@@ -60,6 +60,7 @@ export const newState = () => ({
   imad: null as Pub["imad"] | null, imadN: 0, imadQ: [] as string[],   // Imad's latest line, and the ones waiting to go up together
   custom: [] as Q[],                                 // questions of their own, sent by the phone that started
   typedLate: null as 0 | 1 | null,                  // with a host: the team whose answer came in after time's up
+  spinAt: null as number | null,                     // Russian Roulette: when this lap's barrel started spinning (the question's up SPIN_MS later)
   skipHostQ: false,                                  // a Know the Host answer, the host away 20 s: the captains may skip it
   changedIds: [] as string[],                        // the calls this question that aren't the app's any more (shown as "changed")
   pausedBy: "",                                      // who tapped Pause (the phones say so: the 4 Nov audit, 3.14)

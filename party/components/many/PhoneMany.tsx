@@ -19,6 +19,7 @@ import { Dot, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } 
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
+import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 /* (only the one for this very question: the TV writes the screen first and the answer just after, so a read in between
@@ -140,6 +141,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   useEffect(() => { setSug(""); setSugSent(null); }, [pub.qid]);
   const sugs = useSuggestions(code, pub.qid, members, mine ?? -1, cap && sc === "q");
   const np = useNoPaste(code, pub.qid);   // (no pasting into an answer: refused, and flagged, as with two teams)
+  /* Russian Roulette: the barrel spins first; the question (and the answer box) once it stops */
+  const rr = pub.roulette, spun = useSpun(rr?.spinAt), rrT = pub.teams.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }));
+  const spinning = pub.game?.key === "roulette" && pub.screen === "q" && !spun;
   const suggest = async () => { const t = sug.trim(); if (!t || mine == null) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSugSent(t); setSug(""); } catch { /* the phone says so */ } };
   /* the host's change of a call shows at once, until the TV's own update says the same */
   const [flips, setFlips] = useState<Record<string, boolean>>({});
@@ -176,11 +180,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <ol className="flex flex-col gap-0.5 text-15">{pub.dish.ings.map((t, i) => { const [qty, name] = splitIng(t); return <li key={i} className="flex gap-2 items-baseline"><b>{name}</b>{qty && <span className="text-13 text-[var(--color-ink-2)]">{qty}</span>}</li>; })}</ol>
         </div></ToSide>)}
       {g.key === "quiz" && pub.theme && <ToSide order={2}><div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div></ToSide>}
+      {g.key === "roulette" && rr && <ToSide order={3}><RrPhone rr={rr} me={host ? null : mine ?? null} teams={rrT} host={host} /></ToSide>}
       {g.key === "pin" && <ToSide order={4} className="noselect" {...noCopy}>{small
         ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
         : <PinPhoto pin={pub.pin} h={230} small zoom />}</ToSide>}
       {pub.question && <ToSide order={3} className="noselect" {...noCopy}><p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p></ToSide>}
-      {!(small && g.key === "pin") && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}><Clock deadline={pub.deadline} left={pub.left} size={small ? 70 : 90} /></div></ToSide>}
+      {!(small && g.key === "pin") && !spinning && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}><Clock deadline={pub.deadline} left={pub.left} size={small ? 70 : 90} /></div></ToSide>}
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (
@@ -199,6 +204,10 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     if (mine == null || !R || !g) return null;
     if (g.key === "majority") { const r = R.right?.[mine] ?? 0, of = R.of?.[mine] ?? 0; return { text: `Your team: ${r} of ${of} right`, tone: r > 0 ? "ok" : "mid" }; }
     if (g.only && !g.only.includes(mine)) return null;
+    /* Russian Roulette: right or wrong, and what the chamber paid (the bullet can cost 3) */
+    if (g.key === "roulette" && rr?.rev) { const got = rr.rev.got[mine] ?? 0, x = R.typed?.[mine], bullet = rr.rev.level[mine] === "bullet";
+      if (R.ok?.[mine]) return { text: `Your team: right · ${signed(got)}`, tone: "ok" };
+      return { text: `Your team: ${x ? "wrong" : "no answer"}${bullet ? ` on the bullet · ${signed(got)}` : ""}`, tone: got < 0 || x ? "no" : "mid" }; }
     const v = R.pts?.[mine] ?? 0, p = R.places?.[mine];
     if (v > 0) return { text: `Your team: ${p ? place(p) + " · " : ""}+${v}`, tone: "ok" };
     if (typedKey(g.key)) { const x = R.typed?.[mine]; if (!x) return { text: "Your team: no answer", tone: "mid" };
@@ -215,7 +224,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     const rows: RRow[] = idx.map((i) => {
       const base = { team: i, name: T[i].name, color: T[i].color, letter: LETTERS[i], place: pl(i), me: i === mine, end: <Pts n={R.pts?.[i]} /> };
       if (typedKey(g.key)) { const x = R.typed?.[i]; return { ...base, val: x ?? "No answer", ok: x ? R.ok?.[i] ?? null : null,
-        sub: g.key === "say" && x && R.ok?.[i] === false ? SAY_WHY[R.why?.[i] || ""] : undefined }; }
+        sub: g.key === "say" && x && R.ok?.[i] === false ? SAY_WHY[R.why?.[i] || ""] : g.key === "roulette" && rr?.rev ? `${rr.draw[i]?.theme} · ${rrLevelWord(rr.rev.level[i])}${R.ok?.[i] ? "" : ` · ${rr.rev.answer[i]}`}` : undefined }; }
       if (g.key === "closest") { const n = R.nums?.[i], off = R.off?.[i]; return { ...base, val: n == null ? "No answer" : showNum(n), sub: n == null ? undefined : off === 0 ? "Spot on!" : `Off by ${showNum(off ?? 0)}` }; }
       if (g.key === "pin") return { ...base, val: R.pins?.[i] ? showKm(R.off?.[i] ?? 0) : "No pin" };
       return { ...base, place: null, end: undefined, val: `${R.right?.[i] ?? 0} of ${R.of?.[i] ?? 0}` };
@@ -264,17 +273,22 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
                 <button className="btn btn-sm shrink-0" disabled={busy} onClick={() => move("m/mrOut", { name: m.name })}>{off ? "Put back" : "Take off"}</button>
               </div>); })}
           </div>)}
-        <Main label={g.key === "majority" ? "Start: everyone's in" : "Start"} on={() => move("m/start")} />
+        <Main label={g.key === "majority" ? "Start: everyone's in" : g.key === "roulette" ? "Spin" : "Start"} on={() => move("m/start")} />
       </>)}
       {host && sc === "q" && g && (<>
         <OnScreen />
-        {secret.answer && (
+        {g.key === "roulette" && !spinning && secret.answers && rr && (
+          <div className="card cue-card flex flex-col gap-1" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
+            <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answers. Only you see these</div>
+            {secret.answers.map((a, i) => <div key={i} className="text-15"><b style={{ color: T[i]?.color }}><bdi>{T[i]?.name}</bdi></b> · {rr.draw[i]?.theme}: <b style={{ color: "var(--color-gold)" }}><bdi>{a}</bdi></b></div>)}
+          </div>)}
+        {g.key !== "roulette" && secret.answer && (
           <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{g.key === "say" ? "The app's secret answer: it scores nothing. Only you see this" : "The answer. Only you see this"}</div>
             <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(secret.answer)) : secret.answer}</div>
             {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
           </div>)}
-        {!secret.answer && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Getting the answer…</p>}
+        {(g.key === "roulette" ? !spinning && !secret.answers : !secret.answer) && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Getting the answer…</p>}
         {/* who's in: every team, as the TV shows them */}
         {/* who has answered, live (the owner, 31 Oct): a count, then each team ticked green as it locks in */}
         {(() => { const who = T.map((_, i) => i).filter((i) => !g.only || g.only.includes(i)), n = who.filter((i) => pub.sent[i]).length; return (
@@ -299,7 +313,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         </div>
       </>)}
       {host && sc === "reveal" && g && R && (<>
-        <Answer />
+        {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={null} teams={rrT} /> : <Answer />}
         {typedKey(g.key) ? (<>
           {/* the host is told the calls are theirs to change (the reviewers, 31 Oct) */}
           <p className="text-center text-13 text-[var(--color-ink-2)]">The app made these calls. Tap one to change it.</p>
@@ -309,6 +323,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               <div className="flex-1 min-w-0">
                 <div className="eyebrow flex items-center gap-2" style={{ color: t.color, letterSpacing: ".1em" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
                 {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
+                {g.key === "roulette" && rr?.rev && <div className="text-13 text-[var(--color-ink-2)] leading-snug">{rr.draw[i]?.theme} · {rrLevelWord(rr.rev.level[i])} · Answer: <b><bdi>{rr.rev.answer[i]}</bdi></b></div>}
               </div>
               {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={flips[`${pub.qid}|${i}`] ?? v} say={g.key === "say"} neg={g.key === "say" ? SAY_WHY[R.why?.[i] || ""] : undefined} label={`Rule on ${t.name}’s answer`} busy={false}
                 onPick={(nv) => { if ((flips[`${pub.qid}|${i}`] ?? v) === nv) return; setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i }); }} /></div>}
@@ -318,7 +333,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <ContestMany pub={pub} mine={null} host busy={busy} act={(mv) => { const { type, ...x } = mv; move(String(type), x); }} />
         {/* (Next waits for the ruling, as with two teams) */}
         {pub.contest ? <p className="text-center text-13 text-[var(--color-ink-3)] mt-auto" role="status">Next comes back once you&rsquo;ve ruled on the contest.</p>
-          : <Main label="Next" on={() => move("m/next")} />}
+          : <Main label={g.key === "roulette" && g.leg < g.of ? "Spin" : "Next"} on={() => move("m/next")} />}
       </>)}
       {host && sc === "summary" && (<><Summary />{/* the host's Next waits with the result, so a tap can't skip the TV's reveal (the owner, 1 Nov) */}{!held && <Main label="Next" on={() => move("m/next")} />}</>)}
       {host && sc === "final" && (<>
@@ -366,7 +381,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               <PinMap value={pin} onChange={setPin} color={mine != null ? T[mine].color : undefined} height="min(520px, max(300px, calc(100dvh - 460px)))" />
               <button className="btn btn-gold btn-lg btn-block dock" disabled={busy || !pin} onClick={() => void send("answer", { pin, k: `${pub.qid}|q` })}>Lock in</button>
             </div>
-          ) : (
+          ) : spinning ? null : (
             <div className="card flex flex-col gap-2">
               <label className="field-label !mb-0" htmlFor="mans">{g.key === "closest" ? "Your number" : "Your answer"}</label>
               <input id="mans" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
@@ -388,7 +403,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && (<>
         <OnScreen />
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
-        {mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) ? (
+        {spinning ? null : mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) ? (
           <div className="card flex flex-col gap-2">
             <label className="field-label !mb-0" htmlFor="msug">Suggest to {T[mine]?.captain || "your captain"}</label>
             <div className="flex gap-2">
@@ -407,7 +422,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {/* sudden death keeps its headline: it's the night's winner */}
         {g.key === "sudden" && <Big text={W.text} color={W.color} />}
         {(() => { const y = youOf(); return y && <YouPill text={y.text} tone={y.tone} />; })()}
-        <Answer />
+        {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={mine ?? null} teams={rrT} /> : <Answer />}
         <Table />
         <ContestMany pub={pub} mine={cap ? mine : null} host={false} busy={busy} act={(mv) => void send("next", { move: mv })} />
       </>)}

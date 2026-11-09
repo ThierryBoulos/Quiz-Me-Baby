@@ -18,7 +18,7 @@ export function noteTvTime(tvNowAt?: number) {
    old, and one old gap looked like a wrong clock: its countdown ran long until the next update. 5 Nov review) */
   skew = gaps.length >= 3 && Math.abs(best) > 3000 ? best : 0;
 }
-const tvNow = () => Date.now() - skew;
+export const tvNow = () => Date.now() - skew;
 
 /* Seconds left, from the TV's deadline. Paused shows the frozen number. */
 export function useSecondsLeft(deadline?: number | null, left?: number) {

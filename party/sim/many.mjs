@@ -5,6 +5,7 @@ import { build } from "esbuild";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, ".out/many.mjs");
@@ -20,7 +21,7 @@ const decks = { majority: pick("majority", 15, (q) => q.options?.length === 4), 
   quiz: pick("standard", 12, (q) => q.theme !== "Know the Host"), airport: pick("airport", 6), map: pick("map", 6),
   say: pick("saysame", 6, (q) => (q.pool || []).length >= 5).map((q) => ({ ...q, answer: q.pool[0] })), dish: pick("dish", 5) };
 function rng(seed) { let s = seed >>> 0; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
-const T = { quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8 };
+const T = { quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 60 };
 /* a bot's typed answer: right about half the time (a map by its title; a prompt, any word on its list) */
 const typedFor = (key, q, r) => key === "say" ? q.pool[Math.floor(r() * Math.min(4, q.pool.length))] : r() < 0.5 ? (key === "map" ? q.question : q.answer) : "Atlantis";
 
@@ -161,6 +162,45 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`Imad, 3-8 teams: ${said.length} lines, all filled in and fit for many teams ${ok} — ${ok ? "ok" : "FAILED"}`);
   delete globalThis.localStorage;
+}
+/* 9 Nov: Russian Roulette, 3 to 8 teams: one barrel (6 chambers, 8 with 7 or 8 teams), every team its own chamber
+   each spin and its own question; at least one bullet fires (6 and 8 teams: all three); a chamber pays Medium 2,
+   Hard 3, the bullet +5 or -3 (a game's total never below 0); at the end the most points takes 10 */
+{
+  const Q = createRequire(import.meta.url)("../../engine/core.js");
+  let ok = true; const seen = {};
+  for (const k of [3, 4, 5, 6, 7, 8]) {
+    const n = Q.rouletteChambers(k);
+    for (let seed = 1; seed <= 12; seed++) {
+      const r = rng(seed * 31 + k);
+      const D = Q.createDealer({ bank: () => bank, used: () => new Set(), noRepeat: () => true, rng: r });
+      const g = D.buildGame({ standard: false, rounds: 0, themes: [], minis: ["roulette"], rouletteChambers: n, teamA: { name: "A" }, teamB: { name: "B" } });
+      const laps = [...g.rouletteGame.qs, ...g.rouletteGame.spare];
+      if (laps.length < 3 || laps.some((l) => l.ch.length !== n || new Set(l.ch.map((c) => c.theme)).size !== n)) ok = false;
+      const teams = Array.from({ length: k }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+      const s = L.newNight(teams, { roulette: laps }, ["roulette"]);
+      L.startMini(s, 0, T, []);
+      let hits = 0;
+      for (let guard = 0; s.screen !== "summary" && guard < 10; guard++) {
+        const m = L.miniOf(s), lap = L.qOf(s);
+        if (!lap.draw || new Set(lap.draw).size !== k || s.spinAt == null) ok = false;
+        for (let t = 0; t < k; t++) { const q = lap.ch[lap.draw[t]].q; L.captainAnswer(s, t, { text: r() < 0.5 ? q.answer : "Atlantis" }); }
+        const was = [...m.pts]; L.reveal(s);
+        /* (each call is on the team's own chamber's question: "Atlantis" never right, the answer as the matcher takes it) */
+        for (let t = 0; t < k; t++) if (s.ok[t] !== (s.typed[t] !== "Atlantis" && L.rightOf("quiz", s.typed[t], lap.ch[lap.draw[t]].q))) ok = false;
+        const okNow = [...s.ok], hit = lap.draw.indexOf(lap.bullet); if (hit >= 0) hits++;
+        L.next(s, 0, T);
+        for (let t = 0; t < k; t++) { const j = lap.draw[t], w = j === lap.bullet ? (okNow[t] ? 5 : -3) : okNow[t] ? (lap.ch[j].level === "medium" ? 2 : 3) : 0;
+          if (m.pts[t] !== Math.max(0, was[t] + w)) ok = false; }
+      }
+      const m = L.miniOf(s), top = Math.max(...m.pts);
+      if (hits < 1 || hits > 3 || ((k === 6 || k === 8) && hits !== 3)) ok = false;
+      if (top > 0 && m.pts.some((p, t) => p === top && m.award[t] !== 10)) ok = false;
+      (seen[k] = seen[k] || []).push(hits);
+    }
+  }
+  if (!ok) bad++;
+  console.log(`Russian Roulette, 3-8 teams: own chambers, calls on each team's own question, the bullet (${Object.entries(seen).map(([k, h]) => `${k} teams ${Math.min(...h)}-${Math.max(...h)}`).join(", ")}), the points and the places — ${ok ? "ok" : "FAILED"}`);
 }
 /* the cap: 60 players on one Majority Rules question, every one of them in, in one go */
 {

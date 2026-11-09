@@ -106,8 +106,13 @@ export const Snd = {
     chord([349.23, 440.0, 523.25], 1.2, 2.6, { type: "sine", gain: 0.07 });
   },
   soft() { this.resume(); note(660, 0, 0.16, { type: "sine", gain: 0.06 }); },
+  /* Russian Roulette (9 Nov): the cylinder's ratchet as it spins and slows (about 2.5 s), a dry hammer click, and the
+     bang: a short burst and a low thump, soft like everything else here */
+  spin() { this.resume(); let t = 0; for (let i = 0; i < 26; i++) { noise(t, 0.025, { type: "highpass", f0: 2600, gain: 0.05, att: 0.003 }); t += 0.035 + i * i * 0.00022; } },
+  click() { this.resume(); noise(0, 0.05, { type: "bandpass", f0: 2200, q: 3, gain: 0.16, att: 0.003 }); note(180, 0, 0.06, { type: "triangle", gain: 0.05, att: 0.003 }); },
+  bang() { this.resume(); noise(0, 0.7, { type: "lowpass", f0: 1800, f1: 300, gain: 0.34, att: 0.006 }); note(70, 0, 0.6, { type: "sine", gain: 0.32, att: 0.005, to: 38, glide: 0.4 }); },
   /* a coin landing on the score (a mini-game's points, one coin each) */
   coin(k = 0) { this.resume(); const f = 1046.5 * Math.pow(2, Math.min(k, 7) / 12); note(f, 0, 0.12, { type: "triangle", gain: 0.07 }); note(f * 2, 0.01, 0.08, { type: "sine", gain: 0.025 }); },
 };
-export type SoundName = "jingle" | "alarm" | "whoosh" | "drumroll" | "tick" | "correct" | "wrong" | "point" | "win" | "soft" | "coin" | "pour";
+export type SoundName = "jingle" | "alarm" | "whoosh" | "drumroll" | "tick" | "correct" | "wrong" | "point" | "win" | "soft" | "coin" | "pour" | "spin" | "click" | "bang";
 export const playSound = (n: SoundName) => { try { Snd[n](); } catch { /* no audio */ } };

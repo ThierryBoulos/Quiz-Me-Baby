@@ -692,3 +692,87 @@ test('closest: one question from each round theme first, then the other themes',
   const g = D.buildGame({ standard:false, rounds:0, themes:[], minis:['closest'], teamA:{ name:'A' }, teamB:{ name:'B' } });
   assert.equal(new Set(g.mini.qs.slice(0, 6).map(q => q.theme)).size, 6);
 });
+
+/* 9 Nov: Russian Roulette — a barrel a lap (6 chambers, each its own theme; one bullet, Expert), three laps */
+function roulette(over, seed){
+  const bank = [], themes = ['History', 'Geography', 'Music', 'Movies', 'Science', 'Sports', 'Tech', 'Nature', 'Know the Host', 'Sexy Time'];
+  themes.forEach(t => ['easy', 'medium', 'hard', 'expert'].forEach(l => { for(let i = 0; i < 6; i++) bank.push({ id:`${t}:${l}${i}`, type:'standard', theme:t, difficulty:l, question:`${t} ${l} ${i}`, answer:'x' }); }));
+  let x = seed || 3; const rng = () => { x = (x * 1664525 + 1013904223) >>> 0; return x / 4294967296; };
+  const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => true, rng });
+  const g = D.buildGame(Object.assign({ standard:false, rounds:0, themes:[], minis:['roulette'], teamA:{ name:'Falafel' }, teamB:{ name:'Shawarma' } }, over));
+  return { g, env:{ deal:D, settings:{} } };
+}
+test('roulette: each barrel six themes, one bullet (Expert), three Medium and two Hard; never the host\'s own theme', () => {
+  const { g } = roulette();
+  const s = g.rouletteGame;
+  assert.equal(s.qs.length, 3); assert.equal(s.spare.length, 3); assert.equal(s.n, 6);
+  for(const lap of s.qs.concat(s.spare)){
+    assert.equal(lap.ch.length, 6);
+    assert.equal(new Set(lap.ch.map(c => c.theme)).size, 6);
+    assert.equal(lap.ch[lap.bullet].level, 'expert');
+    assert.deepEqual(lap.ch.filter((c, j) => j !== lap.bullet).map(c => c.level).sort(), ['hard', 'hard', 'medium', 'medium', 'medium']);
+    lap.ch.forEach(c => { assert.equal(c.q.difficulty, c.level); assert.equal(c.q.theme, c.theme); assert.ok(['Know the Host', 'Sexy Time'].indexOf(c.theme) < 0); });
+  }
+  assert.ok(roulette({ themes:['Sexy Time'] }).g.rouletteGame.qs.concat(roulette({ themes:['Sexy Time'] }).g.rouletteGame.spare).length);
+});
+test('roulette: two teams — exactly one bullet hits in the three laps; points, and never below 0', () => {
+  for(let seed = 1; seed < 40; seed++){
+    const { g, env } = roulette({}, seed), s = g.rouletteGame;
+    Q.play(g, { type:'roulette/start' }, env);
+    let hits = 0;
+    for(let l = 0; l < 3; l++){
+      const lap = s.qs[s.i], hit = lap.draw.indexOf(lap.bullet), was = s.pts.slice();
+      assert.notEqual(lap.draw[0], lap.draw[1]);
+      if(hit > -1){ hits++; assert.equal(l, s.bulletLap); }
+      Q.play(g, { type:'roulette/verdict', ok:[false, true] }, env);
+      [0, 1].forEach(t => {
+        const ok = t === 1, j = lap.draw[t], want = j === lap.bullet ? (ok ? 5 : -3) : ok ? (lap.ch[j].level === 'medium' ? 2 : 3) : 0;
+        assert.equal(s.pts[t], Math.max(0, was[t] + want));
+      });
+    }
+    assert.equal(hits, 1);
+  }
+});
+test('roulette: the most points wins the 2; level: one more lap or a point each', () => {
+  const { g, env } = roulette(), s = g.rouletteGame;
+  Q.play(g, { type:'roulette/start' }, env);
+  let fx;
+  for(let l = 0; l < 3; l++) fx = Q.play(g, { type:'roulette/verdict', ok:[false, false] }, env);
+  assert.deepEqual(s.pts, [0, 0]);
+  assert.ok(types(fx).includes('go:rouletteTie'));
+  fx = Q.play(g, { type:'roulette/more' }, env);
+  assert.ok(types(fx).includes('go:rouletteQ'));
+  assert.equal(s.qs.length, 4); assert.equal(s.tieLegs, 1);
+  const lap = s.qs[s.i];
+  fx = Q.play(g, { type:'roulette/verdict', ok:[true, false] }, env);
+  assert.ok(types(fx).includes('go:rouletteSummary'));
+  assert.equal(s.verdict.winner, 0); assert.equal(s.verdict.note, 'Settled by a tie-breaker spin.');
+  assert.equal(g.teams[0].score, 2); assert.ok(lap.got[0] > 0);
+  /* a point each */
+  const b = roulette(), t = b.g.rouletteGame;
+  Q.play(b.g, { type:'roulette/start' }, b.env);
+  for(let l = 0; l < 3; l++) Q.play(b.g, { type:'roulette/verdict', ok:[false, false] }, b.env);
+  fx = Q.play(b.g, { type:'roulette/stop' }, b.env);
+  assert.deepEqual([b.g.teams[0].score, b.g.teams[1].score], [1, 1]);
+  assert.ok(types(fx).includes('go:rouletteSummary'));
+  Q.play(b.g, { type:'roulette/done' }, b.env);
+  assert.equal(b.g.done.roulette, true);
+});
+test('roulette: three teams or more — every spin lands each team on its own chamber; at least one bullet fires', () => {
+  for(let k = 3; k <= 8; k++){
+    const n = Q.rouletteChambers(k);
+    assert.equal(n, k > 6 ? 8 : 6);
+    for(let r = 0; r < 300; r++){
+      const s = { i:0, base:3, fired:0 }, had = [];
+      for(let i = 0; i < 3; i++){
+        s.i = i;
+        const lap = { ch:Array.from({ length:n }, (_, j) => ({ theme:'t' + j, level:'medium' })), bullet:r % n };
+        const d = Q.rouletteSpin(lap, k, Q.rouletteHit(s, k), had);
+        assert.equal(new Set(d).size, k);
+        if(d.indexOf(lap.bullet) > -1) s.fired++;
+        if(k === n) assert.ok(d.indexOf(lap.bullet) > -1);
+      }
+      assert.ok(s.fired >= 1);
+    }
+  }
+});
