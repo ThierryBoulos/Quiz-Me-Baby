@@ -70,7 +70,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
       </Rule>
 
       <Rule n="4" title="Mini-games">
-        <P>Mini-games are selected during setup and appear between trivia rounds.</P>
+        <P>Mini-games are selected during setup and appear between trivia rounds. Each mini-game is worth 2 points to the winner.</P>
         <ul className="flex flex-col gap-2 text-15 leading-relaxed text-[var(--color-ink-2)] list-disc pl-5 marker:text-[var(--color-gold)]">
           <Mini name="Closest To Wins">Teams get the same number-based question and have 60 seconds to enter their estimates. The closest answer wins the leg. Best of 5.</Mini>
         <Mini name="The Auction">2-team setup only. The question is something like: “How many countries can you name?” Captains take turns bidding, raising the number or passing. The highest bidder has 30 seconds to name that many answers aloud. The host or the other captain counts them. Make your bid and you win the leg; fail and you lose it. Best of 3.</Mini>
@@ -81,7 +81,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
         <Mini name="Guess the Airport">A departures board appears. You have 30 seconds to identify the airport using clues such as destinations, airlines and language. Naming the city is enough unless it has more than one airport. Best of 5.</Mini>
         <Mini name="Majority Rules">Everyone plays individually on their own phone. Answer 15 questions, each with four options and 15 seconds to choose. Tapping an answer locks it in. No answer counts as wrong. Each team’s score is based on the percentage of its members’ answers that are correct, so smaller teams aren’t disadvantaged.</Mini>
         <Mini name="Guess the Cocktail or Dish">Ingredients appear one at a time, every 3 seconds, with the giveaway ingredient appearing last. The fastest team to answer wins. With 3–8 teams, each team gets one guess. Best of 5.</Mini>
-        <Mini name="Battle of the Captains">2-team setup only. The captains go head-to-head. Everyone else stays quiet. Each captain gets 10 questions. With a host, answers are given aloud within 7 seconds; without a host, captains type their answers within 15 seconds. The captain with the highest score wins double points. This is always the last mini-game.</Mini>
+        <Mini name="Battle of the Captains">2-team setup only. The captains go head-to-head. Everyone else stays quiet. Each captain gets 10 questions. With a host, answers are given aloud within 7 seconds; without a host, captains type their answers within 15 seconds. The captain with the highest score wins the points. This is always the last mini-game.</Mini>
         </ul>
         <P>In a 2-team setup, if the game is tied, you can play one more to settle it or award a point to each team.</P>
       </Rule>
