@@ -23,6 +23,20 @@ const MINIS = [
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
   ["battle", "Battle of the Captains", "Ten each, captains only. Closes the night."]] as const;
 /* each picture game has its own levels, as in Classic; more than one can be on */
+/* the line under the difficulty: what the levels picked mean, Expert only when it's on (9 Nov, the owner's words) */
+export function levelLine(on: readonly string[], all = false): string {
+  if (all) return "All four levels, Expert included.";
+  if (on.includes("expert")) return "Expert is on: only real buffs get those.";
+  const e = on.includes("easy"), m = on.includes("medium"), h = on.includes("hard");
+  if (e && m && h) return "A bit of everything, from very easy to tough.";
+  if (e && m) return "From things everyone knows to a fair pub quiz.";
+  if (m && h) return "A fair pub quiz, and some that need the whole team.";
+  if (e && h) return "Things everyone knows, and some that need the whole team.";
+  if (e) return "Easy: things everyone knows. Warm-up stuff.";
+  if (m) return "Medium: a fair pub quiz.";
+  if (h) return "Hard: you’ll need the whole team.";
+  return "";
+}
 const MAP_LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 const DISH_LEVELS = { c: [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]], d: [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] } as const;
@@ -150,7 +164,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
           {LEVELS.map(([k, l]) => <button key={k} type="button" className={"btn btn-sm lvl-chip " + (on.includes(k) ? "btn-gold" : "")} aria-pressed={on.includes(k)} onClick={() => toggle(k)}>{l}</button>)}
           <button type="button" className={"btn btn-sm lvl-chip " + (all ? "btn-gold" : "")} aria-pressed={all} onClick={() => set(all ? QMB.DEFAULT_DIFF : "mixed")}>Mixed</button>
         </div>
-        <p className="text-12 text-[var(--color-ink-3)] px-1">{all ? "All four levels, Expert included." : on.includes("expert") ? "Expert is on: only real buffs get those." : on.length > 1 ? "Expert comes in only when a theme runs out of the others." : `${LEVELS.find(([k]) => k === on[0])?.[1]} only.`}</p>
+        <p className="text-12 text-[var(--color-ink-3)] px-1">{levelLine(on, all)}</p>
       </div>);
   };
 
@@ -166,7 +180,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="display text-24">Standard rounds</div>
-            <div className="text-13 text-[var(--color-ink-2)]">Trivia by theme, a question per team, with steals and lifelines.</div>
+            <div className="text-13 text-[var(--color-ink-2)]">Trivia by theme. No multiple choice: the captain types the answer.</div>
           </div>
           {/* the switch is 60×34 to look at, with a 64×48 area to tap */}
           <button type="button" role="switch" aria-checked={standard} aria-label="Standard rounds"

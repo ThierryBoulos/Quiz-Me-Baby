@@ -8,6 +8,7 @@ import { HOST_ONLY_THEMES, QMB, loadBank, themeCounts, type Bank } from "@/lib/e
 import { MANY_COLORS, MANY_MINIS, MANY_ROUNDS, MANY_THEMES, MANY_TITLES, PLACE_PTS, lineup, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
+import { levelLine } from "../Setup";
 
 /* every team, every face, the captains marked. The TV (big) packs up to four in a row, then rows of three or four;
    the phones stack them. away: captains the TV hasn't heard from (the lobby). */
@@ -137,7 +138,7 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
                 <select className="select" aria-label="How many question rounds" value={rounds} onChange={(e) => setRounds(Number(e.target.value))}>
                   {Array.from({ length: MANY_ROUNDS }, (_, i) => i + 1).map((r) => <option key={r} value={r}>{r} round{r === 1 ? "" : "s"}</option>)}
                 </select></label>
-              <div className="flex flex-col gap-2"><span className="sp-k">Level</span><LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} /></div>
+              <div className="flex flex-col gap-2"><span className="sp-k">Level</span><LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} /><p className="text-12 text-[var(--color-ink-3)] px-1">{levelLine(quizLevels, quizLevels.length === 4)}</p></div>
               {/* the themes: a summary, and a tap to change them (up to six; each round takes two in turn) */}
               <div className="flex flex-col gap-2">
                 <button type="button" className="flex items-center justify-between gap-3 min-h-[44px] text-left" aria-expanded={picking} onClick={() => setPicking(!picking)}>
