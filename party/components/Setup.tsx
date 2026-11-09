@@ -118,7 +118,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv }: {
   const miniKeys = MINIS.map(([k]) => k as string).filter((k) => minis.includes(k));
   const battle = miniKeys.includes("battle");
   const each = QMB.miniPointValue(standard ? rounds : 0, miniKeys.length, battle) || 2;
-  const worth = (k: string) => (k === "battle" ? 2 * each : each);   // the Battle pays double
+  const worth = (k: string) => { void k; return each; };   // (9 Nov: every game 2 points, the Battle too)
   const plan: { key: string; after: number }[] = QMB.planMinis(standard ? rounds : 0, (QMB.INTERLEAVED as string[]).filter((k) => miniKeys.includes(k)));
   const slot = (k: string) => k === "battle" ? "last" : standard ? (plan.find((p) => p.key === k) ? `after R${plan.find((p) => p.key === k)!.after + 1}` : "")
     : ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";

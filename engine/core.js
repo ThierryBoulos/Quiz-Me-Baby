@@ -295,14 +295,10 @@
      The Battle counts double (battle: is it on?), and all of them together
      come to about three quarters of the rounds, so the trivia still decides
      most of the night. Never under 1; with no standard rounds, 2 each.     */
-  function miniPointValue(N, M, battle){
-    if(!M) return 0;
-    if(!N) return 2;
-    /* the games together are worth a bit less than the rounds; and no single game is worth more than
-       about a third of a round's worth of them (6 rounds: 2 a game, the Battle 4), so a night with one
-       or two games on the card can't turn on one of them (29 Oct) */
-    const share = Math.max(1, Math.round(0.75 * 2 * N / (M + (battle ? 1 : 0))));
-    return Math.min(share, Math.max(1, Math.round(N / 3)));
+  /* every mini-game pays its winner 2 points, the Battle too, whatever the night's card (9 Nov, the owner: the old
+     share-of-the-rounds formula paid 12 points for six games and 7 for seven). (3-8 teams pay by place instead.) */
+  function miniPointValue(N, M){
+    return M ? 2 : 0;
   }
   /* -> [{key, after}]: `after` is the 0-based round each mini-game follows.
      Equal `after` values run back to back. */
@@ -889,7 +885,7 @@
         plan,                      // [{key, after}] for the interleaved ones
         hasBattle,
         miniPts: miniPointValue(rounds.length, M, hasBattle),
-        battlePts: 2 * miniPointValue(rounds.length, M, hasBattle),
+        battlePts: miniPointValue(rounds.length, M, hasBattle),
         done:{},                   // key -> true once that mini-game has finished
         mini:{ qs:cp, spare, base:cp.length, i:0, wins:[0, 0], subs:[], delta:[0, 0], done:false, awarded:false, tieLegs:0 },
         saySame:{ qs:ssLegs, spare:ssSpare, base:ssLegs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },

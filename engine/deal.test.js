@@ -82,7 +82,7 @@ test('mini-game plan and points', () => {
   assert.deepEqual(g.plan.map(p => p.key), ['flag', 'closest']);       // Flag opens the night
   assert.equal(g.hasBattle, true);
   assert.equal(g.miniPts, Q.miniPointValue(4, 3, true));
-  assert.equal(g.battlePts, 2 * g.miniPts);
+  assert.equal(g.battlePts, g.miniPts);                        // (9 Nov: the Battle pays the same as any game)
   const only = D.buildGame(cfg({ standard:false, minis:['map', 'flag'] }));
   assert.equal(only.rounds.length, 0);
   assert.deepEqual(only.plan, [{ key:'flag', after:0 }, { key:'map', after:0 }]);
