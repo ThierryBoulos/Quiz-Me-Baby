@@ -158,7 +158,7 @@ function rules(pub: PubMany): string[] {
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
     case "roulette": return ["The barrel spins and every team lands on its own chamber: a theme and a question. Captains type the answer.",
       "One chamber holds the bullet: an Expert question. Nobody knows who has it until the reveal.",
-      "Right on Medium: 2 points. Right on Hard: 3. The bullet: right +5, wrong −3.",
+      "Right on Medium: 2 points. Right on Hard: 3. The bullet: right +5, wrong or no answer −3.",
       `${n} spins. The most points wins the game. ${pay}`];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
       /* (7 Nov, the owner: what sudden death means, said before it starts, as with two teams) */

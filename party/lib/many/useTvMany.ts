@@ -53,7 +53,7 @@ export async function setTeams(code: string, state: Record<string, unknown>, mem
 }
 
 /* each game's seconds, from the TV's house settings */
-const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST, roulette: t.tQuestion }; };
+const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST, roulette: t.tRoulette }; };
 /* Russian Roulette: the questions of a lap's drawn chambers count as played on this TV (a dark chamber's don't) */
 function markRoulette(s: StateM) {
   const m = s.minis[s.mi], lap = m?.key === "roulette" && s.screen === "q" ? (m.qs[m.i] as { ch: { q: Q }[]; draw?: number[] }) : null;

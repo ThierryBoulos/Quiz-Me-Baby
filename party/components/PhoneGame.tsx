@@ -1060,7 +1060,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "pinQ": return cap ? "Where is it? Drop your pin, then lock it in." : "Drop the Pin: help your captain";
     case "airportQ": return cap ? "Which airport?" : "Guess the Airport: help your captain";
     case "rouletteQ": return cap ? "Your chamber's question. Type your answer." : "Russian Roulette: help your captain";
-    case "rouletteReveal": return pub.roulette?.rev && pub.roulette.rev.hit >= 0 ? `BANG! ${T[pub.roulette.rev.hit].name} drew the bullet` : "Click. Nobody drew the bullet this time.";
+    case "rouletteReveal": return pub.roulette?.rev && pub.roulette.rev.hit >= 0 ? `BANG! ${T[pub.roulette.rev.hit].name} drew the bullet` : pub.roulette?.rev && pub.roulette.rev.bullet < 0 ? "Tie-breaker: no bullet in this one." : "Click. Nobody drew the bullet this time.";
     case "majorityQ": return "Your own answer: eyes on your phone, no talking";
     case "dishQ": return pub.buzz === mine ? (pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
     case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same as Me: help your captain";

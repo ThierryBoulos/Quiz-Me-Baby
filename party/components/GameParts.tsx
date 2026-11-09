@@ -410,11 +410,11 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Each team scores the share of its answers that are right, so a smaller team isn't at a disadvantage. The higher share takes ${pts}.` }];
     /* Russian Roulette (9 Nov, the owner): one barrel, both captains at once, one bullet in the whole game */
     case "roulette": return [
-      { text: `The barrel spins and each team lands on its own chamber: a theme and a question. Both captains type their answer at the same time, ${sec(t?.question, 60)}.` },
+      { text: `The barrel spins and each team lands on its own chamber: a theme and a question. Both captains type their answer at the same time, ${sec(t?.roulette, 45)}.` },
       { text: "One chamber holds the bullet: an Expert question. Nobody knows who has it until the reveal.", warn: true },
-      { text: "Right on Medium: 2 points. Right on Hard: 3. The bullet: right +5, wrong −3. Wrong on any other: nothing." },
+      { text: "Right on Medium: 2 points. Right on Hard: 3. The bullet: right +5, wrong or no answer −3. Wrong on any other: nothing." },
       { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}.` },
-      { text: `${n} spins, one bullet in the whole game. The most points takes ${pts}. Tied at the end? One more spin, or a point each. ${host ? "The host's call." : "Either captain's call (in 10 seconds, or it's a point each)."}` }];
+      { text: `${n} spins, one bullet in the whole game. The most points takes ${pts}. Tied at the end? One more spin (no bullet in it), or a point each. ${host ? "The host's call." : "Either captain's call (in 10 seconds, or it's a point each)."}` }];
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },

@@ -165,7 +165,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
 }
 /* 9 Nov: Russian Roulette, 3 to 8 teams: one barrel (6 chambers, 8 with 7 or 8 teams), every team its own chamber
    each spin and its own question; at least one bullet fires (6 and 8 teams: all three); a chamber pays Medium 2,
-   Hard 3, the bullet +5 or -3 (a game's total never below 0); at the end the most points takes 10 */
+   Hard 3, the bullet +5 or -3 (wrong or no answer, whatever the total); at the end the most points takes 10 */
 {
   const Q = createRequire(import.meta.url)("../../engine/core.js");
   let ok = true; const seen = {};
@@ -191,7 +191,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
         const okNow = [...s.ok], hit = lap.draw.indexOf(lap.bullet); if (hit >= 0) hits++;
         L.next(s, 0, T);
         for (let t = 0; t < k; t++) { const j = lap.draw[t], w = j === lap.bullet ? (okNow[t] ? 5 : -3) : okNow[t] ? (lap.ch[j].level === "medium" ? 2 : 3) : 0;
-          if (m.pts[t] !== Math.max(0, was[t] + w)) ok = false; }
+          if (m.pts[t] !== was[t] + w) ok = false; }
       }
       const m = L.miniOf(s), top = Math.max(...m.pts);
       if (hits < 1 || hits > 3 || ((k === 6 || k === 8) && hits !== 3)) ok = false;

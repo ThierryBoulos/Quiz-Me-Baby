@@ -88,7 +88,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   { const t = getSettings();
     p.tMini = t.tMini;
     p.timers = { question: t.tQuestion, steal: t.tSteal, friend: t.tFriend, contest: t.tContest, sudden: t.tSudden, mini: t.tMini, flag: t.tFlag, map: t.tMap, say: t.tSay,
-      auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport, majority: t.tMajority }; }
+      auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport, majority: t.tMajority, roulette: t.tRoulette }; }
   /* no host: whose Start or Next the room is waiting for */
   if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
     && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {

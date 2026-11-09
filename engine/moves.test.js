@@ -715,7 +715,7 @@ test('roulette: each barrel six themes, one bullet (Expert), three Medium and tw
   }
   assert.ok(roulette({ themes:['Sexy Time'] }).g.rouletteGame.qs.concat(roulette({ themes:['Sexy Time'] }).g.rouletteGame.spare).length);
 });
-test('roulette: two teams — exactly one bullet hits in the three laps; points, and never below 0', () => {
+test('roulette: two teams — exactly one bullet hits in the three laps; points (the bullet wrong is -3, even below 0)', () => {
   for(let seed = 1; seed < 40; seed++){
     const { g, env } = roulette({}, seed), s = g.rouletteGame;
     Q.play(g, { type:'roulette/start' }, env);
@@ -727,7 +727,7 @@ test('roulette: two teams — exactly one bullet hits in the three laps; points,
       Q.play(g, { type:'roulette/verdict', ok:[false, true] }, env);
       [0, 1].forEach(t => {
         const ok = t === 1, j = lap.draw[t], want = j === lap.bullet ? (ok ? 5 : -3) : ok ? (lap.ch[j].level === 'medium' ? 2 : 3) : 0;
-        assert.equal(s.pts[t], Math.max(0, was[t] + want));
+        assert.equal(s.pts[t], was[t] + want);
       });
     }
     assert.equal(hits, 1);
@@ -735,6 +735,7 @@ test('roulette: two teams — exactly one bullet hits in the three laps; points,
 });
 test('roulette: the most points wins the 2; level: one more lap or a point each', () => {
   const { g, env } = roulette(), s = g.rouletteGame;
+  s.bulletLap = -1;                                                       // (no bullet hits: all wrong is level at 0)
   Q.play(g, { type:'roulette/start' }, env);
   let fx;
   for(let l = 0; l < 3; l++) fx = Q.play(g, { type:'roulette/verdict', ok:[false, false] }, env);
@@ -744,12 +745,14 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   assert.ok(types(fx).includes('go:rouletteQ'));
   assert.equal(s.qs.length, 4); assert.equal(s.tieLegs, 1);
   const lap = s.qs[s.i];
+  assert.ok(lap.blank && lap.draw.indexOf(lap.bullet) < 0);              // a tie-breaker spin: no bullet
   fx = Q.play(g, { type:'roulette/verdict', ok:[true, false] }, env);
   assert.ok(types(fx).includes('go:rouletteSummary'));
   assert.equal(s.verdict.winner, 0); assert.equal(s.verdict.note, 'Settled by a tie-breaker spin.');
   assert.equal(g.teams[0].score, 2); assert.ok(lap.got[0] > 0);
   /* a point each */
   const b = roulette(), t = b.g.rouletteGame;
+  t.bulletLap = -1;
   Q.play(b.g, { type:'roulette/start' }, b.env);
   for(let l = 0; l < 3; l++) Q.play(b.g, { type:'roulette/verdict', ok:[false, false] }, b.env);
   fx = Q.play(b.g, { type:'roulette/stop' }, b.env);

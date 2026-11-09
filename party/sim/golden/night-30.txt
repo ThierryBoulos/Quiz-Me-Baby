@@ -47,8 +47,8 @@
 58.00 rouletteQ | 34 | 3-4 | 0-0 | The host keeps the call. | 
 59.00 rouletteReveal | 34 | 3-4 | 0-0 | The host keeps the call. | 
 59.75 rouletteQ | 35 | 3-4 | 0-0 | The host keeps the call. | 
-60.75 rouletteReveal | 35 | 3-4 | 2-0 | The host keeps the call. | 
-61.50 rouletteSummary | 36 | 5-4 | 2-0 | The host keeps the call. | 
+60.75 rouletteReveal | 35 | 3-4 | 2--3 | The host keeps the call. | 
+61.50 rouletteSummary | 36 | 5-4 | 2--3 | The host keeps the call. | 
 62.50 roundIntro | 37 | 5-4 |  | The host keeps the call. | 
 63.50 ask | 38 | 5-4 |  | The host keeps the call. | 
 65.25 answer | 39 | 6-4 |  | Lions +1 point | 

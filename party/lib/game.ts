@@ -97,7 +97,7 @@ export type Pub = {
   tMini?: number;
   /* the house timers (Settings, on the TV), for the rules shown on every screen */
   timers?: { question: number; steal: number; friend: number; contest: number; sudden: number; mini: number; flag: number; map: number; say: number;
-    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number; majority: number };
+    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number; majority: number ; roulette?: number };
   paused?: boolean;          // the clock was paused: the question is hidden until it restarts
   lead?: 0 | 1;              // no host: the captain who starts and moves the night on (Team A's, or B's)
   nextBy?: string;           // no host: whose Start or Next the room is waiting for

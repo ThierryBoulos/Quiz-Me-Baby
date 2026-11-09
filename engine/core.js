@@ -1102,16 +1102,18 @@
     }
     return best.draw;
   }
-  /* a chamber's points: right on Medium 2, on Hard 3; the bullet right +5, wrong -3 (the caller keeps the game's
-     total at 0 or more) */
+  /* a chamber's points: right on Medium 2, on Hard 3; the bullet right +5, wrong or no answer -3 (a total can go
+     below 0: 9 Nov, the owner). A tie-breaker spin has no bullet */
   function roulettePts(lap, j, ok){
-    if(j === lap.bullet) return ok ? 5 : -3;
+    if(j === lap.bullet && !lap.blank) return ok ? 5 : -3;
     return ok ? (lap.ch[j].level === 'medium' ? 2 : 3) : 0;
   }
   /* two teams: the lap on now, spun and up */
   function rouletteGo(g, env, fx){
     const s = g.rouletteGame, lap = s.qs[s.i], D = env && env.deal;
-    lap.draw = rouletteSpin(lap, 2, rouletteHit(s, 2), s.had, D && D.shuffle);
+    /* (a tie-breaker spin has no bullet: 9 Nov, the owner) */
+    if(s.i >= s.base) lap.blank = true;
+    lap.draw = rouletteSpin(lap, 2, s.i >= s.base ? false : rouletteHit(s, 2), s.had, D && D.shuffle);
     fx.push({ go:'rouletteQ' });
     return fx;
   }
@@ -2021,12 +2023,12 @@
       s.qs[s.i] = s.spare.shift();
       return [{ toast:'New barrel, new spin.' }].concat(rouletteGo(g, env, []));
     },
-    /* ok: each team's call as it stands. The lap's points (the game's total never below 0), then the next lap */
+    /* ok: each team's call as it stands. The lap's points (the bullet wrong costs 3, whatever the total), then the next lap */
     'roulette/verdict'(g, a, env){
       const s = g.rouletteGame, lap = s.qs[s.i];
       if(!lap || !lap.draw || s.done) return [];
       const ok = [!!(a.ok && a.ok[0]), !!(a.ok && a.ok[1])];
-      const got = [0, 1].map(t => { const was = s.pts[t]; s.pts[t] = Math.max(0, was + roulettePts(lap, lap.draw[t], ok[t])); return s.pts[t] - was; });
+      const got = [0, 1].map(t => { const p = roulettePts(lap, lap.draw[t], ok[t]); s.pts[t] += p; return p; });
       const hit = lap.draw.indexOf(lap.bullet);
       lap.ok = ok; lap.got = got;
       [0, 1].forEach(t => s.had[t].push(lap.ch[lap.draw[t]].theme));

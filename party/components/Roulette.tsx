@@ -13,7 +13,7 @@ export type RrLit = { j: number; color: string; letter: string };
 const geo = (n: number) => ({ R: n === 8 ? 58 : 54, r: n === 8 ? 16.5 : 21 });
 const at = (n: number, j: number, R: number) => { const a = (-90 + (360 / n) * j) * (Math.PI / 180); return { x: 100 + R * Math.cos(a), y: 100 + R * Math.sin(a) }; };
 /* the reveal's order: the drawn chambers clockwise from the top, the bullet's last (drawn or not) */
-export const rrOrder = (lit: number[], bullet: number) => [...lit.filter((j) => j !== bullet).sort((a, b) => a - b), bullet];
+export const rrOrder = (lit: number[], bullet: number) => [...lit.filter((j) => j !== bullet).sort((a, b) => a - b), ...(bullet >= 0 ? [bullet] : [])];
 export const rrRevealMs = (count: number) => count * STEP_MS + 900;
 
 /* how far into the spin we are (ms; null: no spin, or it's over) — read once, when the screen opens */
@@ -96,7 +96,7 @@ export function useRouletteSounds(rr: RrPub | undefined, phase: "spin" | "reveal
 }
 
 /* what a chamber is worth, said plainly */
-export const rrLevelWord = (level: string) => (level === "bullet" ? "The bullet" : level === "hard" ? "Hard" : level === "expert" ? "Expert" : "Medium");
+export const rrLevelWord = (level: string) => (level === "bullet" ? "The bullet · Expert" : level === "hard" ? "Hard" : level === "expert" ? "Expert" : "Medium");
 export const rrWorthWord = (level: string) => (level === "bullet" ? "+5 or −3" : level === "medium" ? "2 points" : "3 points");
 export const signed = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0");
 
@@ -126,7 +126,7 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
   return (
     <div className="flex gap-10 items-center w-full justify-center">
       <div className="shrink-0 flex flex-col items-center gap-3">
-        <Barrel n={rr.n} lit={spun || reveal ? lit : []} spinAt={reveal ? null : rr.spinAt} bullet={R ? R.bullet : null} reveal={!!R} size={dense ? 360 : 420} />
+        <Barrel n={rr.n} lit={spun || reveal ? lit : []} spinAt={reveal ? null : rr.spinAt} bullet={R && R.bullet >= 0 ? R.bullet : null} reveal={!!R} size={dense ? 360 : 420} />
       </div>
       <div className="flex-1 min-w-0 max-w-[760px] flex flex-col gap-3 text-left">
         {/* what this spin is, and the clock on the right once the barrel has stopped */}
@@ -165,7 +165,7 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
                 </div>); })}
           </div>)}
         {R && <div className="display rr-late leading-tight" style={{ ["--rr-at" as string]: `${end}ms`, fontSize: dense ? 36 : 44, color: hit >= 0 ? teams[hit].color : "var(--color-ink-2)" }}>
-          {hit >= 0 ? <>BANG! <bdi>{teams[hit].name}</bdi> drew the bullet</> : "Click. Nobody drew the bullet this time."}</div>}
+          {hit >= 0 ? <>BANG! <bdi>{teams[hit].name}</bdi> drew the bullet</> : R.bullet < 0 ? "Tie-breaker: no bullet in this one." : "Click. Nobody drew the bullet this time."}</div>}
       </div>
     </div>);
 }
@@ -202,9 +202,9 @@ export function RrPhoneReveal({ rr, me, teams }: { rr: RrPub; me: number | null;
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{lapWord(rr)}</div>
-      <Barrel n={rr.n} lit={lit} bullet={R.bullet} reveal size={150} />
+      <Barrel n={rr.n} lit={lit} bullet={R.bullet >= 0 ? R.bullet : null} reveal size={150} />
       {me != null && rr.draw[me] && <div className="flex items-center gap-2 flex-wrap justify-center text-14"><span className="text-[var(--color-ink-2)]">Your chamber: {rr.draw[me].theme}</span><LevelChip level={R.level[me]} small /></div>}
       <p className="display text-22 text-center rr-late" style={{ ["--rr-at" as string]: `${end}ms`, color: hit >= 0 ? teams[hit].color : "var(--color-ink-2)" }} role="status">
-        {hit >= 0 ? (hit === me ? "BANG! Your team drew the bullet" : <>BANG! <bdi>{teams[hit].name}</bdi> drew the bullet</>) : "Click. Nobody drew the bullet this time."}</p>
+        {hit >= 0 ? (hit === me ? "BANG! Your team drew the bullet" : <>BANG! <bdi>{teams[hit].name}</bdi> drew the bullet</>) : R.bullet < 0 ? "Tie-breaker: no bullet in this one." : "Click. Nobody drew the bullet this time."}</p>
     </div>);
 }
