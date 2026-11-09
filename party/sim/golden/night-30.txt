@@ -9,17 +9,17 @@
 14.00 roundScore | 8 | 0-2 |  | Owls +1 point | 
 14.75 miniIntro | 9 | 0-2 | 0-0 | Owls +1 point | 
 15.75 miniQ | 10 | 0-2 | 0-0 | Owls +1 point | 
-16.50 closestReveal | 10 | 0-2 | 0-1 | Owls +1 point | 
-17.50 miniQ | 11 | 0-2 | 0-1 | Owls take leg 1. | 
-18.50 closestReveal | 11 | 0-2 | 1-1 | Owls take leg 1. | 
-19.25 miniQ | 12 | 0-2 | 1-1 | Lions take leg 2. | 
-20.25 closestReveal | 12 | 0-2 | 2-1 | Lions take leg 2. | 
-21.00 miniQ | 13 | 0-2 | 2-1 | Lions take leg 3. | 
-22.00 closestReveal | 13 | 0-2 | 3-1 | Lions take leg 3. | 
-23.00 decided | 14 | 0-2 | 3-1 |  | 
-23.75 miniQ | 15 | 2-2 | 3-1 |  | 
-24.75 closestReveal | 15 | 2-2 | 3-2 |  | 
-25.50 miniSummary | 16 | 2-2 | 3-2 | Owls take leg 5. | 
+16.50 closestReveal | 10 | 0-2 | 1-1 | Owls +1 point | 
+17.50 miniQ | 11 | 0-2 | 1-1 | Tie — a point each. | 
+18.50 closestReveal | 11 | 0-2 | 2-1 | Tie — a point each. | 
+19.25 miniQ | 12 | 0-2 | 2-1 | Lions take leg 2. | 
+20.25 closestReveal | 12 | 0-2 | 3-1 | Lions take leg 2. | 
+21.00 miniQ | 13 | 0-2 | 3-1 | Lions take leg 3. | 
+22.00 closestReveal | 13 | 0-2 | 4-1 | Lions take leg 3. | 
+23.00 decided | 14 | 0-2 | 4-1 |  | 
+23.75 miniQ | 15 | 2-2 | 4-1 |  | 
+24.75 closestReveal | 15 | 2-2 | 4-2 |  | 
+25.50 miniSummary | 16 | 2-2 | 4-2 | Owls take leg 5. | 
 26.50 roundIntro | 17 | 2-2 |  | Owls take leg 5. | 
 27.50 ask | 18 | 2-2 |  | Owls take leg 5. | 
 29.25 steal | 19 | 2-2 |  | Owls take leg 5. | 
@@ -43,10 +43,10 @@
 54.50 roundScore | 31 | 3-4 |  | The host keeps the call. | 
 55.25 rouletteIntro | 32 | 3-4 | 0-0 | The host keeps the call. | 
 56.25 rouletteQ | 33 | 3-4 | 0-0 | The host keeps the call. | 
-57.00 rouletteReveal | 33 | 3-4 | 0-0 | The host keeps the call. | 
-58.00 rouletteQ | 34 | 3-4 | 0-0 | The host keeps the call. | 
-59.00 rouletteReveal | 34 | 3-4 | 0-0 | The host keeps the call. | 
-59.75 rouletteQ | 35 | 3-4 | 0-0 | The host keeps the call. | 
+57.00 rouletteReveal | 33 | 3-4 | 0--3 | The host keeps the call. | 
+58.00 rouletteQ | 34 | 3-4 | 0--3 | The host keeps the call. | 
+59.00 rouletteReveal | 34 | 3-4 | 0--3 | The host keeps the call. | 
+59.75 rouletteQ | 35 | 3-4 | 0--3 | The host keeps the call. | 
 60.75 rouletteReveal | 35 | 3-4 | 2--3 | The host keeps the call. | 
 61.50 rouletteSummary | 36 | 5-4 | 2--3 | The host keeps the call. | 
 62.50 roundIntro | 37 | 5-4 |  | The host keeps the call. | 
@@ -58,4 +58,4 @@
 70.50 answer | 42 | 7-4 |  |  | 
 71.50 roundScore | 43 | 7-4 |  |  | 
 72.50 final | 44 | 7-4 |  |  | 
-recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[2,2],"minis":[1,0],"chart":[[0,0],[0,0],[0,1],[0,2],[2,2],[2,3],[3,3],[3,4],[5,4],[6,4],[7,4]],"segs":[{"label":"R1","pts":[[0,1],[0,2]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[2,3],[3,3]]},{"label":"R3","pts":[[3,4]]},{"label":"Russian Roulette","pts":[[5,4]]},{"label":"R4","pts":[[6,4],[7,4]]}],"awards":[]}
+recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[2,2],"minis":[1,0],"best":{"title":"Closest To Wins","team":0,"legs":[4,2]},"chart":[[0,0],[0,0],[0,1],[0,2],[2,2],[2,3],[3,3],[3,4],[5,4],[6,4],[7,4]],"segs":[{"label":"R1","pts":[[0,1],[0,2]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[2,3],[3,3]]},{"label":"R3","pts":[[3,4]]},{"label":"Russian Roulette","pts":[[5,4]]},{"label":"R4","pts":[[6,4],[7,4]]}],"awards":[]}

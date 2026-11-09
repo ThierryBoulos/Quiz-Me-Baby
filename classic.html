@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.58', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.59', date:'9 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1343,7 +1343,7 @@ const BUILD = { v:'3.58', date:'5 Nov 2026', author:'Thierry Boulos', year:2026 
              theme are asked as a matched pair (one to each team) so neither
              team gets an unfairly different KIND of question.
    ========================================================================== */
-const THEMES = ['Acronyms','Art & Books','Disney & Pixar','Food & Drink','Friends','Geek & Gamer','Geography','History','Internet & Memes','Know the Host','Lebanon','Movies','Music','Nature','Pop Culture','Rave Culture','Science','Sexy Time','Sports','Tech','TV Series','90s Kids'];
+const THEMES = ['Acronyms','Art & Books','Celebrities','Disney & Pixar','Food & Drink','Friends','Geek & Gamer','Geography','History','Internet & Memes','Know the Host','Lebanon','Movies','Music','Nature','Rave Culture','Science','Sexy Time','Sports','Tech & Business','TV Series','90s Kids'];
 const DIFFS  = ['easy','medium','hard','expert'];
 /* a night's difficulty in words: the default mix is Easy, Medium and Hard (Expert only once those run
    out), Mixed is all four, or one level on its own */
@@ -1635,21 +1635,21 @@ const SEED = [
 ['Nature','hard','','Which animal makes the loudest sound?','The sperm whale','Its clicks reach about 230 decibels under water. The blue whale, the usual textbook answer, calls at around 188.'],
 ['Nature','medium','','Which animal kills the most humans per year?','The mosquito','Via malaria, dengue and other diseases.'],
 /* ---- POP CULTURE ---- */
-['Pop Culture','medium','tv-setting','In which city is the sitcom Friends set?','New York City','Accept "New York".'],
-['Pop Culture','medium','tv-setting','In which fictional town is Stranger Things set?','Hawkins, Indiana','Accept "Hawkins".'],
-['Pop Culture','easy','superhero-alter-ego','What is Spider-Man\'s real name?','Peter Parker',''],
-['Pop Culture','easy','superhero-alter-ego','What is Batman\'s real name?','Bruce Wayne',''],
-['Pop Culture','medium','','Which cooking show is fronted by Gordon Ramsay and features a red and blue kitchen brigade?','Hell\'s Kitchen',''],
-['Pop Culture','medium','character','What is Batman\'s butler called?','Alfred','Alfred Pennyworth.'],
-['Pop Culture','medium','character','What is Sherlock Holmes\'s loyal companion called?','Dr. John Watson','Accept "Watson".'],
-['Pop Culture','medium','','Which TV character says \'Bazinga!\'?','Sheldon Cooper','The Big Bang Theory.'],
-['Pop Culture','easy','','Which series is famous for a wedding episode nicknamed the Red Wedding?','Game of Thrones','Season 3, episode 9.'],
-['Pop Culture','easy','','Which South Korean series became Netflix\'s most-watched non-English show?','Squid Game',''],
+['Friends','medium','tv-setting','In which city is the sitcom Friends set?','New York City','Accept "New York".'],
+['TV Series','medium','tv-setting','In which fictional town is Stranger Things set?','Hawkins, Indiana','Accept "Hawkins".'],
+['Movies','easy','superhero-alter-ego','What is Spider-Man\'s real name?','Peter Parker',''],
+['Movies','easy','superhero-alter-ego','What is Batman\'s real name?','Bruce Wayne',''],
+['TV Series','medium','','Which cooking show is fronted by Gordon Ramsay and features a red and blue kitchen brigade?','Hell\'s Kitchen',''],
+['Movies','medium','character','What is Batman\'s butler called?','Alfred','Alfred Pennyworth.'],
+['Art & Books','medium','character','What is Sherlock Holmes\'s loyal companion called?','Dr. John Watson','Accept "Watson".'],
+['TV Series','medium','','Which TV character says \'Bazinga!\'?','Sheldon Cooper','The Big Bang Theory.'],
+['TV Series','easy','','Which series is famous for a wedding episode nicknamed the Red Wedding?','Game of Thrones','Season 3, episode 9.'],
+['TV Series','easy','','Which South Korean series became Netflix\'s most-watched non-English show?','Squid Game',''],
 /* ---- FRIENDS ---- */
 /* ---- POP CULTURE ---- */
-['Pop Culture','medium','','What is the name of Harry Potter\'s owl?','Hedwig',''],
+['Movies','medium','','What is the name of Harry Potter\'s owl?','Hedwig',''],
 /* ---- NATURE ---- */
-['Pop Culture','medium','','What kind of dog is Scooby-Doo?','A Great Dane',''],
+['TV Series','medium','','What kind of dog is Scooby-Doo?','A Great Dane',''],
 /* ---- RAVE CULTURE ---- */
 ['Rave Culture','easy','festival-country','In which country is the Tomorrowland festival held?','Belgium','In Boom, near Antwerp.'],
 ['Rave Culture','medium','festival-country','In which US city is the Ultra Music Festival held?','Miami',''],
@@ -1722,18 +1722,18 @@ const SEED = [
 ['Sports','hard','','How many players are on a rugby union team?','15','Rugby league has 13.'],
 ['Sports','medium','','How many holes does a full-size golf course have?','18','18 has been the standard since the Old Course at St Andrews settled on it in 1764.'],
 /* ---- TECH ---- */
-['Tech','medium','founder','Who co-founded Apple with Steve Jobs and Ronald Wayne?','Steve Wozniak',''],
-['Tech','hard','founder','Who founded Microsoft with Bill Gates?','Paul Allen',''],
-['Tech','easy','who-owns','Which company owns Instagram and WhatsApp?','Meta','Accept "Facebook" — the company name until 2021.'],
-['Tech','easy','who-owns','Which company owns YouTube and Android?','Google','Accept "Alphabet".'],
-['Tech','hard','first-of','What was the first product Amazon ever sold?','A book','Fluid Concepts and Creative Analogies, 1995.'],
-['Tech','hard','original-name','What was Amazon originally called when Jeff Bezos founded it in 1994?','Cadabra','Renamed Amazon in 1995, partly because "Cadabra" sounded too much like "cadaver".'],
-['Tech','hard','original-name','What was Nintendo\'s original business when it was founded in 1889?','Playing cards','Hanafuda cards, specifically.'],
-['Tech','hard','product-year','In which year was the first iPhone released?','2007','29 June 2007.'],
-['Tech','hard','product-year','In which year was Facebook launched?','2004','February 2004, out of a Harvard dorm.'],
-['Tech','hard','','Which company did Microsoft buy for about 26 billion dollars in 2016?','LinkedIn',''],
-['Tech','medium','founded-in','In which country was Spotify founded?','Sweden','Stockholm, 2006.'],
-['Tech','medium','founded-in','In which country was TikTok\'s parent company ByteDance founded?','China','Beijing, 2012.'],
+['Tech & Business','medium','founder','Who co-founded Apple with Steve Jobs and Ronald Wayne?','Steve Wozniak',''],
+['Tech & Business','hard','founder','Who founded Microsoft with Bill Gates?','Paul Allen',''],
+['Tech & Business','easy','who-owns','Which company owns Instagram and WhatsApp?','Meta','Accept "Facebook" — the company name until 2021.'],
+['Tech & Business','easy','who-owns','Which company owns YouTube and Android?','Google','Accept "Alphabet".'],
+['Tech & Business','hard','first-of','What was the first product Amazon ever sold?','A book','Fluid Concepts and Creative Analogies, 1995.'],
+['Tech & Business','hard','original-name','What was Amazon originally called when Jeff Bezos founded it in 1994?','Cadabra','Renamed Amazon in 1995, partly because "Cadabra" sounded too much like "cadaver".'],
+['Tech & Business','hard','original-name','What was Nintendo\'s original business when it was founded in 1889?','Playing cards','Hanafuda cards, specifically.'],
+['Tech & Business','hard','product-year','In which year was the first iPhone released?','2007','29 June 2007.'],
+['Tech & Business','hard','product-year','In which year was Facebook launched?','2004','February 2004, out of a Harvard dorm.'],
+['Tech & Business','hard','','Which company did Microsoft buy for about 26 billion dollars in 2016?','LinkedIn',''],
+['Tech & Business','medium','founded-in','In which country was Spotify founded?','Sweden','Stockholm, 2006.'],
+['Tech & Business','medium','founded-in','In which country was TikTok\'s parent company ByteDance founded?','China','Beijing, 2012.'],
 /* ---- SEXY TIME ---- */
 ['Sexy Time','medium','','Which hormone, released during sex and cuddling, is nicknamed the \'love hormone\'?','Oxytocin','Also released during childbirth and breastfeeding.'],
 ['Sexy Time','medium','','What condition was Viagra originally developed to treat?','A heart condition (angina)','Sildenafil was tested for angina and high blood pressure; its famous side effect turned up in 1990s trials.'],
@@ -1752,9 +1752,9 @@ const SEED = [
 ['Know the Host','easy','','What is the host\'s favourite cuisine?','Host knows this one',''],
 ['Know the Host','hard','','What is on the host\'s phone lock screen?','Host knows this one',''],
 /* ---- TECH ---- */
-['Tech','easy','','What is the name of Apple\'s voice assistant?','Siri',''],
-['Tech','easy','','Which billionaire bought Twitter in 2022 and renamed it X?','Elon Musk',''],
-['Tech','hard','','Which company\'s famous early motto was \'Don\'t be evil\'?','Google','Quietly demoted from its code of conduct in 2018.'],
+['Tech & Business','easy','','What is the name of Apple\'s voice assistant?','Siri',''],
+['Tech & Business','easy','','Which billionaire bought Twitter in 2022 and renamed it X?','Elon Musk',''],
+['Tech & Business','hard','','Which company\'s famous early motto was \'Don\'t be evil\'?','Google','Quietly demoted from its code of conduct in 2018.'],
 /* ---- SEXY TIME ---- */
 ['Sexy Time','easy','','What does \'MILF\' stand for?','Mom I\'d Like to F***',''],
 ['Sexy Time','medium','','Which male sex toy, shaped like a torch with a soft insert, is the best-known of its kind?','The Fleshlight',''],
@@ -1766,18 +1766,18 @@ const SEED = [
 ['Sexy Time','medium','','What is the practice of deliberately stopping just before orgasm, over and over, to intensify it?','Edging',''],
 ['Sexy Time','easy','','What is the name of the position where the woman is on top, facing her partner?','Cowgirl','Facing away is the "reverse" version.'],
 /* ---- POP CULTURE ---- */
-['Pop Culture','medium','','As of 2025, who is the most-subscribed individual YouTuber in the world?','MrBeast','Real name Jimmy Donaldson.'],
-['Pop Culture','medium','','What does \'rizz\', Oxford\'s 2023 Word of the Year, mean?','Charisma / charm (flirting ability)',''],
-['Pop Culture','medium','','Which \'ugly-cute\' blind-box monster toy by Pop Mart became a global craze?','Labubu',''],
-['Pop Culture','hard','','As of 2025, who has the most-liked picture on Instagram?','Lionel Messi','His 2022 World Cup celebration post — it dethroned the world-record egg.'],
-['Pop Culture','medium','','What is the name of Kim Kardashian\'s shapewear brand?','Skims',''],
+['Internet & Memes','medium','','As of 2025, who is the most-subscribed individual YouTuber in the world?','MrBeast','Real name Jimmy Donaldson.'],
+['Internet & Memes','medium','','What does \'rizz\', Oxford\'s 2023 Word of the Year, mean?','Charisma / charm (flirting ability)',''],
+['Internet & Memes','medium','','Which \'ugly-cute\' blind-box monster toy by Pop Mart became a global craze?','Labubu',''],
+['Internet & Memes','hard','','As of 2025, who has the most-liked picture on Instagram?','Lionel Messi','His 2022 World Cup celebration post — it dethroned the world-record egg.'],
+['Celebrities','medium','','What is the name of Kim Kardashian\'s shapewear brand?','Skims',''],
 /* ---- INTERNET & MEMES ---- */
 ['Internet & Memes','medium','','Which animal was Harambe, the 2016 meme legend?','A gorilla','Shot at Cincinnati Zoo after a child fell into his enclosure.'],
 ['Internet & Memes','hard','','What is the name of the cartoon frog that became one of the internet\'s most famous memes?','Pepe','Pepe the Frog, created by Matt Furie.'],
 ['Internet & Memes','hard','','What was the name of the ship that blocked the Suez Canal in 2021 and memed worldwide?','Ever Given','Stuck for six days; ~12% of global trade held up.'],
 ['Internet & Memes','easy','','Which 2018 game about finding the impostor became a lockdown hit in 2020?','Among Us','"Sus" entered the dictionary because of it.'],
 /* ---- TECH ---- */
-['Tech','medium','','Which country is Nokia from?','Finland','Originally a paper mill, founded 1865.'],
+['Tech & Business','medium','','Which country is Nokia from?','Finland','Originally a paper mill, founded 1865.'],
 /* ---- HISTORY ---- */
 ['History','medium','','Which country gifted the Statue of Liberty to the USA?','France','Dedicated in 1886; designed by Bartholdi, engineered by Gustave Eiffel.'],
 /* ---- GEOGRAPHY ---- */
@@ -1805,12 +1805,12 @@ const SEED = [
 ['History','medium','','After Elizabeth II, who is the second-longest reigning British monarch?','Queen Victoria','63 years and 216 days.'],
 ['History','hard','','In what year were women first allowed to drive in Saudi Arabia?','2018','The ban was lifted in June 2018.'],
 /* ---- TECH ---- */
-['Tech','expert','what-year','In what year were Apple\'s AirPods released?','2016','Announced alongside the iPhone 7.'],
-['Tech','expert','what-year','In what year did the Bitcoin network go live?','2009','The whitepaper came in 2008; the genesis block was mined in January 2009.'],
-['Tech','expert','what-year','In what year was the iPhone X released?','2017','The tenth-anniversary model that killed the home button.'],
-['Tech','expert','what-year','In what year did Tesla release its first car, the Roadster?','2008','Built on a Lotus Elise chassis.'],
-['Tech','expert','what-year','In what year was MSN Messenger officially discontinued?','2013','Users were migrated to Skype.'],
-['Tech','expert','what-year','In what year did BlackBerry shut down service for its legacy devices?','2022','Classic BlackBerry phones stopped working in January 2022.'],
+['Tech & Business','expert','what-year','In what year were Apple\'s AirPods released?','2016','Announced alongside the iPhone 7.'],
+['Tech & Business','expert','what-year','In what year did the Bitcoin network go live?','2009','The whitepaper came in 2008; the genesis block was mined in January 2009.'],
+['Tech & Business','expert','what-year','In what year was the iPhone X released?','2017','The tenth-anniversary model that killed the home button.'],
+['Tech & Business','expert','what-year','In what year did Tesla release its first car, the Roadster?','2008','Built on a Lotus Elise chassis.'],
+['Tech & Business','expert','what-year','In what year was MSN Messenger officially discontinued?','2013','Users were migrated to Skype.'],
+['Tech & Business','expert','what-year','In what year did BlackBerry shut down service for its legacy devices?','2022','Classic BlackBerry phones stopped working in January 2022.'],
 /* ---- MOVIES ---- */
 ['TV Series','expert','','After M*A*S*H and Cheers, which sitcom had the most-watched series finale?','Seinfeld','Around 76 million viewers in 1998.'],
 ['TV Series','medium','','Which drama series has won the most Emmy Awards?','Game of Thrones','59 wins across its run.'],
@@ -1824,8 +1824,8 @@ const SEED = [
 ['Sports','hard','','Which climber free-soloed El Capitan in the documentary Free Solo?','Alex Honnold','Completed the climb in June 2017.'],
 ['Sports','hard','','Name the four cities that host tennis\'s Grand Slam tournaments.','Melbourne, Paris, London, New York','Australian Open, French Open, Wimbledon, US Open.'],
 /* ---- POP CULTURE ---- */
-['Pop Culture','hard','viral-ranking','Rank these oldest to newest: Mannequin Challenge, Gangnam Style, Harlem Shake','Gangnam Style, Harlem Shake, Mannequin Challenge','July 2012, February 2013, late 2016.'],
-['Pop Culture','hard','','Which video did MrBeast\'s baguette video overtake to become YouTube\'s most-liked?','Despacito','Held the record from 2017 until January 2025.'],
+['Internet & Memes','hard','viral-ranking','Rank these oldest to newest: Mannequin Challenge, Gangnam Style, Harlem Shake','Gangnam Style, Harlem Shake, Mannequin Challenge','July 2012, February 2013, late 2016.'],
+['Internet & Memes','hard','','Which video did MrBeast\'s baguette video overtake to become YouTube\'s most-liked?','Despacito','Held the record from 2017 until January 2025.'],
 /* ---- MUSIC ---- */
 ['Music','hard','','As of 2025, which is the most-streamed English-language band on Spotify?','Coldplay','Bands, not solo artists. Counting every language, BTS are ahead.'],
 /* ---- FOOD & DRINK ---- */
@@ -1852,8 +1852,8 @@ const SEED = [
 ['Nature','hard','','What colour is a polar bear\'s skin?','Black','The fur is translucent, not white.'],
 ['Nature','medium','','Which African animal\'s name means \'river horse\' in Greek?','The hippopotamus',''],
 /* ---- TECH ---- */
-['Tech','medium','','Which web browser did Microsoft finally kill off in 2022?','Internet Explorer','After 27 years.'],
-['Tech','medium','','What was Twitter\'s original character limit per tweet?','140','Doubled to 280 in 2017.'],
+['Tech & Business','medium','','Which web browser did Microsoft finally kill off in 2022?','Internet Explorer','After 27 years.'],
+['Tech & Business','medium','','What was Twitter\'s original character limit per tweet?','140','Doubled to 280 in 2017.'],
 /* ---- RAVE CULTURE ---- */
 ['Rave Culture','hard','','What kind of building does Berghain occupy?','A former power plant','A disused East German heating plant.'],
 ['Rave Culture','medium','','Which French platform films DJ sets at spectacular locations like volcanoes and hot-air balloons?','Cercle',''],
@@ -1874,9 +1874,9 @@ const SEED = [
 ['Geek & Gamer','easy','','What does \'GG\' mean in gaming?','Good game',''],
 ['Geek & Gamer','easy','','Which princess does Mario keep rescuing?','Princess Peach',''],
 /* ---- TECH ---- */
-['Tech','easy','','Which company makes the Galaxy range of phones?','Samsung',''],
-['Tech','easy','','Which app has a white ghost on a yellow background as its logo?','Snapchat',''],
-['Tech','hard','','Which website used to call itself \'the front page of the internet\'?','Reddit',''],
+['Tech & Business','easy','','Which company makes the Galaxy range of phones?','Samsung',''],
+['Tech & Business','easy','','Which app has a white ghost on a yellow background as its logo?','Snapchat',''],
+['Tech & Business','hard','','Which website used to call itself \'the front page of the internet\'?','Reddit',''],
 /* ---- INTERNET & MEMES ---- */
 ['Internet & Memes','easy','','What is the term for using a fake online identity to lure someone into a relationship?','Catfishing','From the 2010 documentary.'],
 ['Internet & Memes','easy','','In internet slang, what does \'IYKYK\' stand for?','If You Know You Know',''],
@@ -2160,18 +2160,18 @@ const SEED = [
 ['Nature','expert','world-largest','Which rainforest plant has the world\'s largest single flower, about a metre wide and smelling of rotting meat?','Rafflesia','A parasite with no leaves, stem or roots of its own: only the flower ever shows. The titan arum\'s giant bloom is really a cluster of many flowers.'],
 ['Nature','expert','world-largest','Which cave in Vietnam is the largest known cave passage on Earth, so big it has its own jungle and clouds?','Son Doong','A local man, Hồ Khanh, found the entrance around 1990 while sheltering from a storm; British cavers first explored it in 2009.'],
 /* ---- POP CULTURE (picked 23 Oct 2026) ---- */
-['Pop Culture','easy','couple-nickname','Which Hollywood couple was nicknamed \'Brangelina\'?','Brad Pitt and Angelina Jolie','Others in the club: Bennifer and TomKat.'],
-['Pop Culture','easy','couple-nickname','Which celebrity couple was nicknamed \'Kimye\'?','Kim Kardashian and Kanye West','Married in Florence in 2014, divorced in 2022.'],
-['Pop Culture','easy','royal-wedding','Who did Prince Harry marry in 2018?','Meghan Markle','At Windsor Castle, 19 May 2018.'],
-['Pop Culture','easy','royal-wedding','Who did Kate Middleton marry in 2011?','Prince William','At Westminster Abbey, 29 April 2011.'],
-['Pop Culture','medium','fashion-logo','Which fashion house has a Medusa head as its logo?','Versace','Gianni Versace came from Calabria, once part of ancient \'Greater Greece\'.'],
-['Pop Culture','medium','fashion-logo','Which fashion brand\'s logo is a polo player on horseback?','Ralph Lauren','It made its name on the brand\'s 1972 short-sleeved polo shirt.'],
-['Pop Culture','hard','celebrity-baby','What is the name of Kim Kardashian and Kanye West\'s first child?','North','Born in 2013. Yes, North West.'],
-['Pop Culture','hard','celebrity-baby','What is the name of Beyoncé and Jay-Z\'s first child?','Blue Ivy','Born in January 2012. She already has a Grammy, for the video of \'Brown Skin Girl\'.'],
-['Pop Culture','hard','celebrity-brand','Which singer founded the make-up brand Rare Beauty?','Selena Gomez','Named after her 2020 album, Rare.'],
-['Pop Culture','hard','celebrity-brand','Which actor co-founded the tequila brand Casamigos?','George Clooney','With Rande Gerber and Mike Meldman in 2013. Diageo bought it in 2017 for up to a billion dollars.'],
-['Pop Culture','hard','celebrity-brand','Which model founded the skincare brand Rhode?','Hailey Bieber','Rhode is her middle name. e.l.f. Beauty bought the brand in 2025 for up to a billion dollars.'],
-['Pop Culture','expert','fictional-company','In Breaking Bad, what is the name of Gus Fring\'s fried-chicken chain?','Los Pollos Hermanos','It is a front for his meth business.'],
+['Celebrities','easy','couple-nickname','Which Hollywood couple was nicknamed \'Brangelina\'?','Brad Pitt and Angelina Jolie','Others in the club: Bennifer and TomKat.'],
+['Celebrities','easy','couple-nickname','Which celebrity couple was nicknamed \'Kimye\'?','Kim Kardashian and Kanye West','Married in Florence in 2014, divorced in 2022.'],
+['Celebrities','easy','royal-wedding','Who did Prince Harry marry in 2018?','Meghan Markle','At Windsor Castle, 19 May 2018.'],
+['Celebrities','easy','royal-wedding','Who did Kate Middleton marry in 2011?','Prince William','At Westminster Abbey, 29 April 2011.'],
+['Celebrities','medium','fashion-logo','Which fashion house has a Medusa head as its logo?','Versace','Gianni Versace came from Calabria, once part of ancient \'Greater Greece\'.'],
+['Celebrities','medium','fashion-logo','Which fashion brand\'s logo is a polo player on horseback?','Ralph Lauren','It made its name on the brand\'s 1972 short-sleeved polo shirt.'],
+['Celebrities','hard','celebrity-baby','What is the name of Kim Kardashian and Kanye West\'s first child?','North','Born in 2013. Yes, North West.'],
+['Celebrities','hard','celebrity-baby','What is the name of Beyoncé and Jay-Z\'s first child?','Blue Ivy','Born in January 2012. She already has a Grammy, for the video of \'Brown Skin Girl\'.'],
+['Celebrities','hard','celebrity-brand','Which singer founded the make-up brand Rare Beauty?','Selena Gomez','Named after her 2020 album, Rare.'],
+['Celebrities','hard','celebrity-brand','Which actor co-founded the tequila brand Casamigos?','George Clooney','With Rande Gerber and Mike Meldman in 2013. Diageo bought it in 2017 for up to a billion dollars.'],
+['Celebrities','hard','celebrity-brand','Which model founded the skincare brand Rhode?','Hailey Bieber','Rhode is her middle name. e.l.f. Beauty bought the brand in 2025 for up to a billion dollars.'],
+['TV Series','expert','fictional-company','In Breaking Bad, what is the name of Gus Fring\'s fried-chicken chain?','Los Pollos Hermanos','It is a front for his meth business.'],
 /* ---- RAVE CULTURE (picked 23 Oct 2026) ---- */
 ['Rave Culture','easy','dance-hit','Which French DJ released \'Titanium\' with Sia in 2011?','David Guetta','From his album Nothing but the Beat.'],
 ['Rave Culture','easy','dance-hit','Which Dutch DJ was just 17 when his 2013 track \'Animals\' went global?','Martin Garrix','It made him the youngest producer ever to top the Beatport chart.'],
@@ -2249,20 +2249,20 @@ const SEED = [
 ['Sports','hard','nba-europeans','Which French teenager was the number one pick in the 2023 NBA draft?','Victor Wembanyama','Picked by the San Antonio Spurs. He is about 2.24 m tall.'],
 ['Sports','hard','nba-europeans','Which Greek basketball star is nicknamed the \'Greek Freak\'?','Giannis Antetokounmpo','Born in Athens to Nigerian parents. He led Milwaukee to the 2021 NBA title.'],
 /* ---- TECH (picked 23 Oct 2026) ---- */
-['Tech','easy','ai-assistant','Which company makes the voice assistant Alexa?','Amazon','She arrived with the Echo smart speaker in 2014.'],
-['Tech','easy','ai-assistant','Which company makes the chatbot ChatGPT?','OpenAI','Launched in November 2022, it became one of the fastest-growing apps ever.'],
-['Tech','easy','app-logo','Which tech giant\'s logo is four coloured squares: red, green, blue and yellow?','Microsoft','The four-square logo was introduced in 2012.'],
-['Tech','easy','app-logo','Which messaging app\'s logo is a white phone inside a green speech bubble?','WhatsApp','Facebook bought it for about 19 billion dollars in 2014.'],
-['Tech','easy','founded-by','Who founded Facebook while a student at Harvard?','Mark Zuckerberg','With co-founders including Eduardo Saverin. It started as \'TheFacebook\'.'],
-['Tech','easy','founded-by','Who founded Amazon in 1994?','Jeff Bezos','He first called it Cadabra, until a lawyer misheard it as \'cadaver\'.'],
-['Tech','medium','rank-tech','Rank these from oldest to newest: the first iPhone, Skype, YouTube','Skype → YouTube → the first iPhone','2003, 2005, 2007.'],
-['Tech','medium','rank-tech','Rank these from oldest to newest: Gmail, the first PlayStation, the iPod','The first PlayStation → the iPod → Gmail','December 1994 (in Japan), October 2001 and April 2004.'],
-['Tech','medium','rank-tech','Rank these from oldest to newest: Instagram, Wikipedia, Google Maps','Wikipedia → Google Maps → Instagram','January 2001, February 2005 and October 2010.'],
-['Tech','medium','retired-tech','What was the nickname of Microsoft Office\'s animated paperclip assistant?','Clippy','Officially \'Clippit\'. Debuted in Office 97 and was dropped for good in Office 2007.'],
-['Tech','expert','ai-boss','Which Nvidia co-founder is famous for always wearing a black leather jacket?','Jensen Huang','He co-founded Nvidia in 1993 over breakfast at a Denny\'s in San Jose.'],
-['Tech','expert','ai-boss','Which DeepMind co-founder shared the 2024 Nobel Prize in Chemistry?','Demis Hassabis','For AlphaFold, the AI that predicts the 3D shape of proteins. Shared with John Jumper and David Baker.'],
-['Tech','expert','first-message','What did the first ever text message, sent in the UK in 1992, say?','Merry Christmas','Engineer Neil Papworth typed it on a PC and sent it to a Vodafone director\'s phone.'],
-['Tech','expert','named-after','The programming language Python is named after which British comedy group?','Monty Python','Not the snake. Its creator, Guido van Rossum, was a fan of the show.'],
+['Tech & Business','easy','ai-assistant','Which company makes the voice assistant Alexa?','Amazon','She arrived with the Echo smart speaker in 2014.'],
+['Tech & Business','easy','ai-assistant','Which company makes the chatbot ChatGPT?','OpenAI','Launched in November 2022, it became one of the fastest-growing apps ever.'],
+['Tech & Business','easy','app-logo','Which tech giant\'s logo is four coloured squares: red, green, blue and yellow?','Microsoft','The four-square logo was introduced in 2012.'],
+['Tech & Business','easy','app-logo','Which messaging app\'s logo is a white phone inside a green speech bubble?','WhatsApp','Facebook bought it for about 19 billion dollars in 2014.'],
+['Tech & Business','easy','founded-by','Who founded Facebook while a student at Harvard?','Mark Zuckerberg','With co-founders including Eduardo Saverin. It started as \'TheFacebook\'.'],
+['Tech & Business','easy','founded-by','Who founded Amazon in 1994?','Jeff Bezos','He first called it Cadabra, until a lawyer misheard it as \'cadaver\'.'],
+['Tech & Business','medium','rank-tech','Rank these from oldest to newest: the first iPhone, Skype, YouTube','Skype → YouTube → the first iPhone','2003, 2005, 2007.'],
+['Tech & Business','medium','rank-tech','Rank these from oldest to newest: Gmail, the first PlayStation, the iPod','The first PlayStation → the iPod → Gmail','December 1994 (in Japan), October 2001 and April 2004.'],
+['Tech & Business','medium','rank-tech','Rank these from oldest to newest: Instagram, Wikipedia, Google Maps','Wikipedia → Google Maps → Instagram','January 2001, February 2005 and October 2010.'],
+['Tech & Business','medium','retired-tech','What was the nickname of Microsoft Office\'s animated paperclip assistant?','Clippy','Officially \'Clippit\'. Debuted in Office 97 and was dropped for good in Office 2007.'],
+['Tech & Business','expert','ai-boss','Which Nvidia co-founder is famous for always wearing a black leather jacket?','Jensen Huang','He co-founded Nvidia in 1993 over breakfast at a Denny\'s in San Jose.'],
+['Tech & Business','expert','ai-boss','Which DeepMind co-founder shared the 2024 Nobel Prize in Chemistry?','Demis Hassabis','For AlphaFold, the AI that predicts the 3D shape of proteins. Shared with John Jumper and David Baker.'],
+['Tech & Business','expert','first-message','What did the first ever text message, sent in the UK in 1992, say?','Merry Christmas','Engineer Neil Papworth typed it on a PC and sent it to a Vodafone director\'s phone.'],
+['Tech & Business','expert','named-after','The programming language Python is named after which British comedy group?','Monty Python','Not the snake. Its creator, Guido van Rossum, was a fan of the show.'],
 /* ---- TV SERIES (picked 23 Oct 2026) ---- */
 ['TV Series','easy','costume-colour','What colour are the players\' tracksuits in Squid Game?','Green','The masked guards wear pink.'],
 ['TV Series','easy','costume-colour','What colour are the robbers\' jumpsuits in La Casa de Papel (Money Heist)?','Red','Worn with masks of a famous Spanish painter.'],
@@ -2341,18 +2341,18 @@ const SEED = [
 ['Art & Books','hard','shakespeare','In Shakespeare\'s play, what is Juliet\'s family name?','Capulet','Her hot-headed cousin Tybalt is the one who kills Mercutio.'],
 ['Art & Books','hard','oldest-story','Which poem from ancient Mesopotamia is often called the oldest great work of literature to survive?','The Epic of Gilgamesh','Its oldest parts are about 4,000 years old, written in cuneiform on clay tablets. Its flood story is strikingly like Noah\'s.'],
 /* ---- POP CULTURE (23 Oct) ---- */
-['Pop Culture','medium','zodiac','Which sign of the zodiac is represented by a crab?','Cancer','From the crab that Hera sent to nip at Hercules while he fought the Hydra.'],
+['Celebrities','medium','zodiac','Which sign of the zodiac is represented by a crab?','Cancer','From the crab that Hera sent to nip at Hercules while he fought the Hydra.'],
 /* ---- TECH (23 Oct) ---- */
-['Tech','hard','investing','If you buy VOO or QQQ, what kind of investment are you buying?','An ETF (exchange-traded fund)','A basket of stocks that you buy and sell in one go, like a single share.'],
-['Tech','expert','investing-x','Which stock market index does the fund with the ticker QQQ track?','The Nasdaq-100','The 100 biggest non-financial companies on the Nasdaq exchange, so mostly tech: Apple, Microsoft, Nvidia and the like.'],
+['Tech & Business','hard','investing','If you buy VOO or QQQ, what kind of investment are you buying?','An ETF (exchange-traded fund)','A basket of stocks that you buy and sell in one go, like a single share.'],
+['Tech & Business','expert','investing-x','Which stock market index does the fund with the ticker QQQ track?','The Nasdaq-100','The 100 biggest non-financial companies on the Nasdaq exchange, so mostly tech: Apple, Microsoft, Nvidia and the like.'],
 /* ---- POP CULTURE (24 Oct) ---- */
-['Pop Culture','expert','stage-name','What is the rapper Drake\'s real first name?','Aubrey','His full name is Aubrey Drake Graham. Before music he played Jimmy in the Canadian teen drama Degrassi.'],
-['Pop Culture','expert','stage-name','What was the name of Beyoncé\'s on-stage alter ego, used in the title of her 2008 album?','Sasha Fierce','The album was \'I Am... Sasha Fierce\'. Two years later she said Sasha was gone.'],
-['Pop Culture','expert','reality-flop','Which 2003 reality show sent Paris Hilton and Nicole Richie to live on a farm in Arkansas?','The Simple Life','It ran for five seasons; later ones moved them to jobs, summer camps and other families\' homes.'],
-['Pop Culture','expert','reality-flop','Which luxury music festival in the Bahamas collapsed in 2017, leaving guests with tents and cheese sandwiches?','Fyre Festival','Its organiser, Billy McFarland, was later jailed for fraud. Netflix and Hulu both made documentaries about it.'],
-['Pop Culture','expert','celeb-firsts','At the 2011 royal wedding, which maid of honour, the bride\'s younger sister, became a worldwide talking point?','Pippa Middleton','Her dress, like the bride\'s, was by Sarah Burton for Alexander McQueen.'],
-['Pop Culture','expert','celeb-firsts','Which magazine has named a \'Sexiest Man Alive\' every year since 1985?','People','The first was Mel Gibson.'],
-['Pop Culture','expert','kardashian','Who was Kim Kardashian\'s first husband, the music producer she married in 2000?','Damon Thomas','They divorced in 2004, three years before Keeping Up with the Kardashians began.'],
+['Celebrities','expert','stage-name','What is the rapper Drake\'s real first name?','Aubrey','His full name is Aubrey Drake Graham. Before music he played Jimmy in the Canadian teen drama Degrassi.'],
+['Celebrities','expert','stage-name','What was the name of Beyoncé\'s on-stage alter ego, used in the title of her 2008 album?','Sasha Fierce','The album was \'I Am... Sasha Fierce\'. Two years later she said Sasha was gone.'],
+['Celebrities','expert','reality-flop','Which 2003 reality show sent Paris Hilton and Nicole Richie to live on a farm in Arkansas?','The Simple Life','It ran for five seasons; later ones moved them to jobs, summer camps and other families\' homes.'],
+['Celebrities','expert','reality-flop','Which luxury music festival in the Bahamas collapsed in 2017, leaving guests with tents and cheese sandwiches?','Fyre Festival','Its organiser, Billy McFarland, was later jailed for fraud. Netflix and Hulu both made documentaries about it.'],
+['Celebrities','expert','celeb-firsts','At the 2011 royal wedding, which maid of honour, the bride\'s younger sister, became a worldwide talking point?','Pippa Middleton','Her dress, like the bride\'s, was by Sarah Burton for Alexander McQueen.'],
+['Celebrities','expert','celeb-firsts','Which magazine has named a \'Sexiest Man Alive\' every year since 1985?','People','The first was Mel Gibson.'],
+['Celebrities','expert','kardashian','Who was Kim Kardashian\'s first husband, the music producer she married in 2000?','Damon Thomas','They divorced in 2004, three years before Keeping Up with the Kardashians began.'],
 /* ---- SPORTS (24 Oct) ---- */
 ['Sports','expert','winter-firsts','Which French town hosted the first Winter Olympics, in 1924?','Chamonix','At the foot of Mont Blanc. Norway won the most medals.'],
 ['Sports','expert','winter-firsts','In which country did the sport of curling begin?','Scotland','Scots were curling on frozen ponds by the 1500s. The oldest known curling stone is dated 1511.'],
@@ -2657,12 +2657,12 @@ const SEED_CLOSEST = [
 /* ---- SPORTS ---- */
 ['Sports','medium','Speed of the fastest tennis serve ever recorded, ratified or not, in km per hour',263,'Sam Groth, 2012 — not ratified by the ATP; the official tour record is John Isner\'s 253 km/h.'],
 /* ---- TECH ---- */
-['Tech','medium','Number of emails sent and received worldwide every day in 2025, in billions',376,'About 376 billion a day in 2025 (Radicati, via Statista); it grows every year.'],
+['Tech & Business','medium','Number of emails sent and received worldwide every day in 2025, in billions',376,'About 376 billion a day in 2025 (Radicati, via Statista); it grows every year.'],
 /* ---- POP CULTURE ---- */
 ['Science','medium','How many digits of pi did the Guinness World Records holder recite from memory?',70000,'Rajveer Meena of India recited 70,000 places in 2015, in almost ten hours, blindfolded (Guinness World Records).'],
 ['Science','medium','Probability of being dealt a royal flush in a standard 5-card poker hand (1 in ?)',649740,''],
 /* ---- TECH ---- */
-['Tech','medium','Number of hours of video uploaded to YouTube every minute, as of 2019 (YouTube\'s last official figure)',500,'YouTube\'s last officially confirmed figure.'],
+['Tech & Business','medium','Number of hours of video uploaded to YouTube every minute, as of 2019 (YouTube\'s last official figure)',500,'YouTube\'s last officially confirmed figure.'],
 /* ---- MOVIES ---- */
 ['Movies','medium','How many episodes of Game of Thrones were made?',73,'Eight seasons, 2011 to 2019.'],
 /* ---- SPORTS ---- */
@@ -4380,11 +4380,13 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 56;   // bumped when the built-in bank changes
+const SEED_VERSION = 57;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
 const SEED_NEVER = [
+  ["qym4vp5","qpntoy8","q15w8amj","mr:squid-game"],   // 9 Nov: Squid Game named in the others (Pop Culture split)
+  ["qhpf4ri","qvx8u96"],                               // 9 Nov: Gangnam Style named in the ranking
   ["q16sivxa", "q8ogfvl"],
   ["qqxubah", "qy955r"],
   ["qgw9neb", "q175twlm"],

@@ -2,44 +2,37 @@
 1.25 roundIntro | 1 | 0-0 |  |  | 
 5.00 roundIntro | 2 | 0-0 |  |  | 
 6.75 ask | 3 | 0-0 |  |  | 
-7.50 answer | 3 | 1-0 |  | Lions +1 point | 
-8.50 ask | 4 | 1-0 |  | Lions +1 point | 
-9.50 steal | 4 | 1-0 |  | Lions +1 point | 
-10.25 answer | 4 | 1-0 |  | Lions +1 point | 
-11.25 roundScore | 5 | 1-0 |  | Lions +1 point | 
-12.00 roundIntro | 6 | 1-0 |  | Lions +1 point | 
-14.00 ask | 7 | 1-0 |  | Lions +1 point | 
-14.75 steal | 7 | 1-0 |  | Lions +1 point | 
-15.75 answer | 7 | 1-0 |  | Lions +1 point | 
-16.50 answer | 7 | 1-0 |  |  | 
-31.50 answer | 7 | 1-0 |  | No answer in time: the call stands. | 
-32.00 ask | 8 | 1-0 |  | No answer in time: the call stands. | 
-32.75 steal | 8 | 1-0 |  | No answer in time: the call stands. | 
-33.75 answer | 8 | 1-0 |  | No answer in time: the call stands. | 
-34.50 roundScore | 9 | 1-0 |  | No answer in time: the call stands. | 
-35.50 roundIntro | 10 | 1-0 |  | No answer in time: the call stands. | 
-36.50 ask | 11 | 1-0 |  | No answer in time: the call stands. | 
-37.25 steal | 11 | 1-0 |  | No answer in time: the call stands. | 
-38.25 answer | 11 | 1-0 |  | No answer in time: the call stands. | 
-39.00 ask | 12 | 1-0 |  | No answer in time: the call stands. | 
-40.00 steal | 12 | 1-0 |  | No answer in time: the call stands. | 
-41.00 answer | 12 | 2-0 |  | Lions +1 point — steal | 
-41.75 roundScore | 13 | 2-0 |  | Lions +1 point — steal | 
-42.75 roundIntro | 14 | 2-0 |  | Lions +1 point — steal | 
-43.50 ask | 15 | 2-0 |  | Lions +1 point — steal | 
-44.50 steal | 15 | 2-0 |  | Lions +1 point — steal | 
-45.50 answer | 15 | 2-0 |  | Lions +1 point — steal | 
-46.25 answer | 15 | 2-0 |  |  | 
-47.25 answer | 15 | 3-0 |  | Call changed: Lions +1 point. | 
-48.00 ask | 16 | 3-0 |  | Call changed: Lions +1 point. | 
-49.00 steal | 16 | 3-0 |  | Call changed: Lions +1 point. | 
-50.00 answer | 16 | 3-0 |  | Call changed: Lions +1 point. | 
-50.75 answer | 16 | 3-0 |  |  | 
-51.75 answer | 16 | 3-0 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-52.50 roundScore | 17 | 3-0 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-(the scores set level, 3-3)
-54.50 roundScore | 17 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
-54.50 sudden | 18 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
-55.25 sudden | 19 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
-56.25 final | 19 | 4-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
-recap: {"margin":1,"sudden":true,"leadChanges":0,"steals":[1,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[2,0],[3,0],[3,3],[4,3]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"R2","pts":[]},{"label":"R3","pts":[[2,0]]},{"label":"R4","pts":[[3,0],[3,3]]},{"label":"Sudden death","pts":[[4,3]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0},{"t":"Best thief","who":"Lions, 1 steal","team":0}]}
+7.50 steal | 3 | 0-0 |  |  | 
+8.50 answer | 3 | 0-0 |  |  | 
+9.50 ask | 4 | 0-0 |  |  | 
+10.25 ask | 4 | 0-0 |  | Owls used Call a Friend. | 
+12.00 ask | 5 | 0-0 |  | Owls used Call a Friend. | 
+13.00 answer | 5 | 0-1 |  | Owls +1 point | 
+14.00 roundScore | 6 | 0-1 |  | Owls +1 point | 
+14.75 roundIntro | 7 | 0-1 |  | Owls +1 point | 
+15.75 ask | 8 | 0-1 |  | Owls +1 point | 
+16.50 answer | 8 | 1-1 |  | Lions +1 point | 
+17.50 answer | 8 | 1-1 |  |  | 
+18.50 answer | 8 | 1-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+19.25 ask | 9 | 1-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+20.25 answer | 9 | 1-2 |  | Owls +1 point | 
+21.00 roundScore | 10 | 1-2 |  | Owls +1 point | 
+22.00 roundIntro | 11 | 1-2 |  | Owls +1 point | 
+23.00 ask | 12 | 1-2 |  | Owls +1 point | 
+23.75 answer | 12 | 2-2 |  | Lions +1 point | 
+24.75 ask | 13 | 2-2 |  | Lions +1 point | 
+25.50 answer | 13 | 2-3 |  | Owls +1 point | 
+26.50 roundScore | 14 | 2-3 |  | Owls +1 point | 
+27.50 roundIntro | 15 | 2-3 |  | Owls +1 point | 
+28.25 ask | 16 | 2-3 |  | Owls +1 point | 
+29.25 answer | 16 | 3-3 |  | Lions +1 point | 
+30.00 ask | 17 | 3-3 |  | Lions +1 point | 
+31.00 answer | 17 | 3-4 |  | Owls +1 point | 
+32.00 roundScore | 18 | 3-4 |  | Owls +1 point | 
+(the scores set level, 4-4)
+33.75 roundScore | 18 | 4-4 |  | Both captains agreed: ⁨Lions⁩ 4, ⁨Owls⁩ 4. | 
+33.75 sudden | 19 | 4-4 |  | Both captains agreed: ⁨Lions⁩ 4, ⁨Owls⁩ 4. | 
+34.50 sudden | 20 | 4-4 |  | Both captains agreed: ⁨Lions⁩ 4, ⁨Owls⁩ 4. | 
+35.50 sudden | 20 | 4-4 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+36.50 final | 20 | 5-4 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+recap: {"margin":1,"sudden":true,"leadChanges":1,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[1,1],[1,2],[2,2],[2,3],[3,3],[3,4],[4,4],[5,4]],"segs":[{"label":"R1","pts":[[0,1]]},{"label":"R2","pts":[[1,1],[1,2]]},{"label":"R3","pts":[[2,2],[2,3]]},{"label":"R4","pts":[[3,3],[3,4],[4,4]]},{"label":"Sudden death","pts":[[5,4]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0}]}

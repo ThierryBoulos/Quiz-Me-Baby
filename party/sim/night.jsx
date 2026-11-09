@@ -21,7 +21,7 @@ globalThis.fetch = async (url) => {
 
 const CODE = "SIMS";
 /* as many themes as rounds, as Setup sends (a fixed set, so the deal is the same each run) */
-const THEMES = ["Movies", "Music", "Geography", "History", "Science", "Sports", "Lebanon", "Food & Drink", "Tech", "Nature", "Friends", "Pop Culture"];
+const THEMES = ["Movies", "Music", "Geography", "History", "Science", "Sports", "Lebanon", "Food & Drink", "Tech & Business", "Nature", "Friends", "Celebrities"];
 const api = { current: null };
 function Tv() {
   const [snap, setSnap] = useState(() => read());

@@ -362,6 +362,10 @@
      chamber its own theme: one is the bullet (an Expert question), the rest Medium or Hard. Spare barrels after them:
      a tie-breaker lap, or Change question. Never the host's own theme. */
   const ROULETTE_LAPS = 3, ROULETTE_SPARE = 3, ROULETTE_SKIP_THEMES = ['Know the Host'];
+  /* ...and only the broad themes, everyone's ground (9 Nov, the owner): a fandom theme (Friends, Rave Culture, Geek &
+     Gamer…) only on a night that picked it, so a spin can't land a team on a show nobody there watches */
+  const ROULETTE_THEMES = ['General Knowledge', 'Geography', 'History', 'Science', 'Nature', 'Sports', 'Music', 'Movies', 'TV Series',
+    'Food & Drink', 'Art & Books', 'Tech & Business'];
   const rouletteChambers = (k) => (k > 6 ? 8 : 6);
   /* The four levels of a standard question (22 Oct). A night's difficulty is one of them, several
      joined with "+" ("easy+medium+hard", the default), or "mixed": all four. */
@@ -746,14 +750,17 @@
     const majorityLevelsOf = (c) => levelsOf(c && c.majorityLevels, MAJORITY_ORDER, MAJORITY_ORDER);
 
     /* Russian Roulette: a barrel for each lap (n chambers, laps of them). Every chamber of a barrel its own theme; one
-       bullet (Expert), the rest Medium and Hard (6 chambers: 3 and 2; 8: 4 and 3), in no set order. The themes: any
-       but the host's own, and Sexy Time and Lebanon only on a night that picked them (cfg.rouletteThemes, else the
-       rounds' cfg.themes). Fresh questions first (another theme before a played one), none the night has already,
+       bullet (Expert), the rest Medium and Hard (6 chambers: 3 and 2; 8: 4 and 3), in no set order. The themes: the
+       broad ones (ROULETTE_THEMES), and any other the night picked (cfg.rouletteThemes, else the rounds' cfg.themes),
+       never the host's own. Fresh questions first (another theme before a played one), none the night has already,
        none that clashes with it: inNight takes each one dealt. A level a theme has run out of: the nearest other. */
     function rouletteDeck(cfg, n, laps, inNight){
       const own = cfg.rouletteThemes || cfg.themes || [];
-      const std = bank().filter(q => q.type === 'standard' && q.theme && ROULETTE_SKIP_THEMES.indexOf(q.theme) < 0
-        && (CLOSEST_ONLY_IF_PICKED.indexOf(q.theme) < 0 || own.indexOf(q.theme) > -1));
+      const usable = (q) => q.type === 'standard' && q.theme && ROULETTE_SKIP_THEMES.indexOf(q.theme) < 0;
+      let std = bank().filter(q => usable(q) && (ROULETTE_THEMES.indexOf(q.theme) > -1 || own.indexOf(q.theme) > -1));
+      /* (a bank too small for a barrel of broad themes: every theme but the host's own, Sexy Time and Lebanon if picked) */
+      if(std.map(q => q.theme).filter((t, i, a) => a.indexOf(t) === i).length < n)
+        std = bank().filter(q => usable(q) && (CLOSEST_ONLY_IF_PICKED.indexOf(q.theme) < 0 || own.indexOf(q.theme) > -1));
       const themes = std.map(q => q.theme).filter((t, i, a) => a.indexOf(t) === i);
       const near = { expert:['expert', 'hard'], hard:['hard', 'medium'], medium:['medium', 'hard'] };
       const take = (t, level, stale) => {

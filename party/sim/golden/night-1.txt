@@ -58,61 +58,69 @@
 98.50 miniQ | 28 | 6-1 | 0-0 | No answer in time: the call stands. | 
 99.50 closestReveal | 28 | 6-1 | 0-1 | No answer in time: the call stands. | 
 100.25 miniQ | 29 | 6-1 | 0-1 | Owls take leg 1. | 
-101.25 closestReveal | 29 | 6-1 | 1-1 | Owls take leg 1. | 
-102.00 miniQ | 30 | 6-1 | 1-1 | Lions take leg 2. | 
-103.00 closestReveal | 30 | 6-1 | 2-1 | Lions take leg 2. | 
-104.00 miniQ | 31 | 6-1 | 2-1 | Lions take leg 3. | 
-104.75 closestReveal | 31 | 6-1 | 3-1 | Lions take leg 3. | 
-105.75 decided | 32 | 6-1 | 3-1 |  | 
-106.50 roundIntro | 33 | 8-1 |  |  | 
-108.50 ask | 34 | 8-1 |  |  | 
-109.25 answer | 34 | 9-1 |  | Lions +1 point | 
-110.25 answer | 34 | 9-1 |  |  | 
-113.75 answer | 34 | 9-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-114.75 ask | 35 | 9-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-115.50 answer | 35 | 9-2 |  | Owls +1 point | 
-116.50 roundScore | 36 | 9-2 |  | Owls +1 point | 
-117.50 roundIntro | 37 | 9-2 |  | Owls +1 point | 
-118.25 ask | 38 | 9-2 |  | Owls +1 point | 
-119.25 answer | 38 | 10-2 |  | Lions +1 point | 
-120.00 ask | 39 | 10-2 |  | Lions +1 point | 
-121.00 answer | 39 | 10-3 |  | Owls +1 point | 
-122.00 roundScore | 40 | 10-3 |  | Owls +1 point | 
-122.75 auctionIntro | 41 | 10-3 | 0-0 | Owls +1 point | 
-123.75 auctionBid | 42 | 10-3 | 0-0 | Owls +1 point | 
-124.50 auctionBid | 43 | 10-3 | 0-0 | Owls +1 point | 
-125.50 auctionRun | 44 | 10-3 | 0-0 | Owls +1 point | 
-128.25 auctionLeg | 44 | 10-3 | 1-0 | Owls +1 point | 
-129.00 auctionBid | 45 | 10-3 | 1-0 | Owls +1 point | 
-130.00 auctionBid | 46 | 10-3 | 1-0 | Owls +1 point | 
-131.00 auctionRun | 47 | 10-3 | 1-0 | Owls +1 point | 
-132.75 auctionLeg | 47 | 10-3 | 1-1 | Owls +1 point | 
-133.50 auctionBid | 48 | 10-3 | 1-1 | Owls +1 point | 
-134.50 auctionBid | 49 | 10-3 | 1-1 | Owls +1 point | 
-135.50 auctionRun | 50 | 10-3 | 1-1 | Owls +1 point | 
-138.00 auctionLeg | 50 | 10-3 | 2-1 | Owls +1 point | 
-139.00 auctionResult | 51 | 12-3 | 2-1 | Owls +1 point | 
-140.00 roundIntro | 52 | 12-3 |  | Owls +1 point | 
-141.75 ask | 53 | 12-3 |  | Owls +1 point | 
-142.50 steal | 53 | 12-3 |  | Owls +1 point | 
-143.50 answer | 53 | 12-3 |  | Owls +1 point | 
-144.50 answer | 53 | 12-3 |  |  | 
-147.00 answer | 53 | 12-3 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-148.00 ask | 54 | 12-3 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-149.00 answer | 54 | 12-4 |  | Owls +1 point | 
-149.75 roundScore | 55 | 12-4 |  | Owls +1 point | 
-150.75 battleIntro | 56 | 12-4 | 0-0 | Owls +1 point | 
-151.50 battleQ | 57 | 12-4 | 0-0 | Owls +1 point | 
-152.50 battleQ | 57 | 12-4 | 1-0 | Owls +1 point | 
-158.75 battleQ | 57 | 12-4 | 2-0 | Owls +1 point | 
-160.50 battleHandoff | 57 | 12-4 | 2-0 | Owls +1 point | 
-161.50 battleQ | 58 | 12-4 | 2-0 | Owls +1 point | 
-162.50 battleQ | 58 | 12-4 | 2-1 | Owls +1 point | 
-163.25 battleQ | 58 | 12-4 | 2-2 | Owls +1 point | 
-164.25 battleQ | 58 | 12-4 | 2-3 | Owls +1 point | 
-166.00 battleQ | 58 | 12-4 | 2-4 | Owls +1 point | 
-167.00 battleQ | 58 | 12-4 | 2-5 | Owls +1 point | 
-170.50 battleReview | 58 | 12-4 | 2-6 | Owls +1 point | 
-171.50 battleSummary | 59 | 12-6 | 2-6 | Owls +1 point | 
-172.25 final | 60 | 12-6 |  | Owls +1 point | 
-recap: {"margin":6,"sudden":false,"leadChanges":2,"steals":[1,1],"minis":[3,1],"best":{"title":"Closest To Wins","team":0,"legs":[3,1]},"chart":[[0,0],[0,0],[1,0],[1,2],[1,0],[3,0],[4,0],[6,0],[6,1],[8,1],[9,1],[9,2],[10,2],[10,3],[12,3],[12,4],[12,6]],"segs":[{"label":"R1","pts":[[1,0],[1,2],[1,0]]},{"label":"R2","pts":[[3,0],[4,0]]},{"label":"Guess the Flag","pts":[[6,0]]},{"label":"R3","pts":[[6,1]]},{"label":"Closest To Wins","pts":[[8,1]]},{"label":"R4","pts":[[9,1],[9,2]]},{"label":"R5","pts":[[10,2],[10,3]]},{"label":"The Auction","pts":[[12,3]]},{"label":"R6","pts":[[12,4]]},{"label":"Battle of the Captains","pts":[[12,6]]}],"awards":[{"t":"One-way traffic","who":"Closest To Wins, Lions 3–1","team":0},{"t":"Battle of the Captains","who":"Lea, 6 of 10","team":1}]}
+101.25 closestReveal | 29 | 6-1 | 0-2 | Owls take leg 1. | 
+102.00 miniQ | 30 | 6-1 | 0-2 | Owls take leg 2. | 
+103.00 closestReveal | 30 | 6-1 | 1-2 | Owls take leg 2. | 
+104.00 miniQ | 31 | 6-1 | 1-2 | Lions take leg 3. | 
+104.75 closestReveal | 31 | 6-1 | 2-2 | Lions take leg 3. | 
+105.75 miniQ | 32 | 6-1 | 2-2 | Lions take leg 4. | 
+106.50 closestReveal | 32 | 6-1 | 2-3 | Lions take leg 4. | 
+107.50 miniSummary | 33 | 6-3 | 2-3 | Owls take leg 5. | 
+108.50 roundIntro | 34 | 6-3 |  | Owls take leg 5. | 
+110.25 ask | 35 | 6-3 |  | Owls take leg 5. | 
+111.00 steal | 35 | 6-3 |  | Owls take leg 5. | 
+112.00 answer | 35 | 6-4 |  | Owls +1 point — steal | 
+113.00 ask | 36 | 6-4 |  | Owls +1 point — steal | 
+113.75 answer | 36 | 6-5 |  | Owls +1 point | 
+114.75 answer | 36 | 6-5 |  |  | 
+117.50 steal | 37 | 6-4 |  | Lions steal a new question. | 
+118.25 answer | 37 | 7-4 |  | Lions +1 point — steal | 
+119.25 answer | 37 | 7-4 |  |  | 
+120.00 answer | 37 | 6-4 |  | Call changed: nobody scores this one. | 
+121.00 roundScore | 38 | 6-4 |  | Call changed: nobody scores this one. | 
+122.00 roundIntro | 39 | 6-4 |  | Call changed: nobody scores this one. | 
+123.75 ask | 40 | 6-4 |  | Call changed: nobody scores this one. | 
+124.50 steal | 40 | 6-4 |  | Call changed: nobody scores this one. | 
+125.50 answer | 40 | 6-5 |  | Owls +1 point — steal | 
+126.50 ask | 41 | 6-5 |  | Owls +1 point — steal | 
+127.25 answer | 41 | 6-6 |  | Owls +1 point | 
+128.25 roundScore | 42 | 6-6 |  | Owls +1 point | 
+129.00 auctionIntro | 43 | 6-6 | 0-0 | Owls +1 point | 
+130.00 auctionBid | 44 | 6-6 | 0-0 | Owls +1 point | 
+131.00 auctionBid | 45 | 6-6 | 0-0 | Owls +1 point | 
+131.75 auctionRun | 46 | 6-6 | 0-0 | Owls +1 point | 
+136.25 auctionLeg | 46 | 6-6 | 1-0 | Owls +1 point | 
+137.25 auctionBid | 47 | 6-6 | 1-0 | Owls +1 point | 
+138.00 auctionBid | 48 | 6-6 | 1-0 | Owls +1 point | 
+139.00 auctionRun | 49 | 6-6 | 1-0 | Owls +1 point | 
+141.75 auctionLeg | 49 | 6-6 | 1-1 | Owls +1 point | 
+142.50 auctionBid | 50 | 6-6 | 1-1 | Owls +1 point | 
+143.50 auctionBid | 51 | 6-6 | 1-1 | Owls +1 point | 
+144.50 auctionRun | 52 | 6-6 | 1-1 | Owls +1 point | 
+149.00 auctionLeg | 52 | 6-6 | 2-1 | Owls +1 point | 
+149.75 auctionResult | 53 | 8-6 | 2-1 | Owls +1 point | 
+150.75 roundIntro | 54 | 8-6 |  | Owls +1 point | 
+151.50 ask | 55 | 8-6 |  | Owls +1 point | 
+153.50 steal | 55 | 8-6 |  | Owls +1 point | 
+154.25 answer | 55 | 8-6 |  | Owls +1 point | 
+155.25 ask | 56 | 8-6 |  | Owls +1 point | 
+156.00 ask | 56 | 8-6 |  | Owls used Call a Friend. | 
+158.75 ask | 57 | 8-6 |  | Owls used Call a Friend. | 
+159.75 answer | 57 | 8-7 |  | Owls +1 point | 
+160.50 roundScore | 58 | 8-7 |  | Owls +1 point | 
+161.50 battleIntro | 59 | 8-7 | 0-0 | Owls +1 point | 
+162.50 battleQ | 60 | 8-7 | 0-0 | Owls +1 point | 
+164.25 battleQ | 60 | 8-7 | 1-0 | Owls +1 point | 
+165.00 battleQ | 60 | 8-7 | 2-0 | Owls +1 point | 
+166.00 battleQ | 60 | 8-7 | 3-0 | Owls +1 point | 
+167.00 battleQ | 60 | 8-7 | 4-0 | Owls +1 point | 
+168.75 battleQ | 60 | 8-7 | 5-0 | Owls +1 point | 
+169.50 battleQ | 60 | 8-7 | 6-0 | Owls +1 point | 
+171.50 battleHandoff | 60 | 8-7 | 6-0 | Owls +1 point | 
+172.25 battleQ | 61 | 8-7 | 6-0 | Owls +1 point | 
+174.00 battleQ | 61 | 8-7 | 6-1 | Owls +1 point | 
+176.75 battleQ | 61 | 8-7 | 6-2 | Owls +1 point | 
+181.25 battleReview | 61 | 8-7 | 6-2 | Owls +1 point | 
+182.25 battleSummary | 62 | 10-7 | 6-2 | Owls +1 point | 
+183.00 final | 63 | 10-7 |  | Owls +1 point | 
+recap: {"margin":3,"sudden":false,"leadChanges":2,"steals":[1,3],"minis":[3,1],"best":{"title":"Guess the Flag","team":0,"legs":[6,4]},"chart":[[0,0],[0,0],[1,0],[1,2],[1,0],[3,0],[4,0],[6,0],[6,1],[6,3],[6,4],[6,5],[6,4],[7,4],[6,4],[6,5],[6,6],[8,6],[8,7],[10,7]],"segs":[{"label":"R1","pts":[[1,0],[1,2],[1,0]]},{"label":"R2","pts":[[3,0],[4,0]]},{"label":"Guess the Flag","pts":[[6,0]]},{"label":"R3","pts":[[6,1]]},{"label":"Closest To Wins","pts":[[6,3]]},{"label":"R4","pts":[[6,4],[6,5],[6,4],[7,4],[6,4]]},{"label":"R5","pts":[[6,5],[6,6]]},{"label":"The Auction","pts":[[8,6]]},{"label":"R6","pts":[[8,7]]},{"label":"Battle of the Captains","pts":[[10,7]]}],"awards":[{"t":"Best thief","who":"Owls, 3 steals","team":1},{"t":"Battle of the Captains","who":"Rami, 6 of 10","team":0}]}
