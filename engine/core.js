@@ -363,9 +363,10 @@
      a tie-breaker lap, or Change question. Never the host's own theme. */
   const ROULETTE_LAPS = 3, ROULETTE_SPARE = 3, ROULETTE_SKIP_THEMES = ['Know the Host'];
   /* ...and only the broad themes, everyone's ground (9 Nov, the owner): a fandom theme (Friends, Rave Culture, Geek &
-     Gamer…) only on a night that picked it, so a spin can't land a team on a show nobody there watches */
+     Gamer…) only on a night that picked it, so a spin can't land a team on a show nobody there watches. Celebrities,
+     Quotes and Acronyms join them (10 Nov, the owner: 'anything that is not fandom') */
   const ROULETTE_THEMES = ['General Knowledge', 'Geography', 'History', 'Science', 'Nature', 'Sports', 'Music', 'Movies', 'TV Series',
-    'Food & Drink', 'Art & Books', 'Tech & Business'];
+    'Food & Drink', 'Art & Books', 'Tech & Business', 'Celebrities', 'Quotes', 'Acronyms'];
   const rouletteChambers = (k) => (k > 6 ? 8 : 6);
   /* The four levels of a standard question (22 Oct). A night's difficulty is one of them, several
      joined with "+" ("easy+medium+hard", the default), or "mixed": all four. */

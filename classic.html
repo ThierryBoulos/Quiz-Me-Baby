@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.60', date:'10 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.61', date:'10 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -4269,7 +4269,7 @@ const MAJORITY = [
   ["card-deck", "easy", "How many cards are there in a standard deck, without the jokers?", ["48", "52", "54", "56"], 1, "Four suits of 13."],
   ["emerald-colour", "easy", "What colour is an emerald?", ["Red", "Blue", "Green", "Purple"], 2, "A ruby is red, a sapphire blue, an amethyst purple."],
   ["catan", "medium", "In the board game Catan, what are the official names of the five resources?", ["Brick, wood, sheep, wheat, stone", "Clay, timber, wool, wheat, stone", "Brick, lumber, wool, grain, ore", "Brick, lumber, sheep, grain, stone"], 2, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
-  ["poker-american-airlines", "medium", "In poker, which starting hand is nicknamed 'American Airlines'?", ["Pair of aces", "Pair of kings", "Ace and king", "Pair of queens"], 0, "AA, like the airline. A pair of kings is 'cowboys', ace and king 'Big Slick', a pair of queens 'ladies'."],
+  ["poker-aces-not-called", "medium", "In poker, which of these is NOT a nickname for a pair of aces?", ["Bullets", "American Airlines", "Rockets", "Ladies"], 3, "'Ladies' is a pair of queens. Aces are 'bullets', 'rockets' and 'American Airlines', for AA."],
   ["which-country-s-calendar-has", "medium", "Which country's calendar has 13 months?", ["Ethiopia", "Iran", "Nepal", "Thailand"], 0, "Twelve months of 30 days, then Pagume, of five or six days. Its years also run 7 or 8 behind ours."],
   ["pencil-lead-is-graphite-mixe", "medium", "Pencil 'lead' is graphite mixed with which material?", ["Clay", "Lead", "Charcoal", "Chalk"], 0, "No lead at all: more clay makes it harder (H), more graphite softer (B). A Frenchman, Nicolas-Jacques Conté, came up with the mix in 1795."],
   ["which-vessels-carry-oxygen-r", "hard", "Which vessels carry oxygen-rich blood from the lungs to the heart?", ["Pulmonary veins", "Pulmonary arteries", "Bronchi", "Aorta"], 0, "The only veins with oxygen-rich blood. The pulmonary arteries are the only arteries with oxygen-poor blood."],
@@ -4545,7 +4545,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 58;   // bumped when the built-in bank changes
+const SEED_VERSION = 59;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */

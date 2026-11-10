@@ -55,17 +55,17 @@
 96.75 roundScore | 25 | 4-4 |  | Owls +1 point | 
 97.50 rouletteIntro | 26 | 4-4 | 0-0 | Owls +1 point | 
 98.50 rouletteQ | 27 | 4-4 | 0-0 | Owls +1 point | 
-99.50 rouletteReveal | 27 | 4-4 | 0-2 | Owls +1 point | 
-100.25 rouletteQ | 28 | 4-4 | 0-2 | Owls +1 point | 
-101.25 rouletteReveal | 28 | 4-4 | 2--1 | Owls +1 point | 
-102.00 rouletteQ | 29 | 4-4 | 2--1 | Owls +1 point | 
+99.50 rouletteReveal | 27 | 4-4 | 0-3 | Owls +1 point | 
+100.25 rouletteQ | 28 | 4-4 | 0-3 | Owls +1 point | 
+101.25 rouletteReveal | 28 | 4-4 | 2-0 | Owls +1 point | 
+102.00 rouletteQ | 29 | 4-4 | 2-0 | Owls +1 point | 
 103.00 rouletteReveal | 29 | 4-4 | 2-2 | Owls +1 point | 
 104.00 rouletteTie | 30 | 4-4 | 2-2 | Owls +1 point | 
 104.75 rouletteQ | 31 | 4-4 | 2-2 | Owls +1 point | 
 105.75 rouletteReveal | 31 | 4-4 | 2-2 | Owls +1 point | 
 106.50 rouletteReveal | 31 | 4-4 | 2-2 |  | 
-107.50 rouletteReveal | 31 | 4-4 | 2-5 | Call changed: ⁨Owls⁩ RIGHT. | 
-108.50 rouletteSummary | 32 | 4-6 | 2-5 | Call changed: ⁨Owls⁩ RIGHT. | 
+107.50 rouletteReveal | 31 | 4-4 | 2-4 | Call changed: ⁨Owls⁩ RIGHT. | 
+108.50 rouletteSummary | 32 | 4-6 | 2-4 | Call changed: ⁨Owls⁩ RIGHT. | 
 109.25 roundIntro | 33 | 4-6 |  | Call changed: ⁨Owls⁩ RIGHT. | 
 110.25 ask | 34 | 4-6 |  | Call changed: ⁨Owls⁩ RIGHT. | 
 111.00 ask | 34 | 4-6 |  | Lions used Double Dip. | 

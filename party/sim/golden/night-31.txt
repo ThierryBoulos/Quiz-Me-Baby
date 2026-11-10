@@ -7,10 +7,10 @@
 10.25 rouletteQ | 4 | 0-0 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
 (the TV reloads)
 11.05 rouletteQ | 4 | 0-0 | 0-0 |  | 
-13.30 rouletteReveal | 4 | 0-0 | 5-3 |  | 
-29.05 rouletteReveal | 4 | 0-0 | 5-3 | No answer in time: the call stands. | 
-29.30 rouletteQ | 5 | 0-0 | 5-3 | No answer in time: the call stands. | 
-30.30 rouletteReveal | 5 | 0-0 | 5-3 | No answer in time: the call stands. | 
-31.30 rouletteSummary | 6 | 2-0 | 5-3 | No answer in time: the call stands. | 
+13.30 rouletteReveal | 4 | 0-0 | 3-2 |  | 
+29.05 rouletteReveal | 4 | 0-0 | 3-2 | No answer in time: the call stands. | 
+29.30 rouletteQ | 5 | 0-0 | 3-2 | No answer in time: the call stands. | 
+30.30 rouletteReveal | 5 | 0-0 | 3--1 | No answer in time: the call stands. | 
+31.30 rouletteSummary | 6 | 2-0 | 3--1 | No answer in time: the call stands. | 
 32.05 final | 7 | 2-0 |  | No answer in time: the call stands. | 
 recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[2,0]],"segs":[{"label":"Russian Roulette","pts":[[2,0]]}],"awards":[]}

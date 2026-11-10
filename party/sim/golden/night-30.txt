@@ -45,17 +45,17 @@
 56.25 rouletteQ | 33 | 3-4 | 0-0 | The host keeps the call. | 
 57.00 rouletteReveal | 33 | 3-4 | 0-0 | The host keeps the call. | 
 58.00 rouletteQ | 34 | 3-4 | 0-0 | The host keeps the call. | 
-59.00 rouletteReveal | 34 | 3-4 | 0-0 | The host keeps the call. | 
-59.75 rouletteQ | 35 | 3-4 | 0-0 | The host keeps the call. | 
-60.75 rouletteReveal | 35 | 3-4 | 5-0 | The host keeps the call. | 
-61.50 rouletteSummary | 36 | 5-4 | 5-0 | The host keeps the call. | 
-62.50 roundIntro | 37 | 5-4 |  | The host keeps the call. | 
-63.50 ask | 38 | 5-4 |  | The host keeps the call. | 
-65.25 answer | 39 | 6-4 |  | Lions +1 point | 
-66.00 ask | 40 | 6-4 |  | Lions +1 point | 
-68.00 steal | 41 | 6-4 |  | Lions +1 point | 
-69.75 answer | 42 | 7-4 |  | Lions +1 point — steal | 
-70.50 answer | 42 | 7-4 |  |  | 
-71.50 roundScore | 43 | 7-4 |  |  | 
-72.50 final | 44 | 7-4 |  |  | 
-recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[2,2],"minis":[1,0],"chart":[[0,0],[0,0],[0,1],[0,2],[2,2],[2,3],[3,3],[3,4],[5,4],[6,4],[7,4]],"segs":[{"label":"R1","pts":[[0,1],[0,2]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[2,3],[3,3]]},{"label":"R3","pts":[[3,4]]},{"label":"Russian Roulette","pts":[[5,4]]},{"label":"R4","pts":[[6,4],[7,4]]}],"awards":[]}
+59.00 rouletteReveal | 34 | 3-4 | -3-0 | The host keeps the call. | 
+59.75 rouletteQ | 35 | 3-4 | -3-0 | The host keeps the call. | 
+60.75 rouletteReveal | 35 | 3-4 | -1-0 | The host keeps the call. | 
+61.50 rouletteSummary | 36 | 3-6 | -1-0 | The host keeps the call. | 
+62.50 roundIntro | 37 | 3-6 |  | The host keeps the call. | 
+63.50 ask | 38 | 3-6 |  | The host keeps the call. | 
+65.25 answer | 39 | 4-6 |  | Lions +1 point | 
+66.00 ask | 40 | 4-6 |  | Lions +1 point | 
+68.00 steal | 41 | 4-6 |  | Lions +1 point | 
+69.75 answer | 42 | 5-6 |  | Lions +1 point — steal | 
+70.50 answer | 42 | 5-6 |  |  | 
+71.50 roundScore | 43 | 5-6 |  |  | 
+72.50 final | 44 | 5-6 |  |  | 
+recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[2,2],"minis":[1,0],"chart":[[0,0],[0,0],[0,1],[0,2],[2,2],[2,3],[3,3],[3,4],[3,6],[4,6],[5,6]],"segs":[{"label":"R1","pts":[[0,1],[0,2]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[2,3],[3,3]]},{"label":"R3","pts":[[3,4]]},{"label":"Russian Roulette","pts":[[3,6]]},{"label":"R4","pts":[[4,6],[5,6]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":1}]}
