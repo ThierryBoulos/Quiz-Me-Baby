@@ -41,7 +41,7 @@ The file name is a hash, so it doesn't give away the landmark. Written by `scrip
 | d644153c7b4f4b59.jpg | Charles Bridge | A.Savin | Free Art License 1.3 | https://commons.wikimedia.org/wiki/File:Prague_07-2016_view_from_Lesser_Town_Tower_of_Charles_Bridge_img3.jpg |
 | f67f77321cdd49e4.jpg | Krak des Chevaliers | Bernard Gagnon | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Krak_des_Chevaliers_01.jpg |
 | 6f3303d15ede70c9.jpg | Church of St George (Bete Giyorgis), Lalibela | Sailko | CC BY 3.0 | https://commons.wikimedia.org/wiki/File:Lalibela,_san_giorgio,_esterno_24.jpg |
-| 1192259143cd9a16.jpg | Borobudur | Gunawan Kartapranata | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Borobudur-Nothwest-view.jpg |
+| e935769241cefbbf.jpg | Borobudur | 22Kartika | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Borobudur_Temple.jpg |
 | 01a25899bf0d8149.jpg | Leshan Giant Buddha | xiquinhosilva | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Leshan_Giant_Buddha_(1).jpg |
 | 58218edd79669edf.jpg | Perito Moreno Glacier | Fernando | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Perito_Moreno_Glacier_2023.jpg |
 | af35b4549acc15fc.jpg | Ha Long Bay | Thomas Hirsch / User:Ravn | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Halong_Bay_in_Vietnam.jpg |

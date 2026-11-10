@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.59', date:'9 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.60', date:'10 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -2016,7 +2016,6 @@ const SEED = [
 ['Geography','expert','two-coasts','Which is the only South American country with coastlines on both the Pacific and the Caribbean?','Colombia','It is named after Christopher Columbus. Chile also reaches the Atlantic, but not the Caribbean.'],
 /* ---- HISTORY (picked 23 Oct 2026) ---- */
 ['History','easy','egypt-find','Which stone, found by French soldiers in Egypt in 1799, held the key to deciphering hieroglyphs?','The Rosetta Stone','One decree carved in hieroglyphs, Demotic and Ancient Greek. Champollion cracked it in 1822; it sits in the British Museum.'],
-['History','easy','famous-ruler','Which French emperor was finally defeated at the Battle of Waterloo in 1815?','Napoleon Bonaparte','Waterloo is in modern Belgium. He died in exile on St Helena in 1821.'],
 ['History','easy','famous-ruler','Which queen of ancient Egypt had famous love affairs with Julius Caesar and Mark Antony?','Cleopatra','She was of Macedonian Greek descent, the last active ruler of Ptolemaic Egypt.'],
 ['History','easy','famous-year','In which year did the Second World War end?','1945','VE Day was 8 May; Japan formally surrendered on 2 September.'],
 ['History','medium','egypt-find','Whose almost untouched tomb did Howard Carter discover in Egypt\'s Valley of the Kings in 1922?','Tutankhamun','The boy pharaoh\'s treasures included his famous gold death mask.'],
@@ -2341,7 +2340,7 @@ const SEED = [
 ['Art & Books','hard','shakespeare','In Shakespeare\'s play, what is Juliet\'s family name?','Capulet','Her hot-headed cousin Tybalt is the one who kills Mercutio.'],
 ['Art & Books','hard','oldest-story','Which poem from ancient Mesopotamia is often called the oldest great work of literature to survive?','The Epic of Gilgamesh','Its oldest parts are about 4,000 years old, written in cuneiform on clay tablets. Its flood story is strikingly like Noah\'s.'],
 /* ---- POP CULTURE (23 Oct) ---- */
-['Celebrities','medium','zodiac','Which sign of the zodiac is represented by a crab?','Cancer','From the crab that Hera sent to nip at Hercules while he fought the Hydra.'],
+['General Knowledge','medium','zodiac','Which sign of the zodiac is represented by a crab?','Cancer','From the crab that Hera sent to nip at Hercules while he fought the Hydra.'],
 /* ---- TECH (23 Oct) ---- */
 ['Tech & Business','hard','investing','If you buy VOO or QQQ, what kind of investment are you buying?','An ETF (exchange-traded fund)','A basket of stocks that you buy and sell in one go, like a single share.'],
 ['Tech & Business','expert','investing-x','Which stock market index does the fund with the ticker QQQ track?','The Nasdaq-100','The 100 biggest non-financial companies on the Nasdaq exchange, so mostly tech: Apple, Microsoft, Nvidia and the like.'],
@@ -2608,6 +2607,158 @@ const SEED = [
 ['Geography','easy','','What is the capital of China?','Beijing','Peking in older spellings. Shanghai is the biggest city.'],
 ['Geography','easy','','After Russia, which is the second-largest country in the world by area?','Canada','Just ahead of the US and China. Russia is about 1.7 times bigger.'],
 ['Geography','easy','','Which desert covers most of North Africa?','The Sahara','The largest hot desert in the world. Antarctica is the largest desert of all.'],
+['Geography','medium','','Which national park in Tanzania is famous for the great wildebeest migration?','Serengeti','Over 1.5 million wildebeest follow the rains through it every year.'],
+['Geography','medium','','The shield and two spears on Kenya\'s flag are those of which people?','Maasai','The red stands for the blood shed for independence, the green for the land, the white for peace.'],
+['History','medium','new-nation','Which African country, founded as a home for freed Black Americans, has been independent since 1847?','Liberia','Its capital, Monrovia, is named after US President James Monroe.'],
+['General Knowledge','medium','','Which country celebrates its New Year, Songkran, with a nationwide water fight every April?','Thailand','It runs from 13 to 15 April. UNESCO added it to its list of living heritage in 2023.'],
+['History','hard','new-nation','Which country was part of Colombia until 1903?','Panama','The USA backed its break-away, then built the canal, which opened in 1914.'],
+['Food & Drink','hard','','The apple first grew wild in the mountains of which Central Asian country?','Kazakhstan','\'Alma\' is Kazakh for apple, and wild apple forests still grow near Almaty.'],
+['History','expert','','What name was given to the 5,300-year-old man found frozen in an Alpine glacier in 1991?','Ötzi','An arrowhead in his shoulder showed he was murdered. He\'s now in a museum in Bolzano, Italy.'],
+['Nature','easy','animal-home','In which ocean does the narwhal, the \'unicorn of the sea\', live?','The Arctic Ocean','Its \'tusk\' is a tooth that can grow to nearly 3 m, mostly on males.'],
+['Geography','hard','colonial-language','Which South American country has Dutch as its official language?','Suriname','A Dutch colony until 1975, it\'s also the smallest country in South America.'],
+['Nature','medium','animal-home','Lemurs are native to only one island in the world. Which one?','Madagascar','Two species also live wild in the Comoros, probably taken there by people.'],
+['Geography','medium','','In which country does the Blue Nile begin?','Ethiopia','It flows out of Lake Tana and joins the White Nile at Khartoum, in Sudan.'],
+['Sports','medium','endurance-where','Which famous ultra-trail race, about 170 km long, starts and ends in Chamonix and crosses France, Italy and Switzerland?','UTMB','About 170 km and 10,000 m of climbing, starting and finishing in Chamonix.'],
+['Sports','hard','endurance-race','In a HYROX race, which workout is always the last of the eight stations?','Wall balls','Each station comes after a 1 km run. The first is the SkiErg.'],
+['Sports','hard','endurance-race','Which Tennessee ultramarathon starts when its founder, Lazarus Lake, lights a cigarette?','The Barkley Marathons','As of 2026 only 20 people have ever finished it. Jasmin Paris, in 2024, is the only woman.'],
+['Sports','hard','','Which town on Hawaii\'s Big Island is the traditional home of the Ironman World Championship?','Kona','From 2023 to 2025 the men raced in Nice instead. In 2026 both races were back in Kona, on one day.'],
+['Sports','hard','tour-jersey','In the Tour de France, what pattern is on the King of the Mountains jersey?','Polka dots','Red on white, since 1975. The dots came from a sponsor, Chocolat Poulain.'],
+['Sports','hard','tour-jersey','In the Tour de France, what colour is the jersey for the leader of the points classification?','Green','Usually a sprinter\'s jersey. It began in 1953, for the Tour\'s 50th anniversary.'],
+['Sports','hard','','As of 2026, what is the record number of Tour de France wins by one rider?','5','Anquetil, Merckx, Hinault, Induráin and, since 2026, Pogačar. Lance Armstrong\'s seven were stripped.'],
+['Sports','easy','','On which famous French avenue does the Tour de France traditionally finish?','The Champs-Élysées','Every year since 1975 except 2024, when the Paris Olympics sent the finish to Nice.'],
+['Sports','expert','','Which Norwegian Olympic and Ironman champion claimed a record VO2 max of 101 in 2026?','Kristian Blummenfelt','Some scientists doubt it: the accepted record was cyclist Oskar Svendsen\'s, about 97.'],
+['Acronyms','easy','sport-acronym','In race results, what does \'DNF\' stand for?','Did Not Finish','DNS means the racer didn\'t start; DSQ means disqualified.'],
+['Acronyms','easy','sport-acronym','In boxing, what does \'KO\' stand for?','Knockout','A TKO, a technical knockout, is when the referee stops the fight.'],
+['History','easy','','In which 1815 battle was Napoleon finally defeated?','Waterloo','Near Brussels, in today\'s Belgium. He died in exile on St Helena in 1821.'],
+['Geography','hard','','How many cantons does Switzerland have?','26','Six were once called half-cantons. The newest, Jura, was created in 1979.'],
+['Music','easy','','Which singing style from the Alps flips quickly between a low chest voice and a high falsetto?','Yodelling','Swiss yodelling joined UNESCO\'s list of living heritage in December 2025.'],
+['Geography','medium','africa-country','Which African country has three capital cities?','South Africa','Pretoria (government), Cape Town (parliament) and Bloemfontein (courts).'],
+['Geography','medium','africa-country','What is the largest country in Africa by area?','Algeria','It took the title in 2011, when South Sudan split from Sudan.'],
+['Geography','expert','colonial-language','Which African country has Spanish as its main official language?','Equatorial Guinea','It was Spanish Guinea until 1968. French and Portuguese are official too.'],
+['General Knowledge','medium','','How many nights are there in a fortnight?','14','The word is a squashed form of the Old English for \'fourteen nights\'.'],
+['General Knowledge','easy','','Whose portrait is on the US one-dollar bill?','George Washington','He has been on it since 1869, copied from a portrait by Gilbert Stuart.'],
+['General Knowledge','easy','','What is the coloured part of the eye called?','The iris','Named after Iris, the Greek goddess of the rainbow.'],
+['General Knowledge','easy','','Which animal ends the famous typing sentence \'The quick brown fox jumps over the lazy…\'?','Dog','It uses every letter of the alphabet, which is why typists practised on it.'],
+['General Knowledge','easy','','Which Hindu festival is known as the festival of lights?','Diwali','From the Sanskrit for \'row of lights\'. Sikhs and Jains celebrate it too.'],
+['General Knowledge','medium','','What is the traditional name for a pirate flag with a skull and crossbones?','The Jolly Roger','Earlier pirate flags were often plain red: a warning that no mercy would be shown.'],
+['General Knowledge','medium','','What do you call a word that reads the same backwards and forwards, like \'level\' or \'kayak\'?','A palindrome','Whole sentences can be one too: \'Was it a car or a cat I saw?\''],
+['General Knowledge','easy','','What is the main raw material used to make glass?','Sand','It\'s mixed with soda ash and limestone, then melted in a furnace.'],
+['General Knowledge','medium','','Which is the only day of the week named in English after a Roman god?','Saturday','After Saturn. Thursday is Thor\'s day and Wednesday is Woden\'s, both Norse gods.'],
+['General Knowledge','medium','','What is the everyday name for the patella?','The kneecap','It\'s the body\'s biggest sesamoid bone: one that grows inside a tendon.'],
+['General Knowledge','medium','','Which emergency phone number works in every country of the European Union?','112','Made the single European emergency number in 1991. It\'s free from any phone, mobile or landline.'],
+['General Knowledge','medium','','What does a philatelist collect?','Stamps','The word was coined in 1864 by a French collector, Georges Herpin.'],
+['General Knowledge','hard','','Which country was the first to use paper money?','China','Called jiaozi, it was first issued by merchants in Sichuan under the Song dynasty, in the 11th century.'],
+['General Knowledge','hard','','The distress call \'Mayday\' comes from which language?','French','From \'m\'aider\', as in \'venez m\'aider\': come and help me. Croydon Airport brought it in in 1923, for flights to Paris.'],
+['General Knowledge','medium','','What did engineer Percy Spencer invent after a radar machine melted the chocolate bar in his pocket?','The microwave oven','The first one on sale, in 1947, stood 6 feet tall and weighed about 340 kg.'],
+['General Knowledge','medium','','On 1 April in France and Italy, what do pranksters secretly stick on people\'s backs?','A paper fish','Then they shout \'Poisson d\'avril!\' or \'Pesce d\'aprile!\'.'],
+['General Knowledge','medium','','Which US president gave his name to the teddy bear?','Theodore Roosevelt','In 1902 he refused to shoot a bear tied to a tree. A cartoon of it inspired a New York shopkeeper to make \'Teddy\'s bear\'.'],
+['General Knowledge','hard','','Which is the only letter of the alphabet that doesn\'t appear in the name of any US state?','Q','J only turns up in New Jersey, and Z only in Arizona.'],
+['General Knowledge','hard','','In Morse code, which letter is a single dot?','E','The most common letter in English got the shortest code.'],
+['General Knowledge','hard','','At what temperature do the Celsius and Fahrenheit scales show the same number?','-40','The only point where they meet. Above it, Fahrenheit always shows the bigger number.'],
+['General Knowledge','hard','','Which knitted jacket is named after the British earl who led the Charge of the Light Brigade in 1854?','A cardigan','The 7th Earl of Cardigan. The word was first used for the jacket in 1868, the year he died.'],
+['General Knowledge','expert','','Velcro was inspired by what, which kept sticking to its Swiss inventor\'s dog after a walk in the Alps in 1941?','Burrs','Under a microscope they were covered in tiny hooks. The name blends the French \'velours\' (velvet) and \'crochet\' (hook).'],
+['General Knowledge','hard','','Hiccups are sudden spasms of which muscle?','The diaphragm','The \'hic\' is your vocal cords snapping shut as the air rushes in.'],
+['General Knowledge','hard','','Which old office machine, fittingly, has a name you can type using only the top row of letters on a keyboard?','Typewriter','Only obscure words like \'rupturewort\', a plant, are longer.'],
+['General Knowledge','hard','','Which car model is the best-selling of all time, with more than 50 million sold?','Toyota Corolla','It passed the Volkswagen Beetle in 1997 and has led ever since.'],
+['General Knowledge','expert','','The word \'robot\' comes from which language?','Czech','From \'robota\', forced labour. It first appeared in Karel Čapek\'s 1920 play R.U.R.'],
+['General Knowledge','hard','','In which country did the world\'s first cash machine open, in 1967?','The United Kingdom','At a Barclays bank in Enfield, north London. The comedy actor Reg Varney made the first withdrawal.'],
+['General Knowledge','expert','','The peace symbol, designed in Britain in 1958, combines the flag-semaphore signals for which two letters?','N and D','N and D for Nuclear Disarmament. Artist Gerald Holtom drew it for the first big march against the bomb.'],
+['General Knowledge','expert','','Which is the only number in English whose letters are in alphabetical order when written as a word?','Forty','\'One\' does the opposite: its letters run in reverse alphabetical order.'],
+['General Knowledge','expert','','Which is the only bone in the human body not connected to any other bone?','The hyoid','A horseshoe-shaped bone in the neck, under the chin, held in place by muscles. It anchors the tongue.'],
+['General Knowledge','expert','','Century years, like 1900 or 2000, count as leap years only if they divide exactly by which number?','400','So 2000 was a leap year, 1900 wasn\'t, and 2100 won\'t be. Pope Gregory XIII\'s rule, from 1582.'],
+['General Knowledge','expert','','What was the first product ever scanned by its barcode at a supermarket till, in Ohio in 1974?','Chewing gum','A 10-pack of Wrigley\'s Juicy Fruit, at 8:01 am on 26 June 1974, in Troy, Ohio.'],
+['General Knowledge','expert','','Bubble wrap was invented in 1957 by two engineers trying to make what?','Textured wallpaper','It flopped as wallpaper, then as greenhouse insulation, until IBM used it to ship its computers.'],
+['General Knowledge','expert','','Engineers at Bell Labs gave the \'#\' key on telephones a jokey name of their own. What is it?','Octothorpe','\'Octo\' for its eight points. Where the \'thorpe\' came from, nobody agrees.'],
+['General Knowledge','expert','','What is the name of the little plastic or metal tip on the end of a shoelace?','An aglet','From an old French word for a little needle.'],
+['General Knowledge','expert','','What is the word for the earthy smell when rain falls on dry ground?','Petrichor','Coined by two Australian scientists in 1964, from the Greek for \'stone\' and the blood of the gods.'],
+['General Knowledge','expert','','The \'£\' sign is a fancy capital L. Which Latin word does the L stand for?','Libra','A Roman pound in weight. The same word gives \'lb\' for pounds on the scales.'],
+['Quotes','easy','','Who said: \'I have a dream\'?','Martin Luther King Jr.','The dream part wasn\'t in his script: gospel singer Mahalia Jackson is said to have called out "Tell them about the dream, Martin!"'],
+['Quotes','easy','','Who said: \'That\'s one small step for man, one giant leap for mankind\'?','Neil Armstrong','He always said he meant "for a man", but no "a" can be heard on the tape.'],
+['Quotes','easy','','Who said: \'Ask not what your country can do for you\'?','John F. Kennedy','From his 1961 inaugural address, which he first drafted in longhand on a yellow legal pad.'],
+['Quotes','easy','','Who said: \'Float like a butterfly, sting like a bee\'?','Muhammad Ali','The line is credited to his cornerman, Drew "Bundini" Brown.'],
+['Quotes','easy','','Who said: \'We shall fight on the beaches\'?','Winston Churchill','He said it to the House of Commons in June 1940. The famous recording was only made in 1949.'],
+['Quotes','easy','','Who said: \'Veni, vidi, vici\'?','Julius Caesar','"I came, I saw, I conquered": his report of a quick win at Zela, in today\'s Turkey, in 47 BC.'],
+['Quotes','easy','','Whose 2008 campaign rallying cry was \'Yes we can\'?','Barack Obama','He later joked that he had stolen it from Dolores Huerta, whose farmworkers\' slogan was "Sí, se puede".'],
+['Quotes','easy','','Who said: \'I did not have sexual relations with that woman\'?','Bill Clinton','He said it at the White House in January 1998. That August, he admitted the affair.'],
+['Quotes','easy','','Who told world leaders at the UN in 2019: \'How dare you\'?','Greta Thunberg','She was 16, and had crossed the Atlantic by sailing boat to avoid flying.'],
+['Quotes','easy','','Which French queen is wrongly credited with saying \'Let them eat cake\'?','Marie Antoinette','Rousseau wrote it about "a great princess" around 1765, when she was a nine-year-old girl in Austria.'],
+['Quotes','medium','','Who said: \'Mr Gorbachev, tear down this wall\'?','Ronald Reagan','Said at Berlin\'s Brandenburg Gate in 1987. His advisers tried to cut the line; he kept it in.'],
+['Quotes','hard','','Who said: \'Four score and seven years ago\'?','Abraham Lincoln','The Gettysburg Address, 1863. The main speaker that day talked for two hours; Lincoln took about two minutes.'],
+['Quotes','hard','','Who shouted \'You cannot be serious\' at a Wimbledon umpire in 1981?','John McEnroe','It became the title of his autobiography in 2002.'],
+['Quotes','medium','','Who said: \'Everybody has a plan until they get punched in the mouth\'?','Mike Tyson','He first said it in 1987, when challenger Tyrell Biggs claimed he had a plan to beat him.'],
+['Quotes','medium','','Who said: \'Senator, we run ads\'?','Mark Zuckerberg','His reply in 2018, when Senator Orrin Hatch asked how Facebook makes money if it\'s free.'],
+['Quotes','medium','','Who told Stanford graduates in 2005: \'Stay hungry, stay foolish\'?','Steve Jobs','He was quoting the back cover of the last Whole Earth Catalog, from 1974.'],
+['Quotes','medium','','Who said: \'Imagination is more important than knowledge\'?','Albert Einstein','He said it in a 1929 interview with The Saturday Evening Post.'],
+['Quotes','medium','','Who said: \'I\'d like to die on Mars, just not on impact\'?','Elon Musk','A joke he made at the SXSW festival in Texas in 2013.'],
+['Quotes','medium','','Who said: \'Now I am become Death, the destroyer of worlds\'?','J. Robert Oppenheimer','A line from the Bhagavad Gita. In a 1965 TV interview he said it came to mind at the first atomic test.'],
+['Quotes','hard','','Which tech founder has long denied ever saying \'640K ought to be enough for anybody\'?','Bill Gates','Nobody has ever found where or when he said it about computer memory.'],
+['Quotes','hard','','Who said: \'The lady\'s not for turning\'?','Margaret Thatcher','Her speechwriter\'s pun on the play The Lady\'s Not for Burning, at the 1980 party conference. She reportedly missed the joke.'],
+['Quotes','hard','said-three-times','Whose three priorities for government were \'education, education, education\'?','Tony Blair','He said it at Labour\'s 1996 conference, the year before he became Prime Minister.'],
+['Quotes','hard','said-three-times','Which tech boss, drenched in sweat, chanted \'Developers, developers, developers\' on stage?','Steve Ballmer','Microsoft\'s boss from 2000 to 2014. He later called the chant "a call to action" for outside developers.'],
+['Quotes','hard','','Who said \'Wir schaffen das\' (\'We can do this\') about refugees in 2015?','Angela Merkel','It became the motto of her open-door policy, quoted by fans and critics alike.'],
+['Quotes','hard','','Who said: \'Please don\'t call me arrogant... I think I\'m a special one\'?','José Mourinho','His first press conference as Chelsea manager, in 2004, just after winning the Champions League with Porto.'],
+['Quotes','hard','','Who said: \'Mr Watson, come here, I want to see you\'?','Alexander Graham Bell','The first sentence heard over his telephone, on 10 March 1876. His assistant Watson was in the next room.'],
+['Quotes','hard','','Who called 1992 an \'annus horribilis\' in a speech?','Queen Elizabeth II','Four days earlier, a fire had badly damaged Windsor Castle.'],
+['Quotes','hard','','Which leader vowed in 2011 to hunt down protesters \'zenga zenga\', alley by alley?','Muammar Gaddafi','Within days, a dance remix of the speech had millions of views around the world.'],
+['Quotes','hard','','Who said \'Poyekhali\' (\'Let\'s go\') at lift-off in 1961?','Yuri Gagarin','The first person in space. "I don\'t see any god up here" is not in his flight transcript: it came from a Khrushchev speech.'],
+['Quotes','expert','','Which explorer greeted a long-lost Scot in 1871 with \'Dr Livingstone, I presume\'?','Henry Morton Stanley','He may have made it up later: the pages of his diary for that day were torn out.'],
+['Quotes','expert','','Which astronaut first said \'Okay, Houston, we\'ve had a problem here\' in 1970?','Jack Swigert','Commander Jim Lovell then repeated it. The film Apollo 13 changed it to "Houston, we have a problem".'],
+['Quotes','expert','','Who said: \'I am just going outside and may be some time\'?','Lawrence Oates','On Scott\'s return from the South Pole in 1912, he walked out into a blizzard so the others might survive without him.'],
+['Quotes','expert','','Who said: \'Well, George, we knocked the bastard off\'?','Edmund Hillary','To teammate George Lowe, on the way down from the first ascent of Everest in 1953.'],
+['Quotes','expert','','Who said: \'Long years ago we made a tryst with destiny\'?','Jawaharlal Nehru','India\'s first prime minister, speaking at midnight as India became independent in August 1947.'],
+['Quotes','expert','','Who said a cat\'s colour doesn\'t matter, \'as long as it catches mice\'?','Deng Xiaoping','His 1962 case for whatever works. In the old Sichuan saying he quoted, the cat was yellow, not white.'],
+['Quotes','expert','','Which driver told his team \'Just leave me alone, I know what to do\' on his way to a 2012 win?','Kimi Räikkönen','At Abu Dhabi, for Lotus. He later gave the team T-shirts printed with the line.'],
+['Quotes','expert','','Who cried \'Vive le Québec libre\' from a Montreal balcony in 1967?','Charles de Gaulle','France\'s president was on an official visit for Expo 67. It caused a diplomatic row with Canada.'],
+['Quotes','expert','','Who told reporters in 1995: \'When the seagulls follow the trawler...\'?','Eric Cantona','"...it is because they think sardines will be thrown into the sea." Then he left. It was his only comment after his kung-fu kick appeal.'],
+['Quotes','expert','','Who told a court in 1964: \'It is an ideal for which I am prepared to die\'?','Nelson Mandela','The last line of his three-hour speech from the dock at the Rivonia Trial. He was jailed for life.'],
+['Quotes','expert','','Who said: \'Chance favours only the prepared mind\'?','Louis Pasteur','From a lecture at the University of Lille in December 1854, where he ran the new science faculty.'],
+['Tech & Business','easy','','In stock market slang, which animal stands for a market where prices keep rising?','A bull','Its opposite is a bear market: a fall of 20% or more from a recent high.'],
+['Tech & Business','easy','','What is the name for the share of a company\'s profits paid out to its shareholders?','A dividend','Coca-Cola has raised its dividend every year for more than 60 years in a row.'],
+['Tech & Business','easy','','Which video rental chain turned down the chance to buy Netflix for 50 million dollars in 2000?','Blockbuster','Ten years later, in 2010, Blockbuster went bankrupt.'],
+['Tech & Business','easy','','Which company bought Lucasfilm, and with it Star Wars, in 2012?','Disney','For about 4 billion dollars. The first new film, The Force Awakens, came out in 2015.'],
+['Tech & Business','easy','','In 2018, which company became the first in the US to be worth a trillion dollars?','Apple','It happened on 2 August 2018, 42 years after Apple was founded.'],
+['Tech & Business','easy','','Which company owns Nespresso, KitKat and Purina pet food?','Nestlé','The Swiss giant, based in Vevey on Lake Geneva, has more than 2,000 brands.'],
+['Tech & Business','hard','','What was Germany\'s currency before the euro?','The Deutsche Mark','The Bundesbank will still swap old marks for euros, with no deadline.'],
+['Tech & Business','medium','big-collapse','As of 2026, which bank\'s collapse in September 2008 is the biggest bankruptcy in US history?','Lehman Brothers','It filed on 15 September 2008 with about 639 billion dollars of assets.'],
+['Tech & Business','medium','big-collapse','Which crypto exchange collapsed in November 2022, landing its founder Sam Bankman-Fried a 25-year prison sentence?','FTX','About 8 billion dollars of customers\' money had gone to his trading firm, Alameda Research.'],
+['Tech & Business','medium','record-company','As of 2026, which company has had the biggest stock market launch ever, raising about 75 billion dollars that June?','SpaceX','It listed on the Nasdaq as SPCX. The old record was Saudi Aramco\'s, about 29 billion dollars in 2019.'],
+['Tech & Business','medium','record-company','In July 2025, which company became the first ever to be worth 4 trillion dollars?','Nvidia','Less than four months later, on 29 October 2025, it became the first to reach 5 trillion.'],
+['Tech & Business','medium','','Which company bought the American supermarket chain Whole Foods in 2017?','Amazon','For about 13.7 billion dollars. It cut prices on some groceries the day the deal closed.'],
+['Tech & Business','hard','','Which sportswear giant started out in 1964 as Blue Ribbon Sports?','Nike','Phil Knight sold Japanese Onitsuka Tiger running shoes, now ASICS, out of his car at track meets.'],
+['Tech & Business','medium','','In 2021, which country became the first to make Bitcoin legal tender?','El Salvador','In 2025, to get an IMF loan, it changed the law: shops no longer have to accept it.'],
+['Tech & Business','hard','','Adidas and Puma were founded by two feuding German brothers. What was their surname?','Dassler','Adi founded Adidas; Rudolf founded Puma, first called Ruda, across the river in their home town, Herzogenaurach.'],
+['Tech & Business','hard','','In 2008, which Indian company bought Jaguar and Land Rover from Ford?','Tata Motors','It paid about 2.3 billion dollars, roughly half what Ford had paid for the two.'],
+['Tech & Business','hard','','Which investor made about a billion dollars betting against the British pound on \'Black Wednesday\' in 1992?','George Soros','It earned him the name \'the man who broke the Bank of England\'.'],
+['Tech & Business','hard','','How many companies make up the Dow Jones Industrial Average?','30','It has had 30 since 1928. It started in 1896 with just 12.'],
+['Tech & Business','hard','','In London\'s FTSE 100 share index, what do the letters \'FT\' stand for?','Financial Times','The index began on 3 January 1984 at 1,000 points, set up by the Financial Times and the London Stock Exchange.'],
+['Tech & Business','hard','','Which luxury group, run by Bernard Arnault, bought the jeweller Tiffany & Co. in 2021?','LVMH','It paid about 15.8 billion dollars, after a court fight that cut the price by 425 million.'],
+['Tech & Business','expert','','Which company\'s collapse in 2001, after a huge accounting fraud, also brought down its auditor, Arthur Andersen?','Enron','It was a Texas energy trader. The \'Big Five\' accounting firms became the Big Four.'],
+['Tech & Business','expert','','Which company became the first ever valued at a trillion dollars, briefly, on its first day of trading in Shanghai in 2007?','PetroChina','On 5 November 2007, at the peak of a Chinese stock bubble. It lost about 800 billion dollars of value over the next ten years.'],
+['Tech & Business','expert','','Which number, divided by a yearly interest rate, gives roughly how many years it takes your money to double?','72','The Rule of 72: at 8% a year, 72 ÷ 8 = 9 years. It works because interest compounds.'],
+['Tech & Business','expert','','Name one of the two men who founded Tesla in 2003, a year before Elon Musk joined.','Martin Eberhard / Marc Tarpenning','A 2009 settlement lets five people call themselves co-founders, Musk included.'],
+['Tech & Business','expert','','Who opened the first Zara shop, in A Coruña in 1975?','Amancio Ortega','His group, Inditex, also owns Massimo Dutti, Bershka and Pull&Bear.'],
+['Tech & Business','expert','','Which German payments company collapsed in 2020 after 1.9 billion euros on its books turned out not to exist?','Wirecard','The cash was supposed to be sitting in two banks in the Philippines.'],
+['Tech & Business','expert','','The world\'s oldest central bank still running was founded in 1668. In which country?','Sweden','The Riksbank grew out of Stockholms Banco, which printed Europe\'s first banknotes in 1661.'],
+['Tech & Business','expert','','In 2000, which British company bought Germany\'s Mannesmann in what was then the biggest takeover ever?','Vodafone','Worth about 183 billion dollars, a record that stood for more than 25 years.'],
+['Celebrities','easy','awards-night','Which actor slapped Chris Rock on stage at the 2022 Oscars?','Will Smith','Later that night he won Best Actor, for \'King Richard\'.'],
+['Celebrities','easy','awards-night','Which singer wore a dress made of raw beef to the 2010 MTV Video Music Awards?','Lady Gaga','It was flank steak from the designer\'s family butcher. A taxidermist later preserved it for the Rock and Roll Hall of Fame.'],
+['Celebrities','hard','','Which American football star did Taylor Swift marry in July 2026?','Travis Kelce','Adam Sandler led the ceremony, at Madison Square Garden.'],
+['Celebrities','easy','','Which king was crowned at Westminster Abbey on 6 May 2023?','Charles III','Queen Camilla was crowned in the same service. The coronation before it was Elizabeth II\'s, in June 1953.'],
+['Celebrities','easy','','What is the real name of the wrestler and actor known as \'The Rock\'?','Dwayne Johnson','His first ring name, Rocky Maivia, joined his father\'s and his grandfather\'s wrestling names.'],
+['Celebrities','easy','reality-judge','Which TV talent-show judge created both \'The X Factor\' and \'Britain\'s Got Talent\'?','Simon Cowell','In 2014 Guinness World Records named Got Talent the world\'s most successful reality TV format.'],
+['Celebrities','easy','','Which talk-show host gave a new car to every one of the 276 people in her studio audience in 2004?','Oprah Winfrey','"Everybody gets a car!" Pontiac paid for them all, a G6 each, out of its advertising budget.'],
+['Celebrities','hard','famous-wedding','Which American film star became Princess of Monaco when she married Prince Rainier III in 1956?','Grace Kelly','Photos of her carrying an Hermès handbag in 1956 made it famous as the \'Kelly\' bag.'],
+['Celebrities','hard','famous-wedding','Who did Jeff Bezos marry in Venice in June 2025?','Lauren Sánchez','They said their vows on the island of San Giorgio Maggiore. About 90 private jets flew the guests in.'],
+['Celebrities','medium','influencer','Which drink brand did YouTubers KSI and Logan Paul launch in 2022?','Prime','The UK hype was so big that one eBay listing asked £400 for 12 bottles.'],
+['Celebrities','hard','','Which longtime editor of American Vogue has chaired the Met Gala almost every year since 1995?','Anna Wintour','Tickets for the 2026 gala cost $100,000 each. The money funds the Met\'s Costume Institute.'],
+['Celebrities','easy','','Which rapper\'s real name is Marshall Mathers?','Eminem','It comes from his initials: as a teenager he rapped as \'M&M\'.'],
+['Celebrities','hard','','What did Gwyneth Paltrow name her daughter, born in 2004?','Apple','Gwyneth said: "Her dad came up with the name and I fell in love with it."'],
+['Celebrities','medium','influencer','As of 2026, who is the most-followed person on Instagram?','Cristiano Ronaldo','Over 679 million followers in November 2026. Only Instagram\'s own account has more.'],
+['Celebrities','hard','','Which king came to the throne on 14 January 2024, when his mother, Queen Margrethe II, stepped down?','Frederik X','He met his wife, Queen Mary, an Australian, in Sydney during the 2000 Olympics.'],
+['Celebrities','hard','','Which singer\'s plunging green dress at the 2000 Grammys was searched for so much that it inspired Google Images?','Jennifer Lopez','In 2019, at 50, she wore a new version of it on the catwalk in Milan.'],
+['Celebrities','hard','','Which TikTok star, famous for silent videos mocking overcomplicated \'life hacks\', became the app\'s most-followed creator in 2022?','Khaby Lame','He started posting in March 2020, after losing his factory job near Turin.'],
+['Celebrities','expert','','What was Miley Cyrus\'s first name at birth?','Destiny','Her parents called her \'Smiley\' as a baby, soon shortened to Miley. It became her legal name in 2008.'],
+['Celebrities','expert','','Which niece of Japan\'s Emperor lost her royal status in 2021 when she married the man she met at university?','Mako','She married Kei Komuro, turned down a state payment of about 140 million yen, and moved to New York.'],
 ];
 
 const SEED_CLOSEST = [
@@ -3843,7 +3994,7 @@ const PINS = [
   ["charles-bridge", "Charles Bridge", "hard", 50.0864, 14.4119, "Prague, Czech Republic", "d644153c7b4f4b59", "A.Savin", "Free Art License 1.3", "https://commons.wikimedia.org/wiki/File:Prague_07-2016_view_from_Lesser_Town_Tower_of_Charles_Bridge_img3.jpg"],
   ["krak-des-chevaliers", "Krak des Chevaliers", "hard", 34.7569, 36.2947, "Near Homs, Syria", "f67f77321cdd49e4", "Bernard Gagnon", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Krak_des_Chevaliers_01.jpg"],
   ["church-of-st-george-lalibela", "Church of St George (Bete Giyorgis), Lalibela", "hard", 12.0316, 39.0411, "Lalibela, Ethiopia", "6f3303d15ede70c9", "Sailko", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:Lalibela,_san_giorgio,_esterno_24.jpg"],
-  ["borobudur", "Borobudur", "hard", -7.6079, 110.2038, "Central Java, Indonesia", "1192259143cd9a16", "Gunawan Kartapranata", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Borobudur-Nothwest-view.jpg"],
+  ["borobudur", "Borobudur", "medium", -7.608, 110.2038, "Near Magelang, Central Java, Indonesia", "e935769241cefbbf", "22Kartika", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Borobudur_Temple.jpg"],
   ["leshan-giant-buddha", "Leshan Giant Buddha", "hard", 29.5469, 103.7693, "Leshan, China", "01a25899bf0d8149", "xiquinhosilva", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Leshan_Giant_Buddha_(1).jpg"],
   ["perito-moreno-glacier", "Perito Moreno Glacier", "hard", -50.4932, -73.128, "Santa Cruz, Argentina", "58218edd79669edf", "Fernando", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Perito_Moreno_Glacier_2023.jpg"],
   ["ha-long-bay", "Ha Long Bay", "hard", 20.9, 107.2, "Quang Ninh, Vietnam", "af35b4549acc15fc", "Thomas Hirsch / User:Ravn", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Halong_Bay_in_Vietnam.jpg"],
@@ -4118,6 +4269,20 @@ const MAJORITY = [
   ["card-deck", "easy", "How many cards are there in a standard deck, without the jokers?", ["48", "52", "54", "56"], 1, "Four suits of 13."],
   ["emerald-colour", "easy", "What colour is an emerald?", ["Red", "Blue", "Green", "Purple"], 2, "A ruby is red, a sapphire blue, an amethyst purple."],
   ["catan", "medium", "In the board game Catan, what are the official names of the five resources?", ["Brick, wood, sheep, wheat, stone", "Clay, timber, wool, wheat, stone", "Brick, lumber, wool, grain, ore", "Brick, lumber, sheep, grain, stone"], 2, "The rulebook's five: brick, lumber, wool, grain and ore. Most players say wood, sheep, wheat and stone."],
+  ["poker-american-airlines", "medium", "In poker, which starting hand is nicknamed 'American Airlines'?", ["Pair of aces", "Pair of kings", "Ace and king", "Pair of queens"], 0, "AA, like the airline. A pair of kings is 'cowboys', ace and king 'Big Slick', a pair of queens 'ladies'."],
+  ["which-country-s-calendar-has", "medium", "Which country's calendar has 13 months?", ["Ethiopia", "Iran", "Nepal", "Thailand"], 0, "Twelve months of 30 days, then Pagume, of five or six days. Its years also run 7 or 8 behind ours."],
+  ["pencil-lead-is-graphite-mixe", "medium", "Pencil 'lead' is graphite mixed with which material?", ["Clay", "Lead", "Charcoal", "Chalk"], 0, "No lead at all: more clay makes it harder (H), more graphite softer (B). A Frenchman, Nicolas-Jacques Conté, came up with the mix in 1795."],
+  ["which-vessels-carry-oxygen-r", "hard", "Which vessels carry oxygen-rich blood from the lungs to the heart?", ["Pulmonary veins", "Pulmonary arteries", "Bronchi", "Aorta"], 0, "The only veins with oxygen-rich blood. The pulmonary arteries are the only arteries with oxygen-poor blood."],
+  ["which-is-the-only-country-th", "hard", "Which is the only country that lies entirely above 1,000 metres?", ["Lesotho", "Nepal", "Andorra", "Bhutan"], 0, "Its lowest point, about 1,400 m, is the highest low point of any country."],
+  ["in-a-backyard-ultra-runners", "hard", "In a backyard ultra, runners start a new loop every hour. How long is each loop?", ["5 km", "6.7 km", "8 km", "10 km"], 1, "4.167 miles, so 24 loops make exactly 100 miles. The last runner still going wins."],
+  ["how-many-minutes-are-there-i", "easy", "How many minutes are there in a day?", ["1,240", "1,440", "1,600", "2,400"], 1, "24 hours of 60 minutes: that's 86,400 seconds."],
+  ["how-many-is-a-baker-s-dozen", "easy", "How many is a 'baker's dozen'?", ["Twelve", "Thirteen", "Fourteen", "Fifteen"], 1, "Probably from medieval bakers adding a spare loaf, so nobody could accuse them of selling short."],
+  ["which-is-the-most-common-eye", "easy", "Which is the most common eye colour in the world?", ["Brown", "Blue", "Green", "Hazel"], 0, "Roughly 70 to 80 per cent of people have brown eyes. Green is the rarest of the four."],
+  ["which-number-is-considered-u", "medium", "Which number is considered unlucky in China, Japan and Korea?", ["Four", "Seven", "Eight", "Thirteen"], 0, "It sounds like the word for 'death'. Many buildings skip the 4th floor, and often the 14th and 24th too."],
+  ["since-2019-which-is-the-bigg", "medium", "Since 2019, which is the biggest euro banknote still being issued?", ["€100", "€200", "€500", "€1,000"], 1, "The €500 was dropped over fears it helped crime, but old ones are still legal tender."],
+  ["which-colour-appears-on-the", "medium", "Which colour appears on the most national flags?", ["Red", "Blue", "Green", "White"], 0, "Red is on about three national flags in four."],
+  ["which-company-trades-on-the", "medium", "Which company trades on the stock market as HOG?", ["Harley-Davidson", "Tyson Foods", "Hormel Foods", "Hugo Boss"], 0, "It swapped HDI for HOG in 2006: big Harleys have long been called 'hogs'."],
+  ["which-car-brand-is-owned-by", "medium", "Which car brand is owned by the Chinese company Geely?", ["Volvo", "Saab", "Skoda", "Seat"], 0, "Geely bought Volvo Cars in 2010. It also owns Lotus and the maker of London's black cabs."],
 ];
 
 /* shared out over the levels that are on, exactly as the flags are (easy: 2 at most) */
@@ -4380,11 +4545,49 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 57;   // bumped when the built-in bank changes
+const SEED_VERSION = 58;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
 const SEED_NEVER = [
+  ["q1vonine", "flag:ke"],   // 10 Nov, round 4
+  ["q1rpz5ma", "q6d4so3"],   // 10 Nov, round 4
+  ["qo4biq9", "qaf00tt"],   // 10 Nov, round 4
+  ["qeht0ww", "qs9e2p4"],   // 10 Nov, round 4
+  ["qujv7nn", "qeomk26", "q1katces"],   // 10 Nov, round 4
+  ["mr:which-is-the-only-country-th", "q1fa2dgy"],   // 10 Nov, round 4
+  ["q1te3xnu", "q1blibhd"],   // 10 Nov, round 4
+  ["qca8fhk", "qvowx8v"],   // 10 Nov, round 4
+  ["q1wcxrc1", "q1iy106v"],   // 10 Nov, round 4
+  ["qzmjg5u", "qo60hpp"],   // 10 Nov, round 4
+  ["qluevy3", "qoz579v"],   // 10 Nov, round 4
+  ["q1vsbm9d", "q1hk3ux3"],   // 10 Nov, round 4
+  ["q10eg6ia", "q1t7g1af"],   // 10 Nov, round 4
+  ["q1m7xccs", "q1sesl46"],   // 10 Nov, round 4
+  ["qufirkb", "qk9k8od", "q1c44vmw", "qwyt3tz"],   // 10 Nov, round 4
+  ["q16thf2e", "q673c5y"],   // 10 Nov, round 4
+  ["qqq202k", "q8vxxrf", "q9j107x", "mr:caesar-title"],   // 10 Nov, round 4
+  ["q11blkf0", "q1jfc8sc"],   // 10 Nov, round 4
+  ["qd2yu83", "q1o2hi6g"],   // 10 Nov, round 4
+  ["q1d48nrg", "q65mdwv"],   // 10 Nov, round 4
+  ["q16sgyuj", "q1ymu974"],   // 10 Nov, round 4
+  ["q1g42gv7", "q1c71r9i"],   // 10 Nov, round 4
+  ["q14itol3", "qcpppge"],   // 10 Nov, round 4
+  ["q1xjek2v", "qslo8e8"],   // 10 Nov, round 4
+  ["ql0he8m", "q1kgy4u1"],   // 10 Nov, round 4
+  ["qeqpwlx", "qc8gvhw", "q1kxezws"],   // 10 Nov, round 4
+  ["qv03r1r", "mr:person-travel"],   // 10 Nov, round 4
+  ["qfl44yu", "qw7wdon"],   // 10 Nov, round 4
+  ["q1k1qsgk", "qeep2zx"],   // 10 Nov, round 4
+  ["qu1nvl4", "qbro0lc"],   // 10 Nov, round 4
+  ["q1yirx6m", "qn86fme"],   // 10 Nov, round 4
+  ["qa56tmj", "q12hja9x"],   // 10 Nov, round 4
+  ["q1ldeg9j", "q14ui5aw"],   // 10 Nov, round 4
+  ["qlbp7an", "qi2l9bf"],   // 10 Nov, round 4
+  ["qq4vnse", "q147ty4u"],   // 10 Nov, round 4
+  ["q1jhe10m", "q1jwx9au", "q2n2chb"],   // 10 Nov, round 4
+  ["qujv7nn", "mr:which-country-s-calendar-has"],   // 10 Nov, round 4
+  ["qwh5bkv", "q2ea5m3"],   // 10 Nov, round 4
   ["qym4vp5","qpntoy8","q15w8amj","mr:squid-game"],   // 9 Nov: Squid Game named in the others (Pop Culture split)
   ["qhpf4ri","qvx8u96"],                               // 9 Nov: Gangnam Style named in the ranking
   ["q16sivxa", "q8ogfvl"],
@@ -4425,7 +4628,7 @@ const SEED_NEVER = [
   ["qr4a1ti", "qu7g7n2"],
   ["mr:whisky-war", "q19dq51e"],
   ["mr:michelin-tyres", "mr:michelin-three", "mr:decade-michelin", "mr:tokyo-stars", "mr:jules-verne-name"],
-  ["mr:ticker-ko", "mr:ticker-race", "mr:ticker-cmg"],
+  ["mr:ticker-ko", "mr:ticker-race", "mr:ticker-cmg", "mr:which-company-trades-on-the"],
   ["pin:eiffel-tower", "pin:louvre-pyramid"],
   ["airport:CDG", "airport:ORY"],
   ["airport:LHR", "airport:LGW"],

@@ -84,22 +84,22 @@
 150.75 dishReveal | 52 | 4-5 | 1-0 | Nobody got it. | 
 152.50 dishQ | 53 | 4-5 | 1-0 | Nobody got it. | 
 155.25 dishQ | 54 | 4-5 | 1-0 | Lions are out of this one — Owls, it is yours to get. | 
-175.25 dishReveal | 55 | 4-5 | 1-0 | Nobody got it. | 
-176.00 dishQ | 56 | 4-5 | 1-0 | Nobody got it. | 
-178.50 dishQ | 57 | 4-5 | 1-0 | Lions are out of this one — Owls, it is yours to get. | 
+172.25 dishReveal | 55 | 4-5 | 1-0 | Nobody got it. | 
+173.25 dishQ | 56 | 4-5 | 1-0 | Nobody got it. | 
+176.00 dishQ | 57 | 4-5 | 1-0 | Lions are out of this one — Owls, it is yours to get. | 
 (a new question)
 200.25 dishQ | 58 | 4-5 | 1-0 | Somebody has already had a go at this one. | 
-204.75 dishReveal | 59 | 4-5 | 1-0 | Nobody got it. | 
-205.50 dishReveal | 59 | 4-5 | 1-0 |  | 
-206.50 dishReveal | 59 | 4-5 | 2-0 | Call changed: Lions take it. | 
-207.50 decided | 60 | 6-5 | 2-0 |  | 
-208.25 roundIntro | 61 | 6-5 |  |  | 
-210.00 ask | 62 | 6-5 |  |  | 
-212.00 answer | 63 | 8-5 |  | Lions +2 points | 
-212.75 ask | 64 | 8-5 |  | Lions +2 points | 
-273.75 ask | 65 | 8-5 |  | Lions +2 points | 
-274.00 steal | 66 | 8-5 |  | Lions +2 points | 
-275.75 answer | 67 | 9-5 |  | Lions +1 point — steal | 
-277.50 roundScore | 68 | 9-5 |  | Lions +1 point — steal | 
-278.50 final | 69 | 9-5 |  | Lions +1 point — steal | 
+211.25 dishReveal | 59 | 4-5 | 1-0 | Nobody got it. | 
+212.00 dishReveal | 59 | 4-5 | 1-0 |  | 
+212.75 dishReveal | 59 | 4-5 | 2-0 | Call changed: Lions take it. | 
+213.75 decided | 60 | 6-5 | 2-0 |  | 
+214.50 roundIntro | 61 | 6-5 |  |  | 
+216.50 ask | 62 | 6-5 |  |  | 
+218.25 answer | 63 | 8-5 |  | Lions +2 points | 
+219.00 ask | 64 | 8-5 |  | Lions +2 points | 
+280.00 ask | 65 | 8-5 |  | Lions +2 points | 
+280.25 steal | 66 | 8-5 |  | Lions +2 points | 
+282.00 answer | 67 | 9-5 |  | Lions +1 point — steal | 
+284.00 roundScore | 68 | 9-5 |  | Lions +1 point — steal | 
+284.75 final | 69 | 9-5 |  | Lions +1 point — steal | 
 recap: {"margin":4,"sudden":false,"leadChanges":3,"steals":[2,1],"minis":[2,1],"best":{"title":"Guess the Cocktail or Dish","team":0,"legs":[2,0]},"chart":[[0,0],[0,0],[0,1],[1,1],[3,1],[4,1],[3,1],[3,2],[3,1],[3,3],[4,4],[4,5],[6,5],[8,5],[9,5]],"segs":[{"label":"R1","pts":[[0,1],[1,1]]},{"label":"Closest To Wins","pts":[[3,1]]},{"label":"R2","pts":[[4,1],[3,1],[3,2],[3,1]]},{"label":"Don't Say the Same as Me","pts":[[3,3]]},{"label":"Guess the Map","pts":[[4,4]]},{"label":"R3","pts":[[4,5]]},{"label":"Guess the Cocktail or Dish","pts":[[6,5]]},{"label":"R4","pts":[[8,5],[9,5]]}],"awards":[{"t":"Best thief","who":"Lions, 2 steals","team":0}]}

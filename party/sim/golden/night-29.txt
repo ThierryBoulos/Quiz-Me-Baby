@@ -55,24 +55,26 @@
 96.75 roundScore | 25 | 4-4 |  | Owls +1 point | 
 97.50 rouletteIntro | 26 | 4-4 | 0-0 | Owls +1 point | 
 98.50 rouletteQ | 27 | 4-4 | 0-0 | Owls +1 point | 
-99.50 rouletteReveal | 27 | 4-4 | 0-3 | Owls +1 point | 
-100.25 rouletteQ | 28 | 4-4 | 0-3 | Owls +1 point | 
-101.25 rouletteReveal | 28 | 4-4 | 2-3 | Owls +1 point | 
-102.00 rouletteQ | 29 | 4-4 | 2-3 | Owls +1 point | 
-103.00 rouletteReveal | 29 | 4-4 | -1-5 | Owls +1 point | 
-104.00 rouletteSummary | 30 | 4-6 | -1-5 | Owls +1 point | 
-104.75 roundIntro | 31 | 4-6 |  | Owls +1 point | 
-105.75 ask | 32 | 4-6 |  | Owls +1 point | 
-106.50 steal | 32 | 4-6 |  | Owls +1 point | 
-107.50 answer | 32 | 4-6 |  | Owls +1 point | 
-108.50 answer | 32 | 4-6 |  |  | 
-123.50 answer | 32 | 4-6 |  | No answer in time: the call stands. | 
-123.75 ask | 33 | 4-6 |  | No answer in time: the call stands. | 
-124.50 ask | 33 | 4-6 |  | Owls used Double Dip. | 
-125.50 steal | 33 | 4-6 |  | Owls used Double Dip. | 
-126.50 answer | 33 | 4-6 |  | Owls used Double Dip. | 
-127.25 answer | 33 | 4-6 |  |  | 
-130.00 answer | 33 | 5-6 |  | Call changed: Lions +1 point. | 
-131.00 roundScore | 34 | 5-6 |  | Call changed: Lions +1 point. | 
-131.75 final | 35 | 5-6 |  | Call changed: Lions +1 point. | 
-recap: {"margin":1,"sudden":false,"leadChanges":3,"steals":[1,0],"minis":[0,1],"best":{"title":"Guess the Flag","team":1,"legs":[3,6]},"chart":[[0,0],[0,0],[1,0],[1,2],[2,2],[2,3],[4,3],[4,4],[4,6],[5,6]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Guess the Flag","pts":[[1,2]]},{"label":"R2","pts":[[2,2],[2,3]]},{"label":"R3","pts":[[4,3],[4,4]]},{"label":"Russian Roulette","pts":[[4,6]]},{"label":"R4","pts":[[5,6]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":1},{"t":"Best thief","who":"Lions, 1 steal","team":0}]}
+99.50 rouletteReveal | 27 | 4-4 | 0-2 | Owls +1 point | 
+100.25 rouletteQ | 28 | 4-4 | 0-2 | Owls +1 point | 
+101.25 rouletteReveal | 28 | 4-4 | 2--1 | Owls +1 point | 
+102.00 rouletteQ | 29 | 4-4 | 2--1 | Owls +1 point | 
+103.00 rouletteReveal | 29 | 4-4 | 2-2 | Owls +1 point | 
+104.00 rouletteTie | 30 | 4-4 | 2-2 | Owls +1 point | 
+104.75 rouletteQ | 31 | 4-4 | 2-2 | Owls +1 point | 
+105.75 rouletteReveal | 31 | 4-4 | 2-2 | Owls +1 point | 
+106.50 rouletteReveal | 31 | 4-4 | 2-2 |  | 
+107.50 rouletteReveal | 31 | 4-4 | 2-5 | Call changed: ⁨Owls⁩ RIGHT. | 
+108.50 rouletteSummary | 32 | 4-6 | 2-5 | Call changed: ⁨Owls⁩ RIGHT. | 
+109.25 roundIntro | 33 | 4-6 |  | Call changed: ⁨Owls⁩ RIGHT. | 
+110.25 ask | 34 | 4-6 |  | Call changed: ⁨Owls⁩ RIGHT. | 
+111.00 ask | 34 | 4-6 |  | Lions used Double Dip. | 
+112.00 answer | 34 | 5-6 |  | Lions +1 point | 
+113.00 ask | 35 | 5-6 |  | Lions +1 point | 
+113.75 steal | 35 | 5-6 |  | Lions +1 point | 
+114.75 answer | 35 | 6-6 |  | Lions +1 point — steal | 
+115.50 roundScore | 36 | 6-6 |  | Lions +1 point — steal | 
+116.50 sudden | 37 | 6-6 |  | Lions +1 point — steal | 
+117.50 sudden | 38 | 6-6 |  | Lions +1 point — steal | 
+118.25 final | 38 | 6-7 |  | Lions +1 point — steal | 
+recap: {"margin":1,"sudden":true,"leadChanges":3,"steals":[1,0],"minis":[0,1],"best":{"title":"Guess the Flag","team":1,"legs":[3,6]},"chart":[[0,0],[0,0],[1,0],[1,2],[2,2],[2,3],[4,3],[4,4],[4,6],[5,6],[6,6],[6,7]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Guess the Flag","pts":[[1,2]]},{"label":"R2","pts":[[2,2],[2,3]]},{"label":"R3","pts":[[4,3],[4,4]]},{"label":"Russian Roulette","pts":[[4,6]]},{"label":"R4","pts":[[5,6],[6,6]]},{"label":"Sudden death","pts":[[6,7]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":1},{"t":"Best thief","who":"Lions, 1 steal","team":0}]}
