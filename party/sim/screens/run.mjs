@@ -183,6 +183,7 @@ if (want("tv")) {
   mkdirSync(join(out, "tv"), { recursive: true });
   await pool(jobs, 4, async (j) => {
     const { ctx, p } = await page(j, { viewport: { width: 1440, height: 900 } });
+    if (process.env.SCREENS_AT) { await p.waitForTimeout(Number(process.env.SCREENS_AT)); await p.screenshot({ path: join(out, "tv", file(j.key) + "_at" + process.env.SCREENS_AT + ".png") }); }
     await p.waitForTimeout(waitFor(j.key));
     report[j.id] = await p.evaluate(TV_MEASURE);
     await p.screenshot({ path: join(out, "tv", file(j.key) + ".png") }); await ctx.close();

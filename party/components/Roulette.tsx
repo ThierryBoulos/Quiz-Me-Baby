@@ -47,9 +47,18 @@ function fitTheme(theme: string, r: number) {
   const h = lines.length * fs * 1.08 + ls;
   return { lines, fs, ls, y0: -h / 2 + fs * 0.8 };
 }
-/* the reveal's order: the drawn chambers clockwise from the top, the bullet's last (drawn or not) */
-export const rrOrder = (lit: number[], bullet: number) => [...lit.filter((j) => j !== bullet).sort((a, b) => a - b), ...(bullet >= 0 ? [bullet] : [])];
-export const rrRevealMs = (count: number) => count * STEP_MS + 900;
+/* the reveal's order. A team drew the bullet: its chamber first, the bang, a pause on it, then the others clockwise
+   from the top (11 Nov, the owner: with 8 teams the bullet was one row among eight). Nobody did: the drawn chambers
+   clockwise, and the bullet last (one more click, in a dark chamber). */
+export const BULLET_HOLD_MS = 1400;
+export const rrOrder = (lit: number[], bullet: number) => {
+  const rest = lit.filter((j) => j !== bullet).sort((a, b) => a - b);
+  return bullet >= 0 && lit.includes(bullet) ? [bullet, ...rest] : [...rest, ...(bullet >= 0 ? [bullet] : [])];
+};
+/* when the k-th chamber of that order shows (first: the bullet leads, the others wait for it) */
+export const rrAt = (k: number, first: boolean) => (first && k > 0 ? BULLET_HOLD_MS + k * STEP_MS : k * STEP_MS);
+/* the "BANG!" line: right after the bullet's chamber when a team drew it; after the last click when nobody did */
+export const rrRevealMs = (count: number, first = false) => (first ? STEP_MS + 250 : count * STEP_MS + 900);
 
 /* how far into the spin we are (ms; null: no spin, or it's over) — read once, when the screen opens */
 /* (for each spin: it was read once, when the screen opened, and a phone that opened on the game's rules took every
@@ -84,8 +93,8 @@ export function Barrel({ n, lit, spinAt, bullet, reveal, size, label, ch, used =
   const { spinning, phase } = useSpinPhase(spinAt);
   const { R, r } = geo(n), big = labels ?? size >= 300;
   const order = bullet != null ? rrOrder(lit.map((x) => x.j), bullet) : [];
-  const step = (j: number) => ({ ["--rr-at" as string]: `${Math.max(0, order.indexOf(j)) * STEP_MS}ms` });
   const hit = bullet != null && lit.some((x) => x.j === bullet);
+  const step = (j: number) => ({ ["--rr-at" as string]: `${rrAt(Math.max(0, order.indexOf(j)), hit)}ms` });
   const chambers = Array.from({ length: n }, (_, j) => j);
   const who = lit.map((x) => x.letter).join(", ");
   return (
@@ -152,7 +161,7 @@ export function useRouletteSounds(rr: RrPub | undefined, phase: "spin" | "reveal
     }
     if (!rr.rev) return;
     const lit = rr.draw.map((d) => d.j), order = rrOrder(lit, rr.rev.bullet), hit = rr.rev.hit >= 0;
-    const ts = order.map((j, k) => setTimeout(() => playSound(k === order.length - 1 && hit ? "bang" : "click"), k * STEP_MS + 60));
+    const ts = order.map((j, k) => setTimeout(() => playSound(k === 0 && hit ? "bang" : "click"), rrAt(k, hit) + 60));
     return () => ts.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, phase]);
@@ -189,8 +198,8 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
   const lit = rr.draw.map((d, t) => ({ j: d.j, color: teams[t].color, letter: teams[t].letter, theme: d.theme, level: d.level }));
   const order = R ? rrOrder(lit.map((x) => x.j), R.bullet) : [];
   const stepOf = (t: number) => Math.max(0, order.indexOf(rr.draw[t].j));
-  const end = rrRevealMs(order.length - 1);
   const hit = R ? R.hit : -1;
+  const end = rrRevealMs(order.length - 1, hit >= 0);
   return (
     <div className="flex gap-8 items-center w-full justify-center">
       <div className="shrink-0 flex flex-col items-center gap-3">
@@ -221,7 +230,7 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
           <div className={"grid " + (cols ? "grid-cols-2" : "grid-cols-1")} style={{ gap: tight ? 6 : dense ? 6 : 10, gridAutoRows: "1fr" }} role="list" aria-label="Each team's chamber">
             {rr.draw.map((d, t) => { const T = teams[t], lv = R?.level[t], got = R?.got[t] ?? 0, x = typed?.[t], v = ok?.[t];
               return (
-                <div key={t} role="listitem" className={"rr-row" + (R ? " rr-late" : " enter") + (R && t === hit ? " bang" : "")} style={{ ["--c" as string]: T.color, ["--rr-at" as string]: `${stepOf(t) * STEP_MS + 250}ms`, padding: tight ? "4px 12px" : dense ? "6px 12px" : undefined }}>
+                <div key={t} role="listitem" className={"rr-row" + (R ? " rr-late" : " enter") + (R && t === hit ? " bang" : "")} style={{ ["--c" as string]: T.color, ["--rr-at" as string]: `${rrAt(stepOf(t), hit >= 0) + 250}ms`, padding: tight ? "4px 12px" : dense ? "6px 12px" : undefined }}>
                   <LetterDot t={T} size={tight ? 24 : dense ? 26 : 34} />
                   <div className="min-w-0 flex flex-col">
                     {/* (two columns: the team by its lettered dot and colour, no name, so the answers have the room: the
@@ -288,7 +297,7 @@ export function RrPhone({ rr, me, teams, host }: { rr: RrPub; me: number | null;
 export function RrPhoneReveal({ rr, me, teams }: { rr: RrPub; me: number | null; teams: RrTeam[] }) {
   const R = rr.rev; if (!R) return null;
   const lit = rr.draw.map((d, t) => ({ j: d.j, color: teams[t].color, letter: teams[t].letter }));
-  const order = rrOrder(lit.map((x) => x.j), R.bullet), end = rrRevealMs(order.length - 1), hit = R.hit;
+  const order = rrOrder(lit.map((x) => x.j), R.bullet), hit = R.hit, end = rrRevealMs(order.length - 1, hit >= 0);
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{lapWord(rr)}</div>

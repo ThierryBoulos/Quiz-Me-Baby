@@ -1,7 +1,8 @@
 /* Russian Roulette (9 Nov, the owner): what both setups share on screen. The rules themselves are the engine's
    (engine/core.js: the barrels, the spin, the bullet, the points); this is the timing and the view of a lap.
    A lap: the barrel spins (SPIN_MS, on the TV and every phone at once), each team lands on a chamber of its own and
-   gets that chamber's question; then the reveal: the chambers click one by one (STEP_MS apart), the bullet last. */
+   gets that chamber's question; then the reveal: the chambers click one by one (STEP_MS apart); the bullet first, and a pause on it, when a team drew
+   it (components/Roulette.tsx, rrOrder). */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QMB } from "./engine";
 
