@@ -135,19 +135,19 @@ Some of these may not apply now or ever; they're here so nothing is forgotten.
 
 ---
 
-## 4. The commercial plan: a proposal (11 Nov 2026, nothing decided)
+## 4. The commercial plan (11 Nov 2026)
 
-The owner's ideas (11 Nov) with Claude's suggestions next to them. Nothing here is decided: the owner picks, and
-the picks move up into section 3 as todo items. Prices are guesses to test, not researched.
+The owner's ideas with Claude's suggestions. **Decided (11 Nov, the owner):** who pays, the free and paid split
+with both additions, the prices, and the credit line. Still to build: everything under "Technical pieces".
 
-### Who pays, who signs in
+### Who pays, who signs in (decided 11 Nov)
 - **The host pays; guests never pay and never sign in.** A guest scans the QR and plays, as today. Only the person
   who creates the room needs an account, and only to buy.
 - **Sign-in for the buyer only:** an e-mail link (no password), or Google / Apple. The purchase belongs to that
   account; a room that account opens is a full room for everyone in it.
 - A free room needs no account at all (as today).
 
-### Free and paid (the owner's split, 11 Nov)
+### Free and paid (decided 11 Nov)
 | | Free | Paid |
 |---|---|---|
 | Question rounds | Easy, Medium, Hard; 8 broad themes; one pair of questions per theme and level | Every theme, the niche ones too; Expert; the whole bank |
@@ -155,23 +155,29 @@ the picks move up into section 3 as todo items. Prices are guesses to test, not 
 | Advanced | Locked | Difficulty per theme, own questions and themes |
 | Seeing the bank | Never | Never (see "Protecting the bank") |
 
-Claude's suggestions to consider on top: 3 to 8 teams as a paid feature (bigger parties are where it's worth most);
-"Play without TV" stays free; the free pack is fixed, so a second free night repeats questions (the reason to buy).
+Also decided: **3 to 8 teams is paid** (bigger parties are where it's worth most); **the free pack is fixed**, so a
+second free night repeats questions (the reason to buy). "Play without TV" stays free.
 
-### Price (to test)
-- **A night pass:** one payment, the full game for 48 hours. Around 5 euros.
-- **A year:** the full game for 12 months. Around 25 euros.
-- A launch price lower than both for the first buyers. No monthly plan to start with (a party game is used in bursts).
+### Price (decided 11 Nov)
+- **A night pass: $4.99**, the full game for 48 hours.
+- **Lifetime: $25**, the full game for good.
+- No monthly plan (a party game is used in bursts).
 
 ### Protecting the bank
 - **Remove "Choose questions" as it is:** it shows any host every question and answer. In its place: a difficulty
   per theme, and "Add your own questions". Nobody browses the bank.
-- **Locked content never leaves the server.** Today the TV downloads the whole bank with its answers; a free room
-  must only ever receive the free pack, and a paid room only tonight's questions. This is the same work as
-  "judge answers on the server" (section 2, decision 1), and it is the real lock: hiding a button isn't one.
-- **Open Trivia DB questions are CC BY-SA 4.0 (share-alike):** questions adapted from them must be offered under
-  the same licence, so they can't be part of a closed, paid-only bank as they are. Decide before adding them:
-  keep them in the free pack with the credit, or write new questions from the facts alone.
+- **Locked content never leaves the server.** Today the TV downloads the whole bank with its answers. Instead:
+  - the bank sits in a database table nobody's phone or TV can read (no read rule at all);
+  - at Start, a server function deals tonight's questions plus a few spares per game (5 or 6, for "Change
+    question"), and the room gets only those; more spares on request if a night runs out;
+  - answers stay on the server and the server judges (section 2, decision 1), so even tonight's answers never
+    reach a phone before the reveal;
+  - limits on how many rooms one account (or one free player) can open a day, so nobody harvests the bank by
+    opening rooms over and over.
+  Someone determined could still copy what they see, night by night: slow, and paid. That's as locked as a game
+  people play can be.
+- **Open Trivia DB questions** (decided 11 Nov): one credit line in the app's Copyright window ("Some questions
+  are adapted from Open Trivia DB, opentdb.com."), nothing more.
 
 ### Technical pieces, in order
 1. Deal and judge on the server (protects the bank; also closes section 2's first item).
