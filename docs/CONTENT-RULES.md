@@ -138,6 +138,15 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   the clue (airline, language, the missing hub). Accept the city spellings people use (Lisboa, New Delhi).
 - **Drop the Pin**: a photo people can recognise (not an aerial ridge only experts know), the pin on the actual
   spot, the place line capitalised ("Near Homs, Syria").
+- **Russian Roulette** (9 and 10 Nov, the owner): it deals standard questions from the broad themes, everyone's
+  ground: General Knowledge, Geography, History, Science, Nature, Sports, Music, Movies, TV Series, Food & Drink,
+  Art & Books, Tech & Business, Celebrities, Quotes, Acronyms (`ROULETTE_THEMES` in `engine/core.js`). A fandom
+  theme (Friends, Rave Culture, Geek & Gamer…), Sexy Time or Lebanon only on a night that picked it; never Know the
+  Host or the host's own themes. Each barrel is 6 chambers (8 with 7 or 8 teams), each its own theme: one bullet
+  (an **Expert** question: +5 right, −3 wrong) and the rest **Medium** (+2) and **Hard** (+3). So every broad theme
+  needs Medium, Hard and Expert questions, and enough of them for several barrels; a theme short of a level gets
+  the nearest one instead (Expert → Hard, Hard → Medium, Medium → Hard). The level is shown on the chamber before
+  the spin, so it has to be right.
 - **Flags**: only flags whose name isn't written on the flag.
 - **Know the Host**: only with a host; wording leaves one answer ("secondary school").
 

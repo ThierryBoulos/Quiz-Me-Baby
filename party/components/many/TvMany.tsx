@@ -3,6 +3,7 @@
    tracker along the top, the same intro, the same question layouts, the same reveal moves (the answer slams in,
    the calls come down as stamps), a game's result as a board of columns, the winner's slam at the end. Only the
    number of teams changes: up to four sit as the two do, eight pack into rows. No buttons: the host's phone runs it. */
+import { wholeSentences } from "@/lib/sentences";
 import { useEffect, useState } from "react";
 import { FitBody } from "../TvStage";
 import { WinName } from "../Motion";
@@ -36,15 +37,6 @@ function HostGoneTv({ info }: { info: { name: string | null; openAt: number } })
     {left > 0 ? `In ${left} s, anyone can take over as the host on their phone.` : "Anyone can take over now: tap Be the host on your phone."}</span>;
 }
 
-/* a note on the TV: whole sentences, as many as fit about two lines (never cut mid-word: "OS is…", 11 Nov, the owner);
-   the phones keep it all */
-const wholeSentences = (t: string, max = 190) => {
-  /* (a sentence ends at . ! or ? before a space or the end: "5.2 inches" stays whole) */
-  const parts = t.match(/.*?[.!?]+["'\u2019\u201d)]*(?:\s+|$)|.+$/gs) || [t];
-  let out = "";
-  for (const p of parts) { if (out && (out + p).trim().length > max) break; out += p; }
-  return out.trim();
-};
 export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany; join?: { url: string; code: string }; host?: string; seats?: number[]; sound?: boolean }) {
   const g = pub.game, R = pub.reveal, T = pub.teams, k = T.length, dense = k > 4;
   const key = pub.screen + pub.step;

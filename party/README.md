@@ -1,7 +1,9 @@
-# Quiz Me Baby — Party (v4, in progress)
+# Quiz Me Baby: Party
 
-The TV is the show, phones are the controllers. Next.js + Supabase, deployed on Vercel.
-The plan is in [`../docs/V4-PLAN.md`](../docs/V4-PLAN.md); the shared rules are in [`../engine/core.js`](../engine/core.js).
+The game. The TV is the show (`/tv/CODE`) and the phones are the controllers (`/join`, `/room/CODE`); with
+"Play without TV" one phone runs the game and everyone plays on their phones. Two teams with a host or without,
+or 3 to 8 teams with a host. Next.js on Vercel, Supabase for the rooms; the rules are in
+[`../engine/core.js`](../engine/core.js).
 
 ## Run it
 
@@ -14,25 +16,26 @@ npm run dev        # http://localhost:3000
 The Supabase address and publishable key are built in (`lib/supabase.ts`); set
 `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_KEY` to point at another project.
 
-## Deploy on Vercel
+## Test it
 
-Import the GitHub repo and set **Root Directory: `party`**. Nothing else is needed.
+```
+npm test           # engine tests, bank/type/map checks, simulated nights (2 teams, 3 to 8, the lobby, chaos)
+npm run screens    # every screen on the TV and on phones: off the edge, cut off, text on text
+npm run typecheck && npm run lint
+```
 
-## What works so far (step 2a: the lobby)
+What each one covers, and how to save new traces: [`../docs/RUNBOOK.md`](../docs/RUNBOOK.md), "Everyday jobs".
 
-- **PLAY** on the device facing the room opens a room: a 4-character code (no 0/O/1/I/L) and a QR code on the TV.
-- **Join** on a phone (SNAKED's screen): room code, name (12 max, unique — a taken name offers "Rami 2?"), a face.
-- **Pick your side** — Team A or B — or **I'm the host** (one per room; taken → "Thierry is the host").
-- **Make me captain** — one per team; teammates then see "Rami is your captain". The captain **names the team**, and the name shows on the TV and every phone.
-- **The host's phone** lists both teams with faces and captains, and can move a player across.
-- **Start the game**: the host's phone, or with no host Team A's captain, once each team has a captain. The TV decides the mode from who joined: hosted, or no host.
-- Your phone remembers you: reopen the page and you're back in your seat.
+## Deploy
 
-Done: the hosted game on the TV (step 2b); captains type, buzz and lock in numbers, players suggest, and Closest To Wins, Guess the Flag and Cocktail or Dish run in Party (step 3); Party with no host, where the app checks and the other captain can overrule, plus Guess the Map and The Auction (step 4); Classic's sound effects on the TV (no voice), rejoining from a new phone with the same name, joining mid-game, changing captain mid-game, and Don't Say the Same as Me and Battle of the Captains (step 5). Every Classic mini-game now runs in Party. Party has three of its own: **Drop the Pin** (a landmark's photo; each captain drops a pin on a world map on their phone, zooming in as far as a street in Paris; the nearer pin by the great circle takes the leg) and **Guess the Airport** (a drawn departures board; captains type the airport, and the app checks it as it does flags), both 22 Oct, and **Majority Rules** (23 Oct: everyone plays on their own phone, four answers a question, each phone in its own order; a team's score is its right answers out of all it could give, the lists fixed at Start so not answering never helps). Drop the Pin's photos and map are ours, in `public/pins/` (`scripts/fetch-pins.mjs`, `scripts/export-pin-world.mjs`; credits in `public/pins/CREDITS.md`).
+Vercel builds this folder (Root Directory `party`); every push to `main` deploys. Setting everything up from
+scratch (Supabase, Vercel, GitHub): [`../docs/RUNBOOK.md`](../docs/RUNBOOK.md).
 
-## Deploying
+## Where things are
 
-Vercel builds this folder (Root Directory `party`). Pushes to `main` are
-meant to deploy automatically through Vercel's GitHub app; if a push doesn't
-show up, redeploy from the Vercel dashboard (Deployments → Redeploy) or
-use a Deploy Hook.
+- `app/`: the pages (home, `tv`, `join`, `room`, `settings`, `how-to-play`, `take-over`) and `api/` (`health`, `bank`)
+- `components/`: the screens; `components/many/` for 3 to 8 teams
+- `lib/`: the game on the TV (`tvGame.ts`, `tv/`), `lib/many/` for 3 to 8 teams
+- `data/bank.json`: the bank with its answers (server only); `public/bank.json` has none
+- `sim/`: the simulated nights and their saved traces (`golden/`); `sim/screens/`: the screen check
+- `scripts/`: flag file names, the bank, type and map checks, the pins

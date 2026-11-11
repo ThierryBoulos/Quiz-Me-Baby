@@ -10,7 +10,7 @@ plus three free accounts: GitHub, Vercel and Supabase.
 | Classic | `classic.html` at the root | Retired as a game (3 Nov 2026): `/classic` redirects home. Kept as the source of the bank, maps and pins exports |
 | Party | `party/` (Next.js) on Vercel | The TV (`/tv/CODE`), the phones (`/join`, `/room/CODE`), `/api/health`, `/api/bank` |
 | Game server | Supabase project (EU, Ireland) | Rooms, members, the action log, secrets; anonymous sign-ins |
-| Shared rules | `engine/core.js` | Used by Classic and Party alike; tests in `engine/*.test.js` |
+| Shared rules | `engine/core.js` | The game's rules (dealing, every move, answer checking), run by the TV, or by a phone when there's no TV; tests in `engine/*.test.js` |
 | Question bank | Kept in `classic.html` (the retired Classic); exported to `party/data/bank.json` (full, server only) and `party/public/bank.json` (no answers) by `node scripts/export-bank.js` | |
 
 ## 1. Supabase (15 min)
@@ -19,13 +19,9 @@ plus three free accounts: GitHub, Vercel and Supabase.
 2. **Authentication → Sign In / Providers → Anonymous sign-ins: on.**
 3. **Authentication → Rate limits → Anonymous sign-ins: 300 per hour** (everyone at a
    party shares one internet address; the default 30 locks people out).
-4. **SQL Editor**: run every file in `supabase/migrations/` in name order:
-   `20261012_party_rooms.sql`, `20261012b_party_helpers_private.sql`,
-   `20261012c_party_snaked_conventions.sql`, `20261012d_party_join.sql`,
-   `20261012e_party_rejoin_cleanup.sql`, `20261016_wave1_join.sql`,
-   `20261016b_wave1_cleanup.sql` (it turns on pg_cron and schedules the nightly
-   clean-up at 04:17 UTC), `20261016c_wave2_privacy.sql`,
-   `20261016d_wave2_lobby_rejoin.sql`.
+4. **SQL Editor**: run every file in `supabase/migrations/`, one at a time, in name order
+   (oldest first). One of them, `20261016b_wave1_cleanup.sql`, turns on pg_cron and schedules
+   the nightly clean-up at 04:17 UTC.
 5. **Database → Publications → supabase_realtime**: the tables `rooms`, `members`,
    `actions` and `secrets` must be in it (the first migration adds them; check).
 6. Copy the project URL and the publishable key (Settings → API).
@@ -35,7 +31,6 @@ plus three free accounts: GitHub, Vercel and Supabase.
 If the Supabase project is new, put its URL and publishable key in
 `party/lib/supabase.ts` (the fallbacks at the top) and in `party/app/api/bank/route.ts`,
 or set them on Vercel as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY`.
-Classic needs nothing: it runs on its own.
 
 ## 3. Vercel (10 min)
 
@@ -75,15 +70,33 @@ Classic needs nothing: it runs on its own.
 
 ## Everyday jobs
 
-- **Change a question:** edit Classic's built-in bank in `index.html`, bump `BUILD.v`
-  and `SEED_VERSION` (and `version.json`), then `node scripts/export-bank.js`
+- **Change a question:** edit the bank in `classic.html` (`index.html` is only the old
+  address's "Legacy" notice), following `docs/CONTENT-RULES.md`. Bump `BUILD.v` and
+  `SEED_VERSION` in `classic.html` and `version.json`, then `node scripts/export-bank.js`
   (needs Playwright's Chromium) and `cd party && npm test`. Commit all of it.
 - **Something broke on the night:** `/api/health` first. Then Supabase → Logs.
   A paused Free project: Supabase dashboard → the project → **Resume**.
-- **Database change:** add a new file in `supabase/migrations/` (never edit an old one)
-  and run it in the SQL editor.
-- **Change how the TV plays (`party/lib/tvGame.ts`, `party/lib/tv/`):** `cd party && npm run sim`
-  plays twelve whole nights in a second and compares each with its saved trace in
-  `party/sim/golden`. A night that differs when it shouldn't is a bug; when the change is
-  meant to alter play, look at the difference (`node sim/run.mjs <n>` prints a night) and
-  save the new traces with `node sim/run.mjs --update`. Commit them with the change.
+- **Database change:** a new file in `supabase/migrations/` (never edit an old one) and a
+  paste-ready copy in `docs/sql/`. Nothing runs without the owner's yes. Then Claude runs it
+  with the Supabase tool; if that tool isn't working, paste the `docs/sql/` copy into
+  Supabase → SQL Editor and run it.
+- **Tests:** `cd party && npm test` runs everything: the engine tests, the bank, type-scale
+  and map checks, 31 whole two-team nights with and without a host (`sim/run.mjs`), the 3 to 8
+  team nights (`sim/many.mjs`), the lobby (`sim/lobby.mjs`), and the chaos and odd-input
+  nights (`sim/chaos.mjs`, `sim/weird.mjs`). A night with no TV runs the same game on a phone,
+  so these cover it too. Each night is compared with its saved trace in `party/sim/golden`. A
+  night that differs when it shouldn't is a bug; when a change is meant to alter play, look at
+  the difference (`node sim/run.mjs <n>` prints a night) and save the new traces with
+  `node sim/run.mjs --update` (`node sim/many.mjs --update` for 3 to 8 teams). Commit them with
+  the change.
+- **Screen check (after changing any screen):** `cd party && npm run screens` plays a few
+  nights (2 teams with and without a host, 3, 5 and 8 teams), keeps every screen they reach,
+  and opens each one in a browser: on the TV, and on phones from 360 wide (Galaxy) to 440
+  (iPhone Pro Max) and held sideways, as the host, a captain and a player, with a TV and with
+  none. It lists anything off the edge, cut off, sideways scroll, or text on top of text, and
+  saves a picture of every screen in `party/sim/.out/screens/` (never committed). A whole run
+  takes about an hour; a part takes minutes: `npm run screens -- tv` (or `phones`, `sizes`),
+  with a filter such as `npm run screens -- phones roulette`. It needs Playwright's Chromium,
+  like the bank export. The page it uses (`party/app/screens/`) is only in the check's own
+  build (`party/.next-screens`): a normal build, `npm run dev` and every deploy don't have it,
+  and nothing it opens can reach the internet.

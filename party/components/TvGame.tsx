@@ -16,6 +16,7 @@ import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, two
 import { LeadBanner, useFlyingPoints, useScreenAt, WinName } from "./Motion";
 import { NightIntroTv } from "./NightIntro";
 import { useLiveCount } from "@/lib/liveCount";
+import { wholeSentences } from "@/lib/sentences";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -358,7 +359,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     return (<>
       <div className="eyebrow text-18">The answer</div>
       <div className="ans-board display" style={{ fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
-      {pub.reveal.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-2 truncate">{pub.reveal.notes}</div>}
+      {pub.reveal.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-2 leading-snug">{wholeSentences(pub.reveal.notes)}</div>}
       <NumberLine pub={pub} ans={ans} w={w} />
       <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} take it` : ""}</div>
     </>);
@@ -412,8 +413,9 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
           <SplitFlap text={pub.reveal?.answer || ""} size={(pub.reveal?.answer || "").length > 34 ? 22 : (pub.reveal?.answer || "").length > 26 ? 26 : 30} />
           {pub.airport.code && <div className="text-24 flex items-center gap-3"><SplitFlap text={pub.airport.code} size={26} start={300} /> · {pub.airport.city}</div>}
           {pub.airport.cityOk === false && <div className="text-18 font-bold text-center" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</div>}
-          {/* the explanation keeps to four lines: with a long airport name on the flaps it ran off the bottom (the owner, 31 Oct) */}
-          {pub.reveal?.notes && <div className="text-15 text-[var(--color-ink-2)] leading-snug text-left w-full" style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{pub.reveal.notes}</div>}
+          {/* the explanation keeps to four lines: with a long airport name on the flaps it ran off the bottom (the owner, 31 Oct);
+              whole sentences, so it never stops mid-word (11 Nov) */}
+          {pub.reveal?.notes && <div className="text-15 text-[var(--color-ink-2)] leading-snug text-left w-full" style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{wholeSentences(pub.reveal.notes, 200)}</div>}
           <TeamRows pub={pub} empty="No answer" small />
         </>)}
       </div>

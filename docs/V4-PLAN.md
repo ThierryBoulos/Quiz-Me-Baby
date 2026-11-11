@@ -1,6 +1,10 @@
 # Quiz Me Baby v4: Party mode (phones as controllers)
 
-Status: **plan agreed, not built**. Decisions from 12 Oct 2026 are folded in (section 8).
+> **History (note of 11 Nov 2026).** This is the plan as agreed on 12 Oct 2026. It has been built and changed
+> since: Classic is retired (3 Nov), "Play without TV" replaced playing on one screen, and there are 3 to 8 team
+> games. Where this plan disagrees with the game or with `CLAUDE.md`, the game and `CLAUDE.md` are right.
+
+Status (12 Oct): **plan agreed, not built**. Decisions from 12 Oct 2026 are folded in (section 8).
 
 ---
 
