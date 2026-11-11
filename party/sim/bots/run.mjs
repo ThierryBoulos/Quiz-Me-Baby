@@ -46,7 +46,7 @@ const rightFor = (pub, secret, t) => secret?.answers?.[t] || secret?.answer || b
 const NAMES = ["Rami", "Lea", "Karim", "Maya", "Joe", "Nour", "Sami", "Rita", "Hadi", "Yara", "Omar", "Dana", "Fadi", "Lina", "Tarek", "Zeina", "Ziad", "Mira",
   "Elie", "Hala", "Jad", "Nadia", "Rayan", "Sara", "Walid", "Tala", "Adam", "Carla", "Marc", "Dima", "Paul", "Jana", "Ali", "Rana"];
 /* (14 letters at most, as on a phone; long ones too, so the screens get tested with them) */
-const TEAM_NAMES = ["Lions", "Quizzical Owls", "Brainy Bunch", "Smarty Pants", "Les Gros Malins", "Quiz Khalifa", "Agatha Quiztie", "Team Spirit"].map((n) => n.slice(0, 14));
+const TEAM_NAMES = ["Lions", "Quizzical Owls", "Brainy Bunch", "Smarty Pants", "Gros Malins", "Quiz Khalifa", "Agatha Quiztie", "Team Spirit"];
 
 /* ---------- a bot: its own sign-in, its seat, its taps ---------- */
 const bots = [];
@@ -141,11 +141,16 @@ async function lobby() {
     const used = new Set(members.map((m) => m.name));
     const free = () => { let n; do n = pick(NAMES); while (used.has(n)); used.add(n); return n; };
     for (let t = 0; t < k; t++) {
-      if (!capOf(t)) { const b = await seat(free(), t, "captain"); await b.send("team_name", { team: t, name: TEAM_NAMES[t] }); await read(); }
+      if (!capOf(t)) { const b = await seat(free(), t, "captain"); b.named = 1; b.namedAt = Date.now(); await b.send("team_name", { team: t, name: TEAM_NAMES[t] }); await read(); }
       const have = bots.filter((b) => b.team === t && b.role === "player").length;
       for (let i = have; i < PLAYERS; i++) await seat(free(), t, "player");
     }
     await read();
+    /* a team name the TV didn't take (sent the moment the armband came): again, a few times */
+    const names = room.state?.teamNames || [];
+    for (const b of bots) if (b.role === "captain" && b.team != null && names[b.team] !== TEAM_NAMES[b.team] && (b.named || 0) < 4 && Date.now() - (b.namedAt || 0) > 5000) {
+      b.named = (b.named || 0) + 1; b.namedAt = Date.now(); await b.send("team_name", { team: b.team, name: TEAM_NAMES[b.team] });
+    }
     /* start: only from the seat that starts the night (the host; with no host, Team A's captain), once it's ready */
     const starter = hostM() || capOf(0), ready = [...Array(k).keys()].every((t) => capOf(t)) && (!many || hostM());
     lobby.readyAt = ready ? lobby.readyAt || Date.now() : 0;

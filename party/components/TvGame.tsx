@@ -172,8 +172,9 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
       <LeadBanner shown={shown} names={[T[0].name, T[1].name]} sound={sound} lift={pub.screen !== "answer"} />
       {/* the strip along the bottom, kept clear of the screen's content: news (a call changed, the host is away,
           a refused tap) and who taps Next, small, on the right */}
-      <div className="tv-foot" role="status" aria-live="polite">
-        {/* the end: the two buttons live here, in the strip nothing else can push off the stage */}
+      <div className={"tv-foot" + (pub.screen === "final" && (onAgain || onExit) ? " end" : "")} role="status" aria-live="polite">
+        {/* the end: the two buttons live here, in the strip nothing else can push off the stage; lower and shorter
+            than the others, with a gap above them, so they never sit on the award cards (the owner, 11 Nov) */}
         {pub.screen === "final" && (onAgain || onExit) && <div className="flex gap-3 mr-auto" style={{ pointerEvents: "auto" }}>
           {/* (short, small and gold: the owner, 11 Nov) */}
           {onAgain && <button className="btn btn-sm btn-gold" onClick={onAgain}>Play again</button>}

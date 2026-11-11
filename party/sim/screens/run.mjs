@@ -89,6 +89,14 @@ const TV_MEASURE = () => {
       && !(el.matches(".display, .display *") && el.scrollWidth <= el.clientWidth + 3 && el.scrollHeight - el.clientHeight <= 10))
       bad.push("CLIP " + (el.scrollWidth - el.clientWidth) + "x" + (el.scrollHeight - el.clientHeight) + " " + name(el));
   }
+  /* a button on top of a card or of text (Play again on an award card: the owner, 11 Nov) */
+  const shownEl = (el) => { const cs = getComputedStyle(el); return cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.05; };
+  const btns = [...scope.querySelectorAll("button")].filter((b) => shownEl(b) && !skip(b));
+  const under = [...scope.querySelectorAll(".card, .win-sign, .board, .ruler")].filter((c) => shownEl(c) && !skip(c));
+  for (const b of btns) { const a = b.getBoundingClientRect();
+    for (const c of under) { if (c.contains(b) || b.contains(c)) continue; const r = c.getBoundingClientRect();
+      const w = Math.min(a.right, r.right) - Math.max(a.left, r.left), h = Math.min(a.bottom, r.bottom) - Math.max(a.top, r.top);
+      if (w > 2 && h > 2) bad.push("BUTTON ON " + Math.round(h / k) + "px " + name(b) + " / " + name(c)); } }
   /* text on top of text: two bits of text (neither inside the other) whose boxes cross by a fair part; the two faces
      of a flip card take turns, so they don't count */
   const txt = [...scope.querySelectorAll("*")].filter((el) => !el.closest("svg") && !skip(el) && !el.closest(".face.back")
