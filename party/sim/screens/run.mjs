@@ -66,12 +66,14 @@ for (let t = 0; ; t++) {
 const TV_MEASURE = () => {
   const st = document.querySelector(".tv-stage"); if (!st) return ["no stage"];
   const S = st.getBoundingClientRect(), k = S.width / 1280, bad = [];
+  /* the night's intro covers the whole stage: what's behind it doesn't show */
+  const scope = st.querySelector(".night-intro") || st;
   /* not part of the layout: lights, effects, celebrations, the bubble Imad speaks in, the plane that flies off the
      airport board, the split-flap letters' halves */
-  const skip = (el) => el.closest(".tv-glow,.confetti,.confetti-late,.win-flash,.win-ring,.lead-banner,.imad-bubble,.tv-cover,[aria-hidden=\"true\"] svg,.mq-beam,.mq-world,.mq-dust,.mq-floor,.plane-ico")
+  const skip = (el) => el.closest(".tv-glow,.confetti,.confetti-late,.win-flash,.win-ring,.lead-banner,.imad-bubble,.tv-cover,[aria-hidden=\"true\"] svg,.mq-beam,.mq-world,.mq-dust,.mq-floor,.plane-ico,.lectern-spot")
     || (el.tagName === "svg" && el.closest("svg") !== el);
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
-  for (const el of st.querySelectorAll("*")) {
+  for (const el of scope.querySelectorAll("*")) {
     if (el.closest("svg") && el.tagName !== "svg") continue;
     if (skip(el)) continue;
     const cs = getComputedStyle(el); if (cs.visibility === "hidden" || cs.display === "none" || +cs.opacity === 0) continue;
@@ -79,7 +81,8 @@ const TV_MEASURE = () => {
     const o = { l: (S.left - r.left) / k, r: (r.right - S.right) / k, t: (S.top - r.top) / k, b: (r.bottom - S.bottom) / k };
     const m = Math.max(o.l, o.r, o.t, o.b);
     if (m > 3) bad.push("OFF " + Math.round(m) + "px " + ["l", "r", "t", "b"].filter((x) => o[x] > 3).join("") + " " + name(el));
-    if (/(hidden|clip)/.test(cs.overflow + cs.overflowX + cs.overflowY) && el.children.length + (el.textContent || "").length > 0 && cs.textOverflow !== "ellipsis"
+    /* (an ellipsis or a line clamp is meant: a long name ends in "…") */
+    if (/(hidden|clip)/.test(cs.overflow + cs.overflowX + cs.overflowY) && el.children.length + (el.textContent || "").length > 0 && cs.textOverflow !== "ellipsis" && !(cs.webkitLineClamp > 0)
       && !/line-clamp|flap-|roll-win/.test(el.className || "") && (el.scrollHeight > el.clientHeight + 3 || el.scrollWidth > el.clientWidth + 3)
       && !el.matches(".tv-stage,.tv-wrap,.spot,.picker") && el.clientHeight > 0
       /* (the display font's letters stand a few pixels taller than their line: not a cut) */
@@ -88,12 +91,14 @@ const TV_MEASURE = () => {
   }
   /* text on top of text: two bits of text (neither inside the other) whose boxes cross by a fair part; the two faces
      of a flip card take turns, so they don't count */
-  const txt = [...st.querySelectorAll("*")].filter((el) => !el.closest("svg") && !skip(el) && !el.closest(".face.back")
+  const txt = [...scope.querySelectorAll("*")].filter((el) => !el.closest("svg") && !skip(el) && !el.closest(".face.back")
     && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 1))
     .filter((el) => { const cs = getComputedStyle(el); return cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.05 && !el.closest(".tv-foot"); });
   /* (what shows of each: a name cut short with "…" counts only as far as it shows) */
   const cutBy = (el) => { for (let e = el.parentElement; e && e !== st; e = e.parentElement) if (/(hidden|clip)/.test(getComputedStyle(e).overflowX)) return e.getBoundingClientRect(); return null; };
-  const rs = txt.map((el) => { const a = el.getBoundingClientRect(), c = cutBy(el);
+  /* (the display font's letters sit in the middle of a taller box: only that part counts) */
+  const ink = (el, a) => (el.closest(".display") ? { left: a.left, right: a.right, top: a.top + 0.18 * a.height, bottom: a.bottom - 0.08 * a.height } : a);
+  const rs = txt.map((el) => { const a = ink(el, el.getBoundingClientRect()), c = cutBy(el);
     return c ? { left: Math.max(a.left, c.left), right: Math.min(a.right, c.right), top: Math.max(a.top, c.top), bottom: Math.min(a.bottom, c.bottom) } : a; });
   for (let i = 0; i < txt.length; i++) for (let j = i + 1; j < txt.length; j++) {
     if (txt[i].contains(txt[j]) || txt[j].contains(txt[i])) continue;
@@ -109,18 +114,20 @@ const PHONE_MEASURE = () => {
   const bad = [], W = innerWidth;
   if (document.documentElement.scrollWidth > W + 1) bad.push("SIDEWAYS " + (document.documentElement.scrollWidth - W) + "px");
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
-  const skip = (el) => el.closest(".confetti,.confetti-back,.win-flash,.win-ring,svg *,canvas,.face.back,.plane-ico") || [...(function* () { for (let e = el; e; e = e.parentElement) yield e; })()].some((e) => getComputedStyle(e).position === "sticky");
+  const cover = document.querySelector(".night-intro");
+  const skip = (el) => el.closest(".confetti,.confetti-back,.win-flash,.win-ring,svg *,canvas,.face.back,.plane-ico,.lectern-spot") || (cover && !cover.contains(el)) || [...(function* () { for (let e = el; e; e = e.parentElement) yield e; })()].some((e) => getComputedStyle(e).position === "sticky");
   const scroller = (el) => { for (let e = el.parentElement; e; e = e.parentElement) { const cs = getComputedStyle(e); if (/(auto|scroll|hidden|clip)/.test(cs.overflowX)) return e; } return null; };
   for (const el of document.querySelectorAll("main *")) {
     if (skip(el)) continue; const cs = getComputedStyle(el); if (cs.visibility === "hidden" || cs.display === "none" || +cs.opacity === 0 || cs.position === "fixed") continue;
     const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) continue;
     if ((r.right > W + 2 || r.left < -2) && !scroller(el)) bad.push("OFF " + Math.round(Math.max(r.right - W, -r.left)) + "px " + name(el));
-    if (/(hidden|clip)/.test(cs.overflow + cs.overflowX + cs.overflowY) && (el.textContent || "").trim() && cs.textOverflow !== "ellipsis" && !/clamp|truncate|line-clamp|roll-win|flap-/.test(el.className || "")
+    if (/(hidden|clip)/.test(cs.overflow + cs.overflowX + cs.overflowY) && (el.textContent || "").trim() && cs.textOverflow !== "ellipsis" && !(cs.webkitLineClamp > 0) && !/clamp|truncate|line-clamp|roll-win|flap-/.test(el.className || "")
       && el.clientHeight > 0 && (el.scrollHeight > el.clientHeight + 3 || el.scrollWidth > el.clientWidth + 3)) bad.push("CLIP " + (el.scrollWidth - el.clientWidth) + "x" + (el.scrollHeight - el.clientHeight) + " " + name(el));
   }
   const txt = [...document.querySelectorAll("main *")].filter((el) => !skip(el) && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 0))
     .filter((el) => { const cs = getComputedStyle(el); return cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.05; });
-  const rs = txt.map((el) => el.getBoundingClientRect()), clipBox = txt.map((el) => { const s = scroller(el); return s ? s.getBoundingClientRect() : null; });
+  const ink = (el, a) => (el.closest(".display") ? { left: a.left, right: a.right, top: a.top + 0.18 * a.height, bottom: a.bottom - 0.08 * a.height } : a);
+  const rs = txt.map((el) => ink(el, el.getBoundingClientRect())), clipBox = txt.map((el) => { const s = scroller(el); return s ? s.getBoundingClientRect() : null; });
   const vis = (i) => { const a = rs[i], c = clipBox[i]; return c ? { left: Math.max(a.left, c.left), right: Math.min(a.right, c.right), top: Math.max(a.top, c.top), bottom: Math.min(a.bottom, c.bottom) } : a; };
   for (let i = 0; i < txt.length; i++) for (let j = i + 1; j < txt.length; j++) {
     if (txt[i].contains(txt[j]) || txt[j].contains(txt[i])) continue;
@@ -131,7 +138,7 @@ const PHONE_MEASURE = () => {
   }
   return [...new Set(bad)].slice(0, 10);
 };
-const waitFor = (k) => (/\.final/.test(k) ? 12000 : /Reveal|reveal|Result|Summary|summary|roundScore|Review|decided/.test(k) ? 6000 : /^lobby/.test(k) ? 3500 : 2500);
+const waitFor = (k) => (/\.final/.test(k) ? 12000 : /Reveal|reveal|Result|Summary|summary|roundScore|Review|decided|\.intro/.test(k) ? 6000 : /^lobby/.test(k) ? 3500 : 2500);
 const file = (s) => s.replace(/[^a-z0-9]+/gi, "_");
 
 const browser = await chromium.launch();
