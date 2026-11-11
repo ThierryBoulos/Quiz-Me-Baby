@@ -763,7 +763,9 @@
       if(std.map(q => q.theme).filter((t, i, a) => a.indexOf(t) === i).length < n)
         std = bank().filter(q => usable(q) && (CLOSEST_ONLY_IF_PICKED.indexOf(q.theme) < 0 || own.indexOf(q.theme) > -1));
       const themes = std.map(q => q.theme).filter((t, i, a) => a.indexOf(t) === i);
-      const near = { expert:['expert', 'hard'], hard:['hard', 'medium'], medium:['medium', 'hard'] };
+      /* the bullet is always Expert (11 Nov, the owner): from a theme that still has an unplayed one, and only when
+         none has, a played one; never a Hard in its place. The others: their level, then the one next to it */
+      const near = { expert:['expert'], hard:['hard', 'medium'], medium:['medium', 'hard'] };
       const take = (t, level, stale) => {
         const ok = std.filter(q => q.theme === t && q.difficulty === level && !inNight.has(q.id) && !clashesWith(q.id, inNight) && (stale || isFresh(q)));
         return ok.length ? shuffle(ok)[0] : null;
@@ -804,12 +806,11 @@
 
     function dishLeg(){ return { shown:1, out:[false, false], buzz:null, calls:[], k:0 }; }
 
-    /* the levels a night didn't ask for, nearest first (the easier one on a tie) */
+    /* the levels next to the night's (one level easier, then one harder), never two away (11 Nov, the owner:
+       "only go one level up or one level down, that's it") */
     function otherLevels(d){
       const on = diffsOf(d).map(x => DIFFS.indexOf(x));
-      return DIFFS.filter(x => diffsOf(d).indexOf(x) < 0)
-        .map(x => ({ x, k:Math.min(...on.map(i => Math.abs(i - DIFFS.indexOf(x)))) * 10 + DIFFS.indexOf(x) }))
-        .sort((a, b) => a.k - b.k).map(o => o.x);
+      return DIFFS.filter(x => diffsOf(d).indexOf(x) < 0 && Math.min(...on.map(i => Math.abs(i - DIFFS.indexOf(x)))) === 1);
     }
 
     function buildGame(cfg){
@@ -820,30 +821,29 @@
     
       for(let i = 0; i < N; i++){
         let pair = null, theme = null;
-        // try each theme in rotation until one still has a usable pair
-        const order = themes.slice(i % themes.length).concat(themes.slice(0, i % themes.length));
+        /* the round's own theme, never another (11 Nov, the owner: "if the host selects geography, then sticks to
+           geography"); Setup says beforehand when a theme hasn't enough at its level */
+        const order = themes.length ? [themes[i % themes.length]] : [];
         for(const t of order){
           /* a hand-picked pair wins outright — the host chose those two on purpose */
           const hand = pickedPair(t, cfg.picks);
           if(hand && !taken.has(hand.a.id) && !taken.has(hand.b.id)){ pair = hand; theme = t; break; }
           const d = diffOf(cfg, t);
+          /* (11 Nov, the owner) unplayed at the night's level; then unplayed one level easier, then one harder; then
+             played ones, the night's level first, then one level either way. Never on the same night as a question
+             it gives away (pairsFor keeps to that throughout) */
           let p = pairsFor(t, d, taken);
-          /* a mix without Expert that has run dry in this theme: Expert comes in only now, once the
-             rest of the theme's bank is spent (an explicit single level stays that level) */
-          if(!p.length && diffsOf(d).length > 1 && diffsOf(d).indexOf('expert') < 0) p = pairsFor(t, 'expert', taken);
-          /* still dry: an unplayed pair at the nearest other level, and only then a played one
-             (tonight's levels first), so a round is never lost to a thin theme (27 Oct) */
           if(!p.length) p = otherLevels(d).reduce((got, l) => got.length ? got : pairsFor(t, l, taken), []);
           if(!p.length) p = pairsFor(t, d, taken, true);
           if(!p.length) p = otherLevels(d).reduce((got, l) => got.length ? got : pairsFor(t, l, taken, true), []);
           if(p.length){ pair = p[0]; theme = t; break; }
         }
-        if(!pair) break;
+        if(!pair) continue;   // (only a tiny theme of the host's own: Setup told them to change its level)
         taken.add(pair.a.id); taken.add(pair.b.id);
         /* (what a pair clashes with is taken too: never dealt later the same night) */
         [pair.a.id, pair.b.id].forEach(id => (CLASH.get(id) || []).forEach(x => taken.add(x)));
         rounds.push({
-          n:i + 1, theme, strict:pair.strict, picked:!!pair.picked, pairKey:pair.key,
+          n:rounds.length + 1, theme, strict:pair.strict, picked:!!pair.picked, pairKey:pair.key,
           q:[pair.a, pair.b],                 // q[0] -> team that goes first slot 0
           dbl:[false, false], llUsed:[[], []],
           res:[null, null],                   // per seat: {correct, stolen}

@@ -147,9 +147,10 @@ test('levels: Easy+Medium+Hard by default, Mixed is all four, Expert only when t
   assert.equal(g1.rounds.slice(0, 2).every(r => r.q.every(q => q.difficulty === 'easy')), true);
   /* both questions of a round always share a level */
   assert.ok(g1.rounds.every(r => r.q[0].difficulty === r.q[1].difficulty));
-  /* a single level stays that level while it lasts; then the nearest other level, never fewer rounds */
+  /* a single level stays that level while it lasts; then one level either side, never two away (11 Nov, the
+     owner): Easy's neighbour is Medium, which this theme hasn't got, so the night has only its two Easy rounds */
   const g2 = deal('easy');
-  assert.deepEqual(g2.rounds.map(r => r.q[0].difficulty), ['easy', 'easy', 'expert', 'expert']);
+  assert.deepEqual(g2.rounds.map(r => r.q[0].difficulty), ['easy', 'easy']);
   /* Mixed takes all four from the start */
   assert.equal(deal('mixed').rounds.length, 4);
   assert.ok(D2.matchDiff({ difficulty:'expert' }, 'mixed') && !D2.matchDiff({ difficulty:'expert' }, Q.DEFAULT_DIFF));
@@ -250,5 +251,35 @@ test('never on the same night: a question that clashes with one already dealt is
     const dealt = new Set(g.rounds.flatMap(rd => rd.q.map(q => q.id)));
     assert.ok(!(dealt.has('s0') && dealt.has('s1')) && !(dealt.has('s2') && dealt.has('s3')), 'two of one group in the rounds');
     assert.ok(g.mini.qs.every(q => !['c0', 'c1', 'c2', 'c3'].includes(q.id)), 'a clashing Closest leg: ' + g.mini.qs.map(q => q.id));
+  }
+});
+
+/* 11 Nov, the owner: a theme short at its level: unplayed one level easier, then one harder; then played ones, its
+   level first; never another theme; Roulette's bullet always Expert */
+test('levels: unplayed one level easier, then harder, then played; never another theme', () => {
+  const b = [];
+  const add = (t, d, n) => { for(let i = 0; i < n; i++) b.push({ id:`${t}-${d}-${i}`, type:'standard', theme:t, difficulty:d, question:t + d + i, answer:'a' }); };
+  add('T', 'hard', 2); add('T', 'medium', 2); add('T', 'expert', 2); add('T', 'easy', 2); add('U', 'hard', 8);
+  const used = new Set(['T-hard-0', 'T-hard-1', 'T-medium-0', 'T-medium-1']);
+  const D2 = Q.createDealer({ bank:() => b, used:() => used, noRepeat:() => true });
+  const deal = (difficulty, rounds) => D2.buildGame({ standard:true, rounds, themes:['T'], difficulty, minis:[], teamA:{ name:'A' }, teamB:{ name:'B' } });
+  /* Hard and Medium all played: Expert (one harder) before a played Hard, never Easy (two away), never theme U */
+  const g = deal('hard', 3);
+  assert.deepEqual(g.rounds.map(r => r.q[0].difficulty), ['expert', 'hard', 'medium']);
+  assert.ok(g.rounds.every(r => r.theme === 'T'));
+  /* unplayed Medium left: one level easier comes before one harder */
+  used.delete('T-medium-0'); used.delete('T-medium-1');
+  assert.equal(deal('hard', 1).rounds[0].q[0].difficulty, 'medium');
+});
+test('roulette: the bullet is always Expert, from a theme that still has one', () => {
+  const b = [];
+  const add = (t, d, n) => { for(let i = 0; i < n; i++) b.push({ id:`${t}-${d}-${i}`, type:'standard', theme:t, difficulty:d, question:t + d + i, answer:'a' }); };
+  for(const t of ['General Knowledge', 'Geography', 'History', 'Science', 'Nature', 'Sports', 'Music']) { add(t, 'medium', 6); add(t, 'hard', 6); }
+  add('Movies', 'expert', 3); add('Movies', 'medium', 3);
+  const D2 = Q.createDealer({ bank:() => b, used:() => new Set(), noRepeat:() => true });
+  for(let n = 0; n < 20; n++) {
+    const laps = D2.rouletteDeck({ themes:[] }, 6, 3, new Set());
+    assert.equal(laps.length, 3);
+    for(const l of laps) { assert.equal(l.ch[l.bullet].level, 'expert'); assert.equal(l.ch[l.bullet].theme, 'Movies'); }
   }
 });
