@@ -25,7 +25,7 @@ const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--
 /* join: where a phone joins this room (Majority Rules puts the QR code up again before it starts) */
 export type Join = { url: string; code: string };
 /* sound: this is the TV itself (it plays the coins and the whoosh; another screen showing the TV stays quiet) */
-export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub; onExit?: () => void; onAgain?: () => void; join?: Join; sound?: boolean }) {
+export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pub: Pub; onExit?: () => void; onAgain?: () => void; join?: Join; sound?: boolean; host?: string }) {
   const T = pub.teams;
   /* the motion: when this screen came up, and the scores as the top bar shows them (points fly up to them) */
   const key = pub.screen + pub.r + (pub.turn ?? "");
@@ -50,7 +50,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
       {/* the tracker, always: Classic's HUD */}
       <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
       {/* the night's intro, before the first round: the plan, until Let's go */}
-      {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `${pub.captains?.[pub.intro.go as 0 | 1] || "The captain"} starts the game` : "The host starts the game"} />}
+      {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `${pub.captains?.[pub.intro.go as 0 | 1] || "The captain"} starts the game` : `${host || "The host"} starts the game`} />}
 
       <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : pub.screen === "final" && recap ? "gap-3 recap-on" : "gap-6")} key={bodyKey}>
         {/* a steal: the light swings over from the team that missed to the one stealing */}

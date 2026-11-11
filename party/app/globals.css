@@ -1401,3 +1401,49 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
    question underneath must not show through */
 .tv-cover { background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,214,120,.10), transparent 72%),
   radial-gradient(ellipse 80% 65% at 50% 42%, #1a1840 0%, #0b0d26 52%, var(--color-bg) 88%), var(--color-bg); }
+
+/* ==== the night line (the night's intro, 11 Nov: option B, reworked) ==== */
+.night-intro.nl { justify-content: space-between; align-items: stretch; padding: 40px 64px 0; gap: 0; }
+.nl-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; }
+.nl-big { font-size: 54px; margin-top: 8px; }
+.nl-legend { display: grid; gap: 8px; padding: 10px 16px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--line); flex: none; }
+.nl-legend .li { display: grid; grid-template-columns: 26px 128px auto; align-items: center; gap: 8px; font-size: var(--text-16); color: var(--color-ink-2); white-space: nowrap; }
+.nl-legend .li b { color: var(--color-ink); font-size: var(--text-14); letter-spacing: .12em; text-transform: uppercase; }
+.nl-legend .pts { font-family: var(--font-display); font-size: var(--text-22); margin-right: 6px; letter-spacing: .02em; }
+.nl-legend .pts.r { color: var(--color-gold); } .nl-legend .pts.m { color: var(--color-a); }
+.nl-legend .places { font-size: var(--text-15); color: var(--color-ink-2); white-space: nowrap; }
+.nl-legend .places b { color: var(--color-ink); font-family: var(--font-display); font-weight: 400; font-size: var(--text-18); letter-spacing: .02em; }
+.nl .sw, .nl-plg .sw { width: 18px; height: 18px; display: inline-block; justify-self: center; flex: none; }
+.nl .sw.r, .nl-plg .sw.r { border-radius: 50%; background: var(--color-gold); }
+.nl .sw.m, .nl-plg .sw.m { border-radius: 5px; border: 3px solid var(--color-a); }
+.nl-body { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 26px; margin: 0; padding: 12px 0; list-style: none; }
+.nl-body.compact { gap: 14px; }
+.nl-row { position: relative; display: grid; align-items: start; }
+.nl-track { position: absolute; top: 24px; height: 4px; border-radius: 4px; background: linear-gradient(90deg, rgba(245,197,24,.65), rgba(49,201,247,.65)); }
+.nl-track.cont::after { content: ""; position: absolute; right: -4px; top: -6px; border: 8px solid transparent; border-left: 12px solid rgba(49,201,247,.8); border-right: 0; }
+.nl-stop { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 5px; min-width: 0; }
+.nl-dot { display: grid; place-items: center; box-shadow: 0 0 0 6px #0d0f2a; }
+.nl-dot.r { width: 52px; height: 52px; border-radius: 50%; background: var(--color-gold); color: #1a1400; font-family: var(--font-display); font-size: var(--text-20); letter-spacing: .01em; }
+.nl-dot.r.two { font-size: var(--text-16); }
+.nl-dot.m { width: 48px; height: 48px; margin: 2px 0; border-radius: 14px; background: #0d0f2a; border: 3px solid var(--color-a); color: var(--color-a); }
+.nl-dot.m svg { width: 24px; height: 24px; }
+.nl-nm { margin-top: 10px; font-weight: 800; font-size: var(--text-16); line-height: 1.15; overflow-wrap: anywhere; }
+.nl-ds { margin-top: 4px; font-size: var(--text-13); line-height: 1.3; color: var(--color-ink-2); }
+.nl-body.compact .nl-dot.r { width: 44px; height: 44px; font-size: var(--text-18); } .nl-body.compact .nl-dot.r.two { font-size: var(--text-14); }
+.nl-body.compact .nl-dot.m { width: 40px; height: 40px; border-radius: 12px; } .nl-body.compact .nl-dot.m svg { width: 20px; height: 20px; }
+.nl-body.compact .nl-track { top: 20px; } .nl-body.compact .nl-nm { font-size: var(--text-14); margin-top: 7px; }
+.nl-foot { height: 74px; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid var(--line); font-size: var(--text-18); color: var(--color-ink-2); }
+.nl-foot b { color: var(--color-ink); font-size: var(--text-20); white-space: nowrap; }
+/* the phone: the same line, going down */
+.nl-plg { display: flex; gap: 14px; flex-wrap: wrap; font-size: var(--text-13); color: var(--color-ink-2); }
+.nl-plg span { display: inline-flex; align-items: center; gap: 6px; } .nl-plg b { color: var(--color-ink); }
+.nl-plg .sw { width: 12px; height: 12px; } .nl-plg .sw.m { border-width: 2px; border-radius: 3px; }
+.nl-vline { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 0 0 0 36px; margin: 0; list-style: none; }
+.nl-vline::before { content: ""; position: absolute; left: 12px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: linear-gradient(var(--color-gold), var(--color-a)); }
+.nl-vline li { position: relative; display: flex; flex-direction: column; min-height: 28px; justify-content: center; }
+.nl-vline .k { position: absolute; left: -36px; top: 0; width: 28px; height: 28px; display: grid; place-items: center; box-shadow: 0 0 0 3px var(--color-bg); }
+.nl-vline li.r .k { border-radius: 50%; background: var(--color-gold); color: #1a1400; font-family: var(--font-display); font-size: var(--text-11); }
+.nl-vline li.m .k { border-radius: 8px; background: var(--color-bg); border: 2px solid var(--color-a); color: var(--color-a); }
+.nl-vline li.m .k svg { width: 15px; height: 15px; }
+.nl-vline .n { font-weight: 800; font-size: var(--text-15); line-height: 1.2; }
+.nl-vline .d { font-size: var(--text-12); color: var(--color-ink-2); line-height: 1.3; }

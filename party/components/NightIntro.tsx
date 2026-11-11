@@ -4,7 +4,7 @@
    with their names and a line on each; then how to win and who starts the game. It explains itself without a
    host, and a host can talk over it. The phones show the same plan, small, and the Let's go button to the one
    who starts the night. Both modes (lib/intro.ts). */
-import { introLine, introTimes, type IntroPub } from "@/lib/intro";
+import { introLine, type IntroItem, type IntroPub } from "@/lib/intro";
 import { PLACE_PTS } from "@/lib/many/logic";
 import { useAfter } from "./Clock";
 import { useNoTv } from "./NoTv";
@@ -18,57 +18,70 @@ export function introWin(I: IntroPub) {
 }
 /* (3-8 teams: a round is one theme, as with two teams; they play two at a time: 11 Nov, the owner) */
 const roundCount = (I: IntroPub) => I.items.filter((x) => x.kind === "q").reduce((a, x) => a + (I.many ? x.rounds?.length || 1 : 1), 0);
-const qCaption = (I: IntroPub) => I.many ? "One theme a round, two questions, two rounds at a time. Every team answers every one."
-  : "One theme a round, a question for each team. Miss yours and the other team can steal it. 1 point a right answer.";
 
-/* who: what the TV's last line says (the host, or the captain who starts) */
-export function NightIntroTv({ intro: I, who }: { intro: IntroPub; who: string }) {
-  const qs = I.items.filter((x) => x.kind === "q"), ms = I.items.filter((x) => x.kind === "mini");
-  const { at, qHead, mHead, end } = introTimes(I.items);
-  const d = (s: number) => ({ animationDelay: `${s.toFixed(2)}s` });
-  const twoCols = qs.length > 0 && ms.length > 0, qWide = qs.length > 6;
-  const tight = ms.length > 7;
-  const pts = !I.many && I.miniPts ? `${I.miniPts} ${I.miniPts === 1 ? "point" : "points"} to each winner${ms.some((x) => x.game === "battle") && I.battlePts && I.battlePts !== I.miniPts ? ` (the Battle: ${I.battlePts})` : ""}` : "";
+/* THE NIGHT LINE (11 Nov, the owner picked option B, reworked): the night as a line of stops, in the order it's played,
+   wrapping onto new rows on a long night (up to 7 a row, 8 past 21, shared out evenly; an arrow at a row's end shows it
+   carries on). Gold stops are rounds (3-8 teams: two rounds, played together), blue ones mini-games with a line on what
+   each is (gone on four-row nights, so nothing gets too small). The points are a small legend in the top corner. */
+const IC: Record<string, string> = {
+  flag: "M5 21V4h11l-2 4 2 4H5", closest: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7.5a4.5 4.5 0 1 0 0 9a4.5 4.5 0 1 0 0-9",
+  auction: "M13 4l7 7-3 3-7-7zM10 10l-7 7 2 2 7-7M4 21h9", saysame: "M4 5h16v11H10l-5 4v-4H4z", say: "M4 5h16v11H10l-5 4v-4H4z",
+  map: "M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14", pin: "M12 21s7-6.3 7-11.5a7 7 0 1 0-14 0C5 14.7 12 21 12 21zM12 7a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5",
+  airport: "M10.5 3.5h2l3.5 7h4.5a1.5 1.5 0 0 1 0 3h-4.5l-3.5 7h-2l1.5-7H7.5l-2 2.5H4l1-4-1-4h1.5l2 2.5H12z", majority: "M5 20V11M12 20V4M19 20v-6",
+  dish: "M5 4h14l-7 8zM12 12v7M8 20h8", roulette: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 6.2v1.6M16.3 9.5v.01M16.3 14.5v.01M12 16.2v1.6M7.7 14.5v.01M7.7 9.5v.01",
+  battle: "M3 18h18L19 7l-4 4-3-6-3 6-4-4z" };
+export const GameIcon = ({ k }: { k: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={IC[k] || ""} /></svg>);
+const rLab = (x: IntroItem) => (x.rounds && x.rounds.length > 1 ? `R${x.rounds[0]}\u2013${x.rounds[x.rounds.length - 1]}` : `R${x.rounds?.[0] ?? x.title.replace(/\D/g, "")}`);
+const summary = (I: IntroPub) => {
+  const r = roundCount(I), m = I.items.filter((x) => x.kind === "mini").length;
+  return [r ? plural(r, "round", "rounds") : "", m ? plural(m, "mini-game", "mini-games") : ""].filter(Boolean).join(" \u00b7 ");
+};
+function Legend({ I }: { I: IntroPub }) {
+  if (I.many) return (
+    <div className="nl-legend">
+      <div className="li"><span className="sw r" /><b>Rounds</b><span>same question for every team</span></div>
+      <div className="li"><span className="sw m" /><b>Mini-games</b><span>every team plays at once</span></div>
+      <div className="places">Each one ranks the teams: {PLACE_PTS.slice(0, Math.min(I.teams, 3)).map((p, i) => <span key={i}><b>+{p}</b> {ordinal(i + 1)}{i < 2 ? " \u00b7 " : ""}</span>)}{I.teams > 3 && <>{" \u00b7 then "}<b>{PLACE_PTS.slice(3, Math.min(I.teams, 6)).map((p) => "+" + p).join(" ")}</b></>}</div>
+    </div>);
+  const m = I.miniPts ?? 2;
   return (
-    <div className="night-intro" role="region" aria-label="Tonight's game">
-      <div className="ni-top">
-        <div className="eyebrow text-20 ni-in" style={d(0.1)}>Tonight</div>
-        <div className="ni-pips" aria-hidden>
-          {I.items.map((x, i) => <span key={x.key} className={"ni-pip" + (x.kind === "mini" ? " mini" : "") + (i === 0 ? " first" : "")}
-            style={{ animationDelay: `${(at[x.key] ?? 0).toFixed(2)}s${i === 0 ? `, ${(end + 0.6).toFixed(2)}s` : ""}` }} />)}
-        </div>
+    <div className="nl-legend">
+      <div className="li"><span className="sw r" /><b>Rounds</b><span><span className="pts r">+1</span>a right answer, or a steal</span></div>
+      <div className="li"><span className="sw m" /><b>Mini-games</b><span><span className="pts m">+{m}</span>to the winner</span></div>
+    </div>);
+}
+/* who: the TV's last line ("Nour starts the game") */
+export function NightIntroTv({ intro: I, who }: { intro: IntroPub; who: string }) {
+  const k = I.items.length, maxC = k <= 21 ? 7 : 8, rows = Math.max(1, Math.ceil(k / maxC)), cols = Math.max(1, Math.ceil(k / rows)), compact = rows >= 4;
+  const d = (s: number) => ({ animationDelay: `${s.toFixed(2)}s` });
+  const step = (100 / cols);
+  return (
+    <div className="night-intro nl" role="region" aria-label="Tonight's game">
+      <div className="nl-head ni-in" style={d(0.1)}>
+        <div><div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: 16 }}>Tonight{I.many ? ` \u00b7 ${I.teams} teams` : ""}</div>
+          <div className="display nl-big">{summary(I)}</div></div>
+        <Legend I={I} />
       </div>
-      <div className={"ni-body" + (twoCols ? " two" : "")}>
-        {qs.length > 0 && (
-          <section className="ni-col" aria-label="Question rounds">
-            <div className="ni-head ni-in" style={d(qHead)}><span className="ni-glyph" aria-hidden /><span>{plural(roundCount(I), "question round", "question rounds")}</span></div>
-            <p className="ni-cap ni-in" style={d(qHead + 0.15)}>{qCaption(I)}</p>
-            <ol className={"ni-list q" + (qWide ? " cols" : "")}>
-              {qs.map((x, i) => (
-                <li key={x.key} className="ni-row ni-in" style={d(at[x.key])}>
-                  <span className="ni-n">{x.rounds?.length ? x.rounds.join("\u2013") : i + 1}</span>
-                  <span className="ni-t">{x.themes?.length ? x.themes.join(" · ") : x.title}</span>
-                </li>))}
-            </ol>
-          </section>)}
-        {ms.length > 0 && (
-          <section className="ni-col" aria-label="Mini-games">
-            <div className="ni-head ni-in" style={d(mHead)}><span className="ni-glyph mini" aria-hidden /><span>{plural(ms.length, "mini-game", "mini-games")}</span>
-              {pts && <span className="ni-pts">{pts}</span>}</div>
-            {qs.length > 0 && <p className="ni-cap ni-in" style={d(mHead + 0.15)}>In between the rounds, in the order on the bar above.</p>}
-            <ol className={"ni-list m" + (tight ? " tight" : "")}>
-              {ms.map((x) => (
-                <li key={x.key} className="ni-row ni-in" style={d(at[x.key])}>
-                  <span className="ni-t">{x.title}</span>
-                  <span className="ni-l">{introLine(x.game, I.many)}</span>
-                </li>))}
-            </ol>
-          </section>)}
-      </div>
-      <div className="ni-foot ni-in" style={d(end)}>
-        <div className="ni-win">{introWin(I)}</div>
-        <div className="ni-sub">Captains answer for their team on their phones.</div>
-        <div className="ni-go">{who}</div>
+      <ol className={"nl-body" + (compact ? " compact" : "")} aria-label="Tonight's game, in order">
+        {Array.from({ length: rows }, (_, r) => {
+          const its = I.items.slice(r * cols, (r + 1) * cols), more = r < rows - 1;
+          const left = r === 0 ? step / 2 : 0, right = more ? 0 : (cols - its.length) * step + step / 2;
+          return (
+            <li key={r} className="nl-row" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+              <span className={"nl-track" + (more ? " cont" : "")} style={{ left: `${left}%`, right: `${right}%` }} aria-hidden />
+              {its.map((x, i) => (
+                <div key={x.key} className="nl-stop ni-in" style={d(0.5 + (r * cols + i) * 0.16)}>
+                  {x.kind === "q"
+                    ? <><span className={"nl-dot r" + (x.rounds && x.rounds.length > 1 ? " two" : "")}>{rLab(x)}</span><span className="nl-nm">{(x.themes?.length ? x.themes : [x.title]).join(" + ")}</span></>
+                    : <><span className="nl-dot m"><GameIcon k={x.game} /></span><span className="nl-nm">{x.title}</span>{!compact && <span className="nl-ds">{introLine(x.game, I.many)}</span>}</>}
+                </div>))}
+            </li>);
+        })}
+      </ol>
+      <div className="nl-foot ni-in" style={d(0.6 + k * 0.16)}>
+        <span>{I.many ? "Most points at the end wins." : "Most points wins. Level at the end? Sudden death."} Captains answer on their phones.</span>
+        <b>{who}</b>
       </div>
     </div>);
 }
@@ -79,20 +92,22 @@ export function NightIntroPhone({ intro: I, go, goAt, busy, who }: { intro: Intr
   const late = useAfter(goAt ?? null);
   const noTv = useNoTv();
   if (goAt != null && !late) go = undefined;
-  const qs = I.items.filter((x) => x.kind === "q").length, ms = I.items.length - qs;
   return (
     <section className="flex flex-col gap-3 enter flex-1">
-      <div className="card text-center">
-        <div className="eyebrow">Tonight</div>
-        <h1 className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{noTv ? "Here\u2019s the plan" : "Eyes on the TV"}</h1>
-        <p className="text-14 text-[var(--color-ink-2)] mt-1">{[qs ? plural(roundCount(I), "question round", "question rounds") : "", ms ? plural(ms, "mini-game", "mini-games") : ""].filter(Boolean).join(" and ")}.{noTv ? "" : " The plan is on the TV."}</p>
+      <div>
+        <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Tonight{I.many ? ` \u00b7 ${I.teams} teams` : ""}{noTv ? "" : " \u00b7 the plan is on the TV"}</div>
+        <h1 className="display text-32 mt-1">{summary(I)}</h1>
       </div>
-      <ol className="card ni-phone" aria-label="Tonight's game, in order">
+      <div className="nl-plg">
+        {I.many ? <><span><i className="sw r" />Rounds</span><span><i className="sw m" />Mini-games</span><span>Each ranks the teams: <b>+{PLACE_PTS[0]} · +{PLACE_PTS[1]} · +{PLACE_PTS[2]}…</b></span></>
+          : <><span><i className="sw r" />Rounds <b>+1</b></span><span><i className="sw m" />Mini-games <b>+{I.miniPts ?? 2}</b></span></>}
+      </div>
+      <ol className="nl-vline" aria-label="Tonight's game, in order">
         {I.items.map((x) => (
-          <li key={x.key}>
-            <span className={"ni-glyph" + (x.kind === "mini" ? " mini" : "")} aria-hidden />
-            <span className="min-w-0"><span className="font-bold">{x.title}</span>
-              {x.themes?.length ? <span className="block text-13 text-[var(--color-ink-2)]">{x.themes.join(" · ")}</span> : null}</span>
+          <li key={x.key} className={x.kind === "q" ? "r" : "m"}>
+            <span className="k">{x.kind === "q" ? rLab(x) : <GameIcon k={x.game} />}</span>
+            <span className="n">{x.kind === "q" ? (x.themes?.length ? x.themes : [x.title]).join(" + ") : x.title}</span>
+            {x.kind === "mini" && <span className="d">{introLine(x.game, I.many)}</span>}
           </li>))}
       </ol>
       <p className="text-13 text-center text-[var(--color-ink-2)]">{introWin(I)}</p>

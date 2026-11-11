@@ -55,7 +55,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
     <div className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       <HudMany pub={pub} size="tv" code={join?.code} sound={sound} />
       {/* the night's intro, before the first game: the plan, until the host's Let's go */}
-      {pub.intro && <NightIntroTv intro={pub.intro} who="The host starts the game" />}
+      {pub.intro && <NightIntroTv intro={pub.intro} who={`${host || "The host"} starts the game`} />}
       {/* the host paused it: the question hides until the clock restarts, as with two teams */}
       {pub.screen === "q" && pub.paused && (
         <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
