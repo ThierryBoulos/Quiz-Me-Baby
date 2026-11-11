@@ -78,7 +78,8 @@ export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"
       </div>
       {/* the mini-game's own score, small, under the night's: "This game: A 1 – 2 B" */}
       {/* (not on a game's result: its picture says it) */}
-      {w && !/Summary$|^auctionResult$/.test(pub.screen) && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
+      {/* (not on a game's rules: only once it starts, so the rules have the room: 11 Nov, the owner) */}
+      {w && !/Summary$|Intro$|^auctionResult$/.test(pub.screen) && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
         <span>This game:</span><span className="nm a">{T[0].name}</span><b className="a">{w[0]}{u}</b><span aria-hidden>–</span><b className="b">{w[1]}{u}</b><span className="nm b">{T[1].name}</span>
       </div>}
     </div>);
@@ -363,7 +364,8 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
   /* the house timers, as set in Settings on the TV */
   const t = pub.timers, sec = (v: number | undefined, d: number) => `${v ?? d} seconds`;
   /* level at the end: the same choice in every mini-game */
-  const level = `Won with legs to spare? Keep playing for fun, or stop. Tied at the end? One more, or a point each. ${host ? "The host's call." : "Either captain's call (in 10 seconds, or it's a point each; keep playing, if won early)."}`;
+  /* (shorter, so every game's rules fit the TV: 11 Nov, the owner) */
+  const level = `Won early? Play on for fun, or stop. Tied? One more, or a point each${host ? ": the host's call" : ""}.`;
   switch (m.key) {
     case "closest": return [
       { text: "Both teams get the same number question at the same time." },
@@ -384,9 +386,8 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Dodged it alone? You take the leg. Both dodged or both said it? Tie, a point each." },
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     case "map": return [
-      { text: `A map goes up: no title, just the colours. ${sec(t?.map, T_MAP)}.` },
-      { text: "Both captains type what the map shows, at the same time." },
-      { text: `${host ? "The host reveals it and rules." : "It's revealed, and each captain rules on the other team's answer."} The idea counts, not the exact words. Both right? A point each. Nobody? Nobody.` },
+      { text: `A map with no title. Captains type what it shows, ${sec(t?.map, T_MAP)}.` },
+      { text: `${host ? "The host rules" : "Each captain rules on the other team's answer"}: the idea counts, not the exact words.` },
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     case "flag": return [
       { text: `A flag goes up. ${sec(t?.flag, T_FLAG)}.` },
@@ -409,12 +410,13 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Eyes on your own phone: every phone has the answers in a different order." },
       { text: `Each team scores the share of its answers that are right, so a smaller team isn't at a disadvantage. The higher share takes ${pts}.` }];
     /* Russian Roulette (9 Nov, the owner): one barrel, both captains at once, one bullet in the whole game */
+    /* (shorter, so it fits the TV; and the bullet is no secret now: everyone sees who drew it once the barrel stops,
+       11 Nov, the owner) */
     case "roulette": return [
-      { text: `The barrel spins and each team lands on its own chamber: a theme and a question. Both captains type their answer at the same time, ${sec(t?.roulette, 45)}.` },
-      { text: "One chamber holds the bullet: an Expert question. Nobody knows who has it until the reveal.", warn: true },
-      { text: "Right on Medium: 2 points. Right on Hard: 3. The bullet: right +5, wrong or no answer −3. Wrong on any other: nothing." },
-      { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}.` },
-      { text: `${n} spins, one bullet in the whole game. The most points takes ${pts}. Tied at the end? One more spin (no bullet in it), or a point each. ${host ? "The host's call." : "Either captain's call (in 10 seconds, or it's a point each)."}` }];
+      { text: `The barrel spins: each team gets its own chamber, a theme and a level. Captains type the answer, ${sec(t?.roulette, 45)}.` },
+      { text: "One chamber is the bullet, an Expert question. You see who drew it when the barrel stops.", warn: true },
+      { text: "Right: Medium 2, Hard 3. The bullet: right +5, wrong or no answer −3." },
+      { text: `${n} spins, one bullet in the game. Most points takes ${pts}. Tied? One more spin, or a point each.` }];
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },

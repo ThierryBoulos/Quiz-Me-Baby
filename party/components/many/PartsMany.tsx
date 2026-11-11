@@ -137,7 +137,7 @@ function rules(pub: PubMany): string[] {
      the place list alone never said: the 4 Nov audit, 3.8) */
   const per = k <= 4 ? `1st gets ${k} points, ${Array.from({ length: k - 1 }, (_, i) => `${place(i + 2)} ${k - i - 1}`).join(", ")}. Wrong, nothing.`
     : `1st gets ${k} points, 2nd ${k - 1}, and so on down to 1. Wrong, nothing.`;
-  const pay = `At the end of the game, the places add to the night: ${PLACE_PTS.slice(0, k).map((p, i) => `${place(i + 1)} ${p}`).join(", ")}. Score nothing in a game, add nothing.`;
+  const pay = `The game's places add to the night: ${PLACE_PTS.slice(0, k).map((p, i) => `${place(i + 1)} ${p}`).join(", ")}. Score nothing, add nothing.`;
   const fast = `Fastest right answer first: ${per}`;
   switch (g.key) {
     case "majority": return [
@@ -148,7 +148,7 @@ function rules(pub: PubMany): string[] {
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
     case "flag": return ["A flag goes up. Captains type the country on their phone.", fast, pay];
     case "airport": return ["A departures board goes up. Captains type which airport it is.", fast, pay];
-    case "map": return ["A map goes up with some places marked. Captains type what they have in common.", fast, pay];
+    case "map": return ["A map with places marked. Captains type what they have in common.", fast, pay];
     case "closest": return ["A question with a number for an answer. Captains type their best guess.", `Closest guess first: ${per}`, pay];
     case "pin": return ["A photo of a famous place. Captains drop a pin on the map where they think it is.", `Closest pin first: ${per}`, pay];
     case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
@@ -156,10 +156,11 @@ function rules(pub: PubMany): string[] {
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
       "One guess per team. A wrong guess puts you out of that one.", fast, pay];
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
-    case "roulette": return ["The barrel spins and every team lands on its own chamber: a theme and a question. Captains type the answer.",
-      "One chamber holds the bullet: an Expert question. Nobody knows who has it until the reveal.",
-      "Right on Medium: 2 points. Right on Hard: 3. The bullet: right +5, wrong or no answer −3.",
-      `${n} spins. The most points wins the game. ${pay}`];
+    /* (shorter; the bullet is no secret now: everyone sees who drew it once the barrel stops, 11 Nov, the owner) */
+    case "roulette": return ["The barrel spins: every team gets its own chamber, a theme and a level. Captains type the answer.",
+      "One chamber is the bullet, an Expert question. You see who drew it when the barrel stops.",
+      "Right: Medium 2, Hard 3. The bullet: right +5, wrong or no answer −3.",
+      `${n} spins. ${pay}`];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
       /* (7 Nov, the owner: what sudden death means, said before it starts, as with two teams) */
       return [`${names} are tied at the top: sudden death.`, "One question at a time, and only their captains answer: type it and send it. The first right answer wins the night.",

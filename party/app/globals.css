@@ -679,8 +679,10 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 @media (prefers-reduced-motion: reduce) { .steal-beam, .lead-banner, .roll-ring, .win-ring, .win-flash, .ruler-band { display: none; } }
 
 /* ---- phase 6 (29 Oct): the glow between questions, the flame, Imad's moves, the chart ---- */
-.tv-glow { position: absolute; inset: 0; z-index: -1; pointer-events: none; transition: opacity 1.4s ease;
-  background: radial-gradient(60% 55% at 50% 100%, color-mix(in srgb, var(--c) 26%, transparent), transparent 70%);
+/* (past the game's 16:9 frame on every side, so on a screen of another shape, a 16:10 laptop, it has no edge and no
+   dark band under it: 11 Nov, the owner) */
+.tv-glow { position: absolute; inset: -30% -20%; z-index: -1; pointer-events: none; transition: opacity 1.4s ease;
+  background: radial-gradient(45% 40% at 50% 80%, color-mix(in srgb, var(--c) 26%, transparent), transparent 75%);
   animation: glowBreathe 5s ease-in-out infinite; }
 @keyframes glowBreathe { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.06); filter: brightness(1.25); } }
 .flame { display: inline-block; font-size: .8em; margin: 0 6px; transform-origin: 50% 90%; animation: flameFlicker .7s ease-in-out infinite alternate; filter: drop-shadow(0 0 8px rgba(255,140,0,.8)); }
@@ -749,8 +751,10 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 .bubble-pop { animation: bubblePop .5s cubic-bezier(.34,1.56,.64,1) both; }
 @keyframes bubblePop { from { opacity: 0; transform: scale(.2); } to { opacity: 1; transform: none; } }
 .lectern-in { animation: flagHoist .6s var(--ease) both; }
-.lectern-spot { position: absolute; left: 50%; top: -60px; width: 240%; height: calc(100% + 60px); transform: translateX(-50%); pointer-events: none;
-  background: radial-gradient(ellipse 50% 70% at 50% 0%, rgba(255,236,170,.28), transparent 70%); }
+/* (the light comes down from above the header and fades in, with no straight edge where it starts: 11 Nov, the owner) */
+.lectern-spot { position: absolute; left: 50%; top: -220px; width: 240%; height: calc(100% + 220px); transform: translateX(-50%); pointer-events: none;
+  background: radial-gradient(ellipse 50% 75% at 50% 18%, rgba(255,236,170,.26), transparent 72%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%); mask-image: linear-gradient(to bottom, transparent, #000 45%); }
 /* a result's reveal: a team comes in at its turn (the last place first, the winner last), and the line under the picture after */
 .rv { animation: rvIn .55s var(--ease) both; }
 @keyframes rvIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }

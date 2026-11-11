@@ -15,7 +15,9 @@ export type RrLap = { ch: RrChamber[]; bullet: number; blank?: boolean; draw?: n
 export type RrPub = {
   n: number; lap: number; laps: number;           // chambers; this lap (1, 2, 3; 4 on: a tie-breaker) of laps
   spinAt: number | null;                          // TV time the barrel started spinning (the question's up SPIN_MS later)
-  draw: { j: number; theme: string; q: string }[];   // per team
+  draw: { j: number; theme: string; q: string; level: string }[];   // per team; level: medium, hard, or "bullet" (shown from the spin on: 11 Nov, the owner)
+  hit: number;                                    // the team that drew the bullet this lap (-1: nobody); everyone sees it once the barrel stops
+  blank?: boolean;                                // a tie-breaker spin: no bullet in it
   pts: number[];                                  // the game's points before this lap
   rev?: { bullet: number; level: string[]; answer: string[]; notes: (string | undefined)[]; got: number[]; hit: number };   // hit: the team that drew the bullet, -1 none
 };
@@ -24,9 +26,10 @@ export const rrWorth = (lap: RrLap, t: number, ok: boolean): number => (lap.draw
 export const rrGot = (lap: RrLap, pts: number[], ok: (boolean | null)[]): number[] =>
   pts.map((_, t) => rrWorth(lap, t, !!ok[t]));   // (the bullet costs 3 whatever the total: it can go below 0)
 export function rrPub(lap: RrLap, i: number, laps: number, n: number, pts: number[], spinAt: number | null, ok: (boolean | null)[] | null): RrPub {
-  const draw = (lap.draw || []).map((j) => ({ j, theme: lap.ch[j].theme, q: String(lap.ch[j].q?.question || "") }));
-  const p: RrPub = { n, lap: i + 1, laps, spinAt, draw, pts: [...pts] };
-  if (ok && lap.draw) p.rev = { bullet: lap.blank ? -1 : lap.bullet, level: lap.draw.map((j) => (j === lap.bullet && !lap.blank ? "bullet" : lap.ch[j].level === "expert" ? "hard" : lap.ch[j].level)),
+  const lvl = (j: number) => (j === lap.bullet && !lap.blank ? "bullet" : lap.ch[j].level === "expert" ? "hard" : lap.ch[j].level);
+  const draw = (lap.draw || []).map((j) => ({ j, theme: lap.ch[j].theme, q: String(lap.ch[j].q?.question || ""), level: lvl(j) }));
+  const p: RrPub = { n, lap: i + 1, laps, spinAt, draw, pts: [...pts], hit: lap.blank || !lap.draw ? -1 : lap.draw.indexOf(lap.bullet), blank: !!lap.blank || undefined };
+  if (ok && lap.draw) p.rev = { bullet: lap.blank ? -1 : lap.bullet, level: lap.draw.map(lvl),
     answer: lap.draw.map((j) => String(lap.ch[j].q?.answer ?? "")), notes: lap.draw.map((j) => lap.ch[j].q?.notes || undefined),
     got: rrGot(lap, pts, ok), hit: lap.blank ? -1 : lap.draw.indexOf(lap.bullet) };
   return p;
