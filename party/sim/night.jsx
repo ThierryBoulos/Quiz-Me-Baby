@@ -192,7 +192,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     const pub = fake.db.rooms[0].state?.pub, g = api.current?.game;
     if (chaos) checkAcks();
-    if (check && pub) { const bad = check(pub, clock(), document.visibilityState); if (bad) { outcome = "broken"; stuckOn = bad; break; } }
+    if (check && pub) { const bad = check(pub, clock(), document.visibilityState, fake.db.secrets[0]?.data); if (bad) { outcome = "broken"; stuckOn = bad; break; } }
     if (!pub || !g) continue;
     /* chaos: now and then a captain taps something at the wrong moment */
     if (chaos && bot() < chaos) {

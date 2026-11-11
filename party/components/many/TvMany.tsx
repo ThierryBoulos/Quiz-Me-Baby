@@ -204,7 +204,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {pub.screen === "reveal" && g && R && g.key === "pin" && R.at && (
           <div className="flex gap-10 items-center w-full">
             <div className="flex-1 min-w-0"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
-              ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
+              ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
               fly height={430} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
             <div className="w-[400px] shrink-0 flex flex-col items-center gap-3">
               <div className="eyebrow text-18">It&rsquo;s here</div>

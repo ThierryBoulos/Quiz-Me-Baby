@@ -854,7 +854,8 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     /* a row for each team that answered: the team asked, then the steal */
     /* (the host: Change in each row, which flips the call, as the list under it used to) */
     const rows = (pub.calls || []).map((c) => row(c.team, c.text || "No answer", c.text && !c.skipped ? c.ok : null, <Pts n={by === c.team && c.ok ? Rr.pts : 0} />,
-      host && act ? <span className="flex items-center gap-2">{c.note && <span>{c.note}</span>}{c.changed && <span style={{ color: "var(--color-gold)" }}>host&rsquo;s call</span>}
+      /* (wraps under the answer on a narrow phone: on a 360-wide one it ran over the points, 11 Nov) */
+      host && act ? <span className="flex flex-wrap items-center gap-x-2">{c.note && <span>{c.note}</span>}{c.changed && <span style={{ color: "var(--color-gold)" }}>host&rsquo;s call</span>}
         <button type="button" className="text-13 font-bold underline underline-offset-4 min-h-[32px]" style={{ color: "var(--color-ink-2)" }} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button></span> : c.note));
     return (<>{top}{rows.length > 0 && <ResultTable rows={rows} head={["Said", "Pts"]} />}
       {quiet && <p className="text-center text-13 text-[var(--color-ink-3)]">{quiet}</p>}</>);

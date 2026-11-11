@@ -62,7 +62,8 @@ export const unitOf = (key: string) => UNIT[key] || "Question";
 export function HudMany({ pub, size, code, me, host, sound = false }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean; sound?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
-    ? <><b>{g.title}</b> &nbsp;·&nbsp; {g.key === "sudden" ? (pub.screen === "intro" ? "Tie at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</>
+    /* (each part whole: on a narrow phone the line breaks at the dot, never inside the game's name) */
+    ? <><b className="inline-block">{g.title}</b> &nbsp;·&nbsp; <span className="inline-block">{g.key === "sudden" ? (pub.screen === "intro" ? "Tie at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</span></>
     : null;
   /* a pip a game, as the two-team night's: a dot a question round, a dash a mini-game (the owner, 1 Nov) */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];

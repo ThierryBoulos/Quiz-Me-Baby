@@ -22,7 +22,8 @@ export function AnswerLine({ question, answer, fact, label, media }: { question?
       {media}
       {label && <div className="eyebrow">{label}</div>}
       {answer != null && answer !== "" && <div className="ans-board sm display leading-none" style={{ color: "var(--color-gold)", fontSize: typeof answer === "string" && answer.length > 22 ? 28 : 40 }}>{answer}</div>}
-      {fact && <p className="text-13 text-[var(--color-ink-3)] leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{fact}</p>}
+      {/* (the whole note: the TV shows only whole sentences of it, the phones all of it, 11 Nov) */}
+      {fact && <p className="text-13 text-[var(--color-ink-3)] leading-snug">{fact}</p>}
     </div>);
 }
 

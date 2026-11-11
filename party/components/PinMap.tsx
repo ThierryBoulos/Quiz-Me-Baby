@@ -65,7 +65,7 @@ export const preloadWorld = () => { void load("far").then(() => load("near")).ca
 
 /* ---- drawing ---- */
 type View = { cx: number; cy: number; s: number };   // the world point at the centre, and pixels per world unit
-export type Mark = { at: LatLon; kind: "pin" | "truth"; color: string; label?: string };
+export type Mark = { at: LatLon; kind: "pin" | "truth"; color: string; label?: string; letter?: string };   /* letter: the team's, in the pin's head */
 const SEA = "#0B1030", LAND = "#2B3152", COAST = "rgba(170,182,255,.30)", BORDER = "#0B1030", RIVER = "rgba(96,132,255,.55)";
 
 /* A path through a run of points, only as much of it as the screen needs. A stretch that stays
@@ -126,7 +126,7 @@ function drawWorld(ctx: CanvasRenderingContext2D, L: Lvl, V: View, W: number, H:
 }
 
 /* a pin: a drop in its team's colour, its tip exactly on the spot */
-function drawPin(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, k: number) {
+function drawPin(ctx: CanvasRenderingContext2D, x: number, y: number, color: string, k: number, letter?: string) {
   const r = 11 * k, cy = y - 2.3 * r;
   ctx.beginPath();
   ctx.moveTo(x, y);
@@ -136,7 +136,9 @@ function drawPin(ctx: CanvasRenderingContext2D, x: number, y: number, color: str
   ctx.closePath();
   ctx.fillStyle = color; ctx.fill();
   ctx.lineWidth = 2 * k; ctx.strokeStyle = "#fff"; ctx.stroke();
-  ctx.beginPath(); ctx.arc(x, cy, r * 0.38, 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.beginPath(); ctx.arc(x, cy, r * (letter ? 0.62 : 0.38), 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill();
+  /* (five teams or more: the team's letter in the head, as on the list beside the map; the names go: 11 Nov, the owner) */
+  if (letter) { ctx.font = `800 ${r * 0.95}px ${getComputedStyle(document.body).fontFamily || "system-ui, sans-serif"}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#04050e"; ctx.fillText(letter, x, cy + r * 0.04); }
   ctx.beginPath(); ctx.arc(x, y, 2.2 * k, 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill();
 }
 /* where it really is: a gold star in a ring */
@@ -249,7 +251,7 @@ export function PinMap({ value, onChange, color = "#31c9f7", marks, fly, height,
         const [a, b] = at(truth.at), [x, y] = at(m.at);
         ctx.setLineDash([7 * k, 6 * k]); ctx.lineWidth = 2.4 * k; ctx.strokeStyle = m.color; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(x, y); ctx.stroke(); ctx.setLineDash([]);
       }
-      for (const m of marks) { if (m.kind === "pin") { const [x, y] = at(m.at); drawPin(ctx, x, y, m.color, k); } }
+      for (const m of marks) { if (m.kind === "pin") { const [x, y] = at(m.at); drawPin(ctx, x, y, m.color, k, m.letter); } }
       /* the pins' heads are taken; then the names, each where it fits */
       const r = 11 * k, taken: Rect[] = marks.filter((m) => m.kind === "pin").map((m) => { const [x, y] = at(m.at); return [x - r - 2, y - 3.4 * r, x + r + 2, y + 2]; });
       if (!bare) taken.push([0, 0, 150 * k, 40 * k]);   /* (the scale bar's corner, top left) */

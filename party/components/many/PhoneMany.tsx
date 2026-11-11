@@ -194,7 +194,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         media={g.key === "flag" ? <FlagImg name={pub.flag} h={96} />
           : g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={180} legend={false} />
           : g.key === "pin" && R.at ? <div className="w-full"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
-            ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
+            ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
             fly height={220} label={`Where it is: ${R.place}`} /></div> : null}
         label={g.key === "say" ? "The app's secret answer" : undefined}
         answer={g.key === "closest" ? showNum(Number(R.answer)) : R.answer} fact={R.place || R.notes} />
