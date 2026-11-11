@@ -144,9 +144,13 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   theme (Friends, Rave Culture, Geek & Gamer…), Sexy Time or Lebanon only on a night that picked it; never Know the
   Host or the host's own themes. Each barrel is 6 chambers (8 with 7 or 8 teams), each its own theme: one bullet
   (an **Expert** question: +5 right, −3 wrong) and the rest **Medium** (+2) and **Hard** (+3). So every broad theme
-  needs Medium, Hard and Expert questions, and enough of them for several barrels; a theme short of a level gets
-  the nearest one instead (Expert → Hard, Hard → Medium, Medium → Hard). The level is shown on the chamber before
-  the spin, so it has to be right.
+  needs Medium, Hard and Expert questions, and enough of them for several barrels. The bullet is always Expert (11
+  Nov, the owner): from a theme with an unplayed Expert question, played ones only when no theme has one, never a
+  Hard instead. A Medium or Hard chamber short of its level takes the one next to it (Hard → Medium, Medium →
+  Hard). The level is shown on the chamber before the spin, so it has to be right.
+- **Question rounds running short** (11 Nov, the owner): a round keeps its theme. Unplayed at its level first, then
+  unplayed one level easier, then one harder, then played ones; never two levels away, never another theme. Setup
+  warns when a picked theme can't fill its round at the level picked.
 - **Flags**: only flags whose name isn't written on the flag.
 - **Know the Host**: only with a host; wording leaves one answer ("secondary school").
 
