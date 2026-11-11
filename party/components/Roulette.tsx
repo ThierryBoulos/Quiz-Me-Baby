@@ -164,10 +164,11 @@ export const rrWorthWord = (level: string) => (level === "bullet" ? "+5 or −3"
 export const signed = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0");
 
 /* a chip for a chamber's level, gold for the bullet */
-export function LevelChip({ level, small }: { level: string; small?: boolean }) {
+export function LevelChip({ level, small, short }: { level: string; small?: boolean; short?: boolean }) {
   const b = level === "bullet";
+  /* (short: "Bullet · Expert", where a row is narrow, two columns of teams) */
   /* what it pays, in green and red (11 Nov, the owner: the bullet's +5 and −3 said where it's shown, not only in the rules) */
-  return <span className={"rr-chip" + (b ? " bullet" : "") + (small ? " sm" : "")}>{rrLevelWord(level)}
+  return <span className={"rr-chip" + (b ? " bullet" : "") + (small ? " sm" : "")}>{b && short ? "Bullet · Expert" : rrLevelWord(level)}
     {b ? <><b className="rr-pt ok">+5</b><b className="rr-pt no">−3</b></> : <b className="rr-pt ok">{level === "medium" ? "+2" : "+3"}</b>}</span>;
 }
 export function RrNote({ children }: { children: ReactNode }) { return <p className="rr-note">{children}</p>; }
@@ -216,7 +217,8 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
         </div>
         {(spun || R) && (
           /* (7 or 8 teams at the reveal: two columns, so it all sits under the bar at the top) */
-          <div className={cols ? "grid grid-cols-2" : "flex flex-col"} style={{ gap: tight ? 6 : dense ? 6 : 10 }} role="list" aria-label="Each team's chamber">
+          /* (every row the same height and width, whatever is in it: the tallest sets them all, the owner, 11 Nov) */
+          <div className={"grid " + (cols ? "grid-cols-2" : "grid-cols-1")} style={{ gap: tight ? 6 : dense ? 6 : 10, gridAutoRows: "1fr" }} role="list" aria-label="Each team's chamber">
             {rr.draw.map((d, t) => { const T = teams[t], lv = R?.level[t], got = R?.got[t] ?? 0, x = typed?.[t], v = ok?.[t];
               return (
                 <div key={t} role="listitem" className={"rr-row" + (R ? " rr-late" : " enter") + (R && t === hit ? " bang" : "")} style={{ ["--c" as string]: T.color, ["--rr-at" as string]: `${stepOf(t) * STEP_MS + 250}ms`, padding: tight ? "4px 12px" : dense ? "6px 12px" : undefined }}>
@@ -224,10 +226,11 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
                   <div className="min-w-0 flex flex-col">
                     {/* (two columns: the team by its lettered dot and colour, no name, so the answers have the room: the
                         owner, 11 Nov) */}
-                    <div className="flex items-center gap-2 flex-wrap" style={{ fontSize: tight ? 16 : dense ? 18 : 22 }}>
-                      {!cols && <b className="truncate" style={{ color: T.color }}><bdi>{T.name}</bdi></b>}
-                      <span className={cols ? "font-bold" : "text-[var(--color-ink-2)]"} style={cols ? { color: T.color } : undefined}>{cols ? d.theme : <>· {d.theme}</>}</span>
-                      <LevelChip level={lv || d.level} small={dense} />
+                    {/* (one line: the name and theme give way, the level chip never wraps under them) */}
+                    <div className="flex items-center gap-2 min-w-0 whitespace-nowrap" style={{ fontSize: tight ? 16 : dense ? 18 : 22 }}>
+                      {!cols && <b className="truncate min-w-0" style={{ color: T.color, flexShrink: 2 }}><bdi>{T.name}</bdi></b>}
+                      <span className={"truncate min-w-0 " + (cols ? "font-bold" : "text-[var(--color-ink-2)]")} style={cols ? { color: T.color } : undefined}>{cols ? d.theme : <>· {d.theme}</>}</span>
+                      <span className="shrink-0"><LevelChip level={lv || d.level} small={dense} short={cols} /></span>
                     </div>
                     {showQs && !R && <div className="font-bold leading-snug" style={{ fontSize: d.q.length > 120 ? 22 : 26 }}>{d.q}</div>}
                     {R && <div className="leading-snug truncate" style={{ fontSize: tight ? 16 : dense ? 18 : 22 }}>

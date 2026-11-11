@@ -129,10 +129,11 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
               eight in two rows (the owner, 30 Oct: as the 3-8 team end, no nutshell: its facts are awards now) */}
           {recap && pub.recap && ((pub.recap.segs?.length ?? 0) > 1 || (pub.recap.chart?.length ?? 0) > 2) && (
             <div className="flex justify-center w-full enter" style={{ position: "relative", zIndex: 60 }}><NightChart pub={pub} short={(pub.recap.awards?.length ?? 0) > 4} /></div>)}
-          {recap && (pub.recap?.awards?.length ?? 0) > 0 && (() => { const A = pub.recap!.awards!, cols = A.length <= 4 ? A.length : Math.ceil(A.length / 2); return (
-            <div className="flex flex-wrap justify-center gap-3 enter w-full max-w-[1168px]" style={{ position: "relative", zIndex: 60 }}>
-              {A.map((a) => (
-                <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ width: `calc((100% - ${(cols - 1) * 12}px) / ${cols})`, borderColor: a.team != null ? tc(a.team) : undefined }}>
+          {/* (every card the same size, both rows; a short last row centred: the owner, 11 Nov) */}
+          {recap && (pub.recap?.awards?.length ?? 0) > 0 && (() => { const A = pub.recap!.awards!, cols = A.length <= 4 ? A.length : Math.ceil(A.length / 2), rem = A.length % cols, last = A.length - rem; return (
+            <div className="grid gap-3 enter w-full max-w-[1168px]" style={{ gridTemplateColumns: `repeat(${cols * 2}, minmax(0, 1fr))`, gridAutoRows: "1fr", position: "relative", zIndex: 60 }}>
+              {A.map((a, i) => (
+                <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ gridColumn: rem && i === last ? `${cols - rem + 1} / span 2` : "span 2", borderColor: a.team != null ? tc(a.team) : undefined }}>
                   <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
                   <div className="text-15 font-bold leading-snug" style={{ color: a.team != null ? tc(a.team) : undefined }}><bdi>{a.who}</bdi></div>
                   {a.note && <div className="text-18 text-[var(--color-ink-2)] italic line-clamp-2">{a.note}</div>}
