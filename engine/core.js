@@ -906,6 +906,9 @@
       /* Russian Roulette's barrels, last: clear of everything else tonight (6 chambers; 8 with 7 or 8 teams) */
       const rrN = cfg.rouletteChambers === 8 ? 8 : 6;
       const rrDeck = asked('roulette') ? rouletteDeck(cfg, rrN, ROULETTE_LAPS + ROULETTE_SPARE, inNight) : [];
+      const rrOne = !cfg.rouletteChambers && rrDeck.length >= ROULETTE_LAPS;
+      const rrQs = rrOne ? Array.from({ length:ROULETTE_LAPS }, () => ({ ch:rrDeck[0].ch, bullet:rrDeck[0].bullet, bid:0 })) : rrDeck.slice(0, ROULETTE_LAPS);
+      const rrSpareQs = rrOne ? rrDeck.slice(1) : rrDeck.slice(ROULETTE_LAPS);
 
       const mk = (t, color) => ({
         name:t.name, captain:t.captain, players:t.players,
@@ -952,7 +955,9 @@
         majorityGame:{ levels:mrLevels, qs:mrDeck.slice(0, MAJORITY_N), spare:mrDeck.slice(MAJORITY_N), base:Math.min(MAJORITY_N, mrDeck.length), i:0, wins:[0, 0], n:[0, 0], right:[0, 0], of:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
         /* Russian Roulette: qs its laps (a barrel each); pts the game's own points; had: each team's themes so far;
            bulletLap: with two teams, the one lap the bullet lands in a team's chamber; fired: bullets that hit a team */
-        rouletteGame:{ n:rrN, qs:rrDeck.slice(0, ROULETTE_LAPS), spare:rrDeck.slice(ROULETTE_LAPS), base:Math.min(ROULETTE_LAPS, rrDeck.length), i:0,
+        /* (two teams play one barrel all game, two chambers a spin, so the bullet is drawn by the third: 11 Nov, the
+           owner. 3-8 teams draw too many chambers a spin for that: a new barrel each spin) */
+        rouletteGame:{ n:rrN, qs:rrQs, spare:rrSpareQs, base:Math.min(ROULETTE_LAPS, rrDeck.length), i:0,
           wins:[0, 0], pts:[0, 0], had:[[], []], bulletLap:rrDeck.length ? Math.floor(rand() * Math.min(ROULETTE_LAPS, rrDeck.length)) : 0, fired:0,
           subs:[], done:false, awarded:false, tieLegs:0 },
         auction:null,
@@ -1096,13 +1101,18 @@
   }
   /* the spin: lap.draw[t], the chamber team t lands on. The bullet first (in a team's chamber k times in n, where it
      falls), then the rest at random; a team that has already had a chamber's theme this game gets another if it can */
-  function rouletteSpin(lap, k, hit, had, shuffle){
+  /* used: chambers already drawn from this barrel (two teams play one barrel all game: 11 Nov, the owner) */
+  function rouletteSpin(lap, k, hit, had, shuffle, used){
     shuffle = shuffle || shuffleWith;
     const n = lap.ch.length, b = lap.bullet, idx = (m) => Array.from({ length:m }, (_, j) => j);
-    const bulletIn = k >= n || (hit === true ? true : hit === false ? false : shuffle(idx(n))[0] < k);
+    const free = idx(n).filter(j => !(used || []).includes(j)), hasB = free.includes(b);
+    /* in a team's chamber: as the lap says (hit), else k times in the chambers left; and always when there's no other
+       chamber left for a team (the barrel's last spin) */
+    let bulletIn = hasB && (hit === true || (hit == null && shuffle(free.slice()).indexOf(b) < k));
+    if(hasB && free.length - 1 < k) bulletIn = true;
     let best = null;
     for(let x = 0; x < 16; x++){
-      const rest = shuffle(idx(n).filter(j => j !== b)), who = bulletIn ? shuffle(idx(k))[0] : -1;
+      const rest = shuffle(free.filter(j => j !== b)), who = bulletIn ? shuffle(idx(k))[0] : -1;
       const draw = idx(k).map(t => (t === who ? b : rest.shift()));
       const rep = draw.filter((j, t) => ((had && had[t]) || []).indexOf(lap.ch[j].theme) > -1).length;
       if(!best || rep < best.rep) best = { draw, rep };
@@ -1117,11 +1127,17 @@
     return ok ? (lap.ch[j].level === 'medium' ? 2 : 3) : 0;
   }
   /* two teams: the lap on now, spun and up */
+  /* the chambers already drawn from this lap's barrel (the laps sharing it: bid) */
+  function rouletteUsed(s, i){
+    const lap = s.qs[i];
+    if(!lap || lap.bid == null) return [];
+    return s.qs.slice(0, i).filter(l => l && l.bid === lap.bid).reduce((a, l) => a.concat(l.draw || []), []);
+  }
   function rouletteGo(g, env, fx){
     const s = g.rouletteGame, lap = s.qs[s.i], D = env && env.deal;
     /* (a tie-breaker spin has no bullet: 9 Nov, the owner) */
     if(s.i >= s.base) lap.blank = true;
-    lap.draw = rouletteSpin(lap, 2, s.i >= s.base ? false : rouletteHit(s, 2), s.had, D && D.shuffle);
+    lap.draw = rouletteSpin(lap, 2, s.i >= s.base ? false : rouletteHit(s, 2), s.had, D && D.shuffle, rouletteUsed(s, s.i));
     fx.push({ go:'rouletteQ' });
     return fx;
   }
@@ -2028,7 +2044,12 @@
     'roulette/swap'(g, a, env){
       const s = g.rouletteGame;
       if(!s.spare.length) return [{ toast:'No other barrel left.' }];
-      s.qs[s.i] = s.spare.shift();
+      const lap = s.qs[s.i], b = s.spare.shift();
+      /* one barrel all game (two teams): the new one serves this spin and the ones after it, as the old one did */
+      if(lap && lap.bid != null && s.i < s.base){
+        const bid = lap.bid + 1;
+        for(let x = s.i; x < s.base; x++) s.qs[x] = { ch:b.ch, bullet:b.bullet, bid };
+      } else s.qs[s.i] = b;
       return [{ toast:'New barrel, new spin.' }].concat(rouletteGo(g, env, []));
     },
     /* ok: each team's call as it stands. The lap's points (the bullet wrong costs 3, whatever the total), then the next lap */

@@ -413,10 +413,10 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
     /* (shorter, so it fits the TV; and the bullet is no secret now: everyone sees who drew it once the barrel stops,
        11 Nov, the owner) */
     case "roulette": return [
-      { text: `The barrel spins: each team gets its own chamber, a theme and a level. Captains type the answer, ${sec(t?.roulette, 45)}.` },
-      { text: "One chamber is the bullet, an Expert question. You see who drew it when the barrel stops.", warn: true },
-      { text: "Right: Medium 2, Hard 3. The bullet: right +5, wrong or no answer −3." },
-      { text: `${n} spins, one bullet in the game. Most points takes ${pts}. Tied? One more spin, or a point each.` }];
+      { text: `The barrel spins: each team lands on a chamber, with its theme and level. Captains type the answer, ${sec(t?.roulette, 45)}.` },
+      { text: `Every chamber is on show before the spin. One is the bullet, an Expert question. The same barrel all game: someone draws it by spin ${n}.`, warn: true },
+      { text: "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3." },
+      { text: `${n} spins. Most points takes ${pts}. Tied? One more spin, or a point each.` }];
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },

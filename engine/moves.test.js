@@ -705,7 +705,9 @@ function roulette(over, seed){
 test('roulette: each barrel six themes, one bullet (Expert), three Medium and two Hard; never the host\'s own theme', () => {
   const { g } = roulette();
   const s = g.rouletteGame;
-  assert.equal(s.qs.length, 3); assert.equal(s.spare.length, 3); assert.equal(s.n, 6);
+  /* (two teams: one barrel for the three spins, five more held back: 11 Nov, the owner) */
+  assert.equal(s.qs.length, 3); assert.equal(s.spare.length, 5); assert.equal(s.n, 6);
+  assert.ok(s.qs.every(l => l.bid === 0 && l.ch === s.qs[0].ch && l.bullet === s.qs[0].bullet));
   for(const lap of s.qs.concat(s.spare)){
     assert.equal(lap.ch.length, 6);
     assert.equal(new Set(lap.ch.map(c => c.theme)).size, 6);
@@ -735,7 +737,9 @@ test('roulette: two teams — exactly one bullet hits in the three laps; points 
 });
 test('roulette: the most points wins the 2; level: one more lap or a point each', () => {
   const { g, env } = roulette(), s = g.rouletteGame;
-  s.bulletLap = -1;                                                       // (no bullet hits: all wrong is level at 0)
+  /* (no bullet hits, all wrong, is level at 0: a barrel a spin, as with 3-8 teams; one barrel all game always fires) */
+  s.qs = [s.qs[0], ...s.spare.splice(0, 2)].map(l => ({ ch:l.ch, bullet:l.bullet }));
+  s.bulletLap = -1;
   Q.play(g, { type:'roulette/start' }, env);
   let fx;
   for(let l = 0; l < 3; l++) fx = Q.play(g, { type:'roulette/verdict', ok:[false, false] }, env);
@@ -752,6 +756,7 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   assert.equal(g.teams[0].score, 2); assert.ok(lap.got[0] > 0);
   /* a point each */
   const b = roulette(), t = b.g.rouletteGame;
+  t.qs = [t.qs[0], ...t.spare.splice(0, 2)].map(l => ({ ch:l.ch, bullet:l.bullet }));
   t.bulletLap = -1;
   Q.play(b.g, { type:'roulette/start' }, b.env);
   for(let l = 0; l < 3; l++) Q.play(b.g, { type:'roulette/verdict', ok:[false, false] }, b.env);
@@ -760,6 +765,23 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   assert.ok(types(fx).includes('go:rouletteSummary'));
   Q.play(b.g, { type:'roulette/done' }, b.env);
   assert.equal(b.g.done.roulette, true);
+});
+test('roulette: two teams play one barrel — six different chambers over the three spins, the bullet drawn exactly once, at any spin', () => {
+  const at = [0, 0, 0];
+  for(let seed = 1; seed < 60; seed++){
+    const { g, env } = roulette({}, seed), s = g.rouletteGame;
+    Q.play(g, { type:'roulette/start' }, env);
+    const seen = [];
+    let hits = 0;
+    for(let l = 0; l < 3; l++){
+      const lap = s.qs[s.i];
+      lap.draw.forEach(j => { assert.ok(seen.indexOf(j) < 0, 'a chamber drawn twice'); seen.push(j); });
+      if(lap.draw.indexOf(lap.bullet) > -1){ hits++; at[l]++; }
+      Q.play(g, { type:'roulette/verdict', ok:[false, false] }, env);
+    }
+    assert.equal(seen.length, 6); assert.equal(hits, 1);
+  }
+  assert.ok(at.every(n => n > 0), 'the bullet comes at every spin over the seeds: ' + at);
 });
 test('roulette: three teams or more — every spin lands each team on its own chamber; at least one bullet fires', () => {
   for(let k = 3; k <= 8; k++){

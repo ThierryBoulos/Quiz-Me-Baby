@@ -157,9 +157,9 @@ function rules(pub: PubMany): string[] {
       "One guess per team. A wrong guess puts you out of that one.", fast, pay];
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
     /* (shorter; the bullet is no secret now: everyone sees who drew it once the barrel stops, 11 Nov, the owner) */
-    case "roulette": return ["The barrel spins: every team gets its own chamber, a theme and a level. Captains type the answer.",
-      "One chamber is the bullet, an Expert question. You see who drew it when the barrel stops.",
-      "Right: Medium 2, Hard 3. The bullet: right +5, wrong or no answer −3.",
+    case "roulette": return ["The barrel spins: every team lands on a chamber, with its theme and level. Captains type the answer.",
+      "Every chamber is on show before the spin. One is the bullet, an Expert question. A new barrel every spin.",
+      "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3.",
       `${n} spins. ${pay}`];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
       /* (7 Nov, the owner: what sudden death means, said before it starts, as with two teams) */

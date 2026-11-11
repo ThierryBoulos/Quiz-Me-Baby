@@ -161,7 +161,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       p.mini.wins = (rev ? rrGot(lap!, m.pts, s.ok).map((v, t) => m.pts[t] + v) : [...m.pts]) as Two<number>;
       if (p.summary) p.summary.wins = [...m.pts] as Two<number>;
       if ((s.screen === "rouletteQ" || s.screen === "rouletteReveal") && lap?.draw) {
-        p.roulette = rrPub(lap, m.i, m.base, m.n || lap.ch.length, m.pts, s.screen === "rouletteQ" ? s.spinAt : null, rev ? s.ok : null);
+        p.roulette = rrPub(lap, m.i, m.base, m.n || lap.ch.length, m.pts, s.screen === "rouletteQ" ? s.spinAt : null, rev ? s.ok : null, m.qs.slice(0, m.i));
         const qs = [rrQ(lap, 0), rrQ(lap, 1)];
         p.qid = secret.qid = qk(s, `rr${m.i}:${qs.map((x: G) => x?.id).join(",")}`);
         secret.answers = [String(qs[0]?.answer ?? ""), String(qs[1]?.answer ?? "")];
