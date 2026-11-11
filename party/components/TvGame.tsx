@@ -143,7 +143,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
       </div>
 
       {pub.lifeline && (
-        <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", backdropFilter: "blur(12px)", zIndex: 20 }}>
+        <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
           <div className="text-center">
             <div className="eyebrow text-20">Lifeline · {T[pub.lifeline.team].name}</div>
             <div className="display mt-3" style={{ fontSize: 110, color: "var(--color-gold)" }}>{pub.lifeline.key === "friend" ? "Calling a friend" : "Double Dip"}</div>
@@ -154,7 +154,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false }: { pub: Pub
         </div>
       )}
       {pub.paused && !pub.lifeline && (
-        <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(4,5,14,.97)", backdropFilter: "blur(12px)", zIndex: 20 }}>
+        <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
           <div className="text-center">
             {pub.agree?.kind === "swap" ? <SwapAsk pub={pub} /> : (<>
               <div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>

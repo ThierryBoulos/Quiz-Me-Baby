@@ -1143,7 +1143,8 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
           </div>
           <p className="text-12 text-[var(--color-ink-3)] text-center">{noTv ? "The game\u2019s" : "The TV\u2019s"} count is the one that counts: {pub.auction?.count ?? 0} so far.</p>
         </div>)}
-      {pub.screen === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />}
+      {/* (not while paused: just "Paused", 11 Nov, the owner) */}
+      {pub.screen === "ask" && !pub.paused && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />}
       {pub.nextBy && <WaitingFor pub={pub} />}
     </div>
   );
@@ -1393,7 +1394,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
 
       {/* the lifelines: everyone sees them; the captain whose question it is taps */}
       {/* (the other team's: a line of text, not tiles that look tappable: 3.10) */}
-      {sc === "ask" && (pub.turn === mine ? <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" busy={busy}
+      {sc === "ask" && !pub.paused && (pub.turn === mine ? <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" busy={busy}
         onUse={myTurn && !locked && !pub.timeUp ? (k) => void act("lifeline", { key: k }) : undefined} /> : <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />)}
 
       {/* the Auction: bidding is always the captains' */}
