@@ -1143,7 +1143,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
           </div>
           <p className="text-12 text-[var(--color-ink-3)] text-center">{noTv ? "The game\u2019s" : "The TV\u2019s"} count is the one that counts: {pub.auction?.count ?? 0} so far.</p>
         </div>)}
-      {pub.screen === "ask" && (pub.turn === mine ? <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" /> : <LifelineLine pub={pub} t={(pub.turn ?? 0) as 0 | 1} />)}
+      {pub.screen === "ask" && <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />}
       {pub.nextBy && <WaitingFor pub={pub} />}
     </div>
   );
@@ -1175,12 +1175,8 @@ function WaitingFor({ pub }: { pub: Pub }) {
   const who = tie || decided ? "a captain" : open && pub.nextOther ? `${pub.nextBy} or ${pub.nextOther}` : pub.nextBy;
   return <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Waiting for {who} to {TIE_SCREENS.includes(pub.screen) ? "choose: one more, or a point each" : pub.screen === DECIDED ? "choose: keep playing for fun, or stop here" : `tap ${/^Start/.test(label) ? "Start" : label}`}.</p>;
 }
-/* the other team's lifelines, as a line of text (3.10) */
-function LifelineLine({ pub, t }: { pub: Pub; t: 0 | 1 }) {
-  const T = pub.teams, used = pub.llUsed?.[t] || [], L = pub.lifeline;
-  const st = (k: "friend" | "dip" | "dbl", name: string) => `${name} ${(L?.team === t && L.key === k) || (k === "dbl" && pub.dbl?.[t]) ? "(in use)" : used.includes(k) ? "(used)" : T[t].ll?.[k] === false ? "(gone)" : ""}`.trim();
-  return <p className="text-center text-13 text-[var(--color-ink-3)]">{poss(T[t].name)} lifelines: {st("friend", "Call a Friend")} · {st("dip", "Double Dip")} · {st("dbl", "Double Points")}</p>;
-}
+/* (the other team's lifelines were a line of text here; they're now the TV's own tiles, read only, so the phone and
+   the TV show them the same way: 11 Nov, the owner) */
 /* with a host: the screens that wait for the host's tap say so on the other phones, as with no host (the 4 Nov audit, 3.9) */
 function WaitingForHost({ pub, members }: { pub: Pub; members: Member[] }) {
   const h = members.find((m) => m.role === "host");
@@ -1398,7 +1394,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {/* the lifelines: everyone sees them; the captain whose question it is taps */}
       {/* (the other team's: a line of text, not tiles that look tappable: 3.10) */}
       {sc === "ask" && (pub.turn === mine ? <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" busy={busy}
-        onUse={myTurn && !locked && !pub.timeUp ? (k) => void act("lifeline", { key: k }) : undefined} /> : <LifelineLine pub={pub} t={(pub.turn ?? 0) as 0 | 1} />)}
+        onUse={myTurn && !locked && !pub.timeUp ? (k) => void act("lifeline", { key: k }) : undefined} /> : <LifelineStrip pub={pub} t={(pub.turn ?? 0) as 0 | 1} size="phone" />)}
 
       {/* the Auction: bidding is always the captains' */}
       {sc === "auctionBid" && A && A.turn === mine && (

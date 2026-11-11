@@ -16,7 +16,10 @@ export function noteTvTime(tvNowAt?: number) {
   const best = Math.min(...gaps);
   /* (three updates first: a phone opening mid-question reads the update already stored, which can be many seconds
    old, and one old gap looked like a wrong clock: its countdown ran long until the next update. 5 Nov review) */
-  skew = gaps.length >= 3 && Math.abs(best) > 3000 ? best : 0;
+  /* (half a second, not three: a phone 3 s off its TV slipped under the old line and counted 63 while the TV said 60,
+     the whole question long: 11 Nov, the owner. A gap is the clocks' difference plus the time an update takes to
+     arrive; the smallest of twenty is nearly all difference, so half a second is safe from the arrival time) */
+  skew = gaps.length >= 3 && Math.abs(best) > 500 ? best : 0;
 }
 export const tvNow = () => Date.now() - skew;
 
