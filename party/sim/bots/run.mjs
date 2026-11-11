@@ -197,6 +197,7 @@ function two(pub) {
   if (sc === "roundIntro" && chance(0.02)) { const b = botCap(chance(0.5) ? 0 : 1); if (b) once(`${k}|dbl`, DELAY, () => b.send("lifeline", { key: "dbl" })); }
   if (sc === "decided") return go(lead, chance(0.3) ? "decided/more" : "decided/stop");
   if (sc === "majorityQ") {
+    if (BH && pub.timeUp) go(0, "ui/reveal", {}, 1000);
     for (const b of bots) if (b.team != null && b.team < 2) once(`${k}|vote|${b.id}`, DELAY * (0.5 + Math.random()), () => b.send("answer", { pick: chance(0.5) && secret?.answer ? secret.answer : pick(pub.majority?.options || ["x"]), k: `${pub.qid}|majorityQ` }), false);
     return;
   }
@@ -206,17 +207,19 @@ function two(pub) {
   if (sc === "ask" || sc === "steal") {
     const t = pub.turn ?? 0;
     if (!pub.sent?.[t] && !pub.timeUp) return answer(t, { texts: [guess(right(t))] });
-    if (BH) go(0, sc === "ask" ? "round/judge" : "round/judgeSteal", { v: secret?.match?.[t] ?? chance(0.5) }, DELAY);
+    /* (nothing typed by time-up: wrong) */
+    if (BH) go(0, sc === "ask" ? "round/judge" : "round/judgeSteal", { v: pub.sent?.[t] ? secret?.match?.[t] ?? chance(0.5) : false }, DELAY);
     return;
   }
-  if (sc === "miniQ") { for (const t of [0, 1]) answer(t, { n: String(Math.round((Number(right(t)) || 100) * (0.5 + Math.random()))) }); return; }
+  if (sc === "miniQ") { for (const t of [0, 1]) answer(t, { n: String(Math.round((Number(right(t)) || 100) * (0.5 + Math.random()))) }); if (BH && pub.timeUp) go(0, "ui/reveal", {}, 1500); return; }
   if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ"].includes(sc)) {
     const kind = { flagQ: "flag", mapQ: "map", airportQ: "airport" }[sc] || "standard";
     for (const t of [0, 1]) answer(t, { text: guess(right(t), kind) });
-    if (BH && pub.sent?.[0] && pub.sent?.[1]) go(0, "ui/reveal", {}, DELAY);
+    /* the host reveals once both are in, or when the clock has run out (a person's captain who didn't answer) */
+    if (BH && ((pub.sent?.[0] && pub.sent?.[1]) || pub.timeUp)) go(0, "ui/reveal", {}, DELAY);
     return;
   }
-  if (sc === "pinQ") { for (const t of [0, 1]) answer(t, { pin: pinGuess() }); return; }
+  if (sc === "pinQ") { for (const t of [0, 1]) answer(t, { pin: pinGuess() }); if (BH && pub.timeUp) go(0, "ui/reveal", {}, 1500); return; }
   if (sc === "dishQ") {
     if (pub.buzz == null) { const t = [0, 1].filter((x) => !pub.out?.[x])[Math.floor(Math.random() * 2)] ?? 0; const b = botCap(t); if (b && !pub.out?.[t]) once(`${k}|buzz`, DELAY * 2, () => b.send("buzz", {})); }
     else if (!pub.sent?.[pub.buzz]) answer(pub.buzz, { text: guess(right(pub.buzz), "dish") });
