@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { motionOff } from "./Marquee";
 import { QRCodeSVG } from "qrcode.react";
 import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
@@ -214,11 +215,11 @@ function Sent({ pub }: { pub: Pub }) {
 }
 
 /* A split-flap board (the old airport kind): every letter cycles through the alphabet, then lands, one after
-   another left to right; words wrap whole. start: ms before it begins. With "reduce motion", just the text. */
+   another left to right; words wrap whole. start: ms before it begins. With motion off in Settings, just the text. */
 const FLAPS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 function SplitFlap({ text, size, start = 0 }: { text: string; size: number; start?: number }) {
   const final = text.toUpperCase();
-  const still = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const still = motionOff();
   const [shown, setShown] = useState(() => (still ? final : final.replace(/\S/g, " ")));
   useEffect(() => {
     if (still) { setShown(final); return; }

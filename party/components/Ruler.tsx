@@ -7,6 +7,7 @@
    Two teams: A's card above, B's below, as the two-team TV always drew it. More: the cards are packed on two
    lanes a side, as near their dot as the others let them, a size smaller, and the dots carry the team's letter. */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { motionOff } from "./Marquee";
 import { offBy, showNum } from "@/lib/game";
 
 /* pts: what the guess pays (more than two teams: points by place), shown at the end of its card */
@@ -46,7 +47,7 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
   const [p, setP] = useState(scale ? 0 : 1);
   useEffect(() => {
     if (!scale) return;
-    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setP(1); return; }
+    if (motionOff()) { setP(1); return; }
     let raf = 0; const t0 = performance.now() + 500, D = 2000;
     const tick = (now: number) => { const k = Math.min(1, Math.max(0, (now - t0) / D)); setP(1 - Math.pow(1 - k, 3)); if (k < 1) raf = requestAnimationFrame(tick); };
     raf = requestAnimationFrame(tick); return () => cancelAnimationFrame(raf);

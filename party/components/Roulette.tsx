@@ -3,7 +3,7 @@
    the phones, two teams or eight. It spins for SPIN_MS from the TV's spinAt (a phone that opens late joins the spin
    where it is, or sees it landed); then each team's chamber lights up in its colour, with its letter. At the reveal
    the drawn chambers click one by one, the bullet last: a brass round, and BANG if a team drew it. Low motion: one
-   rotation, a fade, a pulse; none of it with "reduce motion" on. */
+   rotation, a fade, a pulse; none of it (but the spin) with motion off in Settings. */
 import { useEffect, useState, type ReactNode, useMemo } from "react";
 import { tvNow } from "./Clock";
 import { playSound } from "@/lib/sound";

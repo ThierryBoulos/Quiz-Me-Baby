@@ -142,13 +142,11 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
 .spinner { width: 28px; height: 28px; border-radius: 999px; border: 3px solid var(--line-2); border-top-color: var(--color-gold); animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* the phone's "reduce motion" setting is respected (the marquee screens follow their own Background motion setting:
-   Auto there keeps the bulbs' light changing and stills the rest; see .mq.m-lights) */
-@media (prefers-reduced-motion: reduce) {
-  /* (the roulette's spin is the draw itself, not decoration: it turns even with "reduce motion" on, 11 Nov, the owner) */
-  *:not(.mq):not(.mq *):not(.rr-spin), *:not(.mq):not(.mq *)::before, *:not(.mq):not(.mq *)::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-  .sending::after { animation: none; width: 100%; opacity: 0.6; }
-}
+/* MOTION OFF (Settings, this device): everything still. Never the device's own "reduce motion" setting: the owner,
+   11 Nov, "play the animation all the time, unless someone turns it off" (Marquee.tsx: the switch; the marquee's own
+   lights follow it with .mq.m-off). The roulette's spin is the draw itself, not decoration: it turns even then. */
+html[data-motion="off"] *:not(.mq):not(.mq *):not(.rr-spin), html[data-motion="off"] *:not(.mq):not(.mq *)::before, html[data-motion="off"] *:not(.mq):not(.mq *)::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+html[data-motion="off"] .sending::after { animation: none; width: 100%; opacity: 0.6; }
 
 /* the TV: a fixed 1280×720 stage scaled to whatever screen it's on */
 .tv-wrap { position: fixed; inset: 0; overflow: hidden; }
@@ -330,7 +328,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
   box-shadow: 0 14px 34px rgba(0,0,0,.55); animation: hbPop .45s var(--ease) both; }
 @keyframes hbIn { from { opacity: 0; transform: translateY(-10px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes hbPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: none; } }
-@media (prefers-reduced-motion: reduce) { .imad-bubble, .imad-bubble .hb-text { animation: none; } }
+html[data-motion="off"] .imad-bubble, html[data-motion="off"] .imad-bubble .hb-text { animation: none; }
 
 /* ---- the mini-game's own score, under the night's (TV and phones) ---- */
 .hud-mini { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; min-width: 0;
@@ -374,7 +372,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
   50% { transform: translate3d(calc(var(--sway) * .6), 50vh, 0) rotate(calc(var(--rot) + 360deg)); }
   100% { transform: translate3d(var(--sway), 110vh, 0) rotate(calc(var(--rot) + 720deg)); }
 }
-@media (prefers-reduced-motion: reduce) { .confetti { display: none; } }
+html[data-motion="off"] .confetti { display: none; }
 
 /* ---- the enlarged map (Classic's #mapzoom): fills the screen; tap or pinch to zoom, drag to look around ---- */
 .map-frame { position: relative; cursor: zoom-in; display: flex; justify-content: center; width: 100%; background: none; border: 0; padding: 0; color: inherit; font: inherit; }
@@ -605,7 +603,7 @@ button.ll:not([disabled]):active { transform: scale(.97); }
   background: linear-gradient(to right, rgba(255,210,90,0), rgba(255,210,90,.6)); animation: planeTrail 1.9s cubic-bezier(.55,0,.75,.4) both; }
 @keyframes planeGo { 0% { transform: translateX(0) rotate(90deg) scale(.8); opacity: 0; } 8% { opacity: 1; } 100% { transform: translateX(1500px) rotate(90deg) scale(1.7); opacity: 1; } }
 @keyframes planeTrail { 0% { transform: scaleX(0); opacity: 1; } 80% { opacity: .9; } 100% { transform: scaleX(1); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .plane-fly { display: none; } }
+html[data-motion="off"] .plane-fly { display: none; }
 /* the lobby's Start, in a solid bar along the bottom, so nothing shows through it (the owner, 1 Nov) */
 .start-bar { position: sticky; bottom: 0; z-index: 20; margin: 4px calc(-20px - env(safe-area-inset-right)) 0 calc(-20px - env(safe-area-inset-left));
   padding: 12px calc(20px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
@@ -662,7 +660,7 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 /* a phone waiting for the TV's reveal: the little TV glows softly */
 .watch-tv svg { color: var(--color-gold); animation: watchTv 1.2s ease-in-out infinite alternate; }
 @keyframes watchTv { from { opacity: .45; transform: scale(.96); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .watch-tv svg { animation: none; } }
+html[data-motion="off"] .watch-tv svg { animation: none; }
 /* the map's reveal: the answer's drawing sweeps in over the question's, a gold edge leading */
 .map-wipe { visibility: hidden; }
 .map-wipe.on { visibility: visible; }
@@ -677,7 +675,7 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 /* the night's dots: one fills in as its round or game ends */
 .pip.done { animation: pipDone .6s var(--ease); }
 @keyframes pipDone { 0% { transform: scale(1.9); background: var(--color-gold); } 100% { transform: none; } }
-@media (prefers-reduced-motion: reduce) { .steal-beam, .lead-banner, .roll-ring, .win-ring, .win-flash, .ruler-band { display: none; } }
+html[data-motion="off"] .steal-beam, html[data-motion="off"] .lead-banner, html[data-motion="off"] .roll-ring, html[data-motion="off"] .win-ring, html[data-motion="off"] .win-flash, html[data-motion="off"] .ruler-band { display: none; }
 
 /* ---- phase 6 (29 Oct): the glow between questions, the flame, Imad's moves, the chart ---- */
 /* (past the game's 16:9 frame on every side, so on a screen of another shape, a 16:10 laptop, it has no edge and no
@@ -697,7 +695,7 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 .night-chart { overflow: visible; }
 .chart-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: chartDraw 2.2s ease-out forwards; filter: drop-shadow(0 0 6px currentColor); }
 @keyframes chartDraw { to { stroke-dashoffset: 0; } }
-@media (prefers-reduced-motion: reduce) { .tv-glow, .flame, .imad-bubble img { animation: none; } .chart-line { animation: none; stroke-dashoffset: 0; } }
+html[data-motion="off"] .tv-glow, html[data-motion="off"] .flame, html[data-motion="off"] .imad-bubble img { animation: none; } html[data-motion="off"] .chart-line { animation: none; stroke-dashoffset: 0; }
 
 /* ---- MANY TEAMS (30 Oct): 3 to 8 teams in the same tracker. The teams run along the top in one row,
    the night's label and pips under them (the phone's two-team layout, on the TV too). Every dot carries
@@ -726,7 +724,7 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
   text-shadow: 0 0 18px rgba(46,204,113,.7); animation: plusUp 1.45s cubic-bezier(.2,.8,.3,1) both; }
 /* it rises to the total and shrinks into it as it arrives (never parked over the digits); the total then rolls up */
 @keyframes plusUp { 0% { opacity: 0; transform: translate(-50%, 260px) scale(1.3); } 18% { opacity: 1; } 72% { opacity: 1; transform: translate(-50%, 8px) scale(.9); } 100% { opacity: 0; transform: translate(-50%, -26px) scale(.15); } }
-@media (prefers-reduced-motion: reduce) { .hud-plus { display: none; } }
+html[data-motion="off"] .hud-plus { display: none; }
 /* Guess the Flag's result: the pole, the finial, the flags hoisted up it one after another (the winner's last) */
 .flag-pole { position: absolute; left: 8px; top: 10px; bottom: 0; width: 10px; border-radius: 5px; background: linear-gradient(90deg, #6d7393, #d9dcef 45%, #6d7393); }
 .flag-finial { position: absolute; left: 3px; top: 0; width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c2, var(--color-gold) 50%, #b8860b); box-shadow: 0 0 14px rgba(245,197,24,.7); }
@@ -743,7 +741,7 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 .pin-head { display: grid; place-items: center; border-radius: 50%; color: #04050e; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--c) 50%, #fff), var(--c) 60%);
   border: 3px solid #fff; box-shadow: 0 0 18px var(--c); }
 .pin-stem { width: 4px; background: linear-gradient(180deg, #fff, var(--c)); border-radius: 0 0 2px 2px; }
-@media (prefers-reduced-motion: reduce) { .flag-cloth, .flag-hoist, .pin-stand { animation: none; } }
+html[data-motion="off"] .flag-cloth, html[data-motion="off"] .flag-hoist, html[data-motion="off"] .pin-stand { animation: none; }
 .bar-grow { transform-origin: bottom; animation: barGrow .7s var(--ease) both; }
 /* the new games' results (30 Oct): a glass filling, a bubble popping up, a lectern rising, the winner's spotlight */
 .glass-fill { transform-box: fill-box; transform-origin: bottom; animation: barGrow 1.2s cubic-bezier(.45,.05,.4,1) both; }
@@ -764,9 +762,9 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 .paddle-wave.win { animation: paddleWaveWin 1.1s ease-in-out infinite both; }
 @keyframes paddleWave { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
 @keyframes paddleWaveWin { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
-@media (prefers-reduced-motion: reduce) { .glass-fill, .glass-cherry, .bubble-pop, .lectern-in, .rv, .bar-grow, .flag-hoist, .pin-stand, .board-flip, .paddle-wave { animation: none; } }
+html[data-motion="off"] .glass-fill, html[data-motion="off"] .glass-cherry, html[data-motion="off"] .bubble-pop, html[data-motion="off"] .lectern-in, html[data-motion="off"] .rv, html[data-motion="off"] .bar-grow, html[data-motion="off"] .flag-hoist, html[data-motion="off"] .pin-stand, html[data-motion="off"] .board-flip, html[data-motion="off"] .paddle-wave { animation: none; }
 @keyframes barGrow { from { transform: scaleY(0); } to { transform: none; } }
-@media (prefers-reduced-motion: reduce) { .bar-grow { animation: none; } }
+html[data-motion="off"] .bar-grow { animation: none; }
 .hud.many .hud-mini .dot { width: 14px; height: 14px; font-size: var(--text-8); }
 .hud.many .hud-mini b { color: var(--c); }
 .hud.tv.many .hud-team .nm { font-size: var(--text-18); max-width: 200px; } .hud.tv.many .hud-team .sc { font-size: var(--text-48); }
@@ -845,7 +843,7 @@ select option, select optgroup { background: #10142e; color: var(--color-ink); }
 @keyframes niIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .ni-row.ni-in { animation-name: niRow; animation-duration: .7s; }
 @keyframes niRow { 0% { opacity: 0; transform: translateX(-18px); background: rgba(245,197,24,.0); } 45% { opacity: 1; transform: none; background: rgba(245,197,24,.2); } 100% { opacity: 1; background: rgba(255,255,255,.05); } }
-@media (prefers-reduced-motion: reduce) { .night-intro *, .ni-pip { animation: none !important; } .ni-pip { background: var(--color-ink-2); } .ni-pip.first { background: var(--color-gold); } }
+html[data-motion="off"] .night-intro *, html[data-motion="off"] .ni-pip { animation: none !important; } html[data-motion="off"] .ni-pip { background: var(--color-ink-2); } html[data-motion="off"] .ni-pip.first { background: var(--color-gold); }
 /* the phones' copy: a list with the same glyphs */
 .ni-phone { display: flex; flex-direction: column; gap: 8px; text-align: left; font-size: var(--text-14); }
 .ni-phone li { display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: baseline; column-gap: 6px; }
@@ -1391,7 +1389,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .rr-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px;
   border: 1.5px solid color-mix(in srgb, var(--c) 45%, transparent); background: color-mix(in srgb, var(--c) 8%, transparent); }
 .rr-row.bang { border-color: var(--color-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-gold) 35%, transparent); }
-@media (prefers-reduced-motion: reduce) { .rr-click { animation: none; } .rr-bang { display: none; } .rr-shot, .rr-late, .rr-lit { animation-duration: 1ms; } }
+html[data-motion="off"] .rr-click { animation: none; } html[data-motion="off"] .rr-bang { display: none; } html[data-motion="off"] .rr-shot, html[data-motion="off"] .rr-late, html[data-motion="off"] .rr-lit { animation-duration: 1ms; }
 
 /* the host's question picker (11 Nov, the owner): pinned chips on top, one list at a time, Back/Next pinned below.
    Only the list scrolls, and only up and down. */

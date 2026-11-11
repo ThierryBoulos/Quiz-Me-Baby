@@ -49,11 +49,11 @@ function Toggle({ on, set, title, help }: { on: boolean; set: (v: boolean) => vo
     </button>);
 }
 
-/* the marquee's moving lights on this device (Marquee.tsx: useMotion) */
+/* every animation on this device, on every screen (Marquee.tsx: useMotion, motionOff; the owner, 11 Nov) */
 function MotionToggle() {
   const [on, setOn] = useState(true);
   useEffect(() => { setOn(getMotionPref() !== "off"); }, []);
-  return <Toggle on={on} set={(v) => { setOn(v); setMotionPref(v ? "auto" : "off"); }} title="Background motion" help="Moving lights on the home, join and lobby screens." />;
+  return <Toggle on={on} set={(v) => { setOn(v); setMotionPref(v ? "auto" : "off"); }} title="Animation" help="The lights, the celebration, the scores adding up: on every screen, always. Off: everything holds still." />;
 }
 
 function Timers({ list, s, set }: { list: Timer[]; s: Settings; set: (p: Partial<Settings>) => void }) {

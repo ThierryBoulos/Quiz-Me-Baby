@@ -1,8 +1,9 @@
 "use client";
 /* The TV's motion (28 Oct): the points flying up to the score, and the "Lead change" banner. Everything here
    only shows what already happened: the game itself never waits for it, and a reloaded TV shows the scores as
-   they are, with nothing to replay. With "reduce motion" on, the scores just change. */
+   they are, with nothing to replay. With motion off in Settings, the scores just change. */
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { motionOff } from "./Marquee";
 import { FLY_MS, flyAt, type Pub, type Two } from "@/lib/game";
 import { playSound, Snd } from "@/lib/sound";
 
@@ -13,7 +14,8 @@ export function useScreenAt(key: string) {
   return at.current.t;
 }
 
-const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+/* (only the app's own switch stills them: never the device's "reduce motion", the owner, 11 Nov) */
+const reduced = motionOff;
 
 /* the points, from the line that says "+2" up to the team's score: one "+2" for a question, a coin a point for a
    mini-game (up to 6). Says whether it could fly (no line on screen, no flight). */

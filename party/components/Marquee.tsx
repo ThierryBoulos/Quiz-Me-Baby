@@ -8,23 +8,29 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 export const SLOGAN = "Quiz night done right";
 const useIso = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-/* MOTION (the owner, 2 Nov): one switch in Settings, saved per device. On (the default): everything, except on a
-   phone set to Reduce Motion, where the lights still chase and sparkle (light changing, nothing moving) but the
-   spotlights, the dust and the grain hold still. Off: a still, lit sign. */
+/* MOTION (the owner, 2 Nov; 11 Nov): one switch in Settings, saved per device. On (the default): every animation, on
+   every screen, whatever the device's own "reduce motion" setting says ("play the animation all the time, unless
+   someone turns it off"). Off: everything still, a lit sign. The switch also sets <html data-motion="off">, which the
+   CSS follows (globals.css), set before the first paint by the root layout. */
 export type MotionPref = "auto" | "off";
 export type Motion = "full" | "lights" | "off";
 const MOTION_KEY = "qmb.motion";
 export const getMotionPref = (): MotionPref => { try { return localStorage.getItem(MOTION_KEY) === "off" ? "off" : "auto"; } catch { return "auto"; } };
-export const setMotionPref = (v: MotionPref) => { try { localStorage.setItem(MOTION_KEY, v); } catch { /* private mode */ } window.dispatchEvent(new Event("qmb:motion")); };
-const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+/* (the same, as one line for the root layout's head, before anything paints) */
+export const MOTION_BOOT = `try{if(localStorage.getItem("${MOTION_KEY}")==="off")document.documentElement.setAttribute("data-motion","off")}catch(e){}`;
+export const motionOff = () => typeof window !== "undefined" && getMotionPref() === "off";
+export const setMotionPref = (v: MotionPref) => {
+  try { localStorage.setItem(MOTION_KEY, v); } catch { /* private mode */ }
+  if (v === "off") document.documentElement.setAttribute("data-motion", "off"); else document.documentElement.removeAttribute("data-motion");
+  window.dispatchEvent(new Event("qmb:motion"));
+};
 export function useMotion(): Motion {
   const [m, setM] = useState<Motion>("full");
   useEffect(() => {
-    const calc = () => setM(getMotionPref() === "off" ? "off" : reduced() ? "lights" : "full");
+    const calc = () => setM(getMotionPref() === "off" ? "off" : "full");
     calc();
-    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    window.addEventListener("qmb:motion", calc); mq?.addEventListener?.("change", calc);
-    return () => { window.removeEventListener("qmb:motion", calc); mq?.removeEventListener?.("change", calc); };
+    window.addEventListener("qmb:motion", calc);
+    return () => window.removeEventListener("qmb:motion", calc);
   }, []);
   return m;
 }

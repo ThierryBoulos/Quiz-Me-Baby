@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, Sora } from "next/font/google";
 import "./globals.css";
 import { NoZoom } from "@/components/NoZoom";
+import { MOTION_BOOT } from "@/components/Marquee";
 
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" });
 const sora = Sora({ subsets: ["latin"], weight: ["400", "600", "700", "800"], variable: "--font-sora" });
@@ -24,7 +25,9 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, maxi
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     /* data-look="house": the in-game look (House Lights, the owner approved 2 Nov; globals.css) */
-    <html lang="en" data-look="house" className={`${anton.variable} ${sora.variable}`}>
+    /* (data-motion="off": the Settings switch, set before the first paint; see Marquee.tsx) */
+    <html lang="en" data-look="house" className={`${anton.variable} ${sora.variable}`} suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: MOTION_BOOT }} /></head>
       <body><NoZoom />{children}</body>
     </html>
   );
