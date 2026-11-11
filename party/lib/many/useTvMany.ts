@@ -6,7 +6,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, HOST_ONLY_THEMES, hostOnly, loadBank, type Bank, type Q } from "../engine";
 import { sb } from "../supabase";
-import { getSettings, USED_KEY } from "../settings";
+import { cleanSettings, forgetUsed, getSettings, saveSettings, USED_KEY } from "../settings";
+import { cleanList, mergeCustom } from "../custom";
+import { withCustom } from "../engine";
+import { saveLobbyDraft, useLobbyShare } from "../tv/lobbyShare";
 import { cap1, type Member, type Room } from "../room";
 import { inboxMark, useInbox } from "../tv/useInbox";
 import { usePresent } from "../tv/usePresent";
@@ -87,6 +90,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
      and the answer is only written when it changed */
   const chain = useRef<Promise<void>>(Promise.resolve());
   const lastSecret = useRef("");
+  /* in the lobby, the TV's settings, its own questions and the host's setup go to the host's phone, as with two teams */
+  useLobbyShare(code, isTv, room?.status, { lastSecret, stamp: () => (lastAt.current = Math.max(Date.now(), lastAt.current + 1)) });
   const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publishRef = useRef<() => void>(() => {});
   const marked = useRef<number | null>(null);    // the Russian Roulette spin whose questions are marked played
@@ -184,6 +189,13 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     /* the lobby */
     if (room.status === "lobby") {
       if (a.kind === "setup" && a.payload.teams != null && from?.role === "host") { await setTeams(code, room.state || {}, members, Number(a.payload.teams)); return; }
+      /* the host changes this TV's settings from their phone, or keeps their setup here (as with two teams) */
+      if (a.kind === "setup" && (a.payload.settings || a.payload.forgetPlayed || a.payload.draft) && from?.role === "host") {
+        if (a.payload.settings) saveSettings(cleanSettings(a.payload.settings));
+        if (a.payload.forgetPlayed) { forgetUsed(); window.dispatchEvent(new Event("qmb:settings")); }
+        if (a.payload.draft) saveLobbyDraft(code, a.payload.draft);
+        return;
+      }
       if (a.kind === "team_name" && from?.role === "captain" && (from.team as number) === Number(a.payload.team) && (from.team as number) < k) {
         const names = manyNames(room, MANY_MAX); names[from.team as number] = cap1(String(a.payload.name || "").trim().slice(0, 14)) || names[from.team as number];
         await lobbyWrite({ teamNames: names });
@@ -204,12 +216,17 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         if (why) { await lobbyWrite({ note: { text: why, at: Date.now() } }); return; }
         const cfg = (a.payload.cfg || {}) as G;
         const picked = (Array.isArray(cfg.minis) ? cfg.minis : []).filter((x: string) => (MANY_MINIS as readonly string[]).includes(x)) as ManyKey[];
-        /* the question rounds: how many (1 to 6), spread through the night */
+        /* the question rounds: how many (1 to 14), one theme each, two questions; they play two at a time, back to
+           back, as one game (scored as one: the owner, 11 Nov), so 5 rounds are three games, the last one round */
         const rounds = picked.includes("quiz") ? Math.max(1, Math.min(MANY_ROUNDS, Math.floor(Number(cfg.rounds) || 1))) : 0;
-        const keys = lineup(rounds, picked.filter((x) => x !== "quiz"));
+        const games = Math.ceil(rounds / 2);
+        const keys = lineup(games, picked.filter((x) => x !== "quiz"));
         if (!keys.length) { await lobbyWrite({ note: { text: "Pick at least one game.", at: Date.now() } }); return; }
         let b: Bank;
         try { b = await loadBank(code); } catch { await sb().from("rooms").update({ state: { ...room.state, note: { text: phoneRef.current ? "The game phone couldn't load the questions. Check its internet, then tap Start again." : "The TV couldn't load the questions. Check its internet, then tap Start again.", at: Date.now() } } }).eq("code", code); return; }
+        /* with the host's own questions (written on their phone, or right there in the picker), kept on this TV too */
+        const custom = cleanList(cfg.custom, b.themes);
+        if (custom.length) { b = withCustom(b, custom); mergeCustom(custom, b.themes); }
         bank.current = b;
         /* the decks, dealt exactly as the two-team game deals them (fresh questions first) */
         let used = new Set<string>(); try { used = new Set(JSON.parse(localStorage.getItem(USED_KEY) || "[]")); } catch { /* none */ }
@@ -219,15 +236,23 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
             airport: (q: G) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0,
             majority: (q: G) => q.type === "majority" && Array.isArray(q.options) && q.options.length === 4 && q.options.includes(q.answer) } });
         const lv = (x: unknown, all: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((y) => all.includes(y)); return v.length ? v : dflt; };
-        /* the question rounds come from the two-team rounds' pairs: a pair is a theme's two questions, a round two
-           pairs (two themes), the host's themes in turn (up to six); none picked, any theme but the host's own */
+        /* the question rounds come from the two-team rounds' pairs: a pair is a theme's two questions, a round one pair,
+           the host's themes in turn (one per round); none picked, any theme but the host's own */
         const every = [...new Set(b.bank.filter((q: G) => q.type === "standard" && q.theme && !HOST_ONLY_THEMES.includes(q.theme)).map((q: G) => q.theme as string))];
         const chosen = (Array.isArray(cfg.themes) ? cfg.themes : []).filter((t: string) => every.includes(t)).slice(0, MANY_THEMES);
         const themes = chosen.length ? chosen : every;
         const quizLevels = lv(cfg.quizLevels, ["easy", "medium", "hard", "expert"], ["easy", "medium", "hard"]);
-        /* (four pairs more than the rounds take: one for "Change question", three held back for sudden death) */
-        const g = dealer.buildGame({ standard: true, rounds: rounds * Math.ceil(MANY_LEGS.quiz / 2) + 4, themes, difficulty: quizLevels.join("+"),
-          minis: keys.map((x) => (x === "say" ? "saysame" : x)), picks: {}, themeDiff: {},
+        /* the host's hand-picked questions and difficulty per theme, as with two teams (the picker shows the answers,
+           so only the host's are taken; two per theme, played by every team) */
+        const ids = (x: unknown) => (Array.isArray(x) ? x.filter((v) => typeof v === "string").slice(0, 20) : []) as string[];
+        const picks = Object.fromEntries(Object.entries((cfg.picks && typeof cfg.picks === "object" ? cfg.picks : {}) as Record<string, unknown>)
+          .map(([t, v]) => [t, ids(v).slice(0, 2)]).filter(([t, v]) => v.length === 2 && themes.includes(t as string)));
+        const themeDiff = cfg.themeDiff && typeof cfg.themeDiff === "object"
+          ? Object.fromEntries(Object.entries(cfg.themeDiff as Record<string, string>).filter(([t, d]) => themes.includes(t) && typeof d === "string" && /^(easy|medium|hard|expert|mixed)(\+(easy|medium|hard|expert))*$/.test(d))) : {};
+        const hand = (k: string) => ids(cfg[k]);
+        /* (six pairs more than the rounds take: some for "Change question", the rest held back for sudden death) */
+        const g = dealer.buildGame({ standard: true, rounds: rounds + 6, themes, difficulty: quizLevels.join("+"),
+          minis: keys.map((x) => (x === "say" ? "saysame" : x)), picks, themeDiff,
           mapLevels: lv(cfg.mapLevels, QMB.MAP_ORDER, QMB.MAP_ORDER), airportLevels: lv(cfg.airportLevels, QMB.AIRPORT_ORDER, QMB.AIRPORT_ORDER),
           dishLevels: lv(cfg.dishLevels, ["c-easy", "c-medium", "c-hard", "d-easy", "d-medium", "d-hard"], ["c-medium", "d-medium"]),
           flagLevels: lv(cfg.flagLevels, QMB.FLAG_LEVEL_KEYS, ["veasy", "easy", "medium", "hard"]), pinLevels: lv(cfg.pinLevels, QMB.PIN_ORDER, QMB.PIN_ORDER),
@@ -235,19 +260,21 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
           /* Russian Roulette: a barrel of 6 chambers, 8 with 7 or 8 teams; Sexy Time and Lebanon only if the host picked them */
           rouletteChambers: QMB.rouletteChambers(k), rouletteThemes: chosen,
           teamA: { name: "A", captain: "", players: "" }, teamB: { name: "B", captain: "", players: "" },
-          pickClosest: [], pickAuction: [], pickSaySame: [], pickMap: [], pickFlag: [], pickDish: [], pickPin: [], pickAirport: [], pickMajority: [] });
+          pickClosest: hand("pickClosest"), pickAuction: [], pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish"),
+          pickPin: hand("pickPin"), pickAirport: hand("pickAirport"), pickMajority: hand("pickMajority") });
         /* Don't Say the Same: only the wide prompts (five answers or more), so eight teams have room to dodge */
-        const say = (dealer.saySameDeck({ pickSaySame: [] }) as G[]).filter((q) => (q.pool || []).length >= 5).slice(0, MANY_LEGS.say + 4).map((q) => dealer.drawSaySame(q) as Q);
+        const say = (dealer.saySameDeck({ pickSaySame: hand("pickSaySame") }) as G[]).filter((q) => (q.pool || []).length >= 5).slice(0, MANY_LEGS.say + 4).map((q) => dealer.drawSaySame(q) as Q);
         const quiz = (g.rounds || []).flatMap((r: G) => r.q as Q[]);
         /* each game's deck, its spares after it (the two-team game deals fewer airports, maps and recipes, and every game
            keeps a few back): what a game doesn't play is there for the host's "Change question" (the 5 Nov review) */
         const all = (m: G): Q[] => [...(m?.qs || []), ...(m?.spare || [])];
-        const qn = rounds * MANY_LEGS.quiz + 2;
+        const qn = rounds * 2 + 4;
         const decks: Partial<Record<ManyKey, Q[]>> = { quiz: quiz.slice(0, qn), sudden: quiz.slice(qn), flag: all(g.flagGame), airport: all(g.airportGame), map: all(g.mapGame),
           closest: all(g.mini), pin: all(g.pinGame), majority: all(g.majorityGame), say, dish: all(g.dishGame), roulette: all(g.rouletteGame) };
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
-        st.current = newNight(teams, decks, keys);
+        /* each question-round game two rounds of two questions, the last one round if the rounds are odd */
+        st.current = newNight(teams, decks, keys, { quiz: Array.from({ length: games }, (_, j) => Math.min(MANY_LEGS.quiz, rounds * 2 - j * MANY_LEGS.quiz)) });
         st.current.intro = true;
         /* the questions dealt count as played on this TV */
         try { for (const mm of st.current.minis) for (const q of mm.qs) if (q?.id) used.add(q.id); localStorage.setItem(USED_KEY, JSON.stringify([...used])); } catch { /* in memory only */ }

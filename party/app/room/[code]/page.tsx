@@ -306,7 +306,9 @@ export default function PhoneRoom() {
   /* in the lobby the TV answers by changing the room itself (a team name, who's away), not a game view */
   /* (and by writing why a Start didn't start: that note is the reply, and the phone that tapped shows it) */
   const lobbyNote = room?.status === "lobby" ? (room.state?.note as { text: string; at: number } | undefined) : undefined;
-  const lobbyKey = room?.status === "lobby" ? JSON.stringify([room.state?.teamNames, room.state?.away, lobbyNote?.at]) : "";
+  /* (the team count too: the host's Teams + and − are answered by it, and the phone waited 8 s for nothing, then said
+     "The game hasn't answered": 11 Nov, the owner) */
+  const lobbyKey = room?.status === "lobby" ? JSON.stringify([room.state?.teamNames, room.state?.away, lobbyNote?.at, room.state?.teamCount, room.state?.timers]) : "";
   viewKey.current = `${room?.status}|${pub?.at ?? ""}|${lobbyKey}`;
   useEffect(() => {
     if (waitRef.current.on && viewKey.current !== waitRef.current.key) {
@@ -615,9 +617,9 @@ export default function PhoneRoom() {
               </span>
             </div>)}
           {many && mine.role === "host" ? (
-            <SetupMany busy={busy} k={teamCount} why={manyNotReady(members, teamCount)} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <SetupMany code={code} tv={secret.lobby} busy={busy} k={teamCount} why={manyNotReady(members, teamCount)} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : canStart && !many ? (
-            <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} tv={mine.role === "host" ? secret.lobby : undefined} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} tv={mine.role === "host" ? secret.lobby : undefined} timers={room.state?.timers as Partial<import("@/lib/settings").Settings> | undefined} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-14 text-[var(--color-ink-2)]">
               You&rsquo;re in.{" "}

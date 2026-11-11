@@ -73,6 +73,16 @@ function Timers({ list, s, set }: { list: Timer[]; s: Settings; set: (p: Partial
 }
 
 
+/* the timers on their own: with no host, what the captain who starts the game can change (Setup, Timers) */
+export function TimersOnly({ s, set }: { s: Settings; set: (p: Partial<Settings>) => void }) {
+  const changed = TIMER_KEYS.some((k) => s[k] !== DEFAULTS[k]);
+  return (<>
+    <Section title="Standard trivia"><Timers list={STANDARD_TIMERS} s={s} set={set} /></Section>
+    <Section title="Mini-games"><Timers list={MINI_TIMERS} s={s} set={set} /></Section>
+    <button type="button" className="btn btn-sm btn-ghost self-center" disabled={!changed}
+      onClick={() => set(Object.fromEntries(TIMER_KEYS.map((k) => [k, DEFAULTS[k]])) as Partial<Settings>)}>Back to the default timers</button>
+  </>);
+}
 export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, remote = false }: {
   s: Settings; set: (p: Partial<Settings>) => void; tab: "general" | "timers"; pick: (t: "general" | "timers") => void;
   played: number; onForget: () => void; addQuestion?: ReactNode; remote?: boolean }) {

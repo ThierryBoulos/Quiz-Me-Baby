@@ -1,6 +1,6 @@
 /* MANY TEAMS: what the TV publishes (PubMany, for every phone) and what only the host's phone gets
    (the answer and every team's typed answer). Built from the night's state, never stored. */
-import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, typedKey, type AwardM, type FlagM, type LatLon, type ManyKey, type StateM } from "./logic";
+import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, roundNumbers, typedKey, type AwardM, type FlagM, type LatLon, type ManyKey, type StateM } from "./logic";
 import { dishKind } from "../tv/rules";
 import { revOf } from "../engine";
 import type { IntroPub } from "../intro";
@@ -98,7 +98,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     places: m.places || s.teams.map(() => s.teams.length), award: m.award || [], line: m.key === "majority" ? mrLine(s) || undefined : undefined };
   if (s.intro) { const games = s.minis.filter((x) => x.key !== "sudden");
     pub.intro = { many: true, teams: s.teams.length, items: games.map((x, i) => ({ kind: x.key === "quiz" ? "q" as const : "mini" as const, key: x.key + i, game: x.key, title: titleOf(s.minis, i),
-      ...(x.key === "quiz" ? { themes: [...new Set(x.qs.map((q) => String(q.theme || "")).filter(Boolean))] } : {}) })) }; }
+      ...(x.key === "quiz" ? { themes: [...new Set(x.qs.map((q) => String(q.theme || "")).filter(Boolean))], rounds: roundNumbers(s.minis, i) } : {}) })) }; }
   if (s.screen === "final") pub.final = { order: ranking(s), log: s.log, awards: recapMany(s), games: s.minis.map((_, i) => titleOf(s.minis, i)) };
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
   /* the host's phone: the answer while it's up, and what every captain typed */

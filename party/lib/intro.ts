@@ -2,7 +2,7 @@
    (question rounds) and dashes (mini-games) big across the top; then, one by one, each round lights up with
    its theme, and each mini-game with its name and what it is; then how to win. A host can talk over it, and it
    explains itself without one. The host (with no host, the lead captain) taps Let's go. Both modes. */
-export type IntroItem = { kind: "q" | "mini"; key: string; game: string; title: string; themes?: string[] };   // key: unique; game: which game
+export type IntroItem = { kind: "q" | "mini"; key: string; game: string; title: string; themes?: string[]; rounds?: number[] };   // key: unique; game: which game; rounds: 3-8 teams, the round numbers a game plays
 export type IntroPub = {
   items: IntroItem[];            // the night in order (the tracker's order)
   many?: boolean;                // 3 to 8 teams: games are scored by places

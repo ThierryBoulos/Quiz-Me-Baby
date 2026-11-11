@@ -16,7 +16,9 @@ export function introWin(I: IntroPub) {
   if (I.many) return `Each game ranks the teams: ${PLACE_PTS.slice(0, Math.min(I.teams, 4)).map((p, i) => `${ordinal(i + 1)} ${p}`).join(", ")}${I.teams > 4 ? "…" : ""} points to the night. Score nothing in a game, add nothing. Most points at the end wins.`;
   return "Most points at the end wins the night. Level at the end? Sudden death.";
 }
-const qCaption = (I: IntroPub) => I.many ? "Two themes a round, four questions. Every team answers every one."
+/* (3-8 teams: a round is one theme, as with two teams; they play two at a time: 11 Nov, the owner) */
+const roundCount = (I: IntroPub) => I.items.filter((x) => x.kind === "q").reduce((a, x) => a + (I.many ? x.rounds?.length || 1 : 1), 0);
+const qCaption = (I: IntroPub) => I.many ? "One theme a round, two questions, two rounds at a time. Every team answers every one."
   : "One theme a round, a question for each team. Miss yours and the other team can steal it. 1 point a right answer.";
 
 /* who: what the TV's last line says (the host, or the captain who starts) */
@@ -39,12 +41,12 @@ export function NightIntroTv({ intro: I, who }: { intro: IntroPub; who: string }
       <div className={"ni-body" + (twoCols ? " two" : "")}>
         {qs.length > 0 && (
           <section className="ni-col" aria-label="Question rounds">
-            <div className="ni-head ni-in" style={d(qHead)}><span className="ni-glyph" aria-hidden /><span>{plural(qs.length, "question round", "question rounds")}</span></div>
+            <div className="ni-head ni-in" style={d(qHead)}><span className="ni-glyph" aria-hidden /><span>{plural(roundCount(I), "question round", "question rounds")}</span></div>
             <p className="ni-cap ni-in" style={d(qHead + 0.15)}>{qCaption(I)}</p>
             <ol className={"ni-list q" + (qWide ? " cols" : "")}>
               {qs.map((x, i) => (
                 <li key={x.key} className="ni-row ni-in" style={d(at[x.key])}>
-                  <span className="ni-n">{i + 1}</span>
+                  <span className="ni-n">{x.rounds?.length ? x.rounds.join("\u2013") : i + 1}</span>
                   <span className="ni-t">{x.themes?.length ? x.themes.join(" · ") : x.title}</span>
                 </li>))}
             </ol>
@@ -83,7 +85,7 @@ export function NightIntroPhone({ intro: I, go, goAt, busy, who }: { intro: Intr
       <div className="card text-center">
         <div className="eyebrow">Tonight</div>
         <h1 className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{noTv ? "Here\u2019s the plan" : "Eyes on the TV"}</h1>
-        <p className="text-14 text-[var(--color-ink-2)] mt-1">{[qs ? plural(qs, "question round", "question rounds") : "", ms ? plural(ms, "mini-game", "mini-games") : ""].filter(Boolean).join(" and ")}.{noTv ? "" : " The plan is on the TV."}</p>
+        <p className="text-14 text-[var(--color-ink-2)] mt-1">{[qs ? plural(roundCount(I), "question round", "question rounds") : "", ms ? plural(ms, "mini-game", "mini-games") : ""].filter(Boolean).join(" and ")}.{noTv ? "" : " The plan is on the TV."}</p>
       </div>
       <ol className="card ni-phone" aria-label="Tonight's game, in order">
         {I.items.map((x) => (

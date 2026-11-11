@@ -124,7 +124,8 @@ export type Secret = { qid?: string; step?: number; answer?: string; notes?: str
   answers?: Two<string>;                // Russian Roulette: each team's own question's answer
   lobby?: TvShare };
 /* In the lobby, what the TV shares with the host's phone: its settings, its own questions, how many it has played */
-export type TvShare = { settings: import("./settings").Settings; custom: import("./engine").Q[]; played: number; thin?: Thin[] };
+/* (draft: the host's lobby setup, kept on the TV for the next host's phone: lib/setupDraft.ts) */
+export type TvShare = { settings: import("./settings").Settings; custom: import("./engine").Q[]; played: number; thin?: Thin[]; draft?: unknown };
 /* a game type nearly out of unplayed questions: left of need (standard rounds: themes with two rounds' worth left, of how many) */
 export type Thin = { key: "standard" | MiniKey; left: number; need?: number; of?: number };
 /* what the note says about each */

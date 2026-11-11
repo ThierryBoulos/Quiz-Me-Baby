@@ -47,7 +47,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
       <Rule n="2" title="Set up your night">
         <P>The host (or Captain A) decides how you want to play:</P>
         <UL items={[
-          <><B>Standard trivia rounds:</B> Choose up to 12 rounds, each with its own themes.</>,
+          <><B>Standard trivia rounds:</B> Choose up to 14 rounds, each with its own theme.</>,
           <><B>Mini-games:</B> Pick the mini-games you want to include. They’ll be played between standard rounds.</>,
           <><B>Mix and match:</B> You can play with both or choose either one.</>,
         ]} />

@@ -17,21 +17,29 @@ import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "roulette"] as const;
 /* sudden death isn't picked: it comes when the night ends with teams level at the top */
 export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
-export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Question round", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
+export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
   closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", roulette: "Russian Roulette" };
 export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, roulette: 3 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
 export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "sudden", "roulette"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
-/* a game's name on screen: the question rounds numbered when there's more than one */
-export const titleOf = (minis: { key: ManyKey }[], i: number) => {
+/* a game's name on screen. The question rounds by their numbers: a round is one theme, and they play two at a time
+   ("Rounds 3 and 4"), the last one alone when the night has an odd number ("Round 5"): 11 Nov, the owner */
+const roundsIn = (m: { qs?: unknown[] }) => Math.max(1, Math.ceil((m.qs?.length ?? MANY_LEGS.quiz) / 2));
+export const titleOf = (minis: { key: ManyKey; qs?: unknown[] }[], i: number) => {
   const key = minis[i]?.key; if (!key) return "";
-  const rounds = minis.filter((m) => m.key === "quiz").length;
-  return key === "quiz" && rounds > 1 ? `Question round ${minis.slice(0, i + 1).filter((m) => m.key === "quiz").length}` : MANY_TITLES[key];
+  if (key !== "quiz") return MANY_TITLES[key];
+  const first = minis.slice(0, i).filter((m) => m.key === "quiz").reduce((a, m) => a + roundsIn(m), 0) + 1, last = first + roundsIn(minis[i]) - 1;
+  return last > first ? `Rounds ${first} and ${last}` : `Round ${first}`;
+};
+/* the rounds a question-round game plays (for the night's plan) */
+export const roundNumbers = (minis: { key: ManyKey; qs?: unknown[] }[], i: number) => {
+  const first = minis.slice(0, i).filter((m) => m.key === "quiz").reduce((a, m) => a + roundsIn(m), 0) + 1;
+  return Array.from({ length: roundsIn(minis[i]) }, (_, j) => first + j);
 };
 export const MANY_MIN = 3, MANY_MAX = 8, MANY_PLAYERS = 60;
-/* question rounds (the owner, 30 Oct): up to six, each two themes of two questions; up to six themes for the night */
-export const MANY_ROUNDS = 6, MANY_THEMES = 6;
+/* standard rounds (11 Nov, the owner): 1 to 14, one theme each, as with two teams; one theme per round */
+export const MANY_ROUNDS = 14, MANY_THEMES = 14;
 /* what a game's places pay the night (1st, 2nd, ...); fewer teams take the top of the same table */
 export const PLACE_PTS = [10, 8, 6, 5, 4, 3, 3, 3];
 /* team colours: Team A's cyan and Team B's pink exactly (--color-a, --color-b), then six more that sit apart
@@ -98,12 +106,15 @@ export const qOf = (s: StateM) => { const m = miniOf(s); return m ? m.qs[m.i] : 
 /* the question on screen, as the phones and the TV name it: new each question asked, a changed one too, and each night
    (so last night's suggestions, or an answer for the question just changed, are never taken for this one; 5 Nov review) */
 export const qidOf = (s: StateM) => `${s.night ?? 0}.${s.qn ?? `${s.mi}${miniOf(s)?.i ?? 0}`}`;
-export function newNight(teams: { name: string; captain: string }[], decks: Partial<Record<ManyKey, Q[]>>, order: ManyKey[]): StateM {
+export function newNight(teams: { name: string; captain: string }[], decks: Partial<Record<ManyKey, Q[]>>, order: ManyKey[], sizes: Partial<Record<ManyKey, number[]>> = {}): StateM {
   const k = teams.length;
   /* a game that comes more than once (the question rounds) takes the next questions of its deck each time */
   const used: Partial<Record<ManyKey, number>> = {};
-  const minis: MiniM[] = order.map((key) => { const at = used[key] ?? 0; used[key] = at + MANY_LEGS[key];
-    return { key, qs: (decks[key] || []).slice(at, at + MANY_LEGS[key]), i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k) }; }).filter((m) => m.qs.length);
+  /* (sizes: a game's own length each time it comes, else its usual one: the question rounds' last game can be one round) */
+  const seen: Partial<Record<ManyKey, number>> = {};
+  const minis: MiniM[] = order.map((key) => { const at = used[key] ?? 0, j = seen[key] ?? 0, len = sizes[key]?.[j] ?? MANY_LEGS[key];
+    seen[key] = j + 1; used[key] = at + len;
+    return { key, qs: (decks[key] || []).slice(at, at + len), i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k) }; }).filter((m) => m.qs.length);
   const extra: Partial<Record<ManyKey, Q[]>> = {};
   for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + 4);
   return { v: 2, teams: teams.map((t) => ({ ...t, score: 0 })), minis, mi: 0, screen: minis.length ? "intro" : "final", step: 1,

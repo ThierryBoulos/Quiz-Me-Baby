@@ -51,6 +51,9 @@ export function saveSettings(s: Partial<Settings>) {
   if (typeof window !== "undefined") window.dispatchEvent(new Event("qmb:settings"));
   return next;
 }
+/* the timers alone: with no host, the captain who starts the game can change these and nothing else (11 Nov, the owner) */
+export const TIMER_SETTINGS = (Object.keys(DEFAULTS) as (keyof Settings)[]).filter((k) => /^t[A-Z]/.test(k));
+export const timersOf = (s: Partial<Settings>) => Object.fromEntries(TIMER_SETTINGS.filter((k) => k in s).map((k) => [k, s[k]])) as Partial<Settings>;
 /* What the host's phone sends to change the TV's settings (Setup, Advanced, Settings): only known
    settings, of the right kind; timers whole seconds from 1 to 600, the volume 0 to 1. Never trust a phone. */
 export function cleanSettings(x: unknown): Partial<Settings> {

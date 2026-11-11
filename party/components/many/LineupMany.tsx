@@ -3,9 +3,15 @@
    are more than two, and the host's setup (components/Setup.tsx: the same card, switches and chips, with the
    four games that work for any number of teams). */
 import { useEffect, useMemo, useState } from "react";
+import { adoptDraft, useDraft, useDraftHost } from "@/lib/setupDraft";
+import type { TvShare } from "@/lib/game";
+import { NO_PICKS, Picker, pickSummary, type Picks } from "../Picker";
+import { TvSettings } from "../TvSettings";
+import { useNoTv } from "../NoTv";
 import type { Member, Room } from "@/lib/room";
-import { HOST_ONLY_THEMES, QMB, loadBank, themeCounts, type Bank } from "@/lib/engine";
-import { MANY_COLORS, MANY_MINIS, MANY_ROUNDS, MANY_THEMES, MANY_TITLES, PLACE_PTS, lineup, type ManyKey } from "@/lib/many/logic";
+import { HOST_ONLY_THEMES, QMB, loadBank, themeCounts, withCustom, type Bank } from "@/lib/engine";
+import { cleanList, getCustom } from "@/lib/custom";
+import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS, lineup, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
 import { levelLine } from "../Setup";
@@ -61,7 +67,7 @@ export function PickMany({ room, k, busy, pick, current, members }: { room: Room
 /* ---- the host's setup when there are more than two teams: Setup's mini-games card, with the games that work for
    any number of teams, each with its levels; the Start button docked under it ---- */
 const GAMES: [ManyKey, string][] = [
-  ["quiz", "Rounds of 4 questions on 2 themes. Captains type; the fastest right answer scores most."],
+  ["quiz", "Rounds of 2 questions on one theme. Captains type; the fastest right answer scores most."],
   ["majority", "Everyone answers on their own phone. 15 questions, 4 answers each."],
   ["flag", "10 flags. Captains type the country; the fastest right answer scores most."],
   ["closest", "5 number questions. The closest guess scores most."],
@@ -74,37 +80,86 @@ const GAMES: [ManyKey, string][] = [
 const LEVELS4 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 const LEVELS3 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const COCKTAILS = [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]] as const, DISHES = [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] as const;
-/* themes the 3-8 team night never offers: the host's own (a captain can't know their answers), and the off-by-default one */
-const NO_THEMES = [...HOST_ONLY_THEMES, "Sexy Time"];
+/* themes the 3-8 team night never offers: the host's own (a captain can't know their answers); and those off until the host
+   picks them, as with two teams (11 Nov, the owner: the same game) */
+const NO_THEMES = [...HOST_ONLY_THEMES];
+const OFF_BY_DEFAULT = ["Sexy Time", "Lebanon"];
+const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+/* the 3-8 night's lengths, for the picker (each game's own) */
+const CAPS = { closest: MANY_LEGS.closest, saysame: MANY_LEGS.say, map: MANY_LEGS.map, flag: MANY_LEGS.flag, dish: MANY_LEGS.dish, pin: MANY_LEGS.pin, airport: MANY_LEGS.airport, majority: MANY_LEGS.majority };
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 export type CfgMany = { minis: string[]; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[]; rounds: number; quizLevels: string[]; themes: string[];
-  airportLevels: string[]; mapLevels: string[]; dishLevels: string[] };
+  airportLevels: string[]; mapLevels: string[]; dishLevels: string[]; custom?: unknown[] } & Partial<Picks>;
 
-export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void }) {
-  /* on to start with: a question round and the first four games; the rest are a tap away */
-  const [minis, setMinis] = useState<string[]>(["quiz", "majority", "flag", "closest", "pin"]);
-  const [rounds, setRounds] = useState(3);
-  const [quizLevels, setQuizLevels] = useState<string[]>(["easy", "medium", "hard"]);
-  const [airportLevels, setAirportLevels] = useState<string[]>([...QMB.AIRPORT_ORDER as string[]]);
-  const [mapLevels, setMapLevels] = useState<string[]>([...QMB.MAP_ORDER as string[]]);
-  const [dishLevels, setDishLevels] = useState<string[]>(["c-medium", "d-medium"]);
-  /* the question rounds' themes (up to six): the bank's themes with questions at tonight's levels, six picked at random to start */
-  const [bank, setBank] = useState<Bank | null>(null);
-  useEffect(() => { void loadBank().then(setBank).catch(() => {}); }, []);
-  const avail = useMemo(() => { if (!bank) return [] as string[]; const c = themeCounts(bank, quizLevels.join("+"));
-    return Object.keys(c).filter((t) => c[t] >= 2 && !NO_THEMES.includes(t)).sort(); }, [bank, quizLevels]);
-  const [themes, setThemes] = useState<string[] | null>(null);
-  useEffect(() => { if (avail.length) setThemes((cur) => (cur ?? [...avail].sort(() => Math.random() - 0.5).slice(0, MANY_THEMES)).filter((t) => avail.includes(t))); }, [avail]);
+export function SetupMany({ busy, why, k, onStart, code, tv }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void; code: string; tv?: TvShare }) {
+  const noTv = useNoTv();
+  /* every choice is kept (lib/setupDraft.ts), as with two teams: the team count changing, a reload, another phone
+     taking over as host (11 Nov, the owner) */
+  useDraftHost(code, true);
+  useEffect(() => { if (tv?.draft) adoptDraft(code, tv.draft); }, [code, tv?.draft]);
+  /* on to start with: the standard rounds and the first four games; the rest are a tap away */
+  const [minis, setMinis] = useDraft<string[]>(code, "many.minis", ["quiz", "majority", "flag", "closest", "pin"]);
+  /* standard rounds: one theme each, 1 to 14, played two at a time (the default night is the same as before: six) */
+  const [rounds, setRounds] = useDraft(code, "many.rounds", 6);
+  const [quizLevels, setQuizLevels] = useDraft<string[]>(code, "many.quizLevels", ["easy", "medium", "hard"]);
+  const [airportLevels, setAirportLevels] = useDraft<string[]>(code, "many.airportLevels", [...QMB.AIRPORT_ORDER as string[]]);
+  const [mapLevels, setMapLevels] = useDraft<string[]>(code, "many.mapLevels", [...QMB.MAP_ORDER as string[]]);
+  const [dishLevels, setDishLevels] = useDraft<string[]>(code, "many.dishLevels", ["c-medium", "d-medium"]);
+  /* the rounds' themes, one per round: the bank's themes with questions at tonight's levels (the host's own too), as
+     many picked at random to start as there are rounds */
+  const [mine, setBank] = useState<Bank | null>(null);
+  useEffect(() => {
+    const pull = () => void loadBank().then(setBank).catch(() => {});
+    pull(); window.addEventListener("qmb:custom", pull);
+    return () => window.removeEventListener("qmb:custom", pull);
+  }, []);
+  /* the TV's own questions, shared with the host, join the list as with two teams */
+  const tvQs = useMemo(() => cleanList(tv?.custom).map((q) => ({ ...q, onTv: true })), [tv?.custom]);
+  const bank = useMemo(() => (mine && tvQs.length ? withCustom(mine, tvQs) : mine), [mine, tvQs]);
+  const counts = useMemo(() => (bank ? themeCounts(bank, quizLevels.join("+")) : {}) as Record<string, number>, [bank, quizLevels]);
+  const avail = useMemo(() => Object.keys(counts).filter((t) => counts[t] >= 2 && !NO_THEMES.includes(t)).sort(), [counts]);
+  const [themes, setThemes] = useDraft<string[] | null>(code, "many.themes", null);
+  /* exactly one theme per round: trimmed when the rounds go down, topped up at random when they go up */
+  useEffect(() => {
+    if (!avail.length) return;
+    setThemes((cur) => {
+      let t = (cur ?? shuffle(avail.filter((x) => !OFF_BY_DEFAULT.includes(x)))).filter((x) => avail.includes(x));
+      if (t.length > rounds) t = t.slice(0, rounds);
+      const spare = shuffle(avail.filter((x) => !t.includes(x) && !OFF_BY_DEFAULT.includes(x)));
+      while (t.length < rounds && spare.length) t = [...t, spare.shift()!];
+      return t;
+    });
+  }, [avail, rounds, setThemes]);
   const [picking, setPicking] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
   const picked = themes ?? [];
-  const [flagLevels, setFlagLevels] = useState<string[]>(["veasy", "easy", "medium", "hard"]);
-  const [pinLevels, setPinLevels] = useState<string[]>([...QMB.PIN_ORDER as string[]]);
-  const [majorityLevels, setMajorityLevels] = useState<string[]>([...QMB.MAJORITY_ORDER as string[]]);
+  const [flagLevels, setFlagLevels] = useDraft<string[]>(code, "many.flagLevels", ["veasy", "easy", "medium", "hard"]);
+  const [pinLevels, setPinLevels] = useDraft<string[]>(code, "many.pinLevels", [...QMB.PIN_ORDER as string[]]);
+  const [majorityLevels, setMajorityLevels] = useDraft<string[]>(code, "many.majorityLevels", [...QMB.MAJORITY_ORDER as string[]]);
+  /* the host's Advanced, as with two teams: hand-picked questions, a difficulty per theme, the TV's settings */
+  const [picks, setPicks] = useDraft<Picks>(code, "picks", NO_PICKS);
+  const [full, setFull] = useState<Bank | null>(null);
+  const [choosing, setChoosing] = useState(false);
+  const [tvOpen, setTvOpen] = useState(false);
+  useEffect(() => { if (choosing && !full) void loadBank(code).then(setFull).catch(() => setNote("Couldn't load the questions. Try again.")); }, [choosing, full, code]);
+  useEffect(() => {
+    const pull = () => { if (full) void loadBank(code).then(setFull).catch(() => {}); };
+    window.addEventListener("qmb:custom", pull);
+    return () => window.removeEventListener("qmb:custom", pull);
+  }, [full, code]);
+  const fullAll = useMemo(() => (full && tvQs.length ? withCustom(full, tvQs) : full), [full, tvQs]);
+  const pickMinis = minis.map((x) => (x === "say" ? "saysame" : x));
+  const toggleTheme = (t: string) => {
+    setNote(null);
+    if (picked.includes(t)) { setThemes(picked.filter((x) => x !== t)); return; }
+    if (picked.length >= rounds) { setNote(`That's ${rounds} themes already, one per round. Drop one first, or add a round.`); return; }
+    setThemes([...picked, t]);
+  };
   const on = MANY_MINIS.filter((x) => minis.includes(x));
-  /* the order they'll play in: the question rounds spread through the night */
-  const night = lineup(on.includes("quiz") ? rounds : 0, on.filter((x) => x !== "quiz"));
+  /* the order they'll play in: the standard rounds spread through the night, two at a time */
+  const night = lineup(on.includes("quiz") ? Math.ceil(rounds / 2) : 0, on.filter((x) => x !== "quiz"));
   const slot = (x: string) => { const at = night.map((y, i) => (y === x ? i + 1 : 0)).filter(Boolean); return at.length ? at.map((n) => ordinal(n)).join(", ") : ""; };
-  const blocker = why || (!on.length ? "Switch on at least one game." : on.includes("quiz") && bank && !picked.length ? "Pick at least one theme for the question rounds." : "");
+  const blocker = why || (!on.length ? "Switch on at least one game." : on.includes("quiz") && bank && picked.length !== rounds ? `Pick ${rounds} themes, one per round (${picked.length} so far).` : "");
   /* a level row: tap to add or drop a level; the last one can't be dropped */
   const LevelRow = ({ label, opts, value, set }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void }) => (
     <div className="lvl-row" role="group" aria-label={label}>
@@ -136,23 +191,24 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
             {lit && key === "quiz" && (<div className="sub-panel">
               {/* how many rounds: a dropdown, not a row of six (the owner, 1 Nov) */}
               <label className="sp-row"><span className="sp-k">Rounds</span>
-                <select className="select" aria-label="How many question rounds" value={rounds} onChange={(e) => setRounds(Number(e.target.value))}>
+                <select className="select" aria-label="How many standard rounds" value={rounds} onChange={(e) => { setRounds(Number(e.target.value)); setNote(null); }}>
                   {Array.from({ length: MANY_ROUNDS }, (_, i) => i + 1).map((r) => <option key={r} value={r}>{r} round{r === 1 ? "" : "s"}</option>)}
                 </select></label>
               <div className="flex flex-col gap-2"><span className="sp-k">Level</span><LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} /><p className="text-12 text-[var(--color-ink-3)] px-1">{levelLine(quizLevels, quizLevels.length === 4)}</p></div>
-              {/* the themes: a summary, and a tap to change them (up to six; each round takes two in turn) */}
+              {/* the themes: a summary, and a tap to change them (one per round; the rounds play two at a time) */}
               <div className="flex flex-col gap-2">
                 <button type="button" className="flex items-center justify-between gap-3 min-h-[44px] text-left" aria-expanded={picking} onClick={() => setPicking(!picking)}>
-                  <span className="min-w-0"><span className="sp-k block">Themes · {picked.length} of {MANY_THEMES}</span>
+                  <span className="min-w-0"><span className="sp-k block">Themes · {picked.length} of {rounds}</span>
                     <span className="block text-14 font-bold leading-snug mt-1">{picked.length ? picked.join(", ") : bank ? "None yet" : "Loading…"}</span>
-                    <span className="block text-12 text-[var(--color-ink-3)] mt-0.5">Each round takes two, in turn.</span></span>
+                    <span className="block text-12 text-[var(--color-ink-3)] mt-0.5">One per round. The rounds play two at a time.</span></span>
                   <span className="text-13 font-bold shrink-0" style={{ color: "var(--color-gold)" }}>{picking ? "Done" : "Change"}</span>
                 </button>
                 {picking && <div className="flex flex-wrap gap-2 enter" role="group" aria-label="Question round themes">
-                  {avail.map((t) => { const lit = picked.includes(t), full = !lit && picked.length >= MANY_THEMES; return (
-                    <button key={t} type="button" className={"chip !min-h-[44px] !px-3 !text-13 " + (lit ? "chip-on" : "")} aria-pressed={lit} disabled={full}
-                      onClick={() => setThemes(lit ? picked.filter((x) => x !== t) : [...picked, t])}>{t}</button>); })}
+                  {avail.map((t) => { const lit = picked.includes(t); return (
+                    <button key={t} type="button" className={"chip !min-h-[44px] !px-3 !text-13 " + (lit ? "chip-on" : "")} aria-pressed={lit}
+                      onClick={() => toggleTheme(t)}>{t}</button>); })}
                 </div>}
+                {note && <p className="text-13 text-[var(--color-no)]" role="alert">{note}</p>}
               </div>
             </div>)}
             {lit && key === "flag" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} /></div>}
@@ -168,9 +224,33 @@ export function SetupMany({ busy, why, k, onStart }: { busy: boolean; why: strin
             </div>)}
           </div>); })}
       </div>
+      {/* ---- ADVANCED: the host's (it shows the answers), as with two teams ---- */}
+      <div className="card flex flex-col gap-3">
+        <div>
+          <div className="display text-24">Advanced</div>
+          <div className="text-13 text-[var(--color-ink-2)]">Host only. {pickSummary(picks, on.includes("quiz") ? picked : [], pickMinis)}{tvQs.length > 0 && ` ${noTv ? "The game phone's" : "The TV's"} own ${tvQs.length} question${tvQs.length === 1 ? " is" : "s are"} in the picker too.`}</div>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <button type="button" className="btn btn-sm" onClick={() => setChoosing(true)}>Choose questions</button>
+          <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : noTv ? "Settings (waiting for the game…)" : "Settings (waiting for the TV…)"}</button>
+          {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
+        </div>
+      </div>
+      {tvOpen && tv && <TvSettings code={code} tv={tv} onClose={() => setTvOpen(false)} />}
+      {choosing && fullAll && <Picker bank={fullAll} many caps={CAPS} themes={on.includes("quiz") ? picked : []} minis={pickMinis} difficulty={quizLevels.length === 4 ? "mixed" : quizLevels.join("+")}
+        levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels, pin: pinLevels, airport: airportLevels, majority: majorityLevels }} value={picks} onChange={setPicks} onClose={() => setChoosing(false)}
+        onUseTheme={(t) => {
+          if (!on.includes("quiz")) return "Switch on the standard rounds first.";
+          if (picked.includes(t)) return null;
+          if ((counts[t] || 0) < 2) return `Add one more question to ${t}: a round needs two.`;
+          if (picked.length < rounds) { setThemes([...picked, t]); return `${t} plays tonight.`; }
+          const out = picked[picked.length - 1]; setThemes([...picked.slice(0, -1), t]);
+          return `${t} plays tonight, instead of ${out}.`;
+        }} />}
       <div className="start-bar">
         {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
-        <button className="btn btn-gold btn-block" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels })}>Start the game</button>
+        <button className="btn btn-gold btn-block" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels,
+          custom: getCustom(), ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) })}>Start the game</button>
       </div>
     </section>);
 }

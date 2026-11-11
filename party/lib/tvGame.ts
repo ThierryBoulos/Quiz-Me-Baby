@@ -2,10 +2,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
-import { cleanList, getCustom, mergeCustom } from "./custom";
+import { cleanList, mergeCustom } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
-import { cleanSettings, forgetUsed, getSettings, saveSettings, usedCount, USED_KEY } from "./settings";
+import { cleanSettings, forgetUsed, getSettings, saveSettings, timersOf, USED_KEY, type Settings } from "./settings";
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
 /* The shape of the saved game. Bump it whenever a change means a game saved before it can't be
    carried on (new required state, renamed screens, a changed engine game object): a TV reloaded
@@ -23,6 +23,7 @@ import { usePresent } from "./tv/usePresent";
 import { fireLeg, imadNarrate, imadOnToast, imadSay } from "./tv/imad";
 import { newState, type TvState } from "./tv/state";
 import { setTeams } from "./many/useTvMany";
+import { saveLobbyDraft, useLobbyShare } from "./tv/lobbyShare";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
    right one, or both out) it's the one whose calls can be contested on the next screen. (true: go on) */
@@ -167,7 +168,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* The lobby's team names and who's away, as this TV last wrote them. Two writes a beat apart (both
      captains naming their teams in the same second) must each build on the other, not on a room the
      push hasn't brought back yet: on 20 Oct the second name overwrote the first. */
-  const lobbyMine = useRef<{ teamNames?: [string, string]; away?: string[] }>({});
+  const lobbyMine = useRef<{ teamNames?: [string, string]; away?: string[]; timers?: Partial<Settings> }>({});
   /* (and the newest stamp: a lobby write made before the TV has read back its own Play again must not carry the old one, which the phones would take for an old room) */
   const lobbyState = (room: Room) => ({ ...room.state, ...lobbyMine.current, pubAt: Math.max(Number(room.state?.pubAt) || 0, lastAt.current) || undefined });
   /* the TV's last errors (29 Oct): kept in the room with the next write, so a night that broke can be read
@@ -1090,7 +1091,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* standard rounds can be off (a mini-games-only night), as in Classic */
       const standard = cfgIn.standard !== false;
       if (!standard && !minis.length) return;
-      const rounds = Math.max(4, Math.min(12, Math.floor(Number(cfgIn.rounds) || 6)));
+      const rounds = Math.max(1, Math.min(14, Math.floor(Number(cfgIn.rounds) || 6)));   // 1 to 14 (11 Nov, the owner)
       /* the host's hand-picked questions and per-theme difficulty (only a host can send them: the picker shows answers) */
       const byHost = members.find((m) => m.user_id === a.user_id)?.role === "host";
       const ids = (x: unknown) => (Array.isArray(x) ? x.filter((v) => typeof v === "string").slice(0, 20) : []) as string[];
@@ -1140,9 +1141,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     /* the host changes the TV's settings from their phone (Setup, Advanced, Settings): saved here, on the TV,
        as if changed on its Settings page; the lobby share below sends them back to the host */
-    if (a.kind === "setup" && (a.payload.settings || a.payload.forgetPlayed) && room.status === "lobby" && from?.role === "host") {
+    /* no host: the captain who starts the game changes the timers, and nothing else (Setup, Timers) */
+    if (a.kind === "setup" && a.payload.timers && room.status === "lobby" && !members.some((m) => m.role === "host") && starter(members)?.user_id === a.user_id) {
+      saveSettings(timersOf(cleanSettings(a.payload.timers)));
+      return;
+    }
+    if (a.kind === "setup" && (a.payload.settings || a.payload.forgetPlayed || a.payload.draft) && room.status === "lobby" && from?.role === "host") {
       if (a.payload.settings) saveSettings(cleanSettings(a.payload.settings));
       if (a.payload.forgetPlayed) resetPlayed();
+      if (a.payload.draft) saveLobbyDraft(code, a.payload.draft);
       return;
     }
     if (!s.g || !from) return;
@@ -1191,30 +1198,23 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applyFx, captainInput, captainMove, code, draftKey, env, hostMove, play, publish, refuse, resetPlayed]);   // mrAnswer, onNote, sayLobby: stable (refs and setters)
 
-  /* In the lobby, the TV's settings and its own questions go to the host's phone (the secrets row: the
-     host's alone, as the answers are), so the host can pick the TV's questions and change its settings
-     (Setup, Advanced). Sent again whenever either changes here; the game's first update replaces it.
-     With them, what's nearly played out (the host's Setup shows the same note as the TV). */
-  const thinRef = useRef(thin);
-  thinRef.current = thin;
+  /* In the lobby, the TV's settings, its own questions and the host's setup go to the host's phone (lib/tv/lobbyShare.ts) */
+  useLobbyShare(code, isTv, status, { thin, lastSecret, stamp });
+  /* ...and its timers, in the room for everyone (they're no secret): with no host, the captain who starts the game
+     sees them and can change them (Setup, Timers: 11 Nov, the owner) */
   useEffect(() => {
     if (!isTv || status !== "lobby") return;
-    let t: ReturnType<typeof setTimeout> | undefined;
-    const share = () => { clearTimeout(t); t = setTimeout(() => {
-      const at = stamp();
-      lastSecret.current = "";                         // the game's first answer goes out whatever it is
-      void sb().from("secrets").update({ data: { at, lobby: { settings: getSettings(), custom: getCustom(), played: usedCount(), thin: thinRef.current } } }).eq("room", code)
-        .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).then(({ error }) => { if (error) console.error("lobby share failed", error); });
-    }, 250); };
-    share();
-    window.addEventListener("qmb:thin", share);
-    const onStorage = (e: StorageEvent) => { if (!e.key || e.key.startsWith("qmb.party.")) share(); };
-    window.addEventListener("qmb:settings", share); window.addEventListener("qmb:custom", share); window.addEventListener("storage", onStorage);
-    return () => { clearTimeout(t); window.removeEventListener("qmb:thin", share); window.removeEventListener("qmb:settings", share); window.removeEventListener("qmb:custom", share); window.removeEventListener("storage", onStorage); };
+    const put = () => {
+      const r = ctx.current.room; if (!r || r.status !== "lobby") return;
+      const tm = timersOf(getSettings());
+      if (JSON.stringify(r.state?.timers) === JSON.stringify(tm)) return;
+      lobbyMine.current.timers = tm;
+      void sb().from("rooms").update({ state: { ...lobbyState(r), timers: tm } }).eq("code", code).then(() => {});
+    };
+    const t = setTimeout(put, 400);
+    window.addEventListener("qmb:settings", put);
+    return () => { clearTimeout(t); window.removeEventListener("qmb:settings", put); };
   }, [isTv, status, code]);
-
-  /* a new thin list goes to the host too */
-  useEffect(() => { if (isTv) window.dispatchEvent(new Event("qmb:thin")); }, [isTv, thin]);
 
   /* fetch the questions while everyone's still joining, not when Start is tapped */
   useEffect(() => { if (isTv) void loadBank(code).catch(() => { /* tried again at Start */ }); }, [isTv, code]);
