@@ -145,7 +145,8 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
 /* the phone's "reduce motion" setting is respected (the marquee screens follow their own Background motion setting:
    Auto there keeps the bulbs' light changing and stills the rest; see .mq.m-lights) */
 @media (prefers-reduced-motion: reduce) {
-  *:not(.mq):not(.mq *), *:not(.mq):not(.mq *)::before, *:not(.mq):not(.mq *)::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  /* (the roulette's spin is the draw itself, not decoration: it turns even with "reduce motion" on, 11 Nov, the owner) */
+  *:not(.mq):not(.mq *):not(.rr-spin), *:not(.mq):not(.mq *)::before, *:not(.mq):not(.mq *)::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   .sending::after { animation: none; width: 100%; opacity: 0.6; }
 }
 
@@ -1386,7 +1387,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .rr-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px;
   border: 1.5px solid color-mix(in srgb, var(--c) 45%, transparent); background: color-mix(in srgb, var(--c) 8%, transparent); }
 .rr-row.bang { border-color: var(--color-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-gold) 35%, transparent); }
-@media (prefers-reduced-motion: reduce) { .rr-spin, .rr-click { animation: none; } .rr-bang { display: none; } .rr-shot, .rr-late, .rr-lit { animation-duration: 1ms; } }
+@media (prefers-reduced-motion: reduce) { .rr-click { animation: none; } .rr-bang { display: none; } .rr-shot, .rr-late, .rr-lit { animation-duration: 1ms; } }
 
 /* the host's question picker (11 Nov, the owner): pinned chips on top, one list at a time, Back/Next pinned below.
    Only the list scrolls, and only up and down. */

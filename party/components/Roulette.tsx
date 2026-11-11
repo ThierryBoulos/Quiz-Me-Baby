@@ -9,9 +9,25 @@ import { tvNow } from "./Clock";
 import { playSound } from "@/lib/sound";
 import { SPIN_MS, STEP_MS, type RrPub } from "@/lib/roulette";
 
-export type RrLit = { j: number; color: string; letter: string };
+export type RrLit = { j: number; color: string; letter: string; theme?: string; level?: string };
 const geo = (n: number) => ({ R: n === 8 ? 58 : 54, r: n === 8 ? 16.5 : 21 });
 const at = (n: number, j: number, R: number) => { const a = (-90 + (360 / n) * j) * (Math.PI / 180); return { x: 100 + R * Math.cos(a), y: 100 + R * Math.sin(a) }; };
+/* a theme in a chamber: one line if it fits, else two (at the space nearest the middle), shrunk till it fits; the
+   level under it, small */
+const levelTag = (lv?: string) => (lv === "bullet" ? "BULLET" : lv === "hard" ? "HARD" : lv === "expert" ? "EXPERT" : "MEDIUM");
+function fitTheme(theme: string, r: number) {
+  const w = r * 1.78, wide = (t: string, f: number) => t.length * f * 0.58;
+  let lines = [theme];
+  if (wide(theme, r * 0.36) > w && theme.includes(" ")) {
+    const sp = [...theme].map((c, i) => (c === " " ? i : -1)).filter((i) => i > 0);
+    const cut = sp.reduce((b, i) => (Math.abs(i - theme.length / 2) < Math.abs(b - theme.length / 2) ? i : b), sp[0]);
+    lines = [theme.slice(0, cut), theme.slice(cut + 1)];
+  }
+  const longest = Math.max(...lines.map((l) => l.length));
+  const fs = Math.min(r * 0.36, w / (longest * 0.58)), ls = Math.min(r * 0.27, fs * 0.82);
+  const h = lines.length * fs * 1.08 + ls;
+  return { lines, fs, ls, y0: -h / 2 + fs * 0.8 };
+}
 /* the reveal's order: the drawn chambers clockwise from the top, the bullet's last (drawn or not) */
 export const rrOrder = (lit: number[], bullet: number) => [...lit.filter((j) => j !== bullet).sort((a, b) => a - b), ...(bullet >= 0 ? [bullet] : [])];
 export const rrRevealMs = (count: number) => count * STEP_MS + 900;
@@ -35,7 +51,7 @@ export const useSpun = (spinAt?: number | null) => useSpinPhase(spinAt).done;
 export function Barrel({ n, lit, spinAt, bullet, reveal, size, label }: {
   n: number; lit: RrLit[]; spinAt?: number | null; bullet?: number | null; reveal?: boolean; size: number; label?: string }) {
   const { spinning, phase } = useSpinPhase(spinAt);
-  const { R, r } = geo(n);
+  const { R, r } = geo(n), big = size >= 300;
   const order = bullet != null ? rrOrder(lit.map((x) => x.j), bullet) : [];
   const step = (j: number) => ({ ["--rr-at" as string]: `${Math.max(0, order.indexOf(j)) * STEP_MS}ms` });
   const hit = bullet != null && lit.some((x) => x.j === bullet);
@@ -63,12 +79,18 @@ export function Barrel({ n, lit, spinAt, bullet, reveal, size, label }: {
         <circle cx="100" cy="100" r="14" fill="#2b3157" stroke="#646d9c" strokeWidth="1.5" />
         <circle cx="100" cy="100" r="5" fill="#0a0d20" />
       </g>
-      {/* where each team landed: its colour round the chamber, its letter in it */}
-      {!spinning && lit.map((x) => { const p = at(n, x.j, R); return (
+      {/* where each team landed: its colour round the chamber and in it; on a barrel big enough to read (the TV), the
+          chamber's theme with its level under it, in place of the team's letter (11 Nov, the owner) */}
+      {!spinning && lit.map((x) => { const p = at(n, x.j, R), words = big && x.theme ? fitTheme(x.theme, r) : null; return (
         <g key={"l" + x.j} className={spinAt && !reveal ? "rr-lit" : undefined}>
           <g className={reveal && x.j !== bullet ? "rr-click" : undefined} style={reveal ? step(x.j) : undefined}>
-            <circle cx={p.x} cy={p.y} r={r + 1.5} fill="none" strokeWidth="4.5" style={{ stroke: x.color }} />
-            <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontWeight="800" fontSize={r * 1.05} style={{ fill: x.color, fontFamily: "var(--font-display, inherit)" }}>{x.letter}</text>
+            <circle cx={p.x} cy={p.y} r={r + 1.5} strokeWidth="4.5" style={{ stroke: x.color, fill: x.color, fillOpacity: words ? 0.32 : 0 }} />
+            {words ? (
+              <text x={p.x} textAnchor="middle" fontWeight="800" style={{ fill: "#fff", fontFamily: "var(--font-body, inherit)" }}>
+                {words.lines.map((l, i) => <tspan key={i} x={p.x} y={p.y + words.y0 + i * words.fs * 1.08} fontSize={words.fs}>{l}</tspan>)}
+                <tspan x={p.x} y={p.y + words.y0 + words.lines.length * words.fs * 1.08 + words.ls * 0.2} fontSize={words.ls} style={{ fill: x.level === "bullet" ? "#ffd84a" : "rgba(255,255,255,.8)", letterSpacing: ".04em" }}>{levelTag(x.level)}</tspan>
+              </text>)
+              : <circle cx={p.x} cy={p.y} r={r * 0.42} style={{ fill: x.color }} />}
           </g>
         </g>); })}
       {/* the bullet, last: in a team's chamber, BANG */}
@@ -121,7 +143,7 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
   rr: RrPub; teams: RrTeam[]; clock?: ReactNode; sent?: boolean[]; typed?: (string | null)[]; ok?: (boolean | null)[]; reveal?: boolean; showQs?: boolean; sound?: boolean }) {
   const spun = useSpun(rr.spinAt), k = teams.length, dense = k > 4, tight = k > 6, R = reveal ? rr.rev : undefined;
   useRouletteSounds(sound ? rr : undefined, reveal ? "reveal" : "spin", `${rr.lap}.${rr.spinAt}.${reveal ? "r" : "q"}`);
-  const lit = rr.draw.map((d, t) => ({ j: d.j, color: teams[t].color, letter: teams[t].letter }));
+  const lit = rr.draw.map((d, t) => ({ j: d.j, color: teams[t].color, letter: teams[t].letter, theme: d.theme, level: d.level }));
   const order = R ? rrOrder(lit.map((x) => x.j), R.bullet) : [];
   const stepOf = (t: number) => Math.max(0, order.indexOf(rr.draw[t].j));
   const end = rrRevealMs(order.length - 1);
