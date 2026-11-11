@@ -42,7 +42,7 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         else if (m.key === "dish") { for (let t = 0; t < k && s.screen === "q"; t++) L.captainAnswer(s, t, { text: rng() < 0.4 ? String(q.answer) : "Atlantis" }); }
         else for (let t = 0; t < k; t++) {
           if (rng() < 0.1) continue;
-          if (L.typedKey(m.key)) L.captainAnswer(s, t, { text: rng() < 0.5 ? String(m.key === "map" ? q.question : q.answer) : "Atlantis" });
+          if (L.typedKey(m.key)) L.captainAnswer(s, t, { text: rng() < 0.5 ? String(m.key === "map" ? q.question : m.key === "roulette" ? q.ch?.[q.draw?.[t]]?.q?.answer ?? "Paris" : q.answer) : "Atlantis" });
           if (m.key === "closest") L.captainAnswer(s, t, { n: String(Math.round(Number(q.answer) * (0.5 + rng()))) });
           if (m.key === "pin") L.captainAnswer(s, t, { pin: { lat: Number(q.lat) + (rng() - 0.5) * 20, lon: Number(q.lon) + (rng() - 0.5) * 20 } });
         }
