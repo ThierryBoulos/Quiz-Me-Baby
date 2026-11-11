@@ -120,6 +120,8 @@ Some of these may not apply now or ever; they're here so nothing is forgotten.
   - **Decided (11 Nov, the owner):** use any pictures and logos wanted. One sentence in Settings' Copyright window
     gives the credit, says the game isn't associated with any brand, celebrity or person shown, and gives the
     contact for removal requests: Thierryboulos@hotmail.com. Each picture set stays removable on its own.
+  - **todo (at launch):** replace that personal address with an official one (support@ or legal@ on the game's
+    own domain) everywhere it appears: the Copyright window, the privacy contact, the terms.
 - **todo**: Fact-check pass on the whole bank before selling it (wrong answers become complaints).
 
 ### Product
