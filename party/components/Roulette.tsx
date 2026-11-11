@@ -128,7 +128,7 @@ export function Barrel({ n, lit, spinAt, bullet, reveal, size, label, ch, used =
       </g>
       {/* where each team landed: its colour round the chamber and in it; on a barrel big enough to read (the TV), the
           chamber's theme with its level under it, in place of the team's letter (11 Nov, the owner) */}
-      {!spinning && lit.map((x) => { const p = at(n, x.j, R), words = big && !!x.theme; return (
+      {!spinning && lit.map((x) => { const p = at(n, x.j, R), words = big && !!x.theme && !(reveal && x.j === bullet); return (
         <g key={"l" + x.j} className={spinAt && !reveal ? "rr-lit" : undefined}>
           <g className={reveal && x.j !== bullet ? "rr-click" : undefined} style={reveal ? step(x.j) : undefined}>
             <circle cx={p.x} cy={p.y} r={r + 1.5} strokeWidth="4.5" style={{ stroke: x.color, fill: x.color, fillOpacity: words ? 0.32 : 0 }} />

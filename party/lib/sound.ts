@@ -110,7 +110,12 @@ export const Snd = {
      bang: a short burst and a low thump, soft like everything else here */
   spin() { this.resume(); let t = 0; for (let i = 0; i < 26; i++) { noise(t, 0.025, { type: "highpass", f0: 2600, gain: 0.05, att: 0.003 }); t += 0.035 + i * i * 0.00022; } },
   click() { this.resume(); noise(0, 0.05, { type: "bandpass", f0: 2200, q: 3, gain: 0.16, att: 0.003 }); note(180, 0, 0.06, { type: "triangle", gain: 0.05, att: 0.003 }); },
-  bang() { this.resume(); noise(0, 0.7, { type: "lowpass", f0: 1800, f1: 300, gain: 0.34, att: 0.006 }); note(70, 0, 0.6, { type: "sine", gain: 0.32, att: 0.005, to: 38, glide: 0.4 }); },
+  /* (11 Nov, the owner: a proper bang: a sharp crack, the boom under it, and its echo off the walls) */
+  bang() { this.resume();
+    noise(0, 0.09, { type: "bandpass", f0: 3200, q: 0.8, gain: 0.5, att: 0.002 });
+    noise(0, 0.9, { type: "lowpass", f0: 2400, f1: 220, gain: 0.45, att: 0.004 });
+    note(80, 0, 0.8, { type: "sine", gain: 0.42, att: 0.004, to: 34, glide: 0.5 });
+    noise(0.22, 0.6, { type: "lowpass", f0: 900, f1: 200, gain: 0.12, att: 0.01 }); },
   /* a coin landing on the score (a mini-game's points, one coin each) */
   coin(k = 0) { this.resume(); const f = 1046.5 * Math.pow(2, Math.min(k, 7) / 12); note(f, 0, 0.12, { type: "triangle", gain: 0.07 }); note(f * 2, 0.01, 0.08, { type: "sine", gain: 0.025 }); },
 };
