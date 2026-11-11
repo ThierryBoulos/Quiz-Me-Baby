@@ -117,8 +117,9 @@ Some of these may not apply now or ever; they're here so nothing is forgotten.
     copyright on Wikimedia Commons (still trademarks). Famous faces: free photos exist on Commons (copyright cleared
     with a credit), but the licence doesn't cover the person's own image rights; France asks for consent for
     commercial use and is easier on informational use; no case found about a trivia game.
-  - If built: pictures in the game only (never in ads, the site, an icon or screenshots), "not affiliated" line,
-    credits, a contact to ask for removal and removal the same day, each picture set removable on its own.
+  - **Decided (11 Nov, the owner):** use any pictures and logos wanted. One sentence in Settings' Copyright window
+    gives the credit, says the game isn't associated with any brand, celebrity or person shown, and gives the
+    contact for removal requests: Thierryboulos@hotmail.com. Each picture set stays removable on its own.
 - **todo**: Fact-check pass on the whole bank before selling it (wrong answers become complaints).
 
 ### Product
@@ -168,12 +169,12 @@ second free night repeats questions (the reason to buy). "Play without TV" stays
   per theme, and "Add your own questions". Nobody browses the bank.
 - **Locked content never leaves the server.** Today the TV downloads the whole bank with its answers. Instead:
   - the bank sits in a database table nobody's phone or TV can read (no read rule at all);
-  - at Start, a server function deals tonight's questions plus a few spares per game (5 or 6, for "Change
-    question"), and the room gets only those; more spares on request if a night runs out;
+  - at Start, a server function deals tonight's questions plus 3 spares per game (for "Change question";
+    the owner, 11 Nov), and the room gets only those; the TV asks the server for more if a night runs out;
   - answers stay on the server and the server judges (section 2, decision 1), so even tonight's answers never
     reach a phone before the reveal;
-  - limits on how many rooms one account (or one free player) can open a day, so nobody harvests the bank by
-    opening rooms over and over.
+  - a cap of 10 rooms a day per account (or free player): generous, since people open a room, change their mind
+    and open another, or switch devices (the owner, 11 Nov); enough to stop anyone harvesting the bank.
   Someone determined could still copy what they see, night by night: slow, and paid. That's as locked as a game
   people play can be.
 - **Open Trivia DB questions** (decided 11 Nov): one credit line in the app's Copyright window ("Some questions
