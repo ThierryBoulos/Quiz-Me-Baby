@@ -89,6 +89,19 @@ or set them on Vercel as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KE
   the difference (`node sim/run.mjs <n>` prints a night) and save the new traces with
   `node sim/run.mjs --update` (`node sim/many.mjs --update` for 3 to 8 teams). Commit them with
   the change.
+- **Bots in a real room (when the owner asks for a room full of bots):** the owner opens the
+  room (Create game on the TV, or Play without TV) and says the code; `cd party && npm run bots -- ABCD`
+  puts a bot captain and a bot player on every team that has no captain, and they play the
+  whole night to the final screen, answering in about 3 seconds (the owner's pick). The bots
+  join as phones do and send the same taps, so the game can't tell them apart.
+  - `--host`: a bot host too (it starts the night, taps Next, makes the calls). Without it,
+    the owner is the host, or with no host the bot on Team A starts the night.
+  - `--teams 8`: 3 to 8 teams (they need a host: the owner, or `--host`, which sets the number).
+  - `--players 2` players per team; `--delay 5` seconds per answer; `--rounds 4`,
+    `--minis flag,roulette` for what a bot starts (every game by default).
+  - The bots only take empty seats: the owner joins first to be a captain. Ctrl+C (or stopping
+    the task) takes them out of the room; anything left over goes in the nightly clean-up.
+  - This plays on the live site, with the owner's yes for a few games at a time (11 Nov).
 - **Screen check (after changing any screen):** `cd party && npm run screens` plays a few
   nights (2 teams with and without a host, 3, 5 and 8 teams), keeps every screen they reach,
   and opens each one in a browser: on the TV, and on phones from 360 wide (Galaxy) to 440

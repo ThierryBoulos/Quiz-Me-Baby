@@ -127,14 +127,24 @@ const PHONE_MEASURE = () => {
   const txt = [...document.querySelectorAll("main *")].filter((el) => !skip(el) && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 0))
     .filter((el) => { const cs = getComputedStyle(el); return cs.visibility !== "hidden" && cs.display !== "none" && +cs.opacity > 0.05; });
   const ink = (el, a) => (el.closest(".display") ? { left: a.left, right: a.right, top: a.top + 0.18 * a.height, bottom: a.bottom - 0.08 * a.height } : a);
-  const rs = txt.map((el) => ink(el, el.getBoundingClientRect())), clipBox = txt.map((el) => { const s = scroller(el); return s ? s.getBoundingClientRect() : null; });
-  const vis = (i) => { const a = rs[i], c = clipBox[i]; return c ? { left: Math.max(a.left, c.left), right: Math.min(a.right, c.right), top: Math.max(a.top, c.top), bottom: Math.min(a.bottom, c.bottom) } : a; };
+  /* each line of a bit of text on its own (a sentence that wraps isn't one big box), as far as it shows */
+  /* (inside something that scrolls or cuts, either way: only what shows of it) */
+  const clipBox = txt.map((el) => { let c = null;
+    for (let e = el.parentElement; e; e = e.parentElement) { if (!/(auto|scroll|hidden|clip)/.test(getComputedStyle(e).overflowX + getComputedStyle(e).overflowY)) continue;
+      const r = e.getBoundingClientRect(); c = c ? { left: Math.max(c.left, r.left), right: Math.min(c.right, r.right), top: Math.max(c.top, r.top), bottom: Math.min(c.bottom, r.bottom) } : r; }
+    return c; });
+  const cut = (a, c) => (c ? { left: Math.max(a.left, c.left), right: Math.min(a.right, c.right), top: Math.max(a.top, c.top), bottom: Math.min(a.bottom, c.bottom) } : a);
+  const boxes = txt.map((el, i) => { const d = getComputedStyle(el).display, inl = d === "inline" || d === "contents";
+    return (inl ? [...el.getClientRects()] : [el.getBoundingClientRect()]).map((r) => cut(ink(el, r), clipBox[i])).filter((r) => r.right - r.left > 1 && r.bottom - r.top > 1); });
   for (let i = 0; i < txt.length; i++) for (let j = i + 1; j < txt.length; j++) {
     if (txt[i].contains(txt[j]) || txt[j].contains(txt[i])) continue;
-    const a = vis(i), c = vis(j), ww = Math.min(a.right, c.right) - Math.max(a.left, c.left), hh = Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top);
-    if (ww <= 2 || hh <= 3) continue;
-    const sm = Math.min((a.right - a.left) * (a.bottom - a.top), (c.right - c.left) * (c.bottom - c.top));
-    if (ww * hh > 0.25 * sm) bad.push("OVER " + Math.round(100 * ww * hh / sm) + "% " + name(txt[i]) + " / " + name(txt[j]));
+    let worst = 0;
+    for (const a of boxes[i]) for (const c of boxes[j]) {
+      const ww = Math.min(a.right, c.right) - Math.max(a.left, c.left), hh = Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top);
+      if (ww <= 2 || hh <= 3) continue;
+      worst = Math.max(worst, ww * hh / Math.min((a.right - a.left) * (a.bottom - a.top), (c.right - c.left) * (c.bottom - c.top)));
+    }
+    if (worst > 0.25) bad.push("OVER " + Math.round(100 * worst) + "% " + name(txt[i]) + " / " + name(txt[j]));
   }
   return [...new Set(bad)].slice(0, 10);
 };

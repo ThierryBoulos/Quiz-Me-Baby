@@ -26,5 +26,8 @@ only where the question bank lives. Don't change its screens or rules text; only
 - **Every screen fits (11 Nov).** The TV on any screen shape (16:9, 16:10, a laptop's browser window); phones from
   360 wide (Galaxy) to 440 (iPhone Pro Max), and held sideways. Nothing off the edge, nothing cut off, no text on top
   of text, no sideways scroll. After changing a screen, run `cd party && npm run screens` and look at what it flags.
+- **A room full of bots, on request (11 Nov).** When the owner asks for bot captains, players or a bot host in a
+  room: `cd party && npm run bots -- CODE` (`--host`, `--teams 3-8`, `--players n`; docs/RUNBOOK.md). It's the live
+  site: a few games at a time (the owner's yes), and only in rooms the owner opened.
 - Tests: `cd party && npm test` (engine tests, bank/map/type checks, simulated nights: 2 teams with and without a
   host, 3 to 8 teams, the lobby). Screens: `npm run screens` (docs/RUNBOOK.md, "Everyday jobs").
