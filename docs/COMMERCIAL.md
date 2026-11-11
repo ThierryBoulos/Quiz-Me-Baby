@@ -124,3 +124,65 @@ Some of these may not apply now or ever; they're here so nothing is forgotten.
 ### From the Nov 2026 audit page
 - **todo**: Items the owner marks "Save for commercial phase" on the audit page get copied here when the owner
   says "read the audit".
+
+---
+
+## 4. The commercial plan: a proposal (11 Nov 2026, nothing decided)
+
+The owner's ideas (11 Nov) with Claude's suggestions next to them. Nothing here is decided: the owner picks, and
+the picks move up into section 3 as todo items. Prices are guesses to test, not researched.
+
+### Who pays, who signs in
+- **The host pays; guests never pay and never sign in.** A guest scans the QR and plays, as today. Only the person
+  who creates the room needs an account, and only to buy.
+- **Sign-in for the buyer only:** an e-mail link (no password), or Google / Apple. The purchase belongs to that
+  account; a room that account opens is a full room for everyone in it.
+- A free room needs no account at all (as today).
+
+### Free and paid (the owner's split, 11 Nov)
+| | Free | Paid |
+|---|---|---|
+| Question rounds | Easy, Medium, Hard; 8 broad themes; one pair of questions per theme and level | Every theme, the niche ones too; Expert; the whole bank |
+| Mini-games | 4 of them | All of them |
+| Advanced | Locked | Difficulty per theme, own questions and themes |
+| Seeing the bank | Never | Never (see "Protecting the bank") |
+
+Claude's suggestions to consider on top: 3 to 8 teams as a paid feature (bigger parties are where it's worth most);
+"Play without TV" stays free; the free pack is fixed, so a second free night repeats questions (the reason to buy).
+
+### Price (to test)
+- **A night pass:** one payment, the full game for 48 hours. Around 5 euros.
+- **A year:** the full game for 12 months. Around 25 euros.
+- A launch price lower than both for the first buyers. No monthly plan to start with (a party game is used in bursts).
+
+### Protecting the bank
+- **Remove "Choose questions" as it is:** it shows any host every question and answer. In its place: a difficulty
+  per theme, and "Add your own questions". Nobody browses the bank.
+- **Locked content never leaves the server.** Today the TV downloads the whole bank with its answers; a free room
+  must only ever receive the free pack, and a paid room only tonight's questions. This is the same work as
+  "judge answers on the server" (section 2, decision 1), and it is the real lock: hiding a button isn't one.
+- **Open Trivia DB questions are CC BY-SA 4.0 (share-alike):** questions adapted from them must be offered under
+  the same licence, so they can't be part of a closed, paid-only bank as they are. Decide before adding them:
+  keep them in the free pack with the credit, or write new questions from the facts alone.
+
+### Technical pieces, in order
+1. Deal and judge on the server (protects the bank; also closes section 2's first item).
+2. Accounts for buyers (Supabase Auth: e-mail link, Google, Apple) and an "entitlements" table: who bought what,
+   until when. Owner-only rules (door 3).
+3. Payments through a merchant of record (Paddle or Lemon Squeezy handle EU VAT and invoices; Stripe alone
+   leaves VAT to us). Web checkout, no app store, so no store commission. Webhook checks (door 7).
+4. The free pack and the locks, enforced where the questions are dealt.
+5. Paid hosting (Vercel Pro, Supabase Pro), error monitoring, backups.
+6. Legal: terms, privacy contact, age notice, the name's trademark search, Imad's consent, image licences.
+7. The 7-door security check (section 1), then launch.
+
+### Launch and marketing, in a nutshell
+1. Decide the split and the price above.
+2. Protect the bank, clear the rights (steps 1 and 6).
+3. Build accounts, payments and the free pack (steps 2 to 5).
+4. A free beta with people who aren't friends: 10 to 20 real nights, watch where they get stuck.
+5. A one-page site with a 30-second video of a real night, and the price.
+6. Marketing that fits a party game: short videos of real nights (TikTok, Reels); every guest's phone ends the
+   night with "Host your own night" (each party shows the game to 6 to 30 new people); bars and quiz hosts;
+   the Lebanese diaspora for the Lebanon theme; dates that sell party games (New Year's Eve, Christmas, summer).
+7. Measure nights played and free-to-paid; then languages (French, Arabic).
