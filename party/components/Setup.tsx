@@ -5,6 +5,8 @@ import { QMB, forNoHost, loadBank, themeCounts, withCustom, type Bank, type Q } 
 import { NO_PICKS, Picker, inLevels, pickSummary, type Picks } from "./Picker";
 import { cleanList, getCustom } from "@/lib/custom";
 import { thinLine, type TvShare } from "@/lib/game";
+import { LevelNote } from "./LevelNote";
+import type { FreshLeft } from "@/lib/freshLeft";
 import { sendQuiet } from "@/lib/supabase";
 import { adoptDraft, useDraft, useDraftHost } from "@/lib/setupDraft";
 import { TimersSheet } from "./TimersSheet";
@@ -55,7 +57,7 @@ const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1
    rounds can be switched off (a mini-games-only night); one theme per round,
    so the number of themes always matches the number of rounds; mini-games
    are their own section. Sensible defaults, so Start works straight away. */
-export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, timers }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean; code: string; tv?: TvShare; timers?: Partial<Settings> }) {
+export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, timers, left }: { onStart: (c: Cfg) => void; busy: boolean; ready: boolean; why: string; isHost?: boolean; code: string; tv?: TvShare; timers?: Partial<Settings>; left?: FreshLeft }) {
   const noTv = useNoTv();
   const [mine, setBank] = useState<Bank | null>(null);
   /* the host's question picker shows the answers: the full bank, which only the host's phone gets */
@@ -189,6 +191,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
 
       {/* the TV's bank is nearly played out in places (the TV shows the same, as a pop-up) */}
       {isHost && !!tv?.thin?.length && <ThinNote code={code} lines={tv.thin.map(thinLine)} />}
+      {/* a picked theme that can't fill its round at the level picked (11 Nov, the owner) */}
+      {standard && <LevelNote code={code} themes={picked} bank={bank} left={left} levels={(t) => QMB.diffsOf(picks.themeDiff[t] || difficulty)} onAdd={isHost ? () => setPicking(true) : undefined} />}
 
       {/* ---- STANDARD TRIVIA ROUNDS ---- */}
       <div className="card flex flex-col gap-4" style={{ borderColor: standard ? "color-mix(in srgb, var(--color-gold) 40%, transparent)" : undefined }}>

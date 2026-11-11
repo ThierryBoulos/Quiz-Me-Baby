@@ -617,9 +617,9 @@ export default function PhoneRoom() {
               </span>
             </div>)}
           {many && mine.role === "host" ? (
-            <SetupMany code={code} tv={secret.lobby} busy={busy} k={teamCount} why={manyNotReady(members, teamCount)} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <SetupMany code={code} tv={secret.lobby} left={room.state?.left as import("@/lib/freshLeft").FreshLeft | undefined} busy={busy} k={teamCount} why={manyNotReady(members, teamCount)} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : canStart && !many ? (
-            <Setup code={code} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} tv={mine.role === "host" ? secret.lobby : undefined} timers={room.state?.timers as Partial<import("@/lib/settings").Settings> | undefined} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
+            <Setup code={code} left={room.state?.left as import("@/lib/freshLeft").FreshLeft | undefined} ready={ready} why={notReadyWhy(members)} busy={busy} isHost={mine.role === "host"} tv={mine.role === "host" ? secret.lobby : undefined} timers={room.state?.timers as Partial<import("@/lib/settings").Settings> | undefined} onStart={(cfg) => tell(() => sendAction(code, "setup", { start: true, cfg }))} />
           ) : (
             <p className="text-center text-14 text-[var(--color-ink-2)]">
               You&rsquo;re in.{" "}

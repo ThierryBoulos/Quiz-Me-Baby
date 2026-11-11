@@ -18,6 +18,7 @@ import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
 import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, captainAnswer, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
+import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
 
 /* a phone flagged (8 Nov, as with two teams): who, in which game, how long (null: still away); not the host's, and
@@ -92,6 +93,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const lastSecret = useRef("");
   /* in the lobby, the TV's settings, its own questions and the host's setup go to the host's phone, as with two teams */
   useLobbyShare(code, isTv, room?.status, { lastSecret, stamp: () => (lastAt.current = Math.max(Date.now(), lastAt.current + 1)) });
+  useFreshLeftShare(code, isTv, room?.status, (left) => { void lobbyWrite({ left }); });
   const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publishRef = useRef<() => void>(() => {});
   const marked = useRef<number | null>(null);    // the Russian Roulette spin whose questions are marked played

@@ -1,4 +1,6 @@
 "use client";
+import { LevelNote } from "../LevelNote";
+import type { FreshLeft } from "@/lib/freshLeft";
 /* MANY TEAMS: the lobby's line-up (components/Lineup.tsx, for N teams), the phone's team buttons when there
    are more than two, and the host's setup (components/Setup.tsx: the same card, switches and chips, with the
    four games that work for any number of teams). */
@@ -91,7 +93,7 @@ const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Mediu
 export type CfgMany = { minis: string[]; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[]; rounds: number; quizLevels: string[]; themes: string[];
   airportLevels: string[]; mapLevels: string[]; dishLevels: string[]; custom?: unknown[] } & Partial<Picks>;
 
-export function SetupMany({ busy, why, k, onStart, code, tv }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void; code: string; tv?: TvShare }) {
+export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void; code: string; tv?: TvShare; left?: FreshLeft }) {
   const noTv = useNoTv();
   /* every choice is kept (lib/setupDraft.ts), as with two teams: the team count changing, a reload, another phone
      taking over as host (11 Nov, the owner) */
@@ -195,6 +197,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv }: { busy: boolean; 
                   {Array.from({ length: MANY_ROUNDS }, (_, i) => i + 1).map((r) => <option key={r} value={r}>{r} round{r === 1 ? "" : "s"}</option>)}
                 </select></label>
               <div className="flex flex-col gap-2"><span className="sp-k">Level</span><LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} /><p className="text-12 text-[var(--color-ink-3)] px-1">{levelLine(quizLevels, quizLevels.length === 4)}</p></div>
+              <LevelNote code={code} themes={picked} bank={bank} left={left} levels={() => quizLevels} onAdd={() => setChoosing(true)} />
               {/* the themes: a summary, and a tap to change them (one per round; the rounds play two at a time) */}
               <div className="flex flex-col gap-2">
                 <button type="button" className="flex items-center justify-between gap-3 min-h-[44px] text-left" aria-expanded={picking} onClick={() => setPicking(!picking)}>

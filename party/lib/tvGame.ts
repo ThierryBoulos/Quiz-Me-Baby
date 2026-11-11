@@ -24,6 +24,7 @@ import { fireLeg, imadNarrate, imadOnToast, imadSay } from "./tv/imad";
 import { newState, type TvState } from "./tv/state";
 import { setTeams } from "./many/useTvMany";
 import { saveLobbyDraft, useLobbyShare } from "./tv/lobbyShare";
+import { useFreshLeftShare, type FreshLeft } from "./freshLeft";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
    right one, or both out) it's the one whose calls can be contested on the next screen. (true: go on) */
@@ -168,7 +169,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* The lobby's team names and who's away, as this TV last wrote them. Two writes a beat apart (both
      captains naming their teams in the same second) must each build on the other, not on a room the
      push hasn't brought back yet: on 20 Oct the second name overwrote the first. */
-  const lobbyMine = useRef<{ teamNames?: [string, string]; away?: string[]; timers?: Partial<Settings> }>({});
+  const lobbyMine = useRef<{ teamNames?: [string, string]; away?: string[]; timers?: Partial<Settings>; left?: FreshLeft }>({});
   /* (and the newest stamp: a lobby write made before the TV has read back its own Play again must not carry the old one, which the phones would take for an old room) */
   const lobbyState = (room: Room) => ({ ...room.state, ...lobbyMine.current, pubAt: Math.max(Number(room.state?.pubAt) || 0, lastAt.current) || undefined });
   /* the TV's last errors (29 Oct): kept in the room with the next write, so a night that broke can be read
@@ -1146,6 +1147,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       saveSettings(timersOf(cleanSettings(a.payload.timers)));
       return;
     }
+    /* with no host, Team A's captain can forget what this TV has played (Setup's note: 11 Nov, the owner) */
+    if (a.kind === "setup" && a.payload.forgetPlayed && room.status === "lobby" && !members.some((m) => m.role === "host") && starter(members)?.user_id === a.user_id) {
+      resetPlayed(); return;
+    }
     if (a.kind === "setup" && (a.payload.settings || a.payload.forgetPlayed || a.payload.draft) && room.status === "lobby" && from?.role === "host") {
       if (a.payload.settings) saveSettings(cleanSettings(a.payload.settings));
       if (a.payload.forgetPlayed) resetPlayed();
@@ -1200,6 +1205,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
 
   /* In the lobby, the TV's settings, its own questions and the host's setup go to the host's phone (lib/tv/lobbyShare.ts) */
   useLobbyShare(code, isTv, status, { thin, lastSecret, stamp });
+  /* how many unplayed questions each theme has at each level, for Setup's "no new questions left" note (11 Nov) */
+  useFreshLeftShare(code, isTv, status, (left) => {
+    const room = ctx.current.room; if (!room || room.status !== "lobby") return;
+    lobbyMine.current.left = left;
+    void sb().from("rooms").update({ state: { ...lobbyState(room), left } }).eq("code", code).then(() => {});
+  });
   /* ...and its timers, in the room for everyone (they're no secret): with no host, the captain who starts the game
      sees them and can change them (Setup, Timers: 11 Nov, the owner) */
   useEffect(() => {
