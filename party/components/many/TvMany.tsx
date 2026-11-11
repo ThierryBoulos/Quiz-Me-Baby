@@ -4,6 +4,8 @@
    the calls come down as stamps), a game's result as a board of columns, the winner's slam at the end. Only the
    number of teams changes: up to four sit as the two do, eight pack into rows. No buttons: the host's phone runs it. */
 import { useEffect, useState } from "react";
+import { FitBody } from "../TvStage";
+import { WinName } from "../Motion";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock, useSecondsLeft } from "../Clock";
 import { Board, Confetti, FlagImg, PinPhoto } from "../GameParts";
@@ -63,7 +65,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></div>
         </div>)}
 
-      <div className={"flex-1 flex flex-col items-center justify-center text-center enter min-h-0" + (pub.screen === "reveal" && (g?.key === "airport" || g?.key === "map") ? " gap-3" : " gap-5") + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
+      <FitBody className={"flex-1 flex flex-col items-center justify-center text-center enter min-h-0" + (pub.screen === "reveal" && (g?.key === "airport" || g?.key === "map") ? " gap-3" : " gap-5") + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}
         {pub.screen === "intro" && g && (g.key === "majority" ? (
           <div className="flex gap-10 items-start w-full">
@@ -253,7 +255,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
               <span className="win-tag" aria-hidden>{tops.length > 1 ? "A shared win" : "Tonight\u2019s winner"}</span>
               <span className="win-ring" style={{ ["--c" as string]: c }} aria-hidden />
               <span className="win-ring r2" style={{ ["--c" as string]: c }} aria-hidden />
-              <div className="display win-slam max-w-[1160px] leading-none" style={{ fontSize: (name.length > 10 ? 0.74 : 1) * (recap ? 64 : 150), color: c, transition: "font-size .6s ease" }}><bdi>{name}</bdi></div>
+              <WinName recap={!!recap} color={c} label={name}><bdi>{name}</bdi></WinName>
             </div>
             {/* the recap: the night drawn across the whole screen, the award cards under it (the owner, 30 Oct: no
                 nutshell, it crowded the chart) */}
@@ -273,7 +275,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
                 </div>)}
             </>)}
           </>); })()}
-      </div>
+      </FitBody>
 
       {/* between questions: a soft glow in the leader's colour; it fades out when a question comes up */}
       {/* Imad, the MC (8 Nov: as with two teams; Settings turns him on) */}

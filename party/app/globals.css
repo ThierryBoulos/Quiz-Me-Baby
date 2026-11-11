@@ -99,6 +99,7 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
 .btn-lg { min-height: 64px; font-size: var(--text-20); }
 .btn-block { width: 100%; }
 .btn-ghost { background: transparent; }
+.btn-gold-line { background: transparent; border: 1.5px solid var(--color-gold); color: var(--color-gold); }   /* gold, the quieter of two (Exit by Play again) */
 .btn-sm { min-height: 44px; font-size: var(--text-14); padding: 0 16px; }
 /* the five level chips in one row on a phone: smaller words, so "Medium" sits inside its chip (23 Oct) */
 .lvl-chip { font-size: var(--text-12); padding: 0 2px; letter-spacing: 0; min-width: 0; }
@@ -778,8 +779,14 @@ html[data-motion="off"] .bar-grow { animation: none; }
 .hud.tv.many .hud-mini { gap: 6px 10px; } .hud.tv.many .hud-mini .nm { margin-left: 4px; }
 /* during a game, its own points line, a size up, the teams spaced out a little (the owner: not across the whole row) */
 .hud.tv.many .hud-mini.game-line { justify-content: center; column-gap: 56px; margin-top: 10px; }
-.hud.tv.many.mid .hud-mini.game-line { column-gap: 26px; flex-wrap: nowrap; } .hud.tv.many.mid .hud-mini.game-line .nm { max-width: 150px; }   /* (five teams on one line: two lines pushed a reveal into the scores) */ .hud.tv.many.stack .hud-mini.game-line { column-gap: 34px; }
+.hud.tv.many.mid .hud-mini.game-line { column-gap: 20px; flex-wrap: nowrap; } .hud.tv.many.mid .hud-mini.game-line .nm { max-width: 150px; }   /* (five teams on one line: two lines pushed a reveal into the scores) */ .hud.tv.many.stack .hud-mini.game-line { column-gap: 18px; flex-wrap: nowrap; }   /* (eight teams' percentages on one line: 11 Nov) */
 .hud.tv.many .hud-mini.game-line b { font-size: var(--text-28); }
+/* (never wider than the stage: five teams' percentages ran off both sides, 11 Nov; the names give way first) */
+.hud.tv.many .hud-mini.game-line { max-width: 100%; }
+.hud.tv.many .hud-mini.game-line > span:first-child, .hud.tv.many .hud-mini.game-line > span[style] > b, .hud.tv.many .hud-mini.game-line > span[style] > .dot { flex: none; }
+/* (each team an equal share of the line: a short name keeps its length, the long ones give way evenly) */
+.hud.tv.many .hud-mini.game-line > span[style] { flex: 1 1 0; min-width: 0; max-width: max-content; }
+.hud.tv.many .hud-mini.game-line .nm { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hud.tv.many .hud-mini.game-line .nm { font-size: var(--text-15); max-width: 220px; }
 .hud.tv.many.stack .hud-mini.game-line .dot { width: 18px; height: 18px; }
 /* the phone keeps the two-team stack: the pips, the label under them, then whose side you're on */
@@ -1175,11 +1182,12 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* the winner on the marquee sign: bulbs round its edge (lit, still), "Tonight's winner" on its letter board */
 .win-tag { display: none; }
 [data-look="house"] .win-eyebrow { display: none; }
-[data-look="house"] .win-tag { display: inline-block; margin-bottom: 12px; padding: 4px 12px 2px; border-radius: 7px; background: var(--board); color: var(--board-ink);
+[data-look="house"] .win-tag { display: inline-block; margin-bottom: 14px; padding: 4px 12px 2px; border-radius: 7px; background: var(--board); color: var(--board-ink);
   font-family: var(--font-display); font-size: var(--text-22); letter-spacing: .16em; text-transform: uppercase; line-height: 1.1; box-shadow: 0 0 18px rgba(255,236,190,.3); }
 /* with the recap under it the sign is small: as tall as "The winner" and the name were */
-[data-look="house"] .recap-on .win-tag { font-size: var(--text-12); margin-bottom: 2px; padding: 1px 8px 0; letter-spacing: .14em; }
-[data-look="house"] .recap-on .win-sign { padding: 9px 36px 6px; border-width: 2px; border-radius: 20px; }
+/* (clear of the bulbs all round, the tag and the name: 11 Nov, the owner) */
+[data-look="house"] .recap-on .win-tag { font-size: var(--text-13); margin-bottom: 6px; padding: 2px 9px 1px; letter-spacing: .14em; }
+[data-look="house"] .recap-on .win-sign { padding: 17px 42px 15px; border-width: 2px; border-radius: 20px; }
 /* the recap is taller than the screen under the bar: it starts under the bar (never up over its line), a little tighter (the owner, 2 Nov) */
 [data-look="house"] .recap-on { gap: 12px; justify-content: safe center; }
 [data-look="house"] .recap-on .win-sign::before { inset: 4px; border-radius: 15px;
@@ -1188,7 +1196,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
     radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 100% / 14px 6px repeat-x,
     radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 0 / 6px 14px repeat-y,
     radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 100% 0 / 6px 14px repeat-y; }
-[data-look="house"] .win-sign { padding: 30px 52px 26px; border-radius: 28px; border: 3px solid rgba(245,197,24,.75); background: linear-gradient(180deg, #1d1636, #0d0a1f 70%);
+[data-look="house"] .win-sign { padding: 36px 64px 32px; border-radius: 28px; border: 3px solid rgba(245,197,24,.75); background: linear-gradient(180deg, #1d1636, #0d0a1f 70%);
   box-shadow: 0 0 0 6px rgba(245,197,24,.08), 0 0 60px -10px rgba(255,190,80,.55), inset 0 0 40px rgba(245,197,24,.08); }
 [data-look="house"] .win-sign::before, [data-look="house"] .winner-card::before { content: ""; position: absolute; inset: 9px; border-radius: 20px; pointer-events: none;
   background:

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { FitBody } from "./TvStage";
 import { motionOff } from "./Marquee";
 import { QRCodeSVG } from "qrcode.react";
 import type { Pub, Two } from "@/lib/game";
@@ -12,7 +13,7 @@ import { RouletteTv } from "./Roulette";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
-import { LeadBanner, useFlyingPoints, useScreenAt } from "./Motion";
+import { LeadBanner, useFlyingPoints, useScreenAt, WinName } from "./Motion";
 import { NightIntroTv } from "./NightIntro";
 import { useLiveCount } from "@/lib/liveCount";
 
@@ -53,7 +54,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
       {/* the night's intro, before the first round: the plan, until Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `${pub.captains?.[pub.intro.go as 0 | 1] || "The captain"} starts the game` : `${host || "The host"} starts the game`} />}
 
-      <div className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : pub.screen === "final" && recap ? "gap-3 recap-on" : "gap-6")} key={bodyKey}>
+      <FitBody className={"flex-1 flex flex-col items-center justify-center text-center enter " + (pub.screen === "ask" || pub.screen === "steal" ? "gap-4 spot rounded-[32px] relative isolate overflow-hidden " + (pub.turn === 1 ? "b" : "a") : pub.screen === "final" && recap ? "gap-3 recap-on" : "gap-6")} key={bodyKey}>
         {/* a steal: the light swings over from the team that missed to the one stealing */}
         {pub.screen === "steal" && <div className={"steal-beam " + (pub.turn === 1 ? "b" : "a")} aria-hidden />}
         {pub.screen === "roundIntro" && <div className="w-full max-w-[1080px]"><RoundIntro pub={pub} size="tv" /></div>}
@@ -119,7 +120,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
             <span className="win-tag" aria-hidden>{pub.winner == null ? "The night ends" : "Tonight\u2019s winner"}</span>
             <span className="win-ring" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
             <span className="win-ring r2" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
-            <div className="display win-slam leading-none" style={{ fontSize: (pub.winner != null && T[pub.winner].name.length > 10 ? 0.74 : 1) * (recap ? 64 : 150), color: tc(pub.winner), transition: "font-size .6s ease" }}>{pub.winner == null ? "A draw" : T[pub.winner].name}</div>
+            <WinName recap={!!recap} color={tc(pub.winner)} label={pub.winner == null ? "" : T[pub.winner].name}>{pub.winner == null ? "A draw" : <bdi>{T[pub.winner].name}</bdi>}</WinName>
           </div>
           {/* once the recap is up, the big score board goes (the scores stay in the top bar) */}
           {!recap && <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
@@ -141,7 +142,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
         </>)}
         {pub.contest && <ContestBanner pub={pub} />}
         {pub.agree?.kind === "score" && <AgreeBanner pub={pub} />}
-      </div>
+      </FitBody>
 
       {pub.lifeline && (
         <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
@@ -172,8 +173,9 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
       <div className="tv-foot" role="status" aria-live="polite">
         {/* the end: the two buttons live here, in the strip nothing else can push off the stage */}
         {pub.screen === "final" && (onAgain || onExit) && <div className="flex gap-3 mr-auto" style={{ pointerEvents: "auto" }}>
-          {onAgain && <button className="btn btn-sm" onClick={onAgain}>Play again: same teams</button>}
-          {onExit && <button className="btn btn-sm btn-ghost" onClick={onExit}>Exit: everyone back to the home screen</button>}
+          {/* (short, small and gold: the owner, 11 Nov) */}
+          {onAgain && <button className="btn btn-sm btn-gold" onClick={onAgain}>Play again</button>}
+          {onExit && <button className="btn btn-sm btn-gold-line" onClick={onExit}>Exit</button>}
         </div>}
         {toastOn && <span key={pub.toast!.id} className="tv-note enter">{pub.toast!.text}</span>}
         {pub.nextBy && !pub.contest && <NextHint pub={pub} />}

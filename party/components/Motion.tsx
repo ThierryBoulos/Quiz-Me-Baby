@@ -98,3 +98,21 @@ export function LeadBanner({ shown, names, sound, lift }: { shown: Two<number>; 
       <span>Lead change</span><b><bdi>{names[b.t]}</bdi></b>
     </div>);
 }
+
+/* The winner's name on the end sign (both setups): one line, as big as it can be (150 px; 64 once the recap is up)
+   with room to spare inside the sign, however long the name (11 Nov, the owner: it barely fitted). Measured at 100 px
+   on a hidden copy, so the size never reads mid-transition. */
+export function WinName({ children, recap, color, label }: { children: React.ReactNode; recap: boolean; color: string; label: string }) {
+  const meas = useRef<HTMLSpanElement>(null);
+  const [w100, setW] = useState(0);
+  useEffect(() => {
+    const m = () => { if (meas.current) setW(meas.current.offsetWidth); };
+    m(); void document.fonts?.ready.then(m);
+  }, [label]);
+  const max = recap ? 64 : 150, room = recap ? 600 : 960;
+  const fs = w100 ? Math.min(max, (room / w100) * 100) : max;
+  return (<>
+    <span ref={meas} className="display leading-none" aria-hidden style={{ position: "absolute", visibility: "hidden", whiteSpace: "nowrap", fontSize: 100, pointerEvents: "none" }}>{children}</span>
+    <div className="display win-slam leading-none whitespace-nowrap" style={{ fontSize: fs, color, transition: "font-size .6s ease" }}>{children}</div>
+  </>);
+}

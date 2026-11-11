@@ -297,12 +297,15 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       {/* (the host sees the result at once; Next waits until the TV has shown it, so it can't be skipped by mistake) */}
       {resultHeld ? <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Next comes up once the TV has shown it.</p> : children}
     </div>);
+  /* (short, small and gold, side by side: the owner, 11 Nov) */
   const Exit = () => (
     <div className="mt-auto flex flex-col gap-2">
-      <button className="btn btn-gold btn-lg btn-block" onClick={() => send({ type: "ui/again" })}>Play again: same teams</button>
-      <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
-      {/* home on this phone too, even if the TV is slow to answer */}
-      <button className="btn btn-lg btn-block" onClick={() => { send({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+      <div className="grid grid-cols-2 gap-2">
+        <button className="btn btn-gold" onClick={() => send({ type: "ui/again" })}>Play again</button>
+        {/* home on this phone too, even if the TV is slow to answer */}
+        <button className="btn btn-gold-line" onClick={() => { send({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+      </div>
+      <p className="text-center text-13 text-[var(--color-ink-3)]">Play again: same teams. Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
     </div>);
   const Small = ({ label, move, ghost }: { label: string; move: Record<string, unknown>; ghost?: boolean }) =>
     <button className={"btn btn-sm " + (ghost ? "btn-ghost" : "")} disabled={busy} onClick={() => send(move)}>{label}</button>;
@@ -1435,9 +1438,11 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {!nohost && sc === "final" && <Line className="!text-13">The host chooses: play again with the same teams, or end the night.</Line>}
       <WaitingForHost pub={pub} members={members} />
       {nohost && sc === "final" && (<>
-        <button className="btn btn-gold btn-lg btn-block mt-auto" disabled={busy} onClick={() => void nxt({ type: "ui/again" })}>Play again: same teams</button>
-        <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
-        <button className="btn btn-lg btn-block" disabled={busy} onClick={() => { void nxt({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+        <div className="grid grid-cols-2 gap-2 mt-auto">
+          <button className="btn btn-gold" disabled={busy} onClick={() => void nxt({ type: "ui/again" })}>Play again</button>
+          <button className="btn btn-gold-line" disabled={busy} onClick={() => { void nxt({ type: "ui/exit" }); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+        </div>
+        <p className="text-center text-13 text-[var(--color-ink-3)]">Play again: same teams. Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
       </>)}
       {/* no host, won with legs to spare, or level at the end of a mini-game: either captain picks, and if neither
           does in 10 s the night carries on (keep playing; a point each). The owner's pick on the 4 Nov audit, decision 8:

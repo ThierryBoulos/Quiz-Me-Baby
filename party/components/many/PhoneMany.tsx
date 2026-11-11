@@ -339,9 +339,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {host && sc === "final" && (<>
         <Final />
         <div className="mt-auto flex flex-col gap-2">
-          <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => move("m/again")}>Play again: same teams</button>
-          <p className="text-center text-13 text-[var(--color-ink-3)]">Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
-          <button className="btn btn-lg btn-block" disabled={busy} onClick={() => { move("m/exit"); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+          {/* (short, small and gold, side by side: the owner, 11 Nov) */}
+          <div className="grid grid-cols-2 gap-2">
+            <button className="btn btn-gold" disabled={busy} onClick={() => move("m/again")}>Play again</button>
+            <button className="btn btn-gold-line" disabled={busy} onClick={() => { move("m/exit"); setTimeout(() => location.assign("/"), 2500); }}>Exit</button>
+          </div>
+          <p className="text-center text-13 text-[var(--color-ink-3)]">Play again: same teams. Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
         </div>
       </>)}
 
