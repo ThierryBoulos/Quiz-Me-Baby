@@ -182,6 +182,7 @@ const LetterDot = ({ t, size }: { t: RrTeam; size: number }) => (
 export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, sound }: {
   rr: RrPub; teams: RrTeam[]; clock?: ReactNode; sent?: boolean[]; typed?: (string | null)[]; ok?: (boolean | null)[]; reveal?: boolean; showQs?: boolean; sound?: boolean }) {
   const spun = useSpun(rr.spinAt), stage = useSpinStage(reveal ? null : rr.spinAt), k = teams.length, dense = k > 4, tight = k > 6, R = reveal ? rr.rev : undefined;
+  const cols = !!R && tight;   /* 7 or 8 teams at the reveal: two columns */
   const used = (rr.used || []).map((u) => ({ j: u.j, color: teams[u.t]?.color || "#888", ok: u.ok }));
   useRouletteSounds(sound ? rr : undefined, reveal ? "reveal" : "spin", `${rr.lap}.${rr.spinAt}.${reveal ? "r" : "q"}`);
   const lit = rr.draw.map((d, t) => ({ j: d.j, color: teams[t].color, letter: teams[t].letter, theme: d.theme, level: d.level }));
@@ -215,22 +216,26 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
         </div>
         {(spun || R) && (
           /* (7 or 8 teams at the reveal: two columns, so it all sits under the bar at the top) */
-          <div className={R && tight ? "grid grid-cols-2" : "flex flex-col"} style={{ gap: tight ? 6 : dense ? 6 : 10 }} role="list" aria-label="Each team's chamber">
+          <div className={cols ? "grid grid-cols-2" : "flex flex-col"} style={{ gap: tight ? 6 : dense ? 6 : 10 }} role="list" aria-label="Each team's chamber">
             {rr.draw.map((d, t) => { const T = teams[t], lv = R?.level[t], got = R?.got[t] ?? 0, x = typed?.[t], v = ok?.[t];
               return (
                 <div key={t} role="listitem" className={"rr-row" + (R ? " rr-late" : " enter") + (R && t === hit ? " bang" : "")} style={{ ["--c" as string]: T.color, ["--rr-at" as string]: `${stepOf(t) * STEP_MS + 250}ms`, padding: tight ? "4px 12px" : dense ? "6px 12px" : undefined }}>
                   <LetterDot t={T} size={tight ? 24 : dense ? 26 : 34} />
                   <div className="min-w-0 flex flex-col">
+                    {/* (two columns: the team by its lettered dot and colour, no name, so the answers have the room: the
+                        owner, 11 Nov) */}
                     <div className="flex items-center gap-2 flex-wrap" style={{ fontSize: tight ? 16 : dense ? 18 : 22 }}>
-                      <b className="truncate" style={{ color: T.color }}><bdi>{T.name}</bdi></b>
-                      <span className="text-[var(--color-ink-2)]">· {d.theme}</span>
+                      {!cols && <b className="truncate" style={{ color: T.color }}><bdi>{T.name}</bdi></b>}
+                      <span className={cols ? "font-bold" : "text-[var(--color-ink-2)]"} style={cols ? { color: T.color } : undefined}>{cols ? d.theme : <>· {d.theme}</>}</span>
                       <LevelChip level={lv || d.level} small={dense} />
                     </div>
                     {showQs && !R && <div className="font-bold leading-snug" style={{ fontSize: d.q.length > 120 ? 22 : 26 }}>{d.q}</div>}
                     {R && <div className="leading-snug truncate" style={{ fontSize: tight ? 16 : dense ? 18 : 22 }}>
                       {x ? <><bdi>&ldquo;{x}&rdquo;</bdi> <b style={{ color: v ? "var(--color-ok)" : "var(--color-no)" }}>{v ? "RIGHT" : "WRONG"}</b></> : <span className="text-[var(--color-ink-3)]">No answer</span>}
-                      {!v && <span className="text-[var(--color-ink-2)]"> · <bdi>{R.answer[t]}</bdi></span>}
+                      {!v && !cols && <span className="text-[var(--color-ink-2)]"> · <bdi>{R.answer[t]}</bdi></span>}
                     </div>}
+                    {/* (two columns: the right answer on a line of its own, two lines if it needs them) */}
+                    {R && !v && cols && <div className="leading-snug clamp2 text-[var(--color-ink-2)]" style={{ fontSize: 16 }}><bdi>{R.answer[t]}</bdi></div>}
                   </div>
                   <div className="shrink-0 text-right">
                     {R ? <span className="display leading-none" style={{ fontSize: tight ? 26 : dense ? 30 : 40, color: got > 0 ? "var(--color-ok)" : got < 0 ? "var(--color-no)" : "var(--color-ink-3)" }}>{signed(got)}</span>

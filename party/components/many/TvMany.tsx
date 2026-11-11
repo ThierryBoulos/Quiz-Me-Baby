@@ -36,6 +36,15 @@ function HostGoneTv({ info }: { info: { name: string | null; openAt: number } })
     {left > 0 ? `In ${left} s, anyone can take over as the host on their phone.` : "Anyone can take over now: tap Be the host on your phone."}</span>;
 }
 
+/* a note on the TV: whole sentences, as many as fit about two lines (never cut mid-word: "OS is…", 11 Nov, the owner);
+   the phones keep it all */
+const wholeSentences = (t: string, max = 190) => {
+  /* (a sentence ends at . ! or ? before a space or the end: "5.2 inches" stays whole) */
+  const parts = t.match(/.*?[.!?]+["'\u2019\u201d)]*(?:\s+|$)|.+$/gs) || [t];
+  let out = "";
+  for (const p of parts) { if (out && (out + p).trim().length > max) break; out += p; }
+  return out.trim();
+};
 export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany; join?: { url: string; code: string }; host?: string; seats?: number[]; sound?: boolean }) {
   const g = pub.game, R = pub.reveal, T = pub.teams, k = T.length, dense = k > 4;
   const key = pub.screen + pub.step;
@@ -65,7 +74,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></div>
         </div>)}
 
-      <FitBody className={"flex-1 flex flex-col items-center justify-center text-center enter min-h-0" + (pub.screen === "reveal" && (g?.key === "airport" || g?.key === "map") ? " gap-3" : " gap-5") + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
+      <FitBody className={"flex-1 flex flex-col items-center justify-center text-center enter min-h-0" + (pub.screen === "reveal" && (g?.key === "airport" || g?.key === "map") ? " gap-4" : " gap-5") + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
         {/* the intro: the rules; Majority Rules puts the QR code up again, and how many each team has in */}
         {pub.screen === "intro" && g && (g.key === "majority" ? (
           <div className="flex gap-10 items-start w-full">
@@ -181,14 +190,14 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
           <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
           {/* (the airport's explanation stays on the phones with eight teams: the board and eight answers fill the TV) */}
-          {R.notes && g.key !== "say" && !(g.key === "airport" && dense) && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 leading-snug clamp2">{R.notes}</div>}
+          {R.notes && g.key !== "say" && !(g.key === "airport" && dense) && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "closest" && (<>
           <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
           <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{showNum(Number(R.answer))}</div>
-          {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-3 leading-snug clamp2">{R.notes}</div>}
+          {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
           <Ruler ans={Number(R.answer)} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i), pts: R.pts?.[i] }))} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.6), color: W.color }}>{W.text}</div>
         </>)}

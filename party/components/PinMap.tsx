@@ -150,12 +150,26 @@ type Rect = [number, number, number, number];
 const hits = (a: Rect, b: Rect) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
 /* a name on the map, dark-edged so it reads on land and sea; where it goes is where it bumps into nothing
    already there (the spot's name, the other pin and its name): above the pin, then right, left, below */
-function label(ctx: CanvasRenderingContext2D, text: string, spots: [number, number, CanvasTextAlign][], taken: Rect[], k: number, font: string, color: string, W: number, H: number) {
+/* (pins close together, five to eight teams: the near spots can all be taken; then further out, with a thin line in
+   the team's colour back to its pin, and failing everything the spot that covers the least: 11 Nov, the owner) */
+function label(ctx: CanvasRenderingContext2D, text: string, spots: [number, number, CanvasTextAlign][], taken: Rect[], k: number, font: string, color: string, W: number, H: number, pin?: [number, number]) {
   ctx.font = `800 ${14 * k}px ${font}`; ctx.textBaseline = "bottom";
   const w = ctx.measureText(text).width, h = 17 * k;
   const box = ([x, y, a]: [number, number, CanvasTextAlign]): Rect => { const x0 = a === "center" ? x - w / 2 : a === "left" ? x : x - w; return [x0 - 3, y - h, x0 + w + 3, y + 2]; };
   const inside = (b: Rect) => b[0] >= 2 && b[1] >= 2 && b[2] <= W - 2 && b[3] <= H - 2;
-  const at = spots.find((s) => inside(box(s)) && !taken.some((t) => hits(box(s), t))) || spots.find((s) => inside(box(s))) || spots[0];
+  const near = spots.length;
+  if (pin) for (let n = 1; n <= 4; n++) {
+    const d = n * h * 1.1, [a0, b0] = spots[0], [, b1] = spots[1], [, b3] = spots[3];
+    spots = spots.concat([[a0, b0 - d, "center"], [spots[1][0], b1 - d, "left"], [spots[2][0], b1 - d, "right"], [a0, b3 + d, "center"], [spots[1][0], b1 + d, "left"], [spots[2][0], b1 + d, "right"]]);
+  }
+  const cover = (b: Rect) => taken.reduce((sum, t) => sum + (hits(b, t) ? (Math.min(b[2], t[2]) - Math.max(b[0], t[0])) * (Math.min(b[3], t[3]) - Math.max(b[1], t[1])) : 0), 0);
+  const fits = spots.filter((sp) => inside(box(sp)));
+  const at = fits.find((sp) => cover(box(sp)) === 0) || fits.slice().sort((x, y) => cover(box(x)) - cover(box(y)))[0] || spots[0];
+  if (pin && spots.indexOf(at) >= near) {
+    const bx = box(at), lx = Math.min(Math.max(pin[0], bx[0] + 4), bx[2] - 4), ly = bx[1] > pin[1] ? bx[1] : bx[3];
+    ctx.setLineDash([]); ctx.lineWidth = 1.6 * k; ctx.strokeStyle = color; ctx.globalAlpha = 0.85;
+    ctx.beginPath(); ctx.moveTo(pin[0], pin[1]); ctx.lineTo(lx, ly); ctx.stroke(); ctx.globalAlpha = 1;
+  }
   ctx.textAlign = at[2];
   ctx.lineWidth = 4 * k; ctx.strokeStyle = SEA; ctx.lineJoin = "round"; ctx.strokeText(text, at[0], at[1]);
   ctx.fillStyle = color; ctx.fillText(text, at[0], at[1]);
@@ -238,13 +252,14 @@ export function PinMap({ value, onChange, color = "#31c9f7", marks, fly, height,
       for (const m of marks) { if (m.kind === "pin") { const [x, y] = at(m.at); drawPin(ctx, x, y, m.color, k); } }
       /* the pins' heads are taken; then the names, each where it fits */
       const r = 11 * k, taken: Rect[] = marks.filter((m) => m.kind === "pin").map((m) => { const [x, y] = at(m.at); return [x - r - 2, y - 3.4 * r, x + r + 2, y + 2]; });
+      if (!bare) taken.push([0, 0, 150 * k, 40 * k]);   /* (the scale bar's corner, top left) */
       if (truth) {
         const [x, y] = at(truth.at); drawTruth(ctx, x, y, k);
         if (truth.label) label(ctx, truth.label, [[x, y - 16 * k, "center"], [x, y + 31 * k, "center"], [x + 16 * k, y + 7 * k, "left"], [x - 16 * k, y + 7 * k, "right"]], taken, k, font, "#F5C518", W, H);
       }
       for (const m of marks) if (m.kind === "pin" && m.label) {
         const [x, y] = at(m.at), hy = y - 2.3 * r;
-        label(ctx, m.label, [[x, hy - r - 4 * k, "center"], [x + r + 6 * k, hy + 6 * k, "left"], [x - r - 6 * k, hy + 6 * k, "right"], [x, y + 20 * k, "center"]], taken, k, font, m.color, W, H);
+        label(ctx, m.label, [[x, hy - r - 4 * k, "center"], [x + r + 6 * k, hy + 6 * k, "left"], [x - r - 6 * k, hy + 6 * k, "right"], [x, y + 20 * k, "center"]], taken, k, font, m.color, W, H, [x, hy]);
       }
     }
     if (pin.current) { const [x, y] = at(pin.current); drawPin(ctx, x, y, color, k); }

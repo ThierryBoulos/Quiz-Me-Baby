@@ -1186,7 +1186,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   font-family: var(--font-display); font-size: var(--text-22); letter-spacing: .16em; text-transform: uppercase; line-height: 1.1; box-shadow: 0 0 18px rgba(255,236,190,.3); }
 /* with the recap under it the sign is small: as tall as "The winner" and the name were */
 /* (clear of the bulbs all round, the tag and the name: 11 Nov, the owner) */
-[data-look="house"] .recap-on .win-tag { font-size: var(--text-13); margin-bottom: 6px; padding: 2px 9px 1px; letter-spacing: .14em; }
+[data-look="house"] .recap-on .win-tag { font-size: var(--text-13); margin-bottom: 10px; padding: 2px 9px 1px; letter-spacing: .14em; }
 [data-look="house"] .recap-on .win-sign { padding: 17px 42px 15px; border-width: 2px; border-radius: 20px; }
 /* the recap is taller than the screen under the bar: it starts under the bar (never up over its line), a little tighter (the owner, 2 Nov) */
 [data-look="house"] .recap-on { gap: 12px; justify-content: safe center; }
@@ -1462,3 +1462,6 @@ html[data-motion="off"] .rr-click { animation: none; } html[data-motion="off"] .
 .nl-vline li.m .k svg { width: 15px; height: 15px; }
 .nl-vline .n { font-weight: 800; font-size: var(--text-15); line-height: 1.2; }
 .nl-vline .d { font-size: var(--text-12); color: var(--color-ink-2); line-height: 1.3; }
+
+/* (never squeezed by a short screen: its cards sit outside its box; 11 Nov) */
+.ruler { flex: none; }

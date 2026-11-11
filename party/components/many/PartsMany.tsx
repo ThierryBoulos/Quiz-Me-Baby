@@ -480,7 +480,7 @@ export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; d
           {/* a phone with five teams or more (two columns): the name on a line of its own, so it's never "THE …" */}
           {/* (the TV: the name on a line of its own, whole, over two lines if it must: "THE QUIZZIC…" on the screen that says
               who scored, the 4 Nov audit, 3.6) */}
-          <div className={"flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + ((!tv && dense) || tv ? " flex-wrap gap-y-0" : "")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
+          <div className={"flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + (tv ? " flex-wrap gap-y-1.5" : !tv && dense ? " flex-wrap gap-y-0" : "")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
             <span className={tv ? "display basis-full text-center whitespace-normal leading-tight clamp2" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
             {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
             {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
