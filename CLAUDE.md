@@ -25,9 +25,11 @@ only where the question bank lives. Don't change its screens or rules text; only
   pastes the `docs/sql/` copy into Supabase's SQL Editor.
 - **Every screen fits (11 Nov).** The TV on any screen shape (16:9, 16:10, a laptop's browser window); phones from
   360 wide (Galaxy) to 440 (iPhone Pro Max), and held sideways. Nothing off the edge, nothing cut off, no text on top
-  of text, no sideways scroll. After changing a screen, run `cd party && npm run screens` and look at what it flags.
+  of text, no sideways scroll. After changing a screen, check just those screens (`cd party && npm run screens -- tv
+  roulette`, a part and a filter); the whole check (about an hour) only when the owner asks.
 - **A room full of bots, on request (11 Nov).** When the owner asks for bot captains, players or a bot host in a
   room: `cd party && npm run bots -- CODE` (`--host`, `--teams 3-8`, `--players n`; docs/RUNBOOK.md). It's the live
-  site: a few games at a time (the owner's yes), and only in rooms the owner opened.
+  site: a few games at a time (the owner's yes), and only in rooms the owner opened. Just start it: no reading its
+  code or testing it first, unless the owner asks (11 Nov).
 - Tests: `cd party && npm test` (engine tests, bank/map/type checks, simulated nights: 2 teams with and without a
   host, 3 to 8 teams, the lobby). Screens: `npm run screens` (docs/RUNBOOK.md, "Everyday jobs").
