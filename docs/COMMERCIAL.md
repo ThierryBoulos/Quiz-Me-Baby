@@ -111,6 +111,14 @@ Some of these may not apply now or ever; they're here so nothing is forgotten.
 - **todo**: Flags and landmark photos: check every licence allows commercial use (`party/public/flags/CREDITS.md`, `party/public/pins/CREDITS.md`).
 - **todo**: Map data and the night-lights map: licence and attribution.
 - **todo**: Brand names in questions (beers, logos, TV shows): fine as trivia, but no logos or images without rights.
+  - **Checked online, 11 Nov 2026 (not legal advice; an hour with a lawyer before charging):**
+    logo quiz apps are common on the App Store and say "fair use" in their listings; no court case found for or
+    against one; the real risk is a brand asking a store or us to take a logo down. Simple text logos are free of
+    copyright on Wikimedia Commons (still trademarks). Famous faces: free photos exist on Commons (copyright cleared
+    with a credit), but the licence doesn't cover the person's own image rights; France asks for consent for
+    commercial use and is easier on informational use; no case found about a trivia game.
+  - If built: pictures in the game only (never in ads, the site, an icon or screenshots), "not affiliated" line,
+    credits, a contact to ask for removal and removal the same day, each picture set removable on its own.
 - **todo**: Fact-check pass on the whole bank before selling it (wrong answers become complaints).
 
 ### Product
