@@ -23,59 +23,51 @@
 416.25 roundScore | 10 | 2-1 |  | Call changed: Lions +1 point. | 
 446.75 seeIntro | 11 | 2-1 | 0-0 | Call changed: Lions +1 point. | 
 447.75 seeQ | 12 | 2-1 | 0-0 | Call changed: Lions +1 point. | 
-468.75 seeReveal | 14 | 2-1 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-473.75 seeQ | 15 | 2-1 | 0-0 | Nobody got it. | 
-486.50 seeQ | 15 | 2-1 | 0-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-494.75 seeReveal | 16 | 2-1 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-521.50 seeQ | 17 | 2-1 | 0-0 | Nobody got it. | 
-533.25 seeReveal | 17 | 2-1 | 1-0 | Nobody got it. | 
-540.50 seeReveal | 17 | 2-1 | 1-0 |  | 
-555.50 seeReveal | 17 | 2-1 | 1-0 | No answer in time: the call stands. | 
-573.75 seeQ | 18 | 2-1 | 1-0 | Lions take picture 3. | 
-574.50 seeQ | 18 | 2-1 | 1-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-594.75 seeReveal | 19 | 2-1 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-636.75 seeReveal | 19 | 2-1 | 1-0 |  | 
-651.75 seeReveal | 19 | 2-1 | 1-0 | No answer in time: the call stands. | 
-674.50 seeQ | 20 | 2-1 | 1-0 | Nobody got it. | 
-676.25 seeQ | 20 | 2-1 | 1-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-695.50 seeReveal | 21 | 2-1 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-716.00 seeQ | 22 | 2-1 | 1-0 | Nobody got it. | 
-737.00 seeReveal | 23 | 2-1 | 1-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-744.75 seeReveal | 23 | 2-1 | 1-1 |  | 
-759.75 seeReveal | 23 | 2-1 | 1-1 | No answer in time: the call stands. | 
-832.00 seeQ | 24 | 2-1 | 1-1 | Owls take picture 6. | 
-842.75 seeQ | 24 | 2-1 | 1-1 | ⁨Lions⁩ guessed wrong: out of this picture. | 
-842.75 seeReveal | 24 | 2-1 | 1-1 | ⁨Lions⁩ guessed wrong: out of this picture. | 
-844.50 seeTie | 25 | 2-1 | 1-1 |  | 
-854.50 seeSummary | 26 | 3-2 | 1-1 |  | 
-870.75 roundIntro | 27 | 3-2 |  |  | 
-900.50 ask | 28 | 3-2 |  |  | 
-905.75 answer | 28 | 4-2 |  | Lions +1 point | 
-913.00 answer | 28 | 4-2 |  |  | 
-926.50 answer | 28 | 4-2 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-968.75 ask | 29 | 4-2 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-972.50 answer | 29 | 4-3 |  | Owls +1 point | 
-988.50 roundScore | 30 | 4-3 |  | Owls +1 point | 
-1059.75 battleIntro | 31 | 4-3 | 0-0 | Owls +1 point | 
-1079.50 battleQ | 32 | 4-3 | 0-0 | Owls +1 point | 
-1095.50 battleQ | 33 | 4-3 | 0-0 | Time's up. | 
-1111.50 battleQ | 34 | 4-3 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1114.50 battleQ | 34 | 4-3 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1130.50 battleQ | 35 | 4-3 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1146.50 battleQ | 36 | 4-3 | 3-0 | Time's up. | 
-1149.75 battleQ | 36 | 4-3 | 4-0 | Time's up. | 
-1157.75 battleQ | 36 | 4-3 | 5-0 | Time's up. | 
-1173.75 battleQ | 37 | 4-3 | 5-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1196.25 battleHandoff | 38 | 4-3 | 6-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1226.25 battleQ | 39 | 4-3 | 6-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1252.00 battleQ | 40 | 4-3 | 6-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1256.00 battleQ | 40 | 4-3 | 6-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1272.00 battleQ | 41 | 4-3 | 6-2 | Time's up. | 
-1288.00 battleQ | 42 | 4-3 | 6-2 | Time's up. | 
-1301.75 battleQ | 42 | 4-3 | 6-3 | Time's up. | 
-1317.75 battleQ | 43 | 4-3 | 6-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1341.50 battleQ | 43 | 4-3 | 6-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1342.25 battleReview | 43 | 4-3 | 6-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1375.50 battleSummary | 44 | 6-3 | 6-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1390.00 final | 45 | 6-3 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-recap: {"margin":3,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[1,0],"chart":[[0,0],[0,0],[1,0],[1,1],[2,1],[3,2],[4,2],[4,3],[6,3]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"R2","pts":[[2,1]]},{"label":"What Do You See?","pts":[[3,2]]},{"label":"R3","pts":[[4,2],[4,3]]},{"label":"Battle of the Captains","pts":[[6,3]]}],"awards":[{"t":"Battle of the Captains","who":"Rami, 6 of 10","team":0}]}
+468.75 seeReveal | 13 | 2-1 | 0-0 | Call changed: Lions +1 point. | 
+477.50 seeQ | 14 | 2-1 | 0-0 | Nobody got it. | 
+508.25 seeReveal | 15 | 2-1 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+523.25 seeQ | 16 | 2-1 | 1-0 | Lions take picture 2. | 
+540.50 seeQ | 16 | 2-1 | 1-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+548.75 seeReveal | 17 | 2-1 | 1-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+566.50 seeQ | 18 | 2-1 | 1-0 | Nobody got it. | 
+587.50 seeReveal | 19 | 2-1 | 1-0 | Nobody got it. | 
+634.00 seeQ | 20 | 2-1 | 1-0 | Nobody got it. | 
+655.00 seeReveal | 21 | 2-1 | 1-0 | Nobody got it. | 
+655.50 seeQ | 22 | 2-1 | 1-0 | Nobody got it. | 
+676.50 seeReveal | 23 | 2-1 | 1-0 | Nobody got it. | 
+699.75 seeQ | 24 | 2-1 | 1-0 | Nobody got it. | 
+720.75 seeReveal | 25 | 2-1 | 1-0 | Nobody got it. | 
+730.25 seeSummary | 26 | 4-1 | 1-0 | Nobody got it. | 
+739.25 roundIntro | 27 | 4-1 |  | Nobody got it. | 
+840.00 ask | 28 | 4-1 |  | Nobody got it. | 
+843.75 answer | 28 | 6-1 |  | Lions +2 points | 
+867.00 answer | 28 | 6-1 |  |  | 
+882.00 answer | 28 | 6-1 |  | No answer in time: the call stands. | 
+895.00 ask | 29 | 6-1 |  | No answer in time: the call stands. | 
+898.50 steal | 29 | 6-1 |  | No answer in time: the call stands. | 
+904.00 answer | 29 | 7-1 |  | Lions +1 point — steal | 
+917.50 roundScore | 30 | 7-1 |  | Lions +1 point — steal | 
+961.50 battleIntro | 31 | 7-1 | 0-0 | Lions +1 point — steal | 
+968.00 battleQ | 32 | 7-1 | 0-0 | Lions +1 point — steal | 
+984.00 battleQ | 33 | 7-1 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1000.00 battleQ | 34 | 7-1 | 0-0 | Time's up. | 
+1016.00 battleQ | 35 | 7-1 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1038.00 battleQ | 36 | 7-1 | 1-0 | Time's up. | 
+1054.00 battleQ | 37 | 7-1 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1056.00 battleQ | 37 | 7-1 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1072.00 battleQ | 38 | 7-1 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+1088.00 battleQ | 39 | 7-1 | 3-0 | Time's up. | 
+1091.25 battleHandoff | 39 | 7-1 | 4-0 | Time's up. | 
+1106.50 battleQ | 40 | 7-1 | 4-0 | Time's up. | 
+1122.50 battleQ | 41 | 7-1 | 4-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1145.00 battleQ | 42 | 7-1 | 4-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1159.50 battleQ | 42 | 7-1 | 4-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1166.75 battleQ | 42 | 7-1 | 4-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1182.75 battleQ | 43 | 7-1 | 4-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1189.25 battleQ | 43 | 7-1 | 4-5 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1205.25 battleQ | 44 | 7-1 | 4-5 | Time's up. | 
+1221.25 battleQ | 45 | 7-1 | 4-5 | Time's up. | 
+1235.25 battleReview | 45 | 7-1 | 4-6 | Time's up. | 
+1250.50 battleSummary | 46 | 7-3 | 4-6 | Time's up. | 
+1274.00 final | 47 | 7-3 |  | Time's up. | 
+recap: {"margin":4,"sudden":false,"leadChanges":0,"steals":[1,0],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[1,1],[2,1],[4,1],[6,1],[7,1],[7,3]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"R2","pts":[[2,1]]},{"label":"What Do You See?","pts":[[4,1]]},{"label":"R3","pts":[[6,1],[7,1]]},{"label":"Battle of the Captains","pts":[[7,3]]}],"awards":[{"t":"Best thief","who":"Lions, 1 steal","team":0},{"t":"Battle of the Captains","who":"Lea, 6 of 10","team":1}]}

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
 import { SK_LEVELS, skQ, type SkGame } from "./stakes";
-import { seeWinner } from "./see";
+import { SEE_TYPE, seeWinner } from "./see";
 import { cleanList, mergeCustom } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
@@ -218,7 +218,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-            app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, changedIds: s.changedIds, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, seeAt: s.seeAt, seeOut: s.seeOut, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
+            app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, changedIds: s.changedIds, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, seeAt: s.seeAt, seeOut: s.seeOut, seeBuzz: s.seeBuzz, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
           if (save !== lastSave.current) {
             lastSave.current = save;
             try { localStorage.setItem(saveKey, save); } catch { setBanner("cantSave"); }
@@ -319,7 +319,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         /* no host: a tie (the Cocktail or Dish and the Map end here straight from the engine) or a game decided early takes its default after 10 s */
         else if (s.nohost && PICK_DEFAULT(f.go)) s.autoAt = now + T_PICK * 1000;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
-        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "battleQ", "battleTie"].includes(f.go)) { s.seeAt = [null, null]; s.seeOut = [false, false]; s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; s.typedLate = null; s.changedIds = []; }
+        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "battleQ", "battleTie"].includes(f.go)) { s.seeAt = [null, null]; s.seeOut = [false, false]; s.seeBuzz = null; s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; s.typedLate = null; s.changedIds = []; }
         if (f.go === "dishQ") s.legLog = [];
         if (f.go === "sudden" || f.go === "battleTie") {
           const n = (f.go === "sudden" ? s.g.sd?.n : s.g.battle?.tb?.n) || 0;
@@ -425,11 +425,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.app = [...s.ok] as Two<boolean>;
       s.screen = "sayReveal";
     } else if (s.screen === "seeQ") {
-      /* What Do You See?: each guess was checked as it landed (a wrong one put its team out); none is wrong. The calls
-         can be changed here as Guess the Flag's (the host, or a contest), and the fastest right one takes it */
+      /* What Do You See?: each answer was checked as it landed (a wrong one put its team out). The calls can be changed
+         here as Guess the Flag's (the host, or a contest), and the fastest right one takes it */
       const q = g.seeGame.qs[g.seeGame.i];
       s.ok = [0, 1].map((t) => !!s.typed[t] && !!matchQ(s.typed[t], q)) as Two<boolean>;
       s.app = [...s.ok] as Two<boolean>;
+      s.seeBuzz = null; s.buzzAt = 0;
       s.screen = "seeReveal";
     } else if (s.screen === "rouletteQ") {
       /* each team's answer against its own chamber's question */
@@ -455,6 +456,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     playSound("drumroll");
     s.autoAt = null;
   }, []);
+  /* What Do You See? (12 Nov, the owner: a buzzer): the team that buzzed got it wrong, or said nothing in its 10
+     seconds: it's out of this picture. The other team out too, it's the reveal; else the clock goes on from where the
+     buzz stopped it, and the other team can buzz */
+  const seeMiss = useCallback((team: 0 | 1, late: boolean) => {
+    const s = st.current, g = s.g, nm = (t: 0 | 1) => iso(g.teams[t].name);
+    s.seeOut[team] = true; s.seeBuzz = null; s.buzzAt = 0;
+    if (s.seeOut[other(team)]) { reveal(); return; }
+    s.toast = { id: ++s.toastN, text: `${late ? `Time's up. ${nm(team)} are` : `${nm(team)} guessed wrong:`} out of this picture. ${nm(other(team))} can still buzz.` };
+    applyFx([{ sound: "wrong" }, { timer: "resume" }]);
+  }, [applyFx, reveal]);
 
   /* No host: the app's call on what a captain sent, at once. It can be contested afterwards, where
      the calls are shown (the answer card after the steal, the reveals, the Battle review). */
@@ -631,6 +642,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (t === "ui/introGo") { if (g?.nightIntro) { delete g.nightIntro; s.waitSince = Date.now(); imadNarrate(s); } return; }
     if (g?.nightIntro && t !== "ui/setScore") return;
     if (t === "ui/contestOk") closeContest(!!move.v, true);
+    /* What Do You See?: no new picture once a team has had a go at this one (as the Cocktail or Dish) */
+    else if (t === "see/swap" && s.screen === "seeQ" && (s.seeBuzz != null || s.seeOut[0] || s.seeOut[1])) s.toast = { id: ++s.toastN, text: "Somebody has already had a go at this one." };
     else if (t === "ui/flip") { const c = callsOf(s).find((x) => x.id === move.id); if (c) applyCall(c.id, !c.ok); }
     else if ((t === "dish/right" || t === "dish/wrong") && g.dishGame.leg.buzz != null && !s.nohost) {
       const b = g.dishGame.leg.buzz as 0 | 1;
@@ -731,8 +744,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else if (s.screen === "stakesReveal") play({ type: "stakes/verdict", ok: [!!s.ok[0], !!s.ok[1]] });
       else if (s.screen === "seeReveal") {
         /* the RIGHT that ended the picture early was turned down (the host, or a contest), and the other team never had
-           its guess: a new picture for both, as the Cocktail or Dish does, not "Nobody got it" */
-        const w = seeWinner(s.ok, s.seeAt), ender = ([0, 1] as const).find((t) => s.app[t] && !s.typed[other(t)]);
+           its go: a new picture for both, as the Cocktail or Dish does, not "Nobody got it" */
+        const w = seeWinner(s.ok, s.seeAt), ender = ([0, 1] as const).find((t) => s.app[t] && !s.typed[other(t)] && !s.seeOut[other(t)]);
         if (w === "none" && ender != null && !s.ok[ender] && g.seeGame.spare.length) { play({ type: "see/swap" }); s.toast = { id: ++s.toastN, text: "The call changed: a new picture for both teams." }; }
         else play({ type: "see/verdict", w });
       }
@@ -789,6 +802,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         /* (a second tap on Buzz: theirs is already in) */
         if (L.buzz != null) return L.buzz === team ? true : `${nm(L.buzz)} buzzed first.`;
         play({ type: "dish/buzz", w: team }); s.buzzAt = Date.now(); return true;
+      }
+      /* What Do You See? (12 Nov, the owner: a buzzer): the first captain to buzz stops the picture where it is, and has
+         10 seconds to say it out loud and type it */
+      if (sc === "seeQ") {
+        if (s.seeOut[team]) return `${nm(team)} are out of this picture.`;
+        if (s.seeBuzz != null) return s.seeBuzz === team ? true : `${nm(s.seeBuzz)} buzzed first.`;
+        if (!s.deadline) return false;
+        s.seeAt[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline - Date.now()))));
+        s.seeBuzz = team; s.buzzAt = Date.now();
+        applyFx([{ timer: "pause" }, { sound: "soft" }]);
+        return true;
       }
       /* (no buzzer in sudden death or the tie-breaker any more: a phone a version behind still says why) */
       if (sc === "sudden" || sc === "battleTie") return "No buzzer: type your answer and send it.";
@@ -851,17 +875,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.pins[0] && s.pins[1]) reveal();
       return true;
     }
-    /* What Do You See? (12 Nov): one guess a team, checked the moment it lands. Right: it's theirs, and the picture
-       ends (the reveal). Wrong: that team is out of this picture (the TV says so; what they typed waits for the reveal) */
+    /* What Do You See? (12 Nov, the owner: a buzzer): only the team that buzzed answers, once, and the app checks it the
+       moment it lands. Right: it's theirs, and the picture ends (the reveal). Wrong: that team is out of this picture,
+       the clock goes on and the other team can buzz */
     if (sc === "seeQ") {
       if (!texts.length) return false;
-      if (s.typed[team]) return s.seeOut[team] ? `${nm(team)} guessed wrong: out of this picture.` : `${poss(nm(team))} guess is already in.`;
-      s.typed[team] = texts.slice(0, 1);
-      s.seeAt[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline ? s.deadline - Date.now() : s.left * 1000))));
-      if (matchQ(s.typed[team], g.seeGame.qs[g.seeGame.i])) { reveal(); return true; }
-      s.seeOut[team] = true;
-      if (s.typed[0] && s.typed[1]) reveal();
-      else s.toast = { id: ++s.toastN, text: `${nm(team)} guessed wrong: out of this picture.` };
+      if (s.seeOut[team]) return `${nm(team)} are out of this picture.`;
+      if (s.seeBuzz !== team) return s.seeBuzz == null ? "Buzz first, then say it and type it." : `${nm(s.seeBuzz)} buzzed first.`;
+      if (s.typed[team]) return `${poss(nm(team))} answer is already in.`;
+      s.typed[team] = texts.slice(0, 1); s.buzzAt = 0;
+      if (matchQ(s.typed[team], g.seeGame.qs[g.seeGame.i])) reveal(); else seeMiss(team, false);
       return true;
     }
     if (sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ" || sc === "rouletteQ" || sc === "stakesQ") {
@@ -890,7 +913,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (texts.length && sc === "dishQ") return s.pending ? "Wait for the call on the last answer." : "Buzz first, then type it.";
     if (texts.length && sc === "sudden") return "Wait for the question.";
     return false;
-  }, [applyFx, current, play, reveal, settle, contestWait, draftKey]);
+  }, [applyFx, current, play, reveal, seeMiss, settle, contestWait, draftKey]);
 
   /* time's up with nothing sent: what the captain had typed is their answer (and the TV says so) */
   const takeDraft = useCallback((team: 0 | 1): boolean => {
@@ -899,7 +922,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (!d || d.k !== draftKey()) return false;
     const mini = s.screen === "miniQ", pin = s.screen === "pinQ";
     if (pin ? !d.pin : mini ? !d.n : !d.texts.length) return false;
+    const was = s.screen;
     if (captainInput("answer", team, pin ? { pin: d.pin } : mini ? { n: d.n } : { texts: d.texts }) !== true) return false;
+    /* (What Do You See?: a wrong one, and the note already says who is out and who can still buzz) */
+    if (was === "seeQ" && s.screen === "seeQ") return true;
     /* (not what it says: on a standard question the other team may be about to steal) */
     s.toast = { id: ++s.toastN, text: pin ? `Time's up: ${iso(s.g.teams[team].name)}'s pin counts where it is.` : `Time's up: what ${iso(s.g.teams[team].name)} typed counts as sent.` };
     return true;
@@ -913,6 +939,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (s.lifeline) return "Wait for the lifeline to finish.";
     if (s.pending || s.typed[0] || s.typed[1] || s.guesses[0] != null || s.guesses[1] != null || s.pins[0] || s.pins[1] || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
     if (s.screen === "dishQ") { const L = g.dishGame.leg; if (L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length || s.buzzAt) return "Too late: someone has already had a go at this one."; }
+    if (s.screen === "seeQ" && (s.seeBuzz != null || s.seeOut[0] || s.seeOut[1])) return "Too late: someone has already had a go at this one.";
     return null;
   }, []);
   /* ...not changed after all (No, no answer, too late): the clock that stopped for it goes on */
@@ -1581,17 +1608,17 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           s.toast = { id: ++s.toastN, text: `Time's up. ${iso(g.teams[b].name)} is out of this one.` };
         }
       }
+      /* What Do You See?: a buzz gets 10 seconds to say it and type it; what's typed but not sent goes in, else the team is out */
+      if (s.screen === "seeQ" && s.buzzAt && s.seeBuzz != null) {
+        const b = s.seeBuzz;
+        if (s.typed[b]) s.buzzAt = 0;
+        else if (now - s.buzzAt >= SEE_TYPE * 1000 + T_GRACE_MS) { if (!takeDraft(b)) seeMiss(b, true); s.step++; changed = true; }
+      }
       /* time's up (a moment after the clock shows 0, see T_GRACE_MS): first, what was typed but not sent goes in */
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };
         if (sc === "ask" || sc === "steal") { const t = turnTeam(); if (!s.typed[t] && !s.pending) took(t); }
-        /* What Do You See?: the unsent guesses in the order they were typed (the faster one first), each counted at the
-           moment it was typed */
-        else if (sc === "seeQ") {
-          const order = ([0, 1] as const).slice().sort((a, b) => (s.drafts[a]?.at ?? Infinity) - (s.drafts[b]?.at ?? Infinity));
-          for (const t of order) { const at = s.drafts[t]?.at, dl = s.deadline; if (s.screen === sc && !s.typed[t]) { took(t);
-            if (at && dl && s.typed[t]) s.seeAt[t] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (dl - at)))); } }
-        }
+        /* (What Do You See?: nothing to take: only a team that has buzzed types, and its clock is the 10 seconds above) */
         else if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "rouletteQ", "stakesQ"].includes(sc)) for (const t of [0, 1] as const) { if (sc === "miniQ" ? s.guesses[t] == null : sc === "pinQ" ? !s.pins[t] : !s.typed[t]) took(t); }
         else if (sc === "battleQ" && s.nohost && !s.pending) took(g.battle.cap);
         else if (sc === "dishQ" && g.dishGame.leg.buzz != null && !s.typed[g.dishGame.leg.buzz] && !s.pending) took(g.dishGame.leg.buzz);
@@ -1680,7 +1707,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (changed) void publish();
     }, 250);
     return () => clearInterval(t);
-  }, [isTv, publish, play, reveal, settle, hostMove, applyFx, handOver, closeContest, takeDraft, draftKey, swapBack]);
+  }, [isTv, publish, play, reveal, seeMiss, settle, hostMove, applyFx, handOver, closeContest, takeDraft, draftKey, swapBack]);
 
   /* Exit on the TV itself (it has a mouse): the same as the host's Exit */
   const exit = useCallback(() => { if (st.current.screen !== "final") return; exitGame(); void publish(); }, [publish]);  // eslint-disable-line react-hooks/exhaustive-deps

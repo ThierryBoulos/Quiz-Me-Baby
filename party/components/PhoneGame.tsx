@@ -46,7 +46,8 @@ export function useSecret(code: string, on: boolean) {
 }
 
 /* where a captain buzzes, then types (sudden death and the Battle's tie-breaker have no buzzer since 7 Nov: both type) */
-const BUZZ_SCREENS = ["dishQ"];
+/* (What Do You See? too, 12 Nov, the owner: buzz, say it out loud and type it) */
+const BUZZ_SCREENS = ["dishQ", "seeQ"];
 const RACE = (pub: Pub) => (pub.screen === "sudden" && !!pub.sudden?.ready) || pub.screen === "battleTie";
 /* A captain's inbox: what their own players suggest for the question on
    screen, newest first, with who said it. */
@@ -425,14 +426,18 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
       </div>);
-    /* What Do You See?: the picture as it clears, both guesses as they land (a wrong one: that team is out) */
+    /* What Do You See?: the picture as it clears, who buzzed, what they typed (a wrong one: that team is out) */
     case "seeQ": return (
       <div className="flex flex-col gap-3 flex-1">
-        <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Picture {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
+        <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Picture {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.see?.typeBy ?? pub.deadline} left={pub.see?.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
         {pub.see && <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={200} />}
         <AnswerCard />
-        <Typed t={0} /><Typed t={1} />
-        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change picture" move={{ type: "see/swap" }} /></div>
+        {/* (the buzzer, 12 Nov: who buzzed and their 10 seconds, who is out, who can still buzz; the app checks what's typed) */}
+        {([0, 1] as const).map((t) => { const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t]; return (
+          <Said key={t} t={t} text={x?.join("  /  ")} label={pub.see?.out?.[t] ? `${T[t].name}: out of this picture` : pub.buzz === t ? `${T[t].name} buzzed` : T[t].name}
+            empty={pub.see?.out?.[t] ? "No answer" : pub.buzz === t ? "Saying it out loud, and typing it…" : pub.buzz != null ? "Waiting" : "Can buzz"} />); })}
+        {/* (no Pause while a team that buzzed is answering: the clock is stopped for it already) */}
+        <div className="flex gap-2 justify-center mt-auto">{pub.buzz == null && <Pause />}<Small label="Reveal now" move={{ type: "ui/reveal" }} />{pub.buzz == null && !pub.see?.out?.some(Boolean) && <Small ghost label="Change picture" move={{ type: "see/swap" }} />}</div>
       </div>);
     case "seeReveal": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -1011,7 +1016,7 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
       {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}
       {/* the other team out (the TV's note, which no phone shows: with no TV, nobody would know they can wait for it to clear) */}
       {pub.screen === "seeQ" && mine != null && pub.see.out?.[mine === 0 ? 1 : 0] && <p className="text-14 font-semibold text-center leading-snug" style={{ color: "var(--color-no)" }}>
-        <bdi>{pub.teams[mine === 0 ? 1 : 0].name}</bdi> guessed wrong: out of this picture.</p>}</div></ToSide>}
+        <bdi>{pub.teams[mine === 0 ? 1 : 0].name}</bdi> are out of this picture.</p>}</div></ToSide>}
     {pub.screen === "pinQ" && <ToSide when={side} order={4} className="noselect" {...noCopy}>{small
       /* the captain's phone: the photo beside the clock, so the map gets the room */
       ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
@@ -1041,7 +1046,9 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
     {(["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesPick", "stakesQ", "battleQ"].includes(pub.screen) || (pub.screen === "rouletteQ" && spun)
       /* sudden death and the tie-breaker: their clock (with no host; a host's has none) */
-      || (RACE(pub) && (!!pub.deadline || (pub.left ?? 0) > 0))) && !(small && pub.screen === "pinQ") && !(pub.screen === "dishQ" && pub.dish?.typeBy) && <ToSide when={side && pub.screen !== "miniQ"} order={9} className="side-clock"><div className={"grid place-items-center main-clock" + (pub.screen === "miniQ" ? " clock-last" : "")}><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || pub.screen === "airportQ" || pub.screen === "mapQ" || small ? 64 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div></ToSide>}
+      || (RACE(pub) && (!!pub.deadline || (pub.left ?? 0) > 0))) && !(small && pub.screen === "pinQ") && !(pub.screen === "dishQ" && pub.dish?.typeBy)
+      /* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */
+      && !(pub.screen === "seeQ" && pub.see?.typeBy && captain && pub.buzz === mine) && <ToSide when={side && pub.screen !== "miniQ"} order={9} className="side-clock"><div className={"grid place-items-center main-clock" + (pub.screen === "miniQ" ? " clock-last" : "")}><Clock deadline={pub.screen === "seeQ" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={pub.screen === "seeQ" && pub.see?.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || pub.screen === "airportQ" || pub.screen === "mapQ" || small ? 64 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div></ToSide>}
     {/* the Battle: the last answer, once there's no new question to read (during the questions it's on the TV only) */}
     {pub.battle?.half?.length && pub.screen === "battleHandoff" ? <BattleHalf half={pub.battle.half} />
       : pub.battle?.last && /^battle(Handoff|Summary)$/.test(pub.screen) && <BattleAnswer last={pub.battle.last} />}
@@ -1102,7 +1109,7 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   if (RESULT.test(pub.screen)) return null;            // the result says it
   /* on a question, the question (or flag, or map) is the thing to look at: the instruction steps back */
   /* (out of a picture: said plainly, in red, not stepped back) */
-  const quiet = QUIET.includes(pub.screen) && !pub.paused && !(pub.screen === "seeQ" && me.team != null && pub.see?.out?.[me.team]);
+  const quiet = QUIET.includes(pub.screen) && !pub.paused && !(pub.screen === "seeQ" && me.team != null && (pub.see?.out?.[me.team] || pub.buzz != null));
   /* your move now (gold) or stay out of it (grey), so "Type it fast!" and "Not a word!" can't be mixed up (3 Nov) */
   const tone = statusTone(pub, me);
   return <p className={"text-center text-balance leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite"
@@ -1112,6 +1119,7 @@ function statusTone(pub: Pub, me: Member): "go" | "hush" | "no" | null {
   const mine = me.team, cap = me.role === "captain", sc = pub.screen;
   if (pub.lifeline || pub.paused) return null;
   if (sc === "seeQ" && mine != null && pub.see?.out?.[mine]) return "no";
+  if (sc === "seeQ" && pub.buzz != null) return pub.buzz === mine ? "go" : "hush";
   if (sc === "battleQ") return cap && pub.battle?.cap === mine ? "go" : "hush";
   if (sc === "battleTie" || sc === "sudden") return cap ? "go" : "hush";
   if (sc === "dishQ" && cap && pub.buzz === mine && !pub.sent?.[mine as 0 | 1]) return "go";
@@ -1137,8 +1145,9 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "sudden": return !pub.sudden?.ready ? "Sudden death: you're tied" : cap ? (pub.out?.[mine] ? "Wrong. You're out of this one." : pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : "Type it and send it. First right answer wins!") : "Sudden death: captains only. Not a word!";
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country?" : "Guess the Flag: help your captain";
-    case "seeQ": return pub.see?.out?.[mine] ? (cap ? "Wrong. You're out of this picture." : "Your captain guessed wrong: out of this picture.")
-      : cap ? (pub.sent?.[mine] ? "Guess sent." : "Who or what is it? One guess.") : "What Do You See?: help your captain";
+    case "seeQ": return pub.see?.out?.[mine] ? (!pub.sent?.[mine] ? "Time's up. You're out of this picture." : cap ? "Wrong. You're out of this picture." : "Your captain guessed wrong: out of this picture.")
+      : pub.buzz === mine ? (pub.sent?.[mine] ? "Answer sent. The app checks it." : cap ? "You buzzed! Say it out loud and type it." : "Your captain buzzed! Say it out loud!")
+      : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : cap ? "Know it? BUZZ!" : "What Do You See?: help your captain";
     case "pinQ": return cap ? "Where is it? Drop your pin, then lock it in." : "Drop the Pin: help your captain";
     case "airportQ": return cap ? "Which airport?" : "Guess the Airport: help your captain";
     case "rouletteQ": return cap ? "Your chamber's question. Type your answer." : "Russian Roulette: help your captain";
@@ -1357,14 +1366,14 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const sentHere = !!pub.sent?.[mine] || !!sentTxt;
   const locked = !!pub.pending || sentHere;
   /* (time's up with a host: nothing more to type or use, the host rules on what's in: the 4 Nov audit, 1.15) */
-  const canType = !pub.paused && ((myTurn && !locked && !pub.timeUp) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "seeQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ" || sc === "stakesQ" || (sc === "rouletteQ" && rrSpun)) && !sentHere)
+  const canType = !pub.paused && ((myTurn && !locked && !pub.timeUp) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ" || sc === "stakesQ" || (sc === "rouletteQ" && rrSpun)) && !sentHere)
     /* a buzz: one answer, and once it's sent the box closes (it stayed open, with its Send, and got sent twice: 20 Oct) */
     || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending && !sentHere)
     /* sudden death and the tie-breaker: both captains type at once, one answer each */
     || (RACE(pub) && !pub.out?.[mine] && !sentHere && !pub.contest)
     /* the Battle: typed with no host; with a host it's said out loud */
     || (sc === "battleQ" && nohost && pub.battle?.cap === mine && !locked));
-  const canBuzz = sc === "dishQ" && pub.buzz == null && !pub.out?.[mine];
+  const canBuzz = BUZZ_SCREENS.includes(sc) && pub.buzz == null && !pub.out?.[mine];
   /* Drop the Pin: the map is the answer box */
   const canPin = !pub.paused && sc === "pinQ" && !sentHere;
   const sugs = useSuggestions(code, pub.qid, members, mine, ANSWERING.includes(sc));
@@ -1463,6 +1472,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
             <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
             {/* the cocktail or dish: you buzzed, now type it before your own clock runs out */}
             {sc === "dishQ" && pub.dish?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.dish.typeBy} size={52} />to type it</div>}
+            {/* What Do You See?: the same 10 seconds, to say it out loud and type it */}
+            {sc === "seeQ" && pub.see?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.see.typeBy} size={52} />to say it and type it</div>}
           </div>
           <input id="ans" {...np.props} className="input" value={a} maxLength={80} autoComplete="off" autoCorrect="off" spellCheck={false}
             /* Closest: the number pad, fastest (the reader still takes "1.5 million" if a keyboard sends it) */
@@ -1475,7 +1486,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           {np.hint}
           <button className="btn btn-gold btn-lg" disabled={busy || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onPointerDown={(e) => e.preventDefault()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
           {["ask", "steal", "flagQ", "airportQ", "mapQ"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
-          {sc === "seeQ" && <div className="text-13 text-[var(--color-ink-3)]">One guess. Wrong, and you&rsquo;re out of this picture.</div>}
+          {sc === "seeQ" && <div className="text-13 text-[var(--color-ink-3)]">Say it out loud too! Wrong, and you&rsquo;re out of this picture.</div>}
         </div>)}
       {canPin && (
         <div className="flex flex-col gap-2">

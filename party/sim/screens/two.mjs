@@ -18,6 +18,9 @@ export async function dumpTwo(load) {
       /* the Roulette spin: before it turns, while it turns, after it stops, for each of the three spins */
       /* Secret Stakes' bets: before any is in, and once one team's is (its phone shows its own bet) */
       if (pub.screen === "stakesPick" && pub.stakes) k += pub.stakes.locked.some(Boolean) ? ".one" : ".none";
+      /* What Do You See? (the buzzer): a team has buzzed (the picture stopped, its 10 seconds running); a team is out */
+      if (pub.screen === "seeQ" && pub.buzz != null) k = k.replace(".paused", "") + ".buzz";
+      else if (pub.screen === "seeQ" && pub.out?.some(Boolean)) k += ".out";
       if (pub.screen === "rouletteQ" && pub.roulette?.spinAt) { const d = now - pub.roulette.spinAt; k += d < 1800 ? ".hold" : d < 4400 ? ".turn" : ".after"; k += ".lap" + pub.roulette.lap; }
       const rec = { pub: JSON.parse(JSON.stringify(pub)), secret: secret ? JSON.parse(JSON.stringify(secret)) : null, now };
       if (!got[k + ".a"]) got[k + ".a"] = rec; else got[k + ".z"] = rec;

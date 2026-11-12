@@ -5,7 +5,9 @@
 import type { Two } from "./game";
 
 export type SeeKind = "face" | "logo" | "close";
-export const SEE_CLEAR = 3;          // seconds fully clear at the end
+export const SEE_CLEAR = 3;
+/* a buzz (12 Nov, the owner): the picture stops, and the team has this long to say it out loud and type it */
+export const SEE_TYPE = 10;          // seconds fully clear at the end
 export const SEE_STEPS = 12, SEE_STEPS_STILL = 5;
 /* the blur at the start, as a share of the picture's width (so a phone and the TV show the same). A logo is a simple
    shape that reads through a face's blur (checked by eye, 12 Nov): it starts at nearly twice as much */
@@ -16,7 +18,9 @@ export type SePub = {
   photo: string; kind: SeeKind; effect: "blur" | "zoom"; zoom: [number, number, number] | null;
   total: number;                    // the clock's seconds
   n: number; of: number;            // picture n of 7 (a tie-breaker goes past it)
-  out?: boolean[];                  // a team that guessed wrong: out of this picture
+  out?: boolean[];                  // a team that guessed wrong (or ran out of its 10 seconds): out of this picture
+  buzz?: number | null;             // the team that buzzed, while it answers (the picture and its clock stopped)
+  typeBy?: number | null;           // ...and when its 10 seconds run out (the TV's clock)
   rev?: { answer: string; notes?: string; credit: string; licence: string; who: number | null; ms: number | null; at: (number | null)[] };
 };
 /* the bank row's picture fields */

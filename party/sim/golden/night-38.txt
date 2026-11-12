@@ -44,33 +44,35 @@
 59.00 roundScore | 33 | 4-2 |  | Lions +1 point — steal | 
 59.75 seeIntro | 34 | 4-2 | 0-0 | Lions +1 point — steal | 
 60.75 seeQ | 35 | 4-2 | 0-0 | Lions +1 point — steal | 
-62.50 seeReveal | 35 | 4-2 | 0-1 | Lions +1 point — steal | 
-63.50 seeQ | 36 | 4-2 | 0-1 | Owls take picture 1. | 
-66.00 seeReveal | 36 | 4-2 | 1-1 | Owls take picture 1. | 
-67.00 seeReveal | 36 | 4-2 | 1-1 |  | 
-68.00 seeReveal | 36 | 4-2 | 1-1 | The host keeps the call. | 
-68.75 seeQ | 37 | 4-2 | 1-1 | Lions take picture 2. | 
-69.75 seeReveal | 37 | 4-2 | 2-1 | Lions take picture 2. | 
-70.50 seeQ | 38 | 4-2 | 2-1 | Lions take picture 3. | 
-71.50 seeQ | 38 | 4-2 | 2-1 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-76.00 seeReveal | 38 | 4-2 | 3-1 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-77.00 seeQ | 39 | 4-2 | 3-1 | Lions take picture 4. | 
-77.75 seeReveal | 39 | 4-2 | 3-2 | Lions take picture 4. | 
-78.75 seeQ | 40 | 4-2 | 3-2 | Owls take picture 5. | 
-80.50 seeReveal | 40 | 4-2 | 4-2 | Owls take picture 5. | 
-81.50 decided | 41 | 6-2 | 4-2 |  | 
-82.25 seeQ | 42 | 6-2 | 4-2 |  | 
-84.00 seeQ | 42 | 6-2 | 4-2 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-86.00 seeReveal | 42 | 6-2 | 4-2 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-86.75 seeSummary | 43 | 6-2 | 4-2 | Nobody got it. | 
-87.75 roundIntro | 44 | 6-2 |  | Nobody got it. | 
-88.50 ask | 45 | 6-2 |  | Nobody got it. | 
-91.25 answer | 46 | 7-2 |  | Lions +1 point | 
-92.25 ask | 47 | 7-2 |  | Lions +1 point | 
-94.00 steal | 48 | 7-2 |  | Lions +1 point | 
-95.75 answer | 49 | 7-2 |  | Lions +1 point | 
-96.75 answer | 49 | 7-2 |  |  | 
-98.50 answer | 49 | 7-2 |  | The host keeps the call. | 
-99.50 roundScore | 50 | 7-2 |  | The host keeps the call. | 
-100.25 final | 51 | 7-2 |  | The host keeps the call. | 
-recap: {"margin":5,"sudden":false,"leadChanges":0,"steals":[3,0],"minis":[0,1],"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[4,2],[6,2],[7,2]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[3,2]]},{"label":"R3","pts":[[4,2]]},{"label":"What Do You See?","pts":[[6,2]]},{"label":"R4","pts":[[7,2]]}],"awards":[{"t":"Best thief","who":"Lions, 3 steals","team":0}]}
+63.50 seeQ | 35 | 4-2 | 0-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+68.00 seeReveal | 35 | 4-2 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+68.75 seeQ | 36 | 4-2 | 0-1 | Owls take picture 1. | 
+70.50 seeQ | 36 | 4-2 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+73.25 seeReveal | 36 | 4-2 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+74.25 seeReveal | 36 | 4-2 | 0-1 |  | 
+75.00 seeReveal | 36 | 4-2 | 0-1 | The host keeps the call. | 
+76.00 seeQ | 37 | 4-2 | 0-1 | Nobody got it. | 
+78.75 seeQ | 37 | 4-2 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+80.50 seeReveal | 37 | 4-2 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+81.50 seeQ | 38 | 4-2 | 0-1 | Nobody got it. | 
+90.50 seeQ | 38 | 4-2 | 0-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+94.00 seeReveal | 38 | 4-2 | 0-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+95.00 seeQ | 39 | 4-2 | 0-1 | Nobody got it. | 
+98.50 seeQ | 39 | 4-2 | 0-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+100.25 seeReveal | 39 | 4-2 | 0-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+101.25 seeQ | 40 | 4-2 | 0-1 | Nobody got it. | 
+104.00 seeQ | 40 | 4-2 | 0-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+111.00 seeReveal | 40 | 4-2 | 1-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+112.00 seeQ | 41 | 4-2 | 1-1 | Lions take picture 6. | 
+123.75 seeReveal | 41 | 4-2 | 2-1 | Lions take picture 6. | 
+124.50 seeSummary | 42 | 6-2 | 2-1 | Lions take picture 7. | 
+125.50 roundIntro | 43 | 6-2 |  | Lions take picture 7. | 
+127.25 ask | 44 | 6-2 |  | Lions take picture 7. | 
+129.00 steal | 45 | 6-2 |  | Lions take picture 7. | 
+131.00 answer | 46 | 6-2 |  | Lions take picture 7. | 
+131.75 ask | 47 | 6-2 |  | Lions take picture 7. | 
+133.50 steal | 48 | 6-2 |  | Lions take picture 7. | 
+135.50 answer | 49 | 6-2 |  | Lions take picture 7. | 
+136.25 roundScore | 50 | 6-2 |  | Lions take picture 7. | 
+137.25 final | 51 | 6-2 |  | Lions take picture 7. | 
+recap: {"margin":4,"sudden":false,"leadChanges":0,"steals":[3,0],"minis":[0,1],"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[4,2],[6,2]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[3,2]]},{"label":"R3","pts":[[4,2]]},{"label":"What Do You See?","pts":[[6,2]]},{"label":"R4","pts":[]}],"awards":[{"t":"Best thief","who":"Lions, 3 steals","team":0}]}

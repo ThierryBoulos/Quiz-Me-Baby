@@ -68,8 +68,10 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   else { const want = readFileSync(file, "utf8"); verdict = want === text ? "same as golden" : "DIFFERS"; if (want !== text) bad++; }
   console.log(`many ${k} teams, ${crowd} players: ${s.teams.map((x) => x.score).join("-")} — ${verdict}`);
 }
-/* 12 Nov: What Do You See? with 3, 6 and 8 teams, scored as the Cocktail or Dish is here: one guess a team, the right
-   ones paid by the order they came in (1st as many points as there are teams), a wrong one nothing */
+/* 12 Nov: What Do You See? with 3, 6 and 8 teams, with its buzzer (the owner): the first team to buzz stops the clock
+   and answers. Right ends the picture and pays as many points as there are teams (a 1st place); wrong, or no answer in
+   its 10 seconds, puts that team out, the clock goes on and another team can buzz; every team out, or the clock run
+   out: nobody */
 {
   decks.see = pick("see", 7);
   for (const [k, seed] of [[3, 5], [6, 6], [8, 7]]) {
@@ -79,17 +81,36 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     L.startMini(s, now, T, []);
     for (let guard = 0; guard < 100 && s.screen !== "final"; guard++) {
       if (s.screen === "q") {
-        const q = L.qOf(s), order = [...Array(k).keys()].sort(() => r() - 0.5);
-        for (const t of order) { if (r() < 0.15) continue; now += 1000 + Math.floor(r() * 2000); L.captainAnswer(s, t, { text: r() < 0.5 ? q.answer : "Atlantis" }, undefined, now); }
-        if (L.captainAnswer(s, order[0], { text: q.answer }, undefined, now) === true && s.typed[order[0]] !== q.answer) odd ||= "a second guess taken";
-        L.reveal(s);
+        const q = L.qOf(s), order = [...Array(k).keys()].sort(() => r() - 0.5), late = Array(k).fill(false);
+        for (const t of order) {
+          if (s.screen !== "q") break;
+          if (r() < 0.15) continue;                                   // (this team never buzzes)
+          now += 1000 + Math.floor(r() * 2000);
+          if (s.deadline && now >= s.deadline) break;                 // (the clock ran out first)
+          if (L.captainAnswer(s, t, { text: q.answer }, undefined, now) === true) odd ||= "an answer taken with no buzz";
+          if (L.buzzSee(s, t, now) !== true) { odd ||= "a buzz refused"; continue; }
+          const u = order.find((x) => x !== t && !s.out[x]);
+          if (u != null && L.buzzSee(s, u, now) === true) odd ||= "a second buzz taken";
+          if (s.deadline != null) odd ||= "the clock ran on during a buzz";
+          if (L.pause(s, now)) odd ||= "paused while a team that buzzed was answering";
+          /* now and then nothing in the 10 seconds (the TV's tick puts the team out); else an answer, right or wrong */
+          if (r() < 0.12) { now += 11000; late[t] = true; L.seeMiss(s, t, now, true); }
+          else { now += 2000 + Math.floor(r() * 3000); if (L.captainAnswer(s, t, { text: r() < 0.45 ? q.answer : "Atlantis" }, undefined, now) !== true) odd ||= "the answer of the team that buzzed refused"; }
+          if (s.screen === "q") {
+            if (!s.out[t] || s.buzz != null) odd ||= "a wrong answer didn't put the team out";
+            if (s.deadline == null) odd ||= "the clock didn't go on after a wrong answer";
+            if (L.buzzSee(s, t, now) === true) odd ||= "a team out of the picture buzzed again";
+          }
+        }
+        if (s.screen === "q") L.reveal(s);
         const pl = L.legPlaces(s), pts = L.legPoints(s), right = s.teams.map((_, t) => !!s.ok[t]);
-        /* the fastest right is 1st, and is paid as many points as there are teams; wrong, no answer: nothing */
-        const firstRight = [...Array(k).keys()].filter((t) => right[t]).sort((a, b) => s.at[a] - s.at[b])[0];
-        if (firstRight != null && (pl[firstRight] !== 1 || pts[firstRight] !== k)) odd ||= `leg ${L.miniOf(s).i + 1}: the fastest right isn't 1st on ${k} points`;
-        if (s.teams.some((_, t) => !right[t] && pts[t] !== 0)) odd ||= "a wrong guess scored";
-        if (s.ms.some((v, t) => s.typed[t] != null && !(v >= 0 && v <= T.see * 1000))) odd ||= "a guess's time is off the clock";
-        trace.push(`picture ${L.miniOf(s).i + 1}: ${s.teams.map((_, t) => (s.typed[t] == null ? "-" : right[t] ? `#${pl[t]}` : "x")).join(" ")} | pts ${pts.join(",")}`);
+        /* one team at most gets a picture: it is 1st, and is paid as many points as there are teams; the rest nothing */
+        if (right.filter(Boolean).length > 1) odd ||= "two teams got the same picture";
+        const got = right.indexOf(true);
+        if (got >= 0 && (pl[got] !== 1 || pts[got] !== k)) odd ||= `picture ${L.miniOf(s).i + 1}: the team that got it isn't 1st on ${k} points`;
+        if (s.teams.some((_, t) => !right[t] && pts[t] !== 0)) odd ||= "a wrong answer scored";
+        if (s.ms.some((v, t) => (s.typed[t] != null || late[t]) && !(v >= 0 && v <= T.see * 1000))) odd ||= "a buzz's time is off the clock";
+        trace.push(`picture ${L.miniOf(s).i + 1}: ${s.teams.map((_, t) => (right[t] ? `#${pl[t]}` : late[t] ? "late" : s.typed[t] != null ? "x" : "-")).join(" ")} | pts ${pts.join(",")}`);
         L.next(s, now, T); continue;
       }
       if (s.screen === "summary") { trace.push(`summary award ${L.miniOf(s).award.join(",")}`); L.next(s, now, T); continue; }

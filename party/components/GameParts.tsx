@@ -396,11 +396,12 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     /* What Do You See? (12 Nov, the owner) */
+    /* (12 Nov, the owner: a buzzer, said out loud and typed; the app checks what's typed, so nobody has to) */
     case "see": return [
       { text: `A picture goes up, blurred or zoomed right in, and gets clearer over ${sec(t?.see, 20)}: a famous face, a logo, or a close-up.` },
-      { text: "One guess per team, typed by the captain. Right, and the picture is yours. Wrong, and you're out of this picture.", warn: true },
-      { text: `The app checks each guess as it lands${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. The fastest right answer takes it.` },
-      { text: `Best of ${n} takes ${pts}. ${level}` }];
+      { text: "Know it? Captain, hit BUZZ: the picture stops, and you have 10 seconds to say it out loud and type it.", warn: true },
+      { text: "Right, and the picture is yours. Wrong, and you're out of this picture: the clock goes on and the other team can buzz." },
+      { text: `The app checks what you type${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Best of ${n} takes ${pts}. ${level}` }];
     case "pin": return [
       { text: `A photo of a landmark goes up. ${sec(t?.pin, T_PIN)}. On the hard ones its name comes too: the trick is finding it.` },
       { text: "Both captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better." },

@@ -21,7 +21,7 @@ import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
-import { SeeCredit, SeePicture, seeWho } from "../See";
+import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
 import { signedPts, skLevelWord } from "@/lib/stakes";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
@@ -135,6 +135,10 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const [lastTap, setLastTap] = useState<string | null>(null);
   const got = lastTap ? pub.ack?.[me.user_id]?.[lastTap] : undefined;
   useEffect(() => { if (got && got !== "+" && got !== "-") { setErr(got); setSentTxt(null); } }, [got]);
+  /* What Do You See?: a BUZZ shows at once on this phone (the TV confirms it a moment later, or says who was first) */
+  const [buzzed, setBuzzed] = useState(false);
+  const seeKey = `${pub.qid}|${pub.see?.buzz ?? ""}|${(pub.see?.out || []).join("")}|${got ?? ""}`;
+  useEffect(() => { setBuzzed(false); }, [seeKey]);
   const send = async (kind: string, payload: Record<string, unknown>) => {
     setBusy(true); setErr(null);
     try { setLastTap(await sendAction(code, kind, { ...payload, step: pub.step })); return true; } catch { setErr(noTv ? "That didn't go through. Try again." : "That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
@@ -182,6 +186,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* What Do You See?: the picture, clearing from the TV's clock */}
       {/* (stays in the right column sideways, sized to the screen: under the scores on the left it was cut off) */}
       {g.key === "see" && pub.see && <div className="flex justify-center noselect" {...noCopy}><SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} /></div>}
+      {/* (with no TV, what the TV shows beside the picture: who has buzzed, who is out of it) */}
+      {g.key === "see" && pub.see && noTv && (pub.see.buzz != null || pub.see.out?.some(Boolean)) && <SeeTicks teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} out={pub.see.out} buzz={pub.see.buzz} size={15} />}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
       {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={small ? 180 : 240} legend={false} />}
       {g.key === "dish" && pub.dish && (<ToSide order={4} className="noselect" {...noCopy}>
@@ -197,7 +203,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
         : <PinPhoto pin={pub.pin} h={230} small zoom />}</ToSide>}
       {pub.question && <ToSide order={3} className="noselect" {...noCopy}><p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p></ToSide>}
-      {!(small && g.key === "pin") && !spinning && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}><Clock deadline={pub.deadline} left={pub.left} size={small ? 70 : 90} /></div></ToSide>}
+      {/* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */}
+      {!(small && g.key === "pin") && !spinning && !(g.key === "see" && pub.see?.typeBy && cap && pub.see.buzz === mine) && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}>
+        <Clock deadline={g.key === "see" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={g.key === "see" && pub.see?.typeBy ? undefined : pub.left} size={small ? 70 : 90} /></div></ToSide>}
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (
@@ -330,20 +338,23 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {/* who has answered, live (the owner, 31 Oct): a count, then each team ticked green as it locks in */}
         {(() => { const who = T.map((_, i) => i).filter((i) => !g.only || g.only.includes(i)), n = who.filter((i) => pub.sent[i]).length; return (
           <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who has answered">
-            <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered` : `${n} of ${who.length} teams answered`}</p>
+            <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered`
+              /* (What Do You See?: the buzzer: who buzzed and is saying it and typing it, or nobody yet) */
+              : g.key === "see" ? (pub.see?.buzz != null ? <><bdi>{T[pub.see.buzz]?.name}</bdi> buzzed: saying it out loud, and typing it</> : "Waiting for a buzz…") : `${n} of ${who.length} teams answered`}</p>
             <div className={"who-grid grid gap-x-3 gap-y-1 " + (T.some((t) => t.name.length > 8) ? "grid-cols-1" : "grid-cols-2")}>
-              {who.map((i) => { const out = (secret.out ?? pub.out)?.[i], t = T[i], on = pub.sent[i] && !out; return (
-                <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
+              {who.map((i) => { const out = (secret.out ?? pub.out)?.[i], t = T[i], bz = g.key === "see" && pub.see?.buzz === i, on = bz || (pub.sent[i] && !out); return (
+                <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] || bz ? t.color : "var(--color-ink-3)" }}>
                   <Dot t={i} color={t.color} size={14} /><span className="truncate flex-1"><bdi>{t.name}</bdi></span>
-                  <span className="shrink-0 font-bold" style={{ color: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)" }}>{out ? "✗ out" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting"}</span>
+                  <span className="shrink-0 font-bold" style={{ color: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)" }}>{out ? "✗ out" : bz ? "buzzed!" : g.key === "see" ? "can buzz" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting"}</span>
                 </span>); })}
             </div>
           </div>); })()}
         {/* the same controls as with two teams: Pause, Change question, Reveal now (the 4 Nov audit, 3.11) */}
         {/* (docked: sideways, the question pushed these below the fold; 5 Nov review) */}
         <div className="flex flex-wrap justify-center gap-2 mt-auto dock-group py-2" style={{ background: "var(--color-bg)" }}>
-          <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
-          {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : "Change question"}</button>}
+          {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
+          {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
+          {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && !(g.key === "see" && (pub.see?.buzz != null || pub.see?.out?.some(Boolean))) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
@@ -424,7 +435,30 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* THE CAPTAIN answers the rest */}
       {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !(g.only && mine != null && !g.only.includes(mine)) && (<>
         <OnScreen small={g.key === "pin" && !sentMine} />
-        {sentMine ? <p className="text-center font-bold text-16" role="status">
+        {/* What Do You See? (12 Nov, the owner: a buzzer): BUZZ, then 10 seconds to say it out loud and type it; a wrong
+            answer (or none in time) and the team is out of this picture, and another team can buzz */}
+        {g.key === "see" ? (() => { const S = pub.see, out = mine != null && !!S?.out?.[mine], bz = S?.buzz ?? null, me2 = bz != null && bz === mine, col = mine != null ? T[mine].color : undefined; return (<>
+          <p className="text-center font-bold text-18 text-balance" role="status" style={{ color: out ? "var(--color-no)" : me2 ? "var(--color-gold)" : bz != null ? "var(--color-ink-3)" : undefined }}>
+            {out ? (sentMine ? "Wrong. You’re out of this picture." : "Time’s up. You’re out of this picture.") : me2 ? (sentMine || sentTxt ? "Answer sent. The app checks it." : "You buzzed! Say it out loud and type it.")
+              : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
+          {!out && bz == null && (buzzed
+            ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
+            : <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
+                onClick={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
+          {!out && me2 && !sentMine && !sentTxt && (
+            <div className="card flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-3">
+                <label className="field-label !mb-0" htmlFor="mans">Your answer</label>
+                {S?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={S.typeBy} size={52} />to say it and type it</div>}
+              </div>
+              <input id="mans" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} value={text} onChange={(e) => setText(e.target.value)} placeholder="Type it"
+                onKeyDown={(e) => { const t = text.trim(); if (e.key === "Enter" && !busy && t) { e.preventDefault(); void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); } }} />
+              {np.hint}
+              <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => { const t = text.trim(); void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>Send</button>
+              <div className="text-13 text-[var(--color-ink-3)]">Say it out loud too! Wrong, and you&rsquo;re out of this picture.</div>
+            </div>)}
+        </>); })()
+        : sentMine ? <p className="text-center font-bold text-16" role="status">
             {`Locked in${sentTxt && g.key !== "pin" ? `: ${sentTxt}` : ""}.`}</p>
           : g.key === "pin" ? (
             <div className="flex flex-col gap-2">
@@ -438,7 +472,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               <input id="mans" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
               {np.hint}
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
-              <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "see" ? "One guess for your team. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>
+              <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
         {!sentMine && sugs.length > 0 && g.key !== "pin" && (
@@ -453,8 +487,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       </>)}
       {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && (<>
         <OnScreen />
+        {/* What Do You See?: who buzzed, and whether your team is out of this picture */}
+        {g.key === "see" && mine != null && (pub.see?.out?.[mine] || pub.see?.buzz != null) && (
+          <p className="text-center font-bold text-18 text-balance" role="status" style={{ color: pub.see?.out?.[mine] ? "var(--color-no)" : pub.see?.buzz === mine ? "var(--color-gold)" : "var(--color-ink-3)" }}>
+            {pub.see?.out?.[mine] ? "Your team is out of this picture." : pub.see?.buzz === mine ? "Your captain buzzed! Say it out loud!" : <><bdi>{T[pub.see!.buzz!]?.name}</bdi> buzzed</>}</p>)}
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
-        {spinning ? null : mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) ? (
+        {spinning || (g.key === "see" && mine != null && pub.see?.out?.[mine]) ? null : mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) ? (
           <div className="card flex flex-col gap-2">
             <label className="field-label !mb-0" htmlFor="msug">Suggest to {T[mine]?.captain || "your captain"}</label>
             <div className="flex gap-2">
@@ -466,7 +504,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
           </div>)
           /* (once the captain has sent it, say so: 12 Nov) */
-          : <Line>{mine != null && pub.sent[mine] ? <>Locked in. The answer comes up when the time&rsquo;s up.</> : "Your captain answers this one."}</Line>}
+          : g.key === "see" ? null : <Line>{mine != null && pub.sent[mine] ? <>Locked in. The answer comes up when the time&rsquo;s up.</> : "Your captain answers this one."}</Line>}
       </>)}
 
       {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}

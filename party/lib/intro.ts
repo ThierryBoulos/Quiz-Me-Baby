@@ -21,7 +21,7 @@ const TWO: Record<string, string> = {
   airport: "A departures board. Name the airport.",
   majority: "Everyone plays on their own phone. Four options, one tap.",
   dish: "Ingredients one at a time. Buzz and name it.",
-  see: "A picture gets clearer. One guess each: who or what is it?",
+  see: "A picture gets clearer. Know it? Buzz, say it out loud and type it.",
   roulette: "Spin the barrel: a theme and a question each. One chamber is the bullet.",
   battle: "Captains only, ten questions each.",
   stakes: "The night's last game: bet on a theme and a level, in secret.",

@@ -371,11 +371,11 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} take it` : ""}</div>
     </>);
   }
-  /* What Do You See?: the picture clears as the clock runs (every screen from the TV's clock); then the whole picture,
-     what it is, both guesses and who got it how fast */
+  /* What Do You See?: the picture clears as the clock runs (every screen from the TV's clock) and stops at a buzz; then
+     the whole picture, what it is, both answers and who got it how fast */
   if ((sc === "seeQ" || sc === "seeReveal") && pub.see) return (
     <SeeTv see={pub.see} screen={sc} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))}
-      sent={pub.sent || [false, false]} deadline={pub.deadline} left={pub.left}
+      deadline={pub.deadline} left={pub.left}
       clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} rows={<TeamRows pub={pub} empty="No answer" small />} />);
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (<>
     <FlagImg name={pub.flag} h={sc === "flagQ" ? 300 : 220} maxW={520} />

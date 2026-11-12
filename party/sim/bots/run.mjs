@@ -222,10 +222,18 @@ function two(pub) {
     for (const t of [0, 1]) { const b = botCap(t); if (b && !pub.stakes?.locked?.[t]) once(`${k}|bet|${t}`, DELAY, () => b.send("next", { move: { type: "stakes/pick", k: Math.floor(Math.random() * 3), level: pick(LEVELS) }, step })); }
     return;
   }
-  if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ", "seeQ"].includes(sc)) {
+  /* What Do You See? (12 Nov, the owner: a buzzer): a bot captain buzzes a few seconds in, then types its answer (a
+     wrong one puts its team out, and the other can buzz) */
+  if (sc === "seeQ") {
+    if (pub.buzz == null) { const ts = [0, 1].filter((t) => !pub.out?.[t] && botCap(t)), t = ts[Math.floor(Math.random() * ts.length)];
+      if (t != null) once(`${k}|buzz|${(pub.out || []).map(Number).join("")}`, DELAY * (1 + Math.random() * 2), () => botCap(t)?.send("buzz", {})); }
+    else answer(pub.buzz, { text: guess(right(pub.buzz), "standard"), k: `${pub.qid}|seeQ` });
+    return;
+  }
+  if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(sc)) {
     const kind = { flagQ: "flag", mapQ: "map", airportQ: "airport" }[sc] || "standard";
     /* (tagged as a real phone tags its answer: Russian Roulette's and Secret Stakes' tags were refused before 11 Nov) */
-    for (const t of [0, 1]) answer(t, { text: guess(right(t), kind), ...(sc === "rouletteQ" || sc === "stakesQ" || sc === "seeQ" ? { k: `${pub.qid}|${sc}` } : {}) });
+    for (const t of [0, 1]) answer(t, { text: guess(right(t), kind), ...(sc === "rouletteQ" || sc === "stakesQ" ? { k: `${pub.qid}|${sc}` } : {}) });
     /* the host reveals once both are in, or when the clock has run out (a person's captain who didn't answer) */
     if (BH && ((pub.sent?.[0] && pub.sent?.[1]) || pub.timeUp)) go(0, "ui/reveal", {}, DELAY);
     return;
@@ -264,6 +272,13 @@ function many(pub) {
     return;
   }
   if (sc !== "q") return;
+  /* What Do You See? (the buzzer): one bot captain buzzes a few seconds in; the one that buzzed types its answer */
+  if (key === "see") {
+    const S = pub.see || {}, caps = bots.filter((b) => b.role === "captain" && b.team != null && !S.out?.[b.team]);
+    if (S.buzz == null) { const b = caps[Math.floor(Math.random() * caps.length)]; if (b) once(`${k}|buzz|${(S.out || []).map(Number).join("")}`, DELAY * (1 + Math.random() * 2), () => b.send("buzz", {})); }
+    else { const b = bots.find((x) => x.role === "captain" && x.team === S.buzz); if (b && !pub.sent?.[S.buzz]) once(`${k}|ans|${S.buzz}`, DELAY, () => b.send("answer", { text: guess(rightFor(pub, secret, S.buzz), "standard"), k: `${pub.qid}|q` })); }
+    return;
+  }
   const only = pub.game?.only;
   for (const b of bots) {
     if (b.team == null) continue;

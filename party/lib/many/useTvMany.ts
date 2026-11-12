@@ -13,10 +13,11 @@ import { saveLobbyDraft, useLobbyShare } from "../tv/lobbyShare";
 import { cap1, type Member, type Room } from "../room";
 import { inboxMark, useInbox } from "../tv/useInbox";
 import { usePresent } from "../tv/usePresent";
-import { DISH_LAST, T_AWAY, T_LOBBY_AWAY } from "../game";
+import { DISH_LAST, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY } from "../game";
+import { SEE_TYPE } from "../see";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, captainAnswer, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
@@ -179,7 +180,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         /* the clock picks up where it was: after a sleep (or a reload, which hides the page first) from the time it
            had left; after taking the game over from another phone's copy (savedAt), less the time since that copy
            (the 4 Nov audit, 1.3: a question ran out while the game changed phones) */
-        if (s.away) { if (s.left && s.screen === "q" && !s.paused) { s.deadline = now + s.left * 1000; s.left = 0; } s.away = 0; }
+        if (s.away) { if (s.left && s.screen === "q" && !s.paused && s.buzz == null) { s.deadline = now + s.left * 1000; s.left = 0; } s.away = 0; }
         else if (raw.savedAt && s.deadline) s.deadline += Math.max(0, now - Number(raw.savedAt));
         st.current = s; void loadBank(code).then((b) => { bank.current = b; }).catch(() => {}); publish();
       }
@@ -355,6 +356,13 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const r = contestCall(s, from.team as number, Number(mv.t));
       reply(r === true ? "+" : r); publish(); return;
     }
+    /* What Do You See? (12 Nov, the owner): a captain buzzes; the picture stops while they say it and type it */
+    if (a.kind === "buzz") {
+      const r = from.role === "captain" ? buzzSee(s, from.team as number) : "Your captain buzzes.";
+      reply(r === true ? "+" : r);
+      if (r === true) playSound("soft");
+      publish(); return;
+    }
     /* captains answer; in Majority Rules everyone does */
     if (a.kind === "answer") {
       const m = miniOf(s);
@@ -365,6 +373,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
         : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G, Number(a.id) || undefined) : "Your captain answers this one.";
       reply(r === true ? "+" : r);
+      /* (What Do You See?: checked the moment it lands: the reveal, or that team out and the clock going on) */
+      if (r === true && m?.key === "see") { if (s.screen === "q") playSound("wrong"); publish(); return; }
       /* everyone answers, the Cocktail or Dish too: the faster right, the more points (the owner, 31 Oct) */
       if (r === true && allIn(s)) { reveal(s); publish(); return; }
       publishSoon(); return;
@@ -461,7 +471,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         backedUp.current = { t: 0, screen: "" };
         publish();
       } else if (document.visibilityState === "visible" && s.away) {
-        if ((s.screen === "q" || s.screen === "pick") && !s.deadline && s.left && !s.paused) { s.deadline = now + s.left * 1000; s.left = 0; }
+        if ((s.screen === "q" || s.screen === "pick") && !s.deadline && s.left && !s.paused && s.buzz == null) { s.deadline = now + s.left * 1000; s.left = 0; }
+        if (s.buzz != null && s.buzzAt) s.buzzAt += now - s.away;      // (a team that buzzed: its 10 seconds waited too)
         s.away = 0;
         publish();
       }
@@ -474,7 +485,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   useEffect(() => {
     if (!isTv) return;
     const t = setInterval(() => {
-      const s = st.current; if (!s || (s.screen !== "q" && s.screen !== "pick") || !s.deadline) return;
+      const s = st.current; if (!s) return;
+      /* What Do You See?: a buzz gets 10 seconds to say it and type it; none by then, and the team is out */
+      if (s.screen === "q" && s.buzz != null && s.buzzAt && !s.away && Date.now() - s.buzzAt >= SEE_TYPE * 1000 + T_GRACE_MS) { seeMiss(s, s.buzz, Date.now(), true); playSound("wrong"); publish(); return; }
+      if ((s.screen !== "q" && s.screen !== "pick") || !s.deadline) return;
       /* (Secret Stakes' bets: time's up, the teams that didn't bet take the safe one, and the questions go up) */
       if (Date.now() >= s.deadline) { if (s.screen === "pick") lockStakes(s, Date.now(), timers()); else reveal(s); publish(); return; }
       /* the Cocktail or Dish: the next ingredient */

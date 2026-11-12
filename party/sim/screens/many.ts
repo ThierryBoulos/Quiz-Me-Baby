@@ -43,6 +43,14 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         snap();
         if (m.key === "majority") for (const p of s.roster) { if (rng() < 0.1) continue; L.vote(s, p.name, rng() < 0.5 ? q.answer : (q.options as string[])[Math.floor(rng() * 4)]); }
         else if (m.key === "dish") { for (let t = 0; t < k && s.screen === "q"; t++) L.captainAnswer(s, t, { text: rng() < 0.4 ? String(q.answer) : "Atlantis" }); }
+        /* What Do You See? (the buzzer): a first team buzzes (the picture stops) and gets it wrong (out, the clock goes
+           on); a second buzzes, and more often than not gets it right */
+        else if (m.key === "see") {
+          const a = Math.floor(rng() * k), b = (a + 1) % k;
+          now += 3000; L.buzzSee(s, a, now); now += 2000; snap(".buzz");
+          L.captainAnswer(s, a, { text: "Atlantis" }, undefined, now); now += 1000; snap(".out");
+          if (s.screen === "q") { now += 1000; L.buzzSee(s, b, now); now += 2000; L.captainAnswer(s, b, { text: rng() < 0.6 ? String(q.answer) : "Atlantis" }, undefined, now); }
+        }
         else for (let t = 0; t < k; t++) {
           if (rng() < 0.1) continue;
           if (L.typedKey(m.key)) L.captainAnswer(s, t, { text: rng() < 0.5 ? String(m.key === "map" ? q.question : m.key === "roulette" ? q.ch?.[q.draw?.[t]]?.q?.answer ?? "Paris" : m.key === "stakes" ? L.skQm(s, t)?.answer ?? "Paris" : q.answer) : "Atlantis" }, undefined, now + 1500 + t * 900);

@@ -158,9 +158,10 @@ function rules(pub: PubMany): string[] {
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
       "One guess per team. A wrong guess puts you out of that one.", fast, pay];
     /* What Do You See? (12 Nov, the owner): scored as the Cocktail or Dish is here */
-    /* (the wrong guess said once, as the Cocktail or Dish says it: "Wrong, nothing." is in the points line, 12 Nov) */
-    case "see": return ["A picture goes up, blurred or zoomed right in, and gets clearer as the clock runs: a famous face, a logo, or a close-up. Captains type who or what it is.",
-      "One guess per team. A wrong guess puts you out of that picture.", fast, pay];
+    /* (12 Nov, the owner: a buzzer, said out loud and typed; one team gets a picture, and scores what a 1st place does) */
+    case "see": return ["A picture goes up, blurred or zoomed right in, and gets clearer as the clock runs: a famous face, a logo, or a close-up.",
+      "Know it? Captain, hit BUZZ: the picture stops, and you have 10 seconds to say it out loud and type it.",
+      `Right, and you score ${k} points. Wrong, and you're out of this picture: the clock goes on and another team can buzz.`, pay];
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
     /* (shorter; the bullet is no secret now: everyone sees who drew it once the barrel stops, 11 Nov, the owner) */
     case "roulette": return ["The barrel spins: every team lands on a chamber, with its theme and level. Captains type the answer.",

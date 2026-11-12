@@ -50,46 +50,45 @@
 68.00 roundScore | 23 | 3-5 |  | Owls +2 points | 
 68.75 seeIntro | 24 | 3-5 | 0-0 | Owls +2 points | 
 69.75 seeQ | 25 | 3-5 | 0-0 | Owls +2 points | 
-70.50 seeReveal | 25 | 3-5 | 1-0 | Owls +2 points | 
-71.50 seeQ | 26 | 3-5 | 1-0 | Lions take picture 1. | 
-73.25 seeReveal | 26 | 3-5 | 2-0 | Lions take picture 1. | 
-74.25 seeReveal | 26 | 3-5 | 2-0 |  | 
-75.00 seeReveal | 26 | 3-5 | 1-0 | Call changed: ⁨Lions⁩ WRONG. | 
-76.00 seeQ | 27 | 3-5 | 1-0 | The call changed: a new picture for both teams. | 
-77.00 seeQ | 27 | 3-5 | 1-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-77.75 seeReveal | 27 | 3-5 | 1-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-78.75 seeReveal | 27 | 3-5 | 1-0 |  | 
-79.50 seeReveal | 27 | 3-5 | 1-1 | Call changed: ⁨Owls⁩ RIGHT. | 
-80.50 seeQ | 28 | 3-5 | 1-1 | Owls take picture 2. | 
-81.50 seeReveal | 28 | 3-5 | 2-1 | Owls take picture 2. | 
-82.25 seeQ | 29 | 3-5 | 2-1 | Lions take picture 3. | 
-83.25 seeQ | 29 | 3-5 | 2-1 | ⁨Lions⁩ guessed wrong: out of this picture. | 
-86.00 seeReveal | 29 | 3-5 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. | 
-86.75 seeQ | 30 | 3-5 | 2-2 | Owls take picture 4. | 
-88.50 seeQ | 30 | 3-5 | 2-2 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-90.50 seeReveal | 30 | 3-5 | 2-2 | ⁨Owls⁩ guessed wrong: out of this picture. | 
-91.25 seeReveal | 30 | 3-5 | 2-2 |  | 
-92.25 seeReveal | 30 | 3-5 | 3-2 | Call changed: ⁨Lions⁩ RIGHT. | 
-93.00 seeQ | 31 | 3-5 | 3-2 | Lions take picture 5. | 
-95.00 seeQ | 31 | 3-5 | 3-2 | ⁨Lions⁩ guessed wrong: out of this picture. | 
-95.75 seeReveal | 31 | 3-5 | 3-3 | ⁨Lions⁩ guessed wrong: out of this picture. | 
-96.75 seeQ | 32 | 3-5 | 3-3 | Owls take picture 6. | 
-97.50 seeQ | 32 | 3-5 | 3-3 | ⁨Lions⁩ guessed wrong: out of this picture. | 
-98.50 seeReveal | 32 | 3-5 | 3-3 | ⁨Lions⁩ guessed wrong: out of this picture. | 
-99.50 seeReveal | 32 | 3-5 | 3-3 |  | 
-103.00 seeReveal | 32 | 3-5 | 3-3 | ⁨Rami⁩ doesn't agree: the call stands. | 
-104.00 seeTie | 33 | 3-5 | 3-3 |  | 
-104.75 seeSummary | 34 | 4-6 | 3-3 |  | 
-105.75 roundIntro | 35 | 4-6 |  |  | 
-107.50 ask | 36 | 4-6 |  |  | 
-108.50 answer | 36 | 5-6 |  | Lions +1 point | 
-109.25 ask | 37 | 5-6 |  | Lions +1 point | 
-110.25 answer | 37 | 5-7 |  | Owls +1 point | 
-111.00 answer | 37 | 5-7 |  |  | 
-113.00 steal | 38 | 5-6 |  | Lions steal a new question. | 
-113.75 answer | 38 | 6-6 |  | Lions +1 point — steal | 
-114.75 roundScore | 39 | 6-6 |  | Lions +1 point — steal | 
-115.50 sudden | 40 | 6-6 |  | Lions +1 point — steal | 
-116.50 sudden | 41 | 6-6 |  | Lions +1 point — steal | 
-117.50 final | 41 | 7-6 |  | Lions +1 point — steal | 
-recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[1,0],"minis":[0,1],"best":{"title":"Guess the Flag","team":1,"legs":[3,6]},"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[3,3],[3,5],[4,6],[5,6],[5,7],[5,6],[6,6],[7,6]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,3]]},{"label":"R3","pts":[[3,5]]},{"label":"What Do You See?","pts":[[4,6]]},{"label":"R4","pts":[[5,6],[5,7],[5,6],[6,6]]},{"label":"Sudden death","pts":[[7,6]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0},{"t":"Best thief","who":"Lions, 1 steal","team":0}]}
+71.50 seeQ | 25 | 3-5 | 0-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+74.25 seeReveal | 25 | 3-5 | 0-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+75.00 seeQ | 26 | 3-5 | 0-0 | Nobody got it. | 
+77.00 seeQ | 26 | 3-5 | 0-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+79.50 seeReveal | 26 | 3-5 | 0-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+80.50 seeReveal | 26 | 3-5 | 0-0 |  | 
+81.50 seeReveal | 26 | 3-5 | 0-1 | Call changed: ⁨Owls⁩ RIGHT. | 
+82.25 seeQ | 27 | 3-5 | 0-1 | Owls take picture 2. | 
+88.50 seeQ | 27 | 3-5 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+91.25 seeReveal | 27 | 3-5 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+92.25 seeReveal | 27 | 3-5 | 0-1 |  | 
+93.00 seeReveal | 27 | 3-5 | 0-2 | Call changed: ⁨Owls⁩ RIGHT. | 
+94.00 seeQ | 28 | 3-5 | 0-2 | Owls take picture 3. | 
+95.75 seeQ | 28 | 3-5 | 0-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+97.50 seeReveal | 28 | 3-5 | 0-3 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+98.50 seeQ | 29 | 3-5 | 0-3 | Owls take picture 4. | 
+101.25 seeQ | 29 | 3-5 | 0-3 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+104.00 seeReveal | 29 | 3-5 | 0-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+104.75 seeReveal | 29 | 3-5 | 0-4 |  | 
+108.50 seeReveal | 29 | 3-5 | 0-4 | ⁨Lea⁩ doesn't agree: the call stands. | 
+109.25 decided | 30 | 3-7 | 0-4 |  | 
+110.25 seeQ | 31 | 3-7 | 0-4 |  | 
+112.00 seeQ | 31 | 3-7 | 0-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+115.50 seeReveal | 31 | 3-7 | 0-5 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+116.50 seeReveal | 31 | 3-7 | 0-5 |  | 
+117.50 seeReveal | 31 | 3-7 | 1-4 | Call changed: ⁨Lions⁩ RIGHT. | 
+118.25 seeQ | 32 | 3-7 | 1-4 | Lions take picture 6. | 
+122.00 seeQ | 32 | 3-7 | 1-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+123.75 seeReveal | 32 | 3-7 | 1-5 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+124.50 seeReveal | 32 | 3-7 | 1-5 |  | 
+127.25 seeReveal | 32 | 3-7 | 1-5 | ⁨Lea⁩ doesn't agree: the call stands. | 
+128.25 seeSummary | 33 | 3-7 | 1-5 | Owls take picture 7. | 
+129.00 roundIntro | 34 | 3-7 |  | Owls take picture 7. | 
+130.00 ask | 35 | 3-7 |  | Owls take picture 7. | 
+131.00 answer | 35 | 4-7 |  | Lions +1 point | 
+131.75 answer | 35 | 4-7 |  |  | 
+146.75 answer | 35 | 4-7 |  | No answer in time: the call stands. | 
+147.00 ask | 36 | 4-7 |  | No answer in time: the call stands. | 
+148.00 answer | 36 | 4-8 |  | Owls +1 point | 
+149.00 roundScore | 37 | 4-8 |  | Owls +1 point | 
+149.75 final | 38 | 4-8 |  | Owls +1 point | 
+recap: {"margin":4,"sudden":false,"leadChanges":1,"steals":[0,0],"minis":[0,1],"best":{"title":"Guess the Flag","team":1,"legs":[3,6]},"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[3,3],[3,5],[3,7],[4,7],[4,8]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,3]]},{"label":"R3","pts":[[3,5]]},{"label":"What Do You See?","pts":[[3,7]]},{"label":"R4","pts":[[4,7],[4,8]]}],"awards":[]}

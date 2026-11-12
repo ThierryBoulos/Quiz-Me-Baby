@@ -163,7 +163,9 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   sign. Each file from Wikimedia Commons (a logo Commons hasn't got: its English Wikipedia file page, credited to the
   brand), its author and licence in `party/public/see/CREDITS.md`. Levels Easy, Medium, Hard, about a third each in
   every kind; when unsure, one level easier. Accepted answers: short names and usual spellings ("Messi", "CR7",
-  "McDonalds"), never a different thing ("iPhone" isn't Apple). A picture that is already an answer elsewhere (a
+  "McDonalds"), never a different thing ("iPhone" isn't Apple): since 12 Nov the team that buzzes says its answer
+  out loud and types it, and the app checks what's typed, so a usual spelling left out is a right answer called
+  wrong in front of the room. A picture that is already an answer elsewhere (a
   dish in Guess the Cocktail or Dish, a landmark in Drop the Pin) gets a never-together group. The catalogue is
   `const SEES` in `classic.html`; after a change run `node party/scripts/fetch-sees.mjs` (it skips the files it has).
 - **Flags**: only flags whose name isn't written on the flag.

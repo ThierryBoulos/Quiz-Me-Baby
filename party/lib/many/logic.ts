@@ -73,7 +73,11 @@ export type StateM = {
   why: (string | null)[];                       // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
   shown: number;                                // the Cocktail or Dish: the ingredients up so far
   at: (number | null)[]; seq: number;           // the order this leg's answers came in (Flags: the fastest right first)
-  ms?: (number | null)[];                       // What Do You See?: how far into the picture's clock each guess came (ms)
+  ms?: (number | null)[];                       // What Do You See?: how far into the picture's clock each team buzzed (ms)
+  /* What Do You See? (12 Nov, the owner: a buzzer): the team that buzzed, while it answers (the clock stopped, in
+     left); when it buzzed (10 seconds to say it out loud and type it); and the teams out of this picture (a wrong
+     answer, or none in time) */
+  buzz?: number | null; buzzAt?: number; out?: boolean[];
   ok: (boolean | null)[];                       // this leg's call per team (the app's, then the host's)
   roster: { name: string; team: number }[];     // Majority Rules: who plays (fixed at its start)
   votes: Record<string, string>;
@@ -134,6 +138,7 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
    the game's deck, with a fresh clock). The same controls as with two teams (the 4 Nov audit, 3.11) */
 export function pause(s: StateM, now: number): boolean {
   if (s.screen !== "q" && s.screen !== "pick") return false;
+  if (s.buzz != null) return false;               // (a team that buzzed is answering: the clock is stopped for it already)
   if (!s.paused) { if (!s.deadline) return false; s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; s.paused = true; return true; }
   s.deadline = now + s.left * 1000; s.left = 0; s.paused = false; return true;
 }
@@ -148,6 +153,7 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   if (!m || s.screen !== "q" || m.key === "sudden") return false;
   /* (Majority Rules: a vote counts, not a team with nobody on the list) */
   if ((m.key === "majority" ? false : answered(s).some(Boolean)) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
+  if (m.key === "see" && (s.buzz != null || s.out?.some(Boolean))) return "Too late: someone has already had a go at this one.";
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;
 }
@@ -159,7 +165,7 @@ export function lineup(rounds: number, games: ManyKey[]): ManyKey[] {
   for (let r = 0; r < rounds; r++) out.push("quiz", ...games.slice(r * per, (r + 1) * per));
   return out;
 }
-const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.ms = Array(k).fill(null); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; s.mapHint = false; };
+const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.ms = Array(k).fill(null); s.buzz = null; s.buzzAt = 0; s.out = Array(k).fill(false); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; s.mapHint = false; };
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
 
 /* the host taps Start on a game's intro: its first question */
@@ -239,11 +245,16 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
   const m = miniOf(s); if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
   if (m.only && !m.only.includes(team)) return "Only the teams tied at the top answer this one.";
   if (typedKey(m.key)) {
+    /* What Do You See? (the buzzer): only the team that buzzed answers */
+    if (m.key === "see") {
+      if (s.out?.[team]) return "Your team is out of this picture.";
+      if (s.buzz !== team) return s.buzz == null ? "Buzz first, then say it and type it." : `${s.teams[s.buzz].name} buzzed first.`;
+    }
     if (s.typed[team] != null) return m.key === "dish" || m.key === "see" ? "Your team has had its guess at this one." : "Your answer is in.";
     const text = String(p.text ?? "").trim().slice(0, 80); if (!text) return "Type an answer first.";
     s.typed[team] = text; s.at[team] = order ?? ++s.seq;
-    /* (What Do You See?: and how far into the picture's clock it came, to say how fast) */
-    if (m.key === "see") (s.ms ||= Array(s.teams.length).fill(null))[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline ? s.deadline - now : s.left * 1000))));
+    /* (the app checks it at once: right, and the picture ends, the reveal; wrong, and the team is out) */
+    if (m.key === "see") { const q = qOf(s); if (q && rightOf("see", text, q)) reveal(s); else seeMiss(s, team, now); }
     return true;
   }
   if (m.key === "closest") {
@@ -258,6 +269,27 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
     s.pins[team] = { lat: Number(q.lat), lon: Number(q.lon) }; s.at[team] = order ?? ++s.seq; return true;
   }
   return "Everyone answers this one on their own phone.";
+}
+/* What Do You See? (12 Nov, the owner: a buzzer): a captain buzzes. The first one in stops the picture where it is,
+   and has 10 seconds to say it out loud and type it */
+export function buzzSee(s: StateM, team: number, now = Date.now()): true | string {
+  const m = miniOf(s); if (!m || m.key !== "see" || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
+  if (s.paused) return "The game is paused.";
+  if (s.out?.[team]) return "Your team is out of this picture.";
+  if (s.buzz != null) return s.buzz === team ? true : `${s.teams[s.buzz].name} buzzed first.`;
+  if (!s.deadline) return "Not now.";
+  (s.ms ||= Array(s.teams.length).fill(null))[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline - now))));
+  s.left = Math.max(0.05, (s.deadline - now) / 1000); s.deadline = null;
+  s.buzz = team; s.buzzAt = now;
+  return true;
+}
+/* ...and got it wrong, or said nothing in its 10 seconds (late): the team is out of this picture. Every team out, it's
+   the reveal; else the clock goes on from where the buzz stopped it, and the others can buzz */
+export function seeMiss(s: StateM, team: number, now: number, late = false) {
+  (s.out ||= Array(s.teams.length).fill(false))[team] = true; s.buzz = null; s.buzzAt = 0;
+  if (s.out.every(Boolean)) { reveal(s); return; }
+  toast(s, late ? `Time's up. ${s.teams[team].name} are out of this picture.` : `${s.teams[team].name} guessed wrong: out of this picture.`);
+  if (!s.away) { s.deadline = now + s.left * 1000; s.left = 0; }   // (the game phone asleep: the clock starts when it's back)
 }
 /* Majority Rules: every player on the list taps one of the four (one each) */
 export function vote(s: StateM, name: string, pick: unknown): true | string {
@@ -283,7 +315,7 @@ export function reveal(s: StateM) {
   else if (m.key === "stakes") s.ok = s.typed.map((x, t) => (x == null ? false : !!matchQ([x], skQm(s, t))));     // (each team the question it bet on)
   else if (typedKey(m.key)) s.ok = s.typed.map((x) => (x == null ? false : rightOf(m.key, x, q)));
   if (m.key === "dish") s.shown = (q.ings || []).length;
-  s.contest = null; s.contested = [];
+  s.contest = null; s.contested = []; s.buzz = null; s.buzzAt = 0;
   s.screen = "reveal"; s.deadline = null; s.left = 0; s.paused = false; s.step++; return true;
 }
 /* Don't Say the Same, with many teams (the plan's idea 5): an answer scores if it's on the prompt's list, isn't the

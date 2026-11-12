@@ -145,7 +145,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     if ((p.screen === "ask" || p.screen === "steal") && !p.sent?.[t]) send(who, "answer", { texts: ["Paris"] });
     else if (p.screen === "dishQ" && p.buzz == null) send(capOf(0) || who, "buzz", {});
     else if (["sudden", "battleTie"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && !p.out?.[k] && capOf(k)) send(capOf(k), "answer", { text: "Paris" }); }
-    else if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ", "seeQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
+    else if (p.screen === "seeQ") { const k = [0, 1].find((x) => !p.out?.[x] && capOf(x)); if (p.buzz == null) { if (k != null) send(capOf(k), "buzz", {}); } else if (!p.sent?.[p.buzz] && capOf(p.buzz)) send(capOf(p.buzz), "answer", { text: "France" }); }
+    else if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
     else if (p.screen === "pinQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { pin: { lat: 48.85, lon: 2.35 } }); }
     else if (p.screen === "miniQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { n: "50" }); }
     else if (p.pending && capOf(1 - p.pending.team)) send(capOf(1 - p.pending.team), "next", { move: { type: "ui/rule", v: true }, step: p.step });
@@ -216,7 +217,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
          Majority Rules (any player's phone), words elsewhere; BUZZ where there's a buzzer */
       if (r < 0.3) send(who, "answer", pub.screen === "miniQ" ? { n: "12" } : pub.screen === "pinQ" ? { pin: bot() < 0.2 ? { lat: 91, lon: "x" } : { lat: bot() * 140 - 70, lon: bot() * 360 - 180 } }
         : pub.screen === "majorityQ" ? { pick: bot() < 0.2 ? "Not an answer" : (pub.majority?.options || ["x"])[Math.floor(bot() * 4)] || "x", k: bot() < 0.2 ? "old|majorityQ" : `${pub.qid}|majorityQ` } : { texts: ["Paris"] });
-      else if (r < 0.45) { if (["dishQ", "sudden", "battleTie"].includes(pub.screen)) send(who, "buzz", {}); }
+      else if (r < 0.45) { if (["dishQ", "seeQ", "sudden", "battleTie"].includes(pub.screen)) send(who, "buzz", {}); }
       else if (r < 0.6) send(who, "lifeline", { key: ["dbl", "friend", "dip"][Math.floor(bot() * 3)] });
       else { const type = MOVES[Math.floor(bot() * MOVES.length)];
         send(who, "next", { move: { type, v: bot() < 0.5, n: 3, t: bot() < 0.5 ? 0 : 1, name: FOLK[Math.floor(bot() * FOLK.length)],
@@ -243,7 +244,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     if (slow && bot() < slow) {
       const sc = pub.screen;
       if (["ask", "steal", "miniQ", "flagQ", "seeQ", "mapQ", "sayQ", "pinQ", "airportQ", "battleQ", "dishQ"].includes(sc) && bot() < 0.08) {
-        const t = sc === "battleQ" ? pub.battle?.cap : sc === "dishQ" ? pub.buzz : sc === "ask" || sc === "steal" ? pub.turn : bot() < 0.5 ? 0 : 1;
+        const t = sc === "battleQ" ? pub.battle?.cap : sc === "dishQ" || sc === "seeQ" ? pub.buzz : sc === "ask" || sc === "steal" ? pub.turn : bot() < 0.5 ? 0 : 1;
         if (t != null && !pub.sent?.[t] && capOf(t)) fake.insert("actions", { room: CODE, user_id: capOf(t), kind: "draft", payload: { k: `${pub.qid}|${sc}`, ...(sc === "miniQ" ? { n: "12" } : sc === "pinQ" ? { pin: pinNear(g, bot) } : { texts: [bot() < 0.5 ? answerNow(g, pub) || "Paris" : "xyz"] }) } });
       }
       continue;
@@ -379,11 +380,13 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       for (const t of [0, 1]) if (!pub.sent?.[t]) send(C(t), "answer", { text: guess(right) });
       if (host && pub.sent?.[0] && pub.sent?.[1]) next(0, "ui/reveal");
     }
-    /* What Do You See?: each captain guesses when the picture's clear enough for them (a few ticks in, or never: the
-       clock runs out), tagged as a real phone tags it; a wrong guess puts that team out of the picture */
+    /* What Do You See? (12 Nov, the owner: a buzzer): a captain buzzes when the picture's clear enough for them (a few
+       ticks in, or never: the clock runs out), then types it, tagged as a real phone tags it (now and then not in its
+       10 seconds: out). A wrong answer puts that team out of the picture, and the other can buzz */
     else if (sc === "seeQ") {
-      for (const t of [0, 1]) if (!pub.sent?.[t] && C(t) && bot() < 0.3) send(C(t), "answer", { text: guess(right), k: `${pub.qid}|seeQ` });
-      if (host && pub.sent?.[0] && pub.sent?.[1]) next(0, "ui/reveal");
+      if (pub.buzz == null) { const t = pub.out?.[0] ? 1 : pub.out?.[1] ? 0 : bot() < 0.5 ? 0 : 1;
+        if (!pub.out?.[t] && C(t) && bot() < 0.3) { send(C(t), "buzz", {}); if (simul && !pub.out?.[1 - t] && C(1 - t)) send(C(1 - t), "buzz", {}); } }
+      else if (!pub.sent?.[pub.buzz] && C(pub.buzz) && bot() < 0.9) send(C(pub.buzz), "answer", { text: guess(right), k: `${pub.qid}|seeQ` });
     }
     /* Russian Roulette: each captain its own chamber's question (sent too soon, while the barrel spins, it's refused
        and goes again next tick) */

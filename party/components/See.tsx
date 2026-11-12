@@ -6,7 +6,7 @@
    and no easing (the picture still clears: it is the game). The blur is a share of the picture's width, so a phone
    and the TV look the same. */
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { tvNow } from "./Clock";
+import { Clock, tvNow } from "./Clock";
 import { motionOff } from "./Marquee";
 import { seeBlur, seeGone, seeSecs, seeStep, seeZoom, type SePub } from "@/lib/see";
 
@@ -59,9 +59,9 @@ export function seeWho(see: SePub, teams: SeeTeam[], right?: number): { text: st
   return { text: `${teams[r.who]?.name ?? ""} got it ${(right ?? 0) > 1 ? "first, " : ""}in ${seeSecs(r.ms)}`, color: teams[r.who]?.color ?? "var(--color-gold)" };
 }
 
-/* every team's state while the picture clears: thinking, a guess in (with three or more, nobody knows if it's right
-   until the reveal), or with two teams, out (a wrong guess: the app says so at once) */
-export function SeeTicks({ teams, sent, out, size = 22, column }: { teams: SeeTeam[]; sent: boolean[]; out?: boolean[]; size?: number; column?: boolean }) {
+/* every team's state while the picture clears: thinking, buzzed (it has its 10 seconds), or out of this picture (a
+   wrong answer, or none in time: everyone heard it) */
+export function SeeTicks({ teams, out, buzz, size = 22, column }: { teams: SeeTeam[]; out?: boolean[]; buzz?: number | null; size?: number; column?: boolean }) {
   const many = teams.length > 2;
   return (
     <div className={"flex flex-wrap justify-center " + (column ? "flex-col items-center gap-1" : many ? "gap-x-5 gap-y-2" : "gap-x-10 gap-y-2")} role="status" aria-live="polite">
@@ -69,24 +69,33 @@ export function SeeTicks({ teams, sent, out, size = 22, column }: { teams: SeeTe
         <span key={i} className="flex items-center gap-2 font-bold" style={{ fontSize: size }}>
           <span className="dot ltr shrink-0" aria-hidden style={{ background: t.color, width: size * 1.25, height: size * 1.25, fontSize: size * 0.7 }}>{t.letter}</span>
           {!many && <bdi style={{ color: t.color }}>{t.name}</bdi>}
-          <span style={{ color: out?.[i] ? NO : sent[i] ? OK : "var(--color-ink-3)" }}>{out?.[i] ? "✗ out" : sent[i] ? "✓ in" : "thinking…"}</span>
+          <span style={{ color: out?.[i] ? NO : buzz === i ? OK : "var(--color-ink-3)" }}>{out?.[i] ? "✗ out" : buzz === i ? "buzzed!" : many ? "…" : "thinking…"}</span>
         </span>))}
     </div>);
 }
 
 /* ---- the TV, two teams ---- */
-export function SeeTv({ see, screen, teams, clock, sent, deadline, left, rows }: {
-  see: SePub; screen: "seeQ" | "seeReveal"; teams: SeeTeam[]; clock?: ReactNode; sent: boolean[]; deadline?: number | null; left?: number; rows?: ReactNode }) {
-  if (screen === "seeQ") return (
+export function SeeTv({ see, screen, teams, clock, deadline, left, rows }: {
+  see: SePub; screen: "seeQ" | "seeReveal"; teams: SeeTeam[]; clock?: ReactNode; deadline?: number | null; left?: number; rows?: ReactNode }) {
+  /* (12 Nov, the owner: a buzzer. A buzz stops the picture where it is; the team that buzzed says it out loud and
+     types it, with its own 10 seconds on the clock) */
+  if (screen === "seeQ") { const b = see.buzz != null ? teams[see.buzz] : null; return (
     <div className="flex gap-12 items-center w-full justify-center">
       <div className="flex-1 min-w-0 flex justify-center"><SeePicture see={see} deadline={deadline} left={left} w={720} big /></div>
       <div className="w-[360px] shrink-0 flex flex-col items-center gap-5">
-        <div className="display text-44 leading-tight" style={{ color: "var(--color-gold)" }}>What do you see?</div>
-        {clock}
-        <SeeTicks teams={teams} sent={sent} out={see.out} column />
-        <div className="text-20 text-[var(--color-ink-2)] leading-snug">One guess each. Wrong, and you&rsquo;re out of this picture.</div>
+        {b ? (<>
+          <div className="display text-44 leading-tight text-balance" role="status" style={{ color: b.color }}><bdi>{b.name}</bdi> buzzed!</div>
+          {see.typeBy ? <Clock deadline={see.typeBy} size={130} /> : clock}
+          <div className="text-24 font-bold leading-snug text-balance">Say it out loud, and type it!</div>
+        </>) : (<>
+          <div className="display text-44 leading-tight" style={{ color: "var(--color-gold)" }}>What do you see?</div>
+          {clock}
+          <div className="text-24 font-bold leading-snug">Know it? Buzz!</div>
+        </>)}
+        <SeeTicks teams={teams} out={see.out} buzz={see.buzz} column />
+        <div className="text-20 text-[var(--color-ink-2)] leading-snug text-balance">{b ? "Wrong, and you’re out of this picture." : "Buzz, say it out loud and type it. Wrong, and you’re out of this picture."}</div>
       </div>
-    </div>);
+    </div>); }
   const who = seeWho(see, teams), A = see.rev?.answer || "";
   return (
     <div className="flex gap-12 items-center w-full justify-center">
