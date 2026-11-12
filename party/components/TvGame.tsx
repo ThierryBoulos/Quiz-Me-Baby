@@ -376,7 +376,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if ((sc === "seeQ" || sc === "seeReveal") && pub.see) return (
     <SeeTv see={pub.see} screen={sc} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))}
       sent={pub.sent || [false, false]} deadline={pub.deadline} left={pub.left}
-      clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} rows={<TeamRows pub={pub} empty="No guess" small />} />);
+      clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} rows={<TeamRows pub={pub} empty="No answer" small />} />);
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (<>
     <FlagImg name={pub.flag} h={sc === "flagQ" ? 300 : 220} maxW={520} />
     {sc === "flagQ" ? (<><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} /><Sent pub={pub} /></>) : (<>

@@ -192,9 +192,10 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
         {/* What Do You See?: the whole picture and what it is, who got it first and how fast, then every team's guess */}
-        {pub.screen === "reveal" && g && R && g.key === "see" && pub.see && (() => { const who = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))); return (<>
-          <div className="grid items-center gap-10 w-full max-w-[1160px]" style={{ gridTemplateColumns: `${dense ? 380 : 460}px minmax(0, 1fr)` }}>
-            <div className="flex flex-col items-center gap-1 min-w-0"><SeePicture see={pub.see} clear w={dense ? 380 : 460} big alt={R.answer} /><SeeCredit see={pub.see} size={14} /></div>
+        {pub.screen === "reveal" && g && R && g.key === "see" && pub.see && (() => { const who = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] })), R.winners?.length); return (<>
+          {/* (the picture and what it is side by side, in the middle: 12 Nov) */}
+          <div className="grid items-center justify-center gap-12 w-full max-w-[1160px]" style={{ gridTemplateColumns: `${dense ? 400 : 480}px minmax(0, 600px)` }}>
+            <div className="flex flex-col items-center gap-1 min-w-0"><SeePicture see={pub.see} clear w={dense ? 400 : 480} big alt={R.answer} /><SeeCredit see={pub.see} size={dense ? 13 : 14} /></div>
             <div className="flex flex-col items-center gap-3 min-w-0">
               <div className="eyebrow text-18">It&rsquo;s</div>
               <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: (R.answer || "").length > 22 ? (dense ? 40 : 48) : dense ? 56 : 70, color: "var(--color-gold)" }}>{R.answer}</div>

@@ -203,7 +203,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       <AnswerLine question={["quiz", "say", "majority", "sudden"].includes(g.key) ? pub.question : null}
         media={g.key === "flag" ? <FlagImg name={pub.flag} h={96} />
           : g.key === "see" && pub.see ? <div className="flex flex-col items-center gap-1"><SeePicture see={pub.see} clear w={240} alt={R.answer} /><SeeCredit see={pub.see} size={11} />
-            {(() => { const w = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))); return <span className="display text-18" style={{ color: w.color }}>{w.text}</span>; })()}</div>
+            {(() => { const w = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] })), R.winners?.length); return <span className="display text-18" style={{ color: w.color }}>{w.text}</span>; })()}</div>
           : g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={180} legend={false} />
           : g.key === "pin" && R.at ? <div className="w-full"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
             ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
@@ -365,7 +365,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
                 onPick={(nv) => { if ((flips[`${pub.qid}|${i}`] ?? v) === nv) return; setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i }); }} /></div>}
             </div>); })}</div></>
         ) : <Table />}
-        {g.key !== "majority" && g.key !== "stakes" && <Big text={W.text} color={W.color} />}
+        {/* (the picture says who got it first, under the picture: not twice) */}
+        {g.key !== "majority" && g.key !== "stakes" && g.key !== "see" && <Big text={W.text} color={W.color} />}
         <ContestMany pub={pub} mine={null} host busy={busy} act={(mv) => { const { type, ...x } = mv; move(String(type), x); }} />
         {/* (Next waits for the ruling, as with two teams) */}
         {pub.contest ? <p className="text-center text-13 text-[var(--color-ink-3)] mt-auto" role="status">Next comes back once you&rsquo;ve ruled on the contest.</p>
@@ -462,7 +463,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             {np.hint}
             {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
           </div>)
-          : <Line>Your captain answers this one.</Line>}
+          /* (once the captain has sent it, say so: 12 Nov) */
+          : <Line>{mine != null && pub.sent[mine] ? <>Locked in. The answer comes up when the time&rsquo;s up.</> : "Your captain answers this one."}</Line>}
       </>)}
 
       {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}

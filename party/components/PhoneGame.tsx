@@ -244,7 +244,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="text-13 text-[var(--color-ink-2)] mt-1">Tap Right or Wrong for what they say.</div>
     </div>) : secret.answer ? (
     <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
-      <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answer. Only you see this</div>
+      <div className="eyebrow text-balance" style={{ color: "var(--color-gold)" }}>The answer. Only you see this</div>
       <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{secret.answer}</div>
       {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
       {(secret.accept?.length ?? 0) > 0 && <div className="text-13 text-[var(--color-ink-2)] mt-1"><b className="text-[var(--color-ink)]">Also accepted:</b> {secret.accept!.join(", ")}</div>}
@@ -438,7 +438,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="flex flex-col gap-3 flex-1">
         <OnScreen pub={pub} small />
         <Result pub={pub} host headOnly />
-        <Rulings type="ui/seeOk" empty="No guess" />
+        <Rulings type="ui/seeOk" empty="No answer" />
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
       </div>);
@@ -1006,7 +1006,10 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
     {/* What Do You See?: the picture, clearing from the TV's clock; at the reveal the whole of it, and its credit */}
     {(pub.screen === "seeQ" || pub.screen === "seeReveal") && pub.see && <ToSide when={side} order={4} className="noselect" {...noCopy}><div className="flex flex-col items-center gap-1">
       <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} clear={pub.screen === "seeReveal"} w={pub.screen === "seeReveal" ? (small ? 180 : 240) : small ? 220 : 340} alt={pub.see.rev?.answer} />
-      {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}</div></ToSide>}
+      {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}
+      {/* the other team out (the TV's note, which no phone shows: with no TV, nobody would know they can wait for it to clear) */}
+      {pub.screen === "seeQ" && mine != null && pub.see.out?.[mine === 0 ? 1 : 0] && <p className="text-14 font-semibold text-center leading-snug" style={{ color: "var(--color-no)" }}>
+        <bdi>{pub.teams[mine === 0 ? 1 : 0].name}</bdi> guessed wrong: out of this picture.</p>}</div></ToSide>}
     {pub.screen === "pinQ" && <ToSide when={side} order={4} className="noselect" {...noCopy}>{small
       /* the captain's phone: the photo beside the clock, so the map gets the room */
       ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
@@ -1095,15 +1098,17 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   if (/Intro$/.test(pub.screen) && pub.mini) return <MiniIntro pub={pub} size="phone" />;
   if (RESULT.test(pub.screen)) return null;            // the result says it
   /* on a question, the question (or flag, or map) is the thing to look at: the instruction steps back */
-  const quiet = QUIET.includes(pub.screen) && !pub.paused;
+  /* (out of a picture: said plainly, in red, not stepped back) */
+  const quiet = QUIET.includes(pub.screen) && !pub.paused && !(pub.screen === "seeQ" && me.team != null && pub.see?.out?.[me.team]);
   /* your move now (gold) or stay out of it (grey), so "Type it fast!" and "Not a word!" can't be mixed up (3 Nov) */
   const tone = statusTone(pub, me);
   return <p className={"text-center text-balance leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite"
-    style={!quiet && tone ? { color: tone === "go" ? "var(--color-gold)" : "var(--color-ink-3)" } : undefined}>{status(pub, me, noTv)}</p>;
+    style={!quiet && tone ? { color: tone === "go" ? "var(--color-gold)" : tone === "no" ? "var(--color-no)" : "var(--color-ink-3)" } : undefined}>{status(pub, me, noTv)}</p>;
 }
-function statusTone(pub: Pub, me: Member): "go" | "hush" | null {
+function statusTone(pub: Pub, me: Member): "go" | "hush" | "no" | null {
   const mine = me.team, cap = me.role === "captain", sc = pub.screen;
   if (pub.lifeline || pub.paused) return null;
+  if (sc === "seeQ" && mine != null && pub.see?.out?.[mine]) return "no";
   if (sc === "battleQ") return cap && pub.battle?.cap === mine ? "go" : "hush";
   if (sc === "battleTie" || sc === "sudden") return cap ? "go" : "hush";
   if (sc === "dishQ" && cap && pub.buzz === mine && !pub.sent?.[mine as 0 | 1]) return "go";
@@ -1475,8 +1480,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <PinMap value={pinAt} onChange={setPinAt} color={TEAM_HEX[mine]} height="min(520px, max(300px, calc(100dvh - 460px)))" />
           <button className="btn btn-gold btn-lg btn-block dock" disabled={busy || !pinAt} onClick={() => void sendPin()}>Lock in</button>
         </div>)}
-      {!canType && sentHere && (["miniQ", "flagQ", "seeQ", "mapQ", "sayQ", "pinQ", "airportQ", "stakesQ"].includes(sc) || (myTurn && !pub.pending) || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending)) && (
-        <p className="text-center font-bold text-16" role="status">{sc === "seeQ" ? "Your guess" : "Locked in"}{sentTxt && sc !== "pinQ" ? `: ${sentTxt}` : ""}.</p>)}
+      {!canType && sentHere && !(sc === "seeQ" && pub.see?.out?.[mine]) && (["miniQ", "flagQ", "seeQ", "mapQ", "sayQ", "pinQ", "airportQ", "stakesQ"].includes(sc) || (myTurn && !pub.pending) || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending)) && (
+        <p className="text-center font-bold text-16" role="status">Locked in{sentTxt && sc !== "pinQ" ? `: ${sentTxt}` : ""}.</p>)}
       {sc === "pinQ" && sentHere && pinAt && <PinMap value={pinAt} color={TEAM_HEX[mine]} height="min(40vh, 340px)" label="Your pin" />}
 
       {/* the lifelines: everyone sees them; the captain whose question it is taps */}

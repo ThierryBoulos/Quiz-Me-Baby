@@ -52,10 +52,11 @@ export const SeeCredit = ({ see, size = 13 }: { see: SePub; size?: number }) => 
   <div className="see-credit" style={{ fontSize: size }}>Picture: <bdi>{see.rev.credit}</bdi> · {see.rev.licence} · Wikimedia Commons</div>) : null;
 
 /* the line under the answer: who took it, and how fast */
-export function seeWho(see: SePub, teams: SeeTeam[]): { text: string; color: string } {
+/* right: how many teams got it (3 to 8: the fastest is named, "first" when others got it too) */
+export function seeWho(see: SePub, teams: SeeTeam[], right?: number): { text: string; color: string } {
   const r = see.rev;
   if (!r || r.who == null) return { text: "Nobody got it", color: "var(--color-ink-2)" };
-  return { text: `${teams[r.who]?.name ?? ""} got it in ${seeSecs(r.ms)}`, color: teams[r.who]?.color ?? "var(--color-gold)" };
+  return { text: `${teams[r.who]?.name ?? ""} got it ${(right ?? 0) > 1 ? "first, " : ""}in ${seeSecs(r.ms)}`, color: teams[r.who]?.color ?? "var(--color-gold)" };
 }
 
 /* every team's state while the picture clears: thinking, a guess in (with three or more, nobody knows if it's right

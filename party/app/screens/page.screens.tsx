@@ -17,6 +17,7 @@ import { Hud } from "@/components/GameParts";
 import { HudMany } from "@/components/many/PartsMany";
 import { NoTv } from "@/components/NoTv";
 import { TvLobby } from "@/components/LobbyTv";
+import { SideSlot, useSideways } from "@/components/Side";
 
 const JOIN = { url: "https://quizmebaby.app/join/ABCD", code: "ABCD" };
 /* the night was played on a clock of its own: move its times to now, so clocks and animations run as they did */
@@ -32,6 +33,8 @@ export default function Screens() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [rec, setRec] = useState<any>(null);
   const [mode, setMode] = useState<string[]>([]);
+  /* a phone held sideways: the left column takes the picture, the clock and the question, as in a room (app/room) */
+  const sideways = useSideways(), [sideSlot, setSideSlot] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     const h = decodeURIComponent(location.hash.slice(1)).split(":");
     setMode(h);
@@ -73,13 +76,16 @@ export default function Screens() {
             <span className="eyebrow whitespace-nowrap">ABCD</span>
           </header>
           {many ? <HudMany pub={pub} size="phone" me={me.team} host={role === "host"} /> : <Hud pub={pub} size="phone" />}
+          {sideways && <div className="side-slot" ref={setSideSlot} />}
         </div>
+        <SideSlot.Provider value={sideways ? sideSlot : null}>
         <div className="main">
           {many ? <PhoneMany pub={pub} me={me} code="ABCD" members={members} />
             : role === "host" ? <HostGame pub={pub} secret={secret} send={send} busy={false} />
             : role === "cap" ? <CaptainGame pub={pub} me={me} members={members} code="ABCD" />
             : <PlayerGame pub={pub} me={me} members={members} code="ABCD" />}
         </div>
+        </SideSlot.Provider>
       </main>
     </NoTv.Provider>
   );
