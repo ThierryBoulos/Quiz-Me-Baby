@@ -1293,7 +1293,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   /* What Do You See?: the clearing picture as big as the screen's height allows (right column), the clear one at the
      reveal small (left column, or above the 3-8 results), so neither is cut off under the scores (12 Nov) */
   .screen.split .main .see-frame:not(.clear) { max-width: min(100%, calc((100svh - 120px) * 4 / 3)); }
-  .screen.split .see-frame.clear { max-width: min(100%, calc((100svh - 250px) * 4 / 3)); }
+  .screen.split .see-frame.clear { max-width: min(100%, calc((100svh - 272px) * 4 / 3)); }
   /* the departures board a little tighter, so the answer box under it reaches the screen */
   .screen.split .main .board .board-row { padding-block: .2em; }
   /* Drop the Pin: the clock first, then the photo (the map has the right column to itself) */
