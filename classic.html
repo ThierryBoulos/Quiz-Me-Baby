@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.62', date:'10 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.63', date:'12 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -4037,6 +4037,32 @@ const PINS = [
 ];
 
 /* --------------------------------------------------------------------------
+   WHAT DO YOU SEE? — the catalogue (Party plays it; 11 Nov 2026, the owner)
+   [key, answer, kind, level, photo, credit, licence, file page, { frame }].
+   kind: "face" and "logo" start blurred and sharpen; "close" (food, animals, objects, places) starts zoomed
+   right in and zooms out. frame: crop [x0, y0, x1, y1] (the part of the original to keep, fractions; grown to
+   4:3 around its centre), card (a logo's symbol on a plain light card), zoom [x, y, z] (a close-up's first view:
+   1/z of the picture, centred on x, y, fractions of the 4:3 picture), group (a close-up's: food, animal, object,
+   place), note (shown with the answer). The photo is ours, copied from Wikimedia Commons (a logo Commons hasn't
+   got, from English Wikipedia) under its licence, into party/public/see/ (with CREDITS.md) by
+   party/scripts/fetch-sees.mjs, under a name that doesn't say what it shows. Accepted answers: accept.json.
+   -------------------------------------------------------------------------- */
+const SEES = [
+  ["lionel-messi","Lionel Messi","face","easy","1301347d09523a76","Bryan Berlin","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Lionel_Messi_Argentina_v_Egypt_7_July_2026-112.jpg",{"crop":[0.125,0.08,0.715,0.74],"note":"Won the 2022 World Cup with Argentina."}],
+  ["zinedine-zidane","Zinedine Zidane","face","medium","6d6f2e5245efda84","Oleg Dubyna from Poltava, Ukraine","CC BY-SA 2.0","https://commons.wikimedia.org/wiki/File:Zinedine_Zidane_(41758545214).jpg",{"crop":[0.225,0.04,0.875,0.77],"note":"Won the 1998 World Cup for France, then three Champions Leagues in a row as Real Madrid's coach."}],
+  ["mohamed-salah","Mohamed Salah","face","easy","eac020dfd9b269c6","Bryan Berlin","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Mohamed_Salah_Argentina_v_Egypt_7_July_2026-163.jpg",{"crop":[0.17,0,0.79,0.7],"note":"Egypt's captain and Liverpool's star forward."}],
+  ["lebron-james","LeBron James","face","medium","7b910d41d14d2315","Erik Drost","CC BY 2.0","https://commons.wikimedia.org/wiki/File:LeBron_James_(51959977144)_(cropped2).jpg",{"crop":[0,0,1,0.62],"note":"The NBA's all-time top scorer."}],
+  ["apple","Apple","logo","easy","b6917675922be45a","Rob Janoff (original)","Public domain","https://commons.wikimedia.org/wiki/File:Apple_logo_black.svg",{"card":true,"note":"The bite was added so the apple wouldn't be mistaken for a cherry."}],
+  ["nike","Nike","logo","easy","733cc4052b7b898e","Carolyn Davidson, Nike","Public domain","https://commons.wikimedia.org/wiki/File:Logo_NIKE.svg",{"card":true,"note":"A design student drew the swoosh in 1971 for 35 dollars."}],
+  ["mcdonalds","McDonald's","logo","easy","96e152c1ba6deac9","McDonald's","Public domain","https://commons.wikimedia.org/wiki/File:McDonald%27s_Golden_Arches.svg",{"card":true,"note":"The arches began as real arches on the sides of the first restaurants."}],
+  ["starbucks","Starbucks","logo","easy","6b1dddbe5bd9bc90","Starbucks","Logo, used for identification","https://en.wikipedia.org/wiki/File:Starbucks_Corporation_Logo_2011.svg",{"card":true,"note":"The siren is a twin-tailed mermaid from an old Norse woodcut."}],
+  ["pizza","Pizza","close","easy","f20628550361fbd1","掬茶","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Pizza_Margherita_(Verde_Ischia).jpg",{"crop":[0.08,0.05,0.95,0.95],"zoom":[0.3,0.45,5],"group":"food","note":"The Margherita is said to be named after Queen Margherita of Italy, who tasted it in Naples in 1889."}],
+  ["sushi","Sushi","close","easy","5704a64e6189fedb","Tim Reckmann from Hamm, Deutschland","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Maki_Sushi_(26545027206).jpg",{"crop":[0.1,0.05,0.9,0.95],"zoom":[0.5,0.32,5],"group":"food","note":"Thin rolls like these, with one filling wrapped in nori seaweed, are called hosomaki."}],
+  ["croissant","Croissant","close","medium","1764555bb541cb91","Daniela Kloth","GFDL 1.2","https://commons.wikimedia.org/wiki/File:2018_01_Croissant_IMG_0685.JPG",{"zoom":[0.42,0.2,6],"group":"food","note":"Croissant is French for crescent, the shape it is rolled into."}],
+  ["popcorn","Popcorn","close","medium","b1b3f11fe6566c67","ViajeroExtraviado","CC0","https://commons.wikimedia.org/wiki/File:Popcorn_9.jpg",{"zoom":[0.5,0.4,5],"group":"food","note":"A kernel pops when the water inside turns to steam and bursts the hull."}]
+];
+
+/* --------------------------------------------------------------------------
    GUESS THE AIRPORT — the catalogue (Party and Classic play it)
    [code, airport, level, city, board language, board title, rows, also accepted, clues, source].
    Each row of the departure board is [time, status, destination, flight, gate]: real routes the
@@ -4341,6 +4367,12 @@ function buildSeedBank(party){
       type:'pin', difficulty:'', use_with:'', level:p[2], lat:p[3], lon:p[4], place:p[5],
       photo:p[6], credit:p[7], licence:p[8], page:p[9], src:'seed'
     }); });
+    SEES.forEach(function(p){ var f = p[8] || {}; out.push({
+      id:'see:' + p[0], question:p[1], answer:p[1], notes:f.note || '', theme:'',
+      type:'see', difficulty:'', use_with:'', level:p[3], kind:p[2], effect:p[2] === 'close' ? 'zoom' : 'blur',
+      zoom:p[2] === 'close' && f.zoom ? f.zoom.slice() : null, group:f.group || '',
+      photo:p[4], credit:p[5], licence:p[6], page:p[7], src:'seed'
+    }); });
     MAJORITY.forEach(function(m){ out.push({
       id:'mr:' + m[0], question:m[2], answer:m[3][m[4]], notes:m[5] || '', theme:'',
       type:'majority', difficulty:'', use_with:'', level:m[1], options:m[3].slice(), src:'seed'
@@ -4545,7 +4577,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 60;   // bumped when the built-in bank changes
+const SEED_VERSION = 61;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
@@ -4636,7 +4668,9 @@ const SEED_NEVER = [
   ["airport:JNB", "airport:CPT"],
   ["qd51735", "q1e8pvtp"],
   ["qkknimx", "q644e6o"],
-  ["qokxubj", "q1kdyyg6", "qvgb0wc"]
+  ["qokxubj", "q1kdyyg6", "qvgb0wc"],
+  ["see:pizza", "dish:pizza-margherita"],   // 12 Nov, What Do You See?: the same dish twice
+  ["see:sushi", "dish:california-roll"]   // 12 Nov, What Do You See?
 ];
 /* Seed prompts that shipped once and have since been retired outright — not
    corrected, removed. This is different from `killed`: `killed` is the HOST

@@ -156,6 +156,16 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
 - **Question rounds running short** (11 Nov, the owner): a round keeps its theme. Unplayed at its level first, then
   unplayed one level easier, then one harder, then played ones; never two levels away, never another theme. Setup
   warns when a picked theme can't fill its round at the level picked.
+- **What Do You See?** (11 and 12 Nov, the owner): pictures in three kinds, mixed in one game: **faces** (famous
+  people: one person, face clear, a recent well-known look, in their public role), **logos** (the symbol only, on a
+  plain light card, never the wordmark) and **close-ups** (food, animals, objects, places: the zoomed-in start a real
+  puzzle, the whole picture unmistakable). Nothing in a picture spells the answer: no name on a shirt, a caption, a
+  sign. Each file from Wikimedia Commons (a logo Commons hasn't got: its English Wikipedia file page, credited to the
+  brand), its author and licence in `party/public/see/CREDITS.md`. Levels Easy, Medium, Hard, about a third each in
+  every kind; when unsure, one level easier. Accepted answers: short names and usual spellings ("Messi", "CR7",
+  "McDonalds"), never a different thing ("iPhone" isn't Apple). A picture that is already an answer elsewhere (a
+  dish in Guess the Cocktail or Dish, a landmark in Drop the Pin) gets a never-together group. The catalogue is
+  `const SEES` in `classic.html`; after a change run `node party/scripts/fetch-sees.mjs` (it skips the files it has).
 - **Flags**: only flags whose name isn't written on the flag.
 - **Know the Host**: only with a host; wording leaves one answer ("secondary school").
 
@@ -167,6 +177,6 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
 - Map ideas (`mapKeys`) are keyed by the map's **answer text**: change the answer, move the key.
 - After any bank change: bump `BUILD.v` and `SEED_VERSION` in `classic.html` and `version.json`; run
   `node scripts/export-bank.js`; after a map change also `node scripts/export-maps.js`; after new pins
-  `node party/scripts/fetch-pins.mjs`; then `cd party && npm test` (refresh goldens with `node sim/run.mjs --update`
+  `node party/scripts/fetch-pins.mjs`; after new pictures `node party/scripts/fetch-sees.mjs`; then `cd party && npm test` (refresh goldens with `node sim/run.mjs --update`
   and `node sim/many.mjs --update` only when the change is meant to alter the deal).
 - Commit; push only when the owner says "push".

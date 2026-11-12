@@ -20,14 +20,14 @@ const HOST_ONLY = new Set([...readFileSync(join(root, "party/lib/engine.ts"), "u
 const QMB = require(join(root, "engine/core.js"));
 const bank = JSON.parse(readFileSync(join(root, "party/data/bank.json"), "utf8"));
 const accept = existsSync(join(root, "party/data/accept.json")) ? JSON.parse(readFileSync(join(root, "party/data/accept.json"), "utf8")) : { byId: {}, byAnswer: {} };
-const flagsDir = join(root, "party/public/flags"), mapsDir = join(root, "party/public/maps"), pinsDir = join(root, "party/public/pins");
+const flagsDir = join(root, "party/public/flags"), mapsDir = join(root, "party/public/maps"), pinsDir = join(root, "party/public/pins"), seeDir = join(root, "party/public/see");
 
 const errors = [], warns = [];
 const err = (id, msg) => errors.push(`${id}: ${msg}`);
 const warn = (id, msg) => warns.push(`${id}: ${msg}`);
 const tidy = QMB.tidy;
 
-const DIFF = ["easy", "medium", "hard", "expert"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority"];
+const DIFF = ["easy", "medium", "hard", "expert"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority", "see"];
 const VOLATILE = /\b(most|latest|current|currently|record|to date|as of|best-selling|most-streamed|most-viewed|most-subscribed|most liked|most-watched|set to host|still)\b/i;
 const APOSTROPHE = /\b(Ross|Monica|Chandler|Phoebe|Joey|Rachel|Mickey|Simba|Spider-Man|Batman|YouTube|dog|Arab world)\s+(profession|pet|twin|most famous|job|daughter|twins|official|uncle|real name|parents|view counter)\b/;
 
@@ -70,6 +70,19 @@ for (const q of bank.bank) {
     if (!q.place) err(id, "pin needs its place (\"city, country\")");
     if (!q.credit || !q.licence || !/^https:\/\/commons\.wikimedia\.org\//.test(q.page || "")) err(id, "pin photo needs its credit, licence and Commons page");
     for (const f of [q.photo + ".jpg", q.photo + "-s.jpg"]) if (!existsSync(join(pinsDir, f))) err(id, `pin photo missing: pins/${f}`);
+  }
+  if (q.type === "see") {
+    /* What Do You See? (12 Nov): its two files, a level, a kind; a close-up's zoom starts on a point inside the picture */
+    if (!QMB.SEE_ORDER.includes(q.level)) err(id, `picture level ${q.level} (easy, medium or hard)`);
+    if (!QMB.SEE_KINDS.includes(q.kind)) err(id, `picture kind ${q.kind} (face, logo or close)`);
+    if (q.effect !== (q.kind === "close" ? "zoom" : "blur")) err(id, `a ${q.kind} ${q.kind === "close" ? "zooms" : "blurs"}, got ${q.effect}`);
+    if (q.kind === "close") {
+      const z = q.zoom || [];
+      if (!(z[0] >= 0 && z[0] <= 1 && z[1] >= 0 && z[1] <= 1)) err(id, `zoom focus must be inside the picture, got ${z[0]}, ${z[1]}`);
+      if (!(z[2] >= 4 && z[2] <= 8)) err(id, `zoom must start 4 to 8 times, got ${z[2]}`);
+    }
+    if (!q.credit || !q.licence || !/^https:\/\/(commons|en)\.wikipedia\.org\/|^https:\/\/commons\.wikimedia\.org\//.test(q.page || "")) err(id, "picture needs its credit, licence and Wikimedia page");
+    for (const f of [q.photo + ".jpg", q.photo + "-s.jpg"]) if (!existsSync(join(seeDir, f))) err(id, `picture missing: see/${f}`);
   }
   if (q.type === "airport") {
     if (!DIFF.includes(q.level)) err(id, `airport level ${q.level}`);
