@@ -21,6 +21,8 @@ export async function dumpTwo(load) {
       /* What Do You See? (the buzzer): a team has buzzed (the picture stopped, its 10 seconds running); a team is out */
       if (pub.screen === "seeQ" && pub.buzz != null) k = k.replace(".paused", "") + ".buzz";
       else if (pub.screen === "seeQ" && pub.out?.some(Boolean)) k += ".out";
+      /* ...and its reveal both ways: a team got it, nobody did */
+      if (pub.screen === "seeReveal" && pub.see?.rev) k += pub.see.rev.who != null ? ".won" : ".none";
       if (pub.screen === "rouletteQ" && pub.roulette?.spinAt) { const d = now - pub.roulette.spinAt; k += d < 1800 ? ".hold" : d < 4400 ? ".turn" : ".after"; k += ".lap" + pub.roulette.lap; }
       const rec = { pub: JSON.parse(JSON.stringify(pub)), secret: secret ? JSON.parse(JSON.stringify(secret)) : null, now };
       if (!got[k + ".a"]) got[k + ".a"] = rec; else got[k + ".z"] = rec;

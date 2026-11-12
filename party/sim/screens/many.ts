@@ -11,7 +11,9 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
   const got: Record<string, unknown> = {};
   const T = { sudden: 60, quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 45, stakes: 45, stakesPick: 20, see: 20 };
   const longNames = ["The Quizzical Owls", "Lions", "Brainy Bunch", "Team D", "Smarty Pants", "Les Gros Malins", "Quizteama Aguilera", "Agatha Quiztie"];
-  for (const [k, seed] of [[3, 1], [5, 2], [8, 3]] as const) {
+  /* (SCREENS_TEAMS=4,8: other team counts than the usual 3, 5 and 8, e.g. for pictures of a room of four) */
+  const asked = (process.env.SCREENS_TEAMS || "").split(",").map(Number).filter((n) => Number.isInteger(n) && n >= 3 && n <= 8);
+  for (const [k, seed] of (asked.length ? asked.map((n) => [n, n] as const) : [[3, 1], [5, 2], [8, 3]] as const)) {
     let sd = seed * 7919; const rng = () => ((sd = (Math.imul(sd, 1664525) + 1013904223) >>> 0) / 4294967296);
     const dealer = QMB.createDealer({ bank: () => bank.bank, used: () => new Set(), noRepeat: () => true, rng, never: () => bank.never || [],
       ok: { map: (q: Q) => q.type === "map", flag: (q: Q) => q.type === "flag", dish: (q: Q) => q.type === "dish", pin: (q: Q) => q.type === "pin" && Number.isFinite(q.lat) && !!q.photo,
@@ -44,12 +46,14 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         if (m.key === "majority") for (const p of s.roster) { if (rng() < 0.1) continue; L.vote(s, p.name, rng() < 0.5 ? q.answer : (q.options as string[])[Math.floor(rng() * 4)]); }
         else if (m.key === "dish") { for (let t = 0; t < k && s.screen === "q"; t++) L.captainAnswer(s, t, { text: rng() < 0.4 ? String(q.answer) : "Atlantis" }); }
         /* What Do You See? (the buzzer): a first team buzzes (the picture stops) and gets it wrong (out, the clock goes
-           on); a second buzzes, and more often than not gets it right */
+           on); a second buzzes, and two times in three gets it right */
         else if (m.key === "see") {
-          const a = Math.floor(rng() * k), b = (a + 1) % k;
+          /* (the first to buzz is the team the phones in these pictures are on, Maya its player: its captain's phone
+             shows the answer box, then "out of this picture") */
+          const a = 0, b = 1 + Math.floor(rng() * (k - 1));
           now += 3000; L.buzzSee(s, a, now, "Maya"); now += 2000; snap(".buzz");
           L.captainAnswer(s, a, { text: "Atlantis" }, undefined, now); now += 1000; snap(".out");
-          if (s.screen === "q") { now += 1000; L.buzzSee(s, b, now, "Karim"); now += 2000; L.captainAnswer(s, b, { text: rng() < 0.6 ? String(q.answer) : "Atlantis" }, undefined, now); }
+          if (s.screen === "q") { now += 1000; L.buzzSee(s, b, now, "Karim"); now += 2000; L.captainAnswer(s, b, { text: m.i % 3 !== 1 ? String(q.answer) : "Atlantis" }, undefined, now); }   // (two pictures in three are got, the first and the last among them)
         }
         else for (let t = 0; t < k; t++) {
           if (rng() < 0.1) continue;

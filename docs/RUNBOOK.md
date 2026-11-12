@@ -115,4 +115,5 @@ or set them on Vercel as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KE
   and nothing it opens can reach the internet. Since 12 Nov a phone held sideways is drawn
   with its left column as in a room, and anything below that column's bottom edge is listed
   as `SIDE` (that column scrolls with no bar, so a player doesn't see it); only the sideways
-  phone: `SCREENS_PHONES=sideways npm run screens -- phones`.
+  phone: `SCREENS_PHONES=sideways npm run screens -- phones`. Other team counts than 3, 5 and 8
+  (pictures of a room of four): `SCREENS_TEAMS=4,8 npm run screens -- tv`.
