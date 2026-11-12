@@ -158,11 +158,24 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   warns when a picked theme can't fill its round at the level picked.
 - **What Do You See?** (11 and 12 Nov, the owner): pictures in three kinds, mixed in one game: **faces** (famous
   people: one person, face clear, a recent well-known look, in their public role), **logos** (the symbol only, on a
-  plain light card, never the wordmark) and **close-ups** (food, animals, objects, places: the zoomed-in start a real
+  plain light card, never the wordmark) and **close-ups** (food, animals, objects: the zoomed-in start a real
   puzzle, the whole picture unmistakable). Nothing in a picture spells the answer: no name on a shirt, a caption, a
   sign. Each file from Wikimedia Commons (a logo Commons hasn't got: its English Wikipedia file page, credited to the
   brand), its author and licence in `party/public/see/CREDITS.md`. Levels Easy, Medium, Hard, about a third each in
-  every kind; when unsure, one level easier. Accepted answers: short names and usual spellings ("Messi", "CR7",
+  every kind; when unsure, one level easier. The owner's review (12 Nov):
+  - **No places** at all: no landmarks, cities, buildings or views (Drop the Pin has those).
+  - **Levels are strict.** Easy: nearly everyone at a party gets it once it's clear. Medium: about half the room.
+    Hard: only a few, even clear. Round 1 was "fairly easy, maximum medium": every Hard in it went to Medium, and the
+    most famous Mediums to Easy. Most new pictures should be Hard or Medium.
+  - **Faces beyond entertainment and sport**: people from history, science, tech and the arts (Cleopatra, Darwin,
+    Marie Curie, Churchill). With no photograph, their best-known portrait (a painting, a bust, a statue), with
+    nothing written that names them.
+  - **Logos are a brand's own symbol, drawn clean on the card**: not a photo of a badge (Porsche, Lamborghini, Peugeot,
+    Michelin were left out), not a superhero's sign (Batman, Superman) nor the Olympic rings. A letter monogram (LV,
+    GG) is fine.
+  - Left out too: coffee beans, a guitar, a keyboard (close-ups); pizza, sushi and watermelon wait for better photos.
+    "Mozilla" counts for Firefox, "Key lock" for a padlock.
+  Accepted answers: short names and usual spellings ("Messi", "CR7",
   "McDonalds"), never a different thing ("iPhone" isn't Apple): since 12 Nov the team that buzzes says its answer
   out loud and types it, and the app checks what's typed, so a usual spelling left out is a right answer called
   wrong in front of the room. A picture that is already an answer elsewhere (a
