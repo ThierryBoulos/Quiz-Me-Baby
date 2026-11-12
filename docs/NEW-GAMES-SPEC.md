@@ -100,13 +100,14 @@ The owner's name (key `see`). One picture at a time, unreadable at first and cle
 ### B1. Rules (the same in every setup unless said)
 
 > **Changed 12 Nov (the owner): it's a buzzer game.** Rules 3 and 4 below are as first built; this is how it plays
-> now, in every setup. The captain hits BUZZ: the picture and its clock stop where they are, and the team has 10
-> seconds to **say the answer out loud and type it** (the app checks what's typed, so nobody has to judge; with a
-> host, they can still change the call at the reveal). Right: the picture is theirs and it ends. Wrong, or nothing
+> now, in every setup. **Anyone on a team hits BUZZ** (the players too; the TV says who): the picture and its clock
+> stop where they are, and the team has 10 seconds, fixed, to **say the answer out loud while its captain types it**
+> (the app checks what's typed, so nobody has to judge; with a host, they can still change the call at the reveal). Right: the picture is theirs and it ends. Wrong, or nothing
 > typed in the 10 seconds: that team is out of this picture, the clock goes on and another team can buzz. Everyone
 > out, or the clock run out: nobody gets it. 2 teams: best of 7, as before. 3 to 8 teams: one team gets a picture
 > and scores what a 1st place scores there (as many points as there are teams), so teams level on pictures share a
-> place, as in every 3 to 8 game. The 10 seconds are `SEE_TYPE` in `party/lib/see.ts`.
+> place, as in every 3 to 8 game. The 10 seconds are `SEE_TYPE` in `party/lib/see.ts`. Guess the Cocktail or Dish
+> keeps its own system with 3 to 8 teams (every team types, the faster right answer scores more): the owner, 12 Nov.
 
 1. **One game, three kinds of picture mixed together**, no choosing between them in Setup:
    - **Faces** (famous people) and **Logos**: start blurred and sharpen.

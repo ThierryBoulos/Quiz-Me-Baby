@@ -3,30 +3,27 @@
 1.25 seeIntro | 1 | 0-0 | 0-0 |  | 
 5.00 seeIntro | 2 | 0-0 | 0-0 |  | 
 6.75 seeQ | 3 | 0-0 | 0-0 |  | 
-10.25 seeQ | 3 | 0-0 | 0-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+10.25 seeReveal | 3 | 0-0 | 1-0 |  | 
+11.25 seeQ | 4 | 0-0 | 1-0 | Lions take picture 1. | 
 (the TV reloads)
-12.85 seeQ | 3 | 0-0 | 0-0 |  | 
-15.85 seeReveal | 3 | 0-0 | 0-1 |  | 
-16.85 seeQ | 4 | 0-0 | 0-1 | Owls take picture 1. | 
-21.35 seeQ | 4 | 0-0 | 0-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
-23.10 seeReveal | 4 | 0-0 | 0-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
-24.10 seeQ | 5 | 0-0 | 0-1 | Nobody got it. | 
-28.60 seeReveal | 5 | 0-0 | 1-1 | Nobody got it. | 
-29.35 seeQ | 6 | 0-0 | 1-1 | Lions take picture 3. | 
-34.85 seeReveal | 6 | 0-0 | 2-1 | Lions take picture 3. | 
+12.85 seeQ | 4 | 0-0 | 1-0 |  | 
+15.10 seeReveal | 4 | 0-0 | 1-1 |  | 
+15.85 seeQ | 5 | 0-0 | 1-1 | Owls take picture 2. | 
+20.35 seeQ | 5 | 0-0 | 1-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+22.10 seeReveal | 5 | 0-0 | 1-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+23.10 seeQ | 6 | 0-0 | 1-1 | Nobody got it. | 
+26.60 seeQ | 6 | 0-0 | 1-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+34.85 seeReveal | 6 | 0-0 | 2-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
 35.60 seeQ | 7 | 0-0 | 2-1 | Lions take picture 4. | 
 37.60 seeQ | 7 | 0-0 | 2-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
-42.10 seeReveal | 7 | 0-0 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
-42.85 seeReveal | 7 | 0-0 | 2-2 |  | 
-43.85 seeReveal | 7 | 0-0 | 2-1 | Call changed: ⁨Owls⁩ WRONG. | 
-44.60 seeQ | 8 | 0-0 | 2-1 | Nobody got it. | 
-46.60 seeReveal | 8 | 0-0 | 3-1 | Nobody got it. | 
-47.35 decided | 9 | 2-0 | 3-1 |  | 
-48.35 seeQ | 10 | 2-0 | 3-1 |  | 
-51.10 seeQ | 10 | 2-0 | 3-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
-54.60 seeReveal | 10 | 2-0 | 3-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
-55.60 seeReveal | 10 | 2-0 | 3-2 |  | 
-56.35 seeReveal | 10 | 2-0 | 3-1 | Call changed: ⁨Owls⁩ WRONG. | 
-57.35 seeSummary | 11 | 2-0 | 3-1 | Nobody got it. | 
-58.10 final | 12 | 2-0 |  | Nobody got it. | 
+41.10 seeReveal | 7 | 0-0 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+42.10 seeReveal | 7 | 0-0 | 2-2 |  | 
+42.85 seeReveal | 7 | 0-0 | 2-1 | Call changed: ⁨Owls⁩ WRONG. | 
+43.85 seeQ | 8 | 0-0 | 2-1 | Nobody got it. | 
+45.60 seeQ | 8 | 0-0 | 2-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+49.10 seeReveal | 8 | 0-0 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+50.10 seeQ | 9 | 0-0 | 2-2 | Owls take picture 6. | 
+52.85 seeReveal | 9 | 0-0 | 3-2 | Owls take picture 6. | 
+53.60 seeSummary | 10 | 2-0 | 3-2 | Lions take picture 7. | 
+54.60 final | 11 | 2-0 |  | Lions take picture 7. | 
 recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[2,0]],"segs":[{"label":"What Do You See?","pts":[[2,0]]}],"awards":[]}

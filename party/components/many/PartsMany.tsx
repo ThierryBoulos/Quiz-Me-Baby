@@ -160,7 +160,7 @@ function rules(pub: PubMany): string[] {
     /* What Do You See? (12 Nov, the owner): scored as the Cocktail or Dish is here */
     /* (12 Nov, the owner: a buzzer, said out loud and typed; one team gets a picture, and scores what a 1st place does) */
     case "see": return ["A picture goes up, blurred or zoomed right in, and gets clearer as the clock runs: a famous face, a logo, or a close-up.",
-      "Know it? Captain, hit BUZZ: the picture stops, and you have 10 seconds to say it out loud and type it.",
+      "Know it? Hit BUZZ: anyone on the team can. The picture stops, and you have 10 seconds to say it out loud while your captain types it.",
       `Right, and you score ${k} points. Wrong, and you're out of this picture: the clock goes on and another team can buzz.`, pay];
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
     /* (shorter; the bullet is no secret now: everyone sees who drew it once the barrel stops, 11 Nov, the owner) */

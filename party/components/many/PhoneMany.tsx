@@ -139,6 +139,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const [buzzed, setBuzzed] = useState(false);
   const seeKey = `${pub.qid}|${pub.see?.buzz ?? ""}|${(pub.see?.out || []).join("")}|${got ?? ""}`;
   useEffect(() => { setBuzzed(false); }, [seeKey]);
+  /* ...and a teammate's buzz is felt on the captain's phone: it's the one that types the answer */
+  const seeTeam = cap && mine != null && pub.see?.buzz === mine;
+  useEffect(() => { if (seeTeam) { try { navigator.vibrate?.([60, 40, 60]); } catch { /* not supported */ } } }, [seeTeam]);
   const send = async (kind: string, payload: Record<string, unknown>) => {
     setBusy(true); setErr(null);
     try { setLastTap(await sendAction(code, kind, { ...payload, step: pub.step })); return true; } catch { setErr(noTv ? "That didn't go through. Try again." : "That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
@@ -340,7 +343,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who has answered">
             <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered`
               /* (What Do You See?: the buzzer: who buzzed and is saying it and typing it, or nobody yet) */
-              : g.key === "see" ? (pub.see?.buzz != null ? <><bdi>{T[pub.see.buzz]?.name}</bdi> buzzed: saying it out loud, and typing it</> : "Waiting for a buzz…") : `${n} of ${who.length} teams answered`}</p>
+              : g.key === "see" ? (pub.see?.buzz != null ? <><bdi>{T[pub.see.buzz]?.name}</bdi> buzzed{pub.see.by ? <> (<bdi>{pub.see.by}</bdi>)</> : null}: saying it out loud, and typing it</> : "Waiting for a buzz…") : `${n} of ${who.length} teams answered`}</p>
             <div className={"who-grid grid gap-x-3 gap-y-1 " + (T.some((t) => t.name.length > 8) ? "grid-cols-1" : "grid-cols-2")}>
               {who.map((i) => { const out = (secret.out ?? pub.out)?.[i], t = T[i], bz = g.key === "see" && pub.see?.buzz === i, on = bz || (pub.sent[i] && !out); return (
                 <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] || bz ? t.color : "var(--color-ink-3)" }}>
@@ -439,7 +442,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             answer (or none in time) and the team is out of this picture, and another team can buzz */}
         {g.key === "see" ? (() => { const S = pub.see, out = mine != null && !!S?.out?.[mine], bz = S?.buzz ?? null, me2 = bz != null && bz === mine, col = mine != null ? T[mine].color : undefined; return (<>
           <p className="text-center font-bold text-18 text-balance" role="status" style={{ color: out ? "var(--color-no)" : me2 ? "var(--color-gold)" : bz != null ? "var(--color-ink-3)" : undefined }}>
-            {out ? (sentMine ? "Wrong. You’re out of this picture." : "Time’s up. You’re out of this picture.") : me2 ? (sentMine || sentTxt ? "Answer sent. The app checks it." : "You buzzed! Say it out loud and type it.")
+            {out ? (sentMine ? "Wrong. You’re out of this picture." : "Time’s up. You’re out of this picture.") : me2 ? (sentMine || sentTxt ? "Answer sent. The app checks it." : <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud and type it.</>)
               : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
           {!out && bz == null && (buzzed
             ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
@@ -487,10 +490,17 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       </>)}
       {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && (<>
         <OnScreen />
-        {/* What Do You See?: who buzzed, and whether your team is out of this picture */}
-        {g.key === "see" && mine != null && (pub.see?.out?.[mine] || pub.see?.buzz != null) && (
-          <p className="text-center font-bold text-18 text-balance" role="status" style={{ color: pub.see?.out?.[mine] ? "var(--color-no)" : pub.see?.buzz === mine ? "var(--color-gold)" : "var(--color-ink-3)" }}>
-            {pub.see?.out?.[mine] ? "Your team is out of this picture." : pub.see?.buzz === mine ? "Your captain buzzed! Say it out loud!" : <><bdi>{T[pub.see!.buzz!]?.name}</bdi> buzzed</>}</p>)}
+        {/* What Do You See? (12 Nov, the owner): any player can buzz for the team (the captain types the answer); who
+            buzzed, and whether your team is out of this picture */}
+        {g.key === "see" && mine != null && (() => { const S = pub.see, out = !!S?.out?.[mine], bz = S?.buzz ?? null, col = T[mine]?.color; return (<>
+          <p className="text-center font-bold text-18 text-balance" role="status" style={{ color: out ? "var(--color-no)" : bz === mine ? "var(--color-gold)" : bz != null ? "var(--color-ink-3)" : undefined }}>
+            {out ? "Your team is out of this picture." : bz === mine ? <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud: your captain types it.</>
+              : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
+          {!out && bz == null && (buzzed
+            ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
+            : <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
+                onClick={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
+        </>); })()}
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
         {spinning || (g.key === "see" && mine != null && pub.see?.out?.[mine]) ? null : mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) ? (
           <div className="card flex flex-col gap-2">

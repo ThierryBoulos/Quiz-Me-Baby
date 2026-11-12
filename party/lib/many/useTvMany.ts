@@ -356,9 +356,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const r = contestCall(s, from.team as number, Number(mv.t));
       reply(r === true ? "+" : r); publish(); return;
     }
-    /* What Do You See? (12 Nov, the owner): a captain buzzes; the picture stops while they say it and type it */
+    /* What Do You See? (12 Nov, the owner): anyone on a team buzzes for it; the picture stops while they say it out
+       loud and their captain types it */
     if (a.kind === "buzz") {
-      const r = from.role === "captain" ? buzzSee(s, from.team as number) : "Your captain buzzes.";
+      const r = from.role !== "host" && from.team != null ? buzzSee(s, from.team as number, Date.now(), from.name) : "Only the teams buzz.";
       reply(r === true ? "+" : r);
       if (r === true) playSound("soft");
       publish(); return;

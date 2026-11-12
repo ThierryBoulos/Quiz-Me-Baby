@@ -399,7 +399,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
     /* (12 Nov, the owner: a buzzer, said out loud and typed; the app checks what's typed, so nobody has to) */
     case "see": return [
       { text: `A picture goes up, blurred or zoomed right in, and gets clearer over ${sec(t?.see, 20)}: a famous face, a logo, or a close-up.` },
-      { text: "Know it? Captain, hit BUZZ: the picture stops, and you have 10 seconds to say it out loud and type it.", warn: true },
+      { text: "Know it? Hit BUZZ: anyone on the team can. The picture stops, and you have 10 seconds to say it out loud while your captain types it.", warn: true },
       { text: "Right, and the picture is yours. Wrong, and you're out of this picture: the clock goes on and the other team can buzz." },
       { text: `The app checks what you type${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Best of ${n} takes ${pts}. ${level}` }];
     case "pin": return [

@@ -20,7 +20,7 @@ import { NightIntroTv } from "../NightIntro";
 import { ImadBubble } from "../TvGame";
 import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
-import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
+import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
 import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
@@ -115,7 +115,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
               {b ? (<>
                 <div className="display text-44 leading-tight text-balance" role="status" style={{ color: b.color }}><bdi>{b.name}</bdi> buzzed!</div>
                 {S.typeBy ? <Clock deadline={S.typeBy} size={120} /> : <Clock deadline={pub.deadline} left={pub.left} size={120} />}
-                <div className="text-24 font-bold leading-snug text-balance">Say it out loud, and type it!</div>
+                <SeeSay see={S} />
               </>) : (<>
                 <div className="display text-44 leading-tight" style={{ color: "var(--color-gold)" }}>What do you see?</div>
                 <Clock deadline={pub.deadline} left={pub.left} size={120} />

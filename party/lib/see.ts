@@ -20,6 +20,7 @@ export type SePub = {
   n: number; of: number;            // picture n of 7 (a tie-breaker goes past it)
   out?: boolean[];                  // a team that guessed wrong (or ran out of its 10 seconds): out of this picture
   buzz?: number | null;             // the team that buzzed, while it answers (the picture and its clock stopped)
+  by?: string | null;               // ...and who on that team hit BUZZ (any player can; the captain types the answer)
   typeBy?: number | null;           // ...and when its 10 seconds run out (the TV's clock)
   rev?: { answer: string; notes?: string; credit: string; licence: string; who: number | null; ms: number | null; at: (number | null)[] };
 };

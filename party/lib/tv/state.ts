@@ -63,6 +63,7 @@ export const newState = () => ({
   seeAt: [null, null] as Two<number | null>,          // What Do You See?: when each team's guess came, ms into the picture's clock
   seeOut: [false, false] as Two<boolean>,            // ...and a team whose guess was wrong: out of this picture
   seeBuzz: null as 0 | 1 | null,                     // ...and the team that buzzed, while it answers (buzzAt: when; 10 s to say it and type it)
+  seeBy: null as string | null,                      // ...and who on it hit BUZZ (12 Nov, the owner: any player can; the captain types)
   spinAt: null as number | null,                     // Russian Roulette: when this lap's barrel started spinning (the question's up SPIN_MS later)
   skipHostQ: false,                                  // a Know the Host answer, the host away 20 s: the captains may skip it
   changedIds: [] as string[],                        // the calls this question that aren't the app's any more (shown as "changed")

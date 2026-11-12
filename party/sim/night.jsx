@@ -385,7 +385,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
        10 seconds: out). A wrong answer puts that team out of the picture, and the other can buzz */
     else if (sc === "seeQ") {
       if (pub.buzz == null) { const t = pub.out?.[0] ? 1 : pub.out?.[1] ? 0 : bot() < 0.5 ? 0 : 1;
-        if (!pub.out?.[t] && C(t) && bot() < 0.3) { send(C(t), "buzz", {}); if (simul && !pub.out?.[1 - t] && C(1 - t)) send(C(1 - t), "buzz", {}); } }
+        /* (any player can buzz for the team, the captain types: now and then it's Sam, Lions' player, who buzzes) */
+        if (!pub.out?.[t] && C(t) && bot() < 0.3) { send(t === 0 && bot() < 0.4 ? "p1" : C(t), "buzz", {}); if (simul && !pub.out?.[1 - t] && C(1 - t)) send(C(1 - t), "buzz", {}); } }
       else if (!pub.sent?.[pub.buzz] && C(pub.buzz) && bot() < 0.9) send(C(pub.buzz), "answer", { text: guess(right), k: `${pub.qid}|seeQ` });
     }
     /* Russian Roulette: each captain its own chamber's question (sent too soon, while the barrel spins, it's refused

@@ -74,6 +74,10 @@ export function SeeTicks({ teams, out, buzz, size = 22, column }: { teams: SeeTe
     </div>);
 }
 
+/* what the team that buzzed does now (the TV says it to the room): whoever hit BUZZ says it, the captain types it */
+export const SeeSay = ({ see }: { see: SePub }) => (
+  <div className="text-24 font-bold leading-snug text-balance">{see.by ? <><bdi>{see.by}</bdi> buzzed. </> : null}Say it out loud! Captain, type it!</div>);
+
 /* ---- the TV, two teams ---- */
 export function SeeTv({ see, screen, teams, clock, deadline, left, rows }: {
   see: SePub; screen: "seeQ" | "seeReveal"; teams: SeeTeam[]; clock?: ReactNode; deadline?: number | null; left?: number; rows?: ReactNode }) {
@@ -86,7 +90,7 @@ export function SeeTv({ see, screen, teams, clock, deadline, left, rows }: {
         {b ? (<>
           <div className="display text-44 leading-tight text-balance" role="status" style={{ color: b.color }}><bdi>{b.name}</bdi> buzzed!</div>
           {see.typeBy ? <Clock deadline={see.typeBy} size={130} /> : clock}
-          <div className="text-24 font-bold leading-snug text-balance">Say it out loud, and type it!</div>
+          <SeeSay see={see} />
         </>) : (<>
           <div className="display text-44 leading-tight" style={{ color: "var(--color-gold)" }}>What do you see?</div>
           {clock}

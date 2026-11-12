@@ -232,7 +232,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.see = { ...sePic(q), total: s.total || getSettings().tSee, n: m.i + 1, of: m.base, out: [...s.seeOut] };
     /* (the buzzer, 12 Nov: who buzzed and until when they have to say it and type it; out, as the Cocktail or Dish) */
     if (s.screen === "seeQ") { p.buzz = s.seeBuzz; p.out = [...s.seeOut] as Two<boolean>;
-      p.see.buzz = s.seeBuzz; p.see.typeBy = s.seeBuzz != null && s.buzzAt && !s.typed[s.seeBuzz] ? s.buzzAt + SEE_TYPE * 1000 : null; }
+      p.see.buzz = s.seeBuzz; p.see.by = s.seeBuzz != null ? s.seeBy : null; p.see.typeBy = s.seeBuzz != null && s.buzzAt && !s.typed[s.seeBuzz] ? s.buzzAt + SEE_TYPE * 1000 : null; }
     if (s.screen === "seeReveal") {
       const w = seeWinner(s.ok, s.seeAt);
       p.see.rev = { answer: q.answer, notes: q.notes || undefined, credit: q.credit, licence: q.licence, who: w === "none" ? null : w, ms: w === "none" ? null : s.seeAt[w], at: [...s.seeAt] };

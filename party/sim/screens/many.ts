@@ -47,9 +47,9 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
            on); a second buzzes, and more often than not gets it right */
         else if (m.key === "see") {
           const a = Math.floor(rng() * k), b = (a + 1) % k;
-          now += 3000; L.buzzSee(s, a, now); now += 2000; snap(".buzz");
+          now += 3000; L.buzzSee(s, a, now, "Maya"); now += 2000; snap(".buzz");
           L.captainAnswer(s, a, { text: "Atlantis" }, undefined, now); now += 1000; snap(".out");
-          if (s.screen === "q") { now += 1000; L.buzzSee(s, b, now); now += 2000; L.captainAnswer(s, b, { text: rng() < 0.6 ? String(q.answer) : "Atlantis" }, undefined, now); }
+          if (s.screen === "q") { now += 1000; L.buzzSee(s, b, now, "Karim"); now += 2000; L.captainAnswer(s, b, { text: rng() < 0.6 ? String(q.answer) : "Atlantis" }, undefined, now); }
         }
         else for (let t = 0; t < k; t++) {
           if (rng() < 0.1) continue;

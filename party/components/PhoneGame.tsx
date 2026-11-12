@@ -434,7 +434,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <AnswerCard />
         {/* (the buzzer, 12 Nov: who buzzed and their 10 seconds, who is out, who can still buzz; the app checks what's typed) */}
         {([0, 1] as const).map((t) => { const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t]; return (
-          <Said key={t} t={t} text={x?.join("  /  ")} label={pub.see?.out?.[t] ? `${T[t].name}: out of this picture` : pub.buzz === t ? `${T[t].name} buzzed` : T[t].name}
+          <Said key={t} t={t} text={x?.join("  /  ")} label={pub.see?.out?.[t] ? `${T[t].name}: out of this picture` : pub.buzz === t ? `${T[t].name} buzzed${pub.see?.by ? ` (${pub.see.by})` : ""}` : T[t].name}
             empty={pub.see?.out?.[t] ? "No answer" : pub.buzz === t ? "Saying it out loud, and typing it…" : pub.buzz != null ? "Waiting" : "Can buzz"} />); })}
         {/* (no Pause while a team that buzzed is answering: the clock is stopped for it already) */}
         <div className="flex gap-2 justify-center mt-auto">{pub.buzz == null && <Pause />}<Small label="Reveal now" move={{ type: "ui/reveal" }} />{pub.buzz == null && !pub.see?.out?.some(Boolean) && <Small ghost label="Change picture" move={{ type: "see/swap" }} />}</div>
@@ -1145,9 +1145,12 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "sudden": return !pub.sudden?.ready ? "Sudden death: you're tied" : cap ? (pub.out?.[mine] ? "Wrong. You're out of this one." : pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : "Type it and send it. First right answer wins!") : "Sudden death: captains only. Not a word!";
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country?" : "Guess the Flag: help your captain";
-    case "seeQ": return pub.see?.out?.[mine] ? (!pub.sent?.[mine] ? "Time's up. You're out of this picture." : cap ? "Wrong. You're out of this picture." : "Your captain guessed wrong: out of this picture.")
-      : pub.buzz === mine ? (pub.sent?.[mine] ? "Answer sent. The app checks it." : cap ? "You buzzed! Say it out loud and type it." : "Your captain buzzed! Say it out loud!")
-      : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : cap ? "Know it? BUZZ!" : "What Do You See?: help your captain";
+    /* (12 Nov, the owner: any player can buzz, the captain types; pub.see.by: who hit BUZZ) */
+    case "seeQ": { const by = pub.see?.by, me1 = !!by && by === me.name;
+      return pub.see?.out?.[mine] ? (!pub.sent?.[mine] ? "Time's up. You're out of this picture." : cap ? "Wrong. You're out of this picture." : "Your captain guessed wrong: out of this picture.")
+      : pub.buzz === mine ? (pub.sent?.[mine] ? "Answer sent. The app checks it."
+        : cap ? `${me1 || !by ? "You" : by} buzzed! Say it out loud and type it.` : `${me1 ? "You" : by || "Your team"} buzzed! Say it out loud: your captain types it.`)
+      : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : "Know it? BUZZ!"; }
     case "pinQ": return cap ? "Where is it? Drop your pin, then lock it in." : "Drop the Pin: help your captain";
     case "airportQ": return cap ? "Which airport?" : "Guess the Airport: help your captain";
     case "rouletteQ": return cap ? "Your chamber's question. Type your answer." : "Russian Roulette: help your captain";
@@ -1197,6 +1200,12 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   };
   const callIt = (pub.screen === "battleIntro" || pub.screen === "battleHandoff") && pub.battle && pub.battle.cap === mine;
   const suggest = async () => { const t = text.trim(); if (!t) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSent(t); setText(""); } catch { /* the phone already says so; the text stays */ } };
+  /* What Do You See? (12 Nov, the owner): any player can buzz for the team; the captain types the answer. The BUZZ
+     shows at once on this phone (the TV confirms it a moment later, or says who was first) */
+  const [buzzed, setBuzzed] = useState(false);
+  const outKey = `${pub.out?.[0]}|${pub.out?.[1]}`;
+  useEffect(() => { setBuzzed(false); }, [pub.qid, pub.screen, pub.buzz, outKey]);
+  const canBuzz = pub.screen === "seeQ" && !pub.paused && pub.buzz == null && !pub.out?.[mine];
   return (
     <div className="flex flex-col gap-4 flex-1">
       {/* Majority Rules' join screen: whether you're on the list, and who's here, before the rules */}
@@ -1217,6 +1226,9 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       {/* the Battle's twenty calls, read-only, on every phone (the 4 Nov audit, 3.12: players only saw "Waiting for…") */}
       {pub.screen === "battleReview" && <Calls pub={pub} act={() => {}} />}
       <WaitingForHost pub={pub} members={members} />
+      {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }}
+        onClick={() => { buzzHand(40); setBuzzed(true); void sendAction(code, "buzz", {}).catch(() => setBuzzed(false)); }}>BUZZ</button>}
+      {canBuzz && buzzed && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
       {canSuggest && (
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
@@ -1381,6 +1393,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   /* a short buzz in the hand when it becomes your go (phones that can) */
   const yourGo = (myTurn && !locked) || (sc === "auctionBid" && A?.turn === mine) || canBuzz;
   useEffect(() => { if (yourGo) buzzHand([60, 40, 60]); }, [yourGo, pub.qid, sc]);
+  /* What Do You See?: a teammate buzzed: it's this phone that types the answer */
+  const seeMine = sc === "seeQ" && pub.buzz === mine;
+  useEffect(() => { if (seeMine) buzzHand([60, 40, 60]); }, [seeMine]);
   /* no host: Team A's captain (B's if A has none) starts and moves the night on */
   const lead = pub.lead === mine;
   /* ...and if they haven't after a while (phone in a pocket), the other captain can */

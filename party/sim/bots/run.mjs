@@ -225,8 +225,10 @@ function two(pub) {
   /* What Do You See? (12 Nov, the owner: a buzzer): a bot captain buzzes a few seconds in, then types its answer (a
      wrong one puts its team out, and the other can buzz) */
   if (sc === "seeQ") {
+    /* (any bot on a team with a bot captain may hit BUZZ: a player too; the captain types) */
     if (pub.buzz == null) { const ts = [0, 1].filter((t) => !pub.out?.[t] && botCap(t)), t = ts[Math.floor(Math.random() * ts.length)];
-      if (t != null) once(`${k}|buzz|${(pub.out || []).map(Number).join("")}`, DELAY * (1 + Math.random() * 2), () => botCap(t)?.send("buzz", {})); }
+      const team = t == null ? [] : bots.filter((b) => b.team === t && b.role !== "host"), who = team[Math.floor(Math.random() * team.length)];
+      if (who) once(`${k}|buzz|${(pub.out || []).map(Number).join("")}`, DELAY * (1 + Math.random() * 2), () => who.send("buzz", {})); }
     else answer(pub.buzz, { text: guess(right(pub.buzz), "standard"), k: `${pub.qid}|seeQ` });
     return;
   }
@@ -274,7 +276,9 @@ function many(pub) {
   if (sc !== "q") return;
   /* What Do You See? (the buzzer): one bot captain buzzes a few seconds in; the one that buzzed types its answer */
   if (key === "see") {
-    const S = pub.see || {}, caps = bots.filter((b) => b.role === "captain" && b.team != null && !S.out?.[b.team]);
+    /* (any bot on a team with a bot captain may hit BUZZ: a player too; the captain types) */
+    const capTeams = new Set(bots.filter((b) => b.role === "captain" && b.team != null).map((b) => b.team));
+    const S = pub.see || {}, caps = bots.filter((b) => b.role !== "host" && b.team != null && capTeams.has(b.team) && !S.out?.[b.team]);
     if (S.buzz == null) { const b = caps[Math.floor(Math.random() * caps.length)]; if (b) once(`${k}|buzz|${(S.out || []).map(Number).join("")}`, DELAY * (1 + Math.random() * 2), () => b.send("buzz", {})); }
     else { const b = bots.find((x) => x.role === "captain" && x.team === S.buzz); if (b && !pub.sent?.[S.buzz]) once(`${k}|ans|${S.buzz}`, DELAY, () => b.send("answer", { text: guess(rightFor(pub, secret, S.buzz), "standard"), k: `${pub.qid}|q` })); }
     return;

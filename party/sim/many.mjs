@@ -88,7 +88,9 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
           now += 1000 + Math.floor(r() * 2000);
           if (s.deadline && now >= s.deadline) break;                 // (the clock ran out first)
           if (L.captainAnswer(s, t, { text: q.answer }, undefined, now) === true) odd ||= "an answer taken with no buzz";
-          if (L.buzzSee(s, t, now) !== true) { odd ||= "a buzz refused"; continue; }
+          /* (any player on the team can buzz: every other team's is a player's, Maya's; else the captain's) */
+          if (L.buzzSee(s, t, now, t % 2 ? "Maya" : null) !== true) { odd ||= "a buzz refused"; continue; }
+          if (s.buzzBy !== (t % 2 ? "Maya" : "Cap" + t)) odd ||= "who buzzed isn't kept";
           const u = order.find((x) => x !== t && !s.out[x]);
           if (u != null && L.buzzSee(s, u, now) === true) odd ||= "a second buzz taken";
           if (s.deadline != null) odd ||= "the clock ran on during a buzz";

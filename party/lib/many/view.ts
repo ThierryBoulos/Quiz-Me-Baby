@@ -100,7 +100,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
        the teams out of this picture (everyone heard it); at the reveal, what it was and the fastest right answer */
     else if (m.key === "see") {
       pub.see = { ...sePic(q), total: s.total || 20, n: m.i + 1, of: m.qs.length, out: s.teams.map((_, t) => !!s.out?.[t]) };
-      if (!rev) { pub.see.buzz = s.buzz ?? null; pub.see.typeBy = s.buzz != null && s.buzzAt ? s.buzzAt + SEE_TYPE * 1000 : null; pub.out = pub.see.out; }
+      if (!rev) { pub.see.buzz = s.buzz ?? null; pub.see.by = s.buzz != null ? s.buzzBy ?? null : null; pub.see.typeBy = s.buzz != null && s.buzzAt ? s.buzzAt + SEE_TYPE * 1000 : null; pub.out = pub.see.out; }
       if (rev) { const pl = legPlaces(s), w = pl.indexOf(1), ms = s.ms || [];
         pub.see.rev = { answer: q.answer, notes: q.notes || undefined, credit: q.credit, licence: q.licence, who: w >= 0 ? w : null, ms: w >= 0 ? ms[w] ?? null : null, at: s.teams.map((_, t) => ms[t] ?? null) };
         pub.out = s.teams.map((_, t) => !!s.out?.[t] && !s.ok[t]); }
