@@ -1,0 +1,96 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+7.50 ask | 3 | 0-0 |  | Lions used Double Dip. | 
+8.50 answer | 3 | 1-0 |  | Lions +1 point | 
+9.50 answer | 3 | 1-0 |  |  | 
+11.25 answer | 3 | 1-0 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+12.00 ask | 4 | 1-0 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+13.00 steal | 4 | 1-0 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+14.00 answer | 4 | 2-0 |  | Lions +1 point — steal | 
+14.75 roundScore | 5 | 2-0 |  | Lions +1 point — steal | 
+15.75 roundIntro | 6 | 2-0 |  | Lions +1 point — steal | 
+16.50 ask | 7 | 2-0 |  | Lions +1 point — steal | 
+17.50 answer | 7 | 3-0 |  | Lions +1 point | 
+18.50 ask | 8 | 3-0 |  | Lions +1 point | 
+19.25 answer | 8 | 3-1 |  | Owls +1 point | 
+20.25 roundScore | 9 | 3-1 |  | Owls +1 point | 
+21.00 flagIntro | 10 | 3-1 | 0-0 | Owls +1 point | 
+22.00 flagQ | 11 | 3-1 | 0-0 | Owls +1 point | 
+23.00 flagReveal | 11 | 3-1 | 1-1 | Owls +1 point | 
+23.75 flagQ | 12 | 3-1 | 1-1 | Both got it — a point each. | 
+24.75 flagReveal | 12 | 3-1 | 1-1 | Both got it — a point each. | 
+25.50 flagQ | 13 | 3-1 | 1-1 | Nobody got it. | 
+26.50 flagReveal | 13 | 3-1 | 1-1 | Nobody got it. | 
+27.50 flagReveal | 13 | 3-1 | 1-1 |  | 
+32.00 flagReveal | 13 | 3-1 | 1-2 | Call changed: ⁨Owls⁩ RIGHT. | 
+32.75 flagQ | 14 | 3-1 | 1-2 | Owls take flag 3. | 
+33.75 flagReveal | 14 | 3-1 | 1-2 | Owls take flag 3. | 
+34.50 flagQ | 15 | 3-1 | 1-2 | Nobody got it. | 
+35.50 flagReveal | 15 | 3-1 | 1-3 | Nobody got it. | 
+36.50 flagReveal | 15 | 3-1 | 1-3 |  | 
+51.50 flagReveal | 15 | 3-1 | 1-3 | No answer in time: the call stands. | 
+51.75 flagQ | 16 | 3-1 | 1-3 | Owls take flag 5. | 
+52.50 flagReveal | 16 | 3-1 | 1-3 | Owls take flag 5. | 
+53.50 flagReveal | 16 | 3-1 | 1-3 |  | 
+68.50 flagReveal | 16 | 3-1 | 1-3 | No answer in time: the call stands. | 
+68.75 flagQ | 17 | 3-1 | 1-3 | Nobody got it. | 
+69.75 flagReveal | 17 | 3-1 | 1-4 | Nobody got it. | 
+70.50 flagQ | 18 | 3-1 | 1-4 | Owls take flag 7. | 
+71.50 flagReveal | 18 | 3-1 | 1-4 | Owls take flag 7. | 
+72.50 flagReveal | 18 | 3-1 | 1-4 |  | 
+73.25 flagReveal | 18 | 3-1 | 2-4 | Call changed: ⁨Lions⁩ RIGHT. | 
+74.25 flagQ | 19 | 3-1 | 2-4 | Lions take flag 8. | 
+75.00 flagReveal | 19 | 3-1 | 2-4 | Lions take flag 8. | 
+76.00 decided | 20 | 3-3 | 2-4 |  | 
+77.00 roundIntro | 21 | 3-3 |  |  | 
+77.75 ask | 22 | 3-3 |  |  | 
+78.75 steal | 22 | 3-3 |  |  | 
+79.50 answer | 22 | 3-4 |  | Owls +1 point — steal | 
+80.50 ask | 23 | 3-4 |  | Owls +1 point — steal | 
+81.50 steal | 23 | 3-4 |  | Owls +1 point — steal | 
+82.25 answer | 23 | 3-4 |  | Owls +1 point — steal | 
+83.25 roundScore | 24 | 3-4 |  | Owls +1 point — steal | 
+84.00 roundIntro | 25 | 3-4 |  | Owls +1 point — steal | 
+86.00 ask | 26 | 3-4 |  | Owls +1 point — steal | 
+86.75 steal | 26 | 3-4 |  | Owls +1 point — steal | 
+87.75 answer | 26 | 3-4 |  | Owls +1 point — steal | 
+88.50 ask | 27 | 3-4 |  | Owls +1 point — steal | 
+89.50 ask | 27 | 3-4 |  | Owls used Double Dip. | 
+90.50 steal | 27 | 3-4 |  | Owls used Double Dip. | 
+91.25 answer | 27 | 5-4 |  | Lions +2 points — steal | 
+92.25 roundScore | 28 | 5-4 |  | Lions +2 points — steal | 
+93.00 battleIntro | 29 | 5-4 | 0-0 | Lions +2 points — steal | 
+94.00 battleQ | 30 | 5-4 | 0-0 | Lions +2 points — steal | 
+95.75 battleQ | 30 | 5-4 | 1-0 | Lions +2 points — steal | 
+97.50 battleQ | 30 | 5-4 | 2-0 | Lions +2 points — steal | 
+98.50 battleQ | 30 | 5-4 | 3-0 | Lions +2 points — steal | 
+100.25 battleQ | 30 | 5-4 | 4-0 | Lions +2 points — steal | 
+102.00 battleQ | 30 | 5-4 | 5-0 | Lions +2 points — steal | 
+103.00 battleHandoff | 30 | 5-4 | 6-0 | Lions +2 points — steal | 
+104.00 battleQ | 31 | 5-4 | 6-0 | Lions +2 points — steal | 
+104.75 battleQ | 31 | 5-4 | 6-1 | Lions +2 points — steal | 
+107.50 battleQ | 31 | 5-4 | 6-2 | Lions +2 points — steal | 
+109.25 battleQ | 31 | 5-4 | 6-3 | Lions +2 points — steal | 
+110.25 battleQ | 31 | 5-4 | 6-4 | Lions +2 points — steal | 
+111.00 battleQ | 31 | 5-4 | 6-5 | Lions +2 points — steal | 
+112.00 battleQ | 31 | 5-4 | 6-6 | Lions +2 points — steal | 
+113.00 battleReview | 31 | 5-4 | 6-7 | Lions +2 points — steal | 
+113.75 battleSummary | 32 | 5-6 | 6-7 | Lions +2 points — steal | 
+114.75 stakesIntro | 33 | 5-6 | 0-0 | Lions +2 points — steal | 
+115.50 stakesPick | 34 | 5-6 | 0-0 | Lions +2 points — steal | 
+116.50 stakesQ | 35 | 5-6 | 0-0 | Lions +2 points — steal | 
+117.50 stakesReveal | 35 | 4-4 | 0-0 | Lions +2 points — steal | 
+118.25 stakesReveal | 35 | 4-4 | 0-0 |  | 
+119.25 stakesReveal | 35 | 4-8 | 0-0 | Call changed: ⁨Owls⁩ RIGHT. | 
+120.00 stakesPick | 36 | 4-8 | -1-2 | Call changed: ⁨Owls⁩ RIGHT. | 
+121.00 stakesQ | 37 | 4-8 | -1-2 | Call changed: ⁨Owls⁩ RIGHT. | 
+122.00 stakesReveal | 37 | 4-5 | -1-2 | Call changed: ⁨Owls⁩ RIGHT. | 
+122.75 stakesPick | 38 | 4-5 | -1--1 | Call changed: ⁨Owls⁩ RIGHT. | 
+123.75 stakesQ | 39 | 4-5 | -1--1 | Call changed: ⁨Owls⁩ RIGHT. | 
+124.50 stakesReveal | 39 | 1-2 | -1--1 | Call changed: ⁨Owls⁩ RIGHT. | 
+125.50 stakesSummary | 40 | 1-2 | -4--4 | Call changed: ⁨Owls⁩ RIGHT. | 
+126.50 final | 41 | 1-2 |  | Call changed: ⁨Owls⁩ RIGHT. | 
+recap: {"margin":1,"sudden":false,"leadChanges":3,"steals":[2,1],"minis":[0,2],"best":{"title":"Guess the Flag","team":1,"legs":[2,4]},"chart":[[0,0],[0,0],[1,0],[2,0],[3,0],[3,1],[3,3],[3,4],[5,4],[5,6],[4,8],[4,5],[1,2]],"segs":[{"label":"R1","pts":[[1,0],[2,0]]},{"label":"R2","pts":[[3,0],[3,1]]},{"label":"Guess the Flag","pts":[[3,3]]},{"label":"R3","pts":[[3,4]]},{"label":"R4","pts":[[5,4]]},{"label":"Battle of the Captains","pts":[[5,6]]},{"label":"Secret Stakes","pts":[[4,8],[4,5],[1,2]]}],"awards":[{"t":"Comeback","who":"Owls, 3 points down in Round 2","team":1},{"t":"Down to the wire","who":"Won by a single point","team":1},{"t":"Best thief","who":"Lions, 2 steals","team":0},{"t":"Battle of the Captains","who":"Lea, 7 of 10","team":1}]}

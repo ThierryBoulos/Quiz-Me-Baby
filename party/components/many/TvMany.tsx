@@ -19,6 +19,7 @@ import { Ruler } from "../Ruler";
 import { NightIntroTv } from "../NightIntro";
 import { ImadBubble } from "../TvGame";
 import { RouletteTv } from "../Roulette";
+import { StakesTv } from "../Stakes";
 import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
@@ -60,7 +61,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
       {/* the night's intro, before the first game: the plan, until the host's Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who={`${host || "The host"} starts the game`} />}
       {/* the host paused it: the question hides until the clock restarts, as with two teams */}
-      {pub.screen === "q" && pub.paused && (
+      {(pub.screen === "q" || pub.screen === "pick") && pub.paused && (
         <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
           <div className="text-center"><div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
             <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></div>
@@ -137,6 +138,12 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
               <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
+        {/* Secret Stakes: the themes and who has bet; "Bets are in" while each team answers on its own phones; the reveal,
+            last place first; what each team won or lost */}
+        {g && g.key === "stakes" && pub.stakes && ["pick", "q", "reveal", "summary"].includes(pub.screen) && (
+          <StakesTv sk={pub.stakes} screen={({ pick: "stakesPick", q: "stakesQ", reveal: "stakesReveal", summary: "stakesSummary" } as Record<string, string>)[pub.screen]}
+            teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent}
+            clock={<Clock deadline={pub.deadline} left={pub.left} size={pub.screen === "q" ? 140 : 100} />} />)}
         {/* Russian Roulette: the barrel spins, each team's chamber lights up; at the reveal they click, the bullet last */}
         {(pub.screen === "q" || pub.screen === "reveal") && g && g.key === "roulette" && pub.roulette && (
           <RouletteTv rr={pub.roulette} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent} typed={R?.typed} ok={R?.ok}
@@ -225,7 +232,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         </>)}
 
         {/* a game's result: the board, and who it pays */}
-        {pub.screen === "summary" && g && pub.summary && (<>
+        {pub.screen === "summary" && g && g.key !== "stakes" && pub.summary && (<>
           {/* five teams or more with the bars: a size smaller, so it all sits under the tracker */}
           <div className={"display leading-none slam " + (dense ? "text-40" : "text-52")} style={{ color: "var(--color-gold)" }}>{g.title}</div>
           {/* each game's points in a look of its own, never the totals' row (the owner, 30 Oct) */}

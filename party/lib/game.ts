@@ -3,10 +3,11 @@
    row only the host can read (Supabase row-level security). */
 export type Team = { name: string; score: number; ll: { friend: boolean; dip: boolean; dbl: boolean } };
 export type Two<T> = [T, T];
-export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "majority" | "roulette" | "battle";
+export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "majority" | "roulette" | "battle" | "stakes";
 /* a spot on the earth (Drop the Pin), in degrees */
 export type LatLon = { lat: number; lon: number };
 import type { RrPub } from "./roulette";
+import type { SkPub } from "./stakes";
 export type Pub = {
   step: number;                   // bumps on every host move and screen change; host taps carry it so stale ones are refused
   screen: string;                 // roundIntro | ask | steal | answer | roundScore | sudden | final | miniIntro | miniQ | closestReveal | miniSummary | flag… | dish…
@@ -57,6 +58,7 @@ export type Pub = {
   /* cityOk, at the reveal: false where the city alone doesn't count (it has more than one big airport) */
   airport?: { title: string; board: string[][]; code?: string; city?: string; cityOk?: boolean };
   roulette?: RrPub;                     // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
+  stakes?: SkPub;                       // Secret Stakes: the round's themes, what a bet is worth, who has bet; each team's question; the reveal
   /* Majority Rules: every player answers. The join screen: each team's list (who's on the game screen, who's been
      taken off), and with no host a captain asking to take an absent teammate off (the other captain agrees).
      Then, the list fixed: the names on it, the four answers, how many have answered, and at the reveal how
@@ -97,7 +99,7 @@ export type Pub = {
   tMini?: number;
   /* the house timers (Settings, on the TV), for the rules shown on every screen */
   timers?: { question: number; steal: number; friend: number; contest: number; sudden: number; mini: number; flag: number; map: number; say: number;
-    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number; majority: number ; roulette?: number };
+    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number; majority: number ; roulette?: number; stakesPick?: number; stakesQ?: number };
   paused?: boolean;          // the clock was paused: the question is hidden until it restarts
   lead?: 0 | 1;              // no host: the captain who starts and moves the night on (Team A's, or B's)
   nextBy?: string;           // no host: whose Start or Next the room is waiting for
@@ -131,6 +133,7 @@ export type Thin = { key: "standard" | MiniKey; left: number; need?: number; of?
 /* what the note says about each */
 export function thinLine(t: Thin): string {
   if (t.key === "standard") return `Standard rounds: ${t.left} of ${t.of} themes have two rounds of new questions left`;
+  if (t.key === "stakes") return `${MINI_TITLES.stakes}: ${t.left} ${t.left === 1 ? "theme has" : "themes have"} new questions at every level left, a game shows ${t.need}`;
   return `${MINI_TITLES[t.key]}: ${t.left} new ${t.left === 1 ? "question" : "questions"} left, a game plays ${t.need}`;
 }
 
@@ -139,7 +142,7 @@ export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie",
 /* a mini-game can't be lost any more, with legs still to play: the same people choose — keep playing for fun, or stop here */
 export const DECIDED = "decided";
 export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Guess the Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me",
-  pin: "Drop the Pin", airport: "Guess the Airport", majority: "Majority Rules", roulette: "Russian Roulette", battle: "Battle of the Captains" };
+  pin: "Drop the Pin", airport: "Guess the Airport", majority: "Majority Rules", roulette: "Russian Roulette", battle: "Battle of the Captains", stakes: "Secret Stakes" };
 /* 28 Oct, motion on the TV. The drumroll (answer, dish, auction leg) hits at 0.82 s: the answer, the calls and
    the right/wrong chime land on that hit, not before it. The points then fly up to the score: from the line that
    says "+2" (it shows FLY_AT after the screen comes up), FLY_MS in the air; the point chime plays as they land. */

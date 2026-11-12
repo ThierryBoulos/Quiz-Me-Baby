@@ -23,6 +23,7 @@ const TWO: Record<string, string> = {
   dish: "Ingredients one at a time. Buzz and name it.",
   roulette: "Spin the barrel: a theme and a question each. One chamber is the bullet.",
   battle: "Captains only, ten questions each.",
+  stakes: "The night's last game: bet on a theme and a level, in secret.",
 };
 const MANY: Record<string, string> = {
   ...TWO,

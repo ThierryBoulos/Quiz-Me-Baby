@@ -8,11 +8,26 @@ import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, ty
 import { callsOf, closestW, currentQ, fireOf, leadOf, matchQ, mrTally, okWin, pinW, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
 import { rrGot, rrPub, rrQ, type RrLap } from "../roulette";
+import { skKey, skPub, skQ, skResult, type SkGame } from "../stakes";
 import type { TvState } from "./state";
 
 /* The question in play goes out under a number that means nothing outside this game (D5): its
    real id would find the answer in a bank file. The phones use it only to tell questions apart. */
 export const qk = (s: TvState, id: string) => "k" + (s.qkeys[id] ??= Object.keys(s.qkeys).length + 1);
+/* the question on screen as one id: its own, or where each team has its own (Russian Roulette, Secret Stakes) the
+   set of them; Secret Stakes' bets, the round's themes. The phones tag what they send with it (qk), and the TV checks
+   the tag against this (tvGame's draftKey), so the two must agree */
+export function screenQid(s: TvState): string | null {
+  const g = s.g, sc = s.screen;
+  if (!g) return null;
+  if ((sc === "rouletteQ" || sc === "rouletteReveal") && g.rouletteGame) {
+    const m = g.rouletteGame, lap = m.qs[m.i] as RrLap | undefined;
+    return lap?.draw ? `rr${m.i}:${[rrQ(lap, 0), rrQ(lap, 1)].map((x: G) => x?.id).join(",")}` : null;
+  }
+  if ((sc === "stakesQ" || sc === "stakesReveal") && g.stakesGame) return skKey(g.stakesGame as SkGame);
+  if (sc === "stakesPick" && g.stakesGame) { const S = g.stakesGame as SkGame; return `skp${S.i}:${(S.rounds[S.i]?.themes || []).join(",")}`; }
+  return currentQ(s)?.id ?? null;
+}
 /* which part of the night a screen is in: a round ("R2"), a mini-game (its name), sudden death; the end tie's
    question (One more / A point each) stays with the part before it */
 const segOf = (s: TvState): string | null => {
@@ -74,6 +89,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   g.rounds.forEach((_: G, i: number) => { sched.push({ kind: "std", i }); (g.plan || []).forEach((pl: G) => { if (pl.after === i) sched.push({ kind: "mini", key: pl.key }); }); });
   if (!g.rounds.length) (g.plan || []).forEach((pl: G) => sched.push({ kind: "mini", key: pl.key }));
   if (g.hasBattle) sched.push({ kind: "mini", key: "battle" });
+  if (g.hasStakes) sched.push({ kind: "mini", key: "stakes" });
   p.pips = sched.map((x) => ({ kind: x.kind, state: x.kind === "mini"
     ? (live === x.key ? "now" : g.done[x.key!] ? "done" : "todo")
     : (x.i === g.r && !live && s.screen !== "final" && s.screen !== "sudden" ? "now" : g.rounds[x.i!]?.done ? "done" : "todo") }));
@@ -88,7 +104,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   { const t = getSettings();
     p.tMini = t.tMini;
     p.timers = { question: t.tQuestion, steal: t.tSteal, friend: t.tFriend, contest: t.tContest, sudden: t.tSudden, mini: t.tMini, flag: t.tFlag, map: t.tMap, say: t.tSay,
-      auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport, majority: t.tMajority, roulette: t.tRoulette }; }
+      auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport, majority: t.tMajority, roulette: t.tRoulette,
+      stakesPick: t.tStakesPick, stakesQ: t.tStakesQ }; }
   /* no host: whose Start or Next the room is waiting for */
   if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
     && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {
@@ -149,6 +166,27 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (s.screen === "battleHandoff") p.battle.half = ((b.log?.[0] || []) as G[]).filter(Boolean).map((e) => ({ said: e.said || "", got: !!e.got, answer: e.q?.answer || "" }));
     if (s.screen === "battleQ" || s.screen === "battleTie") { p.question = q?.question; p.turn = s.screen === "battleQ" ? b.cap : undefined; }
     if (s.screen === "battleTie") { p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>; }
+  } else if (key === "stakes" && g.stakesGame) {
+    /* Secret Stakes: points, not legs, and straight on the night's totals (no "this game" tally, no winner's bonus) */
+    const S = g.stakesGame as SkGame, sc = s.screen, scores = [g.teams[0].score, g.teams[1].score];
+    p.mini = { key, title: MINI_TITLES[key], leg: Math.min(S.i + 1, S.base), of: S.base, wins: [S.net[0] || 0, S.net[1] || 0], pts: 0 };
+    p.stakes = skPub(S, sc, scores, sc === "stakesReveal" ? s.ok : null, sc === "stakesReveal" ? [s.typed[0]?.[0] ?? null, s.typed[1]?.[0] ?? null] : null);
+    if (sc === "stakesPick") p.sent = [!!S.picks[0], !!S.picks[1]];
+    if (sc === "stakesQ" || sc === "stakesReveal") {
+      const qs = [skQ(S, 0), skQ(S, 1)];
+      p.qid = secret.qid = qk(s, skKey(S));
+      secret.answers = [String(qs[0]?.answer ?? ""), String(qs[1]?.answer ?? "")];
+      secret.match = [matchQ(s.typed[0], qs[0]), matchQ(s.typed[1], qs[1])];
+      secret.answer = ""; secret.notes = "";
+      if (sc === "stakesReveal") {
+        p.reveal = { answer: "", typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) };
+        /* the round's points go on the night's totals as the reveal comes up, and move with a call changed (the
+           engine adds them for good at Next) */
+        const res = skResult(S, scores, s.ok);
+        p.teams = p.teams.map((t, i) => ({ ...t, score: res.after[i] })) as Pub["teams"];
+      }
+    }
+    if (sc === "stakesPick") p.qid = secret.qid = qk(s, screenQid(s) || "skp");
   } else if (key) {
     const m = miniState(g, key);
     p.mini = { key, title: MINI_TITLES[key], leg: Math.min(m.i + 1, m.qs.length), of: m.base, wins: [...m.wins] as Two<number>, pts: g.miniPts, tie: m.i >= m.base, fun: !!m.fun };

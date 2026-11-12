@@ -20,7 +20,7 @@ const side = (t: 0 | 1) => (t === 0 ? "a" : "b");
 
 /* ---- the tracker: scores, where we are, and the night's progress ---- */
 /* what one go of a mini-game is called, as the 3-8 team night says it (no "leg", 31 Oct) */
-const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round", roulette: "Spin" };
+const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round", roulette: "Spin", stakes: "Round" };
 function hudLabel(pub: Pub): ReactNode {
   const m = pub.mini, sc = pub.screen;
   if (sc === "final") return <b>Final result</b>;
@@ -79,7 +79,8 @@ export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"
       {/* the mini-game's own score, small, under the night's: "This game: A 1 – 2 B" */}
       {/* (not on a game's result: its picture says it) */}
       {/* (not on a game's rules: only once it starts, so the rules have the room: 11 Nov, the owner) */}
-      {w && !/Summary$|Intro$|^auctionResult$/.test(pub.screen) && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
+      {/* (Secret Stakes has no tally of its own: its points go straight on the totals above) */}
+      {w && pub.mini?.key !== "stakes" && !/Summary$|Intro$|^auctionResult$/.test(pub.screen) && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
         <span>This game:</span><span className="nm a">{T[0].name}</span><b className="a">{w[0]}{u}</b><span aria-hidden>–</span><b className="b">{w[1]}{u}</b><span className="nm b">{T[1].name}</span>
       </div>}
     </div>);
@@ -417,6 +418,13 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Every chamber is on show before the spin. One is the bullet, an Expert question. The same barrel all game: someone draws it by spin ${n}.`, warn: true },
       { text: "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3." },
       { text: `${n} spins. Most points takes ${pts}. Tied? One more spin, or a point each.` }];
+    /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a tenth of the leader's total when it starts */
+    case "stakes": { const u = pub.stakes?.unit ?? 1; return [
+      { text: `${n} rounds. Each shows 3 themes. Each captain secretly bets on one theme and one level, ${sec(t?.stakesPick, 20)}.` },
+      { text: `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}.` },
+      { text: `Then the question you bet on, on your own phones: captains type the answer, ${sec(t?.stakesQ, 45)}.` },
+      { text: "Right wins your bet, wrong or no answer loses it, straight on your total. Nobody sees the others' bets till the reveal.", warn: true },
+      { text: host ? "The app checks the answers, and the host can change a call." : "The app checks the answers. Its RIGHT stands; the other captain can give one it called WRONG." }]; }
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },
@@ -434,15 +442,16 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
 export function MiniIntro({ pub, size, head }: { pub: Pub; size: "tv" | "phone"; head?: ReactNode }) {
   const m = pub.mini, tv = size === "tv";
   if (!m) return null;
-  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : `Best of ${m.of}`;
+  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? `${m.of} rounds, 3 themes each` : `Best of ${m.of}`;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
-      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : "Mini-game"}</div>}
+      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : m.key === "stakes" ? "The night's last game" : "Mini-game"}</div>}
       <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? 88 : 44 }}>{m.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
         <span className="sep text-[var(--color-ink-3)]">·</span>
-        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>Winner takes {m.pts} point{m.pts === 1 ? "" : "s"}</span>
+        {/* (Secret Stakes: no winner's points, the bets go straight on the totals) */}
+        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{m.key === "stakes" ? "Win or lose your bet" : <>Winner takes {m.pts} point{m.pts === 1 ? "" : "s"}</>}</span>
         {m.kinds && <><span className="sep text-[var(--color-ink-3)]">·</span><span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{m.kinds}</span></>}
       </div>
       <div className="card w-full">
@@ -497,7 +506,7 @@ export function usePreload(pub: Pub | null) {
 /* won with legs to spare: the same words on the TV and every phone */
 export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
 /* what a mini-game's legs are called ("4 flags", "the last landmark") */
-const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin" };
+const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin", stakes: "round" };
 export const legsLeft = (key: MiniKey, n: number) => { const u = LEG_UNIT[key] || "leg"; return n === 1 ? `The last ${u} is` : `The last ${n} ${u.replace(/y$/, "ie")}s are`; };
 export const decidedPts = (pub: Pub) => (pub.decided ? `+${pub.decided.pts} point${pub.decided.pts === 1 ? "" : "s"}` : "");
 export const decidedFun = (pub: Pub) => (pub.decided ? `${legsLeft(pub.decided.key, pub.decided.spare)} just for fun.` : "");

@@ -346,11 +346,16 @@
        ctx.rng         optional; Math.random when absent
      Anything that needs tonight's game (the Battle's "already used") takes
      it as an argument instead of reading it.                               */
-  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:15, battle:10 };
+  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:15, battle:10, see:7 };
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
         FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, PIN_LEGS = LEGS.pin, AIRPORT_LEGS = LEGS.airport, MAJORITY_N = LEGS.majority, BATTLE_N = LEGS.battle;
   /* Flag first: fast and loud, it opens the night. (Drop the Pin, Guess the Airport and Majority Rules are Party's.) */
-  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'pin', 'airport', 'majority', 'dish', 'roulette'];
+  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'pin', 'airport', 'majority', 'dish', 'see', 'roulette'];
+  /* What Do You See? (11 Nov, the owner): one picture at a time, a face or a logo blurred, a close-up zoomed right in,
+     clearing as the clock runs; one guess per team, the fastest right answer takes the picture. 7 a game; the kinds
+     that are on, in near-equal shares (2 faces, 2 logos, 3 close-ups); Easy, Medium and Hard, as the other picture
+     games' levels. */
+  const SEE_LEGS = LEGS.see, SEE_ORDER = ['easy', 'medium', 'hard'], SEE_KINDS = ['face', 'logo', 'close'];
   const MAP_ORDER = ['easy', 'medium', 'hard'];
   /* Drop the Pin and Guess the Airport: easy, medium and hard, like the maps */
   const PIN_ORDER = MAP_ORDER, AIRPORT_ORDER = MAP_ORDER, MAJORITY_ORDER = MAP_ORDER;
@@ -368,6 +373,31 @@
   const ROULETTE_THEMES = ['General Knowledge', 'Geography', 'History', 'Science', 'Nature', 'Sports', 'Music', 'Movies', 'TV Series',
     'Food & Drink', 'Art & Books', 'Tech & Business', 'Celebrities', 'Quotes', 'Acronyms'];
   const rouletteChambers = (k) => (k > 6 ? 8 : 6);
+  /* Secret Stakes (11 Nov, the owner): the night's last game, after the Battle. Three rounds, each showing three
+     themes (nine over the game, from the same broad themes as Russian Roulette and the night's own); each captain
+     secretly bets on one theme and one level. Easy is the safe bet (0 either way); Medium, Hard and Expert win or
+     lose 1, 2 and 3 bets, straight on the night's total (never below 0). A bet's size comes from the scoreboard when
+     the game starts: the leader's total over STAKES_DIVISOR (so with 2 teams in the teens it's 1, 2, 3; with 3-8
+     teams in the hundreds, 8, 16, 24), at least 1, and from 10 up to the nearest 5. Make STAKES_DIVISOR smaller for
+     bigger bets. One spare round of themes for Change question. */
+  const STAKES_ROUNDS = 3, STAKES_THEMES = 3, STAKES_SPARE = 1, STAKES_DIVISOR = 10;
+  const STAKES_LEVELS = ['easy', 'medium', 'hard', 'expert'], STAKES_TIMES = { easy:0, medium:1, hard:2, expert:3 };
+  function stakesUnit(top){
+    let u = Math.max(1, Math.round((Number(top) || 0) / STAKES_DIVISOR));
+    if(u >= 10) u = Math.round(u / 5) * 5;
+    return u;
+  }
+  const stakesBet = (unit, level) => (unit || 1) * (STAKES_TIMES[level] || 0);
+  /* a round's points, for every team at once: right wins the bet, wrong (or no answer) loses it; a total never
+     goes below 0, so `delta` is what really moved */
+  function stakesResult(scores, picks, ok, unit){
+    const bet = scores.map((_, i) => (picks[i] ? stakesBet(unit, picks[i].level) : 0));
+    const right = scores.map((_, i) => !!(ok && ok[i]));
+    const after = scores.map((v, i) => Math.max(0, v + (right[i] ? bet[i] : -bet[i])));
+    return { bet, ok:right, before:scores.slice(), after, delta:after.map((v, i) => v - scores[i]) };
+  }
+  /* the reveal's order: last place first, up to the leader (level teams: the later letter first) */
+  const stakesOrder = (scores) => scores.map((v, i) => i).sort((a, b) => scores[a] - scores[b] || b - a);
   /* The four levels of a standard question (22 Oct). A night's difficulty is one of them, several
      joined with "+" ("easy+medium+hard", the default), or "mixed": all four. */
   const DIFFS = ['easy', 'medium', 'hard', 'expert'];
@@ -380,7 +410,8 @@
 
   function createDealer(ctx){
     const bank = ctx.bank;
-    const ok = Object.assign({ map:() => false, flag:() => false, dish:() => false, pin:() => false, airport:() => false, majority:() => false }, ctx.ok || {});
+    const ok = Object.assign({ map:() => false, flag:() => false, dish:() => false, pin:() => false, airport:() => false, majority:() => false,
+      see:(q) => q.type === 'see' && !!q.photo && SEE_KINDS.indexOf(q.kind) > -1 }, ctx.ok || {});
     const rand = () => (ctx.rng || Math.random)();
     const shuffle = (a) => shuffleWith(a, ctx.rng);
     const isFresh = (q) => !ctx.noRepeat() || !ctx.used().has(q.id);
@@ -790,6 +821,68 @@
       return out;
     }
 
+    /* What Do You See?: the kinds that are on, each its share of the game (near-equal; the close-ups, the most of
+       them, take what's over), each kind's levels in turn, unplayed ones first; then the order: an easiest one first,
+       and never two of a kind in a row where it can be helped. The rest stay spare (Change question, a tie-breaker) */
+    const seeLevelsOf = (c) => levelsOf(c && c.seeLevels, SEE_ORDER, SEE_ORDER);
+    const seeKindsOf = (c) => { const want = (c && c.seeKinds) || SEE_KINDS, k = SEE_KINDS.filter(x => want.indexOf(x) > -1); return k.length ? k : SEE_KINDS.slice(); };
+    function seeDeck(cfg, n){
+      n = n || SEE_LEGS;
+      const levels = seeLevelsOf(cfg);
+      const kinds = seeKindsOf(cfg).filter(k => bank().some(q => ok.see(q) && q.kind === k && levels.indexOf(q.level) > -1));
+      if(!kinds.length) return { qs:[], spare:[] };
+      const queues = kinds.map(k => levelPool(q => ok.see(q) && q.kind === k, levels));
+      const share = kinds.map(() => Math.floor(n / kinds.length));
+      for(let r = n - share.reduce((a, b) => a + b, 0), x = kinds.length - 1; r > 0; r--, x = (x + kinds.length - 1) % kinds.length) share[x]++;
+      const picked = kinds.map((k, i) => queues[i].splice(0, share[i]));
+      /* (a kind that runs short: the others make it up) */
+      for(let x = 0, short = n - picked.reduce((a, p) => a + p.length, 0); short > 0 && queues.some(q => q.length); x = (x + 1) % kinds.length)
+        if(queues[x].length){ picked[x].push(queues[x].shift()); short--; }
+      const pool = shuffle([].concat.apply([], picked)), out = [];
+      const warm = pool.findIndex(q => q.level === levels[0]);
+      if(warm > -1) out.push(pool.splice(warm, 1)[0]);
+      while(pool.length){
+        const last = out.length ? out[out.length - 1].kind : null, left = {};
+        pool.forEach(q => { left[q.kind] = (left[q.kind] || 0) + 1; });
+        const k = Object.keys(left).filter(x => x !== last).sort((a, b) => left[b] - left[a])[0] || last;
+        out.push(pool.splice(pool.findIndex(q => q.kind === k), 1)[0]);
+      }
+      return { qs:out, spare:mixQueues(queues) };
+    }
+
+    /* Secret Stakes: n rounds of three themes, each theme with one question at each of the four levels (a bet must be
+       honest: a Hard is a Hard). The themes: the broad ones and the night's own, never the host's own trivia nor a
+       theme of their own making. Themes that can fill all four levels with unplayed questions first; only when they
+       run out, ones that need a played question. Never a question the night already has, nor one that clashes with
+       it. Only the questions a team actually gets are marked played (the TV does that at the question). */
+    function stakesDeck(cfg, n, inNight){
+      const own = cfg.stakesThemes || cfg.themes || [];
+      const std = bank().filter(q => q.type === 'standard' && q.theme && ROULETTE_SKIP_THEMES.indexOf(q.theme) < 0 && q.src !== 'manual'
+        && STAKES_LEVELS.indexOf(q.difficulty) > -1 && (ROULETTE_THEMES.indexOf(q.theme) > -1 || own.indexOf(q.theme) > -1));
+      const free = (q, stale) => !inNight.has(q.id) && !clashesWith(q.id, inNight) && (stale || isFresh(q));
+      const can = (t, stale) => STAKES_LEVELS.every(l => std.some(q => q.theme === t && q.difficulty === l && free(q, stale)));
+      const themes = shuffle(std.map(q => q.theme).filter((t, i, a) => a.indexOf(t) === i));
+      const order = themes.filter(t => can(t, false)).concat(themes.filter(t => !can(t, false) && can(t, true)));
+      const out = [];
+      for(let r = 0; r < n; r++){
+        const round = { themes:[], qs:[] };
+        while(round.themes.length < STAKES_THEMES && order.length){
+          const t = order.shift(), set = {};
+          for(const l of STAKES_LEVELS){
+            const at = (stale) => shuffle(std.filter(q => q.theme === t && q.difficulty === l && free(q, stale)))[0];
+            const q = at(false) || at(true);
+            if(!q) break;
+            set[l] = q; inNight.add(q.id);
+          }
+          if(STAKES_LEVELS.some(l => !set[l])){ STAKES_LEVELS.forEach(l => set[l] && inNight.delete(set[l].id)); continue; }
+          round.themes.push(t); round.qs.push(set);
+        }
+        if(round.themes.length < STAKES_THEMES){ round.qs.forEach(set => STAKES_LEVELS.forEach(l => inNight.delete(set[l].id))); break; }
+        out.push(round);
+      }
+      return out;
+    }
+
     function diffOf(cfg, theme){
       const d = cfg && cfg.themeDiff && cfg.themeDiff[theme];
       return d || (cfg ? cfg.difficulty : 'mixed');
@@ -909,6 +1002,12 @@
       const rrOne = !cfg.rouletteChambers && rrDeck.length >= ROULETTE_LAPS;
       const rrQs = rrOne ? Array.from({ length:ROULETTE_LAPS }, () => ({ ch:rrDeck[0].ch, bullet:rrDeck[0].bullet, bid:0 })) : rrDeck.slice(0, ROULETTE_LAPS);
       const rrSpareQs = rrOne ? rrDeck.slice(1) : rrDeck.slice(ROULETTE_LAPS);
+      /* What Do You See?'s pictures (clear of the night's never-together groups) */
+      const seDeck = asked('see') ? seeDeck(cfg) : { qs:[], spare:[] };
+      unclash(seDeck.qs, seDeck.spare, inNight);
+      /* Secret Stakes' themes, after everything else (it's the last game): three rounds and a spare */
+      const skDeck = asked('stakes') ? stakesDeck(cfg, STAKES_ROUNDS + STAKES_SPARE, inNight) : [];
+      const hasStakes = skDeck.length >= STAKES_ROUNDS;
 
       const mk = (t, color) => ({
         name:t.name, captain:t.captain, players:t.players,
@@ -928,7 +1027,8 @@
                                 .filter(k => k !== 'pin' || pnDeck.length)
                                 .filter(k => k !== 'airport' || apDeck.length)
                                 .filter(k => k !== 'majority' || mrDeck.length)
-                                .filter(k => k !== 'roulette' || rrDeck.length >= ROULETTE_LAPS);
+                                .filter(k => k !== 'roulette' || rrDeck.length >= ROULETTE_LAPS)
+                                .filter(k => k !== 'see' || seDeck.qs.length);
       const hasBattle = wanted.indexOf('battle') > -1;
       /* no standard rounds: the mini-games simply run back to back, from the start */
       const plan = rounds.length ? planMinis(rounds.length, inter) : inter.map(k => ({ key:k, after:0 }));
@@ -960,6 +1060,14 @@
         rouletteGame:{ n:rrN, qs:rrQs, spare:rrSpareQs, base:Math.min(ROULETTE_LAPS, rrDeck.length), i:0,
           wins:[0, 0], pts:[0, 0], had:[[], []], bulletLap:rrDeck.length ? Math.floor(rand() * Math.min(ROULETTE_LAPS, rrDeck.length)) : 0, fired:0,
           subs:[], done:false, awarded:false, tieLegs:0 },
+        /* Secret Stakes: rounds of {themes, qs: per theme {easy, medium, hard, expert}}; unit: one bet, fixed when it
+           starts; picks: each team's bet this round ({k: the theme, level}); log: every round's result; net: each
+           team's total won or lost */
+        /* What Do You See?: legs of pictures, as the flags */
+        seeGame:{ levels:seeLevelsOf(cfg), kinds:seeKindsOf(cfg), qs:seDeck.qs, spare:seDeck.spare, base:seDeck.qs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+        hasStakes,
+        stakesGame:{ rounds:skDeck.slice(0, STAKES_ROUNDS), spare:skDeck.slice(STAKES_ROUNDS), base:Math.min(STAKES_ROUNDS, skDeck.length), i:0, unit:1,
+          picks:[null, null], log:[], net:[0, 0], done:false },
         auction:null,
         r:0, seat:0, sub:'intro', miniPlayed:false,
         battle:null,
@@ -982,9 +1090,14 @@
       if(themes.length && low.length * 2 >= themes.length) out.push({ key:'standard', left:themes.length - low.length, of:themes.length });
       const tests = { closest:q => q.type === 'closest', auction:q => q.type === 'auction',
         saysame:q => q.type === 'saysame' && (q.pool || []).length >= 2, map:ok.map, flag:ok.flag, dish:ok.dish,
-        pin:ok.pin, airport:ok.airport, majority:ok.majority,
+        pin:ok.pin, airport:ok.airport, majority:ok.majority, see:ok.see,
         battle:q => std(q) && BATTLE_SKIP_THEMES.indexOf(q.theme) < 0 && (q.difficulty === 'easy' || q.difficulty === 'medium') };
       Object.keys(tests).forEach(k => { const c = left(tests[k]); if(c.fresh < n[k] && c.all > c.fresh) out.push({ key:k, left:c.fresh, need:n[k] }); });
+      /* Secret Stakes: the broad themes that can still fill all four levels with unplayed questions (a game shows 9) */
+      { const at = (t, l, fresh) => bank().some(q => std(q) && q.theme === t && q.difficulty === l && (!fresh || isFresh(q)));
+        const all = ROULETTE_THEMES.filter(t => STAKES_LEVELS.every(l => at(t, l, false)));
+        const fresh = all.filter(t => STAKES_LEVELS.every(l => at(t, l, true))).length, need = STAKES_ROUNDS * STAKES_THEMES;
+        if(fresh < need && all.length > fresh) out.push({ key:'stakes', left:fresh, need }); }
       return out;
     }
 
@@ -993,7 +1106,7 @@
     return { bank, shuffle, isFresh, clashesWith, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, commonOf, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
-             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, rouletteDeck, diffOf, pickedPair, dishLeg, buildGame, thinBank };
+             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, rouletteDeck, stakesDeck, seeDeck, seeLevelsOf, seeKindsOf, diffOf, pickedPair, dishLeg, buildGame, thinBank };
   }
 
 
@@ -1059,6 +1172,7 @@
     dish:{ s:(g) => g.dishGame, q:'dishQ', summary:'dishSummary', left:(s) => s.base - s.i, unit:'recipe' },
     pin:{ s:(g) => g.pinGame, q:'pinQ', summary:'pinSummary', left:(s) => s.base - s.i, unit:'landmark' },
     airport:{ s:(g) => g.airportGame, q:'airportQ', summary:'airportSummary', left:(s) => s.base - s.i, unit:'board' },
+    see:{ s:(g) => g.seeGame, q:'seeQ', summary:'seeSummary', left:(s) => s.base - s.i, unit:'picture' },
     auction:{ s:(g) => g.auction, q:'auctionBid', summary:'auctionResult', left:(s) => s.n - s.leg - 1, unit:'category' }
   };
   /* -> { winner, spare } when this mini-game is settled with legs still to play, else null */
@@ -1181,6 +1295,34 @@
          : s.i < s.base ? 'Won with ' + (s.base - s.i) + ' flag' + (s.base - s.i > 1 ? 's' : '') + ' still to play.' : '' };
     awardMini(g, s, winner, fx);
     fx.push({ go:'flagSummary' });
+    return fx;
+  }
+
+  /* ---- What Do You See?: as Guess the Flag (level at the end: the next spare picture decides it) ---- */
+  function seeAfterLeg(g, fx){
+    const s = g.seeGame;
+    if(s.fun) return funLeg(s, 'seeQ', 'seeSummary', fx);
+    const out = bestOf(s);
+    if(out === 'next'){ fx.push({ go:'seeQ' }); return fx; }
+    if(out === 'level'){
+      if(s.spare && s.spare.length){
+        s.qs.push(s.spare.shift());
+        s.tieLegs++;
+        fx.push({ toast:s.wins[0] ? 'Level at ' + s.wins[0] + ' each — the next picture decides it.' : 'Nobody on the board yet — next picture.', ms:3600 });
+        fx.push({ go:'seeQ' });
+        return fx;
+      }
+      s.done = true;
+      s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no pictures left at these levels. Your call.' };
+      fx.push({ go:'seeSummary' });
+      return fx;
+    }
+    s.done = true;
+    s.verdict = { winner:out.winner, needsHost:false,
+      note:s.tieLegs ? 'Settled by ' + (s.tieLegs === 1 ? 'a tie-breaker picture' : s.tieLegs + ' tie-breaker pictures') + '.'
+         : s.i < s.base ? 'Won with ' + (s.base - s.i) + ' picture' + (s.base - s.i > 1 ? 's' : '') + ' still to play.' : '' };
+    awardMini(g, s, out.winner, fx);
+    fx.push({ go:'seeSummary' });
     return fx;
   }
 
@@ -1397,6 +1539,9 @@
     (g.mini.qs || []).forEach(q => spent.add(q.id));
     (g.mini.spare || []).forEach(q => spent.add(q.id));
     (g.sdUsed || []).forEach(id => spent.add(id));
+    /* (Secret Stakes comes after the Battle: its questions are dealt already, and stay its own) */
+    const sk = g.stakesGame;
+    if(sk) (sk.rounds || []).concat(sk.spare || []).forEach(R => (R.qs || []).forEach(set => Object.keys(set).forEach(l => spent.add(set[l].id))));
     const b = g.battle;
     if(b){
       b.qs.forEach(set => set.forEach(q => spent.add(q.id)));
@@ -1506,17 +1651,27 @@
     if(key === 'airport'){ fx.push({ go:'airportIntro' }); return fx; }
     if(key === 'majority'){ fx.push({ go:'majorityIntro' }); return fx; }
     if(key === 'roulette'){ fx.push({ go:'rouletteIntro' }); return fx; }
+    if(key === 'see'){ fx.push({ go:'seeIntro' }); return fx; }
     if(key === 'battle'){ MOVES['battle/build'](g, {}, env).forEach(f => fx.push(f)); return fx; }
+    if(key === 'stakes'){ stakesOpen(g); fx.push({ go:'stakesIntro' }); return fx; }
     return fx;
   }
+  /* Secret Stakes coming up: one bet is worked out from the scoreboard as it stands now, and stays for the game */
+  function stakesOpen(g){
+    const s = g.stakesGame;
+    s.unit = stakesUnit(Math.max(0, ...g.teams.map(t => t.score)));
+    s.i = 0; s.picks = g.teams.map(() => null);
+    if(!s.net || s.net.length !== g.teams.length) s.net = g.teams.map(() => 0);
+  }
   /* after a round or a mini-game: the next mini-game owed against this
-     round, else the next round, else the Battle (chosen in Setup), else the end */
+     round, else the next round, else the Battle (chosen in Setup), else Secret Stakes, else the end */
   function nextStep(g, env, fx){
     const owed = minisAfter(g, g.r);
     if(owed.length) return startMini(g, env, owed[0].key, fx);
     g.r = Math.min(g.r + 1, g.rounds.length);
     if(g.r < g.rounds.length){ g.seat = 0; fx.push({ go:'roundIntro' }); return fx; }
     if(g.hasBattle && !g.done.battle) return startMini(g, env, 'battle', fx);
+    if(g.hasStakes && !g.done.stakes) return startMini(g, env, 'stakes', fx);
     return endGame(g, env, fx);
   }
   /* points to a team, with the pop-up that says so */
@@ -1757,7 +1912,8 @@
       g.battle = env.deal.buildBattle(battleSpent(g));
       if(!g.battle){
         g.done.battle = true;
-        return endGame(g, env, [{ toast:'Not enough spare questions left for the Battle.' }]);
+        /* (then Secret Stakes, if it's on, else the end) */
+        return nextStep(g, env, [{ toast:'Not enough spare questions left for the Battle.' }]);
       }
       return [{ go:'battleIntro' }];
     },
@@ -1824,7 +1980,7 @@
     },
     /* the Battle's points can make a tie as easily as break one, so this hands
        back to the normal ending — which sends a level game to sudden death */
-    'battle/done'(g, a, env){ g.done.battle = true; return endGame(g, env, []); },
+    'battle/done'(g, a, env){ g.done.battle = true; return nextStep(g, env, []); },
 
     /* a mini-game decided early (see decidedEarly): play the rest for fun, or stop there */
     'mini/fun'(g, a){
@@ -2018,6 +2174,26 @@
     'flag/award'(g, a){ const fx = []; awardMini(g, g.flagGame, a.w, fx); fx.push({ render:true }); return fx; },
     'flag/done'(g){ return finishMini(g, 'flag', g.flagGame); },
 
+    /* What Do You See? (the screen that runs it decides the leg: the first right answer in, or nobody) */
+    'see/start'(g){ g.seeGame.i = 0; return [{ go:'seeQ' }]; },
+    'see/swap'(g){
+      const s = g.seeGame;
+      if(!s.spare.length) return [{ toast:'No other picture left at these levels.' }];
+      s.qs[s.i] = spareLike(s);
+      return [{ toast:'New picture.' }, { go:'seeQ' }];
+    },
+    /* w: 0 | 1 (the fastest right answer) | 'none' */
+    'see/verdict'(g, a){
+      const s = g.seeGame, q = s.qs[s.i], w = a.w, fx = [];
+      s.subs.push({ q, winner:w });
+      if(w === 0 || w === 1){ s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take picture ' + (s.i + 1) + '.' }); }
+      else fx.push({ toast:'Nobody got it.' });
+      s.i++;
+      return seeAfterLeg(g, fx);
+    },
+    'see/award'(g, a){ const fx = []; awardMini(g, g.seeGame, a.w, fx); fx.push({ render:true }); return fx; },
+    'see/done'(g){ return finishMini(g, 'see', g.seeGame); },
+
     'airport/start'(g){ g.airportGame.i = 0; return [{ go:'airportQ' }]; },
     'airport/swap'(g){
       const s = g.airportGame;
@@ -2086,6 +2262,54 @@
     },
     'roulette/award'(g, a){ const fx = []; awardMini(g, g.rouletteGame, a.w, fx); fx.push({ render:true }); return fx; },
     'roulette/done'(g){ return finishMini(g, 'roulette', g.rouletteGame); },
+
+    /* ---- Secret Stakes (11 Nov, the owner) ---- */
+    /* Start: the first round's three themes, and the captains bet */
+    'stakes/start'(g){
+      const s = g.stakesGame;
+      if(!s || !s.rounds.length || s.done) return [];
+      s.i = 0; s.picks = g.teams.map(() => null);
+      return [{ go:'stakesPick' }];
+    },
+    /* a captain's bet (t: the team; k: which of the three themes; level), once: it's locked in. Every bet in, and the
+       questions go up */
+    'stakes/pick'(g, a){
+      const s = g.stakesGame, R = s && s.rounds[s.i], t = Number(a.t), k = Math.floor(Number(a.k));
+      if(!R || s.done || !(t >= 0 && t < g.teams.length) || s.picks[t]) return [];
+      if(STAKES_LEVELS.indexOf(a.level) < 0 || !(k >= 0 && k < R.themes.length)) return [];
+      s.picks[t] = { k, level:a.level };
+      if(s.picks.every(Boolean)) return [{ sound:'soft' }].concat(MOVES['stakes/lock'](g));
+      return [{ sound:'soft' }, { render:true }];
+    },
+    /* time's up on the bets: a team that didn't bet takes the safe one, Easy on the first theme */
+    'stakes/lock'(g){
+      const s = g.stakesGame;
+      if(!s || s.done) return [];
+      s.picks = s.picks.map(p => p || { k:0, level:'easy', auto:true });
+      return [{ go:'stakesQ' }];
+    },
+    /* Change question (before anyone has answered): three new themes, the bets cleared */
+    'stakes/swap'(g){
+      const s = g.stakesGame;
+      if(!s.spare.length) return [{ toast:'No other themes left.' }];
+      s.rounds[s.i] = s.spare.shift();
+      s.picks = g.teams.map(() => null);
+      return [{ toast:'Three new themes.' }, { go:'stakesPick' }];
+    },
+    /* ok: each team's call as it stands. Right wins the bet, wrong or no answer loses it, on the night's total (never
+       below 0); then the next round, or after the third the summary */
+    'stakes/verdict'(g, a){
+      const s = g.stakesGame, R = s && s.rounds[s.i];
+      if(!R || s.done || !s.picks.every(Boolean)) return [];
+      const res = stakesResult(g.teams.map(t => t.score), s.picks, a.ok || [], s.unit);
+      g.teams.forEach((t, i) => { t.score = res.after[i]; s.net[i] = (s.net[i] || 0) + res.delta[i]; });
+      s.log.push({ i:s.i, themes:R.themes.slice(), picks:s.picks.slice(), ok:res.ok, bet:res.bet, delta:res.delta, before:res.before });
+      s.i++; s.picks = g.teams.map(() => null);
+      if(s.i < s.base) return [{ go:'stakesPick' }];
+      s.done = true;
+      return [{ go:'stakesSummary' }];
+    },
+    'stakes/done'(g){ g.done.stakes = true; return [{ next:true }]; },
 
     /* n: how many are on each team's list, fixed now (the screen that runs it decides who) */
     'majority/start'(g, a){
@@ -2254,5 +2478,6 @@
   }
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
-           createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers,
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

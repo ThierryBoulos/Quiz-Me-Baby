@@ -1,0 +1,39 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+7.50 steal | 3 | 0-0 |  |  | 
+8.50 answer | 3 | 0-0 |  |  | 
+9.50 ask | 4 | 0-0 |  |  | 
+10.25 ask | 4 | 0-0 |  | Owls used Double Dip. | 
+11.25 steal | 4 | 0-0 |  | Owls used Double Dip. | 
+12.00 answer | 4 | 1-0 |  | Lions +1 point — steal | 
+13.00 answer | 4 | 1-0 |  |  | 
+14.00 answer | 4 | 0-1 |  | Call changed: Owls +1 point. | 
+14.75 roundScore | 5 | 0-1 |  | Call changed: Owls +1 point. | 
+15.75 roundIntro | 6 | 0-1 |  | Call changed: Owls +1 point. | 
+16.50 ask | 7 | 0-1 |  | Call changed: Owls +1 point. | 
+17.50 ask | 7 | 0-1 |  | Lions used Double Dip. | 
+18.50 answer | 7 | 1-1 |  | Lions +1 point | 
+19.25 ask | 8 | 1-1 |  | Lions +1 point | 
+20.25 steal | 8 | 1-1 |  | Lions +1 point | 
+21.00 answer | 8 | 2-1 |  | Lions +1 point — steal | 
+22.00 answer | 8 | 2-1 |  |  | 
+23.00 answer | 8 | 2-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+23.75 roundScore | 9 | 2-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+24.75 stakesIntro | 10 | 2-1 | 0-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+25.50 stakesPick | 11 | 2-1 | 0-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+26.50 stakesQ | 12 | 2-1 | 0-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+27.50 stakesReveal | 12 | 5-1 | 0-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+28.25 stakesPick | 13 | 5-1 | 3-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+29.25 stakesQ | 14 | 5-1 | 3-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+30.00 stakesReveal | 14 | 5-4 | 3-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+(the TV reloads)
+30.85 stakesReveal | 14 | 5-4 | 3-0 |  | 
+33.10 stakesPick | 15 | 5-4 | 3-3 |  | 
+34.85 stakesQ | 16 | 5-4 | 3-3 |  | 
+35.60 stakesReveal | 16 | 5-2 | 3-3 |  | 
+36.60 stakesSummary | 17 | 5-2 | 3-1 |  | 
+37.60 final | 18 | 5-2 |  |  | 
+recap: {"margin":3,"sudden":false,"leadChanges":2,"steals":[1,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[0,1],[1,1],[2,1],[5,1],[5,4],[5,2]],"segs":[{"label":"R1","pts":[[1,0],[0,1]]},{"label":"R2","pts":[[1,1],[2,1]]},{"label":"Secret Stakes","pts":[[5,1],[5,4],[5,2]]}],"awards":[{"t":"Best thief","who":"Lions, 1 steal","team":0}]}

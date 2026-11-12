@@ -10,6 +10,7 @@ import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { RouletteTv } from "./Roulette";
+import { StakesTv } from "./Stakes";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -350,6 +351,10 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     <RouletteTv rr={pub.roulette} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))} showQs
       sent={pub.sent} typed={pub.reveal?.typed?.map((x) => x?.[0] ?? null)} ok={pub.reveal?.ok} reveal={sc === "rouletteReveal"} sound={sound}
       clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />} />);
+  /* Secret Stakes: the themes and who has bet; "Bets are in" while each team answers on its own phones; the reveal */
+  if (/^stakes(Pick|Q|Reveal|Summary)$/.test(sc) && pub.stakes) return (
+    <StakesTv sk={pub.stakes} screen={sc} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))} sent={pub.sent}
+      clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sc === "stakesQ" ? 150 : 110} />} />);
   if (sc === "miniQ") return (<>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 50, lineHeight: 1.15 }}>{pub.question}</div>
     <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={150} />

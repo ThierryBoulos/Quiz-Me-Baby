@@ -1,0 +1,62 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+10.50 roundIntro | 2 | 0-0 |  |  | 
+76.00 ask | 3 | 0-0 |  |  | 
+77.75 answer | 3 | 1-0 |  | Lions +1 point | 
+88.50 ask | 4 | 1-0 |  | Lions +1 point | 
+94.00 ask | 4 | 1-0 |  | Owls used Double Dip. | 
+121.00 answer | 4 | 1-1 |  | Owls +1 point | 
+122.00 roundScore | 5 | 1-1 |  | Owls +1 point | 
+158.75 roundIntro | 6 | 1-1 |  | Owls +1 point | 
+173.25 ask | 7 | 1-1 |  | Owls +1 point | 
+192.00 steal | 7 | 1-1 |  | Owls +1 point | 
+208.25 answer | 7 | 1-2 |  | Owls +1 point — steal | 
+240.75 answer | 7 | 1-2 |  |  | 
+255.75 answer | 7 | 1-2 |  | No answer in time: the call stands. | 
+262.25 ask | 8 | 1-2 |  | No answer in time: the call stands. | 
+273.00 answer | 8 | 1-3 |  | Owls +1 point | 
+289.25 answer | 8 | 1-3 |  |  | 
+290.25 answer | 8 | 1-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+293.00 roundScore | 9 | 1-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+306.50 roundIntro | 10 | 1-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+314.50 ask | 11 | 1-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+347.00 steal | 11 | 1-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+350.50 answer | 11 | 1-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+392.00 answer | 11 | 1-3 |  |  | 
+407.00 answer | 11 | 1-3 |  | No answer in time: the call stands. | 
+408.00 ask | 12 | 1-3 |  | No answer in time: the call stands. | 
+469.00 answer | 13 | 1-4 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+469.25 answer | 13 | 1-4 |  |  | 
+484.25 answer | 13 | 1-4 |  | No answer in time: the call stands. | 
+491.00 roundScore | 14 | 1-4 |  | No answer in time: the call stands. | 
+509.75 battleIntro | 15 | 1-4 | 0-0 | No answer in time: the call stands. | 
+516.00 battleQ | 16 | 1-4 | 0-0 | No answer in time: the call stands. | 
+518.00 battleQ | 16 | 1-4 | 1-0 | No answer in time: the call stands. | 
+532.25 battleQ | 16 | 1-4 | 2-0 | No answer in time: the call stands. | 
+551.00 battleQ | 17 | 1-4 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+567.00 battleQ | 18 | 1-4 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+630.25 battleHandoff | 19 | 1-4 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+661.00 battleQ | 20 | 1-4 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+691.50 battleQ | 21 | 1-4 | 3-0 | Time's up. | 
+706.00 battleQ | 21 | 1-4 | 3-1 | Time's up. | 
+722.00 battleQ | 22 | 1-4 | 3-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+737.50 battleQ | 22 | 1-4 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+768.75 battleQ | 23 | 1-4 | 3-3 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+795.75 battleReview | 24 | 1-4 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+808.50 battleSummary | 25 | 1-6 | 3-4 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+821.25 stakesIntro | 26 | 1-6 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+823.00 stakesPick | 27 | 1-6 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+842.00 stakesQ | 28 | 1-6 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+842.75 stakesReveal | 28 | 0-4 | 0-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+869.75 stakesReveal | 28 | 0-4 | 0-0 |  | 
+884.75 stakesReveal | 28 | 0-4 | 0-0 | No answer in time: the call stands. | 
+899.50 stakesPick | 29 | 0-4 | -1--2 | No answer in time: the call stands. | 
+900.50 stakesQ | 30 | 0-4 | -1--2 | No answer in time: the call stands. | 
+908.50 stakesReveal | 30 | 0-2 | -1--2 | No answer in time: the call stands. | 
+913.00 stakesPick | 31 | 0-2 | -1--4 | No answer in time: the call stands. | 
+934.00 stakesQ | 32 | 0-2 | -1--4 | No answer in time: the call stands. | 
+937.25 stakesReveal | 32 | 0-2 | -1--4 | No answer in time: the call stands. | 
+940.00 stakesSummary | 33 | 0-2 | -1--4 | No answer in time: the call stands. | 
+951.75 final | 34 | 0-2 |  | No answer in time: the call stands. | 
+recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[0,1],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[1,1],[1,2],[1,3],[1,4],[1,6],[0,4],[0,2]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"R2","pts":[[1,2],[1,3]]},{"label":"R3","pts":[[1,4]]},{"label":"Battle of the Captains","pts":[[1,6]]},{"label":"Secret Stakes","pts":[[0,4],[0,2]]}],"awards":[{"t":"Best thief","who":"Owls, 1 steal","team":1},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1}]}

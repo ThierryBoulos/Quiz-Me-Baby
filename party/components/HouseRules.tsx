@@ -29,6 +29,8 @@ const MINI_TIMERS: Timer[] = [
   ["tAirport", "Guess the Airport", [20, 30, 45, 60]],
   ["tMajority", "Majority Rules: per question", [10, 15, 20, 30]],
   ["tRoulette", "Russian Roulette", [30, 45, 60, 75, 90]],
+  ["tStakesPick", "Secret Stakes: placing a bet", [10, 15, 20, 30, 45]],
+  ["tStakesQ", "Secret Stakes: answering", [30, 45, 60, 75, 90]],
   ["tDishStep", "Guess the Cocktail or Dish: a new ingredient every", [2, 3, 4, 5]],
   ["tDishType", "Time to type after a buzz (Cocktail or Dish)", [5, 10, 15, 20]],
   ["tBattleHost", "Battle, with a host: per question (out loud)", [5, 7, 10, 15]],

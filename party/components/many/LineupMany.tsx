@@ -78,7 +78,9 @@ const GAMES: [ManyKey, string][] = [
   ["map", "6 maps with places marked. Captains type what they have in common."],
   ["say", "6 questions with many answers. No points for the app's secret answer, or another team's."],
   ["dish", "5 recipes, one ingredient at a time. One guess per team; the faster right, the more points."],
-  ["roulette", "3 spins of the barrel. Every team gets its own chamber and question; one chamber is the bullet."]];
+  ["roulette", "3 spins of the barrel. Every team gets its own chamber and question; one chamber is the bullet."],
+  /* (listed last, the night's last game: 11 Nov, the owner) */
+  ["stakes", "The night's last game."]];
 const LEVELS4 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 const LEVELS3 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const COCKTAILS = [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]] as const, DISHES = [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] as const;

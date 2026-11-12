@@ -21,7 +21,7 @@ const decks = { majority: pick("majority", 15, (q) => q.options?.length === 4), 
   quiz: pick("standard", 12, (q) => q.theme !== "Know the Host"), airport: pick("airport", 6), map: pick("map", 6),
   say: pick("saysame", 6, (q) => (q.pool || []).length >= 5).map((q) => ({ ...q, answer: q.pool[0] })), dish: pick("dish", 5) };
 function rng(seed) { let s = seed >>> 0; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
-const T = { quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 60 };
+const T = { quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 60, stakes: 45, stakesPick: 20 };
 /* a bot's typed answer: right about half the time (a map by its title; a prompt, any word on its list) */
 const typedFor = (key, q, r) => key === "say" ? q.pool[Math.floor(r() * Math.min(4, q.pool.length))] : r() < 0.5 ? (key === "map" ? q.question : q.answer) : "Atlantis";
 
@@ -201,6 +201,70 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   }
   if (!ok) bad++;
   console.log(`Russian Roulette, 3-8 teams: own chambers, calls on each team's own question, the bullet (${Object.entries(seen).map(([k, h]) => `${k} teams ${Math.min(...h)}-${Math.max(...h)}`).join(", ")}), the points and the places — ${ok ? "ok" : "FAILED"}`);
+}
+/* 11 Nov: Secret Stakes, 3 to 8 teams: the night's last game. A bet is fixed at its start (a tenth of the leader's
+   total); each round every captain bets (no bet by time-up: Easy on the first theme), answers the question it bet
+   on, and wins or loses its bet straight on the night's total (never below 0); no places paid on top; Change
+   question deals three new themes; Pause holds the bets' clock */
+{
+  const Q = createRequire(import.meta.url)("../../engine/core.js");
+  let ok = true; const why = [];
+  const fail = (w) => { ok = false; if (why.length < 6) why.push(w); };
+  for (const k of [3, 5, 8]) for (let seed = 1; seed <= 6; seed++) {
+    const r = rng(seed * 97 + k);
+    const D = Q.createDealer({ bank: () => bank, used: () => new Set(), noRepeat: () => true, rng: r });
+    const g = D.buildGame({ standard: false, rounds: 0, themes: [], minis: ["stakes"], teamA: { name: "A" }, teamB: { name: "B" } });
+    const rounds = [...g.stakesGame.rounds, ...g.stakesGame.spare];
+    if (rounds.length < 4) fail("deal short");
+    const teams = Array.from({ length: k }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+    const s = L.newNight(teams, { stakes: rounds }, ["stakes"]);
+    s.teams.forEach((x, t) => { x.score = 20 + t * 9; });                   // (the leader on 20 + 9(k-1): 38, 56, 83)
+    L.startMini(s, 0, T, []);
+    const m = L.miniOf(s), top = Math.max(...s.teams.map((x) => x.score));
+    if (m.unit !== Q.stakesUnit(top)) fail(`unit ${m.unit} for ${top}`);
+    if (s.screen !== "pick" || s.deadline !== 20000) fail("not on the bets with a 20 s clock");
+    /* Change question on the bets: three new themes, the bets cleared */
+    const was = m.qs[0].themes.join();
+    L.stakesBet(s, 0, 1, "hard", 0, T);
+    if (L.swapQ(s, 0, T) !== true || m.qs[0].themes.join() === was || s.picks.some(Boolean)) fail("swap");
+    /* Pause: the bets' clock stops, a bet waits */
+    L.pause(s, 1000); if (!s.paused || L.stakesBet(s, 0, 0, "easy", 1000, T) === true) fail("pause"); L.pause(s, 2000);
+    for (let round = 0; round < 3; round++) {
+      const before = s.teams.map((x) => x.score);
+      /* every team bets but the last, which lets the clock run out */
+      for (let t = 0; t < k - 1; t++) if (L.stakesBet(s, t, Math.floor(r() * 3), ["easy", "medium", "hard", "expert"][Math.floor(r() * 4)], 0, T) !== true) fail("bet refused");
+      if (L.stakesBet(s, 0, 0, "expert", 0, T) === true) fail("a second bet taken");
+      if (s.screen !== "pick") fail("questions up before every bet");
+      L.lockStakes(s, 0, T);
+      if (s.screen !== "q" || s.picks[k - 1].level !== "easy" || s.picks[k - 1].k !== 0) fail("no bet: not the safe one");
+      for (let t = 0; t < k; t++) { const q = L.skQm(s, t); if (!q || q.difficulty !== s.picks[t].level) fail("a level's question isn't that level");
+        L.captainAnswer(s, t, { text: r() < 0.5 ? q.answer : "Atlantis" }); }
+      L.reveal(s);
+      for (let t = 0; t < k; t++) if (s.ok[t] !== (s.typed[t] !== "Atlantis" && L.rightOf("quiz", s.typed[t], L.skQm(s, t)))) fail("a call on another question");
+      const okNow = [...s.ok], picks = s.picks.map((p) => ({ ...p }));
+      L.next(s, 0, T);
+      for (let t = 0; t < k; t++) { const bet = Q.stakesBet(m.unit, picks[t].level), want = Math.max(0, before[t] + (okNow[t] ? bet : -bet));
+        if (s.teams[t].score !== want) fail(`round ${round + 1} team ${t}: ${s.teams[t].score}, not ${want}`); }
+      if (round < 2 && s.screen !== "pick") fail("not back on the bets");
+    }
+    if (s.screen !== "summary") fail("no summary");
+    const at = s.teams.map((x) => x.score);
+    L.next(s, 0, T);
+    if (s.screen !== "final" && L.miniOf(s)?.key !== "sudden") fail("not the end");
+    if (s.teams.some((x, t) => x.score !== at[t])) fail("places paid on top");
+    if (m.net.some((v, t) => at[t] - (20 + t * 9) !== v)) fail("net");
+  }
+  /* a total never below 0 */
+  { const D = Q.createDealer({ bank: () => bank, used: () => new Set(), noRepeat: () => true, rng: rng(5) });
+    const g = D.buildGame({ standard: false, rounds: 0, themes: [], minis: ["stakes"], teamA: { name: "A" }, teamB: { name: "B" } });
+    const s = L.newNight([0, 1, 2].map((t) => ({ name: L.defaultName(t), captain: "" })), { stakes: [...g.stakesGame.rounds] }, ["stakes"]);
+    s.teams[0].score = 90; s.teams[1].score = 4; s.teams[2].score = 0;
+    L.startMini(s, 0, T, []);
+    for (let t = 0; t < 3; t++) L.stakesBet(s, t, 0, "expert", 0, T);
+    L.reveal(s); L.next(s, 0, T);
+    if (s.teams.map((x) => x.score).join() !== "63,0,0") fail("below 0: " + s.teams.map((x) => x.score).join()); }
+  if (!ok) bad++;
+  console.log(`Secret Stakes, 3-8 teams: the bet from the scoreboard, the bets, the safe bet at time-up, each team's own question, the totals (never below 0), Change question, Pause, no places on top — ${ok ? "ok" : "FAILED: " + why.join("; ")}`);
 }
 /* the cap: 60 players on one Majority Rules question, every one of them in, in one go */
 {

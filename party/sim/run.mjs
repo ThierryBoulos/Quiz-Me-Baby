@@ -60,6 +60,13 @@ const NIGHTS = [
   { seed: 29, minis: ["roulette", "flag"], rounds: 4, tieMore: 1 },
   { seed: 30, minis: ["roulette", "closest"], rounds: 4, host: true, tieMore: 1 },
   { seed: 31, minis: ["roulette"], rounds: 0, reload: 11 },
+  /* 11 Nov: Secret Stakes, the night's last game: after the Battle, no host and with a host; with a reload in the middle
+     of it; and slow captains (no bet: the safe one; answers taken at time-up) */
+  { seed: 32, minis: ["flag", "battle", "stakes"], rounds: 4 },
+  { seed: 33, minis: ["closest", "battle", "stakes"], rounds: 4, host: true },
+  { seed: 34, minis: ["stakes"], rounds: 2, reload: 30 },
+  { seed: 35, minis: ["stakes", "battle"], rounds: 3, slow: 0.95 },
+  { seed: 36, minis: ["stakes"], rounds: 4, host: true, events: [{ at: 49, type: "swap" }] },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

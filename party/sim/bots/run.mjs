@@ -175,7 +175,9 @@ const NEXT = { roundIntro: "round/begin", miniIntro: "closest/start", flagIntro:
   auctionResult: "auction/done", miniSummary: "closest/done", flagSummary: "flag/done", dishSummary: "dish/done", mapSummary: "map/done", battleReview: "battle/reviewDone",
   pinIntro: "pin/start", airportIntro: "airport/start", pinReveal: "ui/next", airportReveal: "ui/next", pinSummary: "pin/done", airportSummary: "airport/done",
   majorityIntro: "majority/start", majorityReveal: "ui/next", majoritySummary: "majority/done",
-  rouletteIntro: "roulette/start", rouletteReveal: "ui/next", rouletteSummary: "roulette/done" };
+  rouletteIntro: "roulette/start", rouletteReveal: "ui/next", rouletteSummary: "roulette/done",
+  stakesIntro: "stakes/start", stakesReveal: "ui/next", stakesSummary: "stakes/done" };
+const LEVELS = ["easy", "medium", "hard", "expert"];
 /* reveals and results get a longer look before Next: whoever watches the TV has time to read them */
 const look = (sc) => (/Reveal|Summary|Result|roundScore|answer|Review|Leg$|decided|Tie$/.test(sc) ? DELAY * 2 : DELAY);
 const pinGuess = () => ({ lat: Math.random() * 120 - 50, lon: Math.random() * 300 - 150 });
@@ -212,9 +214,15 @@ function two(pub) {
     return;
   }
   if (sc === "miniQ") { for (const t of [0, 1]) answer(t, { n: String(Math.round((Number(right(t)) || 100) * (0.5 + Math.random()))) }); if (BH && pub.timeUp) go(0, "ui/reveal", {}, 1500); return; }
-  if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ"].includes(sc)) {
+  /* Secret Stakes: each bot captain bets (a theme, a level), once */
+  if (sc === "stakesPick") {
+    for (const t of [0, 1]) { const b = botCap(t); if (b && !pub.stakes?.locked?.[t]) once(`${k}|bet|${t}`, DELAY, () => b.send("next", { move: { type: "stakes/pick", k: Math.floor(Math.random() * 3), level: pick(LEVELS) }, step })); }
+    return;
+  }
+  if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(sc)) {
     const kind = { flagQ: "flag", mapQ: "map", airportQ: "airport" }[sc] || "standard";
-    for (const t of [0, 1]) answer(t, { text: guess(right(t), kind) });
+    /* (tagged as a real phone tags its answer: Russian Roulette's and Secret Stakes' tags were refused before 11 Nov) */
+    for (const t of [0, 1]) answer(t, { text: guess(right(t), kind), ...(sc === "rouletteQ" || sc === "stakesQ" ? { k: `${pub.qid}|${sc}` } : {}) });
     /* the host reveals once both are in, or when the clock has run out (a person's captain who didn't answer) */
     if (BH && ((pub.sent?.[0] && pub.sent?.[1]) || pub.timeUp)) go(0, "ui/reveal", {}, DELAY);
     return;
@@ -247,6 +255,11 @@ function many(pub) {
   if (pub.contest && BH) return judge("m/contestOk", { v: chance(0.5) });
   if (sc === "intro") return judge("m/start");
   if (sc === "reveal" || sc === "summary") return judge("m/next", {}, DELAY * 2);
+  /* Secret Stakes: every bot captain bets (the TV takes the safe bet for anyone who doesn't, at time-up) */
+  if (sc === "pick") {
+    for (const b of bots) if (b.role === "captain" && b.team != null && !pub.stakes?.locked?.[b.team]) once(`${k}|bet|${b.team}`, DELAY, () => b.send("next", { move: { type: "m/bet", k: Math.floor(Math.random() * 3), level: pick(LEVELS) } }));
+    return;
+  }
   if (sc !== "q") return;
   const only = pub.game?.only;
   for (const b of bots) {

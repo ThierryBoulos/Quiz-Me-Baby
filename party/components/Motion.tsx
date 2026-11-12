@@ -61,9 +61,11 @@ export function useFlyingPoints(root: RefObject<HTMLDivElement | null>, pub: Pub
     const set = (t: 0 | 1, v: number) => setShown((s) => (t ? [s[0], v] : [v, s[1]]) as Two<number>);
     ([0, 1] as const).forEach((t) => {
       const d = now[t] - prev[t];
-      if (d < 0) { set(t, now[t]); return; }
+      /* (a row that comes in on its own beat, Secret Stakes' reveal: its points go up, or come off, when it does) */
+      const own = Number(root.current?.querySelector(`[data-fly-src~="${t}"]`)?.getAttribute("data-fly-at") || 0);
+      const wait = Math.max(0, scr.current.at + flyAt(scr.current.screen) + own - Date.now());
+      if (d < 0) { if (own && wait > 0) timers.push(setTimeout(() => set(t, now[t]), wait + 300)); else set(t, now[t]); return; }
       if (d === 0) return;
-      const wait = Math.max(0, scr.current.at + flyAt(scr.current.screen) - Date.now());
       timers.push(setTimeout(() => {
         const n = d >= 3 ? Math.min(d, 6) : 1;
         if (!launch(root.current, t, n, d)) { set(t, now[t]); return; }

@@ -13,7 +13,7 @@ export type W = 0 | 1 | "tie" | "none";
 export type PKind = "ask" | "steal" | "dish" | "sudden" | "battle" | "battleTie";
 export type Where = string | string[];
 /* the screens where the app's calls are shown, and can be contested */
-export const CONTEST_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "airportReveal", "rouletteReveal", "dishReveal", "battleReview",
+export const CONTEST_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "airportReveal", "rouletteReveal", "stakesReveal", "dishReveal", "battleReview",
   /* sudden death and the tie-breaker: the question just decided, on the screen after it */
   "final", "battleSummary", "sudden", "battleTie"];
 /* ...where the night goes on meanwhile: no buzz until the contest is decided (its clock waits too) */
@@ -36,6 +36,8 @@ export const HOST_MOVES: Record<string, Where> = {
   "majority/start": "majorityIntro", "majority/swap": "majorityQ", "majority/award": "majoritySummary", "majority/done": "majoritySummary",
   /* Russian Roulette: Spin (the first lap), Change question (a new barrel, spun), the points by hand when level, Next */
   "roulette/start": "rouletteIntro", "roulette/swap": "rouletteQ", "roulette/award": "rouletteSummary", "roulette/done": "rouletteSummary", "ui/rouletteOk": "rouletteReveal",
+  /* Secret Stakes: Start, Change question (three new themes, before anyone has answered), the calls, Next */
+  "stakes/start": "stakesIntro", "stakes/swap": ["stakesPick", "stakesQ"], "stakes/done": "stakesSummary", "ui/stakesOk": "stakesReveal",
   /* Majority Rules' join screen: take someone who isn't here off their team's list (or put them back) */
   "ui/mrOut": "majorityIntro",
   "dish/start": "dishIntro", "dish/swap": "dishQ", "dish/right": "dishQ", "dish/wrong": "dishQ", "dish/next": "dishReveal",
@@ -50,9 +52,9 @@ export const HOST_MOVES: Record<string, Where> = {
   "ui/contestOk": CONTEST_SCREENS, "ui/flip": CONTEST_SCREENS, "battle/reviewDone": "battleReview",
   /* the night's intro (before the first round): Let's go */
   "ui/introGo": "*",
-  "ui/closeLifeline": "*", "ui/setScore": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "battleQ"],
-  "ui/reveal": ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/airportOk": "airportReveal",
-  "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal"],
+  "ui/closeLifeline": "*", "ui/setScore": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ"],
+  "ui/reveal": ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/airportOk": "airportReveal",
+  "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal"],
   "ui/sdRight": ["sudden", "battleTie"], "ui/sdWrong": ["sudden", "battleTie"],
   "ui/exit": "final", "ui/again": "final",
   /* level at the end of a mini-game: one more, or a point each */
@@ -65,8 +67,8 @@ export const HOST_MOVES: Record<string, Where> = {
 /* no host: the question on screen changed, if both captains agree (before anyone has answered it):
    the engine's own swap for each screen, and what the TV and the phones call the thing changed */
 export const SWAPS: Record<string, string> = { ask: "round/swap", miniQ: "closest/swap", flagQ: "flag/swap", pinQ: "pin/swap", airportQ: "airport/swap",
-  majorityQ: "majority/swap", dishQ: "dish/swap", mapQ: "map/swap", sayQ: "say/swap", rouletteQ: "roulette/swap", battleQ: "battle/swap" };
-export const swapWord = (sc: string, q: G) => sc === "flagQ" ? "flag" : sc === "pinQ" ? "landmark" : sc === "airportQ" ? "board" : sc === "mapQ" ? "map" : sc === "rouletteQ" ? "barrel"
+  majorityQ: "majority/swap", dishQ: "dish/swap", mapQ: "map/swap", sayQ: "say/swap", rouletteQ: "roulette/swap", stakesPick: "stakes/swap", stakesQ: "stakes/swap", battleQ: "battle/swap" };
+export const swapWord = (sc: string, q: G) => sc === "flagQ" ? "flag" : sc === "pinQ" ? "landmark" : sc === "airportQ" ? "board" : sc === "mapQ" ? "map" : sc === "rouletteQ" ? "barrel" : sc === "stakesPick" || sc === "stakesQ" ? "set of themes"
   : sc === "sayQ" ? "prompt" : sc === "dishQ" ? dishKind(q).toLowerCase() : "question";
 /* What a CAPTAIN may tap, and who: "any" captain, the team whose "turn" it
    is, the "other" one (the referee), or the "lead": Team A's captain (Team
@@ -85,6 +87,9 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   "airport/start": { where: "airportIntro", who: "lead", nohostOnly: true },
   "majority/start": { where: "majorityIntro", who: "lead", nohostOnly: true },
   "roulette/start": { where: "rouletteIntro", who: "lead", nohostOnly: true },
+  "stakes/start": { where: "stakesIntro", who: "lead", nohostOnly: true },
+  /* Secret Stakes: each captain bets for their own team, host or not */
+  "stakes/pick": { where: "stakesPick", who: "any" },
   /* no host: a captain asks to take an absent teammate off the list; the other captain agrees, or not */
   "ui/mrOut": { where: "majorityIntro", who: "any", nohostOnly: true },
   "ui/mrOutOk": { where: "majorityIntro", who: "any", nohostOnly: true },
@@ -103,7 +108,7 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   "battle/done": { where: "battleSummary", who: "lead", nohostOnly: true },
   "round/afterAnswer": { where: "answer", who: "lead", nohostOnly: true },
   "round/next": { where: "roundScore", who: "lead", nohostOnly: true },
-  "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal", "mapReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal"], who: "lead", nohostOnly: true },
+  "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal", "mapReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal"], who: "lead", nohostOnly: true },
   "dish/next": { where: "dishReveal", who: "lead", nohostOnly: true },
   "auction/nextLeg": { where: "auctionLeg", who: "lead", nohostOnly: true },
   "auction/done": { where: "auctionResult", who: "lead", nohostOnly: true },
@@ -113,9 +118,10 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   "airport/done": { where: "airportSummary", who: "lead", nohostOnly: true },
   "majority/done": { where: "majoritySummary", who: "lead", nohostOnly: true },
   "roulette/done": { where: "rouletteSummary", who: "lead", nohostOnly: true },
+  "stakes/done": { where: "stakesSummary", who: "lead", nohostOnly: true },
   "dish/done": { where: "dishSummary", who: "lead", nohostOnly: true },
   "map/done": { where: "mapSummary", who: "lead", nohostOnly: true },
-  "ui/pause": { where: ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "battleQ"], who: "any", nohostOnly: true },
+  "ui/pause": { where: ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ"], who: "any", nohostOnly: true },
   "ui/closeLifeline": { where: "*", who: "turn", nohostOnly: true },
   /* The app's calls stand unless contested: either captain contests one (host or not); with no host
      the other captain agrees or not (the app's call stands after a while); with a host, the host decides */
@@ -139,26 +145,26 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
    right or wrong, pausing. They skip the stale-tap check (and don't bump the
    step): a host tapping +1 five times fast must get five, and a tap on
    "Next" straight after marking a team must not be refused as stale. */
-export const SAME_SCREEN = new Set(["ui/setScore", "ui/askScore", "ui/agree", "auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/airportOk", "ui/rouletteOk", "ui/mrOut", "ui/mrOutOk", "ui/pause", "ui/pauseFriend", "ui/startCall", "ui/contest", "ui/contestOk", "ui/flip"]);
+export const SAME_SCREEN = new Set(["ui/setScore", "ui/askScore", "ui/agree", "auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/airportOk", "ui/rouletteOk", "ui/stakesOk", "stakes/pick", "ui/mrOut", "ui/mrOutOk", "ui/pause", "ui/pauseFriend", "ui/startCall", "ui/contest", "ui/contestOk", "ui/flip"]);
 /* no host: the screens that wait for the lead captain's Start or Next (nothing moves on by itself) */
-export const WAITS_FOR_NEXT = new Set(["battleReview", "roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "pinIntro", "airportIntro", "majorityIntro", "rouletteIntro", "battleIntro", "battleHandoff",
-  "answer", "roundScore", "closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "dishReveal", "auctionLeg", "auctionResult",
-  "miniSummary", "flagSummary", "dishSummary", "mapSummary", "saySummary", "pinSummary", "airportSummary", "majoritySummary", "rouletteSummary", "battleSummary", "sudden", DECIDED, ...TIE_SCREENS]);
+export const WAITS_FOR_NEXT = new Set(["battleReview", "roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "pinIntro", "airportIntro", "majorityIntro", "rouletteIntro", "stakesIntro", "battleIntro", "battleHandoff",
+  "answer", "roundScore", "closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal", "dishReveal", "auctionLeg", "auctionResult",
+  "miniSummary", "flagSummary", "dishSummary", "mapSummary", "saySummary", "pinSummary", "airportSummary", "majoritySummary", "rouletteSummary", "stakesSummary", "battleSummary", "sudden", DECIDED, ...TIE_SCREENS]);
 export const other = (t: 0 | 1) => (t === 0 ? 1 : 0) as 0 | 1;
 /* a night's difficulty from a phone: "mixed" (all four levels), or levels joined with "+"; anything else is the default */
 export const DIFFS = ["easy", "medium", "hard", "expert", "mixed"];
 export const cleanDiff = (d: unknown): string => d === "mixed" ? "mixed" : QMB.diffsOf(String(d ?? "")).join("+");
 /* a picture game's levels from the phone: known ones only, or the default */
 export const levels = (x: unknown, keys: string[], dflt: string[]) => { const v = (Array.isArray(x) ? x : []).filter((k) => keys.includes(k)); return v.length ? v : dflt; };
-export const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority", "roulette", "battle"];
+export const PARTY_MINIS = ["closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority", "roulette", "battle", "stakes"];
 /* the server's timestamps, in either spelling ("…T12:00:00.123456+00:00" from a read, "… 12:00:00.123456+00" from a push), as ms */
 export const serverMs = (x: string) => Date.parse(String(x || "").replace(" ", "T").replace(/(\.\d{3})\d+/, "$1").replace(/([+-]\d\d)$/, "$1:00"));
 export const dishKind = (q: G) => ((q?.level || "")[0] === "c" ? "Cocktail" : "Dish");
 export const dishTotal = (q: G) => (q.ings.length - 1) * T().tDishStep + DISH_LAST;
 export const miniOf = (sc: string): MiniKey | null => /^(mini|closest)/.test(sc) ? "closest" : /^flag/.test(sc) ? "flag" : /^dish/.test(sc) ? "dish"
-  : /^map/.test(sc) ? "map" : /^auction/.test(sc) ? "auction" : /^say/.test(sc) ? "saysame" : /^pin/.test(sc) ? "pin" : /^airport/.test(sc) ? "airport" : /^majority/.test(sc) ? "majority" : /^roulette/.test(sc) ? "roulette" : /^battle/.test(sc) ? "battle" : null;
+  : /^map/.test(sc) ? "map" : /^auction/.test(sc) ? "auction" : /^say/.test(sc) ? "saysame" : /^pin/.test(sc) ? "pin" : /^airport/.test(sc) ? "airport" : /^majority/.test(sc) ? "majority" : /^roulette/.test(sc) ? "roulette" : /^stakes/.test(sc) ? "stakes" : /^battle/.test(sc) ? "battle" : null;
 /* the engine's move prefix for each mini-game */
-export const PREFIX: Record<MiniKey, string> = { closest: "closest", flag: "flag", dish: "dish", map: "map", auction: "auction", saysame: "say", pin: "pin", airport: "airport", majority: "majority", roulette: "roulette", battle: "battle" };
+export const PREFIX: Record<MiniKey, string> = { closest: "closest", flag: "flag", dish: "dish", map: "map", auction: "auction", saysame: "say", pin: "pin", airport: "airport", majority: "majority", roulette: "roulette", battle: "battle", stakes: "stakes" };
 /* Closest, Say the Same, Flag, Pin and Airport: the engine goes straight into a tie-breaker leg when level at the end;
    Party stops there first and asks (One more / A point each), as Dish and Map already do */
 export const TIES: Record<string, { key: MiniKey; q: string; summary: string; award: string }> = {
@@ -170,7 +176,7 @@ export const TIES: Record<string, { key: MiniKey; q: string; summary: string; aw
   majorityTie: { key: "majority", q: "majorityQ", summary: "majoritySummary", award: "majority/award" },
 };
 export const miniState = (g: G, k: MiniKey | null) => k === "closest" ? g.mini : k === "flag" ? g.flagGame : k === "map" ? g.mapGame : k === "dish" ? g.dishGame : k === "saysame" ? g.saySame
-  : k === "pin" ? g.pinGame : k === "airport" ? g.airportGame : k === "majority" ? g.majorityGame : k === "roulette" ? g.rouletteGame : null;
+  : k === "pin" ? g.pinGame : k === "airport" ? g.airportGame : k === "majority" ? g.majorityGame : k === "roulette" ? g.rouletteGame : k === "stakes" ? g.stakesGame : null;
 /* Drop the Pin: a pin from a phone, if it is one ({lat, lon} in range); else null */
 export const asPin = (x: unknown): { lat: number; lon: number } | null => {
   const p = x as { lat?: unknown; lon?: unknown } | null;

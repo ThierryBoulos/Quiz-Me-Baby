@@ -5,6 +5,7 @@ import type { Member } from "../room";
 import { miniOf, other, type G, type W } from "./rules";
 import type { TvState } from "./state";
 import { offBy, type Two } from "../game";
+import { skQ } from "../stakes";
 
 /* who answers first: fixed for the whole game when it starts (Settings → alternate) */
 export const seatOf = (g: G) => ({ alternateFirst: !!g?.alternateFirst });
@@ -105,11 +106,13 @@ export function callsOf(s: TvState): Call[] {
     /* a steal with the first team's own answer gave it back to them: one call, theirs */
     if (res.steal && !res.same) out.push(res.skipped ? { id: "steal", team: th, text: said(s.typed[th]), ok: false, done: true, skipped: true, note: "skipped" }
       : { id: "steal", team: th, text: said(s.typed[th]), ok: !!res.stolen, done: !!res.correct, note: res.fresh ? "a new question" : "steal" });
-  } else if (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal" || sc === "rouletteReveal") {
-    /* (Russian Roulette: each team had its own question, so each call carries its own answer) */
+  } else if (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal" || sc === "rouletteReveal" || sc === "stakesReveal") {
+    /* (Russian Roulette and Secret Stakes: each team had its own question, so each call carries its own answer) */
     const lap = sc === "rouletteReveal" ? g.rouletteGame?.qs[g.rouletteGame.i] : null;
+    const sk = sc === "stakesReveal" ? g.stakesGame : null;
     for (const t of [0, 1] as const) out.push({ id: "t" + t, team: t, text: said(s.typed[t]), ok: !!s.ok[t], ...(s.app[t] != null && s.ok[t] != null && s.app[t] !== s.ok[t] ? { changed: true } : {}),
-      ...(lap?.draw ? { answer: String(lap.ch[lap.draw[t]]?.q?.answer ?? "") } : {}) });
+      ...(lap?.draw ? { answer: String(lap.ch[lap.draw[t]]?.q?.answer ?? "") } : {}),
+      ...(sk ? { answer: String(skQ(sk, t)?.answer ?? "") } : {}) });
   } else if (sc === "dishReveal") {
     (s.legLog || []).forEach((e, i) => out.push({ id: "d" + i, team: e.team, text: e.text, ok: e.ok }));
   } else if (sc === "battleReview" && g.battle) {

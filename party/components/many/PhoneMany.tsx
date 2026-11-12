@@ -20,6 +20,8 @@ import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
+import { StakesBet, StakesPhone } from "../Stakes";
+import { signedPts, skLevelWord } from "@/lib/stakes";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 /* (only the one for this very question: the TV writes the screen first and the answer just after, so a read in between
@@ -151,6 +153,10 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const move = (type: string, extra: Record<string, unknown> = {}) => void send("judge", { move: { type, ...extra } });
   const opts = useMemo(() => order(pub.options || [], me.name + (pub.qid || "")), [pub.options, me.name, pub.qid]);
   const sentMine = mine != null && pub.sent[mine];
+  /* Secret Stakes: the captain's bet being made (a theme, a level), cleared each round */
+  const sk = pub.stakes, [skTheme, setSkTheme] = useState<number | null>(null), [skLevel, setSkLevel] = useState<string | null>(null);
+  const skRound = `${sk?.round}|${sk?.themes?.join()}`;
+  useEffect(() => { setSkTheme(null); setSkLevel(null); }, [skRound]);
   /* a tap locks in at once on this phone (the owner, 1 Nov: the four stayed up a second while the TV answered) */
   const [tapped, setTapped] = useState<string | null>(null);
   const voted = !!pub.voted?.includes(me.name) || tapped === `${pub.qid}`, onList = !!pub.roster?.includes(me.name);
@@ -181,6 +187,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         </div></ToSide>)}
       {g.key === "quiz" && pub.theme && <ToSide order={2}><div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div></ToSide>}
       {g.key === "roulette" && rr && <ToSide order={3}><RrPhone rr={rr} me={host ? null : mine ?? null} teams={rrT} host={host} /></ToSide>}
+      {g.key === "stakes" && sk && <ToSide order={3} className="noselect" {...noCopy}><StakesPhone sk={sk} screen="stakesQ" teams={rrT} me={host ? null : mine ?? null} /></ToSide>}
       {g.key === "pin" && <ToSide order={4} className="noselect" {...noCopy}>{small
         ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
         : <PinPhoto pin={pub.pin} h={230} small zoom />}</ToSide>}
@@ -208,6 +215,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     if (g.key === "roulette" && rr?.rev) { const got = rr.rev.got[mine] ?? 0, x = R.typed?.[mine], bullet = rr.rev.level[mine] === "bullet";
       if (R.ok?.[mine]) return { text: `Your team: right · ${signed(got)}`, tone: "ok" };
       return { text: `Your team: ${x ? "wrong" : "no answer"}${bullet ? ` on the bullet · ${signed(got)}` : ""}`, tone: got < 0 || x ? "no" : "mid" }; }
+    /* Secret Stakes: right or wrong, and what the bet came to */
+    if (g.key === "stakes" && sk?.rev) { const d = sk.rev.delta[mine] ?? 0, lv = skLevelWord(sk.rev.level[mine]);
+      return R.ok?.[mine] ? { text: `Your team: right on ${lv} · ${signedPts(d)}`, tone: d > 0 ? "ok" : "mid" } : { text: `Your team: ${R.typed?.[mine] ? "wrong" : "no answer"} on ${lv} · ${signedPts(d)}`, tone: d < 0 ? "no" : "mid" }; }
     const v = R.pts?.[mine] ?? 0, p = R.places?.[mine];
     if (v > 0) return { text: `Your team: ${p ? place(p) + " · " : ""}+${v}`, tone: "ok" };
     if (typedKey(g.key)) { const x = R.typed?.[mine]; if (!x) return { text: "Your team: no answer", tone: "mid" };
@@ -235,6 +245,11 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* a game's result (the owner's pick, 1 Nov): your team in a pill, who won in one line, then the standings: place,
      team, the game's score, and what it adds to the night */
   const Summary = () => { if (!g || !pub.summary) return null; if (held) return <WatchTv />;
+    /* Secret Stakes: no places and nothing more to the night, the bets were the points */
+    if (g.key === "stakes" && sk?.sum) { const v = mine != null ? sk.sum.net[mine] ?? 0 : 0; return (<>
+      {mine != null && <YouPill text={`Your team ${v > 0 ? "won" : v < 0 ? "lost" : "broke even"}${v ? ` ${Math.abs(v)}` : ""} on its bets`} tone={v > 0 ? "ok" : v < 0 ? "no" : "mid"} />}
+      <TitleLine eyebrow={g.title} text="The bets are settled" color="var(--color-gold)" />
+      <StakesPhone sk={sk} screen="stakesSummary" teams={rrT} me={mine ?? null} /></>); }
     const S = pub.summary, P = paid(pub), mineAw = mine != null ? S.award[mine] : 0;
     const order = T.map((_, t) => t).sort((a, b) => S.places[a] - S.places[b] || a - b);
     const rows: RRow[] = order.map((t) => ({ team: t, name: T[t].name, color: T[t].color, letter: LETTERS[t], place: S.award[t] > 0 ? S.places[t] : null,
@@ -275,20 +290,35 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           </div>)}
         <Main label={g.key === "majority" ? "Start: everyone's in" : g.key === "roulette" ? "Spin" : "Start"} on={() => move("m/start")} />
       </>)}
+      {/* Secret Stakes: the bets as they come in (the host sees every team's); Pause, Change question */}
+      {host && sc === "pick" && g && sk && (<>
+        <div className="flex items-center justify-between"><div className="eyebrow">Secret Stakes · placing bets</div><Clock deadline={pub.deadline} left={pub.left} size={60} /></div>
+        <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={null} />
+        <p className="text-center text-13 text-[var(--color-ink-3)]">No bet by time&rsquo;s up: the safe one, Easy on the first theme.</p>
+        <div className="flex flex-wrap justify-center gap-2 mt-auto dock-group py-2" style={{ background: "var(--color-bg)" }}>
+          <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
+          <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change the themes</button>
+        </div>
+      </>)}
       {host && sc === "q" && g && (<>
         <OnScreen />
+        {g.key === "stakes" && secret.answers && sk && (
+          <div className="card cue-card flex flex-col gap-1" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
+            <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answers. Only you see these</div>
+            {secret.answers.map((a, i) => <div key={i} className="text-15"><b style={{ color: T[i]?.color }}><bdi>{T[i]?.name}</bdi></b>: <b style={{ color: "var(--color-gold)" }}><bdi>{a}</bdi></b></div>)}
+          </div>)}
         {g.key === "roulette" && !spinning && secret.answers && rr && (
           <div className="card cue-card flex flex-col gap-1" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answers. Only you see these</div>
             {secret.answers.map((a, i) => <div key={i} className="text-15"><b style={{ color: T[i]?.color }}><bdi>{T[i]?.name}</bdi></b> · {rr.draw[i]?.theme}: <b style={{ color: "var(--color-gold)" }}><bdi>{a}</bdi></b></div>)}
           </div>)}
-        {g.key !== "roulette" && secret.answer && (
+        {g.key !== "roulette" && g.key !== "stakes" && secret.answer && (
           <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{g.key === "say" ? "The app's secret answer: it scores nothing. Only you see this" : "The answer. Only you see this"}</div>
             <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(secret.answer)) : secret.answer}</div>
             {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
           </div>)}
-        {(g.key === "roulette" ? !spinning && !secret.answers : !secret.answer) && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Getting the answer…</p>}
+        {(g.key === "roulette" ? !spinning && !secret.answers : g.key === "stakes" ? !secret.answers : !secret.answer) && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Getting the answer…</p>}
         {/* who's in: every team, as the TV shows them */}
         {/* who has answered, live (the owner, 31 Oct): a count, then each team ticked green as it locks in */}
         {(() => { const who = T.map((_, i) => i).filter((i) => !g.only || g.only.includes(i)), n = who.filter((i) => pub.sent[i]).length; return (
@@ -306,14 +336,14 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {/* (docked: sideways, the question pushed these below the fold; 5 Nov review) */}
         <div className="flex flex-wrap justify-center gap-2 mt-auto dock-group py-2" style={{ background: "var(--color-bg)" }}>
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
-          {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change question</button>}
+          {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
         </div>
       </>)}
       {host && sc === "reveal" && g && R && (<>
-        {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={null} teams={rrT} /> : <Answer />}
+        {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={null} teams={rrT} /> : g.key === "stakes" && sk ? <StakesPhone sk={sk} screen="stakesReveal" teams={rrT} me={null} /> : <Answer />}
         {typedKey(g.key) ? (<>
           {/* the host is told the calls are theirs to change (the reviewers, 31 Oct) */}
           <p className="text-center text-13 text-[var(--color-ink-2)]">The app made these calls. Tap one to change it.</p>
@@ -324,12 +354,13 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
                 <div className="eyebrow flex items-center gap-2" style={{ color: t.color, letterSpacing: ".1em" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
                 {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
                 {g.key === "roulette" && rr?.rev && <div className="text-13 text-[var(--color-ink-2)] leading-snug">{rr.draw[i]?.theme} · {rrLevelWord(rr.rev.level[i])} · Answer: <b><bdi>{rr.rev.answer[i]}</bdi></b></div>}
+                {g.key === "stakes" && sk?.rev && <div className="text-13 text-[var(--color-ink-2)] leading-snug">{sk.rev.theme[i]} · {skLevelWord(sk.rev.level[i])} · Answer: <b><bdi>{sk.rev.answer[i]}</bdi></b></div>}
               </div>
               {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={flips[`${pub.qid}|${i}`] ?? v} say={g.key === "say"} neg={g.key === "say" ? SAY_WHY[R.why?.[i] || ""] : undefined} label={`Rule on ${t.name}’s answer`} busy={false}
                 onPick={(nv) => { if ((flips[`${pub.qid}|${i}`] ?? v) === nv) return; setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i }); }} /></div>}
             </div>); })}</div></>
         ) : <Table />}
-        {g.key !== "majority" && <Big text={W.text} color={W.color} />}
+        {g.key !== "majority" && g.key !== "stakes" && <Big text={W.text} color={W.color} />}
         <ContestMany pub={pub} mine={null} host busy={busy} act={(mv) => { const { type, ...x } = mv; move(String(type), x); }} />
         {/* (Next waits for the ruling, as with two teams) */}
         {pub.contest ? <p className="text-center text-13 text-[var(--color-ink-3)] mt-auto" role="status">Next comes back once you&rsquo;ve ruled on the contest.</p>
@@ -355,7 +386,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       </>)}
 
       {/* MAJORITY RULES: everyone on the list answers, on their own phone */}
-      {!host && sc === "q" && pub.paused && (
+      {!host && (sc === "q" || sc === "pick") && pub.paused && (
         <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div>
           <p className="text-14 text-[var(--color-ink-2)] mt-1">The host paused it. The question comes back when the clock restarts.</p></div>)}
       {!host && sc === "q" && !pub.paused && g?.key === "majority" && (<>
@@ -371,6 +402,15 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           </div>}
       </>)}
 
+      {/* Secret Stakes: the captain bets (a theme, a level, Lock in); everyone else sees the themes, and their captain's bet once it's in */}
+      {!host && sc === "pick" && !pub.paused && g && sk && (<>
+        <p className="text-center font-bold text-18" role="status" style={{ color: cap && mine != null && !sk.locked[mine] ? "var(--color-gold)" : undefined }}>
+          {cap ? (mine != null && sk.locked[mine] ? "Bet locked in. Waiting for the others." : "Place your bet: a theme, then a level") : "Secret Stakes: your captain bets"}</p>
+        <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} size={70} /></div>
+        {cap && mine != null && !sk.locked[mine] ? <StakesBet sk={sk} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy}
+            onLock={() => { if (skTheme != null && skLevel) void send("next", { move: { type: "m/bet", k: skTheme, level: skLevel } }); }} />
+          : <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={mine ?? null} cap={false} />}
+      </>)}
       {/* sudden death: a captain whose team isn't level at the top watches */}
       {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>Sudden death: only the teams tied at the top answer this one.</Line></>)}
       {/* THE CAPTAIN answers the rest */}
@@ -425,8 +465,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {/* sudden death keeps its headline: it's the night's winner */}
         {g.key === "sudden" && <Big text={W.text} color={W.color} />}
         {(() => { const y = youOf(); return y && <YouPill text={y.text} tone={y.tone} />; })()}
-        {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={mine ?? null} teams={rrT} /> : <Answer />}
-        <Table />
+        {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={mine ?? null} teams={rrT} /> : g.key === "stakes" && sk ? <StakesPhone sk={sk} screen="stakesReveal" teams={rrT} me={mine ?? null} /> : <Answer />}
+        {g.key !== "stakes" && <Table />}
         <ContestMany pub={pub} mine={cap ? mine : null} host={false} busy={busy} act={(mv) => void send("next", { move: mv })} />
       </>)}
       {!host && sc === "summary" && <Summary />}

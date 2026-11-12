@@ -80,6 +80,9 @@ there; then mark them here with the wave.
 - **todo**: Anyone can try room codes and find live rooms (about 900,000 codes, no limit).
 - **done (5 Nov 2026)**: The 6-digit TV take-over code has no attempt limit (now 5 tries).
 - **todo**: Team changes and stepping down allowed mid-game.
+- **todo**: Secret Stakes picks: keep them off other teams' phones entirely (a private row per team). Today every
+  team's bet travels in the room's public view; each phone only draws its own team's, so it's hidden on screen but
+  not from someone reading the room's data (11 Nov 2026).
 
 ---
 

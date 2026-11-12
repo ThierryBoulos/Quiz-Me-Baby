@@ -16,7 +16,7 @@ import { usePresent } from "../tv/usePresent";
 import { DISH_LAST, T_AWAY, T_LOBBY_AWAY } from "../game";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, captainAnswer, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, lineup, miniOf, newNight, next, pause, reveal, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, captainAnswer, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
@@ -57,12 +57,18 @@ export async function setTeams(code: string, state: Record<string, unknown>, mem
 }
 
 /* each game's seconds, from the TV's house settings */
-const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST, roulette: t.tRoulette }; };
+const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST, roulette: t.tRoulette,
+  stakes: t.tStakesQ, stakesPick: t.tStakesPick }; };
 /* Russian Roulette: the questions of a lap's drawn chambers count as played on this TV (a dark chamber's don't) */
 function markRoulette(s: StateM) {
   const m = s.minis[s.mi], lap = m?.key === "roulette" && s.screen === "q" ? (m.qs[m.i] as { ch: { q: Q }[]; draw?: number[] }) : null;
   if (!lap?.draw) return;
   try { const u = new Set<string>(JSON.parse(localStorage.getItem(USED_KEY) || "[]")); lap.draw.forEach((j) => { const id = lap.ch[j]?.q?.id; if (id) u.add(id); }); localStorage.setItem(USED_KEY, JSON.stringify([...u])); } catch { /* in memory only */ }
+}
+/* Secret Stakes: only the questions a team bet on count as played (a theme or level nobody picked isn't used up) */
+function markStakes(s: StateM) {
+  if (s.minis[s.mi]?.key !== "stakes" || s.screen !== "q") return;
+  try { const u = new Set<string>(JSON.parse(localStorage.getItem(USED_KEY) || "[]")); s.teams.forEach((_, t) => { const id = skQm(s, t)?.id; if (id) u.add(id); }); localStorage.setItem(USED_KEY, JSON.stringify([...u])); } catch { /* in memory only */ }
 }
 
 export function useTvMany(code: string, isTv: boolean, room: Room | null, members: Member[], phone = false) {
@@ -97,12 +103,14 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publishRef = useRef<() => void>(() => {});
   const marked = useRef<number | null>(null);    // the Russian Roulette spin whose questions are marked played
+  const markedSk = useRef<number | null>(null);  // ...and the Secret Stakes round's
   const retryT = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publish = useCallback(() => {
     if (soon.current) { clearTimeout(soon.current); soon.current = null; }
     const s = st.current; if (!s) return;
     imadMany(s);                                    // (Imad's line for this moment, if Settings has him on)
     if (s.screen === "q" && s.spinAt && s.spinAt !== marked.current) { marked.current = s.spinAt; markRoulette(s); }
+    if (s.screen === "q" && miniOf(s)?.key === "stakes" && s.qn !== markedSk.current) { markedSk.current = s.qn ?? null; markStakes(s); }
     const { pub: p, secret } = buildMany(s);
     p.ack = ack.current;
     const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at; p.now = Date.now();
@@ -222,7 +230,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
            back, as one game (scored as one: the owner, 11 Nov), so 5 rounds are three games, the last one round */
         const rounds = picked.includes("quiz") ? Math.max(1, Math.min(MANY_ROUNDS, Math.floor(Number(cfg.rounds) || 1))) : 0;
         const games = Math.ceil(rounds / 2);
-        const keys = lineup(games, picked.filter((x) => x !== "quiz"));
+        /* (Secret Stakes: always the night's last game, 11 Nov, the owner) */
+        const keys = [...lineup(games, picked.filter((x) => x !== "quiz" && x !== "stakes")), ...(picked.includes("stakes") ? ["stakes" as ManyKey] : [])];
         if (!keys.length) { await lobbyWrite({ note: { text: "Pick at least one game.", at: Date.now() } }); return; }
         let b: Bank;
         try { b = await loadBank(code); } catch { await sb().from("rooms").update({ state: { ...room.state, note: { text: phoneRef.current ? "The game phone couldn't load the questions. Check its internet, then tap Start again." : "The TV couldn't load the questions. Check its internet, then tap Start again.", at: Date.now() } } }).eq("code", code); return; }
@@ -261,6 +270,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
           majorityLevels: lv(cfg.majorityLevels, QMB.MAJORITY_ORDER, QMB.MAJORITY_ORDER),
           /* Russian Roulette: a barrel of 6 chambers, 8 with 7 or 8 teams; Sexy Time and Lebanon only if the host picked them */
           rouletteChambers: QMB.rouletteChambers(k), rouletteThemes: chosen,
+          /* Secret Stakes: the broad themes and the host's picks, never the host's own trivia */
+          stakesThemes: chosen,
           teamA: { name: "A", captain: "", players: "" }, teamB: { name: "B", captain: "", players: "" },
           pickClosest: hand("pickClosest"), pickAuction: [], pickSaySame: hand("pickSaySame"), pickMap: hand("pickMap"), pickFlag: hand("pickFlag"), pickDish: hand("pickDish"),
           pickPin: hand("pickPin"), pickAirport: hand("pickAirport"), pickMajority: hand("pickMajority") });
@@ -272,7 +283,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const all = (m: G): Q[] => [...(m?.qs || []), ...(m?.spare || [])];
         const qn = rounds * 2 + 4;
         const decks: Partial<Record<ManyKey, Q[]>> = { quiz: quiz.slice(0, qn), sudden: quiz.slice(qn), flag: all(g.flagGame), airport: all(g.airportGame), map: all(g.mapGame),
-          closest: all(g.mini), pin: all(g.pinGame), majority: all(g.majorityGame), say, dish: all(g.dishGame), roulette: all(g.rouletteGame) };
+          closest: all(g.mini), pin: all(g.pinGame), majority: all(g.majorityGame), say, dish: all(g.dishGame), roulette: all(g.rouletteGame),
+          stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])] };
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
         /* each question-round game two rounds of two questions, the last one round if the rounds are odd */
@@ -335,6 +347,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     /* a captain contests a call on the reveal (8 Nov, the owner): the host decides */
     if (a.kind === "next" && from.role === "captain") {
       const mv = (a.payload.move || {}) as G;
+      /* Secret Stakes: a captain's bet, for their own team */
+      if (String(mv.type) === "m/bet") { const r = stakesBet(s, from.team as number, mv.k, mv.level, Date.now(), timers()); reply(r === true ? "+" : r); publish(); return; }
       if (String(mv.type) !== "m/contest") { reply("-"); return; }
       const r = contestCall(s, from.team as number, Number(mv.t));
       reply(r === true ? "+" : r); publish(); return;
@@ -441,11 +455,11 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const s = st.current, now = Date.now(); if (!s) return;
       if (document.visibilityState === "hidden" && !s.away) {
         s.away = now;
-        if (s.screen === "q" && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; }
+        if ((s.screen === "q" || s.screen === "pick") && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; }
         backedUp.current = { t: 0, screen: "" };
         publish();
       } else if (document.visibilityState === "visible" && s.away) {
-        if (s.screen === "q" && !s.deadline && s.left && !s.paused) { s.deadline = now + s.left * 1000; s.left = 0; }
+        if ((s.screen === "q" || s.screen === "pick") && !s.deadline && s.left && !s.paused) { s.deadline = now + s.left * 1000; s.left = 0; }
         s.away = 0;
         publish();
       }
@@ -458,8 +472,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   useEffect(() => {
     if (!isTv) return;
     const t = setInterval(() => {
-      const s = st.current; if (!s || s.screen !== "q" || !s.deadline) return;
-      if (Date.now() >= s.deadline) { reveal(s); publish(); return; }
+      const s = st.current; if (!s || (s.screen !== "q" && s.screen !== "pick") || !s.deadline) return;
+      /* (Secret Stakes' bets: time's up, the teams that didn't bet take the safe one, and the questions go up) */
+      if (Date.now() >= s.deadline) { if (s.screen === "pick") lockStakes(s, Date.now(), timers()); else reveal(s); publish(); return; }
       /* the Cocktail or Dish: the next ingredient */
       if (miniOf(s)?.key === "dish") { const n = dishShown(s, Date.now(), timers()); if (n !== s.shown) { s.shown = n; publish(); } }
     }, 250);

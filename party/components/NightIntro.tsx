@@ -29,7 +29,9 @@ const IC: Record<string, string> = {
   map: "M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14", pin: "M12 21s7-6.3 7-11.5a7 7 0 1 0-14 0C5 14.7 12 21 12 21zM12 7a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5",
   airport: "M10.5 3.5h2l3.5 7h4.5a1.5 1.5 0 0 1 0 3h-4.5l-3.5 7h-2l1.5-7H7.5l-2 2.5H4l1-4-1-4h1.5l2 2.5H12z", majority: "M5 20V11M12 20V4M19 20v-6",
   dish: "M5 4h14l-7 8zM12 12v7M8 20h8", roulette: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 6.2v1.6M16.3 9.5v.01M16.3 14.5v.01M12 16.2v1.6M7.7 14.5v.01M7.7 9.5v.01",
-  battle: "M3 18h18L19 7l-4 4-3-6-3 6-4-4z" };
+  battle: "M3 18h18L19 7l-4 4-3-6-3 6-4-4z",
+  /* Secret Stakes: a stack of chips */
+  stakes: "M12 4c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3zM4 7v4c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 11v4c0 1.7 3.6 3 8 3s8-1.3 8-3v-4M4 15v2c0 1.7 3.6 3 8 3s8-1.3 8-3v-2" };
 export const GameIcon = ({ k }: { k: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={IC[k] || ""} /></svg>);
 const rLab = (x: IntroItem) => (x.rounds && x.rounds.length > 1 ? `R${x.rounds[0]}\u2013${x.rounds[x.rounds.length - 1]}` : `R${x.rounds?.[0] ?? x.title.replace(/\D/g, "")}`);

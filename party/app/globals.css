@@ -1407,6 +1407,20 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* the bullet's row comes first and lands (11 Nov, the owner): a bigger entrance, then it holds before the others */
 .rr-row.bang.rr-late { animation: rrRowBang .7s cubic-bezier(.2, 1.4, .4, 1) var(--rr-at, 0ms) forwards; }
 html[data-motion="off"] .rr-row.bang.rr-late { animation-duration: 1ms; }
+/* Secret Stakes (11 Nov, the owner): the round's themes on the TV, the captain's bet buttons (the one picked lit gold),
+   and each round's bet in the summary */
+.sk-theme { border: 2px solid color-mix(in srgb, var(--color-gold) 45%, transparent); background: color-mix(in srgb, var(--color-gold) 6%, var(--glass)); }
+.sk-pick { border-radius: 16px; white-space: normal; text-align: center; line-height: 1.15; }
+.sk-pick.sk-lv { min-height: 64px; padding: 6px 10px; }
+.sk-pick.on { border-color: var(--color-gold); background: color-mix(in srgb, var(--color-gold) 18%, var(--glass)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-gold) 35%, transparent); }
+.sk-mini { font-weight: 800; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.sk-chip .rr-pt:not(.ok) { color: var(--color-ink-2); }
+/* a phone held sideways: the three themes in a row, the four levels in a row, so the bet fits without scrolling */
+@media (orientation: landscape) and (max-height: 520px) {
+  .sk-themes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sk-levels { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .sk-pick { min-height: 48px; }
+}
 @keyframes rrRowBang { 0% { opacity: 0; transform: scale(.92); } 60% { opacity: 1; transform: scale(1.03); } 100% { opacity: 1; transform: none; } }
 html[data-motion="off"] .rr-click { animation: none; } html[data-motion="off"] .rr-bang { display: none; } html[data-motion="off"] .rr-shot, html[data-motion="off"] .rr-late, html[data-motion="off"] .rr-lit { animation-duration: 1ms; }
 

@@ -148,6 +148,11 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   Nov, the owner): from a theme with an unplayed Expert question, played ones only when no theme has one, never a
   Hard instead. A Medium or Hard chamber short of its level takes the one next to it (Hard → Medium, Medium →
   Hard). The level is shown on the chamber before the spin, so it has to be right.
+- **Secret Stakes** (11 Nov, the owner): the night's last game deals from the same broad themes as Russian Roulette
+  (and the night's own; never Know the Host or the host's own themes). Each round shows three themes, and each
+  theme needs **one question at every level**, Easy, Medium, Hard and Expert, because a bet is on the level: a
+  Hard bet must be a real Hard question. So every broad theme needs all four levels, with enough unplayed ones for
+  several games (the thin-bank note counts the themes that can still fill every level: a game shows 9).
 - **Question rounds running short** (11 Nov, the owner): a round keeps its theme. Unplayed at its level first, then
   unplayed one level easier, then one harder, then played ones; never two levels away, never another theme. Setup
   warns when a picked theme can't fill its round at the level picked.

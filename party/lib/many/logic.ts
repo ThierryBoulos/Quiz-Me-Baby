@@ -13,15 +13,16 @@
 import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
+import { SK_LEVELS, type SkPick } from "../stakes";
 
-export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "roulette"] as const;
+export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "roulette", "stakes"] as const;
 /* sudden death isn't picked: it comes when the night ends with teams level at the top */
 export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
 export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
-  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", roulette: "Russian Roulette" };
-export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, roulette: 3 };
+  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", roulette: "Russian Roulette", stakes: "Secret Stakes" };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, roulette: 3, stakes: 3 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
-export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "sudden", "roulette"];
+export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "sudden", "roulette", "stakes"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
 /* a game's name on screen. The question rounds by their numbers: a round is one theme, and they play two at a time
    ("Rounds 3 and 4"), the last one alone when the night has an odd number ("Round 5"): 11 Nov, the owner */
@@ -56,15 +57,18 @@ export type TeamM = { name: string; captain: string; score: number };
 /* wins: legs taken (flag: legs right); pts: this game's place points so far; places: its final places */
 export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: number[]; of: number[]; pts: number[]; award?: number[]; places?: number[];
   only?: number[];                                // sudden death: the teams level at the top, the only ones who answer
-  fired?: number; had?: string[][] };             // Russian Roulette: bullets that hit a team so far; each team's themes so far
+  fired?: number; had?: string[][];               // Russian Roulette: bullets that hit a team so far; each team's themes so far
+  /* Secret Stakes: one bet (fixed at its start), what each team has won or lost, and every round's bets */
+  unit?: number; net?: number[]; log?: { i: number; themes: string[]; picks: SkPick[]; ok: boolean[]; bet: number[]; delta: number[]; before: number[] }[] };
 /* the night's numbers for the awards: legs placed 1st and 2nd, the fastest right flags, Drop the Pin's km
    (and how many pins), the run of 1st places now (on fire at 3; a new game starts cold) and the best run */
 export type Stats = { firsts: number[]; seconds: number[]; fastest: number[]; km: number[]; kmN: number[]; run: number[]; best: number[] };
-export type Screen = "intro" | "q" | "reveal" | "summary" | "final";
+export type Screen = "intro" | "pick" | "q" | "reveal" | "summary" | "final";   // pick: Secret Stakes' bets
 export type StateM = {
   v: 2; teams: TeamM[]; minis: MiniM[]; mi: number; screen: Screen; step: number;
   deadline: number | null; left: number; total: number;
   spinAt?: number | null;                       // Russian Roulette: when this lap's barrel started spinning (the question is up SPIN_MS later)
+  picks?: (SkPick | null)[];                    // Secret Stakes: each team's bet this round (a theme of the three, a level)
   typed: (string | null)[]; nums: (number | null)[]; pins: (LatLon | null)[];
   why: (string | null)[];                       // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
   shown: number;                                // the Cocktail or Dish: the ingredients up so far
@@ -97,7 +101,8 @@ export type StateM = {
 };
 export type FlagM = { id: number; name: string; team: number | null; label: string; qid?: string; ms: number | null; kind: "away" | "paste" };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
-export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number; roulette: number };
+export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number; roulette: number;
+  stakes: number; stakesPick: number };   // Secret Stakes: to answer, and to bet
 
 const n = (k: number, v = 0) => Array.from({ length: k }, () => v);
 export const miniOf = (s: StateM) => s.minis[s.mi] as MiniM | undefined;
@@ -126,12 +131,19 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
 /* the host's Pause (the clock stops, the question hides) and Change question (before anyone has answered: another from
    the game's deck, with a fresh clock). The same controls as with two teams (the 4 Nov audit, 3.11) */
 export function pause(s: StateM, now: number): boolean {
-  if (s.screen !== "q") return false;
+  if (s.screen !== "q" && s.screen !== "pick") return false;
   if (!s.paused) { if (!s.deadline) return false; s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; s.paused = true; return true; }
   s.deadline = now + s.left * 1000; s.left = 0; s.paused = false; return true;
 }
 export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
-  const m = miniOf(s); if (!m || s.screen !== "q" || m.key === "sudden") return false;
+  const m = miniOf(s);
+  /* Secret Stakes: three new themes, the bets cleared (on the bets, or before anyone has answered) */
+  if (m?.key === "stakes" && (s.screen === "pick" || s.screen === "q")) {
+    if (s.screen === "q" && answered(s).some(Boolean)) return "Too late: someone has already answered this one.";
+    const R = s.extra?.stakes?.shift(); if (!R) return "No other themes left.";
+    m.qs[m.i] = R; s.paused = false; betPhase(s, now, t); toast(s, "Three new themes."); return true;
+  }
+  if (!m || s.screen !== "q" || m.key === "sudden") return false;
   /* (Majority Rules: a vote counts, not a team with nobody on the list) */
   if ((m.key === "majority" ? false : answered(s).some(Boolean)) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
@@ -153,6 +165,39 @@ export function startMini(s: StateM, now: number, t: Timers, roster: { name: str
   const m = miniOf(s); if (!m || s.screen !== "intro") return false;
   if (m.key === "majority") s.roster = roster.filter((r) => r.team >= 0 && r.team < s.teams.length).slice(0, MANY_PLAYERS);
   s.stats.run = n(s.teams.length);                 // a new game starts cold
+  /* Secret Stakes: one bet, from the scoreboard now (a tenth of the leader's total), then the first round's bets */
+  if (m.key === "stakes") { m.unit = QMB.stakesUnit(Math.max(0, ...s.teams.map((x) => x.score))); m.net = n(s.teams.length); m.log = []; betPhase(s, now, t); return true; }
+  ask(s, now, t); return true;
+}
+/* ---- Secret Stakes (11 Nov, the owner), with 3 to 8 teams: the night's last game. A round: each captain bets in
+   secret (screen "pick": one of the three themes, one level), then answers the question it bet on ("q"), then the
+   reveal; at Next each team wins or loses its bet straight on the night's total (never below 0). No places, no
+   award: the bets are the points. ---- */
+function betPhase(s: StateM, now: number, t: Timers) {
+  clear(s); s.picks = Array(s.teams.length).fill(null);
+  s.screen = "pick"; s.total = t.stakesPick; s.deadline = now + t.stakesPick * 1000; s.left = 0; s.paused = false; s.step++;
+  s.qn = (s.qn ?? 0) + 1;
+}
+/* the question a team bet on (null: no bet yet) */
+export const skQm = (s: StateM, team: number): Q => {
+  const m = miniOf(s), R = m?.key === "stakes" ? m.qs[Math.min(m.i, m.qs.length - 1)] : null, p = s.picks?.[team];
+  return R && p ? R.qs?.[p.k]?.[p.level] ?? null : null;
+};
+/* a captain's bet: once, locked in. Every bet in, and the questions go up */
+export function stakesBet(s: StateM, team: number, k: unknown, level: unknown, now: number, t: Timers): true | string {
+  const m = miniOf(s); if (!m || m.key !== "stakes" || s.screen !== "pick" || team < 0 || team >= s.teams.length) return "Not now.";
+  if (s.paused) return "The game is paused.";
+  if (s.picks?.[team]) return "Your bet is in.";
+  const R = m.qs[m.i], i = Math.floor(Number(k));
+  if (typeof level !== "string" || !SK_LEVELS.includes(level) || !(i >= 0 && i < (R?.themes?.length || 0))) return "Pick a theme and a level.";
+  s.picks![team] = { k: i, level };
+  if (s.picks!.every(Boolean)) lockStakes(s, now, t);
+  return true;
+}
+/* time's up on the bets: a team that didn't bet takes the safe one (Easy, the first theme) */
+export function lockStakes(s: StateM, now: number, t: Timers) {
+  const m = miniOf(s); if (!m || m.key !== "stakes" || s.screen !== "pick") return false;
+  s.picks = (s.picks || []).map((p) => p || { k: 0, level: "easy", auto: true });
   ask(s, now, t); return true;
 }
 function ask(s: StateM, now: number, t: Timers) {
@@ -230,6 +275,7 @@ export function reveal(s: StateM) {
   const m = miniOf(s), q = qOf(s); if (!m || !q || s.screen !== "q") return false;
   if (m.key === "say") sayCalls(s, q);
   else if (m.key === "roulette") s.ok = s.typed.map((x, t) => (x == null ? false : !!matchQ([x], rrQ(q, t))));   // (each team its own chamber's question)
+  else if (m.key === "stakes") s.ok = s.typed.map((x, t) => (x == null ? false : !!matchQ([x], skQm(s, t))));     // (each team the question it bet on)
   else if (typedKey(m.key)) s.ok = s.typed.map((x) => (x == null ? false : rightOf(m.key, x, q)));
   if (m.key === "dish") s.shown = (q.ings || []).length;
   s.contest = null; s.contested = [];
@@ -376,6 +422,14 @@ export function next(s: StateM, now: number, t: Timers) {
       m.had = s.teams.map((_, i) => [...(m.had?.[i] || []), ...(lap.draw ? [lap.ch[lap.draw[i]].theme] : [])]);
       s.stats.run = n(s.teams.length);
       toast(s, hit < 0 ? "Nobody drew the bullet this time." : `${s.teams[hit].name} drew the bullet: ${s.ok[hit] ? "+5" : got[hit] < 0 ? `−${-got[hit]}` : "wrong, with nothing to lose"}.`);
+    } else if (m.key === "stakes") {
+      /* each team wins or loses its bet, straight on the night's total (never below 0) */
+      const R = m.qs[m.i], res = QMB.stakesResult(s.teams.map((x) => x.score), s.picks || [], s.ok.map(Boolean), m.unit || 1);
+      m.net = m.net || n(s.teams.length); m.log = m.log || [];
+      s.teams.forEach((x, i) => { x.score = res.after[i]; m.net![i] += res.delta[i]; if (s.ok[i]) m.wins[i]++; });
+      m.log.push({ i: m.i, themes: [...(R?.themes || [])], picks: (s.picks || []).map((p) => ({ ...(p || { k: 0, level: "easy" }) })), ok: res.ok, bet: res.bet, delta: res.delta, before: res.before });
+      m.pts = [...m.net];
+      s.stats.run = n(s.teams.length);
     } else {
       const w = legWinners(s); w.forEach((i) => m.wins[i]++);
       const pl = legPlaces(s), pts = legPoints(s), S = s.stats, q = qOf(s);
@@ -391,7 +445,9 @@ export function next(s: StateM, now: number, t: Timers) {
         : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} take it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
     }
     m.i++;
-    if (m.i < m.qs.length) { ask(s, now, t); return true; }
+    if (m.i < m.qs.length) { if (m.key === "stakes") betPhase(s, now, t); else ask(s, now, t); return true; }
+    /* Secret Stakes pays nothing more: its bets were the points (the summary shows what each team won or lost) */
+    if (m.key === "stakes") { m.award = [...(m.net || [])]; m.places = placesBy((m.net || []).map((v) => -v)).map((p) => p ?? s.teams.length); s.screen = "summary"; s.step++; s.toast = null; return true; }
     /* the last go's message ("first right: +8") goes: next to the game's +10 it read as a contradiction (the reviewers, 31 Oct) */
     award(s, m); s.screen = "summary"; s.step++; s.toast = null; return true;
   }
