@@ -112,4 +112,7 @@ or set them on Vercel as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KE
   with a filter such as `npm run screens -- phones roulette`. It needs Playwright's Chromium,
   like the bank export. The page it uses (`party/app/screens/`) is only in the check's own
   build (`party/.next-screens`): a normal build, `npm run dev` and every deploy don't have it,
-  and nothing it opens can reach the internet.
+  and nothing it opens can reach the internet. Since 12 Nov a phone held sideways is drawn
+  with its left column as in a room, and anything below that column's bottom edge is listed
+  as `SIDE` (that column scrolls with no bar, so a player doesn't see it); only the sideways
+  phone: `SCREENS_PHONES=sideways npm run screens -- phones`.
