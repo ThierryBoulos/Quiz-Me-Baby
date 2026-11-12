@@ -16,7 +16,7 @@ import { cleanList, getCustom } from "@/lib/custom";
 import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS, lineup, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
-import { levelLine } from "../Setup";
+import { levelLine, SEE_KIND_OPTS } from "../Setup";
 
 /* every team, every face, the captains marked. The TV (big) packs up to four in a row, then rows of three or four;
    the phones stack them. away: captains the TV hasn't heard from (the lobby). */
@@ -78,6 +78,7 @@ const GAMES: [ManyKey, string][] = [
   ["map", "6 maps with places marked. Captains type what they have in common."],
   ["say", "6 questions with many answers. No points for the app's secret answer, or another team's."],
   ["dish", "5 recipes, one ingredient at a time. One guess per team; the faster right, the more points."],
+  ["see", "7 pictures: a face, a logo or a close-up, getting clearer. One guess per team; the faster right, the more points."],
   ["roulette", "3 spins of the barrel. Every team gets its own chamber and question; one chamber is the bullet."],
   /* (listed last, the night's last game: 11 Nov, the owner) */
   ["stakes", "The night's last game."]];
@@ -93,7 +94,7 @@ const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1
 const CAPS = { closest: MANY_LEGS.closest, saysame: MANY_LEGS.say, map: MANY_LEGS.map, flag: MANY_LEGS.flag, dish: MANY_LEGS.dish, pin: MANY_LEGS.pin, airport: MANY_LEGS.airport, majority: MANY_LEGS.majority };
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 export type CfgMany = { minis: string[]; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[]; rounds: number; quizLevels: string[]; themes: string[];
-  airportLevels: string[]; mapLevels: string[]; dishLevels: string[]; custom?: unknown[] } & Partial<Picks>;
+  airportLevels: string[]; mapLevels: string[]; dishLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: unknown[] } & Partial<Picks>;
 
 export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void; code: string; tv?: TvShare; left?: FreshLeft }) {
   const noTv = useNoTv();
@@ -140,6 +141,8 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
   const [flagLevels, setFlagLevels] = useDraft<string[]>(code, "many.flagLevels", ["veasy", "easy", "medium", "hard"]);
   const [pinLevels, setPinLevels] = useDraft<string[]>(code, "many.pinLevels", [...QMB.PIN_ORDER as string[]]);
   const [majorityLevels, setMajorityLevels] = useDraft<string[]>(code, "many.majorityLevels", [...QMB.MAJORITY_ORDER as string[]]);
+  const [seeLevels, setSeeLevels] = useDraft<string[]>(code, "many.seeLevels", ["easy", "medium", "hard"]);
+  const [seeKinds, setSeeKinds] = useDraft<string[]>(code, "many.seeKinds", ["face", "logo", "close"]);
   /* the host's Advanced, as with two teams: hand-picked questions, a difficulty per theme, the TV's settings */
   const [picks, setPicks] = useDraft<Picks>(code, "picks", NO_PICKS);
   const [full, setFull] = useState<Bank | null>(null);
@@ -221,6 +224,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
             {lit && key === "majority" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Majority Rules level" opts={LEVELS3} value={majorityLevels} set={setMajorityLevels} /></div>}
             {lit && key === "airport" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Airport level" opts={LEVELS3} value={airportLevels} set={setAirportLevels} /></div>}
             {lit && key === "map" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Map level" opts={LEVELS3} value={mapLevels} set={setMapLevels} /></div>}
+            {lit && key === "see" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="What Do You See? level" opts={LEVELS3} value={seeLevels} set={setSeeLevels} /></div>}
             {lit && key === "dish" && (<div className="sub-panel">
               <span className="sp-k">Cocktails</span>
               <LevelRow label="Cocktail levels" opts={COCKTAILS} value={dishLevels.filter((l) => l[0] === "c")} set={(v) => setDishLevels([...v, ...dishLevels.filter((l) => l[0] === "d")])} />
@@ -240,6 +244,8 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
           <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : noTv ? "Settings (waiting for the game…)" : "Settings (waiting for the TV…)"}</button>
           {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
         </div>
+        {/* What Do You See?: a kind of picture can be left out */}
+        {on.includes("see") && <div className="sub-panel"><span className="sp-k">Pictures</span><LevelRow label="What Do You See? pictures" opts={SEE_KIND_OPTS} value={seeKinds} set={setSeeKinds} /></div>}
       </div>
       {tvOpen && tv && <TvSettings code={code} tv={tv} onClose={() => setTvOpen(false)} />}
       {choosing && fullAll && <Picker bank={fullAll} many caps={CAPS} themes={on.includes("quiz") ? picked : []} minis={pickMinis} difficulty={quizLevels.length === 4 ? "mixed" : quizLevels.join("+")}
@@ -254,7 +260,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
         }} />}
       <div className="start-bar">
         {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
-        <button className="btn btn-gold btn-block" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels,
+        <button className="btn btn-gold btn-block" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels, seeLevels, seeKinds,
           custom: getCustom(), ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) })}>Start the game</button>
       </div>
     </section>);

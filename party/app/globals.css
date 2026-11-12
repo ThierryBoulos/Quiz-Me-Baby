@@ -422,6 +422,14 @@ html[data-motion="off"] .confetti { display: none; }
 .pinmap .pm-tools .btn:last-child { font-size: var(--text-12); }
 .pin-photo { display: block; max-width: 100%; object-fit: contain; border-radius: 14px; box-shadow: 0 10px 36px rgba(0,0,0,.45); }
 .pin-credit { font-size: var(--text-11); color: var(--color-ink-3); }
+/* What Do You See?: the picture clears in steps, each easing into the next (lib/see.ts); with motion off, no easing */
+.see-frame { position: relative; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; border-radius: 14px; background: #05060f;
+  box-shadow: 0 10px 36px rgba(0,0,0,.45); contain: paint; margin: 0 auto; }
+.see-frame.logo { background: #f6f1e7; }
+.see-frame img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; pointer-events: none;
+  transition: filter .8s ease-out, transform .8s ease-in-out; }
+.see-frame.still img { transition: none; }
+.see-credit { color: var(--color-ink-3); text-align: center; max-width: 100%; overflow-wrap: anywhere; }
 .pin-zoom { position: relative; display: block; padding: 0; border: 0; background: none; cursor: zoom-in; }
 .pin-zoom-hint { position: absolute; right: 6px; bottom: 6px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.62); color: #fff; font-size: var(--text-11); font-weight: 700; }
 /* the photo full screen on a phone: over everything, a tap anywhere closes it */

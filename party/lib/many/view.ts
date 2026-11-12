@@ -2,10 +2,12 @@
    (the answer and every team's typed answer). Built from the night's state, never stored. */
 import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, roundNumbers, typedKey, type AwardM, type FlagM, type LatLon, type ManyKey, type StateM } from "./logic";
 import { dishKind } from "../tv/rules";
+import { matchQ } from "../tv/reads";
 import { revOf } from "../engine";
 import type { IntroPub } from "../intro";
 import { rrPub, rrQ, type RrLap, type RrPub } from "../roulette";
 import { skPub, type SkGame, type SkPub } from "../stakes";
+import { sePic, type SePub } from "../see";
 import { QMB } from "../engine";
 import { skQm } from "./logic";
 
@@ -27,6 +29,7 @@ export type PubMany = {
   dish?: { kind: string; ings: string[]; n: number };
   out?: boolean[];
   roulette?: RrPub;                               // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
+  see?: SePub;                                    // What Do You See?: the picture and how it clears; at the reveal what it was, the fastest right guess
   stakes?: SkPub;                                 // Secret Stakes: the round's themes, who has bet (and each team's bet, drawn only on its own phones), the questions, the reveal
   theme?: string;                                 // a question round: the question's theme
   deadline: number | null; left: number; sent: boolean[]; now?: number; paused?: boolean;
@@ -93,6 +96,14 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
       if (rev) pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }
     else if (m.key === "roulette") pub.roulette = rrPub(q as RrLap, m.i, m.qs.length, (q as RrLap).ch.length, m.pts, s.spinAt ?? null, rev ? s.ok : null);
     else if (m.key === "stakes") { /* (each team's own question: pub.stakes.q) */ }
+    /* What Do You See?: the picture (never its answer); at the reveal, what it was and the fastest right guess. Who
+       guessed wrong stays on the host's phone until then, as with the Cocktail or Dish */
+    else if (m.key === "see") {
+      pub.see = { ...sePic(q), total: s.total || 20, n: m.i + 1, of: m.qs.length };
+      if (rev) { const pl = legPlaces(s), w = pl.indexOf(1), ms = s.ms || [];
+        pub.see.rev = { answer: q.answer, notes: q.notes || undefined, credit: q.credit, licence: q.licence, who: w >= 0 ? w : null, ms: w >= 0 ? ms[w] ?? null : null, at: s.teams.map((_, t) => ms[t] ?? null) };
+        pub.out = s.teams.map((_, t) => s.typed[t] != null && !s.ok[t]); }
+    }
     else pub.question = q.question;
     if (m.key === "quiz" && q.theme) pub.theme = q.theme;
     if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes); }
@@ -128,7 +139,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : m.key === "roulette" || m.key === "stakes" ? undefined : q.notes, typed: s.typed, nums: s.nums,
         ...(m.key === "roulette" ? { answers: s.teams.map((_, t) => String(rrQ(q as RrLap, t)?.answer ?? "")) } : {}),
         ...(m.key === "stakes" ? { answers: s.teams.map((_, t) => String(skQm(s, t)?.answer ?? "")) } : {}),
-        step: s.step, qid: pub.qid, ...(m.key === "dish" ? { out: s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)) } : {}) } : { step: s.step };
+        step: s.step, qid: pub.qid, ...(m.key === "dish" ? { out: s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)) } : {}),
+        ...(m.key === "see" ? { out: s.teams.map((_, t) => s.typed[t] != null && !matchQ([s.typed[t]!], q)) } : {}) } : { step: s.step };
   void allIn;
   return { pub, secret };
 }

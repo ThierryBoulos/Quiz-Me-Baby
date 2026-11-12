@@ -67,6 +67,13 @@ const NIGHTS = [
   { seed: 34, minis: ["stakes"], rounds: 2, reload: 30 },
   { seed: 35, minis: ["stakes", "battle"], rounds: 3, slow: 0.95 },
   { seed: 36, minis: ["stakes"], rounds: 4, host: true, events: [{ at: 49, type: "swap" }] },
+  /* 12 Nov: What Do You See?: no host (the app checks each guess as it lands), with a host and a tie asked about, the
+     pictures alone with a reload in the middle, slow captains (guesses taken at time-up), a pause and a new picture */
+  { seed: 37, minis: ["see", "flag"], rounds: 4 },
+  { seed: 38, minis: ["see", "closest"], rounds: 4, host: true, tieMore: 1 },
+  { seed: 39, minis: ["see"], rounds: 0, reload: 12 },
+  { seed: 40, minis: ["see", "battle"], rounds: 3, slow: 0.95 },
+  { seed: 41, minis: ["see"], rounds: 2, host: true, events: [{ at: 14, type: "pause", for: 8 }, { at: 30, type: "swap" }] },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

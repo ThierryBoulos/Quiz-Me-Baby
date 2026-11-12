@@ -20,6 +20,7 @@ import { NightIntroTv } from "../NightIntro";
 import { ImadBubble } from "../TvGame";
 import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
+import { SeeCredit, SeePicture, seeWho } from "../See";
 import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
@@ -105,6 +106,17 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <Clock deadline={pub.deadline} left={pub.left} size={110} />
           <Sent pub={pub} />
         </>)}
+        {/* What Do You See?: the picture clears as the clock runs; every team's state beside it */}
+        {pub.screen === "q" && g && g.key === "see" && pub.see && (
+          <div className="flex gap-12 items-center w-full justify-center">
+            <div className="flex-1 min-w-0 flex justify-center"><SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={dense ? 660 : 720} big /></div>
+            <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
+              <div className="display text-44 leading-tight" style={{ color: "var(--color-gold)" }}>What do you see?</div>
+              <Clock deadline={pub.deadline} left={pub.left} size={120} />
+              <Sent pub={pub} column={!dense} />
+              <div className="text-20 text-[var(--color-ink-2)] leading-snug">One guess each. The faster right, the more points.</div>
+            </div>
+          </div>)}
         {/* a question round, and Don't Say the Same's prompt: the words big, the clock, every team's state */}
         {pub.screen === "q" && g && (g.key === "quiz" || g.key === "say" || g.key === "sudden") && (<>
           {g.key === "sudden" && <div className="display text-36 leading-none" style={{ color: "var(--color-gold)" }}>First right answer wins the night</div>}
@@ -179,6 +191,18 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
+        {/* What Do You See?: the whole picture and what it is, who got it first and how fast, then every team's guess */}
+        {pub.screen === "reveal" && g && R && g.key === "see" && pub.see && (() => { const who = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))); return (<>
+          <div className="grid items-center gap-10 w-full max-w-[1160px]" style={{ gridTemplateColumns: `${dense ? 380 : 460}px minmax(0, 1fr)` }}>
+            <div className="flex flex-col items-center gap-1 min-w-0"><SeePicture see={pub.see} clear w={dense ? 380 : 460} big alt={R.answer} /><SeeCredit see={pub.see} size={14} /></div>
+            <div className="flex flex-col items-center gap-3 min-w-0">
+              <div className="eyebrow text-18">It&rsquo;s</div>
+              <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: (R.answer || "").length > 22 ? (dense ? 40 : 48) : dense ? 56 : 70, color: "var(--color-gold)" }}>{R.answer}</div>
+              <div className="display text-36 beat" style={{ ...QUICK, ...d(0.5), color: who.color }}>{who.text}</div>
+            </div>
+          </div>
+          <FlagRowsMany pub={pub} size="tv" delay={(i) => d(0.3 + i * 0.08)} />
+        </>); })()}
         {/* a typed answer's reveal (question rounds, airports, maps, Don't Say the Same, the Cocktail or Dish): what was
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
         {pub.screen === "reveal" && g && R && ["quiz", "airport", "map", "say", "dish", "sudden"].includes(g.key) && (<>

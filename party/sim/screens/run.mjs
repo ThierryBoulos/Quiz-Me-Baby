@@ -70,7 +70,8 @@ const TV_MEASURE = () => {
   const scope = st.querySelector(".night-intro") || st;
   /* not part of the layout: lights, effects, celebrations, the bubble Imad speaks in, the plane that flies off the
      airport board, the split-flap letters' halves */
-  const skip = (el) => el.closest(".tv-glow,.confetti,.confetti-late,.win-flash,.win-ring,.lead-banner,.imad-bubble,.tv-cover,[aria-hidden=\"true\"] svg,.mq-beam,.mq-world,.mq-dust,.mq-floor,.plane-ico,.lectern-spot")
+  /* (What Do You See?'s picture is enlarged inside its frame on purpose, the frame cropping it: the frame is checked, not the picture) */
+  const skip = (el) => el.closest(".tv-glow,.confetti,.confetti-late,.win-flash,.win-ring,.lead-banner,.imad-bubble,.tv-cover,[aria-hidden=\"true\"] svg,.mq-beam,.mq-world,.mq-dust,.mq-floor,.plane-ico,.lectern-spot,.see-frame img")
     || (el.tagName === "svg" && el.closest("svg") !== el);
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
   for (const el of scope.querySelectorAll("*")) {
@@ -84,7 +85,7 @@ const TV_MEASURE = () => {
     /* (an ellipsis or a line clamp is meant: a long name ends in "…") */
     if (/(hidden|clip)/.test(cs.overflow + cs.overflowX + cs.overflowY) && el.children.length + (el.textContent || "").length > 0 && cs.textOverflow !== "ellipsis" && !(cs.webkitLineClamp > 0)
       && !/line-clamp|flap-|roll-win/.test(el.className || "") && (el.scrollHeight > el.clientHeight + 3 || el.scrollWidth > el.clientWidth + 3)
-      && !el.matches(".tv-stage,.tv-wrap,.spot,.picker") && el.clientHeight > 0
+      && !el.matches(".tv-stage,.tv-wrap,.spot,.picker,.see-frame") && el.clientHeight > 0
       /* (the display font's letters stand a few pixels taller than their line: not a cut) */
       && !(el.matches(".display, .display *") && el.scrollWidth <= el.clientWidth + 3 && el.scrollHeight - el.clientHeight <= 10))
       bad.push("CLIP " + (el.scrollWidth - el.clientWidth) + "x" + (el.scrollHeight - el.clientHeight) + " " + name(el));
@@ -123,7 +124,7 @@ const PHONE_MEASURE = () => {
   if (document.documentElement.scrollWidth > W + 1) bad.push("SIDEWAYS " + (document.documentElement.scrollWidth - W) + "px");
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
   const cover = document.querySelector(".night-intro");
-  const skip = (el) => el.closest(".confetti,.confetti-back,.win-flash,.win-ring,svg *,canvas,.face.back,.plane-ico,.lectern-spot") || (cover && !cover.contains(el)) || [...(function* () { for (let e = el; e; e = e.parentElement) yield e; })()].some((e) => getComputedStyle(e).position === "sticky");
+  const skip = (el) => el.closest(".confetti,.confetti-back,.win-flash,.win-ring,svg *,canvas,.face.back,.plane-ico,.lectern-spot,.see-frame img") || (cover && !cover.contains(el)) || [...(function* () { for (let e = el; e; e = e.parentElement) yield e; })()].some((e) => getComputedStyle(e).position === "sticky");
   const scroller = (el) => { for (let e = el.parentElement; e; e = e.parentElement) { const cs = getComputedStyle(e); if (/(auto|scroll|hidden|clip)/.test(cs.overflowX)) return e; } return null; };
   for (const el of document.querySelectorAll("main *")) {
     if (skip(el)) continue; const cs = getComputedStyle(el); if (cs.visibility === "hidden" || cs.display === "none" || +cs.opacity === 0 || cs.position === "fixed") continue;

@@ -58,7 +58,7 @@ export async function setTeams(code: string, state: Record<string, unknown>, mem
 
 /* each game's seconds, from the TV's house settings */
 const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST, roulette: t.tRoulette,
-  stakes: t.tStakesQ, stakesPick: t.tStakesPick }; };
+  stakes: t.tStakesQ, stakesPick: t.tStakesPick, see: t.tSee }; };
 /* Russian Roulette: the questions of a lap's drawn chambers count as played on this TV (a dark chamber's don't) */
 function markRoulette(s: StateM) {
   const m = s.minis[s.mi], lap = m?.key === "roulette" && s.screen === "q" ? (m.qs[m.i] as { ch: { q: Q }[]; draw?: number[] }) : null;
@@ -268,6 +268,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
           dishLevels: lv(cfg.dishLevels, ["c-easy", "c-medium", "c-hard", "d-easy", "d-medium", "d-hard"], ["c-medium", "d-medium"]),
           flagLevels: lv(cfg.flagLevels, QMB.FLAG_LEVEL_KEYS, ["veasy", "easy", "medium", "hard"]), pinLevels: lv(cfg.pinLevels, QMB.PIN_ORDER, QMB.PIN_ORDER),
           majorityLevels: lv(cfg.majorityLevels, QMB.MAJORITY_ORDER, QMB.MAJORITY_ORDER),
+          /* What Do You See?: its levels, and the kinds of picture the host left on */
+          seeLevels: lv(cfg.seeLevels, QMB.SEE_ORDER, QMB.SEE_ORDER), seeKinds: lv(cfg.seeKinds, QMB.SEE_KINDS, QMB.SEE_KINDS),
           /* Russian Roulette: a barrel of 6 chambers, 8 with 7 or 8 teams; Sexy Time and Lebanon only if the host picked them */
           rouletteChambers: QMB.rouletteChambers(k), rouletteThemes: chosen,
           /* Secret Stakes: the broad themes and the host's picks, never the host's own trivia */
@@ -283,7 +285,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const all = (m: G): Q[] => [...(m?.qs || []), ...(m?.spare || [])];
         const qn = rounds * 2 + 4;
         const decks: Partial<Record<ManyKey, Q[]>> = { quiz: quiz.slice(0, qn), sudden: quiz.slice(qn), flag: all(g.flagGame), airport: all(g.airportGame), map: all(g.mapGame),
-          closest: all(g.mini), pin: all(g.pinGame), majority: all(g.majorityGame), say, dish: all(g.dishGame), roulette: all(g.rouletteGame),
+          closest: all(g.mini), pin: all(g.pinGame), majority: all(g.majorityGame), say, dish: all(g.dishGame), see: all(g.seeGame), roulette: all(g.rouletteGame),
           stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])] };
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));

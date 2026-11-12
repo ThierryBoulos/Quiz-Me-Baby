@@ -1,0 +1,49 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+7.50 ask | 3 | 0-0 |  |  | 
+9.50 steal | 4 | 0-0 |  |  | 
+11.25 answer | 5 | 0-0 |  |  | 
+13.00 answer | 5 | 0-1 |  | Call changed: Owls +1 point. | 
+14.00 ask | 6 | 0-1 |  | Call changed: Owls +1 point. | 
+(pause, 8 s)
+(resume)
+24.75 answer | 7 | 0-3 |  | Owls +2 points | 
+25.50 roundScore | 8 | 0-3 |  | Owls +2 points | 
+26.50 seeIntro | 9 | 0-3 | 0-0 | Owls +2 points | 
+27.50 seeQ | 10 | 0-3 | 0-0 | Owls +2 points | 
+28.25 seeReveal | 10 | 0-3 | 0-1 | Owls +2 points | 
+29.25 seeReveal | 10 | 0-3 | 0-1 |  | 
+31.00 seeReveal | 10 | 0-3 | 0-1 | The host keeps the call. | 
+32.00 seeQ | 11 | 0-3 | 0-1 | Owls take picture 1. | 
+(a new question)
+32.75 seeQ | 12 | 0-3 | 0-1 | New picture. | 
+36.50 seeReveal | 12 | 0-3 | 1-1 | New picture. | 
+37.25 seeQ | 13 | 0-3 | 1-1 | Lions take picture 2. | 
+38.25 seeReveal | 13 | 0-3 | 2-1 | Lions take picture 2. | 
+39.00 seeQ | 14 | 0-3 | 2-1 | Lions take picture 3. | 
+41.00 seeQ | 14 | 0-3 | 2-1 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+41.75 seeReveal | 14 | 0-3 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+42.75 seeQ | 15 | 0-3 | 2-2 | Owls take picture 4. | 
+43.50 seeReveal | 15 | 0-3 | 2-3 | Owls take picture 4. | 
+44.50 seeReveal | 15 | 0-3 | 2-3 |  | 
+48.00 seeReveal | 15 | 0-3 | 2-3 | The host keeps the call. | 
+49.00 seeQ | 16 | 0-3 | 2-3 | Owls take picture 5. | 
+50.75 seeReveal | 16 | 0-3 | 3-3 | Owls take picture 5. | 
+51.75 seeQ | 17 | 0-3 | 3-3 | Lions take picture 6. | 
+53.50 seeQ | 17 | 0-3 | 3-3 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+54.50 seeReveal | 17 | 0-3 | 3-3 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+55.25 seeTie | 18 | 0-3 | 3-3 |  | 
+56.25 seeSummary | 19 | 1-4 | 3-3 |  | 
+57.00 roundIntro | 20 | 1-4 |  |  | 
+58.00 ask | 21 | 1-4 |  |  | 
+59.75 answer | 22 | 2-4 |  | Lions +1 point | 
+60.75 ask | 23 | 2-4 |  | Lions +1 point | 
+62.50 steal | 24 | 2-4 |  | Lions +1 point | 
+64.25 answer | 25 | 2-4 |  | Lions +1 point | 
+65.25 answer | 25 | 2-4 |  |  | 
+66.00 answer | 25 | 2-4 |  | The host keeps the call. | 
+67.00 roundScore | 26 | 2-4 |  | The host keeps the call. | 
+68.00 final | 27 | 2-4 |  | The host keeps the call. | 
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,1],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[0,3],[1,4],[2,4]],"segs":[{"label":"R1","pts":[[0,1],[0,3]]},{"label":"What Do You See?","pts":[[1,4]]},{"label":"R2","pts":[[2,4]]}],"awards":[{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

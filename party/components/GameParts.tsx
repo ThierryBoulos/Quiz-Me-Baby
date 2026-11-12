@@ -20,7 +20,7 @@ const side = (t: 0 | 1) => (t === 0 ? "a" : "b");
 
 /* ---- the tracker: scores, where we are, and the night's progress ---- */
 /* what one go of a mini-game is called, as the 3-8 team night says it (no "leg", 31 Oct) */
-const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round", roulette: "Spin", stakes: "Round" };
+const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round", roulette: "Spin", stakes: "Round", see: "Picture" };
 function hudLabel(pub: Pub): ReactNode {
   const m = pub.mini, sc = pub.screen;
   if (sc === "final") return <b>Final result</b>;
@@ -395,6 +395,12 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Both captains type whose flag it is, at the same time." },
       { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
       { text: `Best of ${n} takes ${pts}. ${level}` }];
+    /* What Do You See? (12 Nov, the owner) */
+    case "see": return [
+      { text: `A picture goes up, blurred or zoomed right in, and gets clearer over ${sec(t?.see, 20)}: a famous face, a logo, or a close-up.` },
+      { text: "One guess per team, typed by the captain. Right, and the picture is yours. Wrong, and you're out of this picture.", warn: true },
+      { text: `The app checks each guess as it lands${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. The fastest right answer takes it.` },
+      { text: `Best of ${n} takes ${pts}. ${level}` }];
     case "pin": return [
       { text: `A photo of a landmark goes up. ${sec(t?.pin, T_PIN)}. On the hard ones its name comes too: the trick is finding it.` },
       { text: "Both captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better." },
@@ -499,6 +505,8 @@ export function usePreload(pub: Pub | null) {
     P?.flags?.forEach((f) => { const i = new Image(); i.src = `/fx/${f}.svg`; });
     P?.maps?.forEach((m) => preloadMap(m));
     P?.pins?.forEach((f) => { for (const v of ["", "-s"]) { const i = new Image(); i.src = `/pins/${f}${v}.jpg`; } });
+    /* (What Do You See?: the TV takes the big picture, a phone its own size) */
+    P?.sees?.forEach((f) => { const i = new Image(); i.src = `/see/${f}${typeof window !== "undefined" && window.innerWidth >= 900 ? "" : "-s"}.jpg`; });
     if (P?.world) preloadWorld();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
@@ -506,7 +514,7 @@ export function usePreload(pub: Pub | null) {
 /* won with legs to spare: the same words on the TV and every phone */
 export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
 /* what a mini-game's legs are called ("4 flags", "the last landmark") */
-const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin", stakes: "round" };
+const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin", stakes: "round", see: "picture" };
 export const legsLeft = (key: MiniKey, n: number) => { const u = LEG_UNIT[key] || "leg"; return n === 1 ? `The last ${u} is` : `The last ${n} ${u.replace(/y$/, "ie")}s are`; };
 export const decidedPts = (pub: Pub) => (pub.decided ? `+${pub.decided.pts} point${pub.decided.pts === 1 ? "" : "s"}` : "");
 export const decidedFun = (pub: Pub) => (pub.decided ? `${legsLeft(pub.decided.key, pub.decided.spare)} just for fun.` : "");

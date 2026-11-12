@@ -18,6 +18,7 @@ export function currentQ(s: TvState): G {
   if (sc === "sudden") return g.sdReady ? g.sd?.q : null;
   if (["miniQ", "closestReveal"].includes(sc)) return g.mini.qs[g.mini.i];
   if (["flagQ", "flagReveal"].includes(sc)) return g.flagGame.qs[g.flagGame.i];
+  if (["seeQ", "seeReveal"].includes(sc)) return g.seeGame?.qs[g.seeGame.i];
   if (["pinQ", "pinReveal"].includes(sc)) return g.pinGame.qs[g.pinGame.i];
   if (["airportQ", "airportReveal"].includes(sc)) return g.airportGame.qs[g.airportGame.i];
   if (["majorityQ", "majorityReveal"].includes(sc)) return g.majorityGame.qs[g.majorityGame.i];
@@ -106,7 +107,7 @@ export function callsOf(s: TvState): Call[] {
     /* a steal with the first team's own answer gave it back to them: one call, theirs */
     if (res.steal && !res.same) out.push(res.skipped ? { id: "steal", team: th, text: said(s.typed[th]), ok: false, done: true, skipped: true, note: "skipped" }
       : { id: "steal", team: th, text: said(s.typed[th]), ok: !!res.stolen, done: !!res.correct, note: res.fresh ? "a new question" : "steal" });
-  } else if (sc === "flagReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal" || sc === "rouletteReveal" || sc === "stakesReveal") {
+  } else if (sc === "flagReveal" || sc === "seeReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal" || sc === "rouletteReveal" || sc === "stakesReveal") {
     /* (Russian Roulette and Secret Stakes: each team had its own question, so each call carries its own answer) */
     const lap = sc === "rouletteReveal" ? g.rouletteGame?.qs[g.rouletteGame.i] : null;
     const sk = sc === "stakesReveal" ? g.stakesGame : null;

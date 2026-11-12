@@ -21,6 +21,7 @@ import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
+import { SeeCredit, SeePicture, seeWho } from "../See";
 import { signedPts, skLevelWord } from "@/lib/stakes";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
@@ -178,6 +179,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
     <div className="noselect contents" {...noCopy}>
       {g.key === "flag" && <ToSide order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 110 : 150} /></ToSide>}
+      {/* What Do You See?: the picture, clearing from the TV's clock */}
+      {g.key === "see" && pub.see && <ToSide order={4} className="noselect" {...noCopy}><SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} /></ToSide>}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
       {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={small ? 180 : 240} legend={false} />}
       {g.key === "dish" && pub.dish && (<ToSide order={4} className="noselect" {...noCopy}>
@@ -199,6 +202,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     <div className="noselect" {...noCopy}>
       <AnswerLine question={["quiz", "say", "majority", "sudden"].includes(g.key) ? pub.question : null}
         media={g.key === "flag" ? <FlagImg name={pub.flag} h={96} />
+          : g.key === "see" && pub.see ? <div className="flex flex-col items-center gap-1"><SeePicture see={pub.see} clear w={240} alt={R.answer} /><SeeCredit see={pub.see} size={11} />
+            {(() => { const w = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))); return <span className="display text-18" style={{ color: w.color }}>{w.text}</span>; })()}</div>
           : g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={180} legend={false} />
           : g.key === "pin" && R.at ? <div className="w-full"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
             ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
@@ -430,7 +435,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               <input id="mans" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
               {np.hint}
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
-              <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>
+              <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "see" ? "One guess for your team. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
         {!sentMine && sugs.length > 0 && g.key !== "pin" && (

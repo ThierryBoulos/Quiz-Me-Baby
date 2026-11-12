@@ -35,13 +35,15 @@ const log = (...a) => console.log(new Date().toTimeString().slice(0, 8), ...a.ma
 /* the bank (answers for some questions, and wrong answers that look like answers) */
 const bank = JSON.parse(readFileSync(join(party, "data/bank.json"), "utf8")).bank || [];
 const byText = new Map(bank.filter((q) => q.question).map((q) => [String(q.question).trim(), q]));
+/* (What Do You See?: the picture's file name finds it; a bot with no host to peek at needs it to be right now and then) */
+const byPhoto = new Map(bank.filter((q) => q.type === "see" && q.photo).map((q) => [q.photo, q]));
 const pool = (type) => [...new Set(bank.filter((q) => q.type === type && q.answer).map((q) => String(q.answer)))];
 const POOLS = { flag: pool("flag"), map: pool("map"), airport: pool("airport"), dish: pool("dish"), standard: pool("standard").filter((a) => a.length < 24) };
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const chance = (p) => Math.random() < p;
 /* a guess: the right answer now and then (when it's known), otherwise something that looks like an answer */
 const guess = (right, kind = "standard") => (right && chance(0.45) ? String(right) : pick(POOLS[kind]?.length ? POOLS[kind] : POOLS.standard) || "Paris");
-const rightFor = (pub, secret, t) => secret?.answers?.[t] || secret?.answer || byText.get(String(pub?.question || "").trim())?.answer || null;
+const rightFor = (pub, secret, t) => secret?.answers?.[t] || secret?.answer || byText.get(String(pub?.question || "").trim())?.answer || byPhoto.get(pub?.see?.photo)?.answer || null;
 
 const NAMES = ["Rami", "Lea", "Karim", "Maya", "Joe", "Nour", "Sami", "Rita", "Hadi", "Yara", "Omar", "Dana", "Fadi", "Lina", "Tarek", "Zeina", "Ziad", "Mira",
   "Elie", "Hala", "Jad", "Nadia", "Rayan", "Sara", "Walid", "Tala", "Adam", "Carla", "Marc", "Dima", "Paul", "Jana", "Ali", "Rana"];
@@ -176,7 +178,8 @@ const NEXT = { roundIntro: "round/begin", miniIntro: "closest/start", flagIntro:
   pinIntro: "pin/start", airportIntro: "airport/start", pinReveal: "ui/next", airportReveal: "ui/next", pinSummary: "pin/done", airportSummary: "airport/done",
   majorityIntro: "majority/start", majorityReveal: "ui/next", majoritySummary: "majority/done",
   rouletteIntro: "roulette/start", rouletteReveal: "ui/next", rouletteSummary: "roulette/done",
-  stakesIntro: "stakes/start", stakesReveal: "ui/next", stakesSummary: "stakes/done" };
+  stakesIntro: "stakes/start", stakesReveal: "ui/next", stakesSummary: "stakes/done",
+  seeIntro: "see/start", seeReveal: "ui/next", seeSummary: "see/done" };
 const LEVELS = ["easy", "medium", "hard", "expert"];
 /* reveals and results get a longer look before Next: whoever watches the TV has time to read them */
 const look = (sc) => (/Reveal|Summary|Result|roundScore|answer|Review|Leg$|decided|Tie$/.test(sc) ? DELAY * 2 : DELAY);
@@ -219,10 +222,10 @@ function two(pub) {
     for (const t of [0, 1]) { const b = botCap(t); if (b && !pub.stakes?.locked?.[t]) once(`${k}|bet|${t}`, DELAY, () => b.send("next", { move: { type: "stakes/pick", k: Math.floor(Math.random() * 3), level: pick(LEVELS) }, step })); }
     return;
   }
-  if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(sc)) {
+  if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ", "seeQ"].includes(sc)) {
     const kind = { flagQ: "flag", mapQ: "map", airportQ: "airport" }[sc] || "standard";
     /* (tagged as a real phone tags its answer: Russian Roulette's and Secret Stakes' tags were refused before 11 Nov) */
-    for (const t of [0, 1]) answer(t, { text: guess(right(t), kind), ...(sc === "rouletteQ" || sc === "stakesQ" ? { k: `${pub.qid}|${sc}` } : {}) });
+    for (const t of [0, 1]) answer(t, { text: guess(right(t), kind), ...(sc === "rouletteQ" || sc === "stakesQ" || sc === "seeQ" ? { k: `${pub.qid}|${sc}` } : {}) });
     /* the host reveals once both are in, or when the clock has run out (a person's captain who didn't answer) */
     if (BH && ((pub.sent?.[0] && pub.sent?.[1]) || pub.timeUp)) go(0, "ui/reveal", {}, DELAY);
     return;

@@ -1,0 +1,37 @@
+0.00 room lobby
+1.25 room playing
+1.25 seeIntro | 1 | 0-0 | 0-0 |  | 
+5.00 seeIntro | 2 | 0-0 | 0-0 |  | 
+6.75 seeQ | 3 | 0-0 | 0-0 |  | 
+9.50 seeQ | 3 | 0-0 | 0-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+10.25 seeReveal | 3 | 0-0 | 0-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+11.25 seeReveal | 3 | 0-0 | 0-0 |  | 
+(the TV reloads)
+26.35 seeReveal | 3 | 0-0 | 0-0 | No answer in time: the call stands. | 
+26.60 seeQ | 4 | 0-0 | 0-0 | Nobody got it. | 
+31.10 seeReveal | 4 | 0-0 | 1-0 | Nobody got it. | 
+32.10 seeReveal | 4 | 0-0 | 1-0 |  | 
+33.10 seeReveal | 4 | 0-0 | 1-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+33.85 seeQ | 5 | 0-0 | 1-0 | Lions take picture 2. | 
+37.60 seeReveal | 5 | 0-0 | 1-1 | Lions take picture 2. | 
+38.35 seeQ | 6 | 0-0 | 1-1 | Owls take picture 3. | 
+39.35 seeQ | 6 | 0-0 | 1-1 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+42.85 seeReveal | 6 | 0-0 | 1-1 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+43.85 seeReveal | 6 | 0-0 | 1-1 |  | 
+44.60 seeReveal | 6 | 0-0 | 2-1 | Call changed: ⁨Lions⁩ RIGHT. | 
+45.60 seeQ | 7 | 0-0 | 2-1 | Lions take picture 4. | 
+46.60 seeQ | 7 | 0-0 | 2-1 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+49.10 seeReveal | 7 | 0-0 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+50.10 seeQ | 8 | 0-0 | 2-2 | Owls take picture 5. | 
+51.10 seeQ | 8 | 0-0 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+51.85 seeReveal | 8 | 0-0 | 2-3 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+52.85 seeReveal | 8 | 0-0 | 2-3 |  | 
+67.85 seeReveal | 8 | 0-0 | 2-3 | No answer in time: the call stands. | 
+68.10 seeQ | 9 | 0-0 | 2-3 | Owls take picture 6. | 
+69.10 seeQ | 9 | 0-0 | 2-3 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+69.85 seeReveal | 9 | 0-0 | 3-3 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+70.85 seeReveal | 9 | 0-0 | 3-3 |  | 
+71.60 seeReveal | 9 | 0-0 | 2-4 | Call changed: ⁨Owls⁩ RIGHT. | 
+72.60 seeSummary | 10 | 0-2 | 2-4 | Owls take picture 7. | 
+73.60 final | 11 | 0-2 |  | Owls take picture 7. | 
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[0,2]],"segs":[{"label":"What Do You See?","pts":[[0,2]]}],"awards":[]}

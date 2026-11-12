@@ -14,7 +14,7 @@ import type { Settings } from "@/lib/settings";
 import { TvSettings } from "./TvSettings";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
-  mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; custom?: Q[] } & Partial<Picks>;
+  mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: Q[] } & Partial<Picks>;
 /* Classic's MINI_GAMES (index.html), name and one line each */
 const MINIS = [
   ["closest", "Closest To Wins", "Five numbers. Closest guess wins the leg."],
@@ -26,6 +26,7 @@ const MINIS = [
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
   ["majority", "Majority Rules", "Everyone plays on their own phone: 15 questions, four answers. The team with the bigger share of right answers wins."],
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
+  ["see", "What Do You See?", "A face, a logo or a close-up, getting clearer: one guess each, fastest right answer wins."],
   ["roulette", "Russian Roulette", "Spin the barrel: a theme and a question each. One chamber is the bullet."],
   ["battle", "Battle of the Captains", "Ten each, captains only. Closes the night."],
   /* (listed last, the night's last game: 11 Nov, the owner) */
@@ -47,6 +48,8 @@ export function levelLine(on: readonly string[], all = false): string {
 }
 const MAP_LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
+/* What Do You See?: the kinds of picture (the host can leave one out, in Advanced) */
+export const SEE_KIND_OPTS = [["face", "Faces"], ["logo", "Logos"], ["close", "Close-ups"]] as const;
 const DISH_LEVELS = { c: [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]], d: [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] } as const;
 /* the four levels of a standard question: any mix of them, or Mixed (all four). The default is the
    first three: Expert comes in only when a theme runs out of those. */
@@ -85,6 +88,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const [pinLevels, setPinLevels] = useDraft<string[]>(code, "two.pinLevels", ["easy", "medium", "hard"]);
   const [airportLevels, setAirportLevels] = useDraft<string[]>(code, "two.airportLevels", ["easy", "medium", "hard"]);
   const [majorityLevels, setMajorityLevels] = useDraft<string[]>(code, "two.majorityLevels", ["easy", "medium", "hard"]);
+  const [seeLevels, setSeeLevels] = useDraft<string[]>(code, "two.seeLevels", ["easy", "medium", "hard"]);
+  const [seeKinds, setSeeKinds] = useDraft<string[]>(code, "two.seeKinds", ["face", "logo", "close"]);
   const [note, setNote] = useState<string | null>(null);
   const [open, setOpen] = useState<"themes" | null>(null);
   /* the host's advanced options: hand-picked questions, a difficulty per theme */
@@ -254,6 +259,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             {on && k === "pin" && <LevelRow label="Drop the Pin level" opts={MAP_LEVELS} value={pinLevels} set={setPinLevels} />}
             {on && k === "airport" && <LevelRow label="Guess the Airport level" opts={MAP_LEVELS} value={airportLevels} set={setAirportLevels} />}
             {on && k === "majority" && <LevelRow label="Majority Rules level" opts={MAP_LEVELS} value={majorityLevels} set={setMajorityLevels} />}
+            {on && k === "see" && <LevelRow label="What Do You See? level" opts={MAP_LEVELS} value={seeLevels} set={setSeeLevels} />}
             {on && k === "dish" && (<>
               <LevelRow label="Cocktail levels" tag="Cocktails" opts={DISH_LEVELS.c} value={dishLevels.filter((l) => l[0] === "c")}
                 set={(v) => setDishLevels([...v, ...dishLevels.filter((l) => l[0] === "d")])} />
@@ -275,6 +281,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : noTv ? "Settings (waiting for the game…)" : "Settings (waiting for the TV…)"}</button>
             {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
           </div>
+          {/* What Do You See?: a kind of picture can be left out (the host only: 12 Nov, the spec) */}
+          {minis.includes("see") && <LevelRow label="What Do You See? pictures" tag="Pictures" opts={SEE_KIND_OPTS} value={seeKinds} set={setSeeKinds} />}
         </div>)}
       {/* ---- no host: the starting captain can change the timers, nothing else (11 Nov, the owner) ---- */}
       {!isHost && (
@@ -299,7 +307,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
         {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
         {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
         <button className="btn btn-gold btn-block" disabled={!!blocker || busy}
-          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, custom: getCustom(),
+          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, seeLevels, ...(isHost ? { seeKinds } : {}), custom: getCustom(),
             ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
       </div>
     </section>

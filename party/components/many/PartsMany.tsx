@@ -55,7 +55,7 @@ export const byDistance = (pub: PubMany) => {
 };
 
 /* what one go of a game is called, in plain words (no "leg": the reviewers, 31 Oct): "Flag 3 of 10", "Recipe 2 of 5" */
-export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe", roulette: "Spin", stakes: "Round" };
+export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture" };
 export const unitOf = (key: string) => UNIT[key] || "Question";
 /* ---- the tracker: the room code, the teams along the top, the night's label and pips under them, then this game's tally.
    The phone keeps only the label, the pips and whose side you're on: the scores are behind your name at the top left. ---- */
@@ -157,6 +157,9 @@ function rules(pub: PubMany): string[] {
       `No points if you say the app's secret answer, or the same as another team. Any other answer gets ${k} points.`, pay];
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
       "One guess per team. A wrong guess puts you out of that one.", fast, pay];
+    /* What Do You See? (12 Nov, the owner): scored as the Cocktail or Dish is here */
+    case "see": return ["A picture goes up, blurred or zoomed right in, and gets clearer: a famous face, a logo, or a close-up. Captains type who or what it is.",
+      "One guess per team. A wrong guess gets nothing.", fast, pay];
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
     /* (shorter; the bullet is no secret now: everyone sees who drew it once the barrel stops, 11 Nov, the owner) */
     case "roulette": return ["The barrel spins: every team lands on a chamber, with its theme and level. Captains type the answer.",
@@ -180,7 +183,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const g = pub.game, tv = size === "tv";
   if (!g) return null;
   /* how many, in plain words ("5 questions", "10 flags"): no "Best of", every one counts */
-  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "questions", dish: "recipes", roulette: "spins", stakes: "rounds" } as Record<string, string>)[g.key] || "questions"}`;
+  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "questions", dish: "recipes", see: "pictures", roulette: "spins", stakes: "rounds" } as Record<string, string>)[g.key] || "questions"}`;
   /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */

@@ -41,7 +41,8 @@ const NEXT = { roundIntro: "round/begin", miniIntro: "closest/start", flagIntro:
   pinIntro: "pin/start", airportIntro: "airport/start", pinReveal: "ui/next", airportReveal: "ui/next", pinSummary: "pin/done", airportSummary: "airport/done",
   majorityIntro: "majority/start", majorityReveal: "ui/next", majoritySummary: "majority/done",
   rouletteIntro: "roulette/start", rouletteReveal: "ui/next", rouletteSummary: "roulette/done",
-  stakesIntro: "stakes/start", stakesReveal: "ui/next", stakesSummary: "stakes/done" };
+  stakesIntro: "stakes/start", stakesReveal: "ui/next", stakesSummary: "stakes/done",
+  seeIntro: "see/start", seeReveal: "ui/next", seeSummary: "see/done" };
 
 /* the answer to what's on screen, from the TV's own game (bots peek, so some answers are right) */
 function answerNow(g, pub) {
@@ -49,6 +50,7 @@ function answerNow(g, pub) {
     const sc = pub.screen;
     if (sc === "ask" || sc === "steal") return g.rounds[g.r].q[g.seat]?.answer;
     if (sc === "flagQ") return g.flagGame.qs[g.flagGame.i]?.answer;
+    if (sc === "seeQ") return g.seeGame.qs[g.seeGame.i]?.answer;
     if (sc === "airportQ") return g.airportGame.qs[g.airportGame.i]?.answer;
     if (sc === "mapQ") return g.mapGame.qs[g.mapGame.i]?.answer;
     if (sc === "miniQ") return String(g.mini.qs[g.mini.i]?.answer ?? "");
@@ -133,7 +135,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   /* the scripted things, waiting for a screen that allows them; a scripted Pause lasts its `for`; a scripted
      request (no host) is agreed to by the other captain */
   const scripted = []; let pauseUntil = 0, agreeNext = false, tieMoreLeft = tieMore;
-  const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ"];
+  const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "battleQ"];
   const armed = new Set(), asked = new Set(), edged = new Set(), contested = new Set(), contestSeen = new Set(), voted = new Set(), dropped = new Set();
   let contestSilent = false;
   /* while the TV is off, the phones still tap: a captain answers or buzzes what they see */
@@ -143,7 +145,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     if ((p.screen === "ask" || p.screen === "steal") && !p.sent?.[t]) send(who, "answer", { texts: ["Paris"] });
     else if (p.screen === "dishQ" && p.buzz == null) send(capOf(0) || who, "buzz", {});
     else if (["sudden", "battleTie"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && !p.out?.[k] && capOf(k)) send(capOf(k), "answer", { text: "Paris" }); }
-    else if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
+    else if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ", "seeQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
     else if (p.screen === "pinQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { pin: { lat: 48.85, lon: 2.35 } }); }
     else if (p.screen === "miniQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { n: "50" }); }
     else if (p.pending && capOf(1 - p.pending.team)) send(capOf(1 - p.pending.team), "next", { move: { type: "ui/rule", v: true }, step: p.step });
@@ -206,6 +208,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
         "roulette/start", "roulette/swap", "roulette/done", "ui/rouletteOk",
         /* Secret Stakes' (11 Nov) */
         "stakes/start", "stakes/swap", "stakes/done", "ui/stakesOk", "stakes/pick",
+        /* What Do You See?'s (12 Nov) */
+        "see/start", "see/swap", "see/done", "ui/seeOk",
         /* no host: a captain asks for new scores, and the other agrees or not (24 Oct) */
         "ui/askScore", "ui/agree", "ui/askSwap", "ui/askSwap"];
       /* only what a phone can send on this screen: a number on Closest, a pin on Drop the Pin, one of the four on
@@ -238,7 +242,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
        one has typed an answer and never presses Send: the TV takes it at time-up */
     if (slow && bot() < slow) {
       const sc = pub.screen;
-      if (["ask", "steal", "miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "battleQ", "dishQ"].includes(sc) && bot() < 0.08) {
+      if (["ask", "steal", "miniQ", "flagQ", "seeQ", "mapQ", "sayQ", "pinQ", "airportQ", "battleQ", "dishQ"].includes(sc) && bot() < 0.08) {
         const t = sc === "battleQ" ? pub.battle?.cap : sc === "dishQ" ? pub.buzz : sc === "ask" || sc === "steal" ? pub.turn : bot() < 0.5 ? 0 : 1;
         if (t != null && !pub.sent?.[t] && capOf(t)) fake.insert("actions", { room: CODE, user_id: capOf(t), kind: "draft", payload: { k: `${pub.qid}|${sc}`, ...(sc === "miniQ" ? { n: "12" } : sc === "pinQ" ? { pin: pinNear(g, bot) } : { texts: [bot() < 0.5 ? answerNow(g, pub) || "Paris" : "xyz"] }) } });
       }
@@ -373,6 +377,12 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     else if (sc === "miniQ") { for (const t of [0, 1]) if (!pub.sent?.[t]) send(C(t), "answer", { n: String(Math.round((Number(right) || 100) * (0.6 + bot() * 0.8))) }); }
     else if (["flagQ", "mapQ", "sayQ", "airportQ"].includes(sc)) {
       for (const t of [0, 1]) if (!pub.sent?.[t]) send(C(t), "answer", { text: guess(right) });
+      if (host && pub.sent?.[0] && pub.sent?.[1]) next(0, "ui/reveal");
+    }
+    /* What Do You See?: each captain guesses when the picture's clear enough for them (a few ticks in, or never: the
+       clock runs out), tagged as a real phone tags it; a wrong guess puts that team out of the picture */
+    else if (sc === "seeQ") {
+      for (const t of [0, 1]) if (!pub.sent?.[t] && C(t) && bot() < 0.3) send(C(t), "answer", { text: guess(right), k: `${pub.qid}|seeQ` });
       if (host && pub.sent?.[0] && pub.sent?.[1]) next(0, "ui/reveal");
     }
     /* Russian Roulette: each captain its own chamber's question (sent too soon, while the barrel spins, it's refused

@@ -1,6 +1,6 @@
 /* The screen check's two-team nights: every screen they reach, the first and the last of each (screen, game).
    No host, with a host, and a long night of Roulette, Majority Rules and the Battle. `night` is sim/night.jsx's. */
-const ALL = ["flag", "closest", "auction", "battle", "dish", "saysame", "map", "pin", "airport", "majority", "roulette", "stakes"];
+const ALL = ["flag", "closest", "auction", "battle", "dish", "saysame", "map", "pin", "airport", "majority", "roulette", "see", "stakes"];
 const NIGHTS = [
   { tag: "nh", seed: 41, minis: ALL, rounds: 4, crowd: 5, tieMore: 1 },
   { tag: "h", seed: 42, minis: ALL, rounds: 4, host: true, crowd: 5, tieMore: 1 },

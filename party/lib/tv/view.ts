@@ -9,6 +9,7 @@ import { callsOf, closestW, currentQ, fireOf, leadOf, matchQ, mrTally, okWin, pi
 import { recap } from "./recap";
 import { rrGot, rrPub, rrQ, type RrLap } from "../roulette";
 import { skKey, skPub, skQ, skResult, type SkGame } from "../stakes";
+import { sePic, seeWinner } from "../see";
 import type { TvState } from "./state";
 
 /* The question in play goes out under a number that means nothing outside this game (D5): its
@@ -61,7 +62,10 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (mg && /^map/.test(sc)) p.preload = { maps: mg.qs.slice(mg.i, all ? undefined : mg.i + 2).map((x: G) => x.id) };
     /* Drop the Pin: the photos, and the world map itself (big: from the intro on) */
     const pg = g.pinGame;
-    if (pg && /^pin/.test(sc)) p.preload = { pins: pg.qs.slice(pg.i, all ? undefined : pg.i + 2).map((x: G) => x.photo).filter(Boolean), world: true }; }
+    if (pg && /^pin/.test(sc)) p.preload = { pins: pg.qs.slice(pg.i, all ? undefined : pg.i + 2).map((x: G) => x.photo).filter(Boolean), world: true };
+    /* What Do You See?: the next two pictures (the TV fetches its size, a phone its own) */
+    const eg = g.seeGame;
+    if (eg && /^see/.test(sc)) p.preload = { sees: eg.qs.slice(eg.i, eg.i + 2).map((x: G) => x.photo).filter(Boolean) }; }
   /* every change of score, for the recap's chart and lead changes; then the part of the night this screen is in (a
      new one starts where the score log is now). The score first: a mini-game's points land as its result screen
      gives way to the next part's, and they're the mini-game's */
@@ -105,7 +109,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.tMini = t.tMini;
     p.timers = { question: t.tQuestion, steal: t.tSteal, friend: t.tFriend, contest: t.tContest, sudden: t.tSudden, mini: t.tMini, flag: t.tFlag, map: t.tMap, say: t.tSay,
       auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport, majority: t.tMajority, roulette: t.tRoulette,
-      stakesPick: t.tStakesPick, stakesQ: t.tStakesQ }; }
+      stakesPick: t.tStakesPick, stakesQ: t.tStakesQ, see: t.tSee }; }
   /* no host: whose Start or Next the room is waiting for */
   if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
     && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {
@@ -211,6 +215,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   }
   /* a reveal's leg counts in the tracker straight away (and moves with the ruling until Next) */
   const prov: W | null = s.screen === "closestReveal" ? closestW(s) : s.screen === "flagReveal" || s.screen === "mapReveal" || s.screen === "airportReveal" ? okWin(s)
+    : s.screen === "seeReveal" ? seeWinner(s.ok, s.seeAt)
     : s.screen === "sayReveal" ? sayWin(s) : s.screen === "pinReveal" ? pinW(s) : null;
   if (prov != null && p.mini) { if (prov === "tie") { p.mini.wins[0]++; p.mini.wins[1]++; } else if (prov === 0 || prov === 1) p.mini.wins[prov]++; }
   if (s.screen === "miniQ" || s.screen === "sayQ") p.question = q?.question;
@@ -220,6 +225,17 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.reveal = { answer: q.answer, guesses: s.guesses, w: closestW(s), notes: q.notes };
   }
   if ((s.screen === "flagQ" || s.screen === "flagReveal") && q) p.flag = q.flag;
+  /* What Do You See?: the picture and how it clears (never its answer); a wrong guess, out; at the reveal what it
+     was, its credit, who got it and how fast (the fastest right answer, as the calls stand) */
+  if ((s.screen === "seeQ" || s.screen === "seeReveal") && q && g.seeGame) {
+    const m = g.seeGame;
+    p.see = { ...sePic(q), total: s.total || getSettings().tSee, n: m.i + 1, of: m.base, out: [...s.seeOut] };
+    if (s.screen === "seeReveal") {
+      const w = seeWinner(s.ok, s.seeAt);
+      p.see.rev = { answer: q.answer, notes: q.notes || undefined, credit: q.credit, licence: q.licence, who: w === "none" ? null : w, ms: w === "none" ? null : s.seeAt[w], at: [...s.seeAt] };
+      p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w, notes: q.notes };
+    }
+  }
   if (s.screen === "flagReveal" && q) p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) };
   /* Drop the Pin: the photo alone, at every level (24 Oct: no name on the hard ones); at the reveal, where it is and both pins */
   if ((s.screen === "pinQ" || s.screen === "pinReveal") && q) {

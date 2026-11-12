@@ -1,0 +1,87 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+7.50 ask | 3 | 0-0 |  |  | 
+8.50 ask | 3 | 0-0 |  | Lions used Double Dip. | 
+9.50 answer | 3 | 2-0 |  | Lions +2 points | 
+10.25 ask | 4 | 2-0 |  | Lions +2 points | 
+11.25 steal | 4 | 2-0 |  | Lions +2 points | 
+12.00 answer | 4 | 2-0 |  | Lions +2 points | 
+13.00 answer | 4 | 2-0 |  |  | 
+28.00 answer | 4 | 2-0 |  | No answer in time: the call stands. | 
+28.25 roundScore | 5 | 2-0 |  | No answer in time: the call stands. | 
+29.25 flagIntro | 6 | 2-0 | 0-0 | No answer in time: the call stands. | 
+30.00 flagQ | 7 | 2-0 | 0-0 | No answer in time: the call stands. | 
+31.00 flagReveal | 7 | 2-0 | 0-1 | No answer in time: the call stands. | 
+32.00 flagQ | 8 | 2-0 | 0-1 | Owls take flag 1. | 
+32.75 flagReveal | 8 | 2-0 | 1-2 | Owls take flag 1. | 
+33.75 flagQ | 9 | 2-0 | 1-2 | Both got it — a point each. | 
+34.50 flagReveal | 9 | 2-0 | 1-3 | Both got it — a point each. | 
+35.50 flagReveal | 9 | 2-0 | 1-3 |  | 
+37.25 flagReveal | 9 | 2-0 | 2-3 | Call changed: ⁨Lions⁩ RIGHT. | 
+38.25 flagQ | 10 | 2-0 | 2-3 | Both got it — a point each. | 
+39.00 flagReveal | 10 | 2-0 | 2-4 | Both got it — a point each. | 
+40.00 flagQ | 11 | 2-0 | 2-4 | Owls take flag 4. | 
+41.00 flagReveal | 11 | 2-0 | 2-5 | Owls take flag 4. | 
+41.75 flagReveal | 11 | 2-0 | 2-5 |  | 
+42.75 flagReveal | 11 | 2-0 | 2-4 | Call changed: ⁨Owls⁩ WRONG. | 
+43.50 flagQ | 12 | 2-0 | 2-4 | Nobody got it. | 
+44.50 flagReveal | 12 | 2-0 | 2-5 | Nobody got it. | 
+45.50 flagQ | 13 | 2-0 | 2-5 | Owls take flag 6. | 
+46.25 flagReveal | 13 | 2-0 | 3-5 | Owls take flag 6. | 
+47.25 flagQ | 14 | 2-0 | 3-5 | Lions take flag 7. | 
+48.00 flagReveal | 14 | 2-0 | 3-6 | Lions take flag 7. | 
+49.00 decided | 15 | 2-2 | 3-6 |  | 
+50.00 roundIntro | 16 | 2-2 |  |  | 
+51.75 ask | 17 | 2-2 |  |  | 
+52.50 steal | 17 | 2-2 |  |  | 
+53.50 answer | 17 | 2-2 |  |  | 
+58.00 answer | 17 | 3-2 |  | Call changed: Lions +1 point. | 
+59.00 ask | 18 | 3-2 |  | Call changed: Lions +1 point. | 
+59.75 answer | 18 | 3-3 |  | Owls +1 point | 
+60.75 roundScore | 19 | 3-3 |  | Owls +1 point | 
+61.50 roundIntro | 20 | 3-3 |  | Owls +1 point | 
+63.50 ask | 21 | 3-3 |  | Owls +1 point | 
+64.25 steal | 21 | 3-3 |  | Owls +1 point | 
+65.25 answer | 21 | 3-3 |  | Owls +1 point | 
+66.00 ask | 22 | 3-3 |  | Owls +1 point | 
+67.00 answer | 22 | 3-5 |  | Owls +2 points | 
+68.00 roundScore | 23 | 3-5 |  | Owls +2 points | 
+68.75 seeIntro | 24 | 3-5 | 0-0 | Owls +2 points | 
+69.75 seeQ | 25 | 3-5 | 0-0 | Owls +2 points | 
+70.50 seeReveal | 25 | 3-5 | 1-0 | Owls +2 points | 
+71.50 seeQ | 26 | 3-5 | 1-0 | Lions take picture 1. | 
+73.25 seeReveal | 26 | 3-5 | 2-0 | Lions take picture 1. | 
+74.25 seeReveal | 26 | 3-5 | 2-0 |  | 
+75.00 seeReveal | 26 | 3-5 | 1-0 | Call changed: ⁨Lions⁩ WRONG. | 
+76.00 seeQ | 27 | 3-5 | 1-0 | Nobody got it. | 
+77.00 seeQ | 27 | 3-5 | 1-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+77.75 seeReveal | 27 | 3-5 | 1-0 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+78.75 seeReveal | 27 | 3-5 | 1-0 |  | 
+79.50 seeReveal | 27 | 3-5 | 1-1 | Call changed: ⁨Owls⁩ RIGHT. | 
+80.50 seeQ | 28 | 3-5 | 1-1 | Owls take picture 3. | 
+81.50 seeReveal | 28 | 3-5 | 2-1 | Owls take picture 3. | 
+82.25 seeQ | 29 | 3-5 | 2-1 | Lions take picture 4. | 
+83.25 seeQ | 29 | 3-5 | 2-1 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+86.00 seeReveal | 29 | 3-5 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+86.75 seeQ | 30 | 3-5 | 2-2 | Owls take picture 5. | 
+88.50 seeQ | 30 | 3-5 | 2-2 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+90.50 seeReveal | 30 | 3-5 | 2-2 | ⁨Owls⁩ guessed wrong: out of this picture. | 
+91.25 seeReveal | 30 | 3-5 | 2-2 |  | 
+92.25 seeReveal | 30 | 3-5 | 3-2 | Call changed: ⁨Lions⁩ RIGHT. | 
+93.00 seeQ | 31 | 3-5 | 3-2 | Lions take picture 6. | 
+95.00 seeQ | 31 | 3-5 | 3-2 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+95.75 seeReveal | 31 | 3-5 | 3-3 | ⁨Lions⁩ guessed wrong: out of this picture. | 
+96.75 seeTie | 32 | 3-5 | 3-3 |  | 
+97.50 seeSummary | 33 | 4-6 | 3-3 |  | 
+98.50 roundIntro | 34 | 4-6 |  |  | 
+100.25 ask | 35 | 4-6 |  |  | 
+101.25 steal | 35 | 4-6 |  |  | 
+102.00 answer | 35 | 4-7 |  | Owls +1 point — steal | 
+103.00 ask | 36 | 4-7 |  | Owls +1 point — steal | 
+104.00 steal | 36 | 4-7 |  | Owls +1 point — steal | 
+104.75 answer | 36 | 5-7 |  | Lions +1 point — steal | 
+105.75 roundScore | 37 | 5-7 |  | Lions +1 point — steal | 
+106.50 final | 38 | 5-7 |  | Lions +1 point — steal | 
+recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[1,1],"minis":[0,1],"best":{"title":"Guess the Flag","team":1,"legs":[3,6]},"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[3,3],[3,5],[4,6],[4,7],[5,7]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,3]]},{"label":"R3","pts":[[3,5]]},{"label":"What Do You See?","pts":[[4,6]]},{"label":"R4","pts":[[4,7],[5,7]]}],"awards":[]}

@@ -3,11 +3,12 @@
    row only the host can read (Supabase row-level security). */
 export type Team = { name: string; score: number; ll: { friend: boolean; dip: boolean; dbl: boolean } };
 export type Two<T> = [T, T];
-export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "majority" | "roulette" | "battle" | "stakes";
+export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "majority" | "roulette" | "battle" | "stakes" | "see";
 /* a spot on the earth (Drop the Pin), in degrees */
 export type LatLon = { lat: number; lon: number };
 import type { RrPub } from "./roulette";
 import type { SkPub } from "./stakes";
+import type { SePub } from "./see";
 export type Pub = {
   step: number;                   // bumps on every host move and screen change; host taps carry it so stale ones are refused
   screen: string;                 // roundIntro | ask | steal | answer | roundScore | sudden | final | miniIntro | miniQ | closestReveal | miniSummary | flag… | dish…
@@ -43,7 +44,7 @@ export type Pub = {
   /* with a host: what the captain typed (never the answer), so the host's phone shows it the moment it lands */
   said?: Two<string[] | null>;
   /* pictures coming up next (flags under their public/fx names, map ids, landmark photos), fetched ahead so they show at once */
-  preload?: { flags?: string[]; maps?: string[]; pins?: string[]; world?: boolean };
+  preload?: { flags?: string[]; maps?: string[]; pins?: string[]; sees?: string[]; world?: boolean };
   /* the end of the night: a short story of it, shown after the confetti */
   recap?: { margin: number; sudden: boolean; leadChanges: number; steals: Two<number>; minis: Two<number>; best?: { title: string; team: 0 | 1; legs: Two<number> };
     chart?: Two<number>[]; awards?: { t: string; who: string; team?: 0 | 1 | null; note?: string; spoon?: boolean }[];   // the scores through the night; the awards (29 Oct)
@@ -58,6 +59,7 @@ export type Pub = {
   /* cityOk, at the reveal: false where the city alone doesn't count (it has more than one big airport) */
   airport?: { title: string; board: string[][]; code?: string; city?: string; cityOk?: boolean };
   roulette?: RrPub;                     // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
+  see?: SePub;                          // What Do You See?: the picture and how it clears; at the reveal, what it was and who got it
   stakes?: SkPub;                       // Secret Stakes: the round's themes, what a bet is worth, who has bet; each team's question; the reveal
   /* Majority Rules: every player answers. The join screen: each team's list (who's on the game screen, who's been
      taken off), and with no host a captain asking to take an absent teammate off (the other captain agrees).
@@ -99,7 +101,7 @@ export type Pub = {
   tMini?: number;
   /* the house timers (Settings, on the TV), for the rules shown on every screen */
   timers?: { question: number; steal: number; friend: number; contest: number; sudden: number; mini: number; flag: number; map: number; say: number;
-    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number; majority: number ; roulette?: number; stakesPick?: number; stakesQ?: number };
+    auction: number; dishStep: number; dishType: number; battleHost: number; battleTyped: number; pin: number; airport: number; majority: number ; roulette?: number; stakesPick?: number; stakesQ?: number; see?: number };
   paused?: boolean;          // the clock was paused: the question is hidden until it restarts
   lead?: 0 | 1;              // no host: the captain who starts and moves the night on (Team A's, or B's)
   nextBy?: string;           // no host: whose Start or Next the room is waiting for
@@ -138,11 +140,11 @@ export function thinLine(t: Thin): string {
 }
 
 /* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
-export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "rouletteTie", "battleLevel"];
+export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "rouletteTie", "seeTie", "battleLevel"];
 /* a mini-game can't be lost any more, with legs still to play: the same people choose — keep playing for fun, or stop here */
 export const DECIDED = "decided";
 export const MINI_TITLES: Record<MiniKey, string> = { closest: "Closest To Wins", flag: "Guess the Flag", dish: "Guess the Cocktail or Dish", map: "Guess the Map", auction: "The Auction", saysame: "Don't Say the Same as Me",
-  pin: "Drop the Pin", airport: "Guess the Airport", majority: "Majority Rules", roulette: "Russian Roulette", battle: "Battle of the Captains", stakes: "Secret Stakes" };
+  pin: "Drop the Pin", airport: "Guess the Airport", majority: "Majority Rules", roulette: "Russian Roulette", battle: "Battle of the Captains", stakes: "Secret Stakes", see: "What Do You See?" };
 /* 28 Oct, motion on the TV. The drumroll (answer, dish, auction leg) hits at 0.82 s: the answer, the calls and
    the right/wrong chime land on that hit, not before it. The points then fly up to the score: from the line that
    says "+2" (it shows FLY_AT after the screen comes up), FLY_MS in the air; the point chime plays as they land. */

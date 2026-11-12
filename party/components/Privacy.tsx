@@ -31,6 +31,8 @@ export function DataPrivacy() {
           <H>Copyright</H>
           <P>&copy; 2026 Thierry Boulos. Quiz Me Baby, its design, Imad and its questions. All rights reserved.</P>
           <P><B>Flags</B> from Wikimedia Commons, most in the public domain (<A href="/flags/CREDITS.md">flag credits</A>). <B>Drop the Pin photos</B> from Wikimedia Commons, each under the licence named in the <A href="/pins/CREDITS.md">photo credits</A>. <B>Maps</B> from Natural Earth (public domain). <B>Fonts</B>: Anton and Sora, under the SIL Open Font License.</P>
+          <P><B>What Do You See? pictures</B> from Wikimedia Commons, each under the licence named in the <A href="/see/CREDITS.md">picture credits</A>. Quiz Me Baby isn&rsquo;t associated with any brand, celebrity or person shown. To have a picture removed, write to Thierryboulos@hotmail.com.</P>
+          <P>Some questions are adapted from Open Trivia DB (opentdb.com).</P>
           <P>The shows, films, games, brands, bands and people named in the questions belong to their owners. They&rsquo;re named for trivia only; Quiz Me Baby isn&rsquo;t linked to or endorsed by any of them.</P>
 
           <button type="button" className="btn btn-gold btn-block mt-2" onClick={() => setOpen(false)}>Close</button>

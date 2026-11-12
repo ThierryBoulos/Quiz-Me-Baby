@@ -15,14 +15,14 @@ import { matchQ } from "../tv/reads";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_LEVELS, type SkPick } from "../stakes";
 
-export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "roulette", "stakes"] as const;
+export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "roulette", "stakes"] as const;
 /* sudden death isn't picked: it comes when the night ends with teams level at the top */
 export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
 export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
-  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", roulette: "Russian Roulette", stakes: "Secret Stakes" };
-export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, roulette: 3, stakes: 3 };
+  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", see: "What Do You See?", roulette: "Russian Roulette", stakes: "Secret Stakes" };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, see: 7, roulette: 3, stakes: 3 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
-export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "sudden", "roulette", "stakes"];
+export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "see", "sudden", "roulette", "stakes"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
 /* a game's name on screen. The question rounds by their numbers: a round is one theme, and they play two at a time
    ("Rounds 3 and 4"), the last one alone when the night has an odd number ("Round 5"): 11 Nov, the owner */
@@ -73,6 +73,7 @@ export type StateM = {
   why: (string | null)[];                       // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
   shown: number;                                // the Cocktail or Dish: the ingredients up so far
   at: (number | null)[]; seq: number;           // the order this leg's answers came in (Flags: the fastest right first)
+  ms?: (number | null)[];                       // What Do You See?: how far into the picture's clock each guess came (ms)
   ok: (boolean | null)[];                       // this leg's call per team (the app's, then the host's)
   roster: { name: string; team: number }[];     // Majority Rules: who plays (fixed at its start)
   votes: Record<string, string>;
@@ -102,7 +103,8 @@ export type StateM = {
 export type FlagM = { id: number; name: string; team: number | null; label: string; qid?: string; ms: number | null; kind: "away" | "paste" };
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
 export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number; roulette: number;
-  stakes: number; stakesPick: number };   // Secret Stakes: to answer, and to bet
+  stakes: number; stakesPick: number;   // Secret Stakes: to answer, and to bet
+  see: number };                        // What Do You See?: a picture
 
 const n = (k: number, v = 0) => Array.from({ length: k }, () => v);
 export const miniOf = (s: StateM) => s.minis[s.mi] as MiniM | undefined;
@@ -157,7 +159,7 @@ export function lineup(rounds: number, games: ManyKey[]): ManyKey[] {
   for (let r = 0; r < rounds; r++) out.push("quiz", ...games.slice(r * per, (r + 1) * per));
   return out;
 }
-const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; s.mapHint = false; };
+const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.ms = Array(k).fill(null); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; s.mapHint = false; };
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
 
 /* the host taps Start on a game's intro: its first question */
@@ -233,13 +235,16 @@ const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: 
 
 /* a captain's answer (one each, the first stands). order: when it reached the server (the action's id), so the
    fastest is the first to arrive there, however the network hands the answers to the TV; none, the order they come */
-export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown }, order?: number): true | string {
+export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown }, order?: number, now = Date.now()): true | string {
   const m = miniOf(s); if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
   if (m.only && !m.only.includes(team)) return "Only the teams tied at the top answer this one.";
   if (typedKey(m.key)) {
-    if (s.typed[team] != null) return m.key === "dish" ? "Your team has had its guess at this one." : "Your answer is in.";
+    if (s.typed[team] != null) return m.key === "dish" || m.key === "see" ? "Your team has had its guess at this one." : "Your answer is in.";
     const text = String(p.text ?? "").trim().slice(0, 80); if (!text) return "Type an answer first.";
-    s.typed[team] = text; s.at[team] = order ?? ++s.seq; return true;
+    s.typed[team] = text; s.at[team] = order ?? ++s.seq;
+    /* (What Do You See?: and how far into the picture's clock it came, to say how fast) */
+    if (m.key === "see") (s.ms ||= Array(s.teams.length).fill(null))[team] = Math.round(Math.max(0, s.total * 1000 - (s.deadline ? s.deadline - now : s.left * 1000)));
+    return true;
   }
   if (m.key === "closest") {
     if (s.nums[team] != null) return "Your number is in.";

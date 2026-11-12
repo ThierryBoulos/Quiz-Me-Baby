@@ -11,6 +11,7 @@ import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
+import { SeeTv } from "./See";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -41,7 +42,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
   const [shownToast, setShownToast] = useState<number | null>(null);
   const tid = pub.toast?.id ?? null;
   useEffect(() => { if (tid == null) return; setShownToast(tid); const t = setTimeout(() => setShownToast(null), 4000); return () => clearTimeout(t); }, [tid]);
-  const said = / \+\d+ points?( — |$)| takes (leg|map|flag|board|landmark|number) \d+\.$| takes the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
+  const said = / \+\d+ points?( — |$)| takes (leg|map|flag|board|landmark|number|picture) \d+\.$| takes the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
   const toastOn = !!pub.toast && shownToast === pub.toast.id && !said;
   /* a map's question and its reveal are one screen: the map stays put and the answer comes in over it */
   const bodyKey = (pub.screen === "mapQ" || pub.screen === "mapReveal") && pub.map ? "map" + pub.map.id : key;
@@ -370,6 +371,12 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} take it` : ""}</div>
     </>);
   }
+  /* What Do You See?: the picture clears as the clock runs (every screen from the TV's clock); then the whole picture,
+     what it is, both guesses and who got it how fast */
+  if ((sc === "seeQ" || sc === "seeReveal") && pub.see) return (
+    <SeeTv see={pub.see} screen={sc} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))}
+      sent={pub.sent || [false, false]} deadline={pub.deadline} left={pub.left}
+      clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} rows={<TeamRows pub={pub} empty="No guess" small />} />);
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (<>
     <FlagImg name={pub.flag} h={sc === "flagQ" ? 300 : 220} maxW={520} />
     {sc === "flagQ" ? (<><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} /><Sent pub={pub} /></>) : (<>

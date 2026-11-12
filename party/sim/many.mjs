@@ -21,7 +21,7 @@ const decks = { majority: pick("majority", 15, (q) => q.options?.length === 4), 
   quiz: pick("standard", 12, (q) => q.theme !== "Know the Host"), airport: pick("airport", 6), map: pick("map", 6),
   say: pick("saysame", 6, (q) => (q.pool || []).length >= 5).map((q) => ({ ...q, answer: q.pool[0] })), dish: pick("dish", 5) };
 function rng(seed) { let s = seed >>> 0; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
-const T = { quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 60, stakes: 45, stakesPick: 20 };
+const T = { quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 60, stakes: 45, stakesPick: 20, see: 20 };
 /* a bot's typed answer: right about half the time (a map by its title; a prompt, any word on its list) */
 const typedFor = (key, q, r) => key === "say" ? q.pool[Math.floor(r() * Math.min(4, q.pool.length))] : r() < 0.5 ? (key === "map" ? q.question : q.answer) : "Atlantis";
 
@@ -67,6 +67,42 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   else if (update || !existsSync(file)) { writeFileSync(file, text); verdict = "saved"; }
   else { const want = readFileSync(file, "utf8"); verdict = want === text ? "same as golden" : "DIFFERS"; if (want !== text) bad++; }
   console.log(`many ${k} teams, ${crowd} players: ${s.teams.map((x) => x.score).join("-")} — ${verdict}`);
+}
+/* 12 Nov: What Do You See? with 3, 6 and 8 teams, scored as the Cocktail or Dish is here: one guess a team, the right
+   ones paid by the order they came in (1st as many points as there are teams), a wrong one nothing */
+{
+  decks.see = pick("see", 7);
+  for (const [k, seed] of [[3, 5], [6, 6], [8, 7]]) {
+    const r = rng(seed), teams = Array.from({ length: k }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+    const s = L.newNight(teams, decks, ["see"]), trace = [];
+    let now = 0, odd = "";
+    L.startMini(s, now, T, []);
+    for (let guard = 0; guard < 100 && s.screen !== "final"; guard++) {
+      if (s.screen === "q") {
+        const q = L.qOf(s), order = [...Array(k).keys()].sort(() => r() - 0.5);
+        for (const t of order) { if (r() < 0.15) continue; now += 1000 + Math.floor(r() * 2000); L.captainAnswer(s, t, { text: r() < 0.5 ? q.answer : "Atlantis" }, undefined, now); }
+        if (L.captainAnswer(s, order[0], { text: q.answer }, undefined, now) === true && s.typed[order[0]] !== q.answer) odd ||= "a second guess taken";
+        L.reveal(s);
+        const pl = L.legPlaces(s), pts = L.legPoints(s), right = s.teams.map((_, t) => !!s.ok[t]);
+        /* the fastest right is 1st, and is paid as many points as there are teams; wrong, no answer: nothing */
+        const firstRight = [...Array(k).keys()].filter((t) => right[t]).sort((a, b) => s.at[a] - s.at[b])[0];
+        if (firstRight != null && (pl[firstRight] !== 1 || pts[firstRight] !== k)) odd ||= `leg ${L.miniOf(s).i + 1}: the fastest right isn't 1st on ${k} points`;
+        if (s.teams.some((_, t) => !right[t] && pts[t] !== 0)) odd ||= "a wrong guess scored";
+        if (s.ms.some((v, t) => s.typed[t] != null && !(v >= 0 && v <= T.see * 1000))) odd ||= "a guess's time is off the clock";
+        trace.push(`picture ${L.miniOf(s).i + 1}: ${s.teams.map((_, t) => (s.typed[t] == null ? "-" : right[t] ? `#${pl[t]}` : "x")).join(" ")} | pts ${pts.join(",")}`);
+        L.next(s, now, T); continue;
+      }
+      if (s.screen === "summary") { trace.push(`summary award ${L.miniOf(s).award.join(",")}`); L.next(s, now, T); continue; }
+      if (s.screen === "reveal") { L.next(s, now, T); continue; }
+    }
+    const file = join(here, `golden/many-see-${k}.txt`), text = trace.join("\n") + "\n";
+    let verdict;
+    if (s.screen !== "final") { verdict = "NEVER ENDED"; bad++; }
+    else if (odd) { verdict = "WRONG: " + odd; bad++; }
+    else if (update || !existsSync(file)) { writeFileSync(file, text); verdict = "saved"; }
+    else { const want = readFileSync(file, "utf8"); verdict = want === text ? "same as golden" : "DIFFERS"; if (want !== text) bad++; }
+    console.log(`many ${k} teams, What Do You See? (${L.miniOf(s)?.qs.length ?? s.minis[0]?.qs.length} pictures): ${s.teams.map((x) => x.score).join("-")} — ${verdict}`);
+  }
 }
 /* phase 2: a whole evening, every game and two question rounds spread through it */
 {

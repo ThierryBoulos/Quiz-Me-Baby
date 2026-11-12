@@ -31,6 +31,8 @@ const IC: Record<string, string> = {
   dish: "M5 4h14l-7 8zM12 12v7M8 20h8", roulette: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 6.2v1.6M16.3 9.5v.01M16.3 14.5v.01M12 16.2v1.6M7.7 14.5v.01M7.7 9.5v.01",
   battle: "M3 18h18L19 7l-4 4-3-6-3 6-4-4z",
   /* Secret Stakes: a stack of chips */
+  /* What Do You See?: an eye */
+  see: "M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6",
   stakes: "M12 4c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3zM4 7v4c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 11v4c0 1.7 3.6 3 8 3s8-1.3 8-3v-4M4 15v2c0 1.7 3.6 3 8 3s8-1.3 8-3v-2" };
 export const GameIcon = ({ k }: { k: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={IC[k] || ""} /></svg>);

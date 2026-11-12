@@ -1,0 +1,8 @@
+picture 1: - #1 x | pts 0,3,0
+picture 2: - x x | pts 0,0,0
+picture 3: #1 x x | pts 3,0,0
+picture 4: #2 #1 x | pts 2,3,0
+picture 5: #1 #2 #3 | pts 3,2,1
+picture 6: - #2 #1 | pts 0,2,3
+picture 7: #1 #2 x | pts 3,2,0
+summary award 8,10,6

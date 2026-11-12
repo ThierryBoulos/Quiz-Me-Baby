@@ -64,7 +64,8 @@ function urlOf(page, kind, f) {
   const host = /en\.wikipedia\.org/.test(page) ? "en.wikipedia.org" : "commons.wikimedia.org";
   const file = decodeURIComponent(page.split("/wiki/")[1]).replace(/^File:/, "");
   const part = f.crop ? Math.max(0.05, f.crop[2] - f.crop[0]) : 1;
-  const want = f.card ? 1800 : Math.min(6000, Math.ceil(SIZE[kind][0][0] / part));
+  /* (a logo cropped to its symbol: enough of the file that the symbol alone fills the card's 62% of the TV) */
+  const want = f.card ? Math.min(4000, Math.max(1800, Math.ceil(SIZE[kind][0][0] * 0.62 / part))) : Math.min(6000, Math.ceil(SIZE[kind][0][0] / part));
   return `https://${host}/wiki/Special:FilePath/${encodeURIComponent(file)}?width=${want}`;
 }
 

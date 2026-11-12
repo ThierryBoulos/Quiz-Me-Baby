@@ -29,6 +29,7 @@ const MINI_TIMERS: Timer[] = [
   ["tAirport", "Guess the Airport", [20, 30, 45, 60]],
   ["tMajority", "Majority Rules: per question", [10, 15, 20, 30]],
   ["tRoulette", "Russian Roulette", [30, 45, 60, 75, 90]],
+  ["tSee", "What Do You See?: per picture", [15, 20, 25, 30]],
   ["tStakesPick", "Secret Stakes: placing a bet", [10, 15, 20, 30, 45]],
   ["tStakesQ", "Secret Stakes: answering", [30, 45, 60, 75, 90]],
   ["tDishStep", "Guess the Cocktail or Dish: a new ingredient every", [2, 3, 4, 5]],

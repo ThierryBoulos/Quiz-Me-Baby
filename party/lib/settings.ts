@@ -11,6 +11,7 @@ export type Settings = {
   tMini: number; tFlag: number; tMap: number; tSay: number; tAuction: number;
   tPin: number; tAirport: number; tMajority: number;   // Drop the Pin, Guess the Airport, Majority Rules
   tRoulette: number;          // Russian Roulette: to answer a chamber's question (9 Nov, the owner: its own, 45 s)
+  tSee: number;                           // What Do You See? (12 Nov, the owner): 20 s a picture, clear for the last 3
   tStakesPick: number; tStakesQ: number;   // Secret Stakes (11 Nov, the owner): to place a bet (20 s), then to answer (45 s)
   tDishStep: number;          // Guess the Cocktail or Dish: a new ingredient every…
   tDishType: number;          // …and after a buzz, this long to type it
@@ -22,7 +23,7 @@ export type Settings = {
   flagAway: boolean;          // flag a phone that leaves the game screen during a question
 };
 export const DEFAULTS: Settings = { tQuestion: 60, tSteal: 30, tFriend: 30, tContest: T_OVERRULE, tSudden: T_SUDDEN_BUZZ,
-  tMini: T_CLOSEST, tFlag: T_FLAG, tMap: T_MAP, tSay: T_SAY, tAuction: T_AUCTION, tPin: T_PIN, tAirport: T_AIRPORT, tMajority: T_MAJORITY, tRoulette: 45, tStakesPick: 20, tStakesQ: 45, tDishStep: DISH_STEP, tDishType: T_DISH_TYPE,
+  tMini: T_CLOSEST, tFlag: T_FLAG, tMap: T_MAP, tSay: T_SAY, tAuction: T_AUCTION, tPin: T_PIN, tAirport: T_AIRPORT, tMajority: T_MAJORITY, tRoulette: 45, tSee: 20, tStakesPick: 20, tStakesQ: 45, tDishStep: DISH_STEP, tDishType: T_DISH_TYPE,
   tBattleHost: T_BATTLE_HOST, tBattleTyped: T_BATTLE_TYPED, sound: true, tick: true, volume: 0.75, noRepeat: true, alternateFirst: false, imad: false, flagAway: true };
 const KEY = "qmb.party.settings";
 /* Wave 2 changed the house timers (question 60→45, steal 30→20, overrule 15→8, Closest 90→60).
