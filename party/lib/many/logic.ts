@@ -243,7 +243,7 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
     const text = String(p.text ?? "").trim().slice(0, 80); if (!text) return "Type an answer first.";
     s.typed[team] = text; s.at[team] = order ?? ++s.seq;
     /* (What Do You See?: and how far into the picture's clock it came, to say how fast) */
-    if (m.key === "see") (s.ms ||= Array(s.teams.length).fill(null))[team] = Math.round(Math.max(0, s.total * 1000 - (s.deadline ? s.deadline - now : s.left * 1000)));
+    if (m.key === "see") (s.ms ||= Array(s.teams.length).fill(null))[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline ? s.deadline - now : s.left * 1000))));
     return true;
   }
   if (m.key === "closest") {

@@ -55,7 +55,8 @@ export default function TvRoom() {
   const awake = useWakeLock(isTv);
   const pub = many ? null : own || ((room?.state?.pub || null) as Pub | null);
   const pubMany = many ? (M.pub || ((room?.state?.pub as PubMany | null)?.many ? (room?.state?.pub as PubMany) : null)) : null;
-  usePreload(pub);
+  /* (3-8 teams: its view carries the same look-ahead, for What Do You See?'s pictures) */
+  usePreload(pub || (pubMany as unknown as Pub | null));
   /* an old copy of the app (left open across a deploy) reloads between questions */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline), room?.status === "playing");
   /* the night is over and somebody tapped Exit: home (a moment later, so every phone hears it first) */

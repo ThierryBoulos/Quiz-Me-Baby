@@ -30,6 +30,7 @@ export type PubMany = {
   out?: boolean[];
   roulette?: RrPub;                               // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
   see?: SePub;                                    // What Do You See?: the picture and how it clears; at the reveal what it was, the fastest right guess
+  preload?: { sees?: string[] };                  // What Do You See?: the next pictures, fetched ahead (the TV its size, a phone its own)
   stakes?: SkPub;                                 // Secret Stakes: the round's themes, who has bet (and each team's bet, drawn only on its own phones), the questions, the reveal
   theme?: string;                                 // a question round: the question's theme
   deadline: number | null; left: number; sent: boolean[]; now?: number; paused?: boolean;
@@ -129,6 +130,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     places: m.places || s.teams.map(() => s.teams.length), award: m.award || [], line: m.key === "majority" ? mrLine(s) || undefined : undefined };
   /* (Secret Stakes pays nothing at its end: the bets are already on the totals; its summary is pub.stakes.sum) */
   if (m?.key === "stakes" && pub.summary) { pub.summary.award = s.teams.map(() => 0); pub.summary.noAward = true; }
+  if (m?.key === "see" && s.screen !== "summary") pub.preload = { sees: m.qs.slice(m.i, m.i + 2).map((q) => String(q?.photo || "")).filter(Boolean) };
   if (s.intro) { const games = s.minis.filter((x) => x.key !== "sudden");
     pub.intro = { many: true, teams: s.teams.length, items: games.map((x, i) => ({ kind: x.key === "quiz" ? "q" as const : "mini" as const, key: x.key + i, game: x.key, title: titleOf(s.minis, i),
       ...(x.key === "quiz" ? { themes: [...new Set(x.qs.map((q) => String(q.theme || "")).filter(Boolean))], rounds: roundNumbers(s.minis, i) } : {}) })) }; }

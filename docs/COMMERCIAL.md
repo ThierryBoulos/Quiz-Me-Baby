@@ -83,6 +83,9 @@ there; then mark them here with the wave.
 - **todo**: Secret Stakes picks: keep them off other teams' phones entirely (a private row per team). Today every
   team's bet travels in the room's public view; each phone only draws its own team's, so it's hidden on screen but
   not from someone reading the room's data (11 Nov 2026).
+- **todo**: What Do You See?: every phone gets the clear picture's file and blurs or zooms it on screen, so a player
+  who opens the file by itself sees it clear (its name is a hash, so it doesn't say what it is). For a paid version:
+  send only the step on screen (the TV renders each step as its own small file), or the clear file only at the reveal.
 
 ---
 

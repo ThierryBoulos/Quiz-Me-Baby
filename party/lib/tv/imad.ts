@@ -74,14 +74,14 @@ export function imadFlush(s: TvState) {
 /* the legs taken in a row, from the engine's own words; a new mini-game starts cold (29 Oct) */
 export function fireLeg(s: TvState, text: string) {
   const g = s.g; if (!g) return;
-  const m = /^(.+?) takes (?:leg|map|flag|landmark|board|number) \d+\.$/.exec(text);
+  const m = /^(.+?) takes? (?:leg|map|flag|landmark|board|number|picture) \d+\.$/.exec(text);
   if (m) { const t = g.teams.findIndex((x: G) => x.name === m[1]); if (t === 0 || t === 1) { s.streak[t]++; s.streak[other(t)] = 0; } }
   else if (/^Nobody got it/.test(text)) s.streak = [0, 0];
 }
 /* a leg's outcome, as the engine says it in a toast; a contest settled. Not every time: he'd never shut up. (29 Oct) */
 export function imadOnToast(s: TvState, text: string) {
   const g = s.g; if (!g) return;
-  const r = rnd(), m = /^(.+?) takes (?:leg|map|flag|landmark|board|number) \d+\.$/.exec(text);
+  const r = rnd(), m = /^(.+?) takes? (?:leg|map|flag|landmark|board|number|picture) \d+\.$/.exec(text);
   if (m) { const t = g.teams.findIndex((x: G) => x.name === m[1]); if (t >= 0 && r < 0.3) imadSay(s, "leg", { t }); }
   else if (/^Both got it/.test(text)) { if (r < 0.4) imadSay(s, "both"); }
   else if (/^Nobody got it/.test(text)) { if (r < 0.4) imadSay(s, "nobody"); }

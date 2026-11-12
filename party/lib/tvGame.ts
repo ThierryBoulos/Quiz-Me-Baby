@@ -729,7 +729,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else if (s.screen === "airportReveal") play({ type: "airport/verdict", w: okW() });
       else if (s.screen === "rouletteReveal") play({ type: "roulette/verdict", ok: [!!s.ok[0], !!s.ok[1]] });
       else if (s.screen === "stakesReveal") play({ type: "stakes/verdict", ok: [!!s.ok[0], !!s.ok[1]] });
-      else if (s.screen === "seeReveal") play({ type: "see/verdict", w: seeWinner(s.ok, s.seeAt) });
+      else if (s.screen === "seeReveal") {
+        /* the RIGHT that ended the picture early was turned down (the host, or a contest), and the other team never had
+           its guess: a new picture for both, as the Cocktail or Dish does, not "Nobody got it" */
+        const w = seeWinner(s.ok, s.seeAt), ender = ([0, 1] as const).find((t) => s.app[t] && !s.typed[other(t)]);
+        if (w === "none" && ender != null && !s.ok[ender] && g.seeGame.spare.length) { play({ type: "see/swap" }); s.toast = { id: ++s.toastN, text: "The call changed: a new picture for both teams." }; }
+        else play({ type: "see/verdict", w });
+      }
       else if (s.screen === "majorityReveal") { mrWho(s); play({ type: "majority/settle", right: mrTally(s).right }); }
     }
     else if (t === "ui/sdRight" && s.sdBuzz != null && sdRecord(s, s.sdBuzz, true)) play(s.screen === "battleTie" ? { type: "battle/tbWin", w: s.sdBuzz } : { type: "sudden/win", w: s.sdBuzz });
@@ -851,7 +857,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!texts.length) return false;
       if (s.typed[team]) return s.seeOut[team] ? `${nm(team)} guessed wrong: out of this picture.` : `${poss(nm(team))} guess is already in.`;
       s.typed[team] = texts.slice(0, 1);
-      s.seeAt[team] = Math.round(Math.max(0, s.total * 1000 - (s.deadline ? s.deadline - Date.now() : s.left * 1000)));
+      s.seeAt[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline ? s.deadline - Date.now() : s.left * 1000))));
       if (matchQ(s.typed[team], g.seeGame.qs[g.seeGame.i])) { reveal(); return true; }
       s.seeOut[team] = true;
       if (s.typed[0] && s.typed[1]) reveal();
@@ -1579,7 +1585,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };
         if (sc === "ask" || sc === "steal") { const t = turnTeam(); if (!s.typed[t] && !s.pending) took(t); }
-        else if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "rouletteQ", "stakesQ", "seeQ"].includes(sc)) for (const t of [0, 1] as const) { if (sc === "miniQ" ? s.guesses[t] == null : sc === "pinQ" ? !s.pins[t] : !s.typed[t]) took(t); }
+        /* What Do You See?: the unsent guesses in the order they were typed (the faster one first), each counted at the
+           moment it was typed */
+        else if (sc === "seeQ") {
+          const order = ([0, 1] as const).slice().sort((a, b) => (s.drafts[a]?.at ?? Infinity) - (s.drafts[b]?.at ?? Infinity));
+          for (const t of order) { const at = s.drafts[t]?.at, dl = s.deadline; if (s.screen === sc && !s.typed[t]) { took(t);
+            if (at && dl && s.typed[t]) s.seeAt[t] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (dl - at)))); } }
+        }
+        else if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "rouletteQ", "stakesQ"].includes(sc)) for (const t of [0, 1] as const) { if (sc === "miniQ" ? s.guesses[t] == null : sc === "pinQ" ? !s.pins[t] : !s.typed[t]) took(t); }
         else if (sc === "battleQ" && s.nohost && !s.pending) took(g.battle.cap);
         else if (sc === "dishQ" && g.dishGame.leg.buzz != null && !s.typed[g.dishGame.leg.buzz] && !s.pending) took(g.dishGame.leg.buzz);
         /* sudden death and the tie-breaker: both captains' boxes, the one who stopped typing first going first */

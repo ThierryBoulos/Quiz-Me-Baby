@@ -136,6 +136,7 @@ export type Thin = { key: "standard" | MiniKey; left: number; need?: number; of?
 export function thinLine(t: Thin): string {
   if (t.key === "standard") return `Standard rounds: ${t.left} of ${t.of} themes have two rounds of new questions left`;
   if (t.key === "stakes") return `${MINI_TITLES.stakes}: ${t.left} ${t.left === 1 ? "theme has" : "themes have"} new questions at every level left, a game shows ${t.need}`;
+  if (t.key === "see") return `${MINI_TITLES.see}: ${t.left} new ${t.left === 1 ? "picture" : "pictures"} left, a game shows ${t.need}`;
   return `${MINI_TITLES[t.key]}: ${t.left} new ${t.left === 1 ? "question" : "questions"} left, a game plays ${t.need}`;
 }
 
