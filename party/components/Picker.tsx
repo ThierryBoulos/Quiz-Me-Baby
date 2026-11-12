@@ -194,17 +194,20 @@ export function Picker({ bank, themes, minis, difficulty, levels = {}, value, on
         </div>
       </header>
       <div ref={body} className="pk-body pk-gutter flex-1 min-h-0 flex flex-col gap-3 pt-3 pb-4">
-        <p className="text-13 text-[var(--color-ink-2)]">{many ? "Two per theme: every team plays both. Themes you leave alone are dealt as usual." : "Two per theme, one for each team. Themes you leave alone get a matched pair."} The answers show here, so keep this phone to yourself.</p>
+        {/* (one short line, the owner, 12 Nov) */}
+        <p className="text-13 text-[var(--color-ink-2)]">{many ? "Pick 2 per theme." : "Pick 2, 1 per team."}</p>
         {note && <p className="text-13 text-[var(--color-no)]" role="alert">{note}</p>}
         {!sec ? <p className="text-14 text-[var(--color-ink-2)]">Switch on standard rounds or a mini-game in Setup to pick questions.</p>
           : sec.kind === "theme" ? themeSec(sec.key, sec.extra) : miniSec(sec.key)}
         <button type="button" className="btn btn-sm btn-ghost self-start mt-2" onClick={() => onChange(NO_PICKS)}>Clear every pick</button>
       </div>
       {/* Back and Next, pinned */}
-      <nav className="pk-gutter shrink-0 grid grid-cols-[auto_1fr_auto] items-center gap-2 pt-2" aria-label="Move between themes and mini-games"
+      {/* (the count right beside Back, where it stays: in the middle it moved with the Next button's theme, 12 Nov) */}
+      <nav className="pk-gutter shrink-0 grid grid-cols-[auto_auto_1fr_auto] items-center gap-3 pt-2" aria-label="Move between themes and mini-games"
         style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom, 0px))", borderTop: "1px solid var(--line)", background: "var(--color-bg)" }}>
         <button type="button" className="btn btn-sm" disabled={i === 0} onClick={() => go(i - 1)}>&lsaquo; Back</button>
-        <span className="text-13 text-center text-[var(--color-ink-2)] tabular-nums">{secs.length ? `${i + 1} of ${secs.length}` : ""}</span>
+        <span className="text-13 text-[var(--color-ink-2)] tabular-nums whitespace-nowrap">{secs.length ? `${i + 1} of ${secs.length}` : ""}</span>
+        <span aria-hidden />
         {nextSec ? <button type="button" className="btn btn-sm btn-gold min-w-0" onClick={() => go(i + 1)}><span className="truncate max-w-[42vw]">Next: {nextSec.label}</span> &rsaquo;</button>
           : <button type="button" className="btn btn-sm btn-gold" onClick={onClose}>Done</button>}
       </nav>
