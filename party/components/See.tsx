@@ -41,7 +41,7 @@ export function SeePicture({ see, deadline, left, clear, w, big, alt }: { see: S
     style = { filter: b > 0.0004 ? `blur(${(b * width).toFixed(1)}px)` : "none", transform: `scale(${grow.toFixed(4)})` };
   }
   return (
-    <div ref={ref} className={"see-frame" + (see.kind === "logo" ? " logo" : "") + (still ? " still" : "")} style={{ width: `min(100%, ${w}px)` }}>
+    <div ref={ref} className={"see-frame" + (see.kind === "logo" ? " logo" : "") + (still ? " still" : "") + (clear ? " clear" : "")} style={{ width: `min(100%, ${w}px)` }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/see/${see.photo}${big ? "" : "-s"}.jpg`} alt={clear && alt ? alt : "The picture"} draggable={false} style={style} />
     </div>);

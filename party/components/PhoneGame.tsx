@@ -428,8 +428,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     /* What Do You See?: the picture as it clears, both guesses as they land (a wrong one: that team is out) */
     case "seeQ": return (
       <div className="flex flex-col gap-3 flex-1">
-        <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Picture {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        {pub.see && <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={200} />}</ToSide>
+        <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Picture {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
+        {pub.see && <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={200} />}
         <AnswerCard />
         <Typed t={0} /><Typed t={1} />
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change picture" move={{ type: "see/swap" }} /></div>
@@ -1004,7 +1004,9 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
     {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <ToSide when={side} order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 96 : 150} /></ToSide>}
     {/* What Do You See?: the picture, clearing from the TV's clock; at the reveal the whole of it, and its credit */}
-    {(pub.screen === "seeQ" || pub.screen === "seeReveal") && pub.see && <ToSide when={side} order={4} className="noselect" {...noCopy}><div className="flex flex-col items-center gap-1">
+    {/* (sideways, the picture clears in the right column, as big as the screen's height allows: under the scores on the
+       left it was cut off. At the reveal a small clear copy goes left, 12 Nov) */}
+    {(pub.screen === "seeQ" || pub.screen === "seeReveal") && pub.see && <ToSide when={side && pub.screen === "seeReveal"} order={4} className="noselect" {...noCopy}><div className="flex flex-col items-center gap-1">
       <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} clear={pub.screen === "seeReveal"} w={pub.screen === "seeReveal" ? (small ? 180 : 240) : small ? 220 : 340} alt={pub.see.rev?.answer} />
       {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}
       {/* the other team out (the TV's note, which no phone shows: with no TV, nobody would know they can wait for it to clear) */}

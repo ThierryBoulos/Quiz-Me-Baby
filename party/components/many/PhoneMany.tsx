@@ -180,7 +180,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     <div className="noselect contents" {...noCopy}>
       {g.key === "flag" && <ToSide order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 110 : 150} /></ToSide>}
       {/* What Do You See?: the picture, clearing from the TV's clock */}
-      {g.key === "see" && pub.see && <ToSide order={4} className="noselect" {...noCopy}><SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} /></ToSide>}
+      {/* (stays in the right column sideways, sized to the screen: under the scores on the left it was cut off) */}
+      {g.key === "see" && pub.see && <div className="flex justify-center noselect" {...noCopy}><SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} /></div>}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
       {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={small ? 180 : 240} legend={false} />}
       {g.key === "dish" && pub.dish && (<ToSide order={4} className="noselect" {...noCopy}>
