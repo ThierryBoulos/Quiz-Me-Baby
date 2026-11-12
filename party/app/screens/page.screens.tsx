@@ -44,6 +44,15 @@ export default function Screens() {
       if (r) setRec({ pub: shift(r.pub, Date.now() - r.now, r.now), secret: r.secret ? shift(r.secret, Date.now() - r.now, r.now) : {} });
     });
   }, []);
+  /* another moment on the same page, without reloading it (window.dispatchEvent(new CustomEvent("screens:go", { detail:
+     key }))): what happens as one screen gives way to the next, the points flying into the totals (12 Nov) */
+  useEffect(() => {
+    const go = (e: Event) => { const k = String((e as CustomEvent).detail || "");
+      void fetch("/screens/pubs").then((r) => r.json()).then((d) => { const r = d[k];
+        if (r) setRec({ pub: shift(r.pub, Date.now() - r.now, r.now), secret: r.secret ? shift(r.secret, Date.now() - r.now, r.now) : {} }); }); };
+    window.addEventListener("screens:go", go);
+    return () => window.removeEventListener("screens:go", go);
+  }, []);
 
   if (mode[0] === "lobby") {
     const k = Number(mode[1]);
