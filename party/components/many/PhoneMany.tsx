@@ -191,7 +191,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         </div></ToSide>)}
       {g.key === "quiz" && pub.theme && <ToSide order={2}><div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div></ToSide>}
       {g.key === "roulette" && rr && <ToSide order={3}><RrPhone rr={rr} me={host ? null : mine ?? null} teams={rrT} host={host} /></ToSide>}
-      {g.key === "stakes" && sk && <ToSide order={3} className="noselect" {...noCopy}><StakesPhone sk={sk} screen="stakesQ" teams={rrT} me={host ? null : mine ?? null} /></ToSide>}
+      {/* (stays in the right column sideways: under the scores your question was cut off) */}
+      {g.key === "stakes" && sk && <div className="noselect contents" {...noCopy}><StakesPhone sk={sk} screen="stakesQ" teams={rrT} me={host ? null : mine ?? null} /></div>}
       {g.key === "pin" && <ToSide order={4} className="noselect" {...noCopy}>{small
         ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
         : <PinPhoto pin={pub.pin} h={230} small zoom />}</ToSide>}

@@ -1023,8 +1023,9 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
     {pub.screen === "rouletteQ" && pub.roulette && <ToSide when={side} order={3} className="noselect" {...noCopy}><RrPhone rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} host={mine == null} /></ToSide>}
     {pub.screen === "rouletteReveal" && pub.roulette && <RrPhoneReveal rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} />}
     {/* Secret Stakes: the themes (a captain's own buttons are below), your team's question, the reveal */}
-    {/^stakes(Pick|Q|Reveal)$/.test(pub.screen) && pub.stakes && <ToSide when={side && pub.screen === "stakesQ"} order={3} className="noselect" {...noCopy}>
-      <StakesPhone sk={pub.stakes} screen={pub.screen} teams={rr2(pub)} me={mine ?? null} cap={captain} /></ToSide>}
+    {/* (sideways it stays in the right column: under the scores on the left your question was cut off, 12 Nov) */}
+    {/^stakes(Pick|Q|Reveal)$/.test(pub.screen) && pub.stakes && <div className="noselect contents" {...noCopy}>
+      <StakesPhone sk={pub.stakes} screen={pub.screen} teams={rr2(pub)} me={mine ?? null} cap={captain} /></div>}
     {pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={small ? 170 : 260} title={pub.map.title} />}
     {pub.map?.reveal && <div className="display text-26 text-center" style={{ color: "var(--color-gold)" }}>{pub.map.title}</div>}
     {pub.auction && pub.screen === "auctionLeg" && <p className="text-center text-14 text-[var(--color-ink-2)]"><span className="eyebrow mr-2">Leg {pub.auction.wins[0] + pub.auction.wins[1]}</span>{pub.auction.cat}</p>}
