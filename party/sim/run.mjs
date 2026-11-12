@@ -49,7 +49,7 @@ const NIGHTS = [
   { seed: 22, minis: ["dish", "saysame", "map", "closest"], host: true, rounds: 4, events: [{ at: 40, type: "hostGone", for: 90 }, { at: 150, type: "capGone", team: 1 }, { at: 200, type: "swap" }] },
   { seed: 23, minis: ["flag", "closest", "pin", "battle"], events: [{ at: 30, type: "capGone", team: 0 }, { at: 90, type: "score", a: 2, b: 3 }, { at: 120, type: "pause", for: 8 }, { at: 160, type: "swap" }], tieMore: 2 },
   /* 7 Nov: sudden death and the Battle's tie-breaker with no buzzer: both captains type, the first right answer wins
-     (no host, with a host, both answers in the same instant; a Battle that ends level) */
+     (no host, with a host, both answers in the same instant; a Battle that ends tied) */
   { seed: 24, minis: [], rounds: 4, events: [{ at: 0, type: "levelEnd" }] },
   { seed: 25, minis: [], rounds: 4, host: true, events: [{ at: 0, type: "levelEnd" }] },
   { seed: 26, minis: [], rounds: 4, simul: true, events: [{ at: 0, type: "levelEnd" }] },

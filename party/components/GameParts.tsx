@@ -364,7 +364,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
   const m = pub.mini!, n = m.of, pts = m.pts === 1 ? "1 point" : `${m.pts} points`, host = pub.mode === "host";
   /* the house timers, as set in Settings on the TV */
   const t = pub.timers, sec = (v: number | undefined, d: number) => `${v ?? d} seconds`;
-  /* level at the end: the same choice in every mini-game */
+  /* tied at the end: the same choice in every mini-game */
   /* (shorter, so every game's rules fit the TV: 11 Nov, the owner) */
   const level = `Won early? Play on for fun, or stop. Tied? One more, or a point each${host ? ": the host's call" : ""}.`;
   switch (m.key) {
@@ -401,7 +401,8 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `A picture goes up, blurred or zoomed right in, and gets clearer over ${sec(t?.see, 20)}: a famous face, a logo, or a close-up.` },
       { text: "Know it? Hit BUZZ: anyone on the team can. The picture stops, and you have 10 seconds to say it out loud while your captain types it.", warn: true },
       { text: "Right, and the picture is yours. Wrong, and you're out of this picture: the clock goes on and the other team can buzz." },
-      { text: `The app checks what you type${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Best of ${n} takes ${pts}. ${level}` }];
+      /* (12 pictures in every setup; tied teams: the faster buzzer wins, the owner, 12 Nov) */
+      { text: `The app checks what you type${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. ${n} pictures: the most takes ${pts}. Tied? The team that buzzed faster wins. Won early? Play on for fun, or stop.` }];
     case "pin": return [
       { text: `A photo of a landmark goes up. ${sec(t?.pin, T_PIN)}. On the hard ones its name comes too: the trick is finding it.` },
       { text: "Both captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better." },
@@ -450,7 +451,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
 export function MiniIntro({ pub, size, head }: { pub: Pub; size: "tv" | "phone"; head?: ReactNode }) {
   const m = pub.mini, tv = size === "tv";
   if (!m) return null;
-  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? `${m.of} rounds, 3 themes each` : `Best of ${m.of}`;
+  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? `${m.of} rounds, 3 themes each` : m.key === "see" ? `${m.of} pictures` : `Best of ${m.of}`;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
       {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : m.key === "stakes" ? "The night's last game" : "Mini-game"}</div>}

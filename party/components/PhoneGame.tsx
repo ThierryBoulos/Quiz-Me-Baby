@@ -572,7 +572,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <button className="btn btn-lg" disabled={busy} onClick={() => send({ type: "decided/more" })}>Keep playing for fun</button>
         </div>
       </div>);
-    /* level at the end of a mini-game: one more, or a point each */
+    /* tied at the end of a mini-game: one more, or a point each */
     case "miniTie": case "sayTie": case "flagTie": case "dishTie": case "mapTie": case "pinTie": case "airportTie": case "majorityTie": case "rouletteTie": case "seeTie": case "battleLevel": return (
       <div className="flex flex-col gap-4 flex-1">
         <Big eyebrow={pub.mini?.title} size={34} text={tieHead(pub)} sub={tieCall(pub)} />
@@ -1564,7 +1564,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         </div>
         <p className="text-center text-13 text-[var(--color-ink-3)]">Play again: same teams. Exit takes every phone{noTv ? "" : " and the TV"} back to the home screen.</p>
       </>)}
-      {/* no host, won with legs to spare, or level at the end of a mini-game: either captain picks, and if neither
+      {/* no host, won with legs to spare, or tied at the end of a mini-game: either captain picks, and if neither
           does in 10 s the night carries on (keep playing; a point each). The owner's pick on the 4 Nov audit, decision 8:
           the lead captain alone used to decide, and the other could only wait */}
       {nohost && sc === DECIDED && (

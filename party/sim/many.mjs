@@ -116,8 +116,8 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
         L.next(s, now, T); continue;
       }
       if (s.screen === "summary") { const M = L.miniOf(s);
-        /* teams level on pictures: the one whose right buzzes were faster all told is placed higher (the owner, 12 Nov) */
-        for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) if (a !== b && M.pts[a] > 0 && M.pts[a] === M.pts[b] && (M.fast[a] < M.fast[b]) !== (M.places[a] < M.places[b])) odd ||= "level teams not placed by speed";
+        /* teams tied on pictures: the one whose right buzzes were faster all told is placed higher (the owner, 12 Nov) */
+        for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) if (a !== b && M.pts[a] > 0 && M.pts[a] === M.pts[b] && (M.fast[a] < M.fast[b]) !== (M.places[a] < M.places[b])) odd ||= "tied teams not placed by speed";
         trace.push(`summary award ${M.award.join(",")} | places ${M.places.join(",")}`); L.next(s, now, T); continue; }
       if (s.screen === "reveal") { L.next(s, now, T); continue; }
     }
@@ -140,7 +140,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   else { const want = readFileSync(file, "utf8"); verdict = want === text ? "same as golden" : "DIFFERS"; if (want !== text) bad++; }
   console.log(`many 4 teams, every game (${order.length}): ${s.teams.map((x) => x.score).join("-")} — ${verdict}`);
 }
-/* sudden death: a night that ends level at the top. Only the tied teams answer; nobody right brings another
+/* sudden death: a night that ends tied at the top. Only the tied teams answer; nobody right brings another
    question; the fastest right answer wins it (+1) */
 {
   const teams = [0, 1, 2].map((t) => ({ name: L.defaultName(t), captain: "Cap" + t }));

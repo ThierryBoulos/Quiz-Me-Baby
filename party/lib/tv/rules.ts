@@ -59,7 +59,7 @@ export const HOST_MOVES: Record<string, Where> = {
   "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal", "seeReveal"],
   "ui/sdRight": ["sudden", "battleTie"], "ui/sdWrong": ["sudden", "battleTie"],
   "ui/exit": "final", "ui/again": "final",
-  /* level at the end of a mini-game: one more, or a point each */
+  /* tied at the end of a mini-game: one more, or a point each */
   "tie/more": TIE_SCREENS, "tie/stop": TIE_SCREENS,
   /* won with legs to spare: keep playing for fun, or stop here */
   "decided/more": DECIDED, "decided/stop": DECIDED,
@@ -169,7 +169,7 @@ export const miniOf = (sc: string): MiniKey | null => /^(mini|closest)/.test(sc)
   : /^map/.test(sc) ? "map" : /^auction/.test(sc) ? "auction" : /^say/.test(sc) ? "saysame" : /^pin/.test(sc) ? "pin" : /^airport/.test(sc) ? "airport" : /^majority/.test(sc) ? "majority" : /^roulette/.test(sc) ? "roulette" : /^stakes/.test(sc) ? "stakes" : /^see/.test(sc) ? "see" : /^battle/.test(sc) ? "battle" : null;
 /* the engine's move prefix for each mini-game */
 export const PREFIX: Record<MiniKey, string> = { closest: "closest", flag: "flag", dish: "dish", map: "map", auction: "auction", saysame: "say", pin: "pin", airport: "airport", majority: "majority", roulette: "roulette", battle: "battle", stakes: "stakes", see: "see" };
-/* Closest, Say the Same, Flag, Pin and Airport: the engine goes straight into a tie-breaker leg when level at the end;
+/* Closest, Say the Same, Flag, Pin and Airport: the engine goes straight into a tie-breaker leg when tied at the end;
    Party stops there first and asks (One more / A point each), as Dish and Map already do */
 export const TIES: Record<string, { key: MiniKey; q: string; summary: string; award: string }> = {
   miniTie: { key: "closest", q: "miniQ", summary: "miniSummary", award: "closest/award" },

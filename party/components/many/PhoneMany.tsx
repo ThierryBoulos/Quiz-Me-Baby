@@ -440,7 +440,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             onLock={() => { if (skTheme != null && skLevel) void send("next", { move: { type: "m/bet", k: skTheme, level: skLevel } }); }} />
           : <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={mine ?? null} cap={false} />}
       </>)}
-      {/* sudden death: a captain whose team isn't level at the top watches */}
+      {/* sudden death: a captain whose team isn't tied at the top watches */}
       {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>Sudden death: only the teams tied at the top answer this one.</Line></>)}
       {/* THE CAPTAIN answers the rest */}
       {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !(g.only && mine != null && !g.only.includes(mine)) && (<>

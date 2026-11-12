@@ -203,7 +203,7 @@ test('stakes: three rounds, then the summary, then the end; no 2 points for a wi
   assert.equal(g.winner, 0);
 });
 
-test('stakes: level after it — sudden death, as always', () => {
+test('stakes: tied after it — sudden death, as always', () => {
   const { g, env } = night();
   g.teams[0].score = 10; g.teams[1].score = 10;
   Q.play(g, { type:'game/start' }, env); Q.play(g, { type:'stakes/start' }, env);
@@ -217,7 +217,7 @@ test('stakes: stakesResult and stakesOrder for any number of teams (3-8 use them
   assert.deepEqual(r.bet, [24, 0, 16, 8]);
   assert.deepEqual(r.after, [56, 64, 26, 0]);
   assert.deepEqual(r.delta, [-24, 0, 16, -3]);
-  /* last place first, up to the leader; level teams, the later letter first */
+  /* last place first, up to the leader; tied teams, the later letter first */
   assert.deepEqual(Q.stakesOrder([80, 64, 10, 3]), [3, 2, 1, 0]);
   assert.deepEqual(Q.stakesOrder([5, 9, 5]), [2, 0, 1]);
 });

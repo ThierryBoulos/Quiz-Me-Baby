@@ -30,6 +30,12 @@
 66.35 seeQ | 11 | 0-0 | 3-2 | Nobody got it. | 
 68.10 seeQ | 11 | 0-0 | 3-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
 76.10 seeReveal | 11 | 0-0 | 4-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
-77.10 seeSummary | 12 | 2-0 | 4-2 | Lions take picture 9. | 
-78.10 final | 13 | 2-0 |  | Lions take picture 9. | 
+77.10 seeQ | 12 | 0-0 | 4-2 | Lions take picture 9. | 
+79.85 seeReveal | 12 | 0-0 | 5-2 | Lions take picture 9. | 
+80.60 seeReveal | 12 | 0-0 | 5-2 |  | 
+81.60 seeReveal | 12 | 0-0 | 4-2 | Call changed: ⁨Lions⁩ WRONG. | 
+82.60 seeQ | 13 | 0-0 | 4-2 | The call changed: a new picture for both teams. | 
+86.10 seeReveal | 13 | 0-0 | 5-2 | The call changed: a new picture for both teams. | 
+87.10 decided | 14 | 2-0 | 5-2 |  | 
+87.85 final | 15 | 2-0 |  |  | 
 recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[2,0]],"segs":[{"label":"What Do You See?","pts":[[2,0]]}],"awards":[]}

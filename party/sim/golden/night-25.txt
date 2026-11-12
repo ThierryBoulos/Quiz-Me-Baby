@@ -40,7 +40,7 @@
 63.50 ask | 32 | 2-1 |  | Lions used Double Dip. | 
 65.25 answer | 33 | 2-2 |  | Owls +1 point | 
 66.00 roundScore | 34 | 2-2 |  | Owls +1 point | 
-(the scores set level, 2-2)
+(the scores set tied, 2-2)
 67.00 roundScore | 34 | 2-2 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 2. | 
 68.00 sudden | 35 | 2-2 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 2. | 
 68.75 sudden | 36 | 2-2 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 2. | 

@@ -346,7 +346,7 @@
        ctx.rng         optional; Math.random when absent
      Anything that needs tonight's game (the Battle's "already used") takes
      it as an argument instead of reading it.                               */
-  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:15, battle:10, see:9 };   // (What Do You See?: 9, not 7: the owner, 12 Nov)
+  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:15, battle:10, see:12 };   // (What Do You See?: 12 pictures with any number of teams, 2 to 8: the owner, 12 Nov)
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
         FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, PIN_LEGS = LEGS.pin, AIRPORT_LEGS = LEGS.airport, MAJORITY_N = LEGS.majority, BATTLE_N = LEGS.battle;
   /* Flag first: fast and loud, it opens the night. (Drop the Pin, Guess the Airport and Majority Rules are Party's.) */
@@ -398,7 +398,7 @@
     const after = scores.map((v, i) => Math.max(0, v + (right[i] ? bet[i] : -bet[i])));
     return { bet, ok:right, before:scores.slice(), after, delta:after.map((v, i) => v - scores[i]) };
   }
-  /* the reveal's order: last place first, up to the leader (level teams: the later letter first) */
+  /* the reveal's order: last place first, up to the leader (tied teams: the later letter first) */
   const stakesOrder = (scores) => scores.map((v, i) => i).sort((a, b) => scores[a] - scores[b] || b - a);
   /* The four levels of a standard question (22 Oct). A night's difficulty is one of them, several
      joined with "+" ("easy+medium+hard", the default), or "mixed": all four. */
@@ -1067,7 +1067,7 @@
            starts; picks: each team's bet this round ({k: the theme, level}); log: every round's result; net: each
            team's total won or lost */
         /* What Do You See?: legs of pictures, as the flags */
-        seeGame:{ levels:seeLevelsOf(cfg), kinds:seeKindsOf(cfg), qs:seDeck.qs, spare:seDeck.spare, base:seDeck.qs.length, i:0, wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+        seeGame:{ levels:seeLevelsOf(cfg), kinds:seeKindsOf(cfg), qs:seDeck.qs, spare:seDeck.spare, base:seDeck.qs.length, i:0, wins:[0, 0], fast:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
         hasStakes,
         stakesGame:{ rounds:skDeck.slice(0, STAKES_ROUNDS), spare:skDeck.slice(STAKES_ROUNDS), base:Math.min(STAKES_ROUNDS, skDeck.length), i:0, unit:1,
           picks:[null, null], log:[], net:[0, 0], done:false },
@@ -1282,12 +1282,12 @@
       if(s.spare && s.spare.length){
         s.qs.push(s.spare.shift());
         s.tieLegs++;
-        fx.push({ toast:s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next flag decides it.' : 'Nobody on the board yet — next flag.', ms:3600 });
+        fx.push({ toast:s.wins[0] ? 'Tied at ' + s.wins[0] + ' each — next flag decides it.' : 'Nobody on the board yet — next flag.', ms:3600 });
         fx.push({ go:'flagQ' });
         return fx;
       }
       s.done = true;
-      s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no flags left at this level. Your call.' };
+      s.verdict = { winner:null, needsHost:true, note:'Still tied, and there are no flags left at this level. Your call.' };
       fx.push({ go:'flagSummary' });
       return fx;
     }
@@ -1301,22 +1301,33 @@
     return fx;
   }
 
-  /* ---- What Do You See?: as Guess the Flag (level at the end: the next spare picture decides it) ---- */
+  /* ---- What Do You See?: 12 pictures, the most takes it. Tied at the end (12 Nov, the owner: the first to buzz
+     wins): the team whose right buzzes were faster all told; nobody on the board (or the very same time), as Guess the
+     Flag: the next spare picture decides it ---- */
   function seeAfterLeg(g, fx){
     const s = g.seeGame;
     if(s.fun) return funLeg(s, 'seeQ', 'seeSummary', fx);
     const out = bestOf(s);
     if(out === 'next'){ fx.push({ go:'seeQ' }); return fx; }
+    const f = s.fast || [0, 0];
+    if(out === 'level' && s.wins[0] > 0 && f[0] !== f[1]){
+      const w = f[0] < f[1] ? 0 : 1;
+      s.done = true;
+      s.verdict = { winner:w, needsHost:false, note:'Tied at ' + s.wins[0] + ' each: ' + g.teams[w].name + ' buzzed faster.' };
+      awardMini(g, s, w, fx);
+      fx.push({ go:'seeSummary' });
+      return fx;
+    }
     if(out === 'level'){
       if(s.spare && s.spare.length){
         s.qs.push(s.spare.shift());
         s.tieLegs++;
-        fx.push({ toast:s.wins[0] ? 'Level at ' + s.wins[0] + ' each — the next picture decides it.' : 'Nobody on the board yet — next picture.', ms:3600 });
+        fx.push({ toast:s.wins[0] ? 'Tied at ' + s.wins[0] + ' each — the next picture decides it.' : 'Nobody on the board yet — next picture.', ms:3600 });
         fx.push({ go:'seeQ' });
         return fx;
       }
       s.done = true;
-      s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no pictures left at these levels. Your call.' };
+      s.verdict = { winner:null, needsHost:true, note:'Still tied, and there are no pictures left at these levels. Your call.' };
       fx.push({ go:'seeSummary' });
       return fx;
     }
@@ -1375,7 +1386,7 @@
     if(s.fun) return funLeg(s, 'mapQ', 'mapSummary', fx);
     const out = bestOf(s);
     if(out === 'next'){ fx.push({ go:'mapQ' }); return fx; }
-    /* level after the three (or after a tie-breaker): the host reads the room —
+    /* tied after the three (or after a tie-breaker): the host reads the room —
        another map, or stop here with a point each */
     if(out === 'level'){ fx.push({ go:'mapTie' }); return fx; }
     s.done = true;
@@ -1397,12 +1408,12 @@
       if(s.spare && s.spare.length){
         s.qs.push(s.spare.shift());
         s.tieLegs++;
-        fx.push({ toast:s.wins[0] ? 'Level at ' + s.wins[0] + ' each — next board decides it.' : 'Nobody on the board yet — next one.', ms:3600 });
+        fx.push({ toast:s.wins[0] ? 'Tied at ' + s.wins[0] + ' each — next board decides it.' : 'Nobody on the board yet — next one.', ms:3600 });
         fx.push({ go:'airportQ' });
         return fx;
       }
       s.done = true;
-      s.verdict = { winner:null, needsHost:true, note:'Still level, and there are no boards left at these levels. Your call.' };
+      s.verdict = { winner:null, needsHost:true, note:'Still tied, and there are no boards left at these levels. Your call.' };
       fx.push({ go:'airportSummary' });
       return fx;
     }
@@ -1469,7 +1480,7 @@
     dry:'Tied on legs, and there are no landmarks left at these levels for another tie-breaker. Your call.' };
 
   /* ---- Closest To Wins and Don't Say the Same as Me ----
-     Both play every leg; level at the end means a tie-breaker leg from the
+     Both play every leg; tied at the end means a tie-breaker leg from the
      spares while they last, then the host's call. */
   function legsFinish(g, s, o, fx){
     if(s.wins[0] === s.wins[1]){
@@ -2151,7 +2162,7 @@
       s.award = [1, 1];
       g.teams[0].score += 1; g.teams[1].score += 1;
       s.verdict = { winner:null, needsHost:false,
-        note:'Level after ' + s.i + ' map' + (s.i > 1 ? 's' : '') + ' — called there, a point each.' };
+        note:'Tied after ' + s.i + ' map' + (s.i > 1 ? 's' : '') + ' — called there, a point each.' };
       return [{ sound:'point' }, { go:'mapSummary' }];
     },
     'map/award'(g, a){ const fx = []; awardMini(g, g.mapGame, a.w, fx); fx.push({ render:true }); return fx; },
@@ -2186,10 +2197,12 @@
       return [{ toast:'New picture.' }, { go:'seeQ' }];
     },
     /* w: 0 | 1 (the fastest right answer) | 'none' */
+    /* ms: when the team that took it buzzed, into the picture's clock (tied teams: the faster all told wins) */
     'see/verdict'(g, a){
       const s = g.seeGame, q = s.qs[s.i], w = a.w, fx = [];
       s.subs.push({ q, winner:w });
-      if(w === 0 || w === 1){ s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take picture ' + (s.i + 1) + '.' }); }
+      if(w === 0 || w === 1){ s.wins[w]++; s.fast = s.fast || [0, 0]; s.fast[w] += Number.isFinite(a.ms) && a.ms >= 0 ? a.ms : 20000;
+        fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take picture ' + (s.i + 1) + '.' }); }
       else fx.push({ toast:'Nobody got it.' });
       s.i++;
       return seeAfterLeg(g, fx);
@@ -2245,7 +2258,7 @@
       s.i++;
       return rouletteAfterLap(g, env, hit > -1 ? [{ sound:ok[hit] ? 'correct' : 'wrong' }] : []);
     },
-    /* level after the laps: one more lap, or a point each */
+    /* tied after the laps: one more lap, or a point each */
     'roulette/more'(g, a, env){
       const s = g.rouletteGame;
       if(s.done) return [];
@@ -2260,7 +2273,7 @@
       s.done = true; s.awarded = true;
       s.award = [1, 1];
       g.teams[0].score += 1; g.teams[1].score += 1;
-      s.verdict = { winner:null, needsHost:false, note:'Level after ' + s.i + ' laps — called there, a point each.' };
+      s.verdict = { winner:null, needsHost:false, note:'Tied after ' + s.i + ' laps — called there, a point each.' };
       return [{ sound:'point' }, { go:'rouletteSummary' }];
     },
     'roulette/award'(g, a){ const fx = []; awardMini(g, g.rouletteGame, a.w, fx); fx.push({ render:true }); return fx; },
@@ -2454,7 +2467,7 @@
       s.done = true; s.awarded = true;
       s.award = [1, 1];
       g.teams[0].score += 1; g.teams[1].score += 1;
-      s.verdict = { winner:null, needsHost:false, note:'Level — called there, a point each.' };
+      s.verdict = { winner:null, needsHost:false, note:'Tied — called there, a point each.' };
       return [{ sound:'point' }, { go:'dishSummary' }];
     },
     'dish/award'(g, a){ const fx = []; awardMini(g, g.dishGame, a.w, fx); fx.push({ render:true }); return fx; },

@@ -140,7 +140,7 @@ export function thinLine(t: Thin): string {
   return `${MINI_TITLES[t.key]}: ${t.left} new ${t.left === 1 ? "question" : "questions"} left, a game plays ${t.need}`;
 }
 
-/* level at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
+/* tied at the end of a mini-game: the host (with no host, the lead captain) picks "One more" or "A point each" */
 export const TIE_SCREENS = ["miniTie", "sayTie", "flagTie", "dishTie", "mapTie", "pinTie", "airportTie", "majorityTie", "rouletteTie", "seeTie", "battleLevel"];
 /* a mini-game can't be lost any more, with legs still to play: the same people choose — keep playing for fun, or stop here */
 export const DECIDED = "decided";
@@ -183,7 +183,7 @@ export const PARTY_LEGS: Partial<Record<MiniKey, number>> = { closest: 5, saysam
    punctuation around it out of order: "(Abdulrahman) left the screen" stays in order. */
 export const iso = (name: string) => "\u2068" + name + "\u2069";
 /* Closest To Wins: how far a guess is from the answer, without the computer's rounding noise
-   (361.6 − 281 is 80.60000000000002 to it: that's 80.6, and two guesses as far off are level) */
+   (361.6 − 281 is 80.60000000000002 to it: that's 80.6, and two guesses as far off are tied) */
 export const offBy = (guess: number, answer: number) => Number(Math.abs(guess - answer).toPrecision(12));
 /* Drop the Pin: how far off, as people say it: "under 1 km", "14 km", "1,112 km" */
 export const showKm = (km: number) => (km < 1 ? "under 1 km" : `${Math.round(km).toLocaleString("en-GB")} km`);

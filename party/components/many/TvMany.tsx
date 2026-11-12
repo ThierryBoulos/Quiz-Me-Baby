@@ -337,7 +337,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
 
 /* sudden death: the fastest right answer, the night's winner */
 /* every team: locked in, or still thinking (the two-team "Team A: thinking…", for N teams: a row that wraps, or a
-   column); in sudden death only the teams level at the top */
+   column); in sudden death only the teams tied at the top */
 function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
   const only = pub.game?.only, T = pub.teams.map((t, i) => ({ ...t, i })).filter((t) => !only || only.includes(t.i)), dense = T.length > 4, pin = pub.game?.key === "pin", mr = pub.game?.key === "majority";
   /* five teams or more: one row of lettered dots, lit with a tick when the team is in (two rows of names were too much) */

@@ -82,13 +82,23 @@
 159.75 seeReveal | 46 | 4-2 | 3-3 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
 160.50 seeReveal | 46 | 4-2 | 3-3 |  | 
 161.50 seeReveal | 46 | 4-2 | 4-3 | Call changed: ⁨Lions⁩ RIGHT. | 
-162.50 seeSummary | 47 | 6-2 | 4-3 | Lions take picture 9. | 
-163.25 roundIntro | 48 | 6-2 |  | Lions take picture 9. | 
-165.00 ask | 49 | 6-2 |  | Lions take picture 9. | 
-167.00 answer | 50 | 8-2 |  | Lions +2 points | 
-167.75 ask | 51 | 8-2 |  | Lions +2 points | 
-169.50 steal | 52 | 8-2 |  | Lions +2 points | 
-171.50 answer | 53 | 8-2 |  | Lions +2 points | 
-172.25 roundScore | 54 | 8-2 |  | Lions +2 points | 
-173.25 final | 55 | 8-2 |  | Lions +2 points | 
+162.50 seeQ | 47 | 4-2 | 4-3 | Lions take picture 9. | 
+166.00 seeQ | 47 | 4-2 | 4-3 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+170.50 seeReveal | 47 | 4-2 | 4-3 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+171.50 seeQ | 48 | 4-2 | 4-3 | Nobody got it. | 
+177.75 seeQ | 48 | 4-2 | 4-3 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+184.00 seeReveal | 48 | 4-2 | 5-3 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+185.00 seeReveal | 48 | 4-2 | 5-3 |  | 
+185.75 seeReveal | 48 | 4-2 | 4-3 | Call changed: ⁨Lions⁩ WRONG. | 
+186.75 seeQ | 49 | 4-2 | 4-3 | Nobody got it. | 
+190.25 seeReveal | 49 | 4-2 | 5-3 | Nobody got it. | 
+191.25 seeSummary | 50 | 6-2 | 5-3 | Lions take picture 12. | 
+192.00 roundIntro | 51 | 6-2 |  | Lions take picture 12. | 
+194.00 ask | 52 | 6-2 |  | Lions take picture 12. | 
+195.75 answer | 53 | 8-2 |  | Lions +2 points | 
+196.50 ask | 54 | 8-2 |  | Lions +2 points | 
+198.50 steal | 55 | 8-2 |  | Lions +2 points | 
+200.25 answer | 56 | 8-2 |  | Lions +2 points | 
+201.00 roundScore | 57 | 8-2 |  | Lions +2 points | 
+202.00 final | 58 | 8-2 |  | Lions +2 points | 
 recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[3,0],"minis":[0,1],"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[4,2],[6,2],[8,2]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[3,2]]},{"label":"R3","pts":[[4,2]]},{"label":"What Do You See?","pts":[[6,2]]},{"label":"R4","pts":[[8,2]]}],"awards":[{"t":"Best thief","who":"Lions, 3 steals","team":0}]}

@@ -30,7 +30,7 @@
 30.00 ask | 17 | 3-3 |  | Lions +1 point | 
 31.00 answer | 17 | 3-4 |  | Owls +1 point | 
 32.00 roundScore | 18 | 3-4 |  | Owls +1 point | 
-(the scores set level, 4-4)
+(the scores set tied, 4-4)
 33.75 roundScore | 18 | 4-4 |  | Both captains agreed: ⁨Lions⁩ 4, ⁨Owls⁩ 4. | 
 33.75 sudden | 19 | 4-4 |  | Both captains agreed: ⁨Lions⁩ 4, ⁨Owls⁩ 4. | 
 34.50 sudden | 20 | 4-4 |  | Both captains agreed: ⁨Lions⁩ 4, ⁨Owls⁩ 4. | 

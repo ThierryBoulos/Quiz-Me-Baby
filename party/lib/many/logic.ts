@@ -9,14 +9,14 @@
    the teams and pays this game's tally by place: with 8 teams the nearest (Closest, Pin) or the first right
    (Flags: the fastest typist) takes 8, the next 7, down to 1; wrong or no answer, nothing. Majority Rules ranks
    by the share of answers right. At the end of a game its places pay the night: 10, 8, 6, 5, 4, 3, 3, 3
-   (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). Level teams share the better place. */
+   (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). tied teams share the better place. */
 import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_LEVELS, type SkPick } from "../stakes";
 
 export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "roulette", "stakes"] as const;
-/* sudden death isn't picked: it comes when the night ends with teams level at the top */
+/* sudden death isn't picked: it comes when the night ends with teams tied at the top */
 export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
 export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
   closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", see: "What Do You See?", roulette: "Russian Roulette", stakes: "Secret Stakes" };
@@ -56,8 +56,8 @@ export type LatLon = { lat: number; lon: number };
 export type TeamM = { name: string; captain: string; score: number };
 /* wins: legs taken (flag: legs right); pts: this game's place points so far; places: its final places */
 export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: number[]; of: number[]; pts: number[]; award?: number[]; places?: number[];
-  only?: number[];                                // sudden death: the teams level at the top, the only ones who answer
-  fast?: number[];                                // What Do You See?: each team's right buzzes, their times added up (ms): level teams, the faster first
+  only?: number[];                                // sudden death: the teams tied at the top, the only ones who answer
+  fast?: number[];                                // What Do You See?: each team's right buzzes, their times added up (ms): tied teams, the faster first
   fired?: number; had?: string[][];               // Russian Roulette: bullets that hit a team so far; each team's themes so far
   /* Secret Stakes: one bet (fixed at its start), what each team has won or lost, and every round's bets */
   unit?: number; net?: number[]; log?: { i: number; themes: string[]; picks: SkPick[]; ok: boolean[]; bet: number[]; delta: number[]; before: number[] }[] };
@@ -479,7 +479,7 @@ export function next(s: StateM, now: number, t: Timers) {
         if (p === 1 && m.key === "flag") S.fastest[i]++;
         if (m.key === "pin" && s.pins[i] && q) { S.km[i] += QMB.kmBetween(s.pins[i]!, q) as number; S.kmN[i]++; }
       });
-      /* What Do You See?: how fast each team's right buzzes came, all told (teams level on pictures: the faster first) */
+      /* What Do You See?: how fast each team's right buzzes came, all told (teams tied on pictures: the faster first) */
       if (m.key === "see") { m.fast = m.fast || n(s.teams.length); pl.forEach((p, i) => { if (p === 1) m.fast![i] += (s.ms || [])[i] ?? 20000; }); }
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
       toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
@@ -495,7 +495,7 @@ export function next(s: StateM, now: number, t: Timers) {
   if (s.screen === "summary") {
     s.log.push(s.teams.map((x) => x.score));
     s.mi++; s.toast = null;
-    /* the last game played and teams level at the top: sudden death between them, with the questions held back */
+    /* the last game played and teams tied at the top: sudden death between them, with the questions held back */
     if (s.mi >= s.minis.length) { const top = Math.max(...s.teams.map((x) => x.score)), tied = s.teams.map((x, i) => (x.score === top ? i : -1)).filter((i) => i >= 0);
       if (tied.length > 1 && top > 0 && (s.spare || []).length) { const k = s.teams.length;
         s.minis.push({ key: "sudden", qs: s.spare, i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k), only: tied }); s.spare = []; } }
@@ -508,7 +508,7 @@ export function next(s: StateM, now: number, t: Timers) {
 export const gameVal = (m: MiniM, t: number) => (m.key === "majority" ? share(m, t) : m.pts[t]);
 export function award(s: StateM, m: MiniM) {
   const val = s.teams.map((_, t) => gameVal(m, t));
-  /* (What Do You See?: teams level on points, the one whose right buzzes were faster all told goes first: the first
+  /* (What Do You See?: teams tied on points, the one whose right buzzes were faster all told goes first: the first
      to buzz wins, the owner, 12 Nov) */
   const pl = placesBy(val.map((v, t) => (v > 0 ? -v * 1e7 + (m.key === "see" ? m.fast?.[t] ?? 0 : 0) : null)));
   m.places = pl.map((p) => p ?? s.teams.length);

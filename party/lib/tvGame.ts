@@ -386,9 +386,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         : move.type.startsWith("pin") ? "pin" : move.type.startsWith("airport") ? "airport" : move.type.startsWith("see") ? "see" : "dish";
       if (ask(k)) { narrate(); return; }
     }
-    /* level at the end: stop and ask before a tie-breaker (see TIES); the Battle too, unless the host just asked for another */
+    /* tied at the end: stop and ask before a tie-breaker (see TIES); the Battle too, unless the host just asked for another */
     const g = s.g, tie = Object.entries(TIES).find(([, x]) => x.q === s.screen);
-    const level = (screen: string) => {      // the screen itself says "Level at N each"
+    const level = (screen: string) => {      // the screen itself says "Tie at N each"
       s.screen = screen; s.deadline = null; s.left = 0; s.total = 0; s.timeUp = false; s.paused = false; s.waitSince = Date.now(); s.toast = null;
       s.autoAt = s.nohost ? Date.now() + T_PICK * 1000 : null;
     };
@@ -747,7 +747,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
            its go: a new picture for both, as the Cocktail or Dish does, not "Nobody got it" */
         const w = seeWinner(s.ok, s.seeAt), ender = ([0, 1] as const).find((t) => s.app[t] && !s.typed[other(t)] && !s.seeOut[other(t)]);
         if (w === "none" && ender != null && !s.ok[ender] && g.seeGame.spare.length) { play({ type: "see/swap" }); s.toast = { id: ++s.toastN, text: "The call changed: a new picture for both teams." }; }
-        else play({ type: "see/verdict", w });
+        else play({ type: "see/verdict", w, ms: w === 0 || w === 1 ? s.seeAt[w] : null });
       }
       else if (s.screen === "majorityReveal") { mrWho(s); play({ type: "majority/settle", right: mrTally(s).right }); }
     }

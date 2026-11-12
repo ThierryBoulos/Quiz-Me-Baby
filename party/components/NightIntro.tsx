@@ -14,7 +14,7 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 /* how the night is won, in a line */
 export function introWin(I: IntroPub) {
   if (I.many) return `Each game ranks the teams: ${PLACE_PTS.slice(0, Math.min(I.teams, 4)).map((p, i) => `${ordinal(i + 1)} ${p}`).join(", ")}${I.teams > 4 ? "…" : ""} points to the night. Score nothing in a game, add nothing. Most points at the end wins.`;
-  return "Most points at the end wins the night. Level at the end? Sudden death.";
+  return "Most points at the end wins the night. Tied at the end? Sudden death.";
 }
 /* (3-8 teams: a round is one theme, as with two teams; they play two at a time: 11 Nov, the owner) */
 const roundCount = (I: IntroPub) => I.items.filter((x) => x.kind === "q").reduce((a, x) => a + (I.many ? x.rounds?.length || 1 : 1), 0);
@@ -84,7 +84,7 @@ export function NightIntroTv({ intro: I, who }: { intro: IntroPub; who: string }
         })}
       </ol>
       <div className="nl-foot ni-in" style={d(0.6 + k * 0.16)}>
-        <span>{I.many ? "Most points at the end wins." : "Most points wins. Level at the end? Sudden death."} Captains answer on their phones.</span>
+        <span>{I.many ? "Most points at the end wins." : "Most points wins. Tied at the end? Sudden death."} Captains answer on their phones.</span>
         <b>{who}</b>
       </div>
     </div>);

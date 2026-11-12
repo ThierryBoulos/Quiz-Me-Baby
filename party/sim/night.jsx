@@ -290,9 +290,9 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
         else { agreeNext = true; send(w, "next", { move: { type: "ui/askScore", a: sp.a, b: sp.b }, step }); }
         continue;
       }
-      /* the scores set level on the last round's score screen, so the night ends in sudden death (7 Nov) */
+      /* the scores set tied on the last round's score screen, so the night ends in sudden death (7 Nov) */
       if (sp.type === "levelEnd" && sc === "roundScore" && pub.r === rounds - 1 && w) {
-        const m = Math.max(...pub.teams.map((x) => x.score)); scripted.shift(); trace.push(`(the scores set level, ${m}-${m})`);
+        const m = Math.max(...pub.teams.map((x) => x.score)); scripted.shift(); trace.push(`(the scores set tied, ${m}-${m})`);
         if (hostHere) send("host", "judge", { move: { type: "ui/setScore", a: m, b: m }, step });
         else { agreeNext = true; send(w, "next", { move: { type: "ui/askScore", a: m, b: m }, step }); }
         continue;
@@ -416,7 +416,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     else if (sc === "auctionBid") { const a = pub.auction; if (a.bid === 0) send(C(a.turn), "next", { move: { type: "auction/raise", n: 2 + Math.floor(bot() * 4) }, step }); else send(C(a.turn), "next", { move: { type: "auction/pass" }, step }); }
     else if (sc === "auctionRun") { const a = pub.auction; if (a.count < a.bid) next(other(a.by), "auction/tick"); else if (host) next(0, "auction/resolve"); }
-    /* battleLevel: both captains get the even ones right and the odd ones wrong, so the Battle ends level (the tie-breaker) */
+    /* battleLevel: both captains get the even ones right and the odd ones wrong, so the Battle ends tied (the tie-breaker) */
     else if (sc === "battleQ") { const lv = battleLevel && pub.battle.i % 2 === 0;
       if (host) next(0, "battle/mark", { got: battleLevel ? lv : bot() < 0.5 }); else send(C(pub.battle.cap), "answer", { text: battleLevel ? (lv ? right : "xyz") : guess(right) }); }
     else if (sc === "sudden" || sc === "battleTie") {

@@ -21,7 +21,7 @@ test('flag: "a point each" is 1 each whatever the game is worth', () => {
   const g = game();
   g.miniPts = 1;                                           // a long card: each game worth one point
   Q.play(g, { type:'flag/start' });
-  g.flagGame.verdict = { winner:null, needsHost:true, note:'' };   // level at the end: the host says "a point each"
+  g.flagGame.verdict = { winner:null, needsHost:true, note:'' };   // tied at the end: the host says "a point each"
   Q.play(g, { type:'flag/award', w:'split' });
   assert.deepEqual([g.teams[0].score, g.teams[1].score], [1, 1]);
   assert.deepEqual(g.flagGame.award, [1, 1]);
@@ -41,14 +41,14 @@ test('flag: a 6–0 run ends early and pays the mini-game points', () => {
   assert.equal(g.done.flag, true);
 });
 
-test('flag: level after ten brings out a tie-breaker flag', () => {
+test('flag: tied after ten brings out a tie-breaker flag', () => {
   const g = game();
   Q.play(g, { type:'flag/start' });
   for(let i = 0; i < 10; i++) Q.play(g, { type:'flag/verdict', w:i % 2 });
   assert.equal(g.flagGame.tieLegs, 1);
   assert.equal(g.flagGame.qs.length, 11);
   const fx = Q.play(g, { type:'flag/verdict', w:'none' });
-  assert.equal(g.flagGame.tieLegs, 2);                      // still level → another
+  assert.equal(g.flagGame.tieLegs, 2);                      // still tied → another
   assert.ok(types(fx).includes('go:flagQ'));
 });
 
@@ -82,7 +82,7 @@ test('dish without a host: written answers are checked in the order called', () 
   assert.equal(g.dishGame.subs[1].winner, 'none');
 });
 
-test('dish: level after seven — one more, or a point each', () => {
+test('dish: tied after seven — one more, or a point each', () => {
   const g = game();
   Q.play(g, { type:'dish/start' });
   [0, 1, 0, 1, 0, 1].forEach(w => { Q.play(g, { type:'dish/buzz', w }); Q.play(g, { type:'dish/right' }); Q.play(g, { type:'dish/next' }); });
@@ -116,7 +116,7 @@ function game2(){
   return { g, env:{ deal } };
 }
 
-test('map: level after three goes to the table, "stop" pays a point each', () => {
+test('map: tied after three goes to the table, "stop" pays a point each', () => {
   const { g, env } = game2();
   Q.play(g, { type:'map/start' }, env);
   Q.play(g, { type:'map/hint' }, env);
@@ -137,7 +137,7 @@ test('map: a swap draws a map that is not already in play', () => {
   assert.ok(!before.includes(g.mapGame.qs[0].id));
 });
 
-test('closest: guesses add up the gap; level after seven brings a tie-breaker leg', () => {
+test('closest: guesses add up the gap; tied after seven brings a tie-breaker leg', () => {
   const { g, env } = game2();
   Q.play(g, { type:'closest/start' }, env);
   const ans = Number(g.mini.qs[0].answer);
@@ -203,7 +203,7 @@ test('auction: bid up, deliver, and the bidder takes the leg; best of three pays
   assert.equal(g.teams[0].score, g.miniPts);
 });
 
-test('battle: level after both captains goes to a tie-breaker; "done" sends a level night to sudden death', () => {
+test('battle: tied after both captains goes to a tie-breaker; "done" sends a tied night to sudden death', () => {
   const { g, env } = game3({ minis:['battle'] });
   Q.play(g, { type:'battle/build' }, env);
   for(let cap = 0; cap < 2; cap++){
@@ -579,7 +579,7 @@ test('pin: the nearer pin takes the leg; no pin loses; the same km is a point ea
   assert.equal(s.subs[3].winner, 'none');
   assert.equal(s.i, 4);
 });
-test('pin: best of seven; level after seven brings a tie-breaker landmark, then pays', () => {
+test('pin: best of seven; tied after seven brings a tie-breaker landmark, then pays', () => {
   const g = newGames(), s = g.pinGame;
   assert.equal(s.base, 7);
   Q.play(g, { type:'pin/start' });
@@ -737,7 +737,7 @@ test('roulette: two teams — exactly one bullet hits in the three laps; points 
 });
 test('roulette: the most points wins the 2; level: one more lap or a point each', () => {
   const { g, env } = roulette(), s = g.rouletteGame;
-  /* (no bullet hits, all wrong, is level at 0: a barrel a spin, as with 3-8 teams; one barrel all game always fires) */
+  /* (no bullet hits, all wrong, is tied at 0: a barrel a spin, as with 3-8 teams; one barrel all game always fires) */
   s.qs = [s.qs[0], ...s.spare.splice(0, 2)].map(l => ({ ch:l.ch, bullet:l.bullet }));
   s.bulletLap = -1;
   Q.play(g, { type:'roulette/start' }, env);

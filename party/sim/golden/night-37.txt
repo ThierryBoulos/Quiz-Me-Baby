@@ -79,22 +79,33 @@
 128.25 seeReveal | 32 | 3-5 | 3-2 | ⁨Lea⁩ doesn't agree: the call stands. | 
 129.00 seeQ | 33 | 3-5 | 3-2 | Owls take picture 7. | 
 131.75 seeReveal | 33 | 3-5 | 4-2 | Owls take picture 7. | 
-132.75 decided | 34 | 5-5 | 4-2 |  | 
-133.50 seeQ | 35 | 5-5 | 4-2 |  | 
-137.25 seeQ | 35 | 5-5 | 4-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
-140.75 seeReveal | 35 | 5-5 | 4-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
-141.75 seeReveal | 35 | 5-5 | 4-2 |  | 
-156.75 seeReveal | 35 | 5-5 | 4-2 | No answer in time: the call stands. | 
-157.00 seeSummary | 36 | 5-5 | 4-2 | Nobody got it. | 
-158.00 roundIntro | 37 | 5-5 |  | Nobody got it. | 
-159.75 ask | 38 | 5-5 |  | Nobody got it. | 
-160.50 answer | 38 | 6-5 |  | Lions +1 point | 
-161.50 ask | 39 | 6-5 |  | Lions +1 point | 
-162.50 ask | 39 | 6-5 |  | Owls used Double Dip. | 
-163.25 answer | 39 | 6-6 |  | Owls +1 point | 
-164.25 answer | 39 | 6-6 |  |  | 
-167.75 steal | 40 | 6-5 |  | Lions steal a new question. | 
-168.75 answer | 40 | 6-5 |  | Lions steal a new question. | 
-169.50 roundScore | 41 | 6-5 |  | Lions steal a new question. | 
-170.50 final | 42 | 6-5 |  | Lions steal a new question. | 
+132.75 seeQ | 34 | 3-5 | 4-2 | Lions take picture 8. | 
+134.50 seeQ | 34 | 3-5 | 4-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+136.25 seeReveal | 34 | 3-5 | 4-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+137.25 seeQ | 35 | 3-5 | 4-2 | Nobody got it. | 
+140.00 seeReveal | 35 | 3-5 | 5-2 | Nobody got it. | 
+140.75 decided | 36 | 5-5 | 5-2 |  | 
+141.75 seeQ | 37 | 5-5 | 5-2 |  | 
+144.50 seeReveal | 37 | 5-5 | 6-2 |  | 
+160.25 seeReveal | 37 | 5-5 | 6-2 | No answer in time: the call stands. | 
+160.50 seeQ | 38 | 5-5 | 6-2 | Lions take picture 11. | 
+162.50 seeQ | 38 | 5-5 | 6-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+165.00 seeReveal | 38 | 5-5 | 6-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+166.00 seeReveal | 38 | 5-5 | 6-2 |  | 
+167.00 seeReveal | 38 | 5-5 | 6-2 | ⁨Rami⁩ doesn't agree: the call stands. | 
+167.75 seeSummary | 39 | 5-5 | 6-2 | Nobody got it. | 
+168.75 roundIntro | 40 | 5-5 |  | Nobody got it. | 
+170.50 ask | 41 | 5-5 |  | Nobody got it. | 
+171.50 answer | 41 | 6-5 |  | Lions +1 point | 
+172.25 ask | 42 | 6-5 |  | Lions +1 point | 
+173.25 ask | 42 | 6-5 |  | Owls used Call a Friend. | 
+176.00 ask | 43 | 6-5 |  | Owls used Call a Friend. | 
+176.75 answer | 43 | 6-6 |  | Owls +1 point | 
+177.75 answer | 43 | 6-6 |  |  | 
+178.50 steal | 44 | 6-5 |  | Lions steal a new question. | 
+179.50 answer | 44 | 6-5 |  | Lions steal a new question. | 
+180.50 answer | 44 | 6-5 |  |  | 
+181.25 answer | 44 | 6-5 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+182.25 roundScore | 45 | 6-5 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+183.00 final | 46 | 6-5 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
 recap: {"margin":1,"sudden":false,"leadChanges":2,"steals":[0,0],"minis":[0,1],"best":{"title":"Guess the Flag","team":1,"legs":[3,6]},"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[3,3],[3,5],[5,5],[6,5],[6,6],[6,5]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,3]]},{"label":"R3","pts":[[3,5]]},{"label":"What Do You See?","pts":[[5,5]]},{"label":"R4","pts":[[6,5],[6,6],[6,5]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0}]}

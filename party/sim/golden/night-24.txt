@@ -37,7 +37,7 @@
 39.00 steal | 17 | 2-3 |  | Call changed: Lions +1 point. | 
 40.00 answer | 17 | 2-3 |  | Call changed: Lions +1 point. | 
 41.00 roundScore | 18 | 2-3 |  | Call changed: Lions +1 point. | 
-(the scores set level, 3-3)
+(the scores set tied, 3-3)
 42.75 roundScore | 18 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
 42.75 sudden | 19 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 
 43.50 sudden | 20 | 3-3 |  | Both captains agreed: ⁨Lions⁩ 3, ⁨Owls⁩ 3. | 

@@ -90,7 +90,7 @@ export function useFlyingPoints(root: RefObject<HTMLDivElement | null>, pub: Pub
 }
 
 /* "Lead change": when the team ahead changes (on the scores as shown, so once the points have landed), a band
-   in the new leader's colour sweeps across, with the whoosh. A level score doesn't count as a change. */
+   in the new leader's colour sweeps across, with the whoosh. A tied score doesn't count as a change. */
 /* lift: a little higher, over the last line of a summary (on an answer the "+2" sits just above, so it stays low) */
 export function LeadBanner({ shown, names, sound, lift }: { shown: Two<number>; names: [string, string]; sound: boolean; lift?: boolean }) {
   const lead = shown[0] > shown[1] ? 0 : shown[1] > shown[0] ? 1 : null;

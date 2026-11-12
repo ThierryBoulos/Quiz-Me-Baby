@@ -17,7 +17,7 @@ export type PubMany = {
   /* this game: legs taken, its place points so far (this leg's counted from its reveal), Majority Rules' shares */
   game?: { key: ManyKey; title: string; leg: number; of: number; wins: number[]; pts: number[]; shares?: number[]; index: number; count: number;
     keys?: ManyKey[];                             // the night's games in order (the pips: a dot a question round, a dash a mini-game)
-    only?: number[];                              // sudden death: the teams level at the top, the only ones who answer
+    only?: number[];                              // sudden death: the teams tied at the top, the only ones who answer
     themes?: string[] };                          // a question round: its themes, in the order they come
   qid?: string; question?: string; flag?: string; options?: string[];
   pin?: { photo: string; credit: string; licence: string };
