@@ -157,7 +157,8 @@ const PHONE_MEASURE = () => {
   }
   return [...new Set(bad)].slice(0, 10);
 };
-const waitFor = (k) => (/\.final/.test(k) ? 12000 : /Reveal|reveal|Result|Summary|summary|roundScore|Review|decided|\.intro/.test(k) ? 6000 : /^lobby/.test(k) ? 3500 : 2500);
+/* (Secret Stakes' reveal brings its rows in one by one: with 8 teams the last lands at about 7 s) */
+const waitFor = (k) => (/\.final/.test(k) ? 12000 : /[Rr]eveal\.stakes/.test(k) ? 8000 : /Reveal|reveal|Result|Summary|summary|roundScore|Review|decided|\.intro/.test(k) ? 6000 : /^lobby/.test(k) ? 3500 : 2500);
 const file = (s) => s.replace(/[^a-z0-9]+/gi, "_");
 
 const browser = await chromium.launch();

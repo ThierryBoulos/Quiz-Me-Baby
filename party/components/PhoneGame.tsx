@@ -1098,7 +1098,7 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   const quiet = QUIET.includes(pub.screen) && !pub.paused;
   /* your move now (gold) or stay out of it (grey), so "Type it fast!" and "Not a word!" can't be mixed up (3 Nov) */
   const tone = statusTone(pub, me);
-  return <p className={"text-center leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite"
+  return <p className={"text-center text-balance leading-snug " + (quiet ? "text-14 font-semibold text-[var(--color-ink-3)]" : "font-bold text-18")} role="status" aria-live="polite"
     style={!quiet && tone ? { color: tone === "go" ? "var(--color-gold)" : "var(--color-ink-3)" } : undefined}>{status(pub, me, noTv)}</p>;
 }
 function statusTone(pub: Pub, me: Member): "go" | "hush" | null {
