@@ -122,6 +122,10 @@ const TV_MEASURE = () => {
 const PHONE_MEASURE = () => {
   const bad = [], W = innerWidth;
   if (document.documentElement.scrollWidth > W + 1) bad.push("SIDEWAYS " + (document.documentElement.scrollWidth - W) + "px");
+  /* held sideways, the left column holds what you look at (the picture, the flag, the recipe, the clock): it scrolls
+     with no bar, so anything below its bottom edge is cut off for the player (12 Nov) */
+  const side = document.querySelector(".screen.split > .side");
+  if (side && getComputedStyle(side).display !== "contents" && side.scrollHeight > side.clientHeight + 3) bad.push("SIDE " + (side.scrollHeight - side.clientHeight) + "px below the left column");
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
   const cover = document.querySelector(".night-intro");
   const skip = (el) => el.closest(".confetti,.confetti-back,.win-flash,.win-ring,svg *,canvas,.face.back,.plane-ico,.lectern-spot,.see-frame img") || (cover && !cover.contains(el)) || [...(function* () { for (let e = el; e; e = e.parentElement) yield e; })()].some((e) => getComputedStyle(e).position === "sticky");
@@ -198,7 +202,9 @@ if (want("phones")) {
   const roles = (k) => (/^nh/.test(k) ? ["cap", "player"] : /^h\./.test(k) ? ["host"] : /^m[38]\./.test(k) ? ["host", "cap", "player"] : []);
   /* the narrowest (Galaxy S), the widest (iPhone Pro Max) and held sideways, the browser's bars showing: the iPhones
      between (393, 402) fit when both ends do. SCREENS_PHONES=all adds the iPhone at 393 */
-  const PHONES = [["galaxy", 360, 780], ...(process.env.SCREENS_PHONES === "all" ? [["iphone", 393, 852]] : []), ["promax", 440, 956], ["sideways", 852, 340]];
+  /* (SCREENS_PHONES=sideways: only the phone held sideways) */
+  const PHONES = process.env.SCREENS_PHONES === "sideways" ? [["sideways", 852, 340]]
+    : [["galaxy", 360, 780], ...(process.env.SCREENS_PHONES === "all" ? [["iphone", 393, 852]] : []), ["promax", 440, 956], ["sideways", 852, 340]];
   const jobs = [];
   for (const [dev, w, h] of PHONES) for (const k of keys.filter(match)) for (const r of roles(k)) for (const tvIn of ["ph", "pn"])
     jobs.push({ id: `${dev} ${tvIn === "ph" ? "tv" : "no-tv"} ${r} ${k}`, hash: `${tvIn}:${r}:${k}`, key: k, dev, w, h });
