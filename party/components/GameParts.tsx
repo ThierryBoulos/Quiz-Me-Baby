@@ -425,10 +425,11 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Every chamber is on show before the spin. One is the bullet, an Expert question. The same barrel all game: someone draws it by spin ${n}.`, warn: true },
       { text: "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3." },
       { text: `${n} spins. Most points takes ${pts}. Tied? One more spin, or a point each.` }];
-    /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a tenth of the leader's total when it starts */
+    /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
     case "stakes": { const u = pub.stakes?.unit ?? 1; return [
       { text: `${n} rounds. Each shows 3 themes. Each captain secretly bets on one theme and one level, ${sec(t?.stakesPick, 20)}.` },
-      { text: `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}.` },
+      /* (Expert: almost impossible to get, the owner, 12 Nov) */
+      { text: `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}: beware, Expert is almost impossible to get.` },
       { text: `Then the question you bet on, on your own phones: captains type the answer, ${sec(t?.stakesQ, 45)}.` },
       { text: "Right wins your bet, wrong or no answer loses it, straight on your total. Nobody sees the others' bets till the reveal.", warn: true },
       { text: host ? "The app checks the answers, and the host can change a call." : "The app checks the answers. Its RIGHT stands; the other captain can give one it called WRONG." }]; }

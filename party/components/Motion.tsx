@@ -29,8 +29,8 @@ function launch(root: HTMLElement | null, t: 0 | 1, n: number, pts: number) {
   const x1 = (b.left + b.width / 2 - R.left) / k, y1 = (b.top + b.height / 2 - R.top) / k;
   for (let i = 0; i < n; i++) {
     const el = document.createElement("div");
-    el.className = "fly " + (t ? "b" : "a") + (n > 1 ? " coin" : "");
-    el.textContent = n > 1 ? "" : `+${pts}`;
+    el.className = "fly " + (t ? "b" : "a") + (n > 1 ? " coin" : "") + (pts < 0 ? " neg" : "");
+    el.textContent = n > 1 ? "" : pts < 0 ? `−${-pts}` : `+${pts}`;
     el.style.left = x0 + "px"; el.style.top = y0 + "px";
     root.appendChild(el);
     /* up first, then across: a curve, not a straight line (each coin a little apart) */
@@ -64,7 +64,15 @@ export function useFlyingPoints(root: RefObject<HTMLDivElement | null>, pub: Pub
       /* (a row that comes in on its own beat, Secret Stakes' reveal: its points go up, or come off, when it does) */
       const own = Number(root.current?.querySelector(`[data-fly-src~="${t}"]`)?.getAttribute("data-fly-at") || 0);
       const wait = Math.max(0, scr.current.at + flyAt(scr.current.screen) + own - Date.now());
-      if (d < 0) { if (own && wait > 0) timers.push(setTimeout(() => set(t, now[t]), wait + 300)); else set(t, now[t]); return; }
+      /* (a bet lost, 12 Nov, the owner: its "−6" flies into the total too, in red, and the total then rolls down) */
+      if (d < 0) {
+        if (own && wait > 0) timers.push(setTimeout(() => {
+          if (!launch(root.current, t, 1, d)) { set(t, now[t]); return; }
+          timers.push(setTimeout(() => set(t, now[t]), FLY_MS));
+        }, wait));
+        else set(t, now[t]);
+        return;
+      }
       if (d === 0) return;
       timers.push(setTimeout(() => {
         const n = d >= 3 ? Math.min(d, 6) : 1;

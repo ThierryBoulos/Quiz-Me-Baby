@@ -75,19 +75,20 @@
 140.75 seeReveal | 44 | 4-2 | 2-3 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
 141.75 seeReveal | 44 | 4-2 | 2-3 |  | 
 142.50 seeReveal | 44 | 4-2 | 2-3 | The host keeps the call. | 
-143.50 seeSummary | 45 | 4-4 | 2-3 | Owls take picture 7. | 
-144.50 roundIntro | 46 | 4-4 |  | Owls take picture 7. | 
-146.25 ask | 47 | 4-4 |  | Owls take picture 7. | 
-148.00 steal | 48 | 4-4 |  | Owls take picture 7. | 
-149.75 answer | 49 | 4-4 |  | Owls take picture 7. | 
-150.75 ask | 50 | 4-4 |  | Owls take picture 7. | 
-152.50 steal | 51 | 4-4 |  | Owls take picture 7. | 
-154.25 answer | 52 | 4-4 |  | Owls take picture 7. | 
-155.25 roundScore | 53 | 4-4 |  | Owls take picture 7. | 
-156.00 sudden | 54 | 4-4 |  | Owls take picture 7. | 
-157.00 sudden | 55 | 4-4 |  | Owls take picture 7. | 
-158.75 sudden | 56 | 4-4 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
-160.50 sudden | 57 | 4-4 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
-161.50 sudden | 57 | 4-4 |  |  | 
-163.25 final | 58 | 4-5 |  | Call changed: ⁨Owls⁩ win the night. | 
-recap: {"margin":1,"sudden":true,"leadChanges":1,"steals":[3,0],"minis":[0,1],"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[4,2],[4,4],[4,5]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[3,2]]},{"label":"R3","pts":[[4,2]]},{"label":"What Do You See?","pts":[[4,4]]},{"label":"R4","pts":[]},{"label":"Sudden death","pts":[[4,5]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":1},{"t":"Best thief","who":"Lions, 3 steals","team":0}]}
+143.50 seeQ | 45 | 4-2 | 2-3 | Owls take picture 7. | 
+145.25 seeReveal | 45 | 4-2 | 3-3 | Owls take picture 7. | 
+146.25 seeQ | 46 | 4-2 | 3-3 | Lions take picture 8. | 
+157.00 seeQ | 46 | 4-2 | 3-3 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+159.75 seeReveal | 46 | 4-2 | 3-3 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+160.50 seeReveal | 46 | 4-2 | 3-3 |  | 
+161.50 seeReveal | 46 | 4-2 | 4-3 | Call changed: ⁨Lions⁩ RIGHT. | 
+162.50 seeSummary | 47 | 6-2 | 4-3 | Lions take picture 9. | 
+163.25 roundIntro | 48 | 6-2 |  | Lions take picture 9. | 
+165.00 ask | 49 | 6-2 |  | Lions take picture 9. | 
+167.00 answer | 50 | 8-2 |  | Lions +2 points | 
+167.75 ask | 51 | 8-2 |  | Lions +2 points | 
+169.50 steal | 52 | 8-2 |  | Lions +2 points | 
+171.50 answer | 53 | 8-2 |  | Lions +2 points | 
+172.25 roundScore | 54 | 8-2 |  | Lions +2 points | 
+173.25 final | 55 | 8-2 |  | Lions +2 points | 
+recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[3,0],"minis":[0,1],"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[4,2],[6,2],[8,2]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[3,2]]},{"label":"R3","pts":[[4,2]]},{"label":"What Do You See?","pts":[[6,2]]},{"label":"R4","pts":[[8,2]]}],"awards":[{"t":"Best thief","who":"Lions, 3 steals","team":0}]}

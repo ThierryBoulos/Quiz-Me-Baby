@@ -68,12 +68,12 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   else { const want = readFileSync(file, "utf8"); verdict = want === text ? "same as golden" : "DIFFERS"; if (want !== text) bad++; }
   console.log(`many ${k} teams, ${crowd} players: ${s.teams.map((x) => x.score).join("-")} — ${verdict}`);
 }
-/* 12 Nov: What Do You See? with 3, 6 and 8 teams, with its buzzer (the owner): the first team to buzz stops the clock
+/* 12 Nov: What Do You See? with 3, 6 and 8 teams, 12 pictures, with its buzzer (the owner): the first team to buzz stops the clock
    and answers. Right ends the picture and pays as many points as there are teams (a 1st place); wrong, or no answer in
    its 10 seconds, puts that team out, the clock goes on and another team can buzz; every team out, or the clock run
    out: nobody */
 {
-  decks.see = pick("see", 7);
+  decks.see = pick("see", L.MANY_LEGS.see);
   for (const [k, seed] of [[3, 5], [6, 6], [8, 7]]) {
     const r = rng(seed), teams = Array.from({ length: k }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
     const s = L.newNight(teams, decks, ["see"]), trace = [];
@@ -115,7 +115,10 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
         trace.push(`picture ${L.miniOf(s).i + 1}: ${s.teams.map((_, t) => (right[t] ? `#${pl[t]}` : late[t] ? "late" : s.typed[t] != null ? "x" : "-")).join(" ")} | pts ${pts.join(",")}`);
         L.next(s, now, T); continue;
       }
-      if (s.screen === "summary") { trace.push(`summary award ${L.miniOf(s).award.join(",")}`); L.next(s, now, T); continue; }
+      if (s.screen === "summary") { const M = L.miniOf(s);
+        /* teams level on pictures: the one whose right buzzes were faster all told is placed higher (the owner, 12 Nov) */
+        for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) if (a !== b && M.pts[a] > 0 && M.pts[a] === M.pts[b] && (M.fast[a] < M.fast[b]) !== (M.places[a] < M.places[b])) odd ||= "level teams not placed by speed";
+        trace.push(`summary award ${M.award.join(",")} | places ${M.places.join(",")}`); L.next(s, now, T); continue; }
       if (s.screen === "reveal") { L.next(s, now, T); continue; }
     }
     const file = join(here, `golden/many-see-${k}.txt`), text = trace.join("\n") + "\n";
@@ -261,7 +264,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`Russian Roulette, 3-8 teams: own chambers, calls on each team's own question, the bullet (${Object.entries(seen).map(([k, h]) => `${k} teams ${Math.min(...h)}-${Math.max(...h)}`).join(", ")}), the points and the places — ${ok ? "ok" : "FAILED"}`);
 }
-/* 11 Nov: Secret Stakes, 3 to 8 teams: the night's last game. A bet is fixed at its start (a tenth of the leader's
+/* 11 Nov: Secret Stakes, 3 to 8 teams: the night's last game. A bet is fixed at its start (a thirtieth of the leader's
    total); each round every captain bets (no bet by time-up: Easy on the first theme), answers the question it bet
    on, and wins or loses its bet straight on the night's total (never below 0); no places paid on top; Change
    question deals three new themes; Pause holds the bets' clock */
@@ -321,7 +324,8 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     L.startMini(s, 0, T, []);
     for (let t = 0; t < 3; t++) L.stakesBet(s, t, 0, "expert", 0, T);
     L.reveal(s); L.next(s, 0, T);
-    if (s.teams.map((x) => x.score).join() !== "63,0,0") fail("below 0: " + s.teams.map((x) => x.score).join()); }
+    /* (a bet is the leader's total over 30: 3 here, Expert 9; on 4 and on 0, the 9 takes them to 0, never below) */
+    if (s.teams.map((x) => x.score).join() !== "81,0,0") fail("below 0: " + s.teams.map((x) => x.score).join()); }
   if (!ok) bad++;
   console.log(`Secret Stakes, 3-8 teams: the bet from the scoreboard, the bets, the safe bet at time-up, each team's own question, the totals (never below 0), Change question, Pause, no places on top — ${ok ? "ok" : "FAILED: " + why.join("; ")}`);
 }

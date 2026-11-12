@@ -5,21 +5,35 @@
    its bet, its answer, and the points on or off its total; after the third round, what each team won or lost.
    Low motion: rows fade in one after another; nothing else moves (and that's still, with motion off in Settings). */
 import type { ReactNode } from "react";
-import { SK_LEVELS, signedPts, skLevelWord, skRowAt, skWorth, type SkPub } from "@/lib/stakes";
+import { SK_LEVELS, signedPts, skBet, skLevelWord, skRowAt, type SkPub } from "@/lib/stakes";
 
 export type SkTeam = { name: string; color: string; letter: string };
 const OK = "var(--color-ok)", NO = "var(--color-no)";
 
 const Dot = ({ t, size }: { t: SkTeam; size: number }) => (
   <span className="dot ltr shrink-0" aria-hidden style={{ background: t.color, width: size, height: size, fontSize: size * 0.55 }}>{t.letter}</span>);
-/* a level and what it's worth: "Hard ±16"; Easy is the safe bet */
-export function SkChip({ unit, level, small }: { unit: number; level: string; small?: boolean }) {
-  return <span className={"rr-chip sk-chip" + (level === "expert" ? " bullet" : "") + (small ? " sm" : "")}>{skLevelWord(level)}<b className={"rr-pt " + (level === "easy" ? "" : "ok")}>{skWorth(unit, level)}</b></span>;
+/* a level and what it's worth: "Hard +16 −16"; Easy is the safe bet. (12 Nov, the owner: safe in green, the win in
+   green and the loss in red, on every screen; Expert no longer lit gold, it's a level like the others) */
+/* warn: the danger sign beside Expert (the legend, the bet buttons): it's almost impossible to get */
+export function SkChip({ unit, level, small, warn }: { unit: number; level: string; small?: boolean; warn?: boolean }) {
+  const b = skBet(unit, level);
+  return (
+    <span className={"rr-chip sk-chip" + (small ? " sm" : "")} aria-label={level === "easy" ? "Easy: safe" : `${skLevelWord(level)}: win ${b} or lose ${b}`}>
+      {warn && level === "expert" && <span aria-hidden>⚠</span>}{skLevelWord(level)}
+      {level === "easy" ? <b className="rr-pt ok">safe</b> : <><b className="rr-pt ok">+{b}</b><b className="rr-pt no">−{b}</b></>}
+    </span>);
 }
-/* the four levels, once, as a legend */
+/* the four levels, once, as a legend; and where the points come from (the owner, 12 Nov: say it's the total score) */
 export function SkLevels({ unit, small }: { unit: number; small?: boolean }) {
-  return <div className="flex flex-wrap items-center justify-center gap-2" aria-label="What each level is worth">{SK_LEVELS.map((l) => <SkChip key={l} unit={unit} level={l} small={small} />)}</div>;
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="flex flex-wrap items-center justify-center gap-2" aria-label="What each level is worth">{SK_LEVELS.map((l) => <SkChip key={l} unit={unit} level={l} small={small} warn />)}</div>
+      <div className={"text-center font-semibold text-[var(--color-ink-2)] " + (small ? "text-13" : "text-20")}>{SK_TOTAL}</div>
+    </div>);
 }
+/* (the owner, 12 Nov: "it's from their TOTAL SCORES"; and Expert is almost impossible to get, so a danger sign) */
+export const SK_TOTAL = "Win or lose, it comes from your total score.";
+const skWarn = (unit: number) => `Beware: Expert is almost impossible to get. Wrong, and you lose ${skBet(unit, "expert")} from your total score.`;
 /* who has bet (or answered): a row of names (two teams) or lettered dots (three or more) */
 function Ticks({ teams, done, yes, no, size = 22 }: { teams: SkTeam[]; done: boolean[]; yes: string; no: string; size?: number }) {
   const many = teams.length > 2;
@@ -183,7 +197,7 @@ export function StakesPhone({ sk, screen, teams, me, cap }: { sk: SkPub; screen:
             <Dot t={T} size={20} />
             <div className="min-w-0 flex-1 flex flex-col leading-tight">
               <bdi className="text-14 font-bold truncate" style={{ color: T.color }}>{T.name}</bdi>
-              <span className="text-12 text-[var(--color-ink-2)] truncate">{S.rounds[t].map((r) => `${skLevelWord(r.level)} ${signedPts(r.delta)}`).join(" · ")}</span>
+              <span className="text-12 text-[var(--color-ink-2)] truncate">{S.rounds[t].map((r, i) => <span key={i}>{i ? " · " : ""}{skLevelWord(r.level)} <b style={{ color: r.delta > 0 ? OK : r.delta < 0 ? NO : undefined }}>{signedPts(r.delta)}</b></span>)}</span>
             </div>
             <span className="display text-24 shrink-0" style={{ color: v > 0 ? OK : v < 0 ? NO : "var(--color-ink-3)" }}>{signedPts(v)}</span>
           </div>); })}
@@ -205,12 +219,16 @@ export function StakesBet({ sk, theme, level, setTheme, setLevel, onLock, busy }
       </div>
       <div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>2. Pick a level</div>
       <div className="grid grid-cols-2 gap-2 sk-levels" role="radiogroup" aria-label="Level">
-        {SK_LEVELS.map((l) => (
-          <button key={l} type="button" role="radio" aria-checked={level === l} className={"btn btn-lg sk-pick sk-lv flex flex-col !gap-0" + (level === l ? " on" : "")} disabled={busy} onClick={() => setLevel(l)}>
-            <span className="text-18 font-bold">{skLevelWord(l)}</span>
-            <span className="text-13 font-semibold" style={{ color: l === "easy" ? "var(--color-ink-2)" : OK }}>{l === "easy" ? "safe: 0 either way" : `win or lose ${skWorth(sk.unit, l).slice(1)}`}</span>
-          </button>))}
+        {SK_LEVELS.map((l) => { const b = skBet(sk.unit, l); return (
+          <button key={l} type="button" role="radio" aria-checked={level === l} className={"btn btn-lg sk-pick sk-lv flex flex-col !gap-0" + (level === l ? " on" : "") + (l === "expert" ? " sk-danger" : "")} disabled={busy} onClick={() => setLevel(l)}>
+            <span className="text-18 font-bold">{l === "expert" && <span aria-label="Danger">⚠ </span>}{skLevelWord(l)}</span>
+            <span className="text-13 font-semibold text-[var(--color-ink-2)]">{l === "easy" ? <span style={{ color: OK }}>safe: 0 either way</span>
+              : <><span style={{ color: OK }}>win {b}</span> or <span style={{ color: NO }}>lose {b}</span></>}</span>
+          </button>); })}
       </div>
+      <p className="text-center text-14 font-semibold">{SK_TOTAL}</p>
+      {/* (Expert picked: the warning, in red, before Lock in) */}
+      {level === "expert" && <p className="sk-warn text-14 font-semibold leading-snug" role="alert">⚠ {skWarn(sk.unit)}</p>}
       {/* (not docked: docked, it sat over the levels, upright and sideways) */}
       <button className="btn btn-gold btn-lg btn-block" disabled={busy || theme == null || !level} onClick={onLock}>
         {theme != null && level ? `Lock in: ${skLevelWord(level)} on ${sk.themes[theme]}` : "Lock in"}</button>

@@ -14,6 +14,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun, type RrTeam } from "./Roulette";
 import { StakesBet, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
+import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
@@ -1012,6 +1013,8 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
     {/* (sideways, the picture clears in the right column, as big as the screen's height allows: under the scores on the
        left it was cut off. At the reveal a small clear copy goes left, 12 Nov) */}
     {(pub.screen === "seeQ" || pub.screen === "seeReveal") && pub.see && <ToSide when={side && pub.screen === "seeReveal"} order={4} className="noselect" {...noCopy}><div className="flex flex-col items-center gap-1">
+      {/* (the question, by kind: the owner, 12 Nov) */}
+      {pub.screen === "seeQ" && <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>}
       <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} clear={pub.screen === "seeReveal"} w={pub.screen === "seeReveal" ? (small ? 180 : 240) : small ? 220 : 340} alt={pub.see.rev?.answer} />
       {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}
       {/* the other team out (the TV's note, which no phone shows: with no TV, nobody would know they can wait for it to clear) */}

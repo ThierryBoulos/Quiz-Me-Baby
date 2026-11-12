@@ -270,7 +270,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
           flagLevels: lv(cfg.flagLevels, QMB.FLAG_LEVEL_KEYS, ["veasy", "easy", "medium", "hard"]), pinLevels: lv(cfg.pinLevels, QMB.PIN_ORDER, QMB.PIN_ORDER),
           majorityLevels: lv(cfg.majorityLevels, QMB.MAJORITY_ORDER, QMB.MAJORITY_ORDER),
           /* What Do You See?: its levels, and the kinds of picture the host left on */
-          seeLevels: lv(cfg.seeLevels, QMB.SEE_ORDER, QMB.SEE_ORDER), seeKinds: lv(cfg.seeKinds, QMB.SEE_KINDS, QMB.SEE_KINDS),
+          seeLevels: lv(cfg.seeLevels, QMB.SEE_ORDER, QMB.SEE_ORDER), seeKinds: lv(cfg.seeKinds, QMB.SEE_KINDS, QMB.SEE_KINDS), seeLegs: MANY_LEGS.see,
           /* Russian Roulette: a barrel of 6 chambers, 8 with 7 or 8 teams; Sexy Time and Lebanon only if the host picked them */
           rouletteChambers: QMB.rouletteChambers(k), rouletteThemes: chosen,
           /* Secret Stakes: the broad themes and the host's picks, never the host's own trivia */

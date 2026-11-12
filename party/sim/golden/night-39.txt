@@ -24,6 +24,12 @@
 49.10 seeReveal | 8 | 0-0 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
 50.10 seeQ | 9 | 0-0 | 2-2 | Owls take picture 6. | 
 52.85 seeReveal | 9 | 0-0 | 3-2 | Owls take picture 6. | 
-53.60 seeSummary | 10 | 2-0 | 3-2 | Lions take picture 7. | 
-54.60 final | 11 | 2-0 |  | Lions take picture 7. | 
+53.60 seeQ | 10 | 0-0 | 3-2 | Lions take picture 7. | 
+55.60 seeQ | 10 | 0-0 | 3-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+65.35 seeReveal | 10 | 0-0 | 3-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+66.35 seeQ | 11 | 0-0 | 3-2 | Nobody got it. | 
+68.10 seeQ | 11 | 0-0 | 3-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+76.10 seeReveal | 11 | 0-0 | 4-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+77.10 seeSummary | 12 | 2-0 | 4-2 | Lions take picture 9. | 
+78.10 final | 13 | 2-0 |  | Lions take picture 9. | 
 recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[2,0]],"segs":[{"label":"What Do You See?","pts":[[2,0]]}],"awards":[]}

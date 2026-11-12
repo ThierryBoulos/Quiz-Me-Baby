@@ -21,7 +21,7 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
     const every = [...new Set(bank.bank.filter((q: Q) => q.type === "standard" && q.theme && q.theme !== "Know the Host").map((q: Q) => q.theme))];
     const keys: L.ManyKey[] = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "roulette", "quiz", "stakes"];
     const g = dealer.buildGame({ standard: true, rounds: 4 + 6, themes: every, difficulty: "easy+medium+hard", minis: ["majority", "flag", "airport", "map", "closest", "pin", "saysame", "dish", "see", "roulette", "stakes"],
-      rouletteChambers: QMB.rouletteChambers(k), rouletteThemes: [], teamA: { name: "A" }, teamB: { name: "B" } });
+      rouletteChambers: QMB.rouletteChambers(k), rouletteThemes: [], seeLegs: L.MANY_LEGS.see, teamA: { name: "A" }, teamB: { name: "B" } });
     const all = (m: { qs?: unknown[]; spare?: unknown[] }) => [...(m?.qs || []), ...(m?.spare || [])] as Q[];
     const say = (dealer.saySameDeck({}) as { pool?: string[] }[]).filter((q) => (q.pool || []).length >= 5).slice(0, 10).map((q) => dealer.drawSaySame(q));
     const quiz = (g.rounds || []).flatMap((r: { q: Q[] }) => r.q);

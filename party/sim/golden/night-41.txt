@@ -31,13 +31,23 @@
 68.00 seeReveal | 16 | 0-3 | 2-3 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
 68.75 seeReveal | 16 | 0-3 | 2-3 |  | 
 70.50 seeReveal | 16 | 0-3 | 2-4 | Call changed: ⁨Owls⁩ RIGHT. | 
-71.50 decided | 17 | 0-5 | 2-4 |  | 
-72.50 roundIntro | 18 | 0-5 |  |  | 
-74.25 ask | 19 | 0-5 |  |  | 
-76.00 answer | 20 | 1-5 |  | Lions +1 point | 
-77.00 ask | 21 | 1-5 |  | Lions +1 point | 
-78.75 steal | 22 | 1-5 |  | Lions +1 point | 
-80.50 answer | 23 | 1-5 |  | Lions +1 point | 
-81.50 roundScore | 24 | 1-5 |  | Lions +1 point | 
-82.25 final | 25 | 1-5 |  | Lions +1 point | 
-recap: {"margin":4,"sudden":false,"leadChanges":0,"steals":[0,1],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[0,3],[0,5],[1,5]],"segs":[{"label":"R1","pts":[[0,1],[0,3]]},{"label":"What Do You See?","pts":[[0,5]]},{"label":"R2","pts":[[1,5]]}],"awards":[{"t":"Best thief","who":"Owls, 1 steal","team":1}]}
+71.50 seeQ | 17 | 0-3 | 2-4 | Owls take picture 6. | 
+73.25 seeQ | 17 | 0-3 | 2-4 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+75.00 seeReveal | 17 | 0-3 | 2-4 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+76.00 seeQ | 18 | 0-3 | 2-4 | Nobody got it. | 
+79.50 seeQ | 18 | 0-3 | 2-4 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+82.25 seeReveal | 18 | 0-3 | 3-4 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+83.25 seeQ | 19 | 0-3 | 3-4 | Lions take picture 8. | 
+87.75 seeReveal | 19 | 0-3 | 4-4 | Lions take picture 8. | 
+88.50 seeTie | 20 | 0-3 | 4-4 |  | 
+89.50 seeSummary | 21 | 1-4 | 4-4 |  | 
+90.50 roundIntro | 22 | 1-4 |  |  | 
+92.25 ask | 23 | 1-4 |  |  | 
+94.00 steal | 24 | 1-4 |  |  | 
+95.75 answer | 25 | 1-6 |  | Owls +2 points — steal | 
+96.75 ask | 26 | 1-6 |  | Owls +2 points — steal | 
+98.50 steal | 27 | 1-6 |  | Owls +2 points — steal | 
+100.25 answer | 28 | 1-6 |  | Owls +2 points — steal | 
+101.25 roundScore | 29 | 1-6 |  | Owls +2 points — steal | 
+102.00 final | 30 | 1-6 |  | Owls +2 points — steal | 
+recap: {"margin":5,"sudden":false,"leadChanges":0,"steals":[0,2],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[0,3],[1,4],[1,6]],"segs":[{"label":"R1","pts":[[0,1],[0,3]]},{"label":"What Do You See?","pts":[[1,4]]},{"label":"R2","pts":[[1,6]]}],"awards":[{"t":"Best thief","who":"Owls, 2 steals","team":1}]}

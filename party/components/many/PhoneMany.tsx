@@ -22,6 +22,7 @@ import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
 import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
+import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
@@ -188,7 +189,10 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {g.key === "flag" && <ToSide order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 110 : 150} /></ToSide>}
       {/* What Do You See?: the picture, clearing from the TV's clock */}
       {/* (stays in the right column sideways, sized to the screen: under the scores on the left it was cut off) */}
-      {g.key === "see" && pub.see && <div className="flex justify-center noselect" {...noCopy}><SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} /></div>}
+      {g.key === "see" && pub.see && <div className="flex flex-col items-center gap-1 noselect" {...noCopy}>
+        {/* (the question, by kind: the owner, 12 Nov) */}
+        <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>
+        <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} /></div>}
       {/* (with no TV, what the TV shows beside the picture: who has buzzed, who is out of it) */}
       {g.key === "see" && pub.see && noTv && (pub.see.buzz != null || pub.see.out?.some(Boolean)) && <SeeTicks teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} out={pub.see.out} buzz={pub.see.buzz} size={15} />}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
@@ -313,13 +317,15 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <div className="flex items-center justify-between"><div className="eyebrow">Secret Stakes · placing bets</div><Clock deadline={pub.deadline} left={pub.left} size={60} /></div>
         <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={null} />
         <p className="text-center text-13 text-[var(--color-ink-3)]">No bet by time&rsquo;s up: the safe one, Easy on the first theme.</p>
-        <div className="flex flex-wrap justify-center gap-2 mt-auto dock-group py-2" style={{ background: "var(--color-bg)" }}>
+        {/* (after the bets, not over them: a band docked at the bottom covered them, the owner, 12 Nov; as with two teams) */}
+        <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
           <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change the themes</button>
         </div>
       </>)}
       {host && sc === "q" && g && (<>
-        <OnScreen />
+        {/* (the host's picture small, as with two teams: the answer and who buzzed matter more on this phone) */}
+        <OnScreen small={g.key === "see"} />
         {g.key === "stakes" && secret.answers && sk && (
           <div className="card cue-card flex flex-col gap-1" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answers. Only you see these</div>
@@ -353,8 +359,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             </div>
           </div>); })()}
         {/* the same controls as with two teams: Pause, Change question, Reveal now (the 4 Nov audit, 3.11) */}
-        {/* (docked: sideways, the question pushed these below the fold; 5 Nov review) */}
-        <div className="flex flex-wrap justify-center gap-2 mt-auto dock-group py-2" style={{ background: "var(--color-bg)" }}>
+        {/* (after the answer and the list, not docked over them: the band covered the answer card and the list of who's
+           in, the owner, 12 Nov; as with two teams, where these were never docked) */}
+        <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
           {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
           {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && !(g.key === "see" && (pub.see?.buzz != null || pub.see?.out?.some(Boolean))) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : "Change question"}</button>}

@@ -2,7 +2,7 @@
 /* MANY TEAMS: the pieces the TV and every phone share, each the two-team one (components/GameParts.tsx)
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
-import { CodeTiles } from "../Marquee";
+import { CodeTiles, motionOff } from "../Marquee";
 import { useEffect, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
 import { showKm, showNum } from "@/lib/game";
@@ -10,6 +10,7 @@ import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import type { Member } from "@/lib/room";
 import { playSound } from "@/lib/sound";
+import { signedPts, skRowAt } from "@/lib/stakes";
 
 export type Size = "tv" | "phone";
 /* the team's letter in its dot: eight colours never need telling apart */
@@ -57,6 +58,9 @@ export const byDistance = (pub: PubMany) => {
 /* what one go of a game is called, in plain words (no "leg": the reviewers, 31 Oct): "Flag 3 of 10", "Recipe 2 of 5" */
 export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture" };
 export const unitOf = (key: string) => UNIT[key] || "Question";
+/* Secret Stakes' reveal: a row's points start up 150 ms after the row comes in, and reach the total about 1 s later
+   (78% of the 1.3 s flight in globals.css), when the total rolls */
+const SK_RISE = 150, SK_LAND = SK_RISE + 1000;
 /* ---- the tracker: the room code, the teams along the top, the night's label and pips under them, then this game's tally.
    The phone keeps only the label, the pips and whose side you're on: the scores are behind your name at the top left. ---- */
 export function HudMany({ pub, size, code, me, host, sound = false }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean; sound?: boolean }) {
@@ -82,12 +86,24 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
     const t = setTimeout(() => { setLanded(true); if (sound && award?.some((x) => x > 0)) playSound("point"); }, 1500 + flyAfter * 1000);
     return () => clearTimeout(t);
   }, [pub.screen, pub.step]);   // eslint-disable-line react-hooks/exhaustive-deps
-  const num = (i: number) => (award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
+  /* Secret Stakes' reveal (12 Nov, the owner: a bet won or lost goes into the total, as points do everywhere): each
+     total waits at what it was until its team's row comes up, then the "+8" or the "−24" (in red) rises into it and it
+     rolls. With motion off, the totals are as they are */
+  const skRev = tv && g?.key === "stakes" && pub.screen === "reveal" ? pub.stakes?.rev : undefined;
+  const skKey = skRev ? `${g!.index}:${pub.stakes!.round}` : "";
+  const [skIn, setSkIn] = useState<boolean[] | null>(null);
+  useEffect(() => {
+    if (!skKey || !skRev || motionOff()) { setSkIn(null); return; }
+    setSkIn(T.map(() => false));
+    const ts = skRev.order.map((t, n) => setTimeout(() => setSkIn((L) => (L ? L.map((v, i) => v || i === t) : L)), skRowAt(n, k) + SK_LAND));
+    return () => ts.forEach(clearTimeout);
+  }, [skKey]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const num = (i: number) => (skRev && skIn && !skIn[i] ? skRev.before[i] ?? T[i].score : award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
   const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
   /* the pips are the night's games; they say what they are with "Game 1 of 9" beside them (the reviewers, 31 Oct) */
   const track = pips.length > 0 && <div className="pips" aria-hidden>{g && pub.screen !== "intro" && pub.screen !== "final" && g.key !== "sudden" && <span className="pips-tag">Game {g.index + 1} of {g.count}</span>}{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>;
   return (
-    <div className={`hud ${size} many ${packing(k)}${award && !landed ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
+    <div className={`hud ${size} many ${packing(k)}${(award && !landed) || (skRev && skIn && skIn.some((v, i) => !v && !!skRev.delta[i])) ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov: it matters little once the game is on) */}
       {/* the TV: the room code and the night's tracker ("Game 3 of 3" and a dot or dash a game) on one line at the top, not
           beside the game's line (the owner, 2 Nov); one line, not two, so a reveal with eight teams clears it (5 Nov review) */}
@@ -98,7 +114,8 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
             <div className="flex items-center gap-2 min-w-0"><Dot t={i} color={t.color} size={k > 5 ? 16 : k > 4 ? 18 : 22} /><div className="nm"><bdi>{t.name}</bdi></div></div>
             {/* the +points rise to the number itself, centred on it */}
             <div className="sc" data-score={i}><Roll v={num(i)} />
-              {award && !landed && (award[i] || 0) > 0 && <span className="hud-plus" style={{ animationDelay: flyAfter + order.indexOf(i) * 0.07 + "s" }} aria-hidden>+{award[i]}</span>}</div>
+              {award && !landed && (award[i] || 0) > 0 && <span className="hud-plus" style={{ animationDelay: flyAfter + order.indexOf(i) * 0.07 + "s" }} aria-hidden>+{award[i]}</span>}
+              {skRev && skIn && !!skRev.delta[i] && <span className={"hud-plus sk" + (skRev.delta[i] < 0 ? " neg" : "")} style={{ animationDelay: (skRowAt(skRev.order.indexOf(i), k) + SK_RISE) / 1000 + "s" }} aria-hidden>{signedPts(skRev.delta[i])}</span>}</div>
           </div>))}
       </div>}
       <div className="hud-mid">
@@ -168,10 +185,11 @@ function rules(pub: PubMany): string[] {
       "Every chamber is on show before the spin. One is the bullet, an Expert question. A new barrel every spin.",
       "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3.",
       `${n} spins. ${pay}`];
-    /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a tenth of the leader's total when it starts */
+    /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
     case "stakes": { const u = pub.stakes?.unit ?? 1; return [
       `${n} rounds. Each shows 3 themes. Each captain secretly bets on one theme and one level.`,
-      `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}.`,
+      /* (Expert: almost impossible to get, the owner, 12 Nov) */
+      `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}: beware, Expert is almost impossible to get.`,
       "Then the question you bet on, on your own phones: captains type the answer.",
       "Right wins your bet, wrong or no answer loses it, straight on your total. Nobody sees the others' bets till the reveal."]; }
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");

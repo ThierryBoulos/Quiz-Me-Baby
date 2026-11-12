@@ -346,7 +346,7 @@
        ctx.rng         optional; Math.random when absent
      Anything that needs tonight's game (the Battle's "already used") takes
      it as an argument instead of reading it.                               */
-  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:15, battle:10, see:7 };
+  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:15, battle:10, see:9 };   // (What Do You See?: 9, not 7: the owner, 12 Nov)
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
         FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, PIN_LEGS = LEGS.pin, AIRPORT_LEGS = LEGS.airport, MAJORITY_N = LEGS.majority, BATTLE_N = LEGS.battle;
   /* Flag first: fast and loud, it opens the night. (Drop the Pin, Guess the Airport and Majority Rules are Party's.) */
@@ -377,10 +377,12 @@
      themes (nine over the game, from the same broad themes as Russian Roulette and the night's own); each captain
      secretly bets on one theme and one level. Easy is the safe bet (0 either way); Medium, Hard and Expert win or
      lose 1, 2 and 3 bets, straight on the night's total (never below 0). A bet's size comes from the scoreboard when
-     the game starts: the leader's total over STAKES_DIVISOR (so with 2 teams in the teens it's 1, 2, 3; with 3-8
-     teams in the hundreds, 8, 16, 24), at least 1, and from 10 up to the nearest 5. Make STAKES_DIVISOR smaller for
+     the game starts: the leader's total over STAKES_DIVISOR, at least 1, and from 10 up to the nearest 5. Over 30
+     (12 Nov, the owner: a tenth of the total on one question was a lot, three rounds of it more): Expert, the
+     biggest bet, is a tenth of the leader's total, so three rounds of Expert come to under a third of it. With 2
+     teams in the teens it's 1, 2, 3; a leader on 90, 3, 6, 9; on 240, 8, 16, 24. Make STAKES_DIVISOR smaller for
      bigger bets. One spare round of themes for Change question. */
-  const STAKES_ROUNDS = 3, STAKES_THEMES = 3, STAKES_SPARE = 1, STAKES_DIVISOR = 10;
+  const STAKES_ROUNDS = 3, STAKES_THEMES = 3, STAKES_SPARE = 1, STAKES_DIVISOR = 30;
   const STAKES_LEVELS = ['easy', 'medium', 'hard', 'expert'], STAKES_TIMES = { easy:0, medium:1, hard:2, expert:3 };
   function stakesUnit(top){
     let u = Math.max(1, Math.round((Number(top) || 0) / STAKES_DIVISOR));
@@ -1003,7 +1005,8 @@
       const rrQs = rrOne ? Array.from({ length:ROULETTE_LAPS }, () => ({ ch:rrDeck[0].ch, bullet:rrDeck[0].bullet, bid:0 })) : rrDeck.slice(0, ROULETTE_LAPS);
       const rrSpareQs = rrOne ? rrDeck.slice(1) : rrDeck.slice(ROULETTE_LAPS);
       /* What Do You See?'s pictures (clear of the night's never-together groups) */
-      const seDeck = asked('see') ? seeDeck(cfg) : { qs:[], spare:[] };
+      /* (cfg.seeLegs: 3 to 8 teams play 12 pictures, two teams 9: the owner, 12 Nov) */
+      const seDeck = asked('see') ? seeDeck(cfg, cfg.seeLegs) : { qs:[], spare:[] };
       unclash(seDeck.qs, seDeck.spare, inNight);
       /* Secret Stakes' themes, after everything else (it's the last game): three rounds and a spare */
       const skDeck = asked('stakes') ? stakesDeck(cfg, STAKES_ROUNDS + STAKES_SPARE, inNight) : [];

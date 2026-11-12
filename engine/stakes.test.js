@@ -23,9 +23,9 @@ function night(over = {}, opt = {}){
 const goes = (fx) => fx.filter(f => f.go).map(f => f.go);
 const seeded = (seed) => () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
 
-test('stakes: the size of a bet comes from the leader\'s total (over 10; at least 1; from 10 up, to the nearest 5)', () => {
-  assert.equal(Q.STAKES_DIVISOR, 10);
-  assert.deepEqual([0, 4, 12, 9, 15, 24, 25, 84, 96, 104, 130, 172, 240].map(Q.stakesUnit), [1, 1, 1, 1, 2, 2, 3, 8, 10, 10, 15, 15, 25]);
+test('stakes: the size of a bet comes from the leader\'s total (over 30; at least 1; from 10 up, to the nearest 5)', () => {
+  assert.equal(Q.STAKES_DIVISOR, 30);
+  assert.deepEqual([0, 4, 12, 9, 15, 24, 25, 84, 90, 104, 130, 172, 240, 300, 330, 450, 600].map(Q.stakesUnit), [1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 4, 6, 8, 10, 10, 15, 20]);
   assert.deepEqual(['easy', 'medium', 'hard', 'expert'].map(l => Q.stakesBet(8, l)), [0, 8, 16, 24]);
 });
 
@@ -110,10 +110,10 @@ test('stakes: the bet is fixed when the game starts, from the scoreboard then', 
   g.teams[0].score = 84; g.teams[1].score = 51;
   const fx = Q.play(g, { type:'game/start' }, env);
   assert.deepEqual(goes(fx), ['stakesIntro']);
-  assert.equal(g.stakesGame.unit, 8);
+  assert.equal(g.stakesGame.unit, 3);
   g.teams[0].score = 300;                                   // (a change later doesn't move it)
   Q.play(g, { type:'stakes/start' }, env);
-  assert.equal(g.stakesGame.unit, 8);
+  assert.equal(g.stakesGame.unit, 3);
 });
 
 test('stakes: a round — both bets in, the questions go up; right wins the bet, wrong loses it, off the night\'s total', () => {
@@ -143,23 +143,23 @@ test('stakes: a round — both bets in, the questions go up; right wins the bet,
 
 test('stakes: no bet by time-up is the safe one (Easy, the first theme); Easy wins and loses nothing', () => {
   const { g, env } = night();
-  g.teams[0].score = 30; g.teams[1].score = 5;
+  g.teams[0].score = 90; g.teams[1].score = 5;
   Q.play(g, { type:'game/start' }, env); Q.play(g, { type:'stakes/start' }, env);
   Q.play(g, { type:'stakes/pick', t:1, k:2, level:'hard' }, env);
   assert.deepEqual(goes(Q.play(g, { type:'stakes/lock' }, env)), ['stakesQ']);
   assert.deepEqual(g.stakesGame.picks[0], { k:0, level:'easy', auto:true });
   Q.play(g, { type:'stakes/verdict', ok:[false, true] }, env);
-  assert.deepEqual([g.teams[0].score, g.teams[1].score], [30, 11]);   // (30/10 = 3 a bet: Hard is 6)
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [90, 11]);   // (90/30 = 3 a bet: Hard is 6)
 });
 
 test('stakes: a total never goes below 0', () => {
   const { g, env } = night();
-  g.teams[0].score = 40; g.teams[1].score = 2;
+  g.teams[0].score = 120; g.teams[1].score = 2;
   Q.play(g, { type:'game/start' }, env); Q.play(g, { type:'stakes/start' }, env);
   Q.play(g, { type:'stakes/pick', t:0, k:0, level:'medium' }, env);
   Q.play(g, { type:'stakes/pick', t:1, k:0, level:'expert' }, env);
   Q.play(g, { type:'stakes/verdict', ok:[false, false] }, env);
-  assert.deepEqual([g.teams[0].score, g.teams[1].score], [36, 0]);
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [116, 0]);   // (120/30 = 4 a bet)
   assert.deepEqual(g.stakesGame.net, [-4, -2], 'only what really came off');
 });
 
@@ -186,7 +186,7 @@ test('stakes: Change question — three new themes, the bets cleared; none spare
 
 test('stakes: three rounds, then the summary, then the end; no 2 points for a winner, nothing to award', () => {
   const { g, env } = night();
-  g.teams[0].score = 20; g.teams[1].score = 20;
+  g.teams[0].score = 60; g.teams[1].score = 60;
   Q.play(g, { type:'game/start' }, env); Q.play(g, { type:'stakes/start' }, env);
   let fx;
   for(let r = 0; r < 3; r++){
@@ -196,7 +196,7 @@ test('stakes: three rounds, then the summary, then the end; no 2 points for a wi
   }
   assert.deepEqual(goes(fx), ['stakesSummary']);
   assert.ok(g.stakesGame.done);
-  assert.deepEqual([g.teams[0].score, g.teams[1].score], [26, 20]);    // three Mediums at 2, nothing else
+  assert.deepEqual([g.teams[0].score, g.teams[1].score], [66, 60]);    // three Mediums at 2 (60/30), nothing else
   assert.deepEqual(Q.play(g, { type:'stakes/verdict', ok:[true, true] }, env), [], 'nothing after the last round');
   fx = Q.play(g, { type:'stakes/done' }, env);
   assert.ok(fx.some(f => f.finalize));

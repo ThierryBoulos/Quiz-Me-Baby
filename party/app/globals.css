@@ -429,6 +429,8 @@ html[data-motion="off"] .confetti { display: none; }
 .see-frame img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; pointer-events: none;
   transition: filter .8s ease-out, transform .8s ease-in-out; }
 .see-frame.still img { transition: none; }
+/* a face or a logo while it clears: drawn on two stacked canvases (components/See.tsx), the new step fading in */
+.see-frame canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; user-select: none; }
 .see-credit { color: var(--color-ink-3); text-align: center; max-width: 100%; overflow-wrap: anywhere; }
 .pin-zoom { position: relative; display: block; padding: 0; border: 0; background: none; cursor: zoom-in; }
 .pin-zoom-hint { position: absolute; right: 6px; bottom: 6px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.62); color: #fff; font-size: var(--text-11); font-weight: 700; }
@@ -492,6 +494,8 @@ html[data-motion="off"] .confetti { display: none; }
 /* the points in the air, up to the score: "+2", or a coin a point */
 .fly { position: absolute; z-index: 80; pointer-events: none; white-space: nowrap; font-family: var(--font-display); font-size: 58px; line-height: 1; color: var(--color-gold);
   text-shadow: 0 0 22px rgba(245,197,24,.85), 0 4px 0 rgba(0,0,0,.35); will-change: transform, opacity; }
+/* a bet lost (Secret Stakes): "−6" in red, flying into the total, which then rolls down */
+.fly.neg { color: var(--color-no); text-shadow: 0 0 22px rgba(255,77,106,.85), 0 4px 0 rgba(0,0,0,.35); }
 .fly.coin { width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c2, var(--color-gold) 45%, #b8860b 100%);
   box-shadow: 0 0 18px rgba(245,197,24,.9); }
 .fly.coin.a { box-shadow: 0 0 18px rgba(245,197,24,.9), 0 0 0 3px rgba(49,201,247,.55); }
@@ -740,6 +744,11 @@ html[data-motion="off"] .tv-glow, html[data-motion="off"] .flame, html[data-moti
   text-shadow: 0 0 18px rgba(46,204,113,.7); animation: plusUp 1.45s cubic-bezier(.2,.8,.3,1) both; }
 /* it rises to the total and shrinks into it as it arrives (never parked over the digits); the total then rolls up */
 @keyframes plusUp { 0% { opacity: 0; transform: translate(-50%, 260px) scale(1.3); } 18% { opacity: 1; } 72% { opacity: 1; transform: translate(-50%, 8px) scale(.9); } 100% { opacity: 0; transform: translate(-50%, -26px) scale(.15); } }
+/* Secret Stakes' reveal (12 Nov, the owner): a bet won ("+9", green) or lost ("−9", red) rises from the team's row to
+   its total and fades just under the number as the number rolls, never over the digits */
+.hud-plus.sk { animation: skUp 1.3s cubic-bezier(.2,.8,.3,1) both; }
+.hud-plus.neg { color: var(--color-no); text-shadow: 0 0 18px rgba(255,77,106,.7); }
+@keyframes skUp { 0% { opacity: 0; transform: translate(-50%, 260px) scale(1.3); } 15% { opacity: 1; } 78% { opacity: 1; transform: translate(-50%, 30px) scale(.95); } 100% { opacity: 0; transform: translate(-50%, 10px) scale(.5); } }
 html[data-motion="off"] .hud-plus { display: none; }
 /* Guess the Flag's result: the pole, the finial, the flags hoisted up it one after another (the winner's last) */
 .flag-pole { position: absolute; left: 8px; top: 10px; bottom: 0; width: 10px; border-radius: 5px; background: linear-gradient(90deg, #6d7393, #d9dcef 45%, #6d7393); }
@@ -1426,7 +1435,10 @@ html[data-motion="off"] .rr-row.bang.rr-late { animation-duration: 1ms; }
 .sk-pick.sk-lv { min-height: 64px; padding: 6px 10px; }
 .sk-pick.on { border-color: var(--color-gold); background: color-mix(in srgb, var(--color-gold) 18%, var(--glass)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-gold) 35%, transparent); }
 .sk-mini { font-weight: 800; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
-.sk-chip .rr-pt:not(.ok) { color: var(--color-ink-2); }
+/* Expert (12 Nov, the owner: almost impossible to get): a red edge on its bet button, and the warning once it's picked */
+.sk-pick.sk-danger:not(.on) { border-color: color-mix(in srgb, var(--color-no) 55%, transparent); }
+.sk-warn { color: var(--color-no); text-align: center; padding: 8px 12px; border-radius: 12px; border: 1.5px solid color-mix(in srgb, var(--color-no) 60%, transparent);
+  background: color-mix(in srgb, var(--color-no) 10%, transparent); }
 /* a phone held sideways: the three themes in a row, the four levels in a row, so the bet fits without scrolling */
 @media (orientation: landscape) and (max-height: 520px) {
   .sk-themes { grid-template-columns: repeat(3, minmax(0, 1fr)); }

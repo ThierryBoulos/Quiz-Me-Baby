@@ -17,7 +17,7 @@ export const SEE_BLUR: Record<SeeKind, number> = { face: 0.045, logo: 0.085, clo
 export type SePub = {
   photo: string; kind: SeeKind; effect: "blur" | "zoom"; zoom: [number, number, number] | null;
   total: number;                    // the clock's seconds
-  n: number; of: number;            // picture n of 7 (a tie-breaker goes past it)
+  n: number; of: number;            // picture n of 9 (12 with 3 to 8 teams; a tie-breaker goes past it)
   out?: boolean[];                  // a team that guessed wrong (or ran out of its 10 seconds): out of this picture
   buzz?: number | null;             // the team that buzzed, while it answers (the picture and its clock stopped)
   by?: string | null;               // ...and who on that team hit BUZZ (any player can; the captain types the answer)
@@ -51,6 +51,8 @@ export function seeZoom(q: number, zoom: [number, number, number] | null) {
   const x = Math.min(Math.max(cx - half, 0), 1 - 2 * half), y = Math.min(Math.max(cy - half, 0), 1 - 2 * half);
   return { z, x, y };
 }
+/* the question over the picture (12 Nov, the owner): a face, a logo, the rest */
+export const seeAsk = (kind: SeeKind) => (kind === "face" ? "Who do you see?" : kind === "logo" ? "Which logo do you see?" : "What do you see?");
 /* "6.4 s" */
 export const seeSecs = (ms: number | null | undefined) => (ms == null ? "" : `${(Math.round(ms / 100) / 10).toFixed(1)} s`);
 /* two teams: the fastest right answer takes the picture (the calls as they stand: a host's change, a contest agreed) */

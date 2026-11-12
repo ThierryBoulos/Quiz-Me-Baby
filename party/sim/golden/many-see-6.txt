@@ -5,4 +5,9 @@ picture 4: - - - - - #1 | pts 0,0,0,0,0,6
 picture 5: - - x x #1 - | pts 0,0,0,0,6,0
 picture 6: #1 - x x - x | pts 6,0,0,0,0,0
 picture 7: - #1 x - - - | pts 0,6,0,0,0,0
-summary award 10,8,8,0,8,8
+picture 8: x #1 - - - x | pts 0,6,0,0,0,0
+picture 9: #1 late - late late late | pts 6,0,0,0,0,0
+picture 10: late - x #1 - x | pts 0,0,0,6,0,0
+picture 11: - x #1 late x - | pts 0,0,6,0,0,0
+picture 12: #1 - - - - - | pts 6,0,0,0,0,0
+summary award 10,6,8,3,4,5 | places 1,3,2,6,5,4

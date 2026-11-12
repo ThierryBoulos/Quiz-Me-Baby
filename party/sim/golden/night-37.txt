@@ -69,25 +69,32 @@
 111.00 seeReveal | 29 | 3-5 | 2-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
 112.00 seeQ | 30 | 3-5 | 2-1 | Owls take picture 5. | 
 117.50 seeReveal | 30 | 3-5 | 3-1 | Owls take picture 5. | 
-118.25 decided | 31 | 5-5 | 3-1 |  | 
-119.25 seeQ | 32 | 5-5 | 3-1 |  | 
-122.75 seeQ | 32 | 5-5 | 3-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
-124.50 seeReveal | 32 | 5-5 | 3-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
-125.50 seeReveal | 32 | 5-5 | 3-2 |  | 
-128.25 seeReveal | 32 | 5-5 | 3-2 | ⁨Lea⁩ doesn't agree: the call stands. | 
-129.00 seeSummary | 33 | 5-5 | 3-2 | Owls take picture 7. | 
-130.00 roundIntro | 34 | 5-5 |  | Owls take picture 7. | 
-131.00 ask | 35 | 5-5 |  | Owls take picture 7. | 
-131.75 answer | 35 | 6-5 |  | Lions +1 point | 
-132.75 answer | 35 | 6-5 |  |  | 
-147.75 answer | 35 | 6-5 |  | No answer in time: the call stands. | 
-148.00 ask | 36 | 6-5 |  | No answer in time: the call stands. | 
-149.00 answer | 36 | 6-6 |  | Owls +1 point | 
-149.75 roundScore | 37 | 6-6 |  | Owls +1 point | 
-150.75 sudden | 38 | 6-6 |  | Owls +1 point | 
-151.50 sudden | 39 | 6-6 |  | Owls +1 point | 
-152.50 sudden | 39 | 6-6 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
-154.25 sudden | 39 | 6-6 |  | ⁨Owls⁩: wrong. ⁨Lions⁩ can still win it. | 
-155.25 sudden | 39 | 6-6 |  |  | 
-156.00 final | 40 | 7-6 |  | Call changed: ⁨Lions⁩ win the night. | 
-recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[0,0],"minis":[0,1],"best":{"title":"Guess the Flag","team":1,"legs":[3,6]},"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[3,3],[3,5],[5,5],[6,5],[6,6],[7,6]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,3]]},{"label":"R3","pts":[[3,5]]},{"label":"What Do You See?","pts":[[5,5]]},{"label":"R4","pts":[[6,5],[6,6]]},{"label":"Sudden death","pts":[[7,6]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0}]}
+118.25 seeQ | 31 | 3-5 | 3-1 | Lions take picture 6. | 
+120.00 seeReveal | 31 | 3-5 | 4-1 | Lions take picture 6. | 
+121.00 seeReveal | 31 | 3-5 | 4-1 |  | 
+122.00 seeReveal | 31 | 3-5 | 3-1 | Call changed: ⁨Lions⁩ WRONG. | 
+122.75 seeQ | 32 | 3-5 | 3-1 | The call changed: a new picture for both teams. | 
+124.50 seeReveal | 32 | 3-5 | 3-2 | The call changed: a new picture for both teams. | 
+125.50 seeReveal | 32 | 3-5 | 3-2 |  | 
+128.25 seeReveal | 32 | 3-5 | 3-2 | ⁨Lea⁩ doesn't agree: the call stands. | 
+129.00 seeQ | 33 | 3-5 | 3-2 | Owls take picture 7. | 
+131.75 seeReveal | 33 | 3-5 | 4-2 | Owls take picture 7. | 
+132.75 decided | 34 | 5-5 | 4-2 |  | 
+133.50 seeQ | 35 | 5-5 | 4-2 |  | 
+137.25 seeQ | 35 | 5-5 | 4-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+140.75 seeReveal | 35 | 5-5 | 4-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+141.75 seeReveal | 35 | 5-5 | 4-2 |  | 
+156.75 seeReveal | 35 | 5-5 | 4-2 | No answer in time: the call stands. | 
+157.00 seeSummary | 36 | 5-5 | 4-2 | Nobody got it. | 
+158.00 roundIntro | 37 | 5-5 |  | Nobody got it. | 
+159.75 ask | 38 | 5-5 |  | Nobody got it. | 
+160.50 answer | 38 | 6-5 |  | Lions +1 point | 
+161.50 ask | 39 | 6-5 |  | Lions +1 point | 
+162.50 ask | 39 | 6-5 |  | Owls used Double Dip. | 
+163.25 answer | 39 | 6-6 |  | Owls +1 point | 
+164.25 answer | 39 | 6-6 |  |  | 
+167.75 steal | 40 | 6-5 |  | Lions steal a new question. | 
+168.75 answer | 40 | 6-5 |  | Lions steal a new question. | 
+169.50 roundScore | 41 | 6-5 |  | Lions steal a new question. | 
+170.50 final | 42 | 6-5 |  | Lions steal a new question. | 
+recap: {"margin":1,"sudden":false,"leadChanges":2,"steals":[0,0],"minis":[0,1],"best":{"title":"Guess the Flag","team":1,"legs":[3,6]},"chart":[[0,0],[0,0],[2,0],[2,2],[3,2],[3,3],[3,5],[5,5],[6,5],[6,6],[6,5]],"segs":[{"label":"R1","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,3]]},{"label":"R3","pts":[[3,5]]},{"label":"What Do You See?","pts":[[5,5]]},{"label":"R4","pts":[[6,5],[6,6],[6,5]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0}]}
