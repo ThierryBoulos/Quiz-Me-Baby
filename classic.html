@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.66', date:'13 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.67', date:'13 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -4244,15 +4244,13 @@ const SEES = [
   ["air-canada","Air Canada","logo","hard","280d7ac95abc7625","Air Canada","Public domain","https://commons.wikimedia.org/wiki/File:Air_Canada_2017.svg",{"crop":[0,0,0.136,1],"card":true,"note":"The maple leaf roundel is called the Rondelle."}],
   ["aer-lingus","Aer Lingus","logo","hard","9566f7c84c0fde0d","Aer Lingus","Public domain","https://commons.wikimedia.org/wiki/File:Aer_Lingus_2022_logo.svg",{"crop":[0.81,0,1,1],"card":true,"note":"Aer Lingus is Ireland's national airline; the shamrock is on every tail."}],
   ["bp","BP","logo","hard","d857f6762bef21ff","BP","Fair use","https://en.wikipedia.org/wiki/File:BP_Helios_logo.svg",{"crop":[0,0.237,1,1],"card":true,"note":"The green and yellow sunflower is called the Helios, after the Greek sun god."}],
-  ["caltex","Caltex","logo","hard","98cd6e13ebb6efab","Caltex (vector by Beao)","Public domain","https://commons.wikimedia.org/wiki/File:Caltex_brand_logo.svg",{"crop":[0,0,0.36,1],"card":true,"note":"Caltex is Chevron's fuel brand in Asia, Africa and the Middle East."}],
-  ["dominos","Domino's","logo","medium","0b4dcb74feab0210","Domino's Pizza Inc.","Public domain","https://commons.wikimedia.org/wiki/File:Domino%27s_2025_(symbol).svg",{"card":true,"note":"The three dots were the first three shops; the plan was a dot for every new one."}],
+  ["dominos","Domino's","logo","easy","0b4dcb74feab0210","Domino's Pizza Inc.","Public domain","https://commons.wikimedia.org/wiki/File:Domino%27s_2025_(symbol).svg",{"card":true,"note":"The three dots were the first three shops; the plan was a dot for every new one."}],
   ["jagermeister","Jägermeister","logo","hard","0336bd1678118ce1","Presse jaegermeister","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:J%C3%A4germeister-Logo.jpg",{"crop":[0.12,0.06,0.88,0.715],"card":true,"note":"The stag with a glowing cross is from the legend of St Hubertus, patron saint of hunters."}],
   ["walmart","Walmart","logo","hard","10e01f0b19f0a5f7","Walmart","Public domain","https://commons.wikimedia.org/wiki/File:Walmart_spark_(2025).svg",{"card":true,"note":"Walmart is the world's biggest company by revenue."}],
   ["cbs","CBS","logo","hard","f1a2adea4e9e9785","CBS","Public domain","https://commons.wikimedia.org/wiki/File:CBS_Eye_(Didot).svg",{"crop":[0,0,0.3,1],"card":true,"note":"The CBS eye was designed by William Golden in 1951, inspired by Pennsylvania Dutch hex signs."}],
   ["nbc","NBC","logo","hard","9be8c1d8a8d16a8c","NBCUniversal","Public domain","https://commons.wikimedia.org/wiki/File:NBC_Peacock_(2022;_outlined).svg",{"card":true,"note":"The peacock arrived in 1956 to show off NBC's new colour broadcasts."}],
   ["vodafone","Vodafone","logo","medium","b26675069cf243a0","Vodafone (redrawn by Giov.c)","Public domain","https://commons.wikimedia.org/wiki/File:Vodafone_Logo.svg",{"crop":[0.25,0,0.77,0.69],"card":true,"note":"The white shape is a speech mark: a quotation mark for conversation."}],
   ["att","AT&T","logo","hard","61ed67fd5013e225","AT&T","Public domain","https://commons.wikimedia.org/wiki/File:AT%26T_Globe_2016.svg",{"card":true,"note":"The striped globe began as Saul Bass's 1983 'Death Star' design."}],
-  ["chicago-bulls","Chicago Bulls","logo","medium","288704094a646a88","Dean Perry Wessel or Ted Drake","Public domain","https://commons.wikimedia.org/wiki/File:Logo_of_Chicago_Bulls.svg",{"crop":[0,0.39,1,1],"card":true,"note":"Michael Jordan won six NBA titles with the Bulls in the 1990s."}],
   ["four-seasons","Four Seasons","logo","hard","a00a49511b945a8e","Four Seasons Hotels and Resorts","Fair use","https://en.wikipedia.org/wiki/File:Four_Seasons_logo.svg",{"crop":[0.3,0,0.7,0.73],"card":true,"note":"The tree has leaves on one side and bare branches on the other: all four seasons in one."}],
   ["maersk","Maersk","logo","hard","89ec99cbb1c81e8a","A. P. Moller - Maersk A/S","Public domain","https://commons.wikimedia.org/wiki/File:A.P._Moller_-_Maersk_Group.svg",{"crop":[0,0,1,0.8],"card":true,"note":"The white seven-pointed star on blue has flown on Maersk ships since 1886."}],
   ["ubisoft","Ubisoft","logo","hard","e9ebb65f287f5d89","Ubisoft","Public domain","https://commons.wikimedia.org/wiki/File:Ubisoft_logo.svg",{"crop":[0,0,1,0.76],"card":true,"note":"Ubisoft makes Assassin's Creed; its logo is known as the Swirl."}],
@@ -4862,7 +4860,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 64;   // bumped when the built-in bank changes
+const SEED_VERSION = 65;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
@@ -5027,7 +5025,6 @@ const SEED_NEVER = [
   ["see:nestle", "q1j0frxa"],   // Nestlé
   ["see:qatar-airways", "flag:qa", "mr:country-hosted"],   // Qatar Airways
   ["see:vodafone", "q19a6mi0"],   // Vodafone
-  ["see:chicago-bulls", "q16lupm5"],   // Chicago Bulls
   ["see:four-seasons", "q1hd2c6f"],   // Four Seasons
   ["see:kiwi", "q1u0dwj"],   // Kiwi
   ["see:pineapple", "q1b543ox"],   // Pineapple

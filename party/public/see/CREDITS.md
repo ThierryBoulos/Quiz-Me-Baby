@@ -203,7 +203,6 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | 280d7ac95abc7625.jpg | Air Canada | Air Canada | Public domain | https://commons.wikimedia.org/wiki/File:Air_Canada_2017.svg |
 | 9566f7c84c0fde0d.jpg | Aer Lingus | Aer Lingus | Public domain | https://commons.wikimedia.org/wiki/File:Aer_Lingus_2022_logo.svg |
 | d857f6762bef21ff.jpg | BP | BP | Fair use | https://en.wikipedia.org/wiki/File:BP_Helios_logo.svg |
-| 98cd6e13ebb6efab.jpg | Caltex | Caltex (vector by Beao) | Public domain | https://commons.wikimedia.org/wiki/File:Caltex_brand_logo.svg |
 | 0b4dcb74feab0210.jpg | Domino's | Domino's Pizza Inc. | Public domain | https://commons.wikimedia.org/wiki/File:Domino%27s_2025_(symbol).svg |
 | 0336bd1678118ce1.jpg | Jägermeister | Presse jaegermeister | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:J%C3%A4germeister-Logo.jpg |
 | 10e01f0b19f0a5f7.jpg | Walmart | Walmart | Public domain | https://commons.wikimedia.org/wiki/File:Walmart_spark_(2025).svg |
@@ -211,7 +210,6 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | 9be8c1d8a8d16a8c.jpg | NBC | NBCUniversal | Public domain | https://commons.wikimedia.org/wiki/File:NBC_Peacock_(2022;_outlined).svg |
 | b26675069cf243a0.jpg | Vodafone | Vodafone (redrawn by Giov.c) | Public domain | https://commons.wikimedia.org/wiki/File:Vodafone_Logo.svg |
 | 61ed67fd5013e225.jpg | AT&T | AT&T | Public domain | https://commons.wikimedia.org/wiki/File:AT%26T_Globe_2016.svg |
-| 288704094a646a88.jpg | Chicago Bulls | Dean Perry Wessel or Ted Drake | Public domain | https://commons.wikimedia.org/wiki/File:Logo_of_Chicago_Bulls.svg |
 | a00a49511b945a8e.jpg | Four Seasons | Four Seasons Hotels and Resorts | Fair use | https://en.wikipedia.org/wiki/File:Four_Seasons_logo.svg |
 | 89ec99cbb1c81e8a.jpg | Maersk | A. P. Moller - Maersk A/S | Public domain | https://commons.wikimedia.org/wiki/File:A.P._Moller_-_Maersk_Group.svg |
 | e9ebb65f287f5d89.jpg | Ubisoft | Ubisoft | Public domain | https://commons.wikimedia.org/wiki/File:Ubisoft_logo.svg |
