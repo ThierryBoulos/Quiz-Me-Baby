@@ -1387,6 +1387,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   /* what you look at, in the right column: sized to the screen's height, so what you answer with stays in view */
   .screen.split .main .flag-img { height: min(110px, 30svh) !important; }
   .screen.split .main .pin-photo { max-height: min(150px, 42svh) !important; }
+  /* (a captain's photo, beside the clock over the map: smaller, so the map gets the room; tap to enlarge) */
+  .screen.split .main .pin-row .pin-photo { max-height: min(96px, 28svh) !important; }
   .screen.split .main .rr-barrel { max-width: min(100%, calc(100svh - 110px)); }
   /* Closest To Wins: the clock under Lock in, in the right column (the owner, 3 Nov) */
   .screen.split .main .clock-last { order: 10; }
