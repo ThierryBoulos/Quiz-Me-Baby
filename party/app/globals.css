@@ -1364,8 +1364,9 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
     padding: calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
   .screen.split > .side { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(12px + env(safe-area-inset-top)); z-index: 2; }
   .screen.split > .main { display: flex; flex-direction: column; gap: 14px; min-width: 0; min-height: calc(100svh - 26px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
-  /* the left column holds the screen's height: what you look at (the question, the clock, the flag, the photo, your
-     team's card: components/Side) sits centred in the room under the scores; the right column is all for answering */
+  /* the left column holds the screen's height: under the scores, only the top line and the clock (components/Side).
+     What you look at (the question, the flag, the photo, the barrel, the recipe) stays in the right column with what
+     you answer with: under the scores it was cut off (the owner, 13 Nov) */
   .screen.split > .side { height: calc(100svh - 26px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); overflow-y: auto; scrollbar-width: none; }
   .screen.split > .side::-webkit-scrollbar { display: none; }
   .side-slot { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding-bottom: 4px; }
@@ -1383,8 +1384,10 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   .screen.split .see-frame.clear { max-width: min(100%, calc((100svh - 284px) * 4 / 3)); }
   /* the departures board a little tighter, so the answer box under it reaches the screen */
   .screen.split .main .board .board-row { padding-block: .2em; }
-  /* Drop the Pin: the clock first, then the photo (the map has the right column to itself) */
-  .side-part .pin-row { flex-direction: row-reverse; }
+  /* what you look at, in the right column: sized to the screen's height, so what you answer with stays in view */
+  .screen.split .main .flag-img { height: min(110px, 30svh) !important; }
+  .screen.split .main .pin-photo { max-height: min(150px, 42svh) !important; }
+  .screen.split .main .rr-barrel { max-width: min(100%, calc(100svh - 110px)); }
   /* Closest To Wins: the clock under Lock in, in the right column (the owner, 3 Nov) */
   .screen.split .main .clock-last { order: 10; }
   .screen.split .enter { animation-name: enterFade; }

@@ -14,7 +14,7 @@ import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
 import { useNoPaste, useSuggestions } from "../PhoneGame";
-import { ToSide } from "../Side";
+import { ToSide, useSideways } from "../Side";
 import { Dot, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
@@ -168,6 +168,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   useEffect(() => { setSkTheme(null); setSkLevel(null); }, [skRound]);
   /* a tap locks in at once on this phone (the owner, 1 Nov: the four stayed up a second while the TV answered) */
   const [tapped, setTapped] = useState<string | null>(null);
+  const sideways = useSideways();
   const voted = !!pub.voted?.includes(me.name) || tapped === `${pub.qid}`, onList = !!pub.roster?.includes(me.name);
   /* the host's one main button, docked in thumb reach */
   const Main = ({ label, on }: { label: string; on: () => void }) => <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={on}>{label}</button>;
@@ -186,7 +187,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* what's on screen, close up: the flag, the photo, the question, and the clock. It can't be selected or copied */
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
     <div className="noselect contents" {...noCopy}>
-      {g.key === "flag" && <ToSide order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 110 : 150} /></ToSide>}
+      {g.key === "flag" && <div className="flex justify-center"><FlagImg name={pub.flag} h={small ? 110 : 150} /></div>}
       {/* What Do You See?: the picture, clearing from the TV's clock */}
       {/* (stays in the right column sideways, sized to the screen: under the scores on the left it was cut off) */}
       {g.key === "see" && pub.see && <div className="flex flex-col items-center gap-1 noselect" {...noCopy}>
@@ -197,22 +198,22 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {g.key === "see" && pub.see && noTv && (pub.see.buzz != null || pub.see.out?.some(Boolean)) && <SeeTicks teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} out={pub.see.out} buzz={pub.see.buzz} size={15} />}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
       {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={small ? 180 : 240} legend={false} />}
-      {g.key === "dish" && pub.dish && (<ToSide order={4} className="noselect" {...noCopy}>
+      {g.key === "dish" && pub.dish && (<div className="flex flex-col">
         <div className="card !py-2">
           <div className="eyebrow mb-1" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div>
           <ol className="flex flex-col gap-0.5 text-15">{pub.dish.ings.map((t, i) => { const [qty, name] = splitIng(t); return <li key={i} className="flex gap-2 items-baseline"><b>{name}</b>{qty && <span className="text-13 text-[var(--color-ink-2)]">{qty}</span>}</li>; })}</ol>
-        </div></ToSide>)}
+        </div></div>)}
       {g.key === "quiz" && pub.theme && <ToSide order={2}><div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div></ToSide>}
-      {g.key === "roulette" && rr && <ToSide order={3}><RrPhone rr={rr} me={host ? null : mine ?? null} teams={rrT} host={host} /></ToSide>}
+      {g.key === "roulette" && rr && <RrPhone rr={rr} me={host ? null : mine ?? null} teams={rrT} host={host} />}
       {/* (stays in the right column sideways: under the scores your question was cut off) */}
       {g.key === "stakes" && sk && <div className="noselect contents" {...noCopy}><StakesPhone sk={sk} screen="stakesQ" teams={rrT} me={host ? null : mine ?? null} /></div>}
-      {g.key === "pin" && <ToSide order={4} className="noselect" {...noCopy}>{small
+      {g.key === "pin" && (small
         ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
-        : <PinPhoto pin={pub.pin} h={230} small zoom />}</ToSide>}
-      {pub.question && <ToSide order={3} className="noselect" {...noCopy}><p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p></ToSide>}
+        : <PinPhoto pin={pub.pin} h={230} small zoom />)}
+      {pub.question && <p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p>}
       {/* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */}
       {!(small && g.key === "pin") && !spinning && !(g.key === "see" && pub.see?.typeBy && cap && pub.see.buzz === mine) && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}>
-        <Clock deadline={g.key === "see" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={g.key === "see" && pub.see?.typeBy ? undefined : pub.left} size={small ? 70 : 90} /></div></ToSide>}
+        <Clock deadline={g.key === "see" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={g.key === "see" && pub.see?.typeBy ? undefined : pub.left} size={small || sideways ? 70 : 90} /></div></ToSide>}
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (

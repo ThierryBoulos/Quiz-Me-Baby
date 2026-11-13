@@ -1,6 +1,7 @@
 "use client";
-/* A phone held sideways (phase 4, the owner, 3 Nov): the room's left column, under the scores, takes what you look at
-   (the question, the clock, the flag, the photo, your team's card), so the right column is all for answering.
+/* A phone held sideways (phase 4, the owner, 3 Nov; 13 Nov): the room's left column, under the scores, takes only the
+   top line and the clock. What you look at (the question, the flag, the photo, the barrel, the recipe) stays in the
+   right column with what you answer with: under the scores it was cut off.
    Upright there is no slot: <ToSide> renders its children right where they are, exactly as before. Sideways, the
    room page puts a slot in the left column and <ToSide> moves its children there, in the order given. */
 import { createContext, useContext, useSyncExternalStore, type ReactNode, type HTMLAttributes } from "react";

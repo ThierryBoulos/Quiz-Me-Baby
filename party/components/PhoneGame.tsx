@@ -345,13 +345,13 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>);
     case "ask": case "steal": return (
       <div className="flex flex-col gap-3 flex-1">
-        <ToSide order={2}>
-        <AskHead pub={pub} size="phone" />
+        {/* (sideways, the top line and the clock go to the left column; the question stays on the right, under the scores
+           it was cut off: the owner, 13 Nov) */}
+        <ToSide order={2}><AskHead pub={pub} size="phone" /></ToSide>
         <div className="flex items-start gap-3">
           <p className={qCls(pub.question) + " leading-snug flex-1"}>{pub.question}</p>
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} />
+          <ToSide order={9} className="side-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></ToSide>
         </div>
-        </ToSide>
         <AnswerCard />
         <div className="flex flex-col gap-2 mt-auto">
           <Typed t={turn} />
@@ -414,7 +414,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="flex flex-col gap-3 flex-1">
         {/* (sideways, the picture and the clock go to the left column, so the host's calls fit on the right: the 4 Nov audit, 3.7) */}
         <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Flag {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <FlagImg name={pub.flag} h={110} /></ToSide>
+        </ToSide>
+        <FlagImg name={pub.flag} h={110} />
         <AnswerCard />
         <Typed t={0} /><Typed t={1} />
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change flag" move={{ type: "flag/swap" }} /></div>
@@ -451,7 +452,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "pinQ": return (
       <div className="flex flex-col gap-3 flex-1">
         <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Landmark {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <PinPhoto pin={pub.pin} h={150} small zoom /></ToSide>
+        </ToSide>
+        <PinPhoto pin={pub.pin} h={150} small zoom />
         <AnswerCard />
         <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
           <div key={t} className="text-center">
@@ -474,7 +476,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "airportQ": return (
       <div className="flex flex-col gap-3 flex-1">
         <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Board {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <Board air={pub.airport} size="small" /></ToSide>
+        </ToSide>
+        <Board air={pub.airport} size="small" />
         <AnswerCard />
         <Typed t={0} /><Typed t={1} />
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change board" move={{ type: "airport/swap" }} /></div>
@@ -597,7 +600,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "mapQ": return (
       <div className="flex flex-col gap-3 flex-1">
         <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Map {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        {pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={200} legend={false} />}</ToSide>
+        </ToSide>
+        {pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={200} legend={false} />}
         <AnswerCard />
         <Typed t={0} /><Typed t={1} />
         <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause />{!pub.map?.hint && <Small label="Show hint" move={{ type: "map/hint" }} />}<Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change map" move={{ type: "map/swap" }} /></div>
@@ -1004,31 +1008,31 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
     {pub.screen === "sudden" && !pub.sudden?.ready && <SuddenRules pub={pub} size="phone" />}
-    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <ToSide when={side} order={3} className="noselect" {...noCopy}><p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p></ToSide>}
+    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p>}
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
     {/* the fact behind it, right under the answer */}
     {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
-    {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <ToSide when={side} order={4} className="noselect" {...noCopy}><FlagImg name={pub.flag} h={small ? 96 : 150} /></ToSide>}
+    {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
     {/* What Do You See?: the picture, clearing from the TV's clock; at the reveal the whole of it, and its credit */}
-    {/* (sideways, the picture clears in the right column, as big as the screen's height allows: under the scores on the
-       left it was cut off. At the reveal a small clear copy goes left, 12 Nov) */}
-    {(pub.screen === "seeQ" || pub.screen === "seeReveal") && pub.see && <ToSide when={side && pub.screen === "seeReveal"} order={4} className="noselect" {...noCopy}><div className="flex flex-col items-center gap-1">
+    {/* (sideways, the picture stays in the right column, as big as the screen's height allows: under the scores on the
+       left it was cut off, 12 and 13 Nov) */}
+    {(pub.screen === "seeQ" || pub.screen === "seeReveal") && pub.see && <div className="flex flex-col items-center gap-1">
       {/* (the question, by kind: the owner, 12 Nov) */}
       {pub.screen === "seeQ" && <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>}
       <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} clear={pub.screen === "seeReveal"} w={pub.screen === "seeReveal" ? (small ? 180 : 240) : small ? 220 : 340} alt={pub.see.rev?.answer} />
       {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}
       {/* the other team out (the TV's note, which no phone shows: with no TV, nobody would know they can wait for it to clear) */}
       {pub.screen === "seeQ" && mine != null && pub.see.out?.[mine === 0 ? 1 : 0] && <p className="text-14 font-semibold text-center leading-snug" style={{ color: "var(--color-no)" }}>
-        <bdi>{pub.teams[mine === 0 ? 1 : 0].name}</bdi> are out of this picture.</p>}</div></ToSide>}
-    {pub.screen === "pinQ" && <ToSide when={side} order={4} className="noselect" {...noCopy}>{small
+        <bdi>{pub.teams[mine === 0 ? 1 : 0].name}</bdi> are out of this picture.</p>}</div>}
+    {pub.screen === "pinQ" && (small
       /* the captain's phone: the photo beside the clock, so the map gets the room */
       ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
-      : <PinPhoto pin={pub.pin} h={230} small zoom />}</ToSide>}
+      : <PinPhoto pin={pub.pin} h={230} small zoom />)}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <PinMap marks={pinMarks(pub)} fly height={small ? 220 : 300} label={`Where it is: ${pub.pin.reveal.place}`} />}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <div className="text-center"><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.pin.reveal.name}</div>
       <div className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pin.reveal.place}</div></div>}
     {(pub.screen === "airportQ" || pub.screen === "airportReveal") && <Board air={pub.airport} size={small ? "small" : "phone"} />}
-    {pub.screen === "rouletteQ" && pub.roulette && <ToSide when={side} order={3} className="noselect" {...noCopy}><RrPhone rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} host={mine == null} /></ToSide>}
+    {pub.screen === "rouletteQ" && pub.roulette && <RrPhone rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} host={mine == null} />}
     {pub.screen === "rouletteReveal" && pub.roulette && <RrPhoneReveal rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} />}
     {/* Secret Stakes: the themes (a captain's own buttons are below), your team's question, the reveal */}
     {/* (sideways it stays in the right column: under the scores on the left your question was cut off, 12 Nov) */}
@@ -1041,7 +1045,7 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
       {pub.screen === "auctionBid" && <BidBoard pub={pub} />}
       {pub.screen === "auctionRun" && !counting && <div className="display text-44 mt-1"><LiveN A={pub.auction} /> / {pub.auction.bid}</div>}
       {pub.screen === "auctionRun" && pub.auction.countedBy && <div className="text-13 text-[var(--color-ink-2)] mt-1">Counted by <b>{pub.auction.countedBy}</b></div>}</div>}
-    {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <ToSide when={side} order={4} className="noselect" {...noCopy}><div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div></ToSide>}
+    {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
     {pub.reveal && /Reveal$/.test(pub.screen) && !["mapReveal", "sayReveal", "pinReveal", "rouletteReveal"].includes(pub.screen) && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.screen === "seeReveal" && pub.see?.rev && (() => { const w = seeWho(pub.see, rr2(pub)); return <p className="display text-22 text-center -mt-1" style={{ color: w.color }}>{w.text}</p>; })()}
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.airport.cityOk === false && <span className="block mt-1 text-13 font-bold" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</span>}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
