@@ -22,7 +22,7 @@ import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
 import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
-import { BallotsMany, BarrelsMany, BarsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
+import { BallotsMany, BarrelsMany, BarsMany, PilesMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -272,6 +272,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           {/* each game's points in a look of its own, never the totals' row (the owner, 30 Oct) */}
           {g.key === "majority" ? <BallotsMany pub={pub} />
             : g.key === "roulette" ? <BarrelsMany pub={pub} />
+            : g.key === "see" ? <PilesMany pub={pub} />
             : g.key === "flag" ? <FlagPoleMany pub={pub} />
             : g.key === "closest" ? <Ruler ans={0} scale teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: pub.summary!.pts[i], win: pub.summary!.places[i] === 1 && pub.summary!.award[i] > 0, pts: pub.summary!.award[i] }))} />
             : g.key === "pin" ? <DartboardMany pub={pub} />

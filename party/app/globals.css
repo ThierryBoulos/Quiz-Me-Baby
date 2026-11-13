@@ -846,13 +846,23 @@ html[data-motion="off"] .bar-grow { animation: none; }
 @keyframes dtGlow { from { filter: drop-shadow(0 0 0 transparent); } to { filter: drop-shadow(0 0 22px var(--c)); } }
 .dt-shake { transform-box: view-box; transform-origin: center; animation: dtShake .3s ease-out both; }
 @keyframes dtShake { 0%, 100% { transform: none; } 30% { transform: translate(3px, -2px); } 60% { transform: translate(-2px, 1px); } }
+/* What Do You See?'s photo piles: each picture dealt onto its team's pile, blurred, clearing as it lands */
+.ph-print { position: absolute; padding: 5px; border-radius: 4px; background: #f4efe4; box-shadow: 0 6px 14px rgba(0,0,0,.5); transform: rotate(var(--r)); animation: phDeal .45s cubic-bezier(.2,.8,.3,1.1) both; }
+.ph-print img, .ph-blank { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 2px; }
+.ph-print img { animation: phClear .6s ease-out both; }
+.ph-blank { background: linear-gradient(135deg, #2a2f55, #151832); }
+@keyframes phDeal { from { transform: translate(50px, -110px) rotate(calc(var(--r) + 28deg)); opacity: 0; } to { transform: rotate(var(--r)); opacity: 1; } }
+@keyframes phClear { from { filter: blur(10px); } to { filter: none; } }
+.ph-empty { position: absolute; border: 2px dashed #8a92b8; border-radius: 6px; opacity: .55; }
+.ph-pile.lit { animation: phLit .6s ease-out both; animation-delay: var(--g); }
+@keyframes phLit { from { filter: none; } to { filter: drop-shadow(0 0 18px var(--c)); } }
 /* Secret Stakes' chips: each drops onto its stack */
 .sk-drop { animation: skDrop .3s cubic-bezier(.3,1.45,.5,1) both; }
 @keyframes skDrop { 0% { transform: translateY(var(--h)); opacity: 0; } 35% { opacity: 1; } 100% { transform: none; opacity: 1; } }
 /* motion off: each stands as it ends, at once (the winner's board lit, no plane) */
 html[data-motion="off"] .rb-cyl, html[data-motion="off"] .rb-up, html[data-motion="off"] .rb-pop, html[data-motion="off"] .rb-fade, html[data-motion="off"] .mr-slip,
-html[data-motion="off"] .fl-flip, html[data-motion="off"] .dt-dart, html[data-motion="off"] .dt-hit, html[data-motion="off"] .dt-shake, html[data-motion="off"] .dt-glow, html[data-motion="off"] .sk-drop { animation: none; }
-html[data-motion="off"] .dt-glow { filter: drop-shadow(0 0 22px var(--c)); }
+html[data-motion="off"] .fl-flip, html[data-motion="off"] .ph-print, html[data-motion="off"] .ph-print img, html[data-motion="off"] .ph-pile.lit, html[data-motion="off"] .dt-dart, html[data-motion="off"] .dt-hit, html[data-motion="off"] .dt-shake, html[data-motion="off"] .dt-glow, html[data-motion="off"] .sk-drop { animation: none; }
+html[data-motion="off"] .dt-glow, html[data-motion="off"] .ph-pile.lit { filter: drop-shadow(0 0 22px var(--c)); }
 html[data-motion="off"] .fl-plane { display: none; }
 .hud.many .hud-mini .dot { width: 14px; height: 14px; font-size: var(--text-8); }
 .hud.many .hud-mini b { color: var(--c); }

@@ -197,6 +197,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (key === "dish") p.mini.kinds = m.levels.some((l: string) => l[0] === "c") && m.levels.some((l: string) => l[0] === "d") ? "Cocktails + dishes" : m.levels[0][0] === "c" ? "Cocktails" : "Dishes";
     if (/Summary$/.test(s.screen) && m.verdict) p.summary = { wins: [...m.wins] as Two<number>, winner: m.verdict.winner, needsHost: m.verdict.needsHost, note: m.verdict.note || "", award: m.award };
     if (s.screen === "majoritySummary" && p.summary) { const who = mrWhoLine(g); if (who) p.summary.who = who; }
+    /* What Do You See?: the pictures each team took, for its pile at the result */
+    if (key === "see" && p.summary) p.summary.got = [0, 1].map((t) => ((m.subs || []) as { q?: { photo?: string }; winner?: unknown }[]).filter((x) => x.winner === t && x.q?.photo).map((x) => String(x.q!.photo)));
     /* Russian Roulette keeps points, not legs: the tracker and the result show them (this lap's counted from its reveal) */
     if (key === "roulette") {
       const lap = m.qs[m.i] as RrLap | undefined, rev = s.screen === "rouletteReveal" && lap?.draw;

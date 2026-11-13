@@ -79,7 +79,8 @@ export type Pub = {
     offList?: Two<boolean>; notes?: string };   // notes: Closest To Wins' word on the answer. offList: Say the Same: an answer that isn't a real answer to the prompt (it counts as SAID IT)
   summary?: { wins: Two<number>; winner: 0 | 1 | null; needsHost: boolean; note: string; award?: Two<number>;
     who?: string;   // Majority Rules: the players with the most and the fewest right (29 Oct)
-    spins?: number[][] };   // Russian Roulette: each team's points spin by spin (its barrel at the result)
+    spins?: number[][];   // Russian Roulette: each team's points spin by spin (its barrel at the result)
+    got?: string[][] };   // What Do You See?: the pictures each team took (its pile at the result)
   winner?: 0 | 1 | null;
   toast?: { id: number; text: string } | null;
   /* no host: what a captain sent, the app's verdict, and how long the other captain has to change the call */

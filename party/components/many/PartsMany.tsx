@@ -251,7 +251,7 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
 }
 /* ---- the bars (the owner's idea for Majority Rules, 30 Oct; it has its ballot boxes now, 13 Nov): a bar a team, as
    tall as its points, in place order, growing up one after another; the points on top, the place, the name and what
-   it pays under it. What Do You See? draws its result this way, and any game without a look of its own ---- */
+   it pays under it. Any game without a look of its own draws its result this way ---- */
 export function BarsMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 140 : 150, pc = !!S.shares, best = Math.max(1, ...S.pts);
   const val = (t: number) => (pc ? S.shares?.[t] ?? 0 : S.pts[t] / best), lab = (t: number) => (pc ? pct(S.shares?.[t] ?? 0) : String(S.pts[t]));
@@ -384,6 +384,38 @@ function Ballot({ share, color, W, H, at, paid, lit }: { share: number; color: s
       <rect x={W / 2 - bw * 0.24} y={yT - 5.5} width={bw * 0.48} height="4" rx="2" fill="#05060f" />
       <rect x={x0 + 6} y={yT + 7} width="5" height={bh - 16} rx="2.5" fill="#fff" opacity=".13" />
     </svg>);
+}
+
+/* What Do You See? (the owner, 13 Nov): each team's own pile of the pictures it took, like printed photos dealt onto a
+   table: the more it got, the higher its pile; none, an empty frame. Its points on top, its place, name and what it
+   adds under. The photos are dealt on one by one, blurred, and come clear as they land; the winner's pile lights up */
+export function PilesMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, big = k <= 3, cw = dense ? 124 : big ? 200 : 180, P = dense ? 80 : big ? 108 : 98, H = dense ? 140 : big ? 164 : 152;
+  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), rv = revealOf(S, k);
+  return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      {order.map((t) => { const at = rv.at(t), paid = S.award[t] > 0, photos = S.got?.[t] ?? [], n = Math.max(photos.length, S.wins[t] ?? 0); return (
+        <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: cw, animationDelay: at + "s" }}>
+          <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{S.pts[t]}</div>
+          <Pile photos={photos} n={n} P={P} H={H} w={cw} at={at} color={T[t].color} lit={paid && S.places[t] === 1} dim={!paid} />
+          <Caption pub={pub} t={t} dense={dense} />
+        </div>); })}
+    </div>);
+}
+const PILE_TILT = [-6, 5, -3, 7, -5, 4];
+function Pile({ photos, n, P, H, w, at, color, lit, dim }: { photos: string[]; n: number; P: number; H: number; w: number; at: number; color: string; lit: boolean; dim: boolean }) {
+  const step = n > 1 ? Math.max(3, Math.min(20, (H - P - 10) / (n - 1))) : 0;
+  return (
+    <div className={"ph-pile relative" + (lit ? " lit" : "")} aria-hidden style={{ width: w, height: H, opacity: dim ? 0.5 : 1, ["--c" as string]: color, ["--g" as string]: at + 0.3 + n * 0.13 + "s" }}>
+      {n === 0 && <div className="ph-empty" style={{ width: P, height: P, left: (w - P) / 2, top: H - P - 6 }} />}
+      {Array.from({ length: n }, (_, i) => (
+        <div key={i} className="ph-print" style={{ width: P, height: P, left: (w - P) / 2 + (i % 2 ? 1 : -1) * (i ? P * 0.1 : 0), top: H - P - 6 - i * step,
+          ["--r" as string]: PILE_TILT[i % 6] + "deg", animationDelay: (at + 0.15 + i * 0.13).toFixed(2) + "s" }}>
+          {/* (a picture the result can't name, from a game saved before the piles: a blank print) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {photos[i] ? <img src={`/see/${photos[i]}-s.jpg`} alt="" decoding="async" style={{ animationDelay: (at + 0.3 + i * 0.13).toFixed(2) + "s" }} /> : <span className="ph-blank" />}
+        </div>))}
+    </div>);
 }
 
 /* Guess the Airport: each team's points on split-flap tiles, its status under as on a departures board (Boarding for the

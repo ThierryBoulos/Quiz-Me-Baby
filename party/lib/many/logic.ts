@@ -58,6 +58,7 @@ export type TeamM = { name: string; captain: string; score: number };
 export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: number[]; of: number[]; pts: number[]; award?: number[]; places?: number[];
   only?: number[];                                // sudden death: the teams tied at the top, the only ones who answer
   fast?: number[];                                // What Do You See?: each team's right buzzes, their times added up (ms): tied teams, the faster first
+  got?: string[][];                               // What Do You See?: the pictures each team took (their photo files), for its pile at the result
   fired?: number; had?: string[][];               // Russian Roulette: bullets that hit a team so far; each team's themes so far
   /* Secret Stakes: one bet (fixed at its start), what each team has won or lost, and every round's bets */
   unit?: number; net?: number[]; log?: { i: number; themes: string[]; picks: SkPick[]; ok: boolean[]; bet: number[]; delta: number[]; before: number[] }[] };
@@ -480,7 +481,8 @@ export function next(s: StateM, now: number, t: Timers) {
         if (m.key === "pin" && s.pins[i] && q) { S.km[i] += QMB.kmBetween(s.pins[i]!, q) as number; S.kmN[i]++; }
       });
       /* What Do You See?: how fast each team's right buzzes came, all told (teams tied on pictures: the faster first) */
-      if (m.key === "see") { m.fast = m.fast || n(s.teams.length); pl.forEach((p, i) => { if (p === 1) m.fast![i] += (s.ms || [])[i] ?? 20000; }); }
+      if (m.key === "see") { m.fast = m.fast || n(s.teams.length); m.got = m.got || s.teams.map(() => []);
+        pl.forEach((p, i) => { if (p === 1) { m.fast![i] += (s.ms || [])[i] ?? 20000; if (q?.photo) m.got![i].push(String(q.photo)); } }); }
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
       toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
         : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} take it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
