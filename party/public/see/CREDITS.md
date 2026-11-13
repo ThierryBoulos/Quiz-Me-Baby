@@ -196,6 +196,26 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | 3e400dda448fb3b7.jpg | Nestlé | Nestlé | Fair use | https://en.wikipedia.org/wiki/File:Nestlé.svg |
 | 16a4c7b586f25483.jpg | Lufthansa | Lufthansa Group | Public domain | https://commons.wikimedia.org/wiki/File:Lufthansa_Logo_2018_crane.svg |
 | c365c010d43110bf.jpg | Qatar Airways | Qatar Airways | Fair use | https://en.wikipedia.org/wiki/File:Qatar_Airways_Logo.svg |
+| 96db8d66d43d6662.jpg | Deutsche Bank | Deutsche Bank AG | Public domain | https://commons.wikimedia.org/wiki/File:Deutsche_Bank_logo_without_wordmark.svg |
+| f9b83e4e4d7faee4.jpg | HSBC | HSBC (The Hongkong and Shanghai Banking Corporation) | Public domain | https://commons.wikimedia.org/wiki/File:HSBC_%E6%BB%99%E8%B1%90_(logo_only).svg |
+| aa55b201e497556b.jpg | Barclays | Squy2019 | CC0 | https://commons.wikimedia.org/wiki/File:Barclays-Logo.svg |
+| 1cf5b17b19b8a6ff.jpg | Turkish Airlines | Turkish Airlines | Public domain | https://commons.wikimedia.org/wiki/File:Turkish_Airlines_logo_2019_compact.svg |
+| 280d7ac95abc7625.jpg | Air Canada | Air Canada | Public domain | https://commons.wikimedia.org/wiki/File:Air_Canada_2017.svg |
+| 9566f7c84c0fde0d.jpg | Aer Lingus | Aer Lingus | Public domain | https://commons.wikimedia.org/wiki/File:Aer_Lingus_2022_logo.svg |
+| d857f6762bef21ff.jpg | BP | BP | Fair use | https://en.wikipedia.org/wiki/File:BP_Helios_logo.svg |
+| 98cd6e13ebb6efab.jpg | Caltex | Caltex (vector by Beao) | Public domain | https://commons.wikimedia.org/wiki/File:Caltex_brand_logo.svg |
+| 0b4dcb74feab0210.jpg | Domino's | Domino's Pizza Inc. | Public domain | https://commons.wikimedia.org/wiki/File:Domino%27s_2025_(symbol).svg |
+| 0336bd1678118ce1.jpg | Jägermeister | Presse jaegermeister | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:J%C3%A4germeister-Logo.jpg |
+| 10e01f0b19f0a5f7.jpg | Walmart | Walmart | Public domain | https://commons.wikimedia.org/wiki/File:Walmart_spark_(2025).svg |
+| f1a2adea4e9e9785.jpg | CBS | CBS | Public domain | https://commons.wikimedia.org/wiki/File:CBS_Eye_(Didot).svg |
+| 9be8c1d8a8d16a8c.jpg | NBC | NBCUniversal | Public domain | https://commons.wikimedia.org/wiki/File:NBC_Peacock_(2022;_outlined).svg |
+| b26675069cf243a0.jpg | Vodafone | Vodafone (redrawn by Giov.c) | Public domain | https://commons.wikimedia.org/wiki/File:Vodafone_Logo.svg |
+| 61ed67fd5013e225.jpg | AT&T | AT&T | Public domain | https://commons.wikimedia.org/wiki/File:AT%26T_Globe_2016.svg |
+| 288704094a646a88.jpg | Chicago Bulls | Dean Perry Wessel or Ted Drake | Public domain | https://commons.wikimedia.org/wiki/File:Logo_of_Chicago_Bulls.svg |
+| a00a49511b945a8e.jpg | Four Seasons | Four Seasons Hotels and Resorts | Fair use | https://en.wikipedia.org/wiki/File:Four_Seasons_logo.svg |
+| 89ec99cbb1c81e8a.jpg | Maersk | A. P. Moller - Maersk A/S | Public domain | https://commons.wikimedia.org/wiki/File:A.P._Moller_-_Maersk_Group.svg |
+| e9ebb65f287f5d89.jpg | Ubisoft | Ubisoft | Public domain | https://commons.wikimedia.org/wiki/File:Ubisoft_logo.svg |
+| aa907101c30b03fc.jpg | Atari | Atari Corporation | CC0 | https://commons.wikimedia.org/wiki/File:AtariFuji.svg |
 | 1764555bb541cb91.jpg | Croissant | Daniela Kloth | GFDL 1.2 | https://commons.wikimedia.org/wiki/File:2018_01_Croissant_IMG_0685.JPG |
 | b1b3f11fe6566c67.jpg | Popcorn | ViajeroExtraviado | CC0 | https://commons.wikimedia.org/wiki/File:Popcorn_9.jpg |
 | 43b954df4b99f891.jpg | Strawberry | Joselodos | CC0 | https://commons.wikimedia.org/wiki/File:Strawberry_on_white_background.jpg |
@@ -264,3 +284,23 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | 0b3db2d704cf7884.jpg | Cassette tape | Tim Reckmann | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Noname_blank_compact_cassette,_loose_tape_(1).jpg |
 | da7e41d01e414f3f.jpg | Floppy disk | Ivan Radic | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Floppy_disk_(back).jpg |
 | aa62b4f3e1d7314b.jpg | Magnifying glass | Gpkp | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Magnifying_glass_(2026).jpg |
+| 4c7d072e00e316e4.jpg | Violin | mark.drummer | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Violin_001.jpg |
+| 052dcb089a7629ae.jpg | Rotary phone | Wilfredor | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Grey_rotary_dial_telephone.jpg |
+| 002367469d091fc5.jpg | Swiss Army knife | Elmschrat | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Victorinox_Fieldmaster_Swiss_Army_knife.jpg |
+| 2b1776612623451e.jpg | Trumpet | Eusebius | CC BY 3.0 | https://commons.wikimedia.org/wiki/File:Trompette_-_corps.JPG |
+| 8c9f0f4fe3ff8299.jpg | Binoculars | Jacek Halicki | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:2020_Lornetka_Baigish_8x30.jpg |
+| 6f17cf65b7a50b7c.jpg | Bicycle | Petar Milošević | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Dutch_bicycle.jpg |
+| dc6d0dccc2f2e73d.jpg | Stapler | Jiafei Slay Queen | CC0 | https://commons.wikimedia.org/wiki/File:A_green_stapler.jpg |
+| 5422a94095a3970b.jpg | Cauliflower | Rjcastillo | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Brassica_oleracea_var._botrytis_(Coliflor).jpg |
+| bd969845b4188b58.jpg | Baklava | Chitrapa | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Baklava_displayed_on_a_white_plate.jpg |
+| d2a5f5fc9a315371.jpg | Waffle | Ralph Daily | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Waffle_with_strawberries_and_confectioner%27s_sugar.jpg |
+| 2e5fd300437d6e80.jpg | Paella | Juan Emilio Prades Bel | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Paella_marinera_con_galeras_y_langostinos.jpg |
+| 2b41bfd32f3001a8.jpg | Garlic | Ivar Leidus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Garlic_bulbs_and_cloves.jpg |
+| b12a9440f4168aa8.jpg | Hamburger | jeffreyw | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Hamburger_(2).jpg |
+| 706bbe11d2c0d90b.jpg | Pretzel | Fumikas Sagisavas | CC0 | https://commons.wikimedia.org/wiki/File:Pretzel_bows%F0%9F%A5%A8.jpg |
+| 095d09ab511c17db.jpg | Camel | Ltshears | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Dromedary_Camel_14.jpg |
+| 94a9d54c705c7e02.jpg | Tortoise | Moise Nicu | CC BY 3.0 | https://commons.wikimedia.org/wiki/File:Tortoise_portrait.JPG |
+| 5f891719a2c608b5.jpg | Ostrich | H. Zell | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Struthio_camelus_-_male_-_R%C3%BClzheim.jpg |
+| 86b99082fd7e8d92.jpg | Hippopotamus | Bernard Gagnon | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Hippopotamus_in_Chobe_National_Park_01.jpg |
+| 75060a3d6a6eda0f.jpg | Kangaroo | Thennicke | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Eastern_Grey_kangaroo,_Majura_Nature_Reserve_ACT_02.jpg |
+| 771b5cf565454b2f.jpg | Penguin | Jason Auch | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Adelie_Penguins_on_iceberg.jpg |
