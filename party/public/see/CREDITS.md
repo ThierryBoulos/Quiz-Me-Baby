@@ -87,18 +87,15 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | 16d4bf89f4f4c44e.jpg | Sigmund Freud | Max Halberstadt | Public domain | https://commons.wikimedia.org/wiki/File:Sigmund_Freud,_by_Max_Halberstadt_(cropped).jpg |
 | 65575b2c2c1f1061.jpg | Thomas Edison | Louis Bachrach, Bachrach Studios, restored by Michel Vuijlsteke | Public domain | https://commons.wikimedia.org/wiki/File:Thomas_Edison2.jpg |
 | 0ee93da27b5c31ef.jpg | Alan Turing | Elliott & Fry | Public domain | https://commons.wikimedia.org/wiki/File:Alan_turing_header.jpg |
-| 2630819df44274b1.jpg | Ada Lovelace | Alfred Edward Chalon | Public domain | https://commons.wikimedia.org/wiki/File:Ada_Lovelace_portrait.jpg |
 | 4d9fe06e0546afd2.jpg | Jeff Bezos | Seattle City Council from Seattle | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Jeff_Bezos_at_Amazon_Spheres_Grand_Opening_in_Seattle_-_2018_(39074799225)_(cropped2).jpg |
 | b24f4fb8bd3bff3a.jpg | Tim Cook | Dati Bendo / European Union | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Tim_Cook_with_Ursula_von_der_Leyen_in_New_York_City_-_2026.jpg |
 | c1652f4ba7f75f20.jpg | Jensen Huang | Anderseidesvik | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Jensen_huang_stanford_2026-04-30_008.jpg |
 | 1935225bba32e222.jpg | Sam Altman | Village Global | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Sam_Altman_November_2022.jpg |
 | 4771a5cd69c6ac6f.jpg | Larry Page | Marcin Mycielski, European Parliament (Stansfield) | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Larry_Page_in_the_European_Parliament,_17.06.2009.jpg |
-| 8d3bd6f118d37c16.jpg | Satya Nadella | Brian Smale and Microsoft | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:MS-Exec-Nadella-Satya-2017-08-31-22.jpg |
 | 353e76e68593bd5a.jpg | Sundar Pichai | Photographer: Lukasz Kobus (European Commission) | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Sundar_Pichai_(2023).jpg |
 | 145b2a4d4d55d826.jpg | Jack Ma | Foundations World Economic Forum | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:20th_Anniversary_Schwab_Foundation_Gala_Dinner_(44887783681).jpg |
 | ef33d6fe6be87a39.jpg | Warren Buffett | USA International Trade Administration | Public domain | https://commons.wikimedia.org/wiki/File:Warren_Buffett_at_the_2015_SelectUSA_Investment_Summit.jpg |
 | acf68372695c9161.jpg | Steve Wozniak | Gage Skidmore | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Steve_Wozniak_by_Gage_Skidmore_3.jpg |
-| 46d3f0361a2b80f7.jpg | Leonardo da Vinci | Leonardo da Vinci | Public domain | https://commons.wikimedia.org/wiki/File:Leonardo_da_Vinci_-_presumed_self-portrait_-_WGA12798.jpg |
 | 78b5114955d6706c.jpg | Pablo Picasso | Argentina. Revista Vea y Lea | Public domain | https://commons.wikimedia.org/wiki/File:Pablo_picasso_1.jpg |
 | 88b6ba32c61408d6.jpg | Frida Kahlo | Guillermo Kahlo | Public domain | https://commons.wikimedia.org/wiki/File:Frida_Kahlo,_by_Guillermo_Kahlo.jpg |
 | 27f1e8f951e1c0e0.jpg | Vincent van Gogh | Vincent van Gogh | Public domain | https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_(454045).jpg |
@@ -119,7 +116,6 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | e36a649052c8c0a3.jpg | Audi | Strichpunkt / KMS Team | Public domain | https://commons.wikimedia.org/wiki/File:Audi-Logo_2016.svg |
 | cadb610623216610.jpg | Toyota | Toyota Motor Corporation | Public domain | https://commons.wikimedia.org/wiki/File:Toyota_carlogo.svg |
 | a3ac17d944886c04.jpg | Subaru | Subaru Corporation | Public domain | https://commons.wikimedia.org/wiki/File:Subaru_logo_(transparent).svg |
-| 84ce95ddb1713121.jpg | Ferrari | Scuderia Ferrari | Logo, used for identification | https://en.wikipedia.org/wiki/File:Scuderia_Ferrari_HP_logo_24.svg |
 | 8017acf7f4484f8d.jpg | Tesla | Tesla (logo), Fry1989 (vectorization) | Public domain | https://commons.wikimedia.org/wiki/File:Tesla_T_symbol.svg |
 | 7ea7b2de690b8474.jpg | Renault | Renault / Reproduction: Kilyann Le Hen | Public domain | https://commons.wikimedia.org/wiki/File:Renault_2021_Text.svg |
 | 011c533af245cdfe.jpg | Mitsubishi | Mitsubishi | Public domain | https://commons.wikimedia.org/wiki/File:Mitsubishi_logo.svg |
@@ -164,9 +160,7 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | b56e5e5568e3b442.jpg | Lexus | Glebushko0703 | CC0 | https://commons.wikimedia.org/wiki/File:Lexus_Logo.svg |
 | bf8e85515fb570fe.jpg | Acura | Basavarajtalwar | Public domain | https://commons.wikimedia.org/wiki/File:Acura_logo.svg |
 | d12836579eb12c01.jpg | Cupra | SEAT S.A. | Public domain | https://commons.wikimedia.org/wiki/File:Cupra_symbol.svg |
-| 9d6459217ba97cec.jpg | Rolls-Royce | Rolls-Royce Motor Cars | Public domain | https://commons.wikimedia.org/wiki/File:Rolls-Royce_Motor_Cars_logo.svg |
 | 9998e0020adb95af.jpg | Bentley | Kai xzzrs | CC0 | https://commons.wikimedia.org/wiki/File:Bentley.svg |
-| f000eaede8eb21af.jpg | Dodge | Chrysler Corporation | Public domain | https://commons.wikimedia.org/wiki/File:Dodge_1962_logo.svg |
 | 2c0dfce7d3294097.jpg | Cadillac | Cadillac | Public domain | https://commons.wikimedia.org/wiki/File:Cadillac_Logo_2021.svg |
 | 9d284b985fc1568a.jpg | Louis Vuitton | Louis Vuitton | Public domain | https://commons.wikimedia.org/wiki/File:LV_Monogram.svg |
 | cb2b73005cc14023.jpg | Gucci | Tsange | Public domain | https://commons.wikimedia.org/wiki/File:1960s_Gucci_Logo.svg |
@@ -177,21 +171,17 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | d69fad645d8d1a79.jpg | Fila | Fila | Public domain | https://commons.wikimedia.org/wiki/File:Fila_Holdings_Corp._logo.svg |
 | c30f07ab2ac11fa1.jpg | Converse | Converse; Bernardo Pereira; Quibik | Public domain | https://commons.wikimedia.org/wiki/File:Converse_logo.svg |
 | 58a979562c2c274c.jpg | Umbro | Umbro | Public domain | https://commons.wikimedia.org/wiki/File:Umbro_logo_(current).svg |
-| c5b9e370d325bc38.jpg | Reebok | Reebok under license from Adidas | Public domain | https://commons.wikimedia.org/wiki/File:Reebok_2019_logo.svg |
 | ddee6c84741134f0.jpg | Under Armour | Unknown (vector by Kalel2007) | Public domain | https://commons.wikimedia.org/wiki/File:Under_armour_logo.svg |
 | 6fca0c2f91f56217.jpg | Timberland | Timberland | Public domain | https://commons.wikimedia.org/wiki/File:Timberland-logo.png |
 | c8d820e483cd9866.jpg | New Balance | New Balance | Public domain | https://commons.wikimedia.org/wiki/File:New_Balance_logo.svg |
 | 7ebd0f8ab955c431.jpg | UEFA Champions League | Superfroghero10 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:UEFA_Champions_League_logo_no_text_great.svg |
 | 66011c9ac5d02518.jpg | Premier League | Premier League | Fair use | https://en.wikipedia.org/wiki/File:Premier_League_Logo.svg |
 | 11659c92309025d5.jpg | Juventus | Interbrand / Juventus Football Club SpA | Public domain | https://commons.wikimedia.org/wiki/File:Juventus_FC_-_logo_black_(Italy,_2020).svg |
-| 4a8d3ed01efab993.jpg | Mizuno | Mizuno Corporation (vector: Goo16) | Public domain | https://commons.wikimedia.org/wiki/File:MIZUNO_logo.svg |
 | 0d9a706b73a7cd23.jpg | Huawei | Huawei | PD | https://en.wikipedia.org/wiki/File:Huawei_Standard_logo.svg |
-| 4b06a071e2c36270.jpg | Nvidia | Nvidia | Apache License 2.0 | https://commons.wikimedia.org/wiki/File:NVidia-Logo.svg |
 | 0a7ed7cb9de0a8cf.jpg | Ubuntu | Canonical Ltd. | GPLv3 | https://commons.wikimedia.org/wiki/File:Ubuntu-logo-no-wordmark-solid-o-2022.svg |
 | 7e5add3353661fea.jpg | GitHub | GitHub | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:GitHub_Invertocat_Logo.svg |
 | 990900315906f2e6.jpg | Reddit | Reddit | Public domain | https://commons.wikimedia.org/wiki/File:Snoo.svg |
 | ac9750705fd92f56.jpg | Discord | Discord | Fair use | https://en.wikipedia.org/wiki/File:Discord_logo.svg |
-| 9fe1c1d7537ede7e.jpg | Signal | Signal App | Public domain | https://commons.wikimedia.org/wiki/File:Signal-Logo.svg |
 | 16f7ba8c19a7f3f3.jpg | Tinder | Tinder | Public domain | https://commons.wikimedia.org/wiki/File:Tinder_icon_(2026).svg |
 | 4d9ceecd7e479f3a.jpg | Dropbox | Dropbox | Public domain | https://commons.wikimedia.org/wiki/File:Dropbox_Icon.svg |
 | ac429d29e9f007b5.jpg | Slack | Slack Technologies | Public domain | https://commons.wikimedia.org/wiki/File:Slack_icon_2019.svg |
@@ -200,17 +190,10 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | 93f52b456ceaf0c0.jpg | Steam | Steam | Public domain | https://commons.wikimedia.org/wiki/File:Steam_icon_logo.svg |
 | 459f266b6fa7a525.jpg | Wikipedia | Nohat (concept by Paullusmagnus); Wikimedia | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Wikipedia-logo-v2.svg |
 | 8d66ea0947830b85.jpg | Opera | Opera | Public domain | https://commons.wikimedia.org/wiki/File:Opera_2026_icon.svg |
-| ee2f7ca59312f76e.jpg | Safari | House | Public domain | https://commons.wikimedia.org/wiki/File:Safari_rounded.svg |
-| 93233f6ca841d6e2.jpg | Microsoft Edge | Microsoft Corporation | MIT | https://commons.wikimedia.org/wiki/File:Microsoft_Edge_logo_(2019).svg |
-| 8175d147354192ec.jpg | Bluetooth | Bluetooth SIG | CC0 | https://commons.wikimedia.org/wiki/File:Bluetooth_Figure_Mark_Logo.svg |
-| f4266864e2bc70fd.jpg | USB | Mobius at en.wikipedia | Public domain | https://commons.wikimedia.org/wiki/File:USB_icon.svg |
 | 1e433207b9fe9bed.jpg | WeChat | Tencent Holdings Limited | PD | https://en.wikipedia.org/wiki/File:WeChat_logo.svg |
-| 6e061c51a1d85bb3.jpg | Waze | Waze | Public domain | https://commons.wikimedia.org/wiki/File:Waze_logo_2022.png |
 | b7939e7c8b207ec6.jpg | Pinterest | Alexo88 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Pinterest.svg |
 | bdd5578be6b1aeb1.jpg | Linux | Larry Ewing, Simon Budig, Garrett LeSage | Attribution | https://commons.wikimedia.org/wiki/File:Tux.svg |
-| 4a6a706a402cffa6.jpg | Guinness | P L Chadwick | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File:D_J_Cullen_Lake_View_Lounge_(3)_-_Guinness_harp_sign,_Lake_Drive,_Ballyknockan,_Co._Wicklow_-_geograph.org.uk_-_8107799.jpg |
 | 3e400dda448fb3b7.jpg | Nestlé | Nestlé | Fair use | https://en.wikipedia.org/wiki/File:Nestlé.svg |
-| ff19f4d5546814e4.jpg | Monster Energy | DYVER | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Monster_Energy_drink_(cropped).jpg |
 | 16a4c7b586f25483.jpg | Lufthansa | Lufthansa Group | Public domain | https://commons.wikimedia.org/wiki/File:Lufthansa_Logo_2018_crane.svg |
 | c365c010d43110bf.jpg | Qatar Airways | Qatar Airways | Fair use | https://en.wikipedia.org/wiki/File:Qatar_Airways_Logo.svg |
 | 1764555bb541cb91.jpg | Croissant | Daniela Kloth | GFDL 1.2 | https://commons.wikimedia.org/wiki/File:2018_01_Croissant_IMG_0685.JPG |
@@ -262,16 +245,10 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | c54612b1bf05ea89.jpg | Sloth | Urak-Tou | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Costa_Rican_Three-Toed_Sloth.jpg |
 | 9fe90e566ed7a0cb.jpg | Armadillo | http://www.birdphotos.com | CC BY 3.0 | https://commons.wikimedia.org/wiki/File:Nine-banded_Armadillo.jpg |
 | 6ad3924f998c19cd.jpg | Pangolin | flowcomm | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Pangolin_(51837575293).jpg |
-| f74ca90209065ece.jpg | Axolotl | Ruben Undheim from Trondheim, Norway | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File:Ambystoma_mexicanum_(6337857516).jpg |
-| fd5973e8ded37ae5.jpg | Seahorse | Rickard Zerpe | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File:Spotted_seahorse_(Hippocampus_kuda)_(40554459970).jpg |
 | 1e201368dc0b55bd.jpg | Jellyfish | Mtheletter | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Jellyfish_in_a_tank.jpg |
-| b191898d55e8b3ae.jpg | Porcupine | Alina Vozna | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Crested_porcupine._Photo_1.jpg |
 | 5c70156a7bea6f4b.jpg | Rhinoceros | Giles Laurent | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:081_White_rhinoceros_(male)_in_the_Kalahari_Desert_of_Namibia_Photo_by_Giles_Laurent.jpg |
 | 13af7240673c70c1.jpg | Koala | Till Niermann | CC BY 3.0 | https://commons.wikimedia.org/wiki/File:Koala_in_Zoo_Duisburg.jpg |
-| ec825f0468685f59.jpg | Platypus | Charles J. Sharp | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Duck-billed_platypus_(Ornithorhynchus_anatinus)_Scottsdale_3.jpg |
-| a37b41d2b3567f90.jpg | Snail | George Chernilevsky | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Helix_pomatia_2021_G3.jpg |
 | c32bdf0ef16d7508.jpg | Meerkat | Fir0002 | GFDL 1.2 | https://commons.wikimedia.org/wiki/File:Meerkat_feb_09.jpg |
-| f30ad9f1f513168a.jpg | Romanesco broccoli | Ivar Leidus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Romanesco_broccoli_(Brassica_oleracea).jpg |
 | 6bdd1ab4378744c9.jpg | Passion fruit | Ivar Leidus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Passion_fruits_-_whole_and_halved.jpg |
 | 4dad1da7ed04c394.jpg | Lychee | Ivar Leidus | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Lychee_fruits_and_seed.jpg |
 | f0941bb2021f5dde.jpg | Artichoke | Assianir | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Carciofi_mazzo_(cynara_scolymus).jpg |
@@ -280,13 +257,10 @@ write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give 
 | e15945612fb7f5d7.jpg | Star fruit | Lazaregagnidze | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Averrhoa_carambola_Star_Fruit_%E1%83%99%E1%83%90%E1%83%A0%E1%83%90%E1%83%9B%E1%83%91%E1%83%9D%E1%83%9A%E1%83%90.JPG |
 | fcddc8aefd50065f.jpg | Chess knight | Ricardo630 | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Knight-chess.jpg |
 | ccd516d47a95432c.jpg | Hourglass | Aaaatu | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Hourglasses.jpg |
-| 3986b7623acaf7b6.jpg | Compass | Arths-at | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Old_Magnetic_compasses_01.jpg |
 | 5921fbf0f7e8d511.jpg | Saxophone | Sally V | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:A_Saxophone.jpg |
 | 925e351cf1efd357.jpg | Accordion | Iain Cameron | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:John_Ross%27s_Weltmeister_Worldmaster_Piano_Accordion_1.jpg |
 | 0b7b8d1764e63b81.jpg | Typewriter | Sammlung der Medien und Wissenschaft | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Olympia_Simplex.jpg |
-| 8dc2a0e4e66c26f3.jpg | Abacus | Hannes Grobe | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Abacus_hg.jpg |
 | 46f3fb95cf27aed0.jpg | Vinyl record | Evan-Amos | Public domain | https://commons.wikimedia.org/wiki/File:12in-Vinyl-LP-Record-Angle.jpg |
 | 0b3db2d704cf7884.jpg | Cassette tape | Tim Reckmann | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Noname_blank_compact_cassette,_loose_tape_(1).jpg |
 | da7e41d01e414f3f.jpg | Floppy disk | Ivan Radic | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Floppy_disk_(back).jpg |
 | aa62b4f3e1d7314b.jpg | Magnifying glass | Gpkp | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Magnifying_glass_(2026).jpg |
-| bb1a51b20757ccb3.jpg | Safety pin | Jacek Halicki | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:2023_Agrafki.jpg |

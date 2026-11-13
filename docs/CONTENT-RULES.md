@@ -173,6 +173,13 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   - **Logos are a brand's own symbol, drawn clean on the card**: not a photo of a badge (Porsche, Lamborghini, Peugeot,
     Michelin were left out), not a superhero's sign (Batman, Superman) nor the Olympic rings. A letter monogram (LV,
     GG) is fine.
+  - **Close-ups very zoomed in (13 Nov, the owner, for every new one):** the start must be impossible to read, and
+    still hard on the second and third steps: a spot of texture, a corner, an edge nobody would place. Round 2 was
+    "quite easy to spot on the first few pictures". Objects, food, dishes and animals; mostly Hard.
+  - **Logos across industries (13 Nov):** not all cars, fashion and apps; spread them (banks, airlines, energy,
+    drinks, retail, media, sport, telecoms), and more Hard ones. Faces are fine for now.
+  - Round 2's answers (13 Nov): 27 left out (Ferrari, Rolls-Royce, Dodge, Nvidia, Safari, Bluetooth, USB, Waze,
+    Guinness, Axolotl, Seahorse, Snail, Abacus...), 37 levels moved; the chess knight takes "Chess" and "Chess board".
   - Left out too: coffee beans, a guitar, a keyboard (close-ups); pizza, sushi and watermelon wait for better photos.
     "Mozilla" counts for Firefox, "Key lock" for a padlock.
   Accepted answers: short names and usual spellings ("Messi", "CR7",
