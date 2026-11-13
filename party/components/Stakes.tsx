@@ -3,7 +3,8 @@
    go up and the captains bet in secret (the TV only shows who has); then each team's own question on its own phones
    (the TV: "Bets are in" and the clock); then the reveal, one team at a time from last place up, each row its theme,
    its bet, its answer, and the points on or off its total; after the third round, what each team won or lost.
-   Low motion: rows fade in one after another; nothing else moves (and that's still, with motion off in Settings). */
+   Low motion: rows fade in one after another, and at the end each team's chips drop onto its stack (all still, with
+   motion off in Settings). */
 import type { ReactNode } from "react";
 import { SK_LEVELS, signedPts, skBet, skLevelWord, skRowAt, type SkPub } from "@/lib/stakes";
 
@@ -116,28 +117,56 @@ function StakesRevealTv({ sk, teams }: { sk: SkPub; teams: SkTeam[] }) {
     </div>);
 }
 
-/* the game's end: each team's three bets and what they came to, the biggest winner first */
+/* the game's end: each team's stack of chips (the owner, 13 Nov), the biggest winner first, on the left: a chip for
+   what a Medium bet pays, green for what it won, red for what it lost, none if it broke even. Its total on top, its name
+   and its three bets under; every part at the same height across, so nothing runs into anything. The chips drop onto
+   the stack one by one, a team after the other as the rows did; the biggest winner's stack lights up in its colour */
 function StakesSummaryTv({ sk, teams }: { sk: SkPub; teams: SkTeam[] }) {
   const S = sk.sum!, k = teams.length, dense = k > 4, tight = k > 6;
-  const order = teams.map((_, t) => t).sort((a, b) => S.net[b] - S.net[a] || a - b);
+  const order = teams.map((_, t) => t).sort((a, b) => S.net[b] - S.net[a] || a - b), top = Math.max(...S.net);
+  const cw = k <= 4 ? 200 : k <= 6 ? 150 : 120, fs = tight ? 30 : dense ? 36 : 48, most = Math.max(1, ...S.net.map((v) => chipsOf(v, sk.unit)));
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="display leading-none slam" style={{ fontSize: dense ? 52 : 60, color: "var(--color-gold)" }}>The bets are settled</div>
-      <div className="flex flex-col w-full max-w-[1080px]" style={{ gap: tight ? 5 : dense ? 6 : 12 }} role="list" aria-label="What each team won or lost">
-        {order.map((t, n) => { const T = teams[t], v = S.net[t];
+      <div className="flex items-start justify-center w-full max-w-[1080px]" style={{ gap: tight ? 12 : dense ? 16 : 28 }} role="list" aria-label="What each team won or lost">
+        {order.map((t, n) => { const T = teams[t], v = S.net[t], at = 300 + n * 250;
           return (
-            <div key={t} role="listitem" className="rr-row rr-late text-left" style={{ ["--c" as string]: T.color, ["--rr-at" as string]: `${300 + n * 250}ms`, padding: tight ? "4px 12px" : dense ? "6px 12px" : "10px 16px" }}>
-              <Dot t={T} size={tight ? 26 : dense ? 28 : 36} />
-              <div className="min-w-0 flex items-center gap-3">
-                <b className="truncate min-w-0" style={{ color: T.color, fontSize: tight ? 18 : dense ? 20 : 24, flexShrink: 2 }}><bdi>{T.name}</bdi></b>
-                <span className="flex gap-1.5 shrink-0">{S.rounds[t].map((r, i) => (
-                  <span key={i} className="sk-mini" title={`${r.theme}, ${skLevelWord(r.level)}`} style={{ color: r.delta > 0 ? OK : r.delta < 0 ? NO : "var(--color-ink-3)", fontSize: tight ? 13 : 15 }}>
-                    {skLevelWord(r.level)} {signedPts(r.delta)}</span>))}</span>
+            <div key={t} role="listitem" className="rr-late flex flex-col items-center gap-1 min-w-0" style={{ width: cw, ["--rr-at" as string]: `${at}ms` }}
+              aria-label={`${T.name}: ${signedPts(v)}, ${S.rounds[t].map((r) => `${skLevelWord(r.level)} ${signedPts(r.delta)}`).join(", ")}`}>
+              <span className="display leading-none" style={{ fontSize: fs, height: fs, color: v > 0 ? OK : v < 0 ? NO : "var(--color-ink-3)" }}>{signedPts(v)}</span>
+              <Chips n={chipsOf(v, sk.unit)} most={most} lost={v < 0} w={cw} h={dense ? 128 : 150} dense={dense} color={T.color} at={at / 1000} win={v > 0 && v === top} />
+              <div className="flex items-start justify-center w-full mt-1" style={{ fontSize: dense ? 11 : 14, height: "2.5em" }}>
+                <div className="eyebrow text-center min-w-0 max-w-full" style={{ color: T.color, fontSize: "inherit", letterSpacing: ".1em", lineHeight: 1.25, overflowWrap: "anywhere",
+                  display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  <span className="inline-block align-middle mr-1.5" style={{ marginTop: -2 }}><Dot t={T} size={dense ? 14 : 18} /></span><bdi>{T.name}</bdi></div>
               </div>
-              <span className="display shrink-0" style={{ fontSize: tight ? 30 : dense ? 36 : 48, color: v > 0 ? OK : v < 0 ? NO : "var(--color-ink-3)" }}>{signedPts(v)}</span>
+              <div className="flex flex-col items-center gap-1">{S.rounds[t].map((r, i) => (
+                <span key={i} className="sk-mini" title={`${r.theme}, ${skLevelWord(r.level)}`} style={{ color: r.delta > 0 ? OK : r.delta < 0 ? NO : "var(--color-ink-3)", fontSize: tight ? 12 : dense ? 13 : 15 }}>
+                  {skLevelWord(r.level)} {signedPts(r.delta)}</span>))}</div>
             </div>); })}
       </div>
     </div>);
+}
+/* a team's stack: a chip for each Medium bet's worth it won (green) or lost (red); a dashed ring where none. Every
+   stack's chips the same thickness, thin enough for the tallest to stay inside its box: nothing touches the total
+   over it or the name under it */
+const chipsOf = (v: number, unit: number) => Math.min(10, Math.round(Math.abs(v) / Math.max(1, unit)));
+function Chips({ n, most, lost, w, h, dense, color, at, win }: { n: number; most: number; lost: boolean; w: number; h: number; dense: boolean; color: string; at: number; win: boolean }) {
+  const rx = Math.min(w * 0.36, 58), ry = rx * 0.3, th = Math.min(dense ? 11 : 15, (h - 2 * ry - 8) / most), cx = w / 2, base = h - ry - th - 4;
+  const [top, side] = lost ? ["#ff5566", "#b92a40"] : ["#3ddc97", "#1f9a63"];
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden className={win ? "dt-glow" : undefined}
+      style={{ overflow: "visible", display: "block", ...(win ? { ["--c" as string]: color, animationDelay: at + 0.3 + n * 0.08 + "s" } : {}) }}>
+      {!n && <ellipse cx={cx} cy={base} rx={rx} ry={ry} fill="none" stroke="#8a92b8" strokeWidth="2" strokeDasharray="5 5" opacity=".7" />}
+      {Array.from({ length: n }, (_, i) => { const y = base - i * th; return (
+        <g key={i} className="sk-drop" style={{ animationDelay: (at + 0.2 + i * 0.08).toFixed(2) + "s", ["--h" as string]: -70 - i * 3 + "px" }}>
+          <ellipse cx={cx} cy={y + th} rx={rx} ry={ry} fill={side} /><rect x={cx - rx} y={y} width={rx * 2} height={th} fill={side} />
+          {[-0.62, -0.08, 0.46].map((f) => <rect key={f} x={cx + rx * f} y={y + 1} width={rx * 0.16} height={th - 2} fill="#fff" opacity=".75" />)}
+          <ellipse cx={cx} cy={y} rx={rx} ry={ry} fill={top} stroke={side} strokeWidth="1" />
+          <ellipse cx={cx} cy={y} rx={rx * 0.84} ry={ry * 0.84} fill="none" stroke="#fff" strokeWidth={dense ? 2 : 2.6} strokeDasharray={`${rx * 0.22} ${rx * 0.2}`} opacity=".85" />
+          <ellipse cx={cx} cy={y} rx={rx * 0.5} ry={ry * 0.5} fill="none" stroke={color} strokeWidth={dense ? 2.5 : 3} />
+        </g>); })}
+    </svg>);
 }
 
 /* ---- a phone ---- */

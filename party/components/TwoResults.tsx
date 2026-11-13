@@ -1,6 +1,7 @@
 "use client";
-/* A two-team result in the look the 3-8 team night gave each game (the owner, 31 Oct): the bars, the flag pole, the
-   ruler, the pins on the map, the departures board, the glasses, the speech bubbles; and for the two-team night's own
+/* A two-team result in the look the 3-8 team night gave each game (the owner, 31 Oct; 13 Nov): the ballot boxes, the
+   flag pole, the ruler, the dartboard, the pins on the map, the flap tiles, the glasses, the speech bubbles, the
+   barrels; and for the two-team night's own
    games, the Auction's bidding paddles, the Battle's two shields, and a round's game-show lecterns. Every one in the
    same layout: the title, the picture with each team's place and what it adds under it, then the line the coins fly
    from. It makes plain that these numbers are this game's (or this round's), not the night's. */
@@ -8,7 +9,7 @@ import { Fragment } from "react";
 import type { Pub, Two } from "@/lib/game";
 import { MANY_COLORS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
-import { BarsMany, BubblesMany, Caption, DeparturesMany, FlagPoleMany, GlassesMany, LecternsMany, PinsMapMany, revealOf } from "./many/PartsMany";
+import { BallotsMany, BarrelsMany, BubblesMany, Caption, DartboardMany, FlagPoleMany, FlapsMany, GlassesMany, LecternsMany, PinsMapMany, revealOf } from "./many/PartsMany";
 import { PinMap } from "./PinMap";
 import { Ruler } from "./Ruler";
 
@@ -16,15 +17,15 @@ import { Ruler } from "./Ruler";
 export const twoDone = (winner: 0 | 1 | null | undefined) => revealOf({ places: winner == null ? [1, 1] : [1, 2] }, 2).done;
 
 /* the mini-games with a look of their own */
-export const TWO_LOOKS = ["majority", "flag", "closest", "pin", "map", "airport", "dish", "saysame"];
+export const TWO_LOOKS = ["majority", "flag", "closest", "pin", "map", "airport", "dish", "saysame", "roulette"];
 
 /* a two-team result, as the 3-8 team pieces read it: each team's points (or share), its place (a tie shares 1st),
    and what the place adds to the night */
-function two(pub: Pub, pts: Two<number>, winner: 0 | 1 | null | undefined, award: number[], opts: { pct?: boolean; noAward?: boolean; plus?: boolean } = {}): PubMany {
+function two(pub: Pub, pts: Two<number>, winner: 0 | 1 | null | undefined, award: number[], opts: { pct?: boolean; noAward?: boolean; plus?: boolean; spins?: number[][] } = {}): PubMany {
   const places = [0, 1].map((t) => (winner == null ? 1 : winner === t ? 1 : 2));
   return {
     teams: pub.teams.map((t, i) => ({ name: t.name, score: t.score, color: MANY_COLORS[i] })),
-    summary: { wins: [...pts], pts: [...pts], shares: opts.pct ? pts.map((x) => x / 100) : undefined, places, award, noAward: opts.noAward, plus: opts.plus },
+    summary: { wins: [...pts], pts: [...pts], shares: opts.pct ? pts.map((x) => x / 100) : undefined, places, award, noAward: opts.noAward, plus: opts.plus, spins: opts.spins },
   } as unknown as PubMany;
 }
 const awardOf = (pub: Pub, winner: 0 | 1 | null | undefined, award?: Two<number>) => (award ?? [winner === 0 ? pub.mini?.pts ?? 0 : 0, winner === 1 ? pub.mini?.pts ?? 0 : 0]) as number[];
@@ -32,12 +33,14 @@ const awardOf = (pub: Pub, winner: 0 | 1 | null | undefined, award?: Two<number>
 export function TwoResult({ pub, sound = false }: { pub: Pub; sound?: boolean }) {
   const key = pub.mini?.key, S0 = pub.summary;
   if (!S0 || !key || !TWO_LOOKS.includes(key)) return null;
-  const P = two(pub, S0.wins, S0.winner, awardOf(pub, S0.winner, S0.award), { pct: !!pub.mini?.pct }), S = P.summary!;
-  if (key === "majority") return <BarsMany pub={P} />;
+  const P = two(pub, S0.wins, S0.winner, awardOf(pub, S0.winner, S0.award), { pct: !!pub.mini?.pct, spins: S0.spins }), S = P.summary!;
+  if (key === "majority") return <BallotsMany pub={P} />;
+  if (key === "roulette") return <BarrelsMany pub={P} />;
   if (key === "flag") return <FlagPoleMany pub={P} />;
   if (key === "closest") return <Ruler ans={0} scale teams={P.teams.map((t, i) => ({ name: t.name, color: t.color, letter: "AB"[i], guess: S.pts[i], win: S.places[i] === 1 && S.award[i] > 0, pts: S.award[i] || undefined }))} />;
-  if (key === "pin" || key === "map") return <PinsMapMany pub={P} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />;
-  if (key === "airport") return <DeparturesMany pub={P} />;
+  if (key === "pin") return <DartboardMany pub={P} />;
+  if (key === "map") return <PinsMapMany pub={P} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />;
+  if (key === "airport") return <FlapsMany pub={P} />;
   if (key === "dish") return <GlassesMany pub={P} sound={sound} />;
   return <BubblesMany pub={P} />;
 }

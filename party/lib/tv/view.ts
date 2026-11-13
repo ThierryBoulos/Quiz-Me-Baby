@@ -7,7 +7,7 @@ import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, typ
 import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
 import { callsOf, closestW, currentQ, fireOf, leadOf, matchQ, mrTally, okWin, pinW, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
-import { rrGot, rrPub, rrQ, type RrLap } from "../roulette";
+import { rrGot, rrPub, rrQ, rrSpins, type RrLap } from "../roulette";
 import { skKey, skPub, skQ, skResult, type SkGame } from "../stakes";
 import { SEE_TYPE, sePic, seeWinner } from "../see";
 import type { TvState } from "./state";
@@ -201,7 +201,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (key === "roulette") {
       const lap = m.qs[m.i] as RrLap | undefined, rev = s.screen === "rouletteReveal" && lap?.draw;
       p.mini.wins = (rev ? rrGot(lap!, m.pts, s.ok).map((v, t) => m.pts[t] + v) : [...m.pts]) as Two<number>;
-      if (p.summary) p.summary.wins = [...m.pts] as Two<number>;
+      if (p.summary) { p.summary.wins = [...m.pts] as Two<number>; p.summary.spins = rrSpins(m.qs as RrLap[], 2); }
       if ((s.screen === "rouletteQ" || s.screen === "rouletteReveal") && lap?.draw) {
         p.roulette = rrPub(lap, m.i, m.base, m.n || lap.ch.length, m.pts, s.screen === "rouletteQ" ? s.spinAt : null, rev ? s.ok : null, m.qs.slice(0, m.i));
         const qs = [rrQ(lap, 0), rrQ(lap, 1)];

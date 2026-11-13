@@ -22,7 +22,7 @@ import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
 import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
-import { BarsMany, BoardMany, BubblesMany, byDistance, DeparturesMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
+import { BallotsMany, BarrelsMany, BarsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -270,11 +270,13 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           {/* five teams or more with the bars: a size smaller, so it all sits under the tracker */}
           <div className={"display leading-none slam " + (dense ? "text-40" : "text-52")} style={{ color: "var(--color-gold)" }}>{g.title}</div>
           {/* each game's points in a look of its own, never the totals' row (the owner, 30 Oct) */}
-          {g.key === "majority" ? <BarsMany pub={pub} />
+          {g.key === "majority" ? <BallotsMany pub={pub} />
+            : g.key === "roulette" ? <BarrelsMany pub={pub} />
             : g.key === "flag" ? <FlagPoleMany pub={pub} />
             : g.key === "closest" ? <Ruler ans={0} scale teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: pub.summary!.pts[i], win: pub.summary!.places[i] === 1 && pub.summary!.award[i] > 0, pts: pub.summary!.award[i] }))} />
-            : g.key === "pin" || g.key === "map" ? <PinsMapMany pub={pub} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />
-            : g.key === "airport" ? <DeparturesMany pub={pub} />
+            : g.key === "pin" ? <DartboardMany pub={pub} />
+            : g.key === "map" ? <PinsMapMany pub={pub} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />
+            : g.key === "airport" ? <FlapsMany pub={pub} />
             : g.key === "dish" ? <GlassesMany pub={pub} sound={sound} />
             : g.key === "say" ? <BubblesMany pub={pub} />
             : g.key === "quiz" ? <LecternsMany pub={pub} />

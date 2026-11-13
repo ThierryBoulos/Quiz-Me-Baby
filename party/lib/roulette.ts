@@ -30,6 +30,9 @@ export type RrPub = {
 export const rrWorth = (lap: RrLap, t: number, ok: boolean): number => (lap.draw ? QMB.roulettePts(lap, lap.draw[t], ok) : 0);
 export const rrGot = (lap: RrLap, pts: number[], ok: (boolean | null)[]): number[] =>
   pts.map((_, t) => rrWorth(lap, t, !!ok[t]));   // (the bullet costs 3 whatever the total: it can go below 0)
+/* each team's points spin by spin, from the spins played (+2, +3, the bullet +5 or −3, 0 for a miss): its barrel at the result */
+export const rrSpins = (laps: RrLap[], k: number): number[][] =>
+  Array.from({ length: k }, (_, t) => laps.filter((l) => l && l.got).map((l) => l.got![t] ?? 0));
 export function rrPub(lap: RrLap, i: number, laps: number, n: number, pts: number[], spinAt: number | null, ok: (boolean | null)[] | null, prev: RrLap[] = []): RrPub {
   const lvl = (j: number) => (j === lap.bullet && !lap.blank ? "bullet" : lap.ch[j].level === "expert" ? "hard" : lap.ch[j].level);
   const draw = (lap.draw || []).map((j) => ({ j, theme: lap.ch[j].theme, q: String(lap.ch[j].q?.question || ""), level: lvl(j) }));

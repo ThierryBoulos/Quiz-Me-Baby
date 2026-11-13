@@ -796,6 +796,64 @@ html[data-motion="off"] .flag-cloth, html[data-motion="off"] .flag-hoist, html[d
 html[data-motion="off"] .glass-fill, html[data-motion="off"] .glass-cherry, html[data-motion="off"] .bubble-pop, html[data-motion="off"] .lectern-in, html[data-motion="off"] .rv, html[data-motion="off"] .bar-grow, html[data-motion="off"] .flag-hoist, html[data-motion="off"] .pin-stand, html[data-motion="off"] .board-flip, html[data-motion="off"] .paddle-wave { animation: none; }
 @keyframes barGrow { from { transform: scaleY(0); } to { transform: none; } }
 html[data-motion="off"] .bar-grow { animation: none; }
+
+/* ---- the results' own objects (the owner's picks, 13 Nov): each moves as its team comes in; with motion off in
+   Settings, each stands as it ends (the rule above takes every animation to its end at once) ---- */
+/* Russian Roulette's barrel: one spin to the first chamber, then a click a chamber; each chamber pops in as it comes up */
+.rb-cyl { transform-box: view-box; transform-origin: 100px 100px; animation-fill-mode: both; }
+.rb-up { transform-box: fill-box; transform-origin: center; animation-fill-mode: both; }
+@keyframes rbCyl1 { 0% { transform: rotate(-540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 90.0% { transform: rotate(0deg); } 100% { transform: rotate(0deg); } }
+@keyframes rbUp1 { 0% { transform: rotate(540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 90.0% { transform: rotate(0deg); } 100% { transform: rotate(0deg); } }
+.rb-cyl.n1 { animation-name: rbCyl1; animation-duration: 0.50s; } .rb-up.n1 { animation-name: rbUp1; animation-duration: 0.50s; }
+@keyframes rbCyl2 { 0% { transform: rotate(-540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 56.2% { transform: rotate(0deg); } 81.2% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 93.8% { transform: rotate(-60deg); } 100% { transform: rotate(-60deg); } }
+@keyframes rbUp2 { 0% { transform: rotate(540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 56.2% { transform: rotate(0deg); } 81.2% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 93.8% { transform: rotate(60deg); } 100% { transform: rotate(60deg); } }
+.rb-cyl.n2 { animation-name: rbCyl2; animation-duration: 0.80s; } .rb-up.n2 { animation-name: rbUp2; animation-duration: 0.80s; }
+@keyframes rbCyl3 { 0% { transform: rotate(-540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 40.9% { transform: rotate(0deg); } 59.1% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 68.2% { transform: rotate(-60deg); } 86.4% { transform: rotate(-60deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 95.5% { transform: rotate(-120deg); } 100% { transform: rotate(-120deg); } }
+@keyframes rbUp3 { 0% { transform: rotate(540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 40.9% { transform: rotate(0deg); } 59.1% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 68.2% { transform: rotate(60deg); } 86.4% { transform: rotate(60deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 95.5% { transform: rotate(120deg); } 100% { transform: rotate(120deg); } }
+.rb-cyl.n3 { animation-name: rbCyl3; animation-duration: 1.10s; } .rb-up.n3 { animation-name: rbUp3; animation-duration: 1.10s; }
+@keyframes rbCyl4 { 0% { transform: rotate(-540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 32.1% { transform: rotate(0deg); } 46.4% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 53.6% { transform: rotate(-60deg); } 67.9% { transform: rotate(-60deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 75.0% { transform: rotate(-120deg); } 89.3% { transform: rotate(-120deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 96.4% { transform: rotate(-180deg); } 100% { transform: rotate(-180deg); } }
+@keyframes rbUp4 { 0% { transform: rotate(540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 32.1% { transform: rotate(0deg); } 46.4% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 53.6% { transform: rotate(60deg); } 67.9% { transform: rotate(60deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 75.0% { transform: rotate(120deg); } 89.3% { transform: rotate(120deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 96.4% { transform: rotate(180deg); } 100% { transform: rotate(180deg); } }
+.rb-cyl.n4 { animation-name: rbCyl4; animation-duration: 1.40s; } .rb-up.n4 { animation-name: rbUp4; animation-duration: 1.40s; }
+@keyframes rbCyl5 { 0% { transform: rotate(-540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 26.5% { transform: rotate(0deg); } 38.2% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 44.1% { transform: rotate(-60deg); } 55.9% { transform: rotate(-60deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 61.8% { transform: rotate(-120deg); } 73.5% { transform: rotate(-120deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 79.4% { transform: rotate(-180deg); } 91.2% { transform: rotate(-180deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 97.1% { transform: rotate(-240deg); } 100% { transform: rotate(-240deg); } }
+@keyframes rbUp5 { 0% { transform: rotate(540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 26.5% { transform: rotate(0deg); } 38.2% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 44.1% { transform: rotate(60deg); } 55.9% { transform: rotate(60deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 61.8% { transform: rotate(120deg); } 73.5% { transform: rotate(120deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 79.4% { transform: rotate(180deg); } 91.2% { transform: rotate(180deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 97.1% { transform: rotate(240deg); } 100% { transform: rotate(240deg); } }
+.rb-cyl.n5 { animation-name: rbCyl5; animation-duration: 1.70s; } .rb-up.n5 { animation-name: rbUp5; animation-duration: 1.70s; }
+@keyframes rbCyl6 { 0% { transform: rotate(-540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 22.5% { transform: rotate(0deg); } 32.5% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 37.5% { transform: rotate(-60deg); } 47.5% { transform: rotate(-60deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 52.5% { transform: rotate(-120deg); } 62.5% { transform: rotate(-120deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 67.5% { transform: rotate(-180deg); } 77.5% { transform: rotate(-180deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 82.5% { transform: rotate(-240deg); } 92.5% { transform: rotate(-240deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 97.5% { transform: rotate(-300deg); } 100% { transform: rotate(-300deg); } }
+@keyframes rbUp6 { 0% { transform: rotate(540deg); animation-timing-function: cubic-bezier(.15,.6,.3,1); } 22.5% { transform: rotate(0deg); } 32.5% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 37.5% { transform: rotate(60deg); } 47.5% { transform: rotate(60deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 52.5% { transform: rotate(120deg); } 62.5% { transform: rotate(120deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 67.5% { transform: rotate(180deg); } 77.5% { transform: rotate(180deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 82.5% { transform: rotate(240deg); } 92.5% { transform: rotate(240deg); animation-timing-function: cubic-bezier(.3,1.5,.5,1); } 97.5% { transform: rotate(300deg); } 100% { transform: rotate(300deg); } }
+.rb-cyl.n6 { animation-name: rbCyl6; animation-duration: 2.00s; } .rb-up.n6 { animation-name: rbUp6; animation-duration: 2.00s; }
+.rb-pop { transform-box: fill-box; transform-origin: center; animation: rbPop .24s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes rbPop { from { transform: scale(0); opacity: 0; } to { transform: none; opacity: 1; } }
+.rb-fade { animation: rbFade .22s ease-out both; }
+@keyframes rbFade { from { opacity: 0; } to { opacity: 1; } }
+/* Majority Rules' ballot box: each vote drops through the slot onto the pile */
+.mr-slip { animation: mrSlip .36s cubic-bezier(.55,0,.6,1.25) both; }
+@keyframes mrSlip { 0% { transform: translate(var(--dx), var(--dy)); opacity: 0; } 14% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+/* Guess the Airport's flap tiles: a tile flips each time its number changes; the winner's light up */
+.fl-tiles { display: flex; gap: 5px; justify-content: center; }
+.fl-tile { position: relative; border-radius: 7px; background: linear-gradient(#1d2140 0 50%, #151830 50% 100%); border: 2px solid #2f3350; color: #fbf3dc; text-align: center; }
+.fl-tile::after { content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 1.5px); height: 3px; background: #05060f; }
+.fl-tile.lit { border-color: var(--c); box-shadow: 0 0 24px var(--c); transition: border-color .3s, box-shadow .3s; }
+.fl-flip { display: block; transform-origin: center; animation: flFlip .08s linear; }
+@keyframes flFlip { 0% { transform: scaleY(1); } 50% { transform: scaleY(.1); } 100% { transform: scaleY(1); } }
+.fl-status { display: inline-block; font-family: var(--font-body); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; padding: 2px 10px; border-radius: 6px; background: #0b0e24; border: 1px solid currentColor; line-height: 1.5; }
+.fl-plane { position: absolute; left: 100%; top: -4px; color: #ffd25a; filter: drop-shadow(0 0 8px rgba(255,197,24,.75)); animation: flPlane 1.6s cubic-bezier(.45,0,.75,.5) both; pointer-events: none; }
+@keyframes flPlane { 0% { transform: translate(-6px, 6px); opacity: 0; } 12% { opacity: 1; } 100% { transform: translate(150px, -150px) scale(1.3); opacity: 0; } }
+/* Drop the Pin's dartboard: each dart flies in and sticks, a ring where it hits; the winner's lights the board */
+.dt-dart { transform-box: view-box; transform-origin: var(--ox) var(--oy); animation: dtDart .36s cubic-bezier(.2,.8,.3,1) both; }
+@keyframes dtDart { 0% { transform: translate(var(--fx), var(--fy)) scale(1.9); opacity: 0; } 40% { opacity: 1; } 88% { transform: translate(-2px, 2px) scale(1); } 100% { transform: none; opacity: 1; } }
+.dt-hit { transform-box: fill-box; transform-origin: center; opacity: 0; animation: dtHit .55s ease-out both; }
+@keyframes dtHit { 0% { transform: scale(.2); opacity: 0; } 12% { opacity: .95; } 100% { transform: scale(2.6); opacity: 0; } }
+.dt-glow { animation: dtGlow .7s ease-out both; }
+@keyframes dtGlow { from { filter: drop-shadow(0 0 0 transparent); } to { filter: drop-shadow(0 0 22px var(--c)); } }
+.dt-shake { transform-box: view-box; transform-origin: center; animation: dtShake .3s ease-out both; }
+@keyframes dtShake { 0%, 100% { transform: none; } 30% { transform: translate(3px, -2px); } 60% { transform: translate(-2px, 1px); } }
+/* Secret Stakes' chips: each drops onto its stack */
+.sk-drop { animation: skDrop .3s cubic-bezier(.3,1.45,.5,1) both; }
+@keyframes skDrop { 0% { transform: translateY(var(--h)); opacity: 0; } 35% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+/* motion off: each stands as it ends, at once (the winner's board lit, no plane) */
+html[data-motion="off"] .rb-cyl, html[data-motion="off"] .rb-up, html[data-motion="off"] .rb-pop, html[data-motion="off"] .rb-fade, html[data-motion="off"] .mr-slip,
+html[data-motion="off"] .fl-flip, html[data-motion="off"] .dt-dart, html[data-motion="off"] .dt-hit, html[data-motion="off"] .dt-shake, html[data-motion="off"] .dt-glow, html[data-motion="off"] .sk-drop { animation: none; }
+html[data-motion="off"] .dt-glow { filter: drop-shadow(0 0 22px var(--c)); }
+html[data-motion="off"] .fl-plane { display: none; }
 .hud.many .hud-mini .dot { width: 14px; height: 14px; font-size: var(--text-8); }
 .hud.many .hud-mini b { color: var(--c); }
 .hud.tv.many .hud-team .nm { font-size: var(--text-18); max-width: 200px; } .hud.tv.many .hud-team .sc { font-size: var(--text-48); }

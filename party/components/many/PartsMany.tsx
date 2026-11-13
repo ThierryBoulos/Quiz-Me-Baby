@@ -3,7 +3,7 @@
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
 import { CodeTiles, motionOff } from "../Marquee";
-import { useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
 import { showKm, showNum } from "@/lib/game";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
@@ -249,10 +249,9 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
         </div>))}
     </div>);
 }
-/* ---- Majority Rules' result on the TV (the owner's idea, 30 Oct): a bar a team, as tall as its share right, in
-   place order, growing up one after another; the share on top, the place, the name and what it pays under it.
-   The games that have no look of their own yet (the question rounds, airports, maps, Don't Say the Same, the
-   Cocktail or Dish) draw their points the same way, the best as the tallest ---- */
+/* ---- the bars (the owner's idea for Majority Rules, 30 Oct; it has its ballot boxes now, 13 Nov): a bar a team, as
+   tall as its points, in place order, growing up one after another; the points on top, the place, the name and what
+   it pays under it. What Do You See? draws its result this way, and any game without a look of its own ---- */
 export function BarsMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 140 : 150, pc = !!S.shares, best = Math.max(1, ...S.pts);
   const val = (t: number) => (pc ? S.shares?.[t] ?? 0 : S.pts[t] / best), lab = (t: number) => (pc ? pct(S.shares?.[t] ?? 0) : String(S.pts[t]));
@@ -299,33 +298,195 @@ export function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boo
     {!S.noAward && <div className="display leading-none" style={{ fontSize: dense ? 22 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</div>}
   </>);
 }
-/* Guess the Airport: the departures board, each team a flight, flipping in from the top: 1st boards first */
-export function DeparturesMany({ pub }: { pub: PubMany }) {
-  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k, false);
-  const status = (t: number) => (S.award[t] <= 0 ? "Cancelled" : S.places[t] === 1 ? "Boarding" : S.places[t] === k ? "Delayed" : "On time");
-  const rv = revealOf(S, k);
+/* ---- the owner's picks for the results (13 Nov): each game's own object in the middle, moving as the result comes in;
+   the number on top, the place, name and points under, the order, the reveal and the light on the winner as before ---- */
+
+/* Russian Roulette: each team's barrel, a chamber filled for each spin: +2 or +3 in its colour, the bullet in brass (+5)
+   or red (−3), an empty ring for a miss. The barrel spins to its first chamber, which fills, then clicks round a chamber
+   for each spin after; the labels stay upright. Motion off: the barrel stands, filled */
+export function BarrelsMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, big = k <= 3, size = dense ? 124 : big ? 176 : 150, cw = dense ? 124 : big ? 200 : 180;
+  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), rv = revealOf(S, k);
   return (
-    /* eight flights fit under the tracker a size down, rows tighter */
-    <div className={"board" + (dense ? " dense" : "")} style={{ fontSize: dense ? 15 : 22, maxWidth: dense ? 820 : 860 }} role="table" aria-label={"Departures: " + order.map((t) => `${T[t].name} ${S.pts[t]} points`).join(", ")}>
-      <div className="board-title" style={{ fontSize: "1.2em" }}>
-        <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg>
-        Departures: the result
-      </div>
-      {order.map((t) => { const lit = S.award[t] > 0 && S.places[t] === 1; return (
-        <div key={t} className="board-row tv board-flip relative" role="row" style={{ animationDelay: rv.at(t) + "s" }}>
-          <span className="b-time" role="cell">{S.award[t] > 0 ? place(S.places[t]).toUpperCase() : "—"}</span>
-          <span className="b-dest flex items-center gap-2" role="cell" style={{ color: T[t].color }}><Dot t={t} color={T[t].color} size={dense ? 14 : 18} /><bdi className="truncate">{T[t].name}</bdi>{lit && <span aria-label="takes it">🏆</span>}</span>
-          <span className="b-flight" role="cell">{S.pts[t]} pts</span>
-          <span className="b-gate" role="cell" style={{ color: S.award[t] > 0 ? "var(--color-ok)" : undefined }}>{S.award[t] > 0 ? "+" + S.award[t] : "0"}</span>
-          <span className="b-status" role="cell" style={{ color: S.award[t] <= 0 ? "#ff5566" : lit ? "#3ddc97" : S.places[t] === k ? "#ffb020" : "#ffd25a" }}>{status(t)}</span>
-          {/* the winner's flight takes off: a plane climbs off its Boarding row and up off the screen, a trail behind it (the owner, 31 Oct) */}
-          {lit && <span className="plane-fly" aria-hidden style={{ animationDelay: rv.at(t) + 0.5 + "s" }}>
-            <span className="plane-trail" style={{ animationDelay: rv.at(t) + 0.5 + "s" }} />
-            <span className="plane-ico" style={{ animationDelay: rv.at(t) + 0.5 + "s" }}><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg></span>
-          </span>}
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      {order.map((t) => { const at = rv.at(t), paid = S.award[t] > 0; return (
+        <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: cw, animationDelay: at + "s" }}>
+          <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{S.pts[t]}</div>
+          <div className="w-full flex items-end justify-center" style={{ height: size }}>
+            <Barrel spins={S.spins?.[t] ?? []} color={T[t].color} size={size} at={at + 0.15} paid={paid} lit={paid && S.places[t] === 1} />
+          </div>
+          <Caption pub={pub} t={t} dense={dense} />
         </div>); })}
     </div>);
 }
+/* when spin j's chamber comes round to the top, after the barrel starts (s): one spin, then a click a spin (globals.css, .rb-cyl) */
+const RB_LAND = (j: number) => 0.45 + 0.3 * j;
+function Barrel({ spins, color, size, at, paid, lit }: { spins: number[]; color: string; size: number; at: number; paid: boolean; lit: boolean }) {
+  const id = "rb" + useId().replace(/[^a-zA-Z0-9]/g, ""), sp = spins.slice(0, 6), n = " n" + Math.max(1, sp.length);
+  const pos = (j: number) => { const a = ((-90 + 60 * j) * Math.PI) / 180; return [100 + 56 * Math.cos(a), 100 + 56 * Math.sin(a)]; };
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200" aria-hidden style={{ overflow: "visible", opacity: paid ? 1 : 0.4, filter: lit ? `drop-shadow(0 0 16px ${color})` : undefined }}>
+      <defs>
+        <radialGradient id={id + "s"} cx="40%" cy="34%" r="78%"><stop offset="0" stopColor="#4b5180" /><stop offset=".55" stopColor="#252a4c" /><stop offset="1" stopColor="#10132b" /></radialGradient>
+        <radialGradient id={id + "b"} cx="36%" cy="30%" r="72%"><stop offset="0" stopColor="#fff1b8" /><stop offset=".5" stopColor="#e2b24a" /><stop offset="1" stopColor="#8a6420" /></radialGradient>
+      </defs>
+      <g className={"rb-cyl" + n} style={{ animationDelay: at + "s" }}>
+        <circle cx="100" cy="100" r="94" fill={`url(#${id}s)`} stroke="#9aa2c8" strokeWidth="3" />
+        {[0, 1, 2, 3, 4, 5].map((j) => <rect key={"f" + j} x="95.5" y="7" width="9" height="20" rx="4.5" fill="#0b0e24" opacity=".8" transform={`rotate(${60 * j - 30} 100 100)`} />)}
+        {[0, 1, 2, 3, 4, 5].map((j) => { const [x, y] = pos(j); return <circle key={"h" + j} cx={x} cy={y} r="25" fill="#05060f" stroke="#5a6088" strokeWidth="2.5" />; })}
+        {sp.map((v, j) => { const [x, y] = pos(j), d = at + RB_LAND(j); return (
+          <Fragment key={j}>
+            <g className="rb-pop" style={{ animationDelay: d + "s" }}>
+              {v === 5 ? <><circle cx={x} cy={y} r="23" fill={`url(#${id}b)`} /><circle cx={x} cy={y} r="9" fill="#d9b25a" stroke="#8a6420" strokeWidth="2" /></>
+                : v < 0 ? <circle cx={x} cy={y} r="23" fill="#ff5566" stroke="#e2b24a" strokeWidth="3" />
+                : v > 0 ? <circle cx={x} cy={y} r="23" fill={color} /> : <circle cx={x} cy={y} r="20" fill="none" stroke={color} strokeWidth="3" opacity=".6" />}
+            </g>
+            {/* (turned back as the barrel turns, so the number reads upright) */}
+            <g className={"rb-up" + n} style={{ animationDelay: at + "s" }}>
+              <text x={x} y={y + 9} className="rb-fade" style={{ animationDelay: d + "s", fontFamily: "var(--font-display)" }} textAnchor="middle" fontSize="27" fill={v === 0 ? "#8a92b8" : "#fff"}
+                stroke="rgba(6,8,28,.85)" strokeWidth="5" strokeLinejoin="round" paintOrder="stroke">{signedPts(v)}</text>
+            </g>
+          </Fragment>); })}
+        <circle cx="100" cy="100" r="13" fill="#9aa2c8" /><circle cx="100" cy="100" r="5" fill="#05060f" />
+      </g>
+    </svg>);
+}
+
+/* Majority Rules: each team's ballot box, a vote for every 5% right, dropping through the slot one by one and piling up */
+export function BallotsMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = dense ? 124 : 180, H = dense ? 140 : 150, sh = (t: number) => S.shares?.[t] ?? 0;
+  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), rv = revealOf(S, k);
+  return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Share right: " + order.map((t) => `${T[t].name} ${pct(sh(t))}`).join(", ")}>
+      {order.map((t) => { const at = rv.at(t), paid = S.award[t] > 0; return (
+        <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: W, animationDelay: at + "s" }}>
+          <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{pct(sh(t))}</div>
+          <Ballot share={sh(t)} color={T[t].color} W={W} H={H} at={at + 0.15} paid={paid} lit={paid && S.places[t] === 1} />
+          <Caption pub={pub} t={t} dense={dense} />
+        </div>); })}
+    </div>);
+}
+function Ballot({ share, color, W, H, at, paid, lit }: { share: number; color: string; W: number; H: number; at: number; paid: boolean; lit: boolean }) {
+  const x0 = W * 0.12, bw = W * 0.76, yT = H * 0.2, yB = H - 3, bh = yB - yT, rh = (bh - 6) / 10, sw = (bw - 14) / 2, h = rh - 2, n = Math.max(0, Math.min(20, Math.round(share * 20)));
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden style={{ overflow: "visible", display: "block", opacity: paid ? 1 : 0.4, filter: lit ? `drop-shadow(0 0 16px ${color})` : undefined }}>
+      <rect x={x0} y={yT} width={bw} height={bh} rx="8" fill="rgba(255,255,255,.045)" stroke="rgba(255,255,255,.32)" strokeWidth="2" />
+      {Array.from({ length: n }, (_, i) => { const r = Math.floor(i / 2), x = x0 + 5 + (i % 2) * (sw + 4), y = yB - 4 - (r + 1) * rh + 1, rot = (((i * 37) % 7) - 3) * 1.4;
+        return (
+          <g key={i} transform={`rotate(${rot} ${x + sw / 2} ${y + h / 2})`}>
+            <g className="mr-slip" style={{ animationDelay: (at + i * 0.045).toFixed(3) + "s", ["--dx" as string]: (W / 2 - (x + sw / 2)).toFixed(1) + "px", ["--dy" as string]: (yT - 30 - y).toFixed(1) + "px" }}>
+              <rect x={x} y={y} width={sw} height={h} rx="2" fill={color} />
+              <path d={`M${x + sw * 0.36},${y + h * 0.5} l${sw * 0.09},${h * 0.26} l${sw * 0.2},${-h * 0.52}`} fill="none" stroke="#04050e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity=".65" />
+            </g>
+          </g>); })}
+      {/* the lid and its slot, then the glass front */}
+      <rect x={x0 - 5} y={yT - 9} width={bw + 10} height="11" rx="4" fill="#262b4d" stroke="rgba(255,255,255,.38)" strokeWidth="1.5" />
+      <rect x={W / 2 - bw * 0.24} y={yT - 5.5} width={bw * 0.48} height="4" rx="2" fill="#05060f" />
+      <rect x={x0 + 6} y={yT + 7} width="5" height={bh - 16} rx="2.5" fill="#fff" opacity=".13" />
+    </svg>);
+}
+
+/* Guess the Airport: each team's points on split-flap tiles, its status under as on a departures board (Boarding for the
+   winner, On time, Delayed for the last, Cancelled for no points); 1st on the left. The tiles flip through the numbers
+   and stop on the points, a team at a time; the winner's light up in its colour and a plane takes off from its Boarding */
+export function FlapsMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k, false), rv = revealOf(S, k);
+  const status = (t: number): [string, string] => (S.award[t] <= 0 ? ["Cancelled", "#ff5566"] : S.places[t] === 1 ? ["Boarding", "#3ddc97"] : S.places[t] === k ? ["Delayed", "#ffb020"] : ["On time", "#ffd25a"]);
+  return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Departures: " + order.map((t) => `${T[t].name} ${S.pts[t]} points, ${status(t)[0]}`).join(", ")}>
+      {order.map((t) => { const at = rv.at(t), paid = S.award[t] > 0, lit = paid && S.places[t] === 1, [st, sc] = status(t); return (
+        <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: dense ? 124 : 180, animationDelay: at + "s" }}>
+          <Flaps text={String(S.pts[t]).padStart(2, " ")} at={at} lit={lit} color={T[t].color} dense={dense} dim={!paid} />
+          <div className="relative mt-1">
+            <span className="fl-status rb-fade" style={{ animationDelay: at + 0.75 + "s", color: sc, fontSize: dense ? 10 : 13 }}>{st}</span>
+            {lit && <span className="fl-plane" style={{ animationDelay: at + 0.95 + "s" }} aria-hidden>
+              <svg viewBox="0 0 24 24" width={dense ? 22 : 30} height={dense ? 22 : 30} fill="currentColor" style={{ transform: "rotate(45deg)" }}><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg></span>}
+          </div>
+          <Caption pub={pub} t={t} dense={dense} />
+        </div>); })}
+    </div>);
+}
+/* a team's tiles: each flips through a few numbers and stops on its own; the last one stops last. Motion off: the points at once */
+function Flaps({ text, at, lit, color, dense, dim }: { text: string; at: number; lit: boolean; color: string; dense: boolean; dim: boolean }) {
+  const want = text.split(""), [shown, setShown] = useState<string[]>(() => want.map(() => " ")), [flips, setFlips] = useState<number[]>(() => want.map(() => 0)), [done, setDone] = useState(false);
+  useEffect(() => {
+    const w = text.split("");
+    if (motionOff()) { setShown(w); setDone(true); return; }
+    setShown(w.map(() => " ")); setDone(false);
+    const ts: ReturnType<typeof setTimeout>[] = [];
+    w.forEach((ch, j) => { const steps = 7 + j * 2;
+      for (let i = 0; i <= steps; i++) ts.push(setTimeout(() => {
+        setShown((s) => s.map((c, x) => (x === j ? (i === steps ? ch : String((i * 7 + j * 3) % 10)) : c)));
+        setFlips((f) => f.map((c, x) => (x === j ? c + 1 : c)));
+        if (i === steps && j === w.length - 1) setDone(true);
+      }, at * 1000 + 120 + i * 75)); });
+    return () => ts.forEach(clearTimeout);
+  }, [text, at]);
+  const tw = dense ? 46 : 64, th = dense ? 70 : 96;
+  return (
+    <div className="fl-tiles" style={{ opacity: dim ? 0.55 : 1 }}>
+      {shown.map((c, j) => (
+        <div key={j} className={"fl-tile display" + (lit && done ? " lit" : "")} style={{ width: tw, height: th, fontSize: dense ? 56 : 78, lineHeight: th - 4 + "px", ["--c" as string]: color }}>
+          <span key={flips[j]} className="fl-flip">{c === " " ? "\u00a0" : c}</span>
+        </div>))}
+    </div>);
+}
+
+/* Drop the Pin: one dartboard for every team (the owner, 13 Nov). The better a team's place, the nearer its dart to the
+   bullseye, the places spaced out evenly between the bull and the outer ring (the owner: not all near the middle);
+   the winner's in the bull, tied teams the same way out. Each dart carries the team's letter and flies in along itself;
+   the places, names and points in a row under the board, left to right to the winner, as the pins were. The darts fly in
+   one at a time, the last place first; the winner's goes in last and the board lights up in its colour */
+export function DartboardMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = 1120, H = dense ? 300 : 310, B = H - (dense ? 86 : 84), R = B / 2 - 2, SW = B * 1.6, cx = SW / 2, cy = B / 2;
+  const order = T.map((_, i) => i).sort((a, b) => S.places[b] - S.places[a] || b - a), rv = revealOf(S, k);
+  const ps = [...new Set(S.places)].sort((a, b) => a - b), far = (t: number) => (ps.length > 1 ? ps.indexOf(S.places[t]) / (ps.length - 1) : 0);
+  const pt = (r: number, a: number) => [cx + r * Math.cos((a * Math.PI) / 180), cy + r * Math.sin((a * Math.PI) / 180)];
+  const tops = order.filter((t) => S.places[t] === 1 && S.award[t] > 0), glow = tops.length === 1 ? T[tops[0]].color : "var(--color-gold)", hitAt = rv.done - 1 + 0.3;
+  const wedge = (r1: number, r2: number, a1: number, a2: number) => { const [x1, y1] = pt(r2, a1), [x2, y2] = pt(r2, a2), [x3, y3] = pt(r1, a2), [x4, y4] = pt(r1, a1);
+    return `M${x1},${y1} A${r2},${r2} 0 0 1 ${x2},${y2} L${x3},${y3} A${r1},${r1} 0 0 0 ${x4},${y4} Z`; };
+  const rings: [number, number, boolean][] = [[0.1, 0.52, false], [0.52, 0.58, true], [0.58, 0.86, false], [0.86, 0.92, true]];
+  const cw = Math.min(W / k, 240), br = Math.max(9, B * 0.06), L = R * 0.34;
+  return (
+    <div className="flex flex-col items-center justify-center gap-1" style={{ width: W, height: H }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      <svg width={SW} height={B} viewBox={`0 0 ${SW} ${B}`} aria-hidden style={{ overflow: "visible", display: "block" }}>
+        <g className="dt-shake" style={{ animationDelay: hitAt + "s" }}>
+          <g className="dt-glow" style={{ animationDelay: hitAt + "s", ["--c" as string]: glow }}>
+            <circle cx={cx} cy={cy} r={R} fill="#0b0d1f" stroke="#3a3f63" strokeWidth="2" />
+            {Array.from({ length: 20 }, (_, i) => { const a1 = -99 + i * 18, dark = i % 2 === 0; return rings.map(([r1, r2, ring], j) => (
+              <path key={i + "-" + j} d={wedge(R * r1, R * r2, a1, a1 + 18)} fill={ring ? (dark ? "#c8283f" : "#2f9e6a") : dark ? "#1b1e36" : "#e9dfc3"} stroke="#6b7090" strokeWidth=".6" />)); })}
+            <circle cx={cx} cy={cy} r={R * 0.1} fill="#2f9e6a" stroke="#6b7090" strokeWidth=".6" /><circle cx={cx} cy={cy} r={R * 0.045} fill="#c8283f" />
+          </g>
+        </g>
+        {/* each dart sticks out away from the middle, a little tilted, so the letters spread round the board with the darts */}
+        {order.map((t, i) => { const c = T[t].color, a = 180 + (i * 360) / k, rr = R * (0.06 + 0.72 * far(t)), [x, y] = pt(rr, a), d = rv.at(t);
+          const ux = Math.cos(((a - 22) * Math.PI) / 180), uy = Math.sin(((a - 22) * Math.PI) / 180);
+          const P = (f: number) => [x + ux * L * f, y + uy * L * f], [bx, by] = P(0.46), [sx, sy] = P(0.82), [fx, fy] = P(0.98);
+          return (
+            <Fragment key={t}>
+              <g className="dt-dart" style={{ animationDelay: d + "s", opacity: S.award[t] > 0 ? 1 : 0.5, ["--ox" as string]: x + "px", ["--oy" as string]: y + "px", ["--fx" as string]: ux * B * 0.7 + "px", ["--fy" as string]: uy * B * 0.7 + "px" }}>
+                <line x1={x} y1={y} x2={bx} y2={by} stroke="#d8dbea" strokeWidth={Math.max(3, B * 0.022)} strokeLinecap="round" />
+                <line x1={bx} y1={by} x2={sx} y2={sy} stroke="#7d84a8" strokeWidth={Math.max(2, B * 0.012)} />
+                <path d={`M${sx},${sy} l${-uy * br * 1.1},${ux * br * 1.1} L${fx},${fy} Z M${sx},${sy} l${uy * br * 1.1},${-ux * br * 1.1} L${fx},${fy} Z`} fill={c} opacity=".85" />
+                <circle cx={fx} cy={fy} r={br} fill={c} stroke="#04050e" strokeWidth="1.5" />
+                <text x={fx} y={fy + br * 0.42} textAnchor="middle" fontWeight="800" fontSize={br * 1.15} fill="#04050e" style={{ fontFamily: "var(--font-body)" }}>{LETTERS[t]}</text>
+              </g>
+              <circle className="dt-hit" style={{ animationDelay: d + 0.3 + "s" }} cx={x} cy={y} r={B * 0.035} fill="none" stroke={c} strokeWidth="3" />
+            </Fragment>); })}
+      </svg>
+      <div className="flex w-full justify-center">
+        {order.map((t) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
+          <div key={t} role="listitem" className="rv flex flex-col items-center gap-0.5" style={{ width: cw, animationDelay: rv.at(t) + 0.3 + "s" }}>
+            <span className="display leading-none" style={{ fontSize: dense ? 22 : 26, color: T[t].color }}>{S.pts[t]}</span>
+            <span className="display text-15 leading-none" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "–"}</span>
+            <span className="eyebrow text-center min-w-0 max-w-full" style={{ color: T[t].color, fontSize: dense ? 11 : 13, letterSpacing: ".1em", lineHeight: 1.2, overflowWrap: "anywhere", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              <span className="inline-block align-middle mr-1" style={{ marginTop: -2 }}><Dot t={t} color={T[t].color} size={14} /></span><bdi>{T[t].name}</bdi></span>
+            <span className="display leading-none" style={{ fontSize: dense ? 20 : 24, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
+          </div>); })}
+      </div>
+    </div>);
+}
+
 /* the Cocktail or Dish: a cocktail glass a team, filled in its colour to its points (the best full to the brim,
    a cherry on its rim) */
 export function GlassesMany({ pub, sound = false }: { pub: PubMany; sound?: boolean }) {
@@ -347,7 +508,8 @@ export function GlassesMany({ pub, sound = false }: { pub: PubMany; sound?: bool
             {/* the drink, rising from the bottom of the bowl, one glass after another */}
             <g clipPath={`url(#${id})`}><rect className="glass-fill" x="0" y={58 - 50 * lvl} width="100" height={50 * lvl + 1} fill={T[t].color} style={{ animationDelay: rv.at(t) + 0.3 + "s", opacity: S.award[t] > 0 ? 0.9 : 0.4 }} /></g>
             <path d="M8 8 L92 8 L54 58 L46 58 Z" fill="none" stroke="rgba(255,255,255,.75)" strokeWidth="2.5" strokeLinejoin="round" />
-            <path d="M50 58 L50 104 M30 112 Q50 102 70 112" fill="none" stroke="rgba(255,255,255,.75)" strokeWidth="2.5" strokeLinecap="round" />
+            {/* the foot: a straight line (the owner, 13 Nov) */}
+            <path d="M50 58 L50 107 M30 107 L70 107" fill="none" stroke="rgba(255,255,255,.75)" strokeWidth="2.5" strokeLinecap="round" />
             {lit && <g className="glass-cherry" style={{ animationDelay: rv.at(t) + 1.5 + "s" }}><path d="M74 9 Q78 -4 86 -8" stroke="#3ddc97" strokeWidth="2" fill="none" /><circle cx="73" cy="10" r="7" fill="#ff3b5c" /></g>}
           </svg>
           <Caption pub={pub} t={t} dense={dense} />
