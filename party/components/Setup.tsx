@@ -12,6 +12,7 @@ import { adoptDraft, useDraft, useDraftHost } from "@/lib/setupDraft";
 import { TimersSheet } from "./TimersSheet";
 import type { Settings } from "@/lib/settings";
 import { TvSettings } from "./TvSettings";
+import { timeLine, estimateTwo } from "@/lib/estimate";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: Q[] } & Partial<Picks>;
@@ -309,6 +310,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
         <button className="btn btn-gold btn-block" disabled={!!blocker || busy}
           onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, seeLevels, ...(isHost ? { seeKinds } : {}), custom: getCustom(),
             ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
+        {/* how long it should take, from what's picked and the TV's timers (the owner, 14 Nov) */}
+        {(standard || miniKeys.length > 0) && <p className="text-center text-12 text-[var(--color-ink-3)] -mt-1">{timeLine(estimateTwo({ standard, rounds, minis: miniKeys, host: isHost, timers }))}</p>}
       </div>
     </section>
   );

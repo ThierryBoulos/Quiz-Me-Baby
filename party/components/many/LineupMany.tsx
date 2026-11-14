@@ -17,6 +17,7 @@ import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
 import { levelLine, SEE_KIND_OPTS } from "../Setup";
+import { timeLine, estimateMany } from "@/lib/estimate";
 
 /* every team, every face, the captains marked. The TV (big) packs up to four in a row, then rows of three or four;
    the phones stack them. away: captains the TV hasn't heard from (the lobby). */
@@ -262,6 +263,8 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
         {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
         <button className="btn btn-gold btn-block" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels, seeLevels, seeKinds,
           custom: getCustom(), ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) })}>Start the game</button>
+        {/* how long it should take, from what's picked and the TV's timers (the owner, 14 Nov) */}
+        {on.length > 0 && <p className="text-center text-12 text-[var(--color-ink-3)] -mt-1">{timeLine(estimateMany({ minis: on, rounds, teams: k, timers: tv?.settings }))}</p>}
       </div>
     </section>);
 }

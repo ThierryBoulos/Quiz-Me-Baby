@@ -6,6 +6,8 @@
      #ph:<role>:<key>       a phone with a TV in the room (role: host, cap, player)
      #pn:<role>:<key>       a phone with no TV
      #lobby:<teams>         the TV's lobby with 2 to 8 teams
+     #setup:<teams>:<role>  the phone's Setup before the start (2 teams: host, or cap with no host; 3-8: host), with
+                            its game time under Start (14 Nov)
    <key> is a screen kept by sim/screens/two.mjs or many.ts (sim/.out/screens/pubs.json, served by ./pubs). */
 import { useEffect, useState } from "react";
 import { TvGame } from "@/components/TvGame";
@@ -18,6 +20,9 @@ import { HudMany } from "@/components/many/PartsMany";
 import { NoTv } from "@/components/NoTv";
 import { TvLobby } from "@/components/LobbyTv";
 import { SideSlot, useSideways } from "@/components/Side";
+import { Setup } from "@/components/Setup";
+import { SetupMany } from "@/components/many/LineupMany";
+import { DEFAULTS } from "@/lib/settings";
 
 const JOIN = { url: "https://quizmebaby.app/join/ABCD", code: "ABCD" };
 /* the night was played on a clock of its own: move its times to now, so clocks and animations run as they did */
@@ -38,7 +43,7 @@ export default function Screens() {
   useEffect(() => {
     const h = decodeURIComponent(location.hash.slice(1)).split(":");
     setMode(h);
-    if (h[0] === "lobby") return;
+    if (h[0] === "lobby" || h[0] === "setup") return;
     void fetch("/screens/pubs").then((r) => r.json()).then((d) => {
       const r = d[h[h.length - 1]];
       if (r) setRec({ pub: shift(r.pub, Date.now() - r.now, r.now), secret: r.secret ? shift(r.secret, Date.now() - r.now, r.now) : {} });
@@ -63,6 +68,16 @@ export default function Screens() {
     return <TvStage><TvLobby room={{ code: "ABCD", tv_id: "x", status: "lobby", mode: null, state: { teamNames: names }, version: 1 }} members={mem} code="ABCD" k={k}
       joinUrl={JOIN.url} site="quizmebaby.app" status={<span>Hosted by <b>Nour</b>. Ready: <b>Nour</b> starts the game.</span>}
       controls={<button type="button" className="btn btn-sm btn-ghost">Settings</button>} /></TvStage>;
+  }
+  if (mode[0] === "setup") {
+    const k = Number(mode[1]), host = mode[2] !== "cap", tv = { settings: DEFAULTS, custom: [], played: 0 };
+    return (
+      <main className="screen">
+        <footer className="mt-auto flex flex-col gap-2">
+          {k > 2 ? <SetupMany code="ABCD" k={k} busy={false} why="" tv={tv} onStart={() => {}} />
+            : <Setup code="ABCD" ready busy={false} why="" isHost={host} tv={host ? tv : undefined} timers={{}} onStart={() => {}} />}
+        </footer>
+      </main>);
   }
   if (!rec) return null;
 
