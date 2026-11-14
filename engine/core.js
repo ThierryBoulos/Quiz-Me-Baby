@@ -1262,6 +1262,13 @@
   function rouletteAfterLap(g, env, fx){
     const s = g.rouletteGame;
     if(s.i < s.base) return rouletteGo(g, env, fx);
+    /* nobody above 0: nobody wins, nothing paid, as with 3-8 teams (the owner, 14 Nov) */
+    if(Math.max(s.pts[0], s.pts[1]) <= 0){
+      s.done = true; s.awarded = true; s.award = [0, 0];
+      s.verdict = { winner:null, needsHost:false, note:'Nobody scored above 0: no points this time.' };
+      fx.push({ go:'rouletteSummary' });
+      return fx;
+    }
     if(s.pts[0] === s.pts[1]){ fx.push({ go:'rouletteTie' }); return fx; }
     const w = s.pts[0] > s.pts[1] ? 0 : 1;
     s.done = true;

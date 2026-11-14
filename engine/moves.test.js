@@ -742,8 +742,8 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   s.bulletLap = -1;
   Q.play(g, { type:'roulette/start' }, env);
   let fx;
-  for(let l = 0; l < 3; l++) fx = Q.play(g, { type:'roulette/verdict', ok:[false, false] }, env);
-  assert.deepEqual(s.pts, [0, 0]);
+  for(let l = 0; l < 3; l++) { if(l === 2) s.pts = [2, 2]; fx = Q.play(g, { type:'roulette/verdict', ok:[false, false] }, env); }   // (tied on 2 each)
+  assert.deepEqual(s.pts, [2, 2]);
   assert.ok(types(fx).includes('go:rouletteTie'));
   fx = Q.play(g, { type:'roulette/more' }, env);
   assert.ok(types(fx).includes('go:rouletteQ'));
@@ -759,7 +759,7 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   t.qs = [t.qs[0], ...t.spare.splice(0, 2)].map(l => ({ ch:l.ch, bullet:l.bullet }));
   t.bulletLap = -1;
   Q.play(b.g, { type:'roulette/start' }, b.env);
-  for(let l = 0; l < 3; l++) Q.play(b.g, { type:'roulette/verdict', ok:[false, false] }, b.env);
+  for(let l = 0; l < 3; l++) { if(l === 2) t.pts = [2, 2]; Q.play(b.g, { type:'roulette/verdict', ok:[false, false] }, b.env); }
   fx = Q.play(b.g, { type:'roulette/stop' }, b.env);
   assert.deepEqual([b.g.teams[0].score, b.g.teams[1].score], [1, 1]);
   assert.ok(types(fx).includes('go:rouletteSummary'));
@@ -800,4 +800,17 @@ test('roulette: three teams or more — every spin lands each team on its own ch
       assert.ok(s.fired >= 1);
     }
   }
+});
+
+test('roulette: nobody above 0 (0-0, or 0 and -3): nobody wins, nothing paid, as with 3-8 teams (the owner, 14 Nov)', () => {
+  const { g, env } = roulette(), s = g.rouletteGame;
+  s.qs = [s.qs[0], ...s.spare.splice(0, 2)].map(l => ({ ch:l.ch, bullet:l.bullet }));
+  s.bulletLap = -1;
+  Q.play(g, { type:'roulette/start' }, env);
+  const before = g.teams.map(t => t.score);
+  let fx;
+  for(let l = 0; l < 3; l++) fx = Q.play(g, { type:'roulette/verdict', ok:[false, false] }, env);
+  assert.ok(types(fx).includes('go:rouletteSummary'));
+  assert.equal(s.verdict.winner, null); assert.deepEqual(s.award, [0, 0]);
+  assert.deepEqual(g.teams.map(t => t.score), before);
 });
