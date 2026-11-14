@@ -589,7 +589,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <Result pub={pub} host />
         {S?.note && <Line className="!text-13">{S.note}</Line>}
         {S?.needsHost ? (<>
-          <div className="eyebrow text-center">Still a tie. Who gets the {pub.mini?.pts} points?</div>
+          <div className="eyebrow text-center">Still tied. Who gets the {pub.mini?.pts} points?</div>
           <div className="grid grid-cols-3 gap-2 mt-auto">
             <button className="btn btn-a" disabled={busy} onClick={() => send({ type: mk + "/award", w: 0 })}>{T[0].name}</button>
             <button className="btn" disabled={busy} onClick={() => send({ type: mk + "/award", w: "split" })}>Split</button>
@@ -911,7 +911,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     {o.note && <div className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{o.note}</div>}
   </>);
   const won3 = (w: 0 | 1 | null, aw: number | undefined, what: string): [string, Tone] | null => mine == null ? null
-    : w == null ? [aw ? `A tie: +${aw} each` : `A tie`, aw ? "ok" : "mid"] : w === mine ? [`Your team wins ${what} · +${aw ?? 0}`, "ok"] : ["Not this time", "no"];
+    : w == null ? [aw ? `Tied: +${aw} each` : "Nobody scores", aw ? "ok" : "mid"] : w === mine ? [`Your team wins ${what} · +${aw ?? 0}`, "ok"] : ["Not this time", "no"];
   if (sc === "answer" && pub.result) {
     const Rr = pub.result, by = Rr.by;
     const quiet = ([0, 1] as const).filter((t) => silent(pub, t)).map((t) => `${T[t].name}: ${silent(pub, t)}`).join(" · ");
@@ -975,14 +975,14 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     </div>
     {board(pub.auction.wins, "Legs so far", null)}</>); }
   if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null, aw = w != null ? A.award?.[w] ?? m?.pts : A.award?.[0];
-    return standings({ title: "The Auction", text: w == null ? "A tie" : `${T[w].name} +${aw}`, w, vals: A.wins, col: "Legs", endCol: "Night",
+    return standings({ title: "The Auction", text: w == null ? "Tied" : `${T[w].name} +${aw}`, w, vals: A.wins, col: "Legs", endCol: "Night",
       end: (t) => <Pts n={A.award?.[t]} />, you: won3(w, aw, "the Auction") }); }
   if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary, w = S.winner, aw = w != null ? S.award?.[w] ?? m?.pts : S.award?.[0];
-    return standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still a tie" : w == null ? "A split" : `${T[w].name} +${aw}`, w,
+    return standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still tied" : w == null ? ((S.award?.[0] ?? 0) > 0 ? "A split" : "Nobody scores") : `${T[w].name} +${aw}`, w,
       vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : "Legs", endCol: "Night", end: (t) => <Pts n={S.award?.[t]} />,
-      note: S.needsHost ? "The host decides." : S.who, you: S.needsHost ? (mine == null ? null : ["Still a tie: the host decides", "mid"]) : won3(w, aw, m?.title ?? "it") }); }
+      note: S.needsHost ? "The host decides." : S.who, you: S.needsHost ? (mine == null ? null : ["Still tied: the host decides", "mid"]) : won3(w, aw, m?.title ?? "it") }); }
   if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null, aw = w != null ? B.award?.[w] ?? m?.pts : B.award?.[0];
-    return standings({ title: "Battle of the Captains", text: w == null ? (B.note || "A tie") : `${T[w].name} +${aw}`, w, vals: B.score, col: "Right", endCol: "Night",
+    return standings({ title: "Battle of the Captains", text: w == null ? (B.note || "Tied") : `${T[w].name} +${aw}`, w, vals: B.score, col: "Right", endCol: "Night",
       end: (t) => <Pts n={B.award?.[t]} />, note: B.predict, you: won3(w, aw, "the Battle") }); }
   /* the night's end (the owner, 1 Nov): the winner clear at the top, how your team did, then the two teams' points */
   if (sc === "final") { const w = pub.winner ?? null; return (<>

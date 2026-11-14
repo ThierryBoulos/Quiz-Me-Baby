@@ -581,7 +581,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       {/* the game's own look (the 3-8 team night's), or the board for Auction and Battle */}
       {TWO_LOOKS.includes(m.key) ? <TwoResult pub={pub} sound={sound} /> : <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />}
       <div className="rv display text-52" style={{ color: tc(S.winner), animationDelay: (TWO_LOOKS.includes(m.key) ? twoDone(S.winner) : 0) + "s" }}>
-        {S.needsHost ? "Still a tie: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{pointsEach(S.award?.[0] ?? 0)}</span>
+        {S.needsHost ? "Still tied: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{(S.award?.[0] ?? 0) > 0 ? pointsEach(S.award![0]) : "Nobody scores"}</span>
           : <span data-fly-src={S.winner}>{`${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</span>}</div>
       {S.note && !/^split|point each/i.test(S.note) && <div className="text-22 text-[var(--color-ink-2)]">{S.note}</div>}
       {S.who && <div className="text-22" style={{ color: "var(--color-gold)" }}>{S.who}</div>}
