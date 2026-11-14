@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.67', date:'13 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.68', date:'14 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1343,7 +1343,7 @@ const BUILD = { v:'3.67', date:'13 Nov 2026', author:'Thierry Boulos', year:2026
              theme are asked as a matched pair (one to each team) so neither
              team gets an unfairly different KIND of question.
    ========================================================================== */
-const THEMES = ['Acronyms','Art & Books','Celebrities','Disney & Pixar','Food & Drink','Friends','Geek & Gamer','Geography','History','Internet & Memes','Know the Host','Lebanon','Movies','Music','Nature','Rave Culture','Science','Sexy Time','Sports','Tech & Business','TV Series','90s Kids'];
+const THEMES = ['Acronyms','Art & Books','Celebrities','Disney & Pixar','Food & Drink','Friends','Geek & Gamer','Geography','History','Internet & Memes','Know the Host','Lebanon','Movies','Music','Mythology & Folklore','Nature','Rave Culture','Science','Sexy Time','Sports','Tech & Business','TV Series','90s Kids'];
 const DIFFS  = ['easy','medium','hard','expert'];
 /* a night's difficulty in words: the default mix is Easy, Medium and Hard (Expert only once those run
    out), Mixed is all four, or one level on its own */
@@ -2759,6 +2759,98 @@ const SEED = [
 ['Celebrities','hard','','Which TikTok star, famous for silent videos mocking overcomplicated \'life hacks\', became the app\'s most-followed creator in 2022?','Khaby Lame','He started posting in March 2020, after losing his factory job near Turin.'],
 ['Celebrities','expert','','What was Miley Cyrus\'s first name at birth?','Destiny','Her parents called her \'Smiley\' as a baby, soon shortened to Miley. It became her legal name in 2008.'],
 ['Celebrities','expert','','Which niece of Japan\'s Emperor lost her royal status in 2021 when she married the man she met at university?','Mako','She married Kei Komuro, turned down a state payment of about 140 million yen, and moved to New York.'],
+/* ---- Open Trivia DB picks, as the owner reviewed them (14 Nov); Mythology & Folklore is its own theme ---- */
+['General Knowledge','easy','','Facing the front of a ship, what do sailors call its left side?','Port','Early ships were steered by an oar on the right, so they tied up to the quay on their left.'],
+['General Knowledge','easy','car-badge-animal','Which animal is in the middle of the Porsche badge?','A horse','It comes from the coat of arms of Stuttgart, Porsche\'s home city, which grew out of a stud farm.'],
+['General Knowledge','easy','car-badge-animal','Which animal is on the Lamborghini badge?','A bull','Ferruccio Lamborghini was a Taurus, and many of his cars, like the Miura, are named after famous fighting bulls.'],
+['General Knowledge','medium','','In English, which colour do people turn with envy?','Green','Shakespeare\'s Iago calls jealousy \'the green-eyed monster\' in Othello.'],
+['General Knowledge','medium','nato-letter','In the NATO phonetic alphabet, which word stands for the letter M?','Mike','All NATO countries adopted the same spelling alphabet in 1956; pilots use it too.'],
+['General Knowledge','medium','nato-letter','In the NATO phonetic alphabet, which word stands for the letter T?','Tango','Each code word starts with its own letter, from Alfa to Zulu.'],
+['General Knowledge','medium','','Someone born on Valentine\'s Day has which star sign?','Aquarius','Aquarius runs from about 20 January to 18 February.'],
+['General Knowledge','medium','','In which US state is the secret air base known as Area 51?','Nevada','Officially it\'s called Homey Airport or Groom Lake, after the dry salt lake it sits on.'],
+['General Knowledge','hard','','The village of Llanfairpwllgwyngyll, said to have the longest place name in Europe, is in which country?','Wales','The 58-letter version was dreamt up in the 1860s as a stunt to give its railway station the longest name in Britain.'],
+['General Knowledge','hard','','Which Japanese massage has a name meaning \'finger pressure\'?','Shiatsu','\'Shi\' means finger and \'atsu\' means pressure.'],
+['General Knowledge','hard','','The English words \'bungalow\' and \'shampoo\' both come from the languages of which country?','India','\'Bungalow\' meant \'in the Bengal style\'; \'shampoo\' comes from \'chāmpo\', to knead or massage.'],
+['General Knowledge','hard','','Panama hats are traditionally woven in which country?','Ecuador','They got the name because they were shipped and sold through Panama, many to gold rush prospectors.'],
+['General Knowledge','hard','','How many furlongs are there in a mile?','8','A furlong is 220 yards. Horse races are still measured in them.'],
+['General Knowledge','hard','','If someone\'s hair is described as \'Titian\', what colour is it?','Red','Named after the Venetian painter Titian, who often painted women with brownish-red hair.'],
+['General Knowledge','hard','','The word \'coleslaw\' comes from which language?','Dutch','\'Koolsla\' means \'cabbage salad\'. English speakers misheard \'kool\' as \'cold\', hence \'cold slaw\'.'],
+['General Knowledge','expert','','How many syllables are there in a traditional haiku?','17','Three lines of 5, 7 and 5. In Japanese they count sound units called \'on\'.'],
+['General Knowledge','expert','','Which of the three Apollo 11 astronauts never set foot on the Moon?','Michael Collins','He circled the Moon alone in the command module Columbia while Armstrong and Aldrin walked on it.'],
+['General Knowledge','expert','','On a standard dartboard, which number is directly opposite the 1?','19','Clockwise from the top the board runs 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19 and on.'],
+['General Knowledge','expert','','Which wedding anniversary is traditionally the crystal anniversary?','The 15th','The modern gift for the 15th is a watch.'],
+['General Knowledge','expert','','In 2006, the Oxford English Corpus found which word to be the most commonly used noun in English?','Time','Next come person, year, way and day.'],
+['General Knowledge','expert','','10 Downing Street is officially the home of which other title held by the British Prime Minister?','First Lord of the Treasury','The job of Prime Minister was only recognised in law in 1937; the Treasury title is far older.'],
+['General Knowledge','expert','','What nickname was given to the Air Canada jet that ran out of fuel in 1983 and landed safely with both engines dead?','The Gimli Glider','The Boeing 767 came down on a former air force base at Gimli, Manitoba. Nobody died.'],
+['General Knowledge','expert','','Before founding his own company, Enzo Ferrari raced for which Italian car maker?','Alfa Romeo','His Scuderia Ferrari began in 1929 as a team racing Alfa Romeos.'],
+['General Knowledge','expert','','Which animal is on the badge of Abarth, Fiat\'s sporty brand?','A scorpion','Founder Carlo Abarth was a Scorpio, and a scorpion was also hard to copy.'],
+['Geography','easy','','Which European capital is nicknamed \'the City of Light\'?','Paris','The name comes mainly from its leading role in the Age of Enlightenment.'],
+['Geography','easy','which-country-easy','In which country is the Suez Canal?','Egypt','Opened in 1869, it links the Mediterranean to the Red Sea.'],
+['Geography','easy','which-country-easy','The Rock of Gibraltar is an overseas territory of which country?','The United Kingdom','Spain handed it to Britain in 1713 and still claims it today.'],
+['Geography','easy','','After Moscow, what is Russia\'s second-largest city?','Saint Petersburg','It has also been called Petrograd and Leningrad.'],
+['Geography','medium','','Which region of Romania is famous as the home of Count Dracula?','Transylvania','Bram Stoker\'s 1897 novel Dracula tied the region to vampires for good.'],
+['Geography','medium','','What is the name of the peninsula shared by Spain and Portugal?','The Iberian Peninsula','Andorra, Gibraltar and a sliver of France are on it too.'],
+['Geography','medium','','In which city are the Spanish Steps?','Rome','They climb from the Piazza di Spagna up to the church of Trinità dei Monti.'],
+['Geography','medium','other-name','Which country is called \'Aotearoa\' in the Māori language?','New Zealand','It is usually translated as \'land of the long white cloud\'.'],
+['Geography','medium','other-name','Which city was officially called Saigon until 1976?','Ho Chi Minh City','It was the capital of South Vietnam, and locals still call it Saigon.'],
+['Geography','medium','','What is the largest lake in Africa?','Lake Victoria','Shared by Uganda, Kenya and Tanzania, it is the world\'s largest tropical lake.'],
+['Geography','medium','','Which disputed Himalayan region is split between India, Pakistan and China?','Kashmir','Cashmere wool takes its name from it.'],
+['Geography','medium','','Which tiny landlocked principality lies between France and Spain?','Andorra','Its two co-princes are the President of France and a Spanish bishop.'],
+['Geography','hard','','What is the longest river in Europe?','The Volga','It flows entirely through Russia and ends in the Caspian Sea.'],
+['Geography','hard','','Lake Titicaca sits on the border of Peru and which other country?','Bolivia','It is often called the highest navigable lake in the world.'],
+['Geography','hard','','Which British city has more miles of canals than Venice?','Birmingham','Its canals were dug in the Industrial Revolution to carry coal and goods.'],
+['Geography','hard','','Which Russian city was called Königsberg until 1946?','Kaliningrad','It sits in a Russian exclave squeezed between Poland and Lithuania.'],
+['Geography','hard','','In which country is the Baikonur Cosmodrome, launch site of Sputnik and Yuri Gagarin?','Kazakhstan','Russia rents it, and all Russian crewed flights still launch from there.'],
+['Geography','hard','','Which African country has an AK-47 rifle on its national flag?','Mozambique','The rifle is crossed with a hoe and laid over an open book.'],
+['Geography','hard','','On which Canary Island did two jumbo jets collide in 1977, in aviation\'s deadliest accident?','Tenerife','583 people died when a KLM 747 hit a Pan Am 747 on a foggy runway.'],
+['Geography','hard','','Which Siberian lake is the deepest in the world?','Lake Baikal','Over 1,600 m deep, it holds more fresh water than any other lake.'],
+['Geography','expert','','Which Polish port city was known in German as Danzig?','Gdańsk','The 1980 shipyard strikes there gave birth to the Solidarity movement.'],
+['Geography','expert','arctic-capital','What is the capital of Greenland?','Nuuk','About 20,000 people live there, over a third of all Greenlanders.'],
+['Geography','expert','arctic-capital','What is the main town of Svalbard, Norway\'s Arctic archipelago?','Longyearbyen','It is one of the world\'s northernmost towns, home to about 2,500 people.'],
+['Geography','expert','','What is Canada\'s largest island?','Baffin Island','It is the fifth-largest island in the world.'],
+['Geography','expert','','Bir Tawil, a patch of desert claimed by no country, lies between which two countries?','Egypt and Sudan','Each claims the nearby Halaib Triangle instead, so neither wants Bir Tawil.'],
+['Geography','expert','','What is the national language of Bhutan?','Dzongkha','It is written in the Tibetan script.'],
+['Geography','expert','','The Andaman and Nicobar Islands belong to which country?','India','Only 31 of their 836 islands are inhabited.'],
+['History','easy','','What name is given to 6 June 1944, when the Allies landed on the beaches of Normandy?','D-Day','It is still the largest seaborne invasion in history.'],
+['History','easy','','In 2017, Saudi Arabia, the UAE, Bahrain and Egypt cut all ties with which Gulf neighbour?','Qatar','The blockade lasted until January 2021.'],
+['History','medium','','In August 1945, the USA dropped atomic bombs on Hiroshima and which other Japanese city?','Nagasaki','Japan announced its surrender six days later, on 15 August.'],
+['History','medium','','Whose assassination in Sarajevo in 1914 set off the First World War?','Archduke Franz Ferdinand','He was shot by Gavrilo Princip, a 19-year-old Bosnian Serb student.'],
+['History','medium','','Which country did Iraq invade in August 1990, starting the Gulf War?','Kuwait','A US-led coalition drove Iraq out in February 1991.'],
+['History','hard','','Who was the first Roman emperor?','Augustus','Julius Caesar never was emperor; Augustus, his adopted heir, ruled from 27 BC.'],
+['History','hard','','Which sport did astronaut Alan Shepard play on the Moon in 1971?','Golf','He hit two balls with a six-iron head fixed to a sample scoop.'],
+['History','hard','','Who was Britain\'s Prime Minister when the Second World War began?','Neville Chamberlain','He announced the war on the radio on 3 September 1939.'],
+['History','hard','','Saladin, the sultan who took Jerusalem from the Crusaders in 1187, came from which people?','The Kurds','He founded the Ayyubid dynasty and ruled both Egypt and Syria.'],
+['History','expert','','Which car maker gave its name to the 1987 war between Chad and Libya?','Toyota','Chadian troops fought from Toyota pickups fitted with anti-tank missiles and beat Libya\'s tanks.'],
+['History','expert','','Who was caught guarding barrels of gunpowder under Parliament on 5 November 1605?','Guy Fawkes','Britain still burns his effigy on Bonfire Night.'],
+['History','expert','','On which London street did the Great Fire of 1666 start?','Pudding Lane','It broke out in Thomas Farriner\'s bakery just after midnight.'],
+['History','expert','','What was the name of the plane that dropped the atomic bomb on Hiroshima?','Enola Gay','The B-29 was named after the pilot\'s mother.'],
+['History','expert','','What did the Japanese call the storms that wrecked the Mongol invasion fleets in 1274 and 1281?','Kamikaze','It means \'divine wind\'; the name was reused for Japan\'s suicide pilots in 1944.'],
+['History','expert','','What was Genghis Khan\'s birth name?','Temüjin','He took the title Genghis Khan in 1206, when the Mongol tribes united under him.'],
+['History','expert','','Before Donald Trump, who was the only US president to serve two non-consecutive terms?','Grover Cleveland','He was both the 22nd and the 24th president.'],
+['History','expert','','Which tiny European country has the oldest constitution still in force, dating from 1600?','San Marino','Its statutes of 1600 still form the basis of its law today.'],
+['History','expert','','Which Southeast Asian country was once the kingdom of Lan Xang, the \'Land of a Million Elephants\'?','Laos','The kingdom lasted from 1353 to 1707.'],
+['History','expert','','Which English king, aged just 14, faced the Peasants\' Revolt of 1381?','Richard II','The rebels, led by Wat Tyler, took London; Tyler was killed while meeting the king.'],
+['Mythology & Folklore','easy','','How many heads does Cerberus, the guard dog of the Greek underworld, usually have?','3','Capturing him was the last of Hercules\'s twelve labours.'],
+['Mythology & Folklore','easy','troy-easy','According to legend, the Greeks got into Troy by hiding soldiers inside a giant wooden what?','Horse','Today a \'Trojan\' is also malware that hides inside harmless-looking software.'],
+['Mythology & Folklore','easy','troy-easy','Which part of Achilles\'s body was his only weak spot?','His heel','His mother dipped him in the river Styx, holding him by the heel.'],
+['Mythology & Folklore','medium','','The sportswear brand Nike is named after the Greek goddess of what?','Victory','The Romans called her Victoria.'],
+['Mythology & Folklore','medium','','Who is the Greek god of wine?','Dionysus','He was also the god of theatre, festivity and ritual madness.'],
+['Mythology & Folklore','hard','','In Greek myth, who was the wife of Zeus and queen of the gods?','Hera','Famously jealous, she hounded many of Zeus\'s lovers and children.'],
+['Mythology & Folklore','hard','','Which king in Greek myth was condemned to push a boulder up a hill for ever?','Sisyphus','His crime: cheating death, more than once.'],
+['Mythology & Folklore','expert','','In Norse myth, which plant was used to kill the god Baldr?','Mistletoe','Frigg made everything swear never to harm him, but skipped the mistletoe as too small.'],
+['Mythology & Folklore','expert','','In Japanese folklore, which vegetable do the river creatures called kappa love most?','Cucumber','That is why cucumber sushi rolls are called kappa maki.'],
+['Mythology & Folklore','expert','','In Norse myth, what is the name of the giant ash tree that holds the nine worlds together?','Yggdrasil','A dragon, Nidhogg, gnaws at its roots.'],
+['Mythology & Folklore','expert','','In the Epic of Gilgamesh, what is the name of the wild man who becomes Gilgamesh\'s best friend?','Enkidu','He is the oldest wild man in literature; his death sends Gilgamesh looking for eternal life.'],
+['Food & Drink','easy','','Which fruit goes inside a Black Forest gateau?','Cherries','In Germany a cake sold as Schwarzwälder Kirschtorte must also contain kirsch, a cherry brandy.'],
+['Food & Drink','easy','','Foie gras is made from which organ of a duck or goose?','The liver','The name is French for \'fat liver\'.'],
+['Food & Drink','hard','','Earl Grey tea gets its flavour from the oil of which citrus fruit?','Bergamot','Many Earl Greys today use artificial bergamot flavouring instead of the real oil.'],
+['Science','hard','','The \'Rh\' in blood types such as \'O Rh-negative\' is named after which animal?','The rhesus monkey','Landsteiner and Wiener found the factor using blood from rhesus monkeys, around 1940.'],
+['Tech & Business','medium','','What is the currency of Poland?','The złoty','Poland is in the EU but has kept its own money, and has set no date to switch to the euro.'],
+['Tech & Business','medium','','Which car model, launched in Japan in 1997, was the world\'s first mass-produced hybrid?','The Toyota Prius','\'Prius\' is Latin for \'before\' or \'first\'.'],
+['Tech & Business','hard','','Which car maker invented the modern three-point seat belt in 1959 and let every rival use it for free?','Volvo','Its engineer Nils Bohlin designed it. It\'s credited with saving more than a million lives.'],
+['Tech & Business','hard','','Long before it made phones, Nokia started out in 1865 as a mill making what?','Wood pulp / Paper','It took its name from the Finnish town of Nokia, where it opened a second mill in 1868.'],
+['Tech & Business','expert','','Bank of America was founded in San Francisco in 1904 under what name?','Bank of Italy','Its founder, Amadeo Giannini, was the son of Italian immigrants. The bank took the Bank of America name in 1930.'],
+['Acronyms','hard','','What does the \'S\' in \'SIM card\' stand for?','Subscriber','SIM stands for Subscriber Identity Module.'],
 ];
 
 const SEED_CLOSEST = [
@@ -4592,6 +4684,17 @@ const MAJORITY = [
   ["which-colour-appears-on-the", "medium", "Which colour appears on the most national flags?", ["Red", "Blue", "Green", "White"], 0, "Red is on about three national flags in four."],
   ["which-company-trades-on-the", "medium", "Which company trades on the stock market as HOG?", ["Harley-Davidson", "Tyson Foods", "Hormel Foods", "Hugo Boss"], 0, "It swapped HDI for HOG in 2006: big Harleys have long been called 'hogs'."],
   ["which-car-brand-is-owned-by", "medium", "Which car brand is owned by the Chinese company Geely?", ["Volvo", "Saab", "Skoda", "Seat"], 0, "Geely bought Volvo Cars in 2010. It also owns Lotus and the maker of London's black cabs."],
+  /* 14 Nov: Open Trivia DB picks, as the owner reviewed them */
+  ["rushmore-carved", "medium", "Which of these presidents is carved on Mount Rushmore?", ["George Washington", "John F. Kennedy", "Franklin D. Roosevelt", "Ulysses S. Grant"], 0, "The four are Washington, Jefferson, Theodore Roosevelt and Lincoln, each face about 18 metres tall."],
+  ["never-a-ford", "easy", "Which of these car models has never been a Ford?", ["Camry", "Fiesta", "Focus", "Mustang"], 0, "The Camry is a Toyota. Its name comes from the Japanese 'kanmuri', meaning crown."],
+  ["oldest-soft-drink", "medium", "Which of these soft drinks is the oldest?", ["Dr Pepper", "Coca-Cola", "Pepsi", "Sprite"], 0, "Dr Pepper was first served in Waco, Texas, in 1885, a year before Coca-Cola. Pepsi followed in 1893."],
+  ["never-on-a-coin", "hard", "Which of these British monarchs never appeared on a coin in circulation?", ["Edward VIII", "Victoria", "George VI", "Charles II"], 0, "His 1937 coins were ready, but he abdicated in December 1936 and almost all were melted down."],
+  ["french-island", "easy", "Which of these Mediterranean islands belongs to France?", ["Corsica", "Sardinia", "Majorca", "Malta"], 0, "Napoleon was born there, in Ajaccio, in 1769."],
+  ["language-isolate", "hard", "Which of these European languages is related to no other known language?", ["Basque", "Hungarian", "Maltese", "Welsh"], 0, "Basque is Europe's only language isolate, spoken either side of the western Pyrenees."],
+  ["pan-arab-flag", "easy", "Which of these Arab countries' flags does NOT use the Pan-Arab colours (red, white, green and black)?", ["Qatar", "Kuwait", "UAE", "Jordan"], 0, "Qatar's maroon and white flag is the only national flag more than twice as wide as it is tall."],
+  ["not-in-the-uk", "hard", "Which of these island groups is NOT part of the United Kingdom?", ["The Channel Islands", "Orkney", "Shetland", "The Isles of Scilly"], 0, "Jersey and Guernsey are Crown Dependencies: they belong to the Crown, not the UK."],
+  ["not-a-wonder", "easy", "Which of these was NOT one of the Seven Wonders of the Ancient World?", ["The Great Wall of China", "The Colossus of Rhodes", "The Hanging Gardens of Babylon", "The Great Pyramid of Giza"], 0, "All seven stood around the Mediterranean and the Middle East, from Greece to Babylon."],
+  ["empire-state-mast", "hard", "The mast on top of the Empire State Building was first meant to be…", ["A dock for airships", "A lightning rod", "A radio antenna", "A flagpole"], 0, "High winds made mooring airships there impossible, so the plan was dropped."]
 ];
 
 /* shared out over the levels that are on, exactly as the flags are (easy: 2 at most) */
@@ -4860,11 +4963,28 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 65;   // bumped when the built-in bank changes
+const SEED_VERSION = 66;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
 const SEED_NEVER = [
+  ["q1lfre32", "q112e4ml"],   // 14 Nov, Open Trivia DB picks
+  ["mr:rushmore-carved", "pin:mount-rushmore"],   // 14 Nov, Open Trivia DB picks
+  ["q11duzcq", "q1rd34di"],   // 14 Nov, Open Trivia DB picks
+  ["q5puwli", "mr:person-travel"],   // 14 Nov, Open Trivia DB picks
+  ["q1tzq4t9", "flag:mz"],   // 14 Nov, Open Trivia DB picks
+  ["qlbaqsm", "qeiykae"],   // 14 Nov, Open Trivia DB picks
+  ["mr:pan-arab-flag", "flag:qa"],   // 14 Nov, Open Trivia DB picks
+  ["qvvl3wh", "qzzx729"],   // 14 Nov, Open Trivia DB picks
+  ["qnu24hb", "qs2ozq1"],   // 14 Nov, Open Trivia DB picks
+  ["q1j1avn6", "qwyt3tz"],   // 14 Nov, Open Trivia DB picks
+  ["qe67pd2", "q673c5y"],   // 14 Nov, Open Trivia DB picks
+  ["qf5v4ba", "mr:great-fire"],   // 14 Nov, Open Trivia DB picks
+  ["qv0kn1c", "q1ayxqx5"],   // 14 Nov, Open Trivia DB picks
+  ["qkfdrx7", "qjaj80m", "mr:never-a-ford", "q10eg6ia", "see:toyota"],   // 14 Nov, Open Trivia DB picks: Toyota
+  ["qqww2t8", "q1w2hflh", "q1coaj68"],   // 14 Nov, Open Trivia DB picks: India
+  ["qqr90ur", "q1agvrc"],   // 14 Nov, Open Trivia DB picks: cherries
+  ["qp08ww6", "mr:pan-arab-flag"],   // 14 Nov, Open Trivia DB picks: Qatar
   ["q1vonine", "flag:ke"],   // 10 Nov, round 4
   ["q1rpz5ma", "q6d4so3"],   // 10 Nov, round 4
   ["qo4biq9", "qaf00tt"],   // 10 Nov, round 4

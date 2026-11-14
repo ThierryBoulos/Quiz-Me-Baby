@@ -68,10 +68,10 @@
 79.50 miniQ | 29 | 6-6 | 0-1 | Owls take leg 1. | 
 80.50 closestReveal | 29 | 6-6 | 0-2 | Owls take leg 1. | 
 81.50 miniQ | 30 | 6-6 | 0-2 | Owls take leg 2. | 
-82.25 closestReveal | 30 | 6-6 | 1-2 | Owls take leg 2. | 
-83.25 miniQ | 31 | 6-6 | 1-2 | Lions take leg 3. | 
-84.00 closestReveal | 31 | 6-6 | 1-3 | Lions take leg 3. | 
-85.00 decided | 32 | 6-6 | 1-3 |  | 
+82.25 closestReveal | 30 | 6-6 | 1-3 | Owls take leg 2. | 
+83.25 miniQ | 31 | 6-6 | 1-3 | Tie — a point each. | 
+84.00 closestReveal | 31 | 6-6 | 1-4 | Tie — a point each. | 
+85.00 decided | 32 | 6-6 | 1-4 |  | 
 86.00 roundIntro | 33 | 6-8 |  |  | 
 86.75 ask | 34 | 6-8 |  |  | 
 87.75 steal | 34 | 6-8 |  |  | 
@@ -131,4 +131,4 @@
 151.50 battleReview | 62 | 10-10 | 3-4 | Both captains agreed. New question. | 
 152.50 battleSummary | 63 | 10-12 | 3-4 | Both captains agreed. New question. | 
 153.50 final | 64 | 10-12 |  | Both captains agreed. New question. | 
-recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[3,3],"minis":[2,2],"best":{"title":"Closest To Wins","team":1,"legs":[1,3]},"chart":[[0,0],[0,0],[1,0],[2,0],[4,4],[6,4],[6,5],[6,6],[6,8],[6,9],[7,9],[7,10],[9,10],[10,10],[10,12]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"R2","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[4,4],[6,4]]},{"label":"R3","pts":[[6,5],[6,6]]},{"label":"Closest To Wins","pts":[[6,8]]},{"label":"R4","pts":[[6,9],[7,9]]},{"label":"R5","pts":[[7,10]]},{"label":"The Auction","pts":[[9,10]]},{"label":"R6","pts":[[10,10]]},{"label":"Battle of the Captains","pts":[[10,12]]}],"awards":[{"t":"Down to the wire","who":"Owls took the lead for good in the Battle of the Captains","team":1},{"t":"One-way traffic","who":"Closest To Wins, Owls 3–1","team":1},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1}]}
+recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[3,3],"minis":[2,2],"best":{"title":"Closest To Wins","team":1,"legs":[1,4]},"chart":[[0,0],[0,0],[1,0],[2,0],[4,4],[6,4],[6,5],[6,6],[6,8],[6,9],[7,9],[7,10],[9,10],[10,10],[10,12]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"R2","pts":[[2,0]]},{"label":"Guess the Flag","pts":[[4,4],[6,4]]},{"label":"R3","pts":[[6,5],[6,6]]},{"label":"Closest To Wins","pts":[[6,8]]},{"label":"R4","pts":[[6,9],[7,9]]},{"label":"R5","pts":[[7,10]]},{"label":"The Auction","pts":[[9,10]]},{"label":"R6","pts":[[10,10]]},{"label":"Battle of the Captains","pts":[[10,12]]}],"awards":[{"t":"Down to the wire","who":"Owls took the lead for good in the Battle of the Captains","team":1},{"t":"One-way traffic","who":"Closest To Wins, Owls 4–1","team":1},{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1}]}

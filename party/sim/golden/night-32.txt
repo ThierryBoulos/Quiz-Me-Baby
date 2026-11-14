@@ -71,26 +71,27 @@
 102.00 battleQ | 30 | 5-4 | 5-0 | Lions +2 points — steal | 
 103.00 battleHandoff | 30 | 5-4 | 6-0 | Lions +2 points — steal | 
 104.00 battleQ | 31 | 5-4 | 6-0 | Lions +2 points — steal | 
-104.75 battleQ | 31 | 5-4 | 6-1 | Lions +2 points — steal | 
-107.50 battleQ | 31 | 5-4 | 6-2 | Lions +2 points — steal | 
-109.25 battleQ | 31 | 5-4 | 6-3 | Lions +2 points — steal | 
-110.25 battleQ | 31 | 5-4 | 6-4 | Lions +2 points — steal | 
-111.00 battleQ | 31 | 5-4 | 6-5 | Lions +2 points — steal | 
-112.00 battleQ | 31 | 5-4 | 6-6 | Lions +2 points — steal | 
-113.00 battleReview | 31 | 5-4 | 6-7 | Lions +2 points — steal | 
-113.75 battleSummary | 32 | 5-6 | 6-7 | Lions +2 points — steal | 
-114.75 stakesIntro | 33 | 5-6 | 0-0 | Lions +2 points — steal | 
-115.50 stakesPick | 34 | 5-6 | 0-0 | Lions +2 points — steal | 
-116.50 stakesQ | 35 | 5-6 | 0-0 | Lions +2 points — steal | 
-117.50 stakesReveal | 35 | 4-4 | 0-0 | Lions +2 points — steal | 
-118.25 stakesReveal | 35 | 4-4 | 0-0 |  | 
-119.25 stakesReveal | 35 | 4-8 | 0-0 | Call changed: ⁨Owls⁩ RIGHT. | 
-120.00 stakesPick | 36 | 4-8 | -1-2 | Call changed: ⁨Owls⁩ RIGHT. | 
-121.00 stakesQ | 37 | 4-8 | -1-2 | Call changed: ⁨Owls⁩ RIGHT. | 
-122.00 stakesReveal | 37 | 4-5 | -1-2 | Call changed: ⁨Owls⁩ RIGHT. | 
-122.75 stakesPick | 38 | 4-5 | -1--1 | Call changed: ⁨Owls⁩ RIGHT. | 
-123.75 stakesQ | 39 | 4-5 | -1--1 | Call changed: ⁨Owls⁩ RIGHT. | 
-124.50 stakesReveal | 39 | 1-2 | -1--1 | Call changed: ⁨Owls⁩ RIGHT. | 
-125.50 stakesSummary | 40 | 1-2 | -4--4 | Call changed: ⁨Owls⁩ RIGHT. | 
-126.50 final | 41 | 1-2 |  | Call changed: ⁨Owls⁩ RIGHT. | 
-recap: {"margin":1,"sudden":false,"leadChanges":3,"steals":[2,1],"minis":[0,2],"best":{"title":"Guess the Flag","team":1,"legs":[2,4]},"chart":[[0,0],[0,0],[1,0],[2,0],[3,0],[3,1],[3,3],[3,4],[5,4],[5,6],[4,8],[4,5],[1,2]],"segs":[{"label":"R1","pts":[[1,0],[2,0]]},{"label":"R2","pts":[[3,0],[3,1]]},{"label":"Guess the Flag","pts":[[3,3]]},{"label":"R3","pts":[[3,4]]},{"label":"R4","pts":[[5,4]]},{"label":"Battle of the Captains","pts":[[5,6]]},{"label":"Secret Stakes","pts":[[4,8],[4,5],[1,2]]}],"awards":[{"t":"Comeback","who":"Owls, 3 points down in Round 2","team":1},{"t":"Down to the wire","who":"Won by a single point","team":1},{"t":"Best thief","who":"Lions, 2 steals","team":0},{"t":"Battle of the Captains","who":"Lea, 7 of 10","team":1}]}
+107.50 battleQ | 31 | 5-4 | 6-1 | Lions +2 points — steal | 
+109.25 battleQ | 31 | 5-4 | 6-2 | Lions +2 points — steal | 
+110.25 battleQ | 31 | 5-4 | 6-3 | Lions +2 points — steal | 
+111.00 battleQ | 31 | 5-4 | 6-4 | Lions +2 points — steal | 
+112.00 battleQ | 31 | 5-4 | 6-5 | Lions +2 points — steal | 
+113.00 battleReview | 31 | 5-4 | 6-6 | Lions +2 points — steal | 
+113.75 battleTie | 32 | 5-4 | 6-6 | Lions +2 points — steal | 
+114.75 battleTie | 32 | 5-4 | 6-6 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+115.50 battleSummary | 32 | 5-6 | 6-6 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+116.50 stakesIntro | 33 | 5-6 | 0-0 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+117.50 stakesPick | 34 | 5-6 | 0-0 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+118.25 stakesQ | 35 | 5-6 | 0-0 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+119.25 stakesReveal | 35 | 2-9 | 0-0 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+120.00 stakesPick | 36 | 2-9 | -3-3 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+121.00 stakesQ | 37 | 2-9 | -3-3 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+122.00 stakesReveal | 37 | 2-9 | -3-3 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+122.75 stakesPick | 38 | 2-9 | -3-3 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+124.50 stakesQ | 39 | 2-9 | -3-3 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+125.50 stakesReveal | 39 | 0-6 | -3-3 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+126.50 stakesReveal | 39 | 0-6 | -3-3 |  | 
+128.25 stakesReveal | 39 | 0-6 | -3-3 | ⁨Lea⁩ doesn't agree: the call stands. | 
+129.00 stakesSummary | 40 | 0-6 | -5-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+130.00 final | 41 | 0-6 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+recap: {"margin":6,"sudden":false,"leadChanges":3,"steals":[2,1],"minis":[0,2],"best":{"title":"Guess the Flag","team":1,"legs":[2,4]},"chart":[[0,0],[0,0],[1,0],[2,0],[3,0],[3,1],[3,3],[3,4],[5,4],[5,6],[2,9],[0,6]],"segs":[{"label":"R1","pts":[[1,0],[2,0]]},{"label":"R2","pts":[[3,0],[3,1]]},{"label":"Guess the Flag","pts":[[3,3]]},{"label":"R3","pts":[[3,4]]},{"label":"R4","pts":[[5,4]]},{"label":"Battle of the Captains","pts":[[5,6]]},{"label":"Secret Stakes","pts":[[2,9],[0,6]]}],"awards":[{"t":"Comeback","who":"Owls, 3 points down in Round 2","team":1},{"t":"Best thief","who":"Lions, 2 steals","team":0},{"t":"Battle of the Captains","who":"Lea, 6 of 10","team":1}]}

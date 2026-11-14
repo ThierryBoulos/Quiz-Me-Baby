@@ -369,9 +369,10 @@
   const ROULETTE_LAPS = 3, ROULETTE_SPARE = 3, ROULETTE_SKIP_THEMES = ['Know the Host'];
   /* ...and only the broad themes, everyone's ground (9 Nov, the owner): a fandom theme (Friends, Rave Culture, Geek &
      Gamer…) only on a night that picked it, so a spin can't land a team on a show nobody there watches. Celebrities,
-     Quotes and Acronyms join them (10 Nov, the owner: 'anything that is not fandom') */
-  const ROULETTE_THEMES = ['General Knowledge', 'Geography', 'History', 'Science', 'Nature', 'Sports', 'Music', 'Movies', 'TV Series',
-    'Food & Drink', 'Art & Books', 'Tech & Business', 'Celebrities', 'Quotes', 'Acronyms'];
+     Quotes and Acronyms join them (10 Nov, the owner: 'anything that is not fandom'); Mythology & Folklore, its own theme
+     since 14 Nov (the owner: not History), too */
+  const ROULETTE_THEMES = ['General Knowledge', 'Geography', 'History', 'Mythology & Folklore', 'Science', 'Nature', 'Sports', 'Music', 'Movies',
+    'TV Series', 'Food & Drink', 'Art & Books', 'Tech & Business', 'Celebrities', 'Quotes', 'Acronyms'];
   const rouletteChambers = (k) => (k > 6 ? 8 : 6);
   /* Secret Stakes (11 Nov, the owner): the night's last game, after the Battle. Three rounds, each showing three
      themes (nine over the game, from the same broad themes as Russian Roulette and the night's own); each captain

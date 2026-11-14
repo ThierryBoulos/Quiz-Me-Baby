@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Q = require('./core.js');
 
-const THEMES = ['General Knowledge', 'Geography', 'History', 'Science', 'Nature', 'Sports', 'Music', 'Movies', 'TV Series',
-  'Food & Drink', 'Art & Books', 'Tech & Business', 'Celebrities', 'Quotes', 'Acronyms'];
+const THEMES = ['General Knowledge', 'Geography', 'History', 'Mythology & Folklore', 'Science', 'Nature', 'Sports', 'Music', 'Movies',
+  'TV Series', 'Food & Drink', 'Art & Books', 'Tech & Business', 'Celebrities', 'Quotes', 'Acronyms'];
 /* a bank: every broad theme with n questions at each level, a fandom theme, the host's own trivia, and one of the host's making */
 function bankOf(n = 3, extra = []){
   const b = [];
@@ -226,5 +226,5 @@ test('stakes: the thin-bank note counts the themes that can still fill every lev
   const bank = bankOf(1), used = new Set(bank.filter(q => THEMES.slice(0, 8).includes(q.theme)).map(q => q.id));
   const D = Q.createDealer({ bank:() => bank, used:() => used, noRepeat:() => true });
   const t = D.thinBank().find(x => x.key === 'stakes');
-  assert.deepEqual(t, { key:'stakes', left:7, need:9 });
+  assert.deepEqual(t, { key:'stakes', left:THEMES.length - 8, need:9 });
 });

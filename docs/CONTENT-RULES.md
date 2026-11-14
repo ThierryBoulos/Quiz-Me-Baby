@@ -46,6 +46,9 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   "human" 9. Notes then say "Counted from the album version." (never "by the owner": notes are shown on the TV).
 - **A trick question can stay a trick** when it's fair and the notes explain it (first animal in space: fruit
   flies).
+- **Mythology & Folklore is its own theme, not History (14 Nov, the owner).** Gods, myths, legends and folklore
+  (Greek, Roman, Norse, Egyptian, Mesopotamian, Japanese…) go there: Cerberus, the Trojan horse, Baldr, the kappa.
+  Real history stays in History, even when it's ancient (the first Roman emperor, Saladin).
 
 ## 2. Answers and what else counts
 
@@ -139,8 +142,9 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
 - **Drop the Pin**: a photo people can recognise (not an aerial ridge only experts know), the pin on the actual
   spot, the place line capitalised ("Near Homs, Syria").
 - **Russian Roulette** (9 and 10 Nov, the owner): it deals standard questions from the broad themes, everyone's
-  ground: General Knowledge, Geography, History, Science, Nature, Sports, Music, Movies, TV Series, Food & Drink,
-  Art & Books, Tech & Business, Celebrities, Quotes, Acronyms (`ROULETTE_THEMES` in `engine/core.js`). A fandom
+  ground: General Knowledge, Geography, History, Mythology & Folklore, Science, Nature, Sports, Music, Movies, TV
+  Series, Food & Drink, Art & Books, Tech & Business, Celebrities, Quotes, Acronyms (`ROULETTE_THEMES` in
+  `engine/core.js`). A fandom
   theme (Friends, Rave Culture, Geek & Gamer…), Sexy Time or Lebanon only on a night that picked it; never Know the
   Host or the host's own themes. Each barrel is 6 chambers (8 with 7 or 8 teams), each its own theme: one bullet
   (an **Expert** question: +5 right, −3 wrong) and the rest **Medium** (+2) and **Hard** (+3). So every broad theme
