@@ -38,50 +38,50 @@ reveal quiz 1 | reveal | 30-14-24
 reveal quiz 2 | reveal | 30-14-24
 reveal quiz 3 | reveal | 30-14-24
 reveal quiz 4 | reveal | 30-14-24
-next game | intro | 38-24-30
-start closest | q | 38-24-30
-reveal closest 1 | reveal | 38-24-30
-reveal closest 2 | reveal | 38-24-30
-reveal closest 3 | reveal | 38-24-30
-reveal closest 4 | reveal | 38-24-30
-reveal closest 5 | reveal | 38-24-30
-next game | intro | 48-30-38
-start pin | q | 48-30-38
-reveal pin 1 | reveal | 48-30-38
-reveal pin 2 | reveal | 48-30-38
-reveal pin 3 | reveal | 48-30-38
-reveal pin 4 | reveal | 48-30-38
-reveal pin 5 | reveal | 48-30-38
-reveal pin 6 | reveal | 48-30-38
-reveal pin 7 | reveal | 48-30-38
-next game | intro | 56-40-46
-start quiz | q | 56-40-46
-reveal quiz 1 | reveal | 56-40-46
-reveal quiz 2 | reveal | 56-40-46
-reveal quiz 3 | reveal | 56-40-46
-reveal quiz 4 | reveal | 56-40-46
-next game | intro | 64-48-56
-start see | q | 64-48-56
-reveal see 1 | reveal | 64-48-56
-reveal see 2 | reveal | 64-48-56
-reveal see 3 | reveal | 64-48-56
-reveal see 4 | reveal | 64-48-56
-reveal see 5 | reveal | 64-48-56
-reveal see 6 | reveal | 64-48-56
-reveal see 7 | reveal | 64-48-56
-reveal see 8 | reveal | 64-48-56
-reveal see 9 | reveal | 64-48-56
-reveal see 10 | reveal | 64-48-56
-reveal see 11 | reveal | 64-48-56
-reveal see 12 | reveal | 64-48-56
-next game | intro | 70-58-64
-start stakes | pick | 70-58-64
-bets in | q | 70-58-64
-reveal stakes 1 | reveal | 70-58-64
-bets in | q | 70-54-66
-reveal stakes 2 | reveal | 70-54-66
-bets in | q | 64-58-64
-reveal stakes 3 | reveal | 64-58-64
-next game | final | 64-54-64
+next game | intro | 40-24-30
+start closest | q | 40-24-30
+reveal closest 1 | reveal | 40-24-30
+reveal closest 2 | reveal | 40-24-30
+reveal closest 3 | reveal | 40-24-30
+reveal closest 4 | reveal | 40-24-30
+reveal closest 5 | reveal | 40-24-30
+next game | intro | 46-34-40
+start pin | q | 46-34-40
+reveal pin 1 | reveal | 46-34-40
+reveal pin 2 | reveal | 46-34-40
+reveal pin 3 | reveal | 46-34-40
+reveal pin 4 | reveal | 46-34-40
+reveal pin 5 | reveal | 46-34-40
+reveal pin 6 | reveal | 46-34-40
+reveal pin 7 | reveal | 46-34-40
+next game | intro | 54-42-50
+start quiz | q | 54-42-50
+reveal quiz 1 | reveal | 54-42-50
+reveal quiz 2 | reveal | 54-42-50
+reveal quiz 3 | reveal | 54-42-50
+reveal quiz 4 | reveal | 54-42-50
+next game | intro | 64-42-58
+start see | q | 64-42-58
+reveal see 1 | reveal | 64-42-58
+reveal see 2 | reveal | 64-42-58
+reveal see 3 | reveal | 64-42-58
+reveal see 4 | reveal | 64-42-58
+reveal see 5 | reveal | 64-42-58
+reveal see 6 | reveal | 64-42-58
+reveal see 7 | reveal | 64-42-58
+reveal see 8 | reveal | 64-42-58
+reveal see 9 | reveal | 64-42-58
+reveal see 10 | reveal | 64-42-58
+reveal see 11 | reveal | 64-42-58
+reveal see 12 | reveal | 64-42-58
+next game | intro | 70-50-68
+start stakes | pick | 70-50-68
+bets in | q | 70-50-68
+reveal stakes 1 | reveal | 70-50-68
+bets in | q | 76-50-64
+reveal stakes 2 | reveal | 76-50-64
+bets in | q | 74-56-64
+reveal stakes 3 | reveal | 74-56-64
+next game | final | 74-56-68
 games: Rounds 1 and 2, Majority Rules, Guess the Flag, Rounds 3 and 4, Closest To Wins, Drop the Pin, Rounds 5 and 6, What Do You See?, Secret Stakes
-final 1:Team A 1:Team C 3:Team B
+final 1:Team A 2:Team C 3:Team B

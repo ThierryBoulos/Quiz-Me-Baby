@@ -3,85 +3,85 @@ reveal quiz 1 | reveal | 0-0-0-0-0-0-0-0
 reveal quiz 2 | reveal | 0-0-0-0-0-0-0-0
 reveal quiz 3 | reveal | 0-0-0-0-0-0-0-0
 reveal quiz 4 | reveal | 0-0-0-0-0-0-0-0
-next game | intro | 5-8-5-10-3-3-6-0
-start majority | q | 5-8-5-10-3-3-6-0
-reveal majority 1 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 2 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 3 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 4 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 5 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 6 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 7 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 8 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 9 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 10 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 11 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 12 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 13 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 14 | reveal | 5-8-5-10-3-3-6-0
-reveal majority 15 | reveal | 5-8-5-10-3-3-6-0
-next game | intro | 15-18-8-13-8-9-9-4
-start flag | q | 15-18-8-13-8-9-9-4
-reveal flag 1 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 2 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 3 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 4 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 5 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 6 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 7 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 8 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 9 | reveal | 15-18-8-13-8-9-9-4
-reveal flag 10 | reveal | 15-18-8-13-8-9-9-4
-next game | intro | 25-21-13-23-11-15-13-7
-start quiz | q | 25-21-13-23-11-15-13-7
-reveal quiz 1 | reveal | 25-21-13-23-11-15-13-7
-reveal quiz 2 | reveal | 25-21-13-23-11-15-13-7
-reveal quiz 3 | reveal | 25-21-13-23-11-15-13-7
-reveal quiz 4 | reveal | 25-21-13-23-11-15-13-7
-next game | intro | 31-26-21-33-14-18-16-11
-start closest | q | 31-26-21-33-14-18-16-11
-reveal closest 1 | reveal | 31-26-21-33-14-18-16-11
-reveal closest 2 | reveal | 31-26-21-33-14-18-16-11
-reveal closest 3 | reveal | 31-26-21-33-14-18-16-11
-reveal closest 4 | reveal | 31-26-21-33-14-18-16-11
-reveal closest 5 | reveal | 31-26-21-33-14-18-16-11
-next game | intro | 41-31-24-36-18-26-19-19
-start pin | q | 41-31-24-36-18-26-19-19
-reveal pin 1 | reveal | 41-31-24-36-18-26-19-19
-reveal pin 2 | reveal | 41-31-24-36-18-26-19-19
-reveal pin 3 | reveal | 41-31-24-36-18-26-19-19
-reveal pin 4 | reveal | 41-31-24-36-18-26-19-19
-reveal pin 5 | reveal | 41-31-24-36-18-26-19-19
-reveal pin 6 | reveal | 41-31-24-36-18-26-19-19
-reveal pin 7 | reveal | 41-31-24-36-18-26-19-19
-next game | intro | 44-41-27-40-23-29-25-29
-start quiz | q | 44-41-27-40-23-29-25-29
-reveal quiz 1 | reveal | 44-41-27-40-23-29-25-29
-reveal quiz 2 | reveal | 44-41-27-40-23-29-25-29
-reveal quiz 3 | reveal | 44-41-27-40-23-29-25-29
-reveal quiz 4 | reveal | 44-41-27-40-23-29-25-29
-next game | intro | 52-41-27-50-29-34-29-29
-start see | q | 52-41-27-50-29-34-29-29
-reveal see 1 | reveal | 52-41-27-50-29-34-29-29
-reveal see 2 | reveal | 52-41-27-50-29-34-29-29
-reveal see 3 | reveal | 52-41-27-50-29-34-29-29
-reveal see 4 | reveal | 52-41-27-50-29-34-29-29
-reveal see 5 | reveal | 52-41-27-50-29-34-29-29
-reveal see 6 | reveal | 52-41-27-50-29-34-29-29
-reveal see 7 | reveal | 52-41-27-50-29-34-29-29
-reveal see 8 | reveal | 52-41-27-50-29-34-29-29
-reveal see 9 | reveal | 52-41-27-50-29-34-29-29
-reveal see 10 | reveal | 52-41-27-50-29-34-29-29
-reveal see 11 | reveal | 52-41-27-50-29-34-29-29
-reveal see 12 | reveal | 52-41-27-50-29-34-29-29
-next game | intro | 58-46-37-50-33-37-39-29
-start stakes | pick | 58-46-37-50-33-37-39-29
-bets in | q | 58-46-37-50-33-37-39-29
-reveal stakes 1 | reveal | 58-46-37-50-33-37-39-29
-bets in | q | 58-46-31-56-33-31-37-29
-reveal stakes 2 | reveal | 58-46-31-56-33-31-37-29
-bets in | q | 60-40-35-56-31-35-41-35
-reveal stakes 3 | reveal | 60-40-35-56-31-35-41-35
-next game | final | 60-46-31-54-31-33-41-31
+next game | intro | 5-5-5-10-8-3-6-0
+start majority | q | 5-5-5-10-8-3-6-0
+reveal majority 1 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 2 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 3 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 4 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 5 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 6 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 7 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 8 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 9 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 10 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 11 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 12 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 13 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 14 | reveal | 5-5-5-10-8-3-6-0
+reveal majority 15 | reveal | 5-5-5-10-8-3-6-0
+next game | intro | 9-13-13-13-11-8-16-3
+start flag | q | 9-13-13-13-11-8-16-3
+reveal flag 1 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 2 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 3 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 4 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 5 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 6 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 7 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 8 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 9 | reveal | 9-13-13-13-11-8-16-3
+reveal flag 10 | reveal | 9-13-13-13-11-8-16-3
+next game | intro | 12-21-23-16-19-12-19-11
+start quiz | q | 12-21-23-16-19-12-19-11
+reveal quiz 1 | reveal | 12-21-23-16-19-12-19-11
+reveal quiz 2 | reveal | 12-21-23-16-19-12-19-11
+reveal quiz 3 | reveal | 12-21-23-16-19-12-19-11
+reveal quiz 4 | reveal | 12-21-23-16-19-12-19-11
+next game | intro | 20-25-29-19-25-22-22-14
+start closest | q | 20-25-29-19-25-22-22-14
+reveal closest 1 | reveal | 20-25-29-19-25-22-22-14
+reveal closest 2 | reveal | 20-25-29-19-25-22-22-14
+reveal closest 3 | reveal | 20-25-29-19-25-22-22-14
+reveal closest 4 | reveal | 20-25-29-19-25-22-22-14
+reveal closest 5 | reveal | 20-25-29-19-25-22-22-14
+next game | intro | 25-28-39-25-28-26-25-22
+start pin | q | 25-28-39-25-28-26-25-22
+reveal pin 1 | reveal | 25-28-39-25-28-26-25-22
+reveal pin 2 | reveal | 25-28-39-25-28-26-25-22
+reveal pin 3 | reveal | 25-28-39-25-28-26-25-22
+reveal pin 4 | reveal | 25-28-39-25-28-26-25-22
+reveal pin 5 | reveal | 25-28-39-25-28-26-25-22
+reveal pin 6 | reveal | 25-28-39-25-28-26-25-22
+reveal pin 7 | reveal | 25-28-39-25-28-26-25-22
+next game | intro | 28-34-42-29-36-29-35-28
+start quiz | q | 28-34-42-29-36-29-35-28
+reveal quiz 1 | reveal | 28-34-42-29-36-29-35-28
+reveal quiz 2 | reveal | 28-34-42-29-36-29-35-28
+reveal quiz 3 | reveal | 28-34-42-29-36-29-35-28
+reveal quiz 4 | reveal | 28-34-42-29-36-29-35-28
+next game | intro | 34-44-50-33-41-29-38-28
+start see | q | 34-44-50-33-41-29-38-28
+reveal see 1 | reveal | 34-44-50-33-41-29-38-28
+reveal see 2 | reveal | 34-44-50-33-41-29-38-28
+reveal see 3 | reveal | 34-44-50-33-41-29-38-28
+reveal see 4 | reveal | 34-44-50-33-41-29-38-28
+reveal see 5 | reveal | 34-44-50-33-41-29-38-28
+reveal see 6 | reveal | 34-44-50-33-41-29-38-28
+reveal see 7 | reveal | 34-44-50-33-41-29-38-28
+reveal see 8 | reveal | 34-44-50-33-41-29-38-28
+reveal see 9 | reveal | 34-44-50-33-41-29-38-28
+reveal see 10 | reveal | 34-44-50-33-41-29-38-28
+reveal see 11 | reveal | 34-44-50-33-41-29-38-28
+reveal see 12 | reveal | 34-44-50-33-41-29-38-28
+next game | intro | 38-50-56-37-51-32-38-36
+start stakes | pick | 38-50-56-37-51-32-38-36
+bets in | q | 38-50-56-37-51-32-38-36
+reveal stakes 1 | reveal | 38-50-56-37-51-32-38-36
+bets in | q | 34-44-54-31-55-32-32-34
+reveal stakes 2 | reveal | 34-44-54-31-55-32-32-34
+bets in | q | 32-42-54-31-55-38-26-34
+reveal stakes 3 | reveal | 32-42-54-31-55-38-26-34
+next game | final | 26-44-54-29-61-42-26-32
 games: Rounds 1 and 2, Majority Rules, Guess the Flag, Rounds 3 and 4, Closest To Wins, Drop the Pin, Rounds 5 and 6, What Do You See?, Secret Stakes
-final 1:Team A 2:Team D 3:Team B 4:Team G 5:Team F 6:Team C 6:Team E 6:Team H
+final 1:Team E 2:Team C 3:Team B 4:Team F 5:Team H 6:Team D 7:Team A 7:Team G
