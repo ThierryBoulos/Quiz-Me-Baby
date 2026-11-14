@@ -329,6 +329,53 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`Secret Stakes, 3-8 teams: the bet from the scoreboard, the bets, the safe bet at time-up, each team's own question, the totals (never below 0), Change question, Pause, no places on top — ${ok ? "ok" : "FAILED: " + why.join("; ")}`);
 }
+/* the night a new room starts with (the owner, 14 Nov): six standard rounds (three games of two), Majority Rules, Guess
+   the Flag, Closest To Wins, Drop the Pin, What Do You See?, and Secret Stakes last; with 3 teams and with 8 */
+{
+  const Q = createRequire(import.meta.url)("../../engine/core.js");
+  for (const [k, crowd, seed] of [[3, 9, 11], [8, 40, 12]]) {
+    const r = rng(seed);
+    const D = Q.createDealer({ bank: () => bank, used: () => new Set(), noRepeat: () => true, rng: r });
+    const g = D.buildGame({ standard: false, rounds: 0, themes: [], minis: ["stakes"], teamA: { name: "A" }, teamB: { name: "B" } });
+    const order = L.lineup(3, ["majority", "flag", "closest", "pin", "see", "stakes"]);
+    const teams = Array.from({ length: k }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+    const roster = Array.from({ length: crowd }, (_, i) => ({ name: "P" + i, team: i % k }));
+    const s = L.newNight(teams, { ...decks, stakes: [...g.stakesGame.rounds, ...g.stakesGame.spare] }, order), trace = [];
+    let now = 0;
+    const line = (what) => trace.push(`${what} | ${s.screen} | ${s.teams.map((x) => x.score).join("-")}`);
+    for (let guard = 0; guard < 3000 && s.screen !== "final"; guard++) {
+      if (s.screen === "intro") { L.startMini(s, now, T, roster); line("start " + L.miniOf(s).key); continue; }
+      /* Secret Stakes: every team bets (a theme, a level), then the questions */
+      if (s.screen === "pick") { for (let t = 0; t < k; t++) L.stakesBet(s, t, Math.floor(r() * 3), ["easy", "medium", "hard", "expert"][Math.floor(r() * 4)], now, T); L.lockStakes(s, now, T); line("bets in"); continue; }
+      if (s.screen === "q") {
+        const m = L.miniOf(s), q = L.qOf(s);
+        if (m.key === "majority") for (const p of s.roster) { if (r() < 0.1) continue; L.vote(s, p.name, r() < 0.5 ? q.answer : q.options[Math.floor(r() * 4)]); }
+        /* What Do You See?: a team buzzes, then answers; wrong, it's out and another may buzz */
+        else if (m.key === "see") { for (const t of [...Array(k).keys()].sort(() => r() - 0.5)) { if (s.screen !== "q") break; now += 1500;
+          if (L.buzzSee(s, t, now) !== true) continue; L.captainAnswer(s, t, { text: r() < 0.4 ? q.answer : "Atlantis" }, undefined, now); } }
+        else for (let t = 0; t < k; t++) {
+          if (r() < 0.1) continue;
+          if (m.key === "stakes") L.captainAnswer(s, t, { text: r() < 0.5 ? L.skQm(s, t).answer : "Atlantis" });
+          else if (L.typedKey(m.key)) L.captainAnswer(s, t, { text: typedFor(m.key, q, r) });
+          if (m.key === "closest") L.captainAnswer(s, t, { n: String(Math.round(Number(q.answer) * (0.5 + r()))) });
+          if (m.key === "pin") L.captainAnswer(s, t, { pin: { lat: q.lat + (r() - 0.5) * 20, lon: q.lon + (r() - 0.5) * 20 } });
+        }
+        now += 10000; if (s.screen === "q") L.reveal(s);
+        line(`reveal ${m.key} ${m.i + 1}`); continue;
+      }
+      if (s.screen === "reveal" || s.screen === "summary") { const was = s.screen; L.next(s, now, T); if (was === "summary") line("next game"); continue; }
+      L.next(s, now, T);
+    }
+    trace.push("games: " + s.minis.map((_, i) => L.titleOf(s.minis, i)).join(", "));
+    trace.push("final " + L.ranking(s).map((x) => `${x.place}:${s.teams[x.team].name}`).join(" "));
+    const file = join(here, `golden/many-default-${k}.txt`), text = trace.join("\n") + "\n";
+    let verdict;
+    if (s.screen !== "final") { verdict = `NEVER ENDED (on ${s.screen})`; bad++; }
+    else if (update || !existsSync(file)) { writeFileSync(file, text); verdict = "saved"; }
+    else { const want = readFileSync(file, "utf8"); verdict = want === text ? "same as golden" : "DIFFERS"; if (want !== text) bad++; }
+    console.log(`many ${k} teams, the default night (${order.length} games): ${s.teams.map((x) => x.score).join("-")} — ${verdict}`);
+  }
+}
 /* the cap: 60 players on one Majority Rules question, every one of them in, in one go */
 {
   const k = 8, roster = Array.from({ length: 60 }, (_, i) => ({ name: "P" + i, team: i % k }));

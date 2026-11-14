@@ -73,6 +73,10 @@ const NIGHTS = [
   { seed: 38, minis: ["see", "closest"], rounds: 4, host: true, tieMore: 1 },
   { seed: 39, minis: ["see"], rounds: 0, reload: 12 },
   { seed: 40, minis: ["see", "battle"], rounds: 3, slow: 0.95 },
+  /* 14 Nov: the night a new room starts with (the owner): six rounds, Flag, Closest, the Auction, What Do You See?,
+     Russian Roulette, the Battle; no host and with a host */
+  { seed: 50, minis: ["flag", "closest", "auction", "see", "roulette", "battle"] },
+  { seed: 51, minis: ["flag", "closest", "auction", "see", "roulette", "battle"], host: true },
   { seed: 41, minis: ["see"], rounds: 2, host: true, events: [{ at: 14, type: "pause", for: 8 }, { at: 30, type: "swap" }] },
 ];
 

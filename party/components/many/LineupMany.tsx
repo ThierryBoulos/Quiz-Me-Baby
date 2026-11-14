@@ -103,8 +103,9 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
      taking over as host (11 Nov, the owner) */
   useDraftHost(code, true);
   useEffect(() => { if (tv?.draft) adoptDraft(code, tv.draft); }, [code, tv?.draft]);
-  /* on to start with: the standard rounds and the first four games; the rest are a tap away */
-  const [minis, setMinis] = useDraft<string[]>(code, "many.minis", ["quiz", "majority", "flag", "closest", "pin"]);
+  /* on to start with (the owner, 14 Nov): the standard rounds, Majority Rules, Flag, Closest, Drop the Pin, What Do You
+     See? and Secret Stakes; the rest are a tap away */
+  const [minis, setMinis] = useDraft<string[]>(code, "many.minis", ["quiz", "majority", "flag", "closest", "pin", "see", "stakes"]);
   /* standard rounds: one theme each, 1 to 14, played two at a time (the default night is the same as before: six) */
   const [rounds, setRounds] = useDraft(code, "many.rounds", 6);
   const [quizLevels, setQuizLevels] = useDraft<string[]>(code, "many.quizLevels", ["easy", "medium", "hard"]);
