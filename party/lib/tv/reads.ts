@@ -1,6 +1,6 @@
 /* What the TV's state says, without changing it: the question in play, whose turn
    it is, who leads the night with no host, who won the leg on screen. */
-import { QMB, acceptFor, rankFor, someOfFor } from "../engine";
+import { QMB, acceptFor, rankFor, sayAccept, someOfFor } from "../engine";
 import type { Member } from "../room";
 import { miniOf, other, type G, type W } from "./rules";
 import type { TvState } from "./state";
@@ -85,6 +85,12 @@ export function mrTally(s: TvState) {
 }
 /* Say Same: ok = dodged the word. One team dodging alone takes it; otherwise a point each */
 export const sayWin = (s: TvState): W => { const [a, b] = s.ok; return a && !b ? 0 : b && !a ? 1 : "tie"; };
+/* ...and each team's word, kept for its pile of word cards at the result (the owner's pick, 14 Nov): the word on the
+   prompt's list it matched (typos allowed), else what it sent; nothing sent, null */
+export const sayWords = (s: TvState, q: G): Two<string | null> => [0, 1].map((t) => {
+  const tx = s.typed[t]; if (!tx || !tx.length) return null;
+  const w = ((q?.pool || []) as string[]).find((x) => tx.some((y) => QMB.isMatch(y, x, sayAccept(q.id, x))));
+  return String(w ?? tx[0]).trim().slice(0, 40) || null; }) as Two<string | null>;
 export const okWin = (s: TvState): W => { const [a, b] = s.ok; return a && b ? "tie" : a ? 0 : b ? 1 : "none"; };
 
 /* The calls on this screen that can be contested: the answer card (the first team's answer, and

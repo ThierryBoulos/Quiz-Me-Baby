@@ -2105,10 +2105,11 @@
       s.qs[s.i] = D.drawSaySame(D.shuffle(pool)[0]);
       return [{ toast:'New prompt.' }, { go:'sayQ' }];
     },
-    /* w: 0 | 1 | 'tie' */
+    /* w: 0 | 1 | 'tie'; said, ok: each team's word and whether it dodged, kept for the result's word cards (14 Nov) */
     'say/verdict'(g, a, env){
       const s = g.saySame, q = s.qs[s.i], w = a.w, fx = [];
-      s.subs.push({ q, winner:w });
+      const said = Array.isArray(a.said) ? [0, 1].map(t => (typeof a.said[t] === 'string' ? a.said[t].slice(0, 40) : null)) : null;
+      s.subs.push(said ? { q, winner:w, said, ok:[0, 1].map(t => !!(a.ok && a.ok[t])) } : { q, winner:w });
       if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Tie — a point each.' }); }
       else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take leg ' + (s.i + 1) + '.' }); }
       s.i++;

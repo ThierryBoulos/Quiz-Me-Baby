@@ -42,7 +42,9 @@ export type PubMany = {
   /* a game's result: its tally (or shares), its places, what each place pays the night */
   summary?: { wins: number[]; pts: number[]; shares?: number[]; places: number[]; award: number[]; line?: string; noAward?: boolean; plus?: boolean;
     spins?: number[][];   // Russian Roulette: each team's points spin by spin (its barrel at the result)
-    got?: string[][] };   // What Do You See?: the pictures each team took (its pile at the result)
+    got?: string[][];   // What Do You See?: the pictures each team took (its pile at the result)
+    words?: { w: string; ok: boolean }[][];   // Don't Say the Same: each team's words, scored or not (its pile of word cards at the result)
+  };
   final?: { order: { team: number; place: number }[]; log: number[][]; awards: AwardM[]; games: string[] };
   fire?: boolean[];                                // three legs in a row at 1st, this game
   intro?: IntroPub;                              // the night's intro (before the first game), until Let's go
@@ -130,7 +132,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   }
   if (m && s.screen === "summary") pub.summary = { wins: [...m.wins], pts: [...m.pts], shares: m.key === "majority" ? s.teams.map((_, t) => share(m, t)) : undefined,
     places: m.places || s.teams.map(() => s.teams.length), award: m.award || [], line: m.key === "majority" ? mrLine(s) || undefined : undefined,
-    spins: m.key === "roulette" ? rrSpins(m.qs as RrLap[], s.teams.length) : undefined, got: m.key === "see" ? s.teams.map((_, t) => [...(m.got?.[t] || [])]) : undefined };
+    spins: m.key === "roulette" ? rrSpins(m.qs as RrLap[], s.teams.length) : undefined, got: m.key === "see" ? s.teams.map((_, t) => [...(m.got?.[t] || [])]) : undefined,
+    words: m.key === "say" && m.words ? s.teams.map((_, t) => (m.words?.[t] || []).map((x) => ({ ...x }))) : undefined };
   /* (Secret Stakes pays nothing at its end: the bets are already on the totals; its summary is pub.stakes.sum) */
   if (m?.key === "stakes" && pub.summary) { pub.summary.award = s.teams.map(() => 0); pub.summary.noAward = true; }
   if (m?.key === "see" && s.screen !== "summary") pub.preload = { sees: m.qs.slice(m.i, m.i + 2).map((q) => String(q?.photo || "")).filter(Boolean) };

@@ -1,6 +1,6 @@
 "use client";
 /* A two-team result in the look the 3-8 team night gave each game (the owner, 31 Oct; 13 Nov): the ballot boxes, the
-   flag pole, the ruler, the dartboard, the pins on the map, the flap tiles, the glasses, the speech bubbles, the
+   flag pole, the ruler, the dartboard, the pins on the map, the flap tiles, the glasses, the word cards, the
    barrels, the photo piles; and for the two-team night's own
    games, the Auction's bidding paddles, the Battle's two shields, and a round's game-show lecterns. Every one in the
    same layout: the title, the picture with each team's place and what it adds under it, then the line the coins fly
@@ -9,7 +9,7 @@ import { Fragment } from "react";
 import type { Pub, Two } from "@/lib/game";
 import { MANY_COLORS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
-import { BallotsMany, BarrelsMany, BubblesMany, PilesMany, Caption, DartboardMany, FlagPoleMany, FlapsMany, GlassesMany, LecternsMany, PinsMapMany, revealOf } from "./many/PartsMany";
+import { BallotsMany, BarrelsMany, BubblesMany, PilesMany, WordsMany, Caption, DartboardMany, FlagPoleMany, FlapsMany, GlassesMany, LecternsMany, PinsMapMany, revealOf } from "./many/PartsMany";
 import { PinMap } from "./PinMap";
 import { Ruler } from "./Ruler";
 
@@ -21,11 +21,11 @@ export const TWO_LOOKS = ["majority", "flag", "closest", "pin", "map", "airport"
 
 /* a two-team result, as the 3-8 team pieces read it: each team's points (or share), its place (a tie shares 1st),
    and what the place adds to the night */
-function two(pub: Pub, pts: Two<number>, winner: 0 | 1 | null | undefined, award: number[], opts: { pct?: boolean; noAward?: boolean; plus?: boolean; spins?: number[][]; got?: string[][] } = {}): PubMany {
+function two(pub: Pub, pts: Two<number>, winner: 0 | 1 | null | undefined, award: number[], opts: { pct?: boolean; noAward?: boolean; plus?: boolean; spins?: number[][]; got?: string[][]; words?: { w: string; ok: boolean }[][] } = {}): PubMany {
   const places = [0, 1].map((t) => (winner == null ? 1 : winner === t ? 1 : 2));
   return {
     teams: pub.teams.map((t, i) => ({ name: t.name, score: t.score, color: MANY_COLORS[i] })),
-    summary: { wins: [...pts], pts: [...pts], shares: opts.pct ? pts.map((x) => x / 100) : undefined, places, award, noAward: opts.noAward, plus: opts.plus, spins: opts.spins, got: opts.got },
+    summary: { wins: [...pts], pts: [...pts], shares: opts.pct ? pts.map((x) => x / 100) : undefined, places, award, noAward: opts.noAward, plus: opts.plus, spins: opts.spins, got: opts.got, words: opts.words },
   } as unknown as PubMany;
 }
 const awardOf = (pub: Pub, winner: 0 | 1 | null | undefined, award?: Two<number>) => (award ?? [winner === 0 ? pub.mini?.pts ?? 0 : 0, winner === 1 ? pub.mini?.pts ?? 0 : 0]) as number[];
@@ -33,7 +33,7 @@ const awardOf = (pub: Pub, winner: 0 | 1 | null | undefined, award?: Two<number>
 export function TwoResult({ pub, sound = false }: { pub: Pub; sound?: boolean }) {
   const key = pub.mini?.key, S0 = pub.summary;
   if (!S0 || !key || !TWO_LOOKS.includes(key)) return null;
-  const P = two(pub, S0.wins, S0.winner, awardOf(pub, S0.winner, S0.award), { pct: !!pub.mini?.pct, spins: S0.spins, got: S0.got }), S = P.summary!;
+  const P = two(pub, S0.wins, S0.winner, awardOf(pub, S0.winner, S0.award), { pct: !!pub.mini?.pct, spins: S0.spins, got: S0.got, words: S0.words }), S = P.summary!;
   if (key === "majority") return <BallotsMany pub={P} />;
   if (key === "roulette") return <BarrelsMany pub={P} />;
   if (key === "see") return <PilesMany pub={P} />;
@@ -43,7 +43,8 @@ export function TwoResult({ pub, sound = false }: { pub: Pub; sound?: boolean })
   if (key === "map") return <PinsMapMany pub={P} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />;
   if (key === "airport") return <FlapsMany pub={P} />;
   if (key === "dish") return <GlassesMany pub={P} sound={sound} />;
-  return <BubblesMany pub={P} />;
+  /* Don't Say the Same: each team's words on its pile (a game saved before 14 Nov kept no words: its bubbles) */
+  return S.words ? <WordsMany pub={P} /> : <BubblesMany pub={P} />;
 }
 
 /* the end of a round of questions: the question-round lecterns, each lit with what the team scored this round,
@@ -79,15 +80,17 @@ export function AuctionPaddles({ pub }: { pub: Pub }) {
     </div>);
 }
 
-/* Battle of the Captains: two shields face to face, each captain's score on it; the winner's lit, a trophy over it */
+/* Battle of the Captains: two shields face to face, each captain's score on it; the winner's lit, a trophy over it.
+   The clashing shields (the owner's pick, 14 Nov): they slide in from either side and clash in the middle, a flash at
+   the VS. (Battle is two teams only; the shields keep the scoreboard's sides) */
 export function BattleShields({ pub }: { pub: Pub }) {
   const B = pub.battle!, P = two(pub, B.score, B.winner, awardOf(pub, B.winner, B.award)), S = P.summary!, T = P.teams;
   const shield = "M60 6 L110 22 L106 84 Q100 132 60 154 Q20 132 14 84 L10 22 Z";
   return (
     <div className="flex items-end justify-center gap-10" role="list" aria-label={"Battle of the Captains: " + T.map((t, i) => `${t.name} ${S.pts[i]}`).join(", ")}>
       {[0, 1].map((t) => { const lit = S.award[t] > 0 && S.places[t] === 1, c = T[t].color; return (<Fragment key={t}>
-        {t === 1 && <div className="display text-44 self-center mb-24" style={{ color: "var(--color-ink-3)" }}>VS</div>}
-        <div role="listitem" className="lectern-in flex flex-col items-center gap-1" style={{ width: 200, animationDelay: revealOf(S, 2).at(t) + "s" }}>
+        {t === 1 && <div className="display text-44 self-center mb-24 relative" style={{ color: "var(--color-ink-3)" }}>VS<span className="battle-spark" aria-hidden /></div>}
+        <div role="listitem" className={"flex flex-col items-center gap-1 " + (t === 0 ? "battle-in-l" : "battle-in-r")} style={{ width: 200 }}>
           <span className="text-28 leading-none" style={{ visibility: lit ? "visible" : "hidden" }} role={lit ? "img" : undefined} aria-label={lit ? "takes it" : undefined}>🏆</span>
           <svg viewBox="0 0 120 160" width={160} height={213} aria-hidden style={{ overflow: "visible" }}>
             <defs><linearGradient id={"sh" + t} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={c} /><stop offset="1" stopColor={c} stopOpacity=".35" /></linearGradient></defs>

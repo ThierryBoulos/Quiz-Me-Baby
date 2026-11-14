@@ -6,7 +6,7 @@
    at the far right end, past the last tick ("off the scale"), side by side when there are several: a hollow dot and a card that says No answer.
    Two teams: A's card above, B's below, as the two-team TV always drew it. More: the cards are packed on two
    lanes a side, as near their dot as the others let them, a size smaller, and the dots carry the team's letter. */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motionOff } from "./Marquee";
 import { offBy, showNum } from "@/lib/game";
 
@@ -17,7 +17,8 @@ const GAP = 10;
 
 /* scale: a game's points instead of guesses (the many-teams Closest To Wins result, 30 Oct): the line runs from 0 on
    the left to the best score on the right, each team's dot at its points, the band from 0 out to it; no answer
-   marker, no "off by"; the winner's card carries the trophy, pts what its place pays the night */
+   marker, no "off by"; the winner's card carries the trophy, pts what its place pays the night. The gold ruler (the
+   owner's pick, 14 Nov): the line a gold measuring rule, its numbers along it, the winner's card pulsing gold */
 export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: number; width?: number; scale?: boolean }) {
   const two = teams.length <= 2 && !scale, W = width ?? (two ? 1040 : 1120);
   const best = Math.max(1, ...teams.map((t) => t.guess ?? 0)), x0 = W * 0.04;
@@ -58,7 +59,8 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig, W]);
 
-  const CH = box.h, G = two ? 42 : 36;
+  /* (the gold ruler: a little more room between the line and the cards, for its numbers under it) */
+  const CH = box.h, G = two ? 42 : scale ? 50 : 36;
   const lay = useMemo(() => {
     /* lanes: 0 above, 1 below (and with more teams 2 above that, 3 below that) */
     const place = (lanes: number) => {
@@ -99,6 +101,9 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
   /* where a team is drawn: its dot, its card and the line between. The race (scale): every team sets off from the
      left end at once and runs to its points, its card and number with it, the band filling behind it */
   const at = (t: RulerTeam) => (scale ? x0 + (xOf(t) - x0) * p : xOf(t));
+  /* the gold ruler's numbers: 0 to the best score, in steps that leave them room */
+  const step = best > 24 ? 10 : best > 12 ? 5 : best > 6 ? 2 : 1;
+  const marks = scale ? Array.from({ length: Math.floor(best / step) + 1 }, (_, j) => j * step) : [];
   const geo = (t: RulerTeam, i: number) => {
     const x = at(t), a = lay.at[i], w = box.w[i], ct = cardTop(a.lane), up = a.lane % 2 === 0;
     const cx = scale ? Math.max(0, x0 - w / 2) + (a.x - Math.max(0, x0 - w / 2)) * p : a.x;
@@ -106,9 +111,12 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
   };
 
   return (
-    <div className="ruler relative" style={{ width: W, height: H, ["--beat" as string]: ".15s" }} aria-label={(scale ? "Points this game: " : `The answer, ${showNum(ans)}: `) + teams.map((t) => `${t.name} ${t.guess == null ? "no answer" : showNum(t.guess)}`).join(", ")}>
+    <div className={"ruler relative" + (scale ? " gold" : "")} style={{ width: W, height: H, ["--beat" as string]: ".15s" }} aria-label={(scale ? "Points this game: " : `The answer, ${showNum(ans)}: `) + teams.map((t) => `${t.name} ${t.guess == null ? "no answer" : showNum(t.guess)}`).join(", ")}>
       <div className="ruler-track" style={{ top: TY - th / 2, height: th, borderRadius: th / 2 }}><span className="ruler-ticks" style={none ? { right: zone } : undefined} /></div>
       {none && <div className="ruler-off" style={{ top: TY - th / 2, height: th, width: zone }} aria-hidden />}
+      {marks.map((v) => { const x = x0 + (v / best) * W * 0.9; return (
+        <Fragment key={"m" + v}><span className="ruler-mark" style={{ left: x - 1, top: TY - th / 2, height: th }} aria-hidden />
+          <span className="ruler-num display" style={{ left: x, top: TY + th / 2 + 5, animationDelay: 0.1 + v * 0.01 + "s" }} aria-hidden>{v}</span></Fragment>); })}
       {teams.map((t, i) => { if (t.guess == null) return null; const x = at(t), mid = scale ? x0 : W / 2; return (
         <div key={"b" + i} className="ruler-band" style={{ top: bandTop(i), height: bandH, left: Math.min(x, mid), width: Math.abs(x - mid), background: t.color, transformOrigin: x < mid ? "right" : "left", ...d(0.5 + drop(i) * (two ? 0.12 : 0.07)), ...(scale ? { animation: "none" } : {}) }} />); })}
       {!scale && <div className="ruler-mid" style={{ top: TY - th / 2 - 14, height: th + 28 }}>{two && <span className="lbl" style={{ top: th + 34 }}>answer</span>}</div>}

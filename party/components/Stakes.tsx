@@ -117,13 +117,14 @@ function StakesRevealTv({ sk, teams }: { sk: SkPub; teams: SkTeam[] }) {
     </div>);
 }
 
-/* the game's end: each team's stack of chips (the owner, 13 Nov), the biggest winner first, on the left: a chip for
+/* the game's end: each team's stack of chips (the owner, 13 Nov), the biggest loser on the left, the biggest winner on
+   the right, shown one by one from the left (the owner, 14 Nov: every result the same way): a chip for
    what a Medium bet pays, green for what it won, red for what it lost, none if it broke even. Its total on top, its name
    and its three bets under; every part at the same height across, so nothing runs into anything. The chips drop onto
    the stack one by one, a team after the other as the rows did; the biggest winner's stack lights up in its colour */
 function StakesSummaryTv({ sk, teams }: { sk: SkPub; teams: SkTeam[] }) {
   const S = sk.sum!, k = teams.length, dense = k > 4, tight = k > 6;
-  const order = teams.map((_, t) => t).sort((a, b) => S.net[b] - S.net[a] || a - b), top = Math.max(...S.net);
+  const order = teams.map((_, t) => t).sort((a, b) => S.net[a] - S.net[b] || a - b), top = Math.max(...S.net);
   const cw = k <= 4 ? 200 : k <= 6 ? 150 : 120, fs = tight ? 30 : dense ? 36 : 48, most = Math.max(1, ...S.net.map((v) => chipsOf(v, sk.unit)));
   return (
     <div className="flex flex-col items-center gap-4 w-full">

@@ -18,7 +18,7 @@ import { BEAT_MS, BEAT_SCREENS, DECIDED, FLY_MS, flyAt, iso, MAX_BID, MINI_TITLE
   type MiniKey, type Pub, type Secret, type Thin, type Two, poss } from "./game";
 import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
   other, serverMs, SWAPS, swapWord, type Action, type G, type PKind, type W } from "./tv/rules";
-import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, turnOf } from "./tv/reads";
+import { callsOf, closestW, currentQ, leadOf, matchQ, mrTally, okWin, sayWin, sayWords, turnOf } from "./tv/reads";
 import { buildView, qk, screenQid } from "./tv/view";
 import { inboxMark, useInbox } from "./tv/useInbox";
 import { usePresent } from "./tv/usePresent";
@@ -737,7 +737,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.screen === "closestReveal") play({ type: "closest/win", w: closestWinner(), gA: s.guesses[0], gB: s.guesses[1] });
       else if (s.screen === "flagReveal") play({ type: "flag/verdict", w: okW() });
       else if (s.screen === "mapReveal") play({ type: "map/verdict", w: okW() });
-      else if (s.screen === "sayReveal") play({ type: "say/verdict", w: sayW() });
+      else if (s.screen === "sayReveal") play({ type: "say/verdict", w: sayW(), said: sayWords(s, current()), ok: [!!s.ok[0], !!s.ok[1]] });
       else if (s.screen === "pinReveal") play({ type: "pin/settle", pins: [s.pins[0], s.pins[1]] });
       else if (s.screen === "airportReveal") play({ type: "airport/verdict", w: okW() });
       else if (s.screen === "rouletteReveal") play({ type: "roulette/verdict", ok: [!!s.ok[0], !!s.ok[1]] });

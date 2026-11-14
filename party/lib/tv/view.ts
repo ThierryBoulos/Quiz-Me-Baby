@@ -198,6 +198,9 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (/Summary$/.test(s.screen) && m.verdict) p.summary = { wins: [...m.wins] as Two<number>, winner: m.verdict.winner, needsHost: m.verdict.needsHost, note: m.verdict.note || "", award: m.award };
     if (s.screen === "majoritySummary" && p.summary) { const who = mrWhoLine(g); if (who) p.summary.who = who; }
     /* What Do You See?: the pictures each team took, for its pile at the result */
+    /* Don't Say the Same: each team's words, scored or not, for its pile of word cards (a game saved before 14 Nov has none) */
+    if (key === "saysame" && p.summary && (m.subs || []).some((x: { said?: unknown }) => x.said)) p.summary.words = [0, 1].map((t) => ((m.subs || []) as { said?: (string | null)[]; ok?: boolean[] }[])
+      .filter((x) => x.said?.[t]).map((x) => ({ w: String(x.said![t]), ok: !!x.ok?.[t] })));
     if (key === "see" && p.summary) p.summary.got = [0, 1].map((t) => ((m.subs || []) as { q?: { photo?: string }; winner?: unknown }[]).filter((x) => x.winner === t && x.q?.photo).map((x) => String(x.q!.photo)));
     /* Russian Roulette keeps points, not legs: the tracker and the result show them (this lap's counted from its reveal) */
     if (key === "roulette") {

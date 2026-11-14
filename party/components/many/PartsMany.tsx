@@ -255,10 +255,10 @@ export function BoardMany({ pub, cols, size, label, width }: { pub: PubMany; col
 export function BarsMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, H = dense ? 140 : 150, pc = !!S.shares, best = Math.max(1, ...S.pts);
   const val = (t: number) => (pc ? S.shares?.[t] ?? 0 : S.pts[t] / best), lab = (t: number) => (pc ? pct(S.shares?.[t] ?? 0) : String(S.pts[t]));
-  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
+  const order = byPlace(S, k);
   const rv = revealOf(S, k);
   return (
-    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={(pc ? "Share right: " : "Points this game: ") + order.map((t) => `${T[t].name} ${lab(t)}`).join(", ")}>
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={(pc ? "Share right: " : "Points this game: ") + [...order].reverse().map((t) => `${T[t].name} ${lab(t)}`).join(", ")}>
       {order.map((t) => { const v = val(t), paid = S.award[t] > 0, lit = paid && S.places[t] === 1, at = rv.at(t); return (
         <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: dense ? 124 : 180, animationDelay: at + "s" }}>
           <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{lab(t)}</div>
@@ -272,9 +272,11 @@ export function BarsMany({ pub }: { pub: PubMany }) {
 }
 
 /* ---- the new games' results (the owner, 30 Oct: a more creative way than bars), each in its own world. They read left
-   to right to the winner, as Drop the Pin and the Closest To Wins race do; the board reads top down, as boards do ---- */
+   to right to the winner, as the Closest To Wins race does: the lowest on the left, the highest on the right, shown one
+   by one from the lowest (the owner, 14 Nov: every result the same way); tied teams side by side in team order. The
+   board and the flag pole read top down, the winner on top, as boards and poles do ---- */
 const byPlace = (S: NonNullable<PubMany["summary"]>, k: number, winnerLast = true) =>
-  Array.from({ length: k }, (_, i) => i).sort((a, b) => (winnerLast ? S.places[b] - S.places[a] || b - a : S.places[a] - S.places[b] || a - b));
+  Array.from({ length: k }, (_, i) => i).sort((a, b) => (winnerLast ? S.places[b] - S.places[a] : S.places[a] - S.places[b]) || a - b);
 /* the result's reveal (the owner, 31 Oct: suspense): the teams come in a place at a time, the last place first and the
    winner last; tied teams together. at(t): when team t comes in (s); done: when the last has landed, for the line under
    the picture and the points flying up to the totals */
@@ -306,9 +308,9 @@ export function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boo
    for each spin after; the labels stay upright. Motion off: the barrel stands, filled */
 export function BarrelsMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, big = k <= 3, size = dense ? 124 : big ? 176 : 150, cw = dense ? 124 : big ? 200 : 180;
-  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), rv = revealOf(S, k);
+  const order = byPlace(S, k), rv = revealOf(S, k);
   return (
-    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
       {order.map((t) => { const at = rv.at(t), paid = S.award[t] > 0; return (
         <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: cw, animationDelay: at + "s" }}>
           <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{S.pts[t]}</div>
@@ -355,9 +357,9 @@ function Barrel({ spins, color, size, at, paid, lit }: { spins: number[]; color:
 /* Majority Rules: each team's ballot box, a vote for every 5% right, dropping through the slot one by one and piling up */
 export function BallotsMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = dense ? 124 : 180, H = dense ? 140 : 150, sh = (t: number) => S.shares?.[t] ?? 0;
-  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), rv = revealOf(S, k);
+  const order = byPlace(S, k), rv = revealOf(S, k);
   return (
-    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Share right: " + order.map((t) => `${T[t].name} ${pct(sh(t))}`).join(", ")}>
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Share right: " + [...order].reverse().map((t) => `${T[t].name} ${pct(sh(t))}`).join(", ")}>
       {order.map((t) => { const at = rv.at(t), paid = S.award[t] > 0; return (
         <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: W, animationDelay: at + "s" }}>
           <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{pct(sh(t))}</div>
@@ -391,9 +393,9 @@ function Ballot({ share, color, W, H, at, paid, lit }: { share: number; color: s
    adds under. The photos are dealt on one by one, blurred, and come clear as they land; the winner's pile lights up */
 export function PilesMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, big = k <= 3, cw = dense ? 124 : big ? 200 : 180, P = dense ? 80 : big ? 108 : 98, H = dense ? 140 : big ? 164 : 152;
-  const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b), rv = revealOf(S, k);
+  const order = byPlace(S, k), rv = revealOf(S, k);
   return (
-    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Points this game: " + order.map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: dense ? 16 : 28 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
       {order.map((t) => { const at = rv.at(t), paid = S.award[t] > 0, photos = S.got?.[t] ?? [], n = Math.max(photos.length, S.wins[t] ?? 0); return (
         <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: cw, animationDelay: at + "s" }}>
           <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }}>{S.pts[t]}</div>
@@ -568,6 +570,35 @@ export function BubblesMany({ pub }: { pub: PubMany }) {
         </div>); })}
     </div>);
 }
+/* Don't Say the Same: each team's own words (the owner's pick, 14 Nov), dealt onto its pile one by one, the first at the
+   bottom: a word that scored a cream card in the team's colour; one that didn't (another team said it too, it was the
+   app's word, or it wasn't on the list) a dark striped card, the word struck through (the owner: a different look for
+   the failed words). Too many for one pile's height (two teams, tie-breakers), two piles side by side */
+export function WordsMany({ pub }: { pub: PubMany }) {
+  const S = pub.summary!, T = pub.teams, k = T.length, two = k === 2, dense = k > 4, order = byPlace(S, k), rv = revealOf(S, k);
+  const cw = two ? 280 : dense ? 124 : k === 3 ? 200 : 180, H = two ? 176 : dense ? 140 : 160, base = two ? 26 : dense ? 19 : 23, gap = 3;
+  return (
+    <div className="flex items-end justify-center w-full max-w-[1168px]" style={{ gap: two ? 64 : dense ? 16 : 28 }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
+      {order.map((t) => { const at = rv.at(t), paid = S.award[t] > 0, lit = paid && S.places[t] === 1, W = S.words?.[t] ?? [], n = W.length;
+        const cols = n > Math.floor((H + gap) / (base + gap)) && !dense ? 2 : 1, rows = Math.max(1, Math.ceil(n / cols));
+        const ch = Math.max(14, Math.min(base, Math.floor((H - gap * (rows - 1)) / rows))), w = cols === 1 ? cw * 0.86 : (cw * 0.94 - 6) / 2, x0 = (cw - (cols * w + (cols - 1) * 6)) / 2;
+        const step = Math.min(0.13, 1.1 / Math.max(1, n));
+        return (
+          <div key={t} role="listitem" className="rv flex flex-col items-center gap-1 min-w-0" style={{ width: cw, animationDelay: at + "s" }}
+            aria-label={`${T[t].name}, ${S.pts[t]}: ` + (n ? W.map((x) => x.w + (x.ok ? "" : " (didn't score)")).join(", ") : "no words")}>
+            <div className="display leading-none" style={{ fontSize: dense ? 30 : 40, color: T[t].color }} aria-hidden>{S.pts[t]}</div>
+            <div className="relative" style={{ width: cw, height: H, opacity: paid ? 1 : 0.6, filter: lit ? `drop-shadow(0 0 14px ${T[t].color})` : undefined }} aria-hidden>
+              {!n && <div className="absolute rounded" style={{ left: x0, bottom: 0, width: w, height: base, border: "2px dashed #8a92b8", opacity: 0.6 }} />}
+              {W.map((x, i) => { const c = i % cols, r = Math.floor(i / cols), tilt = (((i * 37) % 7) - 3) * 0.8; return (
+                <div key={i} className="absolute" style={{ left: x0 + c * (w + 6), bottom: r * (ch + gap), width: w, height: ch, transform: `rotate(${tilt}deg)` }}>
+                  <div className={"word-card" + (x.ok ? "" : " no")} style={{ height: ch, fontSize: Math.round(ch * 0.62), ["--c" as string]: T[t].color, animationDelay: at + 0.2 + i * step + "s" }}>
+                    <span className="truncate">{x.w}</span></div>
+                </div>); })}
+            </div>
+            <Caption pub={pub} t={t} dense={dense} />
+          </div>); })}
+    </div>);
+}
 /* a question round: a game show's lecterns, a team's score lit on each; the winner's under a spotlight */
 export function LecternsMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k), w = dense ? 130 : 176;
@@ -593,10 +624,11 @@ export function LecternsMany({ pub }: { pub: PubMany }) {
 
 /* ---- Guess the Flag's result on the TV (the owner's pick, 30 Oct): one pole, every team's flag hoisted on it in
    place order, the winner's at the top with the trophy; the longer the flag, the more points; each flag carries its
-   place, the team and its points, and what the place pays the night beside it ---- */
+   place, the team and its points, and what the place pays the night beside it. The flags wave and catch the light, the
+   finial glows; the trophy sits after what the winner's place pays, not stuck on the flag's tip (the owner, 14 Nov) ---- */
 export function FlagPoleMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, rowH = dense ? 30 : 46, best = Math.max(1, ...S.pts);
-  /* the flags take the first column (the longest the full width); the trophy and what each place pays sit in
+  /* the flags take the first column (the longest the full width); what each place pays and the trophy sit in
      columns of their own after it, so they line up down the pole */
   const minW = dense ? 300 : 360, spread = dense ? 330 : 380;
   const order = T.map((_, i) => i).sort((a, b) => S.places[a] - S.places[b] || a - b);
@@ -608,31 +640,33 @@ export function FlagPoleMany({ pub }: { pub: PubMany }) {
         <span className="flag-pole" aria-hidden /><span className="flag-finial" aria-hidden />
         <ol className="flex flex-col" style={{ gap: dense ? 4 : 10 }}>
           {order.map((t) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1; return (
-            <li key={t} role="listitem" className="flag-hoist grid items-center" style={{ gridTemplateColumns: `${minW + spread}px ${dense ? 40 : 48}px ${dense ? 52 : 64}px`, columnGap: 10, animationDelay: rv.at(t) + "s" }}>
-              <div className={"flag-cloth" + (lit ? " lit" : "")} style={{ ["--c" as string]: T[t].color, ["--notch" as string]: dense ? "16px" : "24px", height: rowH, width: minW + (S.pts[t] / best) * spread, opacity: paid ? 1 : 0.5 }}>
+            <li key={t} role="listitem" className="flag-hoist grid items-center" style={{ gridTemplateColumns: `${minW + spread}px ${dense ? 52 : 64}px ${dense ? 40 : 48}px`, columnGap: 10, animationDelay: rv.at(t) + "s" }}>
+              {/* (each flag a beat behind the one above, so they ripple rather than sway as one) */}
+              <div className={"flag-cloth" + (lit ? " lit" : "")} style={{ ["--c" as string]: T[t].color, ["--notch" as string]: dense ? "16px" : "24px", height: rowH, width: minW + (S.pts[t] / best) * spread, opacity: paid ? 1 : 0.5, animationDelay: -0.35 * order.indexOf(t) + "s" }}>
                 <span className="display leading-none" style={{ fontSize: dense ? 16 : 24 }}>{paid ? S.places[t] : "–"}</span>
                 <span className="truncate font-bold uppercase tracking-[.08em]" style={{ fontSize: dense ? 13 : 18 }}><bdi>{T[t].name}</bdi></span>
                 <span className="display leading-none ml-auto" style={{ fontSize: dense ? 22 : 32 }}>{S.pts[t]}</span>
               </div>
-              <span className="leading-none text-center" style={{ fontSize: dense ? 22 : 30 }} role={lit ? "img" : undefined} aria-label={lit ? "takes it" : undefined}>{lit ? "🏆" : ""}</span>
               <span className="display leading-none text-right" style={{ fontSize: dense ? 20 : 28, color: paid ? "var(--color-ok)" : "var(--color-ink-3)" }}>{paid ? "+" + S.award[t] : "0"}</span>
+              <span className="leading-none text-center" style={{ fontSize: dense ? 22 : 30 }} role={lit ? "img" : undefined} aria-label={lit ? "takes it" : undefined}>{lit ? "🏆" : ""}</span>
             </li>); })}
         </ol>
       </div>
     </div>);
 }
 
-/* ---- Drop the Pin's result on the TV (the owner's pick, 30 Oct): a faint world map behind, a pin a team standing on
-   it in place order from the left, the taller the more points, the points in its head; the place, the team and what
-   it pays the night under it; the trophy over the winner ---- */
+/* ---- Guess the Map's result on the TV (the owner's pick, 30 Oct; Drop the Pin's then): the world map behind, a pin a
+   team standing on it in place order from the left, the taller the more points, the points in its head; the place, the
+   team and what it pays the night under it; the trophy over the winner. The map warmer and brighter, and a ripple on
+   the ground where each pin lands (the owner's pick, 14 Nov) ---- */
 export function PinsMapMany({ pub, map }: { pub: PubMany; map?: ReactNode }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, W = 1120, H = dense ? 300 : 310, ground = H - 78, best = Math.max(1, ...S.pts);
   /* read left to right, as the Closest To Wins race: the last place on the left, the winner on the right (the owner, 30 Oct) */
-  const order = T.map((_, i) => i).sort((a, b) => S.places[b] - S.places[a] || b - a), r = dense ? 26 : 34;
+  const order = byPlace(S, k), r = dense ? 26 : 34;
   const rv = revealOf(S, k);
   return (
     <div className="relative rounded-[18px] overflow-hidden" style={{ width: W, height: H }} role="list" aria-label={"Points this game: " + [...order].reverse().map((t) => `${T[t].name} ${S.pts[t]}`).join(", ")}>
-      <div className="absolute inset-0 opacity-40" aria-hidden>{map}</div>
+      <div className="pins-map absolute inset-0" aria-hidden>{map}</div>
       <div className="absolute left-6 right-6 h-[2px]" style={{ top: ground, background: "rgba(255,255,255,.18)" }} aria-hidden />
       {order.map((t, j) => { const paid = S.award[t] > 0, lit = paid && S.places[t] === 1, x = ((j + 0.5) / k) * W, tall = 30 + (S.pts[t] / best) * (ground - 2 * r - 30 - 50);   /* the tallest head 50px below the top: room for the trophy */
         return (
@@ -642,6 +676,7 @@ export function PinsMapMany({ pub, map }: { pub: PubMany; map?: ReactNode }) {
               <span className="pin-head display" style={{ width: 2 * r, height: 2 * r, fontSize: dense ? 20 : 26 }}>{S.pts[t]}</span>
               <span className="pin-stem" style={{ height: tall }} />
             </div>
+            <span className="pin-ripple" style={{ top: ground - 9, animationDelay: rv.at(t) + 0.45 + "s" }} aria-hidden />
             <div className="absolute flex flex-col items-center gap-0.5" style={{ top: ground + 8, width: W / k - 8 }}>
               <span className="display text-15 leading-none" style={{ color: lit ? "var(--color-gold)" : "var(--color-ink-3)" }}>{paid ? place(S.places[t]) : "–"}</span>
               <span className="eyebrow text-center min-w-0 max-w-full" style={{ color: T[t].color, fontSize: dense ? 11 : 13, letterSpacing: ".1em", lineHeight: 1.2, overflowWrap: "anywhere", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>

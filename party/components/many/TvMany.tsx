@@ -22,7 +22,7 @@ import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
 import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
-import { BallotsMany, BarrelsMany, BarsMany, PilesMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
+import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -279,7 +279,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             : g.key === "map" ? <PinsMapMany pub={pub} map={<PinMap marks={[]} interactive={false} height="100%" label="The world" bare />} />
             : g.key === "airport" ? <FlapsMany pub={pub} />
             : g.key === "dish" ? <GlassesMany pub={pub} sound={sound} />
-            : g.key === "say" ? <BubblesMany pub={pub} />
+            : g.key === "say" ? (pub.summary.words ? <WordsMany pub={pub} /> : <BubblesMany pub={pub} />)
             : g.key === "quiz" ? <LecternsMany pub={pub} />
             : <BarsMany pub={pub} />}
           {/* the line comes once the last team (the winner) is in */}

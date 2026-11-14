@@ -607,6 +607,15 @@ html[data-motion="off"] .confetti { display: none; }
 .ruler-off { position: absolute; right: 0; border-radius: 0 7px 7px 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.16) 0 4px, transparent 4px 9px); }
 .ruler-grp.none .ruler-dot { background: #0b0e24; border: 3px dashed var(--c); box-shadow: none; color: var(--c); }
 .ruler-grp.none .card-l { border-style: dashed; background: #0b0e24; }
+/* Closest To Wins' result: the gold ruler, its numbers along it, the winner's card pulsing gold once the race is run (the owner, 14 Nov) */
+.ruler.gold .ruler-track { background: linear-gradient(180deg, #ffe58a, #d9a514 55%, #a87a0a); box-shadow: 0 0 22px rgba(245,197,24,.45), inset 0 -2px 0 rgba(0,0,0,.25); }
+.ruler.gold .ruler-ticks { display: none; }
+.ruler-mark { position: absolute; width: 2px; background: rgba(4,5,14,.45); pointer-events: none; }
+.ruler-num { position: absolute; transform: translateX(-50%); font-size: 15px; line-height: 1; color: var(--color-gold); animation: enterFade .4s ease-out both; pointer-events: none; }
+.ruler.gold .ruler-grp.win .card-l { animation: rulerPulse 1.4s ease-in-out 2.7s infinite; }
+@keyframes rulerPulse { 0%, 100% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), 0 10px 34px -10px var(--c); }
+  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), 0 0 28px 6px rgba(245,197,24,.6); } }
+html[data-motion="off"] .ruler-num, html[data-motion="off"] .ruler.gold .ruler-grp.win .card-l { animation: none; }
 /* a split-flap board: dark tiles, a hinge line across the middle, the letter in the board's yellow */
 .flap { display: flex; flex-wrap: wrap; justify-content: center; gap: .28em .42em; line-height: 1; }
 .flap-word { display: inline-flex; gap: .08em; }
@@ -762,9 +771,15 @@ html[data-motion="off"] .hud-plus { display: none; }
 /* the swallowtail cut the same depth on every flag, long or short, and the number kept clear of it */
 .flag-cloth { --notch: 24px; display: flex; align-items: center; gap: 12px; padding: 0 calc(var(--notch) + 14px) 0 16px; color: #04050e; min-width: 0;
   background: linear-gradient(100deg, var(--c), color-mix(in srgb, var(--c) 70%, #fff) 55%, var(--c)); clip-path: polygon(0 0, 100% 0, calc(100% - var(--notch)) 50%, 100% 100%, 0 100%);
-  transform-origin: left center; animation: flagWave 2.6s ease-in-out infinite alternate; }
+  transform-origin: left center; animation: flagWave 2.6s ease-in-out infinite; position: relative; }
 .flag-cloth.lit { filter: drop-shadow(0 0 16px var(--c)); }
-@keyframes flagWave { from { transform: skewY(-1.2deg); } to { transform: skewY(1.2deg); } }
+/* (the waving flags, the owner's pick, 14 Nov: each cloth ripples in the wind and catches the light as it goes) */
+@keyframes flagWave { 0%, 100% { transform: skewY(0) scaleX(1); } 25% { transform: skewY(-1.4deg) scaleX(.985); } 75% { transform: skewY(1.4deg) scaleX(1.01); } }
+.flag-cloth::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.35) 45%, transparent 60%);
+  background-size: 220% 100%; animation: flagSheen 2.6s linear infinite; animation-delay: inherit; }
+@keyframes flagSheen { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+.flag-finial { animation: finialGlow 2.2s ease-in-out infinite; }
+@keyframes finialGlow { 0%, 100% { box-shadow: 0 0 14px 2px rgba(245,197,24,.6); } 50% { box-shadow: 0 0 22px 6px rgba(245,197,24,.85); } }
 .flag-hoist { animation: flagHoist .6s var(--ease) both; }
 @keyframes flagHoist { from { opacity: 0; transform: translateY(120px); } to { opacity: 1; transform: none; } }
 /* Drop the Pin's result: a pin a team, standing on the map, dropping in one after another */
@@ -772,7 +787,35 @@ html[data-motion="off"] .hud-plus { display: none; }
 .pin-head { display: grid; place-items: center; border-radius: 50%; color: #04050e; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--c) 50%, #fff), var(--c) 60%);
   border: 3px solid #fff; box-shadow: 0 0 18px var(--c); }
 .pin-stem { width: 4px; background: linear-gradient(180deg, #fff, var(--c)); border-radius: 0 0 2px 2px; }
-html[data-motion="off"] .flag-cloth, html[data-motion="off"] .flag-hoist, html[data-motion="off"] .pin-stand { animation: none; }
+/* Don't Say the Same's result: each team's words as cards on a pile, dealt on one by one; a word that didn't score dark
+   and striped, struck through (the owner, 14 Nov) */
+.word-card { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 6px 0 10px; border-radius: 4px; position: relative; overflow: hidden;
+  background: #fbf3dc; color: #1b1607; font-family: var(--font-display); letter-spacing: .06em; text-transform: uppercase; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,.35);
+  animation: wordDrop .4s cubic-bezier(.3,1.4,.5,1) both; }
+.word-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--c); }
+.word-card.no { background: repeating-linear-gradient(135deg, #2b3152 0 5px, #20253f 5px 10px); color: #a9b0d2; border: 1.5px dashed rgba(255,255,255,.3); box-shadow: none; }
+.word-card.no::before { display: none; }
+.word-card.no span { text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: rgba(255,90,110,.85); }
+@keyframes wordDrop { from { transform: translateY(-50px); opacity: 0; } 40% { opacity: 1; } to { transform: none; opacity: 1; } }
+html[data-motion="off"] .word-card { animation: none; }
+/* Battle of the Captains' result: the shields slide in from either side and clash, a flash at the VS (the owner, 14 Nov) */
+.battle-in-l { animation: battleInL .6s cubic-bezier(.3,1.3,.5,1) both; }
+.battle-in-r { animation: battleInR .6s cubic-bezier(.3,1.3,.5,1) both; }
+@keyframes battleInL { from { transform: translateX(-220px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes battleInR { from { transform: translateX(220px); opacity: 0; } to { transform: none; opacity: 1; } }
+.battle-spark { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; margin: -70px; border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle, rgba(255,242,184,.95) 0 8%, rgba(255,197,24,.55) 22%, transparent 60%); animation: battleSpark .55s ease-out .5s both; }
+@keyframes battleSpark { 0% { transform: scale(.2); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+html[data-motion="off"] .battle-in-l, html[data-motion="off"] .battle-in-r { animation: none; }
+html[data-motion="off"] .battle-spark { display: none; }
+/* Guess the Map's result: the map warmer and brighter behind the pins, a ripple where each one lands (the owner, 14 Nov) */
+.pins-map { opacity: .72; filter: sepia(.35) saturate(1.3) brightness(1.15); }
+.pin-ripple { position: absolute; left: 50%; width: 60px; height: 18px; margin-left: -30px; border: 3px solid var(--c); border-radius: 50%; opacity: 0; pointer-events: none;
+  animation: pinRipple 1.1s ease-out both; }
+@keyframes pinRipple { 0% { transform: scale(.2); opacity: .95; } 100% { transform: scale(1.6); opacity: 0; } }
+html[data-motion="off"] .pin-ripple { display: none; }
+html[data-motion="off"] .flag-cloth, html[data-motion="off"] .flag-hoist, html[data-motion="off"] .pin-stand, html[data-motion="off"] .flag-finial { animation: none; }
+html[data-motion="off"] .flag-cloth::after { display: none; }
 .bar-grow { transform-origin: bottom; animation: barGrow .7s var(--ease) both; }
 /* the new games' results (30 Oct): a glass filling, a bubble popping up, a lectern rising, the winner's spotlight */
 .glass-fill { transform-box: fill-box; transform-origin: bottom; animation: barGrow 1.2s cubic-bezier(.45,.05,.4,1) both; }
