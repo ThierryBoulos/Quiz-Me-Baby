@@ -121,6 +121,7 @@ const client = {
   from: (t) => query(t),
   channel,
   removeChannel(ch) { channels.delete(ch); return Promise.resolve("ok"); },
+  getChannels: () => [...channels],
   auth: { getSession: () => Promise.resolve({ data: { session: { access_token: "tv-token", user: { id: "tv" } } } }) },
   rpc: () => Promise.resolve({ data: null, error: null }),
 };
