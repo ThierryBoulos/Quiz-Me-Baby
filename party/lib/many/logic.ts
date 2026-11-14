@@ -205,7 +205,7 @@ export function stakesBet(s: StateM, team: number, k: unknown, level: unknown, n
   const m = miniOf(s); if (!m || m.key !== "stakes" || s.screen !== "pick" || team < 0 || team >= s.teams.length) return "Not now.";
   if (s.paused) return "The game is paused.";
   if (s.picks?.[team]) return "Your bet is in.";
-  const R = m.qs[m.i], i = Math.floor(Number(k));
+  const R = m.qs[m.i], i = Number.isInteger(k) ? Number(k) : -1;
   if (typeof level !== "string" || !SK_LEVELS.includes(level) || !(i >= 0 && i < (R?.themes?.length || 0))) return "Pick a theme and a level.";
   s.picks![team] = { k: i, level };
   if (s.picks!.every(Boolean)) lockStakes(s, now, t);
@@ -286,7 +286,7 @@ export function buzzSee(s: StateM, team: number, now = Date.now(), by: string | 
   if (s.paused) return "The game is paused.";
   if (s.out?.[team]) return "Your team is out of this picture.";
   if (s.buzz != null) return s.buzz === team ? true : `${s.teams[s.buzz].name} buzzed first.`;
-  if (!s.deadline) return "Not now.";
+  if (!s.deadline) return s.away ? "The screen running the game was asleep. Tap again." : "Not now.";
   (s.ms ||= Array(s.teams.length).fill(null))[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline - now))));
   s.left = Math.max(0.05, (s.deadline - now) / 1000); s.deadline = null;
   s.buzz = team; s.buzzAt = now; s.buzzBy = by || s.teams[team].captain || null;
@@ -371,7 +371,7 @@ export function legPlaces(s: StateM): (number | null)[] {
 }
 /* ...and what they pay this game's tally: 1st as many points as there are teams, one less a place, down to 1 */
 export const legPoints = (s: StateM): number[] => { const m = miniOf(s), q = qOf(s);
-  /* Russian Roulette pays by the chamber, not the place: Medium 2, Hard 3, the bullet +5 or -3 (the game's total never below 0) */
+  /* Russian Roulette pays by the chamber, not the place: Medium 2, Hard 3, the bullet +5 or -3 (whatever the total: it can go below 0, 9 Nov) */
   if (m?.key === "roulette" && q) return rrGot(q, m.pts, s.ok);
   return legPlaces(s).map((p) => (p == null ? 0 : s.teams.length - p + 1)); };
 
@@ -444,6 +444,15 @@ export function next(s: StateM, now: number, t: Timers) {
   const m = miniOf(s); if (!m) return false;
   /* a contest still open when the host moves on: the call stands */
   if (s.contest) { s.contest = null; }
+  /* What Do You See?: the RIGHT that ended the picture early was turned down (the host, or a contest), and other teams
+     never had their go: a new picture for everyone, as with two teams (14 Nov) */
+  if (s.screen === "reveal" && m.key === "see" && !s.ok.some(Boolean)) {
+    const q = qOf(s), ender = q ? s.teams.findIndex((_, t) => s.typed[t] != null && rightOf("see", String(s.typed[t]), q)) : -1;
+    if (ender >= 0 && s.teams.some((_, u) => u !== ender && !s.out?.[u])) {
+      const fresh = s.extra?.see?.shift();
+      if (fresh) { m.qs[m.i] = fresh; ask(s, now, t); toast(s, "The call changed: a new picture for everyone."); return true; }
+    }
+  }
   /* sudden death: the fastest right answer wins the night (+1, so the standings say so); nobody right, another
      question; none left, the win stays shared */
   if (s.screen === "reveal" && m.key === "sudden") {

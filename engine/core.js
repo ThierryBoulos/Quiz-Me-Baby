@@ -1612,6 +1612,10 @@
     g.rounds.forEach(r => r.q.forEach(q => inGame.add(q.id)));
     g.mini.qs.forEach(q => inGame.add(q.id));
     (g.sdUsed || []).forEach(id => inGame.add(id));
+    /* (never one of tonight's Secret Stakes or Battle questions either, even with "never reuse" off: 14 Nov) */
+    const add = (q) => { if(q && q.id) inGame.add(q.id); };
+    const st = g.stakesGame; if(st) [...(st.rounds || []), ...(st.spare || [])].forEach(R => (R.qs || []).forEach(lv => Object.values(lv || {}).forEach(add)));
+    const bt = g.battle; if(bt && bt.qs) bt.qs.forEach(side => (side || []).forEach(add));
     const themes = g.cfg.themes || [];
     const free = (q) => q.type === 'standard' && !inGame.has(q.id) && (!D.suddenOk || D.suddenOk(q));
     let pool = D.bank().filter(q => free(q) && themes.indexOf(q.theme) > -1 && D.isFresh(q));
@@ -2263,7 +2267,7 @@
     'roulette/more'(g, a, env){
       const s = g.rouletteGame;
       if(s.done) return [];
-      if(!s.spare.length) return [{ toast:'No barrels left: a point each.' }];
+      if(!s.spare.length) return [{ toast:'No barrels left.' }];
       s.qs.push(s.spare.shift());
       s.tieLegs++;
       return rouletteGo(g, env, []);
@@ -2274,7 +2278,7 @@
       s.done = true; s.awarded = true;
       s.award = [1, 1];
       g.teams[0].score += 1; g.teams[1].score += 1;
-      s.verdict = { winner:null, needsHost:false, note:'Tied after ' + s.i + ' laps — called there, a point each.' };
+      s.verdict = { winner:null, needsHost:false, note:'Tied after ' + s.i + ' spins — called there, a point each.' };
       return [{ sound:'point' }, { go:'rouletteSummary' }];
     },
     'roulette/award'(g, a){ const fx = []; awardMini(g, g.rouletteGame, a.w, fx); fx.push({ render:true }); return fx; },

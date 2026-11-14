@@ -67,7 +67,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
     /* (each part whole: on a narrow phone the line breaks at the dot, never inside the game's name) */
-    ? <><b className="inline-block">{g.title}</b> &nbsp;·&nbsp; <span className="inline-block">{g.key === "sudden" ? (pub.screen === "intro" ? "Tie at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</span></>
+    ? <><b className="inline-block">{g.title}</b> &nbsp;·&nbsp; <span className="inline-block">{g.key === "sudden" ? (pub.screen === "intro" ? "Tied at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</span></>
     : null;
   /* a pip a game, as the two-team night's: a dot a question round, a dash a mini-game (the owner, 1 Nov) */
   const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
@@ -323,8 +323,9 @@ export function BarrelsMany({ pub }: { pub: PubMany }) {
 }
 /* when spin j's chamber comes round to the top, after the barrel starts (s): one spin, then a click a spin (globals.css, .rb-cyl) */
 const RB_LAND = (j: number) => 0.45 + 0.3 * j;
+/* (six chambers: two teams tied into a 7th or 8th spin, the last chamber holds what the spins from the 6th on added up to, so the barrel still adds up: 14 Nov) */
 function Barrel({ spins, color, size, at, paid, lit }: { spins: number[]; color: string; size: number; at: number; paid: boolean; lit: boolean }) {
-  const id = "rb" + useId().replace(/[^a-zA-Z0-9]/g, ""), sp = spins.slice(0, 6), n = " n" + Math.max(1, sp.length);
+  const id = "rb" + useId().replace(/[^a-zA-Z0-9]/g, ""), sp = spins.length > 6 ? [...spins.slice(0, 5), spins.slice(5).reduce((a, b) => a + b, 0)] : spins, n = " n" + Math.max(1, sp.length);
   const pos = (j: number) => { const a = ((-90 + 60 * j) * Math.PI) / 180; return [100 + 56 * Math.cos(a), 100 + 56 * Math.sin(a)]; };
   return (
     <svg width={size} height={size} viewBox="0 0 200 200" aria-hidden style={{ overflow: "visible", opacity: paid ? 1 : 0.4, filter: lit ? `drop-shadow(0 0 16px ${color})` : undefined }}>

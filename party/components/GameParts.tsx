@@ -497,7 +497,7 @@ export const silent = (pub: Pub, t: 0 | 1) => {
 };
 
 /* a tie at the end of a mini-game, in the same words on the TV and every phone */
-export const tieHead = (pub: Pub) => (pub.mini?.pct ? `Tie at ${pub.mini.wins[0]}% each` : `Tie at ${pub.mini?.wins[0] ?? 0} each`);
+export const tieHead = (pub: Pub) => (pub.mini?.pct ? `Tied at ${pub.mini.wins[0]}% each` : `Tied at ${pub.mini?.wins[0] ?? 0} each`);
 export const tieCall = (pub: Pub) => { const each = pub.screen === "battleLevel" ? "the points shared" : "a point each";
   return `One more to settle it, or ${each}: ${pub.mode === "host" ? "the host decides" : `either captain decides (${each} if nobody does)`}.`; };
 /* the pictures coming up, fetched ahead (flags into the browser's cache, maps into MapView's) */

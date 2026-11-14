@@ -1458,7 +1458,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side mine={mine} captain />
       {/* Secret Stakes: your bet, a theme and a level, then Lock in */}
       {sc === "stakesPick" && pub.stakes && !pub.stakes.locked[mine] && !pub.paused && <StakesBet sk={pub.stakes} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy}
-        onLock={() => { if (skTheme != null && skLevel) void nxt({ type: "stakes/pick", k: skTheme, level: skLevel }); }} />}
+        onLock={() => { if (skTheme != null && skLevel) void nxt({ type: "stakes/pick", k: skTheme, level: skLevel, theme: pub.stakes!.themes[skTheme] }); }} />}
       {sc === "stakesPick" && pub.stakes?.locked[mine] && pub.stakes.picks?.[mine] && <p className="text-center font-bold text-16" role="status">Locked in: {skLevelWord(pub.stakes.picks[mine]!.level)} on {pub.stakes.themes[pub.stakes.picks[mine]!.k]}.</p>}
       {/^majority(Q|Reveal)$/.test(sc) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} part="rest" />

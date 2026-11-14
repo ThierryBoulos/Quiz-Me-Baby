@@ -109,6 +109,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const publish = useCallback(() => {
     if (soon.current) { clearTimeout(soon.current); soon.current = null; }
     const s = st.current; if (!s) return;
+    /* the game's screen asleep: a clock that started meanwhile (the last bet in, a new question) waits for it, with all
+       its time, as with two teams (14 Nov) */
+    if (s.away && s.deadline && (s.screen === "q" || s.screen === "pick") && !s.paused && s.buzz == null) { s.left = Math.max(0.05, (s.deadline - Date.now()) / 1000); s.deadline = null; }
     imadMany(s);                                    // (Imad's line for this moment, if Settings has him on)
     if (s.screen === "q" && s.spinAt && s.spinAt !== marked.current) { marked.current = s.spinAt; markRoulette(s); }
     if (s.screen === "q" && miniOf(s)?.key === "stakes" && s.qn !== markedSk.current) { markedSk.current = s.qn ?? null; markStakes(s); }
@@ -180,8 +183,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         /* the clock picks up where it was: after a sleep (or a reload, which hides the page first) from the time it
            had left; after taking the game over from another phone's copy (savedAt), less the time since that copy
            (the 4 Nov audit, 1.3: a question ran out while the game changed phones) */
-        if (s.away) { if (s.left && s.screen === "q" && !s.paused && s.buzz == null) { s.deadline = now + s.left * 1000; s.left = 0; } s.away = 0; }
-        else if (raw.savedAt && s.deadline) s.deadline += Math.max(0, now - Number(raw.savedAt));
+        /* (a team that buzzed keeps the rest of its 10 seconds too, as with two teams: 14 Nov) */
+        if (s.away) { if (s.left && (s.screen === "q" || s.screen === "pick") && !s.paused && s.buzz == null) { s.deadline = now + s.left * 1000; s.left = 0; } if (s.buzz != null && s.buzzAt) s.buzzAt += Math.max(0, now - s.away); s.away = 0; }
+        else if (raw.savedAt) { const gone = Math.max(0, now - Number(raw.savedAt)); if (s.deadline) s.deadline += gone; if (s.buzz != null && s.buzzAt) s.buzzAt += gone; }
         st.current = s; void loadBank(code).then((b) => { bank.current = b; }).catch(() => {}); publish();
       }
     } catch { /* nothing saved */ }
@@ -351,7 +355,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "next" && from.role === "captain") {
       const mv = (a.payload.move || {}) as G;
       /* Secret Stakes: a captain's bet, for their own team */
-      if (String(mv.type) === "m/bet") { const r = stakesBet(s, from.team as number, mv.k, mv.level, Date.now(), timers()); reply(r === true ? "+" : r); publish(); return; }
+      if (String(mv.type) === "m/bet") { const M = miniOf(s), R = M?.key === "stakes" ? (M.qs[M.i] as { themes?: string[] }) : null;
+        /* (a bet tapped on themes that have just been changed: not on the new ones, 14 Nov) */
+        if (mv.theme != null && R?.themes?.[Number(mv.k)] !== mv.theme) { reply("The themes changed: bet again."); publish(); return; }
+        const r = stakesBet(s, from.team as number, mv.k, mv.level, Date.now(), timers()); reply(r === true ? "+" : r); publish(); return; }
       if (String(mv.type) !== "m/contest") { reply("-"); return; }
       const r = contestCall(s, from.team as number, Number(mv.t));
       reply(r === true ? "+" : r); publish(); return;

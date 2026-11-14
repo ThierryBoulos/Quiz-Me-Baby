@@ -549,7 +549,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       : pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} />}
   </>);
   if (pub.battle && sc === "battleTie") return (<>
-    <div className="eyebrow text-20">Tie at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: both captains type, the first right answer takes it</div>
+    <div className="eyebrow text-20">Tied at {pub.battle.score[0]}. Tie-breaker{pub.battle.tb && pub.battle.tb > 1 ? ` ${pub.battle.tb}` : ""}: both captains type, the first right answer takes it</div>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 52, lineHeight: 1.12 }}>{pub.question}</div>
     {(pub.deadline || (pub.left ?? 0) > 0) && <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />}
     <SdRace pub={pub} />

@@ -438,7 +438,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {cap ? (mine != null && sk.locked[mine] ? "Bet locked in. Waiting for the others." : "Place your bet: a theme, then a level") : "Secret Stakes: your captain bets"}</p>
         <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} size={70} /></div>
         {cap && mine != null && !sk.locked[mine] ? <StakesBet sk={sk} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy}
-            onLock={() => { if (skTheme != null && skLevel) void send("next", { move: { type: "m/bet", k: skTheme, level: skLevel } }); }} />
+            onLock={() => { if (skTheme != null && skLevel) void send("next", { move: { type: "m/bet", k: skTheme, level: skLevel, theme: sk.themes[skTheme] } }); }} />
           : <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={mine ?? null} cap={false} />}
       </>)}
       {/* sudden death: a captain whose team isn't tied at the top watches */}

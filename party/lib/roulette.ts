@@ -26,7 +26,7 @@ export type RrPub = {
   pts: number[];                                  // the game's points before this lap
   rev?: { bullet: number; level: string[]; answer: string[]; notes: (string | undefined)[]; got: number[]; hit: number };   // hit: the team that drew the bullet, -1 none
 };
-/* what a chamber pays, by the call as it stands (the game's total never goes below 0) */
+/* what a chamber pays, by the call as it stands (the bullet costs 3 whatever the total: a game's total can go below 0, 9 Nov) */
 export const rrWorth = (lap: RrLap, t: number, ok: boolean): number => (lap.draw ? QMB.roulettePts(lap, lap.draw[t], ok) : 0);
 export const rrGot = (lap: RrLap, pts: number[], ok: (boolean | null)[]): number[] =>
   pts.map((_, t) => rrWorth(lap, t, !!ok[t]));   // (the bullet costs 3 whatever the total: it can go below 0)

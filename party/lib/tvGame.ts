@@ -138,6 +138,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const turnTeam = (): 0 | 1 => turnOf(st.current);
   const closestWinner = (): W => closestW(st.current);
   const sayW = (): W => sayWin(st.current);
+  /* scores set by hand while Secret Stakes' intro is up: its bet (shown on the intro) worked out again from them (14 Nov) */
+  const reStake = () => { const s = st.current, S = s.g?.stakesGame; if (S && s.screen === "stakesIntro") S.unit = QMB.stakesUnit(Math.max(0, ...s.g.teams.map((t: G) => t.score))); };
   const okW = (): W => okWin(st.current);
 
   /* ---- what the phones see (lib/tv/view.ts) ---- */
@@ -388,7 +390,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     /* tied at the end: stop and ask before a tie-breaker (see TIES); the Battle too, unless the host just asked for another */
     const g = s.g, tie = Object.entries(TIES).find(([, x]) => x.q === s.screen);
-    const level = (screen: string) => {      // the screen itself says "Tie at N each"
+    const level = (screen: string) => {      // the screen itself says "Tied at N each"
       s.screen = screen; s.deadline = null; s.left = 0; s.total = 0; s.timeUp = false; s.paused = false; s.waitSince = Date.now(); s.toast = null;
       s.autoAt = s.nohost ? Date.now() + T_PICK * 1000 : null;
     };
@@ -645,7 +647,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* What Do You See?: no new picture once a team has had a go at this one (as the Cocktail or Dish) */
     else if (t === "see/swap" && s.screen === "seeQ" && (s.seeBuzz != null || s.seeOut[0] || s.seeOut[1])) s.toast = { id: ++s.toastN, text: "Somebody has already had a go at this one." };
     /* the host's Change question: only before anyone answers, as How to Play says (with no host, askSwap checks the same; 14 Nov) */
-    else if (/\/swap$/.test(t) && t !== "see/swap" && !s.nohost && answeredYet()) s.toast = { id: ++s.toastN, text: answeredYet()! };
+    else if (/\/swap$/.test(t) && t !== "see/swap" && t !== "dish/swap" && !s.nohost && answeredYet()) s.toast = { id: ++s.toastN, text: answeredYet()! };
     else if (t === "ui/flip") { const c = callsOf(s).find((x) => x.id === move.id); if (c) applyCall(c.id, !c.ok); }
     else if ((t === "dish/right" || t === "dish/wrong") && g.dishGame.leg.buzz != null && !s.nohost) {
       const b = g.dishGame.leg.buzz as 0 | 1;
@@ -658,7 +660,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "ui/setScore") {
       const n = (x: unknown) => Math.max(0, Math.min(999, Math.floor(Number(x))));
       if (!Number.isFinite(Number(move.a)) || !Number.isFinite(Number(move.b))) return;
-      g.teams[0].score = n(move.a); g.teams[1].score = n(move.b);
+      g.teams[0].score = n(move.a); g.teams[1].score = n(move.b); reStake();
       s.toast = { id: ++s.toastN, text: `The host set the scores: ${iso(g.teams[0].name)} ${g.teams[0].score}, ${iso(g.teams[1].name)} ${g.teams[1].score}.` };
     }
     else if (t === "ui/timeUp") { s.deadline = null; s.left = 0; s.timeUp = true; }
@@ -1053,7 +1055,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* points won since the request was made would be wiped out: nothing changes, ask again */
       else if (g.teams[0].score !== A.from[0] || g.teams[1].score !== A.from[1]) s.toast = { id: ++s.toastN, text: "The scores changed meanwhile, so they stay as they are. Ask again if they're still wrong." };
       else {
-        g.teams[0].score = A.a; g.teams[1].score = A.b;
+        g.teams[0].score = A.a; g.teams[1].score = A.b; reStake();
         s.toast = { id: ++s.toastN, text: `Both captains agreed: ${iso(g.teams[0].name)} ${A.a}, ${iso(g.teams[1].name)} ${A.b}.` };
       }
       return true;
@@ -1063,7 +1065,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "stakes/pick") {
       const S = g.stakesGame as SkGame;
       if (S?.picks?.[team]) return "Your bet is in.";
-      if (!SK_LEVELS.includes(String(move.level)) || !(Number(move.k) >= 0 && Number(move.k) < (S?.rounds?.[S.i]?.themes.length || 0))) return false;
+      if (s.paused && !s.awayPaused) return "The game is paused.";    // (the TV asleep pauses itself: a bet meanwhile still counts)
+      /* (a bet tapped on themes that have just been changed: not on the new ones, 14 Nov) */
+      if (move.theme != null && S?.rounds?.[S.i]?.themes[Number(move.k)] !== move.theme) return "The themes changed: bet again.";
+      if (!SK_LEVELS.includes(String(move.level)) || !(Number.isInteger(move.k) && Number(move.k) >= 0 && Number(move.k) < (S?.rounds?.[S.i]?.themes.length || 0))) return false;
       const was = s.screen;
       play({ type: t, t: team, k: Number(move.k), level: String(move.level) });
       /* (both bets in: the questions are up, and taps from the betting screen are stale now) */
