@@ -644,6 +644,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (t === "ui/contestOk") closeContest(!!move.v, true);
     /* What Do You See?: no new picture once a team has had a go at this one (as the Cocktail or Dish) */
     else if (t === "see/swap" && s.screen === "seeQ" && (s.seeBuzz != null || s.seeOut[0] || s.seeOut[1])) s.toast = { id: ++s.toastN, text: "Somebody has already had a go at this one." };
+    /* the host's Change question: only before anyone answers, as How to Play says (with no host, askSwap checks the same; 14 Nov) */
+    else if (/\/swap$/.test(t) && t !== "see/swap" && !s.nohost && answeredYet()) s.toast = { id: ++s.toastN, text: answeredYet()! };
     else if (t === "ui/flip") { const c = callsOf(s).find((x) => x.id === move.id); if (c) applyCall(c.id, !c.ok); }
     else if ((t === "dish/right" || t === "dish/wrong") && g.dishGame.leg.buzz != null && !s.nohost) {
       const b = g.dishGame.leg.buzz as 0 | 1;

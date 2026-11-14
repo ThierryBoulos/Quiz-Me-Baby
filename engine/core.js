@@ -1443,12 +1443,12 @@
       if(s.spare && s.spare.length){
         s.qs.push(s.spare.shift());
         s.tieLegs++;
-        fx.push({ toast:'Dead level — one more question.', ms:3600 });
+        fx.push({ toast:'Tied — one more question.', ms:3600 });
         fx.push({ go:'majorityQ' });
         return fx;
       }
       s.done = true;
-      s.verdict = { winner:null, needsHost:true, note:'Dead level, and no questions left at these levels. Your call. ' + note };
+      s.verdict = { winner:null, needsHost:true, note:'Still tied, and there are no questions left at these levels. Your call. ' + note };
       fx.push({ go:'majoritySummary' });
       return fx;
     }
@@ -1587,7 +1587,7 @@
     if(!pool.length) pool = D.battlePool(battleSpent(g));
     if(!pool.length){
       b.stage = 'done'; b.done = true; b.winner = null;
-      b.note = 'Dead level, and the bank is out of questions. Your call.';
+      b.note = 'Still tied, and the bank is out of questions. Your call.';
       fx.push({ go:'battleSummary' }); return fx;
     }
     const q = D.shuffle(pool)[0];
@@ -2369,7 +2369,7 @@
       const { km, w } = pinLeg(q, pins);
       km.forEach((d, t) => { if(d != null) s.km[t] += d; });
       s.subs.push({ q, pins, km, winner:w });
-      if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Dead level — a point each.' }); }
+      if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Tied — a point each.' }); }
       else if(w === 'none'){ fx.push({ toast:'No pins — no point.' }); }
       else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take landmark ' + (s.i + 1) + '.' }); }
       s.i++;

@@ -326,7 +326,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       let ok = false;
       if (t === "m/go") { ok = !!s.intro; delete s.intro; }
       else if (s.intro) ok = false;
-      else if (t === "m/start") ok = startMini(s, Date.now(), timers(), roster());
+      else if (t === "m/start") { const r = startMini(s, Date.now(), timers(), roster()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);
       else if (t === "m/next") ok = next(s, Date.now(), timers());
       else if (t === "m/flip") ok = flip(s, Number(mv.t));

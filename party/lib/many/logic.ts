@@ -173,9 +173,14 @@ const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
 
 /* the host taps Start on a game's intro: its first question */
-export function startMini(s: StateM, now: number, t: Timers, roster: { name: string; team: number }[]) {
+export function startMini(s: StateM, now: number, t: Timers, roster: { name: string; team: number }[]): boolean | string {
   const m = miniOf(s); if (!m || s.screen !== "intro") return false;
-  if (m.key === "majority") s.roster = roster.filter((r) => r.team >= 0 && r.team < s.teams.length).slice(0, MANY_PLAYERS);
+  if (m.key === "majority") {
+    const list = roster.filter((r) => r.team >= 0 && r.team < s.teams.length).slice(0, MANY_PLAYERS);
+    /* (nobody on the list: fifteen questions nobody could answer, 14 Nov) */
+    if (!list.length) return "Nobody's on the list yet.";
+    s.roster = list;
+  }
   s.stats.run = n(s.teams.length);                 // a new game starts cold
   /* Secret Stakes: one bet, from the scoreboard now (a thirtieth of the leader's total, since 12 Nov), then the first round's bets */
   if (m.key === "stakes") { m.unit = QMB.stakesUnit(Math.max(0, ...s.teams.map((x) => x.score))); m.net = n(s.teams.length); m.log = []; betPhase(s, now, t); return true; }
@@ -298,6 +303,7 @@ export function seeMiss(s: StateM, team: number, now: number, late = false) {
 /* Majority Rules: every player on the list taps one of the four (one each) */
 export function vote(s: StateM, name: string, pick: unknown): true | string {
   const m = miniOf(s); if (!m || m.key !== "majority" || s.screen !== "q") return "Not now.";
+  if (s.paused) return "The game is paused.";
   if (!s.roster.some((r) => r.name === name)) return "You joined after this game started: watch this one.";
   if (s.votes[name] != null) return "Your answer is in.";
   const q = qOf(s), opts: string[] = q?.options || [];
