@@ -209,7 +209,7 @@ if (want("phones")) {
   for (const [dev, w, h] of PHONES) for (const k of keys.filter(match)) for (const r of roles(k)) for (const tvIn of ["ph", "pn"])
     jobs.push({ id: `${dev} ${tvIn === "ph" ? "tv" : "no-tv"} ${r} ${k}`, hash: `${tvIn}:${r}:${k}`, key: k, dev, w, h });
   /* the Setup before the start, with its game time (2 teams: the host, or Team A's captain with no host; 3 and 8 teams) */
-  for (const [dev, w, h] of PHONES) for (const s of ["setup:2:host", "setup:2:cap", "setup:3:host", "setup:8:host"].filter(match))
+  for (const [dev, w, h] of PHONES) for (const s of ["setup:2:host", "setup:2:cap", "setup:3:host", "setup:8:host", "setup:2:host:xp", "setup:5:host:xp"].filter(match))
     jobs.push({ id: `${dev} ${s}`, hash: s, key: s, dev, w, h });
   for (const [dev] of PHONES) mkdirSync(join(out, dev), { recursive: true });
   await pool(jobs, 6, async (j) => {

@@ -163,6 +163,12 @@ html[data-motion="off"] .sending::after { animation: none; width: 100%; opacity:
   padding: 44px 56px; display: flex; flex-direction: column; }
 button.chip { min-height: 44px; padding: 8px 16px; cursor: pointer; }
 .chip.chip-on { background: color-mix(in srgb, var(--color-gold) 18%, transparent); border-color: var(--color-gold); color: var(--color-gold); }
+/* Expert, in every level row: red-ish, with a small warning mark, so it reads as the hard one (the owner, 15 Nov) */
+.lvl-expert { --xp: #ff6b5e; border-color: color-mix(in srgb, var(--xp) 45%, transparent) !important; color: #ffb4ab !important; }
+.chip.lvl-expert.chip-on { background: color-mix(in srgb, var(--xp) 22%, transparent); border-color: var(--xp) !important; color: #ffd2cc !important; }
+.btn.lvl-expert.btn-gold { background: linear-gradient(180deg, #ff7b6b, #d8343f) !important; border-color: #ff8f80 !important; color: #fff !important; box-shadow: 0 0 14px rgba(255, 90, 80, .35); }
+.xp-mark { flex: none; }
+.xp-note { color: #ffb4ab; font-weight: 700; margin-top: 2px; }
 /* the phone's top left: your name, the button to the teams sheet in a game; just your name in the lobby */
 button.chip.me-chip { padding: 6px 12px 6px 6px; min-width: 0; max-width: 64vw; color: var(--color-ink); }
 button.chip.me-chip.chip-on { color: var(--color-gold); }

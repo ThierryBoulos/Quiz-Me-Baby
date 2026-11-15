@@ -16,7 +16,7 @@ import { cleanList, getCustom } from "@/lib/custom";
 import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS, lineup, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
-import { levelLine, SEE_KIND_OPTS } from "../Setup";
+import { chipLabel, FlagExpertNote, levelLine, SEE_KIND_OPTS } from "../Setup";
 import { timeLine, estimateMany } from "@/lib/estimate";
 
 /* every team, every face, the captains marked. The TV (big) packs up to four in a row, then rows of three or four;
@@ -173,8 +173,8 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
   const LevelRow = ({ label, opts, value, set }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void }) => (
     <div className="lvl-row" role="group" aria-label={label}>
       {opts.map(([key, l]) => { const lit = value.includes(key); return (
-        <button key={key} type="button" className={"chip " + (lit ? "chip-on" : "")} aria-pressed={lit}
-          onClick={() => { const next = lit ? value.filter((x) => x !== key) : [...value, key]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{l}</button>); })}
+        <button key={key} type="button" className={"chip " + (lit ? "chip-on" : "") + (key === "expert" ? " lvl-expert" : "")} aria-pressed={lit}
+          onClick={() => { const next = lit ? value.filter((x) => x !== key) : [...value, key]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{chipLabel(key, l)}</button>); })}
     </div>);
   return (
     <section className="flex flex-col gap-3" aria-label="Tonight's game">
@@ -221,7 +221,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
                 {note && <p className="text-13 text-[var(--color-no)]" role="alert">{note}</p>}
               </div>
             </div>)}
-            {lit && key === "flag" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} /></div>}
+            {lit && key === "flag" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} /><FlagExpertNote on={flagLevels.includes("expert")} /></div>}
             {lit && key === "pin" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Drop the Pin level" opts={LEVELS3} value={pinLevels} set={setPinLevels} /></div>}
             {lit && key === "majority" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Majority Rules level" opts={LEVELS3} value={majorityLevels} set={setMajorityLevels} /></div>}
             {lit && key === "airport" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Airport level" opts={LEVELS3} value={airportLevels} set={setAirportLevels} /></div>}

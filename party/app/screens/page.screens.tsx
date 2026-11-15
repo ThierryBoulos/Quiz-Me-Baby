@@ -71,11 +71,15 @@ export default function Screens() {
   }
   if (mode[0] === "setup") {
     const k = Number(mode[1]), host = mode[2] !== "cap", tv = { settings: DEFAULTS, custom: [], played: 0 };
+    /* (#setup:<teams>:<role>:xp: Expert switched on for the question rounds and the flags, 15 Nov) */
+    if (mode[3] === "xp" && typeof window !== "undefined" && !localStorage.getItem("qmb.setup.XPXP")) localStorage.setItem("qmb.setup.XPXP", JSON.stringify({ at: Date.now(), v: {
+      "two.difficulty": "mixed", "two.flagLevels": ["veasy", "easy", "medium", "hard", "expert"], "many.quizLevels": ["easy", "medium", "hard", "expert"], "many.flagLevels": ["veasy", "easy", "medium", "hard", "expert"] } }));
+    const code = mode[3] === "xp" ? "XPXP" : "ABCD";
     return (
       <main className="screen">
         <footer className="mt-auto flex flex-col gap-2">
-          {k > 2 ? <SetupMany code="ABCD" k={k} busy={false} why="" tv={tv} onStart={() => {}} />
-            : <Setup code="ABCD" ready busy={false} why="" isHost={host} tv={host ? tv : undefined} timers={{}} onStart={() => {}} />}
+          {k > 2 ? <SetupMany code={code} k={k} busy={false} why="" tv={tv} onStart={() => {}} />
+            : <Setup code={code} ready busy={false} why="" isHost={host} tv={host ? tv : undefined} timers={{}} onStart={() => {}} />}
         </footer>
       </main>);
   }

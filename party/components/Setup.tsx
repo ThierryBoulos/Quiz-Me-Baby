@@ -55,6 +55,12 @@ const DISH_LEVELS = { c: [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard",
 /* the four levels of a standard question: any mix of them, or Mixed (all four). The default is the
    first three: Expert comes in only when a theme runs out of those. */
 const LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
+/* Expert stands out as the hard one (the owner, 15 Nov): a red-ish chip with a small warning mark */
+export const ExpertMark = () => (
+  <svg className="xp-mark" width="13" height="12" viewBox="0 0 13 12" aria-hidden><path d="M6.5 0.8 L12.4 11.2 H0.6 Z" fill="currentColor" /><path d="M6.5 4.3 V7.4" stroke="#1a0606" strokeWidth="1.6" strokeLinecap="round" /><circle cx="6.5" cy="9.3" r="0.9" fill="#1a0606" /></svg>);
+export const chipLabel = (key: string, label: string) => key === "expert" ? <span className="inline-flex items-center gap-1"><ExpertMark />{label}</span> : label;
+/* Guess the Flag with Expert on (the owner's words, 15 Nov) */
+export const FlagExpertNote = ({ on }: { on: boolean }) => on ? <p className="xp-note text-12 px-1" role="note">Warning, only real buffs get those!</p> : null;
 const ROUND_CHOICES = Array.from({ length: 14 }, (_, i) => i + 1);   // 1 to 14 (11 Nov, the owner)
 const OFF_BY_DEFAULT = ["Know the Host", "Sexy Time", "Lebanon"];
 const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -153,8 +159,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
       {tag && <span className="eyebrow !text-11">{tag}</span>}
       <div className="lvl-row">
       {opts.map(([k, l]) => { const on = value.includes(k); return (
-        <button key={k} type="button" className={"chip " + (on ? "chip-on" : "")} aria-pressed={on}
-          onClick={() => { const next = on ? value.filter((x) => x !== k) : [...value, k]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{l}</button>); })}
+        <button key={k} type="button" className={"chip " + (on ? "chip-on" : "") + (k === "expert" ? " lvl-expert" : "")} aria-pressed={on}
+          onClick={() => { const next = on ? value.filter((x) => x !== k) : [...value, k]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{chipLabel(k, l)}</button>); })}
       </div>
     </div>);
   const half = picked.filter((t) => (picks.picks[t] || []).length === 1);
@@ -186,7 +192,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
       <div className="flex flex-col gap-2" role="group" aria-label={label}>
         <div className="field-label !mb-0">{label}</div>
         <div className="grid grid-cols-5 gap-1.5">
-          {LEVELS.map(([k, l]) => <button key={k} type="button" className={"btn btn-sm lvl-chip " + (on.includes(k) ? "btn-gold" : "")} aria-pressed={on.includes(k)} onClick={() => toggle(k)}>{l}</button>)}
+          {LEVELS.map(([k, l]) => <button key={k} type="button" className={"btn btn-sm lvl-chip " + (on.includes(k) ? "btn-gold" : "") + (k === "expert" ? " lvl-expert" : "")} aria-pressed={on.includes(k)} onClick={() => toggle(k)}>{chipLabel(k, l)}</button>)}
           <button type="button" className={"btn btn-sm lvl-chip " + (all ? "btn-gold" : "")} aria-pressed={all} onClick={() => set(all ? QMB.DEFAULT_DIFF : "mixed")}>Mixed</button>
         </div>
         <p className="text-12 text-[var(--color-ink-3)] px-1">{levelLine(on, all)}</p>
@@ -256,7 +262,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
               </span>
             </button>
             {on && k === "map" && <LevelRow label="Guess the Map level" opts={MAP_LEVELS} value={mapLevels} set={setMapLevels} />}
-            {on && k === "flag" && <LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} />}
+            {on && k === "flag" && <><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} /><FlagExpertNote on={flagLevels.includes("expert")} /></>}
             {on && k === "pin" && <LevelRow label="Drop the Pin level" opts={MAP_LEVELS} value={pinLevels} set={setPinLevels} />}
             {on && k === "airport" && <LevelRow label="Guess the Airport level" opts={MAP_LEVELS} value={airportLevels} set={setAirportLevels} />}
             {on && k === "majority" && <LevelRow label="Majority Rules level" opts={MAP_LEVELS} value={majorityLevels} set={setMajorityLevels} />}
