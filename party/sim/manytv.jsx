@@ -269,10 +269,17 @@ async function repeat(k, phone, tag) {
   check(`${tag} Repeat a theme: never the same theme twice in a row (nor both rounds of one game)`, got.every((t, i) => i === 0 || t !== got[i - 1]), got.join(", "));
 }
 
+/* ---------- What Do You See?'s pictures (the owner, 15 Nov: chosen under the game): only the kinds left on ---------- */
+async function kinds(k, phone, tag) {
+  await setup(k, phone, ["see"], 3, { seeKinds: ["face"] });
+  const m = saved().minis.find((x) => x.key === "see"), got = [...new Set((m?.qs || []).map((q) => q.kind))];
+  check(`${tag} Pictures: only Celebrities on: every picture is one`, (m?.qs || []).length > 0 && got.join() === "face", got.join(", "));
+}
+
 export async function run(only) {
   for (const k of [3, 8]) for (const phone of [false, true]) {
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["repeat", repeat]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["repeat", repeat], ["kinds", kinds]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }

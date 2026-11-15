@@ -82,6 +82,10 @@ const NIGHTS = [
      its theme, never the same question twice, never the same theme back to back */
   { seed: 52, minis: ["flag", "closest"], themes: ["Geography", "Geography", "Geography", "History", "History", "Music"] },
   { seed: 53, minis: ["closest", "battle"], host: true, themes: ["Geography", "Geography", "Geography", "History", "History", "Music"] },
+  /* 15 Nov: What Do You See?'s pictures chosen under the game (the owner): with no host the captain leaves a kind out
+     too; every picture dealt, spares too, is of a kind left on */
+  { seed: 54, minis: ["see"], rounds: 2, seeKinds: ["logo"] },
+  { seed: 55, minis: ["see", "closest"], rounds: 2, host: true, seeKinds: ["face", "close"] },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
@@ -104,7 +108,9 @@ for (const n of NIGHTS) {
     const i = r.dealt.findIndex((t, k) => k > 0 && t === r.dealt[k - 1]);
     return i > 0 ? `${r.dealt[i]} twice in a row (${r.dealt.join(", ")})` : null;
   })();
-  if (repeat) { verdict = `REPEAT A THEME: ${repeat}`; bad++; }
+  const offKind = n.seeKinds && (r.kinds.length ? r.kinds.find((x) => !n.seeKinds.includes(x)) : "none dealt");
+  if (offKind) { verdict = `PICTURES: a ${offKind} picture, with only ${n.seeKinds.join(" and ")} on`; bad++; }
+  else if (repeat) { verdict = `REPEAT A THEME: ${repeat}`; bad++; }
   else if (!ends) { verdict = `NEVER ENDED (${r.outcome}${r.stuckOn ? " on " + r.stuckOn : ""})`; bad++; }
   else if (update || !existsSync(file)) { writeFileSync(file, text); verdict = "saved"; }
   else {
