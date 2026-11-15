@@ -68,7 +68,7 @@ const out = [];
 const check = (name, ok, more = "") => out.push(`${ok ? "ok  " : "FAIL"} ${name}${more !== "" ? "  -- " + more : ""}`);
 
 /* a room: the host, k captains, a player on each team; the host starts a night of the given games */
-async function setup(k, phone, minis, seed = 3) {
+async function setup(k, phone, minis, seed = 3, more = {}) {
   await unmount();
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed); phoneMode = phone; backup = null;
   fake.db.rooms.push({ code: CODE, status: "lobby", mode: null, state: { teamCount: k } });
@@ -78,7 +78,7 @@ async function setup(k, phone, minis, seed = 3) {
     { room: CODE, user_id: "p" + t, name: "Pl" + t, team: t, role: "player", face: null });
   fake.setPresence(fake.db.members.map((m) => m.user_id));
   await mount(); await tick(1500);
-  send("host", "setup", { start: true, cfg: { minis, rounds: 0, themes: [] } });
+  send("host", "setup", { start: true, cfg: { minis, rounds: 0, themes: [], ...more } });
   await tick(3000);
   await judge("m/go");
 }
@@ -257,10 +257,22 @@ async function roulette(k, phone, tag) {
     `${sum?.award} want ${award}`);
 }
 
+/* ---------- Repeat a theme (the owner, 15 Nov): Geography three times, History twice, Music once ---------- */
+async function repeat(k, phone, tag) {
+  const want = ["Geography", "Geography", "Geography", "History", "History", "Music"];
+  await setup(k, phone, ["quiz"], 3, { rounds: 6, themes: want });
+  const qs = saved().minis.filter((m) => m.key === "quiz").flatMap((m) => m.qs);
+  const rounds = Array.from({ length: qs.length / 2 }, (_, r) => qs.slice(r * 2, r * 2 + 2));
+  const got = rounds.map((p) => p[0].theme);
+  check(`${tag} Repeat a theme: six rounds, each its theme's two questions`, rounds.length === 6 && rounds.every((p) => p[0].theme === p[1].theme) && [...got].sort().join() === [...want].sort().join(), got.join(", "));
+  check(`${tag} Repeat a theme: never the same question twice`, new Set(qs.map((q) => q.id)).size === qs.length);
+  check(`${tag} Repeat a theme: never the same theme twice in a row (nor both rounds of one game)`, got.every((t, i) => i === 0 || t !== got[i - 1]), got.join(", "));
+}
+
 export async function run(only) {
   for (const k of [3, 8]) for (const phone of [false, true]) {
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["repeat", repeat]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }

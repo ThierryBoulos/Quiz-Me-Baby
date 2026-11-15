@@ -74,12 +74,16 @@ export default function Screens() {
     /* (#setup:<teams>:<role>:xp: Expert switched on for the question rounds and the flags, 15 Nov) */
     if (mode[3] === "xp" && typeof window !== "undefined" && !localStorage.getItem("qmb.setup.XPXP")) localStorage.setItem("qmb.setup.XPXP", JSON.stringify({ at: Date.now(), v: {
       "two.difficulty": "mixed", "two.flagLevels": ["veasy", "easy", "medium", "hard", "expert"], "many.quizLevels": ["easy", "medium", "hard", "expert"], "many.flagLevels": ["veasy", "easy", "medium", "hard", "expert"] } }));
-    const code = mode[3] === "xp" ? "XPXP" : "ABCD";
+    /* (#setup:<teams>:<role>:rep, Geography three times, History twice, Music: Repeat a theme, 15 Nov; :repo with its window open) */
+    const rep = mode[3] === "rep" || mode[3] === "repo";
+    if (rep && typeof window !== "undefined" && !localStorage.getItem("qmb.setup.REPT")) { const t = ["Geography", "History", "Geography", "Music", "History", "Geography"];
+      localStorage.setItem("qmb.setup.REPT", JSON.stringify({ at: Date.now(), v: { "two.themes": t, "two.rounds": 6, "many.themes": t, "many.rounds": 6 } })); }
+    const code = mode[3] === "xp" ? "XPXP" : rep ? "REPT" : "ABCD";
     return (
       <main className="screen">
         <footer className="mt-auto flex flex-col gap-2">
-          {k > 2 ? <SetupMany code={code} k={k} busy={false} why="" tv={tv} onStart={() => {}} />
-            : <Setup code={code} ready busy={false} why="" isHost={host} tv={host ? tv : undefined} timers={{}} onStart={() => {}} />}
+          {k > 2 ? <SetupMany code={code} k={k} busy={false} why="" tv={tv} onStart={() => {}} repeatOpen={mode[3] === "repo"} />
+            : <Setup code={code} ready busy={false} why="" isHost={host} tv={host ? tv : undefined} timers={{}} onStart={() => {}} repeatOpen={mode[3] === "repo"} />}
         </footer>
       </main>);
   }

@@ -127,14 +127,15 @@ const PHONE_MEASURE = () => {
   const side = document.querySelector(".screen.split > .side");
   if (side && getComputedStyle(side).display !== "contents" && side.scrollHeight > side.clientHeight + 3) bad.push("SIDE " + (side.scrollHeight - side.clientHeight) + "px below the left column");
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
-  const cover = document.querySelector(".night-intro");
+  /* (the night's intro, or a window over the setup (Timers, Repeat a theme): only it shows, so only it counts) */
+  const cover = document.querySelector(".night-intro, [role=dialog][aria-modal=true]");
   const skip = (el) => el.closest(".confetti,.confetti-back,.win-flash,.win-ring,svg *,canvas,.face.back,.plane-ico,.lectern-spot,.see-frame img") || (cover && !cover.contains(el)) || [...(function* () { for (let e = el; e; e = e.parentElement) yield e; })()].some((e) => getComputedStyle(e).position === "sticky");
   const scroller = (el) => { for (let e = el.parentElement; e; e = e.parentElement) { const cs = getComputedStyle(e); if (/(auto|scroll|hidden|clip)/.test(cs.overflowX)) return e; } return null; };
   for (const el of document.querySelectorAll("main *")) {
     if (skip(el)) continue; const cs = getComputedStyle(el); if (cs.visibility === "hidden" || cs.display === "none" || +cs.opacity === 0 || cs.position === "fixed") continue;
     const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) continue;
     if ((r.right > W + 2 || r.left < -2) && !scroller(el)) bad.push("OFF " + Math.round(Math.max(r.right - W, -r.left)) + "px " + name(el));
-    if (/(hidden|clip)/.test(cs.overflow + cs.overflowX + cs.overflowY) && (el.textContent || "").trim() && cs.textOverflow !== "ellipsis" && !(cs.webkitLineClamp > 0) && !/clamp|truncate|line-clamp|roll-win|flap-/.test(el.className || "")
+    if (/(hidden|clip)/.test(cs.overflow + cs.overflowX + cs.overflowY) && (el.textContent || "").trim() && cs.textOverflow !== "ellipsis" && !(cs.webkitLineClamp > 0) && !/clamp|truncate|line-clamp|roll-win|flap-|pk-body/.test(el.className || "")
       && el.clientHeight > 0 && (el.scrollHeight > el.clientHeight + 3 || el.scrollWidth > el.clientWidth + 3)) bad.push("CLIP " + (el.scrollWidth - el.clientWidth) + "x" + (el.scrollHeight - el.clientHeight) + " " + name(el));
   }
   const txt = [...document.querySelectorAll("main *")].filter((el) => !skip(el) && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 0))
@@ -209,7 +210,7 @@ if (want("phones")) {
   for (const [dev, w, h] of PHONES) for (const k of keys.filter(match)) for (const r of roles(k)) for (const tvIn of ["ph", "pn"])
     jobs.push({ id: `${dev} ${tvIn === "ph" ? "tv" : "no-tv"} ${r} ${k}`, hash: `${tvIn}:${r}:${k}`, key: k, dev, w, h });
   /* the Setup before the start, with its game time (2 teams: the host, or Team A's captain with no host; 3 and 8 teams) */
-  for (const [dev, w, h] of PHONES) for (const s of ["setup:2:host", "setup:2:cap", "setup:3:host", "setup:8:host", "setup:2:host:xp", "setup:5:host:xp"].filter(match))
+  for (const [dev, w, h] of PHONES) for (const s of ["setup:2:host", "setup:2:cap", "setup:3:host", "setup:8:host", "setup:2:host:xp", "setup:5:host:xp", "setup:2:host:rep", "setup:2:cap:repo", "setup:2:host:repo", "setup:5:host:rep", "setup:5:host:repo"].filter(match))
     jobs.push({ id: `${dev} ${s}`, hash: s, key: s, dev, w, h });
   for (const [dev] of PHONES) mkdirSync(join(out, dev), { recursive: true });
   await pool(jobs, 6, async (j) => {

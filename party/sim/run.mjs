@@ -78,6 +78,10 @@ const NIGHTS = [
   { seed: 50, minis: ["flag", "closest", "auction", "see", "roulette", "battle"] },
   { seed: 51, minis: ["flag", "closest", "auction", "see", "roulette", "battle"], host: true },
   { seed: 41, minis: ["see"], rounds: 2, host: true, events: [{ at: 14, type: "pause", for: 8 }, { at: 30, type: "swap" }] },
+  /* 15 Nov: Repeat a theme (the owner): Geography three times, History twice; no host and with a host. Every round
+     its theme, never the same question twice, never the same theme back to back */
+  { seed: 52, minis: ["flag", "closest"], themes: ["Geography", "Geography", "Geography", "History", "History", "Music"] },
+  { seed: 53, minis: ["closest", "battle"], host: true, themes: ["Geography", "Geography", "Geography", "History", "History", "Music"] },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
@@ -94,7 +98,14 @@ for (const n of NIGHTS) {
   const label = `night ${n.seed} (${n.host ? "host" : "no host"}, ${n.rounds || 6} rounds, ${n.minis.join(" ") || "no mini-games"})`;
   const ends = r.outcome === "final" || r.outcome === "sudden-cap";
   let verdict;
-  if (!ends) { verdict = `NEVER ENDED (${r.outcome}${r.stuckOn ? " on " + r.stuckOn : ""})`; bad++; }
+  const repeat = n.themes && (() => {
+    const want = [...n.themes].sort().join(), got = [...r.dealt].sort().join();
+    if (want !== got) return `the rounds played ${r.dealt.join(", ")}, not ${n.themes.join(", ")}`;
+    const i = r.dealt.findIndex((t, k) => k > 0 && t === r.dealt[k - 1]);
+    return i > 0 ? `${r.dealt[i]} twice in a row (${r.dealt.join(", ")})` : null;
+  })();
+  if (repeat) { verdict = `REPEAT A THEME: ${repeat}`; bad++; }
+  else if (!ends) { verdict = `NEVER ENDED (${r.outcome}${r.stuckOn ? " on " + r.stuckOn : ""})`; bad++; }
   else if (update || !existsSync(file)) { writeFileSync(file, text); verdict = "saved"; }
   else {
     const want = readFileSync(file, "utf8").split("\n"), got = text.split("\n");

@@ -902,6 +902,25 @@
 
     function dishLeg(){ return { shown:1, out:[false, false], buzz:null, calls:[], k:0 }; }
 
+    /* a theme picked more than once (Setup's "Repeat a theme": the owner, 15 Nov) plays its rounds spread out, never
+       two in a row where it can be helped (with 3 to 8 teams, never both rounds of one game). Each next round: the
+       first theme in the dealt order that isn't the last one played and still leaves the rest a way to stay apart;
+       only when nothing can, the theme with the most rounds left. Every theme once: the order stays as dealt. */
+    function spreadOut(list){
+      if(new Set(list).size === list.length) return list;
+      const left = list.slice(), out = [];
+      const count = (t) => left.filter(x => x === t).length;
+      /* after placing t: the rest (n of them) can still be kept apart, the first of them not t */
+      const fits = (t) => { const n = left.length - 1; return [...new Set(left)].every(y => (count(y) - (y === t ? 1 : 0)) <= (y === t ? Math.floor(n / 2) : Math.ceil(n / 2))); };
+      while(left.length){
+        const last = out[out.length - 1];
+        let i = left.findIndex(t => t !== last && fits(t));
+        if(i < 0){ const most = left.filter(t => t !== last).sort((a, b) => count(b) - count(a))[0]; i = most === undefined ? 0 : left.indexOf(most); }
+        out.push(left.splice(i, 1)[0]);
+      }
+      return out;
+    }
+
     /* the levels next to the night's (one level easier, then one harder), never two away (11 Nov, the owner:
        "only go one level up or one level down, that's it") */
     function otherLevels(d){
@@ -911,7 +930,7 @@
 
     function buildGame(cfg){
       const N = cfg.standard === false ? 0 : cfg.rounds;   // 0 = mini-games only
-      const themes = shuffle(cfg.themes.slice());
+      const themes = spreadOut(shuffle(cfg.themes.slice()));
       const taken = new Set();
       const rounds = [];
     

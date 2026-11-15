@@ -14,11 +14,13 @@ export function LevelNote({ code, themes, levels, left, bank, onAdd }: {
   const [state, setState] = useState<"idle" | "sent" | "failed">("idle");
   if (!bank || !themes.length) return null;
   const short: string[] = [], played: string[] = [];
-  for (const t of themes) {
-    const lv = levels(t), label = `${t} (${lv.map(cap).join(", ")})`;
+  /* (a theme picked more than once needs two questions for each of its rounds: 15 Nov) */
+  for (const t of [...new Set(themes)]) {
+    const n = themes.filter((x) => x === t).length, need = 2 * n;
+    const lv = levels(t), label = `${n > 1 ? `${t} ×${n}` : t} (${lv.map(cap).join(", ")})`;
     const total = bank.bank.filter((q) => q.type === "standard" && q.theme === t && lv.includes(q.difficulty || "")).length;
     const fresh = left ? lv.reduce((n, l) => n + (left[t]?.[LEVELS.indexOf(l as (typeof LEVELS)[number])] ?? 0), 0) : total;
-    if (total < 2) short.push(label); else if (fresh < 2) played.push(label);
+    if (total < need) short.push(label); else if (fresh < need) played.push(label);
   }
   if (!short.length && !played.length) return null;
   return (

@@ -283,3 +283,20 @@ test('roulette: the bullet is always Expert, from a theme that still has one', (
     for(const l of laps) { assert.equal(l.ch[l.bullet].level, 'expert'); assert.equal(l.ch[l.bullet].theme, 'Movies'); }
   }
 });
+
+/* Repeat a theme (the owner, 15 Nov): a theme picked more than once plays a round each time, never the same question
+   twice, and its rounds kept apart where they can be */
+test('a repeated theme: a round each time, no question twice, never back to back', () => {
+  for(let n = 0; n < 20; n++){
+    const g = D.buildGame(cfg({ rounds:5, themes:['Music', 'Music', 'Music', 'Movies', 'Movies'] }));
+    assert.equal(g.rounds.length, 5);
+    assert.deepEqual(g.rounds.map(r => r.theme), ['Music', 'Movies', 'Music', 'Movies', 'Music']);
+    const ids = g.rounds.flatMap(r => r.q.map(q => q.id));
+    assert.equal(new Set(ids).size, ids.length);
+  }
+  /* one theme only: every round it, still no question twice */
+  const g = D.buildGame(cfg({ rounds:3, themes:['Movies', 'Movies', 'Movies'] }));
+  assert.equal(g.rounds.length, 3);
+  const ids = g.rounds.flatMap(r => r.q.map(q => q.id));
+  assert.equal(new Set(ids).size, 6);
+});

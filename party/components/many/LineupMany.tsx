@@ -18,6 +18,8 @@ import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
 import { chipLabel, FlagExpertNote, levelLine, SEE_KIND_OPTS } from "../Setup";
 import { timeLine, estimateMany } from "@/lib/estimate";
+import { RepeatSheet } from "../RepeatSheet";
+import { themeLabel, themeList, timesOf, uniqueThemes } from "@/lib/repeat";
 
 /* every team, every face, the captains marked. The TV (big) packs up to four in a row, then rows of three or four;
    the phones stack them. away: captains the TV hasn't heard from (the lobby). */
@@ -97,7 +99,7 @@ const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Mediu
 export type CfgMany = { minis: string[]; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[]; rounds: number; quizLevels: string[]; themes: string[];
   airportLevels: string[]; mapLevels: string[]; dishLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: unknown[] } & Partial<Picks>;
 
-export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void; code: string; tv?: TvShare; left?: FreshLeft }) {
+export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: openAtFirst = false }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void; code: string; tv?: TvShare; left?: FreshLeft; repeatOpen?: boolean }) {
   const noTv = useNoTv();
   /* every choice is kept (lib/setupDraft.ts), as with two teams: the team count changing, a reload, another phone
      taking over as host (11 Nov, the owner) */
@@ -150,6 +152,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
   const [full, setFull] = useState<Bank | null>(null);
   const [choosing, setChoosing] = useState(false);
   const [tvOpen, setTvOpen] = useState(false);
+  const [repeatOpen, setRepeatOpen] = useState(openAtFirst);
   useEffect(() => { if (choosing && !full) void loadBank(code).then(setFull).catch(() => setNote("Couldn't load the questions. Try again.")); }, [choosing, full, code]);
   useEffect(() => {
     const pull = () => { if (full) void loadBank(code).then(setFull).catch(() => {}); };
@@ -209,14 +212,14 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
               <div className="flex flex-col gap-2">
                 <button type="button" className="flex items-center justify-between gap-3 min-h-[44px] text-left" aria-expanded={picking} onClick={() => setPicking(!picking)}>
                   <span className="min-w-0"><span className="sp-k block">Themes · {picked.length} of {rounds}</span>
-                    <span className="block text-14 font-bold leading-snug mt-1">{picked.length ? picked.join(", ") : bank ? "None yet" : "Loading…"}</span>
+                    <span className="block text-14 font-bold leading-snug mt-1">{picked.length ? themeList(picked) : bank ? "None yet" : "Loading…"}</span>
                     <span className="block text-12 text-[var(--color-ink-3)] mt-0.5">One per round. The rounds play two at a time.</span></span>
                   <span className="text-13 font-bold shrink-0" style={{ color: "var(--color-gold)" }}>{picking ? "Done" : "Change"}</span>
                 </button>
                 {picking && <div className="flex flex-wrap gap-2 enter" role="group" aria-label="Question round themes">
                   {avail.map((t) => { const lit = picked.includes(t); return (
                     <button key={t} type="button" className={"chip !min-h-[44px] !px-3 !text-13 " + (lit ? "chip-on" : "")} aria-pressed={lit}
-                      onClick={() => toggleTheme(t)}>{t}</button>); })}
+                      onClick={() => toggleTheme(t)}>{themeLabel(t, timesOf(picked, t))}</button>); })}
                 </div>}
                 {note && <p className="text-13 text-[var(--color-no)]" role="alert">{note}</p>}
               </div>
@@ -239,18 +242,20 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left }: { busy: boo
       <div className="card flex flex-col gap-3">
         <div>
           <div className="display text-24">Advanced</div>
-          <div className="text-13 text-[var(--color-ink-2)]">Host only. {pickSummary(picks, on.includes("quiz") ? picked : [], pickMinis)}{tvQs.length > 0 && ` ${noTv ? "The game phone's" : "The TV's"} own ${tvQs.length} question${tvQs.length === 1 ? " is" : "s are"} in the picker too.`}</div>
+          <div className="text-13 text-[var(--color-ink-2)]">Host only. {pickSummary(picks, on.includes("quiz") ? uniqueThemes(picked) : [], pickMinis)}{tvQs.length > 0 && ` ${noTv ? "The game phone's" : "The TV's"} own ${tvQs.length} question${tvQs.length === 1 ? " is" : "s are"} in the picker too.`}</div>
         </div>
         <div className="flex gap-2 flex-wrap">
           <button type="button" className="btn btn-sm" onClick={() => setChoosing(true)}>Choose questions</button>
+          {on.includes("quiz") && <button type="button" className="btn btn-sm" onClick={() => setRepeatOpen(true)}>Repeat a theme</button>}
           <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : noTv ? "Settings (waiting for the game…)" : "Settings (waiting for the TV…)"}</button>
           {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
         </div>
         {/* What Do You See?: a kind of picture can be left out */}
         {on.includes("see") && <div className="sub-panel"><span className="sp-k">Pictures</span><LevelRow label="What Do You See? pictures" opts={SEE_KIND_OPTS} value={seeKinds} set={setSeeKinds} /></div>}
       </div>
+      {repeatOpen && <RepeatSheet themes={avail} counts={counts} picked={picked} rounds={rounds} eyebrow="Advanced" onChange={(l) => { setThemes(l); setNote(null); }} onClose={() => setRepeatOpen(false)} />}
       {tvOpen && tv && <TvSettings code={code} tv={tv} onClose={() => setTvOpen(false)} />}
-      {choosing && fullAll && <Picker bank={fullAll} many caps={CAPS} themes={on.includes("quiz") ? picked : []} minis={pickMinis} difficulty={quizLevels.length === 4 ? "mixed" : quizLevels.join("+")}
+      {choosing && fullAll && <Picker bank={fullAll} many caps={CAPS} themes={on.includes("quiz") ? uniqueThemes(picked) : []} minis={pickMinis} difficulty={quizLevels.length === 4 ? "mixed" : quizLevels.join("+")}
         levels={{ map: mapLevels, flag: flagLevels, dish: dishLevels, pin: pinLevels, airport: airportLevels, majority: majorityLevels }} value={picks} onChange={setPicks} onClose={() => setChoosing(false)}
         onUseTheme={(t) => {
           if (!on.includes("quiz")) return "Switch on the standard rounds first.";

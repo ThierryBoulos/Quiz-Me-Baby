@@ -85,7 +85,7 @@ function pinNear(g, bot) {
    net: { dup, delay, stall, stallWrites }  pushes sent twice / up to delay ms late (out of order) / that share of reads, or of the TV's writes, held 5-28 s
    simul: both captains tap Next, buzz, rule at the very same moment
    edge: answers land at the exact moment the clock runs out */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false }) {
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed);
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -129,7 +129,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   };
   const tick = (ms) => act(async () => { await advance(ms); });
   await tick(1000);
-  send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: THEMES.slice(0, rounds), minis } });
+  send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: themes || THEMES.slice(0, rounds), minis } });
 
   let reloaded = false;
   /* the scripted things, waiting for a screen that allows them; a scripted Pause lasts its `for`; a scripted
@@ -432,5 +432,6 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   for (let k = 0, n = (fake.net.stallWrites ? 30000 : 5000) / 250; k < n; k++) { await tick(250); checkAcks(); }
   await act(async () => { tree.unmount(); await flush(); });
   resetClock();
-  return { taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
+  const dealt = (api.current?.game?.rounds || []).map((r) => r.theme);
+  return { dealt, taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
 }
