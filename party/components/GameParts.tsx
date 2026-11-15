@@ -300,7 +300,8 @@ export function RoundIntro({ pub, canArm, onArm, size, busy }: { pub: Pub; canAr
           {([0, 1] as const).filter((t) => pub.dbl?.[t]).map((t) => (
             <span key={t} className={"ll armed " + side(t)} style={tv ? { fontSize: 24, padding: "12px 22px" } : undefined}>{ICON.dbl}<span className="nm">{T[t].name} · Double points</span></span>))}
         </div>)}
-      {captain && <div className={"card flex flex-col gap-3 w-full " + (tv ? "" : "ri-sm !p-3")}>
+      {/* (lifelines off for the night, in Setup: no Double Points either. The owner, 15 Nov) */}
+      {captain && !pub.noLl && <div className={"card flex flex-col gap-3 w-full " + (tv ? "" : "ri-sm !p-3")}>
         <div>
           <div className="eyebrow" style={{ fontSize: tv ? 15 : undefined }}>{tv ? "Captains: double points, yes or no?" : "Double points, yes or no?"}</div>
           <p className="text-[var(--color-ink-3)] mt-1.5" style={{ fontSize: tv ? 16 : 12 }}>{tv ? "Armed now, before the questions: a right answer scores 2, and a steal against you pays them 2. One other lifeline at most this round." : "Arm it now. Right: 2 points. Stolen from you: they get 2. One other lifeline at most this round."}</p>
@@ -318,7 +319,7 @@ export function AskHead({ pub, you, go, size }: { pub: Pub; you?: string; go?: b
   /* (the steal too, in one line: sideways, its four lines pushed the question off the left column: the 4 Nov audit, 1.20) */
   if (!tv) return (
     <div className="flex flex-col items-center text-center gap-1.5">
-      <p className={"whofor " + side(t)} style={{ fontSize: 18 }}>{steal ? <><span style={{ color: "var(--color-gold)" }}>Steal · </span>for <b>{T[t].name}</b><span className="nolife text-[var(--color-ink-2)]"> · no lifelines</span></>
+      <p className={"whofor " + side(t)} style={{ fontSize: 18 }}>{steal ? <><span style={{ color: "var(--color-gold)" }}>Steal · </span>for <b>{T[t].name}</b>{!pub.noLl && <span className="nolife text-[var(--color-ink-2)]"> · no lifelines</span>}</>
         : <><span className="text-[var(--color-ink-2)]">{pub.theme}{armed ? " · Double Points" : ""} · </span>Question for <b>{T[t].name}</b></>}</p>
       {you && <p className={"you-line mt-1 " + (go ? "go" : "")}>{you}</p>}
     </div>);
@@ -338,6 +339,8 @@ export function AskHead({ pub, you, go, size }: { pub: Pub; you?: string; go?: b
 /* ---- the lifelines of the team answering: tiles everyone sees; the captain taps ---- */
 export function LifelineStrip({ pub, t, onUse, busy, size }: { pub: Pub; t: 0 | 1; onUse?: (k: "friend" | "dip") => void; busy?: boolean; size: "tv" | "phone" }) {
   const team = pub.teams[t], used = pub.llUsed?.[t] || [], armed = !!pub.dbl?.[t];
+  /* (off for the night, in Setup: the owner, 15 Nov) */
+  if (pub.noLl) return null;
   const tile = (k: "friend" | "dip") => {
     const inuse = used.includes(k), spent = !team.ll[k] && !inuse;
     const cls = "ll " + (inuse ? "inuse" : spent ? "spent" : "");

@@ -170,7 +170,9 @@ export default function PhoneRoom() {
   const runs = referee && refLock.state === "mine" && !taking;
   const two = useTvGame(code, runs && !many, room, members, true);
   const tvM = useTvMany(code, runs && many, room, members, true);
-  const awake = useWakeLock(runs);
+  /* every phone keeps its screen on while a game is on (the owner, 15 Nov, from a live game: phones went dark mid-question);
+     the phone running a game with no TV from the start. Only that one says so when it can't */
+  const awake = useWakeLock(runs || room?.status === "playing");
   /* the game phone's own warnings, in a red line under the header (the 4 Nov audit, 1.8: they only ever showed on a TV) */
   const refBanner = !runs ? null : (many ? tvM.banner : two.banner);
   /* the phone running the game says it's still here, every 5 s while it's on screen; going out of sight (a call,

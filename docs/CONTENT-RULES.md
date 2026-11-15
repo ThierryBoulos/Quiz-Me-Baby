@@ -58,7 +58,9 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   - common short forms and spellings: "Polyam", "Glute max", "Gluteal", "Jbeil", "O-", "AB+", "Montaigu"
     (Romeo's family in French), "Stabiae" (also destroyed by Vesuvius);
   - slang written out in full: "Grandma I would like to fuck", "Mother I would like to fuck";
-  - the city for an airport whose city has only that airport (JFK → "New York").
+  - the city for an airport whose city has only that airport (JFK → "New York");
+  - **the French form of a famous name (15 Nov, the owner):** "Jules César" for Julius Caesar;
+  - **the first name a person is known by (15 Nov, the owner):** "Sundar" for Sundar Pichai.
 - **Don't accept what's too loose**: "O" for O negative, "Weasley" for one Weasley, "Burger" for Cheeseburger,
   a different acronym (GMILF for GILF). Keep the original-language answer when that is the answer (RSVP is French:
   no English additions).
@@ -71,7 +73,8 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   - `rankById[id]`: a ranking's items in the right order, each with its names;
   - `someOf[id]`: "any N of these" ("Name at least two of the colours": any two of blue, black, white, gold);
   - `mapKeys[answer]`: the ideas a map answer needs.
-- **The checker already handles** (no need to add these): typos by length, number words ("twelve" = 12), ordinals
+- **The checker already handles** (no need to add these): typos by length, a letter doubled or not and a double
+  letter in the wrong place ("Keneddy" for Kennedy, 15 Nov), number words ("twelve" = 12), ordinals
   and small Roman numerals ("6th" = "sixth", "the Second" = "II"), "Mount / River / Lake / Mountains / Range"
   optional, "the" at the start, blood types (O-, AB+), symbols read as words (÷ divide, € euro, + plus), two-part
   answers in any order ("Canada and USA"), an airport with its city in front or behind ("Paris CDG").

@@ -17,7 +17,7 @@ import { RepeatSheet } from "./RepeatSheet";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChips";
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
 
-export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
+export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; lifelines?: boolean;
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: Q[] } & Partial<Picks>;
 /* Classic's MINI_GAMES (index.html), name and one line each */
 const MINIS = [
@@ -28,11 +28,11 @@ const MINIS = [
   ["flag", "Guess the Flag", "Ten flags, fifteen seconds each: whose is it?"],
   ["pin", "Drop the Pin", "A landmark's photo: drop a pin on the map where it is. Nearest pin wins."],
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
-  ["majority", "Majority Rules", "Everyone plays on their own phone: 15 questions, four answers. The team with the bigger share of right answers wins."],
+  ["majority", "Majority Rules", "Everyone plays on their own phone: 10 questions, four answers. The team with the bigger share of right answers wins."],
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
   ["see", "What Do You See?", "A face, a logo or a close-up, getting clearer: one guess each, fastest right answer wins."],
   ["roulette", "Russian Roulette", "Spin the barrel: a theme and a question each. One chamber is the bullet."],
-  ["battle", "Battle of the Captains", "Ten each, captains only. Closes the night."],
+  ["battle", "Battle of the Captains", "Ten each, captains only."],
   /* (listed last, the night's last game: 11 Nov, the owner) */
   ["stakes", "Secret Stakes", "The night's last game."]] as const;
 /* each picture game has its own levels, as in Classic; more than one can be on */
@@ -93,6 +93,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const [majorityLevels, setMajorityLevels] = useDraft<string[]>(code, "two.majorityLevels", ["easy", "medium", "hard"]);
   const [seeLevels, setSeeLevels] = useDraft<string[]>(code, "two.seeLevels", ["easy", "medium", "hard"]);
   const [seeKinds, setSeeKinds] = useDraft<string[]>(code, "two.seeKinds", ["face", "logo", "close"]);
+  /* lifelines on or off for the night (the owner, 15 Nov: useless on a mini-game night) */
+  const [lifelines, setLifelines] = useDraft<boolean>(code, "two.lifelines", true);
   const [note, setNote] = useState<string | null>(null);
   const [open, setOpen] = useState<"themes" | null>(null);
   /* the host's advanced options: hand-picked questions, a difficulty per theme */
@@ -232,6 +234,14 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
               <button key={t} type="button" className={"chip " + (picked.includes(t) ? "chip-on" : "")} aria-pressed={picked.includes(t)} onClick={() => toggleTheme(t)}>{themeLabel(t, timesOf(picked, t))}</button>))}
           </Fold>
           {note && <p className="text-13 text-[var(--color-no)]" role="alert">{note}</p>}
+          {/* lifelines on or off (the owner, 15 Nov), with the host and with none */}
+          <button type="button" role="switch" aria-checked={lifelines} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5" onClick={() => setLifelines(!lifelines)}>
+            <span className="min-w-0"><span className="block font-bold text-15 leading-tight">Lifelines</span>
+              <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">Call a Friend, Double Dip and Double Points.</span></span>
+            <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: lifelines ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
+              <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: lifelines ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
+            </span>
+          </button>
         </>) : <p className="text-14 text-[var(--color-ink-2)]">Off: tonight is mini-games only, back to back.</p>}
       </div>
 
@@ -242,7 +252,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <div className="display text-24">Mini-games</div>
             <span className={"badge shrink-0 " + (miniKeys.length ? "gold" : "line")}>{miniKeys.length ? `${miniKeys.reduce((n, k) => n + worth(k), 0)} pts on the table` : "None"}</span>
           </div>
-          <div className="text-13 text-[var(--color-ink-2)]">{standard ? "Spread between the rounds; the Battle closes the night." : "Played one after another."}</div>
+          <div className="text-13 text-[var(--color-ink-2)]">{standard ? "Spread between the rounds." : "Played one after another."}</div>
         </div>
         {MINIS.map(([k, name, blurb]) => { const on = minis.includes(k); return (
           <div key={k}>
@@ -312,7 +322,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
         {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
         {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
         <button className="btn btn-gold btn-block" disabled={!!blocker || busy}
-          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, seeLevels, seeKinds, custom: getCustom(),
+          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, lifelines, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, seeLevels, seeKinds, custom: getCustom(),
             ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
         {/* how long it should take, from what's picked and the TV's timers (the owner, 14 Nov) */}
         {(standard || miniKeys.length > 0) && <p className="text-center text-12 text-[var(--color-ink-3)] -mt-1">{timeLine(estimateTwo({ standard, rounds, minis: miniKeys, host: isHost, timers }))}</p>}

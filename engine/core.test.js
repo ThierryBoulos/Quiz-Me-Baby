@@ -49,6 +49,8 @@ test('answers: exact, tidy and typo-tolerant', () => {
   assert.ok(!Q.isMatch('Bob', 'Boob'));                    // not in three-letter words
   assert.ok(!Q.isMatch('to', 'too'));
   assert.ok(!Q.isMatch('misisipi', 'Mississippi'));        // two doublings short: a different word
+  assert.ok(Q.isMatch('Keneddy', 'Kennedy'));               // a double letter in the wrong place (15 Nov, a live game)
+  assert.ok(!Q.isMatch('Afocado', 'Affogato'));             // two real slips in seven letters: still wrong
 });
 
 test('answers: numbers compare as numbers', () => {

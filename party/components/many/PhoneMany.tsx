@@ -448,24 +448,29 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <OnScreen small={g.key === "pin" && !sentMine} />
         {/* What Do You See? (12 Nov, the owner: a buzzer): BUZZ, then 10 seconds to say it out loud and type it; a wrong
             answer (or none in time) and the team is out of this picture, and another team can buzz */}
-        {g.key === "see" ? (() => { const S = pub.see, out = mine != null && !!S?.out?.[mine], bz = S?.buzz ?? null, me2 = bz != null && bz === mine, col = mine != null ? T[mine].color : undefined; return (<>
+        {g.key === "see" ? (() => { const S = pub.see, out = mine != null && !!S?.out?.[mine], bz = S?.buzz ?? null, me2 = bz != null && bz === mine, col = mine != null ? T[mine].color : undefined;
+          /* typing starts the moment this captain taps BUZZ, before the TV's word comes back (the owner, 15 Nov: the
+             buzzer felt slow); Send waits for the TV to give the buzz, and if another team was first the box closes */
+          const typing = !out && (me2 || (buzzed && bz == null && !pub.paused)) && !sentMine && !sentTxt, early = !me2;
+          const go = () => { const t = text.trim(); if (!t || early) return; void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); };
+          return (<>
           <p className="text-center font-bold text-18 text-balance" role="status" style={{ color: out ? "var(--color-no)" : me2 ? "var(--color-gold)" : bz != null ? "var(--color-ink-3)" : undefined }}>
             {out ? (sentMine ? "Wrong. You’re out of this picture." : "Time’s up. You’re out of this picture.") : me2 ? (sentMine || sentTxt ? "Answer sent. The app checks it." : <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud and type it.</>)
               : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
-          {!out && bz == null && (buzzed
+          {!out && bz == null && !typing && (buzzed
             ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
             : <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
                 onClick={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
-          {!out && me2 && !sentMine && !sentTxt && (
+          {typing && (
             <div className="card flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
                 <label className="field-label !mb-0" htmlFor="mans">Your answer</label>
                 {S?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={S.typeBy} size={52} />to say it and type it</div>}
               </div>
               <input id="mans" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} value={text} onChange={(e) => setText(e.target.value)} placeholder="Type it"
-                onKeyDown={(e) => { const t = text.trim(); if (e.key === "Enter" && !busy && t) { e.preventDefault(); void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); } }} />
+                onKeyDown={(e) => { if (e.key === "Enter" && !busy && text.trim()) { e.preventDefault(); go(); } }} />
               {np.hint}
-              <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => { const t = text.trim(); void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>Send</button>
+              <button className="btn btn-gold btn-lg" disabled={busy || early || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={go}>Send</button>
               <div className="text-13 text-[var(--color-ink-3)]">Say it out loud too! Wrong, and you&rsquo;re out of this picture.</div>
             </div>)}
         </>); })()

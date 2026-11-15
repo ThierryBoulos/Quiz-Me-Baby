@@ -16,7 +16,7 @@ const update = process.argv.includes("--update");
 
 /* a fixed deal: the first legs' worth of each kind, by id (the dealer's shuffle is the two-team game's business) */
 const pick = (type, k, ok = () => true) => bank.filter((q) => q.type === type && ok(q)).sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, k);
-const decks = { majority: pick("majority", 15, (q) => q.options?.length === 4), flag: pick("flag", 10), closest: pick("closest", 5), pin: pick("pin", 7, (q) => Number.isFinite(q.lat)),
+const decks = { majority: pick("majority", 10, (q) => q.options?.length === 4), flag: pick("flag", 10), closest: pick("closest", 5), pin: pick("pin", 7, (q) => Number.isFinite(q.lat)),
   /* phase 2: two question rounds' worth, airports, maps, the wide prompts (the app's word: the first on the list), recipes */
   quiz: pick("standard", 12, (q) => q.theme !== "Know the Host"), airport: pick("airport", 6), map: pick("map", 6),
   say: pick("saysame", 6, (q) => (q.pool || []).length >= 5).map((q) => ({ ...q, answer: q.pool[0] })), dish: pick("dish", 5) };

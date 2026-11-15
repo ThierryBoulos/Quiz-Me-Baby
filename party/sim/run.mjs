@@ -86,6 +86,9 @@ const NIGHTS = [
      too; every picture dealt, spares too, is of a kind left on */
   { seed: 54, minis: ["see"], rounds: 2, seeKinds: ["logo"] },
   { seed: 55, minis: ["see", "closest"], rounds: 2, host: true, seeKinds: ["face", "close"] },
+  /* 15 Nov: lifelines off for the night (the owner): none used, no host and with a host */
+  { seed: 56, minis: ["flag", "battle"], rounds: 4, lifelines: false },
+  { seed: 57, minis: ["closest"], rounds: 4, host: true, lifelines: false },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
@@ -109,7 +112,9 @@ for (const n of NIGHTS) {
     return i > 0 ? `${r.dealt[i]} twice in a row (${r.dealt.join(", ")})` : null;
   })();
   const offKind = n.seeKinds && (r.kinds.length ? r.kinds.find((x) => !n.seeKinds.includes(x)) : "none dealt");
-  if (offKind) { verdict = `PICTURES: a ${offKind} picture, with only ${n.seeKinds.join(" and ")} on`; bad++; }
+  const llBad = n.lifelines === false && (!r.noLl || r.llUsed) ? (r.llUsed ? "a lifeline was used" : "the night has its lifelines") : null;
+  if (llBad) { verdict = `LIFELINES OFF: ${llBad}`; bad++; }
+  else if (offKind) { verdict = `PICTURES: a ${offKind} picture, with only ${n.seeKinds.join(" and ")} on`; bad++; }
   else if (repeat) { verdict = `REPEAT A THEME: ${repeat}`; bad++; }
   else if (!ends) { verdict = `NEVER ENDED (${r.outcome}${r.stuckOn ? " on " + r.stuckOn : ""})`; bad++; }
   else if (update || !existsSync(file)) { writeFileSync(file, text); verdict = "saved"; }

@@ -9,44 +9,39 @@ reveal majority 7 won by - | reveal | 0-0-0-0-0
 reveal majority 8 won by - | reveal | 0-0-0-0-0
 reveal majority 9 won by - | reveal | 0-0-0-0-0
 reveal majority 10 won by - | reveal | 0-0-0-0-0
-reveal majority 11 won by - | reveal | 0-0-0-0-0
-reveal majority 12 won by - | reveal | 0-0-0-0-0
-reveal majority 13 won by - | reveal | 0-0-0-0-0
-reveal majority 14 won by - | reveal | 0-0-0-0-0
-reveal majority 15 won by - | reveal | 0-0-0-0-0
-summary majority award 10,6,6,4,8 | summary | 10-6-6-4-8
-next game | intro | 10-6-6-4-8
-start flag | q | 10-6-6-4-8
-reveal flag 1 won by 2,3,4 | reveal | 10-6-6-4-8
-reveal flag 2 won by 0,1,2 | reveal | 10-6-6-4-8
-reveal flag 3 won by 0,2 | reveal | 10-6-6-4-8
-reveal flag 4 won by 0,1,3 | reveal | 10-6-6-4-8
-reveal flag 5 won by 0,1,3 | reveal | 10-6-6-4-8
-reveal flag 6 won by 3,4 | reveal | 10-6-6-4-8
-reveal flag 7 won by 0,1 | reveal | 10-6-6-4-8
-reveal flag 8 won by 0 | reveal | 10-6-6-4-8
-reveal flag 9 won by 1 | reveal | 10-6-6-4-8
-reveal flag 10 won by 0,1,4 | reveal | 10-6-6-4-8
-summary flag award 10,8,5,6,4 | summary | 20-14-11-10-12
-next game | intro | 20-14-11-10-12
-start closest | q | 20-14-11-10-12
-reveal closest 1 won by 3 | reveal | 20-14-11-10-12
-reveal closest 2 won by 2 | reveal | 20-14-11-10-12
-reveal closest 3 won by 0,4 | reveal | 20-14-11-10-12
-reveal closest 4 won by 0 | reveal | 20-14-11-10-12
-reveal closest 5 won by 1 | reveal | 20-14-11-10-12
-summary closest award 6,8,4,5,10 | summary | 26-22-15-15-22
-next game | intro | 26-22-15-15-22
-start pin | q | 26-22-15-15-22
-reveal pin 1 won by 3 | reveal | 26-22-15-15-22
-reveal pin 2 won by 4 | reveal | 26-22-15-15-22
-reveal pin 3 won by 0 | reveal | 26-22-15-15-22
-reveal pin 4 won by 0 | reveal | 26-22-15-15-22
-reveal pin 5 won by 0 | reveal | 26-22-15-15-22
-reveal pin 6 won by 3 | reveal | 26-22-15-15-22
-reveal pin 7 won by 4 | reveal | 26-22-15-15-22
-summary pin award 10,6,4,6,8 | summary | 36-28-19-21-30
-next game | final | 36-28-19-21-30
-final 1:Team A 2:Team E 3:Team B 4:Team D 5:Team C
-majority: Most right: P2 & P6, 11 of 15. Least right: P0, 5 of 15.
-awards: Most questions won: Team A, 12 | Always the bridesmaid: Team B, 2nd on 8 questions | Best aim, Drop the Pin: Team A, 647 km off on average | Sharpest in Majority Rules: P2 & P6, 11 of 15 | Least right, Majority Rules: P0, 5 of 15
+summary majority award 8,8,4,5,10 | summary | 8-8-4-5-10
+next game | intro | 8-8-4-5-10
+start flag | q | 8-8-4-5-10
+reveal flag 1 won by 1,2,3 | reveal | 8-8-4-5-10
+reveal flag 2 won by 0,1,4 | reveal | 8-8-4-5-10
+reveal flag 3 won by 1,3,4 | reveal | 8-8-4-5-10
+reveal flag 4 won by 1,2,4 | reveal | 8-8-4-5-10
+reveal flag 5 won by 0,2 | reveal | 8-8-4-5-10
+reveal flag 6 won by 2,3 | reveal | 8-8-4-5-10
+reveal flag 7 won by 1 | reveal | 8-8-4-5-10
+reveal flag 8 won by 1,4 | reveal | 8-8-4-5-10
+reveal flag 9 won by 0,4 | reveal | 8-8-4-5-10
+reveal flag 10 won by 0,3 | reveal | 8-8-4-5-10
+summary flag award 8,10,6,4,6 | summary | 16-18-10-9-16
+next game | intro | 16-18-10-9-16
+start closest | q | 16-18-10-9-16
+reveal closest 1 won by 0 | reveal | 16-18-10-9-16
+reveal closest 2 won by 0 | reveal | 16-18-10-9-16
+reveal closest 3 won by 2 | reveal | 16-18-10-9-16
+reveal closest 4 won by 4 | reveal | 16-18-10-9-16
+reveal closest 5 won by 1 | reveal | 16-18-10-9-16
+summary closest award 6,5,10,8,5 | summary | 22-23-20-17-21
+next game | intro | 22-23-20-17-21
+start pin | q | 22-23-20-17-21
+reveal pin 1 won by 1 | reveal | 22-23-20-17-21
+reveal pin 2 won by 1 | reveal | 22-23-20-17-21
+reveal pin 3 won by 2 | reveal | 22-23-20-17-21
+reveal pin 4 won by 0 | reveal | 22-23-20-17-21
+reveal pin 5 won by 2 | reveal | 22-23-20-17-21
+reveal pin 6 won by 0 | reveal | 22-23-20-17-21
+reveal pin 7 won by 2 | reveal | 22-23-20-17-21
+summary pin award 6,10,8,5,4 | summary | 28-33-28-22-25
+next game | final | 28-33-28-22-25
+final 1:Team B 2:Team A 2:Team C 4:Team E 5:Team D
+majority: Most right: P2 & P14, 8 of 10. Least right: 5 players, 3 of 10.
+awards: Always the bridesmaid: Team C, 2nd on 7 questions | Best aim, Drop the Pin: Team C, 493 km off on average | Sharpest in Majority Rules: P2 & P14, 8 of 10 | Least right, Majority Rules: 5 players, 3 of 10

@@ -1,0 +1,53 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+7.50 ask | 3 | 0-0 |  |  | 
+9.50 steal | 4 | 0-0 |  |  | 
+11.25 answer | 5 | 0-1 |  | Owls +1 point — steal | 
+12.00 ask | 6 | 0-1 |  | Owls +1 point — steal | 
+14.00 steal | 7 | 0-1 |  | Owls +1 point — steal | 
+15.75 answer | 8 | 0-1 |  | Owls +1 point — steal | 
+16.50 answer | 8 | 0-1 |  |  | 
+18.50 answer | 8 | 1-1 |  | Call changed: Lions +1 point. | 
+19.25 roundScore | 9 | 1-1 |  | Call changed: Lions +1 point. | 
+20.25 roundIntro | 10 | 1-1 |  | Call changed: Lions +1 point. | 
+21.00 ask | 11 | 1-1 |  | Call changed: Lions +1 point. | 
+23.00 steal | 12 | 1-1 |  | Call changed: Lions +1 point. | 
+24.75 answer | 13 | 1-2 |  | Owls +1 point — steal | 
+25.50 ask | 14 | 1-2 |  | Owls +1 point — steal | 
+27.50 steal | 15 | 1-2 |  | Owls +1 point — steal | 
+29.25 answer | 16 | 1-2 |  | Owls +1 point — steal | 
+30.00 roundScore | 17 | 1-2 |  | Owls +1 point — steal | 
+31.00 miniIntro | 18 | 1-2 | 0-0 | Owls +1 point — steal | 
+32.00 miniQ | 19 | 1-2 | 0-0 | Owls +1 point — steal | 
+32.75 closestReveal | 19 | 1-2 | 1-0 | Owls +1 point — steal | 
+33.75 miniQ | 20 | 1-2 | 1-0 | Lions take leg 1. | 
+34.50 closestReveal | 20 | 1-2 | 1-1 | Lions take leg 1. | 
+35.50 miniQ | 21 | 1-2 | 1-1 | Owls take leg 2. | 
+36.50 closestReveal | 21 | 1-2 | 1-2 | Owls take leg 2. | 
+37.25 miniQ | 22 | 1-2 | 1-2 | Owls take leg 3. | 
+38.25 closestReveal | 22 | 1-2 | 2-2 | Owls take leg 3. | 
+39.00 miniQ | 23 | 1-2 | 2-2 | Lions take leg 4. | 
+40.00 closestReveal | 23 | 1-2 | 3-2 | Lions take leg 4. | 
+41.00 miniSummary | 24 | 3-2 | 3-2 | Lions take leg 5. | 
+41.75 roundIntro | 25 | 3-2 |  | Lions take leg 5. | 
+42.75 ask | 26 | 3-2 |  | Lions take leg 5. | 
+44.50 answer | 27 | 4-2 |  | Lions +1 point | 
+45.50 answer | 27 | 4-2 |  |  | 
+46.25 answer | 27 | 4-2 |  | The host keeps the call. | 
+47.25 ask | 28 | 4-2 |  | The host keeps the call. | 
+49.00 answer | 29 | 4-3 |  | Owls +1 point | 
+50.00 answer | 29 | 4-3 |  |  | 
+50.75 steal | 30 | 4-2 |  | Lions steal a new question. | 
+52.50 answer | 31 | 5-2 |  | Lions +1 point — steal | 
+53.50 roundScore | 32 | 5-2 |  | Lions +1 point — steal | 
+54.50 roundIntro | 33 | 5-2 |  | Lions +1 point — steal | 
+56.25 ask | 34 | 5-2 |  | Lions +1 point — steal | 
+58.00 answer | 35 | 6-2 |  | Lions +1 point | 
+59.00 ask | 36 | 6-2 |  | Lions +1 point | 
+61.50 answer | 37 | 6-3 |  | Owls +1 point | 
+62.50 answer | 37 | 6-3 |  |  | 
+68.00 roundScore | 38 | 6-3 |  |  | 
+68.75 final | 39 | 6-3 |  |  | 
+recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[2,2],"minis":[1,0],"chart":[[0,0],[0,0],[0,1],[1,1],[1,2],[3,2],[4,2],[4,3],[4,2],[5,2],[6,2],[6,3]],"segs":[{"label":"R1","pts":[[0,1],[1,1]]},{"label":"R2","pts":[[1,2]]},{"label":"Closest To Wins","pts":[[3,2]]},{"label":"R3","pts":[[4,2],[4,3],[4,2],[5,2]]},{"label":"R4","pts":[[6,2],[6,3]]}],"awards":[]}

@@ -219,7 +219,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.exit) { localStorage.removeItem(saveKey); lastSave.current = ""; }
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-            total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
+            noLl: !!s.g?.noLl, total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, changedIds: s.changedIds, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, seeAt: s.seeAt, seeOut: s.seeOut, seeBuzz: s.seeBuzz, seeBy: s.seeBy, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
           if (save !== lastSave.current) {
             lastSave.current = save;
@@ -1221,6 +1221,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.nohost = !members.some((m) => m.role === "host");
       /* the night's intro comes first (the owner, 1 Nov): the plan on the TV until Let's go */
       g.nightIntro = true;
+      /* lifelines off for the night (Setup, the owner, 15 Nov): none left for either team from the start, and none shown */
+      if (cfgIn.lifelines === false) { g.noLl = true; g.teams.forEach((t: { ll: Record<string, boolean> }) => { t.ll = { friend: false, dip: false, dbl: false }; }); }
       s.g = g; s.screen = ""; s.lifeline = null; s.pending = null; s.autoAt = null; s.step = 1; s.scoreLog = []; s.segLog = []; s.agree = null;
       g.rounds.forEach((r: G) => r.q.forEach((q: G) => applyFx([{ used: q }])));
       play({ type: "game/start" });

@@ -24,14 +24,14 @@ const TWO: Record<string, Leg> = {
   dish: { n: 7, t: (s, _p, o) => s.tDishStep * 7 + s.tDishType * 0.6 + o },   // the ingredients come in until someone calls it
   pin: timed(7, (s) => s.tPin),
   airport: timed(5, (s) => s.tAirport),
-  majority: timed(15, (s) => s.tMajority, 0.6),
+  majority: timed(10, (s) => s.tMajority, 0.6),
   see: timed(12, (s) => s.tSee),
   roulette: { n: 3, t: (s, p, o) => 10 + s.tRoulette * p + o },      // the spin, then each team's chamber
   stakes: { n: 3, t: (s, p, o) => s.tStakesPick * p + s.tStakesQ * p + o },
 };
 const MANY: Record<string, Leg> = {
   quiz: timed(4, (s) => s.tQuestion),
-  majority: timed(15, (s) => s.tMajority, 0.6),
+  majority: timed(10, (s) => s.tMajority, 0.6),
   flag: timed(10, (s) => s.tFlag),
   airport: timed(6, (s) => s.tAirport),
   map: timed(6, (s) => s.tMap),

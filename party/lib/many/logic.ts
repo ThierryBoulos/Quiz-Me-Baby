@@ -20,7 +20,7 @@ export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closes
 export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
 export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
   closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", see: "What Do You See?", roulette: "Russian Roulette", stakes: "Secret Stakes" };
-export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 15, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, see: 12, roulette: 3, stakes: 3 };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 10, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, see: 12, roulette: 3, stakes: 3 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
 export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "see", "sudden", "roulette", "stakes"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
@@ -177,7 +177,7 @@ export function startMini(s: StateM, now: number, t: Timers, roster: { name: str
   const m = miniOf(s); if (!m || s.screen !== "intro") return false;
   if (m.key === "majority") {
     const list = roster.filter((r) => r.team >= 0 && r.team < s.teams.length).slice(0, MANY_PLAYERS);
-    /* (nobody on the list: fifteen questions nobody could answer, 14 Nov) */
+    /* (nobody on the list: ten questions nobody could answer, 14 Nov) */
     if (!list.length) return "Nobody's on the list yet.";
     s.roster = list;
   }
@@ -477,7 +477,8 @@ export function next(s: StateM, now: number, t: Timers) {
       if (hit >= 0) m.fired = (m.fired || 0) + 1;
       m.had = s.teams.map((_, i) => [...(m.had?.[i] || []), ...(lap.draw ? [lap.ch[lap.draw[i]].theme] : [])]);
       s.stats.run = n(s.teams.length);
-      toast(s, hit < 0 ? "Nobody drew the bullet this time." : `${s.teams[hit].name} drew the bullet: ${s.ok[hit] ? "+5" : got[hit] < 0 ? `−${-got[hit]}` : "wrong, with nothing to lose"}.`);
+      /* (no note on top: who drew the bullet is the line under the barrel once it stops; a note said it at once, before the
+         barrel had stopped, and said it twice: 15 Nov, from a live game) */
     } else if (m.key === "stakes") {
       /* each team wins or loses its bet, straight on the night's total (never below 0) */
       const R = m.qs[m.i], res = QMB.stakesResult(s.teams.map((x) => x.score), s.picks || [], s.ok.map(Boolean), m.unit || 1);

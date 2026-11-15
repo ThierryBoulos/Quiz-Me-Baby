@@ -74,7 +74,7 @@ export function PickMany({ room, k, busy, pick, current, members }: { room: Room
    any number of teams, each with its levels; the Start button docked under it ---- */
 const GAMES: [ManyKey, string][] = [
   ["quiz", "Rounds of 2 questions on one theme. Captains type; the fastest right answer scores most."],
-  ["majority", "Everyone answers on their own phone. 15 questions, 4 answers each."],
+  ["majority", "Everyone answers on their own phone. 10 questions, 4 answers each."],
   ["flag", "10 flags. Captains type the country; the fastest right answer scores most."],
   ["closest", "5 number questions. The closest guess scores most."],
   ["pin", "7 famous places. Captains drop a pin; the closest scores most."],

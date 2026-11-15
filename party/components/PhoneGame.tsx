@@ -340,7 +340,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="flex flex-col gap-4 flex-1">
         <RoundIntro pub={pub} size="phone" />
         {/* whether the captains have armed Double Points yet, before the host starts (the 4 Nov audit, 3.11) */}
-        <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">Double Points: {([0, 1] as const).map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t) }}>{T[t].name}</b> {pub.dbl?.[t] ? "armed" : T[t].ll?.dbl === false ? "used" : "not armed"}</span>)}</p>
+        {!pub.noLl && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">Double Points: {([0, 1] as const).map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t) }}>{T[t].name}</b> {pub.dbl?.[t] ? "armed" : T[t].ll?.dbl === false ? "used" : "not armed"}</span>)}</p>}
         <Main label={`Start: question for ${T[pub.first ?? 0].name}`} move={{ type: "round/begin" }} />
       </div>);
     case "ask": case "steal": return (
@@ -1164,7 +1164,9 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "stakesPick": return cap ? (pub.stakes?.locked[mine] ? "Bet locked in. Waiting for the others." : "Place your bet: a theme, then a level") : "Secret Stakes: your captain bets";
     case "stakesQ": return cap ? "The question you bet on. Type your answer." : "Secret Stakes: help your captain";
     case "stakesReveal": return "The reveal: from last place up";
-    case "rouletteReveal": return pub.roulette?.rev && pub.roulette.rev.hit >= 0 ? `BANG! ${T[pub.roulette.rev.hit].name} drew the bullet` : pub.roulette?.rev && pub.roulette.rev.bullet < 0 ? "Tie-breaker: no bullet in this one." : "Nobody drew the bullet this time.";
+    /* (who drew the bullet is the line under the barrel, once it stops: said up here too, it came twice and before the
+       barrel had stopped: 15 Nov, a live game) */
+    case "rouletteReveal": return "The reveal";
     case "majorityQ": return "Your own answer: eyes on your phone, no talking";
     case "dishQ": return pub.buzz === mine ? (pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : cap ? "You buzzed! Type it, quick." : "Your captain buzzed!") : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : pub.out?.[mine] ? (pub.dish?.late === mine ? "Time's up. You're out of this one." : "You're out of this one") : cap ? "Know it? BUZZ!" : "Guess the Cocktail or Dish: help your captain";
     case "sayQ": return cap ? "Type an answer the app won't think of" : "Don't Say the Same as Me: help your captain";
@@ -1388,6 +1390,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const canType = !pub.paused && ((myTurn && !locked && !pub.timeUp) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ" || sc === "stakesQ" || (sc === "rouletteQ" && rrSpun)) && !sentHere)
     /* a buzz: one answer, and once it's sent the box closes (it stayed open, with its Send, and got sent twice: 20 Oct) */
     || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending && !sentHere)
+    /* ...and the moment this captain taps BUZZ, before the TV's word comes back: typing starts at once (the owner, 15 Nov:
+       the buzzer felt slow, a second's wait for the box); Send waits for the TV to give the buzz (soon), and if another
+       team was first, the box closes */
+    || (BUZZ_SCREENS.includes(sc) && buzzed && pub.buzz == null && !pub.out?.[mine] && !pub.pending && !sentHere && !pub.paused)
     /* sudden death and the tie-breaker: both captains type at once, one answer each */
     || (RACE(pub) && !pub.out?.[mine] && !sentHere && !pub.contest)
     /* the Battle: typed with no host; with a host it's said out loud */
@@ -1439,7 +1445,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
     return () => clearTimeout(t);
   }, [a, b, canType, draftKey, sc, code]);
   const sendPin = async () => { if (!pinAt) return; setSentTxt("your pin"); if (!(await act("answer", { pin: pinAt, k: draftKey }))) setSentTxt(null); };
+  /* (typing after a BUZZ the TV hasn't given yet: Send waits for it) */
+  const early = BUZZ_SCREENS.includes(sc) && pub.buzz !== mine;
   const send = async () => {
+    if (early) return;
     /* locked in on this phone straight away; put back if it couldn't go */
     if (sc === "miniQ") { if (!Number.isFinite(guess)) return; setSentTxt(a); if (!(await act("answer", { n: a, k: draftKey }))) setSentTxt(null); return; }
     const texts = [a, b].map((x) => x.trim()).filter(Boolean);
@@ -1486,7 +1495,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
 
       {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy}
         onClick={() => { buzzHand(40); setBuzzed(true); void act("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>}
-      {canBuzz && buzzed && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
+      {/* (the answer box is up already: that says it) */}
+      {canBuzz && buzzed && !canType && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
 
       {canType && (
         <div className="card flex flex-col gap-2">
@@ -1500,13 +1510,13 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <input id="ans" {...np.props} className="input" value={a} maxLength={80} autoComplete="off" autoCorrect="off" spellCheck={false}
             /* Closest: the number pad, fastest (the reader still takes "1.5 million" if a keyboard sends it) */
             inputMode={sc === "miniQ" ? "decimal" : "text"} enterKeyHint="send" placeholder={sc === "miniQ" ? "e.g. 236" : "Type it"} onChange={(e) => setA(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !dip && !busy && a.trim()) { e.preventDefault(); void send(); } }} />
+            onKeyDown={(e) => { if (e.key === "Enter" && !dip && !busy && !early && a.trim()) { e.preventDefault(); void send(); } }} />
           {sc === "miniQ" && a.trim() && (Number.isFinite(guess)
             ? ![String(guess), guess.toLocaleString("en-GB")].includes(a.trim()) && <div className="text-13 text-[var(--color-ink-2)]">Counts as <b>{guess.toLocaleString("en-GB")}{per ? ` ${per}` : ""}</b></div>
             : <p className="text-13 text-[var(--color-no)]" role="alert">That isn&rsquo;t a number.</p>)}
           {dip && <input {...np.props} className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {np.hint}
-          <button className="btn btn-gold btn-lg" disabled={busy || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onPointerDown={(e) => e.preventDefault()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
+          <button className="btn btn-gold btn-lg" disabled={busy || early || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onPointerDown={(e) => e.preventDefault()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
           {["ask", "steal", "flagQ", "airportQ", "mapQ"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
           {sc === "seeQ" && <div className="text-13 text-[var(--color-ink-3)]">Say it out loud too! Wrong, and you&rsquo;re out of this picture.</div>}
         </div>)}

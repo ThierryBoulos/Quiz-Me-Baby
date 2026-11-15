@@ -9,44 +9,39 @@ reveal majority 7 won by - | reveal | 0-0-0
 reveal majority 8 won by - | reveal | 0-0-0
 reveal majority 9 won by - | reveal | 0-0-0
 reveal majority 10 won by - | reveal | 0-0-0
-reveal majority 11 won by - | reveal | 0-0-0
-reveal majority 12 won by - | reveal | 0-0-0
-reveal majority 13 won by - | reveal | 0-0-0
-reveal majority 14 won by - | reveal | 0-0-0
-reveal majority 15 won by - | reveal | 0-0-0
-summary majority award 8,10,6 | summary | 8-10-6
-next game | intro | 8-10-6
-start flag | q | 8-10-6
-reveal flag 1 won by 1 | reveal | 8-10-6
-reveal flag 2 won by - | reveal | 8-10-6
-reveal flag 3 won by - | reveal | 8-10-6
-reveal flag 4 won by 2 | reveal | 8-10-6
-reveal flag 5 won by 1 | reveal | 8-10-6
-reveal flag 6 won by 2 | reveal | 8-10-6
-reveal flag 7 won by 1 | reveal | 8-10-6
-reveal flag 8 won by 0,2 | reveal | 8-10-6
-reveal flag 9 won by 1,2 | reveal | 8-10-6
-reveal flag 10 won by 2 | reveal | 8-10-6
-summary flag award 6,8,10 | summary | 14-18-16
-next game | intro | 14-18-16
-start closest | q | 14-18-16
-reveal closest 1 won by 0 | reveal | 14-18-16
-reveal closest 2 won by 0 | reveal | 14-18-16
-reveal closest 3 won by 1 | reveal | 14-18-16
-reveal closest 4 won by 1 | reveal | 14-18-16
-reveal closest 5 won by 1 | reveal | 14-18-16
-summary closest award 10,10,6 | summary | 24-28-22
-next game | intro | 24-28-22
-start pin | q | 24-28-22
-reveal pin 1 won by 2 | reveal | 24-28-22
-reveal pin 2 won by 0 | reveal | 24-28-22
-reveal pin 3 won by 1 | reveal | 24-28-22
-reveal pin 4 won by 0 | reveal | 24-28-22
-reveal pin 5 won by 1 | reveal | 24-28-22
-reveal pin 6 won by 0 | reveal | 24-28-22
-reveal pin 7 won by 2 | reveal | 24-28-22
-summary pin award 8,6,10 | summary | 32-34-32
-next game | final | 32-34-32
-final 1:Team B 2:Team A 2:Team C
-majority: Most right: P1 & P6, 9 of 15. Least right: P2, 4 of 15.
-awards: Most questions won: Team B, 9 | Always the bridesmaid: Team C, 2nd on 9 questions | Best aim, Drop the Pin: Team C, 748 km off on average | Sharpest in Majority Rules: P1 & P6, 9 of 15 | Least right, Majority Rules: P2, 4 of 15
+summary majority award 10,8,6 | summary | 10-8-6
+next game | intro | 10-8-6
+start flag | q | 10-8-6
+reveal flag 1 won by 1,2 | reveal | 10-8-6
+reveal flag 2 won by 0,1,2 | reveal | 10-8-6
+reveal flag 3 won by 1 | reveal | 10-8-6
+reveal flag 4 won by - | reveal | 10-8-6
+reveal flag 5 won by 1 | reveal | 10-8-6
+reveal flag 6 won by - | reveal | 10-8-6
+reveal flag 7 won by 1,2 | reveal | 10-8-6
+reveal flag 8 won by 0,2 | reveal | 10-8-6
+reveal flag 9 won by 0,1,2 | reveal | 10-8-6
+reveal flag 10 won by 2 | reveal | 10-8-6
+summary flag award 6,10,8 | summary | 16-18-14
+next game | intro | 16-18-14
+start closest | q | 16-18-14
+reveal closest 1 won by 2 | reveal | 16-18-14
+reveal closest 2 won by 2 | reveal | 16-18-14
+reveal closest 3 won by 0 | reveal | 16-18-14
+reveal closest 4 won by 1 | reveal | 16-18-14
+reveal closest 5 won by 2 | reveal | 16-18-14
+summary closest award 6,8,10 | summary | 22-26-24
+next game | intro | 22-26-24
+start pin | q | 22-26-24
+reveal pin 1 won by 2 | reveal | 22-26-24
+reveal pin 2 won by 2 | reveal | 22-26-24
+reveal pin 3 won by 2 | reveal | 22-26-24
+reveal pin 4 won by 2 | reveal | 22-26-24
+reveal pin 5 won by 0 | reveal | 22-26-24
+reveal pin 6 won by 0 | reveal | 22-26-24
+reveal pin 7 won by 0 | reveal | 22-26-24
+summary pin award 8,6,10 | summary | 30-32-34
+next game | final | 30-32-34
+final 1:Team C 2:Team B 3:Team A
+majority: Most right: P0 & P5, 7 of 10. Least right: P2, 1 of 10.
+awards: Most questions won: Team C, 8 | Always the bridesmaid: Team B, 2nd on 10 questions | Best aim, Drop the Pin: Team C, 600 km off on average | Sharpest in Majority Rules: P0 & P5, 7 of 10 | Least right, Majority Rules: P2, 1 of 10

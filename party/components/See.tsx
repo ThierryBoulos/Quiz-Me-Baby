@@ -120,8 +120,10 @@ export function SeePicture({ see, deadline, left, clear, w, big, alt }: { see: S
         <canvas ref={cv0} role="img" aria-label="The picture" style={{ opacity: 0 }} />
         <canvas ref={cv1} aria-hidden style={{ opacity: 0 }} />
       </>)
+        /* (a picture of its own for each photo: the next close-up starts zoomed right in, never sliding in from the
+           last one's whole picture, which a phone showed for a moment between pictures: 15 Nov, the owner) */
         /* eslint-disable-next-line @next/next/no-img-element */
-        : <img src={src} alt={clear && alt ? alt : "The picture"} draggable={false} style={style} />}
+        : <img key={src} src={src} alt={clear && alt ? alt : "The picture"} draggable={false} style={style} />}
     </div>);
 }
 

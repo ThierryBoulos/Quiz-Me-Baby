@@ -27,7 +27,8 @@
        - several accepted answers per question; an answer's own bracketed
          note is optional ("Everest (8,849 m)" also accepts "Everest")
        - small typos pass: none in words of 4 letters or fewer, one up to 8,
-         two beyond. "yelephant" is elephant; "elegant" is not.
+         two beyond. "yelephant" is elephant; "elegant" is not. A letter doubled or not, or a
+         double letter in the wrong place ("Keneddy" for Kennedy), is no slip at all.
        - but one country is never a typo of another: "Austria" is not Australia
        - "Mount", "Mt", "River" and "Lake" are optional: "Everest" = "Mount Everest"
        - numbers are compared as numbers: "1,000" = "1000" = "1000.0", "twelve" = "12"
@@ -239,6 +240,9 @@
          only, and not in words of three letters ("to" isn't "too", "Bob" isn't "Boob") */
       const single = (x) => x.replace(/([a-z])\1+/g, '$1');
       if(Math.abs(a.length - b.length) === 1 && Math.min(a.length, b.length) >= 4 && single(a) === single(b)) return true;
+      /* ...or a double letter in the wrong place, the same length ("Keneddy" for Kennedy: the owner, 15 Nov), in
+         words of five letters or more */
+      if(a.length === b.length && a.length >= 5 && single(a) === single(b)) return true;
       if(distance(a, b) <= allowance(b.length)) return true;
     }
     return false;
@@ -346,7 +350,7 @@
        ctx.rng         optional; Math.random when absent
      Anything that needs tonight's game (the Battle's "already used") takes
      it as an argument instead of reading it.                               */
-  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:15, battle:10, see:12 };   // (What Do You See?: 12 pictures with any number of teams, 2 to 8: the owner, 12 Nov)
+  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:10, battle:10, see:12 };   // (Majority Rules: 10 questions, not 15: the owner, 15 Nov; What Do You See?: 12 pictures with any number of teams, 2 to 8: the owner, 12 Nov)
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
         FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, PIN_LEGS = LEGS.pin, AIRPORT_LEGS = LEGS.airport, MAJORITY_N = LEGS.majority, BATTLE_N = LEGS.battle;
   /* Flag first: fast and loud, it opens the night. (Drop the Pin, Guess the Airport and Majority Rules are Party's.) */
