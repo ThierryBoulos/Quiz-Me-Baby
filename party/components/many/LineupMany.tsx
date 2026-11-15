@@ -16,7 +16,8 @@ import { cleanList, getCustom } from "@/lib/custom";
 import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS, lineup, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
-import { chipLabel, FlagExpertNote, levelLine, SEE_KIND_OPTS } from "../Setup";
+import { levelLine } from "../Setup";
+import { FlagExpertNote, LevelChips, SEE_KIND_OPTS } from "../LevelChips";
 import { timeLine, estimateMany } from "@/lib/estimate";
 import { RepeatSheet } from "../RepeatSheet";
 import { themeLabel, themeList, timesOf, uniqueThemes } from "@/lib/repeat";
@@ -172,14 +173,8 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
   const night = lineup(on.includes("quiz") ? Math.ceil(rounds / 2) : 0, on.filter((x) => x !== "quiz"));
   const slot = (x: string) => { const at = night.map((y, i) => (y === x ? i + 1 : 0)).filter(Boolean); return at.length ? at.map((n) => ordinal(n)).join(", ") : ""; };
   const blocker = why || (!on.length ? "Switch on at least one game." : on.includes("quiz") && bank && picked.length !== rounds ? `Pick ${rounds} themes, one per round (${picked.length} so far).` : "");
-  /* a level row: tap to add or drop a level; the last one can't be dropped */
-  /* (the mini-games' rows are compact; the question rounds' and Guess the Flag's full height: they need the room. 15 Nov) */
-  const LevelRow = ({ label, opts, value, set, big }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; big?: boolean }) => (
-    <div className={"lvl-row" + (big ? "" : " compact")} role="group" aria-label={label}>
-      {opts.map(([key, l]) => { const lit = value.includes(key); return (
-        <button key={key} type="button" className={"chip " + (lit ? "chip-on" : "") + (key === "expert" ? " lvl-expert" : "")} aria-pressed={lit}
-          onClick={() => { const next = lit ? value.filter((x) => x !== key) : [...value, key]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{chipLabel(key, l)}</button>); })}
-    </div>);
+  /* a level row: the same piece as the 2-team Setup's (components/LevelChips.tsx) */
+  const LevelRow = LevelChips;
   return (
     <section className="flex flex-col gap-3" aria-label="Tonight's game">
       <div className="eyebrow px-1" style={{ color: "var(--color-gold)" }}>Tonight&rsquo;s game</div>

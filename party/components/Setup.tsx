@@ -14,6 +14,7 @@ import type { Settings } from "@/lib/settings";
 import { TvSettings } from "./TvSettings";
 import { timeLine, estimateTwo } from "@/lib/estimate";
 import { RepeatSheet } from "./RepeatSheet";
+import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChips";
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[];
@@ -51,20 +52,11 @@ export function levelLine(on: readonly string[], all = false): string {
 }
 const MAP_LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
-/* What Do You See?: the kinds of picture, under the game with its levels (a kind can be left out: the owner, 15 Nov;
-   "Celebrities", not "Faces") */
-export const SEE_KIND_OPTS = [["face", "Celebrities"], ["logo", "Logos"], ["close", "Close-ups"]] as const;
 const DISH_LEVELS = { c: [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]], d: [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] } as const;
 /* the four levels of a standard question: any mix of them, or Mixed (all four). The default is the
    first three: Expert comes in only when a theme runs out of those. */
 const LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
-/* Expert stands out as the hard one (the owner, 15 Nov): a red-ish chip with a small warning mark */
-export const ExpertMark = () => (
-  <svg className="xp-mark" width="13" height="12" viewBox="0 0 13 12" aria-hidden><path d="M6.5 0.8 L12.4 11.2 H0.6 Z" fill="currentColor" /><path d="M6.5 4.3 V7.4" stroke="#1a0606" strokeWidth="1.6" strokeLinecap="round" /><circle cx="6.5" cy="9.3" r="0.9" fill="#1a0606" /></svg>);
-/* (the mark beside the word where there's room; on a narrow chip it sits above the word, never off the edge: 15 Nov) */
-export const chipLabel = (key: string, label: string) => key === "expert" ? <span className="xp-label"><ExpertMark /><span>{label}</span></span> : label;
-/* Guess the Flag with Expert on (the owner's words, 15 Nov) */
-export const FlagExpertNote = ({ on }: { on: boolean }) => on ? <p className="xp-note text-12 px-1" role="note">Warning, only real buffs get those!</p> : null;
+/* (the level chips, the Expert mark, the pictures' kinds: components/LevelChips.tsx, shared with the 3-8 Setup) */
 const ROUND_CHOICES = Array.from({ length: 14 }, (_, i) => i + 1);   // 1 to 14 (11 Nov, the owner)
 const OFF_BY_DEFAULT = ["Know the Host", "Sexy Time", "Lebanon"];
 const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -158,16 +150,11 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const plan: { key: string; after: number }[] = QMB.planMinis(standard ? rounds : 0, (QMB.INTERLEAVED as string[]).filter((k) => miniKeys.includes(k)));
   const slot = (k: string) => k === "battle" ? "last" : standard ? (plan.find((p) => p.key === k) ? `after R${plan.find((p) => p.key === k)!.after + 1}` : "")
     : ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";
-  /* a level row: tap to add or drop a level; the last one can't be dropped */
-  /* (the mini-games' rows are compact, Guess the Flag's full height: it needs the room. The owner, 15 Nov) */
-  const LevelRow = ({ label, opts, value, set, tag, big }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string; big?: boolean }) => (
-    <div className="flex flex-col gap-1.5 pl-1 pb-2" role="group" aria-label={label}>
+  /* a level row (components/LevelChips.tsx, the same piece as the 3-8 Setup's), with its small heading when it has one */
+  const LevelRow = ({ tag, ...p }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string; big?: boolean }) => (
+    <div className="flex flex-col gap-1.5 pl-1 pb-2">
       {tag && <span className="eyebrow !text-11">{tag}</span>}
-      <div className={"lvl-row" + (big ? "" : " compact")}>
-      {opts.map(([k, l]) => { const on = value.includes(k); return (
-        <button key={k} type="button" className={"chip " + (on ? "chip-on" : "") + (k === "expert" ? " lvl-expert" : "")} aria-pressed={on}
-          onClick={() => { const next = on ? value.filter((x) => x !== k) : [...value, k]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{chipLabel(k, l)}</button>); })}
-      </div>
+      <LevelChips {...p} />
     </div>);
   const half = picked.filter((t) => (picks.picks[t] || []).length === 1);
 

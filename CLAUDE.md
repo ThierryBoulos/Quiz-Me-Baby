@@ -9,6 +9,12 @@ only where the question bank lives. Don't change its screens or rules text; only
   2 teams with a host, 2 teams with no host, 3 to 8 teams (they always have a host), each with a TV and with no TV.
   The checks cover them too: simulated nights and screen checks in each setup it touches. Where something doesn't
   apply (the Auction is 2 teams only), say so; where it can't work the same way, say what happens there instead.
+  **Never propose leaving a setup out (15 Nov)**, unless it really doesn't make sense there; then say why.
+  **Every report ends with the six setups (15 Nov)**, one line each: 2 teams with a host, 2 teams with no host, 3 to 8
+  teams, each with a TV and with no TV: done and checked (which check), or why it doesn't apply. A report without
+  them isn't finished. The setup screens are one shared piece where they can be (`components/LevelChips.tsx`), so a
+  change lands in every setup at once; the screen check runs every setup by itself (a filter matching one setup's
+  screen runs it in all of them).
 - **The owner's wording (8 Nov).** How to Play (`party/components/Rules.tsx`) is the owner's own text: never reword
   it. When a change to the game makes it wrong, or it looks wrong, tell the owner exactly how you'd change it (the
   sentence as it is, the sentence you'd write) and wait for a yes. In everything else written for players, follow the

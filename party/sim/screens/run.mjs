@@ -6,6 +6,8 @@
      npm run screens -- tv               only part of it: tv (every TV screen and the lobby), phones, sizes
                                          (a few screens on common TVs, laptops and browser windows)
      npm run screens -- phones roulette  only the screens whose name matches "roulette"
+                                         (and the same screens in every other setup: a filter never
+                                         checks one setup alone, 15 Nov)
    The report and the pictures: sim/.out/screens/ (never committed). Needs Playwright's Chromium.
    It builds the game once with QMB_SCREENS=1 (the only build with app/screens in it, kept in .next-screens, never
    deployed) and serves it on this machine. Nothing it opens can reach the internet: every request that isn't to
@@ -34,6 +36,23 @@ const pubs = JSON.parse(readFileSync(join(out, "pubs.json"), "utf8"));
 /* each (screen, game) once: its last moment (".z"), or its only one */
 const keys = Object.keys(pubs).filter((k) => k.endsWith(".z") || !pubs[k.slice(0, -2) + ".z"]);
 console.log(`${Object.keys(pubs).length} moments kept from the nights; ${keys.length} screens to check`);
+/* EVERY SETUP, BY ITSELF (the owner, 15 Nov): a filter that matches a screen in one setup runs the same screen in all
+   of them: 2 teams with no host (nh, nh2) and with a host (h), 3, 5 and 8 teams (m3, m5, m8); the phones each with a TV
+   and with none. The same screen: the same name after the setup ("flagQ.flag.z" in nh and h), or the same game and
+   moment (2 teams' "flagSummary.flag", 3-8's "summary.flag") */
+const sigOf = (k) => { const [, scr = "", game = ""] = k.split("."); const g = game === "saysame" ? "say" : game;
+  return g ? g + ":" + scr.toLowerCase().replace(new RegExp("^" + g), "") : ""; };
+const restOf = (k) => k.split(".").slice(1).join(".");
+const hit = keys.filter(match), rests = new Set(hit.map(restOf)), sigs = new Set(hit.map(sigOf).filter(Boolean));
+const inPlay = keys.filter((k) => match(k) || rests.has(restOf(k)) || sigs.has(sigOf(k)));
+if (filter && inPlay.length > hit.length) console.log(`"${filter}" matched ${hit.length} screens; ${inPlay.length - hit.length} more are the same screens in the other setups, checked too`);
+/* the Setup before the start: every setup (2 teams with a host, 2 teams with no host: Team A's captain; 3, 5 and 8
+   teams), each with a TV and with none, each as it starts and with Expert on (xp), a theme repeated (rep), the Repeat
+   window open (repo). A filter matching one runs that kind in every setup */
+const SETUP_BASES = ["2:host", "2:cap", "3:host", "5:host", "8:host"], SETUP_KINDS = ["", "xp", "rep", "repo"];
+const setupHash = (b, kind, notv) => `setup:${b}${kind ? ":" + kind : ""}${notv ? ":notv" : ""}`;
+const setupJobs = SETUP_KINDS.filter((kind) => !filter || SETUP_BASES.some((b) => [false, true].some((n) => match(setupHash(b, kind, n)))))
+  .flatMap((kind) => SETUP_BASES.flatMap((b) => [false, true].map((n) => setupHash(b, kind, n))));
 
 /* 2. the game, built once for the check (QMB_SCREENS=1: with app/screens, in .next-screens) and served on this machine.
    Next writes its build folder into tsconfig.json and next-env.d.ts; they're put back as they were at the end */
@@ -186,7 +205,9 @@ const page = async (j, opt) => {
 };
 
 if (want("tv")) {
-  const jobs = [...[2, 3, 5, 8].map((t) => `lobby:${t}`), ...keys.map((k) => `tv:${k}`)].filter(match).map((h) => ({ id: "tv " + h, hash: h, key: h.replace(/^tv:/, "") }));
+  /* (the lobby: a filter matching one team count runs them all) */
+  const lobbies = [2, 3, 5, 8].map((t) => `lobby:${t}`);
+  const jobs = [...(lobbies.some(match) ? lobbies : []), ...inPlay.map((k) => `tv:${k}`)].map((h) => ({ id: "tv " + h, hash: h, key: h.replace(/^tv:/, "") }));
   mkdirSync(join(out, "tv"), { recursive: true });
   await pool(jobs, 4, async (j) => {
     const { ctx, p } = await page(j, { viewport: { width: 1440, height: 900 } });
@@ -207,10 +228,10 @@ if (want("phones")) {
   const PHONES = process.env.SCREENS_PHONES === "sideways" ? [["sideways", 852, 340]]
     : [["galaxy", 360, 780], ...(process.env.SCREENS_PHONES === "all" ? [["iphone", 393, 852]] : []), ["promax", 440, 956], ["sideways", 852, 340]];
   const jobs = [];
-  for (const [dev, w, h] of PHONES) for (const k of keys.filter(match)) for (const r of roles(k)) for (const tvIn of ["ph", "pn"])
+  for (const [dev, w, h] of PHONES) for (const k of inPlay) for (const r of roles(k)) for (const tvIn of ["ph", "pn"])
     jobs.push({ id: `${dev} ${tvIn === "ph" ? "tv" : "no-tv"} ${r} ${k}`, hash: `${tvIn}:${r}:${k}`, key: k, dev, w, h });
-  /* the Setup before the start, with its game time (2 teams: the host, or Team A's captain with no host; 3 and 8 teams) */
-  for (const [dev, w, h] of PHONES) for (const s of ["setup:2:host", "setup:2:cap", "setup:3:host", "setup:8:host", "setup:2:host:xp", "setup:5:host:xp", "setup:2:host:rep", "setup:2:cap:repo", "setup:2:host:repo", "setup:5:host:rep", "setup:5:host:repo", "setup:2:host:notv", "setup:2:cap:notv", "setup:2:cap:repo:notv", "setup:5:host:notv"].filter(match))
+  /* the Setup before the start, in every setup (setupJobs, above) */
+  for (const [dev, w, h] of PHONES) for (const s of setupJobs)
     jobs.push({ id: `${dev} ${s}`, hash: s, key: s, dev, w, h });
   for (const [dev] of PHONES) mkdirSync(join(out, dev), { recursive: true });
   await pool(jobs, 6, async (j) => {
