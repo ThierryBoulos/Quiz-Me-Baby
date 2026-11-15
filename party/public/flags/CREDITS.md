@@ -240,7 +240,7 @@ Licences: most are public domain. The others are credited here as their licences
 | `pru.svg` | Prussia | Expert | [Flag of Prussia (1892-1918).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Prussia_(1892-1918).svg) | Attribution — by David Liuzzo |
 | `au-org.svg` | African Union | Expert | [Flag of the African Union.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_African_Union.svg) | Public domain |
 | `arab.svg` | Arab League | Expert | [Flag of the Arab League.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_Arab_League.svg) | Public domain |
-| `nato.svg` | NATO | Expert | [Flag of NATO.svg](https://commons.wikimedia.org/wiki/File:Flag_of_NATO.svg) | Public domain |
+| `nato.svg` | NATO | Hard | [Flag of NATO.svg](https://commons.wikimedia.org/wiki/File:Flag_of_NATO.svg) | Public domain |
 | `srd.svg` | Sardinia | Expert | [Flag of Sardinia, Italy.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Sardinia,_Italy.svg) | CC BY-SA 3.0 — by Angelus |
 | `vlg.svg` | Flanders | Expert | [Flag of Flanders.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Flanders.svg) | CC0 — by Tom Lemmens |
 | `ak.svg` | Alaska | Expert | [Flag of Alaska.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Alaska.svg) | Public domain |
