@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.70', date:'15 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.71', date:'15 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -3909,6 +3909,21 @@ const FLAGS = [["us", "United States", "veasy", ""],
   ["chr", "Christiania", "expert", "Self-governing commune in Copenhagen, Denmark"],
   ["epo", "Esperanto", "expert", "Flag of the Esperanto language and movement"],
   ["abu", "Abu Dhabi", "expert", "Emirate of the United Arab Emirates"],
+  ["c-berlin", "Berlin", "expert", "Capital of Germany"],
+  ["c-zurich", "Zurich", "expert", "City in Switzerland"],
+  ["c-munich", "Munich", "expert", "City in Germany"],
+  ["c-stockholm", "Stockholm", "expert", "Capital of Sweden"],
+  ["c-helsinki", "Helsinki", "expert", "Capital of Finland"],
+  ["c-madrid", "Madrid", "expert", "Capital of Spain"],
+  ["c-barcelona", "Barcelona", "expert", "City in Spain"],
+  ["c-geneva", "Geneva", "expert", "City in Switzerland"],
+  ["c-marseille", "Marseille", "expert", "City in France"],
+  ["c-dublin", "Dublin", "expert", "Capital of Ireland"],
+  ["c-hague", "The Hague", "expert", "City in the Netherlands"],
+  ["c-leipzig", "Leipzig", "expert", "City in Germany"],
+  ["c-frankfurt", "Frankfurt", "expert", "City in Germany"],
+  ["c-minsk", "Minsk", "expert", "Capital of Belarus"],
+  ["c-pristina", "Pristina", "expert", "Capital of Kosovo"],
   ["af","Afghanistan","hard","The flag of the former Islamic Republic, which Afghanistan's team still carried at the 2024 Olympics. The Taliban fly a white flag with the shahada."],
   ["bn","Brunei","hard",""]];
 /* Each flag is a bank row (type 'flag', built in buildSeedBank) so it shows in
@@ -4963,7 +4978,7 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 68;   // bumped when the built-in bank changes
+const SEED_VERSION = 69;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */

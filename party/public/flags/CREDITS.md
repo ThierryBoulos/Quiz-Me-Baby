@@ -267,4 +267,19 @@ Licences: most are public domain. The others are credited here as their licences
 | `chr.svg` | Christiania | Expert | [Flag of Christiania.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Christiania.svg) | Public domain |
 | `epo.svg` | Esperanto | Expert | [Flag of Esperanto.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Esperanto.svg) | Public domain |
 | `abu.svg` | Abu Dhabi | Expert | [Flag of Abu Dhabi.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Abu_Dhabi.svg) | Public domain |
+| `c-berlin.svg` | Berlin | Expert | [Flag of Berlin.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Berlin.svg) | Public domain |
+| `c-zurich.svg` | Zurich | Expert | [Flag of Canton of Zürich.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Canton_of_Z%C3%BCrich.svg) | Public domain |
+| `c-munich.svg` | Munich | Expert | [Flag of Munich (striped).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Munich_(striped).svg) | Public domain |
+| `c-stockholm.svg` | Stockholm | Expert | [Flag of Stockholm.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Stockholm.svg) | CC BY-SA 3.0 — by Alex Great |
+| `c-helsinki.svg` | Helsinki | Expert | [Flag of Helsinki.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Helsinki.svg) | Public domain |
+| `c-madrid.svg` | Madrid | Expert | [Flag of Madrid (city) Spain.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Madrid_(city)_Spain.svg) | CC BY-SA 3.0 — by Nethunter (Taller de Heráldica y Vexilología, Spanish Wikipedia) |
+| `c-barcelona.svg` | Barcelona | Expert | [Flag of Barcelona.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Barcelona.svg) | Public domain |
+| `c-geneva.svg` | Geneva | Expert | [Flag of Canton of Geneva.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Canton_of_Geneva.svg) | Public domain |
+| `c-marseille.svg` | Marseille | Expert | [Flag of Marseille.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Marseille.svg) | Public domain |
+| `c-dublin.svg` | Dublin | Expert | [IRL Dublin flag.svg](https://commons.wikimedia.org/wiki/File:IRL_Dublin_flag.svg) | Public domain |
+| `c-hague.svg` | The Hague | Expert | [Flag of The Hague.svg](https://commons.wikimedia.org/wiki/File:Flag_of_The_Hague.svg) | Public domain |
+| `c-leipzig.svg` | Leipzig | Expert | [Flag of Leipzig.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Leipzig.svg) | Public domain |
+| `c-frankfurt.svg` | Frankfurt | Expert | [Flag of Frankfurt am Main.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Frankfurt_am_Main.svg) | Public domain |
+| `c-minsk.svg` | Minsk | Expert | [Flag of Minsk, Belarus.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Minsk,_Belarus.svg) | Public domain |
+| `c-pristina.svg` | Pristina | Expert | [Flag of Pristina.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Pristina.svg) | Public domain |
 | `af.svg` | Afghanistan | Hard | [Flag of Afghanistan (2013–2021).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Afghanistan_(2013%E2%80%932021).svg) | Public domain |

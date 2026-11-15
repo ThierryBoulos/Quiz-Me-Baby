@@ -196,6 +196,9 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   dish in Guess the Cocktail or Dish, a landmark in Drop the Pin) gets a never-together group. The catalogue is
   `const SEES` in `classic.html`; after a change run `node party/scripts/fetch-sees.mjs` (it skips the files it has).
 - **Flags**: only flags whose name isn't written on the flag.
+  - **City flags are Expert (15 Nov, the owner):** Berlin, Zurich, Munich, Stockholm, Helsinki, Madrid, Barcelona,
+    Geneva, Marseille, Dublin, The Hague, Leipzig, Frankfurt, Minsk, Pristina (codes `c-<city>`); a city whose flag
+    spells its name (Copenhagen, Lisbon, Oslo) or matches a country's (Vienna) stays out.
 - **Know the Host**: only with a host; wording leaves one answer ("secondary school").
 
 ## 8. Mechanics (do these every time)
