@@ -173,8 +173,9 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
   const slot = (x: string) => { const at = night.map((y, i) => (y === x ? i + 1 : 0)).filter(Boolean); return at.length ? at.map((n) => ordinal(n)).join(", ") : ""; };
   const blocker = why || (!on.length ? "Switch on at least one game." : on.includes("quiz") && bank && picked.length !== rounds ? `Pick ${rounds} themes, one per round (${picked.length} so far).` : "");
   /* a level row: tap to add or drop a level; the last one can't be dropped */
-  const LevelRow = ({ label, opts, value, set }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void }) => (
-    <div className="lvl-row" role="group" aria-label={label}>
+  /* (the mini-games' rows are compact; the question rounds' and Guess the Flag's full height: they need the room. 15 Nov) */
+  const LevelRow = ({ label, opts, value, set, big }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; big?: boolean }) => (
+    <div className={"lvl-row" + (big ? "" : " compact")} role="group" aria-label={label}>
       {opts.map(([key, l]) => { const lit = value.includes(key); return (
         <button key={key} type="button" className={"chip " + (lit ? "chip-on" : "") + (key === "expert" ? " lvl-expert" : "")} aria-pressed={lit}
           onClick={() => { const next = lit ? value.filter((x) => x !== key) : [...value, key]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{chipLabel(key, l)}</button>); })}
@@ -206,7 +207,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
                 <select className="select" aria-label="How many standard rounds" value={rounds} onChange={(e) => { setRounds(Number(e.target.value)); setNote(null); }}>
                   {Array.from({ length: MANY_ROUNDS }, (_, i) => i + 1).map((r) => <option key={r} value={r}>{r} round{r === 1 ? "" : "s"}</option>)}
                 </select></label>
-              <div className="flex flex-col gap-2"><span className="sp-k">Level</span><LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} /><p className="text-12 text-[var(--color-ink-3)] px-1">{levelLine(quizLevels, quizLevels.length === 4)}</p></div>
+              <div className="flex flex-col gap-2"><span className="sp-k">Level</span><LevelRow label="Question round level" opts={LEVELS4} value={quizLevels} set={setQuizLevels} big /><p className="text-12 text-[var(--color-ink-3)] px-1">{levelLine(quizLevels, quizLevels.length === 4)}</p></div>
               <LevelNote code={code} themes={picked} bank={bank} left={left} levels={() => quizLevels} onAdd={() => setChoosing(true)} />
               {/* the themes: a summary, and a tap to change them (one per round; the rounds play two at a time) */}
               <div className="flex flex-col gap-2">
@@ -224,12 +225,13 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
                 {note && <p className="text-13 text-[var(--color-no)]" role="alert">{note}</p>}
               </div>
             </div>)}
-            {lit && key === "flag" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} /><FlagExpertNote on={flagLevels.includes("expert")} /></div>}
+            {lit && key === "flag" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} big /><FlagExpertNote on={flagLevels.includes("expert")} /></div>}
             {lit && key === "pin" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Drop the Pin level" opts={LEVELS3} value={pinLevels} set={setPinLevels} /></div>}
             {lit && key === "majority" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Majority Rules level" opts={LEVELS3} value={majorityLevels} set={setMajorityLevels} /></div>}
             {lit && key === "airport" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Airport level" opts={LEVELS3} value={airportLevels} set={setAirportLevels} /></div>}
             {lit && key === "map" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="Guess the Map level" opts={LEVELS3} value={mapLevels} set={setMapLevels} /></div>}
-            {lit && key === "see" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="What Do You See? level" opts={LEVELS3} value={seeLevels} set={setSeeLevels} /></div>}
+            {lit && key === "see" && <div className="sub-panel"><span className="sp-k">Level</span><LevelRow label="What Do You See? level" opts={LEVELS3} value={seeLevels} set={setSeeLevels} />
+              <span className="sp-k">Pictures</span><LevelRow label="What Do You See? pictures" opts={SEE_KIND_OPTS} value={seeKinds} set={setSeeKinds} /></div>}
             {lit && key === "dish" && (<div className="sub-panel">
               <span className="sp-k">Cocktails</span>
               <LevelRow label="Cocktail levels" opts={COCKTAILS} value={dishLevels.filter((l) => l[0] === "c")} set={(v) => setDishLevels([...v, ...dishLevels.filter((l) => l[0] === "d")])} />
@@ -250,8 +252,6 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
           <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : noTv ? "Settings (waiting for the game…)" : "Settings (waiting for the TV…)"}</button>
           {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
         </div>
-        {/* What Do You See?: a kind of picture can be left out */}
-        {on.includes("see") && <div className="sub-panel"><span className="sp-k">Pictures</span><LevelRow label="What Do You See? pictures" opts={SEE_KIND_OPTS} value={seeKinds} set={setSeeKinds} /></div>}
       </div>
       {repeatOpen && <RepeatSheet themes={avail} counts={counts} picked={picked} rounds={rounds} eyebrow="Advanced" onChange={(l) => { setThemes(l); setNote(null); }} onClose={() => setRepeatOpen(false)} />}
       {tvOpen && tv && <TvSettings code={code} tv={tv} onClose={() => setTvOpen(false)} />}

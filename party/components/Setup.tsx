@@ -51,8 +51,9 @@ export function levelLine(on: readonly string[], all = false): string {
 }
 const MAP_LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
-/* What Do You See?: the kinds of picture (the host can leave one out, in Advanced) */
-export const SEE_KIND_OPTS = [["face", "Faces"], ["logo", "Logos"], ["close", "Close-ups"]] as const;
+/* What Do You See?: the kinds of picture, under the game with its levels (a kind can be left out: the owner, 15 Nov;
+   "Celebrities", not "Faces") */
+export const SEE_KIND_OPTS = [["face", "Celebrities"], ["logo", "Logos"], ["close", "Close-ups"]] as const;
 const DISH_LEVELS = { c: [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]], d: [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] } as const;
 /* the four levels of a standard question: any mix of them, or Mixed (all four). The default is the
    first three: Expert comes in only when a theme runs out of those. */
@@ -158,10 +159,11 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const slot = (k: string) => k === "battle" ? "last" : standard ? (plan.find((p) => p.key === k) ? `after R${plan.find((p) => p.key === k)!.after + 1}` : "")
     : ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";
   /* a level row: tap to add or drop a level; the last one can't be dropped */
-  const LevelRow = ({ label, opts, value, set, tag }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string }) => (
+  /* (the mini-games' rows are compact, Guess the Flag's full height: it needs the room. The owner, 15 Nov) */
+  const LevelRow = ({ label, opts, value, set, tag, big }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string; big?: boolean }) => (
     <div className="flex flex-col gap-1.5 pl-1 pb-2" role="group" aria-label={label}>
       {tag && <span className="eyebrow !text-11">{tag}</span>}
-      <div className="lvl-row">
+      <div className={"lvl-row" + (big ? "" : " compact")}>
       {opts.map(([k, l]) => { const on = value.includes(k); return (
         <button key={k} type="button" className={"chip " + (on ? "chip-on" : "") + (k === "expert" ? " lvl-expert" : "")} aria-pressed={on}
           onClick={() => { const next = on ? value.filter((x) => x !== k) : [...value, k]; if (next.length) set(opts.map(([x]) => x).filter((x) => next.includes(x))); }}>{chipLabel(k, l)}</button>); })}
@@ -266,11 +268,12 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
               </span>
             </button>
             {on && k === "map" && <LevelRow label="Guess the Map level" opts={MAP_LEVELS} value={mapLevels} set={setMapLevels} />}
-            {on && k === "flag" && <><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} /><FlagExpertNote on={flagLevels.includes("expert")} /></>}
+            {on && k === "flag" && <><LevelRow label="Guess the Flag level" opts={FLAG_LEVELS} value={flagLevels} set={setFlagLevels} big /><FlagExpertNote on={flagLevels.includes("expert")} /></>}
             {on && k === "pin" && <LevelRow label="Drop the Pin level" opts={MAP_LEVELS} value={pinLevels} set={setPinLevels} />}
             {on && k === "airport" && <LevelRow label="Guess the Airport level" opts={MAP_LEVELS} value={airportLevels} set={setAirportLevels} />}
             {on && k === "majority" && <LevelRow label="Majority Rules level" opts={MAP_LEVELS} value={majorityLevels} set={setMajorityLevels} />}
-            {on && k === "see" && <LevelRow label="What Do You See? level" opts={MAP_LEVELS} value={seeLevels} set={setSeeLevels} />}
+            {on && k === "see" && <><LevelRow label="What Do You See? level" tag="Level" opts={MAP_LEVELS} value={seeLevels} set={setSeeLevels} />
+              <LevelRow label="What Do You See? pictures" tag="Pictures" opts={SEE_KIND_OPTS} value={seeKinds} set={setSeeKinds} /></>}
             {on && k === "dish" && (<>
               <LevelRow label="Cocktail levels" tag="Cocktails" opts={DISH_LEVELS.c} value={dishLevels.filter((l) => l[0] === "c")}
                 set={(v) => setDishLevels([...v, ...dishLevels.filter((l) => l[0] === "d")])} />
@@ -293,8 +296,6 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <button type="button" className="btn btn-sm" disabled={!tv} onClick={() => setTvOpen(true)}>{tv ? "Settings" : noTv ? "Settings (waiting for the game…)" : "Settings (waiting for the TV…)"}</button>
             {(Object.keys(picks.picks).length > 0 || Object.keys(picks.themeDiff).length > 0) && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setPicks(NO_PICKS)}>Clear all picks</button>}
           </div>
-          {/* What Do You See?: a kind of picture can be left out (the host only: 12 Nov, the spec) */}
-          {minis.includes("see") && <LevelRow label="What Do You See? pictures" tag="Pictures" opts={SEE_KIND_OPTS} value={seeKinds} set={setSeeKinds} />}
         </div>)}
       {/* ---- no host: the starting captain can change the timers, nothing else (11 Nov, the owner) ---- */}
       {!isHost && (
@@ -324,7 +325,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
         {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
         {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
         <button className="btn btn-gold btn-block" disabled={!!blocker || busy}
-          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, seeLevels, ...(isHost ? { seeKinds } : {}), custom: getCustom(),
+          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, seeLevels, seeKinds, custom: getCustom(),
             ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
         {/* how long it should take, from what's picked and the TV's timers (the owner, 14 Nov) */}
         {(standard || miniKeys.length > 0) && <p className="text-center text-12 text-[var(--color-ink-3)] -mt-1">{timeLine(estimateTwo({ standard, rounds, minis: miniKeys, host: isHost, timers }))}</p>}

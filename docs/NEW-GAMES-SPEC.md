@@ -138,7 +138,8 @@ The owner's name (key `see`). One picture at a time, unreadable at first and cle
 
 - One toggle in both Setups, and one **Level** row (Easy, Medium, Hard; all three on by default), as the other
   picture games have. Nothing else.
-- For the host only, inside Advanced: "Pictures: Faces · Logos · Close-ups", all on, so a kind can be left out.
+- Under the game in Setup, with its levels (15 Nov, the owner: moved out of Advanced, so with no host the starting
+  captain has it too): "Pictures: Celebrities · Logos · Close-ups", all on, so a kind can be left out.
 - A game's pictures: the kinds that are on in near-equal shares (7 pictures: 2 faces, 2 logos, 3 close-ups),
   shuffled, no two of the same kind in a row where it can be helped, an easiest one first (as flags).
   Unplayed first, then played; never-together respected.

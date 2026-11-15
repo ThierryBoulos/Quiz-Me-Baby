@@ -113,6 +113,12 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
 .lvl-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
 .lvl-row .chip { min-height: 44px; min-width: 0; padding: 4px; font-size: var(--text-13); line-height: 1.15; white-space: normal; text-align: center; justify-content: center; }
 .lvl-row:has(> :nth-child(5)) .chip { font-size: var(--text-12); padding: 4px 2px; }
+/* a mini-game's levels, compact (the owner, 15 Nov): a lower chip to look at, still 44 high to tap (the band above
+   and below it counts); Guess the Flag's and the question rounds' keep their full height */
+.lvl-row.compact .chip { min-height: 32px; padding: 2px 4px; position: relative; }
+.lvl-row.compact .chip::after { content: ""; position: absolute; left: 0; right: 0; top: -6px; bottom: -6px; }
+/* (on the narrowest phones, a word like "Celebrities" keeps a little room inside its chip) */
+@media (max-width: 380px) { .lvl-row.compact .chip { font-size: var(--text-12); padding: 2px 3px; } }
 
 .field-label { display: block; font-size: var(--text-12); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-ink-2); margin-bottom: 8px; }
 .field-error { font-size: var(--text-13); font-style: italic; color: var(--color-no); }
