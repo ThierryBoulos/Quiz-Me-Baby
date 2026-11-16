@@ -79,28 +79,28 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
   /* (on the TV, more than five rows go in two columns, the truth across the bottom: one column of nine shrank the
      whole screen to fit, 16 Nov screen check) */
   const step = tv ? (rows.length > 5 ? 0.6 : 0.9) : 0.6, big = rows.length > 6, cols = !!tv && rows.length > 5;   // (many rows: a quicker beat, the truth in under 6 s)
-  /* who fell for it: each team's dot, and "−1" beside it when the lie's writer named that team (16 Nov, the owner: a right
-     prediction shows clearly); with 2 teams it's always so, and the −1 says it */
-  const two = teams.length === 2;
-  const who = (ts: number[], by: number[]): ReactNode => ts.length ? <span className="flex items-center justify-end gap-1.5 flex-wrap">{ts.map((t) => {
-    const hit = rev.hits.some((h) => h.on === t && by.includes(h.by));
-    return <span key={t} className="inline-flex items-center gap-1"><Dot t={t} color={teams[t]?.color ?? "#888"} size={tv ? (big ? 20 : 24) : 15} />{hit && <span className="fool-minus" aria-label={`${teams[t]?.name} lose 1`}>−1</span>}</span>; })}</span> : null;
+  /* who fell for it: each team's dot */
+  const two = teams.length === 2, ds = tv ? (big ? 20 : 24) : 15;
+  const who = (ts: number[]): ReactNode => ts.length ? <span className="flex items-center justify-end gap-1.5 flex-wrap">{ts.map((t) => <Dot key={t} t={t} color={teams[t]?.color ?? "#888"} size={ds} />)}</span> : null;
   return (
     <div className={cols ? "grid grid-cols-2 w-full" : "flex flex-col w-full"} style={{ gap: tv ? (cols ? 10 : big ? 6 : 10) : 6 }}>
       {rows.map((x, i) => {
         /* (a name ending in s takes the apostrophe alone: "Owls' lie") */
         const by = names(x.o.by), t = x.o.truth, tag = t ? "The truth" : x.o.ours ? "One of ours" : `${by}${/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie`;   // (2-team names carry invisible direction marks)
+        /* a right prediction (16 Nov, the owner: in one piece, not apart): under the lie, "Called it!", the team that fell for it
+           and its −1, together; with 2 teams nobody calls it (it's always the other team): the team and its −1 */
         const pred = t ? [] : x.fell.filter((f) => rev.hits.some((h) => h.on === f && x.o.by.includes(h.by)));
         return (
           <div key={x.k} className={"fool-rev rv" + (t ? " truth" : "") + (tv ? " tv" : "") + (cols && t ? " col-span-2" : "")} style={{ animationDelay: `${i * step}s`, ...(tv ? { fontSize: cols ? 24 : big ? 22 : 28, padding: big && !cols ? "6px 14px" : undefined } : {}) }}>
             <div className="min-w-0 flex-1 text-left">
               <div className="font-bold leading-snug"><bdi>{x.o.text}</bdi></div>
               <div className="eyebrow" style={{ fontSize: tv ? (big ? 12 : 14) : 10, color: t ? "var(--color-gold)" : x.o.ours ? "var(--color-ink-3)" : undefined }}>{tag}</div>
+              {pred.length > 0 && <div className="flex flex-wrap gap-1.5" style={{ marginTop: tv ? 6 : 4 }}>{pred.map((f) => (
+                <span key={f} className="fool-called" role="note" aria-label={`${two ? "" : "Called it! "}${teams[f]?.name} lose 1`} style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 19 : 22) : 12 }}>
+                  {!two && <b>Called it!</b>}<Dot t={f} color={teams[f]?.color ?? "#888"} size={tv ? (cols ? 20 : 24) : 14} /><bdi style={{ color: teams[f]?.color }}>{teams[f]?.name}</bdi><span className="fool-minus">−1</span></span>))}</div>}
             </div>
-            {/* (3 to 8 teams: the writer named a team that fell for it, a stamp says so, in its own space on the row) */}
-            {!two && pred.length > 0 && <span className="fool-called" style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 15 : 18) : 10 }}>Called it!</span>}
             <div className="flex flex-col items-end gap-0.5 shrink-0 text-right">
-              {who(x.fell, x.o.by)}
+              {who(x.fell)}
               <span className="text-[var(--color-ink-3)]" style={{ fontSize: tv ? (big ? 13 : 16) : 11 }}>
                 {t ? (x.fell.length ? "found it" : "nobody found it") : x.fell.length ? "fell for it" : "nobody fell for it"}</span>
             </div>
