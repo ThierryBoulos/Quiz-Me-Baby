@@ -85,16 +85,16 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const [difficulty, setDiff] = useDraft<string>(code, "two.difficulty", QMB.DEFAULT_DIFF);
   const [themes, setThemes] = useDraft<string[] | null>(code, "two.themes", null);
   const [minis, setMinis] = useDraft<string[]>(code, "two.minis", ["flag", "closest", "auction", "see", "roulette", "battle"]);
-  const [mapLevels, setMapLevels] = useDraft<string[]>(code, "two.mapLevels", ["easy", "medium", "hard"]);
+  const [mapLevels, setMapLevels] = useDraft<string[]>(code, "two.mapLevels", ["easy", "medium"]);   // (mini-games start at Easy and Medium: the owner, 16 Nov)
   const [flagLevels, setFlagLevels] = useDraft<string[]>(code, "two.flagLevels", ["veasy", "easy", "medium", "hard"]);   // a mix, Very easy to Hard
-  const [dishLevels, setDishLevels] = useDraft<string[]>(code, "two.dishLevels", ["c-medium", "d-medium"]);
-  const [pinLevels, setPinLevels] = useDraft<string[]>(code, "two.pinLevels", ["easy", "medium", "hard"]);
-  const [airportLevels, setAirportLevels] = useDraft<string[]>(code, "two.airportLevels", ["easy", "medium", "hard"]);
-  const [majorityLevels, setMajorityLevels] = useDraft<string[]>(code, "two.majorityLevels", ["easy", "medium", "hard"]);
+  const [dishLevels, setDishLevels] = useDraft<string[]>(code, "two.dishLevels", ["c-easy", "c-medium", "d-easy", "d-medium"]);
+  const [pinLevels, setPinLevels] = useDraft<string[]>(code, "two.pinLevels", ["easy", "medium"]);
+  const [airportLevels, setAirportLevels] = useDraft<string[]>(code, "two.airportLevels", ["easy", "medium"]);
+  const [majorityLevels, setMajorityLevels] = useDraft<string[]>(code, "two.majorityLevels", ["easy", "medium"]);
   const [seeLevels, setSeeLevels] = useDraft<string[]>(code, "two.seeLevels", ["easy", "medium", "hard"]);
   const [seeKinds, setSeeKinds] = useDraft<string[]>(code, "two.seeKinds", ["face", "logo", "close"]);
   /* lifelines on or off for the night (the owner, 15 Nov: useless on a mini-game night) */
-  const [lifelines, setLifelines] = useDraft<boolean>(code, "two.lifelines", true);
+  const [lifelines, setLifelines] = useDraft<boolean>(code, "two.lifelines", false);   // (off to start with: the owner, 16 Nov)
   const [note, setNote] = useState<string | null>(null);
   const [open, setOpen] = useState<"themes" | null>(null);
   /* the host's advanced options: hand-picked questions, a difficulty per theme */

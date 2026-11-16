@@ -11,7 +11,7 @@ import { NO_PICKS, Picker, pickSummary, type Picks } from "../Picker";
 import { TvSettings } from "../TvSettings";
 import { useNoTv } from "../NoTv";
 import type { Member, Room } from "@/lib/room";
-import { HOST_ONLY_THEMES, QMB, loadBank, themeCounts, withCustom, type Bank } from "@/lib/engine";
+import { HOST_ONLY_THEMES, loadBank, themeCounts, withCustom, type Bank } from "@/lib/engine";
 import { cleanList, getCustom } from "@/lib/custom";
 import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS, lineup, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
@@ -112,9 +112,9 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
   /* standard rounds: one theme each, 1 to 14, played two at a time (the default night is the same as before: six) */
   const [rounds, setRounds] = useDraft(code, "many.rounds", 6);
   const [quizLevels, setQuizLevels] = useDraft<string[]>(code, "many.quizLevels", ["easy", "medium", "hard"]);
-  const [airportLevels, setAirportLevels] = useDraft<string[]>(code, "many.airportLevels", [...QMB.AIRPORT_ORDER as string[]]);
-  const [mapLevels, setMapLevels] = useDraft<string[]>(code, "many.mapLevels", [...QMB.MAP_ORDER as string[]]);
-  const [dishLevels, setDishLevels] = useDraft<string[]>(code, "many.dishLevels", ["c-medium", "d-medium"]);
+  const [airportLevels, setAirportLevels] = useDraft<string[]>(code, "many.airportLevels", ["easy", "medium"]);   // (mini-games start at Easy and Medium: the owner, 16 Nov)
+  const [mapLevels, setMapLevels] = useDraft<string[]>(code, "many.mapLevels", ["easy", "medium"]);
+  const [dishLevels, setDishLevels] = useDraft<string[]>(code, "many.dishLevels", ["c-easy", "c-medium", "d-easy", "d-medium"]);
   /* the rounds' themes, one per round: the bank's themes with questions at tonight's levels (the host's own too), as
      many picked at random to start as there are rounds */
   const [mine, setBank] = useState<Bank | null>(null);
@@ -144,8 +144,8 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
   const [note, setNote] = useState<string | null>(null);
   const picked = themes ?? [];
   const [flagLevels, setFlagLevels] = useDraft<string[]>(code, "many.flagLevels", ["veasy", "easy", "medium", "hard"]);
-  const [pinLevels, setPinLevels] = useDraft<string[]>(code, "many.pinLevels", [...QMB.PIN_ORDER as string[]]);
-  const [majorityLevels, setMajorityLevels] = useDraft<string[]>(code, "many.majorityLevels", [...QMB.MAJORITY_ORDER as string[]]);
+  const [pinLevels, setPinLevels] = useDraft<string[]>(code, "many.pinLevels", ["easy", "medium"]);
+  const [majorityLevels, setMajorityLevels] = useDraft<string[]>(code, "many.majorityLevels", ["easy", "medium"]);
   const [seeLevels, setSeeLevels] = useDraft<string[]>(code, "many.seeLevels", ["easy", "medium", "hard"]);
   const [seeKinds, setSeeKinds] = useDraft<string[]>(code, "many.seeKinds", ["face", "logo", "close"]);
   /* the host's Advanced, as with two teams: hand-picked questions, a difficulty per theme, the TV's settings */
