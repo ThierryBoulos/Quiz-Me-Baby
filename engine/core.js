@@ -2330,12 +2330,12 @@
       s.qs[s.i] = spareLike(s);
       return [{ toast:'New fact.' }, { go:'foolWrite' }];
     },
-    /* a: { opts, picks, predicts } as the TV had them (two teams) */
+    /* a: { opts, picks } as the TV had them (two teams: nobody names a team, so nobody loses 1 for falling for a lie) */
     'fool/settle'(g, a){
       const s = g.foolGame, q = s.qs[s.i], fx = [];
       if(!q || !Array.isArray(a && a.opts)) return [];
       const picks = [0, 1].map(t => (a.picks && Number.isInteger(a.picks[t]) ? a.picks[t] : null));
-      const res = foolScore(a.opts, picks, [1, 0]);
+      const res = foolScore(a.opts, picks, null);
       res.pts.forEach((p, t) => { s.pts[t] += p; });
       s.subs.push({ q, opts:a.opts, picks, pts:res.pts, hits:res.hits });
       s.i++;

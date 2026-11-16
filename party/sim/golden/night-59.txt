@@ -36,23 +36,23 @@
 47.25 foolIntro | 29 | 3-4 | 0-0 | Lions used Call a Friend. | 
 48.00 foolWrite | 30 | 3-4 | 0-0 | Lions used Call a Friend. | 
 50.00 foolPick | 30 | 3-4 | 0-0 | Lions used Call a Friend. | 
-51.75 foolReveal | 30 | 3-4 | -1-3 | Lions used Call a Friend. | 
-52.50 foolWrite | 31 | 3-4 | -1-3 | Lions used Call a Friend. | 
-56.25 foolPick | 31 | 3-4 | -1-3 | Lions used Call a Friend. | 
-57.00 foolReveal | 31 | 3-4 | 1-5 | Lions used Call a Friend. | 
-58.00 foolWrite | 32 | 3-4 | 1-5 | Lions used Call a Friend. | 
-59.00 foolPick | 32 | 3-4 | 1-5 | Lions used Call a Friend. | 
-59.75 foolReveal | 32 | 3-4 | 1-5 | Lions used Call a Friend. | 
-60.75 foolWrite | 33 | 3-4 | 1-5 | Lions used Call a Friend. | 
-62.50 foolPick | 33 | 3-4 | 1-5 | Lions used Call a Friend. | 
-65.25 foolReveal | 33 | 3-4 | 1-7 | Lions used Call a Friend. | 
-66.00 foolWrite | 34 | 3-4 | 1-7 | Lions used Call a Friend. | 
-67.00 foolPick | 34 | 3-4 | 1-7 | Lions used Call a Friend. | 
-68.75 foolReveal | 34 | 3-4 | 2-6 | Lions used Call a Friend. | 
-69.75 foolWrite | 35 | 3-4 | 2-6 | Lions used Call a Friend. | 
-72.50 foolPick | 35 | 3-4 | 2-6 | Lions used Call a Friend. | 
-73.25 foolReveal | 35 | 3-4 | 1-9 | Lions used Call a Friend. | 
-74.25 foolSummary | 36 | 3-6 | 1-9 | Lions used Call a Friend. | 
+51.75 foolReveal | 30 | 3-4 | 0-3 | Lions used Call a Friend. | 
+52.50 foolWrite | 31 | 3-4 | 0-3 | Lions used Call a Friend. | 
+56.25 foolPick | 31 | 3-4 | 0-3 | Lions used Call a Friend. | 
+57.00 foolReveal | 31 | 3-4 | 2-5 | Lions used Call a Friend. | 
+58.00 foolWrite | 32 | 3-4 | 2-5 | Lions used Call a Friend. | 
+59.00 foolPick | 32 | 3-4 | 2-5 | Lions used Call a Friend. | 
+59.75 foolReveal | 32 | 3-4 | 2-5 | Lions used Call a Friend. | 
+60.75 foolWrite | 33 | 3-4 | 2-5 | Lions used Call a Friend. | 
+62.50 foolPick | 33 | 3-4 | 2-5 | Lions used Call a Friend. | 
+65.25 foolReveal | 33 | 3-4 | 2-7 | Lions used Call a Friend. | 
+66.00 foolWrite | 34 | 3-4 | 2-7 | Lions used Call a Friend. | 
+67.00 foolPick | 34 | 3-4 | 2-7 | Lions used Call a Friend. | 
+68.75 foolReveal | 34 | 3-4 | 3-7 | Lions used Call a Friend. | 
+69.75 foolWrite | 35 | 3-4 | 3-7 | Lions used Call a Friend. | 
+72.50 foolPick | 35 | 3-4 | 3-7 | Lions used Call a Friend. | 
+73.25 foolReveal | 35 | 3-4 | 3-10 | Lions used Call a Friend. | 
+74.25 foolSummary | 36 | 3-6 | 3-10 | Lions used Call a Friend. | 
 75.00 roundIntro | 37 | 3-6 |  | Lions used Call a Friend. | 
 77.00 ask | 38 | 3-6 |  | Lions used Call a Friend. | 
 77.75 ask | 38 | 3-6 |  | Lions used Double Dip. | 

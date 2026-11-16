@@ -15,23 +15,23 @@
 29.40 foolIntro | 6 | 0-1 | 0-0 | No answer in time: the call stands. | 
 30.40 foolWrite | 7 | 0-1 | 0-0 | No answer in time: the call stands. | 
 32.90 foolPick | 7 | 0-1 | 0-0 | No answer in time: the call stands. | 
-33.90 foolReveal | 7 | 0-1 | 0-0 | No answer in time: the call stands. | 
-34.90 foolWrite | 8 | 0-1 | 0-0 | No answer in time: the call stands. | 
-36.65 foolPick | 8 | 0-1 | 0-0 | No answer in time: the call stands. | 
-38.40 foolReveal | 8 | 0-1 | 0-2 | No answer in time: the call stands. | 
-39.40 foolWrite | 9 | 0-1 | 0-2 | No answer in time: the call stands. | 
-40.15 foolPick | 9 | 0-1 | 0-2 | No answer in time: the call stands. | 
-41.15 foolReveal | 9 | 0-1 | 0-2 | No answer in time: the call stands. | 
-41.90 foolWrite | 10 | 0-1 | 0-2 | No answer in time: the call stands. | 
-42.90 foolPick | 10 | 0-1 | 0-2 | No answer in time: the call stands. | 
-43.90 foolReveal | 10 | 0-1 | 2-2 | No answer in time: the call stands. | 
-44.65 foolWrite | 11 | 0-1 | 2-2 | No answer in time: the call stands. | 
-45.65 foolPick | 11 | 0-1 | 2-2 | No answer in time: the call stands. | 
-46.40 foolReveal | 11 | 0-1 | 2-2 | No answer in time: the call stands. | 
-47.40 foolWrite | 12 | 0-1 | 2-2 | No answer in time: the call stands. | 
-48.40 foolPick | 12 | 0-1 | 2-2 | No answer in time: the call stands. | 
-49.15 foolReveal | 12 | 0-1 | 4-2 | No answer in time: the call stands. | 
-50.15 foolSummary | 13 | 2-1 | 4-2 | No answer in time: the call stands. | 
+33.90 foolReveal | 7 | 0-1 | 1-1 | No answer in time: the call stands. | 
+34.90 foolWrite | 8 | 0-1 | 1-1 | No answer in time: the call stands. | 
+36.65 foolPick | 8 | 0-1 | 1-1 | No answer in time: the call stands. | 
+38.40 foolReveal | 8 | 0-1 | 1-3 | No answer in time: the call stands. | 
+39.40 foolWrite | 9 | 0-1 | 1-3 | No answer in time: the call stands. | 
+40.15 foolPick | 9 | 0-1 | 1-3 | No answer in time: the call stands. | 
+41.15 foolReveal | 9 | 0-1 | 1-3 | No answer in time: the call stands. | 
+41.90 foolWrite | 10 | 0-1 | 1-3 | No answer in time: the call stands. | 
+42.90 foolPick | 10 | 0-1 | 1-3 | No answer in time: the call stands. | 
+43.90 foolReveal | 10 | 0-1 | 3-3 | No answer in time: the call stands. | 
+44.65 foolWrite | 11 | 0-1 | 3-3 | No answer in time: the call stands. | 
+45.65 foolPick | 11 | 0-1 | 3-3 | No answer in time: the call stands. | 
+46.40 foolReveal | 11 | 0-1 | 4-4 | No answer in time: the call stands. | 
+47.40 foolWrite | 12 | 0-1 | 4-4 | No answer in time: the call stands. | 
+48.40 foolPick | 12 | 0-1 | 4-4 | No answer in time: the call stands. | 
+49.15 foolReveal | 12 | 0-1 | 6-4 | No answer in time: the call stands. | 
+50.15 foolSummary | 13 | 2-1 | 6-4 | No answer in time: the call stands. | 
 50.90 roundIntro | 14 | 2-1 |  | No answer in time: the call stands. | 
 51.90 ask | 15 | 2-1 |  | No answer in time: the call stands. | 
 52.90 answer | 15 | 3-1 |  | Lions +1 point | 

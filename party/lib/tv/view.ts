@@ -204,7 +204,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       .filter((x) => x.said?.[t]).map((x) => ({ w: String(x.said![t]), ok: !!x.ok?.[t] })));
     /* Fool Me Twice keeps points, not legs: the tracker and the result show them (this fact's counted from its reveal) */
     if (key === "fool") {
-      const rev = s.screen === "foolReveal" && s.fool ? QMB.foolScore(s.fool.opts, [...s.foolPicks], [1, 0]) : null;
+      const rev = s.screen === "foolReveal" && s.fool ? QMB.foolScore(s.fool.opts, [...s.foolPicks], null) : null;
       p.mini.wins = m.pts.map((v: number, t: number) => v + (rev ? rev.pts[t] : 0)) as Two<number>;
       if (p.summary) p.summary.wins = [...m.pts] as Two<number>;
       /* the result's lie detector and its awards: each fact's numbers (the engine keeps every fact: subs) */
@@ -216,7 +216,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
         /* (a phone's "sent": its lie in, or its pick) */
         if (s.screen === "foolWrite") p.sent = [s.foolLies[0] != null, s.foolLies[1] != null];
         if (s.screen === "foolPick") p.sent = [s.foolPicks[0] != null, s.foolPicks[1] != null];
-        if (rev && s.fool) p.fool.rev = { opts: s.fool.opts, fooled: rev.fooled, pts: rev.pts, hits: rev.hits, lost: s.fool.lost, predicts: [1, 0], answer: q.answer, notes: q.notes || undefined };
+        if (rev && s.fool) p.fool.rev = { opts: s.fool.opts, fooled: rev.fooled, pts: rev.pts, hits: rev.hits, lost: s.fool.lost, predicts: [null, null], answer: q.answer, notes: q.notes || undefined };
       }
     }
     if (key === "see" && p.summary) p.summary.got = [0, 1].map((t) => ((m.subs || []) as { q?: { photo?: string }; winner?: unknown }[]).filter((x) => x.winner === t && x.q?.photo).map((x) => String(x.q!.photo)));

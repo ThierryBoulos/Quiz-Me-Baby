@@ -411,7 +411,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true: ${sec(t?.foolWrite, 45)}.` },
       { text: "Type the real answer and the app says so: write a lie instead!", warn: true },
       { text: `Then the truth comes up hidden among your lies and a few of ours. Captains pick the one they think is true: ${sec(t?.foolPick, 20)}.` },
-      { text: "The truth: +2. The other team falls for your lie: +1 to you, and −1 to them." },
+      { text: "The truth: +2. The other team falls for your lie: +1 to you." },
       { text: `${n} facts, the last 2 hard. Most points takes ${pts}. Tied? One more fact, or a point each.` }];
     case "pin": return [
       { text: `A photo of a landmark goes up. ${sec(t?.pin, T_PIN)}. On the hard ones its name comes too: the trick is finding it.` },

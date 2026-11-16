@@ -1,8 +1,8 @@
 /* FOOL ME TWICE (the owner, 16 Nov): a strange true fact with a blank. Every team writes a lie to fill it; then the
    lies, a few of ours and the truth come up together, shuffled, and every team picks the one it thinks is true.
    +2 for the truth, +1 for each team your lie fools, nothing for falling for one of ours; and with your lie you say
-   which team will fall for it: if it does, that team loses 1 (with two teams it's always the other team). 6 facts,
-   the last 2 hard. The rules themselves are the engine's (engine/core.js: foolOptions, foolScore), shared by the
+   which team will fall for it: if it does, that team loses 1 (3 to 8 teams; with two teams nobody names a team, and
+   falling for the other team's lie costs nothing: the owner, 16 Nov). 6 facts, the last 2 hard. The rules themselves are the engine's (engine/core.js: foolOptions, foolScore), shared by the
    two-team TV (lib/tvGame.ts) and the 3-8 team one (lib/many/logic.ts). */
 export type FoolOpt = { text: string; truth?: boolean; ours?: boolean; by: number[] };
 export type FoolRev = { opts: FoolOpt[]; fooled: number[][]; pts: number[]; hits: { by: number; on: number }[]; lost: number[];

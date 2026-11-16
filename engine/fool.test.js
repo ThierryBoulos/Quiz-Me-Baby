@@ -75,9 +75,10 @@ test('fool: two teams: the points add up over the facts, the most takes the game
   for(let i = 0; i < 5; i++) fx = Q.play(g, { type:'fool/settle', opts, picks:[0, 0] });
   assert.deepEqual(s.pts, [10, 10]);
   assert.deepEqual(fx, [{ go:'foolWrite' }]);
-  /* the sixth: A falls for B's lie (B: +1, and with two teams B always "predicted" A: A -1) */
+  /* the sixth: A falls for B's lie (B: +1; with two teams nobody names a team, so A loses nothing) */
   fx = Q.play(g, { type:'fool/settle', opts, picks:[2, 0] });
-  assert.deepEqual(s.pts, [9, 13]);
+  assert.deepEqual(s.pts, [10, 13]);
+  assert.deepEqual(s.subs[5].hits, []);
   assert.equal(s.verdict.winner, 1);
   assert.equal(g.teams[1].score, g.miniPts);
   assert.ok(fx.some(f => f.go === 'foolSummary'));

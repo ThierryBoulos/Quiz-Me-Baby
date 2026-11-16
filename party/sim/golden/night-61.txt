@@ -12,25 +12,25 @@
 14.75 foolPick | 9 | 1-1 | 0-0 | Owls +1 point | 
 (pause, 8 s)
 (resume)
-31.00 foolReveal | 9 | 1-1 | 0-0 | Owls +1 point | 
-32.00 foolWrite | 10 | 1-1 | 0-0 | Owls +1 point | 
-32.75 foolPick | 10 | 1-1 | 0-0 | Owls +1 point | 
-33.75 foolReveal | 10 | 1-1 | 0-2 | Owls +1 point | 
-34.50 foolWrite | 11 | 1-1 | 0-2 | Owls +1 point | 
+31.00 foolReveal | 9 | 1-1 | 1-1 | Owls +1 point | 
+32.00 foolWrite | 10 | 1-1 | 1-1 | Owls +1 point | 
+32.75 foolPick | 10 | 1-1 | 1-1 | Owls +1 point | 
+33.75 foolReveal | 10 | 1-1 | 1-3 | Owls +1 point | 
+34.50 foolWrite | 11 | 1-1 | 1-3 | Owls +1 point | 
 (a new question)
-35.50 foolWrite | 12 | 1-1 | 0-2 | New fact. | 
-38.25 foolPick | 12 | 1-1 | 0-2 | New fact. | 
-40.00 foolReveal | 12 | 1-1 | -1-5 | New fact. | 
-41.00 foolWrite | 13 | 1-1 | -1-5 | New fact. | 
-41.75 foolPick | 13 | 1-1 | -1-5 | New fact. | 
-43.50 foolReveal | 13 | 1-1 | -2-6 | New fact. | 
-44.50 foolWrite | 14 | 1-1 | -2-6 | New fact. | 
-45.50 foolPick | 14 | 1-1 | -2-6 | New fact. | 
-48.00 foolReveal | 14 | 1-1 | -3-9 | New fact. | 
-49.00 foolWrite | 15 | 1-1 | -3-9 | New fact. | 
-50.75 foolPick | 15 | 1-1 | -3-9 | New fact. | 
-52.50 foolReveal | 15 | 1-1 | -2-8 | New fact. | 
-53.50 foolSummary | 16 | 1-3 | -2-8 | New fact. | 
+35.50 foolWrite | 12 | 1-1 | 1-3 | New fact. | 
+38.25 foolPick | 12 | 1-1 | 1-3 | New fact. | 
+40.00 foolReveal | 12 | 1-1 | 1-6 | New fact. | 
+41.00 foolWrite | 13 | 1-1 | 1-6 | New fact. | 
+41.75 foolPick | 13 | 1-1 | 1-6 | New fact. | 
+43.50 foolReveal | 13 | 1-1 | 1-7 | New fact. | 
+44.50 foolWrite | 14 | 1-1 | 1-7 | New fact. | 
+45.50 foolPick | 14 | 1-1 | 1-7 | New fact. | 
+48.00 foolReveal | 14 | 1-1 | 1-10 | New fact. | 
+49.00 foolWrite | 15 | 1-1 | 1-10 | New fact. | 
+50.75 foolPick | 15 | 1-1 | 1-10 | New fact. | 
+52.50 foolReveal | 15 | 1-1 | 2-10 | New fact. | 
+53.50 foolSummary | 16 | 1-3 | 2-10 | New fact. | 
 54.50 roundIntro | 17 | 1-3 |  | New fact. | 
 55.25 ask | 18 | 1-3 |  | New fact. | 
 57.00 answer | 19 | 2-3 |  | Lions +1 point | 

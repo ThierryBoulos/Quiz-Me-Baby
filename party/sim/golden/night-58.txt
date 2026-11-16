@@ -60,20 +60,20 @@
 71.50 foolReveal | 27 | 3-4 | 2-2 | Owls +2 points | 
 72.50 foolWrite | 28 | 3-4 | 2-2 | Owls +2 points | 
 73.25 foolPick | 28 | 3-4 | 2-2 | Owls +2 points | 
-75.00 foolReveal | 28 | 3-4 | 5-1 | Owls +2 points | 
-76.00 foolWrite | 29 | 3-4 | 5-1 | Owls +2 points | 
-77.00 foolPick | 29 | 3-4 | 5-1 | Owls +2 points | 
-77.75 foolReveal | 29 | 3-4 | 8-0 | Owls +2 points | 
-78.75 foolWrite | 30 | 3-4 | 8-0 | Owls +2 points | 
-79.50 foolPick | 30 | 3-4 | 8-0 | Owls +2 points | 
-80.50 foolReveal | 30 | 3-4 | 9--1 | Owls +2 points | 
-81.50 foolWrite | 31 | 3-4 | 9--1 | Owls +2 points | 
-83.25 foolPick | 31 | 3-4 | 9--1 | Owls +2 points | 
-85.00 foolReveal | 31 | 3-4 | 12--2 | Owls +2 points | 
-86.00 foolWrite | 32 | 3-4 | 12--2 | Owls +2 points | 
-86.75 foolPick | 32 | 3-4 | 12--2 | Owls +2 points | 
-87.75 foolReveal | 32 | 3-4 | 12--2 | Owls +2 points | 
-88.50 foolSummary | 33 | 5-4 | 12--2 | Owls +2 points | 
+75.00 foolReveal | 28 | 3-4 | 5-2 | Owls +2 points | 
+76.00 foolWrite | 29 | 3-4 | 5-2 | Owls +2 points | 
+77.00 foolPick | 29 | 3-4 | 5-2 | Owls +2 points | 
+77.75 foolReveal | 29 | 3-4 | 8-2 | Owls +2 points | 
+78.75 foolWrite | 30 | 3-4 | 8-2 | Owls +2 points | 
+79.50 foolPick | 30 | 3-4 | 8-2 | Owls +2 points | 
+80.50 foolReveal | 30 | 3-4 | 9-2 | Owls +2 points | 
+81.50 foolWrite | 31 | 3-4 | 9-2 | Owls +2 points | 
+83.25 foolPick | 31 | 3-4 | 9-2 | Owls +2 points | 
+85.00 foolReveal | 31 | 3-4 | 12-2 | Owls +2 points | 
+86.00 foolWrite | 32 | 3-4 | 12-2 | Owls +2 points | 
+86.75 foolPick | 32 | 3-4 | 12-2 | Owls +2 points | 
+87.75 foolReveal | 32 | 3-4 | 12-2 | Owls +2 points | 
+88.50 foolSummary | 33 | 5-4 | 12-2 | Owls +2 points | 
 89.50 roundIntro | 34 | 5-4 |  | Owls +2 points | 
 90.50 ask | 35 | 5-4 |  | Owls +2 points | 
 91.25 answer | 35 | 6-4 |  | Lions +1 point | 

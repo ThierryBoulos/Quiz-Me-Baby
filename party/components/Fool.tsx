@@ -73,7 +73,7 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
      whole screen to fit, 16 Nov screen check) */
   const step = tv ? (rows.length > 5 ? 0.6 : 0.9) : 0.6, big = rows.length > 6, cols = !!tv && rows.length > 5;   // (many rows: a quicker beat, the truth in under 6 s)
   /* who fell for it: each team's dot */
-  const two = teams.length === 2, ds = tv ? (big ? 20 : 24) : 15;
+  const ds = tv ? (big ? 20 : 24) : 15;
   const who = (ts: number[]): ReactNode => ts.length ? <span className="flex items-center justify-end gap-1.5 flex-wrap">{ts.map((t) => <Dot key={t} t={t} color={teams[t]?.color ?? "#888"} size={ds} />)}</span> : null;
   return (
     <div className={cols ? "grid grid-cols-2 w-full" : "flex flex-col w-full"} style={{ gap: tv ? (cols ? 10 : big ? 6 : 10) : 6 }}>
@@ -89,8 +89,8 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
               <div className="font-bold leading-snug"><bdi>{x.o.text}</bdi></div>
               <div className="eyebrow" style={{ fontSize: tv ? (big ? 12 : 14) : 10, color: t ? "var(--color-gold)" : x.o.ours ? "var(--color-ink-3)" : undefined }}>{tag}</div>
               {pred.length > 0 && <div className="flex flex-wrap gap-1.5" style={{ marginTop: tv ? 6 : 4 }}>{pred.map((f) => (
-                <span key={f} className="fool-called" role="note" data-by={rev.hits.find((h) => h.on === f && x.o.by.includes(h.by))?.by} data-on={f} aria-label={`${two ? "" : "Called it! "}${teams[f]?.name} lose 1`} style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 20 : 22) : 12 }}>
-                  {!two && <b>Called it!</b>}<Dot t={f} color={teams[f]?.color ?? "#888"} size={tv ? (cols ? 20 : 24) : 14} /><bdi style={{ color: teams[f]?.color }}>{teams[f]?.name}</bdi><span className="fool-minus">−1</span></span>))}</div>}
+                <span key={f} className="fool-called" role="note" data-by={rev.hits.find((h) => h.on === f && x.o.by.includes(h.by))?.by} data-on={f} aria-label={`Called it! ${teams[f]?.name} lose 1`} style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 20 : 22) : 12 }}>
+                  <b>Called it!</b><Dot t={f} color={teams[f]?.color ?? "#888"} size={tv ? (cols ? 20 : 24) : 14} /><bdi style={{ color: teams[f]?.color }}>{teams[f]?.name}</bdi><span className="fool-minus">−1</span></span>))}</div>}
             </div>
             <div className="flex flex-col items-end gap-0.5 shrink-0 text-right">
               {who(x.fell)}
