@@ -27,6 +27,10 @@ only where the question bank lives. Don't change its screens or rules text; only
   answer, accepted answers, notes, and the 4 options for Majority Rules (rulebook §0). The owner accepts, rejects or
   comments by number.
 - **Commercial-phase and security to-dos**: `docs/COMMERCIAL.md`.
+- **Live lines (16 Nov, the owner: "keep the way back handy")**: taps and screens also go on a faster live line;
+  everything about them is in `docs/LIVE-LINES.md`. The way back: `LIVE_LINES = false` in `party/lib/liveLines.ts`
+  (game only), and `docs/sql/2026-11-16-rollback.sql` (the database). The SQL that added them:
+  `docs/sql/2026-11-16-apply.sql`. Read each game's count (in the doc) before deciding whether to keep them.
 - **Push only when the owner says "push".** Commit locally meanwhile.
 - **Database changes need the owner's approval**: write the SQL to `supabase/migrations/` and a paste-ready copy to
   `docs/sql/`, and ask. Once the owner says yes, run it yourself with the Supabase tool; if the tool fails, the owner

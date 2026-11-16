@@ -117,3 +117,9 @@ or set them on Vercel as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KE
   as `SIDE` (that column scrolls with no bar, so a player doesn't see it); only the sideways
   phone: `SCREENS_PHONES=sideways npm run screens -- phones`. Other team counts than 3, 5 and 8
   (pictures of a room of four): `SCREENS_TEAMS=4,8 npm run screens -- tv`.
+
+### Undo the live lines (16 Nov)
+
+If the faster live lines break something, or use too much of Supabase: set `LIVE_LINES = false` in
+`party/lib/liveLines.ts`, test, push (the game is then as before 16 Nov). To remove the database side too, paste
+`docs/sql/2026-11-16-rollback.sql` into Supabase > SQL editor and run it. Details: `docs/LIVE-LINES.md`.
