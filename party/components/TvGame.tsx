@@ -358,7 +358,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if (/^stakes(Pick|Q|Reveal|Summary)$/.test(sc) && pub.stakes) return (
     <StakesTv sk={pub.stakes} screen={sc} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))} sent={pub.sent}
       clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sc === "stakesQ" ? 150 : 110} />} />);
-  /* Fool Me Twice: the fact while the lies are written; the answers while they pick; then the reveal, a lie at a time */
+  /* Fool Me Twice: the fact while the lies are written; the answers while they pick; then the reveal, the truth first, then a lie at a time */
   if (/^fool(Write|Pick|Reveal)$/.test(sc) && pub.fool) {
     const F = pub.fool, tms = ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` }));
     return (

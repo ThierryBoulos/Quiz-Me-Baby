@@ -168,7 +168,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             clock={<Clock deadline={pub.deadline} left={pub.left} size={pub.screen === "q" ? 140 : 100} />} />)}
         {/* Russian Roulette: the barrel spins, each team's chamber lights up; at the reveal they click, the bullet last */}
         {/* Fool Me Twice: the fact while the lies are written; the answers while they pick (and say who'll fall for theirs);
-            then the reveal, a lie at a time, the truth last */}
+            then the reveal: the truth first, then a lie at a time */}
         {g && g.key === "fool" && pub.fool && ["q", "pick", "reveal"].includes(pub.screen) && (() => { const F = pub.fool, tms = T.map((t) => ({ name: t.name, color: t.color })); return (
           <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
             {pub.screen === "q" && (<>

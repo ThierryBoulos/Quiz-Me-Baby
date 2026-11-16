@@ -1,7 +1,7 @@
 "use client";
 /* FOOL ME TWICE's screens (the owner, 16 Nov), the same pieces on the TV and every phone, 2 teams or 8: the fact with
    its blank, who has written and picked, the answers to pick from, and the reveal (each lie, whose it was and who fell
-   for it, the truth last). The rules are in lib/fool.ts. */
+   for it, the truth first). The rules are in lib/fool.ts. */
 import { Fragment, type ReactNode } from "react";
 import { FOOL_PEN_END as PEN_END, foolAwards, foolAwardWhat, rvFool, type FoolOpt, type FoolPub, type FoolRev, type FoolSum } from "@/lib/fool";
 import { Dot } from "./many/PartsMany";
@@ -62,14 +62,14 @@ export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, 
     </div>);
 }
 
-/* the reveal: each answer that fooled someone or was a team's, whose it was and who fell for it; ours nobody fell for
-   go quietly; the truth last, in gold, with who found it. Then each team's points for this fact */
+/* the reveal: the truth first, on top, in gold, with who guessed it (16 Nov, the owner); then each answer that fooled
+   someone or was a team's, whose it was and who fell for it; ours nobody fell for go quietly. Then each team's points */
 export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]; tv?: boolean }) {
   const names = (ts: number[]) => ts.map((t) => teams[t]?.name ?? "").join(" & ");
   const rows = rev.opts.map((o, k) => ({ o, k, fell: rev.fooled[k] || [] }))
     .filter((x) => x.o.truth || x.o.by.length || x.fell.length)
-    .sort((a, b) => (a.o.truth ? 1 : 0) - (b.o.truth ? 1 : 0) || b.fell.length - a.fell.length);
-  /* (on the TV, more than five rows go in two columns, the truth across the bottom: one column of nine shrank the
+    .sort((a, b) => (b.o.truth ? 1 : 0) - (a.o.truth ? 1 : 0) || b.fell.length - a.fell.length);
+  /* (on the TV, more than five rows go in two columns, the truth across the top: one column of nine shrank the
      whole screen to fit, 16 Nov screen check) */
   const step = tv ? (rows.length > 5 ? 0.6 : 0.9) : 0.6, big = rows.length > 6, cols = !!tv && rows.length > 5;   // (many rows: a quicker beat, the truth in under 6 s)
   /* who fell for it: each team's dot */
@@ -89,13 +89,13 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
               <div className="font-bold leading-snug"><bdi>{x.o.text}</bdi></div>
               <div className="eyebrow" style={{ fontSize: tv ? (big ? 12 : 14) : 10, color: t ? "var(--color-gold)" : x.o.ours ? "var(--color-ink-3)" : undefined }}>{tag}</div>
               {pred.length > 0 && <div className="flex flex-wrap gap-1.5" style={{ marginTop: tv ? 6 : 4 }}>{pred.map((f) => (
-                <span key={f} className="fool-called" role="note" aria-label={`${two ? "" : "Called it! "}${teams[f]?.name} lose 1`} style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 20 : 22) : 12 }}>
+                <span key={f} className="fool-called" role="note" data-by={rev.hits.find((h) => h.on === f && x.o.by.includes(h.by))?.by} data-on={f} aria-label={`${two ? "" : "Called it! "}${teams[f]?.name} lose 1`} style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 20 : 22) : 12 }}>
                   {!two && <b>Called it!</b>}<Dot t={f} color={teams[f]?.color ?? "#888"} size={tv ? (cols ? 20 : 24) : 14} /><bdi style={{ color: teams[f]?.color }}>{teams[f]?.name}</bdi><span className="fool-minus">−1</span></span>))}</div>}
             </div>
             <div className="flex flex-col items-end gap-0.5 shrink-0 text-right">
               {who(x.fell)}
               <span className="text-[var(--color-ink-3)]" style={{ fontSize: tv ? (big ? 13 : 16) : 11 }}>
-                {t ? (x.fell.length ? "found it" : "nobody found it") : x.fell.length ? "fell for it" : "nobody fell for it"}</span>
+                {t ? (x.fell.length ? "guessed it" : "nobody guessed it") : x.fell.length ? "fell for it" : "nobody fell for it"}</span>
             </div>
           </div>);
       })}
