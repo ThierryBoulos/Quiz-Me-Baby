@@ -96,7 +96,7 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
               <div className="font-bold leading-snug"><bdi>{x.o.text}</bdi></div>
               <div className="eyebrow" style={{ fontSize: tv ? (big ? 12 : 14) : 10, color: t ? "var(--color-gold)" : x.o.ours ? "var(--color-ink-3)" : undefined }}>{tag}</div>
               {pred.length > 0 && <div className="flex flex-wrap gap-1.5" style={{ marginTop: tv ? 6 : 4 }}>{pred.map((f) => (
-                <span key={f} className="fool-called" role="note" aria-label={`${two ? "" : "Called it! "}${teams[f]?.name} lose 1`} style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 19 : 22) : 12 }}>
+                <span key={f} className="fool-called" role="note" aria-label={`${two ? "" : "Called it! "}${teams[f]?.name} lose 1`} style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 20 : 22) : 12 }}>
                   {!two && <b>Called it!</b>}<Dot t={f} color={teams[f]?.color ?? "#888"} size={tv ? (cols ? 20 : 24) : 14} /><bdi style={{ color: teams[f]?.color }}>{teams[f]?.name}</bdi><span className="fool-minus">−1</span></span>))}</div>}
             </div>
             <div className="flex flex-col items-end gap-0.5 shrink-0 text-right">
