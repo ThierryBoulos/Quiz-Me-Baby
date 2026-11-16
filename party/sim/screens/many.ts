@@ -74,6 +74,26 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
       snap(); L.next(s, now, T);
     }
     snap();
+    /* Fool Me Twice's worst cases on the reveal (16 Nov, the owner: "will it fit with 8 teams?"), from the first fact's:
+       every team writes a lie and every team's named team falls for it (k right predictions); and one lie fools every
+       other team, its writer's named team among them (one right prediction, k-1 teams on one lie) */
+    const base = got[`m${k}.reveal.fool.a`] as { pub: Q; secret: Q; now: number } | undefined;
+    if (base) {
+      const lies = ["A wig", "Its weight in chocolate", "A hamster", "Forty sheep and a goat", "Wax", "Pickled herring", "Seventeen rubber chickens", "A very small lighthouse"];
+      const truth = base.pub.fool.rev.opts.find((o: Q) => o.truth);
+      const make = (tag: string, picks: number[]) => {
+        const rec = JSON.parse(JSON.stringify(base)), opts = [{ ...truth, by: [] }, ...Array.from({ length: k }, (_, t) => ({ text: lies[t], by: [t] }))];
+        if (k === 3) opts.push({ text: "A lighthouse keeper", ours: true, by: [] });
+        const pred = Array.from({ length: k }, (_, t) => (t + 1) % k), r = QMB.foolScore(opts, picks, pred);
+        rec.pub.fool.opts = opts.map((o) => o.text);
+        rec.pub.fool.rev = { ...rec.pub.fool.rev, opts, fooled: r.fooled, pts: r.pts, hits: r.hits, predicts: pred };
+        if (rec.secret && Array.isArray(rec.secret.typed)) rec.secret.typed = lies.slice(0, k);
+        got[`m${k}.reveal.fool.${tag}.a`] = rec;
+      };
+      /* (the answers: 0 the truth, then team t's lie at t + 1) */
+      make("allcalled", Array.from({ length: k }, (_, u) => 1 + ((u - 1 + k) % k)));
+      make("allfooled", Array.from({ length: k }, (_, u) => (u === 0 ? 0 : 1)));
+    }
   }
   return got;
 }
