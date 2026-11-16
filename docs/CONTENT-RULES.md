@@ -211,10 +211,16 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
     Way) counts too. Never a different answer;
   - **8 fakes of ours**, the same shape and length as the truth, plausible, none of them true by accident, none in
     the accept list, no two the same (the bank check runs the game's own matcher on them);
-  - **the fakes vary in kind (16 Nov, the owner):** never all animals, all art or all hobbies. At most 2 of one
-    kind, at least 5 kinds, and 2 or 3 of the truth's own kind so the truth doesn't stand out as the odd one. Some
-    ridiculous but believable: these are weird facts (for Picasso questioned about a theft, the owner's own: a glass
-    of wine, a stop sign, the president's pen). Each still has to read right in the sentence;
+  - **believable first (16 Nov, the owner: "some are really unrealistic"):** every fake is something a smart adult
+    who doesn't know the answer would seriously consider true. Odd is fine, these are weird facts, but a believable
+    odd (for Picasso questioned about a theft, the owner's own: a glass of wine, a stop sign, the president's pen).
+    No creatures of legend, joke animals, impossible objects or puns nobody would pick;
+  - **varied in kind (16 Nov, the owner):** never all animals, all art or all hobbies; at most 3 of one kind, and the
+    top 4 not all one kind. Never an unrealistic fake just to vary: where the sentence allows one kind only, vary
+    within it;
+  - **ranked (16 Nov, the owner):** the 8 are written best first. The first 4 are the ones most likely to fool the
+    most teams: the game uses them first, in any order. The last 4 are backups, used only when more than 4 are
+    needed (teams with no lie, the same lie twice). Each still has to read right in the sentence;
   - a short **note** after the reveal, and its **source**.
   The owner's 9 samples (16 Nov) are the model; the knocker-upper was dropped as too easy. No hiding of rude lies:
   the players' own. The catalogue is `const FOOLS` in `classic.html` (`[key, level, topic, fact, truth, accept, fakes,

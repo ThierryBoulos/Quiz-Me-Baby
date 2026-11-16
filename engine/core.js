@@ -443,7 +443,10 @@
       const same = opts.find(o => !o.truth && foolSame(x, o.text));
       if(same) same.by.push(t); else opts.push({ text:x, by:[t] });
     });
-    for(const f of shuffleWith((q.fakes || []).slice(), rng)){
+    /* ours: the fact's 8 fakes are ranked (16 Nov, the owner): the top 4, the ones most likely to fool, come first (in
+       any order); the 4 after them only when more than 4 are needed (teams with no lie, the same lie twice) */
+    const fk = (q.fakes || []).slice();
+    for(const f of [...shuffleWith(fk.slice(0, 4), rng), ...shuffleWith(fk.slice(4), rng)]){
       if(opts.length >= want) break;
       const x = foolShow(f);
       if(!x || foolIsTruth(x, q, accept) || opts.some(o => foolSame(x, o.text))) continue;

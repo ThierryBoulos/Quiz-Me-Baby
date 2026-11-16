@@ -40,6 +40,23 @@ test('fool: the same lie from two teams (typos, a full stop) shows once, both it
   /* a team's lie that is one of ours: ours isn't added again */
   assert.equal(opts.filter(o => /goldfish/i.test(o.text)).length, 1);
 });
+test('fool: ours come from the top 4 fakes first; the 4 backups only when more than 4 are needed', () => {
+  const top = fact.fakes.slice(0, 4).map(Q.foolShow), back = fact.fakes.slice(4).map(Q.foolShow);
+  for(let i = 0; i < 40; i++){
+    /* two teams, two lies: one of ours, always from the top 4 */
+    const two = Q.foolOptions(fact, ['Hamster', 'Cat'], accept, rng).opts.filter(o => o.ours).map(o => o.text);
+    assert.equal(two.length, 1); assert.ok(top.includes(two[0]));
+    /* three teams, no lie at all: four of ours, the top 4 */
+    const none = Q.foolOptions(fact, ['', '', ''], accept, rng).opts.filter(o => o.ours).map(o => o.text);
+    assert.deepEqual(none.slice().sort(), top.slice().sort());
+  }
+  /* eight teams, no lie at all: all eight, the backups too */
+  const all = Q.foolOptions(fact, Array(8).fill(''), accept, rng).opts.filter(o => o.ours).map(o => o.text);
+  assert.deepEqual(all.slice().sort(), [...top, ...back].sort());
+  /* a team's lie that is one of the top 4: the next of ours comes from the rest of the top 4 */
+  const dup = Q.foolOptions(fact, ['Goldfish', '', ''], accept, rng).opts.filter(o => o.ours).map(o => o.text);
+  assert.equal(dup.length, 3); assert.ok(dup.every(x => top.includes(x)));
+});
 test('fool: an answer shows tidied: first letter capital, no full stop, 25 letters at most', () => {
   assert.equal(Q.foolShow('  a   wig.  '), 'A wig');
   assert.equal(Q.foolShow('x'.repeat(60)).length, 25);
