@@ -1717,7 +1717,8 @@ button.fool-opt:disabled:not(.on) { opacity: .55; }
 .ld-lab { animation: ldLab .4s cubic-bezier(.2,1.4,.4,1) both; animation-delay: var(--d); }
 @keyframes ldLab { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
 .ld-lab.win { filter: drop-shadow(0 0 10px var(--c)); }
-.ld-bulbs::before, .ld-bulbs::after { content: ""; position: absolute; inset: 4px; border-radius: 11px; pointer-events: none; z-index: 1;
+/* (round the outside of the paper, not over the graph: 16 Nov, the owner) */
+.ld-bulbs::before, .ld-bulbs::after { content: ""; position: absolute; inset: -10px; border-radius: 22px; pointer-events: none; z-index: 1;
   background:
     radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 0 / 15px 6px repeat-x,
     radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 100% / 15px 6px repeat-x,

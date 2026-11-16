@@ -2,7 +2,7 @@
 /* FOOL ME TWICE's screens (the owner, 16 Nov), the same pieces on the TV and every phone, 2 teams or 8: the fact with
    its blank, who has written and picked, the answers to pick from, and the reveal (each lie, whose it was and who fell
    for it, the truth last). The rules are in lib/fool.ts. */
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { FOOL_PEN_END as PEN_END, foolAwards, foolAwardWhat, rvFool, type FoolOpt, type FoolPub, type FoolRev, type FoolSum } from "@/lib/fool";
 import { Dot } from "./many/PartsMany";
 import { QMB } from "@/lib/engine";
@@ -163,15 +163,15 @@ export function FoolResult({ teams, sum, pts, places, award, two }: { teams: Foo
       d += ` L${X(f + 1).toFixed(1)},${Y(v).toFixed(1)}`; prev = v; });
     return d; };
   /* the labels at the pens' ends, kept apart, inside the paper (closer together if eight need it) */
-  /* (clear of the bulbs round the paper's edge, top and bottom) */
-  const lo2 = 27, hi2 = H - 15, gap = Math.min(dense ? 22 : 27, (hi2 - lo2) / Math.max(1, k - 1)), at: number[] = []; let y0 = -Infinity;
+  const lo2 = 22, hi2 = H - 12, gap = Math.min(dense ? 22 : 27, (hi2 - lo2) / Math.max(1, k - 1)), at: number[] = []; let y0 = -Infinity;
   teams.map((_, t) => t).sort((a, b) => Y(end(a)) - Y(end(b)) || a - b).forEach((t) => { at[t] = Math.max(Y(end(t)), lo2, y0 + gap); y0 = at[t]; });
   const over = y0 - hi2; if (over > 0) at.forEach((v, t) => { at[t] = v - over; });
   const fs = dense ? (k > 6 ? 17 : 18) : 21, order = teams.map((_, t) => t).sort((a, b) => places[a] - places[b] || a - b);
   const AW = foolAwards(sum, !!two);
-  const who = (ts: number[]) => (ts.length > 3 ? `${ts.length} teams` : ts.map((t) => teams[t]?.name ?? "").join(" & "));
+  /* (an award's teams: one, its name in its colour; two tied, each name in its own colour; three or more, their letters) */
+  const who = (ts: number[]) => foolAwardWho(ts, teams, dense ? 22 : 26);
   return (
-    <div className="flex flex-col items-center w-full" style={{ gap: dense ? 12 : 16 }}>
+    <div className="flex flex-col items-center w-full" style={{ gap: dense ? 18 : 22 }}>
       <div className="ld-paper ld-bulbs" role="img" aria-label={"Each team's points, fact by fact: " + order.map((t) => `${bare(teams[t].name)} ${pts[t]}`).join(", ")} style={{ width: W, maxWidth: "100%", ["--g" as string]: done + "s" }}>
         <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} style={{ display: "block", overflow: "hidden", borderRadius: 14, maxWidth: "100%", height: "auto" }} aria-hidden>
           <g className="ld-grid">
@@ -208,13 +208,21 @@ export function FoolResult({ teams, sum, pts, places, award, two }: { teams: Foo
           {AW.map((a, i) => { const c = a.teams.length === 1 ? teams[a.teams[0]]?.color : undefined; return (
             <div key={a.t} role="listitem" className="rv card !p-2 !px-3 text-left min-w-0" style={{ animationDelay: done + 0.7 + i * 0.3 + "s", borderColor: c, background: "linear-gradient(180deg, #151a3c, #0c1028)" }}>
               <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: dense ? 14 : 16 }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
-              <div className="font-bold leading-snug line-clamp-2" style={{ color: c, fontSize: dense ? 18 : 20 }}><bdi>{who(a.teams)}</bdi></div>
+              <div className="font-bold leading-snug line-clamp-2" style={{ fontSize: dense ? 18 : 20 }}>{who(a.teams)}</div>
               <div className="text-[var(--color-ink-2)] leading-snug" style={{ fontSize: dense ? 14 : 16 }}>{foolAwardWhat(a, !!two)}</div>
             </div>); })}
         </div>)}
     </div>);
 }
+/* an award's teams (16 Nov, the owner): one team, its name in its colour; two tied, each name in its own colour; three
+   or more, their letters (as on the scores) */
+export function foolAwardWho(ts: number[], teams: FoolTeam[], dot: number): ReactNode {
+  if (ts.length >= 3) return <span className="inline-flex flex-wrap items-center gap-1 align-middle" aria-label={ts.map((t) => teams[t]?.name).join(", ")}>{ts.map((t) => <Dot key={t} t={t} color={teams[t]?.color ?? "#888"} size={dot} />)}</span>;
+  /* (each name whole on its line: a long one moves down entire) */
+  return <>{ts.map((t, i) => <Fragment key={t}>{i > 0 && <span className="text-[var(--color-ink-2)]"> &amp; </span>}<bdi className="inline-block whitespace-nowrap max-w-full overflow-hidden text-ellipsis align-bottom" style={{ color: teams[t]?.color }}>{teams[t]?.name}</bdi></Fragment>)}</>;
+}
 /* the phones' list of the awards (with no TV, the result is the list, as in every game; the awards under it) */
 export const foolAwardList = (sum: FoolSum, teams: FoolTeam[], two: boolean) => foolAwards(sum, two).map((a) => ({
   t: a.t, spoon: a.spoon, color: a.teams.length === 1 ? teams[a.teams[0]]?.color : undefined,
-  who: `${a.teams.length > 3 ? `${a.teams.length} teams` : a.teams.map((t) => teams[t]?.name ?? "").join(" & ")}: ${foolAwardWhat(a, two)}` }));
+  who: `${a.teams.map((t) => teams[t]?.name ?? "").join(" & ")}: ${foolAwardWhat(a, two)}`,
+  node: <>{foolAwardWho(a.teams, teams, 18)}<span className="text-[var(--color-ink-2)] font-normal">: {foolAwardWhat(a, two)}</span></> }));

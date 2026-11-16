@@ -72,7 +72,8 @@ export function WinnerCard({ eyebrow, name, color, sub }: { eyebrow: string; nam
 }
 
 /* the night's awards, a line each */
-export function AwardList({ awards }: { awards: { t: string; who: string; color?: string; note?: string; spoon?: boolean }[] }) {
+/* (node: the who drawn in pieces, each team in its own colour, instead of the plain who) */
+export function AwardList({ awards }: { awards: { t: string; who: string; color?: string; note?: string; spoon?: boolean; node?: ReactNode }[] }) {
   if (!awards.length) return null;
   return (
     <div className="flex flex-col gap-2">
@@ -80,7 +81,7 @@ export function AwardList({ awards }: { awards: { t: string; who: string; color?
       <ul className="flex flex-col gap-2 text-left">{awards.map((a) => (
         <li key={a.t} className="card !p-2 !px-3" style={{ borderColor: a.color ? `color-mix(in srgb, ${a.color} 55%, transparent)` : undefined }}>
           <div className="eyebrow !text-11" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
-          <div className="text-14 font-bold" style={{ color: a.color }}><bdi>{a.who}</bdi></div>
+          <div className="text-14 font-bold" style={{ color: a.color }}>{a.node ?? <bdi>{a.who}</bdi>}</div>
           {a.note && <div className="text-12 text-[var(--color-ink-2)] italic">{a.note}</div>}
         </li>))}</ul>
     </div>);

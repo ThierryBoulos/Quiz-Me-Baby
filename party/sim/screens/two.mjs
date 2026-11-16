@@ -32,5 +32,11 @@ export async function dumpTwo(load) {
       return null;
     } });
   }
+  /* Fool Me Twice tied at the end (16 Nov): the nights rarely end it tied, so its tie screen is the night's own tie screen
+     (the same screen every game shares) with Fool Me Twice's name and points; no host and with a host */
+  for (const tag of ["nh", "h"]) { const src = got[`${tag}.sayTie.saysame.a`]; if (!src) continue;
+    const rec = JSON.parse(JSON.stringify(src)), w = rec.pub.mini.wins[0];
+    rec.pub.screen = "foolTie"; rec.pub.mini = { ...rec.pub.mini, key: "fool", title: "Fool Me Twice", wins: [w + 6, w + 6] };
+    got[`${tag}f.foolTie.fool.a`] = rec; }
   return got;
 }
