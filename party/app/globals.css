@@ -1702,20 +1702,26 @@ button.fool-opt:disabled:not(.on) { opacity: .55; }
 .fool-called b { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: .06em; color: #ffd36b; }
 .fool-called bdi { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 @keyframes foolStamp { from { opacity: 0; transform: scale(1.8); } to { opacity: 1; transform: none; } }
-/* ...or (the owner choosing, 16 Nov) a crooked "Gotcha!" stamp across the lie's row, the team that fell for it and its −1 */
-.fool-stamp { flex: none; align-self: center; display: grid; justify-items: center; gap: .45em; margin: 0 .3em; padding: .18em .5em .28em; border: 3px solid var(--color-no); border-radius: 10px;
-  color: var(--color-no); background: rgba(255,85,102,.08); box-shadow: 0 0 18px rgba(255,85,102,.3); transform: rotate(-3deg);
-  animation: foolStampIn .45s cubic-bezier(.2,1.5,.4,1) both; animation-delay: var(--d, 0s); }
-.fool-stamp b { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: .06em; line-height: 1; }
-.fool-stamp-who { display: inline-flex; align-items: center; gap: .3em; font-weight: 800; line-height: 1.1; white-space: nowrap; }
-@keyframes foolStampIn { from { opacity: 0; transform: rotate(-3deg) scale(2.2); } to { opacity: 1; transform: rotate(-3deg); } }
-/* ...or the owner's sentence after whose lie it was, and a small "Gotcha!" sticker on the dot of the team that fell for it */
-.fool-said { text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--color-ink-2); }
-.fool-ring { display: inline-grid; border-radius: 999px; box-shadow: 0 0 0 2px #04050e, 0 0 0 4px var(--color-no); }
-.fool-sticker { margin-bottom: .2em; white-space: nowrap; font-family: var(--font-display); font-weight: 400; text-transform: uppercase;
-  letter-spacing: .05em; line-height: 1.15; color: #fff; background: var(--color-no); border-radius: 5px; padding: .05em .4em; box-shadow: 0 4px 12px rgba(0,0,0,.4);
-  transform: rotate(-6deg); transform-origin: 100% 100%; animation: foolStick .4s cubic-bezier(.2,1.5,.4,1) both; animation-delay: var(--d, 0s); }
-@keyframes foolStick { from { opacity: 0; transform: rotate(-6deg) scale(2); } to { opacity: 1; transform: rotate(-6deg); } }
+/* the owner choosing among four (16 Nov), none adding a line to the row: a red frame with a "Gotcha!" tab on its top edge;
+   a red ring on the dot of the team that fell for it; whose lie it is flipping to "Gotcha! Lions −1" and back; GOTCHA in
+   little ivory letter tiles in place of "fell for it". The −1 beside that team's dot pops in with the row */
+.fool-pop { animation: foolStamp .45s cubic-bezier(.2,1.5,.4,1) both; animation-delay: var(--d, 0s); }
+.fool-hitrow { border-color: var(--color-no); box-shadow: 0 0 18px rgba(255,85,102,.28); }
+.fool-tab { position: absolute; top: 0; right: 14px; z-index: 1; font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: .06em; line-height: 1.2;
+  color: #fff; background: var(--color-no); border-radius: 6px; padding: .05em .5em; box-shadow: 0 3px 10px rgba(0,0,0,.45);
+  transform: translateY(-50%); animation: foolTab .45s cubic-bezier(.2,1.5,.4,1) both; animation-delay: var(--d, 0s); }
+@keyframes foolTab { from { opacity: 0; transform: translateY(-50%) scale(1.8); } to { opacity: 1; transform: translateY(-50%); } }
+.fool-ring { display: inline-grid; border-radius: 999px; box-shadow: 0 0 0 2px #04050e, 0 0 0 4px var(--color-no); animation: foolStamp .45s cubic-bezier(.2,1.5,.4,1) both; animation-delay: var(--d, 0s); }
+.fool-flap { display: inline-grid; perspective: 400px; }
+.fool-flap > span { grid-area: 1 / 1; backface-visibility: hidden; transform-origin: 50% 50%; }
+.fool-flap-a { animation: foolFlapA 6s linear infinite; animation-delay: var(--d, 0s); }
+.fool-flap-b { animation: foolFlapB 6s linear infinite both; animation-delay: var(--d, 0s); }
+@keyframes foolFlapA { 0%, 6% { opacity: 1; transform: none; } 10%, 58% { opacity: 0; transform: rotateX(90deg); } 62%, 100% { opacity: 1; transform: none; } }
+@keyframes foolFlapB { 0%, 6% { opacity: 0; transform: rotateX(-90deg); } 10%, 58% { opacity: 1; transform: none; } 62%, 100% { opacity: 0; transform: rotateX(-90deg); } }
+.fool-tiles { display: inline-flex; gap: .14em; perspective: 300px; }
+.fool-tiles i { font-style: normal; font-family: var(--font-display); font-weight: 400; display: grid; place-items: center; width: 1.1em; height: 1.3em; line-height: 1;
+  border-radius: .18em; background: #fbf3dc; color: #1b1607; box-shadow: inset 0 -2px 0 rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.4); animation: foolTile .35s cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes foolTile { from { opacity: 0; transform: rotateX(90deg); } to { opacity: 1; transform: none; } }
 
 /* Fool Me Twice's result (16 Nov, the owner's pick): the lie detector. Its ivory paper, the grid drifting as the pens
    draw, each pen's trace drawn left to right with its head riding along, the labels in last place first, the winner's

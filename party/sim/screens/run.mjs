@@ -91,7 +91,7 @@ const TV_MEASURE = () => {
      airport board, the split-flap letters' halves */
   /* (What Do You See?'s picture is enlarged inside its frame on purpose, the frame cropping it: the frame is checked, not the picture) */
   /* (and the points flying up into the totals: they pass over whatever lies between, as in every game) */
-  const skip = (el) => el.closest(".hud-plus,.fly,.tv-glow,.confetti,.confetti-late,.win-flash,.win-ring,.lead-banner,.imad-bubble,.tv-cover,[aria-hidden=\"true\"] svg,.mq-beam,.mq-world,.mq-dust,.mq-floor,.plane-ico,.lectern-spot,.see-frame img")
+  const skip = (el) => el.closest(".hud-plus,.fly,.tv-glow,.confetti,.confetti-late,.win-flash,.win-ring,.lead-banner,.imad-bubble,.tv-cover,[aria-hidden=\"true\"] svg,.mq-beam,.mq-world,.mq-dust,.mq-floor,.plane-ico,.lectern-spot,.see-frame img,.fool-flap-b")
     || (el.tagName === "svg" && el.closest("svg") !== el);
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
   for (const el of scope.querySelectorAll("*")) {
@@ -155,7 +155,7 @@ const PHONE_MEASURE = () => {
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
   /* (the night's intro, or a window over the setup (Timers, Repeat a theme): only it shows, so only it counts) */
   const cover = document.querySelector(".night-intro, [role=dialog][aria-modal=true]");
-  const skip = (el) => el.closest(".confetti,.confetti-back,.win-flash,.win-ring,svg *,canvas,.face.back,.plane-ico,.lectern-spot,.see-frame img") || (cover && !cover.contains(el)) || [...(function* () { for (let e = el; e; e = e.parentElement) yield e; })()].some((e) => getComputedStyle(e).position === "sticky");
+  const skip = (el) => el.closest(".confetti,.confetti-back,.win-flash,.win-ring,svg *,canvas,.face.back,.plane-ico,.lectern-spot,.see-frame img,.fool-flap-b") || (cover && !cover.contains(el)) || [...(function* () { for (let e = el; e; e = e.parentElement) yield e; })()].some((e) => getComputedStyle(e).position === "sticky");
   const scroller = (el) => { for (let e = el.parentElement; e; e = e.parentElement) { const cs = getComputedStyle(e); if (/(auto|scroll|hidden|clip)/.test(cs.overflowX)) return e; } return null; };
   for (const el of document.querySelectorAll("main *")) {
     if (skip(el)) continue; const cs = getComputedStyle(el); if (cs.visibility === "hidden" || cs.display === "none" || +cs.opacity === 0 || cs.position === "fixed") continue;
