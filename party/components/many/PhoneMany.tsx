@@ -21,7 +21,7 @@ import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
-import { FoolFact, FoolHead, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "../Fool";
+import { FoolFact, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "../Fool";
 import { FOOL_MAX } from "@/lib/fool";
 import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
@@ -557,7 +557,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         /* (many teams, many answers: compact, so every answer and the teams to predict fit in one screen, the owner, 16 Nov:
            from 4 teams smaller rows, from 5 two columns and the teams as one row of letters) */
         const cmp: 0 | 1 | 2 = picking ? (T.length >= 5 ? 2 : 1) : 0, seed = me.user_id + "|" + pub.qid;
-        const head = <div className="flex items-center justify-between gap-3"><FoolHead fool={F} />{sc !== "reveal" && <Clock deadline={pub.deadline} left={pub.left} size={cmp ? 48 : 60} />}</div>;
+        /* (the clock only: no "Fact 6 of 6" line, the tracker at the top says it, the owner, 16 Nov) */
+        const head = sc !== "reveal" ? <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} size={cmp ? 48 : 60} /></div> : null;
         const sendLie = () => { const t = text.trim(); if (!t || busy) return;
           void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) { setSentTxt(t); try { localStorage.setItem(lieKey, t); } catch { /* in memory only */ } } }); };
         const status = <FoolStatus teams={foolT} done={(picking ? F.picked : F.wrote) || T.map(() => false)} doing={T.length > 4 ? "…" : picking ? ": picking…" : ": writing…"} finished={T.length > 4 ? "✓" : picking ? ": picked" : ": lie in"} />;

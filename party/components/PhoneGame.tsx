@@ -14,7 +14,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun, type RrTeam } from "./Roulette";
 import { StakesBet, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
-import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "./Fool";
+import { FoolFact, FoolOptions, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "./Fool";
 import { FOOL_MAX, foolDone } from "@/lib/fool";
 import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
@@ -446,7 +446,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     /* Fool Me Twice: the fact and the truth (the host's to know), who has written, then who has picked; the reveal */
     case "foolWrite": case "foolPick": return (
       <div className="flex flex-col gap-3 flex-1">
-        <ToSide order={2}><div className="flex items-center justify-between">{pub.fool && <FoolHead fool={pub.fool} />}<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
+        {/* (no "Fact 6 of 6" line: the tracker at the top says it, the owner, 16 Nov) */}
+        <ToSide order={2}><div className="flex items-center justify-end"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
         {pub.fool && <FoolFact fool={pub.fool} size={17} />}
         <AnswerCard />
         {pub.screen === "foolPick" && pub.fool?.opts && <FoolOptions opts={pub.fool.opts} seed={"host|" + pub.qid} />}
@@ -1040,7 +1041,6 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {/* Fool Me Twice: the fact (at the reveal, with the truth in it); the answers while they pick (a captain picks from
         its own buttons, below); the reveal */}
     {/^fool(Write|Pick|Reveal)$/.test(pub.screen) && pub.fool && <div className="flex flex-col gap-2 w-full">
-      <FoolHead fool={pub.fool} />
       <FoolFact fool={pub.fool} size={small ? 16 : 19} truth={pub.screen === "foolReveal" ? pub.fool.rev?.answer : undefined} />
       {pub.screen === "foolPick" && pub.fool.opts && !captain && <FoolOptions opts={pub.fool.opts} seed={(who || "host") + "|" + pub.qid} />}
       {pub.screen === "foolReveal" && pub.fool.rev && <FoolReveal rev={pub.fool.rev} teams={foolTeams(pub)} />}

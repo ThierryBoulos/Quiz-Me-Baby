@@ -15,7 +15,7 @@ import { SeeTv } from "./See";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
-import { FoolFact, FoolHead, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "./Fool";
+import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "./Fool";
 import { foolDone } from "@/lib/fool";
 import { LeadBanner, useFlyingPoints, useScreenAt, WinName } from "./Motion";
 import { NightIntroTv } from "./NightIntro";
@@ -363,7 +363,6 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     const F = pub.fool, tms = ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` }));
     return (
       <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
-        <FoolHead fool={F} tv />
         {sc === "foolWrite" && (<>
           <FoolFact fool={F} size={54} />
           <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />

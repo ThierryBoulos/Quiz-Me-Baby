@@ -20,7 +20,7 @@ import { NightIntroTv } from "../NightIntro";
 import { ImadBubble } from "../TvGame";
 import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
-import { FoolFact, FoolHead, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
+import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
 import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
 import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
@@ -171,7 +171,6 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             then the reveal, a lie at a time, the truth last */}
         {g && g.key === "fool" && pub.fool && ["q", "pick", "reveal"].includes(pub.screen) && (() => { const F = pub.fool, tms = T.map((t) => ({ name: t.name, color: t.color })); return (
           <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
-            <FoolHead fool={F} tv />
             {pub.screen === "q" && (<>
               <FoolFact fool={F} size={F.fact.length > 120 ? 44 : 54} />
               <Clock deadline={pub.deadline} left={pub.left} size={120} />

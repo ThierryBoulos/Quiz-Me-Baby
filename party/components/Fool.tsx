@@ -10,13 +10,6 @@ import { QMB } from "@/lib/engine";
 export type FoolTeam = { name: string; color: string };
 const LETTERS = "ABCDEFGHI";
 
-/* "Fact 2 of 6", and "A hard one" on the night's last two */
-export function FoolHead({ fool, tv }: { fool: FoolPub; tv?: boolean }) {
-  return (
-    <div className="eyebrow text-center" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : 11 }}>
-      Fact {fool.n} of {fool.of}{fool.hard ? <span style={{ color: "#ff8f80" }}> · A hard one</span> : null}</div>);
-}
-
 /* the truth as it reads in the sentence: "in a race", "the Mona Lisa", "'little mouse'". A name or a title keeps its
    capital ("Tasmania"), and so does a word starting a quote, or in a quoted title ('Cosmic Latte') */
 export function inSentence(fact: string, truth: string, name?: boolean) {
