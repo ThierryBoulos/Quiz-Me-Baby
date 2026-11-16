@@ -19,7 +19,7 @@ import { DISH_LAST, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY } from "../game";
 import { SEE_TYPE } from "../see";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
@@ -61,7 +61,11 @@ export async function setTeams(code: string, state: Record<string, unknown>, mem
 
 /* each game's seconds, from the TV's house settings */
 const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST, roulette: t.tRoulette,
-  stakes: t.tStakesQ, stakesPick: t.tStakesPick, see: t.tSee }; };
+  stakes: t.tStakesQ, stakesPick: t.tStakesPick, see: t.tSee, fool: t.tFoolWrite, foolPick: t.tFoolPick }; };
+/* Fool Me Twice's spare facts, a normal one and a hard one in turn */
+const foolSpares = (L: Q[]) => { const a = L.filter((q) => q?.level !== "hard"), b = L.filter((q) => q?.level === "hard"), out: Q[] = [];
+  for (let i = 0; i < Math.max(a.length, b.length); i++) { if (a[i]) out.push(a[i]); if (b[i]) out.push(b[i]); }
+  return out; };
 /* Russian Roulette: the questions of a lap's drawn chambers count as played on this TV (a dark chamber's don't) */
 function markRoulette(s: StateM) {
   const m = s.minis[s.mi], lap = m?.key === "roulette" && s.screen === "q" ? (m.qs[m.i] as { ch: { q: Q }[]; draw?: number[] }) : null;
@@ -297,7 +301,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const qn = rounds * 2 + 4;
         const decks: Partial<Record<ManyKey, Q[]>> = { quiz: quiz.slice(0, qn), sudden: quiz.slice(qn), flag: all(g.flagGame), airport: all(g.airportGame), map: all(g.mapGame),
           closest: all(g.mini), pin: all(g.pinGame), majority: all(g.majorityGame), say, dish: all(g.dishGame), see: all(g.seeGame), roulette: all(g.rouletteGame),
-          stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])] };
+          stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])],
+          /* Fool Me Twice: its six facts (four, then two hard), the spare ones after them a normal and a hard in turn, so
+             "Change fact" on a hard one finds a hard one */
+          fool: [...(g.foolGame?.qs || []), ...foolSpares(g.foolGame?.spare || [])] };
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
         /* each question-round game two rounds of two questions, the last one round if the rounds are odd */
@@ -337,6 +344,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (t === "m/go") { ok = !!s.intro; delete s.intro; }
       else if (s.intro) ok = false;
       else if (t === "m/start") { const r = startMini(s, Date.now(), timers(), roster()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
+      /* (Fool Me Twice: Reveal now on the lies puts the answers up to pick from; on the picks, the reveal) */
+      else if (t === "m/reveal" && miniOf(s)?.key === "fool") { ok = s.screen === "q" ? foolOpen(s, Date.now(), timers()) : foolReveal(s); if (ok && s.screen === "reveal") playSound("drumroll"); }
       else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);
       else if (t === "m/next") ok = next(s, Date.now(), timers());
       else if (t === "m/flip") ok = flip(s, Number(mv.t));
@@ -384,12 +393,16 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
          as this question's (the 4 Nov audit, 1.10: it could even rank first). A phone still on the build before
          (its key was the bank's id) isn't checked, so a night that spans an update goes on. */
       if (typeof a.payload.k === "string" && /^\d+\.\d+\|q$/.test(a.payload.k) && a.payload.k !== `${qidOf(s)}|q`) { reply("Too late: that answer was for the last question."); publishSoon(); return; }
+      /* (Fool Me Twice: a lie landing once the answers are up, or a pick for the fact before: not taken) */
+      if (m?.key === "fool" && typeof a.payload.k === "string" && a.payload.k !== `${qidOf(s)}|${s.screen}`) { reply(s.screen === "pick" ? "Too late: the answers are up." : "Too late: that was for the last fact."); publishSoon(); return; }
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
         : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G, Number(a.id) || undefined) : "Your captain answers this one.";
       reply(r === true ? "+" : r);
       /* (What Do You See?: checked the moment it lands: the reveal, or that team out and the clock going on) */
       if (r === true && m?.key === "see") { if (s.screen === "q") playSound("wrong"); publish(); return; }
       /* everyone answers, the Cocktail or Dish too: the faster right, the more points (the owner, 31 Oct) */
+      /* (Fool Me Twice: every lie in, the answers go up; every pick in, the reveal) */
+      if (r === true && foolAllIn(s)) { if (s.screen === "q") foolOpen(s, Date.now(), timers()); else { foolReveal(s); playSound("drumroll"); } publish(); return; }
       if (r === true && allIn(s)) { reveal(s); publish(); return; }
       publishSoon(); return;
     }
@@ -434,7 +447,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       }
       /* a captain gone a minute while their team still has to answer: the armband passes to a teammate who's still
          here (8 Nov: as with two teams) */
-      if (room?.status === "playing" && s.screen === "q" && !capBusy.current) {
+      if (room?.status === "playing" && (s.screen === "q" || (s.screen === "pick" && miniOf(s)?.key === "fool")) && !capBusy.current) {
         const m = miniOf(s), done = answered(s);
         for (let tm = 0; tm < s.teams.length && m && m.key !== "majority"; tm++) {
           if ((m.only && !m.only.includes(tm)) || done[tm]) continue;
@@ -504,6 +517,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (s.screen === "q" && s.buzz != null && s.buzzAt && !s.away && Date.now() - s.buzzAt >= SEE_TYPE * 1000 + T_GRACE_MS) { seeMiss(s, s.buzz, Date.now(), true); playSound("wrong"); publish(); return; }
       if ((s.screen !== "q" && s.screen !== "pick") || !s.deadline) return;
       /* (Secret Stakes' bets: time's up, the teams that didn't bet take the safe one, and the questions go up) */
+      /* (Fool Me Twice: time's up on the lies, the answers go up, ours in place of a lie not written; on the picks, the reveal) */
+      if (Date.now() >= s.deadline && miniOf(s)?.key === "fool") { if (s.screen === "q") foolOpen(s, Date.now(), timers()); else { foolReveal(s); playSound("drumroll"); } publish(); return; }
       if (Date.now() >= s.deadline) { if (s.screen === "pick") lockStakes(s, Date.now(), timers()); else reveal(s); publish(); return; }
       /* the Cocktail or Dish: the next ingredient */
       if (miniOf(s)?.key === "dish") { const n = dishShown(s, Date.now(), timers()); if (n !== s.shown) { s.shown = n; publish(); } }

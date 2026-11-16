@@ -14,6 +14,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun, type RrTeam } from "./Roulette";
 import { StakesBet, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
+import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus, ownIndex } from "./Fool";
 import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
 import { MapView } from "./MapView";
@@ -24,7 +25,7 @@ import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, Flag
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
-export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesQ", "sudden", "battleQ", "battleTie"];
+export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesQ", "foolWrite", "foolPick", "sudden", "battleQ", "battleTie"];
 /* captains only: the players keep quiet (and in Majority Rules everyone answers for themselves: nothing to suggest) */
 const CAPTAINS_ONLY = ["sudden", "battleQ", "battleTie", "majorityQ"];
 
@@ -392,7 +393,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "final": return <Results><Exit /></Results>;
 
     /* ---- the mini-games ---- */
-    case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "pinIntro": case "airportIntro": case "majorityIntro": case "rouletteIntro": case "stakesIntro": case "seeIntro": case "battleIntro": return (
+    case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "pinIntro": case "airportIntro": case "majorityIntro": case "rouletteIntro": case "stakesIntro": case "seeIntro": case "foolIntro": case "battleIntro": return (
       <div className="flex flex-col gap-4 flex-1">
         {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={{ role: "host" } as Member} act={fire} />}
         <MiniIntro pub={pub} size="phone" />
@@ -440,6 +441,21 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
             empty={pub.see?.out?.[t] ? "No answer" : pub.buzz === t ? "Saying it out loud, and typing it…" : pub.buzz != null ? "Waiting" : "Can buzz"} />); })}
         {/* (no Pause while a team that buzzed is answering: the clock is stopped for it already) */}
         <div className="flex gap-2 justify-center mt-auto">{pub.buzz == null && <Pause />}<Small label="Reveal now" move={{ type: "ui/reveal" }} />{pub.buzz == null && !pub.see?.out?.some(Boolean) && <Small ghost label="Change picture" move={{ type: "see/swap" }} />}</div>
+      </div>);
+    /* Fool Me Twice: the fact and the truth (the host's to know), who has written, then who has picked; the reveal */
+    case "foolWrite": case "foolPick": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <ToSide order={2}><div className="flex items-center justify-between">{pub.fool && <FoolHead fool={pub.fool} />}<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
+        {pub.fool && <FoolFact fool={pub.fool} size={17} />}
+        <AnswerCard />
+        {pub.screen === "foolPick" && pub.fool?.opts && <FoolOptions opts={pub.fool.opts} />}
+        {pub.fool && <FoolStatus teams={foolTeams(pub)} done={(pub.screen === "foolPick" ? pub.fool.picked : pub.fool.wrote) || [false, false]} doing={pub.screen === "foolPick" ? ": picking…" : ": writing a lie…"} finished={pub.screen === "foolPick" ? ": picked" : ": lie in"} />}
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} />{pub.screen === "foolWrite" && !pub.fool?.wrote.some(Boolean) && <Small ghost label="Change fact" move={{ type: "fool/swap" }} />}</div>
+      </div>);
+    case "foolReveal": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <OnScreen pub={pub} small />
+        <Main label="Next" move={{ type: "ui/next" }} />
       </div>);
     case "seeReveal": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -584,7 +600,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <button className="btn btn-lg" disabled={busy} onClick={() => send({ type: "tie/stop" })}>{pub.screen === "battleLevel" ? "Share the points" : "A point each"}</button>
         </div>
       </div>);
-    case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": case "saySummary": case "pinSummary": case "airportSummary": case "majoritySummary": case "rouletteSummary": case "seeSummary": return (
+    case "miniSummary": case "flagSummary": case "dishSummary": case "mapSummary": case "saySummary": case "pinSummary": case "airportSummary": case "majoritySummary": case "rouletteSummary": case "seeSummary": case "foolSummary": return (
       <div className="flex flex-col gap-4 flex-1">
         <Result pub={pub} host />
         {S?.note && <Line className="!text-13">{S.note}</Line>}
@@ -1002,6 +1018,8 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
 /* counting: this phone counts the Auction's names, and shows its own count */
 /* side: on a phone held sideways, the question, the flag, the photo, the recipe and the clock go to the left column
    (components/Side; upright nothing moves) */
+/* the two teams as Fool Me Twice's pieces want them */
+const foolTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})` }));
 function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean }) {
   const spun = useSpun(pub.roulette?.spinAt);
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
@@ -1013,6 +1031,14 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
     {/* the fact behind it, right under the answer */}
     {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
     {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
+    {/* Fool Me Twice: the fact (at the reveal, with the truth in it); the answers while they pick (a captain picks from
+        its own buttons, below); the reveal */}
+    {/^fool(Write|Pick|Reveal)$/.test(pub.screen) && pub.fool && <div className="flex flex-col gap-2 w-full">
+      <FoolHead fool={pub.fool} />
+      <FoolFact fool={pub.fool} size={small ? 16 : 19} truth={pub.screen === "foolReveal" ? pub.fool.rev?.answer : undefined} />
+      {pub.screen === "foolPick" && pub.fool.opts && !captain && <FoolOptions opts={pub.fool.opts} />}
+      {pub.screen === "foolReveal" && pub.fool.rev && <FoolReveal rev={pub.fool.rev} teams={foolTeams(pub)} />}
+    </div>}
     {/* What Do You See?: the picture, clearing from the TV's clock; at the reveal the whole of it, and its credit */}
     {/* (sideways, the picture stays in the right column, as big as the screen's height allows: under the scores on the
        left it was cut off, 12 and 13 Nov) */}
@@ -1153,6 +1179,10 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country?" : "Guess the Flag: help your captain";
     /* (12 Nov, the owner: any player can buzz, the captain types; pub.see.by: who hit BUZZ) */
+    /* Fool Me Twice: write a lie, then find the truth */
+    case "foolWrite": return pub.sent?.[mine] ? "Lie sent. Waiting for the others." : cap ? "Write a lie that sounds true." : "Help your captain write a lie that sounds true.";
+    case "foolPick": return pub.sent?.[mine] ? "Picked. Wait for the reveal." : cap ? "Which one is the truth?" : "Your captain picks the truth.";
+    case "foolReveal": return "The reveal";
     case "seeQ": { const by = pub.see?.by, me1 = !!by && by === me.name;
       return pub.see?.out?.[mine] ? (!pub.sent?.[mine] ? "Time's up. You're out of this picture." : cap ? "Wrong. You're out of this picture." : "Your captain guessed wrong: out of this picture.")
       : pub.buzz === mine ? (pub.sent?.[mine] ? "Answer sent. The app checks it."
@@ -1277,7 +1307,7 @@ const NEXT_LABEL: Record<string, [string, string]> = {
   rouletteIntro: ["Spin", "roulette/start"], rouletteReveal: ["Next", "ui/next"], rouletteSummary: ["Next", "roulette/done"],
   stakesIntro: ["Start", "stakes/start"], stakesReveal: ["Next", "ui/next"], stakesSummary: ["Next", "stakes/done"],
   majorityIntro: ["Start: everyone's in", "majority/start"], majorityReveal: ["Next question", "ui/next"], majoritySummary: ["Next", "majority/done"],
-  answer: ["Next", "round/afterAnswer"], roundScore: ["Next", "round/next"], closestReveal: ["Next", "ui/next"], flagReveal: ["Next", "ui/next"], seeIntro: ["Start", "see/start"], seeReveal: ["Next", "ui/next"], seeSummary: ["Next", "see/done"],
+  answer: ["Next", "round/afterAnswer"], roundScore: ["Next", "round/next"], closestReveal: ["Next", "ui/next"], flagReveal: ["Next", "ui/next"], seeIntro: ["Start", "see/start"], seeReveal: ["Next", "ui/next"], seeSummary: ["Next", "see/done"], foolIntro: ["Start", "fool/start"], foolReveal: ["Next", "ui/next"], foolSummary: ["Next", "fool/done"],
   dishReveal: ["Next", "dish/next"], auctionLeg: ["Next", "auction/nextLeg"], auctionResult: ["Next", "auction/done"], battleReview: ["Settle the Battle", "battle/reviewDone"],
   miniSummary: ["Next", "closest/done"], flagSummary: ["Next", "flag/done"], dishSummary: ["Next", "dish/done"], mapSummary: ["Next", "map/done"],
 };
@@ -1306,8 +1336,8 @@ const CALL_SCREENS = ["answer", "flagReveal", "seeReveal", "sayReveal", "mapReve
 /* ...and sudden death / the tie-breaker: the question just decided, on the screen after it */
 const SD_CALL_SCREENS = ["battleSummary", "sudden", "battleTie"];
 /* no host: the screens where both captains can agree to a new one, and what it's called */
-const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", seeQ: "picture", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", rouletteQ: "barrel", stakesPick: "themes", stakesQ: "themes", battleQ: "question" };
-const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ"];
+const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", seeQ: "picture", foolWrite: "fact", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", rouletteQ: "barrel", stakesPick: "themes", stakesQ: "themes", battleQ: "question" };
+const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "seeQ", "foolWrite", "foolPick", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ"];
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
    lifelines; the number pad; the buzzer; the bidding; your players'
@@ -1387,7 +1417,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const sentHere = !!pub.sent?.[mine] || !!sentTxt;
   const locked = !!pub.pending || sentHere;
   /* (time's up with a host: nothing more to type or use, the host rules on what's in: the 4 Nov audit, 1.15) */
-  const canType = !pub.paused && ((myTurn && !locked && !pub.timeUp) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ" || sc === "stakesQ" || (sc === "rouletteQ" && rrSpun)) && !sentHere)
+  const canType = !pub.paused && ((myTurn && !locked && !pub.timeUp) || (sc === "miniQ" && !sentHere) || ((sc === "flagQ" || sc === "mapQ" || sc === "sayQ" || sc === "airportQ" || sc === "stakesQ" || sc === "foolWrite" || (sc === "rouletteQ" && rrSpun)) && !sentHere)
     /* a buzz: one answer, and once it's sent the box closes (it stayed open, with its Send, and got sent twice: 20 Oct) */
     || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending && !sentHere)
     /* ...and the moment this captain taps BUZZ, before the TV's word comes back: typing starts at once (the owner, 15 Nov:
@@ -1445,6 +1475,13 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
     return () => clearTimeout(t);
   }, [a, b, canType, draftKey, sc, code]);
   const sendPin = async () => { if (!pinAt) return; setSentTxt("your pin"); if (!(await act("answer", { pin: pinAt, k: draftKey }))) setSentTxt(null); };
+  /* (Fool Me Twice: this team's lie, and its pick) */
+  const foolLie = useRef<string | null>(null);
+  const [foolPicked, setFoolPicked] = useState<number | null>(null);
+  useEffect(() => { setFoolPicked(null); }, [pub.qid, sc]);
+  useEffect(() => { foolLie.current = null; }, [pub.qid]);
+  const storedLie = (() => { if (sc !== "foolPick") return null; if (foolLie.current) return foolLie.current; try { return localStorage.getItem("qmb.fool.lie." + code + "." + pub.qid); } catch { return null; } })();
+  const foolOwn = ownIndex(pub.fool?.opts, storedLie);
   /* (typing after a BUZZ the TV hasn't given yet: Send waits for it) */
   const early = BUZZ_SCREENS.includes(sc) && pub.buzz !== mine;
   const send = async () => {
@@ -1453,6 +1490,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
     if (sc === "miniQ") { if (!Number.isFinite(guess)) return; setSentTxt(a); if (!(await act("answer", { n: a, k: draftKey }))) setSentTxt(null); return; }
     const texts = [a, b].map((x) => x.trim()).filter(Boolean);
     if (!texts.length) return;
+    /* (Fool Me Twice: this team's lie, kept, so its own isn't offered when it picks, even after a reload) */
+    if (sc === "foolWrite") { try { localStorage.setItem("qmb.fool.lie." + code + "." + pub.qid, texts[0]); } catch { /* in memory only */ } foolLie.current = texts[0]; }
     setSentTxt(texts.join(" / "));
     if (!(await act("answer", { texts, k: draftKey }))) setSentTxt(null);
   };
@@ -1501,15 +1540,15 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {canType && (
         <div className="card flex flex-col gap-2">
           <div className="flex items-center justify-between gap-3">
-            <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : dip ? "Your two answers" : "Your answer"}</label>
+            <label className="field-label !mb-0" htmlFor="ans">{sc === "miniQ" ? "Your number" : sc === "foolWrite" ? "Your lie" : dip ? "Your two answers" : "Your answer"}</label>
             {/* the cocktail or dish: you buzzed, now type it before your own clock runs out */}
             {sc === "dishQ" && pub.dish?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.dish.typeBy} size={52} />to type it</div>}
             {/* What Do You See?: the same 10 seconds, to say it out loud and type it */}
             {sc === "seeQ" && pub.see?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.see.typeBy} size={52} />to say it and type it</div>}
           </div>
-          <input id="ans" {...np.props} className="input" value={a} maxLength={80} autoComplete="off" autoCorrect="off" spellCheck={false}
+          <input id="ans" {...np.props} className="input" value={a} maxLength={sc === "foolWrite" ? 40 : 80} autoComplete="off" autoCorrect="off" spellCheck={false}
             /* Closest: the number pad, fastest (the reader still takes "1.5 million" if a keyboard sends it) */
-            inputMode={sc === "miniQ" ? "decimal" : "text"} enterKeyHint="send" placeholder={sc === "miniQ" ? "e.g. 236" : "Type it"} onChange={(e) => setA(e.target.value)}
+            inputMode={sc === "miniQ" ? "decimal" : "text"} enterKeyHint="send" placeholder={sc === "miniQ" ? "e.g. 236" : sc === "foolWrite" ? "A lie that sounds true" : "Type it"} onChange={(e) => setA(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !dip && !busy && !early && a.trim()) { e.preventDefault(); void send(); } }} />
           {sc === "miniQ" && a.trim() && (Number.isFinite(guess)
             ? ![String(guess), guess.toLocaleString("en-GB")].includes(a.trim()) && <div className="text-13 text-[var(--color-ink-2)]">Counts as <b>{guess.toLocaleString("en-GB")}{per ? ` ${per}` : ""}</b></div>
@@ -1517,8 +1556,15 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           {dip && <input {...np.props} className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {np.hint}
           <button className="btn btn-gold btn-lg" disabled={busy || early || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onPointerDown={(e) => e.preventDefault()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
-          {["ask", "steal", "flagQ", "airportQ", "mapQ"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
+          {["ask", "steal", "flagQ", "airportQ", "mapQ", "foolWrite"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
           {sc === "seeQ" && <div className="text-13 text-[var(--color-ink-3)]">Say it out loud too! Wrong, and you&rsquo;re out of this picture.</div>}
+        </div>)}
+      {/* Fool Me Twice: the captain picks the truth (its own lie isn't there); one tap, locked */}
+      {sc === "foolPick" && pub.fool?.opts && !pub.paused && (
+        <div className="flex flex-col gap-2">
+          <FoolOptions opts={pub.fool.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolPicked ?? (pub.sent?.[mine] ? -1 : null)} busy={busy}
+            onPick={(k) => { setFoolPicked(k); void act("answer", { pick: k, k: draftKey }).then((ok) => { if (!ok) setFoolPicked(null); }); }} />
+          <p className="text-13 text-center text-[var(--color-ink-3)]">{pub.sent?.[mine] ? "Picked. Wait for the reveal." : "Which one is the truth? One tap and it's locked."}</p>
         </div>)}
       {canPin && (
         <div className="flex flex-col gap-2">

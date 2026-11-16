@@ -23,10 +23,12 @@ const CODE = "SIMS";
 /* as many themes as rounds, as Setup sends (a fixed set, so the deal is the same each run) */
 const THEMES = ["Movies", "Music", "Geography", "History", "Science", "Sports", "Lebanon", "Food & Drink", "Tech & Business", "Nature", "Friends", "Celebrities"];
 const api = { current: null };
+/* phone: the game runs on a phone, with no TV (the same referee; it keeps a copy on the server too) */
+let phoneMode = false;
 function Tv() {
   const [snap, setSnap] = useState(() => read());
   useEffect(() => fake.onChange((t) => { if (t === "rooms" || t === "members") setSnap(read()); }), []);
-  api.current = useTvGame(CODE, true, snap.room, snap.members);
+  api.current = useTvGame(CODE, true, snap.room, snap.members, phoneMode);
   return null;
 }
 function read() {
@@ -42,7 +44,8 @@ const NEXT = { roundIntro: "round/begin", miniIntro: "closest/start", flagIntro:
   majorityIntro: "majority/start", majorityReveal: "ui/next", majoritySummary: "majority/done",
   rouletteIntro: "roulette/start", rouletteReveal: "ui/next", rouletteSummary: "roulette/done",
   stakesIntro: "stakes/start", stakesReveal: "ui/next", stakesSummary: "stakes/done",
-  seeIntro: "see/start", seeReveal: "ui/next", seeSummary: "see/done" };
+  seeIntro: "see/start", seeReveal: "ui/next", seeSummary: "see/done",
+  foolIntro: "fool/start", foolReveal: "ui/next", foolSummary: "fool/done" };
 
 /* the answer to what's on screen, from the TV's own game (bots peek, so some answers are right) */
 function answerNow(g, pub) {
@@ -85,8 +88,8 @@ function pinNear(g, bot) {
    net: { dup, delay, stall, stallWrites }  pushes sent twice / up to delay ms late (out of order) / that share of reads, or of the TV's writes, held 5-28 s
    simul: both captains tap Next, buzz, rule at the very same moment
    edge: answers land at the exact moment the clock runs out */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true }) {
-  fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed);
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false }) {
+  fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed); phoneMode = phone;
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
   const caps = ["capA", "capB"], gone = new Set();
@@ -135,7 +138,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   /* the scripted things, waiting for a screen that allows them; a scripted Pause lasts its `for`; a scripted
      request (no host) is agreed to by the other captain */
   const scripted = []; let pauseUntil = 0, agreeNext = false, tieMoreLeft = tieMore;
-  const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "battleQ"];
+  const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ"];
   const armed = new Set(), asked = new Set(), edged = new Set(), contested = new Set(), contestSeen = new Set(), voted = new Set(), dropped = new Set();
   let contestSilent = false;
   /* while the TV is off, the phones still tap: a captain answers or buzzes what they see */
@@ -391,6 +394,16 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     /* Russian Roulette: each captain its own chamber's question (sent too soon, while the barrel spins, it's refused
        and goes again next tick) */
+    /* Fool Me Twice: each captain writes a lie (now and then the truth itself: refused, and it writes another; now and
+       then none, and one of ours takes its place), then picks an answer, tagged as a real phone tags it */
+    else if (sc === "foolWrite") {
+      const q = g.foolGame?.qs[g.foolGame.i];
+      for (const t of [0, 1]) if (!pub.sent?.[t] && C(t) && bot() < 0.8) send(C(t), "answer", { text: bot() < 0.12 ? q?.answer : `Lie ${Math.floor(bot() * 1000)}`, k: `${pub.qid}|foolWrite` });
+      if (host && pub.sent?.[0] && pub.sent?.[1]) next(0, "ui/reveal");
+    }
+    else if (sc === "foolPick" && pub.fool?.opts) {
+      for (const t of [0, 1]) if (!pub.sent?.[t] && C(t) && bot() < 0.85) send(C(t), "answer", { pick: Math.floor(bot() * pub.fool.opts.length), k: `${pub.qid}|foolPick` });
+    }
     else if (sc === "rouletteQ") {
       const lap = g.rouletteGame?.qs[g.rouletteGame.i];
       for (const t of [0, 1]) if (!pub.sent?.[t]) send(C(t), "answer", { text: guess(lap?.draw ? lap.ch[lap.draw[t]]?.q?.answer : null) });

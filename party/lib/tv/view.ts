@@ -109,7 +109,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.tMini = t.tMini;
     p.timers = { question: t.tQuestion, steal: t.tSteal, friend: t.tFriend, contest: t.tContest, sudden: t.tSudden, mini: t.tMini, flag: t.tFlag, map: t.tMap, say: t.tSay,
       auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport, majority: t.tMajority, roulette: t.tRoulette,
-      stakesPick: t.tStakesPick, stakesQ: t.tStakesQ, see: t.tSee }; }
+      stakesPick: t.tStakesPick, stakesQ: t.tStakesQ, see: t.tSee, foolWrite: t.tFoolWrite, foolPick: t.tFoolPick }; }
   /* no host: whose Start or Next the room is waiting for */
   if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
     && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {
@@ -201,6 +201,21 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     /* Don't Say the Same: each team's words, scored or not, for its pile of word cards (a game saved before 14 Nov has none) */
     if (key === "saysame" && p.summary && (m.subs || []).some((x: { said?: unknown }) => x.said)) p.summary.words = [0, 1].map((t) => ((m.subs || []) as { said?: (string | null)[]; ok?: boolean[] }[])
       .filter((x) => x.said?.[t]).map((x) => ({ w: String(x.said![t]), ok: !!x.ok?.[t] })));
+    /* Fool Me Twice keeps points, not legs: the tracker and the result show them (this fact's counted from its reveal) */
+    if (key === "fool") {
+      const rev = s.screen === "foolReveal" && s.fool ? QMB.foolScore(s.fool.opts, [...s.foolPicks], [1, 0]) : null;
+      p.mini.wins = m.pts.map((v: number, t: number) => v + (rev ? rev.pts[t] : 0)) as Two<number>;
+      if (p.summary) p.summary.wins = [...m.pts] as Two<number>;
+      if (["foolWrite", "foolPick", "foolReveal"].includes(s.screen) && q) {
+        p.fool = { fact: q.question, n: Math.min(m.i + 1, m.qs.length), of: m.base, hard: q.level === "hard", ...(q.name ? { name: true } : {}), wrote: s.foolLies.map((l) => l != null), total: [...p.mini.wins] };
+        /* picking: the answers only (whose each one is stays here till the reveal) */
+        if (s.screen === "foolPick" && s.fool) { p.fool.opts = s.fool.opts.map((o) => o.text); p.fool.picked = s.foolPicks.map((x) => x != null); }
+        /* (a phone's "sent": its lie in, or its pick) */
+        if (s.screen === "foolWrite") p.sent = [s.foolLies[0] != null, s.foolLies[1] != null];
+        if (s.screen === "foolPick") p.sent = [s.foolPicks[0] != null, s.foolPicks[1] != null];
+        if (rev && s.fool) p.fool.rev = { opts: s.fool.opts, fooled: rev.fooled, pts: rev.pts, hits: rev.hits, lost: s.fool.lost, predicts: [1, 0], answer: q.answer, notes: q.notes || undefined };
+      }
+    }
     if (key === "see" && p.summary) p.summary.got = [0, 1].map((t) => ((m.subs || []) as { q?: { photo?: string }; winner?: unknown }[]).filter((x) => x.winner === t && x.q?.photo).map((x) => String(x.q!.photo)));
     /* Russian Roulette keeps points, not legs: the tracker and the result show them (this lap's counted from its reveal) */
     if (key === "roulette") {

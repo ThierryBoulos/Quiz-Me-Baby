@@ -14,13 +14,14 @@ import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_LEVELS, type SkPick } from "../stakes";
+import { FOOL_MAX, type FoolOpt } from "../fool";
 
-export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "roulette", "stakes"] as const;
+export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "fool", "roulette", "stakes"] as const;
 /* sudden death isn't picked: it comes when the night ends with teams tied at the top */
 export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
 export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
-  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", see: "What Do You See?", roulette: "Russian Roulette", stakes: "Secret Stakes" };
-export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 10, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, see: 12, roulette: 3, stakes: 3 };
+  closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", see: "What Do You See?", fool: "Fool Me Twice", roulette: "Russian Roulette", stakes: "Secret Stakes" };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 10, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, see: 12, fool: 6, roulette: 3, stakes: 3 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
 export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "see", "sudden", "roulette", "stakes"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
@@ -66,12 +67,14 @@ export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: n
 /* the night's numbers for the awards: legs placed 1st and 2nd, the fastest right flags, Drop the Pin's km
    (and how many pins), the run of 1st places now (on fire at 3; a new game starts cold) and the best run */
 export type Stats = { firsts: number[]; seconds: number[]; fastest: number[]; km: number[]; kmN: number[]; run: number[]; best: number[] };
-export type Screen = "intro" | "pick" | "q" | "reveal" | "summary" | "final";   // pick: Secret Stakes' bets
+export type Screen = "intro" | "pick" | "q" | "reveal" | "summary" | "final";   // pick: Secret Stakes' bets; Fool Me Twice's picks (after "q", the lies)
 export type StateM = {
   v: 2; teams: TeamM[]; minis: MiniM[]; mi: number; screen: Screen; step: number;
   deadline: number | null; left: number; total: number;
   spinAt?: number | null;                       // Russian Roulette: when this lap's barrel started spinning (the question is up SPIN_MS later)
   picks?: (SkPick | null)[];                    // Secret Stakes: each team's bet this round (a theme of the three, a level)
+  /* Fool Me Twice: the answers to pick from (the lies in typed), each team's pick and the team it says will fall for its lie */
+  fool?: { opts: FoolOpt[]; lost: number[]; picks: (number | null)[]; pred: (number | null)[] } | null;
   typed: (string | null)[]; nums: (number | null)[]; pins: (LatLon | null)[];
   why: (string | null)[];                       // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
   shown: number;                                // the Cocktail or Dish: the ingredients up so far
@@ -112,7 +115,8 @@ export type FlagM = { id: number; name: string; team: number | null; label: stri
 /* seconds to answer (the Cocktail or Dish: each ingredient's, and the last one's) */
 export type Timers = { sudden: number; quiz: number; flag: number; airport: number; map: number; closest: number; pin: number; majority: number; say: number; dish: number; dishLast: number; roulette: number;
   stakes: number; stakesPick: number;   // Secret Stakes: to answer, and to bet
-  see: number };                        // What Do You See?: a picture
+  see: number;                         // What Do You See?: a picture
+  fool: number; foolPick: number };     // Fool Me Twice: to write a lie, and to pick the truth
 
 const n = (k: number, v = 0) => Array.from({ length: k }, () => v);
 export const miniOf = (s: StateM) => s.minis[s.mi] as MiniM | undefined;
@@ -155,6 +159,13 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
     m.qs[m.i] = R; s.paused = false; betPhase(s, now, t); toast(s, "Three new themes."); return true;
   }
   if (!m || s.screen !== "q" || m.key === "sudden") return false;
+  /* Fool Me Twice: another fact, as hard as this one if there's one left, before any lie is in */
+  if (m.key === "fool") {
+    if (s.typed.some((x) => x != null)) return "Too late: a lie is already in.";
+    const L = s.extra?.fool || [], lv = qOf(s)?.level, j = Math.max(0, L.findIndex((x) => x?.level === lv));
+    if (!L.length) return "No other fact left.";
+    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); return true;
+  }
   /* (Majority Rules: a vote counts, not a team with nobody on the list) */
   if ((m.key === "majority" ? false : answered(s).some(Boolean)) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
   if (m.key === "see" && (s.buzz != null || s.out?.some(Boolean))) return "Too late: someone has already had a go at this one.";
@@ -169,7 +180,7 @@ export function lineup(rounds: number, games: ManyKey[]): ManyKey[] {
   for (let r = 0; r < rounds; r++) out.push("quiz", ...games.slice(r * per, (r + 1) * per));
   return out;
 }
-const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.ms = Array(k).fill(null); s.buzz = null; s.buzzAt = 0; s.buzzBy = null; s.out = Array(k).fill(false); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; s.mapHint = false; };
+const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.ms = Array(k).fill(null); s.buzz = null; s.buzzAt = 0; s.buzzBy = null; s.out = Array(k).fill(false); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; s.mapHint = false; s.fool = null; };
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
 
 /* the host taps Start on a game's intro: its first question */
@@ -250,8 +261,10 @@ const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: 
 
 /* a captain's answer (one each, the first stands). order: when it reached the server (the action's id), so the
    fastest is the first to arrive there, however the network hands the answers to the TV; none, the order they come */
-export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown }, order?: number, now = Date.now()): true | string {
-  const m = miniOf(s); if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
+export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown; pick?: unknown; pred?: unknown }, order?: number, now = Date.now()): true | string {
+  const m = miniOf(s);
+  if (m?.key === "fool") return foolAnswer(s, team, p, order);
+  if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
   if (m.only && !m.only.includes(team)) return "Only the teams tied at the top answer this one.";
   if (typedKey(m.key)) {
     /* What Do You See? (the buzzer): only the team that buzzed answers */
@@ -300,6 +313,51 @@ export function seeMiss(s: StateM, team: number, now: number, late = false) {
   toast(s, late ? `Time's up. ${s.teams[team].name} are out of this picture.` : `${s.teams[team].name} guessed wrong: out of this picture.`);
   if (!s.away) { s.deadline = now + s.left * 1000; s.left = 0; }   // (the game phone asleep: the clock starts when it's back)
 }
+/* ---- Fool Me Twice (16 Nov, the owner), with 3 to 8 teams: each captain writes a lie for the fact's blank (screen
+   "q"), then picks the truth among the lies, a few of ours and the truth, and says which team will fall for its own
+   lie ("pick"); then the reveal. At Next the points (the engine's foolScore): +2 for the truth, +1 for each team a
+   lie fools, and a team that falls for a lie whose writer named it loses 1. The game's tally pays the night by place,
+   as every game does. A lie that is the truth, however it's typed, isn't taken ("That's the truth, write a lie!");
+   no lie by the time it's up, and one of ours takes its place. A team's own lie isn't its pick. ---- */
+function foolAnswer(s: StateM, team: number, p: { text?: unknown; pick?: unknown; pred?: unknown }, order?: number): true | string {
+  const q = qOf(s); if (!q || (s.screen !== "q" && s.screen !== "pick") || team < 0 || team >= s.teams.length) return "Not now.";
+  if (s.paused) return "The game is paused.";
+  if (s.screen === "q") {
+    if (s.typed[team] != null) return "Your lie is in.";
+    const text = QMB.foolShow(String(p.text ?? "").slice(0, FOOL_MAX * 2)); if (!text) return "Type a lie first.";
+    if (QMB.foolIsTruth(text, q, acceptFor(q))) return "That's the truth, write a lie!";
+    s.typed[team] = text; s.at[team] = order ?? ++s.seq; return true;
+  }
+  const F = s.fool; if (!F) return "Not now.";
+  if (F.picks[team] != null) return "Your pick is in.";
+  const k = Number.isInteger(p.pick) ? Number(p.pick) : -1, o = F.opts[k];
+  if (!o) return "Pick one of the answers.";
+  if (o.by.includes(team)) return "That's your own lie: pick another one.";
+  /* (the team it says will fall for its lie: only if its lie is up there, and never itself) */
+  const mine = F.opts.some((x) => x.by.includes(team)), w = Number.isInteger(p.pred) ? Number(p.pred) : -1;
+  if (mine && !(w >= 0 && w < s.teams.length && w !== team)) return "Say which team will fall for your lie.";
+  F.picks[team] = k; F.pred[team] = mine ? w : null; s.at[team] = order ?? ++s.seq;
+  return true;
+}
+/* every lie in (or time's up): the answers to pick from, and the clock for the picks */
+export function foolOpen(s: StateM, now: number, t: Timers): boolean {
+  const m = miniOf(s), q = qOf(s); if (m?.key !== "fool" || !q || s.screen !== "q") return false;
+  const { opts, lost } = QMB.foolOptions(q, s.typed, acceptFor(q), Math.random) as { opts: FoolOpt[]; lost: number[] };
+  s.fool = { opts, lost, picks: s.teams.map(() => null), pred: s.teams.map(() => null) };
+  s.at = s.teams.map(() => null); s.seq = 0;
+  s.screen = "pick"; s.total = t.foolPick; s.deadline = now + t.foolPick * 1000; s.left = 0; s.paused = false; s.step++;
+  return true;
+}
+/* every pick in (or time's up): the reveal */
+export function foolReveal(s: StateM): boolean {
+  if (miniOf(s)?.key !== "fool" || s.screen !== "pick" || !s.fool) return false;
+  s.contest = null; s.contested = [];
+  s.screen = "reveal"; s.deadline = null; s.left = 0; s.paused = false; s.step++; return true;
+}
+export const foolAllIn = (s: StateM) => miniOf(s)?.key === "fool" && (s.screen === "q" || s.screen === "pick") && answered(s).every(Boolean);
+/* this fact's points as the picks stand */
+export const foolRes = (s: StateM) => (s.fool ? QMB.foolScore(s.fool.opts, s.fool.picks, s.fool.pred) as { pts: number[]; fooled: number[][]; hits: { by: number; on: number }[] } : null);
+
 /* Majority Rules: every player on the list taps one of the four (one each) */
 export function vote(s: StateM, name: string, pick: unknown): true | string {
   const m = miniOf(s); if (!m || m.key !== "majority" || s.screen !== "q") return "Not now.";
@@ -312,6 +370,7 @@ export function vote(s: StateM, name: string, pick: unknown): true | string {
 }
 export const answered = (s: StateM): boolean[] => {
   const m = miniOf(s); if (!m) return [];
+  if (m.key === "fool") return s.teams.map((_, t) => (s.screen === "pick" ? s.fool?.picks[t] != null : s.typed[t] != null));
   return s.teams.map((_, t) => (m.only && !m.only.includes(t) ? true : typedKey(m.key) ? s.typed[t] != null : m.key === "closest" ? s.nums[t] != null : m.key === "pin" ? !!s.pins[t]
     : s.roster.filter((r) => r.team === t).every((r) => s.votes[r.name] != null)));
 };
@@ -320,6 +379,7 @@ export const allIn = (s: StateM) => s.screen === "q" && (miniOf(s)?.key === "maj
 /* the reveal: the app's calls (the host can flip any typed answer's) */
 export function reveal(s: StateM) {
   const m = miniOf(s), q = qOf(s); if (!m || !q || s.screen !== "q") return false;
+  if (m.key === "fool") return false;              // (its lies go to the picks first: foolOpen, then foolReveal)
   if (m.key === "say") sayCalls(s, q);
   else if (m.key === "roulette") s.ok = s.typed.map((x, t) => (x == null ? false : !!matchQ([x], rrQ(q, t))));   // (each team its own chamber's question)
   else if (m.key === "stakes") s.ok = s.typed.map((x, t) => (x == null ? false : !!matchQ([x], skQm(s, t))));     // (each team the question it bet on)
@@ -341,6 +401,8 @@ export const dishRight = (s: StateM, team: number) => { const q = qOf(s), x = s.
 /* this leg: who takes it (closest and pin: the nearest, ties all take it; a typed answer: everyone right) */
 export function legWinners(s: StateM): number[] {
   const m = miniOf(s), q = qOf(s); if (!m || !q) return [];
+  /* (Fool Me Twice: the teams that found the truth) */
+  if (m.key === "fool") { const F = s.fool; return F ? s.teams.map((_, t) => t).filter((t) => F.picks[t] != null && !!F.opts[F.picks[t]!]?.truth) : []; }
   if (typedKey(m.key)) return s.ok.map((v, t) => (v ? t : -1)).filter((t) => t >= 0);
   const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer))))
     : m.key === "pin" ? s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null)) : [];
@@ -364,6 +426,7 @@ export function placesBy(keys: (number | null)[]): (number | null)[] {
 export function legPlaces(s: StateM): (number | null)[] {
   const m = miniOf(s), q = qOf(s); if (!m || !q || m.key === "majority") return s.teams.map(() => null);
   if (m.key === "say") return placesBy(s.ok.map((v) => (v ? 0 : null)));
+  if (m.key === "fool") return placesBy((foolRes(s)?.pts || []).map((p) => (p > 0 ? -p : null)));   // (the most points on this fact first)
   if (m.key === "roulette") return placesBy(rrGot(q, m.pts, s.ok).map((g) => (g > 0 ? -g : null)));   // (the most this lap: the bullet right first)
   if (typedKey(m.key)) return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? Number.MAX_SAFE_INTEGER : null)));
   const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null));
@@ -373,6 +436,8 @@ export function legPlaces(s: StateM): (number | null)[] {
 export const legPoints = (s: StateM): number[] => { const m = miniOf(s), q = qOf(s);
   /* Russian Roulette pays by the chamber, not the place: Medium 2, Hard 3, the bullet +5 or -3 (whatever the total: it can go below 0, 9 Nov) */
   if (m?.key === "roulette" && q) return rrGot(q, m.pts, s.ok);
+  /* Fool Me Twice pays its own points: the truth, the teams fooled, the predictions */
+  if (m?.key === "fool") return foolRes(s)?.pts || s.teams.map(() => 0);
   return legPlaces(s).map((p) => (p == null ? 0 : s.teams.length - p + 1)); };
 
 /* Majority Rules, this question: right answers per team, and how many play */

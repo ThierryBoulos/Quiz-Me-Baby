@@ -5,6 +5,9 @@ const NIGHTS = [
   { tag: "nh", seed: 41, minis: ALL, rounds: 4, crowd: 5, tieMore: 1 },
   { tag: "h", seed: 42, minis: ALL, rounds: 4, host: true, crowd: 5, tieMore: 1 },
   { tag: "nh2", seed: 43, minis: ["roulette", "majority", "battle"], rounds: 14, crowd: 3 },
+  /* Fool Me Twice (16 Nov): no host and with a host */
+  { tag: "nhf", seed: 44, minis: ["fool"], rounds: 2, crowd: 3, tieMore: 1 },
+  { tag: "hf", seed: 45, minis: ["fool"], rounds: 2, host: true, crowd: 3, tieMore: 1 },
 ];
 
 /* load(n): a fresh copy of the night module for night n (the engine and the bank keep things between games) */

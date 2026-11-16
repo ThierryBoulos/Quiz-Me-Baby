@@ -15,6 +15,7 @@ import { SeeTv } from "./See";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
+import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus } from "./Fool";
 import { LeadBanner, useFlyingPoints, useScreenAt, WinName } from "./Motion";
 import { NightIntroTv } from "./NightIntro";
 import { useLiveCount } from "@/lib/liveCount";
@@ -356,6 +357,29 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if (/^stakes(Pick|Q|Reveal|Summary)$/.test(sc) && pub.stakes) return (
     <StakesTv sk={pub.stakes} screen={sc} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))} sent={pub.sent}
       clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sc === "stakesQ" ? 150 : 110} />} />);
+  /* Fool Me Twice: the fact while the lies are written; the answers while they pick; then the reveal, a lie at a time */
+  if (/^fool(Write|Pick|Reveal)$/.test(sc) && pub.fool) {
+    const F = pub.fool, tms = ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` }));
+    return (
+      <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
+        <FoolHead fool={F} tv />
+        {sc === "foolWrite" && (<>
+          <FoolFact fool={F} size={54} />
+          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
+          <FoolStatus teams={tms} done={F.wrote} doing=": writing a lie…" finished=": lie in" tv />
+        </>)}
+        {sc === "foolPick" && F.opts && (<>
+          <FoolFact fool={F} size={32} />
+          <FoolOptions opts={F.opts} tv />
+          <div className="flex items-center gap-8"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={86} />
+            <FoolStatus teams={tms} done={F.picked || [false, false]} doing=": picking…" finished=": picked" tv /></div>
+        </>)}
+        {sc === "foolReveal" && F.rev && (<>
+          <FoolFact fool={F} size={30} truth={F.rev.answer} />
+          <FoolReveal rev={F.rev} teams={tms} tv />
+        </>)}
+      </div>);
+  }
   if (sc === "miniQ") return (<>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: 50, lineHeight: 1.15 }}>{pub.question}</div>
     <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={150} />

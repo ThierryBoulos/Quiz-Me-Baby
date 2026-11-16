@@ -37,7 +37,7 @@ const pubs = JSON.parse(readFileSync(join(out, "pubs.json"), "utf8"));
 const keys = Object.keys(pubs).filter((k) => k.endsWith(".z") || !pubs[k.slice(0, -2) + ".z"]);
 console.log(`${Object.keys(pubs).length} moments kept from the nights; ${keys.length} screens to check`);
 /* EVERY SETUP, BY ITSELF (the owner, 15 Nov): a filter that matches a screen in one setup runs the same screen in all
-   of them: 2 teams with no host (nh, nh2) and with a host (h), 3, 5 and 8 teams (m3, m5, m8); the phones each with a TV
+   of them: 2 teams with no host (nh, nh2, nhf) and with a host (h, hf), 3, 5 and 8 teams (m3, m5, m8); the phones each with a TV
    and with none. The same screen: the same name after the setup ("flagQ.flag.z" in nh and h), or the same game and
    moment (2 teams' "flagSummary.flag", 3-8's "summary.flag") */
 const sigOf = (k) => { const [, scr = "", game = ""] = k.split("."); const g = game === "saysame" ? "say" : game;
@@ -221,7 +221,7 @@ if (want("tv")) {
 
 if (want("phones")) {
   /* (2 teams: the captain and a player with no host, the host with one; 3 and 8 teams: all three (5 is on the TV)) */
-  const roles = (k) => (/^nh/.test(k) ? ["cap", "player"] : /^h\./.test(k) ? ["host"] : /^m[38]\./.test(k) ? ["host", "cap", "player"] : []);
+  const roles = (k) => (/^nh/.test(k) ? ["cap", "player"] : /^h\w*\./.test(k) ? ["host"] : /^m[38]\./.test(k) ? ["host", "cap", "player"] : []);
   /* the narrowest (Galaxy S), the widest (iPhone Pro Max) and held sideways, the browser's bars showing: the iPhones
      between (393, 402) fit when both ends do. SCREENS_PHONES=all adds the iPhone at 393 */
   /* (SCREENS_PHONES=sideways: only the phone held sideways) */

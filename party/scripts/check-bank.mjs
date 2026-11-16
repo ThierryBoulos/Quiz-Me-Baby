@@ -27,7 +27,7 @@ const err = (id, msg) => errors.push(`${id}: ${msg}`);
 const warn = (id, msg) => warns.push(`${id}: ${msg}`);
 const tidy = QMB.tidy;
 
-const DIFF = ["easy", "medium", "hard", "expert"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority", "see"];
+const DIFF = ["easy", "medium", "hard", "expert"], TYPES = ["standard", "closest", "auction", "saysame", "map", "flag", "dish", "pin", "airport", "majority", "see", "fool"];
 const VOLATILE = /\b(most|latest|current|currently|record|to date|as of|best-selling|most-streamed|most-viewed|most-subscribed|most liked|most-watched|set to host|still)\b/i;
 const APOSTROPHE = /\b(Ross|Monica|Chandler|Phoebe|Joey|Rachel|Mickey|Simba|Spider-Man|Batman|YouTube|dog|Arab world)\s+(profession|pet|twin|most famous|job|daughter|twins|official|uncle|real name|parents|view counter)\b/;
 
@@ -101,6 +101,22 @@ for (const q of bank.bank) {
     if (!o.includes(q.answer)) err(id, "majority: the right answer isn't one of the four");
     const twin = bank.bank.find((x) => x.type === "standard" && tidy(x.question) === tidy(q.question));
     if (twin) err(id, `majority repeats a standard question: ${twin.question}`);
+  }
+  /* Fool Me Twice (16 Nov): one blank, a short truth, 8 fakes of ours, none of them the truth (as the game checks it,
+     with the truth's other spellings), no two the same; and no two facts with the same truth */
+  if (q.type === "fool") {
+    if (!["normal", "hard"].includes(q.level)) err(id, `fool level ${q.level}`);
+    if ((q.question.match(/____/g) || []).length !== 1) err(id, "fool: one blank (____) in the fact");
+    if (!/[.]$/.test(q.question)) err(id, "fool: the fact ends with a full stop");
+    if (/\b(a|an)\s+____/i.test(q.question)) err(id, "fool: 'a' or 'an' before the blank gives the answer away");
+    if (q.answer.length > 30) err(id, "fool: the truth is over 30 letters");
+    const acc = q.accept || [], fk = q.fakes || [];
+    if (fk.length !== 8) err(id, `fool: 8 fakes, got ${fk.length}`);
+    fk.forEach((f, i) => { if (QMB.foolIsTruth(f, q, acc)) err(id, `fool: the fake "${f}" counts as the truth`);
+      if (QMB.foolShow(f).length > 40) err(id, `fool: the fake "${f}" is over 40 letters`);
+      fk.forEach((g, j) => { if (j > i && QMB.foolSame(QMB.foolShow(f), QMB.foolShow(g))) err(id, `fool: two fakes the same, "${f}" and "${g}"`); }); });
+    const twin = bank.bank.find((x) => x.type === "fool" && x.id !== q.id && QMB.foolSame(x.answer, q.answer) && x.id < q.id);
+    if (twin) warn(id, `fool: the same truth as ${twin.id}`);
   }
   if (q.type === "saysame") {
     const pool = q.pool || [];

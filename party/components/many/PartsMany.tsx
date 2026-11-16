@@ -56,7 +56,7 @@ export const byDistance = (pub: PubMany) => {
 };
 
 /* what one go of a game is called, in plain words (no "leg": the reviewers, 31 Oct): "Flag 3 of 10", "Recipe 2 of 5" */
-export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture" };
+export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
 export const unitOf = (key: string) => UNIT[key] || "Question";
 /* Secret Stakes' reveal: a row's points start up 150 ms after the row comes in, and reach the total about 1 s later
    (78% of the 1.3 s flight in globals.css), when the total rolls */
@@ -192,6 +192,12 @@ function rules(pub: PubMany): string[] {
       `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}: beware, Expert is almost impossible to get.`,
       "Then the question you bet on, on your own phones: captains type the answer.",
       "Right wins your bet, wrong or no answer loses it, straight on your total. Nobody sees the others' bets till the reveal."]; }
+    /* Fool Me Twice (16 Nov, the owner): the two-team card's words, for N teams */
+    case "fool": return ["A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true.",
+      "Type the real answer and the app says so: write a lie instead!",
+      "Then the truth comes up hidden among your lies and a few of ours. Captains pick the one they think is true, and say which team will fall for their lie.",
+      "The truth: +2. Each team that falls for your lie: +1 to you. The team you named falls for it? −1 to them.",
+      `${n} facts, the last 2 hard. ${pay}`];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
       /* (7 Nov, the owner: what sudden death means, said before it starts, as with two teams) */
       return [`${names} are tied at the top: sudden death.`, "One question at a time, and only their captains answer: type it and send it. The first right answer wins the night.",
@@ -203,7 +209,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const g = pub.game, tv = size === "tv";
   if (!g) return null;
   /* how many, in plain words ("5 questions", "10 flags"): no "Best of", every one counts */
-  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "questions", dish: "recipes", see: "pictures", roulette: "spins", stakes: "rounds" } as Record<string, string>)[g.key] || "questions"}`;
+  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "questions", dish: "recipes", see: "pictures", fool: "facts", roulette: "spins", stakes: "rounds" } as Record<string, string>)[g.key] || "questions"}`;
   /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */

@@ -350,16 +350,18 @@
        ctx.rng         optional; Math.random when absent
      Anything that needs tonight's game (the Battle's "already used") takes
      it as an argument instead of reading it.                               */
-  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:10, battle:10, see:12 };   // (Majority Rules: 10 questions, not 15: the owner, 15 Nov; What Do You See?: 12 pictures with any number of teams, 2 to 8: the owner, 12 Nov)
+  const LEGS = { closest:7, auction:3, saysame:9, map:3, flag:10, dish:7, pin:7, airport:5, majority:10, battle:10, see:12, fool:6 };   // (Majority Rules: 10 questions, not 15: the owner, 15 Nov; What Do You See?: 12 pictures with any number of teams, 2 to 8: the owner, 12 Nov)
   const CLOSEST_LEGS = LEGS.closest, SAYSAME_LEGS = LEGS.saysame, MAP_LEGS = LEGS.map,
         FLAG_LEGS = LEGS.flag, DISH_LEGS = LEGS.dish, PIN_LEGS = LEGS.pin, AIRPORT_LEGS = LEGS.airport, MAJORITY_N = LEGS.majority, BATTLE_N = LEGS.battle;
   /* Flag first: fast and loud, it opens the night. (Drop the Pin, Guess the Airport and Majority Rules are Party's.) */
-  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'pin', 'airport', 'majority', 'dish', 'see', 'roulette'];
+  const INTERLEAVED = ['flag', 'closest', 'auction', 'saysame', 'map', 'pin', 'airport', 'majority', 'dish', 'see', 'fool', 'roulette'];
   /* What Do You See? (11 Nov, the owner): one picture at a time, a face or a logo blurred, a close-up zoomed right in,
      clearing as the clock runs; one guess per team, the fastest right answer takes the picture. 7 a game; the kinds
      that are on, in near-equal shares (2 faces, 2 logos, 3 close-ups); Easy, Medium and Hard, as the other picture
      games' levels. */
   const SEE_LEGS = LEGS.see, SEE_ORDER = ['easy', 'medium', 'hard'], SEE_KINDS = ['face', 'logo', 'close'];
+  /* Fool Me Twice (the owner, 16 Nov): 6 facts, the first 4 'normal', the last 2 'hard' (the levels are ours, never in Setup) */
+  const FOOL_LEGS = LEGS.fool, FOOL_HARD = 2;
   const MAP_ORDER = ['easy', 'medium', 'hard'];
   /* Drop the Pin and Guess the Airport: easy, medium and hard, like the maps */
   const PIN_ORDER = MAP_ORDER, AIRPORT_ORDER = MAP_ORDER, MAJORITY_ORDER = MAP_ORDER;
@@ -413,6 +415,55 @@
     if(d === 'mixed') return DIFFS.slice();
     const l = String(d || '').split('+').filter(x => DIFFS.indexOf(x) > -1);
     return l.length ? DIFFS.filter(x => l.indexOf(x) > -1) : diffsOf(DEFAULT_DIFF);
+  }
+
+  /* ---- Fool Me Twice (the owner, 16 Nov): a true fact with a blank; each team writes a lie, then picks the truth ----
+     An answer as it shows on screen: one line, first letter capital, no full stop at the end, 40 letters at most (a
+     lie mustn't give itself away by how it's typed) */
+  function foolShow(x){
+    const t = String(x == null ? '' : x).replace(/\s+/g, ' ').trim().replace(/[.!?…,;:]+$/, '').slice(0, 40).trim();
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
+  }
+  /* is this the truth (any way of writing it: the fact's own list, typos allowed)? */
+  const foolIsTruth = (x, q, accept) => !!foolShow(x) && isMatch(foolShow(x), q.answer, accept || []);
+  /* the same lie twice (or a lie that is one of ours): either way round, typos allowed */
+  const foolSame = (a, b) => isMatch(a, b, []) || isMatch(b, a, []);
+  /* the answers to pick from: the truth, each team's lie (two teams with the same lie share it), and ours to make up
+     the number: with 2 teams 4 answers, with 3 teams 5, with 4 to 8 one per team and the truth. A team with no lie,
+     or whose lie was the truth all along, has one of ours in its place.
+     -> { opts: [{ text, truth?, ours?, by: [teams] }], lost: [teams whose lie couldn't go in] } */
+  function foolOptions(q, lies, accept, rng){
+    const n = lies.length, want = n + 1 + (n <= 3 ? 1 : 0);
+    const opts = [{ text:foolShow(q.answer), truth:true, by:[] }], lost = [];
+    lies.forEach((l, t) => {
+      const x = foolShow(l);
+      if(!x || foolIsTruth(x, q, accept)){ lost.push(t); return; }
+      const same = opts.find(o => !o.truth && foolSame(x, o.text));
+      if(same) same.by.push(t); else opts.push({ text:x, by:[t] });
+    });
+    for(const f of shuffleWith((q.fakes || []).slice(), rng)){
+      if(opts.length >= want) break;
+      const x = foolShow(f);
+      if(!x || foolIsTruth(x, q, accept) || opts.some(o => foolSame(x, o.text))) continue;
+      opts.push({ text:x, ours:true, by:[] });
+    }
+    return { opts:shuffleWith(opts, rng), lost };
+  }
+  /* the points: +2 for picking the truth, +1 to a lie's writer for each team that falls for it; and a team that falls
+     for a lie whose writer said it would (the prediction): -1. Nothing for falling for one of ours. A team's own lie
+     can't be its pick. picks: each team's answer (its number in opts) or null; predicts: each team's guess of who
+     will fall for its lie, or null.
+     -> { pts: per team, fooled: per answer the teams that picked it, hits: [{ by, on }] (the predictions that came true) } */
+  function foolScore(opts, picks, predicts){
+    const pts = picks.map(() => 0), fooled = opts.map(() => []), hits = [];
+    picks.forEach((p, t) => {
+      const o = Number.isInteger(p) ? opts[p] : null;
+      if(!o || o.by.includes(t)) return;
+      fooled[p].push(t);
+      if(o.truth){ pts[t] += 2; return; }
+      for(const w of o.by){ pts[w] += 1; if(predicts && predicts[w] === t){ pts[t] -= 1; hits.push({ by:w, on:t }); } }
+    });
+    return { pts, fooled, hits };
   }
 
   function createDealer(ctx){
@@ -857,6 +908,17 @@
       return { qs:out, spare:mixQueues(queues) };
     }
 
+    /* Fool Me Twice: n facts, the last FOOL_HARD of them 'hard', unplayed ones first; the rest stay spare (a new fact,
+       a tie-breaker): 'normal' ones first, as the tie-breaker comes after the hard ones */
+    function foolDeck(n){
+      n = n || FOOL_LEGS;
+      const isFool = (q) => q.type === 'fool' && q.answer && Array.isArray(q.fakes) && q.fakes.length >= 3;
+      const normal = freshFirst(bank().filter(q => isFool(q) && q.level !== 'hard')), hard = freshFirst(bank().filter(q => isFool(q) && q.level === 'hard'));
+      const nHard = Math.min(hard.length, FOOL_HARD, n), nNormal = Math.min(normal.length, n - nHard);
+      const qs = normal.splice(0, nNormal).concat(hard.splice(0, Math.min(hard.length, n - nNormal)));
+      return { qs, spare:normal.concat(hard) };
+    }
+
     /* Secret Stakes: n rounds of three themes, each theme with one question at each of the four levels (a bet must be
        honest: a Hard is a Hard). The themes: the broad ones and the night's own, never the host's own trivia nor a
        theme of their own making. Themes that can fill all four levels with unplayed questions first; only when they
@@ -1031,6 +1093,7 @@
       /* What Do You See?'s pictures (clear of the night's never-together groups) */
       /* (cfg.seeLegs: 3 to 8 teams play 12 pictures, two teams 9: the owner, 12 Nov) */
       const seDeck = asked('see') ? seeDeck(cfg, cfg.seeLegs) : { qs:[], spare:[] };
+      const foDeck = asked('fool') ? foolDeck(cfg.foolLegs) : { qs:[], spare:[] };
       unclash(seDeck.qs, seDeck.spare, inNight);
       /* Secret Stakes' themes, after everything else (it's the last game): three rounds and a spare */
       const skDeck = asked('stakes') ? stakesDeck(cfg, STAKES_ROUNDS + STAKES_SPARE, inNight) : [];
@@ -1092,6 +1155,8 @@
            team's total won or lost */
         /* What Do You See?: legs of pictures, as the flags */
         seeGame:{ levels:seeLevelsOf(cfg), kinds:seeKindsOf(cfg), qs:seDeck.qs, spare:seDeck.spare, base:seDeck.qs.length, i:0, wins:[0, 0], fast:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
+        /* Fool Me Twice: facts; pts: each team's points in this game (finding the truth, fooling, falling for a predicted lie) */
+        foolGame:{ qs:foDeck.qs, spare:foDeck.spare, base:foDeck.qs.length, i:0, pts:[0, 0], wins:[0, 0], subs:[], done:false, awarded:false, tieLegs:0 },
         hasStakes,
         stakesGame:{ rounds:skDeck.slice(0, STAKES_ROUNDS), spare:skDeck.slice(STAKES_ROUNDS), base:Math.min(STAKES_ROUNDS, skDeck.length), i:0, unit:1,
           picks:[null, null], log:[], net:[0, 0], done:false },
@@ -1133,7 +1198,7 @@
     return { bank, shuffle, isFresh, clashesWith, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, commonOf, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
-             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, rouletteDeck, stakesDeck, seeDeck, seeLevelsOf, seeKindsOf, diffOf, pickedPair, dishLeg, buildGame, thinBank };
+             dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, rouletteDeck, stakesDeck, seeDeck, foolDeck, seeLevelsOf, seeKindsOf, diffOf, pickedPair, dishLeg, buildGame, thinBank };
   }
 
 
@@ -1701,6 +1766,7 @@
     if(key === 'majority'){ fx.push({ go:'majorityIntro' }); return fx; }
     if(key === 'roulette'){ fx.push({ go:'rouletteIntro' }); return fx; }
     if(key === 'see'){ fx.push({ go:'seeIntro' }); return fx; }
+    if(key === 'fool'){ fx.push({ go:'foolIntro' }); return fx; }
     if(key === 'battle'){ MOVES['battle/build'](g, {}, env).forEach(f => fx.push(f)); return fx; }
     if(key === 'stakes'){ stakesOpen(g); fx.push({ go:'stakesIntro' }); return fx; }
     return fx;
@@ -2246,6 +2312,48 @@
     'see/award'(g, a){ const fx = []; awardMini(g, g.seeGame, a.w, fx); fx.push({ render:true }); return fx; },
     'see/done'(g){ return finishMini(g, 'see', g.seeGame); },
 
+    /* Fool Me Twice: the TV writes the answers and takes the picks; the leg is settled here, on the reveal's Next */
+    'fool/start'(g){ g.foolGame.i = 0; return [{ go:'foolWrite' }]; },
+    'fool/swap'(g){
+      const s = g.foolGame;
+      if(!s.spare.length) return [{ toast:'No other fact left.' }];
+      s.qs[s.i] = spareLike(s);
+      return [{ toast:'New fact.' }, { go:'foolWrite' }];
+    },
+    /* a: { opts, picks, predicts } as the TV had them (two teams) */
+    'fool/settle'(g, a){
+      const s = g.foolGame, q = s.qs[s.i], fx = [];
+      if(!q || !Array.isArray(a && a.opts)) return [];
+      const picks = [0, 1].map(t => (a.picks && Number.isInteger(a.picks[t]) ? a.picks[t] : null));
+      const res = foolScore(a.opts, picks, [1, 0]);
+      res.pts.forEach((p, t) => { s.pts[t] += p; });
+      s.subs.push({ q, opts:a.opts, picks, pts:res.pts, hits:res.hits });
+      s.i++;
+      if(s.i < s.qs.length){ fx.push({ go:'foolWrite' }); return fx; }
+      /* the end: the most points takes it; tied, one more fact (a spare one), and with none left a point each */
+      if(s.pts[0] !== s.pts[1]){
+        const w = s.pts[0] > s.pts[1] ? 0 : 1;
+        s.done = true;
+        s.verdict = { winner:w, needsHost:false, note:g.teams[0].name + ' ' + s.pts[0] + ', ' + g.teams[1].name + ' ' + s.pts[1] + '.' };
+        awardMini(g, s, w, fx);
+        fx.push({ go:'foolSummary' });
+        return fx;
+      }
+      if(s.spare.length){
+        s.qs.push(s.spare.shift()); s.tieLegs++;
+        fx.push({ toast:'Tied at ' + s.pts[0] + ' each — one more fact decides it.', ms:3600 });
+        fx.push({ go:'foolWrite' });
+        return fx;
+      }
+      s.done = true;
+      s.verdict = { winner:null, needsHost:false, note:'Tied at ' + s.pts[0] + ' each.' };
+      awardMini(g, s, 'split', fx);
+      fx.push({ go:'foolSummary' });
+      return fx;
+    },
+    'fool/award'(g, a){ const fx = []; awardMini(g, g.foolGame, a.w, fx); fx.push({ render:true }); return fx; },
+    'fool/done'(g){ return finishMini(g, 'fool', g.foolGame); },
+
     'airport/start'(g){ g.airportGame.i = 0; return [{ go:'airportQ' }]; },
     'airport/swap'(g){
       const s = g.airportGame;
@@ -2531,5 +2639,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

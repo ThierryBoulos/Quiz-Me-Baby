@@ -20,6 +20,7 @@ import { NightIntroTv } from "../NightIntro";
 import { ImadBubble } from "../TvGame";
 import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
+import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus } from "../Fool";
 import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
 import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
@@ -166,6 +167,27 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent}
             clock={<Clock deadline={pub.deadline} left={pub.left} size={pub.screen === "q" ? 140 : 100} />} />)}
         {/* Russian Roulette: the barrel spins, each team's chamber lights up; at the reveal they click, the bullet last */}
+        {/* Fool Me Twice: the fact while the lies are written; the answers while they pick (and say who'll fall for theirs);
+            then the reveal, a lie at a time, the truth last */}
+        {g && g.key === "fool" && pub.fool && ["q", "pick", "reveal"].includes(pub.screen) && (() => { const F = pub.fool, tms = T.map((t) => ({ name: t.name, color: t.color })); return (
+          <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
+            <FoolHead fool={F} tv />
+            {pub.screen === "q" && (<>
+              <FoolFact fool={F} size={F.fact.length > 120 ? 44 : 54} />
+              <Clock deadline={pub.deadline} left={pub.left} size={120} />
+              <FoolStatus teams={tms} done={F.wrote} doing={dense ? "…" : ": writing a lie…"} finished={dense ? "✓" : ": lie in"} tv />
+            </>)}
+            {pub.screen === "pick" && F.opts && (<>
+              <FoolFact fool={F} size={F.opts.length > 6 ? 28 : 32} />
+              <FoolOptions opts={F.opts} tv />
+              <div className="flex items-center gap-8"><Clock deadline={pub.deadline} left={pub.left} size={86} />
+                <FoolStatus teams={tms} done={F.picked || T.map(() => false)} doing={dense ? "…" : ": picking…"} finished={dense ? "✓" : ": picked"} tv /></div>
+            </>)}
+            {pub.screen === "reveal" && F.rev && (<>
+              <FoolFact fool={F} size={F.rev.opts.length > 6 ? 26 : 30} truth={F.rev.answer} />
+              <FoolReveal rev={F.rev} teams={tms} tv />
+            </>)}
+          </div>); })()}
         {(pub.screen === "q" || pub.screen === "reveal") && g && g.key === "roulette" && pub.roulette && (
           <RouletteTv rr={pub.roulette} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent} typed={R?.typed} ok={R?.ok}
             reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} size={dense ? 96 : 110} />} />)}

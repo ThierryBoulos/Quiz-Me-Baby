@@ -1,0 +1,66 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+8.50 answer | 4 | 1-0 |  | Lions +1 point | 
+9.50 ask | 5 | 1-0 |  | Lions +1 point | 
+11.25 answer | 6 | 1-1 |  | Owls +1 point | 
+12.00 roundScore | 7 | 1-1 |  | Owls +1 point | 
+13.00 foolIntro | 8 | 1-1 | 0-0 | Owls +1 point | 
+14.00 foolWrite | 9 | 1-1 | 0-0 | Owls +1 point | 
+14.75 foolPick | 9 | 1-1 | 0-0 | Owls +1 point | 
+(pause, 8 s)
+(resume)
+31.00 foolReveal | 9 | 1-1 | 0-0 | Owls +1 point | 
+32.00 foolWrite | 10 | 1-1 | 0-0 | Owls +1 point | 
+32.75 foolPick | 10 | 1-1 | 0-0 | Owls +1 point | 
+33.75 foolReveal | 10 | 1-1 | 0-2 | Owls +1 point | 
+34.50 foolWrite | 11 | 1-1 | 0-2 | Owls +1 point | 
+(a new question)
+35.50 foolWrite | 12 | 1-1 | 0-2 | New fact. | 
+38.25 foolPick | 12 | 1-1 | 0-2 | New fact. | 
+40.00 foolReveal | 12 | 1-1 | -1-5 | New fact. | 
+41.00 foolWrite | 13 | 1-1 | -1-5 | New fact. | 
+41.75 foolPick | 13 | 1-1 | -1-5 | New fact. | 
+43.50 foolReveal | 13 | 1-1 | -2-6 | New fact. | 
+44.50 foolWrite | 14 | 1-1 | -2-6 | New fact. | 
+45.50 foolPick | 14 | 1-1 | -2-6 | New fact. | 
+48.00 foolReveal | 14 | 1-1 | -3-9 | New fact. | 
+49.00 foolWrite | 15 | 1-1 | -3-9 | New fact. | 
+50.75 foolPick | 15 | 1-1 | -3-9 | New fact. | 
+52.50 foolReveal | 15 | 1-1 | -2-8 | New fact. | 
+53.50 foolSummary | 16 | 1-3 | -2-8 | New fact. | 
+54.50 roundIntro | 17 | 1-3 |  | New fact. | 
+55.25 ask | 18 | 1-3 |  | New fact. | 
+57.00 answer | 19 | 2-3 |  | Lions +1 point | 
+58.00 ask | 20 | 2-3 |  | Lions +1 point | 
+59.75 answer | 21 | 2-4 |  | Owls +1 point | 
+60.75 roundScore | 22 | 2-4 |  | Owls +1 point | 
+61.50 battleIntro | 23 | 2-4 | 0-0 | Owls +1 point | 
+62.50 battleQ | 24 | 2-4 | 0-0 | Owls +1 point | 
+63.50 battleQ | 25 | 2-4 | 1-0 | Owls +1 point | 
+64.25 battleQ | 26 | 2-4 | 1-0 | Owls +1 point | 
+65.25 battleQ | 27 | 2-4 | 2-0 | Owls +1 point | 
+66.00 battleQ | 28 | 2-4 | 3-0 | Owls +1 point | 
+67.00 battleQ | 29 | 2-4 | 4-0 | Owls +1 point | 
+68.00 battleQ | 30 | 2-4 | 4-0 | Owls +1 point | 
+68.75 battleQ | 31 | 2-4 | 5-0 | Owls +1 point | 
+69.75 battleQ | 32 | 2-4 | 5-0 | Owls +1 point | 
+70.50 battleQ | 33 | 2-4 | 6-0 | Owls +1 point | 
+71.50 battleHandoff | 34 | 2-4 | 6-0 | Owls +1 point | 
+72.50 battleQ | 35 | 2-4 | 6-0 | Owls +1 point | 
+73.25 battleQ | 36 | 2-4 | 6-0 | Owls +1 point | 
+74.25 battleQ | 37 | 2-4 | 6-1 | Owls +1 point | 
+75.00 battleQ | 38 | 2-4 | 6-2 | Owls +1 point | 
+76.00 battleQ | 39 | 2-4 | 6-2 | Owls +1 point | 
+77.00 battleQ | 40 | 2-4 | 6-2 | Owls +1 point | 
+77.75 battleQ | 41 | 2-4 | 6-3 | Owls +1 point | 
+78.75 battleQ | 42 | 2-4 | 6-4 | Owls +1 point | 
+79.50 battleQ | 43 | 2-4 | 6-4 | Owls +1 point | 
+80.50 battleQ | 44 | 2-4 | 6-5 | Owls +1 point | 
+81.50 battleSummary | 45 | 4-4 | 6-5 | Owls +1 point | 
+82.25 sudden | 46 | 4-4 |  | Owls +1 point | 
+83.25 sudden | 47 | 4-4 |  | Owls +1 point | 
+85.00 final | 48 | 4-5 |  | Owls +1 point | 
+recap: {"margin":1,"sudden":true,"leadChanges":1,"steals":[0,0],"minis":[1,0],"chart":[[0,0],[0,0],[1,0],[1,1],[1,3],[2,3],[2,4],[4,4],[4,5]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Fool Me Twice","pts":[[1,3]]},{"label":"R2","pts":[[2,3],[2,4]]},{"label":"Battle of the Captains","pts":[[4,4]]},{"label":"Sudden death","pts":[[4,5]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":1},{"t":"Battle of the Captains","who":"Rami, 6 of 10","team":0}]}

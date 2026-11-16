@@ -328,7 +328,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         /* no host: a tie (the Cocktail or Dish and the Map end here straight from the engine) or a game decided early takes its default after 10 s */
         else if (s.nohost && PICK_DEFAULT(f.go)) s.autoAt = now + T_PICK * 1000;
         /* a fresh question: nothing typed yet (a steal keeps the first team's answer to show at the reveal) */
-        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "battleQ", "battleTie"].includes(f.go)) { s.seeAt = [null, null]; s.seeOut = [false, false]; s.seeBuzz = null; s.seeBy = null; s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; s.typedLate = null; s.changedIds = []; }
+        if (["ask", "roundIntro", "miniQ", "flagQ", "dishQ", "mapQ", "sudden", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "battleQ", "battleTie"].includes(f.go)) { s.foolLies = [null, null]; s.foolPicks = [null, null]; s.fool = null; s.seeAt = [null, null]; s.seeOut = [false, false]; s.seeBuzz = null; s.seeBy = null; s.typed = [null, null]; s.guesses = [null, null]; s.pins = [null, null]; s.votes = {}; s.ok = [null, null]; s.app = [null, null]; s.buzzAt = 0; s.late = null; s.drafts = [null, null]; s.typedLate = null; s.changedIds = []; }
         if (f.go === "dishQ") s.legLog = [];
         if (f.go === "sudden" || f.go === "battleTie") {
           const n = (f.go === "sudden" ? s.g.sd?.n : s.g.battle?.tb?.n) || 0;
@@ -342,6 +342,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         const secs = f.go === "ask" ? T().tQuestion : f.go === "steal" ? T().tSteal : f.go === "miniQ" ? T().tMini : f.go === "flagQ" ? T().tFlag
           : f.go === "mapQ" ? T().tMap : f.go === "auctionRun" ? T().tAuction : f.go === "pinQ" ? T().tPin : f.go === "airportQ" ? T().tAirport : f.go === "majorityQ" ? T().tMajority
           : f.go === "rouletteQ" ? T().tRoulette : f.go === "seeQ" ? T().tSee
+          : f.go === "foolWrite" ? T().tFoolWrite : f.go === "foolPick" ? T().tFoolPick
           : f.go === "stakesPick" ? T().tStakesPick : f.go === "stakesQ" ? T().tStakesQ
           : f.go === "dishQ" ? dishTotal(g.dishGame.qs[g.dishGame.i])
           : f.go === "sayQ" ? T().tSay : f.go === "battleQ" ? (s.nohost ? T().tBattleTyped : T().tBattleHost)
@@ -358,6 +359,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (f.go === "airportQ") applyFx([{ used: g.airportGame.qs[g.airportGame.i] }]);
         if (f.go === "majorityQ") applyFx([{ used: g.majorityGame.qs[g.majorityGame.i] }]);
         if (f.go === "seeQ") applyFx([{ used: g.seeGame.qs[g.seeGame.i] }]);
+        if (f.go === "foolWrite") applyFx([{ used: g.foolGame.qs[g.foolGame.i] }]);
         /* (the drawn chambers' questions are played; a dark chamber's aren't) */
         if (f.go === "rouletteQ") { const lap = g.rouletteGame.qs[g.rouletteGame.i] as RrLap; applyFx((lap?.draw || []).map((j) => ({ used: lap.ch[j].q }))); }
         /* Secret Stakes: only the questions a team bet on are played (a theme or level nobody picked isn't used up) */
@@ -401,7 +403,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       s.screen = screen; s.deadline = null; s.left = 0; s.total = 0; s.timeUp = false; s.paused = false; s.waitSince = Date.now(); s.toast = null;
       s.autoAt = s.nohost ? Date.now() + T_PICK * 1000 : null;
     };
-    if (tie && /^(closest\/win|say\/verdict|flag\/verdict|pin\/settle|airport\/verdict|majority\/settle|see\/verdict)$/.test(move.type)) { const m = miniState(g, tie[1].key); if (m && m.i >= m.base) level(tie[0]); }
+    if (tie && /^(closest\/win|say\/verdict|flag\/verdict|pin\/settle|airport\/verdict|majority\/settle|see\/verdict|fool\/settle)$/.test(move.type)) { const m = miniState(g, tie[1].key); if (m && m.i >= m.base) level(tie[0]); }
     if (s.screen === "battleTie" && (was === "battleQ" || (move.type === "battle/tbWin" && !move.byHost))) level("battleLevel");
     narrate();
     /* no host: the table's calls that a host would make, made at once */
@@ -415,6 +417,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* the clock ran out, or every captain is in: show what they said */
   const reveal = useCallback(() => {
     const s = st.current, g = s.g;
+    /* Fool Me Twice: every lie in, or time's up: the answers to pick from (the engine's foolOptions), and their clock */
+    if (s.screen === "foolWrite") {
+      const q = g.foolGame.qs[g.foolGame.i];
+      s.fool = QMB.foolOptions(q, s.foolLies, acceptFor(q), Math.random);
+      applyFx([{ go: "foolPick" }]);
+      return;
+    }
+    if (s.screen === "foolPick") { s.screen = "foolReveal"; s.deadline = null; s.left = 0; s.paused = false; s.autoAt = null; playSound("drumroll"); return; }
     if (s.screen === "miniQ") s.screen = "closestReveal";
     else if (s.screen === "pinQ") s.screen = "pinReveal";
     else if (s.screen === "majorityQ") s.screen = "majorityReveal";
@@ -464,7 +474,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     s.deadline = null; s.left = 0; s.paused = false;
     playSound("drumroll");
     s.autoAt = null;
-  }, []);
+  }, [applyFx]);
   /* What Do You See? (12 Nov, the owner: a buzzer): the team that buzzed got it wrong, or said nothing in its 10
      seconds: it's out of this picture. The other team out too, it's the reveal; else the clock goes on from where the
      buzz stopped it, and the other team can buzz */
@@ -753,6 +763,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else if (s.screen === "airportReveal") play({ type: "airport/verdict", w: okW() });
       else if (s.screen === "rouletteReveal") play({ type: "roulette/verdict", ok: [!!s.ok[0], !!s.ok[1]] });
       else if (s.screen === "stakesReveal") play({ type: "stakes/verdict", ok: [!!s.ok[0], !!s.ok[1]] });
+      else if (s.screen === "foolReveal" && s.fool) play({ type: "fool/settle", opts: s.fool.opts, picks: [...s.foolPicks] });
       else if (s.screen === "seeReveal") {
         /* the RIGHT that ended the picture early was turned down (the host, or a contest), and the other team never had
            its go: a new picture for both, as the Cocktail or Dish does, not "Nobody got it" */
@@ -790,7 +801,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (kind !== "answer" && s.tvAway) return (phoneRef.current ? "The game phone's screen was asleep. Tap again." : "The TV's screen was asleep. Tap again.");
     if (kind !== "answer" && s.paused) return "The game is paused.";
     /* (Drop the Pin and Guess the Airport: both in would be the reveal, so not while the host has paused it, 23 Oct) */
-    if (s.paused && (sc === "pinQ" || sc === "airportQ" || sc === "seeQ")) return "The game is paused.";
+    if (s.paused && (sc === "pinQ" || sc === "airportQ" || sc === "seeQ" || sc === "foolWrite" || sc === "foolPick")) return "The game is paused.";
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
@@ -859,6 +870,28 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* with a host, an answer that lands after time's up still goes to them, marked as late (the 4 Nov audit, 1.15) */
       if (s.timeUp) s.typedLate = team;
       check(sc, current());
+      return true;
+    }
+    /* Fool Me Twice (16 Nov, the owner): each captain writes a lie, once; the truth (any way of writing it) isn't one,
+       and the phone is told so while there's time to write another. Then each picks the one it thinks is true, never
+       its own lie. Everyone in, and it moves on */
+    if (sc === "foolWrite") {
+      if (!texts.length) return false;
+      if (s.foolLies[team] != null) return `${poss(nm(team))} lie is already in.`;
+      const q = current(), lie = QMB.foolShow(texts[0]);
+      if (!lie) return "Write a lie first.";
+      if (QMB.foolIsTruth(lie, q, acceptFor(q))) return "That's the truth, write a lie!";
+      s.foolLies[team] = lie;
+      if (s.foolLies[0] != null && s.foolLies[1] != null) reveal();
+      return true;
+    }
+    if (sc === "foolPick") {
+      const k = Number(p.pick), o = Number.isInteger(k) ? s.fool?.opts[k] : null;
+      if (!o) return "Pick one of the answers.";
+      if (o.by.includes(team)) return "That's your own lie: pick another one.";
+      if (s.foolPicks[team] != null) return `${poss(nm(team))} pick is already in.`;
+      s.foolPicks[team] = k;
+      if (s.foolPicks[0] != null && s.foolPicks[1] != null) reveal();
       return true;
     }
     if (sc === "miniQ") {
@@ -951,6 +984,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (s.pending || s.typed[0] || s.typed[1] || s.guesses[0] != null || s.guesses[1] != null || s.pins[0] || s.pins[1] || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
     if (s.screen === "dishQ") { const L = g.dishGame.leg; if (L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length || s.buzzAt) return "Too late: someone has already had a go at this one."; }
     if (s.screen === "seeQ" && (s.seeBuzz != null || s.seeOut[0] || s.seeOut[1])) return "Too late: someone has already had a go at this one.";
+    if (s.screen === "foolWrite" && (s.foolLies[0] != null || s.foolLies[1] != null)) return "Too late: a lie is already in.";
     return null;
   }, []);
   /* ...not changed after all (No, no answer, too late): the clock that stopped for it goes on */
@@ -1104,7 +1138,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* a tap the TV won't take: say why on the TV (and the update ends the phone's "Sending…") */
   const refused = useRef<string | null>(null);        // why the tap being handled was turned down (for its receipt)
   const took = useRef(false);                          // ...or that it was taken
-  const refuse = useCallback((why: string) => { const s = st.current; refused.current = why; s.toast = { id: ++s.toastN, text: why }; void publish(); }, [publish]);
+  /* (quiet: on that captain's phone only, not on the TV: Fool Me Twice's "That's the truth, write a lie!" on the TV
+     would tell the room that team knows the truth, 16 Nov) */
+  const refuse = useCallback((why: string, quiet = false) => { const s = st.current; refused.current = why; if (!quiet) s.toast = { id: ++s.toastN, text: why }; void publish(); }, [publish]);
 
   /* ---- the inbox ---- */
   const handle = useCallback(async (a: Action) => {
@@ -1303,7 +1339,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.g?.nightIntro) { refuse(INTRO_WAIT); return; }
       const ok = captainInput(a.kind, from.team, a.payload as G);
       if (ok === true) { took.current = true; void publish(); }
-      else if (ok) refuse(ok);
+      else if (ok) refuse(ok, /^fool(Write|Pick)$/.test(s.screen));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applyFx, captainInput, captainMove, code, draftKey, env, hostMove, play, publish, refuse, resetPlayed]);   // mrAnswer, onNote, sayLobby: stable (refs and setters)
@@ -1464,6 +1500,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (sc === "ask" || sc === "steal") return turnTeam() === t;
     if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "seeQ", "dishQ", "sudden", "battleTie"].includes(sc)) return true;
     if (sc === "stakesPick") return !g.stakesGame?.picks?.[t];
+    if (sc === "foolWrite") return s.foolLies[t] == null;
+    if (sc === "foolPick") return s.foolPicks[t] == null;
     if (sc === "battleQ") return g.battle?.cap === t;
     if (sc === "auctionBid") return g.auction?.turn === t;
     if (sc === "auctionRun") return s.nohost && g.auction?.by != null && g.auction.by !== t;   // the counter
@@ -1644,6 +1682,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (sc === "ask" || sc === "steal") { const t = turnTeam(); if (!s.typed[t] && !s.pending) took(t); }
         /* (What Do You See?: nothing to take: only a team that has buzzed types, and its clock is the 10 seconds above) */
         else if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "rouletteQ", "stakesQ"].includes(sc)) for (const t of [0, 1] as const) { if (sc === "miniQ" ? s.guesses[t] == null : sc === "pinQ" ? !s.pins[t] : !s.typed[t]) took(t); }
+        /* (Fool Me Twice: a lie typed but not sent goes in, unless it's the truth: then one of ours takes its place) */
+        else if (sc === "foolWrite") for (const t of [0, 1] as const) { if (s.foolLies[t] == null) took(t); }
         else if (sc === "battleQ" && s.nohost && !s.pending) took(g.battle.cap);
         else if (sc === "dishQ" && g.dishGame.leg.buzz != null && !s.typed[g.dishGame.leg.buzz] && !s.pending) took(g.dishGame.leg.buzz);
         /* sudden death and the tie-breaker: both captains' boxes, the one who stopped typing first going first */
@@ -1656,7 +1696,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         s.deadline = null; s.step++; changed = true;
         if (s.screen === "ask" || s.screen === "steal") { say("timeup", { t: turnTeam() }); if (!s.nohost) narrate(); }
-        if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "seeQ"].includes(s.screen)) reveal();
+        if (["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "seeQ", "foolWrite", "foolPick"].includes(s.screen)) reveal();
         /* Secret Stakes: time's up on the bets: a team that didn't bet takes the safe one (Easy, the first theme) */
         else if (s.screen === "stakesPick") play({ type: "stakes/lock" });
         else if (s.screen === "battleQ" && s.nohost) { s.toast = { id: ++s.toastN, text: "Time's up." }; play({ type: "battle/mark", got: false, said: "", review: s.nohost }); }   // (the review after the last one, as a typed answer gets: the 4 Nov audit, 1.14)

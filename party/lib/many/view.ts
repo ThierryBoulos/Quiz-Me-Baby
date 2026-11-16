@@ -1,6 +1,6 @@
 /* MANY TEAMS: what the TV publishes (PubMany, for every phone) and what only the host's phone gets
    (the answer and every team's typed answer). Built from the night's state, never stored. */
-import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, roundNumbers, typedKey, type AwardM, type FlagM, type LatLon, type ManyKey, type StateM } from "./logic";
+import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, foolRes, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, roundNumbers, typedKey, type AwardM, type FlagM, type LatLon, type ManyKey, type StateM } from "./logic";
 import { dishKind } from "../tv/rules";
 import { revOf } from "../engine";
 import type { IntroPub } from "../intro";
@@ -9,6 +9,7 @@ import { skPub, type SkGame, type SkPub } from "../stakes";
 import { SEE_TYPE, sePic, type SePub } from "../see";
 import { QMB } from "../engine";
 import { skQm } from "./logic";
+import type { FoolPub } from "../fool";
 
 export type TeamPub = { name: string; captain: string; score: number; color: string };
 export type PubMany = {
@@ -31,6 +32,7 @@ export type PubMany = {
   roulette?: RrPub;                               // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
   see?: SePub;                                    // What Do You See?: the picture and how it clears; at the reveal what it was, the fastest right guess
   preload?: { sees?: string[] };                  // What Do You See?: the next pictures, fetched ahead (the TV its size, a phone its own)
+  fool?: FoolPub;                                 // Fool Me Twice: the fact, who has written and picked, the answers, the reveal
   stakes?: SkPub;                                 // Secret Stakes: the round's themes, who has bet (and each team's bet, drawn only on its own phones), the questions, the reveal
   theme?: string;                                 // a question round: the question's theme
   deadline: number | null; left: number; sent: boolean[]; now?: number; paused?: boolean;
@@ -89,7 +91,17 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
       if (pub.game) pub.game.pts = (m.net || []).map((v, i) => v + res.delta[i]);
     } else if (pub.game) pub.game.pts = [...(m.net || s.teams.map(() => 0))];
   }
-  if (m && q && (s.screen === "q" || s.screen === "reveal")) {
+  /* Fool Me Twice: the fact (its blank), who has written their lie and who has picked, the answers to pick from (whose
+     they are stays here), and at the reveal who wrote what and who fell for it */
+  if (m?.key === "fool" && q && (s.screen === "q" || s.screen === "pick" || s.screen === "reveal")) {
+    pub.qid = qidOf(s);
+    const F = s.fool, r = s.screen === "reveal" ? foolRes(s) : null;
+    pub.fool = { fact: String(q.question || ""), n: Math.min(m.i + 1, m.qs.length), of: m.qs.length, hard: q.level === "hard", ...(q.name ? { name: true } : {}), wrote: s.typed.map((x) => x != null), total: pub.game ? [...pub.game.pts] : [] };
+    if (F && s.screen !== "q") pub.fool.opts = F.opts.map((o) => o.text);
+    if (F && s.screen === "pick") pub.fool.picked = F.picks.map((x) => x != null);
+    if (F && r) pub.fool.rev = { opts: F.opts, fooled: r.fooled, pts: r.pts, hits: r.hits, lost: F.lost, predicts: F.pred, answer: q.answer, notes: q.notes || undefined };
+  }
+  if (m && q && m.key !== "fool" && (s.screen === "q" || s.screen === "reveal")) {
     /* (a key for this question, not its id in the bank, which anyone can look up: the 4 Nov audit, 4.5) */
     pub.qid = qidOf(s);
     const rev = s.screen === "reveal";
@@ -125,6 +137,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     if (m.key === "map") pub.reveal = { answer: q.question, notes: q.answer, typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (m.key === "roulette") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (m.key === "stakes") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, places: s.teams.map(() => null), pts: pub.stakes?.rev?.delta || [] };
+    else if (m.key === "fool") pub.reveal = { answer: q.answer, notes: q.notes || undefined, winners: w, ...pl };
     else if (typedKey(m.key)) pub.reveal = { answer: q.answer, notes: q.notes || (m.key === "airport" ? [q.city, q.code].filter(Boolean).join(", ") : undefined), typed: s.typed, ok: s.ok, winners: w, ...pl,
       ...(m.key === "say" ? { why: s.why } : {}) };
     else if (m.key === "closest") pub.reveal = { answer: String(q.answer), notes: q.notes, nums: s.nums, off: distances(s), winners: w, ...pl };
@@ -144,7 +157,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   if (s.screen === "final") pub.final = { order: ranking(s), log: s.log, awards: recapMany(s), games: s.minis.map((_, i) => titleOf(s.minis, i)) };
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
   /* the host's phone: the answer while it's up, and what every captain typed */
-  const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal")
+  const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal" || (m.key === "fool" && s.screen === "pick"))
     ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : m.key === "roulette" || m.key === "stakes" ? undefined : q.notes, typed: s.typed, nums: s.nums,
         ...(m.key === "roulette" ? { answers: s.teams.map((_, t) => String(rrQ(q as RrLap, t)?.answer ?? "")) } : {}),
         ...(m.key === "stakes" ? { answers: s.teams.map((_, t) => String(skQm(s, t)?.answer ?? "")) } : {}),

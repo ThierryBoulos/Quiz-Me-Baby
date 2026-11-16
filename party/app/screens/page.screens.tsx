@@ -102,6 +102,9 @@ export default function Screens() {
   const members = [me, { ...me, user_id: "x1", name: "Karim", role: "player" as never, team: 0 as const }, { ...me, user_id: "x2", name: "Lea", role: "captain" as never, team: 1 as 0 },
     { ...me, user_id: "x3", name: "Joe", role: "player" as never, team: 1 as 0 }];
   const send = () => {};
+  /* Fool Me Twice, 3-8 teams: the captain's phone holds the lie it sent (team A's), so its picks leave it out and ask
+     who'll fall for it, as in a real game */
+  if (many && role === "cap" && pub.fool?.opts && typeof window !== "undefined") { const lie = secret?.typed?.[0]; try { if (lie) localStorage.setItem("qmb.fool.lie.ABCD." + pub.qid, lie); } catch { /* none */ } }
   return (
     <NoTv.Provider value={noTv}>
       <main className="screen split">

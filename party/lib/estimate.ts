@@ -26,6 +26,7 @@ const TWO: Record<string, Leg> = {
   airport: timed(5, (s) => s.tAirport),
   majority: timed(10, (s) => s.tMajority, 0.6),
   see: timed(12, (s) => s.tSee),
+  fool: { n: 6, t: (s, p, o) => s.tFoolWrite * p + s.tFoolPick * p + 25 + o },   // write a lie, pick the truth, the reveal
   roulette: { n: 3, t: (s, p, o) => 10 + s.tRoulette * p + o },      // the spin, then each team's chamber
   stakes: { n: 3, t: (s, p, o) => s.tStakesPick * p + s.tStakesQ * p + o },
 };
@@ -40,6 +41,7 @@ const MANY: Record<string, Leg> = {
   say: timed(6, (s) => s.tSay),
   dish: { n: 5, t: (s, _p, o) => s.tDishStep * 7 + s.tDishType * 0.6 + o },
   see: timed(12, (s) => s.tSee),
+  fool: { n: 6, t: (s, p, o) => s.tFoolWrite * p + s.tFoolPick * p + 30 + o },
   roulette: { n: 3, t: (s, p, o) => 10 + s.tRoulette * p + o },
   stakes: { n: 3, t: (s, p, o) => s.tStakesPick * p + s.tStakesQ * p + o },
 };

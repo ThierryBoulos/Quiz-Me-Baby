@@ -8,6 +8,8 @@
      Secret Stakes      the bets' clock through a reload; the last bet landing while the screen is away (the
                         question clock waits); a bet on themes that have just changed, refused
      Majority Rules     no vote while paused; Start refused with nobody on the list
+     Fool Me Twice      the truth refused as a lie, a missing lie, the screen asleep, a reload and a takeover on the picks,
+                        own lie and no prediction refused, the points, Change fact, Reveal now, Pause, the places
      Russian Roulette   a reload mid-spin and mid-question, the screen asleep, a phone takeover from the server's copy
                         mid-question; each spin's points, the game's points, summary.spins and the night's award
    Run: node sim/manytv.mjs (built and run by it). */
@@ -257,6 +259,87 @@ async function roulette(k, phone, tag) {
     `${sum?.award} want ${award}`);
 }
 
+/* ---------- Fool Me Twice (the owner, 16 Nov) ---------- */
+const ackOf = (who, id) => pub().ack?.[who]?.[id];
+async function fool(k, phone, tag) {
+  await setup(k, phone, ["fool"], 12); await judge("m/start");
+  const F = () => pub().fool, fact = () => mini().qs[mini().i];
+  check(`${tag} Fool: the fact is up, its blank, no answers yet`, pub().screen === "q" && !!F()?.fact?.includes("____") && !F().opts, pub().screen);
+  check(`${tag} Fool: 6 facts, the last 2 hard`, mini().qs.length === 6 && mini().qs.map((q) => (q.level === "hard" ? "h" : "n")).join("") === "nnnnhh", mini().qs.map((q) => q.level).join(","));
+  /* the truth, typed as a lie: refused, and said so */
+  let id = tap(); send("c0", "answer", { text: fact().answer.toLowerCase() + ".", k: `${pub().qid}|q`, tap: id }); await tick(1300);
+  check(`${tag} Fool: the truth as a lie: "That's the truth, write a lie!"`, ackOf("c0", id) === "That's the truth, write a lie!" && !pub().sent[0], `reply "${ackOf("c0", id)}"`);
+  /* a player can't write it; the captains can, the last one late */
+  send("p1", "answer", { text: "A player's lie", k: `${pub().qid}|q` }); await tick(600);
+  check(`${tag} Fool: a player's lie refused (the captain writes it)`, !pub().sent[1]);
+  for (let t = 0; t < k - 1; t++) send("c" + t, "answer", { text: t === 1 ? "Hamster" : t === 2 ? "hamstr" : "Lie " + t, k: `${pub().qid}|q` });
+  await tick(1500);
+  check(`${tag} Fool: still on the lies for the last team`, pub().screen === "q" && pub().sent.filter(Boolean).length === k - 1);
+  /* the screen asleep 30 s: the clock waits */
+  const left0 = pub().deadline - clock();
+  await sleep(30000);
+  const left1 = pub().deadline - clock();
+  check(`${tag} Fool: asleep 30 s on the lies: none of the clock lost`, pub().screen === "q" && left1 > left0 - 2000, `${Math.round(left0 / 1000)} s, then ${Math.round(left1 / 1000)} s`);
+  await tick(left1 + 1000);
+  check(`${tag} Fool: time's up: the answers are up, ${k + 1 + (k <= 3 ? 1 : 0)} of them`, pub().screen === "pick" && F().opts?.length === k + 1 + (k <= 3 ? 1 : 0), `${pub().screen} ${F()?.opts?.length}`);
+  /* (the truth is one of the answers, of course: nothing says which) */
+  check(`${tag} Fool: the phones can't tell whose answer is whose, nor which is the truth`, !/"by"|"truth"|"ours"|"rev"/.test(JSON.stringify(pub())) && F().opts.includes(fact().answer));
+  const opts = saved().fool.opts;
+  check(`${tag} Fool: the last team's missing lie: one of ours instead`, saved().fool.lost.includes(k - 1) && opts.filter((o) => o.by.length).length === (k > 3 ? k - 2 : k - 1), JSON.stringify(opts.map((o) => o.by)));
+  /* a lie landing now (sent for the lies) isn't taken */
+  id = tap(); send("c" + (k - 1), "answer", { text: "Too late", k: `${pub().qid}|q`, tap: id }); await tick(1300);
+  check(`${tag} Fool: a lie landing on the picks refused`, /Too late/.test(ackOf("c" + (k - 1), id) || "") && !opts.some((o) => o.text === "Too late"), `reply "${ackOf("c" + (k - 1), id)}"`);
+  /* a reload on the picks: the same answers, the same order */
+  const order0 = JSON.stringify(F().opts);
+  await reload();
+  check(`${tag} Fool: reload on the picks: the same answers in the same order`, pub().screen === "pick" && JSON.stringify(F().opts) === order0);
+  /* its own lie: refused; with no prediction: refused; then a pick and a prediction each */
+  const own = opts.findIndex((o) => o.by.includes(0)), truth = opts.findIndex((o) => o.truth);
+  id = tap(); send("c0", "answer", { pick: own, pred: 1, k: `${pub().qid}|pick`, tap: id }); await tick(1300);
+  check(`${tag} Fool: its own lie as its pick refused`, ackOf("c0", id) === "That's your own lie: pick another one." && !pub().sent[0], `reply "${ackOf("c0", id)}"`);
+  id = tap(); send("c0", "answer", { pick: truth, k: `${pub().qid}|pick`, tap: id }); await tick(1300);
+  check(`${tag} Fool: a pick with no prediction refused`, /Say which team/.test(ackOf("c0", id) || ""), `reply "${ackOf("c0", id)}"`);
+  /* team 0 finds the truth; every other team falls for team 0's lie, team 0 having named team 1 */
+  send("c0", "answer", { pick: truth, pred: 1, k: `${pub().qid}|pick` });
+  for (let t = 1; t < k; t++) send("c" + t, "answer", { pick: own, ...(saved().fool.opts.some((o) => o.by.includes(t)) ? { pred: 0 } : {}), k: `${pub().qid}|pick` });
+  await tick(1500);
+  check(`${tag} Fool: every pick in: the reveal`, pub().screen === "reveal" && !!F().rev, pub().screen);
+  /* +2 the truth, +1 each team fooled (k-1); team 1 fell for it as team 0 said: -1 */
+  check(`${tag} Fool: the points: +2 and +${k - 1} to team 0, -1 to team 1 (named), 0 to the rest`, F().rev.pts[0] === 2 + (k - 1) && F().rev.pts[1] === -1 && F().rev.pts.slice(2).every((p) => p === 0), String(F().rev.pts));
+  check(`${tag} Fool: the reveal says whose lie it was and who fell for it`, F().rev.opts[own].by.includes(0) && F().rev.fooled[own].length === k - 1 && F().rev.hits.some((h) => h.by === 0 && h.on === 1));
+  check(`${tag} Fool: the tracker counts the fact on the reveal`, pub().game.pts[0] === 2 + (k - 1), String(pub().game.pts));
+  await judge("m/next");
+  check(`${tag} Fool: Next: the second fact`, pub().screen === "q" && F().n === 2 && !F().opts, `${pub().screen} ${F()?.n}`);
+  /* Change fact, before any lie: another; with one in, refused */
+  const was = fact().id; await judge("m/swap");
+  check(`${tag} Fool: Change fact`, fact().id !== was && pub().screen === "q");
+  send("c0", "answer", { text: "Something", k: `${pub().qid}|q` }); await tick(600);
+  id = tap(); send("host", "judge", { move: { type: "m/swap" }, step: pub().step, tap: id }); await tick(600);
+  check(`${tag} Fool: Change fact with a lie in: refused`, /a lie is already in/.test(ackOf("host", id) || ""), `reply "${ackOf("host", id)}"`);
+  /* the host's Reveal now: the answers go up; again: the reveal */
+  await judge("m/reveal");
+  check(`${tag} Fool: Reveal now on the lies: the answers go up`, pub().screen === "pick", pub().screen);
+  await judge("m/pause");
+  id = tap(); send("c1", "answer", { pick: 0, pred: 0, k: `${pub().qid}|pick`, tap: id }); await tick(1300);
+  check(`${tag} Fool: no pick while paused`, /paused/.test(ackOf("c1", id) || "") && !pub().sent[1], `reply "${ackOf("c1", id)}"`);
+  await judge("m/pause");
+  if (phone) {
+    /* the game phone gone on the picks; another takes over from the server's copy: the same answers */
+    await tick(4500); const ord = JSON.stringify(F().opts);
+    await takeover(15000);
+    check(`${tag} Fool: taken over on the picks: the same answers, still picking`, pub().screen === "pick" && JSON.stringify(F().opts) === ord, pub().screen);
+  }
+  await judge("m/reveal");
+  check(`${tag} Fool: Reveal now on the picks: the reveal`, pub().screen === "reveal", pub().screen);
+  /* the rest, nobody writing or picking: ours fill every place, nobody scores */
+  for (let f = 2; f < 6; f++) { await judge("m/next"); await tick((pub().deadline - clock()) + 800); await tick((pub().deadline - clock()) + 800);
+    if (f === 2) check(`${tag} Fool: nobody writes: the answers are the truth and ours`, saved().fool.opts.every((o) => o.truth || o.ours) && saved().fool.opts.length === k + 1 + (k <= 3 ? 1 : 0)); }
+  await judge("m/next");
+  check(`${tag} Fool: the summary after 6 facts`, pub().screen === "summary", pub().screen);
+  const pts = mini().pts, award = pts.map((v) => (v > 0 ? PLACE_PTS[pts.filter((x) => x > v).length] : 0));
+  check(`${tag} Fool: the night's points paid by place (none for 0 or below)`, JSON.stringify(pub().summary.award) === JSON.stringify(award) && saved().teams.every((x, t) => x.score === award[t]), `${pub().summary.award} want ${award}`);
+}
+
 /* ---------- Repeat a theme (the owner, 15 Nov): Geography three times, History twice, Music once ---------- */
 async function repeat(k, phone, tag) {
   const want = ["Geography", "Geography", "Geography", "History", "History", "Music"];
@@ -279,7 +362,7 @@ async function kinds(k, phone, tag) {
 export async function run(only) {
   for (const k of [3, 8]) for (const phone of [false, true]) {
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["repeat", repeat], ["kinds", kinds]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["fool", fool], ["repeat", repeat], ["kinds", kinds]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }

@@ -11,6 +11,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, ".out/many.mjs");
 await build({ entryPoints: [join(here, "../lib/many/logic.ts")], outfile: out, bundle: true, platform: "node", format: "esm", logLevel: "error", alias: { "@": join(here, "..") } });
 const L = await import(pathToFileURL(out).href);
+/* (what the phones are sent: the view, for the checks that nothing secret is in it) */
+const outV = join(here, ".out/manyview.mjs");
+await build({ entryPoints: [join(here, "../lib/many/view.ts")], outfile: outV, bundle: true, platform: "node", format: "esm", logLevel: "error", alias: { "@": join(here, "..") } });
+const V = await import(pathToFileURL(outV).href);
 const bank = JSON.parse(readFileSync(join(here, "../data/bank.json"), "utf8")).bank;
 const update = process.argv.includes("--update");
 
@@ -21,7 +25,7 @@ const decks = { majority: pick("majority", 10, (q) => q.options?.length === 4), 
   quiz: pick("standard", 12, (q) => q.theme !== "Know the Host"), airport: pick("airport", 6), map: pick("map", 6),
   say: pick("saysame", 6, (q) => (q.pool || []).length >= 5).map((q) => ({ ...q, answer: q.pool[0] })), dish: pick("dish", 5) };
 function rng(seed) { let s = seed >>> 0; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
-const T = { quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 60, stakes: 45, stakesPick: 20, see: 20 };
+const T = { quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 60, stakes: 45, stakesPick: 20, see: 20, fool: 45, foolPick: 20 };
 /* a bot's typed answer: right about half the time (a map by its title; a prompt, any word on its list) */
 const typedFor = (key, q, r) => key === "say" ? q.pool[Math.floor(r() * Math.min(4, q.pool.length))] : r() < 0.5 ? (key === "map" ? q.question : q.answer) : "Atlantis";
 
@@ -375,6 +379,88 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     else { const want = readFileSync(file, "utf8"); verdict = want === text ? "same as golden" : "DIFFERS"; if (want !== text) bad++; }
     console.log(`many ${k} teams, the default night (${order.length} games): ${s.teams.map((x) => x.score).join("-")} — ${verdict}`);
   }
+}
+/* 16 Nov: Fool Me Twice, 3 to 8 teams (the owner): each captain writes a lie (the truth, however it's typed, refused);
+   time's up and one of ours takes a missing lie's place; the answers: one per team and the truth (5 with 3 teams), the
+   same lie from two teams once; each captain picks (never its own lie) and names the team that will fall for its lie;
+   the points: +2 the truth, +1 a team fooled, -1 to a team that fell for a lie whose writer named it; the game's tally
+   pays the night by place; Change fact (as hard as the one it replaces), Pause. Its own facts here (the bank's are the
+   owner's to approve) */
+{
+  const Q = createRequire(import.meta.url)("../../engine/core.js");
+  let ok = true; const why = [], seenN = {};
+  const fail = (w) => { ok = false; if (why.length < 6) why.push(w); };
+  const fact = (i, level) => ({ id: "fool:t" + level[0] + i, type: "fool", level, question: `Fact ${i}: its blank is ____.`, answer: "Guinea pig " + i,
+    fakes: ["Goldfish", "Goat", "Cow bell", "Alphorn", "Cuckoo clock", "Parrot", "Tortoise", "Rabbit"].map((f) => f + " " + i), notes: "A note." });
+  const facts = [...[0, 1, 2, 3].map((i) => fact(i, "normal")), ...[4, 5].map((i) => fact(i, "hard")), fact(6, "normal"), fact(7, "hard"), fact(8, "normal"), fact(9, "hard")];
+  for (const k of [3, 5, 8]) for (let seed = 1; seed <= 4; seed++) {
+    const r = rng(seed * 131 + k);
+    const teams = Array.from({ length: k }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+    const s = L.newNight(teams, { fool: facts }, ["fool"]);
+    L.startMini(s, 0, T, []);
+    const m = L.miniOf(s);
+    if (m.qs.length !== 6 || m.qs.map((q) => q.level[0]).join("") !== "nnnnhh") fail("not 4 normal then 2 hard");
+    if (s.screen !== "q" || s.deadline !== 45000) fail("not on the lies with a 45 s clock");
+    /* Change fact: before any lie, one as hard as this one */
+    if (seed === 1) { const was = L.qOf(s).id; if (L.swapQ(s, 0, T) !== true || L.qOf(s).id === was || L.qOf(s).level !== "normal") fail("swap"); }
+    const tally = s.teams.map(() => 0);
+    for (let f = 0; f < 6; f++) {
+      const q = L.qOf(s);
+      if (f === 4 && seed === 2) { const was = q.id; if (L.swapQ(s, 0, T) !== true || L.qOf(s).level !== "hard" || L.qOf(s).id === was) fail("a hard fact swapped for an easy one"); }
+      const qq = L.qOf(s);
+      /* the truth refused, any way it's typed; then a lie each (two teams the same, with a typo); the last team none */
+      if (L.captainAnswer(s, 0, { text: qq.answer.toLowerCase() + "s" }) === true) fail("the truth taken as a lie");
+      const lies = s.teams.map((_, t) => (t === 1 ? "Hamster" : t === 2 ? "hamstr." : "Lie " + t + " of " + f));
+      for (let t = 0; t < k - 1; t++) if (L.captainAnswer(s, t, { text: lies[t] }, undefined, t + 1) !== true) fail("a lie refused");
+      if (L.captainAnswer(s, 0, { text: "Another" }) === true) fail("a second lie taken");
+      L.pause(s, 1000); if (L.captainAnswer(s, k - 1, { text: "Late" }) === true) fail("a lie while paused"); L.pause(s, 2000);
+      if (L.foolAllIn(s)) fail("all in with a lie missing");
+      if (L.swapQ(s, 0, T) === true) fail("swap with a lie in");
+      L.foolOpen(s, 3000, T);                                    // (time's up)
+      const F = s.fool;
+      if (s.screen !== "pick" || !F || s.deadline !== 3000 + 20000) fail("not on the picks with a 20 s clock");
+      const want = k + 1 + (k <= 3 ? 1 : 0); (seenN[k] ||= new Set()).add(F.opts.length);
+      if (F.opts.length !== want) fail(`${F.opts.length} answers with ${k} teams, not ${want}`);
+      if (F.opts.filter((o) => o.truth).length !== 1) fail("the truth not once");
+      /* (with 3 teams the third is the one with no lie) */
+      if (F.opts.filter((o) => /hamst/i.test(o.text)).length !== 1 || F.opts.find((o) => /hamst/i.test(o.text)).by.join() !== (k > 3 ? "1,2" : "1")) fail("the same lie twice");
+      if (!F.lost.includes(k - 1)) fail("the missing lie not replaced by one of ours");
+      if (F.opts.some((o) => Q.foolIsTruth(o.text, qq, []) && !o.truth)) fail("the truth shown twice");
+      const pub = JSON.stringify(V.buildMany(s).pub);
+      if (/"by"|"ours"|"truth"/.test(pub)) fail("whose answers are whose, on the phones before the reveal");
+      /* picks: its own lie refused; a pick and a prediction each, the last team none (time's up) */
+      const own = F.opts.findIndex((o) => o.by.includes(0));
+      if (L.captainAnswer(s, 0, { pick: own, pred: 1 }) === true) fail("its own lie taken as a pick");
+      if (L.captainAnswer(s, 0, { pick: F.opts.findIndex((o) => !o.by.includes(0)) }) === true) fail("a pick with no prediction taken");
+      if (L.captainAnswer(s, 0, { pick: F.opts.findIndex((o) => !o.by.includes(0)), pred: 0 }) === true) fail("predicting itself taken");
+      for (let t = 0; t < k - 1; t++) {
+        const can = F.opts.map((o, i) => i).filter((i) => !F.opts[i].by.includes(t)), pick = can[Math.floor(r() * can.length)];
+        const pred = [...Array(k).keys()].filter((u) => u !== t)[Math.floor(r() * (k - 1))];
+        if (L.captainAnswer(s, t, { pick, pred }) !== true) fail("a pick refused");
+      }
+      /* the last team (its lie lost) picks with no prediction: taken, none kept */
+      if (L.captainAnswer(s, k - 1, { pick: F.opts.findIndex((o) => o.truth) }) !== true) fail("a pick without a lie refused");
+      if (!L.foolAllIn(s) || F.pred[k - 1] != null) fail("not all in");
+      L.foolReveal(s);
+      if (s.screen !== "reveal") fail("no reveal");
+      const res = Q.foolScore(F.opts, F.picks, F.pred), pts = L.legPoints(s);
+      if (pts.join() !== res.pts.join()) fail("the points aren't the engine's");
+      /* the points by hand */
+      const hand = s.teams.map(() => 0);
+      F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) { hand[t] += 2; return; } for (const w of o.by) { hand[w]++; if (F.pred[w] === t) hand[t]--; } });
+      if (hand.join() !== res.pts.join()) fail("points: " + res.pts.join() + " not " + hand.join());
+      res.pts.forEach((p, t) => { tally[t] += p; });
+      L.next(s, 0, T);
+      if (f < 5 && s.screen !== "q") fail("not on the next fact");
+    }
+    if (s.screen !== "summary") fail("no summary");
+    if (m.pts.join() !== tally.join()) fail("the game's tally");
+    /* the night: by place on the tally, as every game (a team on 0 or less, nothing) */
+    const pl = L.placesBy(tally.map((v) => (v > 0 ? -v : null)));
+    if (s.teams.some((x, t) => x.score !== (pl[t] == null ? 0 : L.PLACE_PTS[pl[t] - 1]))) fail("the places paid");
+  }
+  if (!ok) bad++;
+  console.log(`Fool Me Twice, 3-8 teams: the lies (the truth refused, ours for a missing one, the same lie once), ${Object.entries(seenN).map(([k, n]) => `${k} teams ${[...n].join("/")} answers`).join(", ")}, the picks (never its own lie), the predictions, the points, the places, Change fact, Pause — ${ok ? "ok" : "FAILED: " + why.join("; ")}`);
 }
 /* the cap: 60 players on one Majority Rules question, every one of them in, in one go */
 {

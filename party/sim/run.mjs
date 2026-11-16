@@ -89,6 +89,12 @@ const NIGHTS = [
   /* 15 Nov: lifelines off for the night (the owner): none used, no host and with a host */
   { seed: 56, minis: ["flag", "battle"], rounds: 4, lifelines: false },
   { seed: 57, minis: ["closest"], rounds: 4, host: true, lifelines: false },
+  /* 16 Nov: Fool Me Twice (the owner): no host and with a host, on a TV and on the game phone with no TV (a reload, Pause
+     and Change fact with a host) */
+  { seed: 58, minis: ["fool", "flag"], rounds: 4, tieMore: 1 },
+  { seed: 59, minis: ["fool", "closest"], rounds: 4, host: true, tieMore: 1 },
+  { seed: 60, minis: ["fool"], rounds: 2, phone: true, reload: 14 },
+  { seed: 61, minis: ["fool", "battle"], rounds: 2, host: true, phone: true, events: [{ at: 15, type: "pause", for: 8 }, { at: 34, type: "swap" }] },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
@@ -102,7 +108,7 @@ for (const n of NIGHTS) {
   const check = (p, now, vis) => (vis === "visible" && p.deadline && !p.paused && !p.pending && now - p.deadline > 6000 ? `${p.screen}: the clock is ${Math.round((now - p.deadline) / 1000)} s past zero and nothing happened` : null);
   const r = await (await load(n.seed))({ ...n, check });
   const file = join(gold, `night-${n.seed}.txt`), text = r.trace.join("\n") + "\n";
-  const label = `night ${n.seed} (${n.host ? "host" : "no host"}, ${n.rounds || 6} rounds, ${n.minis.join(" ") || "no mini-games"})`;
+  const label = `night ${n.seed} (${n.host ? "host" : "no host"}${n.phone ? ", no TV" : ""}, ${n.rounds || 6} rounds, ${n.minis.join(" ") || "no mini-games"})`;
   const ends = r.outcome === "final" || r.outcome === "sudden-cap";
   let verdict;
   const repeat = n.themes && (() => {

@@ -200,6 +200,20 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
     Geneva, Marseille, Dublin, The Hague, Frankfurt, Minsk (codes `c-<city>`); a city whose flag spells its name
     (Copenhagen, Lisbon, Oslo) or matches a country's (Vienna) stays out; Leipzig and Pristina were left out (16 Nov).
 - **Know the Host**: only with a host; wording leaves one answer ("secondary school").
+- **Fool Me Twice (16 Nov, the owner):** a strange **true** fact with one blank (`____`), checked online against a
+  source (no myths sold as fact, no legends: Napoleon's rabbits came out). Harder than the viral trivia everyone has
+  seen. Two levels, internal only: `normal` (the night's first 4 facts) and `hard` (its last 2). The truth is short
+  (30 letters at most), typed the way a person would; teams' lies are 40 at most. Each fact has:
+  - a **long accept list**: every way of typing the same truth (plural, with or without "a/the", typos, rewordings,
+    British and American spellings, the French), so a lie that is really the truth is refused ("That's the truth,
+    write a lie!") and the truth never shows twice; and a word that would make a true "lie" (Stars for the Milky
+    Way) counts too. Never a different answer;
+  - **8 fakes of ours**, the same shape and length as the truth, plausible, none of them true by accident, none in
+    the accept list, no two the same (the bank check runs the game's own matcher on them);
+  - a short **note** after the reveal, and its **source**.
+  The owner's 9 samples (16 Nov) are the model; the knocker-upper was dropped as too easy. No hiding of rude lies:
+  the players' own. The catalogue is `const FOOLS` in `classic.html` (`[key, level, topic, fact, truth, accept, fakes,
+  note, source]`).
 
 ## 8. Mechanics (do these every time)
 

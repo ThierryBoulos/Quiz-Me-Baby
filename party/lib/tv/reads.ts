@@ -19,6 +19,7 @@ export function currentQ(s: TvState): G {
   if (["miniQ", "closestReveal"].includes(sc)) return g.mini.qs[g.mini.i];
   if (["flagQ", "flagReveal"].includes(sc)) return g.flagGame.qs[g.flagGame.i];
   if (["seeQ", "seeReveal"].includes(sc)) return g.seeGame?.qs[g.seeGame.i];
+  if (["foolWrite", "foolPick", "foolReveal"].includes(sc)) return g.foolGame?.qs[g.foolGame.i];
   if (["pinQ", "pinReveal"].includes(sc)) return g.pinGame.qs[g.pinGame.i];
   if (["airportQ", "airportReveal"].includes(sc)) return g.airportGame.qs[g.airportGame.i];
   if (["majorityQ", "majorityReveal"].includes(sc)) return g.majorityGame.qs[g.majorityGame.i];

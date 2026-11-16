@@ -1,0 +1,107 @@
+/* node --test engine/fool.test.js — Fool Me Twice (the owner, 16 Nov): the answers to pick from, the points, the
+   prediction, the deal (4 normal facts, then 2 hard) and the two-team game's end */
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const Q = require('./core.js');
+
+let seed = 11; const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const fact = { answer:'Guinea pig', fakes:['Goldfish', 'Goat', 'Cow bell', 'Alphorn', 'Cuckoo clock', 'Parrot', 'Tortoise', 'Rabbit'] };
+const accept = ['Guinea pigs', 'A guinea pig', 'Ginea pig'];
+
+test('fool: the number of answers: 4 with 2 teams, 5 with 3, one per team and the truth from 4 to 8', () => {
+  for(const [n, want] of [[2, 4], [3, 5], [4, 5], [5, 6], [8, 9]]){
+    const lies = Array.from({ length:n }, (_, t) => 'Lie number ' + t);
+    const { opts } = Q.foolOptions(fact, lies, accept, rng);
+    assert.equal(opts.length, want, n + ' teams');
+    assert.equal(opts.filter(o => o.truth).length, 1);
+  }
+});
+test('fool: the truth typed as a lie, any way it is written, never shows twice; one of ours takes its place', () => {
+  for(const typed of ['guinea pigs', 'A guinea pig', 'Ginea pig', 'guinea  pig.']){
+    const { opts, lost } = Q.foolOptions(fact, [typed, 'Hamster'], accept, rng);
+    assert.deepEqual(lost, [0], typed);
+    assert.equal(opts.length, 4);
+    assert.equal(opts.filter(o => Q.foolIsTruth(o.text, fact, accept)).length, 1, typed + ': the truth once');
+    assert.equal(opts.filter(o => o.ours).length, 2);
+  }
+});
+test('fool: no lie, an empty one: one of ours in its place', () => {
+  const { opts, lost } = Q.foolOptions(fact, [null, '  '], accept, rng);
+  assert.deepEqual(lost, [0, 1]);
+  assert.equal(opts.length, 4);
+  assert.equal(opts.filter(o => o.ours).length, 3);
+});
+test('fool: the same lie from two teams (typos, a full stop) shows once, both its writers; ours fill the gap', () => {
+  const { opts } = Q.foolOptions(fact, ['Hamster', 'hamstr.', 'Goldfish'], accept, rng);
+  const h = opts.filter(o => /hamst/i.test(o.text));
+  assert.equal(h.length, 1);
+  assert.deepEqual(h[0].by.sort(), [0, 1]);
+  assert.equal(opts.length, 5);
+  /* a team's lie that is one of ours: ours isn't added again */
+  assert.equal(opts.filter(o => /goldfish/i.test(o.text)).length, 1);
+});
+test('fool: an answer shows tidied: first letter capital, no full stop, 40 letters at most', () => {
+  assert.equal(Q.foolShow('  a   wig.  '), 'A wig');
+  assert.equal(Q.foolShow('x'.repeat(60)).length, 40);
+});
+test('fool: points: +2 the truth, +1 per team fooled, -1 for falling for a lie whose writer predicted it, 0 for ours', () => {
+  const opts = [{ text:'Guinea pig', truth:true, by:[] }, { text:'Hamster', by:[0] }, { text:'Cat', by:[1, 2] }, { text:'Goat', ours:true, by:[] }];
+  const r = Q.foolScore(opts, [2, 1, 0], [2, null, 0]);
+  assert.deepEqual(r.pts, [0, 1, 3]);              // A: fooled B (+1), fell for Cat, which C predicted (-1); C: truth (+2), fooled A (+1)
+  assert.deepEqual(r.hits, [{ by:2, on:0 }]);
+  assert.deepEqual(Q.foolScore(opts, [3, null, null], [null, null, null]).pts, [0, 0, 0]);   // ours, and no pick: nothing
+  assert.deepEqual(Q.foolScore(opts, [1, null, null], [null, null, null]).pts, [0, 0, 0]);   // its own lie: not a pick
+});
+
+/* the deal and the two-team game */
+const bank = [];
+for(let i = 0; i < 9; i++) bank.push({ id:'fool:n' + i, type:'fool', level:'normal', question:'Fact ' + i + ' ____.', answer:'True ' + i, fakes:['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8'] });
+for(let i = 0; i < 4; i++) bank.push({ id:'fool:h' + i, type:'fool', level:'hard', question:'Hard ' + i + ' ____.', answer:'Truth ' + i, fakes:['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8'] });
+const D = Q.createDealer({ bank:() => bank, used:() => new Set(), noRepeat:() => true, rng });
+const game = () => D.buildGame({ standard:false, rounds:0, themes:[], minis:['fool'], teamA:{ name:'Owls' }, teamB:{ name:'Lions' } });
+
+test('fool: six facts, the first four normal and the last two hard; the rest spare', () => {
+  const s = game().foolGame;
+  assert.equal(s.qs.length, Q.FOOL_LEGS);
+  assert.deepEqual(s.qs.map(q => q.level), ['normal', 'normal', 'normal', 'normal', 'hard', 'hard']);
+  assert.equal(s.spare.length, 13 - 6);
+});
+test('fool: two teams: the points add up over the facts, the most takes the game; tied, one more fact', () => {
+  const g = game(), s = g.foolGame;
+  assert.deepEqual(Q.play(g, { type:'fool/start' }), [{ go:'foolWrite' }]);
+  const opts = [{ text:'T', truth:true, by:[] }, { text:'A', by:[0] }, { text:'B', by:[1] }, { text:'O', ours:true, by:[] }];
+  let fx;
+  /* five facts, each tied: both find the truth */
+  for(let i = 0; i < 5; i++) fx = Q.play(g, { type:'fool/settle', opts, picks:[0, 0] });
+  assert.deepEqual(s.pts, [10, 10]);
+  assert.deepEqual(fx, [{ go:'foolWrite' }]);
+  /* the sixth: A falls for B's lie (B: +1, and with two teams B always "predicted" A: A -1) */
+  fx = Q.play(g, { type:'fool/settle', opts, picks:[2, 0] });
+  assert.deepEqual(s.pts, [9, 13]);
+  assert.equal(s.verdict.winner, 1);
+  assert.equal(g.teams[1].score, g.miniPts);
+  assert.ok(fx.some(f => f.go === 'foolSummary'));
+  assert.deepEqual(Q.play(g, { type:'fool/done' }), [{ finalize:true }]);
+});
+test('fool: tied after six facts: one more from the spare ones', () => {
+  const g = game(), s = g.foolGame;
+  Q.play(g, { type:'fool/start' });
+  const opts = [{ text:'T', truth:true, by:[] }, { text:'A', by:[0] }, { text:'B', by:[1] }, { text:'O', ours:true, by:[] }];
+  let fx;
+  for(let i = 0; i < 6; i++) fx = Q.play(g, { type:'fool/settle', opts, picks:[3, 3] });
+  assert.equal(s.tieLegs, 1);
+  assert.equal(s.qs.length, 7);
+  assert.ok(fx.some(f => f.go === 'foolWrite'));
+  assert.ok(fx.some(f => /Tied at 0 each/.test(f.toast || '')));
+});
+test('fool: a night with rounds: after its round, the game comes up (its intro)', () => {
+  const std = [];
+  for(let i = 0; i < 40; i++) std.push({ id:'s' + i, type:'standard', theme:'Music', difficulty:['easy', 'medium', 'hard'][i % 3], question:'Q' + i + '?', answer:'A' + i });
+  const D2 = Q.createDealer({ bank:() => bank.concat(std), used:() => new Set(), noRepeat:() => true, rng });
+  const g = D2.buildGame({ standard:true, rounds:2, themes:['Music', 'Music'], difficulty:'easy+medium+hard', minis:['fool'], teamA:{ name:'Owls' }, teamB:{ name:'Lions' } });
+  const owed = (g.plan || []).filter(p => p.key === 'fool');
+  assert.equal(owed.length, 1);
+  g.r = owed[0].after;
+  const fx = Q.play(g, { type:'round/next' }, { deal:D2 });
+  assert.ok(fx.some(f => f.go === 'foolIntro'), JSON.stringify(fx));
+});

@@ -9,7 +9,7 @@ type Q = any;
 
 export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
   const got: Record<string, unknown> = {};
-  const T = { sudden: 60, quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 45, stakes: 45, stakesPick: 20, see: 20 };
+  const T = { sudden: 60, quiz: 60, flag: 15, airport: 30, map: 60, closest: 60, pin: 45, majority: 15, say: 30, dish: 3, dishLast: 8, roulette: 45, stakes: 45, stakesPick: 20, see: 20, fool: 45, foolPick: 20 };
   const longNames = ["The Quizzical Owls", "Lions", "Brainy Bunch", "Team D", "Smarty Pants", "Les Gros Malins", "Quizteama Aguilera", "Agatha Quiztie"];
   /* (SCREENS_TEAMS=4,8: other team counts than the usual 3, 5 and 8, e.g. for pictures of a room of four) */
   const asked = (process.env.SCREENS_TEAMS || "").split(",").map(Number).filter((n) => Number.isInteger(n) && n >= 3 && n <= 8);
@@ -19,15 +19,15 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
       ok: { map: (q: Q) => q.type === "map", flag: (q: Q) => q.type === "flag", dish: (q: Q) => q.type === "dish", pin: (q: Q) => q.type === "pin" && Number.isFinite(q.lat) && !!q.photo,
         airport: (q: Q) => q.type === "airport" && Array.isArray(q.board) && q.board.length > 0, majority: (q: Q) => q.type === "majority" && Array.isArray(q.options) && q.options.length === 4 } });
     const every = [...new Set(bank.bank.filter((q: Q) => q.type === "standard" && q.theme && q.theme !== "Know the Host").map((q: Q) => q.theme))];
-    const keys: L.ManyKey[] = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "roulette", "quiz", "stakes"];
-    const g = dealer.buildGame({ standard: true, rounds: 4 + 6, themes: every, difficulty: "easy+medium+hard", minis: ["majority", "flag", "airport", "map", "closest", "pin", "saysame", "dish", "see", "roulette", "stakes"],
+    const keys: L.ManyKey[] = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "fool", "roulette", "quiz", "stakes"];
+    const g = dealer.buildGame({ standard: true, rounds: 4 + 6, themes: every, difficulty: "easy+medium+hard", minis: ["majority", "flag", "airport", "map", "closest", "pin", "saysame", "dish", "see", "fool", "roulette", "stakes"],
       rouletteChambers: QMB.rouletteChambers(k), rouletteThemes: [], seeLegs: L.MANY_LEGS.see, teamA: { name: "A" }, teamB: { name: "B" } });
     const all = (m: { qs?: unknown[]; spare?: unknown[] }) => [...(m?.qs || []), ...(m?.spare || [])] as Q[];
     const say = (dealer.saySameDeck({}) as { pool?: string[] }[]).filter((q) => (q.pool || []).length >= 5).slice(0, 10).map((q) => dealer.drawSaySame(q));
     const quiz = (g.rounds || []).flatMap((r: { q: Q[] }) => r.q);
     const decks = { quiz: quiz.slice(0, 12), sudden: quiz.slice(12), flag: all(g.flagGame), airport: all(g.airportGame), map: all(g.mapGame), closest: all(g.mini), pin: all(g.pinGame),
       majority: all(g.majorityGame), say, dish: all(g.dishGame), see: all(g.seeGame), roulette: all(g.rouletteGame),
-      stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])] } as Partial<Record<L.ManyKey, Q[]>>;
+      stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])], fool: all(g.foolGame) } as Partial<Record<L.ManyKey, Q[]>>;
     const teams = Array.from({ length: k }, (_, t) => ({ name: longNames[t], captain: "Captain" + t }));
     const s = L.newNight(teams, decks, keys, { quiz: [4, 4] });
     s.intro = true;
@@ -39,10 +39,16 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
     for (let guard = 0; guard < 3000 && s.screen !== "final"; guard++) {
       if (s.screen === "intro") { snap(); L.startMini(s, now, T, roster); continue; }
       /* Secret Stakes' bets: before any is in, then with all but one in (the last takes the safe bet at time-up) */
+      /* Fool Me Twice: the answers up, none picked; then all but the last (the reveal at time-up) */
+      if (s.screen === "pick" && L.miniOf(s)?.key === "fool") { snap(".none"); const F = s.fool!;
+        for (let t = 0; t < k - 1; t++) { const can = F.opts.map((_, i) => i).filter((i) => !F.opts[i].by.includes(t)); L.captainAnswer(s, t, { pick: can[Math.floor(rng() * can.length)], pred: (t + 1) % k }); }
+        snap(".some"); L.foolReveal(s); continue; }
       if (s.screen === "pick") { snap(".none"); for (let t = 0; t < k - 1; t++) L.stakesBet(s, t, Math.floor(rng() * 3), ["easy", "medium", "hard", "expert"][Math.floor(rng() * 4)], now, T); snap(".some"); L.lockStakes(s, now, T); continue; }
       if (s.screen === "q") {
         const m = L.miniOf(s)!, q = L.qOf(s)!;
         snap();
+        /* Fool Me Twice: lies of every length (40 letters the longest), the last team none (ours in its place) */
+        if (m.key === "fool") { for (let t = 0; t < k - 1; t++) L.captainAnswer(s, t, { text: ["A wig", "Its own weight in chocolate", "A hamster", "Forty sheep and a very old goat", "Wax", "Pickled herring", "A brass band"][t % 7] }); snap(); L.foolOpen(s, now, T); continue; }
         if (m.key === "majority") for (const p of s.roster) { if (rng() < 0.1) continue; L.vote(s, p.name, rng() < 0.5 ? q.answer : (q.options as string[])[Math.floor(rng() * 4)]); }
         else if (m.key === "dish") { for (let t = 0; t < k && s.screen === "q"; t++) L.captainAnswer(s, t, { text: rng() < 0.4 ? String(q.answer) : "Atlantis" }); }
         /* What Do You See? (the buzzer): a first team buzzes (the picture stops) and gets it wrong (out, the clock goes

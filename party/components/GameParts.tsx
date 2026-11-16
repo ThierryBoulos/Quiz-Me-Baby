@@ -20,7 +20,7 @@ const side = (t: 0 | 1) => (t === 0 ? "a" : "b");
 
 /* ---- the tracker: scores, where we are, and the night's progress ---- */
 /* what one go of a mini-game is called, as the 3-8 team night says it (no "leg", 31 Oct) */
-const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round", roulette: "Spin", stakes: "Round", see: "Picture" };
+const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
 function hudLabel(pub: Pub): ReactNode {
   const m = pub.mini, sc = pub.screen;
   if (sc === "final") return <b>Final result</b>;
@@ -406,6 +406,13 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Right, and the picture is yours. Wrong, and you're out of this picture: the clock goes on and the other team can buzz." },
       /* (12 pictures in every setup; tied teams: the faster buzzer wins, the owner, 12 Nov) */
       { text: `The app checks what you type${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. ${n} pictures: the most takes ${pts}. Tied? The team that buzzed faster wins. Won early? Play on for fun, or stop.` }];
+    /* Fool Me Twice (16 Nov, the owner): a true fact with a blank, a lie each, then find the truth */
+    case "fool": return [
+      { text: `A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true: ${sec(t?.foolWrite, 45)}.` },
+      { text: "Type the real answer and the app says so: write a lie instead!", warn: true },
+      { text: `Then the truth comes up hidden among your lies and a few of ours. Captains pick the one they think is true: ${sec(t?.foolPick, 20)}.` },
+      { text: "The truth: +2. The other team falls for your lie: +1 to you, and −1 to them." },
+      { text: `${n} facts, the last 2 hard. Most points takes ${pts}. Tied? One more fact, or a point each.` }];
     case "pin": return [
       { text: `A photo of a landmark goes up. ${sec(t?.pin, T_PIN)}. On the hard ones its name comes too: the trick is finding it.` },
       { text: "Both captains drop a pin on the world map on their phone, where they think it is. Pinch or tap + to zoom right in: the closer, the better." },
@@ -454,7 +461,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
 export function MiniIntro({ pub, size, head }: { pub: Pub; size: "tv" | "phone"; head?: ReactNode }) {
   const m = pub.mini, tv = size === "tv";
   if (!m) return null;
-  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? `${m.of} rounds, 3 themes each` : m.key === "see" ? `${m.of} pictures` : `Best of ${m.of}`;
+  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? `${m.of} rounds, 3 themes each` : m.key === "see" ? `${m.of} pictures` : m.key === "fool" ? `${m.of} facts` : `Best of ${m.of}`;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
       {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : m.key === "stakes" ? "The night's last game" : "Mini-game"}</div>}
@@ -520,7 +527,7 @@ export function usePreload(pub: Pub | null) {
 /* won with legs to spare: the same words on the TV and every phone */
 export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
 /* what a mini-game's legs are called ("4 flags", "the last landmark") */
-const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin", stakes: "round", see: "picture" };
+const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin", stakes: "round", see: "picture", fool: "fact" };
 export const legsLeft = (key: MiniKey, n: number) => { const u = LEG_UNIT[key] || "leg"; return n === 1 ? `The last ${u} is` : `The last ${n} ${u.replace(/y$/, "ie")}s are`; };
 export const decidedPts = (pub: Pub) => (pub.decided ? `+${pub.decided.pts} point${pub.decided.pts === 1 ? "" : "s"}` : "");
 export const decidedFun = (pub: Pub) => (pub.decided ? `${legsLeft(pub.decided.key, pub.decided.spare)} just for fun.` : "");

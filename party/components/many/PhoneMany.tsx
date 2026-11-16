@@ -21,6 +21,8 @@ import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
+import { FoolFact, FoolHead, FoolOptions, FoolPredict, FoolReveal, FoolStatus, ownIndex } from "../Fool";
+import { FOOL_MAX } from "@/lib/fool";
 import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
@@ -165,6 +167,14 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* Secret Stakes: the captain's bet being made (a theme, a level), cleared each round */
   const sk = pub.stakes, [skTheme, setSkTheme] = useState<number | null>(null), [skLevel, setSkLevel] = useState<string | null>(null);
   const skRound = `${sk?.round}|${sk?.themes?.join()}`;
+  /* Fool Me Twice: the captain's pick and the team it says will fall for its lie (changeable until Lock in), and its
+     own lie (kept, so a reload still leaves it out of the picks) */
+  const fool = g?.key === "fool" && (sc === "q" || sc === "pick" || sc === "reveal") && !!pub.fool;
+  const [foolSel, setFoolSel] = useState<number | null>(null), [foolPred, setFoolPred] = useState<number | null>(null);
+  useEffect(() => { setFoolSel(null); setFoolPred(null); }, [pub.qid, sc]);
+  const lieKey = "qmb.fool.lie." + code + "." + pub.qid;
+  const myLie = (() => { if (!fool || sc !== "pick") return null; try { return localStorage.getItem(lieKey); } catch { return null; } })();
+  const foolOwn = ownIndex(pub.fool?.opts, myLie), foolT = T.map((t) => ({ name: t.name, color: t.color }));
   useEffect(() => { setSkTheme(null); setSkLevel(null); }, [skRound]);
   /* a tap locks in at once on this phone (the owner, 1 Nov: the four stayed up a second while the TV answered) */
   const [tapped, setTapped] = useState<string | null>(null);
@@ -324,7 +334,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change the themes</button>
         </div>
       </>)}
-      {host && sc === "q" && g && (<>
+      {host && sc === "q" && g && !fool && (<>
         {/* (the host's picture small, as with two teams: the answer and who buzzed matter more on this phone) */}
         <OnScreen small={g.key === "see"} />
         {g.key === "stakes" && secret.answers && sk && (
@@ -371,7 +381,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
         </div>
       </>)}
-      {host && sc === "reveal" && g && R && (<>
+      {host && sc === "reveal" && g && R && !fool && (<>
         {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={null} teams={rrT} /> : g.key === "stakes" && sk ? <StakesPhone sk={sk} screen="stakesReveal" teams={rrT} me={null} /> : <Answer />}
         {typedKey(g.key) ? (<>
           {/* the host is told the calls are theirs to change (the reviewers, 31 Oct) */}
@@ -444,7 +454,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* sudden death: a captain whose team isn't tied at the top watches */}
       {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>Sudden death: only the teams tied at the top answer this one.</Line></>)}
       {/* THE CAPTAIN answers the rest */}
-      {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !(g.only && mine != null && !g.only.includes(mine)) && (<>
+      {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && !(g.only && mine != null && !g.only.includes(mine)) && (<>
         <OnScreen small={g.key === "pin" && !sentMine} />
         {/* What Do You See? (12 Nov, the owner: a buzzer): BUZZ, then 10 seconds to say it out loud and type it; a wrong
             answer (or none in time) and the team is out of this picture, and another team can buzz */}
@@ -501,7 +511,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             </div>
           </div>)}
       </>)}
-      {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && (<>
+      {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && (<>
         <OnScreen />
         {/* What Do You See? (12 Nov, the owner): any player can buzz for the team (the captain types the answer); who
             buzzed, and whether your team is out of this picture */}
@@ -531,7 +541,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       </>)}
 
       {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}
-      {!host && sc === "reveal" && g && R && (<>
+      {!host && sc === "reveal" && g && R && !fool && (<>
         {/* sudden death keeps its headline: it's the night's winner */}
         {g.key === "sudden" && <Big text={W.text} color={W.color} />}
         {(() => { const y = youOf(); return y && <YouPill text={y.text} tone={y.tone} />; })()}
@@ -539,6 +549,102 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {g.key !== "stakes" && <Table />}
         <ContestMany pub={pub} mine={cap ? mine : null} host={false} busy={busy} act={(mv) => void send("next", { move: mv })} />
       </>)}
+      {/* FOOL ME TWICE (16 Nov, the owner): the fact, the lie (captains), the answers to pick from and who'll fall for your
+          lie (captains), the reveal; the host sees the truth and every lie as it comes in, and runs it */}
+      {fool && pub.fool && !(sc !== "reveal" && pub.paused && !host) && (() => { const F = pub.fool, picking = sc === "pick", done = mine != null && !!pub.sent[mine];
+        const head = <div className="flex items-center justify-between gap-3"><FoolHead fool={F} />{sc !== "reveal" && <Clock deadline={pub.deadline} left={pub.left} size={60} />}</div>;
+        const sendLie = () => { const t = text.trim(); if (!t || busy) return;
+          void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) { setSentTxt(t); try { localStorage.setItem(lieKey, t); } catch { /* in memory only */ } } }); };
+        const status = <FoolStatus teams={foolT} done={(picking ? F.picked : F.wrote) || T.map(() => false)} doing={T.length > 4 ? "…" : picking ? ": picking…" : ": writing…"} finished={T.length > 4 ? "✓" : picking ? ": picked" : ": lie in"} />;
+        if (sc === "reveal" && F.rev) { const my = mine != null && !host ? F.rev.pts[mine] ?? 0 : null; return (<>
+          {my != null && <YouPill text={`Your team: ${my > 0 ? `+${my}` : my < 0 ? `−${-my}` : "0"}`} tone={my > 0 ? "ok" : my < 0 ? "no" : "mid"} />}
+          <FoolFact fool={F} size={19} truth={F.rev.answer} />
+          <FoolReveal rev={F.rev} teams={foolT} />
+          {host && <Main label="Next" on={() => move("m/next")} />}
+        </>); }
+        if (host) return (<>
+          {head}
+          <FoolFact fool={F} size={18} />
+          {secret.answer && (
+            <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
+              <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The truth. Only you see this</div>
+              <div className="display text-28 mt-1" style={{ color: "var(--color-gold)" }}><bdi>{secret.answer}</bdi></div>
+            </div>)}
+          {picking && F.opts && <FoolOptions opts={F.opts} />}
+          {/* each team's lie as it comes in (only this phone sees them) */}
+          <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who's in">
+            <p className="text-center text-14 font-bold">{`${pub.sent.filter(Boolean).length} of ${T.length} teams ${picking ? "picked" : "wrote a lie"}`}</p>
+            {T.map((t, i) => { const lie = secret.typed?.[i]; return (
+              <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
+                <Dot t={i} color={t.color} size={14} /><span className="truncate shrink-0 max-w-[40%]"><bdi>{t.name}</bdi></span>
+                <span className="truncate flex-1 font-normal text-[var(--color-ink-2)]">{lie ? <bdi>{lie}</bdi> : null}</span>
+                <span className="shrink-0" style={{ color: pub.sent[i] ? "var(--color-ok)" : "var(--color-ink-3)" }}>{pub.sent[i] ? "✓ in" : "waiting"}</span>
+              </span>); })}
+          </div>
+          <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
+            <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
+            {!picking && !pub.sent.some(Boolean) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change fact</button>}
+            <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
+          </div>
+        </>);
+        /* a captain writes the lie */
+        if (cap && !picking) return (<>
+          {head}
+          <FoolFact fool={F} size={19} />
+          {done ? <p className="text-center font-bold text-16" role="status">{sentTxt ? <>Lie sent: <bdi>{sentTxt}</bdi>. Waiting for the others.</> : "Lie sent. Waiting for the others."}</p> : (
+            <div className="card flex flex-col gap-2">
+              <label className="field-label !mb-0" htmlFor="mlie">Your lie</label>
+              <input id="mlie" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={FOOL_MAX} enterKeyHint="send" value={text} onChange={(e) => setText(e.target.value)} placeholder="A lie that sounds true"
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendLie(); } }} />
+              <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={sendLie}>Send</button>
+              {np.hint}
+              <div className="text-13 text-[var(--color-ink-3)]">Write a lie that sounds true. Once you send it, it&rsquo;s locked.</div>
+            </div>)}
+          {!done && sugs.length > 0 && (
+            <div className="card">
+              <div className="eyebrow mb-2">Your team suggests. Tap one to use it.</div>
+              <div className="flex flex-col gap-1">
+                {sugs.map((x) => (
+                  <button key={x.id} type="button" className="text-left text-15 min-h-[44px] px-2 -mx-2 rounded-[12px] active:bg-white/10" onClick={() => setText(x.text.slice(0, FOOL_MAX))}>
+                    <b style={{ color: mine != null ? T[mine].color : undefined }}><bdi>{members.find((m) => m.user_id === x.user_id)?.name}</bdi>:</b> {x.text}</button>))}
+              </div>
+            </div>)}
+          {status}
+        </>);
+        /* a captain picks the truth, and the team that will fall for its lie */
+        if (cap && picking && F.opts && mine != null) { const needPred = foolOwn >= 0; return (<>
+          {head}
+          <FoolFact fool={F} size={17} />
+          <p className="text-center font-bold text-16" role="status" style={{ color: done ? undefined : "var(--color-gold)" }}>{done ? "Picked. Wait for the reveal." : "Which one is the truth?"}</p>
+          <FoolOptions opts={F.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolSel} busy={busy} locked={done} onPick={(k) => setFoolSel(k)} />
+          {needPred && (<>
+            <p className="text-center font-bold text-15">Who will fall for your lie?</p>
+            <FoolPredict teams={foolT} me={mine} value={foolPred} busy={busy} locked={done} onPick={setFoolPred} />
+            <p className="text-center text-12 text-[var(--color-ink-3)]">If they fall for it, they lose 1 point.</p>
+          </>)}
+          {/* (after the answers and the teams, not docked over them: a docked bar covered an answer, as the owner found on 12 Nov) */}
+          {!done && <button className="btn btn-gold btn-lg btn-block" disabled={busy || foolSel == null || (needPred && foolPred == null)}
+            onClick={() => void send("answer", { pick: foolSel, ...(needPred ? { pred: foolPred } : {}), k: `${pub.qid}|pick` })}>Lock in</button>}
+        </>); }
+        /* everyone else: the fact, a lie to suggest to the captain, the answers (the captain picks) */
+        return (<>
+          {head}
+          <FoolFact fool={F} size={19} />
+          {picking && F.opts && <FoolOptions opts={F.opts} />}
+          {!picking && mine != null && !done ? (
+            <div className="card flex flex-col gap-2">
+              <label className="field-label !mb-0" htmlFor="msug">Suggest a lie to {T[mine]?.captain || "your captain"}</label>
+              <div className="flex gap-2">
+                <input id="msug" {...np.props} className="input" autoComplete="off" value={sug} maxLength={FOOL_MAX} placeholder="A lie that sounds true"
+                  onChange={(e) => setSug(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
+                <button className="btn" disabled={!sug.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => void suggest()}>Send</button>
+              </div>
+              {np.hint}
+              {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
+            </div>)
+            : <Line>{mine == null ? "Eyes on the TV." : picking ? (done ? "Picked. Wait for the reveal." : "Your captain picks the truth.") : "Lie sent. Waiting for the others."}</Line>}
+          {status}
+        </>); })()}
       {!host && sc === "summary" && <Summary />}
       {!host && sc === "final" && <Final />}
       {err && <p className="field-error text-center" role="alert">{err}</p>}

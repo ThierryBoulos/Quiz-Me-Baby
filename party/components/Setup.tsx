@@ -31,6 +31,7 @@ const MINIS = [
   ["majority", "Majority Rules", "Everyone plays on their own phone: 10 questions, four answers. The team with the bigger share of right answers wins."],
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
   ["see", "What Do You See?", "A face, a logo or a close-up, getting clearer: one guess each, fastest right answer wins."],
+  ["fool", "Fool Me Twice", "A strange true fact with a blank. Write a lie that sounds true, then find the truth among the lies."],
   ["roulette", "Russian Roulette", "Spin the barrel: a theme and a question each. One chamber is the bullet."],
   ["battle", "Battle of the Captains", "Ten each, captains only."],
   /* (listed last, the night's last game: 11 Nov, the owner) */

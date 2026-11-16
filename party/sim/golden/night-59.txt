@@ -1,0 +1,70 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+8.50 answer | 4 | 1-0 |  | Lions +1 point | 
+9.50 answer | 4 | 1-0 |  |  | 
+12.00 ask | 5 | 1-0 |  |  | 
+14.00 steal | 6 | 1-0 |  |  | 
+15.75 answer | 7 | 2-0 |  | Lions +1 point — steal | 
+16.50 roundScore | 8 | 2-0 |  | Lions +1 point — steal | 
+17.50 miniIntro | 9 | 2-0 | 0-0 | Lions +1 point — steal | 
+18.50 miniQ | 10 | 2-0 | 0-0 | Lions +1 point — steal | 
+19.25 closestReveal | 10 | 2-0 | 0-1 | Lions +1 point — steal | 
+20.25 miniQ | 11 | 2-0 | 0-1 | Owls take leg 1. | 
+21.00 closestReveal | 11 | 2-0 | 0-2 | Owls take leg 1. | 
+22.00 miniQ | 12 | 2-0 | 0-2 | Owls take leg 2. | 
+23.00 closestReveal | 12 | 2-0 | 0-3 | Owls take leg 2. | 
+23.75 decided | 13 | 2-0 | 0-3 |  | 
+24.75 roundIntro | 14 | 2-2 |  |  | 
+26.50 ask | 15 | 2-2 |  |  | 
+28.25 answer | 16 | 3-2 |  | Lions +1 point | 
+29.25 ask | 17 | 3-2 |  | Lions +1 point | 
+31.00 answer | 18 | 3-4 |  | Owls +2 points | 
+32.00 roundScore | 19 | 3-4 |  | Owls +2 points | 
+32.75 roundIntro | 20 | 3-4 |  | Owls +2 points | 
+33.75 ask | 21 | 3-4 |  | Owls +2 points | 
+34.50 ask | 21 | 3-4 |  | Lions used Call a Friend. | 
+37.25 ask | 22 | 3-4 |  | Lions used Call a Friend. | 
+39.00 steal | 23 | 3-4 |  | Lions used Call a Friend. | 
+41.00 answer | 24 | 3-4 |  | Lions used Call a Friend. | 
+41.75 ask | 25 | 3-4 |  | Lions used Call a Friend. | 
+43.50 steal | 26 | 3-4 |  | Lions used Call a Friend. | 
+45.50 answer | 27 | 3-4 |  | Lions used Call a Friend. | 
+46.25 roundScore | 28 | 3-4 |  | Lions used Call a Friend. | 
+47.25 foolIntro | 29 | 3-4 | 0-0 | Lions used Call a Friend. | 
+48.00 foolWrite | 30 | 3-4 | 0-0 | Lions used Call a Friend. | 
+50.00 foolPick | 30 | 3-4 | 0-0 | Lions used Call a Friend. | 
+51.75 foolReveal | 30 | 3-4 | -1-3 | Lions used Call a Friend. | 
+52.50 foolWrite | 31 | 3-4 | -1-3 | Lions used Call a Friend. | 
+56.25 foolPick | 31 | 3-4 | -1-3 | Lions used Call a Friend. | 
+57.00 foolReveal | 31 | 3-4 | 1-5 | Lions used Call a Friend. | 
+58.00 foolWrite | 32 | 3-4 | 1-5 | Lions used Call a Friend. | 
+59.00 foolPick | 32 | 3-4 | 1-5 | Lions used Call a Friend. | 
+59.75 foolReveal | 32 | 3-4 | 1-5 | Lions used Call a Friend. | 
+60.75 foolWrite | 33 | 3-4 | 1-5 | Lions used Call a Friend. | 
+62.50 foolPick | 33 | 3-4 | 1-5 | Lions used Call a Friend. | 
+65.25 foolReveal | 33 | 3-4 | 1-7 | Lions used Call a Friend. | 
+66.00 foolWrite | 34 | 3-4 | 1-7 | Lions used Call a Friend. | 
+67.00 foolPick | 34 | 3-4 | 1-7 | Lions used Call a Friend. | 
+68.75 foolReveal | 34 | 3-4 | 2-6 | Lions used Call a Friend. | 
+69.75 foolWrite | 35 | 3-4 | 2-6 | Lions used Call a Friend. | 
+72.50 foolPick | 35 | 3-4 | 2-6 | Lions used Call a Friend. | 
+73.25 foolReveal | 35 | 3-4 | 1-9 | Lions used Call a Friend. | 
+74.25 foolSummary | 36 | 3-6 | 1-9 | Lions used Call a Friend. | 
+75.00 roundIntro | 37 | 3-6 |  | Lions used Call a Friend. | 
+77.00 ask | 38 | 3-6 |  | Lions used Call a Friend. | 
+77.75 ask | 38 | 3-6 |  | Lions used Double Dip. | 
+79.50 answer | 39 | 4-6 |  | Lions +1 point | 
+80.50 answer | 39 | 4-6 |  |  | 
+81.50 steal | 40 | 3-6 |  | Owls steal a new question. | 
+83.25 answer | 41 | 3-7 |  | Owls +1 point — steal | 
+84.00 answer | 41 | 3-7 |  |  | 
+88.50 answer | 41 | 3-6 |  | Call changed: nobody scores this one. | 
+89.50 ask | 42 | 3-6 |  | Call changed: nobody scores this one. | 
+91.25 steal | 43 | 3-6 |  | Call changed: nobody scores this one. | 
+93.00 answer | 44 | 3-6 |  | Call changed: nobody scores this one. | 
+94.00 roundScore | 45 | 3-6 |  | Call changed: nobody scores this one. | 
+95.00 final | 46 | 3-6 |  | Call changed: nobody scores this one. | 
+recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[1,0],"minis":[0,1],"best":{"title":"Closest To Wins","team":1,"legs":[0,3]},"chart":[[0,0],[0,0],[1,0],[2,0],[2,2],[3,2],[3,4],[3,6],[4,6],[3,6],[3,7],[3,6]],"segs":[{"label":"R1","pts":[[1,0],[2,0]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,4]]},{"label":"R3","pts":[]},{"label":"Fool Me Twice","pts":[[3,6]]},{"label":"R4","pts":[[4,6],[3,6],[3,7],[3,6]]}],"awards":[{"t":"Whitewash","who":"Closest To Wins, Owls 3–0","team":1},{"t":"Best thief","who":"Lions, 1 steal","team":0}]}
