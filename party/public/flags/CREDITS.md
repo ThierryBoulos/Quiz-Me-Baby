@@ -278,8 +278,6 @@ Licences: most are public domain. The others are credited here as their licences
 | `c-marseille.svg` | Marseille | Expert | [Flag of Marseille.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Marseille.svg) | Public domain |
 | `c-dublin.svg` | Dublin | Expert | [IRL Dublin flag.svg](https://commons.wikimedia.org/wiki/File:IRL_Dublin_flag.svg) | Public domain |
 | `c-hague.svg` | The Hague | Expert | [Flag of The Hague.svg](https://commons.wikimedia.org/wiki/File:Flag_of_The_Hague.svg) | Public domain |
-| `c-leipzig.svg` | Leipzig | Expert | [Flag of Leipzig.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Leipzig.svg) | Public domain |
 | `c-frankfurt.svg` | Frankfurt | Expert | [Flag of Frankfurt am Main.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Frankfurt_am_Main.svg) | Public domain |
 | `c-minsk.svg` | Minsk | Expert | [Flag of Minsk, Belarus.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Minsk,_Belarus.svg) | Public domain |
-| `c-pristina.svg` | Pristina | Expert | [Flag of Pristina.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Pristina.svg) | Public domain |
 | `af.svg` | Afghanistan | Hard | [Flag of Afghanistan (2013–2021).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Afghanistan_(2013%E2%80%932021).svg) | Public domain |
