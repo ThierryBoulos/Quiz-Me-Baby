@@ -90,7 +90,8 @@ const TV_MEASURE = () => {
   /* not part of the layout: lights, effects, celebrations, the bubble Imad speaks in, the plane that flies off the
      airport board, the split-flap letters' halves */
   /* (What Do You See?'s picture is enlarged inside its frame on purpose, the frame cropping it: the frame is checked, not the picture) */
-  const skip = (el) => el.closest(".tv-glow,.confetti,.confetti-late,.win-flash,.win-ring,.lead-banner,.imad-bubble,.tv-cover,[aria-hidden=\"true\"] svg,.mq-beam,.mq-world,.mq-dust,.mq-floor,.plane-ico,.lectern-spot,.see-frame img")
+  /* (and the points flying up into the totals: they pass over whatever lies between, as in every game) */
+  const skip = (el) => el.closest(".hud-plus,.fly,.tv-glow,.confetti,.confetti-late,.win-flash,.win-ring,.lead-banner,.imad-bubble,.tv-cover,[aria-hidden=\"true\"] svg,.mq-beam,.mq-world,.mq-dust,.mq-floor,.plane-ico,.lectern-spot,.see-frame img")
     || (el.tagName === "svg" && el.closest("svg") !== el);
   const name = (el) => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 3).join(".") : el.tagName.toLowerCase()) + ' "' + (el.textContent || "").trim().slice(0, 40) + '"';
   for (const el of scope.querySelectorAll("*")) {

@@ -1,5 +1,6 @@
 /* What the phones see: the TV's state turned into the public view (Pub, in the
    room for every phone) and the secret (the answer, for the TV and the host only). */
+import { foolFact, foolSum, type FoolOpt } from "../fool";
 import { QMB, aboutHost, acceptFor, hostOnly, revOf } from "../engine";
 import { getSettings } from "../settings";
 import type { Member } from "../room";
@@ -206,6 +207,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       const rev = s.screen === "foolReveal" && s.fool ? QMB.foolScore(s.fool.opts, [...s.foolPicks], [1, 0]) : null;
       p.mini.wins = m.pts.map((v: number, t: number) => v + (rev ? rev.pts[t] : 0)) as Two<number>;
       if (p.summary) p.summary.wins = [...m.pts] as Two<number>;
+      /* the result's lie detector and its awards: each fact's numbers (the engine keeps every fact: subs) */
+      if (p.summary) p.summary.fool = foolSum(((m.subs || []) as { opts: FoolOpt[]; picks: (number | null)[]; hits: { by: number; on: number }[]; pts: number[] }[]).map((x) => foolFact(x.opts, x.picks, x.hits || [], x.pts)), 2);
       if (["foolWrite", "foolPick", "foolReveal"].includes(s.screen) && q) {
         p.fool = { fact: q.question, n: Math.min(m.i + 1, m.qs.length), of: m.base, hard: q.level === "hard", ...(q.name ? { name: true } : {}), wrote: s.foolLies.map((l) => l != null), total: [...p.mini.wins] };
         /* picking: the answers only (whose each one is stays here till the reveal) */

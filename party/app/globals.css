@@ -1699,3 +1699,28 @@ button.fool-opt:disabled:not(.on) { opacity: .55; }
   color: #ffd36b; border: 2px solid #ffd36b; border-radius: 8px; padding: .15em .5em .1em; transform: rotate(-5deg); box-shadow: 0 0 14px rgba(255,200,90,.35);
   animation: foolStamp .45s cubic-bezier(.2,1.5,.4,1) both; animation-delay: var(--d, 0s); }
 @keyframes foolStamp { from { opacity: 0; transform: rotate(-5deg) scale(2.4); } to { opacity: 1; transform: rotate(-5deg) scale(1); } }
+
+/* Fool Me Twice's result (16 Nov, the owner's pick): the lie detector. Its ivory paper, the grid drifting as the pens
+   draw, each pen's trace drawn left to right with its head riding along, the labels in last place first, the winner's
+   line glowing; small bulbs round the paper, lit and chasing once it's all in */
+.ld-paper { position: relative; background: #fbf3dc; border-radius: 14px; box-shadow: 0 24px 60px -20px rgba(0,0,0,.8), inset 0 0 0 1px rgba(0,0,0,.08); }
+.ld-grid { animation: ldScroll 2.6s linear both; }
+@keyframes ldScroll { from { transform: translateX(0); } to { transform: translateX(-24px); } }
+.ld-pen { fill: none; stroke-width: 3.2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: ldDraw 2.2s cubic-bezier(.4,0,.6,1) .3s both; }
+.ld-pen.win { stroke-width: 5.5; filter: drop-shadow(0 0 5px var(--c)); }
+@keyframes ldDraw { to { stroke-dashoffset: 0; } }
+.ld-head { animation: ldHead 2.2s cubic-bezier(.4,0,.6,1) .3s both; offset-rotate: 0deg; }
+@keyframes ldHead { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+.ld-lab { animation: ldLab .4s cubic-bezier(.2,1.4,.4,1) both; animation-delay: var(--d); }
+@keyframes ldLab { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+.ld-lab.win { filter: drop-shadow(0 0 10px var(--c)); }
+.ld-bulbs::before, .ld-bulbs::after { content: ""; position: absolute; inset: 4px; border-radius: 11px; pointer-events: none; z-index: 1;
+  background:
+    radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 0 / 15px 6px repeat-x,
+    radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 100% / 15px 6px repeat-x,
+    radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 0 0 / 6px 15px repeat-y,
+    radial-gradient(circle, var(--bulb) 0 2px, transparent 2.6px) 100% 0 / 6px 15px repeat-y;
+  filter: drop-shadow(0 0 3px rgba(255,200,90,.9)); opacity: 0; animation: ldBulbsIn .3s ease-out both, foolBulbs .8s steps(1, end) infinite; animation-delay: var(--g, 0s), calc(var(--g, 0s) + .3s); }
+.ld-bulbs::after { background-position: 7.5px 0, 7.5px 100%, 0 7.5px, 100% 7.5px; animation-delay: var(--g, 0s), calc(var(--g, 0s) - .1s); }
+@keyframes ldBulbsIn { from { opacity: 0; } to { opacity: 1; } }
+html[data-motion="off"] .ld-bulbs::before, html[data-motion="off"] .ld-bulbs::after { opacity: 1; }

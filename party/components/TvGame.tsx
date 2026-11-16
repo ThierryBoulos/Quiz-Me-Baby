@@ -12,10 +12,11 @@ import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decided
 import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
 import { SeeTv } from "./See";
-import { BEAT_MS, BEAT_SCREENS, DECIDED, showKm, TIE_SCREENS } from "@/lib/game";
+import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
-import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus } from "./Fool";
+import { FoolFact, FoolHead, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "./Fool";
+import { foolDone } from "@/lib/fool";
 import { LeadBanner, useFlyingPoints, useScreenAt, WinName } from "./Motion";
 import { NightIntroTv } from "./NightIntro";
 import { useLiveCount } from "@/lib/liveCount";
@@ -600,13 +601,18 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
 
   if (/Summary$/.test(sc) && pub.summary) {
     const S = pub.summary;
+    /* Fool Me Twice: the lie detector, and its awards (16 Nov, the owner's pick); its line, and the points flying up, once
+       the pens have drawn and the teams are in (data-fly-at: that much after the usual moment) */
+    const fool = m.key === "fool" && !!S.fool, places = S.winner == null ? [1, 1] : S.winner === 0 ? [1, 2] : [2, 1];
+    const lineAt = fool ? foolDone(places, 2) : TWO_LOOKS.includes(m.key) ? twoDone(S.winner) : 0, flyAt2 = fool ? String(Math.max(0, Math.round(lineAt * 1000 - flyAt(sc)))) : undefined;
     return (<>
-      <MiniTitle title={m.title} small={TWO_LOOKS.includes(m.key)} />
+      <MiniTitle title={m.title} small={TWO_LOOKS.includes(m.key) || fool} />
       {/* the game's own look (the 3-8 team night's), or the board for Auction and Battle */}
-      {TWO_LOOKS.includes(m.key) ? <TwoResult pub={pub} sound={sound} /> : <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />}
-      <div className="rv display text-52" style={{ color: tc(S.winner), animationDelay: (TWO_LOOKS.includes(m.key) ? twoDone(S.winner) : 0) + "s" }}>
-        {S.needsHost ? "Still tied: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined}>{(S.award?.[0] ?? 0) > 0 ? pointsEach(S.award![0]) : "Nobody scores"}</span>
-          : <span data-fly-src={S.winner}>{`${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</span>}</div>
+      {fool ? <FoolResult two teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) }))} sum={S.fool!} pts={[...S.wins]} places={places} award={[S.award?.[0] ?? 0, S.award?.[1] ?? 0]} />
+        : TWO_LOOKS.includes(m.key) ? <TwoResult pub={pub} sound={sound} /> : <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />}
+      <div className="rv display text-52" style={{ color: tc(S.winner), animationDelay: lineAt + "s" }}>
+        {S.needsHost ? "Still tied: the host decides" : S.winner == null ? <span data-fly-src={(S.award?.[0] ?? 0) > 0 ? "0 1" : undefined} data-fly-at={flyAt2}>{(S.award?.[0] ?? 0) > 0 ? pointsEach(S.award![0]) : "Nobody scores"}</span>
+          : <span data-fly-src={S.winner} data-fly-at={flyAt2}>{`${T[S.winner].name} +${S.award?.[S.winner] ?? m.pts}`}</span>}</div>
       {S.note && !/^split|point each/i.test(S.note) && <div className="text-22 text-[var(--color-ink-2)]">{S.note}</div>}
       {S.who && <div className="text-22" style={{ color: "var(--color-gold)" }}>{S.who}</div>}
     </>);

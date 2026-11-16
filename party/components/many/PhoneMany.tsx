@@ -15,13 +15,13 @@ import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
 import { useNoPaste, useSuggestions } from "../PhoneGame";
 import { ToSide, useSideways } from "../Side";
-import { Dot, IntroMany, paid, pct, place, revealOf, splitIng, takes, SAY_WHY } from "./PartsMany";
+import { Dot, IntroMany, paid, pct, place, resultDone, splitIng, takes, SAY_WHY } from "./PartsMany";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
-import { FoolFact, FoolHead, FoolOptions, FoolPredict, FoolReveal, FoolStatus, ownIndex } from "../Fool";
+import { FoolFact, FoolHead, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "../Fool";
 import { FOOL_MAX } from "@/lib/fool";
 import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
@@ -192,7 +192,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* "That's your team!", under who takes it */
   const W = takes(pub);
   /* a game's result waits on the phones while the TV reveals it, last place first (the owner, 31 Oct) */
-  const held = useRevealHold(sc === "summary" && g && pub.summary ? `${g.key}:${g.index}` : null, pub.summary ? revealOf(pub.summary, T.length).done + 0.3 : 0);
+  const held = useRevealHold(sc === "summary" && g && pub.summary ? `${g.key}:${g.index}` : null, pub.summary ? resultDone(pub) + 0.3 : 0);
 
   /* what's on screen, close up: the flag, the photo, the question, and the clock. It can't be selected or copied */
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
@@ -292,6 +292,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       <TitleLine eyebrow={g.title} text={P.text} color={P.color} />
       <ResultTable rows={rows} head={[S.shares ? "Right" : "This game", "Tonight"]} places big />
       {S.line && <p className="text-13 text-center" style={{ color: "var(--color-gold)" }}>{S.line}</p>}
+      {/* Fool Me Twice: its four awards under the result (16 Nov, the owner) */}
+      {g.key === "fool" && S.fool && <AwardList awards={foolAwardList(S.fool, foolT, false)} />}
     </>); };
   /* the night's end (the owner, 1 Nov): the winner clear at the top, how your team did, then the standings */
   const Final = () => { if (!pub.final) return null; const F = pub.final, tops = F.order.filter((x) => x.place === 1).map((x) => x.team), c = tops.length === 1 ? T[tops[0]].color : "var(--color-gold)";

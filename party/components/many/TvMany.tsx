@@ -20,10 +20,10 @@ import { NightIntroTv } from "../NightIntro";
 import { ImadBubble } from "../TvGame";
 import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
-import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus } from "../Fool";
+import { FoolFact, FoolHead, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
 import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
-import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, revealOf } from "./PartsMany";
+import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -303,10 +303,12 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             : g.key === "dish" ? <GlassesMany pub={pub} sound={sound} />
             : g.key === "say" ? (pub.summary.words ? <WordsMany pub={pub} /> : <BubblesMany pub={pub} />)
             : g.key === "quiz" ? <LecternsMany pub={pub} />
+            /* Fool Me Twice: the lie detector, and its four awards (16 Nov, the owner's pick) */
+            : g.key === "fool" && pub.summary.fool ? <FoolResult teams={T.map((t) => ({ name: t.name, color: t.color }))} sum={pub.summary.fool} pts={pub.summary.pts} places={pub.summary.places} award={pub.summary.award} />
             : <BarsMany pub={pub} />}
           {/* the line comes once the last team (the winner) is in */}
-          <div className={"rv display " + (dense ? "text-44" : "text-52")} style={{ color: paid(pub).color, animationDelay: revealOf(pub.summary, T.length).done + "s" }}>{paid(pub).text}</div>
-          {pub.summary.line && <div className="rv text-18 max-w-[900px] truncate" style={{ color: "var(--color-gold)", animationDelay: revealOf(pub.summary, T.length).done + 0.2 + "s" }}><bdi>{pub.summary.line}</bdi></div>}
+          <div className={"rv display " + (dense ? "text-44" : "text-52")} style={{ color: paid(pub).color, animationDelay: resultDone(pub) + "s" }}>{paid(pub).text}</div>
+          {pub.summary.line && <div className="rv text-18 max-w-[900px] truncate" style={{ color: "var(--color-gold)", animationDelay: resultDone(pub) + 0.2 + "s" }}><bdi>{pub.summary.line}</bdi></div>}
         </>)}
 
         {/* the end: "The winner", a beat, then the name slams down with a flash and a shockwave, and the confetti

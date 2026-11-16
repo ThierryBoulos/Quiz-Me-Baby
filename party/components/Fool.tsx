@@ -3,7 +3,7 @@
    its blank, who has written and picked, the answers to pick from, and the reveal (each lie, whose it was and who fell
    for it, the truth last). The rules are in lib/fool.ts. */
 import type { ReactNode } from "react";
-import type { FoolOpt, FoolPub, FoolRev } from "@/lib/fool";
+import { FOOL_PEN_END as PEN_END, foolAwards, foolAwardWhat, rvFool, type FoolOpt, type FoolPub, type FoolRev, type FoolSum } from "@/lib/fool";
 import { Dot } from "./many/PartsMany";
 import { QMB } from "@/lib/engine";
 
@@ -140,3 +140,81 @@ export function FoolPredict({ teams, me, value, onPick, busy, locked, compact }:
     </div>);
 }
 export type { FoolOpt };
+
+/* ---- THE RESULT (16 Nov, the owner's pick of four: the lie detector, with four awards under it). A polygraph's ivory
+   paper with its red grid: each team's pen draws its points fact by fact (up for the truth or a team fooled, down for
+   falling for a lie meant for it), trembling as a lie detector's does; at each pen's end the team's letter, points,
+   name, place and what it adds to the night. The winner's line glows and the paper's bulbs light up and chase; then
+   the points fly into the totals (as in every game), and the awards come in. ---- */
+const PLACE = ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+const bare = (x: string) => x.replace(/[\u2066-\u2069]/g, "");
+export function FoolResult({ teams, sum, pts, places, award, two }: { teams: FoolTeam[]; sum: FoolSum; pts: number[]; places: number[]; award: number[]; two?: boolean }) {
+  const k = teams.length, dense = k > 4, rv = rvFool(places, k), done = PEN_END + rv.done, N = Math.max(1, sum.tally.length);
+  const W = two ? 860 : dense ? 1000 : 960, H = two ? 220 : dense ? 200 : 190, L = 26, R = 360, top = 16, bot = 28, gw = W - L - R, gh = H - top - bot;
+  const all = [0, ...sum.tally.flat()], lo = Math.min(...all), hi = Math.max(1, ...all);
+  const X = (i: number) => L + (i / N) * gw, Y = (v: number) => top + gh - ((v - lo) / (hi - lo || 1)) * gh;
+  const lit = (t: number) => award[t] > 0 && places[t] === 1;
+  const end = (t: number) => (sum.tally.length ? sum.tally[sum.tally.length - 1][t] : 0);
+  /* a pen's trace: its points after each fact, a little tremor between (the same for a team every time) */
+  const path = (t: number) => { let z = 11 + t * 7919; const r = () => (z = (z * 16807) % 2147483647) / 2147483647;
+    let d = `M${X(0)},${Y(0)}`, prev = 0;
+    sum.tally.forEach((row, f) => { const v = row[t];
+      for (let j = 1; j <= 4; j++) d += ` L${(X(f) + (j / 5) * (X(f + 1) - X(f))).toFixed(1)},${(Y(prev + ((v - prev) * j) / 5) + (r() - 0.5) * (j % 2 ? 8 : 4)).toFixed(1)}`;
+      d += ` L${X(f + 1).toFixed(1)},${Y(v).toFixed(1)}`; prev = v; });
+    return d; };
+  /* the labels at the pens' ends, kept apart, inside the paper (closer together if eight need it) */
+  /* (clear of the bulbs round the paper's edge, top and bottom) */
+  const lo2 = 27, hi2 = H - 15, gap = Math.min(dense ? 22 : 27, (hi2 - lo2) / Math.max(1, k - 1)), at: number[] = []; let y0 = -Infinity;
+  teams.map((_, t) => t).sort((a, b) => Y(end(a)) - Y(end(b)) || a - b).forEach((t) => { at[t] = Math.max(Y(end(t)), lo2, y0 + gap); y0 = at[t]; });
+  const over = y0 - hi2; if (over > 0) at.forEach((v, t) => { at[t] = v - over; });
+  const fs = dense ? (k > 6 ? 17 : 18) : 21, order = teams.map((_, t) => t).sort((a, b) => places[a] - places[b] || a - b);
+  const AW = foolAwards(sum, !!two);
+  const who = (ts: number[]) => (ts.length > 3 ? `${ts.length} teams` : ts.map((t) => teams[t]?.name ?? "").join(" & "));
+  return (
+    <div className="flex flex-col items-center w-full" style={{ gap: dense ? 12 : 16 }}>
+      <div className="ld-paper ld-bulbs" role="img" aria-label={"Each team's points, fact by fact: " + order.map((t) => `${bare(teams[t].name)} ${pts[t]}`).join(", ")} style={{ width: W, maxWidth: "100%", ["--g" as string]: done + "s" }}>
+        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} style={{ display: "block", overflow: "hidden", borderRadius: 14, maxWidth: "100%", height: "auto" }} aria-hidden>
+          <g className="ld-grid">
+            {Array.from({ length: Math.ceil(W / 24) + 2 }, (_, i) => <line key={"v" + i} x1={L + i * 24} y1={0} x2={L + i * 24} y2={H} stroke="rgba(201,40,58,.16)" strokeWidth={1} />)}
+            {Array.from({ length: 9 }, (_, i) => <line key={"h" + i} x1={0} y1={top + (i * gh) / 8} x2={W + 30} y2={top + (i * gh) / 8} stroke="rgba(201,40,58,.16)" strokeWidth={1} />)}
+          </g>
+          {Array.from({ length: N }, (_, f) => (
+            <g key={"f" + f}>
+              <text x={(X(f) + X(f + 1)) / 2} y={H - 9} textAnchor="middle" fontSize={12} fontWeight={800} fill="rgba(27,22,7,.45)" letterSpacing=".12em">FACT {f + 1}</text>
+              <line x1={X(f + 1)} y1={top} x2={X(f + 1)} y2={H - bot} stroke="rgba(27,22,7,.2)" strokeDasharray="3 4" />
+            </g>))}
+          <line x1={L} y1={Y(0)} x2={X(N)} y2={Y(0)} stroke="rgba(27,22,7,.35)" />
+          {/* (the winner's pen drawn last, on top) */}
+          {[...order].reverse().map((t) => { const c = teams[t].color, d = path(t), w = lit(t); return (
+            <g key={"p" + t}>
+              <path className={"ld-pen" + (w ? " win" : "")} d={d} pathLength={1} stroke={c} style={{ ["--c" as string]: c }} />
+              <circle className="ld-head" r={w ? 6 : 4.5} fill={c} style={{ offsetPath: `path('${d}')` }} />
+            </g>); })}
+          {order.map((t) => { const c = teams[t].color, paid = award[t] > 0, y = at[t], nm = bare(teams[t].name); return (
+            <g key={"l" + t} className={"ld-lab" + (lit(t) ? " win" : "")} style={{ ["--d" as string]: PEN_END + rv.at(t) + "s", ["--c" as string]: c }}>
+              <line x1={X(N) + 4} y1={Y(end(t))} x2={X(N) + 18} y2={y} stroke={c} strokeWidth={1.5} opacity={0.7} />
+              <circle cx={X(N) + 30} cy={y} r={dense ? 9 : 11} fill={c} />
+              <text x={X(N) + 30} y={y + 4} textAnchor="middle" fontSize={dense ? 10 : 12} fontWeight={800} fill="#04050e">{LETTERS[t]}</text>
+              <text x={X(N) + 46} y={y + 7} fontFamily="var(--font-display)" fontSize={fs + 3} fill="#1b1607">{pts[t] < 0 ? `−${-pts[t]}` : pts[t]}</text>
+              <text x={X(N) + 84} y={y + 6} fontSize={fs - 4} fontWeight={800} fill={c} stroke="rgba(0,0,0,.35)" strokeWidth={0.6} style={{ paintOrder: "stroke" }}>{nm.length > 16 ? nm.slice(0, 15) + "…" : nm}</text>
+              <text x={W - 12} y={y + 7} textAnchor="end" fontFamily="var(--font-display)" fontSize={fs + 1} fill={paid ? "#1f8a57" : "#9a937d"}>{paid ? `${PLACE[places[t]] || places[t] + "th"}  +${award[t]}` : "0"}</text>
+            </g>); })}
+        </svg>
+      </div>
+      {/* the awards, as the night's (16 Nov, the owner): the most correct, the best liars, the best prediction (3 to 8
+          teams), and the team fooled the most; tied teams share one, a 0 has none */}
+      {AW.length > 0 && (
+        <div className="grid w-full" style={{ gap: dense ? 10 : 14, maxWidth: W, gridTemplateColumns: `repeat(${AW.length}, minmax(0, 1fr))` }} role="list" aria-label="The awards">
+          {AW.map((a, i) => { const c = a.teams.length === 1 ? teams[a.teams[0]]?.color : undefined; return (
+            <div key={a.t} role="listitem" className="rv card !p-2 !px-3 text-left min-w-0" style={{ animationDelay: done + 0.7 + i * 0.3 + "s", borderColor: c, background: "linear-gradient(180deg, #151a3c, #0c1028)" }}>
+              <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: dense ? 14 : 16 }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
+              <div className="font-bold leading-snug line-clamp-2" style={{ color: c, fontSize: dense ? 18 : 20 }}><bdi>{who(a.teams)}</bdi></div>
+              <div className="text-[var(--color-ink-2)] leading-snug" style={{ fontSize: dense ? 14 : 16 }}>{foolAwardWhat(a, !!two)}</div>
+            </div>); })}
+        </div>)}
+    </div>);
+}
+/* the phones' list of the awards (with no TV, the result is the list, as in every game; the awards under it) */
+export const foolAwardList = (sum: FoolSum, teams: FoolTeam[], two: boolean) => foolAwards(sum, two).map((a) => ({
+  t: a.t, spoon: a.spoon, color: a.teams.length === 1 ? teams[a.teams[0]]?.color : undefined,
+  who: `${a.teams.length > 3 ? `${a.teams.length} teams` : a.teams.map((t) => teams[t]?.name ?? "").join(" & ")}: ${foolAwardWhat(a, two)}` }));

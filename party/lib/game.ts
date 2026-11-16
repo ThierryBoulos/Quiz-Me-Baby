@@ -7,7 +7,7 @@ export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame
 /* a spot on the earth (Drop the Pin), in degrees */
 export type LatLon = { lat: number; lon: number };
 import type { RrPub } from "./roulette";
-import type { FoolPub } from "./fool";
+import type { FoolPub, FoolSum } from "./fool";
 import type { SkPub } from "./stakes";
 import type { SePub } from "./see";
 export type Pub = {
@@ -86,6 +86,7 @@ export type Pub = {
     spins?: number[][];   // Russian Roulette: each team's points spin by spin (its barrel at the result)
     got?: string[][];   // What Do You See?: the pictures each team took (its pile at the result)
     words?: { w: string; ok: boolean }[][];   // Don't Say the Same: each team's words, scored or not (its pile of word cards at the result)
+    fool?: FoolSum;   // Fool Me Twice: the pens' points fact by fact, and the awards' numbers
   };
   winner?: 0 | 1 | null;
   toast?: { id: number; text: string } | null;

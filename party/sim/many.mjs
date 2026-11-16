@@ -403,7 +403,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     if (s.screen !== "q" || s.deadline !== 45000) fail("not on the lies with a 45 s clock");
     /* Change fact: before any lie, one as hard as this one */
     if (seed === 1) { const was = L.qOf(s).id; if (L.swapQ(s, 0, T) !== true || L.qOf(s).id === was || L.qOf(s).level !== "normal") fail("swap"); }
-    const tally = s.teams.map(() => 0);
+    const tally = s.teams.map(() => 0), runs = [], cnt = { truths: s.teams.map(() => 0), fooled: s.teams.map(() => 0), falls: s.teams.map(() => 0), called: s.teams.map(() => 0) };
     for (let f = 0; f < 6; f++) {
       const q = L.qOf(s);
       if (f === 4 && seed === 2) { const was = q.id; if (L.swapQ(s, 0, T) !== true || L.qOf(s).level !== "hard" || L.qOf(s).id === was) fail("a hard fact swapped for an easy one"); }
@@ -449,12 +449,18 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
       const hand = s.teams.map(() => 0);
       F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) { hand[t] += 2; return; } for (const w of o.by) { hand[w]++; if (F.pred[w] === t) hand[t]--; } });
       if (hand.join() !== res.pts.join()) fail("points: " + res.pts.join() + " not " + hand.join());
-      res.pts.forEach((p, t) => { tally[t] += p; });
+      res.pts.forEach((p, t) => { tally[t] += p; }); runs.push([...tally]);
+      F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) cnt.truths[t]++; else { cnt.falls[t]++; o.by.forEach((w) => cnt.fooled[w]++); } });
+      res.hits.forEach((h) => cnt.called[h.by]++);
       L.next(s, 0, T);
       if (f < 5 && s.screen !== "q") fail("not on the next fact");
     }
     if (s.screen !== "summary") fail("no summary");
     if (m.pts.join() !== tally.join()) fail("the game's tally");
+    /* the result's lie detector and awards: the points after each fact, the truths, the teams fooled, the falls, the right predictions */
+    const FS = V.buildMany(s).pub.summary?.fool;
+    if (!FS || JSON.stringify(FS.tally) !== JSON.stringify(runs)) fail("the result's points fact by fact");
+    for (const key of ["truths", "fooled", "falls", "called"]) if (!FS || FS[key].join() !== cnt[key].join()) fail(`the result's ${key}: ${FS?.[key]} not ${cnt[key]}`);
     /* the night: by place on the tally, as every game (a team on 0 or less, nothing) */
     const pl = L.placesBy(tally.map((v) => (v > 0 ? -v : null)));
     if (s.teams.some((x, t) => x.score !== (pl[t] == null ? 0 : L.PLACE_PTS[pl[t] - 1]))) fail("the places paid");

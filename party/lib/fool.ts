@@ -20,3 +20,51 @@ export type FoolPub = {
 /* a lie's longest (16 Nov, the owner: so every answer fits in its box, two lines at most on the narrowest phone; our own
    answers are 25 at most too). The phone says "Limit reached." when it's reached, never the number */
 export const FOOL_MAX = 25;
+
+/* THE RESULT (16 Nov, the owner's pick: the lie detector, and four awards under it). The game's numbers: each team's
+   points after each fact (the pens), how many times it found the truth, how many times its lie fooled a team, how many
+   times it fell for a lie (a team's or one of ours), how many times it named the team that fell for its lie */
+export type FoolSum = { tally: number[][]; truths: number[]; fooled: number[]; falls: number[]; called: number[] };
+/* one fact's part in them: the answers, each team's pick, the predictions that came true, the points */
+export function foolFact(opts: FoolOpt[], picks: (number | null)[], hits: { by: number; on: number }[], pts: number[]) {
+  const k = picks.length, fooled = Array(k).fill(0), called = Array(k).fill(0);
+  picks.forEach((p, t) => { const o = p == null ? null : opts[p]; if (!o || o.truth || o.by.includes(t)) return; o.by.forEach((w) => { fooled[w]++; }); });
+  hits.forEach((h) => { called[h.by]++; });
+  return { pts: [...pts], truth: picks.map((p) => p != null && !!opts[p]?.truth), fell: picks.map((p, t) => p != null && !!opts[p] && !opts[p].truth && !opts[p].by.includes(t)), fooled, called };
+}
+export type FoolFactSum = ReturnType<typeof foolFact>;
+export function foolSum(facts: FoolFactSum[], k: number): FoolSum {
+  const z = () => Array(k).fill(0), S: FoolSum = { tally: [], truths: z(), fooled: z(), falls: z(), called: z() };
+  let run = z();
+  for (const F of facts) {
+    run = run.map((v, t) => v + (F.pts[t] || 0)); S.tally.push(run);
+    F.truth.forEach((x, t) => { if (x) S.truths[t]++; }); F.fell.forEach((x, t) => { if (x) S.falls[t]++; });
+    F.fooled.forEach((n, t) => { S.fooled[t] += n; }); F.called.forEach((n, t) => { S.called[t] += n; });
+  }
+  return S;
+}
+/* the awards: the most truths found, the best liars (the most times fooling a team), the best prediction (3 to 8 teams:
+   with 2 the team is always the other one), and the team fooled the most. Tied teams share one; none for 0 */
+export type FoolAward = { t: string; teams: number[]; n: number; spoon?: boolean };
+export function foolAwards(S: FoolSum, two: boolean): FoolAward[] {
+  const best = (v: number[]) => { const m = Math.max(0, ...v); return m > 0 ? { teams: v.map((x, i) => (x === m ? i : -1)).filter((i) => i >= 0), n: m } : null; };
+  const out: FoolAward[] = [], a = best(S.truths), b = best(S.fooled), c = two ? null : best(S.called), d = best(S.falls);
+  if (a) out.push({ t: "Most correct", ...a });
+  if (b) out.push({ t: "Best liars", ...b });
+  if (c) out.push({ t: "Best prediction", ...c });
+  if (d) out.push({ t: "Fooled the most", ...d, spoon: true });
+  return out;
+}
+export const foolAwardWhat = (a: FoolAward, two: boolean) => {
+  const n = a.n, x = (one: string, many: string) => (n === 1 ? one : many.replace("#", String(n)));
+  return a.t === "Most correct" ? x("found the truth once", "found the truth # times")
+    : a.t === "Best liars" ? (two ? x("fooled the other team once", "fooled the other team # times") : x("fooled a team once", "fooled teams # times"))
+    : a.t === "Best prediction" ? x("called it once", "called it # times")
+    : x("fell for 1 lie", "fell for # lies");
+};
+/* the result's beat: the pens draw the six facts (2.6 s), then the teams' labels come in, last place first, the winner
+   last; then the winner's line, and the points fly into the totals (the TV's tracker and the phones wait for it) */
+export const FOOL_PEN_END = 2.6;
+export const rvFool = (places: number[], k: number) => { const step = k <= 3 ? 0.6 : 0.35, ps = [...new Set(places)].sort((a, b) => b - a);
+  return { at: (t: number) => Math.max(0, ps.indexOf(places[t])) * step, done: (ps.length - 1) * step + 1 }; };
+export const foolDone = (places: number[], k: number) => FOOL_PEN_END + rvFool(places, k).done;

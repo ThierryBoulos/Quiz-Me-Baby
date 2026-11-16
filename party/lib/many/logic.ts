@@ -14,7 +14,7 @@ import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_LEVELS, type SkPick } from "../stakes";
-import { FOOL_MAX, type FoolOpt } from "../fool";
+import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
 
 export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "fool", "roulette", "stakes"] as const;
 /* sudden death isn't picked: it comes when the night ends with teams tied at the top */
@@ -60,6 +60,7 @@ export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: n
   only?: number[];                                // sudden death: the teams tied at the top, the only ones who answer
   fast?: number[];                                // What Do You See?: each team's right buzzes, their times added up (ms): tied teams, the faster first
   got?: string[][];                               // What Do You See?: the pictures each team took (their photo files), for its pile at the result
+  foolLog?: FoolFactSum[];                        // Fool Me Twice: each fact's part in the result (the pens, the awards)
   words?: { w: string; ok: boolean }[][];         // Don't Say the Same: each team's word every time, and whether it scored, for its pile of word cards at the result
   fired?: number; had?: string[][];               // Russian Roulette: bullets that hit a team so far; each team's themes so far
   /* Secret Stakes: one bet (fixed at its start), what each team has won or lost, and every round's bets */
@@ -554,6 +555,8 @@ export function next(s: StateM, now: number, t: Timers) {
       s.stats.run = n(s.teams.length);
     } else {
       const w = legWinners(s); w.forEach((i) => m.wins[i]++);
+      /* Fool Me Twice: this fact's numbers, for the result's lie detector and its awards */
+      if (m.key === "fool" && s.fool) { const r = foolRes(s); if (r) (m.foolLog ||= []).push(foolFact(s.fool.opts, s.fool.picks, r.hits, r.pts)); }
       const pl = legPlaces(s), pts = legPoints(s), S = s.stats, q = qOf(s);
       pts.forEach((p, i) => { m.pts[i] += p; });
       pl.forEach((p, i) => {

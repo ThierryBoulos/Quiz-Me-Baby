@@ -14,8 +14,8 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun, type RrTeam } from "./Roulette";
 import { StakesBet, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
-import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus, ownIndex } from "./Fool";
-import { FOOL_MAX } from "@/lib/fool";
+import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "./Fool";
+import { FOOL_MAX, foolDone } from "@/lib/fool";
 import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
 import { MapView } from "./MapView";
@@ -864,11 +864,13 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
 /* a game's or a round's result waits on the phones while the TV reveals it (the winner comes in last): true while it
    waits. The host's buttons wait with it, so Next can't skip the reveal by mistake (the owner, 1 Nov) */
 function useTwoHold(pub: Pub) {
+  /* (Fool Me Twice's lie detector draws its pens first: its result is in later) */
+  const foolAt = pub.screen === "foolSummary" && pub.summary ? foolDone(pub.summary.winner == null ? [1, 1] : pub.summary.winner === 0 ? [1, 2] : [2, 1], 2) : null;
   const sc = pub.screen, m = pub.mini;
   const won = sc === "auctionResult" ? pub.auction?.winner : sc === "battleSummary" ? pub.battle?.winner
     : sc === "roundScore" ? (pub.roundPts && pub.roundPts[0] !== pub.roundPts[1] ? (pub.roundPts[0] > pub.roundPts[1] ? 0 : 1) : null) : pub.summary?.winner;
   const holdKey = /Summary$|^auctionResult$|^roundScore$/.test(sc) ? `${sc}:${m?.key ?? ""}:${pub.r}` : null;
-  return useRevealHold(holdKey, twoDone(won) + 0.3);
+  return useRevealHold(holdKey, (foolAt ?? twoDone(won)) + 0.3);
 }
 
 /* part: "pill" is only how your team did (it goes at the top of the phone, above the question), "rest" the result without it */
@@ -995,9 +997,11 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     return standings({ title: "The Auction", text: w == null ? "Tied" : `${T[w].name} +${aw}`, w, vals: A.wins, col: "Legs", endCol: "Night",
       end: (t) => <Pts n={A.award?.[t]} />, you: won3(w, aw, "the Auction") }); }
   if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary, w = S.winner, aw = w != null ? S.award?.[w] ?? m?.pts : S.award?.[0];
-    return standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still tied" : w == null ? ((S.award?.[0] ?? 0) > 0 ? "A split" : "Nobody scores") : `${T[w].name} +${aw}`, w,
-      vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : "Legs", endCol: "Night", end: (t) => <Pts n={S.award?.[t]} />,
-      note: S.needsHost ? "The host decides." : S.who, you: S.needsHost ? (mine == null ? null : ["Still tied: the host decides", "mid"]) : won3(w, aw, m?.title ?? "it") }); }
+    const res = standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still tied" : w == null ? ((S.award?.[0] ?? 0) > 0 ? "A split" : "Nobody scores") : `${T[w].name} +${aw}`, w,
+      vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : m?.key === "fool" ? "Points" : "Legs", endCol: "Night", end: (t) => <Pts n={S.award?.[t]} />,
+      note: S.needsHost ? "The host decides." : S.who, you: S.needsHost ? (mine == null ? null : ["Still tied: the host decides", "mid"]) : won3(w, aw, m?.title ?? "it") });
+    /* Fool Me Twice: its awards under the result (16 Nov, the owner; with 2 teams, no prediction award: it's always the other team) */
+    return m?.key === "fool" && S.fool ? <>{res}<AwardList awards={foolAwardList(S.fool, ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })), true)} /></> : res; }
   if (sc === "battleSummary" && pub.battle) { const B = pub.battle, w = B.winner ?? null, aw = w != null ? B.award?.[w] ?? m?.pts : B.award?.[0];
     return standings({ title: "Battle of the Captains", text: w == null ? (B.note || "Tied") : `${T[w].name} +${aw}`, w, vals: B.score, col: "Right", endCol: "Night",
       end: (t) => <Pts n={B.award?.[t]} />, note: B.predict, you: won3(w, aw, "the Battle") }); }

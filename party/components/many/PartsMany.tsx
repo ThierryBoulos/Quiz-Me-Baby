@@ -2,6 +2,7 @@
 /* MANY TEAMS: the pieces the TV and every phone share, each the two-team one (components/GameParts.tsx)
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
+import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
@@ -79,7 +80,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   const award = pub.screen === "summary" ? pub.summary?.award : undefined;
   const [landed, setLanded] = useState(false);
   /* the +points rise once the result's reveal is done (the last team in), and land 1.5 s later */
-  const flyAfter = pub.screen === "summary" && pub.summary ? revealOf(pub.summary, k).done : 0;
+  const flyAfter = pub.screen === "summary" && pub.summary ? resultDone(pub) : 0;
   useEffect(() => {
     setLanded(false); if (pub.screen !== "summary") return;
     /* as the points land, the TV itself plays the soft "coin in a jar" */
@@ -290,6 +291,9 @@ export function revealOf(S: { places: number[] }, k: number) {
   const step = k <= 3 ? 0.7 : k <= 5 ? 0.55 : 0.4, ps = [...new Set(S.places)].sort((a, b) => b - a);
   return { at: (t: number) => Math.max(0, ps.indexOf(S.places[t])) * step, done: (ps.length - 1) * step + 1 };
 }
+/* ...and when the whole result is in, for the line under it, the points flying up and the phones' wait: Fool Me Twice's
+   lie detector draws its pens first (lib/fool.ts) */
+export const resultDone = (pub: PubMany) => (pub.game?.key === "fool" && pub.summary ? foolDone(pub.summary.places, pub.teams.length) : revealOf(pub.summary!, pub.teams.length).done);
 /* under each one: its place, its name, what the place pays the night */
 export function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boolean }) {
   const S = pub.summary!, T = pub.teams, paid = S.award[t] > 0, lit = paid && S.places[t] === 1;
