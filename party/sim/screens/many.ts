@@ -86,6 +86,8 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         if (k === 3) opts.push({ text: "A lighthouse keeper", ours: true, by: [] });
         const pred = Array.from({ length: k }, (_, t) => (t + 1) % k), r = QMB.foolScore(opts, picks, pred);
         rec.pub.fool.opts = opts.map((o) => o.text);
+        /* (the tracker's "this game" counts the fact on the reveal: this one's points in place of the first fact's) */
+        if (rec.pub.game?.pts) { rec.pub.game.pts = rec.pub.game.pts.map((v: number, t: number) => v - (base.pub.fool.rev.pts[t] || 0) + r.pts[t]); rec.pub.fool.total = [...rec.pub.game.pts]; }
         rec.pub.fool.rev = { ...rec.pub.fool.rev, opts, fooled: r.fooled, pts: r.pts, hits: r.hits, predicts: pred };
         if (rec.secret && Array.isArray(rec.secret.typed)) rec.secret.typed = lies.slice(0, k);
         got[`m${k}.reveal.fool.${tag}.a`] = rec;
