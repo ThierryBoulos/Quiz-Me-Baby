@@ -211,6 +211,10 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
     Way) counts too. Never a different answer;
   - **8 fakes of ours**, the same shape and length as the truth, plausible, none of them true by accident, none in
     the accept list, no two the same (the bank check runs the game's own matcher on them);
+  - **the fakes vary in kind (16 Nov, the owner):** never all animals, all art or all hobbies. At most 2 of one
+    kind, at least 5 kinds, and 2 or 3 of the truth's own kind so the truth doesn't stand out as the odd one. Some
+    ridiculous but believable: these are weird facts (for Picasso questioned about a theft, the owner's own: a glass
+    of wine, a stop sign, the president's pen). Each still has to read right in the sentence;
   - a short **note** after the reveal, and its **source**.
   The owner's 9 samples (16 Nov) are the model; the knocker-upper was dropped as too easy. No hiding of rude lies:
   the players' own. The catalogue is `const FOOLS` in `classic.html` (`[key, level, topic, fact, truth, accept, fakes,
