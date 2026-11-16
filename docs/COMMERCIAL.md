@@ -104,6 +104,11 @@ Some of these may not apply now or ever; they're here so nothing is forgotten.
 - **todo**: Error monitoring and uptime alerts; a status page or a "something's wrong" contact.
 - **todo**: Backups and a restore test; what happens to saved nights.
 - **todo**: Load: many parties at once (realtime connections and message quotas per plan).
+- **todo, check before launch (the owner, 16 Nov)**: since 16 Nov every tap and every screen is sent twice: once
+  through the database, as before, and once on a room's live line (faster, ~0.3-0.5 s a tap). That roughly doubles
+  what a game uses of Supabase's realtime messages (each screen update counts once per phone in the room). Fine on
+  today's free plan at our size; before commercial launch, check the numbers on a real busy night and decide: keep
+  both, drop one, or move to a bigger Supabase plan.
 
 ### Legal and privacy
 - **todo**: Privacy policy and terms; cookie / local storage notice where needed (EU: GDPR).
