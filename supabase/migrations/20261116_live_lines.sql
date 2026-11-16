@@ -49,3 +49,8 @@ create or replace function public.qmb_now() returns bigint
   language sql volatile as
 $$ select floor(extract(epoch from clock_timestamp()) * 1000)::bigint $$;
 grant execute on function public.qmb_now() to anon, authenticated;
+
+-- (16 Nov, after Supabase's security advisor: the clock function pins its search path; the line check is for
+--  signed-in devices only)
+alter function public.qmb_now() set search_path = '';
+revoke execute on function public.qmb_line_ok(text, boolean) from anon;
