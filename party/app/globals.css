@@ -1663,6 +1663,9 @@ button.fool-opt:active:not(:disabled) { transform: scale(.985); }
 .fool-opt.on { border-color: var(--color-gold); background: color-mix(in srgb, var(--color-gold) 16%, transparent); }
 button.fool-opt:disabled:not(.on) { opacity: .55; }
 .fool-team { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; }
+/* every answer box in a list the same height, the tallest's (16 Nov, the owner); a long word breaks inside its box */
+.fool-opts { grid-auto-rows: 1fr; }
+.fool-opts .fool-opt bdi { overflow-wrap: anywhere; }
 /* compact answers on a phone (many teams: every answer in one screen) */
 .fool-cmp .fool-opt { min-height: 44px; padding: 6px 10px; gap: 8px; font-size: var(--text-14); border-radius: 12px; }
 .fool-cmp .fool-letter { width: 1.55em; height: 1.55em; }

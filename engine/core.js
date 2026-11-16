@@ -420,8 +420,10 @@
   /* ---- Fool Me Twice (the owner, 16 Nov): a true fact with a blank; each team writes a lie, then picks the truth ----
      An answer as it shows on screen: one line, first letter capital, no full stop at the end, 40 letters at most (a
      lie mustn't give itself away by how it's typed) */
+  /* a lie's longest (the owner, 16 Nov: every answer fits its box on the narrowest phone; party/lib/fool.ts FOOL_MAX) */
+  const FOOL_CHARS = 25;
   function foolShow(x){
-    const t = String(x == null ? '' : x).replace(/\s+/g, ' ').trim().replace(/[.!?…,;:]+$/, '').slice(0, 40).trim();
+    const t = String(x == null ? '' : x).replace(/\s+/g, ' ').trim().replace(/[.!?…,;:]+$/, '').slice(0, FOOL_CHARS).trim();
     return t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
   }
   /* is this the truth (any way of writing it: the fact's own list, typos allowed)? */

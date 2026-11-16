@@ -15,6 +15,7 @@ import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun, type RrTeam } fro
 import { StakesBet, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
 import { FoolFact, FoolHead, FoolOptions, FoolReveal, FoolStatus, ownIndex } from "./Fool";
+import { FOOL_MAX } from "@/lib/fool";
 import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
 import { MapView } from "./MapView";
@@ -1273,10 +1274,11 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
           <div className="flex gap-2">
-            <input id="sug" {...np.props} className="input" value={text} maxLength={80} inputMode={pub.screen === "miniQ" ? "decimal" : "text"} placeholder={pub.screen === "miniQ" ? "A number" : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
+            <input id="sug" {...np.props} className="input" value={text} maxLength={pub.screen === "foolWrite" ? FOOL_MAX : 80} inputMode={pub.screen === "miniQ" ? "decimal" : "text"} placeholder={pub.screen === "miniQ" ? "A number" : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
             <button className="btn" disabled={!text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => void suggest()}>Send</button>
           </div>
           {np.hint}
+          {pub.screen === "foolWrite" && text.length >= FOOL_MAX && <div className="text-13 font-bold" style={{ color: "var(--color-gold)" }} role="status">Limit reached.</div>}
           {sent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sent}</b></div>}
         </div>)}
       {pub.screen === "auctionRun" && (
@@ -1547,13 +1549,14 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
             {/* What Do You See?: the same 10 seconds, to say it out loud and type it */}
             {sc === "seeQ" && pub.see?.typeBy && <div className="flex items-center gap-2 text-13 font-bold" role="timer"><Clock deadline={pub.see.typeBy} size={52} />to say it and type it</div>}
           </div>
-          <input id="ans" {...np.props} className="input" value={a} maxLength={sc === "foolWrite" ? 40 : 80} autoComplete="off" autoCorrect="off" spellCheck={false}
+          <input id="ans" {...np.props} className="input" value={a} maxLength={sc === "foolWrite" ? FOOL_MAX : 80} autoComplete="off" autoCorrect="off" spellCheck={false}
             /* Closest: the number pad, fastest (the reader still takes "1.5 million" if a keyboard sends it) */
             inputMode={sc === "miniQ" ? "decimal" : "text"} enterKeyHint="send" placeholder={sc === "miniQ" ? "e.g. 236" : sc === "foolWrite" ? "A lie that sounds true" : "Type it"} onChange={(e) => setA(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !dip && !busy && !early && a.trim()) { e.preventDefault(); void send(); } }} />
           {sc === "miniQ" && a.trim() && (Number.isFinite(guess)
             ? ![String(guess), guess.toLocaleString("en-GB")].includes(a.trim()) && <div className="text-13 text-[var(--color-ink-2)]">Counts as <b>{guess.toLocaleString("en-GB")}{per ? ` ${per}` : ""}</b></div>
             : <p className="text-13 text-[var(--color-no)]" role="alert">That isn&rsquo;t a number.</p>)}
+          {sc === "foolWrite" && a.length >= FOOL_MAX && <div className="text-13 font-bold" style={{ color: "var(--color-gold)" }} role="status">Limit reached.</div>}
           {dip && <input {...np.props} className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {np.hint}
           <button className="btn btn-gold btn-lg" disabled={busy || early || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onPointerDown={(e) => e.preventDefault()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
@@ -1660,7 +1663,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <div className="eyebrow mb-2">Your team suggests{canType ? ". Tap one to use it." : ""}</div>
           <div className="flex flex-col gap-1">
             {sugs.map((s) => (
-              <button key={s.id} className="text-left text-15 min-h-[44px] px-2 -mx-2 rounded-[12px] active:bg-white/10" disabled={!canType} onClick={() => setA(s.text)}>
+              <button key={s.id} className="text-left text-15 min-h-[44px] px-2 -mx-2 rounded-[12px] active:bg-white/10" disabled={!canType} onClick={() => setA(sc === "foolWrite" ? s.text.slice(0, FOOL_MAX) : s.text)}>
                 <b style={{ color: tc(mine) }}><bdi>{members.find((m) => m.user_id === s.user_id)?.name}</bdi>:</b> {s.text}</button>))}
           </div>
         </div>)}

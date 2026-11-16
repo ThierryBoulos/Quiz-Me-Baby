@@ -203,7 +203,8 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
 - **Fool Me Twice (16 Nov, the owner):** a strange **true** fact with one blank (`____`), checked online against a
   source (no myths sold as fact, no legends: Napoleon's rabbits came out). Harder than the viral trivia everyone has
   seen. Two levels, internal only: `normal` (the night's first 4 facts) and `hard` (its last 2). The truth is short
-  (30 letters at most), typed the way a person would; teams' lies are 40 at most. Each fact has:
+  (25 letters at most), typed the way a person would; teams' lies are 25 at most too, and so are our fakes (16 Nov,
+  the owner: every answer fits its box, two lines on the narrowest phone; the phone says "Limit reached."). Each fact has:
   - a **long accept list**: every way of typing the same truth (plural, with or without "a/the", typos, rewordings,
     British and American spellings, the French), so a lie that is really the truth is refused ("That's the truth,
     write a lie!") and the truth never shows twice; and a word that would make a true "lie" (Stars for the Milky

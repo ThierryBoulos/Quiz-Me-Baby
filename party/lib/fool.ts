@@ -17,5 +17,6 @@ export type FoolPub = {
   rev?: FoolRev;                           // the reveal
   total: number[];                         // this game's points so far (at the reveal, with this fact's)
 };
-/* a lie's longest */
-export const FOOL_MAX = 40;
+/* a lie's longest (16 Nov, the owner: so every answer fits in its box, two lines at most on the narrowest phone; our own
+   answers are 25 at most too). The phone says "Limit reached." when it's reached, never the number */
+export const FOOL_MAX = 25;

@@ -59,7 +59,7 @@ export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, 
   if (seed && !tv) shown = shown.map((x) => ({ ...x, h: mix(seed + "|" + x.k) })).sort((a, b) => a.h - b.h);
   const two = tv ? shown.length > 4 : compact === 2;
   return (
-    <div className={"grid w-full gap-2 " + (two ? "grid-cols-2" : "grid-cols-1") + (compact && !tv ? " fool-cmp" : "")} style={tv ? { gap: shown.length > 6 ? 10 : 14 } : compact ? { gap: 6 } : undefined} role={onPick ? "group" : "list"} aria-label="The answers">
+    <div className={"grid w-full gap-2 fool-opts " + (two ? "grid-cols-2" : "grid-cols-1") + (compact && !tv ? " fool-cmp" : "")} style={tv ? { gap: shown.length > 6 ? 10 : 14 } : compact ? { gap: 6 } : undefined} role={onPick ? "group" : "list"} aria-label="The answers">
       {shown.map(({ o, k }, i) => {
         const on = mine === k, body = <><span className="fool-letter">{LETTERS[i]}</span><span className="min-w-0 text-left leading-snug"><bdi>{o}</bdi></span></>;
         return onPick

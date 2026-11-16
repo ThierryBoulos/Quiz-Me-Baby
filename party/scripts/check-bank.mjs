@@ -109,11 +109,12 @@ for (const q of bank.bank) {
     if ((q.question.match(/____/g) || []).length !== 1) err(id, "fool: one blank (____) in the fact");
     if (!/[.]$/.test(q.question)) err(id, "fool: the fact ends with a full stop");
     if (/\b(a|an)\s+____/i.test(q.question)) err(id, "fool: 'a' or 'an' before the blank gives the answer away");
-    if (q.answer.length > 30) err(id, "fool: the truth is over 30 letters");
+    /* (25 at most, as the teams' lies: every answer fits its box on the narrowest phone, 16 Nov) */
+    if (q.answer.length > 25) err(id, "fool: the truth is over 25 letters");
     const acc = q.accept || [], fk = q.fakes || [];
     if (fk.length !== 8) err(id, `fool: 8 fakes, got ${fk.length}`);
     fk.forEach((f, i) => { if (QMB.foolIsTruth(f, q, acc)) err(id, `fool: the fake "${f}" counts as the truth`);
-      if (QMB.foolShow(f).length > 40) err(id, `fool: the fake "${f}" is over 40 letters`);
+      if (String(f).trim().length > 25) err(id, `fool: the fake "${f}" is over 25 letters`);
       fk.forEach((g, j) => { if (j > i && QMB.foolSame(QMB.foolShow(f), QMB.foolShow(g))) err(id, `fool: two fakes the same, "${f}" and "${g}"`); }); });
     const twin = bank.bank.find((x) => x.type === "fool" && x.id !== q.id && QMB.foolSame(x.answer, q.answer) && x.id < q.id);
     if (twin) warn(id, `fool: the same truth as ${twin.id}`);

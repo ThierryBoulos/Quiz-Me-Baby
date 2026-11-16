@@ -599,6 +599,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               <label className="field-label !mb-0" htmlFor="mlie">Your lie</label>
               <input id="mlie" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={FOOL_MAX} enterKeyHint="send" value={text} onChange={(e) => setText(e.target.value)} placeholder="A lie that sounds true"
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendLie(); } }} />
+              {text.length >= FOOL_MAX && <div className="text-13 font-bold" style={{ color: "var(--color-gold)" }} role="status">Limit reached.</div>}
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={sendLie}>Send</button>
               {np.hint}
               <div className="text-13 text-[var(--color-ink-3)]">Write a lie that sounds true. Once you send it, it&rsquo;s locked.</div>
@@ -643,6 +644,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
                   onChange={(e) => setSug(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
                 <button className="btn" disabled={!sug.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => void suggest()}>Send</button>
               </div>
+              {sug.length >= FOOL_MAX && <div className="text-13 font-bold" style={{ color: "var(--color-gold)" }} role="status">Limit reached.</div>}
               {np.hint}
               {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
             </div>)

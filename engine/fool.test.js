@@ -40,9 +40,9 @@ test('fool: the same lie from two teams (typos, a full stop) shows once, both it
   /* a team's lie that is one of ours: ours isn't added again */
   assert.equal(opts.filter(o => /goldfish/i.test(o.text)).length, 1);
 });
-test('fool: an answer shows tidied: first letter capital, no full stop, 40 letters at most', () => {
+test('fool: an answer shows tidied: first letter capital, no full stop, 25 letters at most', () => {
   assert.equal(Q.foolShow('  a   wig.  '), 'A wig');
-  assert.equal(Q.foolShow('x'.repeat(60)).length, 40);
+  assert.equal(Q.foolShow('x'.repeat(60)).length, 25);
 });
 test('fool: points: +2 the truth, +1 per team fooled, -1 for falling for a lie whose writer predicted it, 0 for ours', () => {
   const opts = [{ text:'Guinea pig', truth:true, by:[] }, { text:'Hamster', by:[0] }, { text:'Cat', by:[1, 2] }, { text:'Goat', ours:true, by:[] }];

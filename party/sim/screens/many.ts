@@ -48,7 +48,7 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         const m = L.miniOf(s)!, q = L.qOf(s)!;
         snap();
         /* Fool Me Twice: lies of every length (40 letters the longest), the last team none (ours in its place) */
-        if (m.key === "fool") { for (let t = 0; t < k - 1; t++) L.captainAnswer(s, t, { text: ["A wig", "Its own weight in chocolate", "A hamster", "Forty sheep and a very old goat", "Wax", "Pickled herring", "A brass band"][t % 7] }); snap(); L.foolOpen(s, now, T); continue; }
+        if (m.key === "fool") { for (let t = 0; t < k - 1; t++) L.captainAnswer(s, t, { text: ["A wig", "Its weight in chocolate", "A hamster", "Forty sheep and a goat", "Wax", "Pickled herring", "Seventeen rubber chickens"][t % 7] }); snap(); L.foolOpen(s, now, T); continue; }
         if (m.key === "majority") for (const p of s.roster) { if (rng() < 0.1) continue; L.vote(s, p.name, rng() < 0.5 ? q.answer : (q.options as string[])[Math.floor(rng() * 4)]); }
         else if (m.key === "dish") { for (let t = 0; t < k && s.screen === "q"; t++) L.captainAnswer(s, t, { text: rng() < 0.4 ? String(q.answer) : "Atlantis" }); }
         /* What Do You See? (the buzzer): a first team buzzes (the picture stops) and gets it wrong (out, the clock goes
