@@ -1095,6 +1095,14 @@
       const seDeck = asked('see') ? seeDeck(cfg, cfg.seeLegs) : { qs:[], spare:[] };
       const foDeck = asked('fool') ? foolDeck(cfg.foolLegs) : { qs:[], spare:[] };
       unclash(seDeck.qs, seDeck.spare, inNight);
+      /* Fool Me Twice's facts clear of the never-together groups too (two farting facts, two smuggled into space: the
+         owner, 16 Nov), a normal one for a normal one, a hard for a hard; and no spare that clashes with the night */
+      if(foDeck.qs.length){ const hard = (q) => q.level === 'hard';
+        const nL = foDeck.qs.filter(q => !hard(q)), hL = foDeck.qs.filter(hard), nS = foDeck.spare.filter(q => !hard(q)), hS = foDeck.spare.filter(hard);
+        unclash(nL, nS, inNight); unclash(hL, hS, inNight);
+        /* (the spares kept clear of each other too: a Change fact, then a tie's extra fact, could bring in both) */
+        const sp = new Set(inNight); foDeck.qs = nL.concat(hL);
+        foDeck.spare = nS.concat(hS).filter(q => { if(clashesWith(q.id, sp)) return false; sp.add(q.id); return true; }); }
       /* Secret Stakes' themes, after everything else (it's the last game): three rounds and a spare */
       const skDeck = asked('stakes') ? stakesDeck(cfg, STAKES_ROUNDS + STAKES_SPARE, inNight) : [];
       const hasStakes = skDeck.length >= STAKES_ROUNDS;

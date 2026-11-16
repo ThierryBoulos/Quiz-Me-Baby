@@ -552,7 +552,10 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* FOOL ME TWICE (16 Nov, the owner): the fact, the lie (captains), the answers to pick from and who'll fall for your
           lie (captains), the reveal; the host sees the truth and every lie as it comes in, and runs it */}
       {fool && pub.fool && !(sc !== "reveal" && pub.paused && !host) && (() => { const F = pub.fool, picking = sc === "pick", done = mine != null && !!pub.sent[mine];
-        const head = <div className="flex items-center justify-between gap-3"><FoolHead fool={F} />{sc !== "reveal" && <Clock deadline={pub.deadline} left={pub.left} size={60} />}</div>;
+        /* (many teams, many answers: compact, so every answer and the teams to predict fit in one screen, the owner, 16 Nov:
+           from 4 teams smaller rows, from 5 two columns and the teams as one row of letters) */
+        const cmp: 0 | 1 | 2 = picking ? (T.length >= 5 ? 2 : 1) : 0, seed = me.user_id + "|" + pub.qid;
+        const head = <div className="flex items-center justify-between gap-3"><FoolHead fool={F} />{sc !== "reveal" && <Clock deadline={pub.deadline} left={pub.left} size={cmp ? 48 : 60} />}</div>;
         const sendLie = () => { const t = text.trim(); if (!t || busy) return;
           void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) { setSentTxt(t); try { localStorage.setItem(lieKey, t); } catch { /* in memory only */ } } }); };
         const status = <FoolStatus teams={foolT} done={(picking ? F.picked : F.wrote) || T.map(() => false)} doing={T.length > 4 ? "…" : picking ? ": picking…" : ": writing…"} finished={T.length > 4 ? "✓" : picking ? ": picked" : ": lie in"} />;
@@ -570,7 +573,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The truth. Only you see this</div>
               <div className="display text-28 mt-1" style={{ color: "var(--color-gold)" }}><bdi>{secret.answer}</bdi></div>
             </div>)}
-          {picking && F.opts && <FoolOptions opts={F.opts} />}
+          {picking && F.opts && <FoolOptions opts={F.opts} seed={seed} compact={cmp} />}
           {/* each team's lie as it comes in (only this phone sees them) */}
           <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who's in">
             <p className="text-center text-14 font-bold">{`${pub.sent.filter(Boolean).length} of ${T.length} teams ${picking ? "picked" : "wrote a lie"}`}</p>
@@ -612,25 +615,26 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {status}
         </>);
         /* a captain picks the truth, and the team that will fall for its lie */
-        if (cap && picking && F.opts && mine != null) { const needPred = foolOwn >= 0; return (<>
+        if (cap && picking && F.opts && mine != null) { const needPred = foolOwn >= 0; return (
+          <div className={"flex flex-col " + (cmp ? "gap-2" : "gap-4")}>
           {head}
-          <FoolFact fool={F} size={17} />
-          <p className="text-center font-bold text-16" role="status" style={{ color: done ? undefined : "var(--color-gold)" }}>{done ? "Picked. Wait for the reveal." : "Which one is the truth?"}</p>
-          <FoolOptions opts={F.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolSel} busy={busy} locked={done} onPick={(k) => setFoolSel(k)} />
+          <FoolFact fool={F} size={cmp ? 15 : 17} />
+          <p className={"text-center font-bold " + (cmp ? "text-15" : "text-16")} role="status" style={{ color: done ? undefined : "var(--color-gold)" }}>{done ? "Picked. Wait for the reveal." : "Which one is the truth?"}</p>
+          <FoolOptions opts={F.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolSel} busy={busy} locked={done} onPick={(k) => setFoolSel(k)} seed={seed} compact={cmp} />
           {needPred && (<>
-            <p className="text-center font-bold text-15">Who will fall for your lie?</p>
-            <FoolPredict teams={foolT} me={mine} value={foolPred} busy={busy} locked={done} onPick={setFoolPred} />
-            <p className="text-center text-12 text-[var(--color-ink-3)]">If they fall for it, they lose 1 point.</p>
+            {/* (the team picked, or what it costs them, on the same line: one line less) */}
+            <p className="text-center font-bold text-14 mt-1 truncate">Who will fall for your lie? {foolPred != null && cmp === 2 ? <bdi style={{ color: T[foolPred]?.color }}>{T[foolPred]?.name}</bdi> : <span className="font-normal text-[var(--color-ink-3)]">They lose 1.</span>}</p>
+            <FoolPredict teams={foolT} me={mine} value={foolPred} busy={busy} locked={done} onPick={setFoolPred} compact={cmp === 2} />
           </>)}
           {/* (after the answers and the teams, not docked over them: a docked bar covered an answer, as the owner found on 12 Nov) */}
-          {!done && <button className="btn btn-gold btn-lg btn-block" disabled={busy || foolSel == null || (needPred && foolPred == null)}
+          {!done && <button className={"btn btn-gold btn-block " + (cmp ? "" : "btn-lg")} disabled={busy || foolSel == null || (needPred && foolPred == null)}
             onClick={() => void send("answer", { pick: foolSel, ...(needPred ? { pred: foolPred } : {}), k: `${pub.qid}|pick` })}>Lock in</button>}
-        </>); }
+          </div>); }
         /* everyone else: the fact, a lie to suggest to the captain, the answers (the captain picks) */
         return (<>
           {head}
-          <FoolFact fool={F} size={19} />
-          {picking && F.opts && <FoolOptions opts={F.opts} />}
+          <FoolFact fool={F} size={cmp ? 15 : 19} />
+          {picking && F.opts && <FoolOptions opts={F.opts} seed={seed} compact={cmp} />}
           {!picking && mine != null && !done ? (
             <div className="card flex flex-col gap-2">
               <label className="field-label !mb-0" htmlFor="msug">Suggest a lie to {T[mine]?.captain || "your captain"}</label>

@@ -448,7 +448,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <ToSide order={2}><div className="flex items-center justify-between">{pub.fool && <FoolHead fool={pub.fool} />}<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
         {pub.fool && <FoolFact fool={pub.fool} size={17} />}
         <AnswerCard />
-        {pub.screen === "foolPick" && pub.fool?.opts && <FoolOptions opts={pub.fool.opts} />}
+        {pub.screen === "foolPick" && pub.fool?.opts && <FoolOptions opts={pub.fool.opts} seed={"host|" + pub.qid} />}
         {pub.fool && <FoolStatus teams={foolTeams(pub)} done={(pub.screen === "foolPick" ? pub.fool.picked : pub.fool.wrote) || [false, false]} doing={pub.screen === "foolPick" ? ": picking…" : ": writing a lie…"} finished={pub.screen === "foolPick" ? ": picked" : ": lie in"} />}
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} />{pub.screen === "foolWrite" && !pub.fool?.wrote.some(Boolean) && <Small ghost label="Change fact" move={{ type: "fool/swap" }} />}</div>
       </div>);
@@ -1020,7 +1020,8 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
    (components/Side; upright nothing moves) */
 /* the two teams as Fool Me Twice's pieces want them */
 const foolTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})` }));
-function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean }) {
+/* (who: this phone's player, for its own order of Fool Me Twice's answers) */
+function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean; who?: string }) {
   const spun = useSpun(pub.roulette?.spinAt);
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
@@ -1036,7 +1037,7 @@ function OnScreen({ pub, counting, small, side, mine, captain }: { pub: Pub; cou
     {/^fool(Write|Pick|Reveal)$/.test(pub.screen) && pub.fool && <div className="flex flex-col gap-2 w-full">
       <FoolHead fool={pub.fool} />
       <FoolFact fool={pub.fool} size={small ? 16 : 19} truth={pub.screen === "foolReveal" ? pub.fool.rev?.answer : undefined} />
-      {pub.screen === "foolPick" && pub.fool.opts && !captain && <FoolOptions opts={pub.fool.opts} />}
+      {pub.screen === "foolPick" && pub.fool.opts && !captain && <FoolOptions opts={pub.fool.opts} seed={(who || "host") + "|" + pub.qid} />}
       {pub.screen === "foolReveal" && pub.fool.rev && <FoolReveal rev={pub.fool.rev} teams={foolTeams(pub)} />}
     </div>}
     {/* What Do You See?: the picture, clearing from the TV's clock; at the reveal the whole of it, and its credit */}
@@ -1258,7 +1259,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
         </div>)}
       <ToSide order={2} when={SIDE_Q.includes(pub.screen) && !pub.paused}><Head pub={pub} me={me} capName={cap?.name} /></ToSide>
       <Result pub={pub} mine={mine} part="pill" />
-      <OnScreen pub={pub} side mine={mine} />
+      <OnScreen pub={pub} side mine={mine} who={me.user_id} />
       {/^majority(Q|Reveal)$/.test(pub.screen) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} part="rest" />
       {pub.screen === "final" && <Line className="!text-13">{pub.mode === "nohost" ? "A captain chooses" : "The host chooses"}: play again with the same teams, or end the night.</Line>}
@@ -1503,7 +1504,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
       <ToSide order={2} when={SIDE_Q.includes(sc) && !pub.paused}><Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} /></ToSide>
       <Result pub={pub} mine={mine} part="pill" />
-      <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side mine={mine} captain />
+      <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side mine={mine} captain who={me.user_id} />
       {/* Secret Stakes: your bet, a theme and a level, then Lock in */}
       {sc === "stakesPick" && pub.stakes && !pub.stakes.locked[mine] && !pub.paused && <StakesBet sk={pub.stakes} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy}
         onLock={() => { if (skTheme != null && skLevel) void nxt({ type: "stakes/pick", k: skTheme, level: skLevel, theme: pub.stakes!.themes[skTheme] }); }} />}
@@ -1562,7 +1563,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {/* Fool Me Twice: the captain picks the truth (its own lie isn't there); one tap, locked */}
       {sc === "foolPick" && pub.fool?.opts && !pub.paused && (
         <div className="flex flex-col gap-2">
-          <FoolOptions opts={pub.fool.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolPicked ?? (pub.sent?.[mine] ? -1 : null)} busy={busy}
+          <FoolOptions opts={pub.fool.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolPicked ?? (pub.sent?.[mine] ? -1 : null)} busy={busy} seed={me.user_id + "|" + pub.qid}
             onPick={(k) => { setFoolPicked(k); void act("answer", { pick: k, k: draftKey }).then((ok) => { if (!ok) setFoolPicked(null); }); }} />
           <p className="text-13 text-center text-[var(--color-ink-3)]">{pub.sent?.[mine] ? "Picked. Wait for the reveal." : "Which one is the truth? One tap and it's locked."}</p>
         </div>)}

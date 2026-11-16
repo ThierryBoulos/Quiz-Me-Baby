@@ -47,14 +47,19 @@ export function FoolStatus({ teams, done, doing, finished, tv }: { teams: FoolTe
     </div>);
 }
 
+/* a phone's own order (16 Nov, the owner): every phone shuffles the answers its own way, so no two phones show them in
+   the same order (seed: who's holding it and the fact); the TV keeps the order the game dealt */
+const mix = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 /* the answers to pick from: on the TV, all of them; on a captain's phone, buttons (its own lie left out) */
 /* (locked: the pick is sent, no other tap; by default once one is picked: with 3 to 8 teams the captain can change it
    until Lock in) */
-export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked }: { opts: string[]; tv?: boolean; onPick?: (k: number) => void; hide?: number[]; mine?: number | null; busy?: boolean; locked?: boolean }) {
-  const shown = opts.map((o, k) => ({ o, k })).filter((x) => !hide?.includes(x.k));
-  const two = tv && shown.length > 4;
+/* (compact, on a phone (16 Nov, the owner: with many teams every answer in one screen): 1, smaller rows; 2, two columns) */
+export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, compact = 0 }: { opts: string[]; tv?: boolean; onPick?: (k: number) => void; hide?: number[]; mine?: number | null; busy?: boolean; locked?: boolean; seed?: string; compact?: 0 | 1 | 2 }) {
+  let shown = opts.map((o, k) => ({ o, k })).filter((x) => !hide?.includes(x.k));
+  if (seed && !tv) shown = shown.map((x) => ({ ...x, h: mix(seed + "|" + x.k) })).sort((a, b) => a.h - b.h);
+  const two = tv ? shown.length > 4 : compact === 2;
   return (
-    <div className={"grid w-full gap-2 " + (two ? "grid-cols-2" : "grid-cols-1")} style={tv ? { gap: shown.length > 6 ? 10 : 14 } : undefined} role={onPick ? "group" : "list"} aria-label="The answers">
+    <div className={"grid w-full gap-2 " + (two ? "grid-cols-2" : "grid-cols-1") + (compact && !tv ? " fool-cmp" : "")} style={tv ? { gap: shown.length > 6 ? 10 : 14 } : compact ? { gap: 6 } : undefined} role={onPick ? "group" : "list"} aria-label="The answers">
       {shown.map(({ o, k }, i) => {
         const on = mine === k, body = <><span className="fool-letter">{LETTERS[i]}</span><span className="min-w-0 text-left leading-snug"><bdi>{o}</bdi></span></>;
         return onPick
@@ -74,23 +79,30 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
   /* (on the TV, more than five rows go in two columns, the truth across the bottom: one column of nine shrank the
      whole screen to fit, 16 Nov screen check) */
   const step = tv ? (rows.length > 5 ? 0.6 : 0.9) : 0.6, big = rows.length > 6, cols = !!tv && rows.length > 5;   // (many rows: a quicker beat, the truth in under 6 s)
-  const who = (ts: number[]): ReactNode => ts.length ? <span className="flex items-center gap-1 flex-wrap">{ts.map((t) => <Dot key={t} t={t} color={teams[t]?.color ?? "#888"} size={tv ? (big ? 20 : 24) : 15} />)}</span> : null;
+  /* who fell for it: each team's dot, and "−1" beside it when the lie's writer named that team (16 Nov, the owner: a right
+     prediction shows clearly); with 2 teams it's always so, and the −1 says it */
+  const two = teams.length === 2;
+  const who = (ts: number[], by: number[]): ReactNode => ts.length ? <span className="flex items-center justify-end gap-1.5 flex-wrap">{ts.map((t) => {
+    const hit = rev.hits.some((h) => h.on === t && by.includes(h.by));
+    return <span key={t} className="inline-flex items-center gap-1"><Dot t={t} color={teams[t]?.color ?? "#888"} size={tv ? (big ? 20 : 24) : 15} />{hit && <span className="fool-minus" aria-label={`${teams[t]?.name} lose 1`}>−1</span>}</span>; })}</span> : null;
   return (
     <div className={cols ? "grid grid-cols-2 w-full" : "flex flex-col w-full"} style={{ gap: tv ? (cols ? 10 : big ? 6 : 10) : 6 }}>
       {rows.map((x, i) => {
         /* (a name ending in s takes the apostrophe alone: "Owls' lie") */
-        const by = names(x.o.by), t = x.o.truth, tag = t ? "The truth" : x.o.ours ? "One of ours" : `${by}${/s$/i.test(by) ? "'" : "'s"} lie`;
-        const pred = !t && x.fell.filter((f) => rev.hits.some((h) => h.on === f && x.o.by.includes(h.by)));
+        const by = names(x.o.by), t = x.o.truth, tag = t ? "The truth" : x.o.ours ? "One of ours" : `${by}${/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie`;   // (2-team names carry invisible direction marks)
+        const pred = t ? [] : x.fell.filter((f) => rev.hits.some((h) => h.on === f && x.o.by.includes(h.by)));
         return (
           <div key={x.k} className={"fool-rev rv" + (t ? " truth" : "") + (tv ? " tv" : "") + (cols && t ? " col-span-2" : "")} style={{ animationDelay: `${i * step}s`, ...(tv ? { fontSize: cols ? 24 : big ? 22 : 28, padding: big && !cols ? "6px 14px" : undefined } : {}) }}>
             <div className="min-w-0 flex-1 text-left">
               <div className="font-bold leading-snug"><bdi>{x.o.text}</bdi></div>
               <div className="eyebrow" style={{ fontSize: tv ? (big ? 12 : 14) : 10, color: t ? "var(--color-gold)" : x.o.ours ? "var(--color-ink-3)" : undefined }}>{tag}</div>
             </div>
+            {/* (3 to 8 teams: the writer named a team that fell for it, a stamp says so, in its own space on the row) */}
+            {!two && pred.length > 0 && <span className="fool-called" style={{ ["--d" as string]: `${i * step + 0.35}s`, fontSize: tv ? (cols ? 15 : 18) : 10 }}>Called it!</span>}
             <div className="flex flex-col items-end gap-0.5 shrink-0 text-right">
-              {who(x.fell)}
+              {who(x.fell, x.o.by)}
               <span className="text-[var(--color-ink-3)]" style={{ fontSize: tv ? (big ? 13 : 16) : 11 }}>
-                {t ? (x.fell.length ? "found it" : "nobody found it") : x.fell.length ? (pred && pred.length ? "fell for it, as predicted" : "fell for it") : "nobody fell for it"}</span>
+                {t ? (x.fell.length ? "found it" : "nobody found it") : x.fell.length ? "fell for it" : "nobody fell for it"}</span>
             </div>
           </div>);
       })}
@@ -108,8 +120,17 @@ export const ownIndex = (opts: string[] | undefined, lie: string | null | undefi
   const l = QMB.foolShow(lie);
   return l ? opts.findIndex((o) => QMB.foolSame(l, o)) : -1;
 };
-/* 3 to 8 teams: the team a captain says will fall for its lie (any team but its own) */
-export function FoolPredict({ teams, me, value, onPick, busy, locked }: { teams: FoolTeam[]; me: number; value: number | null; onPick: (t: number) => void; busy?: boolean; locked?: boolean }) {
+/* 3 to 8 teams: the team a captain says will fall for its lie (any team but its own). From 5 teams, one row of the teams'
+   letters (in their colours, as on the scores), the team picked named under it: every answer and this fit in one screen */
+export function FoolPredict({ teams, me, value, onPick, busy, locked, compact }: { teams: FoolTeam[]; me: number; value: number | null; onPick: (t: number) => void; busy?: boolean; locked?: boolean; compact?: boolean }) {
+  if (compact) return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="flex flex-wrap justify-center gap-1.5" role="group" aria-label="Who will fall for your lie?">
+        {teams.map((t, i) => i === me ? null : (
+          <button key={i} type="button" className="fool-dot" aria-pressed={value === i} aria-label={t.name} disabled={busy || locked} onClick={() => onPick(i)}
+            style={{ ["--c" as string]: t.color }}>{LETTERS[i]}</button>))}
+      </div>
+    </div>);
   return (
     <div className="flex flex-wrap justify-center gap-2" role="group" aria-label="Who will fall for your lie?">
       {teams.map((t, i) => i === me ? null : (

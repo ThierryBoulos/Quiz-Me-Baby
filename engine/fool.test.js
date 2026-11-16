@@ -105,3 +105,14 @@ test('fool: a night with rounds: after its round, the game comes up (its intro)'
   const fx = Q.play(g, { type:'round/next' }, { deal:D2 });
   assert.ok(fx.some(f => f.go === 'foolIntro'), JSON.stringify(fx));
 });
+test('fool: two facts that never share a night: never both dealt, nor one dealt and the other spare', () => {
+  const b2 = bank.map(q => Object.assign({}, q));
+  for(let seed2 = 1; seed2 <= 40; seed2++){
+    let x = seed2; const r = () => (x = (x * 16807) % 2147483647) / 2147483647;
+    const D3 = Q.createDealer({ bank:() => b2, used:() => new Set(), noRepeat:() => true, rng:r, never:() => [['fool:n0', 'fool:n1'], ['fool:h0', 'fool:h1']] });
+    const s = D3.buildGame({ standard:false, rounds:0, themes:[], minis:['fool'], teamA:{ name:'Owls' }, teamB:{ name:'Lions' } }).foolGame;
+    const all = s.qs.concat(s.spare).map(q => q.id);
+    for(const [a, c] of [['fool:n0', 'fool:n1'], ['fool:h0', 'fool:h1']]) assert.ok(!(all.includes(a) && all.includes(c)), seed2 + ': ' + a + ' and ' + c);
+    assert.deepEqual(s.qs.map(q => q.level), ['normal', 'normal', 'normal', 'normal', 'hard', 'hard']);
+  }
+});
