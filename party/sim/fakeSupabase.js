@@ -3,7 +3,10 @@
 export const db = { rooms: [], members: [], secrets: [], actions: [], nextId: 1, writes: 0, stalls: 0 };
 /* a messy network: pushes sent twice, or late (so out of order), a TV whose writes fail for a while,
    and a server that now and then sits on a read for 5 to 28 s (Supabase's free plan, GRF2) */
-export const net = { dup: 0, delay: 0, stall: 0, stallWrites: 0, twice: 0, rnd: Math.random, failWrites: false };
+export const net = { dup: 0, delay: 0, stall: 0, stallWrites: 0, twice: 0, rnd: Math.random, failWrites: false, lineDrop: 0, lineDelay: 0 };
+/* the live lines (lib/liveLines.ts, 16 Nov): a copy of each tap to the TV and each screen to the phones, on its own
+   numbers; lineDrop: the share of copies lost, lineDelay: up to that many ms late (the database copy still comes) */
+let lineRnd = Math.random;
 /* twice: every tagged tap lands a second time, up to that many ms later (a phone's resend after a held send) */
 let twiceRnd = Math.random;
 const listeners = new Set();              // the harness re-renders when rooms or members change
@@ -13,8 +16,8 @@ const channels = new Set();
 
 export function reset() {
   db.rooms = []; db.members = []; db.secrets = []; db.actions = []; db.nextId = 1; db.writes = 0; db.stalls = 0;
-  net.dup = 0; net.delay = 0; net.stall = 0; net.stallWrites = 0; net.twice = 0; net.failWrites = false;
-  twiceRnd = rngOf(4242);
+  net.dup = 0; net.delay = 0; net.stall = 0; net.stallWrites = 0; net.twice = 0; net.failWrites = false; net.lineDrop = 0; net.lineDelay = 0;
+  twiceRnd = rngOf(4242); lineRnd = rngOf(1616);
   channels.clear(); listeners.clear();
 }
 
@@ -99,14 +102,24 @@ export function insert(table, v, copy = false) {
       later(push);
       if (net.dup && net.rnd() < net.dup) later(push);           // the same push twice
     }
+    /* ...and the database's copy on the room's tap line (the trigger in 20261116_live_lines.sql) */
+    lineSend("act:" + row.room, "action", structuredClone(row), null);
   } else { db[table].push(row); changed(table); }
   return row;
 }
 
+function lineSend(name, event, payload, from) {
+  for (const ch of channels) if (ch !== from && ch.name === name) for (const l of ch.bc) if (l.event === event) {
+    if (net.lineDrop && lineRnd() < net.lineDrop) continue;
+    const go = () => l.cb({ event, payload: structuredClone(payload) });
+    if (net.lineDelay) setTimeout(go, Math.floor(lineRnd() * net.lineDelay)); else Promise.resolve().then(go);
+  }
+}
 function channel(name) {
   const ch = {
-    name, pg: [], present: {},
-    on(type, filter, cb) { if (type === "postgres_changes") ch.pg.push({ filter: filter.filter, cb }); return ch; },
+    name, pg: [], bc: [], present: {},
+    on(type, filter, cb) { if (type === "postgres_changes") ch.pg.push({ filter: filter.filter, cb }); else if (type === "broadcast") ch.bc.push({ event: filter.event, cb }); return ch; },
+    send(m) { if (m?.type === "broadcast") lineSend(name, m.event, m.payload, ch); return Promise.resolve("ok"); },
     subscribe(cb) { channels.add(ch); Promise.resolve().then(() => cb?.("SUBSCRIBED")); return ch; },
     presenceState() { return name.startsWith("here:") ? Object.fromEntries(presence.map((k) => [k, [{ on: 1 }]])) : {}; },
     track() { return Promise.resolve("ok"); }, untrack() { return Promise.resolve("ok"); },

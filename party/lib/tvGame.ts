@@ -1,4 +1,6 @@
 "use client";
+import { LIVE_LINES, actCount, usePubLine } from "./liveLines";
+import { serverOffset } from "@/components/Clock";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
@@ -99,6 +101,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const [pub, setPub] = useState<Pub | null>(null);
   const isTvRef = useRef(isTv);
   isTvRef.current = isTv;
+  /* each new screen straight to the phones too, on the room's live line (lib/liveLines.ts) */
+  const sendLine = usePubLine(code, isTv);
   const phoneRef = useRef(phone);
   phoneRef.current = phone;
   const saveKey = "qmb.tv." + code + ".game", usedKey = USED_KEY;
@@ -211,7 +215,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the TV's own clock, for the phones' clocks (at is an ordering stamp, which can jump ahead of the real time
          after a takeover; the phones read it as the time once, and ran fast for the rest of the night: the 4 Nov audit, 1.16) */
       v[0].now = Date.now();
+      /* (and how far this TV's clock is from the server's, so every phone counts down to the same second: 16 Nov) */
+      v[0].clk = serverOffset() ?? undefined;
       setPub(v[0]);
+      sendLine(v[0], at);
       const s = st.current;
       /* the game, kept on this laptop so a refresh picks it up (only written when it changed);
          stamped with the app's version, so an update mid-night can't load a game it doesn't understand */
@@ -244,7 +251,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
          a ruling leave it as it was — one write, not two */
       if (!pendingSince.current) pendingSince.current = Date.now();   // (the oldest write not landed yet)
       const sec = JSON.stringify(v[1]), withSecret = sec !== lastSecret.current;
-      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0], pubAt: at, ...(errs.current.length ? { errs: errs.current } : {}) } }).eq("code", code)
+      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: v[0], pubAt: at, ...(errs.current.length ? { errs: errs.current } : {}), ...(LIVE_LINES ? { lines: actCount.summary() } : {}) } }).eq("code", code)
         .or(`state->>pubAt.is.null,state->>pubAt.lt.${at}`).select("code")];
       if (withSecret) writes.push(sb().from("secrets").update({ data: { ...v[1], at } }).eq("room", code)
         .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).select("room"));
@@ -280,7 +287,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
     }).catch(failed);
     return c.p;
-  }, [code, saveKey, view]);
+  }, [code, saveKey, view, sendLine]);
   const publishRef = useRef(publish);
   publishRef.current = publish;
 

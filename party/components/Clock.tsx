@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { sb } from "@/lib/supabase";
+import { LIVE_LINES } from "@/lib/liveLines";
 
 /* Every deadline is the TV's time. A phone whose own clock is set wrong (by
    more than a few seconds) would count down wrong, so phones learn how far
@@ -9,7 +11,34 @@ import { useEffect, useState } from "react";
    clock may be set differently, the old one's gaps age out. The 4 Nov audit, 1.16) */
 let skew = 0;
 const gaps: number[] = [];
-export function noteTvTime(tvNowAt?: number) {
+/* THE SERVER'S CLOCK (16 Nov, the owner's yes): this device asks the server its time a few times and keeps the
+   reading that came back fastest (off = server minus this device, within a few hundredths of a second); the TV says
+   its own in every update (clk). A phone then knows the TV's time to the same accuracy, and every timer in the room
+   shows the same second. Until both are known (or with the live lines switched off), the gaps below, as before. */
+let off: number | null = null, bestTrip = Infinity, tvOff: number | null = null, syncing = false;
+export async function syncServerClock(tries = 3) {
+  if (!LIVE_LINES || syncing) return; syncing = true;
+  try {
+    for (let i = 0; i < tries; i++) {
+      const t0 = Date.now(); const { data, error } = await sb().rpc("qmb_now"); const t1 = Date.now();
+      if (!error && typeof data === "number" && t1 - t0 < bestTrip) { bestTrip = t1 - t0; off = data - (t0 + t1) / 2; }
+    }
+  } catch { /* offline, or the function isn't there: the old way */ } finally { syncing = false; }
+}
+export const serverOffset = () => off;
+/* every few minutes, and on the page coming back (a phone's clock can drift, or the network was slow the first time) */
+export function useServerClock(on = true) {
+  useEffect(() => {
+    if (!on || !LIVE_LINES) return;
+    void syncServerClock();
+    const t = setInterval(() => { bestTrip = Infinity; void syncServerClock(); }, 5 * 60000);
+    const vis = () => { if (document.visibilityState === "visible") void syncServerClock(1); };
+    document.addEventListener("visibilitychange", vis);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", vis); };
+  }, [on]);
+}
+export function noteTvTime(tvNowAt?: number, tvClk?: number) {
+  if (typeof tvClk === "number") tvOff = tvClk;
   if (!tvNowAt) return;
   gaps.push(Date.now() - tvNowAt);
   if (gaps.length > 20) gaps.shift();
@@ -21,7 +50,7 @@ export function noteTvTime(tvNowAt?: number) {
      arrive; the smallest of twenty is nearly all difference, so half a second is safe from the arrival time) */
   skew = gaps.length >= 3 && Math.abs(best) > 500 ? best : 0;
 }
-export const tvNow = () => Date.now() - skew;
+export const tvNow = () => (off != null && tvOff != null ? Date.now() + off - tvOff : Date.now() - skew);
 
 /* Seconds left, from the TV's deadline. Paused shows the frozen number. */
 export function useSecondsLeft(deadline?: number | null, left?: number) {

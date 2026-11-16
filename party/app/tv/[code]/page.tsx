@@ -12,6 +12,7 @@ import { notReadyWhy, readyToStart, starter, useRoom } from "@/lib/room";
 import { thinLine, type Pub } from "@/lib/game";
 import { Snd } from "@/lib/sound";
 import { useWakeLock } from "@/lib/wakeLock";
+import { useServerClock } from "@/components/Clock";
 import { useTabLock } from "@/lib/tabLock";
 import { sb } from "@/lib/supabase";
 import { useFreshBuild } from "@/lib/fresh";
@@ -53,6 +54,8 @@ export default function TvRoom() {
   useEffect(() => { if (isTv && status === "lobby" && seats > lastSeats.current) Snd.soft(); lastSeats.current = seats; }, [seats, isTv, status]);
   /* the laptop must not doze off mid-game */
   const awake = useWakeLock(isTv);
+  /* the server's clock: the TV says how far its own is from it, in every update (16 Nov) */
+  useServerClock(isTv);
   const pub = many ? null : own || ((room?.state?.pub || null) as Pub | null);
   const pubMany = many ? (M.pub || ((room?.state?.pub as PubMany | null)?.many ? (room?.state?.pub as PubMany) : null)) : null;
   /* (3-8 teams: its view carries the same look-ahead, for What Do You See?'s pictures) */

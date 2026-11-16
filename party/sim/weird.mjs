@@ -32,6 +32,11 @@ const W = [
   { name: "the host gone for good", minis: ["dish", "saysame", "map"], host: true, events: [{ at: 15, type: "hostGone", for: 100000 }] },
   { name: "no internet for the TV: 30 s, then 90 s", minis: DEF, events: [{ at: 20, type: "writesFail", for: 30 }, { at: 80, type: "writesFail", for: 90 }] },
   { name: "every push sent twice", minis: ALL, net: { dup: 1 } },
+  /* 16 Nov: the live lines (lib/liveLines.ts): half the line's copies lost, the rest up to 2 s late, the database's
+     copies late and doubled too; no host and with a host. Nothing done twice, nothing lost */
+  { name: "live line: half its copies lost, the rest late (no host)", minis: ALL, net: { lineDrop: 0.5, lineDelay: 2000, delay: 1500, dup: 0.3 } },
+  { name: "live line: half its copies lost, the rest late (with a host)", minis: ALL, host: true, net: { lineDrop: 0.5, lineDelay: 2000, delay: 1500, dup: 0.3 } },
+  { name: "live line: every copy early, the database's 3 s late", minis: ALL, net: { delay: 3000 } },
   { name: "pushes up to 3 s late, out of order", minis: ALL, net: { delay: 3000, dup: 0.3 } },
   { name: "both captains tap Next, buzz and rule at the same instant", minis: ALL, simul: true },
   { name: "answers land the very moment the clock runs out", minis: DEF, edge: true },

@@ -12,6 +12,7 @@ import { skQm } from "./logic";
 
 export type TeamPub = { name: string; captain: string; score: number; color: string };
 export type PubMany = {
+  clk?: number;   // the TV's clock against the server's, ms (16 Nov)
   many: true; at?: number; step: number; screen: StateM["screen"];
   teams: TeamPub[];
   /* this game: legs taken, its place points so far (this leg's counted from its reveal), Majority Rules' shares */

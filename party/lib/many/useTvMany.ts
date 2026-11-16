@@ -1,4 +1,6 @@
 "use client";
+import { LIVE_LINES, actCount, usePubLine } from "../liveLines";
+import { serverOffset } from "@/components/Clock";
 /* MANY TEAMS: the TV runs the night (3 to 8 teams, always with a host). Its own state, saved under its own
    key (qmb.tv.<code>.many), so a two-team save is never read here or the other way round. It shares only the
    inbox (lib/tv/useInbox.ts), the bank and the dealer's decks with the two-team game; none of the two-team
@@ -76,6 +78,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave" | "noBank">(null);
   const st = useRef<StateM | null>(null);
   const [pub, setPub] = useState<PubMany | null>(null);
+  /* each new screen straight to the phones too, on the room's live line (lib/liveLines.ts) */
+  const sendLine = usePubLine(code, isTv);
   const ctx = useRef({ room, members }); ctx.current = { room, members };
   const bank = useRef<Bank | null>(null);
   const saveKey = "qmb.tv." + code + ".many";
@@ -118,7 +122,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     const { pub: p, secret } = buildMany(s);
     p.ack = ack.current;
     const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at; p.now = Date.now();
+    p.clk = serverOffset() ?? undefined;
     setPub(p);
+    sendLine(p, at);
     try { localStorage.setItem(saveKey, JSON.stringify({ build: BUILD_ID, shape: SHAPE, s })); setBanner((b) => (b === "cantSave" ? null : b)); } catch { setBanner("cantSave"); }
     /* a copy on the server, so another phone can carry on if this one goes quiet (no TV, 3 Nov): on a new screen
        at once, otherwise every 4 s at most. (Not with a TV: 3-8 teams always have a host, and a laptop doesn't doze.) */
@@ -129,7 +135,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     const sec = JSON.stringify(secret), withSecret = sec !== lastSecret.current;
     const job = async () => {
       const room = ctx.current.room;
-      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: p, pubAt: at } }).eq("code", code)
+      const writes = [sb().from("rooms").update({ state: { ...(room?.state || {}), pub: p, pubAt: at, ...(LIVE_LINES ? { lines: actCount.summary() } : {}) } }).eq("code", code)
         .or(`state->>pubAt.is.null,state->>pubAt.lt.${at}`).select("code")];
       if (withSecret) writes.push(sb().from("secrets").update({ data: { ...secret, at } }).eq("room", code)
         .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).select("room"));
@@ -151,7 +157,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const done = job().catch((e) => { console.error("publish (many)", e); if (!retryT.current) retryT.current = setTimeout(() => { retryT.current = null; publishRef.current(); }, 2000); });
       return Promise.race([done, new Promise<void>((r) => setTimeout(r, 2000))]);
     });
-  }, [code, saveKey]);
+  }, [code, saveKey, sendLine]);
   publishRef.current = publish;
   /* answers coming in (60 phones in Majority Rules): one update a second, not one each (the 4 Nov audit, 1.11) */
   const publishSoon = useCallback(() => {

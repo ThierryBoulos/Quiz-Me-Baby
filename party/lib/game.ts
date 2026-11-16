@@ -10,6 +10,7 @@ import type { RrPub } from "./roulette";
 import type { SkPub } from "./stakes";
 import type { SePub } from "./see";
 export type Pub = {
+  clk?: number;                   // the TV's clock against the server's, ms (16 Nov): phones count down to the same second
   noLl?: boolean;                 // lifelines off for the night (Setup, the owner, 15 Nov): none shown, Double Points too
   step: number;                   // bumps on every host move and screen change; host taps carry it so stale ones are refused
   screen: string;                 // roundIntro | ask | steal | answer | roundScore | sudden | final | miniIntro | miniQ | closestReveal | miniSummary | flag… | dish…

@@ -7,7 +7,8 @@ import { Lineup } from "@/components/Lineup";
 import { ShareButton } from "@/components/Share";
 import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, ScoreFix, TvTakeover, useSecret } from "@/components/PhoneGame";
 import { Confetti, Hud, usePreload } from "@/components/GameParts";
-import { noteTvTime } from "@/components/Clock";
+import { noteTvTime, useServerClock } from "@/components/Clock";
+import { LIVE_LINES, pubCount } from "@/lib/liveLines";
 import { Rules } from "@/components/Rules";
 import { Setup } from "@/components/Setup";
 import { iso, type Pub } from "@/lib/game";
@@ -319,7 +320,19 @@ export default function PhoneRoom() {
     }
     if (lateKey.current != null && viewKey.current !== lateKey.current) { lateKey.current = null; setTapErr(null); }
   }, [room?.status, pub?.at, lobbyKey]);   // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { noteTvTime(pub?.now ?? pub?.at); }, [pub?.at, pub?.now]);
+  useEffect(() => { const p = (room?.state?.pub || null) as { now?: number; at?: number; clk?: number } | null; noteTvTime(p?.now ?? p?.at, p?.clk); }, [room?.state?.pub]);
+  /* the server's clock, for the timers (16 Nov) */
+  useServerClock(room?.status === "playing");
+  /* how much sooner the live line brought the screens than the database, once at the end of a game, for the owner's
+     "is it worth it" (lib/liveLines.ts; read back from the room's log) */
+  const linesSent = useRef("");
+  const endKey = (room?.state?.pub as { screen?: string } | undefined)?.screen === "final" ? code : "";
+  useEffect(() => {
+    if (!endKey) { linesSent.current = ""; return; }   // (a new game: its own count at its end)
+    if (!LIVE_LINES || linesSent.current === endKey || !mine) return;
+    linesSent.current = endKey;
+    void sendAction(code, "count", { lines: pubCount.summary() }).catch(() => { /* only a count */ });
+  }, [endKey]);   // eslint-disable-line react-hooks/exhaustive-deps
   /* an old copy of the app (left open across a deploy) reloads when nothing is being answered */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline), room?.status === "playing");
   /* the night is over and somebody tapped Exit: everyone back to the home screen */

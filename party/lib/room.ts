@@ -1,4 +1,5 @@
 "use client";
+import { hearPubLine, pubCount } from "./liveLines";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { joinLive, note, sb } from "./supabase";
 
@@ -53,7 +54,7 @@ export function useRoom(code: string) {
       /* the push carries the new row: use it straight away (no second trip to the server) */
       .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: "code=eq." + code }, (e) => {
         const n = e.new as Room | undefined;
-        if (n && n.code === code && n.state) { pushed.current = Math.max(pushed.current, stamp(n)); takeRoom(n); setMissing(false); } else void pull();
+        if (n && n.code === code && n.state) { pubCount.note(String(stamp(n)), "db"); pushed.current = Math.max(pushed.current, stamp(n)); takeRoom(n); setMissing(false); } else void pull();
       })
       /* someone joined, moved, became captain or left: apply that one row, not the whole list again */
       .on("postgres_changes", { event: "*", schema: "public", table: "members", filter: "room=eq." + code }, (e) => {
@@ -72,6 +73,12 @@ export function useRoom(code: string) {
         if (live && !was) void pull();                  // (re)connected: catch up on anything missed meanwhile
       }));
     let close = open();
+    /* the TV's screens on the room's live line too (lib/liveLines.ts): a newer one is shown at once, the database's
+       copy of it is then nothing new; everything else in the room (status, players) still comes from the database */
+    const closeLine = hearPubLine(code, (pub, at) => {
+      pubCount.note(String(at), "line");
+      setRoom((cur) => (!cur || at <= stamp(cur) ? cur : { ...cur, state: { ...(cur.state || {}), pub, pubAt: at } }));
+    });
     /* a read that found a newer view than any push: if no push brings it in the next moment, the feed is quiet */
     onRead.current = (r) => {
       const s = stamp(r);
@@ -84,7 +91,7 @@ export function useRoom(code: string) {
     }, 1000);
     const wake = () => { if (document.visibilityState === "visible") { last = Date.now(); void pull(); } };
     document.addEventListener("visibilitychange", wake);
-    return () => { alive.current = false; onRead.current = () => {}; clearInterval(tick); document.removeEventListener("visibilitychange", wake); close(); };
+    return () => { alive.current = false; onRead.current = () => {}; clearInterval(tick); document.removeEventListener("visibilitychange", wake); close(); closeLine(); };
   }, [code, pull, pullMembers, takeRoom]);
 
   return { room, members, missing, refresh: pull };

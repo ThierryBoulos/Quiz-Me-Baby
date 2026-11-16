@@ -1,6 +1,7 @@
 /* The TV's inbox: everything the phones sent since the last action handled on
    this TV, in the order the server received it (that order decides who buzzed
    first). Each one goes to handle(), once, one at a time. */
+import { actCount, hearActLine } from "../liveLines";
 import { useEffect } from "react";
 import { joinLive, sb } from "../supabase";
 import { serverMs, type Action } from "./rules";
@@ -105,13 +106,15 @@ export function useInbox(code: string, isTv: boolean, handle: (a: Action) => Pro
     let live = false, polled = Date.now();
     const open = () => joinLive(() => sb().channel("actions:" + code)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
-        (m: { new?: Partial<Action> }) => { if (m.new?.id && m.new.kind) { pushed.add(m.new.id); enqueue(m.new as Action); } void read(); })
+        (m: { new?: Partial<Action> }) => { if (m.new?.id && m.new.kind) { actCount.note(String(m.new.id), "db"); pushed.add(m.new.id); enqueue(m.new as Action); } void read(); })
       .subscribe((status) => { const was = live; live = status === "SUBSCRIBED"; if (live && !was) void read(); }));
     let close = open();
+    /* the taps on the room's live line too (lib/liveLines.ts): whichever copy lands first is the tap */
+    const closeLine = hearActLine(code, (a) => { const x = a as unknown as Action; actCount.note(String(x.id), "line"); pushed.add(x.id); enqueue(x); });
     /* every tap arrives with the push and is handled at once; this read is the safety net:
        every 20 s while the live connection is up (a tap it missed is picked up by the next push
        anyway), every 3 s while it's down */
     const poll = setInterval(() => { if (Date.now() - polled >= (live && Date.now() > quietUntil ? 20000 : 3000)) { polled = Date.now(); void read(true); } }, 1000);
-    return () => { off = true; clearInterval(poll); close(); };
+    return () => { off = true; clearInterval(poll); close(); closeLine(); };
   }, [code, isTv, handle]);
 }
