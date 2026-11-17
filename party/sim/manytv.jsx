@@ -254,7 +254,7 @@ async function roulette(k, phone, tag) {
   const pts = want.map((w) => w.reduce((a, b) => a + b, 0)), sum = pub().summary;
   check(`${tag} Roulette: summary.spins, spin by spin`, JSON.stringify(sum?.spins) === JSON.stringify(want), `${JSON.stringify(sum?.spins)} want ${JSON.stringify(want)}`);
   check(`${tag} Roulette: the game's points`, JSON.stringify(sum?.pts) === JSON.stringify(pts) && JSON.stringify(mini().pts) === JSON.stringify(pts), `${sum?.pts} want ${pts}`);
-  const award = pts.map((v) => (v > 0 ? PLACE_PTS[pts.filter((x) => x > v).length] : 0));
+  const award = pts.map((v) => PLACE_PTS[v > 0 ? pts.filter((x) => x > v).length : pts.length - 1]);
   check(`${tag} Roulette: the night's points paid by place (none for 0 or below)`, JSON.stringify(sum?.award) === JSON.stringify(award) && saved().teams.every((x, t) => x.score === award[t]),
     `${sum?.award} want ${award}`);
 }
@@ -336,7 +336,7 @@ async function fool(k, phone, tag) {
     if (f === 2) check(`${tag} Fool: nobody writes: the answers are the truth and ours`, saved().fool.opts.every((o) => o.truth || o.ours) && saved().fool.opts.length === k + 1 + (k <= 3 ? 1 : 0)); }
   await judge("m/next");
   check(`${tag} Fool: the summary after 6 facts`, pub().screen === "summary", pub().screen);
-  const pts = mini().pts, award = pts.map((v) => (v > 0 ? PLACE_PTS[pts.filter((x) => x > v).length] : 0));
+  const pts = mini().pts, award = pts.map((v) => PLACE_PTS[v > 0 ? pts.filter((x) => x > v).length : pts.length - 1]);
   check(`${tag} Fool: the night's points paid by place (none for 0 or below)`, JSON.stringify(pub().summary.award) === JSON.stringify(award) && saved().teams.every((x, t) => x.score === award[t]), `${pub().summary.award} want ${award}`);
 }
 

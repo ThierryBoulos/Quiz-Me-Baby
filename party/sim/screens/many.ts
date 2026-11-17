@@ -29,7 +29,7 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
       majority: all(g.majorityGame), say, dish: all(g.dishGame), see: all(g.seeGame), roulette: all(g.rouletteGame),
       stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])], fool: all(g.foolGame) } as Partial<Record<L.ManyKey, Q[]>>;
     const teams = Array.from({ length: k }, (_, t) => ({ name: longNames[t], captain: "Captain" + t }));
-    const s = L.newNight(teams, decks, keys, { quiz: [4, 4] });
+    const s = L.newNight(teams, decks, keys, { quiz: [4, 6] });   // (the second game three rounds: "Rounds 3, 4 and 5", an odd round never plays alone)
     s.intro = true;
     const roster = Array.from({ length: k * 3 }, (_, i) => ({ name: ["Nour", "Karim", "Joe", "Maya", "Rami", "Lea", "Tarek", "Zeina"][i % 8] + (i >= 8 ? i : ""), team: i % k }));
     let now = Date.UTC(2026, 9, 18, 19, 0, 0);

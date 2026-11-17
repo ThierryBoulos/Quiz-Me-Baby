@@ -461,9 +461,9 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     const FS = V.buildMany(s).pub.summary?.fool;
     if (!FS || JSON.stringify(FS.tally) !== JSON.stringify(runs)) fail("the result's points fact by fact");
     for (const key of ["truths", "fooled", "falls", "called"]) if (!FS || FS[key].join() !== cnt[key].join()) fail(`the result's ${key}: ${FS?.[key]} not ${cnt[key]}`);
-    /* the night: by place on the tally, as every game (a team on 0 or less, nothing) */
+    /* the night: by place on the tally, as every game (a team on 0 or less: last, the last place's points) */
     const pl = L.placesBy(tally.map((v) => (v > 0 ? -v : null)));
-    if (s.teams.some((x, t) => x.score !== (pl[t] == null ? 0 : L.PLACE_PTS[pl[t] - 1]))) fail("the places paid");
+    if (s.teams.some((x, t) => x.score !== L.PLACE_PTS[(pl[t] ?? s.teams.length) - 1])) fail("the places paid");
   }
   if (!ok) bad++;
   console.log(`Fool Me Twice, 3-8 teams: the lies (the truth refused, ours for a missing one, the same lie once), ${Object.entries(seenN).map(([k, n]) => `${k} teams ${[...n].join("/")} answers`).join(", ")}, the picks (never its own lie), the predictions, the points, the places, Change fact, Pause — ${ok ? "ok" : "FAILED: " + why.join("; ")}`);

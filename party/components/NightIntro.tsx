@@ -13,7 +13,7 @@ const ordinal = (n: number) => n + (n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 /* how the night is won, in a line */
 export function introWin(I: IntroPub) {
-  if (I.many) return `Each game ranks the teams: ${PLACE_PTS.slice(0, Math.min(I.teams, 4)).map((p, i) => `${ordinal(i + 1)} ${p}`).join(", ")}${I.teams > 4 ? "…" : ""} points to the night. Score nothing in a game, add nothing. Most points at the end wins.`;
+  if (I.many) return `Each game ranks the teams: ${PLACE_PTS.slice(0, Math.min(I.teams, 4)).map((p, i) => `${ordinal(i + 1)} ${p}`).join(", ")}${I.teams > 4 ? "…" : ""} points to the night. Score nothing in a game, still add ${PLACE_PTS[I.teams - 1]}. Most points at the end wins.`;
   return "Most points at the end wins the night. Tied at the end? Sudden death.";
 }
 /* (3-8 teams: a round is one theme, as with two teams; they play two at a time: 11 Nov, the owner) */
@@ -31,6 +31,8 @@ const IC: Record<string, string> = {
   dish: "M5 4h14l-7 8zM12 12v7M8 20h8", roulette: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 6.2v1.6M16.3 9.5v.01M16.3 14.5v.01M12 16.2v1.6M7.7 14.5v.01M7.7 9.5v.01",
   battle: "M3 18h18L19 7l-4 4-3-6-3 6-4-4z",
   /* Secret Stakes: a stack of chips */
+  /* Fool Me Twice: a question mark in a ring */
+  fool: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M9.4 9.6a2.6 2.6 0 1 1 3.9 2.2c-.8.5-1.3 1-1.3 1.9M12 16.8v.01",
   /* What Do You See?: an eye */
   see: "M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6",
   stakes: "M12 4c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3zM4 7v4c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 11v4c0 1.7 3.6 3 8 3s8-1.3 8-3v-4M4 15v2c0 1.7 3.6 3 8 3s8-1.3 8-3v-2" };

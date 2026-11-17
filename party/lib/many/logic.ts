@@ -26,13 +26,18 @@ export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority
 export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "see", "sudden", "roulette", "stakes"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
 /* a game's name on screen. The question rounds by their numbers: a round is one theme, and they play two at a time
-   ("Rounds 3 and 4"), the last one alone when the night has an odd number ("Round 5"): 11 Nov, the owner */
+   ("Rounds 3 and 4": 11 Nov, the owner). A round is never left to play alone: with an odd number of rounds the
+   last one joins the pair before it, a game of three ("Rounds 5, 6 and 7", six questions, paid once: 17 Nov, the
+   owner: one round alone paid as much as a whole game). A night of one round is that round */
+export const quizGames = (rounds: number) => (rounds <= 0 ? 0 : Math.max(1, Math.floor(rounds / 2)));
+/* ...and how many questions each of those games plays: two a round */
+export const quizSizes = (rounds: number) => Array.from({ length: quizGames(rounds) }, (_, j) => (rounds === 1 ? 2 : MANY_LEGS.quiz + (rounds % 2 && j === quizGames(rounds) - 1 ? 2 : 0)));
 const roundsIn = (m: { qs?: unknown[] }) => Math.max(1, Math.ceil((m.qs?.length ?? MANY_LEGS.quiz) / 2));
 export const titleOf = (minis: { key: ManyKey; qs?: unknown[] }[], i: number) => {
   const key = minis[i]?.key; if (!key) return "";
   if (key !== "quiz") return MANY_TITLES[key];
-  const first = minis.slice(0, i).filter((m) => m.key === "quiz").reduce((a, m) => a + roundsIn(m), 0) + 1, last = first + roundsIn(minis[i]) - 1;
-  return last > first ? `Rounds ${first} and ${last}` : `Round ${first}`;
+  const first = minis.slice(0, i).filter((m) => m.key === "quiz").reduce((a, m) => a + roundsIn(m), 0) + 1, nums = Array.from({ length: roundsIn(minis[i]) }, (_, j) => first + j);
+  return nums.length > 1 ? `Rounds ${nums.slice(0, -1).join(", ")} and ${nums[nums.length - 1]}` : `Round ${first}`;
 };
 /* the rounds a question-round game plays (for the night's plan) */
 export const roundNumbers = (minis: { key: ManyKey; qs?: unknown[] }[], i: number) => {
@@ -594,7 +599,9 @@ export function next(s: StateM, now: number, t: Timers) {
   return false;
 }
 /* a game's result: its places (the tally, or Majority Rules' share right), paid by PLACE_PTS. A team that scored
-   nothing in the game (no answer that placed, no right answer) gets nothing */
+   nothing in the game (no answer that placed, no right answer; Roulette's bullet can take it below 0) is last and
+   gets the last place's points: 3 with 8 teams, 4 with 5, 6 with 3 (17 Nov, the owner: it used to get nothing, which
+   made Roulette and What Do You See? pay less than the other games) */
 export const gameVal = (m: MiniM, t: number) => (m.key === "majority" ? share(m, t) : m.pts[t]);
 export function award(s: StateM, m: MiniM) {
   const val = s.teams.map((_, t) => gameVal(m, t));
@@ -602,7 +609,7 @@ export function award(s: StateM, m: MiniM) {
      to buzz wins, the owner, 12 Nov) */
   const pl = placesBy(val.map((v, t) => (v > 0 ? -v * 1e7 + (m.key === "see" ? m.fast?.[t] ?? 0 : 0) : null)));
   m.places = pl.map((p) => p ?? s.teams.length);
-  m.award = pl.map((p) => (p == null ? 0 : PLACE_PTS[p - 1] ?? 0));
+  m.award = pl.map((p) => PLACE_PTS[(p ?? s.teams.length) - 1] ?? 0);
   m.award.forEach((p, t) => { s.teams[t].score += p; });
 }
 /* the final order: score, then games won; places shared on a tie */

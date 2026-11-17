@@ -89,10 +89,11 @@ export async function run() {
   check("3-8: the night starts", room.status === "playing", room.status);
   const items = st?.pub?.intro?.items || [];
   const qItems = items.filter((x) => x.kind === "q");
-  check("3-8: 5 rounds are three games", qItems.length === 3, qItems.map((x) => x.title).join(", "));
-  check("...named by their rounds", qItems.map((x) => x.title).join(", ") === "Rounds 1 and 2, Rounds 3 and 4, Round 5");
+  /* (an odd round never plays alone: it joins the last pair, 17 Nov, the owner) */
+  check("3-8: 5 rounds are two games, the last one three rounds", qItems.length === 2, qItems.map((x) => x.title).join(", "));
+  check("...named by their rounds", qItems.map((x) => x.title).join(", ") === "Rounds 1 and 2, Rounds 3, 4 and 5");
   const got = qItems.map((x) => x.themes || []);
-  check("...one theme a round, each theme once", got.map((t) => t.length).join(",") === "2,2,1" && [...got.flat()].sort().join() === [...themes].sort().join(), got.map((t) => t.join("+")).join(", "));
+  check("...one theme a round, each theme once", got.map((t) => t.length).join(",") === "2,3" && [...got.flat()].sort().join() === [...themes].sort().join(), got.map((t) => t.join("+")).join(", "));
   /* the host's picked pair is played, and their own question is in the TV's bank (kept for next time) */
   const night = JSON.parse(localStorage.getItem("qmb.tv." + CODE + ".many") || "null");
   const quiz = (night?.s?.minis || []).filter((m) => m.key === "quiz").flatMap((m) => m.qs.map((q) => q.id));

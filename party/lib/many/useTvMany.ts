@@ -19,7 +19,7 @@ import { DISH_LAST, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY } from "../game";
 import { SEE_TYPE } from "../see";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
@@ -242,9 +242,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const cfg = (a.payload.cfg || {}) as G;
         const picked = (Array.isArray(cfg.minis) ? cfg.minis : []).filter((x: string) => (MANY_MINIS as readonly string[]).includes(x)) as ManyKey[];
         /* the question rounds: how many (1 to 14), one theme each, two questions; they play two at a time, back to
-           back, as one game (scored as one: the owner, 11 Nov), so 5 rounds are three games, the last one round */
+           back, as one game (scored as one: the owner, 11 Nov); an odd round out joins the last pair, so 5 rounds
+           are two games, the last one three rounds (17 Nov, the owner) */
         const rounds = picked.includes("quiz") ? Math.max(1, Math.min(MANY_ROUNDS, Math.floor(Number(cfg.rounds) || 1))) : 0;
-        const games = Math.ceil(rounds / 2);
+        const games = quizGames(rounds);
         /* (Secret Stakes: always the night's last game, 11 Nov, the owner) */
         const keys = [...lineup(games, picked.filter((x) => x !== "quiz" && x !== "stakes")), ...(picked.includes("stakes") ? ["stakes" as ManyKey] : [])];
         if (!keys.length) { await lobbyWrite({ note: { text: "Pick at least one game.", at: Date.now() } }); return; }
@@ -307,8 +308,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
           fool: [...(g.foolGame?.qs || []), ...foolSpares(g.foolGame?.spare || [])] };
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
-        /* each question-round game two rounds of two questions, the last one round if the rounds are odd */
-        st.current = newNight(teams, decks, keys, { quiz: Array.from({ length: games }, (_, j) => Math.min(MANY_LEGS.quiz, rounds * 2 - j * MANY_LEGS.quiz)) });
+        /* each question-round game two rounds of two questions, the last one three rounds if the rounds are odd */
+        st.current = newNight(teams, decks, keys, { quiz: quizSizes(rounds) });
         st.current.intro = true;
         /* the questions dealt count as played on this TV */
         try { for (const mm of st.current.minis) for (const q of mm.qs) if (q?.id) used.add(q.id); localStorage.setItem(USED_KEY, JSON.stringify([...used])); } catch { /* in memory only */ }

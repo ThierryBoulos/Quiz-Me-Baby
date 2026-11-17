@@ -153,11 +153,11 @@ function rules(pub: PubMany): string[] {
   const g = pub.game!, n = g.of, k = pub.teams.length;
   /* the points, in numbers (the reviewers, 31 Oct): each go pays by place, 1st as many as there are teams; at the
      end the game's places add 10, 8, 6… to the night. With three teams the lists end with a full stop, not dots */
-  /* (in full, every place: the card used to stop at "3rd 6…"; and a team that scores nothing gets nothing, which
-     the place list alone never said: the 4 Nov audit, 3.8) */
+  /* (in full, every place: the card used to stop at "3rd 6…"; and a team that scores nothing is last and gets the
+     last place's points, 17 Nov, the owner) */
   const per = k <= 4 ? `1st gets ${k} points, ${Array.from({ length: k - 1 }, (_, i) => `${place(i + 2)} ${k - i - 1}`).join(", ")}. Wrong, nothing.`
     : `1st gets ${k} points, 2nd ${k - 1}, and so on down to 1. Wrong, nothing.`;
-  const pay = `The game's places add to the night: ${PLACE_PTS.slice(0, k).map((p, i) => `${place(i + 1)} ${p}`).join(", ")}. Score nothing, add nothing.`;
+  const pay = `The game's places add to the night: ${PLACE_PTS.slice(0, k).map((p, i) => `${place(i + 1)} ${p}`).join(", ")}. Score nothing, add ${PLACE_PTS[k - 1]}.`;
   const fast = `Fastest right answer first: ${per}`;
   switch (g.key) {
     case "majority": return [
@@ -214,7 +214,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */
-  const band = g.key === "sudden" ? "First right wins" : g.key === "stakes" ? `${count}, 3 themes each · The night's last game` : th.length ? `${count} – ${th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;
+  const band = g.key === "sudden" ? "First right wins" : g.key === "stakes" ? `${count}, 3 themes each · The night's last game` : th.length ? `${count} – ${th.length > 2 ? `${th.slice(0, -1).join(", ")} and ${th[th.length - 1]}` : th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;   // (three themes, a game of three rounds: "A, B and C")
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
       {/* "Game 2 of 5" is in the tracker right above: not said twice (the owner, 31 Oct) */}
@@ -432,7 +432,7 @@ function Pile({ photos, n, P, H, w, at, color, lit, dim }: { photos: string[]; n
 }
 
 /* Guess the Airport: each team's points on split-flap tiles, its status under as on a departures board (Boarding for the
-   winner, On time, Delayed for the last, Cancelled for no points); 1st on the left. The tiles flip through the numbers
+   winner, On time, Delayed for the last; Cancelled only where a game pays nothing); 1st on the left. The tiles flip through the numbers
    and stop on the points, a team at a time; the winner's light up in its colour and a plane takes off from its Boarding */
 export function FlapsMany({ pub }: { pub: PubMany }) {
   const S = pub.summary!, T = pub.teams, k = T.length, dense = k > 4, order = byPlace(S, k, false), rv = revealOf(S, k);

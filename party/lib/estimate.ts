@@ -2,6 +2,7 @@
    the TV's timers, with time for reveals, rulings, intros and a buffer. Nobody uses every clock to the end, so each
    timer counts for part of its length; and it's a range, not one number. Seconds throughout; the line is in minutes. */
 import { DEFAULTS, type Settings } from "./settings";
+import { quizSizes } from "./many/logic";
 
 /* how much of a clock a question takes, on the whole: two teams answer when they're ready; with many, the slowest counts */
 const PART_TWO = 0.55, PART_MANY = 0.7;
@@ -63,7 +64,7 @@ export function estimateMany(o: { minis: string[]; rounds: number; teams: number
   const s = { ...DEFAULTS, ...(o.timers || {}) }, over = 25 + 1.5 * Math.max(0, o.teams - 2);
   let t = NIGHT;
   for (const k of o.minis) {
-    if (k === "quiz") t += Math.ceil(o.rounds / 2) * game(MANY.quiz, s, PART_MANY, over);   // the rounds play two at a time
+    if (k === "quiz") for (const n of quizSizes(o.rounds)) t += game({ ...MANY.quiz, n }, s, PART_MANY, over);   // the rounds play two at a time, an odd one with the last pair
     else if (MANY[k]) t += game(MANY[k], s, PART_MANY, over);
   }
   return t * BUFFER;
