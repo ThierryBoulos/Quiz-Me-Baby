@@ -359,10 +359,63 @@ async function kinds(k, phone, tag) {
   check(`${tag} Pictures: only Celebrities on: every picture is one`, (m?.qs || []).length > 0 && got.join() === "face", got.join(", "));
 }
 
+/* ---------- The comeback (17 Nov, the owner) ---------- */
+/* the TV, 3-8 teams, with a TV and with the game phone: its questions dealt (not when the Setup switched it off), it
+   comes at the middle of a massacre, 15 seconds a question, only the captains in it answer, the host can't be
+   skipped past it by a stale tap, all three right moves the team up, and the night carries on */
+async function comeback(k, phone, tag) {
+  await setup(k, phone, ["flag", "closest", "pin", "airport"], 3, { comeback: false });
+  check(`${tag} Comeback: switched off in the Setup, no questions dealt`, !saved().cbQs);
+  await setup(k, phone, ["flag", "closest", "pin", "airport"]);
+  const qs = saved().cbQs || [], ids = new Set(saved().minis.flatMap((m) => m.qs.map((q) => q.id)));
+  check(`${tag} Comeback: three easy questions dealt, none of tonight's`, qs.length === 3 && qs.every((q) => q.difficulty === "easy" && q.type === "standard" && !ids.has(q.id)), qs.map((q) => q.difficulty).join());
+  /* two of the four games: nobody answers, the clock runs out on every question */
+  for (let g = 0; g < 2; g++) { await judge("m/start");
+    for (let guard = 0; guard < 40 && pub().screen !== "summary"; guard++) { if (pub().screen === "q") await judge("m/reveal"); else await judge("m/next"); }
+    if (g === 0) await judge("m/next"); }
+  /* the middle: the last team far behind everyone */
+  const sc = Array.from({ length: k }, (_, t) => (t === k - 1 ? 4 : 40 - t));
+  await judge("m/setScores", { scores: sc });
+  await judge("m/next");
+  const c0 = pub().comeback;
+  check(`${tag} Comeback: it comes at the middle, for the team far behind`, pub().screen === "intro" && pub().game?.key === "comeback" && c0?.teams.join() === String(k - 1), `${pub().screen} ${pub().game?.key} ${c0?.teams}`);
+  check(`${tag} Comeback: what it can reach: 85% of the leader, behind the team above`, c0?.target[k - 1] === Math.min(34, 40 - (k - 2) - 1), String(c0?.target));
+  await judge("m/start");
+  check(`${tag} Comeback: 15 seconds on the clock`, pub().screen === "q" && Math.round((pub().deadline - clock()) / 1000) === 15, String((pub().deadline - clock()) / 1000));
+  send("c0", "answer", { text: "x", k: pub().qid + "|q" }); await tick(300);
+  check(`${tag} Comeback: a captain who isn't in it can't answer`, !saved().typed[0]);
+  for (let i = 0; i < 3; i++) {
+    const m = mini(); send("c" + (k - 1), "answer", { text: m.qs[m.i].answer, k: pub().qid + "|q" }); await tick(1500);
+    if (i === 0) check(`${tag} Comeback: its answer in, the reveal comes (nobody else to wait for)`, pub().screen === "reveal" && pub().reveal?.ok?.[k - 1] === true, pub().screen);
+    await judge("m/next");
+  }
+  const c1 = pub().comeback, want = Math.min(34, 40 - (k - 2) - 1);
+  check(`${tag} Comeback: all three right, it moves up, and passes nobody`, pub().screen === "summary" && c1?.made?.[k - 1] === true && pub().teams[k - 1].score === want && pub().teams[k - 2].score > want, `${pub().screen} ${pub().teams.map((t) => t.score)}`);
+  await judge("m/next");
+  check(`${tag} Comeback: the night carries on with its third game`, pub().screen === "intro" && pub().game?.key === "pin" && pub().game.index === 2 && pub().game.count === 4 && !pub().comeback, `${pub().screen} ${pub().game?.key} ${pub().game?.index}`);
+  /* a time-up with nothing sent: out at once, and the result */
+  await setup(k, phone, ["flag", "closest", "pin", "airport"]);
+  for (let g = 0; g < 2; g++) { await judge("m/start");
+    for (let guard = 0; guard < 40 && pub().screen !== "summary"; guard++) { if (pub().screen === "q") await judge("m/reveal"); else await judge("m/next"); }
+    if (g === 0) await judge("m/next"); }
+  await judge("m/setScores", { scores: sc }); await judge("m/next"); await judge("m/start");
+  await tick(15500);
+  check(`${tag} Comeback: 15 seconds and nothing sent: the reveal, by itself`, pub().screen === "reveal" && pub().reveal?.ok?.[k - 1] === false, pub().screen);
+  await judge("m/next");
+  check(`${tag} Comeback: a miss ends it: no comeback, the score as it was`, pub().screen === "summary" && pub().comeback?.made?.[k - 1] === false && pub().teams[k - 1].score === 4, `${pub().screen} ${pub().teams.map((t) => t.score)}`);
+  /* the host's skip, on its intro */
+  await setup(k, phone, ["flag", "closest", "pin", "airport"]);
+  for (let g = 0; g < 2; g++) { await judge("m/start");
+    for (let guard = 0; guard < 40 && pub().screen !== "summary"; guard++) { if (pub().screen === "q") await judge("m/reveal"); else await judge("m/next"); }
+    if (g === 0) await judge("m/next"); }
+  await judge("m/setScores", { scores: sc }); await judge("m/next"); await judge("m/cbSkip");
+  check(`${tag} Comeback: the host skips it: straight to the third game`, pub().screen === "intro" && pub().game?.key === "pin" && pub().teams[k - 1].score === 4, `${pub().screen} ${pub().game?.key}`);
+}
+
 export async function run(only) {
   for (const k of [3, 8]) for (const phone of [false, true]) {
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["fool", fool], ["repeat", repeat], ["kinds", kinds]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }

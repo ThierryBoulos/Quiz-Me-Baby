@@ -165,6 +165,71 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`sudden death: tied teams only ${intro}, a third team refused ${refused}, nobody right brings another ${again}, the fastest right wins (+1) ${won} — ${ok ? "ok" : "FAILED"}`);
 }
+/* 17 Nov, the owner: the comeback. Once, at the night's middle, when a team is too far behind to catch up: three easy
+   questions, 15 seconds each, only the teams in it answer; a miss and a team is out; all three right and it moves up
+   to 85% of the leader, never past another team. Not when it's close, not when switched off, and the host can skip it */
+{
+  const cbDeck = bank.filter((q) => q.type === "standard" && q.difficulty === "easy" && q.theme !== "Know the Host").sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, 5);
+  const order = ["quiz", "flag", "closest", "pin"];
+  const start = (k, scores, deck = cbDeck) => { const teams = Array.from({ length: k }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+    const s = L.newNight(teams, { ...decks, comeback: deck }, order);
+    /* two of the four games played, then the scores as the test wants them at the middle */
+    for (let g = 0; g < 2; g++) { L.startMini(s, 0, T, []); while (s.screen !== "summary") { if (s.screen === "q") L.reveal(s); L.next(s, 0, T); } if (g === 0) L.next(s, 0, T); }
+    scores.forEach((v, t) => { s.teams[t].score = v; });
+    L.next(s, 0, T); return s; };
+  const fails = [];
+  const want = (name, v) => { if (!v) fails.push(name); };
+  /* five teams: 40, 38, 30, 14, 9 with two games left: a game can win back 10 - 4 = 6, so 12 in all; 0.65 x 12 = 7.8.
+     Teams C (10 behind), D (26) and E (31) are in it */
+  { const s = start(5, [40, 38, 30, 14, 9]), m = L.miniOf(s), pub0 = V.buildMany(s).pub;
+    want("it comes at the middle", s.screen === "intro" && m?.key === "comeback" && m.only.join() === "2,3,4");
+    want("what each can reach", m?.cb?.target.join() === ",,34,33,32");
+    want("the screens are sent it", pub0.comeback?.teams.join() === "2,3,4" && pub0.comeback.before.join() === "40,38,30,14,9" && pub0.game.title === "The Comeback");
+    want("it isn't one of the night's games", pub0.game.count === 4 && pub0.game.index === 2);
+    L.startMini(s, 1000, T, []);
+    want("15 seconds a question", s.screen === "q" && s.total === 15 && s.deadline === 1000 + 15000);
+    want("a team not in it can't answer", L.captainAnswer(s, 0, { text: "x" }) !== true);
+    /* question 1: C and D right, E wrong */
+    let q = L.qOf(s); L.captainAnswer(s, 2, { text: q.answer }); L.captainAnswer(s, 3, { text: q.answer }); L.captainAnswer(s, 4, { text: "Atlantis" });
+    want("all in once the teams in it have answered", L.allIn(s));
+    L.reveal(s); want("the app's calls", s.ok[2] === true && s.ok[3] === true && s.ok[4] === false);
+    want("the host can't flip a team that isn't in it", L.flip(s, 0) === false);
+    L.next(s, 2000, T);
+    want("a miss and it's out", s.screen === "q" && m.cb.out.join() === "false,false,false,false,true" && L.captainAnswer(s, 4, { text: "x" }) !== true);
+    /* question 2: C right, D sends nothing */
+    q = L.qOf(s); L.captainAnswer(s, 2, { text: q.answer });
+    want("all in doesn't wait for a team that's out", !L.allIn(s));
+    L.reveal(s); L.next(s, 3000, T);
+    want("no answer is a miss", m.cb.out[3] === true && s.screen === "q");
+    /* question 3: C right: it made it */
+    q = L.qOf(s); L.captainAnswer(s, 2, { text: q.answer }); want("the last team in it is all in", L.allIn(s)); L.reveal(s); L.next(s, 4000, T);
+    const pub = V.buildMany(s).pub;
+    want("the result", s.screen === "summary" && s.teams.map((x) => x.score).join() === "40,38,34,14,9" && pub.comeback.made.join() === "false,false,true,false,false" && pub.comeback.after.join() === "40,38,34,14,9");
+    want("nobody passed anybody", s.teams[2].score < s.teams[1].score);
+    L.next(s, 5000, T);
+    const pubN = V.buildMany(s).pub;
+    want("the night carries on with its third game", s.screen === "intro" && L.miniOf(s).key === "closest" && pubN.game.index === 2 && pubN.game.count === 4 && !pubN.comeback);
+    while (s.screen !== "final") { if (s.screen === "intro") L.startMini(s, 0, T, []); else if (s.screen === "q") L.reveal(s); else L.next(s, 0, T); }
+    want("only once a night", s.minis.filter((x) => x.key === "comeback").length === 1); }
+  /* everyone misses the first question: it ends there */
+  { const s = start(5, [40, 38, 30, 14, 9]); L.startMini(s, 0, T, []); L.reveal(s); L.next(s, 0, T);
+    want("all out, straight to the result", s.screen === "summary" && s.teams.map((x) => x.score).join() === "40,38,30,14,9"); }
+  /* the lower team makes it, the upper one doesn't: it stops one point behind it */
+  { const s = start(4, [40, 38, 14, 9]); L.startMini(s, 0, T, []);
+    for (let i = 0; i < 3; i++) { const q = L.qOf(s); L.captainAnswer(s, 3, { text: q.answer }); if (i > 0) L.captainAnswer(s, 2, { text: q.answer }); L.reveal(s); L.next(s, 0, T); }
+    want("behind the team above, whoever makes it", s.screen === "summary" && s.teams.map((x) => x.score).join() === "40,38,14,13"); }
+  /* a close night, a night with it switched off (no questions dealt), and the host's skip */
+  { const s = start(5, [40, 38, 36, 35, 33]); want("not when it's close", L.miniOf(s).key === "closest" && s.cbDone === true); }
+  { const s = start(5, [40, 38, 30, 14, 9], []); want("not when it's switched off", L.miniOf(s).key === "closest"); }
+  { const s = start(5, [40, 38, 30, 14, 9]); want("the host can skip it", L.skipComeback(s) === true && s.screen === "intro" && L.miniOf(s).key === "closest" && !s.minis.some((x) => x.key === "comeback"));
+    want("...only on its intro", L.skipComeback(s) === false); }
+  /* "Change question" before an answer is in: a spare, and a fresh 15 seconds */
+  { const s = start(5, [40, 38, 30, 14, 9]); L.startMini(s, 0, T, []); const was = L.qOf(s).id;
+    want("Change question", L.swapQ(s, 500, T) === true && L.qOf(s).id !== was && s.deadline === 500 + 15000);
+    L.captainAnswer(s, 2, { text: "x" }); want("...not once an answer is in", L.swapQ(s, 600, T) !== true); }
+  if (fails.length) bad++;
+  console.log(`the comeback, 3-8 teams: at the middle, only the teams far behind, 15 s, a miss is out, all three right moves up (never past a team), once a night, close nights and switched off: none, skip, Change question — ${fails.length ? "FAILED: " + fails.join("; ") : "ok"}`);
+}
 /* 8 Nov: a captain contests a call on the reveal, the host decides (as with two teams): own WRONG or another team's
    RIGHT only, one at a time, each call once; agreed, the call (and the points) move; Next with one open, it stands */
 {
@@ -447,7 +512,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
       if (pts.join() !== res.pts.join()) fail("the points aren't the engine's");
       /* the points by hand */
       const hand = s.teams.map(() => 0);
-      F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) { hand[t] += 2; return; } for (const w of o.by) { hand[w]++; if (F.pred[w] === t) hand[t]--; } });
+      F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) { hand[t] += 2; return; } let cost = 0; for (const w of o.by) { hand[w]++; if (F.pred[w] === t) cost = 1; } hand[t] -= cost; });   // (a shared lie whose writers both named the team costs it 1, not 2)
       if (hand.join() !== res.pts.join()) fail("points: " + res.pts.join() + " not " + hand.join());
       res.pts.forEach((p, t) => { tally[t] += p; }); runs.push([...tally]);
       F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) cnt.truths[t]++; else { cnt.falls[t]++; o.by.forEach((w) => cnt.fooled[w]++); } });

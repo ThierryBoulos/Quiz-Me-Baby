@@ -17,13 +17,16 @@ import { SK_LEVELS, type SkPick } from "../stakes";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
 
 export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "fool", "roulette", "stakes"] as const;
-/* sudden death isn't picked: it comes when the night ends with teams tied at the top */
-export type ManyKey = (typeof MANY_MINIS)[number] | "sudden";
-export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
+/* sudden death isn't picked: it comes when the night ends with teams tied at the top. Nor is the comeback: it comes
+   once, at the night's middle, when a team is too far behind to catch up (17 Nov, the owner: lib/comeback.ts) */
+export type ManyKey = (typeof MANY_MINIS)[number] | "sudden" | "comeback";
+/* (the games that aren't part of the night's count: "Game 3 of 9", the pips, the plan) */
+export const extraGame = (k: ManyKey | undefined) => k === "sudden" || k === "comeback";
+export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", comeback: "The Comeback", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
   closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", see: "What Do You See?", fool: "Fool Me Twice", roulette: "Russian Roulette", stakes: "Secret Stakes" };
-export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, quiz: 4, majority: 10, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, see: 12, fool: 6, roulette: 3, stakes: 3 };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, comeback: 3, quiz: 4, majority: 10, flag: 10, airport: 6, map: 6, closest: 5, pin: 7, say: 6, dish: 5, see: 12, fool: 6, roulette: 3, stakes: 3 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
-export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "see", "sudden", "roulette", "stakes"];
+export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "see", "sudden", "comeback", "roulette", "stakes"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
 /* a game's name on screen. The question rounds by their numbers: a round is one theme, and they play two at a time
    ("Rounds 3 and 4": 11 Nov, the owner). A round is never left to play alone: with an odd number of rounds the
@@ -66,6 +69,9 @@ export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: n
   fast?: number[];                                // What Do You See?: each team's right buzzes, their times added up (ms): tied teams, the faster first
   got?: string[][];                               // What Do You See?: the pictures each team took (their photo files), for its pile at the result
   foolLog?: FoolFactSum[];                        // Fool Me Twice: each fact's part in the result (the pens, the awards)
+  /* the comeback: what each team in it (only) can reach, every team's score as it began, who has missed one (out),
+     and at its end who made it and the scores after */
+  cb?: { target: (number | null)[]; before: number[]; out: boolean[]; made?: boolean[]; after?: number[] };
   words?: { w: string; ok: boolean }[][];         // Don't Say the Same: each team's word every time, and whether it scored, for its pile of word cards at the result
   fired?: number; had?: string[][];               // Russian Roulette: bullets that hit a team so far; each team's themes so far
   /* Secret Stakes: one bet (fixed at its start), what each team has won or lost, and every round's bets */
@@ -98,6 +104,8 @@ export type StateM = {
   toast: { id: number; text: string } | null; toastN: number;
   exit?: boolean; log: number[][];            // the scores after each game, for the final chart
   spare: Q[];                                   // questions held back for sudden death
+  cbQs?: Q[];                                   // the comeback's three easy questions (none: it's switched off); its spares are extra.comeback
+  cbDone?: boolean;                             // the night's middle has passed: the comeback was played, or it wasn't a massacre
   stats: Stats;
   intro?: boolean;                              // the night's intro is up (before the first game), until the host's Let's go
   away?: number;                                // when the game phone's screen went to sleep (0 or none: it's on); the clock waits meanwhile
@@ -126,6 +134,8 @@ export type Timers = { sudden: number; quiz: number; flag: number; airport: numb
 
 const n = (k: number, v = 0) => Array.from({ length: k }, () => v);
 export const miniOf = (s: StateM) => s.minis[s.mi] as MiniM | undefined;
+/* the comeback: is team t answering this question (in it, and not out)? Any other game: yes */
+const cbIn = (m: MiniM | undefined, t: number) => m?.key !== "comeback" || (!!m.only?.includes(t) && !m.cb?.out[t]);
 export const qOf = (s: StateM) => { const m = miniOf(s); return m ? m.qs[m.i] : null; };
 
 /* the question on screen, as the phones and the TV name it: new each question asked, a changed one too, and each night
@@ -142,9 +152,11 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
     return { key, qs: (decks[key] || []).slice(at, at + len), i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k) }; }).filter((m) => m.qs.length);
   const extra: Partial<Record<ManyKey, Q[]>> = {};
   for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + 4);
+  extra.comeback = (decks.comeback || []).slice(MANY_LEGS.comeback);
   return { v: 2, teams: teams.map((t) => ({ ...t, score: 0 })), minis, mi: 0, screen: minis.length ? "intro" : "final", step: 1,
     deadline: null, left: 0, total: 0, typed: Array(k).fill(null), nums: Array(k).fill(null), pins: Array(k).fill(null), ok: Array(k).fill(null), why: Array(k).fill(null), shown: 0,
     at: Array(k).fill(null), seq: 0, roster: [], votes: {}, who: {}, toast: null, toastN: 0, log: [n(k)], spare: (decks.sudden || []).slice(0, MANY_LEGS.sudden),
+    ...((decks.comeback || []).length >= MANY_LEGS.comeback ? { cbQs: decks.comeback!.slice(0, MANY_LEGS.comeback) } : {}),
     stats: { firsts: n(k), seconds: n(k), fastest: n(k), km: n(k), kmN: n(k), run: n(k), best: n(k) }, extra,
     night: Math.floor(Math.random() * 1e6), qn: 0 };
 }
@@ -173,12 +185,18 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
     m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); return true;
   }
   /* (Majority Rules: a vote counts, not a team with nobody on the list) */
-  if ((m.key === "majority" ? false : answered(s).some(Boolean)) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
+  if ((m.key === "majority" ? false : m.key === "comeback" ? (m.only || []).some((t) => s.typed[t] != null) : answered(s).some(Boolean)) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
   if (m.key === "see" && (s.buzz != null || s.out?.some(Boolean))) return "Too late: someone has already had a go at this one.";
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;
 }
 
+/* the host skips the comeback, on its intro: it's gone for the night, and the next game's intro comes up */
+export function skipComeback(s: StateM): boolean {
+  if (miniOf(s)?.key !== "comeback" || s.screen !== "intro") return false;
+  s.minis.splice(s.mi, 1); s.toast = null;
+  s.screen = s.mi < s.minis.length ? "intro" : "final"; s.step++; return true;
+}
 /* the night's order: the question rounds spread through it, one leading each run of the other games */
 export function lineup(rounds: number, games: ManyKey[]): ManyKey[] {
   if (rounds <= 0) return games;
@@ -237,7 +255,7 @@ export function lockStakes(s: StateM, now: number, t: Timers) {
 function ask(s: StateM, now: number, t: Timers) {
   const m = miniOf(s)!; clear(s);
   /* the Cocktail or Dish: an ingredient every few seconds, the last one with longer to think */
-  s.total = m.key === "dish" ? Math.max(0, ((qOf(s)?.ings || []).length - 1)) * t.dish + t.dishLast : t[m.key];
+  s.total = m.key === "dish" ? Math.max(0, ((qOf(s)?.ings || []).length - 1)) * t.dish + t.dishLast : m.key === "comeback" ? QMB.COMEBACK_SECS as number : t[m.key];   // (the comeback: 15 seconds, whatever the timers say)
   /* Russian Roulette: the barrel spins, every team lands on a chamber of its own (the engine's spin: two chambers
      never the same, the bullet where it falls, but it hits someone in the last lap if it hasn't yet); the clock
      starts once it stops */
@@ -271,7 +289,8 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
   const m = miniOf(s);
   if (m?.key === "fool") return foolAnswer(s, team, p, order);
   if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
-  if (m.only && !m.only.includes(team)) return "Only the teams tied at the top answer this one.";
+  if (m.only && !m.only.includes(team)) return m.key === "comeback" ? "Only the teams playing for the comeback answer this one." : "Only the teams tied at the top answer this one.";
+  if (m.key === "comeback" && m.cb?.out[team]) return "Your team is out of the comeback.";
   if (typedKey(m.key)) {
     /* What Do You See? (the buzzer): only the team that buzzed answers */
     if (m.key === "see") {
@@ -377,7 +396,7 @@ export function vote(s: StateM, name: string, pick: unknown): true | string {
 export const answered = (s: StateM): boolean[] => {
   const m = miniOf(s); if (!m) return [];
   if (m.key === "fool") return s.teams.map((_, t) => (s.screen === "pick" ? s.fool?.picks[t] != null : s.typed[t] != null));
-  return s.teams.map((_, t) => (m.only && !m.only.includes(t) ? true : typedKey(m.key) ? s.typed[t] != null : m.key === "closest" ? s.nums[t] != null : m.key === "pin" ? !!s.pins[t]
+  return s.teams.map((_, t) => (m.only && !m.only.includes(t) ? true : m.key === "comeback" && m.cb?.out[t] ? true : typedKey(m.key) ? s.typed[t] != null : m.key === "closest" ? s.nums[t] != null : m.key === "pin" ? !!s.pins[t]
     : s.roster.filter((r) => r.team === t).every((r) => s.votes[r.name] != null)));
 };
 export const allIn = (s: StateM) => s.screen === "q" && (miniOf(s)?.key === "majority" ? s.roster.length > 0 && s.roster.every((r) => s.votes[r.name] != null) : answered(s).every(Boolean));
@@ -457,6 +476,7 @@ export const share = (m: MiniM, t: number) => (m.of[t] ? m.right[t] / m.of[t] : 
 /* the host flips one typed answer's call on the reveal */
 export function flip(s: StateM, t: number) {
   if (s.screen !== "reveal" || !typedKey(miniOf(s)?.key) || t < 0 || t >= s.teams.length) return false;
+  if (!cbIn(miniOf(s), t)) return false;          // (the comeback: only a team still in it has a call)
   s.ok[t] = !s.ok[t];
   /* (the host changed the very call a captain is contesting: that's the contest decided) */
   if (s.contest?.t === t) { s.contest = null; s.contested = [...(s.contested || []), t]; }
@@ -493,6 +513,7 @@ export function contestCall(s: StateM, by: number, t: number): true | string {
   const m = miniOf(s), k = s.teams.length;
   if (!m || s.screen !== "reveal" || !typedKey(m.key)) return "There's no call to contest here.";
   if (by < 0 || by >= k || !Number.isInteger(t) || t < 0 || t >= k) return "Not now.";
+  if (!cbIn(m, t)) return "There's no call to contest there.";
   if (s.contest) return `One at a time: ${s.teams[s.contest.by].name}'s contest is open.`;
   if ((s.contested || []).includes(t)) return "That call has already been looked at.";
   const text = s.typed[t]; if (text == null) return "Nothing was typed there.";
@@ -533,6 +554,22 @@ export function next(s: StateM, now: number, t: Timers) {
     m.i++;
     if (w < 0 && m.i < m.qs.length) { ask(s, now, t); return true; }
     s.log.push(s.teams.map((x) => x.score)); s.screen = "final"; s.step++; return true;
+  }
+  /* the comeback: a team needs all three. Right, it's still in; wrong (or nothing sent), it's out. After the third
+     question, or once every team is out, the result: the teams that made it move up (the engine's comebackSettle:
+     85% of the leader, never past another team) */
+  if (s.screen === "reveal" && m.key === "comeback" && m.cb && m.only) {
+    const cb = m.cb, only = m.only;
+    only.forEach((tm) => { if (!cb.out[tm]) { if (s.ok[tm]) m.right[tm]++; else cb.out[tm] = true; } });
+    m.i++;
+    if (m.i < m.qs.length && only.some((tm) => !cb.out[tm])) { ask(s, now, t); return true; }
+    const made: Record<number, boolean> = {}; only.forEach((tm) => { made[tm] = !cb.out[tm]; });
+    const before = s.teams.map((x) => x.score), after = QMB.comebackSettle(before, only, made) as number[];
+    /* (the scores as they are now: the host may have set them by hand since the comeback began) */
+    cb.before = before; cb.made = s.teams.map((_, tm) => !!made[tm]); cb.after = after;
+    s.teams.forEach((x, tm) => { x.score = after[tm]; });
+    m.award = after.map((v, tm) => v - before[tm]); m.places = s.teams.map(() => s.teams.length);
+    s.screen = "summary"; s.step++; s.toast = null; return true;
   }
   if (s.screen === "reveal") {
     if (m.key === "majority") {
@@ -590,6 +627,14 @@ export function next(s: StateM, now: number, t: Timers) {
   if (s.screen === "summary") {
     s.log.push(s.teams.map((x) => x.score));
     s.mi++; s.toast = null;
+    /* the comeback: looked at once, when half the night's games are played and at least two are left. A team is in it
+       when it's too far behind to catch up: its gap to the leader is more than COMEBACK_GAP of what it could still
+       win back (a game can win back 1st place's points less last place's). Its three questions go in right here */
+    if (s.cbQs && !s.cbDone) { const k = s.teams.length, G = s.minis.filter((x) => !extraGame(x.key)).length, left = G - s.mi;
+      if (s.mi >= Math.ceil(G / 2)) { s.cbDone = true;
+        const plan = left >= 2 ? QMB.comebackPlan(s.teams.map((x) => x.score), (PLACE_PTS[0] - PLACE_PTS[k - 1]) * left) as { teams: number[]; target: (number | null)[] } | null : null;
+        if (plan) s.minis.splice(s.mi, 0, { key: "comeback", qs: s.cbQs, i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k), only: [...plan.teams].sort((a, b) => s.teams[b].score - s.teams[a].score || a - b),
+          cb: { target: plan.target, before: s.teams.map((x) => x.score), out: s.teams.map(() => false) } }); } }
     /* the last game played and teams tied at the top: sudden death between them, with the questions held back */
     if (s.mi >= s.minis.length) { const top = Math.max(...s.teams.map((x) => x.score)), tied = s.teams.map((x, i) => (x.score === top ? i : -1)).filter((i) => i >= 0);
       if (tied.length > 1 && top > 0 && (s.spare || []).length) { const k = s.teams.length;

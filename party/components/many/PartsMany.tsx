@@ -2,6 +2,7 @@
 /* MANY TEAMS: the pieces the TV and every phone share, each the two-team one (components/GameParts.tsx)
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
+import { comebackSays } from "@/lib/comeback";
 import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
@@ -37,6 +38,11 @@ export function takes(pub: PubMany): { text: string; color: string } {
   /* sudden death, the same words on the TV and every phone (the reviewers, 31 Oct) */
   if (pub.game?.key === "sudden") { const f = (pub.reveal?.places || []).findIndex((p) => p === 1), t = f >= 0 ? f : w[0];
     return w.length ? { text: `${T[t].name} win the night!`, color: T[t].color } : { text: "Nobody got it: another one", color: "var(--color-ink-2)" }; }
+  /* the comeback: who is still in it after this question (all three right, or nothing) */
+  if (pub.game?.key === "comeback" && pub.comeback) { const c = pub.comeback, ok = c.teams.filter((t) => !c.out[t] && pub.reveal?.ok?.[t]), last = c.i >= c.of - 1;
+    if (!ok.length) return { text: "No comeback", color: "var(--color-ink-2)" };
+    const who = ok.length === 1 ? T[ok[0]].name : `${ok.length} teams`;
+    return { text: last ? `${who} make the comeback!` : `${who} still in it`, color: ok.length === 1 ? T[ok[0]].color : "var(--color-gold)" }; }
   if (!w.length) return { text: pub.game?.key === "flag" ? "Nobody gets it" : "Nobody takes it", color: "var(--color-ink-2)" };
   if (w.length === 1) return { text: `${T[w[0]].name} take it`, color: T[w[0]].color };
   if (w.length === T.length) return { text: "Everyone takes it", color: "var(--color-gold)" };
@@ -45,6 +51,10 @@ export function takes(pub: PubMany): { text: string; color: string } {
 /* a game's result, in words: who came 1st and what it pays ("TEAM A +10", "2 TEAMS SHARE 1ST, +10 EACH") */
 export function paid(pub: PubMany): { text: string; color: string } {
   const S = pub.summary, T = pub.teams;
+  /* the comeback: who is back in it */
+  if (pub.game?.key === "comeback" && pub.comeback) { const c = pub.comeback, up = c.teams.filter((t) => c.made?.[t] && (c.after?.[t] ?? 0) > c.before[t]);
+    if (!up.length) return { text: "No comeback", color: "var(--color-ink-2)" };
+    return { text: `${up.length === 1 ? T[up[0]].name : `${up.length} teams`} are back in it`, color: up.length === 1 ? T[up[0]].color : "var(--color-gold)" }; }
   const top = (S?.places || []).map((p, t) => (p === 1 && (S?.award[t] ?? 0) > 0 ? t : -1)).filter((t) => t >= 0);
   if (!top.length) return { text: "Nobody scores", color: "var(--color-ink-2)" };
   if (top.length === 1) return { text: `${T[top[0]].name} +${S!.award[top[0]]}`, color: T[top[0]].color };
@@ -57,7 +67,7 @@ export const byDistance = (pub: PubMany) => {
 };
 
 /* what one go of a game is called, in plain words (no "leg": the reviewers, 31 Oct): "Flag 3 of 10", "Recipe 2 of 5" */
-export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
+export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", comeback: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
 export const unitOf = (key: string) => UNIT[key] || "Question";
 /* Secret Stakes' reveal: a row's points start up 150 ms after the row comes in, and reach the total about 1 s later
    (78% of the 1.3 s flight in globals.css), when the total rolls */
@@ -68,10 +78,11 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
     /* (each part whole: on a narrow phone the line breaks at the dot, never inside the game's name) */
-    ? <><b className="inline-block">{g.title}</b> &nbsp;·&nbsp; <span className="inline-block">{g.key === "sudden" ? (pub.screen === "intro" ? "Tied at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</span></>
+    ? <><b className="inline-block">{g.title}</b> &nbsp;·&nbsp; <span className="inline-block">{g.key === "sudden" ? (pub.screen === "intro" ? "Tied at the top" : `Question ${g.leg}`) : g.key === "comeback" && pub.screen === "intro" ? "A chance to catch up" : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</span></>
     : null;
   /* a pip a game, as the two-team night's: a dot a question round, a dash a mini-game (the owner, 1 Nov) */
-  const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index ? "now" : "")) : [];
+  /* (the comeback sits between two games: none of the pips is "now" while it plays) */
+  const pips = g ? Array.from({ length: g.count }, (_, i) => (i < g.index || pub.screen === "final" ? "done" : i === g.index && g.key !== "comeback" ? "now" : "")) : [];
   /* two scores, never on screen together (the owner, 30 Oct): the night's totals, the team row, only between games
      (a game's rules, its result, the end); during a game only its own points, in their own line under its name.
      On a game's result, what each place pays flies up into the totals, then they roll up */
@@ -102,7 +113,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   const num = (i: number) => (skRev && skIn && !skIn[i] ? skRev.before[i] ?? T[i].score : award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
   const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
   /* the pips are the night's games; they say what they are with "Game 1 of 9" beside them (the reviewers, 31 Oct) */
-  const track = pips.length > 0 && <div className="pips" aria-hidden>{g && pub.screen !== "intro" && pub.screen !== "final" && g.key !== "sudden" && <span className="pips-tag">Game {g.index + 1} of {g.count}</span>}{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>;
+  const track = pips.length > 0 && <div className="pips" aria-hidden>{g && pub.screen !== "intro" && pub.screen !== "final" && g.key !== "sudden" && g.key !== "comeback" && <span className="pips-tag">Game {g.index + 1} of {g.count}</span>}{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>;
   return (
     <div className={`hud ${size} many ${packing(k)}${(award && !landed) || (skRev && skIn && skIn.some((v, i) => !v && !!skRev.delta[i])) ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov: it matters little once the game is on) */}
@@ -125,7 +136,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
         {label && <div className="hud-label">{label}</div>}
       </div>
       {/* this game's points, under its name, in their own small line (a dot, the name, the points; on fire beside) */}
-      {tv && inGame && g.key !== "sudden" && (
+      {tv && inGame && g.key !== "sudden" && g.key !== "comeback" && (
         <div className="hud-mini game-line" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}`).join(", ")}`}>
           <span>This game</span>
           {T.map((t, i) => <span key={i} className="flex items-center gap-2" style={{ ["--c" as string]: t.color }}><Dot t={i} color={t.color} size={k > 5 ? 18 : 20} /><span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
@@ -203,6 +214,8 @@ function rules(pub: PubMany): string[] {
       /* (7 Nov, the owner: what sudden death means, said before it starts, as with two teams) */
       return [`${names} are tied at the top: sudden death.`, "One question at a time, and only their captains answer: type it and send it. The first right answer wins the night.",
         "Wrong, and you're out of that question. Nobody right? Another question."]; }
+    /* (the comeback has a screen of its own, components/Comeback.tsx: these are the same words, as a list) */
+    case "comeback": return [comebackSays((g.only || []).map((t) => pub.teams[t].name)), `${n} easy questions, 15 seconds each. All ${n} right, or nothing.`];
   }
 }
 /* compact: the TV's Majority Rules intro, which shares the screen with the QR code */
@@ -293,7 +306,7 @@ export function revealOf(S: { places: number[] }, k: number) {
 }
 /* ...and when the whole result is in, for the line under it, the points flying up and the phones' wait: Fool Me Twice's
    lie detector draws its pens first (lib/fool.ts) */
-export const resultDone = (pub: PubMany) => (pub.game?.key === "fool" && pub.summary ? foolDone(pub.summary.places, pub.teams.length) : revealOf(pub.summary!, pub.teams.length).done);
+export const resultDone = (pub: PubMany) => (pub.game?.key === "comeback" && pub.comeback ? 0.6 + pub.comeback.teams.length * 0.5 : pub.game?.key === "fool" && pub.summary ? foolDone(pub.summary.places, pub.teams.length) : revealOf(pub.summary!, pub.teams.length).done);
 /* under each one: its place, its name, what the place pays the night */
 export function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boolean }) {
   const S = pub.summary!, T = pub.teams, paid = S.award[t] > 0, lit = paid && S.places[t] === 1;
@@ -742,11 +755,14 @@ export const SAY_WHY: Record<string, string> = { said: "Said it", off: "Off the 
 export const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
 /* ---- a typed answer's reveal: each team's ruling beside its name, what it typed under them (TvGame's TeamRows) ---- */
 export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; delay?: (i: number) => React.CSSProperties }) {
-  const T = pub.teams, R = pub.reveal!, k = T.length, tv = size === "tv", n = tv ? colsFor(k) : k > 4 ? 2 : 1, dense = k > 4;
+  /* (the teams shown: all of them; in sudden death the ones tied at the top; in the comeback the ones still in it. The
+     columns are for those, so one team alone sits in the middle, not in the first of four columns) */
+  const T = pub.teams, R = pub.reveal!, shown = T.filter((_, i) => !(pub.game?.only && !pub.game.only.includes(i)) && !pub.comeback?.out[i]).length || T.length;
+  const k = shown, tv = size === "tv", n = tv ? colsFor(k) : k > 4 ? 2 : 1, dense = k > 4;
   const long = T.some((t) => t.name.length > 10);
   return (
     <div className="grid w-full" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gap: tv ? "12px 24px" : "12px 10px", maxWidth: tv ? Math.min(1168, n * (dense ? 300 : 390)) : undefined, ["--beat" as string]: ".4s" }}>
-      {T.map((t, i) => { const ok = R.ok?.[i], x = R.typed?.[i]; if (pub.game?.only && !pub.game.only.includes(i)) return null; return (
+      {T.map((t, i) => { const ok = R.ok?.[i], x = R.typed?.[i]; if (pub.game?.only && !pub.game.only.includes(i)) return null; if (pub.comeback?.out[i]) return null; return (
         <div key={i} className={"flex flex-col items-center gap-1 min-w-0 " + (tv ? "beat" : "")} style={delay?.(i)}>
           {/* a phone with five teams or more (two columns): the name on a line of its own, so it's never "THE …" */}
           {/* (the TV: the name on a line of its own, whole, over two lines if it must: "THE QUIZZIC…" on the screen that says

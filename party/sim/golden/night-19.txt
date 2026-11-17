@@ -53,29 +53,39 @@
 464.75 majorityQ | 29 | 1-4 | 52-50 | Lions +1 point — steal | 
 480.75 majorityReveal | 30 | 1-4 | 53-55 | Lions +1 point — steal | 
 484.50 majoritySummary | 31 | 1-6 | 53-55 | Lions +1 point — steal | 
-497.25 roundIntro | 32 | 1-6 |  | Lions +1 point — steal | 
-500.00 ask | 33 | 1-6 |  | Lions +1 point — steal | 
-514.25 answer | 33 | 2-6 |  | Lions +1 point | 
-518.75 answer | 33 | 2-6 |  |  | 
-533.75 answer | 33 | 2-6 |  | No answer in time: the call stands. | 
-540.50 ask | 34 | 2-6 |  | No answer in time: the call stands. | 
-552.00 steal | 34 | 2-6 |  | No answer in time: the call stands. | 
-556.50 answer | 34 | 3-6 |  | Lions +1 point — steal | 
-570.00 roundScore | 35 | 3-6 |  | Lions +1 point — steal | 
-571.00 roundIntro | 36 | 3-6 |  | Lions +1 point — steal | 
-572.00 ask | 37 | 3-6 |  | Lions +1 point — steal | 
-604.25 steal | 37 | 3-6 |  | Lions +1 point — steal | 
-617.75 answer | 37 | 3-6 |  | Lions +1 point — steal | 
-622.25 ask | 38 | 3-6 |  | Lions +1 point — steal | 
-629.50 answer | 38 | 3-7 |  | Owls +1 point | 
-637.50 roundScore | 39 | 3-7 |  | Owls +1 point | 
-651.00 roundIntro | 40 | 3-7 |  | Owls +1 point | 
-658.25 ask | 41 | 3-7 |  | Owls +1 point | 
-661.00 steal | 41 | 3-7 |  | Owls +1 point | 
-667.25 answer | 41 | 3-7 |  | Owls +1 point | 
-671.00 ask | 42 | 3-7 |  | Owls +1 point | 
-680.00 steal | 42 | 3-7 |  | Owls +1 point | 
-680.75 answer | 42 | 4-7 |  | Lions +1 point — steal | 
-685.25 roundScore | 43 | 4-7 |  | Lions +1 point — steal | 
-689.00 final | 44 | 4-7 |  | Lions +1 point — steal | 
-recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[3,2],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[0,0],[0,1],[0,3],[0,4],[1,4],[1,6],[2,6],[3,6],[3,7],[4,7]],"segs":[{"label":"R1","pts":[[1,0],[0,0],[0,1],[0,3]]},{"label":"R2","pts":[[0,4]]},{"label":"R3","pts":[[1,4]]},{"label":"Majority Rules","pts":[[1,6]]},{"label":"R4","pts":[[2,6],[3,6]]},{"label":"R5","pts":[[3,7]]},{"label":"R6","pts":[[4,7]]}],"awards":[{"t":"Best thief","who":"Lions, 3 steals","team":0},{"t":"Sharpest in Majority Rules","who":"Maya, 8 of 10","team":1},{"t":"Wooden spoon, Majority Rules","who":"Lea, 3 of 10","team":1,"note":"Exactly what a coin would get. Respect.","spoon":true}]}
+497.25 comebackIntro | 32 | 1-6 |  | Lions +1 point — steal | 
+500.00 comebackQ | 33 | 1-6 |  | Lions +1 point — steal | 
+510.75 comebackReveal | 33 | 1-6 |  | Lions +1 point — steal | 
+514.25 comebackReveal | 33 | 1-6 |  |  | 
+525.00 comebackReveal | 33 | 1-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+530.50 comebackQ | 34 | 1-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+540.50 comebackReveal | 34 | 1-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+554.00 comebackSummary | 35 | 1-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+554.75 roundIntro | 36 | 1-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+556.50 ask | 37 | 1-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+565.50 steal | 37 | 1-6 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+570.00 answer | 37 | 1-7 |  | Owls +1 point — steal | 
+583.50 ask | 38 | 1-7 |  | Owls +1 point — steal | 
+584.50 steal | 38 | 1-7 |  | Owls +1 point — steal | 
+615.00 answer | 38 | 1-7 |  | Owls +1 point — steal | 
+624.00 roundScore | 39 | 1-7 |  | Owls +1 point — steal | 
+633.00 roundIntro | 40 | 1-7 |  | Owls +1 point — steal | 
+643.00 ask | 41 | 1-7 |  | Owls +1 point — steal | 
+646.50 answer | 41 | 2-7 |  | Lions +1 point | 
+657.50 ask | 42 | 2-7 |  | Lions +1 point | 
+676.25 ask | 42 | 2-7 |  | Owls used Double Dip. | 
+677.25 answer | 42 | 2-8 |  | Owls +1 point | 
+680.75 roundScore | 43 | 2-8 |  | Owls +1 point | 
+688.00 roundIntro | 44 | 2-8 |  | Owls +1 point | 
+695.25 ask | 45 | 2-8 |  | Owls +1 point | 
+704.25 steal | 45 | 2-8 |  | Owls +1 point | 
+705.00 answer | 45 | 2-9 |  | Owls +1 point — steal | 
+709.50 ask | 46 | 2-9 |  | Owls +1 point — steal | 
+732.00 ask | 46 | 2-9 |  | Owls used Call a Friend. | 
+755.50 ask | 47 | 2-9 |  | Owls used Call a Friend. | 
+756.50 answer | 47 | 2-10 |  | Owls +1 point | 
+757.25 answer | 47 | 2-10 |  |  | 
+762.75 answer | 47 | 2-10 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+764.50 roundScore | 48 | 2-10 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+766.25 final | 49 | 2-10 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+recap: {"margin":8,"sudden":false,"leadChanges":1,"steals":[1,4],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[0,0],[0,1],[0,3],[0,4],[1,4],[1,6],[1,7],[2,7],[2,8],[2,9],[2,10]],"segs":[{"label":"R1","pts":[[1,0],[0,0],[0,1],[0,3]]},{"label":"R2","pts":[[0,4]]},{"label":"R3","pts":[[1,4]]},{"label":"Majority Rules","pts":[[1,6]]},{"label":"The Comeback","pts":[]},{"label":"R4","pts":[[1,7]]},{"label":"R5","pts":[[2,7],[2,8]]},{"label":"R6","pts":[[2,9],[2,10]]}],"awards":[{"t":"Best thief","who":"Owls, 4 steals","team":1},{"t":"Sharpest in Majority Rules","who":"Maya, 8 of 10","team":1},{"t":"Wooden spoon, Majority Rules","who":"Lea, 3 of 10","team":1,"note":"Exactly what a coin would get. Respect.","spoon":true}]}

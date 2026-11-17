@@ -30,6 +30,7 @@ export function currentQ(s: TvState): G {
   if (sc === "sayQ" || sc === "sayReveal") return g.saySame.qs[g.saySame.i];
   if (sc === "battleQ") return g.battle?.qs[g.battle.cap][g.battle.i];
   if (sc === "battleTie") return g.battle?.tb?.q;
+  if (sc === "comebackQ" || sc === "comebackReveal") return g.comeback?.qs[g.comeback.i];
   return null;
 }
 /* right if it matches the answer or any other answer that counts (see acceptFor) */
@@ -121,6 +122,10 @@ export function callsOf(s: TvState): Call[] {
     for (const t of [0, 1] as const) out.push({ id: "t" + t, team: t, text: said(s.typed[t]), ok: !!s.ok[t], ...(s.app[t] != null && s.ok[t] != null && s.app[t] !== s.ok[t] ? { changed: true } : {}),
       ...(lap?.draw ? { answer: String(lap.ch[lap.draw[t]]?.q?.answer ?? "") } : {}),
       ...(sk ? { answer: String(skQ(sk, t)?.answer ?? "") } : {}) });
+  } else if (sc === "comebackReveal" && g.comeback) {
+    /* The Comeback: one team's one answer */
+    const t = g.comeback.teams[0] as 0 | 1;
+    out.push({ id: "t" + t, team: t, text: said(s.typed[t]), ok: !!s.ok[t], ...(s.app[t] != null && s.ok[t] != null && s.app[t] !== s.ok[t] ? { changed: true } : {}) });
   } else if (sc === "dishReveal") {
     (s.legLog || []).forEach((e, i) => out.push({ id: "d" + i, team: e.team, text: e.text, ok: e.ok }));
   } else if (sc === "battleReview" && g.battle) {

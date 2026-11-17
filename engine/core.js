@@ -427,7 +427,15 @@
     return t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
   }
   /* is this the truth (any way of writing it: the fact's own list, typos allowed)? */
-  const foolIsTruth = (x, q, accept) => !!foolShow(x) && isMatch(foolShow(x), q.answer, accept || []);
+  /* (a typo of the truth counts as the truth, but not a word that starts with another letter: "Goats" for Boats,
+     "Brine" for Urine and "Matte" for Latte are lies, and refusing them gave the answer away: 17 Nov. A typo hardly
+     ever hits a word's first letter; an answer on the fact's own list always counts) */
+  const foolKey = (x) => tidy(String(x == null ? '' : x)).replace(/^(a|an|the) /, '');
+  const foolIsTruth = (x, q, accept) => {
+    const t = foolShow(x); if(!t || !isMatch(t, q.answer, accept || [])) return false;
+    const k = foolKey(t), all = [q.answer].concat(accept || []).map(foolKey);
+    return all.indexOf(k) > -1 || all.some(w => w.charAt(0) === k.charAt(0));
+  };
   /* the same lie twice (or a lie that is one of ours): either way round, typos allowed */
   const foolSame = (a, b) => isMatch(a, b, []) || isMatch(b, a, []);
   /* the answers to pick from: the truth, each team's lie (two teams with the same lie share it), and ours to make up
@@ -466,9 +474,50 @@
       if(!o || o.by.includes(t)) return;
       fooled[p].push(t);
       if(o.truth){ pts[t] += 2; return; }
-      for(const w of o.by){ pts[w] += 1; if(predicts && predicts[w] === t){ pts[t] -= 1; hits.push({ by:w, on:t }); } }
+      /* (two teams with the same lie who both named this team: both called it, but it loses 1, not 2: 17 Nov) */
+      let cost = 0;
+      for(const w of o.by){ pts[w] += 1; if(predicts && predicts[w] === t){ cost = 1; hits.push({ by:w, on:t }); } }
+      pts[t] -= cost;
     });
     return { pts, fooled, hits };
+  }
+
+  /* ------------------------------------------------------------------ THE COMEBACK (17 Nov, the owner)
+     Once a night, at its middle, when it's a massacre: the teams too far behind to catch up get one chance. Three easy
+     questions, 15 seconds each, all three right or nothing. A team that makes it moves up to 85% of the leader's
+     score, but never past another team: at most one point behind the team above it (so with many teams it joins the
+     back of the pack; with two it gets the full 85%). The same rules for two teams and for three to eight.
+     "Too far behind": the gap to the leader is more than COMEBACK_GAP of what a team could still win back on the
+     leader in the games left (reach). A share of the leader's score doesn't work as the test: with 3 teams last place
+     pays 6 of 10, so nobody ever falls under 60%, and with 8 a team is under 50% one night in three. */
+  const COMEBACK_GAP = 0.65, COMEBACK_SHARE = 0.85, COMEBACK_LEGS = 3, COMEBACK_SECS = 15, COMEBACK_MIN_TWO = 5;
+  /* the scores after the comeback: `made[t]` is true for a team that got all three. From the top team down, so a
+     team's ceiling is one point under the lowest team that was above it, as that team ends up (made it or not).
+     Teams level before it can end level, or apart if only one makes it; nobody ends above a team it was behind */
+  function comebackSettle(scores, teams, made){
+    const L = Math.max.apply(null, scores), cap = Math.round(COMEBACK_SHARE * L), after = scores.slice();
+    teams.slice().sort((a, b) => scores[b] - scores[a]).forEach(t => {
+      if(!made[t]) return;
+      let ceil = Infinity;
+      scores.forEach((v, u) => { if(v > scores[t]) ceil = Math.min(ceil, after[u] - 1); });
+      const to = Math.min(cap, ceil);
+      if(to > scores[t]) after[t] = to;
+    });
+    return after;
+  }
+  /* who gets the chance, and the most each could reach (if every team in it makes it): null when nobody is far
+     enough behind, or when nobody would gain a point (the team above is right there) */
+  function comebackPlan(scores, reach, minGap){
+    const L = Math.max.apply(null, scores);
+    if(!(L > 0) || !(reach > 0)) return null;
+    /* (minGap: with two teams the points are small, and on a short night 4-0 passed the test: a team must also be
+       at least that many points behind, 17 Nov) */
+    let teams = scores.map((v, t) => (L - v > COMEBACK_GAP * reach && L - v >= (minGap || 0) ? t : -1)).filter(t => t >= 0);
+    if(!teams.length) return null;
+    const all = {}; teams.forEach(t => { all[t] = true; });
+    const best = comebackSettle(scores, teams, all);
+    teams = teams.filter(t => best[t] > scores[t]);
+    return teams.length ? { teams, target:scores.map((v, t) => (teams.indexOf(t) > -1 ? best[t] : null)), leader:L } : null;
   }
 
   function createDealer(ctx){
@@ -1208,7 +1257,24 @@
 
     /* ctx.suddenOk: questions that can't be played in sudden death (Party: the ones a person must judge) */
     const suddenOk = ctx.suddenOk || (() => true);
-    return { bank, shuffle, isFresh, clashesWith, suddenOk, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
+    /* the comeback's questions: easy ones (typed, checked by the app), from the themes everybody knows (17 Nov, the
+       owner: "only common themes": no Sexy Time, Rave Culture, Lebanon, Friends, Geek & Gamer and the like, which a
+       team may never have picked), none of tonight's (taken: their ids), fresh ones first, and each from a different
+       theme where it can. The first COMEBACK_LEGS are played, the rest are spares for "Change question" */
+    const COMEBACK_THEMES = ['General Knowledge', 'Geography', 'History', 'Science', 'Nature', 'Food & Drink', 'Sports', 'Music', 'Movies'];
+    function comebackDeck(taken, n){
+      const free = (q) => q.type === 'standard' && q.theme !== 'Know the Host' && !taken.has(q.id) && suddenOk(q) && !clashesWith(q.id, taken);
+      const common = (q) => COMEBACK_THEMES.indexOf(q.theme) > -1;
+      let pool = bank().filter(q => free(q) && common(q) && q.difficulty === 'easy' && isFresh(q));
+      if(pool.length < n) pool = bank().filter(q => free(q) && common(q) && q.difficulty === 'easy');
+      if(pool.length < n) pool = bank().filter(q => free(q) && q.difficulty === 'easy');
+      if(pool.length < n) pool = bank().filter(free);
+      /* a theme at most once, while there are themes left */
+      const out = [], rest = [], seen = {};
+      shuffle(pool).forEach(q => { if(!seen[q.theme]){ seen[q.theme] = true; out.push(q); } else rest.push(q); });
+      return out.concat(rest).slice(0, n);
+    }
+    return { bank, shuffle, isFresh, clashesWith, suddenOk, comebackDeck, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, commonOf, drawSaySame, saySameDeck,
              mapLevelsOf, mapAt, mapPool, mapDeck, flagLevelsOf, flagPool, flagDeck,
              dishLevelsOf, dishPool, dishDeck, pinLevelsOf, pinPool, airportLevelsOf, airportPool, majorityLevelsOf, rouletteDeck, stakesDeck, seeDeck, foolDeck, seeLevelsOf, seeKindsOf, diffOf, pickedPair, dishLeg, buildGame, thinBank };
@@ -1791,9 +1857,57 @@
     s.i = 0; s.picks = g.teams.map(() => null);
     if(!s.net || s.net.length !== g.teams.length) s.net = g.teams.map(() => 0);
   }
-  /* after a round or a mini-game: the next mini-game owed against this
-     round, else the next round, else the Battle (chosen in Setup), else Secret Stakes, else the end */
+  /* ---- The Comeback, two teams (17 Nov, the owner; the rule itself is the block "THE COMEBACK" above) ---- */
+  /* the night's steps: every round, every planned mini-game, the Battle and Secret Stakes if they're on; and how
+     many of each are still to play */
+  function nightSteps(g){
+    const minis = (g.plan || []).map(p => p.key).concat(g.hasBattle ? ['battle'] : [], g.hasStakes ? ['stakes'] : []);
+    const rounds = g.rounds.filter(r => !r.done).length, left = minis.filter(k => !g.done[k]).length;
+    return { total:g.rounds.length + minis.length, rounds, minis:left, left:rounds + left };
+  }
+  /* two teams: what the team behind could still win back on the leader in what's left of the night: 2 points for
+     each round still to play, 2 for each mini-game (the Battle and Secret Stakes count as mini-games) */
+  const comebackReach = (steps) => 2 * steps.rounds + 2 * steps.minis;
+  /* tonight's questions, so the comeback deals none of them: everything the Battle keeps clear of, Russian
+     Roulette's barrels, a question swapped away, and the themes of the rounds still to play (a swap or a new steal
+     question comes from there) */
+  function comebackTaken(g, D){
+    const taken = battleSpent(g), add = (q) => { if(q && q.id) taken.add(q.id); };
+    const rr = g.rouletteGame; if(rr) (rr.qs || []).concat(rr.spare || []).forEach(lap => ((lap && lap.ch) || []).forEach(c => add(c && c.q)));
+    g.rounds.forEach(r => (r.swapSeen || []).forEach(id => taken.add(id)));
+    const themes = g.rounds.filter(r => !r.done).map(r => r.theme);
+    if(themes.length) D.bank().forEach(q => { if(q.type === 'standard' && themes.indexOf(q.theme) > -1) taken.add(q.id); });
+    return taken;
+  }
+  /* The check, made once a night, at its middle: the first time half the steps (or more) are played, and only with
+     2 steps or more still to play. A massacre: the questions are dealt and the announcement goes up (true); else
+     the night carries on, and there's no comeback later. Off in Setup (cfg.comeback false): never. */
+  function comebackOpen(g, env, fx){
+    const S = nightSteps(g), done = S.total - S.left, mid = Math.ceil(S.total / 2);
+    if(g.comebackAsked || !S.total || done < mid) return false;
+    g.comebackAsked = true;
+    /* (done > mid: a night saved before the comeback existed, past its middle already) */
+    if((g.cfg && g.cfg.comeback === false) || done > mid || S.left < 2) return false;
+    const before = g.teams.map(t => t.score), P = comebackPlan(before, comebackReach(S), COMEBACK_MIN_TWO);
+    if(!P || !env.deal || !env.deal.comebackDeck) return false;
+    const deck = env.deal.comebackDeck(comebackTaken(g, env.deal), COMEBACK_LEGS + 2);
+    if(deck.length < COMEBACK_LEGS) return false;
+    g.comeback = { teams:P.teams, target:P.target, before, qs:deck.slice(0, COMEBACK_LEGS), spare:deck.slice(COMEBACK_LEGS), i:0, log:[], made:null, after:null, done:false };
+    fx.push({ go:'comebackIntro' });
+    return true;
+  }
+  /* a comeback question comes up: it's played now (and kept out of the Battle and sudden death, which both keep
+     clear of g.sdUsed) */
+  function comebackAsk(g, fx){
+    const c = g.comeback, q = c.qs[c.i];
+    g.sdUsed = (g.sdUsed || []).concat([q.id]);
+    fx.push({ used:q }, { go:'comebackQ' });
+    return fx;
+  }
+  /* after a round or a mini-game: the comeback if it's due (once, at the night's middle), else the next mini-game
+     owed against this round, else the next round, else the Battle (chosen in Setup), else Secret Stakes, else the end */
   function nextStep(g, env, fx){
+    if(comebackOpen(g, env, fx)) return fx;
     const owed = minisAfter(g, g.r);
     if(owed.length) return startMini(g, env, owed[0].key, fx);
     g.r = Math.min(g.r + 1, g.rounds.length);
@@ -2153,6 +2267,46 @@
       g.teams[a.w].score += 1;
       g.winner = a.w;
       return [{ finalize:true }];
+    },
+
+    /* ---- The Comeback (17 Nov, the owner): the announcement, three questions, the result ---- */
+    'comeback/start'(g){ const c = g.comeback; if(!c || c.done) return []; c.i = 0; return comebackAsk(g, []); },
+    /* the host skips it: it never happens that night, and the night carries on where it was going */
+    'comeback/skip'(g, a, env){
+      const c = g.comeback;
+      if(!c || c.done) return [];
+      c.done = true; c.skipped = true;
+      return nextStep(g, env, []);
+    },
+    /* Change question (before the answer is in): a spare takes its place */
+    'comeback/swap'(g){
+      const c = g.comeback;
+      if(!c || c.done) return [];
+      if(!c.spare.length) return [{ toast:'No spare questions left to swap in.' }];
+      c.qs[c.i] = c.spare.shift();
+      return comebackAsk(g, [{ toast:'New question.' }]);
+    },
+    /* ok: the call on the answer as it stands (no answer in time is a miss). Right: the next question, or after the
+       third they made it. Wrong: it's over at once. The score moves as the result comes up, not before */
+    'comeback/verdict'(g, a){
+      const c = g.comeback, fx = [];
+      if(!c || c.done || c.made != null) return fx;
+      const ok = !!a.ok;
+      c.log.push({ q:c.qs[c.i], ok });
+      if(ok && c.i + 1 < c.qs.length){ c.i++; fx.push({ sound:'correct' }); return comebackAsk(g, fx); }
+      const made = {}; c.teams.forEach(t => { made[t] = ok; });
+      c.made = ok;
+      c.after = comebackSettle(c.before, c.teams, made);
+      /* (what the comeback gives, on the scores as they stand now) */
+      g.teams.forEach((t, i) => { t.score += c.after[i] - c.before[i]; });
+      fx.push({ sound:ok ? 'point' : 'wrong' }, { go:'comebackSummary' });
+      return fx;
+    },
+    'comeback/done'(g, a, env){
+      const c = g.comeback;
+      if(!c || c.done || c.made == null) return [];
+      c.done = true;
+      return nextStep(g, env, []);
     },
 
     'closest/start'(g){ g.mini.i = 0; return [{ go:'miniQ' }]; },
@@ -2652,5 +2806,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

@@ -23,6 +23,7 @@ import { StakesTv } from "../Stakes";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
 import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
+import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
 import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
@@ -100,7 +101,11 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
                   </div>
                 </div>)}
             </div>
-          </div>) : <div className="w-full max-w-[1080px]"><IntroMany pub={pub} size="tv" /></div>)}
+          </div>) : g.key === "comeback" && pub.comeback ? (<>
+            {/* the comeback (17 Nov, the owner): the announcement in the owner's words, what it takes, what each team can win */}
+            <div className="display text-80 leading-none slam" style={{ color: "var(--color-gold)" }}>{g.title}</div>
+            <ComebackIntro teams={T.map((t) => ({ name: t.name, color: t.color }))} c={pub.comeback} tv />
+          </>) : <div className="w-full max-w-[1080px]"><IntroMany pub={pub} size="tv" /></div>)}
 
         {/* the question: the same screens as the two-team TV, with every team's state under the clock */}
         {pub.screen === "q" && g && g.key === "flag" && (<>
@@ -128,8 +133,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             </div>
           </div>); })()}
         {/* a question round, and Don't Say the Same's prompt: the words big, the clock, every team's state */}
-        {pub.screen === "q" && g && (g.key === "quiz" || g.key === "say" || g.key === "sudden") && (<>
+        {pub.screen === "q" && g && (g.key === "quiz" || g.key === "say" || g.key === "sudden" || g.key === "comeback") && (<>
           {g.key === "sudden" && <div className="display text-36 leading-none" style={{ color: "var(--color-gold)" }}>First right answer wins the night</div>}
+          {g.key === "comeback" && pub.comeback && <ComebackStatus teams={T.map((t) => ({ name: t.name, color: t.color }))} c={pub.comeback} tv />}
           {pub.theme && <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
           <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 160 ? 34 : (pub.question || "").length > 100 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
           {g.key === "say" && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px]">One answer each. No points for the app&rsquo;s secret answer, or the same word as another team.</div>}
@@ -236,7 +242,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         </>); })()}
         {/* a typed answer's reveal (question rounds, airports, maps, Don't Say the Same, the Cocktail or Dish): what was
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
-        {pub.screen === "reveal" && g && R && ["quiz", "airport", "map", "say", "dish", "sudden"].includes(g.key) && (<>
+        {pub.screen === "reveal" && g && R && ["quiz", "airport", "map", "say", "dish", "sudden", "comeback"].includes(g.key) && (<>
           {g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={dense ? 130 : 200} legend={false} still />
             : g.key === "airport" ? <div className="w-full max-w-[860px] board-tight"><Board air={pub.airport} size="reveal" /></div>
             : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
@@ -302,6 +308,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             : g.key === "dish" ? <GlassesMany pub={pub} sound={sound} />
             : g.key === "say" ? (pub.summary.words ? <WordsMany pub={pub} /> : <BubblesMany pub={pub} />)
             : g.key === "quiz" ? <LecternsMany pub={pub} />
+            : g.key === "comeback" && pub.comeback ? <ComebackResult teams={T.map((t) => ({ name: t.name, color: t.color }))} c={pub.comeback} tv />
             /* Fool Me Twice: the lie detector, and its four awards (16 Nov, the owner's pick) */
             : g.key === "fool" && pub.summary.fool ? <FoolResult teams={T.map((t) => ({ name: t.name, color: t.color }))} sum={pub.summary.fool} pts={pub.summary.pts} places={pub.summary.places} award={pub.summary.award} />
             : <BarsMany pub={pub} />}
@@ -365,7 +372,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
 /* every team: locked in, or still thinking (the two-team "Team A: thinking…", for N teams: a row that wraps, or a
    column); in sudden death only the teams tied at the top */
 function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
-  const only = pub.game?.only, T = pub.teams.map((t, i) => ({ ...t, i })).filter((t) => !only || only.includes(t.i)), dense = T.length > 4, pin = pub.game?.key === "pin", mr = pub.game?.key === "majority";
+  const only = pub.game?.only, T = pub.teams.map((t, i) => ({ ...t, i })).filter((t) => (!only || only.includes(t.i)) && !pub.comeback?.out[t.i]), dense = T.length > 4, pin = pub.game?.key === "pin", mr = pub.game?.key === "majority";
   /* five teams or more: one row of lettered dots, lit with a tick when the team is in (two rows of names were too much) */
   if (dense && !column) return (
     <div className="flex flex-wrap justify-center gap-x-5 gap-y-1" role="status" aria-label={T.map((t) => `${t.name} ${pub.sent[t.i] ? "in" : "not yet"}`).join(", ")}>

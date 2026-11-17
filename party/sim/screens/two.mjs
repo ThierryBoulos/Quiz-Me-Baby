@@ -8,15 +8,23 @@ const NIGHTS = [
   /* Fool Me Twice (16 Nov): no host and with a host */
   { tag: "nhf", seed: 44, minis: ["fool"], rounds: 2, crowd: 3, tieMore: 1 },
   { tag: "hf", seed: 45, minis: ["fool"], rounds: 2, host: true, crowd: 3, tieMore: 1 },
+  /* The Comeback (17 Nov): no host and with a host, a team that makes it and a team that misses; the phones' captain
+     and player are Lions, so once Lions play for it (the answer box) and once Owls do. only: just its own four
+     screens are kept from these nights (the rest of them is the nights above) */
+  { tag: "nhcm", seed: 46, minis: [], rounds: 4, crowd: 3, events: [{ at: 5, type: "score", a: 1, b: 12 }], comeback: "make", only: /^comeback/ },
+  { tag: "nhcx", seed: 47, minis: [], rounds: 4, crowd: 3, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "miss", only: /^comeback/ },
+  { tag: "hcm", seed: 48, minis: [], rounds: 4, host: true, crowd: 3, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "make", only: /^comeback/ },
+  { tag: "hcx", seed: 49, minis: [], rounds: 4, host: true, crowd: 3, events: [{ at: 5, type: "score", a: 1, b: 12 }], comeback: "quiet", only: /^comeback/ },
 ];
 
 /* load(n): a fresh copy of the night module for night n (the engine and the bank keep things between games) */
 export async function dumpTwo(load) {
   const got = {};
   let n = 0;
-  for (const { tag, ...o } of NIGHTS) {
+  for (const { tag, only, ...o } of NIGHTS) {
     const night = await load(n++);
     await night({ ...o, check: (pub, now, _v, secret) => {
+      if (only && !only.test(pub.screen)) return null;
       let k = `${tag}.${pub.screen}${pub.mini ? "." + pub.mini.key : ""}${pub.intro ? ".intro" : ""}${pub.paused || pub.deadline === null && pub.left ? ".paused" : ""}`;
       /* the Roulette spin: before it turns, while it turns, after it stops, for each of the three spins */
       /* Secret Stakes' bets: before any is in, and once one team's is (its phone shows its own bet) */
@@ -26,6 +34,9 @@ export async function dumpTwo(load) {
       else if (pub.screen === "seeQ" && pub.out?.some(Boolean)) k += ".out";
       /* ...and its reveal both ways: a team got it, nobody did */
       if (pub.screen === "seeReveal" && pub.see?.rev) k += pub.see.rev.who != null ? ".won" : ".none";
+      /* The Comeback's reveal and result both ways: right or wrong, made it or missed it */
+      if (pub.screen === "comebackReveal" && pub.comeback) k += pub.comeback.out.some(Boolean) ? ".wrong" : ".right";
+      if (pub.screen === "comebackSummary" && pub.comeback) k += pub.comeback.made?.some(Boolean) ? ".made" : ".missed";
       if (pub.screen === "rouletteQ" && pub.roulette?.spinAt) { const d = now - pub.roulette.spinAt; k += d < 1800 ? ".hold" : d < 4400 ? ".turn" : ".after"; k += ".lap" + pub.roulette.lap; }
       const rec = { pub: JSON.parse(JSON.stringify(pub)), secret: secret ? JSON.parse(JSON.stringify(secret)) : null, now };
       if (!got[k + ".a"]) got[k + ".a"] = rec; else got[k + ".z"] = rec;

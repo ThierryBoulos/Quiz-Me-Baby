@@ -10,6 +10,8 @@ import { SEE_TYPE, sePic, type SePub } from "../see";
 import { QMB } from "../engine";
 import { skQm } from "./logic";
 import { foolSum, type FoolPub, type FoolSum } from "../fool";
+import { extraGame } from "./logic";
+import type { ComebackPub } from "../comeback";
 
 export type TeamPub = { name: string; captain: string; score: number; color: string };
 export type PubMany = {
@@ -33,6 +35,7 @@ export type PubMany = {
   see?: SePub;                                    // What Do You See?: the picture and how it clears; at the reveal what it was, the fastest right guess
   preload?: { sees?: string[] };                  // What Do You See?: the next pictures, fetched ahead (the TV its size, a phone its own)
   fool?: FoolPub;                                 // Fool Me Twice: the fact, who has written and picked, the answers, the reveal
+  comeback?: ComebackPub;                         // the comeback: who is in it, what each can reach, who is out; at its end who made it
   stakes?: SkPub;                                 // Secret Stakes: the round's themes, who has bet (and each team's bet, drawn only on its own phones), the questions, the reveal
   theme?: string;                                 // a question round: the question's theme
   deadline: number | null; left: number; sent: boolean[]; now?: number; paused?: boolean;
@@ -70,9 +73,10 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
-  const now = m && m.key !== "majority" && s.screen === "reveal" ? legPoints(s) : null;
+  const now = m && m.key !== "majority" && m.key !== "comeback" && s.screen === "reveal" ? legPoints(s) : null;
   if (m) pub.game = { key: m.key, title: titleOf(s.minis, s.mi), leg: Math.min(m.i + 1, m.qs.length), of: m.qs.length, wins: [...m.wins],
-    pts: m.pts.map((p, t) => p + (now ? now[t] : 0)), index: s.mi, count: s.minis.filter((x) => x.key !== "sudden").length, keys: s.minis.filter((x) => x.key !== "sudden").map((x) => x.key), ...(m.only ? { only: m.only } : {}),
+    pts: m.pts.map((p, t) => p + (now ? now[t] : 0)), /* (sudden death and the comeback aren't among the night's games: they don't count, and have no pip) */
+    index: s.minis.slice(0, s.mi).filter((x) => !extraGame(x.key)).length, count: s.minis.filter((x) => !extraGame(x.key)).length, keys: s.minis.filter((x) => !extraGame(x.key)).map((x) => x.key), ...(m.only ? { only: m.only } : {}),
     ...(m.key === "quiz" ? { themes: [...new Set(m.qs.map((q) => String(q.theme || "")).filter(Boolean))] } : {}) };
   /* Majority Rules: each team's share so far, for the tracker's "this game" line; on the reveal this question
      counts too (it is only banked at Next), so the line agrees with "2 of 2 right" under it (the reviewers, 31 Oct) */
@@ -127,6 +131,8 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
     if (m.key === "quiz" && q.theme) pub.theme = q.theme;
     if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes); }
   }
+  if (m?.key === "comeback" && m.cb && m.only) pub.comeback = { teams: [...m.only], target: [...m.cb.target], before: [...m.cb.before], i: m.i, of: m.qs.length, out: [...m.cb.out],
+    ...(m.cb.made ? { made: [...m.cb.made], after: [...(m.cb.after || m.cb.before)] } : {}) };
   if (s.screen === "reveal") { pub.contest = s.contest ?? null; pub.contested = s.contested || []; }
   if (s.hostGone) pub.hostGone = s.hostGone;
   if (s.flags?.length) pub.flags = s.flags.slice(-30);
@@ -134,7 +140,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   if (s.imad) pub.imad = s.imad;
   if (m && q && s.screen === "reveal") {
     /* (sudden death pays the night one point, to the fastest right answer) */
-    const w = legWinners(s), places = legPlaces(s), pl = { places, pts: m.key === "sudden" ? places.map((p) => (p === 1 ? 1 : 0)) : legPoints(s) };
+    const w = legWinners(s), places = legPlaces(s), pl = { places, pts: m.key === "sudden" ? places.map((p) => (p === 1 ? 1 : 0)) : m.key === "comeback" ? places.map(() => 0) : legPoints(s) };   // (the comeback pays nothing a question: all three, or nothing)
     if (m.key === "map") pub.reveal = { answer: q.question, notes: q.answer, typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (m.key === "roulette") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (m.key === "stakes") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, places: s.teams.map(() => null), pts: pub.stakes?.rev?.delta || [] };
@@ -153,7 +159,7 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   /* (Secret Stakes pays nothing at its end: the bets are already on the totals; its summary is pub.stakes.sum) */
   if (m?.key === "stakes" && pub.summary) { pub.summary.award = s.teams.map(() => 0); pub.summary.noAward = true; }
   if (m?.key === "see" && s.screen !== "summary") pub.preload = { sees: m.qs.slice(m.i, m.i + 2).map((q) => String(q?.photo || "")).filter(Boolean) };
-  if (s.intro) { const games = s.minis.filter((x) => x.key !== "sudden");
+  if (s.intro) { const games = s.minis.filter((x) => !extraGame(x.key));
     pub.intro = { many: true, teams: s.teams.length, items: games.map((x, i) => ({ kind: x.key === "quiz" ? "q" as const : "mini" as const, key: x.key + i, game: x.key, title: titleOf(s.minis, i),
       ...(x.key === "quiz" ? { themes: [...new Set(x.qs.map((q) => String(q.theme || "")).filter(Boolean))], rounds: roundNumbers(s.minis, i) } : {}) })) }; }
   if (s.screen === "final") pub.final = { order: ranking(s), log: s.log, awards: recapMany(s), games: s.minis.map((_, i) => titleOf(s.minis, i)) };

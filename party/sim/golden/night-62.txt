@@ -1,0 +1,60 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 1-12)
+7.50 roundIntro | 2 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+7.50 ask | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+8.50 steal | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+9.50 answer | 3 | 1-13 |  | Owls +1 point — steal | 
+10.25 answer | 3 | 1-13 |  |  | 
+11.25 answer | 3 | 1-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+12.00 ask | 4 | 1-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+13.00 answer | 4 | 1-14 |  | Owls +1 point | 
+14.00 answer | 4 | 1-14 |  |  | 
+15.75 steal | 5 | 1-13 |  | Lions steal a new question. | 
+16.50 answer | 5 | 2-13 |  | Lions +1 point — steal | 
+17.50 answer | 5 | 2-13 |  |  | 
+18.50 answer | 5 | 1-13 |  | Call changed: nobody scores this one. | 
+19.25 roundScore | 6 | 1-13 |  | Call changed: nobody scores this one. | 
+20.25 roundIntro | 7 | 1-13 |  | Call changed: nobody scores this one. | 
+21.00 ask | 8 | 1-13 |  | Call changed: nobody scores this one. | 
+22.00 ask | 8 | 1-13 |  | Lions used Double Dip. | 
+23.00 steal | 8 | 1-13 |  | Lions used Double Dip. | 
+23.75 answer | 8 | 1-13 |  | Lions used Double Dip. | 
+24.75 answer | 8 | 1-13 |  |  | 
+26.50 answer | 8 | 2-13 |  | Call changed: Lions +1 point. | 
+27.50 ask | 9 | 2-13 |  | Call changed: Lions +1 point. | 
+28.25 answer | 9 | 2-14 |  | Owls +1 point | 
+29.25 roundScore | 10 | 2-14 |  | Owls +1 point | 
+30.00 comebackIntro | 11 | 2-14 |  | Owls +1 point | 
+31.00 comebackQ | 12 | 2-14 |  | Owls +1 point | 
+32.00 comebackReveal | 12 | 2-14 |  | Owls +1 point | 
+32.75 comebackQ | 13 | 2-14 |  | Owls +1 point | 
+33.75 comebackReveal | 13 | 2-14 |  | Owls +1 point | 
+34.50 comebackQ | 14 | 2-14 |  | Owls +1 point | 
+35.50 comebackReveal | 14 | 2-14 |  | Owls +1 point | 
+36.50 comebackSummary | 15 | 12-14 |  | Owls +1 point | 
+37.25 roundIntro | 16 | 12-14 |  | Owls +1 point | 
+38.25 ask | 17 | 12-14 |  | Owls +1 point | 
+40.00 answer | 17 | 13-14 |  | Lions +1 point | 
+41.00 answer | 17 | 13-14 |  |  | 
+42.75 steal | 18 | 12-14 |  | Owls steal a new question. | 
+43.50 answer | 18 | 12-15 |  | Owls +1 point — steal | 
+44.50 ask | 19 | 12-15 |  | Owls +1 point — steal | 
+45.50 steal | 19 | 12-15 |  | Owls +1 point — steal | 
+46.25 answer | 19 | 13-15 |  | Lions +1 point — steal | 
+47.25 roundScore | 20 | 13-15 |  | Lions +1 point — steal | 
+48.00 roundIntro | 21 | 13-15 |  | Lions +1 point — steal | 
+50.00 ask | 22 | 13-15 |  | Lions +1 point — steal | 
+50.75 answer | 22 | 15-15 |  | Lions +2 points | 
+51.75 ask | 23 | 15-15 |  | Lions +2 points | 
+52.50 ask | 23 | 15-15 |  | Owls used Double Dip. | 
+53.50 steal | 23 | 15-15 |  | Owls used Double Dip. | 
+54.50 answer | 23 | 15-15 |  | Owls used Double Dip. | 
+55.25 roundScore | 24 | 15-15 |  | Owls used Double Dip. | 
+56.25 sudden | 25 | 15-15 |  | Owls used Double Dip. | 
+57.00 sudden | 26 | 15-15 |  | Owls used Double Dip. | 
+58.00 sudden | 26 | 15-15 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+59.00 final | 26 | 15-16 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+recap: {"margin":1,"sudden":true,"leadChanges":0,"steals":[1,2],"minis":[0,0],"chart":[[0,0],[0,0],[1,12],[1,13],[1,14],[1,13],[2,13],[1,13],[2,13],[2,14],[12,14],[13,14],[12,14],[12,15],[13,15],[15,15],[15,16]],"segs":[{"label":"R1","pts":[[1,12],[1,13],[1,14],[1,13],[2,13],[1,13]]},{"label":"R2","pts":[[2,13],[2,14]]},{"label":"The Comeback","pts":[[12,14]]},{"label":"R3","pts":[[13,14],[12,14],[12,15],[13,15]]},{"label":"R4","pts":[[15,15]]},{"label":"Sudden death","pts":[[15,16]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":1},{"t":"Best thief","who":"Owls, 2 steals","team":1}]}

@@ -27,7 +27,9 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
     const quiz = (g.rounds || []).flatMap((r: { q: Q[] }) => r.q);
     const decks = { quiz: quiz.slice(0, 12), sudden: quiz.slice(12), flag: all(g.flagGame), airport: all(g.airportGame), map: all(g.mapGame), closest: all(g.mini), pin: all(g.pinGame),
       majority: all(g.majorityGame), say, dish: all(g.dishGame), see: all(g.seeGame), roulette: all(g.rouletteGame),
-      stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])], fool: all(g.foolGame) } as Partial<Record<L.ManyKey, Q[]>>;
+      stakes: [...(g.stakesGame?.rounds || []), ...(g.stakesGame?.spare || [])], fool: all(g.foolGame),
+      /* the comeback's easy questions (17 Nov): the night below is made a massacre at its middle, so its screens come up */
+      comeback: bank.bank.filter((q: Q) => q.type === "standard" && q.difficulty === "easy" && q.theme !== "Know the Host" && !quiz.some((x: Q) => x.id === q.id)).slice(0, 5) } as Partial<Record<L.ManyKey, Q[]>>;
     const teams = Array.from({ length: k }, (_, t) => ({ name: longNames[t], captain: "Captain" + t }));
     const s = L.newNight(teams, decks, keys, { quiz: [4, 6] });   // (the second game three rounds: "Rounds 3, 4 and 5", an odd round never plays alone)
     s.intro = true;
@@ -49,7 +51,9 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         snap();
         /* Fool Me Twice: lies of every length (40 letters the longest), the last team none (ours in its place) */
         if (m.key === "fool") { for (let t = 0; t < k - 1; t++) L.captainAnswer(s, t, { text: ["A wig", "Its weight in chocolate", "A hamster", "Forty sheep and a goat", "Wax", "Pickled herring", "Seventeen rubber chickens"][t % 7] }); snap(); L.foolOpen(s, now, T); continue; }
-        if (m.key === "majority") for (const p of s.roster) { if (rng() < 0.1) continue; L.vote(s, p.name, rng() < 0.5 ? q.answer : (q.options as string[])[Math.floor(rng() * 4)]); }
+        /* the comeback: the first team in it gets all three, the others two times in three (one misses, one sends nothing) */
+        if (m.key === "comeback") { (m.only || []).forEach((t, j) => { if (m.cb?.out[t]) return; if (j > 0 && rng() < 0.15) return; L.captainAnswer(s, t, { text: j === 0 || rng() < 0.66 ? String(q.answer) : "Atlantis" }, undefined, now + 1500 + j * 900); }); }
+        else if (m.key === "majority") for (const p of s.roster) { if (rng() < 0.1) continue; L.vote(s, p.name, rng() < 0.5 ? q.answer : (q.options as string[])[Math.floor(rng() * 4)]); }
         else if (m.key === "dish") { for (let t = 0; t < k && s.screen === "q"; t++) L.captainAnswer(s, t, { text: rng() < 0.4 ? String(q.answer) : "Atlantis" }); }
         /* What Do You See? (the buzzer): a first team buzzes (the picture stops) and gets it wrong (out, the clock goes
            on); a second buzzes, and two times in three gets it right */
@@ -70,6 +74,9 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         if (s.screen === "q") snap();
         now += 10000; if (s.screen === "q") L.reveal(s); continue;
       }
+      /* (the night's middle: the last teams far behind, so the comeback comes) */
+      if (s.screen === "summary" && !s.cbDone && s.mi + 1 >= Math.ceil(s.minis.filter((x) => !L.extraGame(x.key)).length / 2)) { const top = Math.max(...s.teams.map((x) => x.score));
+        snap(); s.teams[k - 1].score = Math.round(top * 0.15); if (k > 4) s.teams[k - 2].score = Math.round(top * 0.3); if (k > 6) s.teams[k - 3].score = Math.round(top * 0.33); L.next(s, now, T); continue; }
       if (s.screen === "reveal" || s.screen === "summary") { snap(); if (s.screen === "summary" && s.mi === s.minis.length - 1 && s.teams[0].score !== s.teams[1].score) { s.teams[1].score = s.teams[0].score = Math.max(...s.teams.map((x) => x.score)) + 5; } L.next(s, now, T); continue; }
       snap(); L.next(s, now, T);
     }

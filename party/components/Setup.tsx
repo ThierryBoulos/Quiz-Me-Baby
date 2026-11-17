@@ -8,6 +8,7 @@ import { thinLine, type TvShare } from "@/lib/game";
 import { LevelNote } from "./LevelNote";
 import type { FreshLeft } from "@/lib/freshLeft";
 import { sendQuiet } from "@/lib/supabase";
+import { ComebackSwitch } from "./Comeback";
 import { adoptDraft, useDraft, useDraftHost } from "@/lib/setupDraft";
 import { TimersSheet } from "./TimersSheet";
 import type { Settings } from "@/lib/settings";
@@ -17,7 +18,7 @@ import { RepeatSheet } from "./RepeatSheet";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChips";
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
 
-export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; lifelines?: boolean;
+export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; lifelines?: boolean; comeback?: boolean;
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: Q[] } & Partial<Picks>;
 /* Classic's MINI_GAMES (index.html), name and one line each */
 const MINIS = [
@@ -86,6 +87,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const [difficulty, setDiff] = useDraft<string>(code, "two.difficulty", QMB.DEFAULT_DIFF);
   const [themes, setThemes] = useDraft<string[] | null>(code, "two.themes", null);
   const [minis, setMinis] = useDraft<string[]>(code, "two.minis", ["flag", "closest", "auction", "see", "roulette", "battle"]);
+  const [comeback, setComeback] = useDraft(code, "two.comeback", true);
   const [mapLevels, setMapLevels] = useDraft<string[]>(code, "two.mapLevels", ["easy", "medium"]);   // (mini-games start at Easy and Medium: the owner, 16 Nov)
   const [flagLevels, setFlagLevels] = useDraft<string[]>(code, "two.flagLevels", ["veasy", "easy", "medium", "hard"]);   // a mix, Very easy to Hard
   const [dishLevels, setDishLevels] = useDraft<string[]>(code, "two.dishLevels", ["c-easy", "c-medium", "d-easy", "d-medium"]);
@@ -279,6 +281,8 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
                 set={(v) => setDishLevels([...dishLevels.filter((l) => l[0] === "c"), ...v])} />
             </>)}
           </div>); })}
+        {/* the comeback, on or off (17 Nov, the owner: on by default), with the host and with none */}
+        <ComebackSwitch on={comeback} set={setComeback} />
       </div>
 
       {/* ---- ADVANCED: the host only (it shows the answers) ---- */}
@@ -323,7 +327,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
         {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
         {isHost && half.length > 0 && <p className="text-center text-13 text-[var(--color-no)]" role="status">{half.join(", ")} {half.length > 1 ? "have" : "has"} only one question ticked; {half.length > 1 ? "they fall" : "it falls"} back to a random pair.</p>}
         <button className="btn btn-gold btn-block" disabled={!!blocker || busy}
-          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, lifelines, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, seeLevels, seeKinds, custom: getCustom(),
+          onClick={() => onStart({ standard, rounds, difficulty, themes: picked, lifelines, comeback, minis, mapLevels, flagLevels, dishLevels, pinLevels, airportLevels, majorityLevels, seeLevels, seeKinds, custom: getCustom(),
             ...(isHost ? { ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) } : {}) })}>Start the game</button>
         {/* how long it should take, from what's picked and the TV's timers (the owner, 14 Nov) */}
         {(standard || miniKeys.length > 0) && <p className="text-center text-12 text-[var(--color-ink-3)] -mt-1">{timeLine(estimateTwo({ standard, rounds, minis: miniKeys, host: isHost, timers }))}</p>}

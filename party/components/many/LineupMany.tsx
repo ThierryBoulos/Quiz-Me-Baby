@@ -1,4 +1,5 @@
 "use client";
+import { ComebackSwitch } from "../Comeback";
 import { LevelNote } from "../LevelNote";
 import type { FreshLeft } from "@/lib/freshLeft";
 /* MANY TEAMS: the lobby's line-up (components/Lineup.tsx, for N teams), the phone's team buttons when there
@@ -99,7 +100,7 @@ const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1
 /* the 3-8 night's lengths, for the picker (each game's own) */
 const CAPS = { closest: MANY_LEGS.closest, saysame: MANY_LEGS.say, map: MANY_LEGS.map, flag: MANY_LEGS.flag, dish: MANY_LEGS.dish, pin: MANY_LEGS.pin, airport: MANY_LEGS.airport, majority: MANY_LEGS.majority };
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
-export type CfgMany = { minis: string[]; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[]; rounds: number; quizLevels: string[]; themes: string[];
+export type CfgMany = { minis: string[]; comeback?: boolean; flagLevels: string[]; pinLevels: string[]; majorityLevels: string[]; rounds: number; quizLevels: string[]; themes: string[];
   airportLevels: string[]; mapLevels: string[]; dishLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: unknown[] } & Partial<Picks>;
 
 export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: openAtFirst = false }: { busy: boolean; why: string; k: number; onStart: (cfg: CfgMany) => void; code: string; tv?: TvShare; left?: FreshLeft; repeatOpen?: boolean }) {
@@ -113,6 +114,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
   const [minis, setMinis] = useDraft<string[]>(code, "many.minis", ["quiz", "majority", "flag", "closest", "pin", "see", "stakes"]);
   /* standard rounds: one theme each, 1 to 14, played two at a time (the default night is the same as before: six) */
   const [rounds, setRounds] = useDraft(code, "many.rounds", 6);
+  const [comeback, setComeback] = useDraft(code, "many.comeback", true);
   const [quizLevels, setQuizLevels] = useDraft<string[]>(code, "many.quizLevels", ["easy", "medium", "hard"]);
   const [airportLevels, setAirportLevels] = useDraft<string[]>(code, "many.airportLevels", ["easy", "medium"]);   // (mini-games start at Easy and Medium: the owner, 16 Nov)
   const [mapLevels, setMapLevels] = useDraft<string[]>(code, "many.mapLevels", ["easy", "medium"]);
@@ -236,6 +238,8 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
               <LevelRow label="Dish levels" opts={DISHES} value={dishLevels.filter((l) => l[0] === "d")} set={(v) => setDishLevels([...dishLevels.filter((l) => l[0] === "c"), ...v])} />
             </div>)}
           </div>); })}
+        {/* the comeback, on or off (17 Nov, the owner: on by default): the same switch as with two teams */}
+        <ComebackSwitch on={comeback} set={setComeback} />
       </div>
       {/* ---- ADVANCED: the host's (it shows the answers), as with two teams ---- */}
       <div className="card flex flex-col gap-3">
@@ -264,7 +268,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
         }} />}
       <div className="start-bar">
         {blocker && <p className="text-center text-13 text-[var(--color-ink-2)]" role="status">{blocker}</p>}
-        <button className="btn btn-gold btn-block" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels, seeLevels, seeKinds,
+        <button className="btn btn-gold btn-block" disabled={!!blocker || busy} onClick={() => onStart({ minis: on, comeback, flagLevels, pinLevels, majorityLevels, rounds, quizLevels, themes: picked, airportLevels, mapLevels, dishLevels, seeLevels, seeKinds,
           custom: getCustom(), ...picks, picks: Object.fromEntries(Object.entries(picks.picks).filter(([t]) => picked.includes(t))) })}>Start the game</button>
         {/* how long it should take, from what's picked and the TV's timers (the owner, 14 Nov) */}
         {on.length > 0 && <p className="text-center text-12 text-[var(--color-ink-3)] -mt-1">{timeLine(estimateMany({ minis: on, rounds, teams: k, timers: tv?.settings }))}</p>}

@@ -7,6 +7,7 @@ import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
+import { COMEBACK_TITLE } from "@/lib/comeback";
 import { preloadWorld, type Mark } from "./PinMap";
 import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
 
@@ -21,9 +22,14 @@ const side = (t: 0 | 1) => (t === 0 ? "a" : "b");
 /* ---- the tracker: scores, where we are, and the night's progress ---- */
 /* what one go of a mini-game is called, as the 3-8 team night says it (no "leg", 31 Oct) */
 const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Place", airport: "Board", auction: "Round", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
+/* The Comeback: its two teams as its pieces want them (components/Comeback), and which question is on: "Question 1 of 3"
+   (on the reveal the view counts the question as played) */
+export const comebackTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})` }));
+export const comebackQn = (pub: Pub) => { const c = pub.comeback; return c ? `Question ${Math.min(c.of, pub.screen === "comebackReveal" ? c.i : c.i + 1)} of ${c.of}` : ""; };
 function hudLabel(pub: Pub): ReactNode {
   const m = pub.mini, sc = pub.screen;
   if (sc === "final") return <b>Final result</b>;
+  if (pub.comeback && /^comeback/.test(sc)) return <><b>{COMEBACK_TITLE}</b>{sc === "comebackIntro" ? null : <> &nbsp;·&nbsp; {sc === "comebackSummary" ? "Result" : comebackQn(pub)}</>}</>;
   if (sc === "sudden") return <b>Sudden death</b>;
   if (m) {
     const tail = /Summary$|Result$/.test(sc) ? "Result" : /Tie$/.test(sc) && m.key !== "battle" ? "Tie"

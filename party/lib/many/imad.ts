@@ -51,7 +51,7 @@ export function imadMany(s: StateM) {
     } else if (MINI[m.key]) moments.push(MINI[m.key]);
   }
   /* a mini-game won (a question round has no "mini-game" to win) */
-  if (s.screen === "summary" && m && m.award && m.key !== "quiz" && m.key !== "sudden" && !once["s" + s.mi]) {
+  if (s.screen === "summary" && m && m.award && m.key !== "quiz" && m.key !== "sudden" && m.key !== "comeback" && !once["s" + s.mi]) {
     once["s" + s.mi] = true;
     const w = (m.places || []).indexOf(1);
     if (w >= 0 && (m.places || []).filter((p) => p === 1).length === 1) { moments.push("miniwin"); extra.t = w; extra.pts = m.award[w]; extra.ptsWord = `${m.award[w]} points`; }

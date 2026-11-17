@@ -12,6 +12,7 @@ import { rrGot, rrPub, rrQ, rrSpins, type RrLap } from "../roulette";
 import { skKey, skPub, skQ, skResult, type SkGame } from "../stakes";
 import { SEE_TYPE, sePic, seeWinner } from "../see";
 import type { TvState } from "./state";
+import { COMEBACK_TITLE } from "../comeback";
 
 /* The question in play goes out under a number that means nothing outside this game (D5): its
    real id would find the answer in a bank file. The phones use it only to tell questions apart. */
@@ -36,6 +37,8 @@ const segOf = (s: TvState): string | null => {
   const sc = s.screen, k = sc === DECIDED ? s.decided?.key ?? null : miniOf(sc);
   if (k) return MINI_TITLES[k];
   if (sc === "sudden") return "Sudden death";
+  /* (The Comeback is a part of its own on the end chart: its points aren't the round's before it) */
+  if (/^comeback/.test(sc)) return COMEBACK_TITLE;
   return ["roundIntro", "ask", "steal", "answer", "roundScore"].includes(sc) ? `R${s.g.r + 1}` : null;
 };
 export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
@@ -97,7 +100,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   if (g.hasStakes) sched.push({ kind: "mini", key: "stakes" });
   p.pips = sched.map((x) => ({ kind: x.kind, state: x.kind === "mini"
     ? (live === x.key ? "now" : g.done[x.key!] ? "done" : "todo")
-    : (x.i === g.r && !live && s.screen !== "final" && s.screen !== "sudden" ? "now" : g.rounds[x.i!]?.done ? "done" : "todo") }));
+    : (x.i === g.r && !live && s.screen !== "final" && s.screen !== "sudden" && !/^comeback/.test(s.screen) ? "now" : g.rounds[x.i!]?.done ? "done" : "todo") }));
   /* the night's intro: the same order, each round with its theme, each mini-game named */
   if (g.nightIntro) {
     let r = 0;
@@ -142,6 +145,16 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.sudden = { ready: !!g.sdReady, shown: !!g.sd.shown, n: g.sd.n, answer: g.sd.shown ? g.sd.q.answer : undefined };
     p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>;
     secret.qid = p.qid = qk(s, g.sd.q.id); secret.answer = g.sd.q.answer; secret.notes = g.sd.q.notes;
+  }
+  /* The Comeback (17 Nov): who plays for it and what it can win; the question on (i: on the reveal, the questions
+     played, so the team still in it shows "1 of 3"); a miss, out; the result, as the calls stand */
+  if (/^comeback(Intro|Q|Reveal|Summary)$/.test(s.screen) && g.comeback) {
+    const C = g.comeback, t = C.teams[0] as 0 | 1, sc = s.screen, rev = sc === "comebackReveal";
+    const out = [false, false]; out[t] = rev ? !s.ok[t] : C.made === false;
+    p.comeback = { teams: [...C.teams], target: [...C.target], before: [...C.before], i: C.i + (rev ? 1 : 0), of: C.qs.length, out };
+    if (sc === "comebackSummary") { const made = [false, false]; made[t] = !!C.made; p.comeback.made = made; p.comeback.after = [...(C.after || C.before)]; }
+    if ((sc === "comebackQ" || rev) && q) p.question = q.question;
+    if (rev && q) p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: s.ok[t] ? t : "none", notes: q.notes };
   }
   /* the mini-games */
   const key = s.screen === DECIDED ? s.decided?.key ?? null : miniOf(s.screen);

@@ -1,0 +1,48 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 2-14)
+6.75 roundIntro | 2 | 2-14 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 14. | 
+7.50 ask | 3 | 2-14 |  | The host set the scores: ⁨Lions⁩ 2, ⁨Owls⁩ 14. | 
+9.50 answer | 4 | 3-14 |  | Lions +1 point | 
+10.25 ask | 5 | 3-14 |  | Lions +1 point | 
+12.00 answer | 6 | 3-15 |  | Owls +1 point | 
+13.00 roundScore | 7 | 3-15 |  | Owls +1 point | 
+14.00 roundIntro | 8 | 3-15 |  | Owls +1 point | 
+14.75 ask | 9 | 3-15 |  | Owls +1 point | 
+16.50 steal | 10 | 3-15 |  | Owls +1 point | 
+18.50 answer | 11 | 3-16 |  | Owls +1 point — steal | 
+19.25 ask | 12 | 3-16 |  | Owls +1 point — steal | 
+21.00 steal | 13 | 3-16 |  | Owls +1 point — steal | 
+23.00 answer | 14 | 3-16 |  | Owls +1 point — steal | 
+23.75 answer | 14 | 3-16 |  |  | 
+24.75 roundScore | 15 | 3-16 |  |  | 
+25.50 comebackIntro | 16 | 3-16 |  |  | 
+26.50 comebackQ | 17 | 3-16 |  |  | 
+27.50 comebackReveal | 17 | 3-16 |  |  | 
+28.25 comebackQ | 18 | 3-16 |  |  | 
+29.25 comebackReveal | 18 | 3-16 |  |  | 
+30.00 comebackQ | 19 | 3-16 |  |  | 
+31.00 comebackReveal | 19 | 3-16 |  |  | 
+32.00 comebackSummary | 20 | 14-16 |  |  | 
+32.75 roundIntro | 21 | 14-16 |  |  | 
+33.75 ask | 22 | 14-16 |  |  | 
+35.50 steal | 23 | 14-16 |  |  | 
+37.25 answer | 24 | 14-17 |  | Owls +1 point — steal | 
+38.25 ask | 25 | 14-17 |  | Owls +1 point — steal | 
+40.00 answer | 26 | 14-18 |  | Owls +1 point | 
+41.00 answer | 26 | 14-18 |  |  | 
+41.75 answer | 26 | 14-18 |  | The host keeps the call. | 
+42.75 roundScore | 27 | 14-18 |  | The host keeps the call. | 
+43.50 roundIntro | 28 | 14-18 |  | The host keeps the call. | 
+45.50 ask | 29 | 14-18 |  | The host keeps the call. | 
+47.25 answer | 30 | 15-18 |  | Lions +1 point | 
+48.00 ask | 31 | 15-18 |  | Lions +1 point | 
+50.00 steal | 32 | 15-18 |  | Lions +1 point | 
+51.75 answer | 33 | 17-18 |  | Lions +2 points — steal | 
+52.50 answer | 33 | 17-18 |  |  | 
+53.50 answer | 33 | 17-18 |  | The host keeps the call. | 
+54.50 roundScore | 34 | 17-18 |  | The host keeps the call. | 
+55.25 final | 35 | 17-18 |  | The host keeps the call. | 
+recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[1,2],"minis":[0,0],"chart":[[0,0],[0,0],[2,14],[3,14],[3,15],[3,16],[14,16],[14,17],[14,18],[15,18],[17,18]],"segs":[{"label":"R1","pts":[[2,14],[3,14],[3,15]]},{"label":"R2","pts":[[3,16]]},{"label":"The Comeback","pts":[[14,16]]},{"label":"R3","pts":[[14,17],[14,18]]},{"label":"R4","pts":[[15,18],[17,18]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":1},{"t":"Best thief","who":"Owls, 2 steals","team":1}]}

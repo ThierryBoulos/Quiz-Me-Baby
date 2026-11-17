@@ -45,7 +45,9 @@ const NEXT = { roundIntro: "round/begin", miniIntro: "closest/start", flagIntro:
   rouletteIntro: "roulette/start", rouletteReveal: "ui/next", rouletteSummary: "roulette/done",
   stakesIntro: "stakes/start", stakesReveal: "ui/next", stakesSummary: "stakes/done",
   seeIntro: "see/start", seeReveal: "ui/next", seeSummary: "see/done",
-  foolIntro: "fool/start", foolReveal: "ui/next", foolSummary: "fool/done" };
+  foolIntro: "fool/start", foolReveal: "ui/next", foolSummary: "fool/done",
+  /* The Comeback (17 Nov): Start, Next after each answer's reveal, Next from the result */
+  comebackIntro: "comeback/start", comebackReveal: "ui/next", comebackSummary: "comeback/done" };
 
 /* the answer to what's on screen, from the TV's own game (bots peek, so some answers are right) */
 function answerNow(g, pub) {
@@ -60,6 +62,7 @@ function answerNow(g, pub) {
     if (sc === "dishQ") return g.dishGame.qs[g.dishGame.i]?.answer;
     if (sc === "battleQ") return g.battle.qs[g.battle.cap]?.[g.battle.i]?.answer;
     if (sc === "sudden") return g.sd?.q?.answer;
+    if (sc === "comebackQ") return g.comeback?.qs[g.comeback.i]?.answer;
     if (sc === "battleTie") return g.battle.tb?.q?.answer;
   } catch { /* the bot just guesses */ }
   return null;
@@ -87,8 +90,11 @@ function pinNear(g, bot) {
    tieMore: at that many ties, "one more" instead of "a point each"
    net: { dup, delay, stall, stallWrites }  pushes sent twice / up to delay ms late (out of order) / that share of reads, or of the TV's writes, held 5-28 s
    simul: both captains tap Next, buzz, rule at the very same moment
-   edge: answers land at the exact moment the clock runs out */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false }) {
+   edge: answers land at the exact moment the clock runs out
+   The Comeback (17 Nov): comeback: "make" (its captain gets all three right), "miss" (the first right, the second
+   wrong), "quiet" (no answer: the 15 seconds run out), "skip" (the host skips it), "off" (switched off in Setup);
+   left out, the captain answers at the bots' usual rate. comebackSwap: a new question asked for on its first one */
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed); phoneMode = phone;
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -132,13 +138,14 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   };
   const tick = (ms) => act(async () => { await advance(ms); });
   await tick(1000);
-  send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: themes || THEMES.slice(0, rounds), minis, ...(seeKinds ? { seeKinds } : {}), ...(lifelines === false ? { lifelines: false } : {}) } });
+  send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: themes || THEMES.slice(0, rounds), minis, ...(seeKinds ? { seeKinds } : {}), ...(lifelines === false ? { lifelines: false } : {}), ...(comeback === "off" ? { comeback: false } : {}) } });
 
   let reloaded = false;
   /* the scripted things, waiting for a screen that allows them; a scripted Pause lasts its `for`; a scripted
      request (no host) is agreed to by the other captain */
   const scripted = []; let pauseUntil = 0, agreeNext = false, tieMoreLeft = tieMore;
-  const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ"];
+  const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ", "comebackQ"];
+  let cbSwapped = false;
   const armed = new Set(), asked = new Set(), edged = new Set(), contested = new Set(), contestSeen = new Set(), voted = new Set(), dropped = new Set();
   let contestSilent = false;
   /* while the TV is off, the phones still tap: a captain answers or buzzes what they see */
@@ -150,6 +157,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     else if (["sudden", "battleTie"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && !p.out?.[k] && capOf(k)) send(capOf(k), "answer", { text: "Paris" }); }
     else if (p.screen === "seeQ") { const k = [0, 1].find((x) => !p.out?.[x] && capOf(x)); if (p.buzz == null) { if (k != null) send(capOf(k), "buzz", {}); } else if (!p.sent?.[p.buzz] && capOf(p.buzz)) send(capOf(p.buzz), "answer", { text: "France" }); }
     else if (["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(p.screen)) { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "France" }); }
+    else if (p.screen === "comebackQ") { const k = p.comeback?.teams[0]; if (k != null && !p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { text: "Paris" }); }
     else if (p.screen === "pinQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { pin: { lat: 48.85, lon: 2.35 } }); }
     else if (p.screen === "miniQ") { for (const k of [0, 1]) if (!p.sent?.[k] && capOf(k)) send(capOf(k), "answer", { n: "50" }); }
     else if (p.pending && capOf(1 - p.pending.team)) send(capOf(1 - p.pending.team), "next", { move: { type: "ui/rule", v: true }, step: p.step });
@@ -338,7 +346,8 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* a lifeline card up (Call a Friend): the team starts the call, then closes it (or its clock does) */
     else if (pub.lifeline) { if (pub.lifeline.wait) { if (bot() < 0.6) next(pub.turn ?? 0, "ui/startCall"); } else if (bot() < 0.4) next(pub.turn ?? 0, "ui/closeLifeline"); }
     /* where the app's calls are shown: now and then a captain contests one (once per screen) */
-    else if ((pub.calls || []).some((c) => !c.done) && !contested.has(sc + step) && bot() < 0.35) {
+    /* (not on a comeback the night wants made: a contest agreed would turn its RIGHT into a miss) */
+    else if ((pub.calls || []).some((c) => !c.done) && !contested.has(sc + step) && !(sc === "comebackReveal" && comeback === "make") && bot() < 0.35) {
       contested.add(sc + step);
       /* (a captain contests their own team's WRONG, or the other team's RIGHT) */
       const open = pub.calls.filter((c) => !c.done), c = open[Math.floor(bot() * open.length)], by = c.ok ? 1 - c.team : c.team;
@@ -366,6 +375,21 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
         send(m.user_id, "answer", { pick: bot() < 0.55 && q ? q.answer : opts[Math.floor(bot() * opts.length)], k: `${pub.qid}|majorityQ` });
       }
       if (host && bot() < 0.2) next(0, "ui/reveal");
+    }
+    /* The Comeback: the host can skip it at its announcement; its captain answers each question, tagged as a real
+       phone tags it (right or wrong at the bots' usual rate, now and then not at all, or as the night says); before
+       its first answer a new question can be asked for (the host swaps; with no host the other captain agrees) */
+    else if (sc === "comebackIntro" && comeback === "skip" && hostHere) send("host", "judge", { move: { type: "comeback/skip" }, step });
+    else if (sc === "comebackQ" && pub.comeback) {
+      const t = pub.comeback.teams[0], i = pub.comeback.i;
+      if (comebackSwap && !cbSwapped && pub.deadline) {
+        cbSwapped = true; trace.push("(a new comeback question)");
+        if (hostHere) send("host", "judge", { move: { type: "comeback/swap" }, step });
+        else { agreeNext = true; send(C(1 - t) || C(t), "next", { move: { type: "ui/askSwap" }, step }); }
+      }
+      else if (pub.agree) { /* the request is open: nobody answers meanwhile */ }
+      else if (!pub.sent?.[t] && C(t) && comeback !== "quiet" && (comeback || bot() < 0.85))
+        send(C(t), "answer", { text: comeback === "make" || (comeback === "miss" && i === 0) ? right : comeback === "miss" ? "xyz" : guess(right), k: `${pub.qid}|comebackQ` });
     }
     else if (NEXT[sc]) next(lead, NEXT[sc]);
     else if (/Tie$|Level$/.test(sc) && sc !== "battleTie") next(lead, tieMoreLeft-- > 0 ? "tie/more" : "tie/stop");
@@ -448,5 +472,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   const dealt = (api.current?.game?.rounds || []).map((r) => r.theme);
   const kinds = [...(api.current?.game?.seeGame?.qs || []), ...(api.current?.game?.seeGame?.spare || [])].map((q) => q.kind);
   const G = api.current?.game, llUsed = !!G && (G.rounds || []).some((r) => (r.dbl || []).some(Boolean) || (r.llUsed || []).some((u) => u.length));
-  return { dealt, kinds, llUsed, noLl: !!G?.noLl, taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
+  /* The Comeback: whether it came up, how it went, the scores before and after */
+  const cb = G?.comeback ? { made: G.comeback.made, skipped: !!G.comeback.skipped, before: G.comeback.before, after: G.comeback.after, team: G.comeback.teams[0], asked: G.comeback.log.length } : null;
+  return { cb, dealt, kinds, llUsed, noLl: !!G?.noLl, taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
 }

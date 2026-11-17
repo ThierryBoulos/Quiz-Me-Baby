@@ -52,55 +52,61 @@
 153.50 majorityQ | 31 | 0-5 | 53-52 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 169.50 majorityReveal | 32 | 0-5 | 50-57 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
 170.50 majoritySummary | 33 | 0-7 | 50-57 | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-171.50 roundIntro | 34 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-173.25 ask | 35 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
-174.00 answer | 35 | 1-7 |  | Lions +1 point | 
-175.00 answer | 35 | 1-7 |  |  | 
-176.75 steal | 36 | 0-7 |  | Owls steal a new question. | 
-177.75 answer | 36 | 0-8 |  | Owls +1 point — steal | 
-178.50 ask | 37 | 0-8 |  | Owls +1 point — steal | 
-179.50 answer | 37 | 0-10 |  | Owls +2 points | 
-180.50 roundScore | 38 | 0-10 |  | Owls +2 points | 
-181.25 roundIntro | 39 | 0-10 |  | Owls +2 points | 
-182.25 ask | 40 | 0-10 |  | Owls +2 points | 
-183.00 answer | 40 | 1-10 |  | Lions +1 point | 
-184.00 answer | 40 | 1-10 |  |  | 
-185.75 answer | 40 | 1-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-186.75 ask | 41 | 1-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-187.50 steal | 41 | 1-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-188.50 answer | 41 | 1-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-189.50 roundScore | 42 | 1-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-190.25 roundIntro | 43 | 1-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-191.25 ask | 44 | 1-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-192.00 answer | 44 | 2-10 |  | Lions +1 point | 
-193.00 answer | 44 | 2-10 |  |  | 
-194.75 answer | 44 | 2-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-195.75 ask | 45 | 2-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-196.50 steal | 45 | 2-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-197.50 answer | 45 | 2-10 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
-198.50 answer | 45 | 2-10 |  |  | 
-199.25 answer | 45 | 2-11 |  | Call changed: Owls +1 point. | 
-200.25 roundScore | 46 | 2-11 |  | Call changed: Owls +1 point. | 
-201.00 battleIntro | 47 | 2-11 | 0-0 | Call changed: Owls +1 point. | 
-202.00 battleQ | 48 | 2-11 | 0-0 | Call changed: Owls +1 point. | 
-206.50 battleQ | 48 | 2-11 | 1-0 | Call changed: Owls +1 point. | 
-208.25 battleQ | 48 | 2-11 | 2-0 | Call changed: Owls +1 point. | 
-209.25 battleQ | 48 | 2-11 | 3-0 | Call changed: Owls +1 point. | 
-210.00 battleQ | 48 | 2-11 | 4-0 | Call changed: Owls +1 point. | 
-211.00 battleHandoff | 48 | 2-11 | 5-0 | Call changed: Owls +1 point. | 
-212.00 battleQ | 49 | 2-11 | 5-0 | Call changed: Owls +1 point. | 
-213.75 battleQ | 49 | 2-11 | 5-1 | Call changed: Owls +1 point. | 
-214.50 battleQ | 49 | 2-11 | 5-2 | Call changed: Owls +1 point. | 
-216.50 battleQ | 49 | 2-11 | 5-3 | Call changed: Owls +1 point. | 
-217.25 battleQ | 49 | 2-11 | 5-4 | Call changed: Owls +1 point. | 
-220.00 battleQ | 49 | 2-11 | 5-5 | Call changed: Owls +1 point. | 
-221.00 battleReview | 49 | 2-11 | 5-5 | Call changed: Owls +1 point. | 
-221.75 battleTie | 50 | 2-11 | 5-5 | Call changed: Owls +1 point. | 
-222.75 battleTie | 50 | 2-11 | 5-5 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
-223.50 battleSummary | 50 | 2-13 | 5-5 | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
-224.50 battleSummary | 50 | 2-13 | 5-5 |  | 
-225.50 battleSummary | 51 | 4-11 | 5-5 | Call changed: ⁨Lions⁩ take the tie-breaker. | 
-226.25 battleSummary | 51 | 4-11 | 5-5 |  | 
-227.25 battleSummary | 52 | 2-13 | 5-5 | Call changed: ⁨Owls⁩ take the tie-breaker. | 
-228.00 final | 53 | 2-13 |  | Call changed: ⁨Owls⁩ take the tie-breaker. | 
-recap: {"margin":11,"sudden":false,"leadChanges":0,"steals":[0,3],"minis":[0,2],"chart":[[0,0],[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,7],[1,7],[0,7],[0,8],[0,10],[1,10],[2,10],[2,11],[2,13],[4,11],[2,13]],"segs":[{"label":"R1","pts":[[0,1],[0,2]]},{"label":"R2","pts":[[0,3],[0,4]]},{"label":"R3","pts":[[0,5]]},{"label":"Majority Rules","pts":[[0,7]]},{"label":"R4","pts":[[1,7],[0,7],[0,8],[0,10]]},{"label":"R5","pts":[[1,10]]},{"label":"R6","pts":[[2,10],[2,11]]},{"label":"Battle of the Captains","pts":[[2,13],[4,11],[2,13]]}],"awards":[{"t":"Best thief","who":"Owls, 3 steals","team":1},{"t":"Battle of the Captains","who":"Lea, 5 of 10","team":1},{"t":"Sharpest in Majority Rules","who":"Lea, 7 of 10","team":1},{"t":"Wooden spoon, Majority Rules","who":"Sam & Maya, 4 of 10","team":null,"note":"Last, but with dignity.","spoon":true}]}
+171.50 comebackIntro | 34 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+172.25 comebackQ | 35 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+173.25 comebackReveal | 35 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+174.00 comebackSummary | 36 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+175.00 roundIntro | 37 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+176.00 ask | 38 | 0-7 |  | ⁨Joe⁩ is off ⁨Owls⁩'s list for this one. | 
+176.75 ask | 38 | 0-7 |  | Lions used Call a Friend. | 
+180.50 ask | 39 | 0-7 |  | Lions used Call a Friend. | 
+181.25 steal | 39 | 0-7 |  | Lions used Call a Friend. | 
+182.25 answer | 39 | 0-8 |  | Owls +1 point — steal | 
+183.00 ask | 40 | 0-8 |  | Owls +1 point — steal | 
+184.00 answer | 40 | 0-9 |  | Owls +1 point | 
+185.00 roundScore | 41 | 0-9 |  | Owls +1 point | 
+185.75 roundIntro | 42 | 0-9 |  | Owls +1 point | 
+187.50 ask | 43 | 0-9 |  | Owls +1 point | 
+188.50 steal | 43 | 0-9 |  | Owls +1 point | 
+189.50 answer | 43 | 0-9 |  | Owls +1 point | 
+190.25 ask | 44 | 0-9 |  | Owls +1 point | 
+191.25 steal | 44 | 0-9 |  | Owls +1 point | 
+192.00 answer | 44 | 1-9 |  | Lions +1 point — steal | 
+193.00 roundScore | 45 | 1-9 |  | Lions +1 point — steal | 
+194.00 roundIntro | 46 | 1-9 |  | Lions +1 point — steal | 
+194.75 ask | 47 | 1-9 |  | Lions +1 point — steal | 
+196.50 steal | 47 | 1-9 |  | Lions +1 point — steal | 
+197.50 answer | 47 | 1-9 |  | Lions +1 point — steal | 
+198.50 answer | 47 | 1-9 |  |  | 
+199.25 answer | 47 | 1-10 |  | Call changed: Owls +1 point. | 
+200.25 ask | 48 | 1-10 |  | Call changed: Owls +1 point. | 
+201.00 answer | 48 | 1-11 |  | Owls +1 point | 
+202.00 answer | 48 | 1-11 |  |  | 
+203.75 answer | 48 | 1-11 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+204.75 roundScore | 49 | 1-11 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+205.50 battleIntro | 50 | 1-11 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+206.50 battleQ | 51 | 1-11 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+210.00 battleQ | 51 | 1-11 | 1-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+211.00 battleQ | 51 | 1-11 | 2-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+212.00 battleQ | 51 | 1-11 | 3-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+212.75 battleQ | 51 | 1-11 | 4-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+214.50 battleQ | 51 | 1-11 | 5-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+215.50 battleHandoff | 51 | 1-11 | 6-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+216.50 battleQ | 52 | 1-11 | 6-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+218.25 battleQ | 52 | 1-11 | 6-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+219.00 battleQ | 52 | 1-11 | 6-2 | ⁨Lea⁩ doesn't agree: the call stands. | 
+221.75 battleQ | 52 | 1-11 | 6-3 | ⁨Lea⁩ doesn't agree: the call stands. | 
+223.50 battleQ | 52 | 1-11 | 6-4 | ⁨Lea⁩ doesn't agree: the call stands. | 
+224.50 battleQ | 52 | 1-11 | 6-5 | ⁨Lea⁩ doesn't agree: the call stands. | 
+225.50 battleReview | 52 | 1-11 | 6-5 | ⁨Lea⁩ doesn't agree: the call stands. | 
+226.25 battleReview | 52 | 1-11 | 6-5 |  | 
+227.25 battleReview | 52 | 1-11 | 5-5 | Call changed: ⁨Lions⁩'s answer 6 is WRONG. | 
+228.00 battleTie | 53 | 1-11 | 5-5 | Call changed: ⁨Lions⁩'s answer 6 is WRONG. | 
+229.00 battleSummary | 53 | 3-11 | 5-5 | Call changed: ⁨Lions⁩'s answer 6 is WRONG. | 
+230.00 battleSummary | 53 | 3-11 | 5-5 |  | 
+230.75 battleTie | 54 | 1-11 | 5-5 | Call changed: nobody was right. Another question. | 
+231.75 battleTie | 54 | 1-11 | 5-5 | ⁨Owls⁩: wrong. ⁨Lions⁩ can still win it. | 
+232.50 battleLevel | 54 | 1-11 | 5-5 |  | 
+233.50 battleSummary | 55 | 2-12 | 5-5 |  | 
+234.50 final | 56 | 2-12 |  |  | 
+recap: {"margin":10,"sudden":false,"leadChanges":0,"steals":[1,4],"minis":[0,1],"chart":[[0,0],[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,7],[0,8],[0,9],[1,9],[1,10],[1,11],[3,11],[1,11],[2,12]],"segs":[{"label":"R1","pts":[[0,1],[0,2]]},{"label":"R2","pts":[[0,3],[0,4]]},{"label":"R3","pts":[[0,5]]},{"label":"Majority Rules","pts":[[0,7]]},{"label":"The Comeback","pts":[]},{"label":"R4","pts":[[0,8],[0,9]]},{"label":"R5","pts":[[1,9]]},{"label":"R6","pts":[[1,10],[1,11]]},{"label":"Battle of the Captains","pts":[[3,11],[1,11],[2,12]]}],"awards":[{"t":"Best thief","who":"Owls, 4 steals","team":1},{"t":"Sharpest in Majority Rules","who":"Lea, 7 of 10","team":1},{"t":"Wooden spoon, Majority Rules","who":"Sam & Maya, 4 of 10","team":null,"note":"Last, but with dignity.","spoon":true}]}

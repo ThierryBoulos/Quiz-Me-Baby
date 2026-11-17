@@ -57,6 +57,23 @@ test('fool: ours come from the top 4 fakes first; the 4 backups only when more t
   const dup = Q.foolOptions(fact, ['Goldfish', '', ''], accept, rng).opts.filter(o => o.ours).map(o => o.text);
   assert.equal(dup.length, 3); assert.ok(dup.every(x => top.includes(x)));
 });
+test('fool: a real word a letter from the truth is a lie, a typo of the truth is the truth (17 Nov)', () => {
+  const boats = { answer:'Boats' }, acc = ['Boat', 'Rowing boats', 'Botes'];
+  assert.equal(Q.foolIsTruth('Goats', boats, acc), false);              // another first letter: a lie
+  assert.equal(Q.foolIsTruth('Coats', boats, acc), false);
+  assert.equal(Q.foolIsTruth('Boots', boats, acc), true);               // same first letter, one letter off: the truth, mistyped
+  assert.equal(Q.foolIsTruth('boats.', boats, acc), true);
+  assert.equal(Q.foolIsTruth('The boats', boats, acc), true);
+  assert.equal(Q.foolIsTruth('Rowing boats', boats, acc), true);        // on the fact's own list, whatever its first letter
+  assert.equal(Q.foolIsTruth('Brine', { answer:'Urine' }, ['Pee', 'Wee']), false);
+  assert.equal(Q.foolIsTruth('Pee', { answer:'Urine' }, ['Pee', 'Wee']), true);
+});
+test('fool: two teams with the same lie who both named the team that fell for it: it loses 1, not 2 (17 Nov)', () => {
+  const opts = [{ text:'T', truth:true, by:[] }, { text:'L', by:[0, 1] }, { text:'M', by:[2] }];
+  const r = Q.foolScore(opts, [0, 0, 1], [2, 2, 0]);
+  assert.deepEqual(r.pts, [3, 3, -1]);
+  assert.equal(r.hits.length, 2);                                       // both called it
+});
 test('fool: an answer shows tidied: first letter capital, no full stop, 25 letters at most', () => {
   assert.equal(Q.foolShow('  a   wig.  '), 'A wig');
   assert.equal(Q.foolShow('x'.repeat(60)).length, 25);

@@ -13,7 +13,7 @@ export type W = 0 | 1 | "tie" | "none";
 export type PKind = "ask" | "steal" | "dish" | "sudden" | "battle" | "battleTie";
 export type Where = string | string[];
 /* the screens where the app's calls are shown, and can be contested */
-export const CONTEST_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "airportReveal", "rouletteReveal", "stakesReveal", "seeReveal", "dishReveal", "battleReview",
+export const CONTEST_SCREENS = ["answer", "flagReveal", "sayReveal", "mapReveal", "airportReveal", "rouletteReveal", "stakesReveal", "seeReveal", "dishReveal", "battleReview", "comebackReveal",
   /* sudden death and the tie-breaker: the question just decided, on the screen after it */
   "final", "battleSummary", "sudden", "battleTie"];
 /* ...where the night goes on meanwhile: no buzz until the contest is decided (its clock waits too) */
@@ -35,6 +35,8 @@ export const HOST_MOVES: Record<string, Where> = {
   "see/start": "seeIntro", "see/swap": "seeQ", "see/award": "seeSummary", "see/done": "seeSummary", "ui/seeOk": "seeReveal",
   /* Fool Me Twice: Start, a new fact (before anyone has written), the points by hand when tied, Next */
   "fool/start": "foolIntro", "fool/swap": "foolWrite", "fool/award": "foolSummary", "fool/done": "foolSummary",
+  /* The Comeback: Start (or, the host only, Skip the comeback), Change question before the answer is in, Next */
+  "comeback/start": "comebackIntro", "comeback/skip": "comebackIntro", "comeback/swap": "comebackQ", "comeback/done": "comebackSummary",
   "pin/start": "pinIntro", "pin/swap": "pinQ", "pin/award": "pinSummary", "pin/done": "pinSummary",
   "airport/start": "airportIntro", "airport/swap": "airportQ", "airport/award": "airportSummary", "airport/done": "airportSummary",
   "majority/start": "majorityIntro", "majority/swap": "majorityQ", "majority/award": "majoritySummary", "majority/done": "majoritySummary",
@@ -56,9 +58,9 @@ export const HOST_MOVES: Record<string, Where> = {
   "ui/contestOk": CONTEST_SCREENS, "ui/flip": CONTEST_SCREENS, "battle/reviewDone": "battleReview",
   /* the night's intro (before the first round): Let's go */
   "ui/introGo": "*",
-  "ui/closeLifeline": "*", "ui/setScore": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ"],
+  "ui/closeLifeline": "*", "ui/setScore": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ", "comebackQ"],
   "ui/reveal": ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "seeQ", "foolWrite", "foolPick"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/airportOk": "airportReveal",
-  "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal", "seeReveal", "foolReveal"],
+  "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal", "seeReveal", "foolReveal", "comebackReveal"],
   "ui/sdRight": ["sudden", "battleTie"], "ui/sdWrong": ["sudden", "battleTie"],
   "ui/exit": "final", "ui/again": "final",
   /* tied at the end of a mini-game: one more, or a point each */
@@ -71,7 +73,7 @@ export const HOST_MOVES: Record<string, Where> = {
 /* no host: the question on screen changed, if both captains agree (before anyone has answered it):
    the engine's own swap for each screen, and what the TV and the phones call the thing changed */
 export const SWAPS: Record<string, string> = { ask: "round/swap", miniQ: "closest/swap", flagQ: "flag/swap", pinQ: "pin/swap", airportQ: "airport/swap",
-  majorityQ: "majority/swap", dishQ: "dish/swap", mapQ: "map/swap", sayQ: "say/swap", rouletteQ: "roulette/swap", stakesPick: "stakes/swap", stakesQ: "stakes/swap", seeQ: "see/swap", foolWrite: "fool/swap", battleQ: "battle/swap" };
+  majorityQ: "majority/swap", dishQ: "dish/swap", mapQ: "map/swap", sayQ: "say/swap", rouletteQ: "roulette/swap", stakesPick: "stakes/swap", stakesQ: "stakes/swap", seeQ: "see/swap", foolWrite: "fool/swap", battleQ: "battle/swap", comebackQ: "comeback/swap" };
 export const swapWord = (sc: string, q: G) => sc === "flagQ" ? "flag" : sc === "pinQ" ? "landmark" : sc === "airportQ" ? "board" : sc === "mapQ" ? "map" : sc === "rouletteQ" ? "barrel" : sc === "seeQ" ? "picture" : sc === "foolWrite" ? "fact" : sc === "stakesPick" || sc === "stakesQ" ? "set of themes"
   : sc === "sayQ" ? "prompt" : sc === "dishQ" ? dishKind(q).toLowerCase() : "question";
 /* What a CAPTAIN may tap, and who: "any" captain, the team whose "turn" it
@@ -90,6 +92,9 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   "see/start": { where: "seeIntro", who: "lead", nohostOnly: true },
   "fool/start": { where: "foolIntro", who: "lead", nohostOnly: true },
   "pin/start": { where: "pinIntro", who: "lead", nohostOnly: true },
+  /* The Comeback: Start and Next as on every intro and result (never Skip: the leading captain would always skip) */
+  "comeback/start": { where: "comebackIntro", who: "lead", nohostOnly: true },
+  "comeback/done": { where: "comebackSummary", who: "lead", nohostOnly: true },
   "airport/start": { where: "airportIntro", who: "lead", nohostOnly: true },
   "majority/start": { where: "majorityIntro", who: "lead", nohostOnly: true },
   "roulette/start": { where: "rouletteIntro", who: "lead", nohostOnly: true },
@@ -114,7 +119,7 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   "battle/done": { where: "battleSummary", who: "lead", nohostOnly: true },
   "round/afterAnswer": { where: "answer", who: "lead", nohostOnly: true },
   "round/next": { where: "roundScore", who: "lead", nohostOnly: true },
-  "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal", "mapReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal", "seeReveal", "foolReveal"], who: "lead", nohostOnly: true },
+  "ui/next": { where: ["closestReveal", "flagReveal", "sayReveal", "mapReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal", "seeReveal", "foolReveal", "comebackReveal"], who: "lead", nohostOnly: true },
   "dish/next": { where: "dishReveal", who: "lead", nohostOnly: true },
   "auction/nextLeg": { where: "auctionLeg", who: "lead", nohostOnly: true },
   "auction/done": { where: "auctionResult", who: "lead", nohostOnly: true },
@@ -129,7 +134,7 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   "stakes/done": { where: "stakesSummary", who: "lead", nohostOnly: true },
   "dish/done": { where: "dishSummary", who: "lead", nohostOnly: true },
   "map/done": { where: "mapSummary", who: "lead", nohostOnly: true },
-  "ui/pause": { where: ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ"], who: "any", nohostOnly: true },
+  "ui/pause": { where: ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ", "comebackQ"], who: "any", nohostOnly: true },
   "ui/closeLifeline": { where: "*", who: "turn", nohostOnly: true },
   /* The app's calls stand unless contested: either captain contests one (host or not); with no host
      the other captain agrees or not (the app's call stands after a while); with a host, the host decides */
@@ -155,7 +160,7 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
    "Next" straight after marking a team must not be refused as stale. */
 export const SAME_SCREEN = new Set(["ui/setScore", "ui/askScore", "ui/agree", "auction/tick", "auction/untick", "ui/flagOk", "ui/mapOk", "ui/sayOk", "ui/airportOk", "ui/rouletteOk", "ui/stakesOk", "ui/seeOk", "stakes/pick", "ui/mrOut", "ui/mrOutOk", "ui/pause", "ui/pauseFriend", "ui/startCall", "ui/contest", "ui/contestOk", "ui/flip"]);
 /* no host: the screens that wait for the lead captain's Start or Next (nothing moves on by itself) */
-export const WAITS_FOR_NEXT = new Set(["battleReview", "roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "pinIntro", "airportIntro", "majorityIntro", "rouletteIntro", "stakesIntro", "seeIntro", "foolIntro", "battleIntro", "battleHandoff",
+export const WAITS_FOR_NEXT = new Set(["battleReview", "roundIntro", "miniIntro", "flagIntro", "dishIntro", "mapIntro", "auctionIntro", "sayIntro", "pinIntro", "airportIntro", "majorityIntro", "rouletteIntro", "stakesIntro", "seeIntro", "foolIntro", "battleIntro", "battleHandoff", "comebackIntro", "comebackReveal", "comebackSummary",
   "answer", "roundScore", "closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal", "seeReveal", "foolReveal", "dishReveal", "auctionLeg", "auctionResult",
   "miniSummary", "flagSummary", "dishSummary", "mapSummary", "saySummary", "pinSummary", "airportSummary", "majoritySummary", "rouletteSummary", "stakesSummary", "seeSummary", "foolSummary", "battleSummary", "sudden", DECIDED, ...TIE_SCREENS]);
 export const other = (t: 0 | 1) => (t === 0 ? 1 : 0) as 0 | 1;

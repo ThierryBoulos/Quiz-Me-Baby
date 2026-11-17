@@ -8,7 +8,9 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
-import { AskHead, battleNeeds, Board, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
+import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
+import { COMEBACK_TITLE } from "@/lib/comeback";
+import { AskHead, battleNeeds, Board, comebackTeams, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
 import { SeeTv } from "./See";
@@ -114,6 +116,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
           <SdCalls pub={pub} />
         </>))}
 
+        <TvComeback pub={pub} />
         <TvMini pub={pub} join={join} sound={sound} />
 
         {pub.screen === "final" && (<>
@@ -284,6 +287,35 @@ function BidBar({ n, of, color }: { n: number; of: number; color: string }) {
     <div className={"bid-notches flex gap-2 " + (full ? "full" : "")} aria-hidden>
       {Array.from({ length: of }, (_, i) => <span key={i} className={i < n ? "on" : ""} style={i < n && !full ? { background: color } : undefined} />)}
     </div>);
+}
+
+/* The Comeback on the TV (17 Nov, the owner): the announcement; each question with its 15 seconds; the answer and the
+   call; the result (made it: the points fly up to the score, as after every game) */
+function TvComeback({ pub }: { pub: Pub }) {
+  const c = pub.comeback, sc = pub.screen;
+  if (!c || !/^comeback/.test(sc)) return null;
+  const teams = comebackTeams(pub), t = c.teams[0] as 0 | 1, x = pub.reveal?.typed?.[t]?.[0], ok = pub.reveal?.ok?.[t];
+  if (sc === "comebackIntro") return (<>
+    <h1 className="display slam leading-none" style={{ fontSize: 80, color: "var(--color-gold)" }}>{COMEBACK_TITLE}</h1>
+    <ComebackIntro teams={teams} c={c} tv />
+  </>);
+  if (sc === "comebackQ") return (<>
+    <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 180 ? 30 : (pub.question || "").length > 88 ? 36 : 46, lineHeight: 1.15 }}>{pub.question}</div>
+    <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
+    <ComebackStatus teams={teams} c={c} tv />
+  </>);
+  if (sc === "comebackReveal" && pub.reveal) return (<>
+    <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
+    <div className="ans-board display beat slam" data-len={(pub.reveal.answer || "").length > 40 ? "xl" : (pub.reveal.answer || "").length > 22 ? "l" : undefined} style={{ ...QUICK, fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
+    <div className="text-28 flex items-baseline gap-3 justify-center beat" style={{ ...QUICK, ...d(0.12) }}><b style={{ color: tc(t) }}>{pub.teams[t].name}:</b> {x || "no answer"} <Verdict v={ok} size={24} stamp />
+      {(pub.calls || []).some((k) => k.changed) && <span className="text-18 text-[var(--color-gold)]">{pub.mode === "host" ? "host’s call" : "changed"}</span>}</div>
+    <ComebackStatus teams={teams} c={c} tv />
+  </>);
+  if (sc === "comebackSummary") return (<>
+    <MiniTitle title={COMEBACK_TITLE} />
+    <div className="w-full" data-fly-src={c.made?.[t] ? t : undefined}><ComebackResult teams={teams} c={c} tv /></div>
+  </>);
+  return null;
 }
 
 /* the mini-games on the TV */

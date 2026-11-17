@@ -250,6 +250,8 @@ function two(pub) {
   if (sc === "auctionBid") { const a = pub.auction; return go(a.turn, a.bid === 0 ? "auction/raise" : "auction/pass", a.bid === 0 ? { n: 2 + Math.floor(Math.random() * 4) } : {}, DELAY); }
   if (sc === "auctionRun") { const a = pub.auction; if (a.count < a.bid) go(1 - a.by, "auction/tick", {}, 1500); else if (BH) go(0, "auction/resolve", {}, DELAY); return; }
   if (sc === "battleQ") { if (H) { if (BH) go(0, "battle/mark", { got: chance(0.5) }, DELAY); } else answer(pub.battle.cap, { text: guess(right(pub.battle.cap)) }); return; }
+  /* the comeback: only the team playing for it answers */
+  if (sc === "comebackQ") { const t = pub.comeback?.teams?.[0]; if (t != null && !pub.sent?.[t]) answer(t, { text: guess(right(t)) }); return; }
   if (sc === "sudden" || sc === "battleTie") {
     if (sc === "sudden" && !pub.sudden?.ready) return go(lead, "sudden/go", {}, DELAY);
     if (BH && pub.buzz != null) return go(0, chance(0.5) ? "ui/sdRight" : "ui/sdWrong", {}, DELAY);

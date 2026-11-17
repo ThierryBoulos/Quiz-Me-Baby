@@ -64,6 +64,7 @@ export type Pub = {
   roulette?: RrPub;                     // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
   fool?: FoolPub;                       // Fool Me Twice: the fact, who has written and picked, the answers, the reveal
   see?: SePub;                          // What Do You See?: the picture and how it clears; at the reveal, what it was and who got it
+  comeback?: import("./comeback").ComebackPub;   // The Comeback (17 Nov): who plays for it, the question on, the result
   stakes?: SkPub;                       // Secret Stakes: the round's themes, what a bet is worth, who has bet; each team's question; the reveal
   /* Majority Rules: every player answers. The join screen: each team's list (who's on the game screen, who's been
      taken off), and with no host a captain asking to take an absent teammate off (the other captain agrees).

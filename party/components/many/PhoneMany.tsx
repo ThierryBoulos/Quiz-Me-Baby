@@ -16,6 +16,8 @@ import { LETTERS, typedKey } from "@/lib/many/logic";
 import { useNoPaste, useSuggestions } from "../PhoneGame";
 import { ToSide, useSideways } from "../Side";
 import { Dot, IntroMany, paid, pct, place, resultDone, splitIng, takes, SAY_WHY } from "./PartsMany";
+import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
+import { listNames } from "@/lib/comeback";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
@@ -191,12 +193,19 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     </div>);
   /* "That's your team!", under who takes it */
   const W = takes(pub);
+  /* the comeback (17 Nov, the owner): the teams as its pieces take them; is my team in it, and is it out; and the line
+     for everyone who watches it */
+  const cb = g?.key === "comeback" ? pub.comeback : undefined, cbT = T.map((t) => ({ name: t.name, color: t.color }));
+  const cbIn = !!cb && mine != null && cb.teams.includes(mine), cbOut = cbIn && !!cb?.out[mine!];
+  const cbLine = cb ? `${listNames(cb.teams.filter((t) => !cb.out[t]).map((t) => T[t].name))} are playing for a comeback.` : "";
   /* a game's result waits on the phones while the TV reveals it, last place first (the owner, 31 Oct) */
   const held = useRevealHold(sc === "summary" && g && pub.summary ? `${g.key}:${g.index}` : null, pub.summary ? resultDone(pub) + 0.3 : 0);
 
   /* what's on screen, close up: the flag, the photo, the question, and the clock. It can't be selected or copied */
   const OnScreen = ({ small }: { small?: boolean }) => sc !== "q" || !g ? null : (
     <div className="noselect contents" {...noCopy}>
+      {/* the comeback: who is still in it, over the question */}
+      {cb && <ComebackStatus teams={cbT} c={cb} />}
       {g.key === "flag" && <div className="flex justify-center"><FlagImg name={pub.flag} h={small ? 110 : 150} /></div>}
       {/* What Do You See?: the picture, clearing from the TV's clock */}
       {/* (stays in the right column sideways, sized to the screen: under the scores on the left it was cut off) */}
@@ -228,7 +237,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (
     <div className="noselect" {...noCopy}>
-      <AnswerLine question={["quiz", "say", "majority", "sudden"].includes(g.key) ? pub.question : null}
+      <AnswerLine question={["quiz", "say", "majority", "sudden", "comeback"].includes(g.key) ? pub.question : null}
         media={g.key === "flag" ? <FlagImg name={pub.flag} h={96} />
           : g.key === "see" && pub.see ? <div className="flex flex-col items-center gap-1"><SeePicture see={pub.see} clear w={240} alt={R.answer} /><SeeCredit see={pub.see} size={11} />
             {(() => { const w = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] })), R.winners?.length); return <span className="display text-18" style={{ color: w.color }}>{w.text}</span>; })()}</div>
@@ -243,6 +252,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const youOf = (): { text: string; tone: Tone } | null => {
     if (mine == null || !R || !g) return null;
     if (g.key === "majority") { const r = R.right?.[mine] ?? 0, of = R.of?.[mine] ?? 0; return { text: `Your team: ${r} of ${of} right`, tone: r > 0 ? "ok" : "mid" }; }
+    /* the comeback: still in it, or out (all three, or nothing) */
+    if (cb) { if (!cbIn || cbOut) return null; const x = R.typed?.[mine];
+      return R.ok?.[mine] ? { text: cb.i >= cb.of - 1 ? `Your team: all ${cb.of} right!` : "Your team: right · still in it", tone: "ok" } : { text: `Your team: ${x ? "wrong" : "no answer"} · no comeback`, tone: "no" }; }
     if (g.only && !g.only.includes(mine)) return null;
     /* Russian Roulette: right or wrong, and what the chamber paid (the bullet can cost 3) */
     if (g.key === "roulette" && rr?.rev) { const got = rr.rev.got[mine] ?? 0, x = R.typed?.[mine], bullet = rr.rev.level[mine] === "bullet";
@@ -278,6 +290,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* a game's result (the owner's pick, 1 Nov): your team in a pill, who won in one line, then the standings: place,
      team, the game's score, and what it adds to the night */
   const Summary = () => { if (!g || !pub.summary) return null; if (held) return <WatchTv />;
+    /* the comeback: who made it, and where it took them */
+    if (cb) { const ok = cbIn && !!cb.made?.[mine!], P = paid(pub); return (<>
+      {cbIn && <YouPill text={ok ? `Your team: all ${cb.of} right · ${cb.before[mine!]} → ${cb.after?.[mine!] ?? cb.before[mine!]}` : "Your team: no comeback"} tone={ok ? "ok" : "no"} />}
+      <TitleLine eyebrow={g.title} text={P.text} color={P.color} />
+      <ComebackResult teams={cbT} c={cb} />
+    </>); }
     /* Secret Stakes: no places and nothing more to the night, the bets were the points */
     if (g.key === "stakes" && sk?.sum) { const v = mine != null ? sk.sum.net[mine] ?? 0 : 0; return (<>
       {mine != null && <YouPill text={`Your team ${v > 0 ? "won" : v < 0 ? "lost" : "broke even"}${v ? ` ${Math.abs(v)}` : ""} on its bets`} tone={v > 0 ? "ok" : v < 0 ? "no" : "mid"} />}
@@ -311,7 +329,13 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* (the score bar: the room page draws it, with your name, so a phone held sideways can keep it on the left) */}
 
       {/* THE HOST: the answer on top, one main button */}
-      {host && sc === "intro" && g && (<>
+      {host && sc === "intro" && g && cb && (<>
+        <h1 className="display text-center" style={{ fontSize: 44, color: "var(--color-gold)" }}>{g.title}</h1>
+        <ComebackIntro teams={cbT} c={cb} />
+        <Main label="Start" on={() => move("m/start")} />
+        <button className="btn btn-sm btn-ghost self-center" disabled={busy} onClick={() => move("m/cbSkip")}>Skip the comeback</button>
+      </>)}
+      {host && sc === "intro" && g && !cb && (<>
         <IntroMany pub={pub} size="phone" />
         {/* Majority Rules: someone who has left comes off their team's list before Start (8 Nov: as with two teams) */}
         {g.key === "majority" && (
@@ -358,7 +382,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {(g.key === "roulette" ? !spinning && !secret.answers : g.key === "stakes" ? !secret.answers : !secret.answer) && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Getting the answer…</p>}
         {/* who's in: every team, as the TV shows them */}
         {/* who has answered, live (the owner, 31 Oct): a count, then each team ticked green as it locks in */}
-        {(() => { const who = T.map((_, i) => i).filter((i) => !g.only || g.only.includes(i)), n = who.filter((i) => pub.sent[i]).length; return (
+        {(() => { const who = T.map((_, i) => i).filter((i) => (!g.only || g.only.includes(i)) && !cb?.out[i]), n = who.filter((i) => pub.sent[i]).length; return (
           <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who has answered">
             <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered`
               /* (What Do You See?: the buzzer: who buzzed and is saying it and typing it, or nobody yet) */
@@ -377,7 +401,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
           {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
-          {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : !pub.sent.some(Boolean)) && !(g.key === "see" && (pub.see?.buzz != null || pub.see?.out?.some(Boolean))) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : "Change question"}</button>}
+          {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : cb ? !cb.teams.some((i) => !cb.out[i] && pub.sent[i]) : !pub.sent.some(Boolean)) && !(g.key === "see" && (pub.see?.buzz != null || pub.see?.out?.some(Boolean))) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
@@ -389,7 +413,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {/* the host is told the calls are theirs to change (the reviewers, 31 Oct) */}
           <p className="text-center text-13 text-[var(--color-ink-2)]">The app made these calls. Tap one to change it.</p>
           {/* each team's answer, and its ruling beside it, which the host can always flip (the TV confirms it a beat later) */}
-          <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; if (g.only && !g.only.includes(i)) return null; return (
+          <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; if (g.only && !g.only.includes(i)) return null; if (cb?.out[i]) return null; return (
             <div key={i} className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="eyebrow flex items-center gap-2" style={{ color: t.color, letterSpacing: ".1em" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
@@ -423,7 +447,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
 
       {/* EVERYONE ELSE */}
       {!host && sc === "intro" && g && (<>
-        <IntroMany pub={pub} size="phone" />
+        {cb ? <><h1 className="display text-center" style={{ fontSize: 44, color: "var(--color-gold)" }}>{g.title}</h1><ComebackIntro teams={cbT} c={cb} /></> : <IntroMany pub={pub} size="phone" />}
         <Line className="mt-auto">{noTv ? "The host starts it." : "Eyes on the TV. The host starts it."}</Line>
       </>)}
 
@@ -454,9 +478,11 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           : <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={mine ?? null} cap={false} />}
       </>)}
       {/* sudden death: a captain whose team isn't tied at the top watches */}
-      {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>Sudden death: only the teams tied at the top answer this one.</Line></>)}
+      {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>{cb ? cbLine : "Sudden death: only the teams tied at the top answer this one."}</Line></>)}
+      {/* the comeback: a captain whose team has missed one watches the rest */}
+      {cap && sc === "q" && cbOut && (<><OnScreen /><Line>Your team is out of the comeback.</Line></>)}
       {/* THE CAPTAIN answers the rest */}
-      {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && !(g.only && mine != null && !g.only.includes(mine)) && (<>
+      {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && !(g.only && mine != null && !g.only.includes(mine)) && !cbOut && (<>
         <OnScreen small={g.key === "pin" && !sentMine} />
         {/* What Do You See? (12 Nov, the owner: a buzzer): BUZZ, then 10 seconds to say it out loud and type it; a wrong
             answer (or none in time) and the team is out of this picture, and another team can buzz */}
@@ -527,7 +553,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
                 onClick={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
         </>); })()}
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
-        {spinning || (g.key === "see" && mine != null && pub.see?.out?.[mine]) ? null : mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) ? (
+        {spinning || (g.key === "see" && mine != null && pub.see?.out?.[mine]) ? null : mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) && !cbOut ? (
           <div className="card flex flex-col gap-2">
             <label className="field-label !mb-0" htmlFor="msug">Suggest to {T[mine]?.captain || "your captain"}</label>
             <div className="flex gap-2">
@@ -539,7 +565,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
           </div>)
           /* (once the captain has sent it, say so: 12 Nov) */
-          : g.key === "see" ? null : <Line>{mine != null && pub.sent[mine] ? <>Locked in. The answer comes up when the time&rsquo;s up.</> : "Your captain answers this one."}</Line>}
+          : g.key === "see" ? null : <Line>{cb && cbOut ? "Your team is out of the comeback." : cb && !cbIn ? cbLine : mine != null && pub.sent[mine] ? <>Locked in. The answer comes up when the time&rsquo;s up.</> : "Your captain answers this one."}</Line>}
       </>)}
 
       {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}

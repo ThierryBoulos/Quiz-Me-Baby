@@ -22,13 +22,16 @@ import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { ToSide } from "./Side";
 import { sayCount, useLiveCount } from "@/lib/liveCount";
-import { AskHead, battleNeeds, Board, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, SuddenRules, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
+import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
+import { COMEBACK_TITLE } from "@/lib/comeback";
+import { AskHead, battleNeeds, Board, comebackTeams, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, SuddenRules, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
-export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesQ", "foolWrite", "foolPick", "sudden", "battleQ", "battleTie"];
+export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesQ", "foolWrite", "foolPick", "sudden", "battleQ", "battleTie", "comebackQ"];
 /* captains only: the players keep quiet (and in Majority Rules everyone answers for themselves: nothing to suggest) */
-const CAPTAINS_ONLY = ["sudden", "battleQ", "battleTie", "majorityQ"];
+/* (The Comeback: 15 seconds, the captain answers; no time for ideas to come in) */
+const CAPTAINS_ONLY = ["sudden", "battleQ", "battleTie", "majorityQ", "comebackQ"];
 
 /* The answer for the current question. Only the host's phone can read it —
    the database refuses everyone else, so a player can't peek even with the
@@ -392,6 +395,37 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>);
     /* (no list of calls here: sudden death's last one showed as a stray row under the awards: the 4 Nov audit, 1.17) */
     case "final": return <Results><Exit /></Results>;
+
+    /* ---- The Comeback: Start, or (quieter) skip it; the question and its answer; the call, which the host can change; the result ---- */
+    case "comebackIntro": return (
+      <div className="flex flex-col gap-4 flex-1">
+        <ComebackTop pub={pub} />
+        <div className="flex flex-col gap-2 mt-auto">
+          <button className="btn btn-gold btn-lg btn-block" disabled={busy} onClick={() => send({ type: "comeback/start" })}>Start</button>
+          <div className="flex justify-center"><Small ghost label="Skip the comeback" move={{ type: "comeback/skip" }} /></div>
+        </div>
+      </div>);
+    case "comebackQ": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="flex items-start gap-3">
+          <p className={qCls(pub.question) + " leading-snug flex-1"}>{pub.question}</p>
+          <ToSide order={9} className="side-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></ToSide>
+        </div>
+        <AnswerCard />
+        <ComebackTop pub={pub} />
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change question" move={{ type: "comeback/swap" }} /></div>
+      </div>);
+    case "comebackReveal": return (
+      <div className="flex flex-col gap-3 flex-1">
+        <OnScreen pub={pub} small />
+        <Calls pub={pub} host busy={busy} act={send} />
+        <Main label="Next" move={{ type: "ui/next" }} />
+      </div>);
+    case "comebackSummary": return (
+      <div className="flex flex-col gap-4 flex-1">
+        <ComebackTop pub={pub} />
+        <Main label="Next" move={{ type: "comeback/done" }} />
+      </div>);
 
     /* ---- the mini-games ---- */
     case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "pinIntro": case "airportIntro": case "majorityIntro": case "rouletteIntro": case "stakesIntro": case "seeIntro": case "foolIntro": case "battleIntro": return (
@@ -862,6 +896,21 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
     </div>);
 }
 
+/* The Comeback on a phone, every role, with a TV and with none: the announcement (the owner's words), who is still
+   in it under the question and the answer, the result. (Its name and "Question 1 of 3" are in the tracker at the top) */
+function ComebackTop({ pub }: { pub: Pub }) {
+  const c = pub.comeback, sc = pub.screen;
+  if (!c) return null;
+  const teams = comebackTeams(pub);
+  if (sc === "comebackIntro") return (
+    <div className="flex flex-col items-center text-center gap-4 w-full">
+      <h1 className="display leading-none" style={{ fontSize: 44, color: "var(--color-gold)" }}>{COMEBACK_TITLE}</h1>
+      <ComebackIntro teams={teams} c={c} />
+    </div>);
+  if (sc === "comebackSummary") return <ComebackResult teams={teams} c={c} />;
+  return <ComebackStatus teams={teams} c={c} />;
+}
+
 /* a game's or a round's result waits on the phones while the TV reveals it (the winner comes in last): true while it
    waits. The host's buttons wait with it, so Next can't skip the reveal by mistake (the owner, 1 Nov) */
 function useTwoHold(pub: Pub) {
@@ -870,7 +919,8 @@ function useTwoHold(pub: Pub) {
   const sc = pub.screen, m = pub.mini;
   const won = sc === "auctionResult" ? pub.auction?.winner : sc === "battleSummary" ? pub.battle?.winner
     : sc === "roundScore" ? (pub.roundPts && pub.roundPts[0] !== pub.roundPts[1] ? (pub.roundPts[0] > pub.roundPts[1] ? 0 : 1) : null) : pub.summary?.winner;
-  const holdKey = /Summary$|^auctionResult$|^roundScore$/.test(sc) ? `${sc}:${m?.key ?? ""}:${pub.r}` : null;
+  /* (not The Comeback's result: the reveal before it has already said how it went) */
+  const holdKey = /Summary$|^auctionResult$|^roundScore$/.test(sc) && sc !== "comebackSummary" ? `${sc}:${m?.key ?? ""}:${pub.r}` : null;
   return useRevealHold(holdKey, (foolAt ?? twoDone(won)) + 0.3);
 }
 
@@ -906,6 +956,8 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     /* Secret Stakes: right or wrong, and what the bet came to */
     : sc === "stakesReveal" && pub.stakes?.rev ? (() => { const R = pub.stakes!.rev!, d = R.delta[mine] ?? 0, lv = skLevelWord(R.level[mine]);
       return R.ok[mine] ? pill(`Your team: right on ${lv} · ${signedPts(d)}`, d > 0 ? "ok" : "mid") : pill(`Your team: ${R.typed[mine] ? "wrong" : "no answer"} on ${lv} · ${signedPts(d)}`, d < 0 ? "no" : "mid"); })()
+    /* The Comeback: the team playing for it, right or wrong (the other team's phones: no pill, the table says it) */
+    : sc === "comebackReveal" && pub.comeback?.teams.includes(mine) && pub.reveal ? (pub.reveal.ok?.[mine] ? pill("Your team: right", "ok") : pill(`Your team: ${pub.reveal.typed?.[mine]?.length ? "wrong" : "no answer"}`, "no"))
     : sc === "stakesSummary" && pub.stakes?.sum ? (() => { const v = pub.stakes!.sum!.net[mine] ?? 0; return pill(`Your team ${v > 0 ? "won" : v < 0 ? "lost" : "broke even"}${v ? ` ${Math.abs(v)}` : ""} on its bets`, v > 0 ? "ok" : v < 0 ? "no" : "mid"); })()
     : null;
   if (part === "pill") return heldNow ? null : <>{you}</>;
@@ -974,6 +1026,9 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
         return row(t, x ?? (say ? "Nothing" : "No answer"), x ? v : null, leg(t, w),
           v == null && x ? "Waiting for a ruling" : say && x && !v ? (pub.reveal?.offList?.[t] ? "Not on the list" : "Said it") : undefined); })} /></>);
   }
+  if (sc === "comebackReveal" && pub.reveal && pub.comeback) { const t = pub.comeback.teams[0] as 0 | 1, x = pub.reveal.typed?.[t]?.[0];
+    if (headOnly) return <>{P}</>;
+    return <>{P}<ResultTable head={["Said"]} rows={[row(t, x ?? "No answer", x ? pub.reveal.ok?.[t] : null)]} /></>; }
   if (sc === "rouletteReveal" && pub.reveal && pub.roulette?.rev) { const R = pub.roulette.rev, D = pub.roulette.draw;
     if (headOnly) return <>{P}</>;
     return (<>{P}
@@ -1033,7 +1088,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
     {pub.screen === "sudden" && !pub.sudden?.ready && <SuddenRules pub={pub} size="phone" />}
-    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie"].includes(pub.screen) && <p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p>}
+    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "closestReveal", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie", "comebackQ", "comebackReveal"].includes(pub.screen) && <p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p>}
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
     {/* the fact behind it, right under the answer */}
     {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
@@ -1083,11 +1138,13 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.airport.cityOk === false && <span className="block mt-1 text-13 font-bold" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</span>}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {(["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesPick", "stakesQ", "battleQ"].includes(pub.screen) || (pub.screen === "rouletteQ" && spun)
+    {(["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesPick", "stakesQ", "battleQ", "comebackQ"].includes(pub.screen) || (pub.screen === "rouletteQ" && spun)
       /* sudden death and the tie-breaker: their clock (with no host; a host's has none) */
       || (RACE(pub) && (!!pub.deadline || (pub.left ?? 0) > 0))) && !(small && pub.screen === "pinQ") && !(pub.screen === "dishQ" && pub.dish?.typeBy)
       /* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */
       && !(pub.screen === "seeQ" && pub.see?.typeBy && captain && pub.buzz === mine) && <ToSide when={side && pub.screen !== "miniQ"} order={9} className="side-clock"><div className={"grid place-items-center main-clock" + (pub.screen === "miniQ" ? " clock-last" : "")}><Clock deadline={pub.screen === "seeQ" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={pub.screen === "seeQ" && pub.see?.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || pub.screen === "airportQ" || pub.screen === "mapQ" || small ? 64 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div></ToSide>}
+    {/* The Comeback: who is still in it, under the question (and, at the reveal, the answer) */}
+    {/^comeback(Q|Reveal)$/.test(pub.screen) && <ComebackTop pub={pub} />}
     {/* the Battle: the last answer, once there's no new question to read (during the questions it's on the TV only) */}
     {pub.battle?.half?.length && pub.screen === "battleHandoff" ? <BattleHalf half={pub.battle.half} />
       : pub.battle?.last && /^battle(Handoff|Summary)$/.test(pub.screen) && <BattleAnswer last={pub.battle.last} />}
@@ -1121,7 +1178,7 @@ export function BattleAnswer({ last, size = 15, prev }: { last: { answer: string
 }
 
 /* the screens that show who won what (see Result) */
-const RESULT = /^(answer|roundScore|closestReveal|flagReveal|sayReveal|mapReveal|pinReveal|airportReveal|majorityReveal|dishReveal|auctionLeg|auctionResult|\w+Summary|final)$/;
+const RESULT = /^(answer|roundScore|comebackReveal|closestReveal|flagReveal|sayReveal|mapReveal|pinReveal|airportReveal|majorityReveal|dishReveal|auctionLeg|auctionResult|\w+Summary|final)$/;
 
 /* what this question means for YOU, under the "Question for TEAM" head */
 /* a long question (over 120 characters) in a size that keeps Send on screen */
@@ -1145,6 +1202,7 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   if (pub.screen === "roundIntro") return <RoundIntro pub={pub} size="phone" canArm={canArm} onArm={onArm} busy={busy} />;
   if (pub.screen === "ask" || pub.screen === "steal") return <AskHead pub={pub} size="phone" you={youLine(pub, me, capName)} go={pub.turn === me.team && !pub.lifeline && !pub.pending} />;
   if (/Intro$/.test(pub.screen) && pub.mini) return <MiniIntro pub={pub} size="phone" />;
+  if (pub.screen === "comebackIntro" || pub.screen === "comebackSummary") return <ComebackTop pub={pub} />;
   if (RESULT.test(pub.screen)) return null;            // the result says it
   /* on a question, the question (or flag, or map) is the thing to look at: the instruction steps back */
   /* (out of a picture: said plainly, in red, not stepped back) */
@@ -1161,6 +1219,7 @@ function statusTone(pub: Pub, me: Member): "go" | "hush" | "no" | null {
   if (sc === "seeQ" && pub.buzz != null) return pub.buzz === mine ? "go" : "hush";
   if (sc === "battleQ") return cap && pub.battle?.cap === mine ? "go" : "hush";
   if (sc === "battleTie" || sc === "sudden") return cap ? "go" : "hush";
+  if (sc === "comebackQ") return cap && mine != null && pub.comeback?.teams.includes(mine) ? "go" : "hush";
   if (sc === "dishQ" && cap && pub.buzz === mine && !pub.sent?.[mine as 0 | 1]) return "go";
   return null;
 }
@@ -1169,7 +1228,7 @@ const QUIET = ["miniQ", "flagQ", "seeQ", "mapQ", "sayQ", "pinQ", "airportQ", "ma
 /* Russian Roulette: the two teams as the barrel draws them (their colour and letter) */
 const rr2 = (pub: Pub): RrTeam[] => [0, 1].map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }));
 /* a phone held sideways: on these, the top line (the question's title, or what to do) goes to the left column too */
-const SIDE_Q = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "battleQ"];
+const SIDE_Q = ["comebackQ", "ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "battleQ"];
 function status(pub: Pub, me: Member, noTv = false) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend" : "Double Dip: two answers") : `${T[pub.lifeline.team].name} used a lifeline`;
@@ -1182,6 +1241,9 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "roundIntro": return `Round ${pub.r + 1}: ${pub.theme}`;
     case "roundScore": return `End of round ${pub.r + 1}`;
     case "sudden": return !pub.sudden?.ready ? "Sudden death: you're tied" : cap ? (pub.out?.[mine] ? "Wrong. You're out of this one." : pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The app checks it." : "The host decides."}` : "Type it and send it. First right answer wins!") : "Sudden death: captains only. Not a word!";
+    /* The Comeback: its captain answers; its players watch; the other team waits */
+    case "comebackQ": { const t = pub.comeback?.teams[0] ?? 0;
+      return t === mine ? (cap ? "Your question. Type your answer." : "Your captain is answering.") : `${T[t].name} are playing for a comeback.`; }
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
     case "flagQ": return cap ? "Which country?" : "Guess the Flag: help your captain";
     /* (12 Nov, the owner: any player can buzz, the captain types; pub.see.by: who hit BUZZ) */
@@ -1306,6 +1368,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
    lifelines; the number pad; the buzzer; your players' suggestions. */
 /* the "next thing" button a captain gets when there's no host, and its countdown */
 const NEXT_LABEL: Record<string, [string, string]> = {
+  comebackIntro: ["Start", "comeback/start"], comebackReveal: ["Next", "ui/next"], comebackSummary: ["Next", "comeback/done"],
   roundIntro: ["Start the question", "round/begin"], miniIntro: ["Start", "closest/start"], flagIntro: ["Start", "flag/start"], dishIntro: ["Start", "dish/start"],
   mapIntro: ["Start", "map/start"], auctionIntro: ["Start", "auction/begin"], sayIntro: ["Start", "say/start"], battleIntro: ["Start", "battle/start"],
   battleHandoff: ["Start the second half", "battle/start"], sayReveal: ["Next", "ui/next"], mapReveal: ["Next", "ui/next"], saySummary: ["Next", "say/done"], battleSummary: ["Next", "battle/done"],
@@ -1339,12 +1402,12 @@ function WaitingForHost({ pub, members }: { pub: Pub; members: Member[] }) {
 }
 /* the screens a clock runs on, and so the ones a Pause makes sense on */
 /* where the app's calls are listed, and can be contested */
-const CALL_SCREENS = ["answer", "flagReveal", "seeReveal", "sayReveal", "mapReveal", "airportReveal", "rouletteReveal", "stakesReveal", "dishReveal", "battleReview"];
+const CALL_SCREENS = ["answer", "flagReveal", "seeReveal", "sayReveal", "mapReveal", "airportReveal", "rouletteReveal", "stakesReveal", "dishReveal", "battleReview", "comebackReveal"];
 /* ...and sudden death / the tie-breaker: the question just decided, on the screen after it */
 const SD_CALL_SCREENS = ["battleSummary", "sudden", "battleTie"];
 /* no host: the screens where both captains can agree to a new one, and what it's called */
-const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", seeQ: "picture", foolWrite: "fact", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", rouletteQ: "barrel", stakesPick: "themes", stakesQ: "themes", battleQ: "question" };
-const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "seeQ", "foolWrite", "foolPick", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ"];
+const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", seeQ: "picture", foolWrite: "fact", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", rouletteQ: "barrel", stakesPick: "themes", stakesQ: "themes", battleQ: "question", comebackQ: "question" };
+const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "seeQ", "foolWrite", "foolPick", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ", "comebackQ"];
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the
    lifelines; the number pad; the buzzer; the bidding; your players'
@@ -1431,6 +1494,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
        the buzzer felt slow, a second's wait for the box); Send waits for the TV to give the buzz (soon), and if another
        team was first, the box closes */
     || (BUZZ_SCREENS.includes(sc) && buzzed && pub.buzz == null && !pub.out?.[mine] && !pub.pending && !sentHere && !pub.paused)
+    /* The Comeback: the captain of the team playing for it, one answer */
+    || (sc === "comebackQ" && !!pub.comeback?.teams.includes(mine) && !sentHere)
     /* sudden death and the tie-breaker: both captains type at once, one answer each */
     || (RACE(pub) && !pub.out?.[mine] && !sentHere && !pub.contest)
     /* the Battle: typed with no host; with a host it's said out loud */
@@ -1441,7 +1506,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const sugs = useSuggestions(code, pub.qid, members, mine, ANSWERING.includes(sc));
   const A = pub.auction;
   /* a short buzz in the hand when it becomes your go (phones that can) */
-  const yourGo = (myTurn && !locked) || (sc === "auctionBid" && A?.turn === mine) || canBuzz;
+  const yourGo = (myTurn && !locked) || (sc === "comebackQ" && !!pub.comeback?.teams.includes(mine)) || (sc === "auctionBid" && A?.turn === mine) || canBuzz;
   useEffect(() => { if (yourGo) buzzHand([60, 40, 60]); }, [yourGo, pub.qid, sc]);
   /* What Do You See?: a teammate buzzed: it's this phone that types the answer */
   const seeMine = sc === "seeQ" && pub.buzz === mine;
@@ -1564,7 +1629,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           {dip && <input {...np.props} className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {np.hint}
           <button className="btn btn-gold btn-lg" disabled={busy || early || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onPointerDown={(e) => e.preventDefault()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
-          {["ask", "steal", "flagQ", "airportQ", "mapQ", "foolWrite"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
+          {["ask", "steal", "flagQ", "airportQ", "mapQ", "foolWrite", "comebackQ"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
           {sc === "seeQ" && <div className="text-13 text-[var(--color-ink-3)]">Say it out loud too! Wrong, and you&rsquo;re out of this picture.</div>}
         </div>)}
       {/* Fool Me Twice: the captain picks the truth (its own lie isn't there); one tap, locked */}

@@ -19,7 +19,7 @@ import { DISH_LAST, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY } from "../game";
 import { SEE_TYPE } from "../see";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
@@ -306,6 +306,12 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
           /* Fool Me Twice: its six facts (four, then two hard), the spare ones after them a normal and a hard in turn, so
              "Change fact" on a hard one finds a hard one */
           fool: [...(g.foolGame?.qs || []), ...foolSpares(g.foolGame?.spare || [])] };
+        /* the comeback (17 Nov, the owner; on unless the Setup switched it off): three easy questions, none of tonight's,
+           and two spare for "Change question" */
+        if (cfg.comeback !== false) { const taken = new Set<string>(); for (const list of Object.values(decks)) for (const q of list || []) if (q?.id) taken.add(q.id);
+          for (const R of decks.stakes || []) for (const lv of (R?.qs || []) as G[]) for (const q of Object.values(lv || {}) as G[]) if (q?.id) taken.add(q.id);
+          for (const lap of (decks.roulette || []) as G[]) for (const ch of (lap?.ch || []) as G[]) if (ch?.q?.id) taken.add(ch.q.id);
+          decks.comeback = dealer.comebackDeck(taken, MANY_LEGS.comeback + 2) as Q[]; }
         const names = manyNames(room, k);
         const teams = names.map((name, t) => ({ name, captain: cap1(members.find((m) => (m.team as number) === t && m.role === "captain")?.name || "") }));
         /* each question-round game two rounds of two questions, the last one three rounds if the rounds are odd */
@@ -355,6 +361,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/setScores") ok = setScores(s, mv.scores);
       else if (t === "m/mrOut") ok = toggleMrOut(s, mv.name);
       else if (t === "m/pause") ok = pause(s, Date.now());
+      else if (t === "m/cbSkip") ok = skipComeback(s);
       else if (t === "m/swap") { const r = swapQ(s, Date.now(), timers()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code); }
       else if (t === "m/again") {

@@ -95,6 +95,15 @@ const NIGHTS = [
   { seed: 59, minis: ["fool", "closest"], rounds: 4, host: true, tieMore: 1 },
   { seed: 60, minis: ["fool"], rounds: 2, phone: true, reload: 14 },
   { seed: 61, minis: ["fool", "battle"], rounds: 2, host: true, phone: true, events: [{ at: 15, type: "pause", for: 8 }, { at: 34, type: "swap" }] },
+  /* 17 Nov: The Comeback (the owner): the scores set far apart by hand before the night's middle, so it comes up. No host
+     and with a host, on a TV and on the game phone with no TV: made (all three right), missed (a wrong answer; no answer
+     in its 15 seconds), a new question asked for, a Pause; the host skips it; switched off in Setup, it never comes up */
+  { seed: 62, minis: [], rounds: 4, events: [{ at: 5, type: "score", a: 1, b: 12 }], comeback: "make" },
+  { seed: 63, minis: ["flag"], rounds: 4, host: true, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "miss", comebackSwap: true },
+  { seed: 64, minis: ["closest", "battle"], rounds: 3, phone: true, events: [{ at: 5, type: "score", a: 10, b: 0 }], comeback: "quiet", comebackSwap: true },
+  { seed: 65, minis: [], rounds: 4, host: true, phone: true, events: [{ at: 5, type: "score", a: 2, b: 14 }], comeback: "make" },
+  { seed: 66, minis: [], rounds: 4, host: true, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "skip" },
+  { seed: 67, minis: [], rounds: 4, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "off" },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
@@ -119,7 +128,20 @@ for (const n of NIGHTS) {
   })();
   const offKind = n.seeKinds && (r.kinds.length ? r.kinds.find((x) => !n.seeKinds.includes(x)) : "none dealt");
   const llBad = n.lifelines === false && (!r.noLl || r.llUsed) ? (r.llUsed ? "a lifeline was used" : "the night has its lifelines") : null;
-  if (llBad) { verdict = `LIFELINES OFF: ${llBad}`; bad++; }
+  /* The Comeback: it came up (or, switched off, didn't), went as the night says, and moved the score only when made:
+     to 85% of the leader's score, never past the leader */
+  const cbBad = n.comeback && (() => {
+    const c = r.cb, shown = r.screens.filter((x) => /^comeback/.test(x)).sort().join(" ");
+    if (n.comeback === "off") return c || shown ? "it came up, switched off" : null;
+    if (!c) return "it never came up";
+    if (n.comeback === "skip") return !c.skipped || c.made != null || shown !== "comebackIntro" ? `skipped, but ${shown}` : null;
+    if (shown !== "comebackIntro comebackQ comebackReveal comebackSummary") return `its screens: ${shown}`;
+    const L = Math.max(...c.before), up = c.after[c.team] - c.before[c.team];
+    if (n.comeback === "make") return c.made !== true || c.asked !== 3 || c.after[c.team] !== Math.min(Math.round(0.85 * L), L - 1) || c.after[1 - c.team] !== L ? `made: ${JSON.stringify(c)}` : null;
+    return c.made !== false || up !== 0 || c.asked !== (n.comeback === "miss" ? 2 : 1) ? `missed: ${JSON.stringify(c)}` : null;
+  })();
+  if (cbBad) { verdict = `THE COMEBACK: ${cbBad}`; bad++; }
+  else if (llBad) { verdict = `LIFELINES OFF: ${llBad}`; bad++; }
   else if (offKind) { verdict = `PICTURES: a ${offKind} picture, with only ${n.seeKinds.join(" and ")} on`; bad++; }
   else if (repeat) { verdict = `REPEAT A THEME: ${repeat}`; bad++; }
   else if (!ends) { verdict = `NEVER ENDED (${r.outcome}${r.stuckOn ? " on " + r.stuckOn : ""})`; bad++; }
