@@ -76,7 +76,10 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
       }
       /* (the night's middle: the last teams far behind, so the comeback comes) */
       if (s.screen === "summary" && !s.cbDone && s.mi + 1 >= Math.ceil(s.minis.filter((x) => !L.extraGame(x.key)).length / 2)) { const top = Math.max(...s.teams.map((x) => x.score));
-        snap(); s.teams[k - 1].score = Math.round(top * 0.15); if (k > 4) s.teams[k - 2].score = Math.round(top * 0.3); if (k > 6) s.teams[k - 3].score = Math.round(top * 0.33); L.next(s, now, T); continue; }
+        snap(); s.teams[k - 1].score = Math.round(top * 0.15); if (k > 4) s.teams[k - 2].score = Math.round(top * 0.3); if (k > 6) s.teams[k - 3].score = Math.round(top * 0.33);
+        /* (8 teams: five left behind, every long name in the announcement, 18 Nov) */
+        if (k > 7) { s.teams[k - 4].score = Math.round(top * 0.36); s.teams[k - 5].score = Math.round(top * 0.39); s.teams.slice(0, 3).forEach((x) => { x.score = Math.max(x.score, Math.round(top * 0.9)); }); }
+        L.next(s, now, T); continue; }
       if (s.screen === "reveal" || s.screen === "summary") { snap(); if (s.screen === "summary" && s.mi === s.minis.length - 1 && s.teams[0].score !== s.teams[1].score) { s.teams[1].score = s.teams[0].score = Math.max(...s.teams.map((x) => x.score)) + 5; } L.next(s, now, T); continue; }
       snap(); L.next(s, now, T);
     }

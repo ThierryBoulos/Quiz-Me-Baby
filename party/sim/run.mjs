@@ -104,6 +104,12 @@ const NIGHTS = [
   { seed: 65, minis: [], rounds: 4, host: true, phone: true, events: [{ at: 5, type: "score", a: 2, b: 14 }], comeback: "make" },
   { seed: 66, minis: [], rounds: 4, host: true, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "skip" },
   { seed: 67, minis: [], rounds: 4, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "off" },
+  /* 18 Nov: the comeback and Fool Me Twice on the same night (it comes after Fool Me Twice; Fool Me Twice after it),
+     and the TV's page reloading in the middle of a comeback question, then of its result */
+  { seed: 68, minis: ["fool", "flag"], rounds: 2, host: true, events: [{ at: 5, type: "score", a: 14, b: 1 }], comeback: "make" },
+  { seed: 69, minis: ["fool"], rounds: 4, events: [{ at: 5, type: "score", a: 1, b: 14 }], comeback: "quiet" },
+  { seed: 70, minis: ["closest"], rounds: 4, host: true, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "make", reloadOn: "comebackQ" },
+  { seed: 71, minis: [], rounds: 4, phone: true, events: [{ at: 5, type: "score", a: 1, b: 12 }], comeback: "make", reloadOn: "comebackSummary" },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

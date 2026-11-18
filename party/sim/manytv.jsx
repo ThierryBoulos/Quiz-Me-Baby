@@ -403,6 +403,22 @@ async function comeback(k, phone, tag) {
   check(`${tag} Comeback: 15 seconds and nothing sent: the reveal, by itself`, pub().screen === "reveal" && pub().reveal?.ok?.[k - 1] === false, pub().screen);
   await judge("m/next");
   check(`${tag} Comeback: a miss ends it: no comeback, the score as it was`, pub().screen === "summary" && pub().comeback?.made?.[k - 1] === false && pub().teams[k - 1].score === 4, `${pub().screen} ${pub().teams.map((t) => t.score)}`);
+  /* the TV's page reloads on a comeback question, then the game phone dies on its reveal and another takes over from
+     the server's copy: the comeback carries on where it was (18 Nov) */
+  await setup(k, phone, ["flag", "closest", "pin", "airport"]);
+  for (let g = 0; g < 2; g++) { await judge("m/start");
+    for (let guard = 0; guard < 40 && pub().screen !== "summary"; guard++) { if (pub().screen === "q") await judge("m/reveal"); else await judge("m/next"); }
+    if (g === 0) await judge("m/next"); }
+  await judge("m/setScores", { scores: sc }); await judge("m/next"); await judge("m/start");
+  { let m = mini(); send("c" + (k - 1), "answer", { text: m.qs[m.i].answer, k: pub().qid + "|q" }); await tick(1500); await judge("m/next");
+    await reload();
+    check(`${tag} Comeback: a reload on its 2nd question: still on it, the team still in`, pub().screen === "q" && pub().game?.key === "comeback" && mini().i === 1 && !pub().comeback?.out[k - 1], `${pub().screen} ${mini()?.i}`);
+    m = mini(); send("c" + (k - 1), "answer", { text: m.qs[m.i].answer, k: pub().qid + "|q" }); await tick(1500);
+    /* (the server's copy is the game phone's: with a TV, the TV's page reloads again instead) */
+    if (phone) await takeover(4000); else await reload();
+    check(`${tag} Comeback: ${phone ? "the game phone taken over" : "a second reload"} on a reveal: still there`, pub().screen === "reveal" && pub().game?.key === "comeback", pub().screen);
+    await judge("m/next"); m = mini(); send("c" + (k - 1), "answer", { text: m.qs[m.i].answer, k: pub().qid + "|q" }); await tick(1500); await judge("m/next");
+    check(`${tag} Comeback: ...and made, after both`, pub().screen === "summary" && pub().comeback?.made?.[k - 1] === true && pub().teams[k - 1].score === Math.min(34, 40 - (k - 2) - 1), `${pub().screen} ${pub().teams.map((t) => t.score)}`); }
   /* the host's skip, on its intro */
   await setup(k, phone, ["flag", "closest", "pin", "airport"]);
   for (let g = 0; g < 2; g++) { await judge("m/start");

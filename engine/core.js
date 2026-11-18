@@ -490,7 +490,7 @@
      "Too far behind": the gap to the leader is more than COMEBACK_GAP of what a team could still win back on the
      leader in the games left (reach). A share of the leader's score doesn't work as the test: with 3 teams last place
      pays 6 of 10, so nobody ever falls under 60%, and with 8 a team is under 50% one night in three. */
-  const COMEBACK_GAP = 0.65, COMEBACK_SHARE = 0.85, COMEBACK_LEGS = 3, COMEBACK_SECS = 15, COMEBACK_MIN_TWO = 5;
+  const COMEBACK_GAP = 0.65, COMEBACK_NEAR = 0.5, COMEBACK_SHARE = 0.85, COMEBACK_LEGS = 3, COMEBACK_SECS = 15, COMEBACK_MIN_TWO = 5;
   /* the scores after the comeback: `made[t]` is true for a team that got all three. From the top team down, so a
      team's ceiling is one point under the lowest team that was above it, as that team ends up (made it or not).
      Teams level before it can end level, or apart if only one makes it; nobody ends above a team it was behind */
@@ -512,8 +512,18 @@
     if(!(L > 0) || !(reach > 0)) return null;
     /* (minGap: with two teams the points are small, and on a short night 4-0 passed the test: a team must also be
        at least that many points behind, 17 Nov) */
-    let teams = scores.map((v, t) => (L - v > COMEBACK_GAP * reach && L - v >= (minGap || 0) ? t : -1)).filter(t => t >= 0);
+    const far = (v, share) => L - v > share * reach && L - v >= (minGap || 0);
+    let teams = scores.map((v, t) => (far(v, COMEBACK_GAP) ? t : -1)).filter(t => t >= 0);
     if(!teams.length) return null;
+    /* the group left behind (18 Nov, the owner: 47 47 42 40 38 | 16 14 7, and the 16 wasn't in it, 31 behind where
+       31.85 was the line, which also left the 14 just +1 to win): the biggest drop between two teams in the standings
+       (the highest, if two are as big) cuts the room in two; every team under it that is well behind (more than
+       COMEBACK_NEAR of what's left to win) is in too. Teams on the same score always go in together */
+    const order = scores.map((v, t) => t).sort((a, b) => scores[b] - scores[a] || a - b);
+    let cut = 0, drop = -1;
+    for(let i = 0; i < order.length - 1; i++){ const d = scores[order[i]] - scores[order[i + 1]]; if(d > drop){ drop = d; cut = i; } }
+    order.slice(cut + 1).forEach(t => { if(teams.indexOf(t) < 0 && far(scores[t], COMEBACK_NEAR)) teams.push(t); });
+    teams.sort((a, b) => scores[b] - scores[a] || a - b);
     const all = {}; teams.forEach(t => { all[t] = true; });
     const best = comebackSettle(scores, teams, all);
     teams = teams.filter(t => best[t] > scores[t]);
@@ -1268,7 +1278,7 @@
       let pool = bank().filter(q => free(q) && common(q) && q.difficulty === 'easy' && isFresh(q));
       if(pool.length < n) pool = bank().filter(q => free(q) && common(q) && q.difficulty === 'easy');
       if(pool.length < n) pool = bank().filter(q => free(q) && q.difficulty === 'easy');
-      if(pool.length < n) pool = bank().filter(free);
+      /* (easy, always: with too few easy questions left there's no comeback, never a hard one in its place, 18 Nov) */
       /* a theme at most once, while there are themes left */
       const out = [], rest = [], seen = {};
       shuffle(pool).forEach(q => { if(!seen[q.theme]){ seen[q.theme] = true; out.push(q); } else rest.push(q); });
@@ -2806,5 +2816,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

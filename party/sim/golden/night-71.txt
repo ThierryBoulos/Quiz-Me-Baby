@@ -1,0 +1,54 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 1-12)
+7.50 roundIntro | 2 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+7.50 ask | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+8.50 steal | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+9.50 answer | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+10.25 ask | 4 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+11.25 ask | 4 | 1-12 |  | Owls used Double Dip. | 
+12.00 steal | 4 | 1-12 |  | Owls used Double Dip. | 
+13.00 answer | 4 | 2-12 |  | Lions +1 point — steal | 
+14.00 roundScore | 5 | 2-12 |  | Lions +1 point — steal | 
+14.75 roundIntro | 6 | 2-12 |  | Lions +1 point — steal | 
+16.50 ask | 7 | 2-12 |  | Lions +1 point — steal | 
+17.50 ask | 7 | 2-12 |  | Lions used Double Dip. | 
+18.50 answer | 7 | 3-12 |  | Lions +1 point | 
+19.25 ask | 8 | 3-12 |  | Lions +1 point | 
+20.25 answer | 8 | 3-14 |  | Owls +2 points | 
+21.00 answer | 8 | 3-14 |  |  | 
+23.00 steal | 9 | 3-12 |  | Lions steal a new question. | 
+23.75 answer | 9 | 3-12 |  | Lions steal a new question. | 
+24.75 answer | 9 | 3-12 |  |  | 
+27.50 answer | 9 | 5-12 |  | Call changed: Lions +2 points. | 
+28.25 roundScore | 10 | 5-12 |  | Call changed: Lions +2 points. | 
+29.25 comebackIntro | 11 | 5-12 |  | Call changed: Lions +2 points. | 
+30.00 comebackQ | 12 | 5-12 |  | Call changed: Lions +2 points. | 
+31.00 comebackReveal | 12 | 5-12 |  | Call changed: Lions +2 points. | 
+32.00 comebackQ | 13 | 5-12 |  | Call changed: Lions +2 points. | 
+32.75 comebackReveal | 13 | 5-12 |  | Call changed: Lions +2 points. | 
+33.75 comebackQ | 14 | 5-12 |  | Call changed: Lions +2 points. | 
+34.50 comebackReveal | 14 | 5-12 |  | Call changed: Lions +2 points. | 
+35.50 comebackSummary | 15 | 10-12 |  | Call changed: Lions +2 points. | 
+(the TV reloads)
+36.25 comebackSummary | 15 | 10-12 |  |  | 
+38.50 roundIntro | 16 | 10-12 |  |  | 
+40.25 ask | 17 | 10-12 |  |  | 
+41.00 steal | 17 | 10-12 |  |  | 
+42.00 answer | 17 | 10-13 |  | Owls +1 point — steal | 
+43.00 ask | 18 | 10-13 |  | Owls +1 point — steal | 
+43.75 steal | 18 | 10-13 |  | Owls +1 point — steal | 
+44.75 answer | 18 | 10-13 |  | Owls +1 point — steal | 
+45.50 roundScore | 19 | 10-13 |  | Owls +1 point — steal | 
+46.50 roundIntro | 20 | 10-13 |  | Owls +1 point — steal | 
+48.25 ask | 21 | 10-13 |  | Owls +1 point — steal | 
+49.25 answer | 21 | 12-13 |  | Lions +2 points | 
+50.00 ask | 22 | 12-13 |  | Lions +2 points | 
+51.00 answer | 22 | 12-14 |  | Owls +1 point | 
+52.00 answer | 22 | 12-14 |  |  | 
+52.75 answer | 22 | 12-14 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+53.75 roundScore | 23 | 12-14 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+54.50 final | 24 | 12-14 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[2,1],"minis":[0,0],"chart":[[0,0],[0,0],[1,12],[2,12],[3,12],[3,14],[3,12],[5,12],[10,12],[10,13],[12,13],[12,14]],"segs":[{"label":"R1","pts":[[1,12],[2,12]]},{"label":"R2","pts":[[3,12],[3,14],[3,12],[5,12]]},{"label":"The Comeback","pts":[[10,12]]},{"label":"R3","pts":[[10,13]]},{"label":"R4","pts":[[12,13],[12,14]]}],"awards":[{"t":"Best thief","who":"Lions, 2 steals","team":0}]}

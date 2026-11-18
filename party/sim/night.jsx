@@ -93,8 +93,9 @@ function pinNear(g, bot) {
    edge: answers land at the exact moment the clock runs out
    The Comeback (17 Nov): comeback: "make" (its captain gets all three right), "miss" (the first right, the second
    wrong), "quiet" (no answer: the 15 seconds run out), "skip" (the host skips it), "off" (switched off in Setup);
-   left out, the captain answers at the bots' usual rate. comebackSwap: a new question asked for on its first one */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false }) {
+   left out, the captain answers at the bots' usual rate. comebackSwap: a new question asked for on its first one.
+   reloadOn: the TV's page reloads (once) the first time this screen is up, e.g. "comebackQ" (18 Nov) */
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed); phoneMode = phone;
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -174,7 +175,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     { const tvp = api.current?.pub, dbp = fake.db.rooms[0].state?.pub;
       if (tvp && shows(tvp) !== shows(dbp)) { behindSince ??= clock(); behind = Math.max(behind, clock() - behindSince); } else behindSince = null; }
     /* the TV's page reloads (the game comes back from this laptop's storage) */
-    if (reload && !reloaded && clock() - t0 > reload * 1000) {
+    if (!reloaded && ((reload && clock() - t0 > reload * 1000) || (reloadOn && api.current?.pub?.screen === reloadOn))) {
       reloaded = true; trace.push("(the TV reloads)");
       await act(async () => { tree.unmount(); await flush(); });
       await act(async () => { tree = TestRenderer.create(<Tv />); await flush(); });

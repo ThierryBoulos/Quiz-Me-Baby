@@ -1,0 +1,62 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 12-1)
+6.75 roundIntro | 2 | 12-1 |  | The host set the scores: ⁨Lions⁩ 12, ⁨Owls⁩ 1. | 
+7.50 ask | 3 | 12-1 |  | The host set the scores: ⁨Lions⁩ 12, ⁨Owls⁩ 1. | 
+9.50 answer | 4 | 13-1 |  | Lions +1 point | 
+10.25 answer | 4 | 13-1 |  |  | 
+11.25 answer | 4 | 13-1 |  | The host keeps the call. | 
+12.00 ask | 5 | 13-1 |  | The host keeps the call. | 
+14.00 steal | 6 | 13-1 |  | The host keeps the call. | 
+15.75 answer | 7 | 13-1 |  | The host keeps the call. | 
+16.50 roundScore | 8 | 13-1 |  | The host keeps the call. | 
+17.50 roundIntro | 9 | 13-1 |  | The host keeps the call. | 
+18.50 ask | 10 | 13-1 |  | The host keeps the call. | 
+19.25 ask | 10 | 13-1 |  | Lions used Call a Friend. | 
+28.25 ask | 11 | 13-1 |  | Lions used Call a Friend. | 
+30.00 answer | 12 | 14-1 |  | Lions +1 point | 
+31.00 ask | 13 | 14-1 |  | Lions +1 point | 
+32.75 answer | 14 | 14-2 |  | Owls +1 point | 
+33.75 answer | 14 | 14-2 |  |  | 
+34.50 steal | 15 | 14-1 |  | Lions steal a new question. | 
+36.50 answer | 16 | 14-1 |  | Lions steal a new question. | 
+37.25 roundScore | 17 | 14-1 |  | Lions steal a new question. | 
+38.25 miniIntro | 18 | 14-1 | 0-0 | Lions steal a new question. | 
+39.00 miniQ | 19 | 14-1 | 0-0 | Lions steal a new question. | 
+40.00 closestReveal | 19 | 14-1 | 0-1 | Lions steal a new question. | 
+41.00 miniQ | 20 | 14-1 | 0-1 | Owls take leg 1. | 
+41.75 closestReveal | 20 | 14-1 | 1-1 | Owls take leg 1. | 
+42.75 miniQ | 21 | 14-1 | 1-1 | Lions take leg 2. | 
+43.50 closestReveal | 21 | 14-1 | 1-2 | Lions take leg 2. | 
+44.50 miniQ | 22 | 14-1 | 1-2 | Owls take leg 3. | 
+45.50 closestReveal | 22 | 14-1 | 1-3 | Owls take leg 3. | 
+46.25 decided | 23 | 14-1 | 1-3 |  | 
+47.25 comebackIntro | 24 | 14-3 |  |  | 
+48.00 comebackQ | 25 | 14-3 |  |  | 
+(the TV reloads)
+51.10 comebackReveal | 25 | 14-3 |  |  | 
+51.85 comebackQ | 26 | 14-3 |  |  | 
+52.85 comebackReveal | 26 | 14-3 |  |  | 
+53.60 comebackQ | 27 | 14-3 |  |  | 
+54.60 comebackReveal | 27 | 14-3 |  |  | 
+55.60 comebackSummary | 28 | 14-12 |  |  | 
+56.35 roundIntro | 29 | 14-12 |  |  | 
+58.10 ask | 30 | 14-12 |  |  | 
+60.10 answer | 31 | 15-12 |  | Lions +1 point | 
+60.85 ask | 32 | 15-12 |  | Lions +1 point | 
+62.60 answer | 33 | 15-14 |  | Owls +2 points | 
+63.60 roundScore | 34 | 15-14 |  | Owls +2 points | 
+64.60 roundIntro | 35 | 15-14 |  | Owls +2 points | 
+65.35 ask | 36 | 15-14 |  | Owls +2 points | 
+67.10 steal | 37 | 15-14 |  | Owls +2 points | 
+69.10 answer | 38 | 15-15 |  | Owls +1 point — steal | 
+69.85 ask | 39 | 15-15 |  | Owls +1 point — steal | 
+71.60 steal | 40 | 15-15 |  | Owls +1 point — steal | 
+73.60 answer | 41 | 15-15 |  | Owls +1 point — steal | 
+74.35 roundScore | 42 | 15-15 |  | Owls +1 point — steal | 
+75.35 sudden | 43 | 15-15 |  | Owls +1 point — steal | 
+76.10 sudden | 44 | 15-15 |  | Owls +1 point — steal | 
+78.10 final | 45 | 16-15 |  | Owls +1 point — steal | 
+recap: {"margin":1,"sudden":true,"leadChanges":0,"steals":[0,1],"minis":[0,1],"best":{"title":"Closest To Wins","team":1,"legs":[1,3]},"chart":[[0,0],[0,0],[12,1],[13,1],[14,1],[14,2],[14,1],[14,3],[14,12],[15,12],[15,14],[15,15],[16,15]],"segs":[{"label":"R1","pts":[[12,1],[13,1]]},{"label":"R2","pts":[[14,1],[14,2],[14,1]]},{"label":"Closest To Wins","pts":[[14,3]]},{"label":"The Comeback","pts":[[14,12]]},{"label":"R3","pts":[[15,12],[15,14]]},{"label":"R4","pts":[[15,15]]},{"label":"Sudden death","pts":[[16,15]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0},{"t":"One-way traffic","who":"Closest To Wins, Owls 3–1","team":1},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

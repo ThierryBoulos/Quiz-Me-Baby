@@ -1,0 +1,80 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 14-1)
+6.75 roundIntro | 2 | 14-1 |  | The host set the scores: ⁨Lions⁩ 14, ⁨Owls⁩ 1. | 
+7.50 ask | 3 | 14-1 |  | The host set the scores: ⁨Lions⁩ 14, ⁨Owls⁩ 1. | 
+9.50 steal | 4 | 14-1 |  | The host set the scores: ⁨Lions⁩ 14, ⁨Owls⁩ 1. | 
+11.25 answer | 5 | 14-2 |  | Owls +1 point — steal | 
+12.00 ask | 6 | 14-2 |  | Owls +1 point — steal | 
+14.00 answer | 7 | 14-3 |  | Owls +1 point | 
+14.75 roundScore | 8 | 14-3 |  | Owls +1 point | 
+15.75 flagIntro | 9 | 14-3 | 0-0 | Owls +1 point | 
+16.50 flagQ | 10 | 14-3 | 0-0 | Owls +1 point | 
+17.50 flagReveal | 10 | 14-3 | 0-1 | Owls +1 point | 
+18.50 flagReveal | 10 | 14-3 | 0-1 |  | 
+20.25 flagReveal | 10 | 14-3 | 0-1 | The host keeps the call. | 
+21.00 flagQ | 11 | 14-3 | 0-1 | Owls take flag 1. | 
+22.00 flagReveal | 11 | 14-3 | 1-2 | Owls take flag 1. | 
+23.00 flagQ | 12 | 14-3 | 1-2 | Both got it — a point each. | 
+23.75 flagReveal | 12 | 14-3 | 1-2 | Both got it — a point each. | 
+24.75 flagReveal | 12 | 14-3 | 1-2 |  | 
+25.50 flagReveal | 12 | 14-3 | 1-2 | The host keeps the call. | 
+26.50 flagQ | 13 | 14-3 | 1-2 | Nobody got it. | 
+27.50 flagReveal | 13 | 14-3 | 1-2 | Nobody got it. | 
+28.25 flagQ | 14 | 14-3 | 1-2 | Nobody got it. | 
+29.25 flagReveal | 14 | 14-3 | 2-2 | Nobody got it. | 
+30.00 flagReveal | 14 | 14-3 | 2-2 |  | 
+31.00 flagReveal | 14 | 14-3 | 2-3 | Call changed: ⁨Owls⁩ RIGHT. | 
+32.00 flagQ | 15 | 14-3 | 2-3 | Both got it — a point each. | 
+32.75 flagReveal | 15 | 14-3 | 2-3 | Both got it — a point each. | 
+33.75 flagQ | 16 | 14-3 | 2-3 | Nobody got it. | 
+34.50 flagReveal | 16 | 14-3 | 2-4 | Nobody got it. | 
+35.50 flagQ | 17 | 14-3 | 2-4 | Owls take flag 7. | 
+36.50 flagReveal | 17 | 14-3 | 2-4 | Owls take flag 7. | 
+37.25 flagQ | 18 | 14-3 | 2-4 | Nobody got it. | 
+38.25 flagReveal | 18 | 14-3 | 2-4 | Nobody got it. | 
+39.00 flagReveal | 18 | 14-3 | 2-4 |  | 
+40.00 flagReveal | 18 | 14-3 | 3-4 | Call changed: ⁨Lions⁩ RIGHT. | 
+41.00 flagQ | 19 | 14-3 | 3-4 | Lions take flag 9. | 
+41.75 flagReveal | 19 | 14-3 | 4-5 | Lions take flag 9. | 
+42.75 flagSummary | 20 | 14-5 | 4-5 | Both got it — a point each. | 
+43.50 comebackIntro | 21 | 14-5 |  | Both got it — a point each. | 
+44.50 comebackQ | 22 | 14-5 |  | Both got it — a point each. | 
+45.50 comebackReveal | 22 | 14-5 |  | Both got it — a point each. | 
+46.25 comebackQ | 23 | 14-5 |  | Both got it — a point each. | 
+47.25 comebackReveal | 23 | 14-5 |  | Both got it — a point each. | 
+48.00 comebackQ | 24 | 14-5 |  | Both got it — a point each. | 
+49.00 comebackReveal | 24 | 14-5 |  | Both got it — a point each. | 
+50.00 comebackSummary | 25 | 14-12 |  | Both got it — a point each. | 
+50.75 foolIntro | 26 | 14-12 | 0-0 | Both got it — a point each. | 
+51.75 foolWrite | 27 | 14-12 | 0-0 | Both got it — a point each. | 
+52.50 foolPick | 27 | 14-12 | 0-0 | Both got it — a point each. | 
+53.50 foolReveal | 27 | 14-12 | 0-2 | Both got it — a point each. | 
+54.50 foolWrite | 28 | 14-12 | 0-2 | Both got it — a point each. | 
+57.00 foolPick | 28 | 14-12 | 0-2 | Both got it — a point each. | 
+58.00 foolReveal | 28 | 14-12 | 0-4 | Both got it — a point each. | 
+59.00 foolWrite | 29 | 14-12 | 0-4 | Both got it — a point each. | 
+60.75 foolPick | 29 | 14-12 | 0-4 | Both got it — a point each. | 
+64.25 foolReveal | 29 | 14-12 | 0-7 | Both got it — a point each. | 
+65.25 foolWrite | 30 | 14-12 | 0-7 | Both got it — a point each. | 
+68.75 foolPick | 30 | 14-12 | 0-7 | Both got it — a point each. | 
+70.50 foolReveal | 30 | 14-12 | 3-7 | Both got it — a point each. | 
+71.50 foolWrite | 31 | 14-12 | 3-7 | Both got it — a point each. | 
+72.50 foolPick | 31 | 14-12 | 3-7 | Both got it — a point each. | 
+73.25 foolReveal | 31 | 14-12 | 5-7 | Both got it — a point each. | 
+74.25 foolWrite | 32 | 14-12 | 5-7 | Both got it — a point each. | 
+75.00 foolPick | 32 | 14-12 | 5-7 | Both got it — a point each. | 
+77.00 foolReveal | 32 | 14-12 | 8-7 | Both got it — a point each. | 
+77.75 foolSummary | 33 | 16-12 | 8-7 | Both got it — a point each. | 
+78.75 roundIntro | 34 | 16-12 |  | Both got it — a point each. | 
+79.50 ask | 35 | 16-12 |  | Both got it — a point each. | 
+81.50 answer | 36 | 17-12 |  | Lions +1 point | 
+82.25 ask | 37 | 17-12 |  | Lions +1 point | 
+83.25 ask | 37 | 17-12 |  | Owls used Double Dip. | 
+85.00 steal | 38 | 17-12 |  | Owls used Double Dip. | 
+86.75 answer | 39 | 18-12 |  | Lions +1 point — steal | 
+87.75 roundScore | 40 | 18-12 |  | Lions +1 point — steal | 
+88.50 final | 41 | 18-12 |  | Lions +1 point — steal | 
+recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[1,1],"minis":[0,1],"chart":[[0,0],[0,0],[14,1],[14,2],[14,3],[14,5],[14,12],[16,12],[17,12],[18,12]],"segs":[{"label":"R1","pts":[[14,1],[14,2],[14,3]]},{"label":"Guess the Flag","pts":[[14,5]]},{"label":"The Comeback","pts":[[14,12]]},{"label":"Fool Me Twice","pts":[[16,12]]},{"label":"R2","pts":[[17,12],[18,12]]}],"awards":[]}

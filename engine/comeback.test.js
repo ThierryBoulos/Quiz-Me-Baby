@@ -29,6 +29,23 @@ test('comeback: many teams: up to one point behind the team above, never past it
   assert.deepEqual(P.teams, [7]); assert.equal(P.target[7], 18);       // 85% of 39 is 33, but the team above has 19
   assert.deepEqual(Q.comebackSettle(sc, P.teams, { 7:true }), [39, 34, 30, 27, 24, 21, 19, 18]);
 });
+test('comeback: the group left behind goes in together (18 Nov, the owner: the 16 was left out)', () => {
+  /* 8 teams, 7 games left (7 a game to win back): 31.85 behind is the line on its own; the 16 is 31 behind, but it's
+     under the big drop (38 to 16) with the 14 and the 7, and well behind: it's in */
+  const sc = [47, 47, 40, 38, 42, 16, 14, 7], P = Q.comebackPlan(sc, 49);
+  assert.deepEqual(P.teams, [5, 6, 7]);
+  assert.deepEqual(Q.comebackSettle(sc, P.teams, { 5:true, 6:true, 7:true }), [47, 47, 40, 38, 42, 37, 36, 35]);
+  /* the 16 misses: the 14 stops one under it */
+  assert.deepEqual(Q.comebackSettle(sc, P.teams, { 5:false, 6:true, 7:true }), [47, 47, 40, 38, 42, 16, 15, 14]);
+  /* a bottom five, evenly spaced, under a drop of 25: all five */
+  assert.deepEqual(Q.comebackPlan([47, 46, 45, 20, 18, 16, 15, 14], 49).teams, [3, 4, 5, 6, 7]);
+  /* no drop at all (evenly spread): only the ones well behind */
+  assert.deepEqual(Q.comebackPlan([47, 41, 35, 29, 23, 17, 11, 5], 49).teams, [5, 6, 7]);
+  /* one team far off: only it */
+  assert.deepEqual(Q.comebackPlan([47, 45, 44, 43, 42, 41, 40, 8], 49).teams, [7]);
+  /* the group never takes in a team that isn't well behind */
+  assert.deepEqual(Q.comebackPlan([47, 47, 40, 38, 42, 30, 14, 7], 49).teams, [6, 7]);
+});
 test('comeback: two teams in it: in order, the lower one behind the upper one, whoever makes it', () => {
   const sc = [40, 38, 14, 9], P = Q.comebackPlan(sc, 30);
   assert.deepEqual(P.teams, [2, 3]); assert.deepEqual(P.target, [null, null, 34, 33]);

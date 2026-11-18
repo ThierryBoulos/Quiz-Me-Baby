@@ -1,0 +1,69 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 1-14)
+7.50 roundIntro | 2 | 1-14 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 14. | 
+7.50 ask | 3 | 1-14 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 14. | 
+8.50 ask | 3 | 1-14 |  | Lions used Call a Friend. | 
+10.25 ask | 4 | 1-14 |  | Lions used Call a Friend. | 
+11.25 steal | 4 | 1-14 |  | Lions used Call a Friend. | 
+12.00 answer | 4 | 1-15 |  | Owls +1 point — steal | 
+13.00 answer | 4 | 1-15 |  |  | 
+14.75 answer | 4 | 1-14 |  | Call changed: nobody scores this one. | 
+15.75 ask | 5 | 1-14 |  | Call changed: nobody scores this one. | 
+16.50 ask | 5 | 1-14 |  | Owls used Double Dip. | 
+17.50 steal | 5 | 1-14 |  | Owls used Double Dip. | 
+18.50 answer | 5 | 1-14 |  | Owls used Double Dip. | 
+19.25 answer | 5 | 1-14 |  |  | 
+23.00 answer | 5 | 2-14 |  | Call changed: Lions +1 point. | 
+23.75 roundScore | 6 | 2-14 |  | Call changed: Lions +1 point. | 
+24.75 roundIntro | 7 | 2-14 |  | Call changed: Lions +1 point. | 
+26.50 ask | 8 | 2-14 |  | Call changed: Lions +1 point. | 
+27.50 answer | 8 | 3-14 |  | Lions +1 point | 
+28.25 answer | 8 | 3-14 |  |  | 
+43.25 answer | 8 | 3-14 |  | No answer in time: the call stands. | 
+43.50 ask | 9 | 3-14 |  | No answer in time: the call stands. | 
+44.50 steal | 9 | 3-14 |  | No answer in time: the call stands. | 
+45.50 answer | 9 | 3-14 |  | No answer in time: the call stands. | 
+46.25 roundScore | 10 | 3-14 |  | No answer in time: the call stands. | 
+47.25 foolIntro | 11 | 3-14 | 0-0 | No answer in time: the call stands. | 
+48.00 foolWrite | 12 | 3-14 | 0-0 | No answer in time: the call stands. | 
+50.00 foolPick | 12 | 3-14 | 0-0 | No answer in time: the call stands. | 
+52.50 foolReveal | 12 | 3-14 | 1-0 | No answer in time: the call stands. | 
+53.50 foolWrite | 13 | 3-14 | 1-0 | No answer in time: the call stands. | 
+54.50 foolPick | 13 | 3-14 | 1-0 | No answer in time: the call stands. | 
+57.00 foolReveal | 13 | 3-14 | 1-1 | No answer in time: the call stands. | 
+58.00 foolWrite | 14 | 3-14 | 1-1 | No answer in time: the call stands. | 
+60.75 foolPick | 14 | 3-14 | 1-1 | No answer in time: the call stands. | 
+62.50 foolReveal | 14 | 3-14 | 3-3 | No answer in time: the call stands. | 
+63.50 foolWrite | 15 | 3-14 | 3-3 | No answer in time: the call stands. | 
+65.25 foolPick | 15 | 3-14 | 3-3 | No answer in time: the call stands. | 
+66.00 foolReveal | 15 | 3-14 | 4-4 | No answer in time: the call stands. | 
+67.00 foolWrite | 16 | 3-14 | 4-4 | No answer in time: the call stands. | 
+68.00 foolPick | 16 | 3-14 | 4-4 | No answer in time: the call stands. | 
+68.75 foolReveal | 16 | 3-14 | 4-4 | No answer in time: the call stands. | 
+69.75 foolWrite | 17 | 3-14 | 4-4 | No answer in time: the call stands. | 
+71.50 foolPick | 17 | 3-14 | 4-4 | No answer in time: the call stands. | 
+72.50 foolReveal | 17 | 3-14 | 4-5 | No answer in time: the call stands. | 
+73.25 foolSummary | 18 | 3-16 | 4-5 | No answer in time: the call stands. | 
+74.25 comebackIntro | 19 | 3-16 |  | No answer in time: the call stands. | 
+75.00 comebackQ | 20 | 3-16 |  | No answer in time: the call stands. | 
+91.00 comebackReveal | 21 | 3-16 |  | No answer in time: the call stands. | 
+91.25 comebackSummary | 22 | 3-16 |  | No answer in time: the call stands. | 
+92.25 roundIntro | 23 | 3-16 |  | No answer in time: the call stands. | 
+93.00 ask | 24 | 3-16 |  | No answer in time: the call stands. | 
+94.00 answer | 24 | 4-16 |  | Lions +1 point | 
+95.00 ask | 25 | 4-16 |  | Lions +1 point | 
+95.75 steal | 25 | 4-16 |  | Lions +1 point | 
+96.75 answer | 25 | 5-16 |  | Lions +1 point — steal | 
+97.50 roundScore | 26 | 5-16 |  | Lions +1 point — steal | 
+98.50 roundIntro | 27 | 5-16 |  | Lions +1 point — steal | 
+99.50 ask | 28 | 5-16 |  | Lions +1 point — steal | 
+100.25 steal | 28 | 5-16 |  | Lions +1 point — steal | 
+101.25 answer | 28 | 5-16 |  | Lions +1 point — steal | 
+102.00 ask | 29 | 5-16 |  | Lions +1 point — steal | 
+103.00 answer | 29 | 5-17 |  | Owls +1 point | 
+104.00 roundScore | 30 | 5-17 |  | Owls +1 point | 
+104.75 final | 31 | 5-17 |  | Owls +1 point | 
+recap: {"margin":12,"sudden":false,"leadChanges":0,"steals":[2,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,14],[1,15],[1,14],[2,14],[3,14],[3,16],[4,16],[5,16],[5,17]],"segs":[{"label":"R1","pts":[[1,14],[1,15],[1,14],[2,14]]},{"label":"R2","pts":[[3,14]]},{"label":"Fool Me Twice","pts":[[3,16]]},{"label":"The Comeback","pts":[]},{"label":"R3","pts":[[4,16],[5,16]]},{"label":"R4","pts":[[5,17]]}],"awards":[{"t":"Best thief","who":"Lions, 2 steals","team":0}]}

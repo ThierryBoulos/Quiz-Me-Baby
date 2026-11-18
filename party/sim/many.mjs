@@ -227,6 +227,31 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   { const s = start(5, [40, 38, 30, 14, 9]); L.startMini(s, 0, T, []); const was = L.qOf(s).id;
     want("Change question", L.swapQ(s, 500, T) === true && L.qOf(s).id !== was && s.deadline === 500 + 15000);
     L.captainAnswer(s, 2, { text: "x" }); want("...not once an answer is in", L.swapQ(s, 600, T) !== true); }
+  /* 18 Nov: the comeback and Fool Me Twice on the same night: right after Fool Me Twice, and Fool Me Twice right after it;
+     and the group left behind (the owner: 47 47 40 38 42 | 16 14 7, and the 16 was left out) */
+  { const foolFacts = bank.filter((q) => q.type === "fool").sort((a, b) => (a.id < b.id ? -1 : 1));
+    const fdeck = [...foolFacts.filter((q) => q.level !== "hard").slice(0, 4), ...foolFacts.filter((q) => q.level === "hard").slice(0, 2), ...foolFacts.filter((q) => q.level !== "hard").slice(4, 8)];
+    const play = (s) => { L.startMini(s, 0, T, []); for (let g = 0; g < 400 && s.screen !== "summary"; g++) {
+      if (s.screen === "q" && L.miniOf(s).key === "fool") { s.teams.forEach((_, t) => L.captainAnswer(s, t, { text: "Lie " + t })); L.foolOpen(s, 0, T); }
+      else if (s.screen === "pick") { const F = s.fool; s.teams.forEach((_, t) => { const c = F.opts.findIndex((o) => !o.by.includes(t)); L.captainAnswer(s, t, { pick: c, pred: (t + 1) % s.teams.length }); }); L.foolReveal(s); }
+      else if (s.screen === "q") L.reveal(s); else L.next(s, 0, T); } };
+    for (const [order, name] of [[["flag", "fool", "closest", "pin"], "right after Fool Me Twice"], [["flag", "closest", "fool", "pin"], "Fool Me Twice right after it"]]) {
+      const teams = Array.from({ length: 8 }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+      const s = L.newNight(teams, { ...decks, fool: fdeck, comeback: cbDeck }, order);
+      play(s); L.next(s, 0, T); play(s);
+      [47, 47, 40, 38, 42, 16, 14, 7].forEach((v, t) => { s.teams[t].score = v; }); L.next(s, 0, T);
+      const m = L.miniOf(s);
+      want(`${name}: it comes`, s.screen === "intro" && m?.key === "comeback");
+      want(`${name}: the group left behind is in it, the 16 too`, m?.only?.join() === "5,6,7");
+      L.startMini(s, 0, T, []);
+      for (let i = 0; i < 3; i++) { const q = L.qOf(s); [5, 6, 7].forEach((t) => L.captainAnswer(s, t, { text: q.answer })); L.reveal(s); L.next(s, 0, T); }
+      want(`${name}: all three make it, nobody passes anybody`, s.teams.map((x) => x.score).join() === "47,47,40,38,42,37,36,35");
+      L.next(s, 0, T);
+      want(`${name}: the night carries on`, s.screen === "intro" && L.miniOf(s).key === order[2]);
+      play(s); L.next(s, 0, T); play(s); L.next(s, 0, T);
+      want(`${name}: the night ends`, s.screen === "final" || L.miniOf(s)?.key === "sudden");
+      const F = V.buildMany(s).pub;
+      if (s.screen === "final") want(`${name}: the final's games and scores line up`, F.final.games.length === F.final.log.length - 1); } }
   if (fails.length) bad++;
   console.log(`the comeback, 3-8 teams: at the middle, only the teams far behind, 15 s, a miss is out, all three right moves up (never past a team), once a night, close nights and switched off: none, skip, Change question — ${fails.length ? "FAILED: " + fails.join("; ") : "ok"}`);
 }
