@@ -1275,14 +1275,19 @@
     function comebackDeck(taken, n){
       const free = (q) => q.type === 'standard' && q.theme !== 'Know the Host' && !taken.has(q.id) && suddenOk(q) && !clashesWith(q.id, taken);
       const common = (q) => COMEBACK_THEMES.indexOf(q.theme) > -1;
-      let pool = bank().filter(q => free(q) && common(q) && q.difficulty === 'easy' && isFresh(q));
-      if(pool.length < n) pool = bank().filter(q => free(q) && common(q) && q.difficulty === 'easy');
-      if(pool.length < n) pool = bank().filter(q => free(q) && q.difficulty === 'easy');
-      /* (easy, always: with too few easy questions left there's no comeback, never a hard one in its place, 18 Nov) */
-      /* a theme at most once, while there are themes left */
-      const out = [], rest = [], seen = {};
-      shuffle(pool).forEach(q => { if(!seen[q.theme]){ seen[q.theme] = true; out.push(q); } else rest.push(q); });
-      return out.concat(rest).slice(0, n);
+      /* in this order, as many of each as it takes (18 Nov, the owner): unplayed easy ones; then unplayed medium ones;
+         then easy ones already played on this TV. Never a hard one. Within each, a theme at most once while there
+         are themes left */
+      const tiers = [q => q.difficulty === 'easy' && isFresh(q), q => q.difficulty === 'medium' && isFresh(q), q => q.difficulty === 'easy'];
+      const out = [], got = new Set();
+      for(const tier of tiers){
+        if(out.length >= n) break;
+        const pool = shuffle(bank().filter(q => free(q) && common(q) && tier(q) && !got.has(q.id))), first = [], rest = [], seen = {};
+        out.forEach(q => { seen[q.theme] = true; });
+        pool.forEach(q => { if(!seen[q.theme]){ seen[q.theme] = true; first.push(q); } else rest.push(q); });
+        first.concat(rest).forEach(q => { if(out.length < n){ out.push(q); got.add(q.id); } });
+      }
+      return out;
     }
     return { bank, shuffle, isFresh, clashesWith, suddenOk, comebackDeck, matchDiff, pairsFor, closestPool, capacity, battlePool, battleReady, buildBattle,
              auctionPool, auctionDeck, saySamePool, commonOf, drawSaySame, saySameDeck,

@@ -78,3 +78,13 @@ test('comeback: nobody ever ends above a team it was behind (every outcome, many
     }
   }
 });
+test('comeback: its questions: unplayed easy, then unplayed medium, then easy already played; never hard (18 Nov, the owner)', () => {
+  const bank = [];
+  ['Geography', 'History', 'Science'].forEach(t => ['easy', 'medium', 'hard'].forEach(d => { for(let i = 0; i < 3; i++) bank.push({ id:`${t}:${d}${i}`, type:'standard', theme:t, difficulty:d, question:'?', answer:'A' }); }));
+  const deck = (used, taken) => Q.createDealer({ bank:() => bank, used:() => new Set(used), noRepeat:() => true }).comebackDeck(new Set(taken || []), 5).map(q => q.difficulty);
+  const easy = bank.filter(q => q.difficulty === 'easy').map(q => q.id), med = bank.filter(q => q.difficulty === 'medium').map(q => q.id);
+  assert.deepEqual(deck([]), ['easy', 'easy', 'easy', 'easy', 'easy']);
+  assert.deepEqual(deck(easy.slice(0, 7)), ['easy', 'easy', 'medium', 'medium', 'medium']);   // 2 easy left unplayed, then medium
+  assert.deepEqual(deck(easy.concat(med)), ['easy', 'easy', 'easy', 'easy', 'easy']);          // all played: easy again
+  assert.deepEqual(deck([], easy.concat(med)), []);                                            // all of them on tonight: none (no comeback)
+});
