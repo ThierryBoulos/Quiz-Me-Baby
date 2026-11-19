@@ -29,41 +29,44 @@
 46.25 roundScore | 10 | 3-14 |  | No answer in time: the call stands. | 
 47.25 foolIntro | 11 | 3-14 | 0-0 | No answer in time: the call stands. | 
 48.00 foolWrite | 12 | 3-14 | 0-0 | No answer in time: the call stands. | 
-50.00 foolPick | 12 | 3-14 | 0-0 | No answer in time: the call stands. | 
-52.50 foolReveal | 12 | 3-14 | 1-0 | No answer in time: the call stands. | 
-53.50 foolWrite | 13 | 3-14 | 1-0 | No answer in time: the call stands. | 
-54.50 foolPick | 13 | 3-14 | 1-0 | No answer in time: the call stands. | 
-57.00 foolReveal | 13 | 3-14 | 1-1 | No answer in time: the call stands. | 
-58.00 foolWrite | 14 | 3-14 | 1-1 | No answer in time: the call stands. | 
-60.75 foolPick | 14 | 3-14 | 1-1 | No answer in time: the call stands. | 
-62.50 foolReveal | 14 | 3-14 | 3-3 | No answer in time: the call stands. | 
-63.50 foolWrite | 15 | 3-14 | 3-3 | No answer in time: the call stands. | 
-65.25 foolPick | 15 | 3-14 | 3-3 | No answer in time: the call stands. | 
-66.00 foolReveal | 15 | 3-14 | 4-4 | No answer in time: the call stands. | 
-67.00 foolWrite | 16 | 3-14 | 4-4 | No answer in time: the call stands. | 
-68.00 foolPick | 16 | 3-14 | 4-4 | No answer in time: the call stands. | 
-68.75 foolReveal | 16 | 3-14 | 4-4 | No answer in time: the call stands. | 
-69.75 foolWrite | 17 | 3-14 | 4-4 | No answer in time: the call stands. | 
-71.50 foolPick | 17 | 3-14 | 4-4 | No answer in time: the call stands. | 
-72.50 foolReveal | 17 | 3-14 | 4-5 | No answer in time: the call stands. | 
-73.25 foolSummary | 18 | 3-16 | 4-5 | No answer in time: the call stands. | 
-74.25 comebackIntro | 19 | 3-16 |  | No answer in time: the call stands. | 
-75.00 comebackQ | 20 | 3-16 |  | No answer in time: the call stands. | 
-91.00 comebackReveal | 21 | 3-16 |  | No answer in time: the call stands. | 
-91.25 comebackSummary | 22 | 3-16 |  | No answer in time: the call stands. | 
-92.25 roundIntro | 23 | 3-16 |  | No answer in time: the call stands. | 
-93.00 ask | 24 | 3-16 |  | No answer in time: the call stands. | 
-94.00 answer | 24 | 4-16 |  | Lions +1 point | 
-95.00 ask | 25 | 4-16 |  | Lions +1 point | 
-95.75 steal | 25 | 4-16 |  | Lions +1 point | 
-96.75 answer | 25 | 5-16 |  | Lions +1 point — steal | 
-97.50 roundScore | 26 | 5-16 |  | Lions +1 point — steal | 
-98.50 roundIntro | 27 | 5-16 |  | Lions +1 point — steal | 
-99.50 ask | 28 | 5-16 |  | Lions +1 point — steal | 
-100.25 steal | 28 | 5-16 |  | Lions +1 point — steal | 
-101.25 answer | 28 | 5-16 |  | Lions +1 point — steal | 
-102.00 ask | 29 | 5-16 |  | Lions +1 point — steal | 
-103.00 answer | 29 | 5-17 |  | Owls +1 point | 
-104.00 roundScore | 30 | 5-17 |  | Owls +1 point | 
-104.75 final | 31 | 5-17 |  | Owls +1 point | 
-recap: {"margin":12,"sudden":false,"leadChanges":0,"steals":[2,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,14],[1,15],[1,14],[2,14],[3,14],[3,16],[4,16],[5,16],[5,17]],"segs":[{"label":"R1","pts":[[1,14],[1,15],[1,14],[2,14]]},{"label":"R2","pts":[[3,14]]},{"label":"Fool Me Twice","pts":[[3,16]]},{"label":"The Comeback","pts":[]},{"label":"R3","pts":[[4,16],[5,16]]},{"label":"R4","pts":[[5,17]]}],"awards":[{"t":"Best thief","who":"Lions, 2 steals","team":0}]}
+50.00 foolPick | 13 | 3-14 | 0-0 | No answer in time: the call stands. | 
+50.75 foolReveal | 14 | 3-14 | 1-1 | No answer in time: the call stands. | 
+51.75 foolWrite | 15 | 3-14 | 1-1 | No answer in time: the call stands. | 
+52.50 foolPick | 16 | 3-14 | 1-1 | No answer in time: the call stands. | 
+53.50 foolReveal | 17 | 3-14 | 1-1 | No answer in time: the call stands. | 
+54.50 foolWrite | 18 | 3-14 | 1-1 | No answer in time: the call stands. | 
+57.00 foolPick | 19 | 3-14 | 1-1 | No answer in time: the call stands. | 
+59.75 foolReveal | 20 | 3-14 | 1-4 | No answer in time: the call stands. | 
+60.75 foolWrite | 21 | 3-14 | 1-4 | No answer in time: the call stands. | 
+62.50 foolPick | 22 | 3-14 | 1-4 | No answer in time: the call stands. | 
+64.25 foolReveal | 23 | 3-14 | 1-6 | No answer in time: the call stands. | 
+65.25 foolWrite | 24 | 3-14 | 1-6 | No answer in time: the call stands. | 
+66.00 foolPick | 25 | 3-14 | 1-6 | No answer in time: the call stands. | 
+67.00 foolReveal | 26 | 3-14 | 2-7 | No answer in time: the call stands. | 
+68.00 foolWrite | 27 | 3-14 | 2-7 | No answer in time: the call stands. | 
+71.50 foolPick | 28 | 3-14 | 2-7 | No answer in time: the call stands. | 
+73.25 foolReveal | 29 | 3-14 | 2-10 | No answer in time: the call stands. | 
+74.25 foolSummary | 30 | 3-16 | 2-10 | No answer in time: the call stands. | 
+75.00 comebackIntro | 31 | 3-16 |  | No answer in time: the call stands. | 
+76.00 comebackQ | 32 | 3-16 |  | No answer in time: the call stands. | 
+92.00 comebackReveal | 33 | 3-16 |  | No answer in time: the call stands. | 
+92.25 comebackSummary | 34 | 3-16 |  | No answer in time: the call stands. | 
+93.00 roundIntro | 35 | 3-16 |  | No answer in time: the call stands. | 
+94.00 ask | 36 | 3-16 |  | No answer in time: the call stands. | 
+95.00 steal | 36 | 3-16 |  | No answer in time: the call stands. | 
+95.75 answer | 36 | 3-17 |  | Owls +1 point — steal | 
+96.75 ask | 37 | 3-17 |  | Owls +1 point — steal | 
+97.50 steal | 37 | 3-17 |  | Owls +1 point — steal | 
+98.50 answer | 37 | 3-17 |  | Owls +1 point — steal | 
+99.50 roundScore | 38 | 3-17 |  | Owls +1 point — steal | 
+100.25 roundIntro | 39 | 3-17 |  | Owls +1 point — steal | 
+101.25 ask | 40 | 3-17 |  | Owls +1 point — steal | 
+102.00 steal | 40 | 3-17 |  | Owls +1 point — steal | 
+103.00 answer | 40 | 3-17 |  | Owls +1 point — steal | 
+104.00 ask | 41 | 3-17 |  | Owls +1 point — steal | 
+104.75 answer | 41 | 3-18 |  | Owls +1 point | 
+105.75 answer | 41 | 3-18 |  |  | 
+107.50 answer | 41 | 3-18 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+108.50 roundScore | 42 | 3-18 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+109.25 final | 43 | 3-18 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+recap: {"margin":15,"sudden":false,"leadChanges":0,"steals":[1,1],"minis":[0,0],"chart":[[0,0],[0,0],[1,14],[1,15],[1,14],[2,14],[3,14],[3,16],[3,17],[3,18]],"segs":[{"label":"R1","pts":[[1,14],[1,15],[1,14],[2,14]]},{"label":"R2","pts":[[3,14]]},{"label":"Fool Me Twice","pts":[[3,16]]},{"label":"The Comeback","pts":[]},{"label":"R3","pts":[[3,17]]},{"label":"R4","pts":[[3,18]]}],"awards":[]}

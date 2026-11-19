@@ -1,0 +1,65 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+8.50 answer | 4 | 1-0 |  | Lions +1 point | 
+9.50 ask | 5 | 1-0 |  | Lions +1 point | 
+11.25 steal | 6 | 1-0 |  | Lions +1 point | 
+13.00 answer | 7 | 2-0 |  | Lions +1 point — steal | 
+14.00 answer | 7 | 2-0 |  |  | 
+14.75 answer | 7 | 1-0 |  | Call changed: nobody scores this one. | 
+15.75 roundScore | 8 | 1-0 |  | Call changed: nobody scores this one. | 
+16.50 seeIntro | 9 | 1-0 | 0-0 | Call changed: nobody scores this one. | 
+17.50 seeQ | 10 | 1-0 | 0-0 | Call changed: nobody scores this one. | 
+20.25 seeReveal | 10 | 1-0 | 0-1 | Call changed: nobody scores this one. | 
+21.00 seeQ | 11 | 1-0 | 0-1 | Owls take picture 1. | 
+24.75 seeQ | 11 | 1-0 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+26.50 seeReveal | 11 | 1-0 | 0-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+27.50 seeQ | 12 | 1-0 | 0-1 | Nobody got it. | 
+32.75 seeReveal | 12 | 1-0 | 1-1 | Nobody got it. | 
+33.75 seeReveal | 12 | 1-0 | 1-1 |  | 
+34.50 seeReveal | 12 | 1-0 | 0-1 | Call changed: ⁨Lions⁩ WRONG. | 
+35.50 seeQ | 13 | 1-0 | 0-1 | The call changed: a new picture for both teams. | 
+37.25 seeReveal | 13 | 1-0 | 1-1 | The call changed: a new picture for both teams. | 
+38.25 seeQ | 14 | 1-0 | 1-1 | Lions take picture 3. | 
+46.25 seeQ | 14 | 1-0 | 1-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+50.75 seeReveal | 14 | 1-0 | 1-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+51.75 seeReveal | 14 | 1-0 | 1-1 |  | 
+54.50 seeReveal | 14 | 1-0 | 1-2 | Call changed: ⁨Owls⁩ RIGHT. | 
+55.25 seeQ | 15 | 1-0 | 1-2 | Owls take picture 4. | 
+58.00 seeReveal | 15 | 1-0 | 2-2 | Owls take picture 4. | 
+59.00 seeQ | 16 | 1-0 | 2-2 | Lions take picture 5. | 
+60.75 seeQ | 16 | 1-0 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+64.25 seeReveal | 16 | 1-0 | 2-3 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+65.25 seeReveal | 16 | 1-0 | 2-3 |  | 
+66.00 seeReveal | 16 | 1-0 | 2-2 | Call changed: ⁨Owls⁩ WRONG. | 
+67.00 seeQ | 17 | 1-0 | 2-2 | Nobody got it. | 
+70.50 seeQ | 17 | 1-0 | 2-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+72.50 seeReveal | 17 | 1-0 | 3-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+73.25 seeQ | 18 | 1-0 | 3-2 | Lions take picture 7. | 
+76.00 seeQ | 18 | 1-0 | 3-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+79.50 seeReveal | 18 | 1-0 | 4-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+80.50 seeQ | 19 | 1-0 | 4-2 | Lions take picture 8. | 
+88.50 seeQ | 19 | 1-0 | 4-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+91.25 seeReveal | 19 | 1-0 | 5-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+92.25 seeReveal | 19 | 1-0 | 5-2 |  | 
+95.00 seeReveal | 19 | 1-0 | 4-2 | Call changed: ⁨Lions⁩ WRONG. | 
+95.75 seeQ | 20 | 1-0 | 4-2 | Nobody got it. | 
+97.50 seeReveal | 20 | 1-0 | 5-2 | Nobody got it. | 
+98.50 seeReveal | 20 | 1-0 | 5-2 |  | 
+101.25 seeReveal | 20 | 1-0 | 5-2 | The host keeps the call. | 
+102.00 decided | 21 | 3-0 | 5-2 |  | 
+103.00 roundIntro | 22 | 3-0 |  |  | 
+104.00 ask | 23 | 3-0 |  |  | 
+104.75 ask | 23 | 3-0 |  | Lions used Call a Friend. | 
+107.50 ask | 24 | 3-0 |  | Lions used Call a Friend. | 
+109.25 answer | 25 | 4-0 |  | Lions +1 point | 
+110.25 ask | 26 | 4-0 |  | Lions +1 point | 
+112.00 steal | 27 | 4-0 |  | Lions +1 point | 
+113.75 answer | 28 | 5-0 |  | Lions +1 point — steal | 
+114.75 answer | 28 | 5-0 |  |  | 
+115.50 answer | 28 | 4-0 |  | Call changed: nobody scores this one. | 
+116.50 roundScore | 29 | 4-0 |  | Call changed: nobody scores this one. | 
+117.50 final | 30 | 4-0 |  | Call changed: nobody scores this one. | 
+recap: {"margin":4,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[2,0],[1,0],[3,0],[4,0],[5,0],[4,0]],"segs":[{"label":"R1","pts":[[1,0],[2,0],[1,0]]},{"label":"What Do You See?","pts":[[3,0]]},{"label":"R2","pts":[[4,0],[5,0],[4,0]]}],"awards":[]}

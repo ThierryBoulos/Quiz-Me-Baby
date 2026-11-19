@@ -474,9 +474,11 @@
       if(!o || o.by.includes(t)) return;
       fooled[p].push(t);
       if(o.truth){ pts[t] += 2; return; }
-      /* (two teams with the same lie who both named this team: both called it, but it loses 1, not 2: 17 Nov) */
+      /* (two teams with the same lie who both named this team: both called it, but it loses 1, not 2: 17 Nov).
+         A right call is +1 more for the team that made it (19 Nov, the owner: naming cost nothing, so everyone named
+         the leader); with two teams nobody names anyone (predicts null) */
       let cost = 0;
-      for(const w of o.by){ pts[w] += 1; if(predicts && predicts[w] === t){ cost = 1; hits.push({ by:w, on:t }); } }
+      for(const w of o.by){ pts[w] += 1; if(predicts && predicts[w] === t){ cost = 1; pts[w] += 1; hits.push({ by:w, on:t }); } }
       pts[t] -= cost;
     });
     return { pts, fooled, hits };
@@ -491,6 +493,10 @@
      leader in the games left (reach). A share of the leader's score doesn't work as the test: with 3 teams last place
      pays 6 of 10, so nobody ever falls under 60%, and with 8 a team is under 50% one night in three. */
   const COMEBACK_GAP = 0.65, COMEBACK_NEAR = 0.5, COMEBACK_SHARE = 0.85, COMEBACK_LEGS = 3, COMEBACK_SECS = 15, COMEBACK_MIN_TWO = 5;
+  /* 3 to 8 teams: never under two games' worth of gap (1st place's points less last place's, twice: 8 with 3 teams, 14
+     with 8). On a short night two ordinary games could open the gap the test asks for: half of 4-game nights with
+     evenly matched teams had a comeback (19 Nov, the owner: a minimum gap, as with two teams). Long nights: no change */
+  const COMEBACK_MIN_GAMES = 2;
   /* the scores after the comeback: `made[t]` is true for a team that got all three. From the top team down, so a
      team's ceiling is one point under the lowest team that was above it, as that team ends up (made it or not).
      Teams level before it can end level, or apart if only one makes it; nobody ends above a team it was behind */
@@ -1190,7 +1196,8 @@
                                 .filter(k => k !== 'airport' || apDeck.length)
                                 .filter(k => k !== 'majority' || mrDeck.length)
                                 .filter(k => k !== 'roulette' || rrDeck.length >= ROULETTE_LAPS)
-                                .filter(k => k !== 'see' || seDeck.qs.length);
+                                .filter(k => k !== 'see' || seDeck.qs.length)
+                                .filter(k => k !== 'fool' || foDeck.qs.length);   // (19 Nov review: it was planned with no facts)
       const hasBattle = wanted.indexOf('battle') > -1;
       /* no standard rounds: the mini-games simply run back to back, from the start */
       const plan = rounds.length ? planMinis(rounds.length, inter) : inter.map(k => ({ key:k, after:0 }));
@@ -1752,8 +1759,14 @@
       (b.tbUsed || []).forEach(id => spent.add(id));
       (b.dropped || []).forEach(id => spent.add(id));
     }
+    /* Russian Roulette's barrels, and the questions a round's "Change this question" brought in or swapped away
+       (19 Nov review: a Roulette question came back in the Battle with "never reuse" off) */
+    const rr = g.rouletteGame; if(rr) (rr.qs || []).concat(rr.spare || []).forEach(lap => ((lap && lap.ch) || []).forEach(c => { if(c && c.q && c.q.id) spent.add(c.q.id); }));
+    g.rounds.forEach(r => (r.swapSeen || []).forEach(id => spent.add(id)));
     return spent;
   }
+  /* everything tonight has asked or holds (the Battle's list), for a question dealt late: a round's swap, sudden death */
+  const nightSpent = (g) => battleSpent(g);
   /* the Battle is worth double (games saved before that was so: the old value) */
   const battlePoints = (g) => g.battlePts || g.miniPts;
   function battleAward(g, fx){
@@ -1798,7 +1811,7 @@
   /* ---- the end of the night, and sudden death ---- */
   /* tonight's themes first; wider only when they run dry */
   function suddenPool(g, D){
-    const inGame = new Set();
+    const inGame = nightSpent(g);   // (with Russian Roulette's barrels and the swapped questions: 19 Nov review)
     g.rounds.forEach(r => r.q.forEach(q => inGame.add(q.id)));
     g.mini.qs.forEach(q => inGame.add(q.id));
     (g.sdUsed || []).forEach(id => inGame.add(id));
@@ -1887,9 +1900,7 @@
      Roulette's barrels, a question swapped away, and the themes of the rounds still to play (a swap or a new steal
      question comes from there) */
   function comebackTaken(g, D){
-    const taken = battleSpent(g), add = (q) => { if(q && q.id) taken.add(q.id); };
-    const rr = g.rouletteGame; if(rr) (rr.qs || []).concat(rr.spare || []).forEach(lap => ((lap && lap.ch) || []).forEach(c => add(c && c.q)));
-    g.rounds.forEach(r => (r.swapSeen || []).forEach(id => taken.add(id)));
+    const taken = nightSpent(g);   // (the Roulette barrels and the swapped questions are in it)
     const themes = g.rounds.filter(r => !r.done).map(r => r.theme);
     if(themes.length) D.bank().forEach(q => { if(q.type === 'standard' && themes.indexOf(q.theme) > -1) taken.add(q.id); });
     return taken;
@@ -1970,7 +1981,12 @@
        come back on Team B; the current one can return at the end of a lap. */
     'round/swap'(g, a, env){
       const D = env.deal, rd = g.rounds[g.r], seat = g.seat;
-      const elsewhere = new Set();
+      /* everything else tonight holds: the other rounds (and their swaps), the mini-games, Russian Roulette's barrels,
+         Secret Stakes' questions, the Battle's (19 Nov review: a swap brought in a Roulette or Stakes question); this
+         round's own swaps stay offered in turn below */
+      const elsewhere = nightSpent(g);
+      (rd.swapSeen || []).forEach(id => elsewhere.delete(id));
+      rd.q.forEach(q => elsewhere.delete(q.id));
       g.rounds.forEach((r, ri) => r.q.forEach((q, si) => { if(ri !== g.r || si !== seat) elsewhere.add(q.id); }));
       g.mini.qs.forEach(q => elsewhere.add(q.id));
       const cur = rd.q[seat], mate = rd.q[1 - seat];
@@ -2821,5 +2837,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

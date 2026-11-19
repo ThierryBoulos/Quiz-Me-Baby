@@ -1,0 +1,75 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 1-12)
+7.50 roundIntro | 2 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+8.50 ask | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+9.26 ask | 3 | 1-12 |  | Lions used Call a Friend. | 
+11.25 ask | 4 | 1-12 |  | Lions used Call a Friend. | 
+12.00 steal | 4 | 1-12 |  | Lions used Call a Friend. | 
+12.91 answer | 4 | 1-12 |  | Lions used Call a Friend. | 
+14.00 ask | 5 | 1-12 |  | Lions used Call a Friend. | 
+14.68 answer | 5 | 1-13 |  | Owls +1 point | 
+15.75 answer | 5 | 1-13 |  |  | 
+16.50 answer | 5 | 1-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+17.50 roundScore | 6 | 1-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+18.50 roundIntro | 7 | 1-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+19.25 ask | 8 | 1-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+20.25 steal | 8 | 1-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+21.00 answer | 8 | 1-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+22.00 answer | 8 | 1-13 |  |  | 
+23.75 answer | 8 | 1-14 |  | Call changed: Owls +1 point. | 
+24.75 ask | 9 | 1-14 |  | Call changed: Owls +1 point. | 
+25.50 ask | 9 | 1-14 |  | Owls used Call a Friend. | 
+30.92 ask | 10 | 1-14 |  | Owls used Call a Friend. | 
+32.00 answer | 10 | 1-15 |  | Owls +1 point | 
+32.75 roundScore | 11 | 1-15 |  | Owls +1 point | 
+33.75 foolIntro | 12 | 1-15 | 0-0 | Owls +1 point | 
+34.50 foolWrite | 13 | 1-15 | 0-0 | Owls +1 point | 
+35.38 foolPick | 14 | 1-15 | 0-0 | Owls +1 point | 
+36.35 foolReveal | 15 | 1-15 | 0-1 | Owls +1 point | 
+37.25 foolWrite | 16 | 1-15 | 0-1 | Owls +1 point | 
+38.25 foolPick | 17 | 1-15 | 0-1 | Owls +1 point | 
+40.00 foolReveal | 18 | 1-15 | 0-3 | Owls +1 point | 
+41.00 foolWrite | 19 | 1-15 | 0-3 | Owls +1 point | 
+41.75 foolPick | 20 | 1-15 | 0-3 | Owls +1 point | 
+43.50 foolReveal | 21 | 1-15 | 2-3 | Owls +1 point | 
+44.50 foolWrite | 22 | 1-15 | 2-3 | Owls +1 point | 
+45.50 foolPick | 23 | 1-15 | 2-3 | Owls +1 point | 
+47.15 foolReveal | 24 | 1-15 | 3-4 | Owls +1 point | 
+48.00 foolWrite | 25 | 1-15 | 3-4 | Owls +1 point | 
+50.75 foolPick | 26 | 1-15 | 3-4 | Owls +1 point | 
+53.50 foolReveal | 27 | 1-15 | 6-4 | Owls +1 point | 
+54.50 foolWrite | 28 | 1-15 | 6-4 | Owls +1 point | 
+56.25 foolPick | 29 | 1-15 | 6-4 | Owls +1 point | 
+59.00 foolReveal | 30 | 1-15 | 6-4 | Owls +1 point | 
+59.75 foolSummary | 31 | 3-15 | 6-4 | Owls +1 point | 
+60.71 comebackIntro | 32 | 3-15 |  | Owls +1 point | 
+61.50 comebackQ | 33 | 3-15 |  | Owls +1 point | 
+62.50 comebackReveal | 33 | 3-15 |  | Owls +1 point | 
+63.50 comebackQ | 34 | 3-15 |  | Owls +1 point | 
+64.25 comebackReveal | 34 | 3-15 |  | Owls +1 point | 
+65.24 comebackQ | 35 | 3-15 |  | Owls +1 point | 
+66.00 comebackReveal | 35 | 3-15 |  | Owls +1 point | 
+67.00 comebackSummary | 36 | 13-15 |  | Owls +1 point | 
+68.00 roundIntro | 37 | 13-15 |  | Owls +1 point | 
+69.75 ask | 38 | 13-15 |  | Owls +1 point | 
+(writesFail 20 s)
+90.45 steal | 38 | 13-15 |  | It's ⁨Owls⁩'s turn to answer. | 
+91.25 answer | 38 | 13-16 |  | Owls +1 point — steal | 
+92.25 answer | 38 | 13-16 |  |  | 
+93.00 answer | 38 | 14-15 |  | Call changed: Lions +1 point. | 
+94.00 ask | 39 | 14-15 |  | Call changed: Lions +1 point. | 
+94.77 steal | 39 | 14-15 |  | Call changed: Lions +1 point. | 
+95.75 answer | 39 | 14-15 |  | Call changed: Lions +1 point. | 
+96.58 roundScore | 40 | 14-15 |  | Call changed: Lions +1 point. | 
+97.50 roundIntro | 41 | 14-15 |  | Call changed: Lions +1 point. | 
+98.50 ask | 42 | 14-15 |  | Call changed: Lions +1 point. | 
+99.27 steal | 42 | 14-15 |  | Call changed: Lions +1 point. | 
+100.25 answer | 42 | 14-16 |  | Owls +1 point — steal | 
+101.25 ask | 43 | 14-16 |  | Owls +1 point — steal | 
+103.00 answer | 43 | 14-17 |  | Owls +1 point | 
+103.81 roundScore | 44 | 14-17 |  | Owls +1 point | 
+104.75 final | 45 | 14-17 |  | Owls +1 point | 
+recap: {"margin":3,"sudden":false,"leadChanges":0,"steals":[0,2],"minis":[0,0],"chart":[[0,0],[0,0],[1,12],[1,13],[1,14],[1,15],[3,15],[13,15],[13,16],[14,15],[14,16],[14,17]],"segs":[{"label":"R1","pts":[[1,12],[1,13]]},{"label":"R2","pts":[[1,14],[1,15]]},{"label":"Fool Me Twice","pts":[[3,15]]},{"label":"The Comeback","pts":[[13,15]]},{"label":"R3","pts":[[13,16],[14,15]]},{"label":"R4","pts":[[14,16],[14,17]]}],"awards":[{"t":"Best thief","who":"Owls, 2 steals","team":1}]}

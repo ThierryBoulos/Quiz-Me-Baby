@@ -56,30 +56,33 @@
 68.00 roundScore | 25 | 3-4 |  | Owls +2 points | 
 68.75 foolIntro | 26 | 3-4 | 0-0 | Owls +2 points | 
 69.75 foolWrite | 27 | 3-4 | 0-0 | Owls +2 points | 
-70.50 foolPick | 27 | 3-4 | 0-0 | Owls +2 points | 
-71.50 foolReveal | 27 | 3-4 | 0-0 | Owls +2 points | 
-72.50 foolWrite | 28 | 3-4 | 0-0 | Owls +2 points | 
-73.25 foolPick | 28 | 3-4 | 0-0 | Owls +2 points | 
-75.00 foolReveal | 28 | 3-4 | 1-1 | Owls +2 points | 
-76.00 foolWrite | 29 | 3-4 | 1-1 | Owls +2 points | 
-77.00 foolPick | 29 | 3-4 | 1-1 | Owls +2 points | 
-77.75 foolReveal | 29 | 3-4 | 2-1 | Owls +2 points | 
-78.75 foolWrite | 30 | 3-4 | 2-1 | Owls +2 points | 
-79.50 foolPick | 30 | 3-4 | 2-1 | Owls +2 points | 
-80.50 foolReveal | 30 | 3-4 | 3-2 | Owls +2 points | 
-81.50 foolWrite | 31 | 3-4 | 3-2 | Owls +2 points | 
-83.25 foolPick | 31 | 3-4 | 3-2 | Owls +2 points | 
-85.00 foolReveal | 31 | 3-4 | 5-2 | Owls +2 points | 
-86.00 foolWrite | 32 | 3-4 | 5-2 | Owls +2 points | 
-86.75 foolPick | 32 | 3-4 | 5-2 | Owls +2 points | 
-87.75 foolReveal | 32 | 3-4 | 7-4 | Owls +2 points | 
-88.50 foolSummary | 33 | 5-4 | 7-4 | Owls +2 points | 
-89.50 roundIntro | 34 | 5-4 |  | Owls +2 points | 
-90.50 ask | 35 | 5-4 |  | Owls +2 points | 
-91.25 answer | 35 | 6-4 |  | Lions +1 point | 
-92.25 ask | 36 | 6-4 |  | Lions +1 point | 
-93.00 steal | 36 | 6-4 |  | Lions +1 point | 
-94.00 answer | 36 | 6-4 |  | Lions +1 point | 
-95.00 roundScore | 37 | 6-4 |  | Lions +1 point | 
-95.75 final | 38 | 6-4 |  | Lions +1 point | 
-recap: {"margin":2,"sudden":false,"leadChanges":2,"steals":[1,1],"minis":[1,0],"chart":[[0,0],[0,0],[1,0],[3,0],[3,1],[3,2],[3,4],[5,4],[6,4]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Guess the Flag","pts":[[3,0]]},{"label":"R2","pts":[[3,1],[3,2]]},{"label":"R3","pts":[[3,4]]},{"label":"Fool Me Twice","pts":[[5,4]]},{"label":"R4","pts":[[6,4]]}],"awards":[]}
+70.50 foolPick | 28 | 3-4 | 0-0 | Owls +2 points | 
+71.50 foolReveal | 29 | 3-4 | 2-2 | Owls +2 points | 
+72.50 foolWrite | 30 | 3-4 | 2-2 | Owls +2 points | 
+73.25 foolPick | 31 | 3-4 | 2-2 | Owls +2 points | 
+75.00 foolReveal | 32 | 3-4 | 3-2 | Owls +2 points | 
+76.00 foolWrite | 33 | 3-4 | 3-2 | Owls +2 points | 
+77.00 foolPick | 34 | 3-4 | 3-2 | Owls +2 points | 
+79.50 foolReveal | 35 | 3-4 | 5-4 | Owls +2 points | 
+80.50 foolWrite | 36 | 3-4 | 5-4 | Owls +2 points | 
+81.50 foolPick | 37 | 3-4 | 5-4 | Owls +2 points | 
+83.25 foolReveal | 38 | 3-4 | 5-5 | Owls +2 points | 
+84.00 foolWrite | 39 | 3-4 | 5-5 | Owls +2 points | 
+85.00 foolPick | 40 | 3-4 | 5-5 | Owls +2 points | 
+86.75 foolReveal | 41 | 3-4 | 7-5 | Owls +2 points | 
+87.75 foolWrite | 42 | 3-4 | 7-5 | Owls +2 points | 
+89.50 foolPick | 43 | 3-4 | 7-5 | Owls +2 points | 
+90.50 foolReveal | 44 | 3-4 | 10-5 | Owls +2 points | 
+91.25 foolSummary | 45 | 5-4 | 10-5 | Owls +2 points | 
+92.25 roundIntro | 46 | 5-4 |  | Owls +2 points | 
+93.00 ask | 47 | 5-4 |  | Owls +2 points | 
+94.00 steal | 47 | 5-4 |  | Owls +2 points | 
+95.00 answer | 47 | 5-4 |  | Owls +2 points | 
+95.75 ask | 48 | 5-4 |  | Owls +2 points | 
+96.75 answer | 48 | 5-5 |  | Owls +1 point | 
+97.50 roundScore | 49 | 5-5 |  | Owls +1 point | 
+98.50 sudden | 50 | 5-5 |  | Owls +1 point | 
+99.50 sudden | 51 | 5-5 |  | Owls +1 point | 
+100.25 sudden | 51 | 5-5 |  | ⁨Owls⁩: wrong. ⁨Lions⁩ can still win it. | 
+101.25 final | 51 | 6-5 |  | ⁨Owls⁩: wrong. ⁨Lions⁩ can still win it. | 
+recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[1,1],"minis":[1,0],"chart":[[0,0],[0,0],[1,0],[3,0],[3,1],[3,2],[3,4],[5,4],[5,5],[6,5]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Guess the Flag","pts":[[3,0]]},{"label":"R2","pts":[[3,1],[3,2]]},{"label":"R3","pts":[[3,4]]},{"label":"Fool Me Twice","pts":[[5,4]]},{"label":"R4","pts":[[5,5]]},{"label":"Sudden death","pts":[[6,5]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0}]}

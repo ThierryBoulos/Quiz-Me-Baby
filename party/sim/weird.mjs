@@ -17,7 +17,8 @@ await build({ entryPoints: [join(here, "night.jsx")], outfile: out, bundle: true
   define: { "process.env.NEXT_PUBLIC_BUILD": '"sim"' },
   plugins: [{ name: "fake-supabase", setup(b) { b.onResolve({ filter: /^(\.{1,2}\/)+(lib\/)?supabase$|^@\/lib\/supabase$/ }, () => ({ path: join(here, "fakeSupabase.js") })); } }] });
 
-const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "pin", "airport", "see", "battle", "stakes"], DEF = ["flag", "closest", "auction", "battle"];
+/* (with Russian Roulette and Fool Me Twice: 19 Nov review, they never ran on these nights) */
+const ALL = ["flag", "closest", "dish", "auction", "saysame", "map", "pin", "airport", "see", "roulette", "fool", "battle", "stakes"], DEF = ["flag", "closest", "auction", "battle"];
 const NEW = process.argv.includes("--new");
 /* the TV switched off at many moments of the night: every 37 s, for 20 s to 5 min */
 const offs = (n, len) => Array.from({ length: n }, (_, i) => ({ at: 15 + i * 37, type: "tvOff", for: len[i % len.length] }));
@@ -50,6 +51,10 @@ const W = [
   /* the phones must not wait behind a held update: they're never more than a few seconds behind the TV */
   { name: "the server sits on the TV's updates for 5 to 28 s, now and then", minis: ALL, net: { stallWrites: 0.08 }, lag: true },
   { name: "the same, with a host", minis: ALL, host: true, net: { stallWrites: 0.08 }, lag: true },
+  /* 19 Nov review: The Comeback (the scores set far apart so it comes up) and Fool Me Twice on a bad network, a reload and
+     no internet for 20 s, with taps landing together; with no host and with a host, on a TV and on the game phone */
+  { name: "the comeback and Fool Me Twice, bad network, a reload, no internet (no host)", minis: ["fool", "roulette", "see"], rounds: 4, simul: true, net: { delay: 2000, dup: 0.3 }, events: [{ at: 5, type: "score", a: 1, b: 12 }, { at: 60, type: "reload" }, { at: 90, type: "writesFail", for: 20 }], comeback: "make" },
+  { name: "the same, with a host, on the game phone", minis: ["fool", "roulette", "see"], rounds: 4, host: true, phone: true, simul: true, net: { delay: 2000, dup: 0.3 }, events: [{ at: 5, type: "score", a: 12, b: 1 }, { at: 60, type: "reload" }, { at: 90, type: "writesFail", for: 20 }], comeback: "miss" },
   { name: "the room holds a stamp ahead of the TV's clock, twice", minis: DEF, events: [{ at: 30, type: "futureStamp" }, { at: 120, type: "futureStamp" }], lag: true },
 ];
 
@@ -76,7 +81,7 @@ for (let i = 0; i < W.length; i++) {
     const fails = (w.events || []).filter((e) => e.type === "writesFail");
     const offline = (now) => { t0 ??= now; return fails.some((e) => now - t0 >= e.at * 1000 - 2000 && now - t0 <= (e.at + e.for) * 1000 + 8000); };
     const minis = NEW ? ["pin", "airport", "majority"] : w.minis, room = NEW ? { crowd: 4, absent: seed === 2 ? "Rita" : null } : {};
-    const r = await night({ seed: 500 + i * 10 + seed, minis, rounds: 4, host: !!w.host, events: structuredClone(w.events || []), net: w.net, simul: w.simul, edge: w.edge, chaos: 0.15, check, ...room });
+    const r = await night({ seed: 500 + i * 10 + seed, minis, rounds: 4, host: !!w.host, phone: !!w.phone, comeback: w.comeback || null, events: structuredClone(w.events || []), net: w.net, simul: w.simul, edge: w.edge, chaos: 0.15, check, ...room });
     if (w.twin) {
       const { night: once } = await import(pathToFileURL(out).href + `?w=${i}-${seed}-once`);
       const one = await once({ seed: 500 + i * 10 + seed, minis, rounds: 4, host: !!w.host, chaos: 0.15, ...room });

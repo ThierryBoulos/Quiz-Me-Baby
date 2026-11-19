@@ -68,20 +68,20 @@ test('fool: a real word a letter from the truth is a lie, a typo of the truth is
   assert.equal(Q.foolIsTruth('Brine', { answer:'Urine' }, ['Pee', 'Wee']), false);
   assert.equal(Q.foolIsTruth('Pee', { answer:'Urine' }, ['Pee', 'Wee']), true);
 });
-test('fool: two teams with the same lie who both named the team that fell for it: it loses 1, not 2 (17 Nov)', () => {
+test('fool: two teams with the same lie who both named the team that fell for it: it loses 1, not 2 (17 Nov); each caller +1 more (19 Nov)', () => {
   const opts = [{ text:'T', truth:true, by:[] }, { text:'L', by:[0, 1] }, { text:'M', by:[2] }];
   const r = Q.foolScore(opts, [0, 0, 1], [2, 2, 0]);
-  assert.deepEqual(r.pts, [3, 3, -1]);
+  assert.deepEqual(r.pts, [4, 4, -1]);                                  // the truth +2, fooled C +1, called it +1
   assert.equal(r.hits.length, 2);                                       // both called it
 });
 test('fool: an answer shows tidied: first letter capital, no full stop, 25 letters at most', () => {
   assert.equal(Q.foolShow('  a   wig.  '), 'A wig');
   assert.equal(Q.foolShow('x'.repeat(60)).length, 25);
 });
-test('fool: points: +2 the truth, +1 per team fooled, -1 for falling for a lie whose writer predicted it, 0 for ours', () => {
+test('fool: points: +2 the truth, +1 per team fooled, a right call +1 to the caller and -1 to the team it named, 0 for ours', () => {
   const opts = [{ text:'Guinea pig', truth:true, by:[] }, { text:'Hamster', by:[0] }, { text:'Cat', by:[1, 2] }, { text:'Goat', ours:true, by:[] }];
   const r = Q.foolScore(opts, [2, 1, 0], [2, null, 0]);
-  assert.deepEqual(r.pts, [0, 1, 3]);              // A: fooled B (+1), fell for Cat, which C predicted (-1); C: truth (+2), fooled A (+1)
+  assert.deepEqual(r.pts, [0, 1, 4]);              // A: fooled B (+1), fell for Cat, which C predicted (-1); C: truth (+2), fooled A (+1), called it (+1)
   assert.deepEqual(r.hits, [{ by:2, on:0 }]);
   assert.deepEqual(Q.foolScore(opts, [3, null, null], [null, null, null]).pts, [0, 0, 0]);   // ours, and no pick: nothing
   assert.deepEqual(Q.foolScore(opts, [1, null, null], [null, null, null]).pts, [0, 0, 0]);   // its own lie: not a pick

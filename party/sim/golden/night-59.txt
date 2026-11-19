@@ -35,31 +35,36 @@
 46.25 roundScore | 28 | 3-4 |  | Lions used Call a Friend. | 
 47.25 foolIntro | 29 | 3-4 | 0-0 | Lions used Call a Friend. | 
 48.00 foolWrite | 30 | 3-4 | 0-0 | Lions used Call a Friend. | 
-50.00 foolPick | 30 | 3-4 | 0-0 | Lions used Call a Friend. | 
-50.75 foolReveal | 30 | 3-4 | 0-2 | Lions used Call a Friend. | 
-51.75 foolWrite | 31 | 3-4 | 0-2 | Lions used Call a Friend. | 
-52.50 foolPick | 31 | 3-4 | 0-2 | Lions used Call a Friend. | 
-53.50 foolReveal | 31 | 3-4 | 3-2 | Lions used Call a Friend. | 
-54.50 foolWrite | 32 | 3-4 | 3-2 | Lions used Call a Friend. | 
-55.25 foolPick | 32 | 3-4 | 3-2 | Lions used Call a Friend. | 
-56.25 foolReveal | 32 | 3-4 | 3-5 | Lions used Call a Friend. | 
-57.00 foolWrite | 33 | 3-4 | 3-5 | Lions used Call a Friend. | 
-59.75 foolPick | 33 | 3-4 | 3-5 | Lions used Call a Friend. | 
-62.50 foolReveal | 33 | 3-4 | 6-5 | Lions used Call a Friend. | 
-63.50 foolWrite | 34 | 3-4 | 6-5 | Lions used Call a Friend. | 
-65.25 foolPick | 34 | 3-4 | 6-5 | Lions used Call a Friend. | 
-66.00 foolReveal | 34 | 3-4 | 8-7 | Lions used Call a Friend. | 
-67.00 foolWrite | 35 | 3-4 | 8-7 | Lions used Call a Friend. | 
-68.00 foolPick | 35 | 3-4 | 8-7 | Lions used Call a Friend. | 
-68.75 foolReveal | 35 | 3-4 | 8-10 | Lions used Call a Friend. | 
-69.75 foolSummary | 36 | 3-6 | 8-10 | Lions used Call a Friend. | 
-70.50 roundIntro | 37 | 3-6 |  | Lions used Call a Friend. | 
-72.50 ask | 38 | 3-6 |  | Lions used Call a Friend. | 
-75.00 answer | 39 | 5-6 |  | Lions +2 points | 
-76.00 ask | 40 | 5-6 |  | Lions +2 points | 
-77.75 answer | 41 | 5-7 |  | Owls +1 point | 
-78.75 answer | 41 | 5-7 |  |  | 
-79.50 answer | 41 | 5-7 |  | The host keeps the call. | 
-80.50 roundScore | 42 | 5-7 |  | The host keeps the call. | 
-81.50 final | 43 | 5-7 |  | The host keeps the call. | 
-recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[1,0],"minis":[0,1],"best":{"title":"Closest To Wins","team":1,"legs":[0,3]},"chart":[[0,0],[0,0],[1,0],[2,0],[2,2],[3,2],[3,4],[3,6],[5,6],[5,7]],"segs":[{"label":"R1","pts":[[1,0],[2,0]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,4]]},{"label":"R3","pts":[]},{"label":"Fool Me Twice","pts":[[3,6]]},{"label":"R4","pts":[[5,6],[5,7]]}],"awards":[{"t":"Whitewash","who":"Closest To Wins, Owls 3–0","team":1},{"t":"Best thief","who":"Lions, 1 steal","team":0}]}
+50.00 foolPick | 31 | 3-4 | 0-0 | Lions used Call a Friend. | 
+51.75 foolReveal | 32 | 3-4 | 0-3 | Lions used Call a Friend. | 
+52.50 foolWrite | 33 | 3-4 | 0-3 | Lions used Call a Friend. | 
+56.25 foolPick | 34 | 3-4 | 0-3 | Lions used Call a Friend. | 
+58.00 foolReveal | 35 | 3-4 | 1-4 | Lions used Call a Friend. | 
+59.00 foolWrite | 36 | 3-4 | 1-4 | Lions used Call a Friend. | 
+61.50 foolPick | 37 | 3-4 | 1-4 | Lions used Call a Friend. | 
+62.50 foolReveal | 38 | 3-4 | 1-7 | Lions used Call a Friend. | 
+63.50 foolWrite | 39 | 3-4 | 1-7 | Lions used Call a Friend. | 
+64.25 foolPick | 40 | 3-4 | 1-7 | Lions used Call a Friend. | 
+67.00 foolReveal | 41 | 3-4 | 3-9 | Lions used Call a Friend. | 
+68.00 foolWrite | 42 | 3-4 | 3-9 | Lions used Call a Friend. | 
+68.75 foolPick | 43 | 3-4 | 3-9 | Lions used Call a Friend. | 
+69.75 foolReveal | 44 | 3-4 | 6-9 | Lions used Call a Friend. | 
+70.50 foolWrite | 45 | 3-4 | 6-9 | Lions used Call a Friend. | 
+71.50 foolPick | 46 | 3-4 | 6-9 | Lions used Call a Friend. | 
+72.50 foolReveal | 47 | 3-4 | 6-12 | Lions used Call a Friend. | 
+73.25 foolSummary | 48 | 3-6 | 6-12 | Lions used Call a Friend. | 
+74.25 roundIntro | 49 | 3-6 |  | Lions used Call a Friend. | 
+76.00 ask | 50 | 3-6 |  | Lions used Call a Friend. | 
+77.00 ask | 50 | 3-6 |  | Lions used Double Dip. | 
+78.75 answer | 51 | 4-6 |  | Lions +1 point | 
+79.50 answer | 51 | 4-6 |  |  | 
+80.50 steal | 52 | 3-6 |  | Owls steal a new question. | 
+82.25 answer | 53 | 3-7 |  | Owls +1 point — steal | 
+83.25 answer | 53 | 3-7 |  |  | 
+87.75 answer | 53 | 3-6 |  | Call changed: nobody scores this one. | 
+88.50 ask | 54 | 3-6 |  | Call changed: nobody scores this one. | 
+90.50 steal | 55 | 3-6 |  | Call changed: nobody scores this one. | 
+92.25 answer | 56 | 3-6 |  | Call changed: nobody scores this one. | 
+93.00 roundScore | 57 | 3-6 |  | Call changed: nobody scores this one. | 
+94.00 final | 58 | 3-6 |  | Call changed: nobody scores this one. | 
+recap: {"margin":3,"sudden":false,"leadChanges":1,"steals":[1,0],"minis":[0,1],"best":{"title":"Closest To Wins","team":1,"legs":[0,3]},"chart":[[0,0],[0,0],[1,0],[2,0],[2,2],[3,2],[3,4],[3,6],[4,6],[3,6],[3,7],[3,6]],"segs":[{"label":"R1","pts":[[1,0],[2,0]]},{"label":"Closest To Wins","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[3,4]]},{"label":"R3","pts":[]},{"label":"Fool Me Twice","pts":[[3,6]]},{"label":"R4","pts":[[4,6],[3,6],[3,7],[3,6]]}],"awards":[{"t":"Whitewash","who":"Closest To Wins, Owls 3–0","team":1},{"t":"Best thief","who":"Lions, 1 steal","team":0}]}

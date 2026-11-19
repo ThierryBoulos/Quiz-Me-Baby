@@ -44,8 +44,9 @@ for (const [key, name, , , , , photo, , , page] of PINS) {
 /* the credits: who took each photo, its licence, and where it came from */
 const lines = ["# Drop the Pin: photo credits", "",
   "Every photo here is a copy of a file on Wikimedia Commons, used under the licence named beside it.",
-  "The file name is a hash, so it doesn't give away the landmark. Written by `scripts/fetch-pins.mjs`.", "",
-  "| File | Landmark | Photo by | Licence | Source |", "|---|---|---|---|---|",
-  ...PINS.map(([, name, , , , , photo, credit, licence, page]) => `| ${photo}.jpg | ${name} | ${credit} | ${licence} | ${page} |`), ""];
+  "The file name is a hash, so it doesn't give away the landmark, and this list has no file names and goes by name, so",
+  "it can't be matched to a photo either (19 Nov review). Written by `scripts/fetch-pins.mjs`.", "",
+  "| Landmark | Photo by | Licence | Source |", "|---|---|---|---|",
+  ...PINS.slice().sort((a, b) => String(a[1]).localeCompare(String(b[1]))).map(([, name, , , , , , credit, licence, page]) => `| ${name} | ${credit} | ${licence} | ${page} |`), ""];
 writeFileSync(join(out, "CREDITS.md"), lines.join("\n"));
 console.log(`pins/: ${got} fetched, ${PINS.length} in the catalogue`);

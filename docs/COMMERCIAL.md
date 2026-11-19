@@ -79,7 +79,16 @@ there; then mark them here with the wave.
 - **doing**: Live channels (presence, the Auction count) are open: fake presence or fake counts are possible. 5 Nov: presence now counts only the room's members; private channels still to do.
 - **todo**: Anyone can try room codes and find live rooms (about 900,000 codes, no limit).
 - **done (5 Nov 2026)**: The 6-digit TV take-over code has no attempt limit (now 5 tries).
-- **todo**: Team changes and stepping down allowed mid-game.
+- **todo**: Team changes and stepping down allowed mid-game. (19 Nov review: a player who changes team mid-game can
+  then buzz or answer for the new team in the same question, and the referee takes it.)
+- **todo (19 Nov review)**: Two teams, no host: a captain can use the 6-digit TV code ("The TV died?") to take the TV's
+  place on their own phone, and the TV's copy holds the answers. With a host, the host's take-over after 90 s away
+  has the same reach. For a paid version: the take-over should need the other captain's yes (no host), and the
+  answers should stay off any phone (judging on the server, as above).
+- **done (19 Nov review)**: The picture credits pages (`party/public/see/CREDITS.md`, `party/public/pins/CREDITS.md`)
+  listed each picture's file name beside what it shows, and phones get the file names: an answer key. Now they
+  have no file names and go by name. (Flags: phones get hashed names under `/fx/`; the flag credits' file names
+  aren't those, so they give nothing away.)
 - **todo**: Secret Stakes picks: keep them off other teams' phones entirely (a private row per team). Today every
   team's bet travels in the room's public view; each phone only draws its own team's, so it's hidden on screen but
   not from someone reading the room's data (11 Nov 2026).

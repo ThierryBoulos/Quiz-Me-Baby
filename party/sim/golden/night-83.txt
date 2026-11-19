@@ -1,0 +1,64 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 12-1)
+6.69 roundIntro | 2 | 12-1 |  | The host set the scores: ⁨Lions⁩ 12, ⁨Owls⁩ 1. | 
+7.50 ask | 3 | 12-1 |  | The host set the scores: ⁨Lions⁩ 12, ⁨Owls⁩ 1. | 
+9.50 answer | 4 | 13-1 |  | Lions +1 point | 
+10.25 ask | 5 | 13-1 |  | Lions +1 point | 
+12.00 answer | 6 | 13-2 |  | Owls +1 point | 
+13.00 roundScore | 7 | 13-2 |  | Owls +1 point | 
+14.00 roundIntro | 8 | 13-2 |  | Owls +1 point | 
+14.75 ask | 9 | 13-2 |  | Owls +1 point | 
+16.50 answer | 10 | 14-2 |  | Lions +1 point | 
+17.50 answer | 10 | 14-2 |  |  | 
+18.50 answer | 10 | 14-2 |  | The host keeps the call. | 
+19.25 ask | 11 | 14-2 |  | The host keeps the call. | 
+21.00 steal | 12 | 14-2 |  | The host keeps the call. | 
+23.00 answer | 13 | 15-2 |  | Lions +1 point — steal | 
+23.75 roundScore | 14 | 15-2 |  | Lions +1 point — steal | 
+24.75 foolIntro | 15 | 15-2 | 0-0 | Lions +1 point — steal | 
+25.45 foolWrite | 16 | 15-2 | 0-0 | Lions +1 point — steal | 
+29.10 foolPick | 17 | 15-2 | 0-0 | Lions +1 point — steal | 
+30.99 foolReveal | 18 | 15-2 | 0-3 | Lions +1 point — steal | 
+32.00 foolWrite | 19 | 15-2 | 0-3 | Lions +1 point — steal | 
+33.56 foolPick | 20 | 15-2 | 0-3 | Lions +1 point — steal | 
+36.50 foolReveal | 21 | 15-2 | 2-5 | Lions +1 point — steal | 
+37.25 foolWrite | 22 | 15-2 | 2-5 | Lions +1 point — steal | 
+38.06 foolPick | 23 | 15-2 | 2-5 | Lions +1 point — steal | 
+38.98 foolReveal | 24 | 15-2 | 2-6 | Lions +1 point — steal | 
+40.00 foolWrite | 25 | 15-2 | 2-6 | Lions +1 point — steal | 
+41.75 foolPick | 26 | 15-2 | 2-6 | Lions +1 point — steal | 
+42.75 foolReveal | 27 | 15-2 | 3-6 | Lions +1 point — steal | 
+43.50 foolWrite | 28 | 15-2 | 3-6 | Lions +1 point — steal | 
+44.50 foolPick | 29 | 15-2 | 3-6 | Lions +1 point — steal | 
+48.00 foolReveal | 30 | 15-2 | 5-6 | Lions +1 point — steal | 
+49.00 foolWrite | 31 | 15-2 | 5-6 | Lions +1 point — steal | 
+50.73 foolPick | 32 | 15-2 | 5-6 | Lions +1 point — steal | 
+52.50 foolReveal | 33 | 15-2 | 5-9 | Lions +1 point — steal | 
+53.50 foolSummary | 34 | 15-4 | 5-9 | Lions +1 point — steal | 
+54.39 comebackIntro | 35 | 15-4 |  | Lions +1 point — steal | 
+55.25 comebackQ | 36 | 15-4 |  | Lions +1 point — steal | 
+56.25 comebackReveal | 36 | 15-4 |  | Lions +1 point — steal | 
+57.00 comebackQ | 37 | 15-4 |  | Lions +1 point — steal | 
+57.88 comebackReveal | 37 | 15-4 |  | Lions +1 point — steal | 
+59.00 comebackSummary | 38 | 15-4 |  | Lions +1 point — steal | 
+59.75 roundIntro | 39 | 15-4 |  | Lions +1 point — steal | 
+60.73 ask | 40 | 15-4 |  | Lions +1 point — steal | 
+62.50 answer | 41 | 16-4 |  | Lions +1 point | 
+63.37 ask | 42 | 16-4 |  | Lions +1 point | 
+65.25 answer | 43 | 16-5 |  | Owls +1 point | 
+66.00 roundScore | 44 | 16-5 |  | Owls +1 point | 
+67.00 roundIntro | 45 | 16-5 |  | Owls +1 point | 
+68.00 ask | 46 | 16-5 |  | Owls +1 point | 
+68.75 ask | 46 | 16-5 |  | Lions used Call a Friend. | 
+73.25 ask | 47 | 16-5 |  | Lions used Call a Friend. | 
+75.00 steal | 48 | 16-5 |  | Lions used Call a Friend. | 
+77.00 answer | 49 | 16-5 |  | Lions used Call a Friend. | 
+77.75 ask | 50 | 16-5 |  | Lions used Call a Friend. | 
+79.50 steal | 51 | 16-5 |  | Lions used Call a Friend. | 
+81.50 answer | 52 | 17-5 |  | Lions +1 point — steal | 
+82.25 roundScore | 53 | 17-5 |  | Lions +1 point — steal | 
+83.25 final | 54 | 17-5 |  | Lions +1 point — steal | 
+recap: {"margin":12,"sudden":false,"leadChanges":0,"steals":[2,0],"minis":[0,0],"chart":[[0,0],[0,0],[12,1],[13,1],[13,2],[14,2],[15,2],[15,4],[16,4],[16,5],[17,5]],"segs":[{"label":"R1","pts":[[12,1],[13,1],[13,2]]},{"label":"R2","pts":[[14,2],[15,2]]},{"label":"Fool Me Twice","pts":[[15,4]]},{"label":"The Comeback","pts":[]},{"label":"R3","pts":[[16,4],[16,5]]},{"label":"R4","pts":[[17,5]]}],"awards":[{"t":"Best thief","who":"Lions, 2 steals","team":0}]}

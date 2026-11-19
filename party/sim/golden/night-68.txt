@@ -50,31 +50,38 @@
 50.00 comebackSummary | 25 | 14-12 |  | Both got it — a point each. | 
 50.75 foolIntro | 26 | 14-12 | 0-0 | Both got it — a point each. | 
 51.75 foolWrite | 27 | 14-12 | 0-0 | Both got it — a point each. | 
-52.50 foolPick | 27 | 14-12 | 0-0 | Both got it — a point each. | 
-53.50 foolReveal | 27 | 14-12 | 0-2 | Both got it — a point each. | 
-54.50 foolWrite | 28 | 14-12 | 0-2 | Both got it — a point each. | 
-57.00 foolPick | 28 | 14-12 | 0-2 | Both got it — a point each. | 
-58.00 foolReveal | 28 | 14-12 | 0-4 | Both got it — a point each. | 
-59.00 foolWrite | 29 | 14-12 | 0-4 | Both got it — a point each. | 
-60.75 foolPick | 29 | 14-12 | 0-4 | Both got it — a point each. | 
-64.25 foolReveal | 29 | 14-12 | 0-7 | Both got it — a point each. | 
-65.25 foolWrite | 30 | 14-12 | 0-7 | Both got it — a point each. | 
-68.75 foolPick | 30 | 14-12 | 0-7 | Both got it — a point each. | 
-70.50 foolReveal | 30 | 14-12 | 3-7 | Both got it — a point each. | 
-71.50 foolWrite | 31 | 14-12 | 3-7 | Both got it — a point each. | 
-72.50 foolPick | 31 | 14-12 | 3-7 | Both got it — a point each. | 
-73.25 foolReveal | 31 | 14-12 | 5-7 | Both got it — a point each. | 
-74.25 foolWrite | 32 | 14-12 | 5-7 | Both got it — a point each. | 
-75.00 foolPick | 32 | 14-12 | 5-7 | Both got it — a point each. | 
-77.00 foolReveal | 32 | 14-12 | 8-7 | Both got it — a point each. | 
-77.75 foolSummary | 33 | 16-12 | 8-7 | Both got it — a point each. | 
-78.75 roundIntro | 34 | 16-12 |  | Both got it — a point each. | 
-79.50 ask | 35 | 16-12 |  | Both got it — a point each. | 
-81.50 answer | 36 | 17-12 |  | Lions +1 point | 
-82.25 ask | 37 | 17-12 |  | Lions +1 point | 
-83.25 ask | 37 | 17-12 |  | Owls used Double Dip. | 
-85.00 steal | 38 | 17-12 |  | Owls used Double Dip. | 
-86.75 answer | 39 | 18-12 |  | Lions +1 point — steal | 
-87.75 roundScore | 40 | 18-12 |  | Lions +1 point — steal | 
-88.50 final | 41 | 18-12 |  | Lions +1 point — steal | 
-recap: {"margin":6,"sudden":false,"leadChanges":0,"steals":[1,1],"minis":[0,1],"chart":[[0,0],[0,0],[14,1],[14,2],[14,3],[14,5],[14,12],[16,12],[17,12],[18,12]],"segs":[{"label":"R1","pts":[[14,1],[14,2],[14,3]]},{"label":"Guess the Flag","pts":[[14,5]]},{"label":"The Comeback","pts":[[14,12]]},{"label":"Fool Me Twice","pts":[[16,12]]},{"label":"R2","pts":[[17,12],[18,12]]}],"awards":[]}
+52.50 foolPick | 28 | 14-12 | 0-0 | Both got it — a point each. | 
+53.50 foolReveal | 29 | 14-12 | 0-3 | Both got it — a point each. | 
+54.50 foolWrite | 30 | 14-12 | 0-3 | Both got it — a point each. | 
+57.00 foolPick | 31 | 14-12 | 0-3 | Both got it — a point each. | 
+58.00 foolReveal | 32 | 14-12 | 1-3 | Both got it — a point each. | 
+59.00 foolWrite | 33 | 14-12 | 1-3 | Both got it — a point each. | 
+60.75 foolPick | 34 | 14-12 | 1-3 | Both got it — a point each. | 
+62.50 foolReveal | 35 | 14-12 | 1-3 | Both got it — a point each. | 
+63.50 foolWrite | 36 | 14-12 | 1-3 | Both got it — a point each. | 
+67.00 foolPick | 37 | 14-12 | 1-3 | Both got it — a point each. | 
+68.75 foolReveal | 38 | 14-12 | 1-6 | Both got it — a point each. | 
+69.75 foolWrite | 39 | 14-12 | 1-6 | Both got it — a point each. | 
+71.50 foolPick | 40 | 14-12 | 1-6 | Both got it — a point each. | 
+74.25 foolReveal | 41 | 14-12 | 1-7 | Both got it — a point each. | 
+75.00 foolWrite | 42 | 14-12 | 1-7 | Both got it — a point each. | 
+76.00 foolPick | 43 | 14-12 | 1-7 | Both got it — a point each. | 
+79.50 foolReveal | 44 | 14-12 | 2-7 | Both got it — a point each. | 
+80.50 foolSummary | 45 | 14-14 | 2-7 | Both got it — a point each. | 
+81.50 roundIntro | 46 | 14-14 |  | Both got it — a point each. | 
+82.25 ask | 47 | 14-14 |  | Both got it — a point each. | 
+84.00 steal | 48 | 14-14 |  | Both got it — a point each. | 
+86.00 answer | 49 | 14-14 |  | Both got it — a point each. | 
+86.75 ask | 50 | 14-14 |  | Both got it — a point each. | 
+87.75 ask | 50 | 14-14 |  | Owls used Call a Friend. | 
+93.00 ask | 51 | 14-14 |  | Owls used Call a Friend. | 
+95.00 steal | 52 | 14-14 |  | Owls used Call a Friend. | 
+96.75 answer | 53 | 15-14 |  | Lions +1 point — steal | 
+97.50 answer | 53 | 15-14 |  |  | 
+98.50 answer | 53 | 14-14 |  | Call changed: nobody scores this one. | 
+99.50 roundScore | 54 | 14-14 |  | Call changed: nobody scores this one. | 
+100.25 sudden | 55 | 14-14 |  | Call changed: nobody scores this one. | 
+101.25 sudden | 56 | 14-14 |  | Call changed: nobody scores this one. | 
+103.00 sudden | 57 | 14-14 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+104.75 final | 58 | 14-15 |  | ⁨Lions⁩: wrong. ⁨Owls⁩ can still win it. | 
+recap: {"margin":1,"sudden":true,"leadChanges":1,"steals":[0,1],"minis":[0,1],"chart":[[0,0],[0,0],[14,1],[14,2],[14,3],[14,5],[14,12],[14,14],[15,14],[14,14],[14,15]],"segs":[{"label":"R1","pts":[[14,1],[14,2],[14,3]]},{"label":"Guess the Flag","pts":[[14,5]]},{"label":"The Comeback","pts":[[14,12]]},{"label":"Fool Me Twice","pts":[[14,14]]},{"label":"R2","pts":[[15,14],[14,14]]},{"label":"Sudden death","pts":[[14,15]]}],"awards":[{"t":"Comeback","who":"Owls, 13 points down in Round 1","team":1},{"t":"Down to the wire","who":"Settled in sudden death","team":1},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

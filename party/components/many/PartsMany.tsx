@@ -208,7 +208,7 @@ function rules(pub: PubMany): string[] {
     case "fool": return ["A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true.",
       "Type the real answer and the app says so: write a lie instead!",
       "Then the truth comes up hidden among your lies and a few of ours. Captains pick the one they think is true, and say which team will fall for their lie.",
-      "The truth: +2. Each team that falls for your lie: +1 to you. The team you named falls for it? −1 to them.",
+      "The truth: +2. Each team that falls for your lie: +1 to you. The team you named falls for it? −1 to them, +1 more to you.",
       `${n} facts, the last 2 hard. ${pay}`];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");
       /* (7 Nov, the owner: what sudden death means, said before it starts, as with two teams) */

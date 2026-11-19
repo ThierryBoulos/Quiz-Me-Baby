@@ -14,30 +14,36 @@
 28.40 roundScore | 5 | 0-1 |  | No answer in time: the call stands. | 
 29.40 foolIntro | 6 | 0-1 | 0-0 | No answer in time: the call stands. | 
 30.40 foolWrite | 7 | 0-1 | 0-0 | No answer in time: the call stands. | 
-32.90 foolPick | 7 | 0-1 | 0-0 | No answer in time: the call stands. | 
-33.90 foolReveal | 7 | 0-1 | 1-0 | No answer in time: the call stands. | 
-34.90 foolWrite | 8 | 0-1 | 1-0 | No answer in time: the call stands. | 
-36.65 foolPick | 8 | 0-1 | 1-0 | No answer in time: the call stands. | 
-37.40 foolReveal | 8 | 0-1 | 2-0 | No answer in time: the call stands. | 
-38.40 foolWrite | 9 | 0-1 | 2-0 | No answer in time: the call stands. | 
-39.40 foolPick | 9 | 0-1 | 2-0 | No answer in time: the call stands. | 
-41.15 foolReveal | 9 | 0-1 | 2-0 | No answer in time: the call stands. | 
-41.90 foolWrite | 10 | 0-1 | 2-0 | No answer in time: the call stands. | 
-42.90 foolPick | 10 | 0-1 | 2-0 | No answer in time: the call stands. | 
-44.65 foolReveal | 10 | 0-1 | 2-2 | No answer in time: the call stands. | 
-45.65 foolWrite | 11 | 0-1 | 2-2 | No answer in time: the call stands. | 
-46.40 foolPick | 11 | 0-1 | 2-2 | No answer in time: the call stands. | 
-47.40 foolReveal | 11 | 0-1 | 2-5 | No answer in time: the call stands. | 
-48.40 foolWrite | 12 | 0-1 | 2-5 | No answer in time: the call stands. | 
-49.15 foolPick | 12 | 0-1 | 2-5 | No answer in time: the call stands. | 
-50.90 foolReveal | 12 | 0-1 | 5-5 | No answer in time: the call stands. | 
-51.90 foolTie | 13 | 0-1 | 5-5 |  | 
-52.90 foolSummary | 14 | 1-2 | 5-5 |  | 
-53.65 roundIntro | 15 | 1-2 |  |  | 
-54.65 ask | 16 | 1-2 |  |  | 
-55.40 answer | 16 | 2-2 |  | Lions +1 point | 
-56.40 ask | 17 | 2-2 |  | Lions +1 point | 
-57.40 answer | 17 | 2-3 |  | Owls +1 point | 
-58.15 roundScore | 18 | 2-3 |  | Owls +1 point | 
-59.15 final | 19 | 2-3 |  | Owls +1 point | 
-recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[1,2],[2,2],[2,3]],"segs":[{"label":"R1","pts":[[0,1]]},{"label":"Fool Me Twice","pts":[[1,2]]},{"label":"R2","pts":[[2,2],[2,3]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":1}]}
+32.90 foolPick | 8 | 0-1 | 0-0 | No answer in time: the call stands. | 
+33.90 foolReveal | 9 | 0-1 | 1-1 | No answer in time: the call stands. | 
+34.90 foolWrite | 10 | 0-1 | 1-1 | No answer in time: the call stands. | 
+36.65 foolPick | 11 | 0-1 | 1-1 | No answer in time: the call stands. | 
+37.40 foolReveal | 12 | 0-1 | 2-1 | No answer in time: the call stands. | 
+38.40 foolWrite | 13 | 0-1 | 2-1 | No answer in time: the call stands. | 
+39.40 foolPick | 14 | 0-1 | 2-1 | No answer in time: the call stands. | 
+41.90 foolReveal | 15 | 0-1 | 5-1 | No answer in time: the call stands. | 
+42.90 foolWrite | 16 | 0-1 | 5-1 | No answer in time: the call stands. | 
+46.40 foolPick | 17 | 0-1 | 5-1 | No answer in time: the call stands. | 
+49.15 foolReveal | 18 | 0-1 | 6-2 | No answer in time: the call stands. | 
+50.15 foolWrite | 19 | 0-1 | 6-2 | No answer in time: the call stands. | 
+50.90 foolPick | 20 | 0-1 | 6-2 | No answer in time: the call stands. | 
+52.90 foolReveal | 21 | 0-1 | 8-4 | No answer in time: the call stands. | 
+53.65 foolWrite | 22 | 0-1 | 8-4 | No answer in time: the call stands. | 
+55.40 foolPick | 23 | 0-1 | 8-4 | No answer in time: the call stands. | 
+56.40 foolReveal | 24 | 0-1 | 9-5 | No answer in time: the call stands. | 
+57.40 foolSummary | 25 | 2-1 | 9-5 | No answer in time: the call stands. | 
+58.15 roundIntro | 26 | 2-1 |  | No answer in time: the call stands. | 
+59.15 ask | 27 | 2-1 |  | No answer in time: the call stands. | 
+59.90 steal | 27 | 2-1 |  | No answer in time: the call stands. | 
+60.90 answer | 27 | 2-1 |  | No answer in time: the call stands. | 
+61.90 ask | 28 | 2-1 |  | No answer in time: the call stands. | 
+62.65 steal | 28 | 2-1 |  | No answer in time: the call stands. | 
+63.65 answer | 28 | 3-1 |  | Lions +1 point — steal | 
+64.40 answer | 28 | 3-1 |  |  | 
+65.40 answer | 28 | 2-2 |  | Call changed: Owls +1 point. | 
+66.40 roundScore | 29 | 2-2 |  | Call changed: Owls +1 point. | 
+67.15 sudden | 30 | 2-2 |  | Call changed: Owls +1 point. | 
+68.15 sudden | 31 | 2-2 |  | Call changed: Owls +1 point. | 
+68.90 sudden | 31 | 2-2 |  | ⁨Owls⁩: wrong. ⁨Lions⁩ can still win it. | 
+69.90 final | 31 | 3-2 |  | ⁨Owls⁩: wrong. ⁨Lions⁩ can still win it. | 
+recap: {"margin":1,"sudden":true,"leadChanges":1,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[2,1],[3,1],[2,2],[3,2]],"segs":[{"label":"R1","pts":[[0,1]]},{"label":"Fool Me Twice","pts":[[2,1]]},{"label":"R2","pts":[[3,1],[2,2]]},{"label":"Sudden death","pts":[[3,2]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0}]}

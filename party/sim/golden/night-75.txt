@@ -1,0 +1,47 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+8.50 steal | 4 | 0-0 |  |  | 
+10.25 answer | 5 | 0-1 |  | Owls +1 point — steal | 
+11.25 answer | 5 | 0-1 |  |  | 
+14.75 answer | 5 | 0-0 |  | Call changed: nobody scores this one. | 
+15.75 ask | 6 | 0-0 |  | Call changed: nobody scores this one. | 
+16.50 ask | 6 | 0-0 |  | Owls used Call a Friend. | 
+18.50 ask | 7 | 0-0 |  | Owls used Call a Friend. | 
+20.25 steal | 8 | 0-0 |  | Owls used Call a Friend. | 
+22.00 answer | 9 | 0-0 |  | Owls used Call a Friend. | 
+23.00 roundScore | 10 | 0-0 |  | Owls used Call a Friend. | 
+23.75 foolIntro | 11 | 0-0 | 0-0 | Owls used Call a Friend. | 
+24.75 foolWrite | 12 | 0-0 | 0-0 | Owls used Call a Friend. | 
+25.50 foolPick | 13 | 0-0 | 0-0 | Owls used Call a Friend. | 
+28.25 foolReveal | 14 | 0-0 | 2-2 | Owls used Call a Friend. | 
+(another device takes over)
+29.05 foolReveal | 14 | 0-0 | 2-2 |  | 
+31.30 foolWrite | 15 | 0-0 | 2-2 |  | 
+33.80 foolPick | 16 | 0-0 | 2-2 |  | 
+35.80 foolReveal | 17 | 0-0 | 2-5 |  | 
+36.55 foolWrite | 18 | 0-0 | 2-5 |  | 
+39.30 foolPick | 19 | 0-0 | 2-5 |  | 
+40.30 foolReveal | 20 | 0-0 | 2-7 |  | 
+41.05 foolWrite | 21 | 0-0 | 2-7 |  | 
+42.80 foolPick | 22 | 0-0 | 2-7 |  | 
+43.80 foolReveal | 23 | 0-0 | 3-8 |  | 
+44.80 foolWrite | 24 | 0-0 | 3-8 |  | 
+45.55 foolPick | 25 | 0-0 | 3-8 |  | 
+47.30 foolReveal | 26 | 0-0 | 3-10 |  | 
+48.30 foolWrite | 27 | 0-0 | 3-10 |  | 
+49.30 foolPick | 28 | 0-0 | 3-10 |  | 
+50.05 foolReveal | 29 | 0-0 | 3-13 |  | 
+51.05 foolSummary | 30 | 0-2 | 3-13 |  | 
+51.80 roundIntro | 31 | 0-2 |  |  | 
+53.80 ask | 32 | 0-2 |  |  | 
+55.55 steal | 33 | 0-2 |  |  | 
+57.30 answer | 34 | 0-2 |  |  | 
+58.30 ask | 35 | 0-2 |  |  | 
+60.05 steal | 36 | 0-2 |  |  | 
+61.80 answer | 37 | 0-2 |  |  | 
+62.80 roundScore | 38 | 0-2 |  |  | 
+63.55 final | 39 | 0-2 |  |  | 
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[0,0],[0,2]],"segs":[{"label":"R1","pts":[[0,1],[0,0]]},{"label":"Fool Me Twice","pts":[[0,2]]},{"label":"R2","pts":[]}],"awards":[]}

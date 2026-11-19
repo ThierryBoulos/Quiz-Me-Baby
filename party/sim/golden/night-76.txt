@@ -1,0 +1,34 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+7.50 steal | 3 | 0-0 |  |  | 
+8.50 answer | 3 | 0-0 |  |  | 
+9.50 ask | 4 | 0-0 |  |  | 
+10.25 steal | 4 | 0-0 |  |  | 
+11.25 answer | 4 | 1-0 |  | Lions +1 point — steal | 
+12.00 roundScore | 5 | 1-0 |  | Lions +1 point — steal | 
+13.00 rouletteIntro | 6 | 1-0 | 0-0 | Lions +1 point — steal | 
+14.00 rouletteQ | 7 | 1-0 | 0-0 | Lions +1 point — steal | 
+14.75 rouletteReveal | 7 | 1-0 | 2-0 | Lions +1 point — steal | 
+15.75 rouletteReveal | 7 | 1-0 | 2-0 |  | 
+16.50 rouletteReveal | 7 | 1-0 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+17.50 rouletteQ | 8 | 1-0 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+18.50 rouletteReveal | 8 | 1-0 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+19.25 rouletteQ | 9 | 1-0 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+20.25 rouletteReveal | 9 | 1-0 | 2-5 | ⁨Rami⁩ doesn't agree: the call stands. | 
+21.00 rouletteReveal | 9 | 1-0 | 2-5 |  | 
+23.00 rouletteReveal | 9 | 1-0 | 2--3 | Call changed: ⁨Owls⁩ WRONG. | 
+23.75 rouletteSummary | 10 | 3-0 | 2--3 | Call changed: ⁨Owls⁩ WRONG. | 
+24.75 roundIntro | 11 | 3-0 |  | Call changed: ⁨Owls⁩ WRONG. | 
+25.50 ask | 12 | 3-0 |  | Call changed: ⁨Owls⁩ WRONG. | 
+26.50 answer | 12 | 4-0 |  | Lions +1 point | 
+27.50 ask | 13 | 4-0 |  | Lions +1 point | 
+28.25 steal | 13 | 4-0 |  | Lions +1 point | 
+29.25 answer | 13 | 4-0 |  | Lions +1 point | 
+30.00 answer | 13 | 4-0 |  |  | 
+31.00 answer | 13 | 4-1 |  | Call changed: Owls +1 point. | 
+32.00 roundScore | 14 | 4-1 |  | Call changed: Owls +1 point. | 
+32.75 final | 15 | 4-1 |  | Call changed: Owls +1 point. | 
+recap: {"margin":3,"sudden":false,"leadChanges":0,"steals":[1,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[3,0],[4,0],[4,1]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Russian Roulette","pts":[[3,0]]},{"label":"R2","pts":[[4,0],[4,1]]}],"awards":[{"t":"Best thief","who":"Lions, 1 steal","team":0}]}

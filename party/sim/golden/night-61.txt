@@ -9,59 +9,58 @@
 12.00 roundScore | 7 | 1-1 |  | Owls +1 point | 
 13.00 foolIntro | 8 | 1-1 | 0-0 | Owls +1 point | 
 14.00 foolWrite | 9 | 1-1 | 0-0 | Owls +1 point | 
-14.75 foolPick | 9 | 1-1 | 0-0 | Owls +1 point | 
+14.75 foolPick | 10 | 1-1 | 0-0 | Owls +1 point | 
 (pause, 8 s)
 (resume)
-31.00 foolReveal | 9 | 1-1 | 1-0 | Owls +1 point | 
-32.00 foolWrite | 10 | 1-1 | 1-0 | Owls +1 point | 
-32.75 foolPick | 10 | 1-1 | 1-0 | Owls +1 point | 
-33.75 foolReveal | 10 | 1-1 | 1-2 | Owls +1 point | 
-34.50 foolWrite | 11 | 1-1 | 1-2 | Owls +1 point | 
+31.00 foolReveal | 11 | 1-1 | 1-1 | Owls +1 point | 
+32.00 foolWrite | 12 | 1-1 | 1-1 | Owls +1 point | 
+32.75 foolPick | 13 | 1-1 | 1-1 | Owls +1 point | 
+34.50 foolReveal | 14 | 1-1 | 4-1 | Owls +1 point | 
+35.50 foolWrite | 15 | 1-1 | 4-1 | Owls +1 point | 
 (a new question)
-35.50 foolWrite | 12 | 1-1 | 1-2 | New fact. | 
-38.25 foolPick | 12 | 1-1 | 1-2 | New fact. | 
-40.00 foolReveal | 12 | 1-1 | 1-5 | New fact. | 
-41.00 foolWrite | 13 | 1-1 | 1-5 | New fact. | 
-42.75 foolPick | 13 | 1-1 | 1-5 | New fact. | 
-43.50 foolReveal | 13 | 1-1 | 1-5 | New fact. | 
-44.50 foolWrite | 14 | 1-1 | 1-5 | New fact. | 
-46.25 foolPick | 14 | 1-1 | 1-5 | New fact. | 
-49.00 foolReveal | 14 | 1-1 | 3-5 | New fact. | 
-50.00 foolWrite | 15 | 1-1 | 3-5 | New fact. | 
-51.75 foolPick | 15 | 1-1 | 3-5 | New fact. | 
-52.50 foolReveal | 15 | 1-1 | 4-6 | New fact. | 
-53.50 foolSummary | 16 | 1-3 | 4-6 | New fact. | 
-54.50 roundIntro | 17 | 1-3 |  | New fact. | 
-56.25 ask | 18 | 1-3 |  | New fact. | 
-58.00 steal | 19 | 1-3 |  | New fact. | 
-59.75 answer | 20 | 1-3 |  | New fact. | 
-60.75 answer | 20 | 1-3 |  |  | 
-62.50 answer | 20 | 2-3 |  | Call changed: Lions +1 point. | 
-63.50 ask | 21 | 2-3 |  | Call changed: Lions +1 point. | 
-65.25 answer | 22 | 2-5 |  | Owls +2 points | 
-66.00 roundScore | 23 | 2-5 |  | Owls +2 points | 
-67.00 battleIntro | 24 | 2-5 | 0-0 | Owls +2 points | 
-68.00 battleQ | 25 | 2-5 | 0-0 | Owls +2 points | 
-68.75 battleQ | 26 | 2-5 | 0-0 | Owls +2 points | 
-69.75 battleQ | 27 | 2-5 | 1-0 | Owls +2 points | 
-70.50 battleQ | 28 | 2-5 | 1-0 | Owls +2 points | 
-71.50 battleQ | 29 | 2-5 | 2-0 | Owls +2 points | 
-72.50 battleQ | 30 | 2-5 | 2-0 | Owls +2 points | 
-73.25 battleQ | 31 | 2-5 | 2-0 | Owls +2 points | 
-74.25 battleQ | 32 | 2-5 | 3-0 | Owls +2 points | 
-75.00 battleQ | 33 | 2-5 | 4-0 | Owls +2 points | 
-76.00 battleQ | 34 | 2-5 | 4-0 | Owls +2 points | 
-77.00 battleHandoff | 35 | 2-5 | 4-0 | Owls +2 points | 
-77.75 battleQ | 36 | 2-5 | 4-0 | Owls +2 points | 
-78.75 battleQ | 37 | 2-5 | 4-1 | Owls +2 points | 
-79.50 battleQ | 38 | 2-5 | 4-2 | Owls +2 points | 
-80.50 battleQ | 39 | 2-5 | 4-2 | Owls +2 points | 
-81.50 battleQ | 40 | 2-5 | 4-3 | Owls +2 points | 
-82.25 battleQ | 41 | 2-5 | 4-3 | Owls +2 points | 
-83.25 battleQ | 42 | 2-5 | 4-3 | Owls +2 points | 
-84.00 battleQ | 43 | 2-5 | 4-3 | Owls +2 points | 
-85.00 battleQ | 44 | 2-5 | 4-3 | Owls +2 points | 
-86.00 battleQ | 45 | 2-5 | 4-4 | Owls +2 points | 
-86.75 battleSummary | 46 | 2-7 | 4-5 | Owls +2 points | 
-87.75 final | 47 | 2-7 |  | Owls +2 points | 
-recap: {"margin":5,"sudden":false,"leadChanges":1,"steals":[0,0],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[1,1],[1,3],[2,3],[2,5],[2,7]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Fool Me Twice","pts":[[1,3]]},{"label":"R2","pts":[[2,3],[2,5]]},{"label":"Battle of the Captains","pts":[[2,7]]}],"awards":[{"t":"Battle of the Captains","who":"Lea, 5 of 10","team":1}]}
+36.50 foolWrite | 16 | 1-1 | 4-1 | New fact. | 
+39.00 foolPick | 17 | 1-1 | 4-1 | New fact. | 
+41.00 foolReveal | 18 | 1-1 | 7-1 | New fact. | 
+41.75 foolWrite | 19 | 1-1 | 7-1 | New fact. | 
+43.50 foolPick | 20 | 1-1 | 7-1 | New fact. | 
+44.50 foolReveal | 21 | 1-1 | 9-3 | New fact. | 
+45.50 foolWrite | 22 | 1-1 | 9-3 | New fact. | 
+47.25 foolPick | 23 | 1-1 | 9-3 | New fact. | 
+51.75 foolReveal | 24 | 1-1 | 11-3 | New fact. | 
+52.50 foolWrite | 25 | 1-1 | 11-3 | New fact. | 
+54.50 foolPick | 26 | 1-1 | 11-3 | New fact. | 
+56.25 foolReveal | 27 | 1-1 | 12-4 | New fact. | 
+57.00 foolSummary | 28 | 3-1 | 12-4 | New fact. | 
+58.00 roundIntro | 29 | 3-1 |  | New fact. | 
+59.00 ask | 30 | 3-1 |  | New fact. | 
+60.75 steal | 31 | 3-1 |  | New fact. | 
+62.50 answer | 32 | 3-1 |  | New fact. | 
+63.50 ask | 33 | 3-1 |  | New fact. | 
+65.25 steal | 34 | 3-1 |  | New fact. | 
+67.00 answer | 35 | 4-1 |  | Lions +1 point — steal | 
+68.00 roundScore | 36 | 4-1 |  | Lions +1 point — steal | 
+68.75 battleIntro | 37 | 4-1 | 0-0 | Lions +1 point — steal | 
+69.75 battleQ | 38 | 4-1 | 0-0 | Lions +1 point — steal | 
+70.50 battleQ | 39 | 4-1 | 0-0 | Lions +1 point — steal | 
+71.50 battleQ | 40 | 4-1 | 1-0 | Lions +1 point — steal | 
+72.50 battleQ | 41 | 4-1 | 2-0 | Lions +1 point — steal | 
+73.25 battleQ | 42 | 4-1 | 2-0 | Lions +1 point — steal | 
+74.25 battleQ | 43 | 4-1 | 3-0 | Lions +1 point — steal | 
+75.00 battleQ | 44 | 4-1 | 3-0 | Lions +1 point — steal | 
+76.00 battleQ | 45 | 4-1 | 3-0 | Lions +1 point — steal | 
+77.00 battleQ | 46 | 4-1 | 3-0 | Lions +1 point — steal | 
+77.75 battleQ | 47 | 4-1 | 3-0 | Lions +1 point — steal | 
+78.75 battleHandoff | 48 | 4-1 | 4-0 | Lions +1 point — steal | 
+79.50 battleQ | 49 | 4-1 | 4-0 | Lions +1 point — steal | 
+80.50 battleQ | 50 | 4-1 | 4-1 | Lions +1 point — steal | 
+81.50 battleQ | 51 | 4-1 | 4-1 | Lions +1 point — steal | 
+82.25 battleQ | 52 | 4-1 | 4-2 | Lions +1 point — steal | 
+83.25 battleQ | 53 | 4-1 | 4-2 | Lions +1 point — steal | 
+84.00 battleQ | 54 | 4-1 | 4-2 | Lions +1 point — steal | 
+85.00 battleQ | 55 | 4-1 | 4-3 | Lions +1 point — steal | 
+86.00 battleQ | 56 | 4-1 | 4-4 | Lions +1 point — steal | 
+86.75 battleQ | 57 | 4-1 | 4-4 | Lions +1 point — steal | 
+87.75 battleQ | 58 | 4-1 | 4-5 | Lions +1 point — steal | 
+88.50 battleSummary | 59 | 4-3 | 4-5 | Lions +1 point — steal | 
+89.50 final | 60 | 4-3 |  | Lions +1 point — steal | 
+recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[1,0],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[4,1],[4,3]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Fool Me Twice","pts":[[3,1]]},{"label":"R2","pts":[[4,1]]},{"label":"Battle of the Captains","pts":[[4,3]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0},{"t":"Best thief","who":"Lions, 1 steal","team":0},{"t":"Battle of the Captains","who":"Lea, 5 of 10","team":1}]}

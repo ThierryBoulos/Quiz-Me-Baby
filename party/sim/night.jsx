@@ -10,6 +10,7 @@ import TestRenderer from "react-test-renderer";
 import * as fake from "./fakeSupabase.js";
 import { useTvGame } from "../lib/tvGame";
 import { SWAPS } from "../lib/tv/rules";
+import { storeTakenSave } from "../lib/takeSave";
 import fullBank from "../data/bank.json";
 import accept from "../data/accept.json";
 import liteBank from "../public/bank.json";
@@ -83,6 +84,8 @@ function pinNear(g, bot) {
      { at, type: "hostGone", for }    the host's phone is gone for a while
      { at, type: "writesFail", for }  the TV's writes fail (no internet) for a while
      { at, type: "futureStamp" }      the room holds a stamp a minute ahead of the TV's clock
+     { at, type: "takeover" }         the TV (or the game phone) is gone with no goodbye; another device takes over from the
+                                      server's copy (qmb_tv_backup), as "The TV died?" or a phone taking the game does (19 Nov)
    Scripted nights (sim/run.mjs, 29 Oct), the "something went wrong" paths, at the next screen that allows them:
      { at, type: "pause", for }       Pause (the host; a captain with no host), Resume after `for` seconds
      { at, type: "score", a, b }      the scores set by hand (the host sets them; with no host a captain asks, the other agrees)
@@ -94,13 +97,27 @@ function pinNear(g, bot) {
    The Comeback (17 Nov): comeback: "make" (its captain gets all three right), "miss" (the first right, the second
    wrong), "quiet" (no answer: the 15 seconds run out), "skip" (the host skips it), "off" (switched off in Setup);
    left out, the captain answers at the bots' usual rate. comebackSwap: a new question asked for on its first one.
-   reloadOn: the TV's page reloads (once) the first time this screen is up, e.g. "comebackQ" (18 Nov) */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false }) {
+   reloadOn: the TV's page reloads (once) the first time this screen is up, e.g. "comebackQ" (18 Nov)
+   takeoverOn: the same, but another device takes over from the server's copy instead (19 Nov) */
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false, takeoverOn = null }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed); phoneMode = phone;
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
   const caps = ["capA", "capB"], gone = new Set();
   if (net) Object.assign(fake.net, net, { rnd: rng(seed * 31 + 7) });
+  /* the server's copy of the game (qmb_tv_backup), the last one kept, for a takeover */
+  let backup = null;
+  const rpc0 = fake.sb().rpc;
+  fake.sb().rpc = (name, args) => { if (name === "qmb_tv_backup") backup = structuredClone({ ...args.s, at: clock() }); return rpc0(name, args); };
+  const takeover = async () => {
+    if (!backup) { trace.push("(no server copy yet: no takeover)"); return; }
+    const copy = backup;
+    await act(async () => { tree.unmount(); await flush(); });
+    localStorage.clear();
+    storeTakenSave(CODE, copy, (clock() - copy.at) / 1000);
+    await act(async () => { tree = TestRenderer.create(<Tv />); await flush(); });
+    await tick(2000);
+  };
   /* the captain now (the armband can move to a teammate when a captain's phone is gone) */
   const capOf = (t) => fake.db.members.find((m) => m.team === t && m.role === "captain" && !gone.has(m.user_id))?.user_id;
   fake.db.rooms.push({ code: CODE, status: "lobby", mode: null, state: { teamNames: ["Lions", "Owls"] } });
@@ -141,7 +158,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   await tick(1000);
   send(host ? "host" : "capA", "setup", { start: true, cfg: { standard: true, rounds, difficulty: "mixed", themes: themes || THEMES.slice(0, rounds), minis, ...(seeKinds ? { seeKinds } : {}), ...(lifelines === false ? { lifelines: false } : {}), ...(comeback === "off" ? { comeback: false } : {}) } });
 
-  let reloaded = false;
+  let reloaded = false, tookOver = false;
   /* the scripted things, waiting for a screen that allows them; a scripted Pause lasts its `for`; a scripted
      request (no host) is agreed to by the other captain */
   const scripted = []; let pauseUntil = 0, agreeNext = false, tieMoreLeft = tieMore;
@@ -181,6 +198,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       await act(async () => { tree = TestRenderer.create(<Tv />); await flush(); });
       await tick(2000);
     }
+    if (!tookOver && takeoverOn && api.current?.pub?.screen === takeoverOn) { tookOver = true; trace.push("(another device takes over)"); await takeover(); }
     /* the weird things, when their time comes */
     for (const e of events) {
       if (e.done || clock() - t0 < e.at * 1000) continue;
@@ -196,6 +214,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
         else await act(async () => { setVisible(true); await flush(); });
         await tick(1500);
       }
+      if (e.type === "takeover") await takeover();
       if (e.type === "reload") { await act(async () => { tree.unmount(); await flush(); }); await act(async () => { tree = TestRenderer.create(<Tv />); await flush(); }); await tick(1500); }
       if (e.type === "capGone") { const id = capOf(e.team); if (id) { gone.add(id); fake.setPresence(fake.presence.filter((x) => x !== id)); } }
       if (e.type === "hostGone") {

@@ -14,7 +14,7 @@ import { useNoTv } from "../NoTv";
 import type { Member, Room } from "@/lib/room";
 import { HOST_ONLY_THEMES, loadBank, themeCounts, withCustom, type Bank } from "@/lib/engine";
 import { cleanList, getCustom } from "@/lib/custom";
-import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS, lineup, quizGames, type ManyKey } from "@/lib/many/logic";
+import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS, nightOrder, quizGames, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
 import { levelLine } from "../Setup";
@@ -174,7 +174,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
   };
   const on = MANY_MINIS.filter((x) => minis.includes(x));
   /* the order they'll play in: the standard rounds spread through the night, two at a time */
-  const night = lineup(on.includes("quiz") ? quizGames(rounds) : 0, on.filter((x) => x !== "quiz"));
+  const night = nightOrder(on.includes("quiz") ? quizGames(rounds) : 0, on);   // (as Start builds it: Secret Stakes last)
   const slot = (x: string) => { const at = night.map((y, i) => (y === x ? i + 1 : 0)).filter(Boolean); return at.length ? at.map((n) => ordinal(n)).join(", ") : ""; };
   const blocker = why || (!on.length ? "Switch on at least one game." : on.includes("quiz") && bank && picked.length !== rounds ? `Pick ${rounds} themes, one per round (${picked.length} so far).` : "");
   /* a level row: the same piece as the 2-team Setup's (components/LevelChips.tsx) */

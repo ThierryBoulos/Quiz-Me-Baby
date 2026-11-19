@@ -1,0 +1,35 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+7.50 ask | 3 | 0-0 |  | Lions used Double Dip. | 
+9.50 answer | 4 | 1-0 |  | Lions +1 point | 
+10.25 ask | 5 | 1-0 |  | Lions +1 point | 
+12.00 answer | 6 | 1-1 |  | Owls +1 point | 
+13.00 roundScore | 7 | 1-1 |  | Owls +1 point | 
+14.00 roundIntro | 8 | 1-1 |  | Owls +1 point | 
+15.75 ask | 9 | 1-1 |  | Owls +1 point | 
+17.50 answer | 10 | 3-1 |  | Lions +2 points | 
+18.50 answer | 10 | 3-1 |  |  | 
+19.25 steal | 11 | 1-1 |  | Owls steal a new question. | 
+21.00 answer | 12 | 1-3 |  | Owls +2 points — steal | 
+22.00 answer | 12 | 1-3 |  |  | 
+23.00 answer | 12 | 1-3 |  | The host keeps the call. | 
+23.75 ask | 13 | 1-3 |  | The host keeps the call. | 
+25.50 steal | 14 | 1-3 |  | The host keeps the call. | 
+27.50 answer | 15 | 1-3 |  | The host keeps the call. | 
+28.25 roundScore | 16 | 1-3 |  | The host keeps the call. | 
+29.25 stakesIntro | 17 | 1-3 | 0-0 | The host keeps the call. | 
+30.00 stakesPick | 18 | 1-3 | 0-0 | The host keeps the call. | 
+31.00 stakesQ | 19 | 1-3 | 0-0 | The host keeps the call. | 
+32.00 stakesReveal | 19 | 0-5 | 0-0 | The host keeps the call. | 
+32.75 stakesPick | 20 | 0-5 | -1-2 | The host keeps the call. | 
+33.75 stakesQ | 21 | 0-5 | -1-2 | The host keeps the call. | 
+34.50 stakesReveal | 21 | 2-7 | -1-2 | The host keeps the call. | 
+35.50 stakesPick | 22 | 2-7 | 1-4 | The host keeps the call. | 
+36.50 stakesQ | 23 | 2-7 | 1-4 | The host keeps the call. | 
+37.25 stakesReveal | 23 | 0-7 | 1-4 | The host keeps the call. | 
+38.25 stakesSummary | 24 | 0-7 | -1-4 | The host keeps the call. | 
+39.00 final | 25 | 0-7 |  | The host keeps the call. | 
+recap: {"margin":7,"sudden":false,"leadChanges":1,"steals":[0,1],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[1,1],[1,3],[0,5],[2,7],[0,7]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"R2","pts":[[3,1],[1,1],[1,3]]},{"label":"Secret Stakes","pts":[[0,5],[2,7],[0,7]]}],"awards":[{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

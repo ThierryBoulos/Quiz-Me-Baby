@@ -93,10 +93,11 @@ async function main() {
   const lines = ["# What Do You See?: picture credits", "",
     "Every picture here is a copy of a file on Wikimedia Commons (a few logos: English Wikipedia), used under the licence",
     "named beside it. Quiz Me Baby isn't associated with any brand, celebrity or person shown. To have a picture removed,",
-    "write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give the answer away. Written by",
-    "`scripts/fetch-sees.mjs`.", "",
-    "| File | What it is | By | Licence | Source |", "|---|---|---|---|---|",
-    ...SEES.map(([, answer, , , photo, credit, licence, page]) => `| ${photo}.jpg | ${answer} | ${String(credit).replace(/\|/g, "/")} | ${licence} | ${page} |`), ""];
+    "write to Thierryboulos@hotmail.com. The file name is a hash, so it doesn't give the answer away, and this list has no",
+    "file names and goes by name, so it can't be matched to a picture either (19 Nov review: it was an answer key).",
+    "Written by `scripts/fetch-sees.mjs`.", "",
+    "| What it is | By | Licence | Source |", "|---|---|---|---|",
+    ...SEES.slice().sort((a, b) => String(a[1]).localeCompare(String(b[1]))).map(([, answer, , , , credit, licence, page]) => `| ${answer} | ${String(credit).replace(/\|/g, "/")} | ${licence} | ${page} |`), ""];
   writeFileSync(join(out, "CREDITS.md"), lines.join("\n"));
   console.log(`see/: ${got} fetched, ${SEES.length} in the catalogue`);
 }

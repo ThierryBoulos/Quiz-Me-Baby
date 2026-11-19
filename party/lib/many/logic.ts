@@ -153,6 +153,9 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
   const extra: Partial<Record<ManyKey, Q[]>> = {};
   for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + 4);
   extra.comeback = (decks.comeback || []).slice(MANY_LEGS.comeback);
+  /* (a question round's Change question stays in the question's theme: the rounds' spares, then the questions held
+     back past sudden death's, one pair per theme in turn: 19 Nov review, a Science question became Geography) */
+  if (extra.quiz) extra.quiz = [...extra.quiz, ...(decks.sudden || []).slice(MANY_LEGS.sudden)];
   return { v: 2, teams: teams.map((t) => ({ ...t, score: 0 })), minis, mi: 0, screen: minis.length ? "intro" : "final", step: 1,
     deadline: null, left: 0, total: 0, typed: Array(k).fill(null), nums: Array(k).fill(null), pins: Array(k).fill(null), ok: Array(k).fill(null), why: Array(k).fill(null), shown: 0,
     at: Array(k).fill(null), seq: 0, roster: [], votes: {}, who: {}, toast: null, toastN: 0, log: [n(k)], spare: (decks.sudden || []).slice(0, MANY_LEGS.sudden),
@@ -187,6 +190,12 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   /* (Majority Rules: a vote counts, not a team with nobody on the list) */
   if ((m.key === "majority" ? false : m.key === "comeback" ? (m.only || []).some((t) => s.typed[t] != null) : answered(s).some(Boolean)) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
   if (m.key === "see" && (s.buzz != null || s.out?.some(Boolean))) return "Too late: someone has already had a go at this one.";
+  if (m.key === "quiz") {
+    const th = qOf(s)?.theme, pick = (L: Q[] | undefined) => { const j = (L || []).findIndex((q) => q?.theme === th); return j < 0 ? null : L!.splice(j, 1)[0]; };
+    const next = pick(s.extra?.quiz) ?? pick(s.spare);
+    if (!next) return "No other question left in this theme.";
+    m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;
+  }
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;
 }
@@ -203,6 +212,12 @@ export function lineup(rounds: number, games: ManyKey[]): ManyKey[] {
   const out: ManyKey[] = [], per = Math.ceil(games.length / rounds);
   for (let r = 0; r < rounds; r++) out.push("quiz", ...games.slice(r * per, (r + 1) * per));
   return out;
+}
+/* the night as it plays: the question-round games (`games` of them) spread through it, Secret Stakes always last
+   (11 Nov, the owner). One function for Start and for the Setup's "plays 3rd" (19 Nov review: Setup counted Stakes
+   in the spread, and showed Roulette 3rd when it played 4th) */
+export function nightOrder(games: number, picked: ManyKey[]): ManyKey[] {
+  return [...lineup(games, picked.filter((x) => x !== "quiz" && x !== "stakes")), ...(picked.includes("stakes") ? ["stakes" as ManyKey] : [])];
 }
 const clear = (s: StateM) => { const k = s.teams.length; s.typed = Array(k).fill(null); s.nums = Array(k).fill(null); s.pins = Array(k).fill(null); s.ok = Array(k).fill(null); s.why = Array(k).fill(null); s.at = Array(k).fill(null); s.ms = Array(k).fill(null); s.buzz = null; s.buzzAt = 0; s.buzzBy = null; s.out = Array(k).fill(false); s.votes = {}; s.shown = 1; s.contest = null; s.contested = []; s.mapHint = false; s.fool = null; };
 const toast = (s: StateM, text: string) => { s.toast = { id: ++s.toastN, text }; };
@@ -289,6 +304,7 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
   const m = miniOf(s);
   if (m?.key === "fool") return foolAnswer(s, team, p, order);
   if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
+  if (s.paused) return "The game is paused.";      // (the last answer in is the reveal: not while paused, 19 Nov review)
   if (m.only && !m.only.includes(team)) return m.key === "comeback" ? "Only the teams playing for the comeback answer this one." : "Only the teams tied at the top answer this one.";
   if (m.key === "comeback" && m.cb?.out[team]) return "Your team is out of the comeback.";
   if (typedKey(m.key)) {
@@ -341,7 +357,7 @@ export function seeMiss(s: StateM, team: number, now: number, late = false) {
 /* ---- Fool Me Twice (16 Nov, the owner), with 3 to 8 teams: each captain writes a lie for the fact's blank (screen
    "q"), then picks the truth among the lies, a few of ours and the truth, and says which team will fall for its own
    lie ("pick"); then the reveal. At Next the points (the engine's foolScore): +2 for the truth, +1 for each team a
-   lie fools, and a team that falls for a lie whose writer named it loses 1. The game's tally pays the night by place,
+   lie fools, and a team that falls for a lie whose writer named it loses 1 (and the writer gets 1 more: 19 Nov). The game's tally pays the night by place,
    as every game does. A lie that is the truth, however it's typed, isn't taken ("That's the truth, write a lie!");
    no lie by the time it's up, and one of ours takes its place. A team's own lie isn't its pick. ---- */
 function foolAnswer(s: StateM, team: number, p: { text?: unknown; pick?: unknown; pred?: unknown }, order?: number): true | string {
@@ -503,6 +519,21 @@ export function setScores(s: StateM, scores: unknown): boolean {
   if (v.some((x) => !Number.isFinite(x) || x < 0 || x > 9999) || v.every((x, t) => x === s.teams[t].score)) return false;
   v.forEach((x, t) => { s.teams[t].score = x; });
   toast(s, `The host set the scores: ${s.teams.map((t) => `${t.name} ${t.score}`).join(", ")}.`);
+  /* at the night's end the ending follows the new scores (19 Nov review): sudden death on its intro is for the teams tied
+     at the top now (none: it goes, and the final comes up); on the final, a tie at the top brings sudden death, and the
+     chart's last point is the new scores */
+  const top = Math.max(...v), tied = v.map((x, i) => (x === top ? i : -1)).filter((i) => i >= 0), m = miniOf(s);
+  if (m?.key === "sudden" && s.screen === "intro") {
+    if (tied.length > 1 && top > 0) m.only = tied;
+    else { s.spare = [...m.qs, ...(s.spare || [])]; s.minis.splice(s.mi, 1); s.screen = s.mi < s.minis.length ? "intro" : "final"; s.step++; if (s.log.length) s.log[s.log.length - 1] = [...v]; }
+  } else if (s.screen === "final") {
+    if (s.log.length) s.log[s.log.length - 1] = [...v];
+    if (tied.length > 1 && top > 0 && (s.spare || []).length) {
+      const k = s.teams.length;
+      s.minis.push({ key: "sudden", qs: s.spare!, i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k), only: tied }); s.spare = [];
+      s.mi = s.minis.length - 1; s.screen = "intro"; s.step++;
+    }
+  }
   return true;
 }
 /* how a call reads: Don't Say the Same's "scores" or not, else RIGHT or WRONG */
@@ -632,7 +663,8 @@ export function next(s: StateM, now: number, t: Timers) {
        win back (a game can win back 1st place's points less last place's). Its three questions go in right here */
     if (s.cbQs && !s.cbDone) { const k = s.teams.length, G = s.minis.filter((x) => !extraGame(x.key)).length, left = G - s.mi;
       if (s.mi >= Math.ceil(G / 2)) { s.cbDone = true;
-        const plan = left >= 2 ? QMB.comebackPlan(s.teams.map((x) => x.score), (PLACE_PTS[0] - PLACE_PTS[k - 1]) * left) as { teams: number[]; target: (number | null)[] } | null : null;
+        const spread = PLACE_PTS[0] - PLACE_PTS[k - 1];   // (what one game can win back on the leader; the gap is never under two of them)
+        const plan = left >= 2 ? QMB.comebackPlan(s.teams.map((x) => x.score), spread * left, QMB.COMEBACK_MIN_GAMES * spread) as { teams: number[]; target: (number | null)[] } | null : null;
         if (plan) s.minis.splice(s.mi, 0, { key: "comeback", qs: s.cbQs, i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k), only: [...plan.teams].sort((a, b) => s.teams[b].score - s.teams[a].score || a - b),
           cb: { target: plan.target, before: s.teams.map((x) => x.score), out: s.teams.map(() => false) } }); } }
     /* the last game played and teams tied at the top: sudden death between them, with the questions held back */

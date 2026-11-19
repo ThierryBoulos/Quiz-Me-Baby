@@ -2,6 +2,7 @@
 import { LIVE_LINES, actCount, usePubLine } from "./liveLines";
 import { serverOffset } from "@/components/Clock";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNetProbe } from "./tv/netProbe";
 import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
 import { SK_LEVELS, skQ, type SkGame } from "./stakes";
@@ -227,7 +228,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
             noLl: !!s.g?.noLl, total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
-            app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, changedIds: s.changedIds, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, seeAt: s.seeAt, seeOut: s.seeOut, seeBuzz: s.seeBuzz, seeBy: s.seeBy, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog });
+            app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, changedIds: s.changedIds, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, seeAt: s.seeAt, seeOut: s.seeOut, seeBuzz: s.seeBuzz, seeBy: s.seeBy, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog,
+            /* Fool Me Twice's lies, picks and answers, and the Roulette spin (19 Nov review: a refresh on the picks froze the night) */
+            foolLies: s.foolLies, foolPicks: s.foolPicks, fool: s.fool, spinAt: s.spinAt });
           if (save !== lastSave.current) {
             lastSave.current = save;
             try { localStorage.setItem(saveKey, save); } catch { setBanner("cantSave"); }
@@ -700,7 +703,12 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     else if (t === "ui/reveal") reveal();
     /* a ruling: v sets it (RIGHT/WRONG, DODGED IT/SAID IT); without v it flips */
-    else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk" || t === "ui/airportOk" || t === "ui/rouletteOk" || t === "ui/stakesOk" || t === "ui/seeOk") { const i = move.t === 1 ? 1 : 0; s.ok[i] = typeof move.v === "boolean" ? move.v : !s.ok[i]; }
+    else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk" || t === "ui/airportOk" || t === "ui/rouletteOk" || t === "ui/stakesOk" || t === "ui/seeOk") {
+      const i = move.t === 1 ? 1 : 0, v = typeof move.v === "boolean" ? move.v : !s.ok[i];
+      /* What Do You See?: only a team that buzzed can be right (the first to buzz and be right takes it: 19 Nov review) */
+      if (t === "ui/seeOk" && v && s.seeAt[i] == null) { s.toast = { id: ++s.toastN, text: `${iso(g.teams[i].name)} didn't buzz.` }; return; }
+      s.ok[i] = v;
+    }
     else if (t === "ui/exit") exitGame();
     else if (t === "ui/again") againGame();
     /* Majority Rules: the host takes someone off their team's list (or puts them back), before Start */
@@ -893,7 +901,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!lie) return "Write a lie first.";
       if (QMB.foolIsTruth(lie, q, acceptFor(q))) return "That's the truth, write a lie!";
       s.foolLies[team] = lie;
-      if (s.foolLies[0] != null && s.foolLies[1] != null) reveal();
+      /* (the last lie brings the picks up: taps from the writing screen, the host's Reveal now, are stale now: 19 Nov) */
+      if (s.foolLies[0] != null && s.foolLies[1] != null) { reveal(); s.step++; }
       return true;
     }
     if (sc === "foolPick") {
@@ -902,7 +911,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (o.by.includes(team)) return "That's your own lie: pick another one.";
       if (s.foolPicks[team] != null) return `${poss(nm(team))} pick is already in.`;
       s.foolPicks[team] = k;
-      if (s.foolPicks[0] != null && s.foolPicks[1] != null) reveal();
+      if (s.foolPicks[0] != null && s.foolPicks[1] != null) { reveal(); s.step++; }
       return true;
     }
     /* The Comeback: only the captain of the team playing for it answers, once; the app checks it at once (the reveal) */
@@ -956,7 +965,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!texts.length) return false;
       if (s.typed[team]) return `${poss(nm(team))} answer is already in.`;
       s.typed[team] = texts.slice(0, 1);
-      if (s.typed[0] && s.typed[1]) reveal();
+      /* (both in is the reveal, but not while paused: an answer on its way when the pause landed is kept, and the
+         reveal waits for Resume: 19 Nov review) */
+      if (s.typed[0] && s.typed[1] && !s.paused) reveal();
       return true;
     }
     if (sc === "dishQ" && g.dishGame.leg.buzz === team && texts.length && !s.pending) { s.typed[team] = texts.slice(0, 1); check("dish", current()); return true; }
@@ -1417,6 +1428,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           if (s.awayPaused) s.paused = false;
           s.tvAway = 0; s.awayPaused = false;
         } else if (savedAt) shiftClocks(s, Math.max(0, Date.now() - savedAt));
+        /* Fool Me Twice saved by an older copy without its answers (19 Nov): the list again from the lies kept (our fakes
+           for any lost), so the picks and the reveal can't be left with nothing on them */
+        if ((s.screen === "foolPick" || s.screen === "foolReveal") && !s.fool && s.g?.foolGame) {
+          const q = s.g.foolGame.qs[s.g.foolGame.i];
+          if (!Array.isArray(s.foolLies)) s.foolLies = [null, null];
+          if (!Array.isArray(s.foolPicks)) s.foolPicks = [null, null];
+          if (q) s.fool = QMB.foolOptions(q, s.foolLies, acceptFor(q), Math.random);
+        }
         /* The bank, then the view, to this TV and to every phone (they may still show "paused"). A download
            that fails (one bad request on party Wi-Fi) is tried again every few seconds, with a line on the TV
            meanwhile; the clocks stand still until it comes, and taps are turned down, not swallowed (29 Oct:
@@ -1655,6 +1674,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     return () => document.removeEventListener("visibilitychange", vis);
   }, [isTv, applyFx, publish]);
 
+  /* no internet in a quiet question (nothing written, so no write to fail): the server asked for the time; the clocks
+     wait meanwhile (lib/tv/netProbe.ts, 19 Nov review) */
+  useNetProbe(isTv, { running: () => { const s = st.current; return !!s.g && (!!s.deadline || !!s.buzzAt); }, offline: () => offline.current,
+    lost: (since) => { offline.current = true; offlineAt.current = since; setBanner((b) => b ?? "offline"); }, back: () => void publishRef.current() });
+
   const lastWhole = useRef<number | null>(null);
   const alarmed = useRef(0);                           // the clock whose bell has rung
   /* The clocks. A standard question running out is only "time's up" when
@@ -1700,6 +1724,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.typed[b]) s.buzzAt = 0;
         else if (now - s.buzzAt >= SEE_TYPE * 1000 + T_GRACE_MS) { if (!takeDraft(b)) seeMiss(b, true); s.step++; changed = true; }
       }
+      /* both answers came in while paused: the reveal, now that the game runs again */
+      if (!s.paused && ["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(s.screen) && s.typed[0] && s.typed[1]) { reveal(); changed = true; }
       /* time's up (a moment after the clock shows 0, see T_GRACE_MS): first, what was typed but not sent goes in */
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };

@@ -136,7 +136,8 @@ const client = {
   removeChannel(ch) { channels.delete(ch); return Promise.resolve("ok"); },
   getChannels: () => [...channels],
   auth: { getSession: () => Promise.resolve({ data: { session: { access_token: "tv-token", user: { id: "tv" } } } }) },
-  rpc: () => Promise.resolve({ data: null, error: null }),
+  /* (no internet: a call fails too, as qmb_now does for the TV's probe, lib/tv/netProbe.ts) */
+  rpc: () => Promise.resolve(net.failWrites ? { data: null, error: { message: "Failed to fetch" } } : { data: null, error: null }),
 };
 export const sb = () => client;
 export const note = () => {};

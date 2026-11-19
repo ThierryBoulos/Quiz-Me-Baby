@@ -179,12 +179,12 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     L.next(s, 0, T); return s; };
   const fails = [];
   const want = (name, v) => { if (!v) fails.push(name); };
-  /* five teams: 40, 38, 30, 14, 9 with two games left: a game can win back 10 - 4 = 6, so 12 in all; 0.65 x 12 = 7.8.
-     Teams C (10 behind), D (26) and E (31) are in it */
-  { const s = start(5, [40, 38, 30, 14, 9]), m = L.miniOf(s), pub0 = V.buildMany(s).pub;
+  /* five teams: 40, 38, 26, 14, 9 with two games left: a game can win back 10 - 4 = 6, so 12 in all; 0.65 x 12 = 7.8,
+     and never under two games' worth, 12 (19 Nov). Teams C (14 behind), D (26) and E (31) are in it */
+  { const s = start(5, [40, 38, 26, 14, 9]), m = L.miniOf(s), pub0 = V.buildMany(s).pub;
     want("it comes at the middle", s.screen === "intro" && m?.key === "comeback" && m.only.join() === "2,3,4");
     want("what each can reach", m?.cb?.target.join() === ",,34,33,32");
-    want("the screens are sent it", pub0.comeback?.teams.join() === "2,3,4" && pub0.comeback.before.join() === "40,38,30,14,9" && pub0.game.title === "The Comeback");
+    want("the screens are sent it", pub0.comeback?.teams.join() === "2,3,4" && pub0.comeback.before.join() === "40,38,26,14,9" && pub0.game.title === "The Comeback");
     want("it isn't one of the night's games", pub0.game.count === 4 && pub0.game.index === 2);
     L.startMini(s, 1000, T, []);
     want("15 seconds a question", s.screen === "q" && s.total === 15 && s.deadline === 1000 + 15000);
@@ -212,19 +212,21 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     while (s.screen !== "final") { if (s.screen === "intro") L.startMini(s, 0, T, []); else if (s.screen === "q") L.reveal(s); else L.next(s, 0, T); }
     want("only once a night", s.minis.filter((x) => x.key === "comeback").length === 1); }
   /* everyone misses the first question: it ends there */
-  { const s = start(5, [40, 38, 30, 14, 9]); L.startMini(s, 0, T, []); L.reveal(s); L.next(s, 0, T);
-    want("all out, straight to the result", s.screen === "summary" && s.teams.map((x) => x.score).join() === "40,38,30,14,9"); }
+  { const s = start(5, [40, 38, 26, 14, 9]); L.startMini(s, 0, T, []); L.reveal(s); L.next(s, 0, T);
+    want("all out, straight to the result", s.screen === "summary" && s.teams.map((x) => x.score).join() === "40,38,26,14,9"); }
   /* the lower team makes it, the upper one doesn't: it stops one point behind it */
   { const s = start(4, [40, 38, 14, 9]); L.startMini(s, 0, T, []);
     for (let i = 0; i < 3; i++) { const q = L.qOf(s); L.captainAnswer(s, 3, { text: q.answer }); if (i > 0) L.captainAnswer(s, 2, { text: q.answer }); L.reveal(s); L.next(s, 0, T); }
     want("behind the team above, whoever makes it", s.screen === "summary" && s.teams.map((x) => x.score).join() === "40,38,14,13"); }
   /* a close night, a night with it switched off (no questions dealt), and the host's skip */
   { const s = start(5, [40, 38, 36, 35, 33]); want("not when it's close", L.miniOf(s).key === "closest" && s.cbDone === true); }
-  { const s = start(5, [40, 38, 30, 14, 9], []); want("not when it's switched off", L.miniOf(s).key === "closest"); }
-  { const s = start(5, [40, 38, 30, 14, 9]); want("the host can skip it", L.skipComeback(s) === true && s.screen === "intro" && L.miniOf(s).key === "closest" && !s.minis.some((x) => x.key === "comeback"));
+  /* the minimum gap (19 Nov, the owner): 10 behind with two games left is past 0.65 of 12, but under two games' worth (12) */
+  { const s = start(5, [40, 38, 36, 35, 30]); want("not under two games' worth of gap", L.miniOf(s).key === "closest" && s.cbDone === true); }
+  { const s = start(5, [40, 38, 26, 14, 9], []); want("not when it's switched off", L.miniOf(s).key === "closest"); }
+  { const s = start(5, [40, 38, 26, 14, 9]); want("the host can skip it", L.skipComeback(s) === true && s.screen === "intro" && L.miniOf(s).key === "closest" && !s.minis.some((x) => x.key === "comeback"));
     want("...only on its intro", L.skipComeback(s) === false); }
   /* "Change question" before an answer is in: a spare, and a fresh 15 seconds */
-  { const s = start(5, [40, 38, 30, 14, 9]); L.startMini(s, 0, T, []); const was = L.qOf(s).id;
+  { const s = start(5, [40, 38, 26, 14, 9]); L.startMini(s, 0, T, []); const was = L.qOf(s).id;
     want("Change question", L.swapQ(s, 500, T) === true && L.qOf(s).id !== was && s.deadline === 500 + 15000);
     L.captainAnswer(s, 2, { text: "x" }); want("...not once an answer is in", L.swapQ(s, 600, T) !== true); }
   /* 18 Nov: the comeback and Fool Me Twice on the same night: right after Fool Me Twice, and Fool Me Twice right after it;
@@ -473,7 +475,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
 /* 16 Nov: Fool Me Twice, 3 to 8 teams (the owner): each captain writes a lie (the truth, however it's typed, refused);
    time's up and one of ours takes a missing lie's place; the answers: one per team and the truth (5 with 3 teams), the
    same lie from two teams once; each captain picks (never its own lie) and names the team that will fall for its lie;
-   the points: +2 the truth, +1 a team fooled, -1 to a team that fell for a lie whose writer named it; the game's tally
+   the points: +2 the truth, +1 a team fooled, -1 to a team that fell for a lie whose writer named it (+1 more to the writer); the game's tally
    pays the night by place; Change fact (as hard as the one it replaces), Pause. Its own facts here (the bank's are the
    owner's to approve) */
 {
@@ -537,7 +539,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
       if (pts.join() !== res.pts.join()) fail("the points aren't the engine's");
       /* the points by hand */
       const hand = s.teams.map(() => 0);
-      F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) { hand[t] += 2; return; } let cost = 0; for (const w of o.by) { hand[w]++; if (F.pred[w] === t) cost = 1; } hand[t] -= cost; });   // (a shared lie whose writers both named the team costs it 1, not 2)
+      F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) { hand[t] += 2; return; } let cost = 0; for (const w of o.by) { hand[w]++; if (F.pred[w] === t) { cost = 1; hand[w]++; } } hand[t] -= cost; });   // (a right call: +1 more to the caller, 19 Nov)   // (a shared lie whose writers both named the team costs it 1, not 2)
       if (hand.join() !== res.pts.join()) fail("points: " + res.pts.join() + " not " + hand.join());
       res.pts.forEach((p, t) => { tally[t] += p; }); runs.push([...tally]);
       F.picks.forEach((p, t) => { const o = F.opts[p]; if (!o || o.by.includes(t)) return; if (o.truth) cnt.truths[t]++; else { cnt.falls[t]++; o.by.forEach((w) => cnt.fooled[w]++); } });

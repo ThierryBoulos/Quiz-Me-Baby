@@ -51,7 +51,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
           <><B>Mini-games:</B> Pick the mini-games you want to include. They’ll be played between standard rounds.</>,
           <><B>Mix and match:</B> You can play with both or choose either one.</>,
         ]} />
-        <P>You can also adjust the default timings in Settings → Timers on the TV screen.</P>
+        <P>You can also adjust the default timings in Settings → Timers on the TV screen, or in Setup on the host&rsquo;s phone (no host: Captain A&rsquo;s).</P>
         <P><B>Scoring with 3–8 teams:</B> Throughout the night, teams are ranked in each game, earning 10 points for 1st place, 8 for 2nd, then 6, 5, 4, 3, 3 and 3 points respectively. Teams tied for a position share the points for the higher-ranked place; incorrect answers earn no points, and the fastest correct answer gets the highest score.</P>
         <P><B>The Comeback:</B> Once a night, halfway through, the teams too far behind to catch up get 3 easy questions, 15 seconds each. All 3 right and a team moves up, to 85% of the leader&rsquo;s score at most, but never past another team. Miss one and nothing changes.</P>
       </Rule>

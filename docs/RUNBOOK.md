@@ -81,14 +81,16 @@ or set them on Vercel as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KE
   with the Supabase tool; if that tool isn't working, paste the `docs/sql/` copy into
   Supabase → SQL Editor and run it.
 - **Tests:** `cd party && npm test` runs everything: the engine tests, the bank, type-scale
-  and map checks, 31 whole two-team nights with and without a host (`sim/run.mjs`), the 3 to 8
+  and map checks, 75 whole two-team nights with and without a host, with a TV and with none (`sim/run.mjs`), the 3 to 8
   team nights (`sim/many.mjs`), the lobby (`sim/lobby.mjs`), and the chaos and odd-input
   nights (`sim/chaos.mjs`, `sim/weird.mjs`). A night with no TV runs the same game on a phone,
   so these cover it too. Each night is compared with its saved trace in `party/sim/golden`. A
   night that differs when it shouldn't is a bug; when a change is meant to alter play, look at
   the difference (`node sim/run.mjs <n>` prints a night) and save the new traces with
   `node sim/run.mjs --update` (`node sim/many.mjs --update` for 3 to 8 teams). Commit them with
-  the change.
+  the change. Each two-team night runs in a process of its own, four at a time, so a night gives the same trace
+  alone (`node sim/run.mjs 60`) as in the full run; a new night with no saved trace fails until it's saved (19 Nov).
+  The 3 to 8 team TV checks (`sim/manytv.mjs`) run every team count from 3 to 8, with a TV and with none.
 - **Bots in a real room (when the owner asks for a room full of bots):** the owner opens the
   room (Create game on the TV, or Play without TV) and says the code; `cd party && npm run bots -- ABCD`
   puts a bot captain and a bot player on every team that has no captain, and they play the

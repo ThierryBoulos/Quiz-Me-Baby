@@ -143,10 +143,10 @@
 226.25 rouletteQ | 83 | 7-9 | 0-0 | Owls +1 point | 
 227.25 rouletteReveal | 83 | 7-9 | 0-5 | Owls +1 point | 
 228.00 rouletteQ | 84 | 7-9 | 0-5 | Owls +1 point | 
-229.00 rouletteReveal | 84 | 7-9 | 2-7 | Owls +1 point | 
-230.00 rouletteQ | 85 | 7-9 | 2-7 | Owls +1 point | 
-230.75 rouletteReveal | 85 | 7-9 | 2-10 | Owls +1 point | 
-231.75 rouletteSummary | 86 | 7-11 | 2-10 | Owls +1 point | 
+229.00 rouletteReveal | 84 | 7-9 | 3-7 | Owls +1 point | 
+230.00 rouletteQ | 85 | 7-9 | 3-7 | Owls +1 point | 
+230.75 rouletteReveal | 85 | 7-9 | 3-9 | Owls +1 point | 
+231.75 rouletteSummary | 86 | 7-11 | 3-9 | Owls +1 point | 
 232.50 roundIntro | 87 | 7-11 |  | Owls +1 point | 
 234.50 ask | 88 | 7-11 |  | Owls +1 point | 
 235.25 ask | 88 | 7-11 |  | Lions used Call a Friend. | 

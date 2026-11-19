@@ -39,7 +39,10 @@ function Tv() {
 }
 /* the server's copy (qmb_tv_backup): the game phone sends one; the fake server keeps the last */
 let backup = null;
-fake.sb().rpc = (name, args) => { if (name === "qmb_tv_backup") backup = structuredClone({ ...args.s, at: clock() }); return Promise.resolve({ data: null, error: null }); };
+fake.sb().rpc = (name, args) => {
+  /* (no internet: every call fails, the TV's online check too, lib/tv/netProbe.ts) */
+  if (fake.net.failWrites) return Promise.resolve({ data: null, error: { message: "Failed to fetch" } });
+  if (name === "qmb_tv_backup") backup = structuredClone({ ...args.s, at: clock() }); return Promise.resolve({ data: null, error: null }); };
 
 const send = (who, kind, payload) => fake.insert("actions", { room: CODE, user_id: who, kind, payload });
 const tick = (ms) => act(async () => { await advance(ms); });
@@ -304,10 +307,10 @@ async function fool(k, phone, tag) {
   for (let t = 1; t < k; t++) send("c" + t, "answer", { pick: own, ...(saved().fool.opts.some((o) => o.by.includes(t)) ? { pred: 0 } : {}), k: `${pub().qid}|pick` });
   await tick(1500);
   check(`${tag} Fool: every pick in: the reveal`, pub().screen === "reveal" && !!F().rev, pub().screen);
-  /* +2 the truth, +1 each team fooled (k-1); team 1 fell for it as team 0 said: -1 */
-  check(`${tag} Fool: the points: +2 and +${k - 1} to team 0, -1 to team 1 (named), 0 to the rest`, F().rev.pts[0] === 2 + (k - 1) && F().rev.pts[1] === -1 && F().rev.pts.slice(2).every((p) => p === 0), String(F().rev.pts));
+  /* +2 the truth, +1 each team fooled (k-1); team 1 fell for it as team 0 said: -1 to it, +1 more to team 0 (19 Nov) */
+  check(`${tag} Fool: the points: +2, +${k - 1} and +1 for the right call to team 0, -1 to team 1 (named), 0 to the rest`, F().rev.pts[0] === 2 + (k - 1) + 1 && F().rev.pts[1] === -1 && F().rev.pts.slice(2).every((p) => p === 0), String(F().rev.pts));
   check(`${tag} Fool: the reveal says whose lie it was and who fell for it`, F().rev.opts[own].by.includes(0) && F().rev.fooled[own].length === k - 1 && F().rev.hits.some((h) => h.by === 0 && h.on === 1));
-  check(`${tag} Fool: the tracker counts the fact on the reveal`, pub().game.pts[0] === 2 + (k - 1), String(pub().game.pts));
+  check(`${tag} Fool: the tracker counts the fact on the reveal`, pub().game.pts[0] === 2 + (k - 1) + 1, String(pub().game.pts));
   await judge("m/next");
   check(`${tag} Fool: Next: the second fact`, pub().screen === "q" && F().n === 2 && !F().opts, `${pub().screen} ${F()?.n}`);
   /* Change fact, before any lie: another; with one in, refused */
@@ -415,8 +418,9 @@ async function comeback(k, phone, tag) {
     check(`${tag} Comeback: a reload on its 2nd question: still on it, the team still in`, pub().screen === "q" && pub().game?.key === "comeback" && mini().i === 1 && !pub().comeback?.out[k - 1], `${pub().screen} ${mini()?.i}`);
     m = mini(); send("c" + (k - 1), "answer", { text: m.qs[m.i].answer, k: pub().qid + "|q" }); await tick(1500);
     /* (the server's copy is the game phone's: with a TV, the TV's page reloads again instead) */
-    if (phone) await takeover(4000); else await reload();
-    check(`${tag} Comeback: ${phone ? "the game phone taken over" : "a second reload"} on a reveal: still there`, pub().screen === "reveal" && pub().game?.key === "comeback", pub().screen);
+    /* (with a TV: "The TV died?", a new laptop taking over from the server's copy, 19 Nov review) */
+    await takeover(4000);
+    check(`${tag} Comeback: ${phone ? "the game phone taken over" : "a new laptop taking over (The TV died?)"} on a reveal: still there`, pub().screen === "reveal" && pub().game?.key === "comeback", pub().screen);
     await judge("m/next"); m = mini(); send("c" + (k - 1), "answer", { text: m.qs[m.i].answer, k: pub().qid + "|q" }); await tick(1500); await judge("m/next");
     check(`${tag} Comeback: ...and made, after both`, pub().screen === "summary" && pub().comeback?.made?.[k - 1] === true && pub().teams[k - 1].score === Math.min(34, 40 - (k - 2) - 1), `${pub().screen} ${pub().teams.map((t) => t.score)}`); }
   /* the host's skip, on its intro */
@@ -428,10 +432,30 @@ async function comeback(k, phone, tag) {
   check(`${tag} Comeback: the host skips it: straight to the third game`, pub().screen === "intro" && pub().game?.key === "pin" && pub().teams[k - 1].score === 4, `${pub().screen} ${pub().game?.key}`);
 }
 
+/* no internet (19 Nov review): the TV's writes and calls fail in the middle of a question, past the end of its clock.
+   The question waits (no reveal nobody could see), the banner says so; back, the clock carries on with what it had
+   left, and the question ends when that's up. Then "The TV died?" (a TV) or another phone (none): the server's copy */
+async function net(k, phone, tag) {
+  for (const game of ["roulette", "fool", "stakes", "see", "flag"]) {
+    await setup(k, phone, [game], 21); await judge("m/start"); await tick(game === "roulette" ? 6000 : 2000);
+    const s0 = saved(), scr = s0.screen, left = Math.round((s0.deadline - clock()) / 1000);
+    fake.net.failWrites = true; await tick((left + 5) * 1000);
+    const s1 = saved();
+    check(`${tag} No internet, ${game}: the question waits past its clock`, s1.screen === scr && s1.step === s0.step, `${scr} -> ${s1.screen}`);
+    fake.net.failWrites = false; await tick(6000);
+    const s2 = saved(), left2 = s2.deadline ? (s2.deadline - clock()) / 1000 : null;
+    check(`${tag} No internet, ${game}: back, the clock carries on with what it had left`, pub().screen === scr && left2 != null && left2 > left - 8 && left2 <= left + 1, `${pub().screen}, ${left2?.toFixed(1)} s left of ${left}`);
+    await tick((left2 ?? 0) * 1000 + 2000);
+    check(`${tag} No internet, ${game}: ...and the question ends when that's up`, pub().screen !== scr || pub().step > s0.step, `${pub().screen} step ${pub().step}`);
+  }
+  await setup(k, phone, ["closest"], 22); await judge("m/start"); await tick(16000);
+  check(`${tag} The server's copy of the game is kept${phone ? "" : " with a TV too (The TV died?)"}`, !!backup?.many && backup.s?.screen === "q", backup ? backup.s?.screen : "none");
+}
+
 export async function run(only) {
-  for (const k of [3, 8]) for (const phone of [false, true]) {
+  for (const k of [3, 4, 5, 6, 7, 8]) for (const phone of [false, true]) {   // (every count, 19 Nov review: 4 to 7 never ran through the real referee)
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["net", net]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }

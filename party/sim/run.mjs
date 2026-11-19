@@ -4,15 +4,20 @@
    with the same scores.
      node sim/run.mjs            check every night
      node sim/run.mjs --update   save the traces as the new golden ones (after a change meant to alter play)
-     node sim/run.mjs 3          only night 3 (prints its trace) */
+     node sim/run.mjs 3          only night 3 (prints its trace)
+   Each night runs in a process of its own, four at a time (19 Nov review: a night run alone and the same night in the
+   full run came out different, 22 of 63, from what the earlier nights left behind). A night with no saved trace
+   fails; --update saves it. */
 import { bundleNight } from "./bundle.mjs";
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { spawn } from "node:child_process";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, ".out/night.mjs");
-await bundleNight(out);
+const child = process.argv.includes("--child");
+if (!child) await bundleNight(out);
 /* each night gets fresh modules (the engine and the bank keep things between games, as on a real TV) */
 const load = async (n) => (await import(pathToFileURL(out).href + "?night=" + n)).night;
 
@@ -110,14 +115,52 @@ const NIGHTS = [
   { seed: 69, minis: ["fool"], rounds: 4, events: [{ at: 5, type: "score", a: 1, b: 14 }], comeback: "quiet" },
   { seed: 70, minis: ["closest"], rounds: 4, host: true, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "make", reloadOn: "comebackQ" },
   { seed: 71, minis: [], rounds: 4, phone: true, events: [{ at: 5, type: "score", a: 1, b: 12 }], comeback: "make", reloadOn: "comebackSummary" },
+  /* 19 Nov (the review): Fool Me Twice with the TV's page reloading on the picks and on the reveal (it froze the night),
+     and another device taking over on them; Russian Roulette, Secret Stakes and What Do You See? with no TV, with and
+     without a host, and a takeover in each; Fool Me Twice and The Comeback on a bad network */
+  { seed: 72, minis: ["fool"], rounds: 2, reloadOn: "foolPick" },
+  { seed: 73, minis: ["fool"], rounds: 2, host: true, phone: true, reloadOn: "foolReveal" },
+  { seed: 74, minis: ["fool"], rounds: 2, phone: true, takeoverOn: "foolPick" },
+  { seed: 75, minis: ["fool"], rounds: 2, host: true, takeoverOn: "foolReveal" },
+  { seed: 76, minis: ["roulette"], rounds: 2, phone: true, tieMore: 1 },
+  { seed: 77, minis: ["roulette"], rounds: 2, host: true, phone: true, takeoverOn: "rouletteReveal" },
+  { seed: 78, minis: ["stakes"], rounds: 2, phone: true, takeoverOn: "stakesQ" },
+  { seed: 79, minis: ["stakes"], rounds: 2, host: true, phone: true },
+  { seed: 80, minis: ["see"], rounds: 2, phone: true, takeoverOn: "seeQ" },
+  { seed: 81, minis: ["see"], rounds: 2, host: true, phone: true, tieMore: 1 },
+  { seed: 82, minis: ["fool"], rounds: 4, net: { delay: 2000, dup: 0.3 }, events: [{ at: 5, type: "score", a: 1, b: 12 }, { at: 70, type: "writesFail", for: 20 }], comeback: "make" },
+  { seed: 83, minis: ["fool"], rounds: 4, host: true, phone: true, net: { delay: 2000, dup: 0.3, stall: 0.1 }, events: [{ at: 5, type: "score", a: 12, b: 1 }, { at: 90, type: "writesFail", for: 15 }], comeback: "miss" },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
 const gold = join(here, "golden");
 mkdirSync(gold, { recursive: true });
+
+/* the parent: every night asked for, each in its own process, four at a time; the lines printed in the list's order */
+if (!child) {
+  const todo = NIGHTS.filter((n) => !only.length || only.includes(n.seed));
+  const outs = new Array(todo.length), codes = new Array(todo.length);
+  let next = 0, printed = 0;
+  const flush = () => { while (printed < todo.length && outs[printed] != null) process.stdout.write(outs[printed++]); };
+  const worker = async () => {
+    while (next < todo.length) {
+      const i = next++;
+      await new Promise((res) => {
+        const p = spawn(process.execPath, [fileURLToPath(import.meta.url), "--child", String(todo[i].seed), ...(update ? ["--update"] : []), ...(only.length ? ["--trace"] : [])], { stdio: ["ignore", "pipe", "pipe"] });
+        let o = "";
+        p.stdout.on("data", (d) => { o += d; }); p.stderr.on("data", (d) => { o += d; });
+        p.on("close", (code) => { codes[i] = code; outs[i] = o || `night ${todo[i].seed}: the process ended with nothing said (code ${code})\n`; flush(); res(); });
+      });
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(4, todo.length) }, worker));
+  process.exit(codes.some((c) => c !== 0) ? 1 : 0);
+}
+
 let bad = 0;
+const showTrace = args.includes("--trace");
 for (const n of NIGHTS) {
-  if (only.length && !only.includes(n.seed)) continue;
+  if (!only.includes(n.seed)) continue;
   const t = performance.now();
   /* a clock never sits past zero with nothing happening (while the TV is on) */
   const check = (p, now, vis) => (vis === "visible" && p.deadline && !p.paused && !p.pending && now - p.deadline > 6000 ? `${p.screen}: the clock is ${Math.round((now - p.deadline) / 1000)} s past zero and nothing happened` : null);
@@ -151,7 +194,8 @@ for (const n of NIGHTS) {
   else if (offKind) { verdict = `PICTURES: a ${offKind} picture, with only ${n.seeKinds.join(" and ")} on`; bad++; }
   else if (repeat) { verdict = `REPEAT A THEME: ${repeat}`; bad++; }
   else if (!ends) { verdict = `NEVER ENDED (${r.outcome}${r.stuckOn ? " on " + r.stuckOn : ""})`; bad++; }
-  else if (update || !existsSync(file)) { writeFileSync(file, text); verdict = "saved"; }
+  else if (update) { writeFileSync(file, text); verdict = "saved"; }
+  else if (!existsSync(file)) { verdict = "NO SAVED TRACE: run with --update to save it"; bad++; }
   else {
     const want = readFileSync(file, "utf8").split("\n"), got = text.split("\n");
     const i = want.findIndex((l, k) => l !== got[k]);
@@ -159,6 +203,6 @@ for (const n of NIGHTS) {
     else { verdict = `DIFFERS at line ${i + 1}:\n    golden: ${want[i] ?? "(end)"}\n    now:    ${got[i] ?? "(end)"}`; bad++; }
   }
   console.log(`${label}: ${r.outcome}, ${r.score}, ${r.minutes.toFixed(1)} min played in ${((performance.now() - t) / 1000).toFixed(2)} s, ${r.trace.length} screens, ${r.actions} taps, ${r.writes} writes — ${verdict}`);
-  if (only.length) console.log(r.trace.join("\n"), "\nrecap:", JSON.stringify(r.recap));
+  if (showTrace) console.log(r.trace.join("\n"), "\nrecap:", JSON.stringify(r.recap));
 }
 process.exit(bad ? 1 : 0);

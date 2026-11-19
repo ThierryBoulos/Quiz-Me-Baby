@@ -15,11 +15,12 @@ import { saveLobbyDraft, useLobbyShare } from "../tv/lobbyShare";
 import { cap1, type Member, type Room } from "../room";
 import { inboxMark, useInbox } from "../tv/useInbox";
 import { usePresent } from "../tv/usePresent";
+import { useNetProbe } from "../tv/netProbe";
 import { DISH_LAST, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY } from "../game";
 import { SEE_TYPE } from "../see";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, lineup, lockStakes, miniOf, newNight, next, pause, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, lockStakes, miniOf, newNight, nightOrder, next, pause, qOf, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
@@ -78,6 +79,13 @@ function markStakes(s: StateM) {
   try { const u = new Set<string>(JSON.parse(localStorage.getItem(USED_KEY) || "[]")); s.teams.forEach((_, t) => { const id = skQm(s, t)?.id; if (id) u.add(id); }); localStorage.setItem(USED_KEY, JSON.stringify([...u])); } catch { /* in memory only */ }
 }
 
+/* the question on screen counts as played on this TV, whichever way it came: the comeback's, sudden death's, one a
+   Change question brought in, What Do You See?'s new picture (19 Nov review: only the games' own were marked at Start).
+   (Russian Roulette and Secret Stakes mark their own, above: only what's drawn or bet on) */
+function markAsked(s: StateM, id: string) {
+  try { const u = new Set<string>(JSON.parse(localStorage.getItem(USED_KEY) || "[]")); if (u.has(id)) return; u.add(id); localStorage.setItem(USED_KEY, JSON.stringify([...u])); } catch { /* in memory only */ }
+}
+
 export function useTvMany(code: string, isTv: boolean, room: Room | null, members: Member[], phone = false) {
   const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave" | "noBank">(null);
   const st = useRef<StateM | null>(null);
@@ -89,6 +97,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const saveKey = "qmb.tv." + code + ".many";
   const phoneRef = useRef(phone); phoneRef.current = phone;
   const backedUp = useRef({ t: 0, screen: "" });
+  const markedQ = useRef<string | null>(null);
   const lastAt = useRef(0);
   const ack = useRef<Record<string, Record<string, string>>>({});
   /* the lobby's own writes (team names, who's away, a note): each carries the others this TV wrote last, so two
@@ -114,6 +123,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const marked = useRef<number | null>(null);    // the Russian Roulette spin whose questions are marked played
   const markedSk = useRef<number | null>(null);  // ...and the Secret Stakes round's
   const retryT = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /* no internet (the TV's writes failing, or sat on 8 s): the clocks wait, as with two teams; back, they move on by
+     that much (19 Nov review: a question ran out while no phone could see it, against How to Play) */
+  const offline = useRef(false), offlineAt = useRef(0), pendingSince = useRef(0);
+  const goOffline = (since: number) => { if (!offline.current) { offline.current = true; offlineAt.current = since; } setBanner((b) => b ?? "offline"); };
   const publish = useCallback(() => {
     if (soon.current) { clearTimeout(soon.current); soon.current = null; }
     const s = st.current; if (!s) return;
@@ -123,6 +136,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     imadMany(s);                                    // (Imad's line for this moment, if Settings has him on)
     if (s.screen === "q" && s.spinAt && s.spinAt !== marked.current) { marked.current = s.spinAt; markRoulette(s); }
     if (s.screen === "q" && miniOf(s)?.key === "stakes" && s.qn !== markedSk.current) { markedSk.current = s.qn ?? null; markStakes(s); }
+    { const k = miniOf(s)?.key, id = (qOf(s) as { id?: string } | null)?.id;
+      if (s.screen === "q" && k && k !== "roulette" && k !== "stakes" && id && id !== markedQ.current) { markedQ.current = id; markAsked(s, id); } }
     const { pub: p, secret } = buildMany(s);
     p.ack = ack.current;
     const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at; p.now = Date.now();
@@ -130,9 +145,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     setPub(p);
     sendLine(p, at);
     try { localStorage.setItem(saveKey, JSON.stringify({ build: BUILD_ID, shape: SHAPE, s })); setBanner((b) => (b === "cantSave" ? null : b)); } catch { setBanner("cantSave"); }
-    /* a copy on the server, so another phone can carry on if this one goes quiet (no TV, 3 Nov): on a new screen
-       at once, otherwise every 4 s at most. (Not with a TV: 3-8 teams always have a host, and a laptop doesn't doze.) */
-    if (phoneRef.current && !s.exit && (s.screen !== backedUp.current.screen || Date.now() - backedUp.current.t > 4000)) {
+    /* a copy on the server, so another phone (no TV: every 4 s at most, 3 Nov) or another laptop ("The TV died?": every
+       15 s, 19 Nov review: with a TV there was no copy, and the button gave an error) can carry on; on a new screen at once */
+    if (!s.exit && (s.screen !== backedUp.current.screen || Date.now() - backedUp.current.t > (phoneRef.current ? 4000 : 15000))) {
       backedUp.current = { t: Date.now(), screen: s.screen };
       void sb().rpc("qmb_tv_backup", { r: code, s: { many: true, build: BUILD_ID, shape: SHAPE, s, ...inboxMark(code), savedAt: Date.now(), settings: getSettings() } }).then(() => {}, () => {});
     }
@@ -143,10 +158,18 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         .or(`state->>pubAt.is.null,state->>pubAt.lt.${at}`).select("code")];
       if (withSecret) writes.push(sb().from("secrets").update({ data: { ...secret, at } }).eq("room", code)
         .or(`data.is.null,data->>at.is.null,data->>at.lt.${at}`).select("room"));
+      if (!pendingSince.current) pendingSince.current = Date.now();
       const res = await Promise.all(writes);
       const bad = res.find((r) => r.error);
-      if (bad) { setBanner((b) => b ?? "offline"); throw bad.error; }
+      if (bad) { goOffline(Date.now()); throw bad.error; }
+      pendingSince.current = 0;
       setBanner((b) => (b === "offline" ? null : b));
+      if (offline.current) {
+        offline.current = false;
+        const d = Math.max(0, Date.now() - offlineAt.current), cur = st.current;
+        if (cur && d) { if (cur.deadline) cur.deadline += d; if (cur.buzzAt) cur.buzzAt += d; }
+        setTimeout(() => publishRef.current(), 0);
+      }
       const latest = lastAt.current === at;
       if (withSecret && latest && res[1]?.data?.length) lastSecret.current = sec;   // (a write turned down is sent again with the next)
       if (latest && !res[0].data?.length) {
@@ -158,8 +181,12 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     chain.current = chain.current.then(() => {
       /* a failed write tries again in 2 s: one try waiting at a time, however many writes failed meanwhile (with no
          connection, every tap used to add a retry of its own; 5 Nov review) */
-      const done = job().catch((e) => { console.error("publish (many)", e); if (!retryT.current) retryT.current = setTimeout(() => { retryT.current = null; publishRef.current(); }, 2000); });
-      return Promise.race([done, new Promise<void>((r) => setTimeout(r, 2000))]);
+      const done = job().catch((e) => { console.error("publish (many)", e); goOffline(Date.now()); if (!retryT.current) retryT.current = setTimeout(() => { retryT.current = null; publishRef.current(); }, 2000); });
+      return Promise.race([done, new Promise<void>((r) => setTimeout(() => {
+        /* a write the server sits on, not one that fails: nothing landed for 8 s, as good as offline */
+        if (pendingSince.current && Date.now() - pendingSince.current > 8000) goOffline(pendingSince.current);
+        r();
+      }, 2000))]);
     });
   }, [code, saveKey, sendLine]);
   publishRef.current = publish;
@@ -247,7 +274,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         const rounds = picked.includes("quiz") ? Math.max(1, Math.min(MANY_ROUNDS, Math.floor(Number(cfg.rounds) || 1))) : 0;
         const games = quizGames(rounds);
         /* (Secret Stakes: always the night's last game, 11 Nov, the owner) */
-        const keys = [...lineup(games, picked.filter((x) => x !== "quiz" && x !== "stakes")), ...(picked.includes("stakes") ? ["stakes" as ManyKey] : [])];
+        const keys = nightOrder(games, picked);
         if (!keys.length) { await lobbyWrite({ note: { text: "Pick at least one game.", at: Date.now() } }); return; }
         let b: Bank;
         try { b = await loadBank(code); } catch { await sb().from("rooms").update({ state: { ...room.state, note: { text: phoneRef.current ? "The game phone couldn't load the questions. Check its internet, then tap Start again." : "The TV couldn't load the questions. Check its internet, then tap Start again.", at: Date.now() } } }).eq("code", code); return; }
@@ -516,11 +543,16 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     return () => document.removeEventListener("visibilitychange", vis);
   }, [isTv, publish]);
 
+  /* no internet in a quiet question (nothing written, so no write to fail): the server asked for the time (lib/tv/netProbe.ts) */
+  useNetProbe(isTv, { running: () => { const s = st.current; return !!s && (!!s.deadline || !!s.buzzAt); }, offline: () => offline.current,
+    lost: (since) => goOffline(since), back: () => publishRef.current() });
+
   /* the clock: time up shows the reveal */
   useEffect(() => {
     if (!isTv) return;
     const t = setInterval(() => {
       const s = st.current; if (!s) return;
+      if (offline.current) return;                   // (no internet: nothing runs out; see publish)
       /* What Do You See?: a buzz gets 10 seconds to say it and type it; none by then, and the team is out */
       if (s.screen === "q" && s.buzz != null && s.buzzAt && !s.away && Date.now() - s.buzzAt >= SEE_TYPE * 1000 + T_GRACE_MS) { seeMiss(s, s.buzz, Date.now(), true); playSound("wrong"); publish(); return; }
       if ((s.screen !== "q" && s.screen !== "pick") || !s.deadline) return;
