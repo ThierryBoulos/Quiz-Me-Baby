@@ -190,10 +190,10 @@ export const signed = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0"
 /* a chip for a chamber's level, gold for the bullet */
 export function LevelChip({ level, small, short }: { level: string; small?: boolean; short?: boolean }) {
   const b = level === "bullet";
-  /* (short: "Bullet", where a row is narrow, two columns of teams: "Bullet · Expert" hid the theme beside it, 21 Nov,
-     the owner) */
+  /* (short: "Expert", where a row is narrow, two columns of teams: "Bullet · Expert" hid the theme beside it; the gold
+     tag already says it's the bullet, 21 Nov, the owner) */
   /* what it pays, in green and red (11 Nov, the owner: the bullet's +5 and −3 said where it's shown, not only in the rules) */
-  return <span className={"rr-chip" + (b ? " bullet" : "") + (small ? " sm" : "") + (short ? " short" : "")}>{b && short ? "Bullet" : rrLevelWord(level)}
+  return <span className={"rr-chip" + (b ? " bullet" : "") + (small ? " sm" : "") + (short ? " short" : "")}>{b && short ? "Expert" : rrLevelWord(level)}
     {b ? <><b className="rr-pt ok">+5</b><b className="rr-pt no">−3</b></> : <b className="rr-pt ok">{level === "medium" ? "+2" : "+3"}</b>}</span>;
 }
 export function RrNote({ children }: { children: ReactNode }) { return <p className="rr-note">{children}</p>; }
