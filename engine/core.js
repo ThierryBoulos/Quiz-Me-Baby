@@ -493,10 +493,11 @@
      leader in the games left (reach). A share of the leader's score doesn't work as the test: with 3 teams last place
      pays 6 of 10, so nobody ever falls under 60%, and with 8 a team is under 50% one night in three. */
   const COMEBACK_GAP = 0.65, COMEBACK_NEAR = 0.5, COMEBACK_SHARE = 0.85, COMEBACK_LEGS = 3, COMEBACK_SECS = 15, COMEBACK_MIN_TWO = 5;
-  /* 3 to 8 teams: never under two games' worth of gap (1st place's points less last place's, twice: 8 with 3 teams, 14
-     with 8). On a short night two ordinary games could open the gap the test asks for: half of 4-game nights with
-     evenly matched teams had a comeback (19 Nov, the owner: a minimum gap, as with two teams). Long nights: no change */
-  const COMEBACK_MIN_GAMES = 2;
+  /* 3 to 8 teams: never under three games' worth of gap (1st place's points less last place's, three times: 12 with 3
+     teams, 21 with 8). On a short night a few ordinary games could open the gap the test asks for: half of 4-game
+     nights with evenly matched teams had a comeback (19 Nov, the owner: a minimum gap, as with two teams; 21 Nov, the
+     owner: three games, not two, so an ordinary 6-game night doesn't get one). Long nights: no change */
+  const COMEBACK_MIN_GAMES = 3;
   /* the scores after the comeback: `made[t]` is true for a team that got all three. From the top team down, so a
      team's ceiling is one point under the lowest team that was above it, as that team ends up (made it or not).
      Teams level before it can end level, or apart if only one makes it; nobody ends above a team it was behind */

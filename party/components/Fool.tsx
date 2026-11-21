@@ -2,7 +2,7 @@
 /* FOOL ME TWICE's screens (the owner, 16 Nov), the same pieces on the TV and every phone, 2 teams or 8: the fact with
    its blank, who has written and picked, the answers to pick from, and the reveal (each lie, whose it was and who fell
    for it, the truth first). The rules are in lib/fool.ts. */
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { FOOL_PEN_END as PEN_END, foolAwards, foolAwardWhat, rvFool, type FoolOpt, type FoolPub, type FoolRev, type FoolSum } from "@/lib/fool";
 import { Dot } from "./many/PartsMany";
 import { QMB } from "@/lib/engine";
@@ -75,7 +75,17 @@ export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, 
 
 /* the reveal: the truth first, on top, in gold, with who guessed it (16 Nov, the owner); then each answer that fooled
    someone or was a team's, whose it was and who fell for it; ours nobody fell for go quietly. Then each team's points */
+/* TRIAL (21 Nov, for the owner's choice, pictures only): how the Gotcha line names the teams. "names", the game now;
+   "letters", from 5 teams the teams' dots instead of their names (option A); "points", the owner's idea: the lie's own
+   points on its label ("Lions' lie, +2") and only the −1 on the Gotcha side. Set by the screen check
+   (SCREENS_GOTCHA); qmb.flap = "a" holds the board on the label side with motion off. Goes once the owner picks. */
+function useGotchaTrial() {
+  const [v, setV] = useState({ style: "names", flapA: false });
+  useEffect(() => { try { setV({ style: localStorage.getItem("qmb.gotcha") || "names", flapA: localStorage.getItem("qmb.flap") === "a" }); } catch { /* */ } }, []);
+  return v;
+}
 export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]; tv?: boolean }) {
+  const trial = useGotchaTrial(), dots = trial.style === "letters" && teams.length >= 5, pts = trial.style === "points";
   const names = (ts: number[]) => ts.map((t) => teams[t]?.name ?? "").join(" & ");
   const rows = rev.opts.map((o, k) => ({ o, k, fell: rev.fooled[k] || [] }))
     .filter((x) => x.o.truth || x.o.by.length || x.fell.length)
@@ -89,6 +99,9 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
     const dot = <Dot key={t} t={t} color={teams[t]?.color ?? "#888"} size={ds} />;
     return hit.includes(t) ? <span key={t} className="fool-ring">{dot}</span> : dot; })}</span> : null;
   /* (a team's name in its colour, 16 Nov, the owner: "Team D's lie") */
+  /* (trial "points": what the lie earned its team: 1 a team fooled, 1 more for the right call) */
+  const lieGot = (x: { k: number; fell: number[]; o: FoolOpt }) => { const w = x.o.by[0]; if (w == null) return 0;
+    return x.fell.filter((f) => f !== w).length + rev.hits.filter((h) => h.by === w && x.fell.includes(h.on)).length; };
   const named = (ts: number[], and = " & "): ReactNode => ts.map((w, j) => <Fragment key={w}>{j ? and : ""}<bdi style={{ color: teams[w]?.color }}>{teams[w]?.name}</bdi></Fragment>);
   return (
     <div className="flex flex-col w-full" style={{ gap }}>
@@ -96,16 +109,17 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
       <div className={"grid w-full " + (cols ? "grid-cols-2" : "grid-cols-1")} style={{ gap, gridAutoRows: "1fr" }}>
       {rows.map((x, i) => {
         /* (a name ending in s takes the apostrophe alone: "Owls' lie") */
-        const by = names(x.o.by), t = x.o.truth, tag: ReactNode = t ? "The truth" : x.o.ours ? "One of ours" : <>{named(x.o.by)}{/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie</>;   // (2-team names carry invisible direction marks)
+        const by = names(x.o.by), t = x.o.truth, tag: ReactNode = t ? "The truth" : x.o.ours ? "One of ours" : <>{named(x.o.by)}{/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie{pts && lieGot(x) > 0 ? <>, <span style={{ color: "var(--color-ok)" }}>+{lieGot(x)}</span></> : null}</>;   // (2-team names carry invisible direction marks)
         /* a right prediction: the team whose lie it is named the team that fell for it */
         const pred = t ? [] : x.fell.filter((f) => rev.hits.some((h) => h.on === f && x.o.by.includes(h.by)));
         const got = pred.length > 0, d = { ["--d" as string]: `${i * step + 0.35}s` };
         /* ...and who called it: +1 more each, in green (21 Nov, the owner: "As expected, Gotcha! Lions −1, Owls +1") */
         const callers = x.o.by.filter((w) => rev.hits.some((h) => h.by === w && pred.includes(h.on)));
         const said = `As expected, Gotcha! ${[...pred.map((f) => `${teams[f]?.name} −1`), ...callers.map((w) => `${teams[w]?.name} +1`)].join(", ")}.`;
-        const label = got ? <span className="fool-flap"><span className="fool-flap-a">{tag}</span><span className="fool-flap-b" aria-hidden="true">
-          <span style={{ color: "var(--color-ink-2)" }}>As expected, Gotcha!</span>{pred.map((f, j) => <Fragment key={f}>{j ? "," : ""} <bdi style={{ color: teams[f]?.color }}>{teams[f]?.name}</bdi> <span style={{ color: "var(--color-no)" }}>−1</span></Fragment>)}
-          {callers.map((w) => <Fragment key={"c" + w}>, <bdi style={{ color: teams[w]?.color }}>{teams[w]?.name}</bdi> <span style={{ color: "var(--color-ok)" }}>+1</span></Fragment>)}</span></span> : tag;
+        const nm = (w: number) => dots ? <span className="inline-block align-middle" style={{ marginInline: 2 }}><Dot t={w} color={teams[w]?.color ?? "#888"} size={tv ? (big ? 18 : 20) : 12} /></span> : <bdi style={{ color: teams[w]?.color }}>{teams[w]?.name}</bdi>;
+        const label = got ? <span className={"fool-flap" + (trial.flapA ? " show-a" : "")}><span className="fool-flap-a">{tag}</span><span className="fool-flap-b" aria-hidden="true">
+          <span style={{ color: "var(--color-ink-2)" }}>As expected, Gotcha!</span>{pred.map((f, j) => <Fragment key={f}>{j ? "," : ""} {nm(f)} <span style={{ color: "var(--color-no)" }}>−1</span></Fragment>)}
+          {!pts && callers.map((w) => <Fragment key={"c" + w}>, {nm(w)} <span style={{ color: "var(--color-ok)" }}>+1</span></Fragment>)}</span></span> : tag;
         const caption = t ? (x.fell.length ? "guessed it" : "nobody guessed it") : x.fell.length ? "fell for it" : "nobody fell for it";
         return (
           <div key={x.k} className={"fool-rev rv relative" + (t ? " truth" : "") + (tv ? " tv" : "") + (cols && t ? " col-span-2" : "")} style={{ animationDelay: `${i * step}s`, ...d, ...(tv ? { fontSize: cols ? 24 : big ? 22 : 28, padding: big && !cols ? "6px 14px" : undefined } : {}) }}>

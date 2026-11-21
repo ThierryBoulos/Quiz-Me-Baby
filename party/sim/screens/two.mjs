@@ -54,9 +54,10 @@ export async function dumpTwo(load) {
      other team has answered, and a night that ends tied. The phones are Lions': the other team is Owls */
   const copy = (k) => (got[k] ? JSON.parse(JSON.stringify(got[k])) : null);
   for (const tag of ["nh", "h"]) {
-    const rr = copy(`${tag}.rouletteQ.roulette.hold.lap1.a`);
-    if (rr) { rr.now = rr.pub.roulette.spinAt + 9000; rr.pub.deadline = rr.now + 25000; rr.pub.left = null; rr.pub.timeUp = false;
-      rr.pub.sent = [false, true]; got[`${tag}.rouletteQ.roulette.extra.stopped.a`] = rr; }
+    for (const lap of [1, 2, 3]) {   // (each spin: one of them has a team on the bullet)
+      const rr = copy(`${tag}.rouletteQ.roulette.hold.lap${lap}.a`);
+      if (rr) { rr.now = rr.pub.roulette.spinAt + 9000; rr.pub.deadline = rr.now + 25000; rr.pub.left = null; rr.pub.timeUp = false;
+        rr.pub.sent = [false, true]; got[`${tag}.rouletteQ.roulette.extra.stopped${lap === 1 ? "" : lap}.a`] = rr; } }
     const sq = copy(`${tag}.stakesQ.stakes.z`) || copy(`${tag}.stakesQ.stakes.a`);
     if (sq) { sq.pub.sent = [false, true]; got[`${tag}.stakesQ.stakes.extra.other.a`] = sq; }
     const fin = copy(`${tag}.final.a`);

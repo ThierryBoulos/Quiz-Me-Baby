@@ -14,11 +14,16 @@ let bankP: Promise<Bank> | null = null;
    it (data/accept.json, served with the full bank): by question id, and by
    answer for flags, dishes, maps and Say-the-Same words ("United States"
    also takes "USA"). */
-type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; notById?: Record<string, string[]>; byPool?: Record<string, Record<string, string[]>>; someOf?: Record<string, { items: string[][]; min: number }>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
+type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; notById?: Record<string, string[]>; notTypo?: Record<string, string[]>; byPool?: Record<string, Record<string, string[]>>; someOf?: Record<string, { items: string[][]; min: number }>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
 let accept: Accept = { byId: {}, byAnswer: {} };
 export const acceptFor = (q: { id?: string; type?: string; question?: string; answer?: string; accept?: string[] } | null | undefined) =>
   !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(q.type === "saysame" ? sayAccept(q.id || "", q.answer || "") : givesItAway(q) ? [] : accept.byAnswer[q.answer || ""] || [])]
     .filter((x) => !(accept.notById?.[q.id || ""] || []).includes(x));   // (another name that counts elsewhere but not here: "Tony Stark" isn't the film Iron Man)
+/* What Do You See?: another picture's exact name is never a typo of this one's (21 Nov, the owner: "Trump" isn't "The
+   Tramp" for Chaplin, "Ananas" isn't "Bananas" for the banana). accept.json notTypo lists, for each picture, the other
+   pictures' names the typo allowance would take; scripts/check-bank.mjs finds any new one. */
+export const notTypo = (q: { id?: string } | null | undefined, typed: string) =>
+  !!q && (accept.notTypo?.[q.id || ""] || []).some((n) => QMB.tidy(n) === QMB.tidy(typed));
 /* Don't Say the Same: the other names a word on a prompt's list goes by. A prompt may have its own (accept.json
    byPool), so a name shared with another list doesn't leak in: "Purple" is the colour Violet, not the flower; "Remus"
    is Lupin in Harry Potter, not the flower (5 Nov, content review 2.5) */

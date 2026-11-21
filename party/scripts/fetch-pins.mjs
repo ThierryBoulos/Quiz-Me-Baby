@@ -14,7 +14,7 @@ const sharp = require("sharp");
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const out = join(root, "party/public/pins");
 const force = process.argv.includes("--force");
-const src = readFileSync(join(root, "classic.html"), "utf8");
+const src = readFileSync(join(root, "bank/bank.js"), "utf8");   // (the bank, out of classic.html since 21 Nov)
 const PINS = Function(`return ${src.match(/const PINS = (\[[\s\S]*?\n\]);/)[1]}`)();
 const UA = "QuizMeBabyParty/1.0 (private party quiz app)";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* fetch-sees.mjs — What Do You See?'s pictures: our own copies of the files named in Classic's SEES catalogue
-   (classic.html), framed at 4:3, for the TV (<photo>.jpg) and the phones (<photo>-s.jpg), under names that don't say
+   (bank/bank.js), framed at 4:3, for the TV (<photo>.jpg) and the phones (<photo>-s.jpg), under names that don't say
    what they show, with CREDITS.md beside them (each licence asks for its credit).
      a face: the crop given (head and shoulders), grown to 4:3 around its centre
      a logo: the symbol (cropped first if the file has a word beside it) on a plain light card
@@ -17,7 +17,7 @@ const sharp = require("sharp");
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const out = join(root, "party/public/see");
 const args = process.argv.slice(2), force = args.includes("--force"), only = args.filter((a) => !a.startsWith("--"));
-const src = readFileSync(join(root, "classic.html"), "utf8");
+const src = readFileSync(join(root, "bank/bank.js"), "utf8");   // (the bank, out of classic.html since 21 Nov)
 export const SEES = Function(`return ${src.match(/const SEES = (\[[\s\S]*?\n\]);/)[1]}`)();
 const UA = "QuizMeBabyParty/1.0 (private party quiz app)";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

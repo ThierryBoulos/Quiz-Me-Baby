@@ -160,10 +160,10 @@
 258.75 rouletteQ | 72 | 7-9 | 0-0 | Call changed: Lions +1 point. | 
 259.50 rouletteReveal | 72 | 7-9 | 0-0 | Call changed: Lions +1 point. | 
 260.50 rouletteQ | 73 | 7-9 | 0-0 | Call changed: Lions +1 point. | 
-261.50 rouletteReveal | 73 | 7-9 | 0-2 | Call changed: Lions +1 point. | 
-262.25 rouletteQ | 74 | 7-9 | 0-2 | Call changed: Lions +1 point. | 
-263.25 rouletteReveal | 74 | 7-9 | 2-7 | Call changed: Lions +1 point. | 
-264.00 rouletteSummary | 75 | 7-11 | 2-7 | Call changed: Lions +1 point. | 
+261.50 rouletteReveal | 73 | 7-9 | -3-3 | Call changed: Lions +1 point. | 
+262.25 rouletteQ | 74 | 7-9 | -3-3 | Call changed: Lions +1 point. | 
+263.25 rouletteReveal | 74 | 7-9 | -1-6 | Call changed: Lions +1 point. | 
+264.00 rouletteSummary | 75 | 7-11 | -1-6 | Call changed: Lions +1 point. | 
 265.00 roundIntro | 76 | 7-11 |  | Call changed: Lions +1 point. | 
 266.00 ask | 77 | 7-11 |  | Call changed: Lions +1 point. | 
 266.75 answer | 77 | 8-11 |  | Lions +1 point | 

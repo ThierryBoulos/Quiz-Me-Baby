@@ -11,14 +11,14 @@
 12.00 roundScore | 5 | 1-0 |  | Lions +1 point — steal | 
 13.00 rouletteIntro | 6 | 1-0 | 0-0 | Lions +1 point — steal | 
 14.00 rouletteQ | 7 | 1-0 | 0-0 | Lions +1 point — steal | 
-14.75 rouletteReveal | 7 | 1-0 | 2-0 | Lions +1 point — steal | 
-15.75 rouletteReveal | 7 | 1-0 | 2-0 |  | 
-16.50 rouletteReveal | 7 | 1-0 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
-17.50 rouletteQ | 8 | 1-0 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
-18.50 rouletteReveal | 8 | 1-0 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
-19.25 rouletteQ | 9 | 1-0 | 2-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
-20.25 rouletteReveal | 9 | 1-0 | 2-5 | ⁨Rami⁩ doesn't agree: the call stands. | 
-21.00 rouletteReveal | 9 | 1-0 | 2-5 |  | 
+14.75 rouletteReveal | 7 | 1-0 | 2--3 | Lions +1 point — steal | 
+15.75 rouletteReveal | 7 | 1-0 | 2--3 |  | 
+16.50 rouletteReveal | 7 | 1-0 | 2--3 | ⁨Rami⁩ doesn't agree: the call stands. | 
+17.50 rouletteQ | 8 | 1-0 | 2--3 | ⁨Rami⁩ doesn't agree: the call stands. | 
+18.50 rouletteReveal | 8 | 1-0 | 2--3 | ⁨Rami⁩ doesn't agree: the call stands. | 
+19.25 rouletteQ | 9 | 1-0 | 2--3 | ⁨Rami⁩ doesn't agree: the call stands. | 
+20.25 rouletteReveal | 9 | 1-0 | 2--1 | ⁨Rami⁩ doesn't agree: the call stands. | 
+21.00 rouletteReveal | 9 | 1-0 | 2--1 |  | 
 23.00 rouletteReveal | 9 | 1-0 | 2--3 | Call changed: ⁨Owls⁩ WRONG. | 
 23.75 rouletteSummary | 10 | 3-0 | 2--3 | Call changed: ⁨Owls⁩ WRONG. | 
 24.75 roundIntro | 11 | 3-0 |  | Call changed: ⁨Owls⁩ WRONG. | 

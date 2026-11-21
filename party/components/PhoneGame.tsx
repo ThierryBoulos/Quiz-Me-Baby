@@ -545,9 +545,13 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     /* Russian Roulette: the barrel spins; then each team's chamber, its question and (only here) its answer */
     case "rouletteQ": return (
       <div className="flex flex-col gap-3 flex-1">
-        {/* (its clock once the barrel stops, as Secret Stakes shows it: 19 Nov review, the only game without one here) */}
-        {rrSpun && <div className="flex items-center justify-between"><div className="eyebrow">Russian Roulette</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>}
-        {pub.roulette && <RrPhone rr={pub.roulette} me={null} teams={rr2(pub)} host />}
+        {/* (its clock once the barrel stops, as Secret Stakes shows it: 19 Nov review, the only game without one here; in
+            the empty corner at the barrel's top right, no title beside it: the bar at the top already says Russian
+            Roulette, 21 Nov, the owner) */}
+        {pub.roulette && <div className="relative">
+          <RrPhone rr={pub.roulette} me={null} teams={rr2(pub)} host />
+          {rrSpun && <div className="absolute right-0" style={{ top: 28 }}><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>}
+        </div>}
         {rrSpun && (loading ? <Line>Getting the answers…</Line> : secret.answers && pub.roulette ? (
           <div className="card cue-card flex flex-col gap-1" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answers. Only you see these</div>
@@ -1213,6 +1217,8 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   if (/Intro$/.test(pub.screen) && pub.mini) return <MiniIntro pub={pub} size="phone" />;
   if (pub.screen === "comebackIntro" || pub.screen === "comebackSummary") return <ComebackTop pub={pub} />;
   if (RESULT.test(pub.screen)) return null;            // the result says it
+  /* Fool Me Twice, the captain picking the truth: its line sits under the answers, not here too (21 Nov, the owner) */
+  if (pub.screen === "foolPick" && !pub.paused && !pub.lifeline && me.role === "captain" && me.team != null && pub.fool?.opts) return null;
   /* on a question, the question (or flag, or map) is the thing to look at: the instruction steps back */
   /* (out of a picture: said plainly, in red, not stepped back) */
   const quiet = QUIET.includes(pub.screen) && !pub.paused && !(pub.screen === "seeQ" && me.team != null && (pub.see?.out?.[me.team] || pub.buzz != null));
@@ -1646,8 +1652,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         <div className="flex flex-col gap-2">
           <FoolOptions opts={pub.fool.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolPicked ?? (pub.sent?.[mine] ? -1 : null)} busy={busy} seed={me.user_id + "|" + pub.qid}
             onPick={(k) => { setFoolPicked(k); void act("answer", { pick: k, k: draftKey }).then((ok) => { if (!ok) setFoolPicked(null); }); }} />
-          {/* (the line at the top already asks it, and says "Picked": only what it adds, 19 Nov review) */}
-          {!pub.sent?.[mine] && <p className="text-13 text-center text-[var(--color-ink-3)]">One tap and it&rsquo;s locked.</p>}
+          {/* (under the answers, as it was; the line at the top is gone instead: 21 Nov, the owner) */}
+          <p className="text-13 text-center text-[var(--color-ink-3)]" role="status">{pub.sent?.[mine] ? "Picked. Wait for the reveal." : <>Which one is the truth? One tap and it&rsquo;s locked.</>}</p>
         </div>)}
       {canPin && (
         <div className="flex flex-col gap-2">

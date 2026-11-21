@@ -151,10 +151,10 @@ The owner's name (key `see`). One picture at a time, unreadable at first and cle
 
 ### B3. Pictures: how they're stored
 
-Copy Drop the Pin's way end to end (`const PINS` in `classic.html`, `scripts/export-bank.js`,
+Copy Drop the Pin's way end to end (`const PINS` in `bank/bank.js`, `scripts/export-bank.js`,
 `party/scripts/fetch-pins.mjs`, `party/public/pins/CREDITS.md`):
 
-- A catalogue `const SEES` in `classic.html`, one row a picture: key, answer, kind (`face`, `logo`, `close`),
+- A catalogue `const SEES` in `bank/bank.js`, one row a picture: key, answer, kind (`face`, `logo`, `close`),
   level, effect (`blur` or `zoom`), for a zoom its focus point (x and y in %, and the starting zoom, 4 to 8
   times), the file's hashed name, the author, the licence, the source page. Ids `see:<key>`.
 - `party/scripts/fetch-sees.mjs`: downloads each file, writes a TV size (1280 wide; close-ups 1920 wide, from an

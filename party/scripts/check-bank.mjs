@@ -175,6 +175,13 @@ flagFiles.filter((f) => !used.has(f)).forEach((f) => warn(`flag ${f}`, "svg pres
 const counts = {};
 bank.bank.forEach((q) => { counts[q.type] = (counts[q.type] || 0) + 1; });
 console.log("bank", bank.version, "—", bank.bank.length, "rows", JSON.stringify(counts));
+/* What Do You See?: another picture's exact name the typo allowance would take for this one must be on accept.json
+   notTypo (21 Nov, the owner: "Trump" isn't "The Tramp" for Chaplin), or the game would mark it right */
+{ const see = bank.bank.filter((q) => q.type === "see");
+  const acc = (q) => [...(q.accept || []), ...(accept.byId[q.id] || []), ...(accept.byAnswer[q.answer] || [])].filter((x) => !(accept.notById?.[q.id] || []).includes(x));
+  for (const b of see) { const own = new Set([b.answer, ...acc(b)].map(tidy)), listed = new Set((accept.notTypo?.[b.id] || []).map(tidy));
+    for (const a of see) { if (a === b) continue;
+      for (const n of [a.answer, ...acc(a)]) if (!own.has(tidy(n)) && !listed.has(tidy(n)) && QMB.isMatch(n, b.answer, acc(b))) err(b.id, `"${n}" (${a.id}) would count as a typo of it: add it to accept.json notTypo`); } } }
 if (showWarnings) warns.forEach((w) => console.log("WARN ", w));
 errors.forEach((e) => console.log("ERROR", e));
 /* never on the same night: every id there must still be in the bank (a reworded question has a new id), and every

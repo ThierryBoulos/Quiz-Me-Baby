@@ -1558,7 +1558,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .rr-chip.sm { padding: 1px 8px; font-size: 10px; }
 /* on the TV, read from a sofa (19 Nov review: 12px, and 10px from 5 teams, in Roulette's rows and Secret Stakes) */
 .tv-stage .rr-chip { font-size: 18px; padding: 3px 12px; }
-.tv-stage .rr-chip.sm { font-size: 15px; padding: 2px 10px; }
+/* (from 5 teams: between the old 10px and 15px, the rows were too tall at 8 teams: 21 Nov, the owner) */
+.tv-stage .rr-chip.sm { font-size: 13px; padding: 1px 8px; }
 .rr-chip .rr-pt { font-weight: 900; letter-spacing: 0; }
 .rr-chip .rr-pt.ok { color: var(--color-ok); } .rr-chip .rr-pt.no { color: var(--color-no); }
 .rr-chip.bullet .rr-pt { background: #14110a; border-radius: 999px; padding: 0 6px; }
@@ -1710,6 +1711,8 @@ button.fool-opt:disabled:not(.on) { opacity: .55; }
    and the Gotcha never showed (19 Nov review) */
 html[data-motion="off"] .fool-flap-a { animation: none !important; opacity: 0; }
 html[data-motion="off"] .fool-flap-b { animation: none !important; opacity: 1; transform: none; }
+/* (trial pictures, 21 Nov: the label side held, to show it) */
+html[data-motion="off"] .fool-flap.show-a .fool-flap-a { opacity: 1; } html[data-motion="off"] .fool-flap.show-a .fool-flap-b { opacity: 0; }
 
 /* Fool Me Twice's result (16 Nov, the owner's pick): the lie detector. Its ivory paper, the grid drifting as the pens
    draw, each pen's trace drawn left to right with its head riding along, the labels in last place first, the winner's

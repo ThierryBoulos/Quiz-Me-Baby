@@ -7,11 +7,11 @@ plus three free accounts: GitHub, Vercel and Supabase.
 
 | Piece | Where | What it is |
 |---|---|---|
-| Classic | `classic.html` at the root | Retired as a game (3 Nov 2026): `/classic` redirects home. Kept as the source of the bank, maps and pins exports |
+| Classic | `classic.html` at the root | Retired as a game (3 Nov 2026): `/classic` redirects home. Kept only to draw the maps (`scripts/export-maps.js`) |
 | Party | `party/` (Next.js) on Vercel | The TV (`/tv/CODE`), the phones (`/join`, `/room/CODE`), `/api/health`, `/api/bank` |
 | Game server | Supabase project (EU, Ireland) | Rooms, members, the action log, secrets; anonymous sign-ins |
 | Shared rules | `engine/core.js` | The game's rules (dealing, every move, answer checking), run by the TV, or by a phone when there's no TV; tests in `engine/*.test.js` |
-| Question bank | Kept in `classic.html` (the retired Classic); exported to `party/data/bank.json` (full, server only) and `party/public/bank.json` (no answers) by `node scripts/export-bank.js` | |
+| Question bank | `bank/bank.js` (out of `classic.html` since 21 Nov 2026); exported to `party/data/bank.json` (full, server only) and `party/public/bank.json` (no answers) by `node scripts/export-bank.js` | |
 
 ## 1. Supabase (15 min)
 
@@ -70,10 +70,9 @@ or set them on Vercel as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KE
 
 ## Everyday jobs
 
-- **Change a question:** edit the bank in `classic.html` (`index.html` is only the old
-  address's "Legacy" notice), following `docs/CONTENT-RULES.md`. Bump `BUILD.v` and
-  `SEED_VERSION` in `classic.html` and `version.json`, then `node scripts/export-bank.js`
-  (needs Playwright's Chromium) and `cd party && npm test`. Commit all of it.
+- **Change a question:** edit the bank in `bank/bank.js`, following `docs/CONTENT-RULES.md`.
+  Bump `BUILD.v` and `SEED_VERSION` in `bank/bank.js` and `version.json`, then
+  `node scripts/export-bank.js` and `cd party && npm test`. Commit all of it.
 - **Something broke on the night:** `/api/health` first. Then Supabase → Logs.
   A paused Free project: Supabase dashboard → the project → **Resume**.
 - **Database change:** a new file in `supabase/migrations/` (never edit an old one) and a

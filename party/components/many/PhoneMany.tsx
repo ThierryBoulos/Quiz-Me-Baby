@@ -649,8 +649,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <div className={"flex flex-col " + (cmp ? "gap-2" : "gap-4")}>
           {head}
           <FoolFact fool={F} size={cmp ? 15 : 17} />
-          <p className={"text-center font-bold " + (cmp ? "text-15" : "text-16")} role="status" style={{ color: done ? undefined : "var(--color-gold)" }}>{done ? "Picked. Wait for the reveal." : "Which one is the truth?"}</p>
           <FoolOptions opts={F.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolSel} busy={busy} locked={done} onPick={(k) => setFoolSel(k)} seed={seed} compact={cmp} />
+          {/* (under the answers, as with 2 teams: 21 Nov, the owner) */}
+          <p className={"text-center font-bold " + (cmp ? "text-15" : "text-16")} role="status" style={{ color: done ? undefined : "var(--color-gold)" }}>{done ? "Picked. Wait for the reveal." : "Which one is the truth?"}</p>
           {needPred && (<>
             {/* (the team picked, or what it costs them, on the same line: one line less) */}
             <p className="text-center font-bold text-14 mt-1 truncate">Who will fall for your lie? {foolPred != null && cmp === 2 ? <bdi style={{ color: T[foolPred]?.color }}>{T[foolPred]?.name}</bdi> : <span className="font-normal text-[var(--color-ink-3)]">They lose 1.</span>}</p>

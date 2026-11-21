@@ -191,7 +191,7 @@ const PHONE_MEASURE = () => {
   return [...new Set(bad)].slice(0, 10);
 };
 /* (Secret Stakes' reveal brings its rows in one by one: with 8 teams the last lands at about 7 s) */
-const waitFor = (k) => (/\.final/.test(k) ? 12000 : /[Rr]eveal\.stakes/.test(k) ? 8000 : /Reveal|reveal|Result|Summary|summary|roundScore|Review|decided|\.intro/.test(k) ? 6000 : /^lobby/.test(k) ? 3500 : 2500);
+const waitFor = (k) => (/\.final/.test(k) ? 12000 : /[Rr]eveal\.(stakes|roulette)/.test(k) ? 8000 : /Reveal|reveal|Result|Summary|summary|roundScore|Review|decided|\.intro/.test(k) ? 6000 : /^lobby/.test(k) ? 3500 : 2500);
 const file = (s) => s.replace(/[^a-z0-9]+/gi, "_");
 
 const browser = await chromium.launch();
@@ -210,6 +210,8 @@ const page = async (j, opt) => {
   const ctx = await browser.newContext({ deviceScaleFactor: 1, ...opt }); await offline(ctx);
   /* SCREENS_MOTION=off: the screens with Settings' motion switch off (19 Nov: the Gotcha with motion off) */
   if (process.env.SCREENS_MOTION === "off") await ctx.addInitScript(() => { try { localStorage.setItem("qmb.motion", "off"); } catch { /* */ } });
+  /* SCREENS_GOTCHA=letters|points (and SCREENS_FLAP=a): the trial Gotcha lines, for the owner's choice (21 Nov) */
+  if (process.env.SCREENS_GOTCHA) await ctx.addInitScript(([g, f]) => { try { localStorage.setItem("qmb.gotcha", g); if (f) localStorage.setItem("qmb.flap", f); } catch { /* */ } }, [process.env.SCREENS_GOTCHA, process.env.SCREENS_FLAP || ""]);
   const p = await ctx.newPage(); p.on("pageerror", (e) => errors.push(j.id + ": " + String(e).slice(0, 200)));
   await p.goto(BASE + "/screens#" + encodeURIComponent(j.hash), { timeout: 180000 });
   return { ctx, p };

@@ -11,7 +11,8 @@ without, with a TV or with phones only ("Play without TV" in the TV's lobby).
 |---|---|
 | `party/` | The game: Next.js on Vercel, Supabase for the rooms. How to run, test and deploy it: [`party/README.md`](party/README.md) |
 | `engine/` | The rules: dealing, every move of the night, answer checking. Tests in `engine/*.test.js` |
-| `classic.html` | The old one-screen app, retired as a game on 3 Nov 2026 (`/classic` lands on the home screen). It stays only as the source of the question bank, maps and pins: `scripts/export-bank.js`, `scripts/export-maps.js`, `party/scripts/fetch-pins.mjs` |
+| `bank/bank.js` | The question bank: every question, picture, map, flag, dish, airport, fact. `scripts/export-bank.js` writes Party's two bank files from it; `party/scripts/fetch-pins.mjs` and `fetch-sees.mjs` read their pictures' lists from it. Out of `classic.html` since 21 Nov 2026 |
+| `classic.html` | The old one-screen app, retired as a game on 3 Nov 2026 (`/classic` lands on the home screen). It stays only to draw the maps for `scripts/export-maps.js` (it loads `bank/bank.js`) |
 | `maps-geo.js`, `flags/`, `version.json`, the icons | Classic's files, read by its exports (and `flags/` by `party/scripts/hash-flags.mjs`) |
 | `index.html` | The old GitHub Pages address: a "Legacy" notice |
 | `supabase/migrations/` | The database, one file per change; `docs/sql/` holds paste-ready copies |

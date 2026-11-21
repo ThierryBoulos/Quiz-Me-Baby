@@ -1,7 +1,7 @@
 # Content rules: how to write for Quiz Me Baby
 
 The owner's rulings from the content reviews (October rounds 1–2, the 4–5 Nov 2026 review), written down so new
-content follows them the first time. Read this before writing or changing anything in the bank (`classic.html`).
+content follows them the first time. Read this before writing or changing anything in the bank (`bank/bank.js`).
 When the owner rules on something new, add it here.
 
 ---
@@ -60,7 +60,19 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   - slang written out in full: "Grandma I would like to fuck", "Mother I would like to fuck";
   - the city for an airport whose city has only that airport (JFK → "New York");
   - **the French form of a famous name (15 Nov, the owner):** "Jules César" for Julius Caesar;
-  - **the first name a person is known by (15 Nov, the owner):** "Sundar" for Sundar Pichai.
+  - **the first name a person is known by (15 Nov, the owner):** "Sundar" for Sundar Pichai; "Elon", "Kim", "Billie",
+    "Leo" (for both Messi and DiCaprio: each picture has its own list) (21 Nov, the owner);
+  - **a picture's name in French (21 Nov, the owner):** "Fraise", "Crayon", "Vélo", "Kangourou", "Pingouin", "Hibou",
+    "Papillon", "Tortue";
+  - **the right name with a word too many (21 Nov, the owner):** add it to the list ("Qatar airlines", "Linux
+    penguin", "Twitter X", "Giant tortoises", "His attorney"); never a rule that takes any answer holding the name
+    ("Chess queen" would pass for the knight, "Mobile phone" for the rotary phone);
+  - **a Fool Me Twice truth said another way, rude words included (21 Nov, the owner):** "Buttocks", "Ass",
+    "Arsehole" for Bottoms; "Hamel", "7amel" (Arabic) for Pregnant. Otherwise the game shows it as a lie.
+- **Another thing is a wrong answer, however close (21 Nov):** "Viola" for the violin, "Alligator" for the crocodile.
+- **Another picture's exact name is never a typo (21 Nov, the owner):** "Trump" isn't "The Tramp" for Chaplin,
+  "Ananas" isn't "Bananas" for the banana. accept.json `notTypo[id]` lists them; the bank check (`npm test`) finds any
+  new one a picture brings, and says what to add.
 - **Don't accept what's too loose**: "O" for O negative, "Weasley" for one Weasley, "Burger" for Cheeseburger,
   a different acronym (GMILF for GILF). Keep the original-language answer when that is the answer (RSVP is French:
   no English additions).
@@ -68,6 +80,7 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   - `byId[id]`: extra answers for one question;
   - `byAnswer[answer]`: other names of an answer, shared by every question with that answer (countries, flags);
   - `notById[id]`: a shared name that must *not* count here ("Tony Stark" isn't the film Iron Man);
+  - `notTypo[id]`: What Do You See?: another picture's name the typo allowance would take for this one;
   - `byPool[sayPromptId][word]`: a Say list's own other names, so a shared one doesn't leak ("Purple" isn't the
     flower Violet; "Remus" isn't the flower Lupin);
   - `rankById[id]`: a ranking's items in the right order, each with its names;
@@ -129,7 +142,7 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   The fact is a different game, so it isn't a twin to delete: pair it in `SEED_NEVER` with the question (or the
   Majority Rules one) that asks the same thing, and with any question it gives away (Bell's "Ahoy" and "Who patented
   the telephone?"). Before writing a fact, search the bank for its subject.
-- They go in `SEED_NEVER` in `classic.html` (groups of ids); the dealer deals at most one of each group.
+- They go in `SEED_NEVER` in `bank/bank.js` (groups of ids); the dealer deals at most one of each group.
 - **Better still, don't write the overlap**: a ranking shares no item with another ranking (the trend rankings:
   Rickrolling → KONY 2012 → Ice Bucket; Gangnam → Harlem Shake → Mannequin).
 
@@ -198,7 +211,7 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   out loud and types it, and the app checks what's typed, so a usual spelling left out is a right answer called
   wrong in front of the room. A picture that is already an answer elsewhere (a
   dish in Guess the Cocktail or Dish, a landmark in Drop the Pin) gets a never-together group. The catalogue is
-  `const SEES` in `classic.html`; after a change run `node party/scripts/fetch-sees.mjs` (it skips the files it has).
+  `const SEES` in `bank/bank.js`; after a change run `node party/scripts/fetch-sees.mjs` (it skips the files it has).
 - **Flags**: only flags whose name isn't written on the flag.
   - **City flags are Expert (15 Nov, the owner):** Berlin, Zurich, Munich, Stockholm, Helsinki, Madrid, Barcelona,
     Geneva, Marseille, Dublin, The Hague, Frankfurt, Minsk (codes `c-<city>`); a city whose flag spells its name
@@ -227,7 +240,7 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
     needed (teams with no lie, the same lie twice). Each still has to read right in the sentence;
   - a short **note** after the reveal, and its **source**.
   The owner's 9 samples (16 Nov) are the model; the knocker-upper was dropped as too easy. No hiding of rude lies:
-  the players' own. The catalogue is `const FOOLS` in `classic.html` (`[key, level, topic, fact, truth, accept, fakes,
+  the players' own. The catalogue is `const FOOLS` in `bank/bank.js` (`[key, level, topic, fact, truth, accept, fakes,
   note, source]`).
 
 ## 8. Mechanics (do these every time)
@@ -236,7 +249,7 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   (`byId`, `rankById`, `someOf`, `notById`) and its `SEED_NEVER` groups to the new id; ids in code
   (`HOST_ONLY_IDS` in `party/lib/engine.ts`) too. `npm run check-bank` says when a never-together id is gone.
 - Map ideas (`mapKeys`) are keyed by the map's **answer text**: change the answer, move the key.
-- After any bank change: bump `BUILD.v` and `SEED_VERSION` in `classic.html` and `version.json`; run
+- After any bank change: bump `BUILD.v` and `SEED_VERSION` in `bank/bank.js` and `version.json`; run
   `node scripts/export-bank.js`; after a map change also `node scripts/export-maps.js`; after new pins
   `node party/scripts/fetch-pins.mjs`; after new pictures `node party/scripts/fetch-sees.mjs`; then `cd party && npm test` (refresh goldens with `node sim/run.mjs --update`
   and `node sim/many.mjs --update` only when the change is meant to alter the deal).
