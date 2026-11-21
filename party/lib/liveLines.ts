@@ -43,29 +43,53 @@ function counter() {
 }
 export const pubCount = counter(), actCount = counter();
 
-/* the TV: a line to the phones, open while it runs the game; send() is the screen it has just written */
+/* The screens' line, one per room on this device, shared by whoever needs it here: the device running the game sends on
+   it, and the room's page (lib/room.ts) listens on it. (21 Nov, the owner's no-TV game: the library gives one channel
+   per name on a device, so the sender got the listener's channel back, its "subscribed" never came, and it never sent a
+   screen: every screen came by the database. Shared, the device sends and listens on the same channel.) */
+type Shared = { n: number; ch: RealtimeChannel | null; ready: boolean; takes: Set<(pub: unknown, at: number) => void>; close: () => void };
+const shared = new Map<string, Shared>();
+function take(code: string): Shared {
+  let s = shared.get(code);
+  if (!s) {
+    const S: Shared = { n: 0, ch: null, ready: false, takes: new Set(), close: () => {} };
+    S.close = joinLive(() => {
+      const c = sb().channel(pubLine(code), OPTS); S.ch = c;
+      return c.on("broadcast", { event: "pub" }, (m) => { const p = m.payload as { pub?: unknown; at?: number } | undefined; if (p?.pub && typeof p.at === "number") S.takes.forEach((f) => f(p.pub, p.at!)); })
+        .subscribe((st) => { S.ready = st === "SUBSCRIBED"; });
+    });
+    shared.set(code, S); s = S;
+  }
+  s.n++;
+  return s;
+}
+function give(code: string, s: Shared) {
+  if (--s.n > 0) return;
+  s.ready = false; s.ch = null; s.close();
+  if (shared.get(code) === s) shared.delete(code);
+}
+
+/* the TV (or the phone running a game with no TV): a line to the phones, open while it runs the game; send() is the
+   screen it has just written */
 export function usePubLine(code: string, on: boolean) {
-  const ch = useRef<RealtimeChannel | null>(null), ready = useRef(false);
+  const line = useRef<Shared | null>(null);
   useEffect(() => {
     if (!on || !LIVE_LINES) return;
-    const close = joinLive(() => {
-      const c = sb().channel(pubLine(code), OPTS); ch.current = c;
-      return c.subscribe((st) => { ready.current = st === "SUBSCRIBED"; });
-    });
-    return () => { ready.current = false; ch.current = null; close(); };
+    const s = take(code); line.current = s;
+    return () => { line.current = null; give(code, s); };
   }, [code, on]);
   return useCallback((pub: unknown, at: number) => {
-    if (!ready.current || !ch.current) return;
-    void ch.current.send({ type: "broadcast", event: "pub", payload: { pub, at } }).catch(() => { /* the database brings it */ });
+    const s = line.current;
+    if (!s?.ready || !s.ch) return;
+    void s.ch.send({ type: "broadcast", event: "pub", payload: { pub, at } }).catch(() => { /* the database brings it */ });
   }, []);
 }
 
-/* a phone: the screens as the TV sends them (each with its stamp) */
-export function hearPubLine(code: string, take: (pub: unknown, at: number) => void): () => void {
+/* a phone (and the TV's own page): the screens as the game sends them (each with its stamp) */
+export function hearPubLine(code: string, f: (pub: unknown, at: number) => void): () => void {
   if (!LIVE_LINES) return () => {};
-  return joinLive(() => sb().channel(pubLine(code), OPTS)
-    .on("broadcast", { event: "pub" }, (m) => { const p = m.payload as { pub?: unknown; at?: number } | undefined; if (p?.pub && typeof p.at === "number") take(p.pub, p.at); })
-    .subscribe());
+  const s = take(code); s.takes.add(f);
+  return () => { s.takes.delete(f); give(code, s); };
 }
 
 /* the TV: the taps as the database writes them */

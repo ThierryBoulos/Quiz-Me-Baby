@@ -498,8 +498,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             {out ? (sentMine ? "Wrong. You’re out of this picture." : "Time’s up. You’re out of this picture.") : me2 ? (sentMine || sentTxt ? "Answer sent. The app checks it." : <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud and type it.</>)
               : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
           {!out && bz == null && !typing && (buzzed
-            ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
-            : <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
+            ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
+            : <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
                 onClick={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
           {typing && (
             <div className="card flex flex-col gap-2">
@@ -550,8 +550,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             {out ? "Your team is out of this picture." : bz === mine ? <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud: your captain types it.</>
               : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
           {!out && bz == null && (buzzed
-            ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
-            : <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
+            ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
+            : <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
                 onClick={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
         </>); })()}
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}

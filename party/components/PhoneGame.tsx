@@ -1350,9 +1350,9 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       {/* the Battle's twenty calls, read-only, on every phone (the 4 Nov audit, 3.12: players only saw "Waiting for…") */}
       {pub.screen === "battleReview" && <Calls pub={pub} act={() => {}} />}
       <WaitingForHost pub={pub} members={members} />
-      {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }}
+      {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }}
         onClick={() => { buzzHand(40); setBuzzed(true); void sendAction(code, "buzz", {}).catch(() => setBuzzed(false)); }}>BUZZ</button>}
-      {canBuzz && buzzed && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
+      {canBuzz && buzzed && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
       {canSuggest && (
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
@@ -1622,10 +1622,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {nohost && lead && pub.lifeline?.key === "friend" && !pub.lifeline.wait && (pub.lifeline.deadline || pub.lifeline.left) && (
         <button className="btn btn-sm self-center" onClick={() => fire({ type: "ui/pauseFriend" })}>{pub.lifeline.deadline ? "Pause the call" : "Resume the call"}</button>)}
 
-      {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 110, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy}
+      {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy}
         onClick={() => { buzzHand(40); setBuzzed(true); void act("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>}
       {/* (the answer box is up already: that says it) */}
-      {canBuzz && buzzed && !canType && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 110, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
+      {canBuzz && buzzed && !canType && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
 
       {canType && (
         <div className="card flex flex-col gap-2">
