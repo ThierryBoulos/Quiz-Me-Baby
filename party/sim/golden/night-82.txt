@@ -56,7 +56,7 @@
 68.00 roundIntro | 37 | 13-15 |  | Owls +1 point | 
 69.75 ask | 38 | 13-15 |  | Owls +1 point | 
 (writesFail 20 s)
-90.45 steal | 38 | 13-15 |  | It's ⁨Owls⁩'s turn to answer. | 
+90.45 steal | 38 | 13-15 |  | It's ⁨Owls⁩’ turn to answer. | 
 91.25 answer | 38 | 13-16 |  | Owls +1 point — steal | 
 92.25 answer | 38 | 13-16 |  |  | 
 93.00 answer | 38 | 14-15 |  | Call changed: Lions +1 point. | 

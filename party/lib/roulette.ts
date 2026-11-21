@@ -6,9 +6,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QMB } from "./engine";
 
-/* a spin: the barrel held still HOLD_MS (every chamber's theme and level on show: 11 Nov, the owner), then turning
+/* a spin: the barrel held still HOLD_MS (every chamber's theme and level on show: 11 Nov, the owner; 3 s, 19 Nov review: 1.8 s was too short to read), then turning
    TURN_MS; the question's up SPIN_MS after the spin starts */
-export const HOLD_MS = 1800, TURN_MS = 2600, SPIN_MS = HOLD_MS + TURN_MS, STEP_MS = 650;
+export const HOLD_MS = 3000, TURN_MS = 2600, SPIN_MS = HOLD_MS + TURN_MS, STEP_MS = 650;
 export const RR_LAPS: number = QMB.ROULETTE_LAPS;
 export type RrChamber = { theme: string; level: string; q: any };
 export type RrLap = { ch: RrChamber[]; bullet: number; blank?: boolean; draw?: number[]; ok?: boolean[]; got?: number[]; bid?: number };   // blank: a tie-breaker spin, no bullet; bid: laps sharing one barrel (two teams)

@@ -1556,6 +1556,9 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
   border: 1.5px solid var(--line-2); color: var(--color-ink-2); white-space: nowrap; }
 .rr-chip.bullet { border-color: var(--color-gold); color: #1a1400; background: linear-gradient(180deg, var(--color-gold-2), var(--color-gold)); }
 .rr-chip.sm { padding: 1px 8px; font-size: 10px; }
+/* on the TV, read from a sofa (19 Nov review: 12px, and 10px from 5 teams, in Roulette's rows and Secret Stakes) */
+.tv-stage .rr-chip { font-size: 18px; padding: 3px 12px; }
+.tv-stage .rr-chip.sm { font-size: 15px; padding: 2px 10px; }
 .rr-chip .rr-pt { font-weight: 900; letter-spacing: 0; }
 .rr-chip .rr-pt.ok { color: var(--color-ok); } .rr-chip .rr-pt.no { color: var(--color-no); }
 .rr-chip.bullet .rr-pt { background: #14110a; border-radius: 999px; padding: 0 6px; }
@@ -1671,8 +1674,8 @@ button.fool-opt:disabled:not(.on) { opacity: .55; }
 .fool-cmp .fool-letter { width: 1.55em; height: 1.55em; }
 .fool-cmp.grid-cols-2 .fool-opt { padding: 5px 8px; gap: 6px; font-size: var(--text-13); line-height: 1.25; }
 .fool-cmp.grid-cols-2 .fool-letter { width: 1.45em; height: 1.45em; }
-/* a team's letter to tap, in its colour (the prediction, from 5 teams) */
-.fool-dot { width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; font-weight: 800; font-size: var(--text-15);
+/* a team's letter to tap, in its colour (the prediction, from 5 teams; 44px to hit in a hurry: 19 Nov review) */
+.fool-dot { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; font-weight: 800; font-size: var(--text-15);
   color: var(--c); border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }
 .fool-dot[aria-pressed="true"] { background: var(--c); color: #04050e; box-shadow: 0 0 14px color-mix(in srgb, var(--c) 70%, transparent); }
 .fool-dot:disabled:not([aria-pressed="true"]) { opacity: .5; }
@@ -1703,6 +1706,10 @@ button.fool-opt:disabled:not(.on) { opacity: .55; }
 .fool-flap-b { animation: foolFlapB 6s linear infinite both; animation-delay: var(--d, 0s); }
 @keyframes foolFlapA { 0%, 6% { opacity: 1; transform: none; } 10%, 58% { opacity: 0; transform: rotateX(90deg); } 62%, 100% { opacity: 1; transform: none; } }
 @keyframes foolFlapB { 0%, 6% { opacity: 0; transform: rotateX(-90deg); } 10%, 58% { opacity: 1; transform: none; } 62%, 100% { opacity: 0; transform: rotateX(-90deg); } }
+/* motion off: the board stays on the Gotcha side (it names the liar too: "Owls +1"); it used to stay on the other one,
+   and the Gotcha never showed (19 Nov review) */
+html[data-motion="off"] .fool-flap-a { animation: none !important; opacity: 0; }
+html[data-motion="off"] .fool-flap-b { animation: none !important; opacity: 1; transform: none; }
 
 /* Fool Me Twice's result (16 Nov, the owner's pick): the lie detector. Its ivory paper, the grid drifting as the pens
    draw, each pen's trace drawn left to right with its head riding along, the labels in last place first, the winner's

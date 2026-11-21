@@ -110,7 +110,7 @@ function StakesRevealTv({ sk, teams }: { sk: SkPub; teams: SkTeam[] }) {
               <div className="shrink-0 text-right flex flex-col items-end leading-none">
                 <span className="display" data-fly-src={k === 2 ? String(t) : undefined} data-fly-at={k === 2 ? String(at) : undefined}
                   style={{ fontSize: tight ? 28 : dense ? 32 : 44, color: d > 0 ? OK : d < 0 ? NO : "var(--color-ink-3)" }}>{signedPts(d)}</span>
-                <span className="text-[var(--color-ink-3)] font-bold" style={{ fontSize: tight ? 12 : 15 }}>now {R.after[t]}</span>
+                <span className="text-[var(--color-ink-3)] font-bold" style={{ fontSize: tight ? 14 : 18 }}>now {R.after[t]}</span>
               </div>
             </div>); })}
       </div>
@@ -136,13 +136,13 @@ function StakesSummaryTv({ sk, teams }: { sk: SkPub; teams: SkTeam[] }) {
               aria-label={`${T.name}: ${signedPts(v)}, ${S.rounds[t].map((r) => `${skLevelWord(r.level)} ${signedPts(r.delta)}`).join(", ")}`}>
               <span className="display leading-none" style={{ fontSize: fs, height: fs, color: v > 0 ? OK : v < 0 ? NO : "var(--color-ink-3)" }}>{signedPts(v)}</span>
               <Chips n={chipsOf(v, sk.unit)} most={most} lost={v < 0} w={cw} h={dense ? 128 : 150} dense={dense} color={T.color} at={at / 1000} win={v > 0 && v === top} />
-              <div className="flex items-start justify-center w-full mt-1" style={{ fontSize: dense ? 11 : 14, height: "2.5em" }}>
+              <div className="flex items-start justify-center w-full mt-1" style={{ fontSize: dense ? 13 : 16, height: "2.5em" }}>
                 <div className="eyebrow text-center min-w-0 max-w-full" style={{ color: T.color, fontSize: "inherit", letterSpacing: ".1em", lineHeight: 1.25, overflowWrap: "anywhere",
                   display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                   <span className="inline-block align-middle mr-1.5" style={{ marginTop: -2 }}><Dot t={T} size={dense ? 14 : 18} /></span><bdi>{T.name}</bdi></div>
               </div>
               <div className="flex flex-col items-center gap-1">{S.rounds[t].map((r, i) => (
-                <span key={i} className="sk-mini" title={`${r.theme}, ${skLevelWord(r.level)}`} style={{ color: r.delta > 0 ? OK : r.delta < 0 ? NO : "var(--color-ink-3)", fontSize: tight ? 12 : dense ? 13 : 15 }}>
+                <span key={i} className="sk-mini" title={`${r.theme}, ${skLevelWord(r.level)}`} style={{ color: r.delta > 0 ? OK : r.delta < 0 ? NO : "var(--color-ink-3)", fontSize: tight ? 14 : dense ? 15 : 18 }}>
                   {skLevelWord(r.level)} {signedPts(r.delta)}</span>))}</div>
             </div>); })}
       </div>

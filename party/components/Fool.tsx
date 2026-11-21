@@ -41,7 +41,8 @@ export function FoolStatus({ teams, done, doing, finished, tv }: { teams: FoolTe
 }
 
 /* a phone's own order (16 Nov, the owner): every phone shuffles the answers its own way, so no two phones show them in
-   the same order (seed: who's holding it and the fact); the TV keeps the order the game dealt */
+   the same order (seed: who's holding it and the fact); the TV keeps the order the game dealt. Each answer keeps the
+   TV's letter wherever it is (19 Nov review: the room shouted "it's D!" and D on a phone was another answer) */
 const mix = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 /* the answers to pick from: on the TV, all of them; on a captain's phone, buttons (its own lie left out) */
 /* (locked: the pick is sent, no other tap; by default once one is picked: with 3 to 8 teams the captain can change it
@@ -54,7 +55,7 @@ export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, 
   return (
     <div className={"grid w-full gap-2 fool-opts " + (two ? "grid-cols-2" : "grid-cols-1") + (compact && !tv ? " fool-cmp" : "")} style={tv ? { gap: shown.length > 6 ? 10 : 14 } : compact ? { gap: 6 } : undefined} role={onPick ? "group" : "list"} aria-label="The answers">
       {shown.map(({ o, k }, i) => {
-        const on = mine === k, body = <><span className="fool-letter">{LETTERS[i]}</span><span className="min-w-0 text-left leading-snug"><bdi>{o}</bdi></span></>;
+        const on = mine === k, body = <><span className="fool-letter">{LETTERS[k]}</span><span className="min-w-0 text-left leading-snug"><bdi>{o}</bdi></span></>;
         return onPick
           ? <button key={k} type="button" className={"fool-opt" + (on ? " on" : "")} disabled={busy || (locked ?? mine != null)} aria-pressed={on} onClick={() => onPick(k)}>{body}</button>
           : <div key={k} className={"fool-opt" + (tv ? " tv" : "") + (on ? " on" : "")} role="listitem" style={tv ? { fontSize: shown.length > 6 ? 24 : 30 } : undefined}>{body}</div>;
@@ -63,8 +64,9 @@ export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, 
 }
 
 /* a right prediction (the owner's pick, 17 Nov: the flip board): whose lie it is flips over, like a station board, to
-   "As expected, Gotcha! Lions −1" and back, every few seconds: "As expected, Gotcha!" in grey, the team that fell for it
-   in its colour, its −1 in red; and that team's dot gets a red ring. It adds no line: every row of a reveal is the same
+   "As expected, Gotcha! Lions −1, Owls +1" and back, every few seconds: "As expected, Gotcha!" in grey, the team that
+   fell for it in its colour, its −1 in red, the team that called it in its colour, its +1 in green (21 Nov); and the
+   team that fell for it gets a red ring on its dot. It adds no line: every row of a reveal is the same
    size, with one or without (16 Nov, the owner: "all should fit in the same size boxes, all the time"). 3 to 8 teams
    only: with 2 teams nobody names a team */
 
@@ -95,21 +97,24 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
         /* a right prediction: the team whose lie it is named the team that fell for it */
         const pred = t ? [] : x.fell.filter((f) => rev.hits.some((h) => h.on === f && x.o.by.includes(h.by)));
         const got = pred.length > 0, d = { ["--d" as string]: `${i * step + 0.35}s` };
-        const said = `As expected, Gotcha! ${pred.map((f) => `${teams[f]?.name} −1`).join(", ")}.`;
+        /* ...and who called it: +1 more each, in green (21 Nov, the owner: "As expected, Gotcha! Lions −1, Owls +1") */
+        const callers = x.o.by.filter((w) => rev.hits.some((h) => h.by === w && pred.includes(h.on)));
+        const said = `As expected, Gotcha! ${[...pred.map((f) => `${teams[f]?.name} −1`), ...callers.map((w) => `${teams[w]?.name} +1`)].join(", ")}.`;
         const label = got ? <span className="fool-flap"><span className="fool-flap-a">{tag}</span><span className="fool-flap-b" aria-hidden="true">
-          <span style={{ color: "var(--color-ink-2)" }}>As expected, Gotcha!</span>{pred.map((f, j) => <Fragment key={f}>{j ? "," : ""} <bdi style={{ color: teams[f]?.color }}>{teams[f]?.name}</bdi> <span style={{ color: "var(--color-no)" }}>−1</span></Fragment>)}</span></span> : tag;
+          <span style={{ color: "var(--color-ink-2)" }}>As expected, Gotcha!</span>{pred.map((f, j) => <Fragment key={f}>{j ? "," : ""} <bdi style={{ color: teams[f]?.color }}>{teams[f]?.name}</bdi> <span style={{ color: "var(--color-no)" }}>−1</span></Fragment>)}
+          {callers.map((w) => <Fragment key={"c" + w}>, <bdi style={{ color: teams[w]?.color }}>{teams[w]?.name}</bdi> <span style={{ color: "var(--color-ok)" }}>+1</span></Fragment>)}</span></span> : tag;
         const caption = t ? (x.fell.length ? "guessed it" : "nobody guessed it") : x.fell.length ? "fell for it" : "nobody fell for it";
         return (
           <div key={x.k} className={"fool-rev rv relative" + (t ? " truth" : "") + (tv ? " tv" : "") + (cols && t ? " col-span-2" : "")} style={{ animationDelay: `${i * step}s`, ...d, ...(tv ? { fontSize: cols ? 24 : big ? 22 : 28, padding: big && !cols ? "6px 14px" : undefined } : {}) }}>
             {got && <span className="sr-only">{said}</span>}
             <div className="min-w-0 flex-1 text-left">
               <div className="font-bold leading-snug"><bdi>{x.o.text}</bdi></div>
-              <div className="eyebrow" style={{ fontSize: tv ? (big ? 12 : 14) : 10, color: t ? "var(--color-gold)" : x.o.ours ? "var(--color-ink-3)" : undefined }}>{label}</div>
+              <div className="eyebrow" style={{ fontSize: tv ? (big ? 16 : 18) : 10, color: t ? "var(--color-gold)" : x.o.ours ? "var(--color-ink-3)" : undefined }}>{label}</div>
             </div>
             {/* (on a phone, many teams' dots wrap onto a second line rather than squeeze the lie) */}
             <div className="flex flex-col items-end gap-0.5 shrink-0 text-right" style={tv ? undefined : { maxWidth: "46%" }}>
               {who(x.fell, pred)}
-              <span className="text-[var(--color-ink-3)]" style={{ fontSize: tv ? (big ? 13 : 16) : 11 }}>{caption}</span>
+              <span className="text-[var(--color-ink-3)]" style={{ fontSize: tv ? (big ? 16 : 18) : 11 }}>{caption}</span>
             </div>
           </div>);
       })}
@@ -133,7 +138,7 @@ export const ownIndex = (opts: string[] | undefined, lie: string | null | undefi
 export function FoolPredict({ teams, me, value, onPick, busy, locked, compact }: { teams: FoolTeam[]; me: number; value: number | null; onPick: (t: number) => void; busy?: boolean; locked?: boolean; compact?: boolean }) {
   if (compact) return (
     <div className="flex flex-col items-center gap-1">
-      <div className="flex flex-wrap justify-center gap-1.5" role="group" aria-label="Who will fall for your lie?">
+      <div className="flex flex-wrap justify-center gap-1" role="group" aria-label="Who will fall for your lie?">
         {teams.map((t, i) => i === me ? null : (
           <button key={i} type="button" className="fool-dot" aria-pressed={value === i} aria-label={t.name} disabled={busy || locked} onClick={() => onPick(i)}
             style={{ ["--c" as string]: t.color }}>{LETTERS[i]}</button>))}
@@ -188,7 +193,7 @@ export function FoolResult({ teams, sum, pts, places, award, two }: { teams: Foo
           </g>
           {Array.from({ length: N }, (_, f) => (
             <g key={"f" + f}>
-              <text x={(X(f) + X(f + 1)) / 2} y={H - 9} textAnchor="middle" fontSize={12} fontWeight={800} fill="rgba(27,22,7,.45)" letterSpacing=".12em">FACT {f + 1}</text>
+              <text x={(X(f) + X(f + 1)) / 2} y={H - 9} textAnchor="middle" fontSize={16} fontWeight={800} fill="rgba(27,22,7,.55)" letterSpacing=".12em">FACT {f + 1}</text>
               <line x1={X(f + 1)} y1={top} x2={X(f + 1)} y2={H - bot} stroke="rgba(27,22,7,.2)" strokeDasharray="3 4" />
             </g>))}
           <line x1={L} y1={Y(0)} x2={X(N)} y2={Y(0)} stroke="rgba(27,22,7,.35)" />

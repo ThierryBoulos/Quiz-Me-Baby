@@ -151,10 +151,13 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const miniKeys = MINIS.map(([k]) => k as string).filter((k) => minis.includes(k));
   const battle = miniKeys.includes("battle");
   const each = QMB.miniPointValue(standard ? rounds : 0, miniKeys.length, battle) || 2;
-  const worth = (k: string) => { void k; return each; };   // (9 Nov: every game 2 points, the Battle too)
+  /* (9 Nov: every game 2 points, the Battle too; Secret Stakes none: it's won or lost by the bets, 19 Nov review) */
+  const worth = (k: string) => (k === "stakes" ? 0 : each);
+  const stakesOn = miniKeys.includes("stakes");
   const plan: { key: string; after: number }[] = QMB.planMinis(standard ? rounds : 0, (QMB.INTERLEAVED as string[]).filter((k) => miniKeys.includes(k)));
-  const slot = (k: string) => k === "battle" ? "last" : standard ? (plan.find((p) => p.key === k) ? `after R${plan.find((p) => p.key === k)!.after + 1}` : "")
-    : ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"][miniKeys.filter((x) => x !== "battle").indexOf(k)] || "";
+  /* (Secret Stakes: its blurb says it plays last; the Battle is last only without it: 19 Nov review) */
+  const slot = (k: string) => k === "stakes" ? "" : k === "battle" ? (stakesOn ? "" : "last") : standard ? (plan.find((p) => p.key === k) ? `after R${plan.find((p) => p.key === k)!.after + 1}` : "")
+    : ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th"][miniKeys.filter((x) => x !== "battle" && x !== "stakes").indexOf(k)] || "";
   /* a level row (components/LevelChips.tsx, the same piece as the 3-8 Setup's), with its small heading when it has one */
   const LevelRow = ({ tag, ...p }: { label: string; opts: readonly (readonly [string, string])[]; value: string[]; set: (v: string[]) => void; tag?: string; big?: boolean }) => (
     <div className="flex flex-col gap-1.5 pl-1 pb-2">
@@ -262,7 +265,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{name}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k)} pts{slot(k) ? ` · ${slot(k)}` : ""}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

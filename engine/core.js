@@ -641,7 +641,7 @@
     }
 
     function battlePool(spent, diff){
-      const ok = (q) => q.type === 'standard' && !spent.has(q.id) &&
+      const ok = (q) => q.type === 'standard' && !spent.has(q.id) && !clashesWith(q.id, spent) &&
         BATTLE_SKIP_THEMES.indexOf(q.theme) < 0 &&
         (diff ? q.difficulty === diff : q.difficulty === 'easy' || q.difficulty === 'medium');
       const fresh = bank().filter(q => ok(q) && isFresh(q));
@@ -1763,6 +1763,11 @@
        (19 Nov review: a Roulette question came back in the Battle with "never reuse" off) */
     const rr = g.rouletteGame; if(rr) (rr.qs || []).concat(rr.spare || []).forEach(lap => ((lap && lap.ch) || []).forEach(c => { if(c && c.q && c.q.id) spent.add(c.q.id); }));
     g.rounds.forEach(r => (r.swapSeen || []).forEach(id => spent.add(id)));
+    /* the other games' questions too, so a question that gives one of them away (a never-together group) isn't dealt
+       later: Fool Me Twice's facts, Majority Rules, What Do You See? (21 Nov, the owner's Fool Me Twice pairs) */
+    for(const k of ['foolGame', 'majorityGame', 'seeGame', 'flagGame', 'mapGame', 'pinGame', 'airportGame', 'dishGame', 'saySame']){
+      const G = g[k]; if(G) (G.qs || []).concat(G.spare || []).forEach(q => { if(q && q.id) spent.add(q.id); });
+    }
     return spent;
   }
   /* everything tonight has asked or holds (the Battle's list), for a question dealt late: a round's swap, sudden death */
@@ -1820,7 +1825,7 @@
     const st = g.stakesGame; if(st) [...(st.rounds || []), ...(st.spare || [])].forEach(R => (R.qs || []).forEach(lv => Object.values(lv || {}).forEach(add)));
     const bt = g.battle; if(bt && bt.qs) bt.qs.forEach(side => (side || []).forEach(add));
     const themes = g.cfg.themes || [];
-    const free = (q) => q.type === 'standard' && !inGame.has(q.id) && (!D.suddenOk || D.suddenOk(q));
+    const free = (q) => q.type === 'standard' && !inGame.has(q.id) && (!D.suddenOk || D.suddenOk(q)) && !(D.clashesWith && D.clashesWith(q.id, inGame));
     let pool = D.bank().filter(q => free(q) && themes.indexOf(q.theme) > -1 && D.isFresh(q));
     if(!pool.length) pool = D.bank().filter(q => free(q) && themes.indexOf(q.theme) > -1);
     if(!pool.length) pool = D.bank().filter(q => free(q) && D.isFresh(q));
@@ -1841,7 +1846,7 @@
     const offTheme = (g.cfg.themes || []).indexOf(q.theme) < 0;
     g.sd = { q, n:g.sdRounds, shown:false, offTheme };
     fx.push({ used:q });
-    if(offTheme) fx.push({ toast:'Tonight themes are out of spare questions — pulling from ' + q.theme + '.', ms:4200 });
+    if(offTheme) fx.push({ toast:'Tonight\u2019s themes are out of spare questions — pulling from ' + q.theme + '.', ms:4200 });
     fx.push({ go:'sudden' });
     return fx;
   }
@@ -1990,7 +1995,7 @@
       g.rounds.forEach((r, ri) => r.q.forEach((q, si) => { if(ri !== g.r || si !== seat) elsewhere.add(q.id); }));
       g.mini.qs.forEach(q => elsewhere.add(q.id));
       const cur = rd.q[seat], mate = rd.q[1 - seat];
-      const inTheme = D.bank().filter(q => q.type === 'standard' && q.theme === rd.theme && !elsewhere.has(q.id) && q.id !== cur.id);
+      const inTheme = D.bank().filter(q => q.type === 'standard' && q.theme === rd.theme && !elsewhere.has(q.id) && q.id !== cur.id && !(D.clashesWith && D.clashesWith(q.id, elsewhere)));
       const want = (mate || cur).difficulty;
       const at = (d) => inTheme.filter(q => q.difficulty === d);
       const seen = rd.swapSeen = rd.swapSeen || [];

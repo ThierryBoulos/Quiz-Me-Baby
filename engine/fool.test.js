@@ -151,3 +151,24 @@ test('fool: two facts that never share a night: never both dealt, nor one dealt 
     assert.deepEqual(s.qs.map(q => q.level), ['normal', 'normal', 'normal', 'normal', 'hard', 'hard']);
   }
 });
+
+/* 21 Nov, the owner: a fact and a question that asks the same thing (or gives it away) never share a night; that holds
+   for what's dealt later too: the comeback's questions, the Battle's and sudden death's (tonight's list has the facts) */
+test('fool: a question paired with tonight\'s fact is never dealt later (the comeback, the Battle)', () => {
+  const facts = [];
+  for(let i = 0; i < 9; i++) facts.push({ id:'fool:p' + i, type:'fool', level:'normal', question:'Fact ' + i + ' ____.', answer:'True ' + i, fakes:['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8'] });
+  for(let i = 0; i < 4; i++) facts.push({ id:'fool:ph' + i, type:'fool', level:'hard', question:'Hard ' + i + ' ____.', answer:'Truth ' + i, fakes:['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8'] });
+  const std = [];
+  for(let i = 0; i < 40; i++) std.push({ id:'s' + i, type:'standard', theme:'General Knowledge', difficulty: i % 2 ? 'easy' : 'medium', question:'Question ' + i + '?', answer:'A' + i });
+  /* every fact paired with a question of its own */
+  const never = facts.map((f, i) => [f.id, 's' + i]);
+  const D = Q.createDealer({ bank:() => facts.concat(std), never:() => never, used:() => new Set(), noRepeat:() => true, rng });
+  for(let n = 0; n < 50; n++){
+    const g = D.buildGame({ standard:false, rounds:0, themes:[], minis:['fool'], teamA:{ name:'Owls' }, teamB:{ name:'Lions' } });
+    const tonight = Q.battleSpent(g), paired = new Set();
+    g.foolGame.qs.concat(g.foolGame.spare).forEach(f => { assert.ok(tonight.has(f.id), 'tonight\'s list has the fact ' + f.id); never.filter(p => p[0] === f.id).forEach(p => paired.add(p[1])); });
+    const cb = D.comebackDeck(tonight, 5), bt = D.battlePool(tonight);
+    assert.ok(!cb.some(q => paired.has(q.id)), 'a comeback question paired with a fact');
+    assert.ok(!bt.some(q => paired.has(q.id)), 'a Battle question paired with a fact');
+  }
+});

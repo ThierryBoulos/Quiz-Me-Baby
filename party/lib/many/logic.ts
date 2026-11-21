@@ -12,6 +12,7 @@
    (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). tied teams share the better place. */
 import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
+import { poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_LEVELS, type SkPick } from "../stakes";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
@@ -545,7 +546,7 @@ export function contestCall(s: StateM, by: number, t: number): true | string {
   if (!m || s.screen !== "reveal" || !typedKey(m.key)) return "There's no call to contest here.";
   if (by < 0 || by >= k || !Number.isInteger(t) || t < 0 || t >= k) return "Not now.";
   if (!cbIn(m, t)) return "There's no call to contest there.";
-  if (s.contest) return `One at a time: ${s.teams[s.contest.by].name}'s contest is open.`;
+  if (s.contest) return `One at a time: ${poss(s.teams[s.contest.by].name)} contest is open.`;
   if ((s.contested || []).includes(t)) return "That call has already been looked at.";
   const text = s.typed[t]; if (text == null) return "Nothing was typed there.";
   const ok = !!s.ok[t];
@@ -558,7 +559,7 @@ export function decideContest(s: StateM, agree: boolean): boolean {
   const C = s.contest; if (!C || s.screen !== "reveal") return false;
   s.contest = null; s.contested = [...(s.contested || []), C.t];
   if (agree) s.ok[C.t] = !C.ok;
-  toast(s, agree ? `Call changed: ${s.teams[C.t].name}'s answer ${callWord(s, !C.ok)}.` : "The host keeps the call.");
+  toast(s, agree ? `Call changed: ${poss(s.teams[C.t].name)} answer ${callWord(s, !C.ok)}.` : "The host keeps the call.");
   return true;
 }
 

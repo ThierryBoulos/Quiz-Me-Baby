@@ -1290,7 +1290,7 @@ function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+st
    trap: copying the file to another laptop resets the timestamp, so a build
    from months ago would announce itself as updated today.
    ========================================================================== */
-const BUILD = { v:'3.74', date:'16 Nov 2026', author:'Thierry Boulos', year:2026 };
+const BUILD = { v:'3.75', date:'21 Nov 2026', author:'Thierry Boulos', year:2026 };
 
 /* ==========================================================================
    0b. SELF-UPDATE
@@ -1616,7 +1616,6 @@ const SEED = [
 ['Music','medium','one-hit','Which Swedish group won Eurovision in 1974 with Waterloo?','ABBA',''],
 ['Music','medium','one-hit','Which Irish band is fronted by Bono?','U2',''],
 /* ---- NATURE ---- */
-['Nature','easy','national-animal','What is the national animal of Spain?','The bull','The Spanish fighting bull, the toro bravo. Not fixed by statute — it is the traditional national symbol, and the Osborne bull silhouette on the roadsides is the same animal.'],
 ['Nature','medium','national-animal','What is the national animal of France?','The Gallic rooster','The coq gaulois. It comes from a Latin pun: gallus means both "rooster" and "an inhabitant of Gaul". An emblem by tradition rather than by law — France\'s official state symbol is Marianne.'],
 ['Nature','hard','national-animal','What is the national animal of Scotland?','The unicorn','Genuinely official, and on the Royal Coat of Arms since the 1300s. The unicorn is chained because a free one was believed too dangerous to hold.'],
 ['Nature','easy','superlative-animal','What is the fastest land animal?','The cheetah','Roughly 100 km/h in short bursts.'],
@@ -5090,11 +5089,20 @@ const S = {
    this browser has never seen get merged in — without touching anything the
    host imported or wrote themselves, and without resurrecting ones they deleted.
    -------------------------------------------------------------------------- */
-const SEED_VERSION = 72;   // bumped when the built-in bank changes
+const SEED_VERSION = 73;   // bumped when the built-in bank changes
 /* Never on the same night (the owner's picks, 5 Nov content review 2.6): one gives another away, or both ask the
    same fact, or the same answer comes up too often. By id (a question's id is its wording: change a question here and
    its id changes, so check-bank says when one of these no longer exists). The dealer deals at most one of each. */
 const SEED_NEVER = [
+  /* 21 Nov, the owner: a Fool Me Twice fact and a question that asks the same thing, or gives it away, never on one night */
+  ["fool:unicorn", "q1uxvd56"],                   // Scotland's national animal
+  ["fool:cadabra", "qtgsdrc", "qi2l9bf"],         // Amazon's first name, and who founded it
+  ["fool:cube-shaped-poo", "mr:wombat"],          // the wombat's droppings
+  ["fool:roberts", "mr:barbie-s"],                // Barbie's full name
+  ["fool:ahoy", "q1kgy4u1"],                      // Bell and the telephone
+  ["fool:sitting", "q1ohpptx"],                   // the Spanish Steps, in Rome
+  ["fool:pregnant", "q1hs9bd3"],                  // Baalbek
+  ["fool:tijuana", "mr:country-caesar"],          // the Caesar salad, made in Mexico
   ["fool:fart", "fool:farting"],              // 16 Nov, the owner: two farting facts
   ["fool:jingle-bells", "fool:corned-beef"],  // 16 Nov, the owner: two things Gemini astronauts smuggled into space
   ["q1lfre32", "q112e4ml"],   // 14 Nov, Open Trivia DB picks
@@ -5142,7 +5150,6 @@ const SEED_NEVER = [
   ["qeqpwlx", "qc8gvhw", "q1kxezws"],   // 10 Nov, round 4
   ["qv03r1r", "mr:person-travel"],   // 10 Nov, round 4
   ["qfl44yu", "qw7wdon"],   // 10 Nov, round 4
-  ["q1k1qsgk", "qeep2zx"],   // 10 Nov, round 4
   ["qu1nvl4", "qbro0lc"],   // 10 Nov, round 4
   ["q1yirx6m", "qn86fme"],   // 10 Nov, round 4
   ["qa56tmj", "q12hja9x"],   // 10 Nov, round 4

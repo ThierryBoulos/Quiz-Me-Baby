@@ -128,7 +128,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
             <span className="win-tag" aria-hidden>{pub.winner == null ? "The night ends" : "Tonight\u2019s winner"}</span>
             <span className="win-ring" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
             <span className="win-ring r2" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
-            <WinName recap={!!recap} color={tc(pub.winner)} label={pub.winner == null ? "" : T[pub.winner].name}>{pub.winner == null ? "A draw" : <bdi>{T[pub.winner].name}</bdi>}</WinName>
+            <WinName recap={!!recap} color={tc(pub.winner)} label={pub.winner == null ? "" : T[pub.winner].name}>{pub.winner == null ? "Tied" : <bdi>{T[pub.winner].name}</bdi>}</WinName>
           </div>
           {/* once the recap is up, the big score board goes (the scores stay in the top bar) */}
           {!recap && <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}

@@ -545,6 +545,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     /* Russian Roulette: the barrel spins; then each team's chamber, its question and (only here) its answer */
     case "rouletteQ": return (
       <div className="flex flex-col gap-3 flex-1">
+        {/* (its clock once the barrel stops, as Secret Stakes shows it: 19 Nov review, the only game without one here) */}
+        {rrSpun && <div className="flex items-center justify-between"><div className="eyebrow">Russian Roulette</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>}
         {pub.roulette && <RrPhone rr={pub.roulette} me={null} teams={rr2(pub)} host />}
         {rrSpun && (loading ? <Line>Getting the answers…</Line> : secret.answers && pub.roulette ? (
           <div className="card cue-card flex flex-col gap-1" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
@@ -875,9 +877,9 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
             <span className="min-w-0 break-words leading-snug" style={dim}>
               <span className="font-bold" style={{ color: col }}><span aria-label={say ? (c.ok ? "dodged it:" : "said it:") : c.ok ? "right:" : "wrong:"} className="mr-1">{c.skipped ? "–" : c.ok ? "\u2713" : "\u2717"}</span>{said}</span>
               {c.answer && !c.ok && <span className="text-[var(--color-ink-3)]">{said ? " · " : ""}{c.answer}</span>}</span>
-            <span className="justify-self-end min-h-[36px] flex items-center" style={dim}>
-              {c.skipped ? null : host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[36px] px-1" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
-                : !c.done && !K && mine != null && (c.team === mine ? !c.ok : c.ok) ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[36px] px-1" disabled={busy}
+            <span className="justify-self-end min-h-[44px] flex items-center" style={dim}>
+              {c.skipped ? null : host ? <button className="text-13 font-bold underline underline-offset-4 min-h-[44px] min-w-[44px] px-2" disabled={busy} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button>
+                : !c.done && !K && mine != null && (c.team === mine ? !c.ok : c.ok) ? <button className="text-13 font-bold underline underline-offset-4 text-[var(--color-ink-2)] min-h-[44px] min-w-[44px] px-1" disabled={busy}
                   onClick={() => act({ type: "ui/contest", id: c.id })}>Contest</button> : null}</span>
           </Fragment>); })}
       </div>}
@@ -994,7 +996,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     const rows = (pub.calls || []).map((c) => row(c.team, c.text || "No answer", c.text && !c.skipped ? c.ok : null, <Pts n={by === c.team && c.ok ? Rr.pts : 0} />,
       /* (wraps under the answer on a narrow phone: on a 360-wide one it ran over the points, 11 Nov) */
       host && act ? <span className="flex flex-wrap items-center gap-x-2">{c.note && <span>{c.note}</span>}{c.changed && <span style={{ color: "var(--color-gold)" }}>host&rsquo;s call</span>}
-        <button type="button" className="text-13 font-bold underline underline-offset-4 min-h-[32px]" style={{ color: "var(--color-ink-2)" }} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button></span> : c.note));
+        <button type="button" className="text-13 font-bold underline underline-offset-4 min-h-[44px] min-w-[44px] px-2" style={{ color: "var(--color-ink-2)" }} onClick={() => act({ type: "ui/flip", id: c.id })}>Change</button></span> : c.note));
     return (<>{top}{rows.length > 0 && <ResultTable rows={rows} head={["Said", "Pts"]} />}
       {quiet && <p className="text-center text-13 text-[var(--color-ink-3)]">{quiet}</p>}</>);
   }
@@ -1053,7 +1055,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     return standings({ title: "The Auction", text: w == null ? "Tied" : `${T[w].name} +${aw}`, w, vals: A.wins, col: "Legs", endCol: "Night",
       end: (t) => <Pts n={A.award?.[t]} />, you: won3(w, aw, "the Auction") }); }
   if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary, w = S.winner, aw = w != null ? S.award?.[w] ?? m?.pts : S.award?.[0];
-    const res = standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still tied" : w == null ? ((S.award?.[0] ?? 0) > 0 ? "A split" : "Nobody scores") : `${T[w].name} +${aw}`, w,
+    const res = standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still tied" : w == null ? ((S.award?.[0] ?? 0) > 0 ? "Tied" : "Nobody scores") : `${T[w].name} +${aw}`, w,
       vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : m?.key === "fool" ? "Points" : "Legs", endCol: "Night", end: (t) => <Pts n={S.award?.[t]} />,
       note: S.needsHost ? "The host decides." : S.who, you: S.needsHost ? (mine == null ? null : ["Still tied: the host decides", "mid"]) : won3(w, aw, m?.title ?? "it") });
     /* Fool Me Twice: its awards under the result (16 Nov, the owner; with 2 teams, no prediction award: it's always the other team) */
@@ -1063,8 +1065,8 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
       end: (t) => <Pts n={B.award?.[t]} />, note: B.predict, you: won3(w, aw, "the Battle") }); }
   /* the night's end (the owner, 1 Nov): the winner clear at the top, how your team did, then the two teams' points */
   if (sc === "final") { const w = pub.winner ?? null; return (<>
-    <WinnerCard eyebrow={w == null ? "The night ends" : "The winner"} name={w == null ? "A draw" : T[w].name} color={tc(w)} sub={w != null ? `${T[w].score} points` : `${T[0].score} each`} />
-    {mine != null && <YouPill text={w == null ? "A draw" : w === mine ? "You won the night!" : "Not tonight"} tone={w === mine ? "ok" : w == null ? "mid" : "no"} />}
+    <WinnerCard eyebrow={w == null ? "The night ends" : "The winner"} name={w == null ? "Tied" : T[w].name} color={tc(w)} sub={w != null ? `${T[w].score} points` : `${T[0].score} each`} />
+    {mine != null && <YouPill text={w == null ? "Tied" : w === mine ? "You won the night!" : "Not tonight"} tone={w === mine ? "ok" : w == null ? "mid" : "no"} />}
     <ResultTable big places head={["Points"]} rows={(w === 1 ? [1, 0] as const : [0, 1] as const).map((t) => ({ ...row(t, String(T[t].score), null), place: w == null || w === t ? 1 : 2 }))} />
     {/* the night's awards, as the TV shows them (30 Oct: they took the nutshell's place) */}
     <AwardList awards={(pub.recap?.awards || []).map((a) => ({ ...a, color: a.team != null ? tc(a.team) : undefined }))} />
@@ -1083,7 +1085,13 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
 const foolTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})` }));
 /* (who: this phone's player, for its own order of Fool Me Twice's answers) */
 function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean; who?: string }) {
-  const spun = useSpun(pub.roulette?.spinAt);
+  const spun = useSpun(pub.roulette?.spinAt), noTv = useNoTv();
+  /* with no TV, nothing shows whether the other team has bet or answered (19 Nov review): a line for it, in the words
+     the 3-8 team phones already use ("1 of 2 teams have bet.") and the TV's ("Owls have answered") */
+  const other = mine === 0 || mine === 1 ? (1 - mine) as 0 | 1 : null;
+  const otherLine = noTv && other != null && !pub.paused ? (
+    pub.screen === "stakesPick" && pub.stakes ? `${pub.stakes.locked.filter(Boolean).length} of 2 teams have bet.`
+    : (pub.screen === "stakesQ" || (pub.screen === "rouletteQ" && spun)) && pub.sent?.[other] ? <><bdi>{pub.teams[other].name}</bdi> have answered.</> : null) : null;
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
@@ -1120,6 +1128,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
       <div className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pin.reveal.place}</div></div>}
     {(pub.screen === "airportQ" || pub.screen === "airportReveal") && <Board air={pub.airport} size={small ? "small" : "phone"} />}
     {pub.screen === "rouletteQ" && pub.roulette && <RrPhone rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} host={mine == null} />}
+    {otherLine && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{otherLine}</p>}
     {pub.screen === "rouletteReveal" && pub.roulette && <RrPhoneReveal rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} />}
     {/* Secret Stakes: the themes (a captain's own buttons are below), your team's question, the reveal */}
     {/* (sideways it stays in the right column: under the scores on the left your question was cut off, 12 Nov) */}
@@ -1637,7 +1646,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         <div className="flex flex-col gap-2">
           <FoolOptions opts={pub.fool.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolPicked ?? (pub.sent?.[mine] ? -1 : null)} busy={busy} seed={me.user_id + "|" + pub.qid}
             onPick={(k) => { setFoolPicked(k); void act("answer", { pick: k, k: draftKey }).then((ok) => { if (!ok) setFoolPicked(null); }); }} />
-          <p className="text-13 text-center text-[var(--color-ink-3)]">{pub.sent?.[mine] ? "Picked. Wait for the reveal." : "Which one is the truth? One tap and it's locked."}</p>
+          {/* (the line at the top already asks it, and says "Picked": only what it adds, 19 Nov review) */}
+          {!pub.sent?.[mine] && <p className="text-13 text-center text-[var(--color-ink-3)]">One tap and it&rsquo;s locked.</p>}
         </div>)}
       {canPin && (
         <div className="flex flex-col gap-2">

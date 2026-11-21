@@ -467,7 +467,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
 export function MiniIntro({ pub, size, head }: { pub: Pub; size: "tv" | "phone"; head?: ReactNode }) {
   const m = pub.mini, tv = size === "tv";
   if (!m) return null;
-  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? `${m.of} rounds, 3 themes each` : m.key === "see" ? `${m.of} pictures` : m.key === "fool" ? `${m.of} facts` : `Best of ${m.of}`;
+  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? `${m.of} rounds, 3 themes each` : m.key === "see" ? `${m.of} pictures` : m.key === "fool" ? `${m.of} facts` : m.key === "roulette" ? `${m.of} spins` : `Best of ${m.of}`;   // (Russian Roulette: points after 3 spins, no best-of: 19 Nov review)
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
       {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : m.key === "stakes" ? "The night's last game" : "Mini-game"}</div>}

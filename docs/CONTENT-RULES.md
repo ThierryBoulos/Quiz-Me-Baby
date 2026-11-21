@@ -125,6 +125,10 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   "Which Robert Miles track…?"), the new one replaces the old one, and say so when showing it (owner, 6 Nov).
   Never-together is only for questions that are different facts but give each other away (the Sandstorm meme and
   "Which producer made 'Sandstorm'?").
+- **A Fool Me Twice fact and a question on the same fact: keep both, never on the same night** (21 Nov, the owner).
+  The fact is a different game, so it isn't a twin to delete: pair it in `SEED_NEVER` with the question (or the
+  Majority Rules one) that asks the same thing, and with any question it gives away (Bell's "Ahoy" and "Who patented
+  the telephone?"). Before writing a fact, search the bank for its subject.
 - They go in `SEED_NEVER` in `classic.html` (groups of ids); the dealer deals at most one of each group.
 - **Better still, don't write the overlap**: a ranking shares no item with another ranking (the trend rankings:
   Rickrolling → KONY 2012 → Ice Bucket; Gangnam → Harlem Shake → Mannequin).

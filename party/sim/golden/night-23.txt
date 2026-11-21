@@ -35,7 +35,7 @@
 77.75 flagReveal | 15 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 3 s. | 
 78.75 flagReveal | 15 | 1-1 | 0-2 | ⁨Rami⁩ moves the game on. You can in 2 s. | 
 79.50 flagReveal | 15 | 1-1 | 0-2 |  | 
-91.50 flagReveal | 15 | 1-1 | 0-2 | ⁨Rami⁩ seems to be away. ⁨Sam⁩ is ⁨Lions⁩'s captain now. | 
+91.50 flagReveal | 15 | 1-1 | 0-2 | ⁨Rami⁩ seems to be away. ⁨Sam⁩ is ⁨Lions⁩’ captain now. | 
 92.25 flagReveal | 15 | 1-1 | 0-2 | ⁨Sam⁩ doesn't agree: the call stands. | 
 (the scores set to 2-3)
 94.00 flagReveal | 15 | 2-3 | 0-2 | Both captains agreed: ⁨Lions⁩ 2, ⁨Owls⁩ 3. | 

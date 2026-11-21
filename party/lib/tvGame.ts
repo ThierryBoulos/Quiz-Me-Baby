@@ -549,7 +549,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const contestWait = useCallback(() => {
     const s = st.current, K = s.contest!, by = iso(s.g.teams[K.by].name);
     const cap = ctx.current.members.find((m) => m.team === other(K.by) && m.role === "captain")?.name || s.g.teams[other(K.by)].name;
-    return s.nohost ? `Wait: ${iso(cap)} is deciding ${by}'s contest (${Math.max(1, Math.ceil((K.until - Date.now()) / 1000))} s).` : `Wait: the host is deciding ${by}'s contest.`;
+    return s.nohost ? `Wait: ${iso(cap)} is deciding ${poss(by)} contest (${Math.max(1, Math.ceil((K.until - Date.now()) / 1000))} s).` : `Wait: the host is deciding ${poss(by)} contest.`;
   }, []);
   const verdictWord = (sc: string, ok: boolean) => (sc === "sayReveal" ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
   /* a call changed: the score moves with it (or, a RIGHT turned down with no steal played, a steal on a new question) */
@@ -579,7 +579,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     } else if (sc === "battleReview" && /^b[01]-\d+$/.test(id)) {
       const [cap, i] = id.slice(1).split("-").map(Number);
       play({ type: "battle/rule", cap, i, got: v });
-      s.toast = { id: ++s.toastN, text: `Call changed: ${iso(g.teams[cap].name)}'s answer ${i + 1} is ${v ? "RIGHT" : "WRONG"}.` }; imadOnToast(s, "Call changed");
+      s.toast = { id: ++s.toastN, text: `Call changed: ${poss(iso(g.teams[cap].name))} answer ${i + 1} is ${v ? "RIGHT" : "WRONG"}.` }; imadOnToast(s, "Call changed");
     } else if (/^s\d+$/.test(id) && s.sdLog?.calls[Number(id.slice(1))]) {
       /* sudden death / the tie-breaker: the first right answer (in the order they came) takes it; nobody right
          after all, another question */
@@ -717,7 +717,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!m || (m.team !== 0 && m.team !== 1)) return;
       const off = !s.mrOut.includes(n);
       s.mrOut = off ? [...s.mrOut, n] : s.mrOut.filter((x) => x !== n);
-      s.toast = { id: ++s.toastN, text: off ? `${iso(n)} is off ${iso(g.teams[m.team].name)}'s list for this one.` : `${iso(n)} is back on ${iso(g.teams[m.team].name)}'s list.` };
+      s.toast = { id: ++s.toastN, text: off ? `${iso(n)} is off ${poss(iso(g.teams[m.team].name))} list for this one.` : `${iso(n)} is back on ${poss(iso(g.teams[m.team].name))} list.` };
     }
     /* ...and Start fixes the lists: everyone on a team, but whoever was taken off */
     else if (t === "majority/start") {
@@ -880,7 +880,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (sc === "ask" || sc === "steal") {
       /* one answer: once it's sent it's locked, host or no host */
       if (!texts.length) return false;
-      if (team !== turnTeam()) return `It's ${nm(turnTeam())}'s turn to answer.`;
+      if (team !== turnTeam()) return `It's ${poss(nm(turnTeam()))} turn to answer.`;
       if (s.typed[team]) return `${poss(nm(team))} answer is already in.`;
       if (s.pending) return "Wait for the call on the last answer.";
       if (s.lifeline) return "Wait for the lifeline to finish.";
@@ -1003,7 +1003,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* (What Do You See?: a wrong one, and the note already says who is out and who can still buzz) */
     if (was === "seeQ" && s.screen === "seeQ") return true;
     /* (not what it says: on a standard question the other team may be about to steal) */
-    s.toast = { id: ++s.toastN, text: pin ? `Time's up: ${iso(s.g.teams[team].name)}'s pin counts where it is.` : `Time's up: what ${iso(s.g.teams[team].name)} typed counts as sent.` };
+    s.toast = { id: ++s.toastN, text: pin ? `Time's up: ${poss(iso(s.g.teams[team].name))} pin counts where it is.` : `Time's up: what ${iso(s.g.teams[team].name)} typed counts as sent.` };
     return true;
   }, [captainInput, draftKey]);
 
@@ -1011,7 +1011,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
      (null), else why not. (A lifeline open, or a buzz in the cocktail or dish, counts as a go.) */
   const answeredYet = useCallback((): string | null => {
     const s = st.current, g = s.g;
-    if (s.contest) return `One at a time: ${iso(g.teams[s.contest.by].name)}'s contest is open.`;
+    if (s.contest) return `One at a time: ${poss(iso(g.teams[s.contest.by].name))} contest is open.`;
     if (s.lifeline) return "Wait for the lifeline to finish.";
     if (s.pending || s.typed[0] || s.typed[1] || s.guesses[0] != null || s.guesses[1] != null || s.pins[0] || s.pins[1] || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
     if (s.screen === "dishQ") { const L = g.dishGame.leg; if (L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length || s.buzzAt) return "Too late: someone has already had a go at this one."; }
@@ -1044,7 +1044,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "sudden/go") { if (g.sdReady) return false; }
     /* a contest: one at a time, each call once, and only a call something was typed for */
     else if (t === "ui/contest") {
-      if (s.contest) return `One at a time: ${iso(g.teams[s.contest.by].name)}'s contest is open.`;
+      if (s.contest) return `One at a time: ${poss(iso(g.teams[s.contest.by].name))} contest is open.`;
       const c = callsOf(s).find((x) => x.id === move.id);
       if (!c) return false;
       if (c.done) return c.text ? "That call has already been looked at." : "Nothing was typed there.";
@@ -1076,14 +1076,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!A || team === A.team || typeof move.v !== "boolean") return false;
       s.mrAsk = null;
       if (move.v) s.mrOut = [...s.mrOut, A.name];
-      s.toast = { id: ++s.toastN, text: move.v ? `${iso(A.name)} is off ${iso(g.teams[A.team].name)}'s list for this one.` : `${iso(A.name)} stays on the list.` };
+      s.toast = { id: ++s.toastN, text: move.v ? `${iso(A.name)} is off ${poss(iso(g.teams[A.team].name))} list for this one.` : `${iso(A.name)} stays on the list.` };
       return true;
     }
     /* no host: either captain asks to set the total scores; the other captain agrees, or nothing changes */
     else if (t === "ui/askScore") {
       const n = (x: unknown) => Math.max(0, Math.min(999, Math.floor(Number(x))));
       if (!Number.isFinite(Number(move.a)) || !Number.isFinite(Number(move.b))) return false;
-      if (s.agree) return `One at a time: ${iso(g.teams[s.agree.team].name)}'s request is open.`;
+      if (s.agree) return `One at a time: ${poss(iso(g.teams[s.agree.team].name))} request is open.`;
       const a = n(move.a), b = n(move.b), from: [number, number] = [g.teams[0].score, g.teams[1].score];
       if (a === from[0] && b === from[1]) return "Those are the scores already.";
       /* (the TV and both captains' phones show it while it's open: no toast as well) */
@@ -1093,7 +1093,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* ...or a new question, before anyone has answered it: the clock stops (and the question hides, as for a
        Pause) while the other captain decides */
     else if (t === "ui/askSwap") {
-      if (s.agree) return `One at a time: ${iso(g.teams[s.agree.team].name)}'s request is open.`;
+      if (s.agree) return `One at a time: ${poss(iso(g.teams[s.agree.team].name))} request is open.`;
       if (s.tvAway) return (phoneRef.current ? "The game phone's screen was asleep. Tap again." : "The TV's screen was asleep. Tap again.");
       const why = answeredYet();
       if (why) return why;
@@ -1104,7 +1104,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       return true;
     }
     /* (the clock stays stopped for the answer: no Resume meanwhile) */
-    else if (t === "ui/pause" && s.agree?.kind === "swap") return `Waiting for ${iso(g.teams[other(s.agree.team)].name)}'s captain: a new ${s.agree.what}, or not.`;
+    else if (t === "ui/pause" && s.agree?.kind === "swap") return `Waiting for ${poss(iso(g.teams[other(s.agree.team)].name))} captain: a new ${s.agree.what}, or not.`;
     /* ...and the other captain's answer (to that request: id), not the one who asked */
     else if (t === "ui/agree") {
       const A = s.agree;
@@ -1616,7 +1616,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (b.error) { await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", cap.user_id); continue; }
         H.at[next.user_id] = now;
         s.g.teams[t].captain = next.name;
-        s.toast = { id: ++s.toastN, text: `${iso(cap.name)} seems to be away. ${iso(next.name)} is ${iso(s.g.teams[t].name)}'s captain now.` };
+        s.toast = { id: ++s.toastN, text: `${iso(cap.name)} seems to be away. ${iso(next.name)} is ${poss(iso(s.g.teams[t].name))} captain now.` };
         void publish();
       } finally { H.busy = false; }
       return;
@@ -1810,8 +1810,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           if (!cap || now - (here.current.at[cap.user_id] ?? here.current.since) > 20000) {
             const t = A.turn as 0 | 1, name = iso(g.teams[t].name);
             s.step++; changed = true;
-            if (A.bid > 0) { play({ type: "auction/pass" }); s.toast = { id: ++s.toastN, text: `${name}'s captain seems to be away, so ${name} pass.` }; }
-            else { A.turn = other(t); s.bidTurn = { key: "", at: now }; s.toast = { id: ++s.toastN, text: `${name}'s captain seems to be away, so ${iso(g.teams[other(t)].name)} open the bidding.` }; }
+            if (A.bid > 0) { play({ type: "auction/pass" }); s.toast = { id: ++s.toastN, text: `${poss(name)} captain seems to be away, so ${name} pass.` }; }
+            else { A.turn = other(t); s.bidTurn = { key: "", at: now }; s.toast = { id: ++s.toastN, text: `${poss(name)} captain seems to be away, so ${iso(g.teams[other(t)].name)} open the bidding.` }; }
           }
         }
       }
