@@ -16,7 +16,7 @@ import { cap1, type Member, type Room } from "../room";
 import { inboxMark, useInbox } from "../tv/useInbox";
 import { usePresent } from "../tv/usePresent";
 import { useNetProbe } from "../tv/netProbe";
-import { DISH_LAST, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY } from "../game";
+import { DISH_LAST, poss, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY } from "../game";
 import { SEE_TYPE } from "../see";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
@@ -497,7 +497,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
               const r2 = await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", nx.user_id);
               if (r2.error) { await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", cap.user_id); return; }
               H.at[nx.user_id] = Date.now(); s.teams[tm].captain = nx.name;
-              s.toast = { id: ++s.toastN, text: `${cap.name} seems to be away. ${nx.name} is ${s.teams[tm].name}'s captain now.` };
+              s.toast = { id: ++s.toastN, text: `${cap.name} seems to be away. ${nx.name} is ${poss(s.teams[tm].name)} captain now.` };
               publish();
             } finally { capBusy.current = false; }
           })();

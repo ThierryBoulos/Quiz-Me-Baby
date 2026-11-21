@@ -49,7 +49,7 @@ if (filter && inPlay.length > hit.length) console.log(`"${filter}" matched ${hit
 /* the Setup before the start: every setup (2 teams with a host, 2 teams with no host: Team A's captain; 3, 5 and 8
    teams), each with a TV and with none, each as it starts and with Expert on (xp), a theme repeated (rep), the Repeat
    window open (repo). A filter matching one runs that kind in every setup */
-const SETUP_BASES = ["2:host", "2:cap", "3:host", "5:host", "8:host"], SETUP_KINDS = ["", "xp", "rep", "repo"];
+const SETUP_BASES = ["2:host", "2:cap", "3:host", "5:host", "8:host"], SETUP_KINDS = ["", "xp", "rep", "repo", "extra"];
 const setupHash = (b, kind, notv) => `setup:${b}${kind ? ":" + kind : ""}${notv ? ":notv" : ""}`;
 const setupJobs = SETUP_KINDS.filter((kind) => !filter || SETUP_BASES.some((b) => [false, true].some((n) => match(setupHash(b, kind, n)))))
   .flatMap((kind) => SETUP_BASES.flatMap((b) => [false, true].map((n) => setupHash(b, kind, n))));
@@ -101,7 +101,9 @@ const TV_MEASURE = () => {
     const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) continue;
     const o = { l: (S.left - r.left) / k, r: (r.right - S.right) / k, t: (S.top - r.top) / k, b: (r.bottom - S.bottom) / k };
     const m = Math.max(o.l, o.r, o.t, o.b);
-    if (m > 3) bad.push("OFF " + Math.round(m) + "px " + ["l", "r", "t", "b"].filter((x) => o[x] > 3).join("") + " " + name(el));
+    /* (text inside a box that ends it in "…": the hidden part never shows, so it isn't off the screen; the box is checked) */
+    const inEllipsis = (() => { for (let p = el.parentElement, i = 0; p && i < 3; p = p.parentElement, i++) { const ps = getComputedStyle(p); if (ps.textOverflow === "ellipsis" && /(hidden|clip)/.test(ps.overflow + ps.overflowX)) return true; } return false; })();
+    if (m > 3 && !inEllipsis) bad.push("OFF " + Math.round(m) + "px " + ["l", "r", "t", "b"].filter((x) => o[x] > 3).join("") + " " + name(el));
     /* (an ellipsis or a line clamp is meant: a long name ends in "…") */
     if (/(hidden|clip)/.test(cs.overflow + cs.overflowX + cs.overflowY) && el.children.length + (el.textContent || "").length > 0 && cs.textOverflow !== "ellipsis" && !(cs.webkitLineClamp > 0)
       && !/line-clamp|flap-|roll-win/.test(el.className || "") && (el.scrollHeight > el.clientHeight + 3 || el.scrollWidth > el.clientWidth + 3)

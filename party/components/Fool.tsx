@@ -43,7 +43,10 @@ export function FoolStatus({ teams, done, doing, finished, tv }: { teams: FoolTe
 /* a phone's own order (16 Nov, the owner): every phone shuffles the answers its own way, so no two phones show them in
    the same order (seed: who's holding it and the fact); the TV keeps the order the game dealt. Each answer keeps the
    TV's letter wherever it is (19 Nov review: the room shouted "it's D!" and D on a phone was another answer) */
-const mix = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+/* (the last steps stir every bit: without them the answer's number, last in the string, decided most of the order, and
+   1 phone in 14 showed the same order as another, 1 in 16 the TV's own: 21 Nov) */
+const mix = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return h >>> 0; };
 /* the answers to pick from: on the TV, all of them; on a captain's phone, buttons (its own lie left out) */
 /* (locked: the pick is sent, no other tap; by default once one is picked: with 3 to 8 teams the captain can change it
    until Lock in) */
@@ -138,7 +141,8 @@ export const ownIndex = (opts: string[] | undefined, lie: string | null | undefi
 export function FoolPredict({ teams, me, value, onPick, busy, locked, compact }: { teams: FoolTeam[]; me: number; value: number | null; onPick: (t: number) => void; busy?: boolean; locked?: boolean; compact?: boolean }) {
   if (compact) return (
     <div className="flex flex-col items-center gap-1">
-      <div className="flex flex-wrap justify-center gap-1" role="group" aria-label="Who will fall for your lie?">
+      {/* (8 teams: 7 circles of 44px, 2px apart, still one row on a 360-wide phone: 21 Nov) */}
+      <div className="flex flex-wrap justify-center" style={{ gap: teams.length >= 8 ? 2 : 4 }} role="group" aria-label="Who will fall for your lie?">
         {teams.map((t, i) => i === me ? null : (
           <button key={i} type="button" className="fool-dot" aria-pressed={value === i} aria-label={t.name} disabled={busy || locked} onClick={() => onPick(i)}
             style={{ ["--c" as string]: t.color }}>{LETTERS[i]}</button>))}

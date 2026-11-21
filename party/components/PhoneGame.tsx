@@ -272,7 +272,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const Typed = ({ t }: { t: 0 | 1 }) => {
     /* what they typed comes with the screen itself, so it shows before the secret (the answer, the app's call) lands */
     const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
-    return <Said t={t} text={x?.join("  /  ")} label={x ? `${T[t].name} typed${pub.saidLate === t ? " after time’s up" : ""}` : T[t].name} empty={pub.timeUp ? "No answer" : `Waiting for ${T[t].name}’s captain to type…`} />;
+    return <Said t={t} text={x?.join("  /  ")} label={x ? `${T[t].name} typed${pub.saidLate === t ? " after time’s up" : ""}` : T[t].name} empty={pub.timeUp ? "No answer" : `Waiting for ${poss(T[t].name)} captain to type…`} />;
   };
   /* RIGHT / WRONG under the answer, once there IS an answer (or the clock ran out with none: then the
      app suggests WRONG). The app's call is pre-selected; either button rules. `aloud`: the Battle with a
@@ -282,7 +282,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     if (!x && !late && !aloud) return null;
     const app = x ? secret.match?.[t] ?? null : late ? false : null;
     return (<>{app != null && <p className="text-center text-13 text-[var(--color-ink-2)]">The app&rsquo;s call is filled in. Tap one to rule.</p>}
-      <RulingPicker value={app} app={app} busy={busy || loading} label={`Rule on ${T[t].name}’s answer`} onPick={(v) => send(v ? right : wrong)} /></>);
+      <RulingPicker value={app} app={app} busy={busy || loading} label={`Rule on ${poss(T[t].name)} answer`} onPick={(v) => send(v ? right : wrong)} /></>);
   };
   /* the reveal screens: each team's answer, and its ruling beside it, which the host can always flip */
   const Rulings = ({ type, say, empty }: { type: string; say?: boolean; empty: string }) => (<><p className="text-center text-13 text-[var(--color-ink-2)]">The app made these calls. Tap one to change it.</p>{([0, 1] as const).map((t) => {
@@ -296,7 +296,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           {x && v != null && app != null && v !== app && <div className="text-12 font-bold" style={{ color: v ? "var(--color-ok)" : "var(--color-no)" }}>You changed it: {verdictWord(v, say)}</div>}
         </div>
         {/* nothing written: nothing to rule on */}
-        {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} app={app} say={say} label={`Rule on ${T[t].name}’s answer`} onPick={pick} /></div>}
+        {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} app={app} say={say} label={`Rule on ${poss(T[t].name)} answer`} onPick={pick} /></div>}
       </div>); })}</>);
   /* a results screen: exactly what the players see, and the host's button */
   const resultHeld = useTwoHold(pub);
@@ -713,7 +713,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>); }
     case "battleHandoff": return (
       <div className="flex flex-col gap-4 flex-1">
-        <Big eyebrow="Halfway" size={30} color="var(--color-ink)" text={`${T[0].name} scored ${pub.battle?.score[0]}`} sub={`Now ${T[1].name}’s captain. ${battleNeeds(pub)}`} />
+        <Big eyebrow="Halfway" size={30} color="var(--color-ink)" text={`${T[0].name} scored ${pub.battle?.score[0]}`} sub={`Now ${poss(T[1].name)} captain. ${battleNeeds(pub)}`} />
         <Main label={`Start ${poss(T[1].name)} questions`} move={{ type: "battle/start" }} />
       </div>);
     case "battleTie": return (

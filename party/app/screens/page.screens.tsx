@@ -78,7 +78,10 @@ export default function Screens() {
     const rep = mode[3] === "rep" || mode[3] === "repo";
     if (rep && typeof window !== "undefined" && !localStorage.getItem("qmb.setup.REPT")) { const t = ["Geography", "History", "Geography", "Music", "History", "Geography"];
       localStorage.setItem("qmb.setup.REPT", JSON.stringify({ at: Date.now(), v: { "two.themes": t, "two.rounds": 6, "many.themes": t, "many.rounds": 6 } })); }
-    const code = mode[3] === "xp" ? "XPXP" : rep ? "REPT" : "ABCD";
+    /* (#setup:<teams>:<role>:extra, Secret Stakes switched on with the Battle: what each game's line says, 21 Nov) */
+    if (mode[3] === "extra" && typeof window !== "undefined" && !localStorage.getItem("qmb.setup.STKS")) localStorage.setItem("qmb.setup.STKS", JSON.stringify({ at: Date.now(), v: {
+      "two.minis": ["flag", "closest", "auction", "see", "roulette", "battle", "stakes"] } }));
+    const code = mode[3] === "xp" ? "XPXP" : rep ? "REPT" : mode[3] === "extra" ? "STKS" : "ABCD";
     /* (…:notv: the same Setup in a game with no TV, the game run on a phone) */
     return (
       <NoTv.Provider value={mode.includes("notv")}>

@@ -49,5 +49,19 @@ export async function dumpTwo(load) {
     const rec = JSON.parse(JSON.stringify(src)), w = rec.pub.mini.wins[0];
     rec.pub.screen = "foolTie"; rec.pub.mini = { ...rec.pub.mini, key: "fool", title: "Fool Me Twice", wins: [w + 6, w + 6] };
     got[`${tag}f.foolTie.fool.a`] = rec; }
+  /* moments the nights pass too quickly to catch (21 Nov, the before-and-after pictures): Russian Roulette once the
+     barrel has stopped (the host's clock; with no TV, the other team has answered), Secret Stakes' question once the
+     other team has answered, and a night that ends tied. The phones are Lions': the other team is Owls */
+  const copy = (k) => (got[k] ? JSON.parse(JSON.stringify(got[k])) : null);
+  for (const tag of ["nh", "h"]) {
+    const rr = copy(`${tag}.rouletteQ.roulette.hold.lap1.a`);
+    if (rr) { rr.now = rr.pub.roulette.spinAt + 9000; rr.pub.deadline = rr.now + 25000; rr.pub.left = null; rr.pub.timeUp = false;
+      rr.pub.sent = [false, true]; got[`${tag}.rouletteQ.roulette.extra.stopped.a`] = rr; }
+    const sq = copy(`${tag}.stakesQ.stakes.z`) || copy(`${tag}.stakesQ.stakes.a`);
+    if (sq) { sq.pub.sent = [false, true]; got[`${tag}.stakesQ.stakes.extra.other.a`] = sq; }
+    const fin = copy(`${tag}.final.a`);
+    if (fin) { const sc = Math.max(...fin.pub.teams.map((t) => t.score)); fin.pub.teams.forEach((t) => { t.score = sc; }); fin.pub.winner = null;
+      got[`${tag}.final.extra.tied.a`] = fin; }
+  }
   return got;
 }
