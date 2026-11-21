@@ -11,14 +11,13 @@ bank is `bank/bank.js` (out of `classic.html` since 21 Nov, the owner). `classic
   The checks cover them too: simulated nights and screen checks in each setup it touches. Where something doesn't
   apply (the Auction is 2 teams only), say so; where it can't work the same way, say what happens there instead.
   **Never propose leaving a setup out (15 Nov)**, unless it really doesn't make sense there; then say why.
-  **Every report ends with the six setups (15 Nov)**, one line each: 2 teams with a host, 2 teams with no host, 3 to 8
-  teams, each with a TV and with no TV: done and checked (which check), or why it doesn't apply. A report without
-  them isn't finished. The setup screens are one shared piece where they can be (`components/LevelChips.tsx`), so a
+  **Every report ends with one line on them (21 Nov, replacing the six lines of 15 Nov):** "Tested across the six
+  setups: nothing to declare", or the issue and the fix or plan. Name a setup only where something doesn't apply or
+  works differently there. The setup screens are one shared piece where they can be (`components/LevelChips.tsx`), so a
   change lands in every setup at once; the screen check runs every setup by itself (a filter matching one setup's
   screen runs it in all of them).
 - **Reports: testing in one line (21 Nov, the owner).** Don't list the tests, counts or screens checked. Say "Tested
-  across the six setups: nothing to declare", or what the issue was and the fix (or the plan). The six setups' lines
-  stay, short: "done, tested", or why it doesn't apply.
+  across the six setups: nothing to declare", or what the issue was and the fix (or the plan). No list of the six.
 - **The owner's wording (8 Nov).** How to Play (`party/components/Rules.tsx`) is the owner's own text: never reword
   it. When a change to the game makes it wrong, or it looks wrong, tell the owner exactly how you'd change it (the
   sentence as it is, the sentence you'd write) and wait for a yes. In everything else written for players, follow the
@@ -35,7 +34,8 @@ bank is `bank/bank.js` (out of `classic.html` since 21 Nov, the owner). `classic
   everything about them is in `docs/LIVE-LINES.md`. The way back: `LIVE_LINES = false` in `party/lib/liveLines.ts`
   (game only), and `docs/sql/2026-11-16-rollback.sql` (the database). The SQL that added them:
   `docs/sql/2026-11-16-apply.sql`. Read each game's count (in the doc) before deciding whether to keep them.
-- **Push only when the owner says "push".** Commit locally meanwhile.
+- **Push only when the owner says "push".** Commit locally meanwhile. Asked to push without it, answer only
+  "Not pushed yet." (21 Nov).
 - **Database changes need the owner's approval**: write the SQL to `supabase/migrations/` and a paste-ready copy to
   `docs/sql/`, and ask. Once the owner says yes, run it yourself with the Supabase tool; if the tool fails, the owner
   pastes the `docs/sql/` copy into Supabase's SQL Editor.
