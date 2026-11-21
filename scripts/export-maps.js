@@ -1,7 +1,7 @@
-/* Writes party/public/maps/<id>.json — every map in the bank drawn exactly as
-   Classic draws it (mapSVG + mapLegend), once for play and once for the
-   reveal, so Party shows the very same maps without its own copy of the
-   drawing code. Run it after any change to the maps:
+/* Writes party/public/maps/<id>.json — every map in the bank drawn by
+   bank/maps.js (mapSVG + mapLegend, out of the retired classic.html on 21 Nov),
+   once for play and once for the reveal, so Party shows the maps without its
+   own copy of the drawing code. Run it after any change to the maps:
      node scripts/export-maps.js
    Needs Playwright's Chromium. */
 const { chromium } = require('playwright');
@@ -12,13 +12,13 @@ const root = path.join(__dirname, '..');
    flags' key): the answer's drawing no longer comes down with the question (the 4 Nov audit, 4.5) */
 (async () => {
   const srv = http.createServer((req, res) => {
-    const f = path.join(root, decodeURIComponent(req.url.split('?')[0]).replace(/^\/$/, '/classic.html'));
+    const f = path.join(root, decodeURIComponent(req.url.split('?')[0]).replace(/^\/$/, '/scripts/maps-page.html'));
     fs.readFile(f, (e, d) => { if(e){ res.writeHead(404); res.end(); } else { res.writeHead(200, { 'content-type': f.endsWith('.js') ? 'text/javascript' : f.endsWith('.json') ? 'application/json' : 'text/html' }); res.end(d); } });
   }).listen(0);
   const port = srv.address().port;
   const b = await chromium.launch(process.env.CHROME ? { executablePath:process.env.CHROME } : {});
   const p = await b.newPage();
-  await p.goto(`http://127.0.0.1:${port}/classic.html`);
+  await p.goto(`http://127.0.0.1:${port}/`);
   /* a map's picture layer (the night lights) goes inside its SVG, so Party needs no extra file */
   const raster = { 'maps-night.png': 'data:image/png;base64,' + fs.readFileSync(path.join(root, 'maps-night.png')).toString('base64') };
   const out = await p.evaluate(async (raster) => {

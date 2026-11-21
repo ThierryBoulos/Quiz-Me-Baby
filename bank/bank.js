@@ -3677,5 +3677,21 @@ const SEED_NEVER = [
 ];
 
 
+/* A graded map lists each place's number once (`vals`) and its colour bands
+   from the best down (`bands`); the shaded groups are worked out
+   here (moved from classic.html with the drawing, 21 Nov: it was left behind when the bank moved), so a corrected figure can never leave a country in the wrong band. */
+SEED_MAPS.forEach(function(m){
+  if(!m.vals || !m.bands) return;
+  /* `min` when bigger is better, `max` when it is a ranking (1st is best) */
+  m.cls = m.bands.map(function(b, i){
+    const prev = i ? m.bands[i - 1] : null;
+    const inBand = b.max != null
+      ? v => v <= b.max && v > (prev ? prev.max : -Infinity)
+      : v => v >= b.min && v < (prev ? prev.min : Infinity);
+    return { c:b.c, hint:b.hint, label:b.label,
+      codes:Object.keys(m.vals).filter(k => inBand(m.vals[k])).join(' ') };
+  });
+});
+
 if (typeof module !== 'undefined') module.exports = { BUILD, THEMES, SEED, SEED_CLOSEST, SEED_AUCTION, SEED_SAYSAME, MC, SEED_MAPS, FLAGS, DISHES, PINS,
   SEES, AIRPORTS, FOOLS, MAJORITY, SEED_VERSION, SEED_NEVER, hash, buildSeedBank };
