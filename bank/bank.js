@@ -2,8 +2,8 @@
    they become the bank's rows (buildSeedBank). Moved out of classic.html on 21 Nov 2026 (the owner: Classic is
    retired; the bank shouldn't live in it).
      node scripts/export-bank.js   writes party/data/bank.json and party/public/bank.json from it
-   Plain JavaScript: in a browser it gives its names to the page (classic.html still loads it, to draw the maps for
-   scripts/export-maps.js); in Node, require() it. Bump BUILD.v and SEED_VERSION (and version.json) with every change.
+   Plain JavaScript: in a browser it gives its names to the page (scripts/maps-page.html loads it, to draw the maps for
+   scripts/export-maps.js); in Node, require() it. Bump BUILD.v and SEED_VERSION with every change.
    How the content is written: docs/CONTENT-RULES.md. */
 
 function hash(str){ let h = 5381; for(let i=0;i<str.length;i++) h = ((h<<5)+h+str.charCodeAt(i))|0; return 'q'+(h>>>0).toString(36); }

@@ -1,9 +1,9 @@
 # Quiz Me Baby
 
 Party trivia game. The live app is `party/` (Next.js, Supabase); `engine/core.js` is its game engine. The question
-bank is `bank/bank.js` (out of `classic.html` since 21 Nov, the owner). `classic.html` is the old one-screen app,
-**retired as a game on 3 Nov** (nobody can reach it; `/classic` redirects home): it only draws the maps for
-`scripts/export-maps.js` now. Don't change it.
+bank is `bank/bank.js`; the maps are drawn by `bank/maps.js` (`node scripts/export-maps.js`). The old one-screen app,
+`classic.html`, was retired on 3 Nov and deleted on 21 Nov (the tidy-up's Phase 1; it's in the git history);
+`/classic` redirects home.
 
 - **Every setup, every time (the owner, 8 and 11 Nov).** It's one game. Whatever the owner asks for (a feature, a
   setting, a fix, a test, a change to a mini-game or a theme) and every change made is done and checked in every setup:

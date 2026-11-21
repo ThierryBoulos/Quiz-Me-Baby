@@ -7,7 +7,7 @@ plus three free accounts: GitHub, Vercel and Supabase.
 
 | Piece | Where | What it is |
 |---|---|---|
-| Classic | `classic.html` at the root | Retired as a game (3 Nov 2026): `/classic` redirects home. Kept only to draw the maps (`scripts/export-maps.js`) |
+| Classic | deleted (21 Nov 2026; in the git history) | Retired as a game on 3 Nov 2026: `/classic` redirects home. The maps it drew: `bank/maps.js` |
 | Party | `party/` (Next.js) on Vercel | The TV (`/tv/CODE`), the phones (`/join`, `/room/CODE`), `/api/health`, `/api/bank` |
 | Game server | Supabase project (EU, Ireland) | Rooms, members, the action log, secrets; anonymous sign-ins |
 | Shared rules | `engine/core.js` | The game's rules (dealing, every move, answer checking), run by the TV, or by a phone when there's no TV; tests in `engine/*.test.js` |
@@ -71,7 +71,7 @@ or set them on Vercel as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KE
 ## Everyday jobs
 
 - **Change a question:** edit the bank in `bank/bank.js`, following `docs/CONTENT-RULES.md`.
-  Bump `BUILD.v` and `SEED_VERSION` in `bank/bank.js` and `version.json`, then
+  Bump `BUILD.v` and `SEED_VERSION` in `bank/bank.js`, then
   `node scripts/export-bank.js` and `cd party && npm test`. Commit all of it.
 - **Something broke on the night:** `/api/health` first. Then Supabase → Logs.
   A paused Free project: Supabase dashboard → the project → **Resume**.

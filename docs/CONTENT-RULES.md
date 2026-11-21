@@ -251,7 +251,7 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   (`byId`, `rankById`, `someOf`, `notById`) and its `SEED_NEVER` groups to the new id; ids in code
   (`HOST_ONLY_IDS` in `party/lib/engine.ts`) too. `npm run check-bank` says when a never-together id is gone.
 - Map ideas (`mapKeys`) are keyed by the map's **answer text**: change the answer, move the key.
-- After any bank change: bump `BUILD.v` and `SEED_VERSION` in `bank/bank.js` and `version.json`; run
+- After any bank change: bump `BUILD.v` and `SEED_VERSION` in `bank/bank.js`; run
   `node scripts/export-bank.js`; after a map change also `node scripts/export-maps.js`; after new pins
   `node party/scripts/fetch-pins.mjs`; after new pictures `node party/scripts/fetch-sees.mjs`; then `cd party && npm test` (refresh goldens with `node sim/run.mjs --update`
   and `node sim/many.mjs --update` only when the change is meant to alter the deal).
