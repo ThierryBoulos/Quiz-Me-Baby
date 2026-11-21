@@ -206,6 +206,8 @@ const pool = async (jobs, n, work) => {
 };
 const page = async (j, opt) => {
   const ctx = await browser.newContext({ deviceScaleFactor: 1, ...opt }); await offline(ctx);
+  /* SCREENS_MOTION=off: the screens with Settings' motion switch off (19 Nov: the Gotcha with motion off) */
+  if (process.env.SCREENS_MOTION === "off") await ctx.addInitScript(() => { try { localStorage.setItem("qmb.motion", "off"); } catch { /* */ } });
   const p = await ctx.newPage(); p.on("pageerror", (e) => errors.push(j.id + ": " + String(e).slice(0, 200)));
   await p.goto(BASE + "/screens#" + encodeURIComponent(j.hash), { timeout: 180000 });
   return { ctx, p };
