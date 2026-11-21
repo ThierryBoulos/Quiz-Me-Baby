@@ -77,7 +77,7 @@ export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, 
    someone or was a team's, whose it was and who fell for it; ours nobody fell for go quietly. Then each team's points */
 /* TRIAL (21 Nov, for the owner's choice, pictures only): how the Gotcha line names the teams. "names", the game now;
    "letters", from 5 teams the teams' dots instead of their names (option A); "points", the owner's idea: the lie's own
-   points on its label ("Lions' lie, +2") and only the −1 on the Gotcha side. Set by the screen check
+   points on its label ("Lions' lie, +2") and only the −1 on the Gotcha side; "both", the two together. Set by the screen check
    (SCREENS_GOTCHA); qmb.flap = "a" holds the board on the label side with motion off. Goes once the owner picks. */
 function useGotchaTrial() {
   const [v, setV] = useState({ style: "names", flapA: false });
@@ -85,7 +85,7 @@ function useGotchaTrial() {
   return v;
 }
 export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]; tv?: boolean }) {
-  const trial = useGotchaTrial(), dots = trial.style === "letters" && teams.length >= 5, pts = trial.style === "points";
+  const trial = useGotchaTrial(), dots = (trial.style === "letters" || trial.style === "both") && teams.length >= 5, pts = trial.style === "points" || trial.style === "both";
   const names = (ts: number[]) => ts.map((t) => teams[t]?.name ?? "").join(" & ");
   const rows = rev.opts.map((o, k) => ({ o, k, fell: rev.fooled[k] || [] }))
     .filter((x) => x.o.truth || x.o.by.length || x.fell.length)
