@@ -167,6 +167,21 @@ export function useRouletteSounds(rr: RrPub | undefined, phase: "spin" | "reveal
   }, [key, phase]);
 }
 
+/* Spin, once tapped (21 Nov, the owner: in the 15 Nov game Spin was tapped three times; nothing showed it had been, while
+   the tap went to the TV and the spin came back): "Spinning…", not to be tapped again, until the screen moves on (the
+   barrel starts, or the next spin's screen) or 8 s pass with nothing (then it can be tapped again). `sig` says where the
+   game is: the screen and the spin. Every setup: the host's phone, the captain's with no host, 3 to 8 teams' host. */
+export function useSpinTap(sig: string) {
+  const [p, setP] = useState<{ sig: string; at: number } | null>(null);
+  useEffect(() => {
+    if (!p) return;
+    const t = setTimeout(() => setP(null), Math.max(0, p.at + 8000 - Date.now()));
+    return () => clearTimeout(t);
+  }, [p]);
+  return { pending: !!p && p.sig === sig, press: () => setP({ sig, at: Date.now() }) };
+}
+export const SPINNING = "Spinning…";
+
 /* what a chamber is worth, said plainly */
 export const rrLevelWord = (level: string) => (level === "bullet" ? "The bullet · Expert" : level === "hard" ? "Hard" : level === "expert" ? "Expert" : "Medium");
 export const rrWorthWord = (level: string) => (level === "bullet" ? "+5 or −3" : level === "medium" ? "2 points" : "3 points");
@@ -175,9 +190,10 @@ export const signed = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0"
 /* a chip for a chamber's level, gold for the bullet */
 export function LevelChip({ level, small, short }: { level: string; small?: boolean; short?: boolean }) {
   const b = level === "bullet";
-  /* (short: "Bullet · Expert", where a row is narrow, two columns of teams) */
+  /* (short: "Bullet", where a row is narrow, two columns of teams: "Bullet · Expert" hid the theme beside it, 21 Nov,
+     the owner) */
   /* what it pays, in green and red (11 Nov, the owner: the bullet's +5 and −3 said where it's shown, not only in the rules) */
-  return <span className={"rr-chip" + (b ? " bullet" : "") + (small ? " sm" : "")}>{b && short ? "Bullet · Expert" : rrLevelWord(level)}
+  return <span className={"rr-chip" + (b ? " bullet" : "") + (small ? " sm" : "") + (short ? " short" : "")}>{b && short ? "Bullet" : rrLevelWord(level)}
     {b ? <><b className="rr-pt ok">+5</b><b className="rr-pt no">−3</b></> : <b className="rr-pt ok">{level === "medium" ? "+2" : "+3"}</b>}</span>;
 }
 export function RrNote({ children }: { children: ReactNode }) { return <p className="rr-note">{children}</p>; }

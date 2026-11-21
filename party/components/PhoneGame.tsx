@@ -11,7 +11,7 @@ import { QMB } from "@/lib/engine";
 import { joinLive, newTap, note, rpc, sb, sendAction, sendDraft } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
-import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun, type RrTeam } from "./Roulette";
+import { RrPhone, RrPhoneReveal, rrLevelWord, signed, SPINNING, useSpinTap, useSpun, type RrTeam } from "./Roulette";
 import { StakesBet, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
 import { FoolFact, FoolOptions, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "./Fool";
@@ -231,6 +231,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const secret: Secret = fresh ? raw : {};
   const loading = !!pub.qid && !fresh;
   const rrSpun = useSpun(pub.roulette?.spinAt);   // Russian Roulette: the answers once the barrel stops
+  const spinTap = useSpinTap(`${pub.screen}|${pub.roulette?.spinAt ?? ""}|${pub.mini?.leg ?? ""}`);   // Spin, once tapped
   /* A ruling on a reveal is a switch, and it shows the moment it's tapped (the TV confirms a beat later):
      on a slow server a tap looked like it did nothing (20 Oct). Unconfirmed after 8 s, the TV's call shows again. */
   const [picked, setPicked] = useState<Record<string, boolean>>({});
@@ -242,7 +243,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     const wait = !!pub.contest && NEXT_MOVES.has(String(move.type));
     /* (not docked meanwhile: sideways, the docked button sat over the contest's two buttons: the 4 Nov audit, 1.20) */
     if (wait) return <p className="text-center text-13 text-[var(--color-ink-3)] mt-auto" role="status">{label} comes back once you&rsquo;ve ruled on the contest.</p>;
-    return <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || off} onClick={() => send(move)}>{label}</button>; };
+    const spin = label === "Spin";
+    return <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || off || (spin && spinTap.pending)} onClick={() => { if (spin) spinTap.press(); send(move); }}>{spin && spinTap.pending ? SPINNING : label}</button>; };
   /* the host's private answer: the one box on this phone that isn't a button, so it can't be missed */
   const AnswerCard = () => loading ? <Line>Getting the answer…</Line> : secret.you ? (
     <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
@@ -1457,6 +1459,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const [bid, setBid] = useState("");
   const [pinAt, setPinAt] = useState<LatLon | null>(null);   // Drop the Pin: where this captain's pin is
   const rrSpun = useSpun(pub.roulette?.spinAt);              // Russian Roulette: the box opens once the barrel stops
+  const spinTap = useSpinTap(`${pub.screen}|${pub.roulette?.spinAt ?? ""}|${pub.mini?.leg ?? ""}`);   // Spin, once tapped
   const [skTheme, setSkTheme] = useState<number | null>(null), [skLevel, setSkLevel] = useState<string | null>(null);   // Secret Stakes: the bet being made
   const skRound = `${pub.stakes?.round}|${pub.stakes?.themes?.join()}`;
   useEffect(() => { setSkTheme(null); setSkLevel(null); }, [skRound]);
@@ -1731,7 +1734,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
 
       {/* no host: start, go and next — the lead captain (Team A's) */}
       {showNext && next && (
-        <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: next[1] })}>{next[0]}</button>)}
+        <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || (next[0] === "Spin" && spinTap.pending)}
+          onClick={() => { if (next[0] === "Spin") spinTap.press(); void nxt({ type: next[1] }); }}>{next[0] === "Spin" && spinTap.pending ? SPINNING : next[0]}</button>)}
       {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Start</button>}
       {pub.nextBy && !lead && open && <p className="text-center text-13 text-[var(--color-ink-3)]">{pub.nextBy} hasn&rsquo;t tapped it, so you can.</p>}
       {pub.nextBy && !lead && !open && sc !== DECIDED && !TIE_SCREENS.includes(sc) && sc !== "battleReview" && <WaitingFor pub={pub} />}

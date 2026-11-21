@@ -57,7 +57,7 @@ export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, 
   const two = tv ? shown.length > 4 : compact === 2;
   return (
     <div className={"grid w-full gap-2 fool-opts " + (two ? "grid-cols-2" : "grid-cols-1") + (compact && !tv ? " fool-cmp" : "")} style={tv ? { gap: shown.length > 6 ? 10 : 14 } : compact ? { gap: 6 } : undefined} role={onPick ? "group" : "list"} aria-label="The answers">
-      {shown.map(({ o, k }, i) => {
+      {shown.map(({ o, k }) => {
         const on = mine === k, body = <><span className="fool-letter">{LETTERS[k]}</span><span className="min-w-0 text-left leading-snug"><bdi>{o}</bdi></span></>;
         return onPick
           ? <button key={k} type="button" className={"fool-opt" + (on ? " on" : "")} disabled={busy || (locked ?? mine != null)} aria-pressed={on} onClick={() => onPick(k)}>{body}</button>
@@ -67,25 +67,25 @@ export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, 
 }
 
 /* a right prediction (the owner's pick, 17 Nov: the flip board): whose lie it is flips over, like a station board, to
-   "As expected, Gotcha! Lions −1, Owls +1" and back, every few seconds: "As expected, Gotcha!" in grey, the team that
-   fell for it in its colour, its −1 in red, the team that called it in its colour, its +1 in green (21 Nov); and the
-   team that fell for it gets a red ring on its dot. It adds no line: every row of a reveal is the same
-   size, with one or without (16 Nov, the owner: "all should fit in the same size boxes, all the time"). 3 to 8 teams
-   only: with 2 teams nobody names a team */
+   "As expected, Gotcha! Lions −1" and back, every few seconds: "As expected, Gotcha!" in grey, the team that fell for
+   it in its colour (from 5 teams its dot), its −1 in red; its label says what the lie earned ("Owls' lie, +2", 21 Nov,
+   the owner); and the team that fell for it gets a red ring on its dot. It adds no line: every row of a reveal is the
+   same size, with one or without (16 Nov, the owner: "all should fit in the same size boxes, all the time"). 3 to 8
+   teams only: with 2 teams nobody names a team */
 
 /* the reveal: the truth first, on top, in gold, with who guessed it (16 Nov, the owner); then each answer that fooled
    someone or was a team's, whose it was and who fell for it; ours nobody fell for go quietly. Then each team's points */
-/* TRIAL (21 Nov, for the owner's choice, pictures only): how the Gotcha line names the teams. "names", the game now;
-   "letters", from 5 teams the teams' dots instead of their names (option A); "points", the owner's idea: the lie's own
-   points on its label ("Lions' lie, +2") and only the −1 on the Gotcha side; "both", the two together. Set by the screen check
-   (SCREENS_GOTCHA); qmb.flap = "a" holds the board on the label side with motion off. Goes once the owner picks. */
-function useGotchaTrial() {
-  const [v, setV] = useState({ style: "names", flapA: false });
-  useEffect(() => { try { setV({ style: localStorage.getItem("qmb.gotcha") || "names", flapA: localStorage.getItem("qmb.flap") === "a" }); } catch { /* */ } }, []);
-  return v;
+/* (screen check only: qmb.flap = "a" holds the board on the label side with motion off, so both sides get checked) */
+function useFlapA() {
+  const [a, setA] = useState(false);
+  useEffect(() => { try { setA(localStorage.getItem("qmb.flap") === "a"); } catch { /* */ } }, []);
+  return a;
 }
 export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]; tv?: boolean }) {
-  const trial = useGotchaTrial(), dots = (trial.style === "letters" || trial.style === "both") && teams.length >= 5, pts = trial.style === "points" || trial.style === "both";
+  /* a right call (the owner's pick, 21 Nov): the lie's label says what it earned ("Lions' lie, +2": a team fooled, and
+     the right call), and the Gotcha side only who fell for it, −1; from 5 teams that team by its dot, so the line is
+     always one line and the board keeps its size */
+  const flapA = useFlapA(), dots = teams.length >= 5;
   const names = (ts: number[]) => ts.map((t) => teams[t]?.name ?? "").join(" & ");
   const rows = rev.opts.map((o, k) => ({ o, k, fell: rev.fooled[k] || [] }))
     .filter((x) => x.o.truth || x.o.by.length || x.fell.length)
@@ -109,17 +109,15 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
       <div className={"grid w-full " + (cols ? "grid-cols-2" : "grid-cols-1")} style={{ gap, gridAutoRows: "1fr" }}>
       {rows.map((x, i) => {
         /* (a name ending in s takes the apostrophe alone: "Owls' lie") */
-        const by = names(x.o.by), t = x.o.truth, tag: ReactNode = t ? "The truth" : x.o.ours ? "One of ours" : <>{named(x.o.by)}{/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie{pts && lieGot(x) > 0 ? <>, <span style={{ color: "var(--color-ok)" }}>+{lieGot(x)}</span></> : null}</>;   // (2-team names carry invisible direction marks)
+        const by = names(x.o.by), t = x.o.truth, tag: ReactNode = t ? "The truth" : x.o.ours ? "One of ours" : <>{named(x.o.by)}{/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie{lieGot(x) > 0 ? <>, <span style={{ color: "var(--color-ok)" }}>+{lieGot(x)}</span></> : null}</>;   // (2-team names carry invisible direction marks)
         /* a right prediction: the team whose lie it is named the team that fell for it */
         const pred = t ? [] : x.fell.filter((f) => rev.hits.some((h) => h.on === f && x.o.by.includes(h.by)));
         const got = pred.length > 0, d = { ["--d" as string]: `${i * step + 0.35}s` };
-        /* ...and who called it: +1 more each, in green (21 Nov, the owner: "As expected, Gotcha! Lions −1, Owls +1") */
-        const callers = x.o.by.filter((w) => rev.hits.some((h) => h.by === w && pred.includes(h.on)));
-        const said = `As expected, Gotcha! ${[...pred.map((f) => `${teams[f]?.name} −1`), ...callers.map((w) => `${teams[w]?.name} +1`)].join(", ")}.`;
-        const nm = (w: number) => dots ? <span className="inline-block align-middle" style={{ marginInline: 2 }}><Dot t={w} color={teams[w]?.color ?? "#888"} size={tv ? (big ? 18 : 20) : 12} /></span> : <bdi style={{ color: teams[w]?.color }}>{teams[w]?.name}</bdi>;
-        const label = got ? <span className={"fool-flap" + (trial.flapA ? " show-a" : "")}><span className="fool-flap-a">{tag}</span><span className="fool-flap-b" aria-hidden="true">
-          <span style={{ color: "var(--color-ink-2)" }}>As expected, Gotcha!</span>{pred.map((f, j) => <Fragment key={f}>{j ? "," : ""} {nm(f)} <span style={{ color: "var(--color-no)" }}>−1</span></Fragment>)}
-          {!pts && callers.map((w) => <Fragment key={"c" + w}>, {nm(w)} <span style={{ color: "var(--color-ok)" }}>+1</span></Fragment>)}</span></span> : tag;
+                const said = `${by}${/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie, +${lieGot(x)}. As expected, Gotcha! ${pred.map((f) => `${teams[f]?.name} −1`).join(", ")}.`;
+        const nm = (w: number) => dots ? <span className="inline-grid" style={{ letterSpacing: 0 }}><Dot t={w} color={teams[w]?.color ?? "#888"} size={tv ? (big ? 18 : 20) : 12} /></span> : <bdi style={{ color: teams[w]?.color }}>{teams[w]?.name}</bdi>;
+        /* (one row of items, centred on one line: the words, the dot and the −1 line up, 21 Nov, the owner) */
+        const label = got ? <span className={"fool-flap" + (flapA ? " show-a" : "")}><span className="fool-flap-a">{tag}</span><span className="fool-flap-b" aria-hidden="true" style={{ display: "inline-flex", alignItems: "center", gap: "0.4em", flexWrap: "wrap" }}>
+          <span style={{ color: "var(--color-ink-2)" }}>As expected, Gotcha!</span>{pred.map((f, j) => <span key={f} className="inline-flex items-center" style={{ gap: "0.35em" }}>{j ? <span>,</span> : null}{nm(f)}<span style={{ color: "var(--color-no)" }}>−1</span></span>)}</span></span> : tag;
         const caption = t ? (x.fell.length ? "guessed it" : "nobody guessed it") : x.fell.length ? "fell for it" : "nobody fell for it";
         return (
           <div key={x.k} className={"fool-rev rv relative" + (t ? " truth" : "") + (tv ? " tv" : "") + (cols && t ? " col-span-2" : "")} style={{ animationDelay: `${i * step}s`, ...d, ...(tv ? { fontSize: cols ? 24 : big ? 22 : 28, padding: big && !cols ? "6px 14px" : undefined } : {}) }}>
@@ -129,7 +127,8 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
               <div className="eyebrow" style={{ fontSize: tv ? (big ? 16 : 18) : 10, color: t ? "var(--color-gold)" : x.o.ours ? "var(--color-ink-3)" : undefined }}>{label}</div>
             </div>
             {/* (on a phone, many teams' dots wrap onto a second line rather than squeeze the lie) */}
-            <div className="flex flex-col items-end gap-0.5 shrink-0 text-right" style={tv ? undefined : { maxWidth: "46%" }}>
+            {/* (a little room between the dots and "fell for it" on the TV: 21 Nov, the owner) */}
+            <div className={"flex flex-col items-end shrink-0 text-right " + (tv ? "gap-1.5" : "gap-0.5")} style={tv ? undefined : { maxWidth: "46%" }}>
               {who(x.fell, pred)}
               <span className="text-[var(--color-ink-3)]" style={{ fontSize: tv ? (big ? 16 : 18) : 11 }}>{caption}</span>
             </div>

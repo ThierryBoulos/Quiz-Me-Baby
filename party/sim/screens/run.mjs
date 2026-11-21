@@ -210,8 +210,8 @@ const page = async (j, opt) => {
   const ctx = await browser.newContext({ deviceScaleFactor: 1, ...opt }); await offline(ctx);
   /* SCREENS_MOTION=off: the screens with Settings' motion switch off (19 Nov: the Gotcha with motion off) */
   if (process.env.SCREENS_MOTION === "off") await ctx.addInitScript(() => { try { localStorage.setItem("qmb.motion", "off"); } catch { /* */ } });
-  /* SCREENS_GOTCHA=letters|points (and SCREENS_FLAP=a): the trial Gotcha lines, for the owner's choice (21 Nov) */
-  if (process.env.SCREENS_GOTCHA) await ctx.addInitScript(([g, f]) => { try { localStorage.setItem("qmb.gotcha", g); if (f) localStorage.setItem("qmb.flap", f); } catch { /* */ } }, [process.env.SCREENS_GOTCHA, process.env.SCREENS_FLAP || ""]);
+  /* SCREENS_FLAP=a: Fool Me Twice's flip board held on the label side with motion off, so that side gets checked too */
+  if (process.env.SCREENS_FLAP) await ctx.addInitScript((f) => { try { localStorage.setItem("qmb.flap", f); } catch { /* */ } }, process.env.SCREENS_FLAP);
   const p = await ctx.newPage(); p.on("pageerror", (e) => errors.push(j.id + ": " + String(e).slice(0, 200)));
   await p.goto(BASE + "/screens#" + encodeURIComponent(j.hash), { timeout: 180000 });
   return { ctx, p };

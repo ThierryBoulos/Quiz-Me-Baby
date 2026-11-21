@@ -21,7 +21,7 @@ import { listNames } from "@/lib/comeback";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
-import { RrPhone, RrPhoneReveal, rrLevelWord, signed, useSpun } from "../Roulette";
+import { RrPhone, RrPhoneReveal, rrLevelWord, signed, SPINNING, useSpinTap, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
 import { FoolFact, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "../Fool";
 import { FOOL_MAX } from "@/lib/fool";
@@ -157,6 +157,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const sugs = useSuggestions(code, pub.qid, members, mine ?? -1, cap && sc === "q");
   const np = useNoPaste(code, pub.qid);   // (no pasting into an answer: refused, and flagged, as with two teams)
   /* Russian Roulette: the barrel spins first; the question (and the answer box) once it stops */
+  const spinTap = useSpinTap(`${pub.screen}|${pub.roulette?.spinAt ?? ""}|${pub.game?.leg ?? ""}`);   // Spin, once tapped (lib in ../Roulette)
   const rr = pub.roulette, spun = useSpun(rr?.spinAt), rrT = pub.teams.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }));
   const spinning = pub.game?.key === "roulette" && pub.screen === "q" && !spun;
   const suggest = async () => { const t = sug.trim(); if (!t || mine == null) return; try { await sendAction(code, "suggest", { team: mine, qid: pub.qid, text: t.slice(0, 80) }); setSugSent(t); setSug(""); } catch { /* the phone says so */ } };
@@ -183,7 +184,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const sideways = useSideways();
   const voted = !!pub.voted?.includes(me.name) || tapped === `${pub.qid}`, onList = !!pub.roster?.includes(me.name);
   /* the host's one main button, docked in thumb reach */
-  const Main = ({ label, on }: { label: string; on: () => void }) => <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={on}>{label}</button>;
+  const Main = ({ label, on }: { label: string; on: () => void }) => { const spin = label === "Spin";
+    return <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || (spin && spinTap.pending)} onClick={() => { if (spin) spinTap.press(); on(); }}>{spin && spinTap.pending ? SPINNING : label}</button>; };
   /* a big outcome headline, no box (boxes are for things you can tap) */
   const Big = ({ eyebrow, text, color, size = 32, sub }: { eyebrow?: string; text: React.ReactNode; color?: string; size?: number; sub?: React.ReactNode }) => (
     <div className="text-center flex flex-col gap-1" role="status" aria-live="polite">
@@ -651,7 +653,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <FoolFact fool={F} size={cmp ? 15 : 17} />
           <FoolOptions opts={F.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolSel} busy={busy} locked={done} onPick={(k) => setFoolSel(k)} seed={seed} compact={cmp} />
           {/* (under the answers, as with 2 teams: 21 Nov, the owner) */}
-          <p className={"text-center font-bold " + (cmp ? "text-15" : "text-16")} role="status" style={{ color: done ? undefined : "var(--color-gold)" }}>{done ? "Picked. Wait for the reveal." : "Which one is the truth?"}</p>
+          {/* (the 2-team phone's look: small, grey, not bold, 21 Nov, the owner) */}
+          <p className="text-13 text-center text-[var(--color-ink-3)]" role="status">{done ? "Picked. Wait for the reveal." : "Which one is the truth?"}</p>
           {needPred && (<>
             {/* (the team picked, or what it costs them, on the same line: one line less) */}
             <p className="text-center font-bold text-14 mt-1 truncate">Who will fall for your lie? {foolPred != null && cmp === 2 ? <bdi style={{ color: T[foolPred]?.color }}>{T[foolPred]?.name}</bdi> : <span className="font-normal text-[var(--color-ink-3)]">They lose 1.</span>}</p>

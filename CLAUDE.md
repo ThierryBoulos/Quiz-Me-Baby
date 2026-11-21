@@ -16,6 +16,9 @@ bank is `bank/bank.js` (out of `classic.html` since 21 Nov, the owner). `classic
   them isn't finished. The setup screens are one shared piece where they can be (`components/LevelChips.tsx`), so a
   change lands in every setup at once; the screen check runs every setup by itself (a filter matching one setup's
   screen runs it in all of them).
+- **Reports: testing in one line (21 Nov, the owner).** Don't list the tests, counts or screens checked. Say "Tested
+  across the six setups: nothing to declare", or what the issue was and the fix (or the plan). The six setups' lines
+  stay, short: "done, tested", or why it doesn't apply.
 - **The owner's wording (8 Nov).** How to Play (`party/components/Rules.tsx`) is the owner's own text: never reword
   it. When a change to the game makes it wrong, or it looks wrong, tell the owner exactly how you'd change it (the
   sentence as it is, the sentence you'd write) and wait for a yes. In everything else written for players, follow the

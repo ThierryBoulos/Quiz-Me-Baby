@@ -745,7 +745,7 @@ html[data-motion="off"] .tv-glow, html[data-motion="off"] .flame, html[data-moti
 /* ---- MANY TEAMS (30 Oct): 3 to 8 teams in the same tracker. The teams run along the top in one row,
    the night's label and pips under them (the phone's two-team layout, on the TV too). Every dot carries
    its team's letter, so eight colours never need telling apart; --c is the team's colour. ---- */
-.dot.ltr { display: inline-grid; place-items: center; border-radius: 50%; flex: none; font-family: var(--font-body); font-weight: 800; line-height: 1; color: #04050e; padding-top: .1em; box-sizing: border-box; }
+.dot.ltr { display: inline-grid; place-items: center; border-radius: 50%; flex: none; font-family: var(--font-body); font-weight: 800; line-height: 1; letter-spacing: 0; text-indent: 0; color: #04050e; padding-top: .1em; box-sizing: border-box; }
 .hud.many .hud-in { display: flex; justify-content: space-between; gap: 10px; }
 .hud.many .hud-team { flex: 1 1 0; min-width: 0; justify-content: center; gap: 8px; }
 .hud.many .hud-team:first-child { justify-content: flex-start; } .hud.many .hud-team:last-child { justify-content: flex-end; }
@@ -1561,6 +1561,8 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* (from 5 teams: between the old 10px and 15px, the rows were too tall at 8 teams: 21 Nov, the owner) */
 .tv-stage .rr-chip.sm { font-size: 13px; padding: 1px 8px; }
 .rr-chip .rr-pt { font-weight: 900; letter-spacing: 0; }
+/* (two columns of teams: narrower, the theme beside it stays readable: 21 Nov, the owner) */
+.rr-chip.short { letter-spacing: .02em; gap: 3px; } .rr-chip.short .rr-pt { padding: 0 4px; }
 .rr-chip .rr-pt.ok { color: var(--color-ok); } .rr-chip .rr-pt.no { color: var(--color-no); }
 .rr-chip.bullet .rr-pt { background: #14110a; border-radius: 999px; padding: 0 6px; }
 .rr-chip.bullet .rr-pt.ok { color: #46e38a; } .rr-chip.bullet .rr-pt.no { color: #ff6b7a; }
