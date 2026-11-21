@@ -91,6 +91,8 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   and small Roman numerals ("6th" = "sixth", "the Second" = "II"), "Mount / River / Lake / Mountains / Range"
   optional, "the" at the start, blood types (O-, AB+), symbols read as words (÷ divide, € euro, + plus), two-part
   answers in any order ("Canada and USA"), an airport with its city in front or behind ("Paris CDG").
+  Also (21 Nov, the owner's game): a doubled letter on top of one slip ("Safran" for Saffron), and Arabic or Persian
+  digits ("٤" is 4). The French short forms of a country count ("RDC" for DR Congo).
   It refuses: one country for another, a number for a different number, letters for an answer that has a number.
 
 ## 3. Levels (Easy, Medium, Hard, Expert)

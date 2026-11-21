@@ -35,6 +35,8 @@
      Closest To Wins guesses are read by parseNumber ("1.5 million", "2k").  */
   function tidy(s){
     return String(s == null ? '' : s)
+      /* Arabic and Persian digits are digits ("٤" is 4: the owner's game of 21 Nov, a 4 typed on an Arabic keyboard) */
+      .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x6F0))
       .normalize('NFD').replace(/[̀-ͯ]/g, '')
       .toLowerCase()
       .replace(/&/g, ' and ')
@@ -244,6 +246,9 @@
          words of five letters or more */
       if(a.length === b.length && a.length >= 5 && single(a) === single(b)) return true;
       if(distance(a, b) <= allowance(b.length)) return true;
+      /* ...and one doubled letter on top of a slip: the doubling is free, the slip counts ("Safran" for Saffron: the
+         owner's game, 21 Nov), in words of five letters or more; one doubling only ("misisipi" stays wrong) */
+      if(Math.min(a.length, b.length) >= 5 && Math.abs(a.length - b.length) <= 1 && (single(a) !== a || single(b) !== b) && distance(single(a), single(b)) <= allowance(b.length)) return true;
     }
     return false;
   }
