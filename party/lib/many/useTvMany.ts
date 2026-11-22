@@ -138,7 +138,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (s.screen === "q" && miniOf(s)?.key === "stakes" && s.qn !== markedSk.current) { markedSk.current = s.qn ?? null; markStakes(s); }
     { const k = miniOf(s)?.key, id = (qOf(s) as { id?: string } | null)?.id;
       if (s.screen === "q" && k && k !== "roulette" && k !== "stakes" && id && id !== markedQ.current) { markedQ.current = id; markAsked(s, id); } }
-    const { pub: p, secret } = buildMany(s);
+    const { pub: p, secret } = buildMany(s, timers());
     p.ack = ack.current;
     const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at; p.now = Date.now();
     p.clk = serverOffset() ?? undefined;

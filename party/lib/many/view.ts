@@ -23,6 +23,7 @@ export type PubMany = {
     keys?: ManyKey[];                             // the night's games in order (the pips: a dot a question round, a dash a mini-game)
     only?: number[];                              // sudden death: the teams tied at the top, the only ones who answer
     themes?: string[] };                          // a question round: its themes, in the order they come
+  skIntro?: { unit: number; pick: number; q: number };   // Secret Stakes' intro: the bet and the seconds
   qid?: string; question?: string; flag?: string; options?: string[];
   pin?: { photo: string; credit: string; licence: string };
   /* Guess the Airport: the board (its name and code only at the reveal); Guess the Map: the map; the Cocktail or
@@ -69,7 +70,8 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
   step?: number; qid?: string;                  // which question this answer is for (the host's card shows only a match)
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
-export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
+/* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
+export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
@@ -85,6 +87,9 @@ export function buildMany(s: StateM): { pub: PubMany; secret: SecretMany } {
   /* Secret Stakes: the round as the screens show it; at the reveal the night's totals already move with the calls (the
      points are banked at Next), and the tracker's "this game" line is what each team has won or lost */
   if (m?.key === "stakes") {
+    /* (on the intro, the bet the game will play: worked out from the scores now, as Start will; it read 1 before Start,
+       22 Nov. And the seconds, for its rules) */
+    if (s.screen === "intro") pub.skIntro = { unit: QMB.stakesUnit(Math.max(0, ...s.teams.map((x) => x.score))), pick: t?.stakesPick ?? 20, q: t?.stakes ?? 45 };
     const G: SkGame = { rounds: m.qs, spare: [], i: m.i, base: m.qs.length, unit: m.unit || 1, picks: s.picks || [], log: m.log || [], net: m.net || s.teams.map(() => 0), done: false };
     const sc = s.screen === "pick" ? "stakesPick" : s.screen === "q" ? "stakesQ" : s.screen === "reveal" ? "stakesReveal" : s.screen === "summary" ? "stakesSummary" : "";
     const scores = s.teams.map((x) => x.score);

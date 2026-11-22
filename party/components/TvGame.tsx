@@ -19,7 +19,7 @@ import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "./Fool";
 import { foolDone } from "@/lib/fool";
-import { LeadBanner, useFlyingPoints, useScreenAt, WinName } from "./Motion";
+import { LeadBanner, useFlyingPoints, useScreenAt, useToastOn, WinName } from "./Motion";
 import { NightIntroTv } from "./NightIntro";
 import { useLiveCount } from "@/lib/liveCount";
 import { wholeSentences } from "@/lib/sentences";
@@ -43,11 +43,9 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
   const shown = useFlyingPoints(root, pub, screenAt, sound);
   const beat = BEAT_SCREENS.includes(pub.screen);
   /* a message shows for four seconds, then goes. Not the points or who took a leg: the screen itself shows those */
-  const [shownToast, setShownToast] = useState<number | null>(null);
-  const tid = pub.toast?.id ?? null;
-  useEffect(() => { if (tid == null) return; setShownToast(tid); const t = setTimeout(() => setShownToast(null), 4000); return () => clearTimeout(t); }, [tid]);
+  const toastShown = useToastOn(pub.toast);
   const said = / \+\d+ points?( — |$)| takes? (leg|map|flag|board|landmark|number|picture) \d+\.$| takes? the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
-  const toastOn = !!pub.toast && shownToast === pub.toast.id && !said;
+  const toastOn = toastShown && !said;
   /* a map's question and its reveal are one screen: the map stays put and the answer comes in over it */
   const bodyKey = (pub.screen === "mapQ" || pub.screen === "mapReveal") && pub.map ? "map" + pub.map.id : key;
   /* the end: celebrate the winner first, then the recap comes up under it */

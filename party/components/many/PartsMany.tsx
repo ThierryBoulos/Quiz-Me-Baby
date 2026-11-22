@@ -2,6 +2,7 @@
 /* MANY TEAMS: the pieces the TV and every phone share, each the two-team one (components/GameParts.tsx)
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
+import { SK_ABOVE, SK_BAND2, skBand, skRules } from "../Stakes";
 import { comebackSays } from "@/lib/comeback";
 import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
@@ -73,12 +74,14 @@ export const unitOf = (key: string) => UNIT[key] || "Question";
    (78% of the 1.3 s flight in globals.css), when the total rolls */
 const SK_RISE = 150, SK_LAND = SK_RISE + 1000;
 /* ---- the tracker: the room code, the teams along the top, the night's label and pips under them, then this game's tally.
-   The phone keeps only the label, the pips and whose side you're on: the scores are behind your name at the top left. ---- */
+   The phone keeps the label, the pips and the night's standings, your team lit. ---- */
 export function HudMany({ pub, size, code, me, host, sound = false }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean; sound?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
   const label = pub.screen === "final" ? <b>Final result</b> : g
     /* (each part whole: on a narrow phone the line breaks at the dot, never inside the game's name) */
-    ? <><b className="inline-block">{g.title}</b> &nbsp;·&nbsp; <span className="inline-block">{g.key === "sudden" ? (pub.screen === "intro" ? "Tied at the top" : `Question ${g.leg}`) : g.key === "comeback" && pub.screen === "intro" ? "A chance to catch up" : pub.screen === "intro" ? `Game ${g.index + 1} of ${g.count}` : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`}</span></>
+    /* (a game's intro: just its name, no "Game 14 of 14": the pips under it say that (22 Nov, the owner)) */
+    ? (() => { const sub = g.key === "sudden" ? (pub.screen === "intro" ? "Tied at the top" : `Question ${g.leg}`) : g.key === "comeback" && pub.screen === "intro" ? "A chance to catch up" : pub.screen === "intro" ? null : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`;
+      return <><b className="inline-block">{g.title}</b>{sub && <> &nbsp;·&nbsp; <span className="inline-block">{sub}</span></>}</>; })()
     : null;
   /* a pip a game, as the two-team night's: a dot a question round, a dash a mini-game (the owner, 1 Nov) */
   /* (the comeback sits between two games: none of the pips is "now" while it plays) */
@@ -112,12 +115,13 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   }, [skKey]);   // eslint-disable-line react-hooks/exhaustive-deps
   const num = (i: number) => (skRev && skIn && !skIn[i] ? skRev.before[i] ?? T[i].score : award && !landed ? T[i].score - (award[i] || 0) : T[i].score);
   const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
-  /* the pips are the night's games; they say what they are with "Game 1 of 9" beside them (the reviewers, 31 Oct) */
-  const track = pips.length > 0 && <div className="pips" aria-hidden>{g && pub.screen !== "intro" && pub.screen !== "final" && g.key !== "sudden" && g.key !== "comeback" && <span className="pips-tag">Game {g.index + 1} of {g.count}</span>}{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>;
+  /* the pips are the night's games (no "Game 1 of 9" beside them since 22 Nov, the owner: the pips say it, and it saves
+     room; the reviewers had asked for it on 31 Oct) */
+  const track = pips.length > 0 && <div className="pips" aria-hidden>{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>;
   return (
     <div className={`hud ${size} many ${packing(k)}${(award && !landed) || (skRev && skIn && skIn.some((v, i) => !v && !!skRev.delta[i])) ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov: it matters little once the game is on) */}
-      {/* the TV: the room code and the night's tracker ("Game 3 of 3" and a dot or dash a game) on one line at the top, not
+      {/* the TV: the room code and the night's tracker (a dot or dash a game) on one line at the top, not
           beside the game's line (the owner, 2 Nov); one line, not two, so a reveal with eight teams clears it (5 Nov review) */}
       {tv && (code ? <div className="hud-top">{<div className="hud-tiles" aria-label={`Room ${code}`}><span>Room</span><CodeTiles code={code} className="mini" /></div>}{track}</div> : track)}
       {tv && !inGame && <div className="hud-in">
@@ -152,14 +156,13 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
               <Dot t={i} color={t.color} size={k > 5 && i !== me ? 14 : 10} />{(k <= 5 || i === me) && <bdi className="hs-nm">{t.name}</bdi>}<b>{num(i)}</b>
             </span>))}
         </div>)}
-      {/* the phone: whose side you're on, small, in the team's colour (the screen's glow is that colour too) */}
-      {!tv && me != null && T[me] && <div className="hud-mini" style={{ ["--c" as string]: T[me].color }}><span>You&rsquo;re on</span><Dot t={me} color={T[me].color} size={14} /><span className="nm" style={{ color: T[me].color }}><bdi>{T[me].name}</bdi></span></div>}
+      {/* (no "You're on <team>" line: your team is lit in its colour in the strip above (22 Nov, the owner)) */}
       {!tv && me == null && host && <div className="hud-mini"><span>You&rsquo;re the host</span></div>}
     </div>);
 }
 
 /* ---- a game's intro: the title, the gold band, the numbered rules (GameParts' MiniIntro, for N teams) ---- */
-function rules(pub: PubMany): string[] {
+function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
   /* plain English, only what you need to play (the owner, 31 Oct): no ties, no team counts */
   const g = pub.game!, n = g.of, k = pub.teams.length;
   /* the points, in numbers (the reviewers, 31 Oct): each go pays by place, 1st as many as there are teams; at the
@@ -198,12 +201,7 @@ function rules(pub: PubMany): string[] {
       "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3.",
       `${n} spins. ${pay}`];
     /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
-    case "stakes": { const u = pub.stakes?.unit ?? 1; return [
-      `${n} rounds. Each shows 3 themes. Each captain secretly bets on one theme and one level.`,
-      /* (Expert: almost impossible to get, the owner, 12 Nov) */
-      `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}: beware, Expert is almost impossible to get.`,
-      "Then the question you bet on, on your own phones: captains type the answer.",
-      "Right wins your bet, wrong or no answer loses it, straight on your total. Nobody sees the others' bets till the reveal."]; }
+    case "stakes": { const I = pub.skIntro; return skRules(n, I?.unit ?? pub.stakes?.unit ?? 1, I?.pick ?? 20, I?.q ?? 45); }   // (one card, every setup: components/Stakes.tsx)
     /* Fool Me Twice (16 Nov, the owner): the two-team card's words, for N teams */
     case "fool": return ["A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true.",
       "Type the real answer and the app says so: write a lie instead!",
@@ -227,18 +225,20 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */
-  const band = g.key === "sudden" ? "First right wins" : g.key === "stakes" ? `${count}, 3 themes each · The night's last game` : th.length ? `${count} – ${th.length > 2 ? `${th.slice(0, -1).join(", ")} and ${th[th.length - 1]}` : th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;   // (three themes, a game of three rounds: "A, B and C")
+  const band = g.key === "sudden" ? "First right wins" : g.key === "stakes" ? skBand(g.of) : th.length ? `${count} – ${th.length > 2 ? `${th.slice(0, -1).join(", ")} and ${th[th.length - 1]}` : th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;   // (three themes, a game of three rounds: "A, B and C")
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
       {/* "Game 2 of 5" is in the tracker right above: not said twice (the owner, 31 Oct) */}
-      {head}
+      {head || (g.key === "stakes" && <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{SK_ABOVE}</div>)}
       <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{g.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
+        {/* (Secret Stakes: as with two teams, 22 Nov, the owner) */}
+        {g.key === "stakes" && <><span className="sep text-[var(--color-ink-3)]">·</span><span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{SK_BAND2}</span></>}
       </div>
       <div className="card w-full">
         <ol className="rules" style={tv ? { fontSize: compact ? 18 : 20, gap: compact ? 8 : 12 } : undefined}>
-          {rules(pub).map((r, i) => <li key={i}>{r}</li>)}
+          {rules(pub).map((r, i) => typeof r === "string" ? <li key={i}>{r}</li> : <li key={i} className={r.warn ? "warn" : undefined}>{r.text}</li>)}
         </ol>
       </div>
     </div>);

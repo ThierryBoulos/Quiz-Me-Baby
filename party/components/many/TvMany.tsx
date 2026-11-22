@@ -6,7 +6,7 @@
 import { wholeSentences } from "@/lib/sentences";
 import { useEffect, useState } from "react";
 import { FitBody } from "../TvStage";
-import { WinName } from "../Motion";
+import { useToastOn, WinName } from "../Motion";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock, useSecondsLeft } from "../Clock";
 import { Board, Confetti, FlagImg, PinPhoto } from "../GameParts";
@@ -46,10 +46,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
   const g = pub.game, R = pub.reveal, T = pub.teams, k = T.length, dense = k > 4;
   const key = pub.screen + pub.step;
   /* a message shows for four seconds, then goes */
-  const [shownToast, setShownToast] = useState<number | null>(null);
-  const tid = pub.toast?.id ?? null;
-  useEffect(() => { if (tid == null) return; setShownToast(tid); const t = setTimeout(() => setShownToast(null), 4000); return () => clearTimeout(t); }, [tid]);
-  const toastOn = !!pub.toast && shownToast === pub.toast.id;
+  const toastOn = useToastOn(pub.toast);
   /* the end: celebrate the winner first, then the standings come up under it */
   const [recap, setRecap] = useState(false);
   useEffect(() => { if (pub.screen !== "final") { setRecap(false); return; } const t = setTimeout(() => setRecap(true), 2500); return () => clearTimeout(t); }, [pub.screen]);
@@ -171,7 +168,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {g && g.key === "stakes" && pub.stakes && ["pick", "q", "reveal", "summary"].includes(pub.screen) && (
           <StakesTv sk={pub.stakes} screen={({ pick: "stakesPick", q: "stakesQ", reveal: "stakesReveal", summary: "stakesSummary" } as Record<string, string>)[pub.screen]}
             teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent}
-            clock={<Clock deadline={pub.deadline} left={pub.left} size={pub.screen === "q" ? 140 : 100} />} />)}
+            clock={<Clock deadline={pub.deadline} left={pub.left} size={pub.screen === "q" ? 150 : 110} />} />)}
         {/* Russian Roulette: the barrel spins, each team's chamber lights up; at the reveal they click, the bullet last */}
         {/* Fool Me Twice: the fact while the lies are written; the answers while they pick (and say who'll fall for theirs);
             then the reveal: the truth first, then a lie at a time */}

@@ -1138,6 +1138,8 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {pub.screen === "rouletteReveal" && pub.roulette && <RrPhoneReveal rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} />}
     {/* Secret Stakes: the themes (a captain's own buttons are below), your team's question, the reveal */}
     {/* (sideways it stays in the right column: under the scores on the left your question was cut off, 12 Nov) */}
+    {/* (the betting clock at the top, under the title, without "seconds", as on 3 to 8 teams: 22 Nov, the owner) */}
+    {pub.screen === "stakesPick" && <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={70} /></div>}
     {/^stakes(Pick|Q|Reveal)$/.test(pub.screen) && pub.stakes && <div className="noselect contents" {...noCopy}>
       <StakesPhone sk={pub.stakes} screen={pub.screen} teams={rr2(pub)} me={mine ?? null} cap={captain} /></div>}
     {pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={small ? 170 : 260} title={pub.map.title} />}
@@ -1153,7 +1155,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.airport.cityOk === false && <span className="block mt-1 text-13 font-bold" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</span>}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {(["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesPick", "stakesQ", "battleQ", "comebackQ"].includes(pub.screen) || (pub.screen === "rouletteQ" && spun)
+    {(["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesQ", "battleQ", "comebackQ"].includes(pub.screen) || (pub.screen === "rouletteQ" && spun)
       /* sudden death and the tie-breaker: their clock (with no host; a host's has none) */
       || (RACE(pub) && (!!pub.deadline || (pub.left ?? 0) > 0))) && !(small && pub.screen === "pinQ") && !(pub.screen === "dishQ" && pub.dish?.typeBy)
       /* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */
@@ -1238,6 +1240,8 @@ function statusTone(pub: Pub, me: Member): "go" | "hush" | "no" | null {
   if (sc === "battleTie" || sc === "sudden") return cap ? "go" : "hush";
   if (sc === "comebackQ") return cap && mine != null && pub.comeback?.teams.includes(mine) ? "go" : "hush";
   if (sc === "dishQ" && cap && pub.buzz === mine && !pub.sent?.[mine as 0 | 1]) return "go";
+  /* Secret Stakes: the captain's bet, in gold till it's locked in, as on 3 to 8 teams (22 Nov, the owner) */
+  if (sc === "stakesPick" && cap && mine != null && !pub.stakes?.locked[mine]) return "go";
   return null;
 }
 

@@ -9,6 +9,16 @@ import type { ReactNode } from "react";
 import { SK_LEVELS, signedPts, skBet, skLevelWord, skRowAt, type SkPub } from "@/lib/stakes";
 
 export type SkTeam = { name: string; color: string; letter: string };
+/* The intro, one for every setup (22 Nov, the owner: the 2-team card's words everywhere; the times said; the RIGHT /
+   contest rule gone from both): the line above the title, the band, and the rules (warn: the gold one) */
+export const SK_ABOVE = "The night\u2019s last game", SK_BAND2 = "Win or lose your bet";
+export const skBand = (n: number) => `${n} rounds, 3 themes each`;
+export const skRules = (n: number, u: number, pickSecs: number, qSecs: number): { text: string; warn?: boolean }[] => [
+  { text: `${n} rounds. Each shows 3 themes. Each captain secretly bets on one theme and one level, ${pickSecs} seconds.` },
+  /* (Expert: almost impossible to get, the owner, 12 Nov) */
+  { text: `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}: beware, Expert is almost impossible to get.` },
+  { text: `Then the question you bet on, on your own phones: captains type the answer, ${qSecs} seconds.` },
+  { text: "Right wins your bet, wrong or no answer loses it, straight on your total. Nobody sees the others' bets till the reveal.", warn: true }];
 const OK = "var(--color-ok)", NO = "var(--color-no)";
 
 const Dot = ({ t, size }: { t: SkTeam; size: number }) => (
@@ -37,7 +47,8 @@ export const SK_TOTAL = "Win or lose, it comes from your total score.";
 const skWarn = (unit: number) => `Beware: Expert is almost impossible to get. Wrong, and you lose ${skBet(unit, "expert")} from your total score.`;
 /* who has bet (or answered): a row of names (two teams) or lettered dots (three or more) */
 function Ticks({ teams, done, yes, no, size = 22 }: { teams: SkTeam[]; done: boolean[]; yes: string; no: string; size?: number }) {
-  const many = teams.length > 2;
+  /* (names up to four teams, as the score bar shows them; from five, the lettered dots: 22 Nov, the owner) */
+  const many = teams.length > 4;
   return (
     <div className={"flex flex-wrap justify-center " + (many ? "gap-x-5 gap-y-2" : "gap-x-10 gap-y-2")} role="status" aria-live="polite">
       {teams.map((t, i) => (
@@ -65,9 +76,11 @@ export function StakesTv({ sk, screen, teams, clock, sent }: { sk: SkPub; screen
           </div>))}
       </div>
       <SkLevels unit={sk.unit} />
-      <div className="flex items-center gap-10">
+      {/* (the clock beside the teams in every setup: a row too long to fit wrapped, took the width and pushed the clock
+         to the screen's corner on 3 to 8 teams, 22 Nov) */}
+      <div className="flex items-center justify-center gap-10">
         {clock}
-        <Ticks teams={teams} done={sk.locked} yes="bet in" no="choosing…" size={dense ? 20 : 24} />
+        <div className="max-w-[820px]"><Ticks teams={teams} done={sk.locked} yes="bet in" no="choosing…" size={dense ? 20 : 24} /></div>
       </div>
     </div>);
   if (screen === "stakesQ") return (

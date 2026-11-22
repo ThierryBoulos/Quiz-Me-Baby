@@ -2,7 +2,7 @@
 /* MANY TEAMS: the phones, laid out as the two-team phones are (components/PhoneGame.tsx): the host's answer
    card on top and one main button docked at the bottom; a captain's answer box, the pin map, the four answers
    of Majority Rules; a result as a headline, then the rows. No score strip: the scores sit behind the Scores
-   button in the header, and the tracker says whose side you're on. */
+   button in the header, and the tracker lights your team. */
 import { useEffect, useMemo, useState } from "react";
 import { Clock } from "../Clock";
 import { Board, FlagImg, PinPhoto, RulingPicker } from "../GameParts";

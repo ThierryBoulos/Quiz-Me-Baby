@@ -8,6 +8,14 @@ import { FLY_MS, flyAt, type Pub, type Two } from "@/lib/game";
 import { playSound, Snd } from "@/lib/sound";
 
 /* when the screen on show came up (a new screen, round or turn) */
+/* the TV's message (a toast): shows for four seconds, then goes. One already there when the TV page opens (a refresh, a
+   takeover, a new TV) is old news and isn't shown again (22 Nov: it came back on later screens, both setups) */
+export function useToastOn(toast: { id: number } | null | undefined) {
+  const tid = toast?.id ?? null, [first] = useState(tid), [shown, setShown] = useState<number | null>(null);
+  useEffect(() => { if (tid == null || tid === first) return; setShown(tid); const t = setTimeout(() => setShown(null), 4000); return () => clearTimeout(t); }, [tid, first]);
+  return !!toast && shown === toast.id;
+}
+
 export function useScreenAt(key: string) {
   const at = useRef({ key, t: Date.now() });
   if (at.current.key !== key) at.current = { key, t: Date.now() };

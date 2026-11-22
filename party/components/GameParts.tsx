@@ -3,6 +3,7 @@
    from Classic (index.html): the HUD tracker, the round intro with each
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
+import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -443,13 +444,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3." },
       { text: `${n} spins. Most points takes ${pts}. Tied? One more spin, or a point each.` }];
     /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
-    case "stakes": { const u = pub.stakes?.unit ?? 1; return [
-      { text: `${n} rounds. Each shows 3 themes. Each captain secretly bets on one theme and one level, ${sec(t?.stakesPick, 20)}.` },
-      /* (Expert: almost impossible to get, the owner, 12 Nov) */
-      { text: `Easy is the safe bet: 0 either way. Medium wins or loses ${u}, Hard ${2 * u}, Expert ${3 * u}: beware, Expert is almost impossible to get.` },
-      { text: `Then the question you bet on, on your own phones: captains type the answer, ${sec(t?.stakesQ, 45)}.` },
-      { text: "Right wins your bet, wrong or no answer loses it, straight on your total. Nobody sees the others' bets till the reveal.", warn: true },
-      { text: host ? "The app checks the answers, and the host can change a call." : "The app checks the answers. Its RIGHT stands; the other captain can give one it called WRONG." }]; }
+    case "stakes": return skRules(n, pub.stakes?.unit ?? 1, t?.stakesPick ?? 20, t?.stakesQ ?? 45);   // (one card, every setup: components/Stakes.tsx)
     case "dish": return [
       { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
       { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },
@@ -467,16 +462,16 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
 export function MiniIntro({ pub, size, head }: { pub: Pub; size: "tv" | "phone"; head?: ReactNode }) {
   const m = pub.mini, tv = size === "tv";
   if (!m) return null;
-  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? `${m.of} rounds, 3 themes each` : m.key === "see" ? `${m.of} pictures` : m.key === "fool" ? `${m.of} facts` : m.key === "roulette" ? `${m.of} spins` : `Best of ${m.of}`;   // (Russian Roulette: points after 3 spins, no best-of: 19 Nov review)
+  const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? skBand(m.of) : m.key === "see" ? `${m.of} pictures` : m.key === "fool" ? `${m.of} facts` : m.key === "roulette" ? `${m.of} spins` : `Best of ${m.of}`;   // (Russian Roulette: points after 3 spins, no best-of: 19 Nov review)
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
-      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : m.key === "stakes" ? "The night's last game" : "Mini-game"}</div>}
+      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : m.key === "stakes" ? SK_ABOVE : "Mini-game"}</div>}
       <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? 88 : 44 }}>{m.title}</h1>
       <div className={"mini-band " + (tv ? "" : "sm")}>
         <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
         <span className="sep text-[var(--color-ink-3)]">·</span>
         {/* (Secret Stakes: no winner's points, the bets go straight on the totals) */}
-        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{m.key === "stakes" ? "Win or lose your bet" : <>Winner takes {m.pts} point{m.pts === 1 ? "" : "s"}</>}</span>
+        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{m.key === "stakes" ? SK_BAND2 : <>Winner takes {m.pts} point{m.pts === 1 ? "" : "s"}</>}</span>
         {m.kinds && <><span className="sep text-[var(--color-ink-3)]">·</span><span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{m.kinds}</span></>}
       </div>
       <div className="card w-full">
