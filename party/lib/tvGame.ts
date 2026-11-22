@@ -323,6 +323,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (f.go && isTvRef.current) {
         if (f.go === "roundIntro" || /Intro$/.test(f.go) || (f.go === "sudden" && !s.g.sdReady)) { playSound("whoosh"); playSound("jingle"); }
         else if (f.go === "answer" || f.go === "dishReveal" || f.go === "auctionLeg") playSound("drumroll");
+        /* a game's result, and a round's score: the fanfare, as with 3 to 8 teams (22 Nov, the owner) */
+        else if (/Summary$/.test(f.go) || f.go === "roundScore") playSound("win");
       }
       if (f.go) {
         const was = s.screen;

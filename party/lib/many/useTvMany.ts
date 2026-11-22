@@ -20,7 +20,7 @@ import { DISH_LAST, poss, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY } from "../game";
 import { SEE_TYPE } from "../see";
 import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
-import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, lockStakes, miniOf, newNight, nightOrder, next, pause, qOf, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type ManyKey, type StateM, type Timers } from "./logic";
+import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, legWinners, lockStakes, miniOf, newNight, nightOrder, next, pause, qOf, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type LatLon, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
@@ -120,6 +120,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   useFreshLeftShare(code, isTv, room?.status, (left) => { void lobbyWrite({ left }); });
   const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publishRef = useRef<() => void>(() => {});
+  const heard = useRef<{ screen: string; won: boolean } | null>(null);   // the screen the TV last made its sound for
+  const drafts = useRef<Record<number, { k: string; text: string; pin?: LatLon; seq: number }>>({});   // each captain's typed, unsent answer
   const marked = useRef<string | null>(null);    // the Russian Roulette spin (and its questions) marked played
   const markedSk = useRef<number | null>(null);  // ...and the Secret Stakes round's
   const retryT = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -130,6 +132,17 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const publish = useCallback(() => {
     if (soon.current) { clearTimeout(soon.current); soon.current = null; }
     const s = st.current; if (!s) return;
+    /* the TV's sounds on a new screen, as with 2 teams (22 Nov, the owner: the same sounds in every setup): a game's
+       intro, the whoosh and the jingle; the drumroll as the answers come up; "correct" as Next leaves a question
+       someone got; the fanfare at a game's result and at the end. (Not on the first screen after a refresh) */
+    { const h = heard.current;
+      if (h && h.screen !== s.screen) {
+        if (s.screen === "intro") { playSound("whoosh"); playSound("jingle"); }
+        else if (s.screen === "reveal") playSound("drumroll");
+        else if (s.screen === "summary" || s.screen === "final") playSound("win");
+        if (h.screen === "reveal" && h.won && (s.screen === "q" || s.screen === "pick")) playSound("correct");
+      }
+      heard.current = { screen: s.screen, won: s.screen === "reveal" && legWinners(s).length > 0 }; }
     /* the game's screen asleep: a clock that started meanwhile (the last bet in, a new question) waits for it, with all
        its time, as with two teams (14 Nov) */
     if (s.away && s.deadline && (s.screen === "q" || s.screen === "pick") && !s.paused && s.buzz == null) { s.left = Math.max(0.05, (s.deadline - Date.now()) / 1000); s.deadline = null; }
@@ -354,6 +367,14 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       return;
     }
     const s = st.current; if (!s || !from) return;
+    /* what a captain has typed but not sent, for the question on screen: kept, in case the clock runs out first (as with
+       2 teams: 22 Nov, the owner). Quiet: no reply, no new screen */
+    if (a.kind === "draft") {
+      const t = from.team as number | null, seq = Number(a.payload.seq) || 0, cur = t != null ? drafts.current[t] : undefined;
+      if (from.role !== "captain" || t == null || a.payload.k !== `${qidOf(s)}|q` || (cur && cur.k === a.payload.k && cur.seq > seq)) return;
+      drafts.current[t] = { k: String(a.payload.k), text: String(a.payload.text ?? "").trim().slice(0, 80), pin: a.payload.pin as LatLon | undefined, seq };
+      return;
+    }
     /* a phone's note: it left the game screen during a question, it's back (and for how long, by its own clock), it
        tried to paste an answer (8 Nov: flagged as with two teams; the TV says so, the host's list keeps it) */
     if (a.kind === "count") {
@@ -381,7 +402,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (s.intro) ok = false;
       else if (t === "m/start") { const r = startMini(s, Date.now(), timers(), roster()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       /* (Fool Me Twice: Reveal now on the lies puts the answers up to pick from; on the picks, the reveal) */
-      else if (t === "m/reveal" && miniOf(s)?.key === "fool") { ok = s.screen === "q" ? foolOpen(s, Date.now(), timers()) : foolReveal(s); if (ok && s.screen === "reveal") playSound("drumroll"); }
+      else if (t === "m/reveal" && miniOf(s)?.key === "fool") { ok = s.screen === "q" ? foolOpen(s, Date.now(), timers()) : foolReveal(s); }
       else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);
       else if (t === "m/next") ok = next(s, Date.now(), timers());
       else if (t === "m/flip") ok = flip(s, Number(mv.t));
@@ -389,7 +410,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/hint") ok = showMapHint(s);
       else if (t === "m/setScores") ok = setScores(s, mv.scores);
       else if (t === "m/mrOut") ok = toggleMrOut(s, mv.name);
-      else if (t === "m/pause") ok = pause(s, Date.now());
+      else if (t === "m/pause") { ok = pause(s, Date.now());
+        /* Resume with every answer already in (some landed while paused): the reveal, as with 2 teams */
+        if (ok && !s.paused && s.screen === "q") { if (foolAllIn(s)) foolOpen(s, Date.now(), timers()); else if (allIn(s)) reveal(s); }
+        else if (ok && !s.paused && s.screen === "pick" && miniOf(s)?.key === "fool" && foolAllIn(s)) foolReveal(s); }
       else if (t === "m/cbSkip") ok = skipComeback(s);
       else if (t === "m/swap") { const r = swapQ(s, Date.now(), timers()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code); }
@@ -400,7 +424,6 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         reply("+"); return;
       }
       reply(ok ? "+" : "-");
-      if (ok && s.screen === "summary") playSound("win");
       publish(); return;
     }
     /* a captain contests a call on the reveal (8 Nov, the owner): the host decides */
@@ -439,8 +462,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (r === true && m?.key === "see") { if (s.screen === "q") playSound("wrong"); publish(); return; }
       /* everyone answers, the Cocktail or Dish too: the faster right, the more points (the owner, 31 Oct) */
       /* (Fool Me Twice: every lie in, the answers go up; every pick in, the reveal) */
-      if (r === true && foolAllIn(s)) { if (s.screen === "q") foolOpen(s, Date.now(), timers()); else { foolReveal(s); playSound("drumroll"); } publish(); return; }
-      if (r === true && allIn(s)) { reveal(s); publish(); return; }
+      /* (paused: the answer is kept, and the reveal waits for Resume) */
+      if (r === true && !s.paused && foolAllIn(s)) { if (s.screen === "q") foolOpen(s, Date.now(), timers()); else foolReveal(s); publish(); return; }
+      if (r === true && !s.paused && allIn(s)) { reveal(s); publish(); return; }
       publishSoon(); return;
     }
   }, [code, publish, publishSoon, saveKey, lobbyWrite]);
@@ -550,6 +574,19 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     lost: (since) => goOffline(since), back: () => publishRef.current() });
 
   /* the clock: time up shows the reveal */
+  const lastWhole = useRef<number | null>(null), alarmed = useRef<number | null>(null), graced = useRef<number | null>(null);
+  /* time's up: "wait" through the second's grace (the clock says time up), then each captain's unsent draft goes in */
+  const takeDrafts = (s: StateM): "wait" | "done" => {
+    if (!s.deadline) return "done";
+    if (Date.now() < s.deadline + T_GRACE_MS) { if (graced.current !== s.deadline) { graced.current = s.deadline; publish(); } return "wait"; }
+    const m = miniOf(s), k = `${qidOf(s)}|q`;
+    if (m && m.key !== "majority" && m.key !== "see") Object.entries(drafts.current).forEach(([t, d]) => {
+      if (d.k !== k || (!d.text && !d.pin)) return;
+      captainAnswer(s, Number(t), m.key === "closest" ? { n: d.text } : m.key === "pin" ? { pin: d.pin } : { text: d.text });
+    });
+    drafts.current = {};
+    return "done";
+  };
   useEffect(() => {
     if (!isTv) return;
     const t = setInterval(() => {
@@ -557,16 +594,24 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (offline.current) return;                   // (no internet: nothing runs out; see publish)
       /* What Do You See?: a buzz gets 10 seconds to say it and type it; none by then, and the team is out */
       if (s.screen === "q" && s.buzz != null && s.buzzAt && !s.away && Date.now() - s.buzzAt >= SEE_TYPE * 1000 + T_GRACE_MS) { seeMiss(s, s.buzz, Date.now(), true); playSound("wrong"); publish(); return; }
+      /* the last ten seconds tick; the bells ring at zero (as with 2 teams: 22 Nov, the owner) */
+      { const now = Date.now(), whole = s.deadline && (s.screen === "q" || s.screen === "pick") ? Math.ceil((s.deadline - now) / 1000) : null;
+        if (whole !== lastWhole.current) { if (whole != null && whole <= 10 && whole > 0) playSound("tick"); lastWhole.current = whole; }
+        if (whole != null && now >= s.deadline! && alarmed.current !== s.deadline) { alarmed.current = s.deadline; playSound("alarm"); } }
       if ((s.screen !== "q" && s.screen !== "pick") || !s.deadline) return;
       /* (Secret Stakes' bets: time's up, the teams that didn't bet take the safe one, and the questions go up) */
       /* (Fool Me Twice: time's up on the lies, the answers go up, ours in place of a lie not written; on the picks, the reveal) */
-      if (Date.now() >= s.deadline && miniOf(s)?.key === "fool") { if (s.screen === "q") foolOpen(s, Date.now(), timers()); else { foolReveal(s); playSound("drumroll"); } publish(); return; }
+      if (Date.now() >= s.deadline && s.screen === "q" && miniOf(s)?.key === "fool" && takeDrafts(s) === "wait") return;
+      if (Date.now() >= s.deadline && miniOf(s)?.key === "fool") { if (s.screen === "q") foolOpen(s, Date.now(), timers()); else foolReveal(s); publish(); return; }
+      /* time's up on a question: a second's grace, then what a captain typed but didn't send counts, as with 2 teams
+         (22 Nov, the owner) */
+      if (Date.now() >= s.deadline && s.screen === "q" && takeDrafts(s) === "wait") return;
       if (Date.now() >= s.deadline) { if (s.screen === "pick") lockStakes(s, Date.now(), timers()); else reveal(s); publish(); return; }
       /* the Cocktail or Dish: the next ingredient */
       if (miniOf(s)?.key === "dish") { const n = dishShown(s, Date.now(), timers()); if (n !== s.shown) { s.shown = n; publish(); } }
     }, 250);
     return () => clearInterval(t);
-  }, [isTv, publish]);
+  }, [isTv, publish]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /* the TV's own stepper in the lobby: how many teams (players on a team that goes are left with no team) */
   const setTeamCount = useCallback(async (k: number) => {

@@ -24,7 +24,8 @@ export type PubMany = {
     only?: number[];                              // sudden death: the teams tied at the top, the only ones who answer
     themes?: string[] };                          // a question round: its themes, in the order they come
   skIntro?: { unit: number; pick: number; q: number };
-  rrSecs?: number;   // Russian Roulette's intro: the seconds to answer   // Secret Stakes' intro: the bet and the seconds
+  rrSecs?: number;   // Russian Roulette's intro: the seconds to answer
+  timeUp?: boolean;  // the clock ran out: the second's grace before the reveal (the clocks say "time up", as with 2 teams)   // Secret Stakes' intro: the bet and the seconds
   qid?: string; question?: string; flag?: string; options?: string[];
   pin?: { photo: string; credit: string; licence: string };
   /* Guess the Airport: the board (its name and code only at the reveal); Guess the Map: the map; the Cocktail or
@@ -88,6 +89,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     pub.game.shares = s.teams.map((_, t) => { const r = m.right[t] + (c ? c.right[t] : 0), of = m.of[t] + (c ? c.of[t] : 0); return of ? r / of : 0; }); }
   /* Secret Stakes: the round as the screens show it; at the reveal the night's totals already move with the calls (the
      points are banked at Next), and the tracker's "this game" line is what each team has won or lost */
+  if (s.screen === "q" && s.deadline && Date.now() >= s.deadline) pub.timeUp = true;
   /* Russian Roulette's intro: the seconds, for its rules (as with 2 teams: 22 Nov, the owner) */
   if (m?.key === "roulette" && s.screen === "intro") pub.rrSecs = t?.roulette ?? 45;
   if (m?.key === "stakes") {

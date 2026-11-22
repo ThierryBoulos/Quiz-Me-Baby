@@ -8,7 +8,7 @@ import { Clock } from "../Clock";
 import { Board, FlagImg, PinPhoto, RulingPicker, verdictWord } from "../GameParts";
 import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
-import { sendAction, sb } from "@/lib/supabase";
+import { sendAction, sendDraft, sb } from "@/lib/supabase";
 import { poss, showKm, showNum, type LatLon } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
@@ -168,6 +168,14 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const move = (type: string, extra: Record<string, unknown> = {}) => void send("judge", { move: { type, ...extra } });
   const opts = useMemo(() => order(pub.options || [], me.name + (pub.qid || "")), [pub.options, me.name, pub.qid]);
   const sentMine = mine != null && pub.sent[mine];
+  /* what the captain has typed (or the pin dropped) but not sent, quietly to the TV: if the clock runs out first, it
+     counts, as with 2 teams (22 Nov, the owner) */
+  const draftK = pub.qid ? `${pub.qid}|q` : null;
+  useEffect(() => {
+    if (!cap || sc !== "q" || !draftK || sentMine || (!text.trim() && !pin)) return;
+    const t = setTimeout(() => sendDraft(code, { k: draftK, text: text.trim(), ...(pin ? { pin } : {}) }), 300);
+    return () => clearTimeout(t);
+  }, [text, pin, draftK, cap, sc, sentMine, code]);
   /* Secret Stakes: the captain's bet being made (a theme, a level), cleared each round */
   const sk = pub.stakes, [skTheme, setSkTheme] = useState<number | null>(null), [skLevel, setSkLevel] = useState<string | null>(null);
   const skRound = `${sk?.round}|${sk?.themes?.join()}`;
@@ -228,7 +236,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {g.key === "quiz" && pub.theme && <ToSide order={2}><div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div></ToSide>}
       {/* (the host: the clock in the barrel's empty top-right corner, as with 2 teams: 21 Nov, the owner; one look, 22 Nov) */}
       {g.key === "roulette" && rr && (host ? <div className="relative"><RrPhone rr={rr} me={null} teams={rrT} host />
-        {!spinning && <div className="absolute right-0" style={{ top: 28 }}><Clock deadline={pub.deadline} left={pub.left} size={60} /></div>}</div>
+        {!spinning && <div className="absolute right-0" style={{ top: 28 }}><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>}</div>
         : <RrPhone rr={rr} me={mine ?? null} teams={rrT} host={false} />)}
       {/* (no TV: how many teams have answered, as the 2-team phones say "Owls have answered." (22 Nov, the owner); the
          host's card has the full list) */}
@@ -236,12 +244,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* (stays in the right column sideways: under the scores your question was cut off) */}
       {g.key === "stakes" && sk && <div className="noselect contents" {...noCopy}><StakesPhone sk={sk} screen="stakesQ" teams={rrT} me={host ? null : mine ?? null} /></div>}
       {g.key === "pin" && (small
-        ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} size={64} /></span></div>
+        ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
         : <PinPhoto pin={pub.pin} h={230} small zoom />)}
       {pub.question && <p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p>}
       {/* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */}
       {!(small && g.key === "pin") && !spinning && !(host && g.key === "roulette") && !(g.key === "see" && pub.see?.typeBy && cap && pub.see.buzz === mine) && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}>
-        <Clock deadline={g.key === "see" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={g.key === "see" && pub.see?.typeBy ? undefined : pub.left} size={small || sideways ? 70 : 90} /></div></ToSide>}
+        <Clock deadline={g.key === "see" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={g.key === "see" && pub.see?.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={small || sideways ? 70 : 90} /></div></ToSide>}
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (
@@ -358,7 +366,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       </>)}
       {/* Secret Stakes: the bets as they come in (the host sees every team's); Pause, Change question */}
       {host && sc === "pick" && g && sk && (<>
-        <div className="flex items-center justify-between"><div className="eyebrow">Secret Stakes · placing bets</div><Clock deadline={pub.deadline} left={pub.left} size={60} /></div>
+        <div className="flex items-center justify-between"><div className="eyebrow">Secret Stakes · placing bets</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
         <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={null} />
         <p className="text-center text-13 text-[var(--color-ink-3)]">No bet by time&rsquo;s up: the safe one, Easy on the first theme.</p>
         {/* (after the bets, not over them: a band docked at the bottom covered them, the owner, 12 Nov; as with two teams) */}
@@ -476,7 +484,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {!host && sc === "pick" && !pub.paused && g && sk && (<>
         <p className="text-center font-bold text-18" role="status" style={{ color: cap && mine != null && !sk.locked[mine] ? "var(--color-gold)" : undefined }}>
           {cap ? (mine != null && sk.locked[mine] ? "Bet locked in. Waiting for the others." : "Place your bet: a theme, then a level") : "Secret Stakes: your captain bets"}</p>
-        <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} size={70} /></div>
+        <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={70} /></div>
         {cap && mine != null && !sk.locked[mine] ? <StakesBet sk={sk} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy}
             onLock={() => { if (skTheme != null && skLevel) void send("next", { move: { type: "m/bet", k: skTheme, level: skLevel, theme: sk.themes[skTheme] } }); }} />
           : <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={mine ?? null} cap={false} />}
@@ -591,7 +599,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
            from 4 teams smaller rows, from 5 two columns and the teams as one row of letters) */
         const cmp: 0 | 1 | 2 = picking ? (T.length >= 5 ? 2 : 1) : 0, seed = me.user_id + "|" + pub.qid;
         /* (the clock only: no "Fact 6 of 6" line, the tracker at the top says it, the owner, 16 Nov) */
-        const head = sc !== "reveal" ? <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} size={cmp ? 48 : 60} /></div> : null;
+        const head = sc !== "reveal" ? <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={cmp ? 48 : 60} /></div> : null;
         const sendLie = () => { const t = text.trim(); if (!t || busy) return;
           void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) { setSentTxt(t); try { localStorage.setItem(lieKey, t); } catch { /* in memory only */ } } }); };
         const status = <FoolStatus teams={foolT} done={(picking ? F.picked : F.wrote) || T.map(() => false)} doing={T.length > 4 ? "…" : picking ? ": picking…" : ": writing…"} finished={T.length > 4 ? "✓" : picking ? ": picked" : ": lie in"} />;

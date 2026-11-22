@@ -120,6 +120,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.nextBy = p.captains[leadOf(mem)] || "The captain";
     p.nextOpenAt = s.waitSince + T_NEXT_FALLBACK * 1000; p.nextOther = p.captains[other(leadOf(mem))];
   }
+  /* with a host: the TV says so too, "Waiting for the host to tap Next" (no name: 22 Nov, the owner, every setup) */
+  else if (!s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)) p.nextBy = "the host";
   /* a question only a person can judge: the app has no call to suggest */
   const judged = !!q && hostOnly(q);
   const secret: Secret = { step: s.step, typed: s.typed, match: judged ? [null, null] : [matchQ(s.typed[0], q), matchQ(s.typed[1], q)], guesses: s.guesses };

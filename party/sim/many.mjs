@@ -530,7 +530,9 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
       const lies = s.teams.map((_, t) => (t === 1 ? "Hamster" : t === 2 ? "hamstr." : "Lie " + t + " of " + f));
       for (let t = 0; t < k - 1; t++) if (L.captainAnswer(s, t, { text: lies[t] }, undefined, t + 1) !== true) fail("a lie refused");
       if (L.captainAnswer(s, 0, { text: "Another" }) === true) fail("a second lie taken");
-      L.pause(s, 1000); if (L.captainAnswer(s, k - 1, { text: "Late" }) === true) fail("a lie while paused"); L.pause(s, 2000);
+      /* (a lie that lands while paused is kept, and the answers wait for Resume: 22 Nov, the owner; on a copy, so the last
+         team still has none here) */
+      { const c = structuredClone(s); L.pause(c, 1000); if (L.captainAnswer(c, k - 1, { text: "Late" }) !== true || c.screen !== "q" || !c.paused) fail("a lie while paused"); }
       if (L.foolAllIn(s)) fail("all in with a lie missing");
       if (L.swapQ(s, 0, T) === true) fail("swap with a lie in");
       L.foolOpen(s, 3000, T);                                    // (time's up)

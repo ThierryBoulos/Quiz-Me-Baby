@@ -7,7 +7,7 @@
                         teams still to go: a new picture for everyone, in the same slot
      Secret Stakes      the bets' clock through a reload; the last bet landing while the screen is away (the
                         question clock waits); a bet on themes that have just changed, refused
-     Majority Rules     no vote while paused; Start refused with nobody on the list
+     Majority Rules     a vote while paused kept; Start refused with nobody on the list
      Fool Me Twice      the truth refused as a lie, a missing lie, the screen asleep, a reload and a takeover on the picks,
                         own lie and no prediction refused, the points, Change fact, Reveal now, Pause, the places
      Russian Roulette   a reload mid-spin and mid-question, the screen asleep, a phone takeover from the server's copy
@@ -200,7 +200,8 @@ async function majority(k, phone, tag) {
   await judge("m/pause");
   check(`${tag} Majority: paused`, saved().paused === true);
   const id = tap(); send("p0", "answer", { pick: q().answer, tap: id }); await tick(1500);
-  check(`${tag} Majority: no vote while paused`, saved().votes?.Pl0 == null && /paused/.test(pub().ack?.p0?.[id] || ""), `vote ${saved().votes?.Pl0} reply "${pub().ack?.p0?.[id]}"`);
+  /* (a vote that lands while paused is kept, and the reveal waits for Resume, as with 2 teams: 22 Nov, the owner) */
+  check(`${tag} Majority: a vote while paused is kept, still on the question`, saved().votes?.Pl0 === q().answer && pub().ack?.p0?.[id] === "+" && pub().screen === "q", `vote ${saved().votes?.Pl0} reply "${pub().ack?.p0?.[id]}"`);
   await judge("m/pause");
   send("p0", "answer", { pick: q().answer }); await tick(1500);
   check(`${tag} Majority: resumed: the vote counts`, saved().votes?.Pl0 === q().answer);
@@ -246,8 +247,14 @@ async function roulette(k, phone, tag) {
     for (let t = 0; t < k; t++) if (plan[t] !== "none") send("c" + t, "answer", { text: plan[t] === "right" ? lapAns(t) : "Atlantis", k: `${pub().qid}|q` });
     await tick(1500);
     check(`${L} the answers in, still on the question for the silent team`, pub().screen === "q");
-    await tick((pub().deadline - clock()) + 1000);
+    /* the silent team's captain has typed but not sent: at time's up, after the second's grace, it counts (as with 2
+       teams: 22 Nov, the owner) */
+    send("c" + (k - 1), "draft", { k: `${pub().qid}|q`, text: "Atlantis", seq: 1 }); await tick(300);
+    await tick((pub().deadline - clock()) + 400);
+    check(`${L} time up: the second's grace, the clock says time up`, pub().screen === "q" && pub().timeUp === true, pub().screen);
+    await tick(1100);
     check(`${L} time up: the reveal`, pub().screen === "reveal" && !!pub().roulette?.rev, pub().screen);
+    check(`${L} the silent team's unsent answer counts`, pub().reveal?.typed?.[k - 1] === "Atlantis", String(pub().reveal?.typed?.[k - 1]));
     const levels = pub().roulette.draw.map((d) => d.level), got = plan.map((p, t) => worth(levels[t], p === "right"));
     check(`${L} each team's points on the reveal (+2, +3, the bullet +5 or -3)`, JSON.stringify(pub().roulette.rev.got) === JSON.stringify(got), `levels ${levels.join(",")} got ${pub().roulette.rev.got} want ${got}`);
     got.forEach((g, t) => want[t].push(g));
@@ -324,7 +331,7 @@ async function fool(k, phone, tag) {
   check(`${tag} Fool: Reveal now on the lies: the answers go up`, pub().screen === "pick", pub().screen);
   await judge("m/pause");
   id = tap(); send("c1", "answer", { pick: 0, pred: 0, k: `${pub().qid}|pick`, tap: id }); await tick(1300);
-  check(`${tag} Fool: no pick while paused`, /paused/.test(ackOf("c1", id) || "") && !pub().sent[1], `reply "${ackOf("c1", id)}"`);
+  check(`${tag} Fool: a pick while paused is kept, still picking`, ackOf("c1", id) === "+" && !!pub().sent[1] && pub().screen === "pick", `reply "${ackOf("c1", id)}"`);
   await judge("m/pause");
   if (phone) {
     /* the game phone gone on the picks; another takes over from the server's copy: the same answers */
@@ -335,7 +342,7 @@ async function fool(k, phone, tag) {
   await judge("m/reveal");
   check(`${tag} Fool: Reveal now on the picks: the reveal`, pub().screen === "reveal", pub().screen);
   /* the rest, nobody writing or picking: ours fill every place, nobody scores */
-  for (let f = 2; f < 6; f++) { await judge("m/next"); await tick((pub().deadline - clock()) + 800); await tick((pub().deadline - clock()) + 800);
+  for (let f = 2; f < 6; f++) { await judge("m/next"); await tick((pub().deadline - clock()) + 1300); await tick((pub().deadline - clock()) + 800);
     if (f === 2) check(`${tag} Fool: nobody writes: the answers are the truth and ours`, saved().fool.opts.every((o) => o.truth || o.ours) && saved().fool.opts.length === k + 1 + (k <= 3 ? 1 : 0)); }
   await judge("m/next");
   check(`${tag} Fool: the summary after 6 facts`, pub().screen === "summary", pub().screen);
@@ -402,7 +409,7 @@ async function comeback(k, phone, tag) {
     for (let guard = 0; guard < 40 && pub().screen !== "summary"; guard++) { if (pub().screen === "q") await judge("m/reveal"); else await judge("m/next"); }
     if (g === 0) await judge("m/next"); }
   await judge("m/setScores", { scores: sc }); await judge("m/next"); await judge("m/start");
-  await tick(15500);
+  await tick(16500);   // (15 seconds, then the second's grace)
   check(`${tag} Comeback: 15 seconds and nothing sent: the reveal, by itself`, pub().screen === "reveal" && pub().reveal?.ok?.[k - 1] === false, pub().screen);
   await judge("m/next");
   check(`${tag} Comeback: a miss ends it: no comeback, the score as it was`, pub().screen === "summary" && pub().comeback?.made?.[k - 1] === false && pub().teams[k - 1].score === 4, `${pub().screen} ${pub().teams.map((t) => t.score)}`);

@@ -311,7 +311,9 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
   const m = miniOf(s);
   if (m?.key === "fool") return foolAnswer(s, team, p, order);
   if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
-  if (s.paused) return "The game is paused.";      // (the last answer in is the reveal: not while paused, 19 Nov review)
+  /* (an answer that lands while paused is kept, and the reveal waits for Resume, as with 2 teams: 22 Nov, the owner;
+     till then it was refused, 19 Nov review. What Do You See? buzzes first, and there's no buzzing while paused) */
+  if (s.paused && m.key === "see") return "The game is paused.";
   if (m.only && !m.only.includes(team)) return m.key === "comeback" ? "Only the teams playing for the comeback answer this one." : "Only the teams tied at the top answer this one.";
   if (m.key === "comeback" && m.cb?.out[team]) return "Your team is out of the comeback.";
   if (typedKey(m.key)) {
@@ -369,7 +371,6 @@ export function seeMiss(s: StateM, team: number, now: number, late = false) {
    no lie by the time it's up, and one of ours takes its place. A team's own lie isn't its pick. ---- */
 function foolAnswer(s: StateM, team: number, p: { text?: unknown; pick?: unknown; pred?: unknown }, order?: number): true | string {
   const q = qOf(s); if (!q || (s.screen !== "q" && s.screen !== "pick") || team < 0 || team >= s.teams.length) return "Not now.";
-  if (s.paused) return "The game is paused.";
   if (s.screen === "q") {
     if (s.typed[team] != null) return "Your lie is in.";
     const text = QMB.foolShow(String(p.text ?? "").slice(0, FOOL_MAX * 2)); if (!text) return "Type a lie first.";
@@ -409,7 +410,6 @@ export const foolRes = (s: StateM) => (s.fool ? QMB.foolScore(s.fool.opts, s.foo
 /* Majority Rules: every player on the list taps one of the four (one each) */
 export function vote(s: StateM, name: string, pick: unknown): true | string {
   const m = miniOf(s); if (!m || m.key !== "majority" || s.screen !== "q") return "Not now.";
-  if (s.paused) return "The game is paused.";
   if (!s.roster.some((r) => r.name === name)) return "You joined after this game started: watch this one.";
   if (s.votes[name] != null) return "Your answer is in.";
   const q = qOf(s), opts: string[] = q?.options || [];
@@ -572,7 +572,8 @@ export function decideContest(s: StateM, agree: boolean): boolean {
   const C = s.contest; if (!C || s.screen !== "reveal") return false;
   s.contest = null; s.contested = [...(s.contested || []), C.t];
   if (agree) s.ok[C.t] = !C.ok;
-  toast(s, agree ? `Call changed: ${poss(s.teams[C.t].name)} answer ${callWord(s, !C.ok)}.` : "The host keeps the call.");
+  /* ("Call changed: Lions RIGHT.", the 2-team words: 22 Nov, the owner) */
+  toast(s, agree ? `Call changed: ${s.teams[C.t].name} ${callWord(s, !C.ok)}.` : "The host keeps the call.");
   return true;
 }
 

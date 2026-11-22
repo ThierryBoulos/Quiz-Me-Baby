@@ -65,7 +65,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
       {(pub.screen === "q" || pub.screen === "pick") && pub.paused && (
         <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
           <div className="text-center"><div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
-            <div className="text-26 text-[var(--color-ink-2)] mt-2">The question comes back when the clock restarts.</div></div>
+            {/* (who paused it, as the phones and the 2-team TV say: 22 Nov, the owner) */}
+            <div className="text-26 text-[var(--color-ink-2)] mt-2">The host paused it. The question comes back when the clock restarts.</div></div>
         </div>)}
 
       <FitBody className={"flex-1 flex flex-col items-center justify-center text-center enter min-h-0" + (pub.screen === "reveal" && (g?.key === "airport" || g?.key === "map") ? " gap-4" : " gap-5") + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
@@ -107,7 +108,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* the question: the same screens as the two-team TV, with every team's state under the clock */}
         {pub.screen === "q" && g && g.key === "flag" && (<>
           <FlagImg name={pub.flag} h={dense ? 240 : 260} maxW={520} />
-          <Clock deadline={pub.deadline} left={pub.left} size={110} />
+          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />
           <Sent pub={pub} />
         </>)}
         {/* What Do You See? (12 Nov, the owner: a buzzer): the picture clears as the clock runs and stops at a buzz; the
@@ -118,11 +119,11 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
               {b ? (<>
                 <div className="display text-44 leading-tight text-balance" role="status" style={{ color: b.color }}><bdi>{b.name}</bdi> buzzed!</div>
-                {S.typeBy ? <Clock deadline={S.typeBy} size={120} /> : <Clock deadline={pub.deadline} left={pub.left} size={120} />}
+                {S.typeBy ? <Clock deadline={S.typeBy} size={120} /> : <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />}
                 <SeeSay see={S} />
               </>) : (<>
                 <div className="display text-44 leading-tight text-balance" style={{ color: "var(--color-gold)" }}>{seeAsk(S.kind)}</div>
-                <Clock deadline={pub.deadline} left={pub.left} size={120} />
+                <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
                 <div className="text-24 font-bold leading-snug">Know it? Buzz!</div>
               </>)}
               <SeeTicks teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} out={S.out} buzz={S.buzz} size={k > 4 ? 20 : 22} />
@@ -136,7 +137,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           {pub.theme && <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
           <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 160 ? 34 : (pub.question || "").length > 100 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
           {g.key === "say" && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px]">One answer each. No points for the app&rsquo;s secret answer, or the same word as another team.</div>}
-          <Clock deadline={pub.deadline} left={pub.left} size={130} />
+          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
           <Sent pub={pub} />
         </>)}
         {/* Guess the Airport, Guess the Map: the board or the map, the clock and the teams beside it */}
@@ -145,7 +146,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={460} still />}</div>
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
               <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{g.key === "airport" ? "Which airport?" : "What do they have in common?"}</div>
-              <Clock deadline={pub.deadline} left={pub.left} size={120} />
+              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
               <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
@@ -159,7 +160,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
               <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}?</div>
               <div className="text-22 text-[var(--color-ink-2)]"><b>{pub.dish.ings.length}</b> of {pub.dish.n} ingredients</div>
-              <Clock deadline={pub.deadline} left={pub.left} size={110} />
+              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />
               <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
@@ -168,7 +169,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {g && g.key === "stakes" && pub.stakes && ["pick", "q", "reveal", "summary"].includes(pub.screen) && (
           <StakesTv sk={pub.stakes} screen={({ pick: "stakesPick", q: "stakesQ", reveal: "stakesReveal", summary: "stakesSummary" } as Record<string, string>)[pub.screen]}
             teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent}
-            clock={<Clock deadline={pub.deadline} left={pub.left} size={pub.screen === "q" ? 150 : 110} />} />)}
+            clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={pub.screen === "q" ? 150 : 110} />} />)}
         {/* Russian Roulette: the barrel spins, each team's chamber lights up; at the reveal they click, the bullet last */}
         {/* Fool Me Twice: the fact while the lies are written; the answers while they pick (and say who'll fall for theirs);
             then the reveal: the truth first, then a lie at a time */}
@@ -176,13 +177,13 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
             {pub.screen === "q" && (<>
               <FoolFact fool={F} size={F.fact.length > 120 ? 44 : 54} />
-              <Clock deadline={pub.deadline} left={pub.left} size={120} />
+              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
               <FoolStatus teams={tms} done={F.wrote} doing={dense ? "…" : ": writing a lie…"} finished={dense ? "✓" : ": lie in"} tv />
             </>)}
             {pub.screen === "pick" && F.opts && (<>
               <FoolFact fool={F} size={F.opts.length > 6 ? 28 : 32} />
               <FoolOptions opts={F.opts} tv />
-              <div className="flex items-center gap-8"><Clock deadline={pub.deadline} left={pub.left} size={86} />
+              <div className="flex items-center gap-8"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={86} />
                 <FoolStatus teams={tms} done={F.picked || T.map(() => false)} doing={dense ? "…" : ": picking…"} finished={dense ? "✓" : ": picked"} tv /></div>
             </>)}
             {pub.screen === "reveal" && F.rev && (<>
@@ -192,10 +193,10 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           </div>); })()}
         {(pub.screen === "q" || pub.screen === "reveal") && g && g.key === "roulette" && pub.roulette && (
           <RouletteTv rr={pub.roulette} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent} typed={R?.typed} ok={R?.ok}
-            reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} size={110} />} />)}
+            reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />} />)}
         {pub.screen === "q" && g && g.key === "closest" && (<>
           <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 110 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
-          <Clock deadline={pub.deadline} left={pub.left} size={140} />
+          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={140} />
           <Sent pub={pub} />
         </>)}
         {pub.screen === "q" && g && g.key === "pin" && (
@@ -203,7 +204,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={430} credit /></div>
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
               <div className="display text-44" style={{ color: "var(--color-gold)" }}>Where is this?</div>
-              <Clock deadline={pub.deadline} left={pub.left} size={120} />
+              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
               <Sent pub={pub} column />
             </div>
           </div>)}
@@ -211,7 +212,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 36 : 44, lineHeight: 1.12 }}>{pub.question}</div>
           <div className="grid grid-cols-2 gap-4 w-full max-w-[1400px]">{pub.options.map((o) => <div key={o} className="mr-tv-opt rev"><span className="flex-1 min-w-0"><bdi>{o}</bdi></span></div>)}</div>
           <div className="flex items-center gap-10">
-            <Clock deadline={pub.deadline} left={pub.left} size={100} />
+            <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={100} />
             <Answered pub={pub} />
           </div>
           <Sent pub={pub} />
@@ -359,8 +360,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* the host gone quiet (8 Nov): the night waits; anyone can take over on their phone */}
         {pub.hostGone && <HostGoneTv info={pub.hostGone} />}
         {/* a captain's contest, open: the host decides (8 Nov) */}
-        {pub.screen === "reveal" && pub.contest ? <span className="next-hint"><b style={{ color: T[pub.contest.by].color }}><bdi>{T[pub.contest.by].name}</bdi></b> contest {pub.contest.t !== pub.contest.by ? <><b style={{ color: T[pub.contest.t].color }}><bdi>{T[pub.contest.t].name}</bdi></b>&rsquo;s </> : "their "}call. {host ? <><b><bdi>{host}</bdi></b> decides</> : "The host decides"}.</span>
-          : host && next && <span className="next-hint">Waiting for <b><bdi>{host}</bdi></b> to tap {next}</span>}
+        {pub.screen === "reveal" && pub.contest ? <span className="next-hint"><b style={{ color: T[pub.contest.by].color }}><bdi>{T[pub.contest.by].name}</bdi></b> contest {pub.contest.t !== pub.contest.by ? <><b style={{ color: T[pub.contest.t].color }}><bdi>{T[pub.contest.t].name}</bdi></b>&rsquo;s </> : "their "}call. The host decides.</span>
+          /* (the host, not their name: 22 Nov, the owner, every setup) */
+          : next && <span className="next-hint">Waiting for <b>the host</b> to tap {next}</span>}
       </div>
     </div>);
 }
