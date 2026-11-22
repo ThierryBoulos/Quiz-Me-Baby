@@ -58,6 +58,11 @@ export async function dumpTwo(load) {
       const rr = copy(`${tag}.rouletteQ.roulette.hold.lap${lap}.a`);
       if (rr) { rr.now = rr.pub.roulette.spinAt + 9000; rr.pub.deadline = rr.now + 25000; rr.pub.left = null; rr.pub.timeUp = false;
         rr.pub.sent = [false, true]; got[`${tag}.rouletteQ.roulette.extra.stopped${lap === 1 ? "" : lap}.a`] = rr; } }
+    /* (Russian Roulette's reveal, the worst case for a row: a long theme beside the bullet's tag, 22 Nov: "O…" was all
+       of Owls) */
+    const rv = copy(`${tag}.rouletteReveal.roulette.z`);
+    if (rv?.pub.roulette?.rev && rv.pub.roulette.draw?.[1]) { rv.pub.roulette.draw[1].theme = "Mythology & Folklore"; rv.pub.roulette.draw[1].level = "bullet"; rv.pub.roulette.rev.level[1] = "bullet";
+      got[`${tag}.rouletteReveal.roulette.extra.bullet.a`] = rv; }
     const sq = copy(`${tag}.stakesQ.stakes.z`) || copy(`${tag}.stakesQ.stakes.a`);
     if (sq) { sq.pub.sent = [false, true]; got[`${tag}.stakesQ.stakes.extra.other.a`] = sq; }
     const fin = copy(`${tag}.final.a`);
