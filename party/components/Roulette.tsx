@@ -260,7 +260,7 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
                     {/* (a few letters of the name always show, and the line is a size smaller beside the bullet's long tag:
                        "O…" was all of Owls, 22 Nov, the owner) */}
                     <div className="flex items-center gap-2 min-w-0 whitespace-nowrap" style={{ fontSize: tight ? 16 : dense ? 18 : (lv || d.level) === "bullet" ? 20 : 22 }}>
-                      {!cols && <b className="truncate" style={T.name.length > 5 ? { color: T.color, flexShrink: 2, minWidth: "4em" } : { color: T.color, flexShrink: 0 }}><bdi>{T.name}</bdi></b>}
+                      {!cols && <b className="truncate" style={T.name.replace(/[\u2066-\u2069]/g, "").length > 7 ? { color: T.color, flexShrink: 2, minWidth: "4em" } : { color: T.color, flexShrink: 0 }}><bdi>{T.name}</bdi></b>}
                       <span className={"truncate min-w-0 " + (cols ? "font-bold" : "text-[var(--color-ink-2)]")} style={cols ? { color: T.color } : undefined}>{cols ? d.theme : <>· {d.theme}</>}</span>
                       <span className="shrink-0"><LevelChip level={lv || d.level} small={dense} short={cols} /></span>
                     </div>

@@ -555,6 +555,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           </div>)}
       </>)}
       {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && (<>
+        {/* Russian Roulette: the players' line at the top, as with 2 teams (22 Nov) */}
+        {g.key === "roulette" && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">Russian Roulette: help your captain</p>}
         <OnScreen />
         {/* What Do You See? (12 Nov, the owner): any player can buzz for the team (the captain types the answer); who
             buzzed, and whether your team is out of this picture */}
