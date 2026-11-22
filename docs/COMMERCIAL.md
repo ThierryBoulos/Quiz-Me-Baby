@@ -151,6 +151,8 @@ Some of these may not apply now or ever; they're here so nothing is forgotten.
 - **todo**: App stores: keep it a web app, or wrap it.
 - **todo**: Analytics (privacy-friendly): how many nights, which games, where people drop off.
 - **todo**: Support: help page, contact address, feedback in the app.
+- **todo**: Delete `index.html` at the root (the old GitHub Pages address's "Legacy" notice) and turn GitHub Pages
+  off. Kept until then (22 Nov, the owner).
 
 ### From the Nov 2026 audit page
 - **todo**: Items the owner marks "Save for commercial phase" on the audit page get copied here when the owner
