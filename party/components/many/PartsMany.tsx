@@ -3,6 +3,7 @@
    drawn for 3 to 8 teams: the tracker, the game's intro with its rules, the board of columns (a result, the
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "../Stakes";
+import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
 import { comebackSays } from "@/lib/comeback";
 import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
@@ -44,7 +45,11 @@ export function takes(pub: PubMany): { text: string; color: string } {
     if (!ok.length) return { text: "No comeback", color: "var(--color-ink-2)" };
     const who = ok.length === 1 ? T[ok[0]].name : `${ok.length} teams`;
     return { text: last ? `${who} make the comeback!` : `${who} still in it`, color: ok.length === 1 ? T[ok[0]].color : "var(--color-gold)" }; }
-  if (!w.length) return { text: pub.game?.key === "flag" ? "Nobody gets it" : "Nobody takes it", color: "var(--color-ink-2)" };
+  return takeText(w, T, pub.game?.key === "flag");
+}
+/* ...the words, the same in every setup (the 2-team host's reveal says it too: 22 Nov, the owner) */
+export function takeText(w: number[], T: { name: string; color: string }[], flag = false): { text: string; color: string } {
+  if (!w.length) return { text: flag ? "Nobody gets it" : "Nobody takes it", color: "var(--color-ink-2)" };
   if (w.length === 1) return { text: `${T[w[0]].name} take it`, color: T[w[0]].color };
   if (w.length === T.length) return { text: "Everyone takes it", color: "var(--color-gold)" };
   return { text: `${w.length} teams take it`, color: "var(--color-gold)" };
@@ -196,9 +201,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
       `Right, and you score ${k} points. Wrong, and you're out of this picture: the clock goes on and another team can buzz.`, pay];
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
     /* (shorter; the bullet is no secret now: everyone sees who drew it once the barrel stops, 11 Nov, the owner) */
-    case "roulette": return ["The barrel spins: every team lands on a chamber, with its theme and level. Captains type the answer.",
-      "Every chamber is on show before the spin. One is the bullet, an Expert question. A new barrel every spin.",
-      "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3.",
+    case "roulette": return [rrRule1(`${pub.rrSecs ?? 45} seconds`), { text: rrRule2(false, n), warn: true }, RR_RULE3,
       `${n} spins. ${pay}`];
     /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
     case "stakes": { const I = pub.skIntro; return skRules(n, I?.unit ?? pub.stakes?.unit ?? 1, I?.pick ?? 20, I?.q ?? 45); }   // (one card, every setup: components/Stakes.tsx)

@@ -17,6 +17,7 @@ import { timeLine, estimateTwo } from "@/lib/estimate";
 import { RepeatSheet } from "./RepeatSheet";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChips";
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
+import { RR_SETUP } from "@/lib/roulette";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; lifelines?: boolean; comeback?: boolean;
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: Q[] } & Partial<Picks>;
@@ -33,7 +34,7 @@ const MINIS = [
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
   ["see", "What Do You See?", "A face, a logo or a close-up, getting clearer: one guess each, fastest right answer wins."],
   ["fool", "Fool Me Twice", "A strange true fact with a blank. Write a lie that sounds true, then find the truth among the lies."],
-  ["roulette", "Russian Roulette", "Spin the barrel: a theme and a question each. One chamber is the bullet."],
+  ["roulette", "Russian Roulette", RR_SETUP],
   ["battle", "Battle of the Captains", "Ten each, captains only."],
   /* (listed last, the night's last game: 11 Nov, the owner) */
   ["stakes", "Secret Stakes", "The night's last game."]] as const;
@@ -86,7 +87,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const [rounds, setRounds] = useDraft(code, "two.rounds", 6);
   const [difficulty, setDiff] = useDraft<string>(code, "two.difficulty", QMB.DEFAULT_DIFF);
   const [themes, setThemes] = useDraft<string[] | null>(code, "two.themes", null);
-  const [minis, setMinis] = useDraft<string[]>(code, "two.minis", ["flag", "closest", "auction", "see", "roulette", "battle"]);
+  const [minis, setMinis] = useDraft<string[]>(code, "two.minis", ["flag", "closest", "auction", "see", "battle"]);   // (Russian Roulette off to start with, as with 3 to 8 teams: 22 Nov, the owner)
   const [comeback, setComeback] = useDraft(code, "two.comeback", true);
   const [mapLevels, setMapLevels] = useDraft<string[]>(code, "two.mapLevels", ["easy", "medium"]);   // (mini-games start at Easy and Medium: the owner, 16 Nov)
   const [flagLevels, setFlagLevels] = useDraft<string[]>(code, "two.flagLevels", ["veasy", "easy", "medium", "hard"]);   // a mix, Very easy to Hard

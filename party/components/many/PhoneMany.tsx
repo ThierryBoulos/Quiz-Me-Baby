@@ -5,7 +5,7 @@
    button in the header, and the tracker lights your team. */
 import { useEffect, useMemo, useState } from "react";
 import { Clock } from "../Clock";
-import { Board, FlagImg, PinPhoto, RulingPicker } from "../GameParts";
+import { Board, FlagImg, PinPhoto, RulingPicker, verdictWord } from "../GameParts";
 import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
 import { sendAction, sb } from "@/lib/supabase";
@@ -20,8 +20,9 @@ import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
 import { listNames } from "@/lib/comeback";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
+import { WhoAnswered } from "../WhoAnswered";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
-import { RrPhone, RrPhoneReveal, rrLevelWord, signed, SPINNING, useSpinTap, useSpun } from "../Roulette";
+import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
 import { FoolFact, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "../Fool";
 import { FOOL_MAX } from "@/lib/fool";
@@ -225,7 +226,13 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <ol className="flex flex-col gap-0.5 text-15">{pub.dish.ings.map((t, i) => { const [qty, name] = splitIng(t); return <li key={i} className="flex gap-2 items-baseline"><b>{name}</b>{qty && <span className="text-13 text-[var(--color-ink-2)]">{qty}</span>}</li>; })}</ol>
         </div></div>)}
       {g.key === "quiz" && pub.theme && <ToSide order={2}><div className="eyebrow text-center" style={{ color: "var(--color-gold)" }}>{pub.theme}</div></ToSide>}
-      {g.key === "roulette" && rr && <RrPhone rr={rr} me={host ? null : mine ?? null} teams={rrT} host={host} />}
+      {/* (the host: the clock in the barrel's empty top-right corner, as with 2 teams: 21 Nov, the owner; one look, 22 Nov) */}
+      {g.key === "roulette" && rr && (host ? <div className="relative"><RrPhone rr={rr} me={null} teams={rrT} host />
+        {!spinning && <div className="absolute right-0" style={{ top: 28 }}><Clock deadline={pub.deadline} left={pub.left} size={60} /></div>}</div>
+        : <RrPhone rr={rr} me={mine ?? null} teams={rrT} host={false} />)}
+      {/* (no TV: how many teams have answered, as the 2-team phones say "Owls have answered." (22 Nov, the owner); the
+         host's card has the full list) */}
+      {g.key === "roulette" && rr && !host && noTv && sc === "q" && spun && !pub.paused && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{(pub.sent || []).filter(Boolean).length} of {T.length} teams have answered.</p>}
       {/* (stays in the right column sideways: under the scores your question was cut off) */}
       {g.key === "stakes" && sk && <div className="noselect contents" {...noCopy}><StakesPhone sk={sk} screen="stakesQ" teams={rrT} me={host ? null : mine ?? null} /></div>}
       {g.key === "pin" && (small
@@ -233,7 +240,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         : <PinPhoto pin={pub.pin} h={230} small zoom />)}
       {pub.question && <p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p>}
       {/* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */}
-      {!(small && g.key === "pin") && !spinning && !(g.key === "see" && pub.see?.typeBy && cap && pub.see.buzz === mine) && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}>
+      {!(small && g.key === "pin") && !spinning && !(host && g.key === "roulette") && !(g.key === "see" && pub.see?.typeBy && cap && pub.see.buzz === mine) && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}>
         <Clock deadline={g.key === "see" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={g.key === "see" && pub.see?.typeBy ? undefined : pub.left} size={small || sideways ? 70 : 90} /></div></ToSide>}
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
@@ -259,9 +266,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       return R.ok?.[mine] ? { text: cb.i >= cb.of - 1 ? `Your team: all ${cb.of} right!` : "Your team: right · still in it", tone: "ok" } : { text: `Your team: ${x ? "wrong" : "no answer"} · no comeback`, tone: "no" }; }
     if (g.only && !g.only.includes(mine)) return null;
     /* Russian Roulette: right or wrong, and what the chamber paid (the bullet can cost 3) */
-    if (g.key === "roulette" && rr?.rev) { const got = rr.rev.got[mine] ?? 0, x = R.typed?.[mine], bullet = rr.rev.level[mine] === "bullet";
-      if (R.ok?.[mine]) return { text: `Your team: right · ${signed(got)}`, tone: "ok" };
-      return { text: `Your team: ${x ? "wrong" : "no answer"}${bullet ? ` on the bullet · ${signed(got)}` : ""}`, tone: got < 0 || x ? "no" : "mid" }; }
+    if (g.key === "roulette" && rr?.rev) return rrPill(R.ok?.[mine], !!R.typed?.[mine], rr.rev.level[mine], rr.rev.got[mine] ?? 0);
     /* Secret Stakes: right or wrong, and what the bet came to */
     if (g.key === "stakes" && sk?.rev) { const d = sk.rev.delta[mine] ?? 0, lv = skLevelWord(sk.rev.level[mine]);
       return R.ok?.[mine] ? { text: `Your team: right on ${lv} · ${signedPts(d)}`, tone: d > 0 ? "ok" : "mid" } : { text: `Your team: ${R.typed?.[mine] ? "wrong" : "no answer"} on ${lv} · ${signedPts(d)}`, tone: d < 0 ? "no" : "mid" }; }
@@ -381,22 +386,16 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(secret.answer)) : secret.answer}</div>
             {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
           </div>)}
-        {(g.key === "roulette" ? !spinning && !secret.answers : g.key === "stakes" ? !secret.answers : !secret.answer) && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">Getting the answer…</p>}
+        {(g.key === "roulette" ? !spinning && !secret.answers : g.key === "stakes" ? !secret.answers : !secret.answer) && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{g.key === "roulette" || g.key === "stakes" ? "Getting the answers…" : "Getting the answer…"}</p>}
         {/* who's in: every team, as the TV shows them */}
         {/* who has answered, live (the owner, 31 Oct): a count, then each team ticked green as it locks in */}
         {(() => { const who = T.map((_, i) => i).filter((i) => (!g.only || g.only.includes(i)) && !cb?.out[i]), n = who.filter((i) => pub.sent[i]).length; return (
-          <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who has answered">
-            <p className="text-center text-14 font-bold">{g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered`
+          <WhoAnswered oneCol={T.some((t) => t.name.length > 8)} head={g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered`
               /* (What Do You See?: the buzzer: who buzzed and is saying it and typing it, or nobody yet) */
-              : g.key === "see" ? (pub.see?.buzz != null ? <><bdi>{T[pub.see.buzz]?.name}</bdi> buzzed{pub.see.by ? <> (<bdi>{pub.see.by}</bdi>)</> : null}: saying it out loud, and typing it</> : "Waiting for a buzz…") : `${n} of ${who.length} teams answered`}</p>
-            <div className={"who-grid grid gap-x-3 gap-y-1 " + (T.some((t) => t.name.length > 8) ? "grid-cols-1" : "grid-cols-2")}>
-              {who.map((i) => { const out = (secret.out ?? pub.out)?.[i], t = T[i], bz = g.key === "see" && pub.see?.buzz === i, on = bz || (pub.sent[i] && !out); return (
-                <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] || bz ? t.color : "var(--color-ink-3)" }}>
-                  <Dot t={i} color={t.color} size={14} /><span className="truncate flex-1"><bdi>{t.name}</bdi></span>
-                  <span className="shrink-0 font-bold" style={{ color: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)" }}>{out ? "✗ out" : bz ? "buzzed!" : g.key === "see" ? "can buzz" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting"}</span>
-                </span>); })}
-            </div>
-          </div>); })()}
+              : g.key === "see" ? (pub.see?.buzz != null ? <><bdi>{T[pub.see.buzz]?.name}</bdi> buzzed{pub.see.by ? <> (<bdi>{pub.see.by}</bdi>)</> : null}: saying it out loud, and typing it</> : "Waiting for a buzz…") : `${n} of ${who.length} teams answered`}
+            rows={who.map((i) => { const out = (secret.out ?? pub.out)?.[i], t = T[i], bz = g.key === "see" && pub.see?.buzz === i, on = bz || (pub.sent[i] && !out);
+              return { key: i, name: t.name, color: t.color, dot: <Dot t={i} color={t.color} size={14} />, lit: !!(pub.sent[i] || bz),
+                statusColor: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)", status: out ? "✗ out" : bz ? "buzzed!" : g.key === "see" ? "can buzz" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting" }; })} />); })()}
         {/* the same controls as with two teams: Pause, Change question, Reveal now (the 4 Nov audit, 3.11) */}
         {/* (after the answer and the list, not docked over them: the band covered the answer card and the list of who's
            in, the owner, 12 Nov; as with two teams, where these were never docked) */}
@@ -420,6 +419,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               <div className="flex-1 min-w-0">
                 <div className="eyebrow flex items-center gap-2" style={{ color: t.color, letterSpacing: ".1em" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
                 {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
+                {/* (a call the host has changed says so, as with 2 teams: 22 Nov, the owner) */}
+                {(() => { const now = flips[`${pub.qid}|${i}`] ?? v, app = R.app?.[i]; return x && now != null && app != null && now !== app
+                  ? <div className="text-12 font-bold" style={{ color: now ? "var(--color-ok)" : "var(--color-no)" }}>You changed it: {verdictWord(now, g.key === "say")}</div> : null; })()}
                 {g.key === "roulette" && rr?.rev && <div className="text-13 text-[var(--color-ink-2)] leading-snug">{rr.draw[i]?.theme} · {rrLevelWord(rr.rev.level[i])} · Answer: <b><bdi>{rr.rev.answer[i]}</bdi></b></div>}
                 {g.key === "stakes" && sk?.rev && <div className="text-13 text-[var(--color-ink-2)] leading-snug">{sk.rev.theme[i]} · {skLevelWord(sk.rev.level[i])} · Answer: <b><bdi>{sk.rev.answer[i]}</bdi></b></div>}
               </div>
@@ -485,6 +487,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {cap && sc === "q" && cbOut && (<><OnScreen /><Line>Your team is out of the comeback.</Line></>)}
       {/* THE CAPTAIN answers the rest */}
       {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && !(g.only && mine != null && !g.only.includes(mine)) && !cbOut && (<>
+        {/* Russian Roulette: the captain's line at the top, as with 2 teams (22 Nov, the owner) */}
+        {g.key === "roulette" && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">Your chamber&rsquo;s question. Type your answer.</p>}
         <OnScreen small={g.key === "pin" && !sentMine} />
         {/* What Do You See? (12 Nov, the owner: a buzzer): BUZZ, then 10 seconds to say it out loud and type it; a wrong
             answer (or none in time) and the team is out of this picture, and another team can buzz */}
@@ -528,7 +532,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               <input id="mans" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
               {np.hint}
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
-              <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>
+              {/* (no "Once you send it, it's locked." in Russian Roulette: 22 Nov, the owner) */}
+              {g.key !== "roulette" && <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>}
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
         {!sentMine && sugs.length > 0 && g.key !== "pin" && (

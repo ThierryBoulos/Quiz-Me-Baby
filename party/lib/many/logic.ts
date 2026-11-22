@@ -418,14 +418,21 @@ export const answered = (s: StateM): boolean[] => {
 };
 export const allIn = (s: StateM) => s.screen === "q" && (miniOf(s)?.key === "majority" ? s.roster.length > 0 && s.roster.every((r) => s.votes[r.name] != null) : answered(s).every(Boolean));
 
+/* the app's own calls on what was typed (Don't Say the Same has its own, sayCalls): the reveal's, and what the host's
+   phone compares a flipped call with ("You changed it", as with 2 teams: 22 Nov, the owner) */
+export function appCalls(s: StateM): (boolean | null)[] | null {
+  const m = miniOf(s), q = qOf(s); if (!m || !q) return null;
+  if (m.key === "roulette") return s.typed.map((x, t) => (x == null ? false : !!matchQ([x], rrQ(q, t))));   // (each team its own chamber's question)
+  if (m.key === "stakes") return s.typed.map((x, t) => (x == null ? false : !!matchQ([x], skQm(s, t))));     // (each team the question it bet on)
+  if (typedKey(m.key) && m.key !== "say") return s.typed.map((x) => (x == null ? false : rightOf(m.key, x, q)));
+  return null;
+}
 /* the reveal: the app's calls (the host can flip any typed answer's) */
 export function reveal(s: StateM) {
   const m = miniOf(s), q = qOf(s); if (!m || !q || s.screen !== "q") return false;
   if (m.key === "fool") return false;              // (its lies go to the picks first: foolOpen, then foolReveal)
   if (m.key === "say") sayCalls(s, q);
-  else if (m.key === "roulette") s.ok = s.typed.map((x, t) => (x == null ? false : !!matchQ([x], rrQ(q, t))));   // (each team its own chamber's question)
-  else if (m.key === "stakes") s.ok = s.typed.map((x, t) => (x == null ? false : !!matchQ([x], skQm(s, t))));     // (each team the question it bet on)
-  else if (typedKey(m.key)) s.ok = s.typed.map((x) => (x == null ? false : rightOf(m.key, x, q)));
+  else { const a = appCalls(s); if (a) s.ok = a; }
   if (m.key === "dish") s.shown = (q.ings || []).length;
   s.contest = null; s.contested = []; s.buzz = null; s.buzzAt = 0; s.buzzBy = null;
   s.screen = "reveal"; s.deadline = null; s.left = 0; s.paused = false; s.step++; return true;

@@ -1,6 +1,6 @@
 /* MANY TEAMS: what the TV publishes (PubMany, for every phone) and what only the host's phone gets
    (the answer and every team's typed answer). Built from the night's state, never stored. */
-import { MANY_COLORS, qidOf, allIn, answered, dishRight, distances, fireOfMany, foolRes, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, roundNumbers, typedKey, type AwardM, type FlagM, type LatLon, type ManyKey, type StateM } from "./logic";
+import { MANY_COLORS, qidOf, allIn, answered, appCalls, dishRight, distances, fireOfMany, foolRes, legPlaces, legPoints, legWinners, miniOf, mrCount, mrLine, qOf, ranking, recapMany, share, titleOf, roundNumbers, typedKey, type AwardM, type FlagM, type LatLon, type ManyKey, type StateM } from "./logic";
 import { dishKind } from "../tv/rules";
 import { revOf } from "../engine";
 import type { IntroPub } from "../intro";
@@ -23,7 +23,8 @@ export type PubMany = {
     keys?: ManyKey[];                             // the night's games in order (the pips: a dot a question round, a dash a mini-game)
     only?: number[];                              // sudden death: the teams tied at the top, the only ones who answer
     themes?: string[] };                          // a question round: its themes, in the order they come
-  skIntro?: { unit: number; pick: number; q: number };   // Secret Stakes' intro: the bet and the seconds
+  skIntro?: { unit: number; pick: number; q: number };
+  rrSecs?: number;   // Russian Roulette's intro: the seconds to answer   // Secret Stakes' intro: the bet and the seconds
   qid?: string; question?: string; flag?: string; options?: string[];
   pin?: { photo: string; credit: string; licence: string };
   /* Guess the Airport: the board (its name and code only at the reveal); Guess the Map: the map; the Cocktail or
@@ -45,7 +46,8 @@ export type PubMany = {
   reveal?: { answer: string; notes?: string; typed?: (string | null)[]; ok?: (boolean | null)[]; nums?: (number | null)[]; off?: (number | null)[];
     pins?: (LatLon | null)[]; at?: LatLon; place?: string; winners: number[]; counts?: number[]; right?: number[]; of?: number[];
     why?: (string | null)[];                      // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
-    places?: (number | null)[]; pts?: number[] };            // this leg's places and what they pay this game
+    places?: (number | null)[]; pts?: number[];
+    app?: (boolean | null)[] };                   // the app's own calls, before the host flipped any            // this leg's places and what they pay this game
   /* a game's result: its tally (or shares), its places, what each place pays the night */
   summary?: { wins: number[]; pts: number[]; shares?: number[]; places: number[]; award: number[]; line?: string; noAward?: boolean; plus?: boolean;
     spins?: number[][];   // Russian Roulette: each team's points spin by spin (its barrel at the result)
@@ -71,7 +73,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
 /* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
-export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number }): { pub: PubMany; secret: SecretMany } {
+export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
@@ -86,6 +88,8 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number })
     pub.game.shares = s.teams.map((_, t) => { const r = m.right[t] + (c ? c.right[t] : 0), of = m.of[t] + (c ? c.of[t] : 0); return of ? r / of : 0; }); }
   /* Secret Stakes: the round as the screens show it; at the reveal the night's totals already move with the calls (the
      points are banked at Next), and the tracker's "this game" line is what each team has won or lost */
+  /* Russian Roulette's intro: the seconds, for its rules (as with 2 teams: 22 Nov, the owner) */
+  if (m?.key === "roulette" && s.screen === "intro") pub.rrSecs = t?.roulette ?? 45;
   if (m?.key === "stakes") {
     /* (on the intro, the bet the game will play: worked out from the scores now, as Start will; it read 1 before Start,
        22 Nov. And the seconds, for its rules) */
@@ -155,6 +159,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number })
     else if (m.key === "closest") pub.reveal = { answer: String(q.answer), notes: q.notes, nums: s.nums, off: distances(s), winners: w, ...pl };
     else if (m.key === "pin") pub.reveal = { answer: q.answer, place: q.place, at: { lat: q.lat, lon: q.lon }, pins: s.pins, off: distances(s), winners: w, ...pl };
     else { const c = mrCount(s); pub.reveal = { answer: q.answer, notes: q.notes, counts: c.counts, right: c.right, of: c.of, winners: [] }; }
+    { const app = appCalls(s); if (app && pub.reveal) pub.reveal.app = app; }
   }
   if (m && s.screen === "summary") pub.summary = { wins: [...m.wins], pts: [...m.pts], shares: m.key === "majority" ? s.teams.map((_, t) => share(m, t)) : undefined,
     places: m.places || s.teams.map(() => s.teams.length), award: m.award || [], line: m.key === "majority" ? mrLine(s) || undefined : undefined,

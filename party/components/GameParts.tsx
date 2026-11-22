@@ -4,6 +4,7 @@
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
+import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
 import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -33,6 +34,8 @@ function hudLabel(pub: Pub): ReactNode {
   if (pub.comeback && /^comeback/.test(sc)) return <><b>{COMEBACK_TITLE}</b>{sc === "comebackIntro" ? null : <> &nbsp;·&nbsp; {sc === "comebackSummary" ? "Result" : comebackQn(pub)}</>}</>;
   if (sc === "sudden") return <b>Sudden death</b>;
   if (m) {
+    /* a game's intro: just its name, as with 3 to 8 teams (nothing has started yet: 22 Nov, the owner) */
+    if (/Intro$/.test(sc) && !m.tie) return <b>{m.title}</b>;
     const tail = /Summary$|Result$/.test(sc) ? "Result" : /Tie$/.test(sc) && m.key !== "battle" ? "Tie"
       : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Tie" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
       : sc === "decided" ? "Won" : m.tie ? "Tie-breaker" : sc === "majorityIntro" ? "Everyone on their phone" : m.key === "majority" ? `Question ${m.leg} of ${m.of}`
@@ -439,9 +442,9 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
     /* (shorter, so it fits the TV; and the bullet is no secret now: everyone sees who drew it once the barrel stops,
        11 Nov, the owner) */
     case "roulette": return [
-      { text: `The barrel spins: each team lands on a chamber, with its theme and level. Captains type the answer, ${sec(t?.roulette, 45)}.` },
-      { text: `Every chamber is on show before the spin. One is the bullet, an Expert question. The same barrel all game: someone draws it by spin ${n}.`, warn: true },
-      { text: "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer −3." },
+      { text: rrRule1(sec(t?.roulette, 45)) },
+      { text: rrRule2(true, n), warn: true },
+      { text: RR_RULE3 },
       { text: `${n} spins. Most points takes ${pts}. Tied? One more spin, or a point each.` }];
     /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
     case "stakes": return skRules(n, pub.stakes?.unit ?? 1, t?.stakesPick ?? 20, t?.stakesQ ?? 45);   // (one card, every setup: components/Stakes.tsx)

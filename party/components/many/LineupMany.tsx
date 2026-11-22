@@ -18,6 +18,7 @@ import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS
 import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
 import { levelLine } from "../Setup";
+import { RR_SETUP } from "@/lib/roulette";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS } from "../LevelChips";
 import { timeLine, estimateMany } from "@/lib/estimate";
 import { RepeatSheet } from "../RepeatSheet";
@@ -86,7 +87,7 @@ const GAMES: [ManyKey, string][] = [
   ["see", "12 pictures: a face, a logo or a close-up, getting clearer. Buzz first and get it right to take it."],
   /* (16 Nov, the owner: off to start with) */
   ["fool", "6 strange true facts with a blank. Captains write a lie that sounds true, then find the truth among the lies."],
-  ["roulette", "3 spins of the barrel. Every team gets its own chamber and question; one chamber is the bullet."],
+  ["roulette", RR_SETUP],
   /* (listed last, the night's last game: 11 Nov, the owner) */
   ["stakes", "The night's last game."]];
 const LEVELS4 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;

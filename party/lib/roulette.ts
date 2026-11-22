@@ -46,3 +46,10 @@ export function rrPub(lap: RrLap, i: number, laps: number, n: number, pts: numbe
 }
 /* the question each team answers this lap (null before the spin) */
 export const rrQ = (lap: RrLap | null | undefined, t: number) => (lap?.draw ? lap.ch[lap.draw[t]]?.q ?? null : null);
+/* the rules both setups share (22 Nov, the owner: the same words in every setup; rule 2's barrel and rule 4's points
+   are each setup's own) */
+export const rrRule1 = (secs: string) => `The barrel spins: every team lands on a chamber, with its theme and level. Captains type the answer, ${secs}.`;
+export const RR_RULE3 = "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer \u22123.";
+export const rrRule2 = (oneBarrel: boolean, n: number) => `Every chamber is on show before the spin. One is the bullet, an Expert question. ${oneBarrel ? `The same barrel all game: someone draws it by spin ${n}.` : "A new barrel every spin."}`;
+/* the setup screen's line, every setup (the owner's words, 22 Nov); Russian Roulette is off to start with, every setup */
+export const RR_SETUP = "Spin the barrel: each team gets its own theme and difficulty. One team gets the bullet: an Expert question.";

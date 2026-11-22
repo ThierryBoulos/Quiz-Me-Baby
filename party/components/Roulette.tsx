@@ -183,6 +183,11 @@ export function useSpinTap(sig: string) {
 export const SPINNING = "Spinning…";
 
 /* what a chamber is worth, said plainly */
+/* your team's line at the reveal, every setup: right, wrong (red, as with 3 to 8 teams: 22 Nov, the owner) or no answer,
+   and what the chamber paid (the bullet can cost 3) */
+export const rrPill = (ok: boolean | null | undefined, typed: boolean, level: string, got: number): { text: string; tone: "ok" | "no" | "mid" } =>
+  ok ? { text: `Your team: right · ${signed(got)}`, tone: "ok" }
+    : { text: `Your team: ${typed ? "wrong" : "no answer"}${level === "bullet" ? ` on the bullet · ${signed(got)}` : ""}`, tone: got < 0 || typed ? "no" : "mid" };
 export const rrLevelWord = (level: string) => (level === "bullet" ? "The bullet · Expert" : level === "hard" ? "Hard" : level === "expert" ? "Expert" : "Medium");
 export const rrWorthWord = (level: string) => (level === "bullet" ? "+5 or −3" : level === "medium" ? "2 points" : "3 points");
 export const signed = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0");
@@ -252,8 +257,10 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
                     {/* (two columns: the team by its lettered dot and colour, no name, so the answers have the room: the
                         owner, 11 Nov) */}
                     {/* (one line: the name and theme give way, the level chip never wraps under them) */}
-                    <div className="flex items-center gap-2 min-w-0 whitespace-nowrap" style={{ fontSize: tight ? 16 : dense ? 18 : 22 }}>
-                      {!cols && <b className="truncate min-w-0" style={{ color: T.color, flexShrink: 2 }}><bdi>{T.name}</bdi></b>}
+                    {/* (a few letters of the name always show, and the line is a size smaller beside the bullet's long tag:
+                       "O…" was all of Owls, 22 Nov, the owner) */}
+                    <div className="flex items-center gap-2 min-w-0 whitespace-nowrap" style={{ fontSize: tight ? 16 : dense ? 18 : (lv || d.level) === "bullet" ? 20 : 22 }}>
+                      {!cols && <b className="truncate" style={T.name.length > 5 ? { color: T.color, flexShrink: 2, minWidth: "4em" } : { color: T.color, flexShrink: 0 }}><bdi>{T.name}</bdi></b>}
                       <span className={"truncate min-w-0 " + (cols ? "font-bold" : "text-[var(--color-ink-2)]")} style={cols ? { color: T.color } : undefined}>{cols ? d.theme : <>· {d.theme}</>}</span>
                       <span className="shrink-0"><LevelChip level={lv || d.level} small={dense} short={cols} /></span>
                     </div>

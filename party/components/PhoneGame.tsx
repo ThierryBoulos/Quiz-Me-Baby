@@ -11,7 +11,7 @@ import { QMB } from "@/lib/engine";
 import { joinLive, newTap, note, rpc, sb, sendAction, sendDraft } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
-import { RrPhone, RrPhoneReveal, rrLevelWord, signed, SPINNING, useSpinTap, useSpun, type RrTeam } from "./Roulette";
+import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun, type RrTeam } from "./Roulette";
 import { StakesBet, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
 import { FoolFact, FoolOptions, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "./Fool";
@@ -20,7 +20,9 @@ import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
-import { ToSide } from "./Side";
+import { ToSide, useSideways } from "./Side";
+import { WhoAnswered } from "./WhoAnswered";
+import { Dot, takeText } from "./many/PartsMany";
 import { sayCount, useLiveCount } from "@/lib/liveCount";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
 import { COMEBACK_TITLE } from "@/lib/comeback";
@@ -28,7 +30,8 @@ import { AskHead, battleNeeds, Board, comebackTeams, decidedCall, decidedHead, d
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
-export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesQ", "foolWrite", "foolPick", "sudden", "battleQ", "battleTie", "comebackQ"];
+export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "foolWrite", "foolPick", "sudden", "battleQ", "battleTie", "comebackQ"];
+/* (Russian Roulette joined on 22 Nov, the owner: players suggest, leaving the screen is flagged, as with 3 to 8 teams) */
 /* captains only: the players keep quiet (and in Majority Rules everyone answers for themselves: nothing to suggest) */
 /* (The Comeback: 15 seconds, the captain answers; no time for ideas to come in) */
 const CAPTAINS_ONLY = ["sudden", "battleQ", "battleTie", "majorityQ", "comebackQ"];
@@ -287,7 +290,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <RulingPicker value={app} app={app} busy={busy || loading} label={`Rule on ${poss(T[t].name)} answer`} onPick={(v) => send(v ? right : wrong)} /></>);
   };
   /* the reveal screens: each team's answer, and its ruling beside it, which the host can always flip */
-  const Rulings = ({ type, say, empty }: { type: string; say?: boolean; empty: string }) => (<><p className="text-center text-13 text-[var(--color-ink-2)]">The app made these calls. Tap one to change it.</p>{([0, 1] as const).map((t) => {
+  const Rulings = ({ type, say, empty, sub }: { type: string; say?: boolean; empty: string; sub?: (t: 0 | 1) => React.ReactNode }) => (<><p className="text-center text-13 text-[var(--color-ink-2)]">The app made these calls. Tap one to change it.</p>{([0, 1] as const).map((t) => {
     const x = pub.reveal?.typed?.[t]?.[0], k = pickKey(t), app = pub.reveal?.app?.[t], v = k in picked ? picked[k] : pub.reveal?.ok?.[t];
     const pick = (nv: boolean) => { setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire({ type, t, v: nv }); };
     return (
@@ -296,6 +299,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
           {x ? <div className="font-bold text-18 leading-snug break-words">{x}</div> : <div className="text-14 text-[var(--color-ink-3)]">{empty}</div>}
           {x && v != null && app != null && v !== app && <div className="text-12 font-bold" style={{ color: v ? "var(--color-ok)" : "var(--color-no)" }}>You changed it: {verdictWord(v, say)}</div>}
+          {sub?.(t)}
         </div>
         {/* nothing written: nothing to rule on */}
         {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} app={app} say={say} label={`Rule on ${poss(T[t].name)} answer`} onPick={pick} /></div>}
@@ -559,15 +563,21 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The answers. Only you see these</div>
             {([0, 1] as const).map((t) => <div key={t} className="text-15"><b style={{ color: tc(t) }}>{T[t].name}</b> · {pub.roulette!.draw[t]?.theme}: <b style={{ color: "var(--color-gold)" }}>{secret.answers![t]}</b></div>)}
           </div>) : null)}
-        {rrSpun && <><Typed t={0} /><Typed t={1} /></>}
-        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change question" move={{ type: "roulette/swap" }} /></div>
+        {/* who has answered, as with 3 to 8 teams, and under each team what its captain has typed (22 Nov, the owner) */}
+        {rrSpun && (() => { const typed = (t: 0 | 1) => (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
+          return <WhoAnswered head={`${[0, 1].filter((t) => pub.sent?.[t]).length} of 2 teams answered`} oneCol
+            rows={([0, 1] as const).map((t) => { const x = typed(t), on = !!pub.sent?.[t]; return { key: t, name: T[t].name, color: tc(t), dot: <Dot t={t} color={tc(t)} size={14} />, lit: on,
+              status: on ? "✓ in" : "waiting", statusColor: on ? "var(--color-ok)" : "var(--color-ink-3)",
+              typed: x?.length ? <div className="text-15 font-bold leading-snug pl-[22px]"><bdi>{x.join("  /  ")}</bdi>{pub.saidLate === t && <span className="text-13 font-semibold text-[var(--color-ink-3)]"> (after time&rsquo;s up)</span>}</div> : null }; })} />; })()}
+        {/* (Pause, Change question until a team has sent, Reveal now: as with 3 to 8 teams) */}
+        <div className="flex gap-2 justify-center mt-auto"><Pause />{!pub.sent?.some(Boolean) && <Small ghost label="Change question" move={{ type: "roulette/swap" }} />}<Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "rouletteReveal": return (
       <div className="flex flex-col gap-3 flex-1">
         {pub.roulette && <RrPhoneReveal rr={pub.roulette} me={null} teams={rr2(pub)} />}
-        {pub.roulette?.rev && <div className="flex flex-col gap-0.5 text-13 text-[var(--color-ink-2)] text-center">{([0, 1] as const).map((t) => (
-          <span key={t}><b style={{ color: tc(t) }}>{T[t].name}</b> · {pub.roulette!.draw[t]?.theme} · {rrLevelWord(pub.roulette!.rev!.level[t])} · Answer: <b className="text-[var(--color-ink)]">{pub.roulette!.rev!.answer[t]}</b></span>))}</div>}
-        <Rulings type="ui/rouletteOk" empty="No answer" />
+        {/* (each team's theme, level and answer under what it said, and the headline: as with 3 to 8 teams, 22 Nov, the owner) */}
+        <Rulings type="ui/rouletteOk" empty="No answer" sub={(t) => pub.roulette?.rev && <div className="text-13 text-[var(--color-ink-2)] leading-snug">{pub.roulette.draw[t]?.theme} · {rrLevelWord(pub.roulette.rev.level[t])} · Answer: <b><bdi>{pub.roulette.rev.answer[t]}</bdi></b></div>} />
+        {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) }))); return <Big text={w.text} color={w.color} size={32} />; })()}
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label={(pub.mini?.leg ?? 0) < (pub.mini?.of ?? 0) ? "Spin" : "Next"} move={{ type: "ui/next" }} />
       </div>);
@@ -959,8 +969,8 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     : /^(flag|say|map|airport)Reveal$/.test(sc) && pub.reveal ? (sc !== "mapReveal" || (pub.map?.ruled?.[0] != null && pub.map?.ruled?.[1] != null) ? legPill(pub.reveal.w) : null)
     : sc === "dishReveal" && pub.reveal ? (dishW === mine ? pill("Your team got it", "ok") : dishW != null ? pill(`${T[dishW].name} got it`, "no") : pill("Nobody got it", "mid"))
     /* Russian Roulette: right or wrong, and what the chamber paid (the bullet can cost 3) */
-    : sc === "rouletteReveal" && pub.roulette?.rev ? (() => { const R = pub.roulette!.rev!, got = R.got[mine] ?? 0, bullet = R.level[mine] === "bullet";
-      return pub.reveal?.ok?.[mine] ? pill(`Your team: right · ${signed(got)}`, "ok") : pill(`Your team: ${pub.reveal?.typed?.[mine]?.length ? "wrong" : "no answer"}${bullet ? ` on the bullet · ${signed(got)}` : ""}`, got < 0 ? "no" : "mid"); })()
+    : sc === "rouletteReveal" && pub.roulette?.rev ? (() => { const R = pub.roulette!.rev!, p = rrPill(pub.reveal?.ok?.[mine], !!pub.reveal?.typed?.[mine]?.length, R.level[mine], R.got[mine] ?? 0);
+      return pill(p.text, p.tone); })()
     /* Secret Stakes: right or wrong, and what the bet came to */
     : sc === "stakesReveal" && pub.stakes?.rev ? (() => { const R = pub.stakes!.rev!, d = R.delta[mine] ?? 0, lv = skLevelWord(R.level[mine]);
       return R.ok[mine] ? pill(`Your team: right on ${lv} · ${signedPts(d)}`, d > 0 ? "ok" : "mid") : pill(`Your team: ${R.typed[mine] ? "wrong" : "no answer"} on ${lv} · ${signedPts(d)}`, d < 0 ? "no" : "mid"); })()
@@ -1037,11 +1047,15 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
   if (sc === "comebackReveal" && pub.reveal && pub.comeback) { const t = pub.comeback.teams[0] as 0 | 1, x = pub.reveal.typed?.[t]?.[0];
     if (headOnly) return <>{P}</>;
     return <>{P}<ResultTable head={["Said"]} rows={[row(t, x ?? "No answer", x ? pub.reveal.ok?.[t] : null)]} /></>; }
+  /* (Russian Roulette: the table as with 3 to 8 teams, the most this spin first, with places; captains see it too, their
+     Contest under it: 22 Nov, the owner) */
   if (sc === "rouletteReveal" && pub.reveal && pub.roulette?.rev) { const R = pub.roulette.rev, D = pub.roulette.draw;
-    if (headOnly) return <>{P}</>;
+    if (headOnly && host) return <>{P}</>;
+    const g = R.got, pl = (t: 0 | 1) => ((g[t] ?? 0) > 0 ? ((g[t] ?? 0) >= (g[1 - t] ?? 0) ? 1 : 2) : null);
+    const order = ([0, 1] as const).slice().sort((a, b) => (pl(a) ?? 9) - (pl(b) ?? 9) || (g[b] ?? 0) - (g[a] ?? 0) || a - b);
     return (<>{P}
-      <ResultTable head={["Said", "Pts"]} rows={([0, 1] as const).map((t) => { const v = pub.reveal?.ok?.[t], x = pub.reveal?.typed?.[t]?.[0];
-        return row(t, x ?? "No answer", x ? v : null, <Pts n={R.got[t]} />, `${D[t]?.theme} · ${rrLevelWord(R.level[t])}${v ? "" : ` · ${R.answer[t]}`}`); })} /></>); }
+      <ResultTable head={["Said", "Pts"]} places={order.some((t) => pl(t) != null)} rows={order.map((t) => { const v = pub.reveal?.ok?.[t], x = pub.reveal?.typed?.[t]?.[0];
+        return { ...row(t, x ?? "No answer", x ? v : null, <Pts n={R.got[t]} />, `${D[t]?.theme} · ${rrLevelWord(R.level[t])}${v ? "" : ` · ${R.answer[t]}`}`), place: pl(t) }; })} /></>); }
   if (sc === "stakesReveal" && pub.stakes?.rev) return <>{P}</>;
   if (sc === "stakesSummary" && pub.stakes?.sum) return (<>{P}
     <TitleLine eyebrow="Secret Stakes" text="The bets are settled" color="var(--color-gold)" />
@@ -1060,9 +1074,10 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
   if (sc === "auctionResult" && pub.auction) { const A = pub.auction, w = A.winner ?? null, aw = w != null ? A.award?.[w] ?? m?.pts : A.award?.[0];
     return standings({ title: "The Auction", text: w == null ? "Tied" : `${T[w].name} +${aw}`, w, vals: A.wins, col: "Legs", endCol: "Night",
       end: (t) => <Pts n={A.award?.[t]} />, you: won3(w, aw, "the Auction") }); }
+  /* (Russian Roulette: "This game | Tonight", as with 3 to 8 teams: its numbers are points, not legs (22 Nov, the owner)) */
   if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary, w = S.winner, aw = w != null ? S.award?.[w] ?? m?.pts : S.award?.[0];
     const res = standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still tied" : w == null ? ((S.award?.[0] ?? 0) > 0 ? "Tied" : "Nobody scores") : `${T[w].name} +${aw}`, w,
-      vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : m?.key === "fool" ? "Points" : "Legs", endCol: "Night", end: (t) => <Pts n={S.award?.[t]} />,
+      vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : m?.key === "fool" ? "Points" : m?.key === "roulette" ? "This game" : "Legs", endCol: m?.key === "roulette" ? "Tonight" : "Night", end: (t) => <Pts n={S.award?.[t]} />,
       note: S.needsHost ? "The host decides." : S.who, you: S.needsHost ? (mine == null ? null : ["Still tied: the host decides", "mid"]) : won3(w, aw, m?.title ?? "it") });
     /* Fool Me Twice: its awards under the result (16 Nov, the owner; with 2 teams, no prediction award: it's always the other team) */
     return m?.key === "fool" && S.fool ? <>{res}<AwardList awards={foolAwardList(S.fool, ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })), true)} /></> : res; }
@@ -1091,7 +1106,8 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
 const foolTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})` }));
 /* (who: this phone's player, for its own order of Fool Me Twice's answers) */
 function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean; who?: string }) {
-  const spun = useSpun(pub.roulette?.spinAt), noTv = useNoTv();
+  /* (held sideways, the clock is 70, as with 3 to 8 teams: 22 Nov, the owner) */
+  const spun = useSpun(pub.roulette?.spinAt), noTv = useNoTv(), sideways = useSideways();
   /* with no TV, nothing shows whether the other team has bet or answered (19 Nov review): a line for it, in the words
      the 3-8 team phones already use ("1 of 2 teams have bet.") and the TV's ("Owls have answered") */
   const other = mine === 0 || mine === 1 ? (1 - mine) as 0 | 1 : null;
@@ -1159,7 +1175,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
       /* sudden death and the tie-breaker: their clock (with no host; a host's has none) */
       || (RACE(pub) && (!!pub.deadline || (pub.left ?? 0) > 0))) && !(small && pub.screen === "pinQ") && !(pub.screen === "dishQ" && pub.dish?.typeBy)
       /* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */
-      && !(pub.screen === "seeQ" && pub.see?.typeBy && captain && pub.buzz === mine) && <ToSide when={side && pub.screen !== "miniQ"} order={9} className="side-clock"><div className={"grid place-items-center main-clock" + (pub.screen === "miniQ" ? " clock-last" : "")}><Clock deadline={pub.screen === "seeQ" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={pub.screen === "seeQ" && pub.see?.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || pub.screen === "airportQ" || pub.screen === "mapQ" || small ? 64 : pub.screen === "ask" || pub.screen === "steal" ? 72 : 90} /></div></ToSide>}
+      && !(pub.screen === "seeQ" && pub.see?.typeBy && captain && pub.buzz === mine) && <ToSide when={side && pub.screen !== "miniQ"} order={9} className="side-clock"><div className={"grid place-items-center main-clock" + (pub.screen === "miniQ" ? " clock-last" : "")}><Clock deadline={pub.screen === "seeQ" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={pub.screen === "seeQ" && pub.see?.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={pub.screen === "dishQ" || pub.screen === "airportQ" || pub.screen === "mapQ" || small ? 64 : pub.screen === "ask" || pub.screen === "steal" ? 72 : sideways ? 70 : 90} /></div></ToSide>}
     {/* The Comeback: who is still in it, under the question (and, at the reveal, the answer) */}
     {/^comeback(Q|Reveal)$/.test(pub.screen) && <ComebackTop pub={pub} />}
     {/* the Battle: the last answer, once there's no new question to read (during the questions it's on the TV only) */}
@@ -1668,7 +1684,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           <PinMap value={pinAt} onChange={setPinAt} color={TEAM_HEX[mine]} height="min(520px, max(300px, calc(100dvh - 460px)))" />
           <button className="btn btn-gold btn-lg btn-block dock" disabled={busy || !pinAt} onClick={() => void sendPin()}>Lock in</button>
         </div>)}
-      {!canType && sentHere && !(sc === "seeQ" && pub.see?.out?.[mine]) && (["miniQ", "flagQ", "seeQ", "mapQ", "sayQ", "pinQ", "airportQ", "stakesQ"].includes(sc) || (myTurn && !pub.pending) || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending)) && (
+      {!canType && sentHere && !(sc === "seeQ" && pub.see?.out?.[mine]) && (["miniQ", "flagQ", "seeQ", "mapQ", "sayQ", "pinQ", "airportQ", "rouletteQ", "stakesQ"].includes(sc) || (myTurn && !pub.pending) || (BUZZ_SCREENS.includes(sc) && pub.buzz === mine && !pub.pending)) && (
         <p className="text-center font-bold text-16" role="status">Locked in{sentTxt && sc !== "pinQ" ? `: ${sentTxt}` : ""}.</p>)}
       {sc === "pinQ" && sentHere && pinAt && <PinMap value={pinAt} color={TEAM_HEX[mine]} height="min(40vh, 340px)" label="Your pin" />}
 

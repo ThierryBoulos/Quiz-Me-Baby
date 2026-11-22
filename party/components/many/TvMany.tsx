@@ -192,7 +192,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           </div>); })()}
         {(pub.screen === "q" || pub.screen === "reveal") && g && g.key === "roulette" && pub.roulette && (
           <RouletteTv rr={pub.roulette} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent} typed={R?.typed} ok={R?.ok}
-            reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} size={dense ? 96 : 110} />} />)}
+            reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} size={110} />} />)}
         {pub.screen === "q" && g && g.key === "closest" && (<>
           <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 110 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
           <Clock deadline={pub.deadline} left={pub.left} size={140} />
