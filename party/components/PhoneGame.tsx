@@ -1443,7 +1443,7 @@ const CALL_SCREENS = ["answer", "flagReveal", "seeReveal", "sayReveal", "mapReve
 /* ...and sudden death / the tie-breaker: the question just decided, on the screen after it */
 const SD_CALL_SCREENS = ["battleSummary", "sudden", "battleTie"];
 /* no host: the screens where both captains can agree to a new one, and what it's called */
-const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", seeQ: "picture", foolWrite: "fact", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", rouletteQ: "barrel", stakesPick: "themes", stakesQ: "themes", battleQ: "question", comebackQ: "question" };
+const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", seeQ: "picture", foolWrite: "fact", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", rouletteQ: "question", stakesPick: "themes", stakesQ: "themes", battleQ: "question", comebackQ: "question" };
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "seeQ", "foolWrite", "foolPick", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ", "comebackQ"];
 
 /* A CAPTAIN's phone: only what you can do right now. Type and send; the

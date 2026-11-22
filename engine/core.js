@@ -378,6 +378,8 @@
      chamber its own theme: one is the bullet (an Expert question), the rest Medium or Hard. Spare barrels after them:
      a tie-breaker lap, or Change question. Never the host's own theme. */
   const ROULETTE_LAPS = 3, ROULETTE_SPARE = 3, ROULETTE_SKIP_THEMES = ['Know the Host'];
+  /* Change question's words, every setup (22 Nov) */
+  const RR_SWAPPED = 'New question, same theme and level.', RR_NONE_LEFT = 'No other question left.';
   /* ...and only the broad themes, everyone's ground (9 Nov, the owner): a fandom theme (Friends, Rave Culture, Geek &
      Gamer…) only on a night that picked it, so a spin can't land a team on a show nobody there watches. Celebrities,
      Quotes and Acronyms join them (10 Nov, the owner: 'anything that is not fandom'); Mythology & Folklore, its own theme
@@ -931,8 +933,9 @@
       /* the bullet is always Expert (11 Nov, the owner): from a theme that still has an unplayed one, and only when
          none has, a played one; never a Hard in its place. The others: their level, then the one next to it */
       const near = { expert:['expert'], hard:['hard', 'medium'], medium:['medium', 'hard'] };
+      const pool = (t, level, stale) => std.filter(q => q.theme === t && q.difficulty === level && !inNight.has(q.id) && !clashesWith(q.id, inNight) && (stale || isFresh(q)));
       const take = (t, level, stale) => {
-        const ok = std.filter(q => q.theme === t && q.difficulty === level && !inNight.has(q.id) && !clashesWith(q.id, inNight) && (stale || isFresh(q)));
+        const ok = pool(t, level, stale);
         return ok.length ? shuffle(ok)[0] : null;
       };
       const mids = n === 8 ? 4 : 3, out = [];
@@ -951,6 +954,16 @@
         }
         if(ch.some(c => !c)) break;        // the bank can't fill a whole barrel any more: the laps loaded so far
         out.push({ ch, bullet });
+      }
+      /* each chamber a spare question, the same theme and level, for Change question (22 Nov, the owner): once the
+         barrels are full, from what's left, an unplayed one first; none left, that chamber has no spare */
+      /* (picked from the chamber's own question, not the dealer's random draws, so the rest of the deal and the spins
+         come out as they did before spares existed) */
+      const spare = (c) => { for(const stale of [false, true]){ const L = pool(c.theme, c.level, stale); if(L.length){ let h = 0; for(const ch of String(c.q.id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return L[h % L.length]; } } return null; };
+      for(const l of out) for(const c of l.ch){
+        const q = spare(c);
+        c.alt = q ? [q] : [];
+        if(q) inNight.add(q.id);
       }
       return out;
     }
@@ -1438,6 +1451,16 @@
   function roulettePts(lap, j, ok){
     if(j === lap.bullet && !lap.blank) return ok ? 5 : -3;
     return ok ? (lap.ch[j].level === 'medium' ? 2 : 3) : 0;
+  }
+  /* Change question (22 Nov, the owner): the question on show in each team's chamber gives way to the chamber's
+     spare, the same theme and level; the barrel, the spin and who drew what stay. Every setup. false: a drawn chamber
+     has no spare left (nothing changes) */
+  function rouletteSwapQs(lap){
+    if(!lap || !lap.draw) return false;
+    const js = lap.draw.filter((j, x, a) => j != null && a.indexOf(j) === x);
+    if(!js.length || js.some(j => !lap.ch[j] || !(lap.ch[j].alt || []).length)) return false;
+    js.forEach(j => { const c = lap.ch[j]; lap.ch[j] = Object.assign({}, c, { q:c.alt[0], alt:c.alt.slice(1) }); });
+    return true;
   }
   /* two teams: the lap on now, spun and up */
   /* the chambers already drawn from this lap's barrel (the laps sharing it: bid) */
@@ -2585,17 +2608,12 @@
 
     /* Russian Roulette: Spin (the first lap) */
     'roulette/start'(g, a, env){ const s = g.rouletteGame; if(!s.qs.length) return []; s.i = 0; return rouletteGo(g, env, []); },
-    /* Change question (before anyone has answered): another barrel, spun again (the same bullet rule) */
+    /* Change question (before anyone has answered): each team's chamber its spare question, the same theme and level,
+       and a fresh clock; the barrel and the spin stay (22 Nov, the owner: till then a new barrel, spun again) */
     'roulette/swap'(g, a, env){
       const s = g.rouletteGame;
-      if(!s.spare.length) return [{ toast:'No other barrel left.' }];
-      const lap = s.qs[s.i], b = s.spare.shift();
-      /* one barrel all game (two teams): the new one serves this spin and the ones after it, as the old one did */
-      if(lap && lap.bid != null && s.i < s.base){
-        const bid = lap.bid + 1;
-        for(let x = s.i; x < s.base; x++) s.qs[x] = { ch:b.ch, bullet:b.bullet, bid };
-      } else s.qs[s.i] = b;
-      return [{ toast:'New barrel, new spin.' }].concat(rouletteGo(g, env, []));
+      if(!rouletteSwapQs(s.qs[s.i])) return [{ toast:RR_NONE_LEFT }];
+      return [{ toast:RR_SWAPPED }, { go:'rouletteQ', keepSpin:true }];
     },
     /* ok: each team's call as it stands. The lap's points (the bullet wrong costs 3, whatever the total), then the next lap */
     'roulette/verdict'(g, a, env){
@@ -2848,5 +2866,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, RR_SWAPPED, RR_NONE_LEFT, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

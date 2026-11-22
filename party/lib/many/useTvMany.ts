@@ -120,7 +120,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   useFreshLeftShare(code, isTv, room?.status, (left) => { void lobbyWrite({ left }); });
   const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publishRef = useRef<() => void>(() => {});
-  const marked = useRef<number | null>(null);    // the Russian Roulette spin whose questions are marked played
+  const marked = useRef<string | null>(null);    // the Russian Roulette spin (and its questions) marked played
   const markedSk = useRef<number | null>(null);  // ...and the Secret Stakes round's
   const retryT = useRef<ReturnType<typeof setTimeout> | null>(null);
   /* no internet (the TV's writes failing, or sat on 8 s): the clocks wait, as with two teams; back, they move on by
@@ -134,7 +134,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
        its time, as with two teams (14 Nov) */
     if (s.away && s.deadline && (s.screen === "q" || s.screen === "pick") && !s.paused && s.buzz == null) { s.left = Math.max(0.05, (s.deadline - Date.now()) / 1000); s.deadline = null; }
     imadMany(s);                                    // (Imad's line for this moment, if Settings has him on)
-    if (s.screen === "q" && s.spinAt && s.spinAt !== marked.current) { marked.current = s.spinAt; markRoulette(s); }
+    /* (keyed on the spin and its questions: Change question keeps the spin, and its new questions are played too) */
+    if (s.screen === "q" && s.spinAt) { const L = miniOf(s)?.key === "roulette" ? (qOf(s) as { ch?: { q?: Q }[]; draw?: number[] } | null) : null, mk = `${s.spinAt}|${(L?.draw || []).map((j) => L?.ch?.[j]?.q?.id).join()}`;
+      if (mk !== marked.current) { marked.current = mk; markRoulette(s); } }
     if (s.screen === "q" && miniOf(s)?.key === "stakes" && s.qn !== markedSk.current) { markedSk.current = s.qn ?? null; markStakes(s); }
     { const k = miniOf(s)?.key, id = (qOf(s) as { id?: string } | null)?.id;
       if (s.screen === "q" && k && k !== "roulette" && k !== "stakes" && id && id !== markedQ.current) { markedQ.current = id; markAsked(s, id); } }

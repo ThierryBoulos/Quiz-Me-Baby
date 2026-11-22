@@ -197,6 +197,12 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
     if (!next) return "No other question left in this theme.";
     m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;
   }
+  /* Russian Roulette: each team's chamber its spare question, the same theme and level, and a fresh clock; the barrel
+     and the spin stay, as with 2 teams (22 Nov, the owner: till then a new barrel, spun again) */
+  if (m.key === "roulette") {
+    if (!QMB.rouletteSwapQs(m.qs[m.i])) return QMB.RR_NONE_LEFT as string;
+    s.paused = false; s.deadline = Math.max(now, (s.spinAt ?? 0) + SPIN_MS) + s.total * 1000; s.left = 0; s.step++; toast(s, QMB.RR_SWAPPED as string); return true;
+  }
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;
 }

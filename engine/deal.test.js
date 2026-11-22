@@ -284,6 +284,30 @@ test('roulette: the bullet is always Expert, from a theme that still has one', (
   }
 });
 
+/* Change question (22 Nov, the owner): each chamber has a spare of its theme and level; a swap gives each drawn
+   chamber its spare, keeps the barrel and the draw, and can't happen twice on a chamber with no spare left */
+test('roulette: Change question swaps each drawn chamber for its spare, same theme and level', () => {
+  const b = [];
+  const add = (t, d, n) => { for(let i = 0; i < n; i++) b.push({ id:`${t}-${d}-${i}`, type:'standard', theme:t, difficulty:d, question:t + d + i, answer:'a' }); };
+  for(const t of ['General Knowledge', 'Geography', 'History', 'Science', 'Nature', 'Sports', 'Music', 'Movies']) { add(t, 'medium', 6); add(t, 'hard', 6); add(t, 'expert', 3); }
+  const D3 = Q.createDealer({ bank:() => b, used:() => new Set(), noRepeat:() => true });
+  for(let n = 0; n < 20; n++){
+    const laps = D3.rouletteDeck({ themes:[] }, 6, 3, new Set());
+    assert.equal(laps.length, 3);
+    const ids = laps.flatMap(l => l.ch.flatMap(c => [c.q.id].concat((c.alt || []).map(q => q.id))));
+    assert.equal(new Set(ids).size, ids.length);
+    for(const l of laps) for(const c of l.ch) for(const q of c.alt){ assert.equal(q.theme, c.theme); assert.equal(q.difficulty, c.level); }
+    const lap = laps[0]; lap.draw = [1, 4];
+    const before = lap.ch.map(c => c.q.id), spare = [1, 4].map(j => lap.ch[j].alt[0] && lap.ch[j].alt[0].id);
+    if(spare.some(x => !x)) continue;
+    assert.equal(Q.rouletteSwapQs(lap), true);
+    assert.deepEqual([1, 4].map(j => lap.ch[j].q.id), spare);
+    assert.deepEqual(lap.ch.map((c, j) => (j === 1 || j === 4 ? before[j] : c.q.id)), before);
+    assert.equal(Q.rouletteSwapQs(lap), false);
+  }
+  assert.equal(Q.rouletteSwapQs({ ch:[], bullet:0 }), false);
+});
+
 /* Repeat a theme (the owner, 15 Nov): a theme picked more than once plays a round each time, never the same question
    twice, and its rounds kept apart where they can be */
 test('a repeated theme: a round each time, no question twice, never back to back', () => {

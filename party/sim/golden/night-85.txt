@@ -1,0 +1,39 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+8.50 answer | 4 | 1-0 |  | Lions +1 point | 
+9.50 answer | 4 | 1-0 |  |  | 
+10.25 answer | 4 | 1-0 |  | The host keeps the call. | 
+11.25 ask | 5 | 1-0 |  | The host keeps the call. | 
+13.00 answer | 6 | 1-1 |  | Owls +1 point | 
+14.00 answer | 6 | 1-1 |  |  | 
+15.75 answer | 6 | 1-1 |  | The host keeps the call. | 
+16.50 roundScore | 7 | 1-1 |  | The host keeps the call. | 
+17.50 rouletteIntro | 8 | 1-1 | 0-0 | The host keeps the call. | 
+18.50 rouletteQ | 9 | 1-1 | 0-0 | The host keeps the call. | 
+(a new question)
+19.25 rouletteQ | 10 | 1-1 | 0-0 | New question, same theme and level. | 
+20.25 rouletteReveal | 10 | 1-1 | 0-0 | New question, same theme and level. | 
+21.00 rouletteQ | 11 | 1-1 | 0-0 | New question, same theme and level. | 
+22.00 rouletteReveal | 11 | 1-1 | 0-3 | New question, same theme and level. | 
+23.00 rouletteReveal | 11 | 1-1 | 0-3 |  | 
+23.75 rouletteReveal | 11 | 1-1 | 2-3 | Call changed: ⁨Lions⁩ RIGHT. | 
+24.75 rouletteQ | 12 | 1-1 | 2-3 | Call changed: ⁨Lions⁩ RIGHT. | 
+25.50 rouletteReveal | 12 | 1-1 | 4-0 | Call changed: ⁨Lions⁩ RIGHT. | 
+26.50 rouletteSummary | 13 | 3-1 | 4-0 | Call changed: ⁨Lions⁩ RIGHT. | 
+27.50 roundIntro | 14 | 3-1 |  | Call changed: ⁨Lions⁩ RIGHT. | 
+29.25 ask | 15 | 3-1 |  | Call changed: ⁨Lions⁩ RIGHT. | 
+30.00 ask | 15 | 3-1 |  | Lions used Call a Friend. | 
+35.50 ask | 16 | 3-1 |  | Lions used Call a Friend. | 
+37.25 answer | 17 | 4-1 |  | Lions +1 point | 
+38.25 answer | 17 | 4-1 |  |  | 
+41.75 ask | 18 | 4-1 |  |  | 
+42.75 ask | 18 | 4-1 |  | Owls used Call a Friend. | 
+46.25 ask | 19 | 4-1 |  | Owls used Call a Friend. | 
+48.00 answer | 20 | 4-3 |  | Owls +2 points | 
+49.00 answer | 20 | 4-3 |  |  | 
+50.00 roundScore | 21 | 4-3 |  |  | 
+50.75 final | 22 | 4-3 |  |  | 
+recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[4,1],[4,3]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Russian Roulette","pts":[[3,1]]},{"label":"R2","pts":[[4,1],[4,3]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0}]}

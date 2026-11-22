@@ -40,7 +40,7 @@ export const HOST_MOVES: Record<string, Where> = {
   "pin/start": "pinIntro", "pin/swap": "pinQ", "pin/award": "pinSummary", "pin/done": "pinSummary",
   "airport/start": "airportIntro", "airport/swap": "airportQ", "airport/award": "airportSummary", "airport/done": "airportSummary",
   "majority/start": "majorityIntro", "majority/swap": "majorityQ", "majority/award": "majoritySummary", "majority/done": "majoritySummary",
-  /* Russian Roulette: Spin (the first lap), Change question (a new barrel, spun), the points by hand when level, Next */
+  /* Russian Roulette: Spin (the first lap), Change question (each chamber its spare question, the spin kept), the points by hand when level, Next */
   "roulette/start": "rouletteIntro", "roulette/swap": "rouletteQ", "roulette/award": "rouletteSummary", "roulette/done": "rouletteSummary", "ui/rouletteOk": "rouletteReveal",
   /* Secret Stakes: Start, Change question (three new themes, before anyone has answered), the calls, Next */
   "stakes/start": "stakesIntro", "stakes/swap": ["stakesPick", "stakesQ"], "stakes/done": "stakesSummary", "ui/stakesOk": "stakesReveal",
@@ -74,7 +74,7 @@ export const HOST_MOVES: Record<string, Where> = {
    the engine's own swap for each screen, and what the TV and the phones call the thing changed */
 export const SWAPS: Record<string, string> = { ask: "round/swap", miniQ: "closest/swap", flagQ: "flag/swap", pinQ: "pin/swap", airportQ: "airport/swap",
   majorityQ: "majority/swap", dishQ: "dish/swap", mapQ: "map/swap", sayQ: "say/swap", rouletteQ: "roulette/swap", stakesPick: "stakes/swap", stakesQ: "stakes/swap", seeQ: "see/swap", foolWrite: "fool/swap", battleQ: "battle/swap", comebackQ: "comeback/swap" };
-export const swapWord = (sc: string, q: G) => sc === "flagQ" ? "flag" : sc === "pinQ" ? "landmark" : sc === "airportQ" ? "board" : sc === "mapQ" ? "map" : sc === "rouletteQ" ? "barrel" : sc === "seeQ" ? "picture" : sc === "foolWrite" ? "fact" : sc === "stakesPick" || sc === "stakesQ" ? "set of themes"
+export const swapWord = (sc: string, q: G) => sc === "flagQ" ? "flag" : sc === "pinQ" ? "landmark" : sc === "airportQ" ? "board" : sc === "mapQ" ? "map" : sc === "seeQ" ? "picture" : sc === "foolWrite" ? "fact" : sc === "stakesPick" || sc === "stakesQ" ? "set of themes"
   : sc === "sayQ" ? "prompt" : sc === "dishQ" ? dishKind(q).toLowerCase() : "question";
 /* What a CAPTAIN may tap, and who: "any" captain, the team whose "turn" it
    is, the "other" one (the referee), or the "lead": Team A's captain (Team

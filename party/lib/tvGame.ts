@@ -353,8 +353,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           : f.go === "sayQ" ? T().tSay : f.go === "battleQ" ? (s.nohost ? T().tBattleTyped : T().tBattleHost)
           : ((f.go === "sudden" && g.sdReady) || f.go === "battleTie") && s.nohost ? T().tSudden : 0;
         /* Russian Roulette: the barrel spins first (on the TV and every phone); the clock runs once it stops */
-        s.spinAt = f.go === "rouletteQ" ? now : null;
-        if (secs) { s.deadline = now + secs * 1000 + (s.spinAt ? SPIN_MS : 0); s.total = secs; }
+        /* (Change question keeps the spin: the new questions, a fresh clock, no new spin: 22 Nov, the owner) */
+        const keep = f.go === "rouletteQ" && !!f.keepSpin && !!s.spinAt;
+        s.spinAt = f.go === "rouletteQ" ? (keep ? Math.min(s.spinAt!, now - SPIN_MS) : now) : null;
+        if (secs) { s.deadline = now + secs * 1000 + (s.spinAt && !keep ? SPIN_MS : 0); s.total = secs; }
         if (f.go === "flagQ") applyFx([{ used: g.flagGame.qs[g.flagGame.i] }]);
         if (f.go === "dishQ") applyFx([{ used: g.dishGame.qs[g.dishGame.i] }]);
         if (f.go === "miniQ") applyFx([{ used: g.mini.qs[g.mini.i] }]);

@@ -361,6 +361,30 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`Russian Roulette, 3-8 teams: own chambers, calls on each team's own question, the bullet (${Object.entries(seen).map(([k, h]) => `${k} teams ${Math.min(...h)}-${Math.max(...h)}`).join(", ")}), the points and the places — ${ok ? "ok" : "FAILED"}`);
 }
+/* 22 Nov: Russian Roulette's Change question, 3 to 8 teams (the owner): each team's chamber its spare question, the same
+   theme and level; the barrel, the draw and the spin stay; a fresh clock; refused once a team has answered */
+{
+  const Q = createRequire(import.meta.url)("../../engine/core.js");
+  let ok = true;
+  for (const k of [3, 5, 8]) {
+    const r = rng(k * 7 + 3), D = Q.createDealer({ bank: () => bank, used: () => new Set(), noRepeat: () => true, rng: r });
+    const g = D.buildGame({ standard: false, rounds: 0, themes: [], minis: ["roulette"], rouletteChambers: Q.rouletteChambers(k), teamA: { name: "A" }, teamB: { name: "B" } });
+    const teams = Array.from({ length: k }, (_, t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+    const s = L.newNight(teams, { roulette: [...g.rouletteGame.qs, ...g.rouletteGame.spare] }, ["roulette"]);
+    L.startMini(s, 0, T, []);
+    const lap = L.qOf(s), draw = [...lap.draw], spin = s.spinAt, was = draw.map((j) => lap.ch[j]), spare = was.map((c) => c.alt?.[0]?.id);
+    if (spare.some((x) => !x)) { ok = false; continue; }
+    if (L.swapQ(s, 5000, T) !== true) ok = false;
+    const now = L.qOf(s);
+    if (now.draw.join() !== draw.join() || s.spinAt !== spin || !/New question, same theme and level/.test(s.toast?.text || "")) ok = false;
+    draw.forEach((j, t) => { const c = now.ch[j]; if (c.q.id !== spare[t] || c.theme !== was[t].theme || c.level !== was[t].level || c.q.theme !== c.theme || c.q.difficulty !== c.level) ok = false; });
+    if (!(s.deadline > 5000)) ok = false;
+    L.captainAnswer(s, 0, { text: "Atlantis" });
+    if (typeof L.swapQ(s, 6000, T) !== "string") ok = false;
+  }
+  if (!ok) bad++;
+  console.log(`Russian Roulette, 3-8 teams: Change question gives each team its chamber's spare, same theme and level, the spin kept — ${ok ? "ok" : "FAILED"}`);
+}
 /* 11 Nov: Secret Stakes, 3 to 8 teams: the night's last game. A bet is fixed at its start (a thirtieth of the leader's
    total); each round every captain bets (no bet by time-up: Easy on the first theme), answers the question it bet
    on, and wins or loses its bet straight on the night's total (never below 0); no places paid on top; Change

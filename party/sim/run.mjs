@@ -130,6 +130,10 @@ const NIGHTS = [
   { seed: 81, minis: ["see"], rounds: 2, host: true, phone: true, tieMore: 1 },
   { seed: 82, minis: ["fool"], rounds: 4, net: { delay: 2000, dup: 0.3 }, events: [{ at: 5, type: "score", a: 1, b: 12 }, { at: 70, type: "writesFail", for: 20 }], comeback: "make" },
   { seed: 83, minis: ["fool"], rounds: 4, host: true, phone: true, net: { delay: 2000, dup: 0.3, stall: 0.1 }, events: [{ at: 5, type: "score", a: 12, b: 1 }, { at: 90, type: "writesFail", for: 15 }], comeback: "miss" },
+  /* 22 Nov: Russian Roulette's Change question (the owner): each team's chamber its spare question, the same theme and
+     level, the spin kept and a fresh clock; no host (a captain asks, the other agrees) and with a host */
+  { seed: 84, minis: ["roulette"], rounds: 2, events: [{ at: 11.5, type: "swap" }] },
+  { seed: 85, minis: ["roulette"], rounds: 2, host: true, events: [{ at: 18, type: "swap" }] },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
