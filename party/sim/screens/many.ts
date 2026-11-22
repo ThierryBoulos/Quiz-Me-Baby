@@ -84,6 +84,11 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
       snap(); L.next(s, now, T);
     }
     snap();
+    /* Russian Roulette once the barrel has stopped (22 Nov: the nights pass it too quickly to catch, as with 2 teams):
+       the question up, the clock running, half the teams in */
+    { const rr = got[`m${k}.q.roulette.a`] as { pub: Q; secret: Q; now: number } | undefined;
+      if (rr?.pub.roulette?.spinAt) { const c = JSON.parse(JSON.stringify(rr)); c.now = c.pub.roulette.spinAt + 9000; c.pub.deadline = c.now + 25000; c.pub.left = 0; c.pub.timeUp = false;
+        c.pub.sent = c.pub.teams.map((_: unknown, t: number) => t % 2 === 1); got[`m${k}.q.roulette.extra.stopped.a`] = c; } }
     /* Fool Me Twice's worst cases on the reveal (16 Nov, the owner: "will it fit with 8 teams?"), from the first fact's:
        every team writes a lie and every team's named team falls for it (k right predictions); and one lie fools every
        other team, its writer's named team among them (one right prediction, k-1 teams on one lie) */
