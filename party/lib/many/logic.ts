@@ -12,7 +12,7 @@
    (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). tied teams share the better place. */
 import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
-import { poss } from "../game";
+import { offBy, poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_LEVELS, type SkPick } from "../stakes";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
@@ -210,7 +210,9 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
     m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, "New flag."); return true;
   }
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
-  m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;
+  m.qs[m.i] = next; s.paused = false; ask(s, now, t);
+  if (m.key === "closest") toast(s, "New question.");   // (as with 2 teams: 23 Nov)
+  return true;
 }
 
 /* the host skips the comeback, on its intro: it's gone for the night, and the next game's intro comes up */
@@ -465,7 +467,7 @@ export function legWinners(s: StateM): number[] {
   /* (Fool Me Twice: the teams that found the truth) */
   if (m.key === "fool") { const F = s.fool; return F ? s.teams.map((_, t) => t).filter((t) => F.picks[t] != null && !!F.opts[F.picks[t]!]?.truth) : []; }
   if (typedKey(m.key)) return s.ok.map((v, t) => (v ? t : -1)).filter((t) => t >= 0);
-  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer))))
+  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer))))
     : m.key === "pin" ? s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null)) : [];
   if (m.key === "majority") return [];
   const best = Math.min(...d.filter((x): x is number => x != null));
@@ -473,7 +475,7 @@ export function legWinners(s: StateM): number[] {
 }
 export const distances = (s: StateM): (number | null)[] => {
   const m = miniOf(s), q = qOf(s); if (!m || !q) return [];
-  return m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q)) : null)) : [];
+  return m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer)))) : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q)) : null)) : [];
 };
 /* on fire: 1st three legs in a row in this game */
 export const fireOfMany = (s: StateM): boolean[] => s.teams.map((_, i) => (s.stats?.run?.[i] ?? 0) >= 3);
@@ -490,7 +492,7 @@ export function legPlaces(s: StateM): (number | null)[] {
   if (m.key === "fool") return placesBy((foolRes(s)?.pts || []).map((p) => (p > 0 ? -p : null)));   // (the most points on this fact first)
   if (m.key === "roulette") return placesBy(rrGot(q, m.pts, s.ok).map((g) => (g > 0 ? -g : null)));   // (the most this lap: the bullet right first)
   if (typedKey(m.key)) return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? Number.MAX_SAFE_INTEGER : null)));
-  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : Math.abs(v - Number(q.answer)))) : s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null));
+  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer)))) : s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null));
   return placesBy(d);
 }
 /* ...and what they pay this game's tally: 1st as many points as there are teams, one less a place, down to 1 */
@@ -666,8 +668,8 @@ export function next(s: StateM, now: number, t: Timers) {
       if (m.key === "say" && q) { m.words = m.words || s.teams.map(() => []);
         s.typed.forEach((x, i) => { if (x != null && String(x).trim()) m.words![i].push({ w: String(listWord(x, q) ?? x).trim().slice(0, 40), ok: !!s.ok[i] }); }); }
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
-      /* (Guess the Flag: no line on the next flag, as with 2 teams: the reveal's headline said it, 23 Nov, the owner) */
-      if (m.key !== "flag") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
+      /* (Guess the Flag and Closest To Wins: no line on the next one, as with 2 teams: the reveal's headline said it, 23 Nov, the owner) */
+      if (m.key !== "flag" && m.key !== "closest") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
         : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} take it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
     }
     m.i++;

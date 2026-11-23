@@ -17,12 +17,13 @@ const BUFFER = 1.1;
 type Leg = { n: number; t: (s: Settings, part: number, over: number) => number };
 const timed = (n: number, clock: (s: Settings) => number, over = 1): Leg => ({ n, t: (s, part, o) => clock(s) * part + o * over });
 const TWO: Record<string, Leg> = {
-  closest: timed(7, (s) => s.tMini),
+  /* (2 teams play 5 of Closest To Wins, 7 of Don't Say the Same and 5 recipes, PARTY_LEGS: it counted 7, 9 and 7, 23 Nov) */
+  closest: timed(5, (s) => s.tMini),
   auction: { n: 3, t: () => 100 },                                   // bids back and forth, then naming them, and the count
-  saysame: timed(9, (s) => s.tSay),
+  saysame: timed(7, (s) => s.tSay),
   map: timed(3, (s) => s.tMap),
   flag: timed(10, (s) => s.tFlag),
-  dish: { n: 7, t: (s, _p, o) => s.tDishStep * 7 + s.tDishType * 0.6 + o },   // the ingredients come in until someone calls it
+  dish: { n: 5, t: (s, _p, o) => s.tDishStep * 7 + s.tDishType * 0.6 + o },   // the ingredients come in until someone calls it (5 recipes: PARTY_LEGS)
   pin: timed(7, (s) => s.tPin),
   airport: timed(5, (s) => s.tAirport),
   majority: timed(10, (s) => s.tMajority, 0.6),

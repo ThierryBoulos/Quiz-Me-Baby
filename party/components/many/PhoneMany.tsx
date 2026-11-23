@@ -10,6 +10,7 @@ import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
 import { sendAction, sendDraft, sb } from "@/lib/supabase";
 import { poss, showKm, showNum, type LatLon } from "@/lib/game";
+import { QMB } from "@/lib/engine";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
@@ -126,7 +127,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
 }
 
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
-const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: "Which flag?" };
+const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: "Which flag?", closest: "Type a number. Nearest wins." };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -170,6 +171,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const move = (type: string, extra: Record<string, unknown> = {}) => void send("judge", { move: { type, ...extra } });
   const opts = useMemo(() => order(pub.options || [], me.name + (pub.qid || "")), [pub.options, me.name, pub.qid]);
   const sentMine = mine != null && pub.sent[mine];
+  /* Closest To Wins: the number as the game reads it (units from the question: "in millions") */
+  const guessN: number = g?.key === "closest" && text.trim() ? QMB.parseNumber(text, pub.question) as number : NaN;
+  const perN = /\bin (thousand|million|billion)s\b/i.exec(pub.question || "")?.[1].toLowerCase();
   /* what the captain has typed (or the pin dropped) but not sent, quietly to the TV: if the clock runs out first, it
      counts, as with 2 teams (22 Nov, the owner) */
   const draftK = pub.qid ? `${pub.qid}|q` : null;
@@ -256,7 +260,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* the answer, on a reveal: big, in gold, with the fact behind it */
   const Answer = () => !R || !g ? null : (
     <div className="noselect" {...noCopy}>
-      <AnswerLine question={["quiz", "say", "majority", "sudden", "comeback"].includes(g.key) ? pub.question : null}
+      <AnswerLine question={["quiz", "say", "majority", "sudden", "comeback", "closest"].includes(g.key) ? pub.question : null}
         media={g.key === "flag" ? <FlagImg name={pub.flag} h={96} />
           : g.key === "see" && pub.see ? <div className="flex flex-col items-center gap-1"><SeePicture see={pub.see} clear w={240} alt={R.answer} /><SeeCredit see={pub.see} size={11} />
             {(() => { const w = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] })), R.winners?.length); return <span className="display text-18" style={{ color: w.color }}>{w.text}</span>; })()}</div>
@@ -545,10 +549,14 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             <div className="card flex flex-col gap-2">
               <label className="field-label !mb-0" htmlFor="mans">{g.key === "closest" ? "Your number" : "Your answer"}</label>
               <input id="mans" {...np.props} className="input" autoComplete="off" autoCorrect="off" spellCheck={false} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} value={text} onChange={(e) => setText(e.target.value)} placeholder={g.key === "closest" ? "e.g. 236" : "Type it"} />
+              {/* (Closest To Wins: what the number counts as, or that it isn't one, before it's sent, as with 2 teams: 23 Nov) */}
+              {g.key === "closest" && text.trim() && (Number.isFinite(guessN)
+                ? ![String(guessN), guessN.toLocaleString("en-GB")].includes(text.trim()) && <div className="text-13 text-[var(--color-ink-2)]">Counts as <b>{guessN.toLocaleString("en-GB")}{perN ? ` ${perN}` : ""}</b></div>
+                : <p className="text-13 text-[var(--color-no)]" role="alert">That isn&rsquo;t a number.</p>)}
               {np.hint}
-              <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
+              <button className="btn btn-gold btn-lg" disabled={busy || !text.trim() || (g.key === "closest" && !Number.isFinite(guessN))} onPointerDown={(e) => e.preventDefault()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
               {/* (no "Once you send it, it's locked." in Russian Roulette: 22 Nov, the owner) */}
-              {g.key !== "roulette" && <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>}
+              {g.key !== "roulette" && g.key !== "closest" && <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>}
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
         {!sentMine && sugs.length > 0 && g.key !== "pin" && (

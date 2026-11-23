@@ -2377,8 +2377,7 @@
     },
 
     'closest/start'(g){ g.mini.i = 0; return [{ go:'miniQ' }]; },
-    /* a number that doesn't suit the room: another, preferably from a theme
-       this mini-game hasn't used yet (one theme per leg) */
+    /* a number that doesn't suit the room: another */
     'closest/swap'(g, a, env){
       const m = g.mini, D = env.deal;
       const inPlay = new Set();
@@ -2389,12 +2388,12 @@
       const own = g.rounds.map(r => r.theme), mine = q => CLOSEST_ONLY_IF_PICKED.indexOf(q.theme) < 0 || own.indexOf(q.theme) >= 0;
       let pool = D.bank().filter(q => q.type === 'closest' && !inPlay.has(q.id) && mine(q) && D.isFresh(q));
       if(!pool.length) pool = D.bank().filter(q => q.type === 'closest' && !inPlay.has(q.id) && mine(q));
-      if(!pool.length) return [{ toast:'No spare Closest To Wins question left in the bank.' }];
-      const spent = new Set(m.qs.filter((q, i) => i !== m.i).map(q => q.theme));
-      const offTheme = pool.filter(q => !spent.has(q.theme));
-      const q = D.shuffle(offTheme.length ? offTheme : pool)[0];
+      /* (the next spare, whatever its theme, as with 3 to 8 teams; only when they're gone, one from the bank: 23 Nov,
+         the owner, "forget about the theme") */
+      const q = (m.spare || []).length ? m.spare.shift() : pool.length ? D.shuffle(pool)[0] : null;
+      if(!q) return [{ toast:'No other question left for this game.' }];
       m.qs[m.i] = q;
-      return [{ used:q }, { toast:'New number question — ' + q.theme + '.' }, { go:'miniQ' }];
+      return [{ used:q }, { toast:'New question.' }, { go:'miniQ' }];
     },
     /* w: 0 | 1 | 'tie'; gA, gB: the two guesses when they were typed in */
     'closest/win'(g, a){

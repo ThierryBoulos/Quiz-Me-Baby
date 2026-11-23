@@ -196,8 +196,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <RouletteTv rr={pub.roulette} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent} typed={R?.typed} ok={R?.ok}
             reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />} />)}
         {pub.screen === "q" && g && g.key === "closest" && (<>
-          <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 110 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={140} />
+          {/* (the 2-team sizes up to four teams, smaller only from five: 23 Nov, the owner) */}
+          <div className="font-bold max-w-[1000px]" style={{ fontSize: dense && (pub.question || "").length > 110 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
+          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 140 : 150} />
           <Sent pub={pub} />
         </>)}
         {pub.screen === "q" && g && g.key === "pin" && (

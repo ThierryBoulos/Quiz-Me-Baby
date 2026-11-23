@@ -10,7 +10,7 @@ import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
 import { useSideways } from "../Side";
-import { flagRule1, showKm, showNum } from "@/lib/game";
+import { closestRule1, flagRule1, showKm, showNum } from "@/lib/game";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import type { Member } from "@/lib/room";
@@ -198,8 +198,9 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     case "flag": return [flagRule1(pub.introSecs), fast, pay];
     case "airport": return ["A departures board goes up. Captains type which airport it is.", fast, pay];
     case "map": return ["A map with places marked. Captains type what they have in common.", fast, pay];
-    case "closest": return ["A question with a number for an answer. Captains type their best guess.", `Closest guess first: ${per}`, pay];
-    case "pin": return ["A photo of a famous place. Captains drop a pin on the map where they think it is.", `Closest pin first: ${per}`, pay];
+    /* (no "Wrong, nothing." where nothing is wrong, only further off: 23 Nov, the owner) */
+    case "closest": return [closestRule1(pub.introSecs), `Closest guess first: ${per.replace(" Wrong, nothing.", "")}`, pay];
+    case "pin": return ["A photo of a famous place. Captains drop a pin on the map where they think it is.", `Closest pin first: ${per.replace(" Wrong, nothing.", "")}`, pay];
     case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
       `No points if you say the app's secret answer, or the same as another team. Any other answer gets ${k} points.`, pay];
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",

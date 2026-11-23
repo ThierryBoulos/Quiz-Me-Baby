@@ -15,7 +15,7 @@ import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
 import { takeText } from "./many/PartsMany";
 import { SeeTv } from "./See";
-import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
+import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, showNum, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "./Fool";
@@ -418,12 +418,15 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   </>);
   if (sc === "closestReveal" && pub.reveal) {
     const ans = Number(pub.reveal.answer), w = pub.reveal.w;
+    /* (as with 3 to 8 teams: the question, the answer as people write it, "1,600,000", the fact, the line, who takes
+       it: 23 Nov, the owner) */
+    const hw = takeText(w === "tie" ? [0, 1] : w === 0 || w === 1 ? [w] : [], ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })));
     return (<>
-      <div className="eyebrow text-18">The answer</div>
-      <div className="ans-board display" style={{ fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
-      {pub.reveal.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] -mt-2 leading-snug">{wholeSentences(pub.reveal.notes)}</div>}
+      {pub.question && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>}
+      <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: 80, color: "var(--color-gold)" }}>{showNum(ans)}</div>
+      {pub.reveal.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(pub.reveal.notes)}</div>}
       <NumberLine pub={pub} ans={ans} w={w} />
-      <div className="display text-44" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} take it` : ""}</div>
+      <div className="display text-44 beat" style={{ ...QUICK, color: hw.color }}>{hw.text}</div>
     </>);
   }
   /* What Do You See?: the picture clears as the clock runs (every screen from the TV's clock) and stops at a buzz; then

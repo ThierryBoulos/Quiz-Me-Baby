@@ -221,3 +221,6 @@ export function preloadOf(key: string, qs: { flag?: string; id?: string; photo?:
 export const flagSetupLine = (secs?: number) => `Ten flags, ${secs ?? T_FLAG} seconds each: whose is it?`;
 /* ...and its first rule on the game's intro, every setup (23 Nov, the owner's words) */
 export const flagRule1 = (secs?: number) => `A flag goes up and captains have ${secs ?? T_FLAG} seconds to type whose flag it is.`;
+/* Closest To Wins' line on the setup screen and its first rule, every setup (23 Nov, the owner) */
+export const closestSetupLine = (secs?: number) => `Five number questions, ${secs ?? T_CLOSEST} seconds each: the closest guess wins.`;
+export const closestRule1 = (secs?: number) => `A question with a number for an answer. Captains have ${secs ?? T_CLOSEST} seconds to type their best guess.`;
