@@ -371,8 +371,8 @@ async function kinds(k, phone, tag) {
 }
 
 /* ---------- Drop the Pin: time's up (23 Nov, the owner, as with 2 teams) ---------- */
-/* one captain locks in, one drops a pin but never locks it in (it counts where it is, and the TV says so), the rest
-   drop nothing (no pin, no point, no message for them) */
+/* one captain locks in, one drops a pin but never locks it in (it counts where it is), the rest
+   drop nothing (no pin, no point); no message about it */
 async function pin(k, phone, tag) {
   await setup(k, phone, ["pin"], 5); await judge("m/start");
   await tick(8000);
@@ -387,7 +387,7 @@ async function pin(k, phone, tag) {
   check(`${tag} Pin: time up, the reveal`, pub().screen === "reveal", pub().screen);
   check(`${tag} Pin: the pin dropped but not locked in counts`, !!sv.pins?.[1] && Math.abs(sv.pins[1].lat - (q.lat + 2)) < 1e-6, JSON.stringify(sv.pins?.[1]));
   check(`${tag} Pin: the teams that dropped nothing have no pin`, Array.from({ length: k - 2 }, (_, i) => sv.pins?.[i + 2]).every((x) => !x), JSON.stringify(sv.pins));
-  check(`${tag} Pin: the TV says the unlocked pin counts`, (pub().toast?.text || "").startsWith("Time's up: ") && /pin counts where it is\.$/.test(pub().toast?.text || ""), pub().toast?.text);
+  check(`${tag} Pin: no message, it just goes in (23 Nov, the owner)`, !/^Time's up/.test(pub().toast?.text || ""), pub().toast?.text);
 }
 
 /* ---------- The comeback (17 Nov, the owner) ---------- */

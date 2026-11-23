@@ -226,4 +226,8 @@ export const closestSetupLine = (secs?: number) => `Five number questions, ${sec
 export const closestRule1 = (secs?: number) => `A question with a number for an answer. Captains have ${secs ?? T_CLOSEST} seconds to type their best guess.`;
 /* Drop the Pin's line on the setup screen and its first rule, every setup (23 Nov, the owner) */
 export const pinSetupLine = (secs?: number) => `Seven landmarks, ${secs ?? T_PIN} seconds each: drop a pin where it is.`;
+/* Guess the Airport, every setup (23 Nov, the owner) */
+export const airportSetupLine = (secs?: number) => `Five departure boards, ${secs ?? T_AIRPORT} seconds, which airport is it?`;
+export const airportRule1 = (secs?: number) => `A departures board goes up. Captains have ${secs ?? T_AIRPORT} seconds to type which airport it is.`;
+export const AIRPORT_CITY = "The city is enough, except where it has more than one: then name the airport (Heathrow, not London).";
 export const pinRule1 = (secs?: number) => `A photo of a landmark goes up. Captains have ${secs ?? T_PIN} seconds to drop a pin on the map where they think it is.`;

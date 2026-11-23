@@ -22,6 +22,7 @@ import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
 import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
+import { AirportAnswerTv } from "../Airport";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
 import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
 
@@ -132,8 +133,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <div className="flex gap-10 items-center w-full justify-center">
             <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={460} still />}</div>
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
-              <div className="display text-40 leading-tight" style={{ color: "var(--color-gold)" }}>{g.key === "airport" ? "Which airport?" : "What do they have in common?"}</div>
-              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
+              {/* (Guess the Airport: the 2-team sizes up to four teams: 23 Nov, the owner) */}
+              <div className={"display leading-tight " + (g.key === "airport" && !dense ? "text-44" : "text-40")} style={{ color: "var(--color-gold)" }}>{g.key === "airport" ? "Which airport?" : "What do they have in common?"}</div>
+              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={g.key === "airport" && !dense ? 130 : 120} />
               <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
@@ -239,7 +241,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
             : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
           {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
-          <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
+          {/* (Guess the Airport: its name on the flaps, its code and city, as with 2 teams: 23 Nov, the owner) */}
+          {g.key === "airport" ? <AirportAnswerTv answer={R.answer || ""} air={pub.airport} dense={dense} />
+            : <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>}
           {/* (the airport's explanation stays on the phones with eight teams: the board and eight answers fill the TV) */}
           {R.notes && g.key !== "say" && !(g.key === "airport" && dense) && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />

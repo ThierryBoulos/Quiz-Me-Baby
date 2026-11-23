@@ -15,6 +15,7 @@ import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
 import { takeText, TeamRows as Rows } from "./many/PartsMany";
 import { SeeTv } from "./See";
+import { AirportAnswerTv } from "./Airport";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, showNum, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -216,44 +217,13 @@ function SdRace({ pub }: { pub: Pub }) {
     </div>);
 }
 
-function Sent({ pub }: { pub: Pub }) {
+/* column: one under the other, beside a board or a map (as with 3 to 8 teams: 23 Nov, the owner) */
+function Sent({ pub, column }: { pub: Pub; column?: boolean }) {
   const T = pub.teams;
   return (
-    <div className="flex gap-10" role="status">{[0, 1].map((t) => (
+    <div className={column ? "flex flex-col items-center gap-1" : "flex gap-10"} role="status">{[0, 1].map((t) => (
       <span key={t} className="font-bold" style={{ fontSize: 22, color: pub.sent?.[t] ? tc(t as 0 | 1) : "var(--color-ink-3)" }}>
         {T[t].name}: {pub.sent?.[t] ? "locked in" : "thinking…"}</span>))}
-    </div>);
-}
-
-/* A split-flap board (the old airport kind): every letter cycles through the alphabet, then lands, one after
-   another left to right; words wrap whole. start: ms before it begins. With motion off in Settings, just the text. */
-const FLAPS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-function SplitFlap({ text, size, start = 0 }: { text: string; size: number; start?: number }) {
-  const final = text.toUpperCase();
-  const still = motionOff();
-  const [shown, setShown] = useState(() => (still ? final : final.replace(/\S/g, " ")));
-  useEffect(() => {
-    if (still) { setShown(final); return; }
-    const t0 = Date.now() + start;
-    const tick = () => {
-      const el = Date.now() - t0;
-      let done = true;
-      setShown([...final].map((ch, i) => {
-        if (ch === " ") return " ";
-        if (el >= 380 + i * 55) return ch;
-        done = false;
-        return el < i * 55 ? " " : FLAPS[(Math.floor(el / 50) * 7 + i * 13) % FLAPS.length];
-      }).join(""));
-      if (done) clearInterval(iv);
-    };
-    const iv = setInterval(tick, 50);
-    return () => clearInterval(iv);
-  }, [final, start, still]);
-  let k = 0;
-  return (
-    <div className="flap" style={{ fontSize: size }} aria-label={text}>
-      {final.split(" ").map((w, wi) => { const at = k; k += w.length + 1; return (
-        <span key={wi} className="flap-word" aria-hidden>{[...w].map((_, ci) => <span key={ci} className="flap-t"><span>{shown[at + ci] ?? ""}</span></span>)}</span>); })}
     </div>);
 }
 
@@ -443,7 +413,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       {pub.reveal?.notes && <div className="text-22 text-[var(--color-ink-2)] text-center">{wholeSentences(pub.reveal.notes, 120)}</div>}
       <TeamRows pub={pub} empty="No answer" />
       {/* who takes it, as with 3 to 8 teams (23 Nov, the owner) */}
-      {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` })), true);
+      {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` })));
         return <div className="display text-44 beat" style={{ ...QUICK, color: w.color }}>{w.text}</div>; })()}
     </>)}
   </>);
@@ -476,29 +446,25 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
         <div className="display text-36 mt-3" style={{ color: hw.color }}>{hw.text}</div>
       </div>
     </div>); }
-  /* Guess the Airport: the board, then its name */
-  if ((sc === "airportQ" || sc === "airportReveal") && pub.airport) return (
+  /* Guess the Airport: the board, then its name. The reveal as with 3 to 8 teams, its name on the flaps: the board's
+     first rows, the name, its code and city, the note, each team's answer and the call, who takes it (23 Nov, the owner) */
+  if (sc === "airportQ" && pub.airport) return (
     <div className="flex gap-10 items-center w-full">
-      <div className="flex-1 min-w-0"><Board air={pub.airport} size="tv" flip={sc === "airportQ"} /></div>
+      <div className="flex-1 min-w-0"><Board air={pub.airport} size="tv" flip /></div>
       <div className="w-[380px] flex flex-col items-center gap-4">
-        {sc === "airportQ" ? (<>
-          <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which airport?</div>
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
-          <Sent pub={pub} />
-        </>) : (<>
-          <div className="eyebrow text-16">The airport</div>
-          {/* the airport's name comes up on a split-flap board: each letter clatters through the alphabet and lands, left to right */}
-          {/* a long name ("Ministro Pistarini International Airport (Ezeiza)") on smaller flaps, so the column fits the screen */}
-          <SplitFlap text={pub.reveal?.answer || ""} size={(pub.reveal?.answer || "").length > 34 ? 22 : (pub.reveal?.answer || "").length > 26 ? 26 : 30} />
-          {pub.airport.code && <div className="text-24 flex items-center gap-3"><SplitFlap text={pub.airport.code} size={26} start={300} /> · {pub.airport.city}</div>}
-          {pub.airport.cityOk === false && <div className="text-18 font-bold text-center" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</div>}
-          {/* the explanation keeps to four lines: with a long airport name on the flaps it ran off the bottom (the owner, 31 Oct);
-              whole sentences, so it never stops mid-word (11 Nov) */}
-          {pub.reveal?.notes && <div className="text-15 text-[var(--color-ink-2)] leading-snug text-left w-full" style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{wholeSentences(pub.reveal.notes, 200)}</div>}
-          <TeamRows pub={pub} empty="No answer" small />
-        </>)}
+        <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which airport?</div>
+        <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
+        <Sent pub={pub} column />
       </div>
     </div>);
+  if (sc === "airportReveal" && pub.airport) return (<>
+    <div className="w-full max-w-[860px] board-tight"><Board air={pub.airport} size="reveal" /></div>
+    <AirportAnswerTv answer={pub.reveal?.answer || ""} air={pub.airport} />
+    {pub.reveal?.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(pub.reveal.notes)}</div>}
+    <TeamRows pub={pub} empty="No answer" />
+    {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })));
+      return <div className="display text-44 beat" style={{ ...QUICK, color: w.color }}>{w.text}</div>; })()}
+  </>);
   if ((sc === "dishQ" || sc === "dishReveal") && pub.dish) {
     const long = pub.dish.n > 8;
     return (

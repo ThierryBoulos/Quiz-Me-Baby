@@ -4,7 +4,7 @@
 7.75 roundIntro | 2 | 0-0 |  |  | 
 18.50 ask | 3 | 0-0 |  |  | 
 32.75 steal | 3 | 0-0 |  |  | 
-63.75 answer | 4 | 0-1 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+63.75 answer | 4 | 0-1 |  | Owls +1 point — steal | 
 66.00 answer | 4 | 0-1 |  |  | 
 81.00 answer | 4 | 0-1 |  | No answer in time: the call stands. | 
 106.50 ask | 5 | 0-1 |  | No answer in time: the call stands. | 
@@ -16,11 +16,11 @@
 375.75 answer | 8 | 3-1 |  | Lions +2 points | 
 401.75 ask | 9 | 3-1 |  | Lions +2 points | 
 412.50 steal | 9 | 3-1 |  | Lions +2 points | 
-443.50 answer | 10 | 4-1 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-470.25 roundScore | 11 | 4-1 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-515.25 pinIntro | 12 | 4-1 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-628.50 pinQ | 13 | 4-1 | 0-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-674.50 pinReveal | 15 | 4-1 | 1-0 | Time's up: ⁨Owls⁩’ pin counts where it is. | 
+443.50 answer | 10 | 4-1 |  | Lions +1 point — steal | 
+470.25 roundScore | 11 | 4-1 |  | Lions +1 point — steal | 
+515.25 pinIntro | 12 | 4-1 | 0-0 | Lions +1 point — steal | 
+628.50 pinQ | 13 | 4-1 | 0-0 | Lions +1 point — steal | 
+674.50 pinReveal | 15 | 4-1 | 1-0 | Lions +1 point — steal | 
 788.00 pinQ | 16 | 4-1 | 1-0 | Lions take landmark 1. | 
 795.00 pinReveal | 16 | 4-1 | 2-0 | Lions take landmark 1. | 
 803.25 pinQ | 17 | 4-1 | 2-0 | Lions take landmark 2. | 
@@ -28,16 +28,16 @@
 834.75 pinQ | 18 | 4-1 | 2-1 | Owls take landmark 3. | 
 835.50 pinReveal | 18 | 4-1 | 2-2 | Owls take landmark 3. | 
 848.25 pinQ | 19 | 4-1 | 2-2 | Owls take landmark 4. | 
-894.25 pinReveal | 21 | 4-1 | 3-2 | Time's up: ⁨Lions⁩’ pin counts where it is. | 
+894.25 pinReveal | 21 | 4-1 | 3-2 | Owls take landmark 4. | 
 911.25 pinQ | 22 | 4-1 | 3-2 | Lions take landmark 5. | 
-957.25 pinReveal | 24 | 4-1 | 3-3 | Time's up: ⁨Owls⁩’ pin counts where it is. | 
+957.25 pinReveal | 24 | 4-1 | 3-3 | Lions take landmark 5. | 
 963.50 pinQ | 25 | 4-1 | 3-3 | Owls take landmark 6. | 
-1009.50 pinReveal | 27 | 4-1 | 3-4 | Time's up: ⁨Owls⁩’ pin counts where it is. | 
+1009.50 pinReveal | 27 | 4-1 | 3-4 | Owls take landmark 6. | 
 1038.00 pinSummary | 28 | 4-3 | 3-4 | Owls take landmark 7. | 
 1064.25 roundIntro | 29 | 4-3 |  | Owls take landmark 7. | 
 1068.75 ask | 30 | 4-3 |  | Owls take landmark 7. | 
-1129.75 steal | 31 | 4-3 |  | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1160.75 answer | 32 | 4-4 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1129.75 steal | 31 | 4-3 |  | Owls take landmark 7. | 
+1160.75 answer | 32 | 4-4 |  | Owls +1 point — steal | 
 1164.00 answer | 32 | 4-4 |  |  | 
 1179.00 answer | 32 | 4-4 |  | No answer in time: the call stands. | 
 1191.00 ask | 33 | 4-4 |  | No answer in time: the call stands. | 
@@ -48,7 +48,7 @@
 1340.50 roundIntro | 35 | 4-5 |  | No answer in time: the call stands. | 
 1354.00 ask | 36 | 4-5 |  | No answer in time: the call stands. | 
 1372.00 steal | 36 | 4-5 |  | No answer in time: the call stands. | 
-1403.00 answer | 37 | 4-5 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1403.00 answer | 37 | 4-5 |  | No answer in time: the call stands. | 
 1423.25 answer | 37 | 4-5 |  |  | 
 1438.25 answer | 37 | 4-5 |  | No answer in time: the call stands. | 
 1472.75 ask | 38 | 4-5 |  | No answer in time: the call stands. | 
@@ -75,8 +75,8 @@
 1816.50 roundIntro | 48 | 6-7 |  | Both got it — a point each. | 
 1911.00 ask | 49 | 6-7 |  | Both got it — a point each. | 
 1940.75 steal | 49 | 6-7 |  | Both got it — a point each. | 
-1971.75 answer | 50 | 6-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-2048.00 ask | 51 | 6-8 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1971.75 answer | 50 | 6-8 |  | Owls +1 point — steal | 
+2048.00 ask | 51 | 6-8 |  | Owls +1 point — steal | 
 2058.75 ask | 51 | 6-8 |  | Owls used Double Dip. | 
 2094.75 answer | 51 | 6-9 |  | Owls +1 point | 
 2172.00 roundScore | 52 | 6-9 |  | Owls +1 point | 

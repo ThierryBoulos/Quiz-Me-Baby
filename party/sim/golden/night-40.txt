@@ -25,7 +25,7 @@
 447.75 seeQ | 12 | 2-1 | 0-0 | Call changed: Lions +1 point. | 
 468.75 seeReveal | 13 | 2-1 | 0-0 | Call changed: Lions +1 point. | 
 477.50 seeQ | 14 | 2-1 | 0-0 | Nobody got it. | 
-508.25 seeReveal | 15 | 2-1 | 1-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
+508.25 seeReveal | 15 | 2-1 | 1-0 | Nobody got it. | 
 523.25 seeQ | 16 | 2-1 | 1-0 | Lions take picture 2. | 
 539.50 seeQ | 16 | 2-1 | 1-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
 547.75 seeReveal | 17 | 2-1 | 1-0 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
@@ -52,8 +52,8 @@
 988.50 roundIntro | 37 | 4-1 |  | Nobody got it. | 
 1001.25 ask | 38 | 4-1 |  | Nobody got it. | 
 1029.00 steal | 38 | 4-1 |  | Nobody got it. | 
-1060.00 answer | 39 | 4-2 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1063.25 ask | 40 | 4-2 |  | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1060.00 answer | 39 | 4-2 |  | Owls +1 point — steal | 
+1063.25 ask | 40 | 4-2 |  | Owls +1 point — steal | 
 1094.00 answer | 40 | 4-3 |  | Owls +1 point | 
 1154.25 answer | 40 | 4-3 |  |  | 
 1166.75 answer | 40 | 4-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
@@ -64,18 +64,18 @@
 1219.75 battleQ | 44 | 4-3 | 1-0 | Time's up. | 
 1235.75 battleQ | 45 | 4-3 | 1-0 | Time's up. | 
 1249.50 battleQ | 45 | 4-3 | 2-0 | Time's up. | 
-1265.50 battleQ | 46 | 4-3 | 2-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1289.25 battleQ | 46 | 4-3 | 3-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1306.00 battleQ | 47 | 4-3 | 4-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1319.75 battleHandoff | 47 | 4-3 | 4-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1330.50 battleQ | 48 | 4-3 | 4-0 | Time's up: what ⁨Lions⁩ typed counts as sent. | 
-1346.50 battleQ | 49 | 4-3 | 4-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1362.50 battleQ | 50 | 4-3 | 4-0 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1265.50 battleQ | 46 | 4-3 | 2-0 | Time's up. | 
+1289.25 battleQ | 46 | 4-3 | 3-0 | Time's up. | 
+1306.00 battleQ | 47 | 4-3 | 4-0 | Time's up. | 
+1319.75 battleHandoff | 47 | 4-3 | 4-0 | Time's up. | 
+1330.50 battleQ | 48 | 4-3 | 4-0 | Time's up. | 
+1346.50 battleQ | 49 | 4-3 | 4-0 | Time's up. | 
+1362.50 battleQ | 50 | 4-3 | 4-0 | Time's up. | 
 1378.50 battleQ | 51 | 4-3 | 4-0 | Time's up. | 
-1394.50 battleQ | 52 | 4-3 | 4-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1394.50 battleQ | 52 | 4-3 | 4-1 | Time's up. | 
 1410.50 battleQ | 53 | 4-3 | 4-1 | Time's up. | 
-1426.50 battleQ | 54 | 4-3 | 4-1 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
-1443.00 battleQ | 54 | 4-3 | 4-2 | Time's up: what ⁨Owls⁩ typed counts as sent. | 
+1426.50 battleQ | 54 | 4-3 | 4-1 | Time's up. | 
+1443.00 battleQ | 54 | 4-3 | 4-2 | Time's up. | 
 1470.75 battleReview | 55 | 4-3 | 4-2 | Time's up. | 
 1517.00 battleSummary | 56 | 6-3 | 4-2 | Time's up. | 
 1518.75 final | 57 | 6-3 |  | Time's up. | 

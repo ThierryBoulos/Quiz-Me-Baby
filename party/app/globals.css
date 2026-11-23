@@ -1499,7 +1499,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 
 /* the phone's departures board (the 4 Nov audit, 3.4): the status column gets the room it needs ("Embarquement" was cut,
    and the status is a clue), the destinations the rest */
-.board .board-row:not(.tv) { grid-template-columns: 3.1em minmax(0, 1fr) 4.4em minmax(0, 1fr); gap: .45em; padding: .26em .2em; }
+.board .board-row:not(.tv) { grid-template-columns: 3.1em minmax(0, 1fr) var(--fl, 4.4em) minmax(0, 1fr); gap: .45em; padding: .26em .2em; }   /* (--fl: Board sets it from the longest flight number) */
 .board .board-row:not(.tv) .b-status { white-space: normal; overflow: visible; line-height: 1.1; font-size: .82em; }
 .board.reveal .board-row .b-status { font-size: 1em; white-space: nowrap; }
 .board-tight .board.reveal .board-row:nth-child(n+5) { display: none; }   /* (the reveal: three flights are enough to recall the board) */

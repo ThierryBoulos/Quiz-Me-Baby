@@ -32,7 +32,7 @@ export type PubMany = {
   pin?: { photo: string; credit: string; licence: string };
   /* Guess the Airport: the board (its name and code only at the reveal); Guess the Map: the map; the Cocktail or
      Dish: the ingredients up so far, and the teams whose one guess was wrong (out of this one) */
-  airport?: { title: string; board: string[][]; code?: string; city?: string };
+  airport?: { title: string; board: string[][]; code?: string; city?: string; cityOk?: boolean };
   map?: { id: string; reveal: boolean; title?: string; rev?: string; hint?: string };
   dish?: { kind: string; ings: string[]; n: number };
   out?: boolean[];
@@ -76,7 +76,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
 /* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
-export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number }): { pub: PubMany; secret: SecretMany } {
+export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
@@ -94,7 +94,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen === "q" && s.deadline && Date.now() >= s.deadline) pub.timeUp = true;
   if (m && s.screen !== "final") { const P = preloadOf(m.key, m.qs as { flag?: string; id?: string; photo?: string }[], m.i, s.screen === "intro"); if (P) pub.preload = P; }
   /* Russian Roulette's intro: the seconds, for its rules (as with 2 teams: 22 Nov, the owner) */
-  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
+  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
   if (m?.key === "stakes") {
     /* (on the intro, the bet the game will play: worked out from the scores now, as Start will; it read 1 before Start,
        22 Nov. And the seconds, for its rules) */
@@ -126,7 +126,9 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     const rev = s.screen === "reveal";
     if (m.key === "flag") pub.flag = q.flag;
     else if (m.key === "pin") pub.pin = { photo: q.photo, credit: q.credit, licence: q.licence };
-    else if (m.key === "airport") pub.airport = { title: q.boardTitle, board: q.board, code: rev ? q.code : undefined, city: rev ? q.city : undefined };
+    else if (m.key === "airport") { pub.airport = { title: q.boardTitle, board: q.board, code: rev ? q.code : undefined, city: rev ? q.city : undefined };
+      /* (where the city alone doesn't count, the reveal says so, as with 2 teams: 23 Nov, the owner) */
+      if (rev) pub.airport.cityOk = acceptFor(q).some((a) => QMB.tidy(a) === QMB.tidy(q.city || "")); }
     else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined, ...(rev && revOf(q) ? { rev: revOf(q) } : {}), ...(s.mapHint ? { hint: "on" } : {}) };
     else if (m.key === "dish") { pub.dish = { kind: dishKind(q), ings: (q.ings || []).slice(0, rev ? undefined : Math.max(1, s.shown)), n: (q.ings || []).length };
       if (rev) pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }
@@ -159,7 +161,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     else if (m.key === "roulette") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (m.key === "stakes") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, places: s.teams.map(() => null), pts: pub.stakes?.rev?.delta || [] };
     else if (m.key === "fool") pub.reveal = { answer: q.answer, notes: q.notes || undefined, winners: w, ...pl };
-    else if (typedKey(m.key)) pub.reveal = { answer: q.answer, notes: m.key === "see" ? seeNotes(q) : q.notes || (m.key === "airport" ? [q.city, q.code].filter(Boolean).join(", ") : undefined), typed: s.typed, ok: s.ok, winners: w, ...pl,
+    else if (typedKey(m.key)) pub.reveal = { answer: q.answer, notes: m.key === "see" ? seeNotes(q) : q.notes, typed: s.typed, ok: s.ok, winners: w, ...pl,
       ...(m.key === "say" ? { why: s.why } : {}) };
     else if (m.key === "closest") pub.reveal = { answer: String(q.answer), notes: q.notes, nums: s.nums, off: distances(s), winners: w, ...pl };
     else if (m.key === "pin") pub.reveal = { answer: q.answer, place: q.place, at: { lat: q.lat, lon: q.lon }, pins: s.pins, off: distances(s), winners: w, ...pl };

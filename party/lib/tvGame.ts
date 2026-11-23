@@ -1007,8 +1007,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (captainInput("answer", team, pin ? { pin: d.pin } : mini ? { n: d.n } : { texts: d.texts }) !== true) return false;
     /* (What Do You See?: a wrong one, and the note already says who is out and who can still buzz) */
     if (was === "seeQ" && s.screen === "seeQ") return true;
-    /* (not what it says: on a standard question the other team may be about to steal) */
-    s.toast = { id: ++s.toastN, text: pin ? `Time's up: ${poss(iso(s.g.teams[team].name))} pin counts where it is.` : `Time's up: what ${iso(s.g.teams[team].name)} typed counts as sent.` };
+    /* (no message: it just goes in, every game, every setup: 23 Nov, the owner) */
     return true;
   }, [captainInput, draftKey]);
 

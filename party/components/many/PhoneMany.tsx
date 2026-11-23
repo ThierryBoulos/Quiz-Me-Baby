@@ -22,6 +22,7 @@ import { listNames } from "@/lib/comeback";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
 import { WhoAnswered } from "../WhoAnswered";
+import { AirportFact } from "../Airport";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
@@ -128,7 +129,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
 
 const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
-const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: "Which flag?", closest: "Type a number. Nearest wins.", pin: "Where is it? Drop your pin, then lock it in." };
+const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: "Which flag?", closest: "Type a number. Nearest wins.", pin: "Where is it? Drop your pin, then lock it in.", airport: "Which airport?" };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -276,7 +277,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
             fly height={220} label={`Where it is: ${R.place}`} /></div> : null}
         label={g.key === "say" ? "The app's secret answer" : undefined}
-        answer={g.key === "closest" ? showNum(Number(R.answer)) : R.answer} fact={R.place || R.notes} />
+        answer={g.key === "closest" ? showNum(Number(R.answer)) : R.answer} fact={g.key === "airport" ? <AirportFact air={pub.airport} notes={R.notes} /> : R.place || R.notes} />
     </div>);
   /* the result after a question (the owner's pick, 1 Nov): how your team did, in one pill */
   const youOf = (): { text: string; tone: Tone } | null => {
@@ -428,7 +429,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
           {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
           {/* (shown even once answers are in: the new question clears them, every game: 23 Nov, the owner) */}
-          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? "Change flag" : g.key === "see" ? "Change picture" : g.key === "pin" ? "Change landmark" : "Change question"}</button>}
+          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? "Change flag" : g.key === "see" ? "Change picture" : g.key === "pin" ? "Change landmark" : g.key === "airport" ? "Change board" : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>

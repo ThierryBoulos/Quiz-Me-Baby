@@ -10,7 +10,7 @@ import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
 import { useSideways } from "../Side";
-import { closestRule1, flagRule1, pinRule1, showKm, showNum } from "@/lib/game";
+import { AIRPORT_CITY, airportRule1, closestRule1, flagRule1, pinRule1, showKm, showNum } from "@/lib/game";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
@@ -47,11 +47,12 @@ export function takes(pub: PubMany): { text: string; color: string } {
     if (!ok.length) return { text: "No comeback", color: "var(--color-ink-2)" };
     const who = ok.length === 1 ? T[ok[0]].name : `${ok.length} teams`;
     return { text: last ? `${who} make the comeback!` : `${who} still in it`, color: ok.length === 1 ? T[ok[0]].color : "var(--color-gold)" }; }
-  return takeText(w, T, pub.game?.key === "flag");
+  return takeText(w, T);
 }
 /* ...the words, the same in every setup (the 2-team host's reveal says it too: 22 Nov, the owner) */
-export function takeText(w: number[], T: { name: string; color: string }[], flag = false): { text: string; color: string } {
-  if (!w.length) return { text: flag ? "Nobody gets it" : "Nobody takes it", color: "var(--color-ink-2)" };
+/* (nobody: "Nobody gets it", every game, every setup: 23 Nov, the owner) */
+export function takeText(w: number[], T: { name: string; color: string }[]): { text: string; color: string } {
+  if (!w.length) return { text: "Nobody gets it", color: "var(--color-ink-2)" };
   if (w.length === 1) return { text: `${T[w[0]].name} take it`, color: T[w[0]].color };
   if (w.length === T.length) return { text: "Everyone takes it", color: "var(--color-gold)" };
   return { text: `${w.length} teams take it`, color: "var(--color-gold)" };
@@ -197,7 +198,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     /* the round's themes are in the gold band above ("4 questions – Science & Music"), not said again here (the owner, 31 Oct) */
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
     case "flag": return [flagRule1(pub.introSecs), fast, pay];
-    case "airport": return ["A departures board goes up. Captains type which airport it is.", fast, pay];
+    case "airport": return [airportRule1(pub.introSecs), AIRPORT_CITY, fast, pay];
     case "map": return ["A map with places marked. Captains type what they have in common.", fast, pay];
     /* (no "Wrong, nothing." where nothing is wrong, only further off: 23 Nov, the owner) */
     case "closest": return [closestRule1(pub.introSecs), `Closest guess first: ${per.replace(" Wrong, nothing.", "")}`, pay];

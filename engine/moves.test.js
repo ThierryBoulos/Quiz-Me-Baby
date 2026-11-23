@@ -25,7 +25,7 @@ test('flag: "a point each" is 1 each whatever the game is worth', () => {
   Q.play(g, { type:'flag/award', w:'split' });
   assert.deepEqual([g.teams[0].score, g.teams[1].score], [1, 1]);
   assert.deepEqual(g.flagGame.award, [1, 1]);
-  assert.equal(g.flagGame.verdict.note, 'Split — 1 point each.');
+  assert.equal(g.flagGame.verdict.note, 'Tied: a point each.');
 });
 
 test('flag: a 6–0 run ends early and pays the mini-game points', () => {

@@ -5,7 +5,7 @@
    the mini-game intro with its rules. One look everywhere. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
-import { closestRule1, flagRule1, pinRule1 } from "@/lib/game";
+import { AIRPORT_CITY, airportRule1, closestRule1, flagRule1, pinRule1 } from "@/lib/game";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -13,7 +13,7 @@ import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { COMEBACK_TITLE } from "@/lib/comeback";
 import { preloadWorld, type Mark } from "./PinMap";
-import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, T_MAP, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
+import { DISH_STEP, showKm, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, T_MAP, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -227,8 +227,11 @@ const tone = (st: string) => TONE.find(([r]) => r.test(st))?.[1] || "#ffd25a";
 export function Board({ air, size, flip }: { air?: Pub["airport"]; size: "tv" | "phone" | "small" | "reveal"; flip?: boolean }) {
   if (!air) return null;
   const tv = size === "tv", fs = tv ? 21 : size === "reveal" ? 18 : size === "small" ? 11 : 13;
+  /* (the flight column as wide as this board's longest number needs: "WN 1960" whole on a 360-wide phone, and the
+     cities keep their room on a board of short ones: 23 Nov) */
+  const fl = Math.max(0, ...air.board.map((r) => (r[3] || "").length)) > 6 ? "5.1em" : "4.4em";
   return (
-    <div className={"board" + (size === "reveal" ? " reveal" : "")} style={{ fontSize: fs }} role="table" aria-label="Departures board">
+    <div className={"board" + (size === "reveal" ? " reveal" : "")} style={{ fontSize: fs, ["--fl" as string]: fl }} role="table" aria-label="Departures board">
       <div className="board-title" style={{ fontSize: fs * 1.25 }}>
         <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5Z" /></svg>
         <bdi>{air.title}</bdi>
@@ -239,7 +242,8 @@ export function Board({ air, size, flip }: { air?: Pub["airport"]; size: "tv" | 
           <span className="b-dest" role="cell"><bdi>{r[2]}</bdi></span>
           <span className="b-flight" role="cell">{r[3]}</span>
           {tv && <span className="b-gate" role="cell">{r[4]}</span>}
-          <span className="b-status" role="cell" style={{ color: tone(r[1]) }}><bdi>{r[1]}</bdi></span>
+          {/* (a long one-word status, "Embarquement", a little smaller on a phone, so it never breaks mid-word: 23 Nov) */}
+          <span className="b-status" role="cell" style={{ color: tone(r[1]), fontSize: !tv && size !== "reveal" && !/\s/.test(r[1] || "") && (r[1] || "").length > 10 ? ".68em" : undefined }}><bdi>{r[1]}</bdi></span>
         </div>))}
     </div>);
 }
@@ -431,10 +435,11 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Closest pin: +1. The same distance? A point each. No pin? No point." },
       { text: `Best of ${n} takes ${pts}. Tied? One more, or a point each.` }];
     case "airport": return [
-      { text: `A departures board goes up: where its flights go, the airlines, the language on it. ${sec(t?.airport, T_AIRPORT)}.` },
-      { text: "Both captains type which airport it is, at the same time. The city is enough, except where it has more than one: then name the airport (Heathrow, not London)." },
-      { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
-      { text: `Best of ${n} takes ${pts}. ${level}` }];
+      /* (short, the same with or without a host, rule 1 and the city as with 3 to 8: 23 Nov, the owner) */
+      { text: airportRule1(t?.airport) },
+      { text: AIRPORT_CITY },
+      { text: "Guess it right: +1. Both right? A point each. Nobody? Nobody." },
+      { text: `Best of ${n} takes ${pts}. Tied? One more board, or a point each.` }];
     case "majority": return [
       { text: "Everyone plays on their own phone, captains too. The lists are fixed at Start.", warn: true },
       { text: `${n} questions, four answers, ${sec(t?.majority, T_MAJORITY)} each. One tap and it's locked. No answer counts as wrong.` },
