@@ -193,8 +193,9 @@ second free night repeats questions (the reason to buy). "Play without TV" stays
   per theme, and "Add your own questions". Nobody browses the bank.
 - **Locked content never leaves the server.** Today the TV downloads the whole bank with its answers. Instead:
   - the bank sits in a database table nobody's phone or TV can read (no read rule at all);
-  - at Start, a server function deals tonight's questions plus 3 spares per game (for "Change question";
-    the owner, 11 Nov), and the room gets only those; the TV asks the server for more if a night runs out;
+  - at Start, a server function deals tonight's questions plus 4 spares per game (for "Change question";
+    the owner, 11 Nov; 4, 23 Nov), and the room gets only those; when a game's spares run out, the TV asks the server
+    for another batch on the spot (the same level first: Guess the Flag, 23 Nov);
   - answers stay on the server and the server judges (section 2, decision 1), so even tonight's answers never
     reach a phone before the reveal;
   - a cap of 10 rooms a day per account (or free player): generous, since people open a room, change their mind
