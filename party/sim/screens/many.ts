@@ -111,6 +111,12 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
       make("allcalled", Array.from({ length: k }, (_, u) => 1 + ((u - 1 + k) % k)));
       make("allfooled", Array.from({ length: k }, (_, u) => (u === 0 ? 0 : 1)));
     }
+    /* the night's card with the furthest pin on it (23 Nov, the owner: as with 2 teams), its landmark the longest */
+    { const fk = Object.keys(got).find((x) => x.startsWith(`m${k}.final`)), fin = fk ? (got[fk] as { pub: Q }) : undefined;
+      if (fin?.pub.final?.awards?.length) { const c = JSON.parse(JSON.stringify(fin)), A = c.pub.final.awards as Q[];
+        const far = { t: "Furthest pin", who: `${longNames[k - 1]}, 12,345 km off`, team: k - 1, note: "Borobudur (Near Magelang, Central Java, Indonesia)" };
+        c.pub.final.awards = [...A.filter((a) => !a.spoon).slice(0, 3), far, ...A.filter((a) => a.spoon)].slice(0, 5);
+        got[`m${k}.final.extra.far.a`] = c; } }
   }
   return got;
 }

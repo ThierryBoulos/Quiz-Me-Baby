@@ -370,6 +370,26 @@ async function kinds(k, phone, tag) {
   check(`${tag} Pictures: only Celebrities on: every picture is one`, (m?.qs || []).length > 0 && got.join() === "face", got.join(", "));
 }
 
+/* ---------- Drop the Pin: time's up (23 Nov, the owner, as with 2 teams) ---------- */
+/* one captain locks in, one drops a pin but never locks it in (it counts where it is, and the TV says so), the rest
+   drop nothing (no pin, no point, no message for them) */
+async function pin(k, phone, tag) {
+  await setup(k, phone, ["pin"], 5); await judge("m/start");
+  await tick(8000);
+  check(`${tag} Pin: the landmark is up`, pub().screen === "q" && mini()?.key === "pin", pub().screen);
+  const q = mini().qs[mini().i], kq = `${pub().qid}|q`;
+  send("c0", "answer", { pin: { lat: q.lat + 1, lon: q.lon }, k: kq });
+  send("c1", "draft", { k: kq, text: "", pin: { lat: q.lat + 2, lon: q.lon }, seq: 1 });
+  await tick(1500);
+  await tick((pub().deadline - clock()) + 400);
+  await tick(1100);
+  const sv = saved();
+  check(`${tag} Pin: time up, the reveal`, pub().screen === "reveal", pub().screen);
+  check(`${tag} Pin: the pin dropped but not locked in counts`, !!sv.pins?.[1] && Math.abs(sv.pins[1].lat - (q.lat + 2)) < 1e-6, JSON.stringify(sv.pins?.[1]));
+  check(`${tag} Pin: the teams that dropped nothing have no pin`, Array.from({ length: k - 2 }, (_, i) => sv.pins?.[i + 2]).every((x) => !x), JSON.stringify(sv.pins));
+  check(`${tag} Pin: the TV says the unlocked pin counts`, (pub().toast?.text || "").startsWith("Time's up: ") && /pin counts where it is\.$/.test(pub().toast?.text || ""), pub().toast?.text);
+}
+
 /* ---------- The comeback (17 Nov, the owner) ---------- */
 /* the TV, 3-8 teams, with a TV and with the game phone: its questions dealt (not when the Setup switched it off), it
    comes at the middle of a massacre, 15 seconds a question, only the captains in it answer, the host can't be
@@ -463,7 +483,7 @@ async function net(k, phone, tag) {
 export async function run(only) {
   for (const k of [3, 4, 5, 6, 7, 8]) for (const phone of [false, true]) {   // (every count, 19 Nov review: 4 to 7 never ran through the real referee)
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["net", net]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["pin", pin], ["net", net]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }

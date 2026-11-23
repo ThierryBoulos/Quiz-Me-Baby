@@ -822,8 +822,10 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        Anything else waits for the TV, and says so. */
     if (kind !== "answer" && s.tvAway) return (phoneRef.current ? "The game phone's screen was asleep. Tap again." : "The TV's screen was asleep. Tap again.");
     if (kind !== "answer" && s.paused) return "The game is paused.";
-    /* (Drop the Pin and Guess the Airport: both in would be the reveal, so not while the host has paused it, 23 Oct) */
-    if (s.paused && (sc === "pinQ" || sc === "airportQ" || sc === "seeQ" || sc === "foolWrite" || sc === "foolPick" || sc === "comebackQ")) return "The game is paused.";
+    /* (What Do You See?, Fool Me Twice and the Comeback: not while paused. Drop the Pin and Guess the Airport: a pin or
+       answer that lands while paused is kept, and the reveal waits for Resume, as with 3 to 8 teams: 23 Nov, the owner;
+       till then refused, 23 Oct) */
+    if (s.paused && (sc === "seeQ" || sc === "foolWrite" || sc === "foolPick" || sc === "comebackQ")) return "The game is paused.";
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
@@ -949,7 +951,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.pins[team]) return `${poss(nm(team))} pin is already in.`;
       if (!pin) return "That pin didn't come through. Drop it again.";
       s.pins[team] = pin;
-      if (s.pins[0] && s.pins[1]) reveal();
+      if (s.pins[0] && s.pins[1] && !s.paused) reveal();
       return true;
     }
     /* What Do You See? (12 Nov, the owner: a buzzer): only the team that buzzed answers, once, and the app checks it the
@@ -1727,6 +1729,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
       /* both answers came in while paused: the reveal, now that the game runs again */
       if (!s.paused && ["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(s.screen) && s.typed[0] && s.typed[1]) { reveal(); changed = true; }
+      if (!s.paused && s.screen === "pinQ" && s.pins[0] && s.pins[1]) { reveal(); changed = true; }
       /* time's up (a moment after the clock shows 0, see T_GRACE_MS): first, what was typed but not sent goes in */
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };

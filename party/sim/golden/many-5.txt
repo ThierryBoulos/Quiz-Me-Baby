@@ -44,4 +44,4 @@ summary pin award 6,10,8,5,4 | summary | 28-33-28-22-25
 next game | final | 28-33-28-22-25
 final 1:Team B 2:Team A 2:Team C 4:Team E 5:Team D
 majority: Most right: P2 & P14, 8 of 10. Least right: 5 players, 3 of 10.
-awards: Always the bridesmaid: Team C, 2nd on 7 questions | Best aim, Drop the Pin: Team C, 493 km off on average | Sharpest in Majority Rules: P2 & P14, 8 of 10 | Least right, Majority Rules: 5 players, 3 of 10
+awards: Always the bridesmaid: Team C, 2nd on 7 questions | Best aim, Drop the Pin: Team C, 493 km off on average | Furthest pin: Team E, 1,249 km off | Sharpest in Majority Rules: P2 & P14, 8 of 10 | Least right, Majority Rules: 5 players, 3 of 10

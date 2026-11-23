@@ -1,6 +1,6 @@
 /* 3-8 teams, the real referee (lib/many/useTvMany.ts) through reloads, sleeps and takeovers: sim/manytv.jsx.
    Run: node sim/manytv.mjs            every check
-        node sim/manytv.mjs roulette   one game's (see, stakes, majority, roulette) */
+        node sim/manytv.mjs roulette   one game's (see, stakes, majority, roulette, fool, pin, ...) */
 import { build } from "esbuild";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";

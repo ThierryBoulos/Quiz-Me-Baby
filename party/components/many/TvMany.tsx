@@ -189,11 +189,12 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         </>)}
         {pub.screen === "q" && g && g.key === "pin" && (
           <div className="flex gap-12 items-center w-full justify-center">
-            <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={430} credit /></div>
-            <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
+            {/* (the 2-team sizes up to four teams; names up to four, dots from five: 23 Nov, the owner) */}
+            <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={dense ? 430 : 460} credit /></div>
+            <div className="w-[360px] shrink-0 flex flex-col items-center gap-5">
               <div className="display text-44" style={{ color: "var(--color-gold)" }}>Where is this?</div>
-              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-              <Sent pub={pub} column />
+              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 120 : 130} />
+              <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
         {pub.screen === "q" && g && g.key === "majority" && pub.options && (<>
@@ -255,7 +256,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <div className="flex gap-10 items-center w-full">
             <div className="flex-1 min-w-0"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
               ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
-              fly height={430} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
+              fly height={dense ? 430 : 490} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
             <div className="w-[400px] shrink-0 flex flex-col items-center gap-3">
               <div className="eyebrow text-18">It&rsquo;s here</div>
               <div className="ans-board display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.answer}</div>

@@ -18,7 +18,7 @@ import { RepeatSheet } from "./RepeatSheet";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChips";
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
 import { RR_SETUP } from "@/lib/roulette";
-import { closestSetupLine, flagSetupLine } from "@/lib/game";
+import { closestSetupLine, flagSetupLine, pinSetupLine } from "@/lib/game";
 import { SEE_SETUP } from "@/lib/see";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; lifelines?: boolean; comeback?: boolean;
@@ -89,7 +89,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   const [rounds, setRounds] = useDraft(code, "two.rounds", 6);
   const [difficulty, setDiff] = useDraft<string>(code, "two.difficulty", QMB.DEFAULT_DIFF);
   const [themes, setThemes] = useDraft<string[] | null>(code, "two.themes", null);
-  const [minis, setMinis] = useDraft<string[]>(code, "two.minis", ["flag", "closest", "auction", "see", "battle"]);   // (Russian Roulette off to start with, as with 3 to 8 teams: 22 Nov, the owner)
+  const [minis, setMinis] = useDraft<string[]>(code, "two.minis", ["flag", "closest", "auction", "pin", "see", "battle"]);   // (Russian Roulette off to start with, Drop the Pin on, as with 3 to 8 teams: 22 and 23 Nov, the owner)
   const [comeback, setComeback] = useDraft(code, "two.comeback", true);
   const [mapLevels, setMapLevels] = useDraft<string[]>(code, "two.mapLevels", ["easy", "medium"]);   // (mini-games start at Easy and Medium: the owner, 16 Nov)
   const [flagLevels, setFlagLevels] = useDraft<string[]>(code, "two.flagLevels", ["veasy", "easy", "medium", "hard"]);   // a mix, Very easy to Hard
@@ -268,7 +268,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{name}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? flagSetupLine(timers?.tFlag) : k === "closest" ? closestSetupLine(timers?.tMini) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? flagSetupLine(timers?.tFlag) : k === "closest" ? closestSetupLine(timers?.tMini) : k === "pin" ? pinSetupLine(timers?.tPin) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

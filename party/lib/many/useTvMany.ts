@@ -580,10 +580,14 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (!s.deadline) return "done";
     if (Date.now() < s.deadline + T_GRACE_MS) { if (graced.current !== s.deadline) { graced.current = s.deadline; publish(); } return "wait"; }
     const m = miniOf(s), k = `${qidOf(s)}|q`;
+    const pinned: number[] = [];
     if (m && m.key !== "majority" && m.key !== "see") Object.entries(drafts.current).forEach(([t, d]) => {
       if (d.k !== k || (!d.text && !d.pin)) return;
-      captainAnswer(s, Number(t), m.key === "closest" ? { n: d.text } : m.key === "pin" ? { pin: d.pin } : { text: d.text });
+      const r = captainAnswer(s, Number(t), m.key === "closest" ? { n: d.text } : m.key === "pin" ? { pin: d.pin } : { text: d.text });
+      if (m.key === "pin" && r === true) pinned.push(Number(t));
     });
+    /* a pin dropped but not locked in counts, and the TV says so, as with 2 teams (23 Nov, the owner) */
+    if (pinned.length) s.toast = { id: ++s.toastN, text: pinned.length === 1 ? `Time's up: ${poss(s.teams[pinned[0]].name)} pin counts where it is.` : `Time's up: ${pinned.length} pins count where they are.` };
     drafts.current = {};
     return "done";
   };

@@ -77,7 +77,13 @@ function awardsOf(s: TvState, steals: Two<number>, best: NonNullable<Pub["recap"
   const b = g.battle;
   if (b?.done && b.winner != null) A.battle = { t: "Battle of the Captains", who: `${g.teams[b.winner].captain || nm(b.winner)}, ${b.score[b.winner]} of ${b.n}`, team: b.winner };
   const pg = g.pinGame;
-  if (pg?.done && pg.km && pg.km[0] !== pg.km[1]) { const t = pg.km[0] < pg.km[1] ? 0 : 1; A.aim = { t: "Best aim, Drop the Pin", who: `${nm(t)}, ${Math.round(pg.km[t]).toLocaleString("en")} km off in all`, team: t }; }
+  /* the closest on average, among teams that pinned at least half the landmarks (23 Nov, the owner: as with 3 to 8) */
+  if (pg?.done && pg.subs?.length) {
+    const subs = pg.subs as G[], half = Math.ceil(subs.length / 2);
+    const avg = ([0, 1] as const).map((t) => { const L = subs.map((x) => x.km?.[t]).filter((k): k is number => k != null); return L.length >= half ? L.reduce((a, b) => a + b, 0) / L.length : Infinity; });
+    const lo = Math.min(...avg);
+    if (Number.isFinite(lo) && avg[0] !== avg[1]) { const t = avg[0] < avg[1] ? 0 : 1; A.aim = { t: "Best aim, Drop the Pin", who: `${nm(t)}, ${lo < 1 ? "under 1 km" : Math.round(lo).toLocaleString("en") + " km"} off on average`, team: t }; }
+  }
   /* the furthest pin of the night (500 km off or more) */
   { let far = 0, ft: 0 | 1 = 0, fq: G = null;
     for (const sub of (pg?.subs || []) as G[]) ([0, 1] as const).forEach((t) => { const km = sub.km?.[t]; if (km != null && km > far) { far = km; ft = t; fq = sub.q; } });

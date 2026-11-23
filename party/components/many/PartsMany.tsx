@@ -10,7 +10,7 @@ import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
 import { useSideways } from "../Side";
-import { closestRule1, flagRule1, showKm, showNum } from "@/lib/game";
+import { closestRule1, flagRule1, pinRule1, showKm, showNum } from "@/lib/game";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
@@ -75,7 +75,7 @@ export const byDistance = (pub: PubMany) => {
 };
 
 /* what one go of a game is called, in plain words (no "leg": the reviewers, 31 Oct): "Flag 3 of 10", "Recipe 2 of 5" */
-export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", comeback: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Place", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
+export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", comeback: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Landmark", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
 export const unitOf = (key: string) => UNIT[key] || "Question";
 /* Secret Stakes' reveal: a row's points start up 150 ms after the row comes in, and reach the total about 1 s later
    (78% of the 1.3 s flight in globals.css), when the total rolls */
@@ -201,7 +201,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     case "map": return ["A map with places marked. Captains type what they have in common.", fast, pay];
     /* (no "Wrong, nothing." where nothing is wrong, only further off: 23 Nov, the owner) */
     case "closest": return [closestRule1(pub.introSecs), `Closest guess first: ${per.replace(" Wrong, nothing.", "")}`, pay];
-    case "pin": return ["A photo of a famous place. Captains drop a pin on the map where they think it is.", `Closest pin first: ${per.replace(" Wrong, nothing.", "")}`, pay];
+    case "pin": return [pinRule1(pub.introSecs), `Closest pin first: ${per.replace(" Wrong, nothing.", "")}`, pay];
     case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
       `No points if you say the app's secret answer, or the same as another team. Any other answer gets ${k} points.`, pay];
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
@@ -235,7 +235,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const g = pub.game, tv = size === "tv";
   if (!g) return null;
   /* how many, in plain words ("5 questions", "10 flags"): no "Best of", every one counts */
-  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "places", say: "questions", dish: "recipes", see: "pictures", fool: "facts", roulette: "spins", stakes: "rounds" } as Record<string, string>)[g.key] || "questions"}`;
+  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "landmarks", say: "questions", dish: "recipes", see: "pictures", fool: "facts", roulette: "spins", stakes: "rounds" } as Record<string, string>)[g.key] || "questions"}`;
   /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */

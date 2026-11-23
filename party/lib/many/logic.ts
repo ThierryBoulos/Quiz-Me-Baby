@@ -79,7 +79,7 @@ export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: n
   unit?: number; net?: number[]; log?: { i: number; themes: string[]; picks: SkPick[]; ok: boolean[]; bet: number[]; delta: number[]; before: number[] }[] };
 /* the night's numbers for the awards: legs placed 1st and 2nd, the fastest right flags, Drop the Pin's km
    (and how many pins), the run of 1st places now (on fire at 3; a new game starts cold) and the best run */
-export type Stats = { firsts: number[]; seconds: number[]; fastest: number[]; km: number[]; kmN: number[]; run: number[]; best: number[] };
+export type Stats = { firsts: number[]; seconds: number[]; fastest: number[]; km: number[]; kmN: number[]; run: number[]; best: number[]; far?: { km: number; team: number; note?: string } };
 export type Screen = "intro" | "pick" | "q" | "reveal" | "summary" | "final";   // pick: Secret Stakes' bets; Fool Me Twice's picks (after "q", the lies)
 export type StateM = {
   v: 2; teams: TeamM[]; minis: MiniM[]; mi: number; screen: Screen; step: number;
@@ -154,7 +154,7 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
   const extra: Partial<Record<ManyKey, Q[]>> = {};
   /* (Guess the Flag and What Do You See? keep 40 of the spares dealt past the game, every level mixed, so Change flag
      or picture finds one at the same level, as with 2 teams: 23 Nov. The TV holds the bank anyway; the phones never get the answers) */
-  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" ? 40 : 4));
+  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" || key === "pin" ? 40 : 4));
   extra.comeback = (decks.comeback || []).slice(MANY_LEGS.comeback);
   /* (a question round's Change question stays in the question's theme: the rounds' spares, then the questions held
      back past sudden death's, one pair per theme in turn: 19 Nov review, a Science question became Geography) */
@@ -205,10 +205,10 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   }
   /* Guess the Flag and What Do You See?: a spare at the same level, else another level, as with 2 teams (23 Nov, the
      owner) */
-  if (m.key === "flag" || m.key === "see") {
+  if (m.key === "flag" || m.key === "see" || m.key === "pin") {
     const L = s.extra?.[m.key] || [], j = QMB.spareAt(L, qOf(s)?.level) as number;
-    if (j < 0) return m.key === "flag" ? "No other flag left at this level." : "No other picture left at these levels.";
-    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, m.key === "flag" ? "New flag." : "New picture."); return true;
+    if (j < 0) return m.key === "flag" ? "No other flag left at this level." : m.key === "see" ? "No other picture left at these levels." : "No other landmark left at these levels.";
+    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, m.key === "flag" ? "New flag." : m.key === "see" ? "New picture." : "New landmark."); return true;
   }
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t);
@@ -470,7 +470,7 @@ export function legWinners(s: StateM): number[] {
   if (m.key === "fool") { const F = s.fool; return F ? s.teams.map((_, t) => t).filter((t) => F.picks[t] != null && !!F.opts[F.picks[t]!]?.truth) : []; }
   if (typedKey(m.key)) return s.ok.map((v, t) => (v ? t : -1)).filter((t) => t >= 0);
   const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer))))
-    : m.key === "pin" ? s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null)) : [];
+    : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q) as number) : null)) : [];   // (to the km, as with 2 teams: 23 Nov)
   if (m.key === "majority") return [];
   const best = Math.min(...d.filter((x): x is number => x != null));
   return Number.isFinite(best) ? d.map((x, t) => (x != null && Math.abs(x - best) < 1e-9 ? t : -1)).filter((t) => t >= 0) : [];
@@ -494,7 +494,7 @@ export function legPlaces(s: StateM): (number | null)[] {
   if (m.key === "fool") return placesBy((foolRes(s)?.pts || []).map((p) => (p > 0 ? -p : null)));   // (the most points on this fact first)
   if (m.key === "roulette") return placesBy(rrGot(q, m.pts, s.ok).map((g) => (g > 0 ? -g : null)));   // (the most this lap: the bullet right first)
   if (typedKey(m.key)) return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? Number.MAX_SAFE_INTEGER : null)));
-  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer)))) : s.pins.map((p) => (p ? QMB.kmBetween(p, q) as number : null));
+  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer)))) : s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q) as number) : null));
   return placesBy(d);
 }
 /* ...and what they pay this game's tally: 1st as many points as there are teams, one less a place, down to 1 */
@@ -661,7 +661,9 @@ export function next(s: StateM, now: number, t: Timers) {
         if (p === 1) { S.firsts[i]++; S.run[i]++; S.best[i] = Math.max(S.best[i], S.run[i]); } else S.run[i] = 0;
         if (p === 2) S.seconds[i]++;
         if (p === 1 && m.key === "flag") S.fastest[i]++;
-        if (m.key === "pin" && s.pins[i] && q) { S.km[i] += QMB.kmBetween(s.pins[i]!, q) as number; S.kmN[i]++; }
+        if (m.key === "pin" && s.pins[i] && q) { const km = QMB.kmBetween(s.pins[i]!, q) as number; S.km[i] += km; S.kmN[i]++;
+          /* the furthest pin of the night, as with 2 teams (23 Nov, the owner) */
+          if (km > (S.far?.km ?? 0)) S.far = { km, team: i, note: q.answer ? (q.place ? `${q.answer} (${q.place})` : String(q.answer)) : undefined }; }
       });
       /* What Do You See?: how fast each team's right buzzes came, all told (teams tied on pictures: the faster first) */
       if (m.key === "see") { m.fast = m.fast || n(s.teams.length); m.got = m.got || s.teams.map(() => []);
@@ -671,7 +673,7 @@ export function next(s: StateM, now: number, t: Timers) {
         s.typed.forEach((x, i) => { if (x != null && String(x).trim()) m.words![i].push({ w: String(listWord(x, q) ?? x).trim().slice(0, 40), ok: !!s.ok[i] }); }); }
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
       /* (Guess the Flag and Closest To Wins: no line on the next one, as with 2 teams: the reveal's headline said it, 23 Nov, the owner) */
-      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
+      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see" && m.key !== "pin") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
         : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} take it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
     }
     m.i++;
@@ -744,6 +746,7 @@ export function recapMany(s: StateM): AwardM[] {
   if (has("pin")) {
     const legs = s.minis.find((m) => m.key === "pin")!.qs.length, avg = T.map((_, i) => (S.kmN[i] >= Math.ceil(legs / 2) ? S.km[i] / S.kmN[i] : Infinity));
     const lo = Math.min(...avg); if (Number.isFinite(lo) && avg.filter((x) => x === lo).length === 1) { t = avg.indexOf(lo); out.push({ t: "Best aim, Drop the Pin", who: `${nm(t)}, ${lo < 1 ? "under 1 km" : Math.round(lo).toLocaleString("en") + " km"} off on average`, team: t }); }
+    const f = S.far; if (f && f.km >= 500) out.push({ t: "Furthest pin", who: `${nm(f.team)}, ${Math.round(f.km).toLocaleString("en")} km off`, team: f.team, note: f.note });
   }
   /* Majority Rules' players, one by one (the owner, 30 Oct: these over the flag and streak cards): the sharpest and the
      wooden spoon, shared by up to three, more than that counted */
@@ -761,5 +764,7 @@ export function recapMany(s: StateM): AwardM[] {
     if (has("flag") && (t = topOf(S.fastest, 2)) != null) out.push({ t: "Fastest fingers, Guess the Flag", who: `${nm(t)}, first right ${S.fastest[t]} times`, team: t });
     if ((t = topOf(S.best, 3)) != null) out.push({ t: "Hot streak", who: `${nm(t)}, ${S.best[t]} in a row`, team: t });
   }
-  return out.slice(0, 5);
+  /* five at most; the wooden spoon always ends the card, so with too many the furthest pin goes first */
+  if (out.length > 5) { const f = out.findIndex((a) => a.t === "Furthest pin"); if (f >= 0) out.splice(f, 1); }
+  return out.length > 5 && out[out.length - 1].spoon ? [...out.slice(0, 4), out[out.length - 1]] : out.slice(0, 5);
 }

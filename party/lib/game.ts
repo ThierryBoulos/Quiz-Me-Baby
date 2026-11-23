@@ -224,3 +224,6 @@ export const flagRule1 = (secs?: number) => `A flag goes up and captains have ${
 /* Closest To Wins' line on the setup screen and its first rule, every setup (23 Nov, the owner) */
 export const closestSetupLine = (secs?: number) => `Five number questions, ${secs ?? T_CLOSEST} seconds each: the closest guess wins.`;
 export const closestRule1 = (secs?: number) => `A question with a number for an answer. Captains have ${secs ?? T_CLOSEST} seconds to type their best guess.`;
+/* Drop the Pin's line on the setup screen and its first rule, every setup (23 Nov, the owner) */
+export const pinSetupLine = (secs?: number) => `Seven landmarks, ${secs ?? T_PIN} seconds each: drop a pin where it is.`;
+export const pinRule1 = (secs?: number) => `A photo of a landmark goes up. Captains have ${secs ?? T_PIN} seconds to drop a pin on the map where they think it is.`;

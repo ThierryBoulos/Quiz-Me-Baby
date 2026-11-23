@@ -45,7 +45,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
   const beat = BEAT_SCREENS.includes(pub.screen);
   /* a message shows for four seconds, then goes. Not the points or who took a leg: the screen itself shows those */
   const toastShown = useToastOn(pub.toast);
-  const said = / \+\d+ points?( — |$)| takes? (leg|map|flag|board|landmark|number|picture) \d+\.$| takes? the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Both got it — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
+  const said = / \+\d+ points?( — |$)| takes? (leg|map|flag|board|landmark|number|picture) \d+\.$| takes? the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Tied — a point each\.|No pins — no point\.|Both got it — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
   const toastOn = toastShown && !said;
   /* a map's question and its reveal are one screen: the map stays put and the answer comes in over it */
   const bodyKey = (pub.screen === "mapQ" || pub.screen === "mapReveal") && pub.map ? "map" + pub.map.id : key;

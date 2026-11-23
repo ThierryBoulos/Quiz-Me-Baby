@@ -128,7 +128,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
 
 const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
-const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: "Which flag?", closest: "Type a number. Nearest wins." };
+const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: "Which flag?", closest: "Type a number. Nearest wins.", pin: "Where is it? Drop your pin, then lock it in." };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -428,7 +428,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
           {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
           {/* (shown even once answers are in: the new question clears them, every game: 23 Nov, the owner) */}
-          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? "Change flag" : g.key === "see" ? "Change picture" : "Change question"}</button>}
+          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? "Change flag" : g.key === "see" ? "Change picture" : g.key === "pin" ? "Change landmark" : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
@@ -566,7 +566,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               {g.key !== "roulette" && g.key !== "closest" && <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? "One answer. No points for the app's secret answer, or the same word as another team." : "Once you send it, it’s locked."}</div>}
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
-        {!sentMine && sugs.length > 0 && g.key !== "pin" && (
+        {/* (Drop the Pin too: a teammate can say "near Rome?", as with 2 teams: 23 Nov, the owner) */}
+        {!sentMine && sugs.length > 0 && (
           <div className="card">
             <div className="eyebrow mb-2">Your team suggests. Tap one to use it.</div>
             <div className="flex flex-col gap-1">
@@ -593,7 +594,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
                 onClick={() => { buzzHand(40); setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
         </>); })()}
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
-        {spinning || (g.key === "see" && mine != null && pub.see?.out?.[mine]) ? null : mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) && !cbOut ? (
+        {spinning || (g.key === "see" && mine != null && pub.see?.out?.[mine]) ? null : mine != null && !pub.sent[mine] && !(g.only && !g.only.includes(mine)) && !cbOut ? (
           <div className="card flex flex-col gap-2">
             <label className="field-label !mb-0" htmlFor="msug">Suggest to {T[mine]?.captain || "your captain"}</label>
             <div className="flex gap-2">

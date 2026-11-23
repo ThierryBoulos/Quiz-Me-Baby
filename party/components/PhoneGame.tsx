@@ -274,6 +274,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="eyebrow" style={{ color: tc(t) }}>{label ?? T[t].name}</div>
       {text ? <div className="font-bold text-22 leading-snug">{text}</div> : <div className="text-14 text-[var(--color-ink-3)] mt-0.5">{empty}</div>}
     </div>);
+  /* the host's reveal: who takes it, big, as with 3 to 8 teams (23 Nov) */
+  const HostHead = () => { const w = pub.reveal?.w; const h = takeText(w === "tie" ? [0, 1] : w === 0 || w === 1 ? [w] : [], ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) }))); return <Big text={h.text} color={h.color} size={32} />; };
   /* who has answered, ticked as each team sends, and what it sent under its name (one card, every setup: 23 Nov) */
   const Who = ({ nums }: { nums?: boolean }) => { const typed = (t: 0 | 1) => nums ? (secret.guesses?.[t] != null ? [showNum(secret.guesses[t]!)] : null) : (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
     return <WhoAnswered head={`${[0, 1].filter((t) => pub.sent?.[t]).length} of 2 teams answered`} oneCol
@@ -457,7 +459,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <Who nums />
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change question" move={{ type: "closest/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
-    case "closestReveal": return <Results><Main label="Next" move={{ type: "ui/next" }} /></Results>;
+    case "closestReveal": return <Results><HostHead /><Main label="Next" move={{ type: "ui/next" }} /></Results>;
     case "flagQ": return (
       <div className="flex flex-col gap-3 flex-1">
         {/* (sideways, the picture and the clock go to the left column, so the host's calls fit on the right: the 4 Nov audit, 3.7) */}
@@ -524,17 +526,16 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>);
     case "pinQ": return (
       <div className="flex flex-col gap-3 flex-1">
-        <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Landmark {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        </ToSide>
-        <PinPhoto pin={pub.pin} h={150} small zoom />
+        {/* (as with 3 to 8 teams: the photo, the clock under it (beside it, held sideways), the answer, who has answered:
+           23 Nov, the owner) */}
+        <ToSide order={2}><div className={sideways ? "flex items-center justify-center gap-3" : "flex flex-col items-center gap-2"}>
+          <PinPhoto pin={pub.pin} h={sideways ? 110 : 230} small zoom />
+          <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sideways ? 64 : 90} /></div></div></ToSide>
         <AnswerCard />
-        <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
-          <div key={t} className="text-center">
-            <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
-            <div className="font-bold text-16 mt-0.5">{pub.sent?.[t] ? "Pin in" : "Placing…"}</div></div>))}</div>
-        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change landmark" move={{ type: "pin/swap" }} /></div>
+        <Who />
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change landmark" move={{ type: "pin/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
-    case "pinReveal": return <Results><Main label="Next" move={{ type: "ui/next" }} /></Results>;
+    case "pinReveal": return <Results><HostHead /><Main label="Next" move={{ type: "ui/next" }} /></Results>;
     case "majorityQ": { const M = pub.majority; return (
       <div className="flex flex-col gap-3 flex-1">
         <div className="flex items-center justify-between"><div className="eyebrow">Majority Rules · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
@@ -977,7 +978,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
   /* the mini-games' last column: the leg, to whoever takes it (both on a tie) */
   const leg = (t: 0 | 1, w: unknown) => (w === t || w === "tie" ? <span style={{ color: "var(--color-ok)" }}>✓</span> : <span style={{ color: "var(--color-ink-3)" }}>–</span>);
   /* (Guess the Flag: "the flag", not "the leg": 23 Nov, the owner) */
-  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill(sc === "flagReveal" ? "Your team takes the flag" : sc === "closestReveal" || sc === "seeReveal" ? "Your team takes it" : "Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
+  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill(sc === "flagReveal" ? "Your team takes the flag" : sc === "closestReveal" || sc === "seeReveal" || sc === "pinReveal" ? "Your team takes it" : "Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
     : w === "none" ? pill("Nobody gets it", "mid") : w === 0 || w === 1 ? pill("Not this time", "no") : null;
   const legW = (w: unknown) => (w === 0 || w === 1 ? w : null) as 0 | 1 | null;
   /* how your team did on this question, in one pill */
@@ -1057,7 +1058,10 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     {/* (the game so far is in the bar at the top: no second line saying it again, the owner, 1 Nov) */}</>); }
   if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (<>
     {P}
-    <ResultTable head={["Off by", "Leg"]} rows={([0, 1] as const).map((t) => row(t, R.pins[t] ? showKm(R.km[t] ?? 0) : "No pin", null, leg(t, w)))} /></>); }
+    {/* ("+1" in a Pts column, the closest first, as with 3 to 8 teams: 23 Nov, the owner) */}
+    {(() => { const km = (t: 0 | 1) => (R.pins[t] ? Math.round(R.km[t] ?? 0) : Infinity), took = (t: 0 | 1) => w === t || w === "tie";
+      const order = ([0, 1] as const).slice().sort((a, b) => km(a) - km(b) || a - b);
+      return <ResultTable head={["Off by", "Pts"]} places={order.some(took)} rows={order.map((t) => ({ ...row(t, R.pins[t] ? showKm(R.km[t] ?? 0) : "No pin", null, <Pts n={took(t) ? 1 : 0} />), place: took(t) ? 1 : R.pins[t] ? 2 : null }))} />; })()}</>); }
   if ((sc === "flagReveal" || sc === "seeReveal" || sc === "sayReveal" || sc === "mapReveal" || sc === "airportReveal") && pub.reveal) {
     const say = sc === "sayReveal", w = pub.reveal.w;
     const ok = (t: 0 | 1) => sc === "mapReveal" ? pub.map?.ruled?.[t] : pub.reveal?.ok?.[t];
@@ -1178,9 +1182,9 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
       /* the captain's phone: the photo beside the clock, so the map gets the room */
       ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
       : <PinPhoto pin={pub.pin} h={230} small zoom />)}
-    {pub.screen === "pinReveal" && pub.pin?.reveal && <PinMap marks={pinMarks(pub)} fly height={small ? 220 : 300} label={`Where it is: ${pub.pin.reveal.place}`} />}
-    {pub.screen === "pinReveal" && pub.pin?.reveal && <div className="text-center"><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.pin.reveal.name}</div>
-      <div className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pin.reveal.place}</div></div>}
+    {/* (as with 3 to 8 teams: the map, the landmark's name on its tile, its place as the fact: 23 Nov, the owner) */}
+    {/* (the host's map a little shorter, so who takes it shows above Next on a 360 by 780 phone; a team's phone has the side line) */}
+    {pub.screen === "pinReveal" && pub.pin?.reveal && <AnswerLine media={<div className="w-full"><PinMap marks={pinMarks(pub)} fly height={side ? 220 : 170} label={`Where it is: ${pub.pin.reveal.place}`} /></div>} answer={pub.pin.reveal.name} fact={pub.pin.reveal.place} />}
     {(pub.screen === "airportQ" || pub.screen === "airportReveal") && <Board air={pub.airport} size={small ? "small" : "phone"} />}
     {pub.screen === "rouletteQ" && pub.roulette && <RrPhone rr={pub.roulette} me={mine ?? null} teams={rr2(pub)} host={mine == null} />}
     {otherLine && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{otherLine}</p>}
