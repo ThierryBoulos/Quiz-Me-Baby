@@ -271,7 +271,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w, notes: q.notes };
     }
   }
-  if (s.screen === "flagReveal" && q) p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) };
+  /* (the fact behind the flag, when it has one: every phone and the TV, every setup: 23 Nov, the owner) */
+  if (s.screen === "flagReveal" && q) p.reveal = { answer: q.answer, ...(q.notes ? { notes: String(q.notes) } : {}), typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) };
   /* Drop the Pin: the photo alone, at every level (24 Oct: no name on the hard ones); at the reveal, where it is and both pins */
   if ((s.screen === "pinQ" || s.screen === "pinReveal") && q) {
     p.pin = { photo: q.photo, credit: q.credit, licence: q.licence };

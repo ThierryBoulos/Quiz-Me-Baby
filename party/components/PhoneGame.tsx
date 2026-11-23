@@ -3,7 +3,7 @@ import { twoDone } from "./TwoResults";
 import { useRevealHold, WatchTv } from "./WatchTv";
 import { useNoTv } from "./NoTv";
 import { NEXT_MOVES, WAITS_FOR_NEXT } from "@/lib/tv/rules";
-import { AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
+import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two, poss } from "@/lib/game";
 import type { Member } from "@/lib/room";
@@ -302,7 +302,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     return (
       <div key={t} className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
-          <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
+          {/* (each team by its lettered dot, as with 3 to 8 teams: 23 Nov) */}
+          <div className="eyebrow flex items-center gap-2" style={{ color: tc(t), letterSpacing: ".1em" }}><Dot t={t} color={tc(t)} size={14} /><span className="truncate"><bdi>{T[t].name}</bdi></span></div>
           {x ? <div className="font-bold text-18 leading-snug break-words">{x}</div> : <div className="text-14 text-[var(--color-ink-3)]">{empty}</div>}
           {x && v != null && app != null && v !== app && <div className="text-12 font-bold" style={{ color: v ? "var(--color-ok)" : "var(--color-no)" }}>You changed it: {verdictWord(v, say)}</div>}
           {sub?.(t)}
@@ -1057,8 +1058,9 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     if (headOnly && (host || !CARD_SCREENS.includes(sc))) return <>{top}</>;
     return (<>
       {top}
-      <ResultTable head={["Said", sc === "flagReveal" ? "Flag" : "Leg"]} rows={([0, 1] as const).map((t) => { const v = ok(t), x = pub.reveal?.typed?.[t]?.[0];
-        return row(t, x ?? (say ? "Nothing" : "No answer"), x ? v : null, leg(t, w),
+      {/* (Guess the Flag: the point each flag pays, "+1", in a Pts column, as with 3 to 8 teams: 23 Nov, the owner) */}
+      <ResultTable head={["Said", sc === "flagReveal" ? "Pts" : "Leg"]} rows={([0, 1] as const).map((t) => { const v = ok(t), x = pub.reveal?.typed?.[t]?.[0];
+        return row(t, x ?? (say ? "Nothing" : "No answer"), x ? v : null, sc === "flagReveal" ? <Pts n={w === t || w === "tie" ? 1 : 0} /> : leg(t, w),
           v == null && x ? "Waiting for a ruling" : say && x && !v ? (pub.reveal?.offList?.[t] ? "Not on the list" : "Said it") : undefined); })} /></>);
   }
   if (sc === "comebackReveal" && pub.reveal && pub.comeback) { const t = pub.comeback.teams[0] as 0 | 1, x = pub.reveal.typed?.[t]?.[0];
@@ -1139,7 +1141,9 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
     {/* the fact behind it, right under the answer */}
     {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
-    {(pub.screen === "flagQ" || pub.screen === "flagReveal") && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
+    {pub.screen === "flagQ" && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
+    {/* (the reveal as with 3 to 8 teams: the flag small, the answer on its tile, the fact under it: 23 Nov, the owner) */}
+    {pub.screen === "flagReveal" && pub.reveal && <AnswerLine media={<FlagImg name={pub.flag} h={96} />} answer={pub.reveal.answer} fact={pub.reveal.notes} />}
     {/* Fool Me Twice: the fact (at the reveal, with the truth in it); the answers while they pick (a captain picks from
         its own buttons, below); the reveal */}
     {/^fool(Write|Pick|Reveal)$/.test(pub.screen) && pub.fool && <div className="flex flex-col gap-2 w-full">
@@ -1183,7 +1187,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
       {pub.screen === "auctionRun" && !counting && <div className="display text-44 mt-1"><LiveN A={pub.auction} /> / {pub.auction.bid}</div>}
       {pub.screen === "auctionRun" && pub.auction.countedBy && <div className="text-13 text-[var(--color-ink-2)] mt-1">Counted by <b>{pub.auction.countedBy}</b></div>}</div>}
     {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
-    {pub.reveal && /Reveal$/.test(pub.screen) && !["mapReveal", "sayReveal", "pinReveal", "rouletteReveal"].includes(pub.screen) && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
+    {pub.reveal && /Reveal$/.test(pub.screen) && !["mapReveal", "sayReveal", "pinReveal", "rouletteReveal", "flagReveal"].includes(pub.screen) && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.screen === "seeReveal" && pub.see?.rev && (() => { const w = seeWho(pub.see, rr2(pub)); return <p className="display text-22 text-center -mt-1" style={{ color: w.color }}>{w.text}</p>; })()}
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.airport.cityOk === false && <span className="block mt-1 text-13 font-bold" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</span>}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
@@ -1299,7 +1303,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "comebackQ": { const t = pub.comeback?.teams[0] ?? 0;
       return t === mine ? (cap ? "Your question. Type your answer." : "Your captain is answering.") : `${T[t].name} are playing for a comeback.`; }
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
-    case "flagQ": return cap ? "Which country?" : "Guess the Flag: help your captain";
+    case "flagQ": return cap ? "Which flag?" : "Guess the Flag: help your captain";   // ("flag", not "country": not every flag is a country, 23 Nov, the owner)
     /* (12 Nov, the owner: any player can buzz, the captain types; pub.see.by: who hit BUZZ) */
     /* Fool Me Twice: write a lie, then find the truth */
     case "foolWrite": return pub.sent?.[mine] ? "Lie sent. Waiting for the others." : cap ? "Write a lie that sounds true." : "Help your captain write a lie that sounds true.";

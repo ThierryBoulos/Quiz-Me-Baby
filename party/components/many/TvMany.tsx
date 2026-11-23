@@ -223,6 +223,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {pub.screen === "reveal" && g && R && g.key === "flag" && (<>
           <FlagImg name={pub.flag} h={dense ? 120 : 220} maxW={dense ? 400 : 520} />
           <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 90, color: "var(--color-gold)" }}>{R.answer}</div>
+          {/* (the fact behind the flag, when it has one, as with 2 teams: 23 Nov, the owner) */}
+          {R.notes && <div className={(dense ? "text-18" : "text-22") + " text-[var(--color-ink-2)] text-center"}>{wholeSentences(R.notes, 120)}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}

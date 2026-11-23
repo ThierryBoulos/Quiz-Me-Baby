@@ -45,7 +45,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
   const beat = BEAT_SCREENS.includes(pub.screen);
   /* a message shows for four seconds, then goes. Not the points or who took a leg: the screen itself shows those */
   const toastShown = useToastOn(pub.toast);
-  const said = / \+\d+ points?( — |$)| takes? (leg|map|flag|board|landmark|number|picture) \d+\.$| takes? the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
+  const said = / \+\d+ points?( — |$)| takes? (leg|map|flag|board|landmark|number|picture) \d+\.$| takes? the tie-breaker\.$|^(Nobody got it\.|Tie — a point each\.|Both got it — a point each\.|Nobody answered — no point\.)$/.test(pub.toast?.text || "");
   const toastOn = toastShown && !said;
   /* a map's question and its reveal are one screen: the map stays put and the answer comes in over it */
   const bodyKey = (pub.screen === "mapQ" || pub.screen === "mapReveal") && pub.map ? "map" + pub.map.id : key;
@@ -436,6 +436,8 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     <FlagImg name={pub.flag} h={sc === "flagQ" ? 300 : 220} maxW={520} />
     {sc === "flagQ" ? (<><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} /><Sent pub={pub} /></>) : (<>
       <div className="ans-board display beat slam" style={{ ...QUICK, fontSize: 90, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
+      {/* (the fact behind the flag, when it has one: every setup, 23 Nov, the owner) */}
+      {pub.reveal?.notes && <div className="text-22 text-[var(--color-ink-2)] text-center">{wholeSentences(pub.reveal.notes, 120)}</div>}
       <TeamRows pub={pub} empty="No answer" />
       {/* who takes it, as with 3 to 8 teams (23 Nov, the owner) */}
       {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` })), true);

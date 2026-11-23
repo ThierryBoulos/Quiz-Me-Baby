@@ -16,7 +16,7 @@ const TWO: Record<string, string> = {
   auction: "Bid how many you can name, then name them against the clock.",
   saysame: "Give a real answer, but not the app's hidden word.",
   map: "A map with no title. Say what it shows.",
-  flag: "Name the country from its flag.",
+  flag: "Name the flag.",
   pin: "A landmark photo. Pin it on the world map.",
   airport: "A departures board. Name the airport.",
   majority: "Everyone plays on their own phone. Four options, one tap.",

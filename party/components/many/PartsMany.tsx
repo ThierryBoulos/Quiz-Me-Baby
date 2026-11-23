@@ -161,6 +161,13 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
               <Dot t={i} color={t.color} size={k > 5 && i !== me ? 14 : 10} />{(k <= 5 || i === me) && <bdi className="hs-nm">{t.name}</bdi>}<b>{num(i)}</b>
             </span>))}
         </div>)}
+      {/* during a game, this game's points, small, under the night's strip (as the 2-team phones show "This game": 23 Nov,
+         the owner); each team by its lettered dot, yours lit */}
+      {!tv && inGame && g.key !== "sudden" && g.key !== "comeback" && (
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-1.5 text-12" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}`).join(", ")}`}>
+          <span className="eyebrow text-[var(--color-ink-3)]" style={{ fontSize: 10 }}>This game</span>
+          {T.map((t, i) => <span key={i} className="flex items-center gap-1" style={{ opacity: me == null || i === me ? 1 : 0.75 }}><Dot t={i} color={t.color} size={12} /><b className="tabular-nums" style={{ color: i === me ? t.color : "var(--color-ink-2)" }}>{pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}</b></span>)}
+        </div>)}
       {/* (no "You're on <team>" line: your team is lit in its colour in the strip above (22 Nov, the owner)) */}
       {!tv && me == null && host && <div className="hud-mini"><span>You&rsquo;re the host</span></div>}
     </div>);
