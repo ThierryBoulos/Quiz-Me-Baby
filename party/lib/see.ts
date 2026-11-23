@@ -65,3 +65,6 @@ export function seeWinner(ok: Two<boolean | null>, at: Two<number | null>): 0 | 
 export const SEE_SETUP = "12 pictures: a face, a logo or a close-up, getting clearer. Buzz first and get it right to take it.";
 export const SEE_RULE1 = "A picture goes up, blurred or zoomed right in, and gets clearer as the clock runs: a famous face, a logo, or a close-up.";
 export const SEE_RULE2 = "Know it? Hit BUZZ: anyone on the team can. The picture stops, and you have 10 seconds to say it out loud while your captain types it.";
+/* the fact behind a picture: only for famous faces and logos, never for a close-up (food, objects, animals), and never
+   on the host's phone (23 Nov, the owner) */
+export const seeNotes = (q: { kind?: string; notes?: unknown } | null | undefined) => (q && (q.kind === "face" || q.kind === "logo") && q.notes ? String(q.notes) : undefined);

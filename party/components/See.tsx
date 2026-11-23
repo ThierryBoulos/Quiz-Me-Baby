@@ -146,12 +146,13 @@ export function SeeTicks({ teams, out, buzz, size = 22, column }: { teams: SeeTe
   /* (names up to four teams, lettered dots from five, as every team list on the TV: 23 Nov, the owner) */
   const many = teams.length > 4;
   return (
-    <div className={"flex flex-wrap justify-center " + (column ? "flex-col items-center gap-1" : many ? "gap-x-5 gap-y-2" : "gap-x-10 gap-y-2")} role="status" aria-live="polite">
+    <div className={"flex flex-wrap justify-center " + (column ? "flex-col items-center gap-1 w-full" : many ? "gap-x-5 gap-y-2" : "gap-x-10 gap-y-2")} role="status" aria-live="polite">
+      {/* (a long name on one line, cut short with "…": 23 Nov, the owner) */}
       {teams.map((t, i) => (
-        <span key={i} className="flex items-center gap-2 font-bold" style={{ fontSize: size }}>
+        <span key={i} className="flex items-center gap-2 font-bold max-w-full min-w-0 whitespace-nowrap" style={{ fontSize: size }}>
           <span className="dot ltr shrink-0" aria-hidden style={{ background: t.color, width: size * 1.25, height: size * 1.25, fontSize: size * 0.7 }}>{t.letter}</span>
-          {!many && <bdi style={{ color: t.color }}>{t.name}</bdi>}
-          <span style={{ color: out?.[i] ? NO : buzz === i ? OK : "var(--color-ink-3)" }}>{out?.[i] ? "✗ out" : buzz === i ? "buzzed!" : many ? "…" : "thinking…"}</span>
+          {!many && <bdi className="truncate min-w-0" style={{ color: t.color }}>{t.name}</bdi>}
+          <span className="shrink-0" style={{ color: out?.[i] ? NO : buzz === i ? OK : "var(--color-ink-3)" }}>{out?.[i] ? "✗ out" : buzz === i ? "buzzed!" : many ? "…" : "thinking…"}</span>
         </span>))}
     </div>);
 }

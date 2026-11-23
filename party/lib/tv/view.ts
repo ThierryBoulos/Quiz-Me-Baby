@@ -10,7 +10,7 @@ import { callsOf, closestW, currentQ, fireOf, leadOf, matchQ, mrTally, okWin, pi
 import { recap } from "./recap";
 import { rrGot, rrPub, rrQ, rrSpins, type RrLap } from "../roulette";
 import { skKey, skPub, skQ, skResult, type SkGame } from "../stakes";
-import { SEE_TYPE, sePic, seeWinner } from "../see";
+import { SEE_TYPE, seeNotes, sePic, seeWinner } from "../see";
 import type { TvState } from "./state";
 import { COMEBACK_TITLE } from "../comeback";
 
@@ -119,7 +119,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   /* a question only a person can judge: the app has no call to suggest */
   const judged = !!q && hostOnly(q);
   const secret: Secret = { step: s.step, typed: s.typed, match: judged ? [null, null] : [matchQ(s.typed[0], q), matchQ(s.typed[1], q)], guesses: s.guesses };
-  if (q) { p.qid = secret.qid = qk(s, q.id); secret.answer = q.answer; secret.notes = q.notes; secret.accept = acceptFor(q).slice(0, 8); if (aboutHost(q)) secret.you = true; }
+  if (q) { p.qid = secret.qid = qk(s, q.id); secret.answer = q.answer; secret.notes = /^see/.test(s.screen) ? undefined : q.notes; secret.accept = acceptFor(q).slice(0, 8); if (aboutHost(q)) secret.you = true; }
   if (rd) {
     p.first = QMB.seatTeam(g, rd, 0, seatOf(g));
     p.dbl = [...rd.dbl] as Two<boolean>;
@@ -267,8 +267,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       p.see.buzz = s.seeBuzz; p.see.by = s.seeBuzz != null ? s.seeBy : null; p.see.typeBy = s.seeBuzz != null && s.buzzAt && !s.typed[s.seeBuzz] ? s.buzzAt + SEE_TYPE * 1000 : null; }
     if (s.screen === "seeReveal") {
       const w = seeWinner(s.ok, s.seeAt);
-      p.see.rev = { answer: q.answer, notes: q.notes || undefined, credit: q.credit, licence: q.licence, who: w === "none" ? null : w, ms: w === "none" ? null : s.seeAt[w], at: [...s.seeAt] };
-      p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w, notes: q.notes };
+      p.see.rev = { answer: q.answer, notes: seeNotes(q), credit: q.credit, licence: q.licence, who: w === "none" ? null : w, ms: w === "none" ? null : s.seeAt[w], at: [...s.seeAt] };
+      p.reveal = { answer: q.answer, typed: s.typed, ok: s.ok, app: s.app, w, notes: seeNotes(q) };
     }
   }
   /* (the fact behind the flag, when it has one: every phone and the TV, every setup: 23 Nov, the owner) */

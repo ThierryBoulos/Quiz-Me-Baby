@@ -7,7 +7,7 @@ import { acceptFor, revOf } from "../engine";
 import type { IntroPub } from "../intro";
 import { rrPub, rrQ, rrSpins, type RrLap, type RrPub } from "../roulette";
 import { skPub, type SkGame, type SkPub } from "../stakes";
-import { SEE_TYPE, sePic, type SePub } from "../see";
+import { SEE_TYPE, seeNotes, sePic, type SePub } from "../see";
 import { QMB } from "../engine";
 import { skQm } from "./logic";
 import { foolSum, type FoolPub, type FoolSum } from "../fool";
@@ -138,7 +138,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
       pub.see = { ...sePic(q), total: s.total || 20, n: m.i + 1, of: m.qs.length, out: s.teams.map((_, t) => !!s.out?.[t]) };
       if (!rev) { pub.see.buzz = s.buzz ?? null; pub.see.by = s.buzz != null ? s.buzzBy ?? null : null; pub.see.typeBy = s.buzz != null && s.buzzAt ? s.buzzAt + SEE_TYPE * 1000 : null; pub.out = pub.see.out; }
       if (rev) { const pl = legPlaces(s), w = pl.indexOf(1), ms = s.ms || [];
-        pub.see.rev = { answer: q.answer, notes: q.notes || undefined, credit: q.credit, licence: q.licence, who: w >= 0 ? w : null, ms: w >= 0 ? ms[w] ?? null : null, at: s.teams.map((_, t) => ms[t] ?? null) };
+        pub.see.rev = { answer: q.answer, notes: seeNotes(q), credit: q.credit, licence: q.licence, who: w >= 0 ? w : null, ms: w >= 0 ? ms[w] ?? null : null, at: s.teams.map((_, t) => ms[t] ?? null) };
         pub.out = s.teams.map((_, t) => !!s.out?.[t] && !s.ok[t]); }
     }
     else pub.question = q.question;
@@ -159,7 +159,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     else if (m.key === "roulette") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (m.key === "stakes") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, places: s.teams.map(() => null), pts: pub.stakes?.rev?.delta || [] };
     else if (m.key === "fool") pub.reveal = { answer: q.answer, notes: q.notes || undefined, winners: w, ...pl };
-    else if (typedKey(m.key)) pub.reveal = { answer: q.answer, notes: q.notes || (m.key === "airport" ? [q.city, q.code].filter(Boolean).join(", ") : undefined), typed: s.typed, ok: s.ok, winners: w, ...pl,
+    else if (typedKey(m.key)) pub.reveal = { answer: q.answer, notes: m.key === "see" ? seeNotes(q) : q.notes || (m.key === "airport" ? [q.city, q.code].filter(Boolean).join(", ") : undefined), typed: s.typed, ok: s.ok, winners: w, ...pl,
       ...(m.key === "say" ? { why: s.why } : {}) };
     else if (m.key === "closest") pub.reveal = { answer: String(q.answer), notes: q.notes, nums: s.nums, off: distances(s), winners: w, ...pl };
     else if (m.key === "pin") pub.reveal = { answer: q.answer, place: q.place, at: { lat: q.lat, lon: q.lon }, pins: s.pins, off: distances(s), winners: w, ...pl };
@@ -181,7 +181,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
   /* the host's phone: the answer while it's up, and what every captain typed */
   const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal" || (m.key === "fool" && s.screen === "pick"))
-    ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : m.key === "roulette" || m.key === "stakes" ? undefined : q.notes, typed: s.typed, nums: s.nums,
+    ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : m.key === "roulette" || m.key === "stakes" || m.key === "see" ? undefined : q.notes, typed: s.typed, nums: s.nums,
         ...(m.key === "roulette" ? { answers: s.teams.map((_, t) => String(rrQ(q as RrLap, t)?.answer ?? "")) } : {}),
         ...(m.key === "stakes" ? { answers: s.teams.map((_, t) => String(skQm(s, t)?.answer ?? "")) } : {}),
         ...(typedKey(m.key) && m.key !== "roulette" && m.key !== "stakes" && m.key !== "map" ? { accept: acceptFor(q).slice(0, 8) } : {}),
