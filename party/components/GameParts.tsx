@@ -405,9 +405,10 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `${host ? "The host rules" : "Each captain rules on the other team's answer"}: the idea counts, not the exact words.` },
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     case "flag": return [
+      /* (short, the same with or without a host: 23 Nov, the owner) */
       { text: flagRule1(t?.flag) },
-      { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
-      { text: `Best of ${n} takes ${pts}. ${level}` }];
+      { text: "Guess it right: +1. Both right? A point each. Nobody? Nobody." },
+      { text: `Best of ${n} takes ${pts}. Tied? One more flag, or a point each.` }];
     /* What Do You See? (12 Nov, the owner) */
     /* (12 Nov, the owner: a buzzer, said out loud and typed; the app checks what's typed, so nobody has to) */
     case "see": return [
