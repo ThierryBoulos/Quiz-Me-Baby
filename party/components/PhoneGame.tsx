@@ -486,8 +486,10 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
            their 10 seconds, who is out, who can still buzz, what was typed: 23 Nov, the owner) */}
         {pub.see && <ToSide order={2}><div className="flex flex-col items-center gap-1">
           <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>
-          <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={220} />
-          <div className="grid place-items-center main-clock"><Clock deadline={pub.see.typeBy ?? pub.deadline} left={pub.see.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={70} /></div></div></ToSide>}
+          {/* (held sideways: the picture smaller, the clock beside it, so the left column fits) */}
+          <div className={sideways ? "flex items-center gap-3" : "flex flex-col items-center gap-1"}>
+            <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={sideways ? 110 : 220} />
+            <div className="grid place-items-center main-clock"><Clock deadline={pub.see.typeBy ?? pub.deadline} left={pub.see.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={sideways ? 56 : 70} /></div></div></div></ToSide>}
         <AnswerCard />
         {(() => { const bz = pub.buzz ?? null; return <WhoAnswered oneCol head={bz != null ? <><bdi>{T[bz].name}</bdi> buzzed{pub.see?.by ? <> (<bdi>{pub.see.by}</bdi>)</> : null}: saying it out loud, and typing it</> : "Waiting for a buzz…"}
           rows={([0, 1] as const).map((t) => { const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t], out = !!pub.see?.out?.[t], on = bz === t;
