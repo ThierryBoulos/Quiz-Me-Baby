@@ -593,7 +593,11 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       const s = st.current; if (!s) return;
       if (offline.current) return;                   // (no internet: nothing runs out; see publish)
       /* What Do You See?: a buzz gets 10 seconds to say it and type it; none by then, and the team is out */
-      if (s.screen === "q" && s.buzz != null && s.buzzAt && !s.away && Date.now() - s.buzzAt >= SEE_TYPE * 1000 + T_GRACE_MS) { seeMiss(s, s.buzz, Date.now(), true); playSound("wrong"); publish(); return; }
+      /* (what that captain typed but didn't send counts, as with 2 teams: 23 Nov, the owner) */
+      if (s.screen === "q" && s.buzz != null && s.buzzAt && !s.away && Date.now() - s.buzzAt >= SEE_TYPE * 1000 + T_GRACE_MS) {
+        const b = s.buzz, d = drafts.current[b]; drafts.current = {};
+        if (d && d.k === `${qidOf(s)}|q` && d.text && captainAnswer(s, b, { text: d.text }) === true) { if (s.screen === "q") playSound("wrong"); publish(); return; }
+        seeMiss(s, b, Date.now(), true); playSound("wrong"); publish(); return; }
       /* the last ten seconds tick; the bells ring at zero (as with 2 teams: 22 Nov, the owner) */
       { const now = Date.now(), whole = s.deadline && (s.screen === "q" || s.screen === "pick") ? Math.ceil((s.deadline - now) / 1000) : null;
         if (whole !== lastWhole.current) { if (whole != null && whole <= 10 && whole > 0) playSound("tick"); lastWhole.current = whole; }

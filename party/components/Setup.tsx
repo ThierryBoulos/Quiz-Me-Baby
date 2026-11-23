@@ -19,6 +19,7 @@ import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChi
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
 import { RR_SETUP } from "@/lib/roulette";
 import { closestSetupLine, flagSetupLine } from "@/lib/game";
+import { SEE_SETUP } from "@/lib/see";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; lifelines?: boolean; comeback?: boolean;
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: Q[] } & Partial<Picks>;
@@ -33,7 +34,7 @@ const MINIS = [
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
   ["majority", "Majority Rules", "Everyone plays on their own phone: 10 questions, four answers. The team with the bigger share of right answers wins."],
   ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
-  ["see", "What Do You See?", "A face, a logo or a close-up, getting clearer: one guess each, fastest right answer wins."],
+  ["see", "What Do You See?", SEE_SETUP],
   ["fool", "Fool Me Twice", "A strange true fact with a blank. Write a lie that sounds true, then find the truth among the lies."],
   ["roulette", "Russian Roulette", RR_SETUP],
   ["battle", "Battle of the Captains", "Ten each, captains only."],

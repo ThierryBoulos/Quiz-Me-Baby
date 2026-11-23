@@ -152,9 +152,9 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
     seen[key] = j + 1; used[key] = at + len;
     return { key, qs: (decks[key] || []).slice(at, at + len), i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k) }; }).filter((m) => m.qs.length);
   const extra: Partial<Record<ManyKey, Q[]>> = {};
-  /* (Guess the Flag keeps 40 of the flags dealt past the game's ten, every level mixed, so Change flag finds one at
-     the same level, as with 2 teams: 23 Nov. The TV holds the bank anyway; the phones never get the answers) */
-  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" ? 40 : 4));
+  /* (Guess the Flag and What Do You See? keep 40 of the spares dealt past the game, every level mixed, so Change flag
+     or picture finds one at the same level, as with 2 teams: 23 Nov. The TV holds the bank anyway; the phones never get the answers) */
+  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" ? 40 : 4));
   extra.comeback = (decks.comeback || []).slice(MANY_LEGS.comeback);
   /* (a question round's Change question stays in the question's theme: the rounds' spares, then the questions held
      back past sudden death's, one pair per theme in turn: 19 Nov review, a Science question became Geography) */
@@ -203,11 +203,12 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
     if (!QMB.rouletteSwapQs(m.qs[m.i])) return QMB.RR_NONE_LEFT as string;
     clear(s); s.paused = false; s.deadline = Math.max(now, (s.spinAt ?? 0) + SPIN_MS) + s.total * 1000; s.left = 0; s.step++; toast(s, QMB.RR_SWAPPED as string); return true;
   }
-  /* Guess the Flag: a spare at the flag's level, else another level, as with 2 teams (23 Nov, the owner) */
-  if (m.key === "flag") {
-    const L = s.extra?.flag || [], j = QMB.spareAt(L, qOf(s)?.level) as number;
-    if (j < 0) return "No other flag left at this level.";
-    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, "New flag."); return true;
+  /* Guess the Flag and What Do You See?: a spare at the same level, else another level, as with 2 teams (23 Nov, the
+     owner) */
+  if (m.key === "flag" || m.key === "see") {
+    const L = s.extra?.[m.key] || [], j = QMB.spareAt(L, qOf(s)?.level) as number;
+    if (j < 0) return m.key === "flag" ? "No other flag left at this level." : "No other picture left at these levels.";
+    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, m.key === "flag" ? "New flag." : "New picture."); return true;
   }
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t);
@@ -368,7 +369,8 @@ export function buzzSee(s: StateM, team: number, now = Date.now(), by: string | 
 export function seeMiss(s: StateM, team: number, now: number, late = false) {
   (s.out ||= Array(s.teams.length).fill(false))[team] = true; s.buzz = null; s.buzzAt = 0; s.buzzBy = null;
   if (s.out.every(Boolean)) { reveal(s); return; }
-  toast(s, late ? `Time's up. ${s.teams[team].name} are out of this picture.` : `${s.teams[team].name} guessed wrong: out of this picture.`);
+  /* (as with 2 teams, who can still buzz: 23 Nov, the owner) */
+  toast(s, (late ? `Time's up. ${s.teams[team].name} are out of this picture.` : `${s.teams[team].name} guessed wrong: out of this picture.`) + " The others can still buzz.");
   if (!s.away) { s.deadline = now + s.left * 1000; s.left = 0; }   // (the game phone asleep: the clock starts when it's back)
 }
 /* ---- Fool Me Twice (16 Nov, the owner), with 3 to 8 teams: each captain writes a lie for the fact's blank (screen
@@ -669,7 +671,7 @@ export function next(s: StateM, now: number, t: Timers) {
         s.typed.forEach((x, i) => { if (x != null && String(x).trim()) m.words![i].push({ w: String(listWord(x, q) ?? x).trim().slice(0, 40), ok: !!s.ok[i] }); }); }
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
       /* (Guess the Flag and Closest To Wins: no line on the next one, as with 2 teams: the reveal's headline said it, 23 Nov, the owner) */
-      if (m.key !== "flag" && m.key !== "closest") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
+      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
         : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} take it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
     }
     m.i++;

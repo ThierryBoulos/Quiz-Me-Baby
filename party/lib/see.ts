@@ -61,3 +61,7 @@ export function seeWinner(ok: Two<boolean | null>, at: Two<number | null>): 0 | 
   if (!right.length) return "none";
   return right.length === 1 ? right[0] : (at[0]! <= at[1]! ? 0 : 1);
 }
+/* the words every setup shares: the setup screen's line and the intro's first two rules (23 Nov, the owner) */
+export const SEE_SETUP = "12 pictures: a face, a logo or a close-up, getting clearer. Buzz first and get it right to take it.";
+export const SEE_RULE1 = "A picture goes up, blurred or zoomed right in, and gets clearer as the clock runs: a famous face, a logo, or a close-up.";
+export const SEE_RULE2 = "Know it? Hit BUZZ: anyone on the team can. The picture stops, and you have 10 seconds to say it out loud while your captain types it.";

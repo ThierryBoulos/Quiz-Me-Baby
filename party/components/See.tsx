@@ -1,4 +1,5 @@
 "use client";
+import { wholeSentences } from "@/lib/sentences";
 /* What Do You See? on screen (12 Nov, the owner): the picture that clears as the clock runs, for the TV and the
    phones, two teams or eight. A face or a logo starts blurred and sharpens; a close-up starts zoomed right in on one
    spot and pulls back to the whole picture. In steps (lib/see.ts), each easing into the next, worked out from the
@@ -142,7 +143,8 @@ export function seeWho(see: SePub, teams: SeeTeam[], right?: number): { text: st
 /* every team's state while the picture clears: thinking, buzzed (it has its 10 seconds), or out of this picture (a
    wrong answer, or none in time: everyone heard it) */
 export function SeeTicks({ teams, out, buzz, size = 22, column }: { teams: SeeTeam[]; out?: boolean[]; buzz?: number | null; size?: number; column?: boolean }) {
-  const many = teams.length > 2;
+  /* (names up to four teams, lettered dots from five, as every team list on the TV: 23 Nov, the owner) */
+  const many = teams.length > 4;
   return (
     <div className={"flex flex-wrap justify-center " + (column ? "flex-col items-center gap-1" : many ? "gap-x-5 gap-y-2" : "gap-x-10 gap-y-2")} role="status" aria-live="polite">
       {teams.map((t, i) => (
@@ -158,14 +160,15 @@ export function SeeTicks({ teams, out, buzz, size = 22, column }: { teams: SeeTe
 export const SeeSay = ({ see }: { see: SePub }) => (
   <div className="text-24 font-bold leading-snug text-balance">{see.by ? <><bdi>{see.by}</bdi> buzzed. </> : null}Say it out loud! Captain, type it!</div>);
 
-/* ---- the TV, two teams ---- */
-export function SeeTv({ see, screen, teams, clock, deadline, left, rows }: {
-  see: SePub; screen: "seeQ" | "seeReveal"; teams: SeeTeam[]; clock?: ReactNode; deadline?: number | null; left?: number; rows?: ReactNode }) {
+/* ---- the TV, every setup (23 Nov, the owner: one look; 3 to 8 teams pass their own line under the teams, and five
+   teams or more a smaller picture) ---- */
+export function SeeTv({ see, screen, teams, clock, deadline, left, rows, foot, dense }: {
+  see: SePub; screen: "seeQ" | "seeReveal"; teams: SeeTeam[]; clock?: ReactNode; deadline?: number | null; left?: number; rows?: ReactNode; foot?: string; dense?: boolean }) {
   /* (12 Nov, the owner: a buzzer. A buzz stops the picture where it is; the team that buzzed says it out loud and
      types it, with its own 10 seconds on the clock) */
   if (screen === "seeQ") { const b = see.buzz != null ? teams[see.buzz] : null; return (
     <div className="flex gap-12 items-center w-full justify-center">
-      <div className="flex-1 min-w-0 flex justify-center"><SeePicture see={see} deadline={deadline} left={left} w={720} big /></div>
+      <div className="flex-1 min-w-0 flex justify-center"><SeePicture see={see} deadline={deadline} left={left} w={dense ? 660 : 720} big /></div>
       <div className="w-[360px] shrink-0 flex flex-col items-center gap-5">
         {b ? (<>
           <div className="display text-44 leading-tight text-balance" role="status" style={{ color: b.color }}><bdi>{b.name}</bdi> buzzed!</div>
@@ -176,8 +179,8 @@ export function SeeTv({ see, screen, teams, clock, deadline, left, rows }: {
           {clock}
           <div className="text-24 font-bold leading-snug">Know it? Buzz!</div>
         </>)}
-        <SeeTicks teams={teams} out={see.out} buzz={see.buzz} column />
-        <div className="text-20 text-[var(--color-ink-2)] leading-snug text-balance">{b ? "Wrong, and you’re out of this picture." : "Buzz, say it out loud and type it. Wrong, and you’re out of this picture."}</div>
+        <SeeTicks teams={teams} out={see.out} buzz={see.buzz} column={teams.length <= 2} size={teams.length > 4 ? 20 : 22} />
+        <div className="text-20 text-[var(--color-ink-2)] leading-snug text-balance">{b ? "Wrong, and you’re out of this picture." : foot ?? "Buzz, say it out loud and type it. Wrong, and you’re out of this picture."}</div>
       </div>
     </div>); }
   const who = seeWho(see, teams), A = see.rev?.answer || "";
@@ -190,6 +193,8 @@ export function SeeTv({ see, screen, teams, clock, deadline, left, rows }: {
       <div className="w-[440px] shrink-0 flex flex-col items-center gap-4">
         <div className="eyebrow text-18">It&rsquo;s</div>
         <div className="ans-board display beat slam leading-none" style={{ fontSize: A.length > 22 ? 44 : A.length > 14 ? 56 : 70, color: "var(--color-gold)" }}>{A}</div>
+        {/* (the fact behind the picture, when it has one: every setup, 23 Nov, the owner) */}
+        {see.rev?.notes && <div className="text-20 text-[var(--color-ink-2)] leading-snug text-center">{wholeSentences(see.rev.notes, 120)}</div>}
         {rows}
         <div className="display text-36 beat" style={{ color: who.color }}>{who.text}</div>
       </div>

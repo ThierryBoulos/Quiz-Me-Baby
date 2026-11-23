@@ -482,15 +482,19 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     /* What Do You See?: the picture as it clears, who buzzed, what they typed (a wrong one: that team is out) */
     case "seeQ": return (
       <div className="flex flex-col gap-3 flex-1">
-        <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Picture {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.see?.typeBy ?? pub.deadline} left={pub.see?.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
-        {pub.see && <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={200} />}
+        {/* (as with 3 to 8 teams: the question by kind over the picture, the clock, the answer, then one card: who buzzed and
+           their 10 seconds, who is out, who can still buzz, what was typed: 23 Nov, the owner) */}
+        {pub.see && <ToSide order={2}><div className="flex flex-col items-center gap-1">
+          <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>
+          <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={220} />
+          <div className="grid place-items-center main-clock"><Clock deadline={pub.see.typeBy ?? pub.deadline} left={pub.see.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={70} /></div></div></ToSide>}
         <AnswerCard />
-        {/* (the buzzer, 12 Nov: who buzzed and their 10 seconds, who is out, who can still buzz; the app checks what's typed) */}
-        {([0, 1] as const).map((t) => { const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t]; return (
-          <Said key={t} t={t} text={x?.join("  /  ")} label={pub.see?.out?.[t] ? `${T[t].name}: out of this picture` : pub.buzz === t ? `${T[t].name} buzzed${pub.see?.by ? ` (${pub.see.by})` : ""}` : T[t].name}
-            empty={pub.see?.out?.[t] ? "No answer" : pub.buzz === t ? "Saying it out loud, and typing it…" : pub.buzz != null ? "Waiting" : "Can buzz"} />); })}
-        {/* (no Pause while a team that buzzed is answering: the clock is stopped for it already) */}
-        <div className="flex gap-2 justify-center mt-auto">{pub.buzz == null && <Pause />}<Small label="Reveal now" move={{ type: "ui/reveal" }} />{pub.buzz == null && !pub.see?.out?.some(Boolean) && <Small ghost label="Change picture" move={{ type: "see/swap" }} />}</div>
+        {(() => { const bz = pub.buzz ?? null; return <WhoAnswered oneCol head={bz != null ? <><bdi>{T[bz].name}</bdi> buzzed{pub.see?.by ? <> (<bdi>{pub.see.by}</bdi>)</> : null}: saying it out loud, and typing it</> : "Waiting for a buzz…"}
+          rows={([0, 1] as const).map((t) => { const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t], out = !!pub.see?.out?.[t], on = bz === t;
+            return { key: t, name: T[t].name, color: tc(t), dot: <Dot t={t} color={tc(t)} size={14} />, lit: on, statusColor: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)",
+              status: out ? "✗ out" : on ? "buzzed!" : "can buzz", typed: x?.length ? <div className="text-14 font-bold leading-snug pl-[22px] break-words"><bdi>{x.join("  /  ")}</bdi></div> : null }; })} />; })()}
+        {/* (no Pause or Change picture while a team that buzzed is answering: the clock is stopped for it already) */}
+        <div className="flex gap-2 justify-center mt-auto">{pub.buzz == null && <Pause />}{pub.buzz == null && <Small ghost label="Change picture" move={{ type: "see/swap" }} />}<Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     /* Fool Me Twice: the fact and the truth (the host's to know), who has written, then who has picked; the reveal */
     case "foolWrite": case "foolPick": return (
@@ -971,7 +975,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
   /* the mini-games' last column: the leg, to whoever takes it (both on a tie) */
   const leg = (t: 0 | 1, w: unknown) => (w === t || w === "tie" ? <span style={{ color: "var(--color-ok)" }}>✓</span> : <span style={{ color: "var(--color-ink-3)" }}>–</span>);
   /* (Guess the Flag: "the flag", not "the leg": 23 Nov, the owner) */
-  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill(sc === "flagReveal" ? "Your team takes the flag" : sc === "closestReveal" ? "Your team takes it" : "Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
+  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill(sc === "flagReveal" ? "Your team takes the flag" : sc === "closestReveal" || sc === "seeReveal" ? "Your team takes it" : "Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
     : w === "none" ? pill("Nobody gets it", "mid") : w === 0 || w === 1 ? pill("Not this time", "no") : null;
   const legW = (w: unknown) => (w === 0 || w === 1 ? w : null) as 0 | 1 | null;
   /* how your team did on this question, in one pill */
@@ -983,7 +987,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     : sc === "closestReveal" || sc === "pinReveal" ? legPill(pub.reveal?.w)
     : sc === "majorityReveal" && MR ? pill(`Your team: ${MR.right[mine]} of ${pub.majority?.n?.[mine] ?? 0} right`, MR.right[mine] > 0 ? "ok" : "mid")
     : sc === "sayReveal" && pub.reveal?.w === "tie" ? pill(pub.reveal.ok?.[0] === false && pub.reveal.ok?.[1] === false ? (!pub.reveal.typed?.[0]?.length && !pub.reveal.typed?.[1]?.length ? "Nobody answered · a point each" : "Both said it · a point each") : "Both dodged it · a point each", "ok")
-    : /^(flag|say|map|airport)Reveal$/.test(sc) && pub.reveal ? (sc !== "mapReveal" || (pub.map?.ruled?.[0] != null && pub.map?.ruled?.[1] != null) ? legPill(pub.reveal.w) : null)
+    : /^(flag|say|map|airport|see)Reveal$/.test(sc) && pub.reveal ? (sc !== "mapReveal" || (pub.map?.ruled?.[0] != null && pub.map?.ruled?.[1] != null) ? legPill(pub.reveal.w) : null)
     : sc === "dishReveal" && pub.reveal ? (dishW === mine ? pill("Your team got it", "ok") : dishW != null ? pill(`${T[dishW].name} got it`, "no") : pill("Nobody got it", "mid"))
     /* Russian Roulette: right or wrong, and what the chamber paid (the bullet can cost 3) */
     : sc === "rouletteReveal" && pub.roulette?.rev ? (() => { const R = pub.roulette!.rev!, p = rrPill(pub.reveal?.ok?.[mine], !!pub.reveal?.typed?.[mine]?.length, R.level[mine], R.got[mine] ?? 0);
@@ -1060,8 +1064,8 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     return (<>
       {top}
       {/* (Guess the Flag: the point each flag pays, "+1", in a Pts column, as with 3 to 8 teams: 23 Nov, the owner) */}
-      <ResultTable head={["Said", sc === "flagReveal" ? "Pts" : "Leg"]} rows={([0, 1] as const).map((t) => { const v = ok(t), x = pub.reveal?.typed?.[t]?.[0];
-        return row(t, x ?? (say ? "Nothing" : "No answer"), x ? v : null, sc === "flagReveal" ? <Pts n={w === t || w === "tie" ? 1 : 0} /> : leg(t, w),
+      <ResultTable head={["Said", sc === "flagReveal" || sc === "seeReveal" ? "Pts" : "Leg"]} rows={([0, 1] as const).map((t) => { const v = ok(t), x = pub.reveal?.typed?.[t]?.[0];
+        return row(t, x ?? (say ? "Nothing" : "No answer"), x ? v : null, sc === "flagReveal" || sc === "seeReveal" ? <Pts n={w === t || w === "tie" ? 1 : 0} /> : leg(t, w),
           v == null && x ? "Waiting for a ruling" : say && x && !v ? (pub.reveal?.offList?.[t] ? "Not on the list" : "Said it") : undefined); })} /></>);
   }
   if (sc === "comebackReveal" && pub.reveal && pub.comeback) { const t = pub.comeback.teams[0] as 0 | 1, x = pub.reveal.typed?.[t]?.[0];
@@ -1162,6 +1166,9 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
       {pub.screen === "seeQ" && <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>}
       <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} clear={pub.screen === "seeReveal"} w={pub.screen === "seeReveal" ? (small ? 180 : 240) : small ? 220 : 340} alt={pub.see.rev?.answer} />
       {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}
+      {/* (as with 3 to 8 teams: who got it under the picture, then the answer on its tile and the fact: 23 Nov, the owner) */}
+      {pub.screen === "seeReveal" && pub.see.rev && (() => { const w = seeWho(pub.see, rr2(pub)); return <span className="display text-18 text-center" style={{ color: w.color }}>{w.text}</span>; })()}
+      {pub.screen === "seeReveal" && pub.reveal && <AnswerLine answer={pub.reveal.answer} fact={pub.reveal.notes} />}
       {/* the other team out (the TV's note, which no phone shows: with no TV, nobody would know they can wait for it to clear) */}
       {pub.screen === "seeQ" && mine != null && pub.see.out?.[mine === 0 ? 1 : 0] && <p className="text-14 font-semibold text-center leading-snug" style={{ color: "var(--color-no)" }}>
         <bdi>{pub.teams[mine === 0 ? 1 : 0].name}</bdi> are out of this picture.</p>}</div>}
@@ -1190,8 +1197,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
       {pub.screen === "auctionRun" && !counting && <div className="display text-44 mt-1"><LiveN A={pub.auction} /> / {pub.auction.bid}</div>}
       {pub.screen === "auctionRun" && pub.auction.countedBy && <div className="text-13 text-[var(--color-ink-2)] mt-1">Counted by <b>{pub.auction.countedBy}</b></div>}</div>}
     {(pub.screen === "dishQ" || pub.screen === "dishReveal") && pub.dish && <div className="card"><div className="eyebrow mb-2">Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div><Ings ings={pub.dish.ings} /></div>}
-    {pub.reveal && /Reveal$/.test(pub.screen) && !["mapReveal", "sayReveal", "pinReveal", "rouletteReveal", "flagReveal", "closestReveal"].includes(pub.screen) && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
-    {pub.screen === "seeReveal" && pub.see?.rev && (() => { const w = seeWho(pub.see, rr2(pub)); return <p className="display text-22 text-center -mt-1" style={{ color: w.color }}>{w.text}</p>; })()}
+    {pub.reveal && /Reveal$/.test(pub.screen) && !["mapReveal", "sayReveal", "pinReveal", "rouletteReveal", "flagReveal", "closestReveal", "seeReveal"].includes(pub.screen) && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.screen === "airportReveal" && pub.airport?.code && <p className="text-center text-14 text-[var(--color-ink-2)] -mt-1"><b className="text-[var(--color-ink)]">{pub.airport.code}</b> · {pub.airport.city}{pub.airport.cityOk === false && <span className="block mt-1 text-13 font-bold" style={{ color: "var(--color-gold)" }}>{pub.airport.city} alone doesn&rsquo;t count: it has more than one big airport.</span>}{pub.reveal?.notes ? <span className="block mt-1 text-13">{pub.reveal.notes}</span> : null}</p>}
     {pub.reveal && pub.screen === "sayReveal" && <div className="text-center"><div className="eyebrow">The app&rsquo;s word</div><div className="display text-30" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div></div>}
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
@@ -1313,7 +1319,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "foolPick": return pub.sent?.[mine] ? "Picked. Wait for the reveal." : cap ? "Which one is the truth?" : "Your captain picks the truth.";
     case "foolReveal": return "The reveal";
     case "seeQ": { const by = pub.see?.by, me1 = !!by && by === me.name;
-      return pub.see?.out?.[mine] ? (!pub.sent?.[mine] ? "Time's up. You're out of this picture." : cap ? "Wrong. You're out of this picture." : "Your captain guessed wrong: out of this picture.")
+      return pub.see?.out?.[mine] ? (!pub.sent?.[mine] ? "Time's up. You're out of this picture." : cap ? "Wrong. You're out of this picture." : "Your team guessed wrong: out of this picture.")   // ("your team", not "your captain": 23 Nov, the owner)
       : pub.buzz === mine ? (pub.sent?.[mine] ? "Answer sent. The app checks it."
         : cap ? `${me1 || !by ? "You" : by} buzzed! Say it out loud and type it.` : `${me1 ? "You" : by || "Your team"} buzzed! Say it out loud: your captain types it.`)
       : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : "Know it? BUZZ!"; }

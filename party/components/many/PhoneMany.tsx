@@ -126,6 +126,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
     </div>);
 }
 
+const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
 const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: "Which flag?", closest: "Type a number. Nearest wins." };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
@@ -171,6 +172,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const move = (type: string, extra: Record<string, unknown> = {}) => void send("judge", { move: { type, ...extra } });
   const opts = useMemo(() => order(pub.options || [], me.name + (pub.qid || "")), [pub.options, me.name, pub.qid]);
   const sentMine = mine != null && pub.sent[mine];
+  /* What Do You See?: a buzz in the hand when a new picture opens for buzzing, and on the captain's phone when a
+     teammate buzzes (it's this phone that types the answer), as with 2 teams (23 Nov, the owner) */
+  const seeOpen = !host && sc === "q" && g?.key === "see" && mine != null && !pub.see?.out?.[mine] && pub.see?.buzz == null && !pub.paused;
+  useEffect(() => { if (seeOpen) buzzHand([60, 40, 60]); }, [seeOpen, pub.qid]);
+  const seeMineBuzz = cap && sc === "q" && g?.key === "see" && mine != null && pub.see?.buzz === mine;
+  useEffect(() => { if (seeMineBuzz) buzzHand([60, 40, 60]); }, [seeMineBuzz]);
   /* Closest To Wins: the number as the game reads it (units from the question: "in millions") */
   const guessN: number = g?.key === "closest" && text.trim() ? QMB.parseNumber(text, pub.question) as number : NaN;
   const perN = /\bin (thousand|million|billion)s\b/i.exec(pub.question || "")?.[1].toLowerCase();
@@ -421,7 +428,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
           {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
           {/* (shown even once answers are in: the new question clears them, every game: 23 Nov, the owner) */}
-          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? "Change flag" : "Change question"}</button>}
+          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? "Change flag" : g.key === "see" ? "Change picture" : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
@@ -523,7 +530,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {!out && bz == null && !typing && (buzzed
             ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
             : <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
-                onClick={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
+                onClick={() => { buzzHand(40); setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
           {typing && (
             <div className="card flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
@@ -577,12 +584,13 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             buzzed, and whether your team is out of this picture */}
         {g.key === "see" && mine != null && (() => { const S = pub.see, out = !!S?.out?.[mine], bz = S?.buzz ?? null, col = T[mine]?.color; return (<>
           <p className="text-center font-bold text-18 text-balance" role="status" style={{ color: out ? "var(--color-no)" : bz === mine ? "var(--color-gold)" : bz != null ? "var(--color-ink-3)" : undefined }}>
-            {out ? "Your team is out of this picture." : bz === mine ? <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud: your captain types it.</>
+            {/* (the 2-team words: 23 Nov, the owner) */}
+            {out ? (sentMine ? "Your team guessed wrong: out of this picture." : "Time’s up. You’re out of this picture.") : bz === mine ? <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud: your captain types it.</>
               : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
           {!out && bz == null && (buzzed
             ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
             : <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
-                onClick={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
+                onClick={() => { buzzHand(40); setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
         </>); })()}
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
         {spinning || (g.key === "see" && mine != null && pub.see?.out?.[mine]) ? null : mine != null && !pub.sent[mine] && g.key !== "pin" && !(g.only && !g.only.includes(mine)) && !cbOut ? (

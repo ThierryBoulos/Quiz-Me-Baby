@@ -6,6 +6,7 @@
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
 import { closestRule1, flagRule1 } from "@/lib/game";
+import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -411,11 +412,12 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
     /* What Do You See? (12 Nov, the owner) */
     /* (12 Nov, the owner: a buzzer, said out loud and typed; the app checks what's typed, so nobody has to) */
     case "see": return [
-      { text: `A picture goes up, blurred or zoomed right in, and gets clearer over ${sec(t?.see, 20)}: a famous face, a logo, or a close-up.` },
-      { text: "Know it? Hit BUZZ: anyone on the team can. The picture stops, and you have 10 seconds to say it out loud while your captain types it.", warn: true },
+      /* (rule 1 as with 3 to 8 teams, "as the clock runs"; rule 4 short: 23 Nov, the owner) */
+      { text: SEE_RULE1 },
+      { text: SEE_RULE2, warn: true },
       { text: "Right, and the picture is yours. Wrong, and you're out of this picture: the clock goes on and the other team can buzz." },
       /* (12 pictures in every setup; tied teams: the faster buzzer wins, the owner, 12 Nov) */
-      { text: `The app checks what you type${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. ${n} pictures: the most takes ${pts}. Tied? The team that buzzed faster wins. Won early? Play on for fun, or stop.` }];
+      { text: `${n} pictures: the most takes ${pts}. Tied? The team that buzzed faster wins.` }];
     /* Fool Me Twice (16 Nov, the owner): a true fact with a blank, a lie each, then find the truth */
     case "fool": return [
       { text: `A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true: ${sec(t?.foolWrite, 45)}.` },

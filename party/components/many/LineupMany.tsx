@@ -20,6 +20,7 @@ import { colsFor, Dot, place as ordinal } from "./PartsMany";
 import { levelLine } from "../Setup";
 import { RR_SETUP } from "@/lib/roulette";
 import { closestSetupLine, flagSetupLine } from "@/lib/game";
+import { SEE_SETUP } from "@/lib/see";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS } from "../LevelChips";
 import { timeLine, estimateMany } from "@/lib/estimate";
 import { RepeatSheet } from "../RepeatSheet";
@@ -85,7 +86,7 @@ const GAMES: [ManyKey, string][] = [
   ["map", "6 maps with places marked. Captains type what they have in common."],
   ["say", "6 questions with many answers. No points for the app's secret answer, or another team's."],
   ["dish", "5 recipes, one ingredient at a time. One guess per team; the faster right, the more points."],
-  ["see", "12 pictures: a face, a logo or a close-up, getting clearer. Buzz first and get it right to take it."],
+  ["see", SEE_SETUP],
   /* (16 Nov, the owner: off to start with) */
   ["fool", "6 strange true facts with a blank. Captains write a lie that sounds true, then find the truth among the lies."],
   ["roulette", RR_SETUP],

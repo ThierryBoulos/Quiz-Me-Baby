@@ -21,8 +21,7 @@ import { ImadBubble } from "../TvGame";
 import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
-import { SeeCredit, SeePicture, SeeSay, SeeTicks, seeWho } from "../See";
-import { seeAsk } from "@/lib/see";
+import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
 import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
 
@@ -114,23 +113,10 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         </>)}
         {/* What Do You See? (12 Nov, the owner: a buzzer): the picture clears as the clock runs and stops at a buzz; the
             team that buzzed says it out loud and types it, with its own 10 seconds on the clock; every team's state */}
-        {pub.screen === "q" && g && g.key === "see" && pub.see && (() => { const S = pub.see, b = S.buzz != null ? T[S.buzz] : null, k = T.length; return (
-          <div className="flex gap-12 items-center w-full justify-center">
-            <div className="flex-1 min-w-0 flex justify-center"><SeePicture see={S} deadline={pub.deadline} left={pub.left} w={dense ? 660 : 720} big /></div>
-            <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
-              {b ? (<>
-                <div className="display text-44 leading-tight text-balance" role="status" style={{ color: b.color }}><bdi>{b.name}</bdi> buzzed!</div>
-                {S.typeBy ? <Clock deadline={S.typeBy} size={120} /> : <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />}
-                <SeeSay see={S} />
-              </>) : (<>
-                <div className="display text-44 leading-tight text-balance" style={{ color: "var(--color-gold)" }}>{seeAsk(S.kind)}</div>
-                <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-                <div className="text-24 font-bold leading-snug">Know it? Buzz!</div>
-              </>)}
-              <SeeTicks teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} out={S.out} buzz={S.buzz} size={k > 4 ? 20 : 22} />
-              <div className="text-20 text-[var(--color-ink-2)] leading-snug text-balance">{b ? "Wrong, and you’re out of this picture." : `Right, and you score ${k} points. Wrong, and you’re out of this picture.`}</div>
-            </div>
-          </div>); })()}
+        {pub.screen === "q" && g && g.key === "see" && pub.see && (
+          /* (the 2-team screen, one piece: 23 Nov, the owner) */
+          <SeeTv see={pub.see} screen="seeQ" teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} deadline={pub.deadline} left={pub.left} dense={dense}
+            clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} foot={`Right, and you score ${T.length} points. Wrong, and you’re out of this picture.`} />)}
         {/* a question round, and Don't Say the Same's prompt: the words big, the clock, every team's state */}
         {pub.screen === "q" && g && (g.key === "quiz" || g.key === "say" || g.key === "sudden" || g.key === "comeback") && (<>
           {g.key === "sudden" && <div className="display text-36 leading-none" style={{ color: "var(--color-gold)" }}>First right answer wins the night</div>}
@@ -232,11 +218,13 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* What Do You See?: the whole picture and what it is, who got it first and how fast, then every team's guess */}
         {pub.screen === "reveal" && g && R && g.key === "see" && pub.see && (() => { const who = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] })), R.winners?.length); return (<>
           {/* (the picture and what it is side by side, in the middle: 12 Nov) */}
-          <div className="grid items-center justify-center gap-12 w-full max-w-[1160px]" style={{ gridTemplateColumns: `${dense ? 400 : 480}px minmax(0, 600px)` }}>
-            <div className="flex flex-col items-center gap-1 min-w-0"><SeePicture see={pub.see} clear w={dense ? 400 : 480} big alt={R.answer} /><SeeCredit see={pub.see} size={dense ? 13 : 14} /></div>
+          <div className="grid items-center justify-center gap-12 w-full max-w-[1160px]" style={{ gridTemplateColumns: `${dense ? 400 : 620}px minmax(0, 520px)` }}>
+            <div className="flex flex-col items-center gap-1 min-w-0"><SeePicture see={pub.see} clear w={dense ? 400 : 620} big alt={R.answer} /><SeeCredit see={pub.see} size={dense ? 13 : 14} /></div>
             <div className="flex flex-col items-center gap-3 min-w-0">
               <div className="eyebrow text-18">It&rsquo;s</div>
-              <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: (R.answer || "").length > 22 ? (dense ? 40 : 48) : dense ? 56 : 70, color: "var(--color-gold)" }}>{R.answer}</div>
+              {/* (the 2-team sizes up to four teams; the fact under it: 23 Nov, the owner) */}
+              <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: (R.answer || "").length > 22 ? (dense ? 40 : 44) : (R.answer || "").length > 14 ? (dense ? 48 : 56) : dense ? 56 : 70, color: "var(--color-gold)" }}>{R.answer}</div>
+              {R.notes && <div className={(dense ? "text-18" : "text-20") + " text-[var(--color-ink-2)] leading-snug text-center"}>{wholeSentences(R.notes, 120)}</div>}
               <div className="display text-36 beat" style={{ ...QUICK, ...d(0.5), color: who.color }}>{who.text}</div>
             </div>
           </div>

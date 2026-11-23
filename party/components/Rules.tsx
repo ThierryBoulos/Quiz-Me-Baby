@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
+import { Secs } from "./Secs";
 
 /* HOW TO PLAY, in the owner's own words (8 Nov: "This is how they should be written. Follow my wording going
-   forward"). Don't reword it: propose the exact change to the owner first. Two parts: the night (How to Play, and the
+   forward"). Don't reword it: propose the exact change to the owner first. (Its timers are the settings', <Secs>: 23 Nov.) Two parts: the night (How to Play, and the
    lobby while people wait), and WHEN THINGS GO WRONG (its own page, and the lobby after the night). */
 function Rule({ n, title, children }: { n: string; title: string; children: ReactNode }) {
   return (
@@ -59,7 +60,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
       <Rule n="3" title="Standard trivia rounds">
         <P>Each round has a theme, and teams compete to answer questions and earn points. Every question has a 60-second timer. Your team discusses the answer, and the captain submits the final response before time runs out.</P>
         <Sub>Playing with 2 teams:</Sub>
-        <P>Teams take turns answering different questions at the same difficulty. If a team answers incorrectly or runs out of time, the other team gets 30 seconds to steal the point. If both teams miss, nobody scores.</P>
+        <P>Teams take turns answering different questions at the same difficulty. If a team answers incorrectly or runs out of time, the other team gets <Secs k="tSteal" /> seconds to steal the point. If both teams miss, nobody scores.</P>
         <P>You can also use lifelines to give your team an advantage. Lifelines cannot be used on a steal or during mini-games, and each can be used once.</P>
         <UL items={[
           <><B>Call a Friend:</B> Get 30 extra seconds to call someone for help.</>,
@@ -67,26 +68,26 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
           <><B>Double Points:</B> Activate this on the captain’s phone before the round starts. A correct answer earns double points. If your opponent steals the question, they get the 2 points instead.</>,
         ]} />
         <Sub>Playing with 3–8 teams:</Sub>
-        <P>All teams receive the same question and answer simultaneously within 60 seconds. There are no steals or lifelines—just a straight-up trivia showdown.</P>
+        <P>All teams receive the same question and answer simultaneously within <Secs k="tQuestion" /> seconds. There are no steals or lifelines—just a straight-up trivia showdown.</P>
       </Rule>
 
       <Rule n="4" title="Mini-games">
         <P>Mini-games are selected during setup and appear between trivia rounds. Each mini-game is worth 2 points to the winner, except Secret Stakes.</P>
         <ul className="flex flex-col gap-2 text-15 leading-relaxed text-[var(--color-ink-2)] list-disc pl-5 marker:text-[var(--color-gold)]">
-          <Mini name="Closest To Wins">Teams get the same number-based question and have 60 seconds to enter their estimates. The closest answer wins the leg. Best of 5.</Mini>
-        <Mini name="The Auction">2-team setup only. The question is something like: “How many countries can you name?” Captains take turns bidding, raising the number or passing. The highest bidder has 30 seconds to name that many answers aloud. The host or the other captain counts them. Make your bid and you win the leg; fail and you lose it. Best of 3.</Mini>
-        <Mini name="Don’t Say the Same as Me">You’ll be given a prompt such as “Name a cheese.” Each team has 20 seconds to secretly enter one answer. The app has an answer in mind. If your answer matches the app’s answer, you lose the point. With 3–8 teams, matching another team’s answer loses it too. Answers must be real and valid. Best of 7.</Mini>
-        <Mini name="Guess the Map">A map appears without its title. You have 60 seconds to identify what it represents and type your answer. The general idea counts, not necessarily the exact wording. Best of 3.</Mini>
-        <Mini name="Guess the Flag">Identify the country or region shown by typing its name within 15 seconds. Best of 10.</Mini>
-        <Mini name="Drop the Pin">A landmark photo appears. You have 45 seconds to find the location on the world map on your phone, zoom in and lock in your pin. The closest pin wins. Best of 7.</Mini>
-        <Mini name="Guess the Airport">A departures board appears. You have 30 seconds to identify the airport using clues such as destinations, airlines and language. Naming the city is enough unless it has more than one airport. Best of 5.</Mini>
-        <Mini name="Majority Rules">Everyone plays individually on their own phone. Answer 10 questions, each with four options and 15 seconds to choose. Tapping an answer locks it in. No answer counts as wrong. Each team’s score is based on the percentage of its members’ answers that are correct, so smaller teams aren’t disadvantaged.</Mini>
-        <Mini name="Guess the Cocktail or Dish">Ingredients appear one at a time, every 3 seconds, with the giveaway ingredient appearing last. The fastest team to answer wins. With 3–8 teams, each team gets one guess. Best of 5.</Mini>
-        <Mini name="What Do You See?">A picture appears blurred or zoomed right in, and gets clearer over 20 seconds: a famous face, a logo, or a close-up of a dish, an animal or an object. Know it? Buzz! The picture stops, and your team has 10 seconds to say the answer out loud while your captain types it. Get it wrong and you’re out of that picture, and the other teams can still buzz. 12 pictures. If teams are tied, the one that buzzed faster wins.</Mini>
-        <Mini name="Fool Me Twice">6 strange but true facts appear, one at a time, each with a blank. Each captain has 45 seconds to write a lie to fill it, one that sounds true. Type the real answer and the app tells you to write a lie instead. The truth then appears hidden among your lies and a few of ours, and captains have 20 seconds to pick the one they think is true. Finding the truth earns 2 points, and each team that falls for your lie earns you 1. With 3 or more teams, each captain also names the team they think will fall for their lie: if that team does, it loses 1 point and you earn 1 more.</Mini>
-        <Mini name="Russian Roulette">The barrel spins and each team lands on its own chamber, with its own theme and question. You have 45 seconds to type your answer. Before the spin, every chamber shows its theme and level, the bullet too: an Expert question. Once the barrel stops, everyone sees who drew it. Medium is worth 2 points and Hard 3. The bullet earns 5 points if you get it right and costs you 3 if you get it wrong. 3 spins. With 2 teams, it’s the same barrel all game: one bullet, and someone draws it by spin 3. With 3–8 teams, there’s a new barrel every spin, and with 3, 4, 5 or 7 teams the bullet can also land in an empty chamber.</Mini>
-        <Mini name="Battle of the Captains">2-team setup only. The captains go head-to-head. Everyone else stays quiet. Each captain gets 10 questions. With a host, answers are given aloud within 7 seconds; without a host, captains type their answers within 15 seconds. The captain with the highest score wins the points.</Mini>
-        <Mini name="Secret Stakes">Always the last game of the night, played in 3 rounds. Each round shows 3 themes. Each captain has 20 seconds to secretly pick a theme and a level. Easy is the safe bet: it wins nothing and loses nothing. Medium, Hard and Expert are worth more, and your phone shows how much. You then have 45 seconds to type your answer. Get it right and you win your bet; get it wrong and you lose it, straight from your total score. Nobody sees what the others bet until the reveal.</Mini>
+          <Mini name="Closest To Wins">Teams get the same number-based question and have <Secs k="tMini" /> seconds to enter their estimates. The closest answer wins the leg. Best of 5.</Mini>
+        <Mini name="The Auction">2-team setup only. The question is something like: “How many countries can you name?” Captains take turns bidding, raising the number or passing. The highest bidder has <Secs k="tAuction" /> seconds to name that many answers aloud. The host or the other captain counts them. Make your bid and you win the leg; fail and you lose it. Best of 3.</Mini>
+        <Mini name="Don’t Say the Same as Me">You’ll be given a prompt such as “Name a cheese.” Each team has <Secs k="tSay" /> seconds to secretly enter one answer. The app has an answer in mind. If your answer matches the app’s answer, you lose the point. With 3–8 teams, matching another team’s answer loses it too. Answers must be real and valid. Best of 7.</Mini>
+        <Mini name="Guess the Map">A map appears without its title. You have <Secs k="tMap" /> seconds to identify what it represents and type your answer. The general idea counts, not necessarily the exact wording. Best of 3.</Mini>
+        <Mini name="Guess the Flag">Identify the country or region shown by typing its name within <Secs k="tFlag" /> seconds. Best of 10.</Mini>
+        <Mini name="Drop the Pin">A landmark photo appears. You have <Secs k="tPin" /> seconds to find the location on the world map on your phone, zoom in and lock in your pin. The closest pin wins. Best of 7.</Mini>
+        <Mini name="Guess the Airport">A departures board appears. You have <Secs k="tAirport" /> seconds to identify the airport using clues such as destinations, airlines and language. Naming the city is enough unless it has more than one airport. Best of 5.</Mini>
+        <Mini name="Majority Rules">Everyone plays individually on their own phone. Answer 10 questions, each with four options and <Secs k="tMajority" /> seconds to choose. Tapping an answer locks it in. No answer counts as wrong. Each team’s score is based on the percentage of its members’ answers that are correct, so smaller teams aren’t disadvantaged.</Mini>
+        <Mini name="Guess the Cocktail or Dish">Ingredients appear one at a time, every <Secs k="tDishStep" /> seconds, with the giveaway ingredient appearing last. The fastest team to answer wins. With 3–8 teams, each team gets one guess. Best of 5.</Mini>
+        <Mini name="What Do You See?">A picture appears blurred or zoomed right in, and gets clearer over <Secs k="tSee" /> seconds: a famous face, a logo, or a close-up of a dish, an animal or an object. Know it? Buzz! The picture stops, and your team has 10 seconds to say the answer out loud while your captain types it. Get it wrong and you’re out of that picture, and the other teams can still buzz. 12 pictures. If teams are tied, the one that buzzed faster wins.</Mini>
+        <Mini name="Fool Me Twice">6 strange but true facts appear, one at a time, each with a blank. Each captain has <Secs k="tFoolWrite" /> seconds to write a lie to fill it, one that sounds true. Type the real answer and the app tells you to write a lie instead. The truth then appears hidden among your lies and a few of ours, and captains have <Secs k="tFoolPick" /> seconds to pick the one they think is true. Finding the truth earns 2 points, and each team that falls for your lie earns you 1. With 3 or more teams, each captain also names the team they think will fall for their lie: if that team does, it loses 1 point and you earn 1 more.</Mini>
+        <Mini name="Russian Roulette">The barrel spins and each team lands on its own chamber, with its own theme and question. You have <Secs k="tRoulette" /> seconds to type your answer. Before the spin, every chamber shows its theme and level, the bullet too: an Expert question. Once the barrel stops, everyone sees who drew it. Medium is worth 2 points and Hard 3. The bullet earns 5 points if you get it right and costs you 3 if you get it wrong. 3 spins. With 2 teams, it’s the same barrel all game: one bullet, and someone draws it by spin 3. With 3–8 teams, there’s a new barrel every spin, and with 3, 4, 5 or 7 teams the bullet can also land in an empty chamber.</Mini>
+        <Mini name="Battle of the Captains">2-team setup only. The captains go head-to-head. Everyone else stays quiet. Each captain gets 10 questions. With a host, answers are given aloud within <Secs k="tBattleHost" /> seconds; without a host, captains type their answers within <Secs k="tBattleTyped" /> seconds. The captain with the highest score wins the points.</Mini>
+        <Mini name="Secret Stakes">Always the last game of the night, played in 3 rounds. Each round shows 3 themes. Each captain has <Secs k="tStakesPick" /> seconds to secretly pick a theme and a level. Easy is the safe bet: it wins nothing and loses nothing. Medium, Hard and Expert are worth more, and your phone shows how much. You then have <Secs k="tStakesQ" /> seconds to type your answer. Get it right and you win your bet; get it wrong and you lose it, straight from your total score. Nobody sees what the others bet until the reveal.</Mini>
         </ul>
         <P>In a 2-team setup, if the game is tied, you can play one more to settle it or award a point to each team.</P>
       </Rule>
@@ -126,8 +127,8 @@ export function FixingACall({ standalone = false, noTv = false }: { standalone?:
         <P>The app checks answers automatically. Captains can challenge certain decisions:</P>
         <OL items={[
           <>Where a decision can be challenged, tap <B>Contest</B> on the result. This applies to your team’s answers marked WRONG or the other team’s answers marked RIGHT.</>,
-          <>The other captain gets 15 seconds to respond with <B>Agree</B> or <B>No</B>.</>,
-          <>If the other captain doesn’t respond within 15 seconds, the app’s original decision stands.</>,
+          <>The other captain gets <Secs k="tContest" /> seconds to respond with <B>Agree</B> or <B>No</B>.</>,
+          <>If the other captain doesn’t respond within <Secs k="tContest" /> seconds, the app’s original decision stands.</>,
         ]} />
         <P>If a contest changes the result, the score is automatically updated.</P>
       </Rule>
