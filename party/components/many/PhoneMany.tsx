@@ -410,7 +410,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
           {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
-          {g.key !== "sudden" && (g.key === "majority" ? !(pub.voted?.length) : cb ? !cb.teams.some((i) => !cb.out[i] && pub.sent[i]) : !pub.sent.some(Boolean)) && !(g.key === "see" && (pub.see?.buzz != null || pub.see?.out?.some(Boolean))) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : "Change question"}</button>}
+          {/* (shown even once answers are in: the new question clears them, every game: 23 Nov, the owner) */}
+          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? "Change flag" : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
@@ -632,7 +633,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           </div>
           <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
             <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
-            {!picking && !pub.sent.some(Boolean) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change fact</button>}
+            {!picking && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change fact</button>}
             <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
           </div>
         </>);

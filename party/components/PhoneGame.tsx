@@ -460,7 +460,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <FlagImg name={pub.flag} h={110} />
         <AnswerCard />
         <Typed t={0} /><Typed t={1} />
-        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change flag" move={{ type: "flag/swap" }} /></div>
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change flag" move={{ type: "flag/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "flagReveal": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -570,7 +570,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
               status: on ? "✓ in" : "waiting", statusColor: on ? "var(--color-ok)" : "var(--color-ink-3)",
               typed: x?.length ? <div className="text-15 font-bold leading-snug pl-[22px]"><bdi>{x.join("  /  ")}</bdi>{pub.saidLate === t && <span className="text-13 font-semibold text-[var(--color-ink-3)]"> (after time&rsquo;s up)</span>}</div> : null }; })} />; })()}
         {/* (Pause, Change question until a team has sent, Reveal now: as with 3 to 8 teams) */}
-        <div className="flex gap-2 justify-center mt-auto"><Pause />{!pub.sent?.some(Boolean) && <Small ghost label="Change question" move={{ type: "roulette/swap" }} />}<Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change question" move={{ type: "roulette/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "rouletteReveal": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -1561,8 +1561,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
   const showNext = !!next && sc !== "sudden";
   /* no host: a new question (flag, landmark…) if both captains agree, while nobody has answered this one */
   const swapWord = sc === "dishQ" ? (pub.dish?.kind || "dish").toLowerCase() : SWAP_WORDS[sc];
-  const canSwap = nohost && !!swapWord && !pub.sent?.[0] && !pub.sent?.[1] && !sentHere && pub.buzz == null && !pub.out?.[0] && !pub.out?.[1]
-    && !((pub.majority?.answered?.[0] || 0) + (pub.majority?.answered?.[1] || 0));
+  /* (an answer already in no longer stops it, every game: 23 Nov, the owner; only while a team that buzzed is answering) */
+  const canSwap = nohost && !!swapWord && pub.buzz == null;
 
   /* Closest To Wins: "1.5 million", "2k", "€25" all count; what the TV will read is shown back */
   const guess: number = sc === "miniQ" && a.trim() ? QMB.parseNumber(a, pub.question) : NaN;

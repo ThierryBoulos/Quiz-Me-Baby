@@ -152,7 +152,9 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
     seen[key] = j + 1; used[key] = at + len;
     return { key, qs: (decks[key] || []).slice(at, at + len), i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k) }; }).filter((m) => m.qs.length);
   const extra: Partial<Record<ManyKey, Q[]>> = {};
-  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + 4);
+  /* (Guess the Flag keeps 40 of the flags dealt past the game's ten, every level mixed, so Change flag finds one at
+     the same level, as with 2 teams: 23 Nov. The TV holds the bank anyway; the phones never get the answers) */
+  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" ? 40 : 4));
   extra.comeback = (decks.comeback || []).slice(MANY_LEGS.comeback);
   /* (a question round's Change question stays in the question's theme: the rounds' spares, then the questions held
      back past sudden death's, one pair per theme in turn: 19 Nov review, a Science question became Geography) */
@@ -176,21 +178,19 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   const m = miniOf(s);
   /* Secret Stakes: three new themes, the bets cleared (on the bets, or before anyone has answered) */
   if (m?.key === "stakes" && (s.screen === "pick" || s.screen === "q")) {
-    if (s.screen === "q" && answered(s).some(Boolean)) return "Too late: someone has already answered this one.";
     const R = s.extra?.stakes?.shift(); if (!R) return "No other themes left.";
     m.qs[m.i] = R; s.paused = false; betPhase(s, now, t); toast(s, "Three new themes."); return true;
   }
   if (!m || s.screen !== "q" || m.key === "sudden") return false;
   /* Fool Me Twice: another fact, as hard as this one if there's one left, before any lie is in */
   if (m.key === "fool") {
-    if (s.typed.some((x) => x != null)) return "Too late: a lie is already in.";
     const L = s.extra?.fool || [], lv = qOf(s)?.level, j = Math.max(0, L.findIndex((x) => x?.level === lv));
     if (!L.length) return "No other fact left.";
     m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); return true;
   }
-  /* (Majority Rules: a vote counts, not a team with nobody on the list) */
-  if ((m.key === "majority" ? false : m.key === "comeback" ? (m.only || []).some((t) => s.typed[t] != null) : answered(s).some(Boolean)) || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
-  if (m.key === "see" && (s.buzz != null || s.out?.some(Boolean))) return "Too late: someone has already had a go at this one.";
+  /* (an answer already in no longer stops it: the new question clears what was sent, every game, every setup: 23 Nov,
+     the owner, "if the host decides, why not") */
+  if (s.contest) return "Wait: a contest is open.";
   if (m.key === "quiz") {
     const th = qOf(s)?.theme, pick = (L: Q[] | undefined) => { const j = (L || []).findIndex((q) => q?.theme === th); return j < 0 ? null : L!.splice(j, 1)[0]; };
     const next = pick(s.extra?.quiz) ?? pick(s.spare);
@@ -201,7 +201,13 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
      and the spin stay, as with 2 teams (22 Nov, the owner: till then a new barrel, spun again) */
   if (m.key === "roulette") {
     if (!QMB.rouletteSwapQs(m.qs[m.i])) return QMB.RR_NONE_LEFT as string;
-    s.paused = false; s.deadline = Math.max(now, (s.spinAt ?? 0) + SPIN_MS) + s.total * 1000; s.left = 0; s.step++; toast(s, QMB.RR_SWAPPED as string); return true;
+    clear(s); s.paused = false; s.deadline = Math.max(now, (s.spinAt ?? 0) + SPIN_MS) + s.total * 1000; s.left = 0; s.step++; toast(s, QMB.RR_SWAPPED as string); return true;
+  }
+  /* Guess the Flag: a spare at the flag's level, else another level, as with 2 teams (23 Nov, the owner) */
+  if (m.key === "flag") {
+    const L = s.extra?.flag || [], j = QMB.spareAt(L, qOf(s)?.level) as number;
+    if (j < 0) return "No other flag left at this level.";
+    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, "New flag."); return true;
   }
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t); return true;

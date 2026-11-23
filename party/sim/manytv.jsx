@@ -320,12 +320,13 @@ async function fool(k, phone, tag) {
   check(`${tag} Fool: the tracker counts the fact on the reveal`, pub().game.pts[0] === 2 + (k - 1) + 1, String(pub().game.pts));
   await judge("m/next");
   check(`${tag} Fool: Next: the second fact`, pub().screen === "q" && F().n === 2 && !F().opts, `${pub().screen} ${F()?.n}`);
-  /* Change fact, before any lie: another; with one in, refused */
+  /* Change fact, before any lie: another; with one in, another too (the lie cleared) */
   const was = fact().id; await judge("m/swap");
   check(`${tag} Fool: Change fact`, fact().id !== was && pub().screen === "q");
   send("c0", "answer", { text: "Something", k: `${pub().qid}|q` }); await tick(600);
   id = tap(); send("host", "judge", { move: { type: "m/swap" }, step: pub().step, tap: id }); await tick(600);
-  check(`${tag} Fool: Change fact with a lie in: refused`, /a lie is already in/.test(ackOf("host", id) || ""), `reply "${ackOf("host", id)}"`);
+  /* (a lie in no longer stops it: the new fact clears it, 23 Nov, the owner) */
+  check(`${tag} Fool: Change fact with a lie in: a new fact, the lie cleared`, ackOf("host", id) === "+" && !pub().sent[0] && pub().screen === "q", `reply "${ackOf("host", id)}"`);
   /* the host's Reveal now: the answers go up; again: the reveal */
   await judge("m/reveal");
   check(`${tag} Fool: Reveal now on the lies: the answers go up`, pub().screen === "pick", pub().screen);

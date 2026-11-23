@@ -678,10 +678,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (t === "ui/introGo") { if (g?.nightIntro) { delete g.nightIntro; s.waitSince = Date.now(); imadNarrate(s); } return; }
     if (g?.nightIntro && t !== "ui/setScore") return;
     if (t === "ui/contestOk") closeContest(!!move.v, true);
-    /* What Do You See?: no new picture once a team has had a go at this one (as the Cocktail or Dish) */
-    else if (t === "see/swap" && s.screen === "seeQ" && (s.seeBuzz != null || s.seeOut[0] || s.seeOut[1])) s.toast = { id: ++s.toastN, text: "Somebody has already had a go at this one." };
-    /* the host's Change question: only before anyone answers, as How to Play says (with no host, askSwap checks the same; 14 Nov) */
-    else if (/\/swap$/.test(t) && t !== "see/swap" && t !== "dish/swap" && !s.nohost && answeredYet()) s.toast = { id: ++s.toastN, text: answeredYet()! };
+    /* the host's Change question: not while a contest or a lifeline is open (an answer already in no longer stops it:
+       23 Nov, the owner) */
+    else if (/\/swap$/.test(t) && !s.nohost && answeredYet()) s.toast = { id: ++s.toastN, text: answeredYet()! };
     else if (t === "ui/flip") { const c = callsOf(s).find((x) => x.id === move.id); if (c) applyCall(c.id, !c.ok); }
     else if ((t === "dish/right" || t === "dish/wrong") && g.dishGame.leg.buzz != null && !s.nohost) {
       const b = g.dishGame.leg.buzz as 0 | 1;
@@ -1017,10 +1016,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const s = st.current, g = s.g;
     if (s.contest) return `One at a time: ${poss(iso(g.teams[s.contest.by].name))} contest is open.`;
     if (s.lifeline) return "Wait for the lifeline to finish.";
-    if (s.pending || s.typed[0] || s.typed[1] || s.guesses[0] != null || s.guesses[1] != null || s.pins[0] || s.pins[1] || Object.keys(s.votes).length) return "Too late: someone has already answered this one.";
-    if (s.screen === "dishQ") { const L = g.dishGame.leg; if (L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length || s.buzzAt) return "Too late: someone has already had a go at this one."; }
-    if (s.screen === "seeQ" && (s.seeBuzz != null || s.seeOut[0] || s.seeOut[1])) return "Too late: someone has already had a go at this one.";
-    if (s.screen === "foolWrite" && (s.foolLies[0] != null || s.foolLies[1] != null)) return "Too late: a lie is already in.";
+    /* (an answer already in no longer stops it: the new question clears what was sent, every game, every setup:
+       23 Nov, the owner, "if the host decides or both captains agree, why not") */
     return null;
   }, []);
   /* ...not changed after all (No, no answer, too late): the clock that stopped for it goes on */
@@ -1118,8 +1115,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (A.kind === "swap") {
         if (!move.v) { swapBack(A); s.toast = { id: ++s.toastN, text: `${by} said no: the ${A.what} stays.` }; return true; }
         if (s.screen !== A.screen || draftKey() !== A.key) return true;                 // moved on meanwhile: nothing to change
-        /* an answer that landed while it was asked (typed just before the clock stopped): too late */
-        if (answeredYet()) { swapBack(A); s.toast = { id: ++s.toastN, text: `Too late: someone answered meanwhile, so the ${A.what} stays.` }; return true; }
+        /* (a contest or a lifeline opened meanwhile: it waits) */
+        if (answeredYet()) { swapBack(A); s.toast = { id: ++s.toastN, text: answeredYet()! }; return true; }
         s.toast = null;
         hostMove({ type: SWAPS[sc] });
         s.step++;

@@ -229,7 +229,8 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   /* "Change question" before an answer is in: a spare, and a fresh 15 seconds */
   { const s = start(5, [44, 42, 26, 14, 9]); L.startMini(s, 0, T, []); const was = L.qOf(s).id;
     want("Change question", L.swapQ(s, 500, T) === true && L.qOf(s).id !== was && s.deadline === 500 + 15000);
-    L.captainAnswer(s, 2, { text: "x" }); want("...not once an answer is in", L.swapQ(s, 600, T) !== true); }
+    /* (an answer in no longer stops it: the new question clears it, 23 Nov, the owner) */
+    L.captainAnswer(s, 2, { text: "x" }); want("...and once an answer is in, which it clears", L.swapQ(s, 600, T) === true && s.typed.every((x) => x == null)); }
   /* 18 Nov: the comeback and Fool Me Twice on the same night: right after Fool Me Twice, and Fool Me Twice right after it;
      and the group left behind (the owner: 47 47 40 38 42 | 16 14 7, and the 16 was left out) */
   { const foolFacts = bank.filter((q) => q.type === "fool").sort((a, b) => (a.id < b.id ? -1 : 1));
@@ -380,7 +381,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     draw.forEach((j, t) => { const c = now.ch[j]; if (c.q.id !== spare[t] || c.theme !== was[t].theme || c.level !== was[t].level || c.q.theme !== c.theme || c.q.difficulty !== c.level) ok = false; });
     if (!(s.deadline > 5000)) ok = false;
     L.captainAnswer(s, 0, { text: "Atlantis" });
-    if (typeof L.swapQ(s, 6000, T) !== "string") ok = false;
+    if (L.swapQ(s, 6000, T) !== Q.RR_NONE_LEFT) ok = false;   // (an answer in doesn't stop it; this chamber's spare is gone)
   }
   if (!ok) bad++;
   console.log(`Russian Roulette, 3-8 teams: Change question gives each team its chamber's spare, same theme and level, the spin kept — ${ok ? "ok" : "FAILED"}`);
@@ -534,7 +535,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
          team still has none here) */
       { const c = structuredClone(s); L.pause(c, 1000); if (L.captainAnswer(c, k - 1, { text: "Late" }) !== true || c.screen !== "q" || !c.paused) fail("a lie while paused"); }
       if (L.foolAllIn(s)) fail("all in with a lie missing");
-      if (L.swapQ(s, 0, T) === true) fail("swap with a lie in");
+      { const c = structuredClone(s); if (L.swapQ(c, 0, T) !== true || c.typed.some((x) => x != null)) fail("a new fact with a lie in, the lies cleared"); }
       L.foolOpen(s, 3000, T);                                    // (time's up)
       const F = s.fool;
       if (s.screen !== "pick" || !F || s.deadline !== 3000 + 20000) fail("not on the picks with a 20 s clock");
