@@ -9,6 +9,7 @@ import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
+import { useSideways } from "../Side";
 import { flagRule1, showKm, showNum } from "@/lib/game";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
@@ -82,6 +83,7 @@ const SK_RISE = 150, SK_LAND = SK_RISE + 1000;
    The phone keeps the label, the pips and the night's standings, your team lit. ---- */
 export function HudMany({ pub, size, code, me, host, sound = false }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean; sound?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
+  const sideways = useSideways();
   const label = pub.screen === "final" ? <b>Final result</b> : g
     /* (each part whole: on a narrow phone the line breaks at the dot, never inside the game's name) */
     /* (a game's intro: just its name, no "Game 14 of 14": the pips under it say that (22 Nov, the owner)) */
@@ -163,7 +165,8 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
         </div>)}
       {/* during a game, this game's points, small, under the night's strip (as the 2-team phones show "This game": 23 Nov,
          the owner); each team by its lettered dot, yours lit */}
-      {!tv && inGame && g.key !== "sudden" && g.key !== "comeback" && (
+      {/* (held sideways with six teams or more, it doesn't fit the left column: left out there) */}
+      {!tv && inGame && g.key !== "sudden" && g.key !== "comeback" && !(sideways && k > 5) && (
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-1.5 text-12" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}`).join(", ")}`}>
           <span className="eyebrow text-[var(--color-ink-3)]" style={{ fontSize: 10 }}>This game</span>
           {T.map((t, i) => <span key={i} className="flex items-center gap-1" style={{ opacity: me == null || i === me ? 1 : 0.75 }}><Dot t={i} color={t.color} size={12} /><b className="tabular-nums" style={{ color: i === me ? t.color : "var(--color-ink-2)" }}>{pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}</b></span>)}
