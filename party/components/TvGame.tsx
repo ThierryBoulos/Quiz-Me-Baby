@@ -13,7 +13,7 @@ import { COMEBACK_TITLE } from "@/lib/comeback";
 import { AskHead, battleNeeds, Board, comebackTeams, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
-import { takeText } from "./many/PartsMany";
+import { takeText, TeamRows as Rows } from "./many/PartsMany";
 import { SeeTv } from "./See";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, showNum, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
@@ -458,19 +458,22 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
           <span key={t} className="font-bold" style={{ fontSize: 22, color: pub.sent?.[t] ? tc(t as 0 | 1) : "var(--color-ink-3)" }}>{T[t].name}: {pub.sent?.[t] ? "pin in" : "placing…"}</span>))}</div>
       </div>
     </div>);
-  if (sc === "pinReveal" && pub.pin?.reveal) { const R = pub.pin.reveal, w = pub.reveal?.w; return (
+  if (sc === "pinReveal" && pub.pin?.reveal) {
+    /* (as with 3 to 8 teams: the landmark on its tile, its place, each team's row closest first, the trophy and the
+       points, who takes it: 23 Nov, the owner) */
+    const R = pub.pin.reveal, w = pub.reveal?.w, won = w === "tie" ? [0, 1] : w === 0 || w === 1 ? [w] : [];
+    const order = [0, 1].sort((a, b) => (R.km[a] == null ? 1 : 0) - (R.km[b] == null ? 1 : 0) || Math.round(R.km[a] ?? 0) - Math.round(R.km[b] ?? 0) || a - b);
+    const teams = ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })), hw = takeText(won, teams);
+    return (
     <div className="flex gap-10 items-center w-full">
       <div className="flex-1 min-w-0"><PinMap marks={pinMarks(pub)} fly height={490} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
-      <div className="w-[380px] flex flex-col items-center gap-3 pb-10">
-        <div className="eyebrow text-16">It&rsquo;s here</div>
-        <div className="display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.name}</div>
+      <div className="w-[400px] shrink-0 flex flex-col items-center gap-3">
+        <div className="eyebrow text-18">It&rsquo;s here</div>
+        <div className="ans-board display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.name}</div>
         <div className="text-22 text-[var(--color-ink-2)] -mt-1">{R.place}</div>
-        {[0, 1].map((t) => (
-          <div key={t} className="flex flex-col items-center" style={{ opacity: w === t || w === "tie" ? 1 : 0.6 }}>
-            <div className="display text-22" style={{ color: tc(t as 0 | 1) }}>{T[t].name}</div>
-            <div className="display text-40">{R.pins[t] ? showKm(R.km[t] ?? 0) : "No pin"}{R.pins[t] && <span className="text-22 text-[var(--color-ink-2)]"> off</span>}</div>
-          </div>))}
-        <div className="display text-36 mt-6" style={{ color: tc(w === 0 || w === 1 ? w : null) }}>{w === "tie" ? "A point each" : w === 0 || w === 1 ? `${T[w].name} take it` : "No point"}</div>
+        <div className="w-full mt-2"><Rows teams={teams} winners={won} order={order} size="tv" pts={[0, 1].map((t) => (won.includes(t) ? 1 : 0))}
+          right={(t) => (R.pins[t] ? showKm(R.km[t] ?? 0) : <span className="text-[var(--color-ink-3)]">No pin</span>)} /></div>
+        <div className="display text-36 mt-3" style={{ color: hw.color }}>{hw.text}</div>
       </div>
     </div>); }
   /* Guess the Airport: the board, then its name */

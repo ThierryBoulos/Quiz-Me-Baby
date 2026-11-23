@@ -745,7 +745,11 @@ export const closestCols = (pub: PubMany): Col[] => {
 /* ---- a reveal's rows: each team's line, in the order given (a side column on the TV, a list on a phone), the
    ones who take it with a trophy ---- */
 export function RowsMany({ pub, order, right, size, label, pts }: { pub: PubMany; order: number[]; right: (t: number) => ReactNode; size: Size; label?: (t: number) => ReactNode; pts?: number[] }) {
-  const T = pub.teams, tv = size === "tv", dense = T.length > 4, W = pub.reveal?.winners || [];
+  return <TeamRows teams={pub.teams} winners={pub.reveal?.winners || []} order={order} right={right} size={size} label={label} pts={pts} />;
+}
+/* the rows themselves, for every setup (2 teams' Drop the Pin reveal too: 23 Nov, the owner) */
+export function TeamRows({ teams: T, winners: W, order, right, size, label, pts }: { teams: { name: string; color: string }[]; winners: number[]; order: number[]; right: (t: number) => ReactNode; size: Size; label?: (t: number) => ReactNode; pts?: number[] }) {
+  const tv = size === "tv", dense = T.length > 4;
   return (
     <div className="flex flex-col w-full" style={{ gap: tv ? (dense ? 2 : 8) : 4 }} role="list">
       {order.map((t) => (
