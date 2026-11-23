@@ -179,7 +179,7 @@ export function SeeTv({ see, screen, teams, clock, deadline, left, rows, foot, d
           {clock}
           <div className="text-24 font-bold leading-snug">Know it? Buzz!</div>
         </>)}
-        <SeeTicks teams={teams} out={see.out} buzz={see.buzz} column={teams.length <= 2} size={teams.length > 4 ? 20 : 22} />
+        <SeeTicks teams={teams} out={see.out} buzz={see.buzz} column={teams.length <= 4} size={teams.length > 4 ? 20 : 22} />
         <div className="text-20 text-[var(--color-ink-2)] leading-snug text-balance">{b ? "Wrong, and you’re out of this picture." : foot ?? "Buzz, say it out loud and type it. Wrong, and you’re out of this picture."}</div>
       </div>
     </div>); }

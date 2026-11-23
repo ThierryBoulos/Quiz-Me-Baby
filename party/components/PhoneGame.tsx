@@ -1478,7 +1478,7 @@ const CALL_SCREENS = ["answer", "flagReveal", "seeReveal", "sayReveal", "mapReve
 const SD_CALL_SCREENS = ["battleSummary", "sudden", "battleTie"];
 /* the mini-game reveals with a results table: the captains see the table, and the 3-8 card to contest a call under it
    (23 Nov, the owner: one look in every setup) */
-const CARD_SCREENS = ["flagReveal", "sayReveal", "airportReveal", "rouletteReveal"];
+const CARD_SCREENS = ["flagReveal", "sayReveal", "airportReveal", "rouletteReveal", "seeReveal"];
 /* no host: the screens where both captains can agree to a new one, and what it's called */
 const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", seeQ: "picture", foolWrite: "fact", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", rouletteQ: "question", stakesPick: "themes", stakesQ: "themes", battleQ: "question", comebackQ: "question" };
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "seeQ", "foolWrite", "foolPick", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ", "comebackQ"];
