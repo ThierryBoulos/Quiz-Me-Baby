@@ -111,9 +111,9 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
           onClick={() => set(Object.fromEntries(TIMER_KEYS.map((k) => [k, DEFAULTS[k]])) as Partial<Settings>)}>Back to the default timers</button>
       </>) : (<>
       <Section title="Gameplay">
-        <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="New questions first" help={`Every question ${noTv ? "the phone running the game" : "this TV"} plays is remembered, and the next games deal the ones you haven't played. When a game runs out of new ones, played ones come back (a night never gets shorter) and the lobby offers to reset.`} />
-        <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="Alternate which team answers first each round" help="Off = Team A always goes first." />
-        <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help={`Someone switches app or tab while a question is up (a search, a chatbot)? ${noTv ? "The host's phone keeps the list" : "The TV says so, and the host's phone keeps the list"}. Call a Friend is allowed.`} />
+        <Toggle on={s.noRepeat} set={(v) => set({ noRepeat: v })} title="New questions first" help={`${noTv ? "The phone running the game" : "The TV"} remembers every question played. Once all new questions are used, played ones return. You can reset anytime from the lobby.`} />
+        <Toggle on={s.alternateFirst} set={(v) => set({ alternateFirst: v })} title="In a 2-teams setup, alternate which team answers first each round" help="Off = Team A always goes first." />
+        <Toggle on={s.flagAway} set={(v) => set({ flagAway: v })} title="Flag phones that leave the game during a question" help={`Someone switches app or tab while a question is up (a search, a chatbot)? ${noTv ? "The phone running the game says so" : "The TV says so"}, and the host can track that.`} />
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <span className="text-14 text-[var(--color-ink-2)]">{played} question{played === 1 ? "" : "s"} marked as played{remote ? ` on ${the}` : ""}.</span>
           <button type="button" className="btn btn-sm" disabled={!played}
@@ -138,7 +138,7 @@ export function HouseRules({ s, set, tab, pick, played, onForget, addQuestion, r
 
       {/* (Imad is on the TV: with no TV his switch does nothing, so it's hidden: the owner, 4 Nov audit, 3.1) */}
       {!noTv && <Section title="Your MC: Imad">
-        <Toggle on={s.imad} set={(v) => set({ imad: v })} title="Imad comments" help="He comments on the game in a speech bubble on the TV: round intros, right and wrong answers, steals, lead changes, the final. Text only, no voice." />
+        <Toggle on={s.imad} set={(v) => set({ imad: v })} title="Imad comments" help="He comments on the game in a speech bubble on the TV. Text only, no voice." />
       </Section>}
 
       </>)}

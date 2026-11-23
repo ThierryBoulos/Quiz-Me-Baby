@@ -39,7 +39,7 @@ export function AddQuestion({ theme: preset, note }: { theme?: string; note?: st
   };
   return (
     <div className="flex flex-col gap-4">
-      {note !== "" && <p className="text-14 text-[var(--color-ink-2)]">{note ?? <>Kept in this browser on this device, through every app update. They join the game when this device starts it (or is the TV), and the host can hand-pick them under Advanced. Clearing this browser&rsquo;s data, or a private window, loses them.</>}</p>}
+      {note !== "" && <p className="text-14 text-[var(--color-ink-2)]">{note ?? <>Kept in this browser on this device. They are added to the game when this device starts it, and the host can hand-pick them under Advanced. Clearing this browser&rsquo;s data, or a private window, loses them.</>}</p>}
       <Field id="ny" label="Type">
         <select id="ny" className="input !text-16 cursor-pointer" value={f.type} onChange={(e) => set({ type: e.target.value })}>
           {CUSTOM_TYPES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
