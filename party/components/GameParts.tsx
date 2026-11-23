@@ -5,13 +5,14 @@
    the mini-game intro with its rules. One look everywhere. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
+import { flagRule1 } from "@/lib/game";
 import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { COMEBACK_TITLE } from "@/lib/comeback";
 import { preloadWorld, type Mark } from "./PinMap";
-import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_FLAG, T_MAP, T_PIN, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
+import { DISH_STEP, showKm, T_AIRPORT, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_CLOSEST, T_DISH_TYPE, T_MAP, T_PIN, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -404,8 +405,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `${host ? "The host rules" : "Each captain rules on the other team's answer"}: the idea counts, not the exact words.` },
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     case "flag": return [
-      { text: `A flag goes up. ${sec(t?.flag, T_FLAG)}.` },
-      { text: "Both captains type whose flag it is, at the same time." },
+      { text: flagRule1(t?.flag) },
       { text: `The app checks them${host ? ", and the host can change the call" : ". Its RIGHT stands; the other captain can give one it called WRONG"}. Both right? A point each. Nobody? Nobody.` },
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     /* What Do You See? (12 Nov, the owner) */

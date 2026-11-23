@@ -125,6 +125,8 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
     </div>);
 }
 
+/* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
+const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: "Which country?" };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -393,6 +395,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{g.key === "say" ? "The app's secret answer: it scores nothing. Only you see this" : "The answer. Only you see this"}</div>
             <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{g.key === "closest" ? showNum(Number(secret.answer)) : secret.answer}</div>
             {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
+            {(secret.accept?.length ?? 0) > 0 && <div className="text-13 text-[var(--color-ink-2)] mt-1"><b className="text-[var(--color-ink)]">Also accepted:</b> {secret.accept!.join(", ")}</div>}
           </div>)}
         {(g.key === "roulette" ? !spinning && !secret.answers : g.key === "stakes" ? !secret.answers : !secret.answer) && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{g.key === "roulette" || g.key === "stakes" ? "Getting the answers…" : "Getting the answer…"}</p>}
         {/* who's in: every team, as the TV shows them */}
@@ -402,7 +405,10 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               /* (What Do You See?: the buzzer: who buzzed and is saying it and typing it, or nobody yet) */
               : g.key === "see" ? (pub.see?.buzz != null ? <><bdi>{T[pub.see.buzz]?.name}</bdi> buzzed{pub.see.by ? <> (<bdi>{pub.see.by}</bdi>)</> : null}: saying it out loud, and typing it</> : "Waiting for a buzz…") : `${n} of ${who.length} teams answered`}
             rows={who.map((i) => { const out = (secret.out ?? pub.out)?.[i], t = T[i], bz = g.key === "see" && pub.see?.buzz === i, on = bz || (pub.sent[i] && !out);
+              /* (what each team sent, under its name, the moment it's in, as with 2 teams: 23 Nov, the owner) */
+              const x = typedKey(g.key) ? secret.typed?.[i] : g.key === "closest" && secret.nums?.[i] != null ? showNum(secret.nums[i]!) : null;
               return { key: i, name: t.name, color: t.color, dot: <Dot t={i} color={t.color} size={14} />, lit: !!(pub.sent[i] || bz),
+                typed: x ? <div className="text-14 font-bold leading-snug pl-[22px] break-words"><bdi>{x}</bdi></div> : null,
                 statusColor: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)", status: out ? "✗ out" : bz ? "buzzed!" : g.key === "see" ? "can buzz" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting" }; })} />); })()}
         {/* the same controls as with two teams: Pause, Change question, Reveal now (the 4 Nov audit, 3.11) */}
         {/* (after the answer and the list, not docked over them: the band covered the answer card and the list of who's
@@ -496,8 +502,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {cap && sc === "q" && cbOut && (<><OnScreen /><Line>Your team is out of the comeback.</Line></>)}
       {/* THE CAPTAIN answers the rest */}
       {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && !(g.only && mine != null && !g.only.includes(mine)) && !cbOut && (<>
-        {/* Russian Roulette: the captain's line at the top, as with 2 teams (22 Nov, the owner) */}
-        {g.key === "roulette" && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">Your chamber&rsquo;s question. Type your answer.</p>}
+        {/* the captain's line at the top, as with 2 teams (Russian Roulette 22 Nov, Guess the Flag 23 Nov, the owner) */}
+        {TOP_CAP[g.key] && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">{TOP_CAP[g.key]}</p>}
         <OnScreen small={g.key === "pin" && !sentMine} />
         {/* What Do You See? (12 Nov, the owner: a buzzer): BUZZ, then 10 seconds to say it out loud and type it; a wrong
             answer (or none in time) and the team is out of this picture, and another team can buzz */}
@@ -556,8 +562,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           </div>)}
       </>)}
       {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && (<>
-        {/* Russian Roulette: the players' line at the top, as with 2 teams (22 Nov) */}
-        {g.key === "roulette" && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">Russian Roulette: help your captain</p>}
+        {/* the players' line at the top, as with 2 teams */}
+        {TOP_CAP[g.key] && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">{g.title}: help your captain</p>}
         <OnScreen />
         {/* What Do You See? (12 Nov, the owner): any player can buzz for the team (the captain types the answer); who
             buzzed, and whether your team is out of this picture */}

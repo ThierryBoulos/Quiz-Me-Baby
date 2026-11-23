@@ -9,7 +9,7 @@ import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
-import { showKm, showNum } from "@/lib/game";
+import { flagRule1, showKm, showNum } from "@/lib/game";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import type { Member } from "@/lib/room";
@@ -185,7 +185,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
       "Teams are ranked by the share of their answers that are right.", pay];
     /* the round's themes are in the gold band above ("4 questions – Science & Music"), not said again here (the owner, 31 Oct) */
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
-    case "flag": return ["A flag goes up. Captains type the country on their phone.", fast, pay];
+    case "flag": return [flagRule1(pub.introSecs), fast, pay];
     case "airport": return ["A departures board goes up. Captains type which airport it is.", fast, pay];
     case "map": return ["A map with places marked. Captains type what they have in common.", fast, pay];
     case "closest": return ["A question with a number for an answer. Captains type their best guess.", `Closest guess first: ${per}`, pay];
@@ -201,7 +201,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
       `Right, and you score ${k} points. Wrong, and you're out of this picture: the clock goes on and another team can buzz.`, pay];
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
     /* (shorter; the bullet is no secret now: everyone sees who drew it once the barrel stops, 11 Nov, the owner) */
-    case "roulette": return [rrRule1(`${pub.rrSecs ?? 45} seconds`), { text: rrRule2(false, n), warn: true }, RR_RULE3,
+    case "roulette": return [rrRule1(`${pub.introSecs ?? 45} seconds`), { text: rrRule2(false, n), warn: true }, RR_RULE3,
       `${n} spins. ${pay}`];
     /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
     case "stakes": { const I = pub.skIntro; return skRules(n, I?.unit ?? pub.stakes?.unit ?? 1, I?.pick ?? 20, I?.q ?? 45); }   // (one card, every setup: components/Stakes.tsx)

@@ -4,7 +4,7 @@ import { foolFact, foolSum, type FoolOpt } from "../fool";
 import { QMB, aboutHost, acceptFor, hostOnly, revOf } from "../engine";
 import { getSettings } from "../settings";
 import type { Member } from "../room";
-import { DECIDED, iso, MINI_TITLES, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two, poss } from "../game";
+import { DECIDED, iso, MINI_TITLES, preloadOf, T_NEXT_FALLBACK, type MiniKey, type Pub, type Secret, type Two, poss } from "../game";
 import { CONTEST_SCREENS, WAITS_FOR_NEXT, dishKind, miniOf, miniState, other, type G, type W } from "./rules";
 import { callsOf, closestW, currentQ, fireOf, leadOf, matchQ, mrTally, okWin, pinW, sayWin, seatOf } from "./reads";
 import { recap } from "./recap";
@@ -61,15 +61,9 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   /* with a host: the typed answer rides with the screen (the host's phone shows it at once; the app's opinion follows with the secret) */
   if (!s.nohost && ["ask", "steal", "dishQ", "battleQ", "sudden", "battleTie"].includes(s.screen)) { p.said = [s.typed[0], s.typed[1]]; if (s.typedLate != null) p.saidLate = s.typedLate; }
   /* the next pictures, fetched ahead on every screen (the TV takes the whole deck at the intro) */
-  { const fg = g.flagGame, mg = g.mapGame, sc = s.screen, all = /Intro$/.test(sc);
-    if (fg && /^flag/.test(sc)) p.preload = { flags: fg.qs.slice(fg.i, all ? undefined : fg.i + 3).map((x: G) => x.flag).filter(Boolean) };
-    if (mg && /^map/.test(sc)) p.preload = { maps: mg.qs.slice(mg.i, all ? undefined : mg.i + 2).map((x: G) => x.id) };
-    /* Drop the Pin: the photos, and the world map itself (big: from the intro on) */
-    const pg = g.pinGame;
-    if (pg && /^pin/.test(sc)) p.preload = { pins: pg.qs.slice(pg.i, all ? undefined : pg.i + 2).map((x: G) => x.photo).filter(Boolean), world: true };
-    /* What Do You See?: the next two pictures (the TV fetches its size, a phone its own) */
-    const eg = g.seeGame;
-    if (eg && /^see/.test(sc)) p.preload = { sees: eg.qs.slice(eg.i, eg.i + 2).map((x: G) => x.photo).filter(Boolean) }; }
+  /* (one rule for every setup: lib/game.ts preloadOf) */
+  { const sc = s.screen, all = /Intro$/.test(sc), at = ([["flag", g.flagGame], ["map", g.mapGame], ["pin", g.pinGame], ["see", g.seeGame]] as [string, G][]).find(([k, x]) => x && sc.startsWith(k));
+    if (at) p.preload = preloadOf(at[0], at[1].qs, at[1].i, all); }
   /* every change of score, for the recap's chart and lead changes; then the part of the night this screen is in (a
      new one starts where the score log is now). The score first: a mini-game's points land as its result screen
      gives way to the next part's, and they're the mini-game's */

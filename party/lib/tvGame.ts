@@ -1816,9 +1816,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           }
         }
       }
-      /* away for two seconds during a question: flag it now (how long comes when they're back) */
+      /* away for two seconds during a question: flag it now (how long comes when they're back); 2 s, as with 3 to 8 teams (it said two and waited three: 23 Nov) */
       for (const [k, a] of Object.entries(here.current.away)) {
-        if (!a.flag && now - a.at >= 3000) { a.flag = flag(k, a.qid, null) ?? -1; if (a.flag > 0) changed = true; }
+        if (!a.flag && now - a.at >= 2000) { a.flag = flag(k, a.qid, null) ?? -1; if (a.flag > 0) changed = true; }
       }
       if (changed) void publish();
     }, 250);

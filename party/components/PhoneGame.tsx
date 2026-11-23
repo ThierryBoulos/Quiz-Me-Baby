@@ -226,7 +226,7 @@ function MajorityList({ pub, me, act }: { pub: Pub; me: Member; act?: (move: Rec
 /* THE HOST'S PHONE: the answer always on top, one main button, judging only
    when there's something to judge. */
 export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: Pub; secret: Secret; send: Send; busy: boolean; fire?: Send }) {
-  const noTv = useNoTv();
+  const noTv = useNoTv(), sideways = useSideways();
   const T = pub.teams, turn = pub.turn ?? 0;
   /* only trust the secret when it belongs to this very screen: the question
      and the answer travel separately, and the answer must never be the last one */
@@ -274,6 +274,12 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="eyebrow" style={{ color: tc(t) }}>{label ?? T[t].name}</div>
       {text ? <div className="font-bold text-22 leading-snug">{text}</div> : <div className="text-14 text-[var(--color-ink-3)] mt-0.5">{empty}</div>}
     </div>);
+  /* who has answered, ticked as each team sends, and what it sent under its name (one card, every setup: 23 Nov) */
+  const Who = () => { const typed = (t: 0 | 1) => (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
+    return <WhoAnswered head={`${[0, 1].filter((t) => pub.sent?.[t]).length} of 2 teams answered`} oneCol
+      rows={([0, 1] as const).map((t) => { const x = typed(t), on = !!pub.sent?.[t]; return { key: t, name: T[t].name, color: tc(t), dot: <Dot t={t} color={tc(t)} size={14} />, lit: on,
+        status: on ? "✓ in" : "waiting", statusColor: on ? "var(--color-ok)" : "var(--color-ink-3)",
+        typed: x?.length ? <div className="text-14 font-bold leading-snug pl-[22px] break-words"><bdi>{x.join("  /  ")}</bdi>{pub.saidLate === t && <span className="text-13 font-semibold text-[var(--color-ink-3)]"> (after time&rsquo;s up)</span>}</div> : null }; })} />; };
   const Typed = ({ t }: { t: 0 | 1 }) => {
     /* what they typed comes with the screen itself, so it shows before the secret (the answer, the app's call) lands */
     const x = (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
@@ -455,11 +461,11 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     case "flagQ": return (
       <div className="flex flex-col gap-3 flex-1">
         {/* (sideways, the picture and the clock go to the left column, so the host's calls fit on the right: the 4 Nov audit, 3.7) */}
-        <ToSide order={2}><div className="flex items-center justify-between"><div className="eyebrow">Flag {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        </ToSide>
-        <FlagImg name={pub.flag} h={110} />
+        {/* (as with 3 to 8 teams: the flag at 150, the clock under it, the answer, then who has answered and what they
+           sent: 23 Nov, the owner) */}
+        <ToSide order={2}><div className="flex flex-col items-center gap-2"><FlagImg name={pub.flag} h={150} /><div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sideways ? 70 : 90} /></div></div></ToSide>
         <AnswerCard />
-        <Typed t={0} /><Typed t={1} />
+        <Who />
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change flag" move={{ type: "flag/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "flagReveal": return (
@@ -467,6 +473,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <OnScreen pub={pub} small />
         <Result pub={pub} host headOnly />
         <Rulings type="ui/flagOk" empty="No answer" />
+        {/* (who takes it, as with 3 to 8 teams: 23 Nov, the owner) */}
+        {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })), true); return <Big text={w.text} color={w.color} size={32} />; })()}
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
       </div>);
@@ -564,11 +572,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
             {([0, 1] as const).map((t) => <div key={t} className="text-15"><b style={{ color: tc(t) }}>{T[t].name}</b> · {pub.roulette!.draw[t]?.theme}: <b style={{ color: "var(--color-gold)" }}>{secret.answers![t]}</b></div>)}
           </div>) : null)}
         {/* who has answered, as with 3 to 8 teams, and under each team what its captain has typed (22 Nov, the owner) */}
-        {rrSpun && (() => { const typed = (t: 0 | 1) => (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
-          return <WhoAnswered head={`${[0, 1].filter((t) => pub.sent?.[t]).length} of 2 teams answered`} oneCol
-            rows={([0, 1] as const).map((t) => { const x = typed(t), on = !!pub.sent?.[t]; return { key: t, name: T[t].name, color: tc(t), dot: <Dot t={t} color={tc(t)} size={14} />, lit: on,
-              status: on ? "✓ in" : "waiting", statusColor: on ? "var(--color-ok)" : "var(--color-ink-3)",
-              typed: x?.length ? <div className="text-15 font-bold leading-snug pl-[22px]"><bdi>{x.join("  /  ")}</bdi>{pub.saidLate === t && <span className="text-13 font-semibold text-[var(--color-ink-3)]"> (after time&rsquo;s up)</span>}</div> : null }; })} />; })()}
+        {rrSpun && <Who />}
         {/* (Pause, Change question until a team has sent, Reveal now: as with 3 to 8 teams) */}
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change question" move={{ type: "roulette/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
@@ -859,7 +863,7 @@ function BidBoard({ pub }: { pub: Pub }) {
 /* The app's calls on this screen (the answer card, a reveal, the Battle review), each with a small
    Contest for a captain. With no host the other captain agrees or not (after a while the app's call
    stands); with a host, the host decides, and can change any call. */
-function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 1; host?: boolean; busy?: boolean; act: (move: Record<string, unknown>) => void; cardOnly?: boolean }) {
+function Calls({ pub, mine, host, busy, act, cardOnly, card }: { pub: Pub; mine?: 0 | 1; host?: boolean; busy?: boolean; act: (move: Record<string, unknown>) => void; cardOnly?: boolean; card?: boolean }) {
   const C = pub.calls || [], K = pub.contest, T = pub.teams, say = pub.screen === "sayReveal", left = useSecondsLeft(K?.until);
   if (!C.length) return null;
   const word = (ok: boolean) => (say ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
@@ -874,7 +878,18 @@ function Calls({ pub, mine, host, busy, act, cardOnly }: { pub: Pub; mine?: 0 | 
       {/* (3 Nov, the owner: no RIGHT/WRONG word, which crowded the row: what was typed in green or red, with a tick or a
           cross for anyone who can't tell the two apart, and the right answer after a wrong one, in grey. A long list (the
           Battle's twenty) puts each team's name once, as a heading, and numbers its rows) */}
-      {!cardOnly && <div className={"rtable-box grid items-center gap-x-3 gap-y-1.5 text-14" + (C.length > 6 ? " max-h-[52vh] overflow-y-auto pr-1" : "")}
+      {/* (card: the calls a captain can contest, in the 3-8 card, the table above saying the rest: 23 Nov, the owner) */}
+      {card && !K && mine != null && (() => { const can = C.filter((c) => !c.skipped && !c.done && (c.team === mine ? !c.ok : c.ok));
+        return can.length > 0 && (
+          <div className="card flex flex-col gap-2 !p-3">
+            <div className="eyebrow">Think a call is wrong? {nohost ? "The other captain decides" : "The host decides"}</div>
+            {can.map((c) => (
+              <div key={c.id} className="flex items-center gap-3">
+                <div className="flex-1 min-w-0 text-15 leading-snug break-words"><b style={{ color: tc(c.team) }}><bdi>{T[c.team].name}</bdi></b>: &ldquo;<bdi>{c.text || "No answer"}</bdi>&rdquo; <span className="text-[var(--color-ink-3)]">{word(!!c.ok)}</span></div>
+                <button className="btn btn-sm shrink-0" disabled={busy} onClick={() => act({ type: "ui/contest", id: c.id })}>Contest</button>
+              </div>))}
+          </div>); })()}
+      {!cardOnly && !card && <div className={"rtable-box grid items-center gap-x-3 gap-y-1.5 text-14" + (C.length > 6 ? " max-h-[52vh] overflow-y-auto pr-1" : "")}
         style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto" }}>
         {lastQ && <div className="eyebrow text-center col-span-3">The last question</div>}
         {C.map((c, i) => { const dim = { opacity: K && K.id !== c.id ? 0.6 : 1 }, grouped = C.length > 4, head = grouped && (i === 0 || C[i - 1].team !== c.team);
@@ -954,7 +969,8 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     ({ team: t, name: T[t].name, color: tc(t), letter: "AB"[t], val, ok: ok ?? null, end, sub, me: t === mine });
   /* the mini-games' last column: the leg, to whoever takes it (both on a tie) */
   const leg = (t: 0 | 1, w: unknown) => (w === t || w === "tie" ? <span style={{ color: "var(--color-ok)" }}>✓</span> : <span style={{ color: "var(--color-ink-3)" }}>–</span>);
-  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill("Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
+  /* (Guess the Flag: "the flag", not "the leg": 23 Nov, the owner) */
+  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill(sc === "flagReveal" ? "Your team takes the flag" : "Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
     : w === "none" ? pill("Nobody gets it", "mid") : w === 0 || w === 1 ? pill("Not this time", "no") : null;
   const legW = (w: unknown) => (w === 0 || w === 1 ? w : null) as 0 | 1 | null;
   /* how your team did on this question, in one pill */
@@ -1037,10 +1053,10 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     const say = sc === "sayReveal", w = pub.reveal.w;
     const ok = (t: 0 | 1) => sc === "mapReveal" ? pub.map?.ruled?.[t] : pub.reveal?.ok?.[t];
     const top = P;
-    if (headOnly) return <>{top}</>;
+    if (headOnly && (host || !CARD_SCREENS.includes(sc))) return <>{top}</>;
     return (<>
       {top}
-      <ResultTable head={["Said", "Leg"]} rows={([0, 1] as const).map((t) => { const v = ok(t), x = pub.reveal?.typed?.[t]?.[0];
+      <ResultTable head={["Said", sc === "flagReveal" ? "Flag" : "Leg"]} rows={([0, 1] as const).map((t) => { const v = ok(t), x = pub.reveal?.typed?.[t]?.[0];
         return row(t, x ?? (say ? "Nothing" : "No answer"), x ? v : null, leg(t, w),
           v == null && x ? "Waiting for a ruling" : say && x && !v ? (pub.reveal?.offList?.[t] ? "Not on the list" : "Said it") : undefined); })} /></>);
   }
@@ -1373,6 +1389,8 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }}
         onClick={() => { buzzHand(40); setBuzzed(true); void sendAction(code, "buzz", {}).catch(() => setBuzzed(false)); }}>BUZZ</button>}
       {canBuzz && buzzed && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
+      {/* the captain has sent: the players are told, as with 3 to 8 teams (23 Nov, the owner) */}
+      {!pub.paused && ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "rouletteQ", "stakesQ"].includes(pub.screen) && pub.sent?.[mine] && <p className="text-center font-bold text-16" role="status">Locked in. The answer comes up when the time&rsquo;s up.</p>}
       {canSuggest && (
         <div className="card flex flex-col gap-2">
           <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
@@ -1442,6 +1460,9 @@ function WaitingForHost({ pub, members }: { pub: Pub; members: Member[] }) {
 const CALL_SCREENS = ["answer", "flagReveal", "seeReveal", "sayReveal", "mapReveal", "airportReveal", "rouletteReveal", "stakesReveal", "dishReveal", "battleReview", "comebackReveal"];
 /* ...and sudden death / the tie-breaker: the question just decided, on the screen after it */
 const SD_CALL_SCREENS = ["battleSummary", "sudden", "battleTie"];
+/* the mini-game reveals with a results table: the captains see the table, and the 3-8 card to contest a call under it
+   (23 Nov, the owner: one look in every setup) */
+const CARD_SCREENS = ["flagReveal", "sayReveal", "airportReveal", "rouletteReveal"];
 /* no host: the screens where both captains can agree to a new one, and what it's called */
 const SWAP_WORDS: Record<string, string> = { ask: "question", miniQ: "question", flagQ: "flag", seeQ: "picture", foolWrite: "fact", pinQ: "landmark", airportQ: "board", majorityQ: "question", dishQ: "dish", mapQ: "map", sayQ: "prompt", rouletteQ: "question", stakesPick: "themes", stakesQ: "themes", battleQ: "question", comebackQ: "question" };
 const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "seeQ", "foolWrite", "foolPick", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "battleQ", "comebackQ"];
@@ -1621,7 +1642,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {/^majority(Q|Reveal)$/.test(sc) && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} part="rest" />
       {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
-      {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc) || (nohost && sc === "final")) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
+      {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc) || (nohost && sc === "final")) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} card={CARD_SCREENS.includes(sc)} />}
 
 
       {/* Call a Friend: the calling captain has the script and the call's clock; with no host they start it, with a host the

@@ -203,3 +203,21 @@ export const showNum = (n: number) => n.toLocaleString("en-GB", { maximumFractio
 /* a team's name in a sentence (the 4 Nov audit, 3.15): its own, with "s’" after a plural ("the Owls’ captain", not
    "Owls's"); and team names take plural verbs ("Owls answer first", "The Quizzicals take it") */
 export const poss = (name: string) => (/s$/i.test(name.replace(/[\u2066-\u2069]/g, "").trim()) ? name + "’" : name + "’s");
+/* the pictures coming up, fetched ahead on every screen (the whole deck at the intro): every setup (23 Nov: the 3-8
+   night fetched none, so a flag could come up late) */
+export type Preload = { flags?: string[]; maps?: string[]; pins?: string[]; sees?: string[]; world?: boolean };
+export function preloadOf(key: string, qs: { flag?: string; id?: string; photo?: string }[], i: number, intro: boolean): Preload | undefined {
+  const next = (n: number) => qs.slice(i, intro ? undefined : i + n);
+  if (key === "flag") return { flags: next(3).map((x) => x.flag).filter(Boolean) as string[] };
+  if (key === "map") return { maps: next(2).map((x) => x.id).filter(Boolean) as string[] };
+  /* Drop the Pin: the photos, and the world map itself (big: from the intro on) */
+  if (key === "pin") return { pins: next(2).map((x) => x.photo).filter(Boolean) as string[], world: true };
+  /* What Do You See?: the next two pictures (the TV fetches its size, a phone its own) */
+  if (key === "see") return { sees: qs.slice(i, i + 2).map((x) => x.photo).filter(Boolean) as string[] };
+  return undefined;
+}
+/* Guess the Flag's line on the setup screen, every setup: the 2-team words, its seconds as the timers say (23 Nov,
+   the owner: not always a country, and the time matters) */
+export const flagSetupLine = (secs?: number) => `Ten flags, ${secs ?? T_FLAG} seconds each: whose is it?`;
+/* ...and its first rule on the game's intro, every setup (23 Nov, the owner's words) */
+export const flagRule1 = (secs?: number) => `A flag goes up and captains have ${secs ?? T_FLAG} seconds to type whose flag it is.`;

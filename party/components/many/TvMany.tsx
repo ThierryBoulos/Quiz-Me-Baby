@@ -107,8 +107,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
 
         {/* the question: the same screens as the two-team TV, with every team's state under the clock */}
         {pub.screen === "q" && g && g.key === "flag" && (<>
-          <FlagImg name={pub.flag} h={dense ? 240 : 260} maxW={520} />
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />
+          {/* (the 2-team sizes up to four teams, smaller only from five, where the rows need the room: 23 Nov, the owner) */}
+          <FlagImg name={pub.flag} h={dense ? 240 : 300} maxW={520} />
+          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 110 : 120} />
           <Sent pub={pub} />
         </>)}
         {/* What Do You See? (12 Nov, the owner: a buzzer): the picture clears as the clock runs and stops at a buzz; the
@@ -220,8 +221,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
 
         {/* the reveal: the answer lands, then the calls, then who takes it */}
         {pub.screen === "reveal" && g && R && g.key === "flag" && (<>
-          <FlagImg name={pub.flag} h={dense ? 120 : 170} maxW={400} />
-          <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
+          <FlagImg name={pub.flag} h={dense ? 120 : 220} maxW={dense ? 400 : 520} />
+          <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 90, color: "var(--color-gold)" }}>{R.answer}</div>
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
@@ -293,7 +294,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* a game's result: the board, and who it pays */}
         {pub.screen === "summary" && g && g.key !== "stakes" && pub.summary && (<>
           {/* five teams or more with the bars: a size smaller, so it all sits under the tracker */}
-          <div className={"display leading-none slam " + (dense ? "text-40" : "text-52")} style={{ color: "var(--color-gold)" }}>{g.title}</div>
+          {/* (one size for every game's result, every setup: 44, as with 2 teams: 23 Nov, the owner) */}
+          <div className={"display leading-none slam " + (dense ? "text-40" : "text-44")} style={{ color: "var(--color-gold)" }}>{g.title}</div>
           {/* each game's points in a look of its own, never the totals' row (the owner, 30 Oct) */}
           {g.key === "majority" ? <BallotsMany pub={pub} />
             : g.key === "roulette" ? <BarrelsMany pub={pub} />

@@ -18,6 +18,7 @@ import { RepeatSheet } from "./RepeatSheet";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChips";
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
 import { RR_SETUP } from "@/lib/roulette";
+import { flagSetupLine } from "@/lib/game";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; lifelines?: boolean; comeback?: boolean;
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: Q[] } & Partial<Picks>;
@@ -27,7 +28,7 @@ const MINIS = [
   ["auction", "The Auction", "Bid how many you can name, then deliver it."],
   ["saysame", "Don't Say the Same as Me", "Answer without matching the app's hidden word."],
   ["map", "Guess the Map", "A map, sixty seconds: what does it show?"],
-  ["flag", "Guess the Flag", "Ten flags, fifteen seconds each: whose is it?"],
+  ["flag", "Guess the Flag", "Ten flags: whose is it?"],   // (drawn by flagSetupLine, with the timers' seconds)
   ["pin", "Drop the Pin", "A landmark's photo: drop a pin on the map where it is. Nearest pin wins."],
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
   ["majority", "Majority Rules", "Everyone plays on their own phone: 10 questions, four answers. The team with the bigger share of right answers wins."],
@@ -266,7 +267,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{name}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? flagSetupLine(timers?.tFlag) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

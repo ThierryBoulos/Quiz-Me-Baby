@@ -19,6 +19,7 @@ import { manyNames } from "@/lib/many/useTvMany";
 import { colsFor, Dot, place as ordinal } from "./PartsMany";
 import { levelLine } from "../Setup";
 import { RR_SETUP } from "@/lib/roulette";
+import { flagSetupLine } from "@/lib/game";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS } from "../LevelChips";
 import { timeLine, estimateMany } from "@/lib/estimate";
 import { RepeatSheet } from "../RepeatSheet";
@@ -77,7 +78,7 @@ export function PickMany({ room, k, busy, pick, current, members }: { room: Room
 const GAMES: [ManyKey, string][] = [
   ["quiz", "Rounds of 2 questions on one theme. Captains type; the fastest right answer scores most."],
   ["majority", "Everyone answers on their own phone. 10 questions, 4 answers each."],
-  ["flag", "10 flags. Captains type the country; the fastest right answer scores most."],
+  ["flag", "Ten flags: whose is it?"],   // (drawn by flagSetupLine, with the timers' seconds, as with 2 teams)
   ["closest", "5 number questions. The closest guess scores most."],
   ["pin", "7 famous places. Captains drop a pin; the closest scores most."],
   ["airport", "6 departure boards. Captains type the airport; the fastest right answer scores most."],
@@ -196,7 +197,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
             <button type="button" role="switch" aria-checked={lit} data-mini={key} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(lit ? minis.filter((x) => x !== key) : [...minis, key])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{MANY_TITLES[key]}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{blurb}{lit && <b style={{ color: "var(--color-gold)" }}> {slot(key)}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{key === "flag" ? flagSetupLine(tv?.settings?.tFlag) : blurb}{lit && <b style={{ color: "var(--color-gold)" }}> {slot(key)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: lit ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: lit ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

@@ -13,6 +13,7 @@ import { COMEBACK_TITLE } from "@/lib/comeback";
 import { AskHead, battleNeeds, Board, comebackTeams, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
+import { takeText } from "./many/PartsMany";
 import { SeeTv } from "./See";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
@@ -436,6 +437,9 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     {sc === "flagQ" ? (<><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} /><Sent pub={pub} /></>) : (<>
       <div className="ans-board display beat slam" style={{ ...QUICK, fontSize: 90, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
       <TeamRows pub={pub} empty="No answer" />
+      {/* who takes it, as with 3 to 8 teams (23 Nov, the owner) */}
+      {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` })), true);
+        return <div className="display text-44 beat" style={{ ...QUICK, color: w.color }}>{w.text}</div>; })()}
     </>)}
   </>);
   /* Drop the Pin: the photo while they place their pins; then the map, flying in to the spot */
@@ -566,7 +570,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       <div className="display text-48 beat" style={{ ...d(0.3), color: tc(A.last.won) }}>{T[A.last.won].name} take{A.last.won === A.last.by ? "" : "s"} the leg</div>
     </>);
     if (sc === "auctionResult") return (<>
-      <MiniTitle title="The Auction" small />
+      <MiniTitle title="The Auction" />
       <AuctionPaddles pub={pub} />
       {A.winner != null && <div className="rv display text-52" style={{ color: tc(A.winner), animationDelay: twoDone(A.winner) + "s" }}><span data-fly-src={A.winner}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</span></div>}
     </>);
@@ -621,7 +625,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   </>); }
   if (pub.battle && sc === "battleSummary") { const B = pub.battle; return (<>
     {B.last && <BattleAnswer last={B.last} size={24} />}
-    <MiniTitle title="Battle of the Captains" small />
+    <MiniTitle title="Battle of the Captains" />
     <BattleShields pub={pub} />
     <div className="rv display text-52" style={{ color: tc(B.winner), animationDelay: twoDone(B.winner) + "s" }}>{B.winner == null ? (B.note || "Tie") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
     {B.predict && <div className="text-22" style={{ color: "var(--color-gold)" }}>{B.predict}</div>}
@@ -635,7 +639,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     const fool = m.key === "fool" && !!S.fool, places = S.winner == null ? [1, 1] : S.winner === 0 ? [1, 2] : [2, 1];
     const lineAt = fool ? foolDone(places, 2) : TWO_LOOKS.includes(m.key) ? twoDone(S.winner) : 0, flyAt2 = fool ? String(Math.max(0, Math.round(lineAt * 1000 - flyAt(sc)))) : undefined;
     return (<>
-      <MiniTitle title={m.title} small={TWO_LOOKS.includes(m.key) || fool} />
+      <MiniTitle title={m.title} />
       {/* the game's own look (the 3-8 team night's), or the board for Auction and Battle */}
       {fool ? <FoolResult two teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) }))} sum={S.fool!} pts={[...S.wins]} places={places} award={[S.award?.[0] ?? 0, S.award?.[1] ?? 0]} />
         : TWO_LOOKS.includes(m.key) ? <TwoResult pub={pub} sound={sound} /> : <ScoreBoard pub={pub} w={S.wins} win={S.winner} size="tv" />}
@@ -650,9 +654,10 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
 }
 
 /* a mini-game's name over its result: big, in gold, the way its intro showed it */
-function MiniTitle({ title, small }: { title?: string; small?: boolean }) {
+function MiniTitle({ title }: { title?: string }) {
   if (!title) return null;
-  return <div className={"display leading-none slam " + (small ? "text-44" : "text-52")} style={{ color: "var(--color-gold)" }}>{title}</div>;
+  /* (one size for every game's result, every setup: 23 Nov, the owner; 3 to 8 teams a size smaller from five) */
+  return <div className="display leading-none slam text-44" style={{ color: "var(--color-gold)" }}>{title}</div>;
 }
 
 /* each team's ruling, then what they wrote under it: "TEAM A  DODGED IT" / "Mcdo" */
