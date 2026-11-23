@@ -463,7 +463,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         {/* (sideways, the picture and the clock go to the left column, so the host's calls fit on the right: the 4 Nov audit, 3.7) */}
         {/* (as with 3 to 8 teams: the flag at 150, the clock under it, the answer, then who has answered and what they
            sent: 23 Nov, the owner) */}
-        <ToSide order={2}><div className="flex flex-col items-center gap-2"><FlagImg name={pub.flag} h={150} /><div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sideways ? 70 : 90} /></div></div></ToSide>
+        {/* (held sideways, the flag and the clock side by side, smaller: stacked they ran off the left column) */}
+        <ToSide order={2}><div className={sideways ? "flex items-center justify-center gap-3" : "flex flex-col items-center gap-2"}><FlagImg name={pub.flag} h={sideways ? 96 : 150} /><div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sideways ? 64 : 90} /></div></div></ToSide>
         <AnswerCard />
         <Who />
         <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change flag" move={{ type: "flag/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
