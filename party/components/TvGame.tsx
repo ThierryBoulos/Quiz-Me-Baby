@@ -17,6 +17,7 @@ import { ClosestRevealTv, ClosestTv } from "./Closest";
 import { PinRevealTv, PinTv } from "./Pin";
 import { FlagTv } from "./Flag";
 import { MapRevealTv, MapTv } from "./MapGame";
+import { SayRevealTv, SayTv, sayWord } from "./SayGame";
 import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -485,23 +486,10 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       {A.winner != null && <div className="rv display text-52" style={{ color: tc(A.winner), animationDelay: twoDone(A.winner) + "s" }}><span data-fly-src={A.winner}>{T[A.winner].name} +{A.award?.[A.winner] ?? m.pts}</span></div>}
     </>);
   }
-  if (sc === "sayQ") return (<>
-    <div className="eyebrow text-20">Don&rsquo;t Say the Same as Me</div>
-    <div className="font-bold max-w-[1000px]" style={{ fontSize: 56, lineHeight: 1.1 }}>{pub.question}</div>
-    <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
-    <Sent pub={pub} />
-  </>);
-  if (sc === "sayReveal" && pub.reveal) return (<>
-    <div className="text-26 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
-    <div className="eyebrow text-18">The app&rsquo;s word</div>
-    {/* the app's word: a card face down ("?"), turned over */}
-    <div className="say-card" aria-label={pub.reveal.answer}><div className="say-inner">
-      <div className="face back display" style={{ fontSize: 96 }}>{pub.reveal.answer}</div>
-      <div className="face front display" aria-hidden>?</div>
-    </div></div>
-    <TeamRows pub={pub} say empty="Nothing" />
-    <div className="display text-40" style={{ color: tc(pub.reveal.w === 0 || pub.reveal.w === 1 ? pub.reveal.w : null) }}>{pub.reveal.w === "tie" ? "A point each" : pub.reveal.w === 0 || pub.reveal.w === 1 ? `${T[pub.reveal.w].name} take the leg` : ""}</div>
-  </>);
+  /* Don't Say the Same as Me: one copy for every setup (components/SayGame.tsx): the 3-to-8 design (24 Nov, the owner) */
+  if (sc === "sayQ") return <SayTv question={pub.question} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} />} />;
+  if (sc === "sayReveal" && pub.reveal) return <SayRevealTv question={pub.question} answer={pub.reveal.answer || ""} rows={<TeamRows pub={pub} say empty="No answer" />}
+    head={pub.reveal.w === "tie" ? { text: "A point each", color: "var(--color-gold)" } : takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
   if (pub.battle && sc === "battleQ") { const B = pub.battle; return (<>
     <div className="display text-40" style={{ color: tc(B.cap) }}>{T[B.cap].name}&rsquo;s captain</div>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 100 ? 42 : 54, lineHeight: 1.12 }}>{pub.question}</div>
@@ -575,7 +563,8 @@ function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: 
   const R = pub.reveal, x = (t: number) => R?.typed?.[t]?.[0];
   /* small: a side column, so one team above the other */
   return <TeamCalls teams={both(pub)} column={small} empty={empty} delay={(t) => d(t * 0.12)} ok={(t) => R?.ok?.[t]} typed={x}
-    word={(t) => (R?.ok?.[t] ? (say ? "Dodged it" : undefined) : !x(t) ? "No answer" : say ? (R?.offList?.[t] ? "Not on list" : "Said it") : undefined)} />;
+    pts={say ? (t) => (R?.w === t || R?.w === "tie" ? 1 : 0) : undefined}
+    word={(t) => (say ? sayWord(R?.ok?.[t], x(t), R?.offList?.[t] ? "off" : R?.ok?.[t] === R?.app?.[t] ? "said" : null) : R?.ok?.[t] ? undefined : !x(t) ? "No answer" : undefined)} />;
 }
 
 /* a call being contested: who says what, and who decides (with no host, the time left before the app's call stands) */
@@ -593,12 +582,12 @@ function SdCalls({ pub }: { pub: Pub }) {
 
 function ContestBanner({ pub }: { pub: Pub }) {
   const T = pub.teams, K = pub.contest!, left = useSecondsLeft(K.until), nohost = pub.mode === "nohost";
-  const say = pub.screen === "sayReveal", word = (ok: boolean) => (say ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
+  const say = pub.screen === "sayReveal", word = (ok: boolean) => (ok ? "RIGHT" : "WRONG");
   const decider = nohost ? pub.captains?.[K.by === 0 ? 1 : 0] || "The other captain" : "The host";
   return (
     <div className="card enter text-24 max-w-[1300px]" style={{ borderColor: "var(--color-gold)", position: "relative", zIndex: 26 }} role="status">
       <div className="eyebrow text-16 mb-1" style={{ color: "var(--color-gold)" }}>Contested</div>
-      <b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>&rsquo;s </> : null}&ldquo;{K.text}&rdquo; was <b>{word(!K.ok)}</b>. <b>{decider}</b> decides{nohost ? <span className="text-[var(--color-ink-2)]"> · {left} s</span> : null}.
+      <b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>&rsquo;s </> : null}&ldquo;{K.text}&rdquo; {say ? <b>{K.ok ? "shouldn't score" : "should score"}</b> : <>was <b>{word(!K.ok)}</b></>}. <b>{decider}</b> decides{nohost ? <span className="text-[var(--color-ink-2)]"> · {left} s</span> : null}.
     </div>);
 }
 /* no host: a captain's request (new scores) waiting for the other captain's yes or no */

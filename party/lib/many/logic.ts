@@ -205,7 +205,7 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   }
   /* Guess the Flag and What Do You See?: a spare at the same level, else another level, as with 2 teams (23 Nov, the
      owner) */
-  if (m.key === "flag" || m.key === "see" || m.key === "pin" || m.key === "airport" || m.key === "map") {
+  if (m.key === "flag" || m.key === "see" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say") {
     const L = s.extra?.[m.key] || [], j = QMB.spareAt(L, qOf(s)?.level) as number;
     /* (the words: the engine's, one copy for every setup) */
     const W = QMB.SWAP_WORDS[m.key] as { done: string; none: string };
@@ -675,7 +675,7 @@ export function next(s: StateM, now: number, t: Timers) {
         s.typed.forEach((x, i) => { if (x != null && String(x).trim()) m.words![i].push({ w: String(listWord(x, q) ?? x).trim().slice(0, 40), ok: !!s.ok[i] }); }); }
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
       /* (Guess the Flag and Closest To Wins: no line on the next one, as with 2 teams: the reveal's headline said it, 23 Nov, the owner; Guess the Map too, 24 Nov) */
-      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see" && m.key !== "pin" && m.key !== "airport" && m.key !== "map") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
+      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see" && m.key !== "pin" && m.key !== "airport" && m.key !== "map" && m.key !== "say") toast(s, !first.length ? "Nobody got it."
         : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} take it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
     }
     m.i++;

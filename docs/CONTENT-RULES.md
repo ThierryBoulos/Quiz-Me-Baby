@@ -129,6 +129,13 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
 - Nothing on a list that isn't one (Bruce the shark isn't a villain); borderline ones are the owner's call
   (Jumba stays).
 - Other names for one list only go in `byPool`, never in `byAnswer` (§2).
+- **Words (24 Nov, the owner)**: it's a **question**, never a "prompt"; the word the game keeps is **the game's
+  secret answer** (not "the app's word", not "hidden word"). Six questions, best of 6, in every setup. With 2 teams,
+  both dodging it is a point each; both saying it (or off the list, or nothing) is nobody's.
+
+**Every game (24 Nov, the owner): players read "the game", never "the app"** ("The game checks it.", "The game made
+these calls. Tap one to change it."). Only where it is the software itself ("The app was updated") or another app on
+the phone ("switches app or tab") does "app" stay.
 
 ## 6. Never on the same night
 

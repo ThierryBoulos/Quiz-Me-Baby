@@ -13,7 +13,7 @@ export function HostGone({ info, many, onClaim, busy, onTeam }: {
       <div className="display text-26 leading-tight" style={{ color: "var(--color-gold)" }}>{many ? "The night is waiting for a host" : "The host has gone quiet"}</div>
       <p className="text-14 text-[var(--color-ink-2)]">
         {who ? <><bdi>{who}</bdi>&rsquo;s phone has gone quiet. </> : "The night has no host. "}
-        {many ? "With three teams or more, only the host can move the night on." : "The captains carry the night meanwhile, and the app checks the answers."}</p>
+        {many ? "With three teams or more, only the host can move the night on." : "The captains carry the night meanwhile, and the game checks the answers."}</p>
       {who && <p className="text-13 text-[var(--color-ink-3)]"><bdi>{who}</bdi>: open the game again, or join again with the same name.</p>}
       {left > 0 ? <p className="text-14 font-bold" role="status">Not coming back? In {left} s, anyone here can take over as the host.</p> : (<>
         <button className="btn btn-gold btn-block" disabled={busy} onClick={onClaim}>Be the host</button>

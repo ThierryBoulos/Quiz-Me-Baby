@@ -85,8 +85,9 @@ export function mrTally(s: TvState) {
   }
   return { answered, right, counts };
 }
-/* Say Same: ok = dodged the word. One team dodging alone takes it; otherwise a point each */
-export const sayWin = (s: TvState): W => { const [a, b] = s.ok; return a && !b ? 0 : b && !a ? 1 : "tie"; };
+/* Say Same: ok = dodged the secret answer. One team dodging alone takes it; both, a point each; neither, nobody (both said
+   it, off the list or nothing: 24 Nov, the owner, as How to Play says, "you lose the point") */
+export const sayWin = (s: TvState): W => { const [a, b] = s.ok; return a && !b ? 0 : b && !a ? 1 : a && b ? "tie" : "none"; };
 /* ...and each team's word, kept for its pile of word cards at the result (the owner's pick, 14 Nov): the word on the
    prompt's list it matched (typos allowed), else what it sent; nothing sent, null */
 export const sayWords = (s: TvState, q: G): Two<string | null> => [0, 1].map((t) => {

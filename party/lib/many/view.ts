@@ -14,6 +14,7 @@ import { foolSum, type FoolPub, type FoolSum } from "../fool";
 import { extraGame } from "./logic";
 import type { ComebackPub } from "../comeback";
 import { MAP } from "../minis/map";
+import { SAY } from "../minis/say";
 
 export type TeamPub = { name: string; captain: string; score: number; color: string };
 export type PubMany = {
@@ -77,7 +78,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
 /* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
-export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number }): { pub: PubMany; secret: SecretMany } {
+export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number; say?: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
@@ -95,7 +96,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen === "q" && s.deadline && Date.now() >= s.deadline) pub.timeUp = true;
   if (m && s.screen !== "final") { const P = preloadOf(m.key, m.qs as { flag?: string; id?: string; photo?: string }[], m.i, s.screen === "intro"); if (P) pub.preload = P; }
   /* Russian Roulette's intro: the seconds, for its rules (as with 2 teams: 22 Nov, the owner) */
-  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport" || m.key === "map")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
+  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
   if (m?.key === "stakes") {
     /* (on the intro, the bet the game will play: worked out from the scores now, as Start will; it read 1 before Start,
        22 Nov. And the seconds, for its rules) */
@@ -182,7 +183,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
   /* the host's phone: the answer while it's up, and what every captain typed */
   const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal" || (m.key === "fool" && s.screen === "pick"))
-    ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : m.key === "roulette" || m.key === "stakes" || m.key === "see" ? undefined : q.notes, typed: s.typed, nums: s.nums,
+    ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? SAY.hostNote(true) : m.key === "roulette" || m.key === "stakes" || m.key === "see" ? undefined : q.notes, typed: s.typed, nums: s.nums,
         ...(m.key === "roulette" ? { answers: s.teams.map((_, t) => String(rrQ(q as RrLap, t)?.answer ?? "")) } : {}),
         ...(m.key === "stakes" ? { answers: s.teams.map((_, t) => String(skQm(s, t)?.answer ?? "")) } : {}),
         ...(typedKey(m.key) && m.key !== "roulette" && m.key !== "stakes" ? { accept: acceptFor(q).slice(0, 8) } : {}),

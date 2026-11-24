@@ -23,12 +23,13 @@ import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fo
 import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
 import { AirportRevealTv, AirportTv } from "../Airport";
 import { MapRevealTv, MapTv } from "../MapGame";
+import { SayRevealTv, SayTv, sayWord } from "../SayGame";
 import { ClosestRevealTv, ClosestTv } from "../Closest";
 import { PinRevealTv, PinTv } from "../Pin";
 import { FlagTv } from "../Flag";
 import { SentLine, TeamCalls } from "../TeamCalls";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
-import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone, SAY_WHY } from "./PartsMany";
+import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -119,12 +120,12 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <SeeTv see={pub.see} screen="seeQ" teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} deadline={pub.deadline} left={pub.left} dense={dense}
             clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} foot={`Right, and you score ${T.length} points. Wrong, and you’re out of this picture.`} />)}
         {/* a question round, and Don't Say the Same's prompt: the words big, the clock, every team's state */}
-        {pub.screen === "q" && g && (g.key === "quiz" || g.key === "say" || g.key === "sudden" || g.key === "comeback") && (<>
+        {pub.screen === "q" && g && g.key === "say" && <SayTv question={pub.question} many clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} column={false} />} />}
+        {pub.screen === "q" && g && (g.key === "quiz" || g.key === "sudden" || g.key === "comeback") && (<>
           {g.key === "sudden" && <div className="display text-36 leading-none" style={{ color: "var(--color-gold)" }}>First right answer wins the night</div>}
           {g.key === "comeback" && pub.comeback && <ComebackStatus teams={T.map((t) => ({ name: t.name, color: t.color }))} c={pub.comeback} tv />}
           {pub.theme && <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
           <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 160 ? 34 : (pub.question || "").length > 100 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
-          {g.key === "say" && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px]">One answer each. No points for the app&rsquo;s secret answer, or the same word as another team.</div>}
           <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
           <Sent pub={pub} />
         </>)}
@@ -212,12 +213,13 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "map" && <MapRevealTv map={pub.map} answer={R.answer || ""} notes={R.notes} dense={dense}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
-        {pub.screen === "reveal" && g && R && ["quiz", "say", "dish", "sudden", "comeback"].includes(g.key) && (<>
+        {pub.screen === "reveal" && g && R && g.key === "say" && <SayRevealTv question={pub.question || undefined} answer={R.answer || ""} dense={dense}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
+        {pub.screen === "reveal" && g && R && ["quiz", "dish", "sudden", "comeback"].includes(g.key) && (<>
           {pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
             : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
-          {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
           <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
-          {R.notes && g.key !== "say" && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
+          {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
@@ -337,7 +339,7 @@ function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
 function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: "tv" | "phone"; delay?: (i: number) => React.CSSProperties }) {
   const R = pub.reveal!, say = pub.game?.key === "say";
   return <TeamCalls teams={shownTeams(pub)} size={size} delay={delay} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]} pts={(i) => R.pts?.[i]} places={(i) => (say ? null : R.places?.[i])}
-    word={say ? (i) => (R.ok?.[i] ? "Dodged it" : !R.typed?.[i] ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : undefined} />;
+    word={say ? (i) => sayWord(R.ok?.[i], R.typed?.[i], R.why?.[i]) : undefined} />;
 }
 /* Majority Rules: how many of the room have answered (the roster is names only, so the count is the room's;
    each team's state is the row under the clock) */

@@ -14,7 +14,7 @@ export type IntroPub = {
 const TWO: Record<string, string> = {
   closest: "A number question. The nearest guess takes the leg.",
   auction: "Bid how many you can name, then name them against the clock.",
-  saysame: "Give a real answer, but not the app's hidden word.",
+  saysame: "Give a real answer, but not the game's secret answer.",
   map: "A map with no title. Say what it shows.",
   flag: "Name the flag.",
   pin: "A landmark photo. Pin it on the world map.",
@@ -29,7 +29,7 @@ const TWO: Record<string, string> = {
 };
 const MANY: Record<string, string> = {
   ...TWO,
-  say: "Give a real answer nobody else gives, and not the app's word.",
+  say: "Give a real answer nobody else gives, and not the game's secret answer.",
   dish: "Ingredients one at a time. The faster right, the more points.",
 };
 export const introLine = (key: string, many?: boolean) => (many ? MANY : TWO)[key] || "";

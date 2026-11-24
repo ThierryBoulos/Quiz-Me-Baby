@@ -7,6 +7,7 @@ import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
+import { SAY } from "@/lib/minis/say";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -17,7 +18,7 @@ import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { COMEBACK_TITLE } from "@/lib/comeback";
 import { preloadWorld, type Mark } from "./PinMap";
-import { DISH_STEP, showKm, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
+import { DISH_STEP, showKm, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -404,11 +405,8 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Bids go up to 100. ${host ? "The host counts" : "The other captain counts"}. Make it, you take the leg. Fall short and the other team takes it.` },
       { text: `No lifelines, no help from the room. Most legs takes ${pts}.`, warn: true }];
     case "saysame": return [
-      { text: `A prompt, ${sec(t?.say, T_SAY)}. Both captains type an answer, hidden from each other. The app has a word hidden: matching each other is fine, only matching the app costs you.` },
-      { text: "Your answer must be a real one, on the app's list for the prompt (typos are fine). Anything else counts as SAID IT." },
-      { text: `Time's up: the word comes up. ${host ? "The host can change the app's call." : "The other captain can give you a fair answer the list missed."}` },
-      { text: "Dodged it alone? You take the leg. Both dodged or both said it? Tie, a point each." },
-      { text: `Best of ${n} takes ${pts}. ${level}` }];
+      /* (short, the same with or without a host, rule 1 the same in every setup: 24 Nov, the owner) */
+      { text: SAY.rule1(t?.say) }, ...SAY.rules2(n, pts).map((text) => ({ text }))];
     case "map": return [
       /* (short, the same with or without a host, rule 1 the same in every setup: 24 Nov, the owner) */
       { text: MAP.rule1(t?.map) }, ...MAP.rules2(n, pts).map((text) => ({ text }))];
@@ -427,7 +425,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
     /* Fool Me Twice (16 Nov, the owner): a true fact with a blank, a lie each, then find the truth */
     case "fool": return [
       { text: `A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true: ${sec(t?.foolWrite, 45)}.` },
-      { text: "Type the real answer and the app says so: write a lie instead!", warn: true },
+      { text: "Type the real answer and the game says so: write a lie instead!", warn: true },
       { text: `Then the truth comes up hidden among your lies and a few of ours. Captains pick the one they think is true: ${sec(t?.foolPick, 20)}.` },
       { text: "The truth: +2. The other team falls for your lie: +1 to you." },
       { text: `${n} facts, the last 2 hard. Most points takes ${pts}. Tied? One more fact, or a point each.` }];
@@ -536,7 +534,7 @@ export function usePreload(pub: Pub | null) {
 /* won with legs to spare: the same words on the TV and every phone */
 export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
 /* what a mini-game's legs are called ("4 flags", "the last landmark") */
-const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "prompt", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin", stakes: "round", see: "picture", fool: "fact" };
+const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "question", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin", stakes: "round", see: "picture", fool: "fact" };
 export const legsLeft = (key: MiniKey, n: number) => { const u = LEG_UNIT[key] || "leg"; return n === 1 ? `The last ${u} is` : `The last ${n} ${u.replace(/y$/, "ie")}s are`; };
 export const decidedPts = (pub: Pub) => (pub.decided ? `+${pub.decided.pts} point${pub.decided.pts === 1 ? "" : "s"}` : "");
 export const decidedFun = (pub: Pub) => (pub.decided ? `${legsLeft(pub.decided.key, pub.decided.spare)} just for fun.` : "");

@@ -12,6 +12,7 @@ import { Roll } from "../GameParts";
 import { showKm, showNum } from "@/lib/game";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
+import { SAY } from "@/lib/minis/say";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -69,7 +70,9 @@ export function paid(pub: PubMany): { text: string; color: string } {
     if (!up.length) return { text: "No comeback", color: "var(--color-ink-2)" };
     return { text: `${up.length === 1 ? T[up[0]].name : `${up.length} teams`} are back in it`, color: up.length === 1 ? T[up[0]].color : "var(--color-gold)" }; }
   const top = (S?.places || []).map((p, t) => (p === 1 && (S?.award[t] ?? 0) > 0 ? t : -1)).filter((t) => t >= 0);
-  if (!top.length) return { text: "Nobody scores", color: "var(--color-ink-2)" };
+  /* (every team on 0 still gets last place's points: "Nobody scored: +6 each", not "Nobody scores", 24 Nov, the owner) */
+  if (!top.length) { const a = S?.award || [], v = a[0] ?? 0;
+    return { text: v > 0 && a.every((x) => x === v) ? `Nobody scored: +${v} each` : "Nobody scores", color: "var(--color-ink-2)" }; }
   if (top.length === 1) return { text: `${T[top[0]].name} +${S!.award[top[0]]}`, color: T[top[0]].color };
   return { text: `${top.length > 2 ? `${top.length} teams` : top.map((t) => T[t].name).join(" & ")} share 1st, +${S!.award[top[0]]} each`, color: "var(--color-gold)" };
 }
@@ -218,8 +221,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     /* (no "Wrong, nothing." where nothing is wrong, only further off: 23 Nov, the owner) */
     case "closest": return [CLOSEST.rule1(pub.introSecs), `Closest guess first: ${per.replace(" Wrong, nothing.", "")}`, pay];
     case "pin": return [PIN.rule1(pub.introSecs), `Closest pin first: ${per.replace(" Wrong, nothing.", "")}`, pay];
-    case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
-      `No points if you say the app's secret answer, or the same as another team. Any other answer gets ${k} points.`, pay];
+    case "say": return [SAY.rule1(pub.introSecs), SAY.ruleMany(k), pay];
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
       "One guess per team. A wrong guess puts you out of that one.", fast, pay];
     /* What Do You See? (12 Nov, the owner): scored as the Cocktail or Dish is here */
@@ -234,7 +236,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     case "stakes": { const I = pub.skIntro; return skRules(n, I?.unit ?? pub.stakes?.unit ?? 1, I?.pick ?? 20, I?.q ?? 45); }   // (one card, every setup: components/Stakes.tsx)
     /* Fool Me Twice (16 Nov, the owner): the two-team card's words, for N teams */
     case "fool": return ["A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true.",
-      "Type the real answer and the app says so: write a lie instead!",
+      "Type the real answer and the game says so: write a lie instead!",
       "Then the truth comes up hidden among your lies and a few of ours. Captains pick the one they think is true, and say which team will fall for their lie.",
       "The truth: +2. Each team that falls for your lie: +1 to you. The team you named falls for it? −1 to them, +1 more to you.",
       `${n} facts, the last 2 hard. ${pay}`];
@@ -784,7 +786,6 @@ export function TeamRows({ teams: T, winners: W, order, right, size, label, pts 
 export const kmOf = (pub: PubMany, t: number): ReactNode => (pub.reveal?.pins?.[t] ? showKm(pub.reveal.off?.[t] ?? 0) : <span className="text-[var(--color-ink-3)]">No pin</span>);
 
 /* Don't Say the Same: why an answer scores nothing */
-export const SAY_WHY: Record<string, string> = { said: "Said it", off: "Off the list", same: "Same word" };
 /* the Cocktail or Dish: "60 ml — gin" splits into the amount and the ingredient */
 export const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
 /* ---- the phone's Teams sheet, behind the name at the top left (the owner, 31 Oct: one place for the scores and

@@ -555,7 +555,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const cap = ctx.current.members.find((m) => m.team === other(K.by) && m.role === "captain")?.name || s.g.teams[other(K.by)].name;
     return s.nohost ? `Wait: ${iso(cap)} is deciding ${poss(by)} contest (${Math.max(1, Math.ceil((K.until - Date.now()) / 1000))} s).` : `Wait: the host is deciding ${poss(by)} contest.`;
   }, []);
-  const verdictWord = (sc: string, ok: boolean) => (sc === "sayReveal" ? (ok ? "DODGED IT" : "SAID IT") : ok ? "RIGHT" : "WRONG");
+  /* (Don't Say the Same: "scores" / "doesn't score", as with 3 to 8 teams: 24 Nov, the owner) */
+  const verdictWord = (sc: string, ok: boolean) => (sc === "sayReveal" ? (ok ? "scores" : "doesn't score") : ok ? "RIGHT" : "WRONG");
   /* a call changed: the score moves with it (or, a RIGHT turned down with no steal played, a steal on a new question) */
   const applyCall = useCallback((id: string, v: boolean) => {
     const s = st.current, g = s.g, sc = s.screen;
@@ -1278,7 +1279,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         /* The Comeback (Setup's switch, the owner, 17 Nov): on unless it was switched off (the engine reads g.cfg.comeback) */
         comeback: cfgIn.comeback !== false };
       const g = env().deal.buildGame(cfg);
-      /* Party plays Don't Say the Same as Me best of 7 (its last two prompts, the four-answer
+      /* Party plays Don't Say the Same as Me best of 6 (its last two prompts, the four-answer
          one and the coin flip, stay last) and Guess the Cocktail or Dish best of 5. The engine
          deals Classic's lengths; the legs left over are dropped (Say) or kept back for swaps and
          tie-breakers (Dish). The host's own picks are the last to go. */
@@ -1577,7 +1578,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (wait !== !!s.skipHostQ) { s.skipHostQ = wait; void publish(); } }
     if (s.nohost === hostHere && !s.pending) {
       s.nohost = !hostHere;
-      s.toast = { id: ++s.toastN, text: s.nohost ? "The host is away, so the app checks the answers for now." : "The host is back." };
+      s.toast = { id: ++s.toastN, text: s.nohost ? "The host is away, so the game checks the answers for now." : "The host is back." };
       /* a tie or a game decided early already on screen: with no host, it takes its default after 10 s */
       if (s.nohost && PICK_DEFAULT(s.screen) && !s.autoAt) s.autoAt = now + T_PICK * 1000;
       if (s.nohost) {

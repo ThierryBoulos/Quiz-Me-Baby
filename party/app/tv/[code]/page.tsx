@@ -166,7 +166,7 @@ export default function TvRoom() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M19 12H5M11 6l-6 6 6 6" /></svg>Back</Link>
             {isTv && noTvBtn("btn btn-sm btn-ghost shrink-0")}
             <div className="min-w-0">
-              {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>. </> : "No host yet: the app will check answers. "}
+              {host ? <>Hosted by <b style={{ color: "var(--color-gold)" }}><bdi>{host.name}</bdi></b>. </> : "No host yet: the game will check answers. "}
               {many ? (manyNotReady(members, teamCount) || <>Ready: <b><bdi>{host?.name}</bdi></b> starts the game.</>)
                 : readyToStart(members) ? <>Ready: <b><bdi>{who?.name}</bdi></b> starts the game.</> : notReadyWhy(members)}
               {noTvErr && <><br /><span className="font-bold" style={{ color: "var(--color-no)" }} role="alert">That didn&rsquo;t go through. Check the internet, then tap Play without TV again.</span></>}

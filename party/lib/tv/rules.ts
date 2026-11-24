@@ -75,7 +75,7 @@ export const HOST_MOVES: Record<string, Where> = {
 export const SWAPS: Record<string, string> = { ask: "round/swap", miniQ: "closest/swap", flagQ: "flag/swap", pinQ: "pin/swap", airportQ: "airport/swap",
   majorityQ: "majority/swap", dishQ: "dish/swap", mapQ: "map/swap", sayQ: "say/swap", rouletteQ: "roulette/swap", stakesPick: "stakes/swap", stakesQ: "stakes/swap", seeQ: "see/swap", foolWrite: "fool/swap", battleQ: "battle/swap", comebackQ: "comeback/swap" };
 export const swapWord = (sc: string, q: G) => sc === "flagQ" ? "flag" : sc === "pinQ" ? "landmark" : sc === "airportQ" ? "board" : sc === "mapQ" ? "map" : sc === "seeQ" ? "picture" : sc === "foolWrite" ? "fact" : sc === "stakesPick" || sc === "stakesQ" ? "set of themes"
-  : sc === "sayQ" ? "prompt" : sc === "dishQ" ? dishKind(q).toLowerCase() : "question";
+  : sc === "dishQ" ? dishKind(q).toLowerCase() : "question";
 /* What a CAPTAIN may tap, and who: "any" captain, the team whose "turn" it
    is, the "other" one (the referee), or the "lead": Team A's captain (Team
    B's if A has none), who starts and moves the night on, like a host would.

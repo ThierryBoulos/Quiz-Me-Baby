@@ -1377,6 +1377,7 @@
     pin:{ done:'New landmark.', none:'No other landmark left at these levels.' },
     airport:{ done:'New board.', none:'No other board left at these levels.' },
     map:{ done:'New map.', none:'No other map left at these levels.' },
+    say:{ done:'New question.', none:'No other question left.' },
   };
   const spareLike = (s) => { const cur = s.qs[s.i], i = spareAt(s.spare, cur && cur.level); return s.spare.splice(i, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
@@ -1388,7 +1389,7 @@
      the night's score. s.fun: the rest is for fun; s.asked: already asked.  */
   const LEGGED = {
     closest:{ s:(g) => g.mini, q:'miniQ', summary:'miniSummary', left:(s) => s.base - s.i, unit:'question' },
-    saysame:{ s:(g) => g.saySame, q:'sayQ', summary:'saySummary', left:(s) => s.base - s.i, unit:'prompt' },
+    saysame:{ s:(g) => g.saySame, q:'sayQ', summary:'saySummary', left:(s) => s.base - s.i, unit:'question' },
     flag:{ s:(g) => g.flagGame, q:'flagQ', summary:'flagSummary', left:(s) => s.base - s.i, unit:'flag' },
     map:{ s:(g) => g.mapGame, q:'mapQ', summary:'mapSummary', left:(s) => s.base - s.i, unit:'map' },
     dish:{ s:(g) => g.dishGame, q:'dishQ', summary:'dishSummary', left:(s) => s.base - s.i, unit:'recipe' },
@@ -2443,9 +2444,9 @@
       const avail = fresh.length ? fresh : all;
       let pool = avail.filter(fits);
       if(!pool.length) pool = avail;
-      if(!pool.length) return [{ toast:'No spare prompt left in the bank.' }];
+      if(!pool.length) return [{ toast:SWAP_WORDS.say.none }];
       s.qs[s.i] = D.drawSaySame(D.shuffle(pool)[0]);
-      return [{ toast:'New prompt.' }, { go:'sayQ' }];
+      return [{ toast:SWAP_WORDS.say.done }, { go:'sayQ' }];
     },
     /* w: 0 | 1 | 'tie'; said, ok: each team's word and whether it dodged, kept for the result's word cards (14 Nov) */
     'say/verdict'(g, a, env){
@@ -2453,13 +2454,15 @@
       const said = Array.isArray(a.said) ? [0, 1].map(t => (typeof a.said[t] === 'string' ? a.said[t].slice(0, 40) : null)) : null;
       s.subs.push(said ? { q, winner:w, said, ok:[0, 1].map(t => !!(a.ok && a.ok[t])) } : { q, winner:w });
       if(w === 'tie'){ s.wins[0]++; s.wins[1]++; fx.push({ toast:'Tie — a point each.' }); }
+      /* (neither dodged it: nobody scores, 24 Nov, the owner) */
+      else if(w === 'none'){ fx.push({ toast:'Nobody gets it.' }); }
       else { s.wins[w]++; fx.push({ sound:'correct' }); fx.push({ toast:g.teams[w].name + ' take leg ' + (s.i + 1) + '.' }); }
       s.i++;
       if(s.fun) return funLeg(s, 'sayQ', 'saySummary', fx);
       if(s.i < s.qs.length){ fx.push({ go:'sayQ' }); return fx; }
       /* a spare is a raw prompt — its secret word is drawn as it comes in */
-      return legsFinish(g, s, { what:'prompt', again:'sayQ', summary:'saySummary', draw:(p) => env.deal.drawSaySame(p),
-        dry:'Tied on legs, and there are no spare prompts left for another tie-breaker. Your call.' }, fx);
+      return legsFinish(g, s, { what:'question', again:'sayQ', summary:'saySummary', draw:(p) => env.deal.drawSaySame(p),
+        dry:'Tied on legs, and there are no spare questions left for another tie-breaker. Your call.' }, fx);
     },
     'say/award'(g, a){ const fx = []; awardMini(g, g.saySame, a.w, fx); fx.push({ render:true }); return fx; },
     'say/done'(g){ return finishMini(g, 'saysame', g.saySame); },

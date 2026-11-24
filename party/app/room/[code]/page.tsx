@@ -265,7 +265,7 @@ export default function PhoneRoom() {
     if (error) throw new Error(error.message);
   });
   /* (8 Nov) mid-game, a host is told what happens to the night without them */
-  const hostGoes = (many ? "The night waits until someone taps Be the host." : "The captains carry on, and the app checks the answers, until someone takes over as the host.");
+  const hostGoes = (many ? "The night waits until someone taps Be the host." : "The captains carry on, and the game checks the answers, until someone takes over as the host.");
   const leave = () => (room?.status === "lobby" || window.confirm(mine?.role === "host"
     ? `Leave the game? The game goes on without you: ${hostGoes} You can come back with the same name, as a player.`
     : "Leave the game? You can come back with the same name.")) && act(async () => { await sb().from("members").delete().eq("room", code).eq("user_id", me!); router.replace("/"); });

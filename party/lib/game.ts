@@ -186,7 +186,7 @@ export const T_GRACE_MS = 1000;
 /* the Auction: nobody names more than this in the time (and a typo can't bid 999) */
 export const MAX_BID = 100;
 /* Party plays some mini-games shorter than Classic (the shared engine keeps Classic's lengths) */
-export const PARTY_LEGS: Partial<Record<MiniKey, number>> = { closest: 5, saysame: 7, dish: 5 };
+export const PARTY_LEGS: Partial<Record<MiniKey, number>> = { closest: 5, saysame: 6, dish: 5 };   // (Don't Say the Same: best of 6 in every setup, 24 Nov, the owner)
 
 /* A name inside a sentence, isolated, so a right-to-left name (Arabic) doesn't drag the
    punctuation around it out of order: "(Abdulrahman) left the screen" stays in order. */
