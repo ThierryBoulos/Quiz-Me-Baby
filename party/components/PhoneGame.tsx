@@ -5,9 +5,14 @@ import { useNoTv } from "./NoTv";
 import { NEXT_MOVES, WAITS_FOR_NEXT } from "@/lib/tv/rules";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
 import { AirportFact } from "./Airport";
+import { ClosestAnswer } from "./Closest";
 import { FlagAnswer } from "./Flag";
+import { PinAnswer } from "./Pin";
 import { HostAnswerCard } from "./HostAnswer";
+import { AIRPORT } from "@/lib/minis/airport";
+import { CLOSEST } from "@/lib/minis/closest";
 import { FLAG } from "@/lib/minis/flag";
+import { PIN } from "@/lib/minis/pin";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two, poss } from "@/lib/game";
 import type { Member } from "@/lib/room";
@@ -533,7 +538,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sideways ? 64 : 90} /></div></div></ToSide>
         <AnswerCard />
         <Who />
-        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change landmark" move={{ type: "pin/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label={PIN.change} move={{ type: "pin/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "pinReveal": return <Results><HostHead /><Main label="Next" move={{ type: "ui/next" }} /></Results>;
     case "majorityQ": { const M = pub.majority; return (
@@ -556,7 +561,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <ToSide order={2}><div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sideways ? 64 : 90} /></div></ToSide>
         <AnswerCard />
         <Who />
-        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change board" move={{ type: "airport/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label={AIRPORT.change} move={{ type: "airport/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     /* (as with 3 to 8 teams: the answer, the fact, the calls, who takes it: 23 Nov, the owner) */
     case "airportReveal": return (
@@ -1159,7 +1164,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {pub.screen === "flagQ" && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
     {/* (the reveal as with 3 to 8 teams: the flag small, the answer on its tile, the fact under it: 23 Nov, the owner) */}
     {/* (Closest To Wins: the question small, the answer as people write it on its tile, the fact: as with 3 to 8 teams) */}
-    {pub.screen === "closestReveal" && pub.reveal && <AnswerLine question={pub.question} answer={showNum(Number(pub.reveal.answer))} fact={pub.reveal.notes} />}
+    {pub.screen === "closestReveal" && pub.reveal && <ClosestAnswer question={pub.question} answer={Number(pub.reveal.answer)} notes={pub.reveal.notes} />}
     {pub.screen === "flagReveal" && pub.reveal && <FlagAnswer flag={pub.flag} answer={pub.reveal.answer} notes={pub.reveal.notes} />}
     {/* Fool Me Twice: the fact (at the reveal, with the truth in it); the answers while they pick (a captain picks from
         its own buttons, below); the reveal */}
@@ -1188,7 +1193,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
       : <PinPhoto pin={pub.pin} h={230} small zoom />)}
     {/* (as with 3 to 8 teams: the map, the landmark's name on its tile, its place as the fact: 23 Nov, the owner) */}
     {/* (the host's map a little shorter, so who takes it shows above Next on a 360 by 780 phone; a team's phone has the side line) */}
-    {pub.screen === "pinReveal" && pub.pin?.reveal && <AnswerLine media={<div className="w-full"><PinMap marks={pinMarks(pub)} fly height={side ? 220 : 170} label={`Where it is: ${pub.pin.reveal.place}`} /></div>} answer={pub.pin.reveal.name} fact={pub.pin.reveal.place} />}
+    {pub.screen === "pinReveal" && pub.pin?.reveal && <PinAnswer marks={pinMarks(pub)} height={side ? 220 : 170} name={pub.pin.reveal.name} place={pub.pin.reveal.place} />}
     {/* (as with 3 to 8 teams: the board flips in; at the reveal, the airport on its tile, its code and city, the note:
        23 Nov, the owner) */}
     {pub.screen === "airportQ" && <Board air={pub.airport} size={small ? "small" : "phone"} flip />}
@@ -1323,7 +1328,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     /* The Comeback: its captain answers; its players watch; the other team waits */
     case "comebackQ": { const t = pub.comeback?.teams[0] ?? 0;
       return t === mine ? (cap ? "Your question. Type your answer." : "Your captain is answering.") : `${T[t].name} are playing for a comeback.`; }
-    case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
+    case "miniQ": return cap ? CLOSEST.topCaptain : CLOSEST.topPlayer;
     case "flagQ": return cap ? FLAG.topCaptain : FLAG.topPlayer;
     /* (12 Nov, the owner: any player can buzz, the captain types; pub.see.by: who hit BUZZ) */
     /* Fool Me Twice: write a lie, then find the truth */
@@ -1335,8 +1340,8 @@ function status(pub: Pub, me: Member, noTv = false) {
       : pub.buzz === mine ? (pub.sent?.[mine] ? "Answer sent. The app checks it."
         : cap ? `${me1 || !by ? "You" : by} buzzed! Say it out loud and type it.` : `${me1 ? "You" : by || "Your team"} buzzed! Say it out loud: your captain types it.`)
       : pub.buzz != null ? `${T[pub.buzz].name} buzzed` : "Know it? BUZZ!"; }
-    case "pinQ": return cap ? "Where is it? Drop your pin, then lock it in." : "Drop the Pin: help your captain";
-    case "airportQ": return cap ? "Which airport?" : "Guess the Airport: help your captain";
+    case "pinQ": return cap ? PIN.topCaptain : PIN.topPlayer;
+    case "airportQ": return cap ? AIRPORT.topCaptain : AIRPORT.topPlayer;
     case "rouletteQ": return cap ? "Your chamber's question. Type your answer." : "Russian Roulette: help your captain";
     case "stakesPick": return cap ? (pub.stakes?.locked[mine] ? "Bet locked in. Waiting for the others." : "Place your bet: a theme, then a level") : "Secret Stakes: your captain bets";
     case "stakesQ": return cap ? "The question you bet on. Type your answer." : "Secret Stakes: help your captain";

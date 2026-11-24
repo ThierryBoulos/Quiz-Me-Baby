@@ -215,13 +215,4 @@ export function preloadOf(key: string, qs: { flag?: string; id?: string; photo?:
   if (key === "see") return { sees: qs.slice(i, i + 2).map((x) => x.photo).filter(Boolean) as string[] };
   return undefined;
 }
-/* (Guess the Flag's lines: lib/minis/flag.ts, the game's one copy) */
-/* Closest To Wins' line on the setup screen and its first rule, every setup (23 Nov, the owner) */
-export const closestSetupLine = (secs?: number) => `Five number questions, ${secs ?? T_CLOSEST} seconds each: the closest guess wins.`;
-export const closestRule1 = (secs?: number) => `A question with a number for an answer. Captains have ${secs ?? T_CLOSEST} seconds to type their best guess.`;
-/* Drop the Pin's line on the setup screen and its first rule, every setup (23 Nov, the owner) */
-export const pinSetupLine = (secs?: number) => `Seven landmarks, ${secs ?? T_PIN} seconds each: drop a pin where it is.`;
-/* Guess the Airport, every setup (23 Nov, the owner) */
-export const airportSetupLine = (secs?: number) => `Five departure boards, ${secs ?? T_AIRPORT} seconds, which airport is it?`;
-export const airportRule1 = (secs?: number) => `A departures board goes up. Captains have ${secs ?? T_AIRPORT} seconds to type which airport it is.`;
-export const pinRule1 = (secs?: number) => `A photo of a landmark goes up. Captains have ${secs ?? T_PIN} seconds to drop a pin on the map where they think it is.`;
+/* (each game's lines, Guess the Flag, Closest To Wins, Drop the Pin, Guess the Airport: lib/minis/, the game's one copy) */

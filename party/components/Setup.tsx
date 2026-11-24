@@ -18,7 +18,9 @@ import { RepeatSheet } from "./RepeatSheet";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChips";
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
 import { RR_SETUP } from "@/lib/roulette";
-import { airportSetupLine, closestSetupLine, pinSetupLine } from "@/lib/game";
+import { AIRPORT } from "@/lib/minis/airport";
+import { CLOSEST } from "@/lib/minis/closest";
+import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
 import { SEE_SETUP } from "@/lib/see";
 
@@ -269,7 +271,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{name}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? FLAG.setupLine(timers?.tFlag) : k === "closest" ? closestSetupLine(timers?.tMini) : k === "pin" ? pinSetupLine(timers?.tPin) : k === "airport" ? airportSetupLine(timers?.tAirport) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? FLAG.setupLine(timers?.tFlag) : k === "closest" ? CLOSEST.setupLine(timers?.tMini) : k === "pin" ? PIN.setupLine(timers?.tPin) : k === "airport" ? AIRPORT.setupLine(timers?.tAirport) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

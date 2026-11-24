@@ -1,32 +1,30 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { FitBody } from "./TvStage";
-import { motionOff } from "./Marquee";
 import { QRCodeSVG } from "qrcode.react";
 import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { MapView } from "./MapView";
-import { PinMap } from "./PinMap";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
 import { COMEBACK_TITLE } from "@/lib/comeback";
-import { AskHead, battleNeeds, Board, comebackTeams, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, FlagImg, Hud, LifelineStrip, MiniIntro, PinPhoto, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, comebackTeams, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, Hud, LifelineStrip, MiniIntro, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
 import { takeText, TeamRows as Rows } from "./many/PartsMany";
 import { SeeTv } from "./See";
-import { AirportAnswerTv } from "./Airport";
+import { AirportRevealTv, AirportTv } from "./Airport";
+import { ClosestRevealTv, ClosestTv } from "./Closest";
+import { PinRevealTv, PinTv } from "./Pin";
 import { FlagTv } from "./Flag";
 import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
-import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, showNum, TIE_SCREENS } from "@/lib/game";
-import { Ruler } from "./Ruler";
+import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "./Fool";
 import { foolDone } from "@/lib/fool";
 import { LeadBanner, useFlyingPoints, useScreenAt, useToastOn, WinName } from "./Motion";
 import { NightIntroTv } from "./NightIntro";
 import { useLiveCount } from "@/lib/liveCount";
-import { wholeSentences } from "@/lib/sentences";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -226,11 +224,6 @@ function Sent({ pub, column }: { pub: Pub; column?: boolean }) {
   return <SentLine teams={both(pub)} sent={(t) => !!pub.sent?.[t]} column={column} />;
 }
 
-/* Closest To Wins: the ruler (components/Ruler.tsx): A's card above it, B's below; no answer at the far end */
-function NumberLine({ pub, ans, w }: { pub: Pub; ans: number; w: 0 | 1 | "tie" | "none" | null | undefined }) {
-  const T = pub.teams, g = pub.reveal?.guesses || [];
-  return <Ruler ans={ans} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t), guess: g[t] == null ? null : Number(g[t]), win: w === t || w === "tie" }))} />;
-}
 
 /* the Auction's run: a notch per answer counted, up to the bid. A big bid (over 12) is one bar instead, marked
    every 5, so 25 never means 25 dots. Full, it glows green. */
@@ -380,23 +373,14 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
         </>)}
       </div>);
   }
-  if (sc === "miniQ") return (<>
-    <div className="font-bold max-w-[1000px]" style={{ fontSize: 50, lineHeight: 1.15 }}>{pub.question}</div>
-    <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={150} />
-    <Sent pub={pub} />
-  </>);
+  /* Closest To Wins, Drop the Pin, Guess the Airport: one copy for every setup (components/Closest.tsx, Pin.tsx,
+     Airport.tsx); here, this setup's clock, who has answered, each team's call and who takes it */
+  if (sc === "miniQ") return <ClosestTv question={pub.question} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={150} />} sent={<Sent pub={pub} />} />;
   if (sc === "closestReveal" && pub.reveal) {
-    const ans = Number(pub.reveal.answer), w = pub.reveal.w;
-    /* (as with 3 to 8 teams: the question, the answer as people write it, "1,600,000", the fact, the line, who takes
-       it: 23 Nov, the owner) */
+    const ans = Number(pub.reveal.answer), w = pub.reveal.w, g = pub.reveal.guesses || [];
     const hw = takeText(w === "tie" ? [0, 1] : w === 0 || w === 1 ? [w] : [], ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })));
-    return (<>
-      {pub.question && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>}
-      <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: 80, color: "var(--color-gold)" }}>{showNum(ans)}</div>
-      {pub.reveal.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(pub.reveal.notes)}</div>}
-      <NumberLine pub={pub} ans={ans} w={w} />
-      <div className="display text-44 beat" style={{ ...QUICK, color: hw.color }}>{hw.text}</div>
-    </>);
+    return <ClosestRevealTv question={pub.question} answer={ans} notes={pub.reveal.notes} head={hw}
+      ruler={([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t), guess: g[t] == null ? null : Number(g[t]), win: w === t || w === "tie" }))} />;
   }
   /* What Do You See?: the picture clears as the clock runs (every screen from the TV's clock) and stops at a buzz; then
      the whole picture, what it is, both answers and who got it how fast */
@@ -412,52 +396,20 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       /* (who takes it, as with 3 to 8 teams: 23 Nov, the owner) */
       head={takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` })))} />);
   /* Drop the Pin: the photo while they place their pins; then the map, flying in to the spot */
-  if (sc === "pinQ" && pub.pin) return (
-    <div className="flex gap-12 items-center w-full justify-center">
-      <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={460} credit /></div>
-      <div className="w-[360px] flex flex-col items-center gap-5">
-        <div className="display text-44" style={{ color: "var(--color-gold)" }}>Where is this?</div>
-        <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
-        <SentLine teams={both(pub)} sent={(t) => !!pub.sent?.[t]} column on="pin in" off="placing…" />
-      </div>
-    </div>);
+  if (sc === "pinQ" && pub.pin) return <PinTv pin={pub.pin} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<SentLine teams={both(pub)} sent={(t) => !!pub.sent?.[t]} column on="pin in" off="placing…" />} />;
   if (sc === "pinReveal" && pub.pin?.reveal) {
-    /* (as with 3 to 8 teams: the landmark on its tile, its place, each team's row closest first, the trophy and the
-       points, who takes it: 23 Nov, the owner) */
     const R = pub.pin.reveal, w = pub.reveal?.w, won = w === "tie" ? [0, 1] : w === 0 || w === 1 ? [w] : [];
     const order = [0, 1].sort((a, b) => (R.km[a] == null ? 1 : 0) - (R.km[b] == null ? 1 : 0) || Math.round(R.km[a] ?? 0) - Math.round(R.km[b] ?? 0) || a - b);
-    const teams = ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })), hw = takeText(won, teams);
-    return (
-    <div className="flex gap-10 items-center w-full">
-      <div className="flex-1 min-w-0"><PinMap marks={pinMarks(pub)} fly height={490} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
-      <div className="w-[400px] shrink-0 flex flex-col items-center gap-3">
-        <div className="eyebrow text-18">It&rsquo;s here</div>
-        <div className="ans-board display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.name}</div>
-        <div className="text-22 text-[var(--color-ink-2)] -mt-1">{R.place}</div>
-        <div className="w-full mt-2"><Rows teams={teams} winners={won} order={order} size="tv" pts={[0, 1].map((t) => (won.includes(t) ? 1 : 0))}
-          right={(t) => (R.pins[t] ? showKm(R.km[t] ?? 0) : <span className="text-[var(--color-ink-3)]">No pin</span>)} /></div>
-        <div className="display text-36 mt-3" style={{ color: hw.color }}>{hw.text}</div>
-      </div>
-    </div>); }
+    const teams = ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) }));
+    return <PinRevealTv marks={pinMarks(pub)} name={R.name} place={R.place} head={takeText(won, teams)}
+      rows={<Rows teams={teams} winners={won} order={order} size="tv" pts={[0, 1].map((t) => (won.includes(t) ? 1 : 0))}
+        right={(t) => (R.pins[t] ? showKm(R.km[t] ?? 0) : <span className="text-[var(--color-ink-3)]">No pin</span>)} />} />;
+  }
   /* Guess the Airport: the board, then its name. The reveal as with 3 to 8 teams, its name on the flaps: the board's
      first rows, the name, its code and city, the note, each team's answer and the call, who takes it (23 Nov, the owner) */
-  if (sc === "airportQ" && pub.airport) return (
-    <div className="flex gap-10 items-center w-full">
-      <div className="flex-1 min-w-0"><Board air={pub.airport} size="tv" flip /></div>
-      <div className="w-[380px] flex flex-col items-center gap-4">
-        <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which airport?</div>
-        <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
-        <Sent pub={pub} column />
-      </div>
-    </div>);
-  if (sc === "airportReveal" && pub.airport) return (<>
-    <div className="w-full max-w-[860px] board-tight"><Board air={pub.airport} size="reveal" /></div>
-    <AirportAnswerTv answer={pub.reveal?.answer || ""} air={pub.airport} />
-    {pub.reveal?.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(pub.reveal.notes)}</div>}
-    <TeamRows pub={pub} empty="No answer" />
-    {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })));
-      return <div className="display text-44 beat" style={{ ...QUICK, color: w.color }}>{w.text}</div>; })()}
-  </>);
+  if (sc === "airportQ" && pub.airport) return <AirportTv air={pub.airport} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} column />} />;
+  if (sc === "airportReveal" && pub.airport) return <AirportRevealTv air={pub.airport} answer={pub.reveal?.answer || ""} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" />}
+    head={takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
   if ((sc === "dishQ" || sc === "dishReveal") && pub.dish) {
     const long = pub.dish.n > 8;
     return (

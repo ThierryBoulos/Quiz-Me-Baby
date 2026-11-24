@@ -23,9 +23,14 @@ import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
 import { WhoAnswered } from "../WhoAnswered";
 import { AirportFact } from "../Airport";
+import { ClosestAnswer } from "../Closest";
 import { FlagAnswer } from "../Flag";
+import { PinAnswer } from "../Pin";
 import { HostAnswerCard } from "../HostAnswer";
+import { AIRPORT } from "@/lib/minis/airport";
+import { CLOSEST } from "@/lib/minis/closest";
 import { FLAG } from "@/lib/minis/flag";
+import { PIN } from "@/lib/minis/pin";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
@@ -132,7 +137,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
 
 const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
-const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: FLAG.topCaptain, closest: "Type a number. Nearest wins.", pin: "Where is it? Drop your pin, then lock it in.", airport: "Which airport?" };
+const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: FLAG.topCaptain, closest: CLOSEST.topCaptain, pin: PIN.topCaptain, airport: AIRPORT.topCaptain };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -269,17 +274,19 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <Clock deadline={g.key === "see" && pub.see?.typeBy ? pub.see.typeBy : pub.deadline} left={g.key === "see" && pub.see?.typeBy ? undefined : pub.left} timeUp={pub.timeUp} size={small || sideways ? 70 : 90} /></div></ToSide>}
     </div>);
   /* the answer, on a reveal: big, in gold, with the fact behind it */
-  const Answer = () => !R || !g ? null : g.key === "flag" ? <div className="noselect" {...noCopy}><FlagAnswer flag={pub.flag} answer={R.answer} notes={R.place || R.notes} /></div> : (
+  /* (Guess the Flag, Closest To Wins, Drop the Pin: one copy for every setup, components/Flag.tsx, Closest.tsx, Pin.tsx) */
+  const Answer = () => !R || !g ? null : g.key === "flag" ? <div className="noselect" {...noCopy}><FlagAnswer flag={pub.flag} answer={R.answer} notes={R.place || R.notes} /></div>
+    : g.key === "closest" ? <div className="noselect" {...noCopy}><ClosestAnswer question={pub.question} answer={Number(R.answer)} notes={R.place || R.notes} /></div>
+    : g.key === "pin" && R.at ? <div className="noselect" {...noCopy}><PinAnswer name={R.answer} place={R.place} marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
+      ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]} /></div> : (
     <div className="noselect" {...noCopy}>
-      <AnswerLine question={["quiz", "say", "majority", "sudden", "comeback", "closest"].includes(g.key) ? pub.question : null}
+      <AnswerLine question={["quiz", "say", "majority", "sudden", "comeback"].includes(g.key) ? pub.question : null}
         media={g.key === "see" && pub.see ? <div className="flex flex-col items-center gap-1"><SeePicture see={pub.see} clear w={240} alt={R.answer} /><SeeCredit see={pub.see} size={11} />
             {(() => { const w = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] })), R.winners?.length); return <span className="display text-18" style={{ color: w.color }}>{w.text}</span>; })()}</div>
           : g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={180} legend={false} />
-          : g.key === "pin" && R.at ? <div className="w-full"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
-            ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
-            fly height={220} label={`Where it is: ${R.place}`} /></div> : null}
+          : null}
         label={g.key === "say" ? "The app's secret answer" : undefined}
-        answer={g.key === "closest" ? showNum(Number(R.answer)) : R.answer} fact={g.key === "airport" ? <AirportFact air={pub.airport} notes={R.notes} /> : R.place || R.notes} />
+        answer={R.answer} fact={g.key === "airport" ? <AirportFact air={pub.airport} notes={R.notes} /> : R.place || R.notes} />
     </div>);
   /* the result after a question (the owner's pick, 1 Nov): how your team did, in one pill */
   const youOf = (): { text: string; tone: Tone } | null => {
@@ -428,7 +435,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
           {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
           {/* (shown even once answers are in: the new question clears them, every game: 23 Nov, the owner) */}
-          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? FLAG.change : g.key === "see" ? "Change picture" : g.key === "pin" ? "Change landmark" : g.key === "airport" ? "Change board" : "Change question"}</button>}
+          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? FLAG.change : g.key === "see" ? "Change picture" : g.key === "pin" ? PIN.change : g.key === "airport" ? AIRPORT.change : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>

@@ -1,8 +1,12 @@
 "use client";
 /* Guess the Airport's answer, one piece for every setup (23 Nov, the owner): the airport's name on split-flap letters
    (the TV) and its code and city; on the phones, the code, city and note under the answer's tile. */
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { Board } from "./GameParts";
 import { motionOff } from "./Marquee";
+import { AIRPORT } from "@/lib/minis/airport";
+import { wholeSentences } from "@/lib/sentences";
+import type { Pub } from "@/lib/game";
 
 type Air = { code?: string; city?: string } | null | undefined;
 
@@ -53,5 +57,32 @@ export function AirportFact({ air, notes }: { air: Air; notes?: string | null })
   return (<>
     {air?.code && <span className="block"><b className="text-[var(--color-ink)]">{air.code}</b> · {air.city}</span>}
     {notes && <span className="block mt-1">{notes}</span>}
+  </>);
+}
+
+/* the TV, every setup (24 Nov, the merge): the board up, "Which airport?", the clock and who has answered beside it;
+   then the reveal: the board's first rows, the name on the flaps, its code and city, the note, each team's call, who
+   takes it. Each setup hands in its clock, its line, its rows. dense: five teams or more */
+const QUICK = { ["--beat" as string]: ".15s" } as CSSProperties;
+export function AirportTv({ air, dense, clock, sent }: { air: Pub["airport"]; dense?: boolean; clock: ReactNode; sent: ReactNode }) {
+  return (
+    <div className="flex gap-10 items-center w-full justify-center">
+      <div className="flex-1 min-w-0 flex justify-center"><Board air={air} size="tv" flip /></div>
+      <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
+        {/* (the 2-team sizes up to four teams: 23 Nov, the owner) */}
+        <div className={"display leading-tight " + (dense ? "text-40" : "text-44")} style={{ color: "var(--color-gold)" }}>{AIRPORT.ask}</div>
+        {clock}
+        {sent}
+      </div>
+    </div>);
+}
+export function AirportRevealTv({ air, answer, notes, dense, rows, head, headStyle }: { air: Pub["airport"]; answer: string; notes?: string | null; dense?: boolean; rows: ReactNode; head: { text: string; color: string }; headStyle?: CSSProperties }) {
+  return (<>
+    <div className="w-full max-w-[860px] board-tight"><Board air={air} size="reveal" /></div>
+    <AirportAnswerTv answer={answer} air={air} dense={dense} />
+    {/* (the note stays on the phones with five teams or more: the board and the answers fill the TV) */}
+    {notes && !dense && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(notes)}</div>}
+    {rows}
+    <div className="display text-44 beat" style={{ ...QUICK, ...headStyle, color: head.color }}>{head.text}</div>
   </>);
 }

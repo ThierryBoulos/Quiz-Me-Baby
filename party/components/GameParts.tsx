@@ -5,7 +5,9 @@
    the mini-game intro with its rules. One look everywhere. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
-import { airportRule1, closestRule1, pinRule1 } from "@/lib/game";
+import { AIRPORT } from "@/lib/minis/airport";
+import { CLOSEST } from "@/lib/minis/closest";
+import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { CodeTiles } from "./Marquee";
@@ -390,9 +392,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
   switch (m.key) {
     /* (short, the same rule 1 as with 3 to 8 teams: 23 Nov, the owner) */
     case "closest": return [
-      { text: closestRule1(t?.mini ?? pub.tMini) },
-      { text: "Closest guess: +1. Tied? A point each. Nobody? Nobody." },
-      { text: `Best of ${n} takes ${pts}. Tied? One more, or a point each.` }];
+      { text: CLOSEST.rule1(t?.mini ?? pub.tMini) }, ...CLOSEST.rules2(n, pts).map((text) => ({ text }))];
     case "auction": return [
       { text: `${n} categories. The open alternates, so nobody bids blind twice.` },
       { text: "One captain bids on their phone: how many they can name. The other raises, or passes." },
@@ -430,15 +430,11 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `${n} facts, the last 2 hard. Most points takes ${pts}. Tied? One more fact, or a point each.` }];
     case "pin": return [
       /* (short, rule 1 the same in every setup: 23 Nov, the owner; no "its name comes too": no setup shows it) */
-      { text: pinRule1(t?.pin) },
-      { text: "Closest pin: +1. The same distance? A point each. No pin? No point." },
-      { text: `Best of ${n} takes ${pts}. Tied? One more, or a point each.` }];
+      { text: PIN.rule1(t?.pin) }, ...PIN.rules2(n, pts).map((text) => ({ text }))];
     case "airport": return [
       /* (short, the same with or without a host, rule 1 as with 3 to 8: 23 Nov; the city always counts, no rule for
          it: 24 Nov, the owner) */
-      { text: airportRule1(t?.airport) },
-      { text: "Guess it right: +1. Both right? A point each. Nobody? Nobody." },
-      { text: `Best of ${n} takes ${pts}. Tied? One more board, or a point each.` }];
+      { text: AIRPORT.rule1(t?.airport) }, ...AIRPORT.rules2(n, pts).map((text) => ({ text }))];
     case "majority": return [
       { text: "Everyone plays on their own phone, captains too. The lists are fixed at Start.", warn: true },
       { text: `${n} questions, four answers, ${sec(t?.majority, T_MAJORITY)} each. One tap and it's locked. No answer counts as wrong.` },

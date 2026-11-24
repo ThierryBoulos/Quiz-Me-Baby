@@ -8,9 +8,12 @@ import { comebackSays } from "@/lib/comeback";
 import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
-import { Roll, Verdict } from "../GameParts";
+import { Roll } from "../GameParts";
 import { useSideways } from "../Side";
-import { airportRule1, closestRule1, pinRule1, showKm, showNum } from "@/lib/game";
+import { showKm, showNum } from "@/lib/game";
+import { AIRPORT } from "@/lib/minis/airport";
+import { CLOSEST } from "@/lib/minis/closest";
+import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
@@ -199,11 +202,11 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     /* the round's themes are in the gold band above ("4 questions – Science & Music"), not said again here (the owner, 31 Oct) */
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
     case "flag": return [FLAG.rule1(pub.introSecs), fast, pay];
-    case "airport": return [airportRule1(pub.introSecs), fast, pay];
+    case "airport": return [AIRPORT.rule1(pub.introSecs), fast, pay];
     case "map": return ["A map with places marked. Captains type what they have in common.", fast, pay];
     /* (no "Wrong, nothing." where nothing is wrong, only further off: 23 Nov, the owner) */
-    case "closest": return [closestRule1(pub.introSecs), `Closest guess first: ${per.replace(" Wrong, nothing.", "")}`, pay];
-    case "pin": return [pinRule1(pub.introSecs), `Closest pin first: ${per.replace(" Wrong, nothing.", "")}`, pay];
+    case "closest": return [CLOSEST.rule1(pub.introSecs), `Closest guess first: ${per.replace(" Wrong, nothing.", "")}`, pay];
+    case "pin": return [PIN.rule1(pub.introSecs), `Closest pin first: ${per.replace(" Wrong, nothing.", "")}`, pay];
     case "say": return ["A question with many right answers, like \"Name a colour\". Captains type one.",
       `No points if you say the app's secret answer, or the same as another team. Any other answer gets ${k} points.`, pay];
     case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",

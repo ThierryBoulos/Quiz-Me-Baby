@@ -9,10 +9,10 @@ import { FitBody } from "../TvStage";
 import { useToastOn, WinName } from "../Motion";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock, useSecondsLeft } from "../Clock";
-import { Board, Confetti, FlagImg, PinPhoto } from "../GameParts";
+import { Confetti } from "../GameParts";
 import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
-import { showKm, showNum } from "@/lib/game";
+import { showKm } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { Ruler } from "../Ruler";
@@ -22,7 +22,9 @@ import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
 import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
-import { AirportAnswerTv } from "../Airport";
+import { AirportRevealTv, AirportTv } from "../Airport";
+import { ClosestRevealTv, ClosestTv } from "../Closest";
+import { PinRevealTv, PinTv } from "../Pin";
 import { FlagTv } from "../Flag";
 import { SentLine, TeamCalls } from "../TeamCalls";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
@@ -127,13 +129,13 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           <Sent pub={pub} />
         </>)}
         {/* Guess the Airport, Guess the Map: the board or the map, the clock and the teams beside it */}
-        {pub.screen === "q" && g && (g.key === "airport" || g.key === "map") && (
+        {pub.screen === "q" && g && g.key === "airport" && <AirportTv air={pub.airport} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 120 : 130} />} sent={<Sent pub={pub} column={!dense} />} />}
+        {pub.screen === "q" && g && g.key === "map" && (
           <div className="flex gap-10 items-center w-full justify-center">
-            <div className="flex-1 min-w-0 flex justify-center">{g.key === "airport" ? <Board air={pub.airport} size="tv" flip /> : pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={460} still />}</div>
+            <div className="flex-1 min-w-0 flex justify-center">{pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={460} still />}</div>
             <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
-              {/* (Guess the Airport: the 2-team sizes up to four teams: 23 Nov, the owner) */}
-              <div className={"display leading-tight " + (g.key === "airport" && !dense ? "text-44" : "text-40")} style={{ color: "var(--color-gold)" }}>{g.key === "airport" ? "Which airport?" : "What do they have in common?"}</div>
-              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={g.key === "airport" && !dense ? 130 : 120} />
+              <div className="display leading-tight text-40" style={{ color: "var(--color-gold)" }}>What do they have in common?</div>
+              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
               <Sent pub={pub} column={!dense} />
             </div>
           </div>)}
@@ -181,22 +183,9 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {(pub.screen === "q" || pub.screen === "reveal") && g && g.key === "roulette" && pub.roulette && (
           <RouletteTv rr={pub.roulette} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent} typed={R?.typed} ok={R?.ok}
             reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />} />)}
-        {pub.screen === "q" && g && g.key === "closest" && (<>
-          {/* (the 2-team sizes up to four teams, smaller only from five: 23 Nov, the owner) */}
-          <div className="font-bold max-w-[1000px]" style={{ fontSize: dense && (pub.question || "").length > 110 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 140 : 150} />
-          <Sent pub={pub} />
-        </>)}
-        {pub.screen === "q" && g && g.key === "pin" && (
-          <div className="flex gap-12 items-center w-full justify-center">
-            {/* (the 2-team sizes up to four teams; names up to four, dots from five: 23 Nov, the owner) */}
-            <div className="flex-1 min-w-0 flex justify-center"><PinPhoto pin={pub.pin} h={dense ? 430 : 460} credit /></div>
-            <div className="w-[360px] shrink-0 flex flex-col items-center gap-5">
-              <div className="display text-44" style={{ color: "var(--color-gold)" }}>Where is this?</div>
-              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 120 : 130} />
-              <Sent pub={pub} column={!dense} />
-            </div>
-          </div>)}
+        {/* (Closest To Wins, Drop the Pin, Guess the Airport: one copy for every setup, components/Closest.tsx, Pin.tsx, Airport.tsx) */}
+        {pub.screen === "q" && g && g.key === "closest" && <ClosestTv question={pub.question} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 140 : 150} />} sent={<Sent pub={pub} />} />}
+        {pub.screen === "q" && g && g.key === "pin" && <PinTv pin={pub.pin} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 120 : 130} />} sent={<Sent pub={pub} column={!dense} />} />}
         {pub.screen === "q" && g && g.key === "majority" && pub.options && (<>
           <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 36 : 44, lineHeight: 1.12 }}>{pub.question}</div>
           <div className="grid grid-cols-2 gap-4 w-full max-w-[1400px]">{pub.options.map((o) => <div key={o} className="mr-tv-opt rev"><span className="flex-1 min-w-0"><bdi>{o}</bdi></span></div>)}</div>
@@ -227,40 +216,24 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         </>); })()}
         {/* a typed answer's reveal (question rounds, airports, maps, Don't Say the Same, the Cocktail or Dish): what was
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
-        {pub.screen === "reveal" && g && R && ["quiz", "airport", "map", "say", "dish", "sudden", "comeback"].includes(g.key) && (<>
+        {pub.screen === "reveal" && g && R && g.key === "airport" && <AirportRevealTv air={pub.airport} answer={R.answer || ""} notes={R.notes} dense={dense}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
+        {pub.screen === "reveal" && g && R && ["quiz", "map", "say", "dish", "sudden", "comeback"].includes(g.key) && (<>
           {g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={dense ? 130 : 200} legend={false} still />
-            : g.key === "airport" ? <div className="w-full max-w-[860px] board-tight"><Board air={pub.airport} size="reveal" /></div>
             : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
             : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
           {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
-          {/* (Guess the Airport: its name on the flaps, its code and city, as with 2 teams: 23 Nov, the owner) */}
-          {g.key === "airport" ? <AirportAnswerTv answer={R.answer || ""} air={pub.airport} dense={dense} />
-            : <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>}
-          {/* (the airport's explanation stays on the phones with eight teams: the board and eight answers fill the TV) */}
-          {R.notes && g.key !== "say" && !(g.key === "airport" && dense) && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
+          <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
+          {R.notes && g.key !== "say" && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
         </>)}
-        {pub.screen === "reveal" && g && R && g.key === "closest" && (<>
-          <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
-          <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 80, color: "var(--color-gold)" }}>{showNum(Number(R.answer))}</div>
-          {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
-          <Ruler ans={Number(R.answer)} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i), pts: R.pts?.[i] }))} />
-          <div className="display text-44 beat" style={{ ...QUICK, ...d(0.6), color: W.color }}>{W.text}</div>
-        </>)}
-        {pub.screen === "reveal" && g && R && g.key === "pin" && R.at && (
-          <div className="flex gap-10 items-center w-full">
-            <div className="flex-1 min-w-0"><PinMap marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
-              ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
-              fly height={dense ? 430 : 490} size={1.6} interactive={false} label={`Where it is: ${R.place}`} /></div>
-            <div className="w-[400px] shrink-0 flex flex-col items-center gap-3">
-              <div className="eyebrow text-18">It&rsquo;s here</div>
-              <div className="ans-board display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{R.answer}</div>
-              <div className="text-22 text-[var(--color-ink-2)] -mt-1">{R.place}</div>
-              <div className="w-full mt-2"><RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="tv" pts={R.pts} /></div>
-              <div className="display text-36 mt-3" style={{ color: W.color }}>{W.text}</div>
-            </div>
-          </div>)}
+        {pub.screen === "reveal" && g && R && g.key === "closest" && <ClosestRevealTv question={pub.question} answer={Number(R.answer)} notes={R.notes} dense={dense} head={W} headStyle={d(0.6)}
+          ruler={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i), pts: R.pts?.[i] }))} />}
+        {pub.screen === "reveal" && g && R && g.key === "pin" && R.at && <PinRevealTv dense={dense} name={R.answer} place={R.place} head={W}
+          marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
+            ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
+          rows={<RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="tv" pts={R.pts} />} />}
         {pub.screen === "reveal" && g && R && g.key === "majority" && R.counts && (<>
           <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 36 : 44, lineHeight: 1.12 }}>{pub.question}</div>
           <div className="grid grid-cols-2 gap-4 w-full max-w-[1400px]">{(pub.options || []).map((o, i) => { const ok = R.answer === o;
