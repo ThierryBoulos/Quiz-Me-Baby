@@ -773,32 +773,6 @@ export const kmOf = (pub: PubMany, t: number): ReactNode => (pub.reveal?.pins?.[
 export const SAY_WHY: Record<string, string> = { said: "Said it", off: "Off the list", same: "Same word" };
 /* the Cocktail or Dish: "60 ml — gin" splits into the amount and the ingredient */
 export const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
-/* ---- a typed answer's reveal: each team's ruling beside its name, what it typed under them (TvGame's TeamRows) ---- */
-export function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: Size; delay?: (i: number) => React.CSSProperties }) {
-  /* (the teams shown: all of them; in sudden death the ones tied at the top; in the comeback the ones still in it. The
-     columns are for those, so one team alone sits in the middle, not in the first of four columns) */
-  const T = pub.teams, R = pub.reveal!, shown = T.filter((_, i) => !(pub.game?.only && !pub.game.only.includes(i)) && !pub.comeback?.out[i]).length || T.length;
-  const k = shown, tv = size === "tv", n = tv ? colsFor(k) : k > 4 ? 2 : 1, dense = k > 4;
-  const long = T.some((t) => t.name.length > 10);
-  return (
-    <div className="grid w-full" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gap: tv ? "12px 24px" : "12px 10px", maxWidth: tv ? Math.min(1168, n * (dense ? 300 : 390)) : undefined, ["--beat" as string]: ".4s" }}>
-      {T.map((t, i) => { const ok = R.ok?.[i], x = R.typed?.[i]; if (pub.game?.only && !pub.game.only.includes(i)) return null; if (pub.comeback?.out[i]) return null; return (
-        <div key={i} className={"flex flex-col items-center gap-1 min-w-0 " + (tv ? "beat" : "")} style={delay?.(i)}>
-          {/* a phone with five teams or more (two columns): the name on a line of its own, so it's never "THE …" */}
-          {/* (the TV: the name on a line of its own, whole, over two lines if it must: "THE QUIZZIC…" on the screen that says
-              who scored, the 4 Nov audit, 3.6) */}
-          <div className={"flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + (tv ? " flex-wrap gap-y-1.5" : !tv && dense ? " flex-wrap gap-y-0" : "")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
-            <span className={tv ? "display basis-full text-center whitespace-normal leading-tight clamp2" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
-            {ok != null && <Verdict v={ok} stamp={tv} size={tv ? undefined : 14} word={pub.game?.key === "say" ? (ok ? "Dodged it" : !x ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : ok ? undefined : !x ? "No answer" : undefined} />}
-            {ok && (R.pts?.[i] ?? 0) > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{R.pts![i]}</b>}
-            {/* why that many: the order the right answers came in (the 4 Nov audit, 3.8: +4, +3, +2 said nothing) */}
-            {ok && (R.pts?.[i] ?? 0) > 0 && R.places?.[i] && pub.game?.key !== "say" && <span className="shrink-0" style={{ color: "var(--color-ink-3)", fontSize: tv ? (dense ? 18 : 20) : 12 }}>{place(R.places[i]!)} right</span>}
-          </div>
-          {(x || ok == null) && <div className={"font-bold max-w-full text-center leading-tight " + (tv && dense ? "truncate" : "clamp2")} style={{ fontSize: tv ? (dense ? 18 : 24) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? "No answer"}</bdi></div>}
-        </div>); })}
-    </div>);
-}
-
 /* ---- the phone's Teams sheet, behind the name at the top left (the owner, 31 Oct: one place for the scores and
    the players, instead of a Scores and a Team button): every team in order with its score, its players under its
    name, yours marked (a score strip for eight teams is too much on a phone) ---- */

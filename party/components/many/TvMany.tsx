@@ -24,8 +24,9 @@ import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fo
 import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
 import { AirportAnswerTv } from "../Airport";
 import { FlagTv } from "../Flag";
+import { SentLine, TeamCalls } from "../TeamCalls";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
-import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
+import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone, SAY_WHY } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -359,21 +360,18 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
 /* sudden death: the fastest right answer, the night's winner */
 /* every team: locked in, or still thinking (the two-team "Team A: thinking…", for N teams: a row that wraps, or a
    column); in sudden death only the teams tied at the top */
+/* who has answered, and each team's call at the reveal: one copy for every setup (components/TeamCalls.tsx); here,
+   which teams are in this question (sudden death's tied ones, the comeback's still in it) and this setup's words */
+const shownTeams = (pub: PubMany) => pub.teams.map((t, i) => ({ i, name: t.name, color: t.color })).filter((t) => (!pub.game?.only || pub.game.only.includes(t.i)) && !pub.comeback?.out[t.i]);
 function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
-  const only = pub.game?.only, T = pub.teams.map((t, i) => ({ ...t, i })).filter((t) => (!only || only.includes(t.i)) && !pub.comeback?.out[t.i]), dense = T.length > 4, pin = pub.game?.key === "pin", mr = pub.game?.key === "majority";
-  /* five teams or more: one row of lettered dots, lit with a tick when the team is in (two rows of names were too much) */
-  if (dense && !column) return (
-    <div className="flex flex-wrap justify-center gap-x-5 gap-y-1" role="status" aria-label={T.map((t) => `${t.name} ${pub.sent[t.i] ? "in" : "not yet"}`).join(", ")}>
-      {T.map(({ i, color }) => (
-        <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ opacity: pub.sent[i] ? 1 : 0.4, color: pub.sent[i] ? color : "var(--color-ink-3)" }}>
-          <Dot t={i} color={color} size={22} />{pub.sent[i] ? "✓" : "…"}</span>))}
-    </div>);
-  return (
-    <div className={"flex " + (column ? "flex-col items-center gap-0.5" : "flex-wrap justify-center gap-y-0.5 " + (dense ? "gap-x-5" : "gap-x-10"))} role="status" style={{ maxWidth: 1168 }}>{T.map(({ i, ...t }) => (
-      <span key={i} className="font-bold whitespace-nowrap" style={{ fontSize: column && dense ? 20 : 22, color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
-        {/* a wrong guess in the Cocktail or Dish reads "locked in" too: who got it shows at the reveal (the owner, 2 Nov) */}
-        <bdi>{t.name}</bdi>: {pub.sent[i] ? (pin ? "pin in" : mr ? "all in" : "locked in") : pin ? "placing…" : mr ? "answering…" : "thinking…"}</span>))}
-    </div>);
+  const pin = pub.game?.key === "pin", mr = pub.game?.key === "majority";
+  /* (a wrong guess in the Cocktail or Dish reads "locked in" too: who got it shows at the reveal, the owner, 2 Nov) */
+  return <SentLine teams={shownTeams(pub)} sent={(i) => !!pub.sent[i]} column={column} on={pin ? "pin in" : mr ? "all in" : "locked in"} off={pin ? "placing…" : mr ? "answering…" : "thinking…"} />;
+}
+function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: "tv" | "phone"; delay?: (i: number) => React.CSSProperties }) {
+  const R = pub.reveal!, say = pub.game?.key === "say";
+  return <TeamCalls teams={shownTeams(pub)} size={size} delay={delay} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]} pts={(i) => R.pts?.[i]} places={(i) => (say ? null : R.places?.[i])}
+    word={say ? (i) => (R.ok?.[i] ? "Dodged it" : !R.typed?.[i] ? "No answer" : SAY_WHY[R.why?.[i] || ""] || "Wrong") : undefined} />;
 }
 /* Majority Rules: how many of the room have answered (the roster is names only, so the count is the room's;
    each team's state is the row under the clock) */

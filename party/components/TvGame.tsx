@@ -17,6 +17,7 @@ import { takeText, TeamRows as Rows } from "./many/PartsMany";
 import { SeeTv } from "./See";
 import { AirportAnswerTv } from "./Airport";
 import { FlagTv } from "./Flag";
+import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, showNum, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -218,14 +219,11 @@ function SdRace({ pub }: { pub: Pub }) {
     </div>);
 }
 
-/* column: one under the other, beside a board or a map (as with 3 to 8 teams: 23 Nov, the owner) */
+/* who has answered, and each team's call at the reveal: one copy for every setup (components/TeamCalls.tsx); column:
+   one under the other, beside a board, a map or a picture */
+const both = (pub: Pub): CallTeam[] => ([0, 1] as const).map((t) => ({ i: t, name: pub.teams[t].name, color: tc(t) }));
 function Sent({ pub, column }: { pub: Pub; column?: boolean }) {
-  const T = pub.teams;
-  return (
-    <div className={column ? "flex flex-col items-center gap-1" : "flex gap-10"} role="status">{[0, 1].map((t) => (
-      <span key={t} className="font-bold" style={{ fontSize: 22, color: pub.sent?.[t] ? tc(t as 0 | 1) : "var(--color-ink-3)" }}>
-        {T[t].name}: {pub.sent?.[t] ? "locked in" : "thinking…"}</span>))}
-    </div>);
+  return <SentLine teams={both(pub)} sent={(t) => !!pub.sent?.[t]} column={column} />;
 }
 
 /* Closest To Wins: the ruler (components/Ruler.tsx): A's card above it, B's below; no answer at the far end */
@@ -420,8 +418,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       <div className="w-[360px] flex flex-col items-center gap-5">
         <div className="display text-44" style={{ color: "var(--color-gold)" }}>Where is this?</div>
         <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
-        <div className="flex flex-col items-center gap-1" role="status">{[0, 1].map((t) => (
-          <span key={t} className="font-bold" style={{ fontSize: 22, color: pub.sent?.[t] ? tc(t as 0 | 1) : "var(--color-ink-3)" }}>{T[t].name}: {pub.sent?.[t] ? "pin in" : "placing…"}</span>))}</div>
+        <SentLine teams={both(pub)} sent={(t) => !!pub.sent?.[t]} column on="pin in" off="placing…" />
       </div>
     </div>);
   if (sc === "pinReveal" && pub.pin?.reveal) {
@@ -632,18 +629,10 @@ function MiniTitle({ title }: { title?: string }) {
 
 /* each team's ruling, then what they wrote under it: "TEAM A  DODGED IT" / "Mcdo" */
 function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: string; small?: boolean }) {
-  const T = pub.teams;
-  return (
-    /* small: a side column, so one team above the other */
-    <div className={"flex justify-center " + (small ? "flex-col items-center gap-3" : "gap-20")} style={{ ["--beat" as string]: ".4s" }}>{([0, 1] as const).map((t) => { const ok = pub.reveal?.ok?.[t], x = pub.reveal?.typed?.[t]?.[0]; return (
-      <div key={t} className="flex flex-col items-center gap-1 min-w-0 beat" style={d(t * 0.12)}>
-        <div className="flex items-baseline gap-3 whitespace-nowrap" style={{ fontSize: small ? 22 : 30 }}>
-          <span className="display" style={{ color: tc(t) }}>{T[t].name}</span>
-          {ok == null ? null : <Verdict v={ok} say={say} stamp word={ok ? undefined : !x ? "No answer" : say && pub.reveal?.offList?.[t] ? "Not on list" : undefined} />}
-        </div>
-        {(x || ok == null) && <div className="font-bold" style={{ fontSize: small ? 20 : 28, color: x ? undefined : "var(--color-ink-3)" }}>{x ?? empty}</div>}
-      </div>); })}
-    </div>);
+  const R = pub.reveal, x = (t: number) => R?.typed?.[t]?.[0];
+  /* small: a side column, so one team above the other */
+  return <TeamCalls teams={both(pub)} column={small} empty={empty} delay={(t) => d(t * 0.12)} ok={(t) => R?.ok?.[t]} typed={x}
+    word={(t) => (R?.ok?.[t] ? (say ? "Dodged it" : undefined) : !x(t) ? "No answer" : say ? (R?.offList?.[t] ? "Not on list" : "Said it") : undefined)} />;
 }
 
 /* a call being contested: who says what, and who decides (with no host, the time left before the app's call stands) */
