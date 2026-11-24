@@ -16,13 +16,14 @@ export function SentLine({ teams: T, sent, column, on = "locked in", off = "thin
   if (dense && !column) return (
     <div className="flex flex-wrap justify-center gap-x-5 gap-y-1" role="status" aria-label={T.map((t) => `${t.name} ${sent(t.i) ? "in" : "not yet"}`).join(", ")}>
       {T.map(({ i, color }) => (
-        <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ opacity: sent(i) ? 1 : 0.4, color: sent(i) ? color : "var(--color-ink-3)" }}>
+        <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ color: sent(i) ? color : "var(--color-ink-3)" }}>
           <Dot t={i} color={color} size={22} />{sent(i) ? "✓" : "…"}</span>))}
     </div>);
   return (
     <div className={"flex " + (column ? "flex-col items-center gap-0.5" : "flex-wrap justify-center gap-y-0.5 " + (dense ? "gap-x-5" : "gap-x-10"))} role="status" style={{ maxWidth: 1168 }}>{T.map(({ i, ...t }) => (
-      <span key={i} className="font-bold whitespace-nowrap" style={{ fontSize: column && dense ? 20 : 22, color: sent(i) ? t.color : "var(--color-ink-3)" }}>
-        <bdi>{t.name}</bdi>: {sent(i) ? on : off}</span>))}
+      /* (the team's name always in its colour; only "thinking…" grey: 24 Nov, the owner, "why is it in grey?") */
+      <span key={i} className="font-bold whitespace-nowrap" style={{ fontSize: column && dense ? 20 : 22 }}>
+        <bdi style={{ color: t.color }}>{t.name}</bdi><span style={{ color: sent(i) ? t.color : "var(--color-ink-3)" }}>: {sent(i) ? on : off}</span></span>))}
     </div>);
 }
 

@@ -17,7 +17,7 @@ import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { COMEBACK_TITLE } from "@/lib/comeback";
 import { preloadWorld, type Mark } from "./PinMap";
-import { DISH_STEP, showKm, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, T_MAP, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
+import { DISH_STEP, showKm, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, T_SAY, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -73,7 +73,7 @@ export function Roll({ v }: { v: number }) {
 
 /* shown: the scores to show for now (the TV holds the old one while the points fly up to it) */
 /* code: the room's code, tiny in the TV's top-right corner, so someone signed out can find their way back in */
-export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"; shown?: Two<number>; code?: string }) {
+export function Hud({ pub, size, shown, code, me }: { pub: Pub; size: "tv" | "phone"; shown?: Two<number>; code?: string; me?: number | null }) {
   const T = pub.teams, w = pub.mini?.wins, u = pub.mini?.pct ? "%" : "";
   const sc = (t: 0 | 1) => shown?.[t] ?? T[t].score;
   const pips = pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>;
@@ -97,7 +97,10 @@ export function Hud({ pub, size, shown, code }: { pub: Pub; size: "tv" | "phone"
       {/* (not on a game's rules: only once it starts, so the rules have the room: 11 Nov, the owner) */}
       {/* (Secret Stakes has no tally of its own: its points go straight on the totals above) */}
       {w && pub.mini?.key !== "stakes" && !/Summary$|Intro$|^auctionResult$/.test(pub.screen) && <div className="hud-mini" aria-label={`This game: ${T[0].name} ${w[0]}${u}, ${T[1].name} ${w[1]}${u}`}>
-        <span>This game:</span><span className="nm a">{T[0].name}</span><b className="a">{w[0]}{u}</b><span aria-hidden>–</span><b className="b">{w[1]}{u}</b><span className="nm b">{T[1].name}</span>
+        <span>This game:</span>
+        {/* (your team boxed in its colour, on your phone: 24 Nov, the owner) */}
+        <span className={"flex items-center gap-2" + (size === "phone" && me === 0 ? " hud-mine a" : "")}><span className="nm a">{T[0].name}</span><b className="a">{w[0]}{u}</b></span><span aria-hidden>–</span>
+        <span className={"flex items-center gap-2" + (size === "phone" && me === 1 ? " hud-mine b" : "")}><b className="b">{w[1]}{u}</b><span className="nm b">{T[1].name}</span></span>
       </div>}
     </div>);
 }

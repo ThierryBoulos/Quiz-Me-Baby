@@ -116,7 +116,7 @@ export default function Screens() {
             <button type="button" className="chip me-chip"><span className="face">🙂</span><span className="truncate"><bdi>{me.name}</bdi></span></button>
             <span className="eyebrow whitespace-nowrap">ABCD</span>
           </header>
-          {many ? <HudMany pub={pub} size="phone" me={me.team} host={role === "host"} /> : <Hud pub={pub} size="phone" />}
+          {many ? <HudMany pub={pub} size="phone" me={me.team} host={role === "host"} /> : <Hud pub={pub} size="phone" me={me.team} />}
           {sideways && <div className="side-slot" ref={setSideSlot} />}
         </div>
         <SideSlot.Provider value={sideways ? sideSlot : null}>

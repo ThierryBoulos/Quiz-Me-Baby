@@ -1502,6 +1502,15 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .hud-strip .hs.me { color: var(--c); border-color: color-mix(in srgb, var(--c) 60%, transparent); background: color-mix(in srgb, var(--c) 12%, transparent); }
 .hud-strip .hs.me b { color: var(--c); }
 .hud-strip .hs.me .hs-nm { max-width: 110px; }
+/* your team boxed in its colour on your phone's "This game" line (24 Nov, the owner) */
+.hud-mini .hud-mine { padding: 1px 9px; border-radius: 999px; border: 1.5px solid currentColor; }
+.hud-mini .hud-mine.a { color: var(--color-a); background: color-mix(in srgb, var(--color-a) 12%, transparent); }
+.hud-mini .hud-mine.b { color: var(--color-b); background: color-mix(in srgb, var(--color-b) 12%, transparent); }
+/* this game's row (3 to 8 teams): each team's place, small, before its dot; from six teams, four to a row (two rows) */
+.hud-strip .hs-rk { font-size: var(--text-10); color: var(--color-ink-3); font-variant-numeric: tabular-nums; }
+.hud-strip .hs.me .hs-rk { color: var(--c); }
+.hud-strip.game-grid { display: grid; grid-template-columns: repeat(4, auto); justify-content: center; gap: 4px 5px; }
+.hud-strip.game-grid .hs { padding: 2px 6px; gap: 3px; justify-content: center; }
 
 /* the phone's departures board (the 4 Nov audit, 3.4): the status column gets the room it needs ("Embarquement" was cut,
    and the status is a clue), the destinations the rest */

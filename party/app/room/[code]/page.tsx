@@ -403,7 +403,7 @@ export default function PhoneRoom() {
 
       {/* the tracker, as on the TV: scores, where we are, the night's progress */}
       {/* (two teams: it stays over the teams sheet too, so the scores and the players are on one screen) */}
-      {room.status !== "lobby" && pub && !many && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" />}
+      {room.status !== "lobby" && pub && !many && (mine.team != null || mine.role === "host") && <Hud pub={pub} size="phone" me={mine.team as number | null} />}
       {/* (3-8 teams: over the game, not over the teams sheet) */}
       {room.status !== "lobby" && many && !panel && pubM?.many && !pubM.intro && (mine.team != null || mine.role === "host")
         && <HudMany pub={pubM} size="phone" me={mine.team as number | null} host={mine.role === "host"} />}

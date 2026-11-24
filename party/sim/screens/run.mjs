@@ -234,7 +234,9 @@ if (want("tv")) {
 
 if (want("phones")) {
   /* (2 teams: the captain and a player with no host, the host with one; 3 and 8 teams: all three (5 is on the TV)) */
-  const roles = (k) => (/^nh/.test(k) ? ["cap", "player"] : /^h\w*\./.test(k) ? ["host"] : /^m[38]\./.test(k) ? ["host", "cap", "player"] : []);
+  /* (the phones: 3 and 8 teams; with SCREENS_TEAMS, the counts asked for too, so a room of 4 to 7 is pictured on the
+     phones as well: 24 Nov, the score header's two rows) */
+  const roles = (k) => (/^nh/.test(k) ? ["cap", "player"] : /^h\w*\./.test(k) ? ["host"] : (process.env.SCREENS_TEAMS ? /^m\d\./ : /^m[38]\./).test(k) ? ["host", "cap", "player"] : []);
   /* the narrowest (Galaxy S), the widest (iPhone Pro Max) and held sideways, the browser's bars showing: the iPhones
      between (393, 402) fit when both ends do. SCREENS_PHONES=all adds the iPhone at 393 */
   /* (SCREENS_PHONES=sideways: only the phone held sideways) */

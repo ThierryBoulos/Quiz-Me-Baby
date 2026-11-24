@@ -9,7 +9,6 @@ import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll } from "../GameParts";
-import { useSideways } from "../Side";
 import { showKm, showNum } from "@/lib/game";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
@@ -88,9 +87,28 @@ export const unitOf = (key: string) => UNIT[key] || "Question";
 const SK_RISE = 150, SK_LAND = SK_RISE + 1000;
 /* ---- the tracker: the room code, the teams along the top, the night's label and pips under them, then this game's tally.
    The phone keeps the label, the pips and the night's standings, your team lit. ---- */
+/* the phone during a game (24 Nov, the owner's pick, C): this game's points only, in this game's order with each team's
+   place, your team boxed in its colour; the night's totals come back on a game's rules and result, and your name (top
+   left) always has them. Two rows at most: from four teams the others are their lettered dot, yours says "You"; from six,
+   four to a row */
+function GameRow({ T, g, me, pc }: { T: PubMany["teams"]; g: NonNullable<PubMany["game"]>; me?: number | null; pc: boolean }) {
+  const k = T.length, named = k <= 3, grid = k > 5;
+  const pts = (i: number) => (pc ? g.shares?.[i] ?? 0 : g.pts[i] ?? 0), val = (i: number) => (pc ? pct(g.shares?.[i] ?? 0) : String(g.pts[i] ?? 0));
+  const rank = (i: number) => 1 + T.filter((_, j) => pts(j) > pts(i)).length;
+  const ord = T.map((_, i) => i).sort((a, b) => pts(b) - pts(a) || a - b);
+  return (
+    <div className="flex flex-col items-center gap-1 mt-2" aria-label={`This game: ${ord.map((i) => `${place(rank(i))} ${T[i].name} ${val(i)}`).join(", ")}`}>
+      <span className="eyebrow text-[var(--color-ink-3)]" style={{ fontSize: 10 }}>This game</span>
+      <div className={"hud-strip !mt-0" + (grid ? " game-grid" : "")}>
+        {ord.map((i) => <span key={i} className={"hs" + (i === me ? " me" : "")} style={{ ["--c" as string]: T[i].color }}>
+          <span className="hs-rk">{rank(i)}</span><Dot t={i} color={T[i].color} size={named ? 10 : 13} />
+          {named ? <bdi className="hs-nm">{T[i].name}</bdi> : i === me ? <span>You</span> : null}<b>{val(i)}</b></span>)}
+      </div>
+    </div>);
+}
+
 export function HudMany({ pub, size, code, me, host, sound = false }: { pub: PubMany; size: Size; code?: string; me?: number | null; host?: boolean; sound?: boolean }) {
   const T = pub.teams, g = pub.game, k = T.length, tv = size === "tv", pc = g?.key === "majority";
-  const sideways = useSideways();
   const label = pub.screen === "final" ? <b>Final result</b> : g
     /* (each part whole: on a narrow phone the line breaks at the dot, never inside the game's name) */
     /* (a game's intro: just its name, no "Game 14 of 14": the pips under it say that (22 Nov, the owner)) */
@@ -162,21 +180,13 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
         </div>)}
       {/* the phone: the night's standings, small, every team, yours lit (the owner's pick on the 4 Nov audit, decision 3:
           with no TV, nobody could see them during a game) */}
-      {!tv && (
+      {!tv && inGame && g.key !== "sudden" && g.key !== "comeback" ? <GameRow T={T} g={g} me={me} pc={pc} /> : !tv && (
         <div className="hud-strip" aria-label={`The night so far: ${T.map((t, i) => `${t.name} ${num(i)}`).join(", ")}`}>
           {T.map((t, i) => (
             <span key={i} className={"hs" + (i === me ? " me" : "")} style={{ ["--c" as string]: t.color }}>
               {/* (6 teams or more: the others as their lettered dot and score, so the strip stays on one or two lines) */}
               <Dot t={i} color={t.color} size={k > 5 && i !== me ? 14 : 10} />{(k <= 5 || i === me) && <bdi className="hs-nm">{t.name}</bdi>}<b>{num(i)}</b>
             </span>))}
-        </div>)}
-      {/* during a game, this game's points, small, under the night's strip (as the 2-team phones show "This game": 23 Nov,
-         the owner); each team by its lettered dot, yours lit */}
-      {/* (held sideways with six teams or more, it doesn't fit the left column: left out there) */}
-      {!tv && inGame && g.key !== "sudden" && g.key !== "comeback" && !(sideways && k > 5) && (
-        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-1.5 text-12" aria-label={`This game: ${T.map((t, i) => `${t.name} ${pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}`).join(", ")}`}>
-          <span className="eyebrow text-[var(--color-ink-3)]" style={{ fontSize: 10 }}>This game</span>
-          {T.map((t, i) => <span key={i} className="flex items-center gap-1" style={{ opacity: me == null || i === me ? 1 : 0.75 }}><Dot t={i} color={t.color} size={12} /><b className="tabular-nums" style={{ color: i === me ? t.color : "var(--color-ink-2)" }}>{pc ? pct(g!.shares?.[i] ?? 0) : g!.pts[i]}</b></span>)}
         </div>)}
       {/* (no "You're on <team>" line: your team is lit in its colour in the strip above (22 Nov, the owner)) */}
       {!tv && me == null && host && <div className="hud-mini"><span>You&rsquo;re the host</span></div>}
