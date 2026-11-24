@@ -1370,6 +1370,13 @@
      share of levels holds (25 Oct); none left there, the next spare at all */
   /* Change question's spare: one at the level of the question on show, else the next (every setup: 23 Nov) */
   const spareAt = (spare, level) => { const i = level != null ? spare.findIndex(q => q && q.level === level) : -1; return i > -1 ? i : spare.length ? 0 : -1; };
+  /* Change question's words, one copy for every setup (the 3-to-8 game reads them too: 24 Nov, the merge) */
+  const SWAP_WORDS = {
+    flag:{ done:'New flag.', none:'No other flag left at this level.' },
+    see:{ done:'New picture.', none:'No other picture left at these levels.' },
+    pin:{ done:'New landmark.', none:'No other landmark left at these levels.' },
+    airport:{ done:'New board.', none:'No other board left at these levels.' },
+  };
   const spareLike = (s) => { const cur = s.qs[s.i], i = spareAt(s.spare, cur && cur.level); return s.spare.splice(i, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
 
@@ -2506,9 +2513,9 @@
     'flag/start'(g){ g.flagGame.i = 0; return [{ go:'flagQ' }]; },
     'flag/swap'(g){
       const s = g.flagGame;
-      if(!s.spare.length) return [{ toast:'No other flag left at this level.' }];
+      if(!s.spare.length) return [{ toast:SWAP_WORDS.flag.none }];
       s.qs[s.i] = spareLike(s);
-      return [{ toast:'New flag.' }, { go:'flagQ' }];
+      return [{ toast:SWAP_WORDS.flag.done }, { go:'flagQ' }];
     },
     /* w: 0 | 1 | 'tie' (both right) | 'none' */
     'flag/verdict'(g, a){
@@ -2527,9 +2534,9 @@
     'see/start'(g){ g.seeGame.i = 0; return [{ go:'seeQ' }]; },
     'see/swap'(g){
       const s = g.seeGame;
-      if(!s.spare.length) return [{ toast:'No other picture left at these levels.' }];
+      if(!s.spare.length) return [{ toast:SWAP_WORDS.see.none }];
       s.qs[s.i] = spareLike(s);
-      return [{ toast:'New picture.' }, { go:'seeQ' }];
+      return [{ toast:SWAP_WORDS.see.done }, { go:'seeQ' }];
     },
     /* w: 0 | 1 (the fastest right answer) | 'none' */
     /* ms: when the team that took it buzzed, into the picture's clock (tied teams: the faster all told wins) */
@@ -2590,9 +2597,9 @@
     'airport/start'(g){ g.airportGame.i = 0; return [{ go:'airportQ' }]; },
     'airport/swap'(g){
       const s = g.airportGame;
-      if(!s.spare.length) return [{ toast:'No other board left at these levels.' }];
+      if(!s.spare.length) return [{ toast:SWAP_WORDS.airport.none }];
       s.qs[s.i] = spareLike(s);
-      return [{ toast:'New board.' }, { go:'airportQ' }];
+      return [{ toast:SWAP_WORDS.airport.done }, { go:'airportQ' }];
     },
     /* w: 0 | 1 | 'tie' (both right) | 'none' */
     'airport/verdict'(g, a){
@@ -2728,9 +2735,9 @@
     'pin/start'(g){ g.pinGame.i = 0; return [{ go:'pinQ' }]; },
     'pin/swap'(g){
       const s = g.pinGame;
-      if(!s.spare.length) return [{ toast:'No other landmark left at these levels.' }];
+      if(!s.spare.length) return [{ toast:SWAP_WORDS.pin.none }];
       s.qs[s.i] = spareLike(s);
-      return [{ toast:'New landmark.' }, { go:'pinQ' }];
+      return [{ toast:SWAP_WORDS.pin.done }, { go:'pinQ' }];
     },
     /* the two pins ({lat, lon}, or null: none dropped) -> the leg, by distance */
     'pin/settle'(g, a){
@@ -2866,6 +2873,6 @@
   }
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
-           createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers,
+           createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, SWAP_WORDS,
            STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

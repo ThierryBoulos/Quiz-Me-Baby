@@ -10,7 +10,8 @@ import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll, Verdict } from "../GameParts";
 import { useSideways } from "../Side";
-import { airportRule1, closestRule1, flagRule1, pinRule1, showKm, showNum } from "@/lib/game";
+import { airportRule1, closestRule1, pinRule1, showKm, showNum } from "@/lib/game";
+import { FLAG } from "@/lib/minis/flag";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { LETTERS, PLACE_PTS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
@@ -197,7 +198,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
       "Teams are ranked by the share of their answers that are right.", pay];
     /* the round's themes are in the gold band above ("4 questions – Science & Music"), not said again here (the owner, 31 Oct) */
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
-    case "flag": return [flagRule1(pub.introSecs), fast, pay];
+    case "flag": return [FLAG.rule1(pub.introSecs), fast, pay];
     case "airport": return [airportRule1(pub.introSecs), fast, pay];
     case "map": return ["A map with places marked. Captains type what they have in common.", fast, pay];
     /* (no "Wrong, nothing." where nothing is wrong, only further off: 23 Nov, the owner) */

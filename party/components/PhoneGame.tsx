@@ -5,6 +5,9 @@ import { useNoTv } from "./NoTv";
 import { NEXT_MOVES, WAITS_FOR_NEXT } from "@/lib/tv/rules";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
 import { AirportFact } from "./Airport";
+import { FlagAnswer } from "./Flag";
+import { HostAnswerCard } from "./HostAnswer";
+import { FLAG } from "@/lib/minis/flag";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two, poss } from "@/lib/game";
 import type { Member } from "@/lib/room";
@@ -256,12 +259,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>You know the answer</div>
       <div className="text-13 text-[var(--color-ink-2)] mt-1">Tap Right or Wrong for what they say.</div>
     </div>) : secret.answer ? (
-    <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
-      <div className="eyebrow text-balance" style={{ color: "var(--color-gold)" }}>The answer. Only you see this</div>
-      <div className="display text-32 mt-1" style={{ color: "var(--color-gold)" }}>{pub.screen === "miniQ" && Number.isFinite(Number(secret.answer)) ? showNum(Number(secret.answer)) : secret.answer}</div>
-      {secret.notes && <div className="text-13 text-[var(--color-ink-2)] mt-1">{secret.notes}</div>}
-      {(secret.accept?.length ?? 0) > 0 && <div className="text-13 text-[var(--color-ink-2)] mt-1"><b className="text-[var(--color-ink)]">Also accepted:</b> {secret.accept!.join(", ")}</div>}
-    </div>) : null;
+    /* (one card for every setup and game: components/HostAnswer.tsx) */
+    <HostAnswerCard answer={pub.screen === "miniQ" && Number.isFinite(Number(secret.answer)) ? showNum(Number(secret.answer)) : secret.answer} notes={secret.notes} accept={secret.accept} />) : null;
   /* a big outcome headline, no box */
   const Big = ({ eyebrow, text, color, size = 36, sub }: { eyebrow?: string; text: React.ReactNode; color?: string; size?: number; sub?: React.ReactNode }) => (
     <div className="text-center flex flex-col gap-1" role="status">
@@ -470,7 +469,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <ToSide order={2}><div className={sideways ? "flex items-center justify-center gap-3" : "flex flex-col items-center gap-2"}><FlagImg name={pub.flag} h={sideways ? 96 : 150} /><div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sideways ? 64 : 90} /></div></div></ToSide>
         <AnswerCard />
         <Who />
-        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change flag" move={{ type: "flag/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
+        <div className="flex gap-2 justify-center mt-auto"><Pause /><Small ghost label={FLAG.change} move={{ type: "flag/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "flagReveal": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -983,7 +982,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
   /* the mini-games' last column: the leg, to whoever takes it (both on a tie) */
   const leg = (t: 0 | 1, w: unknown) => (w === t || w === "tie" ? <span style={{ color: "var(--color-ok)" }}>✓</span> : <span style={{ color: "var(--color-ink-3)" }}>–</span>);
   /* (Guess the Flag: "the flag", not "the leg": 23 Nov, the owner) */
-  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill(sc === "flagReveal" ? "Your team takes the flag" : sc === "closestReveal" || sc === "seeReveal" || sc === "pinReveal" || sc === "airportReveal" ? "Your team takes it" : "Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
+  const legPill = (w: unknown) => mine == null ? null : w === mine ? pill(sc === "flagReveal" ? FLAG.taken : sc === "closestReveal" || sc === "seeReveal" || sc === "pinReveal" || sc === "airportReveal" ? "Your team takes it" : "Your team takes the leg", "ok") : w === "tie" ? pill("A point each", "ok")
     : w === "none" ? pill("Nobody gets it", "mid") : w === 0 || w === 1 ? pill("Not this time", "no") : null;
   const legW = (w: unknown) => (w === 0 || w === 1 ? w : null) as 0 | 1 | null;
   /* how your team did on this question, in one pill */
@@ -1161,7 +1160,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {/* (the reveal as with 3 to 8 teams: the flag small, the answer on its tile, the fact under it: 23 Nov, the owner) */}
     {/* (Closest To Wins: the question small, the answer as people write it on its tile, the fact: as with 3 to 8 teams) */}
     {pub.screen === "closestReveal" && pub.reveal && <AnswerLine question={pub.question} answer={showNum(Number(pub.reveal.answer))} fact={pub.reveal.notes} />}
-    {pub.screen === "flagReveal" && pub.reveal && <AnswerLine media={<FlagImg name={pub.flag} h={96} />} answer={pub.reveal.answer} fact={pub.reveal.notes} />}
+    {pub.screen === "flagReveal" && pub.reveal && <FlagAnswer flag={pub.flag} answer={pub.reveal.answer} notes={pub.reveal.notes} />}
     {/* Fool Me Twice: the fact (at the reveal, with the truth in it); the answers while they pick (a captain picks from
         its own buttons, below); the reveal */}
     {/^fool(Write|Pick|Reveal)$/.test(pub.screen) && pub.fool && <div className="flex flex-col gap-2 w-full">
@@ -1325,7 +1324,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "comebackQ": { const t = pub.comeback?.teams[0] ?? 0;
       return t === mine ? (cap ? "Your question. Type your answer." : "Your captain is answering.") : `${T[t].name} are playing for a comeback.`; }
     case "miniQ": return cap ? "Type a number. Nearest wins." : "Closest To Wins: help your captain";
-    case "flagQ": return cap ? "Which flag?" : "Guess the Flag: help your captain";   // ("flag", not "country": not every flag is a country, 23 Nov, the owner)
+    case "flagQ": return cap ? FLAG.topCaptain : FLAG.topPlayer;
     /* (12 Nov, the owner: any player can buzz, the captain types; pub.see.by: who hit BUZZ) */
     /* Fool Me Twice: write a lie, then find the truth */
     case "foolWrite": return pub.sent?.[mine] ? "Lie sent. Waiting for the others." : cap ? "Write a lie that sounds true." : "Help your captain write a lie that sounds true.";

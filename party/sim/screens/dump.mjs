@@ -2,7 +2,8 @@
    in place, which the browser part mustn't have): play the nights, keep every screen they reach, write them to
    sim/.out/screens/pubs.json. Run by sim/screens/run.mjs. */
 import { build } from "esbuild";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { bundleNight } from "../bundle.mjs";
@@ -17,5 +18,10 @@ await build({ entryPoints: [join(here, "many.ts")], outfile: manyFile, bundle: t
 const two = await dumpTwo(async (n) => (await import(pathToFileURL(nightFile).href + "?n=" + n)).night);
 const { dumpMany } = await import(pathToFileURL(manyFile).href);
 const pubs = { ...two, ...dumpMany(JSON.parse(readFileSync(join(party, "data/bank.json"), "utf8"))) };
+/* the flags under their hidden names, as the game hands them out (scripts/hash-flags.mjs, app/api/bank): the nights
+   have the country codes ("ca"), which public/fx doesn't have, so no flag was drawn in the pictures (24 Nov) */
+const KEY = process.env.QMB_FLAG_KEY || "qmb-fx-2026-wave2";
+const fx = (code) => createHash("sha256").update(KEY + ":" + code).digest("hex").slice(0, 16);
+for (const rec of Object.values(pubs)) { const p = rec?.pub; if (p && typeof p.flag === "string" && existsSync(join(party, "public/flags", p.flag + ".svg"))) p.flag = fx(p.flag); }
 writeFileSync(join(out, "pubs.json"), JSON.stringify(pubs));
 process.exit(0);

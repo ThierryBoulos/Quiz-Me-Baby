@@ -23,6 +23,7 @@ import { StakesTv } from "../Stakes";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
 import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
 import { AirportAnswerTv } from "../Airport";
+import { FlagTv } from "../Flag";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
 import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, FlagRowsMany, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
 
@@ -106,12 +107,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           </>) : <div className="w-full max-w-[1080px]"><IntroMany pub={pub} size="tv" /></div>)}
 
         {/* the question: the same screens as the two-team TV, with every team's state under the clock */}
-        {pub.screen === "q" && g && g.key === "flag" && (<>
-          {/* (the 2-team sizes up to four teams, smaller only from five, where the rows need the room: 23 Nov, the owner) */}
-          <FlagImg name={pub.flag} h={dense ? 240 : 300} maxW={520} />
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 110 : 120} />
-          <Sent pub={pub} />
-        </>)}
+        {/* (Guess the Flag: one copy for every setup, components/Flag.tsx) */}
+        {pub.screen === "q" && g && g.key === "flag" && <FlagTv flag={pub.flag} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 110 : 120} />} sent={<Sent pub={pub} />} />}
         {/* What Do You See? (12 Nov, the owner: a buzzer): the picture clears as the clock runs and stops at a buzz; the
             team that buzzed says it out loud and types it, with its own 10 seconds on the clock; every team's state */}
         {pub.screen === "q" && g && g.key === "see" && pub.see && (
@@ -210,14 +207,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         </>)}
 
         {/* the reveal: the answer lands, then the calls, then who takes it */}
-        {pub.screen === "reveal" && g && R && g.key === "flag" && (<>
-          <FlagImg name={pub.flag} h={dense ? 120 : 220} maxW={dense ? 400 : 520} />
-          <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: dense ? 64 : 90, color: "var(--color-gold)" }}>{R.answer}</div>
-          {/* (the fact behind the flag, when it has one, as with 2 teams: 23 Nov, the owner) */}
-          {R.notes && <div className={(dense ? "text-18" : "text-22") + " text-[var(--color-ink-2)] text-center"}>{wholeSentences(R.notes, 120)}</div>}
-          <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
-          <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
-        </>)}
+        {pub.screen === "reveal" && g && R && g.key === "flag" && <FlagTv flag={pub.flag} reveal dense={dense} answer={R.answer} notes={R.notes}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
         {/* What Do You See?: the whole picture and what it is, who got it first and how fast, then every team's guess */}
         {pub.screen === "reveal" && g && R && g.key === "see" && pub.see && (() => { const who = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] })), R.winners?.length); return (<>
           {/* (the picture and what it is side by side, in the middle: 12 Nov) */}

@@ -5,7 +5,8 @@
    the mini-game intro with its rules. One look everywhere. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
-import { airportRule1, closestRule1, flagRule1, pinRule1 } from "@/lib/game";
+import { airportRule1, closestRule1, pinRule1 } from "@/lib/game";
+import { FLAG } from "@/lib/minis/flag";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -410,9 +411,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     case "flag": return [
       /* (short, the same with or without a host: 23 Nov, the owner) */
-      { text: flagRule1(t?.flag) },
-      { text: "Guess it right: +1. Both right? A point each. Nobody? Nobody." },
-      { text: `Best of ${n} takes ${pts}. Tied? One more flag, or a point each.` }];
+      { text: FLAG.rule1(t?.flag) }, ...FLAG.rules2(n, pts).map((text) => ({ text }))];
     /* What Do You See? (12 Nov, the owner) */
     /* (12 Nov, the owner: a buzzer, said out loud and typed; the app checks what's typed, so nobody has to) */
     case "see": return [

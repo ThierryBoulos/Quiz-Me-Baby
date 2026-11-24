@@ -207,8 +207,10 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
      owner) */
   if (m.key === "flag" || m.key === "see" || m.key === "pin" || m.key === "airport") {
     const L = s.extra?.[m.key] || [], j = QMB.spareAt(L, qOf(s)?.level) as number;
-    if (j < 0) return m.key === "flag" ? "No other flag left at this level." : m.key === "see" ? "No other picture left at these levels." : m.key === "pin" ? "No other landmark left at these levels." : "No other board left at these levels.";
-    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, m.key === "flag" ? "New flag." : m.key === "see" ? "New picture." : m.key === "pin" ? "New landmark." : "New board."); return true;
+    /* (the words: the engine's, one copy for every setup) */
+    const W = QMB.SWAP_WORDS[m.key] as { done: string; none: string };
+    if (j < 0) return W.none;
+    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, W.done); return true;
   }
   const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t);

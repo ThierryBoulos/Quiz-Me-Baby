@@ -16,6 +16,7 @@ import { StakesTv } from "./Stakes";
 import { takeText, TeamRows as Rows } from "./many/PartsMany";
 import { SeeTv } from "./See";
 import { AirportAnswerTv } from "./Airport";
+import { FlagTv } from "./Flag";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, showNum, TIE_SCREENS } from "@/lib/game";
 import { Ruler } from "./Ruler";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -405,18 +406,13 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     <SeeTv see={pub.see} screen={sc} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))}
       deadline={pub.deadline} left={pub.left}
       clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} rows={<TeamRows pub={pub} empty="No answer" small />} />);
-  if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (<>
-    <FlagImg name={pub.flag} h={sc === "flagQ" ? 300 : 220} maxW={520} />
-    {sc === "flagQ" ? (<><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} /><Sent pub={pub} /></>) : (<>
-      <div className="ans-board display beat slam" style={{ ...QUICK, fontSize: 90, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
-      {/* (the fact behind the flag, when it has one: every setup, 23 Nov, the owner) */}
-      {pub.reveal?.notes && <div className="text-22 text-[var(--color-ink-2)] text-center">{wholeSentences(pub.reveal.notes, 120)}</div>}
-      <TeamRows pub={pub} empty="No answer" />
-      {/* who takes it, as with 3 to 8 teams (23 Nov, the owner) */}
-      {(() => { const w = takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` })));
-        return <div className="display text-44 beat" style={{ ...QUICK, color: w.color }}>{w.text}</div>; })()}
-    </>)}
-  </>);
+  /* Guess the Flag: one copy for every setup (components/Flag.tsx); here, this setup's clock, who has answered, each
+     team's call and who takes it */
+  if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (
+    <FlagTv flag={pub.flag} reveal={sc === "flagReveal"} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />} sent={<Sent pub={pub} />}
+      answer={pub.reveal?.answer} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" />}
+      /* (who takes it, as with 3 to 8 teams: 23 Nov, the owner) */
+      head={takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` })))} />);
   /* Drop the Pin: the photo while they place their pins; then the map, flying in to the spot */
   if (sc === "pinQ" && pub.pin) return (
     <div className="flex gap-12 items-center w-full justify-center">

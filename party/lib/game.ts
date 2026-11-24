@@ -215,11 +215,7 @@ export function preloadOf(key: string, qs: { flag?: string; id?: string; photo?:
   if (key === "see") return { sees: qs.slice(i, i + 2).map((x) => x.photo).filter(Boolean) as string[] };
   return undefined;
 }
-/* Guess the Flag's line on the setup screen, every setup: the 2-team words, its seconds as the timers say (23 Nov,
-   the owner: not always a country, and the time matters) */
-export const flagSetupLine = (secs?: number) => `Ten flags, ${secs ?? T_FLAG} seconds each: whose is it?`;
-/* ...and its first rule on the game's intro, every setup (23 Nov, the owner's words) */
-export const flagRule1 = (secs?: number) => `A flag goes up and captains have ${secs ?? T_FLAG} seconds to type whose flag it is.`;
+/* (Guess the Flag's lines: lib/minis/flag.ts, the game's one copy) */
 /* Closest To Wins' line on the setup screen and its first rule, every setup (23 Nov, the owner) */
 export const closestSetupLine = (secs?: number) => `Five number questions, ${secs ?? T_CLOSEST} seconds each: the closest guess wins.`;
 export const closestRule1 = (secs?: number) => `A question with a number for an answer. Captains have ${secs ?? T_CLOSEST} seconds to type their best guess.`;
