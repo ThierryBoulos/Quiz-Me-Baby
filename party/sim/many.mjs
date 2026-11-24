@@ -278,6 +278,17 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   if (!ok) bad++;
   console.log(`contest: own WRONG ${own}, one at a time ${twice}, agreed moves the call ${agreed}, once each ${once}, not your own RIGHT ${ownRight}, nothing typed ${nothing}, another team's RIGHT kept ${theirs}, Next leaves it standing ${open && stands} — ${ok ? "ok" : "FAILED"}`);
 }
+/* 24 Nov, the owner: Guess the Airport, the city always counts, even where it has more than one airport (the same
+   check as with 2 teams: lib/tv/reads.ts); the airport's own name still does, and another city doesn't */
+{
+  const air = (re) => bank.find((q) => q.type === "airport" && re.test(q.answer));
+  const cases = [[/Gatwick/, "London"], [/Heathrow/, "london"], [/Orly/, "Paris"], [/Gaulle/, "Paris"], [/Sabiha/, "Istanbul"], [/Gatwick/, "Gatwick"]];
+  const city = cases.every(([re, t]) => { const q = air(re); return !!q && L.rightOf("airport", t, q); });
+  const other = !L.rightOf("airport", "Manchester", air(/Gatwick/)) && !L.rightOf("airport", "Lyon", air(/Orly/));
+  const ok = city && other;
+  if (!ok) bad++;
+  console.log(`airports: the city counts (London for Gatwick and Heathrow, Paris, Istanbul) ${city}, another city doesn't ${other} — ${ok ? "ok" : "FAILED"}`);
+}
 /* 8 Nov: the host sets the totals by hand (as with two teams): a number per team, nothing else */
 {
   const teams = [0, 1, 2].map((t) => ({ name: L.defaultName(t), captain: "Cap" + t }));

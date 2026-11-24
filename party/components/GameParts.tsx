@@ -5,7 +5,7 @@
    the mini-game intro with its rules. One look everywhere. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
-import { AIRPORT_CITY, airportRule1, closestRule1, flagRule1, pinRule1 } from "@/lib/game";
+import { airportRule1, closestRule1, flagRule1, pinRule1 } from "@/lib/game";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { CodeTiles } from "./Marquee";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -435,9 +435,9 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Closest pin: +1. The same distance? A point each. No pin? No point." },
       { text: `Best of ${n} takes ${pts}. Tied? One more, or a point each.` }];
     case "airport": return [
-      /* (short, the same with or without a host, rule 1 and the city as with 3 to 8: 23 Nov, the owner) */
+      /* (short, the same with or without a host, rule 1 as with 3 to 8: 23 Nov; the city always counts, no rule for
+         it: 24 Nov, the owner) */
       { text: airportRule1(t?.airport) },
-      { text: AIRPORT_CITY },
       { text: "Guess it right: +1. Both right? A point each. Nobody? Nobody." },
       { text: `Best of ${n} takes ${pts}. Tied? One more board, or a point each.` }];
     case "majority": return [

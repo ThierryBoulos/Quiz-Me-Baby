@@ -58,7 +58,8 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   - common short forms and spellings: "Polyam", "Glute max", "Gluteal", "Jbeil", "O-", "AB+", "Montaigu"
     (Romeo's family in French), "Stabiae" (also destroyed by Vesuvius);
   - slang written out in full: "Grandma I would like to fuck", "Mother I would like to fuck";
-  - the city for an airport whose city has only that airport (JFK → "New York");
+  - the city for an airport, always, even where the city has more than one (24 Nov, the owner: "London" counts
+    for Heathrow and for Gatwick; the game checks it, nothing to add to the lists);
   - **the French form of a famous name (15 Nov, the owner):** "Jules César" for Julius Caesar;
   - **the first name a person is known by (15 Nov, the owner):** "Sundar" for Sundar Pichai; "Elon", "Kim", "Billie",
     "Leo" (for both Messi and DiCaprio: each picture has its own list) (21 Nov, the owner);
@@ -160,7 +161,8 @@ Then wait for the owner's verdict; rejected items come out, comments are applied
   `party/scripts/check-maps.mjs`; a region far from the world view gets its own view (Asia: `scripts/geo-view.mjs`).
 - **Guess the Airport**: only **real routes** (the airline really flies there from that airport; no MEA to
   Amsterdam); local-language words checked; the city names on the board in the board's language; notes explain
-  the clue (airline, language, the missing hub). Accept the city spellings people use (Lisboa, New Delhi).
+  the clue (airline, language, the missing hub). Accept the city spellings people use (Lisboa, New Delhi). The city
+  alone always counts (24 Nov, the owner), so a board never hangs on telling a city's two airports apart.
 - **Drop the Pin**: a photo people can recognise (not an aerial ridge only experts know), the pin on the actual
   spot, the place line capitalised ("Near Homs, Syria").
 - **Russian Roulette** (9 and 10 Nov, the owner): it deals standard questions from the broad themes, everyone's

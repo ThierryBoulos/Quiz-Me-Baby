@@ -32,7 +32,7 @@ export type PubMany = {
   pin?: { photo: string; credit: string; licence: string };
   /* Guess the Airport: the board (its name and code only at the reveal); Guess the Map: the map; the Cocktail or
      Dish: the ingredients up so far, and the teams whose one guess was wrong (out of this one) */
-  airport?: { title: string; board: string[][]; code?: string; city?: string; cityOk?: boolean };
+  airport?: { title: string; board: string[][]; code?: string; city?: string };
   map?: { id: string; reveal: boolean; title?: string; rev?: string; hint?: string };
   dish?: { kind: string; ings: string[]; n: number };
   out?: boolean[];
@@ -126,9 +126,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     const rev = s.screen === "reveal";
     if (m.key === "flag") pub.flag = q.flag;
     else if (m.key === "pin") pub.pin = { photo: q.photo, credit: q.credit, licence: q.licence };
-    else if (m.key === "airport") { pub.airport = { title: q.boardTitle, board: q.board, code: rev ? q.code : undefined, city: rev ? q.city : undefined };
-      /* (where the city alone doesn't count, the reveal says so, as with 2 teams: 23 Nov, the owner) */
-      if (rev) pub.airport.cityOk = acceptFor(q).some((a) => QMB.tidy(a) === QMB.tidy(q.city || "")); }
+    else if (m.key === "airport") pub.airport = { title: q.boardTitle, board: q.board, code: rev ? q.code : undefined, city: rev ? q.city : undefined };
     else if (m.key === "map") pub.map = { id: q.id, reveal: rev, title: rev ? q.question : undefined, ...(rev && revOf(q) ? { rev: revOf(q) } : {}), ...(s.mapHint ? { hint: "on" } : {}) };
     else if (m.key === "dish") { pub.dish = { kind: dishKind(q), ings: (q.ings || []).slice(0, rev ? undefined : Math.max(1, s.shown)), n: (q.ings || []).length };
       if (rev) pub.out = s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)); }

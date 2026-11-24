@@ -16,9 +16,11 @@ let bankP: Promise<Bank> | null = null;
    also takes "USA"). */
 type Accept = { byId: Record<string, string[]>; byAnswer: Record<string, string[]>; notById?: Record<string, string[]>; notTypo?: Record<string, string[]>; byPool?: Record<string, Record<string, string[]>>; someOf?: Record<string, { items: string[][]; min: number }>; mapKeys?: Record<string, string[][]>; rankById?: Record<string, string[][]> };
 let accept: Accept = { byId: {}, byAnswer: {} };
-export const acceptFor = (q: { id?: string; type?: string; question?: string; answer?: string; accept?: string[] } | null | undefined) =>
-  !q ? [] : [...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(q.type === "saysame" ? sayAccept(q.id || "", q.answer || "") : givesItAway(q) ? [] : accept.byAnswer[q.answer || ""] || [])]
-    .filter((x) => !(accept.notById?.[q.id || ""] || []).includes(x));   // (another name that counts elsewhere but not here: "Tony Stark" isn't the film Iron Man)
+export const acceptFor = (q: { id?: string; type?: string; question?: string; answer?: string; accept?: string[]; city?: string } | null | undefined) =>
+  !q ? [] : [...new Set([...[...(q.accept || []), ...(accept.byId[q.id || ""] || []), ...(q.type === "saysame" ? sayAccept(q.id || "", q.answer || "") : givesItAway(q) ? [] : accept.byAnswer[q.answer || ""] || [])]
+    .filter((x) => !(accept.notById?.[q.id || ""] || []).includes(x)),   // (another name that counts elsewhere but not here: "Tony Stark" isn't the film Iron Man)
+    /* Guess the Airport: the city always counts, London for Heathrow or Gatwick too (24 Nov, the owner) */
+    ...(q.type === "airport" && q.city ? [q.city] : [])])];
 /* What Do You See?: another picture's exact name is never a typo of this one's (21 Nov, the owner: "Trump" isn't "The
    Tramp" for Chaplin, "Ananas" isn't "Bananas" for the banana). accept.json notTypo lists, for each picture, the other
    pictures' names the typo allowance would take; scripts/check-bank.mjs finds any new one. */

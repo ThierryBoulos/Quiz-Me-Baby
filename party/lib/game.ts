@@ -59,8 +59,7 @@ export type Pub = {
   pin?: { photo: string; credit: string; licence: string;
     reveal?: { at: LatLon; name: string; place: string; pins: Two<LatLon | null>; km: Two<number | null> } };
   /* Guess the Airport: its departures board (time, status, destination, flight, gate); at the reveal, its code and city */
-  /* cityOk, at the reveal: false where the city alone doesn't count (it has more than one big airport) */
-  airport?: { title: string; board: string[][]; code?: string; city?: string; cityOk?: boolean };
+  airport?: { title: string; board: string[][]; code?: string; city?: string };
   roulette?: RrPub;                     // Russian Roulette: the barrel, each team's chamber and question (what's behind them at the reveal)
   fool?: FoolPub;                       // Fool Me Twice: the fact, who has written and picked, the answers, the reveal
   see?: SePub;                          // What Do You See?: the picture and how it clears; at the reveal, what it was and who got it
@@ -229,5 +228,4 @@ export const pinSetupLine = (secs?: number) => `Seven landmarks, ${secs ?? T_PIN
 /* Guess the Airport, every setup (23 Nov, the owner) */
 export const airportSetupLine = (secs?: number) => `Five departure boards, ${secs ?? T_AIRPORT} seconds, which airport is it?`;
 export const airportRule1 = (secs?: number) => `A departures board goes up. Captains have ${secs ?? T_AIRPORT} seconds to type which airport it is.`;
-export const AIRPORT_CITY = "The city is enough, except where it has more than one: then name the airport (Heathrow, not London).";
 export const pinRule1 = (secs?: number) => `A photo of a landmark goes up. Captains have ${secs ?? T_PIN} seconds to drop a pin on the map where they think it is.`;
