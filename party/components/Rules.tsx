@@ -76,7 +76,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
         <ul className="flex flex-col gap-2 text-15 leading-relaxed text-[var(--color-ink-2)] list-disc pl-5 marker:text-[var(--color-gold)]">
           <Mini name="Closest To Wins">Teams get the same number-based question and have <Secs k="tMini" /> seconds to enter their estimates. The closest answer wins the leg. Best of 5.</Mini>
         <Mini name="The Auction">2-team setup only. The question is something like: “How many countries can you name?” Captains take turns bidding, raising the number or passing. The highest bidder has <Secs k="tAuction" /> seconds to name that many answers aloud. The host or the other captain counts them. Make your bid and you win the leg; fail and you lose it. Best of 3.</Mini>
-        <Mini name="Don’t Say the Same as Me">You’ll be given a prompt such as “Name a cheese.” Each team has <Secs k="tSay" /> seconds to secretly enter one answer. The app has an answer in mind. If your answer matches the app’s answer, you lose the point. With 3–8 teams, matching another team’s answer loses it too. Answers must be real and valid. Best of 6.</Mini>
+        <Mini name="Don’t Say the Same as Me">You’ll be given a question such as “Name a cheese.” Each team has <Secs k="tSay" /> seconds to secretly enter one answer. The game has an answer in mind. If your answer matches the game’s answer, you lose the point. With 3–8 teams, matching another team’s answer loses it too. Answers must be real and valid. Best of 6.</Mini>
         <Mini name="Guess the Map">A map appears without its title. You have <Secs k="tMap" /> seconds to identify what it represents and type your answer. The general idea counts, not necessarily the exact wording. Best of 3.</Mini>
         <Mini name="Guess the Flag">Identify the country or region shown by typing its name within <Secs k="tFlag" /> seconds. Best of 10.</Mini>
         <Mini name="Drop the Pin">A landmark photo appears. You have <Secs k="tPin" /> seconds to find the location on the world map on your phone, zoom in and lock in your pin. The closest pin wins. Best of 7.</Mini>
@@ -84,7 +84,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
         <Mini name="Majority Rules">Everyone plays individually on their own phone. Answer 10 questions, each with four options and <Secs k="tMajority" /> seconds to choose. Tapping an answer locks it in. No answer counts as wrong. Each team’s score is based on the percentage of its members’ answers that are correct, so smaller teams aren’t disadvantaged.</Mini>
         <Mini name="Guess the Cocktail or Dish">Ingredients appear one at a time, every <Secs k="tDishStep" /> seconds, with the giveaway ingredient appearing last. The fastest team to answer wins. With 3–8 teams, each team gets one guess. Best of 5.</Mini>
         <Mini name="What Do You See?">A picture appears blurred or zoomed right in, and gets clearer over <Secs k="tSee" /> seconds: a famous face, a logo, or a close-up of a dish, an animal or an object. Know it? Buzz! The picture stops, and your team has 10 seconds to say the answer out loud while your captain types it. Get it wrong and you’re out of that picture, and the other teams can still buzz. 12 pictures. If teams are tied, the one that buzzed faster wins.</Mini>
-        <Mini name="Fool Me Twice">6 strange but true facts appear, one at a time, each with a blank. Each captain has <Secs k="tFoolWrite" /> seconds to write a lie to fill it, one that sounds true. Type the real answer and the app tells you to write a lie instead. The truth then appears hidden among your lies and a few of ours, and captains have <Secs k="tFoolPick" /> seconds to pick the one they think is true. Finding the truth earns 2 points, and each team that falls for your lie earns you 1. With 3 or more teams, each captain also names the team they think will fall for their lie: if that team does, it loses 1 point and you earn 1 more.</Mini>
+        <Mini name="Fool Me Twice">6 strange but true facts appear, one at a time, each with a blank. Each captain has <Secs k="tFoolWrite" /> seconds to write a lie to fill it, one that sounds true. Type the real answer and the game tells you to write a lie instead. The truth then appears hidden among your lies and a few of ours, and captains have <Secs k="tFoolPick" /> seconds to pick the one they think is true. Finding the truth earns 2 points, and each team that falls for your lie earns you 1. With 3 or more teams, each captain also names the team they think will fall for their lie: if that team does, it loses 1 point and you earn 1 more.</Mini>
         <Mini name="Russian Roulette">The barrel spins and each team lands on its own chamber, with its own theme and question. You have <Secs k="tRoulette" /> seconds to type your answer. Before the spin, every chamber shows its theme and level, the bullet too: an Expert question. Once the barrel stops, everyone sees who drew it. Medium is worth 2 points and Hard 3. The bullet earns 5 points if you get it right and costs you 3 if you get it wrong. 3 spins. With 2 teams, it’s the same barrel all game: one bullet, and someone draws it by spin 3. With 3–8 teams, there’s a new barrel every spin, and with 3, 4, 5 or 7 teams the bullet can also land in an empty chamber.</Mini>
         <Mini name="Battle of the Captains">2-team setup only. The captains go head-to-head. Everyone else stays quiet. Each captain gets 10 questions. With a host, answers are given aloud within <Secs k="tBattleHost" /> seconds; without a host, captains type their answers within <Secs k="tBattleTyped" /> seconds. The captain with the highest score wins the points.</Mini>
         <Mini name="Secret Stakes">Always the last game of the night, played in 3 rounds. Each round shows 3 themes. Each captain has <Secs k="tStakesPick" /> seconds to secretly pick a theme and a level. Easy is the safe bet: it wins nothing and loses nothing. Medium, Hard and Expert are worth more, and your phone shows how much. You then have <Secs k="tStakesQ" /> seconds to type your answer. Get it right and you win your bet; get it wrong and you lose it, straight from your total score. Nobody sees what the others bet until the reveal.</Mini>
@@ -100,7 +100,7 @@ export function Rules({ fixing = true, noTv = false }: { fixing?: boolean; noTv?
       <section className="card flex flex-col gap-3">
         <h2 className="display text-26">A few ground rules</h2>
         <P>No Googling, no searching, and no asking people outside the room. If a phone leaves the game screen during a question, the game flags it on the main screen.</P>
-        <P>The app checks every typed answer. If you think a call is wrong, you can contest it when the answer is revealed.</P>
+        <P>The game checks every typed answer. If you think a call is wrong, you can contest it when the answer is revealed.</P>
       </section>
 
       {fixing && <FixingACall noTv={noTv} />}
@@ -119,16 +119,16 @@ export function FixingACall({ standalone = false, noTv = false }: { standalone?:
         <P>The host has the final say on answers.</P>
         <OL items={[
           <>The host’s phone displays the correct answer and the captain’s submitted answer, along with two buttons: <B>RIGHT</B> and <B>WRONG</B>.</>,
-          <>The app automatically suggests a decision. The host can accept it or choose the other option.</>,
+          <>The game automatically suggests a decision. The host can accept it or choose the other option.</>,
           <>A captain who disagrees can tap <B>Contest</B> on the result. The host makes the final decision.</>,
           <>The host can change a decision at any point before tapping <B>Next</B>.</>,
         ]} />
         <Sub>Playing without a host (2-team setup)</Sub>
-        <P>The app checks answers automatically. Captains can challenge certain decisions:</P>
+        <P>The game checks answers automatically. Captains can challenge certain decisions:</P>
         <OL items={[
           <>Where a decision can be challenged, tap <B>Contest</B> on the result. This applies to your team’s answers marked WRONG or the other team’s answers marked RIGHT.</>,
           <>The other captain gets <Secs k="tContest" /> seconds to respond with <B>Agree</B> or <B>No</B>.</>,
-          <>If the other captain doesn’t respond within <Secs k="tContest" /> seconds, the app’s original decision stands.</>,
+          <>If the other captain doesn’t respond within <Secs k="tContest" /> seconds, the game’s original decision stands.</>,
         ]} />
         <P>If a contest changes the result, the score is automatically updated.</P>
       </Rule>
