@@ -19,6 +19,7 @@ import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChi
 import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
 import { RR_SETUP } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
+import { MAP } from "@/lib/minis/map";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -31,7 +32,7 @@ const MINIS = [
   ["closest", "Closest To Wins", "Five numbers. Closest guess wins the leg."],
   ["auction", "The Auction", "Bid how many you can name, then deliver it."],
   ["saysame", "Don't Say the Same as Me", "Answer without matching the app's hidden word."],
-  ["map", "Guess the Map", "A map, sixty seconds: what does it show?"],
+  ["map", "Guess the Map", "Three maps: what does each show?"],   // (drawn by MAP.setupLine, with the timers' seconds)
   ["flag", "Guess the Flag", "Ten flags: whose is it?"],   // (drawn by FLAG.setupLine, with the timers' seconds)
   ["pin", "Drop the Pin", "A landmark's photo: drop a pin on the map where it is. Nearest pin wins."],
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
@@ -271,7 +272,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{name}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? FLAG.setupLine(timers?.tFlag) : k === "closest" ? CLOSEST.setupLine(timers?.tMini) : k === "pin" ? PIN.setupLine(timers?.tPin) : k === "airport" ? AIRPORT.setupLine(timers?.tAirport) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? FLAG.setupLine(timers?.tFlag) : k === "closest" ? CLOSEST.setupLine(timers?.tMini) : k === "pin" ? PIN.setupLine(timers?.tPin) : k === "airport" ? AIRPORT.setupLine(timers?.tAirport) : k === "map" ? MAP.setupLine(timers?.tMap) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

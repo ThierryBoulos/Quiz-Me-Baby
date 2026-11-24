@@ -12,6 +12,7 @@ import { Roll } from "../GameParts";
 import { useSideways } from "../Side";
 import { showKm, showNum } from "@/lib/game";
 import { AIRPORT } from "@/lib/minis/airport";
+import { MAP } from "@/lib/minis/map";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -203,7 +204,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
     case "flag": return [FLAG.rule1(pub.introSecs), fast, pay];
     case "airport": return [AIRPORT.rule1(pub.introSecs), fast, pay];
-    case "map": return ["A map with places marked. Captains type what they have in common.", fast, pay];
+    case "map": return [MAP.rule1(pub.introSecs), fast, pay];
     /* (no "Wrong, nothing." where nothing is wrong, only further off: 23 Nov, the owner) */
     case "closest": return [CLOSEST.rule1(pub.introSecs), `Closest guess first: ${per.replace(" Wrong, nothing.", "")}`, pay];
     case "pin": return [PIN.rule1(pub.introSecs), `Closest pin first: ${per.replace(" Wrong, nothing.", "")}`, pay];

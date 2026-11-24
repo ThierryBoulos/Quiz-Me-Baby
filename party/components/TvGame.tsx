@@ -4,7 +4,6 @@ import { FitBody } from "./TvStage";
 import { QRCodeSVG } from "qrcode.react";
 import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
-import { MapView } from "./MapView";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
 import { COMEBACK_TITLE } from "@/lib/comeback";
@@ -17,6 +16,7 @@ import { AirportRevealTv, AirportTv } from "./Airport";
 import { ClosestRevealTv, ClosestTv } from "./Closest";
 import { PinRevealTv, PinTv } from "./Pin";
 import { FlagTv } from "./Flag";
+import { MapRevealTv, MapTv } from "./MapGame";
 import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -85,7 +85,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
           {/* the fun fact goes with the answer */}
           {pub.result.notes && <div className="text-22 text-[var(--color-ink-2)] max-w-[900px] -mt-2 beat" style={d(0.25)}>{pub.result.notes}</div>}
           {/* what each team said, and the app's call on it (contestable until Next) */}
-          {(pub.calls || []).map((c, i) => <div key={c.id} className="text-24 flex items-baseline gap-3 justify-center beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}{c.note === "steal" ? " (steal)" : c.note ? ` (${c.note})` : ""}:</b> {c.text || "no answer"} {c.skipped ? <span className="text-[var(--color-ink-2)]">— skipped, nobody judged it</span> : <Verdict v={c.ok} size={20} stamp />}{c.changed && <span className="text-18 text-[var(--color-gold)]">{pub.mode === "host" ? "host’s call" : "changed"}</span>}</div>)}
+          {(pub.calls || []).map((c, i) => <div key={c.id} className="text-24 flex items-center gap-3 justify-center beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}{c.note === "steal" ? " (steal)" : c.note ? ` (${c.note})` : ""}:</b> {c.text || "no answer"} {c.skipped ? <span className="text-[var(--color-ink-2)]">— skipped, nobody judged it</span> : <Verdict v={c.ok} size={20} stamp />}{c.changed && <span className="text-18 text-[var(--color-gold)]">{pub.mode === "host" ? "host’s call" : "changed"}</span>}</div>)}
           {[0, 1].map((t) => !(pub.calls || []).some((c) => c.team === t) && silent(pub, t as 0 | 1) ? <div key={t} className="text-24 text-[var(--color-ink-2)] beat" style={d(0.1)}><b style={{ color: tc(t as 0 | 1) }}>{T[t].name}:</b> {silent(pub, t as 0 | 1)}</div> : null)}
           <div className="display text-44 beat flex items-center gap-4" style={{ ...d(0.35), color: pub.result.by == null ? "var(--color-ink-2)" : tc(pub.result.by) }}>
             {pub.result.by == null ? ((pub.calls || []).some((c) => c.skipped) ? "Skipped · nobody scores" : "Nobody scores") : <span data-fly-src={pub.result.by}>{`${T[pub.result.by].name} +${pub.result.pts}`}</span>}
@@ -268,7 +268,7 @@ function TvComeback({ pub }: { pub: Pub }) {
   if (sc === "comebackReveal" && pub.reveal) return (<>
     <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
     <div className="ans-board display beat slam" data-len={(pub.reveal.answer || "").length > 40 ? "xl" : (pub.reveal.answer || "").length > 22 ? "l" : undefined} style={{ ...QUICK, fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
-    <div className="text-28 flex items-baseline gap-3 justify-center beat" style={{ ...QUICK, ...d(0.12) }}><b style={{ color: tc(t) }}>{pub.teams[t].name}:</b> {x || "no answer"} <Verdict v={ok} size={24} stamp />
+    <div className="text-28 flex items-center gap-3 justify-center beat" style={{ ...QUICK, ...d(0.12) }}><b style={{ color: tc(t) }}>{pub.teams[t].name}:</b> {x || "no answer"} <Verdict v={ok} size={24} stamp />
       {(pub.calls || []).some((k) => k.changed) && <span className="text-18 text-[var(--color-gold)]">{pub.mode === "host" ? "host’s call" : "changed"}</span>}</div>
     <ComebackStatus teams={teams} c={c} tv />
   </>);
@@ -428,28 +428,19 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
             {pub.dish.typeBy && pub.buzz != null && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.dish.typeBy} size={80} /><span>to type it</span></div>}
           </>) : (<>
             <div className="ans-board display beat slam" style={{ fontSize: 76, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
-            {(pub.calls || []).map((c, i) => <div key={c.id} className="text-22 flex items-baseline gap-2 beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={18} stamp /></div>)}
+            {(pub.calls || []).map((c, i) => <div key={c.id} className="text-22 flex items-center gap-2 beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={18} stamp /></div>)}
             <div className="display text-36 beat" style={{ ...d(0.35), color: tc(pub.reveal?.w === 0 || pub.reveal?.w === 1 ? pub.reveal.w : null) }}>
               {pub.reveal?.w === 0 || pub.reveal?.w === 1 ? `${T[pub.reveal.w].name} got it` : "Nobody got it"}</div>
           </>)}
         </div>
       </div>);
   }
-  if ((sc === "mapQ" || sc === "mapReveal") && pub.map) return (
-    <div className="flex gap-10 items-center w-full" style={{ fontSize: 22 }}>
-      <div className="flex-1 min-w-0"><MapView id={pub.map.id} rev={pub.map.rev} reveal={pub.map.reveal} hint={!!pub.map.hint} maxH={480} title={pub.map.title} wipe /></div>
-      <div className="w-[340px] flex flex-col items-center gap-4">
-        {sc === "mapQ" ? (<>
-          <div className="display text-40" style={{ color: "var(--color-gold)" }}>What does this map show?</div>
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-          <Sent pub={pub} />
-        </>) : (<>
-          <div className="eyebrow text-16">The map shows</div>
-          <div className="display text-40 beat slam" style={{ ...QUICK, color: "var(--color-gold)" }}>{pub.map.title}</div>
-          <TeamRows pub={pub} empty="No answer" small />
-        </>)}
-      </div>
-    </div>);
+  /* Guess the Map: one copy for every setup (components/MapGame.tsx): the map with its key, the question, the clock and
+     who has answered; at the reveal the 3-to-8 design, the title on its tile, the fact, the calls, who takes it (24 Nov,
+     the owner) */
+  if (sc === "mapQ" && pub.map) return <MapTv map={pub.map} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />} sent={<Sent pub={pub} column />} />;
+  if (sc === "mapReveal" && pub.map) return <MapRevealTv map={pub.map} answer={pub.reveal?.answer || ""} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" />}
+    head={takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
   /* won early: who, the score, the points; then only that the rest is for fun, and who chooses */
   if (sc === DECIDED && pub.decided) { const D = pub.decided; return (<>
     <MiniTitle title={m.title} />

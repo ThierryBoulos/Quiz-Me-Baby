@@ -28,6 +28,8 @@ import { FlagAnswer } from "../Flag";
 import { PinAnswer } from "../Pin";
 import { HostAnswerCard } from "../HostAnswer";
 import { AIRPORT } from "@/lib/minis/airport";
+import { MAP } from "@/lib/minis/map";
+import { MapAnswer } from "../MapGame";
 import { CLOSEST } from "@/lib/minis/closest";
 import { FLAG } from "@/lib/minis/flag";
 import { PIN } from "@/lib/minis/pin";
@@ -137,7 +139,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
 
 const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
-const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: FLAG.topCaptain, closest: CLOSEST.topCaptain, pin: PIN.topCaptain, airport: AIRPORT.topCaptain };
+const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: FLAG.topCaptain, closest: CLOSEST.topCaptain, pin: PIN.topCaptain, airport: AIRPORT.topCaptain, map: MAP.topCaptain };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -249,7 +251,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* (with no TV, what the TV shows beside the picture: who has buzzed, who is out of it) */}
       {g.key === "see" && pub.see && noTv && (pub.see.buzz != null || pub.see.out?.some(Boolean)) && <SeeTicks teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} out={pub.see.out} buzz={pub.see.buzz} size={15} />}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}
-      {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={small ? 180 : 240} legend={false} />}
+      {/* (with its colour key, as with 2 teams: 24 Nov, the owner) */}
+      {g.key === "map" && pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={small ? 170 : 240} />}
       {g.key === "dish" && pub.dish && (<div className="flex flex-col">
         <div className="card !py-2">
           <div className="eyebrow mb-1" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}? {pub.dish.ings.length} of {pub.dish.n}</div>
@@ -277,13 +280,13 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* (Guess the Flag, Closest To Wins, Drop the Pin: one copy for every setup, components/Flag.tsx, Closest.tsx, Pin.tsx) */
   const Answer = () => !R || !g ? null : g.key === "flag" ? <div className="noselect" {...noCopy}><FlagAnswer flag={pub.flag} answer={R.answer} notes={R.place || R.notes} /></div>
     : g.key === "closest" ? <div className="noselect" {...noCopy}><ClosestAnswer question={pub.question} answer={Number(R.answer)} notes={R.place || R.notes} /></div>
+    : g.key === "map" && pub.map ? <div className="noselect" {...noCopy}><MapAnswer map={pub.map} answer={R.answer} notes={R.notes} /></div>
     : g.key === "pin" && R.at ? <div className="noselect" {...noCopy}><PinAnswer name={R.answer} place={R.place} marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
       ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]} /></div> : (
     <div className="noselect" {...noCopy}>
       <AnswerLine question={["quiz", "say", "majority", "sudden", "comeback"].includes(g.key) ? pub.question : null}
         media={g.key === "see" && pub.see ? <div className="flex flex-col items-center gap-1"><SeePicture see={pub.see} clear w={240} alt={R.answer} /><SeeCredit see={pub.see} size={11} />
             {(() => { const w = seeWho(pub.see, T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] })), R.winners?.length); return <span className="display text-18" style={{ color: w.color }}>{w.text}</span>; })()}</div>
-          : g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={180} legend={false} />
           : null}
         label={g.key === "say" ? "The app's secret answer" : undefined}
         answer={R.answer} fact={g.key === "airport" ? <AirportFact air={pub.airport} notes={R.notes} /> : R.place || R.notes} />
@@ -394,8 +397,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <p className="text-center text-13 text-[var(--color-ink-3)]">No bet by time&rsquo;s up: the safe one, Easy on the first theme.</p>
         {/* (after the bets, not over them: a band docked at the bottom covered them, the owner, 12 Nov; as with two teams) */}
         <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
-          <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
-          <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change the themes</button>
+          <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
+          <button className="btn btn-sm btn-host btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change the themes</button>
         </div>
       </>)}
       {host && sc === "q" && g && !fool && (<>
@@ -433,12 +436,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
            in, the owner, 12 Nov; as with two teams, where these were never docked) */}
         <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
-          {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
+          {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
           {/* (shown even once answers are in: the new question clears them, every game: 23 Nov, the owner) */}
-          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? FLAG.change : g.key === "see" ? "Change picture" : g.key === "pin" ? PIN.change : g.key === "airport" ? AIRPORT.change : "Change question"}</button>}
+          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-host btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? FLAG.change : g.key === "see" ? "Change picture" : g.key === "pin" ? PIN.change : g.key === "airport" ? AIRPORT.change : g.key === "map" ? MAP.change : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
-          {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
-          <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
+          {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
+          <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
         </div>
       </>)}
       {host && sc === "reveal" && g && R && !fool && (<>
@@ -662,9 +665,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               </span>); })}
           </div>
           <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
-            <button className="btn btn-sm" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
-            {!picking && <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change fact</button>}
-            <button className="btn btn-sm" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
+            <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
+            {!picking && <button className="btn btn-sm btn-host btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change fact</button>}
+            <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
           </div>
         </>);
         /* a captain writes the lie */

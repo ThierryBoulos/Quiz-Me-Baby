@@ -40,9 +40,11 @@ export function TeamCalls({ teams: T, ok, typed, pts, places, word, size = "tv",
     <div className="grid w-full" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gap: tv ? "12px 24px" : "12px 10px", maxWidth: tv ? Math.min(1168, n * (dense ? 300 : 390)) : undefined, ["--beat" as string]: ".4s" }}>
       {T.map((t) => { const v = ok(t.i), x = typed(t.i), p = pts?.(t.i) ?? 0, pl = places?.(t.i); return (
         <div key={t.i} className={"flex flex-col items-center gap-1 min-w-0 " + (tv ? "beat" : "")} style={delay?.(t.i)}>
+          {/* (the TV: RIGHT or WRONG, "+3" and "1st right" on one middle line, the word in the middle of its box: 24 Nov,
+              the owner) */}
           {/* (the TV: the name on a line of its own, whole, over two lines if it must: the 4 Nov audit, 3.6; a phone with
               five teams or more: the name on a line of its own too, so it's never "THE …") */}
-          <div className={"flex items-baseline justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + (tv ? " flex-wrap gap-y-1.5" : dense ? " flex-wrap gap-y-0" : "")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
+          <div className={"flex justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + (tv ? " items-center flex-wrap gap-y-1.5" : dense ? " items-baseline flex-wrap gap-y-0" : " items-baseline")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
             <span className={tv ? "display basis-full text-center whitespace-normal leading-tight clamp2" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
             {v != null && <Verdict v={v} stamp={tv} size={tv ? undefined : 14} word={word?.(t.i) ?? (v ? undefined : !x ? "No answer" : undefined)} />}
             {v && p > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{p}</b>}

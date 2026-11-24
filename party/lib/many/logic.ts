@@ -25,7 +25,7 @@ export type ManyKey = (typeof MANY_MINIS)[number] | "sudden" | "comeback";
 export const extraGame = (k: ManyKey | undefined) => k === "sudden" || k === "comeback";
 export const MANY_TITLES: Record<ManyKey, string> = { sudden: "Sudden death", comeback: "The Comeback", quiz: "Standard rounds", majority: "Majority Rules", flag: "Guess the Flag", airport: "Guess the Airport", map: "Guess the Map",
   closest: "Closest To Wins", pin: "Drop the Pin", say: "Don't Say the Same as Me", dish: "Guess the Cocktail or Dish", see: "What Do You See?", fool: "Fool Me Twice", roulette: "Russian Roulette", stakes: "Secret Stakes" };
-export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, comeback: 3, quiz: 4, majority: 10, flag: 10, airport: 5, map: 6, closest: 5, pin: 7, say: 6, dish: 5, see: 12, fool: 6, roulette: 3, stakes: 3 };
+export const MANY_LEGS: Record<ManyKey, number> = { sudden: 6, comeback: 3, quiz: 4, majority: 10, flag: 10, airport: 5, map: 3, closest: 5, pin: 7, say: 6, dish: 5, see: 12, fool: 6, roulette: 3, stakes: 3 };
 /* the games where each captain types one answer (the app calls it, the host can flip the call) */
 export const TYPED: readonly ManyKey[] = ["quiz", "flag", "airport", "map", "say", "dish", "see", "sudden", "comeback", "roulette", "stakes"];
 export const typedKey = (k: ManyKey | undefined) => !!k && TYPED.includes(k);
@@ -154,7 +154,7 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
   const extra: Partial<Record<ManyKey, Q[]>> = {};
   /* (Guess the Flag and What Do You See? keep 40 of the spares dealt past the game, every level mixed, so Change flag
      or picture finds one at the same level, as with 2 teams: 23 Nov. The TV holds the bank anyway; the phones never get the answers) */
-  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" || key === "pin" || key === "airport" ? 40 : 4));
+  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" || key === "pin" || key === "airport" || key === "map" ? 40 : 4));
   extra.comeback = (decks.comeback || []).slice(MANY_LEGS.comeback);
   /* (a question round's Change question stays in the question's theme: the rounds' spares, then the questions held
      back past sudden death's, one pair per theme in turn: 19 Nov review, a Science question became Geography) */
@@ -205,7 +205,7 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   }
   /* Guess the Flag and What Do You See?: a spare at the same level, else another level, as with 2 teams (23 Nov, the
      owner) */
-  if (m.key === "flag" || m.key === "see" || m.key === "pin" || m.key === "airport") {
+  if (m.key === "flag" || m.key === "see" || m.key === "pin" || m.key === "airport" || m.key === "map") {
     const L = s.extra?.[m.key] || [], j = QMB.spareAt(L, qOf(s)?.level) as number;
     /* (the words: the engine's, one copy for every setup) */
     const W = QMB.SWAP_WORDS[m.key] as { done: string; none: string };
@@ -674,8 +674,8 @@ export function next(s: StateM, now: number, t: Timers) {
       if (m.key === "say" && q) { m.words = m.words || s.teams.map(() => []);
         s.typed.forEach((x, i) => { if (x != null && String(x).trim()) m.words![i].push({ w: String(listWord(x, q) ?? x).trim().slice(0, 40), ok: !!s.ok[i] }); }); }
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
-      /* (Guess the Flag and Closest To Wins: no line on the next one, as with 2 teams: the reveal's headline said it, 23 Nov, the owner) */
-      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see" && m.key !== "pin" && m.key !== "airport") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
+      /* (Guess the Flag and Closest To Wins: no line on the next one, as with 2 teams: the reveal's headline said it, 23 Nov, the owner; Guess the Map too, 24 Nov) */
+      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see" && m.key !== "pin" && m.key !== "airport" && m.key !== "map") toast(s, !first.length ? (m.key === "say" ? "Nobody dodged it." : "Nobody got it.") : m.key === "say" ? `${first.length === 1 ? s.teams[first[0]].name : first.length + " teams"} dodged it: +${pts[first[0]]}${first.length > 1 ? " each" : ""}.`
         : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} take it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
     }
     m.i++;

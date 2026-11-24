@@ -10,7 +10,6 @@ import { useToastOn, WinName } from "../Motion";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock, useSecondsLeft } from "../Clock";
 import { Confetti } from "../GameParts";
-import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
 import { showKm } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
@@ -23,6 +22,7 @@ import { StakesTv } from "../Stakes";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
 import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
 import { AirportRevealTv, AirportTv } from "../Airport";
+import { MapRevealTv, MapTv } from "../MapGame";
 import { ClosestRevealTv, ClosestTv } from "../Closest";
 import { PinRevealTv, PinTv } from "../Pin";
 import { FlagTv } from "../Flag";
@@ -130,15 +130,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         </>)}
         {/* Guess the Airport, Guess the Map: the board or the map, the clock and the teams beside it */}
         {pub.screen === "q" && g && g.key === "airport" && <AirportTv air={pub.airport} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 120 : 130} />} sent={<Sent pub={pub} column={!dense} />} />}
-        {pub.screen === "q" && g && g.key === "map" && (
-          <div className="flex gap-10 items-center w-full justify-center">
-            <div className="flex-1 min-w-0 flex justify-center">{pub.map && <MapView id={pub.map.id} rev={pub.map.rev} reveal={false} hint={!!pub.map.hint} maxH={460} still />}</div>
-            <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
-              <div className="display leading-tight text-40" style={{ color: "var(--color-gold)" }}>What do they have in common?</div>
-              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-              <Sent pub={pub} column={!dense} />
-            </div>
-          </div>)}
+        {pub.screen === "q" && g && g.key === "map" && <MapTv map={pub.map} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />} sent={<Sent pub={pub} column={!dense} />} />}
         {/* the Cocktail or Dish: the ingredients come up one by one; a team that guessed wrong is out of this one */}
         {pub.screen === "q" && g && g.key === "dish" && pub.dish && (
           <div className="flex gap-12 items-center w-full justify-center">
@@ -218,9 +210,10 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
         {pub.screen === "reveal" && g && R && g.key === "airport" && <AirportRevealTv air={pub.airport} answer={R.answer || ""} notes={R.notes} dense={dense}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
-        {pub.screen === "reveal" && g && R && ["quiz", "map", "say", "dish", "sudden", "comeback"].includes(g.key) && (<>
-          {g.key === "map" && pub.map ? <MapView id={pub.map.id} rev={pub.map.rev} reveal maxH={dense ? 130 : 200} legend={false} still />
-            : pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
+        {pub.screen === "reveal" && g && R && g.key === "map" && <MapRevealTv map={pub.map} answer={R.answer || ""} notes={R.notes} dense={dense}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
+        {pub.screen === "reveal" && g && R && ["quiz", "say", "dish", "sudden", "comeback"].includes(g.key) && (<>
+          {pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
             : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
           {g.key === "say" && <div className="eyebrow text-18 -mb-3">The app&rsquo;s secret answer</div>}
           <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>

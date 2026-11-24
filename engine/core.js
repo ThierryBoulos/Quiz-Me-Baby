@@ -1376,6 +1376,7 @@
     see:{ done:'New picture.', none:'No other picture left at these levels.' },
     pin:{ done:'New landmark.', none:'No other landmark left at these levels.' },
     airport:{ done:'New board.', none:'No other board left at these levels.' },
+    map:{ done:'New map.', none:'No other map left at these levels.' },
   };
   const spareLike = (s) => { const cur = s.qs[s.i], i = spareAt(s.spare, cur && cur.level); return s.spare.splice(i, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
@@ -2475,11 +2476,11 @@
       const s = g.mapGame;
       const inPlay = new Set(s.qs.map(q => q.id));
       const pool = env.deal.mapPool(s.levels || MAP_ORDER, inPlay);
-      if(!pool.length) return [{ toast:'No other map left in the bank.' }];
+      if(!pool.length) return [{ toast:SWAP_WORDS.map.none }];
       const cur = s.qs[s.i], q = pool.find(x => cur && x.level === cur.level) || pool[0];   // the same level, when there's one
       s.spare = (s.spare || []).filter(x => x.id !== q.id);
       s.qs[s.i] = q;
-      return [{ toast:'New map.' }, { go:'mapQ' }];
+      return [{ toast:SWAP_WORDS.map.done }, { go:'mapQ' }];
     },
     'map/verdict'(g, a){
       const s = g.mapGame, q = s.qs[s.i], w = a.w, fx = [];

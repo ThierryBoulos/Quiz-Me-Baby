@@ -120,7 +120,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   useFreshLeftShare(code, isTv, room?.status, (left) => { void lobbyWrite({ left }); });
   const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publishRef = useRef<() => void>(() => {});
-  const heard = useRef<{ screen: string; won: boolean } | null>(null);   // the screen the TV last made its sound for
+  const heard = useRef<{ screen: string; won: boolean; hint?: boolean } | null>(null);   // the screen the TV last made its sound for
   const drafts = useRef<Record<number, { k: string; text: string; pin?: LatLon; seq: number }>>({});   // each captain's typed, unsent answer
   const marked = useRef<string | null>(null);    // the Russian Roulette spin (and its questions) marked played
   const markedSk = useRef<number | null>(null);  // ...and the Secret Stakes round's
@@ -142,7 +142,9 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         else if (s.screen === "summary" || s.screen === "final") playSound("win");
         if (h.screen === "reveal" && h.won && (s.screen === "q" || s.screen === "pick")) playSound("correct");
       }
-      heard.current = { screen: s.screen, won: s.screen === "reveal" && legWinners(s).length > 0 }; }
+      /* (Guess the Map's hint: the soft chime, as with 2 teams: 24 Nov, the owner) */
+      if (h && h.screen === "q" && s.screen === "q" && s.mapHint && !h.hint) playSound("soft");
+      heard.current = { screen: s.screen, won: s.screen === "reveal" && legWinners(s).length > 0, hint: !!s.mapHint }; }
     /* the game's screen asleep: a clock that started meanwhile (the last bet in, a new question) waits for it, with all
        its time, as with two teams (14 Nov) */
     if (s.away && s.deadline && (s.screen === "q" || s.screen === "pick") && !s.paused && s.buzz == null) { s.left = Math.max(0.05, (s.deadline - Date.now()) / 1000); s.deadline = null; }

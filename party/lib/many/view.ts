@@ -13,6 +13,7 @@ import { skQm } from "./logic";
 import { foolSum, type FoolPub, type FoolSum } from "../fool";
 import { extraGame } from "./logic";
 import type { ComebackPub } from "../comeback";
+import { MAP } from "../minis/map";
 
 export type TeamPub = { name: string; captain: string; score: number; color: string };
 export type PubMany = {
@@ -76,7 +77,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
 /* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
-export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number }): { pub: PubMany; secret: SecretMany } {
+export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
@@ -94,7 +95,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen === "q" && s.deadline && Date.now() >= s.deadline) pub.timeUp = true;
   if (m && s.screen !== "final") { const P = preloadOf(m.key, m.qs as { flag?: string; id?: string; photo?: string }[], m.i, s.screen === "intro"); if (P) pub.preload = P; }
   /* Russian Roulette's intro: the seconds, for its rules (as with 2 teams: 22 Nov, the owner) */
-  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
+  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport" || m.key === "map")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
   if (m?.key === "stakes") {
     /* (on the intro, the bet the game will play: worked out from the scores now, as Start will; it read 1 before Start,
        22 Nov. And the seconds, for its rules) */
@@ -155,7 +156,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (m && q && s.screen === "reveal") {
     /* (sudden death pays the night one point, to the fastest right answer) */
     const w = legWinners(s), places = legPlaces(s), pl = { places, pts: m.key === "sudden" ? places.map((p) => (p === 1 ? 1 : 0)) : m.key === "comeback" ? places.map(() => 0) : legPoints(s) };   // (the comeback pays nothing a question: all three, or nothing)
-    if (m.key === "map") pub.reveal = { answer: q.question, notes: q.answer, typed: s.typed, ok: s.ok, winners: w, ...pl };
+    if (m.key === "map") pub.reveal = { answer: q.question, notes: MAP.fact(q.notes), typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (m.key === "roulette") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, ...pl };
     else if (m.key === "stakes") pub.reveal = { answer: "", typed: s.typed, ok: s.ok, winners: w, places: s.teams.map(() => null), pts: pub.stakes?.rev?.delta || [] };
     else if (m.key === "fool") pub.reveal = { answer: q.answer, notes: q.notes || undefined, winners: w, ...pl };
@@ -184,7 +185,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? `The app's word. Any other answer on the list scores, if no other team says it too.` : m.key === "roulette" || m.key === "stakes" || m.key === "see" ? undefined : q.notes, typed: s.typed, nums: s.nums,
         ...(m.key === "roulette" ? { answers: s.teams.map((_, t) => String(rrQ(q as RrLap, t)?.answer ?? "")) } : {}),
         ...(m.key === "stakes" ? { answers: s.teams.map((_, t) => String(skQm(s, t)?.answer ?? "")) } : {}),
-        ...(typedKey(m.key) && m.key !== "roulette" && m.key !== "stakes" && m.key !== "map" ? { accept: acceptFor(q).slice(0, 8) } : {}),
+        ...(typedKey(m.key) && m.key !== "roulette" && m.key !== "stakes" ? { accept: acceptFor(q).slice(0, 8) } : {}),
         step: s.step, qid: pub.qid, ...(m.key === "dish" ? { out: s.teams.map((_, t) => s.typed[t] != null && !dishRight(s, t)) } : {}),
         ...(m.key === "see" ? { out: s.teams.map((_, t) => !!s.out?.[t]) } : {}) } : { step: s.step };
   void allIn;

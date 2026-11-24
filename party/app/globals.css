@@ -107,6 +107,9 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
 .btn-ghost { background: transparent; }
 .btn-gold-line { background: transparent; border: 1.5px solid var(--color-gold); color: var(--color-gold); }   /* gold, the quieter of two (Exit by Play again) */
 .btn-sm { min-height: 44px; font-size: var(--text-14); padding: 0 16px; }
+/* the host's controls while a question is up (Pause, Change …, Show hint, Reveal now): as compact as a tap allows,
+   one copy for every setup and every game (24 Nov, the owner). 44 px high, the smallest a finger can hit surely */
+.btn.btn-host { min-height: 44px; padding: 0 11px; font-size: var(--text-13); gap: 6px; }
 /* the five level chips in one row on a phone: smaller words, so "Medium" sits inside its chip (23 Oct) */
 .lvl-chip { font-size: var(--text-12); padding: 0 2px; letter-spacing: 0; min-width: 0; }
 /* a game's levels on one row, equal widths (the owner, 1 Nov): "Very easy" may take two lines inside its chip */
@@ -491,7 +494,9 @@ html[data-motion="off"] .confetti { display: none; }
 @keyframes slam { 0% { opacity: 0; transform: scale(2.2); filter: blur(10px); } 55% { opacity: 1; transform: scale(.94); filter: none; } 75% { transform: scale(1.04); } 100% { transform: none; } }
 /* RIGHT / WRONG comes down like a rubber stamp */
 .verdict.stamped:not([style]) { font-size: .84em; }
-.verdict.stamped { display: inline-block; padding: .02em .34em; border: 2px solid currentColor; border-radius: 7px; transform: rotate(-4deg);
+/* (the word exactly in the middle of its box: the letter-spacing's last gap taken off the right, the line set to the
+   capitals' height; and the box on one middle line with "+3" and "1st right": 24 Nov, the owner) */
+.verdict.stamped { display: inline-block; padding: .1em calc(.34em - .08em) .06em .34em; line-height: 1; border: 2px solid currentColor; border-radius: 7px; transform: rotate(-4deg);
   animation: stampIn .38s cubic-bezier(.2,1.5,.4,1) both; animation-delay: calc(var(--beat) + var(--d, 0s) + .12s); }
 @keyframes stampIn { from { opacity: 0; transform: rotate(-14deg) scale(2.4); } to { opacity: 1; transform: rotate(-4deg) scale(1); } }
 .x2 { display: inline-block; font-family: var(--font-display); color: var(--color-gold); border: 3px solid var(--color-gold); border-radius: 10px; padding: 0 .2em; font-size: .72em; line-height: 1.05;

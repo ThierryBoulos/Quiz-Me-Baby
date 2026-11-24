@@ -6,6 +6,7 @@
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
+import { MAP } from "@/lib/minis/map";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -406,9 +407,8 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: "Dodged it alone? You take the leg. Both dodged or both said it? Tie, a point each." },
       { text: `Best of ${n} takes ${pts}. ${level}` }];
     case "map": return [
-      { text: `A map with no title. Captains type what it shows, ${sec(t?.map, T_MAP)}.` },
-      { text: `${host ? "The host rules" : "Each captain rules on the other team's answer"}: the idea counts, not the exact words.` },
-      { text: `Best of ${n} takes ${pts}. ${level}` }];
+      /* (short, the same with or without a host, rule 1 the same in every setup: 24 Nov, the owner) */
+      { text: MAP.rule1(t?.map) }, ...MAP.rules2(n, pts).map((text) => ({ text }))];
     case "flag": return [
       /* (short, the same with or without a host: 23 Nov, the owner) */
       { text: FLAG.rule1(t?.flag) }, ...FLAG.rules2(n, pts).map((text) => ({ text }))];

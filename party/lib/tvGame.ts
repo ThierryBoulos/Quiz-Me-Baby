@@ -1551,7 +1551,6 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (sc === "auctionBid") return g.auction?.turn === t;
     if (sc === "auctionRun") return s.nohost && g.auction?.by != null && g.auction.by !== t;   // the counter
     if (s.nohost && WAITS_FOR_NEXT.has(sc)) return leadTeam() === t;
-    if (s.nohost && sc === "mapReveal") return s.ok[other(t)] == null;
     return false;
   };
   const handOver = useCallback(async () => {
@@ -1769,14 +1768,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         else s.lifeline = { ...s.lifeline, deadline: null };
         changed = true;
       }
-      /* no host: a map answer the other captain never ruled on stands as right; then the lead captain taps Next */
+      /* (games saved before contests: a screen's own move once its time is up) */
       if (s.nohost && s.autoAt && now >= s.autoAt) {
         const mv = AUTO_NEXT[s.screen] ?? PICK_DEFAULT(s.screen);
         /* a contest or a request open, or paused: it waits for that, then 3 s more */
         if (mv && (s.contest || s.agree || s.paused)) s.autoAt = now + 3000;
         else {
           s.autoAt = null; changed = true;
-          if (s.screen === "mapReveal") { s.ok = [s.ok[0] ?? true, s.ok[1] ?? true]; s.waitSince = now; }
           if (mv) { s.step++; hostMove({ type: mv }); }
         }
       }

@@ -13,6 +13,7 @@ import { skKey, skPub, skQ, skResult, type SkGame } from "../stakes";
 import { SEE_TYPE, seeNotes, sePic, seeWinner } from "../see";
 import type { TvState } from "./state";
 import { COMEBACK_TITLE } from "../comeback";
+import { MAP } from "../minis/map";
 
 /* The question in play goes out under a number that means nothing outside this game (D5): its
    real id would find the answer in a bank file. The phones use it only to tell questions apart. */
@@ -109,8 +110,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       auction: t.tAuction, dishStep: t.tDishStep, dishType: t.tDishType, battleHost: t.tBattleHost, battleTyped: t.tBattleTyped, pin: t.tPin, airport: t.tAirport, majority: t.tMajority, roulette: t.tRoulette,
       stakesPick: t.tStakesPick, stakesQ: t.tStakesQ, see: t.tSee, foolWrite: t.tFoolWrite, foolPick: t.tFoolPick }; }
   /* no host: whose Start or Next the room is waiting for */
-  if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)
-    && !(s.screen === "mapReveal" && (s.ok[0] == null || s.ok[1] == null))) {
+  if (s.nohost && !s.pending && WAITS_FOR_NEXT.has(s.screen) && !(s.screen === "sudden" && g.sdReady)) {
     p.nextBy = p.captains[leadOf(mem)] || "The captain";
     p.nextOpenAt = s.waitSince + T_NEXT_FALLBACK * 1000; p.nextOther = p.captains[other(leadOf(mem))];
   }
@@ -310,8 +310,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   }
   if ((s.screen === "mapQ" || s.screen === "mapReveal") && q) {
     const reveal = s.screen === "mapReveal";
-    p.map = { id: q.id, reveal, hint: (g.mapGame.hints || {})[q.id] ? "on" : undefined, title: reveal ? q.question : undefined, notes: reveal ? q.notes : undefined, ...(reveal && revOf(q) ? { rev: revOf(q) } : {}) };
-    if (reveal) { p.map.ruled = s.ok; p.reveal = { answer: q.question, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s) }; }
+    p.map = { id: q.id, reveal, hint: (g.mapGame.hints || {})[q.id] ? "on" : undefined, title: reveal ? q.question : undefined, ...(reveal && revOf(q) ? { rev: revOf(q) } : {}) };
+    if (reveal) p.reveal = { answer: q.question, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s), notes: MAP.fact(q.notes) };
     secret.answer = q.question; secret.notes = q.answer;
   }
   if ((s.screen === "dishQ" || s.screen === "dishReveal" || s.screen === "dishCheck") && q) {
