@@ -24,7 +24,7 @@ export function currentQ(s: TvState): G {
   if (["airportQ", "airportReveal"].includes(sc)) return g.airportGame.qs[g.airportGame.i];
   if (["majorityQ", "majorityReveal"].includes(sc)) return g.majorityGame.qs[g.majorityGame.i];
   if (["mapQ", "mapReveal"].includes(sc)) return g.mapGame.qs[g.mapGame.i];
-  if (["dishQ", "dishCheck"].includes(sc)) return g.dishGame.qs[g.dishGame.i];
+  if (sc === "dishQ") return g.dishGame.qs[g.dishGame.i];
   if (sc === "dishReveal") { const subs = g.dishGame.subs; return subs[subs.length - 1]?.q; }
   if (/^auction(Bid|Run)$/.test(sc)) return g.auction?.q;
   if (sc === "sayQ" || sc === "sayReveal") return g.saySame.qs[g.saySame.i];

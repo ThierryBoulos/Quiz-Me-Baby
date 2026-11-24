@@ -8,6 +8,7 @@ import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
+import { DISH } from "@/lib/minis/dish";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -18,7 +19,7 @@ import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { COMEBACK_TITLE } from "@/lib/comeback";
 import { preloadWorld, type Mark } from "./PinMap";
-import { DISH_STEP, showKm, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
+import { showKm, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -391,9 +392,6 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
   const m = pub.mini!, n = m.of, pts = m.pts === 1 ? "1 point" : `${m.pts} points`, host = pub.mode === "host";
   /* the house timers, as set in Settings on the TV */
   const t = pub.timers, sec = (v: number | undefined, d: number) => `${v ?? d} seconds`;
-  /* tied at the end: the same choice in every mini-game */
-  /* (shorter, so every game's rules fit the TV: 11 Nov, the owner) */
-  const level = `Won early? Play on for fun, or stop. Tied? One more, or a point each${host ? ": the host's call" : ""}.`;
   switch (m.key) {
     /* (short, the same rule 1 as with 3 to 8 teams: 23 Nov, the owner) */
     case "closest": return [
@@ -452,10 +450,8 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
     /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
     case "stakes": return skRules(n, pub.stakes?.unit ?? 1, t?.stakesPick ?? 20, t?.stakesQ ?? 45);   // (one card, every setup: components/Stakes.tsx)
     case "dish": return [
-      { text: `The ingredients come up one at a time, a new one every ${sec(t?.dishStep, DISH_STEP)}. The giveaway comes last.` },
-      { text: `Know it? Captain, hit BUZZ: the first buzz answers, and has ${sec(t?.dishType, T_DISH_TYPE)} to type it.` },
-      { text: "One go per team. Wrong, and you're out of that one: the list keeps coming for the other team." },
-      { text: `Best of ${n} takes ${pts}. ${level}` }];
+      /* (rule 1 the same in every setup; the buzzer, then the short form: 24 Nov, the owner) */
+      { text: DISH.rule1(t?.dishStep) }, ...DISH.rulesTwo(t?.dishType ?? T_DISH_TYPE, n, pts).map((text) => ({ text }))];
     case "battle": return [
       { text: "Captains only. The room says nothing, and that means nothing.", warn: true },
       { text: `${n} questions each, ${host ? `${sec(t?.battleHost, T_BATTLE_HOST)} a shot, out loud` : `${sec(t?.battleTyped, T_BATTLE_TYPED)} a shot, typed on the phone`}. ${poss(pub.teams[0].name)} captain goes first.` },

@@ -79,13 +79,13 @@
 142.50 dishQ | 46 | 5-5 | 0-0 | Owls +1 point | 
 145.25 dishReveal | 47 | 5-5 | 1-0 | Lions take number 1. | 
 146.25 dishQ | 48 | 5-5 | 1-0 | Lions take number 1. | 
-149.00 dishQ | 49 | 5-5 | 1-0 | Lions are out of this one — Owls, it is yours to get. | 
+149.00 dishQ | 49 | 5-5 | 1-0 | Lions are out of this one. Owls, it's yours to get. | 
 (capGone team 1)
-160.75 dishReveal | 50 | 5-5 | 1-0 | Time's up. ⁨Owls⁩ is out of this one. | 
-161.50 dishQ | 51 | 5-5 | 1-0 | Time's up. ⁨Owls⁩ is out of this one. | 
+160.75 dishReveal | 50 | 5-5 | 1-0 | Time's up. ⁨Owls⁩ are out of this one. | 
+161.50 dishQ | 51 | 5-5 | 1-0 | Time's up. ⁨Owls⁩ are out of this one. | 
 164.25 dishReveal | 52 | 5-5 | 2-0 | Lions take number 3. | 
 165.00 dishQ | 53 | 5-5 | 2-0 | Lions take number 3. | 
-167.75 dishQ | 54 | 5-5 | 2-0 | Lions are out of this one — Owls, it is yours to get. | 
+167.75 dishQ | 54 | 5-5 | 2-0 | Lions are out of this one. Owls, it's yours to get. | 
 181.75 dishReveal | 55 | 5-5 | 2-0 | Nobody got it. | 
 182.25 decided | 56 | 7-5 | 2-0 |  | 
 183.00 roundIntro | 57 | 7-5 |  |  | 

@@ -24,12 +24,13 @@ import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
 import { AirportRevealTv, AirportTv } from "../Airport";
 import { MapRevealTv, MapTv } from "../MapGame";
 import { SayRevealTv, SayTv, sayWord } from "../SayGame";
+import { DishRevealTv, DishTv } from "../DishGame";
 import { ClosestRevealTv, ClosestTv } from "../Closest";
 import { PinRevealTv, PinTv } from "../Pin";
 import { FlagTv } from "../Flag";
 import { SentLine, TeamCalls } from "../TeamCalls";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
-import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, splitIng, takes, resultDone } from "./PartsMany";
+import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, takes, resultDone } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -132,20 +133,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* Guess the Airport, Guess the Map: the board or the map, the clock and the teams beside it */}
         {pub.screen === "q" && g && g.key === "airport" && <AirportTv air={pub.airport} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 120 : 130} />} sent={<Sent pub={pub} column={!dense} />} />}
         {pub.screen === "q" && g && g.key === "map" && <MapTv map={pub.map} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />} sent={<Sent pub={pub} column={!dense} />} />}
-        {/* the Cocktail or Dish: the ingredients come up one by one; a team that guessed wrong is out of this one */}
-        {pub.screen === "q" && g && g.key === "dish" && pub.dish && (
-          <div className="flex gap-12 items-center w-full justify-center">
-            <ol className="text-left grid gap-2 flex-1 min-w-0 max-w-[620px]" style={{ fontSize: pub.dish.n > 8 ? 22 : 28 }}>
-              {pub.dish.ings.map((t, i) => { const [qty, name] = splitIng(t); return (
-                <li key={i} className="enter flex gap-4 items-baseline"><span className="font-bold">{name}</span>{qty && <span className="text-[var(--color-ink-2)]" style={{ fontSize: "0.8em" }}>{qty}</span>}</li>); })}
-            </ol>
-            <div className="w-[380px] shrink-0 flex flex-col items-center gap-4">
-              <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}?</div>
-              <div className="text-22 text-[var(--color-ink-2)]"><b>{pub.dish.ings.length}</b> of {pub.dish.n} ingredients</div>
-              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />
-              <Sent pub={pub} column={!dense} />
-            </div>
-          </div>)}
+        {/* the Cocktail or Dish: one copy for every setup (components/DishGame.tsx): the ingredients one by one, who has answered */}
+        {pub.screen === "q" && g && g.key === "dish" && pub.dish && <DishTv dish={pub.dish} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />} under={<Sent pub={pub} column={!dense} />} />}
         {/* Secret Stakes: the themes and who has bet; "Bets are in" while each team answers on its own phones; the reveal,
             last place first; what each team won or lost */}
         {g && g.key === "stakes" && pub.stakes && ["pick", "q", "reveal", "summary"].includes(pub.screen) && (
@@ -215,9 +204,10 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "say" && <SayRevealTv question={pub.question || undefined} answer={R.answer || ""} dense={dense}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
-        {pub.screen === "reveal" && g && R && ["quiz", "dish", "sudden", "comeback"].includes(g.key) && (<>
-          {pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div>
-            : pub.dish ? <div className="text-20 text-[var(--color-ink-2)] max-w-[1100px] leading-snug clamp2">{pub.dish.ings.map((t) => splitIng(t)[1]).join(", ")}</div> : null}
+        {pub.screen === "reveal" && g && R && g.key === "dish" && <DishRevealTv dish={pub.dish} answer={R.answer || ""} dense={dense}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
+        {pub.screen === "reveal" && g && R && ["quiz", "sudden", "comeback"].includes(g.key) && (<>
+          {pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div> : null}
           <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
           {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
           <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />

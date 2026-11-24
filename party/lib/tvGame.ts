@@ -705,7 +705,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if ((move.on === "pause" && !s.deadline) || (move.on === "resume" && s.deadline)) return;
       applyFx([{ timer: s.deadline ? "pause" : "resume" }]); s.paused = !s.deadline && s.left > 0;
     }
-    else if (t === "ui/reveal") reveal();
+    /* (the Cocktail or Dish: Reveal now ends the recipe, nobody right, unless a captain who buzzed is typing: 24 Nov) */
+    else if (t === "ui/reveal") { if (s.screen === "dishQ") { if (g.dishGame.leg.buzz == null) play({ type: "dish/timeUp" }); } else reveal(); }
     /* a ruling: v sets it (RIGHT/WRONG, DODGED IT/SAID IT); without v it flips */
     else if (t === "ui/flagOk" || t === "ui/mapOk" || t === "ui/sayOk" || t === "ui/airportOk" || t === "ui/rouletteOk" || t === "ui/stakesOk" || t === "ui/seeOk") {
       const i = move.t === 1 ? 1 : 0, v = typeof move.v === "boolean" ? move.v : !s.ok[i];
@@ -845,7 +846,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (kind === "buzz") {
       if (sc === "dishQ") {
         const L = g.dishGame.leg;
-        if (L.out[team]) return `${nm(team)} is out of this one.`;
+        if (L.out[team]) return `${nm(team)} are out of this one.`;
         /* (a second tap on Buzz: theirs is already in) */
         if (L.buzz != null) return L.buzz === team ? true : `${nm(L.buzz)} buzzed first.`;
         play({ type: "dish/buzz", w: team }); s.buzzAt = Date.now(); return true;
@@ -1717,7 +1718,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           s.buzzAt = 0; s.step++; changed = true;
           hostMove({ type: "dish/wrong" });
           s.late = b;
-          s.toast = { id: ++s.toastN, text: `Time's up. ${iso(g.teams[b].name)} is out of this one.` };
+          s.toast = { id: ++s.toastN, text: `Time's up. ${iso(g.teams[b].name)} are out of this one.` };
         }
       }
       /* What Do You See?: a buzz gets 10 seconds to say it and type it; what's typed but not sent goes in, else the team is out */

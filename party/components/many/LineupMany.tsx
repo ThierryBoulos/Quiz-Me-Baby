@@ -22,6 +22,7 @@ import { RR_SETUP } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
+import { DISH } from "@/lib/minis/dish";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -90,7 +91,7 @@ const GAMES: [ManyKey, string][] = [
   ["airport", "6 departure boards. Captains type the airport; the fastest right answer scores most."],
   ["map", "Three maps: what does each show?"],   // (drawn by MAP.setupLine, as with 2 teams)
   ["say", "Six questions: a real answer, but not the game's secret one."],   // (drawn by SAY.setupLine, as with 2 teams)
-  ["dish", "5 recipes, one ingredient at a time. One guess per team; the faster right, the more points."],
+  ["dish", "Five recipes: which cocktail or dish?"],   // (drawn by DISH.setupLine, as with 2 teams)
   ["see", SEE_SETUP],
   /* (16 Nov, the owner: off to start with) */
   ["fool", "6 strange true facts with a blank. Captains write a lie that sounds true, then find the truth among the lies."],
@@ -203,7 +204,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
             <button type="button" role="switch" aria-checked={lit} data-mini={key} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(lit ? minis.filter((x) => x !== key) : [...minis, key])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{MANY_TITLES[key]}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{key === "flag" ? FLAG.setupLine(tv?.settings?.tFlag) : key === "closest" ? CLOSEST.setupLine(tv?.settings?.tMini) : key === "pin" ? PIN.setupLine(tv?.settings?.tPin) : key === "airport" ? AIRPORT.setupLine(tv?.settings?.tAirport) : key === "map" ? MAP.setupLine(tv?.settings?.tMap) : key === "say" ? SAY.setupLine(tv?.settings?.tSay) : blurb}{lit && <b style={{ color: "var(--color-gold)" }}> {slot(key)}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{key === "flag" ? FLAG.setupLine(tv?.settings?.tFlag) : key === "closest" ? CLOSEST.setupLine(tv?.settings?.tMini) : key === "pin" ? PIN.setupLine(tv?.settings?.tPin) : key === "airport" ? AIRPORT.setupLine(tv?.settings?.tAirport) : key === "map" ? MAP.setupLine(tv?.settings?.tMap) : key === "say" ? SAY.setupLine(tv?.settings?.tSay) : key === "dish" ? DISH.setupLine(tv?.settings?.tDishStep) : blurb}{lit && <b style={{ color: "var(--color-gold)" }}> {slot(key)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: lit ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: lit ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

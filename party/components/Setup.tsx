@@ -21,6 +21,7 @@ import { RR_SETUP } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
+import { DISH } from "@/lib/minis/dish";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -38,7 +39,7 @@ const MINIS = [
   ["pin", "Drop the Pin", "A landmark's photo: drop a pin on the map where it is. Nearest pin wins."],
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
   ["majority", "Majority Rules", "Everyone plays on their own phone: 10 questions, four answers. The team with the bigger share of right answers wins."],
-  ["dish", "Guess the Cocktail or Dish", "The ingredients, one at a time: first captain to call it wins."],
+  ["dish", "Guess the Cocktail or Dish", "Five recipes: which cocktail or dish?"],   // (drawn by DISH.setupLine)
   ["see", "What Do You See?", SEE_SETUP],
   ["fool", "Fool Me Twice", "A strange true fact with a blank. Write a lie that sounds true, then find the truth among the lies."],
   ["roulette", "Russian Roulette", RR_SETUP],
@@ -273,7 +274,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
             <button type="button" role="switch" aria-checked={on} data-mini={k} className="flex items-center justify-between gap-3 w-full text-left min-h-[56px] py-1.5"
               onClick={() => setMinis(on ? minis.filter((x) => x !== k) : [...minis, k])}>
               <span className="min-w-0"><span className="block font-bold text-15 leading-tight">{name}</span>
-                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? FLAG.setupLine(timers?.tFlag) : k === "closest" ? CLOSEST.setupLine(timers?.tMini) : k === "pin" ? PIN.setupLine(timers?.tPin) : k === "airport" ? AIRPORT.setupLine(timers?.tAirport) : k === "map" ? MAP.setupLine(timers?.tMap) : k === "saysame" ? SAY.setupLine(timers?.tSay) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
+                <span className="block text-13 text-[var(--color-ink-2)] leading-snug mt-0.5">{k === "flag" ? FLAG.setupLine(timers?.tFlag) : k === "closest" ? CLOSEST.setupLine(timers?.tMini) : k === "pin" ? PIN.setupLine(timers?.tPin) : k === "airport" ? AIRPORT.setupLine(timers?.tAirport) : k === "map" ? MAP.setupLine(timers?.tMap) : k === "saysame" ? SAY.setupLine(timers?.tSay) : k === "dish" ? DISH.setupLine(timers?.tDishStep) : blurb}{on && <b style={{ color: "var(--color-gold)" }}> {worth(k) ? `${worth(k)} pts` : ""}{worth(k) && slot(k) ? " · " : ""}{slot(k)}</b>}</span></span>
               <span className="relative shrink-0 block w-[48px] h-[28px] rounded-full transition-colors" style={{ background: on ? "var(--color-gold)" : "rgba(255,255,255,.14)" }}>
                 <span className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white transition-all" style={{ left: on ? 23 : 3, boxShadow: "0 2px 6px rgba(0,0,0,.4)" }} />
               </span>

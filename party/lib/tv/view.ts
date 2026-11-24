@@ -314,7 +314,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     if (reveal) p.reveal = { answer: q.question, typed: s.typed, ok: s.ok, app: s.app, w: okWin(s), notes: MAP.fact(q.notes) };
     secret.answer = q.question; secret.notes = q.answer;
   }
-  if ((s.screen === "dishQ" || s.screen === "dishReveal" || s.screen === "dishCheck") && q) {
+  if ((s.screen === "dishQ" || s.screen === "dishReveal") && q) {
     const L = g.dishGame.leg, shown = s.screen === "dishQ" ? L.shown : q.ings.length;
     p.dish = { kind: dishKind(q), ings: q.ings.slice(0, shown), n: q.ings.length, late: s.late,
       typeBy: s.screen === "dishQ" && L.buzz != null && s.buzzAt && !s.typed[L.buzz as 0 | 1] && !s.pending ? s.buzzAt + getSettings().tDishType * 1000 : null };

@@ -124,10 +124,10 @@
 151.50 dishReveal | 64 | 8-6 | 3-0 | Lions take number 3. | 
 152.50 decided | 65 | 10-6 | 3-0 |  | 
 153.50 dishQ | 66 | 10-6 | 3-0 |  | 
-155.25 dishQ | 66 | 10-6 | 3-0 | Lions are out of this one — Owls, it is yours to get. | 
+155.25 dishQ | 66 | 10-6 | 3-0 | Lions are out of this one. Owls, it's yours to get. | 
 157.00 dishReveal | 66 | 10-6 | 3-1 | Owls take number 4. | 
 158.00 dishQ | 67 | 10-6 | 3-1 | Owls take number 4. | 
-159.75 dishQ | 67 | 10-6 | 3-1 | Lions are out of this one — Owls, it is yours to get. | 
+159.75 dishQ | 67 | 10-6 | 3-1 | Lions are out of this one. Owls, it's yours to get. | 
 161.50 dishReveal | 67 | 10-6 | 3-1 | Nobody got it. | 
 162.50 dishSummary | 68 | 10-6 | 3-1 | Nobody got it. | 
 163.25 roundIntro | 69 | 10-6 |  | Nobody got it. | 

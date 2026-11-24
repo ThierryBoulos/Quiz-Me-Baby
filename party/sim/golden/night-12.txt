@@ -77,13 +77,13 @@
 97.70 roundScore | 54 | 4-6 |  | Owls +1 point | 
 98.70 dishIntro | 55 | 4-6 | 0-0 | Owls +1 point | 
 99.70 dishQ | 56 | 4-6 | 0-0 | Owls +1 point | 
-102.20 dishQ | 57 | 4-6 | 0-0 | Lions are out of this one — Owls, it is yours to get. | 
+102.20 dishQ | 57 | 4-6 | 0-0 | Lions are out of this one. Owls, it's yours to get. | 
 104.95 dishReveal | 58 | 4-6 | 0-0 | Nobody got it. | 
 105.95 dishQ | 59 | 4-6 | 0-0 | Nobody got it. | 
-108.70 dishQ | 60 | 4-6 | 0-0 | Lions are out of this one — Owls, it is yours to get. | 
+108.70 dishQ | 60 | 4-6 | 0-0 | Lions are out of this one. Owls, it's yours to get. | 
 111.20 dishReveal | 61 | 4-6 | 0-0 | Nobody got it. | 
 112.20 dishQ | 62 | 4-6 | 0-0 | Nobody got it. | 
-114.95 dishQ | 63 | 4-6 | 0-0 | Lions are out of this one — Owls, it is yours to get. | 
+114.95 dishQ | 63 | 4-6 | 0-0 | Lions are out of this one. Owls, it's yours to get. | 
 117.70 dishReveal | 64 | 4-6 | 0-1 | Owls take number 3. | 
 118.45 dishQ | 65 | 4-6 | 0-1 | Owls take number 3. | 
 121.20 dishReveal | 66 | 4-6 | 1-1 | Lions take number 4. | 

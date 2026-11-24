@@ -13,6 +13,7 @@ import { showKm, showNum } from "@/lib/game";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
+import { DISH } from "@/lib/minis/dish";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -222,8 +223,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     case "closest": return [CLOSEST.rule1(pub.introSecs), `Closest guess first: ${per.replace(" Wrong, nothing.", "")}`, pay];
     case "pin": return [PIN.rule1(pub.introSecs), `Closest pin first: ${per.replace(" Wrong, nothing.", "")}`, pay];
     case "say": return [SAY.rule1(pub.introSecs), SAY.ruleMany(k), pay];
-    case "dish": return ["The ingredients come up one by one. Captains guess the cocktail or dish.",
-      "One guess per team. A wrong guess puts you out of that one.", fast, pay];
+    case "dish": return [DISH.rule1(pub.introSecs), fast, pay];
     /* What Do You See? (12 Nov, the owner): scored as the Cocktail or Dish is here */
     /* (12 Nov, the owner: a buzzer, said out loud and typed; one team gets a picture, and scores what a 1st place does) */
     case "see": return [SEE_RULE1, { text: SEE_RULE2, warn: true },   // (the same words and the same red in every setup: 23 Nov, the owner)
@@ -257,7 +257,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */
-  const band = g.key === "sudden" ? "First right wins" : g.key === "stakes" ? skBand(g.of) : th.length ? `${count} – ${th.length > 2 ? `${th.slice(0, -1).join(", ")} and ${th[th.length - 1]}` : th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;   // (three themes, a game of three rounds: "A, B and C")
+  const band = g.key === "sudden" ? "First right wins" : g.key === "stakes" ? skBand(g.of) : g.key === "dish" && pub.dishKinds ? `${count} · ${pub.dishKinds}` : th.length ? `${count} – ${th.length > 2 ? `${th.slice(0, -1).join(", ")} and ${th[th.length - 1]}` : th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;   // (three themes, a game of three rounds: "A, B and C")
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
       {/* "Game 2 of 5" is in the tracker right above: not said twice (the owner, 31 Oct) */}

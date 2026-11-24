@@ -59,7 +59,7 @@ export const HOST_MOVES: Record<string, Where> = {
   /* the night's intro (before the first round): Let's go */
   "ui/introGo": "*",
   "ui/closeLifeline": "*", "ui/setScore": "*", "ui/timeUp": ["ask", "steal"], "ui/pause": ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ", "comebackQ"],
-  "ui/reveal": ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "seeQ", "foolWrite", "foolPick"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/airportOk": "airportReveal",
+  "ui/reveal": ["miniQ", "flagQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "seeQ", "foolWrite", "foolPick"], "ui/flagOk": "flagReveal", "ui/mapOk": "mapReveal", "ui/airportOk": "airportReveal",
   "ui/next": ["closestReveal", "flagReveal", "mapReveal", "sayReveal", "pinReveal", "airportReveal", "majorityReveal", "rouletteReveal", "stakesReveal", "seeReveal", "foolReveal", "comebackReveal"],
   "ui/sdRight": ["sudden", "battleTie"], "ui/sdWrong": ["sudden", "battleTie"],
   "ui/exit": "final", "ui/again": "final",

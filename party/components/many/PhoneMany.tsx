@@ -31,6 +31,7 @@ import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { MapAnswer } from "../MapGame";
 import { SAY } from "@/lib/minis/say";
+import { DISH } from "@/lib/minis/dish";
 import { sayWord } from "../SayGame";
 import { CLOSEST } from "@/lib/minis/closest";
 import { FLAG } from "@/lib/minis/flag";
@@ -141,7 +142,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
 
 const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
-const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: FLAG.topCaptain, closest: CLOSEST.topCaptain, pin: PIN.topCaptain, airport: AIRPORT.topCaptain, map: MAP.topCaptain, say: SAY.topCaptain };
+const TOP_CAP: Record<string, string> = { roulette: "Your chamber\u2019s question. Type your answer.", flag: FLAG.topCaptain, closest: CLOSEST.topCaptain, pin: PIN.topCaptain, airport: AIRPORT.topCaptain, map: MAP.topCaptain, say: SAY.topCaptain, dish: DISH.topCaptain };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -440,7 +441,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {/* (What Do You See?: a team that buzzed is answering: the clock is stopped for it already) */}
           {!(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>}
           {/* (shown even once answers are in: the new question clears them, every game: 23 Nov, the owner) */}
-          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-host btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? FLAG.change : g.key === "see" ? "Change picture" : g.key === "pin" ? PIN.change : g.key === "airport" ? AIRPORT.change : g.key === "map" ? MAP.change : "Change question"}</button>}
+          {g.key !== "sudden" && !(g.key === "see" && pub.see?.buzz != null) && <button className="btn btn-sm btn-host btn-ghost" disabled={busy} onClick={() => move("m/swap")}>{g.key === "stakes" ? "Change the themes" : g.key === "flag" ? FLAG.change : g.key === "see" ? "Change picture" : g.key === "pin" ? PIN.change : g.key === "airport" ? AIRPORT.change : g.key === "map" ? MAP.change : g.key === "dish" ? DISH.change : "Change question"}</button>}
           {/* Guess the Map: one hint a map, as with two teams (8 Nov) */}
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
@@ -575,7 +576,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               {np.hint}
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim() || (g.key === "closest" && !Number.isFinite(guessN))} onPointerDown={(e) => e.preventDefault()} onClick={() => { const t = text.trim(); void send("answer", g.key === "closest" ? { n: t, k: `${pub.qid}|q` } : { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) setSentTxt(t); }); }}>{g.key === "closest" ? "Lock in" : "Send"}</button>
               {/* (no "Once you send it, it's locked." in Russian Roulette: 22 Nov, the owner) */}
-              {g.key !== "roulette" && g.key !== "closest" && <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? "One guess for your team: a wrong one puts you out of this recipe. The faster your right answer, the more points." : g.key === "say" ? SAY.boxLine(true) : "Once you send it, it’s locked."}</div>}
+              {g.key !== "roulette" && g.key !== "closest" && <div className="text-13 text-[var(--color-ink-3)]">{g.key === "dish" ? DISH.boxLine(true) : g.key === "say" ? SAY.boxLine(true) : "Once you send it, it’s locked."}</div>}
             </div>)}
         {sentMine && g.key === "pin" && pin && <PinMap value={pin} color={mine != null ? T[mine].color : undefined} height="min(40vh, 340px)" label="Your pin" />}
         {/* (Drop the Pin too: a teammate can say "near Rome?", as with 2 teams: 23 Nov, the owner) */}

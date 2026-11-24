@@ -77,7 +77,7 @@
 117.50 dishQ | 37 | 4-4 | 0-0 | Owls +1 point | 
 119.25 dishReveal | 37 | 4-4 | 1-0 | Lions take number 1. | 
 120.00 dishQ | 38 | 4-4 | 1-0 | Lions take number 1. | 
-122.00 dishQ | 38 | 4-4 | 1-0 | Lions are out of this one — Owls, it is yours to get. | 
+122.00 dishQ | 38 | 4-4 | 1-0 | Lions are out of this one. Owls, it's yours to get. | 
 123.75 dishReveal | 38 | 4-4 | 1-1 | Owls take number 2. | 
 124.50 dishQ | 39 | 4-4 | 1-1 | Owls take number 2. | 
 126.50 dishReveal | 39 | 4-4 | 2-1 | Lions take number 3. | 
@@ -88,7 +88,7 @@
 132.75 dishReveal | 41 | 4-4 | 3-1 | Lions take number 4. | 
 133.50 decided | 42 | 6-4 | 3-1 |  | 
 134.50 dishQ | 43 | 6-4 | 3-1 |  | 
-136.25 dishQ | 43 | 6-4 | 3-1 | Lions are out of this one — Owls, it is yours to get. | 
+136.25 dishQ | 43 | 6-4 | 3-1 | Lions are out of this one. Owls, it's yours to get. | 
 138.00 dishReveal | 43 | 6-4 | 3-2 | Owls take number 5. | 
 139.00 dishSummary | 44 | 6-4 | 3-2 | Owls take number 5. | 
 140.00 roundIntro | 45 | 6-4 |  | Owls take number 5. | 

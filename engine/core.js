@@ -1378,6 +1378,7 @@
     airport:{ done:'New board.', none:'No other board left at these levels.' },
     map:{ done:'New map.', none:'No other map left at these levels.' },
     say:{ done:'New question.', none:'No other question left.' },
+    dish:{ done:'New recipe.', none:'No other recipe left at these levels.' },
   };
   const spareLike = (s) => { const cur = s.qs[s.i], i = spareAt(s.spare, cur && cur.level); return s.spare.splice(i, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
@@ -1590,15 +1591,6 @@
       fx.push({ toast:g.teams[w].name + ' take ' + (s.i < s.base ? 'number ' + (s.i + 1) : 'the tie-breaker') + '.' });
     }
     fx.push({ go:'dishReveal' });
-    return fx;
-  }
-  /* no host: once the calls are in (or time runs out), check them in order */
-  function dishTurnOver(g, fx){
-    const L = g.dishGame.leg;
-    if(!L.calls.length) return dishEndLeg(g, 'none', fx);
-    fx.push({ timer:'stop' });
-    L.k = 0;
-    fx.push({ go:'dishCheck' });
     return fx;
   }
   function dishAfterLeg(g, fx){
@@ -2765,11 +2757,12 @@
     'dish/start'(g){ const s = g.dishGame; s.i = 0; s.leg = freshLeg(); return [{ go:'dishQ' }]; },
     'dish/swap'(g){
       const s = g.dishGame, L = s.leg;
-      if(L.buzz != null || L.out[0] || L.out[1] || (L.calls || []).length) return [{ toast:'Somebody has already had a go at this one.' }];
-      if(!s.spare.length) return [{ toast:'Nothing else left at these levels.' }];
+      /* (even after a team is out: the new recipe is for both, as in every game, 24 Nov; not while a captain who buzzed types) */
+      if(L.buzz != null) return [];
+      if(!s.spare.length) return [{ toast:SWAP_WORDS.dish.none }];
       s.qs[s.i] = spareLike(s);
       s.leg = freshLeg();
-      return [{ toast:'New one.' }, { go:'dishQ' }];
+      return [{ toast:SWAP_WORDS.dish.done }, { go:'dishQ' }];
     },
     /* with a host: the first captain to call it — the clock and the list stop while they answer */
     'dish/buzz'(g, a){
@@ -2790,31 +2783,12 @@
       L.out[w] = true; L.buzz = null;
       fx.push({ sound:'wrong' });
       if(L.out[o]) return dishEndLeg(g, 'none', fx);
-      fx.push({ toast:g.teams[w].name + ' are out of this one — ' + g.teams[o].name + ', it is yours to get.', ms:3600 });
+      fx.push({ toast:g.teams[w].name + ' are out of this one. ' + g.teams[o].name + ', it\'s yours to get.', ms:3600 });
       fx.push({ timer:'resume' }, { render:true });
       return fx;
     },
-    /* no host: a team has written its answer down, face down */
-    'dish/write'(g, a){
-      const L = g.dishGame.leg, w = a.w, fx = [];
-      if(L.calls.indexOf(w) > -1) return [];
-      L.calls.push(w);
-      fx.push({ sound:'soft' });
-      if(L.calls.length === 2) return dishTurnOver(g, fx);   // both written — nothing left to wait for
-      fx.push({ toast:g.teams[w].name + ' wrote it down — ' + g.teams[other(w)].name + ', still time.', ms:3200 }, { render:true });
-      return fx;
-    },
-    'dish/turnOver'(g){ return dishTurnOver(g, []); },
-    'dish/checkYes'(g){ const L = g.dishGame.leg; return dishEndLeg(g, L.calls[L.k], []); },
-    'dish/checkNo'(g){
-      const L = g.dishGame.leg, fx = [{ sound:'wrong' }];
-      L.k++;
-      if(L.k >= L.calls.length) return dishEndLeg(g, 'none', fx);
-      fx.push({ render:true });
-      return fx;
-    },
-    /* out of time: with a host nobody scores it; without, the written answers are checked */
-    'dish/timeUp'(g){ return g.hostless ? dishTurnOver(g, []) : dishEndLeg(g, 'none', []); },
+    /* out of time (or the host's Reveal now): nobody scores it */
+    'dish/timeUp'(g){ return dishEndLeg(g, 'none', []); },
     'dish/next'(g){ g.dishGame.i++; return dishAfterLeg(g, []); },
     /* a call changed at the reveal (Party): w the leg's winner now, 0 | 1 | 'none' */
     'dish/rule'(g, a){
@@ -2838,7 +2812,7 @@
     },
     'dish/more'(g){
       const s = g.dishGame;
-      if(!s.spare || !s.spare.length) return [{ toast:'Nothing left at these levels.' }];
+      if(!s.spare || !s.spare.length) return [{ toast:SWAP_WORDS.dish.none }];
       s.qs.push(s.spare.shift());
       s.tieLegs++;
       s.leg = freshLeg();

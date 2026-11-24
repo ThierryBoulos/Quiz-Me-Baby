@@ -68,20 +68,20 @@
 81.50 roundScore | 46 | 8-3 |  | Lions +1 point — steal | 
 82.25 dishIntro | 47 | 8-3 | 0-0 | Lions +1 point — steal | 
 83.25 dishQ | 48 | 8-3 | 0-0 | Lions +1 point — steal | 
-86.00 dishQ | 49 | 8-3 | 0-0 | Lions are out of this one — Owls, it is yours to get. | 
+86.00 dishQ | 49 | 8-3 | 0-0 | Lions are out of this one. Owls, it's yours to get. | 
 88.50 dishReveal | 50 | 8-3 | 0-1 | Owls take number 1. | 
 89.50 dishQ | 51 | 8-3 | 0-1 | Owls take number 1. | 
 92.25 dishReveal | 52 | 8-3 | 1-1 | Lions take number 2. | 
 93.00 dishQ | 53 | 8-3 | 1-1 | Lions take number 2. | 
-95.75 dishQ | 54 | 8-3 | 1-1 | Lions are out of this one — Owls, it is yours to get. | 
+95.75 dishQ | 54 | 8-3 | 1-1 | Lions are out of this one. Owls, it's yours to get. | 
 98.50 dishReveal | 55 | 8-3 | 1-1 | Nobody got it. | 
 99.50 dishQ | 56 | 8-3 | 1-1 | Nobody got it. | 
-102.00 dishQ | 57 | 8-3 | 1-1 | Lions are out of this one — Owls, it is yours to get. | 
+102.00 dishQ | 57 | 8-3 | 1-1 | Lions are out of this one. Owls, it's yours to get. | 
 104.75 dishReveal | 58 | 8-3 | 1-1 | Nobody got it. | 
 105.75 dishReveal | 58 | 8-3 | 1-1 |  | 
 106.50 dishReveal | 58 | 8-3 | 1-1 | The host keeps the call. | 
 107.50 dishQ | 59 | 8-3 | 1-1 | The host keeps the call. | 
-110.25 dishQ | 60 | 8-3 | 1-1 | Lions are out of this one — Owls, it is yours to get. | 
+110.25 dishQ | 60 | 8-3 | 1-1 | Lions are out of this one. Owls, it's yours to get. | 
 113.00 dishReveal | 61 | 8-3 | 1-1 | Nobody got it. | 
 113.75 dishTie | 62 | 8-3 | 1-1 | Nobody got it. | 
 114.75 dishSummary | 63 | 9-4 | 1-1 | Nobody got it. | 

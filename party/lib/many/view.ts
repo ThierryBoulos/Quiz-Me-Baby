@@ -28,6 +28,7 @@ export type PubMany = {
     themes?: string[] };                          // a question round: its themes, in the order they come
   skIntro?: { unit: number; pick: number; q: number };
   introSecs?: number;   // a game's intro: its seconds to answer, for its rules (Russian Roulette, Guess the Flag)
+  dishKinds?: string;   // the Cocktail or Dish's intro: "Cocktails + dishes", "Cocktails" or "Dishes"
   preload?: Preload;  // the pictures coming up, fetched ahead (as with 2 teams)
   timeUp?: boolean;  // the clock ran out: the second's grace before the reveal (the clocks say "time up", as with 2 teams)   // Secret Stakes' intro: the bet and the seconds
   qid?: string; question?: string; flag?: string; options?: string[];
@@ -78,7 +79,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
 /* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
-export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number; say?: number }): { pub: PubMany; secret: SecretMany } {
+export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number; say?: number; dish?: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
@@ -96,7 +97,9 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen === "q" && s.deadline && Date.now() >= s.deadline) pub.timeUp = true;
   if (m && s.screen !== "final") { const P = preloadOf(m.key, m.qs as { flag?: string; id?: string; photo?: string }[], m.i, s.screen === "intro"); if (P) pub.preload = P; }
   /* Russian Roulette's intro: the seconds, for its rules (as with 2 teams: 22 Nov, the owner) */
-  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
+  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say" || m.key === "dish")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
+  /* the Cocktail or Dish's band names tonight's kinds, as with 2 teams ("5 recipes · Cocktails + dishes": 24 Nov) */
+  if (m && s.screen === "intro" && m.key === "dish") { const k = new Set(m.qs.map((q) => dishKind(q as never))); pub.dishKinds = k.size > 1 ? "Cocktails + dishes" : k.has("Cocktail") ? "Cocktails" : "Dishes"; }
   if (m?.key === "stakes") {
     /* (on the intro, the bet the game will play: worked out from the scores now, as Start will; it read 1 before Start,
        22 Nov. And the seconds, for its rules) */

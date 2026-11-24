@@ -18,6 +18,7 @@ import { PinRevealTv, PinTv } from "./Pin";
 import { FlagTv } from "./Flag";
 import { MapRevealTv, MapTv } from "./MapGame";
 import { SayRevealTv, SayTv, sayWord } from "./SayGame";
+import { DishRevealTv, DishTv } from "./DishGame";
 import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
@@ -196,7 +197,6 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
 }
 
 const pointsEach = (n: number) => `${n} point${n === 1 ? "" : "s"} each`;
-const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
 
 /* who buzzed, and who is out (Guess the Cocktail or Dish) */
 function Buzzed({ pub }: { pub: Pub }) {
@@ -411,31 +411,14 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if (sc === "airportQ" && pub.airport) return <AirportTv air={pub.airport} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} column />} />;
   if (sc === "airportReveal" && pub.airport) return <AirportRevealTv air={pub.airport} answer={pub.reveal?.answer || ""} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" />}
     head={takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
-  if ((sc === "dishQ" || sc === "dishReveal") && pub.dish) {
-    const long = pub.dish.n > 8;
-    return (
-      <div className="flex gap-14 items-center">
-        <ol className="text-left grid gap-2" style={{ fontSize: long ? 22 : 28, minWidth: 560 }}>
-          {pub.dish.ings.map((t, i) => { const [qty, name] = splitIng(t); return (
-            <li key={i} className="enter flex gap-4 items-baseline"><span className="font-bold">{name}</span>{qty && <span className="text-[var(--color-ink-2)]" style={{ fontSize: "0.8em" }}>{qty}</span>}</li>); })}
-        </ol>
-        <div className="flex flex-col items-center gap-4 min-w-[340px]">
-          {sc === "dishQ" ? (<>
-            <div className="display text-44" style={{ color: "var(--color-gold)" }}>Which {pub.dish.kind.toLowerCase()}?</div>
-            <div className="text-22 text-[var(--color-ink-2)]"><b>{pub.dish.ings.length}</b> of {pub.dish.n} ingredients</div>
-            <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
-            <Buzzed pub={pub} />
-            {/* the buzzer's own clock to type it */}
-            {pub.dish.typeBy && pub.buzz != null && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.dish.typeBy} size={80} /><span>to type it</span></div>}
-          </>) : (<>
-            <div className="ans-board display beat slam" style={{ fontSize: 76, color: "var(--color-gold)" }}>{pub.reveal?.answer}</div>
-            {(pub.calls || []).map((c, i) => <div key={c.id} className="text-22 flex items-center gap-2 beat" style={d(0.1 + i * 0.12)}><b style={{ color: tc(c.team) }}>{T[c.team].name}:</b> {c.text || "no answer"} <Verdict v={c.ok} size={18} stamp /></div>)}
-            <div className="display text-36 beat" style={{ ...d(0.35), color: tc(pub.reveal?.w === 0 || pub.reveal?.w === 1 ? pub.reveal.w : null) }}>
-              {pub.reveal?.w === 0 || pub.reveal?.w === 1 ? `${T[pub.reveal.w].name} got it` : "Nobody got it"}</div>
-          </>)}
-        </div>
-      </div>);
-  }
+  /* Guess the Cocktail or Dish: one copy for every setup (components/DishGame.tsx); under the clock, the buzzer: who
+     buzzed or is out, and the buzzer's clock to type it. The reveal in the 3-to-8 design (24 Nov, the owner) */
+  if (sc === "dishQ" && pub.dish) return <DishTv dish={pub.dish} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />}
+    under={<><Buzzed pub={pub} />{pub.dish.typeBy && pub.buzz != null && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.dish.typeBy} size={80} /><span>to type it</span></div>}</>} />;
+  if (sc === "dishReveal" && pub.dish && pub.reveal) { const R = pub.reveal, C = pub.calls || [], c = (t: number) => C.find((x) => x.team === t);
+    return <DishRevealTv dish={pub.dish} answer={R.answer || ""}
+      rows={<TeamCalls teams={both(pub)} empty="No answer" delay={(t) => d(t * 0.12)} ok={(t) => !!c(t)?.ok} typed={(t) => c(t)?.text || null} pts={(t) => (R.w === t ? 1 : 0)} />}
+      head={takeText(R.w === 0 || R.w === 1 ? [R.w] : [], ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />; }
   /* Guess the Map: one copy for every setup (components/MapGame.tsx): the map with its key, the question, the clock and
      who has answered; at the reveal the 3-to-8 design, the title on its tile, the fact, the calls, who takes it (24 Nov,
      the owner) */

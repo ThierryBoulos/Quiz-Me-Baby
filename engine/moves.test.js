@@ -66,20 +66,11 @@ test('dish with a host: wrong locks you out, the other team can still get it', (
   assert.deepEqual(g.dishGame.wins, [0, 1]);
 });
 
-test('dish without a host: written answers are checked in the order called', () => {
-  const g = game(); g.hostless = true;
+test('dish: out of time with nobody right: nobody', () => {
+  const g = game();
   Q.play(g, { type:'dish/start' });
-  Q.play(g, { type:'dish/write', w:1 });
-  const fx = Q.play(g, { type:'dish/write', w:0 });
-  assert.ok(types(fx).includes('go:dishCheck'));
-  assert.deepEqual(g.dishGame.leg.calls, [1, 0]);
-  Q.play(g, { type:'dish/checkNo' });                                   // Shawarma, first, wrong
-  Q.play(g, { type:'dish/checkYes' });                                  // Falafel, second, right
-  assert.deepEqual(g.dishGame.wins, [1, 0]);
-  /* out of time with nothing written: nobody */
-  Q.play(g, { type:'dish/next' });
   Q.play(g, { type:'dish/timeUp' });
-  assert.equal(g.dishGame.subs[1].winner, 'none');
+  assert.equal(g.dishGame.subs[0].winner, 'none');
 });
 
 test('dish: tied after seven — one more, or a point each', () => {
