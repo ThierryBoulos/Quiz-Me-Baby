@@ -49,7 +49,9 @@ export function TeamCalls({ teams: T, ok, typed, pts, places, word, size = "tv",
             {/* why that many: the order the right answers came in (the 4 Nov audit, 3.8: +4, +3, +2 said nothing) */}
             {v && p > 0 && pl && <span className="shrink-0" style={{ color: "var(--color-ink-3)", fontSize: tv ? (dense ? 18 : 20) : 12 }}>{place(pl)} right</span>}
           </div>
-          {(x || v == null) && <div className={"font-bold max-w-full text-center leading-tight " + (tv && dense ? "truncate" : "clamp2")} style={{ fontSize: tv ? (dense ? 18 : 24) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? empty}</bdi></div>}
+          {/* (beside a map or a picture the column is narrow: a long answer gets a third line, and a size down, so it's
+              never cut: "McDonald's — gold has one today, red had one and lost it") */}
+          {(x || v == null) && <div className={"font-bold max-w-full text-center leading-tight " + (tv && dense ? "truncate" : column ? "clamp3" : "clamp2")} style={{ fontSize: tv ? (dense ? 18 : column ? 20 : 24) : 16, color: x ? undefined : "var(--color-ink-3)" }}><bdi>{x ?? empty}</bdi></div>}
         </div>); })}
     </div>);
 }
