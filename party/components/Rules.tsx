@@ -144,7 +144,7 @@ export function FixingACall({ standalone = false, noTv = false }: { standalone?:
         <P>Sometimes a question is repeated, an image is broken or you simply don’t like the question.</P>
         <UL items={[
           <><B>With a host:</B> The host can tap <B>Change question</B> at any time; any answer already sent is cleared.</>,
-          <><B>Without a host:</B> Either captain can request a replacement at any time; any answer already sent is cleared. This also applies to flags, landmarks, airport boards, cocktails, dishes, maps and other prompts. The clock pauses while the other captain decides.</>,
+          <><B>Without a host:</B> Either captain can request a replacement at any time. The clock pauses while the other captain decides.</>,
           <>A new question of comparable difficulty appears with a fresh timer.</>,
         ]} />
         <Sub>Pausing the game</Sub>
