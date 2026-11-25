@@ -4,7 +4,8 @@
    lib/comeback.ts and the engine. */
 import { Fragment, type ReactNode } from "react";
 import { Dot } from "./many/PartsMany";
-import type { ComebackPub } from "@/lib/comeback";
+import { CB_SAYS1, CB_SAYS2, cbTakes, type ComebackPub } from "@/lib/comeback";
+import { QMB } from "@/lib/engine";
 
 export type CbTeam = { name: string; color: string };
 /* teams by name, each in its colour: "Team B", "Team B and Team E", "Team B, Team E and Team F" */
@@ -17,13 +18,13 @@ export function ComebackIntro({ teams, c, tv }: { teams: CbTeam[]; c: ComebackPu
   return (
     <div className="flex flex-col items-center w-full mx-auto" style={{ gap: tv ? 22 : 12, maxWidth: tv ? 1060 : undefined }}>
       <p className="text-center font-bold leading-snug" style={{ fontSize: tv ? 30 : 16, textWrap: "balance" }}>
-        Okay, we can now call this a massacre… Someone in this room actually went to school.
+        {CB_SAYS1}
       </p>
       <p className="text-center font-bold leading-snug" style={{ fontSize: tv ? 30 : 16, textWrap: "balance" }}>
-        We&rsquo;re all for equity. {named(c.teams, teams)} get a chance for a comeback… Miss it and, well, you deserve that last place.
+        {CB_SAYS2[0]} {named(c.teams, teams)} {CB_SAYS2[1]}
       </p>
       <p className="text-center leading-snug" style={{ fontSize: tv ? 24 : 14, color: "var(--color-gold)", fontWeight: 700 }}>
-        {c.of} easy questions · 15 seconds each · All {c.of} right, or nothing
+        {cbTakes(c.of, QMB.COMEBACK_SECS as number)}
       </p>
       <div className="flex flex-wrap justify-center" style={{ gap: tv ? 14 : 8 }} role="list" aria-label="What each team can win">
         {c.teams.map((t) => (

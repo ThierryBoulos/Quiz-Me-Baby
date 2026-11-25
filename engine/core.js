@@ -1382,6 +1382,7 @@
     majority:{ done:'New question.', none:'No other question left at these levels.' },
     /* (no levels said: Fool Me Twice's are its own, normal and hard, 25 Nov, the owner) */
     fool:{ done:'New fact.', none:'No other fact left.' },
+    stakes:{ done:'Three new themes.', none:'No other themes left.' },
   };
   const spareLike = (s) => { const cur = s.qs[s.i], i = spareAt(s.spare, cur && cur.level); return s.spare.splice(i, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
@@ -2687,10 +2688,10 @@
     /* Change question (before anyone has answered): three new themes, the bets cleared */
     'stakes/swap'(g){
       const s = g.stakesGame;
-      if(!s.spare.length) return [{ toast:'No other themes left.' }];
+      if(!s.spare.length) return [{ toast:SWAP_WORDS.stakes.none }];
       s.rounds[s.i] = s.spare.shift();
       s.picks = g.teams.map(() => null);
-      return [{ toast:'Three new themes.' }, { go:'stakesPick' }];
+      return [{ toast:SWAP_WORDS.stakes.done }, { go:'stakesPick' }];
     },
     /* ok: each team's call as it stands. Right wins the bet, wrong or no answer loses it, on the night's total (never
        below 0); then the next round, or after the third the summary */

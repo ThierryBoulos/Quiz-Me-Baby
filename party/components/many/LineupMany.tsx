@@ -25,6 +25,7 @@ import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
 import { FOOL } from "@/lib/minis/fool";
+import { SK_SETUP } from "@/lib/stakes";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -86,7 +87,7 @@ export function PickMany({ room, k, busy, pick, current, members }: { room: Room
    any number of teams, each with its levels; the Start button docked under it ---- */
 const GAMES: [ManyKey, string][] = [
   ["quiz", "Rounds of 2 questions on one theme. Captains type; the fastest right answer scores most."],
-  ["majority", "Ten questions: everyone answers on their own phone."],   // (drawn by MAJ.setupLine, as with 2 teams)
+  ["majority", ""],   // (its line: MAJ.setupLine, with the seconds, as with 2 teams)
   ["flag", "Ten flags: whose is it?"],   // (drawn by FLAG.setupLine, with the timers' seconds, as with 2 teams)
   ["closest", "5 number questions. The closest guess scores most."],
   ["pin", "7 famous places. Captains drop a pin; the closest scores most."],
@@ -99,7 +100,7 @@ const GAMES: [ManyKey, string][] = [
   ["fool", FOOL.setupLine],   // (one line, every setup: 25 Nov)
   ["roulette", RR_SETUP],
   /* (listed last, the night's last game: 11 Nov, the owner) */
-  ["stakes", "The night's last game."]];
+  ["stakes", SK_SETUP]];
 const LEVELS4 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
 const LEVELS3 = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"]] as const;
 const COCKTAILS = [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"]] as const, DISHES = [["d-easy", "Easy"], ["d-medium", "Medium"], ["d-hard", "Hard"]] as const;

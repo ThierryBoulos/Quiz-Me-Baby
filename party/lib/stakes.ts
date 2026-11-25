@@ -70,3 +70,17 @@ export const skRevealMs = (teams: number) => skRowAt(teams - 1, teams) + 700;
 export const skLevelWord = (level: string) => level[0].toUpperCase() + level.slice(1);
 export const skWorth = (unit: number, level: string) => (level === "easy" ? "safe" : `±${skBet(unit, level)}`);
 export const signedPts = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0");
+
+/* ---- Secret Stakes' words, one copy for every setup (25 Nov, the merge) ---- */
+export const SK_SETUP = "The night's last game.";
+/* a captain's (or player's) top line while bets are placed */
+export const skBetLine = (cap: boolean, locked: boolean) => (cap ? (locked ? "Bet locked in. Waiting for the others." : "Place your bet: a theme, then a level") : "Secret Stakes: your captain bets");
+/* a team's pill at a round's reveal, and at the result */
+export const skRevealPill = (ok: boolean, typed: boolean, level: string, d: number) =>
+  ok ? { text: `Your team: right on ${level} · ${signedPts(d)}`, tone: (d > 0 ? "ok" : "mid") as "ok" | "mid" | "no" }
+    : { text: `Your team: ${typed ? "wrong" : "no answer"} on ${level} · ${signedPts(d)}`, tone: (d < 0 ? "no" : "mid") as "ok" | "mid" | "no" };
+export const skSumPill = (v: number) => ({ text: `Your team ${v > 0 ? "won" : v < 0 ? "lost" : "broke even"}${v ? ` ${Math.abs(v)}` : ""} on its bets`, tone: (v > 0 ? "ok" : v < 0 ? "no" : "mid") as "ok" | "mid" | "no" });
+/* the TV's answers to a captain's bet */
+export const SK_BET_IN = "Your bet is in.";
+export const SK_THEMES_CHANGED = "The themes changed: bet again.";
+

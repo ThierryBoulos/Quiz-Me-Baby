@@ -5,6 +5,7 @@
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "../Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
 import { comebackSays } from "@/lib/comeback";
+import { QMB } from "@/lib/engine";
 import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
@@ -16,6 +17,7 @@ import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
 import { FOOL } from "@/lib/minis/fool";
+import { unitCount, unitTitle } from "@/lib/minis/units";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -86,8 +88,7 @@ export const byDistance = (pub: PubMany) => {
 };
 
 /* what one go of a game is called, in plain words (no "leg": the reviewers, 31 Oct): "Flag 3 of 10", "Recipe 2 of 5" */
-export const UNIT: Record<string, string> = { quiz: "Question", majority: "Question", closest: "Question", say: "Question", sudden: "Question", comeback: "Question", flag: "Flag", airport: "Board", map: "Map", pin: "Landmark", dish: "Recipe", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
-export const unitOf = (key: string) => UNIT[key] || "Question";
+export const unitOf = (key: string) => unitTitle(key);   // (one list for every setup, lib/minis/units.ts)
 /* Secret Stakes' reveal: a row's points start up 150 ms after the row comes in, and reach the total about 1 s later
    (78% of the 1.3 s flight in globals.css), when the total rolls */
 const SK_RISE = 150, SK_LAND = SK_RISE + 1000;
@@ -230,7 +231,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
       `Right, and you score ${k} points. Wrong, and you're out of this picture: the clock goes on and another team can buzz.`, pay];
     /* Russian Roulette (9 Nov, the owner): one barrel, every team spins at once */
     /* (shorter; the bullet is no secret now: everyone sees who drew it once the barrel stops, 11 Nov, the owner) */
-    case "roulette": return [rrRule1(`${pub.introSecs ?? 45} seconds`), { text: rrRule2(false, n), warn: true }, RR_RULE3,
+    case "roulette": return [rrRule1(pub.introSecs ?? 45), { text: rrRule2(false, n), warn: true }, RR_RULE3,
       `${n} spins. ${pay}`];
     /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
     case "stakes": { const I = pub.skIntro; return skRules(n, I?.unit ?? pub.stakes?.unit ?? 1, I?.pick ?? 20, I?.q ?? 45); }   // (one card, every setup: components/Stakes.tsx)
@@ -243,7 +244,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
       return [`${names} are tied at the top: sudden death.`, "One question at a time, and only their captains answer: type it and send it. The first right answer wins the night.",
         "Wrong, and you're out of that question. Nobody right? Another question."]; }
     /* (the comeback has a screen of its own, components/Comeback.tsx: these are the same words, as a list) */
-    case "comeback": return [comebackSays((g.only || []).map((t) => pub.teams[t].name)), `${n} easy questions, 15 seconds each. All ${n} right, or nothing.`];
+    case "comeback": return [comebackSays((g.only || []).map((t) => pub.teams[t].name)), `${n} easy questions, ${QMB.COMEBACK_SECS} seconds each. All ${n} right, or nothing.`];
   }
 }
 /* compact: the TV's Majority Rules intro, which shares the screen with the QR code */
@@ -251,7 +252,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const g = pub.game, tv = size === "tv";
   if (!g) return null;
   /* how many, in plain words ("5 questions", "10 flags"): no "Best of", every one counts */
-  const count = `${g.of} ${({ quiz: "questions", majority: "questions", closest: "questions", flag: "flags", airport: "boards", map: "maps", pin: "landmarks", say: "questions", dish: "recipes", see: "pictures", fool: "facts", roulette: "spins", stakes: "rounds" } as Record<string, string>)[g.key] || "questions"}`;
+  const count = unitCount(g.key, g.of);
   /* a question round names its themes in the band, in the order they come (the owner, 31 Oct) */
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */

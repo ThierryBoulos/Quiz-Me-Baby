@@ -17,4 +17,9 @@ export const COMEBACK_TITLE = "The Comeback";
 /* names in a line: "Team B", "Team B and Team E", "Team B, Team E and Team F" */
 export const listNames = (xs: string[]) => (xs.length > 2 ? `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}` : xs.join(" and "));
 /* the same for a screen reader, or a line of plain text */
-export const comebackSays = (names: string[]) => `Okay, we can now call this a massacre… Someone in this room actually went to school. We're all for equity. ${listNames(names)} get a chance for a comeback… Miss it and, well, you deserve that last place.`;
+/* the announcement, the owner's words (17 Nov), one copy for every setup: its two sentences, the teams named between
+   them (the screen colours each name), and what it takes */
+export const CB_SAYS1 = "Okay, we can now call this a massacre… Someone in this room actually went to school.";
+export const CB_SAYS2 = ["We\u2019re all for equity.", "get a chance for a comeback… Miss it and, well, you deserve that last place."] as const;
+export const comebackSays = (names: string[]) => `${CB_SAYS1} ${CB_SAYS2[0]} ${listNames(names)} ${CB_SAYS2[1]}`;
+export const cbTakes = (n: number, secs: number) => `${n} easy questions · ${secs} seconds each · All ${n} right, or nothing`;

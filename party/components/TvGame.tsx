@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FitBody } from "./TvStage";
 import { MajorityRevealTv, MajorityTv, WhoPlaysTv } from "./MajorityGame";
+import { FOOL } from "@/lib/minis/fool";
 import { QRCodeSVG } from "qrcode.react";
 import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
@@ -331,13 +332,13 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
         {sc === "foolWrite" && (<>
           <FoolFact fool={F} size={54} />
           <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-          <FoolStatus teams={tms} done={F.wrote} doing=": writing a lie…" finished=": lie in" tv />
+          <FoolStatus teams={tms} done={F.wrote} doing={": " + FOOL.writing} finished={": " + FOOL.lieInShort} tv />
         </>)}
         {sc === "foolPick" && F.opts && (<>
           <FoolFact fool={F} size={32} />
           <FoolOptions opts={F.opts} tv />
           <div className="flex items-center gap-8"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={86} />
-            <FoolStatus teams={tms} done={F.picked || [false, false]} doing=": picking…" finished=": picked" tv /></div>
+            <FoolStatus teams={tms} done={F.picked || [false, false]} doing={": " + FOOL.picking} finished={": " + FOOL.picked} tv /></div>
         </>)}
         {sc === "foolReveal" && F.rev && (<>
           <FoolFact fool={F} size={30} truth={F.rev.answer} />

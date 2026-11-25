@@ -11,6 +11,7 @@ import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
 import { FOOL } from "@/lib/minis/fool";
+import { hasUnit, unitTitle, unitWord } from "@/lib/minis/units";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -33,7 +34,8 @@ const side = (t: 0 | 1) => (t === 0 ? "a" : "b");
 
 /* ---- the tracker: scores, where we are, and the night's progress ---- */
 /* what one go of a mini-game is called, as the 3-8 team night says it (no "leg", 31 Oct) */
-const GO: Record<string, string> = { closest: "Question", saysame: "Question", majority: "Question", flag: "Flag", dish: "Recipe", map: "Map", pin: "Landmark", airport: "Board", auction: "Round", roulette: "Spin", stakes: "Round", see: "Picture", fool: "Fact" };
+/* (one list for every setup, lib/minis/units.ts; the Auction's goes are rounds here) */
+const GO = (k: string) => (k === "auction" ? "Round" : unitTitle(k));
 /* The Comeback: its two teams as its pieces want them (components/Comeback), and which question is on: "Question 1 of 3"
    (on the reveal the view counts the question as played) */
 export const comebackTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})` }));
@@ -49,7 +51,7 @@ function hudLabel(pub: Pub): ReactNode {
     const tail = /Summary$|Result$/.test(sc) ? "Result" : /Tie$/.test(sc) && m.key !== "battle" ? "Tie"
       : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Tie" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
       : sc === "decided" ? "Won" : m.tie ? "Tie-breaker" : sc === "majorityIntro" ? "Everyone on their phone" : m.key === "majority" ? `Question ${m.leg} of ${m.of}`
-      : `${GO[m.key] || "Question"} ${m.leg} of ${m.of}${m.fun ? " · for fun" : ""}`;
+      : `${GO(m.key)} ${m.leg} of ${m.of}${m.fun ? " · for fun" : ""}`;
     return <><b>{m.title}</b> &nbsp;·&nbsp; {tail}</>;
   }
   return <>Round <b>{Math.min(pub.r + 1, pub.N)}</b> of {pub.N} &nbsp;·&nbsp; <b>{pub.theme}</b></>;
@@ -443,7 +445,7 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
     /* (shorter, so it fits the TV; and the bullet is no secret now: everyone sees who drew it once the barrel stops,
        11 Nov, the owner) */
     case "roulette": return [
-      { text: rrRule1(sec(t?.roulette, 45)) },
+      { text: rrRule1(t?.roulette ?? 45) },
       { text: rrRule2(true, n), warn: true },
       { text: RR_RULE3 },
       { text: `${n} spins. Most points takes ${pts}. Tied? One more spin, or a point each.` }];
@@ -530,8 +532,8 @@ export function usePreload(pub: Pub | null) {
 /* won with legs to spare: the same words on the TV and every phone */
 export const decidedHead = (pub: Pub) => (pub.decided ? `${pub.teams[pub.decided.winner].name} won it!` : "");
 /* what a mini-game's legs are called ("4 flags", "the last landmark") */
-const LEG_UNIT: Partial<Record<MiniKey, string>> = { closest: "question", saysame: "question", flag: "flag", map: "map", dish: "recipe", pin: "landmark", airport: "board", auction: "category", roulette: "spin", stakes: "round", see: "picture", fool: "fact" };
-export const legsLeft = (key: MiniKey, n: number) => { const u = LEG_UNIT[key] || "leg"; return n === 1 ? `The last ${u} is` : `The last ${n} ${u.replace(/y$/, "ie")}s are`; };
+/* (one list for every setup, lib/minis/units.ts; the Auction's are categories, anything else unknown a "leg") */
+export const legsLeft = (key: MiniKey, n: number) => { const u = key === "auction" ? "category" : key !== "majority" && hasUnit(key) ? unitWord(key) : "leg"; return n === 1 ? `The last ${u} is` : `The last ${n} ${u.replace(/y$/, "ie")}s are`; };
 export const decidedPts = (pub: Pub) => (pub.decided ? `+${pub.decided.pts} point${pub.decided.pts === 1 ? "" : "s"}` : "");
 export const decidedFun = (pub: Pub) => (pub.decided ? `${legsLeft(pub.decided.key, pub.decided.spare)} just for fun.` : "");
 export const decidedSub = (pub: Pub) => (pub.decided ? `${decidedPts(pub)}. ${decidedFun(pub)}` : "");

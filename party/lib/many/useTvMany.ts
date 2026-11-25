@@ -23,6 +23,7 @@ import { playSound } from "../sound";
 import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, legWinners, lockStakes, miniOf, newNight, nightOrder, next, pause, qOf, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type LatLon, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { MAJ } from "../minis/majority";
+import { SK_THEMES_CHANGED } from "../stakes";
 import { FOOL } from "../minis/fool";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
@@ -475,7 +476,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       /* Secret Stakes: a captain's bet, for their own team */
       if (String(mv.type) === "m/bet") { const M = miniOf(s), R = M?.key === "stakes" ? (M.qs[M.i] as { themes?: string[] }) : null;
         /* (a bet tapped on themes that have just been changed: not on the new ones, 14 Nov) */
-        if (mv.theme != null && R?.themes?.[Number(mv.k)] !== mv.theme) { reply("The themes changed: bet again."); publish(); return; }
+        if (mv.theme != null && R?.themes?.[Number(mv.k)] !== mv.theme) { reply(SK_THEMES_CHANGED); publish(); return; }
         const r = stakesBet(s, from.team as number, mv.k, mv.level, Date.now(), timers()); reply(r === true ? "+" : r); publish(); return; }
       if (String(mv.type) !== "m/contest") { reply("-"); return; }
       const r = contestCall(s, from.team as number, Number(mv.t));

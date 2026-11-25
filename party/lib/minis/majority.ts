@@ -29,6 +29,9 @@ export const MAJ = {
   ruleMany: "Teams are ranked by the share of their answers that are right.",
   /* one player's own line at a reveal (every setup: 25 Nov) */
   mine: (said: string | null | undefined, right: boolean) => !said ? "You didn't answer this one (it counts as wrong)." : right ? `You said ${said}: right!` : `You said ${said}: wrong.`,
+  /* a player's top line while a question is up, and a team's pill at the reveal (every setup) */
+  top: "Your own answer: eyes on your phone, no talking",
+  pill: (r: number, n: number) => ({ text: `Your team: ${r} of ${n} right`, tone: (r > 0 ? "ok" : "mid") as "ok" | "mid" }),
   /* a team on the TV and the host's phone while a question is up: how many of its list have answered */
   count: (n: number, of: number) => `${n} of ${of}`,
   /* the TV turning a late joiner's tap away (every setup: 25 Nov), and their phone meanwhile */

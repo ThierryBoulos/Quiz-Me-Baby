@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { FitBody } from "../TvStage";
 import { useToastOn, WinName } from "../Motion";
 import { MajorityRevealTv, MajorityTv, WhoPlaysTv } from "../MajorityGame";
+import { FOOL } from "@/lib/minis/fool";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock, useSecondsLeft } from "../Clock";
 import { Confetti } from "../GameParts";
@@ -140,13 +141,13 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
             {pub.screen === "q" && (<>
               <FoolFact fool={F} size={F.fact.length > 120 ? 44 : 54} />
               <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-              <FoolStatus teams={tms} done={F.wrote} doing={dense ? "…" : ": writing a lie…"} finished={dense ? "✓" : ": lie in"} tv />
+              <FoolStatus teams={tms} done={F.wrote} doing={dense ? "…" : ": " + FOOL.writing} finished={dense ? "✓" : ": " + FOOL.lieInShort} tv />
             </>)}
             {pub.screen === "pick" && F.opts && (<>
               <FoolFact fool={F} size={F.opts.length > 6 ? 28 : 32} />
               <FoolOptions opts={F.opts} tv />
               <div className="flex items-center gap-8"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={86} />
-                <FoolStatus teams={tms} done={F.picked || T.map(() => false)} doing={dense ? "…" : ": picking…"} finished={dense ? "✓" : ": picked"} tv /></div>
+                <FoolStatus teams={tms} done={F.picked || T.map(() => false)} doing={dense ? "…" : ": " + FOOL.picking} finished={dense ? "✓" : ": " + FOOL.picked} tv /></div>
             </>)}
             {pub.screen === "reveal" && F.rev && (<>
               <FoolFact fool={F} size={F.rev.opts.length > 6 ? 26 : 30} truth={F.rev.answer} />

@@ -183,6 +183,17 @@ function Chips({ n, most, lost, w, h, dense, color, at, win }: { n: number; most
     </svg>);
 }
 
+/* the host's phone while bets are placed, one copy for every setup (25 Nov, the merge): the clock, every team's bet as
+   it comes in, what happens to a team with none; each setup hands in its clock and its own buttons */
+export function StakesHostBets({ sk, teams, clock, children }: { sk: SkPub; teams: SkTeam[]; clock: ReactNode; children: ReactNode }) {
+  return (<>
+    <div className="flex items-center justify-between"><div className="eyebrow">Secret Stakes · placing bets</div>{clock}</div>
+    <StakesPhone sk={sk} screen="stakesPick" teams={teams} me={null} />
+    <p className="text-center text-13 text-[var(--color-ink-3)]">No bet by time&rsquo;s up: the safe one, Easy on the first theme.</p>
+    {children}
+  </>);
+}
+
 /* ---- a phone ---- */
 /* what's on screen, for a team's phone (me: its team; null: the host's, which sees every team's) */
 export function StakesPhone({ sk, screen, teams, me, cap }: { sk: SkPub; screen: string; teams: SkTeam[]; me: number | null; cap?: boolean }) {

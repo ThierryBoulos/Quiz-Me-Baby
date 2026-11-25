@@ -25,6 +25,11 @@ export const FOOL = {
   suggest: (cap: string) => `Suggest a lie to ${cap}`,
   suggestHint: "A lie that sounds true",
   change: "Change fact",
+  /* the lie box: its label, its hint, and what it says at the longest a lie can be (never the number) */
+  lieLabel: "Your lie",
+  /* a team's pill at a fact's reveal: what the fact gave it */
+  pill: (v: number) => ({ text: `Your team: ${v > 0 ? `+${v}` : v < 0 ? `\u2212${-v}` : "0"}`, tone: (v > 0 ? "ok" : v < 0 ? "no" : "mid") as "ok" | "no" | "mid" }),
+  limit: "Limit reached.",
   /* who's in, on the TV and every phone */
   writing: "writing a lie…", lieInShort: "lie in", picking: "picking…", picked: "picked",
 };

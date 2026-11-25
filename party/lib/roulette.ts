@@ -48,7 +48,12 @@ export function rrPub(lap: RrLap, i: number, laps: number, n: number, pts: numbe
 export const rrQ = (lap: RrLap | null | undefined, t: number) => (lap?.draw ? lap.ch[lap.draw[t]]?.q ?? null : null);
 /* the rules both setups share (22 Nov, the owner: the same words in every setup; rule 2's barrel and rule 4's points
    are each setup's own) */
-export const rrRule1 = (secs: string) => `The barrel spins: every team lands on a chamber, with its theme and level. Captains type the answer, ${secs}.`;
+export const rrRule1 = (secs: number) => `The barrel spins: every team lands on a chamber, with its theme and level. Captains type the answer, ${secs} seconds.`;
+/* a captain's and a player's top line while a chamber's question is up (every setup) */
+export const RR_TOP_CAP = "Your chamber\u2019s question. Type your answer.";
+export const RR_TOP_PLAYER = "Russian Roulette: help your captain";
+/* under each team's row at the reveal: its chamber's theme and level, and the answer when it got it wrong */
+export const rrRowSub = (theme: string | undefined, level: string, ok: boolean | null | undefined, answer?: string) => `${theme} · ${level}${ok ? "" : ` · ${answer}`}`;
 export const RR_RULE3 = "Right: Medium +2, Hard +3. The bullet: right +5, wrong or no answer \u22123.";
 export const rrRule2 = (oneBarrel: boolean, n: number) => `Every chamber is on show before the spin. One is the bullet, an Expert question. ${oneBarrel ? `The same barrel all game: someone draws it by spin ${n}.` : "A new barrel every spin."}`;
 /* the setup screen's line, every setup (the owner's words, 22 Nov); Russian Roulette is off to start with, every setup */

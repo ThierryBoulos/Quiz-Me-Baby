@@ -24,6 +24,7 @@ import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
 import { FOOL } from "@/lib/minis/fool";
+import { SK_SETUP } from "@/lib/stakes";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -40,14 +41,14 @@ const MINIS = [
   ["flag", "Guess the Flag", "Ten flags: whose is it?"],   // (drawn by FLAG.setupLine, with the timers' seconds)
   ["pin", "Drop the Pin", "A landmark's photo: drop a pin on the map where it is. Nearest pin wins."],
   ["airport", "Guess the Airport", "A departures board: where it flies, in its own language. Which airport?"],
-  ["majority", "Majority Rules", "Ten questions: everyone answers on their own phone."],   // (drawn by MAJ.setupLine)
+  ["majority", "Majority Rules", ""],   // (its line: MAJ.setupLine, with the seconds)
   ["dish", "Guess the Cocktail or Dish", "Five recipes: which cocktail or dish?"],   // (drawn by DISH.setupLine)
   ["see", "What Do You See?", SEE_SETUP],
   ["fool", "Fool Me Twice", FOOL.setupLine],   // (one line, every setup: 25 Nov)
   ["roulette", "Russian Roulette", RR_SETUP],
   ["battle", "Battle of the Captains", "Ten each, captains only."],
   /* (listed last, the night's last game: 11 Nov, the owner) */
-  ["stakes", "Secret Stakes", "The night's last game."]] as const;
+  ["stakes", "Secret Stakes", SK_SETUP]] as const;
 /* each picture game has its own levels, as in Classic; more than one can be on */
 /* the line under the difficulty: what the levels picked mean, Expert only when it's on (9 Nov, the owner's words) */
 export function levelLine(on: readonly string[], all = false): string {

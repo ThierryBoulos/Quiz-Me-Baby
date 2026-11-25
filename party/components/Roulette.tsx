@@ -189,7 +189,6 @@ export const rrPill = (ok: boolean | null | undefined, typed: boolean, level: st
   ok ? { text: `Your team: right · ${signed(got)}`, tone: "ok" }
     : { text: `Your team: ${typed ? "wrong" : "no answer"}${level === "bullet" ? ` on the bullet · ${signed(got)}` : ""}`, tone: got < 0 || typed ? "no" : "mid" };
 export const rrLevelWord = (level: string) => (level === "bullet" ? "The bullet · Expert" : level === "hard" ? "Hard" : level === "expert" ? "Expert" : "Medium");
-export const rrWorthWord = (level: string) => (level === "bullet" ? "+5 or −3" : level === "medium" ? "2 points" : "3 points");
 export const signed = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0");
 
 /* a chip for a chamber's level, gold for the bullet */

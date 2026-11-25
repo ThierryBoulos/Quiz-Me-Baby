@@ -14,7 +14,7 @@ import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 import { offBy, poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
-import { SK_LEVELS, type SkPick } from "../stakes";
+import { SK_BET_IN, SK_LEVELS, type SkPick } from "../stakes";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
 import { MAJ } from "../minis/majority";
 import { FOOL } from "../minis/fool";
@@ -184,8 +184,9 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   const m = miniOf(s);
   /* Secret Stakes: three new themes, the bets cleared (on the bets, or before anyone has answered) */
   if (m?.key === "stakes" && (s.screen === "pick" || s.screen === "q")) {
-    const R = s.extra?.stakes?.shift(); if (!R) return "No other themes left.";
-    m.qs[m.i] = R; s.paused = false; betPhase(s, now, t); toast(s, "Three new themes."); return true;
+    /* (the words: the engine's, every setup) */
+    const R = s.extra?.stakes?.shift(), W = QMB.SWAP_WORDS.stakes as { done: string; none: string }; if (!R) return W.none;
+    m.qs[m.i] = R; s.paused = false; betPhase(s, now, t); toast(s, W.done); return true;
   }
   if (!m || s.screen !== "q" || m.key === "sudden") return false;
   /* Fool Me Twice: another fact, as hard as this one if there's one left, while lies are written (a lie already in is cleared: every game, 23 Nov) */
@@ -279,7 +280,7 @@ export const skQm = (s: StateM, team: number): Q => {
 export function stakesBet(s: StateM, team: number, k: unknown, level: unknown, now: number, t: Timers): true | string {
   const m = miniOf(s); if (!m || m.key !== "stakes" || s.screen !== "pick" || team < 0 || team >= s.teams.length) return "Not now.";
   if (s.paused) return "The game is paused.";
-  if (s.picks?.[team]) return "Your bet is in.";
+  if (s.picks?.[team]) return SK_BET_IN;
   const R = m.qs[m.i], i = Number.isInteger(k) ? Number(k) : -1;
   if (typeof level !== "string" || !SK_LEVELS.includes(level) || !(i >= 0 && i < (R?.themes?.length || 0))) return "Pick a theme and a level.";
   s.picks![team] = { k: i, level };
