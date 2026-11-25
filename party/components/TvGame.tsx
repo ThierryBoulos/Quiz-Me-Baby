@@ -6,8 +6,8 @@ import { FOOL } from "@/lib/minis/fool";
 import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
-import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
-import { COMEBACK_TITLE } from "@/lib/comeback";
+import { ComebackIntro, ComebackQTv, ComebackResult, ComebackRevealTv } from "./Comeback";
+import { cbResultDone, cbResultHead, cbRevealHead, COMEBACK_TITLE } from "@/lib/comeback";
 import { AskHead, battleNeeds, comebackTeams, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, Hud, LifelineStrip, MiniIntro, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
@@ -31,8 +31,6 @@ import { useLiveCount } from "@/lib/liveCount";
 
 /* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
-/* a mini-game's reveal: no drumroll, so its pieces land straight away (the same moves, a shorter beat) */
-const QUICK = { ["--beat" as string]: ".15s" };
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
 /* The TV during the game: no buttons (but Exit at the very end), no answers before the reveal. */
@@ -257,27 +255,25 @@ function BidBar({ n, of, color }: { n: number; of: number; color: string }) {
 function TvComeback({ pub }: { pub: Pub }) {
   const c = pub.comeback, sc = pub.screen;
   if (!c || !/^comeback/.test(sc)) return null;
-  const teams = comebackTeams(pub), t = c.teams[0] as 0 | 1, x = pub.reveal?.typed?.[t]?.[0], ok = pub.reveal?.ok?.[t];
+  const teams = comebackTeams(pub), t = c.teams[0] as 0 | 1;
   if (sc === "comebackIntro") return (<>
     <h1 className="display slam leading-none" style={{ fontSize: 80, color: "var(--color-gold)" }}>{COMEBACK_TITLE}</h1>
     <ComebackIntro teams={teams} c={c} tv />
   </>);
-  if (sc === "comebackQ") return (<>
-    <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 180 ? 30 : (pub.question || "").length > 88 ? 36 : 46, lineHeight: 1.15 }}>{pub.question}</div>
-    <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-    <ComebackStatus teams={teams} c={c} tv />
-  </>);
-  if (sc === "comebackReveal" && pub.reveal) return (<>
-    <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{pub.question}</div>
-    <div className="ans-board display beat slam" data-len={(pub.reveal.answer || "").length > 40 ? "xl" : (pub.reveal.answer || "").length > 22 ? "l" : undefined} style={{ ...QUICK, fontSize: 80, color: "var(--color-gold)" }}>{pub.reveal.answer}</div>
-    <div className="text-28 flex items-center gap-3 justify-center beat" style={{ ...QUICK, ...d(0.12) }}><b style={{ color: tc(t) }}>{pub.teams[t].name}:</b> {x || "no answer"} <Verdict v={ok} size={24} stamp />
-      {(pub.calls || []).some((k) => k.changed) && <span className="text-18 text-[var(--color-gold)]">{pub.mode === "host" ? "host’s call" : "changed"}</span>}</div>
-    <ComebackStatus teams={teams} c={c} tv />
-  </>);
-  if (sc === "comebackSummary") return (<>
+  /* (the question and the reveal: one screen for every setup, the 3-8 team one, components/Comeback.tsx: 25 Nov, the
+     owner); the teams playing, as with 3 to 8 */
+  const playing = c.teams.map((i) => ({ i, name: teams[i].name, color: teams[i].color }));
+  if (sc === "comebackQ") return <ComebackQTv teams={teams} c={c} question={pub.question}
+    clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<SentLine teams={playing.filter((p) => !c.out[p.i])} sent={(i) => !!pub.sent?.[i]} />} />;
+  if (sc === "comebackReveal" && pub.reveal) { const R = pub.reveal; return <ComebackRevealTv question={pub.question} answer={R.answer || ""} notes={R.notes}
+    rows={<TeamCalls teams={playing} delay={(n) => d(n * 0.08)} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]?.[0]} />}
+    head={cbRevealHead(c.teams.filter((i) => R.ok?.[i]), c.i >= c.of, teams)} />; }
+  if (sc === "comebackSummary") { const H = cbResultHead(c, teams); return (<>
     <MiniTitle title={COMEBACK_TITLE} />
     <div className="w-full" data-fly-src={c.made?.[t] ? t : undefined}><ComebackResult teams={teams} c={c} tv /></div>
-  </>);
+    {/* (who is back in it, as with 3 to 8 teams: 25 Nov, the owner) */}
+    <div className="rv display text-52" style={{ color: H.color, animationDelay: cbResultDone(c) + "s" }}>{H.text}</div>
+  </>); }
   return null;
 }
 

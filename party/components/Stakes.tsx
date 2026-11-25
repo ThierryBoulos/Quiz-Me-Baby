@@ -6,7 +6,7 @@
    Low motion: rows fade in one after another, and at the end each team's chips drop onto its stack (all still, with
    motion off in Settings). */
 import type { ReactNode } from "react";
-import { SK_LEVELS, signedPts, skBet, skLevelWord, skRowAt, type SkPub } from "@/lib/stakes";
+import { SK_LEVELS, signedPts, skBet, skBetCount, skLevelWord, skRowAt, type SkPub } from "@/lib/stakes";
 
 export type SkTeam = { name: string; color: string; letter: string };
 /* The intro, one for every setup (22 Nov, the owner: the 2-team card's words everywhere; the times said; the RIGHT /
@@ -194,11 +194,15 @@ export function StakesHostBets({ sk, teams, clock, children }: { sk: SkPub; team
   </>);
 }
 
+/* the host's reveal: a team's theme, level and the answer, under what it said (one copy for every setup, 25 Nov) */
+export function SkSub({ rev, t }: { rev: NonNullable<SkPub["rev"]>; t: number }) {
+  return <div className="text-13 text-[var(--color-ink-2)] leading-snug">{rev.theme[t]} · {skLevelWord(rev.level[t])} · Answer: <b><bdi>{rev.answer[t]}</bdi></b></div>;
+}
+
 /* ---- a phone ---- */
 /* what's on screen, for a team's phone (me: its team; null: the host's, which sees every team's) */
 export function StakesPhone({ sk, screen, teams, me, cap }: { sk: SkPub; screen: string; teams: SkTeam[]; me: number | null; cap?: boolean }) {
   const mine = me != null ? sk.picks?.[me] ?? null : null;
-  const many = teams.length > 2;
   /* (the captain's own buttons are the themes: see StakesBet, so nothing more here for them) */
   if (screen === "stakesPick" && cap) return null;
   if (screen === "stakesPick") return (
@@ -213,7 +217,7 @@ export function StakesPhone({ sk, screen, teams, me, cap }: { sk: SkPub; screen:
       {me == null && <div className="flex flex-col gap-1">{teams.map((T, t) => { const p = sk.picks?.[t]; return (
         <div key={t} className="flex items-center gap-2 text-14"><Dot t={T} size={18} /><bdi className="font-bold truncate min-w-0" style={{ color: T.color }}>{T.name}</bdi>
           <span className="ml-auto shrink-0" style={{ color: p ? OK : "var(--color-ink-3)" }}>{p ? `${sk.themes[p.k]} · ${skLevelWord(p.level)}` : "choosing…"}</span></div>); })}</div>}
-      {me != null && many && <p className="text-center text-13 text-[var(--color-ink-3)]">{sk.locked.filter(Boolean).length} of {teams.length} teams have bet.</p>}
+      {me != null && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{skBetCount(sk, teams.length)}</p>}
     </div>);
   if (screen === "stakesQ") {
     if (me == null) return (
@@ -260,8 +264,8 @@ export function StakesPhone({ sk, screen, teams, me, cap }: { sk: SkPub; screen:
 }
 
 /* the captain's bet: a theme, then a level, then Lock in (no changing it after) */
-export function StakesBet({ sk, theme, level, setTheme, setLevel, onLock, busy }: { sk: SkPub; theme: number | null; level: string | null;
-  setTheme: (k: number) => void; setLevel: (l: string) => void; onLock: () => void; busy?: boolean }) {
+export function StakesBet({ sk, theme, level, setTheme, setLevel, onLock, busy, n }: { sk: SkPub; theme: number | null; level: string | null;
+  setTheme: (k: number) => void; setLevel: (l: string) => void; onLock: () => void; busy?: boolean; n: number }) {
   return (
     <div className="flex flex-col gap-3 w-full">
       {/* (which round it is: the bar at the top says so) */}
@@ -287,5 +291,6 @@ export function StakesBet({ sk, theme, level, setTheme, setLevel, onLock, busy }
       <button className="btn btn-gold btn-lg btn-block" disabled={busy || theme == null || !level} onClick={onLock}>
         {theme != null && level ? `Lock in: ${skLevelWord(level)} on ${sk.themes[theme]}` : "Lock in"}</button>
       <p className="text-center text-13 text-[var(--color-ink-3)]">Nobody else sees your bet. Once it&rsquo;s in, it stays.</p>
+      <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{skBetCount(sk, n)}</p>
     </div>);
 }

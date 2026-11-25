@@ -4,7 +4,7 @@
    standings), the ranked lists of a reveal, and the phone's Scores sheet. Same classes, same words. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "../Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
-import { comebackSays } from "@/lib/comeback";
+import { cbResultDone, cbResultHead, cbRevealHead, comebackSays } from "@/lib/comeback";
 import { QMB } from "@/lib/engine";
 import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
@@ -53,10 +53,8 @@ export function takes(pub: PubMany): { text: string; color: string } {
   if (pub.game?.key === "sudden") { const f = (pub.reveal?.places || []).findIndex((p) => p === 1), t = f >= 0 ? f : w[0];
     return w.length ? { text: `${T[t].name} win the night!`, color: T[t].color } : { text: "Nobody got it: another one", color: "var(--color-ink-2)" }; }
   /* the comeback: who is still in it after this question (all three right, or nothing) */
-  if (pub.game?.key === "comeback" && pub.comeback) { const c = pub.comeback, ok = c.teams.filter((t) => !c.out[t] && pub.reveal?.ok?.[t]), last = c.i >= c.of - 1;
-    if (!ok.length) return { text: "No comeback", color: "var(--color-ink-2)" };
-    const who = ok.length === 1 ? T[ok[0]].name : `${ok.length} teams`;
-    return { text: last ? `${who} make the comeback!` : `${who} still in it`, color: ok.length === 1 ? T[ok[0]].color : "var(--color-gold)" }; }
+  if (pub.game?.key === "comeback" && pub.comeback) { const c = pub.comeback;
+    return cbRevealHead(c.teams.filter((t) => !c.out[t] && pub.reveal?.ok?.[t]), c.i >= c.of - 1, T); }
   return takeText(w, T);
 }
 /* ...the words, the same in every setup (the 2-team host's reveal says it too: 22 Nov, the owner) */
@@ -71,9 +69,7 @@ export function takeText(w: number[], T: { name: string; color: string }[]): { t
 export function paid(pub: PubMany): { text: string; color: string } {
   const S = pub.summary, T = pub.teams;
   /* the comeback: who is back in it */
-  if (pub.game?.key === "comeback" && pub.comeback) { const c = pub.comeback, up = c.teams.filter((t) => c.made?.[t] && (c.after?.[t] ?? 0) > c.before[t]);
-    if (!up.length) return { text: "No comeback", color: "var(--color-ink-2)" };
-    return { text: `${up.length === 1 ? T[up[0]].name : `${up.length} teams`} are back in it`, color: up.length === 1 ? T[up[0]].color : "var(--color-gold)" }; }
+  if (pub.game?.key === "comeback" && pub.comeback) return cbResultHead(pub.comeback, T);
   const top = (S?.places || []).map((p, t) => (p === 1 && (S?.award[t] ?? 0) > 0 ? t : -1)).filter((t) => t >= 0);
   /* (every team on 0 still gets last place's points: "Nobody scored: +6 each", not "Nobody scores", 24 Nov, the owner) */
   if (!top.length) { const a = S?.award || [], v = a[0] ?? 0;
@@ -119,7 +115,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   const label = pub.screen === "final" ? <b>Final result</b> : g
     /* (each part whole: on a narrow phone the line breaks at the dot, never inside the game's name) */
     /* (a game's intro: just its name, no "Game 14 of 14": the pips under it say that (22 Nov, the owner)) */
-    ? (() => { const sub = g.key === "sudden" ? (pub.screen === "intro" ? "Tied at the top" : `Question ${g.leg}`) : g.key === "comeback" && pub.screen === "intro" ? "A chance to catch up" : pub.screen === "intro" ? null : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`;
+    ? (() => { const sub = g.key === "sudden" ? (pub.screen === "intro" ? "Tied at the top" : `Question ${g.leg}`) : pub.screen === "intro" ? null : pub.screen === "summary" ? "Result" : `${unitOf(g.key)} ${g.leg} of ${g.of}`;
       return <><b className="inline-block">{g.title}</b>{sub && <> &nbsp;·&nbsp; <span className="inline-block">{sub}</span></>}</>; })()
     : null;
   /* a pip a game, as the two-team night's: a dot a question round, a dash a mini-game (the owner, 1 Nov) */
@@ -337,7 +333,7 @@ export function revealOf(S: { places: number[] }, k: number) {
 }
 /* ...and when the whole result is in, for the line under it, the points flying up and the phones' wait: Fool Me Twice's
    lie detector draws its pens first (lib/fool.ts) */
-export const resultDone = (pub: PubMany) => (pub.game?.key === "comeback" && pub.comeback ? 0.6 + pub.comeback.teams.length * 0.5 : pub.game?.key === "fool" && pub.summary ? foolDone(pub.summary.places, pub.teams.length) : revealOf(pub.summary!, pub.teams.length).done);
+export const resultDone = (pub: PubMany) => (pub.game?.key === "comeback" && pub.comeback ? cbResultDone(pub.comeback) : pub.game?.key === "fool" && pub.summary ? foolDone(pub.summary.places, pub.teams.length) : revealOf(pub.summary!, pub.teams.length).done);
 /* under each one: its place, its name, what the place pays the night */
 export function Caption({ pub, t, dense }: { pub: PubMany; t: number; dense: boolean }) {
   const S = pub.summary!, T = pub.teams, paid = S.award[t] > 0, lit = paid && S.places[t] === 1;

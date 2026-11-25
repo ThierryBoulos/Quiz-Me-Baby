@@ -230,7 +230,11 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   { const s = start(5, [44, 42, 26, 14, 9]); L.startMini(s, 0, T, []); const was = L.qOf(s).id;
     want("Change question", L.swapQ(s, 500, T) === true && L.qOf(s).id !== was && s.deadline === 500 + 15000);
     /* (an answer in no longer stops it: the new question clears it, 23 Nov, the owner) */
-    L.captainAnswer(s, 2, { text: "x" }); want("...and once an answer is in, which it clears", L.swapQ(s, 600, T) === true && s.typed.every((x) => x == null)); }
+    L.captainAnswer(s, 2, { text: "x" }); want("...and once an answer is in, which it clears", L.swapQ(s, 600, T) === true && s.typed.every((x) => x == null));
+    /* (the words, as with 2 teams: "New question.", and "No other question left." once the spares are gone: 25 Nov) */
+    want("...saying \"New question.\"", s.toast?.text === "New question.");
+    let n = 0; while (L.swapQ(s, 700, T) === true && n < 50) n++;
+    want("...and \"No other question left.\" once they're gone", L.swapQ(s, 700, T) === "No other question left."); }
   /* 18 Nov: the comeback and Fool Me Twice on the same night: right after Fool Me Twice, and Fool Me Twice right after it;
      and the group left behind (the owner: 47 47 40 38 42 | 16 14 7, and the 16 was left out) */
   { const foolFacts = bank.filter((q) => q.type === "fool").sort((a, b) => (a.id < b.id ? -1 : 1));

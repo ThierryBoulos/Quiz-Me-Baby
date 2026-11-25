@@ -75,12 +75,16 @@ export const signedPts = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : 
 export const SK_SETUP = "The night's last game.";
 /* a captain's (or player's) top line while bets are placed */
 export const skBetLine = (cap: boolean, locked: boolean) => (cap ? (locked ? "Bet locked in. Waiting for the others." : "Place your bet: a theme, then a level") : "Secret Stakes: your captain bets");
+/* the phones' top lines, in every setup (25 Nov, the owner) */
+export const SK_TOP_CAP = "The question you bet on. Type your answer.", SK_TOP_PLAYER = "Secret Stakes: help your captain", SK_TOP_REVEAL = "The reveal: from last place up";
+/* how many teams have bet, on every phone in every setup (25 Nov, the owner) */
+export const skBetCount = (sk: { locked: boolean[] }, n: number) => `${sk.locked.filter(Boolean).length} of ${n} teams have bet.`;
 /* a team's pill at a round's reveal, and at the result */
 export const skRevealPill = (ok: boolean, typed: boolean, level: string, d: number) =>
   ok ? { text: `Your team: right on ${level} · ${signedPts(d)}`, tone: (d > 0 ? "ok" : "mid") as "ok" | "mid" | "no" }
     : { text: `Your team: ${typed ? "wrong" : "no answer"} on ${level} · ${signedPts(d)}`, tone: (d < 0 ? "no" : "mid") as "ok" | "mid" | "no" };
 export const skSumPill = (v: number) => ({ text: `Your team ${v > 0 ? "won" : v < 0 ? "lost" : "broke even"}${v ? ` ${Math.abs(v)}` : ""} on its bets`, tone: (v > 0 ? "ok" : v < 0 ? "no" : "mid") as "ok" | "mid" | "no" });
 /* the TV's answers to a captain's bet */
-export const SK_BET_IN = "Your bet is in.";
+export const SK_BET_IN = "Your bet is in.", SK_BET_BAD = "Pick a theme and a level.";
 export const SK_THEMES_CHANGED = "The themes changed: bet again.";
 

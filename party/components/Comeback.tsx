@@ -6,6 +6,7 @@ import { Fragment, type ReactNode } from "react";
 import { Dot } from "./many/PartsMany";
 import { CB_SAYS1, CB_SAYS2, cbTakes, type ComebackPub } from "@/lib/comeback";
 import { QMB } from "@/lib/engine";
+import { wholeSentences } from "@/lib/sentences";
 
 export type CbTeam = { name: string; color: string };
 /* teams by name, each in its colour: "Team B", "Team B and Team E", "Team B, Team E and Team F" */
@@ -46,6 +47,33 @@ export function ComebackStatus({ teams, c, tv }: { teams: CbTeam[]; c: ComebackP
           <span style={{ color: out ? "var(--color-no)" : "var(--color-ok)" }}>{out ? "out" : `${Math.min(c.i, c.of)} of ${c.of}`}</span>
         </span>); })}
     </div>);
+}
+
+/* the TV, a question: who is still in it, the question, the clock, who has locked in (one screen for every setup, the
+   3-8 team one: 25 Nov, the owner); each setup hands in its clock and its "locked in" line */
+export function ComebackQTv({ teams, c, question, clock, sent }: { teams: CbTeam[]; c: ComebackPub; question?: string | null; clock: ReactNode; sent: ReactNode }) {
+  const q = question || "";
+  return (<>
+    <ComebackStatus teams={teams} c={c} tv />
+    <div className="font-bold max-w-[1100px]" style={{ fontSize: q.length > 160 ? 34 : q.length > 100 ? 40 : 50, lineHeight: 1.15 }}>{q}</div>
+    {clock}
+    {sent}
+  </>);
+}
+
+/* the TV, a reveal: the question, the answer, its note, each team's call, and the headline ("Lions make the comeback!",
+   "Lions still in it", "No comeback"): one screen for every setup (25 Nov, the owner) */
+const QUICK = { ["--beat" as string]: ".15s" };
+const at = (x: number) => ({ ["--d" as string]: x + "s" });
+export function ComebackRevealTv({ question, answer, notes, rows, head, dense }: { question?: string | null; answer: string; notes?: string | null; rows: ReactNode; head: { text: string; color: string }; dense?: boolean }) {
+  const n = answer.length;
+  return (<>
+    {question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{question}</div> : null}
+    <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: n > 34 ? (dense ? 40 : 44) : n > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{answer}</div>
+    {notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(notes)}</div>}
+    {rows}
+    <div className="display text-44 beat" style={{ ...QUICK, ...at(0.5), color: head.color }}>{head.text}</div>
+  </>);
 }
 
 /* the result: each team in it, made it (its score moving up) or missed it */

@@ -30,7 +30,7 @@ import { ClosestRevealTv, ClosestTv } from "../Closest";
 import { PinRevealTv, PinTv } from "../Pin";
 import { FlagTv } from "../Flag";
 import { SentLine, TeamCalls } from "../TeamCalls";
-import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
+import { ComebackIntro, ComebackQTv, ComebackResult, ComebackRevealTv } from "../Comeback";
 import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, takes, resultDone } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
@@ -105,9 +105,11 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
             clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} foot={`Right, and you score ${T.length} points. Wrong, and you’re out of this picture.`} />)}
         {/* a question round, and Don't Say the Same's prompt: the words big, the clock, every team's state */}
         {pub.screen === "q" && g && g.key === "say" && <SayTv question={pub.question} many clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} column={false} />} />}
-        {pub.screen === "q" && g && (g.key === "quiz" || g.key === "sudden" || g.key === "comeback") && (<>
+        {/* (the comeback: one screen for every setup, components/Comeback.tsx: 25 Nov) */}
+        {pub.screen === "q" && g && g.key === "comeback" && pub.comeback && <ComebackQTv teams={T.map((t) => ({ name: t.name, color: t.color }))} c={pub.comeback} question={pub.question}
+          clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} />} />}
+        {pub.screen === "q" && g && (g.key === "quiz" || g.key === "sudden") && (<>
           {g.key === "sudden" && <div className="display text-36 leading-none" style={{ color: "var(--color-gold)" }}>First right answer wins the night</div>}
-          {g.key === "comeback" && pub.comeback && <ComebackStatus teams={T.map((t) => ({ name: t.name, color: t.color }))} c={pub.comeback} tv />}
           {pub.theme && <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
           <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 160 ? 34 : (pub.question || "").length > 100 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
           <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
@@ -182,7 +184,9 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "dish" && <DishRevealTv dish={pub.dish} answer={R.answer || ""} dense={dense}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
-        {pub.screen === "reveal" && g && R && ["quiz", "sudden", "comeback"].includes(g.key) && (<>
+        {pub.screen === "reveal" && g && R && g.key === "comeback" && <ComebackRevealTv question={pub.question} answer={R.answer || ""} notes={R.notes} dense={dense}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} />}
+        {pub.screen === "reveal" && g && R && ["quiz", "sudden"].includes(g.key) && (<>
           {pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div> : null}
           <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
           {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}

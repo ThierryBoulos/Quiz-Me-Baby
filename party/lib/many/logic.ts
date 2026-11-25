@@ -14,7 +14,8 @@ import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 import { offBy, poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
-import { SK_BET_IN, SK_LEVELS, type SkPick } from "../stakes";
+import { SK_BET_BAD, SK_BET_IN, SK_LEVELS, type SkPick } from "../stakes";
+import { CB_NOT_YOURS } from "../comeback";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
 import { MAJ } from "../minis/majority";
 import { FOOL } from "../minis/fool";
@@ -220,9 +221,12 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
     if (j < 0) return W.none;
     m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, W.done); return true;
   }
-  const next = s.extra?.[m.key]?.shift(); if (!next) return "No other question left for this game.";
+  /* (the Comeback: the engine's words, as with 2 teams: 25 Nov, the owner) */
+  const CB = m.key === "comeback" ? QMB.SWAP_WORDS.comeback as { done: string; none: string } : null;
+  const next = s.extra?.[m.key]?.shift(); if (!next) return CB ? CB.none : "No other question left for this game.";
   m.qs[m.i] = next; s.paused = false; ask(s, now, t);
   if (m.key === "closest") toast(s, "New question.");   // (as with 2 teams: 23 Nov)
+  if (CB) toast(s, CB.done);
   return true;
 }
 
@@ -282,7 +286,7 @@ export function stakesBet(s: StateM, team: number, k: unknown, level: unknown, n
   if (s.paused) return "The game is paused.";
   if (s.picks?.[team]) return SK_BET_IN;
   const R = m.qs[m.i], i = Number.isInteger(k) ? Number(k) : -1;
-  if (typeof level !== "string" || !SK_LEVELS.includes(level) || !(i >= 0 && i < (R?.themes?.length || 0))) return "Pick a theme and a level.";
+  if (typeof level !== "string" || !SK_LEVELS.includes(level) || !(i >= 0 && i < (R?.themes?.length || 0))) return SK_BET_BAD;
   s.picks![team] = { k: i, level };
   if (s.picks!.every(Boolean)) lockStakes(s, now, t);
   return true;
@@ -339,7 +343,7 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
   /* (an answer that lands while paused is kept, and the reveal waits for Resume, as with 2 teams: 22 Nov, the owner;
      till then it was refused, 19 Nov review. What Do You See? buzzes first, and there's no buzzing while paused) */
   if (s.paused && m.key === "see") return "The game is paused.";
-  if (m.only && !m.only.includes(team)) return m.key === "comeback" ? "Only the teams playing for the comeback answer this one." : "Only the teams tied at the top answer this one.";
+  if (m.only && !m.only.includes(team)) return m.key === "comeback" ? CB_NOT_YOURS : "Only the teams tied at the top answer this one.";
   if (m.key === "comeback" && m.cb?.out[team]) return "Your team is out of the comeback.";
   if (typedKey(m.key)) {
     /* What Do You See? (the buzzer): only the team that buzzed answers */

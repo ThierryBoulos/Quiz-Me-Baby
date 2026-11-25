@@ -30,12 +30,12 @@ import { joinLive, newTap, note, rpc, sb, sendAction, sendDraft } from "@/lib/su
 import { friendly } from "@/lib/errors";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun, type RrTeam } from "./Roulette";
-import { StakesBet, StakesHostBets, StakesPhone } from "./Stakes";
+import { SkSub, StakesBet, StakesHostBets, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
 import { FoolFact, FoolHostCard, FoolOptions, FoolReveal, FoolStatus, foolAwardList, foolVotes, ownIndex } from "./Fool";
 import { FOOL_MAX, foolDone } from "@/lib/fool";
 import { seeAsk } from "@/lib/see";
-import { skBetLine, skLevelWord, skRevealPill, skSumPill } from "@/lib/stakes";
+import { SK_TOP_CAP, SK_TOP_PLAYER, SK_TOP_REVEAL, skBetCount, skBetLine, skLevelWord, skRevealPill, skSumPill } from "@/lib/stakes";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
 import { ToSide, useSideways } from "./Side";
@@ -43,7 +43,7 @@ import { WhoAnswered } from "./WhoAnswered";
 import { Dot, takeText } from "./many/PartsMany";
 import { sayCount, useLiveCount } from "@/lib/liveCount";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
-import { COMEBACK_TITLE } from "@/lib/comeback";
+import { CB_TOP_CAP, CB_TOP_PLAYER, cbResultHead, cbRevealHead, cbSumPill, cbTopWatch, cbYouPill, COMEBACK_TITLE } from "@/lib/comeback";
 import { AskHead, battleNeeds, Board, comebackTeams, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, SuddenRules, TEAM_HEX, tieCall, tieHead, Verdict } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
@@ -214,12 +214,12 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   /* Majority Rules during the game: the host's list, folded away (a change counts from the next question: 25 Nov) */
   const MrDuring = () => <WhoPlaysDuring teams={[0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }))} list={pub.majority?.list || []} me={{ name: "", team: null }} host busy={busy}
     onToggle={(name) => fire({ type: "ui/mrOut", name })} />;
-  const Main = ({ label, move, off }: { label: string; move: Record<string, unknown>; off?: boolean }) => {
+  const Main = ({ label, move, off, flat }: { label: string; move: Record<string, unknown>; off?: boolean; flat?: boolean }) => {
     const wait = !!pub.contest && NEXT_MOVES.has(String(move.type));
     /* (not docked meanwhile: sideways, the docked button sat over the contest's two buttons: the 4 Nov audit, 1.20) */
     if (wait) return <p className="text-center text-13 text-[var(--color-ink-3)] mt-auto" role="status">{label} comes back once you&rsquo;ve ruled on the contest.</p>;
     const spin = label === "Spin";
-    return <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || off || (spin && spinTap.pending)} onClick={() => { if (spin) spinTap.press(); send(move); }}>{spin && spinTap.pending ? SPINNING : label}</button>; };
+    return <button className={"btn btn-gold btn-lg btn-block mt-auto" + (flat ? "" : " dock")} disabled={busy || off || (spin && spinTap.pending)} onClick={() => { if (spin) spinTap.press(); send(move); }}>{spin && spinTap.pending ? SPINNING : label}</button>; };
   /* the host's private answer: the one box on this phone that isn't a button, so it can't be missed */
   const AnswerCard = () => loading ? <Line>Getting the answer…</Line> : secret.you ? (
     <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
@@ -246,9 +246,10 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   /* the host's reveal: who takes it, big, as with 3 to 8 teams (23 Nov) */
   const HostHead = () => { const w = pub.reveal?.w; const h = takeText(w === "tie" ? [0, 1] : w === 0 || w === 1 ? [w] : [], ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) }))); return <Big text={h.text} color={h.color} size={32} />; };
   /* who has answered, ticked as each team sends, and what it sent under its name (one card, every setup: 23 Nov) */
-  const Who = ({ nums }: { nums?: boolean }) => { const typed = (t: 0 | 1) => nums ? (secret.guesses?.[t] != null ? [showNum(secret.guesses[t]!)] : null) : (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
-    return <WhoAnswered head={`${[0, 1].filter((t) => pub.sent?.[t]).length} of 2 teams answered`} oneCol
-      rows={([0, 1] as const).map((t) => { const x = typed(t), on = !!pub.sent?.[t]; return { key: t, name: T[t].name, color: tc(t), dot: <Dot t={t} color={tc(t)} size={14} />, lit: on,
+  /* (only: the teams that answer this one, the Comeback's: 25 Nov) */
+  const Who = ({ nums, only }: { nums?: boolean; only?: number[] }) => { const ts = ([0, 1] as const).filter((t) => !only || only.includes(t)); const typed = (t: 0 | 1) => nums ? (secret.guesses?.[t] != null ? [showNum(secret.guesses[t]!)] : null) : (loading ? null : secret.typed?.[t]) ?? pub.said?.[t];
+    return <WhoAnswered head={`${ts.filter((t) => pub.sent?.[t]).length} of ${ts.length} teams answered`} oneCol
+      rows={ts.map((t) => { const x = typed(t), on = !!pub.sent?.[t]; return { key: t, name: T[t].name, color: tc(t), dot: <Dot t={t} color={tc(t)} size={14} />, lit: on,
         status: on ? "✓ in" : "waiting", statusColor: on ? "var(--color-ok)" : "var(--color-ink-3)",
         typed: x?.length ? <div className="text-14 font-bold leading-snug pl-[22px] break-words"><bdi>{x.join("  /  ")}</bdi>{pub.saidLate === t && <span className="text-13 font-semibold text-[var(--color-ink-3)]"> (after time&rsquo;s up)</span>}</div> : null }; })} />; };
   const Typed = ({ t }: { t: 0 | 1 }) => {
@@ -268,10 +269,12 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   };
   /* the reveal screens: each team's answer, and its ruling beside it, which the host can always flip */
   /* the host's calls at a reveal: one copy for every setup (components/HostCalls.tsx) */
-  const Rulings = ({ type, say, sub, neg }: { type: string; say?: boolean; empty?: string; sub?: (t: 0 | 1) => React.ReactNode; neg?: (t: 0 | 1) => string | undefined }) =>
-    <HostCalls say={say} busy={busy} calls={([0, 1] as const).map((t) => { const k = pickKey(t);
-      return { t, name: T[t].name, color: tc(t), typed: pub.reveal?.typed?.[t]?.[0], value: k in picked ? picked[k] : pub.reveal?.ok?.[t], app: pub.reveal?.app?.[t], sub: sub?.(t), neg: neg?.(t),
-        onPick: (nv: boolean) => { setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire({ type, t, v: nv }); } }; })} />;
+  /* (only: the teams with a call, the Comeback's; its type "ui/flip" turns its call over, by the call's id: 25 Nov) */
+  const Rulings = ({ type, say, sub, neg, only }: { type: string; say?: boolean; empty?: string; sub?: (t: 0 | 1) => React.ReactNode; neg?: (t: 0 | 1) => string | undefined; only?: number[] }) =>
+    <HostCalls say={say} busy={busy} calls={([0, 1] as const).filter((t) => !only || only.includes(t)).map((t) => { const k = pickKey(t), v = k in picked ? picked[k] : pub.reveal?.ok?.[t];
+      return { t, name: T[t].name, color: tc(t), typed: pub.reveal?.typed?.[t]?.[0], value: v, app: pub.reveal?.app?.[t], sub: sub?.(t), neg: neg?.(t),
+        onPick: (nv: boolean) => { const id = type === "ui/flip" ? (pub.calls || []).find((c) => c.team === t)?.id : null; if (type === "ui/flip" && (id == null || nv === !!v)) return;
+          setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire(type === "ui/flip" ? { type, id } : { type, t, v: nv }); } }; })} />;
   /* a results screen: exactly what the players see, and the host's button */
   const resultHeld = useTwoHold(pub);
   const Results = ({ children, act }: { children: React.ReactNode; act?: Send }) => (
@@ -379,24 +382,27 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <div className="flex justify-center"><Small ghost label="Skip the comeback" move={{ type: "comeback/skip" }} /></div>
         </div>
       </div>);
+    /* (the question, the reveal and the result: the same screens as with 3 to 8 teams, 25 Nov, the owner) */
     case "comebackQ": return (
       <div className="flex flex-col gap-3 flex-1">
-        <div className="flex items-start gap-3">
-          <p className={qCls(pub.question) + " leading-snug flex-1"}>{pub.question}</p>
-          <ToSide order={9} className="side-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></ToSide>
-        </div>
-        <AnswerCard />
         <ComebackTop pub={pub} />
-        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change question" move={{ type: "comeback/swap" }} /></div>
+        <p className={qCls(pub.question, 20) + " leading-snug text-center"}>{pub.question}</p>
+        <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={90} /></div>
+        <AnswerCard />
+        <Who only={pub.comeback?.teams} />
+        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change question" move={{ type: "comeback/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "comebackReveal": return (
       <div className="flex flex-col gap-3 flex-1">
-        <OnScreen pub={pub} small />
-        <Calls pub={pub} host busy={busy} act={send} />
+        {pub.reveal && <AnswerLine question={pub.question} answer={pub.reveal.answer} fact={pub.reveal.notes} />}
+        <Rulings type="ui/flip" only={pub.comeback?.teams} />
+        {pub.comeback && pub.reveal && (() => { const c = pub.comeback, h = cbRevealHead(c.teams.filter((t) => pub.reveal?.ok?.[t]), c.i >= c.of, comebackTeams(pub)); return <Big text={h.text} color={h.color} size={32} />; })()}
+        <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "ui/next" }} />
       </div>);
     case "comebackSummary": return (
       <div className="flex flex-col gap-4 flex-1">
+        {pub.comeback && (() => { const h = cbResultHead(pub.comeback, comebackTeams(pub)); return <TitleLine eyebrow={COMEBACK_TITLE} text={h.text} color={h.color} />; })()}
         <ComebackTop pub={pub} />
         <Main label="Next" move={{ type: "comeback/done" }} />
       </div>);
@@ -571,19 +577,23 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       </div>);
     case "stakesQ": return (
       <div className="flex flex-col gap-3 flex-1">
-        <div className="flex items-center justify-between"><div className="eyebrow">Secret Stakes · round {pub.stakes?.round} of {pub.stakes?.rounds}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
+        {/* (the same screen as with 3 to 8 teams, 25 Nov, the owner: every team's question, the clock, the answers, who
+            has answered with what each captain typed; Pause, Change the themes, Reveal now) */}
         {pub.stakes && <StakesPhone sk={pub.stakes} screen="stakesQ" teams={rr2(pub)} me={null} />}
+        <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={90} /></div>
         {loading ? <Line>Getting the answers…</Line> : secret.answers && pub.stakes ? (
           <HostAnswersCard rows={([0, 1] as const).map((t) => ({ key: t, name: T[t].name, color: tc(t), answer: secret.answers![t] }))} />) : null}
-        <Typed t={0} /><Typed t={1} />
-        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change the themes" move={{ type: "stakes/swap" }} /></div>
+        <Who />
+        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change the themes" move={{ type: "stakes/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "stakesReveal": return (
       <div className="flex flex-col gap-3 flex-1">
         {pub.stakes && <StakesPhone sk={pub.stakes} screen="stakesReveal" teams={rr2(pub)} me={null} />}
-        <Rulings type="ui/stakesOk" empty="No answer" />
+        {/* (each team's theme, level and answer under what it said: as with 3 to 8 teams, 25 Nov, the owner) */}
+        <Rulings type="ui/stakesOk" empty="No answer" sub={(t) => pub.stakes?.rev && <SkSub rev={pub.stakes.rev} t={t} />} />
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
-        <Main label="Next" move={{ type: "ui/next" }} />
+        {/* (under the calls, not docked over the last one: every setup, 25 Nov) */}
+        <Main label="Next" move={{ type: "ui/next" }} flat />
       </div>);
     case "stakesSummary": return (
       <div className="flex flex-col gap-4 flex-1">
@@ -982,7 +992,8 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     : sc === "stakesReveal" && pub.stakes?.rev ? (() => { const R = pub.stakes!.rev!, d = R.delta[mine] ?? 0, lv = skLevelWord(R.level[mine]);
       const P = skRevealPill(!!R.ok[mine], !!R.typed[mine], lv, d); return pill(P.text, P.tone); })()
     /* The Comeback: the team playing for it, right or wrong (the other team's phones: no pill, the table says it) */
-    : sc === "comebackReveal" && pub.comeback?.teams.includes(mine) && pub.reveal ? (pub.reveal.ok?.[mine] ? pill("Your team: right", "ok") : pill(`Your team: ${pub.reveal.typed?.[mine]?.length ? "wrong" : "no answer"}`, "no"))
+    /* (the 3-8 team lines, every setup: "right · still in it", "all 3 right!", "wrong · no comeback": 25 Nov, the owner) */
+    : sc === "comebackReveal" && pub.comeback?.teams.includes(mine) && pub.reveal ? (() => { const c = pub.comeback!, P = cbYouPill(!!pub.reveal!.ok?.[mine], !!pub.reveal!.typed?.[mine]?.length, c.i >= c.of, c.of); return pill(P.text, P.tone); })()
     : sc === "stakesSummary" && pub.stakes?.sum ? (() => { const P = skSumPill(pub.stakes!.sum!.net[mine] ?? 0); return pill(P.text, P.tone); })()
     : null;
   if (part === "pill") return heldNow ? null : <>{you}</>;
@@ -1121,8 +1132,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who, picking }: {
      the 3-8 team phones already use ("1 of 2 teams have bet.") and the TV's ("Owls have answered") */
   const other = mine === 0 || mine === 1 ? (1 - mine) as 0 | 1 : null;
   const otherLine = noTv && other != null && !pub.paused ? (
-    pub.screen === "stakesPick" && pub.stakes ? `${pub.stakes.locked.filter(Boolean).length} of 2 teams have bet.`
-    : (pub.screen === "stakesQ" || (pub.screen === "rouletteQ" && spun)) && pub.sent?.[other] ? <><bdi>{pub.teams[other].name}</bdi> have answered.</> : null) : null;
+    (pub.screen === "stakesQ" || (pub.screen === "rouletteQ" && spun)) && pub.sent?.[other] ? <><bdi>{pub.teams[other].name}</bdi> have answered.</> : null) : null;
   if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
@@ -1256,7 +1266,10 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   if (pub.screen === "roundIntro") return <RoundIntro pub={pub} size="phone" canArm={canArm} onArm={onArm} busy={busy} />;
   if (pub.screen === "ask" || pub.screen === "steal") return <AskHead pub={pub} size="phone" you={youLine(pub, me, capName)} go={pub.turn === me.team && !pub.lifeline && !pub.pending} />;
   if (/Intro$/.test(pub.screen) && pub.mini) return <MiniIntro pub={pub} size="phone" />;
-  if (pub.screen === "comebackIntro" || pub.screen === "comebackSummary") return <ComebackTop pub={pub} />;
+  if (pub.screen === "comebackIntro") return <ComebackTop pub={pub} />;
+  /* (the result: your team's line, who is back in it, then each team: as with 3 to 8 teams, 25 Nov, the owner) */
+  if (pub.screen === "comebackSummary" && pub.comeback) { const c = pub.comeback, h = cbResultHead(c, comebackTeams(pub)), Y = me.team != null && c.teams.includes(me.team) ? cbSumPill(c, me.team) : null;
+    return (<>{Y && <YouPill text={Y.text} tone={Y.tone} />}<TitleLine eyebrow={COMEBACK_TITLE} text={h.text} color={h.color} /><ComebackTop pub={pub} /></>); }
   if (RESULT.test(pub.screen)) return null;            // the result says it
   /* (Russian Roulette's reveal: the "Your team" line says it, no "The reveal" above it, as with 3 to 8: 25 Nov) */
   if (pub.screen === "rouletteReveal") return null;
@@ -1307,7 +1320,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "sudden": return !pub.sudden?.ready ? "Sudden death: you're tied" : cap ? (pub.out?.[mine] ? "Wrong. You're out of this one." : pub.sent?.[mine] ? `Answer sent. ${pub.mode === "nohost" ? "The game checks it." : "The host decides."}` : "Type it and send it. First right answer wins!") : "Sudden death: captains only. Not a word!";
     /* The Comeback: its captain answers; its players watch; the other team waits */
     case "comebackQ": { const t = pub.comeback?.teams[0] ?? 0;
-      return t === mine ? (cap ? "Your question. Type your answer." : "Your captain is answering.") : `${T[t].name} are playing for a comeback.`; }
+      return t === mine ? (cap ? CB_TOP_CAP : CB_TOP_PLAYER) : cbTopWatch(T[t].name); }
     case "miniQ": return cap ? CLOSEST.topCaptain : CLOSEST.topPlayer;
     case "flagQ": return cap ? FLAG.topCaptain : FLAG.topPlayer;
     /* (12 Nov, the owner: any player can buzz, the captain types; pub.see.by: who hit BUZZ) */
@@ -1324,8 +1337,8 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "airportQ": return cap ? AIRPORT.topCaptain : AIRPORT.topPlayer;
     case "rouletteQ": return cap ? RR_TOP_CAP : RR_TOP_PLAYER;
     case "stakesPick": return skBetLine(cap, !!pub.stakes?.locked[mine]);
-    case "stakesQ": return cap ? "The question you bet on. Type your answer." : "Secret Stakes: help your captain";
-    case "stakesReveal": return "The reveal: from last place up";
+    case "stakesQ": return cap ? SK_TOP_CAP : SK_TOP_PLAYER;
+    case "stakesReveal": return SK_TOP_REVEAL;
     /* (who drew the bullet is the line under the barrel, once it stops: said up here too, it came twice and before the
        barrel had stopped: 15 Nov, a live game) */
     case "rouletteReveal": return "The reveal";
@@ -1662,9 +1675,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {sc === "majorityReveal" && <MajorityPad pub={pub} me={me} code={code} />}
       <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side mine={mine} captain who={me.user_id} />
       {/* Secret Stakes: your bet, a theme and a level, then Lock in */}
-      {sc === "stakesPick" && pub.stakes && !pub.stakes.locked[mine] && !pub.paused && <StakesBet sk={pub.stakes} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy}
+      {sc === "stakesPick" && pub.stakes && !pub.stakes.locked[mine] && !pub.paused && <StakesBet sk={pub.stakes} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy} n={2}
         onLock={() => { if (skTheme != null && skLevel) void nxt({ type: "stakes/pick", k: skTheme, level: skLevel, theme: pub.stakes!.themes[skTheme] }); }} />}
-      {sc === "stakesPick" && pub.stakes?.locked[mine] && pub.stakes.picks?.[mine] && <p className="text-center font-bold text-16" role="status">Locked in: {skLevelWord(pub.stakes.picks[mine]!.level)} on {pub.stakes.themes[pub.stakes.picks[mine]!.k]}.</p>}
+      {sc === "stakesPick" && pub.stakes?.locked[mine] && pub.stakes.picks?.[mine] && <><p className="text-center font-bold text-16" role="status">Locked in: {skLevelWord(pub.stakes.picks[mine]!.level)} on {pub.stakes.themes[pub.stakes.picks[mine]!.k]}.</p>
+        <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{skBetCount(pub.stakes, 2)}</p></>}
       {sc === "majorityQ" && <MajorityPad pub={pub} me={me} code={code} />}
       {nohost && (sc === "majorityQ" || sc === "majorityReveal") && <MajorityList pub={pub} me={me} act={fire} during />}
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} part="rest" />

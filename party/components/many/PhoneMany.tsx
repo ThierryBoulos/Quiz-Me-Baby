@@ -18,7 +18,7 @@ import { useNoPaste, useSuggestions } from "../PhoneGame";
 import { ToSide, useSideways } from "../Side";
 import { Dot, IntroMany, paid, pct, place, resultDone, splitIng, takes } from "./PartsMany";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
-import { listNames } from "@/lib/comeback";
+import { CB_OUT, CB_TOP_CAP, CB_TOP_PLAYER, cbSumPill, cbTopWatch, cbYouPill, listNames } from "@/lib/comeback";
 import { useRevealHold, WatchTv } from "../WatchTv";
 import { useNoTv } from "../NoTv";
 import { WhoAnswered } from "../WhoAnswered";
@@ -43,12 +43,12 @@ import { FLAG } from "@/lib/minis/flag";
 import { PIN } from "@/lib/minis/pin";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun } from "../Roulette";
-import { StakesBet, StakesHostBets, StakesPhone } from "../Stakes";
+import { SkSub, StakesBet, StakesHostBets, StakesPhone } from "../Stakes";
 import { FoolFact, FoolHostCard, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, foolVotes, ownIndex } from "../Fool";
 import { FOOL_MAX } from "@/lib/fool";
 import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
-import { skBetLine, skLevelWord, skRevealPill, skSumPill } from "@/lib/stakes";
+import { SK_TOP_CAP, SK_TOP_PLAYER, SK_TOP_REVEAL, skBetLine, skLevelWord, skRevealPill, skSumPill } from "@/lib/stakes";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
 /* (only the one for this very question: the TV writes the screen first and the answer just after, so a read in between
@@ -141,7 +141,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
 
 const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
-const TOP_CAP: Record<string, string> = { roulette: RR_TOP_CAP, flag: FLAG.topCaptain, closest: CLOSEST.topCaptain, pin: PIN.topCaptain, airport: AIRPORT.topCaptain, map: MAP.topCaptain, say: SAY.topCaptain, dish: DISH.topCaptain };
+const TOP_CAP: Record<string, string> = { roulette: RR_TOP_CAP, stakes: SK_TOP_CAP, flag: FLAG.topCaptain, closest: CLOSEST.topCaptain, pin: PIN.topCaptain, airport: AIRPORT.topCaptain, map: MAP.topCaptain, say: SAY.topCaptain, dish: DISH.topCaptain };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
   const host = me.role === "host", cap = me.role === "captain", mine = me.team as number | null;
   const g = pub.game, R = pub.reveal, T = pub.teams, sc = pub.screen;
@@ -229,8 +229,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* Majority Rules during the game: the host's list, folded away (a change counts from the next question: 25 Nov) */
   const MrDuring = () => <WhoPlaysDuring teams={T.map((t) => ({ name: t.name, color: t.color }))} list={pub.mrList || []} me={{ name: "", team: null }} host busy={busy} onToggle={(name) => move("m/mrOut", { name })} />;
   /* the host's one main button, docked in thumb reach */
-  const Main = ({ label, on }: { label: string; on: () => void }) => { const spin = label === "Spin";
-    return <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || (spin && spinTap.pending)} onClick={() => { if (spin) spinTap.press(); on(); }}>{spin && spinTap.pending ? SPINNING : label}</button>; };
+  const Main = ({ label, on, flat }: { label: string; on: () => void; flat?: boolean }) => { const spin = label === "Spin";
+    return <button className={"btn btn-gold btn-lg btn-block mt-auto" + (flat ? "" : " dock")} disabled={busy || (spin && spinTap.pending)} onClick={() => { if (spin) spinTap.press(); on(); }}>{spin && spinTap.pending ? SPINNING : label}</button>; };
   /* a big outcome headline, no box (boxes are for things you can tap) */
   const Big = ({ eyebrow, text, color, size = 32, sub }: { eyebrow?: string; text: React.ReactNode; color?: string; size?: number; sub?: React.ReactNode }) => (
     <div className="text-center flex flex-col gap-1" role="status" aria-live="polite">
@@ -244,7 +244,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
      for everyone who watches it */
   const cb = g?.key === "comeback" ? pub.comeback : undefined, cbT = T.map((t) => ({ name: t.name, color: t.color }));
   const cbIn = !!cb && mine != null && cb.teams.includes(mine), cbOut = cbIn && !!cb?.out[mine!];
-  const cbLine = cb ? `${listNames(cb.teams.filter((t) => !cb.out[t]).map((t) => T[t].name))} are playing for a comeback.` : "";
+  const cbLine = cb ? cbTopWatch(listNames(cb.teams.filter((t) => !cb.out[t]).map((t) => T[t].name))) : "";
   /* a game's result waits on the phones while the TV reveals it, last place first (the owner, 31 Oct) */
   const held = useRevealHold(sc === "summary" && g && pub.summary ? `${g.key}:${g.index}` : null, pub.summary ? resultDone(pub) + 0.3 : 0);
 
@@ -309,7 +309,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     if (g.key === "majority") return MAJ.pill(R.right?.[mine] ?? 0, R.of?.[mine] ?? 0);
     /* the comeback: still in it, or out (all three, or nothing) */
     if (cb) { if (!cbIn || cbOut) return null; const x = R.typed?.[mine];
-      return R.ok?.[mine] ? { text: cb.i >= cb.of - 1 ? `Your team: all ${cb.of} right!` : "Your team: right · still in it", tone: "ok" } : { text: `Your team: ${x ? "wrong" : "no answer"} · no comeback`, tone: "no" }; }
+      return cbYouPill(!!R.ok?.[mine], !!x, cb.i >= cb.of - 1, cb.of); }
     if (g.only && !g.only.includes(mine)) return null;
     /* Russian Roulette: right or wrong, and what the chamber paid (the bullet can cost 3) */
     if (g.key === "roulette" && rr?.rev) return rrPill(R.ok?.[mine], !!R.typed?.[mine], rr.rev.level[mine], rr.rev.got[mine] ?? 0);
@@ -344,8 +344,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
      team, the game's score, and what it adds to the night */
   const Summary = () => { if (!g || !pub.summary) return null; if (held) return <WatchTv />;
     /* the comeback: who made it, and where it took them */
-    if (cb) { const ok = cbIn && !!cb.made?.[mine!], P = paid(pub); return (<>
-      {cbIn && <YouPill text={ok ? `Your team: all ${cb.of} right · ${cb.before[mine!]} → ${cb.after?.[mine!] ?? cb.before[mine!]}` : "Your team: no comeback"} tone={ok ? "ok" : "no"} />}
+    if (cb) { const P = paid(pub), Y = cbIn ? cbSumPill(cb, mine!) : null; return (<>
+      {Y && <YouPill text={Y.text} tone={Y.tone} />}
       <TitleLine eyebrow={g.title} text={P.text} color={P.color} />
       <ComebackResult teams={cbT} c={cb} />
     </>); }
@@ -455,7 +455,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             const v = flips[`${pub.qid}|${i}`] ?? R.ok?.[i];
             return { t: i, name: t.name, color: t.color, typed: R.typed?.[i], value: v, app: R.app?.[i], neg: g.key === "say" ? SAY.why[R.why?.[i] || ""] : undefined,
               sub: g.key === "roulette" && rr?.rev ? <div className="text-13 text-[var(--color-ink-2)] leading-snug">{rr.draw[i]?.theme} · {rrLevelWord(rr.rev.level[i])} · Answer: <b><bdi>{rr.rev.answer[i]}</bdi></b></div>
-                : g.key === "stakes" && sk?.rev ? <div className="text-13 text-[var(--color-ink-2)] leading-snug">{sk.rev.theme[i]} · {skLevelWord(sk.rev.level[i])} · Answer: <b><bdi>{sk.rev.answer[i]}</bdi></b></div> : undefined,
+                : g.key === "stakes" && sk?.rev ? <SkSub rev={sk.rev} t={i} /> : undefined,
               onPick: (nv: boolean) => { if (v === nv) return; setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i }); } }; })} /></>
         ) : <Table />}
         {/* (the picture says who got it first, under the picture: not twice) */}
@@ -464,7 +464,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {g.key === "majority" && <MrDuring />}
         {/* (Next waits for the ruling, as with two teams) */}
         {pub.contest ? <p className="text-center text-13 text-[var(--color-ink-3)] mt-auto" role="status">Next comes back once you&rsquo;ve ruled on the contest.</p>
-          : <Main label={g.key === "roulette" && g.leg < g.of ? "Spin" : "Next"} on={() => move("m/next")} />}
+          : <Main label={g.key === "roulette" && g.leg < g.of ? "Spin" : "Next"} on={() => move("m/next")} flat={g.key === "stakes"} />}
       </>)}
       {host && sc === "summary" && (<><Summary />{/* the host's Next waits with the result, so a tap can't skip the TV's reveal (the owner, 1 Nov) */}{!held && <Main label="Next" on={() => move("m/next")} />}</>)}
       {host && sc === "final" && (<>
@@ -503,18 +503,18 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <p className="text-center font-bold text-18" role="status" style={{ color: cap && mine != null && !sk.locked[mine] ? "var(--color-gold)" : undefined }}>
           {skBetLine(cap, mine != null && !!sk.locked[mine])}</p>
         <div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={70} /></div>
-        {cap && mine != null && !sk.locked[mine] ? <StakesBet sk={sk} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy}
+        {cap && mine != null && !sk.locked[mine] ? <StakesBet sk={sk} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy} n={T.length}
             onLock={() => { if (skTheme != null && skLevel) void send("next", { move: { type: "m/bet", k: skTheme, level: skLevel, theme: sk.themes[skTheme] } }); }} />
           : <StakesPhone sk={sk} screen="stakesPick" teams={rrT} me={mine ?? null} cap={false} />}
       </>)}
       {/* sudden death: a captain whose team isn't tied at the top watches */}
       {cap && sc === "q" && g?.only && mine != null && !g.only.includes(mine) && (<><OnScreen /><Line>{cb ? cbLine : "Sudden death: only the teams tied at the top answer this one."}</Line></>)}
       {/* the comeback: a captain whose team has missed one watches the rest */}
-      {cap && sc === "q" && cbOut && (<><OnScreen /><Line>Your team is out of the comeback.</Line></>)}
+      {cap && sc === "q" && cbOut && (<><OnScreen /><Line>{CB_OUT}</Line></>)}
       {/* THE CAPTAIN answers the rest */}
       {cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && !(g.only && mine != null && !g.only.includes(mine)) && !cbOut && (<>
         {/* the captain's line at the top, as with 2 teams (Russian Roulette 22 Nov, Guess the Flag 23 Nov, the owner) */}
-        {TOP_CAP[g.key] && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">{TOP_CAP[g.key]}</p>}
+        {(TOP_CAP[g.key] || cb) && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">{cb ? CB_TOP_CAP : TOP_CAP[g.key]}</p>}
         <OnScreen small={g.key === "pin" && !sentMine} />
         {/* What Do You See? (12 Nov, the owner: a buzzer): BUZZ, then 10 seconds to say it out loud and type it; a wrong
             answer (or none in time) and the team is out of this picture, and another team can buzz */}
@@ -579,7 +579,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       </>)}
       {!host && !cap && sc === "q" && !pub.paused && g && g.key !== "majority" && !fool && (<>
         {/* the players' line at the top, as with 2 teams */}
-        {TOP_CAP[g.key] && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">{g.title}: help your captain</p>}
+        {/* (the comeback: only on a team playing for it, still in it; the others' line is under the question: 25 Nov) */}
+        {(TOP_CAP[g.key] || (cb && cbIn && !cbOut)) && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">{cb ? CB_TOP_PLAYER : g.key === "stakes" ? SK_TOP_PLAYER : `${g.title}: help your captain`}</p>}
         <OnScreen />
         {/* What Do You See? (12 Nov, the owner): any player can buzz for the team (the captain types the answer); who
             buzzed, and whether your team is out of this picture */}
@@ -606,13 +607,14 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
           </div>)
           /* (once the captain has sent it, say so: 12 Nov) */
-          : g.key === "see" ? null : <Line>{cb && cbOut ? "Your team is out of the comeback." : cb && !cbIn ? cbLine : mine != null && pub.sent[mine] ? <>Locked in. The answer comes up when the time&rsquo;s up.</> : "Your captain answers this one."}</Line>}
+          : g.key === "see" ? null : <Line>{cb && cbOut ? CB_OUT : cb && !cbIn ? cbLine : mine != null && pub.sent[mine] ? <>Locked in. The answer comes up when the time&rsquo;s up.</> : "Your captain answers this one."}</Line>}
       </>)}
 
       {/* the result, on every phone that isn't the host's: who takes it, the answer, then the rows */}
       {!host && sc === "reveal" && g && R && !fool && (<>
         {/* sudden death keeps its headline: it's the night's winner */}
         {g.key === "sudden" && <Big text={W.text} color={W.color} />}
+        {g.key === "stakes" && <p className="text-center text-balance leading-snug text-14 font-semibold text-[var(--color-ink-3)]" role="status">{SK_TOP_REVEAL}</p>}
         {(() => { const y = youOf(); return y && <YouPill text={y.text} tone={y.tone} />; })()}
         {/* Majority Rules: this phone's own line, as with 2 teams (25 Nov) */}
         {g.key === "majority" && <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|q`} options={pub.options || []} onList={onList} up="reveal" answer={R.answer} ack={pub.ack} noTv={noTv} />}

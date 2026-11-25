@@ -148,6 +148,10 @@ const NIGHTS = [
      not on 3, 4 or 5, counted again from 6 (no host, and with a host) */
   { seed: 86, minis: ["majority"], rounds: 0, crowd: 4, mrLeave: "Karim", check: mrLeaveCheck("Karim") },
   { seed: 87, minis: ["majority"], rounds: 0, crowd: 4, host: true, mrLeave: "Karim", check: mrLeaveCheck("Karim") },
+  /* 25 Nov: the comeback's answer sent while paused is kept and revealed on Resume, the other captain told why not,
+     with a host and without; and a Secret Stakes bet with no level, refused in words */
+  { seed: 88, minis: ["stakes"], rounds: 4, events: [{ at: 5, type: "score", a: 1, b: 12 }], comeback: "make", comebackPause: true, badBet: true },
+  { seed: 89, minis: ["stakes"], rounds: 4, host: true, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "make", comebackPause: true, badBet: true },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

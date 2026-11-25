@@ -99,7 +99,7 @@ function pinNear(g, bot) {
    left out, the captain answers at the bots' usual rate. comebackSwap: a new question asked for on its first one.
    reloadOn: the TV's page reloads (once) the first time this screen is up, e.g. "comebackQ" (18 Nov)
    takeoverOn: the same, but another device takes over from the server's copy instead (19 Nov) */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false, takeoverOn = null, mrLeave = null }) {
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false, takeoverOn = null, mrLeave = null, comebackPause = false, badBet = false }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed); phoneMode = phone;
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -165,6 +165,9 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   const scripted = []; let pauseUntil = 0, agreeNext = false, tieMoreLeft = tieMore;
   const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ", "comebackQ"];
   let cbSwapped = false;
+  /* comebackPause (25 Nov): the comeback's first question is paused; the other captain answers (refused, in the 3-8
+     words), its captain answers (kept); on Resume it's revealed. badBet: a captain's first bet has no level (refused) */
+  const cbP = { step: 0 }, bb = { sent: false }; let cbPauseBad = "";
   const armed = new Set(), asked = new Set(), edged = new Set(), contested = new Set(), contestSeen = new Set(), voted = new Set(), dropped = new Set();
   let contestSilent = false;
   /* while the TV is off, the phones still tap: a captain answers or buzzes what they see */
@@ -229,6 +232,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     const pub = fake.db.rooms[0].state?.pub, g = api.current?.game;
     if (chaos) checkAcks();
     if (check && pub) { const bad = check(pub, clock(), document.visibilityState, fake.db.secrets[0]?.data); if (bad) { outcome = "broken"; stuckOn = bad; break; } }
+    if (cbPauseBad) { outcome = "broken"; stuckOn = cbPauseBad; break; }
     if (!pub || !g) continue;
     /* chaos: now and then a captain taps something at the wrong moment */
     if (chaos && bot() < chaos) {
@@ -339,7 +343,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* paused: the phones show "Paused" and nothing else, so nobody answers; whoever paused resumes (a real person
        does), a scripted pause when its time is up. (A request open with no host also stops the clock: that one
        waits for the other captain's answer, above.) */
-    if (pub.paused && !pub.tvAway && !pub.agree) {
+    if (pub.paused && !pub.tvAway && !pub.agree && !(comebackPause && (cbP.step === 1 || cbP.step === 2))) {
       if (pauseUntil ? clock() >= pauseUntil : bot() < 0.3) {
         if (pauseUntil) trace.push("(resume)");
         pauseUntil = 0; const w = hostOr(0);
@@ -405,6 +409,19 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
        phone tags it (right or wrong at the bots' usual rate, now and then not at all, or as the night says); before
        its first answer a new question can be asked for (the host swaps; with no host the other captain agrees) */
     else if (sc === "comebackIntro" && comeback === "skip" && hostHere) send("host", "judge", { move: { type: "comeback/skip" }, step });
+    else if (sc === "comebackQ" && pub.comeback && comebackPause && cbP.step < 4 && C(pub.comeback.teams[0]) && C(1 - pub.comeback.teams[0])) {
+      const t = pub.comeback.teams[0], by = hostHere ? "host" : C(t), kind = hostHere ? "judge" : "next", k = `${pub.qid}|comebackQ`;
+      if (cbP.step === 0 && pub.deadline && !pub.paused) { cbP.step = 1; trace.push("(the comeback paused)"); send(by, kind, { move: { type: "ui/pause", on: "pause" }, step }); }
+      else if (cbP.step === 1 && pub.paused) { cbP.step = 2; trace.push("(answers while paused)");
+        send(C(1 - t), "answer", { text: right, k, tap: "cbNotYours" }); send(C(t), "answer", { text: right, k, tap: "cbKept" }); }
+      else if (cbP.step === 2 && pub.paused && pub.ack?.[C(t)]?.cbKept !== undefined && pub.ack?.[C(1 - t)]?.cbNotYours !== undefined) {
+        if (pub.ack[C(1 - t)].cbNotYours !== "Only the teams playing for the comeback answer this one.") cbPauseBad = `the comeback: the other captain was told "${pub.ack[C(1 - t)].cbNotYours}"`;
+        else if (!pub.sent?.[t] || pub.sent?.[1 - t]) cbPauseBad = "the comeback: an answer sent while paused wasn't kept";
+        else { cbP.step = 3; trace.push("(resumed)"); send(by, kind, { move: { type: "ui/pause", on: "resume" }, step }); } }
+      else if (cbP.step === 2 && !pub.paused) cbPauseBad = "the comeback: resumed by itself";
+    }
+    else if (sc === "comebackReveal" && (cbP.step === 1 || cbP.step === 2)) cbPauseBad = "the comeback: revealed while still paused";
+    else if (sc === "comebackReveal" && cbP.step === 3) { cbP.step = 4; if (!pub.reveal?.ok?.[pub.comeback?.teams[0]]) cbPauseBad = "the comeback: the answer kept while paused wasn't the one revealed"; }
     else if (sc === "comebackQ" && pub.comeback) {
       const t = pub.comeback.teams[0], i = pub.comeback.i;
       if (comebackSwap && !cbSwapped && pub.deadline) {
@@ -460,6 +477,10 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     }
     /* Secret Stakes: each captain bets (now and then one doesn't, and gets the safe bet at time-up); then answers the
        question it bet on, tagged as a real phone tags it */
+    else if (sc === "stakesPick" && pub.stakes && badBet && !bb.done && C(0)) {
+      if (!bb.sent) { bb.sent = true; send(C(0), "next", { move: { type: "stakes/pick", k: 0, level: "x" }, step, tap: "badBet" }); }
+      else if (pub.ack?.[C(0)]?.badBet !== undefined) { bb.done = true; trace.push(`(a bet with no level: "${pub.ack[C(0)].badBet}")`); if (pub.ack[C(0)].badBet !== "Pick a theme and a level.") cbPauseBad = `Secret Stakes: a bet with no level was answered "${pub.ack[C(0)].badBet}"`; }
+    }
     else if (sc === "stakesPick" && pub.stakes) {
       for (const t of [0, 1]) if (!pub.stakes.locked[t] && C(t) && bot() < 0.85)
         send(C(t), "next", { move: { type: "stakes/pick", k: Math.floor(bot() * 3), level: ["easy", "medium", "hard", "expert"][Math.floor(bot() * 4)] }, step });

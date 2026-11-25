@@ -1,0 +1,71 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 12-1)
+6.75 roundIntro | 2 | 12-1 |  | The host set the scores: ⁨Lions⁩ 12, ⁨Owls⁩ 1. | 
+8.50 ask | 3 | 12-1 |  | The host set the scores: ⁨Lions⁩ 12, ⁨Owls⁩ 1. | 
+9.50 ask | 3 | 12-1 |  | Lions used Double Dip. | 
+11.25 steal | 4 | 12-1 |  | Lions used Double Dip. | 
+13.00 answer | 5 | 12-1 |  | Lions used Double Dip. | 
+14.00 ask | 6 | 12-1 |  | Lions used Double Dip. | 
+15.75 answer | 7 | 12-2 |  | Owls +1 point | 
+16.50 roundScore | 8 | 12-2 |  | Owls +1 point | 
+17.50 roundIntro | 9 | 12-2 |  | Owls +1 point | 
+19.25 ask | 10 | 12-2 |  | Owls +1 point | 
+21.00 steal | 11 | 12-2 |  | Owls +1 point | 
+23.00 answer | 12 | 12-3 |  | Owls +1 point — steal | 
+23.75 answer | 12 | 12-3 |  |  | 
+28.25 answer | 12 | 12-2 |  | Call changed: nobody scores this one. | 
+29.25 ask | 13 | 12-2 |  | Call changed: nobody scores this one. | 
+31.00 answer | 14 | 12-4 |  | Owls +2 points | 
+32.00 roundScore | 15 | 12-4 |  | Owls +2 points | 
+32.75 roundIntro | 16 | 12-4 |  | Owls +2 points | 
+34.50 ask | 17 | 12-4 |  | Owls +2 points | 
+36.50 answer | 18 | 13-4 |  | Lions +1 point | 
+37.25 ask | 19 | 13-4 |  | Lions +1 point | 
+38.25 ask | 19 | 13-4 |  | Owls used Double Dip. | 
+40.00 answer | 20 | 13-5 |  | Owls +1 point | 
+41.00 roundScore | 21 | 13-5 |  | Owls +1 point | 
+41.75 comebackIntro | 22 | 13-5 |  | Owls +1 point | 
+42.75 comebackQ | 23 | 13-5 |  | Owls +1 point | 
+(the comeback paused)
+(answers while paused)
+44.50 comebackQ | 23 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
+(resumed)
+45.75 comebackReveal | 23 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
+47.25 comebackQ | 24 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
+48.00 comebackReveal | 24 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
+49.00 comebackQ | 25 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
+50.00 comebackReveal | 25 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
+50.75 comebackSummary | 26 | 13-11 |  | Only the teams playing for the comeback answer this one. | 
+51.75 roundIntro | 27 | 13-11 |  | Only the teams playing for the comeback answer this one. | 
+52.50 ask | 28 | 13-11 |  | Only the teams playing for the comeback answer this one. | 
+54.50 answer | 29 | 14-11 |  | Lions +1 point | 
+55.25 answer | 29 | 14-11 |  |  | 
+56.25 steal | 30 | 13-11 |  | Owls steal a new question. | 
+58.00 answer | 31 | 13-12 |  | Owls +1 point — steal | 
+59.00 ask | 32 | 13-12 |  | Owls +1 point — steal | 
+60.75 answer | 33 | 13-13 |  | Owls +1 point | 
+61.50 answer | 33 | 13-13 |  |  | 
+63.50 answer | 33 | 13-13 |  | The host keeps the call. | 
+64.25 roundScore | 34 | 13-13 |  | The host keeps the call. | 
+65.25 stakesIntro | 35 | 13-13 | 0-0 | The host keeps the call. | 
+66.00 stakesPick | 36 | 13-13 | 0-0 | The host keeps the call. | 
+67.00 stakesPick | 36 | 13-13 | 0-0 | Pick a theme and a level. | 
+(a bet with no level: "Pick a theme and a level.")
+68.75 stakesQ | 37 | 13-13 | 0-0 | Pick a theme and a level. | 
+69.75 stakesReveal | 37 | 13-12 | 0-0 | Pick a theme and a level. | 
+70.50 stakesReveal | 37 | 13-12 | 0-0 |  | 
+72.50 stakesReveal | 37 | 13-12 | 0-0 | Call changed: ⁨Lions⁩ WRONG. | 
+73.25 stakesPick | 38 | 13-12 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
+75.00 stakesQ | 39 | 13-12 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
+76.00 stakesReveal | 39 | 16-11 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
+77.00 stakesReveal | 39 | 16-11 | 0--1 |  | 
+77.75 stakesReveal | 39 | 16-11 | 0--1 | The host keeps the call. | 
+78.75 stakesPick | 40 | 16-11 | 3--2 | The host keeps the call. | 
+79.50 stakesQ | 41 | 16-11 | 3--2 | The host keeps the call. | 
+80.50 stakesReveal | 41 | 16-11 | 3--2 | The host keeps the call. | 
+81.50 stakesSummary | 42 | 16-11 | 3--2 | The host keeps the call. | 
+82.25 final | 43 | 16-11 |  | The host keeps the call. | 
+recap: {"margin":5,"sudden":false,"leadChanges":0,"steals":[0,1],"minis":[0,0],"chart":[[0,0],[0,0],[12,1],[12,2],[12,3],[12,2],[12,4],[13,4],[13,5],[13,11],[14,11],[13,11],[13,12],[13,13],[13,12],[16,11]],"segs":[{"label":"R1","pts":[[12,1],[12,2]]},{"label":"R2","pts":[[12,3],[12,2],[12,4]]},{"label":"R3","pts":[[13,4],[13,5]]},{"label":"The Comeback","pts":[[13,11]]},{"label":"R4","pts":[[14,11],[13,11],[13,12],[13,13]]},{"label":"Secret Stakes","pts":[[13,12],[16,11]]}],"awards":[{"t":"Down to the wire","who":"Lions took the lead for good in Secret Stakes","team":0},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

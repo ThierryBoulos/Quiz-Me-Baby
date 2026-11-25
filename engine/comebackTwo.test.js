@@ -169,7 +169,7 @@ test('comeback, two teams: Change question swaps in a spare, until there are non
   assert.deepEqual(goes(fx), ['comebackQ']);
   assert.equal(g.comeback.qs[0].id, spare[0]); assert.notEqual(g.comeback.qs[0].id, was);
   play({ type:'comeback/swap' });
-  assert.deepEqual(play({ type:'comeback/swap' }), [{ toast:'No spare questions left to swap in.' }]);
+  assert.deepEqual(play({ type:'comeback/swap' }), [{ toast:'No other question left.' }]);
   assert.equal(g.comeback.qs[0].id, spare[1]);
 });
 

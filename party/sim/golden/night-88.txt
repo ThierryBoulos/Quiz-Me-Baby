@@ -1,0 +1,69 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+(the scores set to 1-12)
+7.50 roundIntro | 2 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+7.50 ask | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+8.50 steal | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+9.50 answer | 3 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+10.25 ask | 4 | 1-12 |  | Both captains agreed: ⁨Lions⁩ 1, ⁨Owls⁩ 12. | 
+11.25 ask | 4 | 1-12 |  | Owls used Double Dip. | 
+12.00 answer | 4 | 1-13 |  | Owls +1 point | 
+13.00 answer | 4 | 1-13 |  |  | 
+28.00 answer | 4 | 1-13 |  | No answer in time: the call stands. | 
+28.25 roundScore | 5 | 1-13 |  | No answer in time: the call stands. | 
+29.25 roundIntro | 6 | 1-13 |  | No answer in time: the call stands. | 
+31.00 ask | 7 | 1-13 |  | No answer in time: the call stands. | 
+32.00 steal | 7 | 1-13 |  | No answer in time: the call stands. | 
+32.75 answer | 7 | 1-13 |  | No answer in time: the call stands. | 
+33.75 answer | 7 | 1-13 |  |  | 
+34.50 answer | 7 | 3-13 |  | Call changed: Lions +2 points. | 
+35.50 ask | 8 | 3-13 |  | Call changed: Lions +2 points. | 
+36.50 steal | 8 | 3-13 |  | Call changed: Lions +2 points. | 
+37.25 answer | 8 | 3-13 |  | Call changed: Lions +2 points. | 
+38.25 answer | 8 | 3-13 |  |  | 
+39.00 answer | 8 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+40.00 roundScore | 9 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+41.00 roundIntro | 10 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+41.75 ask | 11 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+42.75 steal | 11 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+43.50 answer | 11 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+44.50 ask | 12 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+45.50 steal | 12 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+46.25 answer | 12 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+47.25 roundScore | 13 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+48.00 comebackIntro | 14 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+49.00 comebackQ | 15 | 3-13 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+(the comeback paused)
+(answers while paused)
+50.75 comebackQ | 15 | 3-13 |  | Only the teams playing for the comeback answer this one. | 
+(resumed)
+52.00 comebackReveal | 15 | 3-13 |  | Only the teams playing for the comeback answer this one. | 
+53.50 comebackQ | 16 | 3-13 |  | Only the teams playing for the comeback answer this one. | 
+54.50 comebackReveal | 16 | 3-13 |  | Only the teams playing for the comeback answer this one. | 
+55.25 comebackQ | 17 | 3-13 |  | Only the teams playing for the comeback answer this one. | 
+56.25 comebackReveal | 17 | 3-13 |  | Only the teams playing for the comeback answer this one. | 
+57.00 comebackSummary | 18 | 11-13 |  | Only the teams playing for the comeback answer this one. | 
+58.00 roundIntro | 19 | 11-13 |  | Only the teams playing for the comeback answer this one. | 
+59.75 ask | 20 | 11-13 |  | Only the teams playing for the comeback answer this one. | 
+60.75 steal | 20 | 11-13 |  | Only the teams playing for the comeback answer this one. | 
+61.50 answer | 20 | 11-13 |  | Only the teams playing for the comeback answer this one. | 
+62.50 ask | 21 | 11-13 |  | Only the teams playing for the comeback answer this one. | 
+63.50 answer | 21 | 11-14 |  | Owls +1 point | 
+64.25 roundScore | 22 | 11-14 |  | Owls +1 point | 
+65.25 stakesIntro | 23 | 11-14 | 0-0 | Owls +1 point | 
+66.00 stakesPick | 24 | 11-14 | 0-0 | Owls +1 point | 
+67.00 stakesPick | 24 | 11-14 | 0-0 | Pick a theme and a level. | 
+(a bet with no level: "Pick a theme and a level.")
+70.50 stakesQ | 25 | 11-14 | 0-0 | Pick a theme and a level. | 
+71.50 stakesReveal | 25 | 10-11 | 0-0 | Pick a theme and a level. | 
+72.50 stakesPick | 26 | 10-11 | -1--3 | Pick a theme and a level. | 
+74.25 stakesQ | 27 | 10-11 | -1--3 | Pick a theme and a level. | 
+75.00 stakesReveal | 27 | 12-13 | -1--3 | Pick a theme and a level. | 
+76.00 stakesPick | 28 | 12-13 | 1--1 | Pick a theme and a level. | 
+77.00 stakesQ | 29 | 12-13 | 1--1 | Pick a theme and a level. | 
+77.75 stakesReveal | 29 | 12-13 | 1--1 | Pick a theme and a level. | 
+78.75 stakesSummary | 30 | 12-13 | 1--1 | Pick a theme and a level. | 
+79.50 final | 31 | 12-13 |  | Pick a theme and a level. | 
+recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,12],[1,13],[3,13],[11,13],[11,14],[10,11],[12,13]],"segs":[{"label":"R1","pts":[[1,12],[1,13]]},{"label":"R2","pts":[[3,13]]},{"label":"R3","pts":[]},{"label":"The Comeback","pts":[[11,13]]},{"label":"R4","pts":[[11,14]]},{"label":"Secret Stakes","pts":[[10,11],[12,13]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":1}]}

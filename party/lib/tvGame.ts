@@ -5,8 +5,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNetProbe } from "./tv/netProbe";
 import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
-import { SK_BET_IN, SK_LEVELS, SK_THEMES_CHANGED, skQ, type SkGame } from "./stakes";
+import { SK_BET_BAD, SK_BET_IN, SK_LEVELS, SK_THEMES_CHANGED, skQ, type SkGame } from "./stakes";
 import { SEE_TYPE, seeWinner } from "./see";
+import { CB_IN, CB_NOT_YOURS } from "./comeback";
 import { cleanList, mergeCustom } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
@@ -853,7 +854,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        answer that lands while paused is kept, and the reveal waits for Resume, as with 3 to 8 teams: 23 Nov, the owner;
        till then refused, 23 Oct) */
     /* (Fool Me Twice: kept too, the next step waiting for Resume, as with 3 to 8: 25 Nov, the owner) */
-    if (s.paused && (sc === "seeQ" || sc === "comebackQ")) return "The game is paused.";
+    /* (the Comeback: kept too, the reveal waiting for Resume, as with 3 to 8: 25 Nov, the owner) */
+    if (s.paused && sc === "seeQ") return "The game is paused.";
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
@@ -954,10 +956,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (sc === "comebackQ" && g.comeback) {
       const t = g.comeback.teams[0] as 0 | 1;
       if (!texts.length) return false;
-      if (team !== t) return `It's ${poss(nm(t))} turn to answer.`;
-      if (s.typed[team]) return `${poss(nm(team))} answer is already in.`;
+      /* (the 3-8 team words, every setup: 25 Nov, the owner) */
+      if (team !== t) return CB_NOT_YOURS;
+      if (s.typed[team]) return CB_IN;
       s.typed[team] = texts.slice(0, 1);
-      reveal();
+      if (!s.paused) reveal();
       return true;
     }
     if (sc === "miniQ") {
@@ -1178,7 +1181,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.paused && !s.awayPaused) return "The game is paused.";    // (the TV asleep pauses itself: a bet meanwhile still counts)
       /* (a bet tapped on themes that have just been changed: not on the new ones, 14 Nov) */
       if (move.theme != null && S?.rounds?.[S.i]?.themes[Number(move.k)] !== move.theme) return SK_THEMES_CHANGED;
-      if (!SK_LEVELS.includes(String(move.level)) || !(Number.isInteger(move.k) && Number(move.k) >= 0 && Number(move.k) < (S?.rounds?.[S.i]?.themes.length || 0))) return false;
+      if (!SK_LEVELS.includes(String(move.level)) || !(Number.isInteger(move.k) && Number(move.k) >= 0 && Number(move.k) < (S?.rounds?.[S.i]?.themes.length || 0))) return SK_BET_BAD;
       const was = s.screen;
       play({ type: t, t: team, k: Number(move.k), level: String(move.level) });
       /* (both bets in: the questions are up, and taps from the betting screen are stale now) */
@@ -1764,6 +1767,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       }
       /* both answers came in while paused: the reveal, now that the game runs again */
       if (!s.paused && ["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(s.screen) && s.typed[0] && s.typed[1]) { reveal(); changed = true; }
+      /* (the Comeback: its one team's answer, sent while paused) */
+      if (!s.paused && s.screen === "comebackQ" && s.g.comeback && s.typed[s.g.comeback.teams[0] as 0 | 1]) { reveal(); changed = true; }
       if (!s.paused && s.screen === "pinQ" && s.pins[0] && s.pins[1]) { reveal(); changed = true; }
       if (!s.paused && s.screen === "majorityQ" && mrAllIn(s)) { reveal(); changed = true; }
       if (!s.paused && ((s.screen === "foolWrite" && s.foolLies[0] != null && s.foolLies[1] != null) || (s.screen === "foolPick" && s.foolPicks[0] != null && s.foolPicks[1] != null))) { reveal(); s.step++; changed = true; }

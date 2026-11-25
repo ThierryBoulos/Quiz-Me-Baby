@@ -1383,6 +1383,8 @@
     /* (no levels said: Fool Me Twice's are its own, normal and hard, 25 Nov, the owner) */
     fool:{ done:'New fact.', none:'No other fact left.' },
     stakes:{ done:'Three new themes.', none:'No other themes left.' },
+    /* (the Comeback: the same words in every setup, 25 Nov, the owner) */
+    comeback:{ done:'New question.', none:'No other question left.' },
   };
   const spareLike = (s) => { const cur = s.qs[s.i], i = spareAt(s.spare, cur && cur.level); return s.spare.splice(i, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
@@ -2354,9 +2356,9 @@
     'comeback/swap'(g){
       const c = g.comeback;
       if(!c || c.done) return [];
-      if(!c.spare.length) return [{ toast:'No spare questions left to swap in.' }];
+      if(!c.spare.length) return [{ toast:SWAP_WORDS.comeback.none }];
       c.qs[c.i] = c.spare.shift();
-      return comebackAsk(g, [{ toast:'New question.' }]);
+      return comebackAsk(g, [{ toast:SWAP_WORDS.comeback.done }]);
     },
     /* ok: the call on the answer as it stands (no answer in time is a miss). Right: the next question, or after the
        third they made it. Wrong: it's over at once. The score moves as the result comes up, not before */
