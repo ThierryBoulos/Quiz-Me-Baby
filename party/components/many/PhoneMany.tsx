@@ -5,11 +5,11 @@
    button in the header, and the tracker lights your team. */
 import { useEffect, useMemo, useState } from "react";
 import { Clock } from "../Clock";
-import { Board, FlagImg, PinPhoto, RulingPicker, verdictWord } from "../GameParts";
+import { Board, FlagImg, PinPhoto } from "../GameParts";
 import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
 import { sendAction, sendDraft, sb } from "@/lib/supabase";
-import { poss, showKm, showNum, type LatLon } from "@/lib/game";
+import { showKm, showNum, type LatLon } from "@/lib/game";
 import { QMB } from "@/lib/engine";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
@@ -30,6 +30,7 @@ import { HostAnswerCard } from "../HostAnswer";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { MapAnswer } from "../MapGame";
+import { HostCalls } from "../HostCalls";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { sayWord } from "../SayGame";
@@ -450,23 +451,14 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {host && sc === "reveal" && g && R && !fool && (<>
         {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={null} teams={rrT} /> : g.key === "stakes" && sk ? <StakesPhone sk={sk} screen="stakesReveal" teams={rrT} me={null} /> : <Answer />}
         {typedKey(g.key) ? (<>
-          {/* the host is told the calls are theirs to change (the reviewers, 31 Oct) */}
-          <p className="text-center text-13 text-[var(--color-ink-2)]">The game made these calls. Tap one to change it.</p>
-          {/* each team's answer, and its ruling beside it, which the host can always flip (the TV confirms it a beat later) */}
-          <div className="flex flex-col gap-3">{T.map((t, i) => { const x = R.typed?.[i], v = R.ok?.[i]; if (g.only && !g.only.includes(i)) return null; if (cb?.out[i]) return null; return (
-            <div key={i} className="flex items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="eyebrow flex items-center gap-2" style={{ color: t.color, letterSpacing: ".1em" }}><Dot t={i} color={t.color} size={14} /><span className="truncate"><bdi>{t.name}</bdi></span></div>
-                {x ? <div className="font-bold text-18 leading-snug break-words"><bdi>{x}</bdi></div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
-                {/* (a call the host has changed says so, as with 2 teams: 22 Nov, the owner) */}
-                {(() => { const now = flips[`${pub.qid}|${i}`] ?? v, app = R.app?.[i]; return x && now != null && app != null && now !== app
-                  ? <div className="text-12 font-bold" style={{ color: now ? "var(--color-ok)" : "var(--color-no)" }}>You changed it: {verdictWord(now, g.key === "say")}</div> : null; })()}
-                {g.key === "roulette" && rr?.rev && <div className="text-13 text-[var(--color-ink-2)] leading-snug">{rr.draw[i]?.theme} · {rrLevelWord(rr.rev.level[i])} · Answer: <b><bdi>{rr.rev.answer[i]}</bdi></b></div>}
-                {g.key === "stakes" && sk?.rev && <div className="text-13 text-[var(--color-ink-2)] leading-snug">{sk.rev.theme[i]} · {skLevelWord(sk.rev.level[i])} · Answer: <b><bdi>{sk.rev.answer[i]}</bdi></b></div>}
-              </div>
-              {x && <div className="w-[188px] shrink-0"><RulingPicker compact sticky value={flips[`${pub.qid}|${i}`] ?? v} say={g.key === "say"} neg={g.key === "say" ? SAY.why[R.why?.[i] || ""] : undefined} label={`Rule on ${poss(t.name)} answer`} busy={false}
-                onPick={(nv) => { if ((flips[`${pub.qid}|${i}`] ?? v) === nv) return; setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i }); }} /></div>}
-            </div>); })}</div></>
+          {/* the host's calls, which the host can always flip (the TV confirms it a beat later): one copy for every setup
+              (components/HostCalls.tsx) */}
+          <HostCalls say={g.key === "say"} calls={T.map((t, i) => ({ i, t })).filter(({ i }) => !(g.only && !g.only.includes(i)) && !cb?.out[i]).map(({ i, t }) => {
+            const v = flips[`${pub.qid}|${i}`] ?? R.ok?.[i];
+            return { t: i, name: t.name, color: t.color, typed: R.typed?.[i], value: v, app: R.app?.[i], neg: g.key === "say" ? SAY.why[R.why?.[i] || ""] : undefined,
+              sub: g.key === "roulette" && rr?.rev ? <div className="text-13 text-[var(--color-ink-2)] leading-snug">{rr.draw[i]?.theme} · {rrLevelWord(rr.rev.level[i])} · Answer: <b><bdi>{rr.rev.answer[i]}</bdi></b></div>
+                : g.key === "stakes" && sk?.rev ? <div className="text-13 text-[var(--color-ink-2)] leading-snug">{sk.rev.theme[i]} · {skLevelWord(sk.rev.level[i])} · Answer: <b><bdi>{sk.rev.answer[i]}</bdi></b></div> : undefined,
+              onPick: (nv: boolean) => { if (v === nv) return; setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i }); } }; })} /></>
         ) : <Table />}
         {/* (the picture says who got it first, under the picture: not twice) */}
         {g.key !== "majority" && g.key !== "stakes" && g.key !== "see" && <Big text={W.text} color={W.color} />}

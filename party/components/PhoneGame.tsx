@@ -12,6 +12,7 @@ import { HostAnswerCard } from "./HostAnswer";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { MapAnswer } from "./MapGame";
+import { HostCalls } from "./HostCalls";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { CLOSEST } from "@/lib/minis/closest";
@@ -39,7 +40,7 @@ import { Dot, takeText } from "./many/PartsMany";
 import { sayCount, useLiveCount } from "@/lib/liveCount";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
 import { COMEBACK_TITLE } from "@/lib/comeback";
-import { AskHead, battleNeeds, Board, comebackTeams, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, SuddenRules, TEAM_HEX, tieCall, tieHead, Verdict, verdictWord } from "./GameParts";
+import { AskHead, battleNeeds, Board, comebackTeams, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, SuddenRules, TEAM_HEX, tieCall, tieHead, Verdict } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
@@ -308,21 +309,11 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <RulingPicker value={app} app={app} busy={busy || loading} label={`Rule on ${poss(T[t].name)} answer`} onPick={(v) => send(v ? right : wrong)} /></>);
   };
   /* the reveal screens: each team's answer, and its ruling beside it, which the host can always flip */
-  const Rulings = ({ type, say, empty, sub, neg }: { type: string; say?: boolean; empty: string; sub?: (t: 0 | 1) => React.ReactNode; neg?: (t: 0 | 1) => string | undefined }) => (<><p className="text-center text-13 text-[var(--color-ink-2)]">The game made these calls. Tap one to change it.</p>{([0, 1] as const).map((t) => {
-    const x = pub.reveal?.typed?.[t]?.[0], k = pickKey(t), app = pub.reveal?.app?.[t], v = k in picked ? picked[k] : pub.reveal?.ok?.[t];
-    const pick = (nv: boolean) => { setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire({ type, t, v: nv }); };
-    return (
-      <div key={t} className="flex items-center gap-3">
-        <div className="flex-1 min-w-0">
-          {/* (each team by its lettered dot, as with 3 to 8 teams: 23 Nov) */}
-          <div className="eyebrow flex items-center gap-2" style={{ color: tc(t), letterSpacing: ".1em" }}><Dot t={t} color={tc(t)} size={14} /><span className="truncate"><bdi>{T[t].name}</bdi></span></div>
-          {x ? <div className="font-bold text-18 leading-snug break-words">{x}</div> : <div className="text-14 text-[var(--color-ink-3)]">{empty}</div>}
-          {x && v != null && app != null && v !== app && <div className="text-12 font-bold" style={{ color: v ? "var(--color-ok)" : "var(--color-no)" }}>You changed it: {verdictWord(v, say)}</div>}
-          {sub?.(t)}
-        </div>
-        {/* nothing written: nothing to rule on */}
-        {x && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={v} app={app} say={say} neg={neg?.(t)} label={`Rule on ${poss(T[t].name)} answer`} onPick={pick} /></div>}
-      </div>); })}</>);
+  /* the host's calls at a reveal: one copy for every setup (components/HostCalls.tsx) */
+  const Rulings = ({ type, say, sub, neg }: { type: string; say?: boolean; empty?: string; sub?: (t: 0 | 1) => React.ReactNode; neg?: (t: 0 | 1) => string | undefined }) =>
+    <HostCalls say={say} busy={busy} calls={([0, 1] as const).map((t) => { const k = pickKey(t);
+      return { t, name: T[t].name, color: tc(t), typed: pub.reveal?.typed?.[t]?.[0], value: k in picked ? picked[k] : pub.reveal?.ok?.[t], app: pub.reveal?.app?.[t], sub: sub?.(t), neg: neg?.(t),
+        onPick: (nv: boolean) => { setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire({ type, t, v: nv }); } }; })} />;
   /* a results screen: exactly what the players see, and the host's button */
   const resultHeld = useTwoHold(pub);
   const Results = ({ children, act }: { children: React.ReactNode; act?: Send }) => (
@@ -661,15 +652,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
       <div className="flex flex-col gap-3 flex-1">
         <OnScreen pub={pub} small />
         <Result pub={pub} host headOnly />
-        <p className="text-center text-13 text-[var(--color-ink-2)]">Tap a call to change it.</p>
-        {([0, 1] as const).map((t) => { const c = C.find((x) => x.team === t); return (
-          <div key={t} className="flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="eyebrow flex items-center gap-2" style={{ color: tc(t), letterSpacing: ".1em" }}><Dot t={t} color={tc(t)} size={14} /><span className="truncate"><bdi>{T[t].name}</bdi></span></div>
-              {c?.text ? <div className="font-bold text-18 leading-snug break-words">{c.text}</div> : <div className="text-14 text-[var(--color-ink-3)]">No answer</div>}
-            </div>
-            {c?.text && <div className="w-[172px] shrink-0"><RulingPicker compact sticky value={c.ok} label={`Rule on ${poss(T[t].name)} answer`} onPick={(v) => { if (v !== c.ok) send({ type: "ui/flip", id: c.id }); }} busy={busy} /></div>}
-          </div>); })}
+        <HostCalls intro="Tap a call to change it." busy={busy} calls={([0, 1] as const).map((t) => { const c = C.find((x) => x.team === t);
+          return { t, name: T[t].name, color: tc(t), typed: c?.text, value: c?.ok, onPick: (v: boolean) => { if (c && v !== c.ok) send({ type: "ui/flip", id: c.id }); } }; })} />
         {(() => { const w = pub.reveal?.w; const h = takeText(w === 0 || w === 1 ? [w] : [], ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) }))); return <Big text={h.text} color={h.color} size={32} />; })()}
         <Calls pub={pub} host cardOnly busy={busy} act={send} />
         <Main label="Next" move={{ type: "dish/next" }} />
