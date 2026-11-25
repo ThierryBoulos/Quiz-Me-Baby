@@ -124,7 +124,7 @@ export type StateM = {
   flags?: FlagM[]; flagN?: number;
   mrOut?: string[];                             // Majority Rules: players the host took off the list (they've left), before Start
   mrHere?: string[];                            // ...and who is on the game screen meanwhile (user ids): someone taken off who's back is put back (25 Nov)
-  mrSince?: number;                             // ...since when the intro has been listening for who's here
+  mrGone?: string[];                            // ...those taken off who were then seen away: back on the game screen, back on the list
   mrList?: { name: string; team: number; here: boolean; out?: boolean }[];   // ...every team's list as it stands, for the screens (the TV fills it)
   mapHint?: boolean;                            // Guess the Map: the host showed this map's hint (8 Nov: as with two teams)
   /* Imad, the MC (8 Nov: as with two teams; lib/many/imad.ts): his latest line, and what he's said */

@@ -22,6 +22,7 @@ import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
 import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, legWinners, lockStakes, miniOf, newNight, nightOrder, next, pause, qOf, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type LatLon, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
+import { MAJ } from "../minis/majority";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
 
@@ -63,18 +64,24 @@ export async function setTeams(code: string, state: Record<string, unknown>, mem
 /* each game's seconds, from the TV's house settings */
 /* Majority Rules' intro: every team's list as it stands (who's on the game screen, who the host took off), and someone
    taken off who comes back to the game screen is put back, as with 2 teams (25 Nov, the owner). true: it changed */
-const MR_SETTLE = 8000;
-function mrSync(s: StateM, members: Member[], at: Record<string, number>): boolean {
-  if (miniOf(s)?.key !== "majority" || s.screen !== "intro") { if (!s.mrList && !s.mrHere) return false; delete s.mrList; delete s.mrHere; delete s.mrSince; return false; }
+function mrSync(s: StateM, members: Member[], at: Record<string, number>, settled = true): boolean {
+  if (miniOf(s)?.key !== "majority" || s.screen !== "intro") { if (!s.mrList && !s.mrHere) return false; delete s.mrList; delete s.mrHere; delete s.mrGone; return false; }
   const now = Date.now(), on = members.filter((m) => now - (at[m.user_id] ?? 0) < T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
-  /* (not in its first seconds: who's here is still being heard then, and a phone just heard isn't one coming back) */
-  if (s.mrSince == null) s.mrSince = now;
-  const was = s.mrHere || [], back = now - s.mrSince < MR_SETTLE ? [] : members.filter((m) => on.includes(m.user_id) && !was.includes(m.user_id)).map((m) => m.name);
-  if (s.mrOut?.some((x) => back.includes(x))) s.mrOut = s.mrOut.filter((x) => !back.includes(x));
-  s.mrHere = on;
-  const out = s.mrOut || [], L = members.filter((m) => m.role !== "host" && m.team != null && (m.team as number) < s.teams.length)
-    .map((m) => ({ name: m.name, team: m.team as number, here: on.includes(m.user_id), ...(out.includes(m.name) ? { out: true } : {}) }));
-  const changed = JSON.stringify(L) !== JSON.stringify(s.mrList || null);
+  const hereNames = members.filter((m) => on.includes(m.user_id)).map((m) => m.name);
+  /* someone taken off, then seen away (off the game screen, or out of the room), then seen on the game screen: back
+     on the list, and the TV says so. Taken off while on the screen and never away: stays off. (Not while the TV is
+     still hearing who's here, its first seconds: nobody is taken for away then.) */
+  const out = s.mrOut || [];
+  let gone = (s.mrGone || []).filter((x) => out.includes(x));
+  if (settled) for (const x of out) if (!hereNames.includes(x) && !gone.includes(x)) gone = [...gone, x];
+  const back = gone.filter((x) => hereNames.includes(x));
+  if (back.length) { s.mrOut = out.filter((x) => !back.includes(x)); gone = gone.filter((x) => !back.includes(x));
+    s.toast = { id: ++s.toastN, text: MAJ.backOn(back) }; }
+  /* (someone who left the room for good and isn't a member any more stays remembered as taken off, by name) */
+  s.mrGone = gone; s.mrHere = on;
+  const off = s.mrOut || [], L = members.filter((m) => m.role !== "host" && m.team != null && (m.team as number) < s.teams.length)
+    .map((m) => ({ name: m.name, team: m.team as number, here: on.includes(m.user_id), ...(off.includes(m.name) ? { out: true } : {}) }));
+  const changed = back.length > 0 || JSON.stringify(L) !== JSON.stringify(s.mrList || null);
   s.mrList = L; return changed;
 }
 const timers = (): Timers => { const t = getSettings(); return { sudden: t.tQuestion, quiz: t.tQuestion, flag: t.tFlag, airport: t.tAirport, map: t.tMap, closest: t.tMini, pin: t.tPin, majority: t.tMajority, say: t.tSay, dish: t.tDishStep, dishLast: DISH_LAST, roulette: t.tRoulette,
@@ -171,7 +178,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     if (s.screen === "q" && miniOf(s)?.key === "stakes" && s.qn !== markedSk.current) { markedSk.current = s.qn ?? null; markStakes(s); }
     { const k = miniOf(s)?.key, id = (qOf(s) as { id?: string } | null)?.id;
       if (s.screen === "q" && k && k !== "roulette" && k !== "stakes" && id && id !== markedQ.current) { markedQ.current = id; markAsked(s, id); } }
-    mrSync(s, ctx.current.members, here.current.at);
+    mrSync(s, ctx.current.members, here.current.at, Date.now() - upSince.current > 8000);
     const { pub: p, secret } = buildMany(s, timers());
     p.ack = ack.current;
     const at = Math.max(Date.now(), lastAt.current + 1); lastAt.current = at; p.at = at; p.now = Date.now();
@@ -492,7 +499,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
 
   /* who's here (every phone on the room's live channel), and in the lobby a captain silent for T_LOBBY_AWAY shows as
      away on the TV, as with two teams (the owner, 2 Nov: 3-8 teams never showed it) */
-  const here = useRef({ at: {} as Record<string, number> });
+  const here = useRef({ at: {} as Record<string, number> }), upSince = useRef(Date.now());   // (upSince: since when this screen has been hearing who's here)
   usePresent(code, isTv, here, members, phone);
   useEffect(() => {
     if (!isTv) return;
@@ -550,7 +557,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         }
       }
       /* Majority Rules' intro: who's on the game screen, and someone taken off who's back is on the list again */
-      if (mrSync(s, members, H.at)) changed = true;
+      if (mrSync(s, members, H.at, now - upSince.current > 8000)) changed = true;
       if (changed) publish();
       const h = members.find((m) => m.role === "host");
       if (h && hostFrom.current[h.user_id] == null) hostFrom.current[h.user_id] = now;   // (a new host: from when it was noticed)

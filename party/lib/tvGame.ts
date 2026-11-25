@@ -1785,18 +1785,23 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (now - here.current.checked > 2000) { here.current.checked = now; void handOver(); }
       /* Majority Rules' join screen: who's on the game screen (and someone taken off who turns up is back on);
          a captain's request nobody answered lapses (they stay on the list) */
-      if (s.screen !== "majorityIntro") { if (s.mrSince) s.mrSince = 0; }
+      if (s.screen !== "majorityIntro") { if (s.mrGone?.length) s.mrGone = []; }
       else {
-        if (!s.mrSince) s.mrSince = now;
         const on = ctx.current.members.filter((m) => now - (here.current.at[m.user_id] ?? 0) < T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
-        if (on.join() !== (s.mrHere || []).join()) {
-          /* (only someone just back: one taken off while on the screen stays off when anyone else comes or goes) */
-          /* (not in its first seconds: who's here is still being heard then, and a phone just heard isn't one coming back) */
-          const was = s.mrHere || [], back = now - (s.mrSince || now) < 8000 ? [] : ctx.current.members.filter((m) => on.includes(m.user_id) && !was.includes(m.user_id)).map((m) => m.name);
-          s.mrHere = on; changed = true;
-          if (s.mrOut.some((n) => back.includes(n))) s.mrOut = s.mrOut.filter((n) => !back.includes(n));
-          if (s.mrAsk && back.includes(s.mrAsk.name)) s.mrAsk = null;
-        }
+        if (on.join() !== (s.mrHere || []).join()) { s.mrHere = on; changed = true; }
+        /* someone taken off, then seen away (off the game screen, or out of the room), then seen on the game screen:
+           back on the list, and the TV says so. Taken off while on the screen and never away: stays off. (Not in this
+           screen's first seconds, while it's still hearing who's here: nobody is taken for away then.) The one rule
+           for every setup (lib/many/useTvMany.ts mrSync: 25 Nov, the owner) */
+        const hereNames = ctx.current.members.filter((m) => on.includes(m.user_id)).map((m) => m.name);
+        let gone = (s.mrGone || []).filter((x) => s.mrOut.includes(x));
+        if (now - here.current.since > 8000) for (const x of s.mrOut) if (!hereNames.includes(x) && !gone.includes(x)) gone = [...gone, x];
+        const back = gone.filter((x) => hereNames.includes(x));
+        if (back.length) { s.mrOut = s.mrOut.filter((x) => !back.includes(x)); gone = gone.filter((x) => !back.includes(x));
+          s.toast = { id: ++s.toastN, text: MAJ.backOn(back.map(iso)) }; changed = true; }
+        s.mrGone = gone;
+        /* (a captain's request for someone who's on the game screen after all lapses) */
+        if (s.mrAsk && hereNames.includes(s.mrAsk.name)) { s.mrAsk = null; changed = true; }
         if (s.mrAsk && now >= s.mrAsk.until) { s.toast = { id: ++s.toastN, text: `No answer: ${iso(s.mrAsk.name)} stays on the list.` }; s.mrAsk = null; changed = true; }
       }
       /* a captain's request the other captain never answered lapses (nothing changes); the host back: the host's to do;

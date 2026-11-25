@@ -218,6 +218,24 @@ async function majority(k, phone, tag) {
   const step = pub().step, id2 = tap();
   send("host", "judge", { move: { type: "m/start" }, step, tap: id2 }); await tick(600);
   check(`${tag} Majority: Start refused with nobody on the list`, pub().screen === "intro" && /Nobody/.test(pub().ack?.host?.[id2] || ""), `screen ${pub().screen} reply "${pub().ack?.host?.[id2]}"`);
+  /* who comes back (25 Nov, the owner): taken off while on the game screen, they stay off whoever else comes or goes;
+     seen away and then back on the game screen, they're put back, and the TV says so; never back: they stay off */
+  /* (with a TV: the test room's game phone can't see who's on the game screen, so there nobody is ever away) */
+  if (!phone) { const all = fake.db.members.map((m) => m.user_id), id = (n) => fake.db.members.find((m) => m.name === n).user_id;
+    await tick(10000);
+    check(`${tag} Majority: taken off while on the game screen: they stay off`, (saved().mrOut || []).length === 2 * k, String((saved().mrOut || []).length));
+    fake.setPresence(all.filter((x) => x !== id("Pl1") && x !== id("Pl2"))); await tick(40000);
+    check(`${tag} Majority: two of them go away: still off`, (saved().mrOut || []).includes("Pl1") && (saved().mrOut || []).includes("Pl2"));
+    fake.setPresence(all.filter((x) => x !== id("Pl2"))); await tick(4000);
+    check(`${tag} Majority: one comes back to the game screen: back on the list, and the TV says so`, !(saved().mrOut || []).includes("Pl1") && /Pl1 is back on the list/.test(pub().toast?.text || "") && pub().mrList?.some((x) => x.name === "Pl1" && !x.out),
+      `out ${(saved().mrOut || []).includes("Pl1")}, toast "${pub().toast?.text}"`);
+    check(`${tag} Majority: the one who never came back stays off, the others too`, (saved().mrOut || []).length === 2 * k - 1 && (saved().mrOut || []).includes("Pl2"), String((saved().mrOut || []).length));
+    await judge("m/mrOut", { name: "Pl1" }); await tick(4000);
+    check(`${tag} Majority: taken off again while here: stays off`, (saved().mrOut || []).includes("Pl1"));
+    fake.setPresence(all); await tick(4000);
+    check(`${tag} Majority: the other one comes back later: back on the list too`, !(saved().mrOut || []).includes("Pl2"));
+    await judge("m/mrOut", { name: "Pl2" }); await tick(4000);
+    check(`${tag} Majority: ...and taken off again while here: stays off`, (saved().mrOut || []).includes("Pl2") && (saved().mrOut || []).length === 2 * k); }
   await judge("m/mrOut", { name: "Pl0" });
   await judge("m/start");
   check(`${tag} Majority: one back on the list: Start goes`, pub().screen === "q" && saved().roster.length === 1, `screen ${pub().screen} roster ${saved().roster?.length}`);

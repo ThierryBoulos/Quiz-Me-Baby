@@ -1117,10 +1117,9 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
     {pub.screen === "sudden" && !pub.sudden?.ready && <SuddenRules pub={pub} size="phone" />}
-    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "sayQ", "sayReveal", "majorityQ", "majorityReveal", "battleQ", "battleTie", "comebackQ", "comebackReveal"].includes(pub.screen) && <p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p>}
-    {pub.screen === "majorityReveal" && pub.majority?.reveal && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.majority.reveal.answer}</div>}
-    {/* the fact behind it, right under the answer */}
-    {pub.screen === "majorityReveal" && pub.majority?.reveal?.notes && <p className="text-14 text-[var(--color-ink-2)] text-center leading-snug -mt-1">{pub.majority.reveal.notes}</p>}
+    {pub.question && ["ask", "steal", "answer", "sudden", "miniQ", "sayQ", "sayReveal", "majorityQ", "battleQ", "battleTie", "comebackQ", "comebackReveal"].includes(pub.screen) && <p className={(/Reveal$|^answer$/.test(pub.screen) ? "text-15 text-[var(--color-ink-2)]" : qCls(pub.question, 20)) + " leading-snug text-center"}>{pub.question}</p>}
+    {/* (the question small, the answer on its tile, the fact: the same look as with 3 to 8 teams, 25 Nov, the owner) */}
+    {pub.screen === "majorityReveal" && pub.majority?.reveal && <AnswerLine question={pub.question} answer={pub.majority.reveal.answer} fact={pub.majority.reveal.notes} />}
     {pub.screen === "flagQ" && <FlagImg name={pub.flag} h={small ? 96 : 150} />}
     {/* (the reveal as with 3 to 8 teams: the flag small, the answer on its tile, the fact under it: 23 Nov, the owner) */}
     {/* (Closest To Wins: the question small, the answer as people write it on its tile, the fact: as with 3 to 8 teams) */}
@@ -1370,8 +1369,9 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       {/* Majority Rules' join screen: the rules, then your team's list (the 3-to-8 order, every setup: 25 Nov) */}
       {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={me} />}
       <Result pub={pub} mine={mine} part="pill" />
+      {pub.screen === "majorityReveal" && <MajorityPad pub={pub} me={me} code={code} />}
       <OnScreen pub={pub} side mine={mine} who={me.user_id} />
-      {/^majority(Q|Reveal)$/.test(pub.screen) && <MajorityPad pub={pub} me={me} code={code} />}
+      {pub.screen === "majorityQ" && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} part="rest" />
       {pub.screen === "final" && <Line className="!text-13">{pub.mode === "nohost" ? "A captain chooses" : "The host chooses"}: play again with the same teams, or end the night.</Line>}
       {/* the Battle's twenty calls, read-only, on every phone (the 4 Nov audit, 3.12: players only saw "Waiting for…") */}
@@ -1625,12 +1625,13 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       <ToSide order={2} when={SIDE_Q.includes(sc) && !pub.paused}><Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} /></ToSide>
       {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
       <Result pub={pub} mine={mine} part="pill" />
+      {sc === "majorityReveal" && <MajorityPad pub={pub} me={me} code={code} />}
       <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side mine={mine} captain who={me.user_id} />
       {/* Secret Stakes: your bet, a theme and a level, then Lock in */}
       {sc === "stakesPick" && pub.stakes && !pub.stakes.locked[mine] && !pub.paused && <StakesBet sk={pub.stakes} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy}
         onLock={() => { if (skTheme != null && skLevel) void nxt({ type: "stakes/pick", k: skTheme, level: skLevel, theme: pub.stakes!.themes[skTheme] }); }} />}
       {sc === "stakesPick" && pub.stakes?.locked[mine] && pub.stakes.picks?.[mine] && <p className="text-center font-bold text-16" role="status">Locked in: {skLevelWord(pub.stakes.picks[mine]!.level)} on {pub.stakes.themes[pub.stakes.picks[mine]!.k]}.</p>}
-      {/^majority(Q|Reveal)$/.test(sc) && <MajorityPad pub={pub} me={me} code={code} />}
+      {sc === "majorityQ" && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} part="rest" />
       {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
       {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc) || (nohost && sc === "final")) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} card={CARD_SCREENS.includes(sc)} />}

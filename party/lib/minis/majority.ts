@@ -46,6 +46,8 @@ export const MAJ = {
       spoon: { t: "Least right, Majority Rules", who: `${names(low.map(([k]) => k))}, ${lo} of ${of}`, team: one(low), spoon: true as const } };
   },
   watching: "You joined after it started, so you\u2019re watching this one. You\u2019ll play the next Majority Rules.",
+  /* someone taken off who's back on the game screen is put back: the TV says so */
+  backOn: (L: string[]) => `${andList(L)} ${L.length > 1 ? "are" : "is"} back on the list.`,
   /* who plays, before Start: the TV's list, and a phone's */
   listHead: "Who plays",
   hostHead: "Who plays: take off anyone who has left",

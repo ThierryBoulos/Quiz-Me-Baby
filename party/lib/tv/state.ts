@@ -35,7 +35,7 @@ export const newState = () => ({
      on the join screen, who has been taken off and who's on the game screen, and a captain's request to
      take someone off; then every answer to the question on screen, by name */
   mrList: null as null | { name: string; uid: string; team: 0 | 1 }[],
-  mrOut: [] as string[], mrHere: [] as string[], mrSince: 0,
+  mrOut: [] as string[], mrHere: [] as string[], mrGone: [] as string[],
   mrAsk: null as null | { name: string; team: 0 | 1; until: number },
   votes: {} as Record<string, string>,
   /* the Battle: each player's call on their captain's score, by phone (29 Oct) */
