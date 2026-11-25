@@ -24,6 +24,7 @@ import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
+import { FOOL } from "@/lib/minis/fool";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -95,7 +96,7 @@ const GAMES: [ManyKey, string][] = [
   ["dish", "Five recipes: which cocktail or dish?"],   // (drawn by DISH.setupLine, as with 2 teams)
   ["see", SEE_SETUP],
   /* (16 Nov, the owner: off to start with) */
-  ["fool", "6 strange true facts with a blank. Captains write a lie that sounds true, then find the truth among the lies."],
+  ["fool", FOOL.setupLine],   // (one line, every setup: 25 Nov)
   ["roulette", RR_SETUP],
   /* (listed last, the night's last game: 11 Nov, the owner) */
   ["stakes", "The night's last game."]];

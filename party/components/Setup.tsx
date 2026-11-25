@@ -23,6 +23,7 @@ import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
+import { FOOL } from "@/lib/minis/fool";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -42,7 +43,7 @@ const MINIS = [
   ["majority", "Majority Rules", "Ten questions: everyone answers on their own phone."],   // (drawn by MAJ.setupLine)
   ["dish", "Guess the Cocktail or Dish", "Five recipes: which cocktail or dish?"],   // (drawn by DISH.setupLine)
   ["see", "What Do You See?", SEE_SETUP],
-  ["fool", "Fool Me Twice", "A strange true fact with a blank. Write a lie that sounds true, then find the truth among the lies."],
+  ["fool", "Fool Me Twice", FOOL.setupLine],   // (one line, every setup: 25 Nov)
   ["roulette", "Russian Roulette", RR_SETUP],
   ["battle", "Battle of the Captains", "Ten each, captains only."],
   /* (listed last, the night's last game: 11 Nov, the owner) */

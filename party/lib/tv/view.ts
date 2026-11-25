@@ -120,7 +120,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   /* a question only a person can judge: the app has no call to suggest */
   const judged = !!q && hostOnly(q);
   const secret: Secret = { step: s.step, typed: s.typed, match: judged ? [null, null] : [matchQ(s.typed[0], q), matchQ(s.typed[1], q)], guesses: s.guesses };
-  if (q) { p.qid = secret.qid = qk(s, q.id); secret.answer = q.answer; secret.notes = /^see/.test(s.screen) ? undefined : q.notes; secret.accept = acceptFor(q).slice(0, 8); if (aboutHost(q)) secret.you = true; }
+  if (q) { p.qid = secret.qid = qk(s, q.id); secret.answer = q.answer; /* (no fact on the host's card, every game, every setup: the TV has it, 25 Nov, the owner) */ secret.notes = undefined; secret.accept = acceptFor(q).slice(0, 8); if (aboutHost(q)) secret.you = true; }
   if (rd) {
     p.first = QMB.seatTeam(g, rd, 0, seatOf(g));
     p.dbl = [...rd.dbl] as Two<boolean>;
@@ -141,7 +141,7 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     p.question = g.sdReady ? g.sd.q.question : undefined;
     p.sudden = { ready: !!g.sdReady, shown: !!g.sd.shown, n: g.sd.n, answer: g.sd.shown ? g.sd.q.answer : undefined };
     p.buzz = s.sdBuzz; p.out = [...s.sdOut] as Two<boolean>;
-    secret.qid = p.qid = qk(s, g.sd.q.id); secret.answer = g.sd.q.answer; secret.notes = g.sd.q.notes;
+    secret.qid = p.qid = qk(s, g.sd.q.id); secret.answer = g.sd.q.answer; secret.notes = undefined;
   }
   /* The Comeback (17 Nov): who plays for it and what it can win; the question on (i: on the reveal, the questions
      played, so the team still in it shows "1 of 3"); a miss, out; the result, as the calls stand */
@@ -220,13 +220,14 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
       /* the result's lie detector and its awards: each fact's numbers (the engine keeps every fact: subs) */
       if (p.summary) p.summary.fool = foolSum(((m.subs || []) as { opts: FoolOpt[]; picks: (number | null)[]; hits: { by: number; on: number }[]; pts: number[] }[]).map((x) => foolFact(x.opts, x.picks, x.hits || [], x.pts)), 2);
       if (["foolWrite", "foolPick", "foolReveal"].includes(s.screen) && q) {
-        p.fool = { fact: q.question, n: Math.min(m.i + 1, m.qs.length), of: m.base, hard: q.level === "hard", ...(q.name ? { name: true } : {}), wrote: s.foolLies.map((l) => l != null), total: [...p.mini.wins] };
+        p.fool = { fact: q.question, ...(q.name ? { name: true } : {}), wrote: s.foolLies.map((l) => l != null) };
         /* picking: the answers only (whose each one is stays here till the reveal) */
         if (s.screen === "foolPick" && s.fool) { p.fool.opts = s.fool.opts.map((o) => o.text); p.fool.picked = s.foolPicks.map((x) => x != null); }
         /* (a phone's "sent": its lie in, or its pick) */
         if (s.screen === "foolWrite") p.sent = [s.foolLies[0] != null, s.foolLies[1] != null];
+        secret.lies = [s.foolLies[0] ?? null, s.foolLies[1] ?? null];
         if (s.screen === "foolPick") p.sent = [s.foolPicks[0] != null, s.foolPicks[1] != null];
-        if (rev && s.fool) p.fool.rev = { opts: s.fool.opts, fooled: rev.fooled, pts: rev.pts, hits: rev.hits, lost: s.fool.lost, predicts: [null, null], answer: q.answer, notes: q.notes || undefined };
+        if (rev && s.fool) p.fool.rev = { opts: s.fool.opts, fooled: rev.fooled, pts: rev.pts, hits: rev.hits, answer: q.answer, notes: q.notes || undefined };
       }
     }
     if (key === "see" && p.summary) p.summary.got = [0, 1].map((t) => ((m.subs || []) as { q?: { photo?: string }; winner?: unknown }[]).filter((x) => x.winner === t && x.q?.photo).map((x) => String(x.q!.photo)));

@@ -379,10 +379,10 @@ async function fool(k, phone, tag) {
   check(`${tag} Fool: the reveal says whose lie it was and who fell for it`, F().rev.opts[own].by.includes(0) && F().rev.fooled[own].length === k - 1 && F().rev.hits.some((h) => h.by === 0 && h.on === 1));
   check(`${tag} Fool: the tracker counts the fact on the reveal`, pub().game.pts[0] === 2 + (k - 1) + 1, String(pub().game.pts));
   await judge("m/next");
-  check(`${tag} Fool: Next: the second fact`, pub().screen === "q" && F().n === 2 && !F().opts, `${pub().screen} ${F()?.n}`);
+  check(`${tag} Fool: Next: the second fact`, pub().screen === "q" && pub().game?.leg === 2 && !F().opts, `${pub().screen} ${pub().game?.leg}`);
   /* Change fact, before any lie: another; with one in, another too (the lie cleared) */
   const was = fact().id; await judge("m/swap");
-  check(`${tag} Fool: Change fact`, fact().id !== was && pub().screen === "q");
+  check(`${tag} Fool: Change fact, and the TV says "New fact."`, fact().id !== was && pub().screen === "q" && /^New fact\.$/.test(pub().toast?.text || ""), pub().toast?.text);
   send("c0", "answer", { text: "Something", k: `${pub().qid}|q` }); await tick(600);
   id = tap(); send("host", "judge", { move: { type: "m/swap" }, step: pub().step, tap: id }); await tick(600);
   /* (a lie in no longer stops it: the new fact clears it, 23 Nov, the owner) */
@@ -403,7 +403,11 @@ async function fool(k, phone, tag) {
   await judge("m/reveal");
   check(`${tag} Fool: Reveal now on the picks: the reveal`, pub().screen === "reveal", pub().screen);
   /* the rest, nobody writing or picking: ours fill every place, nobody scores */
-  for (let f = 2; f < 6; f++) { await judge("m/next"); await tick((pub().deadline - clock()) + 1300); await tick((pub().deadline - clock()) + 800);
+  for (let f = 2; f < 6; f++) { await judge("m/next"); await tick((pub().deadline - clock()) + 1300);
+    /* (fact 4: team 0's captain chooses the truth and never locks it in: at time's up it counts, 25 Nov) */
+    if (f === 4) { const tr = saved().fool.opts.findIndex((o) => o.truth); send("c0", "draft", { k: `${pub().qid}|pick`, pick: tr, seq: 1 }); await tick(400); }
+    await tick((pub().deadline - clock()) + 1600);
+    if (f === 4) check(`${tag} Fool: a pick chosen, not locked in: it counts at time's up`, pub().screen === "reveal" && (F().rev?.pts[0] ?? 0) >= 2, `${pub().screen} ${F().rev?.pts}`);
     if (f === 2) check(`${tag} Fool: nobody writes: the answers are the truth and ours`, saved().fool.opts.every((o) => o.truth || o.ours) && saved().fool.opts.length === k + 1 + (k <= 3 ? 1 : 0)); }
   await judge("m/next");
   check(`${tag} Fool: the summary after 6 facts`, pub().screen === "summary", pub().screen);

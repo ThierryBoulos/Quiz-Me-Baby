@@ -5,17 +5,14 @@
    falling for the other team's lie costs nothing: the owner, 16 Nov). 6 facts, the last 2 hard. The rules themselves are the engine's (engine/core.js: foolOptions, foolScore), shared by the
    two-team TV (lib/tvGame.ts) and the 3-8 team one (lib/many/logic.ts). */
 export type FoolOpt = { text: string; truth?: boolean; ours?: boolean; by: number[] };
-export type FoolRev = { opts: FoolOpt[]; fooled: number[][]; pts: number[]; hits: { by: number; on: number }[]; lost: number[];
-  predicts: (number | null)[]; answer: string; notes?: string };
+export type FoolRev = { opts: FoolOpt[]; fooled: number[][]; pts: number[]; hits: { by: number; on: number }[]; answer: string; notes?: string };
 export type FoolPub = {
-  fact: string; n: number; of: number;     // the fact, which one, of how many
-  hard?: boolean;                          // one of the night's last two (ours: shown only as "Hard one")
+  fact: string;                            // the fact, with its blank (which one, and of how many: the tracker says)
   name?: boolean;                          // the truth is a name or a title: it keeps its capital in the sentence
   wrote: boolean[];                        // who has written their lie
   opts?: string[];                         // picking: the answers, shuffled (whose they are stays on the TV)
   picked?: boolean[];                      // who has picked
   rev?: FoolRev;                           // the reveal
-  total: number[];                         // this game's points so far (at the reveal, with this fact's)
 };
 /* a lie's longest (16 Nov, the owner: so every answer fits in its box, two lines at most on the narrowest phone; our own
    answers are 25 at most too). The phone says "Limit reached." when it's reached, never the number */

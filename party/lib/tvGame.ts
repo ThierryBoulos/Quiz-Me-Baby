@@ -31,6 +31,7 @@ import { setTeams } from "./many/useTvMany";
 import { saveLobbyDraft, useLobbyShare } from "./tv/lobbyShare";
 import { useFreshLeftShare, type FreshLeft } from "./freshLeft";
 import { MAJ } from "./minis/majority";
+import { FOOL } from "./minis/fool";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
    right one, or both out) it's the one whose calls can be contested on the next screen. (true: go on) */
@@ -851,7 +852,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* (What Do You See?, Fool Me Twice and the Comeback: not while paused. Drop the Pin and Guess the Airport: a pin or
        answer that lands while paused is kept, and the reveal waits for Resume, as with 3 to 8 teams: 23 Nov, the owner;
        till then refused, 23 Oct) */
-    if (s.paused && (sc === "seeQ" || sc === "foolWrite" || sc === "foolPick" || sc === "comebackQ")) return "The game is paused.";
+    /* (Fool Me Twice: kept too, the next step waiting for Resume, as with 3 to 8: 25 Nov, the owner) */
+    if (s.paused && (sc === "seeQ" || sc === "comebackQ")) return "The game is paused.";
     const rd = g.rounds[g.r];
     if (kind === "lifeline") {
       if (p.key === "dbl" && sc === "roundIntro") { play({ type: "round/armDbl", i: team }); return true; }
@@ -893,7 +895,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (kind !== "answer") return false;
     /* an answer says which question it's for (the phone's k): one sent in the last second of a question,
        landing once the next is up, is the old one's and goes nowhere (20 Oct: "Days" counted for two) */
-    if (typeof p.k === "string" && p.k !== draftKey()) return false;
+    /* (Fool Me Twice: a lie or a pick for an earlier screen says so, on that phone, as with 3 to 8: 25 Nov) */
+    if (typeof p.k === "string" && p.k !== draftKey()) return sc === "foolPick" && /\|foolWrite$/.test(p.k) ? FOOL.lateUp : sc === "foolWrite" || sc === "foolPick" ? FOOL.lateLast : false;
     const texts = (Array.isArray(p.texts) ? p.texts : [p.text]).map((x: unknown) => String(x ?? "").trim().slice(0, 80)).filter(Boolean);
     /* no host: the first answer sent is the one checked. The app's RIGHT stands at once (nobody can take
        it away); a WRONG waits a few seconds, in case the other captain wants to give it to them. */
@@ -927,22 +930,24 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        its own lie. Everyone in, and it moves on */
     if (sc === "foolWrite") {
       if (!texts.length) return false;
-      if (s.foolLies[team] != null) return `${poss(nm(team))} lie is already in.`;
+      /* (the words: lib/minis/fool.ts, every setup) */
+      if (s.foolLies[team] != null) return FOOL.lieIn;
       const q = current(), lie = QMB.foolShow(texts[0]);
-      if (!lie) return "Write a lie first.";
-      if (QMB.foolIsTruth(lie, q, acceptFor(q))) return "That's the truth, write a lie!";
+      if (!lie) return FOOL.noLie;
+      if (QMB.foolIsTruth(lie, q, acceptFor(q))) return FOOL.truth;
       s.foolLies[team] = lie;
-      /* (the last lie brings the picks up: taps from the writing screen, the host's Reveal now, are stale now: 19 Nov) */
-      if (s.foolLies[0] != null && s.foolLies[1] != null) { reveal(); s.step++; }
+      /* (the last lie brings the picks up: taps from the writing screen, the host's Reveal now, are stale now: 19 Nov;
+         paused, it waits for Resume) */
+      if (!s.paused && s.foolLies[0] != null && s.foolLies[1] != null) { reveal(); s.step++; }
       return true;
     }
     if (sc === "foolPick") {
       const k = Number(p.pick), o = Number.isInteger(k) ? s.fool?.opts[k] : null;
-      if (!o) return "Pick one of the answers.";
-      if (o.by.includes(team)) return "That's your own lie: pick another one.";
-      if (s.foolPicks[team] != null) return `${poss(nm(team))} pick is already in.`;
+      if (!o) return FOOL.pickOne;
+      if (o.by.includes(team)) return FOOL.ownLie;
+      if (s.foolPicks[team] != null) return FOOL.pickIn;
       s.foolPicks[team] = k;
-      if (s.foolPicks[0] != null && s.foolPicks[1] != null) { reveal(); s.step++; }
+      if (!s.paused && s.foolPicks[0] != null && s.foolPicks[1] != null) { reveal(); s.step++; }
       return true;
     }
     /* The Comeback: only the captain of the team playing for it answers, once; the app checks it at once (the reveal) */
@@ -1392,6 +1397,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       else if (ok) refuse(ok);
       return;
     }
+    /* (Fool Me Twice: a player's lie or pick is the captain's to send, and the phone is told: as with 3 to 8, 25 Nov) */
+    if (a.kind === "answer" && from.role === "player" && (s.screen === "foolWrite" || s.screen === "foolPick")) { refuse(FOOL.captainOnly, true); return; }
     if (from.role !== "captain" || (from.team !== 0 && from.team !== 1)) return;
     if (a.kind === "next") {
       const move = (a.payload.move || {}) as G, free = SAME_SCREEN.has(move.type);
@@ -1759,6 +1766,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!s.paused && ["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(s.screen) && s.typed[0] && s.typed[1]) { reveal(); changed = true; }
       if (!s.paused && s.screen === "pinQ" && s.pins[0] && s.pins[1]) { reveal(); changed = true; }
       if (!s.paused && s.screen === "majorityQ" && mrAllIn(s)) { reveal(); changed = true; }
+      if (!s.paused && ((s.screen === "foolWrite" && s.foolLies[0] != null && s.foolLies[1] != null) || (s.screen === "foolPick" && s.foolPicks[0] != null && s.foolPicks[1] != null))) { reveal(); s.step++; changed = true; }
       /* time's up (a moment after the clock shows 0, see T_GRACE_MS): first, what was typed but not sent goes in */
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };

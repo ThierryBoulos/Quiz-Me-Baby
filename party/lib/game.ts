@@ -136,6 +136,7 @@ export type Pub = {
 /* host only: the answer, and what the captains typed with the app's opinion */
 export type Secret = { qid?: string; step?: number; answer?: string; notes?: string; accept?: string[]; typed?: Two<string[] | null>; match?: Two<boolean | null>; guesses?: Two<number | null>; you?: boolean;
   answers?: Two<string>;                // Russian Roulette: each team's own question's answer
+  lies?: Two<string | null>;            // Fool Me Twice: each team's lie as it comes in (the host's phone only: 25 Nov)
   lobby?: TvShare };
 /* In the lobby, what the TV shares with the host's phone: its settings, its own questions, how many it has played */
 /* (draft: the host's lobby setup, kept on the TV for the next host's phone: lib/setupDraft.ts) */

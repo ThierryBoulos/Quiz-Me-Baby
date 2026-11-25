@@ -1,6 +1,7 @@
 "use client";
 /* The host's answer card while a question is up, one copy for every setup and every game (24 Nov, the merge): the
-   answer, its note, what else counts. eyebrow: its line on top (Don't Say the Same's says the word scores nothing). */
+   answer, and what else counts. Never the fact: the TV has it (25 Nov, the owner: it cluttered). notes: a line that is
+   part of the answer (the map's colours, Don't Say the Same's rule); eyebrow: its line on top. */
 import type { ReactNode } from "react";
 
 export function HostAnswerCard({ answer, notes, accept, eyebrow = "The answer. Only you see this" }: { answer: ReactNode; notes?: ReactNode; accept?: string[]; eyebrow?: string }) {

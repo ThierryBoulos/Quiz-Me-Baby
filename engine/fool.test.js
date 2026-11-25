@@ -108,7 +108,8 @@ test('fool: two teams: the points add up over the facts, the most takes the game
   /* five facts, each tied: both find the truth */
   for(let i = 0; i < 5; i++) fx = Q.play(g, { type:'fool/settle', opts, picks:[0, 0] });
   assert.deepEqual(s.pts, [10, 10]);
-  assert.deepEqual(fx, [{ go:'foolWrite' }]);
+  /* (someone found the truth: "correct" as Next leaves it, every setup: 25 Nov) */
+  assert.deepEqual(fx, [{ sound:'correct' }, { go:'foolWrite' }]);
   /* the sixth: A falls for B's lie (B: +1; with two teams nobody names a team, so A loses nothing) */
   fx = Q.play(g, { type:'fool/settle', opts, picks:[2, 0] });
   assert.deepEqual(s.pts, [10, 13]);
@@ -127,7 +128,8 @@ test('fool: tied after six facts: one more from the spare ones', () => {
   assert.equal(s.tieLegs, 1);
   assert.equal(s.qs.length, 7);
   assert.ok(fx.some(f => f.go === 'foolWrite'));
-  assert.ok(fx.some(f => /Tied at 0 each/.test(f.toast || '')));
+  /* (no toast: the TV stops on its own tie screen, "Tied at 0 each", first: 25 Nov) */
+  assert.ok(!fx.some(f => f.toast));
 });
 test('fool: a night with rounds: after its round, the game comes up (its intro)', () => {
   const std = [];

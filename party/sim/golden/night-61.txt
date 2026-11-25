@@ -63,4 +63,4 @@
 87.75 battleQ | 58 | 4-1 | 4-5 | Lions +1 point — steal | 
 88.50 battleSummary | 59 | 4-3 | 4-5 | Lions +1 point — steal | 
 89.50 final | 60 | 4-3 |  | Lions +1 point — steal | 
-recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[1,0],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[4,1],[4,3]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Fool Me Twice","pts":[[3,1]]},{"label":"R2","pts":[[4,1]]},{"label":"Battle of the Captains","pts":[[4,3]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0},{"t":"Best thief","who":"Lions, 1 steal","team":0},{"t":"Battle of the Captains","who":"Lea, 5 of 10","team":1}]}
+recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[1,0],"minis":[1,1],"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[4,1],[4,3]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Fool Me Twice","pts":[[3,1]]},{"label":"R2","pts":[[4,1]]},{"label":"Battle of the Captains","pts":[[4,3]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0},{"t":"Best thief","who":"Lions, 1 steal","team":0},{"t":"Battle of the Captains","who":"Lea, 5 of 10","team":1}]}

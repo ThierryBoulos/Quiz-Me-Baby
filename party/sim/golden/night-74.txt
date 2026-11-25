@@ -45,4 +45,4 @@
 53.75 answer | 29 | 3-2 |  | Owls used Call a Friend. | 
 54.50 roundScore | 30 | 3-2 |  | Owls used Call a Friend. | 
 55.50 final | 31 | 3-2 |  | Owls used Call a Friend. | 
-recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[0,1],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[3,2]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Fool Me Twice","pts":[[3,1]]},{"label":"R2","pts":[[3,2]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}
+recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[0,1],"minis":[1,0],"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[3,2]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Fool Me Twice","pts":[[3,1]]},{"label":"R2","pts":[[3,2]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

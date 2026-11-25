@@ -12,6 +12,7 @@ import { PinAnswer } from "./Pin";
 import { HostAnswerCard } from "./HostAnswer";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAJ } from "@/lib/minis/majority";
+import { FOOL } from "@/lib/minis/fool";
 import { MAP } from "@/lib/minis/map";
 import { MapAnswer } from "./MapGame";
 import { HostCalls } from "./HostCalls";
@@ -30,7 +31,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun, type RrTeam } from "./Roulette";
 import { StakesBet, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
-import { FoolFact, FoolOptions, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "./Fool";
+import { FoolFact, FoolHostCard, FoolOptions, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "./Fool";
 import { FOOL_MAX, foolDone } from "@/lib/fool";
 import { seeAsk } from "@/lib/see";
 import { signedPts, skLevelWord } from "@/lib/stakes";
@@ -466,10 +467,12 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         {/* (no "Fact 6 of 6" line: the tracker at the top says it, the owner, 16 Nov) */}
         <ToSide order={2}><div className="flex items-center justify-end"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div></ToSide>
         {pub.fool && <FoolFact fool={pub.fool} size={17} />}
-        <AnswerCard />
         {pub.screen === "foolPick" && pub.fool?.opts && <FoolOptions opts={pub.fool.opts} seed={"host|" + pub.qid} />}
-        {pub.fool && <FoolStatus teams={foolTeams(pub)} done={(pub.screen === "foolPick" ? pub.fool.picked : pub.fool.wrote) || [false, false]} doing={pub.screen === "foolPick" ? ": picking…" : ": writing a lie…"} finished={pub.screen === "foolPick" ? ": picked" : ": lie in"} />}
-        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} />{pub.screen === "foolWrite" && !pub.fool?.wrote.some(Boolean) && <Small ghost label="Change fact" move={{ type: "fool/swap" }} />}</div>
+        {/* (the truth, each lie as it comes in, who's still to go: one card for every setup, components/Fool.tsx; the
+           buttons in the 3-to-8 order, Change fact always there while lies are written: 25 Nov) */}
+        {pub.fool && <FoolHostCard answer={secret.answer} teams={foolTeams(pub)} sent={(pub.screen === "foolPick" ? pub.fool.picked : pub.fool.wrote) || [false, false]} lies={secret.lies} picking={pub.screen === "foolPick"}
+          dot={(i) => <span className="inline-block w-3.5 h-3.5 rounded-full shrink-0" style={{ background: tc(i as 0 | 1) }} aria-hidden />} />}
+        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause />{pub.screen === "foolWrite" && <Small ghost label={FOOL.change} move={{ type: "fool/swap" }} />}<Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "foolReveal": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -637,7 +640,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         </div>
       </div>);
     /* tied at the end of a mini-game: one more, or a point each */
-    case "miniTie": case "sayTie": case "flagTie": case "dishTie": case "mapTie": case "pinTie": case "airportTie": case "majorityTie": case "rouletteTie": case "seeTie": case "battleLevel": return (
+    case "miniTie": case "sayTie": case "flagTie": case "dishTie": case "mapTie": case "pinTie": case "airportTie": case "majorityTie": case "rouletteTie": case "seeTie": case "foolTie": case "battleLevel": return (
       <div className="flex flex-col gap-4 flex-1">
         <Big eyebrow={pub.mini?.title} size={34} text={tieHead(pub)} sub={tieCall(pub)} />
         <div className="flex flex-col gap-3 mt-auto">
@@ -975,6 +978,8 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
     : sc === "majorityReveal" && MR ? pill(`Your team: ${MR.right[mine]} of ${pub.majority?.n?.[mine] ?? 0} right`, MR.right[mine] > 0 ? "ok" : "mid")
     : /^(flag|say|map|airport|see)Reveal$/.test(sc) && pub.reveal ? legPill(pub.reveal.w)
     : sc === "dishReveal" && pub.reveal ? legPill(pub.reveal.w)
+    /* Fool Me Twice: what this fact gave your team, as with 3 to 8 (25 Nov) */
+    : sc === "foolReveal" && pub.fool?.rev ? (() => { const v = pub.fool!.rev!.pts[mine] ?? 0; return pill(`Your team: ${v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0"}`, v > 0 ? "ok" : v < 0 ? "no" : "mid"); })()
     /* Russian Roulette: right or wrong, and what the chamber paid (the bullet can cost 3) */
     : sc === "rouletteReveal" && pub.roulette?.rev ? (() => { const R = pub.roulette!.rev!, p = rrPill(pub.reveal?.ok?.[mine], !!pub.reveal?.typed?.[mine]?.length, R.level[mine], R.got[mine] ?? 0);
       return pill(p.text, p.tone); })()
@@ -1086,7 +1091,7 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
   /* ("This game | Tonight", as with 3 to 8 teams, every game: Russian Roulette 22 Nov, the rest 23 Nov, the owner) */
   if (/Summary$/.test(sc) && sc !== "battleSummary" && pub.summary) { const S = pub.summary, w = S.winner, aw = w != null ? S.award?.[w] ?? m?.pts : S.award?.[0];
     const res = standings({ title: m?.title ?? "Result", text: S.needsHost ? "Still tied" : w == null ? ((S.award?.[0] ?? 0) > 0 ? "Tied" : "Nobody scores") : `${T[w].name} +${aw}`, w,
-      vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : m?.key === "fool" ? "Points" : "This game", endCol: "Tonight", end: (t) => <Pts n={S.award?.[t]} />,
+      vals: S.wins.map((v) => (m?.pct ? `${v}%` : v)) as Two<string | number>, col: m?.pct ? "Right" : "This game", endCol: "Tonight", end: (t) => <Pts n={S.award?.[t]} />,
       note: S.needsHost ? "The host decides." : S.who, you: S.needsHost ? (mine == null ? null : ["Still tied: the host decides", "mid"]) : won3(w, aw, m?.title ?? "it") });
     /* Fool Me Twice: its awards under the result (16 Nov, the owner; with 2 teams, no prediction award: it's always the other team) */
     return m?.key === "fool" && S.fool ? <>{res}<AwardList awards={foolAwardList(S.fool, ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })), true)} /></> : res; }
@@ -1140,6 +1145,9 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {/^fool(Write|Pick|Reveal)$/.test(pub.screen) && pub.fool && <div className="flex flex-col gap-2 w-full">
       <FoolFact fool={pub.fool} size={small ? 16 : 19} truth={pub.screen === "foolReveal" ? pub.fool.rev?.answer : undefined} />
       {pub.screen === "foolPick" && pub.fool.opts && !captain && <FoolOptions opts={pub.fool.opts} seed={(who || "host") + "|" + pub.qid} />}
+      {/* (who's in, on every phone, in the TV's words, as with 3 to 8: 25 Nov) */}
+      {pub.screen !== "foolReveal" && <FoolStatus teams={foolTeams(pub)} done={(pub.screen === "foolPick" ? pub.fool.picked : pub.fool.wrote) || [false, false]}
+        doing={": " + (pub.screen === "foolPick" ? FOOL.picking : FOOL.writing)} finished={": " + (pub.screen === "foolPick" ? FOOL.picked : FOOL.lieInShort)} />}
       {pub.screen === "foolReveal" && pub.fool.rev && <FoolReveal rev={pub.fool.rev} teams={foolTeams(pub)} />}
     </div>}
     {/* What Do You See?: the picture, clearing from the TV's clock; at the reveal the whole of it, and its credit */}
@@ -1189,7 +1197,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
     {pub.reveal && /Reveal$/.test(pub.screen) && !["mapReveal", "sayReveal", "pinReveal", "rouletteReveal", "flagReveal", "closestReveal", "seeReveal", "airportReveal", "dishReveal"].includes(pub.screen) && <div className="display text-30 text-center" style={{ color: "var(--color-gold)" }}>{pub.reveal.answer}</div>}
     {pub.reveal && pub.screen === "sayReveal" && <AnswerLine label={SAY.secret} answer={pub.reveal.answer} />}
     {pub.screen === "answer" && pub.result && <div className="display text-32 text-center" style={{ color: "var(--color-gold)" }}>{pub.result.answer}</div>}
-    {(["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesQ", "battleQ", "comebackQ"].includes(pub.screen) || (pub.screen === "rouletteQ" && spun)
+    {(["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "stakesQ", "battleQ", "comebackQ", "foolWrite", "foolPick"].includes(pub.screen) || (pub.screen === "rouletteQ" && spun)
       /* sudden death and the tie-breaker: their clock (with no host; a host's has none) */
       || (RACE(pub) && (!!pub.deadline || (pub.left ?? 0) > 0))) && !(small && pub.screen === "pinQ") && !(pub.screen === "dishQ" && pub.dish?.typeBy)
       /* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */
@@ -1284,6 +1292,8 @@ const QUIET = ["miniQ", "flagQ", "seeQ", "mapQ", "sayQ", "pinQ", "airportQ", "ma
 const rr2 = (pub: Pub): RrTeam[] => [0, 1].map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }));
 /* a phone held sideways: on these, the top line (the question's title, or what to do) goes to the left column too */
 const SIDE_Q = ["comebackQ", "ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "battleQ"];
+/* the lie this phone sent for this fact (kept on the phone once the TV took it) */
+const myLie = (qid: unknown) => { try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i) || ""; if (k.startsWith("qmb.fool.lie.") && k.endsWith("." + qid)) return localStorage.getItem(k); } } catch { /* none */ } return null; };
 function status(pub: Pub, me: Member, noTv = false) {
   const T = pub.teams, mine = me.team as 0 | 1, cap = me.role === "captain";
   if (pub.lifeline) return pub.lifeline.team === mine ? (pub.lifeline.key === "friend" ? "Your team is calling a friend" : "Double Dip: two answers") : `${T[pub.lifeline.team].name} used a lifeline`;
@@ -1303,7 +1313,7 @@ function status(pub: Pub, me: Member, noTv = false) {
     case "flagQ": return cap ? FLAG.topCaptain : FLAG.topPlayer;
     /* (12 Nov, the owner: any player can buzz, the captain types; pub.see.by: who hit BUZZ) */
     /* Fool Me Twice: write a lie, then find the truth */
-    case "foolWrite": return pub.sent?.[mine] ? "Lie sent. Waiting for the others." : cap ? "Write a lie that sounds true." : "Help your captain write a lie that sounds true.";
+    case "foolWrite": return pub.sent?.[mine] ? FOOL.lieSent(cap ? myLie(pub.qid) : null) : cap ? "Write a lie that sounds true." : "Help your captain write a lie that sounds true.";
     case "foolPick": return pub.sent?.[mine] ? "Picked. Wait for the reveal." : cap ? "Which one is the truth?" : "Your captain picks the truth.";
     case "foolReveal": return "The reveal";
     case "seeQ": { const by = pub.see?.by, me1 = !!by && by === me.name;
@@ -1346,7 +1356,8 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   /* only while it can help: not on the other team's question or steal (20 Oct: players suggested to a
      captain who couldn't answer), nor once their captain's answer is in */
   const notOurs = (pub.screen === "ask" || pub.screen === "steal") && pub.turn !== mine;
-  const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !CAPTAINS_ONLY.includes(pub.screen) && !notOurs && !pub.sent?.[mine];
+  /* (Fool Me Twice: a lie to suggest while the captain writes; none while it picks, as with 3 to 8: 25 Nov) */
+  const canSuggest = !!pub.qid && ANSWERING.includes(pub.screen) && !CAPTAINS_ONLY.includes(pub.screen) && pub.screen !== "foolPick" && !notOurs && !pub.sent?.[mine];
   const np = useNoPaste(code, pub.qid);
   /* the Auction: a count-along, on this phone only (the TV's count is the one that counts); the Battle: one call on
      your captain's score, before their first question (29 Oct) */
@@ -1394,9 +1405,9 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       {!pub.paused && ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "rouletteQ", "stakesQ"].includes(pub.screen) && pub.sent?.[mine] && <p className="text-center font-bold text-16" role="status">Locked in. The answer comes up when the time&rsquo;s up.</p>}
       {canSuggest && (
         <div className="card flex flex-col gap-2">
-          <label className="field-label !mb-0" htmlFor="sug">Suggest to {cap?.name || "your captain"}</label>
+          <label className="field-label !mb-0" htmlFor="sug">{pub.screen === "foolWrite" ? FOOL.suggest(cap?.name || "your captain") : `Suggest to ${cap?.name || "your captain"}`}</label>
           <div className="flex gap-2">
-            <input id="sug" {...np.props} className="input" value={text} maxLength={pub.screen === "foolWrite" ? FOOL_MAX : 80} inputMode={pub.screen === "miniQ" ? "decimal" : "text"} placeholder={pub.screen === "miniQ" ? "A number" : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
+            <input id="sug" {...np.props} className="input" value={text} maxLength={pub.screen === "foolWrite" ? FOOL_MAX : 80} inputMode={pub.screen === "miniQ" ? "decimal" : "text"} placeholder={pub.screen === "miniQ" ? "A number" : pub.screen === "foolWrite" ? FOOL.suggestHint : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
             <button className="btn" disabled={!text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => void suggest()}>Send</button>
           </div>
           {np.hint}
@@ -1529,6 +1540,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
     lastTap.current = null;                          // each receipt once
     if (got === "+") return;                         // taken: the TV's view shows what came of it
     const ack = { no: got === "-" ? undefined : got };
+    /* (Fool Me Twice: a lie the TV turned down, "That's the truth, write a lie!", isn't this team's lie: it mustn't hide
+       the truth from its picks, 25 Nov) */
+    if (L.kind === "answer" && sc === "foolWrite" && !pub.sent?.[mine]) { try { localStorage.removeItem("qmb.fool.lie." + code + "." + pub.qid); } catch { /* none */ } foolLie.current = null; }
     /* taken: it shows as sent, it's waiting for its call, or the question has already moved on (a right answer) */
     const mineIn = !!pub.sent?.[mine] || pub.pending?.team === mine || `${pub.qid}|${sc}` !== L.q;
     if (L.kind === "answer" && !mineIn) { setSentTxt(null); setNo(ack.no || (noTv ? "That answer didn't go through. Send it again." : "The TV didn't take that answer. Send it again.")); }
@@ -1796,7 +1810,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           {canSwap && <button className="btn btn-sm btn-ghost" disabled={busy || !!pub.agree} onClick={() => void nxt({ type: "ui/askSwap" })}>Change the {swapWord}</button>}
         </div>)}
 
-      {sugs.length > 0 && (canType || ANSWERING.includes(sc)) && (
+      {sugs.length > 0 && sc !== "foolPick" && (canType || ANSWERING.includes(sc)) && (
         <div className="card">
           <div className="eyebrow mb-2">Your team suggests{canType ? ". Tap one to use it." : ""}</div>
           <div className="flex flex-col gap-1">

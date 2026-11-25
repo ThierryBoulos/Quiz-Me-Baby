@@ -38,4 +38,4 @@
 86.10 seeReveal | 13 | 0-0 | 5-2 | The call changed: a new picture for both teams. | 
 87.10 decided | 14 | 2-0 | 5-2 |  | 
 87.85 final | 15 | 2-0 |  |  | 
-recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[2,0]],"segs":[{"label":"What Do You See?","pts":[[2,0]]}],"awards":[]}
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[1,0],"best":{"title":"What Do You See?","team":0,"legs":[5,2]},"chart":[[0,0],[0,0],[2,0]],"segs":[{"label":"What Do You See?","pts":[[2,0]]}],"awards":[]}

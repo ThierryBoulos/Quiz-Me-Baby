@@ -17,6 +17,7 @@ import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_LEVELS, type SkPick } from "../stakes";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
 import { MAJ } from "../minis/majority";
+import { FOOL } from "../minis/fool";
 
 export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "fool", "roulette", "stakes"] as const;
 /* sudden death isn't picked: it comes when the night ends with teams tied at the top. Nor is the comeback: it comes
@@ -159,7 +160,7 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
   const extra: Partial<Record<ManyKey, Q[]>> = {};
   /* (Guess the Flag and What Do You See? keep 40 of the spares dealt past the game, every level mixed, so Change flag
      or picture finds one at the same level, as with 2 teams: 23 Nov. The TV holds the bank anyway; the phones never get the answers) */
-  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" || key === "pin" || key === "airport" || key === "map" || key === "dish" ? 40 : key === "majority" ? Infinity : 4));
+  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" || key === "pin" || key === "airport" || key === "map" || key === "dish" ? 40 : key === "majority" || key === "fool" ? Infinity : 4));
   extra.comeback = (decks.comeback || []).slice(MANY_LEGS.comeback);
   /* (a question round's Change question stays in the question's theme: the rounds' spares, then the questions held
      back past sudden death's, one pair per theme in turn: 19 Nov review, a Science question became Geography) */
@@ -187,11 +188,12 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
     m.qs[m.i] = R; s.paused = false; betPhase(s, now, t); toast(s, "Three new themes."); return true;
   }
   if (!m || s.screen !== "q" || m.key === "sudden") return false;
-  /* Fool Me Twice: another fact, as hard as this one if there's one left, before any lie is in */
+  /* Fool Me Twice: another fact, as hard as this one if there's one left, while lies are written (a lie already in is cleared: every game, 23 Nov) */
   if (m.key === "fool") {
-    const L = s.extra?.fool || [], lv = qOf(s)?.level, j = Math.max(0, L.findIndex((x) => x?.level === lv));
-    if (!L.length) return "No other fact left.";
-    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); return true;
+    /* (the words: the engine's, every setup; "New fact." on the TV too, as with 2 teams: 25 Nov) */
+    const L = s.extra?.fool || [], lv = qOf(s)?.level, j = Math.max(0, L.findIndex((x) => x?.level === lv)), W = QMB.SWAP_WORDS.fool as { done: string; none: string };
+    if (!L.length) return W.none;
+    m.qs[m.i] = L.splice(j, 1)[0]; s.paused = false; ask(s, now, t); toast(s, W.done); return true;
   }
   /* (an answer already in no longer stops it: the new question clears what was sent, every game, every setup: 23 Nov,
      the owner, "if the host decides, why not") */
@@ -329,7 +331,7 @@ const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: 
 
 /* a captain's answer (one each, the first stands). order: when it reached the server (the action's id), so the
    fastest is the first to arrive there, however the network hands the answers to the TV; none, the order they come */
-export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown; pick?: unknown; pred?: unknown }, order?: number, now = Date.now()): true | string {
+export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: unknown; pin?: unknown; pick?: unknown; pred?: unknown; late?: boolean }, order?: number, now = Date.now()): true | string {
   const m = miniOf(s);
   if (m?.key === "fool") return foolAnswer(s, team, p, order);
   if (!m || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
@@ -392,23 +394,25 @@ export function seeMiss(s: StateM, team: number, now: number, late = false) {
    lie fools, and a team that falls for a lie whose writer named it loses 1 (and the writer gets 1 more: 19 Nov). The game's tally pays the night by place,
    as every game does. A lie that is the truth, however it's typed, isn't taken ("That's the truth, write a lie!");
    no lie by the time it's up, and one of ours takes its place. A team's own lie isn't its pick. ---- */
-function foolAnswer(s: StateM, team: number, p: { text?: unknown; pick?: unknown; pred?: unknown }, order?: number): true | string {
+function foolAnswer(s: StateM, team: number, p: { text?: unknown; pick?: unknown; pred?: unknown; late?: boolean }, order?: number): true | string {
   const q = qOf(s); if (!q || (s.screen !== "q" && s.screen !== "pick") || team < 0 || team >= s.teams.length) return "Not now.";
   if (s.screen === "q") {
-    if (s.typed[team] != null) return "Your lie is in.";
-    const text = QMB.foolShow(String(p.text ?? "").slice(0, FOOL_MAX * 2)); if (!text) return "Type a lie first.";
-    if (QMB.foolIsTruth(text, q, acceptFor(q))) return "That's the truth, write a lie!";
+    if (s.typed[team] != null) return FOOL.lieIn;
+    const text = QMB.foolShow(String(p.text ?? "").slice(0, FOOL_MAX * 2)); if (!text) return FOOL.noLie;
+    if (QMB.foolIsTruth(text, q, acceptFor(q))) return FOOL.truth;
     s.typed[team] = text; s.at[team] = order ?? ++s.seq; return true;
   }
   const F = s.fool; if (!F) return "Not now.";
-  if (F.picks[team] != null) return "Your pick is in.";
+  if (F.picks[team] != null) return FOOL.pickIn;
   const k = Number.isInteger(p.pick) ? Number(p.pick) : -1, o = F.opts[k];
-  if (!o) return "Pick one of the answers.";
-  if (o.by.includes(team)) return "That's your own lie: pick another one.";
+  if (!o) return FOOL.pickOne;
+  if (o.by.includes(team)) return FOOL.ownLie;
   /* (the team it says will fall for its lie: only if its lie is up there, and never itself) */
   const mine = F.opts.some((x) => x.by.includes(team)), w = Number.isInteger(p.pred) ? Number(p.pred) : -1;
-  if (mine && !(w >= 0 && w < s.teams.length && w !== team)) return "Say which team will fall for your lie.";
-  F.picks[team] = k; F.pred[team] = mine ? w : null; s.at[team] = order ?? ++s.seq;
+  const named = w >= 0 && w < s.teams.length && w !== team;
+  /* (late: the pick chosen when time ran out, never locked in: it counts, with no team named if none was) */
+  if (mine && !named && !p.late) return "Say which team will fall for your lie.";
+  F.picks[team] = k; F.pred[team] = mine && named ? w : null; s.at[team] = order ?? ++s.seq;
   return true;
 }
 /* every lie in (or time's up): the answers to pick from, and the clock for the picks */
@@ -696,7 +700,7 @@ export function next(s: StateM, now: number, t: Timers) {
         s.typed.forEach((x, i) => { if (x != null && String(x).trim()) m.words![i].push({ w: String(listWord(x, q) ?? x).trim().slice(0, 40), ok: !!s.ok[i] }); }); }
       const first = pl.map((p, i) => (p === 1 ? i : -1)).filter((i) => i >= 0);
       /* (Guess the Flag and Closest To Wins: no line on the next one, as with 2 teams: the reveal's headline said it, 23 Nov, the owner; Guess the Map too, 24 Nov) */
-      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see" && m.key !== "pin" && m.key !== "airport" && m.key !== "map" && m.key !== "say" && m.key !== "dish") toast(s, !first.length ? "Nobody got it."
+      if (m.key !== "flag" && m.key !== "closest" && m.key !== "see" && m.key !== "pin" && m.key !== "airport" && m.key !== "map" && m.key !== "say" && m.key !== "dish" && m.key !== "fool") toast(s, !first.length ? "Nobody got it."
         : first.length === 1 ? (typedKey(m.key) ? `${s.teams[first[0]].name}, first right: +${pts[first[0]]}.` : `${s.teams[first[0]].name} take it: +${pts[first[0]]}.`) : `${first.length} teams share it: +${pts[first[0]]} each.`);
     }
     m.i++;

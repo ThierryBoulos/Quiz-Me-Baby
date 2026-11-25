@@ -10,6 +10,7 @@ import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
+import { FOOL } from "@/lib/minis/fool";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -423,9 +424,10 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `${n} pictures: the most takes ${pts}. Tied? The team that buzzed faster wins.` }];
     /* Fool Me Twice (16 Nov, the owner): a true fact with a blank, a lie each, then find the truth */
     case "fool": return [
-      { text: `A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true: ${sec(t?.foolWrite, 45)}.` },
-      { text: "Type the real answer and the game says so: write a lie instead!", warn: true },
-      { text: `Then the truth comes up hidden among your lies and a few of ours. Captains pick the one they think is true: ${sec(t?.foolPick, 20)}.` },
+      /* (rules 1 to 3 the same in every setup, the seconds and the red too: 25 Nov) */
+      { text: FOOL.rule1(t?.foolWrite ?? 45) },
+      { text: FOOL.rule2, warn: true },
+      { text: FOOL.rule3(t?.foolPick ?? 20, false) },
       { text: "The truth: +2. The other team falls for your lie: +1 to you." },
       { text: `${n} facts, the last 2 hard. Most points takes ${pts}. Tied? One more fact, or a point each.` }];
     case "pin": return [

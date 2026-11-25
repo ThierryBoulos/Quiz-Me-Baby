@@ -31,4 +31,4 @@
 31.00 answer | 13 | 4-1 |  | Call changed: Owls +1 point. | 
 32.00 roundScore | 14 | 4-1 |  | Call changed: Owls +1 point. | 
 32.75 final | 15 | 4-1 |  | Call changed: Owls +1 point. | 
-recap: {"margin":3,"sudden":false,"leadChanges":0,"steals":[1,0],"minis":[0,0],"chart":[[0,0],[0,0],[1,0],[3,0],[4,0],[4,1]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Russian Roulette","pts":[[3,0]]},{"label":"R2","pts":[[4,0],[4,1]]}],"awards":[{"t":"Best thief","who":"Lions, 1 steal","team":0}]}
+recap: {"margin":3,"sudden":false,"leadChanges":0,"steals":[1,0],"minis":[1,0],"chart":[[0,0],[0,0],[1,0],[3,0],[4,0],[4,1]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Russian Roulette","pts":[[3,0]]},{"label":"R2","pts":[[4,0],[4,1]]}],"awards":[{"t":"Best thief","who":"Lions, 1 steal","team":0}]}

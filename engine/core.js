@@ -1380,6 +1380,8 @@
     say:{ done:'New question.', none:'No other question left.' },
     dish:{ done:'New recipe.', none:'No other recipe left at these levels.' },
     majority:{ done:'New question.', none:'No other question left at these levels.' },
+    /* (no levels said: Fool Me Twice's are its own, normal and hard, 25 Nov, the owner) */
+    fool:{ done:'New fact.', none:'No other fact left.' },
   };
   const spareLike = (s) => { const cur = s.qs[s.i], i = spareAt(s.spare, cur && cur.level); return s.spare.splice(i, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
@@ -2553,9 +2555,9 @@
     'fool/start'(g){ g.foolGame.i = 0; return [{ go:'foolWrite' }]; },
     'fool/swap'(g){
       const s = g.foolGame;
-      if(!s.spare.length) return [{ toast:'No other fact left.' }];
+      if(!s.spare.length) return [{ toast:SWAP_WORDS.fool.none }];
       s.qs[s.i] = spareLike(s);
-      return [{ toast:'New fact.' }, { go:'foolWrite' }];
+      return [{ toast:SWAP_WORDS.fool.done }, { go:'foolWrite' }];
     },
     /* a: { opts, picks } as the TV had them (two teams: nobody names a team, so nobody loses 1 for falling for a lie) */
     'fool/settle'(g, a){
@@ -2564,6 +2566,8 @@
       const picks = [0, 1].map(t => (a.picks && Number.isInteger(a.picks[t]) ? a.picks[t] : null));
       const res = foolScore(a.opts, picks, null);
       res.pts.forEach((p, t) => { s.pts[t] += p; });
+      /* (someone found the truth: "correct" as Next leaves it, as with 3 to 8 teams: 25 Nov) */
+      if(picks.some(k => k != null && a.opts[k] && a.opts[k].truth)) fx.push({ sound:'correct' });
       s.subs.push({ q, opts:a.opts, picks, pts:res.pts, hits:res.hits });
       s.i++;
       if(s.i < s.qs.length){ fx.push({ go:'foolWrite' }); return fx; }
@@ -2578,7 +2582,7 @@
       }
       if(s.spare.length){
         s.qs.push(s.spare.shift()); s.tieLegs++;
-        fx.push({ toast:'Tied at ' + s.pts[0] + ' each — one more fact decides it.', ms:3600 });
+        /* (no toast: the game stops on its own tie screen first, "Tied at N each", which clears it) */
         fx.push({ go:'foolWrite' });
         return fx;
       }

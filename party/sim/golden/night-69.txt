@@ -69,4 +69,4 @@
 107.50 answer | 41 | 3-18 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
 108.50 roundScore | 42 | 3-18 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
 109.25 final | 43 | 3-18 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
-recap: {"margin":15,"sudden":false,"leadChanges":0,"steals":[1,1],"minis":[0,0],"chart":[[0,0],[0,0],[1,14],[1,15],[1,14],[2,14],[3,14],[3,16],[3,17],[3,18]],"segs":[{"label":"R1","pts":[[1,14],[1,15],[1,14],[2,14]]},{"label":"R2","pts":[[3,14]]},{"label":"Fool Me Twice","pts":[[3,16]]},{"label":"The Comeback","pts":[]},{"label":"R3","pts":[[3,17]]},{"label":"R4","pts":[[3,18]]}],"awards":[]}
+recap: {"margin":15,"sudden":false,"leadChanges":0,"steals":[1,1],"minis":[0,1],"chart":[[0,0],[0,0],[1,14],[1,15],[1,14],[2,14],[3,14],[3,16],[3,17],[3,18]],"segs":[{"label":"R1","pts":[[1,14],[1,15],[1,14],[2,14]]},{"label":"R2","pts":[[3,14]]},{"label":"Fool Me Twice","pts":[[3,16]]},{"label":"The Comeback","pts":[]},{"label":"R3","pts":[[3,17]]},{"label":"R4","pts":[[3,18]]}],"awards":[]}

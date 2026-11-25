@@ -71,7 +71,8 @@ export type PubMany = {
   mrOut?: string[];                               // Majority Rules: taken off the list (the host's, at its intro)
   mrList?: { name: string; team: number; here: boolean; out?: boolean }[];   // ...every team's list at the intro (who's here, who's off)
   mrAnswered?: [number, number][];                // ...each team's answered, of its list, while a question is up
-  mrNot?: { name: string; why: "off" | "back" }[];   // ...after Start: on the list but not counted on this question, and why
+  mrNot?: { name: string; why: "off" | "back" }[];
+  foolSecs?: [number, number];                    // Fool Me Twice's intro: seconds to write a lie, and to pick   // ...after Start: on the list but not counted on this question, and why
   mrFire?: { name: string; n: number }[];         // ...a player right every question so far, at the reveal
   imad?: { id: number; text: string; mood?: string };   // Imad's latest line (the TV's bubble)
   flags?: FlagM[];                                // left the screen during a question, or pasted (the host's list; no host: the captains')
@@ -83,7 +84,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
 /* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
-export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number; say?: number; dish?: number; majority?: number }): { pub: PubMany; secret: SecretMany } {
+export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number; say?: number; dish?: number; majority?: number; fool?: number; foolPick?: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
@@ -101,6 +102,8 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen === "q" && s.deadline && Date.now() >= s.deadline) pub.timeUp = true;
   if (m && s.screen !== "final") { const P = preloadOf(m.key, m.qs as { flag?: string; id?: string; photo?: string }[], m.i, s.screen === "intro"); if (P) pub.preload = P; }
   /* Russian Roulette's intro: the seconds, for its rules (as with 2 teams: 22 Nov, the owner) */
+  /* (Fool Me Twice: its two clocks, for rules 1 and 3, as with 2 teams: 25 Nov) */
+  if (m && s.screen === "intro" && m.key === "fool" && t?.fool != null) pub.foolSecs = [t.fool, t.foolPick ?? 20];
   if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say" || m.key === "dish" || m.key === "majority")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
   /* the Cocktail or Dish's band names tonight's kinds, as with 2 teams ("5 recipes · Cocktails + dishes": 24 Nov) */
   if (m && s.screen === "intro" && m.key === "dish") { const k = new Set(m.qs.map((q) => dishKind(q as never))); pub.dishKinds = k.size > 1 ? "Cocktails + dishes" : k.has("Cocktail") ? "Cocktails" : "Dishes"; }
@@ -124,10 +127,10 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (m?.key === "fool" && q && (s.screen === "q" || s.screen === "pick" || s.screen === "reveal")) {
     pub.qid = qidOf(s);
     const F = s.fool, r = s.screen === "reveal" ? foolRes(s) : null;
-    pub.fool = { fact: String(q.question || ""), n: Math.min(m.i + 1, m.qs.length), of: m.qs.length, hard: q.level === "hard", ...(q.name ? { name: true } : {}), wrote: s.typed.map((x) => x != null), total: pub.game ? [...pub.game.pts] : [] };
+    pub.fool = { fact: String(q.question || ""), ...(q.name ? { name: true } : {}), wrote: s.typed.map((x) => x != null) };
     if (F && s.screen !== "q") pub.fool.opts = F.opts.map((o) => o.text);
     if (F && s.screen === "pick") pub.fool.picked = F.picks.map((x) => x != null);
-    if (F && r) pub.fool.rev = { opts: F.opts, fooled: r.fooled, pts: r.pts, hits: r.hits, lost: F.lost, predicts: F.pred, answer: q.answer, notes: q.notes || undefined };
+    if (F && r) pub.fool.rev = { opts: F.opts, fooled: r.fooled, pts: r.pts, hits: r.hits, answer: q.answer, notes: q.notes || undefined };
   }
   if (m && q && m.key !== "fool" && (s.screen === "q" || s.screen === "reveal")) {
     /* (a key for this question, not its id in the bank, which anyone can look up: the 4 Nov audit, 4.5) */
@@ -199,7 +202,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen !== "final") { const f = fireOfMany(s); if (f.some(Boolean)) pub.fire = f; }
   /* the host's phone: the answer while it's up, and what every captain typed */
   const secret: SecretMany = m && q && (s.screen === "q" || s.screen === "reveal" || (m.key === "fool" && s.screen === "pick"))
-    ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? SAY.hostNote(true) : m.key === "roulette" || m.key === "stakes" || m.key === "see" ? undefined : q.notes, typed: s.typed, nums: s.nums,
+    ? { answer: m.key === "roulette" || m.key === "stakes" ? "" : String(m.key === "map" ? q.question : q.answer), notes: m.key === "map" ? q.answer : m.key === "say" ? SAY.hostNote(true) : undefined,   // (no fact on the host's card, every game, every setup: 25 Nov, the owner; the map's line is what its colours show, its answer) typed: s.typed, nums: s.nums,
         ...(m.key === "roulette" ? { answers: s.teams.map((_, t) => String(rrQ(q as RrLap, t)?.answer ?? "")) } : {}),
         ...(m.key === "stakes" ? { answers: s.teams.map((_, t) => String(skQm(s, t)?.answer ?? "")) } : {}),
         ...(typedKey(m.key) && m.key !== "roulette" && m.key !== "stakes" ? { accept: acceptFor(q).slice(0, 8) } : {}),

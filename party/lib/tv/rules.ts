@@ -33,7 +33,7 @@ export const HOST_MOVES: Record<string, Where> = {
   "flag/start": "flagIntro", "flag/swap": "flagQ", "flag/award": "flagSummary", "flag/done": "flagSummary",
   /* What Do You See?: as Guess the Flag */
   "see/start": "seeIntro", "see/swap": "seeQ", "see/award": "seeSummary", "see/done": "seeSummary", "ui/seeOk": "seeReveal",
-  /* Fool Me Twice: Start, a new fact (before anyone has written), the points by hand when tied, Next */
+  /* Fool Me Twice: Start, a new fact (while lies are written), the points by hand when tied, Next */
   "fool/start": "foolIntro", "fool/swap": "foolWrite", "fool/award": "foolSummary", "fool/done": "foolSummary",
   /* The Comeback: Start (or, the host only, Skip the comeback), Change question before the answer is in, Next */
   "comeback/start": "comebackIntro", "comeback/skip": "comebackIntro", "comeback/swap": "comebackQ", "comeback/done": "comebackSummary",

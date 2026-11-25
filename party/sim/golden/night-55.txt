@@ -74,4 +74,4 @@
 122.75 answer | 39 | 3-5 |  | Owls +1 point | 
 123.75 roundScore | 40 | 3-5 |  | Owls +1 point | 
 124.50 final | 41 | 3-5 |  | Owls +1 point | 
-recap: {"margin":2,"sudden":false,"leadChanges":3,"steals":[0,1],"minis":[0,1],"chart":[[0,0],[0,0],[1,0],[1,2],[3,2],[3,4],[3,5]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Closest To Wins","pts":[[1,2]]},{"label":"What Do You See?","pts":[[3,2]]},{"label":"R2","pts":[[3,4],[3,5]]}],"awards":[{"t":"Down to the wire","who":"Owls took the lead for good in Round 2","team":1},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}
+recap: {"margin":2,"sudden":false,"leadChanges":3,"steals":[0,1],"minis":[1,1],"best":{"title":"What Do You See?","team":0,"legs":[7,3]},"chart":[[0,0],[0,0],[1,0],[1,2],[3,2],[3,4],[3,5]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Closest To Wins","pts":[[1,2]]},{"label":"What Do You See?","pts":[[3,2]]},{"label":"R2","pts":[[3,4],[3,5]]}],"awards":[{"t":"Down to the wire","who":"Owls took the lead for good in Round 2","team":1},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

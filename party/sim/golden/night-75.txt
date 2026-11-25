@@ -44,4 +44,4 @@
 61.80 answer | 37 | 0-2 |  |  | 
 62.80 roundScore | 38 | 0-2 |  |  | 
 63.55 final | 39 | 0-2 |  |  | 
-recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,0],"chart":[[0,0],[0,0],[0,1],[0,0],[0,2]],"segs":[{"label":"R1","pts":[[0,1],[0,0]]},{"label":"Fool Me Twice","pts":[[0,2]]},{"label":"R2","pts":[]}],"awards":[]}
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,1],"chart":[[0,0],[0,0],[0,1],[0,0],[0,2]],"segs":[{"label":"R1","pts":[[0,1],[0,0]]},{"label":"Fool Me Twice","pts":[[0,2]]},{"label":"R2","pts":[]}],"awards":[]}

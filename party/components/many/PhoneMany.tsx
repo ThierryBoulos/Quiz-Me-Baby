@@ -34,6 +34,7 @@ import { HostCalls } from "../HostCalls";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
+import { FOOL } from "@/lib/minis/fool";
 import { MajorityPad as MajorityPadAll, MajorityStart, WhoPlaysDuring, WhoPlaysPhone } from "../MajorityGame";
 import { sayWord } from "../SayGame";
 import { CLOSEST } from "@/lib/minis/closest";
@@ -42,7 +43,7 @@ import { PIN } from "@/lib/minis/pin";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun } from "../Roulette";
 import { StakesBet, StakesPhone } from "../Stakes";
-import { FoolFact, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "../Fool";
+import { FoolFact, FoolHostCard, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "../Fool";
 import { FOOL_MAX } from "@/lib/fool";
 import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
@@ -155,7 +156,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* the TV's receipt for the last tap: one it turned down says why (the 4 Nov audit, 3.3: the reasons were written, never shown) */
   const [lastTap, setLastTap] = useState<string | null>(null);
   const got = lastTap ? pub.ack?.[me.user_id]?.[lastTap] : undefined;
-  useEffect(() => { if (got && got !== "+" && got !== "-") { setErr(got); setSentTxt(null); } }, [got]);
+  useEffect(() => { if (got && got !== "+" && got !== "-") { setErr(got); setSentTxt(null);
+    /* (Fool Me Twice: a lie the TV turned down isn't this team's lie: it mustn't hide the truth from its picks, 25 Nov) */
+    if (pub.game?.key === "fool" && pub.screen === "q" && mine != null && !pub.sent[mine]) { try { localStorage.removeItem("qmb.fool.lie." + code + "." + pub.qid); } catch { /* none */ } } } }, [got]);   // eslint-disable-line react-hooks/exhaustive-deps
   /* What Do You See?: a BUZZ shows at once on this phone (the TV confirms it a moment later, or says who was first) */
   const [buzzed, setBuzzed] = useState(false);
   const seeKey = `${pub.qid}|${pub.see?.buzz ?? ""}|${(pub.see?.out || []).join("")}|${got ?? ""}`;
@@ -207,6 +210,13 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const fool = g?.key === "fool" && (sc === "q" || sc === "pick" || sc === "reveal") && !!pub.fool;
   const [foolSel, setFoolSel] = useState<number | null>(null), [foolPred, setFoolPred] = useState<number | null>(null);
   useEffect(() => { setFoolSel(null); setFoolPred(null); }, [pub.qid, sc]);
+  /* (the pick chosen, not yet locked in, quietly to the TV: if the clock runs out first it counts, with the team named
+     if one is: 25 Nov, the owner) */
+  useEffect(() => {
+    if (!cap || sc !== "pick" || !fool || foolSel == null || (mine != null && pub.sent[mine])) return;
+    const t = setTimeout(() => sendDraft(code, { k: `${pub.qid}|pick`, pick: foolSel, ...(foolPred != null ? { pred: foolPred } : {}) }), 200);
+    return () => clearTimeout(t);
+  }, [foolSel, foolPred]);   // eslint-disable-line react-hooks/exhaustive-deps
   const lieKey = "qmb.fool.lie." + code + "." + pub.qid;
   const myLie = (() => { if (!fool || sc !== "pick") return null; try { return localStorage.getItem(lieKey); } catch { return null; } })();
   const foolOwn = ownIndex(pub.fool?.opts, myLie), foolT = T.map((t) => ({ name: t.name, color: t.color }));
@@ -623,7 +633,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         const head = sc !== "reveal" ? <div className="grid place-items-center"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={cmp ? 48 : 60} /></div> : null;
         const sendLie = () => { const t = text.trim(); if (!t || busy) return;
           void send("answer", { text: t, k: `${pub.qid}|q` }).then((ok) => { if (ok) { setSentTxt(t); try { localStorage.setItem(lieKey, t); } catch { /* in memory only */ } } }); };
-        const status = <FoolStatus teams={foolT} done={(picking ? F.picked : F.wrote) || T.map(() => false)} doing={T.length > 4 ? "…" : picking ? ": picking…" : ": writing…"} finished={T.length > 4 ? "✓" : picking ? ": picked" : ": lie in"} />;
+        const status = <FoolStatus teams={foolT} done={(picking ? F.picked : F.wrote) || T.map(() => false)} doing={T.length > 4 ? "…" : ": " + (picking ? FOOL.picking : FOOL.writing)} finished={T.length > 4 ? "✓" : ": " + (picking ? FOOL.picked : FOOL.lieInShort)} />;
         if (sc === "reveal" && F.rev) { const my = mine != null && !host ? F.rev.pts[mine] ?? 0 : null; return (<>
           {my != null && <YouPill text={`Your team: ${my > 0 ? `+${my}` : my < 0 ? `−${-my}` : "0"}`} tone={my > 0 ? "ok" : my < 0 ? "no" : "mid"} />}
           <FoolFact fool={F} size={19} truth={F.rev.answer} />
@@ -633,22 +643,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         if (host) return (<>
           {head}
           <FoolFact fool={F} size={18} />
-          {secret.answer && (
-            <div className="card cue-card" style={{ borderColor: "rgba(245,197,24,.5)", background: "rgba(245,197,24,.08)" }}>
-              <div className="eyebrow" style={{ color: "var(--color-gold)" }}>The truth. Only you see this</div>
-              <div className="display text-28 mt-1" style={{ color: "var(--color-gold)" }}><bdi>{secret.answer}</bdi></div>
-            </div>)}
           {picking && F.opts && <FoolOptions opts={F.opts} seed={seed} compact={cmp} />}
-          {/* each team's lie as it comes in (only this phone sees them) */}
-          <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who's in">
-            <p className="text-center text-14 font-bold">{`${pub.sent.filter(Boolean).length} of ${T.length} teams ${picking ? "picked" : "wrote a lie"}`}</p>
-            {T.map((t, i) => { const lie = secret.typed?.[i]; return (
-              <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: pub.sent[i] ? t.color : "var(--color-ink-3)" }}>
-                <Dot t={i} color={t.color} size={14} /><span className="truncate shrink-0 max-w-[40%]"><bdi>{t.name}</bdi></span>
-                <span className="truncate flex-1 font-normal text-[var(--color-ink-2)]">{lie ? <bdi>{lie}</bdi> : null}</span>
-                <span className="shrink-0" style={{ color: pub.sent[i] ? "var(--color-ok)" : "var(--color-ink-3)" }}>{pub.sent[i] ? "✓ in" : "waiting"}</span>
-              </span>); })}
-          </div>
+          {/* (the truth, each lie as it comes in, who's still to go: one card for every setup, components/Fool.tsx) */}
+          <FoolHostCard answer={secret.answer} teams={T.map((t) => ({ name: t.name, color: t.color }))} sent={pub.sent} lies={secret.typed} picking={picking} dot={(i) => <Dot t={i} color={T[i].color} size={14} />} />
           <div className="flex flex-wrap justify-center gap-2 mt-auto pt-1">
             <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/pause")}>{pub.paused ? "Resume" : "Pause"}</button>
             {!picking && <button className="btn btn-sm btn-host btn-ghost" disabled={busy} onClick={() => move("m/swap")}>Change fact</button>}

@@ -1,4 +1,5 @@
 "use client";
+import { HostAnswerCard } from "./HostAnswer";
 /* FOOL ME TWICE's screens (the owner, 16 Nov), the same pieces on the TV and every phone, 2 teams or 8: the fact with
    its blank, who has written and picked, the answers to pick from, and the reveal (each lie, whose it was and who fell
    for it, the truth first). The rules are in lib/fool.ts. */
@@ -210,7 +211,7 @@ export function FoolResult({ teams, sum, pts, places, award, two }: { teams: Foo
           </g>
           {Array.from({ length: N }, (_, f) => (
             <g key={"f" + f}>
-              <text x={(X(f) + X(f + 1)) / 2} y={H - 9} textAnchor="middle" fontSize={16} fontWeight={800} fill="rgba(27,22,7,.55)" letterSpacing=".12em">FACT {f + 1}</text>
+              <text x={(X(f) + X(f + 1)) / 2} y={H - 9} textAnchor="middle" fontSize={16} fontWeight={800} fill="rgba(27,22,7,.55)" letterSpacing=".12em">{N > 6 || (X(1) - X(0)) < 90 ? f + 1 : `FACT ${f + 1}`}</text>
               <line x1={X(f + 1)} y1={top} x2={X(f + 1)} y2={H - bot} stroke="rgba(27,22,7,.2)" strokeDasharray="3 4" />
             </g>))}
           <line x1={L} y1={Y(0)} x2={X(N)} y2={Y(0)} stroke="rgba(27,22,7,.35)" />
@@ -256,3 +257,24 @@ export const foolAwardList = (sum: FoolSum, teams: FoolTeam[], two: boolean) => 
   t: a.t, spoon: a.spoon, color: a.teams.length === 1 ? teams[a.teams[0]]?.color : undefined,
   who: `${a.teams.map((t) => teams[t]?.name ?? "").join(" & ")}: ${foolAwardWhat(a, two)}`,
   node: <>{foolAwardWho(a.teams, teams, 18)}<span className="text-[var(--color-ink-2)] font-normal">: {foolAwardWhat(a, two)}</span></> }));
+
+/* the host's phone while lies are written and the truth is picked, one copy for every setup (25 Nov, the owner): the
+   truth on its own (no fact, no "also accepted": the host doesn't need them), then who has written or picked, with each
+   lie as it comes in, and who's still to go */
+export function FoolHostCard({ answer, teams, sent, lies, picking, dot }: {
+  answer?: string | null; teams: FoolTeam[]; sent: boolean[]; lies?: (string | null | undefined)[]; picking: boolean; dot: (i: number) => ReactNode;
+}) {
+  return (<>
+    {answer && <HostAnswerCard answer={<bdi>{answer}</bdi>} eyebrow="The truth. Only you see this" />}
+    <div className="card !py-2 flex flex-col gap-1.5" role="status" aria-label="Who's in">
+      <p className="text-center text-14 font-bold">{`${sent.filter(Boolean).length} of ${teams.length} teams ${picking ? "picked" : "wrote a lie"}`}</p>
+      {teams.map((t, i) => { const lie = lies?.[i]; return (
+        <span key={i} className="flex items-center gap-2 min-w-0 text-14 font-bold" style={{ color: sent[i] ? t.color : "var(--color-ink-3)" }}>
+          {dot(i)}<span className="truncate shrink-0 max-w-[40%]"><bdi>{t.name}</bdi></span>
+          <span className="truncate flex-1 font-normal text-[var(--color-ink-2)]">{lie ? <bdi>{lie}</bdi> : null}</span>
+          <span className="shrink-0" style={{ color: sent[i] ? "var(--color-ok)" : "var(--color-ink-3)" }}>{sent[i] ? "✓ in" : "waiting"}</span>
+        </span>); })}
+    </div>
+  </>);
+}
+

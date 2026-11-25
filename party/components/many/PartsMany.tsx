@@ -15,6 +15,7 @@ import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
+import { FOOL } from "@/lib/minis/fool";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -127,7 +128,8 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
      (a game's rules, its result, the end); during a game only its own points, in their own line under its name.
      On a game's result, what each place pays flies up into the totals, then they roll up */
   /* (Secret Stakes: the night's totals throughout, its bets go straight on them; there's no game tally to show) */
-  const inGame = !!g && g.key !== "stakes" && (pub.screen === "q" || pub.screen === "reveal");
+  /* (Fool Me Twice's picks too: 25 Nov, the header went back to the night's totals while teams picked) */
+  const inGame = !!g && g.key !== "stakes" && (pub.screen === "q" || pub.screen === "reveal" || pub.screen === "pick");
   const award = pub.screen === "summary" ? pub.summary?.award : undefined;
   const [landed, setLanded] = useState(false);
   /* the +points rise once the result's reveal is done (the last team in), and land 1.5 s later */
@@ -233,9 +235,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
     /* Secret Stakes (11 Nov, the owner): the night's last game; a bet is a thirtieth of the leader's total when it starts (a tenth till 12 Nov) */
     case "stakes": { const I = pub.skIntro; return skRules(n, I?.unit ?? pub.stakes?.unit ?? 1, I?.pick ?? 20, I?.q ?? 45); }   // (one card, every setup: components/Stakes.tsx)
     /* Fool Me Twice (16 Nov, the owner): the two-team card's words, for N teams */
-    case "fool": return ["A strange true fact goes up, with a blank. Each captain writes a lie to fill it, one that sounds true.",
-      "Type the real answer and the game says so: write a lie instead!",
-      "Then the truth comes up hidden among your lies and a few of ours. Captains pick the one they think is true, and say which team will fall for their lie.",
+    case "fool": return [FOOL.rule1(pub.foolSecs?.[0] ?? 45), { text: FOOL.rule2, warn: true }, FOOL.rule3(pub.foolSecs?.[1] ?? 20, true),
       "The truth: +2. Each team that falls for your lie: +1 to you. The team you named falls for it? −1 to them, +1 more to you.",
       `${n} facts, the last 2 hard. ${pay}`];
     case "sudden": { const L = (g.only || []).map((t) => pub.teams[t].name), names = L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join("");

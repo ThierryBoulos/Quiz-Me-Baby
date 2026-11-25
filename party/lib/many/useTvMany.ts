@@ -23,6 +23,7 @@ import { playSound } from "../sound";
 import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, legWinners, lockStakes, miniOf, newNight, nightOrder, next, pause, qOf, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type LatLon, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
 import { MAJ } from "../minis/majority";
+import { FOOL } from "../minis/fool";
 import { useFreshLeftShare } from "../freshLeft";
 import { imadContest, imadMany } from "./imad";
 
@@ -152,7 +153,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
   const soon = useRef<ReturnType<typeof setTimeout> | null>(null);
   const publishRef = useRef<() => void>(() => {});
   const heard = useRef<{ screen: string; won: boolean; hint?: boolean } | null>(null);   // the screen the TV last made its sound for
-  const drafts = useRef<Record<number, { k: string; text: string; pin?: LatLon; seq: number }>>({});   // each captain's typed, unsent answer
+  const drafts = useRef<Record<number, { k: string; text: string; pin?: LatLon; seq: number; pick?: number; pred?: number | null }>>({});   // each captain's typed, unsent answer
   const marked = useRef<string | null>(null);    // the Russian Roulette spin (and its questions) marked played
   const markedSk = useRef<number | null>(null);  // ...and the Secret Stakes round's
   const retryT = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -405,8 +406,11 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
        2 teams: 22 Nov, the owner). Quiet: no reply, no new screen */
     if (a.kind === "draft") {
       const t = from.team as number | null, seq = Number(a.payload.seq) || 0, cur = t != null ? drafts.current[t] : undefined;
-      if (from.role !== "captain" || t == null || a.payload.k !== `${qidOf(s)}|q` || (cur && cur.k === a.payload.k && cur.seq > seq)) return;
-      drafts.current[t] = { k: String(a.payload.k), text: String(a.payload.text ?? "").trim().slice(0, 80), pin: a.payload.pin as LatLon | undefined, seq };
+      /* (Fool Me Twice: the pick chosen but not yet locked in, too, on the picks) */
+      const pickK = s.screen === "pick" && miniOf(s)?.key === "fool" ? `${qidOf(s)}|pick` : null;
+      if (from.role !== "captain" || t == null || (a.payload.k !== `${qidOf(s)}|q` && a.payload.k !== pickK) || (cur && cur.k === a.payload.k && cur.seq > seq)) return;
+      drafts.current[t] = { k: String(a.payload.k), text: String(a.payload.text ?? "").trim().slice(0, 80), pin: a.payload.pin as LatLon | undefined, seq,
+        ...(a.payload.k === pickK ? { pick: Number(a.payload.pick), pred: a.payload.pred == null ? null : Number(a.payload.pred) } : {}) };
       return;
     }
     /* a phone's note: it left the game screen during a question, it's back (and for how long, by its own clock), it
@@ -493,7 +497,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
          (its key was the bank's id) isn't checked, so a night that spans an update goes on. */
       if (typeof a.payload.k === "string" && /^\d+\.\d+\|q$/.test(a.payload.k) && a.payload.k !== `${qidOf(s)}|q`) { reply("Too late: that answer was for the last question."); publishSoon(); return; }
       /* (Fool Me Twice: a lie landing once the answers are up, or a pick for the fact before: not taken) */
-      if (m?.key === "fool" && typeof a.payload.k === "string" && a.payload.k !== `${qidOf(s)}|${s.screen}`) { reply(s.screen === "pick" ? "Too late: the answers are up." : "Too late: that was for the last fact."); publishSoon(); return; }
+      if (m?.key === "fool" && typeof a.payload.k === "string" && a.payload.k !== `${qidOf(s)}|${s.screen}`) { reply(s.screen === "pick" ? FOOL.lateUp : FOOL.lateLast); publishSoon(); return; }
       const r = m?.key === "majority" ? vote(s, from.name, a.payload.pick)
         : from.role === "captain" ? captainAnswer(s, from.team as number, a.payload as G, Number(a.id) || undefined) : "Your captain answers this one.";
       reply(r === true ? "+" : r);
@@ -648,6 +652,14 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       /* (Secret Stakes' bets: time's up, the teams that didn't bet take the safe one, and the questions go up) */
       /* (Fool Me Twice: time's up on the lies, the answers go up, ours in place of a lie not written; on the picks, the reveal) */
       if (Date.now() >= s.deadline && s.screen === "q" && miniOf(s)?.key === "fool" && takeDrafts(s) === "wait") return;
+      /* (the picks too: a second's grace, then a pick chosen but not locked in counts, with the team named if one is:
+         25 Nov, the owner) */
+      if (Date.now() >= s.deadline && s.screen === "pick" && miniOf(s)?.key === "fool") {
+        if (Date.now() < s.deadline + T_GRACE_MS) { if (graced.current !== s.deadline) { graced.current = s.deadline; publish(); } return; }
+        const k = `${qidOf(s)}|pick`;
+        for (const [t, d] of Object.entries(drafts.current)) if (d.k === k && d.pick != null && s.fool?.picks[Number(t)] == null) captainAnswer(s, Number(t), { pick: d.pick, pred: d.pred, late: true });
+        drafts.current = {};
+      }
       if (Date.now() >= s.deadline && miniOf(s)?.key === "fool") { if (s.screen === "q") foolOpen(s, Date.now(), timers()); else foolReveal(s); publish(); return; }
       /* time's up on a question: a second's grace, then what a captain typed but didn't send counts, as with 2 teams
          (22 Nov, the owner) */
