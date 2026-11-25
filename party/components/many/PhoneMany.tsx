@@ -3,7 +3,7 @@
    card on top and one main button docked at the bottom; a captain's answer box, the pin map, the four answers
    of Majority Rules; a result as a headline, then the rows. No score strip: the scores sit behind the Scores
    button in the header, and the tracker lights your team. */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock } from "../Clock";
 import { Board, FlagImg, PinPhoto } from "../GameParts";
 import { MapView } from "../MapView";
@@ -33,6 +33,8 @@ import { MapAnswer } from "../MapGame";
 import { HostCalls } from "../HostCalls";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
+import { MAJ } from "@/lib/minis/majority";
+import { MajorityPad as MajorityPadAll, WhoPlaysPhone } from "../MajorityGame";
 import { sayWord } from "../SayGame";
 import { CLOSEST } from "@/lib/minis/closest";
 import { FLAG } from "@/lib/minis/flag";
@@ -64,12 +66,6 @@ function useSecretMany(code: string, on: boolean, step: number, again = "") {
     return () => { live = false; clearTimeout(t); };
   }, [code, on, step, again]);
   return s.step == null || s.step === step ? s : {};
-}
-/* each phone its own order of the four (seeded by the player's name: a neighbour's screen tells you nothing) */
-function order<T>(xs: T[], seed: string) {
-  let h = 2166136261; for (const c of seed) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-  const a = xs.slice(); for (let i = a.length - 1; i > 0; i--) { h = Math.imul(h ^ (h >>> 13), 0x5bd1e995) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
 }
 const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onContextMenu: (e: React.MouseEvent) => e.preventDefault() };
 const Line = ({ children, className = "" }: { children: React.ReactNode; className?: string }) =>
@@ -185,7 +181,6 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const [flips, setFlips] = useState<Record<string, boolean>>({});
   useEffect(() => { setFlips((f) => { const n = { ...f }; let ch = false; for (const k of Object.keys(n)) { const [q, t] = k.split("|"); if (q !== String(pub.qid) || pub.reveal?.ok?.[Number(t)] === n[k]) { delete n[k]; ch = true; } } return ch ? n : f; }); }, [pub.reveal, pub.qid]);
   const move = (type: string, extra: Record<string, unknown> = {}) => void send("judge", { move: { type, ...extra } });
-  const opts = useMemo(() => order(pub.options || [], me.name + (pub.qid || "")), [pub.options, me.name, pub.qid]);
   const sentMine = mine != null && pub.sent[mine];
   /* What Do You See?: a buzz in the hand when a new picture opens for buzzing, and on the captain's phone when a
      teammate buzzes (it's this phone that types the answer), as with 2 teams (23 Nov, the owner) */
@@ -216,10 +211,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   const myLie = (() => { if (!fool || sc !== "pick") return null; try { return localStorage.getItem(lieKey); } catch { return null; } })();
   const foolOwn = ownIndex(pub.fool?.opts, myLie), foolT = T.map((t) => ({ name: t.name, color: t.color }));
   useEffect(() => { setSkTheme(null); setSkLevel(null); }, [skRound]);
-  /* a tap locks in at once on this phone (the owner, 1 Nov: the four stayed up a second while the TV answered) */
-  const [tapped, setTapped] = useState<string | null>(null);
   const sideways = useSideways();
-  const voted = !!pub.voted?.includes(me.name) || tapped === `${pub.qid}`, onList = !!pub.roster?.includes(me.name);
+  const onList = !!pub.roster?.includes(me.name);
   /* the host's one main button, docked in thumb reach */
   const Main = ({ label, on }: { label: string; on: () => void }) => { const spin = label === "Spin";
     return <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || (spin && spinTap.pending)} onClick={() => { if (spin) spinTap.press(); on(); }}>{spin && spinTap.pending ? SPINNING : label}</button>; };
@@ -383,16 +376,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {host && sc === "intro" && g && !cb && (<>
         <IntroMany pub={pub} size="phone" />
         {/* Majority Rules: someone who has left comes off their team's list before Start (8 Nov: as with two teams) */}
-        {g.key === "majority" && (
-          <div className="card flex flex-col gap-2 !p-3">
-            <div className="eyebrow">Who plays: take off anyone who has left</div>
-            {members.filter((m) => m.role !== "host" && m.team != null).map((m) => { const off = (pub.mrOut || []).includes(m.name); return (
-              <div key={m.user_id} className="flex items-center gap-3" style={{ opacity: off ? 0.55 : 1 }}>
-                <span className="flex-1 min-w-0 truncate text-15"><b style={{ color: T[m.team as number]?.color }}><bdi>{m.name}</bdi></b>{off ? " · off the list" : ""}</span>
-                <button className="btn btn-sm shrink-0" disabled={busy} onClick={() => move("m/mrOut", { name: m.name })}>{off ? "Put back" : "Take off"}</button>
-              </div>); })}
-          </div>)}
-        <Main label={g.key === "majority" ? "Start: everyone's in" : g.key === "roulette" ? "Spin" : "Start"} on={() => move("m/start")} />
+        {/* (one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
+        {g.key === "majority" && <WhoPlaysPhone teams={T.map((t) => ({ name: t.name, color: t.color }))} list={pub.mrList || []} me={{ name: me.name, team: null }} host busy={busy} onToggle={(name) => move("m/mrOut", { name })} />}
+        <Main label={g.key === "majority" ? MAJ.start : g.key === "roulette" ? "Spin" : "Start"} on={() => move("m/start")} />
       </>)}
       {/* Secret Stakes: the bets as they come in (the host sees every team's); Pause, Change question */}
       {host && sc === "pick" && g && sk && (<>
@@ -434,7 +420,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               const x = typedKey(g.key) ? secret.typed?.[i] : g.key === "closest" && secret.nums?.[i] != null ? showNum(secret.nums[i]!) : null;
               return { key: i, name: t.name, color: t.color, dot: <Dot t={i} color={t.color} size={14} />, lit: !!(pub.sent[i] || bz),
                 typed: x ? <div className="text-14 font-bold leading-snug pl-[22px] break-words"><bdi>{x}</bdi></div> : null,
-                statusColor: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)", status: out ? "✗ out" : bz ? "buzzed!" : g.key === "see" ? "can buzz" : on ? (g.key === "majority" ? "✓ all in" : "✓ in") : "waiting" }; })} />); })()}
+                statusColor: out ? "var(--color-no)" : on ? "var(--color-ok)" : "var(--color-ink-3)", status: g.key === "majority" ? MAJ.count(pub.mrAnswered?.[i]?.[0] ?? 0, pub.mrAnswered?.[i]?.[1] ?? 0) : out ? "✗ out" : bz ? "buzzed!" : g.key === "see" ? "can buzz" : on ? "✓ in" : "waiting" }; })} />); })()}
         {/* the same controls as with two teams: Pause, Change question, Reveal now (the 4 Nov audit, 3.11) */}
         {/* (after the answer and the list, not docked over them: the band covered the answer card and the list of who's
            in, the owner, 12 Nov; as with two teams, where these were never docked) */}
@@ -483,6 +469,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* EVERYONE ELSE */}
       {!host && sc === "intro" && g && (<>
         {cb ? <><h1 className="display text-center" style={{ fontSize: 44, color: "var(--color-gold)" }}>{g.title}</h1><ComebackIntro teams={cbT} c={cb} /></> : <IntroMany pub={pub} size="phone" />}
+        {/* Majority Rules: every phone its team's list, as with 2 teams (25 Nov) */}
+        {g.key === "majority" && <WhoPlaysPhone teams={T.map((t) => ({ name: t.name, color: t.color }))} list={pub.mrList || []} me={{ name: me.name, team: mine ?? null }} />}
         <Line className="mt-auto">{noTv ? "The host starts it." : "Eyes on the TV. The host starts it."}</Line>
       </>)}
 
@@ -493,14 +481,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {!host && sc === "q" && !pub.paused && g?.key === "majority" && (<>
         <p className="text-center text-14 font-bold text-[var(--color-ink-2)]">Your own answer: eyes on your phone, no talking</p>
         <OnScreen />
-        {!onList ? <Line>You joined after it started, so you&rsquo;re watching this one. You&rsquo;ll play the next Majority Rules.</Line>
-          : voted ? <p className="text-center font-bold text-16" role="status">Locked in. The answer comes up when the time&rsquo;s up.</p>
-          : <div className="flex flex-col gap-2">
-            <div className="grid gap-2.5" role="group" aria-label="The four answers">
-              {opts.map((o) => <button key={o} type="button" className="btn btn-lg btn-block mr-opt" disabled={busy} onClick={() => { setTapped(`${pub.qid}`); void send("answer", { pick: o, k: `${pub.qid}|q` }).then((ok) => { if (!ok) setTapped(null); }); }}><bdi>{o}</bdi></button>)}
-            </div>
-            <p className="text-center text-12 text-[var(--color-ink-3)]">One tap, and it&rsquo;s locked.</p>
-          </div>}
+        {/* (one copy for every setup, components/MajorityGame.tsx: a tap the TV turns down lets go of "Locked in", 25 Nov) */}
+        <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|q`} options={pub.options || []} onList={onList} up="q" paused={pub.paused} disabled={busy} ack={pub.ack} noTv={noTv} />
       </>)}
 
       {/* Secret Stakes: the captain bets (a theme, a level, Lock in); everyone else sees the themes, and their captain's bet once it's in */}
@@ -619,6 +601,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {/* sudden death keeps its headline: it's the night's winner */}
         {g.key === "sudden" && <Big text={W.text} color={W.color} />}
         {(() => { const y = youOf(); return y && <YouPill text={y.text} tone={y.tone} />; })()}
+        {/* Majority Rules: this phone's own line, as with 2 teams (25 Nov) */}
+        {g.key === "majority" && <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|q`} options={pub.options || []} onList={onList} up="reveal" answer={R.answer} ack={pub.ack} noTv={noTv} />}
         {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={mine ?? null} teams={rrT} /> : g.key === "stakes" && sk ? <StakesPhone sk={sk} screen="stakesReveal" teams={rrT} me={mine ?? null} /> : <Answer />}
         {g.key !== "stakes" && <Table />}
         <ContestMany pub={pub} mine={cap ? mine : null} host={false} busy={busy} act={(mv) => void send("next", { move: mv })} />

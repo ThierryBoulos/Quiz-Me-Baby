@@ -30,6 +30,7 @@ import { newState, type TvState } from "./tv/state";
 import { setTeams } from "./many/useTvMany";
 import { saveLobbyDraft, useLobbyShare } from "./tv/lobbyShare";
 import { useFreshLeftShare, type FreshLeft } from "./freshLeft";
+import { MAJ } from "./minis/majority";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
    right one, or both out) it's the one whose calls can be contested on the next screen. (true: go on) */
@@ -656,16 +657,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const mrAnswer = (from: Member, p: G): boolean | string => {
     const s = st.current, q = currentQ(s);
     if (!q || !s.mrList) return false;
-    if (s.paused) return "The game is paused.";                            // (the last pick in would be the reveal)
     if (typeof p.k === "string" && p.k !== draftKey()) return false;     // the last question's, landing late
     const e = s.mrList.find((x) => x.uid === from.user_id) || s.mrList.find((x) => x.name.toLowerCase() === from.name.toLowerCase());
-    if (!e) return "You joined after the start: watch this one.";
+    if (!e) return MAJ.late;
     if (e.uid !== from.user_id) e.uid = from.user_id;
     if (s.votes[e.name] != null) return true;                              // (a second tap: the first one stands)
     const pick = String(p.pick ?? "");
     if (!q.options.includes(pick)) return false;
     s.votes = { ...s.votes, [e.name]: pick };
-    if (s.mrList.every((x) => s.votes[x.name] != null)) reveal();        // everyone's in: the reveal
+    /* everyone's in: the reveal (paused, a tap still counts, as in every game: the reveal waits for Resume, 25 Nov) */
+    if (!s.paused && s.mrList.every((x) => s.votes[x.name] != null)) reveal();
     return true;
   };
 
@@ -1730,6 +1731,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* both answers came in while paused: the reveal, now that the game runs again */
       if (!s.paused && ["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(s.screen) && s.typed[0] && s.typed[1]) { reveal(); changed = true; }
       if (!s.paused && s.screen === "pinQ" && s.pins[0] && s.pins[1]) { reveal(); changed = true; }
+      if (!s.paused && s.screen === "majorityQ" && s.mrList?.length && s.mrList.every((x) => s.votes[x.name] != null)) { reveal(); changed = true; }
       /* time's up (a moment after the clock shows 0, see T_GRACE_MS): first, what was typed but not sent goes in */
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };
@@ -1783,11 +1785,15 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (now - here.current.checked > 2000) { here.current.checked = now; void handOver(); }
       /* Majority Rules' join screen: who's on the game screen (and someone taken off who turns up is back on);
          a captain's request nobody answered lapses (they stay on the list) */
-      if (s.screen === "majorityIntro") {
+      if (s.screen !== "majorityIntro") { if (s.mrSince) s.mrSince = 0; }
+      else {
+        if (!s.mrSince) s.mrSince = now;
         const on = ctx.current.members.filter((m) => now - (here.current.at[m.user_id] ?? 0) < T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
         if (on.join() !== (s.mrHere || []).join()) {
+          /* (only someone just back: one taken off while on the screen stays off when anyone else comes or goes) */
+          /* (not in its first seconds: who's here is still being heard then, and a phone just heard isn't one coming back) */
+          const was = s.mrHere || [], back = now - (s.mrSince || now) < 8000 ? [] : ctx.current.members.filter((m) => on.includes(m.user_id) && !was.includes(m.user_id)).map((m) => m.name);
           s.mrHere = on; changed = true;
-          const back = ctx.current.members.filter((m) => on.includes(m.user_id)).map((m) => m.name);
           if (s.mrOut.some((n) => back.includes(n))) s.mrOut = s.mrOut.filter((n) => !back.includes(n));
           if (s.mrAsk && back.includes(s.mrAsk.name)) s.mrAsk = null;
         }

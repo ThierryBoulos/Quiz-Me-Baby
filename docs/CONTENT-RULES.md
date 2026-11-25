@@ -160,7 +160,8 @@ the phone ("switches app or tab") does "app" stay.
 
 - **Majority Rules**: every question has a one-line fact in its notes (it's shown at the reveal); names written
   one way in every option list ("USA", not "The USA"); the app shuffles the options each night. The bank needs
-  plenty of **easy** ones (a game can use 15).
+  plenty of **easy** ones (a game can use 15). Players read them as "four **answers**", never "options" (25 Nov, the
+  owner: How to Play and the night's intro too). Change question takes any question still left at the same level.
 - **Closest To Wins**: a note with the source and the real figure; Sexy Time and Lebanon only when they're the
   night's own themes.
 - **Guess the Map**: a source in the notes; the year in the title when membership changes; labels readable on a

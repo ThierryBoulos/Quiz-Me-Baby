@@ -33,13 +33,18 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
     const teams = Array.from({ length: k }, (_, t) => ({ name: longNames[t], captain: "Captain" + t }));
     const s = L.newNight(teams, decks, keys, { quiz: [4, 6] });   // (the second game three rounds: "Rounds 3, 4 and 5", an odd round never plays alone)
     s.intro = true;
-    const roster = Array.from({ length: k * 3 }, (_, i) => ({ name: ["Nour", "Karim", "Joe", "Maya", "Rami", "Lea", "Tarek", "Zeina"][i % 8] + (i >= 8 ? i : ""), team: i % k }));
+    /* (SCREENS_PLAYERS=8: eight on every team, the biggest list Majority Rules shows: 25 Nov) */
+    const per = Number(process.env.SCREENS_PLAYERS) || 3, PPL = ["Nour", "Karim", "Joe", "Maya", "Rami", "Lea", "Tarek", "Zeina", "Christophe", "Alexandra", "Sami", "Rita", "Hadi", "Yara", "Omar", "Dana",
+      "Fadi", "Lina", "Georges", "Nathalie", "Elie", "Carla", "Jean-Paul", "Mireille", "Ziad", "Hala", "Marc", "Joanna", "Wissam", "Raya", "Antoine", "Stephanie"];
+    const roster = Array.from({ length: k * per }, (_, i) => ({ name: PPL[i % PPL.length] + (i >= PPL.length ? i : ""), team: i % k }));
+    /* the list before Start: most on the game screen, one not here yet, one taken off */
+    const mrList = roster.map((r, i) => ({ ...r, here: i % 7 !== 3, ...(i === 5 ? { out: true } : {}) }));
     let now = Date.UTC(2026, 9, 18, 19, 0, 0);
     const snap = (extra = "") => { const { pub } = buildMany(s); const m = L.miniOf(s); const key = `m${k}.${pub.screen}${m ? "." + m.key : ""}${(pub as { intro?: unknown }).intro ? ".intro" : ""}${extra}`;
       const rec = { pub: JSON.parse(JSON.stringify(pub)), secret: JSON.parse(JSON.stringify(buildMany(s).secret)), now }; if (!got[key + ".a"]) got[key + ".a"] = rec; else got[key + ".z"] = rec; };
     snap(); s.intro = false;
     for (let guard = 0; guard < 3000 && s.screen !== "final"; guard++) {
-      if (s.screen === "intro") { snap(); L.startMini(s, now, T, roster); continue; }
+      if (s.screen === "intro") { if (L.miniOf(s)?.key === "majority") s.mrList = mrList; snap(); delete s.mrList; L.startMini(s, now, T, roster.filter((_, i) => i !== 5)); continue; }
       /* Secret Stakes' bets: before any is in, then with all but one in (the last takes the safe bet at time-up) */
       /* Fool Me Twice: the answers up, none picked; then all but the last (the reveal at time-up) */
       if (s.screen === "pick" && L.miniOf(s)?.key === "fool") { snap(".none"); const F = s.fool!;
@@ -111,6 +116,16 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
       make("allcalled", Array.from({ length: k }, (_, u) => 1 + ((u - 1 + k) % k)));
       make("allfooled", Array.from({ length: k }, (_, u) => (u === 0 ? 0 : 1)));
     }
+    /* Majority Rules' reveal with the bank's longest four answers and longest fact (25 Nov, the owner: "make sure it fits
+       in the maximum case"): each team's count on every answer up to four teams, the room's from five */
+    { const mr = got[`m${k}.reveal.majority.z`] as { pub: Q; secret: Q; now: number } | undefined, deck = (decks.majority || []) as Q[];
+      const long = deck.slice().sort((a, b) => (b.options as string[]).join("").length - (a.options as string[]).join("").length)[0];
+      const note = deck.slice().sort((a, b) => String(b.notes || "").length - String(a.notes || "").length)[0];
+      if (mr && long) { const c = JSON.parse(JSON.stringify(mr));
+        c.pub.question = long.question; c.pub.options = long.options; c.pub.reveal.answer = long.answer; c.pub.reveal.notes = note?.notes || long.notes;
+        c.pub.reveal.byTeam = (long.options as string[]).map((_, i) => c.pub.teams.map((_: unknown, t: number) => (i * 3 + t * 5) % 9));
+        c.pub.reveal.counts = c.pub.reveal.byTeam.map((r: number[]) => r.reduce((a, x) => a + x, 0));
+        got[`m${k}.reveal.majority.extra.long.a`] = c; } }
     /* the night's card with the furthest pin on it (23 Nov, the owner: as with 2 teams), its landmark the longest */
     { const fk = Object.keys(got).find((x) => x.startsWith(`m${k}.final`)), fin = fk ? (got[fk] as { pub: Q }) : undefined;
       if (fin?.pub.final?.awards?.length) { const c = JSON.parse(JSON.stringify(fin)), A = c.pub.final.awards as Q[];

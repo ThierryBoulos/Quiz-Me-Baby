@@ -9,6 +9,7 @@ import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
+import { MAJ } from "@/lib/minis/majority";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -19,7 +20,7 @@ import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { COMEBACK_TITLE } from "@/lib/comeback";
 import { preloadWorld, type Mark } from "./PinMap";
-import { showKm, T_AUCTION, T_MAJORITY, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
+import { showKm, T_AUCTION, T_BATTLE_HOST, T_BATTLE_TYPED, T_DISH_TYPE, type MiniKey, type Pub, type Two, poss } from "@/lib/game";
 
 const ICON = {
   friend: <svg className="ic" viewBox="0 0 24 24" aria-hidden><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>,
@@ -434,11 +435,8 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       /* (short, the same with or without a host, rule 1 as with 3 to 8: 23 Nov; the city always counts, no rule for
          it: 24 Nov, the owner) */
       { text: AIRPORT.rule1(t?.airport) }, ...AIRPORT.rules2(n, pts).map((text) => ({ text }))];
-    case "majority": return [
-      { text: "Everyone plays on their own phone, captains too. The lists are fixed at Start.", warn: true },
-      { text: `${n} questions, four answers, ${sec(t?.majority, T_MAJORITY)} each. One tap and it's locked. No answer counts as wrong.` },
-      { text: "Eyes on your own phone: every phone has the answers in a different order." },
-      { text: `Each team scores the share of its answers that are right, so a smaller team isn't at a disadvantage. The higher share takes ${pts}.` }];
+    /* (the first three the same in every setup, the owner's words: 25 Nov) */
+    case "majority": return [...MAJ.rules(n, t?.majority), { text: MAJ.ruleTwo(pts) }];
     /* Russian Roulette (9 Nov, the owner): one barrel, both captains at once, one bullet in the whole game */
     /* (shorter, so it fits the TV; and the bullet is no secret now: everyone sees who drew it once the barrel stops,
        11 Nov, the owner) */

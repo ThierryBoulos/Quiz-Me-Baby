@@ -7,6 +7,7 @@ import { wholeSentences } from "@/lib/sentences";
 import { useEffect, useState } from "react";
 import { FitBody } from "../TvStage";
 import { useToastOn, WinName } from "../Motion";
+import { MajorityRevealTv, MajorityTv, WhoPlaysTv } from "../MajorityGame";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock, useSecondsLeft } from "../Clock";
 import { Confetti } from "../GameParts";
@@ -30,7 +31,7 @@ import { PinRevealTv, PinTv } from "../Pin";
 import { FlagTv } from "../Flag";
 import { SentLine, TeamCalls } from "../TeamCalls";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "../Comeback";
-import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, Dot, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, takes, resultDone } from "./PartsMany";
+import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, takes, resultDone } from "./PartsMany";
 
 /* a delay after the beat, for the pieces of a reveal that land one after another */
 const d = (s: number) => ({ ["--d" as string]: s + "s" });
@@ -38,7 +39,7 @@ const d = (s: number) => ({ ["--d" as string]: s + "s" });
 const QUICK = { ["--beat" as string]: ".15s" };
 
 /* join: where a phone joins this room (Majority Rules puts the QR code up again before it starts)
-   host: who taps Start and Next (the strip at the bottom says so); seats: players on each team (the join screen's counts) */
+   host: who taps Start and Next (the strip at the bottom says so) */
 /* sound: this is the TV itself (it plays the pours and the coins landing; another screen showing the TV stays quiet) */
 /* the TV's line while the night waits for a host (8 Nov): big enough to read across the room */
 function HostGoneTv({ info }: { info: { name: string | null; openAt: number } }) {
@@ -48,7 +49,7 @@ function HostGoneTv({ info }: { info: { name: string | null; openAt: number } })
     {left > 0 ? `In ${left} s, anyone can take over as the host on their phone.` : "Anyone can take over now: tap Be the host on your phone."}</span>;
 }
 
-export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany; join?: { url: string; code: string }; host?: string; seats?: number[]; sound?: boolean }) {
+export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?: { url: string; code: string }; host?: string; sound?: boolean }) {
   const g = pub.game, R = pub.reveal, T = pub.teams, k = T.length, dense = k > 4;
   const key = pub.screen + pub.step;
   /* a message shows for four seconds, then goes */
@@ -82,7 +83,7 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
             <div className="flex-1 min-w-0"><IntroMany pub={pub} size="tv" compact /></div>
             {/* joining: the code and its QR side by side, one short line under them; then who's in, a team a row,
                 the name on the left and its count lined up on the right (the owner, 31 Oct: it read untidy) */}
-            <div className="w-[440px] shrink-0 flex flex-col gap-4 text-left">
+            <div className="w-[560px] shrink-0 flex flex-col gap-4 text-left">
               {join && (<>
                 <div className="flex items-center gap-5">
                   <div className="rounded-[16px] p-2.5 bg-[#f4f6ff] shrink-0"><QRCodeSVG value={join.url} size={dense ? 112 : 132} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
@@ -92,18 +93,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
                   </div>
                 </div>
               </>)}
-              {seats && (
-                <div className="card !py-2 !px-4 flex flex-col" role="list" aria-label="Who's in, team by team">
-                  <div className="eyebrow text-18 mb-1">On each team&rsquo;s list</div>
-                  <div className={"grid gap-x-6 " + (k > 4 ? "grid-cols-2" : "grid-cols-1")}>
-                    {T.map((t, i) => (
-                      <div key={i} role="listitem" className="flex items-center gap-2 min-w-0 py-0.5" style={{ fontSize: 18 }}>
-                        <Dot t={i} color={t.color} size={k > 4 ? 14 : 16} />
-                        <span className="font-bold truncate flex-1" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
-                        <span className="tabular-nums font-bold shrink-0 text-[var(--color-ink-2)]">{seats[i] ?? 0}</span>
-                      </div>))}
-                  </div>
-                </div>)}
+              {/* (who plays: one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
+              <WhoPlaysTv teams={T.map((t) => ({ name: t.name, color: t.color }))} list={pub.mrList || []} />
             </div>
           </div>) : g.key === "comeback" && pub.comeback ? (<>
             {/* the comeback (17 Nov, the owner): the announcement in the owner's words, what it takes, what each team can win */}
@@ -168,15 +159,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
         {/* (Closest To Wins, Drop the Pin, Guess the Airport: one copy for every setup, components/Closest.tsx, Pin.tsx, Airport.tsx) */}
         {pub.screen === "q" && g && g.key === "closest" && <ClosestTv question={pub.question} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 140 : 150} />} sent={<Sent pub={pub} />} />}
         {pub.screen === "q" && g && g.key === "pin" && <PinTv pin={pub.pin} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 120 : 130} />} sent={<Sent pub={pub} column={!dense} />} />}
-        {pub.screen === "q" && g && g.key === "majority" && pub.options && (<>
-          <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 36 : 44, lineHeight: 1.12 }}>{pub.question}</div>
-          <div className="grid grid-cols-2 gap-4 w-full max-w-[1400px]">{pub.options.map((o) => <div key={o} className="mr-tv-opt rev"><span className="flex-1 min-w-0"><bdi>{o}</bdi></span></div>)}</div>
-          <div className="flex items-center gap-10">
-            <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={100} />
-            <Answered pub={pub} />
-          </div>
-          <Sent pub={pub} />
-        </>)}
+        {pub.screen === "q" && g && g.key === "majority" && pub.options && <MajorityTv question={pub.question} options={pub.options} teams={T.map((t) => ({ name: t.name, color: t.color }))}
+          answered={pub.mrAnswered || []} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={100} />} sent={<Sent pub={pub} />} />}
 
         {/* the reveal: the answer lands, then the calls, then who takes it */}
         {pub.screen === "reveal" && g && R && g.key === "flag" && <FlagTv flag={pub.flag} reveal dense={dense} answer={R.answer} notes={R.notes}
@@ -219,23 +203,8 @@ export function TvMany({ pub, join, host, seats, sound = false }: { pub: PubMany
           marks={[{ at: R.at, kind: "truth", color: "#F5C518", label: R.answer },
             ...T.map((t, i) => (R.pins?.[i] ? { at: R.pins[i]!, kind: "pin" as const, color: t.color, ...(T.length > 4 ? { label: showKm(R.off?.[i] ?? 0), letter: LETTERS[i] } : { label: `${t.name.replace(/[⁨⁩]/g, "")} · ${showKm(R.off?.[i] ?? 0)}` }) } : null)).filter((x): x is NonNullable<typeof x> => !!x)]}
           rows={<RowsMany pub={pub} order={byDistance(pub)} right={(t) => kmOf(pub, t)} size="tv" pts={R.pts} />} />}
-        {pub.screen === "reveal" && g && R && g.key === "majority" && R.counts && (<>
-          <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 36 : 44, lineHeight: 1.12 }}>{pub.question}</div>
-          <div className="grid grid-cols-2 gap-4 w-full max-w-[1400px]">{(pub.options || []).map((o, i) => { const ok = R.answer === o;
-            /* the wrong answers drop away one after another, then the right one lights up; how many picked each */
-            const n = (pub.options || []).filter((x, j) => j < i && x !== R.answer).length;
-            return (
-              <div key={o} className={"mr-tv-opt rev " + (ok ? "ok mr-win" : "dim mr-out")} style={d(ok ? 0.75 : 0.12 + n * 0.2)}>
-                <span className="flex-1 min-w-0"><bdi>{o}</bdi></span>
-                <span className="shrink-0 text-26 mr-counts flex items-baseline gap-2" aria-label={`${R.counts![i] ?? 0} picked it`}><b>{R.counts![i] ?? 0}</b><span className="text-18 text-[var(--color-ink-2)]">{(R.counts![i] ?? 0) === 1 ? "pick" : "picks"}</span></span>
-              </div>); })}</div>
-          {R.notes && <div className="max-w-[1300px] text-26 leading-snug -mt-1" style={{ color: "var(--color-gold)" }}>{R.notes}</div>}
-          {/* this question, team by team; the game so far is in the bar at the top */}
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 max-w-[1200px] mr-counts" style={{ fontSize: dense ? 20 : 24 }}>
-            <span className="text-[var(--color-ink-2)]">This one:</span>
-            {T.map((t, i) => <span key={i} className="whitespace-nowrap"><b style={{ color: t.color }}><bdi>{t.name}</bdi></b> {R.right?.[i] ?? 0} of {R.of?.[i] ?? 0} right</span>)}
-          </div>
-        </>)}
+        {pub.screen === "reveal" && g && R && g.key === "majority" && R.counts && <MajorityRevealTv question={pub.question} options={pub.options || []} answer={R.answer || ""} notes={R.notes}
+          teams={T.map((t) => ({ name: t.name, color: t.color }))} byTeam={R.byTeam} counts={R.counts} right={R.right || []} of={R.of || []} fire={pub.mrFire} />}
 
         {/* a game's result: the board, and who it pays */}
         {pub.screen === "summary" && g && g.key !== "stakes" && pub.summary && (<>
@@ -324,19 +293,12 @@ const shownTeams = (pub: PubMany) => pub.teams.map((t, i) => ({ i, name: t.name,
 function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
   const pin = pub.game?.key === "pin", mr = pub.game?.key === "majority";
   /* (a wrong guess in the Cocktail or Dish reads "locked in" too: who got it shows at the reveal, the owner, 2 Nov) */
-  return <SentLine teams={shownTeams(pub)} sent={(i) => !!pub.sent[i]} column={column} on={pin ? "pin in" : mr ? "all in" : "locked in"} off={pin ? "placing…" : mr ? "answering…" : "thinking…"} />;
+  return <SentLine teams={shownTeams(pub)} sent={(i) => !!pub.sent[i]} column={column} on={pin ? "pin in" : "locked in"} off={pin ? "placing…" : mr ? "answering…" : "thinking…"} />;
 }
 function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: "tv" | "phone"; delay?: (i: number) => React.CSSProperties }) {
   const R = pub.reveal!, say = pub.game?.key === "say";
   return <TeamCalls teams={shownTeams(pub)} size={size} delay={delay} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]} pts={(i) => R.pts?.[i]} places={(i) => (say ? null : R.places?.[i])}
     word={say ? (i) => sayWord(R.ok?.[i], R.typed?.[i], R.why?.[i]) : undefined} />;
-}
-/* Majority Rules: how many of the room have answered (the roster is names only, so the count is the room's;
-   each team's state is the row under the clock) */
-function Answered({ pub }: { pub: PubMany }) {
-  const roster = pub.roster || [], voted = new Set(pub.voted || []);
-  const n = roster.length, v = roster.filter((r) => voted.has(r)).length;
-  return <span className="font-bold text-26 text-left" style={{ color: v >= n && n > 0 ? "var(--color-ok)" : "var(--color-ink-2)" }}>{v} of {n}<br />answered</span>;
 }
 
 /* a game's name in lines that fit its stretch of the chart (a capital about 0.7 of the size wide, with the spacing) */

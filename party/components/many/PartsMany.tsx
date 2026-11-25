@@ -14,6 +14,7 @@ import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
+import { MAJ } from "@/lib/minis/majority";
 import { CLOSEST } from "@/lib/minis/closest";
 import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
@@ -210,10 +211,7 @@ function rules(pub: PubMany): (string | { text: string; warn?: boolean })[] {
   const pay = `The game's places add to the night: ${PLACE_PTS.slice(0, k).map((p, i) => `${place(i + 1)} ${p}`).join(", ")}. Score nothing, add ${PLACE_PTS[k - 1]}.`;
   const fast = `Fastest right answer first: ${per}`;
   switch (g.key) {
-    case "majority": return [
-      "Everyone plays and answers on their own phone, captains too.",
-      `${n} questions, 4 answers each. One tap and it's locked.`,
-      "Teams are ranked by the share of their answers that are right.", pay];
+    case "majority": return [...MAJ.rules(n, pub.introSecs), MAJ.ruleMany, pay];
     /* the round's themes are in the gold band above ("4 questions – Science & Music"), not said again here (the owner, 31 Oct) */
     case "quiz": return ["Captains type the answer on their phone.", fast, pay];
     case "flag": return [FLAG.rule1(pub.introSecs), fast, pay];

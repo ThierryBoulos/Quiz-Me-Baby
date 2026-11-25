@@ -2,6 +2,7 @@ import { QMB } from "../engine";
 import { MINI_TITLES, showNum, type MiniKey, type Pub, type Two } from "../game";
 import { other, type G } from "./rules";
 import type { TvState } from "./state";
+import { MAJ } from "../minis/majority";
 
 /* the night in a few lines: how close it was, lead changes, steals, mini-games won, the most one-sided mini-game */
 export function recap(s: TvState): NonNullable<Pub["recap"]> {
@@ -45,8 +46,6 @@ function chartOf(L: Two<number>[]): Two<number>[] {
   for (let i = 0; i < 48; i++) out.push(pts[Math.round(i * step)]);
   return out;
 }
-/* names in a sentence: "Lea", "Lea & Omar", "Lea, Dana & Omar"; more than three, counted */
-const names = (L: string[]) => (L.length > 3 ? `${L.length} players` : L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join(""));
 /* where in the night: "R2" says "Round 2" */
 const where = (label: string) => (/^R\d+$/.test(label) ? "Round " + label.slice(1) : label === "Sudden death" ? "sudden death" : /^Battle/.test(label) ? "the " + label : label);
 type Award = NonNullable<NonNullable<Pub["recap"]>["awards"]>[number];
@@ -94,18 +93,8 @@ function awardsOf(s: TvState, steals: Two<number>, best: NonNullable<Pub["recap"
       ([sub.gA, sub.gB] as (number | null)[]).forEach((x, t) => { if (x == null) return; const r = Math.abs(x - ans) / Math.max(Math.abs(ans), 1e-9); if (r > wild) { wild = r; wt = t as 0 | 1; wg = x; wq = sub.q; } }); }
     if (wild >= 0.5 && wq) { const Q = String(wq.question || "");
       A.wild = { t: "Wildest guess, Closest To Wins", who: `${nm(wt)} said ${showNum(wg)}, it was ${showNum(Number(wq.answer))}`, team: wt, note: Q.length > 80 ? Q.slice(0, 79) + "…" : Q || undefined }; } }
-  /* Majority Rules: the sharpest player, and the wooden spoon with a word from the judges (29 Oct) */
-  const who = (g.majorityGame?.who || {}) as Record<string, { r: number; of: number; team: 0 | 1 }>;
-  const mr = Object.entries(who).filter(([, x]) => x.of > 0);
-  if (mr.length >= 2) {
-    const hi = Math.max(...mr.map(([, x]) => x.r)), lo = Math.min(...mr.map(([, x]) => x.r)), of = Math.max(...mr.map(([, x]) => x.of));
-    const top = mr.filter(([, x]) => x.r === hi), worst = mr.filter(([, x]) => x.r === lo), one = (M: typeof mr) => (M.length === 1 ? M[0][1].team : null);
-    if (hi > lo) {
-      A.sharp = { t: "Sharpest in Majority Rules", who: `${names(top.map(([k]) => k))}, ${hi} of ${of}`, team: one(top) };
-      const coin = Math.round(of / 4), quip = lo === 0 ? `Zero. Guessing blind gets about ${coin}.` : lo < coin ? `Guessing blind gets about ${coin}. Just saying.` : lo === coin ? "Exactly what a coin would get. Respect." : "Last, but with dignity.";
-      A.spoon = { t: "Wooden spoon, Majority Rules", who: `${names(worst.map(([k]) => k))}, ${lo} of ${of}`, team: one(worst), note: quip, spoon: true };
-    }
-  }
+  /* Majority Rules: the sharpest player, and the least right said plainly (every setup: lib/minis/majority.ts, 25 Nov) */
+  { const M = MAJ.awards((g.majorityGame?.who || {}) as Record<string, { r: number; of: number; team: 0 | 1 }>); if (M) { A.sharp = { ...M.sharp, team: M.sharp.team as 0 | 1 | null }; A.spoon = { ...M.spoon, team: M.spoon.team as 0 | 1 | null }; } }
   /* in this order; more than eight, the plainest go first (best aim, then the thief) */
   const keys = ["comeback", "wire", "oneSided", "thief", "battle", "aim", "far", "wild", "sharp", "spoon"].filter((k) => A[k]);
   for (const k of ["aim", "thief", "battle"]) if (keys.length > 8 && keys.includes(k)) keys.splice(keys.indexOf(k), 1);

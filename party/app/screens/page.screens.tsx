@@ -96,7 +96,7 @@ export default function Screens() {
   if (!rec) return null;
 
   const { pub, secret } = rec, many = Array.isArray(pub.teams) && !("r" in pub);
-  if (mode[0] === "tv") return <TvStage>{many ? <TvMany pub={pub} join={JOIN} host="Nour" seats={pub.teams.map(() => 3)} />
+  if (mode[0] === "tv") return <TvStage>{many ? <TvMany pub={pub} join={JOIN} host="Nour" />
     : <TvGame pub={pub} onExit={() => {}} onAgain={() => {}} join={JOIN} host={mode[1]?.startsWith("h.") ? "Nour" : undefined} />}</TvStage>;
 
   const role = mode[1], noTv = mode[0] === "pn";

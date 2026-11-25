@@ -1379,6 +1379,7 @@
     map:{ done:'New map.', none:'No other map left at these levels.' },
     say:{ done:'New question.', none:'No other question left.' },
     dish:{ done:'New recipe.', none:'No other recipe left at these levels.' },
+    majority:{ done:'New question.', none:'No other question left at these levels.' },
   };
   const spareLike = (s) => { const cur = s.qs[s.i], i = spareAt(s.spare, cur && cur.level); return s.spare.splice(i, 1)[0]; };
   const freshLeg = () => ({ shown:1, out:[false, false], buzz:null, calls:[], k:0 });
@@ -1672,7 +1673,7 @@
       if(s.spare && s.spare.length){
         s.qs.push(s.spare.shift());
         s.tieLegs++;
-        fx.push({ toast:'Tied — one more question.', ms:3600 });
+        /* (no toast: the game stops on its own tie screen first, "Tied at N each", which clears it) */
         fx.push({ go:'majorityQ' });
         return fx;
       }
@@ -2711,9 +2712,9 @@
     },
     'majority/swap'(g){
       const s = g.majorityGame;
-      if(!s.spare.length) return [{ toast:'No other question left at these levels.' }];
+      if(!s.spare.length) return [{ toast:SWAP_WORDS.majority.none }];
       s.qs[s.i] = spareLike(s);
-      return [{ toast:'New question.' }, { go:'majorityQ' }];
+      return [{ toast:SWAP_WORDS.majority.done }, { go:'majorityQ' }];
     },
     /* right: how many on each team's list got this one right (no answer is a wrong one) */
     'majority/settle'(g, a){

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { FitBody } from "./TvStage";
+import { MajorityRevealTv, MajorityTv, WhoPlaysTv } from "./MajorityGame";
 import { QRCodeSVG } from "qrcode.react";
 import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
@@ -295,45 +296,15 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
           <div><div className="display leading-none" style={{ fontSize: 88, color: "var(--color-gold)", letterSpacing: "0.08em" }}>{join.code}</div>
             <div className="text-20 text-[var(--color-ink-2)] mt-2">Not in yet? Scan, pick your team, and you&rsquo;re on its list.</div></div>
         </div>}
-        <div className="grid grid-cols-2 gap-6">{([0, 1] as const).map((t) => (
-          <div key={t} className="flex flex-col gap-1">
-            <div className="display text-28" style={{ color: tc(t) }}>{T[t].name} · {L.filter((x) => x.team === t && !x.out).length}</div>
-            {L.filter((x) => x.team === t).map((x) => (
-              <div key={x.name} className="text-22 flex items-center gap-2" style={{ opacity: x.out ? 0.4 : 1, textDecoration: x.out ? "line-through" : undefined }}>
-                <span style={{ color: x.here ? "var(--color-ok)" : "var(--color-ink-3)" }} aria-hidden>{x.here ? "●" : "○"}</span><span className="truncate">{x.name}</span>
-                {!x.here && !x.out && <span className="text-16 text-[var(--color-ink-3)]">not here</span>}</div>))}
-          </div>))}</div>
+        {/* (who plays: one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
+        <WhoPlaysTv teams={[0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }))} list={L} />
         {A && <div className="card text-20" style={{ borderColor: "var(--color-gold)" }} role="status"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b> ask to take <b>{A.name}</b> off their list. The other captain decides.</div>}
       </div>
     </div>); }
-  if ((sc === "majorityQ" || sc === "majorityReveal") && pub.majority) { const M = pub.majority, R = M.reveal; return (<>
-    <div className="font-bold max-w-[1400px]" style={{ fontSize: (pub.question || "").length > 90 ? 40 : 50, lineHeight: 1.12 }}>{pub.question}</div>
-    <div className="grid grid-cols-2 gap-5 w-full max-w-[1400px]">{(M.options || []).map((o, i) => { const ok = R?.answer === o;
-      /* the reveal: the wrong answers drop away one after another, then the right one lights up */
-      const k = (M.options || []).filter((x, j) => j < i && x !== R?.answer).length;
-      return (
-      <div key={o} className={"mr-tv-opt " + (R ? (ok ? "ok rev mr-win" : "dim rev mr-out") : "")} style={R ? d(ok ? 0.75 : 0.12 + k * 0.2) : undefined}>
-        <span className="flex-1 min-w-0"><bdi>{o}</bdi></span>
-        {/* how many on each team picked it: a dot in the team's colour, and the number */}
-        {R && <span className="flex gap-5 shrink-0 text-26 mr-counts" aria-label={`${T[0].name} ${R.counts[i]?.[0] ?? 0}, ${T[1].name} ${R.counts[i]?.[1] ?? 0}`}>{[0, 1].map((t) => (
-          <span key={t} className="flex items-center gap-2"><span className="inline-block w-4 h-4 rounded-full" style={{ background: tc(t as 0 | 1) }} aria-hidden /><b>{R.counts[i]?.[t] ?? 0}</b></span>))}</span>}
-      </div>); })}</div>
-    {/* the fact behind the answer, right under it, for the whole room */}
-    {R?.notes && <div className="max-w-[1300px] text-28 leading-snug -mt-1" style={{ color: "var(--color-gold)" }}>{R.notes}</div>}
-    {R && pub.mrFire && <div className="text-26 font-bold enter">{pub.mrFire.map((f) => <span key={f.name} className="mx-3"><span className="flame">🔥</span>{f.name} · {f.n} in a row</span>)}</div>}
-    {!R ? (
-      <div className="flex items-center gap-12">
-        <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-        <div className="flex flex-col gap-1 text-left">{[0, 1].map((t) => (
-          <span key={t} className="font-bold text-26" style={{ color: tc(t as 0 | 1) }}>{T[t].name}: {M.answered?.[t] ?? 0} of {M.n?.[t] ?? 0} answered</span>))}</div>
-      </div>) : (
-      <div className="flex flex-col items-center gap-2">
-        {/* this question; the game so far is in the bar at the top, which counts this question already */}
-        <div className="text-26">This one: {[0, 1].map((t) => <span key={t}>{t ? " · " : ""}<b style={{ color: tc(t as 0 | 1) }}>{T[t].name}</b> {R.right[t]} of {M.n?.[t] ?? 0} right</span>)}</div>
-        {/* with no fact to tell, the game so far (the bar above has it too) */}
-        {!R.notes && <div className="text-20 text-[var(--color-ink-2)]">So far: {M.totals?.right[0]} of {M.totals?.of[0]} answers right, and {M.totals?.right[1]} of {M.totals?.of[1]}</div>}
-      </div>)}
-  </>); }
+  /* (one copy for every setup, components/MajorityGame.tsx: 25 Nov) */
+  if ((sc === "majorityQ" || sc === "majorityReveal") && pub.majority) { const M = pub.majority, R = M.reveal, mt = [0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }));
+    return R ? <MajorityRevealTv question={pub.question} options={M.options || []} answer={R.answer} notes={R.notes} teams={mt} byTeam={R.counts} right={R.right} of={[M.n?.[0] ?? 0, M.n?.[1] ?? 0]} fire={pub.mrFire} />
+      : <MajorityTv question={pub.question} options={M.options || []} teams={mt} answered={[0, 1].map((t) => [M.answered?.[t] ?? 0, M.n?.[t] ?? 0] as [number, number])} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />} />; }
   if (/Intro$/.test(sc)) return (<>
     {/* the Battle: the two captains fly in from their sides, VS slams down between them */}
     <div className="w-full max-w-[1080px]"><MiniIntro pub={pub} size="tv" head={sc === "battleIntro" && pub.captains ? (

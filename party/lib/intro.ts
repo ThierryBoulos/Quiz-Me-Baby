@@ -19,7 +19,7 @@ const TWO: Record<string, string> = {
   flag: "Name the flag.",
   pin: "A landmark photo. Pin it on the world map.",
   airport: "A departures board. Name the airport.",
-  majority: "Everyone plays on their own phone. Four options, one tap.",
+  majority: "Everyone plays on their own phone. Four answers, one tap.",
   dish: "Ingredients one at a time. Buzz and name it.",
   see: "A picture gets clearer. Know it? Buzz, say it out loud and type it.",
   fool: "A strange fact with a blank. Write a lie, then pick the truth.",

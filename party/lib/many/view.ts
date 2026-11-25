@@ -49,7 +49,7 @@ export type PubMany = {
   roster?: string[];                              // Majority Rules: who plays
   voted?: string[];                               // ...and who has answered (names only, never what)
   reveal?: { answer: string; notes?: string; typed?: (string | null)[]; ok?: (boolean | null)[]; nums?: (number | null)[]; off?: (number | null)[];
-    pins?: (LatLon | null)[]; at?: LatLon; place?: string; winners: number[]; counts?: number[]; right?: number[]; of?: number[];
+    pins?: (LatLon | null)[]; at?: LatLon; place?: string; winners: number[]; counts?: number[]; byTeam?: number[][]; right?: number[]; of?: number[];
     why?: (string | null)[];                      // Don't Say the Same: why an answer doesn't score ("said", "off", "same")
     places?: (number | null)[]; pts?: number[];
     app?: (boolean | null)[] };                   // the app's own calls, before the host flipped any            // this leg's places and what they pay this game
@@ -69,6 +69,9 @@ export type PubMany = {
   contested?: number[];
   hostGone?: { name: string | null; since: number; openAt: number } | null;   // the night waits for a host (TV time)
   mrOut?: string[];                               // Majority Rules: taken off the list (the host's, at its intro)
+  mrList?: { name: string; team: number; here: boolean; out?: boolean }[];   // ...every team's list at the intro (who's here, who's off)
+  mrAnswered?: [number, number][];                // ...each team's answered, of its list, while a question is up
+  mrFire?: { name: string; n: number }[];         // ...a player right every question so far, at the reveal
   imad?: { id: number; text: string; mood?: string };   // Imad's latest line (the TV's bubble)
   flags?: FlagM[];                                // left the screen during a question, or pasted (the host's list; no host: the captains')
 };
@@ -79,7 +82,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
   out?: boolean[] };                            // the Cocktail or Dish: the teams whose one guess was wrong (the host's phone only)
 
 /* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
-export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number; say?: number; dish?: number }): { pub: PubMany; secret: SecretMany } {
+export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number; say?: number; dish?: number; majority?: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
   const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
@@ -97,7 +100,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.screen === "q" && s.deadline && Date.now() >= s.deadline) pub.timeUp = true;
   if (m && s.screen !== "final") { const P = preloadOf(m.key, m.qs as { flag?: string; id?: string; photo?: string }[], m.i, s.screen === "intro"); if (P) pub.preload = P; }
   /* Russian Roulette's intro: the seconds, for its rules (as with 2 teams: 22 Nov, the owner) */
-  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say" || m.key === "dish")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
+  if (m && s.screen === "intro" && (m.key === "roulette" || m.key === "flag" || m.key === "closest" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say" || m.key === "dish" || m.key === "majority")) { const v = t?.[m.key]; if (v != null) pub.introSecs = v; }
   /* the Cocktail or Dish's band names tonight's kinds, as with 2 teams ("5 recipes · Cocktails + dishes": 24 Nov) */
   if (m && s.screen === "intro" && m.key === "dish") { const k = new Set(m.qs.map((q) => dishKind(q as never))); pub.dishKinds = k.size > 1 ? "Cocktails + dishes" : k.has("Cocktail") ? "Cocktails" : "Dishes"; }
   if (m?.key === "stakes") {
@@ -148,7 +151,9 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     }
     else pub.question = q.question;
     if (m.key === "quiz" && q.theme) pub.theme = q.theme;
-    if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes); }
+    if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes);
+      /* each team's count: answered, and on its list (the TV and the host's phone, up to four teams: 25 Nov) */
+      pub.mrAnswered = s.teams.map((_, t) => { const L = s.roster.filter((r) => r.team === t); return [L.filter((r) => s.votes[r.name] != null).length, L.length]; }); }
   }
   if (m?.key === "comeback" && m.cb && m.only) pub.comeback = { teams: [...m.only], target: [...m.cb.target], before: [...m.cb.before], i: m.i, of: m.qs.length, out: [...m.cb.out],
     ...(m.cb.made ? { made: [...m.cb.made], after: [...(m.cb.after || m.cb.before)] } : {}) };
@@ -156,6 +161,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.hostGone) pub.hostGone = s.hostGone;
   if (s.flags?.length) pub.flags = s.flags.slice(-30);
   if (s.mrOut?.length) pub.mrOut = s.mrOut;
+  if (m?.key === "majority" && s.screen === "intro" && s.mrList) pub.mrList = s.mrList;
   if (s.imad) pub.imad = s.imad;
   if (m && q && s.screen === "reveal") {
     /* (sudden death pays the night one point, to the fastest right answer) */
@@ -168,7 +174,10 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
       ...(m.key === "say" ? { why: s.why } : {}) };
     else if (m.key === "closest") pub.reveal = { answer: String(q.answer), notes: q.notes, nums: s.nums, off: distances(s), winners: w, ...pl };
     else if (m.key === "pin") pub.reveal = { answer: q.answer, place: q.place, at: { lat: q.lat, lon: q.lon }, pins: s.pins, off: distances(s), winners: w, ...pl };
-    else { const c = mrCount(s); pub.reveal = { answer: q.answer, notes: q.notes, counts: c.counts, right: c.right, of: c.of, winners: [] }; }
+    else { const c = mrCount(s); pub.reveal = { answer: q.answer, notes: q.notes, counts: c.counts, byTeam: c.byTeam, right: c.right, of: c.of, winners: [] };
+      /* a player right ten in a row (counting this one) gets a flame, as with 2 teams (25 Nov) */
+      const hot = s.roster.map((r) => ({ name: r.name, n: s.votes[r.name] === q.answer ? (s.who[r.name]?.run || 0) + 1 : 0 })).filter((x) => x.n >= 10);
+      if (hot.length) pub.mrFire = hot; }
     { const app = appCalls(s); if (app && pub.reveal) pub.reveal.app = app; }
   }
   if (m && s.screen === "summary") pub.summary = { wins: [...m.wins], pts: [...m.pts], shares: m.key === "majority" ? s.teams.map((_, t) => share(m, t)) : undefined,

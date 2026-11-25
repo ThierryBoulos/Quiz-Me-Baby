@@ -16,6 +16,7 @@ import { offBy, poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_LEVELS, type SkPick } from "../stakes";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
+import { MAJ } from "../minis/majority";
 
 export const MANY_MINIS = ["quiz", "majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "fool", "roulette", "stakes"] as const;
 /* sudden death isn't picked: it comes when the night ends with teams tied at the top. Nor is the comeback: it comes
@@ -101,7 +102,7 @@ export type StateM = {
   ok: (boolean | null)[];                       // this leg's call per team (the app's, then the host's)
   roster: { name: string; team: number }[];     // Majority Rules: who plays (fixed at its start)
   votes: Record<string, string>;
-  who: Record<string, { r: number; of: number; team: number }>;
+  who: Record<string, { r: number; of: number; team: number; run?: number }>;
   toast: { id: number; text: string } | null; toastN: number;
   exit?: boolean; log: number[][];            // the scores after each game, for the final chart
   spare: Q[];                                   // questions held back for sudden death
@@ -122,6 +123,9 @@ export type StateM = {
   /* phones that left the game screen during a question, or pasted an answer (8 Nov: as with two teams) */
   flags?: FlagM[]; flagN?: number;
   mrOut?: string[];                             // Majority Rules: players the host took off the list (they've left), before Start
+  mrHere?: string[];                            // ...and who is on the game screen meanwhile (user ids): someone taken off who's back is put back (25 Nov)
+  mrSince?: number;                             // ...since when the intro has been listening for who's here
+  mrList?: { name: string; team: number; here: boolean; out?: boolean }[];   // ...every team's list as it stands, for the screens (the TV fills it)
   mapHint?: boolean;                            // Guess the Map: the host showed this map's hint (8 Nov: as with two teams)
   /* Imad, the MC (8 Nov: as with two teams; lib/many/imad.ts): his latest line, and what he's said */
   imad?: { id: number; text: string; mood?: string }; imadN?: number; imadUsed?: Record<string, number[]>; imadOnce?: Record<string, boolean>; imadLeader?: number | null;
@@ -154,7 +158,7 @@ export function newNight(teams: { name: string; captain: string }[], decks: Part
   const extra: Partial<Record<ManyKey, Q[]>> = {};
   /* (Guess the Flag and What Do You See? keep 40 of the spares dealt past the game, every level mixed, so Change flag
      or picture finds one at the same level, as with 2 teams: 23 Nov. The TV holds the bank anyway; the phones never get the answers) */
-  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" || key === "pin" || key === "airport" || key === "map" || key === "dish" ? 40 : 4));
+  for (const key of Object.keys(used) as ManyKey[]) if (key !== "sudden") extra[key] = (decks[key] || []).slice(used[key] ?? 0, (used[key] ?? 0) + (key === "flag" || key === "see" || key === "pin" || key === "airport" || key === "map" || key === "dish" ? 40 : key === "majority" ? Infinity : 4));
   extra.comeback = (decks.comeback || []).slice(MANY_LEGS.comeback);
   /* (a question round's Change question stays in the question's theme: the rounds' spares, then the questions held
      back past sudden death's, one pair per theme in turn: 19 Nov review, a Science question became Geography) */
@@ -204,8 +208,8 @@ export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
     clear(s); s.paused = false; s.deadline = Math.max(now, (s.spinAt ?? 0) + SPIN_MS) + s.total * 1000; s.left = 0; s.step++; toast(s, QMB.RR_SWAPPED as string); return true;
   }
   /* Guess the Flag and What Do You See?: a spare at the same level, else another level, as with 2 teams (23 Nov, the
-     owner) */
-  if (m.key === "flag" || m.key === "see" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say" || m.key === "dish") {
+     owner; Majority Rules too, from every question its deck has left: 25 Nov) */
+  if (m.key === "flag" || m.key === "see" || m.key === "pin" || m.key === "airport" || m.key === "map" || m.key === "say" || m.key === "dish" || m.key === "majority") {
     const L = s.extra?.[m.key] || [], j = QMB.spareAt(L, qOf(s)?.level) as number;
     /* (the words: the engine's, one copy for every setup) */
     const W = QMB.SWAP_WORDS[m.key] as { done: string; none: string };
@@ -509,9 +513,9 @@ export const legPoints = (s: StateM): number[] => { const m = miniOf(s), q = qOf
 
 /* Majority Rules, this question: right answers per team, and how many play */
 export function mrCount(s: StateM) {
-  const q = qOf(s), k = s.teams.length, right = n(k), of = n(k), counts: number[] = (q?.options || []).map(() => 0);
-  for (const r of s.roster) { of[r.team]++; const v = s.votes[r.name]; if (v == null) continue; if (v === q?.answer) right[r.team]++; const i = (q?.options || []).indexOf(v); if (i >= 0) counts[i]++; }
-  return { right, of, counts };
+  const q = qOf(s), k = s.teams.length, right = n(k), of = n(k), counts: number[] = (q?.options || []).map(() => 0), byTeam: number[][] = (q?.options || []).map(() => n(k));
+  for (const r of s.roster) { of[r.team]++; const v = s.votes[r.name]; if (v == null) continue; if (v === q?.answer) right[r.team]++; const i = (q?.options || []).indexOf(v); if (i >= 0) { counts[i]++; byTeam[i][r.team]++; } }
+  return { right, of, counts, byTeam };
 }
 export const share = (m: MiniM, t: number) => (m.of[t] ? m.right[t] / m.of[t] : 0);
 
@@ -634,7 +638,8 @@ export function next(s: StateM, now: number, t: Timers) {
       const c = mrCount(s);
       c.right.forEach((v, i) => { m.right[i] += v; m.of[i] += c.of[i]; });
       const q = qOf(s);
-      for (const r of s.roster) { const w = (s.who[r.name] = s.who[r.name] || { r: 0, of: 0, team: r.team }); w.of++; if (s.votes[r.name] === q?.answer) w.r++; }
+      /* (run: right in a row, for the flame on the reveal: as with 2 teams, 25 Nov) */
+      for (const r of s.roster) { const w = (s.who[r.name] = s.who[r.name] || { r: 0, of: 0, team: r.team }); w.of++; if (s.votes[r.name] === q?.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
     } else if (m.key === "roulette") {
       /* the lap's points (as the calls stand), the bullet, and the themes each team has had (the next spin avoids them) */
       const lap = qOf(s) as RrLap, got = rrGot(lap, m.pts, s.ok), hit = lap.draw ? lap.draw.indexOf(lap.bullet) : -1;
@@ -726,15 +731,9 @@ export function ranking(s: StateM): { team: number; place: number }[] {
   return order.map((t, i) => { if (s.teams[t].score !== last) { place = i + 1; last = s.teams[t].score; } return { team: t, place }; });
 }
 /* names in a sentence: "Lea", "Lea & Omar", "Lea, Dana & Omar" */
-const andList = (L: string[]) => (L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join(""));
 /* Majority Rules: who had the most right and who the least, over the game (said plainly here, the owner, 31 Oct:
    the wooden spoon is the end of the night's card) */
-export function mrLine(s: StateM): string {
-  const all = Object.entries(s.who).filter(([, w]) => w.of > 0); if (all.length < 2) return "";
-  const hi = Math.max(...all.map(([, w]) => w.r)), lo = Math.min(...all.map(([, w]) => w.r)), of = Math.max(...all.map(([, w]) => w.of));
-  const names = (v: number) => { const L = all.filter(([, w]) => w.r === v).map(([k]) => k); return L.length > 3 ? `${L.length} players` : andList(L); };
-  return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of}. Least right: ${names(lo)}, ${lo} of ${of}.`;
-}
+export const mrLine = (s: StateM): string => MAJ.whoLine(s.who);
 
 /* ---- the end of the night (the two-team night's recap, for N teams): the award cards ---- */
 export type AwardM = { t: string; who: string; team: number | null; note?: string; spoon?: boolean };
@@ -752,16 +751,9 @@ export function recapMany(s: StateM): AwardM[] {
   }
   /* Majority Rules' players, one by one (the owner, 30 Oct: these over the flag and streak cards): the sharpest and the
      wooden spoon, shared by up to three, more than that counted */
-  const mr = Object.entries(s.who).filter(([, w]) => w.of > 0);
-  const hi = Math.max(0, ...mr.map(([, w]) => w.r)), lo = Math.min(...mr.map(([, w]) => w.r)), of = Math.max(0, ...mr.map(([, w]) => w.of));
-  const mrOn = mr.length >= 2 && hi > lo;
-  if (mrOn) {
-    const at = (v: number) => mr.filter(([, w]) => w.r === v), names = (L: typeof mr) => (L.length > 3 ? `${L.length} players` : andList(L.map(([k]) => k)));
-    const top = at(hi), low = at(lo), one = (L: typeof mr) => (L.length === 1 ? L[0][1].team : null);
-    out.push({ t: "Sharpest in Majority Rules", who: `${names(top)}, ${hi} of ${of}`, team: one(top) });
-    /* said plainly, no jab (the owner, 31 Oct) */
-    out.push({ t: "Least right, Majority Rules", who: `${names(low)}, ${lo} of ${of}`, team: one(low), spoon: true });
-  } else {
+  /* (the words: lib/minis/majority.ts, every setup) */
+  const M = MAJ.awards(s.who);
+  if (M) { out.push(M.sharp); out.push(M.spoon);   } else {
     /* no Majority Rules tonight (or everyone level): the quickest flags and the longest run instead */
     if (has("flag") && (t = topOf(S.fastest, 2)) != null) out.push({ t: "Fastest fingers, Guess the Flag", who: `${nm(t)}, first right ${S.fastest[t]} times`, team: t });
     if ((t = topOf(S.best, 3)) != null) out.push({ t: "Hot streak", who: `${nm(t)}, ${S.best[t]} in a row`, team: t });

@@ -7,7 +7,7 @@
                         teams still to go: a new picture for everyone, in the same slot
      Secret Stakes      the bets' clock through a reload; the last bet landing while the screen is away (the
                         question clock waits); a bet on themes that have just changed, refused
-     Majority Rules     a vote while paused kept; Start refused with nobody on the list
+     Majority Rules     Change question at the same level; a vote while paused kept; Start refused with nobody on the list
      Fool Me Twice      the truth refused as a lie, a missing lie, the screen asleep, a reload and a takeover on the picks,
                         own lie and no prediction refused, the points, Change fact, Reveal now, Pause, the places
      Russian Roulette   a reload mid-spin and mid-question, the screen asleep, a phone takeover from the server's copy
@@ -197,6 +197,11 @@ async function majority(k, phone, tag) {
   await setup(k, phone, ["majority"]); await judge("m/start");
   check(`${tag} Majority: the question is up`, pub().screen === "q", pub().screen);
   const q = () => mini().qs[mini().i];
+  /* Change question: one at the same level, from every spare the deck has left, said on the TV (as with 2 teams: 25 Nov) */
+  { const was = q(), lv = was.level, left = (saved().extra?.majority || []).length, same = (saved().extra?.majority || []).some((x) => x.level === lv);
+    await judge("m/swap");
+    check(`${tag} Majority: Change question, the same level, "New question."`, q().id !== was.id && (!same || q().level === lv) && /^New question\.$/.test(pub().toast?.text || "") && left > 4,
+      `level ${lv} -> ${q().level}, ${left} spares, toast "${pub().toast?.text}"`); }
   await judge("m/pause");
   check(`${tag} Majority: paused`, saved().paused === true);
   const id = tap(); send("p0", "answer", { pick: q().answer, tap: id }); await tick(1500);

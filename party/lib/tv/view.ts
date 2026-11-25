@@ -14,6 +14,7 @@ import { SEE_TYPE, seeNotes, sePic, seeWinner } from "../see";
 import type { TvState } from "./state";
 import { COMEBACK_TITLE } from "../comeback";
 import { MAP } from "../minis/map";
+import { MAJ } from "../minis/majority";
 
 /* The question in play goes out under a number that means nothing outside this game (D5): its
    real id would find the answer in a bank file. The phones use it only to tell questions apart. */
@@ -326,16 +327,8 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   return [p, secret];
 }
 
-/* Majority Rules: the players with the most and the fewest right answers over the game (29 Oct) */
-function mrWhoLine(g: G): string {
-  const W = (g.majorityGame?.who || {}) as Record<string, { r: number; of: number }>;
-  const all = Object.entries(W).filter(([, w]) => w.of > 0);
-  if (all.length < 2) return "";
-  const hi = Math.max(...all.map(([, w]) => w.r)), lo = Math.min(...all.map(([, w]) => w.r));
-  const names = (n: number) => { const L = all.filter(([, w]) => w.r === n).map(([k]) => k); return L.length > 3 ? `${L.length} players` : L.join(" & "); };
-  const of = Math.max(...all.map(([, w]) => w.of));
-  return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${names(hi)}, ${hi} of ${of} · Fewest: ${names(lo)}, ${lo} of ${of}`;
-}
+/* Majority Rules: the players with the most and the fewest right answers over the game (the words: lib/minis/majority.ts) */
+const mrWhoLine = (g: G): string => MAJ.whoLine((g.majorityGame?.who || {}) as Record<string, { r: number; of: number; team: number }>);
 /* the Battle: whose call on their captain's score was closest, per team (29 Oct) */
 function predictLine(s: TvState, g: G): string {
   const b = g.battle; if (!b) return "";

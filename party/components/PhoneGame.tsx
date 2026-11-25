@@ -2,6 +2,7 @@
 import { twoDone } from "./TwoResults";
 import { useRevealHold, WatchTv } from "./WatchTv";
 import { useNoTv } from "./NoTv";
+import { MajorityPad as MajorityPadAll, WhoPlaysPhone } from "./MajorityGame";
 import { NEXT_MOVES, WAITS_FOR_NEXT } from "@/lib/tv/rules";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
 import { AirportFact } from "./Airport";
@@ -10,6 +11,7 @@ import { FlagAnswer } from "./Flag";
 import { PinAnswer } from "./Pin";
 import { HostAnswerCard } from "./HostAnswer";
 import { AIRPORT } from "@/lib/minis/airport";
+import { MAJ } from "@/lib/minis/majority";
 import { MAP } from "@/lib/minis/map";
 import { MapAnswer } from "./MapGame";
 import { HostCalls } from "./HostCalls";
@@ -18,7 +20,7 @@ import { DISH } from "@/lib/minis/dish";
 import { CLOSEST } from "@/lib/minis/closest";
 import { FLAG } from "@/lib/minis/flag";
 import { PIN } from "@/lib/minis/pin";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two, poss } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
@@ -155,85 +157,32 @@ function Counter({ A, fire, h, fs, children }: { A: NonNullable<Pub["auction"]>;
 function LiveN({ A }: { A: NonNullable<Pub["auction"]> }) { return <>{useLiveCount(`${A.leg}:${A.cat}`, A.count)}</>; }
 
 /* ---- Majority Rules ---- */
-/* this phone's own order of the four answers: the same all question long, different on every phone
-   (a glance at a neighbour's tap says nothing) */
-function phoneOrder(opts: string[], seed: string) {
-  let h = 2166136261;
-  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
-  const r = () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
-  const a = opts.slice();
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
-}
 const onList = (pub: Pub, me: Member) => !!pub.majority?.on?.some((n) => n.toLowerCase() === me.name.toLowerCase());
-/* every player's (and captain's) answer: four buttons, one tap, locked. After it, nothing says which:
-   a neighbour can't read it off this screen. At the reveal, this phone's own result. */
+/* every player's (and captain's) four buttons, and at the reveal this phone's own line: one copy for every setup
+   (components/MajorityGame.tsx: 25 Nov) */
 function MajorityPad({ pub, me, code }: { pub: Pub; me: Member; code: string }) {
-  const noTv = useNoTv();
-  const M = pub.majority, key = `${pub.qid}|majorityQ`;
-  const [mine, setMine] = useState<{ key: string; pick: string; tap: string } | null>(null);
-  const [no, setNo] = useState<string | null>(null);
-  /* this phone's pick, kept for the question, so a reload doesn't turn it into "You didn't answer" (the 4 Nov audit, 3.14) */
-  const store = "qmb.mr." + code;
-  useEffect(() => { try { const x = JSON.parse(sessionStorage.getItem(store) || "null"); if (x?.key === key && !mine) setMine({ ...x, tap: "" }); } catch { /* none */ } }, [key]);   // eslint-disable-line react-hooks/exhaustive-deps
-  const order = useMemo(() => phoneOrder(M?.options || [], `${me.user_id}|${pub.qid}`), [M?.options, me.user_id, pub.qid]);
-  /* the TV's receipt: a tap it turned down says why, and lets go of it */
-  const got = mine ? pub.ack?.[me.user_id]?.[mine.tap] : undefined;
-  useEffect(() => { if (mine && got && got !== "+" && pub.screen === "majorityQ") { setNo(got === "-" ? (noTv ? "That didn't go through. Tap again." : "The TV didn't take that. Tap again.") : got); setMine(null); } }, [got]);   // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (!no) return; const t = setTimeout(() => setNo(null), 5000); return () => clearTimeout(t); }, [no]);
-  if (!M || !onList(pub, me)) return pub.screen === "majorityQ" ? <Line>You joined after it started, so you&rsquo;re watching this one. You&rsquo;ll play the next Majority Rules.</Line> : null;
-  const picked = mine?.key === key ? mine.pick : null;
-  if (pub.screen === "majorityReveal") {
-    const R = M.reveal, right = !!picked && picked === R?.answer;
-    return <p className="text-center font-bold text-18" role="status" style={{ color: right ? "var(--color-ok)" : "var(--color-no)" }}>
-      {picked ? <>You said {picked}: {right ? "right!" : "wrong."}</> : "You didn't answer this one (it counts as wrong)."}</p>;
-  }
-  if (pub.paused) return null;
-  if (picked) return <p className="text-center font-bold text-16" role="status">Locked in. The answer comes up when the time&rsquo;s up.</p>;
-  const tap = (pick: string) => {
-    const t = newTap();
-    setMine({ key, pick, tap: t }); setNo(null); buzzHand(15);
-    try { sessionStorage.setItem(store, JSON.stringify({ key, pick })); } catch { /* in memory only */ }
-    void sendAction(code, "answer", { pick, k: key, tap: t }).catch(() => setMine(null));
-  };
-  return (
-    <div className="flex flex-col gap-2">
-      {no && <p className="text-center text-14 font-bold" role="alert" style={{ color: "var(--color-gold)" }}>{no}</p>}
-      <div className="grid gap-2.5" role="group" aria-label="The four answers">
-        {order.map((o) => <button key={o} type="button" className="btn btn-lg btn-block mr-opt" disabled={pub.tvAway} onClick={() => tap(o)}><bdi>{o}</bdi></button>)}
-      </div>
-      <p className="text-center text-12 text-[var(--color-ink-3)]">One tap, and it&rsquo;s locked.</p>
-    </div>);
+  const noTv = useNoTv(), M = pub.majority;
+  if (!M) return null;
+  return <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|majorityQ`} options={M.options || []} onList={onList(pub, me)}
+    up={pub.screen === "majorityQ" ? "q" : pub.screen === "majorityReveal" ? "reveal" : null} answer={M.reveal?.answer} paused={pub.paused} disabled={pub.tvAway} ack={pub.ack} noTv={noTv} />;
 }
 /* the join screen's lists, on a phone: who's here; the host takes someone off (or puts them back); with
    no host a captain asks to take an absent teammate off, and the other captain agrees, or not */
 function MajorityList({ pub, me, act }: { pub: Pub; me: Member; act?: (move: Record<string, unknown>) => void }) {
   const L = pub.majority?.list || [], A = pub.majority?.ask, T = pub.teams, host = me.role === "host", cap = me.role === "captain";
   const left = useSecondsLeft(A?.until);
-  const bare = (n: string) => n.replace(/[\u2068\u2069]/g, ""), meOn = L.find((x) => bare(x.name) === me.name);
   return (
     <div className="flex flex-col gap-3">
-      {!host && !(meOn && !meOn.out) && <p className="text-center font-bold text-16" role="status">You&rsquo;re not on a list yet.</p>}
       {A && cap && me.team !== A.team && act && (
         <div className="card flex flex-col gap-2" style={{ borderColor: "var(--color-gold)" }}>
           <p className="text-15"><b>{T[A.team].name}</b> ask to take <b>{A.name}</b> off their list: they&rsquo;re not on the game screen. Agree? ({left} s)</p>
           <div className="grid grid-cols-2 gap-2"><button className="btn btn-gold" onClick={() => act({ type: "ui/mrOutOk", v: true })}>Agree</button><button className="btn" onClick={() => act({ type: "ui/mrOutOk", v: false })}>No, keep them</button></div>
         </div>)}
       {A && !(cap && me.team !== A.team) && <p className="text-center text-13 text-[var(--color-ink-2)]">Asking to take {A.name} off {T[A.team].name}&rsquo;s list…</p>}
-      <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
-        <div key={t} className="flex flex-col gap-1">
-          <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name} · {L.filter((x) => x.team === t && !x.out).length}</div>
-          {L.filter((x) => x.team === t).map((x) => {
-            const mayAsk = cap && me.team === t && !x.here && !x.out && !A && act;
-            return (
-              <div key={x.name} className="flex items-center gap-1.5 text-14 min-h-[32px]" style={{ opacity: x.out ? 0.45 : 1 }}>
-                <span aria-hidden style={{ color: x.here ? "var(--color-ok)" : "var(--color-ink-3)" }}>{x.here ? "●" : "○"}</span>
-                <span className="flex-1 min-w-0 truncate" style={{ textDecoration: x.out ? "line-through" : undefined }}>{x.name}</span>
-                {host && act && <button className="btn btn-sm !min-h-[32px] !px-2 !text-12" aria-label={`${x.out ? "Put back" : "Take off"}: ${bare(x.name)}`} onClick={() => act({ type: "ui/mrOut", name: x.name })}>{x.out ? "Put back" : "Take off"}</button>}
-                {mayAsk && <button className="btn btn-sm !min-h-[32px] !px-2 !text-12" aria-label={`Not here: ask to take ${bare(x.name)} off`} onClick={() => act({ type: "ui/mrOut", name: x.name })}>Not here</button>}
-              </div>); })}
-        </div>))}</div>
-      <p className="text-12 text-[var(--color-ink-3)] text-center">● on the game screen · ○ not here. Everyone listed plays: no answer counts as wrong.</p>
+      {/* (every phone its own team's list, the host every team's: one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
+      <WhoPlaysPhone teams={[0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }))} list={L} me={{ name: me.name, team: me.team ?? null }} host={host}
+        onToggle={act ? (name) => act({ type: "ui/mrOut", name }) : undefined}
+        ask={(x) => (cap && me.team === x.team && !x.here && !x.out && !A && act ? () => act({ type: "ui/mrOut", name: x.name }) : null)} />
     </div>);
 }
 
@@ -446,9 +395,10 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
     /* ---- the mini-games ---- */
     case "miniIntro": case "flagIntro": case "dishIntro": case "mapIntro": case "auctionIntro": case "sayIntro": case "pinIntro": case "airportIntro": case "majorityIntro": case "rouletteIntro": case "stakesIntro": case "seeIntro": case "foolIntro": case "battleIntro": return (
       <div className="flex flex-col gap-4 flex-1">
-        {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={{ role: "host" } as Member} act={fire} />}
         <MiniIntro pub={pub} size="phone" />
-        <Main label={mk === "roulette" ? "Spin" : "Start"} move={{ type: mk === "auction" ? "auction/begin" : mk + "/start" }} />
+        {/* (the rules, then who plays, then Start: the 3-to-8 order, every setup: 25 Nov) */}
+        {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={{ role: "host" } as Member} act={fire} />}
+        <Main label={mk === "roulette" ? "Spin" : mk === "majority" ? MAJ.start : "Start"} move={{ type: mk === "auction" ? "auction/begin" : mk + "/start" }} />
       </div>);
     case "miniQ": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -537,15 +487,17 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small ghost label={PIN.change} move={{ type: "pin/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>);
     case "pinReveal": return <Results><HostHead /><Main label="Next" move={{ type: "ui/next" }} /></Results>;
-    case "majorityQ": { const M = pub.majority; return (
+    /* (the 3-to-8 layout in every setup: the question, the clock under it, the answer, who has answered team by team,
+       then Pause, Change question, Reveal now: 25 Nov, the owner) */
+    case "majorityQ": { const M = pub.majority, v = (M?.answered?.[0] ?? 0) + (M?.answered?.[1] ?? 0), of = (M?.n?.[0] ?? 0) + (M?.n?.[1] ?? 0); return (
       <div className="flex flex-col gap-3 flex-1">
-        <div className="flex items-center justify-between"><div className="eyebrow">Majority Rules · {pub.mini?.leg} of {pub.mini?.of}</div><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={60} /></div>
-        <p className={qCls(pub.question)}>{pub.question}</p>
+        <p className={"font-bold leading-snug text-center " + ((pub.question || "").length > 120 ? "text-16" : "text-20")}>{pub.question}</p>
+        <ToSide order={9} className="side-clock"><div className="grid place-items-center main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sideways ? 70 : 90} /></div></ToSide>
         <AnswerCard />
-        <div className="grid grid-cols-2 gap-3">{([0, 1] as const).map((t) => (
-          <div key={t} className="text-center"><div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
-            <div className="font-bold text-18 mt-0.5">{M?.answered?.[t] ?? 0} of {M?.n?.[t] ?? 0} answered</div></div>))}</div>
-        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small label="Reveal now" move={{ type: "ui/reveal" }} /><Small ghost label="Change question" move={{ type: "majority/swap" }} /></div>
+        <WhoAnswered oneCol head={`${v} of ${of} players answered`} rows={([0, 1] as const).map((t) => { const a = M?.answered?.[t] ?? 0, n = M?.n?.[t] ?? 0, done = n > 0 && a >= n;
+          return { key: t, name: T[t].name, color: tc(t), dot: <span className="inline-block w-3.5 h-3.5 rounded-full shrink-0" style={{ background: tc(t) }} aria-hidden />, lit: a > 0,
+            statusColor: done ? "var(--color-ok)" : "var(--color-ink-3)", status: MAJ.count(a, n) }; })} />
+        <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change question" move={{ type: "majority/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
       </div>); }
     case "majorityReveal": return <Results><Main label="Next" move={{ type: "ui/next" }} /></Results>;
     case "airportQ": return (
@@ -1407,8 +1359,6 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   const canBuzz = pub.screen === "seeQ" && !pub.paused && pub.buzz == null && !pub.out?.[mine];
   return (
     <div className="flex flex-col gap-4 flex-1">
-      {/* Majority Rules' join screen: whether you're on the list, and who's here, before the rules */}
-      {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={me} />}
       {/* the Battle: your call on your captain's score, above the intro so nobody has to scroll for it */}
       {callIt && (
         <div className="card flex flex-col gap-2">
@@ -1417,6 +1367,8 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
             : <div className="grid grid-cols-6 gap-1.5">{Array.from({ length: pub.battle!.n + 1 }, (_, n) => <button key={n} className="btn btn-sm" disabled={predBusy} onClick={() => void predict(n)}>{n}</button>)}</div>}
         </div>)}
       <ToSide order={2} when={SIDE_Q.includes(pub.screen) && !pub.paused}><Head pub={pub} me={me} capName={cap?.name} /></ToSide>
+      {/* Majority Rules' join screen: the rules, then your team's list (the 3-to-8 order, every setup: 25 Nov) */}
+      {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={me} />}
       <Result pub={pub} mine={mine} part="pill" />
       <OnScreen pub={pub} side mine={mine} who={me.user_id} />
       {/^majority(Q|Reveal)$/.test(pub.screen) && <MajorityPad pub={pub} me={me} code={code} />}
@@ -1470,7 +1422,7 @@ const NEXT_LABEL: Record<string, [string, string]> = {
   pinSummary: ["Next", "pin/done"], airportSummary: ["Next", "airport/done"],
   rouletteIntro: ["Spin", "roulette/start"], rouletteReveal: ["Next", "ui/next"], rouletteSummary: ["Next", "roulette/done"],
   stakesIntro: ["Start", "stakes/start"], stakesReveal: ["Next", "ui/next"], stakesSummary: ["Next", "stakes/done"],
-  majorityIntro: ["Start: everyone's in", "majority/start"], majorityReveal: ["Next question", "ui/next"], majoritySummary: ["Next", "majority/done"],
+  majorityIntro: [MAJ.start, "majority/start"], majorityReveal: ["Next", "ui/next"], majoritySummary: ["Next", "majority/done"],
   answer: ["Next", "round/afterAnswer"], roundScore: ["Next", "round/next"], closestReveal: ["Next", "ui/next"], flagReveal: ["Next", "ui/next"], seeIntro: ["Start", "see/start"], seeReveal: ["Next", "ui/next"], seeSummary: ["Next", "see/done"], foolIntro: ["Start", "fool/start"], foolReveal: ["Next", "ui/next"], foolSummary: ["Next", "fool/done"],
   dishReveal: ["Next", "dish/next"], auctionLeg: ["Next", "auction/nextLeg"], auctionResult: ["Next", "auction/done"], battleReview: ["Settle the Battle", "battle/reviewDone"],
   miniSummary: ["Next", "closest/done"], flagSummary: ["Next", "flag/done"], dishSummary: ["Next", "dish/done"], mapSummary: ["Next", "map/done"],
@@ -1670,8 +1622,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
     <div className="flex flex-col gap-3 flex-1">
       {no && <p className="text-center text-14 font-bold enter" role="alert" style={{ color: "var(--color-gold)" }}>{no}</p>}
       {nohost && <AgreeCard pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} />}
-      {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
       <ToSide order={2} when={SIDE_Q.includes(sc) && !pub.paused}><Head pub={pub} me={me} canArm={(t) => t === mine} onArm={() => void act("lifeline", { key: "dbl" })} busy={busy} /></ToSide>
+      {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
       <Result pub={pub} mine={mine} part="pill" />
       <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side mine={mine} captain who={me.user_id} />
       {/* Secret Stakes: your bet, a theme and a level, then Lock in */}
