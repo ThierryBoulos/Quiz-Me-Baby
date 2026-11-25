@@ -9,7 +9,7 @@ import { rrPub, rrQ, rrSpins, type RrLap, type RrPub } from "../roulette";
 import { skPub, type SkGame, type SkPub } from "../stakes";
 import { SEE_TYPE, seeNotes, sePic, type SePub } from "../see";
 import { QMB } from "../engine";
-import { skQm } from "./logic";
+import { skQm, mrOn } from "./logic";
 import { foolSum, type FoolPub, type FoolSum } from "../fool";
 import { extraGame } from "./logic";
 import type { ComebackPub } from "../comeback";
@@ -71,6 +71,7 @@ export type PubMany = {
   mrOut?: string[];                               // Majority Rules: taken off the list (the host's, at its intro)
   mrList?: { name: string; team: number; here: boolean; out?: boolean }[];   // ...every team's list at the intro (who's here, who's off)
   mrAnswered?: [number, number][];                // ...each team's answered, of its list, while a question is up
+  mrNot?: { name: string; why: "off" | "back" }[];   // ...after Start: on the list but not counted on this question, and why
   mrFire?: { name: string; n: number }[];         // ...a player right every question so far, at the reveal
   imad?: { id: number; text: string; mood?: string };   // Imad's latest line (the TV's bubble)
   flags?: FlagM[];                                // left the screen during a question, or pasted (the host's list; no host: the captains')
@@ -151,9 +152,12 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     }
     else pub.question = q.question;
     if (m.key === "quiz" && q.theme) pub.theme = q.theme;
-    if (m.key === "majority") { pub.options = q.options; pub.roster = s.roster.map((r) => r.name); pub.voted = Object.keys(s.votes);
+    /* (roster: who counts on this question; mrNot: on the list, not counted now, and why: 25 Nov) */
+    if (m.key === "majority") { pub.options = q.options; pub.roster = mrOn(s).map((r) => r.name); pub.voted = Object.keys(s.votes);
+      const not = s.roster.filter((r) => r.off).map((r) => ({ name: r.name, why: (s.mrOff || []).includes(r.name) ? "off" as const : "back" as const }));
+      if (not.length) pub.mrNot = not;
       /* each team's count: answered, and on its list (the TV and the host's phone, up to four teams: 25 Nov) */
-      pub.mrAnswered = s.teams.map((_, t) => { const L = s.roster.filter((r) => r.team === t); return [L.filter((r) => s.votes[r.name] != null).length, L.length]; }); }
+      pub.mrAnswered = s.teams.map((_, t) => { const L = mrOn(s).filter((r) => r.team === t); return [L.filter((r) => s.votes[r.name] != null).length, L.length]; }); }
   }
   if (m?.key === "comeback" && m.cb && m.only) pub.comeback = { teams: [...m.only], target: [...m.cb.target], before: [...m.cb.before], i: m.i, of: m.qs.length, out: [...m.cb.out],
     ...(m.cb.made ? { made: [...m.cb.made], after: [...(m.cb.after || m.cb.before)] } : {}) };
@@ -161,7 +165,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
   if (s.hostGone) pub.hostGone = s.hostGone;
   if (s.flags?.length) pub.flags = s.flags.slice(-30);
   if (s.mrOut?.length) pub.mrOut = s.mrOut;
-  if (m?.key === "majority" && s.screen === "intro" && s.mrList) pub.mrList = s.mrList;
+  if (m?.key === "majority" && s.mrList) pub.mrList = s.mrList;   // (before Start, everyone in the room; after, the fixed list: the host's Take off)
   if (s.imad) pub.imad = s.imad;
   if (m && q && s.screen === "reveal") {
     /* (sudden death pays the night one point, to the fastest right answer) */
@@ -176,7 +180,7 @@ export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; r
     else if (m.key === "pin") pub.reveal = { answer: q.answer, place: q.place, at: { lat: q.lat, lon: q.lon }, pins: s.pins, off: distances(s), winners: w, ...pl };
     else { const c = mrCount(s); pub.reveal = { answer: q.answer, notes: q.notes, counts: c.counts, byTeam: c.byTeam, right: c.right, of: c.of, winners: [] };
       /* a player right ten in a row (counting this one) gets a flame, as with 2 teams (25 Nov) */
-      const hot = s.roster.map((r) => ({ name: r.name, n: s.votes[r.name] === q.answer ? (s.who[r.name]?.run || 0) + 1 : 0 })).filter((x) => x.n >= 10);
+      const hot = mrOn(s).map((r) => ({ name: r.name, n: s.votes[r.name] === q.answer ? (s.who[r.name]?.run || 0) + 1 : 0 })).filter((x) => x.n >= 10);
       if (hot.length) pub.mrFire = hot; }
     { const app = appCalls(s); if (app && pub.reveal) pub.reveal.app = app; }
   }

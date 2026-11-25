@@ -241,6 +241,43 @@ async function majority(k, phone, tag) {
   check(`${tag} Majority: one back on the list: Start goes`, pub().screen === "q" && saved().roster.length === 1, `screen ${pub().screen} roster ${saved().roster?.length}`);
 }
 
+/* who counts after Start (25 Nov, the owner): taken off during the game, or out of the room as a question goes up:
+   not counted from the next question; back in the room with the same name: counted again from the next one; the
+   host's Take them off and start */
+async function majorityDuring(k, phone, tag) {
+  await setup(k, phone, ["majority"]);
+  const on = () => pub().roster || [], next = async () => { await judge("m/reveal"); await judge("m/next"); };
+  /* Take them off and start: Pl1 isn't on the game screen, so comes off, and the rest start */
+  if (!phone) { fake.setPresence(fake.db.members.map((m) => m.user_id).filter((u) => u !== "p1")); await tick(40000); }
+  await judge("m/start", phone ? {} : { drop: true });
+  check(`${tag} Majority: Take them off and start: who's away is off, the rest play`, pub().screen === "q" && (phone || (!on().includes("Pl1") && on().includes("Pl0"))), `screen ${pub().screen}, on ${on().join(",")}`);
+  fake.setPresence(fake.db.members.map((m) => m.user_id));
+  /* the host takes Pl0 off during the question: still counted on this one, not from the next */
+  await judge("m/mrOut", { name: "Pl0" });
+  check(`${tag} Majority: taken off during a question: still counted on it`, on().includes("Pl0") && /Pl0 is off the list from the next question/.test(pub().toast?.text || ""), pub().toast?.text);
+  await next();
+  check(`${tag} Majority: ...and not from the next one`, pub().screen === "q" && !on().includes("Pl0") && pub().mrNot?.some((x) => x.name === "Pl0" && x.why === "off"), on().join(","));
+  const id = tap(); send("p0", "answer", { pick: (pub().options || [])[0], tap: id }); await tick(1500);
+  check(`${tag} Majority: their tap is turned away, and says why`, pub().ack?.p0?.[id] === "You\u2019re off the list for this one: watch.", pub().ack?.p0?.[id]);
+  /* Cap1 leaves the room during a question: counted on it, not from the next; back with the same name: counted again
+     from the one after */
+  const cap = fake.db.members.find((m) => m.user_id === "c1");
+  fake.db.members = fake.db.members.filter((m) => m.user_id !== "c1"); await tick(3000);
+  check(`${tag} Majority: left the room during a question: still counted on it`, on().includes("Cap1"));
+  await next();
+  check(`${tag} Majority: ...and not from the next one`, !on().includes("Cap1"), on().join(","));
+  fake.db.members.push(cap); await tick(3000);
+  check(`${tag} Majority: back in the room: not on this question, and told so`, !on().includes("Cap1") && pub().mrNot?.some((x) => x.name === "Cap1" && x.why === "back"));
+  await next();
+  check(`${tag} Majority: ...counted again from the next one`, on().includes("Cap1"), on().join(","));
+  /* the host puts Pl0 back: from the next question */
+  await judge("m/mrOut", { name: "Pl0" }); await next();
+  check(`${tag} Majority: put back during the game: counted from the next question`, on().includes("Pl0"), on().join(","));
+  /* each team's number of answers is the question's own: a team's share isn't pulled down by someone who left */
+  const t1 = (pub().mrAnswered || [])[1];
+  check(`${tag} Majority: each team's count is who counts now`, Array.isArray(t1) && t1[1] === (phone ? 2 : 1), JSON.stringify(t1));
+}
+
 /* ---------- Russian Roulette ---------- */
 /* what a chamber pays (engine/core.js roulettePts): the bullet +5 right, -3 wrong or none; Medium 2, Hard 3 */
 const worth = (level, ok) => (level === "bullet" ? (ok ? 5 : -3) : !ok ? 0 : level === "medium" ? 2 : 3);
@@ -506,7 +543,7 @@ async function net(k, phone, tag) {
 export async function run(only) {
   for (const k of [3, 4, 5, 6, 7, 8]) for (const phone of [false, true]) {   // (every count, 19 Nov review: 4 to 7 never ran through the real referee)
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["pin", pin], ["net", net]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["majorityDuring", majorityDuring], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["pin", pin], ["net", net]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }

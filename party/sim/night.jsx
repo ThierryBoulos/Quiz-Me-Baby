@@ -99,7 +99,7 @@ function pinNear(g, bot) {
    left out, the captain answers at the bots' usual rate. comebackSwap: a new question asked for on its first one.
    reloadOn: the TV's page reloads (once) the first time this screen is up, e.g. "comebackQ" (18 Nov)
    takeoverOn: the same, but another device takes over from the server's copy instead (19 Nov) */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false, takeoverOn = null }) {
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false, takeoverOn = null, mrLeave = null }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed); phoneMode = phone;
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
@@ -161,6 +161,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   let reloaded = false, tookOver = false;
   /* the scripted things, waiting for a screen that allows them; a scripted Pause lasts its `for`; a scripted
      request (no host) is agreed to by the other captain */
+  const mrLeft = { row: null, back: false };
   const scripted = []; let pauseUntil = 0, agreeNext = false, tieMoreLeft = tieMore;
   const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "dishQ", "mapQ", "auctionRun", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesPick", "stakesQ", "seeQ", "foolWrite", "foolPick", "battleQ", "comebackQ"];
   let cbSwapped = false;
@@ -387,6 +388,10 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     /* every player answers for themselves: most of them, right now and then, and a few never do (it counts as wrong) */
     else if (sc === "majorityQ" && pub.majority) {
       const q = g?.majorityGame?.qs[g.majorityGame.i], opts = pub.majority.options || [];
+      /* mrLeave: one player leaves the room during question 2 and comes back during question 5 (25 Nov: counted on
+         question 2, not on 3 and 4, nor on 5, the one they came back on; counted again from 6) */
+      if (mrLeave && g.majorityGame.i === 1 && !mrLeft.row) { mrLeft.row = fake.db.members.find((m) => m.name === mrLeave); fake.db.members.splice(fake.db.members.indexOf(mrLeft.row), 1); trace.push(`(${mrLeave} leaves the room)`); }
+      if (mrLeave && g.majorityGame.i === 4 && mrLeft.row && !mrLeft.back) { mrLeft.back = true; fake.db.members.push(mrLeft.row); trace.push(`(${mrLeave} is back)`); }
       for (const m of fake.db.members) {
         const id = pub.qid + "|" + m.user_id;
         if (m.role === "host" || m.team == null || voted.has(id) || gone.has(m.user_id) || m.name === absent) continue;

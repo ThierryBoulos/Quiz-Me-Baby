@@ -4,13 +4,16 @@ import { T_MAJORITY } from "../game";
 
 type Who = [string, { r: number; of: number; team: number }][];
 const andList = (L: string[]) => (L.length > 1 ? `${L.slice(0, -1).join(", ")} & ${L[L.length - 1]}` : L.join(""));
-/* players who share a count: up to three by name, more than that counted */
-const names = (L: string[]) => (L.length > 3 ? `${L.length} players` : andList(L));
+/* players ranked by the share of their questions they got right (someone who left for a while played fewer: 25 Nov),
+   each with their own count; up to three by name, more than that counted */
 const spread = (who: Record<string, { r: number; of: number; team: number }>) => {
-  const all: Who = Object.entries(who).filter(([, w]) => w.of > 0);
-  return { all, hi: Math.max(0, ...all.map(([, w]) => w.r)), lo: Math.min(...all.map(([, w]) => w.r)), of: Math.max(0, ...all.map(([, w]) => w.of)) };
+  const all: Who = Object.entries(who).filter(([, w]) => w.of > 0), sh = (w: { r: number; of: number }) => w.r / w.of;
+  const hi = Math.max(0, ...all.map(([, w]) => sh(w))), lo = Math.min(...all.map(([, w]) => sh(w)));
+  return { all, hi, lo, at: (v: number) => all.filter(([, w]) => sh(w) === v) };
 };
-
+const say = (L: Who) => {
+  const same = L.every(([, w]) => w.r === L[0][1].r && w.of === L[0][1].of), who = L.length > 3 ? `${L.length} players` : andList(L.map(([k]) => k));
+  return same ? `${who}, ${L[0][1].r} of ${L[0][1].of}` : L.length > 3 ? who : andList(L.map(([k, w]) => `${k} ${w.r} of ${w.of}`)); };
 export const MAJ = {
   title: "Majority Rules",
   unit: "question",
@@ -32,22 +35,33 @@ export const MAJ = {
   late: "You joined after this game started: watch this one.",
   /* the game's result line: the players with the most and the fewest right (every setup, the 3-to-8 words: 25 Nov) */
   whoLine: (who: Record<string, { r: number; of: number; team: number }>) => {
-    const { all, hi, lo, of } = spread(who); if (all.length < 2) return "";
-    const at = (v: number) => names(all.filter(([, w]) => w.r === v).map(([k]) => k));
-    return hi === lo ? `Everyone got ${hi} of ${of}.` : `Most right: ${at(hi)}, ${hi} of ${of}. Least right: ${at(lo)}, ${lo} of ${of}.`;
+    const { all, hi, lo, at } = spread(who); if (all.length < 2) return "";
+    if (hi === lo) { const L = all; const same = L.every(([, w]) => w.r === L[0][1].r && w.of === L[0][1].of); return same ? `Everyone got ${L[0][1].r} of ${L[0][1].of}.` : "Everyone got the same share."; }
+    return `Most right: ${say(at(hi))}. Least right: ${say(at(lo))}.`;
   },
   /* the end of the night's two cards: the sharpest, and the least right said plainly, no jab (the owner, 31 Oct; every
-     setup, 25 Nov). None when everyone got the same */
+     setup, 25 Nov). None when everyone got the same share */
   awards: (who: Record<string, { r: number; of: number; team: number }>) => {
-    const { all, hi, lo, of } = spread(who); if (all.length < 2 || hi <= lo) return null;
-    const at = (v: number) => all.filter(([, w]) => w.r === v), one = (L: Who) => (L.length === 1 ? L[0][1].team : null);
-    const top = at(hi), low = at(lo);
-    return { sharp: { t: "Sharpest in Majority Rules", who: `${names(top.map(([k]) => k))}, ${hi} of ${of}`, team: one(top) },
-      spoon: { t: "Least right, Majority Rules", who: `${names(low.map(([k]) => k))}, ${lo} of ${of}`, team: one(low), spoon: true as const } };
+    const { all, hi, lo, at } = spread(who); if (all.length < 2 || hi <= lo) return null;
+    const one = (L: Who) => (L.length === 1 ? L[0][1].team : null), top = at(hi), low = at(lo);
+    return { sharp: { t: "Sharpest in Majority Rules", who: say(top), team: one(top) },
+      spoon: { t: "Least right, Majority Rules", who: say(low), team: one(low), spoon: true as const } };
   },
-  watching: "You joined after it started, so you\u2019re watching this one. You\u2019ll play the next Majority Rules.",
   /* someone taken off who's back on the game screen is put back: the TV says so */
   backOn: (L: string[]) => `${andList(L)} ${L.length > 1 ? "are" : "is"} back on the list.`,
+  watching: "You joined after it started, so you\u2019re watching this one.",
+  /* after Start (25 Nov, the owner): taken off during the game, or before it and back too late; and someone back in
+     the room, who counts again from the next question */
+  offList: "You\u2019re off the list for this one: watch.",
+  backNext: "You\u2019re back on the list from the next question.",
+  offNext: (n: string) => `${n} is off the list from the next question.`,
+  onNext: (n: string) => `${n} is back on the list from the next question.`,
+  /* the host's list during the game, and its line */
+  duringNote: "Changes count from the next question. The questions already asked stay as they were.",
+  /* Start with someone on a list who isn't on the game screen: the host is told first */
+  notHere: (L: string[]) => `${andList(L)} ${L.length > 1 ? "aren\u2019t" : "isn\u2019t"} on the game screen.`,
+  startAnyway: "Start anyway",
+  dropStart: "Take them off and start",
   /* who plays, before Start: the TV's list, and a phone's */
   listHead: "Who plays",
   hostHead: "Who plays: take off anyone who has left",

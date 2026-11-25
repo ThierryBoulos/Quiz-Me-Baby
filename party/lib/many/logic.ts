@@ -100,7 +100,8 @@ export type StateM = {
   buzz?: number | null; buzzAt?: number; out?: boolean[];
   buzzBy?: string | null;                       // ...and who on that team hit BUZZ (any player can; the captain types the answer)
   ok: (boolean | null)[];                       // this leg's call per team (the app's, then the host's)
-  roster: { name: string; team: number }[];     // Majority Rules: who plays (fixed at its start)
+  roster: { name: string; team: number; off?: boolean }[];     // Majority Rules: who plays (fixed at its start; off: not counted on the question up)
+  mrOff?: string[]; mrAway?: string[];          // ...after Start: taken off by the host, and gone from the room (both count from the next question)
   votes: Record<string, string>;
   who: Record<string, { r: number; of: number; team: number; run?: number }>;
   toast: { id: number; text: string } | null; toastN: number;
@@ -251,7 +252,7 @@ export function startMini(s: StateM, now: number, t: Timers, roster: { name: str
     const list = roster.filter((r) => r.team >= 0 && r.team < s.teams.length).slice(0, MANY_PLAYERS);
     /* (nobody on the list: ten questions nobody could answer, 14 Nov) */
     if (!list.length) return "Nobody's on the list yet.";
-    s.roster = list;
+    s.roster = list.map((r) => ({ name: r.name, team: r.team })); s.mrOff = []; s.mrAway = [];
   }
   s.stats.run = n(s.teams.length);                 // a new game starts cold
   /* Secret Stakes: one bet, from the scoreboard now (a thirtieth of the leader's total, since 12 Nov), then the first round's bets */
@@ -289,8 +290,14 @@ export function lockStakes(s: StateM, now: number, t: Timers) {
   s.picks = (s.picks || []).map((p) => p || { k: 0, level: "easy", auto: true });
   ask(s, now, t); return true;
 }
+/* Majority Rules after Start (25 Nov, the owner): as each question goes up, who counts on it. Not those the host took
+   off during the game, nor anyone out of the room as it's asked; back in the room with the same name, they count again
+   from the next question. As with 2 teams (lib/tvGame.ts mrFreeze) */
+const mrFreeze = (s: StateM) => { for (const r of s.roster) { const off = (s.mrOff || []).includes(r.name) || (s.mrAway || []).includes(r.name); if (off) r.off = true; else delete r.off; } };
+export const mrOn = (s: StateM) => s.roster.filter((r) => !r.off);
 function ask(s: StateM, now: number, t: Timers) {
   const m = miniOf(s)!; clear(s);
+  if (m.key === "majority") mrFreeze(s);
   /* the Cocktail or Dish: an ingredient every few seconds, the last one with longer to think */
   s.total = m.key === "dish" ? Math.max(0, ((qOf(s)?.ings || []).length - 1)) * t.dish + t.dishLast : m.key === "comeback" ? QMB.COMEBACK_SECS as number : t[m.key];   // (the comeback: 15 seconds, whatever the timers say)
   /* Russian Roulette: the barrel spins, every team lands on a chamber of its own (the engine's spin: two chambers
@@ -426,7 +433,9 @@ export const foolRes = (s: StateM) => (s.fool ? QMB.foolScore(s.fool.opts, s.foo
 /* Majority Rules: every player on the list taps one of the four (one each) */
 export function vote(s: StateM, name: string, pick: unknown): true | string {
   const m = miniOf(s); if (!m || m.key !== "majority" || s.screen !== "q") return "Not now.";
-  if (!s.roster.some((r) => r.name === name)) return "You joined after this game started: watch this one.";
+  const r = s.roster.find((x) => x.name === name);
+  if (!r) return MAJ.late;
+  if (r.off) return (s.mrOff || []).includes(name) ? MAJ.offList : MAJ.backNext;
   if (s.votes[name] != null) return "Your answer is in.";
   const q = qOf(s), opts: string[] = q?.options || [];
   if (typeof pick !== "string" || !opts.includes(pick)) return "Pick one of the four.";
@@ -436,9 +445,9 @@ export const answered = (s: StateM): boolean[] => {
   const m = miniOf(s); if (!m) return [];
   if (m.key === "fool") return s.teams.map((_, t) => (s.screen === "pick" ? s.fool?.picks[t] != null : s.typed[t] != null));
   return s.teams.map((_, t) => (m.only && !m.only.includes(t) ? true : m.key === "comeback" && m.cb?.out[t] ? true : typedKey(m.key) ? s.typed[t] != null : m.key === "closest" ? s.nums[t] != null : m.key === "pin" ? !!s.pins[t]
-    : s.roster.filter((r) => r.team === t).every((r) => s.votes[r.name] != null)));
+    : mrOn(s).filter((r) => r.team === t).every((r) => s.votes[r.name] != null)));
 };
-export const allIn = (s: StateM) => s.screen === "q" && (miniOf(s)?.key === "majority" ? s.roster.length > 0 && s.roster.every((r) => s.votes[r.name] != null) : answered(s).every(Boolean));
+export const allIn = (s: StateM) => s.screen === "q" && (miniOf(s)?.key === "majority" ? mrOn(s).length > 0 && mrOn(s).every((r) => s.votes[r.name] != null) : answered(s).every(Boolean));
 
 /* the app's own calls on what was typed (Don't Say the Same has its own, sayCalls): the reveal's, and what the host's
    phone compares a flipped call with ("You changed it", as with 2 teams: 22 Nov, the owner) */
@@ -514,7 +523,7 @@ export const legPoints = (s: StateM): number[] => { const m = miniOf(s), q = qOf
 /* Majority Rules, this question: right answers per team, and how many play */
 export function mrCount(s: StateM) {
   const q = qOf(s), k = s.teams.length, right = n(k), of = n(k), counts: number[] = (q?.options || []).map(() => 0), byTeam: number[][] = (q?.options || []).map(() => n(k));
-  for (const r of s.roster) { of[r.team]++; const v = s.votes[r.name]; if (v == null) continue; if (v === q?.answer) right[r.team]++; const i = (q?.options || []).indexOf(v); if (i >= 0) { counts[i]++; byTeam[i][r.team]++; } }
+  for (const r of mrOn(s)) { of[r.team]++; const v = s.votes[r.name]; if (v == null) continue; if (v === q?.answer) right[r.team]++; const i = (q?.options || []).indexOf(v); if (i >= 0) { counts[i]++; byTeam[i][r.team]++; } }
   return { right, of, counts, byTeam };
 }
 export const share = (m: MiniM, t: number) => (m.of[t] ? m.right[t] / m.of[t] : 0);
@@ -531,7 +540,14 @@ export function flip(s: StateM, t: number) {
 /* Majority Rules: before Start, the host takes a player who has left off their team's list, or puts them back (8 Nov:
    as with two teams) */
 export function toggleMrOut(s: StateM, name: unknown): boolean {
-  const m = miniOf(s); if (!m || m.key !== "majority" || s.screen !== "intro" || typeof name !== "string" || !name) return false;
+  const m = miniOf(s); if (!m || m.key !== "majority" || typeof name !== "string" || !name) return false;
+  if (s.screen === "q" || s.screen === "reveal") {
+    if (!s.roster.some((r) => r.name === name)) return false;
+    const off = s.mrOff || [], now = !off.includes(name);
+    s.mrOff = now ? [...off, name] : off.filter((x) => x !== name);
+    toast(s, now ? MAJ.offNext(name) : MAJ.onNext(name)); return true;
+  }
+  if (s.screen !== "intro") return false;
   const out = s.mrOut || [];
   s.mrOut = out.includes(name) ? out.filter((x) => x !== name) : [...out, name];
   toast(s, out.includes(name) ? `${name} is back on the list.` : `${name} is off the list for this one.`);
@@ -639,7 +655,7 @@ export function next(s: StateM, now: number, t: Timers) {
       c.right.forEach((v, i) => { m.right[i] += v; m.of[i] += c.of[i]; });
       const q = qOf(s);
       /* (run: right in a row, for the flame on the reveal: as with 2 teams, 25 Nov) */
-      for (const r of s.roster) { const w = (s.who[r.name] = s.who[r.name] || { r: 0, of: 0, team: r.team }); w.of++; if (s.votes[r.name] === q?.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
+      for (const r of mrOn(s)) { const w = (s.who[r.name] = s.who[r.name] || { r: 0, of: 0, team: r.team }); w.of++; if (s.votes[r.name] === q?.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
     } else if (m.key === "roulette") {
       /* the lap's points (as the calls stand), the bullet, and the themes each team has had (the next spin avoids them) */
       const lap = qOf(s) as RrLap, got = rrGot(lap, m.pts, s.ok), hit = lap.draw ? lap.draw.indexOf(lap.bullet) : -1;

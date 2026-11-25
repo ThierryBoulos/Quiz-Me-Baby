@@ -34,7 +34,9 @@ export const newState = () => ({
   /* Majority Rules: the teams' lists, fixed at Start (a seat is its name: a phone that rejoins keeps it);
      on the join screen, who has been taken off and who's on the game screen, and a captain's request to
      take someone off; then every answer to the question on screen, by name */
-  mrList: null as null | { name: string; uid: string; team: 0 | 1 }[],
+  /* (off: not counted on the question up: taken off during the game, or out of the room when it was asked) */
+  mrList: null as null | { name: string; uid: string; team: 0 | 1; off?: boolean }[],
+  mrOff: [] as string[], mrAway: [] as string[],   // after Start: taken off by the host (or both captains), and gone from the room
   mrOut: [] as string[], mrHere: [] as string[], mrGone: [] as string[],
   mrAsk: null as null | { name: string; team: 0 | 1; until: number },
   votes: {} as Record<string, string>,

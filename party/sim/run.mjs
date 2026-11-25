@@ -22,6 +22,16 @@ if (!child) await bundleNight(out);
 const load = async (n) => (await import(pathToFileURL(out).href + "?night=" + n)).night;
 
 const DEFAULT = ["flag", "closest", "auction", "battle"];
+/* Majority Rules, someone who leaves the room during question 2 and is back during question 5: who counts on each
+   question (25 Nov, the owner), read off every screen with a question up */
+const mrLeaveCheck = (name) => (pub) => {
+  if (pub.screen !== "majorityQ" || !pub.majority?.on) return null;
+  const leg = pub.mini?.leg, on = pub.majority.on.some((x) => x.replace(/[\u2068\u2069]/g, "") === name);
+  const want = leg === 1 || leg === 2 || leg >= 6;
+  if (leg != null && on !== want) return `Majority Rules: ${name} ${on ? "counted" : "not counted"} on question ${leg}`;
+  if (leg === 5 && !pub.majority.off?.some((x) => x.name === name && x.why === "back")) return `Majority Rules: ${name} not told they're back from the next question`;
+  return null;
+};
 const NIGHTS = [
   { seed: 1, minis: DEFAULT },
   { seed: 2, minis: DEFAULT, again: true },
@@ -134,6 +144,10 @@ const NIGHTS = [
      level, the spin kept and a fresh clock; no host (a captain asks, the other agrees) and with a host */
   { seed: 84, minis: ["roulette"], rounds: 2, events: [{ at: 11.5, type: "swap" }] },
   { seed: 85, minis: ["roulette"], rounds: 2, host: true, events: [{ at: 18, type: "swap" }] },
+  /* 25 Nov: Majority Rules, one player leaves the room during question 2 and is back during question 5: counted on 2,
+     not on 3, 4 or 5, counted again from 6 (no host, and with a host) */
+  { seed: 86, minis: ["majority"], rounds: 0, crowd: 4, mrLeave: "Karim", check: mrLeaveCheck("Karim") },
+  { seed: 87, minis: ["majority"], rounds: 0, crowd: 4, host: true, mrLeave: "Karim", check: mrLeaveCheck("Karim") },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);
@@ -168,7 +182,7 @@ for (const n of NIGHTS) {
   const t = performance.now();
   /* a clock never sits past zero with nothing happening (while the TV is on) */
   const check = (p, now, vis) => (vis === "visible" && p.deadline && !p.paused && !p.pending && now - p.deadline > 6000 ? `${p.screen}: the clock is ${Math.round((now - p.deadline) / 1000)} s past zero and nothing happened` : null);
-  const r = await (await load(n.seed))({ ...n, check });
+  const r = await (await load(n.seed))({ ...n, check: n.check ? (...a) => check(...a) || n.check(...a) : check });
   const file = join(gold, `night-${n.seed}.txt`), text = r.trace.join("\n") + "\n";
   const label = `night ${n.seed} (${n.host ? "host" : "no host"}${n.phone ? ", no TV" : ""}, ${n.rounds || 6} rounds, ${n.minis.join(" ") || "no mini-games"})`;
   const ends = r.outcome === "final" || r.outcome === "sudden-cap";

@@ -34,7 +34,7 @@ import { HostCalls } from "../HostCalls";
 import { SAY } from "@/lib/minis/say";
 import { DISH } from "@/lib/minis/dish";
 import { MAJ } from "@/lib/minis/majority";
-import { MajorityPad as MajorityPadAll, WhoPlaysPhone } from "../MajorityGame";
+import { MajorityPad as MajorityPadAll, MajorityStart, WhoPlaysDuring, WhoPlaysPhone } from "../MajorityGame";
 import { sayWord } from "../SayGame";
 import { CLOSEST } from "@/lib/minis/closest";
 import { FLAG } from "@/lib/minis/flag";
@@ -213,6 +213,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   useEffect(() => { setSkTheme(null); setSkLevel(null); }, [skRound]);
   const sideways = useSideways();
   const onList = !!pub.roster?.includes(me.name);
+  /* Majority Rules during the game: the host's list, folded away (a change counts from the next question: 25 Nov) */
+  const MrDuring = () => <WhoPlaysDuring teams={T.map((t) => ({ name: t.name, color: t.color }))} list={pub.mrList || []} me={{ name: "", team: null }} host busy={busy} onToggle={(name) => move("m/mrOut", { name })} />;
   /* the host's one main button, docked in thumb reach */
   const Main = ({ label, on }: { label: string; on: () => void }) => { const spin = label === "Spin";
     return <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || (spin && spinTap.pending)} onClick={() => { if (spin) spinTap.press(); on(); }}>{spin && spinTap.pending ? SPINNING : label}</button>; };
@@ -378,7 +380,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {/* Majority Rules: someone who has left comes off their team's list before Start (8 Nov: as with two teams) */}
         {/* (one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
         {g.key === "majority" && <WhoPlaysPhone teams={T.map((t) => ({ name: t.name, color: t.color }))} list={pub.mrList || []} me={{ name: me.name, team: null }} host busy={busy} onToggle={(name) => move("m/mrOut", { name })} />}
-        <Main label={g.key === "majority" ? MAJ.start : g.key === "roulette" ? "Spin" : "Start"} on={() => move("m/start")} />
+        {/* (Majority Rules: anyone not on the game screen is said first: Start anyway, or Take them off and start: 25 Nov) */}
+        {g.key === "majority" ? <MajorityStart list={pub.mrList || []} busy={busy} start={(drop) => move("m/start", drop ? { drop: true } : {})} />
+          : <Main label={g.key === "roulette" ? "Spin" : "Start"} on={() => move("m/start")} />}
       </>)}
       {/* Secret Stakes: the bets as they come in (the host sees every team's); Pause, Change question */}
       {host && sc === "pick" && g && sk && (<>
@@ -433,6 +437,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           {g.key === "map" && !pub.map?.hint && <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/hint")}>Show hint</button>}
           <button className="btn btn-sm btn-host" disabled={busy} onClick={() => move("m/reveal")}>Reveal now</button>
         </div>
+        {g.key === "majority" && <MrDuring />}
       </>)}
       {host && sc === "reveal" && g && R && !fool && (<>
         {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={null} teams={rrT} /> : g.key === "stakes" && sk ? <StakesPhone sk={sk} screen="stakesReveal" teams={rrT} me={null} /> : <Answer />}
@@ -449,6 +454,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {/* (the picture says who got it first, under the picture: not twice) */}
         {g.key !== "majority" && g.key !== "stakes" && g.key !== "see" && <Big text={W.text} color={W.color} />}
         <ContestMany pub={pub} mine={null} host busy={busy} act={(mv) => { const { type, ...x } = mv; move(String(type), x); }} />
+        {g.key === "majority" && <MrDuring />}
         {/* (Next waits for the ruling, as with two teams) */}
         {pub.contest ? <p className="text-center text-13 text-[var(--color-ink-3)] mt-auto" role="status">Next comes back once you&rsquo;ve ruled on the contest.</p>
           : <Main label={g.key === "roulette" && g.leg < g.of ? "Spin" : "Next"} on={() => move("m/next")} />}
@@ -482,7 +488,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         <p className="text-center text-14 font-bold text-[var(--color-ink-2)]">Your own answer: eyes on your phone, no talking</p>
         <OnScreen />
         {/* (one copy for every setup, components/MajorityGame.tsx: a tap the TV turns down lets go of "Locked in", 25 Nov) */}
-        <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|q`} options={pub.options || []} onList={onList} up="q" paused={pub.paused} disabled={busy} ack={pub.ack} noTv={noTv} />
+        <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|q`} options={pub.options || []} onList={onList} why={pub.mrNot?.find((x) => x.name === me.name)?.why ?? null} up="q" paused={pub.paused} disabled={busy} ack={pub.ack} noTv={noTv} />
       </>)}
 
       {/* Secret Stakes: the captain bets (a theme, a level, Lock in); everyone else sees the themes, and their captain's bet once it's in */}

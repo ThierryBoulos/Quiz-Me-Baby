@@ -73,6 +73,7 @@ export type Pub = {
     list?: { name: string; team: 0 | 1; here: boolean; out?: boolean }[];
     ask?: { name: string; team: 0 | 1; until: number } | null;
     on?: string[]; options?: string[]; n?: Two<number>; answered?: Two<number>;
+    off?: { name: string; why: "off" | "back" }[];    // after Start: on the list, not counted on this question, and why
     reveal?: { answer: string; counts: Two<number>[]; right: Two<number>; notes?: string };
     totals?: { right: Two<number>; of: Two<number> };
   };

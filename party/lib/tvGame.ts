@@ -61,11 +61,23 @@ function sdRecord(s: TvState, team: 0 | 1, ok: boolean) {
    and moves the night along, and the captains referee each other. */
 /* the clocks stood still for d ms (the TV was asleep, offline, or without its questions): every moment
    the game is waiting for moves on by that much */
+/* Majority Rules after Start (25 Nov, the owner): as each question goes up, who counts on it. Not those taken off
+   during the game, nor anyone out of the room as it's asked (left, or taken out by the host); back in the room with
+   the same name, they count again from the next question. Each team's number on the list is this question's */
+function mrFreeze(s: TvState, inRoom: string[]) {
+  const m = s.g?.majorityGame; if (!m || !s.mrList) return;
+  /* (who's in the room right now: not as last checked, a second or two ago) */
+  s.mrAway = s.mrList.filter((e) => !inRoom.includes(e.name)).map((e) => e.name);
+  for (const e of s.mrList) e.off = s.mrOff.includes(e.name) || s.mrAway.includes(e.name) || undefined;
+  m.n = [0, 1].map((t) => s.mrList!.filter((e) => e.team === t && !e.off).length);
+}
+/* everyone counted on this question has answered (nobody counted: never, the clock ends it) */
+const mrAllIn = (s: TvState) => { const L = (s.mrList || []).filter((e) => !e.off); return L.length > 0 && L.every((x) => s.votes[x.name] != null); };
 /* Majority Rules: each player's own count of right answers across the game (for the summary's line) */
 function mrWho(s: TvState) {
   const g = s.g, q = currentQ(s); if (!g?.majorityGame || !s.mrList) return;
   const W: Record<string, { r: number; of: number; team: 0 | 1; run?: number }> = (g.majorityGame.who = g.majorityGame.who || {});
-  for (const e of s.mrList) { const w = (W[e.name] = W[e.name] || { r: 0, of: 0, team: e.team, run: 0 }); w.of++; if (q && s.votes[e.name] === q.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
+  for (const e of s.mrList) { if (e.off) continue; const w = (W[e.name] = W[e.name] || { r: 0, of: 0, team: e.team, run: 0 }); w.of++; if (q && s.votes[e.name] === q.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
 }
 /* no host: a mini-game leg's reveal moves on by itself after this long (a tap still moves it on sooner);
    the answer card, the round score, intros and summaries still wait for a tap, so people can argue (29 Oct, D27) */
@@ -228,7 +240,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (s.exit) { localStorage.removeItem(saveKey); lastSave.current = ""; }
         else {
           const save = JSON.stringify({ build: BUILD_ID, shape: SAVE_SHAPE, g: s.g, nohost: s.nohost, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, timeUp: s.timeUp,
-            noLl: !!s.g?.noLl, total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
+            noLl: !!s.g?.noLl, total: s.total, lifeline: s.lifeline, typed: s.typed, guesses: s.guesses, pins: s.pins, mrList: s.mrList, mrOut: s.mrOut, mrOff: s.mrOff, mrAway: s.mrAway, mrAsk: s.mrAsk, agree: s.agree, votes: s.votes, predict: s.predict, streak: s.streak, ok: s.ok, sdBuzz: s.sdBuzz, sdOut: s.sdOut, pending: s.pending, autoAt: s.autoAt, paused: s.paused, custom: s.custom, waitSince: s.waitSince, flags: s.flags, flagN: s.flagN, tvAway: s.tvAway, awayPaused: s.awayPaused, bids: s.bids,
             app: s.app, buzzAt: s.buzzAt, late: s.late, typedLate: s.typedLate, lastAns: s.lastAns, decided: s.decided, contest: s.contest, contested: s.contested, changedIds: s.changedIds, legLog: s.legLog, drafts: s.drafts, sdCur: s.sdCur, sdQ: s.sdQ, sdLog: s.sdLog, offList: s.offList, seeAt: s.seeAt, seeOut: s.seeOut, seeBuzz: s.seeBuzz, seeBy: s.seeBy, qkeys: s.qkeys, scoreLog: s.scoreLog, segLog: s.segLog,
             /* Fool Me Twice's lies, picks and answers, and the Roulette spin (19 Nov review: a refresh on the picks froze the night) */
             foolLies: s.foolLies, foolPicks: s.foolPicks, fool: s.fool, spinAt: s.spinAt });
@@ -367,7 +379,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
         if (f.go === "sayQ") applyFx([{ used: g.saySame.qs[g.saySame.i] }]);
         if (f.go === "pinQ") applyFx([{ used: g.pinGame.qs[g.pinGame.i] }]);
         if (f.go === "airportQ") applyFx([{ used: g.airportGame.qs[g.airportGame.i] }]);
-        if (f.go === "majorityQ") applyFx([{ used: g.majorityGame.qs[g.majorityGame.i] }]);
+        if (f.go === "majorityQ") { applyFx([{ used: g.majorityGame.qs[g.majorityGame.i] }]); mrFreeze(s, ctx.current.members.map((x) => x.name)); }
         if (f.go === "seeQ") applyFx([{ used: g.seeGame.qs[g.seeGame.i] }]);
         if (f.go === "foolWrite") applyFx([{ used: g.foolGame.qs[g.foolGame.i] }]);
         /* (the drawn chambers' questions are played; a dark chamber's aren't) */
@@ -660,13 +672,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (typeof p.k === "string" && p.k !== draftKey()) return false;     // the last question's, landing late
     const e = s.mrList.find((x) => x.uid === from.user_id) || s.mrList.find((x) => x.name.toLowerCase() === from.name.toLowerCase());
     if (!e) return MAJ.late;
+    if (e.off) return s.mrOff.includes(e.name) ? MAJ.offList : MAJ.backNext;
     if (e.uid !== from.user_id) e.uid = from.user_id;
     if (s.votes[e.name] != null) return true;                              // (a second tap: the first one stands)
     const pick = String(p.pick ?? "");
     if (!q.options.includes(pick)) return false;
     s.votes = { ...s.votes, [e.name]: pick };
     /* everyone's in: the reveal (paused, a tap still counts, as in every game: the reveal waits for Resume, 25 Nov) */
-    if (!s.paused && s.mrList.every((x) => s.votes[x.name] != null)) reveal();
+    if (!s.paused && mrAllIn(s)) reveal();
     return true;
   };
 
@@ -718,6 +731,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "ui/exit") exitGame();
     else if (t === "ui/again") againGame();
     /* Majority Rules: the host takes someone off their team's list (or puts them back), before Start */
+    else if (t === "ui/mrOut" && s.screen !== "majorityIntro") {
+      /* after Start: off (or back) from the next question; the questions already asked stay as they were */
+      const n = bare(move.name), e = (s.mrList || []).find((x) => x.name === n);
+      if (!e) return;
+      const off = !s.mrOff.includes(n);
+      s.mrOff = off ? [...s.mrOff, n] : s.mrOff.filter((x) => x !== n);
+      s.toast = { id: ++s.toastN, text: off ? MAJ.offNext(iso(n)) : MAJ.onNext(iso(n)) };
+    }
     else if (t === "ui/mrOut") {
       const n = bare(move.name), m = ctx.current.members.find((x) => x.name === n);
       if (!m || (m.team !== 0 && m.team !== 1)) return;
@@ -727,9 +748,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     }
     /* ...and Start fixes the lists: everyone on a team, but whoever was taken off */
     else if (t === "majority/start") {
+      /* (the host's "Take them off and start": everyone not on the game screen comes off first) */
+      if (move.drop && !s.nohost) { const here = new Set(s.mrHere || []); for (const m of ctx.current.members) if ((m.team === 0 || m.team === 1) && m.role !== "host" && !here.has(m.user_id) && !s.mrOut.includes(m.name)) s.mrOut = [...s.mrOut, m.name]; }
       const L = mrRoster();
       if (!L.some((e) => e.team === 0) || !L.some((e) => e.team === 1)) { s.toast = { id: ++s.toastN, text: "Both teams need someone on their list." }; return; }
-      s.mrList = L; s.votes = {}; s.mrAsk = null;
+      s.mrList = L; s.votes = {}; s.mrAsk = null; s.mrOff = []; s.mrAway = [];
       play({ type: "majority/start", n: [L.filter((e) => e.team === 0).length, L.filter((e) => e.team === 1).length] });
     }
     else if (t === "ui/startCall") {
@@ -1068,10 +1091,13 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     else if (t === "ui/pauseFriend") { if (!s.lifeline || s.lifeline.key !== "friend" || leadTeam() !== team) return false; }
     /* Majority Rules, no host: a captain asks to take an absent teammate off the list; the other captain says yes or no */
     else if (t === "ui/mrOut") {
-      const n = bare(move.name), m = ctx.current.members.find((x) => x.name === n);
-      if (!m || m.team !== team || m.role === "host") return false;
-      if (s.mrOut.includes(n)) { s.mrOut = s.mrOut.filter((x) => x !== n); return true; }   // back on the list: no need to ask
-      if ((s.mrHere || []).includes(m.user_id)) return `${iso(n)} is here: everyone here plays.`;
+      const n = bare(move.name), m = ctx.current.members.find((x) => x.name === n), during = s.screen !== "majorityIntro";
+      /* (after Start: anyone on the fixed list, the room or not: someone who has left has no seat to look up) */
+      const mt = during ? (s.mrList || []).find((x) => x.name === n)?.team : m?.team;
+      if (mt !== team || m?.role === "host") return false;
+      const list = during ? s.mrOff : s.mrOut;
+      if (list.includes(n)) { if (during) { s.mrOff = s.mrOff.filter((x) => x !== n); s.toast = { id: ++s.toastN, text: MAJ.onNext(iso(n)) }; } else s.mrOut = s.mrOut.filter((x) => x !== n); return true; }   // back on the list: no need to ask
+      if (m && (s.mrHere || []).includes(m.user_id)) return `${iso(n)} is here: everyone here plays.`;
       if (s.mrAsk) return `One at a time: ${iso(s.mrAsk.name)} first.`;
       s.mrAsk = { name: n, team, until: Date.now() + T().tContest * 1000 };
       return true;
@@ -1080,8 +1106,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const A = s.mrAsk;
       if (!A || team === A.team || typeof move.v !== "boolean") return false;
       s.mrAsk = null;
-      if (move.v) s.mrOut = [...s.mrOut, A.name];
-      s.toast = { id: ++s.toastN, text: move.v ? `${iso(A.name)} is off ${poss(iso(g.teams[A.team].name))} list for this one.` : `${iso(A.name)} stays on the list.` };
+      const during = s.screen !== "majorityIntro";
+      if (move.v) { if (during) s.mrOff = [...s.mrOff, A.name]; else s.mrOut = [...s.mrOut, A.name]; }
+      s.toast = { id: ++s.toastN, text: move.v ? (during ? MAJ.offNext(iso(A.name)) : `${iso(A.name)} is off ${poss(iso(g.teams[A.team].name))} list for this one.`) : `${iso(A.name)} stays on the list.` };
       return true;
     }
     /* no host: either captain asks to set the total scores; the other captain agrees, or nothing changes */
@@ -1731,7 +1758,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* both answers came in while paused: the reveal, now that the game runs again */
       if (!s.paused && ["flagQ", "mapQ", "sayQ", "airportQ", "rouletteQ", "stakesQ"].includes(s.screen) && s.typed[0] && s.typed[1]) { reveal(); changed = true; }
       if (!s.paused && s.screen === "pinQ" && s.pins[0] && s.pins[1]) { reveal(); changed = true; }
-      if (!s.paused && s.screen === "majorityQ" && s.mrList?.length && s.mrList.every((x) => s.votes[x.name] != null)) { reveal(); changed = true; }
+      if (!s.paused && s.screen === "majorityQ" && mrAllIn(s)) { reveal(); changed = true; }
       /* time's up (a moment after the clock shows 0, see T_GRACE_MS): first, what was typed but not sent goes in */
       if (s.deadline && now >= s.deadline + T_GRACE_MS) {
         const sc = s.screen, took = (t: 0 | 1) => { if (takeDraft(t)) { s.step++; changed = true; } };
@@ -1785,6 +1812,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (now - here.current.checked > 2000) { here.current.checked = now; void handOver(); }
       /* Majority Rules' join screen: who's on the game screen (and someone taken off who turns up is back on);
          a captain's request nobody answered lapses (they stay on the list) */
+      /* ...and during the game: who's on the game screen (a captain's "Not here", the host's list), and who has gone
+         from the room or come back to it (they count, or not, from the next question: see mrFreeze) */
+      if ((s.screen === "majorityQ" || s.screen === "majorityReveal") && s.mrList) {
+        const on = ctx.current.members.filter((m) => now - (here.current.at[m.user_id] ?? 0) < T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
+        if (on.join() !== (s.mrHere || []).join()) { s.mrHere = on; changed = true; }
+        const names = new Set(ctx.current.members.map((m) => m.name)), away = s.mrList.filter((e) => !names.has(e.name)).map((e) => e.name);
+        if (away.join() !== s.mrAway.join()) { s.mrAway = away; changed = true; }
+        if (s.mrAsk && s.mrHere.some((u) => ctx.current.members.find((m) => m.user_id === u)?.name === s.mrAsk!.name)) { s.mrAsk = null; changed = true; }
+        if (s.mrAsk && now >= s.mrAsk.until) { s.toast = { id: ++s.toastN, text: `No answer: ${iso(s.mrAsk.name)} stays on the list.` }; s.mrAsk = null; changed = true; }
+      }
       if (s.screen !== "majorityIntro") { if (s.mrGone?.length) s.mrGone = []; }
       else {
         const on = ctx.current.members.filter((m) => now - (here.current.at[m.user_id] ?? 0) < T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();

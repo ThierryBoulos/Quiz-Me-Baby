@@ -2,7 +2,7 @@
 import { twoDone } from "./TwoResults";
 import { useRevealHold, WatchTv } from "./WatchTv";
 import { useNoTv } from "./NoTv";
-import { MajorityPad as MajorityPadAll, WhoPlaysPhone } from "./MajorityGame";
+import { MajorityPad as MajorityPadAll, MajorityStart, WhoPlaysDuring, WhoPlaysPhone } from "./MajorityGame";
 import { NEXT_MOVES, WAITS_FOR_NEXT } from "@/lib/tv/rules";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "./ResultTable";
 import { AirportFact } from "./Airport";
@@ -163,14 +163,18 @@ const onList = (pub: Pub, me: Member) => !!pub.majority?.on?.some((n) => n.toLow
 function MajorityPad({ pub, me, code }: { pub: Pub; me: Member; code: string }) {
   const noTv = useNoTv(), M = pub.majority;
   if (!M) return null;
-  return <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|majorityQ`} options={M.options || []} onList={onList(pub, me)}
+  const why = M.off?.find((x) => x.name.toLowerCase() === me.name.toLowerCase())?.why ?? null;
+  return <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|majorityQ`} options={M.options || []} onList={onList(pub, me)} why={why}
     up={pub.screen === "majorityQ" ? "q" : pub.screen === "majorityReveal" ? "reveal" : null} answer={M.reveal?.answer} paused={pub.paused} disabled={pub.tvAway} ack={pub.ack} noTv={noTv} />;
 }
 /* the join screen's lists, on a phone: who's here; the host takes someone off (or puts them back); with
    no host a captain asks to take an absent teammate off, and the other captain agrees, or not */
-function MajorityList({ pub, me, act }: { pub: Pub; me: Member; act?: (move: Record<string, unknown>) => void }) {
+function MajorityList({ pub, me, act, during }: { pub: Pub; me: Member; act?: (move: Record<string, unknown>) => void; during?: boolean }) {
   const L = pub.majority?.list || [], A = pub.majority?.ask, T = pub.teams, host = me.role === "host", cap = me.role === "captain";
   const left = useSecondsLeft(A?.until);
+  /* (during the game, no host: only the captains, their own team's list folded away, the other captain's request in sight) */
+  if (during && !cap) return null;
+  const Each = during ? WhoPlaysDuring : WhoPlaysPhone;
   return (
     <div className="flex flex-col gap-3">
       {A && cap && me.team !== A.team && act && (
@@ -180,7 +184,7 @@ function MajorityList({ pub, me, act }: { pub: Pub; me: Member; act?: (move: Rec
         </div>)}
       {A && !(cap && me.team !== A.team) && <p className="text-center text-13 text-[var(--color-ink-2)]">Asking to take {A.name} off {T[A.team].name}&rsquo;s list…</p>}
       {/* (every phone its own team's list, the host every team's: one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
-      <WhoPlaysPhone teams={[0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }))} list={L} me={{ name: me.name, team: me.team ?? null }} host={host}
+      <Each teams={[0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }))} list={L} me={{ name: me.name, team: me.team ?? null }} host={host}
         onToggle={act ? (name) => act({ type: "ui/mrOut", name }) : undefined}
         ask={(x) => (cap && me.team === x.team && !x.here && !x.out && !A && act ? () => act({ type: "ui/mrOut", name: x.name }) : null)} />
     </div>);
@@ -205,6 +209,9 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const okNow = `${pub.reveal?.ok?.[0]}|${pub.reveal?.ok?.[1]}`;
   useEffect(() => { setPicked({}); }, [pub.qid, pub.screen, okNow]);
   /* (Next waits while a captain's contest waits for the host's ruling: the 4 Nov audit, 3.11) */
+  /* Majority Rules during the game: the host's list, folded away (a change counts from the next question: 25 Nov) */
+  const MrDuring = () => <WhoPlaysDuring teams={[0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }))} list={pub.majority?.list || []} me={{ name: "", team: null }} host busy={busy}
+    onToggle={(name) => fire({ type: "ui/mrOut", name })} />;
   const Main = ({ label, move, off }: { label: string; move: Record<string, unknown>; off?: boolean }) => {
     const wait = !!pub.contest && NEXT_MOVES.has(String(move.type));
     /* (not docked meanwhile: sideways, the docked button sat over the contest's two buttons: the 4 Nov audit, 1.20) */
@@ -398,7 +405,9 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         <MiniIntro pub={pub} size="phone" />
         {/* (the rules, then who plays, then Start: the 3-to-8 order, every setup: 25 Nov) */}
         {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={{ role: "host" } as Member} act={fire} />}
-        <Main label={mk === "roulette" ? "Spin" : mk === "majority" ? MAJ.start : "Start"} move={{ type: mk === "auction" ? "auction/begin" : mk + "/start" }} />
+        {/* (Majority Rules: anyone not on the game screen is said first: Start anyway, or Take them off and start: 25 Nov) */}
+        {mk === "majority" ? <MajorityStart list={pub.majority?.list || []} busy={busy} start={(drop) => send({ type: "majority/start", ...(drop ? { drop: true } : {}) })} />
+          : <Main label={mk === "roulette" ? "Spin" : "Start"} move={{ type: mk === "auction" ? "auction/begin" : mk + "/start" }} />}
       </div>);
     case "miniQ": return (
       <div className="flex flex-col gap-3 flex-1">
@@ -498,8 +507,9 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           return { key: t, name: T[t].name, color: tc(t), dot: <span className="inline-block w-3.5 h-3.5 rounded-full shrink-0" style={{ background: tc(t) }} aria-hidden />, lit: a > 0,
             statusColor: done ? "var(--color-ok)" : "var(--color-ink-3)", status: MAJ.count(a, n) }; })} />
         <div className="flex flex-wrap gap-2 justify-center mt-auto"><Pause /><Small ghost label="Change question" move={{ type: "majority/swap" }} /><Small label="Reveal now" move={{ type: "ui/reveal" }} /></div>
+        <MrDuring />
       </div>); }
-    case "majorityReveal": return <Results><Main label="Next" move={{ type: "ui/next" }} /></Results>;
+    case "majorityReveal": return <Results><MrDuring /><Main label="Next" move={{ type: "ui/next" }} /></Results>;
     case "airportQ": return (
       <div className="flex flex-col gap-3 flex-1">
         {/* (as with 3 to 8 teams: the board flipping in, the clock under it, the answer, who has answered and what they
@@ -1632,6 +1642,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         onLock={() => { if (skTheme != null && skLevel) void nxt({ type: "stakes/pick", k: skTheme, level: skLevel, theme: pub.stakes!.themes[skTheme] }); }} />}
       {sc === "stakesPick" && pub.stakes?.locked[mine] && pub.stakes.picks?.[mine] && <p className="text-center font-bold text-16" role="status">Locked in: {skLevelWord(pub.stakes.picks[mine]!.level)} on {pub.stakes.themes[pub.stakes.picks[mine]!.k]}.</p>}
       {sc === "majorityQ" && <MajorityPad pub={pub} me={me} code={code} />}
+      {nohost && (sc === "majorityQ" || sc === "majorityReveal") && <MajorityList pub={pub} me={me} act={fire} during />}
       <Result pub={pub} mine={mine} headOnly={CALL_SCREENS.includes(sc)} part="rest" />
       {/* the app's calls, each with a small Contest (the other captain, or the host, decides) */}
       {(CALL_SCREENS.includes(sc) || SD_CALL_SCREENS.includes(sc) || (nohost && sc === "final")) && <Calls pub={pub} mine={mine} busy={busy} act={(m) => void nxt(m)} card={CARD_SCREENS.includes(sc)} />}
@@ -1768,7 +1779,10 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
         </div>)}
 
       {/* no host: start, go and next — the lead captain (Team A's) */}
-      {showNext && next && (
+      {/* (Majority Rules, no host: anyone not on the game screen is said first; Start anyway only, since a captain can't
+         take the other team's players off alone: their own, with Not here and the other captain's yes: 25 Nov) */}
+      {showNext && next && sc === "majorityIntro" && <MajorityStart list={pub.majority?.list || []} busy={busy} solo start={() => void nxt({ type: "majority/start" })} />}
+      {showNext && next && sc !== "majorityIntro" && (
         <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy || (next[0] === "Spin" && spinTap.pending)}
           onClick={() => { if (next[0] === "Spin") spinTap.press(); void nxt({ type: next[1] }); }}>{next[0] === "Spin" && spinTap.pending ? SPINNING : next[0]}</button>)}
       {nohost && mayNext && pub.nextBy && sc === "sudden" && !pub.sudden?.ready && <button className="btn btn-gold btn-lg btn-block mt-auto dock" disabled={busy} onClick={() => void nxt({ type: "sudden/go" })}>Start</button>}

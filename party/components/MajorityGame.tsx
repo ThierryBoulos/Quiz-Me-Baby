@@ -36,16 +36,17 @@ export function WhoPlaysTv({ teams, list }: { teams: MrTeam[]; list: MrEntry[] }
 
 /* a phone: its own team's list (the host: every team's, with Take off and Put back); with 2 teams and no host, a
    captain can ask to take an absent teammate off (ask) */
-export function WhoPlaysPhone({ teams, list, me, host, busy, onToggle, ask }: {
+export function WhoPlaysPhone({ teams, list, me, host, busy, onToggle, ask, during }: {
   teams: MrTeam[]; list: MrEntry[]; me: { name: string; team: number | null }; host?: boolean; busy?: boolean;
   onToggle?: (name: string) => void; ask?: (x: MrEntry) => ((() => void) | null);
+  during?: boolean;   // after Start: the fixed list; a change counts from the next question
 }) {
   const mine = list.find((x) => bare(x.name) === me.name), k = teams.length;
   const show = host ? teams.map((_, i) => i) : me.team != null ? [me.team] : [];
   return (
     <div className="card flex flex-col gap-2 !p-3">
-      <div className="eyebrow">{host ? MAJ.hostHead : MAJ.listHead}</div>
-      {!host && !(mine && !mine.out) && <p className="text-center font-bold text-16" role="status">{MAJ.notOn}</p>}
+      <div className="eyebrow">{host || during ? MAJ.hostHead : MAJ.listHead}</div>
+      {!host && !during && !(mine && !mine.out) && <p className="text-center font-bold text-16" role="status">{MAJ.notOn}</p>}
       <div className={"grid gap-3 " + (host && k === 2 ? "grid-cols-2" : "grid-cols-1")}>{show.map((t) => { const L = list.filter((x) => x.team === t); return (
         <div key={t} className="flex flex-col gap-1">
           <div className="eyebrow flex items-center gap-1.5" style={{ color: teams[t]?.color }}>{k > 2 && <Dot t={t} color={teams[t]?.color} size={14} />}<bdi>{teams[t]?.name}</bdi> · {L.filter((x) => !x.out).length}</div>
@@ -58,7 +59,35 @@ export function WhoPlaysPhone({ teams, list, me, host, busy, onToggle, ask }: {
             </div>); })}
           {!L.length && <div className="text-14 text-[var(--color-ink-3)]">{MAJ.nobody}</div>}
         </div>); })}</div>
-      <p className="text-12 text-[var(--color-ink-3)] text-center">{MAJ.phoneKey}</p>
+      <p className="text-12 text-[var(--color-ink-3)] text-center">{during ? MAJ.duringNote : MAJ.phoneKey}</p>
+    </div>);
+}
+
+/* the host's list during the game, folded away under the buttons (25 Nov, the owner: for the one who walked off with
+   their phone); no host, a captain's own team's, with Not here */
+export function WhoPlaysDuring(p: Parameters<typeof WhoPlaysPhone>[0]) {
+  const [open, setOpen] = useState(false), off = p.list.filter((x) => x.out).length;
+  return (
+    <div className="flex flex-col items-center gap-2 w-full">
+      <button type="button" className="btn btn-sm btn-host btn-ghost" aria-expanded={open} onClick={() => setOpen((o) => !o)}>{open ? "Hide the list" : `Who plays${off ? ` (${off} off)` : ""}`}</button>
+      {open && <div className="w-full"><WhoPlaysPhone {...p} during /></div>}
+    </div>);
+}
+
+/* the host's Start (25 Nov, the owner): anyone on a list who isn't on the game screen, said first, with Start anyway
+   or Take them off and start; with no host, a captain can't take the other team's players off, so Start anyway only */
+export function MajorityStart({ list, busy, start, solo, dock = true }: {
+  list: MrEntry[]; busy?: boolean; start: (drop: boolean) => void; solo?: boolean; dock?: boolean;
+}) {
+  const [ask, setAsk] = useState(false), away = list.filter((x) => !x.here && !x.out).map((x) => bare(x.name));
+  if (!ask || !away.length) return <button className={"btn btn-gold btn-lg btn-block mt-auto" + (dock ? " dock" : "")} disabled={busy} onClick={() => (away.length ? setAsk(true) : start(false))}>{MAJ.start}</button>;
+  return (
+    <div className={"card flex flex-col gap-2 mt-auto" + (dock ? " dock" : "")} role="alert" style={{ borderColor: "var(--color-gold)" }}>
+      <p className="text-15 font-bold">{MAJ.notHere(away)}</p>
+      <div className={"grid gap-2 " + (solo ? "grid-cols-1" : "grid-cols-2")}>
+        <button className="btn" disabled={busy} onClick={() => start(false)}>{MAJ.startAnyway}</button>
+        {!solo && <button className="btn btn-gold" disabled={busy} onClick={() => start(true)}>{MAJ.dropStart}</button>}
+      </div>
     </div>);
 }
 
@@ -123,8 +152,9 @@ function phoneOrder(opts: string[], seed: string) {
   return a;
 }
 const buzzHand = (p: number) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
-export function MajorityPad({ code, me, qid, k, options, onList, up, answer, paused, disabled, ack, noTv }: {
+export function MajorityPad({ code, me, qid, k, options, onList, why, up, answer, paused, disabled, ack, noTv }: {
   code: string; me: { user_id: string }; qid: string; k: string; options: string[]; onList: boolean;
+  why?: "off" | "back" | null;   // not counted now: taken off (off), or back in the room, counted from the next question (back)
   up: "q" | "reveal" | null; answer?: string | null; paused?: boolean; disabled?: boolean;
   ack?: Record<string, Record<string, string>>; noTv?: boolean;
 }) {
@@ -138,7 +168,7 @@ export function MajorityPad({ code, me, qid, k, options, onList, up, answer, pau
   useEffect(() => { if (mine && got && got !== "+" && up === "q") { setNo(got === "-" ? (noTv ? "That didn't go through. Tap again." : "The TV didn't take that. Tap again.") : got); setMine(null);
     try { sessionStorage.removeItem(store); } catch { /* none */ } } }, [got]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!no) return; const t = setTimeout(() => setNo(null), 5000); return () => clearTimeout(t); }, [no]);
-  if (!onList) return up === "q" ? <p className="text-center text-15 text-[var(--color-ink-2)]">{MAJ.watching}</p> : null;
+  if (!onList) return up === "q" ? <p className="text-center text-15 text-[var(--color-ink-2)]">{why === "off" ? MAJ.offList : why === "back" ? MAJ.backNext : MAJ.watching}</p> : null;
   const picked = mine?.key === k ? mine.pick : null;
   if (up === "reveal") {
     const right = !!picked && picked === answer;

@@ -1,0 +1,29 @@
+0.00 room lobby
+1.25 room playing
+1.25 majorityIntro | 1 | 0-0 | 0-0 |  | 
+5.00 majorityIntro | 2 | 0-0 | 0-0 |  | 
+6.75 majorityQ | 3 | 0-0 | 0-0 |  | 
+22.75 majorityReveal | 4 | 0-0 | 50-67 |  | 
+23.00 majorityQ | 5 | 0-0 | 50-67 |  | 
+(Karim leaves the room)
+39.00 majorityReveal | 6 | 0-0 | 50-67 |  | 
+40.00 majorityQ | 7 | 0-0 | 50-67 |  | 
+56.00 majorityReveal | 8 | 0-0 | 55-56 |  | 
+56.25 majorityQ | 9 | 0-0 | 55-56 |  | 
+72.25 majorityReveal | 10 | 0-0 | 50-58 |  | 
+72.50 majorityQ | 11 | 0-0 | 50-58 |  | 
+(Karim is back)
+73.25 majorityReveal | 11 | 0-0 | 53-67 |  | 
+74.25 majorityQ | 12 | 0-0 | 53-67 |  | 
+75.00 majorityReveal | 12 | 0-0 | 62-72 |  | 
+76.00 majorityQ | 13 | 0-0 | 62-72 |  | 
+92.00 majorityReveal | 14 | 0-0 | 52-67 |  | 
+92.25 majorityQ | 15 | 0-0 | 52-67 |  | 
+108.25 majorityReveal | 16 | 0-0 | 48-63 |  | 
+108.50 majorityQ | 17 | 0-0 | 48-63 |  | 
+124.50 majorityReveal | 18 | 0-0 | 45-59 |  | 
+125.50 majorityQ | 19 | 0-0 | 45-59 |  | 
+126.50 majorityReveal | 19 | 0-0 | 49-60 |  | 
+127.25 majoritySummary | 20 | 0-2 | 49-60 |  | 
+128.25 final | 21 | 0-2 |  |  | 
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[0,1],"chart":[[0,0],[0,0],[0,2]],"segs":[{"label":"Majority Rules","pts":[[0,2]]}],"awards":[{"t":"Sharpest in Majority Rules","who":"4 players, 6 of 10","team":null},{"t":"Least right, Majority Rules","who":"Rita, 4 of 10","team":0,"spoon":true}]}

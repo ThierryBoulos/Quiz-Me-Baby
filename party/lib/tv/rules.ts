@@ -45,7 +45,7 @@ export const HOST_MOVES: Record<string, Where> = {
   /* Secret Stakes: Start, Change question (three new themes, before anyone has answered), the calls, Next */
   "stakes/start": "stakesIntro", "stakes/swap": ["stakesPick", "stakesQ"], "stakes/done": "stakesSummary", "ui/stakesOk": "stakesReveal",
   /* Majority Rules' join screen: take someone who isn't here off their team's list (or put them back) */
-  "ui/mrOut": "majorityIntro",
+  "ui/mrOut": ["majorityIntro", "majorityQ", "majorityReveal"],
   "dish/start": "dishIntro", "dish/swap": "dishQ", "dish/right": "dishQ", "dish/wrong": "dishQ", "dish/next": "dishReveal",
   "dish/more": "dishTie", "dish/stop": "dishTie", "dish/award": "dishSummary", "dish/done": "dishSummary",
   "map/start": "mapIntro", "map/hint": "mapQ", "map/swap": "mapQ", "map/more": "mapTie", "map/stop": "mapTie", "map/award": "mapSummary", "map/done": "mapSummary",
@@ -102,8 +102,8 @@ export const CAPTAIN_MOVES: Record<string, { where: Where; who: Who; nohostOnly?
   /* Secret Stakes: each captain bets for their own team, host or not */
   "stakes/pick": { where: "stakesPick", who: "any" },
   /* no host: a captain asks to take an absent teammate off the list; the other captain agrees, or not */
-  "ui/mrOut": { where: "majorityIntro", who: "any", nohostOnly: true },
-  "ui/mrOutOk": { where: "majorityIntro", who: "any", nohostOnly: true },
+  "ui/mrOut": { where: ["majorityIntro", "majorityQ", "majorityReveal"], who: "any", nohostOnly: true },
+  "ui/mrOutOk": { where: ["majorityIntro", "majorityQ", "majorityReveal"], who: "any", nohostOnly: true },
   /* no host: either captain asks to set the total scores (something went wrong); the other captain agrees, or nothing changes */
   "ui/askScore": { where: "*", who: "any", nohostOnly: true },
   "ui/agree": { where: "*", who: "any", nohostOnly: true },

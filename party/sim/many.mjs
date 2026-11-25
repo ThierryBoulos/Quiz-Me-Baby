@@ -305,10 +305,12 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   const s = L.newNight(teams, { majority: decks.majority }, ["majority"]);
   const off = L.toggleMrOut(s, "Joe") && (s.mrOut || []).includes("Joe"), back = L.toggleMrOut(s, "Joe") && !(s.mrOut || []).includes("Joe");
   L.toggleMrOut(s, "Joe"); L.startMini(s, 0, T, [{ name: "Ann", team: 0 }]);
-  const notNow = !L.toggleMrOut(s, "Ann");
-  const ok = off && back && notNow;
+  /* (after Start, 25 Nov: off from the next question, the one up still counts; someone not on the list: no) */
+  const during = L.toggleMrOut(s, "Ann") && !(s.mrOut || []).includes("Ann") && (s.mrOff || []).includes("Ann") && L.mrOn(s).some((r) => r.name === "Ann");
+  const notListed = !L.toggleMrOut(s, "Zed");
+  const ok = off && back && during && notListed;
   if (!ok) bad++;
-  console.log(`Majority Rules list: off ${off}, back ${back}, only before Start ${notNow} — ${ok ? "ok" : "FAILED"}`);
+  console.log(`Majority Rules list: off ${off}, back ${back}, after Start from the next question ${during}, not on the list refused ${notListed} — ${ok ? "ok" : "FAILED"}`);
 }
 /* 8 Nov: Imad with 3-8 teams (Settings on): a line at each game's intro, a mini-game won, a new leader, the final;
    every placeholder filled, nothing only two teams have ("both", a buzzer) */

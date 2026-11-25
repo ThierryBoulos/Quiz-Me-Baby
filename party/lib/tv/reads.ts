@@ -76,6 +76,7 @@ export function mrTally(s: TvState) {
   const q = currentQ(s), opts: string[] = q?.options || [];
   const answered: Two<number> = [0, 0], right: Two<number> = [0, 0], counts: Two<number>[] = opts.map(() => [0, 0]);
   for (const e of s.mrList || []) {
+    if (e.off) continue;                       // (not counted on this question: off the list, or out of the room when it was asked)
     const v = s.votes?.[e.name];
     if (v == null) continue;
     answered[e.team]++;

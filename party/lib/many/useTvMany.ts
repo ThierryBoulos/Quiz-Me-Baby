@@ -65,8 +65,17 @@ export async function setTeams(code: string, state: Record<string, unknown>, mem
 /* Majority Rules' intro: every team's list as it stands (who's on the game screen, who the host took off), and someone
    taken off who comes back to the game screen is put back, as with 2 teams (25 Nov, the owner). true: it changed */
 function mrSync(s: StateM, members: Member[], at: Record<string, number>, settled = true): boolean {
-  if (miniOf(s)?.key !== "majority" || s.screen !== "intro") { if (!s.mrList && !s.mrHere) return false; delete s.mrList; delete s.mrHere; delete s.mrGone; return false; }
-  const now = Date.now(), on = members.filter((m) => now - (at[m.user_id] ?? 0) < T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
+  const mk = miniOf(s)?.key === "majority", now = Date.now(), on = members.filter((m) => now - (at[m.user_id] ?? 0) < T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
+  /* during the game: who has gone from the room or come back to it (they count, or not, from the next question: see
+     mrFreeze in logic.ts), and the fixed list for the host's Take off (who's on the game screen, who's off) */
+  if (mk && (s.screen === "q" || s.screen === "reveal") && s.roster.length) {
+    const names = new Set(members.map((m) => m.name)), away = s.roster.filter((r) => !names.has(r.name)).map((r) => r.name);
+    const uid = new Map(members.map((m) => [m.name, m.user_id])), off = s.mrOff || [];
+    const L = s.roster.map((r) => ({ name: r.name, team: r.team, here: on.includes(uid.get(r.name) ?? ""), ...(off.includes(r.name) ? { out: true } : {}) }));
+    const changed = away.join() !== (s.mrAway || []).join() || JSON.stringify(L) !== JSON.stringify(s.mrList || null);
+    s.mrAway = away; s.mrList = L; delete s.mrGone; delete s.mrHere; return changed;
+  }
+  if (!mk || s.screen !== "intro") { if (!s.mrList && !s.mrHere) return false; delete s.mrList; delete s.mrHere; delete s.mrGone; return false; }
   const hereNames = members.filter((m) => on.includes(m.user_id)).map((m) => m.name);
   /* someone taken off, then seen away (off the game screen, or out of the room), then seen on the game screen: back
      on the list, and the TV says so. Taken off while on the screen and never away: stays off. (Not while the TV is
@@ -77,7 +86,6 @@ function mrSync(s: StateM, members: Member[], at: Record<string, number>, settle
   const back = gone.filter((x) => hereNames.includes(x));
   if (back.length) { s.mrOut = out.filter((x) => !back.includes(x)); gone = gone.filter((x) => !back.includes(x));
     s.toast = { id: ++s.toastN, text: MAJ.backOn(back) }; }
-  /* (someone who left the room for good and isn't a member any more stays remembered as taken off, by name) */
   s.mrGone = gone; s.mrHere = on;
   const off = s.mrOut || [], L = members.filter((m) => m.role !== "host" && m.team != null && (m.team as number) < s.teams.length)
     .map((m) => ({ name: m.name, team: m.team as number, here: on.includes(m.user_id), ...(off.includes(m.name) ? { out: true } : {}) }));
@@ -421,12 +429,17 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     /* the host runs it */
     if (a.kind === "judge" && from.role === "host") {
       const mv = (a.payload.move || {}) as G, t = String(mv.type || "");
+      /* (Majority Rules: who's in the room right now, before a move can put a question up: 25 Nov) */
+      mrSync(s, ctx.current.members, here.current.at, Date.now() - upSince.current > 8000);
       /* (a call changed, or a contest ruled on, carries no step: the reveal's step doesn't move for either) */
       if (t !== "m/flip" && t !== "m/contestOk" && t !== "m/setScores" && t !== "m/mrOut" && Number(a.payload.step) !== s.step) { reply("-"); publish(); return; }
       let ok = false;
       if (t === "m/go") { ok = !!s.intro; delete s.intro; }
       else if (s.intro) ok = false;
-      else if (t === "m/start") { const r = startMini(s, Date.now(), timers(), roster()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
+      else if (t === "m/start") {
+        /* (the host's "Take them off and start": everyone on a list who isn't on the game screen comes off first) */
+        if (mv.drop && miniOf(s)?.key === "majority" && s.screen === "intro") for (const x of s.mrList || []) if (!x.here && !x.out) s.mrOut = [...(s.mrOut || []), x.name];
+        const r = startMini(s, Date.now(), timers(), roster()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       /* (Fool Me Twice: Reveal now on the lies puts the answers up to pick from; on the picks, the reveal) */
       else if (t === "m/reveal" && miniOf(s)?.key === "fool") { ok = s.screen === "q" ? foolOpen(s, Date.now(), timers()) : foolReveal(s); }
       else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);

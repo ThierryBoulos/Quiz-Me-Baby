@@ -293,7 +293,14 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
   if ((s.screen === "majorityQ" || s.screen === "majorityReveal") && q) {
     const m = g.majorityGame, t = mrTally(s);
     p.question = q.question;
-    p.majority = { on: (s.mrList || []).map((e) => e.name), options: q.options, n: [m.n[0], m.n[1]], answered: t.answered,
+    /* on: who counts on this question; off: on the fixed list but not counted now, and why (the host or both captains
+       took them off; or they're back in the room, counted from the next question); list: the fixed list, for the
+       host's Take off and a captain's Not here (25 Nov, the owner) */
+    const L = s.mrList || [], here = new Set(s.mrHere || []), uids = new Map(mem.map((x) => [x.name, x.user_id]));
+    p.majority = { on: L.filter((e) => !e.off).map((e) => e.name), options: q.options, n: [m.n[0], m.n[1]], answered: t.answered,
+      off: L.filter((e) => e.off).map((e) => ({ name: e.name, why: (s.mrOff || []).includes(e.name) ? "off" as const : "back" as const })),
+      list: L.map((e) => ({ name: iso(e.name), team: e.team, here: here.has(uids.get(e.name) ?? ""), out: (s.mrOff || []).includes(e.name) || undefined })),
+      ask: s.mrAsk ? { name: iso(s.mrAsk.name), team: s.mrAsk.team, until: s.mrAsk.until } : null,
       totals: { right: [m.right[0], m.right[1]], of: [m.of[0], m.of[1]] } };
     /* the reveal counts this question in the totals straight away (the engine adds it at Next) */
     if (s.screen === "majorityReveal") {
