@@ -7,9 +7,8 @@ import { wholeSentences } from "@/lib/sentences";
 import { useEffect, useState } from "react";
 import { FitBody } from "../TvStage";
 import { useToastOn, WinName } from "../Motion";
-import { MajorityRevealTv, MajorityTv, WhoPlaysTv } from "../MajorityGame";
+import { MajorityJoin, MajorityRevealTv, MajorityTv, WhoPlaysTv } from "../MajorityGame";
 import { FOOL } from "@/lib/minis/fool";
-import { QRCodeSVG } from "qrcode.react";
 import { Clock, useSecondsLeft } from "../Clock";
 import { Confetti } from "../GameParts";
 import { PinMap } from "../PinMap";
@@ -85,15 +84,7 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
             {/* joining: the code and its QR side by side, one short line under them; then who's in, a team a row,
                 the name on the left and its count lined up on the right (the owner, 31 Oct: it read untidy) */}
             <div className="w-[560px] shrink-0 flex flex-col gap-4 text-left">
-              {join && (<>
-                <div className="flex items-center gap-5">
-                  <div className="rounded-[16px] p-2.5 bg-[#f4f6ff] shrink-0"><QRCodeSVG value={join.url} size={dense ? 112 : 132} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
-                  <div className="min-w-0">
-                    <div className="eyebrow text-18 whitespace-nowrap">Not in yet? Join with</div>
-                    <div className="display leading-none mt-1" style={{ fontSize: dense ? 60 : 72, color: "var(--color-gold)", letterSpacing: "0.08em" }}>{join.code}</div>
-                  </div>
-                </div>
-              </>)}
+              {join && <MajorityJoin join={join} dense={dense} />}
               {/* (who plays: one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
               <WhoPlaysTv teams={T.map((t) => ({ name: t.name, color: t.color }))} list={pub.mrList || []} />
             </div>

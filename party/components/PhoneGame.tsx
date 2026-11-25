@@ -1258,6 +1258,10 @@ function Head({ pub, me, capName, canArm, onArm, busy }: { pub: Pub; me: Member;
   if (/Intro$/.test(pub.screen) && pub.mini) return <MiniIntro pub={pub} size="phone" />;
   if (pub.screen === "comebackIntro" || pub.screen === "comebackSummary") return <ComebackTop pub={pub} />;
   if (RESULT.test(pub.screen)) return null;            // the result says it
+  /* (Russian Roulette's reveal: the "Your team" line says it, no "The reveal" above it, as with 3 to 8: 25 Nov) */
+  if (pub.screen === "rouletteReveal") return null;
+  /* (Fool Me Twice, a captain writing: the line is under the lie box, as with 3 to 8: 25 Nov) */
+  if (pub.screen === "foolWrite" && me.role === "captain" && me.team != null && !pub.sent?.[me.team]) return null;
   /* Fool Me Twice, the captain picking the truth: its line sits under the answers, not here too (21 Nov, the owner) */
   if (pub.screen === "foolPick" && !pub.paused && !pub.lifeline && me.role === "captain" && me.team != null && pub.fool?.opts) return null;
   /* on a question, the question (or flag, or map) is the thing to look at: the instruction steps back */
@@ -1711,7 +1715,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
           {dip && <input {...np.props} className="input" aria-label="Your second answer" value={b} maxLength={80} placeholder="Second answer" onChange={(e) => setB(e.target.value)} />}
           {np.hint}
           <button className="btn btn-gold btn-lg" disabled={busy || early || !a.trim() || (sc === "miniQ" && !Number.isFinite(guess))} onPointerDown={(e) => e.preventDefault()} onClick={() => void send()}>{sc === "miniQ" ? "Lock in" : "Send"}</button>
-          {["ask", "steal", "flagQ", "airportQ", "mapQ", "foolWrite", "comebackQ"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
+          {sc === "foolWrite" ? <div className="text-13 text-[var(--color-ink-3)]">{FOOL.boxLine}</div>
+            : ["ask", "steal", "flagQ", "airportQ", "mapQ", "comebackQ"].includes(sc) && <div className="text-13 text-[var(--color-ink-3)]">Once you send it, it&rsquo;s locked.</div>}
           {sc === "seeQ" && <div className="text-13 text-[var(--color-ink-3)]">Say it out loud too! Wrong, and you&rsquo;re out of this picture.</div>}
           {sc === "sayQ" && <div className="text-13 text-[var(--color-ink-3)]">{SAY.boxLine(false)}</div>}
           {sc === "dishQ" && <div className="text-13 text-[var(--color-ink-3)]">{DISH.boxLine(false)}</div>}

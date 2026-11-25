@@ -27,6 +27,8 @@ export const FOOL = {
   change: "Change fact",
   /* the lie box: its label, its hint, and what it says at the longest a lie can be (never the number) */
   lieLabel: "Your lie",
+  /* under the captain's lie box (no top line as well: 25 Nov, the owner) */
+  boxLine: "Write a lie that sounds true. Once you send it, it\u2019s locked.",
   /* a team's pill at a fact's reveal: what the fact gave it */
   pill: (v: number) => ({ text: `Your team: ${v > 0 ? `+${v}` : v < 0 ? `\u2212${-v}` : "0"}`, tone: (v > 0 ? "ok" : v < 0 ? "no" : "mid") as "ok" | "no" | "mid" }),
   limit: "Limit reached.",

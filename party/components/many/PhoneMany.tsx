@@ -421,7 +421,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {(g.key === "roulette" ? !spinning && !secret.answers : g.key === "stakes" ? !secret.answers : !secret.answer) && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{g.key === "roulette" || g.key === "stakes" ? "Getting the answers…" : "Getting the answer…"}</p>}
         {/* who's in: every team, as the TV shows them */}
         {/* who has answered, live (the owner, 31 Oct): a count, then each team ticked green as it locks in */}
-        {(() => { const who = T.map((_, i) => i).filter((i) => (!g.only || g.only.includes(i)) && !cb?.out[i]), n = who.filter((i) => pub.sent[i]).length; return (
+        {/* (Russian Roulette: once the barrel stops, as with 2 teams: nobody can answer while it spins, 25 Nov) */}
+        {!(g.key === "roulette" && spinning) && (() => { const who = T.map((_, i) => i).filter((i) => (!g.only || g.only.includes(i)) && !cb?.out[i]), n = who.filter((i) => pub.sent[i]).length; return (
           <WhoAnswered oneCol={T.some((t) => t.name.length > 8)} head={g.key === "majority" ? `${pub.voted?.length ?? 0} of ${pub.roster?.length ?? 0} players answered`
               /* (What Do You See?: the buzzer: who buzzed and is saying it and typing it, or nobody yet) */
               : g.key === "see" ? (pub.see?.buzz != null ? <><bdi>{T[pub.see.buzz]?.name}</bdi> buzzed{pub.see.by ? <> (<bdi>{pub.see.by}</bdi>)</> : null}: saying it out loud, and typing it</> : "Waiting for a buzz…") : `${n} of ${who.length} teams answered`}
@@ -617,6 +618,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         {g.key === "majority" && <MajorityPadAll code={code} me={me} qid={String(pub.qid)} k={`${pub.qid}|q`} options={pub.options || []} onList={onList} up="reveal" answer={R.answer} ack={pub.ack} noTv={noTv} />}
         {g.key === "roulette" && rr ? <RrPhoneReveal rr={rr} me={mine ?? null} teams={rrT} /> : g.key === "stakes" && sk ? <StakesPhone sk={sk} screen="stakesReveal" teams={rrT} me={mine ?? null} /> : <Answer />}
         {g.key !== "stakes" && <Table />}
+        {/* Majority Rules: a player right every question so far, as with 2 teams (25 Nov) */}
+        {g.key === "majority" && pub.mrFire && <p className="text-center text-15 font-bold">{pub.mrFire.map((f) => <span key={f.name} className="mx-2 inline-block"><span className="flame">🔥</span><bdi>{f.name}</bdi> · {f.n} in a row</span>)}</p>}
         <ContestMany pub={pub} mine={cap ? mine : null} host={false} busy={busy} act={(mv) => void send("next", { move: mv })} />
       </>)}
       {/* FOOL ME TWICE (16 Nov, the owner): the fact, the lie (captains), the answers to pick from and who'll fall for your
@@ -660,7 +663,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               {text.length >= FOOL_MAX && <div className="text-13 font-bold" style={{ color: "var(--color-gold)" }} role="status">{FOOL.limit}</div>}
               <button className="btn btn-gold btn-lg" disabled={busy || !text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={sendLie}>Send</button>
               {np.hint}
-              <div className="text-13 text-[var(--color-ink-3)]">Write a lie that sounds true. Once you send it, it&rsquo;s locked.</div>
+              <div className="text-13 text-[var(--color-ink-3)]">{FOOL.boxLine}</div>
             </div>)}
           {!done && sugs.length > 0 && (
             <div className="card">

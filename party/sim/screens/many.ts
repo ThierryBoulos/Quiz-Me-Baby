@@ -125,7 +125,10 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         c.pub.question = long.question; c.pub.options = long.options; c.pub.reveal.answer = long.answer; c.pub.reveal.notes = note?.notes || long.notes;
         c.pub.reveal.byTeam = (long.options as string[]).map((_, i) => c.pub.teams.map((_: unknown, t: number) => (i * 3 + t * 5) % 9));
         c.pub.reveal.counts = c.pub.reveal.byTeam.map((r: number[]) => r.reduce((a, x) => a + x, 0));
-        got[`m${k}.reveal.majority.extra.long.a`] = c; } }
+        got[`m${k}.reveal.majority.extra.long.a`] = c; }
+      /* ...and three players right all ten, the flame on every phone (25 Nov) */
+      if (mr) { const c = JSON.parse(JSON.stringify(mr)); c.pub.mrFire = [{ name: "Christophe", n: 10 }, { name: "Alexandra", n: 10 }, { name: "Jean-Paul", n: 10 }];
+        got[`m${k}.reveal.majority.extra.fire.a`] = c; } }
     /* the night's card with the furthest pin on it (23 Nov, the owner: as with 2 teams), its landmark the longest */
     { const fk = Object.keys(got).find((x) => x.startsWith(`m${k}.final`)), fin = fk ? (got[fk] as { pub: Q }) : undefined;
       if (fin?.pub.final?.awards?.length) { const c = JSON.parse(JSON.stringify(fin)), A = c.pub.final.awards as Q[];

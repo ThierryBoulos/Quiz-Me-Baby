@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { FitBody } from "./TvStage";
-import { MajorityRevealTv, MajorityTv, WhoPlaysTv } from "./MajorityGame";
+import { MajorityJoin, MajorityRevealTv, MajorityTv, WhoPlaysTv } from "./MajorityGame";
 import { FOOL } from "@/lib/minis/fool";
-import { QRCodeSVG } from "qrcode.react";
 import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
@@ -290,13 +289,9 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if (sc === "majorityIntro") { const L = pub.majority?.list || [], A = pub.majority?.ask; return (
     <div className="flex gap-10 items-start w-full mr-intro">
       <div className="flex-1 min-w-0"><MiniIntro pub={pub} size="tv" /></div>
-      <div className="w-[560px] shrink-0 flex flex-col gap-5 text-left">
-        <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>Everyone on their phone</div>
-        {join && <div className="flex items-center gap-6">
-          <div className="rounded-[18px] p-3 bg-[#f4f6ff] shrink-0"><QRCodeSVG value={join.url} size={170} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
-          <div><div className="display leading-none" style={{ fontSize: 88, color: "var(--color-gold)", letterSpacing: "0.08em" }}>{join.code}</div>
-            <div className="text-20 text-[var(--color-ink-2)] mt-2">Not in yet? Scan, pick your team, and you&rsquo;re on its list.</div></div>
-        </div>}
+      <div className="w-[560px] shrink-0 flex flex-col gap-4 text-left">
+        {/* (how to join: one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
+        {join && <MajorityJoin join={join} />}
         {/* (who plays: one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
         <WhoPlaysTv teams={[0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }))} list={L} />
         {A && <div className="card text-20" style={{ borderColor: "var(--color-gold)" }} role="status"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b> ask to take <b>{A.name}</b> off their list. The other captain decides.</div>}

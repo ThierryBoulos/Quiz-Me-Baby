@@ -4,6 +4,7 @@
    reveal on the TV, and every player's four buttons. Each setup hands in its teams, its counts and its clock.
    Up to four teams each team has its own count (who has answered; who picked each answer); from five, the room's. */
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Dot } from "./many/PartsMany";
 import { MAJ } from "@/lib/minis/majority";
 import { sendAction, newTap } from "@/lib/supabase";
@@ -14,6 +15,18 @@ const d = (s: number) => ({ ["--d" as string]: s + "s" }) as CSSProperties;
 const bare = (n: string) => n.replace(/[⁨⁩]/g, "");
 
 /* ---- before Start: who plays ---- */
+/* the TV: how to join, the QR code and the room's code side by side (one copy for every setup, the 3-to-8 one: 25 Nov,
+   the owner) */
+export function MajorityJoin({ join, dense }: { join: { url: string; code: string }; dense?: boolean }) {
+  return (
+    <div className="flex items-center gap-5">
+      <div className="rounded-[16px] p-2.5 bg-[#f4f6ff] shrink-0"><QRCodeSVG value={join.url} size={dense ? 112 : 132} bgColor="#f4f6ff" fgColor="#04050e" title="Scan to join this game" /></div>
+      <div className="min-w-0">
+        <div className="eyebrow text-18 whitespace-nowrap">Not in yet? Join with</div>
+        <div className="display leading-none mt-1" style={{ fontSize: dense ? 60 : 72, color: "var(--color-gold)", letterSpacing: "0.08em" }}>{join.code}</div>
+      </div>
+    </div>);
+}
 /* the TV: each team's name and count (taken off doesn't count), then its names in a line: grey, not on the game
    screen; crossed out, taken off */
 export function WhoPlaysTv({ teams, list }: { teams: MrTeam[]; list: MrEntry[] }) {
