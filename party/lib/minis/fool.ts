@@ -30,6 +30,9 @@ export const FOOL = {
   /* a team's pill at a fact's reveal: what the fact gave it */
   pill: (v: number) => ({ text: `Your team: ${v > 0 ? `+${v}` : v < 0 ? `\u2212${-v}` : "0"}`, tone: (v > 0 ? "ok" : v < 0 ? "no" : "mid") as "ok" | "no" | "mid" }),
   limit: "Limit reached.",
+  /* a player while the captain picks (25 Nov, the owner): a tap is a suggestion, the captain sees it beside the answer */
+  helpPick: (cap: string) => `Which one do you think is true? ${cap} sees your tap.`,
+  helpPicked: (cap: string) => `${cap} sees your pick. Tap another to change it.`,
   /* who's in, on the TV and every phone */
   writing: "writing a lie…", lieInShort: "lie in", picking: "picking…", picked: "picked",
 };

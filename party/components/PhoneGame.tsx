@@ -32,7 +32,7 @@ import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun, type RrTeam } from "./Roulette";
 import { StakesBet, StakesHostBets, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
-import { FoolFact, FoolHostCard, FoolOptions, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "./Fool";
+import { FoolFact, FoolHostCard, FoolOptions, FoolReveal, FoolStatus, foolAwardList, foolVotes, ownIndex } from "./Fool";
 import { FOOL_MAX, foolDone } from "@/lib/fool";
 import { seeAsk } from "@/lib/see";
 import { skBetLine, skLevelWord, skRevealPill, skSumPill } from "@/lib/stakes";
@@ -78,7 +78,7 @@ const BUZZ_SCREENS = ["dishQ", "seeQ"];
 const RACE = (pub: Pub) => (pub.screen === "sudden" && !!pub.sudden?.ready) || pub.screen === "battleTie";
 /* A captain's inbox: what their own players suggest for the question on
    screen, newest first, with who said it. */
-type Sug = { id: number; user_id: string; text: string };
+type Sug = { id: number; user_id: string; text: string; pick?: number };   // (pick: Fool Me Twice, the answer a player tapped)
 export function useSuggestions(code: string, qid: string | undefined, members: Member[], team: number, on: boolean) {
   const [list, setList] = useState<Sug[]>([]);
   useEffect(() => {
@@ -86,15 +86,15 @@ export function useSuggestions(code: string, qid: string | undefined, members: M
     if (!on || !qid) return;
     const pull = async () => {
       const { data } = await sb().from("actions").select("id,user_id,payload").eq("room", code).eq("kind", "suggest").eq("payload->>qid", qid).order("id", { ascending: false }).limit(30);
-      setList(((data || []) as { id: number; user_id: string; payload: { text?: string } }[]).map((a) => ({ id: a.id, user_id: a.user_id, text: String(a.payload.text || "") })));
+      setList(((data || []) as { id: number; user_id: string; payload: { text?: string; pick?: unknown } }[]).map((a) => ({ id: a.id, user_id: a.user_id, text: String(a.payload.text || ""), ...(Number.isInteger(a.payload.pick) ? { pick: Number(a.payload.pick) } : {}) })));
     };
     void pull();
     /* a new suggestion arrives with the push: add it straight in; a 25 s read underneath as a safety net */
     const close = joinLive(() => sb().channel("sug:" + code + ":" + qid).on("postgres_changes", { event: "INSERT", schema: "public", table: "actions", filter: "room=eq." + code },
       (e) => {
-        const a = e.new as { id?: number; user_id?: string; kind?: string; payload?: { qid?: string; text?: string } };
+        const a = e.new as { id?: number; user_id?: string; kind?: string; payload?: { qid?: string; text?: string; pick?: unknown } };
         if (a?.kind !== "suggest" || a.payload?.qid !== qid || a.id == null || !a.user_id) return;
-        setList((cur) => (cur.some((x) => x.id === a.id) ? cur : [{ id: a.id!, user_id: a.user_id!, text: String(a.payload?.text || "") }, ...cur].slice(0, 30)));
+        setList((cur) => (cur.some((x) => x.id === a.id) ? cur : [{ id: a.id!, user_id: a.user_id!, text: String(a.payload?.text || ""), ...(Number.isInteger(a.payload?.pick) ? { pick: Number(a.payload!.pick) } : {}) }, ...cur].slice(0, 30)));
       }).subscribe());
     const t = setInterval(() => { if (document.visibilityState === "visible") void pull(); }, 25000);
     return () => { clearInterval(t); close(); };
@@ -1114,7 +1114,7 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
 /* the two teams as Fool Me Twice's pieces want them */
 const foolTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})` }));
 /* (who: this phone's player, for its own order of Fool Me Twice's answers) */
-function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean; who?: string }) {
+function OnScreen({ pub, counting, small, side, mine, captain, who, picking }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean; who?: string; picking?: boolean }) {
   /* (held sideways, the clock is 70, as with 3 to 8 teams: 22 Nov, the owner) */
   const spun = useSpun(pub.roulette?.spinAt), noTv = useNoTv(), sideways = useSideways();
   /* with no TV, nothing shows whether the other team has bet or answered (19 Nov review): a line for it, in the words
@@ -1139,7 +1139,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who }: { pub: Pub
         its own buttons, below); the reveal */}
     {/^fool(Write|Pick|Reveal)$/.test(pub.screen) && pub.fool && <div className="flex flex-col gap-2 w-full">
       <FoolFact fool={pub.fool} size={small ? 16 : 19} truth={pub.screen === "foolReveal" ? pub.fool.rev?.answer : undefined} />
-      {pub.screen === "foolPick" && pub.fool.opts && !captain && <FoolOptions opts={pub.fool.opts} seed={(who || "host") + "|" + pub.qid} />}
+      {pub.screen === "foolPick" && pub.fool.opts && !captain && !picking && <FoolOptions opts={pub.fool.opts} seed={(who || "host") + "|" + pub.qid} />}
       {/* (who's in, on every phone, in the TV's words, as with 3 to 8: 25 Nov) */}
       {pub.screen !== "foolReveal" && <FoolStatus teams={foolTeams(pub)} done={(pub.screen === "foolPick" ? pub.fool.picked : pub.fool.wrote) || [false, false]}
         doing={": " + (pub.screen === "foolPick" ? FOOL.picking : FOOL.writing)} finished={": " + (pub.screen === "foolPick" ? FOOL.picked : FOOL.lieInShort)} />}
@@ -1348,6 +1348,10 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
   const [text, setText] = useState(""), [sent, setSent] = useState<string | null>(null);
   useEffect(() => { setSent(null); setText(""); }, [pub.qid]);
   const cap = members.find((m) => m.team === mine && m.role === "captain");
+  /* (Fool Me Twice: this player's tap while the captain picks, for this fact) */
+  const [foolTap, setFoolTap] = useState<{ q: string; k: number } | null>(null);
+  const foolHelp = pub.screen === "foolPick" && !!pub.fool?.opts && !pub.paused && !pub.sent?.[mine];
+  const myPick = foolTap?.q === String(pub.qid) ? foolTap.k : null;
   /* only while it can help: not on the other team's question or steal (20 Oct: players suggested to a
      captain who couldn't answer), nor once their captain's answer is in */
   const notOurs = (pub.screen === "ask" || pub.screen === "steal") && pub.turn !== mine;
@@ -1386,7 +1390,14 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={me} />}
       <Result pub={pub} mine={mine} part="pill" />
       {pub.screen === "majorityReveal" && <MajorityPad pub={pub} me={me} code={code} />}
-      <OnScreen pub={pub} side mine={mine} who={me.user_id} />
+      <OnScreen pub={pub} side mine={mine} who={me.user_id} picking={foolHelp} />
+      {/* Fool Me Twice: while the captain picks, a tap tells the captain which one you think is true (25 Nov, the owner) */}
+      {foolHelp && pub.fool?.opts && (
+        <div className="flex flex-col gap-2">
+          <FoolOptions opts={pub.fool.opts} seed={me.user_id + "|" + pub.qid} mine={myPick} locked={false}
+            onPick={(k) => { setFoolTap({ q: String(pub.qid), k }); void sendAction(code, "suggest", { team: mine, qid: pub.qid, text: pub.fool!.opts![k].slice(0, 80), pick: k }).catch(() => setFoolTap(null)); }} />
+          <p className="text-13 text-center text-[var(--color-ink-3)]" role="status">{myPick != null ? FOOL.helpPicked(cap?.name || "Your captain") : FOOL.helpPick(cap?.name || "Your captain")}</p>
+        </div>)}
       {pub.screen === "majorityQ" && <MajorityPad pub={pub} me={me} code={code} />}
       <Result pub={pub} mine={mine} part="rest" />
       {pub.screen === "final" && <Line className="!text-13">{pub.mode === "nohost" ? "A captain chooses" : "The host chooses"}: play again with the same teams, or end the night.</Line>}
@@ -1708,7 +1719,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {/* Fool Me Twice: the captain picks the truth (its own lie isn't there); one tap, locked */}
       {sc === "foolPick" && pub.fool?.opts && !pub.paused && (
         <div className="flex flex-col gap-2">
+          {/* (beside each answer, the teammates who tapped it: 25 Nov, the owner) */}
           <FoolOptions opts={pub.fool.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolPicked ?? (pub.sent?.[mine] ? -1 : null)} busy={busy} seed={me.user_id + "|" + pub.qid}
+            who={foolVotes(sugs, (u) => members.find((m) => m.user_id === u)?.name)}
             onPick={(k) => { setFoolPicked(k); void act("answer", { pick: k, k: draftKey }).then((ok) => { if (!ok) setFoolPicked(null); }); }} />
           {/* (under the answers, as it was; the line at the top is gone instead: 21 Nov, the owner) */}
           <p className="text-13 text-center text-[var(--color-ink-3)]" role="status">{pub.sent?.[mine] ? "Picked. Wait for the reveal." : <>Which one is the truth? One tap and it&rsquo;s locked.</>}</p>

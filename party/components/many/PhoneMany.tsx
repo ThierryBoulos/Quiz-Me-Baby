@@ -44,7 +44,7 @@ import { PIN } from "@/lib/minis/pin";
 import { AnswerLine, AwardList, Pts, ResultTable, TitleLine, WinnerCard, YouPill, type RRow, type Tone } from "../ResultTable";
 import { RrPhone, RrPhoneReveal, rrLevelWord, rrPill, SPINNING, useSpinTap, useSpun } from "../Roulette";
 import { StakesBet, StakesHostBets, StakesPhone } from "../Stakes";
-import { FoolFact, FoolHostCard, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, ownIndex } from "../Fool";
+import { FoolFact, FoolHostCard, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, foolVotes, ownIndex } from "../Fool";
 import { FOOL_MAX } from "@/lib/fool";
 import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
 import { seeAsk } from "@/lib/see";
@@ -174,7 +174,9 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   /* players suggest, the captain sees their own team's suggestions (the 4 Nov audit, 3.13) */
   const [sug, setSug] = useState(""), [sugSent, setSugSent] = useState<string | null>(null);
   useEffect(() => { setSug(""); setSugSent(null); }, [pub.qid]);
-  const sugs = useSuggestions(code, pub.qid, members, mine ?? -1, cap && sc === "q");
+  /* (Fool Me Twice: on the picks too, the teammates' taps beside each answer: 25 Nov) */
+  const sugs = useSuggestions(code, pub.qid, members, mine ?? -1, cap && (sc === "q" || (g?.key === "fool" && sc === "pick")));
+  const [foolTap, setFoolTap] = useState<{ q: string; k: number } | null>(null);
   const np = useNoPaste(code, pub.qid);   // (no pasting into an answer: refused, and flagged, as with two teams)
   /* Russian Roulette: the barrel spins first; the question (and the answer box) once it stops */
   const spinTap = useSpinTap(`${pub.screen}|${pub.roulette?.spinAt ?? ""}|${pub.game?.leg ?? ""}`);   // Spin, once tapped (lib in ../Roulette)
@@ -676,7 +678,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <div className={"flex flex-col " + (cmp ? "gap-2" : "gap-4")}>
           {head}
           <FoolFact fool={F} size={cmp ? 15 : 17} />
-          <FoolOptions opts={F.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolSel} busy={busy} locked={done} onPick={(k) => setFoolSel(k)} seed={seed} compact={cmp} />
+          <FoolOptions opts={F.opts} hide={foolOwn >= 0 ? [foolOwn] : []} mine={foolSel} busy={busy} locked={done} onPick={(k) => setFoolSel(k)} seed={seed} compact={cmp}
+            who={foolVotes(sugs, (u) => members.find((m) => m.user_id === u)?.name)} />
           {/* (under the answers, as with 2 teams: 21 Nov, the owner) */}
           {/* (the 2-team phone's look: small, grey, not bold, 21 Nov, the owner) */}
           <p className="text-13 text-center text-[var(--color-ink-3)]" role="status">{done ? "Picked. Wait for the reveal." : "Which one is the truth?"}</p>
@@ -693,7 +696,11 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
         return (<>
           {head}
           <FoolFact fool={F} size={cmp ? 15 : 19} />
-          {picking && F.opts && <FoolOptions opts={F.opts} seed={seed} compact={cmp} />}
+          {/* (a player while the captain picks: a tap tells the captain which one you think is true, 25 Nov, the owner) */}
+          {picking && F.opts && (mine != null && !done && !pub.paused
+            ? <FoolOptions opts={F.opts} seed={seed} compact={cmp} mine={foolTap?.q === String(pub.qid) ? foolTap.k : null} locked={false}
+                onPick={(k) => { setFoolTap({ q: String(pub.qid), k }); void sendAction(code, "suggest", { team: mine, qid: pub.qid, text: F.opts![k].slice(0, 80), pick: k }).catch(() => setFoolTap(null)); }} />
+            : <FoolOptions opts={F.opts} seed={seed} compact={cmp} />)}
           {!picking && mine != null && !done ? (
             <div className="card flex flex-col gap-2">
               <label className="field-label !mb-0" htmlFor="msug">{FOOL.suggest(T[mine]?.captain || "your captain")}</label>
@@ -706,7 +713,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
               {np.hint}
               {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
             </div>)
-            : <Line>{mine == null ? "Eyes on the TV." : picking ? (done ? "Picked. Wait for the reveal." : "Your captain picks the truth.") : FOOL.lieSent(null)}</Line>}
+            : <Line>{mine == null ? "Eyes on the TV." : picking ? (done ? "Picked. Wait for the reveal." : foolTap?.q === String(pub.qid) ? FOOL.helpPicked(T[mine]?.captain || "Your captain") : FOOL.helpPick(T[mine]?.captain || "Your captain")) : FOOL.lieSent(null)}</Line>}
           {status}
         </>); })()}
       {!host && sc === "summary" && <Summary />}

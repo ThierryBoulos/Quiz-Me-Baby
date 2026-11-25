@@ -52,14 +52,16 @@ const mix = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i
 /* (locked: the pick is sent, no other tap; by default once one is picked: with 3 to 8 teams the captain can change it
    until Lock in) */
 /* (compact, on a phone (16 Nov, the owner: with many teams every answer in one screen): 1, smaller rows; 2, two columns) */
-export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, compact = 0 }: { opts: string[]; tv?: boolean; onPick?: (k: number) => void; hide?: number[]; mine?: number | null; busy?: boolean; locked?: boolean; seed?: string; compact?: 0 | 1 | 2 }) {
+export function FoolOptions({ opts, tv, onPick, hide, mine, busy, locked, seed, compact = 0, who }: { opts: string[]; tv?: boolean; onPick?: (k: number) => void; hide?: number[]; mine?: number | null; busy?: boolean; locked?: boolean; seed?: string; compact?: 0 | 1 | 2;
+  who?: Record<number, string> }) {   // (who: on a captain's phone, the teammates who tapped each answer, 25 Nov)
   let shown = opts.map((o, k) => ({ o, k })).filter((x) => !hide?.includes(x.k));
   if (seed && !tv) shown = shown.map((x) => ({ ...x, h: mix(seed + "|" + x.k) })).sort((a, b) => a.h - b.h);
   const two = tv ? shown.length > 4 : compact === 2;
   return (
     <div className={"grid w-full gap-2 fool-opts " + (two ? "grid-cols-2" : "grid-cols-1") + (compact && !tv ? " fool-cmp" : "")} style={tv ? { gap: shown.length > 6 ? 10 : 14 } : compact ? { gap: 6 } : undefined} role={onPick ? "group" : "list"} aria-label="The answers">
       {shown.map(({ o, k }) => {
-        const on = mine === k, body = <><span className="fool-letter">{LETTERS[k]}</span><span className="min-w-0 text-left leading-snug"><bdi>{o}</bdi></span></>;
+        const on = mine === k, body = <><span className="fool-letter">{LETTERS[k]}</span><span className="min-w-0 text-left leading-snug"><bdi>{o}</bdi></span>
+          {who?.[k] && <span className="ml-auto pl-2 shrink min-w-0 max-w-[45%] truncate text-12 font-bold text-[var(--color-ink-2)]"><bdi>{who[k]}</bdi></span>}</>;
         return onPick
           ? <button key={k} type="button" className={"fool-opt" + (on ? " on" : "")} disabled={busy || (locked ?? mine != null)} aria-pressed={on} onClick={() => onPick(k)}>{body}</button>
           : <div key={k} className={"fool-opt" + (tv ? " tv" : "") + (on ? " on" : "")} role="listitem" style={tv ? { fontSize: shown.length > 6 ? 24 : 30 } : undefined}>{body}</div>;
@@ -276,5 +278,12 @@ export function FoolHostCard({ answer, teams, sent, lies, picking, dot }: {
         </span>); })}
     </div>
   </>);
+}
+
+/* the teammates' taps while their captain picks (25 Nov, the owner): each one's latest tap, by answer: "Maya, Joe" */
+export function foolVotes(sugs: { user_id: string; pick?: number }[], nameOf: (uid: string) => string | undefined): Record<number, string> {
+  const seen = new Set<string>(), by: Record<number, string[]> = {};
+  for (const s of sugs) { if (s.pick == null || seen.has(s.user_id)) continue; seen.add(s.user_id); const n = nameOf(s.user_id); if (n) (by[s.pick] = by[s.pick] || []).push(n); }
+  return Object.fromEntries(Object.entries(by).map(([k, L]) => [k, L.join(", ")]));
 }
 
