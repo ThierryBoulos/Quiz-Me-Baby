@@ -698,7 +698,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* the host's Change question: not while a contest or a lifeline is open (an answer already in no longer stops it:
        23 Nov, the owner) */
     else if (/\/swap$/.test(t) && !s.nohost && answeredYet()) s.toast = { id: ++s.toastN, text: answeredYet()! };
-    else if (t === "ui/flip") { const c = callsOf(s).find((x) => x.id === move.id); if (c) applyCall(c.id, !c.ok); }
+    /* (v: the call the host tapped, set rather than turned over, so a lost tap or a contest decided meanwhile can't make
+       the next tap do the opposite: 25 Nov; an older phone sends no v, and the call turns over) */
+    else if (t === "ui/flip") { const c = callsOf(s).find((x) => x.id === move.id); if (c && (typeof move.v !== "boolean" || !!c.ok !== move.v)) applyCall(c.id, !c.ok); }
     else if ((t === "dish/right" || t === "dish/wrong") && g.dishGame.leg.buzz != null && !s.nohost) {
       const b = g.dishGame.leg.buzz as 0 | 1;
       s.legLog = [...s.legLog, { team: b, text: (s.typed[b] || []).join(" / "), ok: t === "dish/right" }];

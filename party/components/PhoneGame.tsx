@@ -273,8 +273,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
   const Rulings = ({ type, say, sub, neg, only }: { type: string; say?: boolean; empty?: string; sub?: (t: 0 | 1) => React.ReactNode; neg?: (t: 0 | 1) => string | undefined; only?: number[] }) =>
     <HostCalls say={say} busy={busy} calls={([0, 1] as const).filter((t) => !only || only.includes(t)).map((t) => { const k = pickKey(t), v = k in picked ? picked[k] : pub.reveal?.ok?.[t];
       return { t, name: T[t].name, color: tc(t), typed: pub.reveal?.typed?.[t]?.[0], value: v, app: pub.reveal?.app?.[t], sub: sub?.(t), neg: neg?.(t),
-        onPick: (nv: boolean) => { const id = type === "ui/flip" ? (pub.calls || []).find((c) => c.team === t)?.id : null; if (type === "ui/flip" && (id == null || nv === !!v)) return;
-          setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire(type === "ui/flip" ? { type, id } : { type, t, v: nv }); } }; })} />;
+        onPick: (nv: boolean) => { const id = type === "ui/flip" ? (pub.calls || []).find((c) => c.team === t)?.id : null; if (type === "ui/flip" && id == null) return;
+          setPicked((c) => ({ ...c, [k]: nv })); setTimeout(() => setPicked((c) => { if (!(k in c)) return c; const n = { ...c }; delete n[k]; return n; }), 8000); fire(type === "ui/flip" ? { type, id, v: nv } : { type, t, v: nv }); } }; })} />;
   /* a results screen: exactly what the players see, and the host's button */
   const resultHeld = useTwoHold(pub);
   const Results = ({ children, act }: { children: React.ReactNode; act?: Send }) => (
@@ -1128,8 +1128,8 @@ const foolTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[
 function OnScreen({ pub, counting, small, side, mine, captain, who, picking }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean; who?: string; picking?: boolean }) {
   /* (held sideways, the clock is 70, as with 3 to 8 teams: 22 Nov, the owner) */
   const spun = useSpun(pub.roulette?.spinAt), noTv = useNoTv(), sideways = useSideways();
-  /* with no TV, nothing shows whether the other team has bet or answered (19 Nov review): a line for it, in the words
-     the 3-8 team phones already use ("1 of 2 teams have bet.") and the TV's ("Owls have answered") */
+  /* with no TV, nothing shows whether the other team has answered (19 Nov review): a line for it, in the TV's words
+     ("Owls have answered"); who has bet is on every phone now (StakesPhone, StakesBet: 25 Nov) */
   const other = mine === 0 || mine === 1 ? (1 - mine) as 0 | 1 : null;
   const otherLine = noTv && other != null && !pub.paused ? (
     (pub.screen === "stakesQ" || (pub.screen === "rouletteQ" && spun)) && pub.sent?.[other] ? <><bdi>{pub.teams[other].name}</bdi> have answered.</> : null) : null;

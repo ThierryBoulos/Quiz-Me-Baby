@@ -194,6 +194,9 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     want("all in once the teams in it have answered", L.allIn(s));
     L.reveal(s); want("the app's calls", s.ok[2] === true && s.ok[3] === true && s.ok[4] === false);
     want("the host can't flip a team that isn't in it", L.flip(s, 0) === false);
+    /* (25 Nov: the host's tap sets the call; the same tap twice, a lost one sent again, leaves it as tapped) */
+    { const c = structuredClone(s), t = c.minis[c.mi].only[0], was = !!c.ok[t]; L.flip(c, t, !was); L.flip(c, t, !was);
+      want("the host's call is set, not turned over", !!c.ok[t] === !was); }
     L.next(s, 2000, T);
     want("a miss and it's out", s.screen === "q" && m.cb.out.join() === "false,false,false,false,true" && L.captainAnswer(s, 4, { text: "x" }) !== true);
     /* question 2: C right, D sends nothing */

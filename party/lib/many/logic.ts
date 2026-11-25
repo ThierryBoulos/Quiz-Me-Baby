@@ -15,7 +15,7 @@ import { matchQ } from "../tv/reads";
 import { offBy, poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_BET_BAD, SK_BET_IN, SK_LEVELS, type SkPick } from "../stakes";
-import { CB_NOT_YOURS } from "../comeback";
+import { CB_NOT_YOURS, CB_OUT } from "../comeback";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
 import { MAJ } from "../minis/majority";
 import { FOOL } from "../minis/fool";
@@ -344,7 +344,7 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
      till then it was refused, 19 Nov review. What Do You See? buzzes first, and there's no buzzing while paused) */
   if (s.paused && m.key === "see") return "The game is paused.";
   if (m.only && !m.only.includes(team)) return m.key === "comeback" ? CB_NOT_YOURS : "Only the teams tied at the top answer this one.";
-  if (m.key === "comeback" && m.cb?.out[team]) return "Your team is out of the comeback.";
+  if (m.key === "comeback" && m.cb?.out[team]) return CB_OUT;
   if (typedKey(m.key)) {
     /* What Do You See? (the buzzer): only the team that buzzed answers */
     if (m.key === "see") {
@@ -538,9 +538,12 @@ export function mrCount(s: StateM) {
 export const share = (m: MiniM, t: number) => (m.of[t] ? m.right[t] / m.of[t] : 0);
 
 /* the host flips one typed answer's call on the reveal */
-export function flip(s: StateM, t: number) {
+/* (v: the call the host tapped, set rather than turned over, so a lost tap can't make the next one do the opposite:
+   25 Nov; none, and it turns over) */
+export function flip(s: StateM, t: number, v?: boolean) {
   if (s.screen !== "reveal" || !typedKey(miniOf(s)?.key) || t < 0 || t >= s.teams.length) return false;
   if (!cbIn(miniOf(s), t)) return false;          // (the comeback: only a team still in it has a call)
+  if (typeof v === "boolean" && !!s.ok[t] === v) return true;
   s.ok[t] = !s.ok[t];
   /* (the host changed the very call a captain is contesting: that's the contest decided) */
   if (s.contest?.t === t) { s.contest = null; s.contested = [...(s.contested || []), t]; }

@@ -449,7 +449,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/reveal" && miniOf(s)?.key === "fool") { ok = s.screen === "q" ? foolOpen(s, Date.now(), timers()) : foolReveal(s); }
       else if (t === "m/reveal" && s.screen === "q") ok = reveal(s);
       else if (t === "m/next") ok = next(s, Date.now(), timers());
-      else if (t === "m/flip") ok = flip(s, Number(mv.t));
+      else if (t === "m/flip") ok = flip(s, Number(mv.t), typeof mv.v === "boolean" ? mv.v : undefined);
       else if (t === "m/contestOk") { ok = decideContest(s, !!mv.v); if (ok) imadContest(s); }
       else if (t === "m/hint") ok = showMapHint(s);
       else if (t === "m/setScores") ok = setScores(s, mv.scores);

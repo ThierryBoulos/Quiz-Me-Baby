@@ -456,7 +456,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             return { t: i, name: t.name, color: t.color, typed: R.typed?.[i], value: v, app: R.app?.[i], neg: g.key === "say" ? SAY.why[R.why?.[i] || ""] : undefined,
               sub: g.key === "roulette" && rr?.rev ? <div className="text-13 text-[var(--color-ink-2)] leading-snug">{rr.draw[i]?.theme} · {rrLevelWord(rr.rev.level[i])} · Answer: <b><bdi>{rr.rev.answer[i]}</bdi></b></div>
                 : g.key === "stakes" && sk?.rev ? <SkSub rev={sk.rev} t={i} /> : undefined,
-              onPick: (nv: boolean) => { if (v === nv) return; setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i }); } }; })} /></>
+              onPick: (nv: boolean) => { setFlips((f) => ({ ...f, [`${pub.qid}|${i}`]: nv })); move("m/flip", { t: i, v: nv }); } }; })} /></>
         ) : <Table />}
         {/* (the picture says who got it first, under the picture: not twice) */}
         {g.key !== "majority" && g.key !== "stakes" && g.key !== "see" && <Big text={W.text} color={W.color} />}
