@@ -5,6 +5,20 @@ Phase 1 first; then Phase 2, one game per session.
 
 ---
 
+
+## Where it stands (26 Nov)
+
+- **Phase 1: done** (21 Nov): `classic.html` is gone; the maps are drawn by `bank/maps.js`; old comments that still
+  described it as live were corrected on 26 Nov.
+- **Phase 2, the screens and the words: done** for every mini-game (flag, closest, see, pin, airport, map, say, dish,
+  majority, roulette, stakes, fool, comeback): one copy in `party/lib/minis/*`, `party/lib/{roulette,stakes,comeback,see}.ts`
+  and the shared components. Still twice: the question rounds and sudden death, the two published views
+  (`lib/tv/view.ts`, `lib/many/view.ts`), the 2-team result tables, and the Cocktail or Dish phones.
+- **Phase 2, the running of each game** (answers, reveal, calls, contest, pause, Change question, time's up): still in
+  both `lib/tvGame.ts` and `lib/many/logic.ts`. Next, one game per session, Secret Stakes first. Shared so far: the
+  "is this tap for the screen still up?" rule (`lib/tapOn.ts`) and the scores' limit, 999 in both (26 Nov, the owner).
+- Sizes on 26 Nov: `lib/tvGame.ts` about 1,900 lines, `components/PhoneGame.tsx` about 1,860.
+
 ## The prompt
 
 You're tidying the code of Quiz Me Baby, a live party trivia game. Read `CLAUDE.md` first: its rules bind this work
@@ -14,7 +28,7 @@ You're tidying the code of Quiz Me Baby, a live party trivia game. Read `CLAUDE.
 screen, wording, timing, score or rule may change. If you find a bug or something you'd improve on the way, don't
 fix it: write it down and tell the owner at the end. A tidy-up that also "improves" things can't be checked.
 
-Why it's worth doing: the game is built twice, once for 2 teams (`party/lib/tvGame.ts`, 1,800 lines;
+Why it's worth doing: the game is built twice, once for 2 teams (`party/lib/tvGame.ts`, 1,800 lines when this was written;
 `party/components/PhoneGame.tsx`, 1,800; `TvGame.tsx`) and once for 3 to 8 teams (`party/lib/many/logic.ts`,
 `useTvMany.ts`, `party/components/many/`). Every change has to be made in both, and several past bugs came from one
 side being missed. The owner's standing rule is that every change lands in every setup; one copy of each game makes

@@ -65,10 +65,8 @@ export function skPub(s: SkGame, screen: string, scores: number[], ok?: (boolean
 
 /* the reveal's timing (TV and phones alike): the k-th team up shows at skRowAt(k); a bigger room goes a little faster */
 export const skRowAt = (k: number, teams: number) => 600 + k * (teams > 4 ? 850 : 1300);
-export const skRevealMs = (teams: number) => skRowAt(teams - 1, teams) + 700;
-/* a level said plainly, and what it's worth: "Hard ±16", "Easy · safe" */
+/* a level said plainly: "Hard" */
 export const skLevelWord = (level: string) => level[0].toUpperCase() + level.slice(1);
-export const skWorth = (unit: number, level: string) => (level === "easy" ? "safe" : `±${skBet(unit, level)}`);
 export const signedPts = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${-v}` : "0");
 
 /* ---- Secret Stakes' words, one copy for every setup (25 Nov, the merge) ---- */

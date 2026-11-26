@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-/* A map exactly as Classic draws it — pre-drawn by scripts/export-maps.js
+/* A map exactly as bank/maps.js draws it — pre-drawn by scripts/export-maps.js
    into public/maps/<id>.json (the drawing for play, the one for the reveal,
    and their legends). Our own files, so the markup is trusted. */
 type MapFile = { q: string; r?: string; lq: string; lr?: string; topic: string };
@@ -71,7 +71,7 @@ export function MapView({ id, reveal, hint, maxH = 420, legend = true, title, wi
     </div>);
 }
 
-/* Classic's enlarged map (index.html, openMapZoom): it fills the screen.
+/* The enlarged map (as the old one-screen app had it): it fills the screen.
    Tap a spot to zoom in there, drag to look around, tap again to zoom out.
    Pinch (two fingers) and the mouse wheel zoom too. The page itself can't
    be pinched (NoZoom), so the map does it on its own. */

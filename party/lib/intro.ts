@@ -33,14 +33,3 @@ const MANY: Record<string, string> = {
   dish: "Ingredients one at a time. The faster right, the more points.",
 };
 export const introLine = (key: string, many?: boolean) => (many ? MANY : TWO)[key] || "";
-/* when each item lights up (seconds from the start): the rounds first, then the mini-games, then the footer */
-export function introTimes(items: IntroItem[]) {
-  const T0 = 1.1, STEP_Q = 0.5, GAP = 0.6, STEP_M = 0.95;
-  const qs = items.filter((x) => x.kind === "q"), ms = items.filter((x) => x.kind === "mini");
-  const at: Record<string, number> = {};
-  qs.forEach((x, i) => { at[x.key] = T0 + 0.4 + i * STEP_Q; });
-  const mStart = qs.length ? T0 + 0.4 + qs.length * STEP_Q + GAP : T0;
-  ms.forEach((x, i) => { at[x.key] = mStart + 0.4 + i * STEP_M; });
-  const end = (ms.length ? mStart + 0.4 + ms.length * STEP_M : mStart) + 0.5;
-  return { at, qHead: T0, mHead: mStart, end };
-}

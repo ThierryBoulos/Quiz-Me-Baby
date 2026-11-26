@@ -1,6 +1,6 @@
 "use client";
-/* The pieces every in-game screen shares — the TV and every phone — copied
-   from Classic (index.html): the HUD tracker, the round intro with each
+/* The pieces every in-game screen shares — the TV and every phone — first
+   copied from the old one-screen app (retired 3 Nov): the HUD tracker, the round intro with each
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";

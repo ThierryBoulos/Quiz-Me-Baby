@@ -10,7 +10,7 @@ import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import { Roll } from "../GameParts";
-import { showKm, showNum } from "@/lib/game";
+import { showKm } from "@/lib/game";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
 import { SAY } from "@/lib/minis/say";
@@ -738,23 +738,8 @@ export function PinsMapMany({ pub, map }: { pub: PubMany; map?: ReactNode }) {
     </div>);
 }
 
-/* the columns of a game's result, by place: the game's points (or the share right), and what the place pays */
-export const summaryCols = (pub: PubMany): Col[] => {
-  const S = pub.summary!;
-  return pub.teams.map((_, t) => t).sort((a, b) => S.places[a] - S.places[b] || a - b).map((t) => ({ t, big: S.shares ? pct(S.shares[t]) : String(S.pts[t]),
-    place: S.award[t] > 0 ? S.places[t] : undefined, lit: S.places[t] === 1 && S.award[t] > 0,
-    sub: S.award[t] > 0 ? <b style={{ color: "var(--color-ok)" }}>+{S.award[t]}</b> : <span className="text-[var(--color-ink-3)]">nothing</span> }));
-};
 /* the columns of the final standings: by place */
 export const finalCols = (pub: PubMany): Col[] => pub.final!.order.map(({ team, place: p }) => ({ t: team, big: String(pub.teams[team].score), place: p, lit: p === 1 }));
-/* the columns of a Closest To Wins reveal: the nearest first */
-export const closestCols = (pub: PubMany): Col[] => {
-  const R = pub.reveal!;
-  return byDistance(pub).map((t) => { const n = R.nums?.[t], off = R.off?.[t]; return {
-    t, big: n == null ? "—" : showNum(n), lit: R.winners.includes(t),
-    sub: n == null ? "No answer" : off === 0 ? "Spot on!" : `Off by ${showNum(off ?? 0)}` }; });
-};
-
 /* ---- a reveal's rows: each team's line, in the order given (a side column on the TV, a list on a phone), the
    ones who take it with a trophy ---- */
 export function RowsMany({ pub, order, right, size, label, pts }: { pub: PubMany; order: number[]; right: (t: number) => ReactNode; size: Size; label?: (t: number) => ReactNode; pts?: number[] }) {

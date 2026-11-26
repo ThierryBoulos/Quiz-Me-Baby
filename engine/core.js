@@ -2,12 +2,12 @@
    Quiz Me Baby — the shared engine (v4, step 1)
    ==========================================================================
    The rules of the game, with no screen in them: no DOM, no sounds, no
-   storage. Classic (index.html) loads this with a plain <script>, Party (the
-   Next.js app) imports it, and the tests run it under Node. Everything here
-   is a pure function of its arguments, so all three see exactly the same
-   game.
+   storage. The app (party/, the Next.js app) imports it, and the tests run
+   it under Node. Everything here is a pure function of its arguments, so
+   both see exactly the same game. (The old one-screen app, classic.html,
+   loaded it too; it was retired on 3 Nov and deleted on 21 Nov.)
 
-   This file grows step by step as logic moves out of index.html:
+   This file grew step by step as logic moved out of the old app:
      1a  answer checking, mini-game points and schedule, best-of legs
      1b  dealing — the decks and the game built from a bank
      1c  the game's moves — Flag and Cocktail or Dish so far
@@ -1348,8 +1348,7 @@
        { sound:'correct'|'wrong'|'soft'|'point' }
        { timer:'stop'|'pause'|'resume' }
        { next:true }              this mini-game is finished — on to whatever comes next
-     Classic carries these out on one screen; Party will carry them out on
-     the TV and the phones. A move that isn't allowed right now returns []
+     The app carries these out on the TV and the phones (party/lib/tvGame.ts). A move that isn't allowed right now returns []
      or just a toast saying why.
        { used:q }                 mark that question as played
        { finalize:true }          the night is over — save it and show the final

@@ -374,7 +374,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     const rows: RRow[] = F.order.map((o) => ({ team: o.team, name: T[o.team].name, color: T[o.team].color, letter: LETTERS[o.team], place: o.place, val: String(T[o.team].score), me: o.team === mine }));
     return (<>
       <WinnerCard eyebrow={tops.length > 1 ? "Tied at the top" : "The winner"} name={tops.map((t) => T[t].name).join(" & ")} color={c} sub={`${T[tops[0]].score} points`} />
-      {my != null && <YouPill text={my === 1 ? "You won the night!" : `Your team finished ${place(my)}`} tone={my === 1 ? "ok" : "mid"} />}
+      {/* (a tied team's phone: "Tied at the top", as the card above says, not "You won the night!": 26 Nov, the owner) */}
+      {my != null && <YouPill text={my === 1 ? (tops.length > 1 ? "Tied at the top" : "You won the night!") : `Your team finished ${place(my)}`} tone={my === 1 ? "ok" : "mid"} />}
       <ResultTable rows={rows} head={["Points"]} places big />
       <AwardList awards={F.awards.map((a) => ({ ...a, color: a.team != null ? T[a.team].color : undefined }))} />
     </>); };

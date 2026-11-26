@@ -3018,7 +3018,7 @@ const SEES = [
 ];
 
 /* --------------------------------------------------------------------------
-   GUESS THE AIRPORT — the catalogue (Party and Classic play it)
+   GUESS THE AIRPORT — the catalogue
    [code, airport, level, city, board language, board title, rows, also accepted, clues, source].
    Each row of the departure board is [time, status, destination, flight, gate]: real routes the
    airline flies from that airport (checked against the airport's destinations), drawn by the app.
@@ -3386,9 +3386,8 @@ const MAJORITY = [
   ["empire-state-mast", "hard", "The mast on top of the Empire State Building was first meant to be…", ["A dock for airships", "A lightning rod", "A radio antenna", "A flagpole"], 0, "High winds made mooring airships there impossible, so the plan was dropped."]
 ];
 
-/* party: true adds the rows only Party plays (Drop the Pin and Majority Rules: everyone answers on their own
-   phone); Classic's own bank leaves them out, so its question list never shows games it can't run
-   (scripts/export-bank.js asks for them). Guess the Airport is in both. */
+/* party: true adds Drop the Pin's and Majority Rules' rows (everyone answers on their own phone). Only the app is left,
+   and scripts/export-bank.js always asks for them; false was the old one-screen app's bank (retired 3 Nov). */
 function buildSeedBank(party){
   const out = [];
   SEED.forEach(function(r){ out.push({

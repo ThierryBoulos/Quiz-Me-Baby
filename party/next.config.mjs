@@ -12,7 +12,7 @@ const nextConfig = {
   ...(process.env.QMB_SCREENS === "1" ? { pageExtensions: ["screens.tsx", "screens.ts", "tsx", "ts", "jsx", "js"], distDir: ".next-screens",
     /* (the types and the lint rules have their own checks: npm run typecheck, npm run lint) */
     typescript: { ignoreBuildErrors: true }, eslint: { ignoreDuringBuilds: true } } : {}),
-  /* the shared engine lives one level up (../engine) — Classic and Party play by one rulebook */
+  /* the shared engine lives one level up (../engine): the game's rules, also run by the tests */
   experimental: { externalDir: true },
   /* which deploy this page came from: a TV or phone left open across a deploy reloads itself (lib/fresh.ts) */
   env: { NEXT_PUBLIC_BUILD: BUILD, NEXT_PUBLIC_BUILD_DATE: new Date().toISOString() },

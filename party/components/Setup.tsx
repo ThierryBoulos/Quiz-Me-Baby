@@ -32,7 +32,7 @@ import { SEE_SETUP } from "@/lib/see";
 
 export type Cfg = { standard: boolean; rounds: number; themes: string[]; difficulty: string; minis: string[]; lifelines?: boolean; comeback?: boolean;
   mapLevels: string[]; flagLevels: string[]; dishLevels: string[]; pinLevels: string[]; airportLevels: string[]; majorityLevels: string[]; seeLevels?: string[]; seeKinds?: string[]; custom?: Q[] } & Partial<Picks>;
-/* Classic's MINI_GAMES (index.html), name and one line each */
+/* the mini-games, name and one line each (first written for the old one-screen app, retired 3 Nov) */
 const MINIS = [
   ["closest", "Closest To Wins", "Five numbers. Closest guess wins the leg."],
   ["auction", "The Auction", "Bid how many you can name, then deliver it."],

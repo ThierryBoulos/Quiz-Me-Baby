@@ -4,7 +4,7 @@ import { QMB, type Bank, type Q } from "@/lib/engine";
 import { PARTY_LEGS } from "@/lib/game";
 import { AddQuestion } from "./AddQuestion";
 
-/* HAND-PICKED QUESTIONS — Classic's picker (index.html, pickerHTML), for the
+/* HAND-PICKED QUESTIONS — first the old one-screen app's picker (retired 3 Nov), for the
    host's phone only: it shows the answers. Two per theme, one for each team;
    a theme left alone gets a matched pair from the app. Mini-games take their
    questions in the order ticked, up to their length; anything short is dealt

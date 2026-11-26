@@ -200,7 +200,6 @@ export function LevelChip({ level, small, short }: { level: string; small?: bool
   return <span className={"rr-chip" + (b ? " bullet" : "") + (small ? " sm" : "") + (short ? " short" : "")}>{b && short ? "Expert" : rrLevelWord(level)}
     {b ? <><b className="rr-pt ok">+5</b><b className="rr-pt no">−3</b></> : <b className="rr-pt ok">{level === "medium" ? "+2" : "+3"}</b>}</span>;
 }
-export function RrNote({ children }: { children: ReactNode }) { return <p className="rr-note">{children}</p>; }
 
 /* ---- the lap, on the TV (both setups): the barrel on the left; on the right what this spin is, then each team's
    chamber (its theme; with two teams the question too, big enough to read across the room), and at the reveal what

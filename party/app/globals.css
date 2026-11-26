@@ -129,15 +129,11 @@ body::before { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 
   background: var(--glass-2); border: 2px solid var(--line-2); outline: none; }
 .input:focus { border-color: var(--color-gold); }
 /* questions can't be selected, copied or long-pressed (no pasting them into a chatbot) */
-/* an empty code box: the hint at body size, centred like the code will be */
-.input-code:placeholder-shown { font-family: var(--font-body); font-size: var(--text-16); letter-spacing: normal; }
 .noselect, .noselect * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 /* the Auction's Pass: clearly a button, with who it hands the bid to */
 .btn.pass-btn { flex-direction: column; gap: 2px; min-height: 66px; border: 2px solid rgba(255,255,255,.45); background: rgba(255,255,255,.08); }
 /* hints in empty boxes: small, light, italic, so they never read as typed text */
 .input::placeholder { font-family: var(--font-body, inherit); font-size: var(--text-15); font-weight: 400; font-style: italic; letter-spacing: normal; text-transform: none; color: var(--color-ink-3); opacity: .75; }
-.input-code { font-family: var(--font-display); font-size: var(--text-40); letter-spacing: 0.22em; text-align: center; text-transform: uppercase;
-  border-color: color-mix(in srgb, var(--color-gold) 60%, transparent); background: color-mix(in srgb, var(--color-gold) 7%, transparent); }
 
 .chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; font-weight: 700; font-size: var(--text-14);
   background: var(--glass-2); border: 1px solid var(--line); }
@@ -204,32 +200,13 @@ button.chip.me-chip.chip-on { color: var(--color-gold); }
    stay dead centre; on phones he stands in the gutter beside the wordmark. */
 .home { position: relative; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
   gap: clamp(18px, 3vh, 32px); padding: calc(clamp(16px, 3vh, 40px) + env(safe-area-inset-top)) 20px calc(clamp(16px, 3vh, 40px) + env(safe-area-inset-bottom)); }
-.home-main { display: flex; flex-direction: column; align-items: center; gap: inherit; width: min(460px, 100%); }
-.mascot { position: absolute; top: 50%; right: calc(50% + 250px); transform: translateY(-50%);
-  width: min(320px, calc(50vw - 280px)); max-height: 76svh; object-fit: contain;
-  filter: drop-shadow(0 26px 44px rgba(0,0,0,.65)) drop-shadow(0 0 48px rgba(245,197,24,.16));
-  animation: mascotIn .7s var(--ease) both; pointer-events: none; user-select: none; -webkit-user-drag: none; }
-@keyframes mascotIn { from { opacity: 0; transform: translate(0, calc(-50% + 20px)) scale(.95); } to { opacity: 1; transform: translateY(-50%); } }
-.logo-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 /* the logo wears the room code's look: solid gold, a hard Team A blue shadow, wide letters */
 .logo { font-family: var(--font-display); font-size: clamp(44px, 7vw + 2vh, 116px); line-height: .95; text-transform: uppercase;
   color: var(--color-gold); text-shadow: .04em .04em 0 rgba(49,201,247,.55); letter-spacing: .06em; }
-@media (max-width: 920px) {
-  .logo-wrap { position: relative; }
-  .mascot { position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%);
-    width: min(calc((100vw - 100%) / 2 - 14px), 150px); max-height: none; animation: mascotInSm .6s var(--ease) both;
-    filter: drop-shadow(0 12px 22px rgba(0,0,0,.62)) drop-shadow(0 0 26px rgba(245,197,24,.16)); }
-}
-@keyframes mascotInSm { from { opacity: 0; transform: translate(0, calc(-50% + 10px)) scale(.94); } to { opacity: 1; transform: translateY(-50%); } }
-.home-menu { display: grid; gap: 12px; width: min(420px, 100%); }
-/* "How to Play": a link, not another button — the rules are for the first night */
-.howto { justify-self: center; margin-top: 2px; min-height: 44px; padding: 6px 10px; font-size: var(--text-13); font-weight: 600; letter-spacing: .02em;
-  color: var(--color-ink-2); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(245,197,24,.6); }
-.howto:hover { color: var(--color-gold); }
 /* the colophon: findable, not loud */
 .colophon { margin-top: 6px; font-size: var(--text-10); letter-spacing: .1em; line-height: 1.5; color: var(--color-ink-3); opacity: .5; }
 .colophon .sep { opacity: .5; margin: 0 2px; }
-@media (max-height: 820px) { .home { padding-top: 10px; padding-bottom: 10px; } .home-main { gap: clamp(12px, 2vh, 20px); } .home-menu { gap: 9px; } }
+@media (max-height: 820px) { .home { padding-top: 10px; padding-bottom: 10px; } }
 
 /* ---------- IN-GAME: Classic's HUD, team cards, lifelines, question head, mini-game intro ---------- */
 /* the tracker: on the TV and every phone */
@@ -255,9 +232,6 @@ button.chip.me-chip.chip-on { color: var(--color-gold); }
 .tv-note, .next-hint { font-size: var(--text-14); padding: 5px 12px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tv-note { color: var(--color-ink); background: var(--color-bg-2); border: 1px solid color-mix(in srgb, var(--color-gold) 45%, transparent); max-width: 760px; }
 .next-hint { color: var(--color-ink-2); flex: none; }
-.hud-code { font-size: var(--text-11); font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--color-ink-3); opacity: .8; margin-bottom: -4px; }
-/* the room code in the TV's top-right corner (fixed: the scaled stage holds it), out of the header's way (the owner, 2 Nov) */
-.hud-code.corner { position: fixed; top: 16px; right: 24px; margin: 0; z-index: 5; }
 /* 3-8 teams on the TV: the night's tracker on its own line at the top, the game's line under the plates */
 .hud.tv.many > .pips { margin: 0 0 8px; }
 .hud.tv.many > .pips + .hud-mid { margin-top: 0; }
@@ -373,13 +347,10 @@ html[data-motion="off"] .imad-bubble, html[data-motion="off"] .imad-bubble .hb-t
 .btn.rule-btn.neg { border-color: color-mix(in srgb, var(--color-no) 55%, transparent); color: var(--color-no); }
 .btn.rule-btn.pos.on { background: var(--color-ok); border-color: var(--color-ok); color: #04210f; }
 .btn.rule-btn.neg.on { background: var(--color-no); border-color: var(--color-no); color: #2b0206; }
-.rule-tag { font-size: var(--text-10); font-weight: 800; letter-spacing: .14em; opacity: .85; }
-.rule-btn:not(.on) .rule-tag { color: var(--color-ink-2); }
 .rule-pick.compact { gap: 6px; }
 /* the small pair beside each answer: a word like "Same word" on one line */
 .rule-pick.compact .btn.rule-btn { font-size: var(--text-12); letter-spacing: .05em; padding: 6px 4px; min-height: 56px; }
 .rule-pick.compact .btn.rule-btn { min-height: 48px; padding: 4px 6px; font-size: var(--text-14); }
-.rule-pick.compact .rule-tag { font-size: var(--text-8); letter-spacing: .08em; }
 
 
 /* a flag's thin light edge, so a black stripe never melts into the dark */
@@ -583,14 +554,6 @@ html[data-motion="off"] .confetti { display: none; }
 .bid-bar span { display: block; height: 100%; border-radius: 999px; transition: width .3s var(--ease); }
 .bid-bar.full span { background: var(--color-ok); box-shadow: 0 0 18px rgba(61,220,151,.7); }
 .bid-bar i { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: rgba(4,5,14,.55); }
-/* Don't Say the Same as Me: the app's word is a card, face down ("?"), and turns over */
-.say-card { perspective: 1200px; }
-.say-inner { position: relative; display: grid; transform-style: preserve-3d; animation: sayTurn .8s cubic-bezier(.3,1.25,.45,1) both; animation-delay: .35s; }
-@keyframes sayTurn { from { transform: rotateY(0deg); } to { transform: rotateY(180deg); } }
-.say-inner .face { grid-area: 1 / 1; display: grid; place-items: center; padding: 10px 44px 4px; border-radius: 22px; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  background: linear-gradient(180deg, #161a36, #0d1029); border: 3px solid rgba(245,197,24,.55); box-shadow: 0 18px 40px -16px rgba(0,0,0,.7); }
-.say-inner .back { transform: rotateY(180deg); color: var(--color-gold); }
-.say-inner .front { font-size: 96px; color: rgba(245,197,24,.75); background: repeating-linear-gradient(45deg, #161a36 0 14px, #12152e 14px 28px); }
 /* Closest To Wins: the ruler (components/Ruler.tsx). The track, its ticks, the answer's gold marker in the middle;
    each guess a dot with a card on a lane (A's above, B's below with two teams) and a band from the answer out to it */
 .ruler-track { position: absolute; left: 0; right: 0; top: 98px; height: 14px; border-radius: 7px; overflow: hidden;
@@ -642,16 +605,6 @@ html[data-motion="off"] .ruler-num, html[data-motion="off"] .ruler.gold .ruler-g
 /* Guess the Airport: the board's rows flip in like a departures board */
 .board-row.board-flip { animation: boardFlip .42s var(--ease) both; transform-origin: top; }
 @keyframes boardFlip { 0% { transform: perspective(600px) rotateX(-90deg); opacity: 0; } 60% { opacity: 1; } 100% { transform: none; opacity: 1; } }
-/* the winner's plane, in gold (the owner, 31 Oct): from the right end of its Boarding row, a steep climb up and off
-   the screen, speeding up as it goes, a gold trail drawn behind it that fades once it's gone. All runs once; the row stays as it was. */
-.board .board-row > .plane-fly { overflow: visible; position: absolute; right: 1.4em; top: 50%; width: 0; height: 0; transform: rotate(-58deg); pointer-events: none; z-index: 5; }
-.plane-fly .plane-ico { position: absolute; left: 0; top: -1em; font-size: 2.1em; color: #ffd25a; filter: drop-shadow(0 0 8px rgba(255,197,24,.75));
-  transform: rotate(90deg); animation: planeGo 1.9s cubic-bezier(.55,0,.75,.4) both; }
-.plane-fly .plane-trail { position: absolute; left: 0; top: -2px; height: 4px; width: 1500px; transform-origin: left center; border-radius: 3px;
-  background: linear-gradient(to right, rgba(255,210,90,0), rgba(255,210,90,.6)); animation: planeTrail 1.9s cubic-bezier(.55,0,.75,.4) both; }
-@keyframes planeGo { 0% { transform: translateX(0) rotate(90deg) scale(.8); opacity: 0; } 8% { opacity: 1; } 100% { transform: translateX(1500px) rotate(90deg) scale(1.7); opacity: 1; } }
-@keyframes planeTrail { 0% { transform: scaleX(0); opacity: 1; } 80% { opacity: .9; } 100% { transform: scaleX(1); opacity: 0; } }
-html[data-motion="off"] .plane-fly { display: none; }
 /* the lobby's Start, in a solid bar along the bottom, so nothing shows through it (the owner, 1 Nov) */
 .start-bar { position: sticky; bottom: 0; z-index: 20; margin: 4px calc(-20px - env(safe-area-inset-right)) 0 calc(-20px - env(safe-area-inset-left));
   padding: 12px calc(20px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
@@ -757,8 +710,7 @@ html[data-motion="off"] .tv-glow, html[data-motion="off"] .flame, html[data-moti
 /* six teams or more: the name over the score, so eight fit */
 .hud.many.stack .hud-team { flex-direction: column; gap: 4px; }
 .hud.many.stack .hud-team .sc { line-height: .9; }
-/* the room code over the teams, centred; the night's label on one line under them: the game and its leg, the pips */
-.hud.many .many-code { text-align: center; margin: 0 0 6px; }
+/* the night's label on one line under the teams: the game and its leg, the pips */
 .hud.many .hud-mid { margin-top: 8px; flex-direction: row; justify-content: center; gap: 14px; }
 .hud.tv.many .hud-label { white-space: nowrap; }
 /* (a phone: the game's name and its question over two lines if they must: "Don't Say the Same as Me · Question 6 of 6"
@@ -1521,7 +1473,6 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 /* up to four teams, "This game" stays on one line (Team D was left alone on a second one: the 4 Nov audit, 3.6) */
 .hud.tv.many:not(.mid):not(.stack) .hud-mini.game-line { flex-wrap: nowrap; column-gap: 32px; }
 .hud.tv.many:not(.mid):not(.stack) .hud-mini.game-line .nm { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tv-stage .hud-code.corner, .hud.tv .hud-code.corner { font-size: var(--text-18); }   /* readable from the sofa (the 4 Nov audit, 3.6) */
 
 /* sideways (the 4 Nov audit, 3.7): 8 teams' "who's answered" in two columns, maps and the board capped, so Reveal and
    Send stay on screen */
@@ -1579,7 +1530,6 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .rr-chip .rr-pt.ok { color: var(--color-ok); } .rr-chip .rr-pt.no { color: var(--color-no); }
 .rr-chip.bullet .rr-pt { background: #14110a; border-radius: 999px; padding: 0 6px; }
 .rr-chip.bullet .rr-pt.ok { color: #46e38a; } .rr-chip.bullet .rr-pt.no { color: #ff6b7a; }
-.rr-note { font-size: var(--text-14); color: var(--color-ink-2); text-align: center; }
 .rr-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px;
   border: 1.5px solid color-mix(in srgb, var(--c) 45%, transparent); background: color-mix(in srgb, var(--c) 8%, transparent); }
 .rr-row.bang { border-color: var(--color-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-gold) 35%, transparent); }

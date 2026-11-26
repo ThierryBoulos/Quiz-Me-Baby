@@ -170,8 +170,6 @@ export const T_SAY = 20, T_BATTLE_HOST = 7, T_BATTLE_TYPED = 15;
 /* no host: the other captain has this long to give a point the app called WRONG (a RIGHT always stands) */
 /* T_OVERRULE: no host, how long a captain has to answer the other captain's contest before the app's call stands */
 export const T_OVERRULE = 15, T_SUDDEN_BUZZ = 30;
-/* the Battle is rapid fire: a shorter window there (the other captain can still confirm at once) */
-export const T_OVERRULE_BATTLE = 8;
 /* no host: if the lead captain hasn't tapped Next after this long, the other captain can */
 export const T_NEXT_FALLBACK = 20;
 /* no host: how long the other captain has to agree to a request (new scores, a new question); no answer: nothing changes */
