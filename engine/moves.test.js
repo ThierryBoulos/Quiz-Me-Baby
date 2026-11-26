@@ -757,6 +757,14 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   Q.play(b.g, { type:'roulette/done' }, b.env);
   assert.equal(b.g.done.roulette, true);
 });
+test('pin: one nearest for every setup (27 Nov, the merge) — to the km, the same km tied, no pin no place', () => {
+  const q = { lat:0, lon:0 }, at = (km) => ({ lat:0, lon:km / 111.19492664455873 });
+  const d = Q.pinOffs(q, [at(100.2), null, at(99.8), at(250), { lat:99, lon:0 }]);
+  assert.deepEqual(d, [100, null, 100, 250, null]);
+  assert.deepEqual(Q.nearest(d), [0, 2]);
+  assert.equal(Q.pinLeg(q, [at(100.2), at(99.8)]).w, 'tie'); assert.equal(Q.pinLeg(q, [at(101), at(99.8)]).w, 1);
+  assert.equal(Q.pinLeg(q, [null, null]).w, 'none'); assert.equal(Q.pinLeg(q, [at(5), null]).w, 0);
+});
 test('closest: one nearest for every setup (27 Nov, the merge) — how far off, ties all take it, nobody, two teams', () => {
   assert.equal(Q.closestOff(0.1 + 0.2, 0), 0.3);
   assert.deepEqual(Q.closestOffs([12, null, 8, 11], '10'), [2, null, 2, 1]);

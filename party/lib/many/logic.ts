@@ -499,7 +499,7 @@ export function legWinners(s: StateM): number[] {
 }
 export const distances = (s: StateM): (number | null)[] => {
   const m = miniOf(s), q = qOf(s); if (!m || !q) return [];
-  return m.key === "closest" ? QMB.closestOffs(s.nums, q.answer) : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q)) : null)) : [];
+  return m.key === "closest" ? QMB.closestOffs(s.nums, q.answer) : m.key === "pin" ? QMB.pinOffs(q, s.pins) : [];
 };
 /* on fire: 1st three legs in a row in this game */
 export const fireOfMany = (s: StateM): boolean[] => s.teams.map((_, i) => (s.stats?.run?.[i] ?? 0) >= 3);
