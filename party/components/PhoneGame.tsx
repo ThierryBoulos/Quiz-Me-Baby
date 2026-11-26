@@ -659,10 +659,14 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         {S?.note && <Line className="!text-13">{S.note}</Line>}
         {S?.needsHost ? (<>
           <div className="eyebrow text-center">Still tied. Who gets the {pub.mini?.pts} points?</div>
-          <div className="grid grid-cols-3 gap-2 mt-auto">
-            <button className="btn btn-a" disabled={busy} onClick={() => send({ type: mk + "/award", w: 0 })}>{T[0].name}</button>
+          {/* (the two teams side by side, "A point each" under them: in the middle of three it broke onto three lines on a
+              narrow phone, where "Split" had fitted: 26 Nov, the owner's "tied" words) */}
+          <div className="flex flex-col gap-2 mt-auto">
+            <div className="grid grid-cols-2 gap-2">
+              <button className="btn btn-a" disabled={busy} onClick={() => send({ type: mk + "/award", w: 0 })}>{T[0].name}</button>
+              <button className="btn btn-b" disabled={busy} onClick={() => send({ type: mk + "/award", w: 1 })}>{T[1].name}</button>
+            </div>
             <button className="btn" disabled={busy} onClick={() => send({ type: mk + "/award", w: "split" })}>A point each</button>
-            <button className="btn btn-b" disabled={busy} onClick={() => send({ type: mk + "/award", w: 1 })}>{T[1].name}</button>
           </div>
         </>) : <Main label="Next" move={{ type: mk + "/done" }} />}
       </div>);

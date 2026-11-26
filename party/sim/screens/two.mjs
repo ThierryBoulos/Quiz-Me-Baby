@@ -68,7 +68,7 @@ export async function dumpTwo(load) {
     /* (26 Nov, the wording pictures: a game still tied after its tie-break, the host's three buttons, "A point each" in
        the middle; and the Battle called tied) */
     const st = copy(`${tag}.flagSummary.flag.a`);
-    if (st?.pub.summary) { st.pub.summary = { ...st.pub.summary, winner: null, needsHost: true, award: [0, 0], note: "" }; st.pub.mini = { ...st.pub.mini, wins: [3, 3] };
+    if (st?.pub.summary) { st.pub.summary = { ...st.pub.summary, wins: [3, 3], winner: null, needsHost: true, award: [0, 0], note: "" }; st.pub.mini = { ...st.pub.mini, wins: [3, 3] };
       got[`${tag}.flagSummary.flag.extra.still.a`] = st; }
     const bt = copy(`${tag}.battleSummary.battle.a`);
     if (bt?.pub.battle) { const h = Math.floor((bt.pub.mini?.pts ?? 2) / 2); bt.pub.battle = { ...bt.pub.battle, winner: null, award: [h, h], note: `Tied: called there, ${h} point${h === 1 ? "" : "s"} each.`, score: [bt.pub.battle.score?.[0] ?? 5, bt.pub.battle.score?.[0] ?? 5] };
