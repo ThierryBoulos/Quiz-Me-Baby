@@ -1497,6 +1497,15 @@
     if(j === lap.bullet && !lap.blank) return ok ? 5 : -3;
     return ok ? (lap.ch[j].level === 'medium' ? 2 : 3) : 0;
   }
+  /* a spin settled, the same in every setup (27 Nov, the merge): each team's call as it stands (k teams), what each
+     chamber paid, the team that drew the bullet (-1: nobody), the theme each team had (the next spin avoids it); the
+     lap keeps its calls and points */
+  function rouletteSettle(lap, ok, k){
+    const calls = Array.from({ length:k }, (_, t) => !!(ok && ok[t]));
+    const got = calls.map((o, t) => roulettePts(lap, lap.draw[t], o));
+    lap.ok = calls; lap.got = got;
+    return { ok:calls, got, hit:lap.draw.indexOf(lap.bullet), themes:lap.draw.map(j => lap.ch[j].theme) };
+  }
   /* Change question (22 Nov, the owner): the question on show in each team's chamber gives way to the chamber's
      spare, the same theme and level; the barrel, the spin and who drew what stay. Every setup. false: a drawn chamber
      has no spare left (nothing changes) */
@@ -2659,11 +2668,8 @@
     'roulette/verdict'(g, a, env){
       const s = g.rouletteGame, lap = s.qs[s.i];
       if(!lap || !lap.draw || s.done) return [];
-      const ok = [!!(a.ok && a.ok[0]), !!(a.ok && a.ok[1])];
-      const got = [0, 1].map(t => { const p = roulettePts(lap, lap.draw[t], ok[t]); s.pts[t] += p; return p; });
-      const hit = lap.draw.indexOf(lap.bullet);
-      lap.ok = ok; lap.got = got;
-      [0, 1].forEach(t => s.had[t].push(lap.ch[lap.draw[t]].theme));
+      const { ok, got, hit, themes } = rouletteSettle(lap, a.ok, 2);
+      [0, 1].forEach(t => { s.pts[t] += got[t]; s.had[t].push(themes[t]); });
       if(hit > -1) s.fired++;
       s.subs.push({ lap:s.i, draw:lap.draw.slice(), ok, got, hit });
       s.i++;
@@ -2888,5 +2894,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, SWAP_WORDS,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, rouletteSettle, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

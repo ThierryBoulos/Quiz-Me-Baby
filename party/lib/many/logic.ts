@@ -672,11 +672,13 @@ export function next(s: StateM, now: number, t: Timers) {
       for (const r of mrOn(s)) { const w = (s.who[r.name] = s.who[r.name] || { r: 0, of: 0, team: r.team }); w.of++; if (s.votes[r.name] === q?.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
     } else if (m.key === "roulette") {
       /* the lap's points (as the calls stand), the bullet, and the themes each team has had (the next spin avoids them) */
-      const lap = qOf(s) as RrLap, got = rrGot(lap, m.pts, s.ok), hit = lap.draw ? lap.draw.indexOf(lap.bullet) : -1;
+      /* (the engine's settle, the same as with 2 teams: 27 Nov, the merge) */
+      const lap = qOf(s) as RrLap, r = lap.draw ? QMB.rouletteSettle(lap, s.ok, s.teams.length) as { got: number[]; hit: number; themes: string[] } : null;
+      const got = r ? r.got : rrGot(lap, m.pts, s.ok), hit = r ? r.hit : -1;
       got.forEach((g, i) => { m.pts[i] += g; if (s.ok[i]) m.wins[i]++; });
-      lap.ok = s.ok.map(Boolean); lap.got = got;
+      if (!r) { lap.ok = s.ok.map(Boolean); lap.got = got; }
       if (hit >= 0) m.fired = (m.fired || 0) + 1;
-      m.had = s.teams.map((_, i) => [...(m.had?.[i] || []), ...(lap.draw ? [lap.ch[lap.draw[i]].theme] : [])]);
+      m.had = s.teams.map((_, i) => [...(m.had?.[i] || []), ...(r ? [r.themes[i]] : [])]);
       s.stats.run = n(s.teams.length);
       /* (no note on top: who drew the bullet is the line under the barrel once it stops; a note said it at once, before the
          barrel had stopped, and said it twice: 15 Nov, from a live game) */

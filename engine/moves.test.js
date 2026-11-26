@@ -757,6 +757,18 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   Q.play(b.g, { type:'roulette/done' }, b.env);
   assert.equal(b.g.done.roulette, true);
 });
+test('roulette: one settle for every setup (27 Nov, the merge) — calls, points, the bullet, the themes', () => {
+  const ch = ['medium', 'medium', 'medium', 'hard', 'hard', 'expert'].map((level, j) => ({ level, theme:'T' + j }));
+  const lap = { ch, bullet:5, draw:[5, 0, 3, 1] };
+  const r = Q.rouletteSettle(lap, [0, 1, true], 4);
+  assert.deepEqual(r.ok, [false, true, true, false]);        // (a missing call is wrong)
+  assert.deepEqual(r.got, [-3, 2, 3, 0]);
+  assert.equal(r.hit, 0); assert.deepEqual(r.themes, ['T5', 'T0', 'T3', 'T1']);
+  assert.deepEqual([lap.ok, lap.got], [r.ok, r.got]);
+  const blank = { ch, bullet:5, blank:true, draw:[5, 2] };
+  assert.deepEqual(Q.rouletteSettle(blank, [true, true], 2).got, [3, 2]);   // (a tie-breaker spin: the Expert pays 3)
+  assert.equal(Q.rouletteSettle({ ch, bullet:5, draw:[1, 2] }, null, 2).hit, -1);
+});
 test('roulette: two teams play one barrel — six different chambers over the three spins, the bullet drawn exactly once, at any spin', () => {
   const at = [0, 0, 0];
   for(let seed = 1; seed < 60; seed++){
