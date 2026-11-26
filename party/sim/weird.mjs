@@ -96,7 +96,7 @@ for (let i = 0; i < W.length; i++) {
     if (!ok) bad++;
     console.log(`${ok ? "ok  " : "FAIL"} ${i + 1}. ${w.name} [seed ${seed}]: ${r.outcome}${r.stuckOn ? " (" + r.stuckOn + ")" : ""}, ${r.score}, ${r.minutes.toFixed(1)} min, ${r.taps.length} taps${lost ? ", " + lost + " without a receipt" : ""}${errors.length ? ", errors: " + [...new Set(errors)].slice(0, 3).join(" | ") : ""}`);
     if (w.lag) {
-      console.log(`     ${r.stalls} updates held; the phones were at most ${(r.behind / 1000).toFixed(1)} s behind the TV`);
+      console.log(`     ${r.stalls} updates held; the phones were at most ${(r.behind / 1000).toFixed(1)} s behind the TV by the database, ${(r.behindSeen / 1000).toFixed(1)} s with the live line`);
       if (r.behind > 7000) { bad++; console.log("FAIL the phones waited behind a held update"); }
     }
     /* a held read must not hold the taps back: each one's receipt comes as fast as on a good night */

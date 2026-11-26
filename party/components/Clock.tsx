@@ -53,9 +53,16 @@ export function noteTvTime(tvNowAt?: number, tvClk?: number) {
 export const tvNow = () => (off != null && tvOff != null ? Date.now() + off - tvOff : Date.now() - skew);
 
 /* Seconds left, from the TV's deadline. Paused shows the frozen number. */
+/* (each number changes just as its second ends, on every screen at once: looked at every quarter second, two screens
+   could show different numbers for up to a quarter second, 26 Nov) */
 export function useSecondsLeft(deadline?: number | null, left?: number) {
   const [now, setNow] = useState(tvNow());
-  useEffect(() => { const t = setInterval(() => setNow(tvNow()), 250); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const go = () => { const n = tvNow(); setNow(n); const r = deadline ? (deadline - n) % 1000 : 250; t = setTimeout(go, (r > 0 ? r : 1000 + r) + 5); };
+    go();
+    return () => clearTimeout(t);
+  }, [deadline]);
   if (deadline) return Math.max(0, Math.ceil((deadline - now) / 1000));
   return left ? Math.ceil(left) : 0;
 }

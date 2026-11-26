@@ -1125,7 +1125,8 @@ const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onCont
 /* the two teams as Fool Me Twice's pieces want them */
 const foolTeams = (pub: Pub) => ([0, 1] as const).map((t) => ({ name: pub.teams[t].name, color: `var(--color-${t ? "b" : "a"})` }));
 /* (who: this phone's player, for its own order of Fool Me Twice's answers) */
-function OnScreen({ pub, counting, small, side, mine, captain, who, picking }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean; who?: string; picking?: boolean }) {
+/* (buzzed: this phone has just buzzed, What Do You See?: its picture stops at once) */
+function OnScreen({ pub, counting, small, side, mine, captain, who, picking, buzzed }: { pub: Pub; counting?: boolean; small?: boolean; side?: boolean; mine?: 0 | 1 | null; captain?: boolean; who?: string; picking?: boolean; buzzed?: boolean }) {
   /* (held sideways, the clock is 70, as with 3 to 8 teams: 22 Nov, the owner) */
   const spun = useSpun(pub.roulette?.spinAt), noTv = useNoTv(), sideways = useSideways();
   /* with no TV, nothing shows whether the other team has answered (19 Nov review): a line for it, in the TV's words
@@ -1161,7 +1162,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who, picking }: {
     {(pub.screen === "seeQ" || pub.screen === "seeReveal") && pub.see && <div className="flex flex-col items-center gap-1">
       {/* (the question, by kind: the owner, 12 Nov) */}
       {pub.screen === "seeQ" && <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>}
-      <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} clear={pub.screen === "seeReveal"} w={pub.screen === "seeReveal" ? (small ? 180 : 240) : small ? 220 : 340} alt={pub.see.rev?.answer} />
+      <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} clear={pub.screen === "seeReveal"} hold={!!buzzed && pub.buzz == null} w={pub.screen === "seeReveal" ? (small ? 180 : 240) : small ? 220 : 340} alt={pub.see.rev?.answer} />
       {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}
       {/* (as with 3 to 8 teams: who got it under the picture, then the answer on its tile and the fact: 23 Nov, the owner) */}
       {pub.screen === "seeReveal" && pub.see.rev && (() => { const w = seeWho(pub.see, rr2(pub)); return <span className="display text-18 text-center" style={{ color: w.color }}>{w.text}</span>; })()}
@@ -1407,7 +1408,7 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       {pub.screen === "majorityIntro" && <MajorityList pub={pub} me={me} />}
       <Result pub={pub} mine={mine} part="pill" />
       {pub.screen === "majorityReveal" && <MajorityPad pub={pub} me={me} code={code} />}
-      <OnScreen pub={pub} side mine={mine} who={me.user_id} picking={foolHelp} />
+      <OnScreen pub={pub} side mine={mine} who={me.user_id} picking={foolHelp} buzzed={buzzed} />
       {/* Fool Me Twice: while the captain picks, a tap tells the captain which one you think is true (25 Nov, the owner) */}
       {foolHelp && pub.fool?.opts && (
         <div className="flex flex-col gap-2">
@@ -1573,9 +1574,9 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
     else if (ack.no) setNo(ack.no);
   }, [got, acks]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!no) return; const t = setTimeout(() => setNo(null), 6000); return () => clearTimeout(t); }, [no]);
-  const nxt = (move: Record<string, unknown>) => act("next", { move, step: pub.step });
+  const nxt = (move: Record<string, unknown>) => act("next", { move, step: pub.step, on: pub.screen });
   /* quick taps (+1, pausing a call): straight out, nothing waits for them */
-  const fire = (move: Record<string, unknown>) => { void sendAction(code, "next", { move, step: pub.step }).catch(() => {}); };
+  const fire = (move: Record<string, unknown>) => { void sendAction(code, "next", { move, step: pub.step, on: pub.screen }).catch(() => {}); };
 
   const myTurn = (sc === "ask" || sc === "steal") && pub.turn === mine && !pub.lifeline;
   const dip = sc === "ask" && (pub.llUsed?.[mine] || []).includes("dip");
@@ -1673,7 +1674,7 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {sc === "majorityIntro" && <MajorityList pub={pub} me={me} act={nohost ? fire : undefined} />}
       <Result pub={pub} mine={mine} part="pill" />
       {sc === "majorityReveal" && <MajorityPad pub={pub} me={me} code={code} />}
-      <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side mine={mine} captain who={me.user_id} />
+      <OnScreen pub={pub} counting={nohost && sc === "auctionRun" && A?.by === theirs} small={sc === "pinQ"} side mine={mine} captain who={me.user_id} buzzed={buzzed} />
       {/* Secret Stakes: your bet, a theme and a level, then Lock in */}
       {sc === "stakesPick" && pub.stakes && !pub.stakes.locked[mine] && !pub.paused && <StakesBet sk={pub.stakes} theme={skTheme} level={skLevel} setTheme={setSkTheme} setLevel={setSkLevel} busy={busy} n={2}
         onLock={() => { if (skTheme != null && skLevel) void nxt({ type: "stakes/pick", k: skTheme, level: skLevel, theme: pub.stakes!.themes[skTheme] }); }} />}

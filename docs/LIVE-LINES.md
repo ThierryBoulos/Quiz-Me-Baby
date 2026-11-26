@@ -42,6 +42,9 @@ Each game counts how much sooner the line was than the database:
 - the TV writes its count for the taps into the room (`rooms.state.lines`: `n` taps matched, `ms` the median ms
   the line was sooner, `p10`/`p90`, and how many came first by each way);
 - each phone sends its count for the screens once, at the end of a game (the room's log, kind `count`, `lines`).
+- with it (26 Nov, the owner's "about a second" on a real night), each phone's tap timing: from a tap leaving to the
+  game's next screen arriving (`taps`: `n` taps, `ms` the median, `p90`, `max`, in ms). Sent even with the lines off.
+  Read it from the room's log: `select payload->'taps' from actions where room = 'CODE' and kind = 'count'`.
 
 Read them after a real game. Rough rule: if the screens' median is under about 150 ms sooner, the line isn't worth
 its extra realtime use; go back (above). The extra use is noted in `docs/COMMERCIAL.md`, to check before launch.

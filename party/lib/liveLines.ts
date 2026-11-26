@@ -42,6 +42,17 @@ function counter() {
   };
 }
 export const pubCount = counter(), actCount = counter();
+/* how long a phone's tap waits for the game's answer (26 Nov, the owner: "about a second" on a real night): from the tap
+   leaving to the first new screen from the TV, in ms. Sent with the end-of-game count (no database change) */
+function timer() {
+  const ms: number[] = [];
+  return {
+    add(t: number) { if (t >= 0 && t < 60000) { ms.push(t); if (ms.length > 500) ms.splice(0, 100); } },
+    summary() { const s = [...ms].sort((a, b) => a - b), q = (p: number) => (s.length ? Math.round(s[Math.min(s.length - 1, Math.floor(p * s.length))]) : null);
+      return { n: s.length, ms: q(0.5), p90: q(0.9), max: s.length ? Math.round(s[s.length - 1]) : null }; },
+  };
+}
+export const tapTimes = timer();
 
 /* The screens' line, one per room on this device, shared by whoever needs it here: the device running the game sends on
    it, and the room's page (lib/room.ts) listens on it. (21 Nov, the owner's no-TV game: the library gives one channel

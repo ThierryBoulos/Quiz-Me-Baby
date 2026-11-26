@@ -8,7 +8,7 @@ import { ShareButton } from "@/components/Share";
 import { ANSWERING, AwayLog, CaptainGame, HostGame, PlayerGame, ScoreFix, TvTakeover, useSecret } from "@/components/PhoneGame";
 import { Confetti, Hud, usePreload } from "@/components/GameParts";
 import { noteTvTime, useServerClock } from "@/components/Clock";
-import { LIVE_LINES, pubCount } from "@/lib/liveLines";
+import { LIVE_LINES, pubCount, tapTimes } from "@/lib/liveLines";
 import { Rules } from "@/components/Rules";
 import { Setup } from "@/components/Setup";
 import { iso, type Pub } from "@/lib/game";
@@ -70,13 +70,15 @@ export default function PhoneRoom() {
   const [tapAt, setTapAt] = useState<{ top?: number; bottom?: number } | null>(null);
   const lastBtn = useRef<Element | null>(null);
   const waitRef = useRef({ on: false, key: "" }), viewKey = useRef(""), sendKey = useRef(""), lateKey = useRef<string | null>(null);
+  /* when the last tap left, for the timing (lib/liveLines.ts tapTimes) */
+  const sentAt = useRef<number | null>(null);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined, again: ReturnType<typeof setTimeout>[] = [];
     const stop = () => { clearTimeout(t); again.forEach(clearTimeout); again = []; waitRef.current.on = false; setWaiting(false); };
     /* the TV's latest update just before the tap went: any newer one is its reply, even one that beat the send back */
-    const sending = (e: Event) => { sendKey.current = viewKey.current; if (!(e as CustomEvent<{ quick?: boolean }>).detail?.quick) setInFlight(true); };
+    const sending = (e: Event) => { sendKey.current = viewKey.current; sentAt.current = performance.now(); if (!(e as CustomEvent<{ quick?: boolean }>).detail?.quick) setInFlight(true); };
     const landed = () => setInFlight(false);
     const on = () => {
       clearTimeout(t); setTapErr(null); lateKey.current = null;
@@ -314,6 +316,7 @@ export default function PhoneRoom() {
   const lobbyKey = room?.status === "lobby" ? JSON.stringify([room.state?.teamNames, room.state?.away, lobbyNote?.at, room.state?.teamCount, room.state?.timers]) : "";
   viewKey.current = `${room?.status}|${pub?.at ?? ""}|${lobbyKey}`;
   useEffect(() => {
+    if (sentAt.current != null && viewKey.current !== sendKey.current) { tapTimes.add(performance.now() - sentAt.current); sentAt.current = null; }
     if (waitRef.current.on && viewKey.current !== waitRef.current.key) {
       waitRef.current.on = false; setWaiting(false);
       setTapErr(lobbyNote && Date.now() - lobbyNote.at < 15000 ? lobbyNote.text : null);
@@ -329,9 +332,10 @@ export default function PhoneRoom() {
   const endKey = (room?.state?.pub as { screen?: string } | undefined)?.screen === "final" ? code : "";
   useEffect(() => {
     if (!endKey) { linesSent.current = ""; return; }   // (a new game: its own count at its end)
-    if (!LIVE_LINES || linesSent.current === endKey || !mine) return;
+    if (linesSent.current === endKey || !mine) return;
     linesSent.current = endKey;
-    void sendAction(code, "count", { lines: pubCount.summary() }).catch(() => { /* only a count */ });
+    /* (and how long this phone's taps waited for the game's answer: 26 Nov) */
+    void sendAction(code, "count", { ...(LIVE_LINES ? { lines: pubCount.summary() } : {}), taps: tapTimes.summary() }).catch(() => { /* only a count */ });
   }, [endKey]);   // eslint-disable-line react-hooks/exhaustive-deps
   /* an old copy of the app (left open across a deploy) reloads when nothing is being answered */
   useFreshBuild(!pub || (!ANSWERING.includes(pub.screen) && !pub.deadline && !pub.pending && !pub.lifeline), room?.status === "playing");
@@ -343,9 +347,9 @@ export default function PhoneRoom() {
   const live = !!pub && !!mine && mine.role !== "host" && !pub.paused && (many ? pub.screen === "q"
     : ANSWERING.includes(pub.screen) && !(pub.lifeline?.key === "friend" && pub.lifeline.team === mine.team));
   useAwayWatch(report, live, pub?.qid);
-  const sendMove = (move: Record<string, unknown>) => tell(() => sendAction(code, "judge", { move, step: pub?.step }));
+  const sendMove = (move: Record<string, unknown>) => tell(() => sendAction(code, "judge", { move, step: pub?.step, on: pub?.screen }));
   /* quick taps (+1, Undo, pausing a call): straight out, the buttons never wait for them */
-  const fireMove = (move: Record<string, unknown>) => { void sendAction(code, "judge", { move, step: pub?.step }).catch(() => { /* the phone already says so */ }); };
+  const fireMove = (move: Record<string, unknown>) => { void sendAction(code, "judge", { move, step: pub?.step, on: pub?.screen }).catch(() => { /* the phone already says so */ }); };
 
   /* the lobby in the marquee's look (the owner, 2 Nov): the stage behind, the sign small at the top */
   const lights = useLights(120, room?.status === "lobby" && !!mine);
@@ -484,7 +488,7 @@ export default function PhoneRoom() {
               onClick={() => { if (window.confirm(`Stop hosting? The game goes on: ${hostGoes} You stay in the room as a player.`)) { void claim("player"); setPanel(false); } }}>Stop hosting</button>}
             {/* no host: either captain asks for new scores; the other captain agrees, or not (back on the game screen) */}
             {mine.role === "captain" && pub?.mode === "nohost" && <ScoreFix pub={pub} ask busy={busy || waiting}
-              send={(move) => { void tell(() => sendAction(code, "next", { move, step: pub.step })); setPanel(false); }} />}
+              send={(move) => { void tell(() => sendAction(code, "next", { move, step: pub.step, on: pub.screen })); setPanel(false); }} />}
             {/* leaving is kept away from everyday buttons, and asks first */}
             <button className="btn btn-sm btn-ghost self-center mt-6" style={{ color: "var(--color-no)", borderColor: "color-mix(in srgb, var(--color-no) 45%, transparent)" }} onClick={leave}>Leave the game</button>
           </section>

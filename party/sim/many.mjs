@@ -621,4 +621,32 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   console.log(`load: ${s.roster.length} on the list (cap 60), ${took} answers taken in ${ms.toFixed(1)} ms, all in: ${all}, a second tap refused: ${dup !== true} — ${ok ? "ok" : "FAILED"}`);
   if (!ok) bad++;
 }
+/* 26 Nov: a Next or Spin tapped on the screen still up, but a step behind, is taken; a tap from an earlier screen, a
+   second tap after the first moved the game on, a tap with no screen (an older phone) or one that isn't a move-on, aren't.
+   One rule for both setups (lib/tapOn.ts) */
+{
+  const outT = join(here, ".out", "tapOn.mjs");
+  await build({ entryPoints: [join(here, "../lib/tapOn.ts")], outfile: outT, bundle: true, platform: "node", format: "esm", logLevel: "error" });
+  const { tapOnThisScreen: on, nextScreenAt: at } = await import(pathToFileURL(outT).href);
+  let up = at({ screen: "", step: 0 }, { screen: "rouletteReveal", step: 40 });
+  const now = { screen: "rouletteReveal", step: 42 };   // (two steps moved under it: answers taken at time's up)
+  const cases = [
+    ["a step behind, this screen", on({ on: "rouletteReveal", step: 41 }, true, now, up), true],
+    ["the very step", on({ on: "rouletteReveal", step: 42 }, true, now, up), false],   // (the usual way takes it)
+    ["from before this screen came up", on({ on: "rouletteReveal", step: 39 }, true, now, up), false],
+    ["another screen's", on({ on: "rouletteQ", step: 41 }, true, now, up), false],
+    ["an older phone (no screen sent)", on({ step: 41 }, true, now, up), false],
+    ["not a move-on", on({ on: "rouletteReveal", step: 41 }, false, now, up), false],
+  ];
+  /* the first tap moved the game on: the same kind of screen again later, its old tap is from before it came up */
+  up = at(up, { screen: "rouletteQ", step: 43 }); up = at(up, { screen: "rouletteReveal", step: 50 });
+  cases.push(["a second tap, the same kind of screen next time", on({ on: "rouletteReveal", step: 41 }, true, { screen: "rouletteReveal", step: 51 }, up), false]);
+  /* 3 to 8 teams: a new game on the same kind of screen */
+  let upM = at({ screen: "", step: 0, mi: -1 }, { screen: "summary", step: 10, mi: 2 });
+  upM = at(upM, { screen: "summary", step: 12, mi: 3 });
+  cases.push(["3 to 8 teams: the last game's result", on({ on: "summary", step: 11 }, true, { screen: "summary", step: 13, mi: 3 }, upM), false]);
+  const wrong = cases.filter(([, got, want]) => got !== want);
+  console.log(`Next and Spin a step behind (both setups): ${cases.length} cases — ${wrong.length ? "FAILED: " + wrong.map((c) => c[0]).join(", ") : "ok"}`);
+  if (wrong.length) bad++;
+}
 process.exit(bad ? 1 : 0);

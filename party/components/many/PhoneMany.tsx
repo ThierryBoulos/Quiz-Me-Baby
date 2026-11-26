@@ -111,7 +111,7 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
   const now = T.map((t) => t.score).join();
   useEffect(() => { if (!open) setV(T.map((t) => t.score)); }, [open, now]);   // eslint-disable-line react-hooks/exhaustive-deps
   if (!open) return <button className="btn btn-sm btn-ghost self-center" onClick={() => setOpen(true)}>Adjust the scores</button>;
-  const step = (t: number, d: number) => setV((x) => x.map((n, i) => (i === t ? Math.max(0, n + d) : n)));
+  const step = (t: number, d: number) => setV((x) => x.map((n, i) => (i === t ? Math.max(0, Math.min(999, n + d)) : n)));
   const changed = v.some((n, t) => n !== T[t].score);
   const save = async () => {
     const what = T.map((t, i) => (v[i] !== t.score ? `${t.name}: ${t.score} → ${v[i]}` : null)).filter(Boolean).join(". ");
@@ -169,7 +169,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
   useEffect(() => { if (seeTeam) { try { navigator.vibrate?.([60, 40, 60]); } catch { /* not supported */ } } }, [seeTeam]);
   const send = async (kind: string, payload: Record<string, unknown>) => {
     setBusy(true); setErr(null);
-    try { setLastTap(await sendAction(code, kind, { ...payload, step: pub.step })); return true; } catch { setErr(noTv ? "That didn't go through. Try again." : "That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
+    try { setLastTap(await sendAction(code, kind, { ...payload, step: pub.step, on: pub.screen })); return true; } catch { setErr(noTv ? "That didn't go through. Try again." : "That didn't reach the TV. Try again."); return false; } finally { setBusy(false); }
   };
   /* players suggest, the captain sees their own team's suggestions (the 4 Nov audit, 3.13) */
   const [sug, setSug] = useState(""), [sugSent, setSugSent] = useState<string | null>(null);
@@ -259,7 +259,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {g.key === "see" && pub.see && <div className="flex flex-col items-center gap-1 noselect" {...noCopy}>
         {/* (the question, by kind: the owner, 12 Nov) */}
         <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>
-        <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} /></div>}
+        <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} hold={buzzed && pub.see.buzz == null} /></div>}
       {/* (with no TV, what the TV shows beside the picture: who has buzzed, who is out of it) */}
       {g.key === "see" && pub.see && noTv && (pub.see.buzz != null || pub.see.out?.some(Boolean)) && <SeeTicks teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} out={pub.see.out} buzz={pub.see.buzz} size={15} />}
       {g.key === "airport" && <Board air={pub.airport} size="phone" flip />}

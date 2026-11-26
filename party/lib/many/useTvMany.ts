@@ -1,4 +1,5 @@
 "use client";
+import { nextScreenAt, tapOnThisScreen, type ScreenAt } from "../tapOn";
 import { LIVE_LINES, actCount, usePubLine } from "../liveLines";
 import { serverOffset } from "@/components/Clock";
 /* MANY TEAMS: the TV runs the night (3 to 8 teams, always with a host). Its own state, saved under its own
@@ -162,7 +163,12 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
      that much (19 Nov review: a question ran out while no phone could see it, against How to Play) */
   const offline = useRef(false), offlineAt = useRef(0), pendingSince = useRef(0);
   const goOffline = (since: number) => { if (!offline.current) { offline.current = true; offlineAt.current = since; } setBanner((b) => b ?? "offline"); };
+  /* the screen up now, and the step it came up at: a Next, Start or Spin tapped on this very screen a step behind is
+     still taken (26 Nov, as with 2 teams: in the 15 Nov game Spin took three taps); an earlier screen's, or a second
+     tap once the first moved the game on, is still ignored */
+  const scrAt = useRef<ScreenAt>({ screen: "", step: 0, mi: -1 });
   const publish = useCallback(() => {
+    if (st.current) scrAt.current = nextScreenAt(scrAt.current, st.current);
     if (soon.current) { clearTimeout(soon.current); soon.current = null; }
     const s = st.current; if (!s) return;
     /* the TV's sounds on a new screen, as with 2 teams (22 Nov, the owner: the same sounds in every setup): a game's
@@ -437,7 +443,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       /* (Majority Rules: who's in the room right now, before a move can put a question up: 25 Nov) */
       mrSync(s, ctx.current.members, here.current.at, Date.now() - upSince.current > 8000);
       /* (a call changed, or a contest ruled on, carries no step: the reveal's step doesn't move for either) */
-      if (t !== "m/flip" && t !== "m/contestOk" && t !== "m/setScores" && t !== "m/mrOut" && Number(a.payload.step) !== s.step) { reply("-"); publish(); return; }
+      const onThis = tapOnThisScreen(a.payload, t === "m/next" || t === "m/start", s, scrAt.current);
+      if (t !== "m/flip" && t !== "m/contestOk" && t !== "m/setScores" && t !== "m/mrOut" && Number(a.payload.step) !== s.step && !onThis) { reply("-"); publish(); return; }
       let ok = false;
       if (t === "m/go") { ok = !!s.intro; delete s.intro; }
       else if (s.intro) ok = false;

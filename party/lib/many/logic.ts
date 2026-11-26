@@ -570,11 +570,13 @@ export function showMapHint(s: StateM): boolean {
   const m = miniOf(s); if (!m || m.key !== "map" || s.screen !== "q" || s.mapHint) return false;
   s.mapHint = true; return true;
 }
+export const SCORE_MAX = 999;
 /* the host sets the night's totals by hand, when something went wrong (8 Nov, the owner: as with two teams) */
 export function setScores(s: StateM, scores: unknown): boolean {
   if (!Array.isArray(scores) || scores.length !== s.teams.length) return false;
+  /* (0 to 999, as with 2 teams: 26 Nov, the owner) */
   const v = scores.map((x) => Math.round(Number(x)));
-  if (v.some((x) => !Number.isFinite(x) || x < 0 || x > 9999) || v.every((x, t) => x === s.teams[t].score)) return false;
+  if (v.some((x) => !Number.isFinite(x) || x < 0 || x > SCORE_MAX) || v.every((x, t) => x === s.teams[t].score)) return false;
   v.forEach((x, t) => { s.teams[t].score = x; });
   toast(s, `The host set the scores: ${s.teams.map((t) => `${t.name} ${t.score}`).join(", ")}.`);
   /* at the night's end the ending follows the new scores (19 Nov review): sudden death on its intro is for the teams tied

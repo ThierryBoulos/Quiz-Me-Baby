@@ -8,6 +8,7 @@ import { SPIN_MS, rrQ, type RrLap } from "./roulette";
 import { SK_BET_BAD, SK_BET_IN, SK_LEVELS, SK_THEMES_CHANGED, skQ, type SkGame } from "./stakes";
 import { SEE_TYPE, seeWinner } from "./see";
 import { CB_IN, CB_NOT_YOURS } from "./comeback";
+import { nextScreenAt, tapOnThisScreen, type ScreenAt } from "./tapOn";
 import { cleanList, mergeCustom } from "./custom";
 import { sb } from "./supabase";
 import { playSound, type SoundName } from "./sound";
@@ -208,10 +209,29 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     window.addEventListener("error", onErr); window.addEventListener("unhandledrejection", onRej);
     return () => { window.removeEventListener("error", onErr); window.removeEventListener("unhandledrejection", onRej); };
   }, [isTv]);
+  /* the last screen sent on the line: the database write that follows reuses its stamp when nothing changed meanwhile,
+     so a phone takes the two copies for one (lib/liveLines.ts counts which came first) */
+  const lastLine = useRef<{ at: number; key: string; pub: Pub } | null>(null);
+  /* while a tap is being handled, its screens wait for the receipt and go out with it, once (26 Nov: each tap went out
+     twice, the second copy waiting for the first's write) */
+  const deferPub = useRef<{ want: boolean } | null>(null);
+  const lineKey = (p: Pub) => JSON.stringify({ ...p, at: 0, now: 0, clk: 0 });
+  /* the screen up now, and the step it came up at: a Next or Spin tapped on this very screen, but a step behind (the step
+     moved under it: an answer taken at time's up, a call), is still taken (26 Nov: in the 15 Nov game Spin took three
+     taps). A tap from an earlier screen, or a second tap once the first has moved the game on, is still ignored */
+  const scrAt = useRef<ScreenAt>({ screen: "", step: 0 });
+  const onThis = (p: G, type: string) => tapOnThisScreen(p, NEXT_MOVES.has(type) || /\/(start|done)$/.test(type), st.current, scrAt.current);
   const publish = useCallback(() => {
     pubN.current++;
-    /* this TV shows the change at once; the phones get it with the next write */
-    const now = view(); if (now) { now[0].at = Date.now(); setPub(now[0]); }
+    scrAt.current = nextScreenAt(scrAt.current, st.current);
+    if (deferPub.current) { deferPub.current.want = true; return chain.current.p; }
+    /* this TV shows the change at once, and the phones get it at once on the line (26 Nov: with 2 teams it waited for
+       the last database write, up to 2 s; as with 3 to 8 teams); the database copy follows */
+    const now = view();
+    if (now) {
+      const at = stamp(); now[0].at = at; now[0].now = Date.now(); now[0].clk = serverOffset() ?? undefined;
+      setPub(now[0]); sendLine(now[0], at); lastLine.current = { at, key: lineKey(now[0]), pub: now[0] };
+    }
     const c = chain.current;
     if (c.queued) return c.p;              // a write that hasn't started yet will pick up this change too
     c.queued = true;
@@ -226,15 +246,20 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     c.p = c.p.then(async () => {
       c.queued = false;
       const v = view(); if (!v) return;
-      const at = stamp();
-      v[0].at = at;
-      /* the TV's own clock, for the phones' clocks (at is an ordering stamp, which can jump ahead of the real time
-         after a takeover; the phones read it as the time once, and ran fast for the rest of the night: the 4 Nov audit, 1.16) */
-      v[0].now = Date.now();
-      /* (and how far this TV's clock is from the server's, so every phone counts down to the same second: 16 Nov) */
-      v[0].clk = serverOffset() ?? undefined;
-      setPub(v[0]);
-      sendLine(v[0], at);
+      /* (the screen the line already took: the same stamp, so the phones take the two copies for one) */
+      const L = lastLine.current, same = !!L && L.key === lineKey(v[0]) && L.at === lastAt.current;
+      const at = same ? L!.at : stamp();
+      if (same) v[0] = L!.pub;
+      else {
+        v[0].at = at;
+        /* the TV's own clock, for the phones' clocks (at is an ordering stamp, which can jump ahead of the real time
+           after a takeover; the phones read it as the time once, and ran fast for the rest of the night: the 4 Nov audit, 1.16) */
+        v[0].now = Date.now();
+        /* (and how far this TV's clock is from the server's, so every phone counts down to the same second: 16 Nov) */
+        v[0].clk = serverOffset() ?? undefined;
+        setPub(v[0]);
+        sendLine(v[0], at); lastLine.current = { at, key: lineKey(v[0]), pub: v[0] };
+      }
       const s = st.current;
       /* the game, kept on this laptop so a refresh picks it up (only written when it changed);
          stamped with the app's version, so an update mid-night can't load a game it doesn't understand */
@@ -1379,7 +1404,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       const where = HOST_MOVES[move.type];
       if (!where || !inScreen(where, s.screen)) return;
       /* a tap made on an earlier screen (a double tap, a slow phone) is ignored */
-      if (!SAME_SCREEN.has(move.type)) { if (a.payload.step !== s.step) return; s.step++; }
+      if (!SAME_SCREEN.has(move.type)) { if (a.payload.step !== s.step && !onThis(a.payload as G, String(move.type))) return; s.step++; }
       if (move.type === "ui/pause") s.pausedBy = "The host";
       hostMove(move); took.current = true;
       void publish();
@@ -1407,7 +1432,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (from.role !== "captain" || (from.team !== 0 && from.team !== 1)) return;
     if (a.kind === "next") {
       const move = (a.payload.move || {}) as G, free = SAME_SCREEN.has(move.type);
-      if (!free && a.payload.step !== s.step) return;
+      if (!free && a.payload.step !== s.step && !onThis(a.payload as G, String(move.type))) return;
       const ok = captainMove(from.team, move);
       if (ok === true) { took.current = true; if (!free) s.step++; void publish(); }
       else if (ok) refuse(ok);
@@ -1516,7 +1541,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   const handleAndReply = useCallback(async (a: Action) => {
     const n = pubN.current;
     refused.current = null; took.current = false;
-    await handle(a);
+    deferPub.current = { want: false };
+    let wanted = false;
+    try { await handle(a); } finally { wanted = !!deferPub.current?.want; deferPub.current = null; }
     const s = st.current, tap = typeof a.payload?.tap === "string" ? (a.payload.tap as string).slice(0, 12) : null;
     /* the receipt: this phone's tap is dealt with; if it wasn't taken the phone shows why and lets go of it */
     if (tap && s.g) {
@@ -1527,12 +1554,14 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* Majority Rules: everyone answering at once, each answer an update to every phone (30 phones, 30 answers in
          two seconds: 180 messages a second, over the realtime limit: 24 Oct). While the question is up, the answers
          that come in within a second go out together; the last one in is the reveal, and goes at once. */
-      if (a.kind === "answer" && s.screen === "majorityQ") publishSoon();
+      /* (a screen the tap changed goes now, with its receipt: a buzz, a reveal, the last Majority answer) */
+      if (wanted) void publish();
+      else if (a.kind === "answer" && s.screen === "majorityQ") publishSoon();
       /* a player's tap (an idea for the captain, a count): the same, so a big room can't make the TV write
          thirty times a second; a captain's or the host's goes out at once (29 Oct) */
       else if (ctx.current.members.find((m) => m.user_id === a.user_id)?.role === "player") publishSoon();
       else void publish();
-    } else if (a.kind !== "count" && a.kind !== "suggest" && a.kind !== "draft" && s.g && pubN.current === n) void publish();
+    } else if (wanted || (a.kind !== "count" && a.kind !== "suggest" && a.kind !== "draft" && s.g && pubN.current === n)) void publish();
   }, [handle, publish, publishSoon]);
   useInbox(code, isTv, handleAndReply);
 

@@ -67,7 +67,9 @@ function drawSee(cv: HTMLCanvasElement, img: HTMLImageElement, cssW: number, sig
 }
 
 /* the picture itself, 4:3, w wide at most (it shrinks to fit a narrower column). clear: the whole picture, sharp */
-export function SeePicture({ see, deadline, left, clear, w, big, alt }: { see: SePub; deadline?: number | null; left?: number; clear?: boolean; w: number; big?: boolean; alt?: string }) {
+/* hold: this phone has just buzzed: the picture stops here at once, before the TV's word comes back (26 Nov: on the
+   other phones it went on clearing for the trip, then snapped back) */
+export function SeePicture({ see, deadline, left, clear, w, big, alt, hold }: { see: SePub; deadline?: number | null; left?: number; clear?: boolean; w: number; big?: boolean; alt?: string; hold?: boolean }) {
   const still = motionOff();
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(w);
@@ -79,11 +81,11 @@ export function SeePicture({ see, deadline, left, clear, w, big, alt }: { see: S
   /* the step from the TV's clock: looked at five times a second, drawn again only when the step changes */
   const [now, setNow] = useState(() => tvNow());
   useEffect(() => {
-    if (clear || !deadline) return;
+    if (clear || !deadline || hold) return;
     setNow(tvNow());
     const t = setInterval(() => setNow(tvNow()), 200);
     return () => clearInterval(t);
-  }, [deadline, clear]);
+  }, [deadline, clear, hold]);
   const q = clear ? 1 : seeStep(seeGone(see.total, deadline, left, now), see.total, still);
   const src = `/see/${see.photo}${big ? "" : "-s"}.jpg`;
   /* a face or a logo while it clears: two canvases, the new step fading in over the last (none with animations off) */

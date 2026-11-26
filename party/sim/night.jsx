@@ -191,10 +191,15 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   /* how far the phones are behind the TV: what the TV shows that the room (what phones read) doesn't, yet */
   const shows = (p) => (p ? JSON.stringify([p.screen, p.step, p.teams?.map((x) => x.score), p.dish?.ings?.length, p.auction?.count, p.sent, p.pending?.team ?? null]) : "");
   let behindSince = null, behind = 0;
+  /* ...and counting the live line too, which is what a phone really sees (26 Nov): the newest screen by either way */
+  let lineAt = 0, linePub = null, seenSince = null, behindSeen = 0;
+  fake.sb().channel("pub:" + CODE).on("broadcast", { event: "pub" }, ({ payload }) => { if (payload && payload.at > lineAt) { lineAt = payload.at; linePub = payload.pub; } }).subscribe();
   while (clock() - t0 < 90 * 60000) {
     await tick(900);
     { const tvp = api.current?.pub, dbp = fake.db.rooms[0].state?.pub;
-      if (tvp && shows(tvp) !== shows(dbp)) { behindSince ??= clock(); behind = Math.max(behind, clock() - behindSince); } else behindSince = null; }
+      if (tvp && shows(tvp) !== shows(dbp)) { behindSince ??= clock(); behind = Math.max(behind, clock() - behindSince); } else behindSince = null;
+      const seenp = linePub && lineAt > (Number(fake.db.rooms[0].state?.pubAt) || 0) ? linePub : dbp;
+      if (tvp && shows(tvp) !== shows(seenp)) { seenSince ??= clock(); behindSeen = Math.max(behindSeen, clock() - seenSince); } else seenSince = null; }
     /* the TV's page reloads (the game comes back from this laptop's storage) */
     if (!reloaded && ((reload && clock() - t0 > reload * 1000) || (reloadOn && api.current?.pub?.screen === reloadOn))) {
       reloaded = true; trace.push("(the TV reloads)");
@@ -520,5 +525,5 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   const G = api.current?.game, llUsed = !!G && (G.rounds || []).some((r) => (r.dbl || []).some(Boolean) || (r.llUsed || []).some((u) => u.length));
   /* The Comeback: whether it came up, how it went, the scores before and after */
   const cb = G?.comeback ? { made: G.comeback.made, skipped: !!G.comeback.skipped, before: G.comeback.before, after: G.comeback.after, team: G.comeback.teams[0], asked: G.comeback.log.length } : null;
-  return { cb, dealt, kinds, llUsed, noLl: !!G?.noLl, taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
+  return { behindSeen, cb, dealt, kinds, llUsed, noLl: !!G?.noLl, taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
 }
