@@ -13,7 +13,8 @@ export type RrLit = { j: number; color: string; letter: string; theme?: string; 
 /* every chamber (shown before the spin), and those drawn in earlier spins of this barrel, in the colour of who had them */
 export type RrCh = { theme: string; level: string };
 export type RrUsed = { j: number; color: string; ok?: boolean };
-const geo = (n: number) => ({ R: n === 8 ? 58 : 54, r: n === 8 ? 16.5 : 21 });
+/* (bigger chambers, the words in them bigger, every word kept: 27 Nov, the owner's pick; till then R 58/54, r 16.5/21) */
+const geo = (n: number) => ({ R: n === 8 ? 61 : 55, r: n === 8 ? 19.5 : 23 });
 const at = (n: number, j: number, R: number) => { const a = (-90 + (360 / n) * j) * (Math.PI / 180); return { x: 100 + R * Math.cos(a), y: 100 + R * Math.sin(a) }; };
 /* a theme in a chamber: one line if it fits, else two (at the space nearest the middle), shrunk till it fits; the
    level under it, small */
@@ -222,7 +223,7 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
   return (
     <div className="flex gap-8 items-center w-full justify-center">
       <div className="shrink-0 flex flex-col items-center gap-3">
-        <Barrel n={rr.n} lit={spun || reveal ? lit : []} spinAt={reveal ? null : rr.spinAt} bullet={R && R.bullet >= 0 ? R.bullet : null} reveal={!!R} size={dense ? 380 : 420} ch={rr.ch} used={used} />
+        <Barrel n={rr.n} lit={spun || reveal ? lit : []} spinAt={reveal ? null : rr.spinAt} bullet={R && R.bullet >= 0 ? R.bullet : null} reveal={!!R} size={dense ? 450 : 460} ch={rr.ch} used={used} />
       </div>
       {/* (a little narrower than it was: at 760 the score at the right edge of each row was cut: 11 Nov, the owner) */}
       <div className="flex-1 min-w-0 max-w-[700px] flex flex-col gap-3 text-left">
