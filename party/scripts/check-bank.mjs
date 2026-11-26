@@ -108,6 +108,8 @@ for (const q of bank.bank) {
     if (!["normal", "hard"].includes(q.level)) err(id, `fool level ${q.level}`);
     if ((q.question.match(/____/g) || []).length !== 1) err(id, "fool: one blank (____) in the fact");
     if (!/[.]$/.test(q.question)) err(id, "fool: the fact ends with a full stop");
+    /* (so the TV shows every fact at one size, in every setup: 26 Nov, the owner) */
+    if (q.question.length > 120) err(id, `fool: the fact is ${q.question.length} letters, over 120`);
     if (/\b(a|an)\s+____/i.test(q.question)) err(id, "fool: 'a' or 'an' before the blank gives the answer away");
     /* (25 at most, as the teams' lies: every answer fits its box on the narrowest phone, 16 Nov) */
     if (q.answer.length > 25) err(id, "fool: the truth is over 25 letters");

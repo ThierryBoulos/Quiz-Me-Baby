@@ -132,7 +132,8 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
         {g && g.key === "fool" && pub.fool && ["q", "pick", "reveal"].includes(pub.screen) && (() => { const F = pub.fool, tms = T.map((t) => ({ name: t.name, color: t.color })); return (
           <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
             {pub.screen === "q" && (<>
-              <FoolFact fool={F} size={F.fact.length > 120 ? 44 : 54} />
+              {/* (one size in every setup: every fact is 120 letters at most, the bank check says so: 26 Nov, the owner) */}
+              <FoolFact fool={F} size={54} />
               <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
               <FoolStatus teams={tms} done={F.wrote} doing={dense ? "…" : ": " + FOOL.writing} finished={dense ? "✓" : ": " + FOOL.lieInShort} tv />
             </>)}
