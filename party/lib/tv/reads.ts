@@ -4,7 +4,7 @@ import { QMB, acceptFor, notTypo, rankFor, sayAccept, someOfFor } from "../engin
 import type { Member } from "../room";
 import { miniOf, other, type G, type W } from "./rules";
 import type { TvState } from "./state";
-import { offBy, type Two } from "../game";
+import { type Two } from "../game";
 import { skQ } from "../stakes";
 
 /* who answers first: fixed for the whole game when it starts (Settings → alternate) */
@@ -59,14 +59,11 @@ export function turnOf(s: TvState): 0 | 1 {
   return s.screen === "steal" ? other(owner) : owner;
 }
 
-/* Closest: nearer wins; level is a point each; nobody wrote anything, nobody scores */
+/* Closest: nearer wins; tied is a point each; nobody wrote anything, nobody scores */
 export function closestW(s: TvState): W {
-  const q = s.g.mini.qs[s.g.mini.i], [a, b] = s.guesses;
-  if (a == null && b == null) return "none";
-  if (a == null) return 1;
-  if (b == null) return 0;
-  const ans = Number(q.answer), da = offBy(a, ans), db = offBy(b, ans);
-  return da === db ? "tie" : da < db ? 0 : 1;
+  /* (the engine's nearest, the same as with 3 to 8 teams: 27 Nov, the merge) */
+  const q = s.g.mini.qs[s.g.mini.i];
+  return QMB.nearestTwo(QMB.closestOffs(s.guesses, q?.answer)) as W;
 }
 /* Drop the Pin: the nearer pin takes it (the engine's own sum, so the reveal and the score agree) */
 export function pinW(s: TvState): W { const q = s.g.pinGame.qs[s.g.pinGame.i]; return q ? QMB.pinLeg(q, s.pins).w : "none"; }

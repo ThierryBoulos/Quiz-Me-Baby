@@ -757,6 +757,14 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   Q.play(b.g, { type:'roulette/done' }, b.env);
   assert.equal(b.g.done.roulette, true);
 });
+test('closest: one nearest for every setup (27 Nov, the merge) — how far off, ties all take it, nobody, two teams', () => {
+  assert.equal(Q.closestOff(0.1 + 0.2, 0), 0.3);
+  assert.deepEqual(Q.closestOffs([12, null, 8, 11], '10'), [2, null, 2, 1]);
+  assert.deepEqual(Q.nearest([2, null, 2, 1]), [3]); assert.deepEqual(Q.nearest([2, null, 2, 3]), [0, 2]);
+  assert.deepEqual(Q.nearest([null, null]), []);
+  assert.equal(Q.nearestTwo([null, null]), 'none'); assert.equal(Q.nearestTwo([null, 5]), 1); assert.equal(Q.nearestTwo([5, null]), 0);
+  assert.equal(Q.nearestTwo([3, 3]), 'tie'); assert.equal(Q.nearestTwo([4, 3]), 1); assert.equal(Q.nearestTwo([0, 3]), 0);
+});
 test('majority: one count for every setup (27 Nov, the merge) — who counts, answered, right, each answer by team, each player', () => {
   const list = [{ name:'Ann', team:0 }, { name:'Bo', team:0, off:true }, { name:'Cy', team:1 }, { name:'Di', team:2 }, { name:'Ed', team:2 }];
   Q.majorityFreeze(list, ['Cy'], ['Ed']);

@@ -12,7 +12,7 @@
    (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). tied teams share the better place. */
 import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
-import { offBy, poss } from "../game";
+import { poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_BET_BAD, SK_BET_IN, type SkPick } from "../stakes";
 import { CB_NOT_YOURS, CB_OUT } from "../comeback";
@@ -493,15 +493,13 @@ export function legWinners(s: StateM): number[] {
   /* (Fool Me Twice: the teams that found the truth) */
   if (m.key === "fool") { const F = s.fool; return F ? s.teams.map((_, t) => t).filter((t) => F.picks[t] != null && !!F.opts[F.picks[t]!]?.truth) : []; }
   if (typedKey(m.key)) return s.ok.map((v, t) => (v ? t : -1)).filter((t) => t >= 0);
-  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer))))
-    : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q) as number) : null)) : [];   // (to the km, as with 2 teams: 23 Nov)
   if (m.key === "majority") return [];
-  const best = Math.min(...d.filter((x): x is number => x != null));
-  return Number.isFinite(best) ? d.map((x, t) => (x != null && Math.abs(x - best) < 1e-9 ? t : -1)).filter((t) => t >= 0) : [];
+  /* (the engine's nearest, the same as with 2 teams: 27 Nov, the merge) */
+  return QMB.nearest(distances(s)) as number[];
 }
 export const distances = (s: StateM): (number | null)[] => {
   const m = miniOf(s), q = qOf(s); if (!m || !q) return [];
-  return m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer)))) : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q)) : null)) : [];
+  return m.key === "closest" ? QMB.closestOffs(s.nums, q.answer) : m.key === "pin" ? s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q)) : null)) : [];
 };
 /* on fire: 1st three legs in a row in this game */
 export const fireOfMany = (s: StateM): boolean[] => s.teams.map((_, i) => (s.stats?.run?.[i] ?? 0) >= 3);
@@ -518,8 +516,7 @@ export function legPlaces(s: StateM): (number | null)[] {
   if (m.key === "fool") return placesBy((foolRes(s)?.pts || []).map((p) => (p > 0 ? -p : null)));   // (the most points on this fact first)
   if (m.key === "roulette") return placesBy(rrGot(q, m.pts, s.ok).map((g) => (g > 0 ? -g : null)));   // (the most this lap: the bullet right first)
   if (typedKey(m.key)) return placesBy(s.ok.map((v, t) => (v ? s.at[t] ?? Number.MAX_SAFE_INTEGER : null)));
-  const d = m.key === "closest" ? s.nums.map((v) => (v == null ? null : offBy(v, Number(q.answer)))) : s.pins.map((p) => (p ? Math.round(QMB.kmBetween(p, q) as number) : null));
-  return placesBy(d);
+  return placesBy(distances(s));
 }
 /* ...and what they pay this game's tally: 1st as many points as there are teams, one less a place, down to 1 */
 export const legPoints = (s: StateM): number[] => { const m = miniOf(s), q = qOf(s);

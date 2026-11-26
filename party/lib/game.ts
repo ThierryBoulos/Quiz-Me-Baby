@@ -6,6 +6,7 @@ export type Two<T> = [T, T];
 export type MiniKey = "closest" | "flag" | "dish" | "map" | "auction" | "saysame" | "pin" | "airport" | "majority" | "roulette" | "battle" | "stakes" | "see" | "fool";
 /* a spot on the earth (Drop the Pin), in degrees */
 export type LatLon = { lat: number; lon: number };
+import { QMB } from "./engine";
 import type { RrPub } from "./roulette";
 import type { FoolPub, FoolSum } from "./fool";
 import type { SkPub } from "./stakes";
@@ -193,7 +194,7 @@ export const PARTY_LEGS: Partial<Record<MiniKey, number>> = { closest: 5, saysam
 export const iso = (name: string) => "\u2068" + name + "\u2069";
 /* Closest To Wins: how far a guess is from the answer, without the computer's rounding noise
    (361.6 − 281 is 80.60000000000002 to it: that's 80.6, and two guesses as far off are tied) */
-export const offBy = (guess: number, answer: number) => Number(Math.abs(guess - answer).toPrecision(12));
+export const offBy = (guess: number, answer: number): number => QMB.closestOff(guess, answer);   // (the engine's, every setup: 27 Nov, the merge)
 /* Drop the Pin: how far off, as people say it: "under 1 km", "14 km", "1,112 km" */
 export const showKm = (km: number) => (km < 1 ? "under 1 km" : `${Math.round(km).toLocaleString("en-GB")} km`);
 /* a number as people read it: 1,500,000 · 80.6 */

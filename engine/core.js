@@ -1782,6 +1782,17 @@
   const PIN_END = { what:'landmark', again:'pinQ', summary:'pinSummary', draw:(q) => q,
     dry:'Tied on legs, and there are no landmarks left at these levels for another tie-breaker. Your call.' };
 
+  /* Closest To Wins, every setup (27 Nov, the merge): how far off a number is (to 12 figures, so 0.1 + 0.2 is 0.3 off
+     nothing), each team's (null: no number), and who's nearest: every team at the nearest (any number of teams);
+     with two, 'none', 'tie' or the team */
+  const closestOff = (guess, answer) => Number(Math.abs(guess - answer).toPrecision(12));
+  const closestOffs = (nums, answer) => nums.map(v => (v == null ? null : closestOff(v, Number(answer))));
+  function nearest(d){
+    const best = Math.min(...d.filter(x => x != null));
+    return Number.isFinite(best) ? d.map((x, t) => (x === best ? t : -1)).filter(t => t >= 0) : [];
+  }
+  const nearestTwo = (d) => { const w = nearest(d); return !w.length ? 'none' : w.length > 1 ? 'tie' : w[0]; };
+
   /* ---- Closest To Wins and Don't Say the Same as Me ----
      Both play every leg; tied at the end means a tie-breaker leg from the
      spares while they last, then the host's call. */
@@ -2926,5 +2937,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, SWAP_WORDS,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, rouletteSettle, majorityFreeze, majorityTally, majorityWho, majorityShare:mrShare, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, rouletteSettle, majorityFreeze, majorityTally, majorityWho, majorityShare:mrShare, closestOff, closestOffs, nearest, nearestTwo, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });
