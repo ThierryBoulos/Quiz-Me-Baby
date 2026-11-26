@@ -300,7 +300,7 @@ export function lockStakes(s: StateM, now: number, t: Timers) {
 /* Majority Rules after Start (25 Nov, the owner): as each question goes up, who counts on it. Not those the host took
    off during the game, nor anyone out of the room as it's asked; back in the room with the same name, they count again
    from the next question. As with 2 teams (lib/tvGame.ts mrFreeze) */
-const mrFreeze = (s: StateM) => { for (const r of s.roster) { const off = (s.mrOff || []).includes(r.name) || (s.mrAway || []).includes(r.name); if (off) r.off = true; else delete r.off; } };
+const mrFreeze = (s: StateM) => QMB.majorityFreeze(s.roster, s.mrOff, s.mrAway);
 export const mrOn = (s: StateM) => s.roster.filter((r) => !r.off);
 function ask(s: StateM, now: number, t: Timers) {
   const m = miniOf(s)!; clear(s);
@@ -531,11 +531,11 @@ export const legPoints = (s: StateM): number[] => { const m = miniOf(s), q = qOf
 
 /* Majority Rules, this question: right answers per team, and how many play */
 export function mrCount(s: StateM) {
-  const q = qOf(s), k = s.teams.length, right = n(k), of = n(k), counts: number[] = (q?.options || []).map(() => 0), byTeam: number[][] = (q?.options || []).map(() => n(k));
-  for (const r of mrOn(s)) { of[r.team]++; const v = s.votes[r.name]; if (v == null) continue; if (v === q?.answer) right[r.team]++; const i = (q?.options || []).indexOf(v); if (i >= 0) { counts[i]++; byTeam[i][r.team]++; } }
+  /* (the engine's count, the same as with 2 teams: 27 Nov, the merge) */
+  const { right, of, counts, byTeam } = QMB.majorityTally(s.roster, s.votes, qOf(s), s.teams.length) as { right: number[]; of: number[]; counts: number[]; byTeam: number[][] };
   return { right, of, counts, byTeam };
 }
-export const share = (m: MiniM, t: number) => (m.of[t] ? m.right[t] / m.of[t] : 0);
+export const share = (m: MiniM, t: number) => QMB.majorityShare(m, t) as number;
 
 /* the host flips one typed answer's call on the reveal */
 /* (v: the call the host tapped, set rather than turned over, so a lost tap can't make the next one do the opposite:
@@ -669,7 +669,7 @@ export function next(s: StateM, now: number, t: Timers) {
       c.right.forEach((v, i) => { m.right[i] += v; m.of[i] += c.of[i]; });
       const q = qOf(s);
       /* (run: right in a row, for the flame on the reveal: as with 2 teams, 25 Nov) */
-      for (const r of mrOn(s)) { const w = (s.who[r.name] = s.who[r.name] || { r: 0, of: 0, team: r.team }); w.of++; if (s.votes[r.name] === q?.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
+      QMB.majorityWho(s.who, s.roster, s.votes, q);
     } else if (m.key === "roulette") {
       /* the lap's points (as the calls stand), the bullet, and the themes each team has had (the next spin avoids them) */
       /* (the engine's settle, the same as with 2 teams: 27 Nov, the merge) */

@@ -757,6 +757,19 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   Q.play(b.g, { type:'roulette/done' }, b.env);
   assert.equal(b.g.done.roulette, true);
 });
+test('majority: one count for every setup (27 Nov, the merge) — who counts, answered, right, each answer by team, each player', () => {
+  const list = [{ name:'Ann', team:0 }, { name:'Bo', team:0, off:true }, { name:'Cy', team:1 }, { name:'Di', team:2 }, { name:'Ed', team:2 }];
+  Q.majorityFreeze(list, ['Cy'], ['Ed']);
+  assert.deepEqual(list.map(e => !!e.off), [false, false, true, false, true]);
+  assert.ok(!('off' in list[1]));                                  // (back on the list: no mark left)
+  const q = { options:['a', 'b', 'c', 'd'], answer:'b' }, votes = { Ann:'b', Bo:'c', Cy:'b', Di:'b', Zed:'b' };
+  const t = Q.majorityTally(list, votes, q, 3);
+  assert.deepEqual([t.of, t.answered, t.right], [[2, 0, 1], [2, 0, 1], [1, 0, 1]]);
+  assert.deepEqual(t.counts, [0, 2, 1, 0]); assert.deepEqual(t.byTeam[1], [1, 0, 1]);
+  const who = Q.majorityWho({ Ann:{ r:1, of:1, team:0, run:1 } }, list, votes, q);
+  assert.deepEqual(who, { Ann:{ r:2, of:2, team:0, run:2 }, Bo:{ r:0, of:1, team:0, run:0 }, Di:{ r:1, of:1, team:2, run:1 } });
+  assert.equal(Q.majorityShare({ right:[3, 0], of:[4, 0] }, 0), 0.75); assert.equal(Q.majorityShare({ right:[3, 0], of:[4, 0] }, 1), 0);
+});
 test('roulette: one settle for every setup (27 Nov, the merge) — calls, points, the bullet, the themes', () => {
   const ch = ['medium', 'medium', 'medium', 'hard', 'hard', 'expert'].map((level, j) => ({ level, theme:'T' + j }));
   const lap = { ch, bullet:5, draw:[5, 0, 3, 1] };

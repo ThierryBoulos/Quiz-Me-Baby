@@ -71,7 +71,7 @@ function mrFreeze(s: TvState, inRoom: string[]) {
   const m = s.g?.majorityGame; if (!m || !s.mrList) return;
   /* (who's in the room right now: not as last checked, a second or two ago) */
   s.mrAway = s.mrList.filter((e) => !inRoom.includes(e.name)).map((e) => e.name);
-  for (const e of s.mrList) e.off = s.mrOff.includes(e.name) || s.mrAway.includes(e.name) || undefined;
+  QMB.majorityFreeze(s.mrList, s.mrOff, s.mrAway);
   m.n = [0, 1].map((t) => s.mrList!.filter((e) => e.team === t && !e.off).length);
 }
 /* everyone counted on this question has answered (nobody counted: never, the clock ends it) */
@@ -79,8 +79,7 @@ const mrAllIn = (s: TvState) => { const L = (s.mrList || []).filter((e) => !e.of
 /* Majority Rules: each player's own count of right answers across the game (for the summary's line) */
 function mrWho(s: TvState) {
   const g = s.g, q = currentQ(s); if (!g?.majorityGame || !s.mrList) return;
-  const W: Record<string, { r: number; of: number; team: 0 | 1; run?: number }> = (g.majorityGame.who = g.majorityGame.who || {});
-  for (const e of s.mrList) { if (e.off) continue; const w = (W[e.name] = W[e.name] || { r: 0, of: 0, team: e.team, run: 0 }); w.of++; if (q && s.votes[e.name] === q.answer) { w.r++; w.run = (w.run || 0) + 1; } else w.run = 0; }
+  g.majorityGame.who = QMB.majorityWho(g.majorityGame.who || {}, s.mrList, s.votes, q);
 }
 /* no host: a mini-game leg's reveal moves on by itself after this long (a tap still moves it on sooner);
    the answer card, the round score, intros and summaries still wait for a tap, so people can argue (29 Oct, D27) */

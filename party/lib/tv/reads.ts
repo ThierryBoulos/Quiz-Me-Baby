@@ -73,18 +73,9 @@ export function pinW(s: TvState): W { const q = s.g.pinGame.qs[s.g.pinGame.i]; r
 /* Majority Rules: the answers so far, against the lists: how many on each team have answered, how many
    are right, and how each of the four answers was picked (a name not on a list never counts) */
 export function mrTally(s: TvState) {
-  const q = currentQ(s), opts: string[] = q?.options || [];
-  const answered: Two<number> = [0, 0], right: Two<number> = [0, 0], counts: Two<number>[] = opts.map(() => [0, 0]);
-  for (const e of s.mrList || []) {
-    if (e.off) continue;                       // (not counted on this question: off the list, or out of the room when it was asked)
-    const v = s.votes?.[e.name];
-    if (v == null) continue;
-    answered[e.team]++;
-    if (q && v === q.answer) right[e.team]++;
-    const i = opts.indexOf(v);
-    if (i > -1) counts[i][e.team]++;
-  }
-  return { answered, right, counts };
+  /* (the engine's count, the same in every setup: 27 Nov, the merge; off: not counted on this question) */
+  const t = QMB.majorityTally(s.mrList, s.votes, currentQ(s), 2) as { answered: Two<number>; right: Two<number>; byTeam: Two<number>[] };
+  return { answered: t.answered, right: t.right, counts: t.byTeam };
 }
 /* Say Same: ok = dodged the secret answer. One team dodging alone takes it; both, a point each; neither, nobody (both said
    it, off the list or nothing: 24 Nov, the owner, as How to Play says, "you lose the point") */

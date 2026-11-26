@@ -1704,6 +1704,38 @@
      decide close calls). Level, to the answer: a tie-breaker question, or the table's call.
      The shares, whole percent, ride in `wins` for the screens. */
   const mrShare = (s, t) => (s.of[t] ? s.right[t] / s.of[t] : 0);
+  /* the same in every setup (27 Nov, the merge). list: the fixed list ({ name, team, off }); off: who counts on no
+     question now (taken off), away: who's out of the room as it's asked; everyone else counts on it */
+  function majorityFreeze(list, off, away){
+    for(const e of list || []){ if((off || []).indexOf(e.name) > -1 || (away || []).indexOf(e.name) > -1) e.off = true; else delete e.off; }
+  }
+  /* this question so far, k teams: how many on each team count, have answered and are right; how each of the four was
+     picked (counts) and by which team (byTeam). Someone not counted, or not on the list, never counts */
+  function majorityTally(list, votes, q, k){
+    const opts = (q && q.options) || [], z = () => Array.from({ length:k }, () => 0);
+    const of = z(), answered = z(), right = z(), counts = opts.map(() => 0), byTeam = opts.map(z);
+    for(const e of list || []){
+      if(e.off) continue;
+      of[e.team]++;
+      const v = votes && votes[e.name];
+      if(v == null) continue;
+      answered[e.team]++;
+      if(q && v === q.answer) right[e.team]++;
+      const i = opts.indexOf(v);
+      if(i > -1){ counts[i]++; byTeam[i][e.team]++; }
+    }
+    return { of, answered, right, counts, byTeam };
+  }
+  /* ...and at the reveal, each player's own count across the game, and their run of right answers (who: by name) */
+  function majorityWho(who, list, votes, q){
+    for(const e of list || []){
+      if(e.off) continue;
+      const w = (who[e.name] = who[e.name] || { r:0, of:0, team:e.team });
+      w.of++;
+      if(q && votes && votes[e.name] === q.answer){ w.r++; w.run = (w.run || 0) + 1; } else w.run = 0;
+    }
+    return who;
+  }
   function mrAfter(g, fx){
     const s = g.majorityGame;
     s.wins = [0, 1].map(t => Math.round(100 * mrShare(s, t)));
@@ -2894,5 +2926,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, SWAP_WORDS,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, rouletteSettle, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, rouletteSettle, majorityFreeze, majorityTally, majorityWho, majorityShare:mrShare, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });
