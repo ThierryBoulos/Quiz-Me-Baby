@@ -412,6 +412,17 @@
     const after = scores.map((v, i) => Math.max(0, v + (right[i] ? bet[i] : -bet[i])));
     return { bet, ok:right, before:scores.slice(), after, delta:after.map((v, i) => v - scores[i]) };
   }
+  /* The rules both setups run (27 Nov, the merge: till then each wrote its own copy): a bet is a level of the four and
+     one of the round's themes (k already a whole number, as the caller reads it); time's up on the bets, a team with
+     none takes the safe one, Easy on the first theme; the question a team bet on; a round settled, and its line in the
+     game's log */
+  const stakesBetOk = (themes, k, level) => STAKES_LEVELS.indexOf(level) > -1 && k >= 0 && k < themes;
+  const stakesLock = (picks) => picks.map(p => p || { k:0, level:'easy', auto:true });
+  const stakesQuestion = (round, pick) => (round && pick ? ((round.qs || [])[pick.k] || {})[pick.level] || null : null);
+  function stakesSettle(scores, round, i, picks, ok, unit){
+    const res = stakesResult(scores, picks, ok, unit);
+    return { res, line:{ i, themes:((round && round.themes) || []).slice(), picks:picks.map(p => Object.assign({}, p || { k:0, level:'easy' })), ok:res.ok, bet:res.bet, delta:res.delta, before:res.before } };
+  }
   /* the reveal's order: last place first, up to the leader (tied teams: the later letter first) */
   const stakesOrder = (scores) => scores.map((v, i) => i).sort((a, b) => scores[a] - scores[b] || b - a);
   /* The four levels of a standard question (22 Oct). A night's difficulty is one of them, several
@@ -2692,7 +2703,7 @@
     'stakes/pick'(g, a){
       const s = g.stakesGame, R = s && s.rounds[s.i], t = Number(a.t), k = Math.floor(Number(a.k));
       if(!R || s.done || !(t >= 0 && t < g.teams.length) || s.picks[t]) return [];
-      if(STAKES_LEVELS.indexOf(a.level) < 0 || !(k >= 0 && k < R.themes.length)) return [];
+      if(!stakesBetOk(R.themes.length, k, a.level)) return [];
       s.picks[t] = { k, level:a.level };
       if(s.picks.every(Boolean)) return [{ sound:'soft' }].concat(MOVES['stakes/lock'](g));
       return [{ sound:'soft' }, { render:true }];
@@ -2701,7 +2712,7 @@
     'stakes/lock'(g){
       const s = g.stakesGame;
       if(!s || s.done) return [];
-      s.picks = s.picks.map(p => p || { k:0, level:'easy', auto:true });
+      s.picks = stakesLock(s.picks);
       return [{ go:'stakesQ' }];
     },
     /* Change question (before anyone has answered): three new themes, the bets cleared */
@@ -2717,9 +2728,9 @@
     'stakes/verdict'(g, a){
       const s = g.stakesGame, R = s && s.rounds[s.i];
       if(!R || s.done || !s.picks.every(Boolean)) return [];
-      const res = stakesResult(g.teams.map(t => t.score), s.picks, a.ok || [], s.unit);
+      const { res, line } = stakesSettle(g.teams.map(t => t.score), R, s.i, s.picks, a.ok || [], s.unit);
       g.teams.forEach((t, i) => { t.score = res.after[i]; s.net[i] = (s.net[i] || 0) + res.delta[i]; });
-      s.log.push({ i:s.i, themes:R.themes.slice(), picks:s.picks.slice(), ok:res.ok, bet:res.bet, delta:res.delta, before:res.before });
+      s.log.push(line);
       s.i++; s.picks = g.teams.map(() => null);
       if(s.i < s.base) return [{ go:'stakesPick' }];
       s.done = true;
@@ -2877,5 +2888,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, SWAP_WORDS,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

@@ -14,7 +14,7 @@ import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
 import { matchQ } from "../tv/reads";
 import { offBy, poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
-import { SK_BET_BAD, SK_BET_IN, SK_LEVELS, type SkPick } from "../stakes";
+import { SK_BET_BAD, SK_BET_IN, type SkPick } from "../stakes";
 import { CB_NOT_YOURS, CB_OUT } from "../comeback";
 import { FOOL_MAX, foolFact, type FoolFactSum, type FoolOpt } from "../fool";
 import { MAJ } from "../minis/majority";
@@ -277,8 +277,8 @@ function betPhase(s: StateM, now: number, t: Timers) {
 }
 /* the question a team bet on (null: no bet yet) */
 export const skQm = (s: StateM, team: number): Q => {
-  const m = miniOf(s), R = m?.key === "stakes" ? m.qs[Math.min(m.i, m.qs.length - 1)] : null, p = s.picks?.[team];
-  return R && p ? R.qs?.[p.k]?.[p.level] ?? null : null;
+  const m = miniOf(s), R = m?.key === "stakes" ? m.qs[Math.min(m.i, m.qs.length - 1)] : null;
+  return QMB.stakesQuestion(R, s.picks?.[team]);
 };
 /* a captain's bet: once, locked in. Every bet in, and the questions go up */
 export function stakesBet(s: StateM, team: number, k: unknown, level: unknown, now: number, t: Timers): true | string {
@@ -286,7 +286,7 @@ export function stakesBet(s: StateM, team: number, k: unknown, level: unknown, n
   if (s.paused) return "The game is paused.";
   if (s.picks?.[team]) return SK_BET_IN;
   const R = m.qs[m.i], i = Number.isInteger(k) ? Number(k) : -1;
-  if (typeof level !== "string" || !SK_LEVELS.includes(level) || !(i >= 0 && i < (R?.themes?.length || 0))) return SK_BET_BAD;
+  if (typeof level !== "string" || !QMB.stakesBetOk(R?.themes?.length || 0, i, level)) return SK_BET_BAD;
   s.picks![team] = { k: i, level };
   if (s.picks!.every(Boolean)) lockStakes(s, now, t);
   return true;
@@ -294,7 +294,7 @@ export function stakesBet(s: StateM, team: number, k: unknown, level: unknown, n
 /* time's up on the bets: a team that didn't bet takes the safe one (Easy, the first theme) */
 export function lockStakes(s: StateM, now: number, t: Timers) {
   const m = miniOf(s); if (!m || m.key !== "stakes" || s.screen !== "pick") return false;
-  s.picks = (s.picks || []).map((p) => p || { k: 0, level: "easy", auto: true });
+  s.picks = QMB.stakesLock(s.picks || []);
   ask(s, now, t); return true;
 }
 /* Majority Rules after Start (25 Nov, the owner): as each question goes up, who counts on it. Not those the host took
@@ -682,10 +682,10 @@ export function next(s: StateM, now: number, t: Timers) {
          barrel had stopped, and said it twice: 15 Nov, from a live game) */
     } else if (m.key === "stakes") {
       /* each team wins or loses its bet, straight on the night's total (never below 0) */
-      const R = m.qs[m.i], res = QMB.stakesResult(s.teams.map((x) => x.score), s.picks || [], s.ok.map(Boolean), m.unit || 1);
+      const { res, line } = QMB.stakesSettle(s.teams.map((x) => x.score), m.qs[m.i], m.i, s.picks || [], s.ok.map(Boolean), m.unit || 1);
       m.net = m.net || n(s.teams.length); m.log = m.log || [];
       s.teams.forEach((x, i) => { x.score = res.after[i]; m.net![i] += res.delta[i]; if (s.ok[i]) m.wins[i]++; });
-      m.log.push({ i: m.i, themes: [...(R?.themes || [])], picks: (s.picks || []).map((p) => ({ ...(p || { k: 0, level: "easy" }) })), ok: res.ok, bet: res.bet, delta: res.delta, before: res.before });
+      m.log.push(line);
       m.pts = [...m.net];
       s.stats.run = n(s.teams.length);
     } else {

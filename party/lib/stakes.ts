@@ -33,10 +33,7 @@ export type SkPub = {
 /* what a level's bet is worth (Easy 0) */
 export const skBet = (unit: number, level: string): number => QMB.stakesBet(unit, level);
 /* the question a team bet on (null: no bet yet) */
-export const skQ = (s: SkGame | null | undefined, t: number): any => {
-  const R = s?.rounds?.[s.i], p = s?.picks?.[t];
-  return R && p ? R.qs[p.k]?.[p.level] ?? null : null;
-};
+export const skQ = (s: SkGame | null | undefined, t: number): any => QMB.stakesQuestion(s?.rounds?.[s.i], s?.picks?.[t]);
 /* the round's questions as one key: the phones tag their answers with it, so a late one can't count for the next */
 export const skKey = (s: SkGame): string => `sk${s.i}:${(s.picks || []).map((_, t) => skQ(s, t)?.id ?? "-").join(",")}`;
 /* the round's result, for every team, by the calls as they stand (scores: each team's total before it) */

@@ -228,3 +228,23 @@ test('stakes: the thin-bank note counts the themes that can still fill every lev
   const t = D.thinBank().find(x => x.key === 'stakes');
   assert.deepEqual(t, { key:'stakes', left:THEMES.length - 8, need:9 });
 });
+
+/* 27 Nov, the merge: the rules both setups run, in one place */
+test('stakes, shared: a bet, the safe bet at time\'s up, the question bet on, a round settled', () => {
+  assert.equal(Q.stakesBetOk(3, 0, 'easy'), true);
+  assert.equal(Q.stakesBetOk(3, 2, 'expert'), true);
+  assert.equal(Q.stakesBetOk(3, 3, 'easy'), false);          // only three themes
+  assert.equal(Q.stakesBetOk(3, -1, 'easy'), false);
+  assert.equal(Q.stakesBetOk(3, 1, 'x'), false);             // not a level
+  assert.equal(Q.stakesBetOk(3, NaN, 'hard'), false);
+  assert.deepEqual(Q.stakesLock([null, { k:2, level:'hard' }]), [{ k:0, level:'easy', auto:true }, { k:2, level:'hard' }]);
+  const R = { themes:['A', 'B', 'C'], qs:[{ easy:'a1' }, { hard:'b3' }, {}] };
+  assert.equal(Q.stakesQuestion(R, { k:1, level:'hard' }), 'b3');
+  assert.equal(Q.stakesQuestion(R, { k:2, level:'hard' }), null);
+  assert.equal(Q.stakesQuestion(R, null), null);
+  assert.equal(Q.stakesQuestion(null, { k:0, level:'easy' }), null);
+  const picks = [{ k:0, level:'hard' }, { k:1, level:'easy' }], { res, line } = Q.stakesSettle([30, 12], R, 0, picks, [true, false], 3);
+  assert.deepEqual(res.after, [36, 12]);
+  assert.deepEqual(line, { i:0, themes:['A', 'B', 'C'], picks:[{ k:0, level:'hard' }, { k:1, level:'easy' }], ok:[true, false], bet:[6, 0], delta:[6, 0], before:[30, 12] });
+  assert.notEqual(line.picks[0], picks[0]);                  // a copy: the log keeps the bet as it was
+});

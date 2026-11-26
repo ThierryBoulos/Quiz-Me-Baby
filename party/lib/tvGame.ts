@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNetProbe } from "./tv/netProbe";
 import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
-import { SK_BET_BAD, SK_BET_IN, SK_LEVELS, SK_THEMES_CHANGED, skQ, type SkGame } from "./stakes";
+import { SK_BET_BAD, SK_BET_IN, SK_THEMES_CHANGED, skQ, type SkGame } from "./stakes";
 import { SEE_TYPE, seeWinner } from "./see";
 import { CB_IN, CB_NOT_YOURS } from "./comeback";
 import { nextScreenAt, tapOnThisScreen, type ScreenAt } from "./tapOn";
@@ -1208,7 +1208,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.paused && !s.awayPaused) return "The game is paused.";    // (the TV asleep pauses itself: a bet meanwhile still counts)
       /* (a bet tapped on themes that have just been changed: not on the new ones, 14 Nov) */
       if (move.theme != null && S?.rounds?.[S.i]?.themes[Number(move.k)] !== move.theme) return SK_THEMES_CHANGED;
-      if (!SK_LEVELS.includes(String(move.level)) || !(Number.isInteger(move.k) && Number(move.k) >= 0 && Number(move.k) < (S?.rounds?.[S.i]?.themes.length || 0))) return SK_BET_BAD;
+      if (!Number.isInteger(move.k) || !QMB.stakesBetOk(S?.rounds?.[S.i]?.themes.length || 0, Number(move.k), String(move.level))) return SK_BET_BAD;
       const was = s.screen;
       play({ type: t, t: team, k: Number(move.k), level: String(move.level) });
       /* (both bets in: the questions are up, and taps from the betting screen are stale now) */
