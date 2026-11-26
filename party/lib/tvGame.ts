@@ -814,7 +814,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
           const b = g.battle, half = Math.floor((g.battlePts || g.miniPts) / 2);
           b.stage = "done"; b.done = true; b.winner = null; b.awarded = true; b.award = [half, half];
           g.teams[0].score += half; g.teams[1].score += half;
-          b.note = `Tie: called there, ${half} point${half === 1 ? "" : "s"} each.`;
+          b.note = `Tied: called there, ${half} point${half === 1 ? "" : "s"} each.`;
           applyFx([{ sound: "point" }, { go: "battleSummary" }]);
         }
       } else if (TIES[sc]) {

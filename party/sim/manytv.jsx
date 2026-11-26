@@ -474,7 +474,9 @@ async function comeback(k, phone, tag) {
   await judge("m/next");
   const c0 = pub().comeback;
   check(`${tag} Comeback: it comes at the middle, for the team far behind`, pub().screen === "intro" && pub().game?.key === "comeback" && c0?.teams.join() === String(k - 1), `${pub().screen} ${pub().game?.key} ${c0?.teams}`);
-  check(`${tag} Comeback: what it can reach: 85% of the leader, behind the team above`, c0?.target[k - 1] === Math.min(34, 40 - (k - 2) - 1), String(c0?.target));
+  /* (the room, 26 Nov: a game's worth under the team above, 1st place's points less last place's, 4 at least; till then 1 point) */
+  const cbRoom = Math.max(4, 10 - [10, 8, 6, 5, 4, 3, 3, 3][k - 1]), cbTo = Math.min(34, 40 - (k - 2) - cbRoom);
+  check(`${tag} Comeback: what it can reach: 85% of the leader, a game's worth behind the team above`, c0?.target[k - 1] === cbTo, String(c0?.target));
   await judge("m/start");
   check(`${tag} Comeback: 15 seconds on the clock`, pub().screen === "q" && Math.round((pub().deadline - clock()) / 1000) === 15, String((pub().deadline - clock()) / 1000));
   send("c0", "answer", { text: "x", k: pub().qid + "|q" }); await tick(300);
@@ -484,7 +486,7 @@ async function comeback(k, phone, tag) {
     if (i === 0) check(`${tag} Comeback: its answer in, the reveal comes (nobody else to wait for)`, pub().screen === "reveal" && pub().reveal?.ok?.[k - 1] === true, pub().screen);
     await judge("m/next");
   }
-  const c1 = pub().comeback, want = Math.min(34, 40 - (k - 2) - 1);
+  const c1 = pub().comeback, want = cbTo;
   check(`${tag} Comeback: all three right, it moves up, and passes nobody`, pub().screen === "summary" && c1?.made?.[k - 1] === true && pub().teams[k - 1].score === want && pub().teams[k - 2].score > want, `${pub().screen} ${pub().teams.map((t) => t.score)}`);
   await judge("m/next");
   check(`${tag} Comeback: the night carries on with its third game`, pub().screen === "intro" && pub().game?.key === "pin" && pub().game.index === 2 && pub().game.count === 4 && !pub().comeback, `${pub().screen} ${pub().game?.key} ${pub().game?.index}`);
@@ -514,7 +516,7 @@ async function comeback(k, phone, tag) {
     await takeover(4000);
     check(`${tag} Comeback: ${phone ? "the game phone taken over" : "a new laptop taking over (The TV died?)"} on a reveal: still there`, pub().screen === "reveal" && pub().game?.key === "comeback", pub().screen);
     await judge("m/next"); m = mini(); send("c" + (k - 1), "answer", { text: m.qs[m.i].answer, k: pub().qid + "|q" }); await tick(1500); await judge("m/next");
-    check(`${tag} Comeback: ...and made, after both`, pub().screen === "summary" && pub().comeback?.made?.[k - 1] === true && pub().teams[k - 1].score === Math.min(34, 40 - (k - 2) - 1), `${pub().screen} ${pub().teams.map((t) => t.score)}`); }
+    check(`${tag} Comeback: ...and made, after both`, pub().screen === "summary" && pub().comeback?.made?.[k - 1] === true && pub().teams[k - 1].score === cbTo, `${pub().screen} ${pub().teams.map((t) => t.score)}`); }
   /* the host's skip, on its intro */
   await setup(k, phone, ["flag", "closest", "pin", "airport"]);
   for (let g = 0; g < 2; g++) { await judge("m/start");

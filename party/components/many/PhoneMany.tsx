@@ -9,7 +9,7 @@ import { Board, FlagImg, PinPhoto } from "../GameParts";
 import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
 import { sendAction, sendDraft, sb } from "@/lib/supabase";
-import { showKm, showNum, type LatLon } from "@/lib/game";
+import { possEnd, showKm, showNum, type LatLon } from "@/lib/game";
 import { QMB } from "@/lib/engine";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
@@ -82,13 +82,13 @@ function ContestMany({ pub, mine, host, busy, act }: { pub: PubMany; mine: numbe
   const nm = (t: number) => <b style={{ color: T[t].color }}><bdi>{T[t].name}</bdi></b>;
   if (K) return host ? (
     <div className="card flex flex-col gap-2 text-center" role="alert">
-      <div className="text-14">{nm(K.by)} say {K.t !== K.by ? <>{nm(K.t)}&rsquo;s </> : null}&ldquo;<bdi>{K.text}</bdi>&rdquo; {say ? (K.ok ? "shouldn't score" : "should score") : <>was <b>{word(!K.ok)}</b></>}. Your call.</div>
+      <div className="text-14">{nm(K.by)} say {K.t !== K.by ? <>{nm(K.t)}{possEnd(T[K.t].name)} </> : null}&ldquo;<bdi>{K.text}</bdi>&rdquo; {say ? (K.ok ? "shouldn't score" : "should score") : <>was <b>{word(!K.ok)}</b></>}. Your call.</div>
       <div className="flex gap-2 justify-center">
         <button className="btn btn-sm" disabled={busy} onClick={() => act({ type: "m/contestOk", v: true })}>{say ? (K.ok ? "Make it not score" : "Make it score") : `Make it ${word(!K.ok)}`}</button>
         <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => act({ type: "m/contestOk", v: false })}>{say ? "Keep the call" : `Keep ${word(K.ok)}`}</button>
       </div>
     </div>)
-    : <Line>{nm(K.by)} contest {K.t !== K.by ? <>{nm(K.t)}&rsquo;s</> : "their"} &ldquo;<bdi>{K.text}</bdi>&rdquo;. The host decides.</Line>;
+    : <Line>{nm(K.by)} contest {K.t !== K.by ? <>{nm(K.t)}{possEnd(T[K.t].name)}</> : "their"} &ldquo;<bdi>{K.text}</bdi>&rdquo;. The host decides.</Line>;
   if (host || mine == null) return null;
   const can = T.map((_, t) => t).filter((t) => R.typed?.[t] != null && !(pub.contested || []).includes(t) && (t === mine ? !R.ok?.[t] : !!R.ok?.[t]));
   if (!can.length) return null;
@@ -280,6 +280,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {g.key === "roulette" && rr && !host && noTv && sc === "q" && spun && !pub.paused && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{(pub.sent || []).filter(Boolean).length} of {T.length} teams have answered.</p>}
       {/* (stays in the right column sideways: under the scores your question was cut off) */}
       {g.key === "stakes" && sk && <div className="noselect contents" {...noCopy}><StakesPhone sk={sk} screen="stakesQ" teams={rrT} me={host ? null : mine ?? null} /></div>}
+      {/* (no TV: how many teams have answered, as Russian Roulette says it here: 26 Nov, the owner; the host's card has the list) */}
+      {g.key === "stakes" && sk && !host && noTv && sc === "q" && !pub.paused && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{(pub.sent || []).filter(Boolean).length} of {T.length} teams have answered.</p>}
       {g.key === "pin" && (small
         ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
         : <PinPhoto pin={pub.pin} h={230} small zoom />)}
@@ -371,7 +373,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
     const my = mine != null ? F.order.find((x) => x.team === mine)?.place : undefined;
     const rows: RRow[] = F.order.map((o) => ({ team: o.team, name: T[o.team].name, color: T[o.team].color, letter: LETTERS[o.team], place: o.place, val: String(T[o.team].score), me: o.team === mine }));
     return (<>
-      <WinnerCard eyebrow={tops.length > 1 ? "A shared win" : "The winner"} name={tops.map((t) => T[t].name).join(" & ")} color={c} sub={`${T[tops[0]].score} points`} />
+      <WinnerCard eyebrow={tops.length > 1 ? "Tied at the top" : "The winner"} name={tops.map((t) => T[t].name).join(" & ")} color={c} sub={`${T[tops[0]].score} points`} />
       {my != null && <YouPill text={my === 1 ? "You won the night!" : `Your team finished ${place(my)}`} tone={my === 1 ? "ok" : "mid"} />}
       <ResultTable rows={rows} head={["Points"]} places big />
       <AwardList awards={F.awards.map((a) => ({ ...a, color: a.team != null ? T[a.team].color : undefined }))} />

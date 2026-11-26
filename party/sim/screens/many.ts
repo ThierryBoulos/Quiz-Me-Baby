@@ -135,6 +135,20 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
         const far = { t: "Furthest pin", who: `${longNames[k - 1]}, 12,345 km off`, team: k - 1, note: "Borobudur (Near Magelang, Central Java, Indonesia)" };
         c.pub.final.awards = [...A.filter((a) => !a.spoon).slice(0, 3), far, ...A.filter((a) => a.spoon)].slice(0, 5);
         got[`m${k}.final.extra.far.a`] = c; } }
+    /* (26 Nov, the wording pictures: a night that ends with two teams on top, "Tied at the top"; and a game two teams
+       tie for, "… tied for 1st, +10 each", with the two longest names) */
+    { const fk = Object.keys(got).find((x) => x.startsWith(`m${k}.final`) && !x.includes("extra")), fin = fk ? (got[fk] as { pub: Q }) : undefined;
+      if (fin?.pub.final?.order?.length > 1) { const c = JSON.parse(JSON.stringify(fin)), O = c.pub.final.order as { team: number; place: number }[];
+        const top = O.find((o) => o.place === 1) || O[0], next = O.find((o) => o.team !== top.team)!;
+        next.place = 1; c.pub.teams[next.team].score = c.pub.teams[top.team].score;
+        got[`m${k}.final.extra.tied.a`] = c; } }
+    { const sk = Object.keys(got).find((x) => x.startsWith(`m${k}.summary.flag`)), sm = sk ? (got[sk] as { pub: Q }) : undefined;
+      if (sm?.pub.summary?.places) { const c = JSON.parse(JSON.stringify(sm)), S = c.pub.summary as { places: number[]; award: number[]; pts: number[] };
+        const byLen = c.pub.teams.map((t: { name: string }, i: number) => [t.name.length, i]).sort((a: number[], b: number[]) => b[0] - a[0]).map((x: number[]) => x[1]), a = byLen[0], b = byLen[1];
+        const was = S.places.indexOf(1), best = Math.max(...S.pts);
+        if (was >= 0 && was !== a && was !== b) { S.places[was] = 3; S.award[was] = 6; S.pts[was] = Math.max(0, best - 1); }
+        S.places[a] = 1; S.places[b] = 1; S.award[a] = 10; S.award[b] = 10; S.pts[a] = best; S.pts[b] = best;
+        got[`m${k}.summary.flag.extra.tied.a`] = c; } }
   }
   return got;
 }

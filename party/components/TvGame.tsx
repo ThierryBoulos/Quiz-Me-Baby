@@ -21,7 +21,7 @@ import { MapRevealTv, MapTv } from "./MapGame";
 import { SayRevealTv, SayTv, sayWord } from "./SayGame";
 import { DishRevealTv, DishTv } from "./DishGame";
 import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
-import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, showKm, TIE_SCREENS } from "@/lib/game";
+import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, poss, possEnd, showKm, TIE_SCREENS } from "@/lib/game";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
 import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "./Fool";
 import { foolDone } from "@/lib/fool";
@@ -437,7 +437,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if (sc === "sayReveal" && pub.reveal) return <SayRevealTv question={pub.question} answer={pub.reveal.answer || ""} rows={<TeamRows pub={pub} say empty="No answer" />}
     head={pub.reveal.w === "tie" ? { text: "A point each", color: "var(--color-gold)" } : takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
   if (pub.battle && sc === "battleQ") { const B = pub.battle; return (<>
-    <div className="display text-40" style={{ color: tc(B.cap) }}>{T[B.cap].name}&rsquo;s captain</div>
+    <div className="display text-40" style={{ color: tc(B.cap) }}>{poss(T[B.cap].name)} captain</div>
     <div className="font-bold max-w-[1000px]" style={{ fontSize: (pub.question || "").length > 100 ? 42 : 54, lineHeight: 1.12 }}>{pub.question}</div>
     <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
     <div className="display text-36"><span style={{ color: tc(0) }}>{B.score[0]}</span> – <span style={{ color: tc(1) }}>{B.score[1]}</span></div>
@@ -445,7 +445,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   </>); }
   if (pub.battle && sc === "battleHandoff") return (<>
     <div className="eyebrow text-20">Halfway</div>
-    <div className="display" style={{ fontSize: 100, color: tc(1) }}>{T[1].name}&rsquo;s captain, you&rsquo;re up</div>
+    <div className="display" style={{ fontSize: 100, color: tc(1) }}>{poss(T[1].name)} captain, you&rsquo;re up</div>
     <div className="text-30">{T[0].name} scored <b>{pub.battle.score[0]}</b> out of {pub.battle.n}. {battleNeeds(pub)}</div>
     {pub.battle.half?.length ? <div className="w-[1320px] max-w-full"><BattleHalf half={pub.battle.half} size={24} cols={2} /></div>
       : pub.battle.last && <BattleAnswer last={pub.battle.last} size={24} />}
@@ -471,7 +471,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     {B.last && <BattleAnswer last={B.last} size={24} />}
     <MiniTitle title="Battle of the Captains" />
     <BattleShields pub={pub} />
-    <div className="rv display text-52" style={{ color: tc(B.winner), animationDelay: twoDone(B.winner) + "s" }}>{B.winner == null ? (B.note || "Tie") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
+    <div className="rv display text-52" style={{ color: tc(B.winner), animationDelay: twoDone(B.winner) + "s" }}>{B.winner == null ? (B.note || "Tied") : <span data-fly-src={B.winner}>{`${T[B.winner].name} +${B.award?.[B.winner] ?? m.pts}`}</span>}</div>
     {B.predict && <div className="text-22" style={{ color: "var(--color-gold)" }}>{B.predict}</div>}
     <SdCalls pub={pub} />
   </>); }
@@ -533,7 +533,7 @@ function ContestBanner({ pub }: { pub: Pub }) {
   return (
     <div className="card enter text-24 max-w-[1300px]" style={{ borderColor: "var(--color-gold)", position: "relative", zIndex: 26 }} role="status">
       <div className="eyebrow text-16 mb-1" style={{ color: "var(--color-gold)" }}>Contested</div>
-      <b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>&rsquo;s </> : null}&ldquo;{K.text}&rdquo; {say ? <b>{K.ok ? "shouldn't score" : "should score"}</b> : <>was <b>{word(!K.ok)}</b></>}. <b>{decider}</b> decides{nohost ? <span className="text-[var(--color-ink-2)]"> · {left} s</span> : null}.
+      <b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>{possEnd(T[K.team].name)} </> : null}&ldquo;{K.text}&rdquo; {say ? <b>{K.ok ? "shouldn't score" : "should score"}</b> : <>was <b>{word(!K.ok)}</b></>}. <b>{decider}</b> decides{nohost ? <span className="text-[var(--color-ink-2)]"> · {left} s</span> : null}.
     </div>);
 }
 /* no host: a captain's request (new scores) waiting for the other captain's yes or no */
@@ -542,8 +542,8 @@ function AgreeBanner({ pub }: { pub: Pub }) {
   return (
     <div className="card enter text-24 max-w-[1300px]" style={{ borderColor: "var(--color-gold)", position: "relative", zIndex: 26 }} role="status">
       <div className="eyebrow text-16 mb-1" style={{ color: "var(--color-gold)" }}>New scores?</div>
-      <b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain asks for <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
-      {" "}<b style={{ color: tc(o) }}>{T[o].name}</b>&rsquo;s captain decides<span className="text-[var(--color-ink-2)]"> · {left} s</span>.
+      <b style={{ color: tc(A.team) }}>{T[A.team].name}</b>{possEnd(T[A.team].name)} captain asks for <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
+      {" "}<b style={{ color: tc(o) }}>{T[o].name}</b>{possEnd(T[o].name)} captain decides<span className="text-[var(--color-ink-2)]"> · {left} s</span>.
     </div>);
 }
 /* no host: a new question asked for; the clock is stopped (and the question hidden) while the other captain decides */
@@ -551,7 +551,7 @@ function SwapAsk({ pub }: { pub: Pub }) {
   const T = pub.teams, A = pub.agree!, left = useSecondsLeft(A.until), o = A.team === 0 ? 1 : 0;
   return (<>
     <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>A new {A.what}?</div>
-    <div className="text-30 mt-3 max-w-[1300px]"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain asks for one. <b style={{ color: tc(o) }}>{T[o].name}</b>&rsquo;s captain decides<span className="text-[var(--color-ink-2)]"> · {left} s</span>.</div>
+    <div className="text-30 mt-3 max-w-[1300px]"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>{possEnd(T[A.team].name)} captain asks for one. <b style={{ color: tc(o) }}>{T[o].name}</b>{possEnd(T[o].name)} captain decides<span className="text-[var(--color-ink-2)]"> · {left} s</span>.</div>
     <div className="text-24 text-[var(--color-ink-2)] mt-2">The clock is stopped meanwhile.</div>
   </>);
 }

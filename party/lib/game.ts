@@ -203,7 +203,10 @@ export const showNum = (n: number) => n.toLocaleString("en-GB", { maximumFractio
 
 /* a team's name in a sentence (the 4 Nov audit, 3.15): its own, with "s’" after a plural ("the Owls’ captain", not
    "Owls's"); and team names take plural verbs ("Owls answer first", "The Quizzicals take it") */
-export const poss = (name: string) => (/s$/i.test(name.replace(/[\u2066-\u2069]/g, "").trim()) ? name + "’" : name + "’s");
+/* (possEnd: just the ending, for a name drawn in its own colour: <b>Lions</b>{possEnd("Lions")} captain: 26 Nov, about
+   twenty messages still wrote ’s by hand, "Lions’s captain") */
+export const possEnd = (name: string) => (/s$/i.test(name.replace(/[\u2066-\u2069]/g, "").trim()) ? "’" : "’s");
+export const poss = (name: string) => name + possEnd(name);
 /* the pictures coming up, fetched ahead on every screen (the whole deck at the intro): every setup (23 Nov: the 3-8
    night fetched none, so a flag could come up late) */
 export type Preload = { flags?: string[]; maps?: string[]; pins?: string[]; sees?: string[]; world?: boolean };

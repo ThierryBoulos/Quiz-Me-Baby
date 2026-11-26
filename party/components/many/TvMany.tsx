@@ -12,7 +12,7 @@ import { FOOL } from "@/lib/minis/fool";
 import { Clock, useSecondsLeft } from "../Clock";
 import { Confetti } from "../GameParts";
 import { PinMap } from "../PinMap";
-import { showKm } from "@/lib/game";
+import { possEnd, showKm } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
 import type { PubMany } from "@/lib/many/view";
 import { Ruler } from "../Ruler";
@@ -237,9 +237,9 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
           return (<>
             <div className="win-flash" style={{ ["--c" as string]: c }} aria-hidden />
             <div className="confetti-late"><Confetti n={140} /></div>
-            <div className="eyebrow text-22 enter relative z-10 win-eyebrow">{tops.length > 1 ? "A shared win" : "The winner"}</div>
+            <div className="eyebrow text-22 enter relative z-10 win-eyebrow">{tops.length > 1 ? "Tied at the top" : "The winner"}</div>
             <div className="win-sign relative z-10 grid place-items-center">
-              <span className="win-tag" aria-hidden>{tops.length > 1 ? "A shared win" : "Tonight\u2019s winner"}</span>
+              <span className="win-tag" aria-hidden>{tops.length > 1 ? "Tied at the top" : "Tonight\u2019s winner"}</span>
               <span className="win-ring" style={{ ["--c" as string]: c }} aria-hidden />
               <span className="win-ring r2" style={{ ["--c" as string]: c }} aria-hidden />
               <WinName recap={!!recap} color={c} label={name}><bdi>{name}</bdi></WinName>
@@ -274,7 +274,7 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
         {/* the host gone quiet (8 Nov): the night waits; anyone can take over on their phone */}
         {pub.hostGone && <HostGoneTv info={pub.hostGone} />}
         {/* a captain's contest, open: the host decides (8 Nov) */}
-        {pub.screen === "reveal" && pub.contest ? <span className="next-hint"><b style={{ color: T[pub.contest.by].color }}><bdi>{T[pub.contest.by].name}</bdi></b> contest {pub.contest.t !== pub.contest.by ? <><b style={{ color: T[pub.contest.t].color }}><bdi>{T[pub.contest.t].name}</bdi></b>&rsquo;s </> : "their "}call. The host decides.</span>
+        {pub.screen === "reveal" && pub.contest ? <span className="next-hint"><b style={{ color: T[pub.contest.by].color }}><bdi>{T[pub.contest.by].name}</bdi></b> contest {pub.contest.t !== pub.contest.by ? <><b style={{ color: T[pub.contest.t].color }}><bdi>{T[pub.contest.t].name}</bdi></b>{possEnd(T[pub.contest.t].name)} </> : "their "}call. The host decides.</span>
           /* (the host, not their name: 22 Nov, the owner, every setup) */
           : next && <span className="next-hint">Waiting for <b>the host</b> to tap {next}</span>}
       </div>

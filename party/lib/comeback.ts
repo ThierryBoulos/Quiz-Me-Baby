@@ -1,6 +1,8 @@
 /* THE COMEBACK (the owner, 17 Nov): once a night, at its middle, when it's a massacre. The teams too far behind to
    catch up get one chance: three easy questions, 15 seconds each, all three right or nothing. A team that makes it
-   moves up to 85% of the leader's score, but never past another team (one point behind the team above it, at most).
+   moves up to 85% of the leader's score at most, and never closer than a game's worth of points (4 at least) to a team
+   that wasn't playing for it; a team that made it can pass one that missed (26 Nov, the owner; till then one point
+   behind the team above it).
    On by default; a switch in the Setup. The rules themselves are the engine's (engine/core.js: comebackPlan,
    comebackSettle, the dealer's comebackDeck), shared by the two-team TV (lib/tvGame.ts) and the 3-8 team one
    (lib/many/logic.ts). This is what the screens are sent, the same in both. */

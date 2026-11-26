@@ -23,7 +23,7 @@ import { CLOSEST } from "@/lib/minis/closest";
 import { FLAG } from "@/lib/minis/flag";
 import { PIN } from "@/lib/minis/pin";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two, poss } from "@/lib/game";
+import { DECIDED, iso, MAX_BID, offBy, showKm, showNum, T_AGREE, TIE_SCREENS, type LatLon, type Pub, type Secret, type Two, poss, possEnd } from "@/lib/game";
 import type { Member } from "@/lib/room";
 import { QMB } from "@/lib/engine";
 import { joinLive, newTap, note, rpc, sb, sendAction, sendDraft } from "@/lib/supabase";
@@ -184,7 +184,7 @@ function MajorityList({ pub, me, act, during }: { pub: Pub; me: Member; act?: (m
           <p className="text-15"><b>{T[A.team].name}</b> ask to take <b>{A.name}</b> off their list: they&rsquo;re not on the game screen. Agree? ({left} s)</p>
           <div className="grid grid-cols-2 gap-2"><button className="btn btn-gold" onClick={() => act({ type: "ui/mrOutOk", v: true })}>Agree</button><button className="btn" onClick={() => act({ type: "ui/mrOutOk", v: false })}>No, keep them</button></div>
         </div>)}
-      {A && !(cap && me.team !== A.team) && <p className="text-center text-13 text-[var(--color-ink-2)]">Asking to take {A.name} off {T[A.team].name}&rsquo;s list…</p>}
+      {A && !(cap && me.team !== A.team) && <p className="text-center text-13 text-[var(--color-ink-2)]">Asking to take {A.name} off {poss(T[A.team].name)} list…</p>}
       {/* (every phone its own team's list, the host every team's: one copy for every setup, components/MajorityGame.tsx: 25 Nov) */}
       <Each teams={[0, 1].map((t) => ({ name: T[t].name, color: tc(t as 0 | 1) }))} list={L} me={{ name: me.name, team: me.team ?? null }} host={host}
         onToggle={act ? (name) => act({ type: "ui/mrOut", name }) : undefined}
@@ -661,7 +661,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
           <div className="eyebrow text-center">Still tied. Who gets the {pub.mini?.pts} points?</div>
           <div className="grid grid-cols-3 gap-2 mt-auto">
             <button className="btn btn-a" disabled={busy} onClick={() => send({ type: mk + "/award", w: 0 })}>{T[0].name}</button>
-            <button className="btn" disabled={busy} onClick={() => send({ type: mk + "/award", w: "split" })}>Split</button>
+            <button className="btn" disabled={busy} onClick={() => send({ type: mk + "/award", w: "split" })}>A point each</button>
             <button className="btn btn-b" disabled={busy} onClick={() => send({ type: mk + "/award", w: 1 })}>{T[1].name}</button>
           </div>
         </>) : <Main label="Next" move={{ type: mk + "/done" }} />}
@@ -919,7 +919,7 @@ function Calls({ pub, mine, host, busy, act, cardOnly, card }: { pub: Pub; mine?
       </div>}
       {K && (host || (nohost && mine != null && mine !== K.by) ? (
         <div className="card flex flex-col gap-2 text-center" role="alert">
-          <div className="text-14"><b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>&rsquo;s </> : null}&ldquo;{K.text}&rdquo; {say ? <b>{K.ok ? "shouldn't score" : "should score"}</b> : <>was <b>{word(!K.ok)}</b></>}.{host ? " Your call." : " Agree?"}</div>
+          <div className="text-14"><b style={{ color: tc(K.by) }}>{T[K.by].name}</b> say {K.team !== K.by ? <><b style={{ color: tc(K.team) }}>{T[K.team].name}</b>{possEnd(T[K.team].name)} </> : null}&ldquo;{K.text}&rdquo; {say ? <b>{K.ok ? "shouldn't score" : "should score"}</b> : <>was <b>{word(!K.ok)}</b></>}.{host ? " Your call." : " Agree?"}</div>
           <div className="flex gap-2 justify-center">
             <button className="btn btn-sm" disabled={busy} onClick={() => act({ type: "ui/contestOk", v: true })}>{host ? (say ? (K.ok ? "Make it not score" : "Make it score") : `Make it ${word(!K.ok)}`) : "Agree"}</button>
             <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => act({ type: "ui/contestOk", v: false })}>{host ? (say ? "Keep the call" : `Keep ${word(K.ok)}`) : "No"}</button>
@@ -1134,7 +1134,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who, picking, buz
   const other = mine === 0 || mine === 1 ? (1 - mine) as 0 | 1 : null;
   const otherLine = noTv && other != null && !pub.paused ? (
     (pub.screen === "stakesQ" || (pub.screen === "rouletteQ" && spun)) && pub.sent?.[other] ? <><bdi>{pub.teams[other].name}</bdi> have answered.</> : null) : null;
-  if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {pub.teams[pub.agree.team === 0 ? 1 : 0].name}&rsquo;s captain decides.</p></div>;
+  if (pub.paused && pub.agree?.kind === "swap") return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>A new {pub.agree.what}?</div><p className="text-14 text-[var(--color-ink-2)] mt-1">The clock is stopped while {poss(pub.teams[pub.agree.team === 0 ? 1 : 0].name)} captain decides.</p></div>;
   if (pub.paused) return <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div><p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</p></div>;
   return (<div className="noselect contents" {...noCopy}>
     {pub.screen === "sudden" && !pub.sudden?.ready && <SuddenRules pub={pub} size="phone" />}
@@ -1511,14 +1511,14 @@ const PAUSABLE = ["ask", "steal", "miniQ", "flagQ", "seeQ", "foolWrite", "foolPi
 function AgreeCard({ pub, mine, busy, act }: { pub: Pub; mine: 0 | 1; busy: boolean; act: (move: Record<string, unknown>) => void }) {
   const A = pub.agree, T = pub.teams, left = useSecondsLeft(A?.until);
   if (!A) return null;
-  if (A.team === mine) return <p className="text-center text-14 text-[var(--color-ink-2)]" role="status">Asking {T[mine === 0 ? 1 : 0].name}&rsquo;s captain to agree to {A.kind === "swap" ? `a new ${A.what}` : "the new scores"}… ({left} s)</p>;
+  if (A.team === mine) return <p className="text-center text-14 text-[var(--color-ink-2)]" role="status">Asking {poss(T[mine === 0 ? 1 : 0].name)} captain to agree to {A.kind === "swap" ? `a new ${A.what}` : "the new scores"}… ({left} s)</p>;
   return (
     <div className="card flex flex-col gap-2 enter" style={{ borderColor: "var(--color-gold)" }} role="group" aria-label="Do you agree?">
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>Do you agree?</div>
       {A.kind === "swap"
-        ? <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants a new {A.what}, just as hard.
+        ? <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>{possEnd(T[A.team].name)} captain wants a new {A.what}, just as hard.
           <span className="text-[var(--color-ink-2)]"> The clock is stopped meanwhile; a new one gets a fresh clock.</span></p>
-        : <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>&rsquo;s captain wants to set the scores to <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
+        : <p className="text-15"><b style={{ color: tc(A.team) }}>{T[A.team].name}</b>{possEnd(T[A.team].name)} captain wants to set the scores to <b style={{ color: tc(0) }}>{T[0].name}</b> {A.a}, <b style={{ color: tc(1) }}>{T[1].name}</b> {A.b}.
           <span className="text-[var(--color-ink-2)]"> Now: {T[0].score}–{T[1].score}.</span></p>}
       <div className="grid grid-cols-2 gap-2">
         <button className="btn btn-gold" disabled={busy} onClick={() => act({ type: "ui/agree", v: true, id: A.id })}>Agree</button>

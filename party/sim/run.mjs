@@ -208,7 +208,7 @@ for (const n of NIGHTS) {
     if (n.comeback === "skip") return !c.skipped || c.made != null || shown !== "comebackIntro" ? `skipped, but ${shown}` : null;
     if (shown !== "comebackIntro comebackQ comebackReveal comebackSummary") return `its screens: ${shown}`;
     const L = Math.max(...c.before), up = c.after[c.team] - c.before[c.team];
-    if (n.comeback === "make") return c.made !== true || c.asked !== 3 || c.after[c.team] !== Math.min(Math.round(0.85 * L), L - 1) || c.after[1 - c.team] !== L ? `made: ${JSON.stringify(c)}` : null;
+    if (n.comeback === "make") return c.made !== true || c.asked !== 3 || c.after[c.team] !== Math.min(Math.round(0.85 * L), L - 4) || c.after[1 - c.team] !== L ? `made: ${JSON.stringify(c)}` : null;
     return c.made !== false || up !== 0 || c.asked !== (n.comeback === "miss" ? 2 : 1) ? `missed: ${JSON.stringify(c)}` : null;
   })();
   if (cbBad) { verdict = `THE COMEBACK: ${cbBad}`; bad++; }

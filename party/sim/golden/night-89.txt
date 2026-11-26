@@ -38,34 +38,34 @@
 48.00 comebackReveal | 24 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
 49.00 comebackQ | 25 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
 50.00 comebackReveal | 25 | 13-5 |  | Only the teams playing for the comeback answer this one. | 
-50.75 comebackSummary | 26 | 13-11 |  | Only the teams playing for the comeback answer this one. | 
-51.75 roundIntro | 27 | 13-11 |  | Only the teams playing for the comeback answer this one. | 
-52.50 ask | 28 | 13-11 |  | Only the teams playing for the comeback answer this one. | 
-54.50 answer | 29 | 14-11 |  | Lions +1 point | 
-55.25 answer | 29 | 14-11 |  |  | 
-56.25 steal | 30 | 13-11 |  | Owls steal a new question. | 
-58.00 answer | 31 | 13-12 |  | Owls +1 point — steal | 
-59.00 ask | 32 | 13-12 |  | Owls +1 point — steal | 
-60.75 answer | 33 | 13-13 |  | Owls +1 point | 
-61.50 answer | 33 | 13-13 |  |  | 
-63.50 answer | 33 | 13-13 |  | The host keeps the call. | 
-64.25 roundScore | 34 | 13-13 |  | The host keeps the call. | 
-65.25 stakesIntro | 35 | 13-13 | 0-0 | The host keeps the call. | 
-66.00 stakesPick | 36 | 13-13 | 0-0 | The host keeps the call. | 
-67.00 stakesPick | 36 | 13-13 | 0-0 | Pick a theme and a level. | 
+50.75 comebackSummary | 26 | 13-9 |  | Only the teams playing for the comeback answer this one. | 
+51.75 roundIntro | 27 | 13-9 |  | Only the teams playing for the comeback answer this one. | 
+52.50 ask | 28 | 13-9 |  | Only the teams playing for the comeback answer this one. | 
+54.50 answer | 29 | 14-9 |  | Lions +1 point | 
+55.25 answer | 29 | 14-9 |  |  | 
+56.25 steal | 30 | 13-9 |  | Owls steal a new question. | 
+58.00 answer | 31 | 13-10 |  | Owls +1 point — steal | 
+59.00 ask | 32 | 13-10 |  | Owls +1 point — steal | 
+60.75 answer | 33 | 13-11 |  | Owls +1 point | 
+61.50 answer | 33 | 13-11 |  |  | 
+63.50 answer | 33 | 13-11 |  | The host keeps the call. | 
+64.25 roundScore | 34 | 13-11 |  | The host keeps the call. | 
+65.25 stakesIntro | 35 | 13-11 | 0-0 | The host keeps the call. | 
+66.00 stakesPick | 36 | 13-11 | 0-0 | The host keeps the call. | 
+67.00 stakesPick | 36 | 13-11 | 0-0 | Pick a theme and a level. | 
 (a bet with no level: "Pick a theme and a level.")
-68.75 stakesQ | 37 | 13-13 | 0-0 | Pick a theme and a level. | 
-69.75 stakesReveal | 37 | 13-12 | 0-0 | Pick a theme and a level. | 
-70.50 stakesReveal | 37 | 13-12 | 0-0 |  | 
-72.50 stakesReveal | 37 | 13-12 | 0-0 | Call changed: ⁨Lions⁩ WRONG. | 
-73.25 stakesPick | 38 | 13-12 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
-75.00 stakesQ | 39 | 13-12 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
-76.00 stakesReveal | 39 | 16-11 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
-77.00 stakesReveal | 39 | 16-11 | 0--1 |  | 
-77.75 stakesReveal | 39 | 16-11 | 0--1 | The host keeps the call. | 
-78.75 stakesPick | 40 | 16-11 | 3--2 | The host keeps the call. | 
-79.50 stakesQ | 41 | 16-11 | 3--2 | The host keeps the call. | 
-80.50 stakesReveal | 41 | 16-11 | 3--2 | The host keeps the call. | 
-81.50 stakesSummary | 42 | 16-11 | 3--2 | The host keeps the call. | 
-82.25 final | 43 | 16-11 |  | The host keeps the call. | 
-recap: {"margin":5,"sudden":false,"leadChanges":0,"steals":[0,1],"minis":[0,0],"chart":[[0,0],[0,0],[12,1],[12,2],[12,3],[12,2],[12,4],[13,4],[13,5],[13,11],[14,11],[13,11],[13,12],[13,13],[13,12],[16,11]],"segs":[{"label":"R1","pts":[[12,1],[12,2]]},{"label":"R2","pts":[[12,3],[12,2],[12,4]]},{"label":"R3","pts":[[13,4],[13,5]]},{"label":"The Comeback","pts":[[13,11]]},{"label":"R4","pts":[[14,11],[13,11],[13,12],[13,13]]},{"label":"Secret Stakes","pts":[[13,12],[16,11]]}],"awards":[{"t":"Down to the wire","who":"Lions took the lead for good in Secret Stakes","team":0},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}
+68.75 stakesQ | 37 | 13-11 | 0-0 | Pick a theme and a level. | 
+69.75 stakesReveal | 37 | 13-10 | 0-0 | Pick a theme and a level. | 
+70.50 stakesReveal | 37 | 13-10 | 0-0 |  | 
+72.50 stakesReveal | 37 | 13-10 | 0-0 | Call changed: ⁨Lions⁩ WRONG. | 
+73.25 stakesPick | 38 | 13-10 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
+75.00 stakesQ | 39 | 13-10 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
+76.00 stakesReveal | 39 | 16-9 | 0--1 | Call changed: ⁨Lions⁩ WRONG. | 
+77.00 stakesReveal | 39 | 16-9 | 0--1 |  | 
+77.75 stakesReveal | 39 | 16-9 | 0--1 | The host keeps the call. | 
+78.75 stakesPick | 40 | 16-9 | 3--2 | The host keeps the call. | 
+79.50 stakesQ | 41 | 16-9 | 3--2 | The host keeps the call. | 
+80.50 stakesReveal | 41 | 16-9 | 3--2 | The host keeps the call. | 
+81.50 stakesSummary | 42 | 16-9 | 3--2 | The host keeps the call. | 
+82.25 final | 43 | 16-9 |  | The host keeps the call. | 
+recap: {"margin":7,"sudden":false,"leadChanges":0,"steals":[0,1],"minis":[0,0],"chart":[[0,0],[0,0],[12,1],[12,2],[12,3],[12,2],[12,4],[13,4],[13,5],[13,9],[14,9],[13,9],[13,10],[13,11],[13,10],[16,9]],"segs":[{"label":"R1","pts":[[12,1],[12,2]]},{"label":"R2","pts":[[12,3],[12,2],[12,4]]},{"label":"R3","pts":[[13,4],[13,5]]},{"label":"The Comeback","pts":[[13,9]]},{"label":"R4","pts":[[14,9],[13,9],[13,10],[13,11]]},{"label":"Secret Stakes","pts":[[13,10],[16,9]]}],"awards":[{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

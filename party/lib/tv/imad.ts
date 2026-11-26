@@ -4,7 +4,7 @@
 import { QMB } from "../engine";
 import { getSettings } from "../settings";
 import { HOST_LINES } from "../imadLines";
-import { iso } from "../game";
+import { iso, poss } from "../game";
 import { miniOf, miniState, other, type G } from "./rules";
 import { fireOf, seatOf } from "./reads";
 import type { TvState } from "./state";
@@ -32,7 +32,8 @@ export function imadSay(s: TvState, moments: string[] | string, extra?: G) {
     if (!free.length) { seen.length = 0; free = pool.map((_, i) => i); }
     const i = free[Math.floor(rnd() * free.length)];
     seen.push(i);
-    s.imadQ.push(pool[i].replace(/\{(\w+)\}/g, (_x, k) => (v[k] != null ? String(v[k]) : "")));
+    /* ("{team}'s": the name's own ending, "Lions’", never "Lions's": 26 Nov) */
+    s.imadQ.push(pool[i].replace(/\{(\w+)\}'s/g, (_x, k) => (v[k] != null ? poss(String(v[k])) : "")).replace(/\{(\w+)\}/g, (_x, k) => (v[k] != null ? String(v[k]) : "")));
   }
 }
 /* once per game, keyed: a screen shown again stays quiet */

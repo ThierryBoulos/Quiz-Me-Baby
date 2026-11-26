@@ -7,6 +7,7 @@ import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { FOOL_PEN_END as PEN_END, foolAwards, foolAwardWhat, rvFool, type FoolOpt, type FoolPub, type FoolRev, type FoolSum } from "@/lib/fool";
 import { Dot } from "./many/PartsMany";
 import { QMB } from "@/lib/engine";
+import { poss, possEnd } from "@/lib/game";
 
 export type FoolTeam = { name: string; color: string };
 const LETTERS = "ABCDEFGHI";
@@ -112,11 +113,11 @@ export function FoolReveal({ rev, teams, tv }: { rev: FoolRev; teams: FoolTeam[]
       <div className={"grid w-full " + (cols ? "grid-cols-2" : "grid-cols-1")} style={{ gap, gridAutoRows: "1fr" }}>
       {rows.map((x, i) => {
         /* (a name ending in s takes the apostrophe alone: "Owls' lie") */
-        const by = names(x.o.by), t = x.o.truth, tag: ReactNode = t ? "The truth" : x.o.ours ? "One of ours" : <>{named(x.o.by)}{/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie{lieGot(x) > 0 ? <>, <span style={{ color: "var(--color-ok)" }}>+{lieGot(x)}</span></> : null}</>;   // (2-team names carry invisible direction marks)
+        const by = names(x.o.by), t = x.o.truth, tag: ReactNode = t ? "The truth" : x.o.ours ? "One of ours" : <>{named(x.o.by)}{possEnd(by)} lie{lieGot(x) > 0 ? <>, <span style={{ color: "var(--color-ok)" }}>+{lieGot(x)}</span></> : null}</>;   // (2-team names carry invisible direction marks)
         /* a right prediction: the team whose lie it is named the team that fell for it */
         const pred = t ? [] : x.fell.filter((f) => rev.hits.some((h) => h.on === f && x.o.by.includes(h.by)));
         const got = pred.length > 0, d = { ["--d" as string]: `${i * step + 0.35}s` };
-                const said = `${by}${/s$/i.test(by.replace(/[\u2066-\u2069]/g, "")) ? "'" : "'s"} lie, +${lieGot(x)}. As expected, Gotcha! ${pred.map((f) => `${teams[f]?.name} −1`).join(", ")}.`;
+                const said = `${poss(by)} lie, +${lieGot(x)}. As expected, Gotcha! ${pred.map((f) => `${teams[f]?.name} −1`).join(", ")}.`;
         const nm = (w: number) => dots ? <span className="inline-grid" style={{ letterSpacing: 0 }}><Dot t={w} color={teams[w]?.color ?? "#888"} size={tv ? (big ? 18 : 20) : 12} /></span> : <bdi style={{ color: teams[w]?.color }}>{teams[w]?.name}</bdi>;
         /* (one row of items, centred on one line: the words, the dot and the −1 line up, 21 Nov, the owner) */
         const label = got ? <span className={"fool-flap" + (flapA ? " show-a" : "")}><span className="fool-flap-a">{tag}</span><span className="fool-flap-b" aria-hidden="true" style={{ display: "inline-flex", alignItems: "center", gap: "0.4em", flexWrap: "wrap" }}>

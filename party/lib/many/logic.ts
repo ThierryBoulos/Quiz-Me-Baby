@@ -75,7 +75,7 @@ export type MiniM = { key: ManyKey; qs: Q[]; i: number; wins: number[]; right: n
   foolLog?: FoolFactSum[];                        // Fool Me Twice: each fact's part in the result (the pens, the awards)
   /* the comeback: what each team in it (only) can reach, every team's score as it began, who has missed one (out),
      and at its end who made it and the scores after */
-  cb?: { target: (number | null)[]; before: number[]; out: boolean[]; made?: boolean[]; after?: number[] };
+  cb?: { target: (number | null)[]; room?: number; before: number[]; out: boolean[]; made?: boolean[]; after?: number[] };
   words?: { w: string; ok: boolean }[][];         // Don't Say the Same: each team's word every time, and whether it scored, for its pile of word cards at the result
   fired?: number; had?: string[][];               // Russian Roulette: bullets that hit a team so far; each team's themes so far
   /* Secret Stakes: one bet (fixed at its start), what each team has won or lost, and every round's bets */
@@ -649,14 +649,14 @@ export function next(s: StateM, now: number, t: Timers) {
   }
   /* the comeback: a team needs all three. Right, it's still in; wrong (or nothing sent), it's out. After the third
      question, or once every team is out, the result: the teams that made it move up (the engine's comebackSettle:
-     85% of the leader, never past another team) */
+     85% of the leader at most, a game's worth of room under the teams that weren't playing for it) */
   if (s.screen === "reveal" && m.key === "comeback" && m.cb && m.only) {
     const cb = m.cb, only = m.only;
     only.forEach((tm) => { if (!cb.out[tm]) { if (s.ok[tm]) m.right[tm]++; else cb.out[tm] = true; } });
     m.i++;
     if (m.i < m.qs.length && only.some((tm) => !cb.out[tm])) { ask(s, now, t); return true; }
     const made: Record<number, boolean> = {}; only.forEach((tm) => { made[tm] = !cb.out[tm]; });
-    const before = s.teams.map((x) => x.score), after = QMB.comebackSettle(before, only, made) as number[];
+    const before = s.teams.map((x) => x.score), after = QMB.comebackSettle(before, only, made, cb.room) as number[];
     /* (the scores as they are now: the host may have set them by hand since the comeback began) */
     cb.before = before; cb.made = s.teams.map((_, tm) => !!made[tm]); cb.after = after;
     s.teams.forEach((x, tm) => { x.score = after[tm]; });
@@ -729,9 +729,10 @@ export function next(s: StateM, now: number, t: Timers) {
     if (s.cbQs && !s.cbDone) { const k = s.teams.length, G = s.minis.filter((x) => !extraGame(x.key)).length, left = G - s.mi;
       if (s.mi >= Math.ceil(G / 2)) { s.cbDone = true;
         const spread = PLACE_PTS[0] - PLACE_PTS[k - 1];   // (what one game can win back on the leader; the gap is never under two of them)
-        const plan = left >= 2 ? QMB.comebackPlan(s.teams.map((x) => x.score), spread * left, QMB.COMEBACK_MIN_GAMES * spread) as { teams: number[]; target: (number | null)[] } | null : null;
+        /* (the room a team that makes it keeps under the teams that weren't playing for it: a game's worth, 4 points at least: 26 Nov) */
+        const plan = left >= 2 ? QMB.comebackPlan(s.teams.map((x) => x.score), spread * left, QMB.COMEBACK_MIN_GAMES * spread, QMB.comebackRoom(spread)) as { teams: number[]; target: (number | null)[]; room: number } | null : null;
         if (plan) s.minis.splice(s.mi, 0, { key: "comeback", qs: s.cbQs, i: 0, wins: n(k), right: n(k), of: n(k), pts: n(k), only: [...plan.teams].sort((a, b) => s.teams[b].score - s.teams[a].score || a - b),
-          cb: { target: plan.target, before: s.teams.map((x) => x.score), out: s.teams.map(() => false) } }); } }
+          cb: { target: plan.target, room: plan.room, before: s.teams.map((x) => x.score), out: s.teams.map(() => false) } }); } }
     /* the last game played and teams tied at the top: sudden death between them, with the questions held back */
     if (s.mi >= s.minis.length) { const top = Math.max(...s.teams.map((x) => x.score)), tied = s.teams.map((x, i) => (x.score === top ? i : -1)).filter((i) => i >= 0);
       if (tied.length > 1 && top > 0 && (s.spare || []).length) { const k = s.teams.length;

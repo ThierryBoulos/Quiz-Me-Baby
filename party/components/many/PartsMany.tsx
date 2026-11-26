@@ -65,7 +65,7 @@ export function takeText(w: number[], T: { name: string; color: string }[]): { t
   if (w.length === T.length) return { text: "Everyone takes it", color: "var(--color-gold)" };
   return { text: `${w.length} teams take it`, color: "var(--color-gold)" };
 }
-/* a game's result, in words: who came 1st and what it pays ("TEAM A +10", "2 TEAMS SHARE 1ST, +10 EACH") */
+/* a game's result, in words: who came 1st and what it pays ("TEAM A +10", "LIONS & OWLS TIED FOR 1ST, +10 EACH": "tied", never "share", 26 Nov, the owner's rule for ties) */
 export function paid(pub: PubMany): { text: string; color: string } {
   const S = pub.summary, T = pub.teams;
   /* the comeback: who is back in it */
@@ -75,7 +75,7 @@ export function paid(pub: PubMany): { text: string; color: string } {
   if (!top.length) { const a = S?.award || [], v = a[0] ?? 0;
     return { text: v > 0 && a.every((x) => x === v) ? `Nobody scored: +${v} each` : "Nobody scores", color: "var(--color-ink-2)" }; }
   if (top.length === 1) return { text: `${T[top[0]].name} +${S!.award[top[0]]}`, color: T[top[0]].color };
-  return { text: `${top.length > 2 ? `${top.length} teams` : top.map((t) => T[t].name).join(" & ")} share 1st, +${S!.award[top[0]]} each`, color: "var(--color-gold)" };
+  return { text: `${top.length > 2 ? `${top.length} teams` : top.map((t) => T[t].name).join(" & ")} tied for 1st, +${S!.award[top[0]]} each`, color: "var(--color-gold)" };
 }
 /* the teams in the order of a reveal: the nearest first, the ones with nothing at the end */
 export const byDistance = (pub: PubMany) => {

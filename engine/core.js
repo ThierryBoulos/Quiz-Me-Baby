@@ -494,8 +494,8 @@
   /* ------------------------------------------------------------------ THE COMEBACK (17 Nov, the owner)
      Once a night, at its middle, when it's a massacre: the teams too far behind to catch up get one chance. Three easy
      questions, 15 seconds each, all three right or nothing. A team that makes it moves up to 85% of the leader's
-     score, but never past another team: at most one point behind the team above it (so with many teams it joins the
-     back of the pack; with two it gets the full 85%). The same rules for two teams and for three to eight.
+     score at most, and never closer than a game's worth of points to a team that wasn't playing for it (the room,
+     below: 26 Nov; till then, one point behind it). The same rules for two teams and for three to eight.
      "Too far behind": the gap to the leader is more than COMEBACK_GAP of what a team could still win back on the
      leader in the games left (reach). A share of the leader's score doesn't work as the test: with 3 teams last place
      pays 6 of 10, so nobody ever falls under 60%, and with 8 a team is under 50% one night in three. */
@@ -505,24 +505,34 @@
      nights with evenly matched teams had a comeback (19 Nov, the owner: a minimum gap, as with two teams; 21 Nov, the
      owner: three games, not two, so an ordinary 6-game night doesn't get one). Long nights: no change */
   const COMEBACK_MIN_GAMES = 3;
-  /* the scores after the comeback: `made[t]` is true for a team that got all three. From the top team down, so a
-     team's ceiling is one point under the lowest team that was above it, as that team ends up (made it or not).
-     Teams level before it can end level, or apart if only one makes it; nobody ends above a team it was behind */
-  function comebackSettle(scores, teams, made){
-    const L = Math.max.apply(null, scores), cap = Math.round(COMEBACK_SHARE * L), after = scores.slice();
+  /* ROOM (26 Nov, the owner: a team that made it landed one point behind the next team, and an equally good team then
+     finished ahead of it 43 nights in 100: "give them some room, at least one game's worth"). A team that makes it never
+     ends closer than `room` points to a team that was further ahead than that: one game's worth, what 1st place earns
+     over last place in a game (4 with 3 teams, 7 with 6 to 8), and 4 points at least (2 teams, where a game is 2 and
+     12 against 10 was still too close). Then an equally good team still overtakes about 1 night in 5. */
+  const COMEBACK_ROOM = 4;
+  const comebackRoom = (unit) => Math.max(COMEBACK_ROOM, Math.round(unit) || 0);
+  /* the scores after the comeback: `made[t]` is true for a team that got all three. From the top team down: for every
+     team above it that it can't pass (a team that wasn't playing for it, or one that made it too), it ends no closer
+     than the room, or than the gap they had if that was smaller (two teams a point apart stay a point apart; two that
+     were far apart end a game apart). A team that missed can be passed (26 Nov, the owner). 85% of the leader at most.
+     Teams tied before it end tied, if both make it. (No room given: a night saved before the room existed, 1 point.) */
+  function comebackSettle(scores, teams, made, room){
+    const L = Math.max.apply(null, scores), cap = Math.round(COMEBACK_SHARE * L), after = scores.slice(), R = room > 0 ? room : 1;
+    const holds = (u) => teams.indexOf(u) < 0 || !!made[u];           // a team nobody passes
     teams.slice().sort((a, b) => scores[b] - scores[a]).forEach(t => {
       if(!made[t]) return;
-      let ceil = Infinity;
-      scores.forEach((v, u) => { if(v > scores[t]) ceil = Math.min(ceil, after[u] - 1); });
-      const to = Math.min(cap, ceil);
+      let to = cap;
+      scores.forEach((v, u) => { if(v > scores[t] && holds(u)) to = Math.min(to, after[u] - Math.min(v - scores[t], R)); });
       if(to > scores[t]) after[t] = to;
     });
     return after;
   }
-  /* who gets the chance, and the most each could reach (if every team in it makes it): null when nobody is far
-     enough behind, or when nobody would gain a point (the team above is right there) */
-  function comebackPlan(scores, reach, minGap){
-    const L = Math.max.apply(null, scores);
+  /* who gets the chance, and what each reaches if every team in it makes it (a team gets at least that; more, when a
+     team above it misses): null when nobody is far enough behind, or when it wouldn't be worth it: a team is only in
+     it for half a game's worth or more (2 to 4 points; before the room, 1 point was enough) */
+  function comebackPlan(scores, reach, minGap, room){
+    const L = Math.max.apply(null, scores), gain = room > 0 ? Math.ceil(room / 2) : 1;
     if(!(L > 0) || !(reach > 0)) return null;
     /* (minGap: with two teams the points are small, and on a short night 4-0 passed the test: a team must also be
        at least that many points behind, 17 Nov) */
@@ -538,10 +548,17 @@
     for(let i = 0; i < order.length - 1; i++){ const d = scores[order[i]] - scores[order[i + 1]]; if(d > drop){ drop = d; cut = i; } }
     order.slice(cut + 1).forEach(t => { if(teams.indexOf(t) < 0 && far(scores[t], COMEBACK_NEAR)) teams.push(t); });
     teams.sort((a, b) => scores[b] - scores[a] || a - b);
-    const all = {}; teams.forEach(t => { all[t] = true; });
-    const best = comebackSettle(scores, teams, all);
-    teams = teams.filter(t => best[t] > scores[t]);
-    return teams.length ? { teams, target:scores.map((v, t) => (teams.indexOf(t) > -1 ? best[t] : null)), leader:L } : null;
+    /* (a team that would gain too little steps out, and then holds its place: the teams under it are settled again) */
+    let best = scores;
+    for(;;){
+      if(!teams.length) return null;
+      const all = {}; teams.forEach(t => { all[t] = true; });
+      best = comebackSettle(scores, teams, all, room);
+      const keep = teams.filter(t => best[t] - scores[t] >= gain);
+      if(keep.length === teams.length) break;
+      teams = keep;
+    }
+    return { teams, target:scores.map((v, t) => (teams.indexOf(t) > -1 ? best[t] : null)), leader:L, room:room > 0 ? room : 1 };
   }
 
   function createDealer(ctx){
@@ -1957,11 +1974,12 @@
     g.comebackAsked = true;
     /* (done > mid: a night saved before the comeback existed, past its middle already) */
     if((g.cfg && g.cfg.comeback === false) || done > mid || S.left < 2) return false;
-    const before = g.teams.map(t => t.score), P = comebackPlan(before, comebackReach(S), COMEBACK_MIN_TWO);
+    /* (the room: 4 points with two teams, two games' worth) */
+    const before = g.teams.map(t => t.score), P = comebackPlan(before, comebackReach(S), COMEBACK_MIN_TWO, comebackRoom(2));
     if(!P || !env.deal || !env.deal.comebackDeck) return false;
     const deck = env.deal.comebackDeck(comebackTaken(g, env.deal), COMEBACK_LEGS + 2);
     if(deck.length < COMEBACK_LEGS) return false;
-    g.comeback = { teams:P.teams, target:P.target, before, qs:deck.slice(0, COMEBACK_LEGS), spare:deck.slice(COMEBACK_LEGS), i:0, log:[], made:null, after:null, done:false };
+    g.comeback = { teams:P.teams, target:P.target, room:P.room, before, qs:deck.slice(0, COMEBACK_LEGS), spare:deck.slice(COMEBACK_LEGS), i:0, log:[], made:null, after:null, done:false };
     fx.push({ go:'comebackIntro' });
     return true;
   }
@@ -2370,7 +2388,7 @@
       if(ok && c.i + 1 < c.qs.length){ c.i++; fx.push({ sound:'correct' }); return comebackAsk(g, fx); }
       const made = {}; c.teams.forEach(t => { made[t] = ok; });
       c.made = ok;
-      c.after = comebackSettle(c.before, c.teams, made);
+      c.after = comebackSettle(c.before, c.teams, made, c.room);
       /* (what the comeback gives, on the scores as they stand now) */
       g.teams.forEach((t, i) => { t.score += c.after[i] - c.before[i]; });
       fx.push({ sound:ok ? 'point' : 'wrong' }, { go:'comebackSummary' });
@@ -2860,5 +2878,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, SWAP_WORDS,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

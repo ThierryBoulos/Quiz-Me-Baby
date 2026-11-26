@@ -41,22 +41,20 @@
 52.85 comebackReveal | 26 | 14-3 |  |  | 
 53.60 comebackQ | 27 | 14-3 |  |  | 
 54.60 comebackReveal | 27 | 14-3 |  |  | 
-55.60 comebackSummary | 28 | 14-12 |  |  | 
-56.35 roundIntro | 29 | 14-12 |  |  | 
-58.10 ask | 30 | 14-12 |  |  | 
-60.10 answer | 31 | 15-12 |  | Lions +1 point | 
-60.85 ask | 32 | 15-12 |  | Lions +1 point | 
-62.60 answer | 33 | 15-14 |  | Owls +2 points | 
-63.60 roundScore | 34 | 15-14 |  | Owls +2 points | 
-64.60 roundIntro | 35 | 15-14 |  | Owls +2 points | 
-65.35 ask | 36 | 15-14 |  | Owls +2 points | 
-67.10 steal | 37 | 15-14 |  | Owls +2 points | 
-69.10 answer | 38 | 15-15 |  | Owls +1 point — steal | 
-69.85 ask | 39 | 15-15 |  | Owls +1 point — steal | 
-71.60 steal | 40 | 15-15 |  | Owls +1 point — steal | 
-73.60 answer | 41 | 15-15 |  | Owls +1 point — steal | 
-74.35 roundScore | 42 | 15-15 |  | Owls +1 point — steal | 
-75.35 sudden | 43 | 15-15 |  | Owls +1 point — steal | 
-76.10 sudden | 44 | 15-15 |  | Owls +1 point — steal | 
-78.10 final | 45 | 16-15 |  | Owls +1 point — steal | 
-recap: {"margin":1,"sudden":true,"leadChanges":0,"steals":[0,1],"minis":[0,1],"best":{"title":"Closest To Wins","team":1,"legs":[1,3]},"chart":[[0,0],[0,0],[12,1],[13,1],[14,1],[14,2],[14,1],[14,3],[14,12],[15,12],[15,14],[15,15],[16,15]],"segs":[{"label":"R1","pts":[[12,1],[13,1]]},{"label":"R2","pts":[[14,1],[14,2],[14,1]]},{"label":"Closest To Wins","pts":[[14,3]]},{"label":"The Comeback","pts":[[14,12]]},{"label":"R3","pts":[[15,12],[15,14]]},{"label":"R4","pts":[[15,15]]},{"label":"Sudden death","pts":[[16,15]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":0},{"t":"One-way traffic","who":"Closest To Wins, Owls 3–1","team":1},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}
+55.60 comebackSummary | 28 | 14-10 |  |  | 
+56.35 roundIntro | 29 | 14-10 |  |  | 
+58.10 ask | 30 | 14-10 |  |  | 
+60.10 answer | 31 | 15-10 |  | Lions +1 point | 
+60.85 ask | 32 | 15-10 |  | Lions +1 point | 
+62.60 answer | 33 | 15-12 |  | Owls +2 points | 
+63.60 roundScore | 34 | 15-12 |  | Owls +2 points | 
+64.60 roundIntro | 35 | 15-12 |  | Owls +2 points | 
+65.35 ask | 36 | 15-12 |  | Owls +2 points | 
+67.10 steal | 37 | 15-12 |  | Owls +2 points | 
+69.10 answer | 38 | 15-13 |  | Owls +1 point — steal | 
+69.85 ask | 39 | 15-13 |  | Owls +1 point — steal | 
+71.60 steal | 40 | 15-13 |  | Owls +1 point — steal | 
+73.60 answer | 41 | 15-13 |  | Owls +1 point — steal | 
+74.35 roundScore | 42 | 15-13 |  | Owls +1 point — steal | 
+75.35 final | 43 | 15-13 |  | Owls +1 point — steal | 
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[0,1],"minis":[0,1],"best":{"title":"Closest To Wins","team":1,"legs":[1,3]},"chart":[[0,0],[0,0],[12,1],[13,1],[14,1],[14,2],[14,1],[14,3],[14,10],[15,10],[15,12],[15,13]],"segs":[{"label":"R1","pts":[[12,1],[13,1]]},{"label":"R2","pts":[[14,1],[14,2],[14,1]]},{"label":"Closest To Wins","pts":[[14,3]]},{"label":"The Comeback","pts":[[14,10]]},{"label":"R3","pts":[[15,10],[15,12]]},{"label":"R4","pts":[[15,13]]}],"awards":[{"t":"One-way traffic","who":"Closest To Wins, Owls 3–1","team":1},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

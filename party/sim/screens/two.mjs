@@ -65,6 +65,14 @@ export async function dumpTwo(load) {
       got[`${tag}.rouletteReveal.roulette.extra.bullet.a`] = rv; }
     const sq = copy(`${tag}.stakesQ.stakes.z`) || copy(`${tag}.stakesQ.stakes.a`);
     if (sq) { sq.pub.sent = [false, true]; got[`${tag}.stakesQ.stakes.extra.other.a`] = sq; }
+    /* (26 Nov, the wording pictures: a game still tied after its tie-break, the host's three buttons, "A point each" in
+       the middle; and the Battle called tied) */
+    const st = copy(`${tag}.flagSummary.flag.a`);
+    if (st?.pub.summary) { st.pub.summary = { ...st.pub.summary, winner: null, needsHost: true, award: [0, 0], note: "" }; st.pub.mini = { ...st.pub.mini, wins: [3, 3] };
+      got[`${tag}.flagSummary.flag.extra.still.a`] = st; }
+    const bt = copy(`${tag}.battleSummary.battle.a`);
+    if (bt?.pub.battle) { const h = Math.floor((bt.pub.mini?.pts ?? 2) / 2); bt.pub.battle = { ...bt.pub.battle, winner: null, award: [h, h], note: `Tied: called there, ${h} point${h === 1 ? "" : "s"} each.`, score: [bt.pub.battle.score?.[0] ?? 5, bt.pub.battle.score?.[0] ?? 5] };
+      got[`${tag}.battleSummary.battle.extra.tied.a`] = bt; }
     const fin = copy(`${tag}.final.a`);
     if (fin) { const sc = Math.max(...fin.pub.teams.map((t) => t.score)); fin.pub.teams.forEach((t) => { t.score = sc; }); fin.pub.winner = null;
       got[`${tag}.final.extra.tied.a`] = fin; }

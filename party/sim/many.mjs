@@ -167,7 +167,8 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
 }
 /* 17 Nov, the owner: the comeback. Once, at the night's middle, when a team is too far behind to catch up: three easy
    questions, 15 seconds each, only the teams in it answer; a miss and a team is out; all three right and it moves up
-   to 85% of the leader, never past another team. Not when it's close, not when switched off, and the host can skip it */
+   to 85% of the leader at most, a game's worth of points under the teams that weren't playing for it (26 Nov; till then
+   one point under). Not when it's close, not when switched off, and the host can skip it */
 {
   const cbDeck = bank.filter((q) => q.type === "standard" && q.difficulty === "easy" && q.theme !== "Know the Host").sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, 5);
   const order = ["quiz", "flag", "closest", "pin"];
@@ -183,7 +184,9 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
      and never under three games' worth, 18 (21 Nov). Teams C (18 behind), D (30) and E (35) are in it */
   { const s = start(5, [44, 42, 26, 14, 9]), m = L.miniOf(s), pub0 = V.buildMany(s).pub;
     want("it comes at the middle", s.screen === "intro" && m?.key === "comeback" && m.only.join() === "2,3,4");
-    want("what each can reach", m?.cb?.target.join() === ",,37,36,35");
+    /* (26 Nov, the room, 6 points with 5 teams: C a game under B's 42; D was 12 behind C and ends a game behind it; E was 5
+       behind D and stays 5 behind) */
+    want("what each can reach", m?.cb?.target.join() === ",,36,30,25" && m.cb.room === 6);
     want("the screens are sent it", pub0.comeback?.teams.join() === "2,3,4" && pub0.comeback.before.join() === "44,42,26,14,9" && pub0.game.title === "The Comeback");
     want("it isn't one of the night's games", pub0.game.count === 4 && pub0.game.index === 2);
     L.startMini(s, 1000, T, []);
@@ -207,7 +210,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     /* question 3: C right: it made it */
     q = L.qOf(s); L.captainAnswer(s, 2, { text: q.answer }); want("the last team in it is all in", L.allIn(s)); L.reveal(s); L.next(s, 4000, T);
     const pub = V.buildMany(s).pub;
-    want("the result", s.screen === "summary" && s.teams.map((x) => x.score).join() === "44,42,37,14,9" && pub.comeback.made.join() === "false,false,true,false,false" && pub.comeback.after.join() === "44,42,37,14,9");
+    want("the result", s.screen === "summary" && s.teams.map((x) => x.score).join() === "44,42,36,14,9" && pub.comeback.made.join() === "false,false,true,false,false" && pub.comeback.after.join() === "44,42,36,14,9");
     want("nobody passed anybody", s.teams[2].score < s.teams[1].score);
     L.next(s, 5000, T);
     const pubN = V.buildMany(s).pub;
@@ -217,10 +220,20 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   /* everyone misses the first question: it ends there */
   { const s = start(5, [44, 42, 26, 14, 9]); L.startMini(s, 0, T, []); L.reveal(s); L.next(s, 0, T);
     want("all out, straight to the result", s.screen === "summary" && s.teams.map((x) => x.score).join() === "44,42,26,14,9"); }
-  /* the lower team makes it, the upper one doesn't: it stops one point behind it */
+  /* the lower team makes it, the upper one doesn't: it takes the place a game (5 points, 4 teams) under the 38, and passes
+     the team that missed (26 Nov, the owner; till then it stopped one point behind it) */
   { const s = start(4, [40, 38, 14, 9]); L.startMini(s, 0, T, []);
     for (let i = 0; i < 3; i++) { const q = L.qOf(s); L.captainAnswer(s, 3, { text: q.answer }); if (i > 0) L.captainAnswer(s, 2, { text: q.answer }); L.reveal(s); L.next(s, 0, T); }
-    want("behind the team above, whoever makes it", s.screen === "summary" && s.teams.map((x) => x.score).join() === "40,38,14,13"); }
+    want("a team that makes it passes one that missed", s.screen === "summary" && s.teams.map((x) => x.score).join() === "40,38,14,33"); }
+  /* 26 Nov, the owner: with 6 to 8 teams, teams far behind are in it ("80 against 20, 20, 20"): a pack and three teams
+     far under it, with 6, 7 and 8 teams; they end tied, a game (7 points) under the pack's last team */
+  for (const k of [6, 7, 8]) { const sc = [80, 76, 72, 70, 68].slice(0, k - 3).concat([20, 20, 20]), s = start(k, sc), m = L.miniOf(s), low = [k - 3, k - 2, k - 1], last = sc[k - 4];
+    want(`${k} teams far behind: it comes, the three are in it`, s.screen === "intro" && m?.key === "comeback" && m.only.join() === low.join());
+    want(`${k} teams far behind: what each can reach`, low.every((t) => m?.cb?.target[t] === last - 7));
+    if (m?.key !== "comeback") continue;
+    L.startMini(s, 0, T, []);
+    for (let i = 0; i < 3; i++) { const q = L.qOf(s); low.forEach((t) => L.captainAnswer(s, t, { text: q.answer })); L.reveal(s); L.next(s, 0, T); }
+    want(`${k} teams far behind: all three move up, tied`, s.screen === "summary" && low.every((t) => s.teams[t].score === last - 7) && s.teams.slice(0, k - 3).every((x, t) => x.score === sc[t])); }
   /* a close night, a night with it switched off (no questions dealt), and the host's skip */
   { const s = start(5, [40, 38, 36, 35, 33]); want("not when it's close", L.miniOf(s).key === "closest" && s.cbDone === true); }
   /* the minimum gap (19 Nov, the owner; three games, 21 Nov): 17 behind with two games left is past 0.65 of 12, but under
@@ -256,7 +269,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
       want(`${name}: the group left behind is in it, the 16 too`, m?.only?.join() === "5,6,7");
       L.startMini(s, 0, T, []);
       for (let i = 0; i < 3; i++) { const q = L.qOf(s); [5, 6, 7].forEach((t) => L.captainAnswer(s, t, { text: q.answer })); L.reveal(s); L.next(s, 0, T); }
-      want(`${name}: all three make it, nobody passes anybody`, s.teams.map((x) => x.score).join() === "47,47,40,38,42,37,36,35");
+      want(`${name}: all three make it, a game under the pack, each keeping its gap`, s.teams.map((x) => x.score).join() === "47,47,40,38,42,31,29,22");
       L.next(s, 0, T);
       want(`${name}: the night carries on`, s.screen === "intro" && L.miniOf(s).key === order[2]);
       play(s); L.next(s, 0, T); play(s); L.next(s, 0, T);
@@ -264,7 +277,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
       const F = V.buildMany(s).pub;
       if (s.screen === "final") want(`${name}: the final's games and scores line up`, F.final.games.length === F.final.log.length - 1); } }
   if (fails.length) bad++;
-  console.log(`the comeback, 3-8 teams: at the middle, only the teams far behind, 15 s, a miss is out, all three right moves up (never past a team), once a night, close nights and switched off: none, skip, Change question — ${fails.length ? "FAILED: " + fails.join("; ") : "ok"}`);
+  console.log(`the comeback, 3-8 teams: at the middle, only the teams far behind, 15 s, a miss is out, all three right moves up (a game's worth under the teams not in it), 6 to 8 teams far behind, once a night, close nights and switched off: none, skip, Change question — ${fails.length ? "FAILED: " + fails.join("; ") : "ok"}`);
 }
 /* 8 Nov: a captain contests a call on the reveal, the host decides (as with two teams): own WRONG or another team's
    RIGHT only, one at a time, each call once; agreed, the call (and the points) move; Next with one open, it stands */

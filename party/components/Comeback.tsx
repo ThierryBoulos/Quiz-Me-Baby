@@ -91,6 +91,8 @@ export function ComebackResult({ teams, c, tv }: { teams: CbTeam[]; c: ComebackP
               ? <span className="inline-flex items-center shrink-0" style={{ gap: tv ? 12 : 8 }}>
                   {up > 0
                     ? <><span className="display" style={{ fontSize: tv ? 30 : 16 }}>{c.before[t]}</span><Arrow /><span className="display" style={{ fontSize: tv ? 30 : 16, color: "var(--color-ok)" }}>{after[t]}</span></>
+                    /* (can't happen since the room, 26 Nov: a team is only in it if it has points to win; kept for a night
+                       saved before it, or scores the host set by hand meanwhile) */
                     : <span style={{ fontSize: tv ? 22 : 13, color: "var(--color-ink-2)" }}>All {c.of} right, but no room to move up</span>}
                 </span>
               : <span className="shrink-0" style={{ fontSize: tv ? 24 : 13, color: "var(--color-ink-3)" }}>missed it</span>}

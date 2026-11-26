@@ -30,7 +30,7 @@ test('comeback, two teams: it comes up at the middle of a massacre, and only the
   assert.deepEqual(goes(round(3, 0)), ['comebackIntro']);              // 2 of 4, 6-0, 4 points still to win: a massacre
   assert.deepEqual(g.comeback.teams, [1]);
   assert.deepEqual(g.comeback.before, [6, 0]);
-  assert.deepEqual(g.comeback.target, [null, 5]);                      // 85% of 6, and never level with the leader
+  assert.deepEqual(g.comeback.target, [null, 2]);                      // 4 points behind the leader (the room, 26 Nov; till then 5)
   assert.equal(g.comeback.qs.length, 3); assert.equal(g.comeback.spare.length, 2);
   assert.equal(g.r, 1);                                                // the night hasn't moved on yet
 });
@@ -89,13 +89,13 @@ test('comeback, two teams: the mini-games, the Battle and Secret Stakes count as
   g.flagGame.verdict = { winner:0, needsHost:false, note:'' };
   assert.deepEqual(goes(play({ type:'flag/done' })), ['comebackIntro']);
   assert.deepEqual(g.comeback.before, [6, 0]);
-  assert.deepEqual(g.comeback.target, [null, 5]);
+  assert.deepEqual(g.comeback.target, [null, 2]);
 });
 
 test('comeback, two teams: all three right, and the team behind moves up as the result comes up', () => {
   const { g, round, play, used } = setup();
   round(6, 0); round(6, 1);                                            // 12-1
-  assert.deepEqual(g.comeback.target, [null, 10]);
+  assert.deepEqual(g.comeback.target, [null, 8]);
   const first = g.comeback.qs.map(q => q.id);
   assert.deepEqual(goes(play({ type:'comeback/start' })), ['comebackQ']);
   assert.deepEqual(goes(play({ type:'comeback/verdict', ok:true })), ['comebackQ']); assert.equal(g.comeback.i, 1);
@@ -103,8 +103,8 @@ test('comeback, two teams: all three right, and the team behind moves up as the 
   assert.deepEqual(scores(g), [12, 1]);                                // not before the result
   assert.deepEqual(goes(play({ type:'comeback/verdict', ok:true })), ['comebackSummary']);
   assert.equal(g.comeback.made, true);
-  assert.deepEqual(g.comeback.after, [12, 10]);
-  assert.deepEqual(scores(g), [12, 10]);
+  assert.deepEqual(g.comeback.after, [12, 8]);
+  assert.deepEqual(scores(g), [12, 8]);
   assert.deepEqual(used, first);                                       // each question played is marked used, as it comes up
   assert.deepEqual(play({ type:'comeback/verdict', ok:true }), []);    // (a second tap changes nothing)
   /* Next: the night carries on where it was going (round 3), and the comeback never comes back */
@@ -179,5 +179,5 @@ test('comeback, two teams: scores put right by hand during it are kept (it adds 
   play({ type:'comeback/start' });
   g.teams[0].score = 13;                                               // the host sets the scores meanwhile
   play({ type:'comeback/verdict', ok:true }); play({ type:'comeback/verdict', ok:true }); play({ type:'comeback/verdict', ok:true });
-  assert.deepEqual(scores(g), [13, 10]);
+  assert.deepEqual(scores(g), [13, 8]);
 });
