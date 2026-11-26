@@ -302,11 +302,15 @@ function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: "tv" | "phone"
 const wrap = (label: string, w: number, size: number) => { const fit = Math.max(4, Math.floor((w - 6) / (size * 0.72))), out: string[] = [];
   for (const word of label.toUpperCase().split(" ")) { const l = out[out.length - 1]; if (l != null && (l + " " + word).length <= fit) out[out.length - 1] = l + " " + word; else out.push(word); }
   return out.slice(0, 3); };
+/* (a long night: a game's stretch is narrower than its longest word, and the names ran into each other. From 12 games
+   they sit on two rows, every other one lower, so each has twice the room: 26 Nov, the owner) */
+const STAGGER_FROM = 12;
 /* the night, drawn (the two-team NightChart, for N teams), the whole width of the screen: every team's score after
    each game, drawing itself across, the games named along the bottom; each line ends on the team's place and score,
    the labels kept apart so none sits on another */
 function NightChartMany({ pub }: { pub: PubMany }) {
-  const L = pub.final!.log, T = pub.teams, W = 890, n = L.length, H = n > 6 ? 284 : 270, PAD = 16, B = H - (n > 6 ? 48 : 30), max = Math.max(1, ...L.flat());
+  const two = pub.final!.games.length >= STAGGER_FROM;
+  const L = pub.final!.log, T = pub.teams, W = 890, n = L.length, H = two ? 325 : n > 6 ? 284 : 270, PAD = 16, B = H - (two ? 89 : n > 6 ? 48 : 30), max = Math.max(1, ...L.flat());
   const x = (i: number) => (i / (n - 1)) * W, y = (v: number) => B - (v / max) * (B - PAD);
   const place = Object.fromEntries(pub.final!.order.map((o) => [o.team, o.place]));
   /* the labels: in score order, each at least 22 apart, kept inside the chart */
@@ -318,9 +322,10 @@ function NightChartMany({ pub }: { pub: PubMany }) {
       <line x1={0} y1={B} x2={W} y2={B} stroke="rgba(255,255,255,.14)" strokeWidth={2} />
       {L.map((_, i) => i > 0 && <line key={i} x1={x(i)} y1={PAD} x2={x(i)} y2={B} stroke="rgba(255,255,255,.06)" strokeWidth={1} />)}
       {/* each game under its own stretch of the chart, on as many lines as it needs to fit (up to three) */}
-      {pub.final!.games.map((gm, i) => { const w = x(i + 1) - x(i), cx = (x(i) + x(i + 1)) / 2, L2 = wrap(gm, w, n > 6 ? 12 : 14); return (
-        <text key={"g" + i} x={cx} y={B + 18} textAnchor="middle" fill="rgba(185,192,222,.75)" fontSize={n > 6 ? 12 : 14} fontWeight={700} letterSpacing=".1em">
-          {L2.map((l, j) => <tspan key={j} x={cx} dy={j ? (n > 6 ? 13 : 15) : 0}>{l}</tspan>)}</text>); })}
+      {pub.final!.games.map((gm, i) => { const w = x(i + 1) - x(i), cx = (x(i) + x(i + 1)) / 2, low = two && i % 2 === 1, L2 = wrap(gm, two ? 2 * w - 8 : w, n > 6 ? 12 : 14); return (
+        /* (the first one starts at the chart's edge on two rows: centred on its narrow stretch it ran off the left) */
+        <text key={"g" + i} x={two && i === 0 ? 0 : cx} y={B + 18 + (low ? 43 : 0)} textAnchor={two && i === 0 ? "start" : "middle"} fill="rgba(185,192,222,.75)" fontSize={n > 6 ? 12 : 14} fontWeight={700} letterSpacing=".1em">
+          {L2.map((l, j) => <tspan key={j} x={two && i === 0 ? 0 : cx} dy={j ? (n > 6 ? 13 : 15) : 0}>{l}</tspan>)}</text>); })}
       {T.map((t, i) => <polyline key={i} points={L.map((row, j) => `${x(j).toFixed(1)},${y(row[i]).toFixed(1)}`).join(" ")} fill="none" stroke={t.color} strokeWidth={4} strokeLinejoin="round" strokeLinecap="round" pathLength={1} className="chart-line" style={{ animationDelay: i * 0.12 + "s" }} />)}
       {lab.map((t) => (
         <g key={"l" + t}>
