@@ -34,7 +34,8 @@ import { SkSub, StakesBet, StakesHostBets, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
 import { FoolFact, FoolHostCard, FoolOptions, FoolReveal, FoolStatus, foolAwardList, foolVotes, ownIndex } from "./Fool";
 import { FOOL_MAX, foolDone } from "@/lib/fool";
-import { seeAsk } from "@/lib/see";
+import { BuzzPad, buzzHand, Line, noCopy, PinBeside, SeeAsk, SuggestBox } from "./PhoneBits";
+import { splitIng } from "./DishGame";
 import { SK_TOP_CAP, SK_TOP_PLAYER, SK_TOP_REVEAL, skBetCount, skBetLine, skLevelWord, skRevealPill, skSumPill } from "@/lib/stakes";
 import { MapView } from "./MapView";
 import { PinMap } from "./PinMap";
@@ -47,7 +48,6 @@ import { CB_TOP_CAP, CB_TOP_PLAYER, cbResultHead, cbRevealHead, cbSumPill, cbTop
 import { AskHead, battleNeeds, Board, comebackTeams, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, SuddenRules, TEAM_HEX, tieCall, tieHead, Verdict } from "./GameParts";
 
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
-const splitIng = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? ["", t] : [t.slice(0, i), t.slice(i + 3)]; };
 export const ANSWERING = ["ask", "steal", "miniQ", "flagQ", "seeQ", "dishQ", "mapQ", "sayQ", "pinQ", "airportQ", "majorityQ", "rouletteQ", "stakesQ", "foolWrite", "foolPick", "sudden", "battleQ", "battleTie", "comebackQ"];
 /* (Russian Roulette joined on 22 Nov, the owner: players suggest, leaving the screen is flagged, as with 3 to 8 teams) */
 /* captains only: the players keep quiet (and in Majority Rules everyone answers for themselves: nothing to suggest) */
@@ -102,9 +102,6 @@ export function useSuggestions(code: string, qid: string | undefined, members: M
   return list.filter((s) => members.find((m) => m.user_id === s.user_id)?.team === team);
 }
 
-/* a status or an outcome is plain text: boxes are for things you can tap */
-const Line = ({ children, className = "" }: { children: React.ReactNode; className?: string }) =>
-  <p className={"text-center text-15 text-[var(--color-ink-2)] " + className} role="status">{children}</p>;
 function Ings({ ings, small }: { ings: string[]; small?: boolean }) {
   return (
     <ol className="grid gap-1" style={{ fontSize: small || ings.length > 7 ? 14 : 16 }}>
@@ -127,8 +124,6 @@ export function useNoPaste(code: string, qid?: string) {
 }
 
 type Send = (move: Record<string, unknown>) => void;
-/* a light vibration where the phone supports it (Android); silently nothing elsewhere */
-const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 
 /* The Auction's +1: the number moves the moment you tap (the TV catches up a
    beat later), and no tap is lost while the last one is still on its way. */
@@ -455,7 +450,7 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
         {/* (as with 3 to 8 teams: the question by kind over the picture, the clock, the answer, then one card: who buzzed and
            their 10 seconds, who is out, who can still buzz, what was typed: 23 Nov, the owner) */}
         {pub.see && <ToSide order={2}><div className="flex flex-col items-center gap-1">
-          <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>
+          <SeeAsk kind={pub.see.kind} />
           {/* (held sideways: the picture smaller, the clock beside it, so the left column fits) */}
           <div className={sideways ? "flex items-center gap-3" : "flex flex-col items-center gap-1"}>
             <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={sideways ? 110 : 220} />
@@ -1122,7 +1117,6 @@ function Result({ pub, mine, headOnly, part, host = false, act }: { pub: Pub; mi
 /* what's on screen, close up: the question, the flag or the ingredients.
    It can't be selected or copied (no pasting it into a chatbot), and while
    the clock is paused it's hidden. */
-const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onContextMenu: (e: React.MouseEvent) => e.preventDefault() };
 /* counting: this phone counts the Auction's names, and shows its own count */
 /* side: on a phone held sideways, the question, the flag, the photo, the recipe and the clock go to the left column
    (components/Side; upright nothing moves) */
@@ -1165,7 +1159,7 @@ function OnScreen({ pub, counting, small, side, mine, captain, who, picking, buz
        left it was cut off, 12 and 13 Nov) */}
     {(pub.screen === "seeQ" || pub.screen === "seeReveal") && pub.see && <div className="flex flex-col items-center gap-1">
       {/* (the question, by kind: the owner, 12 Nov) */}
-      {pub.screen === "seeQ" && <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>}
+      {pub.screen === "seeQ" && <SeeAsk kind={pub.see.kind} />}
       <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} clear={pub.screen === "seeReveal"} hold={!!buzzed && pub.buzz == null} w={pub.screen === "seeReveal" ? (small ? 180 : 240) : small ? 220 : 340} alt={pub.see.rev?.answer} />
       {pub.screen === "seeReveal" && <SeeCredit see={pub.see} size={11} />}
       {/* (as with 3 to 8 teams: who got it under the picture, then the answer on its tile and the fact: 23 Nov, the owner) */}
@@ -1174,10 +1168,8 @@ function OnScreen({ pub, counting, small, side, mine, captain, who, picking, buz
       {/* the other team out (the TV's note, which no phone shows: with no TV, nobody would know they can wait for it to clear) */}
       {pub.screen === "seeQ" && mine != null && pub.see.out?.[mine === 0 ? 1 : 0] && <p className="text-14 font-semibold text-center leading-snug" style={{ color: "var(--color-no)" }}>
         <bdi>{pub.teams[mine === 0 ? 1 : 0].name}</bdi> are out of this picture.</p>}</div>}
-    {pub.screen === "pinQ" && (small
-      /* the captain's phone: the photo beside the clock, so the map gets the room */
-      ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
-      : <PinPhoto pin={pub.pin} h={230} small zoom />)}
+    {/* (the captain's phone: the photo beside the clock, so the map gets the room) */}
+    {pub.screen === "pinQ" && <PinBeside pin={pub.pin} deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} small={!!small} />}
     {/* (as with 3 to 8 teams: the map, the landmark's name on its tile, its place as the fact: 23 Nov, the owner) */}
     {/* (the host's map a little shorter, so who takes it shows above Next on a 360 by 780 phone; a team's phone has the side line) */}
     {pub.screen === "pinReveal" && pub.pin?.reveal && <PinAnswer marks={pinMarks(pub)} height={side ? 220 : 170} name={pub.pin.reveal.name} place={pub.pin.reveal.place} />}
@@ -1426,22 +1418,12 @@ export function PlayerGame({ pub, me, members, code }: { pub: Pub; me: Member; m
       {/* the Battle's twenty calls, read-only, on every phone (the 4 Nov audit, 3.12: players only saw "Waiting for…") */}
       {pub.screen === "battleReview" && <Calls pub={pub} act={() => {}} />}
       <WaitingForHost pub={pub} members={members} />
-      {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }}
-        onClick={() => { buzzHand(40); setBuzzed(true); void sendAction(code, "buzz", {}).catch(() => setBuzzed(false)); }}>BUZZ</button>}
-      {canBuzz && buzzed && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
+      {canBuzz && <BuzzPad color={tc(mine)} buzzed={buzzed} buzz={() => { setBuzzed(true); void sendAction(code, "buzz", {}).catch(() => setBuzzed(false)); }} />}
       {/* the captain has sent: the players are told, as with 3 to 8 teams (23 Nov, the owner) */}
       {!pub.paused && ["miniQ", "flagQ", "mapQ", "sayQ", "pinQ", "airportQ", "rouletteQ", "stakesQ"].includes(pub.screen) && pub.sent?.[mine] && <p className="text-center font-bold text-16" role="status">Locked in. The answer comes up when the time&rsquo;s up.</p>}
-      {canSuggest && (
-        <div className="card flex flex-col gap-2">
-          <label className="field-label !mb-0" htmlFor="sug">{pub.screen === "foolWrite" ? FOOL.suggest(cap?.name || "your captain") : `Suggest to ${cap?.name || "your captain"}`}</label>
-          <div className="flex gap-2">
-            <input id="sug" {...np.props} className="input" value={text} maxLength={pub.screen === "foolWrite" ? FOOL_MAX : 80} inputMode={pub.screen === "miniQ" ? "decimal" : "text"} placeholder={pub.screen === "miniQ" ? "A number" : pub.screen === "foolWrite" ? FOOL.suggestHint : "Your answer"} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
-            <button className="btn" disabled={!text.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => void suggest()}>Send</button>
-          </div>
-          {np.hint}
-          {pub.screen === "foolWrite" && text.length >= FOOL_MAX && <div className="text-13 font-bold" style={{ color: "var(--color-gold)" }} role="status">{FOOL.limit}</div>}
-          {sent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sent}</b></div>}
-        </div>)}
+      {canSuggest && <SuggestBox id="sug" label={pub.screen === "foolWrite" ? FOOL.suggest(cap?.name || "your captain") : `Suggest to ${cap?.name || "your captain"}`} value={text} set={setText} send={() => void suggest()}
+        max={pub.screen === "foolWrite" ? FOOL_MAX : 80} number={pub.screen === "miniQ"} placeholder={pub.screen === "miniQ" ? "A number" : pub.screen === "foolWrite" ? FOOL.suggestHint : "Your answer"}
+        np={np} limit={pub.screen === "foolWrite" ? FOOL.limit : undefined} sent={sent} />}
       {pub.screen === "auctionRun" && (
         <div className="card flex flex-col gap-2 items-center">
           <div className="eyebrow">Count along (just for you)</div>
@@ -1709,10 +1691,8 @@ export function CaptainGame({ pub, me, members, code, hold = false }: { pub: Pub
       {nohost && lead && pub.lifeline?.key === "friend" && !pub.lifeline.wait && (pub.lifeline.deadline || pub.lifeline.left) && (
         <button className="btn btn-sm self-center" onClick={() => fire({ type: "ui/pauseFriend" })}>{pub.lifeline.deadline ? "Pause the call" : "Resume the call"}</button>)}
 
-      {canBuzz && !buzzed && <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: tc(mine), color: "#04050e", borderColor: "transparent" }} disabled={busy}
-        onClick={() => { buzzHand(40); setBuzzed(true); void act("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>}
-      {/* (the answer box is up already: that says it) */}
-      {canBuzz && buzzed && !canType && <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: tc(mine), color: "#04050e", opacity: 0.85 }}>BUZZED!</div>}
+      {/* (buzzed with the answer box up already: that says it) */}
+      {canBuzz && !(buzzed && canType) && <BuzzPad color={tc(mine)} buzzed={buzzed} disabled={busy} buzz={() => { setBuzzed(true); void act("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }} />}
 
       {canType && (
         <div className="card flex flex-col gap-2">

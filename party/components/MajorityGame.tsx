@@ -8,6 +8,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Dot } from "./many/PartsMany";
 import { MAJ } from "@/lib/minis/majority";
 import { sendAction, newTap } from "@/lib/supabase";
+import { buzzHand } from "./PhoneBits";
 
 export type MrTeam = { name: string; color: string };
 export type MrEntry = { name: string; team: number; here?: boolean; out?: boolean };
@@ -164,7 +165,6 @@ function phoneOrder(opts: string[], seed: string) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
-const buzzHand = (p: number) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 export function MajorityPad({ code, me, qid, k, options, onList, why, up, answer, paused, disabled, ack, noTv }: {
   code: string; me: { user_id: string }; qid: string; k: string; options: string[]; onList: boolean;
   why?: "off" | "back" | null;   // not counted now: taken off (off), or back in the room, counted from the next question (back)

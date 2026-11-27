@@ -5,7 +5,7 @@
    button in the header, and the tracker lights your team. */
 import { useEffect, useState } from "react";
 import { Clock } from "../Clock";
-import { Board, FlagImg, PinPhoto } from "../GameParts";
+import { Board, FlagImg } from "../GameParts";
 import { MapView } from "../MapView";
 import { PinMap } from "../PinMap";
 import { sendAction, sendDraft, sb } from "@/lib/supabase";
@@ -14,6 +14,7 @@ import { QMB } from "@/lib/engine";
 import type { Member } from "@/lib/room";
 import type { PubMany, SecretMany } from "@/lib/many/view";
 import { LETTERS, typedKey } from "@/lib/many/logic";
+import { BuzzPad, buzzHand, Line, noCopy, PinBeside, SeeAsk, SuggestBox } from "../PhoneBits";
 import { useNoPaste, useSuggestions } from "../PhoneGame";
 import { ToSide, useSideways } from "../Side";
 import { Dot, IntroMany, paid, pct, place, resultDone, splitIng, takes } from "./PartsMany";
@@ -47,7 +48,6 @@ import { SkSub, StakesBet, StakesHostBets, StakesPhone } from "../Stakes";
 import { FoolFact, FoolHostCard, FoolOptions, FoolPredict, FoolReveal, FoolStatus, foolAwardList, foolVotes, ownIndex } from "../Fool";
 import { FOOL_MAX } from "@/lib/fool";
 import { SeeCredit, SeePicture, SeeTicks, seeWho } from "../See";
-import { seeAsk } from "@/lib/see";
 import { SK_TOP_CAP, SK_TOP_PLAYER, SK_TOP_REVEAL, skBetLine, skLevelWord, skRevealPill, skSumPill } from "@/lib/stakes";
 
 /* the host's answer card: read straight from the secrets row (only the TV and the host can) */
@@ -69,9 +69,6 @@ function useSecretMany(code: string, on: boolean, step: number, again = "") {
   }, [code, on, step, again]);
   return s.step == null || s.step === step ? s : {};
 }
-const noCopy = { onCopy: (e: React.ClipboardEvent) => e.preventDefault(), onContextMenu: (e: React.MouseEvent) => e.preventDefault() };
-const Line = ({ children, className = "" }: { children: React.ReactNode; className?: string }) =>
-  <p className={"text-center text-15 text-[var(--color-ink-2)] " + className} role="status">{children}</p>;
 
 /* Contesting a call on the reveal (8 Nov, the owner: the same as with two teams, the host decides). A captain: their own
    team's WRONG, or another team's RIGHT, once each. The host: Agree or No. Everyone else: who contests, and that the host decides */
@@ -139,7 +136,6 @@ export function ScoreFixMany({ pub, code }: { pub: PubMany; code: string }) {
     </div>);
 }
 
-const buzzHand = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* not supported */ } };
 /* the line at the top of a captain's phone on a question, the 2-team words (PhoneGame's status) */
 const TOP_CAP: Record<string, string> = { roulette: RR_TOP_CAP, stakes: SK_TOP_CAP, flag: FLAG.topCaptain, closest: CLOSEST.topCaptain, pin: PIN.topCaptain, airport: AIRPORT.topCaptain, map: MAP.topCaptain, say: SAY.topCaptain, dish: DISH.topCaptain };
 export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: Member; code: string; members?: Member[] }) {
@@ -258,7 +254,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* (stays in the right column sideways, sized to the screen: under the scores on the left it was cut off) */}
       {g.key === "see" && pub.see && <div className="flex flex-col items-center gap-1 noselect" {...noCopy}>
         {/* (the question, by kind: the owner, 12 Nov) */}
-        <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(pub.see.kind)}</div>
+        <SeeAsk kind={pub.see.kind} />
         <SeePicture see={pub.see} deadline={pub.deadline} left={pub.left} w={small ? 220 : 340} hold={buzzed && pub.see.buzz == null} /></div>}
       {/* (with no TV, what the TV shows beside the picture: who has buzzed, who is out of it) */}
       {g.key === "see" && pub.see && noTv && (pub.see.buzz != null || pub.see.out?.some(Boolean)) && <SeeTicks teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} out={pub.see.out} buzz={pub.see.buzz} size={15} />}
@@ -282,9 +278,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {g.key === "stakes" && sk && <div className="noselect contents" {...noCopy}><StakesPhone sk={sk} screen="stakesQ" teams={rrT} me={host ? null : mine ?? null} /></div>}
       {/* (no TV: how many teams have answered, as Russian Roulette says it here: 26 Nov, the owner; the host's card has the list) */}
       {g.key === "stakes" && sk && !host && noTv && sc === "q" && !pub.paused && <p className="text-center text-13 text-[var(--color-ink-3)]" role="status">{(pub.sent || []).filter(Boolean).length} of {T.length} teams have answered.</p>}
-      {g.key === "pin" && (small
-        ? <div className="flex items-center justify-center gap-4 pin-row"><PinPhoto pin={pub.pin} h={112} small zoom /><span className="main-clock"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={64} /></span></div>
-        : <PinPhoto pin={pub.pin} h={230} small zoom />)}
+      {g.key === "pin" && <PinBeside pin={pub.pin} deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} small={!!small} />}
       {pub.question && <p className={"font-bold leading-snug text-center " + (pub.question.length > 120 ? "text-16" : "text-20")}>{pub.question}</p>}
       {/* (What Do You See?, a buzz: one clock, the team's 10 seconds; the captain who buzzed has it on the answer card) */}
       {!(small && g.key === "pin") && !spinning && !(host && g.key === "roulette") && !(g.key === "see" && pub.see?.typeBy && cap && pub.see.buzz === mine) && <ToSide order={9} className="side-clock" when={g.key !== "closest"}><div className={"grid place-items-center main-clock" + (g.key === "closest" ? " clock-last" : "")}>
@@ -530,10 +524,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
           <p className="text-center font-bold text-18 text-balance" role="status" style={{ color: out ? "var(--color-no)" : me2 ? "var(--color-gold)" : bz != null ? "var(--color-ink-3)" : undefined }}>
             {out ? (sentMine ? "Wrong. You’re out of this picture." : "Time’s up. You’re out of this picture.") : me2 ? (sentMine || sentTxt ? "Answer sent. The game checks it." : <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud and type it.</>)
               : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
-          {!out && bz == null && !typing && (buzzed
-            ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
-            : <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
-                onClick={() => { buzzHand(40); setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
+          {!out && bz == null && !typing && <BuzzPad color={col} buzzed={buzzed} disabled={busy} buzz={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }} />}
           {typing && (
             <div className="card flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
@@ -592,23 +583,12 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
             {/* (the 2-team words: 23 Nov, the owner) */}
             {out ? (sentMine ? "Your team guessed wrong: out of this picture." : "Time’s up. You’re out of this picture.") : bz === mine ? <>{S?.by && S.by !== me.name ? <bdi>{S.by}</bdi> : "You"} buzzed! Say it out loud: your captain types it.</>
               : bz != null ? <><bdi>{T[bz]?.name}</bdi> buzzed</> : "Know it? BUZZ!"}</p>
-          {!out && bz == null && (buzzed
-            ? <div className="display text-center rounded-[16px] grid place-items-center" role="status" style={{ minHeight: 100, fontSize: 40, background: col, color: "#04050e", opacity: 0.85 }}>BUZZED!</div>
-            : <button className="btn btn-lg btn-block display" style={{ minHeight: 100, fontSize: 48, background: col, color: "#04050e", borderColor: "transparent" }} disabled={busy}
-                onClick={() => { buzzHand(40); setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }}>BUZZ</button>)}
+          {!out && bz == null && <BuzzPad color={col} buzzed={buzzed} disabled={busy} buzz={() => { setBuzzed(true); void send("buzz", {}).then((ok) => { if (!ok) setBuzzed(false); }); }} />}
         </>); })()}
         {/* a box to suggest an answer to the captain, as with two teams (the 4 Nov audit, 3.13); not on a map pin */}
         {spinning || (g.key === "see" && mine != null && pub.see?.out?.[mine]) ? null : mine != null && !pub.sent[mine] && !(g.only && !g.only.includes(mine)) && !cbOut ? (
-          <div className="card flex flex-col gap-2">
-            <label className="field-label !mb-0" htmlFor="msug">Suggest to {T[mine]?.captain || "your captain"}</label>
-            <div className="flex gap-2">
-              <input id="msug" {...np.props} className="input" autoComplete="off" value={sug} maxLength={80} inputMode={g.key === "closest" ? "decimal" : "text"} placeholder={g.key === "closest" ? "A number" : "Your answer"}
-                onChange={(e) => setSug(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
-              <button className="btn" disabled={!sug.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => void suggest()}>Send</button>
-            </div>
-            {np.hint}
-            {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
-          </div>)
+          <SuggestBox id="msug" label={<>Suggest to {T[mine]?.captain || "your captain"}</>} value={sug} set={setSug} send={() => void suggest()} max={80} number={g.key === "closest"}
+            placeholder={g.key === "closest" ? "A number" : "Your answer"} np={np} sent={sugSent} noFill />)
           /* (once the captain has sent it, say so: 12 Nov) */
           : g.key === "see" ? null : <Line>{cb && cbOut ? CB_OUT : cb && !cbIn ? cbLine : mine != null && pub.sent[mine] ? <>Locked in. The answer comes up when the time&rsquo;s up.</> : "Your captain answers this one."}</Line>}
       </>)}
@@ -710,17 +690,8 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
                 onPick={(k) => { setFoolTap({ q: String(pub.qid), k }); void sendAction(code, "suggest", { team: mine, qid: pub.qid, text: F.opts![k].slice(0, 80), pick: k }).catch(() => setFoolTap(null)); }} />
             : <FoolOptions opts={F.opts} seed={seed} compact={cmp} />)}
           {!picking && mine != null && !done ? (
-            <div className="card flex flex-col gap-2">
-              <label className="field-label !mb-0" htmlFor="msug">{FOOL.suggest(T[mine]?.captain || "your captain")}</label>
-              <div className="flex gap-2">
-                <input id="msug" {...np.props} className="input" autoComplete="off" value={sug} maxLength={FOOL_MAX} placeholder={FOOL.suggestHint}
-                  onChange={(e) => setSug(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void suggest(); }} />
-                <button className="btn" disabled={!sug.trim()} onPointerDown={(e) => e.preventDefault()} onClick={() => void suggest()}>Send</button>
-              </div>
-              {sug.length >= FOOL_MAX && <div className="text-13 font-bold" style={{ color: "var(--color-gold)" }} role="status">{FOOL.limit}</div>}
-              {np.hint}
-              {sugSent && <div className="text-13 text-[var(--color-ink-2)]">Sent: <b>{sugSent}</b></div>}
-            </div>)
+            <SuggestBox id="msug" label={FOOL.suggest(T[mine]?.captain || "your captain")} value={sug} set={setSug} send={() => void suggest()} max={FOOL_MAX}
+              placeholder={FOOL.suggestHint} np={np} limit={FOOL.limit} sent={sugSent} noFill />)
             : <Line>{mine == null ? "Eyes on the TV." : picking ? (done ? "Picked. Wait for the reveal." : foolTap?.q === String(pub.qid) ? FOOL.helpPicked(T[mine]?.captain || "Your captain") : FOOL.helpPick(T[mine]?.captain || "Your captain")) : FOOL.lieSent(null)}</Line>}
           {status}
         </>); })()}
