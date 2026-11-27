@@ -72,6 +72,11 @@ strangers play. Details, file and line: the security section of the audit page
 (https://claude.ai/artifact/Q5HCTgBJxN6R6gNJHxmxTZ). Some may move into the waves if the owner accepts them
 there; then mark them here with the wave.
 
+**The owner, 27 Nov: every todo below is done before the game is sold, not before.** The six that matter most:
+the answers held on the referee phone with no host; room codes that can be tried without limit; changing team mid-game;
+a captain using the TV code to take the TV with 2 teams and no host; Secret Stakes picks readable from other phones;
+What Do You See?'s clear picture on every phone.
+
 - **todo**: Answers held by the referee phone in no-host games (decision 1): full fix is judging on the server.
 - **done (5 Nov 2026)**: A member can break every captain's suggestion inbox with one bad row (actions read rule casts a number).
 - **done (5 Nov 2026)**: The no-TV referee's seat can be taken from the join screen, stopping the game.
