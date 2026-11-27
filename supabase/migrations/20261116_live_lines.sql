@@ -14,7 +14,7 @@ $$
     when topic like 'pub:%' then exists (
       select 1 from public.rooms r where r.code = substr(topic, 5)
         and (r.tv_id = (select auth.uid())
-             or (not send and exists (select 1 from public.members m where m.room = r.code and m.user_id = (select auth.uid()))))))
+             or (not send and exists (select 1 from public.members m where m.room = r.code and m.user_id = (select auth.uid())))))
     when topic like 'act:%' then (not send) and exists (
       select 1 from public.rooms r where r.code = substr(topic, 5) and r.tv_id = (select auth.uid()))
     else false end
