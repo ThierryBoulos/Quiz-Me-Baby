@@ -338,9 +338,10 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
   const store = { "qmb.party.settings": JSON.stringify({ v: 99, imad: true }) };
   globalThis.localStorage = { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } };
   const io = join(here, ".out/imad.mjs");
-  await build({ entryPoints: [join(here, "../lib/many/imad.ts")], outfile: io, bundle: true, platform: "node", format: "esm", logLevel: "error", alias: { "@": join(here, "..") } });
+  await build({ entryPoints: [join(here, "imad-entry.mjs")], outfile: io, bundle: true, platform: "node", format: "esm", logLevel: "error", alias: { "@": join(here, "..") } });
   const I = await import(pathToFileURL(io).href);
-  const teams = [0, 1, 2, 3].map((t) => ({ name: L.defaultName(t), captain: "Cap" + t }));
+  /* (a name ending in s: "Lions'", never "Lions's", as with 2 teams: 27 Nov) */
+  const teams = [0, 1, 2, 3].map((t) => ({ name: ["Lions", "Owls", "Team C", "Bees"][t], captain: "Cap" + t }));
   const s = L.newNight(teams, { quiz: decks.quiz.slice(0, 4), flag: decks.flag, closest: decks.closest }, ["quiz", "flag", "closest"]);
   const said = []; let last = 0;
   const look = () => { I.imadMany(s); if (s.imad && s.imad.id !== last) { last = s.imad.id; said.push(s.imad.text); } };
@@ -351,7 +352,7 @@ for (const [k, crowd, seed] of [[3, 9, 1], [5, 20, 2], [8, 40, 3]]) {
     else L.next(s, 0, T);
   }
   look();
-  const ok = said.length >= 4 && said.every((x) => !/\{\w+\}/.test(x) && !/\bboth\b|buzz/i.test(x));
+  const ok = said.length >= 4 && said.every((x) => !/\{\w+\}/.test(x) && !/\bboth\b|buzz/i.test(x) && !/s's\b/.test(x)) && I.fillLine("{team}'s", { team: "Lions" }) === "Lions’";
   if (!ok) bad++;
   console.log(`Imad, 3-8 teams: ${said.length} lines, all filled in and fit for many teams ${ok} — ${ok ? "ok" : "FAILED"}`);
   delete globalThis.localStorage;

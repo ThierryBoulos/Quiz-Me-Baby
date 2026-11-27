@@ -3,8 +3,8 @@
    instant ("Correct!" then "LEAD CHANGE!") go up as one. (Classic's Host) */
 import { QMB } from "../engine";
 import { getSettings } from "../settings";
-import { HOST_LINES } from "../imadLines";
-import { iso, poss } from "../game";
+import { fillLine, nextLine } from "../imadLines";
+import { iso } from "../game";
 import { miniOf, miniState, other, type G } from "./rules";
 import { fireOf, seatOf } from "./reads";
 import type { TvState } from "./state";
@@ -26,14 +26,9 @@ export function imadSay(s: TvState, moments: string[] | string, extra?: G) {
   const d = T[0].score - T[1].score;
   v.leader = T[d >= 0 ? 0 : 1].name; v.trailer = T[d >= 0 ? 1 : 0].name; v.gap = Math.abs(d);
   for (const m of ([] as string[]).concat(moments)) {
-    const pool = HOST_LINES[m]; if (!pool?.length) continue;
-    const seen: number[] = ((g.hostUsed = g.hostUsed || {})[m] = g.hostUsed[m] || []);
-    let free = pool.map((_, i) => i).filter((i) => !seen.includes(i));
-    if (!free.length) { seen.length = 0; free = pool.map((_, i) => i); }
-    const i = free[Math.floor(rnd() * free.length)];
-    seen.push(i);
-    /* ("{team}'s": the name's own ending, "Lions’", never "Lions's": 26 Nov) */
-    s.imadQ.push(pool[i].replace(/\{(\w+)\}'s/g, (_x, k) => (v[k] != null ? poss(String(v[k])) : "")).replace(/\{(\w+)\}/g, (_x, k) => (v[k] != null ? String(v[k]) : "")));
+    /* (picked and filled as with 3 to 8 teams: lib/imadLines.ts, 27 Nov, the merge) */
+    const line = nextLine(m, () => ((g.hostUsed = g.hostUsed || {})[m] = g.hostUsed[m] || []), rnd); if (line == null) continue;
+    s.imadQ.push(fillLine(line, v));
   }
 }
 /* once per game, keyed: a screen shown again stays quiet */

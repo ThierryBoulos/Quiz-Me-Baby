@@ -3,7 +3,7 @@
    is "everyone else", {leader} the team on top, {trailer} the team at the bottom; a line that only makes sense with
    two teams or a buzzer ("Both right", "buzz", the other captain) is left out. */
 import { getSettings } from "../settings";
-import { HOST_LINES } from "../imadLines";
+import { fillLine, nextLine } from "../imadLines";
 import { miniOf, type StateM } from "./logic";
 
 let dice = (Date.now() ^ 0x5bd1e995) >>> 0;
@@ -23,14 +23,9 @@ function say(s: StateM, moments: string[], extra: V = {}) {
   const used = (s.imadUsed = s.imadUsed || {}), out: string[] = [];
   let mood = "";
   for (const m of moments) {
-    const pool = (HOST_LINES[m] || []).map((x, i) => ({ x, i })).filter((e) => !TWO_ONLY.test(e.x));
-    if (!pool.length) continue;
-    const seen = (used[m] = used[m] || []);
-    let free = pool.filter((e) => !seen.includes(e.i));
-    if (!free.length) { seen.length = 0; free = pool; }
-    const e = free[Math.floor(rnd() * free.length)];
-    seen.push(e.i);
-    out.push(e.x.replace(/\{(\w+)\}/g, (_k, k) => (v[k] != null ? String(v[k]) : "")));
+    /* (picked and filled as with 2 teams: lib/imadLines.ts, 27 Nov, the merge; "{team}'s" now "Lions'" here too) */
+    const line = nextLine(m, () => (used[m] = used[m] || []), rnd, (x) => !TWO_ONLY.test(x)); if (line == null) continue;
+    out.push(fillLine(line, v));
     if (MOOD[m]) mood = MOOD[m];
   }
   if (out.length) s.imad = { id: (s.imadN = (s.imadN || 0) + 1), text: out.join(" "), ...(mood ? { mood } : {}) };

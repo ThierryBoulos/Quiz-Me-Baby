@@ -3,6 +3,8 @@
    Placeholders: {team} {other} {captain} {othercap}: the team the moment is
    about, the other one, and their captains; {leader} {trailer} {gap}: the
    scoreboard; {theme} {n} {N}: the round; {pts}: a mini-game prize ({ptsWord}: "1 point", "3 points"). */
+import { poss } from "./game";
+
 export const HOST_LINES: Record<string, string[]> = {
   "start": [
     "Are you ready to QUIZ ME BABYYYY?!",
@@ -228,3 +230,20 @@ export const HOST_LINES: Record<string, string[]> = {
     "A dead tie! You're all equally brilliant. Or equally lost."
   ]
 };
+
+/* how Imad picks and fills a line, the same in every setup (27 Nov, the merge). The next line for a moment: one not said
+   yet tonight (all said, they start again), at random; seen() keeps the ones said, and is only asked for when the
+   moment has a line. keep: the lines this setup can use */
+export function nextLine(m: string, seen: () => number[], rnd: () => number, keep: (x: string) => boolean = () => true): string | null {
+  const pool = (HOST_LINES[m] || []).map((x, i) => ({ x, i })).filter((e) => keep(e.x));
+  if (!pool.length) return null;
+  const said = seen();
+  let free = pool.filter((e) => !said.includes(e.i));
+  if (!free.length) { said.length = 0; free = pool; }
+  const e = free[Math.floor(rnd() * free.length)];
+  said.push(e.i);
+  return e.x;
+}
+/* ...the real names and numbers in it ("{team}'s": the name's own ending, "Lions'", never "Lions's": 26 Nov) */
+export const fillLine = (line: string, v: Record<string, unknown>) =>
+  line.replace(/\{(\w+)\}'s/g, (_x, k) => (v[k] != null ? poss(String(v[k])) : "")).replace(/\{(\w+)\}/g, (_x, k) => (v[k] != null ? String(v[k]) : ""));
