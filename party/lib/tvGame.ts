@@ -11,6 +11,7 @@ import { CB_IN, CB_NOT_YOURS } from "./comeback";
 import { nextScreenAt, tapOnThisScreen, type ScreenAt } from "./tapOn";
 import { cleanList, mergeCustom } from "./custom";
 import { sb } from "./supabase";
+import { hostGoneNow, passArmband, phoneNote, sameHostGone } from "./handover";
 import { playSound, type SoundName } from "./sound";
 import { cleanSettings, forgetUsed, getSettings, saveSettings, timersOf, USED_KEY, type Settings } from "./settings";
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
@@ -32,7 +33,7 @@ import { newState, type TvState } from "./tv/state";
 import { setTeams } from "./many/useTvMany";
 import { saveLobbyDraft, useLobbyShare } from "./tv/lobbyShare";
 import { useFreshLeftShare, type FreshLeft } from "./freshLeft";
-import { MAJ } from "./minis/majority";
+import { MAJ, mrBackOn } from "./minis/majority";
 import { FOOL } from "./minis/fool";
 
 /* sudden death or the tie-breaker: an answer and its call, noted; once the question is decided (a
@@ -1588,22 +1589,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* a phone's note: "I left the screen", "I'm back" (and for how long, by
      its own clock), or "hello" from a fresh page (a reload: back too) */
   const onNote = (k: string, n: { away?: { qid?: string }; back?: { qid?: string; ms: number }; hello?: number; paste?: { qid?: string } }) => {
-    const H = here.current, s = st.current, now = Date.now();
-    let changed = false;
-    const setMs = (id: number, ms: number) => { s.flags = s.flags.map((f) => (f.id === id ? { ...f, ms } : f)); changed = true; };
-    if (n.away && !H.away[k]) H.away[k] = { at: now, qid: n.away.qid };
-    /* a paste into an answer box: flagged once per question */
-    if (n.paste && !s.flags.some((f) => f.kind === "paste" && f.qid === n.paste!.qid && f.name === ctx.current.members.find((m) => m.user_id === k)?.name) && flag(k, n.paste.qid, null, "paste")) changed = true;
-    if (n.hello && H.away[k]) { const a = H.away[k]; delete H.away[k]; if (a.flag && a.flag > 0) setMs(a.flag, now - a.at); }
-    if (n.back) {
-      const a = H.away[k]; delete H.away[k];
-      const ms = Math.max(0, Number(n.back.ms) || 0);
-      /* the phone's own clock decides: a glance under two seconds flagged while its "back" was on the way is taken back */
-      if (a?.flag && a.flag > 0 && ms < 2000) { s.flags = s.flags.filter((f) => f.id !== a.flag); changed = true; }
-      else if (a?.flag && a.flag > 0) setMs(a.flag, ms);
-      else if (!a?.flag && ms >= 2000 && flag(k, n.back.qid, ms)) changed = true;
-    }
-    if (changed) void publish();
+    /* (lib/handover.ts, every setup: 27 Nov, the merge) */
+    const s = st.current, name = ctx.current.members.find((m) => m.user_id === k)?.name;
+    if (phoneNote(s as { flags?: { id: number; name: string; kind?: string; qid?: string; ms: number | null }[] }, here.current.away, k, name, n, Date.now(), (qid, ms, kind) => flag(k, qid, ms, kind))) void publish();
   };
   /* is the night waiting on this team's captain right now? (their question, their buzz, their ruling, their Next) */
   const waitsOn = (t: 0 | 1) => {
@@ -1636,10 +1624,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        carry the night meanwhile, as before */
     { if (hostM && hostFrom.current[hostM.user_id] == null) hostFrom.current[hostM.user_id] = now;
       const last = hostM ? Math.max(H.at[hostM.user_id] ?? 0, hostFrom.current[hostM.user_id]) : null;
-      const gone = room?.mode === "host" && s.screen !== "final" && (!hostM || now - (last as number) >= 20000);
-      const was = s.hostGone, none = was && was.name == null;
-      const v = !gone ? null : hostM ? { name: hostM.name, since: last as number, openAt: (last as number) + 90000 } : { name: null, since: none ? was.since : now, openAt: none ? was.openAt : now };
-      if (!((!v && !was) || (v && was && v.name === was.name && v.since === was.since))) { s.hostGone = v; void publish(); } }
+      /* (lib/handover.ts, every setup: 27 Nov, the merge) */
+      const v = hostGoneNow(hostM, last, room?.mode === "host" && s.screen !== "final", s.hostGone, now);
+      if (!sameHostGone(v, s.hostGone)) { s.hostGone = v; void publish(); } }
     /* a Know the Host answer waiting for a host who's been gone 20 s: the captains may skip it (decision 7) */
     { const q = current(), sc = s.screen;
       const wait = (sc === "ask" || sc === "steal") && !!q && hostOnly(q) && (!!s.typed[turnTeam()] || s.timeUp)
@@ -1681,10 +1668,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!next) continue;
       H.busy = true;
       try {
-        const a = await sb().from("members").update({ role: "player" }).eq("room", code).eq("user_id", cap.user_id);
-        if (a.error) continue;
-        const b = await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", next.user_id);
-        if (b.error) { await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", cap.user_id); continue; }
+        if (!(await passArmband(code, cap.user_id, next.user_id))) continue;
         H.at[next.user_id] = now;
         s.g.teams[t].captain = next.name;
         s.toast = { id: ++s.toastN, text: `${iso(cap.name)} seems to be away. ${iso(next.name)} is ${poss(iso(s.g.teams[t].name))} captain now.` };
@@ -1874,11 +1858,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
            screen's first seconds, while it's still hearing who's here: nobody is taken for away then.) The one rule
            for every setup (lib/many/useTvMany.ts mrSync: 25 Nov, the owner) */
         const hereNames = ctx.current.members.filter((m) => on.includes(m.user_id)).map((m) => m.name);
-        let gone = (s.mrGone || []).filter((x) => s.mrOut.includes(x));
-        if (now - here.current.since > 8000) for (const x of s.mrOut) if (!hereNames.includes(x) && !gone.includes(x)) gone = [...gone, x];
-        const back = gone.filter((x) => hereNames.includes(x));
-        if (back.length) { s.mrOut = s.mrOut.filter((x) => !back.includes(x)); gone = gone.filter((x) => !back.includes(x));
-          s.toast = { id: ++s.toastN, text: MAJ.backOn(back.map(iso)) }; changed = true; }
+        const { out, gone, back } = mrBackOn(s.mrOut, s.mrGone, hereNames, now - here.current.since > 8000);
+        if (back.length) { s.mrOut = out; s.toast = { id: ++s.toastN, text: MAJ.backOn(back.map(iso)) }; changed = true; }
         s.mrGone = gone;
         /* (a captain's request for someone who's on the game screen after all lapses) */
         if (s.mrAsk && hereNames.includes(s.mrAsk.name)) { s.mrAsk = null; changed = true; }

@@ -9,6 +9,7 @@ import { serverOffset } from "@/components/Clock";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QMB, HOST_ONLY_THEMES, hostOnly, loadBank, type Bank, type Q } from "../engine";
 import { sb } from "../supabase";
+import { hostGoneNow, passArmband, phoneNote, sameHostGone } from "../handover";
 import { cleanSettings, forgetUsed, getSettings, saveSettings, USED_KEY } from "../settings";
 import { cleanList, mergeCustom } from "../custom";
 import { withCustom } from "../engine";
@@ -23,7 +24,7 @@ import type { Action, G } from "../tv/rules";
 import { playSound } from "../sound";
 import { MANY_LEGS, MANY_MAX, qidOf, quizGames, quizSizes, MANY_ROUNDS, MANY_THEMES, MANY_MINIS, MANY_PLAYERS, allIn, answered, titleOf, buzzSee, captainAnswer, seeMiss, contestCall, decideContest, setScores, toggleMrOut, showMapHint, defaultName, dishShown, flip, foolAllIn, foolOpen, foolReveal, legWinners, lockStakes, miniOf, newNight, nightOrder, next, pause, qOf, reveal, skipComeback, skQm, stakesBet, startMini, swapQ, vote, type LatLon, type ManyKey, type StateM, type Timers } from "./logic";
 import { buildMany, type PubMany } from "./view";
-import { MAJ } from "../minis/majority";
+import { MAJ, mrBackOn } from "../minis/majority";
 import { SK_THEMES_CHANGED } from "../stakes";
 import { FOOL } from "../minis/fool";
 import { useFreshLeftShare } from "../freshLeft";
@@ -39,7 +40,6 @@ function flagIt(s: StateM, m: Member, qid: string | undefined, ms: number | null
   playSound("wrong");
   return id;
 }
-const setFlagMs = (s: StateM, id: number, ms: number) => { s.flags = (s.flags || []).map((f) => (f.id === id ? { ...f, ms } : f)); };
 
 const SHAPE = 1;
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
@@ -83,12 +83,9 @@ function mrSync(s: StateM, members: Member[], at: Record<string, number>, settle
   /* someone taken off, then seen away (off the game screen, or out of the room), then seen on the game screen: back
      on the list, and the TV says so. Taken off while on the screen and never away: stays off. (Not while the TV is
      still hearing who's here, its first seconds: nobody is taken for away then.) */
-  const out = s.mrOut || [];
-  let gone = (s.mrGone || []).filter((x) => out.includes(x));
-  if (settled) for (const x of out) if (!hereNames.includes(x) && !gone.includes(x)) gone = [...gone, x];
-  const back = gone.filter((x) => hereNames.includes(x));
-  if (back.length) { s.mrOut = out.filter((x) => !back.includes(x)); gone = gone.filter((x) => !back.includes(x));
-    s.toast = { id: ++s.toastN, text: MAJ.backOn(back) }; }
+  /* (lib/minis/majority.ts, the same as with 2 teams) */
+  const { out, gone, back } = mrBackOn(s.mrOut || [], s.mrGone, hereNames, settled);
+  if (back.length) { s.mrOut = out; s.toast = { id: ++s.toastN, text: MAJ.backOn(back) }; }
   s.mrGone = gone; s.mrHere = on;
   const off = s.mrOut || [], L = members.filter((m) => m.role !== "host" && m.team != null && (m.team as number) < s.teams.length)
     .map((m) => ({ name: m.name, team: m.team as number, here: on.includes(m.user_id), ...(off.includes(m.name) ? { out: true } : {}) }));
@@ -432,17 +429,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
        tried to paste an answer (8 Nov: flagged as with two teams; the TV says so, the host's list keeps it) */
     if (a.kind === "count") {
       const n = a.payload as { away?: { qid?: string }; back?: { qid?: string; ms: number }; hello?: number; paste?: { qid?: string } };
-      const A = awayAt.current, k = a.user_id, now = Date.now();
-      if (n.away && !A[k]) A[k] = { at: now, qid: n.away.qid };
-      if (n.paste && !(s.flags || []).some((f) => f.kind === "paste" && f.qid === n.paste!.qid && f.name === from.name) && flagIt(s, from, n.paste.qid, null, "paste")) publish();
-      if (n.hello && A[k]) { const x = A[k]; delete A[k]; if (x.flag) { setFlagMs(s, x.flag, now - x.at); publish(); } }
-      if (n.back) {
-        const x = A[k]; delete A[k];
-        const ms = Math.max(0, Number(n.back.ms) || 0);
-        if (x?.flag && ms < 2000) { s.flags = (s.flags || []).filter((f) => f.id !== x.flag); publish(); }
-        else if (x?.flag) { setFlagMs(s, x.flag, ms); publish(); }
-        else if (ms >= 2000 && flagIt(s, from, n.back.qid, ms)) publish();
-      }
+      /* (lib/handover.ts, the same as with 2 teams: 27 Nov, the merge) */
+      if (phoneNote(s, awayAt.current, a.user_id, from.name, n, Date.now(), (qid, ms, kind) => flagIt(s, from, qid, ms, kind))) publish();
       return;
     }
     /* the host runs it */
@@ -575,9 +563,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
           capBusy.current = true;
           void (async () => {
             try {
-              const r1 = await sb().from("members").update({ role: "player" }).eq("room", code).eq("user_id", cap.user_id); if (r1.error) return;
-              const r2 = await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", nx.user_id);
-              if (r2.error) { await sb().from("members").update({ role: "captain" }).eq("room", code).eq("user_id", cap.user_id); return; }
+              if (!(await passArmband(code, cap.user_id, nx.user_id))) return;   // (lib/handover.ts, every setup)
               H.at[nx.user_id] = Date.now(); s.teams[tm].captain = nx.name;
               s.toast = { id: ++s.toastN, text: `${cap.name} seems to be away. ${nx.name} is ${poss(s.teams[tm].name)} captain now.` };
               publish();
@@ -593,11 +579,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       if (h && hostFrom.current[h.user_id] == null) hostFrom.current[h.user_id] = now;   // (a new host: from when it was noticed)
       const playing = room?.status === "playing" && s.screen !== "final";
       const last = h ? Math.max(H.at[h.user_id] ?? 0, hostFrom.current[h.user_id]) : null;
-      const gone = playing && (!h || now - (last as number) >= 20000);
-      const v = !gone ? null : h ? { name: h.name, since: last as number, openAt: (last as number) + 90000 }
-        : { name: null, since: s.hostGone && s.hostGone.name == null ? s.hostGone.since : now, openAt: s.hostGone && s.hostGone.name == null ? s.hostGone.openAt : now };
-      const was = s.hostGone;
-      if ((!v && !was) || (v && was && v.name === was.name && v.since === was.since)) return;
+      const v = hostGoneNow(h, last, playing, s.hostGone, now);   // (lib/handover.ts, every setup)
+      if (sameHostGone(v, s.hostGone)) return;
       s.hostGone = v; publish();
     }, 2000);
     return () => clearInterval(t);

@@ -74,3 +74,14 @@ export const MAJ = {
   notOn: "You\u2019re not on a list yet.",
   phoneKey: "\u25cf on the game screen \u00b7 \u25cb not here. Everyone listed plays: no answer counts as wrong.",
 };
+
+/* Majority Rules' list before Start, every setup (25 Nov, the owner; one copy, 27 Nov): someone taken off (out), then
+   seen away (off the game screen, or out of the room: gone), then seen on the game screen (here): back on the list.
+   Taken off while on the screen and never away: stays off. settled: past the screen's first seconds, while it's still
+   hearing who's here (nobody is taken for away before then) */
+export function mrBackOn(out: string[], gone0: string[] | undefined, here: string[], settled: boolean): { out: string[]; gone: string[]; back: string[] } {
+  let gone = (gone0 || []).filter((x) => out.includes(x));
+  if (settled) for (const x of out) if (!here.includes(x) && !gone.includes(x)) gone = [...gone, x];
+  const back = gone.filter((x) => here.includes(x));
+  return back.length ? { out: out.filter((x) => !back.includes(x)), gone: gone.filter((x) => !back.includes(x)), back } : { out, gone, back };
+}
