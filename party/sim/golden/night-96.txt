@@ -1,0 +1,243 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+(Imad: Let's see who actually paid attention at school. Here comes Sports. Captains, the floor is yours. The floor is also sticky.)
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+(Imad: YES! ⁨Lions⁩, take a bow!)
+7.50 answer | 3 | 1-0 |  | Lions +1 point | 
+8.50 ask | 4 | 1-0 |  | Lions +1 point | 
+(Imad: Look at ⁨Owls⁩, flexing on everyone.)
+9.50 answer | 4 | 1-1 |  | Owls +1 point | 
+10.25 answer | 4 | 1-1 |  |  | 
+(Imad: The referee has spoken. Me. I'm the referee.)
+11.25 steal | 5 | 1-0 |  | Lions steal a new question. | 
+(Imad: Missed the steal. The point floats away into the night.)
+12.00 answer | 5 | 1-0 |  | Lions steal a new question. | 
+(Imad: It's tight! Nobody breathe.)
+13.00 roundScore | 6 | 1-0 |  | Lions steal a new question. | 
+(Imad: Guess the Flag! Rectangles of national pride.)
+14.00 flagIntro | 7 | 1-0 | 0-0 | Lions steal a new question. | 
+14.75 flagQ | 8 | 1-0 | 0-0 | Lions steal a new question. | 
+15.75 flagReveal | 8 | 1-0 | 1-1 | Lions steal a new question. | 
+16.50 flagReveal | 8 | 1-0 | 1-1 |  | 
+20.25 flagReveal | 8 | 1-0 | 1-1 | ⁨Rami⁩ doesn't agree: the call stands. | 
+21.00 flagQ | 9 | 1-0 | 1-1 | Both got it — a point each. | 
+22.00 flagReveal | 9 | 1-0 | 1-2 | Both got it — a point each. | 
+23.00 flagQ | 10 | 1-0 | 1-2 | Owls take flag 2. | 
+23.75 flagReveal | 10 | 1-0 | 1-3 | Owls take flag 2. | 
+(Imad: That one's ⁨Owls⁩’. ⁨Lions⁩, deep breaths.)
+24.75 flagQ | 11 | 1-0 | 1-3 | Owls take flag 3. | 
+25.50 flagReveal | 11 | 1-0 | 2-4 | Owls take flag 3. | 
+26.50 flagQ | 12 | 1-0 | 2-4 | Both got it — a point each. | 
+27.50 flagReveal | 12 | 1-0 | 2-4 | Both got it — a point each. | 
+28.25 flagReveal | 12 | 1-0 | 2-4 |  | 
+29.25 flagReveal | 12 | 1-0 | 2-4 | ⁨Lea⁩ doesn't agree: the call stands. | 
+30.00 flagQ | 13 | 1-0 | 2-4 | Nobody got it. | 
+31.00 flagReveal | 13 | 1-0 | 2-4 | Nobody got it. | 
+32.00 flagQ | 14 | 1-0 | 2-4 | Nobody got it. | 
+32.75 flagReveal | 14 | 1-0 | 3-4 | Nobody got it. | 
+33.75 flagQ | 15 | 1-0 | 3-4 | Lions take flag 7. | 
+34.50 flagReveal | 15 | 1-0 | 4-4 | Lions take flag 7. | 
+35.50 flagQ | 16 | 1-0 | 4-4 | Lions take flag 8. | 
+36.50 flagReveal | 16 | 1-0 | 4-5 | Lions take flag 8. | 
+37.25 flagReveal | 16 | 1-0 | 4-5 |  | 
+(Imad: Contest settled. Let's all move on with our lives.)
+39.00 flagReveal | 16 | 1-0 | 5-5 | Call changed: ⁨Lions⁩ RIGHT. | 
+40.00 flagQ | 17 | 1-0 | 5-5 | Both got it — a point each. | 
+41.00 flagReveal | 17 | 1-0 | 6-6 | Both got it — a point each. | 
+(Imad: Both right. A point each and nothing settled.)
+41.75 flagTie | 18 | 1-0 | 6-6 |  | 
+42.75 flagSummary | 19 | 2-1 | 6-6 |  | 
+(Imad: Science! I can already hear the arguing.)
+43.50 roundIntro | 20 | 2-1 |  |  | 
+44.50 ask | 21 | 2-1 |  |  | 
+(Imad: Correct! Somebody's been reading.)
+45.50 answer | 21 | 3-1 |  | Lions +1 point | 
+46.25 answer | 21 | 3-1 |  |  | 
+47.25 answer | 21 | 3-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+48.00 ask | 22 | 3-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+(Imad: That's… a choice. Steal time! ⁨Lions⁩, eat their lunch.)
+49.00 steal | 22 | 3-1 |  | ⁨Rami⁩ doesn't agree: the call stands. | 
+(Imad: Thief! Brilliant, brilliant thief.)
+50.00 answer | 22 | 4-1 |  | Lions +1 point — steal | 
+50.75 roundScore | 23 | 4-1 |  | Lions +1 point — steal | 
+(Imad: Closest To Wins! Numbers time. Guess big, guess wisely.)
+51.75 miniIntro | 24 | 4-1 | 0-0 | Lions +1 point — steal | 
+52.50 miniQ | 25 | 4-1 | 0-0 | Lions +1 point — steal | 
+53.50 closestReveal | 25 | 4-1 | 1-0 | Lions +1 point — steal | 
+(Imad: ⁨Lions⁩ take it. Smooth.)
+54.50 miniQ | 26 | 4-1 | 1-0 | Lions take leg 1. | 
+55.25 closestReveal | 26 | 4-1 | 1-1 | Lions take leg 1. | 
+(Imad: ⁨Owls⁩! One step closer.)
+56.25 miniQ | 27 | 4-1 | 1-1 | Owls take leg 2. | 
+57.00 closestReveal | 27 | 4-1 | 2-1 | Owls take leg 2. | 
+58.00 miniQ | 28 | 4-1 | 2-1 | Lions take leg 3. | 
+59.00 closestReveal | 28 | 4-1 | 2-2 | Lions take leg 3. | 
+59.75 miniQ | 29 | 4-1 | 2-2 | Owls take leg 4. | 
+60.75 closestReveal | 29 | 4-1 | 3-2 | Owls take leg 4. | 
+(Imad: ⁨Lions⁩ take the mini-game! 2 points, sweet!)
+61.50 miniSummary | 30 | 6-1 | 3-2 | Lions take leg 5. | 
+(Imad: Round 3. Geography. Somebody in this room is about to pretend they knew that.)
+62.50 roundIntro | 31 | 6-1 |  | Lions take leg 5. | 
+(Imad: ⁨Owls⁩ going double. I respect the chaos.)
+64.25 ask | 32 | 6-1 |  | Lions take leg 5. | 
+(Imad: Calling a friend! Hope they pick up.)
+65.25 ask | 32 | 6-1 |  | Lions used Call a Friend. | 
+68.00 ask | 33 | 6-1 |  | Lions used Call a Friend. | 
+(Imad: Hmm. No. Hard no. The door is open, ⁨Owls⁩. Walk right in.)
+68.75 steal | 33 | 6-1 |  | Lions used Call a Friend. | 
+(Imad: Nobody gets it! Everybody loses! Wonderful!)
+69.75 answer | 33 | 6-1 |  | Lions used Call a Friend. | 
+70.50 ask | 34 | 6-1 |  | Lions used Call a Friend. | 
+(Imad: Correct! Mama would be proud.)
+71.50 answer | 34 | 6-3 |  | Owls +2 points | 
+72.50 answer | 34 | 6-3 |  |  | 
+73.25 answer | 34 | 6-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+74.25 roundScore | 35 | 6-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+(Imad: The Auction. Bid high, deliver, or be humiliated. Simple.)
+75.00 auctionIntro | 36 | 6-3 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+76.00 auctionBid | 37 | 6-3 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+77.00 auctionBid | 38 | 6-3 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+77.75 auctionRun | 39 | 6-3 | 0-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+82.25 auctionLeg | 39 | 6-3 | 1-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+83.25 auctionBid | 40 | 6-3 | 1-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+84.00 auctionBid | 41 | 6-3 | 1-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+85.00 auctionRun | 42 | 6-3 | 1-0 | ⁨Lea⁩ doesn't agree: the call stands. | 
+86.75 auctionLeg | 42 | 6-3 | 1-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+87.75 auctionBid | 43 | 6-3 | 1-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+88.50 auctionBid | 44 | 6-3 | 1-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+89.50 auctionRun | 45 | 6-3 | 1-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+93.00 auctionLeg | 45 | 6-3 | 2-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+(Imad: That's 2 points to ⁨Lions⁩. The scoreboard shakes.)
+94.00 auctionResult | 46 | 8-3 | 2-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+(Imad: Round 4! Theme: History. Who's feeling confident? Wrong answer, nobody should be.)
+95.00 roundIntro | 47 | 8-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+96.75 ask | 48 | 8-3 |  | ⁨Lea⁩ doesn't agree: the call stands. | 
+(Imad: That's right! ⁨Rami⁩, you absolute genius.)
+97.50 answer | 48 | 9-3 |  | Lions +1 point | 
+98.50 answer | 48 | 9-3 |  |  | 
+113.50 answer | 48 | 9-3 |  | No answer in time: the call stands. | 
+113.75 ask | 49 | 9-3 |  | No answer in time: the call stands. | 
+(Imad: Correct! ⁨Lions⁩, are you taking notes?)
+114.75 answer | 49 | 9-4 |  | Owls +1 point | 
+(Imad: ⁨Lions⁩ cruising. ⁨Owls⁩, still time… technically.)
+115.50 roundScore | 50 | 9-4 |  | Owls +1 point | 
+116.50 seeIntro | 51 | 9-4 | 0-0 | Owls +1 point | 
+117.50 seeQ | 52 | 9-4 | 0-0 | Owls +1 point | 
+122.00 seeReveal | 52 | 9-4 | 0-1 | Owls +1 point | 
+122.75 seeQ | 53 | 9-4 | 0-1 | Owls take picture 1. | 
+126.50 seeReveal | 53 | 9-4 | 1-1 | Owls take picture 1. | 
+127.25 seeQ | 54 | 9-4 | 1-1 | Lions take picture 2. | 
+129.00 seeQ | 54 | 9-4 | 1-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+137.25 seeReveal | 54 | 9-4 | 2-1 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+(Imad: Leg to ⁨Lions⁩. Don't get comfortable.)
+138.00 seeQ | 55 | 9-4 | 2-1 | Lions take picture 3. | 
+142.50 seeQ | 55 | 9-4 | 2-1 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+144.50 seeReveal | 55 | 9-4 | 2-2 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+(Imad: ⁨Owls⁩ take it. Smooth.)
+145.25 seeQ | 56 | 9-4 | 2-2 | Owls take picture 4. | 
+147.00 seeQ | 56 | 9-4 | 2-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+151.50 seeReveal | 56 | 9-4 | 3-2 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+152.50 seeReveal | 56 | 9-4 | 3-2 |  | 
+(Imad: Deliberation over. Play on.)
+155.25 seeReveal | 56 | 9-4 | 2-3 | Call changed: ⁨Owls⁩ RIGHT. | 
+(Imad: Leg to ⁨Owls⁩. Don't get comfortable.)
+156.00 seeQ | 57 | 9-4 | 2-3 | Owls take picture 5. | 
+159.75 seeQ | 57 | 9-4 | 2-3 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+167.75 seeReveal | 57 | 9-4 | 3-3 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+168.75 seeReveal | 57 | 9-4 | 3-3 |  | 
+183.75 seeReveal | 57 | 9-4 | 3-3 | No answer in time: the call stands. | 
+184.00 seeQ | 58 | 9-4 | 3-3 | Lions take picture 6. | 
+187.50 seeQ | 58 | 9-4 | 3-3 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+192.00 seeReveal | 58 | 9-4 | 3-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+193.00 seeQ | 59 | 9-4 | 3-4 | Owls take picture 7. | 
+197.50 seeReveal | 59 | 9-4 | 4-4 | Owls take picture 7. | 
+198.50 seeReveal | 59 | 9-4 | 4-4 |  | 
+(Imad: Contest settled. Let's all move on with our lives.)
+201.00 seeReveal | 59 | 9-4 | 3-4 | Call changed: ⁨Lions⁩ WRONG. | 
+202.00 seeQ | 60 | 9-4 | 3-4 | The call changed: a new picture for both teams. | 
+204.75 seeReveal | 60 | 9-4 | 4-4 | The call changed: a new picture for both teams. | 
+205.50 seeReveal | 60 | 9-4 | 4-4 |  | 
+(Imad: The referee has spoken. Me. I'm the referee.)
+206.50 seeReveal | 60 | 9-4 | 3-4 | Call changed: ⁨Lions⁩ WRONG. | 
+207.50 seeQ | 61 | 9-4 | 3-4 | The call changed: a new picture for both teams. | 
+213.75 seeQ | 61 | 9-4 | 3-4 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+218.25 seeReveal | 61 | 9-4 | 3-4 | ⁨Owls⁩ guessed wrong: out of this picture. ⁨Lions⁩ can still buzz. | 
+219.00 seeQ | 62 | 9-4 | 3-4 | Nobody got it. | 
+224.50 seeQ | 62 | 9-4 | 3-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+226.25 seeReveal | 62 | 9-4 | 3-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+(Imad: Nobody. Not one. The question wins.)
+227.25 seeQ | 63 | 9-4 | 3-4 | Nobody got it. | 
+234.50 seeQ | 63 | 9-4 | 3-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+237.00 seeReveal | 63 | 9-4 | 3-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+238.00 seeQ | 64 | 9-4 | 3-4 | Nobody got it. | 
+239.75 seeQ | 64 | 9-4 | 3-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+241.50 seeReveal | 64 | 9-4 | 3-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+242.50 seeReveal | 64 | 9-4 | 3-4 |  | 
+(Imad: Deliberation over. Play on.)
+244.25 seeReveal | 64 | 9-4 | 4-4 | Call changed: ⁨Lions⁩ RIGHT. | 
+245.25 seeQ | 65 | 9-4 | 4-4 | Lions take picture 11. | 
+254.25 seeQ | 65 | 9-4 | 4-4 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+256.00 seeReveal | 65 | 9-4 | 4-5 | ⁨Lions⁩ guessed wrong: out of this picture. ⁨Owls⁩ can still buzz. | 
+(Imad: And ⁨Owls⁩ win it! Grab those 2 points.)
+257.00 seeSummary | 66 | 9-6 | 4-5 | Owls take picture 12. | 
+(Imad: Next up: Music. ⁨Rami⁩, I believe in you. Slightly.)
+257.75 roundIntro | 67 | 9-6 |  | Owls take picture 12. | 
+258.75 ask | 68 | 9-6 |  | Owls take picture 12. | 
+(Imad: Wrong! But said with such confidence. Up for grabs! ⁨Owls⁩, don't make me regret this.)
+259.50 steal | 68 | 9-6 |  | Owls take picture 12. | 
+(Imad: And they take it! Ruthless. I love it.)
+260.50 answer | 68 | 9-7 |  | Owls +1 point — steal | 
+261.50 ask | 69 | 9-7 |  | Owls +1 point — steal | 
+(Imad: Wrong! ⁨Lea⁩, who told you that? Steal! ⁨Rami⁩, look them in the eye and take it.)
+262.25 steal | 69 | 9-7 |  | Owls +1 point — steal | 
+(Imad: Nobody. Not a single soul. Beautiful.)
+263.25 answer | 69 | 9-7 |  | Owls +1 point — steal | 
+264.00 roundScore | 70 | 9-7 |  | Owls +1 point — steal | 
+265.00 rouletteIntro | 71 | 9-7 | 0-0 | Owls +1 point — steal | 
+266.00 rouletteQ | 72 | 9-7 | 0-0 | Owls +1 point — steal | 
+266.75 rouletteReveal | 72 | 9-7 | 2-0 | Owls +1 point — steal | 
+267.75 rouletteReveal | 72 | 9-7 | 2-0 |  | 
+282.75 rouletteReveal | 72 | 9-7 | 2-0 | No answer in time: the call stands. | 
+283.00 rouletteQ | 73 | 9-7 | 2-0 | No answer in time: the call stands. | 
+284.00 rouletteReveal | 73 | 9-7 | 5-0 | No answer in time: the call stands. | 
+284.75 rouletteReveal | 73 | 9-7 | 5-0 |  | 
+299.75 rouletteReveal | 73 | 9-7 | 5-0 | No answer in time: the call stands. | 
+300.00 rouletteQ | 74 | 9-7 | 5-0 | No answer in time: the call stands. | 
+301.00 rouletteReveal | 74 | 9-7 | 2-0 | No answer in time: the call stands. | 
+(Imad: ⁨Lions⁩ walk away with it. Classy.)
+302.00 rouletteSummary | 75 | 11-7 | 2-0 | No answer in time: the call stands. | 
+(Imad: Movies. Let's go. No pressure. A little pressure.)
+302.75 roundIntro | 76 | 11-7 |  | No answer in time: the call stands. | 
+303.75 ask | 77 | 11-7 |  | No answer in time: the call stands. | 
+(Imad: Nope! Bold of you, though. ⁨Owls⁩, here's your chance to be terrible to your friends.)
+304.50 steal | 77 | 11-7 |  | No answer in time: the call stands. | 
+(Imad: STOLEN! Daylight robbery!)
+305.50 answer | 77 | 11-8 |  | Owls +1 point — steal | 
+306.50 ask | 78 | 11-8 |  | Owls +1 point — steal | 
+(Imad: So close! Actually, not close at all. ⁨Lions⁩, it's yours to steal!)
+307.25 steal | 78 | 11-8 |  | Owls +1 point — steal | 
+(Imad: Stolen! ⁨Owls⁩, I'd lock up your valuables.)
+308.25 answer | 78 | 12-8 |  | Lions +1 point — steal | 
+309.00 roundScore | 79 | 12-8 |  | Lions +1 point — steal | 
+(Imad: Captains only. Teams, sit on your hands.)
+310.00 battleIntro | 80 | 12-8 | 0-0 | Lions +1 point — steal | 
+311.00 battleQ | 81 | 12-8 | 0-0 | Lions +1 point — steal | 
+311.75 battleQ | 81 | 12-8 | 1-0 | Lions +1 point — steal | 
+314.50 battleQ | 81 | 12-8 | 2-0 | Lions +1 point — steal | 
+315.50 battleQ | 81 | 12-8 | 3-0 | Lions +1 point — steal | 
+(Imad: Halftime! ⁨Rami⁩ sits down. ⁨Lea⁩, your turn to sweat.)
+320.00 battleHandoff | 81 | 12-8 | 3-0 | Lions +1 point — steal | 
+320.75 battleQ | 82 | 12-8 | 3-0 | Lions +1 point — steal | 
+325.25 battleQ | 82 | 12-8 | 3-1 | Lions +1 point — steal | 
+328.00 battleQ | 82 | 12-8 | 3-2 | Lions +1 point — steal | 
+329.00 battleQ | 82 | 12-8 | 3-3 | Lions +1 point — steal | 
+329.75 battleReview | 82 | 12-8 | 3-4 | Lions +1 point — steal | 
+330.75 battleReview | 82 | 12-8 | 3-4 |  | 
+345.75 battleReview | 82 | 12-8 | 3-4 | No answer in time: the call stands. | 
+(Imad: Mini-game to ⁨Owls⁩! Did that hurt, ⁨Lions⁩?)
+346.00 battleSummary | 83 | 12-10 | 3-4 | No answer in time: the call stands. | 
+(Imad: ⁨Lions⁩ WIN! Champions! Unbearable! Champions!)
+347.00 final | 84 | 12-10 |  | No answer in time: the call stands. | 
+recap: {"margin":2,"sudden":false,"leadChanges":0,"steals":[2,2],"minis":[3,2],"chart":[[0,0],[0,0],[1,0],[1,1],[1,0],[2,1],[3,1],[4,1],[6,1],[6,3],[8,3],[9,3],[9,4],[9,6],[9,7],[11,7],[11,8],[12,8],[12,10]],"segs":[{"label":"R1","pts":[[1,0],[1,1],[1,0]]},{"label":"Guess the Flag","pts":[[2,1]]},{"label":"R2","pts":[[3,1],[4,1]]},{"label":"Closest To Wins","pts":[[6,1]]},{"label":"R3","pts":[[6,3]]},{"label":"The Auction","pts":[[8,3]]},{"label":"R4","pts":[[9,3],[9,4]]},{"label":"What Do You See?","pts":[[9,6]]},{"label":"R5","pts":[[9,7]]},{"label":"Russian Roulette","pts":[[11,7]]},{"label":"R6","pts":[[11,8],[12,8]]},{"label":"Battle of the Captains","pts":[[12,10]]}],"awards":[{"t":"Battle of the Captains","who":"Lea, 4 of 10","team":1}]}

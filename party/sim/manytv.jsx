@@ -454,6 +454,50 @@ async function pin(k, phone, tag) {
   check(`${tag} Pin: no message, it just goes in (23 Nov, the owner)`, !/^Time's up/.test(pub().toast?.text || ""), pub().toast?.text);
 }
 
+/* ---------- A whole night, every game, through the real referee (27 Nov, the owner's big test): two question rounds
+   and every mini-game, 3 to 8 teams, with a TV and with none; the host taps Start and Next, every captain answers (right
+   about half the time), every player votes in Majority Rules; it must reach the final with every game played ---------- */
+const ALL = ["majority", "flag", "airport", "map", "closest", "pin", "say", "dish", "see", "fool", "roulette", "stakes"];
+async function whole(k, phone, tag) {
+  await setup(k, phone, ALL, 30 + k, { rounds: 2 });
+  let r = 7 + k; const rnd = () => ((r = (Math.imul(r, 1664525) + 1013904223) >>> 0) / 4294967296);
+  const played = new Set(); let steps = 0, stuck = 0, lastKey = "";
+  for (; steps < 1500 && pub()?.screen !== "final"; steps++) {
+    const P = pub(), sc = P.screen, m = mini(), q = m?.qs?.[m.i], kq = `${P.qid}|q`;
+    const key = `${sc}|${P.step}|${P.qid}`; if (key === lastKey) { if (++stuck > 6) break; } else { stuck = 0; lastKey = key; }
+    if (m) played.add(m.key);
+    if (sc === "intro") { await judge("m/start"); await tick(1500); continue; }
+    if (sc === "reveal" || sc === "summary") { await judge("m/next"); await tick(1500); continue; }
+    if (sc === "pick" && m.key === "stakes") { for (let t = 0; t < k; t++) await bet(t, Math.floor(rnd() * 3), ["easy", "medium", "hard", "expert"][Math.floor(rnd() * 4)]); await tick(1500); continue; }
+    if (sc === "pick" && m.key === "fool") { const n = (P.fool?.opts || []).length || 1;
+      for (let t = 0; t < k; t++) send("c" + t, "answer", { pick: Math.floor(rnd() * n), pred: (t + 1) % k, k: `${P.qid}|pick` });
+      await tick(2500); if (pub().screen === "pick") await tick(Math.max(0, (pub().deadline || clock()) - clock()) + 2500); continue; }
+    if (sc === "q") {
+      if (m.key === "roulette") await tick(9000);              // (the barrel spins first)
+      const ans = (t) => m.key === "roulette" ? (q?.ch?.[q?.draw?.[t]]?.q?.answer ?? "Paris") : m.key === "stakes" ? (saved().minis[saved().mi].qs[saved().minis[saved().mi].i]?.qs?.[saved().picks?.[t]?.k]?.[saved().picks?.[t]?.level]?.answer ?? "Paris")
+        : m.key === "map" ? q?.question : m.key === "say" ? (q?.pool || [])[t % Math.max(1, (q?.pool || []).length)] : q?.answer;
+      if (m.key === "majority") { for (let t = 0; t < k; t++) for (const who of ["c" + t, "p" + t]) send(who, "answer", { pick: rnd() < 0.5 ? q?.answer : (P.options || [])[Math.floor(rnd() * 4)] }); }
+      else if (m.key === "see") { for (let t = 0; t < k && pub().screen === "q"; t++) { send("c" + t, "buzz", {}); await tick(600); send("c" + t, "answer", { text: rnd() < 0.4 ? String(q?.answer) : "Atlantis", k: kq }); await tick(900); } }
+      else if (m.key === "fool") { for (let t = 0; t < k; t++) send("c" + t, "answer", { text: "Lie number " + (t + 1), k: kq }); }
+      else for (let t = 0; t < k; t++) {
+        if (m.only && !m.only.includes(t)) continue;
+        if (rnd() < 0.1) continue;                               // (now and then a team says nothing: the clock ends it)
+        if (m.key === "closest") send("c" + t, "answer", { n: String(Math.round(Number(q?.answer) * (0.5 + rnd()))), k: kq });
+        else if (m.key === "pin") send("c" + t, "answer", { pin: { lat: Number(q?.lat) + (rnd() - 0.5) * 20, lon: Number(q?.lon) + (rnd() - 0.5) * 20 }, k: kq });
+        else send("c" + t, "answer", { text: rnd() < 0.5 ? String(ans(t) ?? "Paris") : "Atlantis", k: kq });
+        if (m.key === "dish") await tick(800);
+      }
+      await tick(2500);
+      if (pub().screen === "q" && pub().step === P.step) await tick(Math.max(0, (pub().deadline || clock()) - clock()) + 2500);
+      continue;
+    }
+    await tick(1500);
+  }
+  const fin = pub()?.screen === "final", missing = ALL.filter((x) => !played.has(x));
+  check(`${tag} A whole night, every game: it reaches the final`, fin, `${pub()?.screen} after ${steps} steps${stuck > 6 ? " (stuck on " + lastKey + ")" : ""}`);
+  check(`${tag} A whole night, every game: every game played`, !missing.length, missing.length ? "missing " + missing.join(", ") : [...played].join(" "));
+}
+
 /* ---------- The game's screen out of sight pauses the game, as with 2 teams (27 Nov, the owner) ---------- */
 async function away(k, phone, tag) {
   await setup(k, phone, ["pin"], 7); await judge("m/start");
@@ -579,7 +623,7 @@ async function net(k, phone, tag) {
 export async function run(only) {
   for (const k of [3, 4, 5, 6, 7, 8]) for (const phone of [false, true]) {   // (every count, 19 Nov review: 4 to 7 never ran through the real referee)
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["majorityDuring", majorityDuring], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["pin", pin], ["away", away], ["net", net]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["majorityDuring", majorityDuring], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["pin", pin], ["away", away], ["whole", whole], ["net", net]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }

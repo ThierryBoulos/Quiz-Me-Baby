@@ -1,0 +1,115 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+(Imad: Let's see who actually paid attention at school. Here comes Music. Captains, the floor is yours. The floor is also sticky.)
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+(Imad: YES! ⁨Lions⁩, take a bow!)
+8.50 answer | 4 | 1-0 |  | Lions +1 point | 
+9.50 ask | 5 | 1-0 |  | Lions +1 point | 
+(Imad: Look at ⁨Owls⁩, flexing on everyone.)
+11.25 answer | 6 | 1-1 |  | Owls +1 point | 
+12.00 answer | 6 | 1-1 |  |  | 
+14.00 answer | 6 | 1-1 |  | The host keeps the call. | 
+(Imad: Tied up. It's anybody's night.)
+14.75 roundScore | 7 | 1-1 |  | The host keeps the call. | 
+(Imad: Great minds think alike. Don't be a great mind.)
+15.75 sayIntro | 8 | 1-1 | 0-0 | The host keeps the call. | 
+16.50 sayQ | 9 | 1-1 | 0-0 | The host keeps the call. | 
+17.50 sayReveal | 9 | 1-1 | 0-0 | The host keeps the call. | 
+18.50 sayReveal | 9 | 1-1 | 0-0 |  | 
+19.25 sayReveal | 9 | 1-1 | 0-0 | The host keeps the call. | 
+20.25 sayQ | 10 | 1-1 | 0-0 | Nobody gets it. | 
+21.00 sayReveal | 10 | 1-1 | 0-0 | Nobody gets it. | 
+22.00 sayReveal | 10 | 1-1 | 0-0 |  | 
+25.50 sayReveal | 10 | 1-1 | 0-0 | The host keeps the call. | 
+26.50 sayQ | 11 | 1-1 | 0-0 | Nobody gets it. | 
+27.50 sayReveal | 11 | 1-1 | 0-0 | Nobody gets it. | 
+28.25 sayQ | 12 | 1-1 | 0-0 | Nobody gets it. | 
+29.25 sayReveal | 12 | 1-1 | 0-0 | Nobody gets it. | 
+30.00 sayQ | 13 | 1-1 | 0-0 | Nobody gets it. | 
+31.00 sayReveal | 13 | 1-1 | 0-0 | Nobody gets it. | 
+32.00 sayQ | 14 | 1-1 | 0-0 | Nobody gets it. | 
+32.75 sayReveal | 14 | 1-1 | 0-0 | Nobody gets it. | 
+33.75 sayReveal | 14 | 1-1 | 0-0 |  | 
+(Imad: Contest settled. Let's all move on with our lives.)
+35.50 sayReveal | 14 | 1-1 | 0-1 | Call changed: ⁨Owls⁩ scores. | 
+(Imad: ⁨Owls⁩ walk away with it. Classy. Oh, the tables have turned! ⁨Owls⁩ in front!)
+36.50 saySummary | 15 | 1-3 | 0-1 | Owls take leg 6. | 
+(Imad: Guess the Cocktail or Dish! I hope you ate before this.)
+37.25 dishIntro | 16 | 1-3 | 0-0 | Owls take leg 6. | 
+38.25 dishQ | 17 | 1-3 | 0-0 | Owls take leg 6. | 
+41.00 dishQ | 18 | 1-3 | 0-0 | Lions are out of this one. Owls, it's yours to get. | 
+43.50 dishReveal | 19 | 1-3 | 0-1 | Owls take number 1. | 
+44.50 dishReveal | 19 | 1-3 | 0-1 |  | 
+45.50 dishReveal | 19 | 1-3 | 0-1 | The host keeps the call. | 
+46.25 dishQ | 20 | 1-3 | 0-1 | The host keeps the call. | 
+49.00 dishReveal | 21 | 1-3 | 1-1 | Lions take number 2. | 
+50.00 dishQ | 22 | 1-3 | 1-1 | Lions take number 2. | 
+52.50 dishQ | 23 | 1-3 | 1-1 | Lions are out of this one. Owls, it's yours to get. | 
+55.25 dishReveal | 24 | 1-3 | 1-2 | Owls take number 3. | 
+56.25 dishQ | 25 | 1-3 | 1-2 | Owls take number 3. | 
+(Imad: ⁨Lions⁩ take it. Smooth.)
+59.00 dishReveal | 26 | 1-3 | 2-2 | Lions take number 4. | 
+59.75 dishQ | 27 | 1-3 | 2-2 | Lions take number 4. | 
+62.50 dishQ | 28 | 1-3 | 2-2 | Lions are out of this one. Owls, it's yours to get. | 
+65.25 dishReveal | 29 | 1-3 | 2-3 | Owls take number 5. | 
+66.00 dishReveal | 29 | 1-3 | 2-3 |  | 
+(Imad: The referee has spoken. Me. I'm the referee.)
+67.00 dishReveal | 29 | 1-3 | 3-2 | Call changed: Lions take it. | 
+(Imad: ⁨Lions⁩ take the mini-game! 2 points, sweet!)
+68.00 dishSummary | 30 | 3-3 | 3-2 | Call changed: Lions take it. | 
+(Imad: Round 2. Movies. Somebody in this room is about to pretend they knew that.)
+68.75 roundIntro | 31 | 3-3 |  | Call changed: Lions take it. | 
+69.75 ask | 32 | 3-3 |  | Call changed: Lions take it. | 
+(Imad: New leaders! ⁨Owls⁩, how does it feel?)
+71.50 answer | 33 | 4-3 |  | Lions +1 point | 
+72.50 answer | 33 | 4-3 |  |  | 
+(Imad: Deliberation over. Play on.)
+73.25 steal | 34 | 3-3 |  | Owls steal a new question. | 
+(Imad: Wrong again! It's a festival of wrong.)
+75.00 answer | 35 | 3-3 |  | Owls steal a new question. | 
+76.00 answer | 35 | 3-3 |  |  | 
+(Imad: ⁨Owls⁩ go ahead! This is getting spicy.)
+77.00 answer | 35 | 3-4 |  | Call changed: Owls +1 point. | 
+77.75 ask | 36 | 3-4 |  | Call changed: Owls +1 point. | 
+(Imad: Correct! Somebody's been reading.)
+79.50 answer | 37 | 3-5 |  | Owls +1 point | 
+80.50 answer | 37 | 3-5 |  |  | 
+81.50 roundScore | 38 | 3-5 |  |  | 
+82.25 foolIntro | 39 | 3-5 | 0-0 |  | 
+83.25 foolWrite | 40 | 3-5 | 0-0 |  | 
+84.00 foolPick | 41 | 3-5 | 0-0 |  | 
+85.00 foolReveal | 42 | 3-5 | 2-2 |  | 
+86.00 foolWrite | 43 | 3-5 | 2-2 |  | 
+86.75 foolPick | 44 | 3-5 | 2-2 |  | 
+88.50 foolReveal | 45 | 3-5 | 5-2 |  | 
+89.50 foolWrite | 46 | 3-5 | 5-2 |  | 
+90.50 foolPick | 47 | 3-5 | 5-2 |  | 
+92.25 foolReveal | 48 | 3-5 | 6-3 |  | 
+93.00 foolWrite | 49 | 3-5 | 6-3 |  | 
+94.00 foolPick | 50 | 3-5 | 6-3 |  | 
+95.00 foolReveal | 51 | 3-5 | 7-4 |  | 
+95.75 foolWrite | 52 | 3-5 | 7-4 |  | 
+96.75 foolPick | 53 | 3-5 | 7-4 |  | 
+97.50 foolReveal | 54 | 3-5 | 7-5 |  | 
+98.50 foolWrite | 55 | 3-5 | 7-5 |  | 
+100.25 foolPick | 56 | 3-5 | 7-5 |  | 
+105.75 foolReveal | 57 | 3-5 | 7-5 |  | 
+(Imad: That's 2 points to ⁨Lions⁩. The scoreboard shakes.)
+106.50 foolSummary | 58 | 5-5 | 7-5 |  | 
+107.50 stakesIntro | 59 | 5-5 | 0-0 |  | 
+108.50 stakesPick | 60 | 5-5 | 0-0 |  | 
+109.25 stakesQ | 61 | 5-5 | 0-0 |  | 
+110.25 stakesReveal | 61 | 8-8 | 0-0 |  | 
+111.00 stakesPick | 62 | 8-8 | 3-3 |  | 
+113.75 stakesQ | 63 | 8-8 | 3-3 |  | 
+114.75 stakesReveal | 63 | 11-5 | 3-3 |  | 
+(Imad: LEAD CHANGE! ⁨Lions⁩ take over!)
+115.50 stakesPick | 64 | 11-5 | 6-0 |  | 
+116.50 stakesQ | 65 | 11-5 | 6-0 |  | 
+117.50 stakesReveal | 65 | 9-4 | 6-0 |  | 
+118.25 stakesSummary | 66 | 9-4 | 4--1 |  | 
+(Imad: And the winner is… ⁨Lions⁩! Quiz me, baby!)
+119.25 final | 67 | 9-4 |  |  | 
+recap: {"margin":5,"sudden":false,"leadChanges":4,"steals":[0,1],"minis":[2,1],"chart":[[0,0],[0,0],[1,0],[1,1],[1,3],[3,3],[4,3],[3,3],[3,4],[3,5],[5,5],[8,8],[11,5],[9,4]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Don't Say the Same as Me","pts":[[1,3]]},{"label":"Guess the Cocktail or Dish","pts":[[3,3]]},{"label":"R2","pts":[[4,3],[3,3],[3,4],[3,5]]},{"label":"Fool Me Twice","pts":[[5,5]]},{"label":"Secret Stakes","pts":[[8,8],[11,5],[9,4]]}],"awards":[{"t":"Down to the wire","who":"Lions took the lead for good in Secret Stakes","team":0},{"t":"Best thief","who":"Owls, 1 steal","team":1}]}

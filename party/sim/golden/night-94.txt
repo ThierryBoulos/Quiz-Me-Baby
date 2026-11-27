@@ -1,0 +1,79 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+7.50 ask | 3 | 0-0 |  |  | 
+8.50 steal | 3 | 0-0 |  |  | 
+9.50 answer | 3 | 0-0 |  |  | 
+25.25 answer | 3 | 0-0 |  | No answer in time: the call stands. | 
+25.50 ask | 4 | 0-0 |  | No answer in time: the call stands. | 
+26.50 steal | 4 | 0-0 |  | No answer in time: the call stands. | 
+27.50 answer | 4 | 0-0 |  | No answer in time: the call stands. | 
+28.25 roundScore | 5 | 0-0 |  | No answer in time: the call stands. | 
+29.25 pinIntro | 6 | 0-0 | 0-0 | No answer in time: the call stands. | 
+30.00 pinQ | 7 | 0-0 | 0-0 | No answer in time: the call stands. | 
+31.00 pinReveal | 7 | 0-0 | 1-0 | No answer in time: the call stands. | 
+32.00 pinQ | 8 | 0-0 | 1-0 | Lions take landmark 1. | 
+32.75 pinQ | 8 | 0-0 | 1-0 | That pin didn't come through. Drop it again. | 
+33.75 pinReveal | 8 | 0-0 | 1-1 | That pin didn't come through. Drop it again. | 
+34.50 pinQ | 9 | 0-0 | 1-1 | Owls take landmark 2. | 
+35.50 pinReveal | 9 | 0-0 | 1-2 | Owls take landmark 2. | 
+36.50 pinQ | 10 | 0-0 | 1-2 | Owls take landmark 3. | 
+37.25 pinReveal | 10 | 0-0 | 2-2 | Owls take landmark 3. | 
+38.25 pinQ | 11 | 0-0 | 2-2 | Lions take landmark 4. | 
+39.00 pinReveal | 11 | 0-0 | 2-3 | Lions take landmark 4. | 
+40.00 pinQ | 12 | 0-0 | 2-3 | Owls take landmark 5. | 
+41.00 pinReveal | 12 | 0-0 | 3-3 | Owls take landmark 5. | 
+41.75 pinQ | 13 | 0-0 | 3-3 | Lions take landmark 6. | 
+42.75 pinReveal | 13 | 0-0 | 3-4 | Lions take landmark 6. | 
+43.50 pinSummary | 14 | 0-2 | 3-4 | Owls take landmark 7. | 
+44.50 airportIntro | 15 | 0-2 | 0-0 | Owls take landmark 7. | 
+45.50 airportQ | 16 | 0-2 | 0-0 | Owls take landmark 7. | 
+46.25 airportReveal | 16 | 0-2 | 1-1 | Owls take landmark 7. | 
+47.25 airportQ | 17 | 0-2 | 1-1 | Both got it — a point each. | 
+48.00 airportReveal | 17 | 0-2 | 1-2 | Both got it — a point each. | 
+49.00 airportQ | 18 | 0-2 | 1-2 | Owls take board 2. | 
+50.00 airportReveal | 18 | 0-2 | 2-3 | Owls take board 2. | 
+50.75 airportReveal | 18 | 0-2 | 2-3 |  | 
+52.50 airportReveal | 18 | 0-2 | 2-2 | Call changed: ⁨Owls⁩ WRONG. | 
+53.50 airportQ | 19 | 0-2 | 2-2 | Lions take board 3. | 
+54.50 airportReveal | 19 | 0-2 | 3-2 | Lions take board 3. | 
+55.25 airportQ | 20 | 0-2 | 3-2 | Lions take board 4. | 
+56.25 airportReveal | 20 | 0-2 | 4-2 | Lions take board 4. | 
+57.00 airportReveal | 20 | 0-2 | 4-2 |  | 
+59.00 airportReveal | 20 | 0-2 | 4-2 | ⁨Rami⁩ doesn't agree: the call stands. | 
+59.75 airportSummary | 21 | 2-2 | 4-2 | Lions take board 5. | 
+60.75 roundIntro | 22 | 2-2 |  | Lions take board 5. | 
+61.50 ask | 23 | 2-2 |  | Lions take board 5. | 
+62.50 answer | 23 | 3-2 |  | Lions +1 point | 
+63.50 ask | 24 | 3-2 |  | Lions +1 point | 
+64.25 ask | 24 | 3-2 |  | Owls used Double Dip. | 
+65.25 steal | 24 | 3-2 |  | Owls used Double Dip. | 
+66.00 answer | 24 | 4-2 |  | Lions +1 point — steal | 
+67.00 roundScore | 25 | 4-2 |  | Lions +1 point — steal | 
+68.00 majorityIntro | 26 | 4-2 | 0-0 | Lions +1 point — steal | 
+68.75 majorityQ | 27 | 4-2 | 0-0 | Lions +1 point — steal | 
+69.75 majorityReveal | 27 | 4-2 | 67-67 | Lions +1 point — steal | 
+70.50 majorityQ | 28 | 4-2 | 67-67 | Lions +1 point — steal | 
+71.50 majorityReveal | 28 | 4-2 | 83-33 | Lions +1 point — steal | 
+72.50 majorityQ | 29 | 4-2 | 83-33 | Lions +1 point — steal | 
+73.25 majorityReveal | 29 | 4-2 | 89-33 | Lions +1 point — steal | 
+74.25 majorityQ | 30 | 4-2 | 89-33 | Lions +1 point — steal | 
+90.25 majorityReveal | 31 | 4-2 | 75-50 | Lions +1 point — steal | 
+90.50 majorityQ | 32 | 4-2 | 75-50 | Lions +1 point — steal | 
+106.50 majorityReveal | 33 | 4-2 | 67-60 | Lions +1 point — steal | 
+107.50 majorityQ | 34 | 4-2 | 67-60 | Lions +1 point — steal | 
+123.50 majorityReveal | 35 | 4-2 | 61-61 | Lions +1 point — steal | 
+123.75 majorityQ | 36 | 4-2 | 61-61 | Lions +1 point — steal | 
+139.75 majorityReveal | 37 | 4-2 | 57-62 | Lions +1 point — steal | 
+140.00 majorityQ | 38 | 4-2 | 57-62 | Lions +1 point — steal | 
+156.00 majorityReveal | 39 | 4-2 | 54-63 | Lions +1 point — steal | 
+157.00 majorityQ | 40 | 4-2 | 54-63 | Lions +1 point — steal | 
+158.00 majorityReveal | 40 | 4-2 | 56-67 | Lions +1 point — steal | 
+158.75 majorityQ | 41 | 4-2 | 56-67 | Lions +1 point — steal | 
+159.75 majorityReveal | 41 | 4-2 | 57-67 | Lions +1 point — steal | 
+160.50 majoritySummary | 42 | 4-4 | 57-67 | Lions +1 point — steal | 
+161.50 sudden | 43 | 4-4 |  | Lions +1 point — steal | 
+162.50 sudden | 44 | 4-4 |  | Lions +1 point — steal | 
+163.25 final | 44 | 4-5 |  | Lions +1 point — steal | 
+recap: {"margin":1,"sudden":true,"leadChanges":2,"steals":[1,0],"minis":[1,2],"best":{"title":"Guess the Airport","team":0,"legs":[4,2]},"chart":[[0,0],[0,0],[0,2],[2,2],[3,2],[4,2],[4,4],[4,5]],"segs":[{"label":"R1","pts":[]},{"label":"Drop the Pin","pts":[[0,2]]},{"label":"Guess the Airport","pts":[[2,2]]},{"label":"R2","pts":[[3,2],[4,2]]},{"label":"Majority Rules","pts":[[4,4]]},{"label":"Sudden death","pts":[[4,5]]}],"awards":[{"t":"Down to the wire","who":"Settled in sudden death","team":1},{"t":"Best thief","who":"Lions, 1 steal","team":0},{"t":"Best aim, Drop the Pin","who":"Owls, 138 km off on average","team":1},{"t":"Furthest pin","who":"Lions, 921 km off","team":0,"note":"Chichén Itzá (El Castillo) (Yucatán, Mexico)"},{"t":"Sharpest in Majority Rules","who":"Lea, Sam & Joe, 8 of 10","team":null},{"t":"Least right, Majority Rules","who":"Maya & Karim, 4 of 10","team":null,"spoon":true}]}

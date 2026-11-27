@@ -152,6 +152,20 @@ const NIGHTS = [
      with a host and without; and a Secret Stakes bet with no level, refused in words */
   { seed: 88, minis: ["stakes"], rounds: 4, events: [{ at: 5, type: "score", a: 1, b: 12 }], comeback: "make", comebackPause: true, badBet: true },
   { seed: 89, minis: ["stakes"], rounds: 4, host: true, events: [{ at: 5, type: "score", a: 12, b: 1 }], comeback: "make", comebackPause: true, badBet: true },
+  /* 27 Nov (the owner's big test): the older games with no TV, no host and with a host (until now only the newer ones
+     were played on the game phone); Imad on; and the TV out of sight on every game's question, paused while it's away */
+  { seed: 90, minis: DEFAULT, rounds: 4, phone: true },
+  { seed: 91, minis: DEFAULT, rounds: 4, phone: true, host: true },
+  { seed: 92, minis: ["dish", "saysame", "map"], rounds: 2, phone: true },
+  { seed: 93, minis: ["dish", "saysame", "map"], rounds: 2, phone: true, host: true },
+  { seed: 94, minis: ["pin", "airport", "majority"], rounds: 2, phone: true, crowd: 3 },
+  { seed: 95, minis: ["pin", "airport", "majority"], rounds: 2, phone: true, host: true, crowd: 3 },
+  { seed: 96, minis: ["flag", "closest", "auction", "see", "roulette", "battle"], imad: true },
+  { seed: 97, minis: ["fool", "stakes", "dish", "saysame"], rounds: 2, host: true, phone: true, imad: true },
+  { seed: 98, minis: ["flag", "closest", "dish", "saysame", "map", "pin", "airport"], rounds: 2,
+    naps: ["ask", "flagQ", "miniQ", "dishQ", "sayQ", "mapQ", "pinQ", "airportQ"] },
+  { seed: 99, minis: ["majority", "see", "fool", "roulette", "stakes"], rounds: 2, host: true, phone: true, crowd: 3,
+    naps: ["ask", "majorityQ", "seeQ", "foolWrite", "foolPick", "rouletteQ", "stakesPick", "stakesQ"] },
 ];
 
 const args = process.argv.slice(2), update = args.includes("--update"), only = args.filter((a) => /^\d+$/.test(a)).map(Number);

@@ -98,9 +98,14 @@ function pinNear(g, bot) {
    wrong), "quiet" (no answer: the 15 seconds run out), "skip" (the host skips it), "off" (switched off in Setup);
    left out, the captain answers at the bots' usual rate. comebackSwap: a new question asked for on its first one.
    reloadOn: the TV's page reloads (once) the first time this screen is up, e.g. "comebackQ" (18 Nov)
-   takeoverOn: the same, but another device takes over from the server's copy instead (19 Nov) */
-export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false, takeoverOn = null, mrLeave = null, comebackPause = false, badBet = false }) {
+   takeoverOn: the same, but another device takes over from the server's copy instead (19 Nov)
+   imad: Imad on (Settings), his lines on every screen (27 Nov)
+   naps: screens (e.g. "flagQ") where the TV's screen goes out of sight 30 s the first time each is up with its clock
+     running: the game pauses, and picks up with the clock where it was (27 Nov, the owner: every game) */
+export async function night({ seed, minis, rounds = 6, host = false, again = false, slow = 0, reload = 0, reloadOn = null, sleep = 0, chaos = 0, events = [], net = null, simul = false, edge = false, check = null, crowd = 0, absent = null, tieMore = 0, battleLevel = false, themes = null, seeKinds = null, lifelines = true, phone = false, comeback = null, comebackSwap = false, takeoverOn = null, mrLeave = null, comebackPause = false, badBet = false, imad = false, naps = null }) {
   fake.reset(); resetClock(); localStorage.clear(); seedRandom(seed); phoneMode = phone;
+  if (imad) localStorage.setItem("qmb.party.settings", JSON.stringify({ v: 4, imad: true }));
+  const napped = new Set();
   const bot = rng(seed * 7919 + 1);
   const t0 = clock(), trace = [], seen = {};
   const caps = ["capA", "capB"], gone = new Set();
@@ -130,10 +135,13 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   const FOLK = ["Maya", "Karim", "Joe", "Rita", "Nadim", "Lina", "Omar", "Tala"];
   for (let i = 0; i < crowd; i++) fake.db.members.push({ room: CODE, user_id: "c" + i, name: FOLK[i], team: (i + 1) % 2, role: "player", face: null });
   fake.setPresence(fake.db.members.map((m) => m.user_id).filter((u) => !absent || fake.db.members.find((m) => m.user_id === u)?.name !== absent));
-  let last = "";
+  let last = "", lastImad = null;
   fake.onChange((t) => {
     if (t !== "rooms") return;
     const room = fake.db.rooms[0], p = room.state?.pub;
+    /* (Imad on: each new line he says, every name filled in) */
+    if (imad && p?.imad && p.imad.id !== lastImad) { lastImad = p.imad.id; const tx = String(p.imad.text || "");
+      trace.push(`(Imad: ${tx}${/\{\w+\}|s's\b/.test(tx) ? " — NOT FILLED IN" : ""})`); }
     const line = p ? [p.screen, p.step, p.teams?.map((x) => x.score).join("-"), p.mini?.wins?.join("-") || "", p.toast?.text || "", p.pending ? "pending" : ""].join(" | ") : `room ${room.status}`;
     if (line === last) return;
     last = line; trace.push(`${((clock() - t0) / 1000).toFixed(2)} ${line}`);
@@ -278,6 +286,19 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
       await act(async () => { setVisible(true); await flush(); }); await tick(1500);
       const p2 = fake.db.rooms[0].state.pub;
       trace.push(`(the TV wakes: ${p2.screen}, answer in: ${!!(p2.sent?.[t] || p2.pending || p2.screen !== "ask")}, clock ${p2.deadline ? Math.round((p2.deadline - clock()) / 1000) + " s" : "stopped"})`);
+      continue;
+    }
+    /* the TV out of sight on each game's question (naps): paused while it's away, the clock where it was when it's back */
+    if (naps && naps.includes(pub.screen) && !napped.has(pub.screen) && pub.deadline && !pub.paused && !pub.pending && !pub.lifeline) {
+      napped.add(pub.screen);
+      const left = (pub.deadline - clock()) / 1000;
+      await act(async () => { setVisible(false); await flush(); }); await tick(1500);
+      const p1 = fake.db.rooms[0].state.pub;
+      await tick(30000);
+      await act(async () => { setVisible(true); await flush(); }); await tick(1500);
+      const p2 = fake.db.rooms[0].state.pub, left2 = p2.deadline ? (p2.deadline - clock()) / 1000 : null;
+      const ok = p1.paused && !p2.paused && left2 != null && left2 > left - 3.5 && left2 <= left;
+      trace.push(`(the TV out of sight 30 s on ${pub.screen}: ${p1.paused ? "paused" : "NOT PAUSED"}; back: ${p2.paused ? "STILL PAUSED" : "running"}, ${left2 == null ? "no clock" : Math.round(left2) + " s of " + Math.round(left) + " s"} — ${ok ? "ok" : "WRONG"})`);
       continue;
     }
     /* slow captains: this beat, nobody taps (so the clocks run out now and then)... but now and then

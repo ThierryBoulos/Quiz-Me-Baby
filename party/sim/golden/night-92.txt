@@ -1,0 +1,70 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+7.50 answer | 3 | 1-0 |  | Lions +1 point | 
+8.50 answer | 3 | 1-0 |  |  | 
+23.50 answer | 3 | 1-0 |  | No answer in time: the call stands. | 
+23.75 ask | 4 | 1-0 |  | No answer in time: the call stands. | 
+24.75 answer | 4 | 1-1 |  | Owls +1 point | 
+25.50 answer | 4 | 1-1 |  |  | 
+40.50 answer | 4 | 1-1 |  | No answer in time: the call stands. | 
+41.00 roundScore | 5 | 1-1 |  | No answer in time: the call stands. | 
+41.75 sayIntro | 6 | 1-1 | 0-0 | No answer in time: the call stands. | 
+42.75 sayQ | 7 | 1-1 | 0-0 | No answer in time: the call stands. | 
+43.50 sayReveal | 7 | 1-1 | 0-0 | No answer in time: the call stands. | 
+44.50 sayQ | 8 | 1-1 | 0-0 | Nobody gets it. | 
+45.50 sayReveal | 8 | 1-1 | 0-0 | Nobody gets it. | 
+46.25 sayQ | 9 | 1-1 | 0-0 | Nobody gets it. | 
+47.25 sayReveal | 9 | 1-1 | 0-0 | Nobody gets it. | 
+48.00 sayQ | 10 | 1-1 | 0-0 | Nobody gets it. | 
+49.00 sayReveal | 10 | 1-1 | 0-0 | Nobody gets it. | 
+50.00 sayQ | 11 | 1-1 | 0-0 | Nobody gets it. | 
+50.75 sayReveal | 11 | 1-1 | 0-0 | Nobody gets it. | 
+51.75 sayReveal | 11 | 1-1 | 0-0 |  | 
+54.50 sayReveal | 11 | 1-1 | 1-0 | Call changed: ⁨Lions⁩ scores. | 
+55.25 sayQ | 12 | 1-1 | 1-0 | Lions take leg 5. | 
+56.25 sayReveal | 12 | 1-1 | 1-0 | Lions take leg 5. | 
+57.00 saySummary | 13 | 3-1 | 1-0 | Nobody gets it. | 
+58.00 mapIntro | 14 | 3-1 | 0-0 | Nobody gets it. | 
+59.00 mapQ | 15 | 3-1 | 0-0 | Nobody gets it. | 
+59.75 mapReveal | 15 | 3-1 | 1-1 | Nobody gets it. | 
+60.75 mapQ | 16 | 3-1 | 1-1 | Both got it — a point each. | 
+61.50 mapReveal | 16 | 3-1 | 1-1 | Both got it — a point each. | 
+62.50 mapReveal | 16 | 3-1 | 1-1 |  | 
+65.25 mapReveal | 16 | 3-1 | 1-1 | ⁨Rami⁩ doesn't agree: the call stands. | 
+66.00 mapQ | 17 | 3-1 | 1-1 | Nobody got it. | 
+67.00 mapReveal | 17 | 3-1 | 1-1 | Nobody got it. | 
+68.00 mapReveal | 17 | 3-1 | 1-1 |  | 
+68.75 mapReveal | 17 | 3-1 | 1-1 | ⁨Lea⁩ doesn't agree: the call stands. | 
+69.75 mapTie | 18 | 3-1 | 1-1 | Nobody got it. | 
+70.50 mapSummary | 19 | 4-2 | 1-1 | Nobody got it. | 
+71.50 roundIntro | 20 | 4-2 |  | Nobody got it. | 
+72.50 ask | 21 | 4-2 |  | Nobody got it. | 
+73.25 ask | 21 | 4-2 |  | Lions used Call a Friend. | 
+77.00 ask | 22 | 4-2 |  | Lions used Call a Friend. | 
+77.75 steal | 22 | 4-2 |  | Lions used Call a Friend. | 
+78.75 answer | 22 | 4-2 |  | Lions used Call a Friend. | 
+79.50 answer | 22 | 4-2 |  |  | 
+81.50 answer | 22 | 5-2 |  | Call changed: Lions +1 point. | 
+82.25 ask | 23 | 5-2 |  | Call changed: Lions +1 point. | 
+83.25 steal | 23 | 5-2 |  | Call changed: Lions +1 point. | 
+84.00 answer | 23 | 5-2 |  | Call changed: Lions +1 point. | 
+85.00 roundScore | 24 | 5-2 |  | Call changed: Lions +1 point. | 
+86.00 dishIntro | 25 | 5-2 | 0-0 | Call changed: Lions +1 point. | 
+86.75 dishQ | 26 | 5-2 | 0-0 | Call changed: Lions +1 point. | 
+88.50 dishQ | 26 | 5-2 | 0-0 | Lions are out of this one. Owls, it's yours to get. | 
+90.50 dishReveal | 26 | 5-2 | 0-1 | Owls take number 1. | 
+91.25 dishQ | 27 | 5-2 | 0-1 | Owls take number 1. | 
+93.00 dishQ | 27 | 5-2 | 0-1 | Lions are out of this one. Owls, it's yours to get. | 
+95.00 dishReveal | 27 | 5-2 | 0-1 | Nobody got it. | 
+95.75 dishQ | 28 | 5-2 | 0-1 | Nobody got it. | 
+97.50 dishQ | 28 | 5-2 | 0-1 | Lions are out of this one. Owls, it's yours to get. | 
+99.50 dishReveal | 28 | 5-2 | 0-1 | Nobody got it. | 
+100.25 dishQ | 29 | 5-2 | 0-1 | Nobody got it. | 
+102.00 dishQ | 29 | 5-2 | 0-1 | Lions are out of this one. Owls, it's yours to get. | 
+104.00 dishReveal | 29 | 5-2 | 0-2 | Owls take number 4. | 
+104.75 decided | 30 | 5-4 | 0-2 |  | 
+105.75 final | 31 | 5-4 |  |  | 
+recap: {"margin":1,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[1,1],"best":{"title":"Guess the Cocktail or Dish","team":1,"legs":[0,2]},"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[4,2],[5,2],[5,4]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Don't Say the Same as Me","pts":[[3,1]]},{"label":"Guess the Map","pts":[[4,2]]},{"label":"R2","pts":[[5,2]]},{"label":"Guess the Cocktail or Dish","pts":[[5,4]]}],"awards":[{"t":"Down to the wire","who":"Won by a single point","team":0}]}

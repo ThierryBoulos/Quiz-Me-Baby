@@ -1,0 +1,145 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+6.75 ask | 3 | 0-0 |  |  | 
+(the TV out of sight 30 s on ask: paused; back: running, 58 s of 59 s — ok)
+41.50 answer | 3 | 1-0 |  | Lions +1 point | 
+42.50 ask | 4 | 1-0 |  | Lions +1 point | 
+43.25 answer | 4 | 1-1 |  | Owls +1 point | 
+44.25 roundScore | 5 | 1-1 |  | Owls +1 point | 
+45.00 flagIntro | 6 | 1-1 | 0-0 | Owls +1 point | 
+46.00 flagQ | 7 | 1-1 | 0-0 | Owls +1 point | 
+(the TV out of sight 30 s on flagQ: paused; back: running, 13 s of 14 s — ok)
+80.75 flagReveal | 7 | 1-1 | 1-0 | Owls +1 point | 
+81.75 flagReveal | 7 | 1-1 | 1-0 |  | 
+83.50 flagReveal | 7 | 1-1 | 1-1 | Call changed: ⁨Owls⁩ RIGHT. | 
+84.50 flagQ | 8 | 1-1 | 1-1 | Both got it — a point each. | 
+85.25 flagReveal | 8 | 1-1 | 2-1 | Both got it — a point each. | 
+86.25 flagQ | 9 | 1-1 | 2-1 | Lions take flag 2. | 
+87.00 flagReveal | 9 | 1-1 | 2-1 | Lions take flag 2. | 
+88.00 flagReveal | 9 | 1-1 | 2-1 |  | 
+103.00 flagReveal | 9 | 1-1 | 2-1 | No answer in time: the call stands. | 
+103.25 flagQ | 10 | 1-1 | 2-1 | Nobody got it. | 
+104.25 flagReveal | 10 | 1-1 | 2-1 | Nobody got it. | 
+105.00 flagQ | 11 | 1-1 | 2-1 | Nobody got it. | 
+106.00 flagReveal | 11 | 1-1 | 3-2 | Nobody got it. | 
+107.00 flagQ | 12 | 1-1 | 3-2 | Both got it — a point each. | 
+107.75 flagReveal | 12 | 1-1 | 3-2 | Both got it — a point each. | 
+108.75 flagQ | 13 | 1-1 | 3-2 | Nobody got it. | 
+109.50 flagReveal | 13 | 1-1 | 3-2 | Nobody got it. | 
+110.50 flagQ | 14 | 1-1 | 3-2 | Nobody got it. | 
+111.50 flagReveal | 14 | 1-1 | 4-2 | Nobody got it. | 
+112.25 flagReveal | 14 | 1-1 | 4-2 |  | 
+113.25 flagReveal | 14 | 1-1 | 4-2 | ⁨Rami⁩ doesn't agree: the call stands. | 
+114.00 flagQ | 15 | 1-1 | 4-2 | Lions take flag 8. | 
+115.00 flagReveal | 15 | 1-1 | 5-2 | Lions take flag 8. | 
+116.00 decided | 16 | 3-1 | 5-2 |  | 
+116.75 miniIntro | 17 | 3-1 | 0-0 |  | 
+117.75 miniQ | 18 | 3-1 | 0-0 |  | 
+(the TV out of sight 30 s on miniQ: paused; back: running, 58 s of 59 s — ok)
+152.50 closestReveal | 18 | 3-1 | 1-0 |  | 
+153.50 miniQ | 19 | 3-1 | 1-0 | Lions take leg 1. | 
+154.25 closestReveal | 19 | 3-1 | 2-0 | Lions take leg 1. | 
+155.25 miniQ | 20 | 3-1 | 2-0 | Lions take leg 2. | 
+156.00 closestReveal | 20 | 3-1 | 3-1 | Lions take leg 2. | 
+157.00 miniQ | 21 | 3-1 | 3-1 | Tie — a point each. | 
+158.00 closestReveal | 21 | 3-1 | 3-2 | Tie — a point each. | 
+158.75 miniQ | 22 | 3-1 | 3-2 | Owls take leg 4. | 
+159.75 closestReveal | 22 | 3-1 | 3-3 | Owls take leg 4. | 
+160.50 miniTie | 23 | 3-1 | 3-3 |  | 
+161.50 miniSummary | 24 | 4-2 | 3-3 |  | 
+162.50 sayIntro | 25 | 4-2 | 0-0 |  | 
+163.25 sayQ | 26 | 4-2 | 0-0 |  | 
+(the TV out of sight 30 s on sayQ: paused; back: running, 18 s of 19 s — ok)
+198.00 sayReveal | 26 | 4-2 | 0-0 |  | 
+199.00 sayQ | 27 | 4-2 | 0-0 | Nobody gets it. | 
+200.00 sayReveal | 27 | 4-2 | 0-0 | Nobody gets it. | 
+200.75 sayQ | 28 | 4-2 | 0-0 | Nobody gets it. | 
+201.75 sayReveal | 28 | 4-2 | 0-0 | Nobody gets it. | 
+202.50 sayQ | 29 | 4-2 | 0-0 | Nobody gets it. | 
+203.50 sayReveal | 29 | 4-2 | 0-0 | Nobody gets it. | 
+204.50 sayReveal | 29 | 4-2 | 0-0 |  | 
+206.25 sayReveal | 29 | 4-2 | 0-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+207.00 sayQ | 30 | 4-2 | 0-0 | Nobody gets it. | 
+208.00 sayReveal | 30 | 4-2 | 0-0 | Nobody gets it. | 
+209.00 sayReveal | 30 | 4-2 | 0-0 |  | 
+210.75 sayReveal | 30 | 4-2 | 1-0 | Call changed: ⁨Lions⁩ scores. | 
+211.50 sayQ | 31 | 4-2 | 1-0 | Lions take leg 5. | 
+212.50 sayReveal | 31 | 4-2 | 1-0 | Lions take leg 5. | 
+213.50 saySummary | 32 | 6-2 | 1-0 | Nobody gets it. | 
+214.25 mapIntro | 33 | 6-2 | 0-0 | Nobody gets it. | 
+215.25 mapQ | 34 | 6-2 | 0-0 | Nobody gets it. | 
+(the TV out of sight 30 s on mapQ: paused; back: running, 58 s of 59 s — ok)
+250.00 mapReveal | 34 | 6-2 | 1-1 | Nobody gets it. | 
+251.00 mapReveal | 34 | 6-2 | 1-1 |  | 
+251.75 mapReveal | 34 | 6-2 | 1-1 | ⁨Rami⁩ doesn't agree: the call stands. | 
+252.75 mapQ | 35 | 6-2 | 1-1 | Both got it — a point each. | 
+253.50 mapReveal | 35 | 6-2 | 2-1 | Both got it — a point each. | 
+254.50 mapQ | 36 | 6-2 | 2-1 | Lions take map 2. | 
+255.50 mapReveal | 36 | 6-2 | 2-2 | Lions take map 2. | 
+256.25 mapReveal | 36 | 6-2 | 2-2 |  | 
+271.25 mapReveal | 36 | 6-2 | 2-2 | No answer in time: the call stands. | 
+271.50 mapTie | 37 | 6-2 | 2-2 | Owls take map 3. | 
+272.50 mapSummary | 38 | 7-3 | 2-2 | Owls take map 3. | 
+273.50 pinIntro | 39 | 7-3 | 0-0 | Owls take map 3. | 
+274.25 pinQ | 40 | 7-3 | 0-0 | Owls take map 3. | 
+(the TV out of sight 30 s on pinQ: paused; back: running, 43 s of 44 s — ok)
+309.00 pinReveal | 40 | 7-3 | 0-1 | Owls take map 3. | 
+310.00 pinQ | 41 | 7-3 | 0-1 | Owls take landmark 1. | 
+311.00 pinReveal | 41 | 7-3 | 0-2 | Owls take landmark 1. | 
+311.75 pinQ | 42 | 7-3 | 0-2 | Owls take landmark 2. | 
+312.75 pinReveal | 42 | 7-3 | 1-2 | Owls take landmark 2. | 
+313.50 pinQ | 43 | 7-3 | 1-2 | Lions take landmark 3. | 
+314.50 pinReveal | 43 | 7-3 | 2-2 | Lions take landmark 3. | 
+315.50 pinQ | 44 | 7-3 | 2-2 | Lions take landmark 4. | 
+316.25 pinReveal | 44 | 7-3 | 2-3 | Lions take landmark 4. | 
+317.25 pinQ | 45 | 7-3 | 2-3 | Owls take landmark 5. | 
+318.00 pinReveal | 45 | 7-3 | 3-3 | Owls take landmark 5. | 
+319.00 pinQ | 46 | 7-3 | 3-3 | Lions take landmark 6. | 
+320.00 pinReveal | 46 | 7-3 | 4-3 | Lions take landmark 6. | 
+320.75 pinSummary | 47 | 9-3 | 4-3 | Lions take landmark 7. | 
+321.75 roundIntro | 48 | 9-3 |  | Lions take landmark 7. | 
+322.50 ask | 49 | 9-3 |  | Lions take landmark 7. | 
+323.50 ask | 49 | 9-3 |  | Lions used Double Dip. | 
+324.50 answer | 49 | 10-3 |  | Lions +1 point | 
+325.25 ask | 50 | 10-3 |  | Lions +1 point | 
+326.25 answer | 50 | 10-4 |  | Owls +1 point | 
+327.00 roundScore | 51 | 10-4 |  | Owls +1 point | 
+328.00 airportIntro | 52 | 10-4 | 0-0 | Owls +1 point | 
+329.00 airportQ | 53 | 10-4 | 0-0 | Owls +1 point | 
+(the TV out of sight 30 s on airportQ: paused; back: running, 28 s of 29 s — ok)
+363.75 airportReveal | 53 | 10-4 | 1-0 | Owls +1 point | 
+364.50 airportReveal | 53 | 10-4 | 1-0 |  | 
+367.25 airportReveal | 53 | 10-4 | 1-1 | Call changed: ⁨Owls⁩ RIGHT. | 
+368.25 airportQ | 54 | 10-4 | 1-1 | Both got it — a point each. | 
+369.00 airportReveal | 54 | 10-4 | 1-1 | Both got it — a point each. | 
+370.00 airportQ | 55 | 10-4 | 1-1 | Nobody got it. | 
+371.00 airportReveal | 55 | 10-4 | 2-1 | Nobody got it. | 
+371.75 airportQ | 56 | 10-4 | 2-1 | Lions take board 3. | 
+372.75 airportReveal | 56 | 10-4 | 2-2 | Lions take board 3. | 
+373.50 airportQ | 57 | 10-4 | 2-2 | Owls take board 4. | 
+374.50 airportReveal | 57 | 10-4 | 2-2 | Owls take board 4. | 
+375.50 airportTie | 58 | 10-4 | 2-2 |  | 
+376.25 airportSummary | 59 | 11-5 | 2-2 |  | 
+377.25 dishIntro | 60 | 11-5 | 0-0 |  | 
+378.00 dishQ | 61 | 11-5 | 0-0 |  | 
+(the TV out of sight 30 s on dishQ: paused; back: running, 33 s of 34 s — ok)
+413.75 dishReveal | 61 | 11-5 | 1-0 | Lions take number 1. | 
+414.75 dishReveal | 61 | 11-5 | 1-0 |  | 
+415.50 dishReveal | 61 | 11-5 | 1-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+416.50 dishQ | 62 | 11-5 | 1-0 | ⁨Rami⁩ doesn't agree: the call stands. | 
+418.25 dishQ | 62 | 11-5 | 1-0 | Lions are out of this one. Owls, it's yours to get. | 
+420.00 dishReveal | 62 | 11-5 | 1-0 | Nobody got it. | 
+421.00 dishQ | 63 | 11-5 | 1-0 | Nobody got it. | 
+422.75 dishQ | 63 | 11-5 | 1-0 | Lions are out of this one. Owls, it's yours to get. | 
+424.50 dishReveal | 63 | 11-5 | 1-0 | Nobody got it. | 
+425.50 dishQ | 64 | 11-5 | 1-0 | Nobody got it. | 
+427.25 dishQ | 64 | 11-5 | 1-0 | Lions are out of this one. Owls, it's yours to get. | 
+429.00 dishReveal | 64 | 11-5 | 1-1 | Owls take number 4. | 
+430.00 dishQ | 65 | 11-5 | 1-1 | Owls take number 4. | 
+431.75 dishQ | 65 | 11-5 | 1-1 | Lions are out of this one. Owls, it's yours to get. | 
+433.50 dishReveal | 65 | 11-5 | 1-2 | Owls take number 5. | 
+434.50 dishSummary | 66 | 11-7 | 1-2 | Owls take number 5. | 
+435.50 final | 67 | 11-7 |  | Owls take number 5. | 
+recap: {"margin":4,"sudden":false,"leadChanges":0,"steals":[0,0],"minis":[3,1],"best":{"title":"Guess the Flag","team":0,"legs":[5,2]},"chart":[[0,0],[0,0],[1,0],[1,1],[3,1],[4,2],[6,2],[7,3],[9,3],[10,3],[10,4],[11,5],[11,7]],"segs":[{"label":"R1","pts":[[1,0],[1,1]]},{"label":"Guess the Flag","pts":[[3,1]]},{"label":"Closest To Wins","pts":[[4,2]]},{"label":"Don't Say the Same as Me","pts":[[6,2]]},{"label":"Guess the Map","pts":[[7,3]]},{"label":"Drop the Pin","pts":[[9,3]]},{"label":"R2","pts":[[10,3],[10,4]]},{"label":"Guess the Airport","pts":[[11,5]]},{"label":"Guess the Cocktail or Dish","pts":[[11,7]]}],"awards":[{"t":"Best aim, Drop the Pin","who":"Lions, 158 km off on average","team":0},{"t":"Furthest pin","who":"Owls, 933 km off","team":1,"note":"Niagara Falls (Horseshoe Falls) (Ontario, Canada, and New York, United States)"}]}

@@ -1,0 +1,63 @@
+0.00 room lobby
+1.25 room playing
+1.25 roundIntro | 1 | 0-0 |  |  | 
+5.00 roundIntro | 2 | 0-0 |  |  | 
+7.50 ask | 3 | 0-0 |  |  | 
+9.50 answer | 4 | 1-0 |  | Lions +1 point | 
+10.25 ask | 5 | 1-0 |  | Lions +1 point | 
+12.00 steal | 6 | 1-0 |  | Lions +1 point | 
+14.00 answer | 7 | 1-0 |  | Lions +1 point | 
+14.75 answer | 7 | 1-0 |  |  | 
+16.50 answer | 7 | 1-0 |  | The host keeps the call. | 
+17.50 roundScore | 8 | 1-0 |  | The host keeps the call. | 
+18.50 sayIntro | 9 | 1-0 | 0-0 | The host keeps the call. | 
+19.25 sayQ | 10 | 1-0 | 0-0 | The host keeps the call. | 
+20.25 sayReveal | 10 | 1-0 | 0-0 | The host keeps the call. | 
+21.00 sayQ | 11 | 1-0 | 0-0 | Nobody gets it. | 
+22.00 sayReveal | 11 | 1-0 | 0-0 | Nobody gets it. | 
+23.00 sayReveal | 11 | 1-0 | 0-0 |  | 
+26.50 sayQ | 12 | 1-0 | 0-0 | Nobody gets it. | 
+27.50 sayReveal | 12 | 1-0 | 0-0 | Nobody gets it. | 
+28.25 sayQ | 13 | 1-0 | 0-0 | Nobody gets it. | 
+29.25 sayReveal | 13 | 1-0 | 0-0 | Nobody gets it. | 
+30.00 sayQ | 14 | 1-0 | 0-0 | Nobody gets it. | 
+31.00 sayReveal | 14 | 1-0 | 0-0 | Nobody gets it. | 
+32.00 sayReveal | 14 | 1-0 | 0-0 |  | 
+35.50 sayReveal | 14 | 1-0 | 1-0 | Call changed: ⁨Lions⁩ scores. | 
+36.50 sayQ | 15 | 1-0 | 1-0 | Lions take leg 5. | 
+37.25 sayReveal | 15 | 1-0 | 1-0 | Lions take leg 5. | 
+38.25 saySummary | 16 | 3-0 | 1-0 | Nobody gets it. | 
+39.00 mapIntro | 17 | 3-0 | 0-0 | Nobody gets it. | 
+40.00 mapQ | 18 | 3-0 | 0-0 | Nobody gets it. | 
+41.00 mapReveal | 18 | 3-0 | 0-1 | Nobody gets it. | 
+41.75 mapQ | 19 | 3-0 | 0-1 | Owls take map 1. | 
+42.75 mapReveal | 19 | 3-0 | 0-1 | Owls take map 1. | 
+43.50 mapQ | 20 | 3-0 | 0-1 | Nobody got it. | 
+44.50 mapReveal | 20 | 3-0 | 1-2 | Nobody got it. | 
+45.50 mapSummary | 21 | 3-2 | 1-2 | Both got it — a point each. | 
+46.25 roundIntro | 22 | 3-2 |  | Both got it — a point each. | 
+47.25 ask | 23 | 3-2 |  | Both got it — a point each. | 
+49.00 steal | 24 | 3-2 |  | Both got it — a point each. | 
+50.75 answer | 25 | 3-2 |  | Both got it — a point each. | 
+51.75 ask | 26 | 3-2 |  | Both got it — a point each. | 
+53.50 answer | 27 | 3-3 |  | Owls +1 point | 
+54.50 answer | 27 | 3-3 |  |  | 
+56.25 roundScore | 28 | 3-3 |  |  | 
+57.00 dishIntro | 29 | 3-3 | 0-0 |  | 
+58.00 dishQ | 30 | 3-3 | 0-0 |  | 
+60.75 dishQ | 31 | 3-3 | 0-0 | Lions are out of this one. Owls, it's yours to get. | 
+63.50 dishReveal | 32 | 3-3 | 0-0 | Nobody got it. | 
+64.25 dishQ | 33 | 3-3 | 0-0 | Nobody got it. | 
+67.00 dishReveal | 34 | 3-3 | 1-0 | Lions take number 2. | 
+68.00 dishQ | 35 | 3-3 | 1-0 | Lions take number 2. | 
+70.50 dishQ | 36 | 3-3 | 1-0 | Lions are out of this one. Owls, it's yours to get. | 
+73.25 dishReveal | 37 | 3-3 | 1-1 | Owls take number 3. | 
+74.25 dishQ | 38 | 3-3 | 1-1 | Owls take number 3. | 
+77.00 dishQ | 39 | 3-3 | 1-1 | Lions are out of this one. Owls, it's yours to get. | 
+79.50 dishReveal | 40 | 3-3 | 1-1 | Nobody got it. | 
+80.50 dishQ | 41 | 3-3 | 1-1 | Nobody got it. | 
+83.25 dishQ | 42 | 3-3 | 1-1 | Lions are out of this one. Owls, it's yours to get. | 
+86.00 dishReveal | 43 | 3-3 | 1-2 | Owls take number 5. | 
+86.75 dishSummary | 44 | 3-5 | 1-2 | Owls take number 5. | 
+87.75 final | 45 | 3-5 |  | Owls take number 5. | 
+recap: {"margin":2,"sudden":false,"leadChanges":1,"steals":[0,0],"minis":[1,2],"chart":[[0,0],[0,0],[1,0],[3,0],[3,2],[3,3],[3,5]],"segs":[{"label":"R1","pts":[[1,0]]},{"label":"Don't Say the Same as Me","pts":[[3,0]]},{"label":"Guess the Map","pts":[[3,2]]},{"label":"R2","pts":[[3,3]]},{"label":"Guess the Cocktail or Dish","pts":[[3,5]]}],"awards":[{"t":"Comeback","who":"Owls, 3 points down in Don't Say the Same as Me","team":1},{"t":"Down to the wire","who":"Owls took the lead for good in Guess the Cocktail or Dish","team":1}]}
