@@ -10,7 +10,7 @@
    (Flags: the fastest typist) takes 8, the next 7, down to 1; wrong or no answer, nothing. Majority Rules ranks
    by the share of answers right. At the end of a game its places pay the night: 10, 8, 6, 5, 4, 3, 3, 3
    (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). tied teams share the better place. */
-import { QMB, acceptFor, sayAccept, mapRight } from "../engine";
+import { QMB, acceptFor, sayOnList, mapRight } from "../engine";
 import { matchQ } from "../tv/reads";
 import { poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
@@ -332,7 +332,7 @@ export function rightOf(key: ManyKey, text: string, q: Q): boolean {
   return !!matchQ([text], q);
 }
 /* Don't Say the Same: the word on the prompt's list an answer is (typos allowed), or null if it isn't on it */
-const listWord = (text: string, q: Q): string | null => (q.pool || []).find((w: string) => QMB.isMatch(text, w, sayAccept(q.id, w))) ?? null;
+const listWord = (text: string, q: Q): string | null => sayOnList([text], q);   // (the same as with 2 teams: 27 Nov, the merge)
 
 /* a captain's answer (one each, the first stands). order: when it reached the server (the action's id), so the
    fastest is the first to arrive there, however the network hands the answers to the TV; none, the order they come */

@@ -3,7 +3,7 @@ import { LIVE_LINES, actCount, usePubLine } from "./liveLines";
 import { serverOffset } from "@/components/Clock";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNetProbe } from "./tv/netProbe";
-import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapRight, loadBank, withCustom, type Bank, type Q } from "./engine";
+import { QMB, HOST_ONLY_THEMES, acceptFor, sayOnList, forNoHost, hostOnly, mapRight, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
 import { SK_BET_BAD, SK_BET_IN, SK_THEMES_CHANGED, skQ, type SkGame } from "./stakes";
 import { SEE_TYPE, seeWinner } from "./see";
@@ -486,7 +486,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
          app's word. Anything else — nothing, gibberish, an answer the list doesn't have — counts as
          SAID IT (the other captain can still give a fair answer the list missed). */
       const q = g.saySame.qs[g.saySame.i];
-      const real = (texts: string[] | null) => !!texts && texts.some((t) => (q.pool || []).some((w: string) => QMB.isMatch(t, w, sayAccept(q.id, w))));
+      const real = (texts: string[] | null) => !!texts && sayOnList(texts, q) != null;
       s.offList = [0, 1].map((t) => !!s.typed[t] && !real(s.typed[t])) as Two<boolean>;
       s.ok = [0, 1].map((t) => !!s.typed[t] && !s.offList[t] && !matchQ(s.typed[t], q)) as Two<boolean>;
       s.app = [...s.ok] as Two<boolean>;

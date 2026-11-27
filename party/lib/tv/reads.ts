@@ -1,6 +1,6 @@
 /* What the TV's state says, without changing it: the question in play, whose turn
    it is, who leads the night with no host, who won the leg on screen. */
-import { QMB, acceptFor, notTypo, rankFor, sayAccept, someOfFor } from "../engine";
+import { QMB, acceptFor, notTypo, rankFor, sayOnList, someOfFor } from "../engine";
 import type { Member } from "../room";
 import { miniOf, other, type G, type W } from "./rules";
 import type { TvState } from "./state";
@@ -81,7 +81,7 @@ export const sayWin = (s: TvState): W => { const [a, b] = s.ok; return a && !b ?
    prompt's list it matched (typos allowed), else what it sent; nothing sent, null */
 export const sayWords = (s: TvState, q: G): Two<string | null> => [0, 1].map((t) => {
   const tx = s.typed[t]; if (!tx || !tx.length) return null;
-  const w = ((q?.pool || []) as string[]).find((x) => tx.some((y) => QMB.isMatch(y, x, sayAccept(q.id, x))));
+  const w = q ? sayOnList(tx, q) : undefined;
   return String(w ?? tx[0]).trim().slice(0, 40) || null; }) as Two<string | null>;
 export const okWin = (s: TvState): W => { const [a, b] = s.ok; return a && b ? "tie" : a ? 0 : b ? 1 : "none"; };
 

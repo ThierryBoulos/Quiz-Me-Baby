@@ -68,6 +68,10 @@ export function mapHit(text: string, keys: string[][] | undefined) {
   return keys.some((k) => k.every(has));
 }
 export const mapKeysFor = (q: { answer?: string } | null | undefined) => (q ? accept.mapKeys?.[q.answer || ""] : undefined);
+/* Don't Say the Same, every setup (27 Nov, the merge): the first word on the prompt's list any of these answers is
+   (typos allowed, and the word's other names), or null: not a real answer to the prompt */
+export const sayOnList = (texts: string[], q: Q): string | null =>
+  ((q.pool || []) as string[]).find((w) => texts.some((t) => QMB.isMatch(t, w, sayAccept(q.id, w)))) ?? null;
 /* Guess the Map, every setup (27 Nov, the merge): right if it's the map's title or another name that counts, or has the
    idea in its own words (the title's short forms, above) */
 export const mapRight = (text: string, q: Q): boolean => !!QMB.isMatch(text, q.answer, [...acceptFor(q), q.question]) || mapHit(text, mapKeysFor(q));
