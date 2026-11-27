@@ -17,7 +17,7 @@ import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { CodeTiles } from "./Marquee";
-import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { COMEBACK_TITLE } from "@/lib/comeback";
@@ -43,7 +43,7 @@ export const comebackQn = (pub: Pub) => { const c = pub.comeback; return c ? `Qu
 function hudLabel(pub: Pub): ReactNode {
   const m = pub.mini, sc = pub.screen;
   if (sc === "final") return <b>Final result</b>;
-  if (pub.comeback && /^comeback/.test(sc)) return <><b>{COMEBACK_TITLE}</b>{sc === "comebackIntro" ? null : <> &nbsp;·&nbsp; {sc === "comebackSummary" ? "Result" : comebackQn(pub)}</>}</>;
+  if (pub.comeback && /^comeback/.test(sc)) return <><b>{COMEBACK_TITLE}</b>{sc === "comebackIntro" ? null : <><span className="sep"> &nbsp;·&nbsp; </span><span className="tail">{sc === "comebackSummary" ? "Result" : comebackQn(pub)}</span></>}</>;
   if (sc === "sudden") return <b>Sudden death</b>;
   if (m) {
     /* a game's intro: just its name, as with 3 to 8 teams (nothing has started yet: 22 Nov, the owner) */
@@ -52,9 +52,9 @@ function hudLabel(pub: Pub): ReactNode {
       : m.key === "battle" && pub.battle ? (sc === "battleTie" ? `Tie-breaker ${pub.battle.tb ?? 1}` : sc === "battleLevel" ? "Tie" : `${pub.teams[pub.battle.cap].name} ${Math.min(pub.battle.i + 1, pub.battle.n)}/${pub.battle.n}`)
       : sc === "decided" ? "Won" : m.tie ? "Tie-breaker" : sc === "majorityIntro" ? "Everyone on their phone" : m.key === "majority" ? `Question ${m.leg} of ${m.of}`
       : `${GO(m.key)} ${m.leg} of ${m.of}${m.fun ? " · for fun" : ""}`;
-    return <><b>{m.title}</b> &nbsp;·&nbsp; {tail}</>;
+    return <><b>{m.title}</b><span className="sep"> &nbsp;·&nbsp; </span><span className="tail">{tail}</span></>;
   }
-  return <>Round <b>{Math.min(pub.r + 1, pub.N)}</b> of {pub.N} &nbsp;·&nbsp; <b>{pub.theme}</b></>;
+  return <><span>Round <b>{Math.min(pub.r + 1, pub.N)}</b> of {pub.N}</span><span className="sep"> &nbsp;·&nbsp; </span><span className="tail"><b>{pub.theme}</b></span></>;
 }
 /* A score that changes rolls like a car's odometer: the old number goes up and out, the new one comes in from
    below (down, the other way), with a pop and a ring in the team's colour when it goes up. */
@@ -82,6 +82,15 @@ export function Roll({ v }: { v: number }) {
 export function Hud({ pub, size, shown, code, me }: { pub: Pub; size: "tv" | "phone"; shown?: Two<number>; code?: string; me?: number | null }) {
   const T = pub.teams, w = pub.mini?.wins, u = pub.mini?.pct ? "%" : "";
   const sc = (t: 0 | 1) => shown?.[t] ?? T[t].score;
+  /* the TV: the label on one line, or, where two long team names leave it too little room, on two (the game's name,
+     then the rest, no "·"), never under the score plates (27 Nov, the big test: "Battle of the Captains · Quizzical
+     Owls 10/17" ran under both) */
+  const lab = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = lab.current; if (!el || size !== "tv") return;
+    const fit = () => { el.classList.remove("two"); if (el.scrollWidth > el.clientWidth + 1) el.classList.add("two"); };
+    fit(); void document.fonts?.ready.then(fit);
+  });
   const pips = pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>;
   return (
     <div className={"hud " + size} role="group" aria-label="Scores">
@@ -94,7 +103,7 @@ export function Hud({ pub, size, shown, code, me }: { pub: Pub; size: "tv" | "ph
           {code && <div className="hud-tiles" aria-label={`Room ${code}`}><span>Room</span><CodeTiles code={code} className="mini" /></div>}
           {/* the night's dots above the round's name, on the TV and the phones (the owner, 2 Nov) */}
           {pips}
-          <div className="hud-label">{hudLabel(pub)}</div>
+          <div className="hud-label" ref={lab}>{hudLabel(pub)}</div>
         </div>
         <div className="hud-team b">{pub.fire?.[1] && <span className="flame" title="On fire" aria-label="on fire">🔥</span>}<div className="sc" data-score="1"><Roll v={sc(1)} /></div><div className="nm">{T[1].name}</div><span className="dot" /></div>
       </div>

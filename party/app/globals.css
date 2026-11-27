@@ -257,6 +257,13 @@ button.chip.me-chip.chip-on { color: var(--color-gold); }
 .hud.tv .hud-team .dot { width: 14px; height: 14px; }
 .hud.tv .hud-label { font-size: var(--text-15); }
 .hud.tv .pip { height: 11px; width: 34px; } .hud.tv .pip.mini { width: 11px; } .hud.tv .pip.now:not(.mini) { width: 40px; }
+/* 2 teams on the TV: the middle (room, the night's track, the label) takes the room the two plates leave, centred while
+   it fits; the label goes on two lines (GameParts' Hud) and the track's dashes get shorter, rather than either running
+   under a plate (27 Nov, the big test: two 14-letter names) */
+.hud.tv:not(.many) .hud-in { grid-template-columns: minmax(max-content, 1fr) minmax(0, max-content) minmax(max-content, 1fr); }
+.hud.tv:not(.many) .hud-label { white-space: nowrap; max-width: 100%; }
+.hud.tv:not(.many) .hud-label.two { white-space: normal; } .hud-label.two .sep { display: none; } .hud-label.two .tail { display: block; }
+.hud.tv:not(.many) .pips { flex-wrap: nowrap; max-width: 100%; } .hud.tv:not(.many) .pip.mini { flex: none; }
 
 .team-card { border-radius: 22px; padding: 18px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
 .team-card.a { background: linear-gradient(180deg, rgba(49,201,247,.10), rgba(255,255,255,.02)); border-color: rgba(49,201,247,.3); }
