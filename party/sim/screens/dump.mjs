@@ -23,5 +23,9 @@ const pubs = { ...two, ...dumpMany(JSON.parse(readFileSync(join(party, "data/ban
 const KEY = process.env.QMB_FLAG_KEY || "qmb-fx-2026-wave2";
 const fx = (code) => createHash("sha256").update(KEY + ":" + code).digest("hex").slice(0, 16);
 for (const rec of Object.values(pubs)) { const p = rec?.pub; if (p && typeof p.flag === "string" && existsSync(join(party, "public/flags", p.flag + ".svg"))) p.flag = fx(p.flag); }
+/* 2 teams: the longest names a captain can give (14 letters, app/room), wide letters, so a screen that only fits short
+   names gets flagged (27 Nov, the big test: "This game" ran off a 360-wide phone; 3 to 8 teams have long ones already) */
+const LONG = ["⁨Wonder Wombats⁩", "⁨Quizzical Owls⁩"];
+for (const [k, rec] of Object.entries(pubs)) if (/^(nh|h)\w*\./.test(k) && Array.isArray(rec?.pub?.teams)) rec.pub.teams.forEach((t, i) => { if (t && LONG[i]) t.name = LONG[i]; });
 writeFileSync(join(out, "pubs.json"), JSON.stringify(pubs));
 process.exit(0);

@@ -188,6 +188,15 @@ const PHONE_MEASURE = () => {
     }
     if (worst > 0.25) bad.push("OVER " + Math.round(100 * worst) + "% " + name(txt[i]) + " / " + name(txt[j]));
   }
+  /* the scores pinned at the top (skipped above, as pinned): no plate over another, none past the edge (27 Nov, the big
+     test: on a 360-wide phone a long name's plate covered the other team's score) */
+  for (const row of document.querySelectorAll(".hud-in")) {
+    const P = [...row.querySelectorAll(":scope > .hud-team")].filter((el) => getComputedStyle(el).display !== "none").map((el) => [el, el.getBoundingClientRect()]);
+    for (const [el, r] of P) if (r.right > W + 2 || r.left < -2) bad.push("OFF " + Math.round(Math.max(r.right - W, -r.left)) + "px " + name(el));
+    for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) { const a = P[i][1], c = P[j][1];
+      const ww = Math.min(a.right, c.right) - Math.max(a.left, c.left), hh = Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top);
+      if (ww > 1 && hh > 1) bad.push("OVER " + Math.round(ww) + "px " + name(P[i][0]) + " / " + name(P[j][0])); }
+  }
   return [...new Set(bad)].slice(0, 10);
 };
 /* (Secret Stakes' reveal brings its rows in one by one: with 8 teams the last lands at about 7 s) */

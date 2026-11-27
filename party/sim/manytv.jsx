@@ -496,6 +496,9 @@ async function whole(k, phone, tag) {
   const fin = pub()?.screen === "final", missing = ALL.filter((x) => !played.has(x));
   check(`${tag} A whole night, every game: it reaches the final`, fin, `${pub()?.screen} after ${steps} steps${stuck > 6 ? " (stuck on " + lastKey + ")" : ""}`);
   check(`${tag} A whole night, every game: every game played`, !missing.length, missing.length ? "missing " + missing.join(", ") : [...played].join(" "));
+  /* Exit at the end closes the room (27 Nov, the big test: the write never went out, and the room stayed "playing") */
+  if (fin) { await judge("m/exit"); await tick(1500); }
+  check(`${tag} A whole night, every game: Exit closes the room`, fin && fake.db.rooms[0].status === "done", fake.db.rooms[0].status);
 }
 
 /* ---------- The game's screen out of sight pauses the game, as with 2 teams (27 Nov, the owner) ---------- */

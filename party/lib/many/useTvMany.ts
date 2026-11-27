@@ -460,7 +460,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/pause") { ok = pause(s, Date.now()); if (ok && !s.paused) resumed(s); }
       else if (t === "m/cbSkip") ok = skipComeback(s);
       else if (t === "m/swap") { const r = swapQ(s, Date.now(), timers()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
-      else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code); }
+      else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code).then(() => {}); }   // (a query only goes out once something waits on it: Exit left the room "playing", 27 Nov, the big test)
       else if (t === "m/again") {
         try { localStorage.removeItem(saveKey); } catch { /* fine */ }
         st.current = null; setPub(null);

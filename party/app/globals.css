@@ -247,6 +247,9 @@ button.chip.me-chip.chip-on { color: var(--color-gold); }
 .hud.phone .hud-in { grid-template-columns: 1fr 1fr; row-gap: 8px; }
 .hud.phone .hud-mid { grid-column: 1 / -1; grid-row: 2; }
 .hud.phone .hud-team .nm { max-width: 140px; }
+/* (each plate stays in its half: a 14-letter name gives way ("…"), never the score. It sized itself to the whole name,
+   and on a 360-wide phone the second plate covered the first team's score: 27 Nov, the big test) */
+.hud.phone:not(.many) .hud-team { max-width: 100%; } .hud.phone:not(.many) .hud-team .sc { flex: none; }
 /* the TV, read from the sofa */
 .hud.tv { padding: 0 0 14px; }
 .hud.tv .hud-team .nm { font-size: var(--text-18); max-width: 230px; }
@@ -333,6 +336,10 @@ html[data-motion="off"] .imad-bubble, html[data-motion="off"] .imad-bubble .hb-t
 .hud-mini { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; min-width: 0;
   font-size: var(--text-11); font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-3); }
 .hud-mini .nm { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 2 teams: two 14-letter names on a narrow phone, the names give way ("…"), never "This game:" nor the scores, and
+   nothing goes off the edge (27 Nov, the big test) */
+.hud:not(.many) .hud-mini > span { min-width: 0; }
+.hud:not(.many) .hud-mini > span:first-child, .hud:not(.many) .hud-mini b { flex: none; white-space: nowrap; }
 .hud-mini b { font-family: var(--font-display); font-weight: 400; font-size: var(--text-18); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
 .hud-mini .a { color: var(--color-a); } .hud-mini .b { color: var(--color-b); }
 .hud.tv .hud-mini { font-size: var(--text-14); gap: 12px; margin-top: 8px; } .hud.tv .hud-mini b { font-size: var(--text-26); } .hud.tv .hud-mini .nm { max-width: 260px; }
