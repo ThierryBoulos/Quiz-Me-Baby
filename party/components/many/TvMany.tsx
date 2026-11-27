@@ -73,7 +73,8 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
         <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
           <div className="text-center"><div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
             {/* (who paused it, as the phones and the 2-team TV say: 22 Nov, the owner) */}
-            <div className="text-26 text-[var(--color-ink-2)] mt-2">The host paused it. The question comes back when the clock restarts.</div></div>
+            {/* (the TV out of sight paused it: no "who", as with 2 teams: 27 Nov) */}
+            <div className="text-26 text-[var(--color-ink-2)] mt-2">{pub.pausedAway ? null : "The host paused it. "}The question comes back when the clock restarts.</div></div>
         </div>)}
 
       <FitBody className={"flex-1 flex flex-col items-center justify-center text-center enter min-h-0" + (pub.screen === "reveal" && (g?.key === "airport" || g?.key === "map") ? " gap-4" : " gap-5") + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>

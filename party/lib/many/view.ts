@@ -45,7 +45,7 @@ export type PubMany = {
   comeback?: ComebackPub;                         // the comeback: who is in it, what each can reach, who is out; at its end who made it
   stakes?: SkPub;                                 // Secret Stakes: the round's themes, who has bet (and each team's bet, drawn only on its own phones), the questions, the reveal
   theme?: string;                                 // a question round: the question's theme
-  deadline: number | null; left: number; sent: boolean[]; now?: number; paused?: boolean;
+  deadline: number | null; left: number; sent: boolean[]; now?: number; paused?: boolean; pausedAway?: boolean;
   roster?: string[];                              // Majority Rules: who plays
   voted?: string[];                               // ...and who has answered (names only, never what)
   reveal?: { answer: string; notes?: string; typed?: (string | null)[]; ok?: (boolean | null)[]; nums?: (number | null)[]; off?: (number | null)[];
@@ -86,7 +86,7 @@ export type SecretMany = { answer?: string; notes?: string; typed?: (string | nu
 /* t: the room's timers, for what the screens say in words (Secret Stakes' intro: its seconds, 22 Nov) */
 export function buildMany(s: StateM, t?: { stakesPick: number; stakes: number; roulette?: number; flag?: number; closest?: number; pin?: number; airport?: number; map?: number; say?: number; dish?: number; majority?: number; fool?: number; foolPick?: number }): { pub: PubMany; secret: SecretMany } {
   const m = miniOf(s), q = qOf(s);
-  const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}),
+  const pub: PubMany = { many: true, step: s.step, screen: s.screen, deadline: s.deadline, left: s.left, sent: answered(s), toast: s.toast, exit: s.exit, ...(s.paused ? { paused: true } : {}), ...(s.paused && s.awayPaused ? { pausedAway: true } : {}),
     teams: s.teams.map((t, i) => ({ name: t.name, captain: t.captain, score: t.score, color: MANY_COLORS[i] })) };
   const now = m && m.key !== "majority" && m.key !== "comeback" && s.screen === "reveal" ? legPoints(s) : null;
   if (m) pub.game = { key: m.key, title: titleOf(s.minis, s.mi), leg: Math.min(m.i + 1, m.qs.length), of: m.qs.length, wins: [...m.wins],

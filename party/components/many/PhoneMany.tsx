@@ -493,7 +493,7 @@ export function PhoneMany({ pub, me, code, members = [] }: { pub: PubMany; me: M
       {/* MAJORITY RULES: everyone on the list answers, on their own phone */}
       {!host && (sc === "q" || sc === "pick") && pub.paused && (
         <div className="text-center py-8" role="status"><div className="display text-40" style={{ color: "var(--color-gold)" }}>Paused</div>
-          <p className="text-14 text-[var(--color-ink-2)] mt-1">The host paused it. The question comes back when the clock restarts.</p></div>)}
+          <p className="text-14 text-[var(--color-ink-2)] mt-1">{pub.pausedAway ? null : "The host paused it. "}The question comes back when the clock restarts.</p></div>)}
       {!host && sc === "q" && !pub.paused && g?.key === "majority" && (<>
         <p className="text-center text-14 font-bold text-[var(--color-ink-2)]">{MAJ.top}</p>
         <OnScreen />

@@ -120,6 +120,13 @@ function markAsked(s: StateM, id: string) {
   try { const u = new Set<string>(JSON.parse(localStorage.getItem(USED_KEY) || "[]")); if (u.has(id)) return; u.add(id); localStorage.setItem(USED_KEY, JSON.stringify([...u])); } catch { /* in memory only */ }
 }
 
+/* the game picks up again (the host's Resume, or the game's screen back after pausing itself): with every answer already
+   in (some landed while paused), it moves on, as with 2 teams */
+function resumed(s: StateM) {
+  const now = Date.now();
+  if (s.screen === "q") { if (foolAllIn(s)) foolOpen(s, now, timers()); else if (allIn(s)) reveal(s); }
+  else if (s.screen === "pick" && miniOf(s)?.key === "fool" && foolAllIn(s)) foolReveal(s);
+}
 export function useTvMany(code: string, isTv: boolean, room: Room | null, members: Member[], phone = false) {
   const [banner, setBanner] = useState<null | "offline" | "cantSave" | "oldSave" | "noBank">(null);
   const st = useRef<StateM | null>(null);
@@ -278,7 +285,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
            had left; after taking the game over from another phone's copy (savedAt), less the time since that copy
            (the 4 Nov audit, 1.3: a question ran out while the game changed phones) */
         /* (a team that buzzed keeps the rest of its 10 seconds too, as with two teams: 14 Nov) */
-        if (s.away) { if (s.left && (s.screen === "q" || s.screen === "pick") && !s.paused && s.buzz == null) { s.deadline = now + s.left * 1000; s.left = 0; } if (s.buzz != null && s.buzzAt) s.buzzAt += Math.max(0, now - s.away); s.away = 0; }
+        /* (paused by the screen going away, a reload among them: it resumes, as when the screen's back) */
+        if (s.away) { if (s.awayPaused && s.paused) { pause(s, now); resumed(s); } else if (s.left && (s.screen === "q" || s.screen === "pick") && !s.paused && s.buzz == null) { s.deadline = now + s.left * 1000; s.left = 0; } delete s.awayPaused; if (s.buzz != null && s.buzzAt) s.buzzAt += Math.max(0, now - s.away); s.away = 0; }
         else if (raw.savedAt) { const gone = Math.max(0, now - Number(raw.savedAt)); if (s.deadline) s.deadline += gone; if (s.buzz != null && s.buzzAt) s.buzzAt += gone; }
         st.current = s; void loadBank(code).then((b) => { bank.current = b; }).catch(() => {}); publish();
       }
@@ -461,10 +469,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
       else if (t === "m/hint") ok = showMapHint(s);
       else if (t === "m/setScores") ok = setScores(s, mv.scores);
       else if (t === "m/mrOut") ok = toggleMrOut(s, mv.name);
-      else if (t === "m/pause") { ok = pause(s, Date.now());
-        /* Resume with every answer already in (some landed while paused): the reveal, as with 2 teams */
-        if (ok && !s.paused && s.screen === "q") { if (foolAllIn(s)) foolOpen(s, Date.now(), timers()); else if (allIn(s)) reveal(s); }
-        else if (ok && !s.paused && s.screen === "pick" && miniOf(s)?.key === "fool" && foolAllIn(s)) foolReveal(s); }
+      else if (t === "m/pause") { ok = pause(s, Date.now()); if (ok && !s.paused) resumed(s); }
       else if (t === "m/cbSkip") ok = skipComeback(s);
       else if (t === "m/swap") { const r = swapQ(s, Date.now(), timers()); ok = r === true; if (typeof r === "string") { reply(r); publish(); return; } }
       else if (t === "m/exit") { s.exit = true; ok = true; try { localStorage.removeItem(saveKey); } catch { /* fine */ } void sb().from("rooms").update({ status: "done" }).eq("code", code); }
@@ -598,21 +603,25 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     return () => clearInterval(t);
   }, [isTv, publish, code]);
 
-  /* The game's screen goes to sleep or out of sight (a phone running the game, with no TV: a call, another app, the
-     screen locking): the clock waits, so nobody's question runs out meanwhile, and picks up where it was when the
-     screen's back (the 4 Nov audit, 1.3: 3-8 teams had no pause at all). A copy goes to the server at once, so a
-     phone that takes over knows the clock was waiting. */
+  /* The game's screen goes to sleep or out of sight (the TV's laptop dozes, someone switches tab; a phone running the
+     game, with no TV: a call, another app, the screen locking): the game pauses, so nobody's question runs out
+     meanwhile and everyone sees why the clock stopped, and picks up where it was when the screen's back (as with 2
+     teams: 27 Nov, the owner; till then only the clock waited). A copy goes to the server at once, so a phone that
+     takes over knows. The host can resume it meanwhile. */
   useEffect(() => {
     if (!isTv) return;
     const vis = () => {
       const s = st.current, now = Date.now(); if (!s) return;
       if (document.visibilityState === "hidden" && !s.away) {
         s.away = now;
-        if ((s.screen === "q" || s.screen === "pick") && s.deadline) { s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; }
+        if ((s.screen === "q" || s.screen === "pick") && s.deadline && !s.paused && pause(s, now)) s.awayPaused = true;
         backedUp.current = { t: 0, screen: "" };
         publish();
       } else if (document.visibilityState === "visible" && s.away) {
-        if ((s.screen === "q" || s.screen === "pick") && !s.deadline && s.left && !s.paused && s.buzz == null) { s.deadline = now + s.left * 1000; s.left = 0; }
+        if (s.awayPaused && s.paused) { pause(s, now); resumed(s); }
+        /* (a question that came up meanwhile waited with its clock full: it starts now) */
+        else if ((s.screen === "q" || s.screen === "pick") && !s.deadline && s.left && !s.paused && s.buzz == null) { s.deadline = now + s.left * 1000; s.left = 0; }
+        delete s.awayPaused;
         if (s.buzz != null && s.buzzAt) s.buzzAt += now - s.away;      // (a team that buzzed: its 10 seconds waited too)
         s.away = 0;
         publish();

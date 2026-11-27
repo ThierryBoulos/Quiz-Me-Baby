@@ -94,6 +94,11 @@ export function dumpMany(bank: { bank: Q[]; never?: unknown[] }) {
     { const rr = got[`m${k}.q.roulette.a`] as { pub: Q; secret: Q; now: number } | undefined;
       if (rr?.pub.roulette?.spinAt) { const c = JSON.parse(JSON.stringify(rr)); c.now = c.pub.roulette.spinAt + 9000; c.pub.deadline = c.now + 25000; c.pub.left = 0; c.pub.timeUp = false;
         c.pub.sent = c.pub.teams.map((_: unknown, t: number) => t % 2 === 1); got[`m${k}.q.roulette.extra.stopped.a`] = c; } }
+    /* the game's screen out of sight pauses the game (27 Nov, the owner: as with 2 teams), and the host's own Pause, side
+       by side: the same question, its clock stopped */
+    { const b = got[`m${k}.q.flag.a`] as { pub: Q; secret: Q; now: number } | undefined;
+      if (b) for (const [tag, away] of [["away", true], ["hostpause", false]] as const) { const c = JSON.parse(JSON.stringify(b)); c.pub.left = Math.max(1, ((c.pub.deadline || c.now) - c.now) / 1000); c.pub.deadline = null; c.pub.paused = true;
+        if (away) c.pub.pausedAway = true; got[`m${k}.q.flag.extra.${tag}.a`] = c; } }
     /* Fool Me Twice's worst cases on the reveal (16 Nov, the owner: "will it fit with 8 teams?"), from the first fact's:
        every team writes a lie and every team's named team falls for it (k right predictions); and one lie fools every
        other team, its writer's named team among them (one right prediction, k-1 teams on one lie) */

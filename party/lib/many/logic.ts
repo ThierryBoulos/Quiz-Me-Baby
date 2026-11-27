@@ -116,6 +116,7 @@ export type StateM = {
   intro?: boolean;                              // the night's intro is up (before the first game), until the host's Let's go
   away?: number;                                // when the game phone's screen went to sleep (0 or none: it's on); the clock waits meanwhile
   paused?: boolean;                             // the host paused the clock (the question hides on the phones)
+  awayPaused?: boolean;                         // ...or the game's screen did, going out of sight: it resumes when it's back (as with 2 teams: 27 Nov, the owner)
   extra?: Partial<Record<ManyKey, Q[]>>;         // a few questions per game left in its deck: the host's "Change question"
   night?: number; qn?: number;                   // this night's number and its questions asked so far: the question's key
   /* a captain's contest of a call on the reveal (8 Nov, the owner: as with two teams, the host decides): whose call (t),
@@ -180,7 +181,7 @@ export function pause(s: StateM, now: number): boolean {
   if (s.screen !== "q" && s.screen !== "pick") return false;
   if (s.buzz != null) return false;               // (a team that buzzed is answering: the clock is stopped for it already)
   if (!s.paused) { if (!s.deadline) return false; s.left = Math.max(0, (s.deadline - now) / 1000); s.deadline = null; s.paused = true; return true; }
-  s.deadline = now + s.left * 1000; s.left = 0; s.paused = false; return true;
+  s.deadline = now + s.left * 1000; s.left = 0; s.paused = false; delete s.awayPaused; return true;
 }
 export function swapQ(s: StateM, now: number, t: Timers): boolean | string {
   const m = miniOf(s);
@@ -284,7 +285,7 @@ export const skQm = (s: StateM, team: number): Q => {
 /* a captain's bet: once, locked in. Every bet in, and the questions go up */
 export function stakesBet(s: StateM, team: number, k: unknown, level: unknown, now: number, t: Timers): true | string {
   const m = miniOf(s); if (!m || m.key !== "stakes" || s.screen !== "pick" || team < 0 || team >= s.teams.length) return "Not now.";
-  if (s.paused) return "The game is paused.";
+  if (s.paused && !s.awayPaused) return "The game is paused.";    // (the game's screen asleep pauses itself: a bet meanwhile still counts, as with 2 teams)
   if (s.picks?.[team]) return SK_BET_IN;
   const R = m.qs[m.i], i = Number.isInteger(k) ? Number(k) : -1;
   if (typeof level !== "string" || !QMB.stakesBetOk(R?.themes?.length || 0, i, level)) return SK_BET_BAD;
@@ -317,7 +318,7 @@ function ask(s: StateM, now: number, t: Timers) {
     lap.draw = QMB.rouletteSpin(lap, k, QMB.rouletteHit({ i: m.i, base: m.qs.length, fired: m.fired || 0 }, k), m.had || []);
     s.spinAt = now;
   }
-  s.screen = "q"; s.deadline = now + s.total * 1000 + (s.spinAt != null ? SPIN_MS : 0); s.left = 0; s.paused = false; s.step++;   // (a pause never carries over)
+  s.screen = "q"; s.deadline = now + s.total * 1000 + (s.spinAt != null ? SPIN_MS : 0); s.left = 0; s.paused = false; delete s.awayPaused; s.step++;   // (a pause never carries over)
   s.qn = (s.qn ?? 0) + 1;
 }
 /* the Cocktail or Dish: how many ingredients are up at this moment (the clock's tick moves it on) */

@@ -454,6 +454,36 @@ async function pin(k, phone, tag) {
   check(`${tag} Pin: no message, it just goes in (23 Nov, the owner)`, !/^Time's up/.test(pub().toast?.text || ""), pub().toast?.text);
 }
 
+/* ---------- The game's screen out of sight pauses the game, as with 2 teams (27 Nov, the owner) ---------- */
+async function away(k, phone, tag) {
+  await setup(k, phone, ["pin"], 7); await judge("m/start");
+  await tick(4000);
+  const left0 = pub().deadline - clock(), q = mini().qs[mini().i], kq = `${pub().qid}|q`;
+  await hide(true); await tick(1000);
+  check(`${tag} Away: the screen out of sight: paused, and the phones are told it wasn't the host`, pub().paused === true && pub().pausedAway === true && !pub().deadline, `paused ${pub().paused} away ${pub().pausedAway}`);
+  await tick(60000);
+  await hide(false); await tick(600);
+  const left1 = pub().deadline ? pub().deadline - clock() : null;
+  check(`${tag} Away: back after a minute: it resumes by itself, none of the clock lost`, !pub().paused && !pub().pausedAway && left1 != null && left1 > left0 - 3000 && left1 <= left0, `${Math.round(left0 / 1000)} s, then ${left1 == null ? "none" : Math.round(left1 / 1000) + " s"}`);
+  /* every pin in while the screen's away: the reveal once it's back */
+  await hide(true); await tick(1000);
+  for (let t = 0; t < k; t++) send("c" + t, "answer", { pin: { lat: q.lat + t, lon: q.lon }, k: kq });
+  await tick(3000);
+  check(`${tag} Away: every pin in while paused: kept, still on the question`, pub().screen === "q" && pub().sent.every(Boolean), `${pub().screen} ${JSON.stringify(pub().sent)}`);
+  await hide(false); await tick(800);
+  check(`${tag} Away: ...and back, the reveal`, pub().screen === "reveal", pub().screen);
+  /* the host resumes while the screen's still away: no longer paused; the clock waits for the screen (as for a question
+     that comes up meanwhile) and isn't paused again when it's back */
+  await judge("m/next"); await tick(4000);
+  await hide(true); await tick(1000); await judge("m/pause"); await tick(2000);
+  check(`${tag} Away: the host's Resume while it's away: not paused, the clock waiting for the screen`, !pub().paused && !pub().deadline && saved().left > 0, `paused ${pub().paused} left ${saved().left}`);
+  await hide(false); await tick(600);
+  check(`${tag} Away: ...and still running when the screen's back`, !pub().paused && !!pub().deadline && pub().screen === "q", `${pub().screen} paused ${pub().paused}`);
+  /* a reload (the page hides first): back, running */
+  await reload();
+  check(`${tag} Away: a reload: running, not paused`, !pub().paused && !!pub().deadline, `paused ${pub().paused} deadline ${pub().deadline}`);
+}
+
 /* ---------- The comeback (17 Nov, the owner) ---------- */
 /* the TV, 3-8 teams, with a TV and with the game phone: its questions dealt (not when the Setup switched it off), it
    comes at the middle of a massacre, 15 seconds a question, only the captains in it answer, the host can't be
@@ -549,7 +579,7 @@ async function net(k, phone, tag) {
 export async function run(only) {
   for (const k of [3, 4, 5, 6, 7, 8]) for (const phone of [false, true]) {   // (every count, 19 Nov review: 4 to 7 never ran through the real referee)
     const tag = `[${k} teams, ${phone ? "no TV" : "TV"}]`;
-    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["majorityDuring", majorityDuring], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["pin", pin], ["net", net]]) {
+    for (const [name, f] of [["see", see], ["stakes", stakes], ["majority", majority], ["majorityDuring", majorityDuring], ["roulette", roulette], ["fool", fool], ["comeback", comeback], ["repeat", repeat], ["kinds", kinds], ["pin", pin], ["away", away], ["net", net]]) {
       if (only && only !== name) continue;
       try { await f(k, phone, tag); } catch (e) { check(`${tag} ${name}: ran to the end`, false, String(e?.stack || e).split("\n").slice(0, 3).join(" | ")); }
     }
