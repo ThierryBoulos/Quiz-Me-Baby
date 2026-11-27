@@ -68,6 +68,9 @@ export function mapHit(text: string, keys: string[][] | undefined) {
   return keys.some((k) => k.every(has));
 }
 export const mapKeysFor = (q: { answer?: string } | null | undefined) => (q ? accept.mapKeys?.[q.answer || ""] : undefined);
+/* Guess the Map, every setup (27 Nov, the merge): right if it's the map's title or another name that counts, or has the
+   idea in its own words (the title's short forms, above) */
+export const mapRight = (text: string, q: Q): boolean => !!QMB.isMatch(text, q.answer, [...acceptFor(q), q.question]) || mapHit(text, mapKeysFor(q));
 /* The house bank any phone may have (public/bank.json): ids, types, themes and
    levels, enough for Setup and Settings. No questions, no answers (D5). */
 export function loadBaseBank(): Promise<Bank> {

@@ -3,7 +3,7 @@ import { LIVE_LINES, actCount, usePubLine } from "./liveLines";
 import { serverOffset } from "@/components/Clock";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNetProbe } from "./tv/netProbe";
-import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapHit, mapKeysFor, loadBank, withCustom, type Bank, type Q } from "./engine";
+import { QMB, HOST_ONLY_THEMES, acceptFor, sayAccept, forNoHost, hostOnly, mapRight, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
 import { SK_BET_BAD, SK_BET_IN, SK_THEMES_CHANGED, skQ, type SkGame } from "./stakes";
 import { SEE_TYPE, seeWinner } from "./see";
@@ -522,7 +522,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* the idea counts, not the exact words: the map's title and its short forms ("Landlocked",
          "Vikings") are accepted; what the app misses, the captains (or the host) can contest */
       const q = g.mapGame.qs[g.mapGame.i];
-      const ok = (x: string[] | null) => !!x && x.some((t) => QMB.isMatch(t, q.answer, [...acceptFor(q), q.question]) || mapHit(t, mapKeysFor(q)));
+      const ok = (x: string[] | null) => !!x && x.some((t) => mapRight(t, q));
       s.ok = [ok(s.typed[0]), ok(s.typed[1])];
       s.app = [...s.ok] as Two<boolean>;
       s.screen = "mapReveal";

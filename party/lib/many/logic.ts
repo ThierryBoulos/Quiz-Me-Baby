@@ -10,7 +10,7 @@
    (Flags: the fastest typist) takes 8, the next 7, down to 1; wrong or no answer, nothing. Majority Rules ranks
    by the share of answers right. At the end of a game its places pay the night: 10, 8, 6, 5, 4, 3, 3, 3
    (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). tied teams share the better place. */
-import { QMB, acceptFor, sayAccept, mapHit, mapKeysFor } from "../engine";
+import { QMB, acceptFor, sayAccept, mapRight } from "../engine";
 import { matchQ } from "../tv/reads";
 import { poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
@@ -328,7 +328,7 @@ export function dishShown(s: StateM, now: number, t: Timers): number {
 /* is a typed answer right? The question rounds, flags, airports and dishes as the two-team game checks them
    (lib/tv/reads.ts); a map by its title and its short forms */
 export function rightOf(key: ManyKey, text: string, q: Q): boolean {
-  if (key === "map") return QMB.isMatch(text, q.answer, [...acceptFor(q), q.question]) || mapHit(text, mapKeysFor(q));
+  if (key === "map") return mapRight(text, q);
   return !!matchQ([text], q);
 }
 /* Don't Say the Same: the word on the prompt's list an answer is (typos allowed), or null if it isn't on it */
