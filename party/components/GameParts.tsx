@@ -17,7 +17,7 @@ import { PIN } from "@/lib/minis/pin";
 import { FLAG } from "@/lib/minis/flag";
 import { SEE_RULE1, SEE_RULE2 } from "@/lib/see";
 import { CodeTiles } from "./Marquee";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { preloadMap } from "./MapView";
 import { COMEBACK_TITLE } from "@/lib/comeback";
@@ -462,28 +462,34 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
       { text: `Best score takes ${pts}. Tied? One question to settle it (both captains type, the first right answer takes it), or the points shared: ${host ? "the host's call" : "either captain's call"}.` }];
   }
 }
+/* a game's intro, every setup (27 Nov, the merge): the small heading, the title, the gold band (its first part in gold,
+   the rest after a dot) and the rules card. compact: the TV's Majority Rules intro, which shares the screen with the QR */
+export function IntroFrame({ tv, compact, head, title, band, rules: R }: { tv: boolean; compact?: boolean; head?: ReactNode; title: ReactNode; band: ReactNode[]; rules: { text: ReactNode; warn?: boolean }[] }) {
+  const fs = tv ? 15 : 11;
+  return (
+    <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
+      {head}
+      <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{title}</h1>
+      <div className={"mini-band " + (tv ? "" : "sm")}>
+        {band.map((b, i) => i === 0 ? <span key={i} className="eyebrow" style={{ color: "var(--color-gold)", fontSize: fs }}>{b}</span>
+          : <Fragment key={i}><span className="sep text-[var(--color-ink-3)]">·</span><span className="eyebrow" style={{ fontSize: fs }}>{b}</span></Fragment>)}
+      </div>
+      <div className="card w-full">
+        <ol className="rules" style={tv ? { fontSize: compact ? 18 : 20, gap: compact ? 8 : 12 } : undefined}>
+          {R.map((r, i) => <li key={i} className={r.warn ? "warn" : undefined}>{r.text}</li>)}
+        </ol>
+      </div>
+    </div>);
+}
 /* head: in place of the small heading above the title (the TV's Battle: its two captains, VS between them) */
 export function MiniIntro({ pub, size, head }: { pub: Pub; size: "tv" | "phone"; head?: ReactNode }) {
   const m = pub.mini, tv = size === "tv";
   if (!m) return null;
   const band = m.key === "battle" ? `${m.of} questions each` : m.key === "majority" ? `${m.of} questions` : m.key === "stakes" ? skBand(m.of) : m.key === "see" ? `${m.of} pictures` : m.key === "fool" ? `${m.of} facts` : m.key === "roulette" ? `${m.of} spins` : `Best of ${m.of}`;   // (Russian Roulette: points after 3 spins, no best-of: 19 Nov review)
-  return (
-    <div className={"flex flex-col items-center text-center w-full " + (tv ? "gap-5" : "gap-4")}>
-      {head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : m.key === "stakes" ? SK_ABOVE : "Mini-game"}</div>}
-      <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? 88 : 44 }}>{m.title}</h1>
-      <div className={"mini-band " + (tv ? "" : "sm")}>
-        <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
-        <span className="sep text-[var(--color-ink-3)]">·</span>
-        {/* (Secret Stakes: no winner's points, the bets go straight on the totals) */}
-        <span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{m.key === "stakes" ? SK_BAND2 : <>Winner takes {m.pts} point{m.pts === 1 ? "" : "s"}</>}</span>
-        {m.kinds && <><span className="sep text-[var(--color-ink-3)]">·</span><span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{m.kinds}</span></>}
-      </div>
-      <div className="card w-full">
-        <ol className="rules" style={tv ? { fontSize: 20, gap: 12 } : undefined}>
-          {rules(pub).map((r, i) => <li key={i} className={r.warn ? "warn" : undefined}>{r.text}</li>)}
-        </ol>
-      </div>
-    </div>);
+  /* (Secret Stakes: no winner's points, the bets go straight on the totals) */
+  return <IntroFrame tv={tv} title={m.title} rules={rules(pub)}
+    head={head || <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{m.key === "battle" ? "The last word" : m.key === "stakes" ? SK_ABOVE : "Mini-game"}</div>}
+    band={[band, m.key === "stakes" ? SK_BAND2 : <>Winner takes {m.pts} point{m.pts === 1 ? "" : "s"}</>, ...(m.kinds ? [m.kinds] : [])]} />;
 }
 
 /* sudden death, before its first question (7 Nov, the owner: what it means, that you're tied, who starts it; no

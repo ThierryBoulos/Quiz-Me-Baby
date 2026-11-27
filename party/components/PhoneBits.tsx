@@ -1,7 +1,7 @@
 "use client";
 /* Small phone pieces every setup uses, one copy each (27 Nov, the merge): the status line, the BUZZ button, the box to
    suggest an answer to your captain, Drop the Pin's photo beside the clock, What Do You See?'s question by kind. */
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Clock } from "./Clock";
 import { PinPhoto } from "./GameParts";
 import type { useNoPaste } from "./PhoneGame";
@@ -53,3 +53,37 @@ export function PinBeside({ pin, deadline, left, timeUp, small }: { pin: Paramet
 /* What Do You See?: the question by kind, over the picture (the owner, 12 Nov) */
 export const SeeAsk = ({ kind }: { kind: SeeKind }) =>
   <div className="text-15 font-bold text-center leading-snug" style={{ color: "var(--color-gold)" }}>{seeAsk(kind)}</div>;
+
+/* the host's (or, with no host, a captain's) Adjust the scores, every setup (27 Nov, the merge): each team's score with
+   − and +, 0 to 999; save(v, close) sends it (and asks first, in the setup's words). about: the line under the title;
+   note: a line after it (one request at a time); err: a send that failed; saveLabel: the gold button; locked: it can't
+   be sent now */
+export function ScoreSheet({ teams, about, note, err, saveLabel = "Save the scores", busy, locked, save }: {
+  teams: { name: string; score: number; color: string }[]; about: ReactNode; note?: ReactNode; err?: string | null; saveLabel?: string; busy?: boolean; locked?: boolean;
+  save: (v: number[], close: () => void) => void;
+}) {
+  const [open, setOpen] = useState(false), [v, setV] = useState<number[]>(teams.map((t) => t.score));
+  const now = teams.map((t) => t.score).join();
+  useEffect(() => { if (!open) setV(teams.map((t) => t.score)); }, [open, now]);   // eslint-disable-line react-hooks/exhaustive-deps
+  if (!open) return <button className="btn btn-sm btn-ghost self-center" onClick={() => setOpen(true)}>Adjust the scores</button>;
+  const step = (t: number, d: number) => setV((x) => x.map((n, i) => (i === t ? Math.max(0, Math.min(999, n + d)) : n)));
+  const changed = v.some((n, t) => n !== teams[t].score);
+  return (
+    <div className="card flex flex-col gap-3">
+      <div className="eyebrow">Adjust the scores</div>
+      <p className="text-13 text-[var(--color-ink-2)]">{about}</p>
+      {note}
+      {teams.map((t, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <b className="flex-1 truncate" style={{ color: t.color }}><bdi>{t.name}</bdi></b>
+          <button className="btn btn-sm" aria-label={`${t.name} minus one`} onClick={() => step(i, -1)}>−</button>
+          <span className="display text-32 w-14 text-center">{v[i]}</span>
+          <button className="btn btn-sm" aria-label={`${t.name} plus one`} onClick={() => step(i, 1)}>+</button>
+        </div>))}
+      {err && <p className="field-error text-center" role="alert">{err}</p>}
+      <div className="flex gap-2">
+        <button className="btn btn-gold flex-1" disabled={busy || !changed || locked} onClick={() => save(v, () => setOpen(false))}>{saveLabel}</button>
+        <button className="btn btn-ghost" onClick={() => setOpen(false)}>Cancel</button>
+      </div>
+    </div>);
+}

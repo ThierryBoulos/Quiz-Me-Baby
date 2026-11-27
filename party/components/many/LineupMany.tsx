@@ -1,5 +1,6 @@
 "use client";
 import { ComebackSwitch } from "../Comeback";
+import { PlayerChip } from "../Lineup";
 import { LevelNote } from "../LevelNote";
 import type { FreshLeft } from "@/lib/freshLeft";
 /* MANY TEAMS: the lobby's line-up (components/Lineup.tsx, for N teams), the phone's team buttons when there
@@ -33,7 +34,7 @@ import { SEE_SETUP } from "@/lib/see";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS } from "../LevelChips";
 import { timeLine, estimateMany } from "@/lib/estimate";
 import { RepeatSheet } from "../RepeatSheet";
-import { themeLabel, themeList, timesOf, uniqueThemes } from "@/lib/repeat";
+import { themeLabel, themeList, timesOf, topUpThemes, uniqueThemes } from "@/lib/repeat";
 
 /* every team, every face, the captains marked. The TV (big) packs up to four in a row, then rows of three or four;
    the phones stack them. away: captains the TV hasn't heard from (the lobby). */
@@ -57,12 +58,7 @@ export function LineupMany({ room, members, k, big }: { room: Room; members: Mem
             <div className="flex flex-wrap gap-2">
               {list.length === 0 && <span className="text-[var(--color-ink-3)]" style={{ fontSize: big ? (dense ? 16 : 22) : 14 }}>Nobody yet</span>}
               {list.map((m) => (
-                <span key={m.user_id} className="chip team pop-in" style={{ ["--c" as string]: c, ...(big ? { fontSize: dense ? 15 : 22, padding: dense ? "6px 12px 6px 6px" : "8px 18px 8px 8px" } : {}) }}>
-                  <span className="face" style={big ? (dense ? { width: 30, height: 30, fontSize: 18 } : { width: 44, height: 44, fontSize: 28 }) : undefined}>{m.avatar || "🙂"}</span>
-                  <bdi>{m.name}</bdi>
-                  {m.role === "captain" && <span className="cap">Captain</span>}
-                  {m.role === "captain" && room.status === "lobby" && away.includes(m.user_id) && <span className="cap" style={{ background: "var(--color-no)" }}>away</span>}
-                </span>))}
+                <PlayerChip key={m.user_id} m={m} color={c} size={!big ? "phone" : dense ? "dense" : "big"} away={room.status === "lobby" && away.includes(m.user_id)} />))}
             </div>
           </div>);
       })}
@@ -108,7 +104,6 @@ const COCKTAILS = [["c-easy", "Easy"], ["c-medium", "Medium"], ["c-hard", "Hard"
    picks them, as with two teams (11 Nov, the owner: the same game) */
 const NO_THEMES = [...HOST_ONLY_THEMES];
 const OFF_BY_DEFAULT = ["Sexy Time", "Lebanon"];
-const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
 /* the 3-8 night's lengths, for the picker (each game's own) */
 const CAPS = { closest: MANY_LEGS.closest, saysame: MANY_LEGS.say, map: MANY_LEGS.map, flag: MANY_LEGS.flag, dish: MANY_LEGS.dish, pin: MANY_LEGS.pin, airport: MANY_LEGS.airport, majority: MANY_LEGS.majority };
 const FLAG_LEVELS = [["veasy", "Very easy"], ["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expert", "Expert"]] as const;
@@ -148,13 +143,7 @@ export function SetupMany({ busy, why, k, onStart, code, tv, left, repeatOpen: o
   /* exactly one theme per round: trimmed when the rounds go down, topped up at random when they go up */
   useEffect(() => {
     if (!avail.length) return;
-    setThemes((cur) => {
-      let t = (cur ?? shuffle(avail.filter((x) => !OFF_BY_DEFAULT.includes(x)))).filter((x) => avail.includes(x));
-      if (t.length > rounds) t = t.slice(0, rounds);
-      const spare = shuffle(avail.filter((x) => !t.includes(x) && !OFF_BY_DEFAULT.includes(x)));
-      while (t.length < rounds && spare.length) t = [...t, spare.shift()!];
-      return t;
-    });
+    setThemes((cur) => topUpThemes(cur, avail, rounds, OFF_BY_DEFAULT));   // (lib/repeat.ts, every setup)
   }, [avail, rounds, setThemes]);
   const [picking, setPicking] = useState(false);
   const [note, setNote] = useState<string | null>(null);

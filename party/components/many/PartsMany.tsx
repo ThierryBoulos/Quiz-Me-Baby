@@ -9,7 +9,7 @@ import { QMB } from "@/lib/engine";
 import { foolDone } from "@/lib/fool";
 import { CodeTiles, motionOff } from "../Marquee";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
-import { Roll } from "../GameParts";
+import { IntroFrame, Roll } from "../GameParts";
 import { showKm } from "@/lib/game";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
@@ -253,22 +253,11 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const th = g.key === "quiz" ? g.themes || [] : [];
   /* "Food & Drink and Friends", not "Food & Drink & Friends", when a theme has its own "&" */
   const band = g.key === "sudden" ? "First right wins" : g.key === "stakes" ? skBand(g.of) : g.key === "dish" && pub.dishKinds ? `${count} · ${pub.dishKinds}` : th.length ? `${count} – ${th.length > 2 ? `${th.slice(0, -1).join(", ")} and ${th[th.length - 1]}` : th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;   // (three themes, a game of three rounds: "A, B and C")
-  return (
-    <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
-      {/* "Game 2 of 5" is in the tracker right above: not said twice (the owner, 31 Oct) */}
-      {head || (g.key === "stakes" && <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{SK_ABOVE}</div>)}
-      <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{g.title}</h1>
-      <div className={"mini-band " + (tv ? "" : "sm")}>
-        <span className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 15 : 11 }}>{band}</span>
-        {/* (Secret Stakes: as with two teams, 22 Nov, the owner) */}
-        {g.key === "stakes" && <><span className="sep text-[var(--color-ink-3)]">·</span><span className="eyebrow" style={{ fontSize: tv ? 15 : 11 }}>{SK_BAND2}</span></>}
-      </div>
-      <div className="card w-full">
-        <ol className="rules" style={tv ? { fontSize: compact ? 18 : 20, gap: compact ? 8 : 12 } : undefined}>
-          {rules(pub).map((r, i) => typeof r === "string" ? <li key={i}>{r}</li> : <li key={i} className={r.warn ? "warn" : undefined}>{r.text}</li>)}
-        </ol>
-      </div>
-    </div>);
+  /* ("Game 2 of 5" is in the tracker right above: not said twice, the owner, 31 Oct; Secret Stakes' band as with two
+     teams, 22 Nov; the frame: GameParts' IntroFrame, every setup, 27 Nov) */
+  return <IntroFrame tv={tv} compact={compact} title={g.title} rules={rules(pub).map((r) => (typeof r === "string" ? { text: r } : r))}
+    head={head || (g.key === "stakes" ? <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{SK_ABOVE}</div> : undefined)}
+    band={[band, ...(g.key === "stakes" ? [SK_BAND2] : [])]} />;
 }
 
 /* ---- the board: a column a team, in the order given, each team's number big in its colour and its name under

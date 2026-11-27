@@ -16,7 +16,7 @@ import { TvSettings } from "./TvSettings";
 import { timeLine, estimateTwo } from "@/lib/estimate";
 import { RepeatSheet } from "./RepeatSheet";
 import { FlagExpertNote, LevelChips, SEE_KIND_OPTS, chipLabel } from "./LevelChips";
-import { themeLabel, timesOf, uniqueThemes } from "@/lib/repeat";
+import { themeLabel, timesOf, topUpThemes, uniqueThemes } from "@/lib/repeat";
 import { RR_SETUP } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
 import { MAP } from "@/lib/minis/map";
@@ -73,7 +73,6 @@ const LEVELS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["expe
 /* (the level chips, the Expert mark, the pictures' kinds: components/LevelChips.tsx, shared with the 3-8 Setup) */
 const ROUND_CHOICES = Array.from({ length: 14 }, (_, i) => i + 1);   // 1 to 14 (11 Nov, the owner)
 const OFF_BY_DEFAULT = ["Know the Host", "Sexy Time", "Lebanon"];
-const shuffle = <T,>(a: T[]) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
 
 /* The starter's phone, before kick-off — Classic's rules: standard trivia
    rounds can be switched off (a mini-games-only night); one theme per round,
@@ -144,13 +143,7 @@ export function Setup({ onStart, busy, ready, why, isHost = false, code, tv, tim
   /* keep exactly one theme per round: trim when rounds go down, add random ones when they go up */
   useEffect(() => {
     if (!avail.length) return;
-    setThemes((cur) => {
-      let t = (cur ?? shuffle(avail.filter((x) => !OFF_BY_DEFAULT.includes(x)))).filter((x) => avail.includes(x));
-      if (t.length > rounds) t = t.slice(0, rounds);
-      const spare = shuffle(avail.filter((x) => !t.includes(x) && !OFF_BY_DEFAULT.includes(x)));
-      while (t.length < rounds && spare.length) t = [...t, spare.shift()!];
-      return t;
-    });
+    setThemes((cur) => topUpThemes(cur, avail, rounds, OFF_BY_DEFAULT));   // (lib/repeat.ts, every setup)
   }, [avail, rounds, setThemes]);
   const picked = themes ?? [];
   const toggleTheme = (t: string) => {

@@ -34,7 +34,7 @@ import { SkSub, StakesBet, StakesHostBets, StakesPhone } from "./Stakes";
 import { SeeCredit, SeePicture, seeWho } from "./See";
 import { FoolFact, FoolHostCard, FoolOptions, FoolReveal, FoolStatus, foolAwardList, foolVotes, ownIndex } from "./Fool";
 import { FOOL_MAX, foolDone } from "@/lib/fool";
-import { BuzzPad, buzzHand, Line, noCopy, PinBeside, SeeAsk, SuggestBox } from "./PhoneBits";
+import { BuzzPad, buzzHand, Line, noCopy, PinBeside, ScoreSheet, SeeAsk, SuggestBox } from "./PhoneBits";
 import { splitIng } from "./DishGame";
 import { SK_TOP_CAP, SK_TOP_PLAYER, SK_TOP_REVEAL, skBetCount, skBetLine, skLevelWord, skRevealPill, skSumPill } from "@/lib/stakes";
 import { MapView } from "./MapView";
@@ -815,34 +815,16 @@ export function TvTakeover({ code }: { code: string }) {
 export function ScoreFix({ pub, send, busy, ask }: { pub: Pub; send: Send; busy: boolean; ask?: boolean }) {
   const noTv = useNoTv();
   const T = pub.teams;
-  const [open, setOpen] = useState(false), [v, setV] = useState<[number, number]>([T[0].score, T[1].score]);
-  useEffect(() => { if (!open) setV([T[0].score, T[1].score]); }, [open, T]);
-  if (!open) return <button className="btn btn-sm btn-ghost self-center" onClick={() => setOpen(true)}>Adjust the scores</button>;
-  const step = (t: 0 | 1, d: number) => setV((x) => (t === 0 ? [Math.max(0, x[0] + d), x[1]] : [x[0], Math.max(0, x[1] + d)]));
-  const changed = v[0] !== T[0].score || v[1] !== T[1].score;
-  const save = () => {
-    if (ask) { send({ type: "ui/askScore", a: v[0], b: v[1] }); setOpen(false); return; }
-    if (!window.confirm(`Are you sure? ${T[0].name}: ${T[0].score} → ${v[0]}. ${T[1].name}: ${T[1].score} → ${v[1]}.`)) return;
-    send({ type: "ui/setScore", a: v[0], b: v[1] }); setOpen(false);
-  };
-  return (
-    <div className="card flex flex-col gap-3">
-      <div className="eyebrow">Adjust the scores</div>
-      <p className="text-13 text-[var(--color-ink-2)]">{ask ? <>Only if something went wrong. The other captain has to agree within {T_AGREE} seconds; if not, the scores stay as they are.</>
-        : "Only if something went wrong. " + (noTv ? "Every phone shows" : "The TV and every phone show") + " the new scores at once."}</p>
-      {ask && pub.agree && <p className="text-13 font-bold" role="status" style={{ color: "var(--color-gold)" }}>One request at a time: wait for the open one first.</p>}
-      {([0, 1] as const).map((t) => (
-        <div key={t} className="flex items-center gap-3">
-          <b className="flex-1 truncate" style={{ color: tc(t) }}>{T[t].name}</b>
-          <button className="btn btn-sm" aria-label={`${T[t].name} minus one`} onClick={() => step(t, -1)}>−</button>
-          <span className="display text-32 w-14 text-center">{v[t]}</span>
-          <button className="btn btn-sm" aria-label={`${T[t].name} plus one`} onClick={() => step(t, 1)}>+</button>
-        </div>))}
-      <div className="flex gap-2">
-        <button className="btn btn-gold flex-1" disabled={busy || !changed || (ask && !!pub.agree)} onClick={save}>{ask ? "Ask the other captain" : "Save the scores"}</button>
-        <button className="btn btn-ghost" onClick={() => setOpen(false)}>Cancel</button>
-      </div>
-    </div>);
+  /* (the sheet: components/PhoneBits.tsx, every setup; with no host, the other captain has to agree) */
+  return <ScoreSheet teams={([0, 1] as const).map((t) => ({ name: T[t].name, score: T[t].score, color: tc(t) }))} busy={busy} locked={ask && !!pub.agree} saveLabel={ask ? "Ask the other captain" : undefined}
+    about={ask ? <>Only if something went wrong. The other captain has to agree within {T_AGREE} seconds; if not, the scores stay as they are.</>
+      : "Only if something went wrong. " + (noTv ? "Every phone shows" : "The TV and every phone show") + " the new scores at once."}
+    note={ask && pub.agree ? <p className="text-13 font-bold" role="status" style={{ color: "var(--color-gold)" }}>One request at a time: wait for the open one first.</p> : undefined}
+    save={(v, close) => {
+      if (ask) { send({ type: "ui/askScore", a: v[0], b: v[1] }); close(); return; }
+      if (!window.confirm(`Are you sure? ${T[0].name}: ${T[0].score} → ${v[0]}. ${T[1].name}: ${T[1].score} → ${v[1]}.`)) return;
+      send({ type: "ui/setScore", a: v[0], b: v[1] }); close();
+    }} />;
 }
 
 /* the Auction while it's bid: each captain's latest bid, the one to beat lit up */
