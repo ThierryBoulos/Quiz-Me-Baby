@@ -2,13 +2,12 @@
 import { useEffect, useRef, useState } from "react";
 import { FitBody } from "./TvStage";
 import { MajorityJoin, MajorityRevealTv, MajorityTv, WhoPlaysTv } from "./MajorityGame";
-import { FOOL } from "@/lib/minis/fool";
 import type { Pub, Two } from "@/lib/game";
 import { Clock, useAfter, useSecondsLeft } from "./Clock";
 import { BattleAnswer, BattleHalf, flagText } from "./PhoneGame";
 import { ComebackIntro, ComebackQTv, ComebackResult, ComebackRevealTv } from "./Comeback";
 import { cbResultDone, cbResultHead, cbRevealHead, COMEBACK_TITLE } from "@/lib/comeback";
-import { AskHead, battleNeeds, comebackTeams, Confetti, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, Hud, LifelineStrip, MiniIntro, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
+import { AskHead, battleNeeds, comebackTeams, decidedFun, decidedHead, decidedPts, decidedWho, silent, tieCall, tieHead, Hud, LifelineStrip, MiniIntro, pinMarks, RoundIntro, ScoreBoard, SuddenRules, Verdict } from "./GameParts";
 import { RouletteTv } from "./Roulette";
 import { StakesTv } from "./Stakes";
 import { takeText, TeamRows as Rows } from "./many/PartsMany";
@@ -23,14 +22,13 @@ import { DishRevealTv, DishTv } from "./DishGame";
 import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, poss, possEnd, showKm, TIE_SCREENS } from "@/lib/game";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
-import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "./Fool";
+import { FoolResult, FoolTv } from "./Fool";
 import { foolDone } from "@/lib/fool";
-import { LeadBanner, useFlyingPoints, useScreenAt, useToastOn, WinName } from "./Motion";
+import { LeadBanner, useFlyingPoints, useScreenAt, useToastOn } from "./Motion";
+import { AwardCards, d, PausedTv, WinSign } from "./TvBits";
 import { NightIntroTv } from "./NightIntro";
 import { useLiveCount } from "@/lib/liveCount";
 
-/* a delay after the drumroll's hit, for the pieces of a reveal that land one after another */
-const d = (s: number) => ({ ["--d" as string]: s + "s" });
 const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--color-b)" : "var(--color-gold)");
 
 /* The TV during the game: no buttons (but Exit at the very end), no answers before the reveal. */
@@ -122,15 +120,8 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
 
         {pub.screen === "final" && (<>
           {/* the winner: "The winner", a beat, then the name slams down with a flash and a shockwave, and the confetti bursts */}
-          <div className="win-flash" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
-          <div className="confetti-late"><Confetti n={140} /></div>
-          <div className="eyebrow text-22 enter win-eyebrow">{pub.winner == null ? "The night ends" : "The winner"}</div>
-          <div className="win-sign relative grid place-items-center">
-            <span className="win-tag" aria-hidden>{pub.winner == null ? "The night ends" : "Tonight\u2019s winner"}</span>
-            <span className="win-ring" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
-            <span className="win-ring r2" style={{ ["--c" as string]: tc(pub.winner) }} aria-hidden />
-            <WinName recap={!!recap} color={tc(pub.winner)} label={pub.winner == null ? "" : T[pub.winner].name}>{pub.winner == null ? "Tied" : <bdi>{T[pub.winner].name}</bdi>}</WinName>
-          </div>
+          <WinSign color={tc(pub.winner)} eyebrow={pub.winner == null ? "The night ends" : "The winner"} tag={pub.winner == null ? "The night ends" : "Tonight\u2019s winner"} recap={!!recap}
+            label={pub.winner == null ? "" : T[pub.winner].name}>{pub.winner == null ? "Tied" : <bdi>{T[pub.winner].name}</bdi>}</WinSign>
           {/* once the recap is up, the big score board goes (the scores stay in the top bar) */}
           {!recap && <ScoreBoard pub={pub} w={[T[0].score, T[1].score]} win={pub.winner} size="tv" />}
           {(!recap || pub.contest) && <SdCalls pub={pub} />}
@@ -139,15 +130,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
           {recap && pub.recap && ((pub.recap.segs?.length ?? 0) > 1 || (pub.recap.chart?.length ?? 0) > 2) && (
             <div className="flex justify-center w-full enter" style={{ position: "relative", zIndex: 60 }}><NightChart pub={pub} short={(pub.recap.awards?.length ?? 0) > 4} /></div>)}
           {/* (every card the same size, both rows; a short last row centred: the owner, 11 Nov) */}
-          {recap && (pub.recap?.awards?.length ?? 0) > 0 && (() => { const A = pub.recap!.awards!, cols = A.length <= 4 ? A.length : Math.ceil(A.length / 2), rem = A.length % cols, last = A.length - rem; return (
-            <div className="grid gap-3 enter w-full max-w-[1168px]" style={{ gridTemplateColumns: `repeat(${cols * 2}, minmax(0, 1fr))`, gridAutoRows: "1fr", position: "relative", zIndex: 60 }}>
-              {A.map((a, i) => (
-                <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ gridColumn: rem && i === last ? `${cols - rem + 1} / span 2` : "span 2", borderColor: a.team != null ? tc(a.team) : undefined }}>
-                  <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
-                  <div className="text-15 font-bold leading-snug" style={{ color: a.team != null ? tc(a.team) : undefined }}><bdi>{a.who}</bdi></div>
-                  {a.note && <div className="text-18 text-[var(--color-ink-2)] italic line-clamp-2">{a.note}</div>}
-                </div>))}
-            </div>); })()}
+          {recap && (pub.recap?.awards?.length ?? 0) > 0 && <AwardCards awards={pub.recap!.awards!} color={(t) => tc(t as 0 | 1)} rows name="text-15" />}
           {(pub.flags?.length ?? 0) > 0 && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px]">Left the game screen during a question: {awayTotals(pub)}</div>}
         </>)}
         {pub.contest && <ContestBanner pub={pub} />}
@@ -168,9 +151,7 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
       {pub.paused && !pub.lifeline && (
         <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
           <div className="text-center">
-            {pub.agree?.kind === "swap" ? <SwapAsk pub={pub} /> : (<>
-              <div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
-              <div className="text-26 text-[var(--color-ink-2)] mt-2">{pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null}The question comes back when the clock restarts.</div></>)}
+            {pub.agree?.kind === "swap" ? <SwapAsk pub={pub} /> : <PausedTv who={pub.pausedBy ? <><bdi>{pub.pausedBy}</bdi> paused it. </> : null} />}
           </div>
         </div>)}
       <AwayFlags pub={pub} />
@@ -317,25 +298,9 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
       clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={sc === "stakesQ" ? 150 : 110} />} />);
   /* Fool Me Twice: the fact while the lies are written; the answers while they pick; then the reveal, the truth first, then a lie at a time */
   if (/^fool(Write|Pick|Reveal)$/.test(sc) && pub.fool) {
-    const F = pub.fool, tms = ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` }));
-    return (
-      <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
-        {sc === "foolWrite" && (<>
-          <FoolFact fool={F} size={54} />
-          <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-          <FoolStatus teams={tms} done={F.wrote} doing={": " + FOOL.writing} finished={": " + FOOL.lieInShort} tv />
-        </>)}
-        {sc === "foolPick" && F.opts && (<>
-          <FoolFact fool={F} size={32} />
-          <FoolOptions opts={F.opts} tv />
-          <div className="flex items-center gap-8"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={86} />
-            <FoolStatus teams={tms} done={F.picked || [false, false]} doing={": " + FOOL.picking} finished={": " + FOOL.picked} tv /></div>
-        </>)}
-        {sc === "foolReveal" && F.rev && (<>
-          <FoolFact fool={F} size={30} truth={F.rev.answer} />
-          <FoolReveal rev={F.rev} teams={tms} tv />
-        </>)}
-      </div>);
+    /* (one copy in every setup: components/Fool.tsx, 27 Nov, the merge) */
+    return <FoolTv fool={pub.fool} step={sc === "foolWrite" ? "write" : sc === "foolPick" ? "pick" : "reveal"} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` }))}
+      clock={(size) => <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={size} />} />;
   }
   /* Closest To Wins, Drop the Pin, Guess the Airport: one copy for every setup (components/Closest.tsx, Pin.tsx,
      Airport.tsx); here, this setup's clock, who has answered, each team's call and who takes it */

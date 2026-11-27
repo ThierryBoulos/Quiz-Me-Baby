@@ -9,10 +9,10 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motionOff } from "./Marquee";
 import { offBy, showNum } from "@/lib/game";
+import { d } from "./TvBits";
 
 /* pts: what the guess pays (more than two teams: points by place), shown at the end of its card */
 export type RulerTeam = { name: string; color: string; letter?: string; guess: number | null; win: boolean; pts?: number };
-const d = (s: number) => ({ ["--d" as string]: s + "s" });
 const GAP = 10;
 
 /* scale: a game's points instead of guesses (the many-teams Closest To Wins result, 30 Oct): the line runs from 0 on

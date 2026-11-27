@@ -8,6 +8,7 @@ import { FOOL_PEN_END as PEN_END, foolAwards, foolAwardWhat, rvFool, type FoolOp
 import { Dot } from "./many/PartsMany";
 import { QMB } from "@/lib/engine";
 import { poss, possEnd } from "@/lib/game";
+import { FOOL } from "@/lib/minis/fool";
 
 export type FoolTeam = { name: string; color: string };
 const LETTERS = "ABCDEFGHI";
@@ -288,3 +289,27 @@ export function foolVotes(sugs: { user_id: string; pick?: number }[], nameOf: (u
   return Object.fromEntries(Object.entries(by).map(([k, L]) => [k, L.join(", ")]));
 }
 
+
+/* the TV, every setup (27 Nov, the merge): the fact while the lies are written; the answers while they pick; then the
+   reveal, the truth first, then a lie at a time. clock(size): the setup's clock; dense: 6 teams or more, the status short */
+export function FoolTv({ fool: F, step, teams, dense, clock }: { fool: FoolPub; step: "write" | "pick" | "reveal"; teams: FoolTeam[]; dense?: boolean; clock: (size: number) => ReactNode }) {
+  return (
+    <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
+      {step === "write" && (<>
+        {/* (one size in every setup: every fact is 120 letters at most, the bank check says so: 26 Nov, the owner) */}
+        <FoolFact fool={F} size={54} />
+        {clock(120)}
+        <FoolStatus teams={teams} done={F.wrote} doing={dense ? "…" : ": " + FOOL.writing} finished={dense ? "✓" : ": " + FOOL.lieInShort} tv />
+      </>)}
+      {step === "pick" && F.opts && (<>
+        <FoolFact fool={F} size={F.opts.length > 6 ? 28 : 32} />
+        <FoolOptions opts={F.opts} tv />
+        <div className="flex items-center gap-8">{clock(86)}
+          <FoolStatus teams={teams} done={F.picked || teams.map(() => false)} doing={dense ? "…" : ": " + FOOL.picking} finished={dense ? "✓" : ": " + FOOL.picked} tv /></div>
+      </>)}
+      {step === "reveal" && F.rev && (<>
+        <FoolFact fool={F} size={F.rev.opts.length > 6 ? 26 : 30} truth={F.rev.answer} />
+        <FoolReveal rev={F.rev} teams={teams} tv />
+      </>)}
+    </div>);
+}

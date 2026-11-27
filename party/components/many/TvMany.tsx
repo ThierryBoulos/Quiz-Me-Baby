@@ -6,11 +6,10 @@
 import { wholeSentences } from "@/lib/sentences";
 import { useEffect, useState } from "react";
 import { FitBody } from "../TvStage";
-import { useToastOn, WinName } from "../Motion";
+import { useToastOn } from "../Motion";
 import { MajorityJoin, MajorityRevealTv, MajorityTv, WhoPlaysTv } from "../MajorityGame";
-import { FOOL } from "@/lib/minis/fool";
 import { Clock, useSecondsLeft } from "../Clock";
-import { Confetti } from "../GameParts";
+import { AwardCards, d, PausedTv, WinSign } from "../TvBits";
 import { PinMap } from "../PinMap";
 import { possEnd, showKm } from "@/lib/game";
 import { LETTERS } from "@/lib/many/logic";
@@ -20,7 +19,7 @@ import { NightIntroTv } from "../NightIntro";
 import { ImadBubble } from "../TvGame";
 import { RouletteTv } from "../Roulette";
 import { StakesTv } from "../Stakes";
-import { FoolFact, FoolOptions, FoolResult, FoolReveal, FoolStatus } from "../Fool";
+import { FoolResult, FoolTv } from "../Fool";
 import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
 import { AirportRevealTv, AirportTv } from "../Airport";
 import { MapRevealTv, MapTv } from "../MapGame";
@@ -33,8 +32,6 @@ import { SentLine, TeamCalls } from "../TeamCalls";
 import { ComebackIntro, ComebackQTv, ComebackResult, ComebackRevealTv } from "../Comeback";
 import { BallotsMany, BarrelsMany, BarsMany, PilesMany, WordsMany, BoardMany, BubblesMany, byDistance, DartboardMany, FlapsMany, GlassesMany, LecternsMany, FlagPoleMany, PinsMapMany, finalCols, HudMany, IntroMany, kmOf, leader, paid, RowsMany, takes, resultDone } from "./PartsMany";
 
-/* a delay after the beat, for the pieces of a reveal that land one after another */
-const d = (s: number) => ({ ["--d" as string]: s + "s" });
 /* a mini-game's reveal: no drumroll, so its pieces land straight away (the same moves, a shorter beat) */
 const QUICK = { ["--beat" as string]: ".15s" };
 
@@ -71,10 +68,8 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
       {/* the host paused it: the question hides until the clock restarts, as with two teams */}
       {(pub.screen === "q" || pub.screen === "pick") && pub.paused && (
         <div className="tv-cover absolute inset-0 grid place-items-center" style={{ zIndex: 20 }}>
-          <div className="text-center"><div className="display" style={{ fontSize: 140, color: "var(--color-gold)" }}>Paused</div>
-            {/* (who paused it, as the phones and the 2-team TV say: 22 Nov, the owner) */}
-            {/* (the TV out of sight paused it: no "who", as with 2 teams: 27 Nov) */}
-            <div className="text-26 text-[var(--color-ink-2)] mt-2">{pub.pausedAway ? null : "The host paused it. "}The question comes back when the clock restarts.</div></div>
+          {/* (who paused it, as the phones and the 2-team TV say: 22 Nov, the owner; the TV out of sight paused it: no "who", 27 Nov) */}
+          <div className="text-center"><PausedTv who={pub.pausedAway ? null : "The host paused it. "} /></div>
         </div>)}
 
       <FitBody className={"flex-1 flex flex-col items-center justify-center text-center enter min-h-0" + (pub.screen === "reveal" && (g?.key === "airport" || g?.key === "map") ? " gap-4" : " gap-5") + (pub.screen === "final" && recap ? " recap-on" : "")} key={key}>
@@ -130,25 +125,10 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
         {/* Russian Roulette: the barrel spins, each team's chamber lights up; at the reveal they click, the bullet last */}
         {/* Fool Me Twice: the fact while the lies are written; the answers while they pick (and say who'll fall for theirs);
             then the reveal: the truth first, then a lie at a time */}
-        {g && g.key === "fool" && pub.fool && ["q", "pick", "reveal"].includes(pub.screen) && (() => { const F = pub.fool, tms = T.map((t) => ({ name: t.name, color: t.color })); return (
-          <div className="flex flex-col items-center gap-4 w-full max-w-[1100px]">
-            {pub.screen === "q" && (<>
-              {/* (one size in every setup: every fact is 120 letters at most, the bank check says so: 26 Nov, the owner) */}
-              <FoolFact fool={F} size={54} />
-              <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />
-              <FoolStatus teams={tms} done={F.wrote} doing={dense ? "…" : ": " + FOOL.writing} finished={dense ? "✓" : ": " + FOOL.lieInShort} tv />
-            </>)}
-            {pub.screen === "pick" && F.opts && (<>
-              <FoolFact fool={F} size={F.opts.length > 6 ? 28 : 32} />
-              <FoolOptions opts={F.opts} tv />
-              <div className="flex items-center gap-8"><Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={86} />
-                <FoolStatus teams={tms} done={F.picked || T.map(() => false)} doing={dense ? "…" : ": " + FOOL.picking} finished={dense ? "✓" : ": " + FOOL.picked} tv /></div>
-            </>)}
-            {pub.screen === "reveal" && F.rev && (<>
-              <FoolFact fool={F} size={F.rev.opts.length > 6 ? 26 : 30} truth={F.rev.answer} />
-              <FoolReveal rev={F.rev} teams={tms} tv />
-            </>)}
-          </div>); })()}
+        {/* (one copy in every setup: components/Fool.tsx, 27 Nov, the merge) */}
+        {g && g.key === "fool" && pub.fool && ["q", "pick", "reveal"].includes(pub.screen) && (
+          <FoolTv fool={pub.fool} step={pub.screen === "q" ? "write" : pub.screen === "pick" ? "pick" : "reveal"} teams={T.map((t) => ({ name: t.name, color: t.color }))} dense={dense}
+            clock={(size) => <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={size} />} />)}
         {(pub.screen === "q" || pub.screen === "reveal") && g && g.key === "roulette" && pub.roulette && (
           <RouletteTv rr={pub.roulette} teams={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i] }))} sent={pub.sent} typed={R?.typed} ok={R?.ok}
             reveal={pub.screen === "reveal"} sound={sound} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={110} />} />)}
@@ -236,31 +216,15 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
           const tops = pub.final!.order.filter((x) => x.place === 1).map((x) => x.team), c = tops.length === 1 ? T[tops[0]].color : "var(--color-gold)";
           const name = tops.map((t) => T[t].name).join(" & ");
           return (<>
-            <div className="win-flash" style={{ ["--c" as string]: c }} aria-hidden />
-            <div className="confetti-late"><Confetti n={140} /></div>
-            <div className="eyebrow text-22 enter relative z-10 win-eyebrow">{tops.length > 1 ? "Tied at the top" : "The winner"}</div>
-            <div className="win-sign relative z-10 grid place-items-center">
-              <span className="win-tag" aria-hidden>{tops.length > 1 ? "Tied at the top" : "Tonight\u2019s winner"}</span>
-              <span className="win-ring" style={{ ["--c" as string]: c }} aria-hidden />
-              <span className="win-ring r2" style={{ ["--c" as string]: c }} aria-hidden />
-              <WinName recap={!!recap} color={c} label={name}><bdi>{name}</bdi></WinName>
-            </div>
+            <WinSign color={c} eyebrow={tops.length > 1 ? "Tied at the top" : "The winner"} tag={tops.length > 1 ? "Tied at the top" : "Tonight\u2019s winner"} recap={!!recap} label={name} lift><bdi>{name}</bdi></WinSign>
             {/* the recap: the night drawn across the whole screen, the award cards under it (the owner, 30 Oct: no
                 nutshell, it crowded the chart) */}
             {recap && (<>
               <div className="flex justify-center w-full enter" style={{ position: "relative", zIndex: 60 }}>
                 {pub.final!.log.length > 2 ? <NightChartMany pub={pub} /> : <BoardMany pub={pub} cols={finalCols(pub)} size="tv" label="Final standings" />}
               </div>
-              {pub.final!.awards.length > 0 && (
-                <div className="grid gap-3 enter w-full max-w-[1168px]" style={{ gridTemplateColumns: `repeat(${pub.final!.awards.length}, minmax(0, 1fr))`, position: "relative", zIndex: 60 }}>
-                  {/* solid cards: the confetti behind them stays behind them */}
-                  {pub.final!.awards.map((a) => (
-                    <div key={a.t} className="card !p-2 !px-3 text-left min-w-0" style={{ borderColor: a.team != null ? T[a.team].color : undefined, background: "linear-gradient(180deg, #151a3c, #0c1028)" }}>
-                      <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{a.spoon ? "🥄" : "🏆"} {a.t}</div>
-                      <div className="text-20 font-bold leading-snug" style={{ color: a.team != null ? T[a.team].color : undefined }}><bdi>{a.who}</bdi></div>
-                      {a.note && <div className="text-18 text-[var(--color-ink-2)] italic line-clamp-2">{a.note}</div>}
-                    </div>))}
-                </div>)}
+              {/* (solid cards: the confetti behind them stays behind them) */}
+              {pub.final!.awards.length > 0 && <AwardCards awards={pub.final!.awards} color={(t) => T[t].color} solid name="text-20" />}
             </>)}
           </>); })()}
       </FitBody>

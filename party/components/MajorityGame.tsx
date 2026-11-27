@@ -3,16 +3,16 @@
    TV's lists, names in a line with commas so four teams of eight fit; a phone's list), the question up and its
    reveal on the TV, and every player's four buttons. Each setup hands in its teams, its counts and its clock.
    Up to four teams each team has its own count (who has answered; who picked each answer); from five, the room's. */
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Dot } from "./many/PartsMany";
 import { MAJ } from "@/lib/minis/majority";
 import { sendAction, newTap } from "@/lib/supabase";
 import { buzzHand } from "./PhoneBits";
+import { d } from "./TvBits";
 
 export type MrTeam = { name: string; color: string };
 export type MrEntry = { name: string; team: number; here?: boolean; out?: boolean };
-const d = (s: number) => ({ ["--d" as string]: s + "s" }) as CSSProperties;
 const bare = (n: string) => n.replace(/[⁨⁩]/g, "");
 
 /* ---- before Start: who plays ---- */
