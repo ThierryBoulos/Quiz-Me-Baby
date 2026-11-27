@@ -12,6 +12,7 @@
    (3 teams: 10, 8, 6; 9 Nov: nobody pays 1 or 2, so with 8 teams one bad game costs 7, not 9). tied teams share the better place. */
 import { QMB, acceptFor, sayOnList, mapRight } from "../engine";
 import { matchQ } from "../tv/reads";
+import { seeAnswerErr, seeBuzzErr, seeBuzzMs } from "../see";
 import { poss } from "../game";
 import { SPIN_MS, rrGot, rrQ, type RrLap } from "../roulette";
 import { SK_BET_BAD, SK_BET_IN, type SkPick } from "../stakes";
@@ -348,8 +349,10 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
   if (typedKey(m.key)) {
     /* What Do You See? (the buzzer): only the team that buzzed answers */
     if (m.key === "see") {
-      if (s.out?.[team]) return "Your team is out of this picture.";
-      if (s.buzz !== team) return s.buzz == null ? "Buzz first, then say it and type it." : `${s.teams[s.buzz].name} buzzed first.`;
+      /* (the buzzer as with 2 teams: lib/see.ts, 27 Nov, the merge) */
+      const err = seeAnswerErr(s.out, s.buzz, team);
+      if (err === "out") return "Your team is out of this picture.";
+      if (err != null) return err === "first" ? "Buzz first, then say it and type it." : `${s.teams[err].name} buzzed first.`;
     }
     if (s.typed[team] != null) return m.key === "dish" || m.key === "see" ? "Your team has had its guess at this one." : "Your answer is in.";
     const text = String(p.text ?? "").trim().slice(0, 80); if (!text) return "Type an answer first.";
@@ -376,10 +379,11 @@ export function captainAnswer(s: StateM, team: number, p: { text?: unknown; n?: 
 export function buzzSee(s: StateM, team: number, now = Date.now(), by: string | null = null): true | string {
   const m = miniOf(s); if (!m || m.key !== "see" || s.screen !== "q" || team < 0 || team >= s.teams.length) return "Not now.";
   if (s.paused) return "The game is paused.";
-  if (s.out?.[team]) return "Your team is out of this picture.";
-  if (s.buzz != null) return s.buzz === team ? true : `${s.teams[s.buzz].name} buzzed first.`;
+  const err = seeBuzzErr(s.out, s.buzz, team);
+  if (err === "out") return "Your team is out of this picture.";
+  if (err != null) return err === "again" ? true : `${s.teams[err].name} buzzed first.`;
   if (!s.deadline) return s.away ? "The screen running the game was asleep. Tap again." : "Not now.";
-  (s.ms ||= Array(s.teams.length).fill(null))[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline - now))));
+  (s.ms ||= Array(s.teams.length).fill(null))[team] = seeBuzzMs(s.total, s.deadline, now);
   s.left = Math.max(0.05, (s.deadline - now) / 1000); s.deadline = null;
   s.buzz = team; s.buzzAt = now; s.buzzBy = by || s.teams[team].captain || null;
   return true;

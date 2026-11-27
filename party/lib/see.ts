@@ -61,6 +61,19 @@ export function seeWinner(ok: Two<boolean | null>, at: Two<number | null>): 0 | 
   if (!right.length) return "none";
   return right.length === 1 ? right[0] : (at[0]! <= at[1]! ? 0 : 1);
 }
+/* the buzzer, the same in every setup (27 Nov, the merge; each says it in its own words). A buzz: null, it's taken;
+   "out", this team is out of this picture; "again", its buzz is in already; else the team that buzzed first */
+export function seeBuzzErr(out: readonly boolean[] | null | undefined, buzz: number | null | undefined, team: number): null | "out" | "again" | number {
+  if (out?.[team]) return "out";
+  return buzz == null ? null : buzz === team ? "again" : buzz;
+}
+/* ...an answer, only from the team that buzzed: null, it's taken; "out"; "first", nobody has buzzed; else who did */
+export function seeAnswerErr(out: readonly boolean[] | null | undefined, buzz: number | null | undefined, team: number): null | "out" | "first" | number {
+  if (out?.[team]) return "out";
+  return buzz === team ? null : buzz == null ? "first" : buzz;
+}
+/* ...and how far into the picture the buzz came (ms), for the fastest right answer */
+export const seeBuzzMs = (total: number, deadline: number, now: number) => Math.round(Math.min(total * 1000, Math.max(0, total * 1000 - (deadline - now))));
 /* the words every setup shares: the setup screen's line and the intro's first two rules (23 Nov, the owner) */
 export const SEE_SETUP = "12 pictures: a face, a logo or a close-up, getting clearer. Buzz first and get it right to take it.";
 export const SEE_RULE1 = "A picture goes up, blurred or zoomed right in, and gets clearer as the clock runs: a famous face, a logo, or a close-up.";

@@ -6,7 +6,7 @@ import { useNetProbe } from "./tv/netProbe";
 import { QMB, HOST_ONLY_THEMES, acceptFor, sayOnList, forNoHost, hostOnly, mapRight, loadBank, withCustom, type Bank, type Q } from "./engine";
 import { SPIN_MS, rrQ, type RrLap } from "./roulette";
 import { SK_BET_BAD, SK_BET_IN, SK_THEMES_CHANGED, skQ, type SkGame } from "./stakes";
-import { SEE_TYPE, seeWinner } from "./see";
+import { SEE_TYPE, seeAnswerErr, seeBuzzErr, seeBuzzMs, seeWinner } from "./see";
 import { CB_IN, CB_NOT_YOURS } from "./comeback";
 import { nextScreenAt, tapOnThisScreen, type ScreenAt } from "./tapOn";
 import { cleanList, mergeCustom } from "./custom";
@@ -908,10 +908,11 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       /* What Do You See? (12 Nov, the owner: a buzzer): the first team to buzz stops the picture where it is, and has 10
          seconds to say it out loud, and its captain to type it. Any player on the team can buzz (p.by: who did) */
       if (sc === "seeQ") {
-        if (s.seeOut[team]) return `${nm(team)} are out of this picture.`;
-        if (s.seeBuzz != null) return s.seeBuzz === team ? true : `${nm(s.seeBuzz)} buzzed first.`;
+        const err = seeBuzzErr(s.seeOut, s.seeBuzz, team);
+        if (err === "out") return `${nm(team)} are out of this picture.`;
+        if (err != null) return err === "again" ? true : `${nm(err as 0 | 1)} buzzed first.`;
         if (!s.deadline) return false;
-        s.seeAt[team] = Math.round(Math.min(s.total * 1000, Math.max(0, s.total * 1000 - (s.deadline - Date.now()))));
+        s.seeAt[team] = seeBuzzMs(s.total, s.deadline, Date.now());
         s.seeBuzz = team; s.buzzAt = Date.now(); s.seeBy = typeof p.by === "string" && p.by ? p.by : g.teams[team].captain || null;
         applyFx([{ timer: "pause" }, { sound: "soft" }]);
         return true;
@@ -1017,8 +1018,9 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
        the clock goes on and the other team can buzz */
     if (sc === "seeQ") {
       if (!texts.length) return false;
-      if (s.seeOut[team]) return `${nm(team)} are out of this picture.`;
-      if (s.seeBuzz !== team) return s.seeBuzz == null ? "Buzz first, then say it and type it." : `${nm(s.seeBuzz)} buzzed first.`;
+      const err = seeAnswerErr(s.seeOut, s.seeBuzz, team);
+      if (err === "out") return `${nm(team)} are out of this picture.`;
+      if (err != null) return err === "first" ? "Buzz first, then say it and type it." : `${nm(err as 0 | 1)} buzzed first.`;
       if (s.typed[team]) return `${poss(nm(team))} answer is already in.`;
       s.typed[team] = texts.slice(0, 1); s.buzzAt = 0;
       if (matchQ(s.typed[team], g.seeGame.qs[g.seeGame.i])) reveal(); else seeMiss(team, false);
