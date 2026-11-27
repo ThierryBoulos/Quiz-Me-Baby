@@ -403,15 +403,14 @@ function foolAnswer(s: StateM, team: number, p: { text?: unknown; pick?: unknown
   const q = qOf(s); if (!q || (s.screen !== "q" && s.screen !== "pick") || team < 0 || team >= s.teams.length) return "Not now.";
   if (s.screen === "q") {
     if (s.typed[team] != null) return FOOL.lieIn;
-    const text = QMB.foolShow(String(p.text ?? "").slice(0, FOOL_MAX * 2)); if (!text) return FOOL.noLie;
-    if (QMB.foolIsTruth(text, q, acceptFor(q))) return FOOL.truth;
-    s.typed[team] = text; s.at[team] = order ?? ++s.seq; return true;
+    /* (the engine's check, the same as with 2 teams: 27 Nov, the merge) */
+    const r = QMB.foolLie(String(p.text ?? "").slice(0, FOOL_MAX * 2), q, acceptFor(q)) as { lie?: string; err?: "noLie" | "truth" };
+    if (r.err) return FOOL[r.err];
+    s.typed[team] = r.lie!; s.at[team] = order ?? ++s.seq; return true;
   }
   const F = s.fool; if (!F) return "Not now.";
-  if (F.picks[team] != null) return FOOL.pickIn;
-  const k = Number.isInteger(p.pick) ? Number(p.pick) : -1, o = F.opts[k];
-  if (!o) return FOOL.pickOne;
-  if (o.by.includes(team)) return FOOL.ownLie;
+  const k = Number.isInteger(p.pick) ? Number(p.pick) : -1, err = QMB.foolPickErr(F.opts, F.picks[team], team, k) as "pickIn" | "pickOne" | "ownLie" | null;
+  if (err) return FOOL[err];
   /* (the team it says will fall for its lie: only if its lie is up there, and never itself) */
   const mine = F.opts.some((x) => x.by.includes(team)), w = Number.isInteger(p.pred) ? Number(p.pred) : -1;
   const named = w >= 0 && w < s.teams.length && w !== team;

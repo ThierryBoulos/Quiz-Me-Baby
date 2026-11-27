@@ -960,20 +960,18 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (!texts.length) return false;
       /* (the words: lib/minis/fool.ts, every setup) */
       if (s.foolLies[team] != null) return FOOL.lieIn;
-      const q = current(), lie = QMB.foolShow(texts[0]);
-      if (!lie) return FOOL.noLie;
-      if (QMB.foolIsTruth(lie, q, acceptFor(q))) return FOOL.truth;
-      s.foolLies[team] = lie;
+      /* (the engine's check, every setup: 27 Nov, the merge) */
+      const q = current(), r = QMB.foolLie(texts[0], q, acceptFor(q)) as { lie?: string; err?: "noLie" | "truth" };
+      if (r.err) return FOOL[r.err];
+      s.foolLies[team] = r.lie!;
       /* (the last lie brings the picks up: taps from the writing screen, the host's Reveal now, are stale now: 19 Nov;
          paused, it waits for Resume) */
       if (!s.paused && s.foolLies[0] != null && s.foolLies[1] != null) { reveal(); s.step++; }
       return true;
     }
     if (sc === "foolPick") {
-      const k = Number(p.pick), o = Number.isInteger(k) ? s.fool?.opts[k] : null;
-      if (!o) return FOOL.pickOne;
-      if (o.by.includes(team)) return FOOL.ownLie;
-      if (s.foolPicks[team] != null) return FOOL.pickIn;
+      const k = Number(p.pick), err = QMB.foolPickErr(s.fool?.opts, s.foolPicks[team], team, k) as "pickIn" | "pickOne" | "ownLie" | null;
+      if (err) return FOOL[err];
       s.foolPicks[team] = k;
       if (!s.paused && s.foolPicks[0] != null && s.foolPicks[1] != null) { reveal(); s.step++; }
       return true;

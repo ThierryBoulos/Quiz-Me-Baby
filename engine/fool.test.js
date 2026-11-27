@@ -174,3 +174,14 @@ test('fool: a question paired with tonight\'s fact is never dealt later (the com
     assert.ok(!bt.some(q => paired.has(q.id)), 'a Battle question paired with a fact');
   }
 });
+test('fool: one check of a lie and a pick for every setup (27 Nov, the merge)', () => {
+  assert.deepEqual(Q.foolLie('  a   goldfish!! ', fact, []), { lie:'A goldfish' });
+  assert.deepEqual(Q.foolLie('   ', fact, []), { err:'noLie' });
+  assert.deepEqual(Q.foolLie('guinea pigs', fact, []), { err:'truth' });
+  const opts = [{ text:'Guinea pig', truth:true, by:[] }, { text:'Goat', by:[1] }, { text:'Parrot', by:[0, 2] }];
+  assert.equal(Q.foolPickErr(opts, null, 0, 1), null);
+  assert.equal(Q.foolPickErr(opts, null, 0, 2), 'ownLie');
+  assert.equal(Q.foolPickErr(opts, null, 0, 7), 'pickOne'); assert.equal(Q.foolPickErr(opts, null, 0, NaN), 'pickOne');
+  assert.equal(Q.foolPickErr(null, null, 0, 0), 'pickOne');
+  assert.equal(Q.foolPickErr(opts, 1, 0, 2), 'pickIn');                  // (picked already: said first, whatever this tap)
+});
