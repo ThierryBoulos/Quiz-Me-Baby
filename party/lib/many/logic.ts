@@ -323,8 +323,7 @@ function ask(s: StateM, now: number, t: Timers) {
 /* the Cocktail or Dish: how many ingredients are up at this moment (the clock's tick moves it on) */
 export function dishShown(s: StateM, now: number, t: Timers): number {
   const q = qOf(s), n = (q?.ings || []).length; if (!n || !s.deadline) return n;
-  const gone = s.total * 1000 - (s.deadline - now);
-  return Math.max(1, Math.min(n, 1 + Math.floor(gone / (t.dish * 1000))));
+  return QMB.dishShownAt(n, s.total, t.dish, (s.deadline - now) / 1000) as number;   // (the same as with 2 teams: 27 Nov, the merge)
 }
 /* is a typed answer right? The question rounds, flags, airports and dishes as the two-team game checks them
    (lib/tv/reads.ts); a map by its title and its short forms */

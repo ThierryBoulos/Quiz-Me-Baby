@@ -1771,7 +1771,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
       if (s.deadline && now >= s.deadline && alarmed.current !== s.deadline) { alarmed.current = s.deadline; playSound("alarm"); }
       if (s.screen === "dishQ" && s.deadline) {
         const q = g.dishGame.qs[g.dishGame.i], L = g.dishGame.leg;
-        const want = Math.min(q.ings.length, 1 + Math.floor((s.total - (s.deadline - now) / 1000) / T().tDishStep + 1e-6));
+        const want = QMB.dishShownAt(q.ings.length, s.total, T().tDishStep, (s.deadline - now) / 1000) as number;   // (every setup: 27 Nov, the merge)
         if (want > L.shown) { L.shown = want; changed = true; }
       }
       if (s.pending && now >= s.pending.until) { s.step++; settle(false); changed = true; }

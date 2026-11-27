@@ -462,6 +462,9 @@
      -> { opts: [{ text, truth?, ours?, by: [teams] }], lost: [teams whose lie couldn't go in] } */
   /* a captain's lie and pick, checked the same in every setup (27 Nov, the merge). The lie as shown, or why it isn't
      taken: 'noLie' (nothing to show), 'truth' (the truth, any way of writing it) */
+  /* the Cocktail or Dish, every setup (27 Nov, the merge): how many of its n ingredients are up, left seconds before the
+     end of a total, one more every step seconds (the first at once) */
+  const dishShownAt = (n, total, step, left) => Math.max(1, Math.min(n, 1 + Math.floor((total - left) / step + 1e-6)));
   function foolLie(text, q, accept){
     const lie = foolShow(text);
     return !lie ? { err:'noLie' } : foolIsTruth(lie, q, accept) ? { err:'truth' } : { lie };
@@ -2951,5 +2954,5 @@
 
   return { tidy, asNumber, numWords, distance, isMatch, rankMatch, someOfMatch, parseNumber, COUNTRIES, miniPointValue, planMinis, bestOf, decidedEarly, shuffle:shuffleWith,
            createDealer, play, MOVES:Object.keys(MOVES), ROULETTE_LAPS, rouletteChambers, SWAP_WORDS,
-           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolLie, foolPickErr, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, rouletteSettle, majorityFreeze, majorityTally, majorityWho, majorityShare:mrShare, closestOff, closestOffs, nearest, nearestTwo, pinOffs, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
+           STAKES_ROUNDS, STAKES_LEVELS, STAKES_DIVISOR, stakesUnit, stakesBet, stakesResult, stakesOrder, stakesBetOk, stakesLock, stakesQuestion, stakesSettle, SEE_LEGS, SEE_ORDER, SEE_KINDS, FOOL_LEGS, FOOL_HARD, foolShow, foolIsTruth, foolSame, foolLie, foolPickErr, dishShownAt, foolOptions, foolScore, COMEBACK_GAP, COMEBACK_NEAR, COMEBACK_SHARE, COMEBACK_LEGS, COMEBACK_SECS, COMEBACK_MIN_GAMES, COMEBACK_ROOM, comebackRoom, comebackPlan, comebackSettle, rouletteHit, rouletteSpin, roulettePts, rouletteSwapQs, rouletteSettle, majorityFreeze, majorityTally, majorityWho, majorityShare:mrShare, closestOff, closestOffs, nearest, nearestTwo, pinOffs, RR_SWAPPED, RR_NONE_LEFT, spareAt, DIFFS, DEFAULT_DIFF, diffsOf, battleSpent, seatTeam, pointValue, minisAfter, LEGS, INTERLEAVED, MAP_ORDER, PIN_ORDER, AIRPORT_ORDER, MAJORITY_ORDER, FLAG_LEVEL_KEYS, DISH_LEVEL_KEYS, BATTLE_SKIP_THEMES, kmBetween, pinLeg };
 });

@@ -757,6 +757,11 @@ test('roulette: the most points wins the 2; level: one more lap or a point each'
   Q.play(b.g, { type:'roulette/done' }, b.env);
   assert.equal(b.g.done.roulette, true);
 });
+test('dish: one ingredient clock for every setup (27 Nov, the merge)', () => {
+  /* 5 ingredients, one every 6 s, 30 s in all */
+  assert.deepEqual([30, 24.5, 24, 18, 0.5, 0, -3].map(left => Q.dishShownAt(5, 30, 6, left)), [1, 1, 2, 3, 5, 5, 5]);
+  assert.equal(Q.dishShownAt(5, 30, 6, 31), 1);                          // (never none)
+});
 test('pin: one nearest for every setup (27 Nov, the merge) — to the km, the same km tied, no pin no place', () => {
   const q = { lat:0, lon:0 }, at = (km) => ({ lat:0, lon:km / 111.19492664455873 });
   const d = Q.pinOffs(q, [at(100.2), null, at(99.8), at(250), { lat:99, lon:0 }]);
