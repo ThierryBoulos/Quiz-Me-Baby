@@ -203,6 +203,20 @@ const PHONE_MEASURE = () => {
 /* (Secret Stakes' reveal brings its rows in one by one: with 8 teams the last lands at about 7 s) */
 const waitFor = (k) => (/\.final/.test(k) ? 12000 : /[Rr]eveal\.(stakes|roulette)/.test(k) ? 8000 : /Reveal|reveal|Result|Summary|summary|roundScore|Review|decided|\.intro/.test(k) ? 6000 : /^lobby/.test(k) ? 3500 : 2500);
 const file = (s) => s.replace(/[^a-z0-9]+/gi, "_");
+/* FASTER (28 Nov, the owner: "make the checks faster", motion still on): a screen is measured as soon as everything on
+   it has finished moving (every animation with an end has ended, twice in a row), not after a fixed wait; never sooner
+   than a short floor (things a timer brings in: a mascot's mood at an answer, ~2 s), never later than the old wait.
+   The end of a night keeps its fixed wait (its recap comes up on a timer, 7 s in). SCREENS_SLOW=1: the old waits. */
+const floorFor = (k) => (/[Rr]eveal|answer|Result|Summary|summary|roundScore|decided|steal/.test(k) ? 2200 : /^lobby|^pick|^side/.test(k) ? 1200 : 900);
+const settle = async (p, k, max) => {
+  if (process.env.SCREENS_SLOW === "1" || /\.final/.test(k)) return p.waitForTimeout(max);
+  const t0 = Date.now(); await p.waitForTimeout(Math.min(floorFor(k), max)); let calm = 0;
+  while (Date.now() - t0 < max) {
+    const busy = await p.evaluate(() => document.getAnimations().some((a) => a.playState === "running" && Number.isFinite(a.effect?.getComputedTiming?.().endTime ?? Infinity))).catch(() => false);
+    calm = busy ? 0 : calm + 1; if (calm >= 2) return;
+    await p.waitForTimeout(150);
+  }
+};
 
 const browser = await chromium.launch();
 const report = {}, errors = [];
@@ -232,10 +246,10 @@ if (want("tv")) {
   const lobbies = [2, 3, 5, 8].map((t) => `lobby:${t}`);
   const jobs = [...(lobbies.some(match) ? lobbies : []), ...inPlay.map((k) => `tv:${k}`)].map((h) => ({ id: "tv " + h, hash: h, key: h.replace(/^tv:/, "") }));
   mkdirSync(join(out, "tv"), { recursive: true });
-  await pool(jobs, 4, async (j) => {
+  await pool(jobs, 5, async (j) => {
     const { ctx, p } = await page(j, { viewport: { width: 1440, height: 900 } });
     if (process.env.SCREENS_AT) { await p.waitForTimeout(Number(process.env.SCREENS_AT)); await p.screenshot({ path: join(out, "tv", file(j.key) + "_at" + process.env.SCREENS_AT + ".png") }); }
-    await p.waitForTimeout(waitFor(j.key));
+    await settle(p, j.key, waitFor(j.key));
     report[j.id] = await p.evaluate(TV_MEASURE);
     await p.screenshot({ path: join(out, "tv", file(j.key) + ".png") }); await ctx.close();
   });
@@ -259,10 +273,13 @@ if (want("phones")) {
   /* the Setup before the start, in every setup (setupJobs, above) */
   for (const [dev, w, h] of PHONES) for (const s of setupJobs)
     jobs.push({ id: `${dev} ${s}`, hash: s, key: s, dev, w, h });
+  /* the lobby's new phone screens (28 Nov): the captain's mascot pick, and Pick a side, with 2 and 8 teams */
+  for (const [dev, w, h] of PHONES) for (const s of ["pick:2", "pick:8", "side:2", "side:8"].filter((x) => !filter || match(x)))
+    jobs.push({ id: `${dev} ${s}`, hash: s, key: s, dev, w, h });
   for (const [dev] of PHONES) mkdirSync(join(out, dev), { recursive: true });
-  await pool(jobs, 6, async (j) => {
+  await pool(jobs, 7, async (j) => {
     const { ctx, p } = await page(j, { viewport: { width: j.w, height: j.h }, hasTouch: true, isMobile: true });
-    await p.waitForTimeout(Math.min(waitFor(j.key), 9000));
+    await settle(p, j.key, Math.min(waitFor(j.key), 9000));
     report[j.id] = await p.evaluate(PHONE_MEASURE);
     await p.screenshot({ path: join(out, j.dev, file(j.hash) + ".png"), fullPage: true }); await ctx.close();
   });

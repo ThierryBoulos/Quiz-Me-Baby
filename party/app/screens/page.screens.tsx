@@ -71,7 +71,8 @@ export default function Screens() {
     const ppl = ["Nour", "Karim", "Joe", "Maya", "Rami", "Lea", "Tarek", "Zeina", "Sami", "Rita", "Hadi", "Yara", "Omar", "Dana", "Fadi", "Lina"];
     const mem = ppl.slice(0, Math.min(16, k * 2 + 2)).map((n, i) => ({ room: "ABCD", user_id: "u" + i, name: n, team: (i === 0 ? null : (i - 1) % k) as 0 | null,
       role: (i === 0 ? "host" : i <= k ? "captain" : "player") as never, avatar: null, joined_at: "" }));
-    return <TvStage><TvLobby room={{ code: "ABCD", tv_id: "x", status: "lobby", mode: null, state: { teamNames: names }, version: 1 }} members={mem} code="ABCD" k={k}
+    /* (one captain and one player away, asleep: 28 Nov) */
+    return <TvStage><TvLobby room={{ code: "ABCD", tv_id: "x", status: "lobby", mode: null, state: { teamNames: names, away: [mem[1]?.user_id, mem[k + 1]?.user_id].filter(Boolean) as string[] }, version: 1 }} members={mem} code="ABCD" k={k}
       joinUrl={JOIN.url} site="quizmebaby.app" status={<span>Hosted by <b>Nour</b>. Ready: <b>Nour</b> starts the game.</span>}
       controls={<button type="button" className="btn btn-sm btn-ghost">Settings</button>} /></TvStage>;
   }

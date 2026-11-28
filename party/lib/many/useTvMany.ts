@@ -536,7 +536,8 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
     const t = setInterval(() => {
       const { room, members } = ctx.current, H = here.current, now = Date.now();
       if (!room || room.status !== "lobby") return;
-      const away = members.filter((m) => m.role === "captain" && now - (H.at[m.user_id] ?? since) >= T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
+      /* (anyone on a team, not only a captain: 28 Nov, the owner; the armband can still only be taken from a captain) */
+      const away = members.filter((m) => m.team != null && now - (H.at[m.user_id] ?? since) >= T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
       const was = ((lobbyMine.current.away ?? room.state?.away) as string[] | undefined || []).join(",");
       if (away.join(",") !== was) void lobbyWrite({ away }).then(() => {}, () => { /* the next tick tries again */ });
     }, 3000);

@@ -35,7 +35,8 @@ export function SentLine({ teams: T, sent, column, on = "locked in", off = "thin
   return (
     <div className={"flex " + (column ? "flex-col items-center gap-0.5" : "flex-wrap justify-center gap-y-0.5 " + (dense ? "gap-x-5" : "gap-x-10"))} role="status" style={{ maxWidth: 1168 }}>{T.map(({ i, ...t }) => (
       /* (the team's name always in its colour; only "thinking…" grey: 24 Nov, the owner, "why is it in grey?") */
-      <span key={i} className="font-bold whitespace-nowrap" style={{ fontSize: column && dense ? 20 : 22 }}>
+      <span key={i} className={"font-bold whitespace-nowrap" + (mascots ? " inline-flex items-center gap-2" : "")} style={{ fontSize: column && dense ? 20 : 22 }}>
+        {mascots && <Mascot kind={mascotOf(picks, i)} color={t.color} mood={sent(i) ? "sent" : "think"} size={column && dense ? 30 : 36} delay={i * 0.37} key={sent(i) ? "in" : "out"} />}
         <bdi style={{ color: t.color }}>{t.name}</bdi>: <span key={sent(i) ? "in" : "out"} className={sent(i) ? "sent-pop" : undefined} style={{ color: sent(i) ? t.color : "var(--color-ink-3)", ["--c" as string]: t.color }}>{sent(i) ? on : off}</span></span>))}
     </div>);
 }

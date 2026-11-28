@@ -5,12 +5,12 @@
    when it's wrong, shrugs when there was no answer. Between questions one walks out and hops about (MascotStroll).
    (The players' faces are gone: 28 Nov, the owner, "it just confuses everyone"; a player is their name, a team its
    mascot.) With Motion off in Settings the mascots stand still and only change face. */
-import { createContext, useContext, useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { createContext, Fragment, useContext, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { motionOff } from "./Marquee";
 
 export const MASCOT_COUNT = 8;
-export type Mood = "idle" | "think" | "sent" | "right" | "wrong" | "none";
+export type Mood = "idle" | "think" | "sent" | "right" | "wrong" | "none" | "yay";
 
 /* the room's picks (room.state.teamMascots): what each team's captain picked, or null. A picked mascot is that team's
    alone: the other captains see it greyed out (28 Nov, the owner). A team that hasn't picked has its own number's
@@ -116,75 +116,102 @@ export function MascotCorners({ colors, moods, away, size = 116, show = [true, t
   </>);
 }
 
-/* BETWEEN QUESTIONS (28 Nov, the owner: "walk around the screen from time to time... jump around"): on a screen that
-   isn't asking anything, every so often one mascot walks out from its side along the bottom of the stage, hops about,
-   and walks back. It only walks where nothing is written: it measures the free floor under what's on screen first,
-   and skips its turn if there's no room. Each team in turn; with 5 teams or more, only one is ever out. */
+/* THE WINNERS' WALK (28 Nov, the owner): at an answer, the team that scored walks out from its side along the bottom of
+   the stage, celebrates ("Yay!", jumps, a spin) and walks back; nobody scored, nobody walks. With 3 to 8 teams, every
+   team that got it walks out together, holding hands, and they celebrate together; more than four, and half come in
+   from each side, so it takes no longer with 8 than with 1 (about 5 seconds, the owner: "don't make me wait"). They
+   walk at the corners' height where nothing is written there; where something is, right along the bottom, and
+   "Waiting for ... to tap Next" fades while they pass ("if there's no room, we need to fix"). Every so often while the
+   answer is up. Motion off: nobody walks. */
 const STAGE_H = 720, STAGE_W = 1280;
-export function MascotStroll({ teams, on, first = 4500, every = 15000, onAway }: {
-  teams: readonly { kind: number; color: string; side?: "l" | "r" }[]; on: boolean; first?: number; every?: number; onAway?: (t: number | null) => void;
+export type Walker = { t: number; kind: number; color: string };
+type Group = { side: "l" | "r"; list: Walker[]; from: number; to: number };
+export function MascotParade({ walkers, on, side = "l", first = 4200, every = 15000, onAway }: {
+  walkers: Walker[]; on: boolean; side?: "l" | "r"; first?: number; every?: number; onAway?: (ts: number[] | null) => void;
 }) {
   /* (it walks on the stage itself, in the stage's own 1280 by 720, wherever this sits in the screen) */
-  const anchor = useRef<HTMLSpanElement>(null), box = useRef<HTMLDivElement>(null);
+  const anchor = useRef<HTMLSpanElement>(null), boxes = useRef<(HTMLDivElement | null)[]>([]);
   const [stageEl, setStageEl] = useState<HTMLElement | null>(null);
   useEffect(() => { setStageEl((anchor.current?.closest(".tv-stage") as HTMLElement | null) ?? null); }, []);
-  const [walker, setWalker] = useState<{ t: number; w: number; top: number; from: number; to: number; side: "l" | "r"; n: number } | null>(null);
+  const [walk, setWalk] = useState<{ w: number; top: number; low: boolean; groups: Group[]; n: number } | null>(null);
+  const [cheer, setCheer] = useState(false);
   const away = useRef(onAway); away.current = onAway;
-  const list = useRef(teams); list.current = teams;
+  const list = useRef(walkers); list.current = walkers;
+  const who = walkers.map((x) => x.t).join(",");
   useEffect(() => {
-    if (!on || motionOff()) return;
+    if (!on || !who || motionOff()) return;
     let n = 0, timer = 0;
     const go = () => {
       const stage = anchor.current?.closest(".tv-stage") as HTMLElement | null, T = list.current;
       if (!stage || !T.length) return;
-      const t = n % T.length, side = T[t].side ?? (n % 2 ? "r" : "l"); n++;
-      /* the free floor, under what's on screen across the stretch it walks (its side to a third of the way in) */
       const S = stage.getBoundingClientRect(), k = S.height / STAGE_H || 1;
-      const x0 = side === "l" ? 0 : STAGE_W * 0.62, x1 = side === "l" ? STAGE_W * 0.38 : STAGE_W;
-      /* (they walk at the corners' height, over the bottom strip where "Waiting for … to tap Next" sits) */
-      const floor = STAGE_H - 58;
-      let low = 0;
-      stage.querySelectorAll<HTMLElement>("*").forEach((el) => {
-        if (el.closest(".msc, .msc-walk, .msc-corner, .op-curtains, .op-lights")) return;
-        const own = [...el.childNodes].some((c) => c.nodeType === 3 && (c.textContent || "").trim()) || /^(IMG|svg|CANVAS|VIDEO|BUTTON)$/.test(el.tagName);
-        if (!own) return;
-        const r = el.getBoundingClientRect(); if (!r.width || !r.height) return;
-        const l = (r.left - S.left) / k, rr = (r.right - S.left) / k, b = (r.bottom - S.top) / k, tp = (r.top - S.top) / k;
-        if (rr > x0 && l < x1 && tp < floor) low = Math.max(low, b);
-      });
-      const room = floor - low - 10, w = Math.min(96, Math.floor(room * 112 / 128));
-      if (w >= 48) {
-        const h = w * 128 / 112;
-        setWalker({ t, w, top: floor - h, side, from: side === "l" ? -w - 20 : STAGE_W + 20, to: side === "l" ? STAGE_W * 0.24 : STAGE_W * 0.76 - w, n });
-      }
+      /* how far down what's written comes, above a line */
+      const lowAbove = (floor: number) => { let low = 0;
+        stage.querySelectorAll<HTMLElement>("*").forEach((el) => {
+          if (el.closest(".msc, .msc-walk, .msc-corner, .op-curtains, .op-lights, .next-hint, .tv-note")) return;
+          const own = [...el.childNodes].some((c) => c.nodeType === 3 && (c.textContent || "").trim()) || /^(IMG|svg|CANVAS|VIDEO|BUTTON)$/.test(el.tagName);
+          if (!own) return;
+          const r = el.getBoundingClientRect(); if (!r.width || !r.height) return;
+          const b = (r.bottom - S.top) / k, tp = (r.top - S.top) / k;
+          if (tp < floor) low = Math.max(low, b);
+        }); return low; };
+      /* the groups: one, or (more than four) half from each side */
+      const split = T.length > 4, groups0 = split ? [{ side: "l" as const, list: T.slice(0, Math.ceil(T.length / 2)) }, { side: "r" as const, list: T.slice(Math.ceil(T.length / 2)) }]
+        : [{ side, list: T }];
+      const most = Math.max(...groups0.map((g) => g.list.length)), unit = most * 0.86 + 0.14;
+      /* the corners' height if nothing written comes down to it; else right along the bottom */
+      let floor = STAGE_H - 58, room = floor - lowAbove(floor) - 10, low = false;
+      if (room * 112 / 128 < 52) { floor = STAGE_H - 4; room = floor - lowAbove(floor) - 6; low = true; }
+      const w = Math.floor(Math.max(44, Math.min(most > 1 ? 72 : 96, room * 112 / 128, (STAGE_W * (split ? 0.46 : 0.6)) / unit)));
+      const h = w * 128 / 112;
+      const groups: Group[] = groups0.map((g) => { const len = w * (g.list.length * 0.86 + 0.14);
+        const to = g.side === "l" ? Math.max(30, (split ? STAGE_W * 0.25 : STAGE_W * 0.24) - len / 2) : Math.min(STAGE_W - len - 30, STAGE_W * 0.76 - len / 2);
+        return { ...g, from: g.side === "l" ? -len - 30 : STAGE_W + 30, to }; });
+      setWalk({ w, top: floor - h, low, groups, n }); n++;
       timer = window.setTimeout(go, every);
     };
     timer = window.setTimeout(go, first);
-    return () => { clearTimeout(timer); setWalker(null); away.current?.(null); };
-  }, [on, first, every]);
-  /* the walk: out to its spot, a hop, a big hop with a spin, then back the way it came */
+    return () => { clearTimeout(timer); setWalk(null); away.current?.(null); };
+  }, [on, who, side, first, every]);
+  /* the walk: out to its spot, the celebration (jumps, "Yay!", a spin), then back the way it came; each group at once */
   useEffect(() => {
-    const el = box.current; if (!walker || !el) return;
+    if (!walk) return;
     let dead = false;
-    away.current?.(walker.t);
-    const at = (x: number, y = 0, r = 0) => `translate(${x}px, ${walker.top + y}px) rotate(${r}deg)`;
-    const run = async () => {
-      el.classList.toggle("face-l", walker.side === "r");
-      await el.animate([{ transform: at(walker.from) }, { transform: at(walker.to) }], { duration: 2200, easing: "linear", fill: "forwards" }).finished;
-      if (dead) return; el.classList.add("hop");
-      await el.animate([{ transform: at(walker.to) }, { transform: at(walker.to, -46), offset: .5 }, { transform: at(walker.to) }], { duration: 520, easing: "ease-in-out", fill: "forwards" }).finished;
-      if (dead) return;
-      await el.animate([{ transform: at(walker.to) }, { transform: at(walker.to, -92, walker.side === "l" ? 180 : -180), offset: .5 }, { transform: at(walker.to, 0, walker.side === "l" ? 360 : -360) }], { duration: 760, easing: "cubic-bezier(.3,0,.4,1)", fill: "forwards" }).finished;
-      if (dead) return; el.classList.remove("hop"); el.classList.toggle("face-l", walker.side === "l");
-      await el.animate([{ transform: at(walker.to) }, { transform: at(walker.from) }], { duration: 2200, easing: "linear", fill: "forwards" }).finished;
-      if (dead) return; setWalker(null); away.current?.(null);
+    const stage = anchor.current?.closest(".tv-stage") as HTMLElement | null;
+    away.current?.(walk.groups.flatMap((g) => g.list.map((x) => x.t)));
+    if (walk.low) stage?.classList.add("msc-walking");
+    const one = async (el: HTMLDivElement, g: Group) => {
+      const at = (x: number, y = 0, r = 0) => `translate(${x}px, ${walk.top + y}px) rotate(${r}deg)`;
+      const step = (frames: Keyframe[], ms: number, easing = "ease-in-out") => el.animate(frames, { duration: ms, easing, fill: "forwards" }).finished;
+      el.classList.toggle("face-l", g.side === "r");
+      await step([{ transform: at(g.from) }, { transform: at(g.to) }], 1600, "cubic-bezier(.3,.1,.4,1)"); if (dead) return;
+      setCheer(true);
+      for (let i = 0; i < 2; i++) { await step([{ transform: at(g.to) }, { transform: at(g.to, -40), offset: .45 }, { transform: at(g.to) }], 400); if (dead) return; }
+      const spin = g.list.length > 1 ? 0 : g.side === "l" ? 360 : -360;
+      await step([{ transform: at(g.to) }, { transform: at(g.to, -80, spin / 2), offset: .5 }, { transform: at(g.to, 0, spin) }], 640, "cubic-bezier(.3,0,.4,1)"); if (dead) return;
+      await new Promise((r) => setTimeout(r, 260)); if (dead) return;
+      setCheer(false); el.classList.toggle("face-l", g.side === "l");
+      await step([{ transform: at(g.to) }, { transform: at(g.from) }], 1500, "cubic-bezier(.6,0,.7,.9)");
     };
-    void run().catch(() => {});
-    return () => { dead = true; el.getAnimations().forEach((a) => a.cancel()); };
-  }, [walker]);
-  const T = walker ? list.current[walker.t] : null;
-  return (<span ref={anchor} hidden>{stageEl && createPortal(
-    <div ref={box} className="msc-walk" aria-hidden style={{ visibility: walker ? "visible" : "hidden" }}>{T && walker && <Mascot key={walker.n} kind={T.kind} color={T.color} mood="idle" size={walker.w} />}</div>, stageEl)}</span>);
+    void Promise.all(walk.groups.map((g, i) => (boxes.current[i] ? one(boxes.current[i]!, g) : Promise.resolve()))).then(() => {
+      if (dead) return; stage?.classList.remove("msc-walking"); setWalk(null); away.current?.(null);
+    }).catch(() => {});
+    const els = [...boxes.current];
+    return () => { dead = true; stage?.classList.remove("msc-walking"); els.forEach((el) => el?.getAnimations().forEach((a) => a.cancel())); };
+  }, [walk]);
+  return (<span ref={anchor} hidden>{stageEl && walk && createPortal(<>
+    {walk.groups.map((g, gi) => (
+      <div key={gi + ":" + walk.n} ref={(el) => { boxes.current[gi] = el; }} className={"msc-walk" + (g.list.length > 1 ? " linked" : "") + (cheer ? " cheer" : "")} aria-hidden>
+        <div className="msc-row" style={{ ["--w" as string]: walk.w + "px" }}>
+          {g.list.map((x, i) => (<Fragment key={x.t}>
+            {/* (holding hands: a little joined hand between each two) */}
+            {i > 0 && <span className="msc-hand" style={{ background: `linear-gradient(90deg, ${shade(g.list[i - 1].color, -0.35)}, ${shade(x.color, -0.35)})` }} />}
+            <Mascot kind={x.kind} color={x.color} mood={cheer ? "yay" : "idle"} size={walk.w} delay={i * 0.11} />
+          </Fragment>))}
+          {cheer && <span className="msc-yay">Yay!</span>}
+        </div>
+      </div>))}
+  </>, stageEl)}</span>);
 }
 
 /* the room's picks, for a list of teams */

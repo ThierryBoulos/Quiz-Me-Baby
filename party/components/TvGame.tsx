@@ -1,6 +1,6 @@
 "use client";
 import { MANY_COLORS } from "@/lib/many/logic";
-import { MascotCorners, MascotStroll, useLater, useMascot, type Mood } from "./Mascot";
+import { MascotCorners, MascotParade, useLater, useMascot, type Mood } from "./Mascot";
 import { TEAM_MAX } from "@/lib/room";
 import { useEffect, useRef, useState } from "react";
 import { FitLine } from "./Fit";
@@ -40,7 +40,7 @@ const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--
 export type Join = { url: string; code: string };
 /* sound: this is the TV itself (it plays the coins and the whoosh; another screen showing the TV stays quiet) */
 /* TEAM MASCOTS (28 Nov): the screens they stand on, the screens they stroll on, and each one's mood */
-const MASCOT_SCREENS = ["ask", "steal", "answer"], STROLL_SCREENS = ["answer", "roundIntro", "roundScore"];
+const MASCOT_SCREENS = ["ask", "steal", "answer"];
 /* which teams are in this question (28 Nov, the owner): its own team only; on a steal both, the team that missed it
    sad; at the answer, the teams that had a go */
 function inPlay2(pub: Pub): [boolean, boolean] {
@@ -88,6 +88,11 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
   /* the mascots: their moods change once the answer's stamps have landed, never before; one may be out walking */
   const revealed = useLater(key + (pub.qid ?? ""), BEAT_MS + 700);
   const [strolling, setStrolling] = useState<number | null>(null);
+  /* who walks out (28 Nov, the owner): the team that scored at an answer, the team that won a round, the team that took
+     a mini-game's leg (both, holding hands, when it's tied with a point each); nobody else */
+  const winners: (0 | 1)[] = pub.screen === "answer" ? (pub.result?.by != null ? [pub.result.by] : [])
+    : pub.screen === "roundScore" ? (() => { const p = pub.roundPts ?? [0, 0]; return p[0] === p[1] ? [] : [p[0] > p[1] ? 0 : 1] as (0 | 1)[]; })()
+    : /Reveal$/.test(pub.screen) ? (pub.reveal?.w === 0 || pub.reveal?.w === 1 ? [pub.reveal.w] : pub.reveal?.w === "tie" ? [0, 1] : []) : [];
   const k0 = useMascot(0), k1 = useMascot(1);
   useEffect(() => { if (pub.screen !== "final") { setRecap(false); return; } const t = setTimeout(() => setRecap(true), 7000); return () => clearTimeout(t); }, [pub.screen]);
   return (
@@ -96,10 +101,10 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
       {/* the tracker, always: Classic's HUD */}
       <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
       {/* the teams' mascots (28 Nov, the owner's pick): in the bottom corners while a question is up and at its answer;
-          between questions one walks out now and then */}
+          the team that scores walks out and celebrates; nobody scores, nobody walks */}
       {MASCOT_SCREENS.includes(pub.screen) && <MascotCorners colors={[MANY_COLORS[0], MANY_COLORS[1]]} moods={moods2(pub, revealed)} away={strolling} show={inPlay2(pub)} />}
-      <MascotStroll teams={([{ kind: k0, color: MANY_COLORS[0], side: "l" }, { kind: k1, color: MANY_COLORS[1], side: "r" }] as const).filter((_, t) => inPlay2(pub)[t])} on={STROLL_SCREENS.includes(pub.screen) && !pub.intro}
-        onAway={(i) => setStrolling(i == null ? null : inPlay2(pub)[0] ? i : 1)} key={"stroll" + key} />
+      <MascotParade walkers={winners.map((t) => ({ t, kind: t ? k1 : k0, color: MANY_COLORS[t] }))} side={winners.length === 1 && winners[0] === 1 ? "r" : "l"} on={winners.length > 0 && !pub.intro}
+        onAway={(ts) => setStrolling(ts?.[0] ?? null)} key={"walk" + key} />
       {/* the night's intro, before the first round: the plan, until Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `${pub.captains?.[pub.intro.go as 0 | 1] || "The captain"} starts the game` : `${host || "The host"} starts the game`} />}
 
@@ -247,7 +252,7 @@ function SdRace({ pub }: { pub: Pub }) {
    one under the other, beside a board, a map or a picture */
 const both = (pub: Pub): CallTeam[] => ([0, 1] as const).map((t) => ({ i: t, name: pub.teams[t].name, color: tc(t) }));
 function Sent({ pub, column }: { pub: Pub; column?: boolean }) {
-  return <SentLine teams={both(pub)} sent={(t) => !!pub.sent?.[t]} column={column} />;
+  return <SentLine teams={both(pub)} sent={(t) => !!pub.sent?.[t]} column={column} mascots />;
 }
 
 
@@ -522,7 +527,7 @@ function MiniTitle({ title }: { title?: string }) {
 function TeamRows({ pub, say, empty, small, callsAt }: { pub: Pub; say?: boolean; empty: string; small?: boolean; callsAt?: number }) {
   const R = pub.reveal, x = (t: number) => R?.typed?.[t]?.[0];
   /* small: a side column, so one team above the other */
-  return <TeamCalls teams={both(pub)} column={small} empty={empty} callsAt={callsAt} delay={(t) => d(t * 0.12)} ok={(t) => R?.ok?.[t]} typed={x}
+  return <TeamCalls teams={both(pub)} column={small} empty={empty} callsAt={callsAt} delay={(t) => d(t * 0.12)} ok={(t) => R?.ok?.[t]} typed={x} mascots
     pts={say ? (t) => (R?.w === t || R?.w === "tie" ? 1 : 0) : undefined}
     word={(t) => (say ? sayWord(R?.ok?.[t], x(t), R?.offList?.[t] ? "off" : R?.ok?.[t] === R?.app?.[t] ? "said" : null) : R?.ok?.[t] ? undefined : !x(t) ? "No answer" : undefined)} />;
 }

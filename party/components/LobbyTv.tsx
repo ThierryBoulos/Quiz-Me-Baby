@@ -3,6 +3,7 @@
    in gold, the sign small at the top; the teams under them, 2 to 8 (2 side by side, 3 or 4 in a row, 5-6 in two
    rows of 3, 7-8 in two rows of 4). Captains in gold with a C armband, first in their team; a team with players
    but no captain says so in a dashed gold chip. The lobby's own controls along the bottom. */
+import { Zzz } from "./Zzz";
 import { Mascot, mascotOf } from "./Mascot";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { QRCodeSVG } from "qrcode.react";
@@ -87,11 +88,11 @@ export function TvLobby({ room, members, code, k, joinUrl, site, status, control
               <div className="ppl">
                 {list.length === 0 && <span className="none">Nobody yet</span>}
                 {list.length > 0 && !cap && <span className="need">Needs a captain</span>}
-                {shown.map((m) => { const gone = m.role === "captain" && away.includes(m.user_id); return (
+                {shown.map((m) => { const gone = away.includes(m.user_id); return (
                   /* a captain whose phone the TV hasn't heard from: the cell dims, the face sleeps (the owner, 1 Nov: no red badge) */
                   <span key={m.user_id} className={"pop-in" + (m.role === "captain" ? " capt" : "") + (gone ? " is-away" : "")} title={gone ? `${m.name} is away` : undefined}>
                     {m.role === "captain" && <b className="arm" aria-label="Captain">C</b>}
-                    {gone && <i aria-label="away">💤</i>}<Fit text={m.name} />
+                    {gone && <i className="zz"><Zzz size={22} /></i>}<Fit text={m.name} />
                   </span>); })}
                 {more > 0 && <span className="more">+{more} more</span>}
               </div>

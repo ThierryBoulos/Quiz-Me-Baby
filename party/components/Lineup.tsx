@@ -1,4 +1,5 @@
 "use client";
+import { Zzz } from "./Zzz";
 import { Mascot, mascotOf } from "./Mascot";
 import { MANY_COLORS } from "@/lib/many/logic";
 import type { Member, Room } from "@/lib/room";
@@ -12,8 +13,8 @@ export function PlayerChip({ m, side, color, size, away, children }: { m: Member
   const big = size !== "phone", dense = size === "dense";
   return (
     <span className={side ? "chip pop-in " + side : "chip team pop-in"} style={{ ...(color ? { ["--c" as string]: color } : {}), ...(big ? { fontSize: dense ? 15 : 22, padding: dense ? "6px 12px" : "8px 18px" } : {}) }}>
-      {/* (no faces for players any more, 28 Nov: only a captain who's away sleeps) */}
-      {m.role === "captain" && away && <span className="face" style={big ? (dense ? { width: 30, height: 30, fontSize: 18 } : { width: 44, height: 44, fontSize: 28 }) : undefined}>💤</span>}
+      {/* (no faces for players any more, 28 Nov: anyone away sleeps, our own Zzz) */}
+      {away && <span className="face zzf"><Zzz size={big ? (dense ? 20 : 28) : 18} /></span>}
       <bdi>{m.name}</bdi>
       {m.role === "captain" && <span className="cap">Captain</span>}
       {m.role === "captain" && away && <span className="cap" style={{ background: "var(--color-no)" }}>away</span>}

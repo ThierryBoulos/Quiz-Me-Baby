@@ -1697,7 +1697,8 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     const t = setInterval(() => {
       const { room, members } = ctx.current, H = here.current, now = Date.now();
       if (!room || room.status !== "lobby") return;
-      const away = members.filter((m) => m.role === "captain" && now - (H.at[m.user_id] ?? H.since) >= T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
+      /* (anyone on a team, not only a captain: 28 Nov, the owner; the armband can still only be taken from a captain) */
+      const away = members.filter((m) => m.team != null && now - (H.at[m.user_id] ?? H.since) >= T_LOBBY_AWAY * 1000).map((m) => m.user_id).sort();
       const base = lobbyState(room), was = ((base.away as string[] | undefined) || []).join(",");
       if (away.join(",") !== was) { lobbyMine.current.away = away; void sb().from("rooms").update({ state: { ...base, away } }).eq("code", code).then(() => {}); }
     }, 3000);

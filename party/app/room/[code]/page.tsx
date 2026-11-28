@@ -1,4 +1,5 @@
 "use client";
+import { Zzz } from "@/components/Zzz";
 import { Mascot, MascotPick, mascotOf, takenBy } from "@/components/Mascot";
 import { storeTakenSave } from "@/lib/takeSave";
 import { useParams, useRouter } from "next/navigation";
@@ -571,11 +572,11 @@ export default function PhoneRoom() {
             <div className="tn"><bdi>{many ? manyNames(room, teamCount)[mine.team as number] : teamName(room, mine.team)}</bdi></div>
             <ul className="mq-mates" aria-label="Your team">
               {onTeam(mine.team as number).sort((x, y) => (x.role === "captain" ? -1 : 0) - (y.role === "captain" ? -1 : 0)).map((m) => {
-                const gone = m.role === "captain" && awayIds.includes(m.user_id);
+                const gone = awayIds.includes(m.user_id);
                 return (
                   <li key={m.user_id} className={(m.role === "captain" ? "capt" : "") + (gone ? " away" : "") + (m.user_id === me ? " me" : "")}>
                     {m.role === "captain" && <b className="arm-c" aria-label="Captain">C</b>}
-                    {gone && <i aria-hidden>💤</i>}<bdi className="truncate">{m.name}</bdi>{m.user_id === me && <span className="you">You</span>}
+                    {gone && <i className="zz"><Zzz size={18} /></i>}<bdi className="truncate">{m.name}</bdi>{m.user_id === me && <span className="you">You</span>}
                   </li>); })}
             </ul>
           </div>

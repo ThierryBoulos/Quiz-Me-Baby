@@ -1888,3 +1888,30 @@ html[data-motion="off"] .op-neon span span { animation: none !important; opacity
 .msc-letter .ml { position: absolute; right: -3px; bottom: 0; min-width: 1.35em; height: 1.35em; border-radius: 999px; display: grid; place-items: center; color: #0b0e24; font-weight: 800; line-height: 1; box-shadow: 0 0 0 2px #0b0e24; }
 /* the captain's pick: one another team has is greyed out */
 .msc-pick.taken { opacity: .28; filter: grayscale(1); cursor: not-allowed; }
+/* asleep (components/Zzz): our own three Z's, drifting up in turn */
+.zzz { display: inline-block; flex: none; overflow: visible; vertical-align: middle; }
+.zzz .z { animation: zzzRise 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+.zzz .z1 { animation-delay: .4s; } .zzz .z2 { animation-delay: .8s; }
+@keyframes zzzRise { 0%, 100% { opacity: .55; transform: translateY(1.5px); } 50% { opacity: 1; transform: translateY(-1.5px); } }
+@media (prefers-reduced-motion: reduce) { .zzz .z { animation: none; } }
+.zz { font-style: normal; display: inline-grid; place-items: center; }
+.chip .face.zzf { background: transparent; }
+/* the winners' walk: in a row, holding hands; "Yay!" over them while they celebrate */
+.msc-walk .msc-row { position: relative; display: flex; align-items: flex-end; }
+.msc-walk .msc-row > .msc + .msc, .msc-walk .msc-row > .msc-hand + .msc { margin-left: calc(var(--w) * -0.14); }
+.msc-walk .msc-hand { position: relative; z-index: 2; flex: none; width: calc(var(--w) * 0.3); height: calc(var(--w) * 0.1); margin: 0 calc(var(--w) * -0.08) calc(var(--w) * 0.5); border-radius: 99px; }
+.msc-walk.linked .msc .arm { transform: none !important; }
+.msc-walk .msc-yay { position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -6px); font-family: var(--font-display); text-transform: uppercase; font-size: 30px; line-height: 1;
+  color: #15172a; background: var(--color-ivory, #fff6df); padding: 6px 14px 4px; border-radius: 16px; box-shadow: 0 4px 0 rgba(0,0,0,.35), 0 0 18px rgba(255,229,138,.6); white-space: nowrap;
+  animation: mscPop .35s cubic-bezier(.3,1.6,.5,1) both; }
+.msc-walk .msc-yay::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -7px; border: 7px solid transparent; border-top-color: var(--color-ivory, #fff6df); }
+/* yay: arms up and waving, a big smile, sparkles */
+.msc.yay .arm.l { animation: mscWaveL .35s ease-in-out infinite alternate; } .msc.yay .arm.r { animation: mscWaveR .35s ease-in-out infinite alternate; }
+@keyframes mscWaveL { from { transform: rotate(40deg); } to { transform: rotate(80deg); } }
+@keyframes mscWaveR { from { transform: rotate(-40deg); } to { transform: rotate(-80deg); } }
+.msc.yay .mo.sm { display: none; } .msc.yay .mo.big { display: inline; }
+.msc.yay .fx.spark { opacity: 1; animation: mscSpark .8s ease-out infinite; }
+.msc-walk.cheer .msc .bod { animation: none; }
+/* while the winners walk along the very bottom, "Waiting for … to tap Next" (and a message) steps aside */
+.tv-stage .next-hint, .tv-stage .tv-note { transition: opacity .25s; }
+.tv-stage.msc-walking .next-hint, .tv-stage.msc-walking .tv-note { opacity: 0; }
