@@ -1,6 +1,7 @@
 "use client";
 /* Guess the Airport's answer, one piece for every setup (23 Nov, the owner): the airport's name on split-flap letters
    (the TV) and its code and city; on the phones, the code, city and note under the answer's tile. */
+import { answerLast } from "./TeamCalls";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Board } from "./GameParts";
 import { motionOff } from "./Marquee";
@@ -43,12 +44,12 @@ export function SplitFlap({ text, size, start = 0 }: { text: string; size: numbe
 }
 
 /* the TV's reveal: the name on the flaps (a long one on smaller flaps), then "AUH · Abu Dhabi" */
-export function AirportAnswerTv({ answer, air, dense }: { answer: string; air: Air; dense?: boolean }) {
+export function AirportAnswerTv({ answer, air, dense, at = 0 }: { answer: string; air: Air; dense?: boolean; at?: number }) {
   const n = answer.length, size = n > 34 ? (dense ? 26 : 30) : n > 24 ? (dense ? 30 : 36) : dense ? 38 : 46;
   return (
     <div className="flex flex-col items-center gap-2 max-w-[1160px]">
-      <SplitFlap text={answer} size={size} />
-      {air?.code && <div className="text-24 flex items-center gap-3"><SplitFlap text={air.code} size={26} start={300} /> · {air.city}</div>}
+      <SplitFlap text={answer} size={size} start={at * 1000} />
+      {air?.code && <div className="text-24 flex items-center gap-3 beat" style={{ ["--beat" as string]: at + "s" }}><SplitFlap text={air.code} size={26} start={at * 1000 + 300} /> · {air.city}</div>}
     </div>);
 }
 
@@ -76,13 +77,16 @@ export function AirportTv({ air, dense, clock, sent }: { air: Pub["airport"]; de
       </div>
     </div>);
 }
-export function AirportRevealTv({ air, answer, notes, dense, rows, head, headStyle }: { air: Pub["airport"]; answer: string; notes?: string | null; dense?: boolean; rows: ReactNode; head: { text: string; color: string }; headStyle?: CSSProperties }) {
+/* (28 Nov, the owner's yes to the ideas from Fibbage, motion only: each team's answer first, then the flaps turn to the
+   airport's name, then the stamps and who takes it: components/TeamCalls answerLast; k: how many teams) */
+export function AirportRevealTv({ air, answer, notes, dense, rows, head, headStyle, k = 2 }: { air: Pub["airport"]; answer: string; notes?: string | null; dense?: boolean; rows: ReactNode; head: { text: string; color: string }; headStyle?: CSSProperties; k?: number }) {
+  const at = answerLast(k);
   return (<>
     <div className="w-full max-w-[860px] board-tight"><Board air={air} size="reveal" /></div>
-    <AirportAnswerTv answer={answer} air={air} dense={dense} />
+    <AirportAnswerTv answer={answer} air={air} dense={dense} at={at.board} />
     {/* (the note stays on the phones with five teams or more: the board and the answers fill the TV) */}
-    {notes && !dense && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(notes)}</div>}
+    {notes && !dense && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug beat" style={{ ...QUICK, ["--d" as string]: at.board + 0.6 + "s" }}>{wholeSentences(notes)}</div>}
     {rows}
-    <div className="display text-44 beat" style={{ ...QUICK, ...headStyle, color: head.color }}>{head.text}</div>
+    <div className="display text-44 beat" style={{ ...QUICK, ...headStyle, ["--d" as string]: at.head + 0.6 + "s", color: head.color }}>{head.text}</div>
   </>);
 }

@@ -343,7 +343,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   /* Guess the Airport: the board, then its name. The reveal as with 3 to 8 teams, its name on the flaps: the board's
      first rows, the name, its code and city, the note, each team's answer and the call, who takes it (23 Nov, the owner) */
   if (sc === "airportQ" && pub.airport) return <AirportTv air={pub.airport} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} column />} />;
-  if (sc === "airportReveal" && pub.airport) return <AirportRevealTv air={pub.airport} answer={pub.reveal?.answer || ""} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" />}
+  if (sc === "airportReveal" && pub.airport) return <AirportRevealTv air={pub.airport} answer={pub.reveal?.answer || ""} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" callsAt={answerLast(2).calls + 0.6} />}
     head={takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
   /* Guess the Cocktail or Dish: one copy for every setup (components/DishGame.tsx); under the clock, the buzzer: who
      buzzed or is out, and the buzzer's clock to type it. The reveal in the 3-to-8 design (24 Nov, the owner) */
@@ -351,7 +351,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     under={<><Buzzed pub={pub} />{pub.dish.typeBy && pub.buzz != null && <div className="flex items-center gap-4 text-24"><Clock deadline={pub.dish.typeBy} size={80} /><span>to type it</span></div>}</>} />;
   if (sc === "dishReveal" && pub.dish && pub.reveal) { const R = pub.reveal, C = pub.calls || [], c = (t: number) => C.find((x) => x.team === t);
     return <DishRevealTv dish={pub.dish} answer={R.answer || ""}
-      rows={<TeamCalls teams={both(pub)} empty="No answer" delay={(t) => d(t * 0.12)} ok={(t) => !!c(t)?.ok} typed={(t) => c(t)?.text || null} pts={(t) => (R.w === t ? 1 : 0)} />}
+      rows={<TeamCalls teams={both(pub)} empty="No answer" callsAt={answerLast(2).calls} delay={(t) => d(t * 0.12)} ok={(t) => !!c(t)?.ok} typed={(t) => c(t)?.text || null} pts={(t) => (R.w === t ? 1 : 0)} />}
       head={takeText(R.w === 0 || R.w === 1 ? [R.w] : [], ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />; }
   /* Guess the Map: one copy for every setup (components/MapGame.tsx): the map with its key, the question, the clock and
      who has answered; at the reveal the 3-to-8 design, the title on its tile, the fact, the calls, who takes it (24 Nov,

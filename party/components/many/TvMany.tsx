@@ -159,14 +159,14 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
         </>); })()}
         {/* a typed answer's reveal (question rounds, airports, maps, Don't Say the Same, the Cocktail or Dish): what was
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
-        {pub.screen === "reveal" && g && R && g.key === "airport" && <AirportRevealTv air={pub.airport} answer={R.answer || ""} notes={R.notes} dense={dense}
-          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
+        {pub.screen === "reveal" && g && R && g.key === "airport" && <AirportRevealTv air={pub.airport} answer={R.answer || ""} notes={R.notes} dense={dense} k={shownTeams(pub).length}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls + 0.6} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "map" && <MapRevealTv map={pub.map} answer={R.answer || ""} notes={R.notes} dense={dense} k={shownTeams(pub).length}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "say" && <SayRevealTv question={pub.question || undefined} answer={R.answer || ""} dense={dense} k={shownTeams(pub).length}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />} head={W} headStyle={d(0.5)} />}
-        {pub.screen === "reveal" && g && R && g.key === "dish" && <DishRevealTv dish={pub.dish} answer={R.answer || ""} dense={dense}
-          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
+        {pub.screen === "reveal" && g && R && g.key === "dish" && <DishRevealTv dish={pub.dish} answer={R.answer || ""} dense={dense} k={shownTeams(pub).length}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "comeback" && <ComebackRevealTv question={pub.question} answer={R.answer || ""} notes={R.notes} dense={dense}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} />}
         {pub.screen === "reveal" && g && R && ["quiz", "sudden"].includes(g.key) && (<>

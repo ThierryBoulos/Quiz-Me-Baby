@@ -11,6 +11,7 @@ import { sendAction, newTap } from "@/lib/supabase";
 import { buzzHand } from "./PhoneBits";
 import { d } from "./TvBits";
 import { FitLine } from "./Fit";
+import { motionOff } from "./Marquee";
 
 export type MrTeam = { name: string; color: string };
 export type MrEntry = { name: string; team: number; here?: boolean; out?: boolean };
@@ -128,6 +129,19 @@ export function MajorityTv({ question, options, teams, answered, clock, sent }: 
 
 /* ---- the TV's reveal: the wrong answers drop away, the right one lights up; who picked each (each team's up to
    four, the room's from five); the fact; a player right every time; how each team did on this one ---- */
+/* (28 Nov, the owner's yes to the ideas from Fibbage, motion only: the picks climb from 0 first, then the wrong answers
+   dim one by one and the right one lights up, then the fact and how each team did) */
+const CLIMB = 0.9;
+function Climb({ n }: { n: number }) {
+  const [v, setV] = useState(() => (motionOff() ? n : 0));
+  useEffect(() => {
+    if (motionOff()) { setV(n); return; }
+    let raf = 0; const t0 = performance.now();
+    const go = (now: number) => { const k = Math.min(1, (now - t0) / (CLIMB * 1000)); setV(Math.round(n * (1 - Math.pow(1 - k, 2)))); if (k < 1) raf = requestAnimationFrame(go); };
+    raf = requestAnimationFrame(go); return () => cancelAnimationFrame(raf);
+  }, [n]);
+  return <>{v}</>;
+}
 export function MajorityRevealTv({ question, options, answer, notes, teams, byTeam, counts, right, of, fire }: {
   question?: string | null; options: string[]; answer: string; notes?: string | null; teams: MrTeam[];
   byTeam?: number[][]; counts?: number[]; right: number[]; of: number[]; fire?: { name: string; n: number }[];
@@ -139,16 +153,16 @@ export function MajorityRevealTv({ question, options, answer, notes, teams, byTe
       const j = options.filter((x, m) => m < i && x !== answer).length;
       const total = counts?.[i] ?? (byTeam?.[i] || []).reduce((a, x) => a + x, 0);
       return (
-        <div key={o} className={"mr-tv-opt rev " + (ok ? "ok mr-win" : "dim mr-out")} style={d(ok ? 0.75 : 0.12 + j * 0.2)}>
+        <div key={o} className={"mr-tv-opt rev " + (ok ? "ok mr-win" : "dim mr-out")} style={d(CLIMB + (ok ? 0.75 : 0.12 + j * 0.2))}>
           <span className="flex-1 min-w-0"><bdi>{o}</bdi></span>
-          {many || !byTeam ? <span className="shrink-0 text-26 mr-counts flex items-baseline gap-2" aria-label={`${total} picked it`}><b>{total}</b><span className="text-18 text-[var(--color-ink-2)]">{total === 1 ? "pick" : "picks"}</span></span>
-            : <span className={"flex shrink-0 mr-counts " + (k > 2 ? "gap-3 text-22" : "gap-5 text-26")} aria-label={teams.map((t, m) => `${bare(t.name)} ${byTeam[i]?.[m] ?? 0}`).join(", ")}>{teams.map((t, m) => (
-              <span key={m} className="flex items-center gap-1.5"><span className="inline-block rounded-full shrink-0" style={{ background: t.color, width: k > 2 ? 14 : 16, height: k > 2 ? 14 : 16 }} aria-hidden /><b className="tabular-nums">{byTeam[i]?.[m] ?? 0}</b></span>))}</span>}
+          {many || !byTeam ? <span className="shrink-0 text-26 mr-counts flex items-baseline gap-2" style={{ animationDelay: "0s" }} aria-label={`${total} picked it`}><b><Climb n={total} /></b><span className="text-18 text-[var(--color-ink-2)]">{total === 1 ? "pick" : "picks"}</span></span>
+            : <span className={"flex shrink-0 mr-counts " + (k > 2 ? "gap-3 text-22" : "gap-5 text-26")} style={{ animationDelay: "0s" }} aria-label={teams.map((t, m) => `${bare(t.name)} ${byTeam[i]?.[m] ?? 0}`).join(", ")}>{teams.map((t, m) => (
+              <span key={m} className="flex items-center gap-1.5"><span className="inline-block rounded-full shrink-0" style={{ background: t.color, width: k > 2 ? 14 : 16, height: k > 2 ? 14 : 16 }} aria-hidden /><b className="tabular-nums"><Climb n={byTeam[i]?.[m] ?? 0} /></b></span>))}</span>}
         </div>); })}</div>
-    {notes && <div className="max-w-[1300px] leading-snug -mt-1" style={{ color: "var(--color-gold)", fontSize: many ? 24 : 26 }}>{notes}</div>}
+    {notes && <div className="max-w-[1300px] leading-snug -mt-1 beat" style={{ ["--beat" as string]: CLIMB + 1.2 + "s", color: "var(--color-gold)", fontSize: many ? 24 : 26 }}>{notes}</div>}
     {fire && fire.length > 0 && <div className="text-26 font-bold enter">{fire.map((f) => <span key={f.name} className="mx-3"><span className="flame">🔥</span><bdi>{f.name}</bdi> · {f.n} in a row</span>)}</div>}
     {/* this question, team by team; the game so far is in the bar at the top */}
-    <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 max-w-[1200px] mr-counts" style={{ fontSize: many ? 20 : k > 2 ? 24 : 26 }}>
+    <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 max-w-[1200px] beat" style={{ ["--beat" as string]: CLIMB + 1.4 + "s", fontSize: many ? 20 : k > 2 ? 24 : 26 }}>
       <span className="text-[var(--color-ink-2)]">This one:</span>
       {teams.map((t, i) => <span key={i} className="whitespace-nowrap"><b style={{ color: t.color }}><bdi>{t.name}</bdi></b> {right[i] ?? 0} of {of[i] ?? 0} right</span>)}
     </div>
