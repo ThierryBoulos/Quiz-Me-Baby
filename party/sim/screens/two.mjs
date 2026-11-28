@@ -6,6 +6,9 @@ const NIGHTS = [
   { tag: "h", seed: 42, minis: ALL, rounds: 4, host: true, crowd: 5, tieMore: 1 },
   { tag: "nh2", seed: 43, minis: ["roulette", "majority", "battle"], rounds: 14, crowd: 3 },
   /* Fool Me Twice (16 Nov): no host and with a host */
+  /* lifelines off for the night (28 Nov, the owner: none on any screen, not crossed out): its standard rounds only */
+  { tag: "nhl", seed: 50, minis: [], rounds: 2, crowd: 3, lifelines: false, only: /^(roundIntro|ask|steal|answer)$/ },
+  { tag: "hl", seed: 51, minis: [], rounds: 2, host: true, crowd: 3, lifelines: false, only: /^(roundIntro|ask|steal|answer)$/ },
   { tag: "nhf", seed: 44, minis: ["fool"], rounds: 2, crowd: 3, tieMore: 1 },
   { tag: "hf", seed: 45, minis: ["fool"], rounds: 2, host: true, crowd: 3, tieMore: 1 },
   /* The Comeback (17 Nov): no host and with a host, a team that makes it and a team that misses; the phones' captain

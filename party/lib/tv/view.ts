@@ -54,6 +54,9 @@ export function buildView(s: TvState, mem: Member[]): [Pub, Secret] | null {
     /* names go out isolated, so a right-to-left (Arabic) name can't scramble the sentence it lands in */
     teams: g.teams.map((t: G) => ({ name: iso(t.name), score: t.score, ll: { ...t.ll } })),
     deadline: s.deadline, left: s.left, timeUp: s.timeUp, lifeline: s.lifeline, toast: s.toast, winner: g.winner ?? null,
+    /* lifelines off for the night (Setup): the screens show none at all, not three crossed out (28 Nov, the owner: it
+       was only in the save, so every screen drew them used up) */
+    ...(g.noLl ? { noLl: true } : {}),
     sent: [!!s.typed[0] || s.guesses[0] != null || !!s.pins?.[0], !!s.typed[1] || s.guesses[1] != null || !!s.pins?.[1]],
     pending: s.pending ? { team: s.pending.team, text: s.pending.text, v: s.pending.v, until: s.pending.until } : null,
     autoAt: s.autoAt, paused: s.paused, ...(s.skipHostQ ? { skipHostQ: true } : {}), ...(s.paused && s.pausedBy ? { pausedBy: s.pausedBy } : {}), lead: leadOf(mem), imad: s.imad || undefined, flags: s.flags.slice(-30), tvAway: !!s.tvAway,

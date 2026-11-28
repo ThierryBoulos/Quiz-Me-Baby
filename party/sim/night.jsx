@@ -107,7 +107,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   if (imad) localStorage.setItem("qmb.party.settings", JSON.stringify({ v: 4, imad: true }));
   const napped = new Set();
   const bot = rng(seed * 7919 + 1);
-  const t0 = clock(), trace = [], seen = {};
+  const t0 = clock(), trace = [], seen = {}; let llShown = false;
   const caps = ["capA", "capB"], gone = new Set();
   if (net) Object.assign(fake.net, net, { rnd: rng(seed * 31 + 7) });
   /* the server's copy of the game (qmb_tv_backup), the last one kept, for a takeover */
@@ -146,6 +146,7 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
     if (line === last) return;
     last = line; trace.push(`${((clock() - t0) / 1000).toFixed(2)} ${line}`);
     if (p) seen[p.screen] = (seen[p.screen] || 0) + 1;
+    if (p && p.teams?.length === 2 && api.current?.game?.noLl && !p.noLl) llShown = true;   // lifelines off, yet a screen was told they're on
   });
 
   let tree;
@@ -546,5 +547,5 @@ export async function night({ seed, minis, rounds = 6, host = false, again = fal
   const G = api.current?.game, llUsed = !!G && (G.rounds || []).some((r) => (r.dbl || []).some(Boolean) || (r.llUsed || []).some((u) => u.length));
   /* The Comeback: whether it came up, how it went, the scores before and after */
   const cb = G?.comeback ? { made: G.comeback.made, skipped: !!G.comeback.skipped, before: G.comeback.before, after: G.comeback.after, team: G.comeback.teams[0], asked: G.comeback.log.length } : null;
-  return { behindSeen, cb, dealt, kinds, llUsed, noLl: !!G?.noLl, taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
+  return { behindSeen, cb, dealt, kinds, llUsed, llShown, noLl: !!G?.noLl, taps, outcome, stuckOn, trace, recap, screens: Object.keys(seen), score: score || fake.db.rooms[0].state?.pub?.teams?.map((x) => x.score).join("-"), minutes: (clock() - t0) / 60000, writes: fake.db.writes, actions: fake.db.actions.length, stalls: fake.db.stalls, behind };
 }

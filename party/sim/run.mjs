@@ -212,7 +212,7 @@ for (const n of NIGHTS) {
     return i > 0 ? `${r.dealt[i]} twice in a row (${r.dealt.join(", ")})` : null;
   })();
   const offKind = n.seeKinds && (r.kinds.length ? r.kinds.find((x) => !n.seeKinds.includes(x)) : "none dealt");
-  const llBad = n.lifelines === false && (!r.noLl || r.llUsed) ? (r.llUsed ? "a lifeline was used" : "the night has its lifelines") : null;
+  const llBad = n.lifelines === false && (!r.noLl || r.llUsed || r.llShown) ? (r.llUsed ? "a lifeline was used" : r.llShown ? "a screen showed the lifelines (crossed out)" : "the night has its lifelines") : null;
   /* The Comeback: it came up (or, switched off, didn't), went as the night says, and moved the score only when made:
      to 85% of the leader's score, never past the leader */
   const cbBad = n.comeback && (() => {
