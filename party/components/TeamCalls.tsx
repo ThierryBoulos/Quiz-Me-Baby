@@ -31,6 +31,12 @@ export function SentLine({ teams: T, sent, column, on = "locked in", off = "thin
 /* ok: the app's call (null: no call yet); typed: what the team sent; pts and places: what a right answer earned and in
    which order it came (3 to 8 teams; none with 2); word: the call's word where it isn't RIGHT or WRONG ("No answer",
    Don't Say the Same's); column: one team under the other, in a side column beside a board or a picture */
+/* THE ANSWER AFTER THE TEAMS' (28 Nov, the owner's yes to the ideas from Fibbage, motion only: Don't Say the Same, Guess
+   the Flag, Guess the Map): each team's answer comes in first, one after another; then the answer slams down; then the
+   stamps land; then who takes it. The screens are unchanged; only the order. k: how many teams are shown */
+export const answerLast = (k: number) => { const step = k <= 2 ? 0.12 : 0.08, rows = 0.4 + Math.max(0, k - 1) * step + 0.5;
+  return { board: rows, calls: rows + 0.25, head: rows + 0.9 + k * step }; };
+
 /* callsAt (seconds, the TV): the teams' answers come in first and the calls (the stamps, the points) only that much later,
    once the answer has been shown (Don't Say the Same, 28 Nov: the answers, then the secret answer, then who said it) */
 export function TeamCalls({ teams: T, ok, typed, pts, places, word, size = "tv", delay, column, empty = "No answer", callsAt }: {

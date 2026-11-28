@@ -19,9 +19,9 @@ import { ClosestRevealTv, ClosestTv } from "./Closest";
 import { PinRevealTv, PinTv } from "./Pin";
 import { FlagTv } from "./Flag";
 import { MapRevealTv, MapTv } from "./MapGame";
-import { sayCalls, SayRevealTv, SayTv, sayWord } from "./SayGame";
+import { SayRevealTv, SayTv, sayWord } from "./SayGame";
 import { DishRevealTv, DishTv } from "./DishGame";
-import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
+import { answerLast, SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, poss, possEnd, showKm, TIE_SCREENS } from "@/lib/game";
 import { AuctionPaddles, BattleShields, RoundLecterns, TWO_LOOKS, TwoResult, twoDone } from "./TwoResults";
 import { FoolResult, FoolTv } from "./Fool";
@@ -327,7 +327,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
      team's call and who takes it */
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (
     <FlagTv flag={pub.flag} reveal={sc === "flagReveal"} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />} sent={<Sent pub={pub} />}
-      answer={pub.reveal?.answer} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" />}
+      answer={pub.reveal?.answer} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" callsAt={answerLast(2).calls} />}
       /* (who takes it, as with 3 to 8 teams: 23 Nov, the owner) */
       head={takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})` })))} />);
   /* Drop the Pin: the photo while they place their pins; then the map, flying in to the spot */
@@ -357,7 +357,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
      who has answered; at the reveal the 3-to-8 design, the title on its tile, the fact, the calls, who takes it (24 Nov,
      the owner) */
   if (sc === "mapQ" && pub.map) return <MapTv map={pub.map} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={120} />} sent={<Sent pub={pub} column />} />;
-  if (sc === "mapReveal" && pub.map) return <MapRevealTv map={pub.map} answer={pub.reveal?.answer || ""} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" />}
+  if (sc === "mapReveal" && pub.map) return <MapRevealTv map={pub.map} answer={pub.reveal?.answer || ""} notes={pub.reveal?.notes} rows={<TeamRows pub={pub} empty="No answer" callsAt={answerLast(2).calls} />}
     head={takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
   /* won early: who, the score, the points; then only that the rest is for fun, and who chooses */
   if (sc === DECIDED && pub.decided) { const D = pub.decided; return (<>
@@ -407,7 +407,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   }
   /* Don't Say the Same as Me: one copy for every setup (components/SayGame.tsx): the 3-to-8 design (24 Nov, the owner) */
   if (sc === "sayQ") return <SayTv question={pub.question} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} />} />;
-  if (sc === "sayReveal" && pub.reveal) return <SayRevealTv question={pub.question} answer={pub.reveal.answer || ""} rows={<TeamRows pub={pub} say empty="No answer" callsAt={sayCalls(2).calls} />}
+  if (sc === "sayReveal" && pub.reveal) return <SayRevealTv question={pub.question} answer={pub.reveal.answer || ""} rows={<TeamRows pub={pub} say empty="No answer" callsAt={answerLast(2).calls} />}
     head={pub.reveal.w === "tie" ? { text: "A point each", color: "var(--color-gold)" } : takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
   if (pub.battle && sc === "battleQ") { const B = pub.battle; return (<>
     <div className="display text-40" style={{ color: tc(B.cap) }}>{poss(T[B.cap].name)} captain</div>

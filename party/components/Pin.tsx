@@ -23,16 +23,20 @@ export function PinTv({ pin, dense, clock, sent }: { pin: Photo; dense?: boolean
     </div>);
 }
 
+/* the map's flight in (components/PinMap: a beat, then 2.2 seconds) */
+const PIN_LAND = 2.4;
 export function PinRevealTv({ marks, name, place, dense, rows, head }: { marks: Marks; name?: string; place?: string; dense?: boolean; rows: ReactNode; head: { text: string; color: string } }) {
   return (
     <div className="flex gap-10 items-center w-full">
       <div className="flex-1 min-w-0"><PinMap marks={marks} fly height={dense ? 430 : 490} size={1.6} interactive={false} label={`Where it is: ${place}`} /></div>
+      {/* (28 Nov, the owner's yes to the ideas from Fibbage, motion only: the map flies in from the whole world first, and
+          only when it lands does the name slam down, then the place, the distances and who takes it) */}
       <div className="w-[400px] shrink-0 flex flex-col items-center gap-3">
-        <div className="eyebrow text-18">It&rsquo;s here</div>
-        <div className="ans-board display text-36 leading-tight" style={{ color: "var(--color-gold)" }}>{name}</div>
-        <div className="text-22 text-[var(--color-ink-2)] -mt-1">{place}</div>
-        <div className="w-full mt-2">{rows}</div>
-        <div className="display text-36 mt-3" style={{ color: head.color }}>{head.text}</div>
+        <div className="eyebrow text-18 beat" style={{ ["--beat" as string]: PIN_LAND + "s" }}>It&rsquo;s here</div>
+        <div className="ans-board display text-36 leading-tight beat slam" style={{ ["--beat" as string]: PIN_LAND + "s", color: "var(--color-gold)" }}>{name}</div>
+        <div className="text-22 text-[var(--color-ink-2)] -mt-1 beat" style={{ ["--beat" as string]: PIN_LAND + 0.3 + "s" }}>{place}</div>
+        <div className="w-full mt-2 beat" style={{ ["--beat" as string]: PIN_LAND + 0.6 + "s" }}>{rows}</div>
+        <div className="display text-36 mt-3 beat slam" style={{ ["--beat" as string]: PIN_LAND + 1.2 + "s", color: head.color }}>{head.text}</div>
       </div>
     </div>);
 }

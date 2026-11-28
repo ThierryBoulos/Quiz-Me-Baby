@@ -5,6 +5,7 @@
    dense: five teams or more. */
 import type { CSSProperties, ReactNode } from "react";
 import { SAY } from "@/lib/minis/say";
+import { answerLast } from "./TeamCalls";
 
 /* the answer's quick landing, as every reveal has it */
 const QUICK = { ["--beat" as string]: ".15s" } as CSSProperties;
@@ -22,12 +23,10 @@ export function SayTv({ question, many, clock, sent }: { question?: string; many
 /* THE SECRET ANSWER AFTER THE TEAMS' (28 Nov, the owner's yes to the ideas from Fibbage, motion only): each team's answer
    comes in first; then the game's secret answer slams down; then the stamps land on who said it; then who gets it. The
    screen is unchanged; only the order. k: how many teams (their answers come in one after another first) */
-export const sayCalls = (k: number) => { const step = k <= 2 ? 0.12 : 0.08, rows = 0.4 + Math.max(0, k - 1) * step + 0.5;
-  return { board: rows, calls: rows + 0.25, head: rows + 0.9 + k * step }; };
 export function SayRevealTv({ question, answer, dense, rows, head, headStyle, k = 2 }: {
   question?: string; answer: string; dense?: boolean; rows?: ReactNode; head?: { text: string; color: string }; headStyle?: CSSProperties; k?: number;
 }) {
-  const n = answer.length, at = sayCalls(k);
+  const n = answer.length, at = answerLast(k);
   return (<>
     {question && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{question}</div>}
     <div className="eyebrow text-18 -mb-3 beat" style={{ ...QUICK, ["--d" as string]: at.board + "s" }}>{SAY.secret}</div>
