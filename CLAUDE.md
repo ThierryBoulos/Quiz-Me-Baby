@@ -24,6 +24,11 @@ bank is `bank/bank.js`; the maps are drawn by `bank/maps.js` (`node scripts/expo
   owner's style: their words, their tone; don't invent new phrasing of your own. **Ties are "tied" (12 Nov):** "tied
   teams", "Tied at 3 each", never "level", "levelled" or "level teams"; "level" only ever means Easy, Medium, Hard,
   Expert. Keep it simple.
+- **Suggesting changes (28 Nov, the owner: "this is how you should be doing your work going forward").** For each
+  idea, at least 3 options, each shown as a before (today, recorded from the real game) and an after (a drawing that
+  plays), checked with 2 and 8 teams and the longest names; one idea at a time. Be creative: new moments, not only
+  the same change again. Once the owner picks, build it on today's screens (only what was picked changes, the rest
+  stays as it is) and show it recorded, before and after.
 - **Writing or changing content?** Read `docs/CONTENT-RULES.md` first and follow it; add the owner's new rulings
   there.
 - **Showing the owner new content**: never a summary or table. Each item numbered and written out exactly: question,
