@@ -10,6 +10,7 @@ import { MAJ } from "@/lib/minis/majority";
 import { sendAction, newTap } from "@/lib/supabase";
 import { buzzHand } from "./PhoneBits";
 import { d } from "./TvBits";
+import { FitLine } from "./Fit";
 
 export type MrTeam = { name: string; color: string };
 export type MrEntry = { name: string; team: number; here?: boolean; out?: boolean };
@@ -62,8 +63,8 @@ export function WhoPlaysPhone({ teams, list, me, host, busy, onToggle, ask, duri
       <div className="eyebrow">{host || during ? MAJ.hostHead : MAJ.listHead}</div>
       {!host && !during && !(mine && !mine.out) && <p className="text-center font-bold text-16" role="status">{MAJ.notOn}</p>}
       <div className={"grid gap-3 " + (host && k === 2 ? "grid-cols-2" : "grid-cols-1")}>{show.map((t) => { const L = list.filter((x) => x.team === t); return (
-        <div key={t} className="flex flex-col gap-1">
-          <div className="eyebrow flex items-center gap-1.5" style={{ color: teams[t]?.color }}>{k > 2 && <Dot t={t} color={teams[t]?.color} size={14} />}<bdi>{teams[t]?.name}</bdi> · {L.filter((x) => !x.out).length}</div>
+        <div key={t} className="flex flex-col gap-1 min-w-0">
+          <div className="eyebrow flex items-center gap-1.5 min-w-0" style={{ color: teams[t]?.color }}>{k > 2 && <Dot t={t} color={teams[t]?.color} size={14} />}<FitLine><bdi>{teams[t]?.name}</bdi></FitLine><span className="shrink-0 whitespace-nowrap">· {L.filter((x) => !x.out).length}</span></div>
           {L.map((x) => { const a = ask?.(x); return (
             <div key={x.name} className="flex items-center gap-1.5 text-14 min-h-[32px]" style={{ opacity: x.out ? 0.45 : 1 }}>
               <span aria-hidden style={{ color: x.here ? "var(--color-ok)" : "var(--color-ink-3)" }}>{x.here ? "●" : "○"}</span>

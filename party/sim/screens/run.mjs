@@ -245,14 +245,15 @@ if (want("phones")) {
   /* (2 teams: the captain and a player with no host, the host with one; 3 and 8 teams: all three (5 is on the TV)) */
   /* (the phones: 3 and 8 teams; with SCREENS_TEAMS, the counts asked for too, so a room of 4 to 7 is pictured on the
      phones as well: 24 Nov, the score header's two rows) */
-  const roles = (k) => (/^nh/.test(k) ? ["cap", "player"] : /^h\w*\./.test(k) ? ["host"] : (process.env.SCREENS_TEAMS ? /^m\d\./ : /^m[38]\./).test(k) ? ["host", "cap", "player"] : []);
+  const roles = (k) => (/^nh/.test(k) ? ["cap", "player"] : /^h\w*\./.test(k) ? ["host"] : (process.env.SCREENS_TEAMS ? /^m\dw?\./ : /^m[38]w?\./).test(k) ? ["host", "cap", "player"] : []);
   /* the narrowest (Galaxy S), the widest (iPhone Pro Max) and held sideways, the browser's bars showing: the iPhones
      between (393, 402) fit when both ends do. SCREENS_PHONES=all adds the iPhone at 393 */
   /* (SCREENS_PHONES=sideways: only the phone held sideways) */
   const PHONES = process.env.SCREENS_PHONES === "sideways" ? [["sideways", 852, 340]]
     : [["galaxy", 360, 780], ...(process.env.SCREENS_PHONES === "all" ? [["iphone", 393, 852]] : []), ["promax", 440, 956], ["sideways", 852, 340]];
   const jobs = [];
-  for (const [dev, w, h] of PHONES) for (const k of inPlay) for (const r of roles(k)) for (const tvIn of ["ph", "pn"])
+  /* (the worst case, sim/screens/dump.mjs: the narrowest phone and sideways; the widest is never harder) */
+  for (const [dev, w, h] of PHONES) for (const k of inPlay) if (!/^[a-z]+\d*w\./.test(k) || dev === "galaxy" || dev === "sideways") for (const r of roles(k)) for (const tvIn of ["ph", "pn"])
     jobs.push({ id: `${dev} ${tvIn === "ph" ? "tv" : "no-tv"} ${r} ${k}`, hash: `${tvIn}:${r}:${k}`, key: k, dev, w, h });
   /* the Setup before the start, in every setup (setupJobs, above) */
   for (const [dev, w, h] of PHONES) for (const s of setupJobs)

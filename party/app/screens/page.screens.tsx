@@ -97,7 +97,7 @@ export default function Screens() {
 
   const { pub, secret } = rec, many = Array.isArray(pub.teams) && !("r" in pub);
   if (mode[0] === "tv") return <TvStage>{many ? <TvMany pub={pub} join={JOIN} host="Nour" />
-    : <TvGame pub={pub} onExit={() => {}} onAgain={() => {}} join={JOIN} host={mode[1]?.startsWith("h.") ? "Nour" : undefined} />}</TvStage>;
+    : <TvGame pub={pub} onExit={() => {}} onAgain={() => {}} join={JOIN} host={mode[1]?.startsWith("h.") || mode[1]?.startsWith("hw.") ? "Nour" : undefined} />}</TvStage>;
 
   const role = mode[1], noTv = mode[0] === "pn";
   const me = { room: "ABCD", user_id: "me", name: role === "host" ? "Nour" : role === "cap" ? "Rami" : "Maya", team: (role === "host" ? null : 0) as 0 | null,

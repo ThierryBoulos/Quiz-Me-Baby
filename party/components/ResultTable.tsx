@@ -3,6 +3,7 @@
    your team did in one pill, then one table, a row a team: its place, its name, what it said (or how far off, or how
    many right), and what it scored. Your row is lit. It replaces the stacked headline, "THE ANSWER" and the blocks. */
 import type { ReactNode } from "react";
+import { FitLine } from "./Fit";
 
 export type Tone = "ok" | "no" | "mid";
 export type RRow = { team: number; name: string; color: string; letter: string; place?: number | null; val: ReactNode; sub?: ReactNode;
@@ -66,7 +67,9 @@ export function WinnerCard({ eyebrow, name, color, sub }: { eyebrow: string; nam
     <div className="winner-card" style={{ ["--wc" as string]: color }} role="status" aria-live="polite">
       <div className="text-40 leading-none" aria-hidden>🏆</div>
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{eyebrow}</div>
-      <div className="display leading-none" style={{ color, fontSize: name.length > 18 ? 34 : 48 }}><bdi>{name}</bdi></div>
+      {/* (one team: one line that fits its card, the widest 14 letters too; tied at the top, "A & B" wraps as before) */}
+      {name.length > 18 ? <div className="display leading-none" style={{ color, fontSize: 34 }}><bdi>{name}</bdi></div>
+        : <FitLine className="display leading-none" size={48} style={{ color }}><bdi>{name}</bdi></FitLine>}
       {sub && <div className="text-14 font-bold text-[var(--color-ink-2)]">{sub}</div>}
     </div>);
 }

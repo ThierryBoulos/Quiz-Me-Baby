@@ -264,6 +264,15 @@ button.chip.me-chip.chip-on { color: var(--color-gold); }
 .hud.tv:not(.many) .hud-label { white-space: nowrap; max-width: 100%; }
 .hud.tv:not(.many) .hud-label.two { white-space: normal; } .hud-label.two .sep { display: none; } .hud-label.two .tail { display: block; }
 .hud.tv:not(.many) .pips { flex-wrap: nowrap; max-width: 100%; } .hud.tv:not(.many) .pip.mini { flex: none; }
+.hud.tv:not(.many) .pips.long { gap: 4px; } .hud.tv:not(.many) .pips.long .pip { height: 9px; width: 24px; min-width: 18px; }
+.hud.tv:not(.many) .pips.long .pip.mini { width: 9px; min-width: 0; } .hud.tv:not(.many) .pips.long .pip.now:not(.mini) { width: 30px; }
+/* the same long night on a phone, every setup: one line, the dashes sharing the room (three lines of marks pushed a
+   sideways phone's left column off the screen: 28 Nov, the worst case) */
+.hud:not(.tv) .pips.long { flex-wrap: nowrap; gap: 3px; width: 100%; }
+.hud:not(.tv) .pips.long .pip { flex: 1 1 0; width: auto; min-width: 0; max-width: 26px; height: 7px; }
+.hud:not(.tv) .pips.long .pip.mini { flex: none; width: 6px; height: 6px; } .hud:not(.tv) .pips.long .pip.now:not(.mini) { width: auto; }
+/* one line that always fits (components/Fit.tsx) */
+.fit-line { display: inline-block; max-width: 100%; min-width: 0; white-space: nowrap; overflow-x: clip; text-overflow: ellipsis; overflow-wrap: normal; vertical-align: bottom; }
 
 .team-card { border-radius: 22px; padding: 18px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
 .team-card.a { background: linear-gradient(180deg, rgba(49,201,247,.10), rgba(255,255,255,.02)); border-color: rgba(49,201,247,.3); }

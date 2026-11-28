@@ -43,6 +43,7 @@ import { ToSide, useSideways } from "./Side";
 import { WhoAnswered } from "./WhoAnswered";
 import { Dot, takeText } from "./many/PartsMany";
 import { sayCount, useLiveCount } from "@/lib/liveCount";
+import { FitLine } from "./Fit";
 import { ComebackIntro, ComebackResult, ComebackStatus } from "./Comeback";
 import { CB_TOP_CAP, CB_TOP_PLAYER, cbResultHead, cbRevealHead, cbSumPill, cbTopWatch, cbYouPill, COMEBACK_TITLE } from "@/lib/comeback";
 import { AskHead, battleNeeds, Board, comebackTeams, decidedCall, decidedHead, decidedSub, FlagImg, PinPhoto, pinMarks, LifelineStrip, MiniIntro, RoundIntro, RulingPicker, ScoreBoard, silent, SuddenRules, TEAM_HEX, tieCall, tieHead, Verdict } from "./GameParts";
@@ -658,8 +659,8 @@ export function HostGame({ pub, secret: raw, send, busy, fire = send }: { pub: P
               narrow phone, where "Split" had fitted: 26 Nov, the owner's "tied" words) */}
           <div className="flex flex-col gap-2 mt-auto">
             <div className="grid grid-cols-2 gap-2">
-              <button className="btn btn-a" disabled={busy} onClick={() => send({ type: mk + "/award", w: 0 })}>{T[0].name}</button>
-              <button className="btn btn-b" disabled={busy} onClick={() => send({ type: mk + "/award", w: 1 })}>{T[1].name}</button>
+              <button className="btn btn-a min-w-0" disabled={busy} onClick={() => send({ type: mk + "/award", w: 0 })}><FitLine>{T[0].name}</FitLine></button>
+              <button className="btn btn-b min-w-0" disabled={busy} onClick={() => send({ type: mk + "/award", w: 1 })}><FitLine>{T[1].name}</FitLine></button>
             </div>
             <button className="btn" disabled={busy} onClick={() => send({ type: mk + "/award", w: "split" })}>A point each</button>
           </div>
@@ -833,8 +834,8 @@ function BidBoard({ pub }: { pub: Pub }) {
   return (
     <div className="grid grid-cols-2 gap-2 mt-3">
       {([0, 1] as const).map((t) => { const b = A.bids?.[t], top = A.by === t && A.bid > 0; return (
-        <div key={t} className="rounded-[14px] py-2.5 px-2 flex flex-col items-center" style={{ background: top ? "rgba(245,197,24,.12)" : "rgba(255,255,255,.04)", border: `1px solid ${top ? "rgba(245,197,24,.55)" : "transparent"}` }}>
-          <div className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</div>
+        <div key={t} className="rounded-[14px] py-2.5 px-2 flex flex-col items-center min-w-0" style={{ background: top ? "rgba(245,197,24,.12)" : "rgba(255,255,255,.04)", border: `1px solid ${top ? "rgba(245,197,24,.55)" : "transparent"}` }}>
+          <FitLine className="eyebrow" style={{ color: tc(t) }}>{T[t].name}</FitLine>
           <div className="display text-40 leading-none mt-1">{b ?? "–"}</div>
           <div className="text-11 font-bold mt-1" style={{ color: top ? "var(--color-gold)" : "var(--color-ink-3)" }}>{top ? "Highest bid" : A.turn === t ? "To bid" : b == null ? "No bid yet" : "Outbid"}</div>
         </div>); })}

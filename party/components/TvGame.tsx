@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { FitLine } from "./Fit";
 import { FitBody } from "./TvStage";
 import { MajorityJoin, MajorityRevealTv, MajorityTv, WhoPlaysTv } from "./MajorityGame";
 import type { Pub, Two } from "@/lib/game";
@@ -179,9 +180,11 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
 const pointsEach = (n: number) => `${n} point${n === 1 ? "" : "s"} each`;
 
 /* who buzzed, and who is out (Guess the Cocktail or Dish) */
+/* (a name too wide for the line, 14 wide letters: the line gets smaller until it fits, never off the TV: 27 Nov, the
+   big test's worst case) */
 function Buzzed({ pub }: { pub: Pub }) {
   const T = pub.teams;
-  if (pub.buzz != null) return <div className="display text-60 enter" style={{ color: tc(pub.buzz) }}>{T[pub.buzz].name} buzzed!</div>;
+  if (pub.buzz != null) return <FitLine className="display text-60 enter" min={0.45} style={{ color: tc(pub.buzz) }}><bdi>{T[pub.buzz].name}</bdi> buzzed!</FitLine>;
   const out = [0, 1].filter((t) => pub.out?.[t]);
   return <div className="h-10 text-24 text-[var(--color-ink-2)]">{out.map((t) => `${T[t].name} are out of this one`).join(" · ")}</div>;
 }

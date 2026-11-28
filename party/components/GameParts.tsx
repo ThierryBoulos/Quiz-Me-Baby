@@ -3,6 +3,7 @@
    copied from the old one-screen app (retired 3 Nov): the HUD tracker, the round intro with each
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
+import { FitLine } from "./Fit";
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
@@ -91,7 +92,9 @@ export function Hud({ pub, size, shown, code, me }: { pub: Pub; size: "tv" | "ph
     const fit = () => { el.classList.remove("two"); if (el.scrollWidth > el.clientWidth + 1) el.classList.add("two"); };
     fit(); void document.fonts?.ready.then(fit);
   });
-  const pips = pub.pips && pub.pips.length > 0 && <div className="pips" aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>;
+  /* (a night of more than 20 rounds and games: smaller marks, closer together, so the dashes stay dashes beside the dots
+     between two long team names: 27 Nov, the big test's worst case) */
+  const pips = pub.pips && pub.pips.length > 0 && <div className={"pips" + (pub.pips.length > 20 ? " long" : "")} aria-hidden>{pub.pips.map((p, i) => <span key={i} className={`pip ${p.kind === "mini" ? "mini" : ""} ${p.state === "todo" ? "" : p.state}`} />)}</div>;
   return (
     <div className={"hud " + size} role="group" aria-label="Scores">
 
@@ -356,9 +359,9 @@ export function AskHead({ pub, you, go, size }: { pub: Pub; you?: string; go?: b
   /* phones, a team's own question: one line, "THEME · Question for TEAM", so Send stays on screen (29 Oct, C18 B) */
   /* (the steal too, in one line: sideways, its four lines pushed the question off the left column: the 4 Nov audit, 1.20) */
   if (!tv) return (
-    <div className="flex flex-col items-center text-center gap-1.5">
-      <p className={"whofor " + side(t)} style={{ fontSize: 18 }}>{steal ? <><span style={{ color: "var(--color-gold)" }}>Steal · </span>for <b>{T[t].name}</b>{!pub.noLl && <span className="nolife text-[var(--color-ink-2)]"> · no lifelines</span>}</>
-        : <><span className="text-[var(--color-ink-2)]">{pub.theme}{armed ? " · Double Points" : ""} · </span>Question for <b>{T[t].name}</b></>}</p>
+    <div className="flex flex-col items-center text-center gap-1.5 max-w-full">
+      <p className={"whofor w-full " + side(t)} style={{ fontSize: 18 }}>{steal ? <><span style={{ color: "var(--color-gold)" }}>Steal · </span>for <b><FitLine>{T[t].name}</FitLine></b>{!pub.noLl && <span className="nolife text-[var(--color-ink-2)]"> · no lifelines</span>}</>
+        : <><span className="text-[var(--color-ink-2)]">{pub.theme}{armed ? " · Double Points" : ""} · </span>Question for <b><FitLine>{T[t].name}</FitLine></b></>}</p>
       {you && <p className={"you-line mt-1 " + (go ? "go" : "")}>{you}</p>}
     </div>);
   return (

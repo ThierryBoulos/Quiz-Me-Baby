@@ -153,7 +153,7 @@ export function HudMany({ pub, size, code, me, host, sound = false }: { pub: Pub
   const order = award ? T.map((_, i) => i).sort((a, b) => (pub.summary!.places[a] - pub.summary!.places[b]) || a - b) : [];
   /* the pips are the night's games (no "Game 1 of 9" beside them since 22 Nov, the owner: the pips say it, and it saves
      room; the reviewers had asked for it on 31 Oct) */
-  const track = pips.length > 0 && <div className="pips" aria-hidden>{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>;
+  const track = pips.length > 0 && <div className={"pips" + (pips.length > 20 ? " long" : "")} aria-hidden>{pips.map((p, i) => <span key={i} className={`pip ${g?.keys && g.keys[i] !== "quiz" ? "mini " : ""}${p}`} />)}</div>;
   return (
     <div className={`hud ${size} many ${packing(k)}${(award && !landed) || (skRev && skIn && skIn.some((v, i) => !v && !!skRev.delta[i])) ? " flying" : ""}`} role="group" aria-label={tv ? "Scores" : "Where we are"}>
       {/* the room code, small, in the TV's top-right corner (the owner, 2 Nov: it matters little once the game is on) */}
