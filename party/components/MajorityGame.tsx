@@ -118,9 +118,9 @@ export function MajorityTv({ question, options, teams, answered, clock, sent }: 
     <div className="flex items-center gap-12">
       {clock}
       {/* up to four teams, each team's count; from five, the room's, and each team's dot under it */}
-      {many ? <span className="font-bold text-26 text-left" style={{ color: v >= of && of > 0 ? "var(--color-ok)" : "var(--color-ink-2)" }}>{MAJ.count(v, of)}<br />answered</span>
+      {many ? <span className="font-bold text-26 text-left" style={{ color: v >= of && of > 0 ? "var(--color-ok)" : "var(--color-ink-2)" }}><span key={v} className={v > 0 ? "sent-pop" : undefined} style={{ ["--c" as string]: "var(--color-ok)" }}>{MAJ.count(v, of)}</span><br />answered</span>
         : <div className="flex flex-col gap-1 text-left">{teams.map((t, i) => (
-          <span key={i} className="font-bold whitespace-nowrap" style={{ color: t.color, fontSize: k > 2 ? 24 : 26 }}><bdi>{t.name}</bdi>: {MAJ.count(answered[i]?.[0] ?? 0, answered[i]?.[1] ?? 0)} answered</span>))}</div>}
+          <span key={i} className="font-bold whitespace-nowrap" style={{ color: t.color, fontSize: k > 2 ? 24 : 26 }}><bdi>{t.name}</bdi>: {/* (the count pops as each player answers, as every game's "who has answered": 28 Nov) */}<span key={answered[i]?.[0] ?? 0} className={(answered[i]?.[0] ?? 0) > 0 ? "sent-pop" : undefined} style={{ ["--c" as string]: t.color }}>{MAJ.count(answered[i]?.[0] ?? 0, answered[i]?.[1] ?? 0)}</span> answered</span>))}</div>}
     </div>
     {many && sent}
   </>);

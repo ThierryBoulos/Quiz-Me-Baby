@@ -273,7 +273,7 @@ export function RouletteTv({ rr, teams, clock, sent, typed, ok, reveal, showQs, 
                   </div>
                   <div className="shrink-0 text-right">
                     {R ? <span className="display leading-none" style={{ fontSize: tight ? 26 : dense ? 30 : 40, color: got > 0 ? "var(--color-ok)" : got < 0 ? "var(--color-no)" : "var(--color-ink-3)" }}>{signed(got)}</span>
-                      : <span className="font-bold" style={{ fontSize: dense ? 15 : 18, color: sent?.[t] ? "var(--color-ok)" : "var(--color-ink-3)" }}>{sent?.[t] ? "✓ in" : "thinking"}</span>}
+                      : <span key={sent?.[t] ? "in" : "out"} className={"font-bold" + (sent?.[t] ? " sent-pop" : "")} style={{ fontSize: dense ? 15 : 18, color: sent?.[t] ? "var(--color-ok)" : "var(--color-ink-3)", ["--c" as string]: "var(--color-ok)" }}>{sent?.[t] ? "✓ in" : "thinking"}</span>}
                   </div>
                 </div>); })}
           </div>)}

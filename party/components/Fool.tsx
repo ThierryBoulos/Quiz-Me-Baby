@@ -39,7 +39,9 @@ export function FoolStatus({ teams, done, doing, finished, tv }: { teams: FoolTe
     <div className={"flex flex-wrap justify-center " + (many ? "gap-x-5 gap-y-1.5" : "gap-x-10 gap-y-1.5")} role="status" aria-label={teams.map((t, i) => `${t.name} ${done[i] ? "in" : "not yet"}`).join(", ")}>
       {teams.map((t, i) => (
         <span key={i} className="flex items-center gap-2 font-bold" style={{ fontSize: tv ? (many ? 20 : 24) : 14, color: done[i] ? t.color : "var(--color-ink-3)" }}>
-          <Dot t={i} color={t.color} size={tv ? 22 : 16} />{!dense && <bdi>{t.name}</bdi>}{done[i] ? finished : doing}</span>))}
+          <Dot t={i} color={t.color} size={tv ? 22 : 16} />{!dense && <bdi>{t.name}</bdi>}
+          {/* (the pop as a team is in, as in every game's "who has answered" line: 28 Nov) */}
+          <span key={done[i] ? "in" : "out"} className={done[i] ? "sent-pop" : undefined} style={{ ["--c" as string]: t.color }}>{done[i] ? finished : doing}</span></span>))}
     </div>);
 }
 

@@ -55,7 +55,7 @@ function Ticks({ teams, done, yes, no, size = 22 }: { teams: SkTeam[]; done: boo
         <span key={i} className="flex items-center gap-2 font-bold" style={{ fontSize: size }}>
           <Dot t={t} size={size * 1.25} />
           {!many && <bdi style={{ color: t.color }}>{t.name}</bdi>}
-          <span style={{ color: done[i] ? OK : "var(--color-ink-3)" }}>{done[i] ? `✓ ${yes}` : no}</span>
+          <span key={done[i] ? "in" : "out"} className={done[i] ? "sent-pop" : undefined} style={{ color: done[i] ? OK : "var(--color-ink-3)", ["--c" as string]: OK }}>{done[i] ? `✓ ${yes}` : no}</span>
         </span>))}
     </div>);
 }

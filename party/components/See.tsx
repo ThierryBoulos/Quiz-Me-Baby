@@ -154,7 +154,7 @@ export function SeeTicks({ teams, out, buzz, size = 22, column }: { teams: SeeTe
         <span key={i} className="flex items-center gap-2 font-bold max-w-full min-w-0 whitespace-nowrap" style={{ fontSize: size }}>
           <span className="dot ltr shrink-0" aria-hidden style={{ background: t.color, width: size * 1.25, height: size * 1.25, fontSize: size * 0.7 }}>{t.letter}</span>
           {!many && <bdi className="truncate min-w-0" style={{ color: t.color }}>{t.name}</bdi>}
-          <span className="shrink-0" style={{ color: out?.[i] ? NO : buzz === i ? OK : "var(--color-ink-3)" }}>{out?.[i] ? "✗ out" : buzz === i ? "buzzed!" : many ? "…" : "thinking…"}</span>
+          <span key={out?.[i] ? "out" : buzz === i ? "buzz" : "wait"} className={"shrink-0" + (out?.[i] || buzz === i ? " sent-pop" : "")} style={{ color: out?.[i] ? NO : buzz === i ? OK : "var(--color-ink-3)", ["--c" as string]: out?.[i] ? NO : OK }}>{out?.[i] ? "✗ out" : buzz === i ? "buzzed!" : many ? "…" : "thinking…"}</span>
         </span>))}
     </div>);
 }
