@@ -216,7 +216,9 @@ function Sent({ pub, column }: { pub: Pub; column?: boolean }) {
 function AuctionCount({ A, color }: { A: NonNullable<Pub["auction"]>; color: string }) {
   const n = useLiveCount(`${A.leg}:${A.cat}`, A.count);
   return (<>
-    <div className="display auc-count" style={{ fontSize: 170, lineHeight: 1 }}><span key={n} className="bump inline-block">{n}</span><span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span></div>
+    <div className="display auc-count relative" style={{ fontSize: 170, lineHeight: 1 }}><span key={n} className="bump inline-block">{n}</span><span className="text-[var(--color-ink-3)]" style={{ fontSize: 80 }}> / {A.bid}</span>
+      {/* (28 Nov, motion only: each one named sends a "+1" up off the number, in the team's colour) */}
+      {n > 0 && <span key={"p" + n} className="plus-one" style={{ color }} aria-hidden>+1</span>}</div>
     {/* a notch for each one named, up to the bid (a long bid fills a bar); full, it glows */}
     <BidBar n={n} of={A.bid} color={color} />
   </>);
@@ -378,8 +380,10 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     if (sc === "auctionBid") return (<>
       <div className="eyebrow text-20">Category</div>
       <div className="display max-w-[1100px]" style={{ fontSize: 76, color: "var(--color-gold)", lineHeight: 1.05 }}>{A.cat}</div>
-      <div className="display text-60">{A.bid ? <>Bid: <span key={A.bid} className="bump inline-block">{A.bid}</span> <span style={{ color: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}</span></> : "No bid yet"}</div>
-      <div className="text-28" style={{ color: tc(A.turn) }}><b>{T[A.turn].name}</b>: raise{A.bid ? " or pass" : ""}</div>
+      {/* (28 Nov, motion only: the new bid comes down like the auctioneer's hammer, the bidder's name lights up in its colour,
+          and whose turn it is slides in from that team's side) */}
+      <div className="display text-60">{A.bid ? <>Bid: <span key={A.bid} className="gavel inline-block" style={{ ["--c" as string]: tc(A.by) }}>{A.bid}</span> <span key={"b" + A.bid} className="name-flash inline-block" style={{ color: tc(A.by), ["--c" as string]: tc(A.by) }}>{A.by != null ? T[A.by].name : ""}</span></> : "No bid yet"}</div>
+      <div key={"t" + A.turn + ":" + A.bid} className={"text-28 " + (A.turn ? "from-r" : "from-l")} style={{ color: tc(A.turn) }}><b>{T[A.turn].name}</b>: raise{A.bid ? " or pass" : ""}</div>
       <div className="text-24 text-[var(--color-ink-2)]">Whoever wins the bid has <b>{pub.timers?.auction ?? 30} seconds</b> to name them.</div>
     </>);
     if (sc === "auctionRun") return (<>
@@ -391,9 +395,9 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
     </>);
     if (sc === "auctionLeg" && A.last) return (<>
       <div className="text-28 text-[var(--color-ink-2)] max-w-[1000px]">{A.cat}</div>
-      <div className="display beat slam" style={{ fontSize: 90, color: A.last.made ? "var(--color-ok)" : "var(--color-no)" }}>{A.last.made ? "Delivered!" : "Short!"}</div>
+      <div key={A.last.made ? "made" : "short"} className={"display beat slam " + (A.last.made ? "glow-ok" : "then-shake")} style={{ fontSize: 90, color: A.last.made ? "var(--color-ok)" : "var(--color-no)" }}>{A.last.made ? "Delivered!" : "Short!"}</div>
       <div className="text-30 beat" style={d(0.15)}>{T[A.last.by].name} bid {A.last.bid}, named {A.last.count}.</div>
-      <div className="display text-48 beat" style={{ ...d(0.3), color: tc(A.last.won) }}>{T[A.last.won].name} take{A.last.won === A.last.by ? "" : "s"} the leg</div>
+      <div className="display text-48 beat" style={{ ...d(0.3), color: tc(A.last.won) }}>{T[A.last.won].name} take the leg</div>
     </>);
     if (sc === "auctionResult") return (<>
       <MiniTitle title="The Auction" />
