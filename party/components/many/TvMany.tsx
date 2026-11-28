@@ -24,7 +24,7 @@ import { FoolResult, FoolTv } from "../Fool";
 import { SeeCredit, SeePicture, SeeTv, seeWho } from "../See";
 import { AirportRevealTv, AirportTv } from "../Airport";
 import { MapRevealTv, MapTv } from "../MapGame";
-import { SayRevealTv, SayTv, sayWord } from "../SayGame";
+import { sayCalls, SayRevealTv, SayTv, sayWord } from "../SayGame";
 import { DishRevealTv, DishTv } from "../DishGame";
 import { ClosestRevealTv, ClosestTv } from "../Closest";
 import { PinRevealTv, PinTv } from "../Pin";
@@ -163,8 +163,8 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "map" && <MapRevealTv map={pub.map} answer={R.answer || ""} notes={R.notes} dense={dense}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
-        {pub.screen === "reveal" && g && R && g.key === "say" && <SayRevealTv question={pub.question || undefined} answer={R.answer || ""} dense={dense}
-          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
+        {pub.screen === "reveal" && g && R && g.key === "say" && <SayRevealTv question={pub.question || undefined} answer={R.answer || ""} dense={dense} k={shownTeams(pub).length}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={sayCalls(shownTeams(pub).length).calls} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "dish" && <DishRevealTv dish={pub.dish} answer={R.answer || ""} dense={dense}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "comeback" && <ComebackRevealTv question={pub.question} answer={R.answer || ""} notes={R.notes} dense={dense}
@@ -258,9 +258,9 @@ function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
   /* (a wrong guess in the Cocktail or Dish reads "locked in" too: who got it shows at the reveal, the owner, 2 Nov) */
   return <SentLine teams={shownTeams(pub)} sent={(i) => !!pub.sent[i]} column={column} on={pin ? "pin in" : "locked in"} off={pin ? "placing…" : mr ? "answering…" : "thinking…"} />;
 }
-function FlagRowsMany({ pub, size, delay }: { pub: PubMany; size: "tv" | "phone"; delay?: (i: number) => React.CSSProperties }) {
+function FlagRowsMany({ pub, size, delay, callsAt }: { pub: PubMany; size: "tv" | "phone"; delay?: (i: number) => React.CSSProperties; callsAt?: number }) {
   const R = pub.reveal!, say = pub.game?.key === "say";
-  return <TeamCalls teams={shownTeams(pub)} size={size} delay={delay} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]} pts={(i) => R.pts?.[i]} places={(i) => (say ? null : R.places?.[i])}
+  return <TeamCalls teams={shownTeams(pub)} size={size} delay={delay} callsAt={callsAt} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]} pts={(i) => R.pts?.[i]} places={(i) => (say ? null : R.places?.[i])}
     word={say ? (i) => sayWord(R.ok?.[i], R.typed?.[i], R.why?.[i]) : undefined} />;
 }
 

@@ -19,7 +19,7 @@ import { ClosestRevealTv, ClosestTv } from "./Closest";
 import { PinRevealTv, PinTv } from "./Pin";
 import { FlagTv } from "./Flag";
 import { MapRevealTv, MapTv } from "./MapGame";
-import { SayRevealTv, SayTv, sayWord } from "./SayGame";
+import { sayCalls, SayRevealTv, SayTv, sayWord } from "./SayGame";
 import { DishRevealTv, DishTv } from "./DishGame";
 import { SentLine, TeamCalls, type CallTeam } from "./TeamCalls";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, flyAt, poss, possEnd, showKm, TIE_SCREENS } from "@/lib/game";
@@ -407,7 +407,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   }
   /* Don't Say the Same as Me: one copy for every setup (components/SayGame.tsx): the 3-to-8 design (24 Nov, the owner) */
   if (sc === "sayQ") return <SayTv question={pub.question} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<Sent pub={pub} />} />;
-  if (sc === "sayReveal" && pub.reveal) return <SayRevealTv question={pub.question} answer={pub.reveal.answer || ""} rows={<TeamRows pub={pub} say empty="No answer" />}
+  if (sc === "sayReveal" && pub.reveal) return <SayRevealTv question={pub.question} answer={pub.reveal.answer || ""} rows={<TeamRows pub={pub} say empty="No answer" callsAt={sayCalls(2).calls} />}
     head={pub.reveal.w === "tie" ? { text: "A point each", color: "var(--color-gold)" } : takeText([0, 1].filter((t) => pub.reveal?.ok?.[t]), ([0, 1] as const).map((t) => ({ name: T[t].name, color: tc(t) })))} />;
   if (pub.battle && sc === "battleQ") { const B = pub.battle; return (<>
     <div className="display text-40" style={{ color: tc(B.cap) }}>{poss(T[B.cap].name)} captain</div>
@@ -478,10 +478,10 @@ function MiniTitle({ title }: { title?: string }) {
 }
 
 /* each team's ruling, then what they wrote under it: "TEAM A  DODGED IT" / "Mcdo" */
-function TeamRows({ pub, say, empty, small }: { pub: Pub; say?: boolean; empty: string; small?: boolean }) {
+function TeamRows({ pub, say, empty, small, callsAt }: { pub: Pub; say?: boolean; empty: string; small?: boolean; callsAt?: number }) {
   const R = pub.reveal, x = (t: number) => R?.typed?.[t]?.[0];
   /* small: a side column, so one team above the other */
-  return <TeamCalls teams={both(pub)} column={small} empty={empty} delay={(t) => d(t * 0.12)} ok={(t) => R?.ok?.[t]} typed={x}
+  return <TeamCalls teams={both(pub)} column={small} empty={empty} callsAt={callsAt} delay={(t) => d(t * 0.12)} ok={(t) => R?.ok?.[t]} typed={x}
     pts={say ? (t) => (R?.w === t || R?.w === "tie" ? 1 : 0) : undefined}
     word={(t) => (say ? sayWord(R?.ok?.[t], x(t), R?.offList?.[t] ? "off" : R?.ok?.[t] === R?.app?.[t] ? "said" : null) : R?.ok?.[t] ? undefined : !x(t) ? "No answer" : undefined)} />;
 }

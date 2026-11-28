@@ -31,15 +31,17 @@ export function SentLine({ teams: T, sent, column, on = "locked in", off = "thin
 /* ok: the app's call (null: no call yet); typed: what the team sent; pts and places: what a right answer earned and in
    which order it came (3 to 8 teams; none with 2); word: the call's word where it isn't RIGHT or WRONG ("No answer",
    Don't Say the Same's); column: one team under the other, in a side column beside a board or a picture */
-export function TeamCalls({ teams: T, ok, typed, pts, places, word, size = "tv", delay, column, empty = "No answer" }: {
+/* callsAt (seconds, the TV): the teams' answers come in first and the calls (the stamps, the points) only that much later,
+   once the answer has been shown (Don't Say the Same, 28 Nov: the answers, then the secret answer, then who said it) */
+export function TeamCalls({ teams: T, ok, typed, pts, places, word, size = "tv", delay, column, empty = "No answer", callsAt }: {
   teams: CallTeam[]; ok: (i: number) => boolean | null | undefined; typed: (i: number) => string | null | undefined;
   pts?: (i: number) => number | undefined; places?: (i: number) => number | null | undefined; word?: (i: number) => string | undefined;
-  size?: "tv" | "phone"; delay?: (n: number) => CSSProperties; column?: boolean; empty?: string;
+  size?: "tv" | "phone"; delay?: (n: number) => CSSProperties; column?: boolean; empty?: string; callsAt?: number;
 }) {
   const k = T.length, tv = size === "tv", n = column ? 1 : tv ? colsFor(k) : k > 4 ? 2 : 1, dense = k > 4;
   const long = T.some((t) => t.name.length > 10);
   return (
-    <div className="grid w-full" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gap: tv ? "12px 24px" : "12px 10px", maxWidth: tv ? Math.min(1168, n * (dense ? 300 : 390)) : undefined, ["--beat" as string]: ".4s" }}>
+    <div className="grid w-full" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gap: tv ? "12px 24px" : "12px 10px", maxWidth: tv ? Math.min(1168, n * (dense ? 300 : 390)) : undefined, ["--beat" as string]: ".4s", ...(tv && callsAt != null ? { ["--calls" as string]: callsAt + "s" } : null) }}>
       {T.map((t) => { const v = ok(t.i), x = typed(t.i), p = pts?.(t.i) ?? 0, pl = places?.(t.i); return (
         <div key={t.i} className={"flex flex-col items-center gap-1 min-w-0 " + (tv ? "beat" : "")} style={delay?.(t.i)}>
           {/* (the TV: RIGHT or WRONG, "+3" and "1st right" on one middle line, the word in the middle of its box: 24 Nov,
@@ -49,9 +51,9 @@ export function TeamCalls({ teams: T, ok, typed, pts, places, word, size = "tv",
           <div className={"flex justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + (tv ? " items-center flex-wrap gap-y-1.5" : dense ? " items-baseline flex-wrap gap-y-0" : " items-baseline")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
             <span className={tv ? "display basis-full text-center whitespace-normal leading-tight clamp2" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
             {v != null && <Verdict v={v} stamp={tv} size={tv ? undefined : 14} word={word?.(t.i) ?? (v ? undefined : !x ? "No answer" : undefined)} />}
-            {v && p > 0 && <b className="display" style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{p}</b>}
+            {v && p > 0 && <b className={"display" + (tv && callsAt != null ? " calls-late" : "")} style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{p}</b>}
             {/* why that many: the order the right answers came in (the 4 Nov audit, 3.8: +4, +3, +2 said nothing) */}
-            {v && p > 0 && pl && <span className="shrink-0" style={{ color: "var(--color-ink-3)", fontSize: tv ? (dense ? 18 : 20) : 12 }}>{place(pl)} right</span>}
+            {v && p > 0 && pl && <span className={"shrink-0" + (tv && callsAt != null ? " calls-late" : "")} style={{ color: "var(--color-ink-3)", fontSize: tv ? (dense ? 18 : 20) : 12 }}>{place(pl)} right</span>}
           </div>
           {/* (beside a map or a picture the column is narrow: a long answer gets a third line, and a size down, so it's
               never cut: "McDonald's — gold has one today, red had one and lost it") */}

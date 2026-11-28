@@ -19,16 +19,21 @@ export function SayTv({ question, many, clock, sent }: { question?: string; many
   </>);
 }
 
-export function SayRevealTv({ question, answer, dense, rows, head, headStyle }: {
-  question?: string; answer: string; dense?: boolean; rows?: ReactNode; head?: { text: string; color: string }; headStyle?: CSSProperties;
+/* THE SECRET ANSWER AFTER THE TEAMS' (28 Nov, the owner's yes to the ideas from Fibbage, motion only): each team's answer
+   comes in first; then the game's secret answer slams down; then the stamps land on who said it; then who gets it. The
+   screen is unchanged; only the order. k: how many teams (their answers come in one after another first) */
+export const sayCalls = (k: number) => { const step = k <= 2 ? 0.12 : 0.08, rows = 0.4 + Math.max(0, k - 1) * step + 0.5;
+  return { board: rows, calls: rows + 0.25, head: rows + 0.9 + k * step }; };
+export function SayRevealTv({ question, answer, dense, rows, head, headStyle, k = 2 }: {
+  question?: string; answer: string; dense?: boolean; rows?: ReactNode; head?: { text: string; color: string }; headStyle?: CSSProperties; k?: number;
 }) {
-  const n = answer.length;
+  const n = answer.length, at = sayCalls(k);
   return (<>
     {question && <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{question}</div>}
-    <div className="eyebrow text-18 -mb-3">{SAY.secret}</div>
-    <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: n > 34 ? (dense ? 40 : 44) : n > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{answer}</div>
+    <div className="eyebrow text-18 -mb-3 beat" style={{ ...QUICK, ["--d" as string]: at.board + "s" }}>{SAY.secret}</div>
+    <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ["--beat" as string]: 0.15 + at.board + "s", fontSize: n > 34 ? (dense ? 40 : 44) : n > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{answer}</div>
     {rows}
-    {head && <div className="display text-44 beat" style={{ ...QUICK, ...headStyle, color: head.color }}>{head.text}</div>}
+    {head && <div className="display text-44 beat" style={{ ...QUICK, ...headStyle, ["--d" as string]: at.head + "s", color: head.color }}>{head.text}</div>}
   </>);
 }
 

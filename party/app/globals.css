@@ -491,7 +491,9 @@ html[data-motion="off"] .confetti { display: none; }
 /* (the word exactly in the middle of its box: the letter-spacing's last gap taken off the right, the line set to the
    capitals' height; and the box on one middle line with "+3" and "1st right": 24 Nov, the owner) */
 .verdict.stamped { display: inline-block; padding: .1em calc(.34em - .08em) .06em .34em; line-height: 1; border: 2px solid currentColor; border-radius: 7px; transform: rotate(-4deg);
-  animation: stampIn .38s cubic-bezier(.2,1.5,.4,1) both; animation-delay: calc(var(--beat) + var(--d, 0s) + .12s); }
+  animation: stampIn .38s cubic-bezier(.2,1.5,.4,1) both; animation-delay: calc(var(--beat) + var(--d, 0s) + var(--calls, 0s) + .12s); }
+/* (the points beside a call that comes in late: with the stamp) */
+.calls-late { animation: beatIn .3s var(--ease) both; animation-delay: calc(var(--beat) + var(--d, 0s) + var(--calls, 0s) + .25s); }
 @keyframes stampIn { from { opacity: 0; transform: rotate(-14deg) scale(2.4); } to { opacity: 1; transform: rotate(-4deg) scale(1); } }
 .x2 { display: inline-block; font-family: var(--font-display); color: var(--color-gold); border: 3px solid var(--color-gold); border-radius: 10px; padding: 0 .2em; font-size: .72em; line-height: 1.05;
   box-shadow: 0 0 24px -4px rgba(245,197,24,.7); }
