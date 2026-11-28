@@ -8,33 +8,11 @@
 import { createContext, Fragment, useContext, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { motionOff } from "./Marquee";
+import { MASCOT_COUNT, allMascots, mascotOf, pickedOf, takenBy } from "@/lib/mascots";
+export { MASCOT_COUNT, allMascots, mascotOf, pickedOf, takenBy };
 
-export const MASCOT_COUNT = 8;
 export type Mood = "idle" | "think" | "sent" | "right" | "wrong" | "none" | "yay";
 
-/* the room's picks (room.state.teamMascots): what each team's captain picked, or null. A picked mascot is that team's
-   alone: the other captains see it greyed out (28 Nov, the owner). A team that hasn't picked has its own number's
-   creature, or the next one nobody has, so no two teams ever look alike */
-const TEAMS_MAX = 8;
-export const pickedOf = (picks: unknown, t: number) => {
-  const v = Array.isArray(picks) && picks[t] != null ? Number(picks[t]) : NaN;
-  return Number.isInteger(v) && v >= 0 && v < MASCOT_COUNT ? v : null;
-};
-export function allMascots(picks: unknown): number[] {
-  const taken = new Set<number>(), out: number[] = [];
-  for (let t = 0; t < TEAMS_MAX; t++) { const v = pickedOf(picks, t); if (v != null) taken.add(v); }
-  for (let t = 0; t < TEAMS_MAX; t++) {
-    const v = pickedOf(picks, t);
-    if (v != null) { out[t] = v; continue; }
-    let c = t % MASCOT_COUNT;
-    for (let j = 0; j < MASCOT_COUNT; j++) { const x = (t + j) % MASCOT_COUNT; if (!taken.has(x)) { c = x; break; } }
-    out[t] = c; taken.add(c);
-  }
-  return out;
-}
-export const mascotOf = (picks: unknown, t: number) => allMascots(picks)[t] ?? t % MASCOT_COUNT;
-/* the mascots the other teams (of k) have picked: not to be picked again */
-export const takenBy = (picks: unknown, t: number, k: number) => new Set(Array.from({ length: k }, (_, i) => (i === t ? null : pickedOf(picks, i))).filter((v): v is number => v != null));
 /* the TV hands its room's picks down to every screen (the screens never carry them: they're the room's, like its names) */
 const Picks = createContext<unknown>(null);
 export const MascotPicks = Picks.Provider;

@@ -1,5 +1,5 @@
 "use client";
-import { MASCOT_COUNT, pickedOf, takenBy } from "@/components/Mascot";
+import { MASCOT_COUNT, pickedOf, takenBy } from "@/lib/mascots";
 import { nextScreenAt, tapOnThisScreen, type ScreenAt } from "../tapOn";
 import { LIVE_LINES, actCount, usePubLine } from "../liveLines";
 import { serverOffset } from "@/components/Clock";
