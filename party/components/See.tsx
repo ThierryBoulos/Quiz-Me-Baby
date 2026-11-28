@@ -1,4 +1,5 @@
 "use client";
+import { answerLast } from "./TeamCalls";
 import { wholeSentences } from "@/lib/sentences";
 /* What Do You See? on screen (12 Nov, the owner): the picture that clears as the clock runs, for the TV and the
    phones, two teams or eight. A face or a logo starts blurred and sharpens; a close-up starts zoomed right in on one
@@ -194,12 +195,13 @@ export function SeeTv({ see, screen, teams, clock, deadline, left, rows, foot, d
         <SeeCredit see={see} size={14} />
       </div>
       <div className="w-[440px] shrink-0 flex flex-col items-center gap-4">
-        <div className="eyebrow text-18">It&rsquo;s</div>
-        <div className="ans-board display beat slam leading-none" style={{ fontSize: A.length > 22 ? 44 : A.length > 14 ? 56 : 70, color: "var(--color-gold)" }}>{A}</div>
+        {/* (the teams' guesses first, then what it is, then the stamps: components/TeamCalls answerLast, 28 Nov) */}
+        <div className="eyebrow text-18 beat" style={{ ["--beat" as string]: answerLast(2).board + "s" }}>It&rsquo;s</div>
+        <div className="ans-board display beat slam leading-none" style={{ ["--beat" as string]: 0.15 + answerLast(2).board + "s", fontSize: A.length > 22 ? 44 : A.length > 14 ? 56 : 70, color: "var(--color-gold)" }}>{A}</div>
         {/* (the fact behind the picture, when it has one: every setup, 23 Nov, the owner) */}
-        {see.rev?.notes && <div className="text-20 text-[var(--color-ink-2)] leading-snug text-center">{wholeSentences(see.rev.notes, 120)}</div>}
+        {see.rev?.notes && <div className="text-20 text-[var(--color-ink-2)] leading-snug text-center beat" style={{ ["--beat" as string]: answerLast(2).board + 0.35 + "s" }}>{wholeSentences(see.rev.notes, 120)}</div>}
         {rows}
-        <div className="display text-36 beat" style={{ color: who.color }}>{who.text}</div>
+        <div className="display text-36 beat" style={{ ["--beat" as string]: answerLast(2).head + 0.15 + "s", color: who.color }}>{who.text}</div>
       </div>
     </div>);
 }

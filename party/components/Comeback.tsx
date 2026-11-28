@@ -2,6 +2,7 @@
 /* THE COMEBACK's screens (the owner, 17 Nov), the same pieces on the TV and every phone, 2 teams or 8: the announcement
    (the owner's words), who is still in it while the three questions play, and the result. The rules are in
    lib/comeback.ts and the engine. */
+import { answerLast } from "./TeamCalls";
 import { Fragment, type ReactNode } from "react";
 import { Dot } from "./many/PartsMany";
 import { CB_SAYS1, CB_SAYS2, cbTakes, type ComebackPub } from "@/lib/comeback";
@@ -65,14 +66,15 @@ export function ComebackQTv({ teams, c, question, clock, sent }: { teams: CbTeam
    "Lions still in it", "No comeback"): one screen for every setup (25 Nov, the owner) */
 const QUICK = { ["--beat" as string]: ".15s" };
 const at = (x: number) => ({ ["--d" as string]: x + "s" });
-export function ComebackRevealTv({ question, answer, notes, rows, head, dense }: { question?: string | null; answer: string; notes?: string | null; rows: ReactNode; head: { text: string; color: string }; dense?: boolean }) {
-  const n = answer.length;
+export function ComebackRevealTv({ question, answer, notes, rows, head, dense, k = 2 }: { question?: string | null; answer: string; notes?: string | null; rows: ReactNode; head: { text: string; color: string }; dense?: boolean; k?: number }) {
+  /* (the teams' answers first, then the answer, then the stamps: components/TeamCalls answerLast, 28 Nov) */
+  const n = answer.length, w = answerLast(k);
   return (<>
     {question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{question}</div> : null}
-    <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: n > 34 ? (dense ? 40 : 44) : n > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{answer}</div>
-    {notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(notes)}</div>}
+    <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ["--beat" as string]: 0.15 + w.board + "s", fontSize: n > 34 ? (dense ? 40 : 44) : n > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{answer}</div>
+    {notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug beat" style={{ ...QUICK, ...at(w.board + 0.2) }}>{wholeSentences(notes)}</div>}
     {rows}
-    <div className="display text-44 beat" style={{ ...QUICK, ...at(0.5), color: head.color }}>{head.text}</div>
+    <div className="display text-44 beat" style={{ ...QUICK, ...at(w.head), color: head.color }}>{head.text}</div>
   </>);
 }
 

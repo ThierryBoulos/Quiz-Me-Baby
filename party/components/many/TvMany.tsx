@@ -148,14 +148,14 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
           <div className="grid items-center justify-center gap-12 w-full max-w-[1160px]" style={{ gridTemplateColumns: `${dense ? 400 : 620}px minmax(0, 520px)` }}>
             <div className="flex flex-col items-center gap-1 min-w-0"><SeePicture see={pub.see} clear w={dense ? 400 : 620} big alt={R.answer} /><SeeCredit see={pub.see} size={dense ? 13 : 14} /></div>
             <div className="flex flex-col items-center gap-3 min-w-0">
-              <div className="eyebrow text-18">It&rsquo;s</div>
+              <div className="eyebrow text-18 beat" style={{ ["--beat" as string]: answerLast(shownTeams(pub).length).board + "s" }}>It&rsquo;s</div>
               {/* (the 2-team sizes up to four teams; the fact under it: 23 Nov, the owner) */}
-              <div className="ans-board display beat slam leading-none" style={{ ...QUICK, fontSize: (R.answer || "").length > 22 ? (dense ? 40 : 44) : (R.answer || "").length > 14 ? (dense ? 48 : 56) : dense ? 56 : 70, color: "var(--color-gold)" }}>{R.answer}</div>
-              {R.notes && <div className={(dense ? "text-18" : "text-20") + " text-[var(--color-ink-2)] leading-snug text-center"}>{wholeSentences(R.notes, 120)}</div>}
-              <div className="display text-36 beat" style={{ ...QUICK, ...d(0.5), color: who.color }}>{who.text}</div>
+              <div className="ans-board display beat slam leading-none" style={{ ["--beat" as string]: 0.15 + answerLast(shownTeams(pub).length).board + "s", fontSize: (R.answer || "").length > 22 ? (dense ? 40 : 44) : (R.answer || "").length > 14 ? (dense ? 48 : 56) : dense ? 56 : 70, color: "var(--color-gold)" }}>{R.answer}</div>
+              {R.notes && <div className={(dense ? "text-18" : "text-20") + " text-[var(--color-ink-2)] leading-snug text-center beat"} style={{ ["--beat" as string]: answerLast(shownTeams(pub).length).board + 0.35 + "s" }}>{wholeSentences(R.notes, 120)}</div>}
+              <div className="display text-36 beat" style={{ ...QUICK, ...d(answerLast(shownTeams(pub).length).head), color: who.color }}>{who.text}</div>
             </div>
           </div>
-          <FlagRowsMany pub={pub} size="tv" delay={(i) => d(0.3 + i * 0.08)} />
+          <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />
         </>); })()}
         {/* a typed answer's reveal (question rounds, airports, maps, Don't Say the Same, the Cocktail or Dish): what was
             asked, small; the answer slams in; every team's answer and its call; who takes it */}
@@ -167,14 +167,15 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />} head={W} headStyle={d(0.5)} />}
         {pub.screen === "reveal" && g && R && g.key === "dish" && <DishRevealTv dish={pub.dish} answer={R.answer || ""} dense={dense} k={shownTeams(pub).length}
           rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />} head={W} headStyle={d(0.5)} />}
-        {pub.screen === "reveal" && g && R && g.key === "comeback" && <ComebackRevealTv question={pub.question} answer={R.answer || ""} notes={R.notes} dense={dense}
-          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />} head={W} />}
+        {pub.screen === "reveal" && g && R && g.key === "comeback" && <ComebackRevealTv question={pub.question} answer={R.answer || ""} notes={R.notes} dense={dense} k={shownTeams(pub).length}
+          rows={<FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />} head={W} />}
         {pub.screen === "reveal" && g && R && ["quiz", "sudden"].includes(g.key) && (<>
           {pub.question ? <div className="text-22 text-[var(--color-ink-2)] max-w-[1000px] leading-snug clamp2">{pub.question}</div> : null}
-          <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ...QUICK, fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
-          {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug">{wholeSentences(R.notes)}</div>}
-          <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} />
-          <div className="display text-44 beat" style={{ ...QUICK, ...d(0.5), color: W.color }}>{W.text}</div>
+          {/* (the teams' answers first, then the answer, then the stamps: components/TeamCalls answerLast, 28 Nov) */}
+          <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ["--beat" as string]: 0.15 + answerLast(shownTeams(pub).length).board + "s", fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
+          {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug beat" style={{ ...QUICK, ...d(answerLast(shownTeams(pub).length).board + 0.2) }}>{wholeSentences(R.notes)}</div>}
+          <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />
+          <div className="display text-44 beat" style={{ ...QUICK, ...d(answerLast(shownTeams(pub).length).head), color: W.color }}>{W.text}</div>
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "closest" && <ClosestRevealTv question={pub.question} answer={Number(R.answer)} notes={R.notes} dense={dense} head={W} headStyle={d(0.6)}
           ruler={T.map((t, i) => ({ name: t.name, color: t.color, letter: LETTERS[i], guess: R.nums?.[i] ?? null, win: R.winners.includes(i), pts: R.pts?.[i] }))} />}

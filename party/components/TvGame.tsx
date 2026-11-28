@@ -252,8 +252,8 @@ function TvComeback({ pub }: { pub: Pub }) {
   const playing = c.teams.map((i) => ({ i, name: teams[i].name, color: teams[i].color }));
   if (sc === "comebackQ") return <ComebackQTv teams={teams} c={c} question={pub.question}
     clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} sent={<SentLine teams={playing.filter((p) => !c.out[p.i])} sent={(i) => !!pub.sent?.[i]} />} />;
-  if (sc === "comebackReveal" && pub.reveal) { const R = pub.reveal; return <ComebackRevealTv question={pub.question} answer={R.answer || ""} notes={R.notes}
-    rows={<TeamCalls teams={playing} delay={(n) => d(n * 0.08)} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]?.[0]} />}
+  if (sc === "comebackReveal" && pub.reveal) { const R = pub.reveal; return <ComebackRevealTv question={pub.question} answer={R.answer || ""} notes={R.notes} k={playing.length}
+    rows={<TeamCalls teams={playing} callsAt={answerLast(playing.length).calls} delay={(n) => d(n * 0.08)} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]?.[0]} />}
     head={cbRevealHead(c.teams.filter((i) => R.ok?.[i]), c.i >= c.of, teams)} />; }
   if (sc === "comebackSummary") { const H = cbResultHead(c, teams); return (<>
     <MiniTitle title={COMEBACK_TITLE} />
@@ -322,7 +322,7 @@ function TvMini({ pub, join, sound = false }: { pub: Pub; join?: Join; sound?: b
   if ((sc === "seeQ" || sc === "seeReveal") && pub.see) return (
     <SeeTv see={pub.see} screen={sc} teams={([0, 1] as const).map((t) => ({ name: T[t].name, color: `var(--color-${t ? "b" : "a"})`, letter: "AB"[t] }))}
       deadline={pub.deadline} left={pub.left}
-      clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} rows={<TeamRows pub={pub} empty="No answer" small />} />);
+      clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />} rows={<TeamRows pub={pub} empty="No answer" small callsAt={answerLast(2).calls} />} />);
   /* Guess the Flag: one copy for every setup (components/Flag.tsx); here, this setup's clock, who has answered, each
      team's call and who takes it */
   if ((sc === "flagQ" || sc === "flagReveal") && pub.flag) return (
