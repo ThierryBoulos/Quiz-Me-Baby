@@ -1857,8 +1857,9 @@ html[data-motion="off"] .op-neon span span { animation: none !important; opacity
 .msc.still *, .msc.still { animation: none !important; transition: none !important; }
 .msc.still.right .fx.spark, .msc.still.wrong .fx.cloud, .msc.still.none .fx.qm, .msc.still.sent .fx.tick { opacity: 1; }
 /* the TV, 2 teams: one in each bottom corner of the stage, under its team's side */
-.msc-corner { position: absolute; bottom: 26px; z-index: 5; pointer-events: none; }
-.msc-corner.l { left: 40px; } .msc-corner.r { right: 40px; bottom: 74px; }
+/* (both at the same height, just over the bottom strip where "Waiting for … to tap Next" sits: 28 Nov, the owner) */
+.msc-corner { position: absolute; bottom: 58px; z-index: 5; pointer-events: none; }
+.msc-corner.l { left: 40px; } .msc-corner.r { right: 40px; }
 /* between questions (MascotStroll): one walks out along the bottom of the stage, hops up onto its team's plate, then
    walks off the other way */
 .msc-walk { position: absolute; z-index: 45; pointer-events: none; left: 0; top: 0; will-change: transform; }
@@ -1878,3 +1879,12 @@ html[data-motion="off"] .op-neon span span { animation: none !important; opacity
 .msc-pick { display: grid; place-items: center; min-height: 64px; border-radius: 16px; border: 2px solid transparent; background: rgba(255,255,255,.05); cursor: pointer; padding: 6px 0 2px; }
 .msc-pick[aria-pressed="true"] { border-color: var(--color-gold); background: rgba(245,197,24,.14); }
 .msc-pick:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
+/* no faces for players any more (28 Nov, the owner): a chip with nothing at its start gets an even side; your chip up
+   top has your team's mascot where your face was */
+.chip:not(.me-flat):not(:has(> .face)):not(:has(> .msc)) { padding-left: 12px; }
+.chip .msc.chip-msc { margin: -6px 0 -4px 2px; }
+/* a mascot wearing its team's letter */
+.msc-letter { position: relative; display: inline-block; flex: none; line-height: 0; }
+.msc-letter .ml { position: absolute; right: -3px; bottom: 0; min-width: 1.35em; height: 1.35em; border-radius: 999px; display: grid; place-items: center; color: #0b0e24; font-weight: 800; line-height: 1; box-shadow: 0 0 0 2px #0b0e24; }
+/* the captain's pick: one another team has is greyed out */
+.msc-pick.taken { opacity: .28; filter: grayscale(1); cursor: not-allowed; }

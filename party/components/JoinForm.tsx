@@ -1,16 +1,15 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { FacePicker } from "@/components/Face";
-import { FACES } from "@/lib/faces";
+import { useEffect, useRef, useState } from "react";
 import { cap1, cleanCode } from "@/lib/room";
 import { ensureSession, rpc } from "@/lib/supabase";
 import { friendly } from "@/lib/errors";
 import { CodeTiles, MqStage, Sign, useLights } from "@/components/Marquee";
 
 /* JOIN — one card in the marquee's look (the owner, 1 Nov): the room code in lit letter tiles, your name
-   under it, a face, "Take my seat". Errors sit beside the thing that's wrong; a taken name offers a fix. */
+   under it, "Take my seat". (No face to pick any more: 28 Nov, the owner, "it just confuses everyone"; a player shows as
+   their name, and their team as its mascot.) Errors sit beside the thing that's wrong; a taken name offers a fix. */
 /* (no TV: nobody has a TV to read a new code from) */
 const GAME_OVER_NO_TV = "That game is over. Ask whoever made it for the new code.";
 
@@ -27,20 +26,12 @@ export function JoinForm({ initial }: { initial: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const putName = (v: string) => { setName(v); if (nameRef.current) nameRef.current.value = v; };
-  const [face, setFace] = useState(FACES[0]);
-  /* each phone starts on its own random face, so a room scanning the QR together doesn't all reach for the first one */
-  useEffect(() => { setFace(FACES[Math.floor(Math.random() * FACES.length)]); }, []);
-  const [taken, setTaken] = useState<string[]>([]);
   const [codeErr, setCodeErr] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [suggest, setSuggest] = useState<string | null>(null);
   const [canRejoin, setCanRejoin] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const loadTaken = useCallback(async () => {
-    if (code.length !== 4) { setTaken([]); return []; }
-    try { await ensureSession(); const t = await rpc<string[]>("qmb_taken_faces", { r: code }); setTaken(t); return t; } catch { setTaken([]); return []; }
-  }, [code]);
   /* the fourth letter in: is there a game with this code? ("Found it", or what's wrong, under the tiles) */
   const [found, setFound] = useState<string | null>(null);
   /* a game with no TV (Play without TV): nothing here points at a TV (3 Nov) */
@@ -63,10 +54,6 @@ export function JoinForm({ initial }: { initial: string }) {
   }, [code]);
   const [codeFocus, setCodeFocus] = useState(false);
   const lights = useLights(80);
-  useEffect(() => { void loadTaken(); }, [loadTaken]);
-  /* don't sit on a face somebody already has */
-  const freeFace = (t: string[]) => { const free = FACES.filter((f) => !t.includes(f)); return free.length ? free[Math.floor(Math.random() * free.length)] : null; };
-  useEffect(() => { if (taken.includes(face)) setFace(freeFace(taken) || face); }, [taken, face]);
 
   async function join(useName: string) {
     setErr(null); setCodeErr(null);
@@ -78,13 +65,12 @@ export function JoinForm({ initial }: { initial: string }) {
       const state = await rpc<string>("qmb_room_state", { r: code });
       if (state === "done") { setCodeErr(tvless ? GAME_OVER_NO_TV : friendly("game_over")); setBusy(false); return; }
       if (state === "gone") { setCodeErr(friendly("no_room")); setBusy(false); return; }
-      /* the server seats one phone at a time and hands out the next free face if this one just went */
-      const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean; face?: string }>("qmb_join", { r: code, nm: cap1(useName.trim()), face });
+      /* the server seats one phone at a time (it still keeps a face per seat, unseen) */
+      const res = await rpc<{ ok?: boolean; error?: string; suggestion?: string; playing?: boolean }>("qmb_join", { r: code, nm: cap1(useName.trim()), face: null });
       if (res.error === "no_room" || res.error === "game_over") { setCodeErr(friendly(res.error)); setBusy(false); return; }
       if (res.error === "name_taken") { setSuggest(res.suggestion ?? null); setCanRejoin(true);   /* the lobby too: a phone that died can take its seat back */ setBusy(false); return; }
-      if (res.error === "face_taken") { setErr(friendly("face_taken")); void loadTaken(); setBusy(false); return; }
+      if (res.error === "face_taken") { setErr(friendly("face_taken")); setBusy(false); return; }
       if (res.error) { setErr(friendly(res.error)); setBusy(false); return; }
-      if (res.face) setFace(res.face);
       router.push("/room/" + code);
     } catch (e) { setErr(friendly(e)); setBusy(false); }
   }
@@ -108,7 +94,7 @@ export function JoinForm({ initial }: { initial: string }) {
       <MqStage floor={false} />
       <div className="top">{back}<Sign size={30}>Quiz Me Baby!</Sign><span /></div>
       <Sign className="big-sign">Quiz Me Baby!</Sign>
-      {/* one card: the code, your name, a face (the owner, 1 Nov: fewer screens, fewer taps; no name, no seat) */}
+      {/* one card: the code and your name (the owner, 1 Nov: fewer screens, fewer taps; no name, no seat) */}
       <section className="card">
         <h1>Join a game</h1>
         <div>
@@ -131,10 +117,6 @@ export function JoinForm({ initial }: { initial: string }) {
             <span className="text-12 text-[var(--color-ink-3)] tabular-nums" aria-live="polite">{name.length}/12</span></div>
           <input id="name" ref={nameRef} className="input" defaultValue="" maxLength={12} placeholder="Enter your name" autoComplete="off"
             autoFocus={code.length === 4} onChange={(e) => { setName(e.target.value); setSuggest(null); setCanRejoin(false); }} />
-        </div>
-        <div>
-          <div className="field-label">Pick a face</div>
-          <FacePicker value={face} taken={taken} onPick={setFace} />
         </div>
         {suggest && (
           <button disabled={busy} onClick={() => { putName(suggest); void join(suggest); }}

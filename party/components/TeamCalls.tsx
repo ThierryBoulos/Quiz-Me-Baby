@@ -68,10 +68,14 @@ export function TeamCalls({ teams: T, ok, typed, pts, places, word, size = "tv",
           {/* (the TV: the name on a line of its own, whole, over two lines if it must: the 4 Nov audit, 3.6; a phone with
               five teams or more: the name on a line of its own too, so it's never "THE …") */}
           <div className={"flex justify-center gap-2 whitespace-nowrap min-w-0 max-w-full" + (tv ? " items-center flex-wrap gap-y-1.5" : dense ? " items-baseline flex-wrap gap-y-0" : " items-baseline")} style={{ fontSize: tv ? (dense ? 20 : long ? 26 : 30) : 14 }}>
-            <span className={tv ? "display basis-full text-center whitespace-normal leading-tight clamp2" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>
-            {/* (the team's mascot, by its stamp: it takes its mood as the stamp lands, 28 Nov) */}
-            {tv && mascots && <MascotAt kind={mascotOf(picks, t.i)} color={t.color} size={dense ? 40 : 52} delay={t.i * 0.37}
-              mood={v == null ? "think" : v ? "right" : !x ? "none" : "wrong"} at={(callsAt ?? 0.4 + t.i * 0.08) + 0.35} />}
+            {/* (the team's mascot on the left of its name: it takes its mood as the stamp lands, 28 Nov, the owner) */}
+            {tv && mascots ? (
+              <span className="basis-full flex items-center justify-center gap-2 min-w-0">
+                <MascotAt kind={mascotOf(picks, t.i)} color={t.color} size={dense ? 36 : 48} delay={t.i * 0.37}
+                  mood={v == null ? "think" : v ? "right" : !x ? "none" : "wrong"} at={(callsAt ?? 0.4 + t.i * 0.08) + 0.35} />
+                <span className="display text-center whitespace-normal leading-tight clamp2 min-w-0" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
+              </span>)
+            : <span className={tv ? "display basis-full text-center whitespace-normal leading-tight clamp2" : "eyebrow truncate" + (dense ? " basis-full text-center" : "")} style={{ color: t.color, ...(!tv && dense ? { letterSpacing: ".1em", fontSize: 12 } : {}) }}><bdi>{t.name}</bdi></span>}
             {v != null && <Verdict v={v} stamp={tv} size={tv ? undefined : 14} word={word?.(t.i) ?? (v ? undefined : !x ? "No answer" : undefined)} />}
             {v && p > 0 && <b className={"display" + (tv && callsAt != null ? " calls-late" : "")} style={{ color: "var(--color-ok)", fontSize: tv ? (dense ? 20 : 26) : 14 }}>+{p}</b>}
             {/* why that many: the order the right answers came in (the 4 Nov audit, 3.8: +4, +3, +2 said nothing) */}

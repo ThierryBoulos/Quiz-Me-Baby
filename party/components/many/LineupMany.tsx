@@ -1,4 +1,5 @@
 "use client";
+import { MascotLetter, mascotOf } from "../Mascot";
 import { ComebackSwitch } from "../Comeback";
 import { PlayerChip } from "../Lineup";
 import { LevelNote } from "../LevelNote";
@@ -17,7 +18,7 @@ import { HOST_ONLY_THEMES, loadBank, themeCounts, withCustom, type Bank } from "
 import { cleanList, getCustom } from "@/lib/custom";
 import { MANY_COLORS, MANY_LEGS, MANY_MINIS, MANY_ROUNDS, MANY_TITLES, PLACE_PTS, nightOrder, quizGames, type ManyKey } from "@/lib/many/logic";
 import { manyNames } from "@/lib/many/useTvMany";
-import { colsFor, Dot, place as ordinal } from "./PartsMany";
+import { colsFor, place as ordinal } from "./PartsMany";
 import { levelLine } from "../Setup";
 import { RR_SETUP } from "@/lib/roulette";
 import { AIRPORT } from "@/lib/minis/airport";
@@ -51,7 +52,7 @@ export function LineupMany({ room, members, k, big }: { room: Room; members: Mem
         return (
           <div key={t} className="card min-w-0" style={{ borderColor: `color-mix(in srgb, ${c} 45%, transparent)`, ...(big ? { flex: `0 0 calc((100% - ${(cols - 1) * gap}px) / ${cols})`, padding: dense ? "12px 14px" : undefined } : {}) }}>
             <div className={dense ? "mb-2" : "mb-3"}>
-              <div className="flex items-center gap-2 min-w-0"><Dot t={t} color={c} size={!big ? 20 : dense ? 22 : 26} />
+              <div className="flex items-center gap-2 min-w-0"><MascotLetter kind={mascotOf(room.state?.teamMascots, t)} color={c} letter={"ABCDEFGH"[t]} size={!big ? 30 : dense ? 34 : 40} delay={t * 0.37} />
                 <div className="display truncate leading-tight" style={{ color: c, fontSize: name.length > 10 ? ({ 36: 30, 30: 26, 28: 24, 24: 20 } as Record<number, number>)[nameSize] : nameSize }}><bdi>{name}</bdi></div></div>
               <div className={"eyebrow mt-1 " + (dense ? "text-12" : "")}>{list.length} {list.length === 1 ? "player" : "players"}</div>
             </div>
@@ -74,7 +75,7 @@ export function PickMany({ room, k, busy, pick, current, members }: { room: Room
       {names.map((name, t) => { const c = MANY_COLORS[t], n = members?.filter((m) => (m.team as number) === t && m.role !== "host").length; return (
         <button key={t} className={"mq-pick sm min-w-0" + (current === t ? " on" : "")} disabled={busy || current === t} aria-pressed={current === t} aria-label={`${"ABCDEFGH"[t]} · ${name}`} onClick={() => pick(t)}
           style={{ ["--c" as string]: c }}>
-          <span className="flex items-center gap-2 min-w-0 max-w-full"><Dot t={t} color={c} size={20} /><span className={"tn truncate" + (name.length > 10 ? " long" : "")}><bdi>{name}</bdi></span></span>
+          <span className="flex items-center gap-2 min-w-0 max-w-full"><MascotLetter kind={mascotOf(room.state?.teamMascots, t)} color={c} letter={"ABCDEFGH"[t]} size={34} delay={t * 0.37} /><span className={"tn truncate" + (name.length > 10 ? " long" : "")}><bdi>{name}</bdi></span></span>
           {n != null && <small>{current === t ? "You\u2019re here" : n === 0 ? "Nobody yet" : `${n} ${n === 1 ? "player" : "players"}`}</small>}</button>); })}
     </div>);
 }

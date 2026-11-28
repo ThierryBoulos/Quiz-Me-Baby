@@ -9,6 +9,7 @@
      #setup:<teams>:<role>  the phone's Setup before the start (2 teams: host, or cap with no host; 3-8: host), with
                             its game time under Start (14 Nov)
    <key> is a screen kept by sim/screens/two.mjs or many.ts (sim/.out/screens/pubs.json, served by ./pubs). */
+import { PickMany } from "@/components/many/LineupMany";
 import { MANY_COLORS } from "@/lib/many/logic";
 import { Mascot, MascotPick } from "@/components/Mascot";
 import { useEffect, useState } from "react";
@@ -75,6 +76,20 @@ export default function Screens() {
       controls={<button type="button" className="btn btn-sm btn-ghost">Settings</button>} /></TvStage>;
   }
   /* the captain's phone in the lobby: the team's card with its mascot, and the mascot pick (28 Nov); pick:k, the widest name */
+  /* a player's phone, before picking a team: Pick a side, each team's button with its mascot (28 Nov); side:k, the widest
+     names */
+  if (mode[0] === "side") {
+    const k = Number(mode[1] || 2), names = Array.from({ length: k }, (_, t) => (t % 2 ? "MMMMMMMMMMMM" : "WWWWWWWWWWWW"));
+    const room = { code: "ABCD", tv_id: "x", status: "lobby" as const, mode: null, state: { teamNames: names, teamCount: k }, version: 1 };
+    return (
+      <main className="screen mq mq-room"><section className="flex flex-col gap-3 enter">
+        <h1 className="mq-h1 text-center">Pick a side</h1>
+        {k > 2 ? <PickMany room={room} k={k} busy={false} pick={() => {}} members={[]} /> : (<>
+          <button className="mq-pick" style={{ ["--c" as string]: "var(--color-a)" }}><Mascot kind={0} color={MANY_COLORS[0]} size={56} /><span className="tn"><bdi>{names[0]}</bdi></span><small>Nobody yet</small></button>
+          <span className="mq-vs" aria-hidden>vs</span>
+          <button className="mq-pick" style={{ ["--c" as string]: "var(--color-b)" }}><Mascot kind={1} color={MANY_COLORS[1]} size={56} delay={0.6} /><span className="tn"><bdi>{names[1]}</bdi></span><small>Captain: Lea</small></button></>)}
+      </section></main>);
+  }
   if (mode[0] === "pick") {
     const t = Math.max(0, Number(mode[1] || 2) - 1), c = MANY_COLORS[t];
     return (
@@ -83,14 +98,15 @@ export default function Screens() {
           <Mascot kind={t} color={c} size={58} className="mq-team-msc" />
           <div className="eyebrow">You&rsquo;re on</div>
           <div className="tn"><bdi>WWWWWWWWWWWW</bdi></div>
-          <ul className="mq-mates" aria-label="Your team"><li className="capt me"><b className="arm-c" aria-label="Captain">C</b><i aria-hidden>🦊</i><bdi className="truncate">Rami</bdi><span className="you">You</span></li>
-            <li><i aria-hidden>🐼</i><bdi className="truncate">Karim</bdi></li></ul>
+          <ul className="mq-mates" aria-label="Your team"><li className="capt me"><b className="arm-c" aria-label="Captain">C</b><bdi className="truncate">Rami</bdi><span className="you">You</span></li>
+            <li><bdi className="truncate">Karim</bdi></li></ul>
         </div>
         <div className="card flex flex-col gap-3">
           <div className="flex items-center gap-2"><b className="arm-c lg" aria-hidden>C</b><span className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</span></div>
           <label className="field-label !mb-0" htmlFor="tname">Name your team</label>
           <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}><input id="tname" className="input" defaultValue="WWWWWWWWWWWW" /><button type="submit" className="btn shrink-0">Save</button></form>
-          <MascotPick value={t} color={c} onPick={() => {}} />
+          {/* (another team has picked the fifth: it's greyed out here) */}
+          <MascotPick value={t} color={c} onPick={() => {}} taken={new Set([4])} />
           <button type="button" className="btn btn-sm btn-ghost self-start">Step down</button>
         </div>
       </section></main>);
@@ -139,7 +155,7 @@ export default function Screens() {
       <main className="screen split">
         <div className="side">
           <header className="flex items-center justify-between gap-3">
-            <button type="button" className="chip me-chip"><span className="face">🙂</span><span className="truncate"><bdi>{me.name}</bdi></span></button>
+            <button type="button" className="chip me-chip">{me.team != null && <Mascot kind={0} color={MANY_COLORS[0]} size={26} className="chip-msc" />}<span className="truncate"><bdi>{me.name}</bdi></span></button>
             <span className="eyebrow whitespace-nowrap">ABCD</span>
           </header>
           {many ? <HudMany pub={pub} size="phone" me={me.team} host={role === "host"} /> : <Hud pub={pub} size="phone" me={me.team} />}

@@ -6,7 +6,7 @@ const CODES: Record<string, string> = {
   no_room: "Room not found. Check the room code.",
   bad_name: "Names can be 1 to 12 characters.",
   name_taken: "Someone here already has that name.",
-  face_taken: "Someone already took that face. Pick another.",
+  face_taken: "This game is full: 16 players at most.",
   not_started: "That game hasn't started yet, so just join with your name.",
   no_such_player: "Nobody with that name is in this game.",
   seat_in_use: "That seat's phone is still here. If it's yours and it died, wait a minute and try again.",
@@ -21,7 +21,7 @@ const CODES: Record<string, string> = {
 const DB: [RegExp, string][] = [
   [/members_name_check|name.*too long|value too long/i, "Names can be 1 to 12 characters."],
   [/members_name_unique/i, "Someone here already has that name."],
-  [/members_avatar_unique/i, "Someone already took that face. Pick another."],
+  [/members_avatar_unique/i, "This game is full: 16 players at most."],
   [/members_one_captain/i, "Your team already has a captain."],
   [/members_one_host/i, "There's already a host."],
   [/too many taps/i, "Slow down a little: that's a lot of taps at once. Try again in a second."],

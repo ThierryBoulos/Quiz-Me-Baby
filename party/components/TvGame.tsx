@@ -41,9 +41,22 @@ export type Join = { url: string; code: string };
 /* sound: this is the TV itself (it plays the coins and the whoosh; another screen showing the TV stays quiet) */
 /* TEAM MASCOTS (28 Nov): the screens they stand on, the screens they stroll on, and each one's mood */
 const MASCOT_SCREENS = ["ask", "steal", "answer"], STROLL_SCREENS = ["answer", "roundIntro", "roundScore"];
+/* which teams are in this question (28 Nov, the owner): its own team only; on a steal both, the team that missed it
+   sad; at the answer, the teams that had a go */
+function inPlay2(pub: Pub): [boolean, boolean] {
+  const turn = (pub.turn ?? 0) as 0 | 1;
+  if (pub.screen === "ask") return [turn === 0, turn === 1];
+  if (pub.screen === "steal") return [true, true];
+  if (pub.screen === "answer" && pub.result) {
+    const r = pub.result, had = (t: 0 | 1) => r.owner === t || r.by === t || (pub.calls || []).some((c) => c.team === t);
+    return r.owner == null ? [true, true] : [had(0), had(1)];
+  }
+  return [true, true];
+}
 function moods2(pub: Pub, revealed: boolean): [Mood, Mood] {
   const m: [Mood, Mood] = ["idle", "idle"], turn = (pub.turn ?? 0) as 0 | 1;
-  if (pub.screen === "ask" || pub.screen === "steal") { m[turn] = pub.sent?.[turn] ? "sent" : "think"; return m; }
+  if (pub.screen === "ask") { m[turn] = pub.sent?.[turn] ? "sent" : "think"; return m; }
+  if (pub.screen === "steal") { m[turn] = pub.sent?.[turn] ? "sent" : "think"; m[(1 - turn) as 0 | 1] = "wrong"; return m; }
   if (pub.screen === "answer" && pub.result) {
     if (!revealed) return ["think", "think"];
     for (const t of [0, 1] as const) {
@@ -84,8 +97,9 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
       <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
       {/* the teams' mascots (28 Nov, the owner's pick): in the bottom corners while a question is up and at its answer;
           between questions one walks out now and then */}
-      {MASCOT_SCREENS.includes(pub.screen) && <MascotCorners colors={[MANY_COLORS[0], MANY_COLORS[1]]} moods={moods2(pub, revealed)} away={strolling} />}
-      <MascotStroll teams={[{ kind: k0, color: MANY_COLORS[0], side: "l" }, { kind: k1, color: MANY_COLORS[1], side: "r" }]} on={STROLL_SCREENS.includes(pub.screen) && !pub.intro} onAway={setStrolling} key={"stroll" + key} />
+      {MASCOT_SCREENS.includes(pub.screen) && <MascotCorners colors={[MANY_COLORS[0], MANY_COLORS[1]]} moods={moods2(pub, revealed)} away={strolling} show={inPlay2(pub)} />}
+      <MascotStroll teams={([{ kind: k0, color: MANY_COLORS[0], side: "l" }, { kind: k1, color: MANY_COLORS[1], side: "r" }] as const).filter((_, t) => inPlay2(pub)[t])} on={STROLL_SCREENS.includes(pub.screen) && !pub.intro}
+        onAway={(i) => setStrolling(i == null ? null : inPlay2(pub)[0] ? i : 1)} key={"stroll" + key} />
       {/* the night's intro, before the first round: the plan, until Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `${pub.captains?.[pub.intro.go as 0 | 1] || "The captain"} starts the game` : `${host || "The host"} starts the game`} />}
 

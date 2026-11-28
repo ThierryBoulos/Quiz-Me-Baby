@@ -1,5 +1,5 @@
 "use client";
-import { MASCOT_COUNT, mascotOf } from "@/components/Mascot";
+import { MASCOT_COUNT, pickedOf, takenBy } from "@/components/Mascot";
 import { nextScreenAt, tapOnThisScreen, type ScreenAt } from "../tapOn";
 import { LIVE_LINES, actCount, usePubLine } from "../liveLines";
 import { serverOffset } from "@/components/Clock";
@@ -315,7 +315,10 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         /* (the team's mascot, picked on the captain's phone with the same message as its name: 28 Nov) */
         if (a.payload.mascot != null) {
           const v = Number(a.payload.mascot); if (!Number.isInteger(v) || v < 0 || v >= MASCOT_COUNT) return;
-          const ms = Array.from({ length: MANY_MAX }, (_, t) => mascotOf(lobbyMine.current.teamMascots ?? room.state?.teamMascots, t)); ms[from.team as number] = v;
+          const cur = lobbyMine.current.teamMascots ?? room.state?.teamMascots;
+          /* (a mascot another team has picked is theirs: 28 Nov, the owner) */
+          if (takenBy(cur, from.team as number, k).has(v)) return;
+          const ms = Array.from({ length: MANY_MAX }, (_, t) => pickedOf(cur, t)); ms[from.team as number] = v;
           await lobbyWrite({ teamMascots: ms });
           return;
         }

@@ -3,8 +3,8 @@
    lobby from eight, in the team's colour. It lives the question with its team on the TV: it bobs and blinks, looks up at
    the clock, hops when its captain sends, jumps with its arms up when the team is right, sinks under a little rain cloud
    when it's wrong, shrugs when there was no answer. Between questions one walks out and hops about (MascotStroll).
-   The players' own faces (lib/faces) stay as they are: those are the players', these are the teams' (the owner: "keep
-   both"). With Motion off in Settings the mascots stand still and only change face. */
+   (The players' faces are gone: 28 Nov, the owner, "it just confuses everyone"; a player is their name, a team its
+   mascot.) With Motion off in Settings the mascots stand still and only change face. */
 import { createContext, useContext, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { motionOff } from "./Marquee";
@@ -12,12 +12,29 @@ import { motionOff } from "./Marquee";
 export const MASCOT_COUNT = 8;
 export type Mood = "idle" | "think" | "sent" | "right" | "wrong" | "none";
 
-/* the room's picks (room.state.teamMascots), one per team; a team that hasn't picked has its own number's creature, so no
-   two teams start the same */
-export const mascotOf = (picks: unknown, t: number) => {
-  const v = Array.isArray(picks) ? Number(picks[t]) : NaN;
-  return Number.isInteger(v) && v >= 0 && v < MASCOT_COUNT ? v : t % MASCOT_COUNT;
+/* the room's picks (room.state.teamMascots): what each team's captain picked, or null. A picked mascot is that team's
+   alone: the other captains see it greyed out (28 Nov, the owner). A team that hasn't picked has its own number's
+   creature, or the next one nobody has, so no two teams ever look alike */
+const TEAMS_MAX = 8;
+export const pickedOf = (picks: unknown, t: number) => {
+  const v = Array.isArray(picks) && picks[t] != null ? Number(picks[t]) : NaN;
+  return Number.isInteger(v) && v >= 0 && v < MASCOT_COUNT ? v : null;
 };
+export function allMascots(picks: unknown): number[] {
+  const taken = new Set<number>(), out: number[] = [];
+  for (let t = 0; t < TEAMS_MAX; t++) { const v = pickedOf(picks, t); if (v != null) taken.add(v); }
+  for (let t = 0; t < TEAMS_MAX; t++) {
+    const v = pickedOf(picks, t);
+    if (v != null) { out[t] = v; continue; }
+    let c = t % MASCOT_COUNT;
+    for (let j = 0; j < MASCOT_COUNT; j++) { const x = (t + j) % MASCOT_COUNT; if (!taken.has(x)) { c = x; break; } }
+    out[t] = c; taken.add(c);
+  }
+  return out;
+}
+export const mascotOf = (picks: unknown, t: number) => allMascots(picks)[t] ?? t % MASCOT_COUNT;
+/* the mascots the other teams (of k) have picked: not to be picked again */
+export const takenBy = (picks: unknown, t: number, k: number) => new Set(Array.from({ length: k }, (_, i) => (i === t ? null : pickedOf(picks, i))).filter((v): v is number => v != null));
 /* the TV hands its room's picks down to every screen (the screens never carry them: they're the room's, like its names) */
 const Picks = createContext<unknown>(null);
 export const MascotPicks = Picks.Provider;
@@ -91,11 +108,11 @@ export function useLater(key: string, ms: number) {
 
 /* THE TV, 2 TEAMS: one mascot in each bottom corner of the stage, under its team's side of the score bar; away: the one
    out on a stroll (it isn't in its corner meanwhile) */
-export function MascotCorners({ colors, moods, away, size = 116 }: { colors: [string, string]; moods: [Mood, Mood]; away?: number | null; size?: number }) {
+export function MascotCorners({ colors, moods, away, size = 116, show = [true, true] }: { colors: [string, string]; moods: [Mood, Mood]; away?: number | null; size?: number; show?: [boolean, boolean] }) {
   const k0 = useMascot(0), k1 = useMascot(1);
   return (<>
-    {away !== 0 && <span className="msc-corner l" aria-hidden><Mascot kind={k0} color={colors[0]} mood={moods[0]} size={size} /></span>}
-    {away !== 1 && <span className="msc-corner r" aria-hidden><Mascot kind={k1} color={colors[1]} mood={moods[1]} size={size} delay={0.6} /></span>}
+    {show[0] && away !== 0 && <span className="msc-corner l" aria-hidden><Mascot kind={k0} color={colors[0]} mood={moods[0]} size={size} /></span>}
+    {show[1] && away !== 1 && <span className="msc-corner r" aria-hidden><Mascot kind={k1} color={colors[1]} mood={moods[1]} size={size} delay={0.6} /></span>}
   </>);
 }
 
@@ -105,7 +122,7 @@ export function MascotCorners({ colors, moods, away, size = 116 }: { colors: [st
    and skips its turn if there's no room. Each team in turn; with 5 teams or more, only one is ever out. */
 const STAGE_H = 720, STAGE_W = 1280;
 export function MascotStroll({ teams, on, first = 4500, every = 15000, onAway }: {
-  teams: { kind: number; color: string; side?: "l" | "r" }[]; on: boolean; first?: number; every?: number; onAway?: (t: number | null) => void;
+  teams: readonly { kind: number; color: string; side?: "l" | "r" }[]; on: boolean; first?: number; every?: number; onAway?: (t: number | null) => void;
 }) {
   /* (it walks on the stage itself, in the stage's own 1280 by 720, wherever this sits in the screen) */
   const anchor = useRef<HTMLSpanElement>(null), box = useRef<HTMLDivElement>(null);
@@ -124,16 +141,18 @@ export function MascotStroll({ teams, on, first = 4500, every = 15000, onAway }:
       /* the free floor, under what's on screen across the stretch it walks (its side to a third of the way in) */
       const S = stage.getBoundingClientRect(), k = S.height / STAGE_H || 1;
       const x0 = side === "l" ? 0 : STAGE_W * 0.62, x1 = side === "l" ? STAGE_W * 0.38 : STAGE_W;
+      /* (they walk at the corners' height, over the bottom strip where "Waiting for … to tap Next" sits) */
+      const floor = STAGE_H - 58;
       let low = 0;
       stage.querySelectorAll<HTMLElement>("*").forEach((el) => {
         if (el.closest(".msc, .msc-walk, .msc-corner, .op-curtains, .op-lights")) return;
         const own = [...el.childNodes].some((c) => c.nodeType === 3 && (c.textContent || "").trim()) || /^(IMG|svg|CANVAS|VIDEO|BUTTON)$/.test(el.tagName);
         if (!own) return;
         const r = el.getBoundingClientRect(); if (!r.width || !r.height) return;
-        const l = (r.left - S.left) / k, rr = (r.right - S.left) / k, b = (r.bottom - S.top) / k;
-        if (rr > x0 && l < x1) low = Math.max(low, b);
+        const l = (r.left - S.left) / k, rr = (r.right - S.left) / k, b = (r.bottom - S.top) / k, tp = (r.top - S.top) / k;
+        if (rr > x0 && l < x1 && tp < floor) low = Math.max(low, b);
       });
-      const floor = STAGE_H - 8, room = floor - low - 10, w = Math.min(96, Math.floor(room * 112 / 128));
+      const room = floor - low - 10, w = Math.min(96, Math.floor(room * 112 / 128));
       if (w >= 48) {
         const h = w * 128 / 112;
         setWalker({ t, w, top: floor - h, side, from: side === "l" ? -w - 20 : STAGE_W + 20, to: side === "l" ? STAGE_W * 0.24 : STAGE_W * 0.76 - w, n });
@@ -179,13 +198,19 @@ export function MascotAt({ kind, color, mood, at, size, delay }: { kind: number;
 }
 
 /* the captain's phone, in the lobby: the team's mascot, eight to tap (the one picked hops, with a tick) */
-export function MascotPick({ value, color, busy, onPick }: { value: number; color: string; busy?: boolean; onPick: (k: number) => void }) {
+export function MascotPick({ value, color, busy, onPick, taken }: { value: number; color: string; busy?: boolean; onPick: (k: number) => void; taken?: Set<number> }) {
   return (<>
     <div className="field-label !mb-0">Pick your team&rsquo;s mascot</div>
     <div className="grid grid-cols-4 gap-2" role="group" aria-label="Your team’s mascot">
-      {Array.from({ length: MASCOT_COUNT }, (_, k) => { const on = value === k; return (
-        <button key={k} type="button" className="msc-pick" aria-pressed={on} aria-label={`Mascot ${k + 1}`} disabled={busy} onClick={() => onPick(k)}>
+      {Array.from({ length: MASCOT_COUNT }, (_, k) => { const on = value === k, gone = !on && !!taken?.has(k); return (
+        <button key={k} type="button" className={"msc-pick" + (gone ? " taken" : "")} aria-pressed={on} aria-label={gone ? `Mascot ${k + 1}, taken` : `Mascot ${k + 1}`} disabled={busy || gone} onClick={() => onPick(k)}>
           <Mascot kind={k} color={color} mood={on ? "sent" : "idle"} size={46} delay={k * 0.3} key={on ? "on" : "off"} /></button>); })}
     </div>
   </>);
+}
+
+/* a team's mascot wearing its team's letter (the lobby's boxes, the phones' team buttons) */
+export function MascotLetter({ kind, color, letter, size, delay }: { kind: number; color: string; letter: string; size: number; delay?: number }) {
+  return (<span className="msc-letter" style={{ width: size }}><Mascot kind={kind} color={color} size={size} delay={delay} />
+    <span className="ml" style={{ background: color, fontSize: Math.max(9, Math.round(size * 0.3)) }}>{letter}</span></span>);
 }

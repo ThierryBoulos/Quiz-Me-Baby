@@ -1,5 +1,5 @@
 "use client";
-import { Mascot, MascotPick, mascotOf } from "@/components/Mascot";
+import { Mascot, MascotPick, mascotOf, takenBy } from "@/components/Mascot";
 import { storeTakenSave } from "@/lib/takeSave";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -301,6 +301,11 @@ export default function PhoneRoom() {
   const [mascotDraft, setMascotDraft] = useState<number | null>(null);
   const roomMascot = mine?.team != null ? mascotOf(room?.state?.teamMascots, mine.team as number) : 0;
   useEffect(() => { if (mascotDraft != null && mascotDraft === roomMascot) setMascotDraft(null); }, [mascotDraft, roomMascot]);
+  /* (another captain got there first: the TV keeps theirs, and this phone goes back to what the room shows) */
+  useEffect(() => { if (mascotDraft == null) return; const t = setTimeout(() => setMascotDraft(null), 6000); return () => clearTimeout(t); }, [mascotDraft]);
+  /* the chip up top: your team's mascot where your face was (28 Nov, the owner: no faces for players any more); no
+     team yet (or the host): just your name */
+  const myMascot = mine?.team != null ? <Mascot kind={mascotDraft ?? roomMascot} color={MANY_COLORS[mine.team as number]} size={26} className="chip-msc" /> : null;
   const pickMascot = (k: number) => {
     if (!mine || mine.team == null) return;
     setMascotDraft(k);
@@ -378,9 +383,10 @@ export default function PhoneRoom() {
     return l.length === 0 ? "Nobody yet" : <>{l.length} {l.length === 1 ? "player" : "players"}{c && <> · Captain <bdi>{c.name}</bdi></>}</>; };
   const twoSides = (
     <>
-      <button className="mq-pick" style={{ ["--c" as string]: "var(--color-a)" }} disabled={busy} onClick={() => pickTeam(0)}><span className="tn"><bdi>{teamName(room, 0)}</bdi></span><small>{sideInfo(0)}</small></button>
+      {/* (each side with its team's mascot: 28 Nov, the owner) */}
+      <button className="mq-pick" style={{ ["--c" as string]: "var(--color-a)" }} disabled={busy} onClick={() => pickTeam(0)}><Mascot kind={mascotOf(room.state?.teamMascots, 0)} color={MANY_COLORS[0]} size={56} /><span className="tn"><bdi>{teamName(room, 0)}</bdi></span><small>{sideInfo(0)}</small></button>
       <span className="mq-vs" aria-hidden>vs</span>
-      <button className="mq-pick" style={{ ["--c" as string]: "var(--color-b)" }} disabled={busy} onClick={() => pickTeam(1)}><span className="tn"><bdi>{teamName(room, 1)}</bdi></span><small>{sideInfo(1)}</small></button>
+      <button className="mq-pick" style={{ ["--c" as string]: "var(--color-b)" }} disabled={busy} onClick={() => pickTeam(1)}><Mascot kind={mascotOf(room.state?.teamMascots, 1)} color={MANY_COLORS[1]} size={56} delay={0.6} /><span className="tn"><bdi>{teamName(room, 1)}</bdi></span><small>{sideInfo(1)}</small></button>
     </>);
 
   return (<NoTv.Provider value={noTv}>
@@ -399,10 +405,10 @@ export default function PhoneRoom() {
             players, your captaincy and Leave, in place of a Scores and a Team button; in the lobby it's just your name */}
         {room.status !== "lobby"
           ? <button type="button" className={"chip me-chip" + (panel ? " chip-on" : "")} aria-expanded={panel} aria-label={`${mine.name}: teams and scores`} onClick={() => setPanel(!panel)}>
-              <span className="face">{mine.avatar || "🙂"}</span><span className="truncate"><bdi>{mine.name}</bdi></span>
+              {myMascot}<span className="truncate"><bdi>{mine.name}</bdi></span>
               <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden className="shrink-0 opacity-70" style={{ transform: panel ? "rotate(180deg)" : undefined, transition: "transform .2s" }}><path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
-          : <span className="chip me-flat"><span className="face">{mine.avatar || "🙂"}</span><span className="truncate"><bdi>{mine.name}</bdi></span></span>}
+          : <span className="chip me-flat">{myMascot}<span className="truncate"><bdi>{mine.name}</bdi></span></span>}
         {/* the room code opens its QR code and Share, so a late friend can scan this phone (the owner, 31 Oct) */}
         <button type="button" className="eyebrow whitespace-nowrap inline-flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 rounded-[12px]" aria-haspopup="dialog" aria-label={`Room ${code}: show the QR code to join`}
           onClick={() => setInvite(`${window.location.origin}/join?code=${code}`)}>
@@ -569,7 +575,7 @@ export default function PhoneRoom() {
                 return (
                   <li key={m.user_id} className={(m.role === "captain" ? "capt" : "") + (gone ? " away" : "") + (m.user_id === me ? " me" : "")}>
                     {m.role === "captain" && <b className="arm-c" aria-label="Captain">C</b>}
-                    <i aria-hidden>{gone ? "💤" : m.avatar || "🙂"}</i><bdi className="truncate">{m.name}</bdi>{m.user_id === me && <span className="you">You</span>}
+                    {gone && <i aria-hidden>💤</i>}<bdi className="truncate">{m.name}</bdi>{m.user_id === me && <span className="you">You</span>}
                   </li>); })}
             </ul>
           </div>
@@ -590,7 +596,8 @@ export default function PhoneRoom() {
               {tooLong && <p className="field-error" role="alert">Team names can be up to {TEAM_MAX} characters. Try a shorter one.</p>}
               {nameState === "saved" && <p className="text-13 font-bold" role="status" style={{ color: "var(--color-ok)" }}>Saved.{noTv ? "" : <> It&rsquo;s on the TV.</>}</p>}
               {nameState === "late" && <p className="field-error" role="alert">{noTv ? "That didn\u2019t go through. Try again." : <>The TV didn&rsquo;t pick it up. Is the TV screen still open? Try again.</>}</p>}
-              <MascotPick value={mascotDraft ?? roomMascot} color={MANY_COLORS[mine.team as number]} busy={busy} onPick={pickMascot} />
+              <MascotPick value={mascotDraft ?? roomMascot} color={MANY_COLORS[mine.team as number]} busy={busy} onPick={pickMascot}
+                taken={takenBy(room.state?.teamMascots, mine.team as number, many ? teamCount : 2)} />
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
             </div>
           ) : myCaptain ? (

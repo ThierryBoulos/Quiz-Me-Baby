@@ -794,6 +794,6 @@ function Players({ list }: { list: Member[] }) {
   if (!L.length) return <span className="text-13 text-[var(--color-ink-3)]">Nobody yet</span>;
   return (
     <span className="text-13 leading-snug text-[var(--color-ink-2)] mt-0.5">
-      {L.map((m, i) => <span key={m.user_id}>{i > 0 && ", "}<span className="whitespace-nowrap"><span aria-hidden>{m.avatar || "🙂"}</span> <bdi>{m.name}</bdi>{m.role === "captain" && <span className="cap ml-1">Captain</span>}</span></span>)}
+      {L.map((m, i) => <span key={m.user_id}>{i > 0 && ", "}<span className="whitespace-nowrap"><bdi>{m.name}</bdi>{m.role === "captain" && <span className="cap ml-1">Captain</span>}</span></span>)}
     </span>);
 }
