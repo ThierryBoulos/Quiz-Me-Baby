@@ -255,7 +255,7 @@ export function IntroMany({ pub, size, head, compact }: { pub: PubMany; size: Si
   const band = g.key === "sudden" ? "First right wins" : g.key === "stakes" ? skBand(g.of) : g.key === "dish" && pub.dishKinds ? `${count} · ${pub.dishKinds}` : th.length ? `${count} – ${th.length > 2 ? `${th.slice(0, -1).join(", ")} and ${th[th.length - 1]}` : th.join(th.some((x) => x.includes("&")) ? " and " : " & ")}` : count;   // (three themes, a game of three rounds: "A, B and C")
   /* ("Game 2 of 5" is in the tracker right above: not said twice, the owner, 31 Oct; Secret Stakes' band as with two
      teams, 22 Nov; the frame: GameParts' IntroFrame, every setup, 27 Nov) */
-  return <IntroFrame tv={tv} compact={compact} title={g.title} rules={rules(pub).map((r) => (typeof r === "string" ? { text: r } : r))}
+  return <IntroFrame tv={tv} compact={compact} title={g.title} opening={g.key === "quiz" || g.key === "sudden" ? "lights" : "curtain"} rules={rules(pub).map((r) => (typeof r === "string" ? { text: r } : r))}
     head={head || (g.key === "stakes" ? <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>{SK_ABOVE}</div> : undefined)}
     band={[band, ...(g.key === "stakes" ? [SK_BAND2] : [])]} />;
 }

@@ -3,6 +3,7 @@
    copied from the old one-screen app (retired 3 Nov): the HUD tracker, the round intro with each
    team's lifelines, the "Question for TEAM A" head, the lifeline tiles and
    the mini-game intro with its rules. One look everywhere. */
+import { Curtains, MarqueeTitle, Spotlights } from "./Opening";
 import { FitLine } from "./Fit";
 import { SK_ABOVE, SK_BAND2, skBand, skRules } from "./Stakes";
 import { RR_RULE3, rrRule1, rrRule2 } from "@/lib/roulette";
@@ -332,7 +333,9 @@ export function RoundIntro({ pub, canArm, onArm, size, busy }: { pub: Pub; canAr
     <div className={"flex flex-col items-center text-center " + (tv ? "gap-5" : "gap-4")}>
       <div className="flex flex-col items-center gap-2">
         <div className="eyebrow" style={{ color: "var(--color-gold)", fontSize: tv ? 16 : undefined }}>Round {pub.r + 1} of {pub.N}</div>
-        <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? 104 : 46 }}>{pub.theme}</h1>
+        {/* (the TV: the round opens with the spotlights and its title in the marquee: components/Opening, 28 Nov) */}
+        {tv ? <><Spotlights /><MarqueeTitle text={pub.theme || ""} style={{ fontSize: (pub.theme || "").length > 16 ? 84 : 104 }} /></>
+          : <h1 className="display" style={{ fontSize: 46 }}>{pub.theme}</h1>}
         <p className="text-[var(--color-ink-2)]" style={{ fontSize: tv ? 22 : 13 }}>{T[pub.first ?? 0].name} answer first</p>
       </div>
       {/* the TV, the host and the players: no explaining, just a badge once a team has armed it */}
@@ -476,12 +479,15 @@ function rules(pub: Pub): { text: string; warn?: boolean }[] {
 }
 /* a game's intro, every setup (27 Nov, the merge): the small heading, the title, the gold band (its first part in gold,
    the rest after a dot) and the rules card. compact: the TV's Majority Rules intro, which shares the screen with the QR */
-export function IntroFrame({ tv, compact, head, title, band, rules: R }: { tv: boolean; compact?: boolean; head?: ReactNode; title: ReactNode; band: ReactNode[]; rules: { text: ReactNode; warn?: boolean }[] }) {
+export function IntroFrame({ tv, compact, head, title, band, rules: R, opening = "curtain" }: { tv: boolean; compact?: boolean; head?: ReactNode; title: ReactNode; band: ReactNode[]; rules: { text: ReactNode; warn?: boolean }[]; opening?: "curtain" | "lights" }) {
   const fs = tv ? 15 : 11;
   return (
     <div className={"flex flex-col items-center text-center w-full " + (tv && !compact ? "gap-5" : "gap-4")}>
       {head}
-      <h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{title}</h1>
+      {/* (the TV: a mini-game opens with the curtains; 3 to 8 teams' rounds with the spotlights and the marquee:
+          components/Opening, 28 Nov) */}
+      {tv && opening === "lights" && typeof title === "string" ? <><Spotlights /><MarqueeTitle text={title} style={{ fontSize: compact ? 64 : title.length > 16 ? 72 : 88 }} /></>
+        : <>{tv && <Curtains />}<h1 className={"display" + (tv ? " slam" : "")} style={{ fontSize: tv ? (compact ? 64 : 88) : 44 }}>{title}</h1></>}
       <div className={"mini-band " + (tv ? "" : "sm")}>
         {band.map((b, i) => i === 0 ? <span key={i} className="eyebrow" style={{ color: "var(--color-gold)", fontSize: fs }}>{b}</span>
           : <Fragment key={i}><span className="sep text-[var(--color-ink-3)]">·</span><span className="eyebrow" style={{ fontSize: fs }}>{b}</span></Fragment>)}
