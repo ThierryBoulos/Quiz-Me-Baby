@@ -1,4 +1,5 @@
 "use client";
+import { MASCOT_COUNT, mascotOf } from "@/components/Mascot";
 import { LIVE_LINES, actCount, usePubLine } from "./liveLines";
 import { serverOffset } from "@/components/Clock";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -194,7 +195,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
   /* The lobby's team names and who's away, as this TV last wrote them. Two writes a beat apart (both
      captains naming their teams in the same second) must each build on the other, not on a room the
      push hasn't brought back yet: on 20 Oct the second name overwrote the first. */
-  const lobbyMine = useRef<{ teamNames?: [string, string]; away?: string[]; timers?: Partial<Settings>; left?: FreshLeft }>({});
+  const lobbyMine = useRef<{ teamNames?: [string, string]; teamMascots?: number[]; away?: string[]; timers?: Partial<Settings>; left?: FreshLeft }>({});
   /* (and the newest stamp: a lobby write made before the TV has read back its own Play again must not carry the old one, which the phones would take for an old room) */
   const lobbyState = (room: Room) => ({ ...room.state, ...lobbyMine.current, pubAt: Math.max(Number(room.state?.pubAt) || 0, lastAt.current) || undefined });
   /* the TV's last errors (29 Oct): kept in the room with the next write, so a night that broke can be read
@@ -1279,7 +1280,16 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     /* the host's phone adds a team (three or more play the 3-8 team game, which takes the lobby over from here) */
     if (a.kind === "setup" && a.payload.teams != null && from?.role === "host" && room.status === "lobby") { await setTeams(code, lobbyState(room), members, Number(a.payload.teams)); return; }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
-      const base = lobbyState(room), names = [...(base.teamNames || ["Team A", "Team B"])] as [string, string];
+      const base = lobbyState(room);
+      /* (the team's mascot, picked on the captain's phone with the same message as its name: 28 Nov) */
+      if (a.payload.mascot != null) {
+        const v = Number(a.payload.mascot); if (!Number.isInteger(v) || v < 0 || v >= MASCOT_COUNT) return;
+        const ms = [0, 1].map((t) => mascotOf(base.teamMascots, t)); ms[from.team as 0 | 1] = v;
+        lobbyMine.current.teamMascots = ms;
+        await sb().from("rooms").update({ state: { ...base, teamMascots: ms } }).eq("code", code);
+        return;
+      }
+      const names = [...(base.teamNames || ["Team A", "Team B"])] as [string, string];
       names[from.team as 0 | 1] = cap1(String(a.payload.name || "").trim().slice(0, TEAM_MAX)) || names[from.team as 0 | 1];
       lobbyMine.current.teamNames = names;
       await sb().from("rooms").update({ state: { ...base, teamNames: names } }).eq("code", code);

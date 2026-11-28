@@ -1811,3 +1811,70 @@ html[data-motion="off"] .ld-bulbs::before, html[data-motion="off"] .ld-bulbs::af
 .op-marquee.still .op-neon span span { animation: none; opacity: 1; }
 html[data-motion="off"] .op-bulbs i { animation: none !important; background: radial-gradient(circle at 38% 34%, #fff 0 16%, #fff3c4 30%, #ffd75e 55%, #e0a90c 82%, #8a6400 100%); }
 html[data-motion="off"] .op-neon span span { animation: none !important; opacity: 1; }
+
+/* ===== TEAM MASCOTS (components/Mascot.tsx; 28 Nov, the owner's pick): each team's creature, its moods ===== */
+.msc { display: inline-block; position: relative; flex: none; line-height: 0; }
+.msc svg { width: 100%; height: auto; overflow: visible; display: block; }
+.msc .bod { transform-box: fill-box; transform-origin: 50% 100%; animation: mscBob 1.8s ease-in-out infinite; animation-delay: var(--dl, 0s); }
+@keyframes mscBob { 50% { transform: translateY(-2.5%) scaleY(1.02); } }
+.msc .pu { transition: transform .35s; }
+.msc .lid { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: mscBlink 4s infinite; animation-delay: var(--bl, 0s); }
+@keyframes mscBlink { 0%, 92%, 100% { transform: scaleY(0); } 95% { transform: scaleY(1); } }
+.msc .mo { display: none; } .msc .mo.sm { display: inline; }
+.msc .arm { transform-box: fill-box; transition: transform .3s; }
+.msc .arm.l { transform-origin: 100% 30%; } .msc .arm.r { transform-origin: 0 30%; }
+.msc .fx { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
+/* thinking: eyes up to the clock */
+.msc.think .pu { transform: translate(2px, -3px); }
+/* sent: a hop and a tick */
+.msc.sent .bod { animation: mscHop .5s cubic-bezier(.3,1.5,.5,1), mscBob 1.8s ease-in-out .5s infinite; }
+@keyframes mscHop { 0% { transform: scale(1.12, .86); } 45% { transform: translateY(-16%); } 100% { transform: none; } }
+.msc.sent .fx.tick { opacity: 1; animation: mscPop .4s cubic-bezier(.3,1.6,.5,1); }
+.msc.sent .mo.sm { display: none; } .msc.sent .mo.op { display: inline; }
+/* right: jumping, arms up, a big smile, sparkles */
+.msc.right .bod { animation: mscJump .55s cubic-bezier(.3,0,.5,1) infinite alternate; }
+@keyframes mscJump { 0% { transform: scale(1.08, .9); } 100% { transform: translateY(-14%) scale(.97, 1.05); } }
+.msc.right .arm.l { transform: rotate(60deg); } .msc.right .arm.r { transform: rotate(-60deg); }
+.msc.right .mo.sm { display: none; } .msc.right .mo.big { display: inline; }
+.msc.right .fx.spark { opacity: 1; animation: mscSpark 1s ease-out infinite; }
+@keyframes mscSpark { 0% { opacity: 0; transform: scale(.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.2); } }
+/* wrong: sinks, eyes droop, a little rain cloud */
+.msc.wrong .bod { animation: mscSlump .6s ease forwards; }
+@keyframes mscSlump { to { transform: scale(1.06, .86) translateY(2%); } }
+.msc.wrong .lid { animation: none; transform: scaleY(.55); }
+.msc.wrong .pu { transform: translate(0, 3px); }
+.msc.wrong .mo.sm { display: none; } .msc.wrong .mo.fr { display: inline; }
+.msc.wrong .arm.l { transform: rotate(-12deg); } .msc.wrong .arm.r { transform: rotate(12deg); }
+.msc.wrong .fx.cloud { opacity: 1; animation: mscPop .4s ease .2s both; }
+.msc.wrong .drop { animation: mscRain .7s linear infinite; } .msc.wrong .drop:nth-child(2) { animation-delay: -.25s; } .msc.wrong .drop:nth-child(3) { animation-delay: -.5s; }
+@keyframes mscRain { from { transform: translateY(0); opacity: 1; } to { transform: translateY(14px); opacity: 0; } }
+/* no answer: a shrug and a question mark */
+.msc.none .arm.l { transform: rotate(-50deg); } .msc.none .arm.r { transform: rotate(50deg); }
+.msc.none .mo.sm { display: none; } .msc.none .mo.fl { display: inline; }
+.msc.none .fx.qm { opacity: 1; animation: mscPop .4s cubic-bezier(.3,1.6,.5,1); }
+@keyframes mscPop { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: none; } }
+/* Motion off: they stand still and only change face */
+.msc.still *, .msc.still { animation: none !important; transition: none !important; }
+.msc.still.right .fx.spark, .msc.still.wrong .fx.cloud, .msc.still.none .fx.qm, .msc.still.sent .fx.tick { opacity: 1; }
+/* the TV, 2 teams: one in each bottom corner of the stage, under its team's side */
+.msc-corner { position: absolute; bottom: 26px; z-index: 5; pointer-events: none; }
+.msc-corner.l { left: 40px; } .msc-corner.r { right: 40px; bottom: 74px; }
+/* between questions (MascotStroll): one walks out along the bottom of the stage, hops up onto its team's plate, then
+   walks off the other way */
+.msc-walk { position: absolute; z-index: 45; pointer-events: none; left: 0; top: 0; will-change: transform; }
+.msc-walk .msc .bod { animation: mscStep .32s ease-in-out infinite alternate; }
+@keyframes mscStep { from { transform: rotate(-5deg) translateY(0); } to { transform: rotate(5deg) translateY(-6%); } }
+.msc-walk.hop .msc .bod { animation: mscHop .5s cubic-bezier(.3,1.5,.5,1); }
+.msc-walk.face-l .msc { transform: scaleX(-1); }
+/* the lobby, on the TV: each team's mascot at the front of its box's header, by its name (28 Nov, the owner: "the
+   mascot somewhere in the box or around the box for each") */
+/* (the mascot wears its team's letter, where the letter's dot was, so the name keeps its room) */
+.mq-lobby .team .hd b .lobm { position: relative; flex: none; display: inline-block; width: 1.05em; margin: -.32em .05em -.22em 0; }
+.mq-lobby .team .hd b .lobm .msc.lob { width: 100%; }
+.mq-lobby .team .hd b .lobm .dt { position: absolute; right: -.18em; bottom: -.06em; width: 1.05em; height: 1.05em; font-size: .4em; box-shadow: 0 0 0 .14em #0b0e24; }
+/* the phone: your team's card has its mascot standing on its top edge; the captain's pick, eight to tap */
+.mq-team { position: relative; }
+.mq-team .msc.mq-team-msc { position: absolute; top: -26px; right: 14px; }
+.msc-pick { display: grid; place-items: center; min-height: 64px; border-radius: 16px; border: 2px solid transparent; background: rgba(255,255,255,.05); cursor: pointer; padding: 6px 0 2px; }
+.msc-pick[aria-pressed="true"] { border-color: var(--color-gold); background: rgba(245,197,24,.14); }
+.msc-pick:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }

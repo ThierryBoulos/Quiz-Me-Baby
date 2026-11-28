@@ -1,4 +1,6 @@
 "use client";
+import { MANY_COLORS } from "@/lib/many/logic";
+import { MascotCorners, MascotStroll, useLater, useMascot, type Mood } from "./Mascot";
 import { TEAM_MAX } from "@/lib/room";
 import { useEffect, useRef, useState } from "react";
 import { FitLine } from "./Fit";
@@ -37,6 +39,23 @@ const tc = (t?: 0 | 1 | null) => (t === 0 ? "var(--color-a)" : t === 1 ? "var(--
 /* join: where a phone joins this room (Majority Rules puts the QR code up again before it starts) */
 export type Join = { url: string; code: string };
 /* sound: this is the TV itself (it plays the coins and the whoosh; another screen showing the TV stays quiet) */
+/* TEAM MASCOTS (28 Nov): the screens they stand on, the screens they stroll on, and each one's mood */
+const MASCOT_SCREENS = ["ask", "steal", "answer"], STROLL_SCREENS = ["answer", "roundIntro", "roundScore"];
+function moods2(pub: Pub, revealed: boolean): [Mood, Mood] {
+  const m: [Mood, Mood] = ["idle", "idle"], turn = (pub.turn ?? 0) as 0 | 1;
+  if (pub.screen === "ask" || pub.screen === "steal") { m[turn] = pub.sent?.[turn] ? "sent" : "think"; return m; }
+  if (pub.screen === "answer" && pub.result) {
+    if (!revealed) return ["think", "think"];
+    for (const t of [0, 1] as const) {
+      const calls = (pub.calls || []).filter((c) => c.team === t && !c.skipped);
+      if (pub.result.by === t) m[t] = "right";
+      else if (calls.length) m[t] = calls.some((c) => c.ok) ? "right" : "wrong";
+      else if (silent(pub, t)) m[t] = "none";
+    }
+  }
+  return m;
+}
+
 export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pub: Pub; onExit?: () => void; onAgain?: () => void; join?: Join; sound?: boolean; host?: string }) {
   const T = pub.teams;
   /* the motion: when this screen came up, and the scores as the top bar shows them (points fly up to them) */
@@ -53,12 +72,20 @@ export function TvGame({ pub, onExit, onAgain, join, sound = false, host }: { pu
   const bodyKey = (pub.screen === "mapQ" || pub.screen === "mapReveal") && pub.map ? "map" + pub.map.id : key;
   /* the end: celebrate the winner first, then the recap comes up under it */
   const [recap, setRecap] = useState(false);
+  /* the mascots: their moods change once the answer's stamps have landed, never before; one may be out walking */
+  const revealed = useLater(key + (pub.qid ?? ""), BEAT_MS + 700);
+  const [strolling, setStrolling] = useState<number | null>(null);
+  const k0 = useMascot(0), k1 = useMascot(1);
   useEffect(() => { if (pub.screen !== "final") { setRecap(false); return; } const t = setTimeout(() => setRecap(true), 7000); return () => clearTimeout(t); }, [pub.screen]);
   return (
     /* nothing on the TV can be selected or copied */
     <div ref={root} className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       {/* the tracker, always: Classic's HUD */}
       <Hud pub={pub} size="tv" shown={shown} code={join?.code} />
+      {/* the teams' mascots (28 Nov, the owner's pick): in the bottom corners while a question is up and at its answer;
+          between questions one walks out now and then */}
+      {MASCOT_SCREENS.includes(pub.screen) && <MascotCorners colors={[MANY_COLORS[0], MANY_COLORS[1]]} moods={moods2(pub, revealed)} away={strolling} />}
+      <MascotStroll teams={[{ kind: k0, color: MANY_COLORS[0], side: "l" }, { kind: k1, color: MANY_COLORS[1], side: "r" }]} on={STROLL_SCREENS.includes(pub.screen) && !pub.intro} onAway={setStrolling} key={"stroll" + key} />
       {/* the night's intro, before the first round: the plan, until Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who={pub.intro.go != null ? `${pub.captains?.[pub.intro.go as 0 | 1] || "The captain"} starts the game` : `${host || "The host"} starts the game`} />}
 

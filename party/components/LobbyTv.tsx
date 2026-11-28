@@ -3,6 +3,7 @@
    in gold, the sign small at the top; the teams under them, 2 to 8 (2 side by side, 3 or 4 in a row, 5-6 in two
    rows of 3, 7-8 in two rows of 4). Captains in gold with a C armband, first in their team; a team with players
    but no captain says so in a dashed gold chip. The lobby's own controls along the bottom. */
+import { Mascot, mascotOf } from "./Mascot";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { teamName, type Member, type Room } from "@/lib/room";
@@ -80,7 +81,7 @@ export function TvLobby({ room, members, code, k, joinUrl, site, status, control
           return (
             <div key={t} className={"team" + (tier.nf ? " nf" : "")} style={{ ["--c" as string]: MANY_COLORS[t], ...cellStyle }}>
               <div className="hd">
-                <b><span className="dt">{LETTERS[t]}</span><Fit text={name} min={0.6} className="tn" /></b>
+                <b><span className="lobm"><Mascot kind={mascotOf(room.state?.teamMascots, t)} color={MANY_COLORS[t]} size={0} delay={t * 0.37} className="lob" /><span className="dt">{LETTERS[t]}</span></span><Fit text={name} min={0.6} className="tn" /></b>
                 <span>{list.length} {list.length === 1 ? "player" : "players"}</span>
               </div>
               <div className="ppl">

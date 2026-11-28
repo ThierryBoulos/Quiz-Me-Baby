@@ -18,6 +18,7 @@ import { sb } from "@/lib/supabase";
 import { useFreshBuild } from "@/lib/fresh";
 import { ANSWERING } from "@/components/PhoneGame";
 import { TvLobby } from "@/components/LobbyTv";
+import { MascotPicks } from "@/components/Mascot";
 import { TvMany } from "@/components/many/TvMany";
 import { manyNotReady, teamCountOf, useTvMany } from "@/lib/many/useTvMany";
 import { MANY_MAX } from "@/lib/many/logic";
@@ -159,6 +160,7 @@ export default function TvRoom() {
             </div>
           </div>
         </div>)}
+      <MascotPicks value={room.state?.teamMascots}>
       {room.status === "lobby" ? (
         <TvLobby room={room} members={members} code={code} k={teamCount} joinUrl={joinUrl} site={origin.replace(/^https?:\/\//, "")}
           status={<>
@@ -189,6 +191,7 @@ export default function TvRoom() {
           <div className="display" style={{ fontSize: 120, color: "var(--color-gold)" }}>Let&rsquo;s play</div>
         </div>
       )}
+      </MascotPicks>
     </TvStage>
     {/* opened on a phone, the TV's lobby is tiny: the same choice, phone-sized, along the bottom */}
     {isTv && room.status === "lobby" && (

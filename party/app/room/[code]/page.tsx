@@ -1,4 +1,5 @@
 "use client";
+import { Mascot, MascotPick, mascotOf } from "@/components/Mascot";
 import { storeTakenSave } from "@/lib/takeSave";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -295,6 +296,16 @@ export default function PhoneRoom() {
     (document.activeElement as HTMLElement | null)?.blur?.();
   };
   const shownName = mine?.team != null ? teamName(room, mine.team) : "";
+  /* a captain picks the team's mascot (28 Nov): sent with the team's name message; the TV writes it. Until the room
+     shows it, the phone shows the one just tapped */
+  const [mascotDraft, setMascotDraft] = useState<number | null>(null);
+  const roomMascot = mine?.team != null ? mascotOf(room?.state?.teamMascots, mine.team as number) : 0;
+  useEffect(() => { if (mascotDraft != null && mascotDraft === roomMascot) setMascotDraft(null); }, [mascotDraft, roomMascot]);
+  const pickMascot = (k: number) => {
+    if (!mine || mine.team == null) return;
+    setMascotDraft(k);
+    void sendAction(code, "team_name", { team: mine.team, mascot: k }).catch(() => setMascotDraft(null));
+  };
   useEffect(() => {
     if (nameState !== "saving") return;
     if (draft != null && shownName === cap1(draft.trim())) { setNameState("saved"); setDraft(null); return; }
@@ -548,6 +559,8 @@ export default function PhoneRoom() {
               side shows it in the left column, under the sign */}
           <ToSide order={3}>
           <div className="mq-team" style={{ ["--c" as string]: manyColor || `var(--color-${side})` }}>
+            {/* (the team's mascot, around its card: 28 Nov) */}
+            <Mascot kind={mascotDraft ?? roomMascot} color={MANY_COLORS[mine.team as number]} size={58} className="mq-team-msc" />
             <div className="eyebrow">You&rsquo;re on</div>
             <div className="tn"><bdi>{many ? manyNames(room, teamCount)[mine.team as number] : teamName(room, mine.team)}</bdi></div>
             <ul className="mq-mates" aria-label="Your team">
@@ -577,6 +590,7 @@ export default function PhoneRoom() {
               {tooLong && <p className="field-error" role="alert">Team names can be up to {TEAM_MAX} characters. Try a shorter one.</p>}
               {nameState === "saved" && <p className="text-13 font-bold" role="status" style={{ color: "var(--color-ok)" }}>Saved.{noTv ? "" : <> It&rsquo;s on the TV.</>}</p>}
               {nameState === "late" && <p className="field-error" role="alert">{noTv ? "That didn\u2019t go through. Try again." : <>The TV didn&rsquo;t pick it up. Is the TV screen still open? Try again.</>}</p>}
+              <MascotPick value={mascotDraft ?? roomMascot} color={MANY_COLORS[mine.team as number]} busy={busy} onPick={pickMascot} />
               <button className="btn btn-sm btn-ghost self-start" disabled={busy} onClick={() => claim("player")}>Step down</button>
             </div>
           ) : myCaptain ? (

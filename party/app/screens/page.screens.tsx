@@ -9,6 +9,8 @@
      #setup:<teams>:<role>  the phone's Setup before the start (2 teams: host, or cap with no host; 3-8: host), with
                             its game time under Start (14 Nov)
    <key> is a screen kept by sim/screens/two.mjs or many.ts (sim/.out/screens/pubs.json, served by ./pubs). */
+import { MANY_COLORS } from "@/lib/many/logic";
+import { Mascot, MascotPick } from "@/components/Mascot";
 import { useEffect, useState } from "react";
 import { TvGame } from "@/components/TvGame";
 import { TvMany } from "@/components/many/TvMany";
@@ -71,6 +73,27 @@ export default function Screens() {
     return <TvStage><TvLobby room={{ code: "ABCD", tv_id: "x", status: "lobby", mode: null, state: { teamNames: names }, version: 1 }} members={mem} code="ABCD" k={k}
       joinUrl={JOIN.url} site="quizmebaby.app" status={<span>Hosted by <b>Nour</b>. Ready: <b>Nour</b> starts the game.</span>}
       controls={<button type="button" className="btn btn-sm btn-ghost">Settings</button>} /></TvStage>;
+  }
+  /* the captain's phone in the lobby: the team's card with its mascot, and the mascot pick (28 Nov); pick:k, the widest name */
+  if (mode[0] === "pick") {
+    const t = Math.max(0, Number(mode[1] || 2) - 1), c = MANY_COLORS[t];
+    return (
+      <main className="screen"><section className="flex flex-col gap-3" style={{ ["--tint" as string]: c }}>
+        <div className="mq-team" style={{ ["--c" as string]: c }}>
+          <Mascot kind={t} color={c} size={58} className="mq-team-msc" />
+          <div className="eyebrow">You&rsquo;re on</div>
+          <div className="tn"><bdi>WWWWWWWWWWWW</bdi></div>
+          <ul className="mq-mates" aria-label="Your team"><li className="capt me"><b className="arm-c" aria-label="Captain">C</b><i aria-hidden>🦊</i><bdi className="truncate">Rami</bdi><span className="you">You</span></li>
+            <li><i aria-hidden>🐼</i><bdi className="truncate">Karim</bdi></li></ul>
+        </div>
+        <div className="card flex flex-col gap-3">
+          <div className="flex items-center gap-2"><b className="arm-c lg" aria-hidden>C</b><span className="eyebrow" style={{ color: "var(--color-gold)" }}>You&rsquo;re the captain</span></div>
+          <label className="field-label !mb-0" htmlFor="tname">Name your team</label>
+          <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}><input id="tname" className="input" defaultValue="WWWWWWWWWWWW" /><button type="submit" className="btn shrink-0">Save</button></form>
+          <MascotPick value={t} color={c} onPick={() => {}} />
+          <button type="button" className="btn btn-sm btn-ghost self-start">Step down</button>
+        </div>
+      </section></main>);
   }
   if (mode[0] === "setup") {
     const k = Number(mode[1]), host = mode[2] !== "cap", tv = { settings: DEFAULTS, custom: [], played: 0 };

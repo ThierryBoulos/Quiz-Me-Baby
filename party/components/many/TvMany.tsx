@@ -3,6 +3,7 @@
    tracker along the top, the same intro, the same question layouts, the same reveal moves (the answer slams in,
    the calls come down as stamps), a game's result as a board of columns, the winner's slam at the end. Only the
    number of teams changes: up to four sit as the two do, eight pack into rows. No buttons: the host's phone runs it. */
+import { MascotStroll, mascotOf, useMascotPicks } from "../Mascot";
 import { TEAM_MAX } from "@/lib/room";
 import { wholeSentences } from "@/lib/sentences";
 import { useEffect, useState } from "react";
@@ -60,10 +61,15 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
   const spinNext = g?.key === "roulette" && (pub.screen === "intro" || (pub.screen === "reveal" && g.leg < g.of));
   const next = spinNext ? "Spin" : pub.screen === "intro" ? "Start" : pub.screen === "reveal" || pub.screen === "summary" ? "Next" : null;
   const W = takes(pub);
+  const picks = useMascotPicks();
   return (
     /* nothing on the TV can be selected or copied */
     <div className="relative flex flex-col h-full noselect" onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
       <HudMany pub={pub} size="tv" code={join?.code} sound={sound} />
+      {/* between questions, now and then one team's mascot walks out and hops about (28 Nov, the owner): on a quiz's
+          answer, a game's intro and its result; one at a time, each team in turn */}
+      <MascotStroll teams={T.map((t, i) => ({ kind: mascotOf(picks, i), color: t.color }))} on={!pub.intro && !pub.paused && (pub.screen === "summary" || pub.screen === "intro" || (pub.screen === "reveal" && (g?.key === "quiz" || g?.key === "sudden")))}
+        first={pub.screen === "reveal" ? 5500 : 4500} key={"stroll" + pub.screen + (g?.key ?? "") + (g?.leg ?? "")} />
       {/* the night's intro, before the first game: the plan, until the host's Let's go */}
       {pub.intro && <NightIntroTv intro={pub.intro} who={`${host || "The host"} starts the game`} />}
       {/* the host paused it: the question hides until the clock restarts, as with two teams */}
@@ -110,7 +116,7 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
           {pub.theme && <div className="eyebrow text-18" style={{ color: "var(--color-gold)" }}>{pub.theme}</div>}
           <div className="font-bold max-w-[1100px]" style={{ fontSize: (pub.question || "").length > 160 ? 34 : (pub.question || "").length > 100 ? 40 : 50, lineHeight: 1.15 }}>{pub.question}</div>
           <Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={130} />
-          <Sent pub={pub} />
+          <Sent pub={pub} mascots />
         </>)}
         {/* Guess the Airport, Guess the Map: the board or the map, the clock and the teams beside it */}
         {pub.screen === "q" && g && g.key === "airport" && <AirportTv air={pub.airport} dense={dense} clock={<Clock deadline={pub.deadline} left={pub.left} timeUp={pub.timeUp} size={dense ? 120 : 130} />} sent={<Sent pub={pub} column={!dense} />} />}
@@ -174,7 +180,7 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
           {/* (the teams' answers first, then the answer, then the stamps: components/TeamCalls answerLast, 28 Nov) */}
           <div className="ans-board display beat slam leading-none max-w-[1160px]" style={{ ["--beat" as string]: 0.15 + answerLast(shownTeams(pub).length).board + "s", fontSize: (R.answer || "").length > 34 ? (dense ? 40 : 44) : (R.answer || "").length > 24 ? (dense ? 44 : 56) : dense ? 64 : 80, color: "var(--color-gold)" }}>{R.answer}</div>
           {R.notes && <div className="text-20 text-[var(--color-ink-2)] max-w-[1000px] leading-snug beat" style={{ ...QUICK, ...d(answerLast(shownTeams(pub).length).board + 0.2) }}>{wholeSentences(R.notes)}</div>}
-          <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} />
+          <FlagRowsMany pub={pub} size="tv" delay={(i) => d(i * 0.08)} callsAt={answerLast(shownTeams(pub).length).calls} mascots />
           <div className="display text-44 beat" style={{ ...QUICK, ...d(answerLast(shownTeams(pub).length).head), color: W.color }}>{W.text}</div>
         </>)}
         {pub.screen === "reveal" && g && R && g.key === "closest" && <ClosestRevealTv question={pub.question} answer={Number(R.answer)} notes={R.notes} dense={dense} head={W} headStyle={d(0.6)}
@@ -254,15 +260,15 @@ export function TvMany({ pub, join, host, sound = false }: { pub: PubMany; join?
 /* who has answered, and each team's call at the reveal: one copy for every setup (components/TeamCalls.tsx); here,
    which teams are in this question (sudden death's tied ones, the comeback's still in it) and this setup's words */
 const shownTeams = (pub: PubMany) => pub.teams.map((t, i) => ({ i, name: t.name, color: t.color })).filter((t) => (!pub.game?.only || pub.game.only.includes(t.i)) && !pub.comeback?.out[t.i]);
-function Sent({ pub, column }: { pub: PubMany; column?: boolean }) {
+function Sent({ pub, column, mascots }: { pub: PubMany; column?: boolean; mascots?: boolean }) {
   const pin = pub.game?.key === "pin", mr = pub.game?.key === "majority";
   /* (a wrong guess in the Cocktail or Dish reads "locked in" too: who got it shows at the reveal, the owner, 2 Nov) */
-  return <SentLine teams={shownTeams(pub)} sent={(i) => !!pub.sent[i]} column={column} on={pin ? "pin in" : "locked in"} off={pin ? "placing…" : mr ? "answering…" : "thinking…"} />;
+  return <SentLine teams={shownTeams(pub)} sent={(i) => !!pub.sent[i]} column={column} on={pin ? "pin in" : "locked in"} off={pin ? "placing…" : mr ? "answering…" : "thinking…"} mascots={mascots} />;
 }
-function FlagRowsMany({ pub, size, delay, callsAt }: { pub: PubMany; size: "tv" | "phone"; delay?: (i: number) => React.CSSProperties; callsAt?: number }) {
+function FlagRowsMany({ pub, size, delay, callsAt, mascots }: { pub: PubMany; size: "tv" | "phone"; delay?: (i: number) => React.CSSProperties; callsAt?: number; mascots?: boolean }) {
   const R = pub.reveal!, say = pub.game?.key === "say";
   return <TeamCalls teams={shownTeams(pub)} size={size} delay={delay} callsAt={callsAt} ok={(i) => R.ok?.[i]} typed={(i) => R.typed?.[i]} pts={(i) => R.pts?.[i]} places={(i) => (say ? null : R.places?.[i])}
-    word={say ? (i) => sayWord(R.ok?.[i], R.typed?.[i], R.why?.[i]) : undefined} />;
+    word={say ? (i) => sayWord(R.ok?.[i], R.typed?.[i], R.why?.[i]) : undefined} mascots={mascots} />;
 }
 
 /* a game's name in lines that fit its stretch of the chart (a capital about 0.7 of the size wide, with the spacing) */
