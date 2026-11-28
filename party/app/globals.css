@@ -1168,7 +1168,7 @@ body:has(.mq-room) { background: transparent; }   /* (so the stage, under everyt
 .mq-team { --c: var(--tint); text-align: center; border-radius: 26px; padding: 16px 14px; border: 2px solid var(--c);
   background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--c) 26%, transparent), transparent 70%), rgba(10,10,28,.74);
   box-shadow: 0 0 36px -12px var(--c), inset 0 0 24px -14px var(--c); }
-.mq-team .tn { margin-top: 4px; font-family: var(--font-display); text-transform: uppercase; font-size: var(--text-48); line-height: .95; letter-spacing: .02em; color: var(--c);
+.mq-team .tn { margin-top: 14px; font-family: var(--font-display); text-transform: uppercase; font-size: var(--text-48); line-height: .95; letter-spacing: .02em; color: var(--c);
   overflow-wrap: anywhere; text-wrap: balance; text-shadow: 0 0 .3em color-mix(in srgb, var(--c) 55%, transparent); }
 .mq-mates { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 14px; }
 .mq-mates li { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; max-width: 100%; padding: 3px 12px 3px 6px; border-radius: 999px;
