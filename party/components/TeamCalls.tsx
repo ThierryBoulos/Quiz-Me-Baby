@@ -17,13 +17,14 @@ export function SentLine({ teams: T, sent, column, on = "locked in", off = "thin
     <div className="flex flex-wrap justify-center gap-x-5 gap-y-1" role="status" aria-label={T.map((t) => `${t.name} ${sent(t.i) ? "in" : "not yet"}`).join(", ")}>
       {T.map(({ i, color }) => (
         <span key={i} className="flex items-center gap-1.5 font-bold text-20" style={{ color: sent(i) ? color : "var(--color-ink-3)" }}>
-          <Dot t={i} color={color} size={22} />{sent(i) ? "✓" : "…"}</span>))}
+          {/* (28 Nov, the idea from Fibbage: a team's mark pops the moment its captain sends) */}
+          <span key={sent(i) ? "in" : "out"} className={"flex items-center gap-1.5" + (sent(i) ? " sent-pop" : "")} style={sent(i) ? { ["--c" as string]: color } : undefined}><Dot t={i} color={color} size={22} />{sent(i) ? "✓" : "…"}</span></span>))}
     </div>);
   return (
     <div className={"flex " + (column ? "flex-col items-center gap-0.5" : "flex-wrap justify-center gap-y-0.5 " + (dense ? "gap-x-5" : "gap-x-10"))} role="status" style={{ maxWidth: 1168 }}>{T.map(({ i, ...t }) => (
       /* (the team's name always in its colour; only "thinking…" grey: 24 Nov, the owner, "why is it in grey?") */
       <span key={i} className="font-bold whitespace-nowrap" style={{ fontSize: column && dense ? 20 : 22 }}>
-        <bdi style={{ color: t.color }}>{t.name}</bdi><span style={{ color: sent(i) ? t.color : "var(--color-ink-3)" }}>: {sent(i) ? on : off}</span></span>))}
+        <bdi style={{ color: t.color }}>{t.name}</bdi>: <span key={sent(i) ? "in" : "out"} className={sent(i) ? "sent-pop" : undefined} style={{ color: sent(i) ? t.color : "var(--color-ink-3)", ["--c" as string]: t.color }}>{sent(i) ? on : off}</span></span>))}
     </div>);
 }
 

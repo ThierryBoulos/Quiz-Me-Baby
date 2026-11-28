@@ -52,7 +52,10 @@ export default function Screens() {
   /* another moment on the same page, without reloading it (window.dispatchEvent(new CustomEvent("screens:go", { detail:
      key }))): what happens as one screen gives way to the next, the points flying into the totals (12 Nov) */
   useEffect(() => {
-    const go = (e: Event) => { const k = String((e as CustomEvent).detail || "");
+    /* (or a moment handed in whole, { pub, secret }: a screen as it changes, recorded as a video, 28 Nov) */
+    const go = (e: Event) => { const det = (e as CustomEvent).detail;
+      if (det && typeof det === "object" && det.pub) { setRec({ pub: det.pub, secret: det.secret || {} }); return; }
+      const k = String(det || "");
       void fetch("/screens/pubs").then((r) => r.json()).then((d) => { const r = d[k];
         if (r) setRec({ pub: shift(r.pub, Date.now() - r.now, r.now), secret: r.secret ? shift(r.secret, Date.now() - r.now, r.now) : {} }); }); };
     window.addEventListener("screens:go", go);

@@ -14,7 +14,7 @@ import { cleanSettings, forgetUsed, getSettings, saveSettings, USED_KEY } from "
 import { cleanList, mergeCustom } from "../custom";
 import { withCustom } from "../engine";
 import { saveLobbyDraft, useLobbyShare } from "../tv/lobbyShare";
-import { cap1, type Member, type Room } from "../room";
+import { cap1, TEAM_MAX, type Member, type Room } from "../room";
 import { inboxMark, useInbox } from "../tv/useInbox";
 import { usePresent } from "../tv/usePresent";
 import { useNetProbe } from "../tv/netProbe";
@@ -311,7 +311,7 @@ export function useTvMany(code: string, isTv: boolean, room: Room | null, member
         return;
       }
       if (a.kind === "team_name" && from?.role === "captain" && (from.team as number) === Number(a.payload.team) && (from.team as number) < k) {
-        const names = manyNames(room, MANY_MAX); names[from.team as number] = cap1(String(a.payload.name || "").trim().slice(0, 14)) || names[from.team as number];
+        const names = manyNames(room, MANY_MAX); names[from.team as number] = cap1(String(a.payload.name || "").trim().slice(0, TEAM_MAX)) || names[from.team as number];
         await lobbyWrite({ teamNames: names });
         return;
       }

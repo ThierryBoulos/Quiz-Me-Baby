@@ -11,6 +11,9 @@ export type Room = { code: string; tv_id: string; status: "lobby" | "playing" | 
 export const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 export const cleanCode = (s: string) => s.toUpperCase().split("").filter((c) => CODE_ALPHABET.includes(c)).join("").slice(0, 4);
 /* names always start with a capital ("sanofi" shows as "Sanofi") */
+/* a team's name: 12 characters at most, every setup (28 Nov, the owner: two fewer than the 14 it was, so names fit
+   better across the screens) */
+export const TEAM_MAX = 12;
 export const cap1 = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 export const teamName = (room: Room | null, t: number) => cap1(((room?.state?.teamNames as string[] | undefined) || [])[t] || "Team " + "ABCDEFGH"[t]);
 

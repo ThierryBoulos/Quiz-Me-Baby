@@ -19,7 +19,15 @@ const GAP = 10;
    the left to the best score on the right, each team's dot at its points, the band from 0 out to it; no answer
    marker, no "off by"; the winner's card carries the trophy, pts what its place pays the night. The gold ruler (the
    owner's pick, 14 Nov): the line a gold measuring rule, its numbers along it, the winner's card pulsing gold */
-export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: number; width?: number; scale?: boolean }) {
+/* after (seconds): the answer last (Closest To Wins' reveal, 28 Nov): the guesses' cards drop first, lowest to highest so
+   their order gives nothing away; the gold mark, the bands, "off by", the trophy and the points only after that */
+export function Ruler({ teams, ans, width, scale, after }: { teams: RulerTeam[]; ans: number; width?: number; scale?: boolean; after?: number }) {
+  const [shown, setShown] = useState(after == null);
+  useEffect(() => {
+    if (after == null) return;
+    if (motionOff()) { setShown(true); return; }
+    const t = window.setTimeout(() => setShown(true), after * 1000); return () => clearTimeout(t);
+  }, [after]);
   const two = teams.length <= 2 && !scale, W = width ?? (two ? 1040 : 1120);
   const best = Math.max(1, ...teams.map((t) => t.guess ?? 0)), x0 = W * 0.04;
   /* the scale: the farthest guess sits 42% (two teams) or 40% out from the middle; no answer at 97% */
@@ -36,8 +44,9 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
   /* the order they drop in: the farthest first, the nearest last; no answer before them all */
   const order = useMemo(() => teams.map((_, i) => i).sort((a, b) => {
     if (scale) return (teams[a].guess ?? 0) - (teams[b].guess ?? 0) || b - a;     /* the lowest first, the winner last */
+    if (after != null) return (teams[a].guess ?? Infinity) - (teams[b].guess ?? Infinity) || a - b;   /* the answer last: lowest first */
     const da = teams[a].guess == null ? Infinity : Math.abs(teams[a].guess! - ans), db = teams[b].guess == null ? Infinity : Math.abs(teams[b].guess! - ans);
-    return db - da || a - b; }), [teams, ans, scale]);
+    return db - da || a - b; }), [teams, ans, scale, after]);
   const drop = (i: number) => order.indexOf(i);
 
   /* the cards are measured, then packed (before the first paint, so nothing jumps) */
@@ -117,9 +126,9 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
       {marks.map((v) => { const x = x0 + (v / best) * W * 0.9; return (
         <Fragment key={"m" + v}><span className="ruler-mark" style={{ left: x - 1, top: TY - th / 2, height: th }} aria-hidden />
           <span className="ruler-num display" style={{ left: x, top: TY + th / 2 + 5, animationDelay: 0.1 + v * 0.01 + "s" }} aria-hidden>{v}</span></Fragment>); })}
-      {teams.map((t, i) => { if (t.guess == null) return null; const x = at(t), mid = scale ? x0 : W / 2; return (
+      {shown && teams.map((t, i) => { if (t.guess == null) return null; const x = at(t), mid = scale ? x0 : W / 2; return (
         <div key={"b" + i} className="ruler-band" style={{ top: bandTop(i), height: bandH, left: Math.min(x, mid), width: Math.abs(x - mid), background: t.color, transformOrigin: x < mid ? "right" : "left", ...d(0.5 + drop(i) * (two ? 0.12 : 0.07)), ...(scale ? { animation: "none" } : {}) }} />); })}
-      {!scale && <div className="ruler-mid" style={{ top: TY - th / 2 - 14, height: th + 28 }}>{two && <span className="lbl" style={{ top: th + 34 }}>answer</span>}</div>}
+      {!scale && shown && <div className={"ruler-mid" + (after != null ? " drop-in" : "")} style={{ top: TY - th / 2 - 14, height: th + 28 }}>{two && <span className="lbl" style={{ top: th + 34 }}>answer</span>}</div>}
       {/* the lines first, every card over them (the owner: no line across another team's card) */}
       {teams.map((t, i) => { const g = geo(t, i); return (
         <div key={"l" + i} className="ruler-grp" style={{ ["--drop" as string]: g.up ? "-36px" : "36px", ...d(0.12 + drop(i) * (two ? 0.14 : 0.1)) }} aria-hidden>
@@ -128,16 +137,16 @@ export function Ruler({ teams, ans, width, scale }: { teams: RulerTeam[]; ans: n
       {teams.map((t, i) => {
         const g = geo(t, i), off = t.guess == null ? null : offBy(t.guess, ans);
         return (
-          <div key={i} className={"ruler-grp" + (t.win ? " win" : "") + (t.guess == null ? " none" : "")} style={{ ["--c" as string]: t.color, ["--drop" as string]: g.up ? "-36px" : "36px", ...d(0.12 + drop(i) * (two ? 0.14 : 0.1)) }}>
+          <div key={i} className={"ruler-grp" + (t.win && shown ? " win" : "") + (t.guess == null ? " none" : "")} style={{ ["--c" as string]: t.color, ["--drop" as string]: g.up ? "-36px" : "36px", ...d(0.12 + drop(i) * (two ? 0.14 : 0.1)) }}>
             <span className="ruler-dot" style={{ left: g.x - 12, top: TY - 12 }}>{!two && t.letter}</span>
             <div ref={(el) => { refs.current[i] = el; }} className={"card-l " + (two ? "" : "sm")} style={{ left: g.cx, top: g.ct }}>
               <span className="nm" style={{ color: t.color }}><bdi>{t.name}</bdi></span>
               {/* who takes it, at a glance, however bunched the cards are (the race: once it's run) */}
               {/* (the race: the number counts up; the trophy and the +points keep their room and show at the finish,
                   so the cards, measured at the start, never grow into each other) */}
-              {t.win && <span className="trophy" role="img" aria-label="takes it" style={p < 1 ? { visibility: "hidden" } : undefined}>🏆</span>}
-              {t.guess == null ? <span className="off">no answer</span> : <><span className="v display text-right" style={scale ? { minWidth: showNum(t.guess).length + "ch" } : undefined}>{showNum(scale ? Math.round(t.guess * p) : t.guess)}</span>{!scale && <span className="off">{off === 0 ? "spot on!" : "off by " + showNum(off!)}</span>}</>}
-              {t.pts != null && t.guess != null && <span className="pts display" style={p < 1 ? { visibility: "hidden" } : undefined}>+{t.pts}</span>}
+              {t.win && <span className={"trophy" + (after != null ? " pop-in" : "")} role="img" aria-label="takes it" style={p < 1 || !shown ? { visibility: "hidden" } : undefined}>🏆</span>}
+              {t.guess == null ? <span className="off">no answer</span> : <><span className="v display text-right" style={scale ? { minWidth: showNum(t.guess).length + "ch" } : undefined}>{showNum(scale ? Math.round(t.guess * p) : t.guess)}</span>{!scale && <span className={"off" + (after != null ? " pop-in" : "")} style={shown ? undefined : { visibility: "hidden" }}>{off === 0 ? "spot on!" : "off by " + showNum(off!)}</span>}</>}
+              {t.pts != null && t.guess != null && <span className={"pts display" + (after != null ? " pop-in" : "")} style={p < 1 || !shown ? { visibility: "hidden" } : undefined}>+{t.pts}</span>}
             </div>
           </div>); })}
     </div>);

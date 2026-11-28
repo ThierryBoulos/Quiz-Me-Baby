@@ -3,6 +3,7 @@
    tracker along the top, the same intro, the same question layouts, the same reveal moves (the answer slams in,
    the calls come down as stamps), a game's result as a board of columns, the winner's slam at the end. Only the
    number of teams changes: up to four sit as the two do, eight pack into rows. No buttons: the host's phone runs it. */
+import { TEAM_MAX } from "@/lib/room";
 import { wholeSentences } from "@/lib/sentences";
 import { useEffect, useState } from "react";
 import { FitBody } from "../TvStage";
@@ -295,7 +296,7 @@ function NightChartMany({ pub }: { pub: PubMany }) {
       {lab.map((t) => (
         <g key={"l" + t}>
           <line x1={W} y1={y(L[n - 1][t])} x2={W + 14} y2={at[t]} stroke={T[t].color} strokeWidth={1.5} opacity={0.6} />
-          <text x={W + 20} y={at[t] + 6} fill={T[t].color} fontSize={17} fontWeight={800}>{place[t]}. {T[t].name.length > 14 ? T[t].name.slice(0, 13) + "…" : T[t].name}  {T[t].score}</text>
+          <text x={W + 20} y={at[t] + 6} fill={T[t].color} fontSize={17} fontWeight={800}>{place[t]}. {T[t].name.length > TEAM_MAX ? T[t].name.slice(0, TEAM_MAX - 1) + "…" : T[t].name}  {T[t].score}</text>
         </g>))}
     </svg>);
 }

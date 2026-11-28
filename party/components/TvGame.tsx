@@ -1,4 +1,5 @@
 "use client";
+import { TEAM_MAX } from "@/lib/room";
 import { useEffect, useRef, useState } from "react";
 import { FitLine } from "./Fit";
 import { FitBody } from "./TvStage";
@@ -608,7 +609,7 @@ function NightChart({ pub, short }: { pub: Pub; short?: boolean }) {
       {order.map((t) => (
         <g key={"l" + t}>
           <line x1={W} y1={y(pts[pts.length - 1].v[t])} x2={W + 14} y2={at[t]} stroke={tc(t)} strokeWidth={1.5} opacity={0.6} />
-          <text x={W + 20} y={at[t] + 6} fill={tc(t)} fontSize={17} fontWeight={800}>{place(t)}. {T[t].name.length > 14 ? T[t].name.slice(0, 13) + "…" : T[t].name} · {T[t].score}</text>
+          <text x={W + 20} y={at[t] + 6} fill={tc(t)} fontSize={17} fontWeight={800}>{place(t)}. {T[t].name.length > TEAM_MAX ? T[t].name.slice(0, TEAM_MAX - 1) + "…" : T[t].name} · {T[t].score}</text>
         </g>))}
     </svg>);
 }

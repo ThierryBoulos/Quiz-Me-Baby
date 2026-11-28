@@ -67,7 +67,7 @@ export function WinnerCard({ eyebrow, name, color, sub }: { eyebrow: string; nam
     <div className="winner-card" style={{ ["--wc" as string]: color }} role="status" aria-live="polite">
       <div className="text-40 leading-none" aria-hidden>🏆</div>
       <div className="eyebrow" style={{ color: "var(--color-gold)" }}>{eyebrow}</div>
-      {/* (one team: one line that fits its card, the widest 14 letters too; tied at the top, "A & B" wraps as before) */}
+      {/* (one team: one line that fits its card, the widest 12 letters too; tied at the top, "A & B" wraps as before) */}
       {name.length > 18 ? <div className="display leading-none" style={{ color, fontSize: 34 }}><bdi>{name}</bdi></div>
         : <FitLine className="display leading-none" size={48} style={{ color }}><bdi>{name}</bdi></FitLine>}
       {sub && <div className="text-14 font-bold text-[var(--color-ink-2)]">{sub}</div>}

@@ -1,7 +1,7 @@
 "use client";
 /* ONE LINE THAT ALWAYS FITS (28 Nov, the owner: "all mini-games, the longest names, and any game added later"): a team's
    name where it has one line and a box of its own (the winner's card, a bid tile, a button, a list's heading). As it
-   was when it fits; too wide for its box (14 wide letters on a 360-wide phone), it is drawn a little smaller, just
+   was when it fits; too wide for its box (12 wide letters on a 360-wide phone), it is drawn a little smaller, just
    enough to fit, down to `min` of its size, and only then cut with "…". Never off the screen, never over its
    neighbour. Use it for any name on a line of its own; the screen check's worst case (sim/screens/dump.mjs) shows
    where one is missing. */

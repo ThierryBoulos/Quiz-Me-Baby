@@ -19,7 +19,7 @@ const BUILD_ID = process.env.NEXT_PUBLIC_BUILD || "dev";
    carried on (new required state, renamed screens, a changed engine game object): a TV reloaded
    onto the new version then says so and offers Exit, instead of playing on with a broken game. */
 const SAVE_SHAPE = 1;
-import { cap1, notReadyWhy, readyToStart, starter, type Member, type Room } from "./room";
+import { cap1, notReadyWhy, readyToStart, starter, TEAM_MAX, type Member, type Room } from "./room";
 import { BEAT_MS, BEAT_SCREENS, DECIDED, FLY_MS, flyAt, iso, MAX_BID, MINI_TITLES, PARTY_LEGS, T_AWAY, T_GRACE_MS, T_LOBBY_AWAY, T_NEXT_FALLBACK, T_AGREE, TIE_SCREENS,
   type MiniKey, type Pub, type Secret, type Thin, type Two, poss } from "./game";
 import { CAPTAIN_MOVES, NEXT_MOVES, SD_CONTEST, DIFFS, cleanDiff, HOST_MOVES, PARTY_MINIS, PREFIX, SAME_SCREEN, T, TIES, WAITS_FOR_NEXT, asPin, dishTotal, inScreen, levels, miniOf, miniState,
@@ -1280,7 +1280,7 @@ export function useTvGame(code: string, isTv: boolean, room: Room | null, member
     if (a.kind === "setup" && a.payload.teams != null && from?.role === "host" && room.status === "lobby") { await setTeams(code, lobbyState(room), members, Number(a.payload.teams)); return; }
     if (a.kind === "team_name" && from?.role === "captain" && from.team === a.payload.team && room.status === "lobby") {
       const base = lobbyState(room), names = [...(base.teamNames || ["Team A", "Team B"])] as [string, string];
-      names[from.team as 0 | 1] = cap1(String(a.payload.name || "").trim().slice(0, 14)) || names[from.team as 0 | 1];
+      names[from.team as 0 | 1] = cap1(String(a.payload.name || "").trim().slice(0, TEAM_MAX)) || names[from.team as 0 | 1];
       lobbyMine.current.teamNames = names;
       await sb().from("rooms").update({ state: { ...base, teamNames: names } }).eq("code", code);
       return;

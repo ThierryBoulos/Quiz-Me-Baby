@@ -23,19 +23,19 @@ const pubs = { ...two, ...dumpMany(JSON.parse(readFileSync(join(party, "data/ban
 const KEY = process.env.QMB_FLAG_KEY || "qmb-fx-2026-wave2";
 const fx = (code) => createHash("sha256").update(KEY + ":" + code).digest("hex").slice(0, 16);
 for (const rec of Object.values(pubs)) { const p = rec?.pub; if (p && typeof p.flag === "string" && existsSync(join(party, "public/flags", p.flag + ".svg"))) p.flag = fx(p.flag); }
-/* 2 teams: the longest names a captain can give (14 letters, app/room), wide letters, so a screen that only fits short
+/* 2 teams: the longest names a captain can give (12 letters since 28 Nov, lib/room TEAM_MAX), wide letters, so a screen that only fits short
    names gets flagged (27 Nov, the big test: "This game" ran off a 360-wide phone; 3 to 8 teams have long ones already) */
-const LONG = ["⁨Wonder Wombats⁩", "⁨Quizzical Owls⁩"];
+const LONG = ["⁨Brainy Bunch⁩", "⁨Smarty Pants⁩"];
 for (const [k, rec] of Object.entries(pubs)) if (/^(nh|h)\w*\./.test(k) && Array.isArray(rec?.pub?.teams)) rec.pub.teams.forEach((t, i) => { if (t && LONG[i]) t.name = LONG[i]; });
 /* THE WORST CASE, every setup by itself (27 Nov, the owner: "all mini-games, the longest night, the longest names, and
    any game added later"): each screen again, its setup's tag + "w" (nhw, hw, m3w...), with the widest names a captain
-   can give (14 W's and M's, wider than any real name), the longest night the setup allows (14 question rounds and
+   can give (12 W's and M's, wider than any real name), the longest night the setup allows (14 question rounds and
    every game: 28 marks) and the bank's longest theme. The game's own name and line are the screen's own, so a game
    added to the nights is in here too. TV and phones (the narrowest and sideways: the widest phone is never harder) */
 const bank = JSON.parse(readFileSync(join(party, "data/bank.json"), "utf8"));
 const themes = new Set(); (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === "object") for (const [k, v] of Object.entries(o)) { if (/theme/i.test(k) && typeof v === "string") themes.add(v); walk(v); } })(bank);
 const THEME = [...themes].sort((a, b) => b.length - a.length)[0] || "Mythology & Folklore";
-const WIDE = ["⁨WWWWWWWWWWWWWW⁩", "⁨MMMMMMMMMMMMMM⁩"], MARKS = 28;
+const WIDE = ["⁨WWWWWWWWWWWW⁩", "⁨MMMMMMMMMMMM⁩"], MARKS = 28;
 for (const [k, rec] of Object.entries(pubs)) {
   const m = /^([a-z]+\d*)\.(.*)$/.exec(k); if (!m || !rec?.pub || !Array.isArray(rec.pub.teams)) continue;
   const c = JSON.parse(JSON.stringify(rec)), p = c.pub, many = !("r" in p);
